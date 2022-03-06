@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  4-Mar-2022 18:52 (eg)
+# Last file update:  4-Mar-2022 19:33 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme streams srfi stklos
@@ -80,7 +80,6 @@ SRC_STK = bigloo-support.stk  \
           pretty-print.stk    \
           recette.stk         \
           slib.stk            \
-          srfi-59.stk         \
           srfi-89.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
@@ -101,7 +100,6 @@ scheme_OBJS = compfile.ostk     \
           pretty-print.ostk     \
           recette.ostk          \
           slib.ostk             \
-          srfi-59.ostk          \
           srfi-89.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \

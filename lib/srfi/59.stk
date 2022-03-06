@@ -1,0 +1,88 @@
+;;;;
+;;;; 59.stk     -- Implementation of SRFI 59
+;;;;
+;;;;
+;;;;           Author: Erick Gallesio using code from Aubrey Jaffer
+;;;;    Creation date:  8-Mar-2005
+;;;; Last file update:  6-Mar-2022 15:12 (eg)
+;;;;
+
+(define-module srfi/59
+  (export program-vicinity library-vicinity implementation-vicinity
+          user-vicinity home-vicinity in-vicinity sub-vicinity
+          make-vicinity pathname->vicinity vicinity:suffix?)
+
+  ;; Returns the vicinity of the currently loading Scheme code.
+  (define (program-vicinity)
+    (or (script-directory)
+        (let ((cur (current-loading-file)))
+          (if  cur
+               (dirname (expand-file-name cur))
+               (error 'program-vicinity
+                      "called while not a script or within load")))))
+
+  ;; (implementation-vicinity) should be defined to be the pathname of
+  ;; the directory where any auxillary files to your Scheme
+  ;; implementation reside.
+  (define (implementation-vicinity)
+    (%stklos-conf-file "slib"))
+
+  ;; (library-vicinity) should be defined to be the pathname of the
+  ;; directory where files of Scheme library functions reside.
+  (define library-vicinity
+    (let ((library-path
+           (or
+            (getenv "SCHEME_LIBRARY_PATH")
+            (let ((perso (make-path (implementation-vicinity)
+                                    "require.scm")))
+              (make-path (if (file-exists? perso)
+                             (%stklos-conf-file "slib")
+                             (make-path (%library-prefix)
+                                        "lib"
+                                        "stklos"
+                                        "slib"))
+                         "")))))
+      (lambda () library-path)))
+
+  ;; (home-vicinity) should return the vicinity of the user's HOME
+  ;; directory, the directory which typically contains files which
+  ;; customize a computer environment for a user.
+  (define (home-vicinity)
+    (let ((home (getenv "HOME")))
+      (and home
+           (if (eqv? #\/ (string-ref home (+ -1 (string-length home))))
+               home
+               (string-append home "/")))))
+
+  ;; Returns the vicinity of the current directory of the user. On most
+  ;; systems this is `""'
+  (define (user-vicinity) "")
+
+  ;; Returns a filename suitable for use by load, open-input-file,
+  ;; open-output-file, etc. The returned filename is filename in vicinity.
+  ;; in-vicinity should allow filename to override vicinity when filename
+  ;; is an absolute pathname and vicinity is equal to the value of
+  ;;(user-vicinity).  For most systems in-vicinity can be string-append.
+  (define (in-vicinity vicinity filename)
+    (expand-file-name (make-path vicinity filename)))
+
+  ;; Returns the vicinity of vicinity restricted to name. This is used for
+  ;; large systems where names of files in subsystems could conflict.
+  ;; On systems with directory structure sub-vicinity will return a pathname
+  ;; of the subdirectory name of vicinity.
+  (define (sub-vicinity vic name)
+	(string-append vic name "/"))
+
+  ;; Returns dirpath as a vicinity for use as first argument to in-vicinity.
+  (define (make-vicinity pathname) pathname)
+
+  ;; Returns the vicinity containing path.
+  (define pathname->vicinity dirname)
+
+  ;; Returns the `#t' if chr is a vicinity suffix character; and #f otherwise. 
+  (define (vicinity:suffix? chr)
+    (eq? chr #\/))
+
+)
+
+(provide "srfi/59")
