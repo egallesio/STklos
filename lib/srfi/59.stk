@@ -4,7 +4,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio using code from Aubrey Jaffer
 ;;;;    Creation date:  8-Mar-2005
-;;;; Last file update:  6-Mar-2022 15:12 (eg)
+;;;; Last file update:  9-Mar-2022 18:08 (eg)
 ;;;;
 
 (define-module srfi/59
@@ -12,6 +12,14 @@
           user-vicinity home-vicinity in-vicinity sub-vicinity
           make-vicinity pathname->vicinity vicinity:suffix?)
 
+  (define *slib-possible-paths* `(,(make-path (%stklos-conf-dir) "slib")
+                                  ,(make-path (%library-prefix)
+                                              "share"
+                                              "stklos"
+                                              "slib")
+                                  "/usr/local/share/slib"
+                                  "/usr/share/slib"))
+  
   ;; Returns the vicinity of the currently loading Scheme code.
   (define (program-vicinity)
     (or (script-directory)
@@ -24,8 +32,13 @@
   ;; (implementation-vicinity) should be defined to be the pathname of
   ;; the directory where any auxillary files to your Scheme
   ;; implementation reside.
-  (define (implementation-vicinity)
-    (%stklos-conf-file "slib"))
+  (define implementation-vicinity
+    (let ((path (or (getenv "STKLOS_IMPLEMENTATION_PATH")
+                    (make-path (%library-prefix)
+                               "share"
+                               "stklos"
+                               "slib"))))
+      (lambda () path)))
 
   ;; (library-vicinity) should be defined to be the pathname of the
   ;; directory where files of Scheme library functions reside.
@@ -33,15 +46,12 @@
     (let ((library-path
            (or
             (getenv "SCHEME_LIBRARY_PATH")
-            (let ((perso (make-path (implementation-vicinity)
-                                    "require.scm")))
-              (make-path (if (file-exists? perso)
-                             (%stklos-conf-file "slib")
-                             (make-path (%library-prefix)
-                                        "lib"
-                                        "stklos"
-                                        "slib"))
-                         "")))))
+            (let ((path (find-path "require.scm" *slib-possible-paths*)))
+              (if path
+                  (dirname path)
+                  (error
+                   (string-append "Unable to locate the SLIB library.\n"
+                                  "Define SCHEME_LIBRARY_PATH shell variable")))))))
       (lambda () library-path)))
 
   ;; (home-vicinity) should return the vicinity of the user's HOME
