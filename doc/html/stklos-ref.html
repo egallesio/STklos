@@ -23135,10 +23135,10 @@ allocated memory (a NULL value for C).</p>
 <div class="paragraph">
 <p>
 
-<a href="https://cvs.savannah.gnu.org/viewvc/slib/slib/">SLIB</a> is a library for
-the programming language Scheme, written by Aubrey Jaffer.
-It uses only standard Scheme syntax and thus works on many different
-Scheme implementations.</p>
+<strong><em>SLIB</em></strong> is a library for the programming language Scheme, written by
+Aubrey Jaffer <a href="#SLIB">[SLIB]</a>.   It provides a platform independent framework for
+using packages of Scheme procedures and syntax. It uses only standard Scheme
+syntax and thus works on many different Scheme implementations.</p>
 </div>
 <div class="paragraph">
 <p>To  use this package, you have just to type</p>
@@ -23149,8 +23149,16 @@ Scheme implementations.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>and follow the instructions given in the <strong><em>SLIB</em></strong> library
-to use a particular package.</p>
+<p>or use the <strong><a href="http://srfi.schemers.org/srfi-96/srfi-96.html">SRFI-96</a></strong> (<em>SLIB Prerequisites</em>) with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">96</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and follow the instructions given in the <strong><em>SLIB</em></strong> library manual to
+use a particular package.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -23159,11 +23167,26 @@ to use a particular package.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<strong><em>SLIB</em></strong> uses also the <em>require</em> and <em>provide</em> mechanism to load
+<div class="paragraph">
+<p><strong><em>SLIB</em></strong> uses also the <em>require</em> and <em>provide</em> mechanism to load
 components of the library. Once <strong><em>SLIB</em></strong> has been loaded, the standard
-<strong><em>STklos</em></strong> <code>require</code> and <code>provide</code> are overloaded such as if their parameter
-is a string this is the old <strong><em>STklos</em></strong> procedure which is called, and if their
-parameter is a symbol, this is the <strong><em>SLIB</em></strong> one which is called.
+<strong><em>STklos</em></strong> <code>require</code> and <code>provide</code> are overloaded such as if their
+parameter is a string this is the old <strong><em>STklos</em></strong> procedure which is
+called, and if their parameter is a symbol, this is the <strong><em>SLIB</em></strong> one
+which is called.</p>
+</div>
+<div class="paragraph">
+<p><strong><em>SLIB</em></strong> needs to create a catalog of the file that must be loaded to
+implement a given feature. This catalog is stored in a file named
+<code>slibcat</code> This file is, by default located in the
+<code>~/.stklos/slib</code> directory.  It is possible to change this
+directory with the <code>STKLOS_IMPLEMENTATION_PATH</code> shell variable.</p>
+</div>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> searches the <strong><em>SLIB</em></strong> implementation directory in some standard
+places. If not found, you can fix it with the <code>SCHEME_LIBRARY_PATH</code> shell
+variable.</p>
+</div>
 </td>
 </tr>
 </table>
@@ -24417,6 +24440,9 @@ with Intelligent Backtrack</strong>&#8201;&#8212;&#8201;Workshop in Static Analy
 </li>
 <li>
 <p><a id="R7RS"></a>[R7RS] Alex S. Shinn, John Cowan and Arthur A. Gleckler&#8201;&#8212;&#8201;<a href="https://small.r7rs.org/attachment/r7rs.pdf"><strong>The Revised7 Report on the Algorithmic Language Scheme&#8201;&#8212;&#8201;R7RS small</strong></a>&#8201;&#8212;&#8201;July, 2013.</p>
+</li>
+<li>
+<p><a id="SLIB"></a>[SLIB] Aubrey Jaffer &#8201;&#8212;&#8201;<a href="https://people.csail.mit.edu/jaffer/SLIB"><strong>The SLIB Portable Scheme Library Home Page</strong></a></p>
 </li>
 <li>
 <p><a id="SOS"></a>[SOS] Chris Hanson&#8201;&#8212;&#8201;<a href="https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-sos.pdf">The SOS Reference Manual, version 1.9</a>&#8201;&#8212;&#8201;November, 2011.</p>
@@ -26325,7 +26351,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-04 19:13:46 +0100
+Last updated 2022-03-10 18:19:51 +0100
 </div>
 </div>
 </body>
