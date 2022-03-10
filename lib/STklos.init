@@ -4,7 +4,7 @@
 ;;;
 ;;; This code is in the public domain.
 ;;;
-;;; Last file update: 10-Mar-2022 12:49 (eg)
+;;; Last file update: 10-Mar-2022 18:24 (eg)
 ;;;
 
 ;;;
@@ -398,17 +398,15 @@
 ;;;
 ;;; Redefine require/provide so that symbols use SLIB one and strings use STk one
 ;;;
-
 (define-macro (require what)
-  `(begin
-     (if (symbol? ,what)
-       (slib:require ,what)
-       (stklos:require ,what #f))))
+  ` (if (string? ,what)
+        (stklos:require ,what #f)
+        (slib:require ,what)))
 
 (define slib:provide provide)
 
 (define (provide item)
-  ((if (symbol? item) slib:provide stklos:provide) item))
+  ((if (string? item) stklos:provide slib:provide) item))
 
 (define provided?
   (let ((slib:provided? provided?))
