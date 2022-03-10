@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-100.stk   -- SRFI-100 implementation
+;;;; 100.stk   -- SRFI-100 implementation
 ;;;;
 ;;;; Copyright (c) 2009 Joo ChurlSoo.
 ;;;;
@@ -26,10 +26,16 @@
 ;;;;
 ;;;;           Author: Joo ChurlSoo.
 ;;;;    Creation date: ??-???-2009 ??:??
-;;;; Last file update:  1-Jul-2020 19:00 (eg)
+;;;; Last file update: 10-Mar-2022 15:47 (eg)
 ;;;;
 
-;; define-lambda-object --- define-macro
+;; **STklos**: check-duplicate check-field and field-key are part of the macro expansion
+;; ==> they are prefixed by a '%' since they need to be exported
+
+(define-module srfi/100
+  (export %check-duplicate %check-field %field-key)
+  ;; FIXME
+  (export-syntax define-lambda-object)
 
 (define-macro (unquote-get symbol args)
   (if (null? args)
@@ -76,8 +82,8 @@
        ,(opt-seq z o body)))))
 
 ;; Choose either procedure type or macro type according to your implementation.
-;; 1. procedure field-key
-(define (field-key z k d)
+;; 1. procedure %field-key
+(define (%field-key z k d)
   (let ((x (car z)) (y (cdr z)))
     (if (null? y)
     (cons d z)
@@ -93,24 +99,25 @@
                 (cons (car y) (append head (cdr y)))
                 (lp (cons x (cons (car y) head)) (cdr y)))))))))))
 ;; 2. macro field-key!
-(define-macro (field-key! z n d)
-  (let ((x (gensym)) (y (gensym)) (head (gensym)) (tail (gensym)))
-    `(let ((,x (car ,z)) (,y (cdr ,z)))
-       (if (null? ,y)
-       ,d
-       (if (eq? ',n ,x)
-           (begin (set! ,z (cdr ,y)) (car ,y))
-           (let lp ((,head (list ,x (car ,y)))
-            (,tail (cdr ,y)))
-         (if (null? ,tail)
-             ,d
-             (let ((,x (car ,tail)) (,y (cdr ,tail)))
-               (if (null? ,y)
-               ,d
-               (if (eq? ',n ,x)
-                   (begin (set! ,z (append ,head (cdr ,y)))
-                      (car ,y))
-                   (lp (cons ,x (cons (car ,y) ,head)) (cdr ,y))))))))))))
+;; **STklos** supressed the macro field-key!
+;; (define-macro (field-key! z n d)
+;;   (let ((x (gensym)) (y (gensym)) (head (gensym)) (tail (gensym)))
+;;     `(let ((,x (car ,z)) (,y (cdr ,z)))
+;;        (if (null? ,y)
+;;        ,d
+;;        (if (eq? ',n ,x)
+;;            (begin (set! ,z (cdr ,y)) (car ,y))
+;;            (let lp ((,head (list ,x (car ,y)))
+;;             (,tail (cdr ,y)))
+;;          (if (null? ,tail)
+;;              ,d
+;;              (let ((,x (car ,tail)) (,y (cdr ,tail)))
+;;                (if (null? ,y)
+;;                ,d
+;;                (if (eq? ',n ,x)
+;;                    (begin (set! ,z (append ,head (cdr ,y)))
+;;                       (car ,y))
+;;                    (lp (cons ,x (cons (car ,y) ,head)) (cdr ,y))))))))))))
 
 (define-macro (key-lambda r o body)
   (define (opt-key z cls body)
@@ -120,8 +127,8 @@
          (error 'define-lambda-object "too many arguments" ,z))
     (let ((cl (car cls)))
       (let ((var (car cl)) (val (cadr cl)))
-        ;; 1. procedure field-key
-        `(let* ((,z (if (null? ,z) (cons ,val ,z) (field-key ,z ',var ,val)))
+        ;; 1. procedure %field-key
+        `(let* ((,z (if (null? ,z) (cons ,val ,z) (%field-key ,z ',var ,val)))
                 (,var (car ,z))
                 (,z (cdr ,z)))
         ;; 2. macro field-key!
@@ -132,12 +139,12 @@
       (let ((z (gensym)))
     `(lambda (,@r . ,z) ,(opt-key z o body)))))
 
-(define (check-duplicate ls err-str)
+(define (%check-duplicate ls err-str)    ;; **STklos**: prefixed with a '%'
   (cond ((null? ls) #f)
     ((memq (car ls) (cdr ls)) (error 'define-lambda-object err-str (car ls)))
-    (else (check-duplicate (cdr ls) err-str))))
+    (else (%check-duplicate (cdr ls) err-str))))
 
-(define (check-field part-list main-list cmp name err-str)
+(define (%check-field part-list main-list cmp name err-str) ;; **STklos**: prefixed with a '%'
   (let lp ((part part-list) (main main-list))
     (if (null? part)
     main
@@ -178,21 +185,21 @@
      (define ,safe-parent
        (begin
          ;; check duplication
-         (check-duplicate (append (list ',name) ',gi ',gr) "duplicated group")
-         (check-duplicate ',(append fm (map car fi) (map car h)) "duplicated field")
+         (%check-duplicate (append (list ',name) ',gi ',gr) "duplicated group")
+         (%check-duplicate ',(append fm (map car fi) (map car h)) "duplicated field")
          ;; check field
          (for-each (lambda (g y)
-             (check-field (g 'read-write-field) ',fm eq? y "incompatible read-write field")
-             (check-field (g 'read-only-field) ',(map car fi) eq? y "incompatible read-only field")
-             (check-field (g 'required-field) ',r eq? y "incompatible required field")
-             (check-field (g 'optional-field) ',o equal? y "incompatible optional field")
-             (check-field (g 'automatic-field) ',(append c v a) equal? y "incompatible automatic field")
-             (check-field (map car (g 'common-field)) ',(map car c) eq? y "incompatible common field")
-             (check-field (map car (g 'virtual-field)) ',(map car v) eq? y "incompatible virtual field")
-             (check-field (map car (g 'hidden-field)) ',(map car h) eq? y "incompatible hidden field"))
+             (%check-field (g 'read-write-field) ',fm eq? y "incompatible read-write field")
+             (%check-field (g 'read-only-field) ',(map car fi) eq? y "incompatible read-only field")
+             (%check-field (g 'required-field) ',r eq? y "incompatible required field")
+             (%check-field (g 'optional-field) ',o equal? y "incompatible optional field")
+             (%check-field (g 'automatic-field) ',(append c v a) equal? y "incompatible automatic field")
+             (%check-field (map car (g 'common-field)) ',(map car c) eq? y "incompatible common field")
+             (%check-field (map car (g 'virtual-field)) ',(map car v) eq? y "incompatible virtual field")
+             (%check-field (map car (g 'hidden-field)) ',(map car h) eq? y "incompatible hidden field"))
                (list ,@gi) ',gi)
          (for-each (lambda (g y)
-             (check-field (append (g 'read-write-field) (g 'read-only-field) (map car (g 'hidden-field))) ',(append fm (map car fi) (map car h)) eq? y "incompatible whole field"))
+             (%check-field (append (g 'read-write-field) (g 'read-only-field) (map car (g 'hidden-field))) ',(append fm (map car fi) (map car h)) eq? y "incompatible whole field"))
                (list ,@gr) ',gr)
          (list ,@gi ,@gr)))
      ;; Alist, vector/enum, vector/alist or hashtable can be used instead of
@@ -387,7 +394,6 @@
         (group-sort gr (cons gg gi) '() field)
         (field-sort gr gi field '() '() '() '() '() '() '() '()))))
   (group-sort '() '() group field))
+)
 
-;; **STklos**
-(provide "srfi-100")
-;;; eof
+(provide "srfi/100")
