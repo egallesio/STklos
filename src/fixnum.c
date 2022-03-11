@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 19-Feb-2022 19:29 (eg)
+ * Last file update: 11-Mar-2022 09:40 (eg)
  */
 
 #include "stklos.h"
@@ -743,7 +743,7 @@ doc>
   shifted (at least with GCC and LLVM -- this is not defined by the
   standard, actually).
  */
-extern inline unsigned int bit_count(unsigned long n) {
+extern inline unsigned int STk_bit_count(unsigned long n) {
   /* A lookup table with the bit count for every possible byte. */
   static unsigned int bc[256] =
     { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
@@ -776,8 +776,8 @@ DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
 {
     ensure_fx(o);
     return (INT_VAL(o) < 0)
-        ? MAKE_INT(bit_count(~INT_VAL(o)))
-        : MAKE_INT(bit_count( INT_VAL(o)));
+        ? MAKE_INT(STk_bit_count(~INT_VAL(o)))
+        : MAKE_INT(STk_bit_count( INT_VAL(o)));
 }
 
 

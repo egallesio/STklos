@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 02-Jan-2022 18:41
- * Last file update:  4-Feb-2022 10:28 (eg)
+ * Last file update: 11-Mar-2022 09:51 (eg)
  */
 
 
@@ -496,23 +496,12 @@ trie_bitmap_delete_max(long b) {
     return b & (~ trie_highestbit(b, trie_lowestbit (b)));
 }
 
-
-
-/*
-  Count the number of ones in a long integer.
-  bit_count is defined in fixnum.c
- */
-static inline unsigned int
-trie_bit_count(unsigned long n) {
-    return bit_count(n);
-}
-
 /*
   Given a prefix and a bitmap, return the key.
   FIXME: works for a single bit in the bitmap only!
  */
 static inline long
-STk_pm2key(long prefix, long bitmap) {
+pm2key(long prefix, long bitmap) {
     return (prefix | trie_first_set_bit(bitmap));
 }
 
@@ -1289,7 +1278,7 @@ trie_map_for_each(SCM trie, SCM collect, SCM proc) {
             long p = TRIE_PREFIX(trie);
             long b = TRIE_BITMAP(trie);
             while (b) {
-                SCM res = STk_C_apply(proc, 1, MAKE_INT(STk_pm2key(p, b)));
+                SCM res = STk_C_apply(proc, 1, MAKE_INT(pm2key(p, b)));
                 if ((collect==STk_true) && (!INTP(res)))
                     STk_error ("mapping procedure produced non-fixnum ~S", res);
 
@@ -1332,14 +1321,15 @@ trie_map_for_each(SCM trie, SCM collect, SCM proc) {
 
 
 /*
-  Counts the number of elements in a trie.
+  Counts the number of elements in a trie. Use the fixnum.c STk_bit_count
+  function which counts the numbers of ones in a long integer.
 */
 long
 trie_count_aux(SCM trie) {
     if (TRIE_EMPTYP(trie)) return 0;
     if (TRIE_LEAFP (trie)) return FXMAPP(trie)
                                ? 1
-                               : trie_bit_count(TRIE_BITMAP(trie));
+                               : STk_bit_count(TRIE_BITMAP(trie));
     return
         trie_count_aux(TRIE_LEFT(trie)) +
         trie_count_aux(TRIE_RIGHT(trie));
@@ -1361,8 +1351,8 @@ trie_min_max_aux(SCM trie, int want_max) {
             if (FXMAPP(trie)) return STk_n_values(2, MAKE_INT(TRIE_KEY(trie)), TRIE_VALUE(trie));
             else {
                 return want_max
-                    ? MAKE_INT(STk_pm2key(p, trie_highestbit(b, 1)))
-                    : MAKE_INT(STk_pm2key(p, b));
+                    ? MAKE_INT(pm2key(p, trie_highestbit(b, 1)))
+                    : MAKE_INT(pm2key(p, b));
             }
         }
 
@@ -1408,11 +1398,11 @@ trie_del_min_max_aux(SCM trie, int want_max) {
 
         /* It's an ISET, and we use the bitmap-deleting functions: */
         return want_max
-            ? STk_cons(MAKE_INT(STk_pm2key(p,trie_highestbit(b,1))),
+            ? STk_cons(MAKE_INT(pm2key(p,trie_highestbit(b,1))),
                        trie_make_leaf(p,
                                           trie_bitmap_delete_max(b),
                                           NULL))
-            : STk_cons(MAKE_INT(STk_pm2key(p,b)),
+            : STk_cons(MAKE_INT(pm2key(p,b)),
                        trie_make_leaf(p,
                                           trie_bitmap_delete_min(b),
                                           NULL));
@@ -1528,7 +1518,7 @@ trie_fold(SCM proc, SCM nil, SCM trie, int from_right)
                     hi = trie_highestbit(b, 1);
                     cur = p + trie_last_set_bit(hi);
                 } else
-                    cur = STk_pm2key(p, b);
+                    cur = pm2key(p, b);
                 last = STk_C_apply(proc, 2, MAKE_INT(cur), last);
                 b = from_right
                     ? b ^ hi
@@ -1598,7 +1588,7 @@ trie_partition_aux(SCM pred, SCM trie, SCM sets, int partition) {
             long  p = TRIE_PREFIX(trie);
             long  b = TRIE_BITMAP(trie);
             while (b) {
-                long val = STk_pm2key(p, b);
+                long val = pm2key(p, b);
                 int success = (STk_C_apply(pred, 1, MAKE_INT(val)) == STk_true);
                 if (success)
                     CAR(sets) = trie_insert_aux(CAR(sets),

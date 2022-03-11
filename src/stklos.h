@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  1-Sep-2021 15:21 (eg)
+ * Last file update: 11-Mar-2022 09:42 (eg)
  */
 
 
@@ -598,6 +598,7 @@ int STk_init_ffi(void);
 */
 long STk_fixval(SCM v);
 long STk_fixnum_cmp(SCM a, SCM b);
+unsigned int STk_bit_count(unsigned long n);
 EXTERN_PRIMITIVE("fx+",        fxplus,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx-",        fxminus, subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx*",        fxtime,  subr2, (SCM o1, SCM o2));
