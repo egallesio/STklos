@@ -743,7 +743,7 @@ doc>
   shifted (at least with GCC and LLVM -- this is not defined by the
   standard, actually).
  */
-static inline unsigned int bit_count(unsigned long n) {
+extern inline unsigned int bit_count(unsigned long n) {
   /* A lookup table with the bit count for every possible byte. */
   static unsigned int bc[256] =
     { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
