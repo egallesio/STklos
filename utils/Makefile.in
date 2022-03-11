@@ -16,7 +16,7 @@
 
 # Makefile.am for STklos/utils source file
 #
-# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 16-Jul-2021 10:17 (eg)
+# Last file update: 16-Jan-2022 11:25 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -177,6 +177,7 @@ ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+ASCIIDOCTOR = @ASCIIDOCTOR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -322,7 +323,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-scmbin = stklos-compile stklos-genlex
+scmbin = stklos-compile stklos-genlex stklos-pp
 bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
 all: all-am
 
@@ -562,6 +563,9 @@ stklos-compile: stklos-compile.stk
 
 stklos-genlex: stklos-genlex.stk
 	$(COMP) -o stklos-genlex stklos-genlex.stk
+
+stklos-pp: stklos-pp.stk
+	$(COMP) -o stklos-pp stklos-pp.stk
 
 clean-am:
 	rm -f $(scmbin) $(localscript) *~

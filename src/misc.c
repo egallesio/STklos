@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  6-Sep-2021 17:28 (eg)
+ * Last file update: 11-Jan-2022 16:42 (eg)
  */
 
 #include "stklos.h"
@@ -101,7 +101,7 @@ SCM STk_read_from_C_string(char *str)
  * Returns a string identifying the current version of the system. A
  * version is constituted of two numbers separated by a point: the version
  * and the release numbers. Note that |implementation-version| corresponds
- * to the ,(srfi 112) name of this function.
+ * to the {{link-srfi 112}} name of this function.
 doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))
@@ -129,7 +129,7 @@ DEFINE_PRIMITIVE("%stklos-git", stklos_git, subr0, (void))
  * (void)
  * (void arg1 ...)
  *
- * Returns the special ,(emph "void") object. If arguments are passed to |void|,
+ * Returns the special *_void_* object. If arguments are passed to |void|,
  * they are evalued and simply ignored.
 doc>
  */
@@ -315,31 +315,34 @@ static char URI_regexp[] =
  *
  * Parses the string |str| as a RFC-2396 URI and return a keyed list with the
  * following components
- * ,(itemize
- * (item [|scheme| : the scheme used as a string (defaults to |"file"|)])
- * (item [|user|: the user information (generally expressed as
- *      |login:password|)])
- * (item [|host| : the host as a string (defaults to "")])
- * (item [|port| : the port as an integer (0 if no port specified)])
- * (item [|path| : the path ])
- * (item [|query| : the qury part of the URI as a string (defaults to the
- * empty string)])
- * (item [|fragment| : the fragment of the URI as a string (defaults to the
- * empty string)])
- * )
+ *
+ * - |scheme| : the scheme used as a string (defaults to |"file"|)
+ * - |user|: the user information (generally expressed as |login:password|)
+ * - |host| : the host as a string (defaults to "")
+ * - |port| : the port as an integer (0 if no port specified)
+ * - |path| : the path
+ * - |query| : the qury part of the URI as a string (defaults to the
+ *    empty string)
+ * - |fragment| : the fragment of the URI as a string (defaults to the
+ *   empty string)
+ *
  * @lisp
- * (uri-parse "http://google.com")
- *     => (:scheme "http" :user "" :host "google.com" :port 80
+ * (uri-parse "http://google.com") 
+{*    => (:scheme "http" :user "" :host "google.com" :port 80 
  *         :path "/" :query "" :fragment "")
+ *
  * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
  *     => (:scheme "http" :user "" :host "stklos.net" :port 8080
  *         :path "/a/file" :query "x=1;y=2" :fragment "end")
+ *
  * (uri-parse "http://foo:secret@stklos.net:2000/a/file")
  *     => (:scheme "http" :user "foo:secret" :host "stklos.net"
  *         :port 2000  :path "/a/file" :query "" :fragment "")
+ * 
  * (uri-parse "/a/file")
  *    => (:scheme "file" :user "" :host "" :port 0 :path "/a/file"
  *        :query "" :fragment "")
+ * 
  * (uri-parse "")
  *    => (:scheme "file"  :user "" :host "" :port 0 :path ""
  *        :query "" :fragment "")

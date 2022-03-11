@@ -1,7 +1,7 @@
 /*
  * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 10-Apr-2021 18:48 (eg)
+ * Last file update: 17-Jan-2022 09:34 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -76,7 +76,7 @@ struct timeval STk_thread_abstime_to_reltime(double abs_secs)
 <doc EXT current-thread
  * (current-thread)
  *
- *  Returns the current thread.
+ * Returns the current thread.
  * @lisp
  * (eq? (current-thread) (current-thread))  =>  #t
  * @end lisp
@@ -186,7 +186,11 @@ DEFINE_PRIMITIVE("thread-name", thread_name, subr1, (SCM thr))
  * (thread-stack-size thread)
  *
  * Returns the allocated stack size for |thread|.
- * Note that this procedure is not present in ,(quick-link-srfi 18).
+ * @lisp
+ * (thread-stack-size (make-thread (lambda () #f) 'foo 2000)) => 2000
+ * @end lisp
+ *
+ * Note that this procedure is not present in {{quick-link-srfi 18}}.
 doc>
 */
 DEFINE_PRIMITIVE("thread-stack-size", thread_ssize, subr1, (SCM thr))

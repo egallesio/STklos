@@ -1,7 +1,7 @@
 ;;;;
 ;;;; load.stk   -- Extended load function
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 18-Nov-2021 22:47 (eg)
+;;;; Last file update: 27-Jan-2022 16:02 (eg)
 ;;;;
 
 
@@ -49,14 +49,25 @@
 #|
 <doc EXT build-path-from-shell-variable
  * (build-path-from-shell-variable var)
+ * (build-path-from-shell-variable var sep)
  *
- * TODO
+ * Builds a path as a list of strings (which is the way STklos represents
+ * paths) from the environment variable |var|, given the separator characters
+ * given in |sep| (which defaults to `":"`, the standrad Unix path separator).
+ * If the |var| is not definied in the environment,
+ * |build-path-from-shell-variable| returns the empty list.
+ *
+ * If the shell variable `MYPATH` is "/bin:/sbin:/usr/bin"`, then
+ * @lisp
+ * (build-path-from-shell-variable "MYPATH")       => ("/bin" "/sbin" "/usr/bin")
+ * (build-path-from-shell-variable "MYPATH" "/:")  => ("bin" "sbin" "usr" "bin")
+ * @end lisp
 doc>
-|#
-(define (build-path-from-shell-variable var)
+|# 
+(define (build-path-from-shell-variable var :optional (sep *path-separator*))
   (let ((path (getenv var)))
     (if path
-        (string-split path *path-separator*)
+        (string-split path sep)
         '())))
 
 ;======================================================================
@@ -311,11 +322,11 @@ doc>
  * (provided? string)
  *
  * |Require| loads the file whose name is |string| if it was not
- * previously ,(q (emph  "provided")). |Provide| permits to store |string| in
+ * previously "_provided_". |Provide| permits to store |string| in
  * the list of already provided files. Providing a file permits to avoid
  * subsequent loads of this file. |Require/provide| is more or less equivalent to
- * a |require| followed by a |provide|. |Provided?| returns |%t| if
- * |string| was already provided; it returns |%f| otherwise.
+ * a |require| followed by a |provide|. |Provided?| returns `#t` if
+ * |string| was already provided; it returns `#f` otherwise.
 doc>
 |#
 (define %%require       #f)
@@ -359,7 +370,7 @@ doc>
 (let ((provided '())
       (stklos-building? (getenv "STKLOS_BUILDING")))
 
-  
+
   (set! %%require
     (lambda (what lib-only?)
       (when stklos-building?

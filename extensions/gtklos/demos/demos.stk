@@ -1,7 +1,7 @@
 ;;;;
 ;;;; demos.stk  -- Run all the STklos demos
 ;;;;
-;;;; Copyright © 2009-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2009-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 19-Sep-2009 20:45 (eg)
-;;;; Last file update: 30-Jun-2021 20:07 (eg)
+;;;; Last file update:  2-Feb-2022 16:38 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -49,8 +49,13 @@
             ;; A real demo. Make a button to run it
             (let ((b (make <button>
                        #:text (symbol->string (car lst))
-                       #:command (lambda (w ev)
-                                   (system (format "unset indemo; ./~A &" (car lst)))))))
+                       #:command
+                       (lambda (w ev)
+                         ;; Do not call the executable directly, since STklos
+                         ;; is perhaps not yet installed. Use stklos with -f
+                         ;; option directly
+                         (system (format "unset indemo; stklos -f ./~A &"
+                                         (car lst)))))))
               (container-add! grid b #:top top #:left left)
               (if (zero? (modulo (+ left 1) 4))
                   (Loop (+ top 1) 0    (cdr lst))

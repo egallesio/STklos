@@ -2,7 +2,7 @@
  *
  * c h a r . c                          -- Characters management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update:  2-Jun-2020 10:47 (eg)
+ * Last file update:  3-Feb-2022 12:02 (eg)
  */
 
 #include <ctype.h>
@@ -254,12 +254,12 @@ doc>
  *
  * These procedures impose a total ordering on the set of characters.
  * It is guaranteed that under this ordering:
- * ,(itemize
- * (item [The upper case characters are in order.])
- * (item [The lower case characters are in order.])
- * (item [The digits are in order.])
- * (item [Either all the digits precede all the upper case letters, or vice versa.])
- * (item [Either all the digits precede all the lower case letters, or vice versa.])
+ *
+ * - The upper case characters are in order.
+ * - The lower case characters are in order.
+ * - The digits are in order.
+ * - Either all the digits precede all the upper case letters, or vice versa.
+ * - Either all the digits precede all the lower case letters, or vice versa.
  * )
 doc>
  */
@@ -388,7 +388,7 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c)) {
  * (digit-value #\3)        => 3
  * (digit-value #\x0664)    => 4
  * (digit-value #\x0AE6)    => 0
- * (digit-value #\x0EA6)    #f
+ * (digit-value #\x0EA6)    => #f
  * @end lisp
 doc>
  */
@@ -422,7 +422,7 @@ DEFINE_PRIMITIVE("digit-value", digit_value, subr1, (SCM c))
  * ordering and some subset of the integers under the |<=|
  * ordering. That is, if
  * @lisp
- *    (char<=? a b) => #t  ,(bold "and")  (<= x y) => #t
+ *    (char<=? a b) => #t  and  (<= x y) => #t
  * @end lisp
  * and x and y are in the domain of |integer->char|, then
  * @lisp
@@ -517,7 +517,7 @@ doc>
 uint32_t STk_to_fold(uint32_t c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, fold_table, fold_table_length);
-    return (res <=0) ? STk_to_lower(c) : (uint32_t) res; 
+    return (res <=0) ? STk_to_lower(c) : (uint32_t) res;
   } else
     return tolower(c);
 }

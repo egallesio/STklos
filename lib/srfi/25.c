@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 19-Nov-2021 12:34 (eg)
+ * Last file update: 12-Jan-2022 16:40 (eg)
  */
 
 #include "stklos.h"
@@ -1013,7 +1013,7 @@ static void shared_array_inc_count(SCM array)
     MUT_LOCK(a->share_cnt_lock);
     (*(a->orig_share_count))++;
     MUT_UNLOCK(a->share_cnt_lock);
-};
+}
 
 /* Decreases the sare counter of an array. This is registered as a finalizer
    only for arrays that were build with share-array. */
@@ -1024,7 +1024,7 @@ static void shared_array_dec_count(SCM array,  void _UNUSED(*client_data))
     // fprintf(stderr,"DECREMENTED\n");
     (*(a->orig_share_count))--;
     MUT_UNLOCK(a->share_cnt_lock);
-};
+}
 
 
 EXTERN_PRIMITIVE("array-shape",srfi_25_array_shape,subr1,(SCM array));  /* will be used in share-array */
@@ -1124,8 +1124,8 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
 <doc EXT shared-array?
  * (shared-array? array)
  *
- * Will return ,(code "#t") when the array has its data shared with other
- * arrays, and ,(code "#f") otherwise.
+ * Will return `#t` when the array has its data shared with other
+ * arrays, and `#f` otherwise.
 doc>
  */
 DEFINE_PRIMITIVE("shared-array?",srfi_25_shared_arrayp,subr1,(SCM array))
@@ -1138,7 +1138,7 @@ DEFINE_PRIMITIVE("shared-array?",srfi_25_shared_arrayp,subr1,(SCM array))
 <doc EXT array-share-count
  * (array-share-count array)
  *
- * Returns the number of arrays that were built sharing |array|'s
+ * Returns the number of arrays that were built sharing `|array|`'s
  * elements through |(share-array array shape proc)|, and that were not
  * yet garbage collected.
  * Note that it may take a long time for an object to be garbage
@@ -1263,11 +1263,11 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
  * @lisp
  * (shape-for-each (shape 1 3 10 12)
  *                 (lambda (x y)
- *                   (format #t "\[~a ~a\]~%" x y)))
- * \[1 10\]
- * \[1 11\]
- * \[2 10\]
- * \[2 11\]
+ *                   (format #t "[~a ~a]~%" x y)))
+ *         @print [1 10]
+ *            [1 11]
+ *            [2 10]
+ *            [2 11]
  * @end lisp
  * If |index-object| is provided, it is used as a place to store the
  * indices, so proc must accept either a vector or an array (this is to
@@ -1277,26 +1277,26 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
  * (let ((vec (make-vector 2 #f)))
  *   (shape-for-each (shape 1 3 10 12)
  *                   (lambda (o)
- *                     (format #t "\[~a ~a\]~%"
+ *                     (format #t "[~a ~a]~%"
  *                     (vector-ref o 0)
  *                     (vector-ref o 1)))
  *                   vec))
- * \[1 10\]
- * \[1 11\]
- * \[2 10\]
- * \[2 11\]
+ *         @print [1 10]
+ *            [1 11]
+ *            [2 10]
+ *            [2 11]
  *
  * (let ((arr (make-array (shape 0 2))))
  *   (shape-for-each (shape 1 3 10 12)
  *                   (lambda (o)
- *                     (format #t "\[~a ~a\]~%"
+ *                     (format #t "[~a ~a]~%"
  *                     (array-ref o 0)
  *                     (array-ref o 1)))
  *                   arr))
- * \[1 10\]
- * \[1 11\]
- * \[2 10\]
- * \[2 11\]
+ *          @print [1 10]
+ *             [1 11]
+ *             [2 10]
+ *             [2 11]
  * @end lisp
 doc>
  */

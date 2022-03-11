@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 11-Apr-2021 17:19 (eg)
+ * Last file update: 13-Jan-2022 18:59 (eg)
  */
 #include <sys/resource.h>
 #include "stklos.h"
@@ -110,65 +110,47 @@ doc>
  * implementations of Scheme.
  *
  * The |eqv?| procedure returns |#t| if:
- * ,(itemize
- * (item [
- * |obj1| and |obj2| are both |#t| or both |#f|.
- * ])
  *
- * (item [
- * |obj1| and |obj2| are both symbols and
- * @lisp
+ * - |obj1| and |obj2| are both |#t| or both |#f|.
+ *
+ * - |obj1| and |obj2| are both symbols and
+ * +
+ * ```scheme
  * (string=? (symbol->string obj1)
- *           (symbol->string obj2))
- *                      =>  #t
- * @end lisp
- *
- * ,(bold "Note:") This assumes that neither |obj1| nor |obj2| is an
+ *           (symbol->string obj2))     =>  #t
+ * ```
+ * +
+ * NOTE: This assumes that neither |obj1| nor |obj2| is an
  * "uninterned symbol".
- * ])
  *
- * (item [
- * |obj1| and |obj2| are both keywords and
- * @lisp
+ * - |obj1| and |obj2| are both keywords and
+ * +
+ * ```scheme
  * (string=? (keyword->string obj1)
- *           (keyword->string obj2))
- *                      =>  #t
- * @end lisp
- * ])
+ *           (keyword->string obj2))    =>  #t
+ * ```
  *
- * (item [
- * |obj1| and |obj2| are both numbers, are numerically equal
- * (see ,(ref :mark "=")), and are either both exact or both inexact.
- * ])
+ * - |obj1| and |obj2| are both numbers, are _<<numeq,numerically equal>>_,
+ *  and are either both exact or both inexact.
  *
- * (item [
- * |obj1| and |obj2| are both characters and are the same character
- * according to the |char=?| procedure (see ,(ref :mark "char=?")).
- * ])
+ * - |obj1| and |obj2| are both characters and are the same character
+ *   according to the _<<chareq, `char=?` procedure>>`_.
  *
- * (item [
- * both |obj1| and |obj2| are the empty list.
- * ])
+ * -  both |obj1| and |obj2| are the empty list.
  *
- * (item [
- * |obj1| and |obj2| are pairs, vectors, or strings that denote
- * the same locations in the store.
- * ])
+ * - |obj1| and |obj2| are pairs, vectors, or strings that denote
+ *   the same locations in the store.
  *
- * (item [
- * |obj1| and |obj2| are procedures whose location tags are equal.
- * ])
- * )
+ * - |obj1| and |obj2| are procedures whose location tags are equal.
  *
- * ,(bold "Note:") STklos extends R5RS |eqv?| to take into account
- * the keyword type.
- * ,(linebreak)
- * Here are some examples:
+ * STklos extends R5RS |eqv?| to take into account
+ * the keyword type. Here are some examples:
  * @lisp
  * (eqv? 'a 'a)                     =>  #t
  * (eqv? 'a 'b)                     =>  #f
  * (eqv? 2 2)                       =>  #t
  * (eqv? :foo :foo)                 =>  #t
+ * (eqv? #:foo :foo)                =>  #t
  * (eqv? :foo :bar)                 =>  #f
  * (eqv? '() '())                   =>  #t
  * (eqv? 100000000 100000000)       =>  #t
@@ -192,10 +174,10 @@ doc>
  *       (lambda (y) y))    =>  unspecified
  * @end lisp
  *
- * ,(bold "Note:") In fact, the value returned by STklos depends of
+ * NOTE: In fact, the value returned by STklos depends of
  * the way code is entered and can yield |#t| in some cases and |#f|
  * in others.
- * ,(linebreak)
+ *
  * See R5RS for more details on |eqv?|.
 doc>
  */
@@ -270,20 +252,20 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
  *
  * |Eq?| is similar to |eqv?| except that in some cases it is capable of
  * discerning distinctions finer than those detectable by |eqv?|.
- * ,(linebreak)
+ *
  * |Eq?| and |eqv?| are guaranteed to have the same behavior on symbols,
  * keywords, booleans, the empty list, pairs, procedures, and non-empty strings
- * and vectors. |Eq?|'s behavior on numbers and characters is
+ * and vectors. `|Eq?|`'s behavior on numbers and characters is
  * implementation-dependent, but it will always return either true or false,
  * and will return true only when |eqv?| would also return true.
  * |Eq?| may also behave differently from |eqv?| on empty vectors
- * and empty strings.
- * ,(linebreak)
- * ,(bold "Note:") STklos extends R5RS |eq?| to take into account
- * the keyword type.
- * ,(linebreak)
- * ,(bold "Note:") In STklos, comparison of character returns |#t| for identical
- * characters and |#f| otherwise.
+ * and empty strings. +
+ * Note that:
+ *
+ *   - STklos extends R5RS |eq?| to take into account  the keyword type.
+ *   - In STklos, comparison of character returns |#t| for identical
+ *     characters and |#f| otherwise.
+ *
  *
  * @lisp
  * (eq? 'a 'a)                     =>  #t
@@ -295,10 +277,10 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
  * (eq? :foo :bar)                 =>  #f
  * (eq? '() '())                   =>  #t
  * (eq? 2 2)                       =>  unspecified
- * (eq? #\\A #\\A)                   =>  #t (unspecified in R5RS)
+ * (eq? #A #A)                     =>  #t (unspecified in r5rs)
  * (eq? car car)                   =>  #t
  * (let ((n (+ 2 3)))
- *   (eq? n n))                    =>  #t (unspecified in R5RS)
+ *   (eq? n n))                    =>  #t (unspecified in r5rs)
  * (let ((x '(a)))
  *   (eq? x x))                    =>  #t
  * (let ((x '#()))
@@ -336,11 +318,11 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  * (equal? 2 2)                    =>  #t
  * (equal? (make-vector 5 'a)
  *         (make-vector 5 'a))     =>  #t
- * (equal? '\#1=(a b . \#1\#)
- *         '\#2=(a b a b . \#2\#)) =>  #t
+ * (equal? '#1=(a b . #1#)
+ *         '#2=(a b a b . #2#))    =>  #t
  * @end lisp
  *
- * ,(bold "Note:") A rule of thumb is that objects are generally
+ * NOTE: A rule of thumb is that objects are generally
  * |equal?| if they print the same.
 doc>
  */

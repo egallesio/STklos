@@ -1,6 +1,6 @@
 # Makefile.am for STklos documentation
 #
-# Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Jun-2021 19:13 (eg)
+# Last file update: 29-Jan-2022 18:37 (eg)
+
+.PHONY: subdoc docdb extradoc
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -39,34 +41,18 @@ docpdfdir   = $(doclocation)/pdf
 docpdf_DATA = pdf/stklos-ref.pdf
 
 dochtmldir  = $(doclocation)/html
-dochtml_DATA= html/index.html		\
-	      html/stklos-ref.html	\
-	      html/stklos-ref-1.html	\
-	      html/stklos-ref-2.html	\
-	      html/stklos-ref-3.html	\
-	      html/stklos-ref-4.html	\
-	      html/stklos-ref-5.html	\
-	      html/stklos-ref-6.html	\
-	      html/stklos-ref-7.html	\
-	      html/stklos-ref-8.html	\
-	      html/stklos-ref-9.html	\
-	      html/stklos-ref-10.html	\
-              html/stklos-ref-11.html	\
-	      html/stklos-ref-12.html	\
-	      html/stklos-ref-13.html	\
-	      html/stklos-ref-14.html	\
-	      html/stklos-ref-15.html	\
-	      html/stklos-ref-16.html	\
-	      html/doc-style.css
+dochtml_DATA= html/stklos-ref.html
 
 docimgdir   = $(doclocation)/html/images
-docimg_DATA = html/images/hierarchy.jpg
+docimg_DATA = html/images/hierarchy.png
 
+SUBDOCS     = refman
 
 all: $(DOCDB)
+	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
 
-skribe:
-	(cd skb; $(MAKE) $(HTML) $(PDF))
+extradoc: $(DOCDB)
+	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
 
 #
 # Database construction
@@ -88,11 +74,12 @@ clean:
 	/bin/rm -f $(ALLDB)  stklos*.1 *~
 
 distclean: clean
-	(cd skb; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:
 	rmdir $(docpdfdir) $(docimgdir) $(dochtmldir) $(doclocation) || true
+
+
 # Local Variables:
 # tab-width: 8
 # End:

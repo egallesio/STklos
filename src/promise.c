@@ -1,7 +1,7 @@
 /*
  * promise.c    -- Implementation of promises
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 27-Aug-2021 20:34 (eg)
+ * Last file update: 13-Jan-2022 12:17 (eg)
  */
 #include "stklos.h"
 
@@ -121,11 +121,11 @@ DEFINE_PRIMITIVE("%promise-value-set!", promise_val_set, subr2, (SCM p, SCM v))
 <doc force
  * (force promise)
  *
- * Forces the value of |promise| (see ,(ref :mark "delay")). If no value has been
- * computed for the promise, then a value is computed and
- * returned. The value of the promise is cached (or "memoized") so
- * that if it is forced a second time, the previously computed value
- * is returned.
+ * Forces the value of |promise| (see _<<delay,primitive delay>>_).
+ * If no value has been computed for the promise, then a value is
+ * computed and returned. The value of the promise is cached
+ * (or "memoized") so that if it is forced a second time, the
+ * previously computed value is returned.
  *
  * @lisp
  * (force (delay (+ 1 2)))        =>  3
@@ -160,7 +160,7 @@ DEFINE_PRIMITIVE("%promise-value-set!", promise_val_set, subr2, (SCM p, SCM v))
  * (begin (set! x 10)
  *        (force p))     =>  6
  * @end lisp
- * ,(bold "Note:") See R5RS for details on a posssible way to implement
+ * NOTE: See R5RS for details on a posssible way to implement
  * |force| and |delay|.
 doc>
 */
@@ -200,7 +200,7 @@ DEFINE_PRIMITIVE("force", force, subr1, (SCM promise))
 <doc r7rs promise?
  * (promise? obj)
  *
- *  Returns |#t| if |obj| is a promise, otherwise returns |#f|.
+ * Returns |#t| if |obj| is a promise, otherwise returns |#f|.
 doc>
 */
 DEFINE_PRIMITIVE("promise?", promisep, subr1, (SCM obj))

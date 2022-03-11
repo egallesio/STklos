@@ -33,11 +33,10 @@ If everything is correct, you can install the *GTklos* extension with a `make in
 
 ## Getting started
 
-To use the *GTklos* extension you need to require the `"gtklos"` and import the `GTKLOS` module. This can be done with:
+To use the *GTklos* extension you need to import the `(stklos gtklos)` library. This can be done with:
 
 ```scheme
-(require "gtklos")  ;; to load the gtklos extension
-(import GTKLOS)     ;; to acces the GTKLOS exported symols
+(import (stklos gtklos))     ;; to acces the GTKLOS exported symols
 ```
 
 **Content**
@@ -83,7 +82,7 @@ Slots are:
 stklos> 
 ```
 
-Now that the window is creates, we need to start the GTK+ interaction loop to see it effectively on our screen. This can be done by calling 
+Now that the window is created, we need to start the GTK+ interaction loop to see it effectively on our screen. This can be done by calling 
 - `(start-interactive-gtk)`, or
 - `(gtk-main)`
 
@@ -111,7 +110,7 @@ stklos> (width w)
 Of course,  we can also define the widget size at creation time with a class such as
 
 ```scheme 
-stklos> (define w (make <window> #:tile "A first window"
+stklos> (define w (make <window> #:title "A first window"
                                  #:width 400
                                  #:height 100))
 ```

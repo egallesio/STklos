@@ -23,7 +23,7 @@
 ;;;; NATURE WHATSOEVER.
 ;;;;
 ;;;;    Creation date: 26-Jan-2001 17:49 (eg)
-;;;; Last file update:  5-Nov-2021 17:30 (eg)
+;;;; Last file update:  7-Jan-2022 20:21 (eg)
 ;;;;
 
 #|
@@ -38,13 +38,13 @@
  * |syntax-rules|, and |<body>| should be a sequence of one or more expressions.  It
  * is an error for a |<keyword>| to appear more than once in the list of keywords
  * being bound.
- * ,(linebreak)
+ *
  * The |<body>| is expanded in the syntactic environment obtained by
  * extending the syntactic environment of the |let-syntax| expression with macros
- * whose keywords are the |<keyword>|s, bound to the specified transformers.  Each
+ * whose keywords are the `|<keyword>|`s, bound to the specified transformers.  Each
  * binding of a |<keyword>| has |<body>| as its region.
- * ,(linebreak)
- * ,(bold "Note:") |let-syntax| is available only after having required the file
+ *
+ * NOTE: |let-syntax| is available only after having required the file
  * |"full-syntax"|.
  * @lisp
  * (let-syntax ((when (syntax-rules ()
@@ -66,16 +66,16 @@ doc>
  * (letrec-syntax <bindings> <body>)
  *
  * Syntax of |letrec-syntax| is the same as for |let-syntax|.
- * ,(linebreak)
+ *
  * The |<body>| is expanded in the syntactic environment obtained by
  * extending the syntactic environment of the |letrec-syntax| expression
- * with macros whose keywords are the |<keyword>|s, bound to the specified
+ * with macros whose keywords are the `|<keyword>|`s, bound to the specified
  * transformers.  Each binding of a |<keyword>| has the |<bindings>| as well
  * as the |<body>| within its region, so the transformers can transcribe
  * expressions into uses of the macros introduced by the |letrec-syntax|
  * expression.
- * ,(linebreak)
- * ,(bold "Note:") |letrec-syntax| is available only after having required the file
+ *
+ * NOTE: |letrec-syntax| is available only after having required the file
  * |"full-syntax"|.
  *
  * @lisp

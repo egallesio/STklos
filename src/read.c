@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 28-Sep-2021 07:51 (eg)
+ * Last file update:  3-Feb-2022 11:58 (eg)
  *
  */
 
@@ -858,8 +858,8 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           STk_ungetc(c, port);
           return STk_C_apply(read_brace_func, 1, port);
         }
-        goto default_case;
-      return read_list(port, '}', ctx);
+        goto default_case;                   //FIXME
+        //return read_list(port, '}', ctx);
       }
 
       case ')':
@@ -1172,7 +1172,7 @@ static SCM read_srfi10(SCM port, SCM l)
  * This parameter object permits to change the default behaviour of
  * the |read| primitive when reading a symbol. If this parameter has a
  * a true value a symbol is not converted to a default case when interned.
- * Since ,(rseven) requires that symbol are case insignificant, the default
+ * Since R7RS requires that symbol are case insignificant, the default
  * value  of this parameter is |#t|.
  * @lisp
  * (read-case-sensitive)        => |#t|
@@ -1180,12 +1180,12 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive #f)
  * (read-from-string "ABC")     => abc
  * @end lisp
- * ,(bold "Note:")  Default behaviour can be changed for a whole execution
- * with the |--case-sensitive| or |case-insensitive| options.
- * @l
- * ,(bold "Note:") See also syntax for ,(ref :mark "bar-in-symbol" :text
- * [special characters]) in symbols.
- *
+ * [NOTE]
+ * ====
+ * *  Default behaviour can be changed for a whole execution
+ *    with the |--case-sensitive| or |case-insensitive| options.
+ * *  See also syntax for _<<_symbols, special characters>>_ in symbols.
+ * ====
 doc>
 */
 static SCM read_case_sensitive_conv(SCM value)
@@ -1201,14 +1201,13 @@ static SCM read_case_sensitive_conv(SCM value)
  * (keyword-colon-position value)
  *
  * This parameter object indicates the convention used by the reader to
- * denote keywords. The allowed values are
- * ,(itemize
- *     (item [none, to forbid a symbol with colon to be interpreted as a
- *           keyword])
- *     (item [before, to read symbols starting with a colon as keywords])
- *     (item [after, to read symbols ending with a colon as keywords])
- *     (item [both, to read symbols starting or ending with a colon as
- *            keywords]))
+ * denote keywords. The allowed values are:
+ *
+ * - *none*, to forbid a symbol with colon to be interpreted as a keyword,
+ * - *before*, to read symbols starting with a colon as keywords,
+ * - *after*, to read symbols ending with a colon as keywords,
+ * - *both*,  to read symbols starting or ending with a colon as keywords.
+ *
  * Note that the notation |#:key| is always read as a keyword independently
  * of the value of |keyword-colon-position|. Hence, we have
  * @lisp
@@ -1251,6 +1250,23 @@ int STk_keyword_colon_convention(void)
   return colon_pos;
 }
 
+
+DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
+{
+  struct read_context ctx;
+
+  if (!PORTP(port)) STk_error_bad_port(port);
+  if (!CHARACTERP(end_delim)) STk_error("bad character ~s", end_delim);
+
+  ctx.cycles           = STk_nil;
+  ctx.inner_refs       = STk_nil;
+  ctx.comment_level    = 0;
+  ctx.case_significant = PORT_CASE_SENSITIVEP(port);
+  ctx.constant         = TRUE;
+
+  return read_list(port, CHARACTER_VAL(end_delim), &ctx);
+}
+
 /*===========================================================================*\
  *
  *                      I n i t i a l i z a t i o n
@@ -1290,5 +1306,10 @@ int STk_init_reader(void)
                         keyword_colon_position_get,
                         keyword_colon_position_set,
                         STk_STklos_module);
+
+  /* Add primitive for reading a list whose first character is already read */
+  /* This is useful to add specialized reader on [] and {} */
+  ADD_PRIMITIVE(user_read_list);
+
   return TRUE;
 }

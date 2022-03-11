@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 17-Dec-2021 11:14 (eg)
+ * Last file update:  7-Jan-2022 20:41 (eg)
  */
 
 #include "stklos.h"
@@ -262,8 +262,8 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
  *
  * Returns |#t| if |object| is a module and |#f| otherwise.
  * @lisp
- * (module? (find-module 'ST\klos))  => #t
- * (module? 'ST\klos)                => #f
+ * (module? (find-module 'STklos))   => #t
+ * (module? 'STklos)                 => #f
  * (module? 123 'no)                 => no
  * @end lisp
 doc>
@@ -278,7 +278,7 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
  * (library? object)
  *
  * Returns |#t| if |object| is a module defined as a R7RS library and |#f| otherwise.
- * Note that R7RS libraries, since they are implemented using ,(stklos) modules, are
+ * Note that R7RS libraries, since they are implemented using {{stklos}} modules, are
  * also modules.
  * @lisp
  * (define-module a)
@@ -331,8 +331,7 @@ DEFINE_PRIMITIVE("find-module", scheme_find_module, subr12, (SCM name, SCM def))
  * (define-module M
  *   (display
  *       (cons (eq? (current-module) (find-module 'M))
- *             (eq? (current-module) (find-module 'STklos)))))
- *    @print{} (#t . #f)
+ *             (eq? (current-module) (find-module 'STklos)))))  @print{} (#t . #f)
  * @end lisp
 doc>
  */

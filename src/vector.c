@@ -2,7 +2,7 @@
  *
  * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update: 10-Apr-2021 18:48 (eg)
+ * Last file update:  8-Jan-2022 20:54 (eg)
  */
 
 #include <string.h>
@@ -225,12 +225,12 @@ DEFINE_PRIMITIVE("vector-length", vector_length, subr1, (SCM v))
  * element |k| of vector.
  * @lisp
  * (vector-ref '#(1 1 2 3 5 8 13 21)
- *             5)         =>  8
+ *             5)                                    =>  8
  * (vector-ref '#(1 1 2 3 5 8 13 21)
  *             (let ((i (round (* 2 (acos -1)))))
  *               (if (inexact? i)
  *                   (inexact->exact i)
- *                   i))) => 13
+ *                   i)))                            => 13
  * @end lisp
 doc>
  */
@@ -252,7 +252,7 @@ DEFINE_PRIMITIVE("vector-ref", vector_ref, subr2, (SCM v, SCM index))
  * (vector-set! vector k obj)
  *
  * |k| must be a valid index of |vector|. |Vector-set!| stores |obj| in element
- * |k| of |vector|. The value returned by |vector-set!| is ,(emph "void").
+ * |k| of |vector|. The value returned by |vector-set!| is *_void_*.
  *
  * @lisp
  * (let ((vec (vector 0 '(2 2 2 2) "Anna")))
@@ -295,7 +295,7 @@ DEFINE_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value)
  * (list->vector '(dididit dah))        =>  #(dididit dah)
  * @end lisp
  *
- * ,(bold "Note"): The R5RS version of |vector->list| accepts only one
+ * NOTE: The R5RS version of |vector->list| accepts only one
  * parameter.
 doc>
  */
@@ -415,8 +415,8 @@ DEFINE_PRIMITIVE("vector-append", vector_append, vsubr, (int argc, SCM *argv))
  * (vector-fill! vector fill start end)
  *
  * Stores |fill| in every element of |vector| between |start| and |end|.
- * @l
- * ,(bold "Note"): The R5RS version of |vector-fill!| accepts only one
+ * 
+ * NOTE: The R5RS version of |vector-fill!| accepts only one
  * parameter.
 doc>
  */
@@ -450,7 +450,7 @@ DEFINE_PRIMITIVE("vector-fill!", vector_fill,  vsubr, (int argc, SCM *argv))
  * Returns a copy of v of the given |size|. If |size| is greater
  * than the vector size of |v|, the contents of the newly allocated vector cells
  * is  set to the value of |fill|. If |fill| is omitted the content of the
- * new cells is ,(emph "void").
+ * new cells is *_void_*.
 doc>
  */
 DEFINE_PRIMITIVE("vector-resize", vector_resize, subr23,(SCM vect,SCM size,SCM val))

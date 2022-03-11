@@ -1,0 +1,66 @@
+;;;;
+;;;; 35.stk
+;;;;
+
+;;; FIXME: This import should not be here.  Delete it when all the srfis are
+;;; imported rather than loaded with require-feature
+(import (srfi 35))
+
+(define-condition-type &c &condition
+  c?
+  (x c-x))
+
+(define-condition-type &c1 &c
+  c1?
+  (a c1-a))
+
+(define-condition-type &c2 &c
+  c2?
+  (b c2-b))
+
+
+(define v1 (make-condition &c1 'x "V1" 'a "a1"))
+(test  "srfi-35.1" #t   (c? v1))
+(test  "srfi-35.2" #t   (c1? v1))
+(test  "srfi-35.3" #f   (c2? v1))
+(test  "srfi-35.4" "V1" (c-x v1))
+(test  "srfi-35.5" "a1" (c1-a v1))
+
+
+(define v2 (condition (&c2 (x "V2") (b "b2"))))
+(test  "srfi-35.6" #t     (c? v2))
+(test  "srfi-35.7" #f     (c1? v2))
+(test  "srfi-35.8" #t     (c2? v2))
+(test  "srfi-35.9" "V2"   (c-x v2))
+(test  "srfi-35.10" "b2"  (c2-b v2))
+
+(define v3 (condition (&c1 (x "V3/1") (a "a3"))
+                      (&c2 (b "b3"))))
+(test  "srfi-35.11" #t      (c? v3))
+(test  "srfi-35.12" #t     (c1? v3))
+(test  "srfi-35.13" #t     (c2? v3))
+(test  "srfi-35.14" "V3/1" (c-x v3))
+(test  "srfi-35.15" "a3"   (c1-a v3))
+(test  "srfi-35.16" "b3"   (c2-b v3))
+
+(define v4 (make-compound-condition v1 v2))
+(test  "srfi-35.17" #t      (c? v4))
+(test  "srfi-35.18" #t     (c1? v4))
+(test  "srfi-35.19" #t     (c2? v4))
+(test  "srfi-35.20" "V1"   (c-x v4))
+(test  "srfi-35.21" "a1"   (c1-a v4))
+(test  "srfi-35.22" "b2"   (c2-b v4))
+
+(define v5 (make-compound-condition v2 v3))
+(test  "srfi-35.23" #t      (c? v5))
+(test  "srfi-35.24" #t     (c1? v5))
+(test  "srfi-35.25" #t     (c2? v5))
+(test  "srfi-35.26" "V2"   (c-x v5))
+(test  "srfi-35.27" "a3"   (c1-a v5))
+(test  "srfi-35.28" "b2"   (c2-b v5))
+
+
+(test "srfi-35.29" #t (condition-type? &condition))
+(test "srfi-35.30" #t (condition-type? &message))
+(test "srfi-35.31" #t (condition-type? &serious))
+(test "srfi-35.32" #t (condition-type? &error))

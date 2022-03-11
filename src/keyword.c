@@ -238,7 +238,7 @@ DEFINE_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
  * |List| must be a list of keywords and their respective values.
  * |key-delete| remove the |key| and its associated value of the keyword
  * list. The key can be absent of the list.
- * ,(linebreak)
+ * 
  * |key-delete!| does the same job than |key-delete| by physically 
  * modifying its |list| argument.
  * @lisp

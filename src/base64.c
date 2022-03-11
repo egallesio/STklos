@@ -2,7 +2,7 @@
  *
  * b a s e 6 4 . c          -- Base64 support for STk
  *
- * Copyright © 1998-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1998-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 20-Jul-1998 12:19
- * Last file update: 19-Sep-2020 19:05 (eg)
+ * Last file update: 17-Jan-2022 09:30 (eg)
  */
 
 #include <stklos.h>
@@ -122,6 +122,13 @@ static void decode(SCM f, SCM g)
  *
  * Encode in Base64 the characters from input port |in| to the output port
  * |out|. If |out| is not specified, it defaults to the current output port.
+ * @lisp
+ * (with-input-from-string "Hello"
+ *   (lambda ()
+ *     (with-output-to-string
+ *       (lambda ()
+ *         (base64-encode (current-input-port)))))) => "SGVsbG8="
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
@@ -143,6 +150,15 @@ DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
  *
  * Decode the Base64 characters from input port |in| to the output port
  * |out|. If |out| is not specified, it defaults to the current output port.
+ *
+ * @lisp
+ * (with-input-from-string "SGVsbG8="
+ *   (lambda ()
+ *     (with-output-to-string
+ *       (lambda ()
+ *         (base64-decode (current-input-port))))))  => "Hello"
+ * @end lisp
+doc>
 doc>
 */
 DEFINE_PRIMITIVE("base64-decode", base64_decode, subr12, (SCM f, SCM g))

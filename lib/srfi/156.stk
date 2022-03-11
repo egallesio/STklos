@@ -1,0 +1,161 @@
+;;;;
+;;;; 156.stk            -- Implementation of SRFI-156
+;;;;
+;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by Panicz Maciej Godek, it is copyrighted as:
+;;;;
+;;;;;;  Copyright (c) 2017 Panicz Maciej Godek
+;;;;;;  Permission is hereby granted, free of charge, to any person
+;;;;;;  obtaining a copy of this software and associated documentation
+;;;;;;  files (the "Software"), to deal in the Software without
+;;;;;;  restriction, including without limitation the rights to use,
+;;;;;;  copy, modify, merge, publish, distribute, sublicense, and/or
+;;;;;;  sell copies of the Software, and to permit persons to whom the
+;;;;;;  Software is furnished to do so, subject to the following
+;;;;;;  conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice shall be
+;;;;;; included in all copies or substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 10-Jul-2020 06:55 (jpellegrini)
+;;;; Last file update: 21-Feb-2022 16:46 (eg)
+;;;;
+
+(define-module srfi/156
+
+(export infix/postfix extract-placeholders identity-syntax is isnt)
+
+(define-syntax infix/postfix
+  (syntax-rules ()
+    ((infix/postfix x somewhat?)
+     (somewhat? x))
+
+    ((infix/postfix left related-to? right)
+     (related-to? left right))
+
+    ((infix/postfix left related-to? right . likewise)
+     (let ((right* right))
+       (and (infix/postfix left related-to? right*)
+            (infix/postfix right* . likewise))))))
+
+;; The folowing doesn't work in STklos, because STklos will introduce
+;; identical symbols for argumets of closures, like (lambda (a a) ...).
+;; I have written another macro, using define-macro, below. -- jpellegrini
+;;
+;; (define-syntax extract-placeholders
+;;   (syntax-rules (_)
+;;     ((extract-placeholders final () () body)
+;;      (final (infix/postfix . body)))
+
+;;     ((extract-placeholders final () args body)
+;;      (lambda args (final (infix/postfix . body))))
+
+;;     ((extract-placeholders final (_ op . rest) (args ...) (body ...))
+;;      (extract-placeholders final rest (args ... arg) (body ... arg op)))
+
+;;     ((extract-placeholders final (arg op . rest) args (body ...))
+;;      (extract-placeholders final rest args (body ... arg op)))
+
+;;     ((extract-placeholders final (_) (args ...) (body ...))
+;;      (extract-placeholders final () (args ... arg) (body ... arg)))
+
+;;     ((extract-placeholders final (arg) args (body ...))
+;;      (extract-placeholders final () args (body ... arg)))))
+
+(define-macro  (extract-placeholders final a b body)
+  (cond ((and (null? a) (null? b))
+           `(,final ,(cons 'infix/postfix body)))
+
+          ((null? a)
+           `(lambda ,b ,(list final (cons 'infix/postfix body))))
+
+          ((and (> (length a) 1)
+                (eq? (car a) '_))
+           (let ((op (cadr a))
+                 (rest (cddr a))
+                 (arg (gensym "arg")))
+             `(extract-placeholders ,final
+                                    ,rest
+                                    ,(append b (list arg))
+                                    ,(append body (list arg op)))))
+
+          ((> (length a) 1)
+           (let ((arg (car a))
+                 (op (cadr a))
+                 (rest (cddr a)))
+             `(extract-placeholders ,final
+                                    ,rest
+                                    ,b
+                                    ,(append body (list arg op)))))
+
+          ((equal? a '(_))
+           (let ((arg (gensym "arg")))
+             `(extract-placeholders ,final
+                                    ()
+                                    ,(append b (list arg))
+                                    ,(append body (list arg)))))
+
+          ((= (length a) 1)
+           (let ((arg (car a)))
+             `(extract-placeholders ,final
+                                    ()
+                                    ,b
+                                    ,(append body (list arg)))))))
+
+(define-syntax identity-syntax
+  (syntax-rules ()
+    ((identity-syntax form)
+     form)))
+
+(define-syntax is
+  (syntax-rules ()
+    ((is . something)
+     (extract-placeholders identity-syntax something () ()))))
+
+(define-syntax isnt
+  (syntax-rules ()
+    ((isnt . something)
+     (extract-placeholders not something () ()))))
+
+;; FIXME:
+(define infix/postfix #void)
+(define extract-placeholders #void)
+(define identity-syntax #void)
+(define is #void)
+(define isnt #void)
+(export-syntax infix/postfix
+               extract-placeholders
+               identity-syntax
+               is
+               isnt)
+) ;; End of module srfi/156
+
+(provide "srfi/156")

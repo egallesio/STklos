@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  1-Sep-2021 15:21 (eg)
+ * Last file update: 11-Mar-2022 09:42 (eg)
  */
 
 
@@ -46,7 +46,7 @@ extern "C"
 #include <setjmp.h>
 #include <memory.h>
 #include <locale.h>
-#include <stdint.h>
+
 #ifndef THEADS_NONE
 #  include <pthread.h>
 #  define GC_THREADS 1
@@ -99,6 +99,9 @@ extern "C"
 #define AS_LONG(x)              ((unsigned long) (x))
 #define AS_SCM(x)               ((SCM) ((unsigned long) (x)))
 
+/* UNTAG removes the tag bits. It is useful in optimized fixnum
+   operations (see fixnum.c). --jpellegrini */
+#define UNTAG(x)                (((long) x) & (~ ((unsigned long) 3)))
 
 /*===========================================================================*\
  *
@@ -255,7 +258,7 @@ typedef struct {
    *    DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM obj)) {
    *       <body>
    *    }
-   * It will be expansed in
+   * It will be expanded in
    *    SCM STk_pairp(SCM obj);
    *    static struct obj_primitive obj_pairp = { "pair?", tc_subr1, STk_pairp};
    *    SCM STk_pairp(SCM obj){
@@ -543,7 +546,7 @@ void STk_export_all_symbols(SCM module);
   ------------------------------------------------------------------------------
 */
   /* The `extended_type_descr' structure is used for the types which need
-   *  more information (such as modules, ports, ....). All the extended
+   * more information (such as modules, ports, ....). All the extended
    * descriptors are stored in the STk_xtypes array.
    */
 struct extended_type_descr {
@@ -595,12 +598,15 @@ int STk_init_ffi(void);
 */
 long STk_fixval(SCM v);
 long STk_fixnum_cmp(SCM a, SCM b);
+unsigned int STk_bit_count(unsigned long n);
 EXTERN_PRIMITIVE("fx+",        fxplus,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx-",        fxminus, subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx*",        fxtime,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fxquotient", fxdiv,   subr2, (SCM o1, SCM o2));
 int STk_init_fixnum(void);
 
+/* TAG_FIXNUM forces a fixnum tag on x. */
+#define TAG_FIXNUM(x)      ((UNTAG(x)) | 1)
 
 /*
   ------------------------------------------------------------------------------
@@ -1334,9 +1340,9 @@ int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(char *s, int max);
 int STk_utf8_read_char(SCM port);
 int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
-int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
+int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch */
 int STk_utf8_verify_sequence(char *s, int len); /* s constitutes a valid UTF8? */
-char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
+char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s */
 int STk_utf8_char_from_byte(char *s, int i, int max); /*  byte index => char index */
 
 int STk_init_utf8(void);

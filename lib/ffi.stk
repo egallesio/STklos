@@ -1,7 +1,7 @@
 ;;;;
 ;;;; ffi.stk            -- FFI support
 ;;;;
-;;;; Copyright © 2007-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 31-Aug-2020 19:18 (eg)
+;;;; Last file update: 12-Jan-2022 17:58 (eg)
 ;;;;
 
 (define make-external-function #f)
@@ -98,49 +98,50 @@
  * element is the name of the parameter, and the second one is a type
  * keyword.  All the types defined in the above table, except
  * |:void|, are allowed for the parameters of a foreign function.
- * ,(linebreak)
+ *
  * |Define-external| accepts several options:
- * ,(itemize
- * (item [
- * |:return-type| is used to define the type of the value returned
+ *
+ * - |:return-type| is used to define the type of the value returned
  * by the foreign function. The type returned must be chosen in the types specified
  * in the table. For instance:
+ * +
  * @lisp
  * (define-external maximum(:int :int)
  *    :return-type :int)
  * @end lisp
+ * +
  * defines the foreign function maximum which takes two C integers and
  * returns an integer result. Omitting this option default to a result
- * type equal to |:void| (i.e. the returned value is ,(emph "undefined")).
- * ])
+ * type equal to |:void| (i.e. the returned value is _undefined_).
  *
- * (item [
- * |:entry-name| is used to specify the name of the foreign
+ * - |:entry-name| is used to specify the name of the foreign
  * function in the C world. If this option is omitted, the entry-name is
  * supposed to be |name|. For instance:
+ * +
  * @lisp
  * (define-external minimum((a :int) (b :int))
  *    :return-type :int
  *    :entry-name  "min")
  * @end lisp
+ * +
  * defines the Scheme function |minimum| whose application
  * executes the C function called |min|.
- * ])
- * (item [
- * |:library-name| is used to specify the library which contains the
+ *
+ * - |:library-name| is used to specify the library which contains the
  * foreign-function. If necessary, the library is loaded before calling the
  * C function. So,
+ * +
  * @lisp
  * (define-external minimum((a :int) (b :int))
  *    :return-type  :int
  *    :entry-name   "min"
- *     :library-name "libminmax")
+ *    :library-name "libminmax")
  * @end lisp
+ * +
  * defines a function which will execute the function |min|
  * located in the library |libminmax.xx| (where |xx| is the suffix used
- * for shared libraries on the running system (generally |so|))
- * ])
- * )
+ * for shared libraries on the running system (generally |so|)).
+ * 
 doc>
 |#
 (define-macro (define-external name parameters . args)

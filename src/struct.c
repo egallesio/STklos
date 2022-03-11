@@ -1,7 +1,7 @@
 /*
  * struct.c         -- Low level support for structures
  *
- * Copyright © 2004-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 27-Aug-2021 20:37 (eg)
+ * Last file update:  8-Jan-2022 21:03 (eg)
  */
 
 #include "stklos.h"
@@ -81,7 +81,7 @@ SCM STk_int_struct_set(SCM s, SCM slot, SCM val)
  * type from which is the new structure type is a subtype (or |#f| is the
  * new structure-type has no super type). |Slots| is the list of the slot
  * names which constitute the structure tpe.
- * @l
+ * 
  * When a structure type is s subtype of a previous type, its slots are added
  * to the ones of the super type.
 doc>
@@ -200,7 +200,7 @@ DEFINE_PRIMITIVE("struct-type-name", st_name, subr1, (SCM obj))
  * to the |proc| procedure. The |proc| procedure must accept 2 arguments
  * (the structure to write and the port wher the structure must be written
  * in that order). The value returned by |struct-type-change-writer!| is the
- * old writer associated to |structype|. To restore the standard wtructure
+ * old writer associated to |structype|. To restore the standard structure
  * writer for |structype|, use the special value |#f|.
  *
  * @lisp
@@ -273,7 +273,7 @@ static void print_struct_type(SCM expr, SCM port, int _UNUSED(mode))
  * Returns a newly allocated instance of the structure type |structype|,
  * whose slots are initialized to |expr| ... If fewer |expr| than the number of
  * instances are given to |make-struct|, the remaining slots are inialized with
- * the special ,(emph "void") value.
+ * the special *_void_* value.
 doc>
 */
 DEFINE_PRIMITIVE("make-struct", make_struct, vsubr, (int argc, SCM *argv))
@@ -356,7 +356,7 @@ DEFINE_PRIMITIVE("struct-ref", struct_ref, subr2, (SCM s, SCM slot))
  * (struct-set! s slot-name value)
  *
  * Stores value in the to slot |slot-name| of the |s| structure. The value
- * returned by |struct-set!| is ,(emph "void").
+ * returned by |struct-set!| is *_void_*.
  *
  * @lisp
  * (define point  (make-struct-type 'point #f '(x y)))
@@ -379,8 +379,8 @@ DEFINE_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val))
  * (struct-is-a? s structype)
  *
  * Return a boolean that indicates if the structure |s| is a of type |structype|.
- * Note that if |s| is an instance of a subtype of ,(emph "S"), it is considered
- * also as an instance of type ,(emph "S").
+ * Note that if |s| is an instance of a subtype of _S_, it is considered
+ * also as an instance of type _S_.
  *
  * @lisp
  * (define point  (make-struct-type 'point #f '(x y)))

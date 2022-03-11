@@ -1,7 +1,7 @@
 ;;;;
-;;;; getopt.stk				-- getopt
+;;;; getopt.stk                         -- getopt
 ;;;;
-;;;; Copyright © 2001-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Oct-2001 08:40 (eg)
-;;;; Last file update: 27-Jul-2011 22:53 (eg)
+;;;; Last file update: 10-Jan-2022 19:51 (eg)
 ;;;;
 
 ;;;;
@@ -37,8 +37,8 @@
  * This procedure is only bound inside a |parse-arguments| form.
  * It pretty prints the help associated to the clauses of the
  * |parse-arguments| form on the given port. If the argument
- * |as-sexpr| is passed and is not| #f|, the help strings are
- * printed on |port| as ,(emph "S-expr")s. This is useful if the help
+ * |as-sexpr| is passed and is not `#f`, the help strings are
+ * printed on |port| as __Sexpr__s. This is useful if the help
  * strings need to be manipulated by a program.
  *
 doc>
@@ -46,35 +46,35 @@ doc>
 (define (%print-usage port clauses sexpr)
   (define (make-line-info l)
     (let ((opt    (car l))
-	  (help   (key-get (cdr l) :help #f))
-	  (alt    (key-get (cdr l) :alternate #f))
-	  (arg    (key-get (cdr l) :arg #f))
-	  (pretty (lambda (s arg)
-		    (let ((long? (> (string-length s) 1)))
-		      (string-append (if long? "--" "-")
-				     s
-				     (if arg
-					 (string-append (if long? "=<" " <")
-							(symbol->string arg)
-							">")
-					 ""))))))
+          (help   (key-get (cdr l) :help #f))
+          (alt    (key-get (cdr l) :alternate #f))
+          (arg    (key-get (cdr l) :arg #f))
+          (pretty (lambda (s arg)
+                    (let ((long? (> (string-length s) 1)))
+                      (string-append (if long? "--" "-")
+                                     s
+                                     (if arg
+                                         (string-append (if long? "=<" " <")
+                                                        (symbol->string arg)
+                                                        ">")
+                                         ""))))))
       (if help
-	  ; We have an help string, return something like ("--long, -l" . "help")
-	  (cons
-	   (if alt
-	       (format #f "~A, ~A" (pretty opt arg) (pretty alt arg))
-	       (format #f "~A" (pretty opt arg)))
-	   help)
-	  ; No help string
-	  '())))
+          ; We have an help string, return something like ("--long, -l" . "help")
+          (cons
+           (if alt
+               (format #f "~A, ~A" (pretty opt arg) (pretty alt arg))
+               (format #f "~A" (pretty opt arg)))
+           help)
+          ; No help string
+          '())))
 
   (define (print-as-sexpr clauses)
     (format port "(\n")
     (for-each (lambda (x)
-		(when (and (pair? x) (pair? (car x)))
-		  (let ((info (make-line-info (car x))))
-		    (format port "(~S ~S)\n" (car info) (cdr info)))))
-	      clauses)
+                (when (and (pair? x) (pair? (car x)))
+                  (let ((info (make-line-info (car x))))
+                    (format port "(~S ~S)\n" (car info) (cdr info)))))
+              clauses)
     (format port ")\n"))
 
   ;;
@@ -85,26 +85,26 @@ doc>
       (print-as-sexpr clauses)
       ;; Pretty print the options on given port
       (let* ((lines (map (lambda (clause)
-			   (cond
-			     ((string? clause)     clause)
-			     ((pair? (car clause)) (make-line-info (car clause)))
-			     (else 		       #f)))
-			 clauses))
-	     (len   (apply max (map (lambda (x)
-				      (if (pair? x) (string-length (car x)) 0))
-				    lines))))
+                           (cond
+                             ((string? clause)     clause)
+                             ((pair? (car clause)) (make-line-info (car clause)))
+                             (else                     #f)))
+                         clauses))
+             (len   (apply max (map (lambda (x)
+                                      (if (pair? x) (string-length (car x)) 0))
+                                    lines))))
 
-	;; lines contains the line to be displayed and len is the length of the
-	;; longest option. Pretty print the options from those values
-	(for-each (lambda (x)
-		    (cond
-		      ((pair? x)
-		       (format port "  ~A~A  ~A\n" (car x)
-			       (make-string (- len (string-length (car x))) #\space)
-			       (cdr x)))
-		      ((string? x)
-		       (format port "~A\n" x))))
-		  lines))))
+        ;; lines contains the line to be displayed and len is the length of the
+        ;; longest option. Pretty print the options from those values
+        (for-each (lambda (x)
+                    (cond
+                      ((pair? x)
+                       (format port "  ~A~A  ~A\n" (car x)
+                               (make-string (- len (string-length (car x))) #\space)
+                               (cdr x)))
+                      ((string? x)
+                       (format port "~A\n" x))))
+                  lines))))
 
 ;;;;
 ;;;; PARSE-ARGUMENTS
@@ -121,40 +121,41 @@ doc>
  * this form internally uses the GNU C |getopt| function. As a
  * consequence |parse-arguments| accepts options which start with
  * the '-' (short option) or '--' characters (long option).
- * ,(linebreak)
+ *
  * The first argument of |parse-arguments| is a list of the arguments
  * given to the program (comprising the program name in the CAR of this
  * list). Following arguments are clauses. Clauses are described later.
- * ,(linebreak)
+ *
  * By  default, |parse-arguments| permutes the contents of (a copy) of
  * the arguments as it scans, so that eventually all the non-options are
  * at the end. However, if the shell environment variable |POSIXLY_CORRECT|
  * is set, then option processing stops as soon as a non-option argument
  * is encountered.
- * ,(linebreak)
+ *
  * A clause must follow the syntax:
- * ,(raw-code [
+ * ```
  * <clause>       => string @pipe <list-clause>
  * <list clause>  => (<option descr> <expr> ...) @pipe (else <expr> ...)
  * <option descr> => (<option name> [<keyword> value]*)
  * <option name>  => string
  * <keyword>      => :alternate @pipe :arg @pipe :help
- * ])
+ * ```
  *
  * A string clause is used to build the  help associated to the command.
- * A list clause must follow the syntax describes an option. The |<expr>|s
- * associated to a list clauses are executed when the option is recognized.
- * The |else| clauses is executed when all parameters have been parsed.
- * The |:alternate| key permits to have an alternate name for an option
- * (generally a short or long name if the option name is a
+ * A list clause must follow the syntax describes an option. The
+ * `|<expr>|`s associated to a list clauses are executed when the option
+ * is recognized.
+ * The |else| clauses is executed when all parameters have
+ * been parsed. The |:alternate| key permits to have an alternate name for an
+ * option (generally a short or long name if the option name is a
  * short or long name).  The |:help| is used to provide help about the
  * the option. The |:arg| is used when the option admit a parameter:
  * the symbol given after |:arg| will be bound to the value of the option
  * argument when the corresponding |<expr>|s will be executed.
- * ,(linebreak)
+ *
  * In an |else| clause the symbol |other-arguments| is bound to the
  * list of the arguments which are not options.
- * ,(linebreak)
+ *
  * The following example shows a rather complete usage of the
  * |parse-arguments| form
  *
@@ -165,28 +166,27 @@ doc>
  *   (parse-arguments args
  *      "Usage: foo [options] [parameter ...]"
  *      "General options:"
- *        (("verbose" :alternate "v" :help "be more verbose")
- *          (format #t "Seen the verbose option~%"))
- *        (("long" :help "a long option alone")
- *          (format #t "Seen the long option~%"))
- *        (("s" :help "a short option alone")
- *          (format #t "Seen the short option~%"))
+ *          (("verbose" :alternate "v" :help "be more verbose")
+ *            (printf "Seen the verbose option~%"))
+ *          (("long" :help "a long option alone")
+ *            (printf "Seen the long option~%"))
+ *          (("s" :help "a short option alone")
+ *            (printf "Seen the short option~%"))
  *      "File options:"
- *        (("input" :alternate "f" :arg file
- *                  :help "use <file> as input")
- *          (format #t "Seen the input option with ~S argument~%" file))
- *        (("output" :alternate "o" :arg file
- *                   :help "use <file> as output")
- *          (format #t "Seen the output option with ~S argument~%" file))
+ *          (("input" :alternate "f" :arg file
+ *                    :help "use <file> as input")
+ *            (printf "Seen the input option with ~S argument~%" file))
+ *          (("output" :alternate "o" :arg file
+ *                     :help "use <file> as output")
+ *            (printf "Seen the output option with ~S argument~%" file))
  *      "Misc:"
- *        (("help" :alternate "h"
- *                 :help "provides help for the command")
- *          (arg-usage (current-error-port))
- *          (exit 1))
- *        (else
- *      (format #t
- *              "All options parsed. Remaining arguments are ~S~%"
- *              other-arguments))))
+ *          (("help" :alternate "h"
+ *                   :help "provides help for the command")
+ *            (arg-usage (current-error-port))
+ *            (exit 1))
+ *      (else
+ *          (printf "All options parsed. Remaining arguments are ~S~%"
+ *                  other-arguments))))
  * @end lisp
  *
  * The following program invocation
@@ -195,20 +195,20 @@ doc>
  * @end lisp
  *
  * produces the following output
- * ,(raw-code [
+ * ```
  * Seen the verbose option
  * Seen the short option
  * Seen the input option with "in" argument
  * Seen the output option with "out" argument
  * All options parsed. Remaining arguments are ("arg1" "arg2")
- * ])
+ * ```
  *
  * Finally, the program invocation
  * @lisp
  * foo --help
  * @end lisp
  * produces the following output
- * ,(raw-code [
+ * ```
  * Usage: foo [options] [parameter ...]
  * General options:
  *   --verbose, -v               be more verbose
@@ -219,27 +219,33 @@ doc>
  *   --output=<file>, -o <file>  use <file> as output
  * Misc:
  *   --help, -h                  provides help for the command
- * ])
+ * ```
  *
- * ,(bold "Note:")
- * ,(itemize
- * (item [Short option can be concatenated. That is,
+ * **Notes:**
+ *
+ * * Short option can be concatenated. That is,
+ * +
  * @lisp
  * prog -abc
  * @end lisp
+ * +
  * is equivalent to the following program call
+ * +
  * @lisp
  * prog -a -b -c
- * @end lisp])
- * (item [Any argument following a '--' argument is no more considered as
- * an option, even if it starts with a '-' or '--'.])
- * (item [Option with a parameter can be written in several ways. For instance
- * to set the output in the |bar| file for the previous example can be expressed as
- * ,(itemize
- * (item [|--output=bar|])
- * (item [|-o bar|])
- * (item [|-obar|]))])
- * )
+ * @end lisp
+ *
+ * * Any argument following a '--' argument is no more considered as
+ *   an option, even if it starts with a '-' or '--'.
+ *
+ * * Option with a parameter can be written in several ways. For instance
+ *   to set the output in the |bar| file for the previous example can be
+ *   expressed as
+ *
+ * ** |--output=bar|, or
+ * ** |-o bar|, or
+ * ** |-obar|
+ *
 doc>
 |#
 
@@ -249,28 +255,28 @@ doc>
     ;; returns a cons with the long name in its CAR and the short name in its CDR
     ;; If one of them is absent, it is set to #f
     (let ((opt1 (car descr))
-	  (opt2 (key-get (cdr descr) :alternate #f))
-	  (err  (lambda (o) (error 'parse-arguments "bad option name ~S" o))))
+          (opt2 (key-get (cdr descr) :alternate #f))
+          (err  (lambda (o) (error 'parse-arguments "bad option name ~S" o))))
       (cond
-	 ((not (string? opt1))
-	  (err opt1))
-	 ((not opt2)
-	  (if (> (string-length opt1) 1)
-	      (cons opt1 opt2)
-	      (cons opt2 opt1)))
-	 ((not (string? opt2))
-	  (err opt2))
-	 (else
-	  (let ((len1 (string-length opt1))
-		(len2 (string-length opt2)))
-	    (cond
-	     ((and (> len1 1) (= len2 1))
-	      (cons opt1 opt2))
-	     ((and (> len2 1) (= len1 1))
-	      (cons opt2 opt1))
-	     (else
-	      (error 'parse-arguments "bad option names: ~S and ~S"
-		     opt1 opt2))))))))
+         ((not (string? opt1))
+          (err opt1))
+         ((not opt2)
+          (if (> (string-length opt1) 1)
+              (cons opt1 opt2)
+              (cons opt2 opt1)))
+         ((not (string? opt2))
+          (err opt2))
+         (else
+          (let ((len1 (string-length opt1))
+                (len2 (string-length opt2)))
+            (cond
+             ((and (> len1 1) (= len2 1))
+              (cons opt1 opt2))
+             ((and (> len2 1) (= len1 1))
+              (cons opt2 opt1))
+             (else
+              (error 'parse-arguments "bad option names: ~S and ~S"
+                     opt1 opt2))))))))
 
   (define (make-getopt-parameters clauses)
     ;; This function is too much complicated ;-<
@@ -282,44 +288,44 @@ doc>
     ;;    - an Alist for short options which maps them in the longopt parameter.
     ;;      Key of the Alist is the character option.
     (let Loop ((l clauses)
-	       (long '())
-	       (short "")
-	       (assoc '())
-	       (pos   0))
+               (long '())
+               (short "")
+               (assoc '())
+               (pos   0))
       (cond
        ((or (null? l) (and (pair? (car l)) (eq? (caar l) 'else)))
-	  ;; We have finished; return  SHORT, ASSOC and LONG values in a list
-	  (list short (reverse! long) assoc))
+          ;; We have finished; return  SHORT, ASSOC and LONG values in a list
+          (list short (reverse! long) assoc))
 
        ((string? (car l))
- 	 ;; Skip this help string
-	 (Loop (cdr l) long short assoc pos))
+         ;; Skip this help string
+         (Loop (cdr l) long short assoc pos))
 
        ((and (pair? (car l)) (pair? (caar l)))
-	  (let* ((descr (caar l))
-		 (names (option-names descr))
-		 (lg    (if (car names)
-			    ;; We had a long name
-			    (cons (car names) (key-get (cdr descr) :arg #f))
-			    (cons "" #f)))
-		 (sht   (if (cdr names)
-			    ;; We had a short name
-			    (string-append (cdr names)
-					   (if (key-get (cdr descr) :arg #f)
-					       ":"
-					       ""))
-			    ""))
-		 (ass   (if (cdr names)
-			    ;; Add the association of this short name
-			    (cons (string-ref (cdr names) 0) pos)
-			    #f)))
+          (let* ((descr (caar l))
+                 (names (option-names descr))
+                 (lg    (if (car names)
+                            ;; We had a long name
+                            (cons (car names) (key-get (cdr descr) :arg #f))
+                            (cons "" #f)))
+                 (sht   (if (cdr names)
+                            ;; We had a short name
+                            (string-append (cdr names)
+                                           (if (key-get (cdr descr) :arg #f)
+                                               ":"
+                                               ""))
+                            ""))
+                 (ass   (if (cdr names)
+                            ;; Add the association of this short name
+                            (cons (string-ref (cdr names) 0) pos)
+                            #f)))
 
-	    ;; We have new values for long and short for this item. Iterate
-	    (Loop (cdr l)
-		  (cons lg long)
-		  (string-append short sht)
-		  (if ass (cons ass assoc) assoc)
-		  (+ pos 1))))
+            ;; We have new values for long and short for this item. Iterate
+            (Loop (cdr l)
+                  (cons lg long)
+                  (string-append short sht)
+                  (if ass (cons ass assoc) assoc)
+                  (+ pos 1))))
 
        (else (error 'parse-arguments "bad clause ~S" (car l))))))
 
@@ -327,55 +333,54 @@ doc>
   ;;; Macro body starts here
   ;;;
   (let* ((actions   (gensym "actions"))
-	 (Loop      (gensym "Loop"))
-	 (alist	    (gensym "alist"))
-	 (opts      (make-getopt-parameters clauses))
-	 (clauses*  (map (lambda (z) (if (pair? z) (list (car z)) z))
-			  clauses)))  ;; clauses without code (=> shorter constant)
+         (Loop      (gensym "Loop"))
+         (alist     (gensym "alist"))
+         (opts      (make-getopt-parameters clauses))
+         (clauses*  (map (lambda (z) (if (pair? z) (list (car z)) z))
+                          clauses)))  ;; clauses without code (=> shorter constant)
 
   `(let* ((arg-usage (lambda (port :optional sexpr)
-		       (%print-usage port ',clauses* sexpr)))
-	  (,alist    ',(caddr opts))
-	  (,actions  (vector
-		      ,@(let Loop ((l clauses) (res '()))
-			  (cond
-			    ((null? l)
-			     (reverse! res))
-			    ((string? (car l))
-			     (Loop (cdr l)
-				   res))
-			    ((eq? (caar l) 'else)
-			     (Loop (cdr l)
-				   (cons `(lambda (other-arguments)
-					    (void) ,@(cdar l))
-					 res)))
-			    (else (let ((name (key-get (cdaar l) :arg (gensym))))
-				    (Loop (cdr l)
-					  (cons
-					   `(lambda (,name) (void) ,@(cdar l))
-					   res)))))))))
+                       (%print-usage port ',clauses* sexpr)))
+          (,alist    ',(caddr opts))
+          (,actions  (vector
+                      ,@(let Loop ((l clauses) (res '()))
+                          (cond
+                            ((null? l)
+                             (reverse! res))
+                            ((string? (car l))
+                             (Loop (cdr l)
+                                   res))
+                            ((eq? (caar l) 'else)
+                             (Loop (cdr l)
+                                   (cons `(lambda (other-arguments)
+                                            (void) ,@(cdar l))
+                                         res)))
+                            (else (let ((name (key-get (cdaar l) :arg (gensym))))
+                                    (Loop (cdr l)
+                                          (cons
+                                           `(lambda (,name) (void) ,@(cdar l))
+                                           res)))))))))
 
      (%initialize-getopt ,argv ,(car opts) ',(list->vector (cadr opts)))
 
      (let ,Loop ((x (%getopt)))
-	  (cond
-	    ((boolean? x) ;; There was an error (already signaled). Treat next opt.
-	       (,Loop (%getopt)))
-	    ((and (pair? x))
-	       (cond
-		 ((char? (car x))
-		    ((vector-ref ,actions (cdr (assq (car x) ,alist))) (cdr x))
-		    (,Loop (%getopt)))
-		 ((>= (car x) 0)
- 	             ((vector-ref ,actions (car x)) (cdr x))
-		     (,Loop (%getopt)))
-		 (else
-		    ;; Special case for the ELSE clause (if it exists)
-		    ,(let ((end (last-pair clauses)))
-		       (if (eq? (caar end) 'else)
-			   `((vector-ref ,actions (- (vector-length ,actions) 1))
-			     (cdr x))
-			   '(void)))))))))))
+          (cond
+            ((boolean? x) ;; There was an error (already signaled). Treat next opt.
+               (,Loop (%getopt)))
+            ((and (pair? x))
+               (cond
+                 ((char? (car x))
+                    ((vector-ref ,actions (cdr (assq (car x) ,alist))) (cdr x))
+                    (,Loop (%getopt)))
+                 ((>= (car x) 0)
+                     ((vector-ref ,actions (car x)) (cdr x))
+                     (,Loop (%getopt)))
+                 (else
+                    ;; Special case for the ELSE clause (if it exists)
+                    ,(let ((end (last-pair clauses)))
+                       (if (eq? (caar end) 'else)
+                           `((vector-ref ,actions (- (vector-length ,actions) 1))
+                             (cdr x))
+                           '(void)))))))))))
 
 (provide "getopt")
-

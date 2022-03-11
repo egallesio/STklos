@@ -16,7 +16,7 @@
 
 # Makefile for SILex/STklos
 #
-# Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 13-Dec-2003 10:54 (eg)
-# Last file update:  1-Jun-2021 18:26 (eg)
+# Last file update: 27-Jan-2022 11:11 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -146,6 +146,7 @@ ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+ASCIIDOCTOR = @ASCIIDOCTOR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -488,6 +489,8 @@ install-sources:
 
 uninstall-hook:
 	(cd $(DESTDIR)/$(schemedir) && rm -f $(SRC))
+
+doc:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

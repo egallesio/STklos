@@ -1,0 +1,62 @@
+;;;;
+;;;;
+;;;; stklos-pp.stk         -- A simple STklos preprocessor
+;;;;
+;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  1-Jan-2022 15:00
+;;;; Last file update: 17-Jan-2022 18:00 (eg)
+;;;;
+
+
+(import (prefix (stklos preproc) pp-))
+
+(define (main args)
+  (let ((output "-"))
+    (parse-arguments args
+      "Usage: stklos-pp [options] document"
+      "A simple preprocessor for text documents"
+      ""
+      (("define" :alternate "D" :arg str :help "Define new metadata")
+       (pp-parse-metadata str))
+
+      (("output" :alternate "o" :arg file :help "Output in <file>")
+       (set! output file))
+
+      (("help" :alternate "h" :help "This help")
+       (arg-usage (current-output-port))
+       (exit 0))
+
+      ""
+      "Examples:"
+      "  stklos-pp -D'run-command: \"pandoc\"' f  preprocess f and send result to pandoc"
+      "  stklos-pp                              preprocess stdin, output goes to stdout"
+
+      (else
+       (case (length other-arguments)
+         ((0)                ;; No argument: use stdin
+          (pp-translate "-")
+          (exit 0))
+         ((1)               ;; One argument: use it as input
+          (pp-translate (car other-arguments))
+          (exit 0))
+         (else              ;; Error
+          (arg-usage (current-error-port))
+          (exit 1)))))))

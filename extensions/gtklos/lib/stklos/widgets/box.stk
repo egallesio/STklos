@@ -1,0 +1,204 @@
+;;;;
+;;;; box.stk    -- Vertical and Horizontal GTk Boxes
+;;;;
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 25-May-2001 15:44 (eg)
+;;;; Last file update: 31-Jan-2022 20:16 (eg)
+;;;;
+
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk gtk-box-new (#:long #:long) :pointer "gtk_box_new")
+(define-gtk gtk-box-pack-start (#:pointer #:pointer :boolean #:boolean :long) #:void
+  "gtk_box_pack_start")
+(define-gtk gtk-box-pack-end(#:pointer #:pointer #:boolean #:boolean #:long) #:void
+  "gtk_box_pack_end")
+(define-gtk gtk-orientable-set-orientation (#:pointer #:long) #:void
+  "gtk_orientable_set_orientation")
+(define-gtk gtk-orientable-get-orientation (#:pointer) #:long
+  "gtk_orientable_get_orientation")
+
+
+(define (orientation->int orient)
+  (case orient
+    ((horizontal) 0)
+    ((vertical)   1)
+    (else (error "bad orientation value: ~S\n" orient))))
+
+(define (int->orientation orient)
+  (if (zero? orient) 'horizontal 'vertical))
+
+
+;;======================================================================
+;;
+;;                 C l a s s    < g t k - b o x >
+;;
+;;======================================================================
+(define-class <gtk-box> (<gtk-orientable>)
+  ((expand             #:accessor       expand
+                       #:init-keyword   #:expand
+                       #:init-form      #f)
+   (fill               #:accessor       fill
+                       #:init-keyword   #:fill
+                       #:init-form      #f)
+   (padding            #:accessor       padding
+                       #:init-keyword   #:padding
+                       #:init-form      0)
+   (homogeneous        #:accessor       homogeneous
+                       #:init-keyword   #:homogeneous
+                       #:allocation     #:gtk-property)
+   (spacing            #:accessor       spacing
+                       #:init-keyword   #:spacing
+                       #:allocation     #:gtk-property)
+   (baseline-position  #:accessor       baseline-position
+                       #:init-keyword   #:baseline-position
+                       #:allocation     #:gtk-property)))
+;;;;
+;;;; Methods for Boxes
+;;;;
+(define-method container-add! ((cont <gtk-box>) widget
+                               #:key (expand  (slot-ref cont 'expand))
+                                     (fill    (slot-ref cont 'fill))
+                                     (padding (slot-ref cont 'padding))
+                                     (end     #f))
+  (let ((c    (slot-ref cont   'wid))
+        (w    (slot-ref widget 'wid))
+        (func (if end gtk-box-pack-end gtk-box-pack-start)))
+    (func c w expand fill padding)))
+
+
+(define-method realize-widget ((self <gtk-box>) initargs)
+  (let* ((orient (key-get initargs #:orientation 'vertical))
+         (space  (key-get initargs #:spacing 0))
+         (box    (gtk-box-new (orientation->int orient) space)))
+      (cpointer-type-set! box 'gtk-box)
+      (slot-set! self 'wid   box)))
+
+
+;;// FIXME:
+;;//(define-method %container-place ((cont <gtk-box>) widget
+;;//                 #:key (expand  #t expand?)
+;;//                      (fill    #t fill?)
+;;//                      (padding 0  padding?))
+;;// (let ((c (slot-ref cont   'wid))
+;;//       (w (slot-ref widget 'wid)))
+;;//   (when expand?  (%child-set! c w #:expand  expand))
+;;//   (when padding? (%child-set! c w #:padding padding))
+;;//   (when fill?    (%child-set! c w #:fill    fill)))
+;;// (void))
+
+
+;; ======================================================================
+;;
+;;          C O N T A I N E R - I N F O
+;;
+;; ======================================================================
+(define-method %container-info ((parent <gtk-box>) widget)
+  (let ((w (wid widget))
+        (c (wid parent)))
+    (list #:parent parent
+          #:expand    (%gtk-get-child-property c w "expand")
+          #:fill      (%gtk-get-child-property c w "fill")
+          #:padding   (%gtk-get-child-property c w "padding")
+          #:position  (%gtk-get-child-property c w "position")
+          #:end       (zero? (%gtk-get-child-property c w "pack-type")))))
+
+
+
+;======================================================================
+;
+;                 C l a s s    < h b o x >
+;
+;======================================================================
+(define-class <hbox> (<gtk-box>)
+  ())
+
+(define-method initialize ((self <hbox>) initargs)
+  (next-method self (append initargs '(#:orientation horizontal))))
+
+
+;======================================================================
+;
+;                 C l a s s    < v b o x >
+;
+;======================================================================
+(define-class <vbox> (<gtk-box>)
+  ())
+
+(define-method initialize ((self <vbox>) initargs)
+  (next-method self (append initargs '(#:orientation vertical))))
+
+
+;;======================================================================
+;;
+;;                 C l a s s    < % b o x >
+;;
+;;======================================================================
+
+;; The class <%box> is used by GTK containers that only accept one child.  In
+;; fact, for these widgets we define a new classes with a <hbox> or a <vbox>
+;; stored in the %bcontent slot
+(define-class <%box> ()
+  ((%bcontent #:init-form #f)))
+
+
+(define-method container-add! ((self <%box>) w . args)
+  (let ((container (slot-ref self '%bcontent)))
+    (if container
+        ;; If a container exists, that is that the widget is initialized and
+        ;; that we are filling it with subwidgets.
+        (apply container-add! container w args)
+        ;; nothing special
+        (next-method))))
+
+;;
+;; <%hbox> and <%vbox> are used for classes with embedded <hbox> / <vbox>
+;;
+(define-class <%hbox> (<%box>)   ())
+(define-class <%vbox> (<%box>)   ())
+
+
+(define-method internal-arrange-widget ((self <%hbox>) initargs)
+  (let* ((init    (key-delete initargs #:parent)) ;; skip :parent if present
+         (content (apply make <hbox> init)))
+    (container-add! self content)
+    (slot-set! self '%bcontent content))) 
+
+(define-method internal-arrange-widget ((self <%vbox>) initargs)
+  (let* ((init    (key-delete initargs #:parent)) ;; skip :parent if present
+         (content (apply make <vbox> init)))
+    (container-add! self content initargs)
+    (slot-set! self '%bcontent content))) 
+
+
+;;;
+;;; Module exports
+;;;
+(export <gtk-box>
+        ;; accessors
+        expand fill padding homogeneous spacing orientation
+        <hbox> <vbox>)
+
+;; Local Variables:
+;; compile-command: "make -C .."
+;; End:

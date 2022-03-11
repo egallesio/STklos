@@ -1,0 +1,247 @@
+;;;;
+;;;; preproc.stk     -- various stuff for pre-processing Text file with STlklos
+;;;;
+;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 24-Dec-2021 11:10
+;;;; Last file update: 17-Jan-2022 17:53 (eg)
+;;;;
+
+
+(define-module stklos/preproc/env
+  ;; This module contains the variables accessible from the document
+  ;; environment. New bindings can be added with defines embedded in the
+  ;; document or with metadata definitions
+
+  ;; Predefined functions/variables
+  (define (stklos-pp-version) "0.1")
+)
+
+;; ----------------------------------------------------------------------
+;;
+;;  The (stklos preproc) module
+;;
+;; ______________________________________________________________________
+(define-module stklos/preproc
+  (export parse-metadata process-file process-string translate)
+
+  (define *printing*      #t)
+  (define *print-stack*   '())
+  (define *md-env*        (find-module 'stklos/preproc/env))
+  (define *command-chars* '(#\{ #\}))
+
+  ;;
+  ;; Utilities
+  ;;
+  (define (Include file)
+    (let ((port (open-input-file file)))
+      (let Loop ()
+        (call-with-values
+            (lambda () (read-line port))
+          (lambda (line delim)
+            (unless (eof-object? line)
+              (display line)
+              (unless (eof-object? delim) (display delim))
+              (Loop)))))))
+
+  (define (Include* file)
+    (process-file file))
+
+  (define (System str)
+    (Include (string-append "| " str)))
+
+  (define (exec-internal-command expr)
+    (let ((len (length expr))
+          (cmd (car expr)))
+      (case len
+        ((2) (let ((val (eval (cadr expr) *md-env*)))
+               (case cmd
+                 ((If)
+                  (set! *print-stack* (cons *printing* *print-stack*))
+                  (set! *printing* val))
+                 ((Include)
+                  (when *printing* (Include val)))
+                 ((Include*)
+                  (when *printing* (Include* val)))
+                 ((System)
+                  (when *printing* (System val)))
+                 (else
+                  (die (format "command ~s cannot have parameter" cmd))))))
+        ((1) (case cmd
+               ((Else)
+                (set! *printing* (not *printing*)))
+               ((End)
+                (set! *printing* (car *print-stack*))
+                (set! *print-stack* (cdr *print-stack*)))
+               (else
+                (die (format "command ~s must have a parameter" cmd)))))
+        (else
+         (die (format "bad command call ~s" expr))))))
+
+  ;;;;
+  ;;;; parse-metadata
+  ;;;;
+  (define (parse-metadata str)
+    (with-input-from-string str
+      (lambda ()
+        (let* ((var (read))
+               (val (read))
+               (end (read)))
+          (unless (keyword? var)    (error "bad key when reading ~S" str))
+          (when   (eof-object? val) (set! val ""))
+          (unless (eof-object? end) (error "too mush values in ~S" str))
+          ;; Store it as a definition in the (stklos preproc) environment
+          (eval `(define ,(string->symbol (keyword->string var)) ,val)
+                *md-env*)))))
+
+  ;;;;
+  ;;;; read-header
+  ;;;;
+  (define (read-header port)
+    (let ((ch (peek-char port)))
+      (when (eq? ch #\%)
+        (read-char port)  ;; to skip the '%'
+        (parse-metadata (read-line port))
+        (read-header port))))
+
+  ;;;;
+  ;;;; read-command
+  ;;;;
+  (define (read-command port open close)
+
+    (define (skip-spaces)
+      (let ((ch (peek-char port)))
+        (when (and (not (eof-object? ch)) (char-whitespace? ch))
+          (read-char port)
+          (skip-spaces))))
+
+    (define (verify-close)
+      (let ((ch (read-char port)))
+        (unless (char=? ch close)
+          (error "expected closing ~S" close))
+        ;; skip a newline if it just follows a end delimiter (bad idea. FIXME?)
+        #;(let ((ch (peek-char port)))
+          (when (and (not (eof-object? ch)) (char=? ch #\newline))
+            (read-char port)))))
+
+
+    ;; Fist delimiter is already read
+    (let ((ch (peek-char port)))
+      (if (char=? ch open)
+          (let* ((expr (read port)))
+            (skip-spaces)
+            (verify-close)
+            (cond
+             ((member (car expr) '(If Else End Include Include* System))
+              ;; This is and internal command)
+              (exec-internal-command expr))
+
+             ((= (length expr) 1)
+              ;; A single component in the command
+              (let ((res (eval (car expr) *md-env*)))
+                (if (procedure? res)                ;; FIXME: add handler
+                    (set! res (apply res '())))
+                res))
+
+             (else
+              ;; a function/macro call
+              (let ((res (eval expr *md-env*)))     ;; FIXME: add handler
+                res))))
+          ;; A single opening delimiter
+          open)))
+
+  ;;;
+  ;;; do-read
+  ;;;
+  (define (do-read port)
+    (read-header port)
+    (let Loop ((ch (read-char port)))
+      (if (eof-object? ch)
+          (unless (null? *print-stack*)
+            (error "unclosed if/else"))      ;; FIXME: add opening line
+          (begin
+            (let ((val (if (eq? ch (car *command-chars*))
+                           (apply read-command port *command-chars*)
+                           ch)))
+              (when (and *printing* (not (equal? val #void)))
+                (display val))
+              (Loop (read-char port)))))))
+  ;;;
+  ;;; process-file
+  ;;;
+  (define (process-file file)
+    (with-output-to-string
+      (lambda ()
+        (let ((port (if (equal? file "-")
+                        (current-input-port)
+                        (open-input-file file))))
+          (do-read port)))))
+
+  ;;;
+  ;;; process-string
+  ;;;
+  (define (process-string str)
+    (with-output-to-string
+      (lambda ()
+        (do-read (open-input-string str)))))
+
+  (define (translate file)
+    ;; First process the user file since it contains metadata definitions
+    (let ((body (process-file file))
+          (pre  "")                     ;; content of prelude template
+          (post ""))                    ;; content of postlude template
+
+      ;; build prelude and postlude templates
+      (let ((template (symbol-value 'template *md-env* #f)))
+        (when (string? template)
+          (let ((prelude-file (string-append template "-prelude.templ"))
+                (postlude-file (string-append template "-postlude.templ")))
+            (unless (file-exists? prelude-file)
+              (die (format "cannot find prelude template file ~s" prelude-file)))
+            (unless (file-exists? postlude-file)
+              (die (format "cannot find postlude template file ~s" postlude-file)))
+            (set! pre  (process-file prelude-file))
+            (set! post (process-file postlude-file)))))
+
+      ;; display pre + body sent to the external document processor + post
+      ;; external document processor can be pandoc, markdown, asciidoc ...
+      (display pre)
+      (let ((md-cmd  (symbol-value 'md-command *md-env* "/bin/cat"))
+            (md-args (symbol-value 'md-args *md-env* "")))
+        (with-output-to-file (string-append "| " md-cmd " " md-args)
+          (lambda () (display body))))
+      (display post)))
+
+  ;;
+  ;; Define the reader for braces
+  ;;
+  (define (read-brace port)
+    ;; skip opening brace which has been pushed back by the reader
+    (read-char port)
+    ;; read a liste finisched by a closing brace
+    (%read-list port #\}))
+
+  ;; Change the STklos reader for braces
+  (eval `(define %read-brace ,read-brace)
+        (find-module 'STklos))
+  
+) ;; End of module preproc
+
+(provide "stklos/preproc")

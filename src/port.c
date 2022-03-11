@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 21-Nov-2021 18:45 (eg)
+ * Last file update: 13-Jan-2022 18:51 (eg)
  *
  */
 
@@ -125,7 +125,7 @@ static SCM verify_port(SCM port, int mode)
  * (output-port? obj)
  *
  * Returns |#t| if |obj| is an input port or output port respectively,
- * otherwise returns #f.
+ * otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-port?", input_portp, subr1, (SCM port))
@@ -144,7 +144,7 @@ DEFINE_PRIMITIVE("output-port?", output_portp, subr1, (SCM port))
  * (binary-port? obj)
  *
  * Returns |#t| if |obj| is an textual port or binary port respectively,
- * otherwise returns #f.
+ * otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("textual-port?", textual_portp, subr1, (SCM port))
@@ -163,7 +163,7 @@ DEFINE_PRIMITIVE("binary-port?", binary_portp, subr1, (SCM port))
  * (port? obj)
  *
  * Returns |#t| if |obj| is an input port or an output port,
- * otherwise returns #f.
+ * otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("port?", portp, subr1, (SCM port))
@@ -255,7 +255,7 @@ static SCM STk_set_current_error_port(SCM port)
  * The port argument may be omitted, in which case it defaults to the value
  * returned by |current-input-port|. It is an error to read from a closed port.
  * @l
- * ,(stklos) |read| supports the ,(link-srfi 10) |#,()| form that can be used
+ * {{stklos}} |read| supports the {{quick-link-srfi 10}} |#,()| form that can be used
  * to denote values that do not have a convenient printed representation. See
  * the SRFI document for more information.
 doc>
@@ -335,8 +335,8 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
  * string is smaller than |size| and its size is the number of available
  * characters. |Port| may be omitted, in which case it defaults to the
  * value returned by |current-input-port|.
- * @l
- * ,(bold "Note:") This function was previously called |read-chars|. Usage
+ *
+ * NOTE: This function was previously called |read-chars|. Usage
  * of the old name is deprecated.
 doc>
  */
@@ -370,10 +370,10 @@ DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
  *
  * This function reads the characters available from |port| in the string |str|
  * by chuncks whose size is equal to the length of |str|.
- * The value returned by |read-bytes!|is an integer indicating the number
+ * The value returned by |read-bytes!| is an integer indicating the number
  * of characters read. |Port| may be omitted, in which case it defaults to the
  * value returned by |current-input-port|.
- * @l
+ *
  * This function is similar to |read-bytes| except that it avoids to allocate
  * a new string for each read.
  * @lisp
@@ -393,7 +393,7 @@ DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
  *              (close-port out)))))))
  * @end lisp
  *
- * ,(bold "Note:") This function was previously called |read-chars!|. Usage
+ * NOTE: This function was previously called |read-chars!|. Usage
  * of the old name is deprecated.
 doc>
  */
@@ -494,7 +494,7 @@ DEFINE_PRIMITIVE("read-byte", read_byte, subr01, (SCM port))
  * available, an end of file object is returned. |Port| may be omitted, in
  * which case it defaults to the value returned by |current-input-port|.
  * @l
- * ,(bold "Note:") The value returned by a call to |peek-char| is the same as the
+ * NOTE: The value returned by a call to |peek-char| is the same as the
  * value that would have been returned by a call to |read-char| with the same
  * port. The only difference is that the very next call to |read-char| or
  * |peek-char| on that port will return the value returned by the preceding
@@ -555,7 +555,8 @@ DEFINE_PRIMITIVE("eof-object?", eof_objectp, subr1, (SCM obj))
 <doc EXT eof-object
  * (eof-object)
  *
- * ,(index "#eof")
+ * (((#eof)))
+ * ((end of file))
  * Returns an end of file object. Note that the special notation |#eof| is
  * another way to return such an end of file object.
 doc>
@@ -590,11 +591,11 @@ DEFINE_PRIMITIVE("char-ready?", char_readyp, subr01, (SCM port))
  * (u8-ready?)
  * (u8-ready? port)
  *
- * Returns #t if a byte is ready on the binary input |port| and
- * returns #f otherwise. If |u8-ready?| returns #t then the
+ * Returns |#t| if a byte is ready on the binary input |port| and
+ * returns |#f| otherwise. If |u8-ready?| returns |#t| then the
  * next read-u8 operation on the given port is guaranteed
  * not to hang. If the |port| is at end of file then |u8-ready?|
- * returns #t.
+ * returns |#t|.
 doc>
 */
 DEFINE_PRIMITIVE("u8-ready?", u8_readyp, subr01, (SCM port))
@@ -638,12 +639,12 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
  * Writes a written representation of |obj| to the given port.  The
  * main difference with the |write| procedure is that |write*|
  * handles data structures with cycles. Circular structure written by
- * this procedure use the ,(code (q "#n=")) and ,(code (q "#n#"))
- * notations (see ,(ref :mark "Circular structure")).
- * @l
- * ,(bold "Note:") This function is also called |write*|.
- * The name |write*| was the name used by ,(stklos) for
- * |write-shared| before it was introduced in ,(rseven).
+ * this procedure use the `"{{sharp}}n="`)) and  `"{{sharp}}n{{sharp}}"`))
+ * notations (see <<_other_notations>>).
+ *
+ * NOTE: This function is also called |write*|.
+ * The name |write*| was the name used by {{stklos}} for
+ * |write-shared| before it was introduced in R7RS.
  *
 doc>
 <doc EXT write-with-shared-structure
@@ -655,9 +656,9 @@ doc>
  * (write/ss obj port optarg)
  *
  * |write-with-shared-structure| has been added to be compatible with
- * ,(link-srfi 38). It is is identical to |write*|, except that it accepts one
+ * {{link-srfi 38}}. It is is identical to |write*|, except that it accepts one
  * more parameter (|optarg|). This parameter, which is not specified
- * in ,(srfi 38), is always ignored. |write/ss| is only a shorter name for
+ * in {{quick-link-srfi 38}}, is always ignored. |write/ss| is only a shorter name for
  * |write-with-shared-structure|.
  *
 doc>
@@ -682,10 +683,10 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * unspecified value. The |port| argument may be omitted, in which
  * case it defaults to the value returned by |current-output-port|.
  * @l
- * ,(bold "Rationale:") |Write| is intended for producing machine-readable
+ * IMPORTANT: |Write| is intended for producing machine-readable
  * output and |display| is for producing human-readable output.
  * @l
- * ,(bold "Note:") As required by ,(rseven) does not loop forever when
+ * NOTE: As required by R7RS does not loop forever when
  * |obj| contains self-references.
 doc>
  */
@@ -803,7 +804,7 @@ DEFINE_PRIMITIVE("%write-string", write_string, subr4, (SCM str, SCM port,
  * in which case it defaults to the value returned by
  * |current-output-port|.
  * @l
- * ,(bold "Note:") This function is generally
+ * NOTE: This function is generally
  * faster than |display| for strings. Furthermore, this primitive does
  * not use the buffer associated to |port|.
  *
@@ -1097,59 +1098,56 @@ Incorrect_format_width:
  * string |str|. |Str| is written literally, except for the following
  * sequences:
  *
- * ,(itemize
- * (item [|~a| or |~A| is replaced by the printed representation
- * of the next |obj|.])
+ * - |~a| or |~A| is replaced by the printed representation of the
+ *   next |obj|.
  *
- * (item [|~s| or |~S| is replaced by the ``slashified'' printed
- * representation of the next |obj|.])
+ * - |~s| or |~S| is replaced by the _slashified_ printed
+ *   representation of the next |obj|.
  *
- * (item [|~w| or |~W| is replaced by the printed representation
- * of the next |obj| (circular structures are correctly handled and
- * printed using |write*|).])
+ * - |~w| or |~W| is replaced by the printed representation
+ *   of the next |obj| (circular structures are correctly handled and
+ *   printed using |write*|).
  *
- * (item [|~d| or |~D| is replaced by the decimal printed representation
- * of the next |obj| (which must be a number).])
+ * - |~d| or |~D| is replaced by the decimal printed representation
+ *   of the next |obj| (which must be a number).
  *
- * (item [|~x| or |~X| is replaced by the hexadecimal printed representation
- * of the next |obj| (which must be a number).])
+ * - |~x| or |~X| is replaced by the hexadecimal printed representation
+ *   of the next |obj| (which must be a number).
  *
- * (item [|~o| or |~O| is replaced by the octal printed representation
- * of the next |obj| (which must be a number).])
+ * - |~o| or |~O| is replaced by the octal printed representation
+ *   of the next |obj| (which must be a number).
  *
- * (item [|~b| or |~B| is replaced by the binary printed representation
- * of the next |obj| (which must be a number).])
+ * - |~b| or |~B| is replaced by the binary printed representation
+ *   of the next |obj| (which must be a number).
  *
- * (item [|~c| or |~C| is replaced by the printed representation
- * of the next |obj| (which must be a character).])
+ * - |~c| or |~C| is replaced by the printed representation
+ *   of the next |obj| (which must be a character).
  *
- * (item [|~y| or |~Y| is replaced by the pretty-printed representation
- * of the next |obj|. The standard pretty-printer is used here.])
+ * - |~y| or |~Y| is replaced by the pretty-printed representation
+ *   of the next |obj|. The standard pretty-printer is used here.
  *
- * (item [|~?| is replaced by the result of the recursive call of |format|
- * with the two next |obj|: the first item should be a string, and the
- * second, a list with the arguments.])
+ * - |~?| is replaced by the result of the recursive call of |format|
+ *   with the two next |obj|: the first item should be a string, and the
+ *   second, a list with the arguments.
  *
- * (item [|~k| or |~K| is another name for |~?|])
+ * - |~k| or |~K| is another name for |~?|
  *
- * (item [|~\[w\[,d\]\]f| or |~\[w\[,d\]\]F| is replaced by the printed
- * representation of next |obj| (which must be a number) with width |w|
- * and |d| digits after the decimal. Eventually, |d| may be omitted.])
+ * - |~[w[,d]]f| or |~[w[,d]]F| is replaced by the printed
+ *   representation of next |obj| (which must be a number) with width |w|
+ *   and |d| digits after the decimal. Eventually, |d| may be omitted.
  *
- * (item [|~~| is replaced by a single tilde character.])
+ * - |~~| is replaced by a single tilde character.
  *
- * (item [|~%| is replaced by a newline])
+ * - |~%| is replaced by a newline
  *
- * (item [|~t| or |~t| is replaced by a tabulation character.])
+ * - |~t| or |~T| is replaced by a tabulation character.
  *
- * (item [|~&| is replaced by a newline character if it is known that the
- * previous character was not a newline])
+ * - |~&| is replaced by a newline character if it is known that the
+ *   previous character was not a newline
  *
- * (item [|~_| is replaced by a space])
+ * - |~_| is replaced by a space
  *
- * (item [|~h| or |~H| provides some help])
- *
- * )
+ * - |~h| or |~H| provides some help
  *
  * |Port| can be a boolean or a port. If |port| is |#t|, output goes to
  * the current output port; if |port| is |#f|, the output is returned as a
@@ -1157,26 +1155,24 @@ Incorrect_format_width:
  * @lisp
  *    (format #f "A test.")        => "A test."
  *    (format #f "A ~a." "test")   => "A test."
- *    (format #f "A ~s." "test")   => "A \\"test\\"."
+ *    (format #f "A ~s." "test")   => "A \"test\"."
  *    (format "~8,2F" 1/3)         => "    0.33"
  *    (format "~6F" 32)            => "    32"
  *    (format "~1,2F" 4321)        => "4321.00"
  *    (format "~1,2F" (sqrt -3.9)) => "0.00+1.97i"
  *    (format "#d~d #x~x #o~o #b~b~%" 32 32 32 32)
- *                                 => "#d32 #x20 #o40 #b100000\\n"
+ *                                 => "#d32 #x20 #o40 #b100000\n"
  *    (format #f "~&1~&~&2~&~&~&3~%")
- *                                 => "1\\n2\\n3\\n"
+ *                                 => "\n1\n2\n3\n"
  *    (format "~a ~? ~a" 'a "~s" '(new) 'test)
  *                                 => "a new test"
  * @end lisp
  *
- * ,(bold "Note:") The second form of |format| is compliant with
- * ,(link-srfi 28). That is, when
- * |port| is omitted, the output is returned as a string as if |port| was
- * given the value |#f|.
- * @l
- * ,(bold "Note:") Since version 0.58, |format| is also compliant with
- * ,(link-srfi 48).
+ * NOTE: The second form of |format| is compliant with {{link-srfi 28}}.
+ * That is, when |port| is omitted, the output is returned as a string as if
+ * |port| was given the value |#f|.
+ *
+ * NOTE: Since version 0.58, |format| is also compliant with {{link-srfi 48}}.
 doc>
  */
 DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
@@ -1193,16 +1189,15 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * |error| is used to signal an error to the user. The second form
  * of |error| takes  a symbol as first parameter; it is generally used for the
  * name of the procedure which raises the error.
- * @l
- * ,(bold "Note:") The specification string may follow the
- * ,(emph "tilde conventions")
- * of |format| (see ,(ref :mark "format")); in this case this procedure builds an
- * error message according to the specification given in |str|. Otherwise,
+ *
+ * NOTE: The specification string may follow the _tilde conventions_ of
+ * |format| (see _<<format, primitive `format`>>_); in this case this
+ * procedure builds an error message according to the specification
+ * given in |str|. Otherwise,
  * this procedure is conform to the |error| procedure defined in
- * ,(link-srfi 23) and  |str| is printed with the |display| procedure,
+ * {{link-srfi 23}} and  |str| is printed with the |display| procedure,
  * whereas the |obj|s are printed  with the |write| procedure.
  *
- * @l
  * Hereafter, are some calls of the |error| procedure using a formatted string
  * @lisp
  * (error "bad integer ~A" "a")
@@ -1213,7 +1208,7 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  *                      @print{} foo: bar is not between 0 and 5
  * @end lisp
  *
- * and some conform to ,(srfi 23)
+ * and some conform to {{quick-link-srfi 23}}
  * @lisp
  * (error "bad integer" "a")
  *                     @print{} bad integer "a"
@@ -1322,7 +1317,7 @@ DEFINE_PRIMITIVE("signal-error", scheme_signal_error, vsubr, (int argc, SCM *arg
  *
  * Closes the port associated with |port|, rendering the port incapable of
  * delivering or accepting characters. These routines have no effect if the
- * port has already been closed. The value returned is ,(emph "void").
+ * port has already been closed. The value returned is *_void_*.
 doc>
  */
 DEFINE_PRIMITIVE("close-input-port", close_input_port, subr1, (SCM port))
@@ -1364,9 +1359,9 @@ DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
  * On the contrary, |port-open?| returns |#t| if |port| is open and
  * |#f| otherwise.
  * @l
- * ,(bold "Note:") |port-closed?| was the usual STklos function to
+ * NOTE: |port-closed?| was the usual STklos function to
  * test if a port is closed. |port-open?| has been added to be the companion
- * of the ,(rseven) functions |input-port-open?| and |output-port-open?|
+ * of the R7RS functions |input-port-open?| and |output-port-open?|
 doc>
 */
 DEFINE_PRIMITIVE("port-closed?", port_closed, subr1, (SCM port))
@@ -1397,7 +1392,7 @@ DEFINE_PRIMITIVE("port-open?", port_open, subr1, (SCM port))
  * on |port|, an end of file object is returned.  |Port| may be omitted,
  * in which case it defaults to the value returned by |current-input-port|.
  * @l
- * ,(bold "Note:") As said in ,(ref :mark "values"), if |read-line| is not
+ * NOTE: As said in _<<values, primitive `values`>>_, if |read-line| is not
  * used in  the context of |call-with-values|, the second value returned by
  * this procedure is ignored.
 doc>
@@ -1526,7 +1521,7 @@ DEFINE_PRIMITIVE("flush-output-port", port_flush, subr01, (SCM port))
  * integer. The |port| argument may be omitted, in which case it defaults to
  * the value returned by |current-input-port|.
  * @l
- * ,(bold "Note"): The |port-seek|, |read-chars| and |read-chars!| procedures
+ * NOTE: The |port-seek|, |read-chars| and |read-chars!| procedures
  * generally break the line-number. After using one of theses procedures, the
  * value returned by |port-current-line| will be |-1| (except a |port-seek|
  * at the beginning of the port reinitializes the line counter).
@@ -1573,7 +1568,7 @@ DEFINE_PRIMITIVE("port-current-position", port_position, subr01, (SCM port))
  * indicator, or end-of-file, respectively. If |whence| is omitted, it
  * defaults to |:start|.
  * @l
- * ,(bold "Note"): After using port-seek, the value returned by
+ * NOTE: After using port-seek, the value returned by
  * |port-current-line| may be incorrect.
 doc>
  */
@@ -1615,7 +1610,7 @@ DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
  * (port-rewind port)
  *
  * Sets the port position to the beginning of |port|. The value returned by
- * |port-rewind| is ,(emph "void").
+ * |port-rewind| is *_void_*.
 doc>
  */
 DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))

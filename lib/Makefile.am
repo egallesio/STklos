@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 10-Dec-2021 20:05 (eg)
+# Last file update: 10-Mar-2022 15:29 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme srfi
+	      scheme streams srfi stklos
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -67,11 +67,11 @@ scheme_extra = STklos.init
 SRC_STK = bigloo-support.stk  \
           bigmatch.stk        \
           compfile.stk        \
+          conditions.stk      \
           describe.stk        \
           env.stk             \
           expand.ss           \
           full-syntax.stk     \
-          full-conditions.stk \
           getopt.stk          \
           help.stk            \
           http.stk            \
@@ -80,31 +80,14 @@ SRC_STK = bigloo-support.stk  \
           pretty-print.stk    \
           recette.stk         \
           slib.stk            \
-          streams-primitive.stk \
-          streams-derived.stk \
-          srfi-35.stk         \
-          srfi-36.stk         \
-          srfi-41.stk         \
-          srfi-51.stk         \
-          srfi-59.stk         \
-          srfi-61.stk         \
-          srfi-89.stk         \
-          srfi-94.stk         \
-          srfi-96.stk         \
-          srfi-100.stk        \
-          srfi-137.stk        \
-          srfi-156.stk        \
-          srfi-171.stk        \
-          srfi-190.stk        \
-          trie.stk            \
           tar.stk             \
           trace.stk
 
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
+          conditions.ostk       \
           full-syntax.ostk      \
-          full-conditions.ostk  \
           describe.ostk         \
           env.ostk              \
           getopt.ostk           \
@@ -114,25 +97,12 @@ scheme_OBJS = compfile.ostk     \
           pretty-print.ostk     \
           recette.ostk          \
           slib.ostk             \
-          streams-primitive.ostk \
-          streams-derived.ostk   \
-          srfi-35.ostk          \
-          srfi-36.ostk          \
-          srfi-41.ostk          \
-          srfi-51.ostk          \
-          srfi-59.ostk          \
-          srfi-61.ostk          \
-          srfi-89.ostk          \
-          srfi-94.ostk          \
-          srfi-96.ostk          \
-          srfi-100.ostk         \
-          srfi-137.ostk         \
-          srfi-156.ostk         \
-          srfi-171.ostk         \
-          srfi-190.ostk         \
-          trie.ostk             \
           tar.ostk              \
           trace.ostk
+
+SRC_C     =
+SRC_C_STK =
+SRC_SHOBJ =
 
 
 DOCDB       = DOCDB
@@ -143,16 +113,19 @@ BASEDIR     = ..
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA  = $(scheme_SOLIBS)
+schemelib_DATA  = $(scheme_SOLIBS) $(SRC_SHOBJ)
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
-SUFFIXES = .stk .ostk .scm .c
+SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
 .scm.ostk:
 	$(COMP) -o $*.ostk $*.scm
+
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
@@ -216,12 +189,10 @@ install-sources:
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
-full-conditions: srfi-35.ostk srfi-36.ostk
+#full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
 # srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
-srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
-streams-derived.ostk: streams-primitive.ostk
 
 
 #

@@ -1,0 +1,198 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update: 26-Jan-2022 13:16 (eg)
+
+{{chapter "Introduction"}}
+
+=== Overview of {{stklos}}
+((("STk")))
+((("Tk")))
+{{stklos}} is the successor of {{stk}} <<STk>>,
+a Scheme interpreter which was tightly
+connected to the Tk graphical toolkit <<Tk>>.
+{{stk}} had an object layer which was called {{stklos}}. At this
+time, {{stk}} was used to denote the base Scheme interpreter and
+{{stklos}} was used to denote its object layer, which was an
+extension.  For instance, when programming a GUI application,
+a user could access the widgets at the (low) Tk level, or access
+them using a neat hierarchy of classes wrapped in {{stklos}}.
+
+Since the object layer is now more closely integrated with
+the language, the new system has been renamed {{stklos}} and
+{{stk}} is now used to designate the old system.
+
+((("GTK+")))
+*Compatibility with STk*: +
+{{stklos}} has been
+completely rewritten and as a consequence, due to new
+implementation choices, old {{stk}} programs are not fully
+compatible with the new system. However, these changes are very
+minor and adapting a {{stk}} program for the {{stklos}} system is
+generally quite easy. The only programs which need heavier work
+are programs which use Tk without objects, since the new
+preferred GUI system is now based on GTK+
+<<GTK>>. Programmers used to GUI programming using
+{{stklos}} classes will find that both system, even if not
+identical in every points, share the same philosophy.
+
+
+===  Lexical Conventions
+
+==== Identifiers
+((("keyword")))
+((("#!fold-case")))
+((("#!no-fold-case")))
+((("#!keyword-colon-position-none")))
+((("#!keyword-colon-position-before")))
+((("#!keyword-colon-position-after")))
+((("#!keyword-colon-position-both")))
+In {{stklos}}, by default, identifiers which start (or end) with a colon
+"`:`" are considered as keywords.  For instance `:foo` and
+`bar:` are {{stklos}} keywords, but `not:key` is not a
+keyword. Alternatively, to be compatible with other Scheme implementations,
+the notation `#:foo` is also available to denote the keyword of name
+`foo`. See _<<_keywords>>_ for more information.
+
+The reader behavior, concerning keywords, can also be changed by the
+following directives:
+
+* the `#!keyword-colon-position-none` tells the reader
+that colon in a symbol should not be interpreted as a keyword;
+
+* the `#!keyword-colon-position-before` tells the reader
+that a symbol starting with a colon should be interpreted as a keyword;
+
+* the `#!keyword-colon-position-after`  tells the reader
+that a symbol ending with a colon should be interpreted as
+a keyword;
+
+* the `#!keyword-colon-position-both` tells the reader
+that a symbol starting or ending with a colon should be interpreted
+as a keyword
+
+In any case, the notation `#:key` is always read as a keyword.
+
+By default, {{stklos}} is case sensitive as specified by R7RS. This
+behavior can be changed by
+
+* the `--case-insensitive` option used for the commands `stklos` or
+`stklos-compile`
+
+* the `{{sharp}}!fold-case` directive which can appear anywhere comments are permitted but must be followed by a delimiter. This directive (and the `{{sharp}}!no-fold-case`) are treated as comments, except that they affect the reading of subsequent data from the same port. The `{{sharp}}!fold-case` directive causes subsequent identifiers and character names to be case-folded as if by `string-foldcase`. It has no effect on character literals. The `{{sharp}}!no-fold-case` directive causes the reader to a non-folding behavior.
+
+
+==== Comments
+((("comments")))
+((("scripts files")))
+((("multi-line comment")))
+There are four types of comments in {{stklos}}:
+
+* a semicolon `;` indicates the start of a comment. This kind of
+comment extends to the end of the line (as described in {{rfive}}).
+
+* multi-lines comment use the classical Lisp convention: a comment begins with `{{sharp}}|` and ends with `|{{sharp}}`.  This form of comment is now defined by {{link-srfi 30}}.
+
+* a sharp sign followed by a semicolon `{{sharp}};` comments the next Scheme
+expression. This is useful to comment a piece of code which spans
+multiple lines
+
+* comments can also be introduced by `{{sharp}}!`.  Such a comment extends to
+the end of the line which introduces it. This extension is particularly
+useful for building {{stklos}} scripts. On most Unix implementations,
+if the first line of a script looks like this:
+
+```
+#!/usr/local/bin/stklos -file
+```
+
+then the script can be started directly as if it was a binary
+program. {{stklos}} is loaded behind the scene and
+executes the script as a Scheme program. This form is compatible with
+the notation introduced in {{link-srfi 22}}.
+
+Note that, as a special case, that the sequences `{{sharp}}!key`,
+`{{sharp}}!optional` and `{{sharp}}!rest` are respectively converted
+to the {{stklos}} keywords `{{sharp}}:key`, `{{sharp}}:optional` and
+`{{sharp}}:rest`. This permits to Scheme lambdas, which accepts
+keywords and optional arguments, to be compatible with DSSSL lambdas
+<<DSSSL>>.
+
+
+
+
+==== Here Strings
+((("here string")))
+((("string")))
+Here strings permit to easily enter multilines strings in programs.
+The sequence of characters `{{sharp}}<<` starts a here string. The characters
+following this sequence `{{sharp}}<<` until a newline character define a terminator for
+the here string. The content of the string includes all characters between
+the `{{sharp}}<<` line and a line whose only content is the specified terminator.
+No escape sequences are recognized between the starting and terminating lines.
+
+*Example:* the sequence
+
+```scheme
+#<<EOF
+abc
+def
+  ghi
+EOF
+```
+
+is equivalent to the string
+
+```scheme
+"abc\ndef\n  ghi"
+```
+
+==== Other Notations
+((("#t")))
+((("#f")))
+((("#true")))
+((("#false")))
+{{stk}} accepts all the notations defined in {{rfive}} plus
+
+
+
+* `#true` and `#false` are other names for
+the constants `#t` and `#f` as proposed by {{rseven}}.
+
+* `[]` Brackets are equivalent to
+parentheses. They are used for grouping and to build lists. A
+list opened with a left square bracket must be closed with a
+right square bracket (see _<<_pairs_and_lists>>_).
+
+* `:` a colon at the beginning or the end of
+a symbol introduces a keyword.  Keywords are described in section
+Keywords (see _<<_keywords>>).
+
+* `{{sharp}}n=` ((("Circular structure"))) 
+ is used to represent circular structures.  The value given of `n`
+must be a number. It is used as a label, which can be referenced
+later by a `{{sharp}}n{{sharp}}` notation
+(see below). The scope of the label is the expression being read by the
+outermost `read`.
+
+* `{{sharp}}n{{sharp}}` is used to reference some object previously
+labeled by a `{{sharp}}n=` notation; that is, `{{sharp}}n{{sharp}}`
+represents a pointer to the object labeled exactly by
+`{{sharp}}n=`. For instance, the object returned by the following
+expression
+
+
+```scheme
+(let* ((a (list 1 2))
+       (b (cons 'x a)))
+  (list a b))
+```
+
+can also be represented in this way:
+
+```scheme
+(#0=(1 2) (x . #0#))
+```

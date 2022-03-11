@@ -26,7 +26,9 @@ The VM has a stack, which in the source code is accessed using the C functions
 Of these, only a few are relevant to understanding the bytecode -- these are the
 value registers and the stack.
 
+## The bytecode
 
+STklos bytecode is a sequence of 16-bit integers.
 You can see the opcodes of a compiled thunk with
 
 ```scheme
@@ -123,8 +125,81 @@ CONSTANT
 000:  SMALL-INT            5
 ```
 
+Small integers are *not* the same as fixnums! A small integer is an integer number
+that fits in 16 bits (that is, in one bytecode element). The fixnum range depends
+on the size of `long` in the platform being used.
 
+Suppose STklos has been compiled on a 64 bit system and also ona 32 bit system.
+The ranges for small ints and fixnums are:
 
+```
+small integer (on both): [ -2^15, +2^15 - 1 ]
+fixnum (long is 32-bit): [ -2^29, +2^29 - 1 ] 
+fixnum (long is 64-bit): [ -2^61, +2^61 - 1 ]
+```
+
+The expression above, `5`, is compiled into the bytes
+
+```
+00 08 00 05
+```
+
+where `00 08` is the opcode for "small int", and `00 05` is the argument 
+(the small integer, 5).
+
+Small integers are compiled *into* the bytecode. Fixnums, bignums, strings
+are stored *outside* of the bytecode, and the instruction `CONSTANT` takes
+as argument an index into the constants vector.
+
+The expression `50000` is not a small integer, so it is compiled as a constant:
+
+```
+(disassemble-expr 50000 #t)
+000:  CONSTANT             0
+002:
+
+Constants:
+0: 50000
+```
+
+Zero is the index of `50000` in the constants vector.
+
+The above code is compiled into bytecode as
+
+```
+00 09 00 00
+```
+
+where `00 09` means `CONSTANT` and `00 00` is the index into the constants vector.
+
+Another clarifying example:
+
+(disassemble-expr '(values 50000 "abc") #t)
+
+```
+000:  PREPARE-CALL        
+001:  CONSTANT-PUSH        0
+003:  CONSTANT-PUSH        1
+005:  GREF-INVOKE          2 2
+008:
+
+Constants:
+0: 50000
+1: "abc"
+2: values
+```
+
+The bytecode is
+
+```
+37 85 0 85 1 86 2 2
+```
+
+Here, 
+
+* `85 0` is `CONSTANT-PUSH 0` (0 = first element of the vector)
+* `85 1` is `CONSTANT-PUSH 1` (1 = second element)
+* `86 2 2`  is `GREF-INVOKE 2 2` (2 = number, arg to `values, next 2 = third element of vector)
 
 ## Stack
 

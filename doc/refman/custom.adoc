@@ -1,0 +1,25 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update: 26-Jan-2022 13:16 (eg)
+
+== Customizations
+{{stklos}} environement can be customized using
+Parameter Objects. These
+parmaters are listed below.
+
+{{insertdoc 'real-precision}}
+[#srfi169]
+{{insertdoc 'accept-srfi-169-numbers}}
+{{insertdoc 'read-case-sensitive}}
+{{insertdoc 'write-pretty-quotes}}
+(((STKLOS_LOAD_PATH)))
+{{insertdoc 'load-path}}
+(((STKLOS_LOAD_SUFFIXES)))
+{{insertdoc 'load-suffixes}}
+{{insertdoc 'load-verbose}}
+{{insertdoc 'thread-handler-error-show}}
+{{insertdoc 'stklos-debug-level}}
