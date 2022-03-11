@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 11-Mar-2022 09:40 (eg)
+ * Last file update: 11-Mar-2022 09:58 (eg)
  */
 
 #include "stklos.h"
@@ -745,7 +745,7 @@ doc>
  */
 extern inline unsigned int STk_bit_count(unsigned long n) {
   /* A lookup table with the bit count for every possible byte. */
-  static unsigned int bc[256] =
+  static unsigned char bc[256] =
     { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
       2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4,
       2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5,
