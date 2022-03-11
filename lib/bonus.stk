@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 17-Jan-2022 10:10 (eg)
+;;;; Last file update:  6-Mar-2022 15:05 (eg)
 ;;;;
 
 
@@ -325,8 +325,6 @@ doc>
         env))
 
 
-
-
 ;;;;
 ;;;; System functions
 ;;;;
@@ -363,7 +361,7 @@ doc>
  * Returns the invocation name of the current program as a string. If the file is
  * not a script (in sense of {{quick-link-srfi 193}}), it is the name of the
  * running {{stklos}} interpreter, otherwise it is the name of the running script.
- * This function always returns a string wheareas the |command-name| procedure returns
+ * This function always returns a string whereas the |command-name| procedure returns
  * `#f` when the program name is not a script.
 doc>
 |#
@@ -771,7 +769,7 @@ doc>
  * Returns the setter associated to a |proc|. Setters are defined in the
  * {{link-srfi 17}} document. A setter proc, can be used in a generalized
  * assignment, as described in |set!|.
- * 
+ *
  * To associate |s| to the procedure |p|, use the following form:
  * @lisp
  * (set! (setter p) s)
@@ -1810,23 +1808,11 @@ doc>
            (else (error 'case-lambda "no matching clause in list ~S for ~S"
                         ',(map car clauses) ,args)))))))
 
-;;
-;; SRFI-38: "External Representation for Data With Shared Structure"
-;;
-(define read-with-shared-structure read)
+;;;
+;;; SRFI-35: "Conditions"
+;;;
 
-(define (write-with-shared-structure obj :optional (port (current-output-port))
-                                                   (optarg #f))
-  ;; optarg is unspecified in {{link-srfi 38}}, it is a hook for implementation
-  ;; We don't use it
-  (write* obj port))
-
-(define read/ss read-with-shared-structure)
-(define write/ss write-with-shared-structure)
-
-;;
 ;; Macro used by SRFI-35 & SRFI-36 implementations
-;;
 (define-macro (%define-condition-type-accessors name supertype predicate . slots)
   (let ((obj (gensym)))
     `(begin
@@ -1840,6 +1826,37 @@ doc>
                      (error ',(cadr x) "bad type for condition ~S" ,obj))
                    (condition-ref ,obj ',(car x))))
               slots))))
+;;
+;; Predefined SRFI-35 conditions
+;;
+(%define-condition-type-accessors &message &condition   ;; &message
+   message-condition?
+   (message condition-message))
+
+(%define-condition-type-accessors &serious &condition   ;; &serious
+   serious-condition?)
+
+(%define-condition-type-accessors &error &serious       ;; &error
+   error?)
+
+(%define-condition-type-accessors &error-message &error ;; &error-message (extension)
+   error-message?
+  (location error-location)
+  (message  error-message))
+
+;;
+;; SRFI-38: "External Representation for Data With Shared Structure"
+;;
+(define read-with-shared-structure read)
+
+(define (write-with-shared-structure obj :optional (port (current-output-port))
+                                                   (optarg #f))
+  ;; optarg is unspecified in {{link-srfi 38}}, it is a hook for implementation
+  ;; We don't use it
+  (write* obj port))
+
+(define read/ss read-with-shared-structure)
+(define write/ss write-with-shared-structure)
 
 ;;
 ;; SRFI-39: "Parameter Objects"
@@ -1910,48 +1927,56 @@ doc>
  * @lisp
  * (require-extension <clause> ...)
  * @end lisp
- * A clause has the form:
- * @lisp
- *  (srfi <extension-argument> ...)
- * @end lisp
- * where `|<extension-argument>|`s may be any Scheme-values.
- * @l
- * If an |<extension-argument>| is a nonnegative integer, the functionality
- * of the indicated SRFIs is made available in the context in
- * which the require-extension form appears. For instance,
- * @lisp
- * (require-extension (srfi 1 2))
- *                ; Make the SRFI 1 and 2 available
- * @end lisp
- * This form is compatible with {{link-srfi 55}}. However, STklos
- * accepts also some symbolic names for requiring some extensions.
+ * A clause may have the form:
+ *
+ * 1. |(srfi number ...)|
+ *
+ * 2. |(identifier ...)|
+ *
+ * 3. |identifier|
+ *
+ * In the first form the functionality of the indicated SRFIs are made
+ * available in the context in which the |require-extension| form appears.
  * For instance,
  * @lisp
- * (require-extension (srfi lists and-let*))
+ * (require-extension (srfi 1 2)) ; Make the SRFI 1 and 2 available
  * @end lisp
- * is equivalent to the previous |require-extension|. A list of available
- * symbols as |<extension-argument>| is given in <<_srfis>>.
+ * This form is compatible with {{link-srfi 55}}.
+ *
+ * The second and third forms are {{stklos}} extensions.
+ * If the form is a list, it is equivalent to an import. That is,
+ * @lisp
+ * (require-extension (streams primitive) (streams derived))
+ * @end lisp
+ * is equivalent to
+ * @lisp
+ * (import (streams primitive) (streams derived))
+ * @end lisp
+ *
+ * The final form permits to use symbolic names for requiring some extensions.
+ * For instance,
+ * @lisp
+ * (require-extension lists and-let*)
+ * @end lisp
+ * is equivalent to the requiring |srfi-1| and |srfi-2|.
+
+ * A list of available symbolic names for features is given in <<_srfis>>.
 doc>
 |#
-(define-macro (require-extension . clauses)
-  (when (null? clauses)
-    (error 'require-extension "requires at least one clause"))
-  `(let ((%has-feature? (in-module SRFI-0 %has-feature?)))
-     ,@(map (lambda (x)
-              `(cond
-                ((and (pair? ',x) (eq? (car ',x) 'srfi) (not (null? (cdr ',x))))
-                 (let ((ok? (lambda (x)
-                              (let ((x (if (integer? x)
-                                           (string->symbol (format "srfi-~a" x))
-                                           x)))
-                                (or (%has-feature? x)
-                                    (error 'require-extension
-                                           "extension ~S is absent" x))))))
-                   (and ,@(map (lambda (x) `(ok? ',x))
-                               (cdr x))
-                        (void))))
-                (else (error 'require-extension "bad clause ~S" ',x))))
-            clauses)))
+
+(define-syntax require-extension
+  (syntax-rules (srfi)
+    ((_ "internal" (srfi id ...))
+     (begin (require-feature id) ...))
+    ((_ "internal" (x ...))
+     (import (x ...)))
+    ((_ "internal" id)
+     (cond-expand
+      (id #void)
+      (else (error "cannot require extension named '~s'" 'id))))
+    ((_ clause ...)
+     (begin (require-extension "internal" clause) ...)) ) )
+
 
 ;;
 ;; SRFI-88: "keyword objects"

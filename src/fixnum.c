@@ -1,7 +1,7 @@
 /*
  * fixnum.c     -- Fixnum operations
  *
- * Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 20-Aug-2021 17:23 (eg)
+ * Last file update: 11-Mar-2022 09:58 (eg)
  */
 
 #include "stklos.h"
@@ -139,7 +139,7 @@ DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 <doc EXT fixnum-width
  * (fixnum-width)
  *
- * Returns the number of bits used to represent a fixnum number
+ * Returns the number of bits used to represent a fixnum number.
 doc>
 */
 DEFINE_PRIMITIVE("fixnum-width", fixnum_width, subr0, (void))
@@ -239,13 +239,23 @@ doc>
 DEFINE_PRIMITIVE("fxodd?", fxoddp, subr1, (SCM o))
 {
   ensure_fx(o);
-  return MAKE_BOOLEAN (INT_VAL(o)&1);
+  /* This was:
+       return MAKE_BOOLEAN (INT_VAL(o)&1);
+     However, since the fixnum tag is "01", we can just check if the
+     third bit is one. --jpellegrini
+  */
+  return MAKE_BOOLEAN (((long) o) & 4);
 }
 
 DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM o))
 {
   ensure_fx(o);
-  return MAKE_BOOLEAN (!(INT_VAL(o)&1));
+  /* This was:
+       return MAKE_BOOLEAN (!(INT_VAL(o)&1));
+     However, since the fixnum tag is "01", we can just check if the
+     third bit is one. --jpellegrini
+  */
+  return MAKE_BOOLEAN (!(((long) o) & 4));
 }
 
 
@@ -270,13 +280,23 @@ doc>
 DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
 {
   ensure_fx2(o1,o2);
-  return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
+  /* This was:
+        return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
+      However, since the fixnum tag is 01, we could just clear the tag of one
+      operand and sum both. No tagging/untagging necessary.
+      --jpellegrini  */
+  return (SCM) ( ((long) o1) + UNTAG(o2) );
 }
 
 DEFINE_PRIMITIVE("fx-", fxminus, subr2, (SCM o1, SCM o2))
 {
   ensure_fx2(o1, o2);
-  return MAKE_INT(INT_VAL(o1) - INT_VAL(o2));
+  /* This was:
+       return MAKE_INT(INT_VAL(o1) - INT_VAL(o2));
+     However, since the fixnum tag is 01, we could just clear the tag of the
+     second operand and subtract.  No tagging/untagging necessary.
+      --jpellegrini  */
+  return (SCM) ( ((long) o1) - UNTAG(o2) );
 }
 
 DEFINE_PRIMITIVE("fx*", fxtime, subr2, (SCM o1, SCM o2))
@@ -328,8 +348,20 @@ DEFINE_PRIMITIVE("fxmodulo", fxmod, subr2, (SCM o1, SCM o2))
 
 DEFINE_PRIMITIVE("fxabs", fxabs, subr1, (SCM o))
 {
+    /* As per Sean Eron Anderson's bit twiddling page,
+       we can compute abs directly, without branching and without
+       calling the C library (labs).
+       http://graphics.stanford.edu/~seander/bithacks.html#IntegerAbs
+
+       NOTE: this won't work for fx-least because the result is not
+       a fixnum, but then... It wasn't when we used labs anyway.
+       We assume the user knows overflows and underflows are not
+       signaled (the same is true for other fixnum procedures).
+       --jpellegrini */
   ensure_fx(o);
-  return MAKE_INT(labs(INT_VAL(o)));
+  long v = INT_VAL(o);
+  long const mask = v >> (sizeof(long) * CHAR_BIT - 1);
+  return MAKE_INT((v + mask) ^ mask);
 }
 
 DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o))
@@ -349,7 +381,7 @@ DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o))
  * that |(fxsqrt n)| returns two values |a|, |b|, such that |a*a+b|=|n|.
  * @lisp
  *   (fxsqrt #f)             =>  error
- *   (fxdqrt (expt 100 100)) =>  error
+ *   (fxsqrt (expt 100 100)) =>  error
  *   (fxsqrt -1)             =>  error
  *   (fxsqrt 0)              =>  0, 0
  *   (fxsqrt 1)              =>  1, 0
@@ -459,8 +491,22 @@ FX_COMP("fx<?",  fxlt, >=)
 FX_COMP("fx<=?", fxle, >)
 FX_COMP("fx>?",  fxgt, <=)
 FX_COMP("fx>=?", fxge, <)
-FX_COMP("fx=?",  fxeq, !=)
 
+/* fx=? is different than other compare ops, as it requires nothing
+   else than a direct comparison with ==, so it's defined separately
+   --jpellegrini */
+DEFINE_PRIMITIVE("fx=?", fxeq, vsubr, (int argc, SCM *argv))
+{
+    SCM p;
+    if (argc == 0) error_fx_at_least_1();
+    ensure_fx(*argv);
+    if (argc == 1) return STk_true;
+    for (p = *argv--; --argc; p=*argv,argv--) {
+        ensure_fx(*argv);
+        if (p != *argv) return STk_false;
+    }
+  return STk_true;
+}
 
 /*
 <doc EXT fxnot fxand fxior fxxor
@@ -484,9 +530,28 @@ doc>
 DEFINE_PRIMITIVE("fxnot", fxnot, subr1, (SCM o))
 {
   ensure_fx(o);
-  return MAKE_INT(~INT_VAL(o));
+  /* TAG_FIXNUM costs two bitwise operations; doing INT_VAL
+     and MAKE_INT would cost two shifts + 1  or.
+     --jpellegrini */
+  return (SCM)TAG_FIXNUM(~((long) o));
 }
 
+/* Optimization: instead of doing INT_VALUE several times
+   and then MAKE_INT on the result, we operate directly on the
+   bits of the tagged fixnums. This will NOT make a difference
+   for the relevant bits (bit 3 and above), but will destroy the
+   tag, which we re-build later.
+
+   Cost of unboxing + boxing:
+     n*(INT_VALUE) + MAKE_INT   [ n+1 shifts + one "or" ]
+   Cost of optimized version:
+     1*TAG_FIXNUM               [ one "and" + one "or" ]
+
+   When n=1, the first cost is that of two shifts + one "or",
+   but the second is that of one "and" and one "or".
+   When n>1, the second is clearly better.
+   --jpellegrini
+ */
 #define FX_LOGICAL(name, func, op) \
 DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))  \
 {                                                           \
@@ -496,11 +561,12 @@ DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))  \
   if (argc == 1) return *argv;                              \
   else {                                                    \
     long int res;                                           \
-    for (res = INT_VAL(*argv--); --argc; argv--) {          \
+    for (res = ((long)*argv--); --argc; argv--) {           \
       ensure_fx(*argv);                                     \
-      res op INT_VAL(*argv);                                \
+      res op ( (long) (*argv));                             \
     }                                                       \
-    return MAKE_INT(res);                                   \
+    res = TAG_FIXNUM(res);                                  \
+    return (SCM) res;                                       \
   }                                                         \
 }
 
@@ -667,21 +733,53 @@ DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
  * @end lisp
 doc>
 */
+/*
+  Count the number of ones in a long integer.
+
+  It does work with signed long integers; the 'unsigned long' in the
+  declaration is to fore a cast so 'n' will be treated as if it were
+  unsigned, because the algoritm does shift it to the right, and if
+  it's signed negative numbers would get ones from the right side when
+  shifted (at least with GCC and LLVM -- this is not defined by the
+  standard, actually).
+ */
+extern inline unsigned int STk_bit_count(unsigned long n) {
+  /* A lookup table with the bit count for every possible byte. */
+  static unsigned char bc[256] =
+    { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
+      2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4,
+      2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5,
+      4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+      2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4,
+      3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
+      4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4,
+      3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+      2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5,
+      4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5,
+      3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6,
+      5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+      4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8 };
+
+  unsigned int c = 0;
+  unsigned long mask = 0xff;
+  while(n) {
+    c += bc[n & mask];
+    n = n >> 8;
+  }
+  return c;
+}
+
 DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
 /* TODO: Somewhat efficient, but there is a better way, described
    in "Hacker's Delight", but it needs to be adapted to the
    variable length datum. */
 {
-  ensure_fx(o);
-  {
-    long n = INT_VAL(o);
-    int total=0;
-    for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
-      if ( n & 1 )
-        total++;
-    return MAKE_INT(total);
-  }
+    ensure_fx(o);
+    return (INT_VAL(o) < 0)
+        ? MAKE_INT(STk_bit_count(~INT_VAL(o)))
+        : MAKE_INT(STk_bit_count( INT_VAL(o)));
 }
+
 
 /*
 <doc EXT fxfirst-set-bit
@@ -702,9 +800,21 @@ DEFINE_PRIMITIVE("fxfirst-set-bit", fxfirst_set_bit, subr1, (SCM o))
 {
   ensure_fx(o);
   {
-    unsigned long n = INT_VAL(o);
-    for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
-      if ( n & 1 )
+      /*
+        We had
+          unsigned long n = INT_VAL(o);
+        here.
+        and then checked each bit like
+          if ( n & 1 )
+        but it's faster to not unbox o, and just check its third bit!
+          if ( o & 4 )
+        In the for loop, we need to explain the compiler that we're
+        doing the shift as if o was integer:
+          o = (SCM) (((long) o) >> 1))
+        but this has no extra cost. --jpellegrini
+       */
+    for (int i=0; i < (int) INT_LENGTH; i++, o=(SCM) (((long) o) >> 1))
+      if ( ((long) o) & 4 )
         return MAKE_INT(i);
     return MAKE_INT(-1UL);
   }

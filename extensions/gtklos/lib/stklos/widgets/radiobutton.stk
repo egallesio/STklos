@@ -1,0 +1,261 @@
+;;;;
+;;;; radiobutton.stk            -- GTklos Radio button Widget
+;;;;
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  2-Aug-2001 16:56 (eg)
+;;;; Last file update: 31-Jan-2022 20:18 (eg)
+;;;;
+
+;;;
+;;; GTk bindings
+;;;
+(define-gtk gtk-radio-button-new-from-widget (#:pointer) #:pointer
+  "gtk_radio_button_new_from_widget")
+
+
+(define (find-radio-group o)
+  ;; find the group to which the radiobutton belongs
+  (let ((sibling (%widget-data-get o #:sibling #f)))
+    (%widget-data-get (if sibling sibling o)
+                      #:group
+                      '())))
+
+(define (group-selected-getter o)
+  (let Loop ((group (find-radio-group o)))
+    (cond
+     ((null? group) #f)
+     ((value (car group)) (car group))
+     (else (Loop (cdr group))))))
+
+(define (group-selected-setter o v)
+  (slot-set! v 'value #t))
+
+
+;;======================================================================
+;;
+;;           < R a d i o - b u t t o n >
+;;
+;;======================================================================
+(define-class <radio-button> (<check-button>)
+  ((group-selected   #:accessor     group-selected
+                     #:init-keyword #:group-selected
+                     #:allocation   #:virtual
+                     #:slot-ref     group-selected-getter
+                     #:slot-set!    group-selected-setter)))
+
+
+(define-method initialize ((self <radio-button>) initargs)
+  ;; initialize the widget and it %data field that we will change
+  (next-method self initargs)
+
+  ;; The leader of the group has the list of all the members of the group
+  ;; in the #:group key. Used to apply the same behavior to all the
+  ;; members of the same group.
+  (let ((sibling (key-get initargs #:sibling #f)))
+    (if sibling
+        ;; Retain sibling and add self to the group leader
+        (let ((group (%widget-data-get sibling #:group'())))
+          (%widget-data-set! self #:sibling sibling)
+          (%widget-data-set! sibling #:group (cons self group)))
+        ;; Place ourself in our group
+        (begin
+          (%widget-data-set! self #:sibling #f)
+          (%widget-data-set! self #:group (list self))))))
+
+
+(define-method realize-widget ((self <radio-button>) initargs)
+  (let* ((sibling (key-get initargs #:sibling #f))
+         (s       (if sibling (slot-ref sibling 'wid) (void)))
+         (id      (gtk-radio-button-new-from-widget s)))
+    (cpointer-type-set! id 'gtk-radio)
+    (slot-set! self 'wid id)))
+
+
+
+
+;; ======================================================================
+;;
+;;     < r a d i o - g r o u p >
+;;
+;; ======================================================================
+
+
+;;//;;======================================================================
+;;//;
+;;//;           < R a d i o - b u t t o n >
+;;//;
+;;//;======================================================================
+;;//
+;;//(define (%radio-button-children o)
+;;//  (let ((layout (%widget-data-get o #:layout #f)))
+;;//    (if layout
+;;//    (children layout)
+;;//    '())))
+;;//
+;;//;;; --------------------------------------------------
+;;//;;; Radio value accessors
+;;//;;; --------------------------------------------------
+;;//(define (%gtk-radio-value-get o)
+;;//  (let Loop ((buttons (%radio-button-children o)))
+;;//    (cond ((null? buttons)        "")
+;;//      ((value (car buttons))  (text (car buttons)))
+;;//      (else           (Loop (cdr buttons))))))
+;;//
+;;//
+;;//(define (%gtk-radio-value-set! o v)
+;;//  (for-each (lambda (but)
+;;//          (when (equal? (text but) v)
+;;//        (slot-set! but 'value #t)))
+;;//        (%radio-button-children o)))
+;;//
+;;//;;; --------------------------------------------------
+;;//;;; Radio command accessors
+;;//;;; --------------------------------------------------
+;;//(define (%gtk-radio-command-get o)
+;;//  (let ((children (%radio-button-children o)))
+;;//    (if (null? children)
+;;//    #f
+;;//    (command (car children)))))
+;;//
+;;//(define (%gtk-radio-command-set! o v)
+;;//  (let ((new-v (lambda (e)
+;;//         (let ((button (event-widget e)))
+;;//           (when (value button) (v e))))))
+;;//    ;; Place new-v on all the buttons of the radio
+;;//    (for-each (lambda (b)
+;;//            (slot-set! b 'command new-v))
+;;//          (%radio-button-children o))))
+;;//
+;;//(define (%gtk-radio-command-set! o v)
+;;//  ;; Place a lambda on each buttons
+;;//  ;; Things are a little bit complicated because command are called when selected
+;;//  ;; AND deselected
+;;//  (for-each (lambda (b)
+;;//          (slot-set! b 'command (lambda (e)
+;;//                      (when (value b)
+;;//                    (v e)))))
+;;//        (%radio-button-children o)))
+;;//
+;;//;;; --------------------------------------------------
+;;//;;; Radio tooltip accessors
+;;//;;; --------------------------------------------------
+;;//(define (%gtk-radio-tooltip-get o)
+;;//  (%widget-data-get o #:tooltip ""))
+;;//
+;;//(define (%gtk-radio-tooltip-set! o v)
+;;//  (let ((txt (texts o)))
+;;//    (cond
+;;//      ((string? v)
+;;//         ;; Place the tooltip on all the buttons of the radio
+;;//         (for-each (lambda (b) (slot-set! b 'tooltip v))
+;;//           (%radio-button-children o)))
+;;//
+;;//      ((and (list? v) (list? txt) (eq? (length v) (length txt)))
+;;//         ;; Place one tooltip on each button
+;;//         (let ((children (%radio-button-children o)))
+;;//       (for-each (lambda (t tooltip)
+;;//               (for-each (lambda (x)
+;;//                   (if (equal? (text x) t)
+;;//                       (slot-set! x 'tooltip tooltip)))
+;;//                 children))
+;;//             txt
+;;//             v)))
+;;//      (else
+;;//       (error "bad tooltip value ~S for radio button ~S" v o))))
+;;//
+;;//  ;; Save the value in the widget plist
+;;//  (%widget-data-set!  o #:tooltip v))
+;;//
+;;//
+;;//;;; --------------------------------------------------
+;;//;;; The class itself
+;;//;;; --------------------------------------------------
+;;//(define-class <radio-button> (<frame>)
+;;//  ((texts       #:getter       texts
+;;//                #:init-keyword     #:texts
+;;//                #:allocation   #:virtual
+;;//                #:slot-ref     (lambda (o)
+;;//                                 (%widget-data-get o #:texts '()))
+;;//                #:slot-set!    (lambda (o v)
+;;//                                 (when (%widget-data-get o #:texts #f)
+;;//                                   (error "slot 'texts' cannot be changed"))
+;;//                                 (%widget-data-set! o #:texts v)))
+;;//   (orientation #:getter       orientation
+;;//                #:init-keyword     #:orientation
+;;//                #:init-form    'vertical
+;;//                #:allocation   #:virtual
+;;//                #:slot-ref     (lambda (o)
+;;//                                 (%widget-data-get o #:rdo 'vertical))
+;;//                #:slot-set!    (lambda (o v)
+;;//                                 (when (%widget-data-get o #:rdo #f)
+;;//                                   (error "slot orientation cannot be changed"))
+;;//                                 (%widget-data-set! o #:rdo v)))
+;;//   (tooltip     #:accessor     tooltip
+;;//                #:allocation   #:virtual
+;;//                #:init-keyword     #:tooltip
+;;//                #:slot-ref     %gtk-radio-tooltip-get
+;;//                #:slot-set!    %gtk-radio-tooltip-set!)
+;;//   (command     #:accessor     command
+;;//                #:init-keyword     #:command
+;;//                #:allocation   #:virtual
+;;//                #:slot-ref     %gtk-radio-command-get
+;;//                #:slot-set!    %gtk-radio-command-set!)
+;;//   (value       #:accessor     value
+;;//                #:init-keyword     #:value
+;;//                #:allocation   #:virtual
+;;//                #:slot-ref     %gtk-radio-value-get
+;;//                #:slot-set!    %gtk-radio-value-set!)))
+;;//
+;;//
+;;//;;; ----------------------------------------------------------------------
+;;//;;;
+;;//;;; Methods for <radio-button>
+;;//;;;
+;;//;;; ----------------------------------------------------------------------
+;;//(define-method internal-arrange-widget ((self <radio-button>) initargs)
+;;//  (let* ((orientation (key-get initargs #:orientation 'vertical))
+;;//     (texts       (key-get initargs #:texts       '()))
+;;//     (layout      (make <gtk-box> #:orientation orientation #:parent self
+;;//                #:fill #f #:expand #f #:homogeneous #f))
+;;//     (first       #f))
+;;//
+;;//    (%widget-data-set! self #:layout layout)
+;;//    ;; Create the internal <gtk-radio>s
+;;//    (for-each (lambda (t)
+;;//        (let ((x (make <gtk-radio> #:text t #:sibling first #:parent layout)))
+;;//          (unless first
+;;//            (set! first x))))
+;;//          texts)
+;;//    ;; If an initial value or command are given, do the initialization.
+;;//    ;; This doesn't work "by itself" because of the weird initialization
+;;//    ;; scheme that we have here
+;;//    (let ((val (key-get initargs #:value (void)))
+;;//      (cmd (key-get initargs #:command (void)))
+;;//      (tip (key-get initargs #:tooltip (void))))
+;;//      (unless (eq? val (void)) (slot-set! self 'value val))
+;;//      (unless (eq? cmd (void)) (slot-set! self 'command cmd))
+;;//      (unless (eq? tip (void)) (slot-set! self 'tooltip tip)))))
+
+
+;;;
+;;; Exports
+;;;
+(export <radio-button> group-selected)

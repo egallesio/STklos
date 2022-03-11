@@ -2,14 +2,14 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 28-Jan-2022 09:41 (eg)
+# Last file update:  3-Feb-2022 11:46 (eg)
 
 
 ADOC=@ASCIIDOCTOR@
 
-SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
-           intro.adoc licence.adoc match.adoc object.adoc       \
-           progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc    \
+SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc      \
+           intro.adoc libs.adoc licence.adoc match.adoc object.adoc  \
+           progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc         \
            srfi.adoc stdproc.adoc stklos.adoc threads.adoc
 DOCDB    = ../DOCDB
 SPP      = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
@@ -54,38 +54,51 @@ pdf:     ../pdf/$(PDF)
 extradoc: multi pdf
 
 # ----------------------------------------------------------------------
-../html/$(HTMLMAIN): $(SOURCES) $(DOCDB)
+# Don't use pipes here, because if we have a Scheme error in the original
+# document, it  will not be caught by make (set -o pipefile doesn't work
+# everywhere)
+
+
+# ----------------------------------------------------------------------
+../html/$(HTMLMAIN): tmp-html.txt
 	mkdir -p ../html/images
-	$(SPP) -D "doc-fmt: 'html" stklos.adoc | $(ADOC) -v -o $@ -
 	cp -a $(IMG) ../html/images
+	$(ADOC) -v -o $@ tmp-html.txt
 
 # ----------------------------------------------------------------------
 # For the Multiple file version of the manual, we need to install
 # https://github.com/owenh000/asciidoctor-multipage
-#
-# The STklos prepreocessor creates a file (instead of passing doc as a pipe)
-# to resolve back links to the main page
-../html/$(HTMLMULTI): $(SOURCES) $(DOCDB)
+# The backreferences are alawas on the name of the source file.
+# So during the build of this version of the manual we create a link on
+# tmp-html.txt 
+../html/$(HTMLMULTI): tmp-html.txt
 	mkdir -p ../html/images
-	$(SPP) -D "doc-fmt: 'html" stklos.adoc > stklos-ref-multi.adoc
+	cp -a $(IMG) ../html/images
+	ln -s tmp-html.txt stklos-ref-multi.txt 2>/dev/stderr || true
 	$(ADOC) -v -r asciidoctor-multipage -b multipage_html5 \
-		  -o $@ stklos-ref-multi.adoc
-	rm -f stklos-ref-multi.adoc
+			-o $@ stklos-ref-multi.txt && \
+		rm -f stklos-ref-multi.txt
 
 # ----------------------------------------------------------------------
-../pdf/$(PDF):  $(SOURCES) $(DOCDB)
-	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc | \
-           $(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ -
+../pdf/$(PDF): tmp-pdf.txt
+	mkdir -p ../pdf
+	$(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ tmp-pdf.txt
 
+# ----------------------------------------------------------------------
+tmp-html.txt: $(SOURCES) $(DOCDB)
+	$(SPP) -D "doc-fmt: 'html" stklos.adoc > $@
+
+tmp-pdf.txt: $(SOURCES) $(DOCDB)
+	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc > $@
 # ----------------------------------------------------------------------
 $(DOCDB):
 	(cd ..; $(MAKE) docdb)
 
 clean:
-	rm -f  stklos-ref-multi.adoc *~
+	rm -f  tmp-html.txt tmp-pdf.txt stklos-ref-multi.txt *~
 
 distclean: clean
-	rm -f  ../html/$(HTMLMAIN) ../html/$(HTMLMULTI) 
+	rm -f  ../html/$(HTMLMAIN) ../html/$(HTMLMULTI)
 	for i in $(MULTI_AUX); do rm -f ../html/$$i ; done
 	rm -f ../html/$(IMG)
 	rm -f ../pdf/$(PDF)

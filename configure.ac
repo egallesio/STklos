@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 27-Jan-2022 11:05 (eg)
+### Last file update:  3-Mar-2022 13:56 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -482,7 +482,7 @@ else
 fi
 
 if test "X${GOOVERS}" != "X"
-then 
+then
    GTK_CFLAGS=`${PKGCONFIG} --cflags ${GOOVERS}`
    HAVE_GTK=1
    HAVE_CANVAS=1
@@ -592,7 +592,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           utils/stklos-script examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/ScmPkg.d/Makefile
-          lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile
+          lib/scheme/Makefile lib/srfi/Makefile
+          lib/stklos/Makefile lib/streams/Makefile
           tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
@@ -601,14 +602,19 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           extensions/Makefile
 
           extensions/gtklos/Makefile
-          extensions/gtklos/src/Makefile
+          extensions/gtklos/lib/stklos/Makefile
+          extensions/gtklos/lib/stklos/gtklos-config.h
+          extensions/gtklos/lib/stklos/gtklos.stk
           extensions/gtklos/demos/Makefile
-          extensions/gtklos/src/gtklos-config.h
-          extensions/gtklos/src/gtklos.stk
 
-          extensions/stklos-fuse/Makefile
-          extensions/stklos-fuse/src/Makefile
-          extensions/stklos-fuse/demos/Makefile
+          extensions/curl/Makefile
+          extensions/curl/lib/stklos/Makefile
+          extensions/curl/demos/Makefile
+          extensions/curl/doc/Makefile
+
+          extensions/fuse/Makefile
+          extensions/fuse/lib/stklos/Makefile
+          extensions/fuse/demos/Makefile
 ])
 AC_OUTPUT
 

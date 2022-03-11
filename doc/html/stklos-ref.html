@@ -863,21 +863,28 @@ pre.rouge {
 </ul>
 </li>
 <li><a href="#_bibliography">Bibliography</a></li>
-<li><a href="#FDL">Appendix A: GNU Free Documentation License</a>
+<li><a href="#_libraries">Appendix A: STklos Libraries</a>
 <ul class="sectlevel2">
-<li><a href="#_preamble">A.1. PREAMBLE</a></li>
-<li><a href="#_applicability_and_definitions">A.2. APPLICABILITY AND DEFINITIONS</a></li>
-<li><a href="#_verbatim_copying">A.3. VERBATIM COPYING</a></li>
-<li><a href="#_copying_in_quantity">A.4. COPYING IN QUANTITY</a></li>
-<li><a href="#_modifications">A.5. MODIFICATIONS</a></li>
-<li><a href="#_combining_documents">A.6. COMBINING DOCUMENTS</a></li>
-<li><a href="#_collections_of_documents">A.7. COLLECTIONS OF DOCUMENTS</a></li>
-<li><a href="#_aggregation_with_independent_works">A.8. AGGREGATION WITH INDEPENDENT WORKS</a></li>
-<li><a href="#_translation">A.9. TRANSLATION</a></li>
-<li><a href="#_termination">A.10. TERMINATION</a></li>
-<li><a href="#_future_revisions_of_this_license">A.11. FUTURE REVISIONS OF THIS LICENSE</a></li>
-<li><a href="#_relicensing">A.12. RELICENSING</a></li>
-<li><a href="#_addendum_how_to_use_this_license_for_your_documents">A.13. ADDENDUM: How to use this License for your documents</a></li>
+<li><a href="#_the_scheme_libraries">A.1. The (scheme &#8230;&#8203;) libraries</a></li>
+<li><a href="#_the_srfi_libraries">A.2. The (srfi &#8230;&#8203;) libraries</a></li>
+<li><a href="#_the_stklos_libraries">A.3. The (stklos &#8230;&#8203;) libraries</a></li>
+</ul>
+</li>
+<li><a href="#FDL">Appendix B: GNU Free Documentation License</a>
+<ul class="sectlevel2">
+<li><a href="#_preamble">B.1. PREAMBLE</a></li>
+<li><a href="#_applicability_and_definitions">B.2. APPLICABILITY AND DEFINITIONS</a></li>
+<li><a href="#_verbatim_copying">B.3. VERBATIM COPYING</a></li>
+<li><a href="#_copying_in_quantity">B.4. COPYING IN QUANTITY</a></li>
+<li><a href="#_modifications">B.5. MODIFICATIONS</a></li>
+<li><a href="#_combining_documents">B.6. COMBINING DOCUMENTS</a></li>
+<li><a href="#_collections_of_documents">B.7. COLLECTIONS OF DOCUMENTS</a></li>
+<li><a href="#_aggregation_with_independent_works">B.8. AGGREGATION WITH INDEPENDENT WORKS</a></li>
+<li><a href="#_translation">B.9. TRANSLATION</a></li>
+<li><a href="#_termination">B.10. TERMINATION</a></li>
+<li><a href="#_future_revisions_of_this_license">B.11. FUTURE REVISIONS OF THIS LICENSE</a></li>
+<li><a href="#_relicensing">B.12. RELICENSING</a></li>
+<li><a href="#_addendum_how_to_use_this_license_for_your_documents">B.13. ADDENDUM: How to use this License for your documents</a></li>
 </ul>
 </li>
 </ul>
@@ -911,7 +918,7 @@ following URL: <a href="https://www.gnu.org/licenses/gpl-3.0.html" class="bare">
 </li>
 <li>
 <p>The manual you’re now reading is published under the terms of the
-<em>GNU Free Documentation License or later</em> (see <a href="#FDL">Appendix A</a>).</p>
+<em>GNU Free Documentation License or later</em> (see <a href="#FDL">Appendix B</a>).</p>
 </li>
 </ul>
 </div>
@@ -5055,7 +5062,7 @@ functions should be used only when speed really matters.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns the number of bits used to represent a fixnum number</p>
+<p>Returns the number of bits used to represent a fixnum number.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -5221,7 +5228,7 @@ that <code>(fxsqrt n)</code> returns two values <code>a</code>, <code>b</code>, 
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme">  <span class="p">(</span><span class="nf">fxsqrt</span> <span class="no">#f</span><span class="p">)</span>             <span class="nv">=&gt;</span>  <span class="nv">error</span>
-  <span class="p">(</span><span class="nf">fxdqrt</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">100</span> <span class="mi">100</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="nv">error</span>
+  <span class="p">(</span><span class="nf">fxsqrt</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">100</span> <span class="mi">100</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="nv">error</span>
   <span class="p">(</span><span class="nf">fxsqrt</span> <span class="mi">-1</span><span class="p">)</span>             <span class="nv">=&gt;</span>  <span class="nv">error</span>
   <span class="p">(</span><span class="nf">fxsqrt</span> <span class="mi">0</span><span class="p">)</span>              <span class="nv">=&gt;</span>  <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span>
   <span class="p">(</span><span class="nf">fxsqrt</span> <span class="mi">1</span><span class="p">)</span>              <span class="nv">=&gt;</span>  <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span>
@@ -6942,14 +6949,27 @@ used. Hereafter, are some examples of characters:</p>
 </div>
 <div class="paragraph">
 <p>These procedures impose a total ordering on the set of characters.
-It is guaranteed that under this ordering:
-,(itemize
-(item [The upper case characters are in order.])
-(item [The lower case characters are in order.])
-(item [The digits are in order.])
-(item [Either all the digits precede all the upper case letters, or vice versa.])
-(item [Either all the digits precede all the lower case letters, or vice versa.])
+It is guaranteed that under this ordering:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The upper case characters are in order.</p>
+</li>
+<li>
+<p>The lower case characters are in order.</p>
+</li>
+<li>
+<p>The digits are in order.</p>
+</li>
+<li>
+<p>Either all the digits precede all the upper case letters, or vice versa.</p>
+</li>
+<li>
+<p>Either all the digits precede all the lower case letters, or vice versa.
 )</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>
@@ -14573,15 +14593,26 @@ modifying its <code>list</code> argument.</p>
 </div>
 <div class="paragraph">
 <p>This parameter object indicates the convention used by the reader to
-denote keywords. The allowed values are
-,(itemize
-    (item [none, to forbid a symbol with colon to be interpreted as a
-          keyword])
-    (item [before, to read symbols starting with a colon as keywords])
-    (item [after, to read symbols ending with a colon as keywords])
-    (item [both, to read symbols starting or ending with a colon as
-           keywords]))
-Note that the notation <code>#:key</code> is always read as a keyword independently
+denote keywords. The allowed values are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>none</strong>, to forbid a symbol with colon to be interpreted as a keyword,</p>
+</li>
+<li>
+<p><strong>before</strong>, to read symbols starting with a colon as keywords,</p>
+</li>
+<li>
+<p><strong>after</strong>, to read symbols ending with a colon as keywords,</p>
+</li>
+<li>
+<p><strong>both</strong>,  to read symbols starting or ending with a colon as keywords.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that the notation <code>#:key</code> is always read as a keyword independently
 of the value of <code>keyword-colon-position</code>. Hence, we have</p>
 </div>
 <div class="listingblock">
@@ -17055,40 +17086,65 @@ of the procedure which raised the error.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>A clause has the form:</p>
+<p>A clause may have the form:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="nf">srfi</span> <span class="nv">&lt;extension-argument&gt;</span> <span class="o">...</span><span class="p">)</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>where <code>&lt;extension-argument&gt;</code>s may be any Scheme-values.</p>
-</div>
-<div class="paragraph">
-<p>If an <code>&lt;extension-argument&gt;</code> is a nonnegative integer, the functionality
-of the indicated SRFIs is made available in the context in
-which the require-extension form appears. For instance,</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>
-               <span class="c1">; Make the SRFI 1 and 2 available</span></code></pre>
-</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>(srfi number &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(identifier &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>identifier</code></p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
-<p>This form is compatible with <strong><a href="http://srfi.schemers.org/srfi-55/srfi-55.html">SRFI-55</a></strong> (<em>Require-extension</em>). However, STklos
-accepts also some symbolic names for requiring some extensions.
+<p>In the first form the functionality of the indicated SRFIs are made
+available in the context in which the <code>require-extension</code> form appears.
 For instance,</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">srfi</span> <span class="nv">lists</span> <span class="nv">and-let*</span><span class="p">))</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span> <span class="c1">; Make the SRFI 1 and 2 available</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>is equivalent to the previous <code>require-extension</code>. A list of available
-symbols as <code>&lt;extension-argument&gt;</code> is given in <a href="#_srfis">Chapter 14</a>.</p>
+<p>This form is compatible with <strong><a href="http://srfi.schemers.org/srfi-55/srfi-55.html">SRFI-55</a></strong> (<em>Require-extension</em>).</p>
+</div>
+<div class="paragraph">
+<p>The second and third forms are <strong><em>STklos</em></strong> extensions.
+If the form is a list, it is equivalent to an import. That is,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">primitive</span><span class="p">)</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">derived</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">primitive</span><span class="p">)</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">derived</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The final form permits to use symbolic names for requiring some extensions.
+For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="nv">lists</span> <span class="nv">and-let*</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is equivalent to the requiring <code>srfi-1</code> and <code>srfi-2</code>.</p>
+</div>
+<div class="paragraph">
+<p>A list of available symbolic names for features is given in <a href="#_srfis">Chapter 14</a>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -20283,12 +20339,21 @@ is always allocated.</p>
 <strong><em>STklos</em></strong> implements all the conditions types which are defined in
 <strong><a href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong> (<em>Conditions</em>) and <strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong> (<em>I/O Conditions</em>).
 However, the access functions which are (implicitely) defined
-in those SRFIs are only available if the file <code>"full-conditions"</code> is
-required. This can be done with the following call</p>
+in those SRFIs are only available if the file <code>"conditions"</code> is
+required. This can be done with the call:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require</span> <span class="s">"full-conditions"</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require</span> <span class="s">"conditions"</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another way to have access to the hierarchy of the <strong><a href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong> (<em>Conditions</em>)
+and <strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong> (<em>I/O Conditions</em>) condition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="nv">conditions</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -22907,6 +22972,23 @@ errors, crashes&#8230;&#8203;
 a pointer to a C object), and <code>#f</code> otherwise.</p>
 </div>
 <div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(cpointer-null? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is a cpointer and its value is the C NULL value.
+Returnd <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
 <p>
 </p>
 </div>
@@ -23053,10 +23135,10 @@ allocated memory (a NULL value for C).</p>
 <div class="paragraph">
 <p>
 
-<a href="https://cvs.savannah.gnu.org/viewvc/slib/slib/">SLIB</a> is a library for
-the programming language Scheme, written by Aubrey Jaffer.
-It uses only standard Scheme syntax and thus works on many different
-Scheme implementations.</p>
+<strong><em>SLIB</em></strong> is a library for the programming language Scheme, written by
+Aubrey Jaffer <a href="#SLIB">[SLIB]</a>.   It provides a platform independent framework for
+using packages of Scheme procedures and syntax. It uses only standard Scheme
+syntax and thus works on many different Scheme implementations.</p>
 </div>
 <div class="paragraph">
 <p>To  use this package, you have just to type</p>
@@ -23067,8 +23149,16 @@ Scheme implementations.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>and follow the instructions given in the <strong><em>SLIB</em></strong> library
-to use a particular package.</p>
+<p>or use the <strong><a href="http://srfi.schemers.org/srfi-96/srfi-96.html">SRFI-96</a></strong> (<em>SLIB Prerequisites</em>) with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">96</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and follow the instructions given in the <strong><em>SLIB</em></strong> library manual to
+use a particular package.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -23077,11 +23167,26 @@ to use a particular package.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<strong><em>SLIB</em></strong> uses also the <em>require</em> and <em>provide</em> mechanism to load
+<div class="paragraph">
+<p><strong><em>SLIB</em></strong> uses also the <em>require</em> and <em>provide</em> mechanism to load
 components of the library. Once <strong><em>SLIB</em></strong> has been loaded, the standard
-<strong><em>STklos</em></strong> <code>require</code> and <code>provide</code> are overloaded such as if their parameter
-is a string this is the old <strong><em>STklos</em></strong> procedure which is called, and if their
-parameter is a symbol, this is the <strong><em>SLIB</em></strong> one which is called.
+<strong><em>STklos</em></strong> <code>require</code> and <code>provide</code> are overloaded such as if their
+parameter is a string this is the old <strong><em>STklos</em></strong> procedure which is
+called, and if their parameter is a symbol, this is the <strong><em>SLIB</em></strong> one
+which is called.</p>
+</div>
+<div class="paragraph">
+<p><strong><em>SLIB</em></strong> needs to create a catalog of the file that must be loaded to
+implement a given feature. This catalog is stored in a file named
+<code>slibcat</code> This file is, by default located in the
+<code>~/.stklos/slib</code> directory.  It is possible to change this
+directory with the <code>STKLOS_IMPLEMENTATION_PATH</code> shell variable.</p>
+</div>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> searches the <strong><em>SLIB</em></strong> implementation directory in some standard
+places. If not found, you can fix it with the <code>SCHEME_LIBRARY_PATH</code> shell
+variable.</p>
+</div>
 </td>
 </tr>
 </table>
@@ -23111,7 +23216,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>102</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>103</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -23223,6 +23328,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-217/srfi-217.html">SRFI-217</a></strong>&#8201;&#8212;&#8201;<em>Integer Sets</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-219/srfi-219.html">SRFI-219</a></strong>&#8201;&#8212;&#8201;<em>Define higher-order lambda</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-223/srfi-223.html">SRFI-223</a></strong>&#8201;&#8212;&#8201;<em>Generalized binary search procedures</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-224/srfi-224.html">SRFI-224</a></strong>&#8201;&#8212;&#8201;<em>Integer Mappings</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-229/srfi-229.html">SRFI-229</a></strong>&#8201;&#8212;&#8201;<em>Tagged Procedures</em><br></p>
 </div>
 </div>
@@ -23289,7 +23395,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-117</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-161</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-223</code> <code>srfi-229</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-117</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-161</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-229</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -24336,6 +24442,9 @@ with Intelligent Backtrack</strong>&#8201;&#8212;&#8201;Workshop in Static Analy
 <p><a id="R7RS"></a>[R7RS] Alex S. Shinn, John Cowan and Arthur A. Gleckler&#8201;&#8212;&#8201;<a href="https://small.r7rs.org/attachment/r7rs.pdf"><strong>The Revised7 Report on the Algorithmic Language Scheme&#8201;&#8212;&#8201;R7RS small</strong></a>&#8201;&#8212;&#8201;July, 2013.</p>
 </li>
 <li>
+<p><a id="SLIB"></a>[SLIB] Aubrey Jaffer &#8201;&#8212;&#8201;<a href="https://people.csail.mit.edu/jaffer/SLIB"><strong>The SLIB Portable Scheme Library Home Page</strong></a></p>
+</li>
+<li>
 <p><a id="SOS"></a>[SOS] Chris Hanson&#8201;&#8212;&#8201;<a href="https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-sos.pdf">The SOS Reference Manual, version 1.9</a>&#8201;&#8212;&#8201;November, 2011.</p>
 </li>
 <li>
@@ -24357,7 +24466,1328 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 </div>
 </div>
 <div class="sect1">
-<h2 id="FDL">Appendix A: GNU Free Documentation License</h2>
+<h2 id="_libraries">Appendix A: STklos Libraries</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section describes the standard libraries provided by <strong><em>STklos</em></strong>.</p>
+</div>
+<div class="sect2">
+<h3 id="_the_scheme_libraries">A.1. The (scheme &#8230;&#8203;) libraries</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> offers all the libraries defined by R<sup>7</sup>RS:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>base</p>
+</li>
+<li>
+<p>case-lambda</p>
+</li>
+<li>
+<p>char</p>
+</li>
+<li>
+<p>complex</p>
+</li>
+<li>
+<p>cxr</p>
+</li>
+<li>
+<p>eval</p>
+</li>
+<li>
+<p>file</p>
+</li>
+<li>
+<p>inexact</p>
+</li>
+<li>
+<p>lazy</p>
+</li>
+<li>
+<p>load</p>
+</li>
+<li>
+<p>process-context</p>
+</li>
+<li>
+<p>r5rs</p>
+</li>
+<li>
+<p>read</p>
+</li>
+<li>
+<p>repl</p>
+</li>
+<li>
+<p>time</p>
+</li>
+<li>
+<p>write</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See the <a href="#R7RS">[R7RS]</a> document for more information.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_srfi_libraries">A.2. The (srfi &#8230;&#8203;) libraries</h3>
+<div class="paragraph">
+<p>All the SRFI supported by <strong><em>STklos</em></strong> are placed under
+the <code>srfi</code> meta library and their name is SRFI number. Hence, to use
+the exported symbols of <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a></strong>, you&#8217;ll have to import the
+<code>(srfi 1)</code> library.</p>
+</div>
+<div class="paragraph">
+<p>See  <em><a href="#_srfis">Chapter 14</a></em> for more information</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_stklos_libraries">A.3. The (stklos &#8230;&#8203;) libraries</h3>
+<div class="paragraph">
+<p>This section describes the standard libraries which are placed under
+the <code>stklos</code> meta library. Note that <strong><em>STklos</em></strong> extensions can add
+some libraries in the <code>stklos</code> meta library; they will be described in
+the extension documentation.</p>
+</div>
+<div class="sect3">
+<h4 id="_stklos_itrie_library">A.3.1. (stklos itrie) library</h4>
+<div class="paragraph">
+<p>This library was designed by Jerônimo Pellegrini
+(<a href="https://github.com/jpellegrini">@jpellegrini</a>).</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Small description needed
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The symbols exported by <code>(stklos itrie)</code> are described below:</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(alist&#8594;fxmapping alist) → fxmapping</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated fxmapping containing the associations of
+alist. It is an error if the car of any pair in alist is not a
+fixnum. If an integer k appears as the key of multiple associations in
+alist (i.e. as the car of multiple pairs), then the first association
+for k is preferred.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-&gt;alist</span>
+  <span class="p">(</span><span class="nf">alist-&gt;fxmapping</span> <span class="o">'</span><span class="p">((</span><span class="nf">1</span> <span class="o">.</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="o">.</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="o">.</span> <span class="nv">c</span><span class="p">))))</span>
+ <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="o">.</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">1</span> <span class="o">.</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="o">.</span> <span class="nv">c</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">fxmapping-&gt;alist</span>
+  <span class="p">(</span><span class="nf">alist-&gt;fxmapping</span> <span class="o">'</span><span class="p">((</span><span class="nf">-10</span> <span class="o">.</span> <span class="s">"yar"</span><span class="p">)</span> <span class="p">(</span><span class="nf">-10</span> <span class="o">.</span> <span class="s">"worf"</span><span class="p">))))</span>
+ <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">-10</span> <span class="o">.</span> <span class="s">"yar"</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping k1 v1 k2 v2 &#8230;&#8203; kn vn)</code></strong><br>
+<strong><code>(constant-fxmapping k1 v1 k2 v2 &#8230;&#8203; kn vn)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Builds a fixnum map containing the integer keys <code>k1</code>, <code>k2</code>, &#8230;&#8203;, <code>kn</code>
+with respective associated values <code>v1</code>, <code>v2</code>, &#8230;&#8203; <code>vn</code>.</p>
+</div>
+<div class="paragraph">
+<p>It is an error if any of the keys is not an integer, or if the
+number of arguments is not even.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset n1 n2 &#8230;&#8203; nk)</code></strong><br>
+<strong><code>(constant-iset n1 n2 &#8230;&#8203; nk)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Builds a fixnum set containing the fixnums  <code>n1</code>, <code>n2</code>, &#8230;&#8203;, <code>nk</code>.</p>
+</div>
+<div class="paragraph">
+<p>It is an error if any of the keys is not an integer.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-adjoin fxmap k1 obj1 k2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a fxmapping containing all of the associations of <code>fxmap</code> as
+well as the associations <code>(k1, obj1)</code>, <code>(k2, obj2)</code>, &#8230;&#8203; The number of
+key/value arguments must be even.</p>
+</div>
+<div class="paragraph">
+<p>If any of the keys already have associations in <code>fxmap</code>, the old
+associations are preserved.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-&gt;alist</span> <span class="p">(</span><span class="nf">fxmapping-adjoin</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">1</span> <span class="ss">'b</span><span class="p">)</span> <span class="mi">0</span> <span class="ss">'a</span><span class="p">))</span>
+ <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="o">.</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">1</span> <span class="o">.</span> <span class="nv">b</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-contains? map element)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns true if <code>map</code> contains an association for <code>element</code>, and false otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-empty? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is an empty fxmapping and <code>#f</code> if it
+is an fxmapping containing at least one key.
+If <code>obj</code> is not an fxmapping object, an error is sginaled.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-height trie)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the height of the internal trie of an fxmap. The
+expected running time of searches and insertions is
+proportional to this value.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-keys fxmap)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the keys of <code>fxmap</code> as a list in ascending numerical order.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-keys</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">137</span> <span class="ss">'a</span> <span class="mi">-24</span> <span class="ss">'b</span> <span class="mi">-5072</span> <span class="ss">'c</span><span class="p">))</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">-5072</span> <span class="mi">-24</span> <span class="mi">137</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-mutable? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is a mutable fxmapping and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-ref/default map k obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If an association <code>(k, v)</code> occurs in <code>map</code>, returns <code>v</code>. Otherwise, returns <code>obj</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-ref/default</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">36864</span> <span class="ss">'zap</span><span class="p">)</span> <span class="mi">36864</span> <span class="no">#f</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">zap</span>
+<span class="p">(</span><span class="nf">fxmapping-ref/default</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">0</span> <span class="ss">'a</span><span class="p">)</span> <span class="mi">36864</span> <span class="no">#f</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-size trie)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the number of key/value pairs in an fxmap.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-values fxmap)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the values of <code>fxmap</code> as a list in ascending numerical order of
+key. That is, if <code>(k1, v1), &#8230;&#8203;, (kn, vn)</code> are the associations of <code>fxmap</code>
+ordered so that <code>k1 &#8656; … &#8656; kn</code>, then <code>(fxmapping-values fxmap)</code> produces
+the list <code>(v1 &#8230;&#8203; vn)</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-values</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">0</span> <span class="s">"picard"</span> <span class="mi">1</span> <span class="s">"riker"</span> <span class="mi">2</span> <span class="s">"troi"</span><span class="p">))</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"picard"</span> <span class="s">"riker"</span> <span class="s">"troi"</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping-union fxmap1 fxmap2 fxmap3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(fxmapping-intersection fxmap1 fxmap2 fxmap3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(fxmapping-difference fxmap1 fxmap2 fxmap3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(fxmapping-xor fxmap1 fxmap2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return a fxmapping whose set of associations is the union,
+intersection, asymmetric difference, or symmetric difference of the
+sets of associations of the fxmaps. Asymmetric difference is extended
+to more than two fxmappings by taking the difference between the first
+fxmapping and the union of the others. Symmetric difference is not
+extended beyond two fxmappings. When comparing associations, only the
+keys are compared. In case of duplicate keys, associations in the
+result fxmapping are drawn from the first fxmapping in which they
+appear.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-&gt;alist</span> <span class="p">(</span><span class="nf">fxmapping-union</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">0</span> <span class="ss">'a</span> <span class="mi">2</span> <span class="ss">'c</span><span class="p">)</span>
+                                  <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">1</span> <span class="ss">'b</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span>
+   <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="o">.</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">1</span> <span class="o">.</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="o">.</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">3</span> <span class="o">.</span> <span class="nv">d</span><span class="p">))</span>
+
+ <span class="p">(</span><span class="nf">fxmapping-&gt;alist</span>
+  <span class="p">(</span><span class="nf">fxmapping-intersection</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">0</span> <span class="ss">'a</span> <span class="mi">2</span> <span class="ss">'c</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">1</span> <span class="ss">'b</span> <span class="mi">2</span> <span class="ss">'c</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">2</span> <span class="ss">'c</span> <span class="mi">4</span> <span class="ss">'e</span><span class="p">)))</span>
+    <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">2</span> <span class="o">.</span> <span class="nv">c</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">fxmapping-&gt;alist</span>
+ <span class="p">(</span><span class="nf">fxmapping-difference</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">0</span> <span class="ss">'a</span> <span class="mi">1</span> <span class="ss">'b</span> <span class="mi">2</span> <span class="ss">'c</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">2</span> <span class="s">"worf"</span><span class="p">)</span>
+                       <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">1</span> <span class="s">"data"</span><span class="p">)))</span>
+    <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="o">.</span> <span class="nv">a</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(fxmapping? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is an fxmapping object and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset=? iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset&lt;? iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset&gt;? iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset&#8656;? iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset&gt;=? iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return true when each set is
+equal (<code>iset=?</code>) or a proper subset (<code>iset&lt;?</code>), a proper
+superset (<code>iset&gt;?</code>), a subset (<code>iset&#8656;?</code>) or a superset
+(<code>iset&gt;=?</code>) of the next one.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset=?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>           <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">iset&lt;?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">4</span> <span class="mi">2</span> <span class="mi">1</span> <span class="mi">3</span><span class="p">))</span>         <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">iset&gt;=?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">3</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset&#8594;list set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated list containing the members of
+<code>set</code> in increasing numerical order.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-adjoin set element1 element2 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-adjoin! set element1 element2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>iset-adjoin</code> procedure returns a newly allocated iset that contains
+all the values of <code>set</code>, and in addition each element unless it is
+already equal to one of the existing or newly added members.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-adjoin</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span> <span class="mi">0</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>iset-adjoin!</code> procedure is the linear update version of
+<code>iset-adjoin</code>. In STklos, it is an alias to <code>iset-adjoin</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-any? pred? set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns true if at least one of the elements of <code>set</code> satisfies
+<code>pred?</code>. Note that this differs from the SRFI 1 analogue because
+it does not return an element of the iset.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-any</span> <span class="nv">odd?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">10</span> <span class="mi">2</span> <span class="mi">-3</span> <span class="mi">4</span><span class="p">))</span>    <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">iset-any</span> <span class="nv">odd?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">10</span> <span class="mi">2</span> <span class="mi">-8</span> <span class="mi">4</span> <span class="mi">0</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-open-interval set low high)</code></strong><br>
+<strong><code>(iset-closed-interval set low high)</code></strong><br>
+<strong><code>(iset-open-closed-interval set low high)</code></strong><br>
+<strong><code>(iset-closed-open-interval set low high)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Procedures that return a subset of <code>set</code> contained in the interval from
+<code>low</code> to <code>high</code>. The interval may be open, closed, open below and closed
+above, or open above and closed below.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-open-interval</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">2</span> <span class="mi">7</span><span class="p">))</span>        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">5</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-closed-interval</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">2</span> <span class="mi">7</span><span class="p">))</span>      <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-open-closed-interval</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">2</span> <span class="mi">7</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">5</span> <span class="mi">7</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-closed-open-interval</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">2</span> <span class="mi">7</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-contains? set element)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns true if <code>set</code> contains <code>element</code>, and false otherwise.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-copy set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated iset containing the elements of <code>set</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-count pred? set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the number of elements of <code>set</code> that satisfy
+<code>pred?</code> as an exact integer.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-count</span> <span class="nv">odd?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">10</span> <span class="mi">2</span> <span class="mi">1</span> <span class="mi">-3</span> <span class="mi">9</span> <span class="mi">4</span> <span class="mi">3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="mi">4</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-delete set element1 element2 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-delete! set element1 element2 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-delete-all set element-list)</code></strong><br>
+<strong><code>(iset-delete-all! set element-list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>iset-delete</code> procedure returns a newly allocated iset containing
+all the values of <code>set</code> except for any that are equal to one or more of
+the elements. Any element that is not equal to some member of the <code>set</code>
+is ignored.</p>
+</div>
+<div class="paragraph">
+<p>The <code>iset-delete!</code> procedure is the same as <code>iset-delete</code>.
+is permitted to mutate and return the iset argument rather than
+allocating a new iset&#8201;&#8212;&#8201;but in STklos, it doesn&#8217;t.</p>
+</div>
+<div class="paragraph">
+<p>The <code>iset-delete-all</code> and <code>iset-delete-all!</code> procedures are the same as
+<code>iset-delete</code> and <code>iset-delete!</code>, except that they accept a single
+argument which is a list of elements to be deleted.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-delete</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span> <span class="mi">3</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">5</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-delete-all</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span>
+                             <span class="o">'</span><span class="p">(</span><span class="nf">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-delete-min set)</code></strong><br>
+<strong><code>(iset-delete-min! set)</code></strong><br>
+<strong><code>(iset-delete-max set)</code></strong><br>
+<strong><code>(iset-delete-max! set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns two values: the smallest/largest integer n in <code>set</code> and a
+newly-allocated iset that contains all elements of <code>set</code> except for
+n. It is an error if iset is empty.</p>
+</div>
+<div class="paragraph">
+<p>The <code>iset-delete-min!</code> and <code>iset-delete-max!</code> procedures are the same as
+<code>iset-delete-min</code> and <code>iset-delete-max</code>, respectively, except that they
+are permitted to mutate and return the <code>set</code> argument instead of
+allocating a new iset. In STklos, they do not.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">let-values</span> <span class="p">(((</span><span class="nf">n</span> <span class="nv">set</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset-delete-min</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nb">list</span> <span class="nv">n</span> <span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="nv">set</span><span class="p">)))</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">let-values</span> <span class="p">(((</span><span class="nf">n</span> <span class="nv">set</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset-delete-max</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nb">list</span> <span class="nv">n</span> <span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="nv">set</span><span class="p">)))</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">11</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-disjoint? iset1 iset2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>iset1</code> and <code>iset2</code> have no elements in common and <code>#f</code> otherwise.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-disjoint?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">iset-disjoint?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-empty? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is an empty iset and <code>#f</code> if it
+is an iset containing at least one key.
+If <code>obj</code> is not an iset object, an error is sginaled.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-every? predicate iset)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if every element of <code>set</code> satisfies <code>predicate</code>, or <code>#f</code>
+otherwise. Note that this differs from the SRFI 1 analogue because it
+does not return an element of the iset.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-every?</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">x</span> <span class="mi">5</span><span class="p">))</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">-2</span> <span class="mi">-1</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">iset-every?</span> <span class="nv">positive?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">-2</span> <span class="mi">-1</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>            <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-filter predicate set)</code></strong><br>
+<strong><code>(iset-filter! predicate set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated iset containing just the elements
+of <code>set</code> that satisfy <code>predicate</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-filter</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">x</span> <span class="mi">6</span><span class="p">))</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)))</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>iset-filter!</code> is allowed to modify <code>set</code>, but in STklos it does not.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-find predicate set failure)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the smallest element of <code>set</code> that satisfies predicate, or
+the result of invoking <code>failure</code> with no arguments if there is none.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-find</span> <span class="nv">positive?</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">-1</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="no">#f</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">iset-find</span> <span class="nv">zero?</span>     <span class="p">(</span><span class="nf">iset</span> <span class="mi">-1</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="no">#f</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-fold proc nil set)</code></strong><br>
+<strong><code>(iset-fold-right proc nil set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Invokes <code>proc</code> on each member of <code>set</code> in increasing/decreasing numerical
+order, passing the result of the previous invocation as a second
+argument. For the first invocation, <code>nil</code> is used as the second
+argument. Returns the result of the last invocation, or <code>nil</code> if there
+was no invocation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-fold</span> <span class="nv">+</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span>            <span class="nv">=&gt;</span> <span class="mi">28</span>
+<span class="p">(</span><span class="nf">iset-fold</span> <span class="nv">cons</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span>       <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">11</span> <span class="mi">7</span> <span class="mi">5</span> <span class="mi">3</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-fold-right</span> <span class="nv">cons</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-for-each proc set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Applies <code>proc</code> to <code>set</code> in increasing numerical order, discarding the
+returned values. Returns an unspecified result.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">sum</span> <span class="mi">0</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">iset-for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">sum</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">sum</span> <span class="nv">x</span><span class="p">)))</span>
+                 <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span>
+  <span class="nv">sum</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="mi">28</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-height trie)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the height of the internal trie of an iset. The
+expected running time of searches and insertions is
+proportional to this value.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-map proc set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Applies <code>proc</code> to each element of <code>set</code> in arbitrary order and returns a
+newly allocated iset, created as if by iset, which contains the
+results of the applications. It is an error if <code>proc</code> returns a value
+that is not an exact integer.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">10</span> <span class="nv">x</span><span class="p">))</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">1</span> <span class="mi">11</span> <span class="mi">21</span><span class="p">))</span>
+     <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">10</span> <span class="mi">110</span> <span class="mi">210</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">quotient</span> <span class="nv">x</span> <span class="mi">2</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">iset</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-min set)</code></strong><br>
+<strong><code>(iset-max set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the smallest or largest integer in <code>set</code>, or <code>#f</code> if there is none.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-min</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">iset-max</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">11</span>
+<span class="p">(</span><span class="nf">iset-max</span> <span class="p">(</span><span class="nf">iset</span><span class="p">))</span>            <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-member element set default)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the element of <code>set</code> that is equal to <code>element</code>. If <code>element</code> is not a member
+of <code>set</code>, then <code>default</code> is returned.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-mutable? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is a mutable iset and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-partition predicate set)</code></strong><br>
+<strong><code>(iset-partition! predicate set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns two values: a newly allocated iset that contains just the
+elements of <code>set</code> that satisfy <code>predicate</code> and another newly allocated
+iset that contains just the elements of <code>set</code> that do not satisfy
+<code>predicate</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">let-values</span> <span class="p">(((</span><span class="nf">low</span> <span class="nv">high</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset-partition</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">x</span> <span class="mi">6</span><span class="p">))</span>
+                                         <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nb">list</span> <span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="nv">low</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="nv">high</span><span class="p">)))</span>
+ <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">7</span> <span class="mi">11</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-remove predicate set)</code></strong><br>
+<strong><code>(iset-remove! predicate set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated <code>set</code> containing just the elements of <code>set</code>
+that do not satisfy <code>predicate</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-remove</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">x</span> <span class="mi">6</span><span class="p">))</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)))</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">7</span> <span class="mi">11</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Iset-remove!</code> is allowed to modify <code>set</code>, but in STklos it does not.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-search set element failure success)</code></strong><br>
+<strong><code>(iset-search! iset element failure success)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Set</code> is searched from lowest to highest value for <code>element</code>. If it
+is not found, then the <code>failure</code> procedure is tail-called with two
+continuation arguments, <code>insert</code> and <code>ignore</code>, and is expected to
+tail-call one of them. If <code>element</code> is found, then the <code>success</code> procedure
+is tail-called with the matching element of <code>set</code> and two
+continuations, <code>update</code> and <code>remove</code>, and is expected to tail-call one of
+them.</p>
+</div>
+<div class="paragraph">
+<p>The effects of the continuations are as follows (where <code>obj</code> is any
+Scheme object):</p>
+</div>
+<div class="paragraph">
+<p>Invoking <code>(insert obj)</code> causes <code>element</code> to be inserted into iset.</p>
+</div>
+<div class="paragraph">
+<p>Invoking <code>(ignore obj)</code> causes <code>set</code> to remain unchanged.</p>
+</div>
+<div class="paragraph">
+<p>Invoking <code>(update new-element obj)</code> causes <code>new-element</code> to be
+inserted into <code>set</code> in place of <code>element</code>.</p>
+</div>
+<div class="paragraph">
+<p>Invoking <code>(remove obj)</code> causes the matching element of <code>set</code> to
+be removed from it.</p>
+</div>
+<div class="paragraph">
+<p>In all cases, two values are returned: an iset and <code>obj</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>iset-search!</code> procedure is the same as <code>iset-search</code>, except that it
+is permitted to mutate and return the iset argument rather than
+allocating a new iset. In STklos, it does not.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-size set)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the number of fixnums in <code>set</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-unfold stop? mapper successor seed)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a newly allocated iset as if by iset. If the result of
+applying the predicate <code>stop?</code> to <code>seed</code> is true, return the
+iset. Otherwise, apply the procedure <code>mapper</code> to <code>seed</code>. The
+value that <code>mapper</code> returns is added to the iset. Then get a
+new seed by applying the procedure <code>successor</code> to <code>seed</code>, and
+repeat this algorithm.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-unfold</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span> <span class="p">(</span><span class="nb">&gt;</span> <span class="nv">n</span> <span class="mi">64</span><span class="p">))</span>
+                         <span class="nv">values</span>
+                         <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">))</span>
+                         <span class="mi">2</span><span class="p">))</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">4</span> <span class="mi">8</span> <span class="mi">16</span> <span class="mi">32</span> <span class="mi">64</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset-union iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-intersection iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-difference iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-xor iset1 iset2)</code></strong><br>
+<strong><code>(iset-union! iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-intersection! iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-difference! iset1 iset2 iset3 &#8230;&#8203;)</code></strong><br>
+<strong><code>(iset-xor! iset1 iset2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return a newly allocated iset that is the union, intersection,
+asymmetric difference, or symmetric difference of the
+isets. Asymmetric difference is extended to more than two isets by
+taking the difference between the first iset and the union of the
+others. Symmetric difference is not extended beyond two
+isets. Elements in the result iset are drawn from the first iset in
+which they appear.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-union</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-intersection</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-difference</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">4</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">iset-xor</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The procedures whose name end in <code>!</code> are linear update procedures.
+The specification says they may or may not alter their argument. In
+STklos they do not: in fact, they are aliases to the pure functional
+versions.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iset? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is an iset and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(isubset= set k)</code></strong><br>
+<strong><code>(isubset&lt; set k)</code></strong><br>
+<strong><code>(isubset&#8656; set k)</code></strong><br>
+<strong><code>(isubset&gt; set k)</code></strong><br>
+<strong><code>(isubset&gt;= set k)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Procedures that return an integer set containing the elements of <code>set</code>
+that are equal to, less than, less than or equal to, greater than, or
+greater than or equal to <code>k</code>. Note that the result of <code>isubset=</code> contains
+at most one element.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">isubset=</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">7</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">7</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">isubset&lt;</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">7</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">isubset&gt;=</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">7</span> <span class="mi">11</span><span class="p">)</span> <span class="mi">7</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">7</span> <span class="mi">11</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(list&#8594;iset list)</code></strong><br>
+<strong><code>(list&#8594;iset! set list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated iset, created as if by iset, that contains
+the elements of <code>list</code>. Duplicate elements are omitted.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">list-&gt;iset</span> <span class="o">'</span><span class="p">(</span><span class="nf">-3</span> <span class="mi">-1</span> <span class="mi">0</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">-3</span> <span class="mi">-1</span> <span class="mi">0</span> <span class="mi">2</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>list&#8594;iset!</code> may mutate <code>set</code> rather than allocating a new iset,
+but in STklos it does not.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">list-&gt;iset!</span> <span class="p">(</span><span class="nf">iset</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span> <span class="o">'</span><span class="p">(</span><span class="nf">-3</span> <span class="mi">-1</span> <span class="mi">0</span><span class="p">)))</span> <span class="err">⇒</span> <span class="p">(</span><span class="nf">-3</span> <span class="mi">-1</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(make-range-iset start end [step])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated iset specified by an inclusive lower bound
+<code>start</code>, an exclusive upper bound `e`nd, and a step value (default 1), all
+of which are exact integers. This constructor produces an iset
+containing the sequence</p>
+</div>
+<div class="paragraph">
+<p><code>start, (+ start step), (+ start (* 2 step)), &#8230;&#8203;, (+ start (* n step))</code>,</p>
+</div>
+<div class="paragraph">
+<p>where <code>n</code> is the greatest integer such that <code>(+ start (* n step)) &lt; end</code>
+if <code>step</code> is positive, or such that <code>(+ start (* n step)) &gt; end</code> if <code>step</code>
+is negative. It is an error if <code>step</code> is zero.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">make-range-iset</span> <span class="mi">25</span> <span class="mi">30</span><span class="p">))</span>    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">25</span> <span class="mi">26</span> <span class="mi">27</span> <span class="mi">28</span> <span class="mi">29</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iset-&gt;list</span> <span class="p">(</span><span class="nf">make-range-iset</span> <span class="mi">-10</span> <span class="mi">10</span> <span class="mi">6</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">-10</span> <span class="mi">-4</span> <span class="mi">2</span> <span class="mi">8</span><span class="p">)</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_stklos_preproc_library">A.3.2. (stklos preproc) library</h4>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This library  must be described
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="FDL">Appendix B: GNU Free Documentation License</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Version 1.3, 3 November 2008</p>
@@ -24371,7 +25801,7 @@ Inc. <a href="https://fsf.org/" class="bare">https://fsf.org/</a></p>
 license document, but changing it is not allowed.</p>
 </div>
 <div class="sect2">
-<h3 id="_preamble">A.1. PREAMBLE</h3>
+<h3 id="_preamble">B.1. PREAMBLE</h3>
 <div class="paragraph">
 <p>The purpose of this License is to make a manual, textbook, or other
 functional and useful document ``free" in the sense of freedom: to
@@ -24398,7 +25828,7 @@ works whose purpose is instruction or reference.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_applicability_and_definitions">A.2. APPLICABILITY AND DEFINITIONS</h3>
+<h3 id="_applicability_and_definitions">B.2. APPLICABILITY AND DEFINITIONS</h3>
 <div class="paragraph">
 <p>This License applies to any manual or other work, in any medium, that
 contains a notice placed by the copyright holder saying it can be
@@ -24497,7 +25927,7 @@ meaning of this License.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_verbatim_copying">A.3. VERBATIM COPYING</h3>
+<h3 id="_verbatim_copying">B.3. VERBATIM COPYING</h3>
 <div class="paragraph">
 <p>You may copy and distribute the Document in any medium, either
 commercially or noncommercially, provided that this License, the
@@ -24515,7 +25945,7 @@ you may publicly display copies.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_copying_in_quantity">A.4. COPYING IN QUANTITY</h3>
+<h3 id="_copying_in_quantity">B.4. COPYING IN QUANTITY</h3>
 <div class="paragraph">
 <p>If you publish printed copies (or copies in media that commonly have
 printed covers) of the Document, numbering more than 100, and the
@@ -24557,7 +25987,7 @@ them a chance to provide you with an updated version of the Document.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_modifications">A.5. MODIFICATIONS</h3>
+<h3 id="_modifications">B.5. MODIFICATIONS</h3>
 <div class="paragraph">
 <p>You may copy and distribute a Modified Version of the Document under the
 conditions of sections 2 and 3 above, provided that you release the
@@ -24680,7 +26110,7 @@ imply endorsement of any Modified Version.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_combining_documents">A.6. COMBINING DOCUMENTS</h3>
+<h3 id="_combining_documents">B.6. COMBINING DOCUMENTS</h3>
 <div class="paragraph">
 <p>You may combine the Document with other documents released under this
 License, under the terms defined in section 4 above for modified
@@ -24708,7 +26138,7 @@ must delete all sections Entitled "Endorsements".</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_collections_of_documents">A.7. COLLECTIONS OF DOCUMENTS</h3>
+<h3 id="_collections_of_documents">B.7. COLLECTIONS OF DOCUMENTS</h3>
 <div class="paragraph">
 <p>You may make a collection consisting of the Document and other documents
 released under this License, and replace the individual copies of this
@@ -24724,7 +26154,7 @@ other respects regarding verbatim copying of that document.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_aggregation_with_independent_works">A.8. AGGREGATION WITH INDEPENDENT WORKS</h3>
+<h3 id="_aggregation_with_independent_works">B.8. AGGREGATION WITH INDEPENDENT WORKS</h3>
 <div class="paragraph">
 <p>A compilation of the Document or its derivatives with other separate and
 independent documents or works, in or on a volume of a storage or
@@ -24745,7 +26175,7 @@ they must appear on printed covers that bracket the whole aggregate.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_translation">A.9. TRANSLATION</h3>
+<h3 id="_translation">B.9. TRANSLATION</h3>
 <div class="paragraph">
 <p>Translation is considered a kind of modification, so you may distribute
 translations of the Document under the terms of section 4. Replacing
@@ -24767,7 +26197,7 @@ its Title (section 1) will typically require changing the actual title.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_termination">A.10. TERMINATION</h3>
+<h3 id="_termination">B.10. TERMINATION</h3>
 <div class="paragraph">
 <p>You may not copy, modify, sublicense, or distribute the Document except
 as expressly provided under this License. Any attempt otherwise to copy,
@@ -24799,7 +26229,7 @@ not give you any rights to use it.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_future_revisions_of_this_license">A.11. FUTURE REVISIONS OF THIS LICENSE</h3>
+<h3 id="_future_revisions_of_this_license">B.11. FUTURE REVISIONS OF THIS LICENSE</h3>
 <div class="paragraph">
 <p>The Free Software Foundation may publish new, revised versions of the
 GNU Free Documentation License from time to time. Such new versions will
@@ -24821,7 +26251,7 @@ permanently authorizes you to choose that version for the Document.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_relicensing">A.12. RELICENSING</h3>
+<h3 id="_relicensing">B.12. RELICENSING</h3>
 <div class="paragraph">
 <p>"Massive Multiauthor Collaboration Site" (or "MMC Site") means any
 World Wide Web server that publishes copyrightable works and also
@@ -24856,7 +26286,7 @@ provided the MMC is eligible for relicensing.</p>
 <div style="page-break-after: always;"></div>
 </div>
 <div class="sect2">
-<h3 id="_addendum_how_to_use_this_license_for_your_documents">A.13. ADDENDUM: How to use this License for your documents</h3>
+<h3 id="_addendum_how_to_use_this_license_for_your_documents">B.13. ADDENDUM: How to use this License for your documents</h3>
 <div class="paragraph">
 <p>To use this License in a document you have written, include a copy of
 the License in the document and put the following copyright and license
@@ -24921,7 +26351,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-01-28 18:04:48 +0100
+Last updated 2022-03-10 18:19:51 +0100
 </div>
 </div>
 </body>

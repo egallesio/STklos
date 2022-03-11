@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 13-Jan-2022 17:42 (eg)
+;;;; Last file update: 10-Mar-2022 11:13 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -122,7 +122,7 @@ doc>
                   (if (regexp-match "srfi-[0-9]+" x)
                       (let ((str (format "srfi/~a" (substring x 5 (string-length x)))))
                         (unless (provided? str)
-                          ;; Never loaded srfi/N ore srfi-N
+                          ;; Never loaded srfi/N or srfi-N
                           (require x)
                           (provide str)))
                       ;; simple require
@@ -130,11 +130,13 @@ doc>
                 files))))
 
 ;; ----------------------------------------------------------------------
-(define (%has-feature? x)
-  (define (load-implementation files)
-    (for-each* require files)
-    #t)
+(define (%load-implementation files)
+  (for-each* (lambda (x)
+               ;; Use require macro here and not the function 
+               (require x))
+             files))
 
+(define (%find-feature x)
   (let Loop ((l *all-features*))
     (if (null? l)
         #f                          ;; not found
@@ -142,7 +144,7 @@ doc>
           (if (pair? current)
               ;; Clause is (FEATURE . file) or (FEATURE file1 file2 ...)
               (if (eq? (car current) x)
-                  (load-implementation (cdr current))
+                  (cdr current)
                   (Loop (cdr l)))
               ;; Clause is FEATURE
               (or (eq? current x)
@@ -198,9 +200,19 @@ doc>
               (else 'cond-expand "bad clause ~S" c))))
          (else
           ;; Clause is (FEATURE ...)
-          (if (%has-feature? (caar clauses))
-              `(begin ,@(cdar clauses))
-              `(cond-expand ,@(cdr clauses)))))))))
+          (let* ((name  (caar clauses))
+                 (data  (%find-feature name))
+                 (sname (format "~a" name)))
+            (if data
+                (begin
+                  (unless (or (boolean? data)  (provided? sname))
+                    (%load-implementation data)
+                    (when (pair? data)
+                      ;; We have loaded multiple files with a unique name
+                      ;; => provide 'sname' to avoid multiple loading.
+                      (provide sname)))
+                  `(begin ,@(cdar clauses)))
+                `(cond-expand ,@(cdr clauses))))))))))
 
 
 ;; ----------------------------------------------------------------------

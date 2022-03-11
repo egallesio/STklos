@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 28-Jan-2022 18:23 (eg)
+# Last file update: 10-Mar-2022 15:28 (eg)
 
 #-======================================================================
 
@@ -52,16 +52,31 @@ SRC_STK   = 1.stk   \
             28.stk  \
             29.stk  \
             31.stk  \
+            34.stk  \
+            35.stk  \
+            36.stk  \
             37.stk  \
+            38.stk  \
+            39.stk  \
+            41.stk  \
+            45.stk  \
             48.stk  \
+            51.stk  \
             54.stk  \
+            55.stk  \
+            59.stk  \
             60.stk  \
+            61.stk  \
             64.stk  \
             66.stk  \
             69.stk  \
             70.stk  \
             74.stk  \
             88.stk  \
+            89.stk  \
+            94.stk  \
+            96.stk  \
+            100.stk \
             111.stk \
             113.stk \
             117.stk \
@@ -72,16 +87,20 @@ SRC_STK   = 1.stk   \
             130.stk \
             134.stk \
             135.stk \
+            137.stk \
             141.stk \
             151.stk \
             154.stk \
+            156.stk \
             158.stk \
             161.stk \
+            171.stk \
             173.stk \
             174.stk \
             180.stk \
             185.stk \
             189.stk \
+            190.stk \
             195.stk \
             196.stk \
             207.stk \
@@ -89,7 +108,9 @@ SRC_STK   = 1.stk   \
             214.stk \
             215.stk \
             216.stk \
+            217.stk \
             223.stk \
+            224.stk \
             229.stk \
             230.stk
 
@@ -114,16 +135,31 @@ SRC_OSTK =  1.ostk   \
             28.ostk  \
             29.ostk  \
             31.ostk  \
+            34.ostk  \
+            35.ostk  \
+            36.ostk  \
             37.ostk  \
+            38.ostk  \
+            39.ostk  \
+            41.ostk  \
+            45.ostk  \
             48.ostk  \
+            51.ostk  \
             54.ostk  \
+            55.ostk  \
+            59.ostk  \
             60.ostk  \
+            61.ostk  \
             64.ostk  \
             66.ostk  \
             69.ostk  \
             70.ostk  \
             74.ostk  \
             88.ostk  \
+            89.ostk  \
+            94.ostk  \
+            96.ostk  \
+            100.ostk \
             111.ostk \
             117.ostk \
             118.ostk \
@@ -134,16 +170,20 @@ SRC_OSTK =  1.ostk   \
             130.ostk \
             134.ostk \
             135.ostk \
+            137.ostk \
             141.ostk \
             151.ostk \
             154.ostk \
+            156.ostk \
             158.ostk \
             161.ostk \
+            171.ostk \
             173.ostk \
             174.ostk \
             180.ostk \
             185.ostk \
             189.ostk \
+            190.ostk \
             195.ostk \
             196.ostk \
             207.ostk \
@@ -151,7 +191,9 @@ SRC_OSTK =  1.ostk   \
             214.ostk \
             215.ostk \
             216.ostk \
+            217.ostk \
             223.ostk \
+            224.ostk \
             229.ostk \
             230.ostk
 
@@ -185,16 +227,15 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
-	-c -o $*.o $*.c
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
-	/bin/rm -f $*.o
+	@/bin/rm -f $*.o
 
 #======================================================================
-
 # Dependencies
 13.ostk: 14.ostk
-113.ostk:  128.ostk
+41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
+113.ostk: 128.ostk
 134.ostk: 158.ostk
 
 25.$(SO):  25-incl.c  25.c
@@ -204,6 +245,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 144.$(SO): 144-incl.c 144.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
+
+
 
 #======================================================================
 

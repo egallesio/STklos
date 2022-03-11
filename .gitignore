@@ -36,8 +36,14 @@ CVS
 TODO.org
 .beta-number
 bootstrap
-
 Python
+
+# Clangd
+compile_commands.json
+.cache
+
+
+
 
 # Doc directory 
 doc/TODO
@@ -50,8 +56,12 @@ doc/stklos-install.1
 doc/stklos-pkg.1
 doc/stklos-script.1
 doc/stklos.1
-doc/adoc/html
-doc/adoc/stklos-ref.pdf
+doc/refman/html
+doc/refman/pdf
+doc/refman/tmp-html.txt
+doc/refman/tmp-pdf.txt
+
+
 
 # Examples directory 
 examples/socket-client
@@ -165,5 +175,5 @@ utils/stklos-pp
 
 
 # Extensions directory
-extensions/gtklos/src/gtklos-config.h
-extensions/gtklos/src/gtklos.stk
+extensions/gtklos/lib/stklos/gtklos-config.h
+extensions/gtklos/lib/stklos/gtklos.stk

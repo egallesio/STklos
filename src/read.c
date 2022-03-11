@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 17-Jan-2022 17:41 (eg)
+ * Last file update:  3-Feb-2022 11:58 (eg)
  *
  */
 
@@ -1201,14 +1201,13 @@ static SCM read_case_sensitive_conv(SCM value)
  * (keyword-colon-position value)
  *
  * This parameter object indicates the convention used by the reader to
- * denote keywords. The allowed values are
- * ,(itemize
- *     (item [none, to forbid a symbol with colon to be interpreted as a
- *           keyword])
- *     (item [before, to read symbols starting with a colon as keywords])
- *     (item [after, to read symbols ending with a colon as keywords])
- *     (item [both, to read symbols starting or ending with a colon as
- *            keywords]))
+ * denote keywords. The allowed values are:
+ *
+ * - *none*, to forbid a symbol with colon to be interpreted as a keyword,
+ * - *before*, to read symbols starting with a colon as keywords,
+ * - *after*, to read symbols ending with a colon as keywords,
+ * - *both*,  to read symbols starting or ending with a colon as keywords.
+ *
  * Note that the notation |#:key| is always read as a keyword independently
  * of the value of |keyword-colon-position|. Hence, we have
  * @lisp

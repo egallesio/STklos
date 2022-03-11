@@ -246,3 +246,32 @@
       #f
       (fixnum? (- fx-least 1)))
 
+
+;; extra tests
+
+(test "fxbit-count.0"   0   (fxbit-count 0))
+(test "fxbit-count.1"   1   (fxbit-count 1))
+(test "fxbit-count.2"   1   (fxbit-count 2))
+(test "fxbit-count.3"   2   (fxbit-count 3))
+(test "fxbit-count.4"   1   (fxbit-count 4))
+(test "fxbit-count.5"   2   (fxbit-count 5))
+(test "fxbit-count.6"   2   (fxbit-count 6))
+(test "fxbit-count.7"   3   (fxbit-count 7))
+(test "fxbit-count.8"   1   (fxbit-count 8))
+(test "fxbit-count.9"   2   (fxbit-count 9))
+(test "fxbit-count.10"  2   (fxbit-count 10))
+(test "fxbit-count.11"  3   (fxbit-count 11))
+          
+(test "fxbit-count.-1"   0   (fxbit-count -1))
+(test "fxbit-count.-2"   1   (fxbit-count -2))
+(test "fxbit-count.-3"   1   (fxbit-count -3))
+(test "fxbit-count.-4"   2   (fxbit-count -4))
+(test "fxbit-count.-5"   1   (fxbit-count -5))
+(test "fxbit-count.-6"   2   (fxbit-count -6))
+(test "fxbit-count.-7"   2   (fxbit-count -7))
+(test "fxbit-count.-8"   3   (fxbit-count -8))
+(test "fxbit-count.-9"   1   (fxbit-count -9))
+(test "fxbit-count.-10"  2   (fxbit-count -10))
+(test "fxbit-count.-11"  2   (fxbit-count -11))
+(test "fxbit-count.-30"  4   (fxbit-count -30))
+

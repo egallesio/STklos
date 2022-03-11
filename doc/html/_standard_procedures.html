@@ -821,7 +821,9 @@ pre.rouge {
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
 </li>
-<li><a href="FDL.html">Appendix B: GNU Free Documentation License</a>
+<li><a href="_libraries.html">Appendix C: STklos Libraries</a>
+</li>
+<li><a href="FDL.html">Appendix D: GNU Free Documentation License</a>
 </li>
 </ul>
 </div>
@@ -4251,14 +4253,27 @@ used. Hereafter, are some examples of characters:</p>
 </div>
 <div class="paragraph">
 <p>These procedures impose a total ordering on the set of characters.
-It is guaranteed that under this ordering:
-,(itemize
-(item [The upper case characters are in order.])
-(item [The lower case characters are in order.])
-(item [The digits are in order.])
-(item [Either all the digits precede all the upper case letters, or vice versa.])
-(item [Either all the digits precede all the lower case letters, or vice versa.])
+It is guaranteed that under this ordering:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The upper case characters are in order.</p>
+</li>
+<li>
+<p>The lower case characters are in order.</p>
+</li>
+<li>
+<p>The digits are in order.</p>
+</li>
+<li>
+<p>Either all the digits precede all the upper case letters, or vice versa.</p>
+</li>
+<li>
+<p>Either all the digits precede all the lower case letters, or vice versa.
 )</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>
@@ -11882,15 +11897,26 @@ modifying its <code>list</code> argument.</p>
 </div>
 <div class="paragraph">
 <p>This parameter object indicates the convention used by the reader to
-denote keywords. The allowed values are
-,(itemize
-    (item [none, to forbid a symbol with colon to be interpreted as a
-          keyword])
-    (item [before, to read symbols starting with a colon as keywords])
-    (item [after, to read symbols ending with a colon as keywords])
-    (item [both, to read symbols starting or ending with a colon as
-           keywords]))
-Note that the notation <code>#:key</code> is always read as a keyword independently
+denote keywords. The allowed values are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>none</strong>, to forbid a symbol with colon to be interpreted as a keyword,</p>
+</li>
+<li>
+<p><strong>before</strong>, to read symbols starting with a colon as keywords,</p>
+</li>
+<li>
+<p><strong>after</strong>, to read symbols ending with a colon as keywords,</p>
+</li>
+<li>
+<p><strong>both</strong>,  to read symbols starting or ending with a colon as keywords.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that the notation <code>#:key</code> is always read as a keyword independently
 of the value of <code>keyword-colon-position</code>. Hence, we have</p>
 </div>
 <div class="listingblock">
@@ -15051,7 +15077,7 @@ encoded format.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-01-28 18:04:54 +0100
+Last updated 2022-02-04 11:04:12 +0100
 </div>
 </div>
 </body>

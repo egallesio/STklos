@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 28-Aug-2007 14:35 (eg)
- * Last file update: 27-Jan-2022 09:46 (eg)
+ * Last file update:  7-Feb-2022 13:37 (eg)
  */
 
 #include "stklos.h"
@@ -56,6 +56,21 @@ doc>
 DEFINE_PRIMITIVE("cpointer?", cpointerp, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(CPOINTERP(obj));
+}
+
+
+/*
+<doc EXT cpointer-null?
+ * (cpointer-null? obj)
+ *
+ * Returns `#t` is |obj| is a cpointer and its value is the C NULL value.
+ * Returnd `#f` otherwise.
+doc>
+ */
+DEFINE_PRIMITIVE("cpointer-null?", cpointer_nullp, subr1, (SCM obj))
+{
+  if (! CPOINTERP(obj)) error_bad_cpointer(obj);
+  return MAKE_BOOLEAN(CPOINTER_VALUE(obj) == NULL);
 }
 
 /*
@@ -230,6 +245,7 @@ DEFINE_PRIMITIVE("free-bytes", free_bytes, subr1, (SCM p))
 int STk_init_cpointer(void)
 {
   ADD_PRIMITIVE(cpointerp);
+  ADD_PRIMITIVE(cpointer_nullp);
   ADD_PRIMITIVE(cpointer_data);
   ADD_PRIMITIVE(cpointer_type);
   ADD_PRIMITIVE(cpointer_data_set);

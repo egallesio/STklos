@@ -1,7 +1,7 @@
-bg;;;;
+;;;;
 ;;;; demos-utils.stk    -- Definition of useful things for GTKlos demos
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,19 +21,17 @@ bg;;;;
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Jul-2001 16:19 (eg)
-;;;; Last file update: 30-Jun-2021 20:18 (eg)
+;;;; Last file update:  2-Feb-2022 16:21 (eg)
 ;;;;
 
 
 ;;;; Adapt the load-path.
 (when-load-and-compile
  (let ((path (load-path)))
-   (unless (member "../src" path)
-     (load-path `("../src"  ,@path)))))
+   (unless (member "../lib" path)
+     (load-path `("../lib"  ,@path)))))
 
-;;; load GTklos
-(require "gtklos")
-(import GTKLOS)
+(import (stklos gtklos))
 
 ;;;;
 ;;;; Utilities
@@ -123,7 +121,7 @@ bg;;;;
 
 (define-method internal-arrange-widget ((self <demo-window>) initargs)
   (next-method)
-  (let ((box (make <box> #:parent self #:orientation 'vertical))
+  (let ((box (make <vbox> #:parent self))
         (msg (slot-ref self 'message)))
 
     ;; Create the top message, adding some fontification to make things prettier
@@ -138,8 +136,7 @@ bg;;;;
 
     ;; Create the separator and the bottom buttons
     (let ((sep  (make <separator>))
-          (hbox (make <box> #:orientation 'horizontal
-                            #:padding 4 #:expand #t #:fill #t)))
+          (hbox (make <hbox> #:padding 4 #:expand #t #:fill #t)))
       (container-add! box hbox #:padding 3  #:end #t)
       (container-add! box sep  #:padding 10 #:end #t)
 
@@ -164,7 +161,7 @@ bg;;;;
                     (exit 0)))
 
     ;; Create a container for demo specific subwidgets
-    (let ((content (make <box> #:orientation 'vertical #:expand #t #:fill #t)))
+    (let ((content (make <vbox>  #:expand #t #:fill #t)))
       ;; Set it to the content slot *after* creation (tested by container-add!)
       (apply container-add! box content initargs)
       (slot-set! self 'content content))))

@@ -4,7 +4,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 15-Jul-2021 19:39
-# Last file update: 16-Jul-2021 10:20 (eg)
+# Last file update:  2-Feb-2022 16:21 (eg)
 
 # Change the directory because the "See code" buttons in each demos search in
 # the current directory only
@@ -12,7 +12,9 @@ cd demos
 
 # Assume that the user has perhaps not yet installed STklos, and that the
 # stklos-script wrapper is not available.
-PATH=../../../utils:$PATH
+top=../../..
+PATH=${top}/src:$PATH
 
-# Run the demos script
-./demos
+# Run the demos script. Since STklos is perhaps not yet installed. Don't use
+# stklos-script and call directly stklos on compiled files
+stklos -f ./demos

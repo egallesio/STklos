@@ -1,7 +1,7 @@
 ;;;;
 ;;;; image2.stk -- An Image Animation
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Aug-2001 15:45 (eg)
-;;;; Last file update: 22-Jun-2021 12:01 (eg)
+;;;; Last file update: 31-Jan-2022 19:59 (eg)
 ;;;;
 
 
@@ -55,7 +55,7 @@ We use here the function 'when-idle' to  do the animation.
   (let* ((win  (make <demo-window>  #:title "Buttons Demo" #:x 100 #:y 100
                      #:file "image2" #:border-width 5
                      #:message *message*))
-         (box  (make <box> #:orientation 'vertical #:parent win))
+         (box  (make <vbox> #:parent win))
          (img  (make <image> #:parent box #:file-name (car *imgs*)))
          (s    (make <scale> #:orientation 'horizontal #:from 10 #:to 101
                      #:value 50 #:digits 0 #:increment 10 #:parent box

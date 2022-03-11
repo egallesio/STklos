@@ -1,0 +1,72 @@
+;;;;
+;;;;
+;;;; curl.stk         -- cURL STklos extension
+;;;;
+;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  7-Feb-2022 15:59
+;;;; Last file update: 10-Feb-2022 16:12 (eg)
+;;;;
+
+;;
+;; Avoid compilation warnings
+;;
+(%compile-time-define curl-version curl-init curl-set-option curl-cleanup
+                      curl-perform)
+
+
+(select-module stklos/curl)
+(export curl)
+
+(define (curl url . options)
+  (let  ((handle (curl-init)))
+    ;; Set the URL
+    (curl-set-option handle #:url url)
+
+    ;; CURL uses stdin, stdout and stder which are different from
+    ;; the scheme port (and they can be redirected) ==> set the port
+    ;; of he curl session to the scheme ports. This can be invalidated
+    ;; just after if the user pass another value
+    (curl-set-option handle #:iport (current-input-port))
+    (curl-set-option handle #:oport (current-output-port))
+    (curl-set-option handle #:eport (current-error-port))
+
+    ;; Permit redirections
+    (curl-set-option handle :followlocation 1)
+
+    ;; Set a referer, since some site don't work without it
+    (curl-set-option handle
+                     :referer
+                     (string-append "STklos-curl/"
+                                    (car (string-split (curl-version)))))
+    ;; Set the user options
+    (let Loop ((options options))
+      (unless (null? options)
+        (when (null? (cdr options))
+          (error "Missing value gor option ~S" (car options)))
+        (curl-set-option handle (car options) (cadr options))
+        (Loop (cddr options))))
+
+    ;; The options are set. Perform the action and cleanup handle
+    (curl-perform handle)
+    (curl-cleanup handle)))
+
+
+(provide "stklos/curl")

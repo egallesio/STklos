@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update: 16-Jan-2022 17:20 (eg)
+# Last file update:  2-Feb-2022 19:40 (eg)
 
 #======================================================================
 
@@ -168,8 +168,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(schemedir)"
-DATA = $(scheme_DATA)
+am__installdirs = "$(DESTDIR)$(schemedir)" "$(DESTDIR)$(schemelibdir)"
+DATA = $(scheme_DATA) $(schemelib_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -341,23 +341,36 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 STKLOS_FLAGS = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
+
+#
+# Libraries written in Scheme only
+#
 SRC_STK = preproc.stk
-SRC_C = 
-scheme_OBJS = preproc.ostk
+SRC_OSTK = preproc.ostk
+
+#
+# Libraries written in C and Scheme
+#
+SRC_C = itrie.c
+SRC_C_STK = itrie.stk
+SRC_SHOBJ = itrie.$(SO)
+scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 DOCDB = ../DOCDB
-SOURCES = $(SRC_C) $(SRC_STK)
+BASEDIR = ../..
+SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
+schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+scheme_DATA = $(SRC_OSTK)
+schemelib_DATA = $(SRC_SHOBJ)
 scheme_sources = $(SRC_STK)
-scheme_DATA = $(scheme_OBJS)
-
 #======================================================================
-SUFFIXES = .stk .ostk
+SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .stk .ostk .scm
+.SUFFIXES: .stk .ostk .stk -incl.c .$(SO) .c
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -408,6 +421,27 @@ uninstall-schemeDATA:
 	@list='$(scheme_DATA)'; test -n "$(schemedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(schemedir)'; $(am__uninstall_files_from_dir)
+install-schemelibDATA: $(schemelib_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(schemelib_DATA)'; test -n "$(schemelibdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(schemelibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(schemelibdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(schemelibdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(schemelibdir)" || exit $$?; \
+	done
+
+uninstall-schemelibDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(schemelib_DATA)'; test -n "$(schemelibdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(schemelibdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -497,7 +531,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(schemedir)"; do \
+	for dir in "$(DESTDIR)$(schemedir)" "$(DESTDIR)$(schemelibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -546,7 +580,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-schemeDATA
+install-data-am: install-schemeDATA install-schemelibDATA
 
 install-dvi: install-dvi-am
 
@@ -590,7 +624,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-schemeDATA
+uninstall-am: uninstall-schemeDATA uninstall-schemelibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: install-am install-strip uninstall-am
@@ -602,29 +636,40 @@ uninstall-am: uninstall-schemeDATA
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
-	install-schemeDATA install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
-	tags-am uninstall uninstall-am uninstall-hook \
-	uninstall-schemeDATA
+	install-schemeDATA install-schemelibDATA install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook uninstall-schemeDATA uninstall-schemelibDATA
 
 .PRECIOUS: Makefile
 
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
+
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
-.scm.ostk:
-	$(COMP) -o $*.ostk $*.scm
-#======================================================================
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
 
+.c.$(SO) :
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
+	-c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	/bin/rm -f $*.o
+#======================================================================
+# Dependencies
+
+itrie.$(SO): itrie-incl.c itrie.c
+
+# ======================================================================
 install-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS)  *~
+	rm -f $(scheme_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile

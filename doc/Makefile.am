@@ -19,9 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Jan-2022 09:43 (eg)
+# Last file update: 29-Jan-2022 18:37 (eg)
 
-SUBDIRS      = refman
+.PHONY: subdoc docdb extradoc
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -43,15 +43,16 @@ docpdf_DATA = pdf/stklos-ref.pdf
 dochtmldir  = $(doclocation)/html
 dochtml_DATA= html/stklos-ref.html
 
-
-
 docimgdir   = $(doclocation)/html/images
 docimg_DATA = html/images/hierarchy.png
 
+SUBDOCS     = refman
 
-all: docdb
+all: $(DOCDB)
+	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
 
-docdb: $(DOCDB)
+extradoc: $(DOCDB)
+	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
 
 #
 # Database construction
@@ -77,9 +78,6 @@ distclean: clean
 
 uninstall-hook:
 	rmdir $(docpdfdir) $(docimgdir) $(dochtmldir) $(doclocation) || true
-
-extradoc:
-	for d in $(SUBDIRS); do (cd $$d; $(MAKE) $@); done
 
 
 # Local Variables:

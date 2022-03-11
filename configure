@@ -7417,7 +7417,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 pkgman/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/src/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/gtklos-config.h extensions/gtklos/src/gtklos.stk extensions/stklos-fuse/Makefile extensions/stklos-fuse/src/Makefile extensions/stklos-fuse/demos/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 pkgman/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8166,6 +8166,7 @@ do
     "lib/scheme/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/Makefile" ;;
     "lib/srfi/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi/Makefile" ;;
     "lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES lib/stklos/Makefile" ;;
+    "lib/streams/Makefile") CONFIG_FILES="$CONFIG_FILES lib/streams/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "doc/stklos.1") CONFIG_FILES="$CONFIG_FILES doc/stklos.1" ;;
     "doc/stklos-config.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-config.1" ;;
@@ -8176,13 +8177,17 @@ do
     "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
     "extensions/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/Makefile" ;;
     "extensions/gtklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/Makefile" ;;
-    "extensions/gtklos/src/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/src/Makefile" ;;
+    "extensions/gtklos/lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/lib/stklos/Makefile" ;;
+    "extensions/gtklos/lib/stklos/gtklos-config.h") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/lib/stklos/gtklos-config.h" ;;
+    "extensions/gtklos/lib/stklos/gtklos.stk") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/lib/stklos/gtklos.stk" ;;
     "extensions/gtklos/demos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/demos/Makefile" ;;
-    "extensions/gtklos/src/gtklos-config.h") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/src/gtklos-config.h" ;;
-    "extensions/gtklos/src/gtklos.stk") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/src/gtklos.stk" ;;
-    "extensions/stklos-fuse/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/stklos-fuse/Makefile" ;;
-    "extensions/stklos-fuse/src/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/stklos-fuse/src/Makefile" ;;
-    "extensions/stklos-fuse/demos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/stklos-fuse/demos/Makefile" ;;
+    "extensions/curl/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/curl/Makefile" ;;
+    "extensions/curl/lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/curl/lib/stklos/Makefile" ;;
+    "extensions/curl/demos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/curl/demos/Makefile" ;;
+    "extensions/curl/doc/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/curl/doc/Makefile" ;;
+    "extensions/fuse/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/fuse/Makefile" ;;
+    "extensions/fuse/lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/fuse/lib/stklos/Makefile" ;;
+    "extensions/fuse/demos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/fuse/demos/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

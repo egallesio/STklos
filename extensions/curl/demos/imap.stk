@@ -1,0 +1,47 @@
+;;;;
+;;;;
+;;;; imap.stk         -- Get the list of folder from an IMAP server
+;;;;
+;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  8-Feb-2022 18:32
+;;;; Last file update:  8-Feb-2022 20:36 (eg)
+;;;;
+
+
+(import (stklos curl))
+
+(define (ask msg :optional (secret? #f))
+  (display msg)
+  (flush)
+  (if secret? (get-password) (read-line)))
+
+
+(define (main args)
+  (let ((handle   (curl-init))
+        (server   (ask "Server url (e.g. imaps://imap.example.com)? "))
+        (user     (ask "login: "))
+        (password (ask "password: " #t)))
+
+    (curl-set-option handle :username user)
+    (curl-set-option handle :password password)
+    (curl-set-option handle :url server)
+    (curl-perform handle)
+    (curl-cleanup handle)))
