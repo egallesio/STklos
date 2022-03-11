@@ -496,43 +496,15 @@ trie_bitmap_delete_max(long b) {
     return b & (~ trie_highestbit(b, trie_lowestbit (b)));
 }
 
-/* A lookup table with the bit count for every possible byte.  Will be
-   used by trie_count_aux and trie_bit_count, since the number of
-   elements in a leaf is the number of bits set in the bitmap. */
-static unsigned int bc[256] =
-{ 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
-  2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4,
-  2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5,
-  4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-  2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4,
-  3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
-  4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4,
-  3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-  2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5,
-  4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5,
-  3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6,
-  5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-  4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8 };
+
 
 /*
   Count the number of ones in a long integer.
-
-  It does work with signed long integers; the 'unsigned long' in the
-  declaration is to fore a cast so 'n' will be treated as if it were
-  unsigned, because the algoritm does shift it to the right, and if
-  it's signed negative numbers would get ones from the right side when
-  shifted (at least with GCC and LLVM -- this is not defined by the
-  standard, actually).
+  bit_count is defined in fixnum.c
  */
 static inline unsigned int
 trie_bit_count(unsigned long n) {
-    unsigned int c = 0;
-    unsigned long mask = 0xff;
-    while(n) {
-        c += bc[n & mask];
-        n = n >> 8;
-    }
-    return c;
+    return bit_count(n);
 }
 
 /*
