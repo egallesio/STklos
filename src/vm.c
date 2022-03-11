@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 11-Jan-2022 17:34 (eg)
+ * Last file update:  5-Nov-2021 17:14 (eg)
  */
 
 // INLINER values
@@ -366,7 +366,7 @@ static void patch_environment(vm_thread_t *vm)
   //STk_debug(">>>>>>>>>>");
 }
 
-static void error_bad_arity(SCM func, int arity, short given_args, vm_thread_t *vm)
+static void error_bad_arity(SCM func, int arity, int16_t given_args, vm_thread_t *vm)
 {
    ACT_SAVE_PROC(vm->fp) = func;
   if (arity >= 0)
@@ -378,15 +378,15 @@ static void error_bad_arity(SCM func, int arity, short given_args, vm_thread_t *
 }
 
 
-static Inline short adjust_arity(SCM func, short nargs, vm_thread_t *vm)
+static Inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
 {
-  short arity = CLOSURE_ARITY(func);
+  int16_t arity = CLOSURE_ARITY(func);
 
   if (arity != nargs) {
     if (arity >= 0)
       error_bad_arity(func, arity, nargs, vm);
     else {                                              /* nary procedure call */
-      short min_arity = -arity-1;
+      int16_t min_arity = -arity-1;
 
       if (nargs < min_arity)
         error_bad_arity(func, arity, nargs, vm);
@@ -502,7 +502,7 @@ SCM STk_C_apply(SCM func, int nargs, ...)
   }
   va_end(ap);
 
-  code[1] = (short) nargs;                          /* Patch # of args  */
+  code[1]     = (int16_t) nargs;                    /* Patch # of args  */
   vm->val     = func;                               /* Store fun in VAL */
   vm->pc      = code;
   run_vm(vm);
@@ -569,7 +569,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
- * NOTE: R5RS imposes to use multiple values in the context of
+ * ,(bold "Note:") R5RS imposes to use multiple values in the context of
  * of a |call-with-values|. In STklos, if |values| is not used with
  * |call-with-values|, only the first value is used (i.e. others values are
  * ,(emph "ignored")).
@@ -875,7 +875,7 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
-  short tailp;
+  int16_t tailp;
   volatile int offset,
                have_global_lock = 0;     /* if true, we're patching the code */
   int nargs=0;
@@ -884,7 +884,7 @@ static void run_vm(vm_thread_t *vm)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
 #else
-   short byteop;
+   int16_t byteop;
 #endif
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
@@ -892,7 +892,7 @@ static void run_vm(vm_thread_t *vm)
   static STk_instr *code_base = NULL;
 #endif
 #if defined(STAT_VM)
-  static short previous_op = NOP;
+  static int16_t previous_op = NOP;
 #endif
 
 #if defined(USE_COMPUTED_GOTO)
@@ -949,7 +949,7 @@ CASE(CONSTANT_PUSH) { push(fetch_const());           NEXT; }
 CASE(PUSH_GLOBAL_REF)
 CASE(GLOBAL_REF) {
   SCM ref = NULL;
-  short orig_opcode;
+  int16_t orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1017,7 +1017,7 @@ CASE(UGLOBAL_REF_PUSH) { /* Never produced by compiler */
 CASE(PUSH_GREF_INVOKE)
 CASE(GREF_INVOKE) {
   SCM ref = NULL;
-  short orig_opcode;
+  int16_t orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1060,7 +1060,7 @@ CASE(UGREF_INVOKE) { /* Never produced by compiler */
 CASE(PUSH_GREF_TAIL_INV)
 CASE(GREF_TAIL_INVOKE) {
   SCM ref = NULL;
-  short orig_opcode;
+  int16_t orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1905,7 +1905,7 @@ void STk_raise_exception(SCM cond)
  * (current-exception-handler)
  *
  * Returns the current exception handler. This procedure is defined in
- * {{link-srfi 18}}.
+ * ,(link-srfi 18).
 doc>
 */
 DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))
