@@ -22,13 +22,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Mar-2022 16:43
-;;;; Last file update:  3-Mar-2022 16:45 (eg)
+;;;; Last file update: 12-Mar-2022 19:29 (eg)
 ;;;;
 
 (define-module srfi/45
   (import SCHEME)
   (export force eager)
   ;; FIXME
-  (export-syntax delay lazy))
+  #;(export-syntax delay lazy))
 
 (provide "srfi/45")
