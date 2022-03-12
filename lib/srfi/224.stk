@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Jan-2022 11:03
-;;;; Last file update:  2-Feb-2022 19:44 (eg)
+;;;; Last file update: 12-Mar-2022 19:42 (eg)
 ;;;;
 
 ;;; The comments before each section explain how each procedure was
@@ -173,6 +173,25 @@
                   (return (eof-object))))))))
 
 (define (fold kons knil lis1 . lists)
+  (define (null-list? l)
+    (cond ((pair? l) #f)
+          ((null? l) #t)
+          (else (error 'null-list? "argument out of domain ~S" l))))
+
+  (define (car+cdr pair) (values (car pair) (cdr pair)))
+
+  (define (%cars+cdrs+ lists cars-final)
+    (call/ec
+     (lambda (abort)
+       (let recur ((lists lists))
+         (if (pair? lists)
+             (receive (list other-lists) (car+cdr lists)
+               (if (null-list? list) (abort '() '()) ; LIST is empty -- bail out
+                   (receive (a d) (car+cdr list)
+                     (receive (cars cdrs) (recur other-lists)
+                       (values (cons a cars) (cons d cdrs))))))
+             (values (list cars-final) '()))))))
+
   (if (pair? lists)
       (let lp ((lists (cons lis1 lists)) (ans knil))    ; N-ary case
     (receive (cars+ans cdrs) (%cars+cdrs+ lists ans)
