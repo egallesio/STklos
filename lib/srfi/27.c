@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 03-May-2021 15:22
- * Last file update: 21-Nov-2021 12:05 (eg)
+ * Last file update: 13-Mar-2022 16:59 (eg)
  */
 
 #include <gmp.h>
@@ -378,13 +378,14 @@ DEFINE_PRIMITIVE("%random-source-randomize-mt!", srfi_27_random_source_randomize
 
     /* FIXME: does /dev/random exist in all supported platforms? */
     uint64_t r;
-    int randsrc = open("/dev/random", O_RDONLY);
-    read(randsrc, &r, sizeof(uint64_t));
+    int res, randsrc = open("/dev/random", O_RDONLY);
+    res = read(randsrc, &r, sizeof(uint64_t));       // res is unused. Nedded if _FORTIFY_SOURCE=2
     close(randsrc);
 
     STATE_MT_MTI(st) = NN+1;
     init_genrand64((state_mt *)st, r);
 
+    (void) res;
     return STk_void;
 }
 

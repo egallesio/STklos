@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 11-Mar-2022 09:42 (eg)
+ * Last file update: 13-Mar-2022 17:19 (eg)
  */
 
 
@@ -80,15 +80,12 @@ extern "C"
 #  define TRUE (!FALSE)
 #endif
 
-#ifdef _POSIX_PATH_MAX
-#  define MAX_PATH_LENGTH        _POSIX_PATH_MAX
+#ifdef PATH_MAX
+#  define MAX_PATH_LENGTH     PATH_MAX
 #else
-#  ifdef PATH_MAX
-#    define MAX_PATH_LENGTH     PATH_MAX
-#  else
-#    define MAX_PATH_LENGTH        4096
-#  endif
+#  define MAX_PATH_LENGTH        4096
 #endif
+
 
 #define MAX_TOKEN_SIZE          1024            /* max size of a token */
 
