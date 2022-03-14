@@ -58,8 +58,8 @@ doc/stklos-script.1
 doc/stklos.1
 doc/refman/html
 doc/refman/pdf
-doc/refman/tmp-html.txt
-doc/refman/tmp-pdf.txt
+doc/*/tmp-html.txt
+doc/*/tmp-pdf.txt
 
 
 
