@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 29-Jan-2022 18:37 (eg)
+# Last file update: 14-Mar-2022 18:50 (eg)
 
 .PHONY: subdoc docdb extradoc
 
@@ -38,13 +38,13 @@ scheme_DATA = DOCDB
 doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
 
 docpdfdir   = $(doclocation)/pdf
-docpdf_DATA = pdf/stklos-ref.pdf
+docpdf_DATA = PDF/stklos-ref.pdf
 
 dochtmldir  = $(doclocation)/html
-dochtml_DATA= html/stklos-ref.html
+dochtml_DATA= HTML/stklos-ref.html
 
 docimgdir   = $(doclocation)/html/images
-docimg_DATA = html/images/hierarchy.png
+docimg_DATA = HTML/images/hierarchy.png
 
 SUBDOCS     = refman
 

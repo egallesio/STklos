@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  3-Feb-2022 11:46 (eg)
+# Last file update: 14-Mar-2022 18:56 (eg)
 
 
 ADOC=@ASCIIDOCTOR@
@@ -48,9 +48,9 @@ all: single
 # Multiple HTML files and PDF file generations must be called by hand
 # since they demand special asciidoctor modules
 
-single : ../html/$(HTMLMAIN)
-multi:   ../html/$(HTMLMULTI)
-pdf:     ../pdf/$(PDF)
+single : ../HTML/$(HTMLMAIN)
+multi:   ../HTML/$(HTMLMULTI)
+pdf:     ../PDF/$(PDF)
 extradoc: multi pdf
 
 # ----------------------------------------------------------------------
@@ -60,9 +60,9 @@ extradoc: multi pdf
 
 
 # ----------------------------------------------------------------------
-../html/$(HTMLMAIN): tmp-html.txt
-	mkdir -p ../html/images
-	cp -a $(IMG) ../html/images
+../HTML/$(HTMLMAIN): tmp-html.txt
+	mkdir -p ../HTML/images
+	cp -a $(IMG) ../HTML/images
 	$(ADOC) -v -o $@ tmp-html.txt
 
 # ----------------------------------------------------------------------
@@ -71,17 +71,17 @@ extradoc: multi pdf
 # The backreferences are alawas on the name of the source file.
 # So during the build of this version of the manual we create a link on
 # tmp-html.txt 
-../html/$(HTMLMULTI): tmp-html.txt
-	mkdir -p ../html/images
-	cp -a $(IMG) ../html/images
+../HTML/$(HTMLMULTI): tmp-html.txt
+	mkdir -p ../HTML/images
+	cp -a $(IMG) ../HTML/images
 	ln -s tmp-html.txt stklos-ref-multi.txt 2>/dev/stderr || true
 	$(ADOC) -v -r asciidoctor-multipage -b multipage_html5 \
 			-o $@ stklos-ref-multi.txt && \
 		rm -f stklos-ref-multi.txt
 
 # ----------------------------------------------------------------------
-../pdf/$(PDF): tmp-pdf.txt
-	mkdir -p ../pdf
+../PDF/$(PDF): tmp-pdf.txt
+	mkdir -p ../PDF
 	$(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ tmp-pdf.txt
 
 # ----------------------------------------------------------------------
@@ -98,7 +98,7 @@ clean:
 	rm -f  tmp-html.txt tmp-pdf.txt stklos-ref-multi.txt *~
 
 distclean: clean
-	rm -f  ../html/$(HTMLMAIN) ../html/$(HTMLMULTI)
-	for i in $(MULTI_AUX); do rm -f ../html/$$i ; done
-	rm -f ../html/$(IMG)
-	rm -f ../pdf/$(PDF)
+	rm -f  ../HTML/$(HTMLMAIN) ../HTML/$(HTMLMULTI)
+	for i in $(MULTI_AUX); do rm -f ../HTML/$$i ; done
+	rm -f ../HTML/$(IMG)
+	rm -f ../PDF/$(PDF)
