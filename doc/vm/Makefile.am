@@ -2,17 +2,17 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 14-Mar-2022 19:12 (eg)
+# Last file update: 14-Mar-2022 19:24 (eg)
 
 
 ADOC=@ASCIIDOCTOR@
 
-SOURCE  = hacking.adoc
+SOURCE  = vm.adoc
 DOCDB   =
 SPP     = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
 
-HTMLMAIN  = hacking.html
-PDF       = hacking.pdf
+HTMLMAIN  = vm.html
+PDF       = vm.pdf
 
 all-recursive: all
 
