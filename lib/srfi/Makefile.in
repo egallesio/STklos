@@ -389,6 +389,7 @@ SRC_STK = 1.stk   \
             88.stk  \
             89.stk  \
             94.stk  \
+            95.stk  \
             96.stk  \
             100.stk \
             111.stk \
@@ -472,6 +473,7 @@ SRC_OSTK = 1.ostk   \
             88.ostk  \
             89.ostk  \
             94.ostk  \
+            95.ostk  \
             96.ostk  \
             100.ostk \
             111.ostk \
@@ -826,6 +828,7 @@ STKLOS_BINARY ?= ../../src/stklos
 # Dependencies
 13.ostk: 14.ostk
 41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
+95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
 134.ostk: 158.ostk
 

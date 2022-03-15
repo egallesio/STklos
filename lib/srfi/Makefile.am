@@ -75,6 +75,7 @@ SRC_STK   = 1.stk   \
             88.stk  \
             89.stk  \
             94.stk  \
+            95.stk  \
             96.stk  \
             100.stk \
             111.stk \
@@ -158,6 +159,7 @@ SRC_OSTK =  1.ostk   \
             88.ostk  \
             89.ostk  \
             94.ostk  \
+            95.ostk  \
             96.ostk  \
             100.ostk \
             111.ostk \
@@ -199,7 +201,7 @@ SRC_OSTK =  1.ostk   \
 
 #
 # SRFIs written in C and Scheme
-#
+ #
 SRC_C     = 25.c     27.c     132.c     133.c      144.c      170.c      175.c
 SRC_C_STK = 25.stk   27.stk   132.stk   133.stk    144.stk    170.stk    175.stk
 SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
@@ -235,6 +237,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # Dependencies
 13.ostk: 14.ostk
 41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
+95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
 134.ostk: 158.ostk
 
