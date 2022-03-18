@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 18-Mar-2022 13:14 (eg)
+# Last file update: 18-Mar-2022 13:36 (eg)
 
 #-======================================================================
 
@@ -93,18 +93,22 @@ SRC_STK   = 1.stk   \
             135.stk \
             137.stk \
             141.stk \
+            143.stk \
             151.stk \
             154.stk \
             156.stk \
             158.stk \
             161.stk \
+            169.stk \
             171.stk \
             173.stk \
             174.stk \
+            176.stk \
             180.stk \
             185.stk \
             189.stk \
             190.stk \
+            193.stk \
             195.stk \
             196.stk \
             207.stk \
@@ -113,6 +117,7 @@ SRC_STK   = 1.stk   \
             215.stk \
             216.stk \
             217.stk \
+            219.stk \
             223.stk \
             224.stk \
             229.stk \
@@ -180,18 +185,22 @@ SRC_OSTK =  1.ostk   \
             135.ostk \
             137.ostk \
             141.ostk \
+            143.ostk \
             151.ostk \
             154.ostk \
             156.ostk \
             158.ostk \
             161.ostk \
+            169.ostk \
             171.ostk \
             173.ostk \
             174.ostk \
+            176.ostk \
             180.ostk \
             185.ostk \
             189.ostk \
             190.ostk \
+            193.ostk \
             195.ostk \
             196.ostk \
             207.ostk \
@@ -200,6 +209,7 @@ SRC_OSTK =  1.ostk   \
             215.ostk \
             216.ostk \
             217.ostk \
+            219.ostk \
             223.ostk \
             224.ostk \
             229.ostk \
