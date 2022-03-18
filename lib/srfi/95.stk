@@ -1,0 +1,112 @@
+;;;;
+;;;; srfi-95.stk         -- SRFI-95: Sorting and Merging
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date:  3-Dec-2021 12:01
+;;;; Last file update:  3-Dec-2021 12:35 (jpellegrini)
+;;;;
+
+;; This is SRFI-95 written on top of SRFI-132.
+;; SRFI 95 has some inefficiency problems -- it forces
+;; dynamic dispatch, and requires an optional argument
+;; to all procedures. But it's here, nevertheless!
+
+(define-module srfi/95
+  (import (srfi 132)) ;; the heavy work is there!
+  (export sorted?
+          merge
+          merge!
+          sort
+          sort!
+
+          ;; extra: these are slightly faster than the
+          ;; generic versions, since there's no dynamic
+          ;; dispatching:
+          string-sorted?
+          string-sort
+          string-sort!)
+
+  (%compile-time-define list-merge!
+                        list-merge
+                        list-sorted?
+                        vector-sorted?)
+  
+(define (string-sorted? less? str)
+  (vector-sorted? less? (string->vector str)))
+
+(define (string-sort less? str)
+  (vector->string (vector-sort less? (string->vector str))))
+
+
+(define (string-sort! less? str)
+  ;; It's unlikely that someone will be sorting a string
+  ;; (as opposed to a set of strings), so instead of sorting
+  ;; in-place, we delegate to vector-sort! and copy back the
+  ;; result into the string. The extra cost shouldn't be high.
+  (let ((vec (string->vector str)))
+    (vector-sort! less? vec)
+    (dotimes (i (vector-length vec))
+      (string-set! str i (vector-ref vec i))))
+  ;; SRFI-95 requires that we return the mutated string:
+  str)
+
+(define (sorted? seq less? :optional (key #f))
+  (let ((less? (if key
+                   (lambda (x y) (less? (key x) (key y)))
+                   less?)))
+    (cond ((vector? seq)  (vector-sorted? less? seq))
+          ((list?   seq)  (list-sorted?   less? seq))
+          ((string? seq)  (string-sorted? less? seq))
+          (else           (error 'sorted? "not vector, list or string ~S" seq)))))
+
+(define (merge l1 l2 less? :optional (key #f))
+  (let ((less? (if key
+                   (lambda (x y) (less? (key x) (key y)))
+                   less?)))
+    (list-merge less? l1 l2)))
+
+(define (merge! l1 l2 less? :optional (key #f))
+  (let ((less? (if key
+                   (lambda (x y) (less? (key x) (key y)))
+                   less?)))
+    (list-merge! less? l1 l2)))
+
+(define (sort seq less? :optional (key #f))
+  (let ((less? (if key
+                   (lambda (x y) (less? (key x) (key y)))
+                   less?)))
+    (cond ((vector? seq)  (vector-sort less? seq))
+          ((list?   seq)  (list-sort   less? seq))
+          ((string? seq)  (string-sort less? seq))
+          (else           (error 'sort "not vector, list or string ~S" seq)))))
+
+(define (sort! seq less? :optional (key #f))
+  (let ((less? (if key
+                   (lambda (x y) (less? (key x) (key y)))
+                   less?)))
+    (cond ((vector? seq)  (vector-sort! less? seq) seq)
+          ((list?   seq)  (list-sort!   less? seq))
+          ((string? seq)  (string-sort! less? seq))
+          (else           (error 'sort! "not vector, list or string ~S" seq)))))
+
+)
+
+(provide "srfi/95")
