@@ -382,7 +382,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
- 	        scheme streams srfi stklos
+	      scheme streams srfi stklos
 
 STKLOS_FLAGS = --no-init-file --case-sensitive
 scheme_BOOT = assembler.stk \
@@ -892,9 +892,7 @@ install-sources:
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
-#full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
-# srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 
 #
