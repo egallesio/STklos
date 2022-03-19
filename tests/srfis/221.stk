@@ -1,3 +1,5 @@
+(import (srfi 41))        ;; FIXME:  needed because stream-null is broken by previous loaded files
+                          ;; must be changed
 (define srfi-221-test-name "")
 
 (define test-g-equal
