@@ -189,9 +189,7 @@ install-sources:
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
-#full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
-# srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 
 
