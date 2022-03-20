@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 26-Jan-2022 13:16 (eg)
+// Last file update: 20-Mar-2022 18:11 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -339,5 +339,14 @@ _<<assume,`assume` special form>>_.
 (((underscore)))
 {{quick-link-srfi 169}} is fully supported. See _<<srfi169, parameter `accept-srfi-169-numbers`>>_ to eventually forbid the usage of
 underscores in numbers.
+
+
+// **** SRFI-216
+{{srfi-subsection 216}}
+(((SICP)))
+{{quick-link-srfi 216}} is fully supported. However, it defines the constant `stream-null` and the predicate
+`stream-null?` which are incompatible with the ones defined in the `(stream primitive)` library used by
+{{quick-link-srfi 41}} or {{quick-link-srfi 221}}. Prefix the imported symbols of this SRFI, if you plan to
+use it with one of the previous libraries.
 
 :sectnums:
