@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 30-Jun-2020 05:01 (jpellegrini)
-;;;; Last file update:  4-Dec-2021 09:16 (jpellegrini)
+;;;; Last file update: 30-Mar-2022 15:43 (eg)
 ;;;;
 
 (define-module srfi/117
@@ -63,7 +63,7 @@
 ;; of requireing SRFI-1, we define a simpler version of map! here,
 ;; unless SRFI-1 is already provided.
 (define srfi-117:map!
-        (let ((srfi-1 (find-module 'SRIF-1 #f)))
+        (let ((srfi-1 (find-module 'srfi/1 #f)))
           (if srfi-1
               (symbol-value 'map! srfi-1)
               (lambda (f lis)
