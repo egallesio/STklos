@@ -12,7 +12,7 @@ SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc      \
            progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc         \
            srfi.adoc stdproc.adoc stklos.adoc threads.adoc
 DOCDB    = ../DOCDB
-SPP      = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
+SPP      = $(STKLOS_BINARY) -q -I ../../lib -f ../../utils/stklos-pp.stk --
 
 HTMLMAIN  = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html
