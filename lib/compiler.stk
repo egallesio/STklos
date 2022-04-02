@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 31-Jan-2022 14:33 (eg)
+;;;; Last file update:  2-Apr-2022 19:40 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -89,7 +89,6 @@
 (include "computils.stk")
 
 
-
 ;; ----------------------------------------------------------------------
 ;; Debbugging support
 ;; ----------------------------------------------------------------------
@@ -130,6 +129,38 @@
 
 (define (emit-label lab)
   (set! *code-instr* (cons lab *code-instr*)))
+
+; ======================================================================
+;
+;                               SCOPE
+;
+; ======================================================================
+(define-struct scope
+  locals      ;; local symbols
+  slocals     ;; local syntaxes
+  parent)     ;; parent scope
+
+;;//;; Temporary function for bootstraping the environment representation
+;;//(define (%list->scope lst)
+;;//  (if (null? lst)
+;;//      #f
+;;//      (make-scope (car lst) '() (%list->scope (cdr lst)))))
+;;//
+;;//;; Temporary function for bootstraping the environment representation
+;;//(define (%scope->list sc)
+;;//  (if (not sc)
+;;//      '()
+;;//      (cons (scope-locals sc)
+;;//            (%scope->list (scope-parent sc)))))
+;;//
+;;//(define (%debug-scope env)
+;;//  (%debug "***SCOPE*** ~S\n" env)
+;;//  (let L ((env env))
+;;//    (when env
+;;//      (%debug "   ==> locals= ~S slocals= ~S parent =~S"
+;;//              (scope-locals env) (scope-slocals env) (scope-parent env))
+;;//      (L (scope-parent env)))))
+
 
 
 ; ======================================================================
@@ -205,7 +236,6 @@ doc>
   (or (symbol-bound? symbol)
       (memq symbol (compiler-known-globals))))
 
-
 (define (compiler-warn-undef symbol epair)
   (compiler-warning (void) epair "reference to undefined symbol ~S" symbol))
 
@@ -247,11 +277,11 @@ doc>
          (who (cadr l)))
     (if (not (= (length l) 3))
         (compiler-error 'define args "bad definition")
-        (if (null? env)
+        (if (not env)
             (if (symbol? who)
                 (begin
                   (register-new-global! who)
-                  (compile (caddr l) '() args #f)
+                  (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
                 (compiler-error 'define args "bad variable name ~S" who))
             (compiler-error 'define args "internal define forbidden here ~S" args)))))
@@ -260,12 +290,24 @@ doc>
 ;;;;
 ;;;; REFERENCES & ASSIGNMENT
 ;;;;
-(define (symbol-in-env? symb env)
+
+#;(define (symbol-in-env? symb env)
+  (when (is-scope? env) (set! env (%scope->list env)))
   (let Loop ((l env))
     (cond
       ((null? l)                #f)
       ((memq symb (car l))      #t)
       (else                     (Loop (cdr l))))))
+
+(define (find-symbol-in-env symb env)
+  (when (list? env) (set! env (%list->scope env)))
+  ;(%debug "symbol-in-env ~S ~S" symb env)
+  (let Loop ((env env))
+    (cond
+     ((not env)                       #f)
+     ((memq symb (scope-locals  env)) symb)
+     ((assq symb (scope-slocals env)) )
+     (else                            (Loop (scope-parent env))))))
 
 
 (define (compile-access name env epair ref)
@@ -278,16 +320,17 @@ doc>
     (apply emit (if ref i1 i2) args))
 
   (let loop ((lev 0) (env env))
-    (if (null? env)
+    (if (not env)
         ;; name is a global variable
         (begin
           (verify-global name epair)
           (em 'GLOBAL-REF 'GLOBAL-SET (fetch-constant name)))
         ;; name is a local variable
-        (let loop2 ((idx 0) (l (car env)))
+        (let loop2 ((idx 0) (l (scope-locals env)))
           (cond
             ((null? l)
-             (loop (+ lev 1) (cdr env)))
+             (loop (+ lev 1) (scope-parent env)))
+
             ((eq? (car l) name)
              (if (zero? lev)
                  ;; variable in  innermost block
@@ -351,7 +394,7 @@ doc>
 ;;
 (define (compile-define-macro e env tail?)
   ;; Called for global macros.
-  (if (null? env)
+  (if (not env)
       (let ((l (define->lambda e)))
         (when (= (length l) 3)
           (let* ((l        (extended-lambda->lambda l))
@@ -364,7 +407,7 @@ doc>
             (install-expander! name (eval expander) proc)
             ;; Compile code for installing expander (for byte-code files)
             ;; YES! we need both (install + compile)
-            (compile expander '() e #f)
+            (compile expander #f e #f)
             (emit 'MAKE-EXPANDER (fetch-constant name)))))
       (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
 
@@ -519,13 +562,15 @@ doc>
                      ((null? l) res)
                      ((pair? l) (aux (cdr l) (cons (car l) res)))
                      (else      (cons l res))))))
-    (cons (aux formals '()) env)))
+    (make-scope (aux formals '())
+                '()
+                env)))
 
 
-(define (extend-current-env env symbol)
-  ;; Add just symbol to the current environment (used by let*)
-  (cons (append (car env) (list symbol))
-        (cdr env)))
+;;//(define (extend-current-env env symbol)
+;;//  ;; Add just symbol to the current environment (used by let*)
+;;//  (cons (append (car env) (list symbol))
+;;//        (cdr env)))
 
 ;;  (define (valid-lambda? expr)
 ;;    (define (param-ok? l seen)
@@ -909,7 +954,7 @@ doc>
     (lambda (fct env)
       ;; Avoid to use *inline-table* on all symbols (assoc is too expensive here)
       (if (and (memq fct *inline-symbols*)
-               (not (symbol-in-env? fct env)))
+               (not (find-symbol-in-env fct env)))
           (let ((f (assoc fct *inline-table*)))
             (and f (eq? (symbol-value* fct STklos) (cdr f))))
           (memq fct *always-inlined*)))))
@@ -1535,7 +1580,7 @@ doc>
 
                   (do ((expr (%read port) (%read port)))
                       ((eof-object? expr))
-                    (compile expr '() expr #f))
+                    (compile expr #f expr #f))
 
                   (set! *compiler-port* old))
     (close-port port)))
@@ -1720,7 +1765,7 @@ doc>
     (let ((first (car e)))
       (compiler-maybe-do-autoload first)
       (if (and (symbol? first)
-               (not (symbol-in-env? first env))
+               (not (find-symbol-in-env first env))
                (expander? first))
           ;; ---- macro call
           (compile (macro-expand e) env epair tail?)
@@ -1777,7 +1822,7 @@ doc>
 (define (eval e :optional env)
 
   (define (parse-expression e)
-    (compile e '() e #f)
+    (compile e #f e #f)
     (emit 'END-OF-CODE)
     (assemble (reverse! *code-instr*)))
 
