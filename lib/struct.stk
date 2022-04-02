@@ -1,5 +1,5 @@
 ;;;;
-;;;; struct.stk	-- Defining STklos Structures
+;;;; struct.stk -- Defining STklos Structures
 ;;;;
 ;;;; Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 17-May-2004 23:35 (eg)
-;;;; Last file update:  8-Jan-2022 20:59 (eg)
+;;;; Last file update:  2-Apr-2022 11:53 (eg)
 ;;;;
 
 
@@ -40,7 +40,8 @@
  *
  * - |<name>?| is a predicate which returns |%t| when applied to an
  *   instance of the |<name>| structure type and |%f| otherwise
- *   |<name>-<slot>| (one for each defined |<slot>|) to read the
+ *
+ * - |<name>-<slot>| (one for each defined |<slot>|) to read the
  *   content of an instance of the |<name>| structure type. Writting the
  *   content of a slot can be done using a generalized |set!|.
  *
@@ -63,36 +64,36 @@ doc>
       (- (length slots) (length sublist))))
 
   (let* ((pred    (string->symbol (format "~a?" name)))
-	 (arg     (gensym))
-	 (val     (gensym)))
+         (arg     (gensym))
+         (val     (gensym)))
     `(begin
        ;; Build the structure
        (define ,name (make-struct-type ',name #f ',slots))
 
        ;; Build the constructor
        (define (,(string->symbol (format "make-~a" name)) . ,arg)
-	 (apply make-struct ,name ,arg))
+         (apply make-struct ,name ,arg))
 
        ;; Build the predicate
        (define (,pred ,arg)
-	 (and (struct? ,arg) (struct-is-a? ,arg ,name)))
+         (and (struct? ,arg) (struct-is-a? ,arg ,name)))
 
        ;; Build the slot readers
        ,@(map (lambda (x)
-		(let ((fname (string->symbol (format "~a-~a" name x))))
-		  `(define ,fname
-		     (lambda (,arg)
-		       (%fast-struct-ref ,arg ,name ',fname
-					 ,(compute-offset x slots))))))
-	      slots)
+                (let ((fname (string->symbol (format "~a-~a" name x))))
+                  `(define ,fname
+                     (lambda (,arg)
+                       (%fast-struct-ref ,arg ,name ',fname
+                                         ,(compute-offset x slots))))))
+              slots)
        ;; Build the slot setters
        ,@(map (lambda (x)
-		(let ((fname (string->symbol (format "~a-~a" name x))))
-		  `(set! (setter ,fname)
-		     (lambda (,arg ,val)
-		       (%fast-struct-set! ,arg ,name ',fname
-					  ,(compute-offset x slots) ,val)))))
-	      slots)
+                (let ((fname (string->symbol (format "~a-~a" name x))))
+                  `(set! (setter ,fname)
+                     (lambda (,arg ,val)
+                       (%fast-struct-set! ,arg ,name ',fname
+                                          ,(compute-offset x slots) ,val)))))
+              slots)
 
        ;; Build the toplevel result
        (values (void) ',name))))
