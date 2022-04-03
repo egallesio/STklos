@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  3-Apr-2022 17:01 (eg)
+;;;; Last file update:  3-Apr-2022 17:21 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -298,17 +298,7 @@ doc>
 ;;;; REFERENCES & ASSIGNMENT
 ;;;;
 
-#;(define (symbol-in-env? symb env)
-  (when (is-scope? env) (set! env (%scope->list env)))
-  (let Loop ((l env))
-    (cond
-      ((null? l)                #f)
-      ((memq symb (car l))      #t)
-      (else                     (Loop (cdr l))))))
-
 (define (find-symbol-in-env symb env)
-  (when (list? env) (set! env (%list->scope env)))
-  ;(%debug "symbol-in-env ~S ~S" symb env)
   (let Loop ((env env))
     (cond
      ((not env)                       #f)
