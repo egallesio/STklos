@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 17-Jan-2022 10:11 (eg)
+;;;; Last file update:  3-Apr-2022 17:13 (eg)
 ;;;;
 
 
@@ -108,14 +108,17 @@ doc>
 |#
 
 (define-macro (select-module name)
-  ;; HACK: try to register the symbols definied in chose module to make
+  ;; HACK: try to register the symbols definined in chosen module to make
   ;; them known to the compiler (and avoid messages about undefined)
-  (let ((mod (find-module name #f)))
+  (let* ((mod    (find-module name #f))
+         (newmod (or mod (%module-create name))))
     (when (and mod (not (eq? name 'STklos)))
-      (register-new-globals! (module-symbols mod))))
+      (register-new-globals! (module-symbols mod)))
 
   ;; The real expansion of the select-module
-  `(%%set-current-module (find-module ',name)))
+  `(begin
+     (%%set-current-module (find-module ',name))
+     (when-compile (compiler-current-module ,newmod)))))
 
 
 ;;=============================================================================
@@ -183,12 +186,16 @@ doc>
                             (raise (%module-restore)))))
 
 (define-macro (define-module name . body)
+  (let ((oldmod (compiler-current-module))
+        (newmod (or (find-module name #f) (%module-create name))))
   `(with-handler
       %module-handler
       (%%set-current-module (%module-create ',name))
+      (when-compile (compiler-current-module ,newmod))
       ,@body
+      (when-compile (compiler-current-module ,oldmod))
       (%%set-current-module (%module-restore))
-      (values (void) ',name)))
+      (values (void) ',name))))
 
 
 ;;=============================================================================

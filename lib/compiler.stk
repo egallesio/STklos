@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  2-Apr-2022 19:40 (eg)
+;;;; Last file update:  3-Apr-2022 17:01 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -37,7 +37,9 @@
           compiler:inline-common-functions
 
           %grab-file-information
-          %compiler-new-label))
+          %compiler-new-label
+          ;; FIXME
+          compiler-current-module))
 
 (select-module STKLOS-COMPILER)
 
@@ -116,6 +118,11 @@
                     (lambda (v)
                       (set! *inline-symbols* (if v inlined '()))
                       (not (null? *inline-symbols*))))))
+
+(define compiler-current-module
+  ;; parameter that contains the module in which the compiler produces code
+  (make-parameter (current-module)))
+
 
 (define (new-label)
   (let ((lab *code-labels*))
