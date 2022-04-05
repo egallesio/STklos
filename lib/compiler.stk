@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  3-Apr-2022 17:21 (eg)
+;;;; Last file update:  5-Apr-2022 15:01 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -38,8 +38,12 @@
 
           %grab-file-information
           %compiler-new-label
+
           ;; FIXME
-          compiler-current-module))
+          compiler-current-module
+          make-syntax
+          syntax?
+          %macro-expand))
 
 (select-module STKLOS-COMPILER)
 
@@ -102,51 +106,17 @@
 ;;=   (when  (%compiler-debug) (apply eprintf args)))
 ;;=
 
-;; ----------------------------------------------------------------------
-;;      Compiler parameters ...
-;; ----------------------------------------------------------------------
-(define compiler:time-display                   (make-parameter #t))
-(define compiler:gen-line-number                (make-parameter #f))
-(define compiler:warn-use-undefined             (make-parameter #f))
-(define compiler:warn-use-undefined-postpone    (make-parameter #t))
-(define compiler:show-assembly-code             (make-parameter #f))
-(define compiler:generate-signature             (make-parameter #f))
-
-(define compiler:inline-common-functions
-  (let ((inlined *inline-symbols*))
-    (make-parameter #t
-                    (lambda (v)
-                      (set! *inline-symbols* (if v inlined '()))
-                      (not (null? *inline-symbols*))))))
-
-(define compiler-current-module
-  ;; parameter that contains the module in which the compiler produces code
-  (make-parameter (current-module)))
-
-
-(define (new-label)
-  (let ((lab *code-labels*))
-    (set! *code-labels* (+ *code-labels* 1))
-    lab))
-
-(define %compiler-new-label new-label)  ;; public name of new-label
-
-(define (emit . args)
-  (set! *code-instr* (cons args *code-instr*)))
-
-(define (emit-label lab)
-  (set! *code-instr* (cons lab *code-instr*)))
-
 ; ======================================================================
 ;
 ;                               SCOPE
 ;
 ; ======================================================================
 (define-struct scope
-  locals      ;; local symbols
-  slocals     ;; local syntaxes
-  parent)     ;; parent scope
+  locals                        ; local symbols
+  slocals                       ; local syntaxes
+  parent)                       ; parent scope
 
+;;// FIXME:
 ;;//;; Temporary function for bootstraping the environment representation
 ;;//(define (%list->scope lst)
 ;;//  (if (null? lst)
@@ -168,6 +138,119 @@
 ;;//              (scope-locals env) (scope-slocals env) (scope-parent env))
 ;;//      (L (scope-parent env)))))
 
+
+; ======================================================================
+;
+;                               SYNTAX
+;
+; ======================================================================
+(define-struct syntax
+  type                       ; syntax-rules? syntax-case? other?
+  name                       ; may be useful
+  expander                   ; source
+  compiled-expander          ; compiled with environment
+;  environment                ; the environment representation as used in the compiler
+  module)                    ; module where the macro was defined
+
+(struct-type-change-writer!
+    syntax
+    (lambda (s port)
+      (fprintf port "#[syntax ~A in ~A ~A]"
+               (syntax-name s) (syntax-module s) (address-of (syntax-compiled-expander s)))))
+
+
+(define (%macro-expand form)
+  (if (pair? form)
+      (let* ((name (car form))
+             (val  (symbol-value name (compiler-current-module) #f)))
+        ;; FIXME
+        ;;(when (eq? name 'add1) (%debug "module: ~S val = ~S" (compiler-current-module) val))
+        (if (and (symbol? name) (syntax? val))
+            (apply (syntax-compiled-expander val) (cdr form))
+            form))
+      ;; Form is not a pair => return it unmodified
+      form))
+
+;;;
+;;; Management of exported syntaxes
+;;;
+
+; modules seen in a file (used by compile-file)
+(define *file-module-list* '())
+
+(define (file-module-list-reset!)
+  (set! *file-module-list* '()))
+
+(define add-file-module-list!
+  (let ((stklos (find-module 'stklos)))
+    (lambda (mod)
+      (unless (or (eq? mod stklos) (memq mod *file-module-list*))
+        (set! *file-module-list* (cons mod *file-module-list*))))))
+
+(define (file-module-list-expanders)
+  (apply append
+         (map (lambda (mod)
+                ;; XXXX:
+                ;(%debug "We need to publish the macros of ~S" (module-name mod))
+                ;(%debug "   Symbols: ~S ~S exports ~S" (module-symbols mod)
+                ;         (map (lambda (s) (syntax? (symbol-value s mod #f))) (module-symbols mod))
+                ;        (module-exports mod))
+                (let Loop ((lst (module-exports mod))
+                           (res '()))
+                  (if (null? lst)
+                      res
+                      (let* ((symb (caar lst))
+                             (val  (symbol-value symb mod #f)))
+                        ;; XXXX (%debug "symbole ~S syntax? ~S" symb (syntax? val))
+                        (Loop (cdr lst)
+                              (if (syntax? val)
+                                  (cons (list symb
+                                              (module-name mod)
+                                              (syntax-expander val))
+                                        res)
+                                  res))))))
+              *file-module-list*)))
+
+;; ----------------------------------------------------------------------
+;;      Compiler parameters ...
+;; ----------------------------------------------------------------------
+(define compiler:time-display                   (make-parameter #t))
+(define compiler:gen-line-number                (make-parameter #f))
+(define compiler:warn-use-undefined             (make-parameter #f))
+(define compiler:warn-use-undefined-postpone    (make-parameter #t))
+(define compiler:show-assembly-code             (make-parameter #f))
+(define compiler:generate-signature             (make-parameter #f))
+
+(define compiler:inline-common-functions
+  (let ((inlined *inline-symbols*))
+    (make-parameter #t
+                    (lambda (v)
+                      (set! *inline-symbols* (if v inlined '()))
+                      (not (null? *inline-symbols*))))))
+
+(define compiler-current-module
+  (make-parameter (current-module)
+                  (lambda (new)
+                    (unless (module? new)
+                      (error 'compiler-current-module "bad module parameter ~s" new))
+                    (add-file-module-list! new)
+                    new)))
+
+
+;; ----------------------------------------------------------------------
+
+(define (new-label)
+  (let ((lab *code-labels*))
+    (set! *code-labels* (+ *code-labels* 1))
+    lab))
+
+(define %compiler-new-label new-label)  ;; public name of new-label
+
+(define (emit . args)
+  (set! *code-instr* (cons args *code-instr*)))
+
+(define (emit-label lab)
+  (set! *code-instr* (cons lab *code-instr*)))
 
 
 ; ======================================================================
@@ -422,6 +505,30 @@ doc>
         (push-expander! name (eval expander))
         ;; return the name of the defined macro
         name))))
+
+(define (compile-defmacro e env tail?)
+  (if (not env)
+      ;; We have a global macro
+      (let ((l (define->lambda e)))
+        (when (= (length l) 3)
+          (let* ((l        (extended-lambda->lambda l))
+                 (name     (cadr l))
+                 (proc     (caddr l))
+                 (mod      (compiler-current-module)))
+            (if (symbol? name)
+                (let ((obj `(make-syntax 'defmacro
+                                         ',name
+                                         ',proc
+                                         (eval ',proc (find-module ',(module-name mod)))
+                                         ',(module-name mod))))
+                  ;; produce code for defining the macro
+                  (register-new-global! name)
+                  (compile obj #f env #f)
+                  (emit 'DEFINE-SYMBOL (fetch-constant name))
+                  ;; register the macro, so that the compiler expand macro calls
+                  (%symbol-define name (eval obj mod) mod))
+                (compiler-error 'define-macro e "bad variable name ~S" name)))))
+      (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
 
 ;;;;
 ;;;; WHEN/UNLESS
@@ -1762,43 +1869,50 @@ doc>
     (let ((first (car e)))
       (compiler-maybe-do-autoload first)
       (if (and (symbol? first)
-               (not (find-symbol-in-env first env))
-               (expander? first))
-          ;; ---- macro call
-          (compile (macro-expand e) env epair tail?)
-          ;; ---- special-form? function call?
-          (case first
-            ((if)                 (compile-if             e env tail?))
-            ((define)             (compile-define         e env tail?))
-            ((begin)              (compile-begin          e env tail?))
-            ((lambda λ)                (compile-lambda         e env tail?))
-            ((let %let)           (compile-let            e env tail?))
-            ((let*)               (compile-let*           e env tail?))
-            ((letrec)             (compile-letrec         e env tail?))
-            ((and)                (compile-and            e env tail?))
-            ((or)                 (compile-or             e env tail?))
-            ((cond)               (compile-cond           e env tail?))
-            ((case)               (compile-case           e env tail?))
-            ((do)                 (compile-do             e env tail?))
-            ((quote)              (compile-quote          e env tail?))
-            ((quasiquote)         (compile-quasiquote     e env tail?))
-            ((with-handler)       (compile-with-handler   e env tail?))
-            ((define-macro)       (compile-define-macro   e env tail?))
-            ((%%set!)             (compile-set!           e env tail?))
+               (syntax? (symbol-value first (compiler-current-module) #f)))
+          (let ((val (symbol-value first (compiler-current-module))))
+            ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)
+            (compile (%macro-expand e) env epair tail?))
+          (if (and (symbol? first)
+                   (not (find-symbol-in-env first env))
+                   (expander? first))
+              ;; ---- macro call
+              (compile (macro-expand e) env epair tail?)
+              ;; ---- special-form? function call?
+              (case first
+                ((if)                 (compile-if             e env tail?))
+                ((define)             (compile-define         e env tail?))
+                ((begin)              (compile-begin          e env tail?))
+                ((lambda λ)                (compile-lambda         e env tail?))
+                ((let %let)           (compile-let            e env tail?))
+                ((let*)               (compile-let*           e env tail?))
+                ((letrec)             (compile-letrec         e env tail?))
+                ((and)                (compile-and            e env tail?))
+                ((or)                 (compile-or             e env tail?))
+                ((cond)               (compile-cond           e env tail?))
+                ((case)               (compile-case           e env tail?))
+                ((do)                 (compile-do             e env tail?))
+                ((quote)              (compile-quote          e env tail?))
+                ((quasiquote)         (compile-quasiquote     e env tail?))
+                ((with-handler)       (compile-with-handler   e env tail?))
+                ((define-macro)       (compile-define-macro   e env tail?))
+                ((defmacro)           (compile-defmacro       e env tail?))
 
-            ;; Special calls
-            ((%%require)          (compile-require        e env tail?))
-            ((%%require4syntax)   (compile-require4syntax e env tail?))
-            ((%%when-compile)     (compile-when-compile   e env tail?))
-            ((%%include)          (compile-include        e env tail?))
-            ((%%include-ci)       (compile-include-ci     e env tail?))
-            ((%%source-pos)       (compile-%%source-pos   e env tail?))
-            ((%%label)            (compile-%%label        e env tail?))
-            ((%%goto)             (compile-%%goto         e env tail?))
-            ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
+                ((%%set!)             (compile-set!           e env tail?))
 
-            ;; Standard call
-            (else                 (compile-call           e env tail?))))))
+                ;; Special calls
+                ((%%require)          (compile-require        e env tail?))
+                ((%%require4syntax)   (compile-require4syntax e env tail?))
+                ((%%when-compile)     (compile-when-compile   e env tail?))
+                ((%%include)          (compile-include        e env tail?))
+                ((%%include-ci)       (compile-include-ci     e env tail?))
+                ((%%source-pos)       (compile-%%source-pos   e env tail?))
+                ((%%label)            (compile-%%label        e env tail?))
+                ((%%goto)             (compile-%%goto         e env tail?))
+                ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
+
+                ;; Standard call
+                (else                 (compile-call           e env tail?)))))))
 
    ;; ---- We have a symbol
    ((symbol? e)

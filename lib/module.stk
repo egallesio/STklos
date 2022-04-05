@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  3-Apr-2022 17:13 (eg)
+;;;; Last file update:  5-Apr-2022 15:09 (eg)
 ;;;;
 
 
@@ -451,15 +451,25 @@ doc>
   (let Loop ((l symbols) (res '()))
     (cond
      ((null? l)
-          ;; Hack to avoid useless compilation messages.
-          (register-new-globals!  (map car res))
-          (reverse! res))
+          (let ((res (reverse! res)))
+            ;; HACK: register exported symbols to avoid furteher useless
+            ;; compilation messages.
+            (register-new-globals!  (map car res))
+
+            ;; HACK: do the exportations in compiler-current-module to
+            ;; permit the syntax publication in header of `.ostk` files
+            ;; It means that exportation is done 2 times when compiling
+            ;; (but only onece when loding a file
+            (%do-exports (compiler-current-module) res)
+            res))
+
      ((symbol? (car l))
           ;; export a single identifier
           (let ((s (car l)))
             (Loop (cdr l)
                   (cons (cons s s)
                         res))))
+
      ((and (pair? (car l)) (eq? (caar l) 'rename))
           ;; export with renaming: (rename old new)
           (let ((symbs (cdar l)))
@@ -470,6 +480,7 @@ doc>
             (Loop (cdr l)
                   (cons (cons (car symbs) (cadr symbs))
                         res))))
+
      (else
           (error 'export "bad exportation `~S'" (car l))))))
 
@@ -510,6 +521,7 @@ doc>
 ;;//  (%do-exports module symbols))
 
 
+;;; FIXME:
 (define-macro (export-syntax . arg)
   ;; This is only an approximation. Must be rewritten
   `(%%publish-syntax ,@arg))
