@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  5-Apr-2022 15:01 (eg)
+;;;; Last file update:  5-Apr-2022 19:42 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -204,7 +204,7 @@
                         ;; XXXX (%debug "symbole ~S syntax? ~S" symb (syntax? val))
                         (Loop (cdr lst)
                               (if (syntax? val)
-                                  (cons (list symb
+                                  (cons (list (cdar lst)
                                               (module-name mod)
                                               (syntax-expander val))
                                         res)
