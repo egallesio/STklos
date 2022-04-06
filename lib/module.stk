@@ -282,7 +282,7 @@ doc>
                    (error 'import "bad list of symbols ~s in only clause"
                           ids key))
                  `(,@(parse (cadr import-set)) #:only ,ids))
-               (error 'inport "bad only clause ~s" import-set)))
+               (error 'import "bad only clause ~s" import-set)))
 
           ((except)
            (if (>= (length import-set) 3)
@@ -290,13 +290,13 @@ doc>
                  (unless (every symbol? ids)
                    (error 'import "bad list of symbols ~s in except clause" ids))
                  `(,@(parse (cadr import-set)) #:except ,ids))
-               (error 'inport "bad except clause ~s" import-set)))
+               (error 'import "bad except clause ~s" import-set)))
 
           ((prefix)
            (if (and (= (length import-set) 3)
                     (symbol? (caddr import-set)))
                `(,@(parse (cadr import-set)) #:prefix ,(caddr import-set))
-               (error 'inport "bad prefix clause ~s" import-set)))
+               (error 'import "bad prefix clause ~s" import-set)))
 
           ((rename)
            (if (>= (length import-set) 3)
@@ -309,7 +309,7 @@ doc>
                    (error 'import "bad list of associations ~s in rename clause"
                           assocs))
                  `(,@(parse (cadr import-set)) #:rename ,assocs))
-               (error 'inport "bad rename clause ~s" import-set)))
+               (error 'import "bad rename clause ~s" import-set)))
 
           (else
            (list (%library-name->symbol import-set))))))

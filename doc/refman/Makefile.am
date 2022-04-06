@@ -2,17 +2,18 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 14-Mar-2022 18:56 (eg)
+# Last file update:  6-Apr-2022 18:07 (eg)
 
 
 ADOC=@ASCIIDOCTOR@
+STKLOS_BINARY ?= ../../src/stklos
 
 SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc      \
            intro.adoc libs.adoc licence.adoc match.adoc object.adoc  \
            progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc         \
            srfi.adoc stdproc.adoc stklos.adoc threads.adoc
 DOCDB    = ../DOCDB
-SPP      = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
+SPP      = $(STKLOS_BINARY) -q -I ../../lib -f ../../utils/stklos-pp.stk --
 
 HTMLMAIN  = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html

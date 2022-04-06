@@ -470,11 +470,12 @@ extradoc: pdf
 
 # ----------------------------------------------------------------------
 ../HTML/$(HTMLMAIN): tmp-html.txt
+	mkdir -p ../HTML
 	$(ADOC) -v -o $@ tmp-html.txt
 
 # ----------------------------------------------------------------------
 ../PDF/$(PDF): tmp-pdf.txt
-	mkdir -p ../pdf
+	mkdir -p ../PDF
 	$(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ tmp-pdf.txt
 
 # ----------------------------------------------------------------------
@@ -489,7 +490,7 @@ clean:
 	rm -f  tmp-html.txt tmp-pdf.txt  *~
 
 distclean: clean
-	rm -f  ../HTML/$(HTMLMAIN) 
+	rm -f ../HTML/$(HTMLMAIN) 
 	rm -f ../PDF/$(PDF)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
