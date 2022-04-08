@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 19-Mar-2022 22:47 (eg)
+# Last file update:  8-Apr-2022 14:25 (eg)
 
 #-======================================================================
 
@@ -845,11 +845,25 @@ STKLOS_BINARY ?= ../../src/stklos
 
 #======================================================================
 # Dependencies
+DEPEND_1:  51.ostk 134.ostk 171.ostk 189.ostk 196.ostk 207.ostk
+DEPEND_9:  37.ostk  64.ostk 113.ostk 117.ostk 128.ostk 134.ostk 135.ostk 154.ostk \
+	      161.ostk 171.ostk 173.ostk 180.ostk 189.ostk 196.ostk 207.ostk 230.ostk
+
+$(DEPEND_1): 1.ostk
+$(DEPEND_9): 9.ostk
 13.ostk: 14.ostk
 41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
+74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
+94.ostk: 60.ostk 
 95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
+133.ostk: ../stklos/itrie.so
 134.ostk: 158.ostk
+135.ostk: 129.ostk
+190.ostk: 158.ostk
+216.ostk: 27.$(SO)
+217.ostk: ../stklos/itrie.so
+221.ostk: 41.ostk 158.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c

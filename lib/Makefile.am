@@ -20,10 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 10-Mar-2022 15:29 (eg)
+# Last file update:  8-Apr-2022 13:31 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme streams srfi stklos
+	      scheme streams stklos srfi
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
