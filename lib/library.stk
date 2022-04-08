@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  6-Apr-2022 17:29 (eg)
+;;;; Last file update:  8-Apr-2022 12:44 (eg)
 ;;;;
 
 ;;
@@ -122,7 +122,7 @@
        ;; ①: Define (eventually) the library and do the imports and exports
        (let ((,lib (%eventually-create-library ',module-name)))
          ;; Do the imports
-         ,@(map (lambda (x) `(%do-imports ,lib ',x)) imports)
+         ,@(map (lambda (x) `(%do-imports ,lib ',x #f)) imports)
 
          ;; Do the exports
          ,@(map (lambda (x) `(%do-exports ,lib ',x)) exports)

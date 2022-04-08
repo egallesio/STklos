@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  5-Apr-2022 19:42 (eg)
+;;;; Last file update:  8-Apr-2022 13:37 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -175,6 +175,9 @@
 ;;; Management of exported syntaxes
 ;;;
 
+
+;; FIXME: This code should be in compfile
+
 ; modules seen in a file (used by compile-file)
 (define *file-module-list* '())
 
@@ -188,23 +191,20 @@
         (set! *file-module-list* (cons mod *file-module-list*))))))
 
 (define (file-module-list-expanders)
+  ;; Build the list of all exported macros of the modules(s) in
+  ;; the current file processed by current compile-file
   (apply append
          (map (lambda (mod)
-                ;; XXXX:
-                ;(%debug "We need to publish the macros of ~S" (module-name mod))
-                ;(%debug "   Symbols: ~S ~S exports ~S" (module-symbols mod)
-                ;         (map (lambda (s) (syntax? (symbol-value s mod #f))) (module-symbols mod))
-                ;        (module-exports mod))
                 (let Loop ((lst (module-exports mod))
                            (res '()))
                   (if (null? lst)
                       res
                       (let* ((symb (caar lst))
                              (val  (symbol-value symb mod #f)))
-                        ;; XXXX (%debug "symbole ~S syntax? ~S" symb (syntax? val))
+                        ;; XXXX (%debug "symbol ~S syntax? ~S" symb (syntax? val))
                         (Loop (cdr lst)
                               (if (syntax? val)
-                                  (cons (list (cdar lst)
+                                  (cons (list (car lst)
                                               (module-name mod)
                                               (syntax-expander val))
                                         res)
@@ -1755,13 +1755,44 @@ doc>
   (when (pair? infos)
     ;; Register all the global symbols of the file
     (for-each register-new-global! (key-get infos :globals '()))
-    ;; Install the expanders of the required file
+
+    ;; FIXME: This code must be deleted when defmacro is completed
     (for-each (lambda (x)
                 (let* ((name     (car x))
                        (proc     (cdr x))
                        (expander `(lambda (form e) (apply ,proc (cdr form)))))
                   (install-expander! name (eval expander) proc)))
-              (key-get infos :expanders '()))))
+              (key-get infos :expanders '()))
+
+    ;; Rebuild the expanders exported by the imported file.
+    (for-each (lambda (x)
+                (let* ((names   (car x))
+                       (modname (cadr x))
+                       (proc    (caddr x))
+                       (name    (cdr names))
+                       (module  (or (find-module modname #f)
+                                    (%create-module modname)))
+                       (expander (eval proc module))
+                       (obj      (make-syntax 'defmacro
+                                              name
+                                              proc
+                                              expander
+                                              modname)))
+                  ;; Define the expander in the imported module
+                  ;; (%debug "Build expander ~s in ~S with ~S" name module proc)
+                  (%symbol-define name obj module)
+
+                  ;; Add the current expander in the exported list of imorted
+                  ;; module
+                  ;; NOTE: Since the expander is in the file information, it
+                  ;; is exported. We need to add it to the export list, so
+                  ;; that an import clause can retrieve it at compile time
+                  ;; when we produce a .ostk file. This is not necessary for
+                  ;; import of source file, but mandatory for file compilation.
+                  (let ((exports (module-exports module)))
+                    (unless (member names exports)
+                      (%module-exports-set! module (cons names exports))))))
+              (key-get infos :macros '()))))
 
 
 (define (%grab-file-information str)

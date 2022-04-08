@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  5-Apr-2022 15:09 (eg)
+;;;; Last file update:  8-Apr-2022 13:38 (eg)
 ;;;;
 
 
@@ -326,7 +326,7 @@ doc>
   (map parse imports))
 
 
-(define (%do-imports lib clauses)
+(define (%do-imports lib clauses only-syntax)
 
   (define (eventually-load-library name)
     (let ((module (find-module name #f)))
@@ -392,10 +392,17 @@ doc>
                                          keylist
                                          (list-copy (module-exports mod)))))
       ;; Make aliases for all symbols in imported list
-      (for-each (lambda (pair)
-                  (%symbol-link (cdr pair) (car pair) lib mod)
-                  (register-new-global! (cdr pair)))
-                imported)))
+      (if only-syntax
+          (for-each (lambda (pair)
+                      (let ((val (symbol-value (car pair) mod 'absent)))
+                        (when (syntax? val)
+                          (%symbol-link (cdr pair) (car pair) lib mod))
+                        (register-new-global! (cdr pair))))
+                      imported)
+          (for-each (lambda (pair)
+                      (%symbol-link (cdr pair) (car pair) lib mod)
+                      (register-new-global! (cdr pair)))
+                    imported))))
 
   ;; Call import-symbols for each import spec
   (for-each (lambda (imp)
@@ -418,8 +425,11 @@ doc>
     (for-each (lambda (x)
                 (%grab-file-information (symbol->string (car x))))
               imp)
+    ;; HACK
+    (%do-imports (compiler-current-module) (list-copy imp) #t)
+
     ;; Run time expansion
-    `(%do-imports (current-module) (list-copy ',imp))))
+    `(%do-imports (current-module) (list-copy ',imp) #f)))
 
 
 ;;=============================================================================
@@ -456,10 +466,10 @@ doc>
             ;; compilation messages.
             (register-new-globals!  (map car res))
 
-            ;; HACK: do the exportations in compiler-current-module to
-            ;; permit the syntax publication in header of `.ostk` files
-            ;; It means that exportation is done 2 times when compiling
-            ;; (but only onece when loding a file
+            ;; HACK: do the exportations in compiler-current-module to permit
+            ;; the syntax publication in header of `.ostk` files. It means
+            ;; that exportations are done two times when compiling (but only
+            ;; once when loding a file)
             (%do-exports (compiler-current-module) res)
             res))
 

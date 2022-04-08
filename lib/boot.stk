@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  3-Apr-2022 17:20 (eg)
+;;;; Last file update:  8-Apr-2022 14:36 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -67,7 +67,7 @@
 (autoload        "help"           help)
 (autoload        "lex-rt"         lexer-next-token)
 (syntax-autoload "scmpkg-support" interface)
-(autoload        "srfi-27"        random-integer random-real)
+;(autoload        "srfi-27"        random-integer random-real) ;; FIXME; autoload is broken here
 (autoload        "srfi-48"        srfi48:help srfi48:format-fixed)
 
 ;==============================================================================

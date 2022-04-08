@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 29-Nov-2021 22:15 (eg)
+;;;; Last file update:  8-Apr-2022 12:17 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -82,7 +82,7 @@
         (let* ((c1 (read-byte in))
                (c2 (read-byte in)))
           (format out
-                  "~5f"
+                  "~a"
                   (string-append
                    "0x"
                    (number->string (bit-or (bit-shift c1 8) c2)
