@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Feb-2022 18:13 (eg)
+# Last file update:  8-Apr-2022 18:20 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -64,8 +64,8 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  fport.c gnu-getopt.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
- signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
+ signal.c sio.c socket.c sport.c stklos.c str.c struct.c symbol.c \
+ syntax.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
 # HACK:  Normally BUILT_SOURCES contains the files that must be generated before
 # starting the construction of the main target. We use it with a fictive target

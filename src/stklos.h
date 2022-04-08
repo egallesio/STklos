@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 13-Mar-2022 17:19 (eg)
+ * Last file update:  8-Apr-2022 18:22 (eg)
  */
 
 
@@ -190,6 +190,7 @@ typedef enum {
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,      /* 30 */
   tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex,            /* 35 */
   tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,               /* 40 */
+  tc_syntax,                                                            /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -1284,6 +1285,14 @@ SCM STk_intern(char *name);
 SCM STk_make_uninterned_symbol(char *name);
 int STk_init_symbol(void);
 
+  /*
+  ------------------------------------------------------------------------------
+  ----
+  ----                           S Y N T A X  . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+int STk_init_syntax(void);
 
 /*
   ------------------------------------------------------------------------------

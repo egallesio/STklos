@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Feb-2022 18:13 (eg)
+# Last file update:  8-Apr-2022 18:20 (eg)
 
 
 VPATH = @srcdir@
@@ -131,9 +131,9 @@ am__stklos_SOURCES_DIST = base64.c boolean.c boot.c box.c char.c \
 	misc.c md5.c number.c object.c parameter.c path.c port.c \
 	print.c proc.c process.c promise.c read.c regexp.c signal.c \
 	sio.c socket.c sport.c stklos.c str.c struct.c symbol.c \
-	system.c utf8.c uvector.c vector.c vm.c vport.c thread-none.c \
-	mutex-none.c thread-common.c thread-pthreads.c mutex-common.c \
-	mutex-pthreads.c
+	syntax.c system.c utf8.c uvector.c vector.c vm.c vport.c \
+	thread-none.c mutex-none.c thread-common.c thread-pthreads.c \
+	mutex-common.c mutex-pthreads.c
 @NO_THREAD_FALSE@@PTHREADS_TRUE@am__objects_1 =  \
 @NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-common.$(OBJEXT) \
 @NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) \
@@ -153,9 +153,9 @@ am_stklos_OBJECTS = base64.$(OBJEXT) boolean.$(OBJEXT) boot.$(OBJEXT) \
 	promise.$(OBJEXT) read.$(OBJEXT) regexp.$(OBJEXT) \
 	signal.$(OBJEXT) sio.$(OBJEXT) socket.$(OBJEXT) \
 	sport.$(OBJEXT) stklos.$(OBJEXT) str.$(OBJEXT) \
-	struct.$(OBJEXT) symbol.$(OBJEXT) system.$(OBJEXT) \
-	utf8.$(OBJEXT) uvector.$(OBJEXT) vector.$(OBJEXT) vm.$(OBJEXT) \
-	vport.$(OBJEXT) $(am__objects_1)
+	struct.$(OBJEXT) symbol.$(OBJEXT) syntax.$(OBJEXT) \
+	system.$(OBJEXT) utf8.$(OBJEXT) uvector.$(OBJEXT) \
+	vector.$(OBJEXT) vm.$(OBJEXT) vport.$(OBJEXT) $(am__objects_1)
 stklos_OBJECTS = $(am_stklos_OBJECTS)
 am__DEPENDENCIES_1 =
 stklos_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -194,11 +194,11 @@ am__depfiles_remade = ./$(DEPDIR)/base64.Po ./$(DEPDIR)/boolean.Po \
 	./$(DEPDIR)/regexp.Po ./$(DEPDIR)/signal.Po ./$(DEPDIR)/sio.Po \
 	./$(DEPDIR)/socket.Po ./$(DEPDIR)/sport.Po \
 	./$(DEPDIR)/stklos.Po ./$(DEPDIR)/str.Po ./$(DEPDIR)/struct.Po \
-	./$(DEPDIR)/symbol.Po ./$(DEPDIR)/system.Po \
-	./$(DEPDIR)/thread-common.Po ./$(DEPDIR)/thread-none.Po \
-	./$(DEPDIR)/thread-pthreads.Po ./$(DEPDIR)/utf8.Po \
-	./$(DEPDIR)/uvector.Po ./$(DEPDIR)/vector.Po ./$(DEPDIR)/vm.Po \
-	./$(DEPDIR)/vport.Po
+	./$(DEPDIR)/symbol.Po ./$(DEPDIR)/syntax.Po \
+	./$(DEPDIR)/system.Po ./$(DEPDIR)/thread-common.Po \
+	./$(DEPDIR)/thread-none.Po ./$(DEPDIR)/thread-pthreads.Po \
+	./$(DEPDIR)/utf8.Po ./$(DEPDIR)/uvector.Po \
+	./$(DEPDIR)/vector.Po ./$(DEPDIR)/vm.Po ./$(DEPDIR)/vport.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -444,8 +444,8 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  fport.c gnu-getopt.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
- signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
+ signal.c sio.c socket.c sport.c stklos.c str.c struct.c symbol.c \
+ syntax.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
 BUILT_SOURCES = generate-git-info
 
@@ -634,6 +634,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/str.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbol.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/syntax.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/system.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-common.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-none.Po@am__quote@ # am--include-marker
@@ -900,6 +901,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/str.Po
 	-rm -f ./$(DEPDIR)/struct.Po
 	-rm -f ./$(DEPDIR)/symbol.Po
+	-rm -f ./$(DEPDIR)/syntax.Po
 	-rm -f ./$(DEPDIR)/system.Po
 	-rm -f ./$(DEPDIR)/thread-common.Po
 	-rm -f ./$(DEPDIR)/thread-none.Po

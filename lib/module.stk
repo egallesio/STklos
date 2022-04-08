@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  8-Apr-2022 13:38 (eg)
+;;;; Last file update:  8-Apr-2022 19:36 (eg)
 ;;;;
 
 
@@ -395,7 +395,7 @@ doc>
       (if only-syntax
           (for-each (lambda (pair)
                       (let ((val (symbol-value (car pair) mod 'absent)))
-                        (when (syntax? val)
+                        (when (%syntax? val)
                           (%symbol-link (cdr pair) (car pair) lib mod))
                         (register-new-global! (cdr pair))))
                       imported)
