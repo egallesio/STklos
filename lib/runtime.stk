@@ -1,7 +1,7 @@
 ;;;;
 ;;;; runtime.stk        -- Stuff necessary for bootstaping the system
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 30-Nov-2021 21:06 (eg)
+;;;; Last file update:  8-Apr-2022 20:25 (eg)
 ;;;;
 
 
@@ -233,3 +233,27 @@ doc>
   (let ((x (gensym)))
     `(with-handler (lambda (,x) (error ,owner (condition-ref ,x 'message)))
                    ,@body)))
+
+
+
+;----------------------------------------------------------------------
+(define %modules-stack  '())
+(define %module-create  (lambda (name)
+                          (set! %modules-stack (cons (current-module)
+                                                     %modules-stack))
+                          (%create-module name)))
+
+(define %module-restore (lambda ()
+                          (let ((previous (car %modules-stack)))
+                            (set! %modules-stack (cdr %modules-stack))
+                            previous)))
+
+(define %module-handler (lambda (c)
+                          (let ((mod (%module-restore)))
+                            ;; Push c on the module stack since env will be broken
+                            ;; by the module reset!
+                            (set! %modules-stack (cons c %modules-stack))
+                            (%%set-current-module mod)
+                            ;; Hack: Here %module-restore will get back the old c
+                            (raise (%module-restore)))))
+

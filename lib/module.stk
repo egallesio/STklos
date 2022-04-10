@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  8-Apr-2022 19:36 (eg)
+;;;; Last file update:  8-Apr-2022 20:24 (eg)
 ;;;;
 
 
@@ -165,26 +165,6 @@ doc>
  * The result of |define-module| is *_void_*.
 doc>
 |#
-(define %modules-stack  '())
-(define %module-create  (lambda (name)
-                          (set! %modules-stack (cons (current-module)
-                                                     %modules-stack))
-                          (%create-module name)))
-
-(define %module-restore (lambda ()
-                          (let ((previous (car %modules-stack)))
-                            (set! %modules-stack (cdr %modules-stack))
-                            previous)))
-
-(define %module-handler (lambda (c)
-                          (let ((mod (%module-restore)))
-                            ;; Push c on the module stack since env will be broken
-                            ;; by the module reset!
-                            (set! %modules-stack (cons c %modules-stack))
-                            (%%set-current-module mod)
-                            ;; Hack: Here %module-restore will get back the old c
-                            (raise (%module-restore)))))
-
 (define-macro (define-module name . body)
   (let ((oldmod (compiler-current-module))
         (newmod (or (find-module name #f) (%module-create name))))
