@@ -21,12 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  8-Apr-2022 14:36 (eg)
+;;;; Last file update: 10-Apr-2022 18:37 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
+
+;; Include files that do not use modules
 (include "runtime.stk")         ; Definition necessary for the bootstrap
-(include "module.stk")          ; All the macros for defining modules
 (include "r5rs.stk")            ; R5RS stuff written in Scheme
 (include "str.stk")             ; String functions UTF-8 aware
 (include "callcc.stk")          ; Call/cc support
@@ -34,20 +35,25 @@
 (include "bonus.stk")           ; Extended functions and syntaxes
 (include "load.stk")            ; Extended load dealing with paths and suffixes
 (include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
-(include "srfi-0.stk")          ; Implementation of SRFI-0
-(include "mbe.stk")             ; A simple R5RS macro system
 (include "regexp.stk")          ; Regular expressions
 (include "process.stk")         ; Processes from Scheme
 (include "equiv.stk")           ; equivalence of circular structures
-(include "compiler.stk")        ; VM Compiler
-(include "object.stk")          ; CLOS like object system
 (include "date.stk")            ; Dates
 (include "logical.stk")         ; Logical operations
 (include "thread.stk")          ; Thread support
 (include "ffi.stk")             ; FFI support
-(include "r7rs.stk")            ; Preliminary support of R7RS
-(include "library.stk")         ; R7RS define-library
 (include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
+
+;; Include file using module (order cannot be change easily for bootstap)
+(include "module.stk")          ; All the macros for defining modules
+(include "compiler.stk")        ; VM Compiler
+(include "r7rs.stk")            ; Support of R7RS (FIXME: should be upper in list)
+(include "library.stk")         ; R7RS define-library
+(include "object.stk")          ; CLOS like object system
+(include "mbe.stk")             ; A simple R5RS macro system
+(include "srfi-0.stk")          ; Implementation of SRFI-0
+
+;; Include file for the REPL
 (include "repl.stk")            ; Read Eval Print Loop
 (include "readline.stk")        ; Readline support
 (include "repl-readline.stk")   ; REPL + readline
