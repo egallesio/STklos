@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  8-Apr-2022 14:25 (eg)
+# Last file update: 11-Apr-2022 12:10 (eg)
 
 #-======================================================================
 
@@ -260,6 +260,7 @@ DEPEND_9:  37.ostk  64.ostk 113.ostk 117.ostk 128.ostk 134.ostk 135.ostk 154.ost
 $(DEPEND_1): 1.ostk
 $(DEPEND_9): 9.ostk
 13.ostk: 14.ostk
+37.ostk: 13.ostk
 41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk 

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  8-Apr-2022 13:37 (eg)
+;;;; Last file update: 11-Apr-2022 11:54 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -41,8 +41,6 @@
 
           ;; FIXME
           compiler-current-module
-          make-syntax
-          syntax?
           %macro-expand))
 
 (select-module STKLOS-COMPILER)
@@ -144,29 +142,14 @@
 ;                               SYNTAX
 ;
 ; ======================================================================
-(define-struct syntax
-  type                       ; syntax-rules? syntax-case? other?
-  name                       ; may be useful
-  expander                   ; source
-  compiled-expander          ; compiled with environment
-;  environment                ; the environment representation as used in the compiler
-  module)                    ; module where the macro was defined
-
-(struct-type-change-writer!
-    syntax
-    (lambda (s port)
-      (fprintf port "#[syntax ~A in ~A ~A]"
-               (syntax-name s) (syntax-module s) (address-of (syntax-compiled-expander s)))))
-
-
 (define (%macro-expand form)
   (if (pair? form)
       (let* ((name (car form))
-             (val  (symbol-value name (compiler-current-module) #f)))
+             (val  (symbol-value* name (compiler-current-module) #f)))
         ;; FIXME
         ;;(when (eq? name 'add1) (%debug "module: ~S val = ~S" (compiler-current-module) val))
-        (if (and (symbol? name) (syntax? val))
-            (apply (syntax-compiled-expander val) (cdr form))
+        (if (and (symbol? name) (%syntax? val))
+            (apply (%syntax-expander val) (cdr form))
             form))
       ;; Form is not a pair => return it unmodified
       form))
@@ -200,13 +183,13 @@
                   (if (null? lst)
                       res
                       (let* ((symb (caar lst))
-                             (val  (symbol-value symb mod #f)))
-                        ;; XXXX (%debug "symbol ~S syntax? ~S" symb (syntax? val))
+                             (val  (symbol-value* symb mod #f)))
+                        ;; XXXX (%debug "symbol ~S syntax? ~S" symb (%syntax? val))
                         (Loop (cdr lst)
-                              (if (syntax? val)
+                              (if (%syntax? val)
                                   (cons (list (car lst)
                                               (module-name mod)
-                                              (syntax-expander val))
+                                              (%syntax-source val))
                                         res)
                                   res))))))
               *file-module-list*)))
@@ -516,11 +499,10 @@ doc>
                  (proc     (caddr l))
                  (mod      (compiler-current-module)))
             (if (symbol? name)
-                (let ((obj `(make-syntax 'defmacro
-                                         ',name
-                                         ',proc
-                                         (eval ',proc (find-module ',(module-name mod)))
-                                         ',(module-name mod))))
+                (let ((obj `(%make-syntax ',name
+                                          ',proc
+                                          ,proc
+                                          ',(module-name mod))))
                   ;; produce code for defining the macro
                   (register-new-global! name)
                   (compile obj #f env #f)
@@ -1773,11 +1755,10 @@ doc>
                        (module  (or (find-module modname #f)
                                     (%create-module modname)))
                        (expander (eval proc module))
-                       (obj      (make-syntax 'defmacro
-                                              name
-                                              proc
-                                              expander
-                                              modname)))
+                       (obj      (%make-syntax name
+                                               proc
+                                               expander
+                                               modname)))
                   ;; Define the expander in the imported module
                   ;; (%debug "Build expander ~s in ~S with ~S" name module proc)
                   (%symbol-define name obj module)
@@ -1900,7 +1881,7 @@ doc>
     (let ((first (car e)))
       (compiler-maybe-do-autoload first)
       (if (and (symbol? first)
-               (syntax? (symbol-value first (compiler-current-module) #f)))
+               (%syntax? (symbol-value* first (compiler-current-module) #f)))
           (let ((val (symbol-value first (compiler-current-module))))
             ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)
             (compile (%macro-expand e) env epair tail?))

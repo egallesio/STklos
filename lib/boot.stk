@@ -34,7 +34,6 @@
 (include "struct.stk")          ; STklos structures
 (include "bonus.stk")           ; Extended functions and syntaxes
 (include "load.stk")            ; Extended load dealing with paths and suffixes
-(include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "regexp.stk")          ; Regular expressions
 (include "process.stk")         ; Processes from Scheme
 (include "equiv.stk")           ; equivalence of circular structures
@@ -51,6 +50,8 @@
 (include "library.stk")         ; R7RS define-library
 (include "object.stk")          ; CLOS like object system
 (include "mbe.stk")             ; A simple R5RS macro system
+
+(include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "srfi-0.stk")          ; Implementation of SRFI-0
 
 ;; Include file for the REPL
