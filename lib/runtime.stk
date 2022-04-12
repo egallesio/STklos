@@ -21,9 +21,42 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update:  8-Apr-2022 20:25 (eg)
+;;;; Last file update: 12-Apr-2022 19:11 (eg)
 ;;;;
 
+;; ----------------------------------------------------------------------
+;;
+;; List functions
+;;
+;; ----------------------------------------------------------------------
+(define caar   (lambda (x) (car (car x))))
+(define cdar   (lambda (x) (cdr (car x))))
+(define cadr   (lambda (x) (car (cdr x))))
+(define cddr   (lambda (x) (cdr (cdr x))))
+(define caaar  (lambda (x) (car (car (car x)))))
+(define cdaar  (lambda (x) (cdr (car (car x)))))
+(define cadar  (lambda (x) (car (cdr (car x)))))
+(define cddar  (lambda (x) (cdr (cdr (car x)))))
+(define caadr  (lambda (x) (car (car (cdr x)))))
+(define cdadr  (lambda (x) (cdr (car (cdr x)))))
+(define caddr  (lambda (x) (car (cdr (cdr x)))))
+(define cdddr  (lambda (x) (cdr (cdr (cdr x)))))
+(define caaaar (lambda (x) (car (car (car (car x))))))
+(define cdaaar (lambda (x) (cdr (car (car (car x))))))
+(define cadaar (lambda (x) (car (cdr (car (car x))))))
+(define cddaar (lambda (x) (cdr (cdr (car (car x))))))
+(define caadar (lambda (x) (car (car (cdr (car x))))))
+(define cdadar (lambda (x) (cdr (car (cdr (car x))))))
+(define caddar (lambda (x) (car (cdr (cdr (car x))))))
+(define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
+(define caaadr (lambda (x) (car (car (car (cdr x))))))
+(define cdaadr (lambda (x) (cdr (car (car (cdr x))))))
+(define cadadr (lambda (x) (car (cdr (car (cdr x))))))
+(define cddadr (lambda (x) (cdr (cdr (car (cdr x))))))
+(define caaddr (lambda (x) (car (car (cdr (cdr x))))))
+(define cdaddr (lambda (x) (cdr (car (cdr (cdr x))))))
+(define cadddr (lambda (x) (car (cdr (cdr (cdr x))))))
+(define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
 
 (define (map* fn . l)           ; A map which accepts dotted lists (arg lists
   (cond                         ; must be "isomorph"
@@ -45,7 +78,6 @@
 #| example
   (filter-map (lambda (x) (and (number? x) (+ x 1)))
             '(1 2 foo "bar" 7))
-
 |#
 
 (define (append-map proc . args)
@@ -55,6 +87,74 @@
   (apply append! (apply map proc args)))
 
 
+;; ----------------------------------------------------------------------
+;;
+;; SETTERS
+;;
+;; ----------------------------------------------------------------------
+#|
+<doc EXT setter
+ * (setter proc)
+ *
+ * Returns the setter associated to a |proc|. Setters are defined in the
+ * {{link-srfi 17}} document. A setter proc, can be used in a generalized
+ * assignment, as described in |set!|.
+ *
+ * To associate |s| to the procedure |p|, use the following form:
+ * @lisp
+ * (set! (setter p) s)
+ * @end lisp
+ * For instance, we can write
+ * @lisp
+ * (set! (setter car) set-car!)
+ * @end lisp
+ *
+ * The following standard procedures have pre-defined setters:
+ * @lisp
+ * (set! (car x) v)              == (set-car! x v)
+ * (set! (cdr x) v)              == (set-cdr! x v)
+ * (set! (string-ref x i) v)     == (string-set! x i v)
+ * (set! (vector-ref x i) v)     == (vector-set! x i v)!
+ * (set! (slot-ref x 'name) v)   == (slot-set! x 'name v)
+ * (set! (struct-ref x 'name) v) == (struct-set! x 'name v)
+ * @end lisp
+ * Furhermore, Parameter Objects (see _<<_parameter_objects>>_) are
+ * their own setter:
+ * @lisp
+ * (real-precision)              => 15
+ * (set! (real-precision) 12)
+ * (real-precision)              => 12
+ * @end lisp
+doc>
+|#
+(define (setter proc)
+  (if (or (generic? proc) (parameter? proc))
+      proc
+      (or (key-get (%procedure-plist proc) :setter #f)
+          (error 'setter "no setter defined for ~S" proc))))
+
+
+;; Initialize the setter of setter !!
+(%set-procedure-plist!
+         setter
+         (list :setter
+               (lambda (proc setter)
+                 (%set-procedure-plist! proc
+                                        (key-set! (%procedure-plist proc)
+                                                  :setter
+                                                  setter)))))
+
+;; And now set some setter for primitive functions
+(set! (setter car)              set-car!)
+(set! (setter cdr)              set-cdr!)
+(set! (setter vector-ref)       vector-set!)
+(set! (setter string-ref)       string-set!)
+(set! (setter slot-ref)         slot-set!)
+(set! (setter struct-ref)       struct-set!)
+
+;; ----------------------------------------------------------------------
+;;      symbol-append
+;; ----------------------------------------------------------------------
 (define (symbol-append . args)
   (let loop ((args args)
              (res  ""))
@@ -256,4 +356,5 @@ doc>
                             (%%set-current-module mod)
                             ;; Hack: Here %module-restore will get back the old c
                             (raise (%module-restore)))))
+
 

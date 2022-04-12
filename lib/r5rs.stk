@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update:  9-Jan-2022 18:05 (eg)
+;;;; Last file update: 12-Apr-2022 19:05 (eg)
 ;;;;
 
 
@@ -643,8 +643,6 @@ doc>
 doc>
 |#
 
-
-
 #|
 <doc caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr
  * (caar pair)
@@ -662,36 +660,6 @@ doc>
  * There are twenty-eight of these procedures in all.
 doc>
 |#
-
-(define caar   (lambda (x) (car (car x))))
-(define cdar   (lambda (x) (cdr (car x))))
-(define cadr   (lambda (x) (car (cdr x))))
-(define cddr   (lambda (x) (cdr (cdr x))))
-(define caaar  (lambda (x) (car (car (car x)))))
-(define cdaar  (lambda (x) (cdr (car (car x)))))
-(define cadar  (lambda (x) (car (cdr (car x)))))
-(define cddar  (lambda (x) (cdr (cdr (car x)))))
-(define caadr  (lambda (x) (car (car (cdr x)))))
-(define cdadr  (lambda (x) (cdr (car (cdr x)))))
-(define caddr  (lambda (x) (car (cdr (cdr x)))))
-(define cdddr  (lambda (x) (cdr (cdr (cdr x)))))
-(define caaaar (lambda (x) (car (car (car (car x))))))
-(define cdaaar (lambda (x) (cdr (car (car (car x))))))
-(define cadaar (lambda (x) (car (cdr (car (car x))))))
-(define cddaar (lambda (x) (cdr (cdr (car (car x))))))
-(define caadar (lambda (x) (car (car (cdr (car x))))))
-(define cdadar (lambda (x) (cdr (car (cdr (car x))))))
-(define caddar (lambda (x) (car (cdr (cdr (car x))))))
-(define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
-(define caaadr (lambda (x) (car (car (car (cdr x))))))
-(define cdaadr (lambda (x) (cdr (car (car (cdr x))))))
-(define cadadr (lambda (x) (car (cdr (car (cdr x))))))
-(define cddadr (lambda (x) (cdr (cdr (car (cdr x))))))
-(define caaddr (lambda (x) (car (car (cdr (cdr x))))))
-(define cdaddr (lambda (x) (cdr (car (cdr (cdr x))))))
-(define cadddr (lambda (x) (car (cdr (cdr (cdr x))))))
-(define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
-
 
 #|
 <doc with-input-from-file with-output-to-file
