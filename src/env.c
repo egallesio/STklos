@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  7-Jan-2022 20:41 (eg)
+ * Last file update: 12-Apr-2022 17:03 (eg)
  */
 
 #include "stklos.h"
@@ -48,11 +48,6 @@ static void error_not_exist(SCM obj)
 static void error_bad_list(SCM obj)
 {
   STk_error("bad list ~S", obj);
-}
-
-static void error_unbound_variable(SCM symbol)
-{
-  STk_error("variable ~S unbound", symbol);
 }
 
 static void error_bad_symbol(SCM symbol)
@@ -85,6 +80,12 @@ struct module_obj {
 SCM STk_STklos_module;          /* The module whose name is STklos */
 static SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
+
+
+static void error_unbound_variable(SCM symbol, SCM module)
+{
+  STk_error("variable ~S unbound in ~S", symbol, MODULE_NAME(module));
+}
 
 static void print_module(SCM module, SCM port, int mode)
 {
@@ -565,7 +566,7 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
   if (res) {
     return *BOX_VALUES(CDR(res));    /* sure that this box arity is 1 */
   } else {
-    if (!default_value) error_unbound_variable(symbol);
+    if (!default_value) error_unbound_variable(symbol, module);
     return default_value;
   }
 }
@@ -659,7 +660,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
   if (!res)
-    error_unbound_variable(old);
+    error_unbound_variable(old, module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
   return STk_void;
@@ -677,7 +678,7 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old);
   if (!res)
-    error_unbound_variable(old);
+    error_unbound_variable(old, old_module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
   return STk_void;
@@ -701,7 +702,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
 
   // symbol was not found in the given env module. Try to find it in
-  // the the STklos modle (if this is not a R7RS library)
+  // the the STklos module (if this is not a R7RS library)
   if (!MODULE_IS_LIBRARY(env) &&  env != STk_STklos_module) {
     env = STk_STklos_module;
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
@@ -713,7 +714,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 
   /* It definitively does not exists  :-< */
   if (err_if_unbound)
-    error_unbound_variable(symbol);
+    STk_error("variable ~S unbound", symbol);
   return STk_void;
 }
 
