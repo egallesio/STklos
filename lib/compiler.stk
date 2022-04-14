@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 11-Apr-2022 11:54 (eg)
+;;;; Last file update: 14-Apr-2022 14:42 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -41,6 +41,7 @@
 
           ;; FIXME
           compiler-current-module
+          %syntax-error
           %macro-expand))
 
 (select-module STKLOS-COMPILER)
@@ -515,17 +516,17 @@ doc>
 ;;;;
 ;;;; WHEN/UNLESS
 ;;;;
-(define-macro (when . args)
-  (let ((len (length args)))
-    (if (> len 1)
-        `(if ,(car args) (begin ,@(cdr args)))
-        (compiler-error 'when args "bad syntax in ~S" `(when ,@args)))))
-
-(define-macro (unless . args)
-  (let ((len (length args)))
-    (if (> len 1)
-        `(if (not ,(car args)) (begin ,@(cdr args)))
-        (compiler-error 'unless args "bad syntax in ~S" `(unless ,@args)))))
+;;(define-macro (when . args)
+;;  (let ((len (length args)))
+;;    (if (> len 1)
+;;        `(if ,(car args) (begin ,@(cdr args)))
+;;        (compiler-error 'when args "bad syntax in ~S" `(when ,@args)))))
+;;
+;;(define-macro (unless . args)
+;;  (let ((len (length args)))
+;;    (if (> len 1)
+;;        `(if (not ,(car args)) (begin ,@(cdr args)))
+;;        (compiler-error 'unless args "bad syntax in ~S" `(unless ,@args)))))
 
 
 ;;;;
@@ -1806,6 +1807,7 @@ doc>
                   (error '%%publish-syntax "bad symbol ~S" x)))
             (cdr e)))
 
+
 ;;;;
 ;;;; REQUIRE-FOR-SYNTAX
 ;;;;
@@ -1828,6 +1830,8 @@ doc>
        (eprintf "*** Exception while evaluation of required syntax ~S\n" e)
        (raise c))
      (require (cadr e))))
+
+
 
 
 ;;;;
@@ -1882,7 +1886,7 @@ doc>
       (compiler-maybe-do-autoload first)
       (if (and (symbol? first)
                (%syntax? (symbol-value* first (compiler-current-module) #f)))
-          (let ((val (symbol-value first (compiler-current-module))))
+          (let ((val (symbol-value* first (compiler-current-module))))
             ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)
             (compile (%macro-expand e) env epair tail?))
           (if (and (symbol? first)
@@ -1922,7 +1926,6 @@ doc>
                 ((%%label)            (compile-%%label        e env tail?))
                 ((%%goto)             (compile-%%goto         e env tail?))
                 ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
-
                 ;; Standard call
                 (else                 (compile-call           e env tail?)))))))
 

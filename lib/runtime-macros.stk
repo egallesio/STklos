@@ -1,0 +1,46 @@
+;;;;
+;;;;
+;;;; runtime-macros.stk         -- Macros available at bootstrap
+;;;;
+;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 14-Apr-2022 15:55
+;;;; Last file update: 14-Apr-2022 16:27 (eg)
+;;;;
+
+;; NOTE: Force the module to STklos (this is the case by default, EXCEPT that
+;; it is STKLOS-COMPILER when we are bootstrapping.
+(select-module STklos)
+
+
+(defmacro (syntax-error . args)
+  (if (zero? (length args))
+      (error 'syntax-error "needs at least one argument")
+      `(%syntax-error ,@args)))
+
+(defmacro (when . args)
+  (if (<= (length args) 1)
+      (syntax-error 'when "bad syntax in ~S" `(when ,@args))
+      `(if ,(car args) (begin ,@(cdr args)))))
+
+(defmacro (unless . args)
+  (if (<= (length args) 1)
+      (syntax-error 'unless "bad syntax in ~S" `(unless ,@args))
+      `(if (not ,(car args)) (begin ,@(cdr args)))))

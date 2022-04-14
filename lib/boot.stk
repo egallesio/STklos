@@ -21,41 +21,17 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 12-Apr-2022 18:36 (eg)
+;;;; Last file update: 14-Apr-2022 16:02 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
 
+(include "runtime.stk")         ; Definitions necessary for the bootstrap
+(include "runtime-macros.stk")  ; Macros necessary for the bootstrap
 
-;; Include files that do not use modules
-(include "runtime.stk")         ; Definition necessary for the bootstrap
-
-
-;;/;(include "r5rs.stk")            ; R5RS stuff written in Scheme
-;;//(include "str.stk")             ; String functions UTF-8 aware
-;;//(include "callcc.stk")          ; Call/cc support
-;;//(include "struct.stk")          ; STklos structures
-;(include "bonus.stk")           ; Extended functions and syntaxes
-;;//(include "load.stk")            ; Extended load dealing with paths and suffixes
-;;//(include "regexp.stk")          ; Regular expressions
-;;//(include "process.stk")         ; Processes from Scheme
-;;//(include "equiv.stk")           ; equivalence of circular structures
-;;//(include "date.stk")            ; Dates
-;;//(include "logical.stk")         ; Logical operations
-;;//(include "thread.stk")          ; Thread support
-;;//(include "ffi.stk")             ; FFI support
-;;//(include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
-
-
-
-;; Include file using module (order cannot be change easily for bootstap)
 (include "module.stk")          ; All the macros for defining modules
 (include "compiler.stk")        ; VM Compiler
-
-
-;;(define when (in-module STKLOS-COMPILER when 'absent))
-;;(when-compile (%debug "when ===>~S" (in-module STKLOS-COMPILER when 'absent)))
-
+(import STKLOS-COMPILER)        ; Force to be in the STklos module
 
 (include "r5rs.stk")            ; R5RS stuff written in Scheme
 (include "str.stk")             ; String functions UTF-8 aware
@@ -71,18 +47,6 @@
 (include "thread.stk")          ; Thread support
 (include "ffi.stk")             ; FFI support
 (include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
-
-
-
-
-
-
-
-
-
-
-
-
 (include "r7rs.stk")            ; Support of R7RS (FIXME: should be upper in list)
 (include "library.stk")         ; R7RS define-library
 (include "object.stk")          ; CLOS like object system
@@ -91,7 +55,7 @@
 (include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "srfi-0.stk")          ; Implementation of SRFI-0
 
-;; Include file for the REPL
+;; Include files for the REPL
 (include "repl.stk")            ; Read Eval Print Loop
 (include "readline.stk")        ; Readline support
 (include "repl-readline.stk")   ; REPL + readline
@@ -121,8 +85,7 @@
 ;; A main function which will probably overloaded by the user
 (define main void)
 
-(defmacro (++ v) `(+ ,v 1))
-(when-compile (%debug "when ===>~S" (in-module STKLOS-COMPILER when 'absent)))
+
 
 ;; ----------------------------------------------------------------------
 ;;      %display-backtrace ...
