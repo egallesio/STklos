@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 12-Apr-2022 19:07 (eg)
+;;;; Last file update: 14-Apr-2022 19:09 (eg)
 ;;;;
 
 
@@ -749,7 +749,9 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (fluid-let bindings . body)
+
+;;;FIXME: 
+#;(define-macro (fluid-let bindings . body)
   (let* ((vars (map car bindings))
          (vals (map cadr bindings))
          (tmps (map (lambda (x) (gensym)) vars)))
@@ -759,7 +761,15 @@ doc>
           (lambda () ,@body)
           (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps))))))
 
-
+(defmacro (fluid-let bindings . body)
+  (let* ((vars (map car bindings))
+         (vals (map cadr bindings))
+         (tmps (map (lambda (x) (gensym)) vars)))
+    `(let ,(map list tmps vars)
+       (dynamic-wind
+          (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars vals))
+          (lambda () ,@body)
+          (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps))))))
 ;=============================================================================
 
 #|
@@ -772,7 +782,7 @@ doc>
  * This is CPU time, and not real ("wall") time.
 doc>
 |#
-(define-macro time
+(defmacro time
   (lambda args
     (let ((tmp1 (gensym))
           (tmp2 (gensym)))
@@ -780,8 +790,6 @@ doc>
               (,tmp2 (begin ,@args)))
          (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,tmp1))
          ,tmp2))))
-
-
 
 #|
 <doc EXT-SYNTAX tagbody ->
@@ -821,7 +829,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (tagbody . body)
+(defmacro (tagbody . body)
   (let ((tags  (map (lambda (x) (cons x (%compiler-new-label)))
                     (filter keyword? body))))
 
@@ -856,7 +864,6 @@ doc>
                          body)))
       (verify new-body)
       `(begin ,@new-body))))
-
 #|
 <doc EXT-SYNTAX dotimes
  * (dotimes [var count] <expression1> <expression2> ...)
@@ -877,7 +884,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (dotimes bindings . body)
+(defmacro (dotimes bindings . body)
   (apply (lambda (var count . result)
            (let ((limit  (gensym))
                  (result (if (null? result) (list '(void)) result)))
@@ -886,7 +893,6 @@ doc>
                     ((>= ,var ,limit) ,@result)
                   ,@body))))
          bindings))
-
 #|
 <doc EXT-SYNTAX repeat
  * (repeat count <expression1> <expression2> ...)
@@ -904,7 +910,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (repeat expr . body)
+(defmacro (repeat expr . body)
   (let ((var (gensym)))
     `(let ((,var ,expr))
        (tagbody
@@ -914,6 +920,7 @@ doc>
           ,@body
           (-> #:top))))))
 
+
 #|
 <doc EXT-SYNTAX while
  * (while <test> <expression1> <expression2> ...)
@@ -922,7 +929,7 @@ doc>
  * value. The value returned by this form is *_void_*.
 doc>
 |#
-(define-macro (while test . body)
+(defmacro (while test . body)
   (let ((lab (gensym)))
     `(let ,lab ()
           (when ,test ,@body (,lab)))))
@@ -935,12 +942,10 @@ doc>
  * value. The value returned by this form is *_void_*.
 doc>
 |#
-(define-macro (until test . body)
+(defmacro (until test . body)
   (let ((lab (gensym)))
     `(let ,lab ()
           (unless ,test ,@body (,lab)))))
-
-
 
 #|
 <doc EXT call/ec
@@ -1197,7 +1202,7 @@ doc>
  *
 doc>
 |#
-(define-macro (declare-new-error name)
+(defmacro (declare-new-error name)
   (let ((cond-name (string->symbol (format "&~a" name)))
         (predicate (string->symbol (format "&~a?" name)))
         (args      (gensym)))
@@ -1596,7 +1601,7 @@ doc>
  *     ...)
 doc>
 |#
-(define-macro (define-constant . args)
+(defmacro (define-constant . args)
   (define (rewrite l)
     (if (<= (length l) 1)
         (error "bad constant definition"))
@@ -1666,7 +1671,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (receive vars producer . body)
+(defmacro (receive vars producer . body)
   `(call-with-values (lambda () ,producer)
                      (lambda ,vars ,@body)))
 
@@ -1718,7 +1723,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (case-lambda . clauses)
+(defmacro (case-lambda . clauses)
   (let ((len  (gensym))
         (args (gensym))
         (compute-arity (in-module STKLOS-COMPILER compute-arity)))
@@ -1750,7 +1755,7 @@ doc>
 ;;;
 
 ;; Macro used by SRFI-35 & SRFI-36 implementations
-(define-macro (%define-condition-type-accessors name supertype predicate . slots)
+(defmacro (%define-condition-type-accessors name supertype predicate . slots)
   (let ((obj (gensym)))
     `(begin
        ;; define the predicate
@@ -1828,7 +1833,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (parameterize bindings . body)
+(defmacro (parameterize bindings . body)
   (let ((tmp1 (map (lambda (_) (gensym)) bindings))
         (tmp2 (map (lambda (_) (gensym)) bindings)))
     `(let (,@(map (lambda (x y) (list y (cadr x)))
@@ -2052,7 +2057,7 @@ doc>
  * When {{stklos}} is not in debug mode, the call to |assume| is elided.
 doc>
 |#
-(define-macro (assume expr . args)
+(defmacro (assume expr . args)
   (if (positive? (stklos-debug-level))
       ;; Assumptions are evaluated in debug mode ...
       (let* ((efile (and (%epair? expr) (%epair-file expr)))
@@ -2065,7 +2070,6 @@ doc>
              (error ,fmt ',expr ,@args)))
       ;; ... and ignored otherwise
       #void))
-
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI-176: "Version flag"

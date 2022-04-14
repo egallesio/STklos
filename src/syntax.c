@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 25-Nov-2019 12:14
- * Last file update:  8-Apr-2022 19:38 (eg)
+ * Last file update: 14-Apr-2022 18:42 (eg)
  */
 
 #include "stklos.h"
@@ -53,7 +53,7 @@ DEFINE_PRIMITIVE("%make-syntax", make_syntax, subr4,
 {
   SCM z;
 
-  STk_debug("DEFINING syntax ~S in ~S", name, mod);
+  // STk_debug("DEFINING syntax ~S in ~S", name, mod);
 
   //FIXME: Add controls on parameter types
   NEWCELL(z, syntax);

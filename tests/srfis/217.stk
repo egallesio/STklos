@@ -70,7 +70,7 @@
 ;; "args" as formals in let-values, while other Schemes require an
 ;; explicit list of arguments. It was easier to reimplement with
 ;; define-macro. -- jpellegrini
-(define-macro (test-values expected expr)
+(defmacro (test-values expected expr)
   `(test "srfi-217-values.nonumber"
          (call-with-values (lambda () ,expected) list)
          (call-with-values (lambda () ,expr) list)))

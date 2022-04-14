@@ -170,7 +170,7 @@ doc>
   ;;
   ;; The TRACE macro
   ;;
-  (define-macro (trace . args)
+  (defmacro (trace . args)
     (let ((trace-symbol (symbol-value 'trace-symbol (find-module 'Trace))))
       (if (null? args)
 	  ;; Show all the traced symbols
@@ -210,7 +210,7 @@ doc>
   ;;
   ;; The UNTRACE macro
   ;;
-  (define-macro (untrace . args)
+  (defmacro (untrace . args)
     (let ((untrace-symbol (symbol-value 'untrace-symbol (find-module 'Trace))))
       (if (null? args)
 	  ;; Untrace, all the traced arguments

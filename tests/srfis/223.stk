@@ -2,7 +2,7 @@
 ;;  SRFI 223 ...
 ;; ----------------------------------------------------------------------
 
-(define-macro (test-group name . rest)
+(defmacro (test-group name . rest)
   `(begin ,@rest))
 
 ;; OEIS A003056

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 11-Jan-2022 17:32 (eg)
+;;;; Last file update: 14-Apr-2022 18:16 (eg)
 ;;;;
 
 
@@ -66,7 +66,7 @@
  * @end lisp
 doc>
 |#
-(define-macro (letrec* bindings . body)
+(defmacro (letrec* bindings . body)
   (if (list? bindings)
       (for-each (lambda (x)
                   (unless (and (list? x) (= (length x) 2))
@@ -123,7 +123,7 @@ is
                   (a |G161|))
               (list a b c d))))))
 |#
-(define-macro (let-values bindings . body)
+(defmacro (let-values bindings . body)
   (let ((tmps '()))  ;; A-list of temporaries.
 
     (define (expand-once bindings tmps)
@@ -174,7 +174,7 @@ is
  * @end lisp
 doc>
 |#
-(define-macro (let*-values bindings . body)
+(defmacro (let*-values bindings . body)
   (if (> (length bindings) 1)
       `(let-values (,(car bindings))
          (let*-values ,(cdr bindings) ,@body))
@@ -200,7 +200,7 @@ doc>
  * description of |delay|.
 doc>
 |#
-(define-macro (delay exp)
+(defmacro (delay exp)
   `(delay-force (%make-promise (list ,exp))))
 
 #|
@@ -220,10 +220,10 @@ doc>
  *
 doc>
 |#
-(define-macro (delay-force exp)
+(defmacro (delay-force exp)
   `(%make-promise (lambda () ,exp)))
 
-(define-macro (lazy expr)      ;; the SRFI-45 sytax
+(defmacro (lazy expr)      ;; the SRFI-45 sytax
   `(delay-force ,expr))
 
 #|
@@ -503,7 +503,7 @@ doc>
 ;;
 ;; Generalized string comparison functions
 ;;
-(define-macro (%generalize-string-compare func func2)
+(defmacro (%generalize-string-compare func func2)
   `(begin
      ;; Keep the old function since it is twice faster than the general one
      (define ,func2 ,func)
@@ -1452,7 +1452,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (guard clauses . body)
+(defmacro (guard clauses . body)
   (let* ((var      (car clauses))
          (last     (last-pair clauses))
          (ex       (gensym))

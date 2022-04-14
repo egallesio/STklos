@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 14-Apr-2022 14:42 (eg)
+;;;; Last file update: 14-Apr-2022 19:06 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -41,6 +41,8 @@
 
           ;; FIXME
           compiler-current-module
+          when-compile
+          when-load-and-compile
           %syntax-error
           %macro-expand))
 
@@ -468,6 +470,7 @@ doc>
                  (e        (gensym '_))
                  (expander `(lambda (,form ,e) (apply ,proc (cdr ,form)))))
             ;; Install expander for further compilation
+            (%debug "==========> Install expander for ~s" name)
             (install-expander! name (eval expander) proc)
             ;; Compile code for installing expander (for byte-code files)
             ;; YES! we need both (install + compile)
@@ -514,23 +517,7 @@ doc>
       (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
 
 ;;;;
-;;;; WHEN/UNLESS
-;;;;
-;;(define-macro (when . args)
-;;  (let ((len (length args)))
-;;    (if (> len 1)
-;;        `(if ,(car args) (begin ,@(cdr args)))
-;;        (compiler-error 'when args "bad syntax in ~S" `(when ,@args)))))
-;;
-;;(define-macro (unless . args)
-;;  (let ((len (length args)))
-;;    (if (> len 1)
-;;        `(if (not ,(car args)) (begin ,@(cdr args)))
-;;        (compiler-error 'unless args "bad syntax in ~S" `(unless ,@args)))))
-
-
-;;;;
-;;;; WHEN/UNLESS
+;;;; SET!
 ;;;;
 (define-macro (set! . args)
   `(%%set! ,@args))
@@ -1843,12 +1830,12 @@ doc>
                   (raise c))
      (eval `(begin ,@(cdr e) (void)))))
 
-(define-macro (when-compile . body)
+(defmacro (when-compile . body)
   `(begin
      (%%when-compile ,@body)
      (void)))
 
-(define-macro (when-load-and-compile . body)
+(defmacro (when-load-and-compile . body)
   `(begin
      (%%when-compile ,@body)
      ,@body
@@ -1958,8 +1945,14 @@ doc>
       ;;(disassemble-code code (current-error-port))
       (%execute code (list->vector *code-constants*) (or env (current-module))))))
 
-
+;; FIXME:
 (define-macro (%compile-time-define . symbs)
+  ;; This macro permits to add the given symbols in the list of defined symbols
+  ;; to avoid the "undefined symbol" warning messages
+  `(when-compile
+     ,@(map (lambda(x) `(define ,x #void)) symbs)))
+
+#;(defmacro (%compile-time-define . symbs)
   ;; This macro permits to add the given symbols in the list of defined symbols
   ;; to avoid the "undefined symbol" warning messages
   `(when-compile

@@ -59,7 +59,7 @@
  * @end lisp
 doc>
 |#
-(define-macro (match-lambda  . clauses)
+(defmacro (match-lambda  . clauses)
   (expand-match-lambda  (cons '()  clauses)))
 
 
@@ -96,7 +96,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (match-case expr . clauses)
+(defmacro (match-case expr . clauses)
   `((match-lambda  ,@clauses) ,expr))
 
 (provide "bigmatch")

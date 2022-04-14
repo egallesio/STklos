@@ -8,7 +8,7 @@
 (require "srfi-26") ;; two tests use cut...
 
 
-(define-macro (mute-cat expr)
+(defmacro (mute-cat expr)
   `(let ((res #f))
      (with-output-to-string (lambda () (set! res ,expr)))
      res))

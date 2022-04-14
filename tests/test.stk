@@ -121,7 +121,7 @@
 ;; ----------------------------------------------------------------------
 ;;  test ...
 ;; ----------------------------------------------------------------------
-(define-macro (test msg expect expr :optional (compare equal?))
+(defmacro (test msg expect expr :optional (compare equal?))
   `(%tester ,msg ,expect (lambda () ,expr) ',expr ,compare))
 
 ;; ----------------------------------------------------------------------

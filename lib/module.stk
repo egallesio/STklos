@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 11-Apr-2022 11:59 (eg)
+;;;; Last file update: 14-Apr-2022 18:36 (eg)
 ;;;;
 
 
@@ -106,8 +106,8 @@ doc>
  * @end lisp
 doc>
 |#
-
-(define-macro (select-module name)
+;FIXME:
+#;(define-macro (select-module name)
   ;; HACK: try to register the symbols definined in chosen module to make
   ;; them known to the compiler (and avoid messages about undefined)
   (let* ((mod    (find-module name #f))
@@ -120,7 +120,18 @@ doc>
      (%%set-current-module (find-module ',name))
      (when-compile (compiler-current-module ,newmod)))))
 
+(defmacro (select-module name)
+  ;; HACK: try to register the symbols definined in chosen module to make
+  ;; them known to the compiler (and avoid messages about undefined)
+  (let* ((mod    (find-module name #f))
+         (newmod (or mod (%module-create name))))
+    (when (and mod (not (eq? name 'STklos)))
+      (register-new-globals! (module-symbols mod)))
 
+  ;; The real expansion of the select-module
+  `(begin
+     (%%set-current-module (find-module ',name))
+     (when-compile (compiler-current-module ,newmod)))))
 ;;=============================================================================
 ;;
 ;;                              DEFINE-MODULE
@@ -165,7 +176,8 @@ doc>
  * The result of |define-module| is *_void_*.
 doc>
 |#
-(define-macro (define-module name . body)
+;; FIXME
+#;(define-macro (define-module name . body)
   (let ((oldmod (compiler-current-module))
         (newmod (or (find-module name #f) (%module-create name))))
   `(with-handler
@@ -177,6 +189,17 @@ doc>
       (%%set-current-module (%module-restore))
       (values (void) ',name))))
 
+(defmacro (define-module name . body)
+  (let ((oldmod (compiler-current-module))
+        (newmod (or (find-module name #f) (%module-create name))))
+  `(with-handler
+      %module-handler
+      (%%set-current-module (%module-create ',name))
+      (when-compile (compiler-current-module ,newmod))
+      ,@body
+      (when-compile (compiler-current-module ,oldmod))
+      (%%set-current-module (%module-restore))
+      (values (void) ',name))))
 
 ;;=============================================================================
 ;;
@@ -398,7 +421,8 @@ doc>
 ;;;;
 ;;;; IMPORT
 ;;;;
-(define-macro (import . modules)
+;;FIXME:
+#;(define-macro (import . modules)
   (let ((imp (%parse-imports modules)))
     ;; Since imported modules can define macros. We need to grab them
     ;; in case we are just compiling a file to produce a '.ostk' file
@@ -411,7 +435,18 @@ doc>
     ;; Run time expansion
     `(%do-imports (current-module) (list-copy ',imp) #f)))
 
+(defmacro (import . modules)
+  (let ((imp (%parse-imports modules)))
+    ;; Since imported modules can define macros. We need to grab them
+    ;; in case we are just compiling a file to produce a '.ostk' file
+    (for-each (lambda (x)
+                (%grab-file-information (symbol->string (car x))))
+              imp)
+    ;; HACK
+    (%do-imports (compiler-current-module) (list-copy imp) #t)
 
+    ;; Run time expansion
+    `(%do-imports (current-module) (list-copy ',imp) #f)))
 ;;=============================================================================
 ;;
 ;;                              EXPORT
@@ -501,18 +536,26 @@ doc>
 ;;;;
 ;;;; EXPORT
 ;;;;
-(define-macro (export . symbols)
+;; FIXME: 
+
+#;(define-macro (export . symbols)
   (let ((s (%parse-exports symbols)))
     `(%do-exports (current-module) ',s)))
 
-
+(defmacro (export . symbols)
+  (let ((s (%parse-exports symbols)))
+    `(%do-exports (current-module) ',s)))
 ;;//;; FIXME: For compatibility (should be deleted soon)
 ;;//(define (%module-export module . symbols)
 ;;//  (%do-exports module symbols))
 
 
 ;;; FIXME:
-(define-macro (export-syntax . arg)
+#;(define-macro (export-syntax . arg)
+  ;; This is only an approximation. Must be rewritten
+  `(%%publish-syntax ,@arg))
+
+(defmacro (export-syntax . arg)
   ;; This is only an approximation. Must be rewritten
   `(%%publish-syntax ,@arg))
 
@@ -542,5 +585,9 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (in-module mod symb . default)
+;; FIXME:
+#;(define-macro (in-module mod symb . default)
+  `(apply symbol-value* ',symb (find-module ',mod) ',default))
+
+(defmacro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))

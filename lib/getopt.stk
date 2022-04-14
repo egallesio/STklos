@@ -249,7 +249,7 @@ doc>
 doc>
 |#
 
-(define-macro (parse-arguments argv . clauses)
+(defmacro (parse-arguments argv . clauses)
 
   (define (option-names descr)
     ;; returns a cons with the long name in its CAR and the short name in its CDR

@@ -573,23 +573,23 @@ doc>
 
 #|
 <doc EXT-SYNTAX define-macro
- * (define-macro (<name> <formals>) <body>)
- * (define-macro <name> (lambda <formals> <body>))
+ * (defmacro (<name> <formals>) <body>)
+ * (defmacro <name> (lambda <formals> <body>))
  *
  * |define-macro| can be used to define low-level macro
  * (i.e. ,(emph "non hygienic") macros). This form is similar to the
  * |defmacro| form of Common Lisp.
  * @lisp
- * (define-macro (incr x) `(set! ,x (+ ,x 1)))
+ * (defmacro (incr x) `(set! ,x (+ ,x 1)))
  * (let ((a 1)) (incr a) a)   => 2
  *
- * (define-macro (when test . body)
+ * (defmacro (when test . body)
  *   `(if ,test ,@(if (null? (cdr body)) body `((begin ,@body)))))
  * (macro-expand '(when a b)) => (if a b)
  * (macro-expand '(when a b c d))
  *                            => (if a (begin b c d))
  *
- * (define-macro (my-and . exprs)
+ * (defmacro (my-and . exprs)
  *   (cond
  *    ((null? exprs)        #t)
  *    ((= (length exprs) 1) (car exprs))
@@ -611,7 +611,7 @@ doc>
  * otherwise |form| is returned unchanged.
  *
  * @lisp
- * (define-macro (incr x) `(set! ,x (+ ,x 1)))
+ * (defmacro (incr x) `(set! ,x (+ ,x 1)))
  * (macro-expand '(incr foo)) => (set! foo (+ foo 1))
  * (macro-expand '(car bar))  => (car bar)
  * @end lisp

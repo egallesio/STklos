@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 12-Jan-2022 13:58 (eg)
+;;;; Last file update: 14-Apr-2022 19:15 (eg)
 
 
 #|
@@ -62,7 +62,14 @@
     class-direct-slots class-slots
     generic-function-name generic-function-methods
     generic-function-documentation
-    slot-value))
+    slot-value
+
+    ;; Syntaxes
+    define-class
+    define-generic
+    method
+    define-method
+    ))
 
 (select-module STKLOS-OBJECT)
 
@@ -436,7 +443,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (define-class name supers slots . options)
+(defmacro (define-class name supers slots . options)
   `(define ,name
       (ensure-class
         ',name                                  ; name
@@ -481,7 +488,7 @@ doc>
 ;=============================================================================
 
 ; ==== Define-generic
-(define-macro (define-generic gf :optional (meta '<generic>)
+(defmacro (define-generic gf :optional (meta '<generic>)
                                  :key      (documentation #f))
   `(define ,gf (ensure-generic-function ',gf ,meta ,documentation)))
 
@@ -563,12 +570,12 @@ doc>
 
 
 ;====  Method
-(define-macro (method args . body)
+(defmacro (method args . body)
   (ensure-method #f args body))
 
 
 ; ==== Define-method
-(define-macro (define-method name args . body)
+(defmacro (define-method name args . body)
   (let ((gf (gensym "gf")))
     `(let ((,gf (ensure-generic-function ',name)))
        (add-method! ,gf ,(ensure-method gf args body))

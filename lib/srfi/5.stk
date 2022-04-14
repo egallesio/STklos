@@ -2,7 +2,7 @@
 ;;;;
 ;;;; srfi-5.stk         -- Implementattion of SRFI-5
 ;;;;
-;;;; Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  8-Oct-2020 17:17
-;;;; Last file update: 10-Oct-2021 19:31 (eg)
+;;;; Last file update: 14-Apr-2022 18:58 (eg)
 ;;;;
 
 ;; SRFI-5 idenntifies the followings cases
@@ -46,10 +46,8 @@
 
 
 (define-module srfi/5
-
-  (define-macro (let bindings . body)
-    ;; FIXME: 
-    ;(export let)
+  (export let)
+  (defmacro (let bindings . body)
 
     (define (find-names lst)
       (cond
@@ -81,12 +79,10 @@
              (bindings (car body))
              (body     (cdr body)))
         ;; === Named, non-signature-style, no rest argument
-        ;; === Named, non-signature-style, rest argument 
+        ;; === Named, non-signature-style, rest argument
         `(letrec ((,name (lambda ,(find-names bindings) ,@body)))
            (,name ,@(find-values bindings)))))))
 
-  ;;FIXME:
-  (export-syntax let)
 )
 
 (provide "srfi/5")

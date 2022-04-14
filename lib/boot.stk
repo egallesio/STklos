@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 14-Apr-2022 16:02 (eg)
+;;;; Last file update: 14-Apr-2022 19:14 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -51,6 +51,7 @@
 (include "library.stk")         ; R7RS define-library
 (include "object.stk")          ; CLOS like object system
 (include "mbe.stk")             ; A simple R5RS macro system
+;(import STKLOS-OBJECT MBE)
 
 (include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "srfi-0.stk")          ; Implementation of SRFI-0
