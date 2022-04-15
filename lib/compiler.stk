@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 14-Apr-2022 19:06 (eg)
+;;;; Last file update: 15-Apr-2022 18:56 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -44,6 +44,7 @@
           when-compile
           when-load-and-compile
           %syntax-error
+          %compile-time-define
           %macro-expand))
 
 (select-module STKLOS-COMPILER)
@@ -515,13 +516,6 @@ doc>
                   (%symbol-define name (eval obj mod) mod))
                 (compiler-error 'define-macro e "bad variable name ~S" name)))))
       (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
-
-;;;;
-;;;; SET!
-;;;;
-(define-macro (set! . args)
-  `(%%set! ,@args))
-
 
 #|
 
@@ -1945,14 +1939,7 @@ doc>
       ;;(disassemble-code code (current-error-port))
       (%execute code (list->vector *code-constants*) (or env (current-module))))))
 
-;; FIXME:
-(define-macro (%compile-time-define . symbs)
-  ;; This macro permits to add the given symbols in the list of defined symbols
-  ;; to avoid the "undefined symbol" warning messages
-  `(when-compile
-     ,@(map (lambda(x) `(define ,x #void)) symbs)))
-
-#;(defmacro (%compile-time-define . symbs)
+(defmacro (%compile-time-define . symbs)
   ;; This macro permits to add the given symbols in the list of defined symbols
   ;; to avoid the "undefined symbol" warning messages
   `(when-compile

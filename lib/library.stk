@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  8-Apr-2022 12:44 (eg)
+;;;; Last file update: 15-Apr-2022 18:44 (eg)
 ;;;;
 
 ;;
@@ -80,7 +80,7 @@
         (%register-library-as-module lib name)
         lib)))
 
-(define-macro (define-library name . decls)
+(defmacro (define-library name . decls)
   (let* ((module-name    (%library-name->symbol name))
          (imports        '())
          (exports        '())
