@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 29-Mar-2005 14:58 (eg)
-;;;; Last file update: 12-Apr-2022 19:26 (eg)
+;;;; Last file update: 15-Apr-2022 17:40 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -59,9 +59,7 @@ This is a dump of the image in file ~A
                    "0x~A"
                    (number->string (bit-or (bit-shift c1 8) c2) 16))
            (when (< i (- sz 1))
-             (display ", " out))
-           (when (zero? (modulo i 8))
-             (display "\n" out))))
+             (display ",\n" out))))
       (display "};\n" out))
     (flush-output-port out)
     (close-port out)))
