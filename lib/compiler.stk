@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 15-Apr-2022 18:56 (eg)
+;;;; Last file update: 16-Apr-2022 18:27 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -146,17 +146,23 @@
 ;                               SYNTAX
 ;
 ; ======================================================================
+
+(define (syntax-in-module symbol module)
+  (and (symbol? symbol)
+       (let ((val (symbol-value* symbol module #f)))
+         (and (%syntax? val) val))))
+
 (define (%macro-expand form)
   (if (pair? form)
       (let* ((name (car form))
              (val  (symbol-value* name (compiler-current-module) #f)))
-        ;; FIXME
-        ;;(when (eq? name 'add1) (%debug "module: ~S val = ~S" (compiler-current-module) val))
         (if (and (symbol? name) (%syntax? val))
             (apply (%syntax-expander val) (cdr form))
             form))
       ;; Form is not a pair => return it unmodified
       form))
+
+
 
 ;;;
 ;;; Management of exported syntaxes
@@ -667,8 +673,13 @@ doc>
       (let ((cur (cond
                    ((null? l)
                       (error "body is empty"))
+                   ((and (pair? l)
+                         (pair? (car l))
+                         (syntax-in-module (caar l) (compiler-current-module)))
+                    ;; FIXME: should be some kind of %macro-expand*
+                    (%macro-expand (car l)))
                    ((and (pair? l) (pair? (car l)) (expander? (caar l)))
-                      (%macro-expand* (car l)))
+                    (%macro-expand* (car l)))
                    (else
                       (car l)))))
         (cond
@@ -1866,6 +1877,7 @@ doc>
     (let ((first (car e)))
       (compiler-maybe-do-autoload first)
       (if (and (symbol? first)
+               (not (find-symbol-in-env first env))
                (%syntax? (symbol-value* first (compiler-current-module) #f)))
           (let ((val (symbol-value* first (compiler-current-module))))
             ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)

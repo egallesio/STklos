@@ -21,14 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 14-Apr-2022 19:14 (eg)
+;;;; Last file update: 16-Apr-2022 18:46 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
 
 (include "runtime.stk")         ; Definitions necessary for the bootstrap
 (include "runtime-macros.stk")  ; Macros necessary for the bootstrap
-
 (include "module.stk")          ; All the macros for defining modules
 (include "compiler.stk")        ; VM Compiler
 (import STKLOS-COMPILER)        ; Force to be in the STklos module
@@ -51,7 +50,7 @@
 (include "library.stk")         ; R7RS define-library
 (include "object.stk")          ; CLOS like object system
 (include "mbe.stk")             ; A simple R5RS macro system
-;(import STKLOS-OBJECT MBE)
+(import STKLOS-OBJECT MBE)
 
 (include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "srfi-0.stk")          ; Implementation of SRFI-0

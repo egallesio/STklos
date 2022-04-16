@@ -31,7 +31,7 @@
 ;;; by Eugene Kohlbecker and in R4RS Appendix.
 ;;;
 ;;;
-;;; Last file update: 27-May-2011 23:04 (eg)
+;;; Last file update: 16-Apr-2022 18:44 (eg)
 
 #|
 			STklos Implementation Notes
@@ -126,14 +126,15 @@ doc>
 
 (define-module MBE
   (import SCHEME)
+  (export let-syntax letrec-syntax)
 
   (define (%not-implemented name args)
     (error name
       "cannot be used here. You must load the file \"full-syntax\" to access it:"
       (cons name args)))
 
-  (define-macro (let-syntax . args)   (%not-implemented 'let-syntax ',args))
-  (define-macro (letrec-syntax . args)(%not-implemented 'letrec-syntax ',args))
+  (defmacro (let-syntax . args)   (%not-implemented 'let-syntax ',args))
+  (defmacro (letrec-syntax . args)(%not-implemented 'letrec-syntax ',args))
 
 
 ;;;

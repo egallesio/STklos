@@ -22,14 +22,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Mar-2022 18:42
-;;;; Last file update: 12-Mar-2022 19:27 (eg)
+;;;; Last file update: 16-Apr-2022 17:34 (eg)
 ;;;;
 
 ;; SRFI-55 is embedded in STklos (but can be imported ...)
 
 (define-module srfi/55
   (import SCHEME)
-  ;; FIXME
-  #;(export require-extension))
+  (export require-extension))
 
 (provide "srfi/55")
