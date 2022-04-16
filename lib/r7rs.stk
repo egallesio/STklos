@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 14-Apr-2022 18:16 (eg)
+;;;; Last file update: 16-Apr-2022 18:42 (eg)
 ;;;;
 
 
@@ -275,7 +275,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (define-values formals expr)
+#;(defmacro (define-values formals expr)
   (cond
    ((symbol? formals)
     `(define ,formals (call-with-values (lambda () ,expr) list)))
@@ -291,6 +291,24 @@ doc>
          (values (void) ',formals))))
    (else (error "bad formal list in define-values ~S" ',formals))))
 
+(defmacro (define-values formals expr)
+  (define (flat lst)
+    (cond
+     ((null? lst) lst)
+     ((pair? lst) (cons (car lst) (flat (cdr lst))))
+     (else        (list lst))))
+
+  (if (null? formals)
+      `(call-with-values (lambda () ,expr) void)
+      (let* ((tmps (map* (lambda(x) (gensym)) formals))
+             (ff   (flat formals))
+             (ft   (flat tmps)))
+        `(begin
+           ,@(map (lambda (x) `(define ,x #void)) ff)
+           (call-with-values (lambda () ,expr)
+             (lambda ,tmps ,@(map (lambda (x y) `(set! ,x ,y)) ff ft)))
+           ;; return a (values (void) ...) for the REPL
+           (values (void) ',formals)))))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.1 Equivalence predicate
