@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Apr-2022 13:31 (eg)
+# Last file update: 19-Apr-2022 12:25 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme streams stklos srfi
@@ -56,6 +56,7 @@ scheme_BOOT = assembler.stk \
           repl.stk          \
           repl-readline.stk \
           runtime.stk       \
+          runtime-macros.stk\
           srfis-data.scm    \
           srfi-0.stk        \
           str.stk           \
