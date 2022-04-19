@@ -2,7 +2,7 @@
 ;;;;
 ;;;; r5rs.stk         -- The (scheme r5rs) library
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Oct-2021 19:30
-;;;; Last file update: 17-Oct-2021 20:40 (eg)
+;;;; Last file update: 19-Apr-2022 12:11 (eg)
 ;;;;
 
 
@@ -31,7 +31,7 @@
   ;; HACK START
   ;; THIS IS A UGLY HACK. THIS MACRO MUST BE DELETED AS SOON AS WE KNOW
   ;; HOW TO CLEANLY EXPORT SYNTAXES?
-  (define-macro (%define-here . lst)
+  (defmacro (%define-here . lst)
    `(begin ,@(map (lambda (symb) `(define ,symb #void))
                   lst)))
 
