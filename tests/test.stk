@@ -128,7 +128,7 @@
 ;; test/error ...
 ;; ----------------------------------------------------------------------
 
-(define-syntax test/error
+(defsyntax test/error
   (syntax-rules ()
     ((_ str code)
      (test str *test-failed* result))))

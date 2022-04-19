@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 19-Apr-2022 12:14 (eg)
+;;;; Last file update: 19-Apr-2022 15:21 (eg)
 ;;;;
 
 ;;
@@ -63,6 +63,7 @@
 ;;
 ;; A macro to redefine a symbol in a R7RS module
 ;;
+;; FIXME: must be deleted when macro are OK
 (defmacro (%module-define-and-export . lst)
   `(begin
      ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)

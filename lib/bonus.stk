@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 14-Apr-2022 19:09 (eg)
+;;;; Last file update: 19-Apr-2022 12:27 (eg)
 ;;;;
 
 
@@ -1906,7 +1906,7 @@ doc>
 doc>
 |#
 
-(define-syntax require-extension
+(defsyntax require-extension
   (syntax-rules (srfi)
     ((_ "internal" (srfi id ...))
      (begin (require-feature id) ...))

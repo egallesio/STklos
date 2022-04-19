@@ -2784,8 +2784,8 @@ and R. Kent Dybvig.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(define-macro (&lt;name&gt; &lt;formals&gt;) &lt;body&gt;)</code></strong><br>
-<strong><code>(define-macro &lt;name&gt; (lambda &lt;formals&gt; &lt;body&gt;))</code></strong><br></p>
+<p><strong><code>(defmacro (&lt;name&gt; &lt;formals&gt;) &lt;body&gt;)</code></strong><br>
+<strong><code>(defmacro &lt;name&gt; (lambda &lt;formals&gt; &lt;body&gt;))</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -2796,16 +2796,16 @@ and R. Kent Dybvig.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-macro</span> <span class="p">(</span><span class="nf">incr</span> <span class="nv">x</span><span class="p">)</span> <span class="o">`</span><span class="p">(</span><span class="k">set!</span> <span class="o">,</span><span class="nv">x</span> <span class="p">(</span><span class="nb">+</span> <span class="o">,</span><span class="nv">x</span> <span class="mi">1</span><span class="p">)))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">defmacro</span> <span class="p">(</span><span class="nf">incr</span> <span class="nv">x</span><span class="p">)</span> <span class="o">`</span><span class="p">(</span><span class="k">set!</span> <span class="o">,</span><span class="nv">x</span> <span class="p">(</span><span class="nb">+</span> <span class="o">,</span><span class="nv">x</span> <span class="mi">1</span><span class="p">)))</span>
 <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">a</span> <span class="mi">1</span><span class="p">))</span> <span class="p">(</span><span class="nf">incr</span> <span class="nv">a</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="mi">2</span>
 
-<span class="p">(</span><span class="nf">define-macro</span> <span class="p">(</span><span class="nf">when</span> <span class="nv">test</span> <span class="o">.</span> <span class="nv">body</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">defmacro</span> <span class="p">(</span><span class="nf">when</span> <span class="nv">test</span> <span class="o">.</span> <span class="nv">body</span><span class="p">)</span>
   <span class="o">`</span><span class="p">(</span><span class="k">if</span> <span class="o">,</span><span class="nv">test</span> <span class="o">,@</span><span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">null?</span> <span class="p">(</span><span class="nb">cdr</span> <span class="nv">body</span><span class="p">))</span> <span class="nv">body</span> <span class="o">`</span><span class="p">((</span><span class="k">begin</span> <span class="o">,@</span><span class="nv">body</span><span class="p">)))))</span>
 <span class="p">(</span><span class="nf">macro-expand</span> <span class="o">'</span><span class="p">(</span><span class="nf">when</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="k">if</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>
 <span class="p">(</span><span class="nf">macro-expand</span> <span class="o">'</span><span class="p">(</span><span class="nf">when</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span>
                            <span class="nv">=&gt;</span> <span class="p">(</span><span class="k">if</span> <span class="nv">a</span> <span class="p">(</span><span class="k">begin</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span>
 
-<span class="p">(</span><span class="nf">define-macro</span> <span class="p">(</span><span class="nf">my-and</span> <span class="o">.</span> <span class="nv">exprs</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">defmacro</span> <span class="p">(</span><span class="nf">my-and</span> <span class="o">.</span> <span class="nv">exprs</span><span class="p">)</span>
   <span class="p">(</span><span class="k">cond</span>
    <span class="p">((</span><span class="nb">null?</span> <span class="nv">exprs</span><span class="p">)</span>        <span class="no">#t</span><span class="p">)</span>
    <span class="p">((</span><span class="nb">=</span> <span class="p">(</span><span class="nb">length</span> <span class="nv">exprs</span><span class="p">)</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">exprs</span><span class="p">))</span>
@@ -3049,7 +3049,7 @@ otherwise <code>form</code> is returned unchanged.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-macro</span> <span class="p">(</span><span class="nf">incr</span> <span class="nv">x</span><span class="p">)</span> <span class="o">`</span><span class="p">(</span><span class="k">set!</span> <span class="o">,</span><span class="nv">x</span> <span class="p">(</span><span class="nb">+</span> <span class="o">,</span><span class="nv">x</span> <span class="mi">1</span><span class="p">)))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">defmacro</span> <span class="p">(</span><span class="nf">incr</span> <span class="nv">x</span><span class="p">)</span> <span class="o">`</span><span class="p">(</span><span class="k">set!</span> <span class="o">,</span><span class="nv">x</span> <span class="p">(</span><span class="nb">+</span> <span class="o">,</span><span class="nv">x</span> <span class="mi">1</span><span class="p">)))</span>
 <span class="p">(</span><span class="nf">macro-expand</span> <span class="o">'</span><span class="p">(</span><span class="nf">incr</span> <span class="nv">foo</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">foo</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">foo</span> <span class="mi">1</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">macro-expand</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="nv">bar</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">bar</span><span class="p">)</span></code></pre>
 </div>
@@ -26367,7 +26367,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-04-06 18:30:46 +0200
+Last updated 2022-04-19 17:07:15 +0200
 </div>
 </div>
 </body>

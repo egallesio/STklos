@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Apr-2022 15:55
-;;;; Last file update: 15-Apr-2022 18:53 (eg)
+;;;; Last file update: 19-Apr-2022 12:21 (eg)
 ;;;;
 
 ;; NOTE: Force the module to STklos (this is the case by default, EXCEPT that
@@ -75,3 +75,14 @@
       (error 'syntax-error "needs at least one argument")
       `(%syntax-error ,@args)))
 
+
+(defmacro (defsyntax macro-name syn-rules)
+  (if (or (not (pair? syn-rules))
+          (not (eq? (car syn-rules) 'syntax-rules)))
+      (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
+
+      (let ((keywords    (cons macro-name (cadr syn-rules)))
+            (clauses     (cddr syn-rules))
+            (find-clause (symbol-value 'find-clause (find-module 'MBE))))
+        `(defmacro (,macro-name . args)
+           (%find-macro-clause ',macro-name args ',keywords ',clauses)))))
