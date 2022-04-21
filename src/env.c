@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 12-Apr-2022 17:03 (eg)
+ * Last file update: 21-Apr-2022 15:01 (eg)
  */
 
 #include "stklos.h"
@@ -67,6 +67,7 @@ struct module_obj {
   SCM exported_symbols;         /* symbols declared as exported */
   SCM imports;                  /* imported modules */
   int is_library;               /* 1 if module is a R7RS library; 0 otherwise */
+  int is_instancied;            /* 1 if module has already been selected */
   struct hash_table_obj hash;   /* The associated hash table */
 };
 
@@ -99,7 +100,7 @@ static void print_module(SCM module, SCM port, int mode)
         STk_putc((*s == '/') ? ' ': *s, port);
       }
       STk_putc(')', port);
-    } else {
+    } else {                                                            //FIXME: no more anonymous
       /* anonymous library => print its address */
       char buffer[100];
       snprintf(buffer, sizeof(buffer), "%lx", (unsigned long) module);
@@ -112,18 +113,6 @@ static void print_module(SCM module, SCM port, int mode)
   STk_putc(']', port);
 }
 
-static SCM make_simple_module(SCM name)
-{
-  register SCM z;
-
-  NEWCELL(z, module);
-  MODULE_NAME(z)        = name;
-  MODULE_EXPORTS(z)     = STk_nil;
-  MODULE_IMPORTS(z)     = STk_nil;
-  MODULE_IS_LIBRARY(z)  = 0;
-  STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
-  return z;
-}
 
 static void register_module(SCM mod)
 {
@@ -133,14 +122,15 @@ static void register_module(SCM mod)
   MUT_UNLOCK(lck);
 }
 
-static SCM STk_makemodule(SCM name)
+static SCM STk_makemodule(SCM name)             //FIXME: delete STk_ prefix
 {
   register SCM z;
 
   NEWCELL(z, module);
-  MODULE_NAME(z)        = name;
-  MODULE_EXPORTS(z)     = STk_nil;
-  MODULE_IMPORTS(z)     = (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
+  MODULE_NAME(z)          = name;
+  MODULE_EXPORTS(z)       = STk_nil;
+  MODULE_IMPORTS(z)       = (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
+  MODULE_IS_LIBRARY(z)    = 0;
   /* Initialize the associated hash table & store the module in the global list*/
   STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
   register_module(z);
@@ -196,26 +186,29 @@ DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
   return find_module(name, TRUE);
 }
 
- DEFINE_PRIMITIVE("%make-library", make_library, subr0, (void))
+DEFINE_PRIMITIVE("%ensure-module", ensure_module, subr1, (SCM name))
 {
-  SCM z = make_simple_module(STk_void);
+  SCM z;
+  if (!SYMBOLP(name)) error_bad_module_name(name);
+  z = find_module(name, FALSE);
 
-  MODULE_IS_LIBRARY(z) = 1;
-  return z;
+  if (z != STk_void) return z;
+  return STk_makemodule(name);
 }
 
-DEFINE_PRIMITIVE("%register-library-as-module", register_library,
-                 subr2, (SCM m, SCM name))
+DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
 {
-  if (!MODULEP(m))    error_bad_module(m);
-  if (!SYMBOLP(name)) error_bad_symbol(name);
-  MODULE_NAME(m) = name;
-  register_module(m);
-  return STk_void;;
+  SCM z;
+
+  if (!SYMBOLP(name)) error_bad_module_name(name);
+
+  z = find_module(name, FALSE);
+  if (z == STk_void) error_bad_module_name(name);
+
+  MODULE_IS_LIBRARY(z) = TRUE;
+  STk_dremq(STk_STklos_module, MODULE_IMPORTS(z));
+  return STk_void;
 }
-
-
-
 
 DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 {
@@ -250,7 +243,7 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
                  (SCM exporter,SCM exported))
 {
   if (!MODULEP(exporter)) error_bad_module(exporter);
-  if (!CONSP(exported))   error_bad_list(exported);
+  if (!NULLP(exported) && !CONSP(exported)) error_bad_list(exported);
 
   MODULE_EXPORTS(exporter) = exported;
   return STk_void;
@@ -511,7 +504,7 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
  * (symbol-lock! symb)
  * (symbol-lock! symb mod)
  *
- * Makes the symbol |symb| in module |mod| unmutable. If |mod| is not specified, 
+ * Makes the symbol |symb| in module |mod| unmutable. If |mod| is not specified,
  * the current module is used.
  *
  * @lisp
@@ -764,9 +757,9 @@ int STk_late_init_env(void)
   Scheme_module = STk_makemodule(STk_intern("SCHEME"));
 
   /* ==== Undocumented primitives ==== */
-  ADD_PRIMITIVE(make_library);
-  ADD_PRIMITIVE(register_library);
   ADD_PRIMITIVE(create_module);
+  ADD_PRIMITIVE(module2library);
+  ADD_PRIMITIVE(ensure_module);
   ADD_PRIMITIVE(select_module);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);

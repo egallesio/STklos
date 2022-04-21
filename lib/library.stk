@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 19-Apr-2022 15:21 (eg)
+;;;; Last file update: 21-Apr-2022 14:42 (eg)
 ;;;;
 
 ;;
@@ -75,12 +75,6 @@
 ;; DEFINE-LIBRARY
 ;;
 ;; ======================================================================
-(define (%eventually-create-library name)
-  (or (find-module name #f)
-      (let ((lib (%make-library)))
-        (%register-library-as-module lib name)
-        lib)))
-
 (defmacro (define-library name . decls)
   (let* ((module-name    (%library-name->symbol name))
          (imports        '())
@@ -88,7 +82,7 @@
          (body           '())
          (lib            (gensym))
          (module-restore (symbol-value '%module-restore
-                                       (find-module 'STklos))))
+                                       (find-module 'SCHEME))))
 
     ;; Parse declarations
     (for-each (lambda (d)
@@ -98,11 +92,9 @@
                       (rest (cdr d)))
                   (case key
                     ((import)
-                     (let ((imp (%parse-imports rest)))
-                       (set! imports (append! imports (list imp)))))
+                     (set! imports (append imports rest)))
                     ((export)
-                     (let ((exp (%parse-exports rest)))
-                       (set! exports (append! exports (list exp)))))
+                     (set! exports (append exports rest)))
                     ((begin include include-ci)
                      (set! body (append body (list d))))
                     (else
@@ -113,27 +105,31 @@
     ;;
     ;; The difficulty here is that libraries have an empty environment. That
     ;; means that we cannot expand in a "define-module" and do the imports
-    ;; and the exports in it. Consequently, we work in two time:
-    ;;  1. First, we create an empty library and fill it with the import and
-    ;;     the export. This is done in in the STklos environment
-    ;;  2. Then, we use a standard define-module which will use the library
-    ;;     previously built where the imports/exports have bee forged.
+    ;; and the exports in it. Consequently, we work in four phases:
+    ;;  1. First, we create the library as a module and just do the imports and
+    ;;     exports in it. This allows us to use all the expansion code of
+    ;;     of import and exports since the STklos environment is visible.
+    ;;  2. We forge the symbols %module-restore and %make-syntax in the
+    ;;     environment of the module/library. The former is uses at the end of the
+    ;;     expansion of define-module. The latter is used by define-macro.
+    ;;  3. We transform the module in a library (that means more of less that
+    ;;     the STklos module is  deleted from the import list.
+    ;;  4. we evaluate the body in the module (which is now a library)
     ;;
     `(begin
-       ;; ①: Define (eventually) the library and do the imports and exports
-       (let ((,lib (%eventually-create-library ',module-name)))
-         ;; Do the imports
-         ,@(map (lambda (x) `(%do-imports ,lib ',x #f)) imports)
+       (define-module ,module-name
+         ;; ①: define the imports and the exports
+         (import ,@imports)
+         (export ,@exports)
+         ;; ②: define useful 'secret" symbols
+         (%symbol-define '%module-restore %module-restore (current-module))
+         (%symbol-define '%make-syntax    %make-syntax    (current-module))
 
-         ;; Do the exports
-         ,@(map (lambda (x) `(%do-exports ,lib ',x)) exports)
+         ;; ③: transform the module in a library
+         (%module->library! ',module-name)
 
-         ;; HACK: %module-restore is used at the end of the expansion.
-         ;; We define here it locally to permit the module restoration
-         (%symbol-define '%module-restore %module-restore ,lib))
-
-       ;; ②: Define a standard STklos module
-       (define-module ,module-name ,@body))))
+         ;; ④: evaluate the body in the library environment
+         ,@body))))
 
 
 #|
@@ -141,7 +137,7 @@
  * (library-name lib)
  *
  * Returns the name of |lib| if it was defined as an R7RS library,
- * and #f if the library is anonymous. If |lib| is not a library, 
+ * and #f if the library is anonymous. If |lib| is not a library,
  * |library-name| raises an error.
  *
  * @lisp
