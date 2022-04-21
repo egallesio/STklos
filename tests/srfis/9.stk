@@ -9,7 +9,7 @@
   (y kdr))
 
 (test "my-pair?.1" #t (my-pair? (kons 1 2)))
-(test "my-pair?.2" #t (my-pair? (cons 1 2)))
+(test "my-pair?.2" #f (my-pair? (cons 1 2)))
 (test "kar"        1  (kar (kons 1 2)))
 (test "kdr"        2  (kdr (kons 1 2)))
 (let ((k (kons 1 2)))
