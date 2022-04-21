@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-r7rs-lib.stk         -- Testing R7RS libraries
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 22-Oct-2021 12:15
-;;;; Last file update: 25-Oct-2021 17:40 (eg)
+;;;; Last file update: 21-Apr-2022 15:20 (eg)
 ;;;;
 
 (require "test")
@@ -37,8 +37,10 @@
 
 (define (library-symbols name)
   (let ((symbs  (module-symbols (find-module name))))
-    ;; Delete the %module-symbols symbol which is used for module management
-    (sort-list (delete '%module-restore symbs))))
+    ;; Delete the symbols %module-symbols and %make-syntax used for module
+    ;; management
+    (sort-list (filter (lambda (x) (not (memq x '(%module-restore %make-syntax))))
+                       symbs))))
 
 (define (library-exports name)
   (sort-list (module-exports (find-module name))))
