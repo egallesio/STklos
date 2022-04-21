@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Jun-2020 15:32
-;;;; Last file update: 21-Feb-2022 11:47 (eg)
+;;;; Last file update: 21-Apr-2022 18:01 (eg)
 ;;;;
 
 
@@ -33,16 +33,11 @@
   (define (yield value)
     (error 'yield "cannot be used outside coroutine generator"))
 
-  (define-macro (coroutine-generator . body)
+  (defmacro (coroutine-generator . body)
     `(make-coroutine-generator (lambda (yield) ,@body)))
 
-  (define-macro (define-coroutine-generator proto . body)
-    `(define ,proto (coroutine-generator ,@body)))
-
-  ;;FIXME:
-  (define coroutine-generator #void)
-  (define define-coroutine-generator #void)
-  (export-syntax coroutine-generator define-coroutine-generator))
+  (defmacro (define-coroutine-generator proto . body)
+    `(define ,proto (coroutine-generator ,@body))))
 
 #|
 Examples:

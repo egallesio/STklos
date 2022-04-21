@@ -1,5 +1,5 @@
 ;;;;
-;;;; 128.stk		-- Implementation of SRFI-128
+;;;; 128.stk            -- Implementation of SRFI-128
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-Jul-2020 13:21 (jpellegrini)
-;;;; Last file update: 04-Dec-2021 10:22 (jpellegrini)
+;;;; Last file update: 21-Apr-2022 17:03 (eg)
 ;;;;
 
 
@@ -69,12 +69,6 @@
    ;; need to export %salt, otherwise (hash-salt) won't work:
    %salt%)
 
-(define comparator-if<=> "<<FIXME>>")
-(define hash-salt        "<<FIXME>>")
-(define hash-bound       "<<FIXME>>")
-
-  
-
 ;;;; Main part of the SRFI 114 reference implementation
 
 ;;; "There are two ways of constructing a software design: One way is to
@@ -86,7 +80,7 @@
 
 ;; Arithmetic if
 
-(define-syntax comparator-if<=>
+(defsyntax comparator-if<=>
   (syntax-rules ()
     ((if<=> a b less equal greater)
      (comparator-if<=> (make-default-comparator) a b less equal greater))
@@ -97,17 +91,17 @@
        (else greater)))))
 
 ;; Upper bound of hash functions is 2^25-1
-(define-syntax hash-bound
+(defsyntax hash-bound
   (syntax-rules ()
     ((hash-bound) 33554432)))
 
 (define %salt% (make-parameter 16064047))
 
-(define-syntax hash-salt
+(defsyntax hash-salt
    (syntax-rules ()
      ((hash-salt) (%salt%))))
 
-(define-syntax with-hash-salt
+(defsyntax with-hash-salt
   (syntax-rules ()
     ((with-hash-salt new-salt hash-func obj)
      (parameterize ((%salt% new-salt)) (hash-func obj)))))
@@ -174,27 +168,27 @@
 (define (=? comparator a b . objs)
   (let loop ((a a) (b b) (objs objs))
     (and (binary=? comparator a b)
-	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
+         (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (<? comparator a b . objs)
   (let loop ((a a) (b b) (objs objs))
     (and (binary<? comparator a b)
-	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
+         (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (>? comparator a b . objs)
   (let loop ((a a) (b b) (objs objs))
     (and (binary>? comparator a b)
-	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
+         (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (<=? comparator a b . objs)
   (let loop ((a a) (b b) (objs objs))
     (and (binary<=? comparator a b)
-	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
+         (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 (define (>=? comparator a b . objs)
   (let loop ((a a) (b b) (objs objs))
     (and (binary>=? comparator a b)
-	 (if (null? objs) #t (loop b (car objs) (cdr objs))))))
+         (if (null? objs) #t (loop b (car objs) (cdr objs))))))
 
 
 ;;; Simple ordering and hash functions
@@ -424,8 +418,8 @@
 (define (string-hash obj)
   (let ((h (hash-table-hash (substring obj 0 (string-length obj)))))
     (if (positive? (hash-bound))
- 	(modulo h (hash-bound))
- 	h)))
+        (modulo h (hash-bound))
+        h)))
 
 ;;; The default comparator
 
@@ -508,7 +502,7 @@
     ((6) (complex<? a b))
     ((7) ((make-vector<? (make-default-comparator) vector? vector-length vector-ref) a b))
     ((8) ((make-vector<? (make-comparator exact-integer? = < default-hash)
-			 bytevector? bytevector-length bytevector-u8-ref) a b))
+                         bytevector? bytevector-length bytevector-u8-ref) a b))
     ; Add more here
     (else (binary<? (registered-comparator type) a b))))
 

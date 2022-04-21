@@ -23,8 +23,34 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Mar-2022 13:08
-;;;; Last file update: 18-Mar-2022 13:32 (eg)
+;;;; Last file update: 21-Apr-2022 17:17 (eg)
 ;;;;
 
-(define-module srfi/143)
+(define-module srfi/143
+  (import (only SCHEME
+                 fx-width fx-greatest fx-least
+                 fixnum? fx=? fx<? fx>? fx<=? fx>=?
+                 fxzero? fxpositive? fxnegative?
+                 fxodd? fxeven? fxmax fxmin
+                 fx+ fx- fxneg fx* fxquotient fxremainder
+                 fxabs fxsquare fxsqrt
+                 fx+/carry fx-/carry fx*/carry
+                 fxnot fxand fxior fxxor fxarithmetic-shift
+                 fxarithmetic-shift-left fxarithmetic-shift-right
+                 fxbit-count fxlength fxif fxbit-set? fxcopy-bit
+                 fxfirst-set-bit fxbit-field
+                 fxbit-field-rotate fxbit-field-reverse))
+  (export fx-width fx-greatest fx-least
+          fixnum? fx=? fx<? fx>? fx<=? fx>=?
+          fxzero? fxpositive? fxnegative?
+          fxodd? fxeven? fxmax fxmin
+          fx+ fx- fxneg fx* fxquotient fxremainder
+          fxabs fxsquare fxsqrt
+          fx+/carry fx-/carry fx*/carry
+          fxnot fxand fxior fxxor fxarithmetic-shift
+          fxarithmetic-shift-left fxarithmetic-shift-right
+          fxbit-count fxlength fxif fxbit-set? fxcopy-bit
+          fxfirst-set-bit fxbit-field
+          fxbit-field-rotate fxbit-field-reverse))
+
 (provide "srfi/143")

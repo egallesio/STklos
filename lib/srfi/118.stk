@@ -25,16 +25,16 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  4-Dec-2021 09:20
-;;;; Last file update:  4-Dec-2021 09:31 (jpellegrini)
+;;;; Last file update: 21-Apr-2022 17:01 (eg)
 ;;;;
 
 
 ;; The two procedures defined in the SRFI text are native primitives
-;; in STklos, so we just import them from the STklos module and export
+;; in STklos, so we just import them from the SCHEME module and export
 ;; them here.
 
 (define-module srfi/118
-  (import STklos) ;; where those two procedures are
+  (import (only SCHEME string-append! string-replace!))
   (export string-append!
           string-replace!))
 

@@ -1,6 +1,6 @@
-;;;; 7.stk 				-- SRFI-7 (PROGRAM)
+;;;; 7.stk                              -- SRFI-7 (PROGRAM)
 ;;;;
-;;;; Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -22,14 +22,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 31-Aug-1999 16:10 (eg)
-;;;; Last file update: 10-Oct-2021 20:12 (eg)
+;;;; Last file update: 19-Apr-2022 14:52 (eg)
 
 
 (define-module srfi/7
-  ;; FIXME:
-  ; (export program)
-  
-  (define-syntax program
+  (export program)
+
+  (defsyntax program
     (syntax-rules (requires files code feature-cond)
       ((program)
        (begin))
@@ -41,9 +40,7 @@
        (begin stuff ... (program more ...)))
       ((program (feature-cond (requirement stuff ...) ...) more ...)
        (begin (cond-expand (requirement (program stuff ...)) ...)
-	          (program more ...)))))
+                  (program more ...))))))
 
-  (export-syntax program))
 
 (provide "srfi/7")
-

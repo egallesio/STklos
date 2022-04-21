@@ -184,7 +184,7 @@
 
 
 ; Destructive operations on one vector
-(define-syntax mutate-as
+(defsyntax mutate-as
   (syntax-rules ()
     ((_ name vec expr)
       (let ((name (vector->flexvector vec)))

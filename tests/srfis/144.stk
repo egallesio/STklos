@@ -1,5 +1,5 @@
 ;;; Copyright (C) William D Clinger (2017).
-;;; 
+;;;
 ;;; Permission is hereby granted, free of charge, to any person
 ;;; obtaining a copy of this software and associated documentation
 ;;; files (the "Software"), to deal in the Software without
@@ -8,10 +8,10 @@
 ;;; sell copies of the Software, and to permit persons to whom the
 ;;; Software is furnished to do so, subject to the following
 ;;; conditions:
-;;; 
+;;;
 ;;; The above copyright notice and this permission notice shall be
 ;;; included in all copies or substantial portions of the Software.
-;;; 
+;;;
 ;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 ;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -19,7 +19,7 @@
 ;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 ;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 ;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-;;; OTHER DEALINGS IN THE SOFTWARE. 
+;;; OTHER DEALINGS IN THE SOFTWARE.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -183,7 +183,7 @@
 ;;            ((< n 0) x))))))
 
 (define epsilon 10e-6)
-  
+
 (define (good-enough? x y)
      ;; relative error should be with 0.1%, but greater
      ;; relative error is allowed when the expected value
@@ -213,7 +213,6 @@
        ((test/approx name expr1 expr2)
         (test name #t (good-enough? expr1 expr2)))))
 
-    
    (define-syntax test-assert
      (syntax-rules ()
        ((test-assert name expr)
@@ -660,7 +659,7 @@
      (test "srfi-144.261 " (map flnan?
                 (map fl+ infinities (reverse infinities)))
            (map (lambda (x) #t) infinities))
-     
+
      (test "srfi-144.262 " (fl*) one)
      (test "srfi-144.263 " (fl* zero) zero)
      (test "srfi-144.264 " (flzero? (fl* negzero)) #t)
@@ -675,7 +674,7 @@
            (map (lambda (x) posinf) infinities))
      (test "srfi-144.271 " (map fl* infinities (reverse infinities))
            (map (lambda (x) neginf) infinities))
-     
+
      (let ((three (flonum 3))
            (four  (flonum 4))
            (five  (flonum 5))
@@ -723,7 +722,7 @@
            '(#t #t))
      (test "srfi-144.297 " (map fl- infinities (reverse infinities))
            infinities)
-     
+
      (test "srfi-144.298 " (fl/ zero) posinf)
      (test "srfi-144.299 " (fl/ negzero) neginf)
      (test "srfi-144.300 " (fl/ one) one)
@@ -737,12 +736,12 @@
            '(#t #t))
      (test "srfi-144.306 " (map flnan? (map fl/ infinities (reverse infinities)))
            '(#t #t))
-     
+
      (test "srfi-144.307 " (flabs zero) zero)
      (test "srfi-144.308 " (flabs negzero) zero)
      (test "srfi-144.309 " (flabs one) one)
      (test "srfi-144.310 " (flabs (flonum -5.25)) (flonum 5.25))
-     
+
      (test "srfi-144.311 " (flabsdiff zero one) one)
      (test "srfi-144.312 " (flabsdiff one zero) one)
      (test "srfi-144.313 " (flabsdiff one one) zero)
@@ -820,7 +819,7 @@
 
      (test "srfi-144.372 " (fl+ one (flexp-1 negzero)) one)
      (test "srfi-144.373 " (fl+ one (flexp-1 zero)) one)
-     ;; [EG]: Changed the following "test" in "test-approx" 
+     ;; [EG]: Changed the following "test" in "test-approx"
      (test/approx "srfi-144.374 " (fl+ one (flexp-1 one)) fl-e)
      (test/approx "srfi-144.375 " (fl+ one (flexp-1 (fl- one))) fl-1/e)
      (test/approx "srfi-144.376 " (fl+ one (flexp-1 two)) fl-e-2)
@@ -1486,5 +1485,3 @@
        (g (flonum 0.015) 0.5600499741400112)
        (g (flonum 0.010) 0.5614099274382259)
        (g (flonum 0.005) 0.5627895581750243))
-
-     

@@ -6,11 +6,11 @@
 (define (identity x) x)
 
 
-(define-syntax constantly
+(defsyntax constantly
   (syntax-rules ()
     ((_ obj) (lambda _ obj))))
 
-(define-syntax values->list
+(defsyntax values->list
   (syntax-rules ()
     ((_ expr)
      (call-with-values (lambda () expr) list))))

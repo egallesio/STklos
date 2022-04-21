@@ -20,13 +20,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-Oct-2020 20:22
-;;;; Last file update: 19-Feb-2022 17:03 (eg)
+;;;; Last file update: 21-Apr-2022 15:46 (eg)
 ;;;;
 
 (define-module srfi/61
   (export cond)
 
-  (define-syntax cond
+  (defsyntax cond
     (syntax-rules (else =>)
       ((cond (else result1 result2 ...))
        (begin result1 result2 ...))
@@ -61,12 +61,7 @@
              clause1 clause2 ...)
        (if test
            (begin result1 result2 ...)
-           (cond clause1 clause2 ...)))
-
-      )
-    )
-  ;; FIXME: Must be changed....
-  (define cond #void)
-  (export-syntax cond))
+           (cond clause1 clause2 ...)))))
+)
 
 (provide "srfi/61")

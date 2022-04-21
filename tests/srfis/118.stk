@@ -2,7 +2,7 @@
 ;;  SRFI 118 ...
 ;; ----------------------------------------------------------------------
 
-(define-syntax set-mutable-string!
+(defsyntax set-mutable-string!
   (syntax-rules ()
     ((_ s v)
      (set! s (string-copy v)))))

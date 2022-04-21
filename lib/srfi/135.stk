@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 19-Nov-2020 10:11 (jpellegrini)
-;;;; Last file update: 04-Dec-2021 10:50 (jpellegrini)
+;;;; Last file update: 21-Apr-2022 17:10 (eg)
 ;;;;
 
 
@@ -175,12 +175,12 @@
 (define (length&i0.i0 k)
   (remainder k N))
 
-(define-syntax length&i0.length
+(defsyntax length&i0.length
   (syntax-rules ()
    ((_ k)
     (quotient k N))))
 
-(define-syntax length&i0.i0
+(defsyntax length&i0.i0
   (syntax-rules ()
    ((_ k)
     (remainder k N))))
@@ -723,7 +723,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-syntax %textual->text
+(defsyntax %textual->text
   (syntax-rules ()
     ((_ x)
      (if (string? x)
@@ -743,7 +743,7 @@
 ;;;
 ;;; (define-textual (f textual args ...) ...)
 
-(define-syntax define-textual
+(defsyntax define-textual
   (syntax-rules ()
     ((_ (f textual arg . args) expr1 expr2 ...)
      (define (f textual arg . args)
@@ -759,7 +759,7 @@
 ;;; (define-textual-start-end (f args ... textual start end)
 ;;;   ...)
 
-(define-syntax define-textual-start-end
+(defsyntax define-textual-start-end
   (syntax-rules ()
     ((_ (f args ... textual start end) expr1 expr2 ...)
      (define f

@@ -27,7 +27,7 @@
   (map cons xs xs))
 
 ;; From SRFI 210, reduced.
-(define-syntax value/mv
+(defsyntax value/mv
   (syntax-rules ()
     ((value/mv i producer)
      (let-values ((vs producer))

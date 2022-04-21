@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-26.stk        -- SRFI-26 implementation
 ;;;;
-;;;; Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,22 +21,19 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 19-Dec-2003 12:57 (eg)
-;;;; Last file update: 21-Nov-2021 17:21 (eg)
+;;;; Last file update: 19-Apr-2022 16:21 (eg)
 ;;;;
 
 
 (define-module srfi/26
   (export cut cute)
 
-  (define cut  "<<FIXME>>")  ;; should be deleted
-  (define cute "<<FIXME>>")
-  
 ;; ======================================================================
 ;;
 ;;                              C U T
 ;;
 ;; ======================================================================
-(define-macro (cut . slots-or-exprs)
+(defmacro (cut . slots-or-exprs)
   (define (aux lst slot-names pos)
     (cond
       ((null? lst)
@@ -69,7 +66,7 @@
 ;;                              C U T E
 ;;
 ;; ======================================================================
-(define-macro (cute . slots-or-exprs)
+(defmacro (cute . slots-or-exprs)
   (define (aux lst slot-names pos bindings)
     (cond
       ((null? lst)
@@ -98,8 +95,7 @@
                        bindings))))))
   ;;
   (aux slots-or-exprs '() '() '()))
-
-(export-syntax cute cut))
+)
 
 
 (provide "srfi/26")

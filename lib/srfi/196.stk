@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-196.stk		-- Implementation of SRFI-196
+;;;; srfi-196.stk               -- Implementation of SRFI-196
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Nov-2020 12:34 (jpellegrini)
-;;;; Last file update: 24-Nov-2021 10:25 (eg)
+;;;; Last file update: 21-Apr-2022 18:07 (eg)
 ;;;;
 
 
@@ -191,7 +191,7 @@
 
 ;; A portable implementation can't rely on inlining, but it
 ;; can rely on macros.
-(define-syntax %range-ref-no-check
+(defsyntax %range-ref-no-check
   (syntax-rules ()
     ((_ r index)
      ((range-indexer r) (+ index (range-start-index r))))))

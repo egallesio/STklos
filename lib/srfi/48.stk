@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 23-Apr-2004 21:19 (eg)
-;;;; Last file update:  3-Mar-2022 16:51 (eg)
+;;;; Last file update: 19-Apr-2022 16:45 (eg)
 ;;;;
 ;;;;
 ;;;; Most of the implementation is done in C. The part which are
@@ -59,7 +59,7 @@
 ;;;;     FITNESS FOR A PARTICULAR PURPOSE.
 
 (define-module srfi/48
-  (import SCHEME)
+  (import (only SCHEME format))
   (export format srfi48:help srfi48:format-fixed)
 
 (define srfi48:help

@@ -21,11 +21,19 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  1-Jun-2004 12:33 (eg)
-;;;; Last file update: 24-Feb-2022 18:04 (eg)
+;;;; Last file update: 19-Apr-2022 16:39 (eg)
 ;;;;
 
 (define-module srfi/36
-  (import SCHEME)
+  (import (only SCHEME
+                %define-condition-type-accessors
+                &i/o-closed-error                 &i/o-error
+                &i/o-file-already-exists-error    &i/o-file-is-read-only-error
+                &i/o-file-protection-error        &i/o-filename-error
+                &i/o-malformed-filename-error     &i/o-no-such-file-error
+                &i/o-port-error                   &i/o-read-error
+                &i/o-write-error                  &read-error))
+  
   (export &i/o-error i/o-error?
           &i/o-port-error i/o-port-error? i/o-error-port
           &i/o-read-error i/o-read-error?

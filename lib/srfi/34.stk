@@ -22,18 +22,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Feb-2022 18:25
-;;;; Last file update: 12-Mar-2022 19:27 (eg)
+;;;; Last file update: 19-Apr-2022 16:28 (eg)
 ;;;;
 
 
-
 (define-module srfi/34
-  (import SCHEME)
-  (export with-exception-handler guard raise)
-
-  ;;FIXME
-  (define guard "<<FIXME>>")
-  #;(export-syntax guard))
+  (import (only SCHEME with-exception-handler guard raise))
+  (export with-exception-handler guard raise))
 
 (provide "srfi/34")
 

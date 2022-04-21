@@ -2,7 +2,7 @@
 ;;;;
 ;;;; 18.stk         -- Implementation of the (srfi 18) library
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,11 +22,33 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Oct-2021 19:38
-;;;; Last file update: 21-Nov-2021 13:31 (eg)
+;;;; Last file update: 19-Apr-2022 15:24 (eg)
 ;;;;
 
 
 (define-module srfi/18
+  (import (only SCHEME
+                current-thread thread? make-thread
+                thread-name thread-specific thread-specific-set!
+                thread-start! thread-yield! thread-sleep!
+                thread-terminate! thread-join!
+                mutex? make-mutex mutex-name
+                mutex-specific mutex-specific-set!
+                mutex-state mutex-lock! mutex-unlock!
+                condition-variable? make-condition-variable
+                condition-variable-name condition-variable-specific
+                condition-variable-specific-set!
+                condition-variable-signal!
+                condition-variable-broadcast!
+                current-time time? time->seconds
+                seconds->time current-exception-handler
+                with-exception-handler
+                raise
+                join-timeout-exception?
+                abandoned-mutex-exception?
+                terminated-thread-exception?
+                uncaught-exception?
+                uncaught-exception-reason))
   (export current-thread thread? make-thread
           thread-name thread-specific thread-specific-set!
           thread-start! thread-yield! thread-sleep!
@@ -41,7 +63,7 @@
           condition-variable-broadcast!
           current-time time? time->seconds
           seconds->time current-exception-handler
-          ; with-exception-handler FIXME
+          with-exception-handler
           raise
           join-timeout-exception?
           abandoned-mutex-exception?
@@ -49,32 +71,29 @@
           uncaught-exception?
           uncaught-exception-reason)
 
-    ;; SRFI-18 is embedded in STklos; Redefine functions here
-  (%module-define-and-export
-          current-thread thread? make-thread
-          thread-name thread-specific thread-specific-set!
-          thread-start! thread-yield! thread-sleep!
-          thread-terminate! thread-join!
-          mutex? make-mutex mutex-name
-          mutex-specific mutex-specific-set!
-          mutex-state mutex-lock! mutex-unlock!
-          condition-variable? make-condition-variable
-          condition-variable-name condition-variable-specific
-          condition-variable-specific-set!
-          condition-variable-signal!
-          condition-variable-broadcast!
-          current-time time? time->seconds
-          seconds->time current-exception-handler
-          ; with-exception-handler  FIXME
-          raise
-          join-timeout-exception?
-          abandoned-mutex-exception?
-          terminated-thread-exception?
-          uncaught-exception?
-          uncaught-exception-reason)
-  ;; FIXME
-  ;; To be changed with-exception-handler  should be a function, not syntax!!!
-  (define with-exception-handler "<<FIXME>>")
+;;//  ;; SRFI-18 is embedded in STklos; Redefine functions here
+;;//  (%module-define-and-export
+;;//          current-thread thread? make-thread
+;;//          thread-name thread-specific thread-specific-set!
+;;//          thread-start! thread-yield! thread-sleep!
+;;//          thread-terminate! thread-join!
+;;//          mutex? make-mutex mutex-name
+;;//          mutex-specific mutex-specific-set!
+;;//          mutex-state mutex-lock! mutex-unlock!
+;;//          condition-variable? make-condition-variable
+;;//          condition-variable-name condition-variable-specific
+;;//          condition-variable-specific-set!
+;;//          condition-variable-signal!
+;;//          condition-variable-broadcast!
+;;//          current-time time? time->seconds
+;;//          seconds->time current-exception-handler
+;;//          with-exception-handler
+;;//          raise
+;;//          join-timeout-exception?
+;;//          abandoned-mutex-exception?
+;;//          terminated-thread-exception?
+;;//          uncaught-exception?
+;;//          uncaught-exception-reason)
 )
 
 

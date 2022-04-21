@@ -21,11 +21,16 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  4-Dec-2021 19:40
-;;;; Last file update:  8-Dec-2021 10:56 (eg)
+;;;; Last file update: 21-Apr-2022 18:09 (eg)
 ;;;;
 
 (define-module srfi/208
-  (import SCHEME)
+  (import (only SCHEME
+                make-nan
+                nan-negative?
+                nan-quiet?
+                nan-payload
+                nan=?))
   (export make-nan
           nan-negative?
           nan-quiet?

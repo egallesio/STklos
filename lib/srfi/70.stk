@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Aubrey Jaffer (SRFI Reference implementation)
 ;;;;    Creation date: 12-Sep-2005 14:51 (eg)
-;;;; Last file update: 18-Mar-2022 10:28 (eg)
+;;;; Last file update: 21-Apr-2022 16:30 (eg)
 ;;;;
 ;;;;
 ;;;; The implementation is taken directly from the SRFI reference implementation.
@@ -39,7 +39,55 @@
 
 
 (define-module srfi/70
-  (import SCHEME)
+  (import (only SCHEME
+                ;; 6.2.3 Implementation restrictions
+                +            -             *
+                quotient     remainder     modulo
+                max          min           abs
+                numerator    denominator   gcd
+                lcm          floor         ceiling
+                truncate     round         rationalize
+                expt
+
+                ;; 6.2.4 Syntax of numerical constants
+                ;; (reader-specific, nothing to export)
+
+                ;; 6.2.5 Numerical operations
+                number?
+                complex?
+                real?
+                rational?
+                integer?
+                exact?
+                inexact?
+
+                = < > <= >=
+
+                finite? infinite?
+                zero?   positive? negative?
+                odd?    even?
+
+                max min
+
+                /
+
+                abs
+
+                exp  log
+                sin  cos  tan
+                asin acos atan
+                sqrt
+
+                make-rectangular make-polar
+                real-part        imag-part
+                magnitude        angle
+
+                exact->inexact
+                inexact->exact
+
+                ;; 6.2.6 Numerical input and output
+                number->string
+                string->number))
 
   ;; we re-export the R5RS procedures in the SRFI
   ;; in case they have been changed:

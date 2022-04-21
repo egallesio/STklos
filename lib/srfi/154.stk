@@ -47,15 +47,15 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Apr-2021 17:13
-;;;; Last file update: 27-Nov-2021 08:55 (jpellegrini)
+;;;; Last file update: 21-Apr-2022 17:45 (eg)
 ;;;;
 
 (define-module srfi/154
 
 (import (srfi 9))
-(export dynamic-extent? 
-          current-dynamic-extent 
-	  with-dynamic-extent)
+(export dynamic-extent?
+        current-dynamic-extent
+        with-dynamic-extent)
 
 (export-syntax dynamic-lambda)
 
@@ -69,14 +69,14 @@
   (call-with-current-continuation
    (lambda (return)
      (let-values
-	 (((k thunk)
-	   (call-with-current-continuation
-	    (lambda (c)
-	       (return
-		(make-dynamic-extent (lambda (thunk)
-					    (call-with-current-continuation
-					     (lambda (k)
-					       (c k thunk))))))))))
+         (((k thunk)
+           (call-with-current-continuation
+            (lambda (c)
+               (return
+                (make-dynamic-extent (lambda (thunk)
+                                            (call-with-current-continuation
+                                             (lambda (k)
+                                               (c k thunk))))))))))
        (call-with-values thunk k)))))
 
 
@@ -88,8 +88,8 @@
     ((dynamic-lambda formals body)
      (let ((dynamic-extent (current-dynamic-extent)))
        (lambda formals
-	 (with-dynamic-extent dynamic-extent (lambda ()
-					       body)))))))
+         (with-dynamic-extent dynamic-extent (lambda ()
+                                               body)))))))
 
 )
 

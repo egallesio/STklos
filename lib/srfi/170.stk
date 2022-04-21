@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 25-Nov-2021 14:19 (eg)
+;;;; Last file update: 21-Apr-2022 17:47 (eg)
 ;;;;
 
 (select-module srfi/170)
@@ -42,7 +42,7 @@
 
 
 ;; defines a list of symbols evaluating to themselves:
-(define-syntax defsymbol
+(defsyntax defsymbol
   (syntax-rules ()
     ((_ s)
      (define s 's))

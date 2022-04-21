@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 28-Apr-2021 02:01
-;;;; Last file update: 21-Nov-2021 11:40 (eg)
+;;;; Last file update: 19-Apr-2022 16:24 (eg)
 ;;;;
 
 (select-module srfi/27)
@@ -43,7 +43,7 @@
         <random-state-mt>
         <random-source-mt>)
 
-(define-syntax push!
+(defsyntax push!
   (syntax-rules ()
     ((_ e l)
      (set! l (cons e l)))))

@@ -22,11 +22,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Mar-2022 10:46
-;;;; Last file update:  3-Mar-2022 10:48 (eg)
+;;;; Last file update: 19-Apr-2022 16:40 (eg)
 ;;;;
 
 (define-module srfi/38
-  (import SCHEME)
+  (import (only SCHEME
+                write-with-shared-structure read-with-shared-structure
+                write/ss read/ss))
   (export write-with-shared-structure read-with-shared-structure
           write/ss read/ss))
 

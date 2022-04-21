@@ -25,11 +25,11 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Dec-2021 00:31
-;;;; Last file update:  8-Dec-2021 10:51 (eg)
+;;;; Last file update: 21-Apr-2022 16:46 (eg)
 ;;;;
 
 (define-module srfi/88
-  (import SCHEME)
+  (import (only SCHEME keyword?  keyword->string string->keyword))
   (export keyword?
           keyword->string
           string->keyword))

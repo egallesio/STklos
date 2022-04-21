@@ -5,7 +5,7 @@
 ;; the public domain.".
 ;;
 ;;    Creation date: 30-Aug-1999 14:43 (eg)
-;; Last file update: 10-Oct-2021 17:39 (eg)
+;; Last file update: 19-Apr-2022 12:48 (eg)
 ;;
 ;;=============================================================================
 
@@ -145,8 +145,9 @@
 ;
 
 (define-module srfi/2
-
-  (define-syntax and-let*
+  (export and-let*)
+  
+  (defsyntax and-let*
     (syntax-rules ()
       ((_ ())
        #t)
@@ -166,9 +167,6 @@
       ((_ (id . claw*) . body)
        (and id (and-let* claw* . body)))
       ((_ . _)
-       (syntax-error "ill-formed and-let* form"))))
-
-  ;; FIXME:
-  (export-syntax and-let*))
+       (syntax-error "ill-formed and-let* form")))))
 
 (provide "srfi/2")

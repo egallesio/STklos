@@ -46,14 +46,14 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 10-Jul-2020 06:55 (jpellegrini)
-;;;; Last file update: 21-Feb-2022 16:46 (eg)
+;;;; Last file update: 21-Apr-2022 17:23 (eg)
 ;;;;
 
 (define-module srfi/156
 
 (export infix/postfix extract-placeholders identity-syntax is isnt)
 
-(define-syntax infix/postfix
+(defsyntax infix/postfix
   (syntax-rules ()
     ((infix/postfix x somewhat?)
      (somewhat? x))
@@ -70,7 +70,7 @@
 ;; identical symbols for argumets of closures, like (lambda (a a) ...).
 ;; I have written another macro, using define-macro, below. -- jpellegrini
 ;;
-;; (define-syntax extract-placeholders
+;; (defsyntax extract-placeholders
 ;;   (syntax-rules (_)
 ;;     ((extract-placeholders final () () body)
 ;;      (final (infix/postfix . body)))
@@ -130,17 +130,17 @@
                                     ,b
                                     ,(append body (list arg)))))))
 
-(define-syntax identity-syntax
+(defsyntax identity-syntax
   (syntax-rules ()
     ((identity-syntax form)
      form)))
 
-(define-syntax is
+(defsyntax is
   (syntax-rules ()
     ((is . something)
      (extract-placeholders identity-syntax something () ()))))
 
-(define-syntax isnt
+(defsyntax isnt
   (syntax-rules ()
     ((isnt . something)
      (extract-placeholders not something () ()))))

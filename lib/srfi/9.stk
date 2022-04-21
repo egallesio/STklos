@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-9.stk -- SRFI-9 (Records)
 ;;;;
-;;;; Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-Sep-1999 13:06 (eg)
-;;;; Last file update: 11-Nov-2021 20:57 (eg)
+;;;; Last file update: 19-Apr-2022 12:59 (eg)
 ;;;;
 
 
 (define-module srfi/9
   (export define-record-type)
 
-  (define define-record-type "<<FIXME>>")   ;; To be deleted 
-  
-  (define-macro (define-record-type name constructor predicate . fields)
+  (defmacro (define-record-type name constructor predicate . fields)
     (let ((struct-type (gensym))
           (tmp         (gensym))
           (val         (gensym)))
@@ -77,8 +75,6 @@
                   fields)
                                         ; Result for oplevel (if any)
            (values (void) ',name))))))
-;; FIXME:
-(export-syntax define-record-type)
 
 (provide "srfi/9")
 

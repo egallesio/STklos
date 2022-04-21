@@ -4,7 +4,7 @@
 
 (define *tests-failed* 0)
 
-(define-syntax check
+(defsyntax check
   (syntax-rules (=>)
     ((check expr => expected)
      (test "" expected expr))))
@@ -19,7 +19,7 @@
   ;; (display message)
   ;; (newline))
 
-(define-syntax constantly
+(defsyntax constantly
   (syntax-rules ()
     ((_ obj) (lambda _ obj))))
 

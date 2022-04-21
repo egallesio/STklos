@@ -56,7 +56,7 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 16-Jul-2020 10:20
-;;;; Last file update: 03-Dec-2021 07:29 (jpellegrini)
+;;;; Last file update: 21-Apr-2022 17:09 (eg)
 ;;;;
 
 (select-module srfi/133)
@@ -137,7 +137,7 @@
      (let*-optionals:aux ?args ?args ((?var ?default) ...)
        ?body1 ?body2 ...))))
 
-(define-syntax let*-optionals:aux
+(defsyntax let*-optionals:aux
   (syntax-rules ()
     ((aux ?orig-args-var ?args-var () ?body1 ?body2 ...)
      (if (null? ?args-var)
@@ -190,7 +190,7 @@
 ;;;                         <start-name> <end-name>
 ;;;                         <callee>) -> [start end] ; implemented as primitive
 
-(define-syntax let-vector-start+end
+(defsyntax let-vector-start+end
   (syntax-rules ()
     ((let-vector-start+end ?callee ?vec ?args (?start ?end)
        ?body1 ?body2 ...)

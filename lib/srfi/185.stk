@@ -47,7 +47,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 31-Jul-2020 09:12 (jpellegrini)
-;;;; Last file update: 04-Dec-2021 14:24 (jpellegrini)
+;;;; Last file update: 21-Apr-2022 17:57 (eg)
 ;;;;
 
 (define-module srfi/185
@@ -55,7 +55,7 @@
           string-replace-linear!)
   (export-syntax string-append!
                  string-replace!)
-  
+
 ;; define the procedures required by the SRFI.
 ;; these are already built-in, so no problem.
 (define string-append-linear! string-append!)
@@ -64,7 +64,7 @@
 ;; define new syntax, as per SRFI-185.
 ;; see that the original procedures are still available,
 ;; WITH THE SAME NAMES:
-;; 
+;;
 ;; stklos> (eq? string-append! string-append-linear!)
 ;; #t
 ;;
@@ -97,5 +97,3 @@
 )
 
 (provide "srfi/185")
-
-
