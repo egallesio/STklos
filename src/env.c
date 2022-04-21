@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 21-Apr-2022 15:01 (eg)
+ * Last file update: 21-Apr-2022 15:31 (eg)
  */
 
 #include "stklos.h"
@@ -94,18 +94,11 @@ static void print_module(SCM module, SCM port, int mode)
     char *name = MODULE_NAME(module);
 
     STk_nputs(port, "#[library ", 11);
-    if (SYMBOLP(name)) {
-      STk_putc('(', port);
-      for (char *s = SYMBOL_PNAME(name); *s; s++) {
-        STk_putc((*s == '/') ? ' ': *s, port);
-      }
-      STk_putc(')', port);
-    } else {                                                            //FIXME: no more anonymous
-      /* anonymous library => print its address */
-      char buffer[100];
-      snprintf(buffer, sizeof(buffer), "%lx", (unsigned long) module);
-      STk_puts(buffer, port);
+    STk_putc('(', port);
+    for (char *s = SYMBOL_PNAME(name); *s; s++) {
+      STk_putc((*s == '/') ? ' ': *s, port);
     }
+    STk_putc(')', port);
   } else  {
     STk_nputs(port, "#[module ", 9);
     STk_print(MODULE_NAME(module), port, mode);
@@ -122,7 +115,7 @@ static void register_module(SCM mod)
   MUT_UNLOCK(lck);
 }
 
-static SCM STk_makemodule(SCM name)             //FIXME: delete STk_ prefix
+static SCM make_module(SCM name)             //FIXME: delete STk_ prefix
 {
   register SCM z;
 
@@ -151,7 +144,7 @@ static SCM find_module(SCM name, int create)
       return CAR(tmp);
   }
   /* module does not exists */
-  return (create) ? STk_makemodule(name) : STk_void;
+  return (create) ? make_module(name) : STk_void;
 }
 
 /*===========================================================================*\
@@ -184,16 +177,6 @@ DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
 {
   if (!SYMBOLP(name)) error_bad_module_name(name);
   return find_module(name, TRUE);
-}
-
-DEFINE_PRIMITIVE("%ensure-module", ensure_module, subr1, (SCM name))
-{
-  SCM z;
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-  z = find_module(name, FALSE);
-
-  if (z != STk_void) return z;
-  return STk_makemodule(name);
 }
 
 DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
@@ -739,7 +722,7 @@ int STk_init_env(void)
   all_modules = STk_nil;
 
   /* Create the stklos module */
-  STk_STklos_module  = STk_makemodule(STk_void); /* will be changed later */
+  STk_STklos_module  = make_module(STk_void); /* will be changed later */
 
   /* Declare the extended types module_obj and frame_obj */
   DEFINE_XTYPE(module, &xtype_module);
@@ -754,12 +737,11 @@ int STk_late_init_env(void)
   MODULE_IMPORTS(STk_STklos_module) = LIST1(STk_STklos_module);
 
   /* Create the SCHEME module */
-  Scheme_module = STk_makemodule(STk_intern("SCHEME"));
+  Scheme_module = make_module(STk_intern("SCHEME"));
 
   /* ==== Undocumented primitives ==== */
   ADD_PRIMITIVE(create_module);
   ADD_PRIMITIVE(module2library);
-  ADD_PRIMITIVE(ensure_module);
   ADD_PRIMITIVE(select_module);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
