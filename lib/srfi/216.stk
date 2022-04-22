@@ -2,7 +2,7 @@
 ;;;;
 ;;;; srfi-216.stk         -- SRFI-116: SICP Prerequisites
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Jan-2021 16:03
-;;;; Last file update:  3-Dec-2021 07:06 (jpellegrini)
+;;;; Last file update: 22-Apr-2022 16:09 (eg)
 ;;;;
 
 (define-module srfi/216
@@ -31,8 +31,8 @@
           runtime
           random
           parallel-execute test-and-set!
-          the-empty-stream stream-null?)
-  (export-syntax cons-stream)
+          the-empty-stream stream-null?
+          cons-stream)
 
 ;; ======================================================================
 ;; Constants
@@ -82,7 +82,7 @@
 ;; ======================================================================
 ;; Streams.
 ;; ======================================================================
-(define-macro (cons-stream a b)
+(defmacro (cons-stream a b)
   `(cons ,a (delay ,b)))
 
 (define the-empty-stream '())

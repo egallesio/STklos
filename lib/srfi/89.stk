@@ -30,7 +30,7 @@
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 ;;;;
 ;;;;    Creation date:  8-Dec-2007 10:20 (eg)
-;;;; Last file update:  6-Mar-2022 18:22 (eg)
+;;;; Last file update: 22-Apr-2022 16:31 (eg)
 ;;;;
 
 
@@ -44,18 +44,17 @@
           $opt-key
           $req-key)
 
-  ;; FIXME
-  (export-syntax define* lambda*)
+  (export define* lambda*)
   
   ;; Macro expander for define*.
-  (define-macro (define* pattern . body)
+  (defmacro (define* pattern . body)
     (if (pair? pattern)
         `(define ,(car pattern)
            (lambda* ,(cdr pattern) ,@body))
         `(define ,pattern ,@body)))
 
   ;; Macro expander for lambda*.
-  (define-macro (lambda* formals . body)
+  (defmacro (lambda* formals . body)
 
     ;;------------------------------------------------------------------------------
     ;; Procedures needed at expansion time.

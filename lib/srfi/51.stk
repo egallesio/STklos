@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 22-Jun-2020 08:21 (jpellegrini)
-;;;; Last file update:  3-Mar-2022 17:02 (eg)
+;;;; Last file update: 22-Apr-2022 16:34 (eg)
 
 (define-module srfi/51
   (import (srfi 1))
@@ -59,19 +59,6 @@
           err-ands
           err-or
           err-ors)
-  
-  (define arg-and  "<<FIXME>>")
-  (define arg-ands "<<FIXME>>")
-  (define arg-or  "<<FIXME>>")
-  (define arg-ors  "<<FIXME>>")
-  (define err-or   "<<FIXME>>")
-  (define err-ors   "<<FIXME>>")
-  (define err-and  "<<FIXME>>")
-  (define err-ands "<<FIXME>>")
-  (define err-ors  "<<FIXME>>")
-
-  
-
 
 (define (rest-values rest . default)
   (let* ((caller (if (or (null? default)
@@ -207,7 +194,7 @@
                         (append rest-list (list-tail default-list rest-length))
                         rest-list))))))
 
-(define-syntax arg-and
+(defsyntax arg-and
   (syntax-rules()
     ((arg-and arg (a1 a2 ...) ...)
      (and (or (symbol? 'arg)
@@ -227,7 +214,7 @@
           ...))))
 
 ;; accessory macro for arg-ands
-(define-syntax caller-arg-and
+(defsyntax caller-arg-and
   (syntax-rules()
     ((caller-arg-and caller arg (a1 a2 ...) ...)
      (and (or (symbol? 'arg)
@@ -248,14 +235,14 @@
                   (error "incorrect argument" arg 'arg '(a1 a2 ...) caller)))
           ...))))
 
-(define-syntax arg-ands
+(defsyntax arg-ands
   (syntax-rules (common)
     ((arg-ands (a1 a2 ...) ...)
      (and (arg-and a1 a2 ...) ...))
     ((arg-ands common caller (a1 a2 ...) ...)
      (and (caller-arg-and caller a1 a2 ...) ...))))
 
-(define-syntax arg-or
+(defsyntax arg-or
   (syntax-rules()
     ((arg-or arg (a1 a2 ...) ...)
      (or (and (not (symbol? 'arg))
@@ -275,7 +262,7 @@
          ...))))
 
 ;; accessory macro for arg-ors
-(define-syntax caller-arg-or
+(defsyntax caller-arg-or
   (syntax-rules()
     ((caller-arg-or caller arg (a1 a2 ...) ...)
      (or (and (not (symbol? 'arg))
@@ -296,14 +283,14 @@
                   (error "incorrect argument" arg 'arg '(a1 a2 ...) caller)))
          ...))))
 
-(define-syntax arg-ors
+(defsyntax arg-ors
   (syntax-rules (common)
     ((arg-ors (a1 a2 ...) ...)
      (or (arg-or a1 a2 ...) ...))
     ((arg-ors common caller (a1 a2 ...) ...)
      (or (caller-arg-or caller a1 a2 ...) ...))))
 
-(define-syntax err-and
+(defsyntax err-and
   (syntax-rules ()
     ((err-and err expression ...)
      (and (or expression
@@ -312,13 +299,13 @@
                   (error "false expression" 'expression err)))
           ...))))
 
-(define-syntax err-ands
+(defsyntax err-ands
   (syntax-rules ()
     ((err-ands (err expression ...)  ...)
      (and (err-and err expression ...)
           ...))))
 
-(define-syntax err-or
+(defsyntax err-or
   (syntax-rules ()
     ((err-or err expression ...)
      (or (and expression
@@ -327,7 +314,7 @@
                   (error "true expression" 'expression err)))
          ...))))
 
-(define-syntax err-ors
+(defsyntax err-ors
   (syntax-rules ()
     ((err-ors (err expression ...) ...)
      (or (err-or err expression ...)

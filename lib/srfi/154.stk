@@ -47,7 +47,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Apr-2021 17:13
-;;;; Last file update: 21-Apr-2022 17:45 (eg)
+;;;; Last file update: 22-Apr-2022 15:36 (eg)
 ;;;;
 
 (define-module srfi/154
@@ -55,9 +55,8 @@
 (import (srfi 9))
 (export dynamic-extent?
         current-dynamic-extent
-        with-dynamic-extent)
-
-(export-syntax dynamic-lambda)
+        with-dynamic-extent
+        dynamic-lambda)
 
 (define-record-type <dynamic-extent>
   (make-dynamic-extent proc)
@@ -83,7 +82,7 @@
 (define (with-dynamic-extent dynamic-extent thunk)
   ((dynamic-extent-proc dynamic-extent) thunk))
 
-(define-syntax dynamic-lambda
+(defsyntax dynamic-lambda
   (syntax-rules ()
     ((dynamic-lambda formals body)
      (let ((dynamic-extent (current-dynamic-extent)))

@@ -46,7 +46,7 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update:  2-Dec-2021 18:17 (eg)
+;;;; Last file update: 22-Apr-2022 16:10 (eg)
 ;;;;
 
 (define-module srfi/189
@@ -82,23 +82,6 @@
           maybe-let*-values either-let*-values
           maybe-if)
 
-  (define maybe-if           "<<FIXME>>")
-  (define either-let*-values "<<FIXME>>")
-  (define maybe-let*         "<<FIXME>>")
-  (define maybe-let*-values  "<<FIXME>>")
-  (define either-let*        "<<FIXME>>")
-  (define either-or          "<<FIXME>>")
-  (define either-and         "<<FIXME>>")
-  (define maybe-or           "<<FIXME>>")
-  (define maybe-and          "<<FIXME>>")
-  (define either-guard       "<<FIXME>>")
-
-  (export-syntax maybe-if either-let*-values maybe-let*
-                 maybe-let*-values either-let* either-or
-                 either-and maybe-or maybe-and either-guard)
-
-
-
 (define-record-type <just>
   (raw-just objs)
   just?
@@ -131,19 +114,19 @@
 
 ;;;; Utility
 
-(define-syntax const
+(defsyntax const
   (syntax-rules ()
     ((_ obj) (lambda _ obj))))
 
 (define (singleton? lis)
   (and (pair? lis) (null? (cdr lis))))
 
-(define-syntax fast-apply
+(defsyntax fast-apply
   (syntax-rules ()
     ((_ proc args)
      (if (singleton? args) (proc (car args)) (apply proc args)))))
 
-(define-syntax fast-list->values
+(defsyntax fast-list->values
   (syntax-rules ()
     ((_ vals)
      (if (singleton? vals) (car vals) (apply values vals)))))
@@ -702,7 +685,7 @@
 
 ;;;; Syntax
 
-(define-syntax maybe-if
+(defsyntax maybe-if
   (syntax-rules ()
     ((_ maybe-expr just-expr nothing-expr)
      (let ((mval maybe-expr))
@@ -711,7 +694,7 @@
        (if (just? mval) just-expr nothing-expr)))))
 
 ;; Return the value of expr if it satisfies pred.
-(define-syntax %guard-value
+(defsyntax %guard-value
   (syntax-rules ()
     ((_ pred expr)
      (let ((val expr))
@@ -722,7 +705,7 @@
 ;; Maybe analog of and.  Evaluate the argument expressions in order.
 ;; If any expression evaluates to Nothing, return it.  Otherwise,
 ;; return the last Just.
-(define-syntax maybe-and
+(defsyntax maybe-and
   (syntax-rules ()
     ((_) (just unspecified))
     ((_ maybe-expr) (%guard-value maybe? maybe-expr))
@@ -736,7 +719,7 @@
 ;; Maybe analog of or.  Evaluate the argument expressions in order.
 ;; If any expression evaluates to a Just, return it immediately.
 ;; Otherwise, return Nothing.
-(define-syntax maybe-or
+(defsyntax maybe-or
   (syntax-rules ()
     ((_) (nothing))
     ((_ maybe-expr) (%guard-value maybe? maybe-expr))
@@ -751,7 +734,7 @@
 ;; or bound variable to a Maybe, or binds the payload of the value of a
 ;; Maybe expression to a name in later claws and the body.  If any claw
 ;; gives a Nothing, the whole expression evaluates to Nothing.
-(define-syntax maybe-let*
+(defsyntax maybe-let*
   (syntax-rules ()
     ((_ ()) (just unspecified))
     ((_ () expr1 expr2 ...)
@@ -784,7 +767,7 @@
 ;; Like maybe-let*, but a claw of the form (<formals> <maybe-expr>)
 ;; binds the payload of the value of <maybe-expr> to <formals> in the
 ;; manner of let-values.
-(define-syntax maybe-let*-values
+(defsyntax maybe-let*-values
   (syntax-rules ()
     ((_ ()) (just unspecified))
     ((_ () expr1 expr2 ...)
@@ -818,7 +801,7 @@
 ;; Either analog of and.  Evaluate the argument expressions in order.
 ;; If any expression evaluates to a Left, return it immediately.
 ;; Otherwise, return the last Right.
-(define-syntax either-and
+(defsyntax either-and
   (syntax-rules ()
     ((_) (right unspecified))
     ((_ either-expr) (%guard-value either? either-expr))
@@ -831,7 +814,7 @@
 ;; Either analog of or.  Evaluate the argument expressions in order.
 ;; If any expression evaluates to a Right, return it immediately.
 ;; Otherwise, return the last Left.
-(define-syntax either-or
+(defsyntax either-or
   (syntax-rules ()
     ((_) (left unspecified))
     ((_ either-expr) (%guard-value either? either-expr))
@@ -845,7 +828,7 @@
 ;; or bound variable to a Maybe, or binds the payload of the value of an
 ;; Either expression to a name in later claws and the body.  If any claw
 ;; gives a Left, then the whole expression evaluates to that Left.
-(define-syntax either-let*
+(defsyntax either-let*
   (syntax-rules ()
     ((_ ()) (right unspecified))
     ((_ () expr1 expr2 ...)
@@ -878,7 +861,7 @@
 ;; Like either-let*, but a claw of the form (<formals> <either-expr>)
 ;; binds the payload of the value of <either-expr> to <formals> in the
 ;; manner of let-values.
-(define-syntax either-let*-values
+(defsyntax either-let*-values
   (syntax-rules ()
     ((_ ()) (right unspecified))
     ((_ () expr1 expr2 ...)
@@ -909,7 +892,7 @@
     ((_ . _)
      (syntax-error "ill-formed either-let*-values form"))))
 
-(define-syntax either-guard
+(defsyntax either-guard
   (syntax-rules ()
     ((_ pred-expr expr1 expr2 ...)
      (exception->either pred-expr (lambda () expr1 expr2 ...)))))

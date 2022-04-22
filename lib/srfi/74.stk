@@ -1,12 +1,12 @@
 ;;;;
 ;;;; srfi-74.stk                        -- SRFI-74 implementation
 ;;;;
-;;;; Copyright © 2010-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2010-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;           Author: Michael Sperber
 ;;;;      Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2005
-;;;; Last file update: 24-Nov-2021 10:28 (eg)
+;;;; Last file update: 22-Apr-2022 16:32 (eg)
 ;;;;
 ;;;; This code is an adaptation of the reference implementation provided
 ;;;; with the SRFI document by Michael Sperber.
@@ -37,10 +37,11 @@
 
 
 (define-module srfi/74
-  (import (srfi 4) 
+  (import (srfi 4)
           (srfi 26)
           (srfi 60)
           (srfi 66))
+
   (export endianness blob? make-blob blob-length
           blob-u8-ref blob-s8-ref
           blob-u8-set! blob-s8-set!
@@ -63,17 +64,13 @@
           blob->uint-list blob->sint-list uint-list->blob
           sint-list->blob)
 
-  (export-syntax endianness)
 
-  (define endianness "<<FIXME>>")
-
-  
 (define *endianness/little* (list 'little))
 (define *endianness/big* (list 'big))
 (define *endianness/native*
   (if (%big-endian?) *endianness/big* *endianness/little*))
 
-(define-syntax endianness
+(defsyntax endianness
   (syntax-rules (little big native)
     ((endianness little) (in-module srfi/74 *endianness/little*))
     ((endianness big)    (in-module srfi/74 *endianness/big*))

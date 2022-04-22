@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 10-Jul-2020 06:55 (jpellegrini)
-;;;; Last file update: 21-Apr-2022 17:23 (eg)
+;;;; Last file update: 22-Apr-2022 16:04 (eg)
 ;;;;
 
 (define-module srfi/156
@@ -90,7 +90,7 @@
 ;;     ((extract-placeholders final (arg) args (body ...))
 ;;      (extract-placeholders final () args (body ... arg)))))
 
-(define-macro  (extract-placeholders final a b body)
+(defmacro  (extract-placeholders final a b body)
   (cond ((and (null? a) (null? b))
            `(,final ,(cons 'infix/postfix body)))
 
@@ -145,17 +145,6 @@
     ((isnt . something)
      (extract-placeholders not something () ()))))
 
-;; FIXME:
-(define infix/postfix #void)
-(define extract-placeholders #void)
-(define identity-syntax #void)
-(define is #void)
-(define isnt #void)
-(export-syntax infix/postfix
-               extract-placeholders
-               identity-syntax
-               is
-               isnt)
 ) ;; End of module srfi/156
 
 (provide "srfi/156")

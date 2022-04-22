@@ -2,12 +2,12 @@
         (srfi 128)
         (srfi 189))
 
-(define-syntax test-equal
+(defsyntax test-equal
   (syntax-rules ()
     ((_ expected expr)
      (test "srfi-224-equal.nonumber" expected expr))))
 
-(define-syntax test-eqv
+(defsyntax test-eqv
   (syntax-rules ()
     ((_ expected expr)
      (test "srfi-224-eqv.nonumber"  expected expr))))

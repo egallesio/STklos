@@ -21,7 +21,7 @@
 ;; SOFTWARE.
 
 (define-module srfi/230
-  (export ;memory-order
+  (export memory-order
           memory-order?
           make-atomic-flag
           atomic-flag?
@@ -51,7 +51,6 @@
           atomic-pair-swap!
           atomic-pair-compare-and-swap!
           atomic-fence)
-  (export-syntax memory-order)
   (import ;;(scheme base)
           ;;(scheme case-lambda)
           (srfi 9)
@@ -63,7 +62,7 @@
 
     (define lock (make-mutex))
 
-    (define-syntax lock-guard
+    (defsyntax lock-guard
       (syntax-rules ()
         ((lock-guard . body)
          (dynamic-wind
@@ -82,7 +81,7 @@
     ;; Note: On an R6RS system, the following syntax and procedure would be
     ;; implemented as an enumeration type.
 
-    (define-syntax memory-order
+    (defsyntax memory-order
       (syntax-rules ()
         ((memory-order symbol) 'symbol)))
 

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 21-Apr-2022 15:29 (eg)
+;;;; Last file update: 22-Apr-2022 16:12 (eg)
 ;;;;
 
 
@@ -305,7 +305,14 @@ doc>
 (define (%do-imports lib clauses only-syntax)
 
   (define (eventually-load-library name)
-    (let ((module (find-module name #f)))
+    (let ((module (find-module name #f))
+          (x      (%find-instanciated-module name)))
+      (when (and module (not x))
+        ;; FIXME FIXME
+        ;;(%debug "On a trouvé le module ~S non instancié (~S)" module only-syntax)
+        (unless only-syntax
+          ;;(%debug "Bon ben je vais provoquer son chargement")
+          (set! module #f)))
       (or module
           ;; Try to load a file which could define this module
           (begin
@@ -388,8 +395,8 @@ doc>
             clauses)
 
   ;; Retain the import list (for module-imports)
-  (%module-imports-set! lib (append! (module-imports lib)
-                                     clauses)))
+  (%module-imports-set! lib (append (module-imports lib)
+                                    clauses)))
 
 ;;;;
 ;;;; IMPORT

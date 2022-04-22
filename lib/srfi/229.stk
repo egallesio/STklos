@@ -21,16 +21,16 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  3-Dec-2021 08:23
-;;;; Last file update:  3-Dec-2021 08:56 (jpellegrini)
+;;;; Last file update: 22-Apr-2022 16:07 (eg)
 ;;;;
 
 
 (define-module srfi/229
   (export procedure/tag?
           procedure-tag
-          set-procedure-tag!) ; extra procedure exported!
-  (export-syntax case-lambda/tag
-	         lambda/tag)
+          set-procedure-tag! ; extra procedure exported!
+          case-lambda/tag
+	      lambda/tag)
   
 (define (set-procedure-tag! proc tag)
   (let ((plist  (%procedure-plist proc)))
@@ -45,7 +45,7 @@
 (define (procedure/tag? proc)
   (and (memq #:tag (%procedure-plist proc)) #t))
 
-(define-syntax case-lambda/tag
+(defsyntax case-lambda/tag
   (syntax-rules ()
     ((case-lambda/tag expr (formals body1 ... body2) ...)
      (let ((e expr) ;; evaluate expr first (explicitly
@@ -54,7 +54,7 @@
        (set-procedure-tag! proc e)
        proc))))
 
-(define-syntax lambda/tag
+(defsyntax lambda/tag
   (syntax-rules ()
     ((lambda/tag expr formals body1 ... body2)
      (let ((e expr) ;; evaluate expr first (explicitly

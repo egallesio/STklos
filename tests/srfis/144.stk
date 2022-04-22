@@ -208,27 +208,27 @@
             (< (magnitude (- x y)) 1e-6))))
 
 
-   (define-syntax test/approx
+   (defsyntax test/approx
      (syntax-rules ()
        ((test/approx name expr1 expr2)
         (test name #t (good-enough? expr1 expr2)))))
 
-   (define-syntax test-assert
+   (defsyntax test-assert
      (syntax-rules ()
        ((test-assert name expr)
         (test name #t expr))))
 
-   (define-syntax test-deny
+   (defsyntax test-deny
      (syntax-rules ()
        ((test-assert name expr)
         (test name #f expr))))
 
-   (define-syntax test-error
+   (defsyntax test-error
      (syntax-rules ()
        ((test-error expr)
         (test/error name expr))))
 
-   (define-syntax test/=
+   (defsyntax test/=
      (syntax-rules ()
       ((test/= name expr1 expr2)
        (test name expr1 expr2))))

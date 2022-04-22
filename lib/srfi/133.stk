@@ -56,7 +56,7 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 16-Jul-2020 10:20
-;;;; Last file update: 21-Apr-2022 17:09 (eg)
+;;;; Last file update: 22-Apr-2022 16:17 (eg)
 ;;;;
 
 (select-module srfi/133)
@@ -128,7 +128,7 @@
 
 ;;; Not the best LET*-OPTIONALS, but not the worst, either.  Use Olin's
 ;;; if it's available to you.
-(define-syntax let*-optionals
+(defsyntax let*-optionals
   (syntax-rules ()
     ((let*-optionals (?x ...) ((?var ?default) ...) ?body1 ?body2 ...)
      (let ((args (?x ...)))

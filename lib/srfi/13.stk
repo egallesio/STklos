@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-13.stk                -- Implementation of SRFI-13
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  5-Jun-2002 19:20 (eg)
-;;;; Last file update: 14-Nov-2021 20:13 (eg)
+;;;; Last file update: 22-Apr-2022 16:25 (eg)
 ;;;;
 
 (define-module srfi/13
@@ -81,10 +81,10 @@
           substring-spec-ok? check-substring-spec
           ;; Knuth Morris Pratt Searching
           make-kmp-restart-vector kmp-step string-kmp-partial-search
-
+          let-string-start+end
   )
 
-  (define-macro (check-arg pred val caller)
+  (defmacro (check-arg pred val caller)
     `(if (,pred ,val)
          ,val
          (error ,caller "bad argument ~S" ,val)))
@@ -105,7 +105,7 @@
         (error proc "low index is greater than high index on ~S" str))
       end))
 
-  (define-macro (%check-indexes str start end proc :optional (off 0))
+  (defmacro (%check-indexes str start end proc :optional (off 0))
     `(set! ,end (%%check-indexes-func ,str ,start ,end ,proc ,off)))
 
   (define (%check-substring-indexes s start end proc)
@@ -1093,7 +1093,7 @@
        (values start end))))
 
 
-(define-syntax let-string-start+end
+(defsyntax let-string-start+end
   (syntax-rules ()
     ((_ (?start ?end ?rest) ?proc ?s ?args . ?body)
      (call-with-values
