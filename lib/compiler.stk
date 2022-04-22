@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 16-Apr-2022 18:27 (eg)
+;;;; Last file update: 22-Apr-2022 14:37 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -152,17 +152,42 @@
        (let ((val (symbol-value* symbol module #f)))
          (and (%syntax? val) val))))
 
-(define (%macro-expand form)
-  (if (pair? form)
-      (let* ((name (car form))
-             (val  (symbol-value* name (compiler-current-module) #f)))
-        (if (and (symbol? name) (%syntax? val))
-            (apply (%syntax-expander val) (cdr form))
-            form))
-      ;; Form is not a pair => return it unmodified
-      form))
+;;// (define (%macro-expand-new form)
+;;//   (define (application-expander x e)
+;;//     (map* (lambda (y) (e y e)) x))
+;;//   (define (initial-expander x e)
+;;//     (cond
+;;//      ((not (pair? x))             x)
+;;//      ((not (symbol? (car x)))     (application-expander x e))
+;;//      (else  (let* ((name (car x))
+;;//                    (val  (symbol-value* name (compiler-current-module) #f)))
+;;//               (if (and (symbol? name) (%syntax? val))
+;;//                   (apply (%syntax-expander val) (cdr x))
+;;//                   (application-expander x e))))))
+;;//
+;;//   ;; %macro-expand body
+;;//   (initial-expander form initial-expander))
 
+(define (%macro-expand form env)     ;; NOTE: env is unused for now
+  (let ((map-expander (lambda (form)
+                        (map* (lambda (x) (%macro-expand x env)) form))))
+    (cond
+     ((not (pair? form))          form)
+     ((not (symbol? (car form)))  (map-expander form))
+     (else  (let* ((name (car form))
+                   (val  (symbol-value* name (compiler-current-module) #f)))
+              (if (or (eq?  name 'quote) (eq? name 'quasiquote))
+                  form
+                  (if (and (symbol? name) (%syntax? val))
+                      (apply (%syntax-expander val) (cdr form))
+                      (map-expander form))))))))
 
+;; FIXME: not yet
+;;// (define (%macro-expand* exp env)
+;;//   (let ((new (%macro-expand exp env)))
+;;//     (if (equal? new exp)
+;;//         new
+;;//         (%macro-expand* new env))))
 
 ;;;
 ;;; Management of exported syntaxes
@@ -672,12 +697,11 @@ doc>
     (let Loop ((l body) (defs '()))
       (let ((cur (cond
                    ((null? l)
-                      (error "body is empty"))
+                    (error "body is empty"))
                    ((and (pair? l)
                          (pair? (car l))
                          (syntax-in-module (caar l) (compiler-current-module)))
-                    ;; FIXME: should be some kind of %macro-expand*
-                    (%macro-expand (car l)))
+                    (%macro-expand (car l) env))
                    ((and (pair? l) (pair? (car l)) (expander? (caar l)))
                     (%macro-expand* (car l)))
                    (else
@@ -1753,10 +1777,10 @@ doc>
                                                expander
                                                modname)))
                   ;; Define the expander in the imported module
-                  ;; (%debug "Build expander ~s in ~S with ~S" name module proc)
+                  ;; FIXME: %debug "Build expander ~s in ~S with ~S" name module proc)
                   (%symbol-define name obj module)
 
-                  ;; Add the current expander in the exported list of imorted
+                  ;; Add the current expander in the exported list of imported
                   ;; module
                   ;; NOTE: Since the expander is in the file information, it
                   ;; is exported. We need to add it to the export list, so
@@ -1881,7 +1905,7 @@ doc>
                (%syntax? (symbol-value* first (compiler-current-module) #f)))
           (let ((val (symbol-value* first (compiler-current-module))))
             ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)
-            (compile (%macro-expand e) env epair tail?))
+            (compile (%macro-expand e env) env epair tail?))
           (if (and (symbol? first)
                    (not (find-symbol-in-env first env))
                    (expander? first))
