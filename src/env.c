@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 21-Apr-2022 15:31 (eg)
+ * Last file update: 22-Apr-2022 14:06 (eg)
  */
 
 #include "stklos.h"
@@ -72,11 +72,12 @@ struct module_obj {
 };
 
 
-#define MODULE_NAME(m)          (((struct module_obj *) (m))->name)
-#define MODULE_EXPORTS(m)       (((struct module_obj *) (m))->exported_symbols)
-#define MODULE_IMPORTS(m)       (((struct module_obj *) (m))->imports)
-#define MODULE_IS_LIBRARY(m)    (((struct module_obj *) (m))->is_library)
-#define MODULE_HASH_TABLE(m)    (((struct module_obj *) (m))->hash)
+#define MODULE_NAME(m)            (((struct module_obj *) (m))->name)
+#define MODULE_EXPORTS(m)         (((struct module_obj *) (m))->exported_symbols)
+#define MODULE_IMPORTS(m)         (((struct module_obj *) (m))->imports)
+#define MODULE_IS_LIBRARY(m)      (((struct module_obj *) (m))->is_library)
+#define MODULE_IS_INSTANCIATED(m) (((struct module_obj *) (m))->is_instancied)
+#define MODULE_HASH_TABLE(m)      (((struct module_obj *) (m))->hash)
 
 SCM STk_STklos_module;          /* The module whose name is STklos */
 static SCM Scheme_module;       /* The module whose name is SCHEME */
@@ -103,6 +104,7 @@ static void print_module(SCM module, SCM port, int mode)
     STk_nputs(port, "#[module ", 9);
     STk_print(MODULE_NAME(module), port, mode);
   }
+  if (!MODULE_IS_INSTANCIATED(module)) STk_puts(" (*)", port);
   STk_putc(']', port);
 }
 
@@ -120,10 +122,11 @@ static SCM make_module(SCM name)             //FIXME: delete STk_ prefix
   register SCM z;
 
   NEWCELL(z, module);
-  MODULE_NAME(z)          = name;
-  MODULE_EXPORTS(z)       = STk_nil;
-  MODULE_IMPORTS(z)       = (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
-  MODULE_IS_LIBRARY(z)    = 0;
+  MODULE_NAME(z)            = name;
+  MODULE_EXPORTS(z)         = STk_nil;
+  MODULE_IMPORTS(z)         = (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
+  MODULE_IS_LIBRARY(z)      = FALSE;
+  MODULE_IS_INSTANCIATED(z) = FALSE;
   /* Initialize the associated hash table & store the module in the global list*/
   STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
   register_module(z);
@@ -179,6 +182,18 @@ DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
   return find_module(name, TRUE);
 }
 
+
+DEFINE_PRIMITIVE("%find-instanciated-module", find_inst_module, subr1, (SCM name))
+{
+  SCM z;
+
+  if (!SYMBOLP(name)) error_bad_module_name(name);
+  z = find_module(name, FALSE);
+
+  return  ((z != STk_void) && MODULE_IS_INSTANCIATED(z))? z: STk_false;
+}
+
+
 DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
 {
   SCM z;
@@ -198,6 +213,7 @@ DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
   vm_thread_t *vm = STk_get_current_vm();
 
   if (!MODULEP(module)) error_bad_module(module);
+  MODULE_IS_INSTANCIATED(module) = TRUE;
   vm->current_module= module;
   return STk_void;
 }
@@ -735,12 +751,15 @@ int STk_late_init_env(void)
   /* Now that symbols are initialized change the STklos module name */
   MODULE_NAME(STk_STklos_module) = STk_intern("stklos");
   MODULE_IMPORTS(STk_STklos_module) = LIST1(STk_STklos_module);
+  MODULE_IS_INSTANCIATED(STk_STklos_module) = TRUE;
 
   /* Create the SCHEME module */
   Scheme_module = make_module(STk_intern("SCHEME"));
+  MODULE_IS_INSTANCIATED(Scheme_module) = TRUE;
 
   /* ==== Undocumented primitives ==== */
   ADD_PRIMITIVE(create_module);
+  ADD_PRIMITIVE(find_inst_module);
   ADD_PRIMITIVE(module2library);
   ADD_PRIMITIVE(select_module);
   ADD_PRIMITIVE(module_imports_set);
