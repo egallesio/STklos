@@ -339,3 +339,11 @@ doc>
                             (raise (%module-restore)))))
 
 
+;; ----------------------------------------------------------------------
+(define (%debug fmt . args)
+  (let ((out (current-error-port)))
+    (display "\x1b;[33m" out)                  ;; yellow
+    (display (apply format fmt args) out)
+    (display  "\x1b;[0m" out)
+    (newline out)))
+
