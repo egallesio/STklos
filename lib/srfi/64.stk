@@ -52,16 +52,17 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 22-Feb-2022 19:11 (eg)
+;;;; Last file update: 24-Apr-2022 19:14 (eg)
 ;;;;
 
 (define-module srfi/64
   (import (srfi 9)
           (srfi 35))
+
   ;; List of exported names
   (export
    test-begin ;; must be listed first, since in Kawa (at least) it is "magic".
-   
+
    ;;; for STklos - macros will use these symbols, and will only
    ;;; be expanded outside the module
    %test-approximate=
@@ -81,6 +82,12 @@
    %test-runner-skip-list!
    %test-match-nth
    %test-match-any
+   %test-comp1body
+   %test-evaluate-with-catch
+   %test-comp2
+   %test-comp2body
+   %test-error
+
 
    test-end test-assert test-eqv test-eq test-equal
    test-approximate test-assert test-error test-apply test-with-runner
@@ -106,7 +113,7 @@
    test-runner-on-group-begin test-runner-on-group-begin!
    test-runner-on-group-end test-runner-on-group-end!
    test-runner-on-final test-runner-on-final!
-   test-runner-on-bad-count test-runner-on-bad-count!
+   test-runner-on-bad-count!
    test-runner-on-bad-end-name test-runner-on-bad-end-name!
    test-result-alist test-result-alist!
    test-runner-aux-value test-runner-aux-value!
@@ -135,8 +142,8 @@
   (define test-begin                "<<FIXME>>")
   (define test-end                  "<<FIXME>>")
 
-  
-;; (define-syntax %test-record-define
+
+;; (defsyntax %test-record-define
 ;;   (syntax-rules ()
 ;;     ((%test-record-define tname alloc runner? (name index getter setter) ...)
 ;;      (define-record-type tname
@@ -145,7 +152,7 @@
 ;;        (name getter setter) ...))))
 
 (define %test-runner-cookie (list "test-runner"))
-(define-syntax %test-record-define
+(defsyntax %test-record-define
   (syntax-rules ()
     ((%test-record-define tname alloc runner? (name index getter setter) ...)
      (begin
@@ -312,7 +319,7 @@
     (test-runner-group-stack! runner (cons suite-name
 					   (test-runner-group-stack runner)))))
 
-(define-syntax test-begin
+(defsyntax test-begin
   (syntax-rules ()
     ((test-begin suite-name)
      (%test-begin suite-name #f))
@@ -467,7 +474,7 @@
              ((test-runner-on-final r) r)
              (test-runner-current #f))))))
 
-(define-syntax test-group
+(defsyntax test-group
   (syntax-rules ()
     ((test-group suite-name . body)
      (let ((r (test-runner-current)))
@@ -479,7 +486,7 @@
 	     (lambda () . body)
 	     (lambda () (test-end  suite-name))))))))
 
-(define-syntax test-group-with-cleanup
+(defsyntax test-group-with-cleanup
   (syntax-rules ()
     ((test-group-with-cleanup suite-name form cleanup-form)
      (test-group suite-name
@@ -507,7 +514,7 @@
 	  (if source-line (%test-write-result1 source-line log))
 	  (if source-form (%test-write-result1 source-form log))))))
 
-(define-syntax test-result-ref
+(defsyntax test-result-ref
   (syntax-rules ()
     ((test-result-ref runner pname)
      (test-result-ref runner pname #f))
@@ -606,7 +613,7 @@
     ((test-runner-on-test-end r) r)))
 
 
-(define-syntax %test-evaluate-with-catch
+(defsyntax %test-evaluate-with-catch
   (syntax-rules ()
     ((%test-evaluate-with-catch test-expression)
      (guard (err (else #f)) test-expression))))
@@ -629,7 +636,7 @@
 (define (test-runner-test-name runner)
   (test-result-ref runner 'test-name ""))
 
-(define-syntax %test-comp2body
+(defsyntax %test-comp2body
   (syntax-rules ()
     ((%test-comp2body r comp expected expr)
      (let ()
@@ -652,7 +659,7 @@
            (<= rval (+ rexp error))
            (<= ival (+ iexp error))))))
 
-(define-syntax %test-comp1body
+(defsyntax %test-comp1body
   (syntax-rules ()
     ((%test-comp1body r expr)
      (let ()
@@ -667,7 +674,7 @@
  ((or kawa mzscheme guile-2)
   ;; Should be made to work for any Scheme with syntax-case
   ;; However, I haven't gotten the quoting working.  FIXME.
-  (define-syntax test-end
+  (defsyntax test-end
     (lambda (x)
       (syntax-case (list x (list (syntax quote) (%test-source-line2 x))) ()
 	(((mac suite-name) line)
@@ -676,7 +683,7 @@
 	(((mac) line)
 	 (syntax
 	  (%test-end #f line))))))
-  (define-syntax test-assert
+  (defsyntax test-assert
     (lambda (x)
       (syntax-case (list x (list (syntax quote) (%test-source-line2 x))) ()
 	(((mac tname expr) line)
@@ -703,13 +710,13 @@
 	(let* ((r (test-runner-get)))
 	  (test-result-alist! r line)
 	  (%test-comp2body r comp expected expr))))))
-  (define-syntax test-eqv
+  (defsyntax test-eqv
     (lambda (x) (%test-comp2 (syntax eqv?) x)))
-  (define-syntax test-eq
+  (defsyntax test-eq
     (lambda (x) (%test-comp2 (syntax eq?) x)))
-  (define-syntax test-equal
+  (defsyntax test-equal
     (lambda (x) (%test-comp2 (syntax equal?) x)))
-  (define-syntax test-approximate ;; FIXME - needed for non-Kawa
+  (defsyntax test-approximate ;; FIXME - needed for non-Kawa
     (lambda (x)
       (syntax-case (list x (list (syntax quote) (%test-source-line2 x))) ()
       (((mac tname expected expr error) line)
@@ -724,13 +731,13 @@
 	  (test-result-alist! r line)
 	  (%test-comp2body r (%test-approximate= error) expected expr))))))))
  (else
-  (define-syntax test-end
+  (defsyntax test-end
     (syntax-rules ()
       ((test-end)
        (%test-end #f '()))
       ((test-end suite-name)
        (%test-end suite-name '()))))
-  (define-syntax test-assert
+  (defsyntax test-assert
     (syntax-rules ()
       ((test-assert tname test-expression)
        (let* ((r (test-runner-get))
@@ -741,7 +748,7 @@
        (let* ((r (test-runner-get)))
 	 (test-result-alist! r '())
 	 (%test-comp1body r test-expression)))))
-  (define-syntax %test-comp2
+  (defsyntax %test-comp2
     (syntax-rules ()
       ((%test-comp2 comp tname expected expr)
        (let* ((r (test-runner-get))
@@ -752,19 +759,19 @@
        (let* ((r (test-runner-get)))
 	 (test-result-alist! r '())
 	 (%test-comp2body r comp expected expr)))))
-  (define-syntax test-equal
+  (defsyntax test-equal
     (syntax-rules ()
       ((test-equal . rest)
        (%test-comp2 equal? . rest))))
-  (define-syntax test-eqv
+  (defsyntax test-eqv
     (syntax-rules ()
       ((test-eqv . rest)
        (%test-comp2 eqv? . rest))))
-  (define-syntax test-eq
+  (defsyntax test-eq
     (syntax-rules ()
       ((test-eq . rest)
        (%test-comp2 eq? . rest))))
-  (define-syntax test-approximate
+  (defsyntax test-approximate
     (syntax-rules ()
       ((test-approximate tname expected expr error)
        (%test-comp2 (%test-approximate= error) tname expected expr))
@@ -773,7 +780,7 @@
 
 (cond-expand
  (guile
-  (define-syntax %test-error
+  (defsyntax %test-error
     (syntax-rules ()
       ((%test-error r etype expr)
        (cond ((%test-on-test-begin r)
@@ -792,7 +799,7 @@
                                        #t)))
                 (%test-report-result))))))))
  (mzscheme
-  (define-syntax %test-error
+  (defsyntax %test-error
     (syntax-rules ()
       ((%test-error r etype expr)
        (%test-comp1body r (with-handlers (((lambda (h) #t) (lambda (h) #t)))
@@ -800,12 +807,12 @@
 					   (test-result-set! r 'actual-value expr)
 					   #f)))))))
  (chicken
-  (define-syntax %test-error
+  (defsyntax %test-error
     (syntax-rules ()
       ((%test-error r etype expr)
         (%test-comp1body r (condition-case expr (ex () #t)))))))
  (kawa
-  (define-syntax %test-error
+  (defsyntax %test-error
     (syntax-rules ()
       ((%test-error r #t expr)
        (cond ((%test-on-test-begin r)
@@ -836,7 +843,7 @@
 					   (else #t)))))
 	     (%test-report-result)))))))
  ((and srfi-34 srfi-35)
-  (define-syntax %test-error
+  (defsyntax %test-error
     (syntax-rules ()
       ((%test-error r etype expr)
        (%test-comp1body r (guard (ex ((condition-type? etype)
@@ -848,12 +855,12 @@
 		  (else #t))
 	      expr #f))))))
  (srfi-34
-  (define-syntax %test-error
+  (defsyntax %test-error
     (syntax-rules ()
       ((%test-error r etype expr)
        (%test-comp1body r (guard (ex (else #t)) expr #f))))))
  (else
-  (define-syntax %test-error
+  (defsyntax %test-error
     (syntax-rules ()
       ((%test-error r etype expr)
        (begin
@@ -864,7 +871,7 @@
 (cond-expand
  ((or kawa mzscheme guile-2)
 
-  (define-syntax test-error
+  (defsyntax test-error
     (lambda (x)
       (syntax-case (list x (list (syntax quote) (%test-source-line2 x))) ()
 	(((mac tname etype expr) line)
@@ -884,7 +891,7 @@
 	    (test-result-alist! r line)
 	    (%test-error r #t expr))))))))
  (else
-  (define-syntax test-error
+  (defsyntax test-error
     (syntax-rules ()
       ((test-error name etype expr)
        (let ((r (test-runner-get)))
@@ -899,7 +906,7 @@
          (test-result-alist! r '())
          (%test-error r #t expr)))))))
 
-(define-syntax test-with-runner
+(defsyntax test-with-runner
   (syntax-rules ()
     ((test-with-runner runner form ...)
      (let ((saved-runner (test-runner-current)))
@@ -935,7 +942,7 @@
       (set! i (+ i 1))
       (and (>= i n) (< i (+ n count))))))
 
-(define-syntax test-match-nth
+(defsyntax test-match-nth
   (syntax-rules ()
     ((test-match-nth n)
      (test-match-nth n 1))
@@ -952,8 +959,8 @@
 	      (if (not ((car l) runner))
 		  (set! result #f))
 	      (loop (cdr l))))))))
-  
-(define-syntax test-match-all
+
+(defsyntax test-match-all
   (syntax-rules ()
     ((test-match-all pred ...)
      (%test-match-all (%test-as-specifier pred) ...))))
@@ -968,8 +975,8 @@
 	      (if ((car l) runner)
 		  (set! result #t))
 	      (loop (cdr l))))))))
-  
-(define-syntax test-match-any
+
+(defsyntax test-match-any
   (syntax-rules ()
     ((test-match-any pred ...)
      (%test-match-any (%test-as-specifier pred) ...))))
@@ -982,7 +989,7 @@
 	(else
 	 (error "not a valid test specifier"))))
 
-(define-syntax test-skip
+(defsyntax test-skip
   (syntax-rules ()
     ((test-skip pred ...)
      (let ((runner (test-runner-get)))
@@ -990,7 +997,7 @@
 				  (cons (test-match-all (%test-as-specifier pred)  ...)
 					(%test-runner-skip-list runner)))))))
 
-(define-syntax test-expect-fail
+(defsyntax test-expect-fail
   (syntax-rules ()
     ((test-expect-fail pred ...)
      (let ((runner (test-runner-get)))
