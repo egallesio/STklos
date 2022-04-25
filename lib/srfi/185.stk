@@ -1,5 +1,5 @@
 ;;;;
-;;;; 185.stk		-- Implementation of SRFI-185
+;;;; 185.stk        -- Implementation of SRFI-185
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -47,53 +47,54 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 31-Jul-2020 09:12 (jpellegrini)
-;;;; Last file update: 21-Apr-2022 17:57 (eg)
+;;;; Last file update: 25-Apr-2022 17:59 (eg)
 ;;;;
 
 (define-module srfi/185
+  (import (only (SCHEME) string-append! string-replace!))
   (export string-append-linear!
-          string-replace-linear!)
-  (export-syntax string-append!
-                 string-replace!)
+          string-replace-linear!
+          string-append!
+          string-replace!)
 
-;; define the procedures required by the SRFI.
-;; these are already built-in, so no problem.
-(define string-append-linear! string-append!)
-(define string-replace-linear! string-replace!)
+  ;; define the procedures required by the SRFI.
+  ;; these are already built-in, so no problem.
+  (define string-append-linear! string-append!)
+  (define string-replace-linear! string-replace!)
 
-;; define new syntax, as per SRFI-185.
-;; see that the original procedures are still available,
-;; WITH THE SAME NAMES:
-;;
-;; stklos> (eq? string-append! string-append-linear!)
-;; #t
-;;
-;; but what we get when we call string-append! now is the
-;; new macro:
-;;
-;; stklos> (string-append! "a" "b")
-;; **** Error:
-;; string-append!: changing the constant string "a" is not allowed
-;; 	(type ",help" for more information)
-;; stklos> (require "srfi-185")
-;; "srfi-185"
-;; stklos>  (string-append! "a" "b")
-;; **** Error:
-;; error: set!: "a" is a bad symbol
-;; 	(type ",help" for more information)
-;;
-;; This is according to the SRFI specification.
-;;
-(define-syntax string-append!
-  (syntax-rules ()
-    ((_ place . args)
-     (set! place (string-append-linear! place . args)))))
+  ;; define new syntax, as per SRFI-185.
+  ;; see that the original procedures are still available,
+  ;; WITH THE SAME NAMES:
+  ;;
+  ;; stklos> (eq? string-append! string-append-linear!)
+  ;; #t
+  ;;
+  ;; but what we get when we call string-append! now is the
+  ;; new macro:
+  ;;
+  ;; stklos> (string-append! "a" "b")
+  ;; **** Error:
+  ;; string-append!: changing the constant string "a" is not allowed
+  ;;  (type ",help" for more information)
+  ;; stklos> (require "srfi-185")
+  ;; "srfi-185"
+  ;; stklos>  (string-append! "a" "b")
+  ;; **** Error:
+  ;; error: set!: "a" is a bad symbol
+  ;;  (type ",help" for more information)
+  ;;
+  ;; This is according to the SRFI specification.
+  ;;
+  (defsyntax string-append!
+    (syntax-rules ()
+      ((_ place . args)
+       (set! place (string-append-linear! place . args)))))
 
-(define-syntax string-replace!
-  (syntax-rules ()
-    ((_ place . args)
-     (set! place (string-replace-linear! place . args)))))
+  (defsyntax string-replace!
+    (syntax-rules ()
+      ((_ place . args)
+       (set! place (string-replace-linear! place . args)))))
 
-)
+  )
 
 (provide "srfi/185")
