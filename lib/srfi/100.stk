@@ -26,17 +26,19 @@
 ;;;;
 ;;;;           Author: Joo ChurlSoo.
 ;;;;    Creation date: ??-???-2009 ??:??
-;;;; Last file update: 22-Apr-2022 16:47 (eg)
+;;;; Last file update: 25-Apr-2022 09:12 (eg)
 ;;;;
 
 ;; **STklos**: check-duplicate check-field and field-key are part of the macro expansion
 ;; ==> they are prefixed by a '%' since they need to be exported
 
 (define-module srfi/100
-  (export %check-duplicate %check-field %field-key)
+  ;; FIXME: Following symbols should not be exported
+  (export %check-duplicate %check-field %field-key unquote-get unquote-get*
+          unquote-set! seq-lambda key-lambda define-object)
   (export define-lambda-object)
 
-  (define-macro (unquote-get symbol args)
+  (defmacro (unquote-get symbol args)
     (if (null? args)
         `(error 'define-lambda-object "absent field" ,symbol)
         (let ((arg (car args)))
@@ -44,7 +46,7 @@
                ,(cdr arg)
                (unquote-get ,symbol ,(cdr args))))))
 
-(define-macro (unquote-get* symbol args)
+(defmacro (unquote-get* symbol args)
   (if (null? args)
       `(error 'define-lambda-object "not available inspection" ,symbol)
       (let ((arg (car args)))
@@ -52,7 +54,7 @@
          ,arg
          (unquote-get* ,symbol ,(cdr args))))))
 
-(define-macro (unquote-set! symbol new-val args iargs)
+(defmacro (unquote-set! symbol new-val args iargs)
   (define (lp args)
     (if (null? args)
     `(if (memq ,symbol ',iargs)
@@ -64,7 +66,7 @@
            ,(lp (cdr args))))))
   (lp args))
 
-(define-macro (seq-lambda r o body)
+(defmacro (seq-lambda r o body)
   (define (opt-seq z cls body)
     (if (null? cls)
     `(if (null? ,z)
@@ -99,7 +101,7 @@
                 (lp (cons x (cons (car y) head)) (cdr y)))))))))))
 ;; 2. macro field-key!
 ;; **STklos** supressed the macro field-key!
-;; (define-macro (field-key! z n d)
+;; (defmacro (field-key! z n d)
 ;;   (let ((x (gensym)) (y (gensym)) (head (gensym)) (tail (gensym)))
 ;;     `(let ((,x (car ,z)) (,y (cdr ,z)))
 ;;        (if (null? ,y)
@@ -118,7 +120,7 @@
 ;;                       (car ,y))
 ;;                    (lp (cons ,x (cons (car ,y) ,head)) (cdr ,y))))))))))))
 
-(define-macro (key-lambda r o body)
+(defmacro (key-lambda r o body)
   (define (opt-key z cls body)
     (if (null? cls)
     `(if (null? ,z)
@@ -165,7 +167,7 @@
 ;;  '()
 ;;  (cons (cons (car ls) n) (loop (cdr ls) (+ 1 n))))))
 
-(define-macro (define-object name gr gi fm fi r o a c v h)
+(defmacro (define-object name gr gi fm fi r o a c v h)
   (let ((safe-name (gensym))
     (safe-parent (gensym))
     (arg (gensym))

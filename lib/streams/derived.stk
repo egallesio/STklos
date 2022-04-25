@@ -89,18 +89,14 @@
           stream-iterate stream-length stream-map
           stream-range stream-ref stream-reverse stream-scan stream-take
           stream-take-while stream-unfold stream-unfolds stream-zip)
-  (export define-stream stream stream-let stream-match stream-of)
-  (export-syntax define-stream stream stream-let stream-match stream-of)
+  (export define-stream stream stream-let stream-match stream-match-next
+          stream-match-one stream-match-body stream-of stream-of-aux stream-of-aux2)
 
-  (define define-stream "<<FIXME>>")
-  (define stream        "<<FIXME>>")
-  (define stream-let    "<<FIXME>>")
-  (define stream-match  "<<FIXME>>")
-  (define stream-of     "<<FIXME>>")
+
 
   (define exists any)
 
-  (define-syntax define-stream
+  (defsyntax define-stream
     (syntax-rules ()
       ((define-stream (name . formal) body0 body1 ...)
         (define name (stream-lambda formal body0 body1 ...)))))
@@ -127,7 +123,7 @@
           (error 'port->stream "non-input-port argument")
           (port->stream p))))
 
-  (define-syntax stream
+  (defsyntax stream
     (syntax-rules ()
       ((stream) stream-null)
       ((stream x y ...) (stream-cons x (stream y ...)))))
@@ -254,7 +250,7 @@
               len
               (loop (+ len 1) (stream-cdr strm))))))
 
-  (define-syntax stream-let
+  (defsyntax stream-let
     (syntax-rules ()
       ((stream-let tag ((name val) ...) body1 body2 ...)
        ((letrec ((tag (stream-lambda (name ...) body1 body2 ...))) tag) val ...))))
@@ -274,7 +270,7 @@
 
 ;;; The following uses syntax-case. For this macro only, we have
 ;;; switched to Chibi's implementation
-  ;; (define-syntax stream-match
+  ;; (defsyntax stream-match
   ;;   (syntax-rules ()
   ;;     ((stream-match strm-expr clause ...)
   ;;       (let ((strm strm-expr))
@@ -283,14 +279,14 @@
   ;;           ((stream-match-test strm clause) => car) ...
   ;;           (else (error 'stream-match "pattern failure")))))))
 
-  ;; (define-syntax stream-match-test
+  ;; (defsyntax stream-match-test
   ;;   (syntax-rules ()
   ;;     ((stream-match-test strm (pattern fender expr))
   ;;       (stream-match-pattern strm pattern () (and fender (list expr))))
   ;;     ((stream-match-test strm (pattern expr))
   ;;       (stream-match-pattern strm pattern () (list expr)))))
 
-  ;; (define-syntax stream-match-pattern
+  ;; (defsyntax stream-match-pattern
   ;;   (lambda (x)
   ;;     (define (wildcard? x)
   ;;       (and (identifier? x)
@@ -314,7 +310,7 @@
   ;;         (syntax (let ((var strm) binding ...) body))))))
 
 ;;; BEGIN portion taken from Chibi
-(define-syntax stream-match
+(defsyntax stream-match
   (syntax-rules ()
     ((stream-match expr clause ...)
      (let ((strm expr))
@@ -322,7 +318,7 @@
            (error 'stream-match "non-stream argument")
            (stream-match-next strm clause ...))))))
 
-(define-syntax stream-match-next
+(defsyntax stream-match-next
   (syntax-rules ()
     ((stream-match-next strm)
      (error 'stream-match "pattern failure"))
@@ -330,7 +326,7 @@
      (let ((fail (lambda () (stream-match-next strm . clauses))))
        (stream-match-one strm clause (fail))))))
 
-(define-syntax stream-match-one
+(defsyntax stream-match-one
   (syntax-rules (_)
     ((stream-match-one strm (() . body) fail)
      (if (stream-null? strm)
@@ -350,7 +346,7 @@
      (let ((a strm))
        (stream-match-body fail . body)))))
 
-(define-syntax stream-match-body
+(defsyntax stream-match-body
   (syntax-rules ()
     ((stream-match-body fail fender expr)
      (if fender expr fail))
@@ -359,13 +355,13 @@
 ;;; END of portion from Chibi
 
 
-  (define-syntax stream-of
+  (defsyntax stream-of
     (syntax-rules ()
       ((_ expr rest ...)
         (stream-of-aux expr stream-null rest ...))))
 
 
-  (define-macro (stream-of-aux2 expr base v . rest)
+  (defmacro (stream-of-aux2 expr base v . rest)
     (let ((var  (car v))
           (loop (gensym "loop"))
           (strm (gensym "strm"))
@@ -377,7 +373,7 @@
                          (stream-of-aux ,expr (,loop (stream-cdr ,strm)) ,@rest ))))))
 
 
-  (define-syntax stream-of-aux
+  (defsyntax stream-of-aux
     (syntax-rules (in is)
       ((stream-of-aux expr base)
         (stream-cons expr base))
