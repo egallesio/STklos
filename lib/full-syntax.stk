@@ -23,7 +23,7 @@
 ;;;; NATURE WHATSOEVER.
 ;;;;
 ;;;;    Creation date: 26-Jan-2001 17:49 (eg)
-;;;; Last file update:  7-Jan-2022 20:21 (eg)
+;;;; Last file update: 26-Apr-2022 18:43 (eg)
 ;;;;
 
 #|
@@ -269,12 +269,6 @@ doc>
                                         (syntax-case x (k ...)
                                            ((dummy . pattern) (syntax template))
                                            ...))))))))))
-
-
-;;;;
-;;;; Tell macro-expand that we have a new function to expand syntax-case macros
-;;;;
-(set! syntax-expand sc:expand-syntax)
 
 (provide "full-syntax")
 

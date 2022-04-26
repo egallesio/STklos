@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 15-Apr-2022 18:52 (eg)
+;;;; Last file update: 26-Apr-2022 18:38 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -205,119 +205,10 @@ doc>
                   (set! lst (cons symbol lst))))
               symbols)
     (compiler-known-globals lst)))
-  
 
-;;; ----------------------------------------------------------------------
-;;;
-;;;                             E x p a n d e r s
-;;;
-;;; ----------------------------------------------------------------------
-(define *expander-list*     '())  ; the macros
-(define *expander-list-src* '())  ; their source code
-(define *expander-published* '()) ; names of the macro to "publish"
-
-(define (expander? x)
-  (assq x *expander-list*))
-
-
-(define (application-expander x e)
-  (map* (lambda (y) (e y e)) x))
-
-
-(define (initial-expander x e)
- (cond
-   ((not (pair? x))             x)
-   ((not (symbol? (car x)))  (application-expander x e))
-   (else  (let ((functor (car x)))
-            (cond
-               ((expander? functor) ((cdr (assq functor *expander-list*)) x e))
-               (else (application-expander x e)))))))
-
-
-(define (install-expander! id proc code)
-  ;; Add the new macro to the expander list
-  (let ((old (assq id *expander-list*)))
-    (if old
-      (set-cdr! old proc)
-      (set! *expander-list* (cons (cons id proc) *expander-list*))))
-  ;; Global macro: Keep the macro code to eventually save it in byte-code header
-  (let ((old (assq id *expander-list-src*)))
-    (if old
-      (set-cdr! old code)
-      (set! *expander-list-src* (cons (cons id code) *expander-list-src*)))))
-
-
-(define (push-expander! id proc)
-  ;; Used by internal macro. Macro is pushed on the list to shadow the global one
-  (set! *expander-list* (cons (cons id proc) *expander-list*)))
-
-
-(define (delete-expander! id)
-  (let loop ((lst *expander-list*)
-             (prv #f))
-    (cond
-      ((null? lst)
-         (void))
-      ((eq? (caar lst) id)
-         (if prv
-           (set-cdr! prv (cdr lst))
-           (set! *expander-list* (cdr lst))))
-      (else
-         (loop (cdr lst) lst)))))
-
-;;;
-;;; Published macro management
-;;;
-(define (expander-published-reset!)
-  (set! *expander-list-src* '())
-  (set! *expander-published* '()))
-
-(define (expander-published-sources)
-  (let ((warning (in-module |STKLOS-COMPILER| compiler-warning)))
-    (let Loop ((lst *expander-published*)
-               (res '()))
-      (if (null? lst)
-          (reverse! res)
-          (let ((mac (assoc (car lst) *expander-list-src*)))
-            (if mac
-                (Loop (cdr lst) (cons mac res))
-                (begin
-                  (warning (void) 'export-syntax
-                           "cannot find source of syntax named ~S" (car lst))
-                  (Loop (cdr lst) res))))))))
-
-(define (expander-published-add! name)
-  (unless (memq name *expander-published*)
-    (set! *expander-published* (cons name *expander-published*))))
-
-;;;
-;;; Runtime support for R5RS macro
-;;;
-(define (syntax-expand expr) expr)
-
-(define (macro-expand x)
-  (initial-expander (syntax-expand x) initial-expander))
-
-(define (macro-expand* exp)
-  (let ((new (macro-expand exp)))
-    (if (equal? new exp)
-        new
-        (macro-expand* new))))
-
-;; ======================================================================
-(define %macro-expand*
-  (let ((expand (lambda (x)
-                  ;; as macro-expand without syntax expand (used by full-syntax)
-                  (initial-expander x (lambda (x e) x)))))
-    (lambda (exp)
-      (let ((new (expand exp)))
-        (if (equal? new exp)
-            new
-            (%macro-expand* new))))))
-
-
-
-;----------------------------------------------------------------------
+;; ----------------------------------------------------------------------
+;;      Module management
+;;----------------------------------------------------------------------
 (define %modules-stack  '())
 (define %module-create  (lambda (name)
                           (set! %modules-stack (cons (current-module)
@@ -338,12 +229,12 @@ doc>
                             ;; Hack: Here %module-restore will get back the old c
                             (raise (%module-restore)))))
 
-
 ;; ----------------------------------------------------------------------
+;;      A trace function, defined early to permit some traces
+;;----------------------------------------------------------------------
 (define (%debug fmt . args)
   (let ((out (current-error-port)))
     (display "\x1b;[33m" out)                  ;; yellow
     (display (apply format fmt args) out)
     (display  "\x1b;[0m" out)
     (newline out)))
-

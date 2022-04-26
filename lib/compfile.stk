@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update:  5-Apr-2022 11:57 (eg)
+;;;; Last file update: 26-Apr-2022 18:42 (eg)
 ;;;;
 
 (select-module STKLOS-COMPILER)
@@ -58,8 +58,7 @@ doc>
       ;; Return informations
       (list :version   (version)
             :globals   globs
-            :macros    (file-module-list-expanders)
-            :expanders (expander-published-sources))))
+            :macros    (file-module-list-expanders))))
 
   (let ((out      (open-output-file output))
         (globs    (compiler-known-globals))
@@ -67,7 +66,6 @@ doc>
         (copts    (compiler:warn-use-undefined-postpone)))
 
     ;; Clear the list containing  macros sources
-    (expander-published-reset!)   ;; FIXME:
     (file-module-list-reset!)
 
     ;; Defer warning til the end of the compilation of file

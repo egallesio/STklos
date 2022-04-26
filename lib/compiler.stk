@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 22-Apr-2022 14:37 (eg)
+;;;; Last file update: 26-Apr-2022 18:45 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -490,41 +490,6 @@ doc>
 ;;
 ;; DEFINE-MACRO
 ;;
-(define (compile-define-macro e env tail?)
-  ;; Called for global macros.
-  (if (not env)
-      (let ((l (define->lambda e)))
-        (when (= (length l) 3)
-          (let* ((l        (extended-lambda->lambda l))
-                 (name     (cadr l))
-                 (proc     (caddr l))
-                 (form     (gensym 'form))
-                 (e        (gensym '_))
-                 (expander `(lambda (,form ,e) (apply ,proc (cdr ,form)))))
-            ;; Install expander for further compilation
-            (%debug "==========> Install expander for ~s" name)
-            (install-expander! name (eval expander) proc)
-            ;; Compile code for installing expander (for byte-code files)
-            ;; YES! we need both (install + compile)
-            (compile expander #f e #f)
-            (emit 'MAKE-EXPANDER (fetch-constant name)))))
-      (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
-
-
-(define (compile-internal-define-macro e env tail?)
-  ;; This one is called when we find a define-macro while rewriting a body
-  ;; (for internal defines -> letrec)
-  (let ((l (define->lambda e)))
-    (when (= (length l) 3)
-      (let* ((l        (extended-lambda->lambda l))
-             (name     (cadr l))
-             (proc     (caddr l))
-             (expander `(lambda (form e) (apply ,proc (cdr form)))))
-        ;; Push expander for further compilation (shadowing global macro)
-        (push-expander! name (eval expander))
-        ;; return the name of the defined macro
-        name))))
-
 (define (compile-defmacro e env tail?)
   (if (not env)
       ;; We have a global macro
@@ -702,8 +667,6 @@ doc>
                          (pair? (car l))
                          (syntax-in-module (caar l) (compiler-current-module)))
                     (%macro-expand (car l) env))
-                   ((and (pair? l) (pair? (car l)) (expander? (caar l)))
-                    (%macro-expand* (car l)))
                    (else
                       (car l)))))
         (cond
@@ -714,11 +677,6 @@ doc>
         ((and (pair? cur) (eq? (car cur) 'define))
            ;; This is an internal define
            (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
-        ((and (pair? cur) (eq? (car cur) 'define-macro))
-           ;; This is an internal define-macro. Add expander + skip expression
-           (let ((name (compile-internal-define-macro cur env #f)))
-             (set! internal-macros (cons name internal-macros))
-             (Loop (cdr l) defs)))
         (else
            ;; We have parsed all the (starting) definitions
            (if (null? defs)
@@ -730,11 +688,7 @@ doc>
                     ,@l))))))))
 
   ;; rewrite the body to transform internal define to letrec
-  (compile (rewrite-body body) env epair tail?)
-
-  ;; delete all the internal macros from the list of expanders
-  (for-each delete-expander! internal-macros))
-
+  (compile (rewrite-body body) env epair tail?))
 
 (define (compile-user-lambda formals body arity env)    ; i.e R5RS ones
   (let* ((env  (extend-env env formals))
@@ -1755,14 +1709,6 @@ doc>
     ;; Register all the global symbols of the file
     (for-each register-new-global! (key-get infos :globals '()))
 
-    ;; FIXME: This code must be deleted when defmacro is completed
-    (for-each (lambda (x)
-                (let* ((name     (car x))
-                       (proc     (cdr x))
-                       (expander `(lambda (form e) (apply ,proc (cdr form)))))
-                  (install-expander! name (eval expander) proc)))
-              (key-get infos :expanders '()))
-
     ;; Rebuild the expanders exported by the imported file.
     (for-each (lambda (x)
                 (let* ((names   (car x))
@@ -1813,17 +1759,8 @@ doc>
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
 
-;;;;
-;;;; PUBLISH-SYNTAX
-;;;;
-(define (compile-%%pubsyntax e env tail)
-  (for-each (lambda (x)
-              (if (symbol? x)
-                  (expander-published-add! x)
-                  (error '%%publish-syntax "bad symbol ~S" x)))
-            (cdr e)))
 
-
+;;; FIXME: should be deleted
 ;;;;
 ;;;; REQUIRE-FOR-SYNTAX
 ;;;;
@@ -1903,48 +1840,41 @@ doc>
       (if (and (symbol? first)
                (not (find-symbol-in-env first env))
                (%syntax? (symbol-value* first (compiler-current-module) #f)))
-          (let ((val (symbol-value* first (compiler-current-module))))
+          (let ((val (symbol-value* first (compiler-current-module))))                ;; FIXME: val unused
             ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)
             (compile (%macro-expand e env) env epair tail?))
-          (if (and (symbol? first)
-                   (not (find-symbol-in-env first env))
-                   (expander? first))
-              ;; ---- macro call
-              (compile (macro-expand e) env epair tail?)
-              ;; ---- special-form? function call?
-              (case first
-                ((if)                 (compile-if             e env tail?))
-                ((define)             (compile-define         e env tail?))
-                ((begin)              (compile-begin          e env tail?))
-                ((lambda λ)                (compile-lambda         e env tail?))
-                ((let %let)           (compile-let            e env tail?))
-                ((let*)               (compile-let*           e env tail?))
-                ((letrec)             (compile-letrec         e env tail?))
-                ((and)                (compile-and            e env tail?))
-                ((or)                 (compile-or             e env tail?))
-                ((cond)               (compile-cond           e env tail?))
-                ((case)               (compile-case           e env tail?))
-                ((do)                 (compile-do             e env tail?))
-                ((quote)              (compile-quote          e env tail?))
-                ((quasiquote)         (compile-quasiquote     e env tail?))
-                ((with-handler)       (compile-with-handler   e env tail?))
-                ((define-macro)       (compile-define-macro   e env tail?))
-                ((defmacro)           (compile-defmacro       e env tail?))
+          ;; ---- special-form? function call?
+          (case first
+            ((if)                 (compile-if             e env tail?))
+            ((define)             (compile-define         e env tail?))
+            ((begin)              (compile-begin          e env tail?))
+            ((lambda λ)                (compile-lambda         e env tail?))
+            ((let %let)           (compile-let            e env tail?))
+            ((let*)               (compile-let*           e env tail?))
+            ((letrec)             (compile-letrec         e env tail?))
+            ((and)                (compile-and            e env tail?))
+            ((or)                 (compile-or             e env tail?))
+            ((cond)               (compile-cond           e env tail?))
+            ((case)               (compile-case           e env tail?))
+            ((do)                 (compile-do             e env tail?))
+            ((quote)              (compile-quote          e env tail?))
+            ((quasiquote)         (compile-quasiquote     e env tail?))
+            ((with-handler)       (compile-with-handler   e env tail?))
+            ((defmacro)           (compile-defmacro       e env tail?))
 
-                ((%%set!)             (compile-set!           e env tail?))
+            ((%%set!)             (compile-set!           e env tail?))
 
-                ;; Special calls
-                ((%%require)          (compile-require        e env tail?))
-                ((%%require4syntax)   (compile-require4syntax e env tail?))
-                ((%%when-compile)     (compile-when-compile   e env tail?))
-                ((%%include)          (compile-include        e env tail?))
-                ((%%include-ci)       (compile-include-ci     e env tail?))
-                ((%%source-pos)       (compile-%%source-pos   e env tail?))
-                ((%%label)            (compile-%%label        e env tail?))
-                ((%%goto)             (compile-%%goto         e env tail?))
-                ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
-                ;; Standard call
-                (else                 (compile-call           e env tail?)))))))
+            ;; Special calls
+            ((%%require)          (compile-require        e env tail?))
+            ((%%require4syntax)   (compile-require4syntax e env tail?))      ;; FIXME
+            ((%%when-compile)     (compile-when-compile   e env tail?))
+            ((%%include)          (compile-include        e env tail?))
+            ((%%include-ci)       (compile-include-ci     e env tail?))
+            ((%%source-pos)       (compile-%%source-pos   e env tail?))
+            ((%%label)            (compile-%%label        e env tail?))
+            ((%%goto)             (compile-%%goto         e env tail?))
+            ;; Standard call
+            (else                 (compile-call           e env tail?))))))
 
    ;; ---- We have a symbol
    ((symbol? e)
