@@ -45,7 +45,7 @@
 (define (procedure/tag? proc)
   (and (memq #:tag (%procedure-plist proc)) #t))
 
-(defsyntax case-lambda/tag
+(define-syntax case-lambda/tag
   (syntax-rules ()
     ((case-lambda/tag expr (formals body1 ... body2) ...)
      (let ((e expr) ;; evaluate expr first (explicitly
@@ -54,7 +54,7 @@
        (set-procedure-tag! proc e)
        proc))))
 
-(defsyntax lambda/tag
+(define-syntax lambda/tag
   (syntax-rules ()
     ((lambda/tag expr formals body1 ... body2)
      (let ((e expr) ;; evaluate expr first (explicitly

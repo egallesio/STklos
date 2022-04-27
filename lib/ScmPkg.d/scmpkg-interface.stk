@@ -49,7 +49,7 @@
 		       ))
 
 
-(defmacro (%push! lst v)
+(define-macro (%push! lst v)
   `(set! ,lst (cons ,v ,lst)))
 
 
@@ -63,7 +63,7 @@
 ;; ======================================================================
 ;;	interface ...
 ;; ======================================================================
-(defmacro (interface name . body)
+(define-macro (interface name . body)
 
   (define (find-imports lang imp)
     (let ((main (car lang)))

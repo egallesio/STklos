@@ -79,7 +79,7 @@
            char-set:hex-digit   char-set:blank       char-set:ascii
            char-set:empty       char-set:full)
 
-(defmacro (check-arg pred val caller)
+(define-macro (check-arg pred val caller)
   `(if (,pred ,val)
        ,val
        (error ,caller "bad argument ~S" ,val)))

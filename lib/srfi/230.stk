@@ -62,7 +62,7 @@
 
     (define lock (make-mutex))
 
-    (defsyntax lock-guard
+    (define-syntax lock-guard
       (syntax-rules ()
         ((lock-guard . body)
          (dynamic-wind
@@ -81,7 +81,7 @@
     ;; Note: On an R6RS system, the following syntax and procedure would be
     ;; implemented as an enumeration type.
 
-    (defsyntax memory-order
+    (define-syntax memory-order
       (syntax-rules ()
         ((memory-order symbol) 'symbol)))
 

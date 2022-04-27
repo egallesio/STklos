@@ -53,7 +53,7 @@
 
 (export infix/postfix extract-placeholders identity-syntax is isnt)
 
-(defsyntax infix/postfix
+(define-syntax infix/postfix
   (syntax-rules ()
     ((infix/postfix x somewhat?)
      (somewhat? x))
@@ -70,7 +70,7 @@
 ;; identical symbols for argumets of closures, like (lambda (a a) ...).
 ;; I have written another macro, using define-macro, below. -- jpellegrini
 ;;
-;; (defsyntax extract-placeholders
+;; (define-syntax extract-placeholders
 ;;   (syntax-rules (_)
 ;;     ((extract-placeholders final () () body)
 ;;      (final (infix/postfix . body)))
@@ -90,7 +90,7 @@
 ;;     ((extract-placeholders final (arg) args (body ...))
 ;;      (extract-placeholders final () args (body ... arg)))))
 
-(defmacro  (extract-placeholders final a b body)
+(define-macro  (extract-placeholders final a b body)
   (cond ((and (null? a) (null? b))
            `(,final ,(cons 'infix/postfix body)))
 
@@ -130,17 +130,17 @@
                                     ,b
                                     ,(append body (list arg)))))))
 
-(defsyntax identity-syntax
+(define-syntax identity-syntax
   (syntax-rules ()
     ((identity-syntax form)
      form)))
 
-(defsyntax is
+(define-syntax is
   (syntax-rules ()
     ((is . something)
      (extract-placeholders identity-syntax something () ()))))
 
-(defsyntax isnt
+(define-syntax isnt
   (syntax-rules ()
     ((isnt . something)
      (extract-placeholders not something () ()))))

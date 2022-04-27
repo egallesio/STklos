@@ -82,7 +82,7 @@
 ;; ======================================================================
 ;; Streams.
 ;; ======================================================================
-(defmacro (cons-stream a b)
+(define-macro (cons-stream a b)
   `(cons ,a (delay ,b)))
 
 (define the-empty-stream '())

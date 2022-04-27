@@ -47,7 +47,7 @@
 
 (define-module srfi/5
   (export let)
-  (defmacro (let bindings . body)
+  (define-macro (let bindings . body)
 
     (define (find-names lst)
       (cond

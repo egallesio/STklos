@@ -70,7 +70,7 @@
 (define *endianness/native*
   (if (%big-endian?) *endianness/big* *endianness/little*))
 
-(defsyntax endianness
+(define-syntax endianness
   (syntax-rules (little big native)
     ((endianness little) (in-module srfi/74 *endianness/little*))
     ((endianness big)    (in-module srfi/74 *endianness/big*))

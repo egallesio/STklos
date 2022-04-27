@@ -133,8 +133,8 @@ doc>
       "cannot be used here. You must load the file \"full-syntax\" to access it:"
       (cons name args)))
 
-  (defmacro (let-syntax . args)   (%not-implemented 'let-syntax ',args))
-  (defmacro (letrec-syntax . args)(%not-implemented 'letrec-syntax ',args))
+  (define-macro (let-syntax . args)   (%not-implemented 'let-syntax ',args))
+  (define-macro (letrec-syntax . args)(%not-implemented 'letrec-syntax ',args))
 
 
 ;;;

@@ -426,7 +426,7 @@ doc>
 
 
 ;; Overload require with a macro to let the compiler deal with globals
-(defmacro (require what)
+(define-macro (require what)
   (if (string? what)
       (let ((spec (%rewrite-require-spec what (load-path) (load-suffixes))))
         (if (and spec (cdr spec))
@@ -438,7 +438,7 @@ doc>
       `(%%require ,what #f)))
 
 
-(defmacro (require-library what)
+(define-macro (require-library what)
   `(%%require ,what #t))
 
 #|
@@ -447,12 +447,12 @@ doc>
  *
 doc>
 |#
-#;(defmacro (require-for-syntax name)
+#;(define-macro (require-for-syntax name)
   `(when-compile
       (require ,name)))
 
 
-(defmacro (require-for-syntax file)
+(define-macro (require-for-syntax file)
   `(%%require4syntax ,file))
 
 
@@ -462,7 +462,7 @@ doc>
 ; INCLUDE
 ;
 ;=============================================================================
-(defmacro (%do-include kind files)
+(define-macro (%do-include kind files)
   (let ((inc (string->symbol (format "%%~a" kind))))
     (if (null? files)
         (error kind "at least one parameter must be provided")
@@ -471,14 +471,14 @@ doc>
                         (or (find-path x) x))
                       files)))))
 
-(defmacro (include . files)
+(define-macro (include . files)
   `(%do-include include ,files))
 
-(defmacro (include-ci . files)
+(define-macro (include-ci . files)
   `(%do-include include-ci ,files))
 
 
-(defmacro (include-file file) ;; Only one file no search in the load-path
+(define-macro (include-file file) ;; Only one file no search in the load-path
   `(%%include ,file))
 
 ;=============================================================================
@@ -505,7 +505,7 @@ doc>
  *
 doc>
 |#
-(defmacro (autoload file . symbols)
+(define-macro (autoload file . symbols)
   (let ((args (gensym))
         (old  (gensym)))
     `(begin
@@ -528,7 +528,7 @@ doc>
  *
 doc>
 |#
-(defmacro (syntax-autoload file . symbols)
+(define-macro (syntax-autoload file . symbols)
   `(set! *%autoloads* (append ',(map (lambda (s) (cons s file)) symbols)
                               *%autoloads*)))
 

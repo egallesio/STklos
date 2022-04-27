@@ -194,7 +194,7 @@
                         (append rest-list (list-tail default-list rest-length))
                         rest-list))))))
 
-(defsyntax arg-and
+(define-syntax arg-and
   (syntax-rules()
     ((arg-and arg (a1 a2 ...) ...)
      (and (or (symbol? 'arg)
@@ -214,7 +214,7 @@
           ...))))
 
 ;; accessory macro for arg-ands
-(defsyntax caller-arg-and
+(define-syntax caller-arg-and
   (syntax-rules()
     ((caller-arg-and caller arg (a1 a2 ...) ...)
      (and (or (symbol? 'arg)
@@ -235,14 +235,14 @@
                   (error "incorrect argument" arg 'arg '(a1 a2 ...) caller)))
           ...))))
 
-(defsyntax arg-ands
+(define-syntax arg-ands
   (syntax-rules (common)
     ((arg-ands (a1 a2 ...) ...)
      (and (arg-and a1 a2 ...) ...))
     ((arg-ands common caller (a1 a2 ...) ...)
      (and (caller-arg-and caller a1 a2 ...) ...))))
 
-(defsyntax arg-or
+(define-syntax arg-or
   (syntax-rules()
     ((arg-or arg (a1 a2 ...) ...)
      (or (and (not (symbol? 'arg))
@@ -262,7 +262,7 @@
          ...))))
 
 ;; accessory macro for arg-ors
-(defsyntax caller-arg-or
+(define-syntax caller-arg-or
   (syntax-rules()
     ((caller-arg-or caller arg (a1 a2 ...) ...)
      (or (and (not (symbol? 'arg))
@@ -283,14 +283,14 @@
                   (error "incorrect argument" arg 'arg '(a1 a2 ...) caller)))
          ...))))
 
-(defsyntax arg-ors
+(define-syntax arg-ors
   (syntax-rules (common)
     ((arg-ors (a1 a2 ...) ...)
      (or (arg-or a1 a2 ...) ...))
     ((arg-ors common caller (a1 a2 ...) ...)
      (or (caller-arg-or caller a1 a2 ...) ...))))
 
-(defsyntax err-and
+(define-syntax err-and
   (syntax-rules ()
     ((err-and err expression ...)
      (and (or expression
@@ -299,13 +299,13 @@
                   (error "false expression" 'expression err)))
           ...))))
 
-(defsyntax err-ands
+(define-syntax err-ands
   (syntax-rules ()
     ((err-ands (err expression ...)  ...)
      (and (err-and err expression ...)
           ...))))
 
-(defsyntax err-or
+(define-syntax err-or
   (syntax-rules ()
     ((err-or err expression ...)
      (or (and expression
@@ -314,7 +314,7 @@
                   (error "true expression" 'expression err)))
          ...))))
 
-(defsyntax err-ors
+(define-syntax err-ors
   (syntax-rules ()
     ((err-ors (err expression ...) ...)
      (or (err-or err expression ...)

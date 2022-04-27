@@ -640,7 +640,7 @@
         (array->list (array-shape orig))))
 
 
-(defsyntax push!
+(define-syntax push!
   (syntax-rules ()
     ((_ e lst)
      (set! lst (cons e lst)))))

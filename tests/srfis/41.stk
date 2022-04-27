@@ -6,7 +6,7 @@
 ;(require "srfi-41")
 
 ;; wrapper for srfi-41-test-assert:
-(defmacro (srfi-41-test-assert expr result)
+(define-macro (srfi-41-test-assert expr result)
   (let ((name (symbol->string (gensym "srfi-41-"))))
     `(test ,name ,result ,expr)))
 

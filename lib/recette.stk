@@ -103,7 +103,7 @@
 (select-module STklos)
 (import recette)
 
-(defmacro (define-test id prgm . rest)
+(define-macro (define-test id prgm . rest)
   (let ((t (cond
              ((null? rest)
               `(list ',id (lambda () ,prgm) #f (lambda (x y) #t)))

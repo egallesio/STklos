@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Apr-2022 15:55
-;;;; Last file update: 19-Apr-2022 12:21 (eg)
+;;;; Last file update: 27-Apr-2022 15:02 (eg)
 ;;;;
 
 ;; NOTE: Force the module to STklos (this is the case by default, EXCEPT that
@@ -33,12 +33,12 @@
 ;;;;
 ;;;; WHEN/UNLESS
 ;;;; 
-(defmacro (when . args)
+(define-macro (when . args)
   (if (<= (length args) 1)
       (syntax-error 'when "bad syntax in ~S" `(when ,@args))
       `(if ,(car args) (begin ,@(cdr args)))))
 
-(defmacro (unless . args)
+(define-macro (unless . args)
   (if (<= (length args) 1)
       (syntax-error 'unless "bad syntax in ~S" `(unless ,@args))
       `(if (not ,(car args)) (begin ,@(cdr args)))))
@@ -46,7 +46,7 @@
 ;;;;
 ;;;; SET!
 ;;;;
-(defmacro (set! . args)
+(define-macro (set! . args)
   `(%%set! ,@args))
 
 
@@ -63,20 +63,27 @@
 ;;  change-first-char!: bad character `10'
 ;;
 ;; Here the error is claimed by change-first-char! instead of string-set!
-(defmacro (%claim-error owner . body)
+(define-macro (%claim-error owner . body)
   (let ((x (gensym)))
     `(with-handler (lambda (,x) (error ,owner (condition-ref ,x 'message)))
                    ,@body)))
 
 
 ;; ----------------------------------------------------------------------
-(defmacro (syntax-error . args)
+#|
+<doc SYNTAX syntax-error
+ *  (syntax-error . args)
+ * TODO
+ *
+doc>
+|#
+(define-macro (syntax-error . args)
   (if (zero? (length args))
       (error 'syntax-error "needs at least one argument")
       `(%syntax-error ,@args)))
 
 
-(defmacro (defsyntax macro-name syn-rules)
+(define-macro (define-syntax macro-name syn-rules)
   (if (or (not (pair? syn-rules))
           (not (eq? (car syn-rules) 'syntax-rules)))
       (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
@@ -84,5 +91,5 @@
       (let ((keywords    (cons macro-name (cadr syn-rules)))
             (clauses     (cddr syn-rules))
             (find-clause (symbol-value 'find-clause (find-module 'MBE))))
-        `(defmacro (,macro-name . args)
+        `(define-macro (,macro-name . args)
            (%find-macro-clause ',macro-name args ',keywords ',clauses)))))

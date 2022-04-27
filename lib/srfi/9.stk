@@ -28,7 +28,7 @@
 (define-module srfi/9
   (export define-record-type)
 
-  (defmacro (define-record-type name constructor predicate . fields)
+  (define-macro (define-record-type name constructor predicate . fields)
     (let ((struct-type (gensym))
           (tmp         (gensym))
           (val         (gensym)))

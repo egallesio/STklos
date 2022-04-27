@@ -361,7 +361,7 @@
 		       name
 		       fun)))
 
-(defmacro (defmacro-pattern name variables body)
+(define-macro (defmacro-pattern name variables body)
   `(begin
 ;*     (set! r.macro-pattern  */
 ;*          (extend-alist r.macro-pattern  */

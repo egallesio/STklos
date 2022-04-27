@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 26-Apr-2022 18:45 (eg)
+;;;; Last file update: 26-Apr-2022 19:08 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -490,7 +490,7 @@ doc>
 ;;
 ;; DEFINE-MACRO
 ;;
-(define (compile-defmacro e env tail?)
+(define (compile-define-macro e env tail?)
   (if (not env)
       ;; We have a global macro
       (let ((l (define->lambda e)))
@@ -512,6 +512,7 @@ doc>
                   (%symbol-define name (eval obj mod) mod))
                 (compiler-error 'define-macro e "bad variable name ~S" name)))))
       (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
+
 
 #|
 
@@ -1796,12 +1797,12 @@ doc>
                   (raise c))
      (eval `(begin ,@(cdr e) (void)))))
 
-(defmacro (when-compile . body)
+(define-macro (when-compile . body)
   `(begin
      (%%when-compile ,@body)
      (void)))
 
-(defmacro (when-load-and-compile . body)
+(define-macro (when-load-and-compile . body)
   `(begin
      (%%when-compile ,@body)
      ,@body
@@ -1860,7 +1861,8 @@ doc>
             ((quote)              (compile-quote          e env tail?))
             ((quasiquote)         (compile-quasiquote     e env tail?))
             ((with-handler)       (compile-with-handler   e env tail?))
-            ((defmacro)           (compile-defmacro       e env tail?))
+            ;;((defmacro)           (compile-define-macro   e env tail?))  ;;FIXME
+            ((define-macro)       (compile-define-macro   e env tail?))
 
             ((%%set!)             (compile-set!           e env tail?))
 
@@ -1905,7 +1907,7 @@ doc>
       ;;(disassemble-code code (current-error-port))
       (%execute code (list->vector *code-constants*) (or env (current-module))))))
 
-(defmacro (%compile-time-define . symbs)
+(define-macro (%compile-time-define . symbs)
   ;; This macro permits to add the given symbols in the list of defined symbols
   ;; to avoid the "undefined symbol" warning messages
   `(when-compile

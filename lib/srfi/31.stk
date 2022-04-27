@@ -36,7 +36,7 @@
 (define-module srfi/31
   (export rec)
 
-  (defmacro (rec name . body)
+  (define-macro (rec name . body)
     (if (symbol? name)
         (if (= (length body) 1)
             `(letrec ((,name ,@body)) ,name)

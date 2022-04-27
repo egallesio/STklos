@@ -121,14 +121,14 @@
 ;; ----------------------------------------------------------------------
 ;;  test ...
 ;; ----------------------------------------------------------------------
-(defmacro (test msg expect expr :optional (compare equal?))
+(define-macro (test msg expect expr :optional (compare equal?))
   `(%tester ,msg ,expect (lambda () ,expr) ',expr ,compare))
 
 ;; ----------------------------------------------------------------------
 ;; test/error ...
 ;; ----------------------------------------------------------------------
 
-(defsyntax test/error
+(define-syntax test/error
   (syntax-rules ()
     ((_ str code)
      (test str *test-failed* result))))

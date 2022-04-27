@@ -63,8 +63,7 @@
 ;;
 ;; A macro to redefine a symbol in a R7RS module
 ;;
-;; FIXME: must be deleted when macro are OK
-(defmacro (%module-define-and-export . lst)
+(define-macro (%module-define-and-export . lst)
   `(begin
      ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)
      (export ,@lst)))
@@ -75,7 +74,7 @@
 ;; DEFINE-LIBRARY
 ;;
 ;; ======================================================================
-(defmacro (define-library name . decls)
+(define-macro (define-library name . decls)
   (let* ((module-name    (%library-name->symbol name))
          (imports        '())
          (exports        '())

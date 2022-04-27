@@ -106,7 +106,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (select-module name)
+(define-macro (select-module name)
   ;; HACK: try to register the symbols definined in chosen module to make
   ;; them known to the compiler (and avoid messages about undefined)
   (let* ((mod    (find-module name #f))
@@ -162,7 +162,7 @@ doc>
  * The result of |define-module| is *_void_*.
 doc>
 |#
-(defmacro (define-module name . body)
+(define-macro (define-module name . body)
   (let ((oldmod (compiler-current-module))
         (newmod (or (find-module name #f) (%module-create name))))
   `(with-handler
@@ -401,7 +401,7 @@ doc>
 ;;;;
 ;;;; IMPORT
 ;;;;
-(defmacro (import . modules)
+(define-macro (import . modules)
   (let ((imp (%parse-imports modules)))
     ;; Since imported modules can define macros. We need to grab them
     ;; in case we are just compiling a file to produce a '.ostk' file
@@ -504,7 +504,7 @@ doc>
 ;;;;
 ;;;; EXPORT
 ;;;;
-(defmacro (export . symbols)
+(define-macro (export . symbols)
   (let ((s (%parse-exports symbols)))
     `(%do-exports (current-module) ',s)))
 
@@ -515,7 +515,7 @@ doc>
 
 
 ;;; FIXME:
-(defmacro (export-syntax . arg)
+(define-macro (export-syntax . arg)
   ;; This is only an approximation. Must be rewritten
   `(%%publish-syntax ,@arg))
 
@@ -545,5 +545,5 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (in-module mod symb . default)
+(define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))

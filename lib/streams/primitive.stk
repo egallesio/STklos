@@ -66,7 +66,7 @@
   (define (stream-promise! s x)
     (set! (stream-promise s) x))
 
-  (defsyntax stream-lazy
+  (define-syntax stream-lazy
     (syntax-rules ()
       ((stream-lazy expr)
         (make-stream
@@ -76,7 +76,7 @@
     (make-stream
       (cons 'eager expr)))
 
-  (defsyntax stream-delay
+  (define-syntax stream-delay
     (syntax-rules ()
       ((stream-delay expr)
         (stream-lazy (%stream-eager expr)))))
@@ -109,7 +109,7 @@
          (eqv? (stream-force obj)
                (stream-force stream-null))))
 
-  (defsyntax stream-cons
+  (define-syntax stream-cons
     (syntax-rules ()
       ((stream-cons obj strm)
         (%stream-eager (make-stream-pare (stream-delay obj) (stream-lazy strm))))))
@@ -124,7 +124,7 @@
           ((stream-null? strm) (error 'stream-cdr "null stream"))
           (else (stream-kdr (stream-force strm)))))
 
-  (defsyntax stream-lambda
+  (define-syntax stream-lambda
     (syntax-rules ()
       ((stream-lambda formals body0 body1 ...)
         (lambda formals (stream-lazy (let () body0 body1 ...))))))

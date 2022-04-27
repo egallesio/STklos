@@ -147,7 +147,7 @@
 (define-module srfi/2
   (export and-let*)
   
-  (defsyntax and-let*
+  (define-syntax and-let*
     (syntax-rules ()
       ((_ ())
        #t)

@@ -84,7 +84,7 @@
           let-string-start+end
   )
 
-  (defmacro (check-arg pred val caller)
+  (define-macro (check-arg pred val caller)
     `(if (,pred ,val)
          ,val
          (error ,caller "bad argument ~S" ,val)))
@@ -105,7 +105,7 @@
         (error proc "low index is greater than high index on ~S" str))
       end))
 
-  (defmacro (%check-indexes str start end proc :optional (off 0))
+  (define-macro (%check-indexes str start end proc :optional (off 0))
     `(set! ,end (%%check-indexes-func ,str ,start ,end ,proc ,off)))
 
   (define (%check-substring-indexes s start end proc)
@@ -1093,7 +1093,7 @@
        (values start end))))
 
 
-(defsyntax let-string-start+end
+(define-syntax let-string-start+end
   (syntax-rules ()
     ((_ (?start ?end ?rest) ?proc ?s ?args . ?body)
      (call-with-values

@@ -43,7 +43,7 @@
      &condition &message &serious &error
    )
 
-(defmacro (%define-condition-type-accessors name supertype predicate . slots)
+(define-macro (%define-condition-type-accessors name supertype predicate . slots)
   (let ((obj (gensym)))
     `(begin
        ;; define the predicate
@@ -60,7 +60,7 @@
 ;; ----------------------------------------------------------------------
 ;;      define-condition-type ...
 ;; ----------------------------------------------------------------------
-(defmacro (define-condition-type name supertype predicate . slots)
+(define-macro (define-condition-type name supertype predicate . slots)
   `(begin
      ;; define the condition name
      (define ,name (make-condition-type ',name
@@ -72,7 +72,7 @@
 ;; ----------------------------------------------------------------------
 ;;      condition ...
 ;; ----------------------------------------------------------------------
-(defmacro (condition . bindings)
+(define-macro (condition . bindings)
   (let ((ct     (map car bindings))
         (slots  (apply append (map cdr bindings)))
         (new-ct (gensym))

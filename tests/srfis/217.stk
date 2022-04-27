@@ -50,17 +50,17 @@
 
 (import (srfi 1))
 
-(defsyntax test-assert
+(define-syntax test-assert
   (syntax-rules ()
     ((_ expr)
      (test "srfi-217-assert.nonumber" #t expr))))
 
-(defsyntax test-not
+(define-syntax test-not
   (syntax-rules ()
     ((_ expr)
      (test "srfi-217-not.nonumber" #f expr))))
 
-(defsyntax test-equal
+(define-syntax test-equal
   (syntax-rules ()
     ((_ equal expected expr)
      (test "srfi-217-equal.nonumber" expected expr))))
@@ -70,7 +70,7 @@
 ;; "args" as formals in let-values, while other Schemes require an
 ;; explicit list of arguments. It was easier to reimplement with
 ;; define-macro. -- jpellegrini
-(defmacro (test-values expected expr)
+(define-macro (test-values expected expr)
   `(test "srfi-217-values.nonumber"
          (call-with-values (lambda () ,expected) list)
          (call-with-values (lambda () ,expr) list)))

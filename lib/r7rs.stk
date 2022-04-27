@@ -66,7 +66,7 @@
  * @end lisp
 doc>
 |#
-(defmacro (letrec* bindings . body)
+(define-macro (letrec* bindings . body)
   (if (list? bindings)
       (for-each (lambda (x)
                   (unless (and (list? x) (= (length x) 2))
@@ -123,7 +123,7 @@ is
                   (a |G161|))
               (list a b c d))))))
 |#
-(defmacro (let-values bindings . body)
+(define-macro (let-values bindings . body)
   (let ((tmps '()))  ;; A-list of temporaries.
 
     (define (expand-once bindings tmps)
@@ -174,7 +174,7 @@ is
  * @end lisp
 doc>
 |#
-(defmacro (let*-values bindings . body)
+(define-macro (let*-values bindings . body)
   (if (> (length bindings) 1)
       `(let-values (,(car bindings))
          (let*-values ,(cdr bindings) ,@body))
@@ -200,7 +200,7 @@ doc>
  * description of |delay|.
 doc>
 |#
-(defmacro (delay exp)
+(define-macro (delay exp)
   `(delay-force (%make-promise (list ,exp))))
 
 #|
@@ -220,10 +220,10 @@ doc>
  *
 doc>
 |#
-(defmacro (delay-force exp)
+(define-macro (delay-force exp)
   `(%make-promise (lambda () ,exp)))
 
-(defmacro (lazy expr)      ;; the SRFI-45 sytax
+(define-macro (lazy expr)      ;; the SRFI-45 sytax
   `(delay-force ,expr))
 
 #|
@@ -275,24 +275,7 @@ doc>
  * @end lisp
 doc>
 |#
-;; FIXME
-#;(defmacro (define-values formals expr)
-  (cond
-   ((symbol? formals)
-    `(define ,formals (call-with-values (lambda () ,expr) list)))
-   ((null? formals)
-    `(call-with-values (lambda () ,expr) void))
-   ((pair? formals)
-    (let ((first (car formals)))
-      `(begin
-         (define ,first (call-with-values (lambda () ,expr) list))
-         (define-values ,(cdr formals) (apply values (cdr ,first)))
-         (set! ,first (car ,first))
-         ;; return a (values (void) ...) for the REPL
-         (values (void) ',formals))))
-   (else (error "bad formal list in define-values ~S" ',formals))))
-
-(defmacro (define-values formals expr)
+(define-macro (define-values formals expr)
   (define (flat lst)
     (cond
      ((null? lst) lst)
@@ -522,7 +505,7 @@ doc>
 ;;
 ;; Generalized string comparison functions
 ;;
-(defmacro (%generalize-string-compare func func2)
+(define-macro (%generalize-string-compare func func2)
   `(begin
      ;; Keep the old function since it is twice faster than the general one
      (define ,func2 ,func)
@@ -1471,7 +1454,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (guard clauses . body)
+(define-macro (guard clauses . body)
   (let* ((var      (car clauses))
          (last     (last-pair clauses))
          (ex       (gensym))

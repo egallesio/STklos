@@ -110,6 +110,7 @@
  * (syntax-error message arg1 ...)
  *
  * TODO
+doc>
 |#
 
 (define (%syntax-error msg . args)

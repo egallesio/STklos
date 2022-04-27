@@ -58,7 +58,7 @@
  *
 doc>
 |#
-(defmacro (define-struct name . slots)
+(define-macro (define-struct name . slots)
   (define (compute-offset slot slots)
     (let ((sublist (memq slot slots)))
       (- (length slots) (length sublist))))

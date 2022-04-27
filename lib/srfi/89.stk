@@ -47,14 +47,14 @@
   (export define* lambda*)
   
   ;; Macro expander for define*.
-  (defmacro (define* pattern . body)
+  (define-macro (define* pattern . body)
     (if (pair? pattern)
         `(define ,(car pattern)
            (lambda* ,(cdr pattern) ,@body))
         `(define ,pattern ,@body)))
 
   ;; Macro expander for lambda*.
-  (defmacro (lambda* formals . body)
+  (define-macro (lambda* formals . body)
 
     ;;------------------------------------------------------------------------------
     ;; Procedures needed at expansion time.

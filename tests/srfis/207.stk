@@ -19,7 +19,7 @@
 
 ;; Replaced check from the SRFI tests with a wrapper around STklos'
 ;; test procedure.
-(defsyntax check
+(define-syntax check
   (syntax-rules (=>)
     ((check expr => expected)
      (test (inc-test-num-str) expected expr))))
@@ -38,7 +38,7 @@
 
 
 
-(defsyntax constantly
+(define-syntax constantly
   (syntax-rules ()
     ((_ obj) (lambda _ obj))))
 
@@ -46,14 +46,14 @@
 (define never (constantly #f))
 
 ;; Returns a list of the values produced by expr.
-(defsyntax values~>list
+(define-syntax values~>list
   (syntax-rules ()
     ((_ expr)
      (call-with-values (lambda () expr) list))))
 
 ;; If expr causes an exception to be raised, return 'bytestring-error
 ;; if the raised object satisfies bytestring-error?, and #f otherwise.
-(defsyntax catch-bytestring-error
+(define-syntax catch-bytestring-error
   (syntax-rules ()
    ((_ expr)
     (guard (condition ((bytestring-error? condition) 'bytestring-error)

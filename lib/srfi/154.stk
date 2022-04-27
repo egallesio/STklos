@@ -82,7 +82,7 @@
 (define (with-dynamic-extent dynamic-extent thunk)
   ((dynamic-extent-proc dynamic-extent) thunk))
 
-(defsyntax dynamic-lambda
+(define-syntax dynamic-lambda
   (syntax-rules ()
     ((dynamic-lambda formals body)
      (let ((dynamic-extent (current-dynamic-extent)))

@@ -30,7 +30,7 @@
       (open-output-file obj)))
 
 ;;; Macro used for multi-grammar readers à la Bigloo
-(defmacro (define-regular-grammar name args defs grammar)
+(define-macro (define-regular-grammar name args defs grammar)
   (let ((tmp (open-input-string (string-append defs "\n%%\n" grammar)))
 	(out (open-output-string)))
     (lex-tables tmp (symbol->string name) out 'code 'counters 'line)

@@ -38,7 +38,7 @@
           unquote-set! seq-lambda key-lambda define-object)
   (export define-lambda-object)
 
-  (defmacro (unquote-get symbol args)
+  (define-macro (unquote-get symbol args)
     (if (null? args)
         `(error 'define-lambda-object "absent field" ,symbol)
         (let ((arg (car args)))
@@ -46,7 +46,7 @@
                ,(cdr arg)
                (unquote-get ,symbol ,(cdr args))))))
 
-(defmacro (unquote-get* symbol args)
+(define-macro (unquote-get* symbol args)
   (if (null? args)
       `(error 'define-lambda-object "not available inspection" ,symbol)
       (let ((arg (car args)))
@@ -54,7 +54,7 @@
          ,arg
          (unquote-get* ,symbol ,(cdr args))))))
 
-(defmacro (unquote-set! symbol new-val args iargs)
+(define-macro (unquote-set! symbol new-val args iargs)
   (define (lp args)
     (if (null? args)
     `(if (memq ,symbol ',iargs)
@@ -66,7 +66,7 @@
            ,(lp (cdr args))))))
   (lp args))
 
-(defmacro (seq-lambda r o body)
+(define-macro (seq-lambda r o body)
   (define (opt-seq z cls body)
     (if (null? cls)
     `(if (null? ,z)
@@ -101,7 +101,7 @@
                 (lp (cons x (cons (car y) head)) (cdr y)))))))))))
 ;; 2. macro field-key!
 ;; **STklos** supressed the macro field-key!
-;; (defmacro (field-key! z n d)
+;; (define-macro (field-key! z n d)
 ;;   (let ((x (gensym)) (y (gensym)) (head (gensym)) (tail (gensym)))
 ;;     `(let ((,x (car ,z)) (,y (cdr ,z)))
 ;;        (if (null? ,y)
@@ -120,7 +120,7 @@
 ;;                       (car ,y))
 ;;                    (lp (cons ,x (cons (car ,y) ,head)) (cdr ,y))))))))))))
 
-(defmacro (key-lambda r o body)
+(define-macro (key-lambda r o body)
   (define (opt-key z cls body)
     (if (null? cls)
     `(if (null? ,z)
@@ -167,7 +167,7 @@
 ;;  '()
 ;;  (cons (cons (car ls) n) (loop (cdr ls) (+ 1 n))))))
 
-(defmacro (define-object name gr gi fm fi r o a c v h)
+(define-macro (define-object name gr gi fm fi r o a c v h)
   (let ((safe-name (gensym))
     (safe-parent (gensym))
     (arg (gensym))
@@ -307,7 +307,7 @@
                         virtual-field hidden-field)))))
      (define ,safe-name ,name)))))
 
-(defmacro (define-lambda-object group . field)
+(define-macro (define-lambda-object group . field)
   (define (field-sort gr gi field fm fi r o a c v h)
     (if (null? field)
     `(define-object ,(car gi) ,gr ,(cdr gi) ,fm ,fi ,r ,o ,a ,c ,v ,h)

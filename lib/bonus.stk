@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 22-Apr-2022 14:51 (eg)
+;;;; Last file update: 27-Apr-2022 14:59 (eg)
 ;;;;
 
 
@@ -749,9 +749,7 @@ doc>
  * @end lisp
 doc>
 |#
-
-;;;FIXME: 
-#;(define-macro (fluid-let bindings . body)
+(define-macro (fluid-let bindings . body)
   (let* ((vars (map car bindings))
          (vals (map cadr bindings))
          (tmps (map (lambda (x) (gensym)) vars)))
@@ -761,15 +759,6 @@ doc>
           (lambda () ,@body)
           (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps))))))
 
-(defmacro (fluid-let bindings . body)
-  (let* ((vars (map car bindings))
-         (vals (map cadr bindings))
-         (tmps (map (lambda (x) (gensym)) vars)))
-    `(let ,(map list tmps vars)
-       (dynamic-wind
-          (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars vals))
-          (lambda () ,@body)
-          (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps))))))
 ;=============================================================================
 
 #|
@@ -782,7 +771,7 @@ doc>
  * This is CPU time, and not real ("wall") time.
 doc>
 |#
-(defmacro time
+(define-macro time
   (lambda args
     (let ((tmp1 (gensym))
           (tmp2 (gensym)))
@@ -829,7 +818,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (tagbody . body)
+(define-macro (tagbody . body)
   (let ((tags  (map (lambda (x) (cons x (%compiler-new-label)))
                     (filter keyword? body))))
 
@@ -884,7 +873,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (dotimes bindings . body)
+(define-macro (dotimes bindings . body)
   (apply (lambda (var count . result)
            (let ((limit  (gensym))
                  (result (if (null? result) (list '(void)) result)))
@@ -910,7 +899,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (repeat expr . body)
+(define-macro (repeat expr . body)
   (let ((var (gensym)))
     `(let ((,var ,expr))
        (tagbody
@@ -929,7 +918,7 @@ doc>
  * value. The value returned by this form is *_void_*.
 doc>
 |#
-(defmacro (while test . body)
+(define-macro (while test . body)
   (let ((lab (gensym)))
     `(let ,lab ()
           (when ,test ,@body (,lab)))))
@@ -942,7 +931,7 @@ doc>
  * value. The value returned by this form is *_void_*.
 doc>
 |#
-(defmacro (until test . body)
+(define-macro (until test . body)
   (let ((lab (gensym)))
     `(let ,lab ()
           (unless ,test ,@body (,lab)))))
@@ -1195,7 +1184,7 @@ doc>
  *
 doc>
 |#
-(defmacro (declare-new-error name)
+(define-macro (declare-new-error name)
   (let ((cond-name (string->symbol (format "&~a" name)))
         (predicate (string->symbol (format "&~a?" name)))
         (args      (gensym)))
@@ -1594,7 +1583,7 @@ doc>
  *     ...)
 doc>
 |#
-(defmacro (define-constant . args)
+(define-macro (define-constant . args)
   (define (rewrite l)
     (if (<= (length l) 1)
         (error "bad constant definition"))
@@ -1664,7 +1653,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (receive vars producer . body)
+(define-macro (receive vars producer . body)
   `(call-with-values (lambda () ,producer)
                      (lambda ,vars ,@body)))
 
@@ -1716,7 +1705,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (case-lambda . clauses)
+(define-macro (case-lambda . clauses)
   (let ((len  (gensym))
         (args (gensym))
         (compute-arity (in-module STKLOS-COMPILER compute-arity)))
@@ -1748,7 +1737,7 @@ doc>
 ;;;
 
 ;; Macro used by SRFI-35 & SRFI-36 implementations
-(defmacro (%define-condition-type-accessors name supertype predicate . slots)
+(define-macro (%define-condition-type-accessors name supertype predicate . slots)
   (let ((obj (gensym)))
     `(begin
        ;; define the predicate
@@ -1826,7 +1815,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (parameterize bindings . body)
+(define-macro (parameterize bindings . body)
   (let ((tmp1 (map (lambda (_) (gensym)) bindings))
         (tmp2 (map (lambda (_) (gensym)) bindings)))
     `(let (,@(map (lambda (x y) (list y (cadr x)))
@@ -1899,7 +1888,7 @@ doc>
 doc>
 |#
 
-(defsyntax require-extension
+(define-syntax require-extension
   (syntax-rules (srfi)
     ((_ "internal" (srfi id ...))
      (begin (require-feature id) ...))
@@ -2050,7 +2039,7 @@ doc>
  * When {{stklos}} is not in debug mode, the call to |assume| is elided.
 doc>
 |#
-(defmacro (assume expr . args)
+(define-macro (assume expr . args)
   (if (positive? (stklos-debug-level))
       ;; Assumptions are evaluated in debug mode ...
       (let* ((efile (and (%epair? expr) (%epair-file expr)))

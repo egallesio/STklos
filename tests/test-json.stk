@@ -36,22 +36,22 @@
 (require "test")
 (require "srfi-180")
 
-(defmacro (test-json-read name expected str)
+(define-macro (test-json-read name expected str)
   `(test ,name ,expected (call-with-input-string ,str json-read)))
 
-(defmacro (test-json-error name  str)
+(define-macro (test-json-error name  str)
   `(test/error ,name (call-with-input-string ,str json-read)))
 
-(defmacro (test-json-write name expected json)
+(define-macro (test-json-write name expected json)
   `(test ,name ,expected (with-output-to-string (lambda () (json-write ,json)))))
 
-(defmacro (test-json-read+write name json)
+(define-macro (test-json-read+write name json)
   `(test ,name
          ,json
          (with-output-to-string (lambda ()
                                   (json-write (call-with-input-string ,json, json-read))))))
 
-(defmacro (test-json-write+read name obj)
+(define-macro (test-json-write+read name obj)
   `(test ,name
          ,obj
          (call-with-input-string (with-output-to-string (lambda () (json-write ,obj)))

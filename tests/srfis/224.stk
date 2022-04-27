@@ -2,12 +2,12 @@
         (srfi 128)
         (srfi 189))
 
-(defsyntax test-equal
+(define-syntax test-equal
   (syntax-rules ()
     ((_ expected expr)
      (test "srfi-224-equal.nonumber" expected expr))))
 
-(defsyntax test-eqv
+(define-syntax test-eqv
   (syntax-rules ()
     ((_ expected expr)
      (test "srfi-224-eqv.nonumber"  expected expr))))
@@ -27,7 +27,7 @@
   (map cons xs xs))
 
 ;; From SRFI 210, reduced.
-(defsyntax value/mv
+(define-syntax value/mv
   (syntax-rules ()
     ((value/mv i producer)
      (let-values ((vs producer))

@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-Jul-2020 16:21 (jpellegrini)
-;;;; Last file update: 19-Apr-2022 12:11 (eg)
+;;;; Last file update: 09-Mal-2020 04:00 (jpellegrini)
 ;;;;
 
 (define-module srfi/151
@@ -64,7 +64,7 @@
 
 
    ;; FIXME: Using a library will resove this problem
-  (defmacro (%define-here . lst)
+  (define-macro (%define-here . lst)
    `(begin ,@(map (lambda (symb) `(define ,symb ,symb))
                   lst)))
 

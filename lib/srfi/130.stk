@@ -82,13 +82,13 @@
 ;;; Shivers-compatible let-optionals*
 ;;; This version from Scheme-48 1.9.2,
 ;;; using error instead of assertion-violation
-(defsyntax let-optionals*
+(define-syntax let-optionals*
   (syntax-rules ()
     ((let-optionals* arg (opt-clause ...) body ...)
      (let ((rest arg))
        (%let-optionals* rest (opt-clause ...) body ...)))))
 
-(defsyntax %let-optionals*
+(define-syntax %let-optionals*
   (syntax-rules ()
     ((%let-optionals* arg (((var ...) xparser) opt-clause ...) body ...)
      (call-with-values (lambda () (xparser arg))
@@ -176,7 +176,7 @@
 ;;; This macro parses optional start/end arguments from arg lists, defaulting
 ;;; them to 0/(string-length s), and checks them for correctness.
 
-(defsyntax let-string-start+end
+(define-syntax let-string-start+end
   (syntax-rules ()
     ((let-string-start+end (start end) proc s-exp args-exp body ...)
      (receive (start end) (string-parse-final-start+end proc s-exp args-exp)
@@ -187,7 +187,7 @@
 
 ;;; This one parses out a *pair* of final start/end indices.
 ;;; Not exported; for internal use.
-(defsyntax let-string-start+end2
+(define-syntax let-string-start+end2
   (syntax-rules ()
     ((l-s-s+e2 (start1 end1 start2 end2) proc s1 s2 args body ...)
      (let ((procv proc)) ; Make sure PROC is only evaluated once.

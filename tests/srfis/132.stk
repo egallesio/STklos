@@ -4,7 +4,7 @@
   (for-each display xs)
   (newline))
 
-(defsyntax fail
+(define-syntax fail
   (syntax-rules ()
     ((_ token)
      token)))
@@ -12,7 +12,7 @@
 
 (define r7rs-vector-copy vector-copy)
 
-(defsyntax x-test
+(define-syntax x-test
   (syntax-rules (equal?)
     ((_ (equal? expr res) msg)
      (test msg res expr))

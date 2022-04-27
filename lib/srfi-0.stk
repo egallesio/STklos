@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 15-Apr-2022 16:32 (eg)
+;;;; Last file update: 10-Mar-2022 11:13 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -221,7 +221,7 @@ doc>
 (select-module STklos)
 (import SRFI-0)
 
-(defmacro (cond-expand . clauses)
+(define-macro (cond-expand . clauses)
   (let ((expander (in-module SRFI-0 %srfi-0-expand)))
     (expander clauses)))
 

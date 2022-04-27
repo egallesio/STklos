@@ -443,7 +443,7 @@ doc>
  * @end lisp
 doc>
 |#
-(defmacro (define-class name supers slots . options)
+(define-macro (define-class name supers slots . options)
   `(define ,name
       (ensure-class
         ',name                                  ; name
@@ -488,7 +488,7 @@ doc>
 ;=============================================================================
 
 ; ==== Define-generic
-(defmacro (define-generic gf :optional (meta '<generic>)
+(define-macro (define-generic gf :optional (meta '<generic>)
                                  :key      (documentation #f))
   `(define ,gf (ensure-generic-function ',gf ,meta ,documentation)))
 
@@ -570,12 +570,12 @@ doc>
 
 
 ;====  Method
-(defmacro (method args . body)
+(define-macro (method args . body)
   (ensure-method #f args body))
 
 
 ; ==== Define-method
-(defmacro (define-method name args . body)
+(define-macro (define-method name args . body)
   (let ((gf (gensym "gf")))
     `(let ((,gf (ensure-generic-function ',name)))
        (add-method! ,gf ,(ensure-method gf args body))

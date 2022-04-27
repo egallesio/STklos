@@ -80,7 +80,7 @@
 
 ;; Arithmetic if
 
-(defsyntax comparator-if<=>
+(define-syntax comparator-if<=>
   (syntax-rules ()
     ((if<=> a b less equal greater)
      (comparator-if<=> (make-default-comparator) a b less equal greater))
@@ -91,17 +91,17 @@
        (else greater)))))
 
 ;; Upper bound of hash functions is 2^25-1
-(defsyntax hash-bound
+(define-syntax hash-bound
   (syntax-rules ()
     ((hash-bound) 33554432)))
 
 (define %salt% (make-parameter 16064047))
 
-(defsyntax hash-salt
+(define-syntax hash-salt
    (syntax-rules ()
      ((hash-salt) (%salt%))))
 
-(defsyntax with-hash-salt
+(define-syntax with-hash-salt
   (syntax-rules ()
     ((with-hash-salt new-salt hash-func obj)
      (parameterize ((%salt% new-salt)) (hash-func obj)))))

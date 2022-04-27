@@ -85,12 +85,12 @@
   ;;
   ;; This is according to the SRFI specification.
   ;;
-  (defsyntax string-append!
+  (define-syntax string-append!
     (syntax-rules ()
       ((_ place . args)
        (set! place (string-append-linear! place . args)))))
 
-  (defsyntax string-replace!
+  (define-syntax string-replace!
     (syntax-rules ()
       ((_ place . args)
        (set! place (string-replace-linear! place . args)))))

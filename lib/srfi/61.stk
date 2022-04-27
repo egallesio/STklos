@@ -26,7 +26,7 @@
 (define-module srfi/61
   (export cond)
 
-  (defsyntax cond
+  (define-syntax cond
     (syntax-rules (else =>)
       ((cond (else result1 result2 ...))
        (begin result1 result2 ...))

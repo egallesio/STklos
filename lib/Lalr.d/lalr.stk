@@ -24,9 +24,9 @@
 
 (define (pprint form) (pp form :port (current-output-port)))
 (define lalr-keyword? keyword?)
-(defmacro (BITS-PER-WORD) 30)
-(defmacro (logical-or x . y) `(bit-or ,x ,@y))
-(defmacro (lalr-error msg obj) `(error 'lalr-parser ,msg ,obj))
+(define-macro (BITS-PER-WORD) 30)
+(define-macro (logical-or x . y) `(bit-or ,x ,@y))
+(define-macro (lalr-error msg obj) `(error 'lalr-parser ,msg ,obj))
 (define (note-source-location lvalue tok) lvalue)
 
 (define-struct lexical-token category source value)
@@ -35,7 +35,7 @@
 
       ;; - Macros pour la gestion des vecteurs de bits
 
-(defmacro (lalr-parser . arguments)
+(define-macro (lalr-parser . arguments)
   (define (set-bit v b)
     (let ((x (quotient b (BITS-PER-WORD)))
 	  (y (expt 2 (remainder b (BITS-PER-WORD)))))

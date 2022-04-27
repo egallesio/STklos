@@ -28,7 +28,7 @@
 ;;; define-inline
 ;;;
 
-(defmacro (define-inline args . body)
+(define-macro (define-inline args . body)
   `(define ,args ,@body))
 
 
@@ -36,7 +36,7 @@
 ;;; labels
 ;;;
 
-(defmacro (labels bindings . body)
+(define-macro (labels bindings . body)
   (define (expand binding)
     (when (< (length binding) 3)
       (error 'labels "bad binding ~S" binding))
@@ -45,16 +45,16 @@
   `(letrec ,(map expand bindings)
      ,@body))
 
-(defmacro (=fx a b ) `(= ,a ,b))
-(defmacro (>=fx a b) `(>= ,a ,b))
-(defmacro (<=fx a b) `(<= ,a ,b))
-(defmacro (<fx a b)  `(<  ,a ,b))
-(defmacro (>fx a b)  `(>  ,a ,b))
+(define-macro (=fx a b ) `(= ,a ,b))
+(define-macro (>=fx a b) `(>= ,a ,b))
+(define-macro (<=fx a b) `(<= ,a ,b))
+(define-macro (<fx a b)  `(<  ,a ,b))
+(define-macro (>fx a b)  `(>  ,a ,b))
 
-(defmacro (+fx a b) `(+ ,a ,b))
-(defmacro (-fx a b) `(- ,a ,b))
-(defmacro (*fx a b) `(* ,a ,b))
-(defmacro (/fx a b) `(truncate (/ ,a ,b)))
+(define-macro (+fx a b) `(+ ,a ,b))
+(define-macro (-fx a b) `(- ,a ,b))
+(define-macro (*fx a b) `(* ,a ,b))
+(define-macro (/fx a b) `(truncate (/ ,a ,b)))
 
 
 ;;;
@@ -64,7 +64,7 @@
 ;;; Alas, the problem is that we don't have match-case here :-)
 ;;;
 
-(defmacro (module name . clauses)
+(define-macro (module name . clauses)
   (define (import-directive x)
     `(import ,@(map (lambda (x) (if (pair? x) (car x) x)) x)))
 

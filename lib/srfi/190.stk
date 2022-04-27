@@ -33,10 +33,10 @@
   (define (yield value)
     (error 'yield "cannot be used outside coroutine generator"))
 
-  (defmacro (coroutine-generator . body)
+  (define-macro (coroutine-generator . body)
     `(make-coroutine-generator (lambda (yield) ,@body)))
 
-  (defmacro (define-coroutine-generator proto . body)
+  (define-macro (define-coroutine-generator proto . body)
     `(define ,proto (coroutine-generator ,@body))))
 
 #|

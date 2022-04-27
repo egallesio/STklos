@@ -33,7 +33,7 @@
 ;;                              C U T
 ;;
 ;; ======================================================================
-(defmacro (cut . slots-or-exprs)
+(define-macro (cut . slots-or-exprs)
   (define (aux lst slot-names pos)
     (cond
       ((null? lst)
@@ -66,7 +66,7 @@
 ;;                              C U T E
 ;;
 ;; ======================================================================
-(defmacro (cute . slots-or-exprs)
+(define-macro (cute . slots-or-exprs)
   (define (aux lst slot-names pos bindings)
     (cond
       ((null? lst)

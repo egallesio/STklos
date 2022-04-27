@@ -82,7 +82,7 @@
   ;; Avoid warnings
   (%compile-time-define %list->uvector %uvector->list)
 
-(defmacro (%uniform-vector-functions tag type)
+(define-macro (%uniform-vector-functions tag type)
   (let ((pred   (string->symbol (format #f "~Avector?" tag)))
         (make   (string->symbol (format #f "make-~Avector" tag)))
         (constr (string->symbol (format #f "~Avector" tag)))
