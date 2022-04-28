@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 12-Apr-2022 19:05 (eg)
+;;;; Last file update: 28-Apr-2022 09:57 (eg)
 ;;;;
 
 
@@ -604,21 +604,6 @@ doc>
 
 
 #|
-<doc EXT macro-expand
- * (macro-expand form)
- *
- * Returns the macro expansion of |form| if it is a macro call,
- * otherwise |form| is returned unchanged.
- *
- * @lisp
- * (define-macro (incr x) `(set! ,x (+ ,x 1)))
- * (macro-expand '(incr foo)) => (set! foo (+ foo 1))
- * (macro-expand '(car bar))  => (car bar)
- * @end lisp
-doc>
-|#
-
-#|
 <doc eval
  * (eval expression environment)
  * (eval expression)
@@ -824,7 +809,7 @@ doc>
  * be opened, an error is signaled. If |proc| returns, then the port is closed
  * automatically and the value(s) yielded by the proc is(are) returned.
  * If proc does not return, then the port will not be closed automatically.
- * 
+ *
  * IMPORTANT: Because Scheme's escape procedures have unlimited extent,
  * it is possible to escape from the current continuation but later to escape
  * back in. If implementations were permitted to close the port on any escape

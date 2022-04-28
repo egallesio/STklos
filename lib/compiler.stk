@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 26-Apr-2022 19:08 (eg)
+;;;; Last file update: 27-Apr-2022 16:37 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -38,16 +38,14 @@
 
           %grab-file-information
           %compiler-new-label
+          %macro-expand
 
           ;; FIXME
           compiler-current-module
           when-compile
           when-load-and-compile
           %syntax-error
-          %compile-time-define
-          %macro-expand))
-
-(select-module STKLOS-COMPILER)
+          %compile-time-define)
 
 (define *compiler-port* #f)
 
@@ -151,22 +149,6 @@
   (and (symbol? symbol)
        (let ((val (symbol-value* symbol module #f)))
          (and (%syntax? val) val))))
-
-;;// (define (%macro-expand-new form)
-;;//   (define (application-expander x e)
-;;//     (map* (lambda (y) (e y e)) x))
-;;//   (define (initial-expander x e)
-;;//     (cond
-;;//      ((not (pair? x))             x)
-;;//      ((not (symbol? (car x)))     (application-expander x e))
-;;//      (else  (let* ((name (car x))
-;;//                    (val  (symbol-value* name (compiler-current-module) #f)))
-;;//               (if (and (symbol? name) (%syntax? val))
-;;//                   (apply (%syntax-expander val) (cdr x))
-;;//                   (application-expander x e))))))
-;;//
-;;//   ;; %macro-expand body
-;;//   (initial-expander form initial-expander))
 
 (define (%macro-expand form env)     ;; NOTE: env is unused for now
   (let ((map-expander (lambda (form)
@@ -1913,7 +1895,7 @@ doc>
   `(when-compile
      ,@(map (lambda(x) `(define ,x #void)) symbs)))
 
-
+)
 ;; ======================================================================
 (select-module STklos)
 (import STKLOS-COMPILER)

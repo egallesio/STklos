@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 27-Apr-2022 14:59 (eg)
+;;;; Last file update: 28-Apr-2022 10:19 (eg)
 ;;;;
 
 
@@ -61,6 +61,40 @@ doc>
       (string->uninterned-symbol (string-append prefix
                                                 (number->string counter))))))
 
+#|
+<doc EXT macro-expand* macro-expand
+ * (macro-expand form)
+ * (macro-expand* form)
+ *
+ * |macro-expand| returns the macro expansion of |form| if it is a macro call,
+ * otherwise |form| is returned unchanged.
+ *
+ * @lisp
+ * (define-macro (add1 x) `(+ ,x 1))
+ * (macro-expand '(add1 foo)) => (+ foo 1)
+ * (macro-expand '(car bar))  => (car bar)
+ * @end lisp
+ *
+ * |macro-expand| returns the *full* macro expansion of |form|, that is it repeats
+ * the macro-expansion, while the expanded form contains macro calls.
+ *
+ * @lisp
+ * (define-macro (add2 x) `(add1 (add1 ,x)))
+ * (macro-expand '(add2 foo)) => (add1 (add1 foo))
+ * (macro-expand* '(add2 foo)) => (+ (+ foo 1) 1)
+ * @end lisp
+ *
+ * NOTE: |macro-expand| and |macro-expand*| expand only the global macros.
+doc>
+|#
+(define (macro-expand exp)
+  (%macro-expand exp #f))
+
+(define (macro-expand* exp)
+  (let ((new (%macro-expand exp #f)))
+    (if (equal? new exp)
+        exp
+        (macro-expand* new))))
 
 #|
 <doc EXT remove remove!
