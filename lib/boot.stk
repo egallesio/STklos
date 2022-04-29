@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 16-Apr-2022 18:46 (eg)
+;;;; Last file update: 29-Apr-2022 18:30 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -75,8 +75,9 @@
 (autoload        "help"           help)
 (autoload        "lex-rt"         lexer-next-token)
 (syntax-autoload "scmpkg-support" interface)
-;(autoload        "srfi-27"        random-integer random-real) ;; FIXME; autoload is broken here
-(autoload        "srfi-48"        srfi48:help srfi48:format-fixed)
+
+(autoload        "srfi/27"        random-integer random-real)
+(autoload        "srfi/48"        srfi48:help srfi48:format-fixed)
 
 ;==============================================================================
 ;; Execute the REPL only if a file was not given on the command line
