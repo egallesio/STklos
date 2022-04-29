@@ -332,11 +332,50 @@ void STk_print_vm_registers(char *msg, STk_instr *code)
 
 static Inline SCM listify_top(int n, vm_thread_t *vm)
 {
-  SCM *p, res = STk_nil;
+  SCM *p;
+  struct cons_obj *res = STk_must_malloc(n * sizeof(struct cons_obj));
 
-  for (p = vm->sp, vm->sp+=n; p < vm->sp; p++)
-    res = STk_cons(*p, res);
-  return res;
+  /* We first check for n==0, because in this case we need to return
+     STk_nil, and *not* the address of the beginning of a vector whose
+     first cell is nil... */
+  if (n == 0) return STk_nil;
+
+  /*
+    res is a C array of cons cell, each pointing to the next.
+
+    +------------+-------------+         +------------+
+    |  _____ ___ |   _____ ___ |         |  _____ ___ |
+    | | car | ----->| car | ------> ...  | | car | -------> nil
+    |  ----- --- |   ----- --- |         |  ----- --- |
+    +------------+-------------+         +------------+
+         res[0]      res[1]         ...     res[n-1]
+
+    We first allocate it, then fill it so it will be a list, and then
+    return a pointer to the first one ( &res[0] ).
+
+    Why?
+    So we can allocate in a single call instead of calling STk_cons
+    for each value.
+    The drawback: so long as there is a reference to *one* of these
+    objects, the whole list will stay in memory and won't be garbage
+    collected.
+   */
+
+  int i=n-1;
+  for (p = vm->sp, vm->sp+=n; p < vm->sp; p++) {
+    /* We do the same as NEWCELL would do after allocating each
+       cons cell: */
+    BOXED_TYPE(&res[i]) = tc_cons;
+    BOXED_INFO(&res[i]) = 0;
+    /* And set car and cdr: */
+    CAR(&res[i]) = *p;
+    CDR(&res[i]) = &res[i+1];
+    i--;
+  }
+
+  CDR(&res[n-1]) = STk_nil; /* Was pointing to outside the array before */
+
+  return (SCM) &res[0];
 }
 
 
