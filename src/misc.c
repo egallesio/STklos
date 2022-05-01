@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 11-Jan-2022 16:42 (eg)
+ * Last file update:  1-May-2022 18:01 (eg)
  */
 
 #include "stklos.h"
@@ -557,7 +557,7 @@ DEFINE_PRIMITIVE("get-password", getpass, subr0, (void))
 
 #define BACKTRACE_SIZE 1024
 
-DEFINE_PRIMITIVE("%debug", set_debug, subr0, (void))
+DEFINE_PRIMITIVE("%%debug", set_debug, subr0, (void))
 {
   STk_interactive_debug = !STk_interactive_debug;
   STk_debug("Debug mode %d", STk_interactive_debug);
