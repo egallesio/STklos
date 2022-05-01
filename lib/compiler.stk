@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 27-Apr-2022 16:37 (eg)
+;;;; Last file update:  1-May-2022 19:44 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -116,6 +116,14 @@
   slocals                       ; local syntaxes
   parent)                       ; parent scope
 
+(define (find-symbol-in-env symb env)
+  (let Loop ((env env))
+    (cond
+     ((not env)                       #f)
+     ((memq symb (scope-locals  env)) symb)
+     ((assq symb (scope-slocals env)) )
+     (else                            (Loop (scope-parent env))))))
+
 ;;// FIXME:
 ;;//;; Temporary function for bootstraping the environment representation
 ;;//(define (%list->scope lst)
@@ -145,10 +153,13 @@
 ;
 ; ======================================================================
 
-(define (syntax-in-module symbol module)
-  (and (symbol? symbol)
-       (let ((val (symbol-value* symbol module #f)))
-         (and (%syntax? val) val))))
+(define (syntax-in-env? symb env)
+  (and (symbol? symb)
+       (or (%syntax? (find-symbol-in-env symb env))    ; local macro?
+           (%syntax? (symbol-value* symb               ; global macro
+                                    (compiler-current-module)
+                                    #f)))))
+
 
 (define (%macro-expand form env)     ;; NOTE: env is unused for now
   (let ((map-expander (lambda (form)
@@ -163,18 +174,6 @@
                   (if (and (symbol? name) (%syntax? val))
                       (apply (%syntax-expander val) (cdr form))
                       (map-expander form))))))))
-
-;; FIXME: not yet
-;;// (define (%macro-expand* exp env)
-;;//   (let ((new (%macro-expand exp env)))
-;;//     (if (equal? new exp)
-;;//         new
-;;//         (%macro-expand* new env))))
-
-;;;
-;;; Management of exported syntaxes
-;;;
-
 
 ;; FIXME: This code should be in compfile
 
@@ -380,15 +379,6 @@ doc>
 ;;;;
 ;;;; REFERENCES & ASSIGNMENT
 ;;;;
-
-(define (find-symbol-in-env symb env)
-  (let Loop ((env env))
-    (cond
-     ((not env)                       #f)
-     ((memq symb (scope-locals  env)) symb)
-     ((assq symb (scope-slocals env)) )
-     (else                            (Loop (scope-parent env))))))
-
 
 (define (compile-access name env epair ref)
 
@@ -648,7 +638,7 @@ doc>
                     (error "body is empty"))
                    ((and (pair? l)
                          (pair? (car l))
-                         (syntax-in-module (caar l) (compiler-current-module)))
+                         (syntax-in-env? (caar l) env))
                     (%macro-expand (car l) env))
                    (else
                       (car l)))))
@@ -1820,10 +1810,8 @@ doc>
    ((pair? e)
     (let ((first (car e)))
       (compiler-maybe-do-autoload first)
-      (if (and (symbol? first)
-               (not (find-symbol-in-env first env))
-               (%syntax? (symbol-value* first (compiler-current-module) #f)))
-          (let ((val (symbol-value* first (compiler-current-module))))                ;; FIXME: val unused
+      (if (syntax-in-env? first env)
+          (let ()
             ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)
             (compile (%macro-expand e env) env epair tail?))
           ;; ---- special-form? function call?
