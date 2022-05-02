@@ -27,6 +27,22 @@
 #include <stklos.h>
 #include "132-incl.c"
 
+
+/* We have fast paths for sorting vectors when the predicate is either
+   fx< or fx>.
+   In order to check if the predicate *really* is one of those, we check
+   if it is EQ to STk_fxlt and STk_fxgt.
+   
+   Remark 1: Fast paths for fx<= and fx>= would be possible, but I'm not
+   sure many people would use those, and they'd clutter the code.
+   
+   Remark 2: Fast paths for fl< and fl> would certainly be possible,
+   but those are not loaded by default (it's a SRFI), so things become
+   more complicated.  */
+
+EXTERN_PRIMITIVE("fx<?", fxlt, vsubr, (int argc, SCM *argv));
+EXTERN_PRIMITIVE("fx>?", fxgt, vsubr, (int argc, SCM *argv));
+
 static void error_bad_list(SCM x)
 {
   STk_error("bad list ~W", x);
@@ -276,12 +292,22 @@ long gallop(SCM pred, SCM to,
          long saved_starta = starta;
          long tmp = starta;
          long i = 2;
+	 
+         int go;
          while (starta == tmp && starta < enda) {
              tmp = starta + i - 1;
-             if (tmp < enda &&
-                 STk_C_apply(pred,2,
-                             VECTOR_DATA(a)[tmp],
-                             VECTOR_DATA(b)[startb]) == STk_true) {
+
+             /* Fast path for fx<, fx> */
+             if (pred == STk_fxlt) /* fx< */
+                 go = INT_VAL(VECTOR_DATA(a)[tmp]) < INT_VAL(VECTOR_DATA(b)[startb]);
+             else if (pred == STk_fxgt) /* fx> */
+                 go = INT_VAL(VECTOR_DATA(a)[tmp]) > INT_VAL(VECTOR_DATA(b)[startb]);
+             else
+                 go = STk_C_apply(pred,2,
+                                  VECTOR_DATA(a)[tmp],
+                                  VECTOR_DATA(b)[startb]) == STk_true;
+             
+             if (tmp < enda && go) {
                  starta = tmp;
                  i = i*2;
              }
@@ -310,27 +336,46 @@ void vector_merge_aux(SCM pred, SCM to, SCM v1, SCM v2,
 {
 
     long skipped;
-    if (cstart1 < cend1 &&
-        cstart2 < cend2 &&
-        STk_C_apply(pred,2,
-                    VECTOR_DATA(v1)[cstart1],
-                    VECTOR_DATA(v2)[cstart2]) == STk_true) {
-        skipped = gallop(pred, to, v1, v2, start, cstart1, cend1, cstart2, cend2);
-        cstart1 += skipped;
-    } else {
-        skipped = gallop(pred, to, v2, v1, start, cstart2, cend2, cstart1, cend1);
-        cstart2 += skipped;
-    }
-    start += skipped;
 
+    /* if v1 starts before, we call gallop with "v1, v2" else we use
+       "v2, v1".
+       We have fast paths for fx< and fx>, so we use a boolean "v1v2"
+       to decide which one goes first, v1 or v2. */
+
+     if (cstart1 < cend1 &&
+	 cstart2 < cend2 &&
+	 ( (pred == STk_fxlt &&
+	    INT_VAL(VECTOR_DATA(v1)[cstart1]) < INT_VAL(VECTOR_DATA(v2)[cstart2])) ||
+	   (pred == STk_fxgt &&
+	    INT_VAL(VECTOR_DATA(v1)[cstart1]) > INT_VAL(VECTOR_DATA(v2)[cstart2])) ||
+	   STk_C_apply(pred,2,
+		       VECTOR_DATA(v1)[cstart1],
+		       VECTOR_DATA(v2)[cstart2]) == STk_true)) {
+	 skipped = gallop(pred, to, v1, v2, start, cstart1, cend1, cstart2, cend2);
+	 cstart1 += skipped;
+     } else {
+	 skipped = gallop(pred, to, v2, v1, start, cstart2, cend2, cstart1, cend1);
+	 cstart2 += skipped;
+     }
+     start += skipped;
+
+     
      /* do the proper merge: */
      int i = start;
+     int go;
      while ((cstart1 < cend1) || (cstart2 < cend2)) {
          if ((cstart1 < cend1) && (cstart2 < cend2)) {
-
-             if (STk_C_apply(pred,2,
-                             VECTOR_DATA(v2)[cstart2],
-                             VECTOR_DATA(v1)[cstart1]) == STk_true) {
+             
+             if (pred == STk_fxlt) /* fx< */
+                 go = INT_VAL(VECTOR_DATA(v2)[cstart2]) < INT_VAL(VECTOR_DATA(v1)[cstart1]);
+             else if (pred == STk_fxgt) /* fx> */
+                 go = INT_VAL(VECTOR_DATA(v2)[cstart2]) > INT_VAL(VECTOR_DATA(v1)[cstart1]);
+             else
+                 go = STk_C_apply(pred,2,
+                                  VECTOR_DATA(v2)[cstart2],
+                                  VECTOR_DATA(v1)[cstart1]) == STk_true;
+                     
+             if (go) {
                  VECTOR_DATA(to)[i] = VECTOR_DATA(v2)[cstart2];
                  cstart2++;
              } else {
@@ -339,8 +384,9 @@ void vector_merge_aux(SCM pred, SCM to, SCM v1, SCM v2,
              }
              i++;
          } else break;
-    }
+     }
 
+     
     /* when there are elements left in one of the chunks, copy them */
      if (cstart1 < cend1) {
         memcpy(&VECTOR_DATA(to)[i],
@@ -417,7 +463,6 @@ DEFINE_PRIMITIVE("vector-merge",vector_merge,vsubr, (int argc, SCM *argv))
 
     SCM v3 = STk_makevect ( (cend1 - cstart1) + (cend2 - cstart2),
                             MAKE_INT((unsigned long) -1));
-                            //(SCM) NULL );
 
     vector_merge_aux(pred,v3,v1,v2,0,cstart1,cend1,cstart2,cend2);
 
@@ -517,15 +562,31 @@ void insertion_sort(SCM *vec, SCM less, long start, long end)
     int q = start + 1;
     SCM swap_aux;
 
+    /* If pred is a FIXNUM, then the predicate which was used depends on its value:
+       1 fx<
+       2 fx>
+       So instead of calling the predicate (using an expensive Scheme call), we
+       use a hardcoded '<' or '>'.  */
+
     /* TODO: use binary insertion sort */
+
     while (q < end) {
         r = q;
-        while (r > start &&
-               STk_C_apply(less, 2, vec[r], vec[r-1] ) == STk_true) {
+
+	int go = 0;
+	if (less == STk_fxlt) go = INT_VAL(vec[r]) < INT_VAL(vec[r-1]);
+	else if (less == STk_fxgt) go = INT_VAL(vec[r]) > INT_VAL(vec[r-1]);
+	else go = STk_C_apply(less, 2, vec[r], vec[r-1] ) == STk_true;
+	while (r > start && go) {
             swap_aux = vec[r];
-            vec[r] = vec[r-1];
-            vec[r-1] = swap_aux;
+	    vec[r] = vec[r-1];
+	    vec[r-1] = swap_aux;
             r--;
+	    if (r > start) {
+		if (less == STk_fxlt) go = INT_VAL(vec[r]) < INT_VAL(vec[r-1]);
+		else if (less == STk_fxgt) go = INT_VAL(vec[r]) > INT_VAL(vec[r-1]);
+		else go = STk_C_apply(less, 2, vec[r], vec[r-1] ) == STk_true;
+	    }
         }
         q++;
     }
@@ -805,7 +866,6 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
 
     runs[0]=cstart;
 
-
     while (run_end <= cend) {
         /* Find a run. Try forward, then backward. One of these will immediately fail,
            unless the user has been kind enough to call this procedure with `=` as a
@@ -814,23 +874,31 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
         j = s = run_end;
 
         /* forward */
-        while ( (j < cend) &&
-                STk_C_apply(less, 2, vec[j-1], vec[j] ) == STk_true) {
-            j++;
-        }
-
+        if (less == STk_fxlt) /* fx< */
+            while ( (j < cend) && INT_VAL(vec[j-1]) < INT_VAL(vec[j]) ) j++;
+        else if (less == STk_fxgt) /* fx> */
+            while ( (j < cend) && INT_VAL(vec[j-1]) > INT_VAL(vec[j]) ) j++;
+        else
+            while ( (j < cend) &&
+                    STk_C_apply(less, 2, vec[j-1], vec[j] ) == STk_true)
+                j++;
+        
         /* backward */
-        while ( (s < cend) &&
-                STk_C_apply(less, 2, vec[s], vec[s-1] ) == STk_true) {
-            s++;
-        }
+        if (less == STk_fxlt) /* fx< */
+            while ( (s < cend) && INT_VAL(vec[s]) < INT_VAL(vec[s-1]) ) s++;
+        else if (less == STk_fxgt) /* fx> */
+            while ( (s < cend) && INT_VAL(vec[s]) > INT_VAL(vec[s-1]) ) s++;
+        else
+            while ( (s < cend) &&
+                    STk_C_apply(less, 2, vec[s], vec[s-1] ) == STk_true)
+                s++;
 
         run_end = (s > j) ? s : j;
 
         /* un-reverse the reversed run, regardless of its size: */
         if (s > j) reverse_vector(vec, i, run_end);
 
-
+	
         /* if the run is too short, create a long one with insertion sort
            (cannot be shell, mnust be a stable sort): */
         if ( (run_end - i) < min_timsort_run && run_end < cend) {
@@ -846,7 +914,6 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
 
         /* include the end of the run into the list of runs to merge. */
         runs[k] = run_end;
-
 
         /* The following is the heard of timsort. Look at the runs stack and
            decide if it's time to merge. */
