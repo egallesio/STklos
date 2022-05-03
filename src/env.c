@@ -83,7 +83,7 @@ struct module_obj {
 #define MODULE_HASH_TABLE(m)    (((struct module_obj *) (m))->hash)
 
 SCM STk_STklos_module;          /* The module whose name is STklos */
-static SCM Scheme_module;       /* The module whose name is SCHEME */
+SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)

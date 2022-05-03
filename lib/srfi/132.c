@@ -40,6 +40,8 @@
    but those are not loaded by default (it's a SRFI), so things become
    more complicated.  */
 
+EXTERN_PRIMITIVE("symbol-value", symbol_value, subr23,
+                 (SCM symbol, SCM module, SCM default_value));
 EXTERN_PRIMITIVE("fx<?", fxlt, vsubr, (int argc, SCM *argv));
 EXTERN_PRIMITIVE("fx>?", fxgt, vsubr, (int argc, SCM *argv));
 
@@ -865,6 +867,30 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
     long run_end = i+1;
 
     runs[0]=cstart;
+
+    SCM fxl   = STk_symbol_value(STk_intern("fx<"), Scheme_module, NULL);
+    SCM less2 = less;
+    BOXED_INFO(less2) |= CONS_CONST;
+    //if (STk_eqv(less,fxl)==STk_true)
+    if ((void*)less == (void*) fxl)
+	fprintf(stderr,"fx<?\n");
+    else
+	fprintf(stderr,"NO fx<?\n");
+    
+    fprintf(stderr,"STk_fxl = %p %lu\n",
+	    (void*) fxl,
+	    (unsigned long) fxl);
+
+    fprintf(stderr,"less = %p %lu, STk_fxlt = %p %lu\n",
+	    less,
+	    (unsigned long) less,
+	    STk_fxlt,
+	    (unsigned long) STk_fxlt);
+    fprintf(stderr,"less2 = %p %lu, STk_fxlt = %p %lu\n",
+	    less2,
+	    (unsigned long) less2,
+	    STk_fxlt,
+	    (unsigned long) STk_fxlt);
 
     while (run_end <= cend) {
         /* Find a run. Try forward, then backward. One of these will immediately fail,

@@ -528,6 +528,7 @@ int STk_init_env(void);
 int STk_late_init_env(void); /* must be done after symbol initialization */
 
 extern SCM STk_STklos_module;
+extern SCM Scheme_module;
 
 EXTERN_PRIMITIVE("%create-module", create_module, subr1, (SCM name));
 EXTERN_PRIMITIVE("current-module", current_module, subr0, (void));
