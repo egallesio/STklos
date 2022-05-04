@@ -1673,7 +1673,7 @@ doc>
         `(begin                   ;; NOTE: this code should be atomic
            (define ,@args)
            (symbol-lock! ',(car args)))
-        (error "bad constant defiition ~S" `(define-constant ,@args)))))
+        (error "bad constant definition ~S" `(define-constant ,@args)))))
 
 ;;;; ======================================================================
 ;;;;
