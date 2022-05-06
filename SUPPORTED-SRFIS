@@ -74,6 +74,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
     - SRFI-113: Sets and Bags
+    - SRFI-116: Immutable List Library
     - SRFI-117: Queues based on lists
     - SRFI-118: Simple adjustable-size strings
     - SRFI-127: Lazy Sequences
