@@ -1,7 +1,7 @@
 ;;;;
 ;;;; tune.stk	-- Package tuning
 ;;;;
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Manuel Serrano
 ;;;;    Creation date: 18-Jan-2007 16:44 (eg)
-;;;; Last file update: 27-Mar-2007 16:26 (eg)
+;;;; Last file update:  8-May-2022 18:26 (eg)
 ;;;;
 
 ;; Most of the code her was given by Manuel Serrano.
@@ -183,7 +183,7 @@
 		       (if (eof-object? e)
 			 (reverse! pos)
 			 (let ((i (get-def-ident e)))
-			   (if (and i (hash-table-get defs i #f))
+			   (if (and i (hash-table-ref/default defs i #f))
 			     (loop (cons (%epair-line e) pos))
 			     (loop pos))))))))))
 
