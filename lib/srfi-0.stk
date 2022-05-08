@@ -21,17 +21,17 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 10-Mar-2022 11:13 (eg)
+;;;; Last file update:  8-May-2022 18:11 (eg)
 ;;;;
 
 (define-module SRFI-0
   (import SCHEME)
   (export srfi0-register-feature!
           srfi-0-feature-implementation-file
-          require-feature))
+          require-feature
+          cond-expand)
 
-
-(select-module SRFI-0)
+(include "srfis-data.scm") ;; Generated information on implemented SRFIs for SRFI-0
 
 (define *all-features*
   `(stklos                              ; Of course
@@ -132,7 +132,7 @@ doc>
 ;; ----------------------------------------------------------------------
 (define (%load-implementation files)
   (for-each* (lambda (x)
-               ;; Use require macro here and not the function 
+               ;; Use require macro here and not the function
                (require x))
              files))
 
@@ -214,16 +214,13 @@ doc>
                   `(begin ,@(cdar clauses)))
                 `(cond-expand ,@(cdr clauses))))))))))
 
-
 ;; ----------------------------------------------------------------------
 ;;      cond-expand ...
 ;; ----------------------------------------------------------------------
-(select-module STklos)
-(import SRFI-0)
-
 (define-macro (cond-expand . clauses)
-  (let ((expander (in-module SRFI-0 %srfi-0-expand)))
-    (expander clauses)))
+  (%srfi-0-expand clauses))
+
+) ;; End of module SRFI-0
 
 (provide "srfi-0")
 

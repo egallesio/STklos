@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  8-May-2022 00:19 (eg)
+;;;; Last file update:  8-May-2022 18:08 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -72,18 +72,16 @@
 (include "object.stk")          ; CLOS like object system
 (include "mbe.stk")             ; A simple R5RS macro system
 (include "r7rs.stk")            ; Support of R7RS (FIXME: should be upper in list)
-
 (include "load.stk")            ; Extended load dealing with paths and suffixes
 (include "library.stk")         ; R7RS define-library
 (%pseudo-import-in-STklos (find-module 'SCHEME))
 
-
-(include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "srfi-0.stk")          ; Implementation of SRFI-0
+
 
 (include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
 
-(import STKLOS-OBJECT MBE)
+(import STKLOS-OBJECT MBE SRFI-0)
 
 ;(module-lock! (find-module 'SCHEME))
 

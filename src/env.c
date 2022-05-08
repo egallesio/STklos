@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  6-May-2022 20:59 (eg)
+ * Last file update:  8-May-2022 17:09 (eg)
  */
 
 #include "stklos.h"
@@ -433,9 +433,7 @@ DEFINE_PRIMITIVE("module-lock!", module_lock, subr1, (SCM module))
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(module));
        !NULLP(lst);
        lst = CDR(lst)) {
-    STk_debug ("Lock of ~S", CAR(lst));
     SCM tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), CAR(lst));
-    STk_debug("tmp = %d", tmp);
     BOXED_INFO(tmp) |= CONS_CONST;
   }
   BOXED_INFO(module) |= MODULE_LOCKED;
