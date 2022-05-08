@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  8-May-2022 18:11 (eg)
+;;;; Last file update:  8-May-2022 18:45 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -222,7 +222,6 @@ doc>
 
 ) ;; End of module SRFI-0
 
-(provide "srfi-0")
 
 
 #|

@@ -22,24 +22,24 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update:  6-May-2022 17:37 (eg)
+;;;; Last file update:  8-May-2022 18:40 (eg)
 ;;;;
 
-;;//(define-module SCHEME
-;;//  (export string-lower string-upper
-;;//          set-load-path! set-load-suffixes!
-;;//          flush rewind-file-port
-;;//          hash-table->list hash-table-put! hash-table-get
-;;//          stklos-pragma remove-directory
-;;//          %build-path-from-shell-variable
-;;//          copy-tree %set-std-port!
-;;//          make-box make-constant-box box-set!
-;;//          string-index argv
-;;//          fxdiv fxrem fxmod fx< fx<= fx> fx>= fx=
-;;//          make-directory make-directories)
-;;//
+(define-module SCHEME
+  (export string-lower string-upper
+          set-load-path! set-load-suffixes!
+          flush rewind-file-port
+          hash-table->list hash-table-put! hash-table-get hash-table-remove!
+          stklos-pragma
+          remove-directory
+          %build-path-from-shell-variable
+          copy-tree %set-std-port!
+          make-box make-constant-box box-set!
+          string-index argv
+          fxdiv fxrem fxmod fx< fx<= fx> fx>= fx=
+          make-directory make-directories )
 
-
+  
 ;;; 11-Jun-2002 (v0.53)
 (define string-lower string-downcase)
 (define string-upper string-upcase)
@@ -60,7 +60,6 @@
 
 ;; 19-May-2005 (v 0.62)
 (define rewind-file-port port-rewind)
-
 
 ;; 27-Oct-2005 (v 0.71)
 (define hash-table->list hash-table->alist)
@@ -123,4 +122,4 @@
 (define make-directory   create-directory)
 (define make-directories create-directories)
 
-;;// )
+)
