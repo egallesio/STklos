@@ -430,10 +430,27 @@ static Inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
       if (nargs < min_arity)
         error_bad_arity(func, arity, nargs, vm);
       else { /* Make a list from the arguments which are on the stack. */
-        SCM res = STk_nil;
-
-        while (nargs-- > min_arity) res = STk_cons(pop(), res);
-        push(res);
+        int n = nargs - min_arity;
+        struct cons_obj *res = STk_must_malloc(n * sizeof(struct cons_obj));
+        /* We first check for n==0, because in this case we need to push nil
+           and return -arity, and *not* try to do anything else. */
+        if (n != 0) {
+        
+            int i = n - 1;
+            while (nargs-- > min_arity) {
+                /* We do the same as NEWCELL would do after allocating each
+                   cons cell: */
+                BOXED_TYPE(&res[i]) = tc_cons;
+                BOXED_INFO(&res[i]) = 0;
+                /* And set car and cdr: */
+                CAR(&res[i]) = pop();
+                CDR(&res[i]) = &res[i+1];
+                i--;
+            }
+            CDR(&res[n-1]) = STk_nil; /* Was pointing to outside the array before */
+            push( (SCM) &res[0] );
+        }
+        else push (STk_nil);
       }
       return -arity;
     }
