@@ -1,7 +1,7 @@
 ;;;;
-;;;; logical.stk	-- Logical operations
+;;;; logical.stk        -- Logical operations
 ;;;;
-;;;; Copyright © 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2009-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Oct-2009 23:46 (eg)
-;;;; Last file update: 18-Oct-2009 00:43 (eg)
+;;;; Last file update:  6-May-2022 16:45 (eg)
 ;;;;
 
 ;;;; This implementation is an adaptation of the code given in the reference
@@ -47,7 +47,8 @@
 ;promotional, or sales literature without prior written consent in
 ;each case.
 
-
+(define-module SCHEME
+  (export bit-and bit-or bit-xor bit-not bit-shift)
 
 #|
 <doc EXT bit-and bit-or bit-xor bit-not bit-shift
@@ -120,14 +121,14 @@ doc>
 
   (define (logical:ash-4 x)
     (if (negative? x)
-	(+ -1 (quotient (+ 1 x) 16))
-	(quotient x 16)))
+        (+ -1 (quotient (+ 1 x) 16))
+        (quotient x 16)))
 
   (define (logical:reduce op4 ident)
     (lambda args
       (do ((res ident (op4 res (car rgs) 1 0))
-	   (rgs args (cdr rgs)))
-	  ((null? rgs) res))))
+           (rgs args (cdr rgs)))
+          ((null? rgs) res))))
 
 
   ;; ----------------------------------------------------------------------
@@ -135,19 +136,19 @@ doc>
   ;; ----------------------------------------------------------------------
   (set! bit-and
     (letrec
-	((lgand
-	  (lambda (n2 n1 scl acc)
-	    (cond ((= n1 n2) (+ acc (* scl n1)))
-		  ((zero? n2) acc)
-		  ((zero? n1) acc)
-		  (else (lgand (logical:ash-4 n2)
-			       (logical:ash-4 n1)
-			       (* 16 scl)
-			       (+ (* (vector-ref (vector-ref logical:boole-and
-							     (modulo n1 16))
-						 (modulo n2 16))
-				     scl)
-				  acc)))))))
+        ((lgand
+          (lambda (n2 n1 scl acc)
+            (cond ((= n1 n2) (+ acc (* scl n1)))
+                  ((zero? n2) acc)
+                  ((zero? n1) acc)
+                  (else (lgand (logical:ash-4 n2)
+                               (logical:ash-4 n1)
+                               (* 16 scl)
+                               (+ (* (vector-ref (vector-ref logical:boole-and
+                                                             (modulo n1 16))
+                                                 (modulo n2 16))
+                                     scl)
+                                  acc)))))))
       (logical:reduce lgand -1)))
 
   ;; ----------------------------------------------------------------------
@@ -155,20 +156,20 @@ doc>
   ;; ----------------------------------------------------------------------
   (set! bit-or
     (letrec
-	((lgior
-	  (lambda (n2 n1 scl acc)
-	    (cond ((= n1 n2) (+ acc (* scl n1)))
-		  ((zero? n2) (+ acc (* scl n1)))
-		  ((zero? n1) (+ acc (* scl n2)))
-		  (else (lgior (logical:ash-4 n2)
-			       (logical:ash-4 n1)
-			       (* 16 scl)
-			       (+ (* (- 15 (vector-ref
-					    (vector-ref logical:boole-and
-							(- 15 (modulo n1 16)))
-					    (- 15 (modulo n2 16))))
-				     scl)
-				  acc)))))))
+        ((lgior
+          (lambda (n2 n1 scl acc)
+            (cond ((= n1 n2) (+ acc (* scl n1)))
+                  ((zero? n2) (+ acc (* scl n1)))
+                  ((zero? n1) (+ acc (* scl n2)))
+                  (else (lgior (logical:ash-4 n2)
+                               (logical:ash-4 n1)
+                               (* 16 scl)
+                               (+ (* (- 15 (vector-ref
+                                            (vector-ref logical:boole-and
+                                                        (- 15 (modulo n1 16)))
+                                            (- 15 (modulo n2 16))))
+                                     scl)
+                                  acc)))))))
       (logical:reduce lgior 0)))
 
   ;; ----------------------------------------------------------------------
@@ -176,19 +177,19 @@ doc>
   ;; ----------------------------------------------------------------------
   (set! bit-xor
     (letrec
-	((lgxor
-	  (lambda (n2 n1 scl acc)
-	    (cond ((= n1 n2) acc)
-		  ((zero? n2) (+ acc (* scl n1)))
-		  ((zero? n1) (+ acc (* scl n2)))
-		  (else (lgxor (logical:ash-4 n2)
-			       (logical:ash-4 n1)
-			       (* 16 scl)
-			       (+ (* (vector-ref (vector-ref logical:boole-xor
-							     (modulo n1 16))
-						 (modulo n2 16))
-				     scl)
-				  acc)))))))
+        ((lgxor
+          (lambda (n2 n1 scl acc)
+            (cond ((= n1 n2) acc)
+                  ((zero? n2) (+ acc (* scl n1)))
+                  ((zero? n1) (+ acc (* scl n2)))
+                  (else (lgxor (logical:ash-4 n2)
+                               (logical:ash-4 n1)
+                               (* 16 scl)
+                               (+ (* (vector-ref (vector-ref logical:boole-xor
+                                                             (modulo n1 16))
+                                                 (modulo n2 16))
+                                     scl)
+                                  acc)))))))
       (logical:reduce lgxor 0))))
 
 
@@ -210,3 +211,4 @@ doc>
             (quotient n k)))
       (* (expt 2 m) n)))
 
+)

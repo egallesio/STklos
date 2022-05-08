@@ -1,7 +1,7 @@
 ;;;;
 ;;;; str.stk	-- string operations
 ;;;;
-;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,14 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jul-2011 16:42 (eg)
-;;;; Last file update: 10-Aug-2011 16:17 (eg)
+;;;; Last file update:  5-May-2022 18:56 (eg)
 ;;;;
 
 ;;; The functions defined here replace C primitives which are not UTF-8 aware.
 ;;; These functions still use their correspondant C primitive if the string
 ;;; argument doesn't use multi-byte characters
 
-
+(define-module SCHEME
 (when (%use-utf8?)
   (let ((%string-split		string-split)
 	(%string-blit!		string-blit!)
@@ -180,3 +180,4 @@
 					   (else          (char-downcase curr))))
 		      (Loop (+ i 1) curr-is-sep?))))))))
     ))
+)

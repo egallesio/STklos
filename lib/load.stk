@@ -21,8 +21,27 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update:  8-Apr-2022 12:44 (eg)
+;;;; Last file update:  6-May-2022 20:38 (eg)
 ;;;;
+
+(define-module SCHEME
+  (export build-path-from-shell-variable
+          load-path load-suffixes load-verbose current-loading-file
+          try-load load
+          find-path
+          require provide provided? require/provide
+          warning-when-not-provided
+          require-library require-for-syntax
+          include include-ci include-file
+          autoload-file remove-autoload! autoload syntax-autoload
+
+          ;; FIXME
+          %stklos-conf-dir
+          %stklos-conf-file
+          %try-load-tmp
+          *%autoloads*
+          %do-include
+          %%require)
 
 
 (define *%autoloads* '())
@@ -63,7 +82,7 @@
  * (build-path-from-shell-variable "MYPATH" "/:")  => ("bin" "sbin" "usr" "bin")
  * @end lisp
 doc>
-|# 
+|#
 (define (build-path-from-shell-variable var :optional (sep *path-separator*))
   (let ((path (getenv var)))
     (if path
@@ -237,24 +256,29 @@ doc>
     (when (and path (not (file-is-directory? path)))
       (current-loading-file path)
       (with-handler (lambda (c)
-                      (set! %try-load-tmp (cons c %try-load-tmp))
+                      ;; (set! %try-load-tmp (cons c %try-load-tmp))
                       (current-loading-file oldp)
                       (%%set-current-module mod)
-                      ;; We have lost current environment :-<
-                      (let ((c (car %try-load-tmp)))
-                        (set! %try-load-tmp (cdr %try-load-tmp))
-                        (raise c)))
-                    (when *load-verbose* (format out ";; Loading file ~S.\n" path))
-                    (set! res             (%primitive-try-load path))
-                    (when *load-verbose* (format out ";; File ~S loaded.\n" path))
-                    ;; Restore current-load-path
-                    (current-loading-file oldp)
-                    ;; Restore the module we had when entering
-                    (%%set-current-module mod)))
+                      ;;               ;; We have lost current environment :-<
+                      ;;               (let ((c (car %try-load-tmp)))
+                      ;;                 (set! %try-load-tmp (cdr %try-load-tmp))
+                      ;;                 (raise c)))
+                      (raise c))
+          (when *load-verbose* (format out ";; Loading file ~S.\n" path))
+          (set! res             (%primitive-try-load path))
+          (when *load-verbose* (format out ";; File ~S loaded.\n" path))
+          ;; Restore current-load-path
+          (current-loading-file oldp)
+          ;; Restore the module we had when entering
+          (%%set-current-module mod)))
     res))
 
-(define (try-load fn)
-  (%try-load fn (load-path) (load-suffixes)))
+;;
+;; Overload the function try-load primitive with a version which uses load-path annd
+;; load-suffixes
+;;
+(set! try-load (lambda (fn)
+                 (%try-load fn (load-path) (load-suffixes))))
 
 ;=============================================================================
 ;
@@ -533,6 +557,6 @@ doc>
                               *%autoloads*)))
 
 
-
+)
 
 ; LocalWords:  repl autoload prepended

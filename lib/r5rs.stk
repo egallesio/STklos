@@ -21,10 +21,17 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 28-Apr-2022 09:57 (eg)
+;;;; Last file update:  6-May-2022 15:20 (eg)
 ;;;;
 
-
+(define-module SCHEME
+  (export with-input-from-file with-output-to-file with-error-to-file
+          with-input-from-string with-output-to-string 
+          with-input-from-port with-output-to-port with-error-to-port
+          %call-with ;; FIXME
+          call-with-input-file call-with-output-file
+          rationalize
+          call-with-values)
 #|
 <doc EXT-SYNTAX lambda
  * (lambda <formals> <body>)
@@ -913,5 +920,5 @@ doc>
       ((0) (con))
       (else (apply con vals)))))
 
-
+) ;; End of module
 ; LocalWords:  noindent EXT

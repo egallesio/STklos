@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 29-Apr-2022 18:30 (eg)
+;;;; Last file update:  8-May-2022 00:19 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -29,15 +29,39 @@
 (include "runtime.stk")         ; Definitions necessary for the bootstrap
 (include "runtime-macros.stk")  ; Macros necessary for the bootstrap
 (include "module.stk")          ; All the macros for defining modules
+
+;; ----------------------------------------------------------------------
+;;      SCHEME Module
+;; ----------------------------------------------------------------------
+;; The SCHEME module is a copy of the STklos module before the user
+;;; may have the possibility to modify standard bindings.
+;;; If a module needs to be sure to have the original bindings, it
+;;; can import this module which will be visible before the STklos
+;;; module. Note that this is only partially true since bindings
+;;; in SCHEME module are mutable
+;;; Note that module SCHEME was already created before bootstrap
+(let ((STklos (find-module 'STklos))
+      (SCHEME (find-module 'SCHEME)))
+  (%populate-scheme-module)
+  (%module-exports-set! SCHEME (module-exports STklos)))
+
+
+(define (%pseudo-import-in-STklos module)
+  (let ((STklos (find-module 'STklos)))
+    (for-each (lambda(x)
+                (let ((v (cdr x)))
+                  ;(%debug "Il faut définir ~S à ~S" v (symbol-value v module 1))
+                  (%symbol-define v (symbol-value v module) STklos)))
+              (module-exports module))))
+
 (include "compiler.stk")        ; VM Compiler
-(import STKLOS-COMPILER)        ; Force to be in the STklos module
+(import STKLOS-COMPILER)
 
 (include "r5rs.stk")            ; R5RS stuff written in Scheme
 (include "str.stk")             ; String functions UTF-8 aware
 (include "callcc.stk")          ; Call/cc support
 (include "struct.stk")          ; STklos structures
 (include "bonus.stk")           ; Extended functions and syntaxes
-(include "load.stk")            ; Extended load dealing with paths and suffixes
 (include "regexp.stk")          ; Regular expressions
 (include "process.stk")         ; Processes from Scheme
 (include "equiv.stk")           ; equivalence of circular structures
@@ -45,15 +69,23 @@
 (include "logical.stk")         ; Logical operations
 (include "thread.stk")          ; Thread support
 (include "ffi.stk")             ; FFI support
-(include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
-(include "r7rs.stk")            ; Support of R7RS (FIXME: should be upper in list)
-(include "library.stk")         ; R7RS define-library
 (include "object.stk")          ; CLOS like object system
 (include "mbe.stk")             ; A simple R5RS macro system
-(import STKLOS-OBJECT MBE)
+(include "r7rs.stk")            ; Support of R7RS (FIXME: should be upper in list)
+
+(include "load.stk")            ; Extended load dealing with paths and suffixes
+(include "library.stk")         ; R7RS define-library
+(%pseudo-import-in-STklos (find-module 'SCHEME))
+
 
 (include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "srfi-0.stk")          ; Implementation of SRFI-0
+
+(include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
+
+(import STKLOS-OBJECT MBE)
+
+;(module-lock! (find-module 'SCHEME))
 
 ;; Include files for the REPL
 (include "repl.stk")            ; Read Eval Print Loop
@@ -61,6 +93,11 @@
 (include "repl-readline.stk")   ; REPL + readline
 (import REPL REPL-READLINE)
 
+;;
+;; Define common standard libraries to minimize file accesses at runtime
+;;
+(include "./scheme/base.stk")
+(include "./scheme/write.stk")
 
 ;==============================================================================
 (autoload        "compfile"       compile-file)
@@ -288,7 +325,7 @@
             (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
             (load file)
             ;; Try to execute the main procedure with the given arguments
-            (let ((ret-code (main (cons (program-name) (argv)))))
+            (let ((ret-code (main (cons (program-name) (command-args)))))
               (%before-exit-hook)
               (if (integer? ret-code) ret-code 0))))
     ;; "--expression" option

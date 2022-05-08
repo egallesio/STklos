@@ -1,5 +1,4 @@
 ;;;;
-
 ;;;;
 ;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
@@ -21,9 +20,67 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 28-Apr-2022 10:19 (eg)
+;;;; Last file update:  6-May-2022 15:09 (eg)
 ;;;;
 
+
+(define-module SCHEME
+  (export read-chars read-chars! display-shared gensym
+          macro-expand macro-expand*
+          remove remove! delete delete!
+          every any
+          call-with-input-string call-with-output-string
+          open-input-virtual open-output-virtual
+          read-from-string eval-from-string
+          command-line program-name
+          create-directories ensure-directories-exist
+          posix-error? posix-error-name posix-error-message
+          posix-error-errno posix-error-procedure posix-error-arguments
+          make-hash-table hash-table->alist alist->hash-table
+          hash-table-update! hash-table-update!/default
+          hash-table-keys hash-table-values hash-table-fold
+          hash-table-merge! hash-table-copy
+          fluid-let time tagbody
+          dotimes repeat while until
+          call/ec
+          base64-encode-string base64-decode-string
+          md5sum-file
+          ansi-color ansi-color-protect do-color
+          port->string port->sexp-list port->string-list
+          print printerr eprintf printf fprintf
+          declare-new-error
+          exec exec-list
+          apropos die
+          decompose-file-name dirname basename file-separator
+          make-path file-suffix file-prefix
+          port-idle-register! port-idle-unregister! port-idle-reset!
+          chmod
+          with-mutex
+          error-object-location %push-id
+          define-constant
+          receive case-lambda
+
+          %define-condition-type-accessors
+          message-condition? condition-message
+          serious-condition?
+          error?
+          error-message? error-location error-message
+          read-with-shared-structure read/ss
+          write-with-shared-structure write/ss
+          parameterize
+          require-extension
+          string->keyword
+          get-environment-variable get-environment-variables
+          implementation-name implementation-version cpu-architecture
+          machine-name os-name os-version
+          fx-width fx-greatest fx-least
+          assume
+          version-alist
+          port-has-port-position? port-position port-has-set-port-position!?
+          set-port-position!
+          make-i/o-invalid-position-error i/o-invalid-position-error?
+          command-name command-args argc script-file script-directory
+          make-nan)
 
 ;;;; Deprecated names
 (define read-chars read-bytes)
@@ -455,6 +512,11 @@ doc>
   (and (condition? obj)
        (condition-has-type? obj &posix-error)))
 
+(define (%posix-error-condition-ref posix-error field)
+  (unless (posix-error? posix-error)
+    (error "expected a posix-error condition" posix-error))
+  (condition-ref posix-error field))
+
 #|
 <doc EXT posix-error-name
  * (posix-error-name posix-error)
@@ -467,11 +529,6 @@ doc>
  * This function is defined in {{link-srfi 170}}.
 doc>
 |#
-(define (%posix-error-condition-ref posix-error field)
-  (unless (posix-error? posix-error)
-    (error "expected a posix-error condition" posix-error))
-  (condition-ref posix-error field))
-
 (define (posix-error-name posix-error)
   (%posix-error-condition-ref posix-error 'errname))
 
@@ -1348,7 +1405,7 @@ doc>
  * @end lisp
 doc>
 |#
-(if (eq? (running-os) 'cygwin-windows)
+(if (eq? (running-os) 'cygwin-windows)                    ;; FIXME: delete cygwin support?
     [begin
       (define (decompose-file-name str)
         (let ((str (posixify-file-name str)))
@@ -1799,8 +1856,8 @@ doc>
 
 (%define-condition-type-accessors &error-message &error ;; &error-message (extension)
    error-message?
-  (location error-location)
-  (message  error-message))
+   (location error-location)
+   (message  error-message))
 
 ;;
 ;; SRFI-38: "External Representation for Data With Shared Structure"
@@ -2365,7 +2422,7 @@ doc>
 doc>
 |#
 
-
+) ;; End of module SCHEME
 
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg

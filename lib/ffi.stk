@@ -21,8 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 12-Jan-2022 17:58 (eg)
+;;;; Last file update:  6-May-2022 16:53 (eg)
 ;;;;
+
+(define-module SCHEME
+  (export make-external-function make-callback
+          define-external)
+
 
 (define make-external-function #f)
 (define make-callback          #f)
@@ -141,7 +146,7 @@
  * defines a function which will execute the function |min|
  * located in the library |libminmax.xx| (where |xx| is the suffix used
  * for shared libraries on the running system (generally |so|)).
- * 
+ *
 doc>
 |#
 (define-macro (define-external name parameters . args)
@@ -157,5 +162,4 @@ doc>
                                            ',parameters
                                            ,return-type
                                            ,lib-name))))
-
-(provide "ffi")
+)

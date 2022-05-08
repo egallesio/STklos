@@ -21,8 +21,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 12-Dec-2000 14:04 (eg)
-;;;; Last file update: 10-Jan-2022 20:53 (eg)
+;;;; Last file update:  6-May-2022 16:31 (eg)
 ;;;;
+
+(define-module SCHEME
+  (export run-process process-kill process-stop process-continue)
+
 
 #|
 <doc EXT run-process
@@ -66,7 +70,7 @@
  * program is lost. This feature mimics the ``|exec|'' primitive of the
  * Unix shells. By default, a fork is executed before running the process
  * (i.e. |:fork| is |%t|). This option works on Unix implementations only.
- * 
+ *
  *
  * The following example launches a process which executes the
  * Unix command |ls| with the arguments |-l| and |/bin|. The lines
@@ -127,4 +131,5 @@ doc>
 (define (process-stop proc)     (process-signal proc 'SIGSTOP))
 (define (process-continue proc) (process-signal proc 'SIGCONT))
 
+)
 ; LocalWords:  SIGSTOP SIGCONT

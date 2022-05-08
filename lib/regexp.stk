@@ -21,11 +21,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  9-Nov-1994 13:24 (eg)
-;;;; Last file update:  9-Jan-2022 23:22 (eg)
+;;;; Last file update:  6-May-2022 16:30 (eg)
 ;;;;
 
 
-
+(define-module SCHEME
+  (export regexp-replace regexp-replace-all)
 #|
 <doc EXT regexp-replace regexp-replace-all
  * (regexp-replace pattern string substitution)
@@ -135,3 +136,5 @@ doc>
                                                     subst))
                             str)))))
             (regexp-replace-all-r pat str subst)))))
+
+)

@@ -21,8 +21,18 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 14-Jan-2022 12:29 (eg)
+;;;; Last file update:  6-May-2022 16:50 (eg)
 ;;;;
+
+
+(define-module SCHEME
+  (export make-thread thread-handler-error-show thread-sleep! thread-join!
+          mutex-lock! mutex-unlock!
+          join-timeout-exception? abandoned-mutex-exception?
+          terminated-thread-exception?
+          &uncaught-exception uncaught-exception? uncaught-exception-reason)
+
+
 (define (%thread-timeout->seconds timeout)
   (cond
     ((time? timeout) (time->seconds timeout))
@@ -181,8 +191,9 @@ doc>
 ;;
 ;; Using the macro-expansion avoid the auto-loading of SRFI-35
 (define &uncaught-exception (make-condition-type '&uncaught-exception
-                         &condition
-                         '(reason)))
+                                                 &condition
+                                                 '(reason)))
+
 (%define-condition-type-accessors &uncaught-exception &condition
    uncaught-exception?
    (reason uncaught-exception-reason))
@@ -234,3 +245,6 @@ doc>
  * of that thread (`exc` must be an _uncaught exception_ object).
 doc>
 |#
+
+
+) 

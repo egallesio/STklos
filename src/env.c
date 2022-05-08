@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 22-Apr-2022 14:06 (eg)
+ * Last file update:  6-May-2022 20:59 (eg)
  */
 
 #include "stklos.h"
@@ -420,7 +420,7 @@ DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
  * (module-lock! module)
  *
  * Locks the module |module|. When a module is locked, it is impossible
- * to define int it new symbols or change the value of already defined ones.
+ * to define new symbols in it or change the value of already defined ones.
  *
 doc>
  */
@@ -433,7 +433,9 @@ DEFINE_PRIMITIVE("module-lock!", module_lock, subr1, (SCM module))
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(module));
        !NULLP(lst);
        lst = CDR(lst)) {
+    STk_debug ("Lock of ~S", CAR(lst));
     SCM tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), CAR(lst));
+    STk_debug("tmp = %d", tmp);
     BOXED_INFO(tmp) |= CONS_CONST;
   }
   BOXED_INFO(module) |= MODULE_LOCKED;
@@ -578,12 +580,12 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
     /* Redefine symbol in (car lst) in SCHEME module */
     STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
 
-    /* Make this variable constant */
-    res = STk_hash_get_variable(&MODULE_HASH_TABLE(Scheme_module), CAR(lst));
-    BOXED_INFO(res) |= CONS_CONST;
+//    /* Make this variable constant */
+//    res = STk_hash_get_variable(&MODULE_HASH_TABLE(Scheme_module), CAR(lst));
+//    BOXED_INFO(res) |= CONS_CONST;
   }
   /* Lock the module */
-  BOXED_INFO(Scheme_module) |= MODULE_LOCKED;
+//  BOXED_INFO(Scheme_module) |= MODULE_LOCKED;
   return STk_void;
 }
 

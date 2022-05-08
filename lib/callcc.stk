@@ -21,8 +21,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2006 12:27 (eg)
-;;;; Last file update:  9-Jan-2022 14:44 (eg)
+;;;; Last file update:  5-May-2022 18:58 (eg)
 ;;;;
+
+(define-module SCHEME
+  (export call/cc call-with-current-continuation dynamic-wind)
 
 #|
 <doc call-with-current-continuation call/cc
@@ -240,3 +243,5 @@ doc>
 ;; call-with-current-continuation
 ;;
 (define call-with-current-continuation call/cc)     ;; also set the procedure-name
+
+)

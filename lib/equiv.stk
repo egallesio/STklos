@@ -2,7 +2,7 @@
 ;;;;
 ;;;; equiv.stk         -- Equal on circular structures
 ;;;;
-;;;; Copyright © 2018 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2018-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 ;;;;    Original author: William D Clinger
 ;;;;  STklos adaptation: Erick Gallesio
 ;;;;      Creation date: 27-Nov-2018 11:26
-;;;;   Last file update: 27-Nov-2018 14:58 (eg)
+;;;;   Last file update:  6-May-2022 16:33 (eg)
 ;;;;
 
 ;;; This code uses some parts of the implementation of William
@@ -94,6 +94,10 @@
 ;;; It starts out by trying the traditional recursive algorithm
 ;;; to bounded depth.
 ;;; It handles easy cases specially.
+
+
+(define-module SCHEME
+  (export %equiv?)
 
 (define %equiv? #f)
 
@@ -240,5 +244,5 @@
           res
           (equiv? x y))))
 
-  (set! %equiv? equiv?)
+  (set! %equiv? equiv?))
 )

@@ -21,8 +21,49 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 16-Apr-2022 18:53 (eg)
+;;;; Last file update:  6-May-2022 18:11 (eg)
 ;;;;
+
+
+(define-module SCHEME
+  (export write-shared write-simple
+          letrec* let-values let*-values
+          delay delay-force lazy make-promise eager
+          define-values
+          equal-simple?
+          exact-integer?
+          floor-quotient floor/ truncate/ truncate-quotient
+          truncate-remainder floor-remainder
+          square exact-integer-sqrt exact inexact
+          boolean=?
+          make-list member-simple assoc-simple member assoc
+          symbol=?
+          string=?     %string2=?
+          string<?     %string2<?
+          string<=?    %string2<=?
+          string>?     %string2>?
+          string>=?    %string2>=?
+          string-ci=?  %string-ci2=?
+          string-ci<?  %string-ci2<?
+          string-ci<=? %string-ci2<=?
+          string-ci>?  %string-ci2>?
+          string-ci>=? %string-ci2>=?
+          string->list string-copy!
+          string-fill! %string-fill2!
+          vector->list vector-copy! vector->string string->vector
+          make-bytevector bytevector? bytevector bytevector-length
+          bytevector-u8-ref bytevector-u8-set! bytevector-copy!
+          string-map vector-map
+          string-for-each vector-for-each
+          error-object? error-object-message error-object-irritants
+          read-error? file-error?
+          call-with-port input-port-open? output-port-open?
+          read-string read-u8 peek-u8 read-bytevector!
+          write-string write-u8 write-bytevector
+          with-exception-handler raise-continuable guard
+          current-jiffy jiffies-per-second features
+          %continuable-exception?  %continuable-exception-value;; FIXME
+          )
 
 
 ;;;; Aliases
@@ -268,7 +309,7 @@ doc>
  * (let ()
  *    (define-values (x y) (values 1 2))
  *    (+ x y))                     => 3
- * 
+ *
  * (let ()
  *    (define-values (x . y) (values 1 2 3))
  *    (list x y)                  => (1 (2 3))
@@ -632,7 +673,7 @@ doc>
 ;;;; ----------------------------------------------------------------------
 
 ;;
-;; Generalized string->list
+;; Generalized vector->list
 ;;
 (let ((v->l vector->list)) ;; v->l is the R5RS function
   (set! vector->list
@@ -1539,7 +1580,7 @@ doc>
  * example of what |features| might return:
  *
  * @lisp
- * (features) => (STklos STklos-{{version}} exact-complex 
+ * (features) => (STklos STklos-{{version}} exact-complex
 *                 ieee-float full-unicode ratios little-endian ...)
  * @end lisp
 doc>
@@ -1553,3 +1594,4 @@ doc>
                     ((pair? (car x)) (car x))
                     (else            (list (car x)))))
                 all))))
+)

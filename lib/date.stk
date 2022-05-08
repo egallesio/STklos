@@ -21,8 +21,18 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 13-Jan-2022 18:45 (eg)
+;;;; Last file update:  6-May-2022 17:39 (eg)
 ;;;;
+
+
+(define-module SCHEME
+  (export time? time->seconds seconds->time make-date date? seconds->date
+          date-second date-minute date-hour
+          date-day date-month date-year
+          date-week-day date-year-day
+          date-dst date-tz
+          seconds->list current-date seconds->string date->string)
+
 
 ;;;; ======================================================================
 ;;;;
@@ -341,6 +351,4 @@ doc>
 
   (seconds->string format (date->seconds date)))
 
-
-
-(provide "date")
+) ;; End of module SCHEME
