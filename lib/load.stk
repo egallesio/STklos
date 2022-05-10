@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update:  6-May-2022 20:38 (eg)
+;;;; Last file update: 10-May-2022 12:39 (eg)
 ;;;;
 
 (define-module SCHEME
@@ -33,18 +33,16 @@
           warning-when-not-provided
           require-library require-for-syntax
           include include-ci include-file
-          autoload-file remove-autoload! autoload syntax-autoload
+          autoload-add-syntax autoload-file remove-autoload! autoload syntax-autoload
 
           ;; FIXME
           %stklos-conf-dir
           %stklos-conf-file
           %try-load-tmp
-          *%autoloads*
           %do-include
           %%require)
 
 
-(define *%autoloads* '())
 (define %try-load-tmp '())   ;; Use a global when restoring environment
 
 
@@ -512,6 +510,11 @@ doc>
 ;=============================================================================
 (define *%autoloads* '())
 
+(define (autoload-add-syntax file symbols)
+  (set! *%autoloads* (append (map (lambda (s) (cons s file)) symbols)
+                             *%autoloads*)))
+
+
 (define (autoload-file id)
   (let ((info (assq id *%autoloads*)))
     (if info (cdr info) #f)))
@@ -553,8 +556,7 @@ doc>
 doc>
 |#
 (define-macro (syntax-autoload file . symbols)
-  `(set! *%autoloads* (append ',(map (lambda (s) (cons s file)) symbols)
-                              *%autoloads*)))
+  `(autoload-add-syntax ,file ',symbols))
 
 
 )
