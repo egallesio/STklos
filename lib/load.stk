@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 10-May-2022 12:39 (eg)
+;;;; Last file update: 11-May-2022 14:25 (eg)
 ;;;;
 
 (define-module SCHEME
@@ -503,27 +503,6 @@ doc>
 (define-macro (include-file file) ;; Only one file no search in the load-path
   `(%%include ,file))
 
-;=============================================================================
-;
-; AUTOLOAD & SYNTAX-AUTOLOAD
-;
-;=============================================================================
-(define *%autoloads* '())
-
-(define (autoload-add-syntax file symbols)
-  (set! *%autoloads* (append (map (lambda (s) (cons s file)) symbols)
-                             *%autoloads*)))
-
-
-(define (autoload-file id)
-  (let ((info (assq id *%autoloads*)))
-    (if info (cdr info) #f)))
-
-(define (remove-autoload! id)
-  (let ((exp (assq id *%autoloads*)))
-    (when exp
-      (set! *%autoloads* (delete! exp *%autoloads* eq?)))))
-
 #|
 <doc EXT autoload
  * (autoload file symbol ...)
@@ -545,18 +524,6 @@ doc>
                                            ',x ,file)
                                     (apply ,x ,args))))))
               symbols))))
-
-
-#|
-<doc EXT syntax-autoload
- * (syntax-autoload file symbol ...)
- *
- * TODO
- *
-doc>
-|#
-(define-macro (syntax-autoload file . symbols)
-  `(autoload-add-syntax ,file ',symbols))
 
 
 )

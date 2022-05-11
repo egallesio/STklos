@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  8-May-2022 18:53 (eg)
+;;;; Last file update: 11-May-2022 14:31 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -95,13 +95,27 @@
 (include "./scheme/base.stk")
 (include "./scheme/write.stk")
 
+
+
+
+
+
 ;==============================================================================
+(define-macro (trace . args)
+  (%trace-expand args))
+
+(define-macro (untrace . args)
+  (%untrace-expand args))
+
+
+
+
 (autoload        "compfile"       compile-file)
 (autoload        "describe"       describe)
 (syntax-autoload "bigmatch"       match-case match-lambda)
 (autoload        "getopt"         %print-usage)
 (syntax-autoload "getopt"         parse-arguments)
-(syntax-autoload "trace"          trace untrace)
+(autoload        "trace"          %trace-expand %untrace-expand)
 (autoload        "pretty-print"   pp pretty-print)
 (autoload        "env"            null-environment scheme-report-environment
                                   interaction-environment)
