@@ -112,11 +112,11 @@ extern "C"
 #  define MUT_LOCK(lck)
 #  define MUT_UNLOCK(lck)
 #else
-#  define MUT_DECL(lck)    static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER;
+#  define MUT_DECL(lck)    static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER
 #  define MUT_FIELD(lck)   pthread_mutex_t lck
-#  define MUT_INIT(lck)    { pthread_mutex_init(&lck, NULL); }
-#  define MUT_LOCK(lck)    { pthread_mutex_lock(&lck); }
-#  define MUT_UNLOCK(lck)  { pthread_mutex_unlock(&lck); }
+#  define MUT_INIT(lck)    pthread_mutex_init(&lck, NULL)
+#  define MUT_LOCK(lck)    pthread_mutex_lock(&lck)
+#  define MUT_UNLOCK(lck)  pthread_mutex_unlock(&lck)
 #endif
 
 /*===========================================================================*\
@@ -229,23 +229,23 @@ typedef struct {
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
-#define NEWCELL(_var, _type)    {                                               \
+#define NEWCELL(_var, _type)    do{                                               \
         _var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));    \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                              \
         BOXED_INFO(_var) = 0;                                                   \
-        }
+        }while(0)
 
-#define NEWCELL_WITH_LEN(_var, _type, _len)     {       \
+#define NEWCELL_WITH_LEN(_var, _type, _len)     do{       \
         _var = (SCM) STk_must_malloc(_len);             \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
-        }
+        }while(0)
 
-#define NEWCELL_ATOMIC(_var, _type, _len)       {       \
+#define NEWCELL_ATOMIC(_var, _type, _len)       do{       \
         _var = (SCM) STk_must_malloc_atomic(_len);      \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
-        }
+        }while(0)
 
   /*
    * PRIMITIVES
