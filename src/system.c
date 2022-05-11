@@ -1249,7 +1249,7 @@ DEFINE_PRIMITIVE("create-temp-directory", create_tmp_dir, subr01, (SCM arg))
  * @end lisp
 doc>
 */
-MUT_DECL(at_exit_mutex)         /* The exit mutex */
+MUT_DECL(at_exit_mutex);         /* The exit mutex */
 
 DEFINE_PRIMITIVE("register-exit-function!", at_exit, subr1, (SCM proc))
 {

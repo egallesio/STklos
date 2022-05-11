@@ -263,7 +263,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 static SCM** checked_globals;
 static int   checked_globals_len  = CHECK_GLOBAL_INIT_SIZE;
 static int   checked_globals_used = 0;
-MUT_DECL(global_lock)          /* the lock to access checked_globals */
+MUT_DECL(global_lock);          /* the lock to access checked_globals */
 
 
 
