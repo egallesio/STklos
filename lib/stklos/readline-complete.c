@@ -49,7 +49,7 @@ generator(const char *text, int state) {
 			MAKE_BOOLEAN(state));
     if (s == STk_nil) return NULL;
     size_t size = STRING_SIZE(s);
-    char *res = malloc(size+1);
+    char *res = STk_must_malloc(size+1);
     strncpy(res,STRING_CHARS(s), size);
     res[size]=0;
     return res;
