@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 11-May-2022 16:07 (eg)
+;;;; Last file update: 11-May-2022 18:53 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -127,7 +127,6 @@
                                   interaction-environment)
 (autoload        "help"           help)
 (autoload        "lex-rt"         lexer-next-token)
-
 (autoload        "srfi/27"        random-integer random-real)
 (autoload        "srfi/48"        srfi48:help srfi48:format-fixed)
 

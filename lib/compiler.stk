@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  1-May-2022 19:44 (eg)
+;;;; Last file update: 11-May-2022 19:03 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1627,19 +1627,6 @@ doc>
   (parameterize ((read-case-sensitive #f))
     (for-each %include-file (cdr e))))
 
-;;
-;; Autoloads management
-;;
-(define (compiler-maybe-do-autoload symb)
-  (let ((file (autoload-file symb)))
-    (when file
-      ;; Do the autoload
-      (let ((old-code *code-instr*)
-            (old-cst  *code-constants*))
-        (remove-autoload! symb)
-        (require file)
-        (set! *code-instr* old-code)
-        (set! *code-constants* old-cst)))))
 
 ;;;;======================================================================
 ;;;;
@@ -1809,7 +1796,6 @@ doc>
    ;; ---- We have a pair
    ((pair? e)
     (let ((first (car e)))
-      (compiler-maybe-do-autoload first)
       (if (syntax-in-env? first env)
           (let ()
             ;; XXXX (%debug "On a un appel de defmacro ~S ~S" first e)
@@ -1850,7 +1836,6 @@ doc>
 
    ;; ---- We have a symbol
    ((symbol? e)
-    (compiler-maybe-do-autoload e)
     (compile-reference e env epair tail?))
 
    ;; Self evaluating object

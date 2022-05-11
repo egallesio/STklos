@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 11-May-2022 14:25 (eg)
+;;;; Last file update: 11-May-2022 19:01 (eg)
 ;;;;
 
 (define-module SCHEME
@@ -33,7 +33,7 @@
           warning-when-not-provided
           require-library require-for-syntax
           include include-ci include-file
-          autoload-add-syntax autoload-file remove-autoload! autoload syntax-autoload
+          autoload
 
           ;; FIXME
           %stklos-conf-dir
