@@ -129,7 +129,7 @@ extern "C"
    * functions of the GC used in the interpreter must be declared here since
    * the file <gc.h> is not included in the source file in order to simplify
    * header file management (i.e. only this header file is necessary to use
-   * the stklos library.
+   * the stklos library)).
    * Don't use the functions GC_* they can be changed. The only allocation
    * functions that must be used are functions of the form STk_*
    */
@@ -614,7 +614,7 @@ int STk_init_fixnum(void);
 */
 struct keyword_obj {
   stk_header header;
-  char *pname;                  /* must be at the same offset than for symbols */
+  char *pname;                  /* must be at the same offset as for symbols */
 };
 
 #define KEYWORD_PNAME(p)        (((struct keyword_obj *) (p))->pname)
@@ -905,7 +905,7 @@ SCM STk_resolve_link(char *path, int count);
   ------------------------------------------------------------------------------
 */
 
-  /* Code for port is splitted in several files:
+  /* Code for port is split in several files:
    *    - s contains the low level IO functions which mimic the C IO. All
    *      these functions take Scheme ports as parameter instead of FILE *
    *    - fport.c contains the specific code for port associated to files
@@ -1267,7 +1267,7 @@ int STk_init_struct(void);
   ------------------------------------------------------------------------------
 */
 struct symbol_obj {
-  stk_header header;    /* must be at the same offset than for keywords */
+  stk_header header;    /* must be at the same offset as for keywords */
   char *pname;
 };
 

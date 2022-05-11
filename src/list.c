@@ -747,7 +747,7 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
  * |Filter| returns all the elements of |list| that satisfy predicate
  * |pred|. The |list| is not disordered: elements that appear in the
  * result list occur in the same order as they occur in the argument
- * list. |Filter!| does the same job than |filter| by physically
+ * list. |Filter!| does the same job as |filter| by physically
  * modifying its |list| argument
  * @lisp
  * (filter even? '(0 7 8 8 43 -4)) => (0 8 8 -4)
@@ -915,7 +915,7 @@ SCM STk_dremq(SCM obj, SCM list)
 
 /*
  *
- * Fast version of assq; for internal use only (alist must be well formed)
+ * Fast version of assq; for internal use only (alist must be well-formed)
  *
  */
 SCM STk_int_assq(SCM obj, SCM alist)

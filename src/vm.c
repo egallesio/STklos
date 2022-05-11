@@ -157,7 +157,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 
 #define ACT_RECORD_SIZE    7
 
-#define ACT_VARARG(reg)    ((reg)[0]) /* place holder for &rest parameters */
+#define ACT_VARARG(reg)    ((reg)[0]) /* placeholder for &rest parameters */
 #define ACT_SAVE_ENV(reg)  ((reg)[1])
 #define ACT_SAVE_PC(reg)   ((reg)[2])
 #define ACT_SAVE_CST(reg)  ((reg)[3])
@@ -468,7 +468,7 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
  *                              S T k _ C _ a p p l y
  *
  *
- * Execute a Scheme function from C. This function can be used as a
+ * Execute a Scheme function from C. This function can be used as
  * an "excv" or an "execl" function. If nargs is > 0 it is as a Unix "execl"
  * function:
  *    STk_C_apply(STk_cons, 2, MAKE_INT(1), MAKE_INT(2)) => (1 . 2)
@@ -569,7 +569,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
- * ,(bold "Note:") R5RS imposes to use multiple values in the context of
+ * ,(bold "Note:") R5RS imposes to use multiple values in the context
  * of a |call-with-values|. In STklos, if |values| is not used with
  * |call-with-values|, only the first value is used (i.e. others values are
  * ,(emph "ignored")).
@@ -613,7 +613,7 @@ DEFINE_PRIMITIVE("%call-for-values", call_for_values, subr1, (SCM prod))
   len = vm->valc;
   vm->valc = 1;
 
-  /* We don't use use STk_values2vector here since we will call apply with the
+  /* We don't use STk_values2vector here since we will call apply with the
    * values produced by "prod" ⟹ buil a list here. There are too much allocation
    * here :-(
    */
@@ -1784,7 +1784,7 @@ FUNCALL:  /* (int nargs, int tailp) */
         }
       }
 
-      /* Now we can call call "func" with "nargs" arguments */
+      /* Now we can call "func" with "nargs" arguments */
       vm->val = func;
       goto FUNCALL;
     }
@@ -1895,7 +1895,7 @@ void STk_raise_exception(SCM cond)
   vm->val = STk_C_apply(proc, 1, cond);
 
   /*
-   * Return in the good "run_vm" incarnation
+   * Return to the good "run_vm" incarnation
    */
   MY_LONGJMP(*(vm->top_jmp_buf), 1);
 }

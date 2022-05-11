@@ -35,7 +35,7 @@
 
 #define STK_IOFBF   (1 << 0) /* Full buffered*/
 #define STK_IOLBF   (1 << 1) /* Line buffered */
-#define STK_IONBF   (1 << 2) /* No buffered (unused for now) */
+#define STK_IONBF   (1 << 2) /* Non buffered (unused for now) */
 #define STK_IOEOF   (1 << 3) /* EOF encountered on this file */
 #define STK_IOREAD  (1 << 4) /* File is opened in read */
 

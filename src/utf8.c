@@ -80,7 +80,7 @@ int STk_utf8_read_char(SCM port)
   int c = STk_getc(port);
 
   if (STk_use_utf8 && (c >= 0x80)) {
-    /* Read an UTF-8 character */
+    /* Read a UTF-8 character */
     if ((c < 0xc0) || (c > 0xf7))
       return UTF8_INCORRECT_SEQUENCE;
     else if (c < 0xe0) {
@@ -143,7 +143,7 @@ int STk_utf8_char_bytes_needed(unsigned int ch)
 
 int STk_utf8_sequence_length(char *str)
 {
-  /* return length of a the UTF-8 sequence starting at given address */
+  /* return length of the UTF-8 sequence starting at given address */
   uint8_t c = *((uint8_t *) str);
 
   if (c < 0x80)                         return 1;

@@ -211,8 +211,8 @@ DEFINE_PRIMITIVE("%initialize-getopt", init_getopt, subr3, (SCM argv, SCM s, SCM
   int i, len;
 
   STk_start_getopt_from_scheme();
-  optind = 1;    /* Initialize optind, since it has already be used
-                  * by ouserlves  before initializing the VM.
+  optind = 1;    /* Initialize optind, since it has already been used
+                  * by ourselves before initializing the VM.
                   */
 
   /*
@@ -313,7 +313,7 @@ static char URI_regexp[] =
 <doc EXT uri-parse
  * (uri-parse str)
  *
- * Parses the string |str| as a RFC-2396 URI and return a keyed list with the
+ * Parses the string |str| as an RFC-2396 URI and return a keyed list with the
  * following components
  *
  * - |scheme| : the scheme used as a string (defaults to |"file"|)
@@ -384,7 +384,7 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
     for (start = url; *url && *url != '/' && *url != '@'; url++) {
     }
     if (*url == '@') {
-      /* We have an user */
+      /* We have a user */
       user = STk_makestring(url-start, start);
       /* read the host now */
       for (start = ++url; *url && *url != '/' && *url != ':'; url++) {
@@ -461,7 +461,7 @@ Error:
  * (string->html str)
  *
  * This primitive is a convenience function; it returns a string where
- * the HTML special chars are properly translated. It can easily written
+ * the HTML special chars are properly translated. It can easily be written
  * in Scheme, but this version is fast.
  * @lisp
  * (string->html "Just a <test>")

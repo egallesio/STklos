@@ -79,7 +79,7 @@ static unsigned long hash_string(register char *string)
    *    and multiplying by 9 is just about as good.
    * 2. Times-9 is (shift-left-3) plus (old).  This means that each
    *    character's bits hang around in the low-order bits of the
-   *    hash value for ever, plus they spread fairly rapidly up to
+   *    hash value forever, plus they spread fairly rapidly up to
    *    the high-order bits to fill out the hash value.  This seems
    *    works well both for decimal and non-decimal strings.
    */
@@ -140,8 +140,8 @@ static unsigned long sxhash(SCM obj)
                         return h;
     default:            /* A complex type (STklos object, user defined type,
                          * hashtable...). In this case we return the type of the
-                         * object. This is very  inneficient but it should be
-                         * rare to use a  structured object as a key.
+                         * object. This is very inefficient, but it should be
+                         * rare to use a structured object as a key.
                          */
                          return (unsigned long) BOXED_TYPE(obj);
   }
@@ -225,7 +225,7 @@ static void enlarge_table(register struct hash_table_obj *h)
     HASH_BUCKETS(h)[i] = STk_nil;
   }
 
-  /*  Rehash all of the existing entries into the new bucket array. */
+  /*  Rehash all the existing entries into the new bucket array. */
   for (i = 0; i < old_size; i++) {
     for (tmp = old_buckets[i]; !NULLP(tmp); tmp = CDR(tmp)) {
       switch (BOXED_INFO(h)) {
@@ -333,7 +333,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, SCM (*create) (cha
 
 /*===========================================================================*\
  *
- *             v a r i a b l e s    h a s h t a b l e   f u n t i o n s
+ *             v a r i a b l e s    h a s h t a b l e   f u n c t i o n s
  *
  *
  * Here variable are the variables defined in a module. Keys are symbols.
@@ -869,12 +869,12 @@ DEFINE_PRIMITIVE("hash-table-map", hash_map, subr2, (SCM ht, SCM proc))
  * (hash-table-hash obj)
  *
  * Computes a hash code for an object and returns this hash code as a
- * non negative integer. A property of |hash-table-hash| is that
+ * non-negative integer. A property of |hash-table-hash| is that
  * @lisp
  * (equal? x y) => (equal? (hash-table-hash x) (hash-table-hash y)
  * @end lisp
  *
- * as the the Common Lisp |sxhash| function from which this procedure is
+ * as the Common Lisp |sxhash| function from which this procedure is
  * modeled.
 doc>
 */

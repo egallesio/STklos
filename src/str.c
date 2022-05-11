@@ -787,7 +787,7 @@ int get_substring_size(SCM string, long from, long to) {
  * Replaces the characters of the variable-size string dst (between
  * dst-start and dst-end) with the characters of the string src
  * (between src-start and src-end). The number of characters from src
- * may be different than the number replaced in dst, so the string may
+ * may be different from the number replaced in dst, so the string may
  * grow or contract. The special case where dst-start is equal to
  * dst-end corresponds to insertion; the case where src-start is equal
  * to src-end corresponds to deletion. The order in which characters
@@ -795,7 +795,7 @@ int get_substring_size(SCM string, long from, long to) {
  * destination overlap, copying takes place as if the source is first
  * copied into a temporary string and then into the destination.
  * Returns string, appended with the characters form the concatenation
- * of the given arguments, which can be wither strings or characters.
+ * of the given arguments, which can be either strings or characters.
  *
  * It is guaranteed that string-replace! will return the same object that
  * was passed to it as first argument, whose size may be larger.
@@ -1302,7 +1302,7 @@ static SCM string_dxxcase(int argc, SCM *argv,
       copy_array(wchars, end-start, startp);
     }
     else {
-      /* This code is inefficient, but it seems that that the converted case
+      /* This code is inefficient, but it seems that the converted case
          character always use the same length encoding. It is likely that this
          code is never used in practice
       */

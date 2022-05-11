@@ -62,7 +62,7 @@ struct process_obj {
   SCM streams[3];               /* standard ports for the process */
   int exited;                   /* Process is terminated */
   int exit_status;              /* Exit status of the processus */
-  int waited_on;                /* non zero if the process is being
+  int waited_on;                /* non-zero if the process is being
                                    waited on by a waitpid(..,..,0) */
 };
 
@@ -131,7 +131,7 @@ static void process_terminate_handler(int _UNUSED(sig)) /* called when a child d
   /* Delete the processes which are not alive from the global list
    * This loop may delete nobody if this the process has been deleted
    * before (a previous call to this function may have deleted more than
-   * one process.
+   * one process).
    * Note: No assumption is made on the process which has terminated;
    * we act blindly here since it does not seem that there is a POSIX way
    * to find the id of the process which died.
@@ -398,12 +398,12 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
  * call which permits to create a new (heavy) process.
  * When called without parameter, this procedure returns two times
  * (one time in the parent process and one time in the child process).
- * The value returned in the parent process is a process object
- * representing the child process and the value returned in the child
+ * The value returned to the parent process is a process object
+ * representing the child process and the value returned to the child
  * process is always the value |#f|.
  * When called with a parameter (which must be a thunk), the new process
  * excutes |thunk| and terminate it execution when |thunk| returns. The
- * value returned in the parent process is a process object representing
+ * value returned to the parent process is a process object representing
  * the child process.
 doc>
 */

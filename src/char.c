@@ -192,7 +192,7 @@ int STk_string2char(char *s)
   register struct charelem *p;
   uint32_t val;
 
-  /* Try to see if it is a multi-byte character */
+  /* Try to see if it is a multibyte character */
   if (* (STk_utf8_grab_char(s, &val)) == '\0') return val;
 
   if (*s == 'x') {
@@ -433,8 +433,8 @@ DEFINE_PRIMITIVE("digit-value", digit_value, subr1, (SCM c))
  *            (integer->char y))     =>  #t
  * @end lisp
  * |integer->char| accepts an exact number between 0 and #xD7FFF or between
- * #xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise it accepts a
- * number between0 and #xFF.
+ * #xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise, it accepts a
+ * number between 0 and #xFF.
 doc>
  */
 DEFINE_PRIMITIVE("char->integer", char2integer, subr1, (SCM c))

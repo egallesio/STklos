@@ -231,7 +231,7 @@ static int vport_puts(char *s, void *stream)
  * Returns a virtual port using the |read-char| procedure to read a
  * character from the port, |ready?| to know if there is any data to
  * read from the port, |eof?| to know if the end of file is reached
- * on the port and finally |close| to close the port. All theses
+ * on the port and finally |close| to close the port. All these
  * procedure takes one parameter which is the port from which the input
  * takes place.  |Open-input-virtual| accepts also the special value
  * |#f| for the I/O procedures with the following conventions:
@@ -319,7 +319,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  * for the I/O procedures. If a procedure is |#f| nothing is done
  * on the corresponding action.
  *
- * Hereafter is an (very inefficient) implementation of a variant of
+ * Hereafter is a (very inefficient) implementation of a variant of
  * |open-output-string| using virtual ports. The value of the output
  * string is printed when the port is closed:
  * @lisp

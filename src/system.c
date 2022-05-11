@@ -1093,7 +1093,7 @@ DEFINE_PRIMITIVE("directory-files", directory_files, subr12, (SCM dirname, SCM d
   if (!dir) STk_error_posix(errno, "", dirname, NULL);
 
   /* readdir and closedir can yield an error (EBADF) only on  when dir is incorrect
-   * This cannot occurs here since we have tested that opendir result is OK.
+   * This cannot occur here since we have tested that opendir result is OK.
    */
   for (d = readdir(dir); d ; d = readdir(dir)) {
     if (d->d_name[0] == '.') {
@@ -1304,7 +1304,7 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
     }
   }
 
-  /* Raise a &exit-r7rs condition  with the numeric value of the exit code*/
+  /* Raise an &exit-r7rs condition  with the numeric value of the exit code*/
   cond = STk_make_C_cond(STk_exit_condition, 1, MAKE_INT(ret));
   STk_raise(cond);
 

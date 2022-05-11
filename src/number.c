@@ -182,7 +182,7 @@ static double make_nan(int neg, int quiet, unsigned long pay)
    * BUT
    *   +inf.0          is 0x7ff0000000000000
    * Consequently, clearing bit 51 is not sufficient (if the payload is 0, a
-   * signaling dille be seen as a positive infinity.
+   * signaling dille be seen as a positive infinity).
    * So, to make a signaling NaN, we clear the bit 51 and set the bit 50
    * ==> the payload can use only 50 bits
    */
@@ -397,7 +397,7 @@ static Inline SCM double2real(double x)
   return z;
 }
 
-static SCM double2integer(double n)     /* small or big depending of n's size */
+static SCM double2integer(double n)     /* small or big depending on n's size */
 {
   unsigned int i, j;
   size_t size = 30;
@@ -1084,7 +1084,7 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
      * digits expressed in base 10) are not read as bignums.
      * This optimisation is easily missed (e.g. 000000000000000001 will be
      * read as a bignum), but it avoids allocation for current numbers
-     * represented in an usual form.
+     * represented in a usual form.
      */
     mpz_t n;
 
@@ -1262,8 +1262,8 @@ SCM STk_Cstr2number(char *str, long base)
  * These numerical type predicates can be applied to any kind of
  * argument, including non-numbers. They return |#t| if the object is of
  * the named type, and otherwise they return |#f|. In general, if a type
- * predicate is true of a number then all higher type predicates are
- * also true of that number. Consequently, if a type predicate is
+ * predicate is true for a number then all higher type predicates are
+ * also true for that number. Consequently, if a type predicate is
  * false of a number, then all lower type predicates are also false of
  * that number.
  *
@@ -3349,7 +3349,7 @@ int STk_init_number(void)
                           reallocate_function,
                           deallocate_function);
 
-  /* register the extended types types for numbers */
+  /* register the extended types for numbers */
   DEFINE_XTYPE(bignum,   &xtype_bignum);
   DEFINE_XTYPE(rational, &xtype_rational);
   DEFINE_XTYPE(complex,  &xtype_complex);

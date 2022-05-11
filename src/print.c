@@ -157,7 +157,7 @@ static void printstring(SCM s, SCM port, int mode)
                       if (printable)
                         *buff++ = *p;
                       else {
-                        /* Non printable char. (It works only for char < 0xFF !!) */
+                        /* Non-printable char. (It works only for char < 0xFF !!) */
                         *buff++ = '\\';
                         *buff++ = 'x';
                         *buff++ = printhexa((unsigned char) *p / 16);

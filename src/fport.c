@@ -166,7 +166,7 @@ void STk_close_all_ports(void)
   }
   MUT_UNLOCK(all_fports_mutex);
 
-  /* Finally close error and output port (must be done last) */
+  /* Finally, close error and output port (must be done last) */
   STk_close(eport);
   STk_close(oport);
 }
@@ -460,7 +460,7 @@ make_fport(char *fname, int fd, int flags)
   /* keep the indication that file is opened in read in the stream part */
   if (flags & (PORT_READ | PORT_RW)) mode |= STK_IOREAD;
 
-  /* Set the case sensitive bit */
+  /* Set the case-sensitive bit */
   if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
 
   /* Initialize the stream part */
