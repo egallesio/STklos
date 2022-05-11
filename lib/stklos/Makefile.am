@@ -38,9 +38,9 @@ SRC_OSTK = preproc.ostk
 #
 # Libraries written in C and Scheme
 #
-SRC_C     = itrie.c
-SRC_C_STK = itrie.stk
-SRC_SHOBJ = itrie.$(SO)
+SRC_C     = itrie.c     readline-complete.c
+SRC_C_STK = itrie.stk   readline-complete.stk
+SRC_SHOBJ = itrie.$(SO) readline-complete.$(SO)
 
 scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -72,6 +72,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # Dependencies
 
 itrie.$(SO): itrie-incl.c itrie.c
+readline-complete.$(SO): readline-complete-incl.c readline-complete.c
 
 # ======================================================================
 install-sources:
