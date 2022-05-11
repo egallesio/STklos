@@ -112,6 +112,9 @@ doc>
 ;; init-readline-completion-function actually tells readline to start
 ;; doing tab completion, and passes our completion function to it.
 (define (init-readline-completion-function)
+  (unless (eq? (key-get *%system-state-plist* :readline 'no-readline)
+               'readline)
+    (error "readline completion requested, but readline not installed")
   (%init-readline-completion-function readline-completion-generator))
 
 (provide "stklos/readline-complete")
