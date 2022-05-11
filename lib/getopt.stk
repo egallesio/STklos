@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Oct-2001 08:40 (eg)
-;;;; Last file update: 11-May-2022 14:35 (eg)
+;;;; Last file update: 11-May-2022 15:19 (eg)
 ;;;;
 
 ;;;;
@@ -383,7 +383,7 @@ doc>
                              (cdr x))
                            '(void)))))))))))
 
-(define-macro (parse-arguments argv . clauses)
-  (%parse-arguments-expand argv clauses))
+;(define-macro (parse-arguments argv . clauses)
+;  (%parse-arguments-expand argv clauses))
 
 (provide "getopt")

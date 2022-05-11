@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 11-May-2022 14:31 (eg)
+;;;; Last file update: 11-May-2022 15:17 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -107,14 +107,16 @@
 (define-macro (untrace . args)
   (%untrace-expand args))
 
+(define-macro (parse-arguments argv . clauses)
+  (%parse-arguments-expand argv clauses))
 
 
 
 (autoload        "compfile"       compile-file)
 (autoload        "describe"       describe)
 (syntax-autoload "bigmatch"       match-case match-lambda)
-(autoload        "getopt"         %print-usage)
-(syntax-autoload "getopt"         parse-arguments)
+(autoload        "getopt"         %parse-arguments-expand %print-usage)
+;(syntax-autoload "getopt"         parse-arguments)
 (autoload        "trace"          %trace-expand %untrace-expand)
 (autoload        "pretty-print"   pp pretty-print)
 (autoload        "env"            null-environment scheme-report-environment
