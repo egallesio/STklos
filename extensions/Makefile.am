@@ -17,9 +17,9 @@ all:
 	@echo "***"
 
 clean-am:
-	for d in $(subdirs) ;do (cd $$d; make $@) ;done
+	for d in $(subdirs) ;do (cd $$d; $(MAKE) $@) ;done
 	rm -f *~
 
 distclean-am:
-	for d in $(subdirs) ;do (cd $$d; make $@) ;done
+	for d in $(subdirs) ;do (cd $$d; $(MAKE) $@) ;done
 	rm -f Makefile
