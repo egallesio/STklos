@@ -113,7 +113,7 @@ doc>
 (define (init-readline-completion-function)
   (unless (eq? (key-get *%system-state-plist* :readline 'no-readline)
                'readline)
-    (error "readline completion requested, but readline not installed")
+    (error "readline completion requested, but readline not installed"))
   (%init-readline-completion-function readline-completion-generator))
 
 (provide "stklos/readline-complete")
