@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  8-May-2022 17:09 (eg)
+ * Last file update: 12-May-2022 15:32 (eg)
  */
 
 #include "stklos.h"
@@ -569,7 +569,6 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
   // This function is called to populate the SCHEME module with all the
   // symbols defined in STklos module. This permits to have a copy of the
   // original bindings that can reliably be used by the runtime.
-  // NOTE: the bindings in the SCHEME module are immutable.
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module));
        !NULLP(lst);
        lst = CDR(lst)) {
@@ -577,13 +576,7 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
 
     /* Redefine symbol in (car lst) in SCHEME module */
     STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
-
-//    /* Make this variable constant */
-//    res = STk_hash_get_variable(&MODULE_HASH_TABLE(Scheme_module), CAR(lst));
-//    BOXED_INFO(res) |= CONS_CONST;
   }
-  /* Lock the module */
-//  BOXED_INFO(Scheme_module) |= MODULE_LOCKED;
   return STk_void;
 }
 

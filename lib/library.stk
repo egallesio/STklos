@@ -22,22 +22,15 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  6-May-2022 20:46 (eg)
+;;;; Last file update: 12-May-2022 15:54 (eg)
 ;;;;
 
-;;
-;; Define common standard libraries to minimize files accesses at runtime
-;;
-;(include "./scheme/base.stk")
-;(include "./scheme/write.stk")
 
-
-(define-module SCHEME
-  (export define-library library-name
-          ;; FIXME
-          %library-name->symbol
-          %symbol->library-name
-          %module-define-and-export)
+(export define-library library-name
+        ;; FIXME
+        %library-name->symbol
+        %symbol->library-name
+        %module-define-and-export)
 
 ;;
 ;; library name conversion functions
@@ -167,5 +160,3 @@ doc>
   (let ((name (module-name lib)))
     (and (not (eq? name #void))
          (%symbol->library-name (module-name lib)))))
-
-)

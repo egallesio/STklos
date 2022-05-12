@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Oct-2009 23:46 (eg)
-;;;; Last file update:  6-May-2022 16:45 (eg)
+;;;; Last file update: 12-May-2022 15:50 (eg)
 ;;;;
 
 ;;;; This implementation is an adaptation of the code given in the reference
@@ -47,8 +47,8 @@
 ;promotional, or sales literature without prior written consent in
 ;each case.
 
-(define-module SCHEME
-  (export bit-and bit-or bit-xor bit-not bit-shift)
+(export bit-and bit-or bit-xor bit-not bit-shift)
+
 
 #|
 <doc EXT bit-and bit-or bit-xor bit-not bit-shift
@@ -210,5 +210,3 @@ doc>
             (+ -1 (quotient (+ 1 n) k))
             (quotient n k)))
       (* (expt 2 m) n)))
-
-)

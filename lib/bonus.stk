@@ -20,67 +20,67 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  6-May-2022 15:09 (eg)
+;;;; Last file update: 12-May-2022 15:44 (eg)
 ;;;;
 
 
-(define-module SCHEME
-  (export read-chars read-chars! display-shared gensym
-          macro-expand macro-expand*
-          remove remove! delete delete!
-          every any
-          call-with-input-string call-with-output-string
-          open-input-virtual open-output-virtual
-          read-from-string eval-from-string
-          command-line program-name
-          create-directories ensure-directories-exist
-          posix-error? posix-error-name posix-error-message
-          posix-error-errno posix-error-procedure posix-error-arguments
-          make-hash-table hash-table->alist alist->hash-table
-          hash-table-update! hash-table-update!/default
-          hash-table-keys hash-table-values hash-table-fold
-          hash-table-merge! hash-table-copy
-          fluid-let time tagbody
-          dotimes repeat while until
-          call/ec
-          base64-encode-string base64-decode-string
-          md5sum-file
-          ansi-color ansi-color-protect do-color
-          port->string port->sexp-list port->string-list
-          print printerr eprintf printf fprintf
-          declare-new-error
-          exec exec-list
-          apropos die
-          decompose-file-name dirname basename file-separator
-          make-path file-suffix file-prefix
-          port-idle-register! port-idle-unregister! port-idle-reset!
-          chmod
-          with-mutex
-          error-object-location %push-id
-          define-constant
-          receive case-lambda
+(export read-chars read-chars! display-shared gensym
+        macro-expand macro-expand*
+        remove remove! delete delete!
+        every any
+        call-with-input-string call-with-output-string
+        open-input-virtual open-output-virtual
+        read-from-string eval-from-string
+        command-line program-name
+        create-directories ensure-directories-exist
+        posix-error? posix-error-name posix-error-message
+        posix-error-errno posix-error-procedure posix-error-arguments
+        make-hash-table hash-table->alist alist->hash-table
+        hash-table-update! hash-table-update!/default
+        hash-table-keys hash-table-values hash-table-fold
+        hash-table-merge! hash-table-copy
+        fluid-let time tagbody
+        dotimes repeat while until
+        call/ec
+        base64-encode-string base64-decode-string
+        md5sum-file
+        ansi-color ansi-color-protect do-color
+        port->string port->sexp-list port->string-list
+        print printerr eprintf printf fprintf
+        declare-new-error
+        exec exec-list
+        apropos die
+        decompose-file-name dirname basename file-separator
+        make-path file-suffix file-prefix
+        port-idle-register! port-idle-unregister! port-idle-reset!
+        chmod
+        with-mutex
+        error-object-location %push-id
+        define-constant
+        receive case-lambda
 
-          %define-condition-type-accessors
-          message-condition? condition-message
-          serious-condition?
-          error?
-          error-message? error-location error-message
-          read-with-shared-structure read/ss
-          write-with-shared-structure write/ss
-          parameterize
-          require-extension
-          string->keyword
-          get-environment-variable get-environment-variables
-          implementation-name implementation-version cpu-architecture
-          machine-name os-name os-version
-          fx-width fx-greatest fx-least
-          assume
-          version-alist
-          port-has-port-position? port-position port-has-set-port-position!?
-          set-port-position!
-          make-i/o-invalid-position-error i/o-invalid-position-error?
-          command-name command-args argc script-file script-directory
-          make-nan)
+        %define-condition-type-accessors
+        message-condition? condition-message
+        serious-condition?
+        error?
+        error-message? error-location error-message
+        read-with-shared-structure read/ss
+        write-with-shared-structure write/ss
+        parameterize
+        require-extension
+        string->keyword
+        get-environment-variable get-environment-variables
+        implementation-name implementation-version cpu-architecture
+        machine-name os-name os-version
+        fx-width fx-greatest fx-least
+        assume
+        version-alist
+        port-has-port-position? port-position port-has-set-port-position!?
+        set-port-position!
+        make-i/o-invalid-position-error i/o-invalid-position-error?
+        command-name command-args argc script-file script-directory
+        make-nan)
+
 
 ;;;; Deprecated names
 (define read-chars read-bytes)
@@ -2421,8 +2421,5 @@ doc>
  * @end lisp
 doc>
 |#
-
-) ;; End of module SCHEME
-
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg

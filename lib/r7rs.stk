@@ -21,49 +21,48 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  6-May-2022 18:11 (eg)
+;;;; Last file update: 12-May-2022 15:52 (eg)
 ;;;;
 
 
-(define-module SCHEME
-  (export write-shared write-simple
-          letrec* let-values let*-values
-          delay delay-force lazy make-promise eager
-          define-values
-          equal-simple?
-          exact-integer?
-          floor-quotient floor/ truncate/ truncate-quotient
-          truncate-remainder floor-remainder
-          square exact-integer-sqrt exact inexact
-          boolean=?
-          make-list member-simple assoc-simple member assoc
-          symbol=?
-          string=?     %string2=?
-          string<?     %string2<?
-          string<=?    %string2<=?
-          string>?     %string2>?
-          string>=?    %string2>=?
-          string-ci=?  %string-ci2=?
-          string-ci<?  %string-ci2<?
-          string-ci<=? %string-ci2<=?
-          string-ci>?  %string-ci2>?
-          string-ci>=? %string-ci2>=?
-          string->list string-copy!
-          string-fill! %string-fill2!
-          vector->list vector-copy! vector->string string->vector
-          make-bytevector bytevector? bytevector bytevector-length
-          bytevector-u8-ref bytevector-u8-set! bytevector-copy!
-          string-map vector-map
-          string-for-each vector-for-each
-          error-object? error-object-message error-object-irritants
-          read-error? file-error?
-          call-with-port input-port-open? output-port-open?
-          read-string read-u8 peek-u8 read-bytevector!
-          write-string write-u8 write-bytevector
-          with-exception-handler raise-continuable guard
-          current-jiffy jiffies-per-second features
-          %continuable-exception?  %continuable-exception-value;; FIXME
-          )
+(export write-shared write-simple
+        letrec* let-values let*-values
+        delay delay-force lazy make-promise eager
+        define-values
+        equal-simple?
+        exact-integer?
+        floor-quotient floor/ truncate/ truncate-quotient
+        truncate-remainder floor-remainder
+        square exact-integer-sqrt exact inexact
+        boolean=?
+        make-list member-simple assoc-simple member assoc
+        symbol=?
+        string=?     %string2=?
+        string<?     %string2<?
+        string<=?    %string2<=?
+        string>?     %string2>?
+        string>=?    %string2>=?
+        string-ci=?  %string-ci2=?
+        string-ci<?  %string-ci2<?
+        string-ci<=? %string-ci2<=?
+        string-ci>?  %string-ci2>?
+        string-ci>=? %string-ci2>=?
+        string->list string-copy!
+        string-fill! %string-fill2!
+        vector->list vector-copy! vector->string string->vector
+        make-bytevector bytevector? bytevector bytevector-length
+        bytevector-u8-ref bytevector-u8-set! bytevector-copy!
+        string-map vector-map
+        string-for-each vector-for-each
+        error-object? error-object-message error-object-irritants
+        read-error? file-error?
+        call-with-port input-port-open? output-port-open?
+        read-string read-u8 peek-u8 read-bytevector!
+        write-string write-u8 write-bytevector
+        with-exception-handler raise-continuable guard
+        current-jiffy jiffies-per-second features
+        %continuable-exception?  %continuable-exception-value;; FIXME
+        )
 
 
 ;;;; Aliases
@@ -1594,4 +1593,3 @@ doc>
                     ((pair? (car x)) (car x))
                     (else            (list (car x)))))
                 all))))
-)
