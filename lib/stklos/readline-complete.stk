@@ -84,7 +84,6 @@ doc>
           (let ((match (lambda (s)
                          (and (>= (string-length s) size)
                           (string=? str (substring s 0 size))))))
-            ;;(write (format #f "str [~a] res ~a~%" str (filter match symbols)) (current-error-port))
             (filter match symbols))))))
 
 ;; readline-completion-generator is a generator of string completions.
