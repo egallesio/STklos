@@ -74,6 +74,18 @@ case $os in
           SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS="-rdynamic"
       ;;
+  OpenBSD*)
+      case $machine in
+        i*86) machine=ix86;;
+      esac
+      OS=OPENBSD
+      SH_COMP_FLAGS='-fpic'
+      SH_LOAD_FLAGS='-shared -o'
+      SH_LOADER="$LD"
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
+      SH_MAIN_LOAD_FLAGS="-rdynamic"
+      ;;
   HP*)
           OS=HPUX
           SH_COMP_FLAGS="+Z"
