@@ -138,17 +138,21 @@ void STk_srfi_144_define_constants(SCM module) {
 
    DBL_MIN:
    [ 0 | 00000000001 | 0000000000000000000000000000000000000000000000000000 ]
-   DBL_MIN / 2:
-   [ 0 | 00000000000 | 1000000000000000000000000000000000000000000000000000 ]
-   DBL_MIN / 4:
-   [ 0 | 00000000000 | 0100000000000000000000000000000000000000000000000000 ]
    Signal = 0, Exponent = 1, Mantissa = 0.
+
+   DBL_MIN / 2.0:
+   [ 0 | 00000000000 | 1000000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 0, Mantissa = 2^52.
+
+   DBL_MIN / 4.0:
+   [ 0 | 00000000000 | 0100000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 0, Mantissa = 2^51.
    
    DBL_TRUE_MIN:
    [ 0 | 00000000000 | 0000000000000000000000000000000000000000000000000001 ]
    Signal = 0, Exponent = 0, Mantissa = 1.
 
-   Each time we divide DBL_MIN by 2, we do a right shift on the number.
+   Each time we divide DBL_MIN by 2.0, we do a right shift on the number.
    Eventually, it will become zero.
 
    Note that the first time that DBL_MIN is divided by zero already results in
