@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 12-May-2022 18:24 (eg)
+;;;; Last file update: 13-May-2022 14:49 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -30,13 +30,9 @@
 ;; Following code is in the STklos module and is needed to ensure STklos
 :; bootstap
 ;;
-
 (include "runtime.stk")         ; Definitions necessary for the bootstrap
 (include "runtime-macros.stk")  ; Macros necessary for the bootstrap
 (include "module.stk")          ; All the macros for defining modules
-(include "compiler.stk")        ; VM Compiler
-(import STKLOS-COMPILER)        ; mainly for "eval"
-
 
 ;; ----------------------------------------------------------------------
 ;;      SCHEME Module
@@ -54,6 +50,9 @@
 (%populate-scheme-module)
 (%module-exports-set! (find-module 'SCHEME)
                       (module-exports (find-module 'STklos)))
+
+;; NOTE: This include MUST be done early (and not earlier). See why.
+(include "compiler.stk")        ; VM Compiler (this include MUST be done early)
 
 
 (define-module SCHEME
@@ -93,11 +92,11 @@
 ;;
 (import STKLOS-OBJECT MBE SRFI-0 REPL REPL-READLINE)
 
-
 ;;
 ;; Add all the exported bindings in SCHEME module to STklos. Don't use import
 ;; here, since import makes new bindings read-only (and we want that bindings
 ;; in STklos can be broken if needed).
+;;
 (let ((STklos (find-module 'STklos))
       (SCHEME (find-module 'SCHEME)))
   (for-each (lambda(x)
@@ -111,12 +110,11 @@
 (include "./scheme/base.stk")
 (include "./scheme/write.stk")
 
-
 ;;
 ;; It's time to lock the SCHEME module, that is make bindings in it read-only
 ;; and forbid further definitions.
 (define-module SCHEME
-  (import STKLOS-OBJECT MBE SRFI-0 REPL REPL-READLINE) ; as in STklos
+  (import STKLOS-COMPILER STKLOS-OBJECT MBE SRFI-0 REPL REPL-READLINE)
 
   ;; During he bootstap, the module SCHEME is present and all the definitions
   ;; made above (yes above!!), need an unlocked SCHEME module. So, the module
@@ -124,21 +122,18 @@
   ;; not defined)
   (unless (getenv "STKLOS_BUILDING")
     ;; We are not bootstapping
-    (module-lock! (find-module 'SCHEME))))
-
+    (module-lock! (current-module))))
 
 
 ;; ======================================================================
 ;;
-;; Define exception handlers, analyze options and eventually launch REPL
+;; Define exception handlers, analyze options
 ;;
-;; ======================================================================
-
 ;; Execute the REPL only if a file was not given on the command line
-(define %before-exit-hook void)
+;; ======================================================================
 
-;; A main function which will probably overloaded by the user
-(define main void)
+(define %before-exit-hook void)
+(define main void) ;; A main function which will probably overloaded by the user
 
 ;; ----------------------------------------------------------------------
 ;;      %display-backtrace ...
