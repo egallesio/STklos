@@ -93,7 +93,7 @@ struct instance_obj {
  * of the closure which implement method body.
  */
 #define SET_NEXT_METHOD(closure, value) \
-		{FRAME_LOCAL(CLOSURE_ENV(closure),0) = (value);}
+		FRAME_LOCAL(CLOSURE_ENV(closure),0) = (value)
 
 EXTERN_PRIMITIVE("method?", methodp, subr1, (SCM obj));
 EXTERN_PRIMITIVE("generic?", genericp, subr1, (SCM obj));

@@ -1029,12 +1029,12 @@ DEFINE_PRIMITIVE("glob", glob, vsubr, (int argc, SCM *argv))
  * reasons. ,(index "remove-file")
 doc>
 */
-#define do_remove(filename)                             \
+#define do_remove(filename)                          do{\
   if (!STRINGP(filename)) error_bad_string(filename);   \
   if (remove(STRING_CHARS(filename)) != 0)              \
     STk_error_posix(errno, "", filename, NULL);       \
   return STk_void;                                      \
-
+}while(0)
 DEFINE_PRIMITIVE("delete-file", delete_file, subr1, (SCM filename))
 {
   do_remove(filename);

@@ -667,7 +667,7 @@ static type_cell convert(SCM *px, SCM *py)
     case tc_real:
             switch (TYPEOF(y)) {
               case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:    /*already done */ ;                      break;
+              case tc_real:    /*already done */                        break;
               case tc_rational: *py = rational2real(y);                 break;
               case tc_bignum:   *py = scheme_bignum2real(y);            break;
               case tc_integer:  *py = double2real((double) INT_VAL(y)); break;
@@ -678,7 +678,7 @@ static type_cell convert(SCM *px, SCM *py)
             switch (TYPEOF(y)) {
               case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));   break;
               case tc_real:     *px = rational2real(x);                break;
-              case tc_rational: /*already done */ ;                    break;
+              case tc_rational: /*already done */                      break;
               case tc_bignum:   /* no break */
               case tc_integer:  *py = Cmake_rational(y , MAKE_INT(1)); break;
               default:          error_bad_number(y);                   break;

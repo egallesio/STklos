@@ -59,8 +59,8 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #  define NEXT          continue;/* Be sure to not use continue elsewhere */
 #endif
 
-#define NEXT0           {vm->val = STk_void; vm->valc = 0; NEXT;}
-#define NEXT1           {vm->valc = 1; NEXT;}
+#define NEXT0           do{vm->val = STk_void; vm->valc = 0; NEXT;}while(0)
+#define NEXT1           do{vm->valc = 1; NEXT;}while(0)
 
 
 #ifdef sparc
@@ -176,28 +176,28 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 #define VM_STATE_FP(reg)        ((reg)[3])
 #define VM_STATE_JUMP_BUF(reg)  ((reg)[4])
 
-#define SAVE_VM_STATE()                 {               \
+#define SAVE_VM_STATE()               do{               \
   vm->sp                   -= VM_STATE_SIZE;            \
   VM_STATE_PC(vm->sp)       = (SCM) vm->pc;             \
   VM_STATE_CST(vm->sp)      = (SCM) vm->constants;      \
   VM_STATE_ENV(vm->sp)      = (SCM) vm->env;            \
   VM_STATE_FP(vm->sp)       = (SCM) vm->fp;             \
   VM_STATE_JUMP_BUF(vm->sp) = (SCM) vm->top_jmp_buf;    \
-}
+}while(0)
 
-#define FULL_RESTORE_VM_STATE(p)        {                       \
+#define FULL_RESTORE_VM_STATE(p)      do{                       \
   vm->pc                     = (STk_instr *) VM_STATE_PC(p);    \
   RESTORE_VM_STATE(p);                                          \
-}
+}while(0)
 
-#define RESTORE_VM_STATE(p)             {                       \
+#define RESTORE_VM_STATE(p)           do{                       \
   /* pc is not restored here. See FULL_RESTORE_VM_STATE */      \
   vm->constants          = (SCM *)  VM_STATE_CST(p);            \
   vm->env                = (SCM)    VM_STATE_ENV(p);            \
   vm->fp                 = (SCM *)  VM_STATE_FP(p);             \
   vm->top_jmp_buf        = (jbuf *) VM_STATE_JUMP_BUF(p);       \
   vm->sp                += VM_STATE_SIZE;                       \
-}
+}while(0)
 
 
 /*
@@ -211,20 +211,20 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 #define HANDLER_PREV(reg)       ((reg)[2])
 
 
-#define SAVE_HANDLER_STATE(proc, addr)  {               \
+#define SAVE_HANDLER_STATE(proc, addr)  do{             \
   vm->sp                   -= EXCEPTION_HANDLER_SIZE;   \
   HANDLER_PROC(vm->sp)  =  (SCM) (proc);                \
   HANDLER_END(vm->sp)   =  (SCM) (addr);                \
   HANDLER_PREV(vm->sp)  =  (SCM) vm->handlers;          \
   vm->handlers          = vm->sp;                       \
-}
+}while(0)
 
-#define UNSAVE_HANDLER_STATE()  {                       \
+#define UNSAVE_HANDLER_STATE()  do{                     \
   SCM *old = vm->handlers;                              \
                                                         \
   vm->handlers = (SCM *) HANDLER_PREV(vm->handlers);    \
   vm->sp       = old + EXCEPTION_HANDLER_SIZE;          \
-}
+}while(0)
 
 
 /*===========================================================================*\
@@ -233,7 +233,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
  *
 \*===========================================================================*/
 
-#define PREP_CALL() {                                   \
+#define PREP_CALL() do{                                 \
   SCM fp_save = (SCM)(vm->fp);                          \
                                                         \
   /* Push an activation record on the stack */          \
@@ -243,16 +243,16 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   ACT_SAVE_PROC(vm->fp) = STk_false;                    \
   ACT_SAVE_INFO(vm->fp) = STk_false;                    \
   /* Other fields will be initialized later */          \
-}
+}while(0)
 
 
-#define RET_CALL() {                                    \
+#define RET_CALL() do{                                  \
   vm->sp        = vm->fp + ACT_RECORD_SIZE;             \
   vm->env       = ACT_SAVE_ENV(vm->fp);                 \
   vm->pc        = ACT_SAVE_PC(vm->fp);                  \
   vm->constants = ACT_SAVE_CST(vm->fp);                 \
   vm->fp        = ACT_SAVE_FP(vm->fp);                  \
-}
+}while(0)
 
 
 /*
@@ -273,34 +273,34 @@ MUT_DECL(global_lock);          /* the lock to access checked_globals */
 
 
 
-#define PUSH_ENV(nargs, func, next_env)  {      \
+#define PUSH_ENV(nargs, func, next_env)  do{    \
     BOXED_TYPE(vm->sp)   = tc_frame;            \
     FRAME_LENGTH(vm->sp) = nargs;               \
     FRAME_NEXT(vm->sp)   = next_env;            \
     FRAME_OWNER(vm->sp)  = func;                \
-}
+}while(0)
 
-#define CALL_CLOSURE(func) {                    \
+#define CALL_CLOSURE(func) do{                  \
     vm->pc        = CLOSURE_BCODE(func);        \
     vm->constants = CLOSURE_CONST(func);        \
     vm->env       = (SCM) vm->sp;               \
-}
+}while(0)
 
-#define CALL_PRIM(v, args) {                    \
+#define CALL_PRIM(v, args) do{                  \
     ACT_SAVE_PROC(vm->fp) = v;                  \
     v = PRIMITIVE_FUNC(v)args;                  \
-}
+}while(0)
 
-#define REG_CALL_PRIM(name) {                           \
+#define REG_CALL_PRIM(name) do{                           \
   extern struct primitive_obj CPP_CONCAT(STk_o_, name);         \
   ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);    \
-}
+}while(0)
 
 
-#define RETURN_FROM_PRIMITIVE() {               \
+#define RETURN_FROM_PRIMITIVE() do{             \
     vm->sp = vm->fp + ACT_RECORD_SIZE;          \
     vm->fp = (SCM *) ACT_SAVE_FP(vm->fp);       \
-}
+}while(0)
 
 static void run_vm(vm_thread_t *vm);
 
@@ -852,25 +852,26 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *      operand at [n+1]
  *   4) Thread A resumes, updates operand at [n+1], releases lock
  */
-#define LOCK_AND_RESTART                        \
+#define LOCK_AND_RESTART                     do{\
   if (!have_global_lock) {                      \
     MUT_LOCK(global_lock);                      \
     have_global_lock=1;                         \
     (vm->pc)--;                                 \
     NEXT;                                       \
-  }
-
-#define RELEASE_LOCK                            \
+  }                                             \
+}while(0)
+#define RELEASE_LOCK                         do{\
    {                                            \
     MUT_UNLOCK(global_lock);                    \
     have_global_lock=0;                         \
-   }
-
-#define RELEASE_POSSIBLE_LOCK                   \
+   }                                            \
+}while(0)
+#define RELEASE_POSSIBLE_LOCK                do{\
   if (have_global_lock) {                       \
     MUT_UNLOCK(global_lock);                    \
     have_global_lock=0;                         \
-  }
+  }                                             \
+}while(0)
 
 static void run_vm(vm_thread_t *vm)
 {

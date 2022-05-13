@@ -81,7 +81,7 @@ static SCM all_processes = STk_nil;
 #endif
 
 #ifdef USE_SIGCHLD
-#  define PURGE_PROCESS_TABLE()                             /* Nothing to do */
+#  define PURGE_PROCESS_TABLE()   (void)0                          /* Nothing to do */
 #else
 #  define PURGE_PROCESS_TABLE() process_terminate_handler(0)/* Simulate a SIGCHLD */
 #endif
