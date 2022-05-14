@@ -152,11 +152,11 @@ static unsigned long sxhash(SCM obj)
  *                              H a s h    S t a t s
  *
 \*===========================================================================*/
-#define _MAX_COUNT 5
+#define MAX_COUNT 5
 
 static void hash_stats(struct hash_table_obj *h, SCM port)
 {
-  int i, j, more, len, count[_MAX_COUNT] = {0};
+  int i, j, more, len, count[MAX_COUNT] = {0};
 
   /* If we're using unicode, we can draw a nicer histogram bar... */
   char *bar_char;
@@ -175,7 +175,7 @@ static void hash_stats(struct hash_table_obj *h, SCM port)
         STk_fprintf(port,bar_char);
     STk_putc('\n', port);
 
-    if (len < _MAX_COUNT)
+    if (len < MAX_COUNT)
       count[len] += 1;
     else
       more += 1;
@@ -186,12 +186,12 @@ static void hash_stats(struct hash_table_obj *h, SCM port)
               (double) HASH_NENTRIES(h)/ HASH_NBUCKETS(h));
   STk_fprintf(port, "Repartition\n");
 
-  for (i = 0; i < _MAX_COUNT; i++) {
+  for (i = 0; i < MAX_COUNT; i++) {
     if (count[i])
       STk_fprintf(port, "  %d buckets with %d entries\n", count[i], i);
   }
   if (more)
-    STk_fprintf(port, "  %d buckets with more than %d entries\n", more, _MAX_COUNT);
+    STk_fprintf(port, "  %d buckets with more than %d entries\n", more, MAX_COUNT);
 }
 
 
