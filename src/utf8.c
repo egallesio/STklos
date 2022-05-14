@@ -29,7 +29,7 @@
 int STk_use_utf8 = -1;
 
 
-static void error_bad_sequence(char *str)
+static void error_bad_sequence(const char *str)
 {
   int i;
   char *buffer = STk_must_malloc_atomic(strlen(str) + 1);
@@ -154,10 +154,10 @@ int STk_utf8_sequence_length(char *str)
 }
 
 
-int STk_utf8_strlen(char *s, int max)
+int STk_utf8_strlen(const char* s, int max)
 {
   int len;
-  char *start = s, *end = s + max;
+  const char *start = s, *end = s + max;
 
   for (len = 0;  s < end; len++) {
     int sz =  STk_utf8_sequence_length(s);

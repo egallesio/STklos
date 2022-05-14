@@ -140,7 +140,7 @@ STk_put_character(int c, SCM port)       /* c may be a wide char */
 
 
 int
-STk_puts(char *s, SCM port)
+STk_puts(const char* s, SCM port)
 {
   int n =  PORT_PUTS(port)(s, PORT_STREAM(port));
   if (n >= 0)
@@ -159,7 +159,7 @@ STk_putstring(SCM s, SCM port)
 
 
 int
-STk_nputs(SCM port, char *s, int len)
+STk_nputs(SCM port, const char* s, int len)
 {
   int n = PORT_NPUTS(port)(PORT_STREAM(port), s, len);
   if (n >= 0)

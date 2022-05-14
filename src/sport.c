@@ -119,7 +119,7 @@ static Inline int Sputc(int c, void *stream)
 }
 
 
-static Inline int Swrite(void *stream, void *buffer, int count)
+static Inline int Swrite(void *stream, const void* buffer, int count)
 {
   int tmp, pos;
 
@@ -137,7 +137,7 @@ static Inline int Swrite(void *stream, void *buffer, int count)
   return count;
 }
 
-static Inline int Sputs(char *s, void *stream)
+static Inline int Sputs(const char* s, void *stream)
 {
   return Swrite(stream, s, strlen(s));
 }
@@ -341,7 +341,7 @@ make_bport(enum kind_port kind,  SCM str, int init_len, int flags)
 /*
  * open-input-string with a C string ...
  */
-SCM STk_open_C_string(char *str)
+SCM STk_open_C_string(const char* str)
 {
   return (SCM) make_sport(PREAD_C, (SCM) str, strlen(str),
                           PORT_IS_STRING | PORT_READ | PORT_TEXTUAL);

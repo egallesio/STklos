@@ -52,7 +52,7 @@ struct fstream {
   SCM  idle_procs;
   void *user_data;
   int (*low_read)(struct fstream *f, void *buf, int count);
-  int (*low_write)(struct fstream *f, void *buf, int count);
+  int (*low_write)(struct fstream *f, const void *buf, int count);
 };
 
 

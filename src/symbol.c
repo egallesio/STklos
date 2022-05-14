@@ -42,7 +42,7 @@ static void error_bad_string(SCM str)
   STk_error("bad string ~S", str);
 }
 
-int STk_symbol_flags(register char *s)
+int STk_symbol_flags(const register char* s)
 {
   if (!*s || (*s == '.' && !s[1])) {
     /* Special symbols || and |.| which always need bars */
@@ -68,7 +68,7 @@ int STk_symbol_flags(register char *s)
   }
 }
 
-SCM STk_make_uninterned_symbol(char *name)
+SCM STk_make_uninterned_symbol(const char* name)
 {
   SCM z;
 

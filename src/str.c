@@ -297,7 +297,7 @@ SCM STk_makestring(int len, char *init)
 }
 
 
-SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(const char* str) /* Embed a C string in Scheme world  */
 {
   SCM  z;
   size_t len = strlen(str);

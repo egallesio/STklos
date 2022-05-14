@@ -64,7 +64,7 @@
  *
 \*===========================================================================*/
 
-static unsigned long hash_string(register char *string)
+static unsigned long hash_string(const register char* string)
 {
   register unsigned long result = 0;
   register int c;
@@ -93,7 +93,7 @@ static unsigned long hash_string(register char *string)
 
 static unsigned long hash_scheme_string(SCM str)
 {                                            /* The same one for Scheme strings */
-  char *string;
+  const char *string;
   unsigned long result = 0;
   int i, l;
 
@@ -299,7 +299,7 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag)
  *
 \*===========================================================================*/
 
-static Inline SCM hash_get_symbol(struct hash_table_obj *h, char *s, int *index)
+static Inline SCM hash_get_symbol(struct hash_table_obj *h, const char* s, int *index)
 {
   register SCM l;
 
@@ -312,7 +312,7 @@ static Inline SCM hash_get_symbol(struct hash_table_obj *h, char *s, int *index)
 }
 
 
-SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, SCM (*create) (char*s))
+SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char* s, SCM (* create) (const char* s))
 {
   SCM z;
   int index;

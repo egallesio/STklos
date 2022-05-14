@@ -725,8 +725,8 @@ extern int STk_interactive_debug;
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
-SCM STk_eval_C_string(char *str, SCM module);
-SCM STk_read_from_C_string(char *str);
+SCM STk_eval_C_string(const char* str, SCM module);
+SCM STk_read_from_C_string(const char* str);
 
 int STk_init_misc(void);
 
@@ -814,7 +814,7 @@ struct complex_obj {
   /****
    **** Conversions
    ****/
-SCM             STk_Cstr2number(char *str, long base);
+SCM             STk_Cstr2number(const char* str, long base);
 char           *STk_bignum2Cstring(SCM n, int base);
 SCM             STk_long2integer(long n);
 SCM             STk_ulong2integer(unsigned long n);
@@ -890,9 +890,9 @@ SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_valu
   ----
   ------------------------------------------------------------------------------
 */
-char *STk_expand_file_name(char *s);
+char *STk_expand_file_name(const char* s);
 SCM STk_do_glob(int argc, SCM *argv);
-SCM STk_resolve_link(char *path, int count);
+SCM STk_resolve_link(const char* path, int count);
 
 
 /*
@@ -932,13 +932,13 @@ struct port_obj {
   int   (*cgetc)     (void *stream);
   int   (*ceofp)     (void *stream);
   int   (*cclose)    (void *stream);
-  int   (*cputc)     (int c, void * stream);
-  int   (*cputs)     (char *s, void * stream);
-  int   (*cnputs)    (void *stream, char *str, int len);
+  int   (*cputc)     (int c, void *stream);
+  int   (*cputs)     (const char *s, void *stream);
+  int   (*cnputs)    (void *stream, const char *str, int len);
   int   (*cputstring)(void *stream, SCM str);
   int   (*cflush)    (void *stream);
   int   (*read_buff) (void *stream, void *buf, int count);
-  int   (*write_buff)(void *stream, void *buf, int count);
+  int   (*write_buff)(void *stream, const void *buf, int count);
   off_t (*seek)      (void *stream, off_t offset, int whence);
 };
 
@@ -1020,9 +1020,9 @@ int STk_ungetc(int c, SCM port);
 int STk_close(SCM port);
 int STk_putc(int c, SCM port);
 int STk_put_character(int c, SCM port);   /* c may be a wide char */
-int STk_puts(char *s, SCM port);
+int STk_puts(const char* s, SCM port);
 int STk_putstring(SCM s, SCM port);
-int STk_nputs(SCM port, char *s, int len);
+int STk_nputs(SCM port, const char* s, int len);
 off_t STk_seek(SCM port, off_t offset, int whence);
 off_t STk_tell(SCM port);
 void STk_rewind(SCM port);
@@ -1039,7 +1039,7 @@ int STk_write_buffer(SCM port, void *buff, int count);
 SCM STk_rewind_file_port(SCM port);
 SCM STk_open_file(char *filename, char *mode);
 SCM STk_add_port_idle(SCM port, SCM idle_func);
-SCM STk_fd2scheme_port(int fd, char *mode, char *identification);
+SCM STk_fd2scheme_port(int fd, const char *mode, char *identification);
 void STk_set_line_buffered_mode(SCM port);
 int STk_init_fport(void);
 SCM STk_current_input_port(void);
@@ -1053,7 +1053,7 @@ void STk_close_all_ports(void);
  ****/
 EXTERN_PRIMITIVE("open-output-string", open_output_string, subr0, (void));
 SCM STk_get_output_string(SCM port);
-SCM STk_open_C_string(char *str);
+SCM STk_open_C_string(const char* str);
 int STk_init_sport(void);
 
 /****
@@ -1241,7 +1241,7 @@ struct string_obj {
 #define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
 SCM STk_makestring(int len, char *init);
-SCM STk_Cstring2string(char *str);           /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(const char* str);           /* Embed a C string in Scheme world  */
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
@@ -1279,9 +1279,9 @@ struct symbol_obj {
 
 EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
-int STk_symbol_flags(char *s);
+int STk_symbol_flags(const char* s);
 SCM STk_intern(char *name);
-SCM STk_make_uninterned_symbol(char *name);
+SCM STk_make_uninterned_symbol(const char* name);
 int STk_init_symbol(void);
 
 
@@ -1334,7 +1334,7 @@ extern int STk_use_utf8;
 
 char *STk_utf8_grab_char(char *str, uint32_t *c);/* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
-int STk_utf8_strlen(char *s, int max);
+int STk_utf8_strlen(const char* s, int max);
 int STk_utf8_read_char(SCM port);
 int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
 int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/

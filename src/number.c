@@ -99,7 +99,7 @@ static int zerop(SCM n);
 static int negativep(SCM n);
 static int positivep(SCM n);
 static int isexactp(SCM z);
-static SCM gcd2(SCM o1, SCM o2);
+static SCM gcd2(SCM n1, SCM n2);
 
 EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i));
 EXTERN_PRIMITIVE("real-part", real_part, subr1, (SCM z));
@@ -118,10 +118,10 @@ EXTERN_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z));
 #define inexact2exact STk_inex2ex
 
 
-static SCM int_quotient(SCM o1, SCM o2);
+static SCM int_quotient(SCM x, SCM y);
 static SCM my_cos(SCM z);
 static SCM my_sin(SCM z);
-static SCM STk_complexp(SCM n);
+static SCM STk_complexp(SCM x);
 
 
 /******************************************************************************
@@ -1001,7 +1001,7 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
  * (no double underscores, no leading or trailing underscores, and no
  * underscore close to anything that is not a digit).
  */
-static int remove_underscores(char *str, char *end, long base) {
+static int remove_underscores(char *str, const char *end, long base) {
   char *q;
   int just_saw_one = 0;
   for (char *p=str; p<end-1; p++)
@@ -1156,7 +1156,7 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
   return STk_false;             /* never reached */
 }
 
-SCM STk_Cstr2number(char *str, long base)
+SCM STk_Cstr2number(const char* str, long base)
 {
   int i, exact, radix, polar, is_signed;
   char *p = str;
