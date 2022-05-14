@@ -141,7 +141,7 @@ int STk_utf8_char_bytes_needed(unsigned int ch)
   return 1; /* to avoid infinite loop, but obiously incorrect */
 }
 
-int STk_utf8_sequence_length(char *str)
+int STk_utf8_sequence_length(const char* str)
 {
   /* return length of the UTF-8 sequence starting at given address */
   uint8_t c = *((uint8_t *) str);

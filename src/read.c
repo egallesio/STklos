@@ -148,7 +148,7 @@ static void warning_bad_escaped_sequence(SCM port, int c)
 }
 
 
-static int colon_position_value(char *str)
+static int colon_position_value(const char* str)
 {
   if      (strcmp(str, "none")   == 0) return COLON_NONE;
   else if (strcmp(str, "before") == 0) return COLON_BEFORE;
@@ -898,7 +898,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                          SCM word = read_token(port, c, FALSE);
 
                          if (SYMBOLP(word)) {
-                           char *s = SYMBOL_PNAME(word);
+                           const char *s = SYMBOL_PNAME(word);
 
                            /* Try to see if it is a DSSL keyword */
                            if ((strcmp(s, "optional") == 0) ||

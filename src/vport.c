@@ -123,7 +123,7 @@ static int call_user_close(void *stream)
  */
 
 static int call_user_putstring(SCM s, void *stream);
-static int vport_nputs(void *stream, char *s, int len);
+static int vport_nputs(void *stream, const char* s, int len);
 
 static int call_user_putc(int c, void *stream)
 {
@@ -184,10 +184,10 @@ static int vport_read(void *stream, void *buf, int count)
 }
 
 
-static int vport_write(void *stream, void *buf, int count)
+static int vport_write(void *stream, const void *buf, int count)
 {
   int i;
-  char *s = buf;
+  const char *s = buf;
 
   for (i = 0; i < count; i++) {
     int c = call_user_putc(*s++, stream);
@@ -204,7 +204,7 @@ static off_t vport_seek(void  _UNUSED(*stream),
   return 0;
 }
 
-static int vport_nputs(void *stream, char *s, int len)
+static int vport_nputs(void *stream, const char* s, int len)
 {
   int i;
 
@@ -213,7 +213,7 @@ static int vport_nputs(void *stream, char *s, int len)
   return len;
 }
 
-static int vport_puts(char *s, void *stream)
+static int vport_puts(const char *s, void *stream)
 {
   return vport_nputs(stream, s, strlen(s));
 }

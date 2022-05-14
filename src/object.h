@@ -129,7 +129,5 @@ struct next_method_obj {
 
 SCM STk_make_next_method(SCM gf, int argc, SCM *argv, SCM methods);
 
-SCM STk_int_call_gf(char *name, SCM val, int nargs); /* FIXME: Utilisée encore? */
-
 
 extern int STk_oo_initialized;			     /* FIXME: */

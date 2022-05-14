@@ -147,7 +147,7 @@ static Inline int Sputstring(SCM s, void *stream)
   return Swrite(stream, STRING_CHARS(s), STRING_SIZE(s));
 }
 
-static Inline int Snputs(void *stream, char *s, int len)
+static Inline int Snputs(void *stream, const char* s, int len)
 {
   return Swrite(stream, s, len);
 }

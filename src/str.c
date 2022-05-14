@@ -29,8 +29,6 @@
 #include "stklos.h"
 
 
-extern SCM STk_make_bytevector_from_string(char *str, long len);
-
 
 /* min size added to a string when reallocated in a string-set! */
 #define UTF8_STRING_INCR        8
@@ -271,7 +269,7 @@ static SCM make_substring(SCM string, long from, long to)
 }
 
 
-SCM STk_makestring(int len, char *init)
+SCM STk_makestring(int len, const char* init)
 {
   register SCM z;
 

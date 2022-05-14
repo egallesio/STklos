@@ -102,7 +102,7 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly);
  */
 SCM STk_hash_keys(struct hash_table_obj *h);
 SCM STk_make_basic_hash_table(void);
-SCM STk_hash_table_search(SCM ht, SCM key);
+SCM hash_table_search(SCM ht, SCM key);
 
 /*
  * Scheme interface

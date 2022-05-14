@@ -80,7 +80,7 @@ SCM STk_extended_class_of(SCM o)
 // Scheme aceess to the extended type descriptor
 //
 // ----------------------------------------------------------------------
-static struct extended_type_descr *search_descriptor(char *str) {
+static struct extended_type_descr *search_descriptor(const char* str) {
   for (int i = tc_last_standard+1; i <= user_extended_type; i++) {
     if (strcmp(str, (STk_xtypes[i])->name) == 0) return STk_xtypes[i];
   }

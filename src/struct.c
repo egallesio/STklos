@@ -237,7 +237,7 @@ DEFINE_PRIMITIVE("struct-type-change-writer!",
 }
 
 
-static char *get_struct_type_name(SCM st)
+static const char* get_struct_type_name(SCM st)
 {
   SCM name = STRUCT_TYPE_NAME(st);
 

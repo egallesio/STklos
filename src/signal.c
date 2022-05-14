@@ -147,7 +147,7 @@ static void sigabort(int _UNUSED(i))
 
 int STk_get_signal_value(SCM sig)
 {
-  char *s;
+  const char *s;
   struct signal_info *p;
 
   if (!SYMBOLP(sig)) goto Error;

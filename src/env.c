@@ -94,7 +94,7 @@ static void print_module(SCM module, SCM port, int mode)
     STk_nputs(port, "#[library ", 11);
     if (SYMBOLP(name)) {
       STk_putc('(', port);
-      for (char *s = SYMBOL_PNAME(name); *s; s++) {
+      for (const char *s = SYMBOL_PNAME(name); *s; s++) {
         STk_putc((*s == '/') ? ' ': *s, port);
       }
       STk_putc(')', port);

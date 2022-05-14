@@ -345,7 +345,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char* s, SCM (* creat
 static inline SCM hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
 {
   register SCM l;
-  char *s = SYMBOL_PNAME(v);
+  const char *s = SYMBOL_PNAME(v);
 
   *index = hash_string(s) & HASH_MASK(h);
 
@@ -639,7 +639,7 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
  * @end lisp
 doc>
 */
-static Inline SCM hash_table_search(SCM ht, SCM key)
+Inline SCM hash_table_search(SCM ht, SCM key)
 {
   int index = 0;
   SCM func, l = STk_nil;

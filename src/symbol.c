@@ -135,7 +135,7 @@ doc>
 DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
 {
   SCM str;
-  char *s;
+  const char *s;
 
   if (!SYMBOLP(symbol)) STk_error("bad symbol ~S", symbol);
 

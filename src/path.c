@@ -38,7 +38,7 @@
 
 static void tilde_expand(const char *name, char *result, size_t result_len)
 {
-  char *p;
+  const char *p;
   struct passwd *pwPtr;
 
   if (name[0] != '~') {

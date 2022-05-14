@@ -352,18 +352,6 @@ int STk_init_box(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ----                      B Y T E V E C T O R . C
-  ----
-  ------------------------------------------------------------------------------
-*/
-SCM STk_bytevector2u8list(SCM obj);
-SCM STk_u8list2bytevector(SCM obj);
-int STk_init_bytevector(void);
-
-
-/*
-  ------------------------------------------------------------------------------
-  ----
   ----                            C H A R  . C
   ----
   ------------------------------------------------------------------------------
@@ -381,8 +369,8 @@ int STk_init_bytevector(void);
 
 
 /* Comparison of characters. No test on types */
-int STk_charcomp(SCM c1, SCM c2);
-int STk_charcompi(SCM c1, SCM c2);
+int charcomp(SCM c1, SCM c2);
+int charcompi(SCM c1, SCM c2);
 
 /* Simple  character conversion functions */
 uint32_t STk_to_upper(uint32_t c);
@@ -626,7 +614,7 @@ struct keyword_obj {
 EXTERN_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val));
 EXTERN_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt));
 
-SCM STk_makekey(char *tok);
+SCM STk_makekey(const char* token);
 int STk_init_keyword(void);
 
 /*
@@ -814,8 +802,7 @@ struct complex_obj {
   /****
    **** Conversions
    ****/
-SCM             STk_Cstr2number(const char* str, long base);
-char           *STk_bignum2Cstring(SCM n, int base);
+SCM             STk_Cstr2number(char* str, long base);
 SCM             STk_long2integer(long n);
 SCM             STk_ulong2integer(unsigned long n);
 SCM             STk_double2real(double d);
@@ -833,7 +820,6 @@ SCM STk_mul2(SCM o1, SCM o2);
 SCM STk_div2(SCM o1, SCM o2);
 
 long STk_numeq2(SCM o1, SCM o2);
-long STk_numdiff2(SCM o1, SCM o2);
 long STk_numlt2(SCM o1, SCM o2);
 long STk_numgt2(SCM o1, SCM o2);
 long STk_numle2(SCM o1, SCM o2);
@@ -1036,7 +1022,6 @@ int STk_write_buffer(SCM port, void *buff, int count);
 /****
  ****           fport.h primitives
  ****/
-SCM STk_rewind_file_port(SCM port);
 SCM STk_open_file(char *filename, char *mode);
 SCM STk_add_port_idle(SCM port, SCM idle_func);
 SCM STk_fd2scheme_port(int fd, const char *mode, char *identification);
@@ -1240,7 +1225,7 @@ struct string_obj {
 
 #define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
-SCM STk_makestring(int len, char *init);
+SCM STk_makestring(int len, const char* init);
 SCM STk_Cstring2string(const char* str);           /* Embed a C string in Scheme world  */
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
@@ -1268,7 +1253,7 @@ int STk_init_struct(void);
 */
 struct symbol_obj {
   stk_header header;    /* must be at the same offset as for keywords */
-  char *pname;
+  const char *pname;
 };
 
 #define SYMBOL_PNAME(p) (((struct symbol_obj *) (p))->pname)
@@ -1336,7 +1321,7 @@ char *STk_utf8_grab_char(char *str, uint32_t *c);/* result = pos. after current 
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(const char* s, int max);
 int STk_utf8_read_char(SCM port);
-int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
+int STk_utf8_sequence_length(const char* str); /* # of bytes of sequence starting at str */
 int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
 int STk_utf8_verify_sequence(char *s, int len); /* s constitutes a valid UTF8? */
 char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
@@ -1436,7 +1421,6 @@ int STk_init_vector(void);
 */
 #define DEFAULT_STACK_SIZE 100000
 
-void STk_execute_current_handler(SCM kind, SCM location, SCM message);
 void STk_raise_exception(SCM cond);
 SCM STk_C_apply(SCM func, int nargs, ...);
 SCM STk_C_apply_list(SCM func, SCM l);

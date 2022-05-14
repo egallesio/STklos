@@ -1156,7 +1156,7 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
   return STk_false;             /* never reached */
 }
 
-SCM STk_Cstr2number(const char* str, long base)
+SCM STk_Cstr2number(char* str, long base)
 {
   int i, exact, radix, polar, is_signed;
   char *p = str;
