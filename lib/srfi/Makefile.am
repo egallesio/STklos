@@ -95,6 +95,7 @@ SRC_STK   = 1.stk   \
             141.stk \
             143.stk \
             151.stk \
+            152.stk \
             154.stk \
             156.stk \
             158.stk \
@@ -188,6 +189,7 @@ SRC_OSTK =  1.ostk   \
             141.ostk \
             143.ostk \
             151.ostk \
+            152.ostk \
             154.ostk \
             156.ostk \
             158.ostk \
@@ -258,6 +260,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
 134.ostk: 158.ostk
+130.ostk: 13.ostk
+152.ostk: 130.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c

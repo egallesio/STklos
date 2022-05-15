@@ -1,0 +1,831 @@
+;;;;
+;;;; 152.stk		-- Implementation of SRFI-152
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by Olin Shivers and John Cowan, it is copyrighted as:
+;;;;
+;;;;;;; The prefix/suffix and comparison routines in this code had (extremely
+;;;;;;; distant) origins in MIT Scheme's string lib, and was substantially
+;;;;;;; reworked by Olin Shivers (shivers@ai.mit.edu) 9/98. As such, it is
+;;;;;;; covered by MIT Scheme's open source copyright. See below for details.
+;;;;;;; 
+;;;;;;; The KMP string-search code was influenced by implementations written
+;;;;;;; by Stephen Bevan, Brian Dehneyer and Will Fitzgerald. However, this
+;;;;;;; version was written from scratch by myself.
+;;;;;;;
+;;;;;;; The remainder of this code was written from scratch by myself for scsh.
+;;;;;;; The scsh copyright is a BSD-style open source copyright. See below for
+;;;;;;; details.
+;;;;;;;     -Olin Shivers
+
+;;;;;;; MIT Scheme copyright terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;; This material was developed by the Scheme project at the Massachusetts
+;;;;;;; Institute of Technology, Department of Electrical Engineering and
+;;;;;;; Computer Science.  Permission to copy and modify this software, to
+;;;;;;; redistribute either the original software or a modified version, and
+;;;;;;; to use this software for any purpose is granted, subject to the
+;;;;;;; following restrictions and understandings.
+;;;;;;; 
+;;;;;;; 1. Any copy made of this software must include this copyright notice
+;;;;;;; in full.
+;;;;;;; 
+;;;;;;; 2. Users of this software agree to make their best efforts (a) to
+;;;;;;; return to the MIT Scheme project any improvements or extensions that
+;;;;;;; they make, so that these may be included in future releases; and (b)
+;;;;;;; to inform MIT of noteworthy uses of this software.
+;;;;;;; 
+;;;;;;; 3. All materials developed as a consequence of the use of this
+;;;;;;; software shall duly acknowledge such use, in accordance with the usual
+;;;;;;; standards of acknowledging credit in academic research.
+;;;;;;; 
+;;;;;;; 4. MIT has made no warrantee or representation that the operation of
+;;;;;;; this software will be error-free, and MIT is under no obligation to
+;;;;;;; provide any services, by way of maintenance, update, or otherwise.
+;;;;;;; 
+;;;;;;; 5. In conjunction with products arising from the use of this material,
+;;;;;;; there shall be no use of the name of the Massachusetts Institute of
+;;;;;;; Technology nor of any adaptation thereof in any advertising,
+;;;;;;; promotional, or sales literature without prior written consent from
+;;;;;;; MIT in each case.
+
+;;;;;;; Scsh copyright terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;; All rights reserved.
+;;;;;;; 
+;;;;;;; Redistribution and use in source and binary forms, with or without
+;;;;;;; modification, are permitted provided that the following conditions
+;;;;;;; are met:
+;;;;;;; 1. Redistributions of source code must retain the above copyright
+;;;;;;;    notice, this list of conditions and the following disclaimer.
+;;;;;;; 2. Redistributions in binary form must reproduce the above copyright
+;;;;;;;    notice, this list of conditions and the following disclaimer in the
+;;;;;;;    documentation and/or other materials provided with the distribution.
+;;;;;;; 3. The name of the authors may not be used to endorse or promote products
+;;;;;;;    derived from this software without specific prior written permission.
+;;;;;;; 
+;;;;;;; THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS OR
+;;;;;;; IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+;;;;;;; OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+;;;;;;; IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+;;;;;;; INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+;;;;;;; NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;;;;;;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;;;;;;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;;;;;;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+;;;;;;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 12-May-2022 20:32 (jpellegrini)
+;;;; Last file update: 15-May-2022 00:20 (jpellegrini)
+;;;;
+
+
+;;; NOTE: this is a mix of code from SRFIs 130 and 152 (and SRFI 152
+;;; itself also borrows a lot from SRFI 130).
+;;;
+;;;
+;;; * We do not import the string comparison procedures from STklos
+;;;   directly, but rather renaming them. This is because we need to
+;;;   modify their behavior (the SRFI and reference implementation
+;;;   require us to let these procedures accept zero arguments);
+;;;
+;;; * We also had to modify SRFI 130 so it won't import-modify-then-reexport
+;;;   some symbols. Those symbols could not be overriden by this SRFI when
+;;;   it was loaded.
+
+(define-module srfi/152
+  (import (only STklos
+                ;; STklos primitives that we'll use:
+                string-copy!
+                string-fill!
+                string-set!
+                write-string
+                read-string
+                string-for-each
+                string-map
+                string-append
+                string-copy
+                ;;string-ci>=?
+                ;;string-ci<=?
+                ;;string-ci>?
+                ;;string-ci<?
+                ;;string-ci=?
+                ;;string>=?
+                ;;string<=?
+                ;;string>?
+                ;;string<?
+                ;;string=?
+                substring
+                string-ref
+                string-length
+                list->string
+                string->list
+                vector->string
+                string->vector
+                string
+                make-string
+                string?
+                ))
+  (import (rename STklos
+                  (string=?     stklos:string=?)
+                  (string-ci>=? stklos:string-ci>=?)
+                  (string-ci<=? stklos:string-ci<=?)
+                  (string-ci>?  stklos:string-ci>?)
+                  (string-ci<?  stklos:string-ci<?)
+                  (string-ci=?  stklos:string-ci=?)
+                  (string>=?    stklos:string>=?)
+                  (string<=?    stklos:string<=?)
+                  (string>?     stklos:string>?)
+                  (string<?     stklos:string<?)
+                  ))
+                  
+
+  (import (srfi 13))
+  
+  (export ;; Predicates
+          string?
+          string-null? 
+          string-every string-any
+
+          ;; Constructors
+          make-string string
+          string-tabulate
+          string-unfold string-unfold-right
+
+          ;; Conversion
+          string->vector string->list
+          vector->string list->string
+          reverse-list->string
+
+          ;; Selection
+          string-length
+          string-ref
+          substring
+          string-copy
+          string-take string-take-right
+          string-drop string-drop-right
+          string-pad string-pad-right 
+          string-trim string-trim-right string-trim-both
+
+          ;; Replacement
+          string-replace
+
+          ;; Comparison
+          string=? string-ci=?
+          string<? string-ci<?
+          string>? string-ci>?
+          string<=? string-ci<=?
+          string>=? string-ci>=?
+
+          ;; Prefixes and suffixes
+          string-prefix-length string-suffix-length
+          string-prefix? string-suffix?    
+
+          ;; Searching
+          string-index string-index-right
+          string-skip string-skip-right
+          string-contains string-contains-right
+          string-take-while string-take-while-right
+          string-drop-while string-drop-while-right
+          string-break string-span
+
+          ;; Concatenation
+          string-append string-concatenate string-concatenate-reverse
+          string-join
+
+          ;; Fold and map and friends
+          string-fold string-fold-right
+          string-map string-for-each
+          string-count
+          string-filter string-remove
+
+          ;; Replication and splitting
+          string-replicate
+          string-segment string-split
+
+          ;; Input-output
+          read-string write-string
+
+          ;; Mutation
+          string-set! string-fill! string-copy!)
+
+;; allow-no-args takes a procedure name and
+;; creates another, that
+;; * returns #t when called with no arguments
+;; * delegates to stklos:proc (proc, prefixed by stklos:)
+(define-macro (allow-no-args proc)
+  (let ((args (gensym 'args))
+        (pref (lambda (a b)
+                (string->symbol (string-append a (symbol->string b))))))
+    `(define (,proc . ,args)
+       (if (null? ,args) #t (apply ,(pref "stklos:" proc) ,args)))))
+
+(allow-no-args string=?)
+(allow-no-args string<?)
+(allow-no-args string>?)
+(allow-no-args string<=?)
+(allow-no-args string>=?)
+(allow-no-args string-ci=?)
+(allow-no-args string-ci<?)
+(allow-no-args string-ci>?)
+(allow-no-args string-ci<=?)
+(allow-no-args string-ci>=?)
+
+
+;;; Shivers-compatible let-optionals*
+;;; This version from Scheme-48 1.9.2,
+;;; using error instead of assertion-violation
+(define-syntax let-optionals*
+  (syntax-rules ()
+    ((let-optionals* arg (opt-clause ...) body ...)
+     (let ((rest arg))
+       (%let-optionals* rest (opt-clause ...) body ...)))))
+
+(define-syntax %let-optionals*
+  (syntax-rules ()
+    ((%let-optionals* arg (((var ...) xparser) opt-clause ...) body ...)
+     (call-with-values (lambda () (xparser arg))
+       (lambda (rest var ...)
+         (%let-optionals* rest (opt-clause ...) body ...))))
+    
+    ((%let-optionals* arg ((var default) opt-clause ...) body ...)
+     (call-with-values (lambda () (if (null? arg) (values default '())
+				      (values (car arg) (cdr arg))))
+       (lambda (var rest)
+	 (%let-optionals* rest (opt-clause ...) body ...))))
+
+    ((%let-optionals* arg ((var default test) opt-clause ...) body ...)
+     (call-with-values (lambda ()
+			 (if (null? arg) (values default '())
+			     (let ((var (car arg)))
+			       (if test (values var (cdr arg))
+				   (error "arg failed LET-OPT test" var)))))
+       (lambda (var rest)
+	 (%let-optionals* rest (opt-clause ...) body ...))))
+
+    ((%let-optionals* arg ((var default test supplied?) opt-clause ...) body ...)
+     (call-with-values (lambda ()
+			 (if (null? arg) (values default #f '())
+			     (let ((var (car arg)))
+			       (if test (values var #t (cdr arg))
+				   (error "arg failed LET-OPT test" var)))))
+       (lambda (var supplied? rest)
+	 (%let-optionals* rest (opt-clause ...) body ...))))
+
+    ((%let-optionals* arg (rest) body ...)
+     (let ((rest arg)) body ...))
+
+    ((%let-optionals* arg () body ...)
+     (if (null? arg) (begin body ...)
+	 (error "Too many arguments in let-opt" arg))))) 
+  
+;;; Support for START/END substring specs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; This macro parses optional start/end arguments from arg lists, defaulting
+;;; them to 0/(string-length s), and checks them for correctness.
+
+;; (define-syntax let-string-start+end
+;;   (syntax-rules ()
+;;     ((let-string-start+end (start end) proc s-exp args-exp body ...)
+;;      (receive (start end) (string-parse-final-start+end proc s-exp args-exp)
+;;        body ...))
+;;     ((let-string-start+end (start end rest) proc s-exp args-exp body ...)
+;;      (receive (rest start end) (string-parse-start+end proc s-exp args-exp)
+;;        body ...))))
+
+(define-syntax let-string-start+end
+  (syntax-rules ()
+    ((_ (?start ?end ?rest) ?proc ?s ?args . ?body)
+     (call-with-values
+       (lambda () (string-parse-start+end ?proc ?s ?args))
+       (lambda (?rest ?start ?end) . ?body)))
+    ((_ (?start ?end) ?proc ?s ?args . ?body)
+     (call-with-values
+       (lambda () (string-parse-final-start+end ?proc ?s ?args))
+       (lambda (?start ?end) . ?body)))))
+
+;;; This one parses out a *pair* of final start/end indices.
+;;; Not exported; for internal use.
+(define-syntax let-string-start+end2
+  (syntax-rules ()
+    ((l-s-s+e2 (start1 end1 start2 end2) proc s1 s2 args body ...)
+     (let ((procv proc)) ; Make sure PROC is only evaluated once.
+       (let-string-start+end (start1 end1 rest) procv s1 args
+         (let-string-start+end (start2 end2) procv s2 rest
+           body ...))))))
+
+
+
+
+(define-macro (check-arg pred val caller)
+  `(if (,pred ,val)
+       ,val
+       (error ,caller "bad argument ~S" ,val)))
+
+  
+;;; string-split s delimiter [grammar limit start end] -> list
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Returns a list of the words contained in the substring of string from
+;;; start (inclusive) to end (exclusive). Delimiter specifies a string
+;;; whose characters are to be used as the word separator. The returned
+;;; list will then have one more item than the number of non-overlapping
+;;; occurrences of the delimiter in the string. If delimiter is an
+;;; empty string, then the returned list contains a list of strings,
+;;; each of which contains a single character.  Grammar is a symbol with
+;;; the same meaning as in the string-join procedure. If it is infix,
+;;; which is the default, processing is done as described above, except
+;;; that an empty s produces the empty list; if it is strict-infix,
+;;; an empty s signals an error. The values prefix and suffix cause a
+;;; leading/trailing empty string in the result to be suppressed.
+;;;
+;;; If limit is a non-negative exact integer, at most that many splits
+;;; occur, and the remainder of string is returned as the final element
+;;; of the list (thus, the result will have at most limit+1 elements). If
+;;; limit is not specified or is #f, then as many splits as possible
+;;; are made. It is an error if limit is any other value.
+;;;
+;;; Thanks to Shiro Kawai for the following code.
+
+(define (string-split s delimiter . args)
+  ;; The argument checking part might be refactored with other srfi-130
+  ;; routines.
+  (if (not (string? s)) (error "string expected" s))
+  (if (not (string? delimiter)) (error "string expected" delimiter))
+  (let ((slen (string-length s)))
+    (receive (grammar limit no-limit start end)
+        (if (pair? args)
+          (if (pair? (cdr args))
+            (if (pair? (cddr args))
+              (if (pair? (cdddr args))
+                (values (car args) (cadr args) #f (caddr args) (cadddr args))
+                (values (car args) (cadr args) #f (caddr args) slen))
+              (values (car args) (cadr args) #f 0 slen))
+            (values (car args) #f #t 0 slen))
+          (values 'infix #f #t 0 slen))
+      (if (not (memq grammar '(infix strict-infix prefix suffix)))
+        (error "grammar must be one of (infix strict-infix prefix suffix)" grammar))
+      (if (not limit) (set! no-limit #t))
+      (if (not (or no-limit
+                  (and (integer? limit) (exact? limit) (>= limit 0))))
+        (error "limit must be exact nonnegative integer or #f" limit))
+      (if (not (and (integer? start) (exact? start)))
+        (error "start argument must be exact integer" start))
+      (if (not (<= 0 start slen))
+        (error "start argument out of range" start))
+      (if (not (<= 0 end slen))
+        (error "end argument out of range" end))
+      (if (not (<= start end))
+        (error "start argument is greater than end argument" (list start end)))
+
+      (cond ((= start end)
+             (if (eq? grammar 'strict-infix)
+               (error "empty string cannot be spilt with strict-infix grammar")
+               '()))
+            ((string-null? delimiter)
+             (%string-split-chars s start end limit))
+            (else (%string-split s start end delimiter grammar limit))))))
+
+(define (%string-split-chars s start end limit)
+  (if (not limit)
+      (map string (string->list s start end))
+      (let loop ((r '()) (c start) (n 0))
+        (cond ((= c end) (reverse r))
+              ((>= n limit) (reverse (cons (substring s c end) r)))
+              (else (loop (cons (string (string-ref s c)) r)
+                          (+ c 1)
+                          (+ n 1)))))))
+
+(define (%string-split s start end delimiter grammar limit)
+  (let ((dlen (string-length delimiter)))
+    (define (finish r c)
+      (let ((rest (substring s c end)))
+        (if (and (eq? grammar 'suffix) (string-null? rest))
+            (reverse r)
+            (reverse (cons rest r)))))
+    (define (scan r c n)
+      (if (and limit (>= n limit))
+          (finish r c)
+          (let ((i (string-contains s delimiter c end)))
+            (if i
+                (let ((fragment (substring s c i)))
+                  (if (and (= n 0) (eq? grammar 'prefix) (string-null? fragment))
+                      (scan r (+ i dlen) (+ n 1))
+                      (scan (cons fragment r) 
+                            (+ i dlen)
+                            (+ n 1))))
+                (finish r c)))))
+    (scan '() start 0)))
+
+;; ;;; (string-join string-list [delimiter grammar]) => string
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;; Paste strings together using the delimiter string.
+;; ;;;
+;; ;;; (join-strings '("foo" "bar" "baz") ":") => "foo:bar:baz"
+;; ;;;
+;; ;;; DELIMITER defaults to a single space " "
+;; ;;; GRAMMAR is one of the symbols {prefix, infix, strict-infix, suffix} 
+;; ;;; and defaults to 'infix.
+;; ;;;
+;; ;;; I could rewrite this more efficiently -- precompute the length of the
+;; ;;; answer string, then allocate & fill it in iteratively. Using 
+;; ;;; STRING-CONCATENATE is less efficient.
+
+
+;;; Split out so that other routines in this library can avoid arg-parsing
+;;; overhead for END parameter.
+(define (%substring s start end)
+  (if (and (zero? start) (= end (string-length s))) s
+      (substring s start end)))
+
+;; (define (string-join strings . delim+grammar)
+;;   (let-optionals* delim+grammar ((delim " " (string? delim))
+;; 				 (grammar 'infix))
+;;     (let ((buildit (lambda (lis final)
+;; 		     (let recur ((lis lis))
+;; 		       (if (pair? lis)
+;; 			   (cons delim (cons (car lis) (recur (cdr lis))))
+;; 			   final)))))
+
+;;       (cond ((pair? strings)
+;; 	     (string-concatenate
+;; 	      (case grammar
+
+;; 		((infix strict-infix)
+;; 		 (cons (car strings) (buildit (cdr strings) '())))
+
+;; 		((prefix) (buildit strings '()))
+
+;; 		((suffix)
+;; 		 (cons (car strings) (buildit (cdr strings) (list delim))))
+
+;; 		(else (error "Illegal join grammar"
+;; 			     grammar string-join)))))
+
+;; 	     ((not (null? strings))
+;; 	      (error "STRINGS parameter not list." strings string-join))
+
+;; 	     ;; STRINGS is ()
+
+;; 	     ((eq? grammar 'strict-infix)
+;; 	      (error "Empty list cannot be joined with STRICT-INFIX grammar."
+;; 		     string-join))
+
+;; 	     (else "")))))		; Special-cased for infix grammar.
+
+(define (string-segment str k)
+  (if (< k 1) (error "minimum segment size is 1" k))
+  (let ((len (string-length str)))
+    (let loop ((start 0)
+               (result '()))
+      (if (= start len)
+        (reverse result)
+        (let ((end (min (+ start k) len)))
+          (loop end (cons (%substring str start end) result)))))))
+
+
+(define (string-take-while s criterion . maybe-start+end)
+  (let-string-start+end (start end) string-take-while s maybe-start+end
+    (let ((idx (string-skip s criterion start end)))
+      (if idx
+          (%substring s 0 idx)
+          ""))))
+
+(define (string-take-while-right s criterion . maybe-start+end)
+  (let-string-start+end (start end) string-take-while s maybe-start+end
+    (let ((idx (string-skip-right s criterion start end)))
+      (if idx
+          (%substring s (+ idx 1) (string-length s))
+          ""))))
+
+(define (string-drop-while s criterion . maybe-start+end)
+  (let-string-start+end (start end) string-drop-while s maybe-start+end
+    (let ((idx (string-skip s criterion start end)))
+      (if idx
+          (%substring s idx (string-length s))
+          s))))
+
+(define (string-drop-while-right s criterion . maybe-start+end)
+  (let-string-start+end (start end) string-drop-while s maybe-start+end
+    (let ((idx (string-skip-right s criterion start end)))
+      (if idx
+          (%substring s 0 (+ idx 1))
+          s))))
+
+
+(define (string-span s criterion . maybe-start+end)
+  (let-string-start+end (start end) string-span s maybe-start+end
+    (let ((idx (string-skip s criterion start end)))
+      (if idx
+        (values (%substring s 0 idx) (%substring s idx (string-length s)))
+        (values "" s)))))
+
+
+(define (string-break s criterion . maybe-start+end)
+  (let-string-start+end (start end) string-break s maybe-start+end
+    (let ((idx (string-index s criterion start end)))
+      (if idx
+        (values (%substring s 0 idx) (%substring s idx (string-length s)))
+        (values s "")))))
+
+;;; string-replicate s from [to start end] -> string
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; S is a string; START and END are optional arguments that demarcate
+;;; a substring of S, defaulting to 0 and the length of S (e.g., the whole
+;;; string). Replicate this substring up and down index space, in both the
+;;  positive and negative directions. For example, if S = "abcdefg", START=3, 
+;;; and END=6, then we have the conceptual bidirectionally-infinite string
+;;;     ...  d  e  f  d  e  f  d  e  f  d  e  f  d  e  f  d  e  f  d  e  f ...
+;;;     ... -9 -8 -7 -6 -5 -4 -3 -2 -1  0  1  2  3  4  5  6  7  8  9 ...
+;;; XSUBSTRING returns the substring of this string beginning at index FROM,
+;;; and ending at TO (which defaults to FROM+(END-START)).
+;;; 
+;;; You can use XSUBSTRING in many ways:
+;;; - To rotate a string left:  (string-replicate "abcdef" 2)  => "cdefab"
+;;; - To rotate a string right: (string-replicate "abcdef" -2) => "efabcd"
+;;; - To replicate a string:    (string-replicate "abc" 0 7) => "abcabca"
+;;;
+;;; Note that 
+;;;   - The FROM/TO indices give a half-open range -- the characters from
+;;;     index FROM up to, but not including index TO.
+;;;   - The FROM/TO indices are not in terms of the index space for string S.
+;;;     They are in terms of the replicated index space of the substring
+;;;     defined by S, START, and END.
+;;;
+;;; It is an error if START=END -- although this is allowed by special
+;;; dispensation when FROM=TO.
+
+(define (string-replicate s from . maybe-to+start+end)
+  (check-arg (lambda (val) (and (integer? val) (exact? val)))
+	     from string-replicate)
+  (receive (to start end)
+           (if (pair? maybe-to+start+end)
+	       (let-string-start+end (start end) string-replicate s (cdr maybe-to+start+end)
+		 (let ((to (car maybe-to+start+end)))
+		   (check-arg (lambda (val) (and (integer? val)
+						 (exact? val)
+						 (<= from val)))
+			      to string-replicate)
+		   (values to start end)))
+	       (let ((slen (string-length (check-arg string? s string-replicate))))
+		 (values (+ from slen) 0 slen)))
+    (let ((slen   (- end start))
+	  (anslen (- to  from)))
+      (cond ((zero? anslen) "")
+	    ((zero? slen) (error "Cannot replicate empty (sub)string"
+				  string-replicate s from to start end))
+
+	    ((= 1 slen)		; Fast path for 1-char replication.
+	     (make-string anslen (string-ref s start)))
+
+	    ;; Selected text falls entirely within one span.
+	    ((= (floor (/ from slen)) (floor (/ to slen)))
+	     (substring s (+ start (modulo from slen))
+			  (+ start (modulo to   slen))))
+
+	    ;; Selected text requires multiple spans.
+	    (else (let ((ans (make-string anslen)))
+		    (%multispan-repcopy! ans 0 s from to start end)
+		    ans))))))
+
+
+;;; Library-internal routine
+(define (%string-copy! to tstart from fstart fend)
+  (if (> fstart tstart)
+      (do ((i fstart (+ i 1))
+	   (j tstart (+ j 1)))
+	  ((>= i fend))
+	(string-set! to j (string-ref from i)))
+
+      (do ((i (- fend 1)                    (- i 1))
+	   (j (+ -1 tstart (- fend fstart)) (- j 1)))
+	  ((< i fstart))
+	(string-set! to j (string-ref from i)))))
+
+;;; This is the core copying loop for XSUBSTRING and STRING-XCOPY!
+;;; Internal -- not exported, no careful arg checking.
+(define (%multispan-repcopy! target tstart s sfrom sto start end)
+  (let* ((slen (- end start))
+	 (i0 (+ start (modulo sfrom slen)))
+	 (total-chars (- sto sfrom)))
+
+    ;; Copy the partial span ! the beginning
+    (%string-copy! target tstart s i0 end)
+		    
+    (let* ((ncopied (- end i0))			; We've copied this many.
+	   (nleft (- total-chars ncopied))	; # chars left to copy.
+	   (nspans (quotient nleft slen)))	; # whole spans to copy
+			   
+      ;; Copy the whole spans in the middle.
+      (do ((i (+ tstart ncopied) (+ i slen))	; Current target index.
+	   (nspans nspans (- nspans 1)))	; # spans to copy
+	  ((zero? nspans)
+	   ;; Copy the partial-span ! the end & we're done.
+	   (%string-copy! target i s start (+ start (- total-chars (- i tstart)))))
+
+	(%string-copy! target i s start end))))); Copy a whole span.
+
+;;; Filtering strings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; string-remove char/pred string [start end]
+;;; string-filter char/pred string [start end]
+;;;
+;;; If the criterion is a predicate, we don't do this double-scan strategy, 
+;;;   because the predicate might have side-effects or be very expensive to
+;;;   compute. So we preallocate a temp buffer pessimistically, and only do
+;;;   one scan over S. This is likely to be faster and more space-efficient
+;;;   than consing a list.
+
+(define (string-remove criterion s . maybe-start+end)
+  (let-string-start+end (start end) string-remove s maybe-start+end
+	(let* ((slen (- end start))
+	       (temp (make-string slen))
+	       (ans-len (string-fold (lambda (c i)
+				       (if (criterion c) i
+					   (begin (string-set! temp i c)
+						  (+ i 1))))
+				     0 s start end)))
+	  (if (= ans-len slen) temp (substring temp 0 ans-len)))))
+
+
+
+
+;;; Knuth-Morris-Pratt string searching
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; See
+;;;     "Fast pattern matching in strings"
+;;;     SIAM J. Computing 6(2):323-350 1977
+;;;     D. E. Knuth, J. H. Morris and V. R. Pratt
+;;; also described in
+;;;     "Pattern matching in strings"
+;;;     Alfred V. Aho
+;;;     Formal Language Theory - Perspectives and Open Problems
+;;;     Ronald V. Brook (editor)
+;;; This algorithm is O(m + n) where m and n are the
+;;; lengths of the pattern and string respectively
+
+;;; KMP search source[start,end) for PATTERN. Return starting index of
+;;; leftmost match or #f.
+
+(define (%kmp-search pattern text c= p-start p-end t-start t-end)
+  (let ((plen (- p-end p-start))
+	(rv (make-kmp-restart-vector pattern c= p-start p-end)))
+
+    ;; The search loop. TJ & PJ are redundant state.
+    (let lp ((ti t-start) (pi 0)
+	     (tj (- t-end t-start)) ; (- tlen ti) -- how many chars left.
+	     (pj plen))		 ; (- plen pi) -- how many chars left.
+
+      (if (= pi plen)
+	  (- ti plen)			; Win.
+	  (and (<= pj tj)		; Lose.
+	       (if (c= (string-ref text ti) ; Search.
+		       (string-ref pattern (+ p-start pi)))
+		   (lp (+ 1 ti) (+ 1 pi) (- tj 1) (- pj 1)) ; Advance.
+
+		   (let ((pi (vector-ref rv pi))) ; Retreat.
+		     (if (= pi -1)
+			 (lp (+ ti 1) 0  (- tj 1) plen) ; Punt.
+			 (lp ti       pi tj       (- plen pi))))))))))
+
+;;; (make-kmp-restart-vector pattern [c= start end]) -> integer-vector
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Compute the KMP restart vector RV for string PATTERN.  If
+;;; we have matched chars 0..i-1 of PATTERN against a search string S, and
+;;; PATTERN[i] doesn't match S[k], then reset i := RV[i], and try again to
+;;; match S[k].  If RV[i] = -1, then punt S[k] completely, and move on to
+;;; S[k+1] and PATTERN[0] -- no possible match of PAT[0..i] contains S[k].
+;;;
+;;; In other words, if you have matched the first i chars of PATTERN, but
+;;; the i+1'th char doesn't match, RV[i] tells you what the next-longest
+;;; prefix of PATTERN is that you have matched.
+;;;
+;;; - C= (default CHAR=?) is used to compare characters for equality.
+;;;   Pass in CHAR-CI=? for case-folded string search.
+;;;
+;;; - START & END restrict the pattern to the indicated substring; the
+;;;   returned vector will be of length END - START. The numbers stored
+;;;   in the vector will be values in the range [0,END-START) -- that is,
+;;;   they are valid indices into the restart vector; you have to add START
+;;;   to them to use them as indices into PATTERN.
+;;;
+;;; I've split this out as a separate function in case other constant-string
+;;; searchers might want to use it.
+;;;
+;;; E.g.:
+;;;    a b d  a b x
+;;; #(-1 0 0 -1 1 2)
+
+#;(define (make-kmp-restart-vector pattern . maybe-c=+start+end)
+  (let-optionals* maybe-c=+start+end
+                  ((c= char=? (procedure? c=))
+		   ((start end) (lambda (args)
+				  (string-parse-start+end make-kmp-restart-vector
+							  pattern args))))
+    (let* ((rvlen (- end start))
+	   (rv (make-vector rvlen -1)))
+      (if (> rvlen 0)
+	  (let ((rvlen-1 (- rvlen 1))
+		(c0 (string-ref pattern start)))
+
+	    ;; Here's the main loop. We have set rv[0] ... rv[i].
+	    ;; K = I + START -- it is the corresponding index into PATTERN.
+	    (let lp1 ((i 0) (j -1) (k start))
+	      (if (< i rvlen-1)
+		  ;; lp2 invariant:
+		  ;;   pat[(k-j) .. k-1] matches pat[start .. start+j-1]
+		  ;;   or j = -1.
+		  (let lp2 ((j j))
+		    (cond ((= j -1)
+			   (let ((i1 (+ 1 i)))
+			     (if (not (c= (string-ref pattern (+ k 1)) c0))
+				 (vector-set! rv i1 0))
+			     (lp1 i1 0 (+ k 1))))
+			  ;; pat[(k-j) .. k] matches pat[start..start+j].
+			  ((c= (string-ref pattern k) (string-ref pattern (+ j start)))
+			   (let* ((i1 (+ 1 i))
+				  (j1 (+ 1 j)))
+			     (vector-set! rv i1 j1)
+			     (lp1 i1 j1 (+ k 1))))
+
+			  (else (lp2 (vector-ref rv j)))))))))
+      rv)))
+
+
+(define (make-kmp-restart-vector pattern . maybe-c=+start+end)
+  (let-optionals* maybe-c=+start+end
+                  ((c= char=?) rest) ; (procedure? c=))
+     (receive (rest2 start end) (string-parse-start+end make-kmp-restart-vector pattern rest)
+       (let* ((rvlen (- end start))
+	      (rv (make-vector rvlen -1)))
+      (if (> rvlen 0)
+	  (let ((rvlen-1 (- rvlen 1))
+		(c0 (string-ref pattern start)))
+
+	    ;; Here's the main loop. We have set rv[0] ... rv[i].
+	    ;; K = I + START -- it is the corresponding index into PATTERN.
+	    (let lp1 ((i 0) (j -1) (k start))
+	      (if (< i rvlen-1)
+
+		  ;; lp2 invariant:
+		  ;;   pat[(k-j) .. k-1] matches pat[start .. start+j-1]
+		  ;;   or j = -1.
+		  (let lp2 ((j j))
+
+		    (cond ((= j -1)
+			   (let ((i1 (+ i 1))
+				 (ck+1 (string-ref pattern (add1 k))))
+			     (vector-set! rv i1 (if (c= ck+1 c0) -1 0))
+			     (lp1 i1 0 (+ k 1))))
+
+			  ;; pat[(k-j) .. k] matches pat[start..start+j].
+			  ((c= (string-ref pattern k)
+			       (string-ref pattern (+ j start)))
+			   (let* ((i1 (+ 1 i))
+				  (j1 (+ 1 j)))
+			     (vector-set! rv i1 j1)
+			     (lp1 i1 j1 (+ k 1))))
+
+			  (else (lp2 (vector-ref rv j)))))))))
+      rv))))
+
+
+
+(define (string-contains-right text pattern . maybe-starts+ends)
+  (let-string-start+end2 (t-start t-end p-start p-end)
+                         string-contains-right text pattern maybe-starts+ends
+    (let* ((t-len (string-length text))
+           (p-len (string-length pattern))
+           (p-size (- p-end p-start))
+           (rt-start (- t-len t-end))
+           (rt-end (- t-len t-start))
+           (rp-start (- p-len p-end))
+           (rp-end (- p-len p-start))
+           (res (%kmp-search (string-reverse pattern)
+                             (string-reverse text)
+                             char=? rp-start rp-end rt-start rt-end)))
+      (if res
+        (- t-len res p-size)
+        #f))))
+
+)
+
+(provide "srfi/152")

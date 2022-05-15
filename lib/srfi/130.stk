@@ -46,11 +46,16 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 13-Nov-2020 21:10 (jpellegrini)
-;;;; Last file update: 10-Dec-2021 20:44 (eg)
+;;;; Last file update: 15-May-2022 00:20 (jpellegrini)
 ;;;;
 
 (define-module srfi/130
-  (import (srfi 13))
+  ;; Do not import some procedures, since we
+  ;; are redefining them. If we do import them, they'll cause
+  ;; problems when we import SRFI 13 afain in SRFI 152.
+  (import (except (srfi 13)
+                  string-index string-index-right
+                  string-skip string-skip-right))
    
   (export string-cursor? string-ref/cursor)
   (export string-cursor-start string-cursor-end
