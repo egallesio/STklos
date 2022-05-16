@@ -76,16 +76,7 @@ _exclude_duplicated_opts() {
     done
 }
 
-
-########################################################################
-###
-### STKLOS
-###
-########################################################################
-
-_stklos() {
-    local opts=(--load= --file= --execute= --boot-file= --conf-dir= --prepend-load-path= --append-load-path= --no-init-file --interactive --no-line-editor --debug --stack-size= --case-sensitive --case-insensitive  --utf8-encoding= --version -V --help)
-    
+_maybe_add_spaces() {
     # Options that do not end in '=' get an extra space appended.
     # This is so completion for options with parameters will put the
     # cursor right after the equal sign,
@@ -102,6 +93,33 @@ _stklos() {
             opts[$i]+=' '
         fi
     done
+}
+
+# This function is called when completion is requested with the cursor after
+# a hyphen. We complete with all options.
+_complete_after_hyphen() {
+    if [[ $word == -* ]]; then
+        _exclude_duplicated_opts
+        # exclude space from IFS, or it would remove the space from the
+        # completed option
+        local IFS=$'\t\n'
+        compopt -o nospace
+        COMPREPLY=($(compgen -W "${opts[*]}" -- "${word}"))
+        return 0
+    fi
+}
+
+
+########################################################################
+###
+### STKLOS
+###
+########################################################################
+
+_stklos() {
+    local opts=(--load= --file= --execute= --boot-file= --conf-dir= --prepend-load-path= --append-load-path= --no-init-file --interactive --no-line-editor --debug --stack-size= --case-sensitive --case-insensitive  --utf8-encoding= --version -V --help)
+
+    _maybe_add_spaces
     
     # Start with empty completion list
     COMPREPLY=()
@@ -117,16 +135,7 @@ _stklos() {
     #
     
     # After a hyphen (complete with options)
-    if [[ $word == -* ]]; then
-        _exclude_duplicated_opts
-        # exclude space from IFS, or it would remove the space from the
-        # completed option
-        local IFS=$'\t\n'
-        compopt -o nospace
-        COMPREPLY=($(compgen -W "${opts[*]}" -- "${word}"))
-        return 0
-    fi
-
+    _complete_after_hyphen
 
     # Right after a short option, or a long option without parameters
     case $prev in
@@ -219,22 +228,7 @@ _stklos_compile() {
     # Our options, in an array:
     local opts=(--case-sensitive --case-insensitive --colon-position= --output= --C-code --evaluate= --prepend-code= --define-feature= --line-info --show-instructions --prepend-load-path= --append-load-path= --no-time --help)
 
-    # Options that do not end in '=' get an extra space appended.
-    # This is so completion for options with parameters will put the
-    # cursor right after the equal sign,
-    #
-    # --file=[]
-    #
-    # while completion of parameterless options put the cursor after
-    # a space:
-    #
-    # --debug []
-    #
-    for i in ${!opts[*]}; do
-        if [[ ${opts[$i]} != *= ]]; then
-            opts[$i]+=' '
-        fi
-    done
+    _maybe_add_spaces
 
     # Start with empty completion list
     COMPREPLY=()
@@ -250,15 +244,7 @@ _stklos_compile() {
     #
     
     # After a hyphen (complete with options)
-    if [[ $word == -* ]]; then
-        _exclude_duplicated_opts
-        # exclude space from IFS, or it would remove the space from the
-        # completed option
-        local IFS=$'\t\n'
-        compopt -o nospace
-        COMPREPLY=($(compgen -W "${opts[*]}" -- "${word}"))
-        return 0
-    fi
+    _complete_after_hyphen
 
     # Right after a short option, or a long option without parameters
     case $prev in
