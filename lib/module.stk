@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 22-Apr-2022 16:12 (eg)
+;;;; Last file update: 13-May-2022 19:34 (eg)
 ;;;;
 
 
@@ -46,13 +46,13 @@ doc>
 (define symbol-value*
   (let ((absent (list 'absent))
         (stklos-module (find-module 'STklos)))
-    (lambda (name module :optional (default #f default?))
+    (lambda (name module . default)
       (let ((val (symbol-value name module absent)))
         (when (and (eq? val absent) (not (library? module)))
           (set! val (symbol-value name stklos-module absent)))
         (if (eq? val absent)
-            (if default?
-                default
+            (if (not (null? default))
+                (car default)
                 (error 'symbol-value* "symbol ``~S'' not found" name))
             val)))))
 
@@ -67,9 +67,10 @@ doc>
 |#
 (define symbol-bound?
   (let ((absent (list 'absent)))
-    (lambda (symb #:optional (module (current-module)))
-      (not (eq? (symbol-value* symb module absent)
-                absent)))))
+    (lambda (symb . module)
+      (let ((module (if (null? module) (current-module) (car module))))
+        (not (eq? (symbol-value* symb module absent)
+                  absent))))))
 
 
 ;;=============================================================================
