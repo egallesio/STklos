@@ -31,12 +31,27 @@
 
 #
 # Source this file to get tab completion for the STklos command in
-# Bash.  For a permanent effect, either source this from your
-# .bash_profile or put it with the other bash completion files
-# in your system -- for example, in Debian and Debian-based
-# systems, this will be
+# Bash.
 #
-# /usr/share/bash-completion/completions/
+# For a permanent effect, either:
+#
+# - source this from your .bash_profile, or
+#
+# - put it in your users' local bash completion directory. In
+#   Debian this is $XDG_DATA_HOME/bash-completion/completions
+#   or
+#
+# - put it with the other bash completion files in your system --
+#   for example, in Debian and Debian-based systems, this will be
+#   /usr/share/bash-completion/completions/
+#
+# It is recommended that the completion script have the same name
+# as the command, so a good choice is to install the script under
+# the name 'stklos' and create a symbolic link from 'stklos-compile'
+# to 'stklos'
+#
+# -rw-r--r-- 1 root root 9380 May 16 10:35  stklos
+# lrwxrwxrwx 1 root root    6 May 16 10:37  stklos-compile -> stklos
 #
 
 
