@@ -46,6 +46,9 @@
 ###
 ########################################################################
 
+
+
+
 # This function removes from the command line the
 # options that were already typed before, so if the user
 # types --no- and asks for completion, it will get
@@ -74,10 +77,15 @@ _exclude_duplicated_opts() {
 }
 
 
-_stklos() {
-    # Our options, in an array:
-    local opts=(--load= --file= --execute= --boot-file= --conf-dir= --prepend-load-path= --append-load-path= --no-init-file --interactive --no-line-editor --debug --stack-size= --case-sensitive --case-insensitive  --utf8-encoding= --version -V --help)
+########################################################################
+###
+### STKLOS
+###
+########################################################################
 
+_stklos() {
+    local opts=(--load= --file= --execute= --boot-file= --conf-dir= --prepend-load-path= --append-load-path= --no-init-file --interactive --no-line-editor --debug --stack-size= --case-sensitive --case-insensitive  --utf8-encoding= --version -V --help)
+    
     # Options that do not end in '=' get an extra space appended.
     # This is so completion for options with parameters will put the
     # cursor right after the equal sign,
@@ -94,10 +102,10 @@ _stklos() {
             opts[$i]+=' '
         fi
     done
-
+    
     # Start with empty completion list
     COMPREPLY=()
-
+    
     # Our variables:
     local cmd="${1##*/}"
     local word=${COMP_WORDS[COMP_CWORD]}
@@ -111,14 +119,18 @@ _stklos() {
     # After a hyphen (complete with options)
     if [[ $word == -* ]]; then
         _exclude_duplicated_opts
+        # exclude space from IFS, or it would remove the space from the
+        # completed option
+        local IFS=$'\t\n'
         compopt -o nospace
         COMPREPLY=($(compgen -W "${opts[*]}" -- "${word}"))
         return 0
     fi
 
-    # Right after a short option
+
+    # Right after a short option, or a long option without parameters
     case $prev in
-        -f | -l )
+        -f|-l)
             # Scheme files
             compopt -o plusdirs
             COMPREPLY=($(compgen -f -X "!(*.stk|*.scm)" -- "${word}"))
@@ -157,6 +169,10 @@ _stklos() {
                 COMPREPLY=($(compgen -d))
                 return 0
                 ;;
+            --utf8-encoding)
+                COMPREPLY=($(compgen -W "yes no"))
+                return 0
+                ;;
         esac
     fi
 
@@ -179,8 +195,9 @@ _stklos() {
                 COMPREPLY=($(compgen -f -X "!*.img" -- "${word}"))
                 return 0
                 ;;
-            --utf8-encoding )
-                COMPREPLY=($(compgen -W "yes no"))
+            --utf8-encoding)
+                compopt +o nospace
+                COMPREPLY=($(compgen -W "yes no" -- ${word}))
                 return 0
                 ;;
         esac
@@ -189,3 +206,128 @@ _stklos() {
 
 # Call complete to register our completion function for stklos:
 complete -F _stklos stklos
+
+
+
+########################################################################
+###
+### STKLOS-COMPILE
+###
+########################################################################
+
+_stklos_compile() {
+    # Our options, in an array:
+    local opts=(--case-sensitive --case-insensitive --colon-position= --output= --C-code --evaluate= --prepend-code= --define-feature= --line-info --show-instructions --prepend-load-path= --append-load-path= --no-time --help)
+
+    # Options that do not end in '=' get an extra space appended.
+    # This is so completion for options with parameters will put the
+    # cursor right after the equal sign,
+    #
+    # --file=[]
+    #
+    # while completion of parameterless options put the cursor after
+    # a space:
+    #
+    # --debug []
+    #
+    for i in ${!opts[*]}; do
+        if [[ ${opts[$i]} != *= ]]; then
+            opts[$i]+=' '
+        fi
+    done
+
+    # Start with empty completion list
+    COMPREPLY=()
+
+    # Our variables:
+    local cmd="${1##*/}"
+    local word=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+    local ante=${COMP_WORDS[COMP_CWORD-2]}
+    
+    #
+    # SITUATIONS:
+    #
+    
+    # After a hyphen (complete with options)
+    if [[ $word == -* ]]; then
+        _exclude_duplicated_opts
+        # exclude space from IFS, or it would remove the space from the
+        # completed option
+        local IFS=$'\t\n'
+        compopt -o nospace
+        COMPREPLY=($(compgen -W "${opts[*]}" -- "${word}"))
+        return 0
+    fi
+
+    # Right after a short option, or a long option without parameters
+    case $prev in
+        -f | -l )
+            # Scheme files
+            compopt -o plusdirs
+            COMPREPLY=($(compgen -f -X "!(*.stk|*.scm)" -- "${word}"))
+            return 0
+            ;;
+        -D|-I|-A)
+            # directories
+            COMPREPLY=($(compgen -d -- "${word}"))
+            return 0
+            ;;
+
+        # Nothing follows the following options
+        # (STklos does not take any parameters that are not
+        #  options prefixed by at least one hyphen)
+        stklos|--case-sensitive|--case-insensitive|-c|-i)
+            return 0
+            ;;
+        --C-code|-C|-l|--line-info|--show-instructions|-S)
+            return 0
+            ;;
+        --no-time|-h)
+            return 0
+            ;;
+     esac
+
+    # Right after a long option, no chars for the parameter typed yet
+    if [ $word = "=" ]; then
+        case $prev in
+            --colon-position)
+                COMPREPLY=($(compgen -W "before after both"))
+                return 0  
+                ;;
+            
+            --prepend-load-path|--append-load-path)
+                # directories
+                compopt -o nospace
+                COMPREPLY=($(compgen -d))
+                return 0
+                ;;
+        esac
+    fi
+
+    # After long option, parameter partly typed
+    if [ $prev = "=" ]; then
+        compopt -o nospace
+        case $ante in
+            --colon-position)
+                compopt +o nospace
+                COMPREPLY=($(compgen -W "before after both" -- "${word}"))
+                return 0  
+                ;;
+            
+            --evaluate|--prepend-code|--define-feature|--output)
+                return 0
+                ;;
+            
+            --prepend-load-path|--append-load-path)
+                # directories
+                compopt -o nospace
+                COMPREPLY=($(compgen -d -- "${word}"))
+                return 0
+                ;;
+        esac
+    fi
+}
+
+# Call complete to register our completion function for stklos-compile:
+complete -F _stklos_compile stklos-compile
