@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Apr-1997 16:02 (eg)
-;;;; Last file update: 11-May-2022 14:29 (eg)
+;;;; Last file update: 17-May-2022 18:00 (eg)
 ;;;;
 
 
@@ -224,7 +224,7 @@ doc>
            ,@(map (lambda (x)
                     `(set! ,x (,untrace-symbol ',x (current-module))))
                   args)))))
-)
+
 (select-module STklos)
 (import Trace)
 
