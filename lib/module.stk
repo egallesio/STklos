@@ -21,56 +21,8 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 13-May-2022 19:34 (eg)
+;;;; Last file update: 17-May-2022 19:00 (eg)
 ;;;;
-
-
-;;=============================================================================
-;;
-;;                              SYMBOL-VALUE*
-;;
-;;=============================================================================
-#|
-<doc EXT symbol-value*
- * (symbol-value* symbol module)
- * (symbol-value* symbol module default)
- *
- * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
- * an error is signaled if no |default| is provided, otherwise |symbol-value|
- * returns |default|.
- *
- * Note that this function searches the value of |symbol| in |module|
- * *and* in the STklos module if module is not a R7RS library.
-doc>
-|#
-(define symbol-value*
-  (let ((absent (list 'absent))
-        (stklos-module (find-module 'STklos)))
-    (lambda (name module . default)
-      (let ((val (symbol-value name module absent)))
-        (when (and (eq? val absent) (not (library? module)))
-          (set! val (symbol-value name stklos-module absent)))
-        (if (eq? val absent)
-            (if (not (null? default))
-                (car default)
-                (error 'symbol-value* "symbol ``~S'' not found" name))
-            val)))))
-
-#|
-<doc EXT symbol-bound?
- * (symbol-bound? symb)
- * (symbol-bound? symb module)
- *
- * Returns #t is |symb| is bound in |module| and #f otherwise. If |module| is
- * omitted it defaults to the current module.
-doc>
-|#
-(define symbol-bound?
-  (let ((absent (list 'absent)))
-    (lambda (symb . module)
-      (let ((module (if (null? module) (current-module) (car module))))
-        (not (eq? (symbol-value* symb module absent)
-                  absent))))))
 
 
 ;;=============================================================================

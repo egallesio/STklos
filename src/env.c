@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 12-May-2022 15:32 (eg)
+ * Last file update: 17-May-2022 18:59 (eg)
  */
 
 #include "stklos.h"
@@ -534,7 +534,13 @@ DEFINE_PRIMITIVE("symbol-lock!", symbol_lock, subr12, (SCM symb, SCM module))
 }
 
 /*===========================================================================*/
-
+static Inline SCM find_symbol_value(SCM symbol, SCM module)
+{
+  SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
+  if (res)
+    return *BOX_VALUES(CDR(res));    /* sure that this box arity is 1 */
+  return NULL;
+}
 
 /*
 <doc EXT symbol-value
@@ -549,20 +555,78 @@ doc>
 DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
                  (SCM symbol, SCM module, SCM default_value))
 {
-  SCM res;
-
   if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
   if (!MODULEP(module)) error_bad_module(module);
 
-  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
-  if (res) {
-    return *BOX_VALUES(CDR(res));    /* sure that this box arity is 1 */
-  } else {
-    if (!default_value) error_unbound_variable(symbol, module);
-    return default_value;
+  SCM res = find_symbol_value(symbol, module);
+  if (!res) {
+    if (default_value) return default_value;
+    error_unbound_variable(symbol, module);
   }
+  return res;
 }
 
+/*
+<doc EXT symbol-value*
+ * (symbol-value* symbol module)
+ * (symbol-value* symbol module default)
+ *
+ * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
+ * an error is signaled if no |default| is provided, otherwise |symbol-value|
+ * returns |default|.
+ *
+ * Note that this function searches the value of |symbol| in |module|
+ * *and* in the STklos module if module is not a R7RS library.
+doc>
+*/
+DEFINE_PRIMITIVE("symbol-value*", symbol_value_all, subr23,
+                 (SCM symbol, SCM module, SCM default_value))
+{
+  if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
+  if (!MODULEP(module)) error_bad_module(module);
+
+  SCM res = find_symbol_value(symbol, module);
+  if (!res) { /* Symbol not found */
+    if (module != STk_STklos_module && !MODULE_IS_LIBRARY(module)) {
+      /* Try to find symbol in STklos module */
+      res = find_symbol_value(symbol, STk_STklos_module);
+    }
+  }
+  if (!res) {
+    if (default_value) return default_value;
+    error_unbound_variable(symbol, module);
+  }
+  return res;
+}
+
+
+/*
+<doc EXT symbol-bound?
+ * (symbol-bound? symb)
+ * (symbol-bound? symb module)
+ *
+ * Returns #t is |symb| is bound in |module| and #f otherwise. If |module| is
+ * omitted it defaults to the current module.
+doc>
+*/
+DEFINE_PRIMITIVE("symbol-bound?", symbol_boundp, subr12, (SCM symbol, SCM module))
+{
+  if (!module)
+    module = STk_current_module();
+  else
+    if (!MODULEP(module)) error_bad_module(module);
+
+  SCM res = find_symbol_value(symbol, module);
+  if (!res) { /* Symbol not found */
+    if (module != STk_STklos_module && !MODULE_IS_LIBRARY(module)) {
+      /* Try to find symbol in STklos module */
+      res = find_symbol_value(symbol, STk_STklos_module);
+    }
+  }
+
+  return MAKE_BOOLEAN(res);
+}
+/* ---------------------------------------------------------------------- */
 
 DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void))
 {
@@ -773,6 +837,8 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_lockedp);
 
   ADD_PRIMITIVE(symbol_value);
+  ADD_PRIMITIVE(symbol_value_all);
+  ADD_PRIMITIVE(symbol_boundp);
   ADD_PRIMITIVE(symbol_mutablep);
   ADD_PRIMITIVE(symbol_lock);
   ADD_PRIMITIVE(symbol_define);
