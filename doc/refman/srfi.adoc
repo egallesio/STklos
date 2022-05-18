@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 18-May-2022 14:53 (eg)
+// Last file update: 18-May-2022 16:26 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -332,12 +332,8 @@ NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 {{insertdoc 'not-ipair?}}
 {{insertdoc 'null-ilist?}}
 
-//icar icdr ... icddadr icddddr
-//insertdoc 'ilist-ref}}
 {{insertdoc 'itenth}}
 {{insertdoc 'icar+icdr}}
-//insertdoc 'ilist-tail}}
-//insertdoc 'idrop/ilist-tail}}
 {{insertdoc 'idrop-right}}
 {{insertdoc 'isplit-at}}
 {{insertdoc 'last-ipair}}

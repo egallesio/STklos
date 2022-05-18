@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 01-May-2022 20:12
- * Last file update: 05-May-2022 12:37 (jpellegrini)
+ * Last file update: 18-May-2022 16:13 (eg)
  */
 
 
@@ -45,6 +45,7 @@ DEFINE_PRIMITIVE("ipair",srfi_116_ipair,subr2, (SCM a, SCM d))
  * Returns a newly allocated |ipair| whose |icar| is |a| and whose |icdr| is |d|.
  * The ipair is guaranteed to be different (in the sense of |eqv?|)
  * from every existing object.
+doc>
  */
 {
     SCM cons = STk_cons(a,d);
@@ -74,7 +75,7 @@ doc>
   }
   return l;
 }
-    
+
 /*
 <doc EXT ipair*
  * (ipair* obj ...)
@@ -120,8 +121,8 @@ doc>
 DEFINE_PRIMITIVE("ipair?", srfi_116_ipairp, subr1, (SCM obj))
 {
     return (CONSP(obj) && (BOXED_INFO(obj) & CONS_CONST))
-	? STk_true
-	: STk_false;
+        ? STk_true
+        : STk_false;
 }
 
 
@@ -152,21 +153,21 @@ doc>
 void
 STk_lock_list(SCM l) {
     for(;CONSP(l); l = CDR(l))
-	BOXED_INFO(l) |= CONS_CONST;
+        BOXED_INFO(l) |= CONS_CONST;
 }
 
 void
 STk_unlock_list(SCM l) {
     for(;CONSP(l); l = CDR(l))
-	BOXED_INFO(l) &= (~CONS_CONST);
+        BOXED_INFO(l) &= (~CONS_CONST);
 }
 
 void
 STk_lock_tree(SCM l) {
     if (CONSP(l)) {
-	BOXED_INFO(l) |= CONS_CONST;
-	STk_lock_tree(CAR(l));
-	STk_lock_tree(CDR(l));
+        BOXED_INFO(l) |= CONS_CONST;
+        STk_lock_tree(CAR(l));
+        STk_lock_tree(CDR(l));
     }
     return;
 }
@@ -174,9 +175,9 @@ STk_lock_tree(SCM l) {
 void
 STk_unlock_tree(SCM l) {
     if (CONSP(l)) {
-	BOXED_INFO(l) &= (~CONS_CONST);
-	STk_lock_tree(CAR(l));
-	STk_lock_tree(CDR(l));
+        BOXED_INFO(l) &= (~CONS_CONST);
+        STk_lock_tree(CAR(l));
+        STk_lock_tree(CDR(l));
     }
     return;
 }
@@ -269,7 +270,7 @@ DEFINE_PRIMITIVE("replace-icdr", srfi_116_replace_icdr, subr2, (SCM ipair, SCM o
  *
  * These procedures, which are inverses, return an ipair and
  * a pair respectively that have the same (i)car and (i)cdr
- * fields as the argument. 
+ * fields as the argument.
 doc>
  */
 DEFINE_PRIMITIVE("ipair->pair",srfi_116_ipair_pair, subr1, (SCM ipair))
@@ -395,7 +396,7 @@ MODULE_ENTRY_START("srfi/116")
   ADD_PRIMITIVE_IN_MODULE(srfi_116_icar_icdr,    module);
 
   ADD_PRIMITIVE_IN_MODULE(srfi_116_iappend,      module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(srfi_116_replace_icar, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_116_replace_icdr, module);
 
