@@ -57,7 +57,7 @@
     (16 "Syntax for procedures of variable arity" (case-lambda))
     (17 "Generalized set!" () "srfi-17")
     (18 "Multithreading support")
-    ;;  19 Time Data Types and Procedures
+    (19 "Time Data Types and Procedures" () "srfi-19")
     ;;  20 ........ Withdrawn
     ;;  21  Real-time multithreading support
     (22 "Running Scheme Scripts on Unix")

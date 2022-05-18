@@ -121,7 +121,7 @@
         system                          ;posix (system <string>)
         getenv                          ;posix (getenv <string>)
         program-arguments               ;returns list of strings (argv)
-;;;     current-time                    ;returns time in seconds since 1/1/1970
+;;;     %current-time                    ;returns time in seconds since 1/1/1970
 
                   ;; Implementation Specific features
 

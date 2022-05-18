@@ -21,8 +21,8 @@
  * USA.
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
- *    Creation date: 29-Mar-1994 10:57
- * Last file update: 10-Jan-2022 20:20 (eg)
+ *    Creation date: 29-Mar-1994 10:57 (eg)
+ * Last file update: 26-May-2022 01:21 (jpellegrini)
  */
 
 #include <unistd.h>
@@ -34,6 +34,7 @@
 #include <dirent.h>
 #include <time.h>
 #include <locale.h>
+#include <math.h>
 #include "stklos.h"
 #include "struct.h"
 
@@ -1441,7 +1442,7 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  * (current-seconds)
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
- * measured in seconds.
+ * measured in seconds in the Coordinated Universal Time (UTC) scale.
  * 
  * NOTE: This {{stklos}} function should not be confused with
  * the R7RS  primitive |current-second| which returns an inexact number
@@ -1486,13 +1487,14 @@ DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
 
 
 /*
-<doc EXT current-time
- * (current-time)
+<doc EXT %current-time
+ * (%current-time)
  *
- * Returns a time object corresponding to the current time.
+ * Returns a time object corresponding to the current time
+ * (UTC).
 doc>
 */
-DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
+DEFINE_PRIMITIVE("%current-time", current_time, subr0, (void))
 {
   struct timespec now;
   SCM argv[4];
@@ -1500,7 +1502,7 @@ DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
   clock_gettime(CLOCK_REALTIME, &now);
 
   argv[3] = time_type;
-  argv[2] = STk_makekey("time-utc");
+  argv[2] = STk_intern("time-utc");
   argv[1] = STk_long2integer(now.tv_sec);
   argv[0] = STk_long2integer(now.tv_nsec);
   return STk_make_struct(4, &argv[3]);
@@ -1533,13 +1535,48 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
   return STk_void;
 }
 
+/*
+<doc EXT local-timezone-offset
+ * (local-timezone-offset)
+ *
+ * Returns the local timezone offset, in seconds.
+ *
+ * For example, for GMT+2 it will be |2 * 60 * 60| = |7200|
+ *
+ * @lisp
+ * (local-timezone-offset) => 0        ;; for GMT
+ * (local-timezone-offset) => 7200     ;; for GMT+2
+ * (local-timezone-offset) => -10800   ;; for GMT-3
+ * @end lisp
+ *
+ * The timezone is searched for in the environment variable |TZ|. If this
+ * variable does not appear in the environment, the system timezone is used.
+doc>
+*/
+DEFINE_PRIMITIVE("local-timezone-offset", local_timezone_offset, subr0, ())
+{
+  /* Init the timezone: */
+  time_t tt = (time_t) 0L;
+  struct tm *t __attribute__ ((unused)) = localtime(&tt);
+  
+  /* For some strange reason, timezone contains the offset seconds with the
+     opposite sign as one would usually see, so we swap it here. */
+  return STk_long2integer(-timezone);
+}
 
 /*
-<doc EXT seconds->date
- * (seconds->date n)
+<doc EXT %seconds->date
+ * (%seconds->date n)
  *
- * Convert the date |n| expressed as a number of seconds since the Epoch
- * to a date.
+ * Convert the date |n| expressed as a number of seconds since the _Epoch_,
+ * 1970-01-01 00:00:00 +0000 (UTC) into a date.
+ *
+ * This is equivalent to converting time-UTC to date.
+ * @lisp
+ * (%seconds->date 1351216417)           => #[date 2012-10-26 1:53:37]
+ * (time-utc->date
+ *   (make-time 'time-utc 0 1351216417)) => #[date 2012-10-26 1:53:37]
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
@@ -1548,14 +1585,30 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
   SCM argv[12];
   struct tm *t;
   time_t tt;
+  long nsec = 0L;
 
-  tt = (time_t) STk_integer2int32(seconds, &overflow);
-
-  if (overflow) error_bad_int_or_out_of_bounds(seconds);
+  if (INTP(seconds)) {
+      tt = (time_t) STk_integer2int32(seconds, &overflow);
+      if (overflow) error_bad_int_or_out_of_bounds(seconds);
+  } else if (REALP(seconds)) {
+      double sec = REAL_VAL(seconds);
+      tt = (time_t) STk_integer2int32(MAKE_INT((long)floor(sec)), &overflow);
+      if (overflow) STk_error("bad number ~S (or out of range)",seconds);
+      /* There doesn't seem to be an easy way to portably detect the maximum
+	 value for time_t, so we have to assume it's *at least* the same as
+         a long int... If time_t is a float or double, it could hold larger
+         numbers, but then we'd have to detect the typt of time_t, and the
+         magnitude of the times represented doesn't seem like something one'd
+         actually need.
+         --jpellegrini */
+      if (tt > INT_MAX_VAL || tt < INT_MIN_VAL)
+	  STk_error("seconds value out of representable bounds ~S", seconds);
+      nsec = (sec - tt) * 1000000000;
+  } else STk_error("bad integer or real ~S", seconds);
 
   t = localtime(&tt);
   argv[11] = date_type;
-  argv[10] = MAKE_INT(0);         /* zero nanoseconds */
+  argv[10] = MAKE_INT(nsec);
   argv[9]  = MAKE_INT(t->tm_sec);
   argv[8]  = MAKE_INT(t->tm_min);
   argv[7]  = MAKE_INT(t->tm_hour);
@@ -1568,7 +1621,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 #ifdef DARWIN
   argv[0]  = MAKE_INT(0);       /* Cannot figure how to find the timezone */
 #else
-  /* For some strange reason, timezone returns the offset seconds with the
+  /* For some strange reason, timezone contains the offset seconds with the
      opposite sign as one would usually see, so we swap it here. */
   argv[0]  = STk_long2integer(-timezone);
 #endif
@@ -1580,7 +1633,17 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 <doc EXT date->seconds
  * (date->seconds d)
  *
- * Convert the date |d| to the number of seconds since the _Epoch"_.
+ * Convert the date |d| to the number of seconds since the _Epoch_,
+ * 1970-01-01 00:00:00 +0000 (UTC).
+ *
+ * Since we are converting into a number of seconds, this is equivalent
+ * to converting a date to time-UTC.
+ *
+ * @lisp
+ * (time-second
+ * (date->time-utc (make-date 0 37 53 1 26 10 2012 0))) => 1351216417
+ * (date->seconds (make-date 0 37 53 1 26 10 2012 0))   => 1351216417.0
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
@@ -1588,24 +1651,25 @@ DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
   struct tm t;
   time_t n;
   SCM *p;
-
+  double nanoseconds;
+  
   if (!STRUCTP(date) || STRUCT_TYPE(date) != date_type)
     STk_error("bad date ~S", date);
 
   p = (SCM *) &(STRUCT_SLOTS(date));
-  p++; /* nanoseconds, ignored... */
-  t.tm_sec   = STk_integer_value(*p++);
-  t.tm_min   = STk_integer_value(*p++);
-  t.tm_hour  = STk_integer_value(*p++);
-  t.tm_mday  = STk_integer_value(*p++);
-  t.tm_mon   = STk_integer_value(*p++) - 1;
-  t.tm_year  = STk_integer_value(*p++) - 1900;
-  t.tm_isdst = -1;                      /* to ignore DST */
+  nanoseconds = STk_integer_value(*p++) / 1000000000.0;
+  t.tm_sec    = STk_integer_value(*p++);
+  t.tm_min    = STk_integer_value(*p++);
+  t.tm_hour   = STk_integer_value(*p++);
+  t.tm_mday   = STk_integer_value(*p++);
+  t.tm_mon    = STk_integer_value(*p++) - 1;
+  t.tm_year   = STk_integer_value(*p++) - 1900;
+  t.tm_isdst  = -1;                      /* to ignore DST */
 
   n = mktime(&t);
   if (n == (time_t)(-1)) STk_error("cannot convert date to seconds (~S)", date);
 
-  return STk_double2real((double) n);
+  return STk_double2real((double) n + nanoseconds);
 }
 
 
@@ -1877,8 +1941,8 @@ int STk_init_system(void)
   time_type =  STk_make_struct_type(STk_intern("%time"),
                                     STk_false,
                                     LIST3(STk_intern("type"),
-                                          STk_intern("second"),
-                                          STk_intern("nanosecond")));
+                                          STk_intern("nanosecond"),
+                                          STk_intern("second")));
   STk_define_variable(STk_intern("%time"), time_type, current_module);
 
 
@@ -1898,6 +1962,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(seconds2date);
   ADD_PRIMITIVE(date2seconds);
   ADD_PRIMITIVE(date2string);
+  ADD_PRIMITIVE(local_timezone_offset);
   ADD_PRIMITIVE(running_os);
   ADD_PRIMITIVE(getenv);
   ADD_PRIMITIVE(setenv);

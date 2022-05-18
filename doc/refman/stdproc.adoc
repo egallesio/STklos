@@ -794,15 +794,25 @@ SRFI's documentation for more information.
 
 === Dates and Times
 {{stklos}} stores dates and times with a compact
-representation which consists is an integer which represents the
-number of seconds elapsed since the *_Epoch_* (00:00:00 on
-January 1, 1970, Coordinated Universal Time --UTC). Dates can
-also be represented with date structures.
+representation which consists of two integers representing the
+number of seconds and nanoseconds elapsed since the *_Epoch_*
+(00:00:00 on January 1, 1970, Coordinated Universal Time --UTC).
+Dates can also be represented with date structures.
+SRFI 19 contains more time and date-related procedures,
+such as time durations, tome comparisons and Julian calendar
+functions.
 
 {{insertdoc 'current-second}}
 {{insertdoc 'current-seconds}}
 {{insertdoc 'current-time}}
 {{insertdoc 'time?}}
+{{insertdoc 'make-time}}
+{{insertdoc 'time?}}
+{{insertdoc 'time-type}}
+{{insertdoc 'time-second}}
+{{insertdoc 'time-nanosecond}}
+{{insertdoc 'time-tai->time-utc}}
+{{insertdoc 'time-utc->time-tai}}
 {{insertdoc 'time->seconds}}
 {{insertdoc 'seconds->time}}
 {{insertdoc 'current-date}}
@@ -822,6 +832,7 @@ also be represented with date structures.
 {{insertdoc 'date->seconds}}
 {{insertdoc 'date->string}}
 {{insertdoc 'seconds->date}}
+{{insertdoc 'local-timezone-offset}}
 [#seconds2string]
 {{insertdoc 'seconds->string}}
 {{insertdoc 'seconds->list}}

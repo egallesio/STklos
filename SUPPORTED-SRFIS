@@ -33,6 +33,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-16: Syntax for procedures of variable arity
     - SRFI-17: Generalized set!
     - SRFI-18: Multithreading support
+    - SRFI-19: Time Data Types and Procedures
     - SRFI-22: Running Scheme Scripts on Unix
     - SRFI-23: Error reporting mechanism
     - SRFI-25: Multi-dimensional Arrays

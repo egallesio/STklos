@@ -361,6 +361,7 @@ SRC_STK = 1.stk   \
             16.stk  \
             17.stk  \
             18.stk  \
+            19.stk  \
             22.stk  \
             23.stk  \
             26.stk  \
@@ -455,6 +456,7 @@ SRC_OSTK = 1.ostk   \
             16.ostk  \
             17.ostk  \
             18.ostk  \
+            19.ostk  \
             22.ostk  \
             23.ostk  \
             26.ostk  \
