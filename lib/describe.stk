@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 27-Jan-2022 14:23 (eg)
+;;;; Last file update: 18-May-2022 13:06 (eg)
 ;;;;
 
 
@@ -100,13 +100,17 @@ doc>
                             (cond
                               ((integer? x)  (format port "an integer number"))
                               ((rational? x) (format port "a rational number"))
-                              ((complex? x)  (format port "an exact complex number")))
+                              ((complex? x)  (format port
+                                                     "an exact complex number")))
                             (cond
                               ((infinite? x) (format port "~a infinity"
-                                                     (if (negative? x) "negative" "positive")))
+                                                     (if (negative? x)
+                                                         "negative"
+                                                         "positive")))
                               ((nan? x)      (format port "a non-number (NaN)"))
                               ((real? x)     (format port "a real number"))
-                              ((complex? x)  (format port "an inexact complex number")))))
+                              ((complex? x)  (format port
+                                                     "an inexact complex number")))))
      ((null?    x)      (format port "the empty list"))
      ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
      ((char?    x)      (format port "a character, ascii value is ~s"
