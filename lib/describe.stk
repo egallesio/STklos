@@ -100,16 +100,25 @@ doc>
                             (cond
                               ((integer? x)  (format port "an integer number"))
                               ((rational? x) (format port "a rational number"))
-                              ((complex? x)  (format port "a complex number")))
+                              ((complex? x)  (format port "an exact complex number")))
                             (cond
-                              ((real? x)    (format port "a real number"))
-                              ((complex? x) (format port "a complex number")))))
-     ((null?    x)      (format port "an empty list"))
+                              ((infinite? x) (format port "~a infinity"
+                                                     (if (negative? x) "negative" "positive")))
+                              ((nan? x)      (format port "a non-number (NaN)"))
+                              ((real? x)     (format port "a real number"))
+                              ((complex? x)  (format port "an inexact complex number")))))
+     ((null?    x)      (format port "the empty list"))
      ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
      ((char?    x)      (format port "a character, ascii value is ~s"
                                 (char->integer x)))
-     ((symbol?  x)      (format port "a symbol"))
-     ((pair?    x)      (format port "a list"))
+     ((symbol?  x)      (format port "a symbol")
+                        (call/cc
+                         (lambda (out)
+                           (with-handler
+                            (lambda (e) (out))
+                            (format port ", with ~amutable binding"
+                                    (if (symbol-mutable? x) "" "im"))))))
+     ((pair?    x)      (format port "a non-empty list"))
      ((string?  x)      (if (eqv? x "")
                             (format port "an empty string")
                             (format port "a string of length ~s"
@@ -125,11 +134,11 @@ doc>
      ((eof-object? x)   (format port "the end-of-file object"))
      ((struct-type? x)  (format port "the type structure named ~A"
                                 (struct-type-name x)))
-     ((library? x)      (format port "a ~alocked R7RS library named ~A"
-                                (if (module-locked? x) "" "non ")
+     ((library? x)      (format port "~a R7RS library named ~A"
+                                (if (module-locked? x) "a locked" "an unlocked")
                                 (library-name x)))
-     ((module? x)       (format port "a ~alocked module named ~A"
-                                (if (module-locked? x) "" "non ")
+     ((module? x)       (format port "~a module named ~A"
+                                (if (module-locked? x) "a locked" "an unlocked")
                                 (module-name x)))
      ((port? x)         (format port "an ~a ~a port"
                                 (if (input-port? x) "input" "output")
