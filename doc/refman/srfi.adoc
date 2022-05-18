@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 18-May-2022 16:26 (eg)
+// Last file update: 18-May-2022 17:42 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -327,13 +327,19 @@ NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 {{insertdoc 'ilist-copy}}
 {{insertdoc 'iiota}}
 
+{{insertdoc 'icdr}}
 {{insertdoc 'ipair?}}
+{{insertdoc 'ilist?}}
 {{insertdoc 'dotted-ilist?}}
 {{insertdoc 'not-ipair?}}
 {{insertdoc 'null-ilist?}}
+{{insertdoc 'ilist=}}
+{{insertdoc 'list-lock!}}
 
 {{insertdoc 'itenth}}
 {{insertdoc 'icar+icdr}}
+{{insertdoc 'ilist-tail}}
+
 {{insertdoc 'idrop-right}}
 {{insertdoc 'isplit-at}}
 {{insertdoc 'last-ipair}}
@@ -344,6 +350,7 @@ NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 {{insertdoc 'ireverse}}
 {{insertdoc 'iappend-reverse}}
 {{insertdoc 'izip}}
+{{insertdoc 'iunzip5}}
 {{insertdoc 'icount}}
 
 {{insertdoc 'imap}}
@@ -353,7 +360,7 @@ NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 {{insertdoc 'ipair-fold}}
 {{insertdoc 'ireduce}}
 {{insertdoc 'ifold-right}}
-//insertdoc 'iunfold-right}}
+{{insertdoc 'iunfold-right}}
 {{insertdoc 'ipair-fold-right}}
 {{insertdoc 'ireduce-right}}
 {{insertdoc 'iappend-map}}
@@ -376,6 +383,7 @@ NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 {{insertdoc 'ibreak}}
 
 {{insertdoc 'idelete}}
+{{insertdoc 'ialist-cons}}
 {{insertdoc 'idelete-duplicates}}
 
 {{insertdoc 'iassv}}
@@ -384,6 +392,8 @@ NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 {{insertdoc 'replace-icdr}}
 
 {{insertdoc 'ilist->list}}
+{{insertdoc 'ipair->pair}}
+{{insertdoc 'itree->tree}}
 {{insertdoc 'gtree->tree}}
 
 {{insertdoc 'iapply}}

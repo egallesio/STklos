@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 02-May-2022 12:41
-;;;; Last file update: 18-May-2022 16:53 (eg)
+;;;; Last file update: 18-May-2022 17:46 (eg)
 
 
 ;;; STKLOS IMPLEMENTATION:
@@ -479,7 +479,7 @@ doc>
   (not (proper-ilist? x)))
 
 #|
-<doc EXT ilist
+<doc EXT ilist=
  * (ilist= elt= ilist1 ...)
  *
  * Determines ilist equality, given an element-equality procedure. Proper
@@ -550,10 +550,10 @@ doc>
  * error to apply them to the empty ilist.
  *
  * @lisp
- * (icar (iq a b c))       =>  a        (icdr (iq a b c))     =>  (b c)
- * (icar (iq (a) b c d))   =>  (a)           (icdr (iq (a) b c d)) =>  (b c d)
- * (icar (ipair 1 2))      =>  1             (icdr (ipair 1 2))    =>  2
- * (icar '())              =>  *error*  (icdr '())            =>  *error*
+ * (icar (iq a b c))       =>  a          (icdr (iq a b c))     =>  (b c)
+ * (icar (iq (a) b c d))   =>  (a)        (icdr (iq (a) b c d)) =>  (b c d)
+ * (icar (ipair 1 2))      =>  1          (icdr (ipair 1 2))    =>  2
+ * (icar '())              =>  *error*    (icdr '())            =>  *error*
  * @end lisp
 doc>
 |#
@@ -867,12 +867,12 @@ doc>
   (iapply imap ilist ilists))
 
 #|
-<doc EXT unzip1 unzip2 unzip3 unzip4 unzip5
- * (iunzip1 ilist) -> ilist
- * (iunzip2 ilist) -> [ilist ilist]
- * (iunzip3 ilist) -> [ilist ilist ilist]
- * (iunzip4 ilist) -> [ilist ilist ilist ilist]
- * (iunzip5 ilist) -> [ilist ilist ilist ilist ilist]
+<doc EXT iunzip1 iunzip2 iunzip3 iunzip4 iunzip5
+ * (iunzip1 ilist)
+ * (iunzip2 ilist)
+ * (iunzip3 ilist)
+ * (iunzip4 ilist)
+ * (iunzip5 ilist)
  *
  * |Iunzip1| takes an ilist of ilists, where every ilist must
  * contain at least one element, and returns an ilist containing
@@ -1287,7 +1287,7 @@ doc>
             (ipair (f seed) (recur (g seed)))))))
 
 #|
-<doc ext unfold-right
+<doc ext iunfold-right
  * (iunfold-right p f g seed [tail])
  *
  * |Iunfold-right| constructs an ilist with the following loop:
@@ -2046,7 +2046,7 @@ doc>
 (define iassv  assv)
 
 #|
-<doc EXT ialis-cons
+<doc EXT ialist-cons
  * (ialist-cons key datum ialist)
  *
  * Constructs a new ialist entry mapping key -> datum onto ialist.

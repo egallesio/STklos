@@ -24383,7 +24383,7 @@ To obtain the symbol <code>:</code> in <strong><em>STklos</em></strong>, you mus
 <p></p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -24397,19 +24397,18 @@ To obtain the symbol <code>:</code> in <strong><em>STklos</em></strong>, you mus
 The ipair is guaranteed to be different (in the sense of <code>eqv?</code>)
 from every existing object.</p>
 </div>
-<div class="literalblock">
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
 <div class="content">
-<pre>SCM cons = STk_cons(a,d);
-BOXED_INFO(cons) |= CONS_CONST;
-return cons;</pre>
+<div class="paragraph small">
+<p><strong><code>(ilist obj &#8230;&#8203;)</code></strong><br></p>
 </div>
 </div>
-<div class="paragraph">
-<p>INE_PRIMITIVE("ilist",srfi_116_ilist,vsubr, (int argc, SCM *argv))</p>
-</div>
-<div class="paragraph">
-<p>c ilist
-(ilist obj &#8230;&#8203;)</p>
 </div>
 <div class="paragraph">
 <p>Returns a newly allocated ilist of its arguments.</p>
@@ -24422,65 +24421,6 @@ return cons;</pre>
 </div>
 <div class="paragraph">
 <p>Being an ilist, its CAR, CDR and all sublists are immutable.</p>
-</div>
-<div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><strong><code>(ilist= elt= ilist1 &#8230;&#8203;)</code></strong><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Determines ilist equality, given an element-equality procedure. Proper
-ilist A equals proper ilist B if they are of the same length, and
-their corresponding elements are equal, as determined by <code>elt=</code>. If the
-element-comparison procedure&#8217;s first argument is from ilisti, then
-its second argument is from ilisti+1, i.e. it is always called as
-<code>(elt= a b)</code> for <code>a</code> an element of ilist A, and <code>b</code> an element of ilist B.</p>
-</div>
-<div class="paragraph">
-<p>In the n-ary case, every ilisti is compared to ilisti+1 (as opposed,
-for example, to comparing ilist1 to ilisti, for i&gt;1). If there are no
-ilist arguments at all, <code>ilist=</code> simply returns true.</p>
-</div>
-<div class="paragraph">
-<p>It is an error to apply ilist= to anything except proper ilists. It
-cannot reasonably be extended to dotted ilists, as it provides no way
-to specify an equality procedure for comparing the ilist terminators.</p>
-</div>
-<div class="paragraph">
-<p>Note that the dynamic order in which the elt= procedure is applied to
-pairs of elements is not specified. For example, if ilist= is applied
-to three ilists, A, B, and C, it may first completely compare A to B,
-then compare B to C, or it may compare the first elements of A and B,
-then the first elements of B and C, then the second elements of A and
-B, and so forth.</p>
-</div>
-<div class="paragraph">
-<p>The equality procedure must be consistent with <code>eq?</code>. That is, it must
-be the case that</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">eq?</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">elt=</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span><span class="o">.</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Note that this implies that two ilists which are <code>eq?</code> are always ilist=,
-as well; implementations may exploit this fact to "short-cut" the
-element-by-element comparisons.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ilist=</span> <span class="nv">eq?</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="no">#t</span>       <span class="c1">; Trivial cases</span>
-<span class="p">(</span><span class="nf">ilist=</span> <span class="nv">eq?</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
-</div>
 </div>
 <div class="paragraph">
 <p></p>
@@ -24628,6 +24568,34 @@ primitive.</p>
 </div>
 </div>
 <div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(icar ipair)</code></strong><br>
+<strong><code>(icdr ipair)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return the contents of the icar and icdr
+field of their argument, respectively. Note that it is an
+error to apply them to the empty ilist.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">icar</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>       <span class="nv">=&gt;</span>  <span class="nv">a</span>          <span class="p">(</span><span class="nf">icdr</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>     <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">icar</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span>   <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span><span class="p">)</span>        <span class="p">(</span><span class="nf">icdr</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">icar</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>      <span class="nv">=&gt;</span>  <span class="mi">1</span>          <span class="p">(</span><span class="nf">icdr</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>    <span class="nv">=&gt;</span>  <span class="mi">2</span>
+<span class="p">(</span><span class="nf">icar</span> <span class="o">'</span><span class="p">())</span>              <span class="nv">=&gt;</span>  <span class="nv">*error*</span>    <span class="p">(</span><span class="nf">icdr</span> <span class="o">'</span><span class="p">())</span>            <span class="nv">=&gt;</span>  <span class="nv">*error*</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -24643,6 +24611,33 @@ primitive.</p>
 <div class="paragraph">
 <p>Returns true and only if <code>x</code> is a proper ilist — that is,
 a ()-terminated ilist.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(proper-ilist? x)</code></strong><br>
+<strong><code>(ilist? x)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These identifiers are bound either to the same procedure.
+In either case, true is returned iff <code>x</code> is a proper ilist
+— a ()-terminated ilist.</p>
+</div>
+<div class="paragraph">
+<p>More carefully: The empty list is a proper ilist. An ipair
+whose icdr is a proper ilist is also a proper ilist. Everything
+else is a dotted ilist. This includes non-ipair, non-() values
+(e.g. symbols, numbers, mutable pairs), which are considered to
+be dotted ilists of length 0.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -24710,6 +24705,85 @@ recommended as the termination condition for ilist-processing
 procedures that are not defined on dotted ilists.</p>
 </div>
 <div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilist= elt= ilist1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Determines ilist equality, given an element-equality procedure. Proper
+ilist A equals proper ilist B if they are of the same length, and
+their corresponding elements are equal, as determined by <code>elt=</code>. If the
+element-comparison procedure&#8217;s first argument is from ilisti, then
+its second argument is from ilisti+1, i.e. it is always called as
+<code>(elt= a b)</code> for <code>a</code> an element of ilist A, and <code>b</code> an element of ilist B.</p>
+</div>
+<div class="paragraph">
+<p>In the n-ary case, every ilisti is compared to ilisti+1 (as opposed,
+for example, to comparing ilist1 to ilisti, for i&gt;1). If there are no
+ilist arguments at all, <code>ilist=</code> simply returns true.</p>
+</div>
+<div class="paragraph">
+<p>It is an error to apply ilist= to anything except proper ilists. It
+cannot reasonably be extended to dotted ilists, as it provides no way
+to specify an equality procedure for comparing the ilist terminators.</p>
+</div>
+<div class="paragraph">
+<p>Note that the dynamic order in which the elt= procedure is applied to
+pairs of elements is not specified. For example, if ilist= is applied
+to three ilists, A, B, and C, it may first completely compare A to B,
+then compare B to C, or it may compare the first elements of A and B,
+then the first elements of B and C, then the second elements of A and
+B, and so forth.</p>
+</div>
+<div class="paragraph">
+<p>The equality procedure must be consistent with <code>eq?</code>. That is, it must
+be the case that</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">eq?</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">elt=</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that this implies that two ilists which are <code>eq?</code> are always ilist=,
+as well; implementations may exploit this fact to "short-cut" the
+element-by-element comparisons.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ilist=</span> <span class="nv">eq?</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="no">#t</span>       <span class="c1">; Trivial cases</span>
+<span class="p">(</span><span class="nf">ilist=</span> <span class="nv">eq?</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(list-lock+! lst)</code></strong><br>
+<strong><code>(list-lock! lst)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Destructive versions of <code>list&#8594;ilist</code>: both procedures change their
+argument so it will become an immutable list.
+<code>List-lock+!</code> returns the list, while <code>list-lock!</code> returns <code>#void</code>.</p>
+</div>
+<div class="paragraph">
 <p>
 
 
@@ -24736,7 +24810,7 @@ procedures that are not defined on dotted ilists.</p>
 <strong><code>(iseventh ipair)</code></strong><br>
 <strong><code>(ieighth  ipair)</code></strong><br>
 <strong><code>(ininth   ipair)</code></strong><br>
-<strong>`(itenth   ipair) `</strong><br></p>
+<strong><code>(itenth   ipair)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -24764,6 +24838,59 @@ procedures that are not defined on dotted ilists.</p>
 <div class="paragraph">
 <p>The fundamental ipair deconstructor. Returns two values:
 the icar and the icdrif <code>ip</code>.</p>
+</div>
+<div class="paragraph">
+<p>
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(itake x i)</code></strong><br>
+<strong><code>(idrop x i)</code></strong><br>
+<strong><code>(ilist-tail x i)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>itake</code> returns the first i elements of ilist <code>x</code>.
+<code>idrop</code> returns all but the first i elements of ilist <code>x</code>.
+<code>ilist-tail</code> is either the same procedure as idrop or else a procedure
+with the same behavior.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="nf">itake</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>  <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+ <span class="p">(</span><span class="nf">idrop</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>  <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>x</code> may be any value — a proper or dotted ilist:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">itake</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span>    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">idrop</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">3</span> <span class="o">.</span> <span class="nv">d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">itake</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">3</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">idrop</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">3</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">d</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a legal <code>i</code>, itake and idrop partition the ilist in a manner
+which can be inverted with iappend:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iappend</span> <span class="p">(</span><span class="nf">itake</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="p">(</span><span class="nf">idrop</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>idrop is exactly equivalent to performing i icdr operations on <code>x</code>;
+the returned value shares a common tail with <code>x</code>.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -24808,12 +24935,14 @@ the icar and the icdrif <code>ip</code>.</p>
 <p>For a legal <code>i</code>, <code>itake-right</code> and <code>idrop-right</code> partition the ilist
 in a manner which can be inverted with <code>iappend</code>:</p>
 </div>
-<div class="paragraph">
-<p>(iappend (itake dilist i) (idrop dilist i)) = dilist</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>(iappend (itake dilist i) (idrop dilist i)) = dilist</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p><code>Itake-right&#8217;s return value is guaranteed to share a common tail
-with `dilist</code>.</p>
+<p><code>Itake-right</code>'s return value is guaranteed to share a common tail
+with <code>dilist</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -24975,9 +25104,8 @@ in reverse order.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ireverse</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">c</span> <span class="nv">b</span> <span class="nv">a</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">ireverse</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="nv">d</span> <span class="p">(</span><span class="nf">e</span> <span class="p">(</span><span class="nf">f</span><span class="p">))))</span>
-     <span class="nv">=&gt;</span>  <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="nf">f</span><span class="p">))</span> <span class="nv">d</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ireverse</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>              <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">c</span> <span class="nv">b</span> <span class="nv">a</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">ireverse</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="nv">d</span> <span class="p">(</span><span class="nf">e</span> <span class="p">(</span><span class="nf">f</span><span class="p">))))</span>  <span class="nv">=&gt;</span>  <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="nf">f</span><span class="p">))</span> <span class="nv">d</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -25038,6 +25166,44 @@ the corresponding elements from the parameter ilists.</p>
 </div>
 </div>
 <div class="paragraph">
+<p>
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iunzip1 ilist)</code></strong><br>
+<strong><code>(iunzip2 ilist)</code></strong><br>
+<strong><code>(iunzip3 ilist)</code></strong><br>
+<strong><code>(iunzip4 ilist)</code></strong><br>
+<strong><code>(iunzip5 ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Iunzip1</code> takes an ilist of ilists, where every ilist must
+contain at least one element, and returns an ilist containing
+the initial element of each such ilist. That is, it returns
+<code>(imap icar ilists)</code>. <code>Iunzip2</code> takes an ilist of ilists, where
+every ilist must contain at least two elements, and returns two
+values: an ilist of the first elements, and an ilist of the second
+elements. <code>Iunzip3</code> does the same for the first three elements of
+the ilists, and so forth.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iunzip2</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">1</span> <span class="nv">one</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="nv">two</span><span class="p">)</span> <span class="p">(</span><span class="nf">3</span> <span class="nv">three</span><span class="p">)))</span> <span class="nv">=&gt;</span>
+    <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">one</span> <span class="nv">two</span> <span class="nv">three</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -25061,8 +25227,8 @@ expires.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">count</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span> <span class="mi">2</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">3</span>
-<span class="p">(</span><span class="nf">count</span> <span class="nv">&lt;</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span> <span class="mi">8</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">4</span> <span class="mi">6</span> <span class="mi">8</span> <span class="mi">10</span> <span class="mi">12</span> <span class="mi">14</span> <span class="mi">16</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">3</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">icount</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span> <span class="mi">2</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">))</span>            <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nf">icount</span> <span class="nv">&lt;</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span> <span class="mi">8</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">4</span> <span class="mi">6</span> <span class="mi">8</span> <span class="mi">10</span> <span class="mi">12</span> <span class="mi">14</span> <span class="mi">16</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">3</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -25170,9 +25336,9 @@ and the value returned by <code>ifor-each</code> is unspecified.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme">  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">+</span> <span class="mi">0</span> <span class="nv">lis</span><span class="p">)</span>			<span class="c1">; Add up the elements of LIS.</span>
-  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">)</span>		<span class="c1">; Reverse LIS.</span>
-  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">ipair</span> <span class="nv">tail</span> <span class="nv">rev-head</span><span class="p">)</span>	<span class="c1">; See APPEND-REVERSE.</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme">  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">+</span> <span class="mi">0</span> <span class="nv">lis</span><span class="p">)</span>                    <span class="c1">; Add up the elements of LIS.</span>
+  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">)</span>              <span class="c1">; Reverse LIS.</span>
+  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">ipair</span> <span class="nv">tail</span> <span class="nv">rev-head</span><span class="p">)</span>        <span class="c1">; See APPEND-REVERSE.</span></code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -25319,15 +25485,15 @@ the ipairs making up the lists, giving this (tail) recursion:</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span> <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">tail</span> <span class="p">(</span><span class="nf">icdr</span> <span class="nv">lis</span><span class="p">)))</span>
                               <span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">kons</span> <span class="p">(</span><span class="nf">kons</span> <span class="nv">lis</span> <span class="nv">knil</span><span class="p">)</span> <span class="nv">tail</span><span class="p">))</span>
-<span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span>
-<span class="nv">end</span> <span class="nv">lisp</span>
-
-<span class="nv">Example:</span>
-
-
-<span class="o">```</span><span class="nv">scheme</span>
-
-<span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span></code></pre>
+<span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -25412,15 +25578,15 @@ may not be performed with ireduce).</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">kons</span> <span class="p">(</span><span class="nf">icar</span> <span class="nv">lis</span><span class="p">)</span> <span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="p">(</span><span class="nf">icdr</span> <span class="nv">lis</span><span class="p">)))</span>
-<span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span>
-<span class="nv">end</span> <span class="nv">lisp</span>
-
-<span class="nv">Examples:</span>
-
-
-<span class="o">```</span><span class="nv">scheme</span>
-
-<span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">)</span>		<span class="c1">; Copy LIS.</span>
+<span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Examples:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">)</span>          <span class="c1">; Copy LIS.</span>
 
 <span class="c1">;; Filter the even numbers out of LIS.</span>
 <span class="p">(</span><span class="nf">ifold-right</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">even?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">ipair</span> <span class="nv">x</span> <span class="nv">l</span><span class="p">)</span> <span class="nv">l</span><span class="p">))</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">))</span></code></pre>
@@ -25434,25 +25600,125 @@ shortest ilist runs out of values:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">ipair*</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">1</span> <span class="nv">b</span> <span class="mi">2</span> <span class="nv">c</span> <span class="mi">3</span><span class="p">)</span>
-<span class="nv">end</span> <span class="nv">lisp</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">ipair*</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">1</span> <span class="nv">b</span> <span class="mi">2</span> <span class="nv">c</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iunfold-right p f g seed [tail])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Iunfold-right</code> constructs an ilist with the following loop:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="nv">lp</span> <span class="p">((</span><span class="nf">seed</span> <span class="nv">seed</span><span class="p">)</span> <span class="p">(</span><span class="nf">lis</span> <span class="nv">tail</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">p</span> <span class="nv">seed</span><span class="p">)</span> <span class="nv">lis</span>
+      <span class="p">(</span><span class="nf">lp</span> <span class="p">(</span><span class="nf">g</span> <span class="nv">seed</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">ipair</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">seed</span><span class="p">)</span> <span class="nv">lis</span><span class="p">))))</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>p         Determines when to stop unfolding.
+f         Maps each seed value to the corresponding ilist element.
+g         Maps each seed value to next seed value.
+seed      The "state" value for the unfold.
+tail      ilist terminator; defaults to '().</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In other words, we use g to generate a sequence of seed values</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">seed,</span> <span class="nv">g</span><span class="p">(</span><span class="nf">seed</span><span class="p">)</span><span class="o">,</span> <span class="nv">g2</span><span class="p">(</span><span class="nf">seed</span><span class="p">)</span><span class="o">,</span> <span class="nv">g3</span><span class="p">(</span><span class="nf">seed</span><span class="p">)</span><span class="o">,</span> <span class="o">...</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These seed values are mapped to ilist elements by <code>f</code>, producing the
+elements of the result ilist in a right-to-left order. P says when to
+stop.</p>
+</div>
+<div class="paragraph">
+<p><code>Iunfold-right</code> is the fundamental iterative ilist constructor, just as
+<code>ifold</code> is the fundamental iterative ilist consumer. While <code>iunfold-right</code>
+may seem a bit abstract to novice functional programmers, it can be
+used in a number of ways:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; Ilist of squares: 1^2 ... 10^2</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">zero?</span>
+              <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+              <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span> <span class="mi">1</span><span class="p">))</span>
+              <span class="mi">10</span><span class="p">)</span>
 
+<span class="c1">;; Reverse a proper ilist.</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">null-ilist?</span> <span class="nv">icar</span> <span class="nv">icdr</span> <span class="nv">lis</span><span class="p">)</span>
 
-<span class="nv">//insertdoc</span> <span class="ss">'iunfold-right</span><span class="err">}}</span>
-<span class="p">(((</span><span class="nf">ipair-fold-right</span><span class="p">)))</span>
-<span class="p">[</span><span class="o">.</span><span class="nv">text-right</span><span class="p">]</span>
-<span class="p">[</span><span class="o">.</span><span class="nv">rmargin</span><span class="o">.</span><span class="nv">small</span><span class="p">]</span><span class="o">#</span><span class="nv">_STklos_</span> <span class="nv">procedure</span><span class="o">#</span>
-<span class="nv">****</span>
-<span class="p">[</span><span class="o">.</span><span class="nv">small</span><span class="p">]</span>
-<span class="nv">*</span><span class="o">`</span><span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">ilist1</span> <span class="nv">ilist2</span> <span class="o">...</span><span class="p">)</span><span class="o">`</span><span class="nv">*</span> <span class="nv">+</span>
-<span class="nv">****</span>
-<span class="nv">Holds</span> <span class="nv">the</span> <span class="nv">same</span> <span class="nv">relationship</span> <span class="nv">with</span> <span class="o">`</span><span class="nv">ifold-right</span><span class="o">`</span> <span class="nv">that</span> <span class="o">`</span><span class="nv">ipair-fold</span><span class="o">`</span>
-<span class="nv">holds</span> <span class="nv">with</span> <span class="o">`</span><span class="nv">ifold</span><span class="o">`.</span> <span class="nv">Obeys</span> <span class="nv">the</span> <span class="nv">recursion</span>
+<span class="c1">;; Read current input port into an ilist of values.</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">eof-object?</span> <span class="nv">values</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">read</span><span class="p">))</span> <span class="p">(</span><span class="nb">read</span><span class="p">))</span>
 
-
-<span class="o">```</span><span class="nv">scheme</span>
-
- <span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span>
+<span class="c1">;; (iappend-reverse rev-head tail)</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">null-ilist?</span> <span class="nv">icar</span> <span class="nv">icdr</span> <span class="nv">rev-head</span> <span class="nv">tail</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Interested functional programmers may enjoy noting that ifold and
+<code>iunfold-right</code> are in some sense inverses. That is, given operations
+<code>knull?</code>, <code>kar</code>, <code>kdr</code>, <code>kons</code>, and <code>knil</code> satisfying</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">kons</span> <span class="p">(</span><span class="nf">kar</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">kdr</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span> <span class="nv">and</span> <span class="p">(</span><span class="nf">knull?</span> <span class="nv">knil</span><span class="p">)</span> <span class="nv">=</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">knull?</span> <span class="nv">kar</span> <span class="nv">kdr</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">knull?</span> <span class="nv">kar</span> <span class="nv">kdr</span> <span class="p">(</span><span class="nf">ifold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span><span class="o">.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipair-fold-right kons knil ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Holds the same relationship with <code>ifold-right</code> that <code>ipair-fold</code>
+holds with <code>ifold</code>. Obeys the recursion</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span>
      <span class="p">(</span><span class="nf">kons</span> <span class="nv">lis</span> <span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="p">(</span><span class="nf">icdr</span> <span class="nv">lis</span><span class="p">)))</span>
  <span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span></code></pre>
 </div>
@@ -25526,21 +25792,24 @@ following definition:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iapply</span> <span class="nv">iappend</span> <span class="p">(</span><span class="nf">imap</span> <span class="nv">f</span> <span class="nv">ilist1</span> <span class="nv">ilist2</span> <span class="o">...</span><span class="p">))</span>
-<span class="nv">end</span> <span class="nv">lisp</span>
-<span class="nv">Map</span> <span class="nv">f</span> <span class="nv">over</span> <span class="nv">the</span> <span class="nv">elements</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">ilists,</span> <span class="nv">just</span> <span class="nv">as</span> <span class="nv">in</span> <span class="nv">the</span> <span class="o">`</span><span class="nv">imap</span><span class="o">`</span>
-<span class="nv">function</span><span class="o">.</span> <span class="nv">However,</span> <span class="nv">the</span> <span class="nv">results</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">applications</span> <span class="nv">are</span> <span class="nv">appended</span>
-<span class="nv">together</span> <span class="p">(</span><span class="nf">using</span> <span class="o">`</span><span class="nv">iappend</span><span class="o">`</span><span class="p">)</span> <span class="nv">to</span> <span class="nv">make</span> <span class="nv">the</span> <span class="nv">final</span> <span class="nv">result</span><span class="o">.</span>
-
-<span class="nv">The</span> <span class="nv">dynamic</span> <span class="nv">order</span> <span class="nv">in</span> <span class="nv">which</span> <span class="nv">the</span> <span class="nv">various</span> <span class="nv">applications</span> <span class="nv">of</span> <span class="o">`</span><span class="nv">f</span><span class="o">`</span> <span class="nv">are</span> <span class="nv">made</span> <span class="nv">is</span>
-<span class="nv">not</span> <span class="nv">specified</span><span class="o">.</span>
-
-<span class="nv">Example:</span>
-
-
-<span class="o">```</span><span class="nv">scheme</span>
-
-<span class="p">(</span><span class="nf">iappend-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">ilist</span> <span class="nv">x</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span><span class="p">)))</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">8</span><span class="p">))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iapply</span> <span class="nv">iappend</span> <span class="p">(</span><span class="nf">imap</span> <span class="nv">f</span> <span class="nv">ilist1</span> <span class="nv">ilist2</span> <span class="o">...</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Map f over the elements of the ilists, just as in the <code>imap</code>
+function. However, the results of the applications are appended
+together (using <code>iappend</code>) to make the final result.</p>
+</div>
+<div class="paragraph">
+<p>The dynamic order in which the various applications of <code>f</code> are made is
+not specified.</p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iappend-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">ilist</span> <span class="nv">x</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span><span class="p">)))</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">8</span><span class="p">))</span>
     <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">-1</span> <span class="mi">3</span> <span class="mi">-3</span> <span class="mi">8</span> <span class="mi">-8</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -25762,24 +26031,29 @@ element of ilist that is greater than five with <code>(imember 5 ilist &lt;)</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifind-tail</span> <span class="nv">even?</span> <span class="nv">ilist</span><span class="p">)</span> <span class="c1">; Find the first elt with an even key.</span>
-<span class="nv">end</span> <span class="nv">lisp</span>
-
-
-<span class="p">(((</span><span class="nf">ifind</span><span class="p">)))</span>
-<span class="p">[</span><span class="o">.</span><span class="nv">text-right</span><span class="p">]</span>
-<span class="p">[</span><span class="o">.</span><span class="nv">rmargin</span><span class="o">.</span><span class="nv">small</span><span class="p">]</span><span class="o">#</span><span class="nv">R^5^RS</span> <span class="nv">procedure</span><span class="o">#</span>
-<span class="nv">****</span>
-<span class="p">[</span><span class="o">.</span><span class="nv">small</span><span class="p">]</span>
-<span class="nv">*</span><span class="o">`</span><span class="p">(</span><span class="nf">ifind</span> <span class="nv">pred</span> <span class="nv">ilist</span><span class="p">)</span><span class="o">`</span><span class="nv">*</span> <span class="nv">+</span>
-<span class="nv">****</span>
-<span class="nv">Return</span> <span class="nv">the</span> <span class="nv">first</span> <span class="nv">element</span> <span class="nv">of</span> <span class="nv">ilist</span> <span class="nv">that</span> <span class="nv">satisfies</span> <span class="nv">predicate</span> <span class="o">`</span><span class="nv">pred</span><span class="o">`</span><span class="c1">;</span>
-<span class="nv">false</span> <span class="nv">if</span> <span class="nv">no</span> <span class="nv">element</span> <span class="nv">does</span><span class="o">.</span>
-
-
-<span class="o">```</span><span class="nv">scheme</span>
-
-<span class="p">(</span><span class="nf">ifind</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">4</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifind-tail</span> <span class="nv">even?</span> <span class="nv">ilist</span><span class="p">)</span> <span class="c1">; Find the first elt with an even key.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifind pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the first element of ilist that satisfies predicate <code>pred</code>;
+false if no element does.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifind</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">4</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -26101,6 +26375,28 @@ numbers greater than five from an ilist with <code>(idelete 5 ilist &lt;)</code>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
+<p><strong><code>(ialist-cons key datum ialist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Constructs a new ialist entry mapping key &#8594; datum onto ialist.
+This is the same as</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">key</span> <span class="nv">datum</span> <span class="nv">ialist</span><span class="p">)</span> <span class="p">(</span><span class="nf">ipair</span> <span class="p">(</span><span class="nf">ipair</span> <span class="nv">key</span> <span class="nv">datum</span><span class="p">)</span> <span class="nv">ialist</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
 <p><strong><code>(idelete-duplicates  ilist [=])</code></strong><br></p>
 </div>
 </div>
@@ -26169,8 +26465,8 @@ uses <code>equal?</code>.</p>
 <span class="p">(</span><span class="nf">iassq</span> <span class="ss">'d</span> <span class="nv">e</span><span class="p">)</span>                               <span class="nv">=&gt;</span>  <span class="no">#f</span>
 <span class="p">(</span><span class="nf">iassq</span> <span class="p">(</span><span class="nf">ilist</span> <span class="ss">'a</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">((</span><span class="nf">a</span><span class="p">))</span> <span class="p">((</span><span class="nf">b</span><span class="p">))</span> <span class="p">((</span><span class="nf">c</span><span class="p">))))</span>  <span class="nv">=&gt;</span>  <span class="no">#f</span>
 <span class="p">(</span><span class="nf">iassoc</span> <span class="o">'</span><span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">ilist</span> <span class="o">'</span><span class="p">((</span><span class="nf">a</span><span class="p">))</span> <span class="o">'</span><span class="p">((</span><span class="nf">b</span><span class="p">))</span> <span class="o">'</span><span class="p">((</span><span class="nf">c</span><span class="p">))))</span> <span class="nv">=&gt;</span>  <span class="p">((</span><span class="nf">a</span><span class="p">))</span>
-<span class="p">(</span><span class="nf">iassq</span> <span class="mi">5</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">11</span> <span class="mi">13</span><span class="p">)))</span>	   <span class="nv">=&gt;</span>  <span class="nv">*unspecified*</span>
-<span class="p">(</span><span class="nf">iassv</span> <span class="mi">5</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">11</span> <span class="mi">13</span><span class="p">)))</span>	   <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span></code></pre>
+<span class="p">(</span><span class="nf">iassq</span> <span class="mi">5</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">11</span> <span class="mi">13</span><span class="p">)))</span>         <span class="nv">=&gt;</span>  <span class="nv">*unspecified*</span>
+<span class="p">(</span><span class="nf">iassv</span> <span class="mi">5</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">11</span> <span class="mi">13</span><span class="p">)))</span>         <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -26275,6 +26571,54 @@ list is converted to itself.</p>
 </div>
 <div class="paragraph">
 <p>It is an error to apply list&#8594;ilist to a circular list.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(pair&#8594;ipair pair)</code></strong><br>
+<strong><code>(ipair&#8594;pair ipair)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures, which are inverses, return an ipair and
+a pair respectively that have the same (i)car and (i)cdr
+fields as the argument.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(tree&#8594;itree object)</code></strong><br>
+<strong><code>(itree&#8594;tree object)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures walk a tree of pairs or ipairs respectively and
+make a deep copy of it, returning an isomorphic tree containing
+ipairs or pairs respectively. The result may share structure with
+the argument. If the argument is not of the expected type, it is
+returned.</p>
+</div>
+<div class="paragraph">
+<p>These procedures are not inverses in the general case. For example,
+a pair of ipairs would be converted by <code>tree&#8594;itree</code> to an ipair of
+ipairs, which if converted by <code>itree&#8594;tree</code> would produce a pair of
+pairs.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -28321,7 +28665,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-05-18 14:58:21 +0200
+Last updated 2022-05-18 17:46:31 +0200
 </div>
 </div>
 </body>

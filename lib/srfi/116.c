@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 01-May-2022 20:12
- * Last file update: 18-May-2022 16:13 (eg)
+ * Last file update: 18-May-2022 17:16 (eg)
  */
 
 
@@ -37,25 +37,24 @@ EXTERN_PRIMITIVE("append", append, vsubr, (int argc, SCM* argv));
 /* CONSTRUCTORS */
 /*              */
 
-DEFINE_PRIMITIVE("ipair",srfi_116_ipair,subr2, (SCM a, SCM d))
 /*
-<doc ipair
+<doc EXT ipair
  * (ipair a d)
  *
  * Returns a newly allocated |ipair| whose |icar| is |a| and whose |icdr| is |d|.
  * The ipair is guaranteed to be different (in the sense of |eqv?|)
  * from every existing object.
 doc>
- */
+*/
+DEFINE_PRIMITIVE("ipair",srfi_116_ipair,subr2, (SCM a, SCM d))
 {
     SCM cons = STk_cons(a,d);
     BOXED_INFO(cons) |= CONS_CONST;
     return cons;
 }
 
-DEFINE_PRIMITIVE("ilist",srfi_116_ilist,vsubr, (int argc, SCM *argv))
 /*
-<doc ilist
+<doc EXT ilist
  * (ilist obj ...)
  *
  * Returns a newly allocated ilist of its arguments.
@@ -66,6 +65,8 @@ DEFINE_PRIMITIVE("ilist",srfi_116_ilist,vsubr, (int argc, SCM *argv))
  * Being an ilist, its CAR, CDR and all sublists are immutable.
 doc>
  */
+
+DEFINE_PRIMITIVE("ilist",srfi_116_ilist,vsubr, (int argc, SCM *argv))
 {
   register SCM *tmp, l = STk_nil;
 
@@ -264,7 +265,7 @@ DEFINE_PRIMITIVE("replace-icdr", srfi_116_replace_icdr, subr2, (SCM ipair, SCM o
 /*            */
 
 /*
-<doc EXT pair->ipair ipair->pair list->ilist ilist->list
+<doc EXT pair->ipair ipair->pair
  * (pair->ipair pair)
  * (ipair->pair ipair)
  *
