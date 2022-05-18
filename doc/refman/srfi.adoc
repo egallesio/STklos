@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 20-Mar-2022 18:11 (eg)
+// Last file update: 18-May-2022 14:53 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -311,6 +311,88 @@ keyword: For {{stklos}}, `:` is equivalent to the keyword `#:||`,
 whereas the SRFI considers that `:` is not a keyword but a symbol.
 
 NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
+
+
+// **** SRFI-116
+{{srfi-subsection 116}}
+((("immutable lists")))
+{{stklos}} implements the arrays of {{quick-link-srfi 116}}.
+
+{{insertdoc 'ipair}}
+{{insertdoc 'ilist}}
+{{insertdoc 'xipair}}
+{{insertdoc 'ipair*}}
+{{insertdoc 'make-ilist}}
+{{insertdoc 'ilist-tabulate}}
+{{insertdoc 'ilist-copy}}
+{{insertdoc 'iiota}}
+
+{{insertdoc 'ipair?}}
+{{insertdoc 'dotted-ilist?}}
+{{insertdoc 'not-ipair?}}
+{{insertdoc 'null-ilist?}}
+
+//icar icdr ... icddadr icddddr
+//insertdoc 'ilist-ref}}
+{{insertdoc 'itenth}}
+{{insertdoc 'icar+icdr}}
+//insertdoc 'ilist-tail}}
+//insertdoc 'idrop/ilist-tail}}
+{{insertdoc 'idrop-right}}
+{{insertdoc 'isplit-at}}
+{{insertdoc 'last-ipair}}
+
+{{insertdoc 'ilength}}
+{{insertdoc 'iappend}}
+{{insertdoc 'iconcatenate}}
+{{insertdoc 'ireverse}}
+{{insertdoc 'iappend-reverse}}
+{{insertdoc 'izip}}
+{{insertdoc 'icount}}
+
+{{insertdoc 'imap}}
+{{insertdoc 'ifor-each}}
+{{insertdoc 'ifold}}
+{{insertdoc 'iunfold}}
+{{insertdoc 'ipair-fold}}
+{{insertdoc 'ireduce}}
+{{insertdoc 'ifold-right}}
+//insertdoc 'iunfold-right}}
+{{insertdoc 'ipair-fold-right}}
+{{insertdoc 'ireduce-right}}
+{{insertdoc 'iappend-map}}
+{{insertdoc 'ipair-for-each}}
+{{insertdoc 'ifilter-map}}
+{{insertdoc 'imap-in-order}}
+
+{{insertdoc 'ifilter}}
+{{insertdoc 'ipartition}}
+{{insertdoc 'iremove}}
+
+{{insertdoc 'imemv}}
+{{insertdoc 'ifind}}
+{{insertdoc 'ifind-tail}}
+{{insertdoc 'iany}}
+{{insertdoc 'ievery}}
+{{insertdoc 'ilist-index}}
+{{insertdoc 'itake-while}}
+{{insertdoc 'idrop-while}}
+{{insertdoc 'ibreak}}
+
+{{insertdoc 'idelete}}
+{{insertdoc 'idelete-duplicates}}
+
+{{insertdoc 'iassv}}
+{{insertdoc 'ialist-delete}}
+
+{{insertdoc 'replace-icdr}}
+
+{{insertdoc 'ilist->list}}
+{{insertdoc 'gtree->tree}}
+
+{{insertdoc 'iapply}}
+
+
 
 
 // **** SRFI-138
