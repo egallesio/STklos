@@ -196,7 +196,7 @@ DEFINE_PRIMITIVE("struct-type-name", st_name, subr1, (SCM obj))
 <doc EXT struct-type-change-writer!
  * (struct-type-change-writer! structype proc)
  *
- * Change the default writer associated to structures of type |structype| to
+ * Change the default writer associated to structures of type |structype|
  * to the |proc| procedure. The |proc| procedure must accept 2 arguments
  * (the structure to write and the port wher the structure must be written
  * in that order). The value returned by |struct-type-change-writer!| is the
@@ -237,7 +237,7 @@ DEFINE_PRIMITIVE("struct-type-change-writer!",
 }
 
 
-static char *get_struct_type_name(SCM st)
+static const char* get_struct_type_name(SCM st)
 {
   SCM name = STRUCT_TYPE_NAME(st);
 
@@ -378,7 +378,7 @@ DEFINE_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val))
 <doc EXT struct-is-a?
  * (struct-is-a? s structype)
  *
- * Return a boolean that indicates if the structure |s| is a of type |structype|.
+ * Return a boolean that indicates if the structure |s| is of type |structype|.
  * Note that if |s| is an instance of a subtype of _S_, it is considered
  * also as an instance of type _S_.
  *

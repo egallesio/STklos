@@ -316,7 +316,7 @@ DEFINE_PRIMITIVE("make-client-socket", make_client_socket, subr23,
  * |Socket-shutdown| shutdowns the connection associated to
  * |socket|. If the socket is a server socket, |socket-shutdown| is called
  * on all the client sockets connected to this server.
- * |Close| indicates if the the socket must be closed or not, when
+ * |Close| indicates if the socket must be closed or not, when
  * the connection is destroyed. Closing the socket forbids further
  * connections on the same port with the |socket-accept| procedure.
  * Omitting a value for |close| implies the closing of socket.
@@ -358,7 +358,7 @@ DEFINE_PRIMITIVE("socket-shutdown", socket_shutdown, subr12, (SCM sock, SCM clos
   }
 
   /*
-   * Warning: input and output can have already be garbaged: if the
+   * Warning: input and output can have already been garbaged: if the
    * socket is no more used, the input and output are not marked as
    * used and can (eventually) be released before the call to shutdown
    * by the socket finalizer.
@@ -417,7 +417,7 @@ static void socket_finalizer(SCM socket, void _UNUSED(*client_data))
  * example, this can be achieved with `netcat localhost 12345`]
  *
  * Once the connection with the distant program is established, we read
- * a line on the input port  associated to the socket and we write the
+ * a line on the input port associated to the socket, and we write the
  * length of this line on its output port.
  * @lisp
  * (let* ((server (make-server-socket 12345))
@@ -548,7 +548,7 @@ DEFINE_PRIMITIVE("socket-port-number", socket_port_number, subr1, (SCM sock))
  *
  * The following example shows how to make a client socket. Here we
  * create a socket on port 13 of the machine 
- * |kaolin.unice.fr| footnote:[Port 13, if open,  can  used for testing:
+ * |kaolin.unice.fr| footnote:[Port 13, if open, can be used for testing:
  * making a connection to it permits to know the distant system's idea
  * of the time of day.]:
  * @lisp

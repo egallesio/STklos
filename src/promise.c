@@ -225,7 +225,7 @@ static struct extended_type_descr xtype_promise = {
 
 int STk_init_promise(void)
 {
-  /* register the extended type type for promises */
+  /* register the extended type for promises */
   DEFINE_XTYPE(promise,   &xtype_promise);
 
   /* Add primitives */

@@ -48,7 +48,7 @@ static void error_const_cell(SCM x)
   STk_error("changing the constant ~s is not allowed", x);
 }
 
-static SCM make_uninterned_keyword(char *name)
+static SCM make_uninterned_keyword(const char *name)
 {
   SCM z;
 
@@ -59,7 +59,7 @@ static SCM make_uninterned_keyword(char *name)
 }
 
 
-SCM STk_makekey(char *token)
+SCM STk_makekey(const char* token)
 {
   SCM res;
   MUT_DECL(lck);
@@ -94,7 +94,7 @@ doc>
  */
 DEFINE_PRIMITIVE("make-keyword", make_keyword, subr1, (SCM str))
 {
-  char *s = "";
+  const char *s = "";
 
   if (STRINGP(str))
     s = STRING_CHARS(str);
@@ -239,7 +239,7 @@ DEFINE_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
  * |key-delete| remove the |key| and its associated value of the keyword
  * list. The key can be absent of the list.
  * 
- * |key-delete!| does the same job than |key-delete| by physically 
+ * |key-delete!| does the same job as |key-delete| by physically
  * modifying its |list| argument.
  * @lisp
  * (key-delete '(:one 1 :two 2) :two)    => (:one 1)

@@ -172,7 +172,7 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr1, (SCM p))
 <doc EXT allocate-bytes
  * (allocate-bytes n)
  *
- * |Allocate-bytes| will allocate |n| consecutive bytes using the
+ * |Allocate-bytes| will allocate |n| consecutive bytes using
  * the standard STklos allocation function (which uses the
  * Boehm–Demers–Weiser garbage collector <<BoehmGC>>).
  * It returns a |cpointer| Scheme object that points to the first byte
@@ -208,7 +208,7 @@ DEFINE_PRIMITIVE("allocate-bytes", allocate_bytes, subr1, (SCM sz))
  * - the C function |free| (if it  was allocated by the standard C |malloc|
  *   function), or
  * - the Boehm GC free  function (if the pointer was allocated using
- *   |allocate-bytes| primitive.
+ *   |allocate-bytes| primitive).
  *
  * @lisp
  * (define a (allocate-bytes 10))
