@@ -1379,3 +1379,46 @@
 (for-each test-all-sorts
           '( 3  5 10 10 10 20 20 10 10 10 10 10  10  10  10  10  10)
           '( 0  1  2  3  4  5 10 20 30 40 50 99 100 101 499 500 501))
+
+;;; Extra tests -- jpellegrini
+(let ((v (make-vector 5000)))
+  (dotimes (i 5000)
+    (vector-set! v i (if (odd? i) i (- i))))
+  (let ((w (vector-copy v))
+        (u (vector-copy v)))
+    (vector-stable-sort! < v)
+    (vector-stable-sort! fx< w)
+    (test "sorted? <" #t (vector-sorted? < v))
+    (test "sortd? fx<" #t (vector-sorted? < w))
+    (test "sorted the same, < fx<" #t (equal? v w))
+    (vector-stable-sort! < v)
+    (test "re-sorted <" #t (vector-sorted? < v))
+    (test "re-sorted <, same as fx<" #t (equal? v w))
+    (vector-stable-sort! < w)
+    (test "re-sorted fx<" #t (vector-sorted? < w))
+    (test "re-sorted fx<, same as <" #t (equal? v w))))
+
+
+
+
+
+
+(let ((v (make-vector 500000)))
+
+  ;; Interleave an ascending vector with a descending one:
+  (dotimes (i 500000)
+    (vector-set! v i (if (odd? i) i (- i))))
+
+  (let ((w (vector-copy v))
+        (u (vector-copy v)))
+    (vector-stable-sort! < v)
+    (vector-stable-sort! fx< w)
+    (test "sorted? <" #t (vector-sorted? < v))
+    (test "sortd? fx<" #t (vector-sorted? < w))
+    (test "sorted the same, < fx<" #t (equal? v w))
+    (vector-stable-sort! < v)
+    (test "re-sorted <" #t (vector-sorted? < v))
+    (test "re-sorted <, same as fx<" #t (equal? v w))
+    (vector-stable-sort! < w)
+    (test "re-sorted fx<" #t (vector-sorted? < w))
+    (test "re-sorted fx<, same as <" #t (equal? v w))))
