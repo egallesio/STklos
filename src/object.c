@@ -183,7 +183,7 @@ static int applicablep(SCM actual, SCM formal)
 
   /* We test that (memq formal (slot-ref actual 'cpl))
    * However, we don't call memq here since we already know that
-   * the list is well formed
+   * the list is well-formed
    */
   for (ptr=INST_SLOT(actual, S_cpl); !NULLP(ptr); ptr = CDR(ptr)) {
     if (CAR(ptr) == formal) return TRUE;
@@ -793,7 +793,7 @@ static SCM compute_getters_n_setters(SCM slots)
   /* Build a kind of A-list which is something like
    *     ( .... (slot-name #f . 3) ... )
    * where #f is the slot initialization function and 3 is the offset of a slot
-   * in a the vector of slots
+   * in a vector of slots
    */
   for (  ; !NULLP(slots); slots = CDR(slots))
     res = STk_cons(STk_cons(CAR(slots),

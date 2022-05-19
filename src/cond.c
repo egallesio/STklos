@@ -143,7 +143,7 @@ DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3,
  *
  * |Make-compound-condition-type| returns a new condition type, built
  * from the condition types |ct~1~|, ...
- * |Id| must be a symbol  that serves as a symbolic name for the
+ * |Id| must be a symbol that serves as a symbolic name for the
  * condition type. The slots names of the new condition type is the
  * union of the slots of conditions |ct~1~| ...
  * 
@@ -315,7 +315,7 @@ DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
     cts = STk_cons(STRUCT_TYPE(*argv--), cts);
   }
 
-  /* Create a new type and and instance of it for the compound condition */
+  /* Create a new type and instance of it for the compound condition */
   snprintf(buff, sizeof(buff), "&cct-%d", counter++);
   type = STk_make_comp_cond_type(STk_make_uninterned_symbol(buff),
                                  cts);
@@ -545,7 +545,7 @@ int STk_init_cond(void)
                                                      STk_intern("errno")),
                                         module);
 
-  /* Conditions types */
+  /* Condition types */
   ADD_PRIMITIVE(alloc_cond);
   ADD_PRIMITIVE(make_cond_type);
   ADD_PRIMITIVE(ctp);

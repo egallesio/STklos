@@ -169,7 +169,7 @@ DEFINE_PRIMITIVE("regexp?", regexpp, subr1, (SCM obj))
  * These functions attempt to match |pattern| (a string or a regexp value)
  * to |str|. If the match fails, |#f| is returned. If the match succeeds,
  * a list (containing strings for |regexp-match| and positions for
- * |regexp-match-positions| is returned. The first string (or positions) in
+ * |regexp-match-positions|) is returned. The first string (or positions) in
  * this list is the portion of string that matched pattern. If two portions
  * of string can match pattern, then the earliest and longest match is found,
  * by default.
@@ -204,7 +204,7 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
   int i, ret, depth, max;
   SCM result;
 
-  /* RE can be a string or a already compiled regexp */
+  /* RE can be a string or an already compiled regexp */
   if (STRINGP(re)) re = STk_str2regexp(re);
   else if (!REGEXPP(re)) STk_error("bad compiled regexp ~S", re);
 

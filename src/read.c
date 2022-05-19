@@ -148,7 +148,7 @@ static void warning_bad_escaped_sequence(SCM port, int c)
 }
 
 
-static int colon_position_value(char *str)
+static int colon_position_value(const char* str)
 {
   if      (strcmp(str, "none")   == 0) return COLON_NONE;
   else if (strcmp(str, "before") == 0) return COLON_BEFORE;
@@ -898,7 +898,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                          SCM word = read_token(port, c, FALSE);
 
                          if (SYMBOLP(word)) {
-                           char *s = SYMBOL_PNAME(word);
+                           const char *s = SYMBOL_PNAME(word);
 
                            /* Try to see if it is a DSSL keyword */
                            if ((strcmp(s, "optional") == 0) ||
@@ -1170,7 +1170,7 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive value)
  *
  * This parameter object permits to change the default behaviour of
- * the |read| primitive when reading a symbol. If this parameter has a
+ * the |read| primitive when reading a symbol. If this parameter has
  * a true value a symbol is not converted to a default case when interned.
  * Since R7RS requires that symbol are case insignificant, the default
  * value  of this parameter is |#t|.

@@ -94,7 +94,7 @@ static void print_module(SCM module, SCM port, int mode)
     STk_nputs(port, "#[library ", 11);
     if (SYMBOLP(name)) {
       STk_putc('(', port);
-      for (char *s = SYMBOL_PNAME(name); *s; s++) {
+      for (const char *s = SYMBOL_PNAME(name); *s; s++) {
         STk_putc((*s == '/') ? ' ': *s, port);
       }
       STk_putc(')', port);
@@ -210,7 +210,7 @@ DEFINE_PRIMITIVE("%register-library-as-module", register_library,
   if (!SYMBOLP(name)) error_bad_symbol(name);
   MODULE_NAME(m) = name;
   register_module(m);
-  return STk_void;;
+  return STk_void;
 }
 
 
@@ -701,7 +701,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
 
   // symbol was not found in the given env module. Try to find it in
-  // the the STklos modle (if this is not a R7RS library)
+  // the STklos modle (if this is not a R7RS library)
   if (!MODULE_IS_LIBRARY(env) &&  env != STk_STklos_module) {
     env = STk_STklos_module;
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);

@@ -33,7 +33,7 @@ static int pretty_quotes = 1;
 static void printlist(SCM exp, SCM port, int mode)
 {
   register SCM tmp;
-  char *s;
+  const char *s;
 
   if (pretty_quotes) {
     /* Special case for pretty printing of quoted expressions */
@@ -62,7 +62,7 @@ static void printlist(SCM exp, SCM port, int mode)
 
 static Inline void printsymbol(SCM symb, SCM port, int mode)
 {
-  char *s = SYMBOL_PNAME(symb);
+  const char *s = SYMBOL_PNAME(symb);
 
   if ((mode==WRT_MODE) &&
       ((BOXED_INFO(symb) & SYMBOL_NEEDS_BARS) ||
@@ -157,7 +157,7 @@ static void printstring(SCM s, SCM port, int mode)
                       if (printable)
                         *buff++ = *p;
                       else {
-                        /* Non printable char. (It works only for char < 0xFF !!) */
+                        /* Non-printable char. (It works only for char < 0xFF !!) */
                         *buff++ = '\\';
                         *buff++ = 'x';
                         *buff++ = printhexa((unsigned char) *p / 16);

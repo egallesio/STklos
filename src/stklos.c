@@ -28,24 +28,24 @@
 #include <langinfo.h>
 #include "gnu-getopt.h"
 
-#define ADD_OPTION(o, k)                                        \
+#define ADD_OPTION(o, k)                                     do{\
   if (*o) options = STk_key_set(options,                        \
                                 STk_makekey(k),                 \
-                                STk_Cstring2string(o));
-
-#define ADD_BOOL_OPTION(o, k)                           \
+                                STk_Cstring2string(o));         \
+}while(0)
+#define ADD_BOOL_OPTION(o, k)                        do{\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
-                        MAKE_BOOLEAN(o));
-
-#define ADD_INT_OPTION(o, k)                            \
+                        MAKE_BOOLEAN(o));               \
+}while(0)
+#define ADD_INT_OPTION(o, k)                         do{\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
-                        MAKE_INT(o));
-
-#define ADD_SCM_OPTION(o, k)                            \
-  options = STk_key_set(options, STk_makekey(k),o);
-
+                        MAKE_INT(o));                   \
+}while(0)
+#define ADD_SCM_OPTION(o, k)                         do{\
+  options = STk_key_set(options, STk_makekey(k),o);     \
+}while(0)
 /*=============================================================================
  *
  * Program arguments

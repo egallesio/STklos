@@ -123,7 +123,7 @@ static int call_user_close(void *stream)
  */
 
 static int call_user_putstring(SCM s, void *stream);
-static int vport_nputs(void *stream, char *s, int len);
+static int vport_nputs(void *stream, const char* s, int len);
 
 static int call_user_putc(int c, void *stream)
 {
@@ -184,10 +184,10 @@ static int vport_read(void *stream, void *buf, int count)
 }
 
 
-static int vport_write(void *stream, void *buf, int count)
+static int vport_write(void *stream, const void *buf, int count)
 {
   int i;
-  char *s = buf;
+  const char *s = buf;
 
   for (i = 0; i < count; i++) {
     int c = call_user_putc(*s++, stream);
@@ -204,7 +204,7 @@ static off_t vport_seek(void  _UNUSED(*stream),
   return 0;
 }
 
-static int vport_nputs(void *stream, char *s, int len)
+static int vport_nputs(void *stream, const char* s, int len)
 {
   int i;
 
@@ -213,7 +213,7 @@ static int vport_nputs(void *stream, char *s, int len)
   return len;
 }
 
-static int vport_puts(char *s, void *stream)
+static int vport_puts(const char *s, void *stream)
 {
   return vport_nputs(stream, s, strlen(s));
 }
@@ -231,7 +231,7 @@ static int vport_puts(char *s, void *stream)
  * Returns a virtual port using the |read-char| procedure to read a
  * character from the port, |ready?| to know if there is any data to
  * read from the port, |eof?| to know if the end of file is reached
- * on the port and finally |close| to close the port. All theses
+ * on the port and finally |close| to close the port. All these
  * procedure takes one parameter which is the port from which the input
  * takes place.  |Open-input-virtual| accepts also the special value
  * |#f| for the I/O procedures with the following conventions:
@@ -319,7 +319,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  * for the I/O procedures. If a procedure is |#f| nothing is done
  * on the corresponding action.
  *
- * Hereafter is an (very inefficient) implementation of a variant of
+ * Hereafter is a (very inefficient) implementation of a variant of
  * |open-output-string| using virtual ports. The value of the output
  * string is printed when the port is closed:
  * @lisp
