@@ -1545,7 +1545,7 @@ doc>
 DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 {
   int overflow;
-  SCM argv[11];
+  SCM argv[12];
   struct tm *t;
   time_t tt;
 
@@ -1554,7 +1554,8 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
   if (overflow) error_bad_int_or_out_of_bounds(seconds);
 
   t = localtime(&tt);
-  argv[10]  = date_type;
+  argv[11] = date_type;
+  argv[10] = MAKE_INT(0);         /* zero nanoseconds */
   argv[9]  = MAKE_INT(t->tm_sec);
   argv[8]  = MAKE_INT(t->tm_min);
   argv[7]  = MAKE_INT(t->tm_hour);
@@ -1567,9 +1568,11 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 #ifdef DARWIN
   argv[0]  = MAKE_INT(0);       /* Cannot figure how to find the timezone */
 #else
-  argv[0]  = STk_long2integer(timezone);
+  /* For some strange reason, timezone returns the offset seconds with the
+     opposite sign as one would usually see, so we swap it here. */
+  argv[0]  = STk_long2integer(-timezone);
 #endif
-  return STk_make_struct(11, &argv[10]);
+  return STk_make_struct(12, &argv[11]);
 }
 
 
@@ -1590,6 +1593,7 @@ DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
     STk_error("bad date ~S", date);
 
   p = (SCM *) &(STRUCT_SLOTS(date));
+  p++; /* nanoseconds, ignored... */
   t.tm_sec   = STk_integer_value(*p++);
   t.tm_min   = STk_integer_value(*p++);
   t.tm_hour  = STk_integer_value(*p++);
@@ -1856,16 +1860,17 @@ int STk_init_system(void)
   /* Create the system-date structure-type */
   date_type =  STk_make_struct_type(STk_intern("%date"),
                                     STk_false,
-                                    LIST10(STk_intern("second"),
-                                           STk_intern("minute"),
-                                           STk_intern("hour"),
-                                           STk_intern("day"),
-                                           STk_intern("month"),
-                                           STk_intern("year"),
-                                           STk_intern("week-day"),
-                                           STk_intern("year-day"),
-                                           STk_intern("dst"),
-                                           STk_intern("tz")));
+				    STk_cons(STk_intern("nanosecond"),
+					     LIST10(STk_intern("second"),
+						    STk_intern("minute"),
+						    STk_intern("hour"),
+						    STk_intern("day"),
+						    STk_intern("month"),
+						    STk_intern("year"),
+						    STk_intern("week-day"),
+						    STk_intern("year-day"),
+						    STk_intern("dst"),
+						    STk_intern("tz"))));
   STk_define_variable(STk_intern("%date"), date_type, current_module);
 
   /* Create the time structure-type */

@@ -103,11 +103,11 @@ doc>
 <doc EXT make-date
  * (make-date :key second minute hour day month year)
  *
- * Build a date from its argument. |hour|, |minute|, |second| default to 0;
- * |day| and |month| default to 1; |year| defaults to 1970
+ * Build a date from its argument. |hour|, |minute|, |second|, |nanosecond|
+ * default to 0; |day| and |month| default to 1; |year| defaults to 1970
 doc>
 |#
-(define (make-date :key (second 0) (minute 0) (hour 0)
+(define (make-date :key (nanosecond 0) (second 0) (minute 0) (hour 0)
                         (day 1) (month 1) (year 1970))
   (let ((tmp (make-struct %date second minute hour day month year)))
     ;; tmp is probably partially initialized convert it to seconds and back
@@ -141,6 +141,11 @@ doc>
 
 
 #|
+<doc EXT date-nanosecond
+ * (date-nanosecond d)
+ *
+ * Return the nanosecond of date |d|.
+doc>
 <doc EXT date-second
  * (date-second d)
  *
@@ -197,19 +202,20 @@ doc>
  * Return the time zone of date |d|.
 doc>
 |#
-(define (date-second d)         (%fast-struct-ref d %date 'date-second 0))
-(define (date-minute d)         (%fast-struct-ref d %date 'date-minute 1))
-(define (date-hour d)           (%fast-struct-ref d %date 'date-hour 2))
+(define (date-nanosecond d)     (%fast-struct-ref d %date 'date-nanosecond 0))
+(define (date-second d)         (%fast-struct-ref d %date 'date-second 1))
+(define (date-minute d)         (%fast-struct-ref d %date 'date-minute 2))
+(define (date-hour d)           (%fast-struct-ref d %date 'date-hour 3))
 
-(define (date-day d)            (%fast-struct-ref d %date 'date-day 3))
-(define (date-month d)          (%fast-struct-ref d %date 'date-month 4))
-(define (date-year d)           (%fast-struct-ref d %date 'date-year 5))
+(define (date-day d)            (%fast-struct-ref d %date 'date-day 4))
+(define (date-month d)          (%fast-struct-ref d %date 'date-month 5))
+(define (date-year d)           (%fast-struct-ref d %date 'date-year 6))
 
-(define (date-week-day d)       (%fast-struct-ref d %date 'date-week-day 6))
-(define (date-year-day d)       (%fast-struct-ref d %date 'date-year-day 7))
+(define (date-week-day d)       (%fast-struct-ref d %date 'date-week-day 7))
+(define (date-year-day d)       (%fast-struct-ref d %date 'date-year-day 8))
 
-(define (date-dst d)            (%fast-struct-ref d %date 'date-dst 8))
-(define (date-tz d)             (%fast-struct-ref d %date 'date-tz 9))
+(define (date-dst d)            (%fast-struct-ref d %date 'date-dst 9))
+(define (date-tz d)             (%fast-struct-ref d %date 'date-tz 10))
 
 
 #|
@@ -219,6 +225,7 @@ doc>
  * Returns a keyword list for the date given by |sec| (a date based on the
  * Epoch). The keyed values returned are
  *
+ * - nanosecond : 0 to 999999
  * - second : 0 to 59 (but can be up to 61 to allow for leap seconds)
  * - minute : 0 to 59
  * - hour : 0 to 23
@@ -234,7 +241,7 @@ doc>
  *
  * @lisp
  * (seconds->list (current-second))
- *        => (#:second 21 #:minute 35 #:hour 20 #:day 10 #:month 1
+ *        => (#:nanosecond 182726 #:second 21 #:minute 35 #:hour 20 #:day 10 #:month 1
  *            #:year 2022 #:week-day 1 #:year-day 10 #:dst 0 #:tz -3600)
  * @end lisp
 doc>
