@@ -29,8 +29,6 @@
 #include <ctype.h>
 #include "stklos.h"
 
-
-
 struct charelem {
   char *name;
   unsigned char value;
@@ -164,13 +162,13 @@ static void error_bad_char(SCM c)
   STk_error("bad char", c);
 }
 
-Inline int charcomp(SCM c1, SCM c2)
+static Inline int charcomp(SCM c1, SCM c2)
 {
   return (CHARACTER_VAL(c1) - CHARACTER_VAL(c2));
 }
 
 
-int charcompi(SCM c1, SCM c2)
+static int charcompi(SCM c1, SCM c2)
 {
   return STk_use_utf8 ?
     (int) (STk_to_fold(CHARACTER_VAL(c1)) -
@@ -178,6 +176,10 @@ int charcompi(SCM c1, SCM c2)
     (int) (tolower((unsigned char) CHARACTER_VAL(c1)) -
            tolower((unsigned char) CHARACTER_VAL(c2)));
 }
+
+/* Comparison of characters. No test on types */
+int STk_charcomp(SCM c1, SCM c2)  { return charcomp(c1,  c2);  }
+int STk_charcompi(SCM c1, SCM c2) { return charcompi(c1,  c2); }
 
 
 int STk_string2char(char *s)

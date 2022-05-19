@@ -175,7 +175,7 @@ static void close_all_files(int pipes[3][2])
   }
 }
 
-static int same_files(char* f1, char* f2)
+static int same_files(char *f1, char *f2)
 {
   struct stat s1, s2;
 

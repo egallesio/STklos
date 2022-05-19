@@ -72,7 +72,7 @@ void STk_add_primitive_in_module(struct primitive_obj *o, SCM module)
 
 
 
-SCM STk_eval_C_string(const char* str, SCM module)
+SCM STk_eval_C_string(const char *str, SCM module)
 {
   SCM ref, eval = STk_lookup(STk_intern("eval-from-string"),
                              module,
@@ -82,7 +82,7 @@ SCM STk_eval_C_string(const char* str, SCM module)
 }
 
 
-SCM STk_read_from_C_string(const char* str)
+SCM STk_read_from_C_string(const char *str)
 {
   return STk_read(STk_open_C_string(str), STk_read_case_sensitive);
 }

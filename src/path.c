@@ -144,7 +144,7 @@ static void absolute(char *s, char *pathname)
 \*===========================================================================*/
 #define MAXLINK 50  /* Number max of link before declaring we have a loop */
 
-SCM STk_resolve_link(const char* path, int count)
+SCM STk_resolve_link(const char *path, int count)
 {
 #ifdef WIN32
   return STk_Cstring2string(STk_expand_file_name(path));
@@ -203,7 +203,7 @@ SCM STk_resolve_link(const char* path, int count)
  * STk_expand_file_name
  *
 \*===========================================================================*/
-char *STk_expand_file_name(const char* s)
+char *STk_expand_file_name(const char *s)
 {
   char expanded[2 * MAX_PATH_LENGTH], abs[2 * MAX_PATH_LENGTH];
   /* Warning: absolute makes no control about path overflow. Hence the "2 *" */

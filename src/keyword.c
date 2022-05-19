@@ -59,7 +59,7 @@ static SCM make_uninterned_keyword(const char *name)
 }
 
 
-SCM STk_makekey(const char* token)
+SCM STk_makekey(const char *token)
 {
   SCM res;
   MUT_DECL(lck);

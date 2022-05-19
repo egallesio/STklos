@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update:  8-Jan-2022 15:09 (eg)
+ * Last file update: 19-May-2022 17:07 (eg)
  */
 
 #include <ctype.h>
@@ -42,7 +42,7 @@ static void error_bad_string(SCM str)
   STk_error("bad string ~S", str);
 }
 
-int STk_symbol_flags(const register char* s)
+int STk_symbol_flags(register const char *s)
 {
   if (!*s || (*s == '.' && !s[1])) {
     /* Special symbols || and |.| which always need bars */
@@ -68,7 +68,7 @@ int STk_symbol_flags(const register char* s)
   }
 }
 
-SCM STk_make_uninterned_symbol(const char* name)
+SCM STk_make_uninterned_symbol(const char *name)
 {
   SCM z;
 

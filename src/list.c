@@ -634,12 +634,12 @@ do{                                                             \
 
 DEFINE_PRIMITIVE("assq", assq, subr2, (SCM obj, SCM alist))
 {
-    LASSOC(PTR_EQ);
+  LASSOC(PTR_EQ);
 }
 
 DEFINE_PRIMITIVE("assv", assv, subr2, (SCM obj, SCM alist))
 {
-    LASSOC(PTR_EQV);
+  LASSOC(PTR_EQV);
 }
 
 DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))

@@ -63,7 +63,7 @@ static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
 static int  line_editor   = 1;
 static int  srfi_176      = 0;
-static char* script_file  = "";
+static char *script_file  = "";
 static SCM  Idirs         = STk_nil;
 static SCM  Adirs         = STk_nil;
 

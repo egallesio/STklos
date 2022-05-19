@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 13-Jan-2022 15:01 (eg)
+ * Last file update: 19-May-2022 17:06 (eg)
  */
 
 #include "stklos.h"
@@ -64,7 +64,7 @@
  *
 \*===========================================================================*/
 
-static unsigned long hash_string(const register char* string)
+static unsigned long hash_string(register const char *string)
 {
   register unsigned long result = 0;
   register int c;
@@ -299,7 +299,7 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag)
  *
 \*===========================================================================*/
 
-static Inline SCM hash_get_symbol(struct hash_table_obj *h, const char* s, int *index)
+static Inline SCM hash_get_symbol(struct hash_table_obj *h, const char *s, int *index)
 {
   register SCM l;
 
@@ -312,7 +312,7 @@ static Inline SCM hash_get_symbol(struct hash_table_obj *h, const char* s, int *
 }
 
 
-SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char* s, SCM (* create) (const char* s))
+SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s, SCM (*create) (const char *s))
 {
   SCM z;
   int index;
@@ -639,7 +639,7 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
  * @end lisp
 doc>
 */
-Inline SCM hash_table_search(SCM ht, SCM key)
+static Inline SCM hash_table_search(SCM ht, SCM key)
 {
   int index = 0;
   SCM func, l = STk_nil;

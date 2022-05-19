@@ -29,7 +29,6 @@
 #include "stklos.h"
 
 
-
 /* min size added to a string when reallocated in a string-set! */
 #define UTF8_STRING_INCR        8
 
@@ -240,7 +239,7 @@ static SCM make_string_from_int_array(uint32_t *buff, int len, int utf8_len)
 }
 
 
-static void copy_array(uint32_t *buff, int len, char* from)
+static void copy_array(uint32_t *buff, int len, char *from)
 {
   while (len--)
     from += STk_char2utf8(*buff++, from);
@@ -269,7 +268,7 @@ static SCM make_substring(SCM string, long from, long to)
 }
 
 
-SCM STk_makestring(int len, const char* init)
+SCM STk_makestring(int len, const char *init)
 {
   register SCM z;
 
@@ -295,7 +294,7 @@ SCM STk_makestring(int len, const char* init)
 }
 
 
-SCM STk_Cstring2string(const char* str) /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(const char *str) /* Embed a C string in Scheme world  */
 {
   SCM  z;
   size_t len = strlen(str);
@@ -900,7 +899,7 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
        variable. do it here. */
     start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
 
-  char* start_char_src = STk_utf8_index(STRING_CHARS(src),src_start,STRING_SIZE(src));
+  char *start_char_src = STk_utf8_index(STRING_CHARS(src),src_start,STRING_SIZE(src));
   memcpy(start_char_dst, start_char_src, (unsigned long) src_substring_size);
 
   STRING_LENGTH(dst) = STRING_LENGTH(dst) + (src_end - src_start) - (dst_end - dst_start);

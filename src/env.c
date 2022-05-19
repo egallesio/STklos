@@ -701,7 +701,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
 
   // symbol was not found in the given env module. Try to find it in
-  // the STklos modle (if this is not a R7RS library)
+  // the STklos module (if this is not a R7RS library)
   if (!MODULE_IS_LIBRARY(env) &&  env != STk_STklos_module) {
     env = STk_STklos_module;
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);

@@ -40,12 +40,12 @@ static char rev_table[128] = {
      41, 42, 43, 44,  45, 46, 47, 48, 49, 50, 51,  0,  0,  0,  0,  0
 };
 
-#define OutChar(c, f) do{             \
+#define OutChar(c, f) do{           \
     STk_putc((c), (f));             \
     if (++count>=72) {              \
       STk_putc('\n', (f));          \
-      count=0;                  \
-    }                       \
+      count=0;                      \
+    }                               \
 }while(0)
 
 static void error_bad_input_port(SCM obj)

@@ -1032,7 +1032,7 @@ doc>
 #define do_remove(filename)                          do{\
   if (!STRINGP(filename)) error_bad_string(filename);   \
   if (remove(STRING_CHARS(filename)) != 0)              \
-    STk_error_posix(errno, "", filename, NULL);       \
+    STk_error_posix(errno, "", filename, NULL);         \
   return STk_void;                                      \
 }while(0)
 DEFINE_PRIMITIVE("delete-file", delete_file, subr1, (SCM filename))

@@ -534,7 +534,7 @@ static char *convert_for_win32(char *mode)
 }
 #endif
 
-static int convert_mode(const char* mode) {
+static int convert_mode(const char *mode) {
   char first = *mode;
 
   if (mode[1] == 'b')
@@ -949,7 +949,7 @@ DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
     f = STk_open_file(fname, "r");
     if (f != STk_false) {
       int type  = find_file_nature(f);
-      char* str = "";
+      char *str = "";
 
       switch (type) {
         case FILE_IS_SOURCE: str = "source"; break;

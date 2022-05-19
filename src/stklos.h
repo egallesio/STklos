@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 13-Mar-2022 17:19 (eg)
+ * Last file update: 19-May-2022 17:28 (eg)
  */
 
 
@@ -177,7 +177,7 @@ void STk_gc_init(void);
 
 #define MAX_CELL_TYPES          256
 
-typedef void* SCM;
+typedef void *SCM;
 
 typedef enum {
   tc_not_boxed=-1,
@@ -229,19 +229,19 @@ typedef struct {
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
-#define NEWCELL(_var, _type)    do{                                               \
+#define NEWCELL(_var, _type)    do{                                             \
         _var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));    \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                              \
         BOXED_INFO(_var) = 0;                                                   \
         }while(0)
 
-#define NEWCELL_WITH_LEN(_var, _type, _len)     do{       \
+#define NEWCELL_WITH_LEN(_var, _type, _len)     do{     \
         _var = (SCM) STk_must_malloc(_len);             \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
         }while(0)
 
-#define NEWCELL_ATOMIC(_var, _type, _len)       do{       \
+#define NEWCELL_ATOMIC(_var, _type, _len)       do{     \
         _var = (SCM) STk_must_malloc_atomic(_len);      \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
@@ -369,8 +369,8 @@ int STk_init_box(void);
 
 
 /* Comparison of characters. No test on types */
-int charcomp(SCM c1, SCM c2);
-int charcompi(SCM c1, SCM c2);
+int STk_charcomp(SCM c1, SCM c2);
+int STk_charcompi(SCM c1, SCM c2);
 
 /* Simple  character conversion functions */
 uint32_t STk_to_upper(uint32_t c);
@@ -614,7 +614,7 @@ struct keyword_obj {
 EXTERN_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val));
 EXTERN_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt));
 
-SCM STk_makekey(const char* token);
+SCM STk_makekey(const char *token);
 int STk_init_keyword(void);
 
 /*
@@ -713,8 +713,8 @@ extern int STk_interactive_debug;
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
-SCM STk_eval_C_string(const char* str, SCM module);
-SCM STk_read_from_C_string(const char* str);
+SCM STk_eval_C_string(const char *str, SCM module);
+SCM STk_read_from_C_string(const char *str);
 
 int STk_init_misc(void);
 
@@ -802,7 +802,7 @@ struct complex_obj {
   /****
    **** Conversions
    ****/
-SCM             STk_Cstr2number(char* str, long base);
+SCM             STk_Cstr2number(char *str, long base);
 SCM             STk_long2integer(long n);
 SCM             STk_ulong2integer(unsigned long n);
 SCM             STk_double2real(double d);
@@ -876,9 +876,9 @@ SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_valu
   ----
   ------------------------------------------------------------------------------
 */
-char *STk_expand_file_name(const char* s);
+char *STk_expand_file_name(const char *s);
 SCM STk_do_glob(int argc, SCM *argv);
-SCM STk_resolve_link(const char* path, int count);
+SCM STk_resolve_link(const char *path, int count);
 
 
 /*
@@ -1006,9 +1006,9 @@ int STk_ungetc(int c, SCM port);
 int STk_close(SCM port);
 int STk_putc(int c, SCM port);
 int STk_put_character(int c, SCM port);   /* c may be a wide char */
-int STk_puts(const char* s, SCM port);
+int STk_puts(const char *s, SCM port);
 int STk_putstring(SCM s, SCM port);
-int STk_nputs(SCM port, const char* s, int len);
+int STk_nputs(SCM port, const char *s, int len);
 off_t STk_seek(SCM port, off_t offset, int whence);
 off_t STk_tell(SCM port);
 void STk_rewind(SCM port);
@@ -1038,7 +1038,7 @@ void STk_close_all_ports(void);
  ****/
 EXTERN_PRIMITIVE("open-output-string", open_output_string, subr0, (void));
 SCM STk_get_output_string(SCM port);
-SCM STk_open_C_string(const char* str);
+SCM STk_open_C_string(const char *str);
 int STk_init_sport(void);
 
 /****
@@ -1225,8 +1225,8 @@ struct string_obj {
 
 #define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
-SCM STk_makestring(int len, const char* init);
-SCM STk_Cstring2string(const char* str);           /* Embed a C string in Scheme world  */
+SCM STk_makestring(int len, const char *init);
+SCM STk_Cstring2string(const char *str);           /* Embed a C string in Scheme world  */
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
@@ -1264,9 +1264,9 @@ struct symbol_obj {
 
 EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
-int STk_symbol_flags(const char* s);
+int STk_symbol_flags(const char *s);
 SCM STk_intern(char *name);
-SCM STk_make_uninterned_symbol(const char* name);
+SCM STk_make_uninterned_symbol(const char *name);
 int STk_init_symbol(void);
 
 
@@ -1319,9 +1319,9 @@ extern int STk_use_utf8;
 
 char *STk_utf8_grab_char(char *str, uint32_t *c);/* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
-int STk_utf8_strlen(const char* s, int max);
+int STk_utf8_strlen(const char *s, int max);
 int STk_utf8_read_char(SCM port);
-int STk_utf8_sequence_length(const char* str); /* # of bytes of sequence starting at str */
+int STk_utf8_sequence_length(const char *str); /* # of bytes of sequence starting at str */
 int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
 int STk_utf8_verify_sequence(char *s, int len); /* s constitutes a valid UTF8? */
 char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/

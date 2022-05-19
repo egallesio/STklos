@@ -3662,7 +3662,7 @@ such cases is that the value returned by eqv? must be a boolean.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-In fact, the value returned by STklos depends of
+In fact, the value returned by STklos depends on
 the way code is entered and can yield <code>#t</code> in some cases and <code>#f</code>
 in others.
 </td>
@@ -3821,8 +3821,8 @@ infinity), <code>+nan.0</code> (not a number), and <code>-nan.0</code> (not a nu
 <p>These numerical type predicates can be applied to any kind of
 argument, including non-numbers. They return <code>#t</code> if the object is of
 the named type, and otherwise they return <code>#f</code>. In general, if a type
-predicate is true of a number then all higher type predicates are
-also true of that number. Consequently, if a type predicate is
+predicate is true for a number then all higher type predicates are
+also true for that number. Consequently, if a type predicate is
 false of a number, then all lower type predicates are also false of
 that number.</p>
 </div>
@@ -6452,7 +6452,7 @@ the <code>car</code> and <code>cdr</code> of <code>obj</code>, respectively.</p>
 <p><code>Filter</code> returns all the elements of <code>list</code> that satisfy predicate
 <code>pred</code>. The <code>list</code> is not disordered: elements that appear in the
 result list occur in the same order as they occur in the argument
-list. <code>Filter!</code> does the same job than <code>filter</code> by physically
+list. <code>Filter!</code> does the same job as <code>filter</code> by physically
 modifying its <code>list</code> argument</p>
 </div>
 <div class="listingblock">
@@ -7070,8 +7070,8 @@ ordering. That is, if</p>
 </div>
 <div class="paragraph">
 <p><code>integer&#8594;char</code> accepts an exact number between 0 and #xD7FFF or between
-#xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise it accepts a
-number between0 and #xFF.</p>
+#xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise, it accepts a
+number between 0 and #xFF.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -7980,7 +7980,7 @@ This function is defined in SRFI-118.
 <p>Replaces the characters of the variable-size string dst (between
 dst-start and dst-end) with the characters of the string src
 (between src-start and src-end). The number of characters from src
-may be different than the number replaced in dst, so the string may
+may be different from the number replaced in dst, so the string may
 grow or contract. The special case where dst-start is equal to
 dst-end corresponds to insertion; the case where src-start is equal
 to src-end corresponds to deletion. The order in which characters
@@ -7988,7 +7988,7 @@ are copied is unspecified, except that if the source and
 destination overlap, copying takes place as if the source is first
 copied into a temporary string and then into the destination.
 Returns string, appended with the characters form the concatenation
-of the given arguments, which can be wither strings or characters.</p>
+of the given arguments, which can be either strings or characters.</p>
 </div>
 <div class="paragraph">
 <p>It is guaranteed that string-replace! will return the same object that
@@ -8133,7 +8133,7 @@ In STklos, vectors constants don&#8217;t need to be quoted.
 </div>
 <div class="paragraph">
 <p>Returns a newly allocated vector of <code>k</code> elements. If a second argument is
-given, then each element is initialized to <code>fill</code>. Otherwise the initial
+given, then each element is initialized to <code>fill</code>. Otherwise, the initial
 contents of each element is unspecified.</p>
 </div>
 <div class="paragraph">
@@ -8666,7 +8666,7 @@ or <code>#f</code> otherwise.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Change the default writer associated to structures of type <code>structype</code> to
+<p>Change the default writer associated to structures of type <code>structype</code>
 to the <code>proc</code> procedure. The <code>proc</code> procedure must accept 2 arguments
 (the structure to write and the port wher the structure must be written
 in that order). The value returned by <code>struct-type-change-writer!</code> is the
@@ -8814,7 +8814,7 @@ returned by <code>struct-set!</code> is <strong><em>void</em></strong>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Return a boolean that indicates if the structure <code>s</code> is a of type <code>structype</code>.
+<p>Return a boolean that indicates if the structure <code>s</code> is of type <code>structype</code>.
 Note that if <code>s</code> is an instance of a subtype of <em>S</em>, it is considered
 also as an instance of type <em>S</em>.</p>
 </div>
@@ -9654,7 +9654,7 @@ when all the power of <code>call/cc</code> is not needded.</p>
 </div>
 <div class="paragraph">
 <p>Delivers all of its arguments to its continuation.
-,(bold "Note:") R<sup>5</sup>RS imposes to use multiple values in the context of
+,(bold "Note:") R<sup>5</sup>RS imposes to use multiple values in the context
 of a <code>call-with-values</code>. In STklos, if <code>values</code> is not used with
 <code>call-with-values</code>, only the first value is used (i.e. others values are
 ,(emph "ignored")).</p>
@@ -10173,7 +10173,7 @@ otherwise returns <code>#f</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is an textual port or binary port respectively,
+<p>Returns <code>#t</code> if <code>obj</code> is a textual port or binary port respectively,
 otherwise returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
@@ -10547,7 +10547,7 @@ delivers bytes from the <code>bytevector</code>.</p>
 <p>Returns a virtual port using the <code>read-char</code> procedure to read a
 character from the port, <code>ready?</code> to know if there is any data to
 read from the port, <code>eof?</code> to know if the end of file is reached
-on the port and finally <code>close</code> to close the port. All theses
+on the port and finally <code>close</code> to close the port. All these
 procedure takes one parameter which is the port from which the input
 takes place.  <code>Open-input-virtual</code> accepts also the special value
 <code>#f</code> for the I/O procedures with the following conventions:</p>
@@ -10676,7 +10676,7 @@ for the I/O procedures. If a procedure is <code>#f</code> nothing is done
 on the corresponding action.</p>
 </div>
 <div class="paragraph">
-<p>Hereafter is an (very inefficient) implementation of a variant of
+<p>Hereafter is a (very inefficient) implementation of a variant of
 <code>open-output-string</code> using virtual ports. The value of the output
 string is printed when the port is closed:</p>
 </div>
@@ -10942,7 +10942,7 @@ the value returned by <code>current-input-port</code>.</p>
 </td>
 <td class="content">
 The <code>port-seek</code>, <code>read-chars</code> and <code>read-chars!</code> procedures
-generally break the line-number. After using one of theses procedures, the
+generally break the line-number. After using one of these procedures, the
 value returned by <code>port-current-line</code> will be <code>-1</code> (except a <code>port-seek</code>
 at the beginning of the port reinitializes the line counter).
 </td>
@@ -11745,7 +11745,7 @@ returns <code>#t</code>.</p>
 </div>
 <div class="paragraph">
 <p>Reads the next line available from the input port <code>port</code>. This function
-returns 2 values: the first one is is the string which contains the line
+returns 2 values: the first one is the string which contains the line
 read, and the second one is the end of line delimiter. The end of line
 delimiter can be an end of file object, a character or a string in case
 of a multiple character delimiter. If no more characters are available
@@ -14567,7 +14567,7 @@ If the key is already present in <code>list</code>, the keyword list is
 list. The key can be absent of the list.</p>
 </div>
 <div class="paragraph">
-<p><code>key-delete!</code> does the same job than <code>key-delete</code> by physically
+<p><code>key-delete!</code> does the same job as <code>key-delete</code> by physically
 modifying its <code>list</code> argument.</p>
 </div>
 <div class="listingblock">
@@ -14783,7 +14783,7 @@ the <code>hash-table-hash</code> function to speed up hash table retrievals).
 </div>
 <div class="paragraph">
 <p>Computes a hash code for an object and returns this hash code as a
-non negative integer. A property of <code>hash-table-hash</code> is that</p>
+non-negative integer. A property of <code>hash-table-hash</code> is that</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -14791,7 +14791,7 @@ non negative integer. A property of <code>hash-table-hash</code> is that</p>
 </div>
 </div>
 <div class="paragraph">
-<p>as the the Common Lisp <code>sxhash</code> function from which this procedure is
+<p>as the Common Lisp <code>sxhash</code> function from which this procedure is
 modeled.</p>
 </div>
 <div class="paragraph">
@@ -16397,12 +16397,12 @@ its execution. They are equivalent, respectively, to</p>
 call which permits to create a new (heavy) process.
 When called without parameter, this procedure returns two times
 (one time in the parent process and one time in the child process).
-The value returned in the parent process is a process object
-representing the child process and the value returned in the child
+The value returned to the parent process is a process object
+representing the child process and the value returned to the child
 process is always the value <code>#f</code>.
 When called with a parameter (which must be a thunk), the new process
 excutes <code>thunk</code> and terminate it execution when <code>thunk</code> returns. The
-value returned in the parent process is a process object representing
+value returned to the parent process is a process object representing
 the child process.</p>
 </div>
 </div>
@@ -16475,7 +16475,7 @@ otherwise, the communication port is chosen by the system.</p>
 <p><code>Socket-shutdown</code> shutdowns the connection associated to
 <code>socket</code>. If the socket is a server socket, <code>socket-shutdown</code> is called
 on all the client sockets connected to this server.
-<code>Close</code> indicates if the the socket must be closed or not, when
+<code>Close</code> indicates if the socket must be closed or not, when
 the connection is destroyed. Closing the socket forbids further
 connections on the same port with the <code>socket-accept</code> procedure.
 Omitting a value for <code>close</code> implies the closing of socket.</p>
@@ -16528,7 +16528,7 @@ on the port 12345 <sup class="footnote">[<a id="_footnoteref_4" class="footnote"
 </div>
 <div class="paragraph">
 <p>Once the connection with the distant program is established, we read
-a line on the input port  associated to the socket and we write the
+a line on the input port associated to the socket, and we write the
 length of this line on its output port.</p>
 </div>
 <div class="listingblock">
@@ -16912,8 +16912,8 @@ The specification string may follow the <em>tilde conventions</em> of
 <code>format</code> (see <em><a href="#format">primitive <code>format</code></a></em>); in this case this
 procedure builds an error message according to the specification
 given in <code>str</code>. Otherwise,
-this procedure is conform to the <code>error</code> procedure defined in
-<strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong> (<em>Error reporting mechanism</em>) and  <code>str</code> is printed with the <code>display</code> procedure,
+this procedure is in conformance with the <code>error</code> procedure defined in
+<strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong> (<em>Error reporting mechanism</em>) and <code>str</code> is printed with the <code>display</code> procedure,
 whereas the <code>obj`s are printed  with the `write</code> procedure.
 </td>
 </tr>
@@ -17576,7 +17576,7 @@ the table of the contants used in <code>sexpr</code> is also printed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Parses the string <code>str</code> as a RFC-2396 URI and return a keyed list with the
+<p>Parses the string <code>str</code> as an RFC-2396 URI and return a keyed list with the
 following components</p>
 </div>
 <div class="ulist">
@@ -17644,7 +17644,7 @@ empty string)</p>
 </div>
 <div class="paragraph">
 <p>This primitive is a convenience function; it returns a string where
-the HTML special chars are properly translated. It can easily written
+the HTML special chars are properly translated. It can easily be written
 in Scheme, but this version is fast.</p>
 </div>
 <div class="listingblock">
@@ -19411,7 +19411,7 @@ otherwise <code>regexp</code> returns <code>#f</code>.</p>
 <p>These functions attempt to match <code>pattern</code> (a string or a regexp value)
 to <code>str</code>. If the match fails, <code>#f</code> is returned. If the match succeeds,
 a list (containing strings for <code>regexp-match</code> and positions for
-<code>regexp-match-positions</code> is returned. The first string (or positions) in
+<code>regexp-match-positions</code>) is returned. The first string (or positions) in
 this list is the portion of string that matched pattern. If two portions
 of string can match pattern, then the earliest and longest match is found,
 by default.</p>
@@ -20131,7 +20131,7 @@ the slots of the conditions associated with the condition type.</p>
 <div class="paragraph">
 <p><code>Make-compound-condition-type</code> returns a new condition type, built
 from the condition types <code>ct<sub>1</sub></code>, &#8230;&#8203;
-<code>Id</code> must be a symbol  that serves as a symbolic name for the
+<code>Id</code> must be a symbol that serves as a symbolic name for the
 condition type. The slots names of the new condition type is the
 union of the slots of conditions <code>ct<sub>1</sub></code> &#8230;&#8203;</p>
 </div>
@@ -22270,7 +22270,7 @@ underscores are accepted in numbers.</p>
 </div>
 <div class="paragraph">
 <p>This parameter object permits to change the default behaviour of
-the <code>read</code> primitive when reading a symbol. If this parameter has a
+the <code>read</code> primitive when reading a symbol. If this parameter has
 a true value a symbol is not converted to a default case when interned.
 Since R<sup>7</sup>RS requires that symbol are case insignificant, the default
 value  of this parameter is <code>#t</code>.</p>
@@ -23085,7 +23085,7 @@ in a fatal error.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>Allocate-bytes</code> will allocate <code>n</code> consecutive bytes using the
+<p><code>Allocate-bytes</code> will allocate <code>n</code> consecutive bytes using
 the standard STklos allocation function (which uses the
 Boehm–Demers–Weiser garbage collector <a href="#BoehmGC">[BoehmGC]</a>).
 It returns a <code>cpointer</code> Scheme object that points to the first byte
@@ -23111,7 +23111,7 @@ on <code>obj</code>, it will deallocate its data calling
 - the C function <code>free</code> (if it  was allocated by the standard C <code>malloc</code>
   function), or
 - the Boehm GC free  function (if the pointer was allocated using
-  <code>allocate-bytes</code> primitive.</p>
+  <code>allocate-bytes</code> primitive).</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -28657,7 +28657,7 @@ their use in free software.</p>
 <a href="#_footnoteref_4">4</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
 </div>
 <div class="footnote" id="_footnotedef_5">
-<a href="#_footnoteref_5">5</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<a href="#_footnoteref_5">5</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
 </div>
 <div class="footnote" id="_footnotedef_6">
 <a href="#_footnoteref_6">6</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
@@ -28665,7 +28665,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-05-18 17:46:31 +0200
+Last updated 2022-05-19 18:23:59 +0200
 </div>
 </div>
 </body>

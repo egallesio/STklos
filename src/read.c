@@ -148,7 +148,7 @@ static void warning_bad_escaped_sequence(SCM port, int c)
 }
 
 
-static int colon_position_value(const char* str)
+static int colon_position_value(const char *str)
 {
   if      (strcmp(str, "none")   == 0) return COLON_NONE;
   else if (strcmp(str, "before") == 0) return COLON_BEFORE;
@@ -178,7 +178,7 @@ static int flush_spaces(SCM port, char *message, SCM file)
 }
 
 
-static int read_hex_sequence(SCM port, char* utf8_seq, int use_utf8) // ⇒ -1 if incorrect
+static int read_hex_sequence(SCM port, char *utf8_seq, int use_utf8) // ⇒ -1 if incorrect
 {
   char buffer[MAX_HEX_SEQ_LEN];
   char *end;   /* normally max value is 10FFFFF */

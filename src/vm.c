@@ -292,8 +292,8 @@ MUT_DECL(global_lock);          /* the lock to access checked_globals */
 }while(0)
 
 #define REG_CALL_PRIM(name) do{                           \
-  extern struct primitive_obj CPP_CONCAT(STk_o_, name);         \
-  ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);    \
+  extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
+  ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);      \
 }while(0)
 
 
@@ -2019,7 +2019,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-static void restore_cont_jump(struct continuation_obj *k, void* addr){
+static void restore_cont_jump(struct continuation_obj *k, void *addr){
   char unused_buf[1024];  /* needed here to arbitrarily use some stack space */
   vm_thread_t *vm = STk_get_current_vm();
   int cur_stack_size;

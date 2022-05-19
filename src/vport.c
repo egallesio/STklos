@@ -123,7 +123,7 @@ static int call_user_close(void *stream)
  */
 
 static int call_user_putstring(SCM s, void *stream);
-static int vport_nputs(void *stream, const char* s, int len);
+static int vport_nputs(void *stream, const char *s, int len);
 
 static int call_user_putc(int c, void *stream)
 {
@@ -204,7 +204,7 @@ static off_t vport_seek(void  _UNUSED(*stream),
   return 0;
 }
 
-static int vport_nputs(void *stream, const char* s, int len)
+static int vport_nputs(void *stream, const char *s, int len)
 {
   int i;
 

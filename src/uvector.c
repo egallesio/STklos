@@ -35,7 +35,7 @@ static SCM u64_max, s64_min, s64_max;
  *
  */
 
-static char* type_vector(int tip)
+static char *type_vector(int tip)
 {
   switch (tip) {
     case UVECT_S8:  return "s8";
