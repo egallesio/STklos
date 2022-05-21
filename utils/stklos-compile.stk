@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 29-Nov-2021 22:15 (eg)
+;;;; Last file update: 20-May-2022 18:57 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -162,7 +162,7 @@
      (("prepend-load-path" :alternate "I" :arg dir
        :help "Prepend <dir> to the loading path")
       (set! (load-path) (cons dir (load-path))))
-     (("append-load-path"  :altrenate "A" :arg dir
+     (("append-load-path"  :alternate "A" :arg dir
        :help "Append <dir> to the loading path")
       (set! (load-path) (append (load-path) (list dir))))
 
