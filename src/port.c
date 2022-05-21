@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 13-Jan-2022 18:51 (eg)
+ * Last file update: 20-May-2022 18:55 (eg)
  *
  */
 
@@ -1582,7 +1582,7 @@ DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
   if (p == LONG_MIN) STk_error_bad_io_param("bad offset ~S", pos);
   if (w) {
     if (KEYWORDP(w)) {
-      char *s = KEYWORD_PNAME(w);
+      const char *s = KEYWORD_PNAME(w);
 
       if (strcmp(s, "start") == 0) whence = SEEK_SET;
       else if (strcmp(s, "end") == 0) whence = SEEK_END;

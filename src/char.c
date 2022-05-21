@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update:  3-Feb-2022 12:02 (eg)
+ * Last file update: 20-May-2022 20:07 (eg)
  */
 
 #include <ctype.h>
@@ -176,10 +176,6 @@ static int charcompi(SCM c1, SCM c2)
     (int) (tolower((unsigned char) CHARACTER_VAL(c1)) -
            tolower((unsigned char) CHARACTER_VAL(c2)));
 }
-
-/* Comparison of characters. No test on types */
-int STk_charcomp(SCM c1, SCM c2)  { return charcomp(c1,  c2);  }
-int STk_charcompi(SCM c1, SCM c2) { return charcompi(c1,  c2); }
 
 
 int STk_string2char(char *s)

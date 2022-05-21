@@ -1,7 +1,7 @@
 /*
  * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 28-Sep-2021 11:53 (eg)
+ * Last file update: 20-May-2022 18:56 (eg)
  *
  */
 #include <ctype.h>
@@ -95,7 +95,7 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
 
 static Inline void printkeyword(SCM key, SCM port, int mode)
 {
-  char *s = KEYWORD_PNAME(key);
+  const char *s = KEYWORD_PNAME(key);
 
   if (mode==WRT_MODE) {
     if ((BOXED_INFO(key) & SYMBOL_NEEDS_BARS) ||

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 19-May-2022 17:28 (eg)
+ * Last file update: 20-May-2022 19:55 (eg)
  */
 
 
@@ -368,10 +368,6 @@ int STk_init_box(void);
 #define CHARACTERP(n)     ((AS_LONG(n) & 7) == 6)
 
 
-/* Comparison of characters. No test on types */
-int STk_charcomp(SCM c1, SCM c2);
-int STk_charcompi(SCM c1, SCM c2);
-
 /* Simple  character conversion functions */
 uint32_t STk_to_upper(uint32_t c);
 uint32_t STk_to_lower(uint32_t c);
@@ -602,7 +598,7 @@ int STk_init_fixnum(void);
 */
 struct keyword_obj {
   stk_header header;
-  char *pname;                  /* must be at the same offset as for symbols */
+  const char *pname;            /* must be at the same offset as for symbols */
 };
 
 #define KEYWORD_PNAME(p)        (((struct keyword_obj *) (p))->pname)

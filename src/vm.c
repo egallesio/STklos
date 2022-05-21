@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  5-Nov-2021 17:14 (eg)
+ * Last file update: 20-May-2022 19:51 (eg)
  */
 
 // INLINER values
@@ -569,10 +569,10 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
- * ,(bold "Note:") R5RS imposes to use multiple values in the context
+ * NOTE:  R5RS imposes to use multiple values in the context
  * of a |call-with-values|. In STklos, if |values| is not used with
  * |call-with-values|, only the first value is used (i.e. others values are
- * ,(emph "ignored")).
+ * _ignored_)).
  *
 doc>
 */
