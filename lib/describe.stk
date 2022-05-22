@@ -147,6 +147,12 @@ doc>
      ((port? x)         (format port "an ~a ~a port"
                                 (if (input-port? x) "input" "output")
                                 (if (binary-port? x) "binary" "textual")))
+     ((hash-table? x)   (format port "~a~a hash table~a"
+                                (if (hash-table-mutable? x)     "a mutable" "an immutable")
+                                (if (zero? (hash-table-size x)) ", empty"   "")
+                                (if (positive? (hash-table-size x))
+                                    (format #f " with ~a entries" (hash-table-size x))
+                                    "")))
      (else              (let ((user-type-name (%user-type-name x)))
                           (if user-type-name
                               ;; Object type is user defined.
