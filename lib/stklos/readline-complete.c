@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-May-2022 09:22
- * Last file update: 23-May-2022 17:55 (eg)
+ * Last file update: 23-May-2022 19:22 (eg)
  */
 
 #include <stklos.h>
@@ -49,13 +49,13 @@ typedef char **rl_completion_func_t(const char *, int, int);
 extern char **rl_completion_matches(const char *, rl_compentry_func_t *);
 
 /* Readline variables used */
-extern char *rl_line_buffer;                      // The line buffer
-extern int rl_attempted_completion_over;          // 1 to suppress filename completion
-extern char *rl_completer_word_break_characters;  // word deparator. Normally "n\"\\'`@$>"
+extern char *rl_line_buffer;                    // The line buffer
+extern int rl_attempted_completion_over;        // 1 to suppress filename completion
+extern char *rl_completer_word_break_characters;// word deparator. Normally "n\"\\'`@$>"
 extern rl_completion_func_t *rl_attempted_completion_function; // Pointer on our completion func
 
 
-SCM gen;
+static SCM gen;                 // A pointer on the Scheme generator function
 
 /*
   Calls the generator (gen) with two arguments:
@@ -66,32 +66,42 @@ SCM gen;
      - #t if this is a subsequent call (and we want one more match).
   This is how readline works.
  */
-char *
+static char *
 generator(const char *text, int state) {
   SCM s = STk_C_apply(gen,2,
                       STk_Cstring2string((char *)text),
                       MAKE_BOOLEAN(state));
+
   if (s == STk_nil) return NULL;
-  size_t size = STRING_SIZE(s);
+
   /* We MUST call malloc, and not use libgc, because readline will attempt
      to free the pointer (at least on FresBSD). */
+  size_t size = STRING_SIZE(s);
   char *res = malloc(size+1);
   strncpy(res,STRING_CHARS(s), size);
   res[size]=0;
   return res;
 }
 
-/* STk_completion is the function passed to libreadline to do tab
+/* scheme_completion is the function passed to libreadline to do tab
    completion. Its arguments are
    - The partially typed string
-   - The start and end positions, which we ignore.
+   - The start and end positions, (end position is ignored here)
    The actualy work is done by the generator function in this file,
    which in turn calls the Scheme procedure complete in
-   readline-complete.stk. */
-char **
-STk_completion(const char *str, int _UNUSED(start), int _UNUSED(end)) {
-    rl_attempted_completion_over = 1;
-    return rl_completion_matches(str, generator);
+   readline-complete.stk.
+*/
+static char **
+scheme_completion(const char *str, int start, int _UNUSED(end)) {
+
+  // We want path completion when we are after a double quote If the character
+  // preceding the first char of str is a '"' (we search it in the complete
+  // line buffer), we inhibit path completion by setting
+  // rl_attempted_completion_over to 0.
+  rl_attempted_completion_over = (start == 0 ||
+                                  rl_line_buffer[start-1] != '\"');
+
+  return rl_completion_matches(str, generator);
 }
 
 /*
@@ -103,7 +113,7 @@ STk_completion(const char *str, int _UNUSED(start), int _UNUSED(end)) {
   It is called by the Scheme procedure 'init-readline-completion-function'.
  */
 DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,subr1,
-         (SCM generator))
+                 (SCM generator))
 {
   gen = generator;
   /* The word break chars are by default " \t\n\"\\'`@$><=;|&{(".
@@ -111,9 +121,8 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,s
      It's not perfect, though: we'll ignore variables names starting
      with \t, \n, ; etc, because if we matched them we'd have trouble
      with separating tokens. */
-  rl_completer_word_break_characters = " \t\n'`;|(";
-
-  rl_attempted_completion_function = STk_completion;
+  rl_completer_word_break_characters = " \t\n\"'`;|(";
+  rl_attempted_completion_function = scheme_completion;
   return STk_void;
 }
 
@@ -122,7 +131,6 @@ MODULE_ENTRY_START("stklos/readline-complete")
   SCM module =  STk_create_module(STk_intern("stklos/readline-complete"));
 
   ADD_PRIMITIVE_IN_MODULE(readline_init_completion, module);
-
   /* Execute Scheme code */
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
