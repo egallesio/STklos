@@ -21,12 +21,38 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-May-2022 09:22
- * Last file update: 11-May-2022 08:06 (jpellegrini)
+ * Last file update: 23-May-2022 17:55 (eg)
  */
 
 #include <stklos.h>
-#include <readline/readline.h>
 #include "readline-complete-incl.c"
+
+//
+// Readline interface for completion
+//
+// When using completion we need some variables and function from
+// "readline/readline.h" However, since we don't use autoconf for locating the
+// installation directory of readline (or libedit), we just declare what we need
+// here. It permits also to compile this file, without libredline or libedit.
+//
+// NOTE: STklos does not try to link the GNU readline library since on BSD
+// system, it is generally not present (plus the complex interaction of LGPL
+// and GPL). Hence, autoconf doesn't try to locate any editing library and,
+// the REPL just tries to link against a line editing library,at runtime, if
+// it finds one such lib.
+
+/* Readline typedefs for the completion system */
+typedef char *rl_compentry_func_t(const char *, int);
+typedef char **rl_completion_func_t(const char *, int, int);
+
+/* Readline function used */
+extern char **rl_completion_matches(const char *, rl_compentry_func_t *);
+
+/* Readline variables used */
+extern char *rl_line_buffer;                      // The line buffer
+extern int rl_attempted_completion_over;          // 1 to suppress filename completion
+extern char *rl_completer_word_break_characters;  // word deparator. Normally "n\"\\'`@$>"
+extern rl_completion_func_t *rl_attempted_completion_function; // Pointer on our completion func
 
 
 SCM gen;
@@ -42,19 +68,17 @@ SCM gen;
  */
 char *
 generator(const char *text, int state) {
-    /* We need to keep 'const' for the 'text' parameter,
-       so we use a cast when passing it to STk_Cstring2string. */
-    SCM s = STk_C_apply(gen,2,
-			STk_Cstring2string((char *)text),
-			MAKE_BOOLEAN(state));
-    if (s == STk_nil) return NULL;
-    size_t size = STRING_SIZE(s);
-    /* We MUST call malloc, and not use libgc, because readline will attempt
-       to free the pointer (at least on FresBSD). */
-    char *res = malloc(size+1);
-    strncpy(res,STRING_CHARS(s), size);
-    res[size]=0;
-    return res;
+  SCM s = STk_C_apply(gen,2,
+                      STk_Cstring2string((char *)text),
+                      MAKE_BOOLEAN(state));
+  if (s == STk_nil) return NULL;
+  size_t size = STRING_SIZE(s);
+  /* We MUST call malloc, and not use libgc, because readline will attempt
+     to free the pointer (at least on FresBSD). */
+  char *res = malloc(size+1);
+  strncpy(res,STRING_CHARS(s), size);
+  res[size]=0;
+  return res;
 }
 
 /* STk_completion is the function passed to libreadline to do tab
@@ -65,7 +89,7 @@ generator(const char *text, int state) {
    which in turn calls the Scheme procedure complete in
    readline-complete.stk. */
 char **
-STk_completion(const char *str, int start, int end) {
+STk_completion(const char *str, int _UNUSED(start), int _UNUSED(end)) {
     rl_attempted_completion_over = 1;
     return rl_completion_matches(str, generator);
 }
@@ -79,18 +103,18 @@ STk_completion(const char *str, int start, int end) {
   It is called by the Scheme procedure 'init-readline-completion-function'.
  */
 DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,subr1,
-		 (SCM generator))
+         (SCM generator))
 {
-    gen = generator;
-    /* The word break chars are by default " \t\n\"\\'`@$><=;|&{(".
-       We adapt those here so they make sense in a Scheme environment.
-       It's not perfect, though: we'll ignore variables names starting
-       with \t, \n, ; etc, because if we matched them we'd have trouble
-       with separating tokens. */
-    rl_completer_word_break_characters = " \t\n'`;|(";
-	
-    rl_attempted_completion_function = STk_completion;
-    return STk_void;
+  gen = generator;
+  /* The word break chars are by default " \t\n\"\\'`@$><=;|&{(".
+     We adapt those here so they make sense in a Scheme environment.
+     It's not perfect, though: we'll ignore variables names starting
+     with \t, \n, ; etc, because if we matched them we'd have trouble
+     with separating tokens. */
+  rl_completer_word_break_characters = " \t\n'`;|(";
+
+  rl_attempted_completion_function = STk_completion;
+  return STk_void;
 }
 
 MODULE_ENTRY_START("stklos/readline-complete")
@@ -98,7 +122,7 @@ MODULE_ENTRY_START("stklos/readline-complete")
   SCM module =  STk_create_module(STk_intern("stklos/readline-complete"));
 
   ADD_PRIMITIVE_IN_MODULE(readline_init_completion, module);
-    
+
   /* Execute Scheme code */
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
