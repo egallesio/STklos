@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 20-May-2022 19:51 (eg)
+ * Last file update: 23-May-2022 13:29 (eg)
  */
 
 // INLINER values
@@ -569,6 +569,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
+ * 
  * NOTE:  R5RS imposes to use multiple values in the context
  * of a |call-with-values|. In STklos, if |values| is not used with
  * |call-with-values|, only the first value is used (i.e. others values are
