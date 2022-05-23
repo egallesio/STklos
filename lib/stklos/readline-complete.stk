@@ -20,7 +20,7 @@
 ;;;; USA.
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-May-2022 08:59
-;;;; Last file update: 11-May-2022 07:50 (jpellegrini)
+;;;; Last file update: 23-May-2022 19:33 (eg)
 
 (select-module stklos/readline-complete)
 
@@ -75,7 +75,7 @@ doc>
                                    (get-module-symbols (car mod+ext) (cdr mod+ext)))
                                  modules))
              (symbols (apply append symbols-lists)))
-        
+
         ;; We just compare the prefix. Perhapes in the future we could optionally
         ;; use a regexp so the user can decide to match any parts of the word (like,
         ;; type 'polar', hit tab, and get the expansion 'make-polar')
@@ -88,12 +88,12 @@ doc>
 
 ;; readline-completion-generator is a generator of string completions.
 ;; It takes as argument a string, 'str' and a state indicator, 'state'.
-;; 
+;;
 ;; - Completions will be searched for 'str'.
 ;; - When state is #f a fresh list of completions is searched, and the first
 ;; item is returned.
 ;; - When state is #t the next of the current list is returned.
-;; 
+;;
 ;; This is written this way to match the expected behavior of the readline
 ;; function rl_completion_matches.
 (define readline-completion-generator #f)
@@ -111,8 +111,8 @@ doc>
 ;; init-readline-completion-function actually tells readline to start
 ;; doing tab completion, and passes our completion function to it.
 (define (init-readline-completion-function)
-  (unless (eq? (key-get *%system-state-plist* :readline 'no-readline)
-               'readline)
+  (when (eq? (key-get *%system-state-plist* :readline 'no-readline)
+               'no-readline)
     (error "readline completion requested, but readline not installed"))
   (%init-readline-completion-function readline-completion-generator))
 
