@@ -61,6 +61,47 @@
 
 (select-module srfi/133)
 
+;;;
+;;; NOTE: when an exported symbol is already defined in STklos, we
+;;; actually define it inside the module, as in
+;;;
+;;; (define vector-fill! (symbol-value 'vector-fill! scheme))
+;;;
+;;; because otherwise SRFI-133 would require the SCHEME (or STklos)
+;;; module in order to work. Also, if someone changed the binding of
+;;; vector-fill!, for example, in module STklos, and SRFI-133 counts on
+;;; its original binding, then SRFI-133 will not behave as intended.
+;;;
+;;; --jpellegrini
+;;;
+;;; Now, instead of typing the entire the define with symbol-value line,
+;;; we make a little convenience macro:
+
+(define-syntax from-scheme
+  (syntax-rules ()
+    ((_ name)
+     (define name (symbol-value (quote name) scheme)))))
+
+(define scheme (find-module 'SCHEME))
+
+
+
+;; Now we do "(from-scheme vector-fill!)", and the binding is imported.
+
+;; Also, we need to explicitly export the bindings!
+
+(export vector-copy
+        vector-append
+        vector-map
+        vector-for-each
+        vector-fill!
+        vector-copy!
+        vector->list
+        list->vector
+        vector->string)
+
+
+
 ;; Pseudo-define the primitives defined in C to avoid compiler warnings
 (%compile-time-define check-index vector-parse-start+end %smallest-length
                       %vector-copy! %vector-reverse-copy! %vector-reverse!
@@ -316,6 +357,9 @@
 ;;;   the new locations from which there is no respective element in
 ;;;   VECTOR are filled with FILL.
 
+(from-scheme vector-copy)
+
+
 ;;; (VECTOR-REVERSE-COPY <vector> [<start> <end>]) -> vector
 ;;;   Create a newly allocated vector whose elements are the reversed
 ;;;   sequence of elements between START and END in VECTOR.  START's
@@ -342,6 +386,9 @@
 ;;; (VECTOR-APPEND <vector> ...) -> vector
 ;;;   Append VECTOR ... into a newly allocated vector and return that
 ;;;   new vector.
+
+(from-scheme vector-append)
+
 
 ;;; (VECTOR-APPEND-SUBVECTORS <arg> ...) -> vector
 ;;;   Like VECTOR-APPEND but appends subvectors specified by
@@ -506,6 +553,9 @@
 ;;;   from the old vectors by (F I (vector-ref VECTOR I) ...).  The
 ;;;   dynamic order of application of F is unspecified.
 
+(from-scheme vector-map)
+
+
 ;;; (VECTOR-MAP! <f> <vector> ...) -> unspecified
 ;;;     (F <elt> ...) -> element' ; N vectors -> N args
 ;;;   Similar to VECTOR-MAP, but rather than mapping the new elements
@@ -533,6 +583,8 @@
 ;;;   contrast with VECTOR-MAP, F is reliably applied to each
 ;;;   subsequent elements, starting at index 0 from left to right, in
 ;;;   the vectors.
+
+(from-scheme vector-for-each)
 
 
 ;;; (VECTOR-COUNT <predicate?> <vector> ...)
@@ -797,12 +849,16 @@
 ;;;
 ;;; This one can probably be made really fast natively.
 
+(from-scheme vector-fill!)
+
 ;;;; ALREADY IN STklos:
 ;;; (VECTOR-COPY! <target> <tstart> <source> [<sstart> <send>])
 ;;;       -> unspecified
 ;;;   Copy the values in the locations in [SSTART,SEND) from SOURCE to
 ;;;   to TARGET, starting at TSTART in TARGET.
 ;;; [wdc] Corrected to allow 0 <= sstart <= send <= (vector-length source).
+
+(from-scheme vector-copy!)
 
 ;;; (VECTOR-REVERSE-COPY! <target> <tstart> <source> [<sstart> <send>])
 ;;; [wdc] Corrected to allow 0 <= sstart <= send <= (vector-length source).
@@ -869,6 +925,8 @@
 ;;;   between START, whose default is 0, and END, whose default is the
 ;;;   length of VECTOR, from VECTOR.
 
+(from-scheme vector->list)
+
 
 ;;; (REVERSE-VECTOR->LIST <vector> [<start> <end>]) -> list
 ;;;   Produce a list containing the elements in the locations between
@@ -894,6 +952,8 @@
 ;;; and causes - to fail as well.  Given a LENGTH* that computes the
 ;;; length of a list's cycle, this wouldn't diverge, and would work
 ;;; great for circular lists.
+
+(from-scheme list->vector)
 
 
 ;;; (REVERSE-LIST->VECTOR <list> [<start> <end>]) -> vector
@@ -933,6 +993,8 @@
 ;;;   Produce a string containing the elements in the locations
 ;;;   between START, whose default is 0, and END, whose default is the
 ;;;   length of VECTOR, from VECTOR.
+
+(from-scheme vector->string)
 
 
 ;;; (STRING->VECTOR <string> [<start> <end>]) -> vector
