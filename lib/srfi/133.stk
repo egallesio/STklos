@@ -867,18 +867,7 @@
     (let ((tstart (check-type nonneg-int? tstart 'vector-reverse-copy!))
           (sstart (check-type nonneg-int? sstart 'vector-reverse-copy!))
           (send   (check-type nonneg-int? send 'vector-reverse-copy!)))
-      (cond ((and (eq? target source)
-                  (or (between? sstart tstart send)
-                      (between? tstart sstart
-                                (+ tstart (- send sstart)))))
-               (error 'vector-reverse-copy!
-                      "vector range for self-copying overlaps"
-                      vector-reverse-copy!
-                      `(vector was ,target)
-                      `(tstart was ,tstart)
-                      `(sstart was ,sstart)
-                      `(send   was ,send)))
-            ((and (<= 0 sstart send source-length)
+      (cond ((and (<= 0 sstart send source-length)
                   (<= (+ tstart (- send sstart)) (vector-length target)))
              (%vector-reverse-copy! target tstart source sstart send))
             (else

@@ -138,10 +138,49 @@ DEFINE_PRIMITIVE("%vector-reverse-copy!",srfi_133__nvector_reverse_copy,subr5,(S
     int csstart = INT_VAL(sstart);
     int csend   = INT_VAL(send) - 1;
 
-    while (csend >= csstart) {
-        VECTOR_DATA(target)[ctstart] = VECTOR_DATA(source)[csend];
-        ctstart++;
-        csend--;
+    /* R7RS specifies that, for vector-copy!,
+
+       "The order in which elements are copied is unspecified, except
+       that if the source and destination overlap, copying takes place
+       as if the source is first copied into a temporary vector and
+       then into the destination. This can be achieved without
+       allocating storage by making sure to copy in the correct
+       direction in such circumstances.",
+
+       and that vector-reverse-copy! is "Like vector-copy!, but the
+       elements appear in to in reverse order."
+
+       So that restriction is also true for vector-reverse-copy!.
+
+       However, I know of no way to do that without allocating extra
+       space for REVERSE copying of overlapping parts of the same
+       vector.
+
+       We allocate new space *of the size of the part being copied*,
+       so if the vecor has a billion elements and only 10 are being
+       copied, then we allocate 10 cells.
+       
+       Of course, we split this in two cases, overlapping and
+       non-overlapping...
+
+       --jpellegrini */
+
+    int size = csend - csstart + 1;
+    int ctend  = ctstart + size;
+    
+    if (target == source &&
+	(csend >= ctstart || ctend <= csstart ||
+	 (csend == ctend && csstart == ctstart))) {
+	SCM *tmp = STk_must_malloc_atomic(sizeof (SCM) * size);
+	for (int i = csstart; i <= csend; i++)
+	    tmp[size - i - 1] = VECTOR_DATA(source)[i];
+	memcpy(&VECTOR_DATA(target)[ctstart], tmp, size * sizeof(SCM));
+    } else {
+	while (csend >= csstart) {
+	    VECTOR_DATA(target)[ctstart] = VECTOR_DATA(source)[csend];
+	    ctstart++;
+	    csend--;
+	}
     }
     return STk_void;
 }
