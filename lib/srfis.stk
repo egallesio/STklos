@@ -81,7 +81,7 @@
     ;; 40  A Library of Streams
     (41 "Streams" (streams) "srfi-41")
     ;; 42  Eager Comprehensions
-    ;; 43  Vector library
+    (43 "Vector library" () "srfi-43")
     ;; 44  Collections
     (45 "Primitives for Expressing Iterative Lazy Algorithms")
     ;; 46 Basic Syntax-rules Extensions
