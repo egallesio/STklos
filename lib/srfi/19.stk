@@ -476,7 +476,7 @@ doc>
 	  time3))))
 
 (define (add-duration time1 duration)
-  (tm:add-duration time1 duration (make-time (time-type time1) #f #f)))
+  (tm:add-duration time1 duration (make-time (time-type time1) 0 0)))
 
 (define (add-duration! time1 duration)
   (tm:add-duration time1 duration time1))
@@ -500,7 +500,7 @@ doc>
 	  time3))))
 
 (define (subtract-duration time1 duration)
-  (tm:subtract-duration time1 duration (make-time (time-type time1) #f #f)))
+  (tm:subtract-duration time1 duration (make-time (time-type time1) 0 0)))
 
 (define (subtract-duration! time1 duration)
   (tm:subtract-duration time1 duration time1))
@@ -541,7 +541,7 @@ doc>
 (define (time-utc->time-monotonic time-in)
   (if (not (eq? (time-type time-in) time-utc))
       (tm:time-error 'time-utc->time-monotonic 'incompatible-time-types time-in))
-  (let ((ntime (%time-utc->time-tai! time-in (make-time #f #f #f)
+  (let ((ntime (%time-utc->time-tai! time-in (make-time time-tai 0 0)
 				       'time-utc->time-monotonic)))
     (set-time-type! ntime time-monotonic)
     ntime))
