@@ -272,6 +272,18 @@ b|)
 (test/error "repeat.3"
             (repeat 'not-a-number (display "." p)))
 
+;;----------------------------------------------------------------------
+(test-subsection "(void)")
+
+(test "void.1" #t (eq? (void) #void))
+(test "void.2" #t (eq? (void 1 2 3) #void))
+(test "void.3"
+      '(-1 20 #void)
+      (let ((x 1)
+            (y 2))
+        (let ((z (void (set! x -1)
+                       (set! y (* y 10)))))
+          (list x y z))))
 
 ;;------------------------------------------------------------------
 (test-section-end)
