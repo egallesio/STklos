@@ -293,3 +293,11 @@
   (mutate-as x '#(1 2 3 4 5) (flexvector-fill! x 'baz 2 4)))
 (test "flexvector-fill! clamped" '#(qux qux qux)
   (mutate-as x '#(1 2 3) (flexvector-fill! x 'qux -1 10)))
+
+;; Testing setter
+(test "flexvector setter"
+      #(a beta c)
+      (flexvector->vector
+       (let ((fv (flexvector 'a 'b 'c)))
+         (set! (flexvector-ref fv 1) 'beta)
+         fv)))
