@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 23-May-2022 13:29 (eg)
+ * Last file update: 30-May-2022 15:17 (eg)
  */
 
 // INLINER values
@@ -1937,6 +1937,10 @@ DEFINE_PRIMITIVE("%pop-exception-handler", pop_handler, subr0, (void))
  *                         C O N T I N U A T I O N S
  *
 \*===========================================================================*/
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-pointer"
+
 void STk_get_stack_pointer(void **addr)
 {
   char c;
@@ -2019,6 +2023,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Winfinite-recursion"
 
 static void restore_cont_jump(struct continuation_obj *k, void *addr){
   char unused_buf[1024];  /* needed here to arbitrarily use some stack space */
@@ -2074,6 +2079,7 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
   return STk_void;
 }
 
+#pragma GCC diagnostic pop
 
 DEFINE_PRIMITIVE("%continuation?", continuationp, subr1, (SCM obj))
 {
@@ -2141,10 +2147,11 @@ DEFINE_PRIMITIVE("%dump-code", dump_code, subr2, (SCM f, SCM v))
 }
 
 
-static Inline STk_instr* read_code(SCM f, int len) /* read a code phrase */
+static Inline STk_instr* read_code(SCM f, unsigned int len) /* read a code phrase */
 {
   STk_instr *res, *tmp;
-  int i, c1, c2;
+  unsigned int i;
+  int c1, c2;
 
   tmp = res = STk_must_malloc_atomic(len * sizeof(STk_instr));
 
