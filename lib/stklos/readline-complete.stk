@@ -20,62 +20,29 @@
 ;;;; USA.
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-May-2022 08:59
-;;;; Last file update: 23-May-2022 19:33 (eg)
+;;;; Last file update: 24-May-2022 12:43 (eg)
 
 (select-module stklos/readline-complete)
 
-(export readline-completion-generator
-        readline-complete-get-modules
-        init-readline-completion-function)
 
-#|
-<doc EXT readline-complete-get-modules
- * (readline-complete-get-modules)
- *
- * This is a parameter that holds one procedure. The procedure should
- * return a list that specifies the modules that will be searched when
- * doing tab completion, and which symbols should be considered from
- * each module.
- * The list returned from the procedure is a list of conses, where
- * the CAR is a module, and the CDR is :export when only the exported
- * symbols should be considered from that module.
- *
- * The default value is
- * @lisp
- * (lambda () (list (cons (find-module 'STklos) :export)
- *             (cons (current-module)      :all)))
- * @end lisp
- * which will read all exported symbols in the STklos module and all
- * symbols (exported or not) from the current module.
-doc>
-|#
-(define readline-complete-get-modules
-  (make-parameter
-   (lambda () (list (cons (find-module 'STklos) :export)
-               (cons (current-module)      :all)))))
 
-;; Returns a list with the symbols in 'module'.
-;; If 'inly-exports' is equal to #:export, only exported
-;; symbols are considered.
-(define (get-module-symbols module only-exports)
-  (map symbol->string
-       (if (eq? only-exports #:export)
-           (map car (module-exports module))
-           (module-symbols (current-module)))))
+(define (get-module-symbols module)
+  ;; Find all the global symbols of a module/library
+  (append (module-symbols (current-module))
+          (if (library? module)
+              '()
+              (module-symbols (find-module 'STklos)))))
 
-;; Given a string 'str' (which is the partially typed string in the
-;; REPL), the 'complete' procedure uses the 'readline-complete-get-modules'
-;; parameter to get all completions for that string.
-(define (complete str)
-  ;; We need to bail out when the length is zero, otherwise the program crashes.
+
+
+;;
+;; A default completer function, which completes on the symbols usable
+;; at the global level of the current REPL module
+;;
+(define (default-complete-function str)
   (if (zero? (string-length str))
       '()
-      (let* ((modules ((readline-complete-get-modules)))
-             (symbols-lists (map (lambda (mod+ext)
-                                   (get-module-symbols (car mod+ext) (cdr mod+ext)))
-                                 modules))
-             (symbols (apply append symbols-lists)))
-
+      (let ((symbols (get-module-symbols (current-module))))
         ;; We just compare the prefix. Perhapes in the future we could optionally
         ;; use a regexp so the user can decide to match any parts of the word (like,
         ;; type 'polar', hit tab, and get the expansion 'make-polar')
@@ -83,8 +50,15 @@ doc>
         (let ((size (string-length str)))
           (let ((match (lambda (s)
                          (and (>= (string-length s) size)
-                          (string=? str (substring s 0 size))))))
-            (filter match symbols))))))
+                              (string=? str (substring s 0 size))))))
+            (filter match (map symbol->string symbols)))))))
+
+;;
+;; The parameter completer-function contains the function used to complete strings
+;; It defaults to default-complet-function
+;;
+(define completer-function (make-parameter default-complete-function))
+
 
 ;; readline-completion-generator is a generator of string completions.
 ;; It takes as argument a string, 'str' and a state indicator, 'state'.
@@ -96,24 +70,24 @@ doc>
 ;;
 ;; This is written this way to match the expected behavior of the readline
 ;; function rl_completion_matches.
-(define readline-completion-generator #f)
-
-(let ((ans '()))
-  (set! readline-completion-generator
+(define readline-completion-generator
+  (let ((ans '()))
     (lambda (str state)
-      (when (not state) (set! ans (complete str)))
+      (when (not state)
+        (set! ans ((completer-function) str)))
       (if (null? ans)
           ans
           (let ((s (car ans)))
             (set! ans (cdr ans))
             s)))))
 
-;; init-readline-completion-function actually tells readline to start
-;; doing tab completion, and passes our completion function to it.
-(define (init-readline-completion-function)
-  (when (eq? (key-get *%system-state-plist* :readline 'no-readline)
-               'no-readline)
-    (error "readline completion requested, but readline not installed"))
+;;
+;; Initialization
+;;
+(unless (eq? (key-get *%system-state-plist* :readline 'no-readline)
+             'no-readline)
+  ;; Tell readline to start doing tab completion, by passing our completion
+  ;; function to it.
   (%init-readline-completion-function readline-completion-generator))
 
 (provide "stklos/readline-complete")
