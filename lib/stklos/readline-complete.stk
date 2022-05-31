@@ -20,10 +20,13 @@
 ;;;; USA.
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-May-2022 08:59
-;;;; Last file update: 24-May-2022 12:43 (eg)
+;;;; Last file update: 30-May-2022 16:32 (eg)
 
 (select-module stklos/readline-complete)
 
+(export completer-function            ; parametee to get/set clompletion function
+        default-complete-function     ; the prefix default completion function
+        substring-complete-function)  ; another compeletion function using substring 
 
 
 (define (get-module-symbols module)
@@ -34,24 +37,32 @@
               (module-symbols (find-module 'STklos)))))
 
 
-
 ;;
 ;; A default completer function, which completes on the symbols usable
-;; at the global level of the current REPL module
+;; at the global level of the current REPL module. 
 ;;
 (define (default-complete-function str)
   (if (zero? (string-length str))
       '()
-      (let ((symbols (get-module-symbols (current-module))))
-        ;; We just compare the prefix. Perhapes in the future we could optionally
-        ;; use a regexp so the user can decide to match any parts of the word (like,
-        ;; type 'polar', hit tab, and get the expansion 'make-polar')
-        ;; If we do that, we need to be careful to properly escape the matching string.
-        (let ((size (string-length str)))
-          (let ((match (lambda (s)
-                         (and (>= (string-length s) size)
-                              (string=? str (substring s 0 size))))))
-            (filter match (map symbol->string symbols)))))))
+      ;; We just compare the prefix.
+      (let* ((symbols (get-module-symbols (current-module)))
+             (size (string-length str))
+             (match (lambda (s)
+                      (and (>= (string-length s) size)
+                           (string=? str (substring s 0 size))))))
+        (filter match (map symbol->string symbols)))))))
+
+;;
+;; Another completer. This one tries to find if str is a substring of
+;; a symbols defined at global level
+;;
+(define (substring-complete-function str)
+  (if (zero? (string-length str))
+      '()
+      (let ((symbols (get-module-symbols (current-module)))
+            (match (lambda (s) (string-find? str s))))
+        (filter match (map symbol->string symbols)))))
+
 
 ;;
 ;; The parameter completer-function contains the function used to complete strings
