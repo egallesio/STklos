@@ -1639,6 +1639,81 @@ a")
            (list x aaa))))
 
 
+;;======================================================================
+(test-subsection "6.12 Environments and evaluation")
+
+(let ((scheme (find-module 'SCHEME)))
+  (test "eval.scheme.1" -1   (eval -1 (scheme-report-environment 5)))
+  (test "eval.scheme.2"
+        (symbol-value 'display scheme)
+        (eval 'display (scheme-report-environment 5)))
+  (let ((display print))
+    (test "eval.scheme.3"
+          (symbol-value 'display scheme)
+          (eval 'display (scheme-report-environment 5))))
+  (test/error "eval.null.1"  (eval -1 (null-environment 5))))
+
+(define-library (testing x y)
+  (export x) ;; but not y!
+  (begin (define x -1)
+         (define y -2)))
+
+(define-module testing-d
+  (export d)
+  (define d "ddd"))
+
+(define-module testing-a-b-c-d
+  (import testing-d)
+  (export a b d)
+  (define a "aaa")
+  (define b "bbb")
+  (define c "ccc"))
+
+;; without name
+(define e (environment '(testing x y)    ; user lib
+                       'testing-a-b-c-d  ; user module
+                       '(scheme write))) ; system lib
+
+
+(test "environment.0" #void (module-name e))
+(test "environment.1" "aaa" (eval 'a e))
+(test "environment.2" "bbb" (eval 'b e))
+(test/error "environment.3" (eval 'c e))
+(test "environment.4" "ddd" (eval 'd e))
+(test "environment.5" -1 (eval 'x e))
+(test/error "environment.6" (eval 'y e))
+
+;; with name
+(define e2 (environment "my-env"
+                        '(testing x y)    ; user lib
+                        'testing-a-b-c-d  ; user module
+                        '(scheme write))) ; system lib
+
+(test "environment.7" 'my-env (module-name e2))
+(test "environment.8" "aaa" (eval 'a e2))
+(test "environment.9" "bbb" (eval 'b e2))
+(test/error "environment.10" (eval 'c e2))
+(test "environment.11" "ddd" (eval 'd e2))
+(test "environment.12" -1 (eval 'x e2))
+(test/error "environment.13" (eval 'y e2))
+
+;; null
+(test "environment.null.1"
+      #t
+      (eq? (null-environment)
+           (environment)))
+
+(test "environment.null.2"
+      #t
+      (eq? (null-environment)
+           (environment "useless name")))
+
+(test/error "environment.null.3" (eval 'car (null-environment)))            
+
+;; bad arguments to environment
+(test/error "environment.badargs.1" (environment 1))     ; 1 not module
+(test/error "environment.badargs.2" (environment e 1))   ; 1 not module (2nd arg)
+(test/error "environment.badargs.3" (environment e "n")) ; name should be first arg
 
 ;;======================================================================
 (test-subsection "6.13 Input and Output")
