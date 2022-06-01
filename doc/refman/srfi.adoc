@@ -334,7 +334,7 @@ NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 {{insertdoc 'not-ipair?}}
 {{insertdoc 'null-ilist?}}
 {{insertdoc 'ilist=}}
-{{insertdoc 'list-lock!}}
+{{insertdoc 'list-immutable!}}
 
 {{insertdoc 'itenth}}
 {{insertdoc 'icar+icdr}}

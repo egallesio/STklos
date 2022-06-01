@@ -65,7 +65,7 @@
 ;;;   (the reference implementation has a simpler procedure that runs in
 ;;;   quadratic time).
 ;;;
-;;; * The list-lock+! procedure is used to change a list, in-place, so
+;;; * The list-immutable+! procedure is used to change a list, in-place, so
 ;;;   it becomes immutable.
 
 
@@ -242,7 +242,7 @@
                       ipair->pair pair->ipair
                       ilist->list list->ilist
                       tree->itree itree->tree
-                      list-lock+!)
+                      list-immutable+!)
 
 ;;;
 ;;; UTILITIES FROM THE REFRENCE IMPLEMENTATION
@@ -340,7 +340,7 @@ doc>
 doc>
 |#
 (define (make-ilist n :optional (fill #void))
-  (list-lock+! (make-list n fill)))
+  (list-immutable+! (make-list n fill)))
 
 
 #|
@@ -371,7 +371,7 @@ doc>
  * Copies the spine of the argument, including the ilist tail.
 doc>
 |#
-(define (ilist-copy x) (list-lock+! (list-copy x)))
+(define (ilist-copy x) (list-immutable+! (list-copy x)))
 
 #|
 <doc EXT iiota
@@ -820,7 +820,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define (ireverse il) (list-lock+! (reverse il)))
+(define (ireverse il) (list-immutable+! (reverse il)))
 
 
 #|
@@ -1387,7 +1387,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define (imap . args) (list-lock+! (apply map args)))
+(define (imap . args) (list-immutable+! (apply map args)))
 
 #|
 <doc EXT ifor-each
@@ -1515,7 +1515,7 @@ doc>
  * not specified.
 doc>
 |#
-(define (ifilter-map . args)  (list-lock+! (apply filter-map args)))
+(define (ifilter-map . args)  (list-immutable+! (apply filter-map args)))
 
 
 ;; FILTERING AND PARTITIONING
@@ -1537,7 +1537,7 @@ doc>
 doc>
 |#
 (define (ifilter p l)
-  (list-lock+! (filter p l)))
+  (list-immutable+! (filter p l)))
 
 #|
 <doc EXT ipartition
@@ -1592,7 +1592,7 @@ doc>
 doc>
 |#
 (define (iremove p l)
-  (list-lock+! (remove p l)))
+  (list-immutable+! (remove p l)))
 
 ;; SEARCHING
 
@@ -1895,19 +1895,19 @@ doc>
 doc>
 |#
 ;; We need to check if the result is #f, member/memq/memv
-;; returns #f when the element is not found, but list-lock+!
+;; returns #f when the element is not found, but list-immutable+!
 ;; expects a list.
 (define (imember x il :optional (e equal?))
   (let ((lst (member x il e)))
-    (if (list? lst) (list-lock+! lst) lst)))
+    (if (list? lst) (list-immutable+! lst) lst)))
 
 (define (imemq x il)
   (let ((lst (memq x il)))
-    (if (list? lst) (list-lock+! lst) lst)))
+    (if (list? lst) (list-immutable+! lst) lst)))
 
 (define (imemv  x il)
   (let ((lst (memv x il)))
-    (if (list? lst) (list-lock+! lst) lst)))
+    (if (list? lst) (list-immutable+! lst) lst)))
 
 
 ;; DELETION
@@ -1940,7 +1940,7 @@ doc>
 doc>
 |#
 (define (idelete x il :optional (= equal?))
-  (list-lock+! (delete x il =)))
+  (list-immutable+! (delete x il =)))
 
 
 #|
