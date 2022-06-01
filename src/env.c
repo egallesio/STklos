@@ -415,19 +415,19 @@ DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
 \*===========================================================================*/
 
 /*
-<doc EXT module-lock!
- * (module-lock! module)
+<doc EXT module-immutable!
+ * (module-immutable! module)
  *
- * Locks the module |module|. When a module is locked, it is impossible
+ * Makes the module |module| immutable, so that it will be impossible
  * to define new symbols in it or change the value of already defined ones.
  *
 doc>
  */
-DEFINE_PRIMITIVE("module-lock!", module_lock, subr1, (SCM module))
+DEFINE_PRIMITIVE("module-immutable!", module_immutable, subr1, (SCM module))
 {
   if (!MODULEP(module)) error_bad_module(module);
 
-  if (BOXED_INFO(module) & MODULE_LOCKED) return STk_void;  //already locked
+  if (BOXED_INFO(module) & MODULE_CONST) return STk_void;  /* already immutable */
 
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(module));
        !NULLP(lst);
@@ -435,29 +435,29 @@ DEFINE_PRIMITIVE("module-lock!", module_lock, subr1, (SCM module))
     SCM tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), CAR(lst));
     BOXED_INFO(tmp) |= CONS_CONST;
   }
-  BOXED_INFO(module) |= MODULE_LOCKED;
+  BOXED_INFO(module) |= MODULE_CONST;
   return STk_void;
 }
 
 
 /*
-<doc EXT module-locked?
- * (module-locked? mod)
+<doc EXT module-mutable?
+ * (module-mutable? mod)
  *
- * Returns |#t| if |mod| is a locked module and |#f|  otherwise.  Note that the
+ * Returns |#t| if |mod| is an immutable module and |#f|  otherwise.  Note that the
  * |SCHEME| module, which contains the original bindings of the STklos at boot
- * time, is locked.
+ * time, is immutable.
  *
  * @lisp
- * (module-locked? (find-module 'STklos)) => #f
- * (module-locked? (find-module 'SCHEME)) => #t
+ * (module-immutable? (find-module 'STklos)) => #f
+ * (module-immutable? (find-module 'SCHEME)) => #t
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("module-locked?", module_lockedp, subr1, (SCM module))
+DEFINE_PRIMITIVE("module-mutable?", module_immutablep, subr1, (SCM module))
 {
   if (!MODULEP(module)) error_bad_module(module);
-  return MAKE_BOOLEAN((BOXED_INFO(module) & MODULE_LOCKED));
+  return MAKE_BOOLEAN(!(BOXED_INFO(module) & MODULE_CONST));
 }
 
 
@@ -498,23 +498,23 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
 }
 
 /*
-<doc EXT symbol-lock!
- * (symbol-lock! symb)
- * (symbol-lock! symb mod)
+<doc EXT symbol-immutable!
+ * (symbol-immutable! symb)
+ * (symbol-immutable! symb mod)
  *
- * Makes the symbol |symb| in module |mod| unmutable. If |mod| is not specified,
+ * Makes the symbol |symb| in module |mod| immutable. If |mod| is not specified, 
  * the current module is used.
  *
  * @lisp
  * (define a 1)
  * (symbol-mutable? 'a)     => #t
- * (symbol-lock! 'a)
+ * (symbol-immutable! 'a)
  * (symbol-mutable? 'a)     => #f
  * (set! a 10)              => error
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("symbol-lock!", symbol_lock, subr12, (SCM symb, SCM module))
+DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM module))
 {
   SCM tmp;
 
@@ -640,6 +640,8 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
     /* Redefine symbol in (car lst) in SCHEME module */
     STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
   }
+  /* Lock the module */
+  BOXED_INFO(Scheme_module) |= MODULE_CONST;
   return STk_void;
 }
 
@@ -674,7 +676,7 @@ SCM STk_clone_frame(SCM f)
 
 void STk_define_variable(SCM symbol, SCM value, SCM module)
 {
-  if (BOXED_INFO(module) & MODULE_LOCKED)
+  if (BOXED_INFO(module) & MODULE_CONST)
     STk_error("cannot define symbol ~S in ~a", symbol, module);
   STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
 }
@@ -832,14 +834,14 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(module_symbols);
   ADD_PRIMITIVE(all_modules);
-  ADD_PRIMITIVE(module_lock);
-  ADD_PRIMITIVE(module_lockedp);
+  ADD_PRIMITIVE(module_immutable);
+  ADD_PRIMITIVE(module_immutablep);
 
   ADD_PRIMITIVE(symbol_value);
   ADD_PRIMITIVE(symbol_value_all);
   ADD_PRIMITIVE(symbol_boundp);
   ADD_PRIMITIVE(symbol_mutablep);
-  ADD_PRIMITIVE(symbol_lock);
+  ADD_PRIMITIVE(symbol_immutable);
   ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);

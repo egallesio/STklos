@@ -139,10 +139,10 @@ doc>
      ((struct-type? x)  (format port "the type structure named ~A"
                                 (struct-type-name x)))
      ((library? x)      (format port "~a R7RS library named ~A"
-                                (if (module-locked? x) "a locked" "an unlocked")
+                                (if (module-mutable? x) "a mutable" "an immutable")
                                 (library-name x)))
      ((module? x)       (format port "~a module named ~A"
-                                (if (module-locked? x) "a locked" "an unlocked")
+                                (if (module-mutable? x) "a mutable" "an immutable")
                                 (module-name x)))
      ((port? x)         (format port "an ~a ~a port"
                                 (if (input-port? x) "input" "output")

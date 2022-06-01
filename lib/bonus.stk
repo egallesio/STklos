@@ -1798,7 +1798,7 @@ doc>
     (if (= (length args) 2)
         `(begin                   ;; NOTE: this code should be atomic
            (define ,@args)
-           (symbol-lock! ',(car args)))
+           (symbol-immutable! ',(car args)))
         (error "bad constant definition ~S" `(define-constant ,@args)))))
 
 ;;;; ======================================================================
