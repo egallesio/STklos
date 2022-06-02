@@ -190,7 +190,7 @@
     ;; 149  Basic Syntax-rules Template Extensions
     ;; 150  Hygienic ERR5RS Record Syntax (reduced)
     (151 "Bitwise Operations" (bitwise-ops) "srfi-151")
-    ;; 152  String Library (reduced)
+    (152 "String Library (reduced)" () "srfi-152")
     ;; 153  ....... withdrawn
     (154 "First-class dynamic extents" () "srfi-154")
     ;; 155  Promises
