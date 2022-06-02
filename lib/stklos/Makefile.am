@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  2-Feb-2022 19:40 (eg)
+# Last file update:  2-Jun-2022 15:37 (eg)
 
 #======================================================================
 
@@ -38,9 +38,9 @@ SRC_OSTK = preproc.ostk
 #
 # Libraries written in C and Scheme
 #
-SRC_C     = itrie.c     readline-complete.c
-SRC_C_STK = itrie.stk   readline-complete.stk
-SRC_SHOBJ = itrie.$(SO) readline-complete.$(SO)
+SRC_C     = itrie.c
+SRC_C_STK = itrie.stk
+SRC_SHOBJ = itrie.$(SO)
 
 scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 

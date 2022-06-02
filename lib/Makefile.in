@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 10-Mar-2022 15:29 (eg)
+# Last file update: 31-May-2022 15:33 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -454,9 +454,9 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-SRC_C = 
+SRC_C = readline-complete.c
 SRC_C_STK = 
-SRC_SHOBJ = 
+scheme_SOLIBS = readline-complete.@SH_SUFFIX@
 DOCDB = DOCDB
 BASEDIR = ..
 
@@ -464,7 +464,7 @@ BASEDIR = ..
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA = $(scheme_SOLIBS) $(SRC_SHOBJ)
+schemelib_DATA = $(scheme_SOLIBS) 
 scheme_sources = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c
@@ -934,7 +934,7 @@ uninstall-hook:
 
 # Local Variables:
 # tab-width: 4
-# End:
+# End:w
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
