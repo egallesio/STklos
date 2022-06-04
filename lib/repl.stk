@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  1-Jan-2022 10:37 (eg)
+;;;; Last file update:  4-Jun-2022 20:47 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -47,26 +47,44 @@
 (define default-out (current-output-port))
 (define default-err (current-error-port))
 
-
-;; ======================================================================
-;; REPL themes and colors
-;;
-;; The parameter function `repl-theme` returns the list of color
-;; associations currently in use.
-;;
-;; To change the REPL theme, you can just use
-;;     - (repl-theme 'xxx) where xxx is one of classic, monochrome or
-;;       minimal,
-;;     - (rep-theme `(:error red :prompt (bold red) ...)) to fix a
-;;       personal theme
-;;
-;; To change only one color in the current theme, you can do
-;;      (key-set! (repl-theme) :prompt '(bold green))
-;;
-;; A good place to change your theme is the .stklosrc file
-;; (or interactively)
-;;
-;; ======================================================================
+#|
+<doc EXT repl-theme
+ * (repl-theme)
+ * (repl-theme plist)
+ * (repl-theme name)
+ *
+ * The {{stklos}} REPL colors can be customized using a property list (or a theme
+ * name) using the `repl-theme` parameter. The properties that can be used in this
+ * property list are:
+ *
+ * - `#:error` for the color of error messages
+ * - `#:prompt` for the color of the prompt
+ * - `#:help-prompt` for the color of the help prompt
+ * - `#:help` for the color of the help messages
+ * - `#:repl-depth` for the color of the depth indicator for recursive REPLs
+ * - `#:info` for the color of information messages.
+ *
+ * There are three default themes:
+ *
+ * - **classic** which is the (colorful) default theme.
+ * - **monochrome** which doesn't use colors
+ * - **minimal** where only the prompt and errors are colored.
+ *
+ * Colors are expressed using the conventions of
+ * <<ansicolor, the `ansi-color` primitive>>. For instance:
+ *
+ * @lisp
+ * (key-set! (repl-theme) :prompt '(bold green)) ;; set the prompt to bold green
+ *
+ * (repl-theme 'minimal)                         ;; to use a sober prompt
+ *
+ * (repl-theme '(#:error (bold red)              ;; explicitly defined theme
+ *               #:prompt (bold bg-red white)))
+ * @end lisp
+ *
+ * A good place to change your theme is the `.stklosrc` file.
+doc>
+|#
 (define *repl-themes* `(
      (classic     .  (:error       (bold red)         ;; error messages
                       :input       (normal bold)      ;; normal input
@@ -199,7 +217,7 @@
         (str2 (format "~A>" (module-name module))))
     (repl-prompt (if (repl-prompt-use-color?)
                      (string-append
-                        (do-color (get-repl-color :repl-level) str1 'normal)
+                        (do-color (get-repl-color :repl-depth) str1 'normal)
                         (do-color (get-repl-color :prompt) str2 'normal
                                   (get-repl-color :input))
                         " ")

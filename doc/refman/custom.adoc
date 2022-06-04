@@ -4,11 +4,14 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 26-Jan-2022 13:16 (eg)
+// Last file update:  4-Jun-2022 20:36 (eg)
 
-== Customizations
-{{stklos}} environement can be customized using
-Parameter Objects. These
+== STklos Customization
+
+
+=== Parameter Objects
+
+{{stklos}} environement can be customized using Parameter Objects. These
 parmaters are listed below.
 
 {{insertdoc 'real-precision}}
@@ -17,9 +20,32 @@ parmaters are listed below.
 {{insertdoc 'read-case-sensitive}}
 {{insertdoc 'write-pretty-quotes}}
 (((STKLOS_LOAD_PATH)))
+[#loadpath]
 {{insertdoc 'load-path}}
 (((STKLOS_LOAD_SUFFIXES)))
 {{insertdoc 'load-suffixes}}
 {{insertdoc 'load-verbose}}
 {{insertdoc 'thread-handler-error-show}}
 {{insertdoc 'stklos-debug-level}}
+{{insertdoc 'repl-theme}}
+
+
+
+=== Environment variables
+
+The following variables can be used to customize {{stklos}}:
+
+
+- ((("STKLOS_LOAD_PATH")))**STKLOS_LOAD_PATH**: This is a colon-separated list
+  of directories in which stklos looks for loading files. It is used by
+  primitives such as `<<load,load>>` or `<<tryload,try-load>>`.  See also the
+  `<<loadpath,load-path>>` parameter.
+
+- (((STKLOS_FRAMES)))**STKLOS-FRAME**: This variable must contains an integer
+  which indicates the number of frames printed on an error. Use
+  the value 0 for an unlimited backtrace.
+
+- (((STKLOS_CONFDIR)))**STKLOS-CONFDIR**: This variable can be used to
+  designate the directory used by {{stklos}} to store its configuration or
+  packages files. It not set, the default {{stklos}} configuration directory
+  is by default `~/.stklos`.

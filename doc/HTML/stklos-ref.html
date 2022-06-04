@@ -841,7 +841,12 @@ pre.rouge {
 <li><a href="#_conditions_2">9.4. Conditions</a></li>
 </ul>
 </li>
-<li><a href="#_customizations">10. Customizations</a></li>
+<li><a href="#_stklos_customization">10. STklos Customization</a>
+<ul class="sectlevel2">
+<li><a href="#_parameter_objects_2">10.1. Parameter Objects</a></li>
+<li><a href="#_environment_variables">10.2. Environment variables</a></li>
+</ul>
+</li>
 <li><a href="#_the_scmpkg_package_system">11. The ScmPkg Package System</a>
 <ul class="sectlevel2">
 <li><a href="#_scmpkg_tutorial">11.1. <em>ScmPkg</em> "tutorial"</a></li>
@@ -12379,8 +12384,10 @@ that STklos supports.</p>
 <div class="sect3">
 <h4 id="_loading_code">4.13.1. Loading code</h4>
 <div class="paragraph">
-<p>
-</p>
+<p></p>
+</div>
+<div id="load" class="paragraph">
+<p></p>
 </div>
 <div class="paragraph text-right">
 <p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
@@ -12406,7 +12413,7 @@ all architectures. The value returned by <code>load</code> is <strong><em>void</
 to find it in one of the directories given by <code>"load-path"</code>
 with the suffixes given by <code>"load-suffixes"</code>.</p>
 </div>
-<div class="paragraph">
+<div id="tryload" class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -22201,11 +22208,12 @@ of that thread (<code>exc</code> must be an <em>uncaught exception</em> object).
 </div>
 </div>
 <div class="sect1">
-<h2 id="_customizations">10. Customizations</h2>
+<h2 id="_stklos_customization">10. STklos Customization</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_parameter_objects_2">10.1. Parameter Objects</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> environement can be customized using
-Parameter Objects. These
+<p><strong><em>STklos</em></strong> environement can be customized using Parameter Objects. These
 parmaters are listed below.</p>
 </div>
 <div class="paragraph">
@@ -22348,8 +22356,10 @@ By default, this parameter value is set to <code>#t</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>
-</p>
+<p></p>
+</div>
+<div id="loadpath" class="paragraph">
+<p></p>
 </div>
 <div class="paragraph text-right">
 <p><span class="rmargin small"><em>STklos</em> procedure</span></p>
@@ -22462,6 +22472,109 @@ This makes debugging easier. By default, this parameter is set to
 debugging level. The default value of this parameter is 0 (meaning "no debug").
 Note that the debugging level can also be set by the <code>--debug</code> option of the
 <code>stklos(1)</code> command.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(repl-theme)</code></strong><br>
+<strong><code>(repl-theme plist)</code></strong><br>
+<strong><code>(repl-theme name)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <strong><em>STklos</em></strong> REPL colors can be customized using a property list (or a theme
+name) using the <code>repl-theme</code> parameter. The properties that can be used in this
+property list are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#:error</code> for the color of error messages</p>
+</li>
+<li>
+<p><code>#:prompt</code> for the color of the prompt</p>
+</li>
+<li>
+<p><code>#:help-prompt</code> for the color of the help prompt</p>
+</li>
+<li>
+<p><code>#:help</code> for the color of the help messages</p>
+</li>
+<li>
+<p><code>#:repl-depth</code> for the color of the depth indicator for recursive REPLs</p>
+</li>
+<li>
+<p><code>#:info</code> for the color of information messages.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are three default themes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>classic</strong> which is the (colorful) default theme.</p>
+</li>
+<li>
+<p><strong>monochrome</strong> which doesn&#8217;t use colors</p>
+</li>
+<li>
+<p><strong>minimal</strong> where only the prompt and errors are colored.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Colors are expressed using the conventions of
+<a href="#ansicolor">the <code>ansi-color</code> primitive</a>. For instance:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">key-set!</span> <span class="p">(</span><span class="nf">repl-theme</span><span class="p">)</span> <span class="nv">:prompt</span> <span class="o">'</span><span class="p">(</span><span class="nf">bold</span> <span class="nv">green</span><span class="p">))</span> <span class="c1">;; set the prompt to bold green</span>
+
+<span class="p">(</span><span class="nf">repl-theme</span> <span class="ss">'minimal</span><span class="p">)</span>                         <span class="c1">;; to use a sober prompt</span>
+
+<span class="p">(</span><span class="nf">repl-theme</span> <span class="o">'</span><span class="p">(</span><span class="o">#</span><span class="nv">:error</span> <span class="p">(</span><span class="nf">bold</span> <span class="nv">red</span><span class="p">)</span>              <span class="c1">;; explicitly defined theme</span>
+              <span class="o">#</span><span class="nv">:prompt</span> <span class="p">(</span><span class="nf">bold</span> <span class="nv">bg-red</span> <span class="nv">white</span><span class="p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A good place to change your theme is the <code>.stklosrc</code> file.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_environment_variables">10.2. Environment variables</h3>
+<div class="paragraph">
+<p>The following variables can be used to customize <strong><em>STklos</em></strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>STKLOS_LOAD_PATH</strong>: This is a colon-separated list
+of directories in which stklos looks for loading files. It is used by
+primitives such as <code><a href="#load">load</a></code> or <code><a href="#tryload">try-load</a></code>.  See also the
+<code><a href="#loadpath">load-path</a></code> parameter.</p>
+</li>
+<li>
+<p><strong>STKLOS-FRAME</strong>: This variable must contains an integer
+which indicates the number of frames printed on an error. Use
+the value 0 for an unlimited backtrace.</p>
+</li>
+<li>
+<p><strong>STKLOS-CONFDIR</strong>: This variable can be used to
+designate the directory used by <strong><em>STklos</em></strong> to store its configuration or
+packages files. It not set, the default <strong><em>STklos</em></strong> configuration directory
+is by default <code>~/.stklos</code>.</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 </div>
@@ -23229,7 +23342,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>107</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>108</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -23316,6 +23429,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-144/srfi-144.html">SRFI-144</a></strong>&#8201;&#8212;&#8201;<em>Flonums</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-145/srfi-145.html">SRFI-145</a></strong>&#8201;&#8212;&#8201;<em>Assumptions</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-151/srfi-151.html">SRFI-151</a></strong>&#8201;&#8212;&#8201;<em>Bitwise Operations</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-152/srfi-152.html">SRFI-152</a></strong>&#8201;&#8212;&#8201;<em>String Library (reduced)</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-154/srfi-154.html">SRFI-154</a></strong>&#8201;&#8212;&#8201;<em>First-class dynamic extents</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-156/srfi-156.html">SRFI-156</a></strong>&#8201;&#8212;&#8201;<em>Syntactic combiners for binary predicates</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-158/srfi-158.html">SRFI-158</a></strong>&#8201;&#8212;&#8201;<em>Generators and Accumulators</em><br>
@@ -23412,7 +23526,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-161</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-229</code> <code>srfi-230</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-161</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-229</code> <code>srfi-230</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -28676,7 +28790,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-05-23 13:29:36 +0200
+Last updated 2022-06-04 20:38:51 +0200
 </div>
 </div>
 </body>
