@@ -77,6 +77,8 @@ generator(const char *text, int state) {
      to free the pointer (at least on FresBSD). */
   size_t size = STRING_SIZE(s);
   char *res = malloc(size+1);
+  if (res == NULL) return ""; /* better return no completions than
+				 signaling an error... */
   strncpy(res,STRING_CHARS(s), size);
   res[size]=0;
   return res;
