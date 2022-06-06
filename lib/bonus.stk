@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  6-Jun-2022 16:36 (eg)
+;;;; Last file update:  6-Jun-2022 16:39 (eg)
 ;;;;
 
 
@@ -1083,6 +1083,42 @@ doc>
 ;; ======================================================================
 ;;      ansi-color  & ansi-color-protect...
 ;; ======================================================================
+
+#|
+<doc EXT ansi-color
+ * (ansi-color e1 e2 ... en)
+ *
+ * |ansi-color| permits to build a string which embeds ANSI codes to
+ * colorize texts on a terminal. Each expression e~i~ must be a string,
+ * a symbol or an integer.
+ *
+ * Strings constitute the message to be displayed.
+ *
+ * A symbol can designate
+ *
+ * - a color in the set {|black|, |red|, |green|, |yellow|, |blue|,
+ *   |magenta|, |cyan|, |white|} for foreground colors
+ * - a color in the set {|bg-black|, |bg-red|, |bg-green|, |bg-yellow|,
+ *   |bg-blue|, |bg-magenta|, |bg-cyan|, |bg-white|} for background colors.
+ * - a qualifier such as |normal|, |bold|, |italic|, |underline|, |blink|,
+ *   |reverse| or |no-bold|, |no-italic|, |no-underline|, |no-blink|,
+ *   |no-reverse|.
+ *
+ * Integer values can be used for terminals which are able to display  256 colors.
+ * If the number is positive, it is used as a foreground color. Otherwise,
+ * it is uses as a background color. Note that not all the terminals are able to
+ * use more than eight colors.
+ *
+ * For instance,
+ * @lisp
+ * (display (ansi-color "a word in "
+ *                      'bold 'red "RED" 'normal
+ *                      " and another in "
+ *                      'reverse 'blue "BLUE" 'normal))
+ * @end lisp
+ * will display the words BLUE and RED in color.
+doc>
+|#
 (define ansi-color         #f)
 (define ansi-color-protect #f)
 

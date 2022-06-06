@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update:  2-Jun-2022 21:01 (eg)
+// Last file update:  6-Jun-2022 16:40 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -930,6 +930,8 @@ See SRFI document for more information.
 {{insertdoc 'trace}}
 {{insertdoc 'untrace}}
 {{insertdoc 'pp}}
+[#ansicolor]
+{{insertdoc 'ansi-color}}
 {{insertdoc 'disassemble}}
 {{insertdoc 'disassemble-expr}}
 {{insertdoc 'uri-parse}}

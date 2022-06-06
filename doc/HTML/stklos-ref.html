@@ -17462,6 +17462,67 @@ output goes to the current output port and if <code>port</code> is <code>#f</cod
 is returned as a string by <code>pretty-print</code>.
 Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
 </div>
+<div id="ansicolor" class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ansi-color e1 e2 &#8230;&#8203; en)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>ansi-color</code> permits to build a string which embeds ANSI codes to
+colorize texts on a terminal. Each expression e<sub>i</sub> must be a string,
+a symbol or an integer.</p>
+</div>
+<div class="paragraph">
+<p>Strings constitute the message to be displayed.</p>
+</div>
+<div class="paragraph">
+<p>A symbol can designate</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a color in the set {<code>black</code>, <code>red</code>, <code>green</code>, <code>yellow</code>, <code>blue</code>,
+<code>magenta</code>, <code>cyan</code>, <code>white</code>} for foreground colors</p>
+</li>
+<li>
+<p>a color in the set {<code>bg-black</code>, <code>bg-red</code>, <code>bg-green</code>, <code>bg-yellow</code>,
+<code>bg-blue</code>, <code>bg-magenta</code>, <code>bg-cyan</code>, <code>bg-white</code>} for background colors.</p>
+</li>
+<li>
+<p>a qualifier such as <code>normal</code>, <code>bold</code>, <code>italic</code>, <code>underline</code>, <code>blink</code>,
+<code>reverse</code> or <code>no-bold</code>, <code>no-italic</code>, <code>no-underline</code>, <code>no-blink</code>,
+<code>no-reverse</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Integer values can be used for terminals which are able to display  256 colors.
+If the number is positive, it is used as a foreground color. Otherwise,
+it is uses as a background color. Note that not all the terminals are able to
+use more than eight colors.</p>
+</div>
+<div class="paragraph">
+<p>For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nf">ansi-color</span> <span class="s">"a word in "</span>
+                     <span class="ss">'bold</span> <span class="ss">'red</span> <span class="s">"RED"</span> <span class="ss">'normal</span>
+                     <span class="s">" and another in "</span>
+                     <span class="ss">'reverse</span> <span class="ss">'blue</span> <span class="s">"BLUE"</span> <span class="ss">'normal</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will display the words BLUE and RED in color.</p>
+</div>
 <div class="paragraph">
 <p></p>
 </div>
@@ -22477,7 +22538,7 @@ Note that the debugging level can also be set by the <code>--debug</code> option
 <p></p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -28790,7 +28851,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-04 20:38:51 +0200
+Last updated 2022-06-06 16:46:18 +0200
 </div>
 </div>
 </body>
