@@ -101,6 +101,9 @@
                        shape-for-each array?         shape?
                        share-array    array-size)
 
+;; And why not have a setter for arrays?
+(set! (setter array-ref) array-set!)
+
 ;; EXTRA: almost all procdures in arlib.scm, not part of the
 ;;        SRFI spec but included with the reference implementation.
 ;;
