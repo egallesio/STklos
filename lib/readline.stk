@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update:  6-Jun-2022 16:48 (eg)
+;;;; Last file update:  6-Jun-2022 17:26 (eg)
 ;;;;
 
 (define-module READLINE
@@ -110,21 +110,13 @@
 ;;
 ;; ======================================================================
 
-;; Find all the global symbols of a module/library
-(define (get-module-symbols module)
-  (append (module-symbols (current-module))
-          (if (library? module)
-              '()
-              (module-symbols (find-module 'STklos)))))
-
-
 ;; A default completer function, which completes on the symbols usable
 ;; at the global level of the current REPL module.
 (define (default-complete-function str)
   (if (zero? (string-length str))
       '()
       ;; We just compare the prefix.
-      (let* ((symbols (get-module-symbols (current-module)))
+      (let* ((symbols (module-symbols* (current-module)))
              (size (string-length str))
              (match (lambda (s)
                       (and (>= (string-length s) size)
@@ -142,7 +134,7 @@
     (define (substring-complete-function str)
       (if (zero? (string-length str))
           '()
-          (let ((symbols (get-module-symbols (current-module)))
+          (let ((symbols (module-symbols* (current-module)))
                 (match (lambda (s) (string-find? str s))))
             (filter match (map symbol->string symbols)))))
 |#

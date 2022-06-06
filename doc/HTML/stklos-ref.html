@@ -3396,8 +3396,8 @@ returns <code>default</code>.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(symbol-value</strong> symbol module)</code>*<br>
-<strong><code>(symbol-value</strong> symbol module default)</code>*<br></p>
+<p><strong><code>(symbol-value* symbol module)</code></strong><br>
+<strong><code>(symbol-value* symbol module default)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -3475,6 +3475,24 @@ some of these symbols can be not yet defined.</p>
 </div>
 <div class="paragraph">
 <p>Returns the list of symbols already defined in <code>module</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(module-symbols* module)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the the list of symbols acessible in <code>module</code> (that is the symbols
+defined in <code>module</code> and the one defined in the <code>STklos</code> module if module
+is not a R<sup>7</sup>RS library.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -28851,7 +28869,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-06 16:46:18 +0200
+Last updated 2022-06-06 17:21:34 +0200
 </div>
 </div>
 </body>

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  6-Apr-2022 17:25 (eg)
+;;;; Last file update:  6-Jun-2022 17:27 (eg)
 ;;;;
 
 
@@ -32,8 +32,8 @@
 ;;=============================================================================
 #|
 <doc EXT symbol-value*
- * (symbol-value* symbol module)
- * (symbol-value* symbol module default)
+ * (symbol-value+++*+++ symbol module)
+ * (symbol-value+++*+++ symbol module default)
  *
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
  * an error is signaled if no |default| is provided, otherwise |symbol-value|
@@ -70,7 +70,25 @@ doc>
     (lambda (symb #:optional (module (current-module)))
       (not (eq? (symbol-value* symb module absent)
                 absent)))))
-
+;;=============================================================================
+;;
+;;                              MODULE-SYMBOLS*
+;;
+;;=============================================================================
+#|
+<doc EXT module-symbols*
+ * (module-symbols+++*+++ module)
+ *
+ * Returns the the list of symbols acessible in |module| (that is the symbols
+ * defined in |module| and the one defined in the |STklos| module if module
+ * is not a R7RS library.
+doc>
+|#
+(define (module-symbols* module)
+  (append (module-symbols (current-module))
+          (if (library? module)
+              '()
+              (module-symbols (find-module 'STklos)))))
 
 ;;=============================================================================
 ;;
