@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  6-Mar-2022 15:05 (eg)
+;;;; Last file update:  6-Jun-2022 16:36 (eg)
 ;;;;
 
 
@@ -1130,6 +1130,14 @@ doc>
                    (string-append res
                                   (if str-prev? "" ansi-color-stop)
                                   (car args))))
+          ((integer? (car args))
+             (Loop (cdr args)
+                   #f
+                   (string-append res
+                                  (if str-prev? ansi-color-start ";")
+                                  (if (positive? (car args))
+                                      (format "38;5;~a" (car args))
+                                      (format "48;5;~a" (car args))))))
           ((symbol? (car args))
              (Loop (cdr args)
                    #f
