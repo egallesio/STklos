@@ -276,6 +276,26 @@
 (define uint-list->blob (make-int-list->blob blob-uint-set!))
 (define sint-list->blob (make-int-list->blob blob-sint-set!))
 
+(set! (setter blob-u8-ref)   blob-u8-set!)
+(set! (setter blob-s8-ref)   blob-s8-set!)
+(set! (setter blob-uint-ref) blob-uint-set!)
+(set! (setter blob-sint-ref) blob-sint-set!)
+
+(set! (setter blob-u16-ref)   blob-u16-set!)
+(set! (setter blob-s16-ref)   blob-s16-set!)
+(set! (setter blob-u16-native-ref)   blob-u16-native-set!)
+(set! (setter blob-s16-native-ref)   blob-s16-native-set!)
+
+(set! (setter blob-u32-ref)   blob-u32-set!)
+(set! (setter blob-s32-ref)   blob-s32-set!)
+(set! (setter blob-u32-native-ref)   blob-u32-native-set!)
+(set! (setter blob-s32-native-ref)   blob-s32-native-set!)
+
+(set! (setter blob-u64-ref)   blob-u64-set!)
+(set! (setter blob-s64-ref)   blob-s64-set!)
+(set! (setter blob-u64-native-ref)   blob-u64-native-set!)
+(set! (setter blob-s64-native-ref)   blob-s64-native-set!)
+
 )
 ;; ----------------------------------------------------------------------
 
