@@ -191,6 +191,8 @@
     (vector-set! (vec fv) index x)
     last-value))
 
+(set! (setter flexvector-ref) flexvector-set!)
+
 (define flexvector-add!
   (case-lambda
     ((fv i x)
