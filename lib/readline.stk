@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update:  2-Jun-2022 15:48 (eg)
+;;;; Last file update:  6-Jun-2022 16:48 (eg)
 ;;;;
 
 (define-module READLINE
@@ -30,10 +30,7 @@
           readline add-history read-history
           write-history read-with-history
           rl-event-hook rl-input-timeout
-
-          completer-function            ; parametee to get/set clompletion function
-          default-complete-function     ; the prefix default completion function
-          substring-complete-function)  ; another compl. function using substring
+          rl-completer-function)
 
 
 ;;;; In module READLINE
@@ -134,20 +131,21 @@
                            (string=? str (substring s 0 size))))))
         (filter match (map symbol->string symbols)))))
 
+;; The parameter rl-completer-function contains the function used
+;; to complete strings It defaults to default-complete-function
+(define rl-completer-function (make-parameter default-complete-function))
 
-;; Another completer. This one tries to find if str is a substring of
-;; a symbols defined at global level
-(define (substring-complete-function str)
-  (if (zero? (string-length str))
-      '()
-      (let ((symbols (get-module-symbols (current-module)))
-            (match (lambda (s) (string-find? str s))))
-        (filter match (map symbol->string symbols)))))
+#|
+  As an example, here is another compter function. This one tries to find
+  if str is a substring of a symbol defined at global level
 
-
-;; The parameter completer-function contains the function used to complete strings
-;; It defaults to default-complet-function
-(define completer-function (make-parameter default-complete-function))
+    (define (substring-complete-function str)
+      (if (zero? (string-length str))
+          '()
+          (let ((symbols (get-module-symbols (current-module)))
+                (match (lambda (s) (string-find? str s))))
+            (filter match (map symbol->string symbols)))))
+|#
 
 
 ;; readline-completion-generator is a generator of string completions.
@@ -164,7 +162,7 @@
   (let ((ans '()))
     (lambda (str state)
       (when (not state)
-        (set! ans ((completer-function) str)))
+        (set! ans ((rl-completer-function) str)))
       (if (null? ans)
           ans
           (let ((s (car ans)))
@@ -177,6 +175,8 @@
 ;; Initialization
 ;;
 ;; ======================================================================
+(%compile-time-define %init-readline-completion-function)
+
 (define (try-initialize-readline)
   ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
   (let* ((suffix (%shared-library-suffix))
