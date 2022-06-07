@@ -200,6 +200,11 @@ struct trie_empty_obj {
     stk_header header;
 };
 
+/* REMINDER: both iset and fxmap leaves need the 'long prefix'
+             member, since TRIE_PREFIX uses it. Do not change
+	     the structure withtout reviewing the accessor
+	     macros. */
+
 struct trie_leaf_iset_obj {
     stk_header header;
     long prefix;
@@ -225,8 +230,8 @@ struct trie_leaf_fxmap_obj {
 #define TRIE_BRANCHP(p)      (!(TRIE_LEAFP(p)))
 #define TRIE_EMPTYP(p)       (BOXED_INFO(p) & TRIE_EMPTY)
 
-/* BRANCHES AND LEAVES! */
-#define TRIE_PREFIX(p)       (((struct trie_branch_obj *)   (p))->prefix)
+/* BRANCHES _AND_ LEAVES! */
+#define TRIE_PREFIX(p)       (((struct trie_leaf_iset_obj  *)   (p))->prefix)
 
 /* branches: */
 #define TRIE_BRANCHBIT(p)    (((struct trie_branch_obj *)   (p))->branch_bit)
@@ -234,7 +239,7 @@ struct trie_leaf_fxmap_obj {
 #define TRIE_RIGHT(p)        (((struct trie_branch_obj *)   (p))->right)
 
 /* leaves: */
-#define TRIE_BITMAP(p)       (((struct trie_leaf_iset_obj *)  (p))->bitmap)
+#define TRIE_BITMAP(p)       (((struct trie_leaf_iset_obj *)   (p))->bitmap)
 #define TRIE_KEY(p)          (((struct trie_leaf_fxmap_obj *)  (p))->prefix) /* ??? */
 #define TRIE_VALUE(p)        (((struct trie_leaf_fxmap_obj *)  (p))->value)
 
