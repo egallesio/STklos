@@ -145,3 +145,23 @@
 (test "(blob->sint-list 2 (endianness little) b4)"
       '(0 0 0 14640 -1 -1 -1 -513)
       (blob->sint-list 2 (endianness little) b4))
+
+;;; SETTERS
+
+
+;; We're only testnig a few cases...
+(let ((b (u8-list->blob '(2 0 9 4))))
+  (set! (blob-u8-ref b 1) 02)
+  (test "srfi-74-setter.1" #u8(2 2 9 4) b))
+
+(let* ((b (u8-list->blob '(2 0 9 4 5 10 99 82)))
+       (c (blob-copy b)))
+  (set! (blob-u32-native-ref b 4) 12)
+  (blob-u32-native-set! c 4 12)
+  (test "srfi-74-setter.2" #t (equal? b c)))
+
+(let* ((b (u8-list->blob '(2 0 9 4 5 10 99 82)))
+       (c (blob-copy b)))
+  (set! (blob-u32-ref  (endianness little) b 4) 1234)
+  (blob-u32-set!  (endianness little) c 4 1234)
+  (test "srfi-74-setter.3" #t (equal? b c)))

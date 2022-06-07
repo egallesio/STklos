@@ -674,3 +674,16 @@
 ;;         (u16vector-set! v 2 0)
 ;;         (u16vector-set! v 3 0)
 ;;         (equal? v #u32(#xFFFFFFFF 0))))
+
+
+;;; SETTERS
+
+;; No need to check all types. We check s32 and u32, others should be similar.
+(let ((v (u32vector 10 20 30))
+      (w (s32vector -1 2 3)))
+  (set! (u32vector-ref v 1) 200)
+  (test "srfi-4-setter.1" #u32(10 200 30) v)
+  (test/error "srfi-4-setter.2" (set! (u32vector-ref v 1) -2)) ; -2 not allowed, it's unsigned
+  (set! (s32vector-ref w 2) -3)
+  (test "srfi-4-setter.3" #s32(-1 2 -3) w)
+  (test/error "srfi-4-setter.4" (+ v w))) ; different data types
