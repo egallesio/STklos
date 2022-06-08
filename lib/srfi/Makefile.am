@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Apr-2022 12:10 (eg)
+# Last file update:  8-Jun-2022 09:55 (eg)
 
 #-======================================================================
 
@@ -95,6 +95,7 @@ SRC_STK   = 1.stk   \
             141.stk \
             143.stk \
             151.stk \
+            152.stk \
             154.stk \
             156.stk \
             158.stk \
@@ -188,6 +189,7 @@ SRC_OSTK =  1.ostk   \
             141.ostk \
             143.ostk \
             151.ostk \
+            152.ostk \
             154.ostk \
             156.ostk \
             158.ostk \
@@ -219,10 +221,14 @@ SRC_OSTK =  1.ostk   \
 
 #
 # SRFIs written in C and Scheme
- #
-SRC_C     = 25.c     27.c     132.c     133.c      144.c      170.c      175.c
-SRC_C_STK = 25.stk   27.stk   132.stk   133.stk    144.stk    170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
+#
+#FIXME SRC_C     = 25.c     27.c     116.c     132.c     133.c      144.c      170.c      175.c
+#FIXME SRC_C_STK = 25.stk   27.stk   116.stk   132.stk   133.stk    144.stk    170.stk    175.stk
+#FIXME SRC_SHOBJ = 25.$(SO) 27.$(SO) 116.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
+
+SRC_C     = 25.c     27.c          132.c     133.c      144.c      170.c      175.c
+SRC_C_STK = 25.stk   27.stk      132.stk   133.stk    144.stk    170.stk    175.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO)  132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -263,12 +269,14 @@ $(DEPEND_9): 9.ostk
 37.ostk: 13.ostk
 41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
-94.ostk: 60.ostk 
+94.ostk: 60.ostk
 95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
+130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.so
 134.ostk: 158.ostk
 135.ostk: 129.ostk
+152.ostk: 130.ostk
 190.ostk: 158.ostk
 216.ostk: 27.$(SO)
 217.ostk: ../stklos/itrie.so
@@ -277,6 +285,7 @@ $(DEPEND_9): 9.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
+#FIXME: 116.$(SO): 128.ostk 116-incl.c 116.c
 132.$(SO): 132-incl.c 132.c
 133.$(SO): 133-incl.c 133.c
 144.$(SO): 144-incl.c 144.c

@@ -21,9 +21,28 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 17-May-2022 19:00 (eg)
+;;;; Last file update:  6-Jun-2022 17:27 (eg)
 ;;;;
 
+;;=============================================================================
+;;
+;;                              MODULE-SYMBOLS*
+;;
+;;=============================================================================
+#|
+<doc EXT module-symbols*
+ * (module-symbols+++*+++ module)
+ *
+ * Returns the the list of symbols acessible in |module| (that is the symbols
+ * defined in |module| and the one defined in the |STklos| module if module
+ * is not a R7RS library.
+doc>
+|#
+(define (module-symbols* module)
+  (append (module-symbols (current-module))
+          (if (library? module)
+              '()
+              (module-symbols (find-module 'STklos)))))
 
 ;;=============================================================================
 ;;

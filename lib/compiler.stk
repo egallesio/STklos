@@ -79,7 +79,8 @@
                          (string-set!    . ,string-set!)
                          (eq?            . ,eq?)
                          (eqv?           . ,eqv?)
-                         (equal?         . ,equal?)))
+                         (equal?         . ,equal?)
+                         (void           . ,void)))
 
 (define *inline-symbols* (map car *inline-table*))
 
@@ -1197,6 +1198,10 @@ doc>
       ((eq?)            (comp2 'IN-EQ))
       ((eqv?)           (comp2 'IN-EQV))
       ((equal?)         (comp2 'IN-EQUAL))
+      ((void)           (if (zero? len)
+                            (emit 'IM-VOID)
+                            (compile (append (cons 'begin actuals) (list (void)))
+                                     env epair #f)))
       (else             (panic "unimplemented inline primitive ~S" fct)))))
 
 

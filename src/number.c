@@ -99,7 +99,7 @@ static int zerop(SCM n);
 static int negativep(SCM n);
 static int positivep(SCM n);
 static int isexactp(SCM z);
-static SCM gcd2(SCM o1, SCM o2);
+static SCM gcd2(SCM n1, SCM n2);
 
 EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i));
 EXTERN_PRIMITIVE("real-part", real_part, subr1, (SCM z));
@@ -118,10 +118,10 @@ EXTERN_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z));
 #define inexact2exact STk_inex2ex
 
 
-static SCM int_quotient(SCM o1, SCM o2);
+static SCM int_quotient(SCM x, SCM y);
 static SCM my_cos(SCM z);
 static SCM my_sin(SCM z);
-static SCM STk_complexp(SCM n);
+static SCM STk_complexp(SCM x);
 
 
 /******************************************************************************
@@ -182,7 +182,7 @@ static double make_nan(int neg, int quiet, unsigned long pay)
    * BUT
    *   +inf.0          is 0x7ff0000000000000
    * Consequently, clearing bit 51 is not sufficient (if the payload is 0, a
-   * signaling dille be seen as a positive infinity.
+   * signaling dille be seen as a positive infinity).
    * So, to make a signaling NaN, we clear the bit 51 and set the bit 50
    * ==> the payload can use only 50 bits
    */
@@ -397,7 +397,7 @@ static Inline SCM double2real(double x)
   return z;
 }
 
-static SCM double2integer(double n)     /* small or big depending of n's size */
+static SCM double2integer(double n)     /* small or big depending on n's size */
 {
   unsigned int i, j;
   size_t size = 30;
@@ -667,7 +667,7 @@ static type_cell convert(SCM *px, SCM *py)
     case tc_real:
             switch (TYPEOF(y)) {
               case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:    /*already done */ ;                      break;
+              case tc_real:     /* already done */                      break;
               case tc_rational: *py = rational2real(y);                 break;
               case tc_bignum:   *py = scheme_bignum2real(y);            break;
               case tc_integer:  *py = double2real((double) INT_VAL(y)); break;
@@ -678,7 +678,7 @@ static type_cell convert(SCM *px, SCM *py)
             switch (TYPEOF(y)) {
               case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));   break;
               case tc_real:     *px = rational2real(x);                break;
-              case tc_rational: /*already done */ ;                    break;
+              case tc_rational: /* already done */                     break;
               case tc_bignum:   /* no break */
               case tc_integer:  *py = Cmake_rational(y , MAKE_INT(1)); break;
               default:          error_bad_number(y);                   break;
@@ -1001,7 +1001,7 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
  * (no double underscores, no leading or trailing underscores, and no
  * underscore close to anything that is not a digit).
  */
-static int remove_underscores(char *str, char *end, long base) {
+static int remove_underscores(char *str, const char *end, long base) {
   char *q;
   int just_saw_one = 0;
   for (char *p=str; p<end-1; p++)
@@ -1084,7 +1084,7 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
      * digits expressed in base 10) are not read as bignums.
      * This optimisation is easily missed (e.g. 000000000000000001 will be
      * read as a bignum), but it avoids allocation for current numbers
-     * represented in an usual form.
+     * represented in a usual form.
      */
     mpz_t n;
 
@@ -1262,8 +1262,8 @@ SCM STk_Cstr2number(char *str, long base)
  * These numerical type predicates can be applied to any kind of
  * argument, including non-numbers. They return |#t| if the object is of
  * the named type, and otherwise they return |#f|. In general, if a type
- * predicate is true of a number then all higher type predicates are
- * also true of that number. Consequently, if a type predicate is
+ * predicate is true for a number then all higher type predicates are
+ * also true for that number. Consequently, if a type predicate is
  * false of a number, then all lower type predicates are also false of
  * that number.
  *
@@ -3349,7 +3349,7 @@ int STk_init_number(void)
                           reallocate_function,
                           deallocate_function);
 
-  /* register the extended types types for numbers */
+  /* register the extended types for numbers */
   DEFINE_XTYPE(bignum,   &xtype_bignum);
   DEFINE_XTYPE(rational, &xtype_rational);
   DEFINE_XTYPE(complex,  &xtype_complex);

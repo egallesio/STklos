@@ -29,9 +29,6 @@
 #include "stklos.h"
 
 
-extern SCM STk_make_bytevector_from_string(char *str, long len);
-
-
 /* min size added to a string when reallocated in a string-set! */
 #define UTF8_STRING_INCR        8
 
@@ -242,7 +239,7 @@ static SCM make_string_from_int_array(uint32_t *buff, int len, int utf8_len)
 }
 
 
-static void copy_array(uint32_t *buff, int len, char* from)
+static void copy_array(uint32_t *buff, int len, char *from)
 {
   while (len--)
     from += STk_char2utf8(*buff++, from);
@@ -271,7 +268,7 @@ static SCM make_substring(SCM string, long from, long to)
 }
 
 
-SCM STk_makestring(int len, char *init)
+SCM STk_makestring(int len, const char *init)
 {
   register SCM z;
 
@@ -297,7 +294,7 @@ SCM STk_makestring(int len, char *init)
 }
 
 
-SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(const char *str) /* Embed a C string in Scheme world  */
 {
   SCM  z;
   size_t len = strlen(str);
@@ -787,7 +784,7 @@ int get_substring_size(SCM string, long from, long to) {
  * Replaces the characters of the variable-size string dst (between
  * dst-start and dst-end) with the characters of the string src
  * (between src-start and src-end). The number of characters from src
- * may be different than the number replaced in dst, so the string may
+ * may be different from the number replaced in dst, so the string may
  * grow or contract. The special case where dst-start is equal to
  * dst-end corresponds to insertion; the case where src-start is equal
  * to src-end corresponds to deletion. The order in which characters
@@ -795,7 +792,7 @@ int get_substring_size(SCM string, long from, long to) {
  * destination overlap, copying takes place as if the source is first
  * copied into a temporary string and then into the destination.
  * Returns string, appended with the characters form the concatenation
- * of the given arguments, which can be wither strings or characters.
+ * of the given arguments, which can be either strings or characters.
  *
  * It is guaranteed that string-replace! will return the same object that
  * was passed to it as first argument, whose size may be larger.
@@ -902,7 +899,7 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
        variable. do it here. */
     start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
 
-  char* start_char_src = STk_utf8_index(STRING_CHARS(src),src_start,STRING_SIZE(src));
+  char *start_char_src = STk_utf8_index(STRING_CHARS(src),src_start,STRING_SIZE(src));
   memcpy(start_char_dst, start_char_src, (unsigned long) src_substring_size);
 
   STRING_LENGTH(dst) = STRING_LENGTH(dst) + (src_end - src_start) - (dst_end - dst_start);
@@ -1302,7 +1299,7 @@ static SCM string_dxxcase(int argc, SCM *argv,
       copy_array(wchars, end-start, startp);
     }
     else {
-      /* This code is inefficient, but it seems that that the converted case
+      /* This code is inefficient, but it seems that the converted case
          character always use the same length encoding. It is likely that this
          code is never used in practice
       */

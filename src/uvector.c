@@ -35,7 +35,7 @@ static SCM u64_max, s64_min, s64_max;
  *
  */
 
-static char* type_vector(int tip)
+static char *type_vector(int tip)
 {
   switch (tip) {
     case UVECT_S8:  return "s8";
@@ -91,7 +91,7 @@ static void error_bad_list(SCM l)
 
 static int vector_element_size(int type)
 {
-  /* compute len of one element depending of type.  We assume here
+  /* compute len of one element depending on type.  We assume here
    * that characters use 8 bits and that we are at least on a 32 bits
    * architecture. Consquenetly, S8, S16 and S32 are represented
    * without boxing whereas S64 are represeneted by a bignum
@@ -166,7 +166,7 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfi
 }
 
 
-/* Return the type of an uniform vector given its tag */
+/* Return the type of a uniform vector given its tag */
 int STk_uniform_vector_tag(char *s)
 {
   static char *table[] =
@@ -193,7 +193,7 @@ int STk_uvector_equal(SCM u1, SCM u2)
 }
 
 /*
- * Basic accessors to an uniform vector
+ * Basic accessors to a uniform vector
  *
  */
 static void uvector_set(int _UNUSED(type), SCM v, long i, SCM value)
@@ -310,7 +310,7 @@ static SCM makeuvect(int type, int len, SCM init)
   long i, size = 1;
   SCM  z;
 
-  /* compute len of one element depending of type.  We assume here
+  /* compute len of one element depending on type.  We assume here
    * that characters use 8 bits and that we are at least on a 32 bits
    * architecture. Consquenetly, S8, S16 and S32 are represented
    * without boxing whereas S64 are represeneted by a bignum

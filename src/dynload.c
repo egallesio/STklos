@@ -55,7 +55,7 @@ typedef SCM  (*InfoFunc)(void);
 
 
 static SCM files_already_loaded = (SCM) NULL;
-MUT_DECL(dynload_mutex)
+MUT_DECL(dynload_mutex);
 
 
 static void initialize_dynload(void)
@@ -83,7 +83,7 @@ void *STk_find_external_function(char *path, char *fname, int error_if_absent)
 
   /* See if the file has already loaded. If so, use the old handle */
   for (l = files_already_loaded; !NULLP(l); l = CDR(l)) {
-    /* An inline Assoc which knows that keys are well formed C strings */
+    /* An inline Assoc which knows that keys are well-formed C strings */
     if (strcmp(STRING_CHARS(CAR(CAR(l))), path) == 0) {
       handle = (void *) CDR(CAR(l));
       break;

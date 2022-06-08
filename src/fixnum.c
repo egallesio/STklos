@@ -56,25 +56,25 @@ long exp_2_fxwidth() {
 }
 
 #if CONTROL_FX_PARAMETERS == 1
-#define ensure_fx(x) {        \
+#define ensure_fx(x) do{      \
   if (!INTP(x))               \
     error_bad_fixnum1(x);     \
-}
+}while(0)
 
-#define ensure_fx2(x, y) {      \
+#define ensure_fx2(x, y) do{    \
   if (!(INTP(x) && INTP(y)))    \
     error_bad_fixnum2(x, y);    \
-}
+}while(0)
 
-#define ensure_fx3(x, y, z) {           \
+#define ensure_fx3(x, y, z) do{         \
   if (!(INTP(x) && INTP(y) && INTP(z))) \
     error_bad_fixnum3(x, y, z);         \
-}
+}while(0)
 
-#define ensure_fx4(x, y, z, w) {                   \
+#define ensure_fx4(x, y, z, w) do{                 \
   if (!(INTP(x) && INTP(y) && INTP(z) && INTP(w))) \
     error_bad_fixnum4(x, y, z, w);                 \
-}
+}while(0)
 
 static void error_bad_fixnum1(SCM o1)
 {
@@ -492,7 +492,7 @@ FX_COMP("fx<=?", fxle, >)
 FX_COMP("fx>?",  fxgt, <=)
 FX_COMP("fx>=?", fxge, <)
 
-/* fx=? is different than other compare ops, as it requires nothing
+/* fx=? is different from other compare ops, as it requires nothing
    else than a direct comparison with ==, so it's defined separately
    --jpellegrini */
 DEFINE_PRIMITIVE("fx=?", fxeq, vsubr, (int argc, SCM *argv))
@@ -737,7 +737,7 @@ doc>
   Count the number of ones in a long integer.
 
   It does work with signed long integers; the 'unsigned long' in the
-  declaration is to fore a cast so 'n' will be treated as if it were
+  declaration is to force a cast so 'n' will be treated as if it were
   unsigned, because the algoritm does shift it to the right, and if
   it's signed negative numbers would get ones from the right side when
   shifted (at least with GCC and LLVM -- this is not defined by the

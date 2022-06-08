@@ -31,7 +31,7 @@
 
 
 /* Define the maximum calls for equal-count (a version of equal bounded in
-  recursive calls). The value depends of the way the program is compiled:
+  recursive calls). The value depends on the way the program is compiled:
   if optimizations are used, the program grows stack faster
 */
 
@@ -51,7 +51,7 @@ static void limit_max_equal_calls(void) {
   struct rlimit rl;
 
   if (getrlimit(RLIMIT_STACK, &rl) == 0) {
-    /* Determine a value for the maximum calls for equal-count depending of stack size*/
+    /* Determine a value for the maximum calls for equal-count depending on stack size*/
     max_equal_calls = rl.rlim_cur / (optimized? STK_DIVISOR_OPTIM: STK_DIVISOR_NOT_OPTIM);
   }
 }
@@ -174,7 +174,7 @@ doc>
  *       (lambda (y) y))    =>  unspecified
  * @end lisp
  *
- * NOTE: In fact, the value returned by STklos depends of
+ * NOTE: In fact, the value returned by STklos depends on
  * the way code is entered and can yield |#t| in some cases and |#f|
  * in others.
  *

@@ -20,10 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Apr-2022 12:25 (eg)
+# Last file update:  8-Jun-2022 09:42 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme streams stklos srfi
+	      scheme stklos streams srfi
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -101,9 +101,9 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-SRC_C     =
-SRC_C_STK =
-SRC_SHOBJ =
+SRC_C         = readline-complete.c
+SRC_C_STK     =
+scheme_SOLIBS = readline-complete.@SH_SUFFIX@
 
 
 DOCDB       = DOCDB
@@ -114,7 +114,7 @@ BASEDIR     = ..
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA  = $(scheme_SOLIBS) $(SRC_SHOBJ)
+schemelib_DATA  = $(scheme_SOLIBS) 
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 

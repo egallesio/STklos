@@ -71,7 +71,7 @@ struct continuation_obj {
 #define CONTP(k)        (BOXED_TYPE_EQ((k), tc_continuation))
 
 SCM STk_make_continuation(void);
-SCM STk_restore_continuation(SCM cont, SCM val);
+SCM STk_restore_cont(SCM cont, SCM val);
 
 
 /*===========================================================================*\

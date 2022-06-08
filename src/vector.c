@@ -165,7 +165,7 @@ DEFINE_PRIMITIVE("vector?", vectorp, subr1, (SCM obj))
  * (make-vector k fill)
  *
  * Returns a newly allocated vector of |k| elements. If a second argument is
- * given, then each element is initialized to |fill|. Otherwise the initial
+ * given, then each element is initialized to |fill|. Otherwise, the initial
  * contents of each element is unspecified.
 doc>
  */

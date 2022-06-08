@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  2-Feb-2022 19:40 (eg)
+# Last file update:  2-Jun-2022 15:37 (eg)
 
 #======================================================================
 
@@ -72,6 +72,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # Dependencies
 
 itrie.$(SO): itrie-incl.c itrie.c
+readline-complete.$(SO): readline-complete-incl.c readline-complete.c
 
 # ======================================================================
 install-sources:

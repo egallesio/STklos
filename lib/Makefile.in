@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Apr-2022 12:25 (eg)
+# Last file update:  8-Jun-2022 09:42 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -382,7 +382,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme streams stklos srfi
+	      scheme stklos streams srfi
 
 STKLOS_FLAGS = --no-init-file --case-sensitive
 scheme_BOOT = assembler.stk \
@@ -455,9 +455,9 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-SRC_C = 
+SRC_C = readline-complete.c
 SRC_C_STK = 
-SRC_SHOBJ = 
+scheme_SOLIBS = readline-complete.@SH_SUFFIX@
 DOCDB = DOCDB
 BASEDIR = ..
 
@@ -465,7 +465,7 @@ BASEDIR = ..
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA = $(scheme_SOLIBS) $(SRC_SHOBJ)
+schemelib_DATA = $(scheme_SOLIBS) 
 scheme_sources = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c

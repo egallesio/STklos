@@ -5,7 +5,7 @@
 ;;;;           Author: Olin Shivers
 ;;;       Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: ??
-;;;; Last file update: 10-Oct-2021 11:53 (eg)
+;;;; Last file update: 08-May-2022 08:52 (jpellegrini)
 ;;;;
 
 ;;;; ===========================================================================
@@ -1454,29 +1454,41 @@ FILTER an FILTER! are primitives in STklos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; delete-duplicates delete-duplicates!
 ;;;
-;;; Beware -- these are N^2 algorithms. To efficiently remove duplicates
-;;; in long lists, sort the list to bring duplicates together, then use a
-;;; linear-time algorithm to kill the dups. Or use an algorithm based on
-;;; element-marking. The former gives you O(n lg n), the latter is linear.
+;;; The reference implementaiton of SRFI-1 has the following caveat:
+;;;
+;;;;; Beware -- these are N^2 algorithms. To efficiently remove duplicates
+;;;;; in long lists, sort the list to bring duplicates together, then use a
+;;;;; linear-time algorithm to kill the dups. Or use an algorithm based on
+;;;;; element-marking. The former gives you O(n lg n), the latter is linear.
+;;;
+;;; We have implemented a simple element-marking approach using hash tables,
+;;; and it is consistently faster for lists of size larger than 10.
+;;; It does require more space, since besides the list being build we also
+;;; keep a hash table as large as the set of elements, but the difference
+;;; in running time is quite large.
 
-(define (delete-duplicates lis :optional (elt= equal?))
-  (check-arg procedure? elt= delete-duplicates)
-  (let recur ((lis lis))
-    (if (null-list? lis) lis
-    (let* ((x (car lis))
-           (tail (cdr lis))
-           (new-tail (recur (delete x tail elt=))))
-      (if (eq? tail new-tail) lis (cons x new-tail))))))
+(define (delete-duplicates lis :optional (eq equal?))
+  (check-arg procedure? eq delete-duplicates)
 
-(define (delete-duplicates! lis :optional (elt= equal?))
-  (check-arg procedure? elt= delete-duplicates!)
-  (let recur ((lis lis))
-    (if (null-list? lis) lis
-    (let* ((x (car lis))
-           (tail (cdr lis))
-           (new-tail (recur (delete! x tail elt=))))
-      (if (eq? tail new-tail) lis (cons x new-tail))))))
+  (if (null? lis)
+      '()
+      ;; delete-duplicates with expected linear time.
+      (let ((h (make-hash-table eq))
+            (mark #(1))) ;; unique reference, guaranteed to
+                         ;; not be present in lis
+        (let Loop ( (lis lis) )
+          (if (pair? lis)
+              (if (eq? (hash-table-ref/default h (car lis) mark) mark)
+                  ;; not found, include it
+                  (begin (hash-table-set! h (car lis) #t)
+                         (cons (car lis) (Loop (cdr lis))))
+                  ;; found (hash table returned mark), ignore it
+                  (Loop (cdr lis)))
+              lis))))) 
 
+;; The reference implementation had duplicated code for these two procedures.
+;; We can just make on alias to the other.
+(define delete-duplicates! delete-duplicates)
 
 ;;; alist stuff
 ;;;;;;;;;;;;;;;

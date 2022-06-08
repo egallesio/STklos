@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 12-May-2022 15:44 (eg)
+;;;; Last file update:  6-Mar-2022 15:05 (eg)
 ;;;;
 
 
@@ -850,6 +850,70 @@ doc>
           (lambda () ,@body)
           (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps))))))
 
+;;;;
+;;;; SETTERS
+;;;;
+#|
+<doc EXT setter
+ * (setter proc)
+ *
+ * Returns the setter associated to a |proc|. Setters are defined in the
+ * {{link-srfi 17}} document. A setter proc, can be used in a generalized
+ * assignment, as described in |set!|.
+ *
+ * To associate |s| to the procedure |p|, use the following form:
+ * @lisp
+ * (set! (setter p) s)
+ * @end lisp
+ * For instance, we can write
+ * @lisp
+ * (set! (setter car) set-car!)
+ * @end lisp
+ *
+ * The following standard procedures have pre-defined setters:
+ * @lisp
+ * (set! (car x) v)              == (set-car! x v)
+ * (set! (cdr x) v)              == (set-cdr! x v)
+ * (set! (string-ref x i) v)     == (string-set! x i v)
+ * (set! (vector-ref x i) v)     == (vector-set! x i v)!
+ * (set! (slot-ref x 'name) v)   == (slot-set! x 'name v)
+ * (set! (struct-ref x 'name) v) == (struct-set! x 'name v)
+ * @end lisp
+ * Furhermore, Parameter Objects (see _<<_parameter_objects>>_) are
+ * their own setter:
+ * @lisp
+ * (real-precision)              => 15
+ * (set! (real-precision) 12)
+ * (real-precision)              => 12
+ * @end lisp
+doc>
+|#
+(define (setter proc)
+  (if (or (generic? proc) (parameter? proc))
+      proc
+      (or (key-get (%procedure-plist proc) :setter #f)
+          (error 'setter "no setter defined for ~S" proc))))
+
+
+;; Initialize the setter of setter !!
+(%set-procedure-plist!
+         setter
+         (list :setter
+               (lambda (proc setter)
+                 (%set-procedure-plist! proc
+                                        (key-set! (%procedure-plist proc)
+                                                  :setter
+                                                  setter)))))
+
+;; And now set some setter for primitive functions
+(set! (setter car)              set-car!)
+(set! (setter cdr)              set-cdr!)
+(set! (setter vector-ref)       vector-set!)
+(set! (setter string-ref)       string-set!)
+(set! (setter slot-ref)         slot-set!)
+(set! (setter struct-ref)       struct-set!)
+
+
 ;=============================================================================
 
 #|
@@ -870,6 +934,7 @@ doc>
               (,tmp2 (begin ,@args)))
          (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,tmp1))
          ,tmp2))))
+
 
 #|
 <doc EXT-SYNTAX tagbody ->
@@ -944,6 +1009,7 @@ doc>
                          body)))
       (verify new-body)
       `(begin ,@new-body))))
+
 #|
 <doc EXT-SYNTAX dotimes
  * (dotimes [var count] <expression1> <expression2> ...)
@@ -973,6 +1039,7 @@ doc>
                     ((>= ,var ,limit) ,@result)
                   ,@body))))
          bindings))
+
 #|
 <doc EXT-SYNTAX repeat
  * (repeat count <expression1> <expression2> ...)
@@ -1000,7 +1067,6 @@ doc>
           ,@body
           (-> #:top))))))
 
-
 #|
 <doc EXT-SYNTAX while
  * (while <test> <expression1> <expression2> ...)
@@ -1026,6 +1092,7 @@ doc>
   (let ((lab (gensym)))
     `(let ,lab ()
           (unless ,test ,@body (,lab)))))
+
 
 #|
 <doc EXT call/ec
@@ -1105,6 +1172,42 @@ doc>
 ;; ======================================================================
 ;;      ansi-color  & ansi-color-protect...
 ;; ======================================================================
+
+#|
+<doc EXT ansi-color
+ * (ansi-color e1 e2 ... en)
+ *
+ * |ansi-color| permits to build a string which embeds ANSI codes to
+ * colorize texts on a terminal. Each expression e~i~ must be a string,
+ * a symbol or an integer.
+ *
+ * Strings constitute the message to be displayed.
+ *
+ * A symbol can designate
+ *
+ * - a color in the set {|black|, |red|, |green|, |yellow|, |blue|,
+ *   |magenta|, |cyan|, |white|} for foreground colors
+ * - a color in the set {|bg-black|, |bg-red|, |bg-green|, |bg-yellow|,
+ *   |bg-blue|, |bg-magenta|, |bg-cyan|, |bg-white|} for background colors.
+ * - a qualifier such as |normal|, |bold|, |italic|, |underline|, |blink|,
+ *   |reverse| or |no-bold|, |no-italic|, |no-underline|, |no-blink|,
+ *   |no-reverse|.
+ *
+ * Integer values can be used for terminals which are able to display  256 colors.
+ * If the number is positive, it is used as a foreground color. Otherwise,
+ * it is uses as a background color. Note that not all the terminals are able to
+ * use more than eight colors.
+ *
+ * For instance,
+ * @lisp
+ * (display (ansi-color "a word in "
+ *                      'bold 'red "RED" 'normal
+ *                      " and another in "
+ *                      'reverse 'blue "BLUE" 'normal))
+ * @end lisp
+ * will display the words BLUE and RED in color.
+doc>
+|#
 (define ansi-color         #f)
 (define ansi-color-protect #f)
 
@@ -1152,6 +1255,14 @@ doc>
                    (string-append res
                                   (if str-prev? "" ansi-color-stop)
                                   (car args))))
+          ((integer? (car args))
+             (Loop (cdr args)
+                   #f
+                   (string-append res
+                                  (if str-prev? ansi-color-start ";")
+                                  (if (positive? (car args))
+                                      (format "38;5;~a" (car args))
+                                      (format "48;5;~a" (car args))))))
           ((symbol? (car args))
              (Loop (cdr args)
                    #f
@@ -1688,7 +1799,7 @@ doc>
         `(begin                   ;; NOTE: this code should be atomic
            (define ,@args)
            (symbol-lock! ',(car args)))
-        (error "bad constant defiition ~S" `(define-constant ,@args)))))
+        (error "bad constant definition ~S" `(define-constant ,@args)))))
 
 ;;;; ======================================================================
 ;;;;
@@ -2143,6 +2254,7 @@ doc>
              (error ,fmt ',expr ,@args)))
       ;; ... and ignored otherwise
       #void))
+
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI-176: "Version flag"

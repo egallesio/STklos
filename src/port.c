@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 13-Jan-2022 18:51 (eg)
+ * Last file update: 20-May-2022 18:55 (eg)
  *
  */
 
@@ -143,7 +143,7 @@ DEFINE_PRIMITIVE("output-port?", output_portp, subr1, (SCM port))
  * (textual-port? obj)
  * (binary-port? obj)
  *
- * Returns |#t| if |obj| is an textual port or binary port respectively,
+ * Returns |#t| if |obj| is a textual port or binary port respectively,
  * otherwise returns |#f|.
 doc>
  */
@@ -211,7 +211,7 @@ SCM STk_current_output_port(void){ return STk_get_current_vm()->oport; }
 SCM STk_current_error_port(void) { return STk_get_current_vm()->eport; }
 
 /* The setters for the standard port (since current-xxx-port are parameters
- * in R7RS.
+ * in R7RS).
  */
 static SCM STk_set_current_input_port(SCM port)
 {
@@ -1194,8 +1194,8 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * |format| (see _<<format, primitive `format`>>_); in this case this
  * procedure builds an error message according to the specification
  * given in |str|. Otherwise,
- * this procedure is conform to the |error| procedure defined in
- * {{link-srfi 23}} and  |str| is printed with the |display| procedure,
+ * this procedure is in conformance with the |error| procedure defined in
+ * {{link-srfi 23}} and |str| is printed with the |display| procedure,
  * whereas the |obj|s are printed  with the |write| procedure.
  *
  * Hereafter, are some calls of the |error| procedure using a formatted string
@@ -1385,7 +1385,7 @@ DEFINE_PRIMITIVE("port-open?", port_open, subr1, (SCM port))
  * (read-line port)
  *
  * Reads the next line available from the input port |port|. This function
- * returns 2 values: the first one is is the string which contains the line
+ * returns 2 values: the first one is the string which contains the line
  * read, and the second one is the end of line delimiter. The end of line
  * delimiter can be an end of file object, a character or a string in case
  * of a multiple character delimiter. If no more characters are available
@@ -1522,7 +1522,7 @@ DEFINE_PRIMITIVE("flush-output-port", port_flush, subr01, (SCM port))
  * the value returned by |current-input-port|.
  * @l
  * NOTE: The |port-seek|, |read-chars| and |read-chars!| procedures
- * generally break the line-number. After using one of theses procedures, the
+ * generally break the line-number. After using one of these procedures, the
  * value returned by |port-current-line| will be |-1| (except a |port-seek|
  * at the beginning of the port reinitializes the line counter).
 doc>
@@ -1582,7 +1582,7 @@ DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
   if (p == LONG_MIN) STk_error_bad_io_param("bad offset ~S", pos);
   if (w) {
     if (KEYWORDP(w)) {
-      char *s = KEYWORD_PNAME(w);
+      const char *s = KEYWORD_PNAME(w);
 
       if (strcmp(s, "start") == 0) whence = SEEK_SET;
       else if (strcmp(s, "end") == 0) whence = SEEK_END;

@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 28-Jan-2022 18:04 (eg)
+// Last file update:  6-Jun-2022 16:40 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -614,7 +614,9 @@ that STklos supports.
 
 ==== Loading code
 ((("STKLOS_LOAD_PATH")))
+[#load]
 {{insertdoc 'load}}
+[#tryload]
 {{insertdoc 'try-load}}
 {{insertdoc 'find-path}}
 {{insertdoc 'current-loading-file}}
@@ -928,6 +930,8 @@ See SRFI document for more information.
 {{insertdoc 'trace}}
 {{insertdoc 'untrace}}
 {{insertdoc 'pp}}
+[#ansicolor]
+{{insertdoc 'ansi-color}}
 {{insertdoc 'disassemble}}
 {{insertdoc 'disassemble-expr}}
 {{insertdoc 'uri-parse}}

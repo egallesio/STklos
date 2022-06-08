@@ -119,7 +119,7 @@ static Inline int Sputc(int c, void *stream)
 }
 
 
-static Inline int Swrite(void *stream, void *buffer, int count)
+static Inline int Swrite(void *stream, const void *buffer, int count)
 {
   int tmp, pos;
 
@@ -137,7 +137,7 @@ static Inline int Swrite(void *stream, void *buffer, int count)
   return count;
 }
 
-static Inline int Sputs(char *s, void *stream)
+static Inline int Sputs(const char *s, void *stream)
 {
   return Swrite(stream, s, strlen(s));
 }
@@ -147,7 +147,7 @@ static Inline int Sputstring(SCM s, void *stream)
   return Swrite(stream, STRING_CHARS(s), STRING_SIZE(s));
 }
 
-static Inline int Snputs(void *stream, char *s, int len)
+static Inline int Snputs(void *stream, const char *s, int len)
 {
   return Swrite(stream, s, len);
 }
@@ -160,7 +160,7 @@ static Inline int Sflush(void _UNUSED(*stream))
 
 static off_t Sseek(void *stream, off_t offset, int whence)
 {
-  char* p;
+  char *p;
 
   switch (whence) {
   case SEEK_SET:
@@ -219,7 +219,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
 
   /* Initialize the stream part */
   switch (kind) {
-    case PREAD:   /* this is a input string */
+    case PREAD:   /* this is an input string */
                   {
                     char *s = STRING_CHARS(str);
 
@@ -228,7 +228,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
                     PORT_STR(ss)  = str;
                     break;
                   }
-    case PREAD_C: /* this is a input string (from a C string) */
+    case PREAD_C: /* this is an input string (from a C string) */
                   PORT_BASE(ss) = (char *) str;
                   PORT_END(ss)  = (char *) str + init_len;
                   PORT_STR(ss)  = str;
@@ -242,7 +242,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_PTR(ss)     = PORT_BASE(ss);
   PORT_BUFSIZE(ss) = init_len;
 
-  /* Set the case sensitive bit */
+  /* Set the case-sensitive bit */
   if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
 
   /* Initialize now the port itself */
@@ -287,7 +287,7 @@ make_bport(enum kind_port kind,  SCM str, int init_len, int flags)
 
   /* Initialize the stream part */
   switch (kind) {
-    case PREAD:   /* this is a input bytevector */
+    case PREAD:   /* this is an input bytevector */
                   {
                     char *s = UVECTOR_DATA(str);
 
@@ -341,7 +341,7 @@ make_bport(enum kind_port kind,  SCM str, int init_len, int flags)
 /*
  * open-input-string with a C string ...
  */
-SCM STk_open_C_string(char *str)
+SCM STk_open_C_string(const char *str)
 {
   return (SCM) make_sport(PREAD_C, (SCM) str, strlen(str),
                           PORT_IS_STRING | PORT_READ | PORT_TEXTUAL);

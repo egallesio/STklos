@@ -38,7 +38,7 @@ static pthread_key_t vm_key;
 
 static void cleanup_vm_specific(void _UNUSED(*p))    /* Nothing to do for now */
 {
-  /* Do nothing */;
+  /* Do nothing */
 }
 
 static void initialize_vm_key(void)

@@ -74,6 +74,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
     - SRFI-113: Sets and Bags
+    - SRFI-116: Immutable List Library
     - SRFI-117: Queues based on lists
     - SRFI-118: Simple adjustable-size strings
     - SRFI-127: Lazy Sequences
@@ -91,6 +92,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-144: Flonums
     - SRFI-145: Assumptions
     - SRFI-151: Bitwise Operations
+    - SRFI-152: String Library (reduced)
     - SRFI-154: First-class dynamic extents
     - SRFI-156: Syntactic combiners for binary predicates
     - SRFI-158: Generators and Accumulators

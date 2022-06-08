@@ -64,7 +64,7 @@ STk_get_character(SCM port)  /* result may be a wide character */
     return (PORT_UNGETC(port) != EOF) ?
                   /* we have an ungetted char, call normal getc */
                   STk_getc(port):
-                  /* try to read it as an UTF-8 sequence */
+                  /* try to read it as a UTF-8 sequence */
                   // FIXME: on ne gère pas la ligne ici!!!
                   STk_utf8_read_char(port);
   else
@@ -140,7 +140,7 @@ STk_put_character(int c, SCM port)       /* c may be a wide char */
 
 
 int
-STk_puts(char *s, SCM port)
+STk_puts(const char *s, SCM port)
 {
   int n =  PORT_PUTS(port)(s, PORT_STREAM(port));
   if (n >= 0)
@@ -159,7 +159,7 @@ STk_putstring(SCM s, SCM port)
 
 
 int
-STk_nputs(SCM port, char *s, int len)
+STk_nputs(SCM port, const char *s, int len)
 {
   int n = PORT_NPUTS(port)(PORT_STREAM(port), s, len);
   if (n >= 0)
@@ -176,7 +176,7 @@ STk_seek(SCM port, off_t offset, int whence)
 
   if (whence == SEEK_CUR) {
     //if (PORT_UNGETC(port) != EOF) offset -= 1;
-    /* Don't use relative access since fports stream does'nt know its cur. pos. */
+    /* Don't use relative access since fports stream doesn't know its cur. pos. */
     offset = PORT_POS(port) + offset;
     whence = SEEK_SET;
   }

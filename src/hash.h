@@ -86,8 +86,8 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag);
  * little interest except for the obarrays. Don't use it but the
  * higher level interface instead.
  */
-SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s,
-                           SCM (*create)(char *s));
+SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s,
+                           SCM (*create)(const char *s));
 
 /*
  * Function for accessing module hash table. Don't use them but the
@@ -102,7 +102,6 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly);
  */
 SCM STk_hash_keys(struct hash_table_obj *h);
 SCM STk_make_basic_hash_table(void);
-SCM STk_hash_table_search(SCM ht, SCM key);
 
 /*
  * Scheme interface

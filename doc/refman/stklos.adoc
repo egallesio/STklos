@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 14-Mar-2022 19:07 (eg)
+// Last file update:  2-Jun-2022 16:55 (eg)
 
 = STklos Reference Manual : (version {{version}})
 :authors: Erick Gallesio
@@ -83,6 +83,7 @@ Free Documentation License">>.
 [#_libraries]
 {{Include* "libs.adoc"}}
 
+[appendix]
 [appendix]
 [#FDL]
 {{Include* "licence.adoc"}}

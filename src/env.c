@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 17-May-2022 18:59 (eg)
+ * Last file update:  8-Jun-2022 08:59 (eg)
  */
 
 #include "stklos.h"
@@ -48,6 +48,11 @@ static void error_not_exist(SCM obj)
 static void error_bad_list(SCM obj)
 {
   STk_error("bad list ~S", obj);
+}
+
+static void error_unbound_variable(SCM symbol, SCM modname)
+{
+  STk_error("variable ~S unbound in ~S", symbol, modname);
 }
 
 static void error_bad_symbol(SCM symbol)
@@ -83,20 +88,14 @@ SCM STk_STklos_module;          /* The module whose name is STklos */
 static SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
 
-
-static void error_unbound_variable(SCM symbol, SCM module)
-{
-  STk_error("variable ~S unbound in ~S", symbol, MODULE_NAME(module));
-}
-
 static void print_module(SCM module, SCM port, int mode)
 {
   if (MODULE_IS_LIBRARY(module)) {
-    char *name = MODULE_NAME(module);
+    const char *name = MODULE_NAME(module);
 
     STk_nputs(port, "#[library ", 11);
     STk_putc('(', port);
-    for (char *s = SYMBOL_PNAME(name); *s; s++) {
+    for (const char *s = SYMBOL_PNAME(name); *s; s++) {
       STk_putc((*s == '/') ? ' ': *s, port);
     }
     STk_putc(')', port);
@@ -561,15 +560,15 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
   SCM res = find_symbol_value(symbol, module);
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, module);
+    error_unbound_variable(symbol, MODULE_NAME(module));
   }
   return res;
 }
 
 /*
 <doc EXT symbol-value*
- * (symbol-value* symbol module)
- * (symbol-value* symbol module default)
+ * (symbol-value+++*+++ symbol module)
+ * (symbol-value+++*+++ symbol module default)
  *
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
  * an error is signaled if no |default| is provided, otherwise |symbol-value|
@@ -594,7 +593,7 @@ DEFINE_PRIMITIVE("symbol-value*", symbol_value_all, subr23,
   }
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, module);
+    error_unbound_variable(symbol, MODULE_NAME(module));
   }
   return res;
 }
@@ -709,7 +708,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
   if (!res)
-    error_unbound_variable(old, module);
+    error_unbound_variable(old, MODULE_NAME(module));
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
   return STk_void;
@@ -727,7 +726,7 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old);
   if (!res)
-    error_unbound_variable(old, old_module);
+    error_unbound_variable(old, MODULE_NAME(old_module));
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
   return STk_void;
@@ -751,7 +750,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
 
   // symbol was not found in the given env module. Try to find it in
-  // the the STklos module (if this is not a R7RS library)
+  // the STklos module (if this is not a R7RS library)
   if (!MODULE_IS_LIBRARY(env) &&  env != STk_STklos_module) {
     env = STk_STklos_module;
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);

@@ -117,6 +117,9 @@
        (define (,set vect i val)
          (%uvector-set! ,type vect i val))
 
+       ;; (set! (setter TAGvector-ref) TAGvector-set!)
+       (set! (setter ,ref) ,set)
+
        ;; (TAGvector->list TAGvect)
        (define (,v->l vect)
          (%uvector->list ,type vect))
