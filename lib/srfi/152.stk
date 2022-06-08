@@ -792,7 +792,7 @@
 
 		    (cond ((= j -1)
 			   (let ((i1 (+ i 1))
-				 (ck+1 (string-ref pattern (add1 k))))
+				 (ck+1 (string-ref pattern (+ k 1))))
 			     (vector-set! rv i1 (if (c= ck+1 c0) -1 0))
 			     (lp1 i1 0 (+ k 1))))
 
