@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update:  4-Sep-2021 15:06 (eg)
+;;;; Last file update:  8-Jun-2022 13:23 (eg)
 ;;;;
 
 (require "test")
@@ -284,6 +284,13 @@ b|)
         (let ((z (void (set! x -1)
                        (set! y (* y 10)))))
           (list x y z))))
+
+;;----------------------------------------------------------------------
+(test-subsection "syntax names in environment")
+
+(test "syntax in env.1" '(1 2 3) (lambda (begin) (begin 1 2 3)) (lambda lambda lambda))
+(test "syntax in env.2" 3 (lambda (_) (begin 1 2 3)) (lambda lambda lambda))
+
 
 ;;------------------------------------------------------------------
 (test-section-end)

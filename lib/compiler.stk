@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 12-May-2022 18:27 (eg)
+;;;; Last file update:  8-Jun-2022 12:34 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1801,41 +1801,48 @@ doc>
    ;; ---- We have a pair
    ((pair? e)
     (let ((first (car e)))
-      (if (syntax-in-env? first env)
-          (compile (%macro-expand e env) env epair tail?)
-          ;; ---- special-form? function call?
-          (case first
-            ((if)                 (compile-if             e env tail?))
-            ((define)             (compile-define         e env tail?))
-            ((begin)              (compile-begin          e env tail?))
-            ((lambda λ)                (compile-lambda         e env tail?))
-            ((let %let)           (compile-let            e env tail?))
-            ((let*)               (compile-let*           e env tail?))
-            ((letrec)             (compile-letrec         e env tail?))
-            ((and)                (compile-and            e env tail?))
-            ((or)                 (compile-or             e env tail?))
-            ((cond)               (compile-cond           e env tail?))
-            ((case)               (compile-case           e env tail?))
-            ((do)                 (compile-do             e env tail?))
-            ((quote)              (compile-quote          e env tail?))
-            ((quasiquote)         (compile-quasiquote     e env tail?))
-            ((with-handler)       (compile-with-handler   e env tail?))
-            ;;((defmacro)           (compile-define-macro   e env tail?))  ;;FIXME
-            ((define-macro)       (compile-define-macro   e env tail?))
+      (cond
+       ((syntax-in-env? first env)
+          ;; ---- Macro call
+          (compile (%macro-expand e env) env epair tail?))
 
-            ((%%set!)             (compile-set!           e env tail?))
+       ((find-symbol-in-env first env)
+          ;; --- Symbol is in environment => function call
+          (compile-call e env tail?))
 
-            ;; Special calls
-            ((%%require)          (compile-require        e env tail?))
-            ((%%require4syntax)   (compile-require4syntax e env tail?))      ;; FIXME
-            ((%%when-compile)     (compile-when-compile   e env tail?))
-            ((%%include)          (compile-include        e env tail?))
-            ((%%include-ci)       (compile-include-ci     e env tail?))
-            ((%%source-pos)       (compile-%%source-pos   e env tail?))
-            ((%%label)            (compile-%%label        e env tail?))
-            ((%%goto)             (compile-%%goto         e env tail?))
-            ;; Standard call
-            (else                 (compile-call           e env tail?))))))
+       (else
+        ;; ---- special-form OR (not in env) function call?
+        (case first
+          ((if)                 (compile-if             e env tail?))
+          ((define)             (compile-define         e env tail?))
+          ((begin)              (compile-begin          e env tail?))
+          ((lambda λ)                (compile-lambda         e env tail?))
+          ((let %let)           (compile-let            e env tail?))
+          ((let*)               (compile-let*           e env tail?))
+          ((letrec)             (compile-letrec         e env tail?))
+          ((and)                (compile-and            e env tail?))
+          ((or)                 (compile-or             e env tail?))
+          ((cond)               (compile-cond           e env tail?))
+          ((case)               (compile-case           e env tail?))
+          ((do)                 (compile-do             e env tail?))
+          ((quote)              (compile-quote          e env tail?))
+          ((quasiquote)         (compile-quasiquote     e env tail?))
+          ((with-handler)       (compile-with-handler   e env tail?))
+          ((define-macro)       (compile-define-macro   e env tail?))
+
+          ((%%set!)             (compile-set!           e env tail?))
+
+          ;; Special calls
+          ((%%require)          (compile-require        e env tail?))
+          ((%%when-compile)     (compile-when-compile   e env tail?))
+          ((%%include)          (compile-include        e env tail?))
+          ((%%include-ci)       (compile-include-ci     e env tail?))
+          ((%%source-pos)       (compile-%%source-pos   e env tail?))
+          ((%%label)            (compile-%%label        e env tail?))
+          ((%%goto)             (compile-%%goto         e env tail?))
+
+          ;; Standard call (first is not in lexical env)
+          (else                 (compile-call           e env tail?)))))))
 
    ;; ---- We have a symbol
    ((symbol? e)
