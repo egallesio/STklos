@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  6-Jun-2022 17:27 (eg)
+;;;; Last file update:  8-Jun-2022 11:40 (eg)
 ;;;;
 
 ;;=============================================================================
@@ -297,6 +297,14 @@ doc>
                        (%symbol->library-name name)))
               mod)))))
 
+  (define (not-in-import-set clause symbol)
+    ;; Signal an error only if we are not just importing for syntax.
+    ;; Teh problem comes from the fact that we must do compute the import
+    ;; clause two times (with only-syntax set to #t and #f).
+    ;; In any case, the real import will always signal error, if some symbol
+    ;; is not properly defined.
+    (unless only-syntax
+      (error clause "symbol ~s is not in the import set" symbol)))
 
   (define (build-import-list lib lst imported)
     (if (null? lst)
@@ -309,17 +317,16 @@ doc>
              (let ((public (map cdr imported)))
                (for-each (lambda (symb)
                            (unless (memq symb public)
-                             (error 'import "only: symbol ~s is not in the import set"
-                                    symb)))
-                         val)
-               (set! imported (filter! (lambda (x) (memq (cdr x) val)) imported))))
+                             (not-in-import-set 'only symb)))
+                         val))
+             (set! imported (filter! (lambda (x) (memq (cdr x) val)) imported)))
 
             ((#:except)
              (let ((public (map cdr imported)))
                (for-each (lambda (symb)
                            (if (memq symb public)
                                (set! imported (remove (lambda (x) (eq? (cdr x) symb)) imported))
-                               (error 'import "except: symbol ~s is not in the import set" symb)))
+                               (not-in-import-set 'except symb)))
                          val)))
             ((#:rename)
              (for-each (lambda (pair)
@@ -327,8 +334,7 @@ doc>
                                (new      (cadr pair)))
                            (let Loop ((lst imported))
                              (if (null? lst)
-                                 (error 'import
-                                        "rename: symbol ~s is not in the import set" original)
+                                 (not-in-import-set 'rename original)
                                  (if (eq? (cdar lst) original)
                                      (set-cdr! (car lst) new)
                                      (Loop (cdr lst)))))))
