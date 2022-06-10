@@ -1,7 +1,7 @@
 ;;;;
 ;;;; do-test.stk        -- The pilot of all tests
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 16-Dec-2021 17:35 (eg)
+;;;; Last file update: 10-Jun-2022 14:21 (eg)
 ;;;;
 
 (load-path `("../lib"
@@ -49,6 +49,7 @@
   (load "test-circular.stk")
   (load "test-utf8.stk")
   (load "test-unmutable-bindings.stk")
+  (load "test-macros.stk")
   (load "test-misc.stk")
   (load "test-r5rs-pitfall.stk")
 )
