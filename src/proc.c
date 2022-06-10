@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update:  7-Jan-2022 16:39 (eg)
+ * Last file update: 10-Jun-2022 16:59 (eg)
  */
 
 #include "stklos.h"
@@ -282,6 +282,12 @@ DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
   return CLOSURE_FORMALS(proc);
 }
 
+DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) return STk_false;
+  return CLOSURE_ENV(proc);
+}
+
 /*===========================================================================*\
  *
  *                      M A P   &   F O R - E A C H
@@ -413,6 +419,7 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(procedure_name);
   ADD_PRIMITIVE(set_procedure_name);
   ADD_PRIMITIVE(proc_signature);
+  ADD_PRIMITIVE(proc_env);
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);

@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 18-May-2022 13:06 (eg)
+;;;; Last file update: 10-Jun-2022 17:42 (eg)
 ;;;;
 
 
@@ -363,6 +363,16 @@ doc>
       (fprintf port "Its content is:~%")
       (for-each (lambda (x) (fprintf port "    ~W~%" x))
                 (call-with-values (lambda () (unbox self)) list)))))
+
+;;; ======================================================================
+;;;     Describe for syntax
+;;; ======================================================================
+(define-method describe ((self <syntax>) port)
+  (next-method)
+  (fprintf port "Its name is ~a.~%" (%syntax-name self))
+  (fprintf port "Its expander procedure is ~a whose source code is:~%"
+           (%syntax-expander self))
+  (pretty-print (%syntax-source self) :port port))
 
 ;;; ======================================================================
 ;;;     Describe without second parameter
