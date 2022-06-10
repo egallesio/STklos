@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  8-Jun-2022 12:34 (eg)
+;;;; Last file update: 10-Jun-2022 14:03 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -114,7 +114,7 @@
 ; ======================================================================
 (define-struct scope
   locals                        ; local symbols
-  slocals                       ; local syntaxes
+  mlocals                       ; #t if symbols are macros
   parent)                       ; parent scope
 
 (define (find-symbol-in-env symb env)
@@ -122,7 +122,7 @@
     (cond
      ((not env)                       #f)
      ((memq symb (scope-locals  env)) symb)
-     ((assq symb (scope-slocals env)) )
+     ((assq symb (scope-mlocals env)) => cdr)
      (else                            (Loop (scope-parent env))))))
 
 ;;// FIXME:
@@ -139,13 +139,15 @@
 ;;//      (cons (scope-locals sc)
 ;;//            (%scope->list (scope-parent sc)))))
 ;;//
-;;//(define (%debug-scope env)
-;;//  (%debug "***SCOPE*** ~S\n" env)
-;;//  (let L ((env env))
-;;//    (when env
-;;//      (%debug "   ==> locals= ~S slocals= ~S parent =~S"
-;;//              (scope-locals env) (scope-slocals env) (scope-parent env))
-;;//      (L (scope-parent env)))))
+
+
+(define (%debug-scope env)     ;; FIXME:
+  (%debug "***SCOPE*** ~S\n" env)
+  (let L ((env env))
+    (when env
+      (%debug "   ==> locals= ~S mlocals= ~S parent =~S"
+              (scope-locals env) (scope-mlocals env) (scope-parent env))
+      (L (scope-parent env)))))
 
 
 ; ======================================================================
@@ -154,12 +156,43 @@
 ;
 ; ======================================================================
 
-(define (syntax-in-env? symb env)
+;; FIXME: delete
+;;//(define (syntax-in-env? symb env)
+;;//  (and (symbol? symb)
+;;//       (or (%syntax? (find-symbol-in-env symb env))    ; local macro?
+;;//           (%syntax? (symbol-value* symb               ; global macro
+;;//                                    (compiler-current-module)
+;;//                                    #f)))))
+
+(define (find-syntax-in-env symb env)
   (and (symbol? symb)
-       (or (%syntax? (find-symbol-in-env symb env))    ; local macro?
-           (%syntax? (symbol-value* symb               ; global macro
-                                    (compiler-current-module)
-                                    #f)))))
+       (let ((val (find-symbol-in-env symb env)))         ; local macro?
+         (if (%syntax? val)
+             val
+             (let ((val (symbol-value* symb               ; global macro?
+                                       (compiler-current-module)
+                                       #f)))
+               (and (%syntax? val)
+                    val))))))
+
+;; FIXME: delete
+;;//(define (%macro-expand form env)     ;; NOTE: env is unused for now
+;;//  (let ((map-expander (lambda (form)
+;;//                        (map* (lambda (x) (%macro-expand x env)) form))))
+;;//    (cond
+;;//     ((not (pair? form))          form)
+;;//     ((not (symbol? (car form)))  (map-expander form))
+;;//     (else  (let* ((name (car form))
+;;//                   (val  (symbol-value* name (compiler-current-module) #f)))
+;;//              (if (or (eq?  name 'quote) (eq? name 'quasiquote))
+;;//                  form
+;;//                  (if (and (symbol? name) (%syntax? val))
+;;//                      (apply (%syntax-expander val) (cdr form))
+;;//                      (map-expander form))))))))
+;;//
+;;//
+;;//
+
 
 
 (define (%macro-expand form env)     ;; NOTE: env is unused for now
@@ -169,12 +202,16 @@
      ((not (pair? form))          form)
      ((not (symbol? (car form)))  (map-expander form))
      (else  (let* ((name (car form))
-                   (val  (symbol-value* name (compiler-current-module) #f)))
+                   (val  (find-syntax-in-env name env)))
               (if (or (eq?  name 'quote) (eq? name 'quasiquote))
                   form
                   (if (and (symbol? name) (%syntax? val))
                       (apply (%syntax-expander val) (cdr form))
                       (map-expander form))))))))
+
+
+
+
 
 ;; FIXME: This code should be in compfile
 
@@ -391,6 +428,9 @@ doc>
     (apply emit (if ref i1 i2) args))
 
   (let loop ((lev 0) (env env))
+    ;; lev denotes the number of frames between the searched variable location
+    ;; and the current frame. Note that the extra levels introduced by %let-syntax
+    ;; don't result in a frame in the stack.
     (if (not env)
         ;; name is a global variable
         (begin
@@ -400,8 +440,11 @@ doc>
         (let loop2 ((idx 0) (l (scope-locals env)))
           (cond
             ((null? l)
-             (loop (+ lev 1) (scope-parent env)))
-
+             (if (null? (scope-mlocals env))
+                 ;; we have only locals variables, increment lev by 1
+                 (loop (+ lev 1) (scope-parent env))
+                 ;; we have only macros at this level. Keep lev as is
+                 (loop lev (scope-parent env))))
             ((eq? (car l) name)
              (if (zero? lev)
                  ;; variable in  innermost block
@@ -639,7 +682,7 @@ doc>
                     (error "body is empty"))
                    ((and (pair? l)
                          (pair? (car l))
-                         (syntax-in-env? (caar l) env))
+                         (find-syntax-in-env (caar l) env))
                     (%macro-expand (car l) env))
                    (else
                       (car l)))))
@@ -1635,6 +1678,47 @@ doc>
 
 ;;;;======================================================================
 ;;;;
+;;;;            LET-SYNTAX
+;;;;
+;;;;======================================================================
+
+(define (compile-%let-syntax e env tail?)
+  (let ((len (length e)))
+    (if (not (= len 3))
+        (compiler-error '%let-syntax e "ill formed %let-syntax ~S" e)
+        (let ((bindings (cadr e))
+              (body     (cddr e)))
+          (if (null? bindings)
+              (compile-body body env body tail?)
+              (let Loop ((bindings bindings)
+                         (new-env  '()))
+                (if (null? bindings)
+                    ;; compile body in a new environement
+                    (compile-body body
+                                  (make-scope '() new-env env)
+                                  body
+                                  tail?)
+                    ;; build a new macro environment for evaluating body
+                    (let ((new (car bindings)))
+                      (unless (and (list? new) (= (length new) 2))
+                        (compiler-error '%let-syntax new
+                                        "ill formed binding ~S" new))
+                      (let* ((name      (car new))
+                             (expander  (cadr new))
+                             (new-macro (%make-syntax
+                                            name
+                                            expander
+                                            (eval expander
+                                                  (compiler-current-module))
+                                            (module-name
+                                                (compiler-current-module)))))
+                        (Loop (cdr bindings)
+                              (cons (cons name new-macro)
+                                    new-env)))))))))))
+
+
+;;;;======================================================================
+;;;;
 ;;;;            Special Calls
 ;;;;
 ;;;;======================================================================
@@ -1802,7 +1886,7 @@ doc>
    ((pair? e)
     (let ((first (car e)))
       (cond
-       ((syntax-in-env? first env)
+       ((find-syntax-in-env first env)
           ;; ---- Macro call
           (compile (%macro-expand e env) env epair tail?))
 
@@ -1831,6 +1915,8 @@ doc>
           ((define-macro)       (compile-define-macro   e env tail?))
 
           ((%%set!)             (compile-set!           e env tail?))
+
+          ((%let-syntax)        (compile-%let-syntax     e env tail?))
 
           ;; Special calls
           ((%%require)          (compile-require        e env tail?))
