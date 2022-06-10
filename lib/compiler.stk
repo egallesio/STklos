@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 10-Jun-2022 14:03 (eg)
+;;;; Last file update: 10-Jun-2022 16:17 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1684,7 +1684,7 @@ doc>
 
 (define (compile-%let-syntax e env tail?)
   (let ((len (length e)))
-    (if (not (= len 3))
+    (if (< len  3)
         (compiler-error '%let-syntax e "ill formed %let-syntax ~S" e)
         (let ((bindings (cadr e))
               (body     (cddr e)))
@@ -1715,7 +1715,6 @@ doc>
                         (Loop (cdr bindings)
                               (cons (cons name new-macro)
                                     new-env)))))))))))
-
 
 ;;;;======================================================================
 ;;;;
