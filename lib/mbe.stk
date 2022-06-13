@@ -31,7 +31,7 @@
 ;;; by Eugene Kohlbecker and in R4RS Appendix.
 ;;;
 ;;;
-;;; Last file update: 25-Apr-2022 15:56 (eg)
+;;; Last file update: 10-Jun-2022 18:50 (eg)
 
 #|
                         STklos Implementation Notes
@@ -133,9 +133,9 @@ doc>
       "cannot be used here. You must load the file \"full-syntax\" to access it:"
       (cons name args)))
 
-  (define-macro (let-syntax . args)   (%not-implemented 'let-syntax ',args))
   (define-macro (letrec-syntax . args)(%not-implemented 'letrec-syntax ',args))
 
+  
 
 ;;;
 ;;; Scheme utilities
@@ -661,10 +661,34 @@ doc>
                              '()))
                 (Loop (cdr l))))))))
 
+
+;;
+;; A very simple implementation od let-syntax. 
+;; FIXME: Need some work
+;;
+(define-macro (let-syntax bindings . body)
+  `(%let-syntax
+    ,(map (lambda (x)
+            (let* ((macro-name (car x))
+                   (syn-rules  (cadr x))
+                   (keywords   (cons macro-name (cadr syn-rules)))
+                   (clauses    (cddr syn-rules)))
+              `(,macro-name (lambda args
+                              (%find-macro-clause ',macro-name
+                                                  args
+                                                  ',keywords
+                                                  ',clauses)))))
+          bindings)
+    ,@body))
+
 )       ;;; end of module definition of MBE
 
 
 (define %find-macro-clause (symbol-value 'find-clause (find-module 'MBE)))
+
+
+
+
 
 
 ;;MAC (define-macro (define-syntax macro-name syn-rules)
