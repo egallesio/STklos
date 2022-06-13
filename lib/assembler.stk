@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 11-Jan-2022 16:27 (eg)
+;;;; Last file update: 13-Jun-2022 17:19 (eg)
 ;;;;
 
 ;;;
@@ -127,7 +127,7 @@
            (IN-EQV              0)
            (IN-EQUAL            0)
            (IN-APPLY            2)
-           (MAKE-EXPANDER       1)
+           (UNUSED-2            0)  ;; NOTE: It was: (MAKE-EXPANDER       1)
            (SET-CUR-MOD         0)
 
            ;; Documentation string

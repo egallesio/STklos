@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 10-Jun-2022 16:17 (eg)
+;;;; Last file update: 13-Jun-2022 17:15 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -195,7 +195,7 @@
 
 
 
-(define (%macro-expand form env)     ;; NOTE: env is unused for now
+(define (%macro-expand form env)
   (let ((map-expander (lambda (form)
                         (map* (lambda (x) (%macro-expand x env)) form))))
     (cond
