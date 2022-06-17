@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 13-Jun-2022 17:15 (eg)
+;;;; Last file update: 17-Jun-2022 20:27 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -156,14 +156,6 @@
 ;
 ; ======================================================================
 
-;; FIXME: delete
-;;//(define (syntax-in-env? symb env)
-;;//  (and (symbol? symb)
-;;//       (or (%syntax? (find-symbol-in-env symb env))    ; local macro?
-;;//           (%syntax? (symbol-value* symb               ; global macro
-;;//                                    (compiler-current-module)
-;;//                                    #f)))))
-
 (define (find-syntax-in-env symb env)
   (and (symbol? symb)
        (let ((val (find-symbol-in-env symb env)))         ; local macro?
@@ -174,26 +166,6 @@
                                        #f)))
                (and (%syntax? val)
                     val))))))
-
-;; FIXME: delete
-;;//(define (%macro-expand form env)     ;; NOTE: env is unused for now
-;;//  (let ((map-expander (lambda (form)
-;;//                        (map* (lambda (x) (%macro-expand x env)) form))))
-;;//    (cond
-;;//     ((not (pair? form))          form)
-;;//     ((not (symbol? (car form)))  (map-expander form))
-;;//     (else  (let* ((name (car form))
-;;//                   (val  (symbol-value* name (compiler-current-module) #f)))
-;;//              (if (or (eq?  name 'quote) (eq? name 'quasiquote))
-;;//                  form
-;;//                  (if (and (symbol? name) (%syntax? val))
-;;//                      (apply (%syntax-expander val) (cdr form))
-;;//                      (map-expander form))))))))
-;;//
-;;//
-;;//
-
-
 
 (define (%macro-expand form env)
   (let ((map-expander (lambda (form)
@@ -1681,7 +1653,24 @@ doc>
 ;;;;            LET-SYNTAX
 ;;;;
 ;;;;======================================================================
+#|
+This implementation is incorrect.
+For instance,
+(let ((x 'outer))
+  (let-syntax ((m (syntax-rules () ((m a) (list x a)))))
+    (let ((x 'inner))
+      (cons x (m 17)))))    => (inner inner 17)
 
+It should probably produce (outer inner 17) if we want to be coherent with
+the R7RS form 
+(let ((x 'outer))
+  (let-syntax ((m (syntax-rules () ((m a) (list x a)))))
+    (let ((x 'inner))
+      (cons x (m 17)))))
+
+NOTE: Hopefully our implementation produce the SAME (incorrect) result for
+both forms.
+|#
 (define (compile-%let-syntax e env tail?)
   (let ((len (length e)))
     (if (< len  3)
@@ -1708,10 +1697,8 @@ doc>
                              (new-macro (%make-syntax
                                             name
                                             expander
-                                            (eval expander
-                                                  (compiler-current-module))
-                                            (module-name
-                                                (compiler-current-module)))))
+                                            (eval expander)
+                                            #f))) ; #f =>  non global macro
                         (Loop (cdr bindings)
                               (cons (cons name new-macro)
                                     new-env)))))))))))
@@ -1771,7 +1758,6 @@ doc>
                                                expander
                                                modname)))
                   ;; Define the expander in the imported module
-                  ;; FIXME: %debug "Build expander ~s in ~S with ~S" name module proc)
                   (%symbol-define name obj module)
 
                   ;; Add the current expander in the exported list of imported
@@ -1806,33 +1792,6 @@ doc>
       (import-file-informations infos)))
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
-
-
-;;; FIXME: should be deleted
-;;;;
-;;;; REQUIRE-FOR-SYNTAX
-;;;;
-(define (compile-require4syntax e env tail)
-   (if  (and (= (length e) 2)
-             (string? (cadr e)))
-     (with-handler
-         (lambda (c) (eprintf "*** Exception while required-for-syntax ~S\n" e)
-                     (raise c))
-         (let ((infos (find-file-informations (cadr e) (load-path) #t)))
-           (import-file-informations infos)
-           (void)))
-     (error 'require-for-syntax "bad form ~S" e)))
-
-
-#;(define (compile-require4syntax e env tail)
-  ;; No code is produced here, we only load the file for the compiler
-  (with-handler
-     (lambda (c)
-       (eprintf "*** Exception while evaluation of required syntax ~S\n" e)
-       (raise c))
-     (require (cadr e))))
-
-
 
 
 ;;;;

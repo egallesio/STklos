@@ -21,17 +21,16 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 25-Nov-2019 12:14
- * Last file update: 14-Apr-2022 18:42 (eg)
+ * Last file update: 17-Jun-2022 16:25 (eg)
  */
 
 #include "stklos.h"
 
-struct syntax_obj {                  // FIXME: Do we need all this slots?
+struct syntax_obj {
   stk_header header;
   SCM name;
   SCM expander_src;
   SCM expander;
-  SCM environment;
   SCM module;
 };
 

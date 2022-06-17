@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Jul-2021 13:24 (jpellegrini)
-;;;; Last file update: 10-Jun-2022 14:20 (eg)
+;;;; Last file update: 17-Jun-2022 19:58 (eg)
 ;;;;
 
 ;;;
@@ -204,7 +204,7 @@
 (select-module STklos)
 
 
-;;; This subsection 
+;;; Hygienic Macros  subsection 
 
 (test-subsection "hygienic macros")
 
