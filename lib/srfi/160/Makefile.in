@@ -14,9 +14,10 @@
 
 @SET_MAKE@
 
-# Makefile for the R7RS SRFI standard libraries
+# Makefile for the SRFI 160
 #
-# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info>
+# Based on the SRFI Makefiles by Erick Gallesio.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,9 +34,9 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 # USA.
 #
-#           Author: Erick Gallesio [eg@unice.fr]
-#    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  8-Jun-2022 11:52 (eg)
+#           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+#    Creation date: 20-Jun-2022 09:24 (jpellegrini)
+# Last file update: 21-Jun-2022 08:47 (jpellegrini)
 
 #-======================================================================
 
@@ -113,7 +114,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = lib/srfi
+subdir = lib/srfi/160
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -136,14 +137,6 @@ am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
 DIST_SOURCES =
-RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
-	ctags-recursive dvi-recursive html-recursive info-recursive \
-	install-data-recursive install-dvi-recursive \
-	install-exec-recursive install-html-recursive \
-	install-info-recursive install-pdf-recursive \
-	install-ps-recursive install-recursive installcheck-recursive \
-	installdirs-recursive pdf-recursive ps-recursive \
-	tags-recursive uninstall-recursive
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -178,14 +171,6 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"
 DATA = $(srfi_DATA) $(srfilib_DATA)
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-am__recursive_targets = \
-  $(RECURSIVE_TARGETS) \
-  $(RECURSIVE_CLEAN_TARGETS) \
-  $(am__extra_recursive_targets)
-AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
-	distdir distdir-am
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -203,34 +188,8 @@ am__define_uniq_tagged_files = \
   unique=`for i in $$list; do \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
-DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-am__relativize = \
-  dir0=`pwd`; \
-  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
-  sed_rest='s,^[^/]*/*,,'; \
-  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
-  sed_butlast='s,/*[^/]*$$,,'; \
-  while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
-  done; \
-  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
@@ -381,244 +340,62 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-
-# We have SUBDIRS_SRFIS and SUBDIRS.
-#
-# SUBDIRS_SRFIS must *not* include the current directory,
-# otherwise the clean target enters an infinite loop.
-# But SUBDIRS *does* need to include the current directory.
-# We can control the build order in the SUBDIRS variable.
-#
-# NOTE: 160.ostk needs the sublibraries to be built first.
-#
-SUBDIRS_SRFIS = 160
-# Build this directory before others:
-SUBDIRS = $(SUBDIRS_SRFIS) .
 STKLOS_FLAGS = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
+# ORGANIZATION OF SRFI-160 IMPLEMENTATION:
 #
-# SRFI written in Scheme
+# - base.c, base.stk: implementation of the base library,
+#   (srfi 160 base), where there's also much code that is
+#   used by the specific s8, u8, etc, libraries.
 #
-SRC_STK = 1.stk   \
-            2.stk   \
-            4.stk   \
-            5.stk   \
-            6.stk   \
-            7.stk   \
-            8.stk   \
-            9.stk   \
-            10.stk  \
-            11.stk  \
-            13.stk  \
-            14.stk  \
-            15.stk  \
-            16.stk  \
-            17.stk  \
-            18.stk  \
-            22.stk  \
-            23.stk  \
-            26.stk  \
-            28.stk  \
-            29.stk  \
-            31.stk  \
-            34.stk  \
-            35.stk  \
-            36.stk  \
-            37.stk  \
-            38.stk  \
-            39.stk  \
-            41.stk  \
-            45.stk  \
-            48.stk  \
-            51.stk  \
-            54.stk  \
-            55.stk  \
-            59.stk  \
-            60.stk  \
-            61.stk  \
-            62.stk  \
-            64.stk  \
-            66.stk  \
-            69.stk  \
-            70.stk  \
-            74.stk  \
-            87.stk  \
-            88.stk  \
-            89.stk  \
-            94.stk  \
-            95.stk  \
-            96.stk  \
-            100.stk \
-            111.stk \
-            113.stk \
-            117.stk \
-            118.stk \
-            127.stk \
-            128.stk \
-            129.stk \
-            130.stk \
-            134.stk \
-            135.stk \
-            137.stk \
-            141.stk \
-            143.stk \
-            151.stk \
-            152.stk \
-            154.stk \
-            156.stk \
-            158.stk \
-            160.stk \
-            161.stk \
-            169.stk \
-            171.stk \
-            173.stk \
-            174.stk \
-            176.stk \
-            180.stk \
-            185.stk \
-            189.stk \
-            190.stk \
-            193.stk \
-            195.stk \
-            196.stk \
-            207.stk \
-            208.stk \
-            214.stk \
-            215.stk \
-            216.stk \
-            217.stk \
-            219.stk \
-            221.stk \
-            223.stk \
-            224.stk \
-            229.stk \
-            230.stk
+# - s8.stk, u8,stk, ..., c128.stk: the specific libraries
+#   (srfi 160 s8), and so on. They have thin wrappers over
+#   procedures defined in base.c
+#
+# - ../160.stk (in the directory above this one): the non-standard
+#   (srfi 160) library. It is useful for the tests.
+#
+# the s8.stk, etc files are generated (with sed) from the file
+# tagvector-template.stk.
+SRC_STK = base.stk \
+          tagvector-template.stk
 
-SRC_OSTK = 1.ostk   \
-            2.ostk   \
-            4.ostk   \
-            5.ostk   \
-            6.ostk   \
-            7.ostk   \
-            8.ostk   \
-            9.ostk   \
-            10.ostk  \
-            11.ostk  \
-            13.ostk  \
-            14.ostk  \
-            15.ostk  \
-            16.ostk  \
-            17.ostk  \
-            18.ostk  \
-            22.ostk  \
-            23.ostk  \
-            26.ostk  \
-            28.ostk  \
-            29.ostk  \
-            31.ostk  \
-            34.ostk  \
-            35.ostk  \
-            36.ostk  \
-            37.ostk  \
-            38.ostk  \
-            39.ostk  \
-            41.ostk  \
-            45.ostk  \
-            48.ostk  \
-            51.ostk  \
-            54.ostk  \
-            55.ostk  \
-            59.ostk  \
-            60.ostk  \
-            61.ostk  \
-            62.ostk  \
-            64.ostk  \
-            66.ostk  \
-            69.ostk  \
-            70.ostk  \
-            74.ostk  \
-            87.ostk  \
-            88.ostk  \
-            89.ostk  \
-            94.ostk  \
-            95.ostk  \
-            96.ostk  \
-            100.ostk \
-            111.ostk \
-            117.ostk \
-            118.ostk \
-            113.ostk \
-            127.ostk \
-            128.ostk \
-            129.ostk \
-            130.ostk \
-            134.ostk \
-            135.ostk \
-            137.ostk \
-            141.ostk \
-            143.ostk \
-            151.ostk \
-            152.ostk \
-            154.ostk \
-            156.ostk \
-            158.ostk \
-            160.ostk \
-            161.ostk \
-            169.ostk \
-            171.ostk \
-            173.ostk \
-            174.ostk \
-            176.ostk \
-            180.ostk \
-            185.ostk \
-            189.ostk \
-            190.ostk \
-            193.ostk \
-            195.ostk \
-            196.ostk \
-            207.ostk \
-            208.ostk \
-            214.ostk \
-            215.ostk \
-            216.ostk \
-            217.ostk \
-            219.ostk \
-            221.ostk \
-            223.ostk \
-            224.ostk \
-            229.ostk \
-            230.ostk
+SRC_OSTK = base.ostk \
+           s8.ostk \
+           u8.ostk \
+           s16.ostk \
+           u16.ostk \
+           s32.ostk \
+           u32.ostk \
+           s64.ostk \
+           u64.ostk \
+           f32.ostk \
+           f64.ostk \
+           c64.ostk \
+           c128.ostk
 
-
-#
-# SRFIs written in C and Scheme
-#
-SRC_C = 25.c     27.c     116.c     132.c     133.c      144.c      170.c      175.c
-SRC_C_STK = 25.stk   27.stk   116.stk   132.stk   133.stk    144.stk    170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 116.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
+SRC_C = base.c
+SRC_C_STK = base.stk
+SRC_SHOBJ = base.$(SO)
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
-DOCDB = ../DOCDB
-BASEDIR = ../..
+srfi_interm = s8.stk u8.stk s16.stk u16.stk \
+	      s32.stk u32.stk s64.stk u64.stk \
+	      f32.stk f64.stk c64.stk c128.stk
+
+DOCDB = ../../DOCDB
+BASEDIR = ../../..
 SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
-srfilibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfidir = $(prefix)/share/@PACKAGE@/@VERSION@/srfi/160
+srfilibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi/160
 srfi_DATA = $(SRC_OSTK)
 srfilib_DATA = $(SRC_SHOBJ)
 srfi_sources = $(SRC_STK)
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
-
-#======================================================================
-# CLEAN
-#
-# SUBDIRS_SRFIS is the list of subdirectories, *excluding* this
-# one (so we don't enter an infinite loop).
-SUBCLEAN = $(addsuffix .clean,$(SUBDIRS_SRFIS) )
-SUBDISTCLEAN = $(addsuffix .distclean,$(SUBDIRS_SRFIS) )
-all: all-recursive
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .stk .ostk .stk -incl.c .$(SO) .c
@@ -631,9 +408,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu lib/srfi/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu lib/srfi/160/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu lib/srfi/Makefile
+	  $(AUTOMAKE) --gnu lib/srfi/160/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -694,61 +471,14 @@ uninstall-srfilibDATA:
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(srfilibdir)'; $(am__uninstall_files_from_dir)
 
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run 'make' without going through this Makefile.
-# To change the values of 'make' variables: instead of editing Makefiles,
-# (1) if the variable is set in 'config.status', edit 'config.status'
-#     (which will cause the Makefiles to be regenerated when you run 'make');
-# (2) otherwise, pass the desired values on the 'make' command line.
-$(am__recursive_targets):
-	@fail=; \
-	if $(am__make_keepgoing); then \
-	  failcom='fail=yes'; \
-	else \
-	  failcom='exit 1'; \
-	fi; \
-	dot_seen=no; \
-	target=`echo $@ | sed s/-recursive//`; \
-	case "$@" in \
-	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
-	  *) list='$(SUBDIRS)' ;; \
-	esac; \
-	for subdir in $$list; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done; \
-	if test "$$dot_seen" = "no"; then \
-	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
-	fi; test -z "$$fail"
-
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
-tags: tags-recursive
+tags: tags-am
 TAGS: tags
 
 tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	set x; \
 	here=`pwd`; \
-	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
-	  include_option=--etags-include; \
-	  empty_fix=.; \
-	else \
-	  include_option=--include; \
-	  empty_fix=; \
-	fi; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
-	  fi; \
-	done; \
 	$(am__define_uniq_tagged_files); \
 	shift; \
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
@@ -761,7 +491,7 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	      $$unique; \
 	  fi; \
 	fi
-ctags: ctags-recursive
+ctags: ctags-am
 
 CTAGS: ctags
 ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
@@ -774,7 +504,7 @@ GTAGS:
 	here=`$(am__cd) $(top_builddir) && pwd` \
 	  && $(am__cd) $(top_srcdir) \
 	  && gtags -i $(GTAGS_ARGS) "$$here"
-cscopelist: cscopelist-recursive
+cscopelist: cscopelist-am
 
 cscopelist-am: $(am__tagged_files)
 	list='$(am__tagged_files)'; \
@@ -825,48 +555,22 @@ distdir-am: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    $(am__make_dryrun) \
-	      || test -d "$(distdir)/$$subdir" \
-	      || $(MKDIR_P) "$(distdir)/$$subdir" \
-	      || exit 1; \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
-		am__remove_distdir=: \
-		am__skip_length_check=: \
-		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
-	  fi; \
-	done
 check-am: all-am
-check: check-recursive
+check: check-am
 all-am: Makefile $(DATA)
-installdirs: installdirs-recursive
-installdirs-am:
+installdirs:
 	for dir in "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-recursive
-install-exec: install-exec-recursive
-install-data: install-data-recursive
-uninstall: uninstall-recursive
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-recursive
+installcheck: installcheck-am
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -892,86 +596,98 @@ clean-am: clean-generic mostlyclean-am
 
 distclean-am: clean-am distclean-generic distclean-tags
 
-dvi: dvi-recursive
+dvi: dvi-am
 
 dvi-am:
 
-html: html-recursive
+html: html-am
 
 html-am:
 
-info: info-recursive
+info: info-am
 
 info-am:
 
 install-data-am: install-srfiDATA install-srfilibDATA
 
-install-dvi: install-dvi-recursive
+install-dvi: install-dvi-am
 
 install-dvi-am:
 
 install-exec-am:
 
-install-html: install-html-recursive
+install-html: install-html-am
 
 install-html-am:
 
-install-info: install-info-recursive
+install-info: install-info-am
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-recursive
+install-pdf: install-pdf-am
 
 install-pdf-am:
 
-install-ps: install-ps-recursive
+install-ps: install-ps-am
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-recursive
+maintainer-clean: maintainer-clean-am
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-recursive
+mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-generic
 
-pdf: pdf-recursive
+pdf: pdf-am
 
 pdf-am:
 
-ps: ps-recursive
+ps: ps-am
 
 ps-am:
 
 uninstall-am: uninstall-srfiDATA uninstall-srfilibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
-.MAKE: $(am__recursive_targets) install-am install-strip uninstall-am
+.MAKE: install-am install-strip uninstall-am
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
-	check-am clean clean-generic cscopelist-am ctags ctags-am \
-	distclean distclean-generic distclean-tags distdir dvi dvi-am \
-	html html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-srfiDATA install-srfilibDATA \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
-	tags-am uninstall uninstall-am uninstall-hook \
-	uninstall-srfiDATA uninstall-srfilibDATA
+.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
+	cscopelist-am ctags ctags-am distclean distclean-generic \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-srfiDATA install-srfilibDATA install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook uninstall-srfiDATA uninstall-srfilibDATA
 
 .PRECIOUS: Makefile
 
 
-COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../../src/stklos
+COMP ?= ../../../utils/tmpcomp
+STKLOS_BINARY ?= ../../../src/stklos
+
+# The procedures defined are exactly the same for all data types,
+# only the type changes. So we generate them from a template.
+#
+# We use a multiple-target rule, which calls sed to change the
+# string "TAG" in the template into s8, u8, etc, writing it to
+# a new file "s8.stk", "u8.stk" etc.
+s8.stk  u8.stk  s16.stk u16.stk \
+s32.stk u32.stk s64.stk u64.stk \
+f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.so
+	sed 's/TAG/$(basename $@)/g'   tagvector-template.stk > $@
+
+#======================================================================
 
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
@@ -980,78 +696,36 @@ STKLOS_BINARY ?= ../../src/stklos
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 #======================================================================
 # Dependencies
-DEPEND_1:  51.ostk 134.ostk 171.ostk 189.ostk 196.ostk 207.ostk
-DEPEND_9:  37.ostk  64.ostk 113.ostk 117.ostk 128.ostk 134.ostk 135.ostk 154.ostk \
-	      161.ostk 171.ostk 173.ostk 180.ostk 189.ostk 196.ostk 207.ostk 230.ostk
 
-$(DEPEND_1): 1.ostk
-$(DEPEND_9): 9.ostk
-13.ostk: 14.ostk
-37.ostk: 13.ostk
-41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
-74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
-94.ostk: 60.ostk
-95.ostk:  132.ostk 132.$(SO)
-113.ostk: 128.ostk
-130.ostk: 13.ostk
-133.ostk: ../stklos/itrie.so
-134.ostk: 158.ostk
-135.ostk: 129.ostk
-152.ostk: 130.ostk
-160.ostk: 160
-190.ostk: 158.ostk
-216.ostk: 27.$(SO)
-217.ostk: ../stklos/itrie.so
-221.ostk: 41.ostk 158.ostk
-
-25.$(SO):  25-incl.c  25.c
-27.$(SO):  27-incl.c  27.c
-116.$(SO): 128.ostk 116-incl.c 116.c
-132.$(SO): 132-incl.c 132.c
-133.$(SO): 133-incl.c 133.c
-144.$(SO): 144-incl.c 144.c
-170.$(SO): 170-incl.c 170.c
-175.$(SO): 175-incl.c 175.c
+base.$(SO): base-incl.c base.c
 
 #======================================================================
 
 install-sources:
 	install $(srfi_sources) $(srfidir)
-.PHONY: clean distclean $(SUBCLEAN) $(SUBDISTCLEAN)
 
-### CLEAN
-# How to clean each subdir:
-$(SUBCLEAN): %.clean:
-	$(MAKE) -C $* clean
+# we also clean the TAG.stk files -- $(srfi-interm) --, which are NOT
+# srfi_OBJS (should not be installed with other objects):
+clean:
+	rm -f $(srfi_OBJS) *-incl.c *~ $(srfi_interm)
 
-# To clean this one, first clean the subdirs, then execute
-# our clean rule:
-clean: $(SUBCLEAN)
-	rm -f $(srfi_OBJS) *-incl.c *~
-
-### DISTCLEAN
-# How to clean each subdir:
-$(SUBDISTCLEAN): %.distclean:
-	$(MAKE) -C $* distclean
-
-distclean: $(SUBDISTCLEAN) clean
+distclean: clean
 	/bin/rm -f Makefile
-
-#======================================================================
 
 uninstall-hook:
 	(cd $(srfidir); rm -f $(srfi_sources))
 	rmdir $(srfidir) || true
 
-doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+# no docs...
+# doc:
+# 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+# 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

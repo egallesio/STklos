@@ -23,6 +23,19 @@
 
 #-======================================================================
 
+# We have SUBDIRS_SRFIS and SUBDIRS.
+#
+# SUBDIRS_SRFIS must *not* include the current directory,
+# otherwise the clean target enters an infinite loop.
+# But SUBDIRS *does* need to include the current directory.
+# We can control the build order in the SUBDIRS variable.
+#
+# NOTE: 160.ostk needs the sublibraries to be built first.
+#
+SUBDIRS_SRFIS = 160
+# Build this directory before others:
+SUBDIRS = $(SUBDIRS_SRFIS) .
+
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
@@ -99,6 +112,7 @@ SRC_STK   = 1.stk   \
             154.stk \
             156.stk \
             158.stk \
+            160.stk \
             161.stk \
             169.stk \
             171.stk \
@@ -193,6 +207,7 @@ SRC_OSTK =  1.ostk   \
             154.ostk \
             156.ostk \
             158.ostk \
+            160.ostk \
             161.ostk \
             169.ostk \
             171.ostk \
@@ -273,6 +288,7 @@ $(DEPEND_9): 9.ostk
 134.ostk: 158.ostk
 135.ostk: 129.ostk
 152.ostk: 130.ostk
+160.ostk: 160
 190.ostk: 158.ostk
 216.ostk: 27.$(SO)
 217.ostk: ../stklos/itrie.so
@@ -288,18 +304,39 @@ $(DEPEND_9): 9.ostk
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
 
-
-
 #======================================================================
 
 install-sources:
 	install $(srfi_sources) $(srfidir)
 
-clean:
+#======================================================================
+# CLEAN
+#
+# SUBDIRS_SRFIS is the list of subdirectories, *excluding* this
+# one (so we don't enter an infinite loop).
+SUBCLEAN = $(addsuffix .clean,$(SUBDIRS_SRFIS) )
+SUBDISTCLEAN = $(addsuffix .distclean,$(SUBDIRS_SRFIS) )
+.PHONY: clean distclean $(SUBCLEAN) $(SUBDISTCLEAN)
+
+### CLEAN
+# How to clean each subdir:
+$(SUBCLEAN): %.clean:
+	$(MAKE) -C $* clean
+
+# To clean this one, first clean the subdirs, then execute
+# our clean rule:
+clean: $(SUBCLEAN)
 	rm -f $(srfi_OBJS) *-incl.c *~
 
-distclean: clean
+### DISTCLEAN
+# How to clean each subdir:
+$(SUBDISTCLEAN): %.distclean:
+	$(MAKE) -C $* distclean
+
+distclean: $(SUBDISTCLEAN) clean
 	/bin/rm -f Makefile
+
+#======================================================================
 
 uninstall-hook:
 	(cd $(srfidir); rm -f $(srfi_sources))
