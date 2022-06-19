@@ -326,7 +326,7 @@ static SCM makeuvect(int type, int len, SCM init)
     case UVECT_F32:                 size = 4;           break;
     case UVECT_F64:                 size = 8;           break;
   }
-  NEWCELL_WITH_LEN(z, uvector, sizeof(struct vector_obj) + size*len - 1);
+  NEWCELL_WITH_LEN(z, uvector, sizeof(struct uvector_obj) + size*len - 1);
   UVECTOR_TYPE(z) = type;
   UVECTOR_SIZE(z) = len;
 
