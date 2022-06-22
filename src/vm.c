@@ -675,8 +675,16 @@ SCM STk_values2vector(SCM obj, SCM vect)
 
   if (vect) {
     /* User has provided a vector for storing result */
-    if (!VECTORP(vect) || VECTOR_SIZE(vect) != len)
-      STk_error("bad vector ~S", vect);
+
+    /* "not a vector" is an error on the C side of things;
+       a wrong number of values could be triggered by
+       errors in C or on the Scheme side... We'll give
+       a clear message in this case (expected and given
+       number of values). */
+    if (!VECTORP(vect))
+	STk_error("bad vector ~S", vect);
+    if (VECTOR_SIZE(vect) != len)
+	STk_error("expected ~S values, but ~S were given", VECTOR_SIZE(vect), len);
     retval = vect;
   } else {
     /* Allocate a new vector for result */
