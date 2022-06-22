@@ -414,3 +414,27 @@
 (test "@vector-gen 3" 4 (g))
 (test "@vector-gen 4" 5 (g))
 (test-assert "@vector-gen eof" (eof-object? (g)))
+
+
+;;;
+;;; EXTRA tests -- jpellegrini
+;;;
+
+(define v (c128vector 0.0 (sqrt 1.0) (sqrt -1.0) 2-2i))
+
+(test/error "wrong element.1" (s8vector 1000))
+(test/error "wrong element.2" (f64vector 1.0-1i))
+(test/error "wrong element.2" (s64vector 1.0))
+(test/error "wrong procedure.1" (c128vector-map 1 v))
+(test/error "wrong procedure.2" (c128vector-map (lambda (a b) (* a b)) v))
+(test/error "wrong procedure.3" (c128vector-unfold (lambda (a b) 1.0) 3 1.0))
+(test/error "wrong procedure.4" (c128vector-filter 1 v))
+(test/error "wrong seed"        (c128vector-unfold (lambda (a b) (values b 1.0)) 3 1))
+
+(test/error "wrong index.1" (c128swap! v 1 5))
+(test/error "wrong index.2" (c128swap! v -1 2))
+(test/error "wrong index.3" (c128fill! v 1 -1 2))
+(test/error "wrong index.4" (c128fill! v 1 0 5))
+(test/error "wrong value"   (c128fill! v 1 0 4))
+(test/error "wrong vector"  (c64swap! v 1 2))
+(test/error "wrong vector"  (c64fill! v 1.0))
