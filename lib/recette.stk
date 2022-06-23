@@ -29,7 +29,7 @@
 (define-module recette
   (import SCHEME)
   (export
-      run-tests recette-add-test! define-test))
+      run-tests recette-add-test! define-test)
 
 
 (define *tests* '())
