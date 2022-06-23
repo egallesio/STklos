@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 20-May-2022 19:55 (eg)
+ * Last file update: 23-Jun-2022 09:02 (eg)
  */
 
 
@@ -1384,9 +1384,10 @@ extern int STk_uvectors_allowed;
 int STk_uniform_vector_tag(char *s);
 int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
+SCM STk_uvector_get(SCM v, long i);
 int STk_init_uniform_vector(void);
 
-  SCM STk_make_C_bytevector(int len);
+SCM STk_make_C_bytevector(int len);
 SCM STk_make_bytevector_from_C_string(char *str, long len);
 
 

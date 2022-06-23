@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 19-May-2022 17:06 (eg)
+ * Last file update: 23-Jun-2022 09:22 (eg)
  */
 
 #include "stklos.h"
@@ -138,6 +138,11 @@ static unsigned long sxhash(SCM obj)
                         for (i=VECTOR_SIZE(obj)-1; i >= 0; i--)
                           h = HASH_WORD(h, sxhash(VECTOR_DATA(obj)[i]));
                         return h;
+    case tc_uvector:    h = UVECTOR_TYPE(obj);     /* start with some "entropy" */
+                        for (long i=UVECTOR_SIZE(obj)-1; i >= 0; i--)
+                          h = HASH_WORD(h, sxhash(STk_uvector_get(obj, i)));
+                        return h;
+
     default:            /* A complex type (STklos object, user defined type,
                          * hashtable...). In this case we return the type of the
                          * object. This is very inefficient, but it should be

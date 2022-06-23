@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 23-Jun-2022 09:09 (eg)
+ * Last file update: 23-Jun-2022 09:13 (eg)
  */
 
 #include "stklos.h"
@@ -299,6 +299,10 @@ static SCM uvector_ref(SCM v, long i)
   return STk_void; /* never reached */
 }
 
+SCM STk_uvector_get(SCM v, long i)      /* public version of uvector_ref */
+{
+  return uvector_ref(v, i);
+}
 
 /*
  *
