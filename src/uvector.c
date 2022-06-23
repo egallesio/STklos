@@ -355,6 +355,12 @@ static void uvector_set(SCM v, long i, SCM value)
             value, type_vector(UVECTOR_TYPE(v)));
 }
 
+
+void STk_uvector_put(SCM v, long i, SCM value) /* public version of uvector_set */
+{
+    uvector_set(v, i, value);
+}
+
 static SCM uvector_ref(SCM v, long i)
 {
   switch (UVECTOR_TYPE(v)) {

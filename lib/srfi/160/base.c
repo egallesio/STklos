@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 17-Jun-2022 09:10
- * Last file update: 20-Jun-2022 10:17 (jpellegrini)
+ * Last file update: 23-Jun-2022 07:26 (jpellegrini)
  */
 
 #include <float.h>
@@ -42,8 +42,6 @@ extern SCM get_s64_min();
 extern SCM get_s64_max();
 extern SCM makeuvect(int type, int len, SCM init);
 extern int vector_element_size(int type);
-extern void uvector_set(int _UNUSED(type), SCM v, long i, SCM value);
-extern SCM uvector_ref(int _UNUSED(type), SCM v, long i);
     
 EXTERN_PRIMITIVE("list?", listp, subr1, (SCM x));
 EXTERN_PRIMITIVE("length", list_length, subr1, (SCM l));
@@ -155,7 +153,13 @@ resize_uvector(SCM w, long len, int stride) {
   This runs in around 600ms with memcpy, and 1400ms with
   the C API.
 
-  Vector-fill! becomes even faster.
+  Vector-fill! becomes even faster, since using STk_uvector_put
+  would check the type of the same element 6000000 times (goes
+  from 1800ms to 31ms !
+
+  CAUTION: we use memcpy and not memmove here because it's the
+  most commonly needed case in the code, but remember that if
+  the chunks overlap, memmove should be used.
 */
 
 #define UVECTOR_GET(dstaddr,v,i,stride) do{                       \
@@ -180,17 +184,20 @@ STk_uvector_copy_contents(int type,
 			  SCM to, long to_start, long to_end,
 			  SCM from, long from_start, long from_end,
 			  SCM reverse, long stride) {
-    if (to == from &&
+    if (reverse == STk_true &&
+	to == from &&
 	(from_end >= to_start ||
 	 to_end <= from_start ||
 	 (from_end == to_end && from_start == to_start))) {
-	/* THE CHUNKS OVERLAP *_AND_* the SRFI spec requires us to
+	/* THE CHUNKS OVERLAP *_AND_* WE SHOULD REVERSE!
+	   The SRFI spec requires us to
 	   do as if we had copied the vector before proceeding, so...
 	   We do copy it! (Calling -copy! or -reverse-copy! with
 	   overlapping chunks shouldn't be common, and not good
 	   practice in my opinion, so even if there is some small
 	   room for improvement, let's do the simpler thing here. */
 	SCM new = makeuvect(type, from_end - from_start, NULL);
+	/* Copying a whole bunch, so not using UVECTOR_COPY_ELT */
 	memcpy(UVECTOR_DATA(new),
 	       &UVECTOR_DATA(from)[from_start * stride],
 	       stride * UVECTOR_SIZE(new));
@@ -199,20 +206,23 @@ STk_uvector_copy_contents(int type,
 					 new, 0, UVECTOR_SIZE(new),
 					 reverse, stride);
     }
-    
+
     if (reverse == STk_true) {
+	/* Guaranteed to not overlap (see above), so we can
+	   use memcpy. */
 	from_end -= 1;
 	while (from_end >= from_start) {
-	    memcpy(&UVECTOR_DATA(to)[to_start * stride],
-		   &UVECTOR_DATA(from)[from_end * stride],
-		   stride);
+	    UVECTOR_COPY_ELT(to, to_start, from, from_end, stride);
 	    to_start += 1;
 	    from_end -= 1;
 	}
     } else {
-	memcpy(&UVECTOR_DATA(to)[to_start * stride],
-	       &UVECTOR_DATA(from)[from_start * stride],
-	       stride * (from_end - from_start));
+	/* - May overlap, need to use memmove
+	   - Copying a whole bunch
+	   So not using UVECTOR_COPY_ELT... */
+	memmove(&UVECTOR_DATA(to)[to_start * stride],
+		&UVECTOR_DATA(from)[from_start * stride],
+		stride * (from_end - from_start));
     }
     return to;
 }
@@ -351,6 +361,8 @@ DEFINE_PRIMITIVE("%uvector-unfold", uvector_unfold, vsubr, (int argc, SCM *argv)
 	? vec
 	: makeuvect(INT_VAL(type), end, NULL);
 
+    long stride = vector_element_size(UVECTOR_TYPE(to));
+
     /* the srfi says that f will return two VALUES, so we need a vector to
        hold them... */
     SCM res = STk_makevect(2, NULL);
@@ -367,28 +379,12 @@ DEFINE_PRIMITIVE("%uvector-unfold", uvector_unfold, vsubr, (int argc, SCM *argv)
     for (long i = 0;
 	 i < end - start;
 	 i++, idx += step) {
-	/* FIXME: we mark both values as #f, so we can tell if the procedure
-                  really returned at least two values (if we use NULL, then
-		  STklos would crash).
 
-	   HOWEVER:
-           ========
-
-	   1. if the procedure doesn't return two values, we'll get
-              a not useful error:
-	   
-              stklos> (c128vector-unfold (lambda (x y) 1-1i) 3 0.0+0.0i)
-              **** Error:
-              %uvector-unfold: bad vector `#(#f #f)'
-
-	   2. An error is also signaled if there are too many values.
-	      (Although Chicken, Gauche and Sagittarius also do this)
-	*/
 	VECTOR_DATA(res)[0] = STk_false;
 	VECTOR_DATA(res)[1] = STk_false;
 	STk_values2vector ( STk_C_apply(f,2,MAKE_INT(idx),seed),
 			    res );
-	uvector_set(INT_VAL(type), to, idx, VECTOR_DATA(res)[0]);
+        STk_uvector_put(to, idx, VECTOR_DATA(res)[0]);
 	seed = VECTOR_DATA(res)[1];
     }
     return to;
@@ -774,8 +770,10 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
 	SCM vecs_ptr = vecs;
 	for (int j=0; j<arity; j++) {
 	    res = CAR(vecs_ptr);
-	    CAR(&args[j]) = uvector_ref(type, res, idx); /* idx-th element of current vector */
-	    vecs_ptr = CDR(vecs_ptr);                    /* next vector */
+	    /* Using uvector_get here, because our UVECTOR_GET
+	       macro didn't work in this case... */
+	    CAR(&args[j]) = STk_uvector_get(res, idx); /* idx-th element of current vector */
+	    vecs_ptr = CDR(vecs_ptr);                  /* next vector */
 	}
 
 	/* FIXME: we wouldn't need to CONS here, but it's just one cell... */
@@ -787,7 +785,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
 	/* NO case for FOR_EACH, since nothing should be done anyway! */
 	switch (op) {
 	case MAP:
-	    uvector_set(type, w, idx, res);
+	    STk_uvector_put(w, idx, res);
 	    break;
 	case ANY:
 	    if (res != STk_false) return res;
@@ -809,21 +807,16 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
 	    break;
 	case CUMULATE:
 	    seed = res;
-	    uvector_set(type, w, idx, seed);
+	    STk_uvector_put(w, idx, seed);
 	    break;
 
-       /* Two remarks:
-
-          - In the following cases there is only ONE uvector
-            being traversed, CAR(vecs), so we can access it
-            directly.
-
-
-       */
+       /* In the following cases there is only ONE uvector
+          being traversed, CAR(vecs), so we can access it
+          directly. */
 	case FILTER:
 	    if (res != STk_false) {
                 /* Slow:
-                   uvector_set(type, w, left_idx,
+                   uvector_put(w, left_idx,
                                uvector_ref(type, CAR(vecs), idx)); */
                 /* Fast: */
                 UVECTOR_COPY_ELT(w, left_idx, CAR(vecs), idx, stride);
@@ -863,15 +856,13 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
     case FILTER:    return resize_uvector(w, left_idx, stride);
     case PARTITION:
 	/* need to reverse the second part of the vector... */
-	SCM tmp;
+	char buf[16];
 	long max = UVECTOR_SIZE(w);
 	right_idx++;
 	for (long i=0; i < (max - right_idx)/2; i++) {
-	    tmp = uvector_ref(-1, w,right_idx + i);
-            
-	    uvector_set(-1, w, right_idx + i, uvector_ref(-1, w,max - i - 1));
-	    uvector_set(-1, w, max - i - 1, tmp);
-            
+	    UVECTOR_GET(&buf[0], w,right_idx +i, stride);
+	    UVECTOR_COPY_ELT(w, right_idx + i, w, max -i -1, stride);
+	    UVECTOR_SET(w,max - i - 1, &buf[0], stride);
 	}
 	return w;	
     case REMOVE:    return resize_uvector(w, left_idx, stride);
@@ -981,16 +972,16 @@ DEFINE_PRIMITIVE("%uvector-fill!", uvector_fill, vsubr, (int argc, SCM *argv))
 
   int stride = vector_element_size(UVECTOR_TYPE(vec));
 
-  /* Call uvector_set ONCE only, then use UVECTOR_COPY_ELT
+  /* Call STk_uvector_put ONCE only, then use UVECTOR_COPY_ELT
      to copy the first element onto the rest of the vector.
      This makes filling incredibly faster!
 
      Bonus:
      
-     - uvector_set will also check the fill argument and
+     - STk_uvector_put will also check the fill argument and
        the vector type for us!  */
   
-  uvector_set(-1, vec, start, fill);
+  STk_uvector_put(vec, start, fill);
   for (long i=start+1; i<end; i++)
       UVECTOR_COPY_ELT(vec,i,
 		       vec,start,

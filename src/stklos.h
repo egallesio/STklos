@@ -1387,6 +1387,7 @@ int STk_uniform_vector_tag(char *s);
 int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 SCM STk_uvector_get(SCM v, long i);
+void STk_uvector_put(SCM v, long i, SCM value);
 int STk_init_uniform_vector(void);
 
 SCM STk_make_C_bytevector(int len);
