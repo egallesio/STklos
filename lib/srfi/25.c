@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 12-Jan-2022 16:40 (eg)
+ * Last file update: 23-Jun-2022 18:29 (eg)
  */
 
 #include "stklos.h"
@@ -1033,7 +1033,7 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
 {
     if (!ARRAYP(old_array)) STk_error("bad array ~S", old_array);
     if (STk_srfi_25_shapep(new_shape)==STk_false) STk_error("bad arrayp ~S", new_shape);
-    if (!STk_procedurep(proc)) STk_error("bad procedure ~S", proc);
+    if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
 
     int p = ARRAY_LENGTH(new_shape)/2; /* rank of new */
     int q = ARRAY_RANK(old_array);     /* rank of old */
