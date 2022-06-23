@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 10-Apr-2021 18:47 (eg)
+ * Last file update: 23-Jun-2022 09:13 (eg)
  */
 
 #include <float.h>
@@ -228,7 +228,7 @@ EXTERN_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z));
  * Basic accessors to a uniform vector
  *
  */
-void uvector_set(int _UNUSED(type), SCM v, long i, SCM value)
+static void uvector_set(SCM v, long i, SCM value)
 {
   long vali;
   int overflow;
@@ -355,7 +355,7 @@ void uvector_set(int _UNUSED(type), SCM v, long i, SCM value)
             value, type_vector(UVECTOR_TYPE(v)));
 }
 
-SCM uvector_ref(int _UNUSED(type), SCM v, long i)
+static SCM uvector_ref(SCM v, long i)
 {
   switch (UVECTOR_TYPE(v)) {
     case UVECT_S8: return MAKE_INT(((char *) UVECTOR_DATA(v))[i]);
@@ -401,6 +401,10 @@ SCM uvector_ref(int _UNUSED(type), SCM v, long i)
   return STk_void; /* never reached */
 }
 
+SCM STk_uvector_get(SCM v, long i)      /* public version of uvector_ref */
+{
+  return uvector_ref(v, i);
+}
 
 /*
  *
@@ -436,7 +440,7 @@ SCM makeuvect(int type, int len, SCM init)
 
   if (init) {
     for(i=0; i < len; i++)
-      uvector_set(type, z, i, init);
+      uvector_set(z, i, init);
   }
   return z;
 }
@@ -450,7 +454,7 @@ SCM STk_list2uvector(int type, SCM l)
 
   z = makeuvect(type, len, (SCM) NULL);
   for (i = 0; i < len; i++) {
-    uvector_set(type, z, i, CAR(l));
+    uvector_set(z, i, CAR(l));
     l = CDR(l);
   }
   return z;
@@ -509,7 +513,7 @@ DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr3, (SCM type, SCM v, SCM index
   if (tip < UVECT_S8 || tip > UVECT_C128)        error_bad_uniform_type(type);
   if (i < 0 || i >= UVECTOR_SIZE(v))             error_bad_index(index);
 
-  return uvector_ref(tip, v, i);
+  return uvector_ref(v, i);
 }
 
 DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr4,
@@ -523,7 +527,7 @@ DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr4,
   if (BOXED_INFO(v) & VECTOR_CONST)             error_change_const_vector(v);
   if (i < 0 || i >= UVECTOR_SIZE(v))            error_bad_index(index);
 
-  uvector_set(tip, v, i, value);
+  uvector_set(v, i, value);
   return STk_void;
 }
 
@@ -540,9 +544,9 @@ DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr2, (SCM type, SCM v))
   if (!len) return STk_nil;
 
   /* len > 0. Build the fist cell and iterate */
-  tmp = z = STk_cons(uvector_ref(tip, v, 0), STk_nil);
+  tmp = z = STk_cons(uvector_ref(v, 0), STk_nil);
   for (i=1; i<len; i++) {
-    tmp = CDR(tmp) = STk_cons(uvector_ref(tip, v, i), STk_nil);
+    tmp = CDR(tmp) = STk_cons(uvector_ref(v, i), STk_nil);
   }
   return z;
 }
@@ -583,11 +587,10 @@ static void print_uvector(SCM vect, SCM port, int mode)
 {
   int i;
   int n = UVECTOR_SIZE(vect);
-  int t = UVECTOR_TYPE(vect);
 
   STk_fprintf(port, "#%s(", type_vector(UVECTOR_TYPE(vect)));
   for (i = 0; i < n; i++) {
-    STk_print(uvector_ref(t, vect, i), port, mode);
+    STk_print(uvector_ref(vect, i), port, mode);
     if (i < n - 1) STk_putc(' ', port);
   }
   STk_putc(')', port);
