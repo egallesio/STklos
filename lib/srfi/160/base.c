@@ -115,7 +115,7 @@ void check_type(SCM v, int type) {
 
 static inline
 void check_procedure(SCM proc) {
-    if (! (STk_procedurep(proc) ))
+    if ( (STk_procedurep(proc) == STk_false ))
 	STk_error("bad procedure ~S", proc);
 }
 
