@@ -684,7 +684,8 @@ SCM STk_values2vector(SCM obj, SCM vect)
     if (!VECTORP(vect))
 	STk_error("bad vector ~S", vect);
     if (VECTOR_SIZE(vect) != len)
-	STk_error("expected ~S values, but ~S were given", VECTOR_SIZE(vect), len);
+	STk_error("expected %d values, but %d were given",
+		  VECTOR_SIZE(vect), len);
     retval = vect;
   } else {
     /* Allocate a new vector for result */
