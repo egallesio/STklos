@@ -1308,7 +1308,7 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
     SCM proc  = *argv;
 
     if (!ARRAYP(shape))  STk_error("shape ~S is not an array", shape);
-    if (!CLOSUREP(proc)) STk_error("bad procedure ~S", proc);
+    if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
 
     long * cshape = shapetoCshape(shape);
 
@@ -1388,10 +1388,11 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
         /***************/
         /** ARGS CASE **/
         /***************/
-        if (rank != CLOSURE_ARITY(proc) && CLOSURE_ARITY(proc) >=0)
-            STk_error("length of shape (~S) is different fromm procedure arity (~S)",
-                      MAKE_INT(rank),
-                      MAKE_INT(CLOSURE_ARITY(proc)));
+        if (rank != INT_VAL(STk_proc_arity(proc)) &&
+	    0    <= INT_VAL(STk_proc_arity(proc)))
+            STk_error("length of shape (%d) is different fromm procedure arity (~S)",
+                      rank,
+                      STk_proc_arity(proc));
 
         SCM idx = STk_makevect(rank,NULL);
 
