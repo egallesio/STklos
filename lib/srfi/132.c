@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 08-Aug-2021 13:40
- * Last file update: 24-Jun-2022 12:10 (eg)
+ * Last file update: 24-Jun-2022 14:55 (eg)
  */
 
 #include <stklos.h>
@@ -404,14 +404,14 @@ void vector_merge_aux(SCM pred, SCM to, SCM v1, SCM v2,
 
     /* when there are elements left in one of the chunks, copy them */
      if (cstart1 < cend1) {
-        memcpy(&VECTOR_DATA(to)[i],
-               &VECTOR_DATA(v1)[cstart1],
-               (cend1-cstart1) * sizeof(SCM));
+        memmove(&VECTOR_DATA(to)[i],
+                &VECTOR_DATA(v1)[cstart1],
+                (cend1-cstart1) * sizeof(SCM));
      }
      if (cstart2 < cend2) {
-         memcpy(&VECTOR_DATA(to)[i],
-                &VECTOR_DATA(v2)[cstart2],
-                (cend2-cstart2) * sizeof(SCM));
+         memmove(&VECTOR_DATA(to)[i],
+                 &VECTOR_DATA(v2)[cstart2],
+                 (cend2-cstart2) * sizeof(SCM));
      }
 }
 
@@ -553,9 +553,9 @@ void merge(SCM v, SCM aux,
            long i
            )
 {
-    memcpy( VECTOR_DATA(aux),
-            &(VECTOR_DATA(v)[runs[i-2]]),
-            (runs[i-1] - runs[i-2])* sizeof(SCM));
+    memmove( VECTOR_DATA(aux),
+             &(VECTOR_DATA(v)[runs[i-2]]),
+             (runs[i-1] - runs[i-2])* sizeof(SCM));
 
     vector_merge_aux(less,
                      v,                        /* result is in v */
@@ -1028,7 +1028,7 @@ DEFINE_PRIMITIVE("vector-stable-sort",
 
     if (size == 0) return w;
 
-    memcpy(&VECTOR_DATA(w)[0],&VECTOR_DATA(v)[cstart], size * sizeof(SCM));
+    memmove(&VECTOR_DATA(w)[0],&VECTOR_DATA(v)[cstart], size * sizeof(SCM));
 
     /* TODO: we're unboxing-then-boxing-then-unboxing. */
     *(original_argv-1) = w;
@@ -1185,10 +1185,10 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
 
     SCM w = STk_makevect(cend - cstart, NULL);
 
-    memcpy (&VECTOR_DATA(w)[0],
+    memmove(&VECTOR_DATA(w)[0],
             &VECTOR_DATA(v)[cstart],
             (cend-cstart) * sizeof(SCM));
-
+    
     if (VECTOR_SIZE(v)<2) return w;
 
     long dups = srfi_132_vector_del_dups_aux(w, eq, 0, cend-cstart);
@@ -1196,7 +1196,7 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
     /* Oh no! We can't realoc VECTOR_DATA, so we need to make yet
        another copy of the vector! */
     SCM u = STk_makevect(VECTOR_SIZE(w) - dups, NULL);
-    memcpy (&VECTOR_DATA(u)[0],
+    memmove(&VECTOR_DATA(u)[0],
             &VECTOR_DATA(w)[0],
             VECTOR_SIZE(u) * sizeof(SCM));
     return u;
