@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 08-Aug-2021 13:40
- * Last file update: 19-May-2022 10:16 (eg)
+ * Last file update: 24-Jun-2022 12:10 (eg)
  */
 
 #include <stklos.h>
@@ -334,9 +334,9 @@ static long gallop(SCM pred, SCM to,
 
          /* copy the beginning of A, which only has elements lesser than
             all elements in B. */
-         memcpy( &VECTOR_DATA(to)[start],
-                 &VECTOR_DATA(a)[saved_starta],
-                 skipped * sizeof(SCM));
+         memmove( &VECTOR_DATA(to)[start],
+                  &VECTOR_DATA(a)[saved_starta],
+                  skipped * sizeof(SCM));
          return skipped;
      }
      return 0;
