@@ -1,0 +1,334 @@
+#!/bin/bash
+#
+# BASH TAB COMPLETION FOR STKLOS
+#
+# Copyright © 2022 Jerônimo Pellegrini <j_p@aleph0.info>
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+# USA.
+#
+#           Author: Jerônimo Pellegrini [j_p@aleph0.info]
+#    Creation date: 15-May-2022 18:21
+# Last file update: 16-May-2022 02:01 (jpellegrini)
+
+
+########################################################################
+###
+### INSTRUCTIONS
+###
+########################################################################
+
+#
+# Source this file to get tab completion for the STklos command in
+# Bash.
+#
+# For a permanent effect, either:
+#
+# - source this from your .bash_profile, or
+#
+# - put it in your users' local bash completion directory. In
+#   Debian this is $XDG_DATA_HOME/bash-completion/completions
+#   or
+#
+# - put it with the other bash completion files in your system --
+#   for example, in Debian and Debian-based systems, this will be
+#   /usr/share/bash-completion/completions/
+#
+# It is recommended that the completion script have the same name
+# as the command, so a good choice is to install the script under
+# the name 'stklos' and create a symbolic link from 'stklos-compile'
+# to 'stklos'
+#
+# -rw-r--r-- 1 root root 9380 May 16 10:35  stklos
+# lrwxrwxrwx 1 root root    6 May 16 10:37  stklos-compile -> stklos
+#
+
+
+########################################################################
+###
+### CODE STARTS HERE
+###
+########################################################################
+
+
+
+
+# This function removes from the command line the
+# options that were already typed before, so if the user
+# types --no- and asks for completion, it will get
+#
+#   --no-init-file --no-line-editor
+#
+# BUT if --no-line-editor was specified before, then
+# the user only gets
+#
+#   --no-init-file
+#
+# as option.
+#
+# This makes sense because STklos only accepts each option
+# once.
+#
+# TODO: also exclude options after the one being completed
+_exclude_duplicated_opts() {
+    local len=$(($COMP_CWORD - 1))
+    local i
+    for i in "${COMP_WORDS[@]:1:$len}" ; do
+         if [[ $i == --* ]]; then
+             opts=( "${opts[@]/$i}" )
+         fi
+    done
+}
+
+_maybe_add_spaces() {
+    # Options that do not end in '=' get an extra space appended.
+    # This is so completion for options with parameters will put the
+    # cursor right after the equal sign,
+    #
+    # --file=[]
+    #
+    # while completion of parameterless options put the cursor after
+    # a space:
+    #
+    # --debug []
+    #
+    for i in ${!opts[*]}; do
+        if [[ ${opts[$i]} != *= ]]; then
+            opts[$i]+=' '
+        fi
+    done
+}
+
+# This function is called when completion is requested with the cursor after
+# a hyphen. We complete with all options.
+_complete_after_hyphen() {
+    if [[ $word == -* ]]; then
+        _exclude_duplicated_opts
+        # exclude space from IFS, or it would remove the space from the
+        # completed option
+        local IFS=$'\t\n'
+        compopt -o nospace
+        COMPREPLY=($(compgen -W "${opts[*]}" -- "${word}"))
+        return 0
+    fi
+}
+
+
+########################################################################
+###
+### STKLOS
+###
+########################################################################
+
+_stklos() {
+    local opts=(--load= --file= --execute= --boot-file= --conf-dir= --prepend-load-path= --append-load-path= --no-init-file --interactive --no-line-editor --debug --stack-size= --case-sensitive --case-insensitive  --utf8-encoding= --version -V --help)
+
+    _maybe_add_spaces
+    
+    # Start with empty completion list
+    COMPREPLY=()
+    
+    # Our variables:
+    local cmd="${1##*/}"
+    local word=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+    local ante=${COMP_WORDS[COMP_CWORD-2]}
+
+    #
+    # SITUATIONS:
+    #
+    
+    # After a hyphen (complete with options)
+    _complete_after_hyphen
+
+    # Right after a short option, or a long option without parameters
+    case $prev in
+        -f|-l)
+            # Scheme files
+            compopt -o plusdirs
+            COMPREPLY=($(compgen -f -X "!(*.stk|*.scm)" -- "${word}"))
+            return 0
+            ;;
+        -D|-I|-A)
+            # directories
+            COMPREPLY=($(compgen -d -- "${word}"))
+            return 0
+            ;;
+        stklos|-q|--no-init-file|-d|--debug)
+            # Nothing follows these options
+            # (STklos does not take any parameters that are not
+            #  options prefixed by at least one hyphen)
+            return 0
+            ;;
+        -v|--version|-V|-h|--help|-e|-s|-c)
+            # nothing follows these options
+            return 0
+            ;;
+     esac
+
+    # Right after a long option, no chars for the parameter typed yet
+    if [ $word = "=" ]; then
+        case $prev in
+            --file | --load )
+                # Scheme files
+                compopt -o nospace
+                compopt -o plusdirs
+                COMPREPLY=($(compgen -f -X "!(*.stk|*.scm)"))
+                return 0
+                ;;
+            --conf-dir|--prepend-load-path|--append-load-path)
+                # directories
+                compopt -o nospace
+                COMPREPLY=($(compgen -d))
+                return 0
+                ;;
+            --utf8-encoding)
+                COMPREPLY=($(compgen -W "yes no"))
+                return 0
+                ;;
+        esac
+    fi
+
+    # After long option, parameter partly typed
+    if [ $prev = "=" ]; then
+        compopt -o nospace
+        case $ante in
+            --file | --load )
+                COMPREPLY=($(compgen -f -X "!(*.stk|*.scm)" -- "${word}"))
+                return 0
+                ;;
+            --conf-dir|--prepend-load-path|--append-load-path)
+                COMPREPLY=($(compgen -d -- "${word}"))
+                return 0
+                ;;
+            --execute|--stack-size)
+                return 0
+                ;;
+            --boot-file)
+                COMPREPLY=($(compgen -f -X "!*.img" -- "${word}"))
+                return 0
+                ;;
+            --utf8-encoding)
+                compopt +o nospace
+                COMPREPLY=($(compgen -W "yes no" -- ${word}))
+                return 0
+                ;;
+        esac
+    fi
+}
+
+# Call complete to register our completion function for stklos:
+complete -F _stklos stklos
+
+
+
+########################################################################
+###
+### STKLOS-COMPILE
+###
+########################################################################
+
+_stklos_compile() {
+    # Our options, in an array:
+    local opts=(--case-sensitive --case-insensitive --colon-position= --output= --C-code --evaluate= --prepend-code= --define-feature= --line-info --show-instructions --prepend-load-path= --append-load-path= --no-time --help)
+
+    _maybe_add_spaces
+
+    # Start with empty completion list
+    COMPREPLY=()
+
+    # Our variables:
+    local cmd="${1##*/}"
+    local word=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[COMP_CWORD-1]}
+    local ante=${COMP_WORDS[COMP_CWORD-2]}
+    
+    #
+    # SITUATIONS:
+    #
+    
+    # After a hyphen (complete with options)
+    _complete_after_hyphen
+
+    # Right after a short option, or a long option without parameters
+    case $prev in
+        -f | -l )
+            # Scheme files
+            compopt -o plusdirs
+            COMPREPLY=($(compgen -f -X "!(*.stk|*.scm)" -- "${word}"))
+            return 0
+            ;;
+        -D|-I|-A)
+            # directories
+            COMPREPLY=($(compgen -d -- "${word}"))
+            return 0
+            ;;
+
+        # Nothing follows the following options
+        # (STklos does not take any parameters that are not
+        #  options prefixed by at least one hyphen)
+        stklos|--case-sensitive|--case-insensitive|-c|-i)
+            return 0
+            ;;
+        --C-code|-C|-l|--line-info|--show-instructions|-S)
+            return 0
+            ;;
+        --no-time|-h)
+            return 0
+            ;;
+     esac
+
+    # Right after a long option, no chars for the parameter typed yet
+    if [ $word = "=" ]; then
+        case $prev in
+            --colon-position)
+                COMPREPLY=($(compgen -W "before after both"))
+                return 0  
+                ;;
+            
+            --prepend-load-path|--append-load-path)
+                # directories
+                compopt -o nospace
+                COMPREPLY=($(compgen -d))
+                return 0
+                ;;
+        esac
+    fi
+
+    # After long option, parameter partly typed
+    if [ $prev = "=" ]; then
+        compopt -o nospace
+        case $ante in
+            --colon-position)
+                compopt +o nospace
+                COMPREPLY=($(compgen -W "before after both" -- "${word}"))
+                return 0  
+                ;;
+            
+            --evaluate|--prepend-code|--define-feature|--output)
+                return 0
+                ;;
+            
+            --prepend-load-path|--append-load-path)
+                # directories
+                compopt -o nospace
+                COMPREPLY=($(compgen -d -- "${word}"))
+                return 0
+                ;;
+        esac
+    fi
+}
+
+# Call complete to register our completion function for stklos-compile:
+complete -F _stklos_compile stklos-compile
