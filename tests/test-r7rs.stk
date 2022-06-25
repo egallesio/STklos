@@ -1675,7 +1675,8 @@ a")
                        '(scheme write))) ; system lib
 
 
-(test "environment.0" #void (module-name e))
+;; All modules have names now...
+;;(test "environment.0" #void (module-name e))
 (test "environment.1" "aaa" (eval 'a e))
 (test "environment.2" "bbb" (eval 'b e))
 (test/error "environment.3" (eval 'c e))
