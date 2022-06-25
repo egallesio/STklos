@@ -515,13 +515,24 @@ doc>
         (old  (gensym)))
     `(begin
        ,@(map (lambda (x)
-                `(define ,x (lambda ,args
-                              (let ((,old ,x))
-                                (require ,file)
-                                (if (eq? ,old ,x)
-                                    (error 'autoload "~S has not been defined in ~S"
-                                           ',x ,file)
-                                    (apply ,x ,args))))))
+                (let ((x-found (gensym
+                                  (string-append "%%"
+                                                 (symbol->string x)
+                                                 "-found"))))
+                  (list 'begin
+                   `(define ,x-found #f)
+                   `(define ,x (lambda ,args
+                                 (let ((,old ,x))
+                                   (require ,file)
+                                   (if (eq? ,old ,x)
+                                       (error 'autoload "~S has not been defined in ~S"
+                                              ',x ,file)
+                                       (begin (set! ,x-found #t)
+                                              (apply ,x ,args))))))
+                   ;; If it was found, remove the previous definition of x
+                   ;; and bind it to its proper value in its module:
+                   `(when ,x-found
+                      (define ,x ,x-found)))))
               symbols))))
 
 ; LocalWords:  repl autoload prepended
