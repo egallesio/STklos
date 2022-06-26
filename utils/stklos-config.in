@@ -88,7 +88,7 @@ while test $# -gt 0; do
             echo @THREADS@
             ;;
         --libraries|-L)
-            echo "@LIB_SUMMARY@"
+            echo "@CONF_SUMMARY@"
             ;;
         --help|-h|-\?)
             usage 0 1>&2
