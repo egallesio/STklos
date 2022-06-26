@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.16">
 <meta name="author" content="Jeronimo Pellegrini">
 <title>Hacking STklos</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -194,8 +194,7 @@ body.toc2.toc-right{padding-left:0;padding-right:20em}}
 #content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
 details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
 details{margin-left:1.25rem}
-details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
-details>summary::-webkit-details-marker{display:none}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;-webkit-tap-highlight-color:transparent}
 details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
 details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
 details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
@@ -237,8 +236,9 @@ pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
 table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
 table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
 table.linenotable td.code{padding-left:.75em}
-table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
-pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+table.linenotable td.linenos{border-right:1px solid;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
 .quoteblock{margin:0 1em 1.25em 1.5em;display:table}
 .quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
 .quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
@@ -275,7 +275,7 @@ table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-c
 table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
 table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
 table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
-table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
 th.halign-left,td.halign-left{text-align:left}
 th.halign-right,td.halign-right{text-align:right}
 th.halign-center,td.halign-center{text-align:center}
@@ -291,11 +291,10 @@ ol{margin-left:1.75em}
 ul li ol{margin-left:1.5em}
 dl dd{margin-left:1.125em}
 dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
-li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
 ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
 ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
 ul.unstyled,ol.unstyled{margin-left:0}
-li>p:empty:only-child::before{content:"";display:inline-block}
 ul.checklist>li>p:first-child{margin-left:-1em}
 ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
 ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
@@ -338,6 +337,8 @@ sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
 #footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
 #footnotes .footnote:last-of-type{margin-bottom:0}
 #content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
 div.unbreakable{page-break-inside:avoid}
 .big{font-size:larger}
 .small{font-size:smaller}
@@ -740,35 +741,43 @@ pre.rouge {
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_directories">1. Directories</a></li>
-<li><a href="#_stklos_initialization">2. STklos initialization</a></li>
-<li><a href="#_adding_simple_modules_and_srfis">3. Adding simple modules and SRFIs</a>
+<li><a href="#_basic_debugging">2. Basic debugging</a>
 <ul class="sectlevel2">
-<li><a href="#_adding_modules">3.1. Adding modules</a></li>
-<li><a href="#_adding_srfis">3.2. Adding SRFIs</a></li>
-<li><a href="#_mixed_srfis_scheme_and_c">3.3. Mixed SRFIs (Scheme and C)</a></li>
-<li><a href="#_content_of_the_c_file">3.4. Content of the C file</a></li>
-<li><a href="#_documentation">3.5. Documentation</a></li>
+<li><a href="#_stk_debug">2.1. STK_DEBUG</a></li>
+<li><a href="#_other_debugging_primitives_in_scheme">2.2. Other debugging primitives in Scheme</a></li>
+<li><a href="#_c_debugging">2.3. C debugging</a></li>
 </ul>
 </li>
-<li><a href="#_writing_primitives_in_c">4. Writing primitives in C</a>
+<li><a href="#_stklos_initialization">3. STklos initialization</a></li>
+<li><a href="#_adding_simple_modules_and_srfis">4. Adding simple modules and SRFIs</a>
 <ul class="sectlevel2">
-<li><a href="#_calling_scheme_primitives">4.1. Calling Scheme primitives</a></li>
-<li><a href="#_returning_values">4.2. Returning values</a></li>
-<li><a href="#_errors">4.3. Errors</a></li>
-<li><a href="#_unboxed_types">4.4. Unboxed types</a></li>
-<li><a href="#_boxed_types">4.5. Boxed types</a></li>
-<li><a href="#_dynamically_loadable_modules">4.6. Dynamically loadable modules</a></li>
-<li><a href="#_creating_new_types">4.7. Creating new types</a></li>
+<li><a href="#_adding_modules">4.1. Adding modules</a></li>
+<li><a href="#_adding_srfis">4.2. Adding SRFIs</a></li>
+<li><a href="#_mixed_srfis_scheme_and_c">4.3. Mixed SRFIs (Scheme and C)</a></li>
+<li><a href="#_content_of_the_c_file">4.4. Content of the C file</a></li>
+<li><a href="#_documentation">4.5. Documentation</a></li>
 </ul>
 </li>
-<li><a href="#_the_virtual_machine">5. The virtual machine</a></li>
-<li><a href="#_compiler_and_optimizations">6. Compiler and optimizations</a>
+<li><a href="#_writing_primitives_in_c">5. Writing primitives in C</a>
 <ul class="sectlevel2">
-<li><a href="#_the_compiler">6.1. The compiler</a></li>
-<li><a href="#_peephole_optimizer">6.2. Peephole optimizer</a></li>
+<li><a href="#_calling_scheme_primitives">5.1. Calling Scheme primitives</a></li>
+<li><a href="#_returning_multiple_values">5.2. Returning multiple values</a></li>
+<li><a href="#_using_multiple_returned_values">5.3. Using multiple returned values</a></li>
+<li><a href="#_errors">5.4. Errors</a></li>
+<li><a href="#_unboxed_types">5.5. Unboxed types</a></li>
+<li><a href="#_boxed_types">5.6. Boxed types</a></li>
+<li><a href="#_dynamically_loadable_modules">5.7. Dynamically loadable modules</a></li>
+<li><a href="#_creating_new_types">5.8. Creating new types</a></li>
 </ul>
 </li>
-<li><a href="#_garbage_collection">7. Garbage collection</a></li>
+<li><a href="#_the_virtual_machine">6. The virtual machine</a></li>
+<li><a href="#_compiler_and_optimizations">7. Compiler and optimizations</a>
+<ul class="sectlevel2">
+<li><a href="#_the_compiler">7.1. The compiler</a></li>
+<li><a href="#_peephole_optimizer">7.2. Peephole optimizer</a></li>
+</ul>
+</li>
+<li><a href="#_garbage_collection">8. Garbage collection</a></li>
 </ul>
 </div>
 </div>
@@ -806,7 +815,7 @@ basics, hacking STklos should not be difficult.</p>
 <p><code>gc</code> – the Boehm-Demers-Weiser garbage collector, libgc (a local copy)</p>
 </li>
 <li>
-<p><code>gmp</code> – a slow compatible GNU MP )</p>
+<p><code>gmp</code> – a slow compatible GNU MP</p>
 </li>
 <li>
 <p><code>lib</code> – Scheme files, including from basic things like the boot
@@ -829,10 +838,126 @@ program up to high-level things like modules implementing SRFIs</p>
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>The "local copies" of <code>libffi</code>, <code>libgc</code> and <code>libpcre</code>, as well as the mini-GMP
+in <code>gmp/</code> are compiled when there&#8217;s no version of those available in the system,
+or when you force their use in the configure script with <code>--with-provided-gc</code>,
+<code>--with-gmp-light</code> and so on.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_stklos_initialization">2. STklos initialization</h2>
+<h2 id="_basic_debugging">2. Basic debugging</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_stk_debug">2.1. STK_DEBUG</h3>
+<div class="paragraph">
+<p>STklos has conditionally-compiled debugging code, which is enabled when
+the <code>STK_DEBUG</code> variable is visible to the C compiler. To enable a
+debug-enabled binary of STklos, configure it passing <code>CFLAGS="-DSTK_DEBUG"</code>
+to the configure script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>./configure CFLAGS="-DSTK_DEBUG"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will enable:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>[misc.c]</code>: <code>(%%debug)</code> which toggles debugging on and off.</p>
+</li>
+<li>
+<p><code>[misc.c]</code>: <code>(%c-backtrace)</code>, which produces a backtrace of C function calls.</p>
+</li>
+<li>
+<p><code>[misc.c]</code>: <code>(%test proc)</code>, which applies <code>proc</code> without arguments.</p>
+</li>
+<li>
+<p><code>[misc.c]</code>: <code>(%vm &#8230;&#8203;)</code>, which you can customize in <code>src/vm.c</code> to your needs.</p>
+</li>
+<li>
+<p><code>[src/utf8.c]</code>: <code>(%char-utf8-encoding c)</code>, which shows how the character <code>c</code> is
+encoded in UTF8.</p>
+</li>
+<li>
+<p><code>[`src/utf8.c]</code>: <code>(%dump-string s)</code>, which shows the bytes in the internal representation of
+the string <code>s</code>.</p>
+</li>
+<li>
+<p><code>[src/promise.c]</code>: <code>(%promise-value p)</code>, which returns the value of promise <code>p</code>.
+When not yet forced, the value will be a procedure, which you can then call. But
+calling <code>%promise-value p</code> does <strong>not</strong> force <code>p</code>, and does not interfere with
+the rest of the program.</p>
+</li>
+<li>
+<p><code>[src/promise.c]</code>: <code>(%promise-value-set! p v)</code>, which sets the value of promise
+<code>p</code> to <code>v</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Clearly, you can add other primitives useful for debugging guarded by</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#ifdef STK_DEBUG
+</span><span class="p">...</span>
+<span class="cp">#endif</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>as necessary.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_other_debugging_primitives_in_scheme">2.2. Other debugging primitives in Scheme</h3>
+<div class="paragraph">
+<p>Even without <code>STK_DEBUG</code>, you can use in your Scheme code:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(%vm-backtrace)</code> to obtain a trace of Scheme procedure calls</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_c_debugging">2.3. C debugging</h3>
+<div class="paragraph">
+<p>When copiling the C part of STklos, it may be interesting to compile
+with <code>-g -O0 -Wall</code> also:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>./configure CFLAGS="-DSTK_DEBUG -g -O0 -Wall"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And to use GCC&#8217;s static analyzer (with GCC version 11 or later),</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>./configure CFLAGS="-DSTK_DEBUG -g -O0 -Wall -fanalyzer"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To debug STklos, you can use gdb:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>gdb -q src/stklos</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stklos_initialization">3. STklos initialization</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><code>main</code> is in <code>src/stklos.c</code>, where command line options are parsed and
@@ -867,10 +992,10 @@ edit <code>lib/boot.stk</code>.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_adding_simple_modules_and_srfis">3. Adding simple modules and SRFIs</h2>
+<h2 id="_adding_simple_modules_and_srfis">4. Adding simple modules and SRFIs</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_adding_modules">3.1. Adding modules</h3>
+<h3 id="_adding_modules">4.1. Adding modules</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -888,7 +1013,7 @@ directory and include it in the list of loaded files in <code>do-test.stk</code>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_adding_srfis">3.2. Adding SRFIs</h3>
+<h3 id="_adding_srfis">4.2. Adding SRFIs</h3>
 <div class="paragraph">
 <p>In order to add SRFI 9999 to STklos,</p>
 </div>
@@ -930,7 +1055,7 @@ update</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_mixed_srfis_scheme_and_c">3.3. Mixed SRFIs (Scheme and C)</h3>
+<h3 id="_mixed_srfis_scheme_and_c">4.3. Mixed SRFIs (Scheme and C)</h3>
 <div class="paragraph">
 <p>To add a mixed SRFI 8888,</p>
 </div>
@@ -950,7 +1075,7 @@ written in C and Scheme'' (variables `SRC_C</code>, <code>SRC_C_STK</code>, and
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_content_of_the_scheme_file">3.3.1. Content of the Scheme file</h4>
+<h4 id="_content_of_the_scheme_file">4.3.1. Content of the Scheme file</h4>
 <div class="paragraph">
 <p>The Scheme file will be compiled as a byte-code stream embedded in C.
 Here, the compiled file will be called <code>$DIR/srfi-170-incl.c</code>. It is
@@ -972,7 +1097,7 @@ of this file.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_content_of_the_c_file">3.4. Content of the C file</h3>
+<h3 id="_content_of_the_c_file">4.4. Content of the C file</h3>
 <div class="paragraph">
 <p>The C file must follow the conventions of dynamically loadable code as
 shown in the example in the <code>/etc</code> directory.</p>
@@ -1036,9 +1161,9 @@ compiler warning about an unresolved reference.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_documentation">3.5. Documentation</h3>
+<h3 id="_documentation">4.5. Documentation</h3>
 <div class="sect3">
-<h4 id="_documenting_srfis_in_srfi_skb">3.5.1. Documenting SRFIs in <code>srfi.skb</code></h4>
+<h4 id="_documenting_srfis_in_srfi_skb">4.5.1. Documenting SRFIs in <code>srfi.skb</code></h4>
 <div class="paragraph">
 <p>General documentation is automatically generated for SRFIs. If you need
 to give a precision specific to a given SRFI, add it to the end of the
@@ -1051,7 +1176,7 @@ HTML and PDF documentation is rebuilt from time to time by @egallesio.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_documenting_primitives_written_in_c">3.5.2. Documenting primitives written in C</h4>
+<h4 id="_documenting_primitives_written_in_c">4.5.2. Documenting primitives written in C</h4>
 <div class="paragraph">
 <p>Before <code>DEFINE_PRIMITIVE</code>, add a comment similar to the others you see
 in the C files. An example:</p>
@@ -1088,7 +1213,7 @@ example of usage.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_writing_primitives_in_c">4. Writing primitives in C</h2>
+<h2 id="_writing_primitives_in_c">5. Writing primitives in C</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Use the macro <code>DEFINE_PRIMITIVE</code>:</p>
@@ -1136,7 +1261,7 @@ all Scheme objects in STklos).</p>
 <p>The name passed to <code>ADD_PRIMITIVE</code> is the C function name.</p>
 </div>
 <div class="sect2">
-<h3 id="_calling_scheme_primitives">4.1. Calling Scheme primitives</h3>
+<h3 id="_calling_scheme_primitives">5.1. Calling Scheme primitives</h3>
 <div class="paragraph">
 <p>Recall that a primitive is defined like this:</p>
 </div>
@@ -1149,7 +1274,7 @@ all Scheme objects in STklos).</p>
 </div>
 </div>
 <div class="paragraph">
-<p>TO use this primitive later in C code, add the <code>STk_</code> prefix to its C
+<p>To use this primitive later in C code, add the <code>STk_</code> prefix to its C
 function name:</p>
 </div>
 <div class="listingblock">
@@ -1159,7 +1284,7 @@ function name:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_returning_values">4.2. Returning values</h3>
+<h3 id="_returning_multiple_values">5.2. Returning multiple values</h3>
 <div class="paragraph">
 <p><code>STk_n_values(n, v1, v2, &#8230;&#8203;, vn)</code> returns <code>n</code> values from a procedure.</p>
 </div>
@@ -1185,7 +1310,63 @@ second value.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_errors">4.3. Errors</h3>
+<h3 id="_using_multiple_returned_values">5.3. Using multiple returned values</h3>
+<div class="paragraph">
+<p>Just as one can use <code>STk_n_values</code> to produce values, it is also possible
+to call (from C) a Scheme procedure that produces a sequence of values
+and use them from the C code. The function <code>STk_values2vector</code> (defined
+in <code>vm.c</code>) does this.</p>
+</div>
+<div class="paragraph">
+<p>In Scheme, one could to this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">my-proc</span> <span class="nv">x</span> <span class="nv">y</span> <span class="nv">z</span><span class="p">)</span>        <span class="c1">;; takes three arguments</span>
+  <span class="p">(</span><span class="nb">values</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">y</span> <span class="nv">z</span><span class="p">)))</span>    <span class="c1">;; returns two values</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If we assume that the C <code>SCM</code> variable <code>proc</code> points to the closure
+<code>my-proc</code>, then we can call it like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="n">SCM</span> <span class="n">a</span> <span class="o">=</span> <span class="n">MAKE_INT</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">SCM</span> <span class="n">b</span> <span class="o">=</span> <span class="n">MAKE_INT</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+<span class="n">SCM</span> <span class="n">c</span> <span class="o">=</span> <span class="n">MAKE_INT</span><span class="p">(</span><span class="mi">30</span><span class="p">);</span>
+
+<span class="cm">/* Define a Scheme vector to hold EXACTLY two values: */</span>
+<span class="n">SCM</span> <span class="n">results</span> <span class="o">=</span> <span class="n">STk_makevect</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+
+<span class="n">VECTOR_DATA</span><span class="p">(</span><span class="n">results</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">STk_false</span><span class="p">;</span>
+<span class="n">VECTOR_DATA</span><span class="p">(</span><span class="n">results</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">STk_false</span><span class="p">;</span>
+
+<span class="cm">/* Call the procedure proc, passing 3 arguments; proc */</span>
+<span class="n">STk_values2vector</span> <span class="p">(</span> <span class="n">STk_C_apply</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span>
+                    <span class="n">results</span> <span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The Scheme vector <code>results</code> will then hold the two returned values.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If you pass <code>NULL</code> as second argument to <code>STk_values2vector</code> instead
+of passing a vector, the VM will allocate a vector with the size of
+the number of values returned.</p>
+</li>
+<li>
+<p>If you do pass a vector to <code>STk_values2vector</code>, then the procedure
+being called <strong>must</strong> produce <strong>exactly</strong> that number of values (not
+more, not less), otherwise the VM will signal an error.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_errors">5.4. Errors</h3>
 <div class="paragraph">
 <p>The C function that raises errors is</p>
 </div>
@@ -1221,7 +1402,7 @@ wrappers:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_unboxed_types">4.4. Unboxed types</h3>
+<h3 id="_unboxed_types">5.5. Unboxed types</h3>
 <div class="paragraph">
 <p>The trditional way to representa data in Lisp languages is by <em>tagged
 objects</em>. A long enough machine word is used to represent all types, and
@@ -1265,7 +1446,7 @@ the value of the fixnum is 9 (because after discarding the <code>01</code> that 
 on the right of the sequence, the number left is <code>1001</code>).</p>
 </div>
 <div class="sect3">
-<h4 id="_booleans">4.4.1. Booleans</h4>
+<h4 id="_booleans">5.5.1. Booleans</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1286,7 +1467,7 @@ is true, then the value is <code>STk_true</code>, otherwise it is <code>STk_fals
 </div>
 </div>
 <div class="sect3">
-<h4 id="_fixnums">4.4.2. Fixnums</h4>
+<h4 id="_fixnums">5.5.2. Fixnums</h4>
 <div class="paragraph">
 <p>Fixnums are not allocated but have their two least significant bits set
 to <code>01</code> (in Lisp-parlance, it has <code>01</code> as its <em>tag</em>).</p>
@@ -1321,7 +1502,7 @@ value (the opposite of the previous operation)</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_boxed_types">4.5. Boxed types</h3>
+<h3 id="_boxed_types">5.6. Boxed types</h3>
 <div class="paragraph">
 <p>Boxed types are anything except for fixnums, small objects and small
 constants. They are tagged with <code>00</code>.</p>
@@ -1364,7 +1545,7 @@ self-explanatory:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_lists">4.5.1. Lists</h4>
+<h4 id="_lists">5.6.1. Lists</h4>
 <div class="paragraph">
 <p>Here are some primitives for lists, for example:</p>
 </div>
@@ -1391,7 +1572,7 @@ object, which certainly is a list)</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_strings">4.5.2. Strings</h4>
+<h4 id="_strings">5.6.2. Strings</h4>
 <div class="paragraph">
 <p>Another example are strings. They are defined as the following
 structure:</p>
@@ -1435,13 +1616,13 @@ used by several files use them, so they’re included with
 </div>
 </div>
 <div class="sect2">
-<h3 id="_dynamically_loadable_modules">4.6. Dynamically loadable modules</h3>
+<h3 id="_dynamically_loadable_modules">5.7. Dynamically loadable modules</h3>
 <div class="paragraph">
 <p>See some examples in <code>etc/</code></p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_creating_new_types">4.7. Creating new types</h3>
+<h3 id="_creating_new_types">5.8. Creating new types</h3>
 <div class="paragraph">
 <p>We’ll be using SRFI-25 as an example. In that SRFI, am <code>array</code> type is
 created.</p>
@@ -1620,7 +1801,7 @@ a reader procedure:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_virtual_machine">5. The virtual machine</h2>
+<h2 id="_the_virtual_machine">6. The virtual machine</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>See the file <code>vm.adoc</code> for a description of the opcodes.</p>
@@ -1628,10 +1809,10 @@ a reader procedure:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_compiler_and_optimizations">6. Compiler and optimizations</h2>
+<h2 id="_compiler_and_optimizations">7. Compiler and optimizations</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_the_compiler">6.1. The compiler</h3>
+<h3 id="_the_compiler">7.1. The compiler</h3>
 <div class="paragraph">
 <p>The compiler is in the file <code>lib/compiler.stk</code>.</p>
 </div>
@@ -1666,7 +1847,7 @@ instruction on the code (which will later be reversed, of course)</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_peephole_optimizer">6.2. Peephole optimizer</h3>
+<h3 id="_peephole_optimizer">7.2. Peephole optimizer</h3>
 <div class="paragraph">
 <p>STklos uses a peephole optimzier, located in the file
 <code>lib/peephole.stk</code>. This optimizer will transform several instruction
@@ -1734,7 +1915,7 @@ in the beginning of the file:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_garbage_collection">7. Garbage collection</h2>
+<h2 id="_garbage_collection">8. Garbage collection</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>STklos uses the Boehm-Demers-Weiser garbage collector. The wrapper for
@@ -1777,7 +1958,7 @@ will be called when the object at <code>ptr</code> is collected.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 19:14:56 +0100
+Last updated 2022-06-26 00:03:36 -0300
 </div>
 </div>
 </body>
