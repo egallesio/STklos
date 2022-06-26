@@ -270,6 +270,7 @@ $(DEPEND_9): 9.ostk
 94.ostk: 60.ostk
 95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
+125.ostk: 128.ostk
 130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.so
 134.ostk: 158.ostk

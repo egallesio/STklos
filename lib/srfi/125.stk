@@ -50,9 +50,6 @@
 
 
 
-(define deb #f)
-(define (debug . args) (when deb (apply eprintf args)))
-
 (define-module srfi/125
   (import (srfi 128))
 
@@ -127,6 +124,7 @@
 (define s:hash-table-exists?     (symbol-value 'hash-table-exists?     scheme))
 (define s:hash-table-set!        (symbol-value 'hash-table-set!        scheme))
 (define s:hash-table-delete!     (symbol-value 'hash-table-delete!     scheme))
+(define s:hash-table-clear!      (symbol-value 'hash-table-clear!      scheme))
 (define s:hash-table-ref         (symbol-value 'hash-table-ref         scheme))
 (define s:hash-table-ref/default (symbol-value 'hash-table-ref/default scheme))
 (define s:hash-table-fold        (symbol-value 'hash-table-fold        scheme))
@@ -137,6 +135,8 @@
 (define s:hash-table-values      (symbol-value 'hash-table-values      scheme))
 (define s:hash-table-size        (symbol-value 'hash-table-size        scheme))
 (define s:hash-table-hash        (symbol-value 'hash-table-hash        scheme))
+
+(define s125:hash-table-mutable? (symbol-value 'hash-table-mutable?    scheme))
 
 (define s128:default-hash        (symbol-value 'default-hash    (find-module 'srfi/128)))
 (define s128:string-hash         (symbol-value 'string-hash     (find-module 'srfi/128)))
@@ -314,22 +314,16 @@
 ;;;     (which is a deprecated usage).
 
 (define (s125:make-hash-table comparator/equiv . rest)
-  (debug "enter s125:make-hash-table, rest = ~a~%" rest)
   (if (comparator? comparator/equiv)
       (let ((equiv (comparator-equality-predicate comparator/equiv))
             (hash-function (%comparator-hash-function comparator/equiv)))
-        (debug "s125:make-hash-table CASE 1~%")
-        (let ((x
-               (%%make-hash-table equiv hash-function rest))
-              )
-          (debug "s125:make-hash-table END~%") x))
+        (%%make-hash-table equiv hash-function rest))
       (let* ((equiv comparator/equiv)
              (hash-function (if (and (not (null? rest))
                                      (procedure? (car rest)))
                                 (car rest)
                                 #f))
              (rest (if hash-function (cdr rest) rest)))
-        (debug "s125:make-hash-table CASE 2~%")
         (%%make-hash-table equiv hash-function rest))))
 
 ;; We'll trust STklos' hash-table-hash to do the right thing, and define
@@ -343,7 +337,6 @@
 ;; an extra '%' here...
 (define (%%make-hash-table equiv hash-function opts)
   (%check-optional-arguments 'make-hash-table opts)
-  (debug "enter %make-hash-table, opts = ~a~%" opts)
   (cond ((eq? equiv eq?)
          (s:make-hash-table eq?))
         ((eq? equiv eqv?)
@@ -373,7 +366,8 @@
                (car kvs)))
        (else (s:hash-table-set! ht (car kvs) (cadr kvs))
              (loop (cddr kvs)))))
-    (s:hash-table-copy ht)))
+    (hash-table-immutable! ht)
+    ht))
 
 (define (s125:hash-table-unfold stop? mapper successor seed comparator . rest)
   (let ((ht (apply s125:make-hash-table comparator rest)))
@@ -422,10 +416,6 @@
                                               (s:hash-table-ref ht1 key 'ignored))))
                                 ht2))))
 
-;;; FIXME: pending implementation of immutable hashtables
-;;;
-(define (s125:hash-table-mutable? ht) #t)
-;;  (hashtable-mutable? ht))
 
 ;;; Accessors.
 
@@ -446,6 +436,8 @@
   (s:hash-table-ref/default ht key default))
 
 ;;; Mutators.
+
+(define s125:hash-table-clear!  s:hash-table-clear!)
 
 (define (s125:hash-table-set! ht . rest)
   (if (= 2 (length rest))
@@ -492,14 +484,6 @@
           (return key value))
         ht)
       (error "hash-table-pop!: hash table is empty" ht))))
-
-;; FIXME: maybe a primitive would be better, so we could just
-;;        deallocate the table's internal vector and not have to
-;;        iterate over the keys?
-(define (s125:hash-table-clear! ht)
-  (let ((keys (s:hash-table-keys ht)))
-    (for-each (lambda (k) (s:hash-table-delete! ht k))
-              keys)))
 
 ;;; The whole hash table.
 
@@ -566,16 +550,7 @@
 
 
 (define (s125:hash-table-for-each proc h)
-  (debug "enter s125:hash-table-for-each~%") ;; DEBUG
-  ;;(%display-backtrace (%vm-backtrace) 3)   ;; DEBUG
   (s:hash-table-for-each h proc))
-
-;; Original code, from reference implementation:
-;; (define (hash-table-for-each proc ht)
-;;   (call-with-values
-;;    (lambda () (hashtable-entries ht))
-;;    (lambda (keys vals)
-;;      (vector-for-each proc keys vals))))
 
 (define (s125:hash-table-map! proc ht)
   (s125:hash-table-for-each (lambda (key val)
@@ -587,18 +562,6 @@
       (deprecated:hash-table-fold proc init ht)
       (s:hash-table-fold ht proc init)))
 
-      ;; Original code, from reference implementation:
-      ;; (call-with-values
-      ;;  (lambda () (hash-table-entries ht))
-      ;;  (lambda (keys vals)
-      ;;    (let loop ((keys keys)
-      ;;               (vals vals)
-      ;;               (x    init))
-      ;;      (if (null? keys)
-      ;;          x
-      ;;          (loop (cdr keys)
-      ;;                (cdr vals)
-      ;;                (proc (car keys) (car vals) x))))))))
 
 (define (s125:hash-table-prune! proc ht)
   (s125:hash-table-for-each (lambda (key val)
@@ -608,26 +571,20 @@
 
 ;;; Copying and conversion.
 
-(define (s125:hash-table-copy ht . rest)
-  ;; FIXME: we do not support immutable hash tables. This should be easy
-  ;; to add.
-  (s:hash-table-copy ht))
+(define (s125:hash-table-copy ht :optional (mutable? #f))
+  (let ((ht (s:hash-table-copy ht)))
+    (unless mutable?
+      (hash-table-immutable! ht))
+    ht))
 
 ;; FIXME: This copies the entire hashtable! It'd be better to create a
 ;; primitive for this
 (define (s125:hash-table-empty-copy ht)
-  (let* ((ht2 (s:hash-table-copy ht)) ;; FIXME: should not be immutable?
-         (ignored (s125:hash-table-clear! ht2)))
+  (let* ((ht2 (s:hash-table-copy ht)))
+    (s:hash-table-clear! ht2)
     ht2))
 
 (define s125:hash-table->alist s:hash-table->alist)
-
-;; Original code, from reference implementation:
-;; (define (hash-table->alist ht)
-;;   (call-with-values
-;;    (lambda () (hash-table-entries ht))
-;;    (lambda (keys vals)
-;;      (map cons keys vals))))
 
 ;;; Hash tables as sets.
 
