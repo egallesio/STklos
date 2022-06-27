@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 13-May-2022 14:49 (eg)
+;;;; Last file update: 27-Jun-2022 20:43 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -122,7 +122,7 @@
   ;; not defined)
   (unless (getenv "STKLOS_BUILDING")
     ;; We are not bootstapping
-    (module-lock! (current-module))))
+    (module-immutable! (current-module))))
 
 
 ;; ======================================================================
