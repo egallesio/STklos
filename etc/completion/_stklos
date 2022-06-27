@@ -1,0 +1,78 @@
+#compdef stklos stklos-compile
+#
+#  _stklos      -- Completion script for stklos and stklos-compile
+#
+#
+# Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+# USA.
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 24-Jun-2022 17:36
+# Last file update: 24-Jun-2022 18:12 (eg)
+
+
+# How to use this file:
+#
+# To add completion for zsh place this file in one of the directories accessible in
+# the $fpath environment variable. Eventually run the `compinit` function
+# if it is not called in your ~/.zhsrc. Et voilà.
+
+
+case $service in
+    stklos)
+        _arguments -s -S '(- *)'{-h,--help}'[show this help and exit]' \
+            {-v,--version}'[show version (simple) and exit]' \
+            {-l,--load=}'[load file before going interactive]:file:_files -g "*.stk *.ostk *.so *.scm *.ss"' \
+            {-f,--file=}'[use file as program]:file:_files -g "*.stk *ostk *.so *scm *.ss"' \
+            {-e,--execute=}'[evaluate the given sexpr and exit]' \
+            {-b,--boot-file=}'[use file to boot the program]:file:_files -g "*.img"' \
+            {-D,--conf-dir=}'[change configuration directory]:dir:_files -g "*/"' \
+            {-q,--no-init-file}'[do not load user init file]' \
+            {-i,--interactive}'[interactive mode]' \
+            {-n,--no-line-editor}'[do not use line editor]' \
+            {-d,--debug}'[add information to ease debugging]' \
+            {-s,--stack-size=}'[set stack of size n (default 100000)]:value' \
+            {-c,--case-sensitive}'[be case sensitive by default]' \
+            {-u,--utf8-encoding=}'[use UTF-8 encoding]:value:(yes no)' \
+            -I'[prepend directory to the load path]:dir:_files -g "*/"' \
+            -A'[append directory to the load path]:dir:_files -g "*/"' \
+            -V'[show version (detailed) and exit]' \
+            --case-insensitive'[be case insensitive by default]' \
+            '*:argument:_files'  # Use files for the completion of arguments
+        ;;
+    stklos-compile)
+        _arguments -s -S '(- *)'{-h,--help}'[show this help and exit]' \
+            {-c,--case-sensitive}'[be case sensitive on symbols]' \
+            {-i,--case-insensitive}'[be case insensitive on symbols]'\
+            {-p,--colon-position=}'[position of colon in keyword]:value:(none before after both)' \
+            {-o,--output=}'[output file]' \
+            {-C,--C-code}'[produce C code]' \
+            {-e,--evaluate=}'[evaluate expression  before compiling file]' \
+            {-k, --prepend-code=}'[Insert expression before file contents]' \
+            {-D,--define-feature=}'[Add feature (SRFI 138)]' \
+            {-l,--line-info}'[insert line numbers in generated file]' \
+            {-S,--show-instructions}'[show  instructions in generated file]' \
+            {-I,--prepend-load-path=}'[prepend directory to the loading path]:dir:_files -g "*/"' \
+            {-A,--append-load-path='[append directory to the loading path]:dir:_files -g "*/"' \
+            --no-time'[do not display compilation time]' \
+            '(*):argument:_files -g "*.stk *.scm *.ss"' # Accept only one argument which is a Scheme file
+         ;;
+esac
+
+
+# Local Variables:
+# mode: sh
+# End:
