@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  7-Dec-2021 23:04 (jpellegrini)
-;;;; Last file update: 17-Dec-2021 22:38 (eg)
+;;;; Last file update: 27-Jun-2022 21:20 (eg)
 ;;;;
 
 (require "test")
@@ -57,7 +57,7 @@
 
 ;; Lock module %%unmutability1
 (select-module STklos)
-(module-lock! %%mod1)
+(module-immutable! %%mod1)
 (test "symbol-mutable?.7" #f (symbol-mutable? 'a %%mod1))
 (test "symbol-mutable?.8" #f (symbol-mutable? 'b %%mod1))
 (test "symbol-mutable?.9" #f (symbol-mutable? 'c %%mod1))
@@ -90,11 +90,11 @@
 
 
 (test "unmutable SCHEME module.1"
-      #t
-      (module-locked? (find-module 'SCHEME)))
-(test "mutable STklos module.2"
       #f
-      (module-locked? (find-module 'STklos)))
+      (module-mutable? (find-module 'SCHEME)))
+(test "mutable STklos module.2"
+      #t
+      (module-mutable? (find-module 'STklos)))
 
 (select-module SCHEME)
 (test/error "unmutable SCHEME module.3" (set! + -))
