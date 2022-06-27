@@ -152,33 +152,33 @@ doc>
 /*                                   */
 
 void
-STk_lock_list(SCM l) {
+STk_immutable_list(SCM l) {
     for(;CONSP(l); l = CDR(l))
         BOXED_INFO(l) |= CONS_CONST;
 }
 
 void
-STk_unlock_list(SCM l) {
+STk_mutable_list(SCM l) {
     for(;CONSP(l); l = CDR(l))
         BOXED_INFO(l) &= (~CONS_CONST);
 }
 
 void
-STk_lock_tree(SCM l) {
+STk_immutable_tree(SCM l) {
     if (CONSP(l)) {
         BOXED_INFO(l) |= CONS_CONST;
-        STk_lock_tree(CAR(l));
-        STk_lock_tree(CDR(l));
+        STk_immutable_tree(CAR(l));
+        STk_immutable_tree(CDR(l));
     }
     return;
 }
 
 void
-STk_unlock_tree(SCM l) {
+STk_mutable_tree(SCM l) {
     if (CONSP(l)) {
         BOXED_INFO(l) &= (~CONS_CONST);
-        STk_lock_tree(CAR(l));
-        STk_lock_tree(CDR(l));
+        STk_immutable_tree(CAR(l));
+        STk_immutable_tree(CDR(l));
     }
     return;
 }
@@ -221,7 +221,7 @@ DEFINE_PRIMITIVE("iappend", srfi_116_iappend, vsubr, (int argc, SCM *argv))
     default: res = STk_append(argc, argv);
              break;
   }
-  if (CONSP(res)) STk_lock_list(res);
+  if (CONSP(res)) STk_immutable_list(res);
   return res;
 }
 
@@ -307,14 +307,14 @@ doc>
 DEFINE_PRIMITIVE("list->ilist", srfi_116_list_ilist, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_lock_list(z);
+    STk_immutable_list(z);
     return z;
 }
 
 DEFINE_PRIMITIVE("ilist->list", srfi_116_ilist_list, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_unlock_list(z);
+    STk_mutable_list(z);
     return z;
 }
 
@@ -338,14 +338,14 @@ doc>
 DEFINE_PRIMITIVE("tree->itree", srfi_116_tree_itree, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_lock_tree(z);
+    STk_immutable_tree(z);
     return z;
 }
 
 DEFINE_PRIMITIVE("itree->tree", srfi_116_itree_tree, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_unlock_tree(z);
+    STk_mutable_tree(z);
     return z;
 }
 
@@ -355,26 +355,26 @@ DEFINE_PRIMITIVE("itree->tree", srfi_116_itree_tree, subr1, (SCM l))
 /* EXTRA */
 
 /*
-<doc EXT list-lock+! list-lock!
- * (list-lock+! lst)
- * (list-lock! lst)
+<doc EXT list-immutable+! list-immutable!
+ * (list-immutable+! lst)
+ * (list-immutable! lst)
  *
  * Destructive versions of |list->ilist|: both procedures change their
  * argument so it will become an immutable list.
- * |List-lock+!| returns the list, while |list-lock!| returns |#void|.
+ * |List-immutable+!| returns the list, while |list-immutable!| returns |#void|.
 doc>
 */
-DEFINE_PRIMITIVE("list-lock+!", srfi_116_list_lock_plus, subr1, (SCM obj))
+DEFINE_PRIMITIVE("list-immutable+!", srfi_116_list_immutable_plus, subr1, (SCM obj))
 {
     if (!CONSP(obj)) STk_error("bad list ~S", obj);
-    STk_lock_list(obj);
+    STk_immutable_list(obj);
     return obj;
 }
 
-DEFINE_PRIMITIVE("list-lock!", srfi_116_list_lock, subr1, (SCM obj))
+DEFINE_PRIMITIVE("list-immutable!", srfi_116_list_immutable, subr1, (SCM obj))
 {
     if (!CONSP(obj)) STk_error("bad list ~S", obj);
-    STk_lock_list(obj);
+    STk_immutable_list(obj);
     return STk_void;
 }
 
@@ -401,8 +401,8 @@ MODULE_ENTRY_START("srfi/116")
   ADD_PRIMITIVE_IN_MODULE(srfi_116_replace_icar, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_116_replace_icdr, module);
 
-  ADD_PRIMITIVE_IN_MODULE(srfi_116_list_lock_plus,    module);
-  ADD_PRIMITIVE_IN_MODULE(srfi_116_list_lock,    module);
+  ADD_PRIMITIVE_IN_MODULE(srfi_116_list_immutable_plus,    module);
+  ADD_PRIMITIVE_IN_MODULE(srfi_116_list_immutable,    module);
 
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);

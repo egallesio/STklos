@@ -498,23 +498,23 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
 }
 
 /*
-<doc EXT symbol-lock!
- * (symbol-lock! symb)
- * (symbol-lock! symb mod)
+<doc EXT symbol-immutable!
+ * (symbol-immutable! symb)
+ * (symbol-immutable! symb mod)
  *
- * Makes the symbol |symb| in module |mod| unmutable. If |mod| is not specified,
+ * Makes the symbol |symb| in module |mod| immutable. If |mod| is not specified, 
  * the current module is used.
  *
  * @lisp
  * (define a 1)
  * (symbol-mutable? 'a)     => #t
- * (symbol-lock! 'a)
+ * (symbol-immutable! 'a)
  * (symbol-mutable? 'a)     => #f
  * (set! a 10)              => error
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("symbol-lock!", symbol_lock, subr12, (SCM symb, SCM module))
+DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM module))
 {
   SCM tmp;
 
@@ -839,7 +839,7 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_value_all);
   ADD_PRIMITIVE(symbol_boundp);
   ADD_PRIMITIVE(symbol_mutablep);
-  ADD_PRIMITIVE(symbol_lock);
+  ADD_PRIMITIVE(symbol_immutable);
   ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);

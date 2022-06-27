@@ -457,6 +457,10 @@ static void error_bad_hash_table(SCM obj)
   STk_error("bad hash table ~S", obj);
 }
 
+static void error_hash_immutable(SCM obj)
+{
+  STk_error("hash table ~S is not mutable", obj);
+}
 
 static void error_bad_procedure(SCM obj)
 {
@@ -506,6 +510,38 @@ SCM STk_make_basic_hash_table(void) {
   HASH_TYPE(z)   = hash_eqp;
   return z;
 }
+
+
+/*
+<doc EXT hash-immutable!
+ * (hash-immutable! obj)
+ *
+ * If |obj| is a hash table, makes it immutable. Otherwise, raises
+ * an error.
+doc>
+*/
+DEFINE_PRIMITIVE("hash-table-immutable!", hash_table_lock, subr1, (SCM ht))
+{
+  if(!HASHP(ht)) error_bad_hash_table(ht);
+  BOXED_INFO(ht) |= HASH_CONST;
+  return STk_void;
+}
+
+/*
+<doc EXT hash-mutable?
+ * (hash-mutable? obj)
+ *
+ * Returns |#t| if |obj| is an immutable hash table, |#f| if it
+ * is a mutable hash table, and raises an error if |obj| is not a
+ * hash table.
+doc>
+*/
+DEFINE_PRIMITIVE("hash-table-mutable?", hash_table_mutablep, subr1, (SCM ht))
+{
+  if(!HASHP(ht)) error_bad_hash_table(ht);
+  return MAKE_BOOLEAN(!(HASH_CONSTP(ht)));
+}
+
 
 /*
 <doc EXT hash-table?
@@ -579,6 +615,8 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
 
   if (!HASHP(ht)) error_bad_hash_table(ht);
 
+  if (HASH_CONSTP(ht)) error_hash_immutable(ht);
+  
   switch (HASH_TYPE(ht)) {
     case hash_eqp:
       index = RANDOM_INDEX(ht, key);
@@ -748,6 +786,8 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
   SCM func, l, prev;
 
   if (!HASHP(ht)) error_bad_hash_table(ht);
+
+  if (HASH_CONSTP(ht)) error_hash_immutable(ht);
 
   l = prev = STk_nil;
 
@@ -928,6 +968,8 @@ int STk_init_hash(void)
 
   /* Define primitives */
   ADD_PRIMITIVE(make_hash);
+  ADD_PRIMITIVE(hash_table_lock);
+  ADD_PRIMITIVE(hash_table_mutablep);
   ADD_PRIMITIVE(hashtablep);
   ADD_PRIMITIVE(hash_table_size);
   ADD_PRIMITIVE(hash_table_eqv_func);

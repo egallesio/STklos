@@ -45,6 +45,8 @@
 #define HASH_OBARRAY_FLAG   1   /* Only for the symbol table      */
 #define HASH_VAR_FLAG       2   /* For modules (keys are symbols) */
 #define HASH_SCM_FLAG       3   /* For secheme hash tables        */
+/* 4, '100' means the table is constant. do NOT define macros for 5,6,7. */
+#define HASH_CONST          4
 
 typedef enum {hash_system, hash_eqp, hash_stringp, hash_general} hash_type;
 
@@ -71,6 +73,8 @@ struct hash_table_obj {
 #define HASH_NEWSIZE(h)         (((struct hash_table_obj *) (h))->rebuild_size)
 #define HASH_SHIFT(h)           (((struct hash_table_obj *) (h))->down_shift)
 #define HASH_MASK(h)            (((struct hash_table_obj *) (h))->mask)
+
+#define HASH_CONSTP(h)          (BOXED_INFO(h) & HASH_CONST)
 
 #define HASH_TYPE(h)            (((struct hash_table_obj *) (h))->type)
 #define HASH_COMPAR(h)          (((struct hash_table_obj *) (h))->comparison)
