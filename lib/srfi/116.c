@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 01-May-2022 20:12
- * Last file update: 18-May-2022 17:16 (eg)
+ * Last file update: 28-Jun-2022 16:19 (eg)
  */
 
 
@@ -177,8 +177,8 @@ void
 STk_mutable_tree(SCM l) {
     if (CONSP(l)) {
         BOXED_INFO(l) &= (~CONS_CONST);
-        STk_immutable_tree(CAR(l));
-        STk_immutable_tree(CDR(l));
+        STk_mutable_tree(CAR(l));
+        STk_mutable_tree(CDR(l));
     }
     return;
 }
