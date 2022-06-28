@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 01-May-2022 20:12
- * Last file update: 28-Jun-2022 16:19 (eg)
+ * Last file update: 28-Jun-2022 16:40 (eg)
  */
 
 
@@ -151,34 +151,34 @@ doc>
 /* CONCATENATE, REVERSE, ZIP & COUNT */
 /*                                   */
 
-void
-STk_immutable_list(SCM l) {
+static void
+immutable_list(SCM l) {
     for(;CONSP(l); l = CDR(l))
         BOXED_INFO(l) |= CONS_CONST;
 }
 
-void
-STk_mutable_list(SCM l) {
+static void
+mutable_list(SCM l) {
     for(;CONSP(l); l = CDR(l))
         BOXED_INFO(l) &= (~CONS_CONST);
 }
 
-void
-STk_immutable_tree(SCM l) {
+static void
+immutable_tree(SCM l) {
     if (CONSP(l)) {
         BOXED_INFO(l) |= CONS_CONST;
-        STk_immutable_tree(CAR(l));
-        STk_immutable_tree(CDR(l));
+        immutable_tree(CAR(l));
+        immutable_tree(CDR(l));
     }
     return;
 }
 
-void
-STk_mutable_tree(SCM l) {
+static void
+mutable_tree(SCM l) {
     if (CONSP(l)) {
         BOXED_INFO(l) &= (~CONS_CONST);
-        STk_mutable_tree(CAR(l));
-        STk_mutable_tree(CDR(l));
+        mutable_tree(CAR(l));
+        mutable_tree(CDR(l));
     }
     return;
 }
@@ -221,7 +221,7 @@ DEFINE_PRIMITIVE("iappend", srfi_116_iappend, vsubr, (int argc, SCM *argv))
     default: res = STk_append(argc, argv);
              break;
   }
-  if (CONSP(res)) STk_immutable_list(res);
+  if (CONSP(res)) immutable_list(res);
   return res;
 }
 
@@ -307,14 +307,14 @@ doc>
 DEFINE_PRIMITIVE("list->ilist", srfi_116_list_ilist, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_immutable_list(z);
+    immutable_list(z);
     return z;
 }
 
 DEFINE_PRIMITIVE("ilist->list", srfi_116_ilist_list, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_mutable_list(z);
+    mutable_list(z);
     return z;
 }
 
@@ -338,14 +338,14 @@ doc>
 DEFINE_PRIMITIVE("tree->itree", srfi_116_tree_itree, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_immutable_tree(z);
+    immutable_tree(z);
     return z;
 }
 
 DEFINE_PRIMITIVE("itree->tree", srfi_116_itree_tree, subr1, (SCM l))
 {
     SCM z = STk_list_copy(l);
-    STk_mutable_tree(z);
+    mutable_tree(z);
     return z;
 }
 
@@ -367,14 +367,14 @@ doc>
 DEFINE_PRIMITIVE("list-immutable+!", srfi_116_list_immutable_plus, subr1, (SCM obj))
 {
     if (!CONSP(obj)) STk_error("bad list ~S", obj);
-    STk_immutable_list(obj);
+    immutable_list(obj);
     return obj;
 }
 
 DEFINE_PRIMITIVE("list-immutable!", srfi_116_list_immutable, subr1, (SCM obj))
 {
     if (!CONSP(obj)) STk_error("bad list ~S", obj);
-    STk_immutable_list(obj);
+    immutable_list(obj);
     return STk_void;
 }
 
