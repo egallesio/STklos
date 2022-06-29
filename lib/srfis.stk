@@ -138,7 +138,7 @@
     (98 "Interface to access environment variables")
     ;; 99 ERR5RS Records
     (100 "define-lambda-object" () "srfi-100")
-    ;; 101  Purely Functional Random-Access Pairs and Lists
+    (101 "Purely Functional Random-Access Pairs and Lists" (rpair) "srfi-101")
     ;; 102
     ;; 103  ....... withdrawn
     ;; 104  ....... withdrawn

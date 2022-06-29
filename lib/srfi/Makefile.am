@@ -86,6 +86,7 @@ SRC_STK   = 1.stk   \
             95.stk  \
             96.stk  \
             100.stk \
+            101.stk \
             111.stk \
             112.stk \
             113.stk \
@@ -205,6 +206,7 @@ SRC_OSTK =  1.ostk   \
             95.ostk  \
             96.ostk  \
             100.ostk \
+            101.ostk \
             111.ostk \
             112.ostk \
             113.ostk \
@@ -318,6 +320,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
 95.ostk:  ../scheme/sort.$(SO)
+101.ostk: ../scheme/rlist.$(SO)
 113.ostk: ../scheme/set.ostk
 115.ostk: ../scheme/regex.ostk
 116.ostk: ../scheme/ilist.$(SO)
@@ -353,6 +356,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
+101.$(SO): 101-incl.c 101.c
 116.$(SO): 128.ostk 116-incl.c 116.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
@@ -377,6 +381,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme && $(MAKE) lseq.ostk)
 ../scheme/sort.$(SO):
 	(cd ../scheme && $(MAKE) sort.$(SO))
+../scheme/rlist.$(SO):
+	(cd ../scheme && $(MAKE) rlist.$(SO))
 ../scheme/generator.ostk:
 	(cd ../scheme && $(MAKE) generator.ostk)
 ../scheme/ideque.ostk:
