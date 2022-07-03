@@ -1409,7 +1409,42 @@ DEFINE_PRIMITIVE("inexact?", inexactp, subr1, (SCM z))
   return MAKE_BOOLEAN(!isexactp(z));
 }
 
+/*
+<doc EXT integer-length
+ * (integer-length n)
+ *
+ * |Integer-length| returns the necessary number of bits to represent |n|
+ * in 2's complement, assuming a leading 1 bit when |n| is negative. When
+ * |n| is zero, the procedure returns zero.
+ * This procedure works for any type of integer (fixnums and bignums).
+ *
+ * @lisp
+ * (integer-length -3)            => 2
+ * (integer-length -2)            => 1
+ * (integer-length -1)            => 0
+ * (integer-length 0)             => 0
+ * (integer-length 1)             => 1
+ * (integer-length 2)             => 2
+ * (integer-length 3)             => 2
+ * (integer-length (expt 2 5000)) => 5001
+ * @end lisp
+doc>
+ */
+DEFINE_PRIMITIVE("integer-length", integer_length, subr1, (SCM z))
+{
+  switch (TYPEOF(z)) {
+    case tc_integer:
+	long n = INT_VAL(z);
+	if (n == -1 || n == 0) return MAKE_INT(0);
+	if (n>0)  return MAKE_INT( (long) log2( (float) n) + 1 ); /* n >  0 */
+	return MAKE_INT( (long) log2( (float) labs(n+1) ) + 1 );  /* n < -1 */
 
+    case tc_bignum:  return MAKE_INT(mpz_sizeinbase(BIGNUM_VAL(z),2));
+
+    default: STk_error ("bad integer ~S", z);
+  }
+  return STk_void; /* Never reached */
+}
 
 /*
 <doc  = < > <= >=
@@ -3364,6 +3399,7 @@ int STk_init_number(void)
   ADD_PRIMITIVE(integerp);
   ADD_PRIMITIVE(exactp);
   ADD_PRIMITIVE(inexactp);
+  ADD_PRIMITIVE(integer_length);
 
   ADD_PRIMITIVE(numeq);
   ADD_PRIMITIVE(numlt);
