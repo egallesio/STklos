@@ -508,7 +508,7 @@ doc>
 (define (disassemble-expr expr :optional (show-consts #f)
                                          (port (current-output-port)))
   (define (compile-expression e)
-    (compile e '() e #f)
+    (compile e #f e #f)
     (emit 'END-OF-CODE)
     (assemble (reverse! *code-instr*)))
 
