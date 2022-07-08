@@ -1,0 +1,205 @@
+;;;;
+;;;; bytevector.stk       -- Implementation of R7RS-Large bytevectors
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 07-Jul-2022 21:02
+;;;; Last file update: 08-Jul-2022 14:12 (jpellegrini)
+
+(select-module scheme/bytevector)
+
+
+;; Some of the procedures are mandatory in R7RS, so they are
+;; already present in the SCHEME module
+(import (only SCHEME
+              make-bytevector
+              bytevector?
+              bytevector-length
+              bytevector-copy!
+              bytevector-copy
+              bytevector-u8-ref
+              bytevector-u8-set!
+              utf8->string
+              string->utf8))
+
+
+(export endianness
+        ;; native-endianness   -> in C
+        bytevector?         ;; -> already in STklos
+        make-bytevector     ;; -> already in STklos, DIFFERENT SEMANTICS!
+        bytevector-length   ;; -> already in STklos
+        ;; bytevector=?     ;; -> in C
+        ;; bytevector-fill!    -> in C
+        bytevector-copy!    ;; -> already in STklos, DIFFERENT ARGUMENT ORDER!
+        bytevector-copy     ;; -> already in STklos
+        ;; bytevector-s8-ref   -> in C
+        ;; bytevector-s8-set!  -> in C
+        bytevector-u8-ref   ;; -> already in STklos
+        bytevector-u8-set!  ;; -> already in STklos
+        utf8->string        ;; -> already in STklos
+        string->utf8        ;; -> already in STklos
+        bytevector->u8-list
+        u8-list->bytevector
+        bytevector->uint-list
+        bytevector->sint-list
+        uint-list->bytevector
+        sint-list->bytevector
+        ;; utf16->string       -> in C
+        ;; string->utf16       -> in C
+        ;; utf32->string       -> in C
+        ;; string->utf32       -> in C
+        )
+
+(define s:make-bytevector  (symbol-value 'make-bytevector  (find-module 'SCHEME)))
+(define s:bytevector-copy! (symbol-value 'bytevector-copy! (find-module 'SCHEME)))
+
+#|
+<doc endianness
+ * (endianness endianness-symbol)
+ *
+ * The name of |endianness-symbol| must be a symbol describing an 
+ * endianness.  An implementation must support at least the symbols big
+ * and little, but may support other endianness symbols.
+ * |(endianness endianness-symbol)| evaluates to the symbol named
+ * |endianness-symbol|. Whenever one of the procedures operating on
+ * bytevectors accepts an endianness as an argument, that argument must
+ * be one of these symbols. It is a syntax violation for |endianness-symbol|
+ * to be anything other than |little| or |big|.
+doc>
+|#
+(define-macro (endianness x)
+  (if (memq x '(little big))
+      `(quote ,x)
+      `(syntax-error "bad endianness symbol ~S" (quote ,x))))
+
+;; Wrapper to create an R6RS-like version of make-bytevector.
+;; R7RS-Large is incompatible with R7RS-Small in this aspect.
+(define (make-bytevector k :optional (fill 0))
+  (s:make-bytevector k (if (negative? fill)
+                           (fx+ fill 256)
+                           fill)))
+
+;; Wrapper to create an R6RS-like version of bytevector-copy!.
+;; Quite weird, but it's what R7RS-large does: it overrides
+;; R7RS-small!
+(define (bytevector-copy! source
+                          source-start
+                          target
+                          target-start
+                          k)
+  (s:bytevector-copy! target target-start
+                      source source-start
+                      (fx+ source-start k)))
+
+(define (bytevector->u8-list b)
+  (unless (bytevector? b) (error "bad bytevector ~S" b))
+  (let ((len (bytevector-length b)))
+    (let loop ((lst ()) (i 0))
+      (if (>= i len)
+          lst
+          (cons (bytevector-u8-ref b i) (loop lst (fx+ i 1)))))))
+
+(define (u8-list->bytevector lst)
+  (unless (list? lst) (error "bad list ~S" lst))
+  (let ((b (make-bytevector (length lst))))
+    (let loop ((lst lst) (i 0))
+      (unless (null? lst)
+        (bytevector-u8-set! b i (car lst))
+        (loop (cdr lst) (fx+ i 1)))
+      b)))
+
+(define (bytevector->uint-list b end size)
+  (when (not (bytevector? b))
+    (error "bad bytevector ~S" b))
+  (when (not (memq end '(little big)))
+    (error "bad endianness ~S" end))
+  (when (not (and (integer? size)
+                  (>= size 0)))
+    (error "bad integer ~S" size))
+  (when (positive? (remainder (bytevector-length b) size))
+    (error "bytevector length ~S is not multiple if chunk size ~S"
+           (bytevector-length b) size))
+
+  (let loop ((i (- (bytevector-length b) size))
+             (lst '()))
+    (if (>= i 0)
+        (loop (- i size)
+              (cons (bytevector-uint-ref b i end size) lst))
+        lst)))
+
+(define (bytevector->sint-list b end size)
+  (when (not (bytevector? b))
+    (error "bad bytevector ~S" b))
+  (when (not (memq end '(little big)))
+    (error "bad endianness ~S" end))
+  (when (not (and (integer? size)
+                  (>= size 0)))
+    (error "bad integer ~S" size))
+  (when (positive? (remainder (bytevector-length b) size))
+    (error "bytevector length ~S is not multiple if chunk size ~S"
+           (bytevector-length b) size))
+
+  (let loop ((i (- (bytevector-length b) size))
+             (lst '()))
+    (if (>= i 0)
+        (loop (- i size)
+              (cons (bytevector-sint-ref b i end size) lst))
+        lst)))
+
+(define (uint-list->bytevector lst end size)
+  (when (not (list? lst))
+    (error "bad bytevector ~S" b))
+  (when (not (memq end '(little big)))
+    (error "bad endianness ~S" end))
+  (when (not (and (integer? size)
+                  (>= size 0)))
+    (error "bad integer ~S" size))
+  (let ((l-len (length lst)))
+    (let ((b-len (* l-len size)))
+      (let ((b (make-bytevector b-len)))
+        (let loop ((i 0)
+                   (ptr lst))
+          (if (>= i b-len)
+              b
+              (begin
+                (bytevector-uint-set! b i (car ptr) end size)
+                (loop (fx+ i size) (cdr ptr)))))))))
+
+
+
+(define (sint-list->bytevector lst end size)
+  (when (not (list? lst))
+    (error "bad bytevector ~S" b))
+  (when (not (memq end '(little big)))
+    (error "bad endianness ~S" end))
+  (when (not (and (integer? size)
+                  (>= size 0)))
+    (error "bad integer ~S" size))
+  (let ((l-len (length lst)))
+    (let ((b-len (* l-len size)))
+      (let ((b (make-bytevector b-len)))
+        (let loop ((i 0)
+                   (ptr lst))
+          (if (>= i b-len)
+              b
+              (begin
+                (bytevector-sint-set! b i (car ptr) end size)
+                (loop (fx+ i size) (cdr ptr)))))))))
+
+(provide "scheme-bytevector")
