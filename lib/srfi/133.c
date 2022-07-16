@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Mar-2021 12:14 (jpellegrini)
- * Last file update:  3-Dec-2021 07:27 (jpellegrini)
+ * Last file update: 16-Jul-2022 19:43 (eg)
  */
 
 
@@ -152,14 +152,6 @@ DEFINE_PRIMITIVE("%vector-reverse-copy!",srfi_133__nvector_reverse_copy,subr5,(S
 
        So that restriction is also true for vector-reverse-copy!.
 
-       However, I know of no way to do that without allocating extra
-       space for REVERSE copying of overlapping parts of the same
-       vector.
-
-       We allocate new space *of the size of the part being copied*,
-       so if the vecor has a billion elements and only 10 are being
-       copied, then we allocate 10 cells.
-       
        Of course, we split this in two cases, overlapping and
        non-overlapping...
 
@@ -167,20 +159,27 @@ DEFINE_PRIMITIVE("%vector-reverse-copy!",srfi_133__nvector_reverse_copy,subr5,(S
 
     int size = csend - csstart + 1;
     int ctend  = ctstart + size;
-    
+
     if (target == source &&
-	(csend >= ctstart || ctend <= csstart ||
-	 (csend == ctend && csstart == ctstart))) {
-	SCM *tmp = STk_must_malloc_atomic(sizeof (SCM) * size);
-	for (int i = csstart; i <= csend; i++)
-	    tmp[size - i - 1] = VECTOR_DATA(source)[i];
-	memcpy(&VECTOR_DATA(target)[ctstart], tmp, size * sizeof(SCM));
+        (csend >= ctstart || ctend <= csstart ||
+         (csend == ctend && csstart == ctstart))) {
+      SCM *v = VECTOR_DATA(target);
+
+      // copy (in order) to destination
+      for (int i = csend, j=ctend-1; j >= ctstart; i--, j--) {
+        v[j] = v[i];
+      }
+
+      // reverse in place
+      for (int i = ctstart, j = ctend-1; j > i; i++, j--) {
+        SCM tmp = v[i]; v[i] = v[j]; v[j] = tmp;
+      }
     } else {
-	while (csend >= csstart) {
+      while (csend >= csstart) {
 	    VECTOR_DATA(target)[ctstart] = VECTOR_DATA(source)[csend];
 	    ctstart++;
 	    csend--;
-	}
+      }
     }
     return STk_void;
 }
