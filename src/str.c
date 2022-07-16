@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  8-Jan-2022 20:49 (eg)
+ * Last file update: 16-Jul-2022 17:20 (eg)
  */
 
 #include <ctype.h>
@@ -556,7 +556,7 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
  * characters in the same positions, otherwise returns |#f|. |String-ci=?|
  * treats upper and lower case letters as though they were the same character,
  * but |string=?| treats upper and lower case as distinct characters.
- * 
+ *
  * NOTE: R5RS version of these functions accept only two arguments.
 doc>
  */
@@ -578,7 +578,7 @@ doc>
  * characters. If two strings differ in length but are the same up to the
  * length of the shorter string, the shorter string is considered to be
  * lexicographically less than the longer string.
- * 
+ *
  * NOTE: R5RS version of these functions accept only two arguments.
 doc>
  */
@@ -697,7 +697,7 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
  * It is guaranteed that string-append! will return the same object that
  * was passed to it as first argument, whose size may be larger.
  *
- * 
+ *
  * NOTE: This function is defined in SRFI-118.
 doc>
  */
@@ -779,7 +779,9 @@ int get_substring_size(SCM string, long from, long to) {
 
 /*
 <doc EXT string-replace!
- * (string-replace! dst dst-start dst-end src [src-start [src-end]])
+ * (string-replace! dst dst-start dst-end src)
+ * (string-replace! dst dst-start dst-end src src-start)
+ * (string-replace! dst dst-start dst-end src src-start src-end)
  *
  * Replaces the characters of the variable-size string dst (between
  * dst-start and dst-end) with the characters of the string src
@@ -796,12 +798,18 @@ int get_substring_size(SCM string, long from, long to) {
  *
  * It is guaranteed that string-replace! will return the same object that
  * was passed to it as first argument, whose size may be larger.
- * 
+ *
  * NOTE: This function is defined in SRFI-118.
 doc>
  */
 DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv))
 {
+  if (argc<4 || argc >6) {
+    STk_error("incorrect number of arguments (%d)", argc);
+    return STk_void;
+  }
+
+  /* Number of parameters is OK */
   SCM dst = argv[0];
   SCM src = argv[-3];
   long dst_start, dst_end, src_start, src_end;
@@ -828,8 +836,9 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
     if (  src_end < 0 ||   src_end > STRING_LENGTH(src))
       error_index_out_of_bound(src, argv[-5]);
     break;
-  default: STk_error("incorrect number of arguments (%d)", argc);
-    return STk_void;      /* for the compiler */
+  default:
+    // already tested before. Needed to avoid warnings
+    return STk_void;
   }
 
   if (!INTP(argv[-1])) error_bad_index(argv[-1]);
@@ -989,7 +998,7 @@ DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
  *
  * Returns a newly allocated copy of the part of the given |string|
  * between |start| and |stop|.
- * 
+ *
  * NOTE: The R5RS version of |string-copy| accepts only one argument.
 doc>
 */
