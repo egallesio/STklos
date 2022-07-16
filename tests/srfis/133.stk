@@ -174,3 +174,22 @@
 (vector-unfold-right! (lambda (i x y) (values (+ i x y) (+ x 1) (+ x 1))) vur2 1 4 0 0)
 (test "vectors/mutation 19" '#(1 5 4 3 5) (vector-copy vur2))
 
+
+;;;
+;;; Extra tests
+;;;
+
+;; From Shiro Kawai, test for SRFI 43 (which is actually valid for
+;; SRFI 133):
+
+(test "vector-reverse-copy! self0"
+       '#(e d c b a)
+       (let ((v (vector 'a 'b 'c 'd 'e)))
+         (vector-reverse-copy! v 0 v)
+         v))
+
+(test "vector-reverse-copy! self1"
+      '#(b a c d e)
+      (let ((v (vector 'a 'b 'c 'd 'e)))
+        (vector-reverse-copy! v 0 v 0 2)
+        v))
