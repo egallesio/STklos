@@ -764,7 +764,7 @@ long STk_integer2int32(SCM n, int *overflow)
 #else                             /* longs are more than 32 bits (probably 64) */
     long val = INT_VAL(n);
 
-    if ((- INT32_MAX - 1) <= val && val < INT32_MAX)
+    if ((- INT32_MAX - 1) <= val && val <= INT32_MAX)
       return val;
     else {
       *overflow = 1;
@@ -793,7 +793,7 @@ unsigned long STk_integer2uint32(SCM n, int *overflow)
 #if (ULONG_MAX == UINT32_MAX)   /* unsigned longs are on 32 bits */
       return (unsigned long) INT_VAL(n);
 #else                           /* longs are more than 32 bits (probably 64) */
-      if (val < UINT32_MAX)
+      if (val <= UINT32_MAX)
         return val;
       else {
         *overflow = 1;
