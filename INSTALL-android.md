@@ -154,6 +154,13 @@ Configure: in order to install STklos for usage within Termux, we use the prefix
 
 ```
 ./configure --prefix=/data/data/com.termux/files/usr/
+```
+
+Note: you can pass `CFLAGS` do configure, but do not pass `CFLAGS=-DSTK_DEBUG`, because
+the debugging code in STklos uses `execinfo.h`, which Bionic libc (in Termux) does not
+support.
+
+```
 make
 make test
 ```
