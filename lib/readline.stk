@@ -175,7 +175,13 @@
   (let* ((suffix (%shared-library-suffix))
          (res (or (try-initialize (string-append "libreadline." suffix))
                   (try-initialize (string-append "libedit."  suffix)))))
-    (when (and res (try-load (string-append "readline-complete." suffix)))
+    (when (and res
+               ;; It seems that rl_attempted_completion_function is not
+               ;; usable or some reason on Android, so we temporarilly
+               ;; disable it:
+               (not (eq? 'android (running-os)))
+               ;;
+               (try-load (string-append "readline-complete." suffix)))
       ;; We have found a readline library. Try to load completion support
       (%init-readline-completion-function readline-completion-generator))
     res))
