@@ -5174,6 +5174,14 @@ then :
   printf "%s\n" "#define HAVE_UNISTD_H 1" >>confdefs.h
 
 fi
+ac_fn_c_check_header_compile "$LINENO" "execinfo.h" "ac_cv_header_execinfo_h" "$ac_includes_default"
+if test "x$ac_cv_header_execinfo_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_EXECINFO_H 1" >>confdefs.h
+
+fi
+
+
 
 
 ### Checks for typedefs, structures, and compiler characteristics.
@@ -6464,6 +6472,63 @@ then :
   printf "%s\n" "#define HAVE_STRTOUL 1" >>confdefs.h
 
 fi
+
+
+
+  for ac_func in backtrace
+do :
+  ac_fn_c_check_func "$LINENO" "backtrace" "ac_cv_func_backtrace"
+if test "x$ac_cv_func_backtrace" = xyes
+then :
+  printf "%s\n" "#define HAVE_BACKTRACE 1" >>confdefs.h
+
+else $as_nop
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for backtrace in -lexecinfo" >&5
+printf %s "checking for backtrace in -lexecinfo... " >&6; }
+if test ${ac_cv_lib_execinfo_backtrace+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lexecinfo  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char backtrace ();
+int
+main (void)
+{
+return backtrace ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_execinfo_backtrace=yes
+else $as_nop
+  ac_cv_lib_execinfo_backtrace=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_execinfo_backtrace" >&5
+printf "%s\n" "$ac_cv_lib_execinfo_backtrace" >&6; }
+if test "x$ac_cv_lib_execinfo_backtrace" = xyes
+then :
+  printf "%s\n" "#define HAVE_LIBEXECINFO 1" >>confdefs.h
+
+  LIBS="-lexecinfo $LIBS"
+
+fi
+
+fi
+
+done
 
 
 ### ======================================================================

@@ -18,6 +18,9 @@
 /* Define to 1 if you have the `atexit' function. */
 #undef HAVE_ATEXIT
 
+/* Define to 1 if you have the `backtrace' function. */
+#undef HAVE_BACKTRACE
+
 /* System provides dlopen */
 #undef HAVE_DLOPEN
 
@@ -26,6 +29,9 @@
 
 /* Define to 1 if you have the `endpwent' function. */
 #undef HAVE_ENDPWENT
+
+/* Define to 1 if you have the <execinfo.h> header file. */
+#undef HAVE_EXECINFO_H
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
@@ -74,6 +80,9 @@
 
 /* Define to 1 if you have the `isascii' function. */
 #undef HAVE_ISASCII
+
+/* Define to 1 if you have the `execinfo' library (-lexecinfo). */
+#undef HAVE_LIBEXECINFO
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H

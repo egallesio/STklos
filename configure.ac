@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 13-Mar-2022 19:26 (eg)
+### Last file update: 22-Jul-2022 20:11 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -47,7 +47,9 @@ AC_PROG_MKDIR_P
 AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 AC_CHECK_PROG(ASCIIDOCTOR, asciidoctor, "asciidoctor", "../adoc-fake.sh")
 ### Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h execinfo.h])
+
+
 
 ### Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -67,6 +69,9 @@ AC_FUNC_REALLOC
 AC_FUNC_STRCOLL
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday glob inet_ntoa isascii memchr memmove memset mkdir modf putenv rmdir select socket sqrt strcasecmp strchr strerror strrchr strstr strtoul])
+
+AC_CHECK_FUNCS(backtrace, , AC_CHECK_LIB(execinfo, backtrace))
+
 
 ### ======================================================================
 ### Various stuff done by hand

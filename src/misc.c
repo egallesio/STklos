@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  1-May-2022 18:01 (eg)
+ * Last file update: 29-Jul-2022 14:51 (eg)
  */
 
 #include "stklos.h"
@@ -29,7 +29,9 @@
 #include "git-info.h"
 
 #ifdef STK_DEBUG
-#include <execinfo.h>
+  #ifdef HAVE_BACKTRACE
+     #include <execinfo.h>
+  #endif
 
 int STk_interactive_debug = 0;
 #endif
@@ -572,6 +574,7 @@ DEFINE_PRIMITIVE("%test", test, subr1, (SCM s))
 
 DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 {
+# ifdef HAVE_BACKTRACE
   void *buffer[BACKTRACE_SIZE];
   int n;
 
@@ -581,6 +584,9 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
   }
 
   backtrace_symbols_fd(buffer, n, 2);
+#else
+  STk_debug("backtrace is not available on this system. Sorry.");
+#endif
   return STk_void;
 }
 #endif
