@@ -7416,12 +7416,103 @@ case `uname -s` in
     ;;
 esac
 
-# Adapt libraries that must be loaded fo systems with broken RTLD_GLOBAL (as Android)
+# Adapt libraries that must be loaded for systems with broken RTLD_GLOBAL (as Android)
 case $UNAME_O in
-  Android) DLLIBS="$DLLIBS -lc -lm";;
+  Android) DLLIBS="$DLLIBS -lc -lm"
+           # Test if we have readline lib or libedit
+           { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for readline in -lreadline" >&5
+printf %s "checking for readline in -lreadline... " >&6; }
+if test ${ac_cv_lib_readline_readline+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lreadline $LIBS $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char readline ();
+int
+main (void)
+{
+return readline ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_readline_readline=yes
+else $as_nop
+  ac_cv_lib_readline_readline=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_readline_readline" >&5
+printf "%s\n" "$ac_cv_lib_readline_readline" >&6; }
+if test "x$ac_cv_lib_readline_readline" = xyes
+then :
+  HAVE_READLINE="yes"
+else $as_nop
+  HAVE_READLINE="no"
+fi
+
+           if test "$HAVE_READLINE" = "yes" ;then
+               DLLIBS="$DLLIBS -lreadline";
+           else
+               { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for readline in -ledit" >&5
+printf %s "checking for readline in -ledit... " >&6; }
+if test ${ac_cv_lib_edit_readline+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ledit $LIBS $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char readline ();
+int
+main (void)
+{
+return readline ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_edit_readline=yes
+else $as_nop
+  ac_cv_lib_edit_readline=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_edit_readline" >&5
+printf "%s\n" "$ac_cv_lib_edit_readline" >&6; }
+if test "x$ac_cv_lib_edit_readline" = xyes
+then :
+  HAVE_LIBEDIT="yes"
+else $as_nop
+  HAVE_LIBEDIT="no"
+fi
+
+               if "$HAVE_LIBEDIT" = "yes" ;then
+                  DLLIBS="$DLLIBS -ledit";
+               fi
+           fi;;
   *) DLLIBS="";;
 esac
-
 
 ### Output files
 

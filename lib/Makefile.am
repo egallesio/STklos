@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Jun-2022 09:42 (eg)
+# Last file update: 29-Jul-2022 17:27 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme stklos streams srfi
@@ -193,6 +193,11 @@ ffi.ostk: bigmatch.ostk
 recette.ostk: pretty-print.ostk
 slib.ostk: slib.stk STklos.init
 
+readline-complete.@SH_SUFFIX@: readline-complete.c 
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
+	-c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@ @RDLINE@
+	/bin/rm -f $*.o
 
 #
 # SRFIs support

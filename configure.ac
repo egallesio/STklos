@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 22-Jul-2022 20:11 (eg)
+### Last file update: 29-Jul-2022 17:20 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -526,12 +526,22 @@ case `uname -s` in
     ;;
 esac
 
-# Adapt libraries that must be loaded fo systems with broken RTLD_GLOBAL (as Android)
+# Adapt libraries that must be loaded for systems with broken RTLD_GLOBAL (as Android)
+RDLINE="";        # Necessary for Android
 case $UNAME_O in
-  Android) DLLIBS="$DLLIBS -lc -lm";;
+  Android) # Test if we have readline lib or libedit
+           DLLIBS="$DLLIBS -lc -lm"
+           AC_CHECK_LIB(readline, readline, HAVE_READLINE="yes", HAVE_READLINE="no", $LIBS)
+           if test "$HAVE_READLINE" = "yes" ;then
+              RDLINE="-lreadline";
+            else
+                AC_CHECK_LIB(edit, readline, HAVE_LIBEDIT="yes", HAVE_LIBEDIT="no", $LIBS)
+                if "$HAVE_LIBEDIT" = "yes" ;then
+                   RDLINE="-ledit";
+                fi
+            fi;;
   *) DLLIBS="";;
 esac
-
 
 ### Output files
 AC_SUBST(STKCFLAGS)
@@ -575,6 +585,8 @@ AC_SUBST(PCREPKG)
 AC_SUBST(FFI)
 AC_SUBST(FFILIB)
 AC_SUBST(FFIINC)
+# readline completion support 
+AC_SUBST(RDLINE)
 
 AC_SUBST(THREADS)
 AC_SUBST(CONF_SUMMARY)
