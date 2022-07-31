@@ -68,8 +68,8 @@ char *STk_utf8_grab_char(char *str, uint32_t *c) /* result = pos. after current 
     return str + 3;
   }
 
-  *c = ((buff[0] & 0x0f) << 16) +
-       ((buff[1] & 0x3f) <<  6) +
+  *c = ((buff[0] & 0x07) << 18) +
+       ((buff[1] & 0x3f) << 12) +
        ((buff[2] & 0x3f) <<  6) +
         (buff[3] & 0x3f);
   return str + 4;

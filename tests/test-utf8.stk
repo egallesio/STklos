@@ -304,6 +304,26 @@
         '(1 2 3)
         ( (λ λ λ) 1 2 3)))
 
+(test-subsection "Integer <-> character UTF-8 conversion")
+
+;; #xD800 = start of surrogate range
+(dotimes (i #xD800)
+  (test "list->string / string->list unicode range (low)"
+        #t
+        (equal? (string->list
+                 (list->string
+                  (list (integer->char i))))
+                (list (integer->char i)))))
+
+;; #xE000   = min unicoode after surrogates
+;; #x10FFFD = max unicode range
+(dotimes (i (- #x10FFFD #xE000))
+  (test "list->string / string->list unicode range (high)"
+        #t
+        (equal? (string->list
+                 (list->string
+                  (list (integer->char (fx+ i #xE000)))))
+                (list (integer->char (fx+ i #xE000))))))
 
 ;;------------------------------------------------------------------
 (test-section-end)
