@@ -1,7 +1,7 @@
 ;;;;                                                    -*- coding utf-8 -*-
 ;;;; test-utf8.stk      -- Test of UTF-8 strings
 ;;;;
-;;;; Copyright © 2011-2020 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update: 13-Jul-2020 15:02 (eg)
+;;;; Last file update: 31-Jul-2022 17:04 (eg)
 ;;;;
 
 (require "test")
@@ -307,23 +307,29 @@
 (test-subsection "Integer <-> character UTF-8 conversion")
 
 ;; #xD800 = start of surrogate range
-(dotimes (i #xD800)
+(let ((fail '())
+      (chr  #f))
+  (dotimes (i #xD800)
+    (set! chr (list (integer->char i)))
+    (unless (equal? (string->list (list->string chr)) chr)
+       (set! fail (cons i fail))))
   (test "list->string / string->list unicode range (low)"
-        #t
-        (equal? (string->list
-                 (list->string
-                  (list (integer->char i))))
-                (list (integer->char i)))))
+        '()
+        fail))
 
 ;; #xE000   = min unicoode after surrogates
 ;; #x10FFFD = max unicode range
-(dotimes (i (- #x10FFFD #xE000))
+(let ((fail '())
+      (chr  #f))
+  (dotimes (i (- #x10FFFD #xE000))
+     (set! chr (list (integer->char (fx+ i #xE000))))
+     (unless (equal? (string->list (list->string chr)) chr)
+       (set! fail (cons i fail))))
+
   (test "list->string / string->list unicode range (high)"
-        #t
-        (equal? (string->list
-                 (list->string
-                  (list (integer->char (fx+ i #xE000)))))
-                (list (integer->char (fx+ i #xE000))))))
+        '()
+        fail))
+
 
 ;;------------------------------------------------------------------
 (test-section-end)
