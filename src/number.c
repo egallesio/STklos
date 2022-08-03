@@ -2919,16 +2919,16 @@ DEFINE_PRIMITIVE("imag-part", imag_part, subr1, (SCM z))
 
 DEFINE_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i))
 {
-  if (STk_realp(r) == STk_false) error_bad_number(r);
-  if (STk_realp(i) == STk_false) error_bad_number(i);
+  if (STk_realp(r) == STk_false) error_not_a_real_number(r);
+  if (STk_realp(i) == STk_false) error_not_a_real_number(i);
   return make_complex(r, i);
 }
 
 
 DEFINE_PRIMITIVE("make-polar", make_polar, subr2, (SCM a, SCM m))
 {
-  if (STk_realp(a) == STk_false) error_bad_number(a);
-  if (STk_realp(m) == STk_false) error_bad_number(m);
+  if (STk_realp(a) == STk_false) error_not_a_real_number(a);
+  if (STk_realp(m) == STk_false) error_not_a_real_number(m);
 
   return make_polar(a, m);
 }
