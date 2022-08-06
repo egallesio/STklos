@@ -34,7 +34,7 @@ History
 STklos is the successor of STk, a Scheme interpreter tightly connected
 to the Tk toolkit, that I have developed since September 1993.
 
-STklos is very similar to STk, for the user, but very different in he
+STklos is very similar to STk, for the user, but very different in the
 implementation. Everything has been rewritten and STklos uses now a
 compiler to a byte-code machine, rather than direct interpretation.
 As a consequence, it is a lot faster than STk.  STklos is also better
@@ -63,13 +63,14 @@ Support for 16 new [**SRFIs**](https://www.stklos.net/srfi.html).
 
 **November 2021**
 The 1.70 version supports 14 new [**SRFIs**](https://www.stklos.net/srfi.html)
-(we have now 98 SRFIs supported). The (new) `extensions` directory contains an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit. 
+(we have now 98 SRFIs supported). The (new) `extensions` directory contains 
+an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit. 
 
 
 SRFI Support
 ------------
 
-Current version of STklos supports some SRFIs (a complete list of
+Current version of STklos supports several SRFIs (a complete list of
 implemented SRFIs is available in the file SUPPORTED-SRFIS in the
 distribution). The goal is to support as much as possible final
 SRFIs. Any help on implementing other SRFIs on STklos is welcome.
