@@ -26,6 +26,14 @@ This is a quick guide to STklos hacking. It’s not detailed, so the
 document doesn’t become huge, and also because after understanding the
 basics, hacking STklos should not be difficult.
 
+== Basic editor configuration
+
+There is a `.editorconfig` file in STklos' root folder, which
+describes the style to be used, and which is automatically used when
+editorconfig is configured ([editorconfig](https://editorconfig.org/)
+helps maintain consistentcoding styles for multiple developers working
+on the same project across various editors and IDEs).
+
 == Directories
 
 The subdirectories in the STklos source tree are:
@@ -228,11 +236,11 @@ MODULE_ENTRY_START("srfi/25")
 {
   SCM module =  STk_create_module(STk_intern("srfi/25"));
   STk_export_all_symbols(module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(...);
   ...
   ...
-  
+
   /* Execute Scheme code */
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
