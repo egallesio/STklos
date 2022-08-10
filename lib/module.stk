@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  8-Jun-2022 11:40 (eg)
+;;;; Last file update: 10-Aug-2022 18:50 (eg)
 ;;;;
 
 ;;=============================================================================
@@ -391,6 +391,17 @@ doc>
 
     ;; Run time expansion
     `(%do-imports (current-module) (list-copy ',imp) #f)))
+
+(define (%%import lib modules)
+  (let ((imp (%parse-imports modules)))
+    ;; Since imported modules can define macros. We need to grab them
+    ;; in case we are just compiling a file to produce a '.ostk' file
+    (for-each (lambda (x)
+                (%grab-file-information (symbol->string (car x))))
+              imp)
+    ;; Do importation at compile time AND at execution time
+    ;(%do-imports  (compiler-current-module) (list-copy imp) #t)
+    (%do-imports lib (list-copy imp) #f)))
 
 
 ;;=============================================================================

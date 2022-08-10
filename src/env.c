@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 27-Jun-2022 21:13 (eg)
+ * Last file update: 10-Aug-2022 18:33 (eg)
  */
 
 #include "stklos.h"
@@ -90,18 +90,22 @@ static SCM all_modules;         /* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)
 {
-  if (MODULE_IS_LIBRARY(module)) {
-    const char *name = MODULE_NAME(module);
+  if (MODULE_NAME(module) == STk_false) {
+    STk_fprintf(port, "#[environment %lx", (unsigned long) module);
+  } else {
+    if (MODULE_IS_LIBRARY(module)) {
+      const char *name = MODULE_NAME(module);
 
-    STk_nputs(port, "#[library ", 11);
-    STk_putc('(', port);
-    for (const char *s = SYMBOL_PNAME(name); *s; s++) {
-      STk_putc((*s == '/') ? ' ': *s, port);
+      STk_nputs(port, "#[library ", 11);
+      STk_putc('(', port);
+      for (const char *s = SYMBOL_PNAME(name); *s; s++) {
+        STk_putc((*s == '/') ? ' ': *s, port);
+      }
+      STk_putc(')', port);
+    } else  {
+      STk_nputs(port, "#[module ", 9);
+      STk_print(MODULE_NAME(module), port, mode);
     }
-    STk_putc(')', port);
-  } else  {
-    STk_nputs(port, "#[module ", 9);
-    STk_print(MODULE_NAME(module), port, mode);
   }
   if (!MODULE_IS_INSTANCIATED(module)) STk_puts(" (*)", port);
   STk_putc(']', port);
@@ -116,20 +120,30 @@ static void register_module(SCM mod)
   MUT_UNLOCK(lck);
 }
 
-static SCM make_module(SCM name)             //FIXME: delete STk_ prefix
+
+static Inline SCM make_empty_environment(SCM name)
 {
   register SCM z;
 
   NEWCELL(z, module);
   MODULE_NAME(z)            = name;
   MODULE_EXPORTS(z)         = STk_nil;
-  MODULE_IMPORTS(z)         = (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
-  MODULE_IS_LIBRARY(z)      = FALSE;
+  MODULE_IMPORTS(z)         = STk_nil;
+  MODULE_IS_LIBRARY(z)      = TRUE;
   MODULE_IS_INSTANCIATED(z) = FALSE;
-  /* Initialize the associated hash table & store the module in the global list*/
+  /* Initialize the associated hash table */
   STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
-  register_module(z);
+  return z;
+}
 
+
+static Inline SCM make_module(SCM name)
+{
+  register SCM z = make_empty_environment(name);
+
+  if (name != STk_void) MODULE_IMPORTS(z) = LIST1(STk_STklos_module);
+  MODULE_IS_LIBRARY(z) = FALSE;
+  register_module(z);
   return z;
 }
 
@@ -174,6 +188,11 @@ void STk_export_all_symbols(SCM module)
 }
 
 /* ==== Undocumented primitives ==== */
+DEFINE_PRIMITIVE("%make-empty-environment", make_empty_env, subr0, (void))
+{
+  return make_empty_environment(STk_false);
+}
+
 
 DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
 {
@@ -207,6 +226,8 @@ DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
   return STk_void;
 }
 
+
+//FIXME: should be a C function, not a primitive
 DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 {
   vm_thread_t *vm = STk_get_current_vm();
@@ -216,6 +237,21 @@ DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
   vm->current_module= module;
   return STk_void;
 }
+
+
+DEFINE_PRIMITIVE("%module-name-set!", module_name_set, subr2,
+                 (SCM module, SCM name))
+{
+  if (!MODULEP(module)) error_bad_module(module);
+  if (!SYMBOLP(name))   error_bad_symbol(name);
+
+  MODULE_NAME(module) = name;
+  MODULE_IS_INSTANCIATED(module) = TRUE;
+  register_module(module);
+
+  return STk_void;
+}
+
 
 DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
                  (SCM importer,SCM imported))
@@ -814,10 +850,12 @@ int STk_late_init_env(void)
   MODULE_IS_INSTANCIATED(Scheme_module) = TRUE;
 
   /* ==== Undocumented primitives ==== */
+  ADD_PRIMITIVE(make_empty_env);
   ADD_PRIMITIVE(create_module);
   ADD_PRIMITIVE(find_inst_module);
   ADD_PRIMITIVE(module2library);
   ADD_PRIMITIVE(select_module);
+  ADD_PRIMITIVE(module_name_set);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
   ADD_PRIMITIVE(populate_scheme_module);
