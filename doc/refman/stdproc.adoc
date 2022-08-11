@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update:  6-Jun-2022 16:40 (eg)
+// Last file update: 11-Aug-2022 15:35 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -461,6 +461,7 @@ need to be quoted in programs.
 {{insertdoc 'receive}}
 {{insertdoc 'dynamic-wind}}
 {{insertdoc 'eval}}
+{{insertdoc 'environment}}
 {{insertdoc 'scheme-report-environment}}
 {{insertdoc 'null-environment}}
 {{insertdoc 'interaction-environment}}

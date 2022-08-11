@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 10-Aug-2022 19:30 (eg)
+;;;; Last file update: 11-Aug-2022 12:15 (eg)
 ;;;;
 
 (require "test")
@@ -1696,6 +1696,17 @@ a")
 (test/error "environment.badargs.1" (environment 1))     ; 1 not module
 (test/error "environment.badargs.2" (environment e 1))   ; 1 not module (2nd arg)
 (test/error "environment.badargs.3" (environment e "n")) ; name should be first arg
+
+
+;; less simpler import specs
+(define e1 (environment '(only (scheme base) + -) '(only (scheme write) display)))
+(define e2 (environment '(prefix (only (scheme base) + -) |foo:|)))
+
+(test "environment only" 3 (length (module-symbols e1)))
+(test "environment only+prefix"  #t (let ((symbs (module-symbols e2)))
+                                      (or (equal? symbs '(foo:+ foo:-))
+                                          (equal? symbs '(foo:- foo:+)))))
+
 
 ;;======================================================================
 (test-subsection "6.13 Input and Output")

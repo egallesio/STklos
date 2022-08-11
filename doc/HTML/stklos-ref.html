@@ -8020,7 +8020,9 @@ This function is defined in SRFI-118.
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(string-replace! dst dst-start dst-end src [src-start [src-end]])</code></strong><br></p>
+<p><strong><code>(string-replace! dst dst-start dst-end src)</code></strong><br>
+<strong><code>(string-replace! dst dst-start dst-end src src-start)</code></strong><br>
+<strong><code>(string-replace! dst dst-start dst-end src src-start src-end)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -9937,6 +9939,53 @@ as data. <code>Environment</code> may be a R<sup>5</sup>RS environment-specifier
 <p></p>
 </div>
 <div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(environment set1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This procedure returns a specifier for the environment that
+results by starting with an empty environment and then
+importing each <strong>set</strong>, considered as an import
+set, into it. The bindings of the environment represented by
+the specifier, as is the environment itself.</p>
+</div>
+<div class="paragraph">
+<p>In STklos,
+- each <code>set</code> argument can be a list (specifying an R<sup>7</sup>RS
+  library) or a symbol (specifying a module).
+- the return environment is an R<sup>7</sup>RS library (which can be
+  passed to <code>eval</code>).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">eval</span> <span class="o">'</span><span class="p">(</span><span class="nb">*</span> <span class="mi">7</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)))</span>    <span class="nv">=&gt;</span> <span class="mi">21</span>
+
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">f</span> <span class="p">(</span><span class="nb">eval</span> <span class="o">'</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+               <span class="p">(</span><span class="nb">null-environment</span> <span class="mi">5</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nf">f</span> <span class="nv">+</span> <span class="mi">10</span><span class="p">))</span>                                     <span class="nv">=&gt;</span> <span class="mi">20</span>
+
+<span class="p">(</span><span class="nb">eval</span> <span class="o">'</span><span class="p">(</span><span class="k">define</span> <span class="nv">foo</span> <span class="mi">32</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)))</span>             <span class="nv">=&gt;</span> <span class="nv">errror</span>
+
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">only</span> <span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)</span> <span class="nv">+</span> <span class="nv">-</span><span class="p">)</span>
+                      <span class="o">'</span><span class="p">(</span><span class="nf">only</span> <span class="p">(</span><span class="nf">scheme</span> <span class="nv">write</span><span class="p">)</span> <span class="nv">display</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nb">length</span> <span class="p">(</span><span class="nf">module-symbols</span> <span class="nv">e</span><span class="p">)))</span>                  <span class="nv">=&gt;</span> <span class="mi">3</span>
+
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">prefix</span> <span class="p">(</span><span class="nf">only</span> <span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)</span> <span class="nv">car</span><span class="p">)</span>
+                               <span class="nv">foo-</span><span class="p">))))</span>
+   <span class="p">(</span><span class="nf">module-symbols</span> <span class="nv">e</span><span class="p">))</span>                            <span class="nv">=&gt;</span> <span class="nv">foo-car</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
 <p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
@@ -10011,7 +10060,8 @@ without the version number (defaults to 5).
 </div>
 <div class="paragraph">
 <p>This procedure returns the environment in the expression are
-evaluated by default (the <strong><em>STklos</em></strong> module).</p>
+evaluated by default (the <strong><em>STklos</em></strong> module). The returned environment
+is mutable.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -28894,7 +28944,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-27 21:17:28 +0200
+Last updated 2022-08-11 15:39:28 +0200
 </div>
 </div>
 </body>
