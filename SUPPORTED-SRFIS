@@ -126,3 +126,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-224: Integer Mappings
     - SRFI-229: Tagged Procedures
     - SRFI-230: Atomic Operations
+    - SRFI-233: INI files
