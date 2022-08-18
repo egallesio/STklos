@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 17-Jun-2022 09:03
-;;;; Last file update: 20-Jun-2022 12:31 (jpellegrini)
+;;;; Last file update: 18-Aug-2022 19:41 (eg)
 ;;;;
 
 
@@ -68,61 +68,5 @@
 
         c128vector?  make-c128vector c128vector c128vector-length c128vector-ref
         c128vector-set! c128vector->list list->c128vector)
-
-
-(%compile-time-define %list->uvector %uvector->list)
-
-;; FIXME: we are re-defining a macro already defined in SRFI-4...
-(define-macro (%uniform-vector-functions tag type)
-  (let ((pred   (string->symbol (format #f "~Avector?" tag)))
-        (make   (string->symbol (format #f "make-~Avector" tag)))
-        (constr (string->symbol (format #f "~Avector" tag)))
-        (len    (string->symbol (format #f "~Avector-length" tag)))
-        (ref    (string->symbol (format #f "~Avector-ref" tag)))
-        (set    (string->symbol (format #f "~Avector-set!" tag)))
-        (v->l   (string->symbol (format #f "~Avector->list" tag)))
-        (l->v   (string->symbol (format #f "list->~Avector" tag)))
-        (dfl    (cond ((memv tag '(f32 f64)) 0.0)
-                      ((memv tag '(c64 c128)) 0.0+0.0i)
-                      (else 0))))
-    `(begin
-       ;; (TAGvector? obj)
-       (define (,pred obj)
-         (%uvector? ,type obj))
-
-       ;; (make-TAGvector n [ TAGvalue ])
-       (define (,make size :optional (default ,dfl))
-         (%make-uvector ,type size default))
-
-       ;; (TAGvector TAGvalue...)
-       (define (,constr . l)
-         (%uvector ,type l))
-
-       ;; (TAGvector-length TAGvect)
-       (define (,len vect)
-         (%uvector-length ,type vect))
-
-       ;; (TAGvector-ref TAGvect i)
-       (define (,ref vect i)
-         (%uvector-ref ,type vect i))
-
-       ;; (TAGvector-set! TAGvect i TAGvalue)
-       (define (,set vect i val)
-         (%uvector-set! ,type vect i val))
-
-       ;; (set! (setter TAGvector-ref) TAGvector-set!)
-       (set! (setter ,ref) ,set)
-
-       ;; (TAGvector->list TAGvect)
-       (define (,v->l vect)
-         (%uvector->list ,type vect))
-
-       ;; (list->TAGvector TAGlist)
-       (define (,l->v lst)
-         (%list->uvector ,type lst)))))
-
-(%uniform-vector-functions c64  10)
-(%uniform-vector-functions c128 11)
-
 
 (provide "srfi-160/base")

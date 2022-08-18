@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 18-May-2022 17:42 (eg)
+// Last file update: 18-Aug-2022 20:56 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -151,6 +151,13 @@ Furthermore, the feature identifier *_stklos_* and *_STklos_* are defined for
 applications which need to know on which Scheme implementation they are
 running on.
 
+// **** SRFI-4
+{{srfi-subsection 4}}
+(((SRFI-160")))
+{{quick-link-srfi 4}} is fully supported and is extended to provide the
+additional *c64vector* and *c128vector* types of {{link-srfi 160}}.
+
+
 // **** SRFI-10
 {{srfi-subsection 10}}
 ((("define-reader-ctor")))

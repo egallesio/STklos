@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Apr-2001 11:36 (eg)
-;;;; Last file update: 19-Apr-2022 13:06 (eg)
+;;;; Last file update: 18-Aug-2022 19:29 (eg)
 ;;;;
 
 
@@ -55,7 +55,13 @@
           f32vector-set! f32vector->list list->f32vector
 
           f64vector?  make-f64vector f64vector f64vector-length f64vector-ref
-          f64vector-set! f64vector->list list->f64vector)
+          f64vector-set! f64vector->list list->f64vector
+
+          c64vector?  make-c64vector c64vector c64vector-length c64vector-ref
+          c64vector-set! c64vector->list list->c64vector
+
+          c128vector?  make-c128vector c128vector c128vector-length c128vector-ref
+          c128vector-set! c128vector->list list->c128vector)
 
 
 ;; Following two definitions have been added here to avoid compilation warnings
@@ -85,7 +91,7 @@
 ;; --jpellegrini
 
 
-;; Avoid warnings 
+;; Avoid warnings
 
   (%compile-time-define %list->uvector %uvector->list)
 
@@ -151,6 +157,11 @@
 
 (%uniform-vector-functions f32 8)
 (%uniform-vector-functions f64 9)
+
+(%uniform-vector-functions c64  10)
+(%uniform-vector-functions c128 11)
+
+
 
 ) ;; End of module
 
