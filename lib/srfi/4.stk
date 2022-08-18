@@ -98,7 +98,7 @@
         (set    (string->symbol (format #f "~Avector-set!" tag)))
         (v->l   (string->symbol (format #f "~Avector->list" tag)))
         (l->v   (string->symbol (format #f "list->~Avector" tag)))
-        (dfl    (if (memv tag '(f32 f64)) 0.0 0)))
+        (dfl    (if (memv tag '(f32 f64 c64 c128)) 0.0 0)))
     `(begin
        ;; (TAGvector? obj)
        (define (,pred obj)
