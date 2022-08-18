@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 17-Jun-2022 09:10
- * Last file update: 18-Aug-2022 18:32 (eg)
+ * Last file update: 18-Aug-2022 18:41 (eg)
  */
 
 #include <float.h>
@@ -39,9 +39,6 @@ static SCM u64_max, s64_min, s64_max;
 
 extern SCM STk_makeuvect(int type, int len, SCM init);
 extern int STk_vector_element_size(int type);
-
-EXTERN_PRIMITIVE("list?", listp, subr1, (SCM x));
-EXTERN_PRIMITIVE("length", list_length, subr1, (SCM l));
 
 /*
  * We use exact->inexact to cast complex vectors in c64 and c128 types
@@ -585,7 +582,7 @@ DEFINE_PRIMITIVE("%uvector=", u_vector_equal, subr2, (SCM t, SCM vecs))
     check_int(t);
     int type = INT_VAL(t);
     if (NULLP(vecs)) return STk_true;
-    if (!STk_listp(vecs))
+    if (STk_int_length(vecs) == -1)
         STk_error("bad uvector list ~S", vecs);
 
     SCM vec2;
@@ -681,8 +678,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
 
     check_procedure(proc);
 
-    /* Fixme: actually check if it's a list? */
-    if (!STk_listp(vecs)) STk_error ("bad list ~S", vecs);
+    if (STk_int_length(vecs) == -1) STk_error ("bad list ~S", vecs);
 
     check_boolean(mutate);
 
@@ -691,7 +687,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
         check_type(CAR(ptr), type);
     }
 
-    long arity = INT_VAL(STk_list_length(vecs));
+    long arity = STk_int_length(vecs);
 
     /* vecs should have at least one element, so CAR and CDR are available: */
     long vec_len = UVECTOR_SIZE(CAR(vecs));
