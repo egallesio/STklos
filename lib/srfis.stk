@@ -198,7 +198,7 @@
     ;; 157  Continuation marks
     (158 "Generators and Accumulators" () "srfi-158")
     ;; 159  Combinator Formatting
-    ;; 160  Homogeneous numeric vector libraries
+    (160 "Homogeneous numeric vector libraries" () "srfi-160")
     (161 "Unifiable Boxes" () "srfi-161")
     ;; 162  Comparators sublibrary
     ;; 163  Enhanced array literals
