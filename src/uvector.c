@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 23-Jun-2022 09:13 (eg)
+ * Last file update: 18-Aug-2022 18:00 (eg)
  */
 
 #include <float.h>
@@ -96,7 +96,7 @@ SCM get_s64_min () { return s64_min; }
 SCM get_s64_max () { return s64_max; }
 
 
-int vector_element_size(int type)
+int STk_vector_element_size(int type)
 {
   /* compute len of one element depending on type.  We assume here
    * that characters use 8 bits and that we are at least on a 32 bits
@@ -199,7 +199,7 @@ int STk_uvector_equal(SCM u1, SCM u2)
     return 0;
 
   /* same length and same type, compare the bytes */
-  int len = vector_element_size(UVECTOR_TYPE(u1)) * UVECTOR_SIZE(u1);
+  int len = STk_vector_element_size(UVECTOR_TYPE(u1)) * UVECTOR_SIZE(u1);
 
   return (memcmp(UVECTOR_DATA(u1), UVECTOR_DATA(u2), len) == 0);
 }
@@ -317,35 +317,35 @@ static void uvector_set(SCM v, long i, SCM value)
     */
     case UVECT_C64:
       if (COMPLEXP(value)) {
-	/* Following what exact->inexact does, we don't signal error on
-	   overflow when converting. This is similar to what other Schemes
-	   do. */
+        /* Following what exact->inexact does, we don't signal error on
+           overflow when converting. This is similar to what other Schemes
+           do. */
         SCM rea = STk_ex2inex(COMPLEX_REAL(value));
-	SCM img = STk_ex2inex(COMPLEX_IMAG(value));
+        SCM img = STk_ex2inex(COMPLEX_IMAG(value));
         /* We'll actually DOWNCAST the number to float + float.  */
         ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(rea);
-	((float *) UVECTOR_DATA(v))[2*i + 1] = (float) REAL_VAL(img);
+        ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) REAL_VAL(img);
         return;
       } else if (REALP(value)){
         ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(value);
-	((float *) UVECTOR_DATA(v))[2*i + 1] = (float) 0.0;
-	return;
+        ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) 0.0;
+        return;
       }
       break;
     case UVECT_C128:
       if (COMPLEXP(value)) {
-	/* Following what exact->inexact does, we don't signal error on
-	   overflow when converting. This is similar to what other Schemes
-	   do. */
+        /* Following what exact->inexact does, we don't signal error on
+           overflow when converting. This is similar to what other Schemes
+           do. */
         SCM rea = STk_ex2inex(COMPLEX_REAL(value));
-	SCM img = STk_ex2inex(COMPLEX_IMAG(value));
+        SCM img = STk_ex2inex(COMPLEX_IMAG(value));
         ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(rea);
-	((double *) UVECTOR_DATA(v))[2*i + 1] = (double) REAL_VAL(img);
-	return;
+        ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) REAL_VAL(img);
+        return;
       } else if (REALP(value)) {
         ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(value);
-	((double *) UVECTOR_DATA(v))[2*i + 1] = (double) 0.0;
-	return;
+        ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) 0.0;
+        return;
       }
       break;
   }
@@ -389,20 +389,20 @@ static SCM uvector_ref(SCM v, long i)
      a double. Forthermore, for c64 vectors, they're downcasted to floats.
     */
     case UVECT_C64:
-	/* Don't return complexes with zero imaginary part! Those are reals... */
-	if ( ( (float) (((float*)UVECTOR_DATA(v))[2*i + 1]) ) == 0.0 )
-	    return STk_double2real( (float) (((float*)UVECTOR_DATA(v))[2*i]) );
-	else
-	    return Cmake_complex(STk_double2real((float) ((float *) UVECTOR_DATA(v))[2*i]),
-				 STk_double2real((float) ((float *) UVECTOR_DATA(v))[2*i + 1]));
+        /* Don't return complexes with zero imaginary part! Those are reals... */
+        if ( ( (float) (((float*)UVECTOR_DATA(v))[2*i + 1]) ) == 0.0 )
+            return STk_double2real( (float) (((float*)UVECTOR_DATA(v))[2*i]) );
+        else
+            return Cmake_complex(STk_double2real((float) ((float *) UVECTOR_DATA(v))[2*i]),
+                                 STk_double2real((float) ((float *) UVECTOR_DATA(v))[2*i + 1]));
 
     case UVECT_C128:
-	/* Don't return complexes with zero imaginary part! Those are reals... */
-	if ( ( (double) (((double*) UVECTOR_DATA(v))[2*i + 1]) ) == 0.0 )
-	    return STk_double2real( (double) (((double*) UVECTOR_DATA(v))[2*i]) );
-	else
-	    return Cmake_complex(STk_double2real(((double *) UVECTOR_DATA(v))[2*i]),
-				 STk_double2real(((double *) UVECTOR_DATA(v))[2*i + 1]));
+        /* Don't return complexes with zero imaginary part! Those are reals... */
+        if ( ( (double) (((double*) UVECTOR_DATA(v))[2*i + 1]) ) == 0.0 )
+            return STk_double2real( (double) (((double*) UVECTOR_DATA(v))[2*i]) );
+        else
+            return Cmake_complex(STk_double2real(((double *) UVECTOR_DATA(v))[2*i]),
+                                 STk_double2real(((double *) UVECTOR_DATA(v))[2*i + 1]));
   }
   return STk_void; /* never reached */
 }
@@ -417,7 +417,7 @@ SCM STk_uvector_get(SCM v, long i)      /* public version of uvector_ref */
  * Uniform vector constructor
  *
  */
-SCM makeuvect(int type, int len, SCM init)
+static SCM makeuvect(int type, int len, SCM init)
 {
   long i, size = 1;
   SCM  z;
@@ -450,6 +450,14 @@ SCM makeuvect(int type, int len, SCM init)
   }
   return z;
 }
+
+
+// public version of makeuvect (used by srfi-160)
+SCM STk_makeuvect(int type, int len, SCM init) 
+{
+  return makeuvect(type, len, init);
+}
+
 
 SCM STk_list2uvector(int type, SCM l)
 {
