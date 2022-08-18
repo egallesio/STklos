@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 17-Jun-2022 09:10
- * Last file update: 18-Aug-2022 18:07 (eg)
+ * Last file update: 18-Aug-2022 18:32 (eg)
  */
 
 #include <float.h>
@@ -34,12 +34,9 @@
     UTILITIES FOR SRFI-160
  ***/
 
-#define UVECTOR_C64  10
-#define UVECTOR_C128 11
+static SCM u64_max, s64_min, s64_max;
 
-extern SCM get_u64_max();
-extern SCM get_s64_min();
-extern SCM get_s64_max();
+
 extern SCM STk_makeuvect(int type, int len, SCM init);
 extern int STk_vector_element_size(int type);
 
@@ -527,13 +524,13 @@ DEFINE_PRIMITIVE("u32?", u32p, subr1, (SCM x))
 DEFINE_PRIMITIVE("s64?", s64p, subr1, (SCM x))
 {
     return MAKE_BOOLEAN ( (INTP(x) || BIGNUMP(x)) &&
-                          (STk_numle2(get_s64_min(), x) && STk_numle2(x, get_s64_max())) );
+                          (STk_numle2(s64_min, x) && STk_numle2(x, s64_max)) );
 }
 
 DEFINE_PRIMITIVE("u64?", u64p, subr1, (SCM x))
 {
     return MAKE_BOOLEAN ( (INTP(x) || BIGNUMP(x)) &&
-                          (STk_numle2(MAKE_INT(0), x) && STk_numle2(x, get_u64_max())) );
+                          (STk_numle2(MAKE_INT(0), x) && STk_numle2(x, u64_max)) );
 }
 
 DEFINE_PRIMITIVE("f32?", f32p, subr1, (SCM x))
@@ -680,7 +677,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
 
     check_int(t);
     int type = INT_VAL(t);
-    if (type < 0 || type > UVECTOR_C128) STk_error ("bad uvector type descriptor ~A, out of bounds!", t);
+    if (type < 0 || type > UVECT_C128) STk_error ("bad uvector type descriptor ~A, out of bounds!", t);
 
     check_procedure(proc);
 
@@ -854,7 +851,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
     case FOLD:      return seed;
     case CUMULATE:  return w;
     case FILTER:    return resize_uvector(w, left_idx, stride);
-    case PARTITION:
+    case PARTITION: {
         /* need to reverse the second part of the vector... */
         char buf[16];
         long max = UVECTOR_SIZE(w);
@@ -865,6 +862,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
             UVECTOR_SET(w,max - i - 1, &buf[0], stride);
         }
         return w;
+    }
     case REMOVE:    return resize_uvector(w, left_idx, stride);
     case FOR_EACH:  return STk_void;
     }
@@ -1013,6 +1011,11 @@ MODULE_ENTRY_START("srfi/160/base")
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);
 
+  /* initialize the maxima for 64 bits values (copied from uvector.c) */
+  u64_max = STk_Cstr2number(U64_MAX, 10);
+  s64_min = STk_Cstr2number(S64_MIN, 10);
+  s64_max = STk_Cstr2number(S64_MAX, 10);
+  
   /********************************************************
    * The following are not exported, they will be used to *
    * make procedures exported by separate libraries --    *

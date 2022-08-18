@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 18-Aug-2022 18:00 (eg)
+ * Last file update: 18-Aug-2022 18:33 (eg)
  */
 
 #include <float.h>
@@ -90,11 +90,6 @@ static void error_bad_list(SCM l)
 {
   STk_error("bad list ~s", l);
 }
-
-SCM get_u64_max () { return u64_max; }
-SCM get_s64_min () { return s64_min; }
-SCM get_s64_max () { return s64_max; }
-
 
 int STk_vector_element_size(int type)
 {
