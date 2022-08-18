@@ -1362,10 +1362,12 @@ struct uvector_obj {
 #define UVECT_U64       7
 #define UVECT_F32       8
 #define UVECT_F64       9
+#define UVECT_C64       10
+#define UVECT_C128      11
 
 /*
  * 64 bits values are always represented with bignums even on 64 bits machines
- * Here are the intersting maxima for 64 bits.
+ * Here are the interesting maxima for 64 bits.
  */
 #define S64_MIN "-9223372036854775808"
 #define S64_MAX  "9223372036854775807"
@@ -1385,6 +1387,7 @@ int STk_uniform_vector_tag(char *s);
 int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 SCM STk_uvector_get(SCM v, long i);
+void STk_uvector_put(SCM v, long i, SCM value);
 int STk_init_uniform_vector(void);
 
 SCM STk_make_C_bytevector(int len);

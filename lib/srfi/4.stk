@@ -78,8 +78,15 @@
 ;;  UVECT_F32   8
 ;;  UVECT_F64   9
 
+;; NOTE: SRFI 160 also defines
+;; UVECT_C64    10
+;; UVECT_C128   11
+;; See lib/srfi/160/base.stk
+;; --jpellegrini
 
-  ;; Avoid warnings
+
+;; Avoid warnings 
+
   (%compile-time-define %list->uvector %uvector->list)
 
 (define-macro (%uniform-vector-functions tag type)

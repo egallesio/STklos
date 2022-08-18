@@ -617,6 +617,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
           pkgman/Makefile
 
+          lib/srfi/160/Makefile
+
           extensions/Makefile
 
           extensions/gtklos/Makefile

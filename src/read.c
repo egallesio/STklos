@@ -803,7 +803,7 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
     return STk_false;
   } else {
     if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
-        (STk_uvectors_allowed && (len == 2 || len == 3))) {
+        (STk_uvectors_allowed && (len >= 2 || len <= 4))) {
       c = STk_getc(port);
       if (c == '"')
         return read_srfi207_bytevector(port, ctx->constant);
@@ -888,6 +888,10 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           // FIXME:
           case 'F' :
           case 'f' : if (STk_uvectors_allowed)
+                       return maybe_read_uniform_vector(port, c, ctx);
+                     goto default_sharp;
+          case 'C' :
+          case 'c' : if (STk_uvectors_allowed)
                        return maybe_read_uniform_vector(port, c, ctx);
                      goto default_sharp;
           case '\\': return read_char(port, STk_getc(port));

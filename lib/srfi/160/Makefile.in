@@ -14,9 +14,10 @@
 
 @SET_MAKE@
 
-# Makefile.am for testing STklos
+# Makefile for the SRFI 160
 #
-# Copyright © 2005-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info>
+# Based on the SRFI Makefiles by Erick Gallesio.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,9 +34,12 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 # USA.
 #
-#           Author: Erick Gallesio [eg@essi.fr]
-#    Creation date: 23-May-2005 14:52 (eg)
-# Last file update: 26-Nov-2020 15:00 (eg)
+#           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+#    Creation date: 20-Jun-2022 09:24 (jpellegrini)
+# Last file update: 21-Jun-2022 08:47 (jpellegrini)
+
+#-======================================================================
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -110,7 +114,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = tests
+subdir = lib/srfi/160
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -132,14 +136,58 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-SOURCES =
 DIST_SOURCES =
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"
+DATA = $(srfi_DATA) $(srfilib_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+# Read a list of newline-separated strings from the standard input,
+# and print each of them once, without duplicates.  Input order is
+# *not* preserved.
+am__uniquify_input = $(AWK) '\
+  BEGIN { nonempty = 0; } \
+  { items[$$0] = 1; nonempty = 1; } \
+  END { if (nonempty) { for (i in items) print i; }; } \
+'
+# Make sure the list of sources is unique.  This is necessary because,
+# e.g., the same source file might be shared among _SOURCES variables
+# for different programs/libraries.
+am__define_uniq_tagged_files = \
+  list='$(am__tagged_files)'; \
+  unique=`for i in $$list; do \
+    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+  done | $(am__uniquify_input)`
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -293,9 +341,65 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+STKLOS_FLAGS = --no-init-file --case-sensitive
+SO = @SH_SUFFIX@
+
+# ORGANIZATION OF SRFI-160 IMPLEMENTATION:
+#
+# - base.c, base.stk: implementation of the base library,
+#   (srfi 160 base), where there's also much code that is
+#   used by the specific s8, u8, etc, libraries.
+#
+# - s8.stk, u8,stk, ..., c128.stk: the specific libraries
+#   (srfi 160 s8), and so on. They have thin wrappers over
+#   procedures defined in base.c
+#
+# - ../160.stk (in the directory above this one): the non-standard
+#   (srfi 160) library. It is useful for the tests.
+#
+# the s8.stk, etc files are generated (with sed) from the file
+# tagvector-template.stk.
+SRC_STK = base.stk \
+          tagvector-template.stk
+
+SRC_OSTK = base.ostk \
+           s8.ostk \
+           u8.ostk \
+           s16.ostk \
+           u16.ostk \
+           s32.ostk \
+           u32.ostk \
+           s64.ostk \
+           u64.ostk \
+           f32.ostk \
+           f64.ostk \
+           c64.ostk \
+           c128.ostk
+
+SRC_C = base.c
+SRC_C_STK = base.stk
+SRC_SHOBJ = base.$(SO)
+srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+srfi_interm = s8.stk u8.stk s16.stk u16.stk \
+	      s32.stk u32.stk s64.stk u64.stk \
+	      f32.stk f64.stk c64.stk c128.stk
+
+DOCDB = ../../DOCDB
+BASEDIR = ../../..
+SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
+
+#======================================================================
+srfidir = $(prefix)/share/@PACKAGE@/@VERSION@/srfi/160
+srfilibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi/160
+srfi_DATA = $(SRC_OSTK)
+srfilib_DATA = $(SRC_SHOBJ)
+srfi_sources = $(SRC_STK)
+#======================================================================
+SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .stk .ostk .stk -incl.c .$(SO) .c
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -305,9 +409,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu tests/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu lib/srfi/160/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu tests/Makefile
+	  $(AUTOMAKE) --gnu lib/srfi/160/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -325,12 +429,100 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-tags TAGS:
+install-srfiDATA: $(srfi_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(srfi_DATA)'; test -n "$(srfidir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(srfidir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(srfidir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(srfidir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(srfidir)" || exit $$?; \
+	done
 
-ctags CTAGS:
+uninstall-srfiDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(srfi_DATA)'; test -n "$(srfidir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(srfidir)'; $(am__uninstall_files_from_dir)
+install-srfilibDATA: $(srfilib_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(srfilib_DATA)'; test -n "$(srfilibdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(srfilibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(srfilibdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(srfilibdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(srfilibdir)" || exit $$?; \
+	done
 
-cscope cscopelist:
+uninstall-srfilibDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(srfilib_DATA)'; test -n "$(srfilibdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(srfilibdir)'; $(am__uninstall_files_from_dir)
 
+ID: $(am__tagged_files)
+	$(am__define_uniq_tagged_files); mkid -fID $$unique
+tags: tags-am
+TAGS: tags
+
+tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
+	set x; \
+	here=`pwd`; \
+	$(am__define_uniq_tagged_files); \
+	shift; \
+	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
+	  test -n "$$unique" || unique=$$empty_fix; \
+	  if test $$# -gt 0; then \
+	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	      "$$@" $$unique; \
+	  else \
+	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	      $$unique; \
+	  fi; \
+	fi
+ctags: ctags-am
+
+CTAGS: ctags
+ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
+	$(am__define_uniq_tagged_files); \
+	test -z "$(CTAGS_ARGS)$$unique" \
+	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
+	     $$unique
+
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && $(am__cd) $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) "$$here"
+cscopelist: cscopelist-am
+
+cscopelist-am: $(am__tagged_files)
+	list='$(am__tagged_files)'; \
+	case "$(srcdir)" in \
+	  [\\/]* | ?:[\\/]*) sdir="$(srcdir)" ;; \
+	  *) sdir=$(subdir)/$(srcdir) ;; \
+	esac; \
+	for i in $$list; do \
+	  if test -f "$$i"; then \
+	    echo "$(subdir)/$$i"; \
+	  else \
+	    echo "$$sdir/$$i"; \
+	  fi; \
+	done >> $(top_builddir)/cscope.files
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 distdir: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) distdir-am
 
@@ -366,8 +558,12 @@ distdir-am: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(DATA)
 installdirs:
+	for dir in "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -397,9 +593,9 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
+clean-am: clean-generic mostlyclean-am
 
-distclean-am: clean-am distclean-generic
+distclean-am: clean-am distclean-generic distclean-tags
 
 dvi: dvi-am
 
@@ -413,7 +609,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-srfiDATA install-srfilibDATA
 
 install-dvi: install-dvi-am
 
@@ -457,39 +653,80 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-srfiDATA uninstall-srfilibDATA
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: install-am install-strip uninstall-am
 
-.MAKE: install-am install-strip
-
-.PHONY: all all-am check check-am clean clean-generic cscopelist-am \
-	ctags-am distclean distclean-generic distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
+	cscopelist-am ctags ctags-am distclean distclean-generic \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-srfiDATA install-srfilibDATA install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am tags-am uninstall uninstall-am
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook uninstall-srfiDATA uninstall-srfilibDATA
 
 .PRECIOUS: Makefile
 
 
-all:
-	@echo "Use \"make test\" for testing STklos."
+COMP ?= ../../../utils/tmpcomp
+STKLOS_BINARY ?= ../../../src/stklos
 
-check: test
+# The procedures defined are exactly the same for all data types,
+# only the type changes. So we generate them from a template.
+#
+# We use a multiple-target rule, which calls sed to change the
+# string "TAG" in the template into s8, u8, etc, writing it to
+# a new file "s8.stk", "u8.stk" etc.
+s8.stk  u8.stk  s16.stk u16.stk \
+s32.stk u32.stk s64.stk u64.stk \
+f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.so
+	sed 's/TAG/$(basename $@)/g'   tagvector-template.stk > $@
 
-test tests:
-	@../src/stklos --no-init-file --utf8-encoding=yes -f do-test.stk
+#======================================================================
 
-clean-am:
-	rm -f TEST.LOG SRFI-64_Meta-Test_Suite.log data *~
+.stk.ostk:
+	$(COMP) -o $*.ostk $*.stk
+
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
+
+.c.$(SO) :
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@/bin/rm -f $*.o
+
+#======================================================================
+# Dependencies
+
+base.$(SO): base-incl.c base.c
+
+#======================================================================
+
+install-sources:
+	install $(srfi_sources) $(srfidir)
+
+# we also clean the TAG.stk files -- $(srfi-interm) --, which are NOT
+# srfi_OBJS (should not be installed with other objects):
+clean:
+	rm -f $(srfi_OBJS) *-incl.c *~ $(srfi_interm)
 
 distclean: clean
-	rm -f Makefile
+	/bin/rm -f Makefile
 
-install:
+uninstall-hook:
+	(cd $(srfidir); rm -f $(srfi_sources))
+	rmdir $(srfidir) || true
+
+# no docs...
+# doc:
+# 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+# 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

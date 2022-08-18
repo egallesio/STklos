@@ -179,7 +179,7 @@ am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/stklos-compile.1.in \
 	$(srcdir)/stklos-config.1.in $(srcdir)/stklos-genlex.1.in \
 	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos-script.1.in \
-	$(srcdir)/stklos.1.in $(top_srcdir)/mkinstalldirs
+	$(srcdir)/stklos.1.in $(top_srcdir)/mkinstalldirs TODO
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -264,6 +264,7 @@ PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
 RANLIB = @RANLIB@
+RDLINE = @RDLINE@
 SCMDIR = @SCMDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@

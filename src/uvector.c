@@ -24,6 +24,7 @@
  * Last file update: 23-Jun-2022 09:13 (eg)
  */
 
+#include <float.h>
 #include "stklos.h"
 
 int STk_uvectors_allowed = 0;
@@ -38,16 +39,18 @@ static SCM u64_max, s64_min, s64_max;
 static char *type_vector(int tip)
 {
   switch (tip) {
-    case UVECT_S8:  return "s8";
-    case UVECT_U8:  return "u8";
-    case UVECT_S16: return "s16";
-    case UVECT_U16: return "u16";
-    case UVECT_S32: return "s32";
-    case UVECT_U32: return "u32";
-    case UVECT_S64: return "s64";
-    case UVECT_U64: return "u64";
-    case UVECT_F32: return "f32";
-    case UVECT_F64: return "f64";
+    case UVECT_S8:   return "s8";
+    case UVECT_U8:   return "u8";
+    case UVECT_S16:  return "s16";
+    case UVECT_U16:  return "u16";
+    case UVECT_S32:  return "s32";
+    case UVECT_U32:  return "u32";
+    case UVECT_S64:  return "s64";
+    case UVECT_U64:  return "u64";
+    case UVECT_F32:  return "f32";
+    case UVECT_F64:  return "f64";
+    case UVECT_C64:  return "c64";
+    case UVECT_C128: return "c128";
     default:        return ""; /* never reached */
   }
 }
@@ -88,8 +91,12 @@ static void error_bad_list(SCM l)
   STk_error("bad list ~s", l);
 }
 
+SCM get_u64_max () { return u64_max; }
+SCM get_s64_min () { return s64_min; }
+SCM get_s64_max () { return s64_max; }
 
-static int vector_element_size(int type)
+
+int vector_element_size(int type)
 {
   /* compute len of one element depending on type.  We assume here
    * that characters use 8 bits and that we are at least on a 32 bits
@@ -106,6 +113,8 @@ static int vector_element_size(int type)
     case UVECT_S64: case UVECT_U64: return sizeof(SCM);
     case UVECT_F32:                 return 4;
     case UVECT_F64:                 return 8;
+    case UVECT_C64:                 return 8;
+    case UVECT_C128:                return 16;
   }
   return 0; /* never reached */
 }
@@ -170,7 +179,10 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfi
 int STk_uniform_vector_tag(char *s)
 {
   static char *table[] =
-    {"s8", "u8", "s16", "u16", "s32", "u32", "s64", "u64", "f32", "f64", "" };
+    {"s8", "u8", "s16", "u16", "s32", "u32", "s64", "u64",
+     "f32", "f64",
+     "c64", "c128",
+     "" };
   char **p;
 
   for (p = table; **p; p++) {
@@ -186,11 +198,31 @@ int STk_uvector_equal(SCM u1, SCM u2)
       (UVECTOR_SIZE(u1) != UVECTOR_SIZE(u2)))
     return 0;
 
-  /* same length and same tyep, compare the bytes */
+  /* same length and same type, compare the bytes */
   int len = vector_element_size(UVECTOR_TYPE(u1)) * UVECTOR_SIZE(u1);
 
   return (memcmp(UVECTOR_DATA(u1), UVECTOR_DATA(u2), len) == 0);
 }
+
+
+/* Duplicated from number.c: */
+static Inline SCM Cmake_complex(SCM r, SCM i)
+{
+  SCM z;
+
+  NEWCELL(z, complex);
+  COMPLEX_REAL(z) = r;
+  COMPLEX_IMAG(z) = i;
+  return z;
+}
+
+
+/*
+ * We use exact->inexact to cast complex vectors in c64 and c128 types
+ * (possibly resultingin +inf.0 or -inf.0)
+ */
+EXTERN_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z));
+
 
 /*
  * Basic accessors to a uniform vector
@@ -272,11 +304,61 @@ static void uvector_set(SCM v, long i, SCM value)
         return;
       }
       break;
+
+    /*
+     Complexes are stored with the real part in the even-indexed cells, and
+     imaginary parts in odd-indexed cells:
+
+      -----+-----+-----+-----+-------
+     | r_1 | i_1 | r_2 | i_2 |  ...  |
+      -----+-----+-----+-----+-------
+     Every complex real-part and imag-part is transformed into inexact, so it would into
+     a double. Forthermore, for c64 vectors, they're downcasted to floats.
+    */
+    case UVECT_C64:
+      if (COMPLEXP(value)) {
+	/* Following what exact->inexact does, we don't signal error on
+	   overflow when converting. This is similar to what other Schemes
+	   do. */
+        SCM rea = STk_ex2inex(COMPLEX_REAL(value));
+	SCM img = STk_ex2inex(COMPLEX_IMAG(value));
+        /* We'll actually DOWNCAST the number to float + float.  */
+        ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(rea);
+	((float *) UVECTOR_DATA(v))[2*i + 1] = (float) REAL_VAL(img);
+        return;
+      } else if (REALP(value)){
+        ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(value);
+	((float *) UVECTOR_DATA(v))[2*i + 1] = (float) 0.0;
+	return;
+      }
+      break;
+    case UVECT_C128:
+      if (COMPLEXP(value)) {
+	/* Following what exact->inexact does, we don't signal error on
+	   overflow when converting. This is similar to what other Schemes
+	   do. */
+        SCM rea = STk_ex2inex(COMPLEX_REAL(value));
+	SCM img = STk_ex2inex(COMPLEX_IMAG(value));
+        ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(rea);
+	((double *) UVECTOR_DATA(v))[2*i + 1] = (double) REAL_VAL(img);
+	return;
+      } else if (REALP(value)) {
+        ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(value);
+	((double *) UVECTOR_DATA(v))[2*i + 1] = (double) 0.0;
+	return;
+      }
+      break;
   }
 
   /* If we arrive here we are sure that we have a value which is out of bounds */
   STk_error("value ~S is out of bounds or incorrect for a %svector",
             value, type_vector(UVECTOR_TYPE(v)));
+}
+
+
+void STk_uvector_put(SCM v, long i, SCM value) /* public version of uvector_set */
+{
+    uvector_set(v, i, value);
 }
 
 static SCM uvector_ref(SCM v, long i)
@@ -295,6 +377,32 @@ static SCM uvector_ref(SCM v, long i)
 
     case UVECT_F32: return STk_double2real(((float *) UVECTOR_DATA(v))[i]);
     case UVECT_F64: return STk_double2real(((double *) UVECTOR_DATA(v))[i]);
+
+   /*
+     Complexes are stored with the real part in the even-indexed cells, and
+     imaginary parts in odd-indexed cells:
+
+      -----+-----+-----+-----+-------
+     | r_1 | i_1 | r_2 | i_2 |  ...  |
+      -----+-----+-----+-----+-------
+     Every complex real-part and imag-part is transformed into inexact, so it would into
+     a double. Forthermore, for c64 vectors, they're downcasted to floats.
+    */
+    case UVECT_C64:
+	/* Don't return complexes with zero imaginary part! Those are reals... */
+	if ( ( (float) (((float*)UVECTOR_DATA(v))[2*i + 1]) ) == 0.0 )
+	    return STk_double2real( (float) (((float*)UVECTOR_DATA(v))[2*i]) );
+	else
+	    return Cmake_complex(STk_double2real((float) ((float *) UVECTOR_DATA(v))[2*i]),
+				 STk_double2real((float) ((float *) UVECTOR_DATA(v))[2*i + 1]));
+
+    case UVECT_C128:
+	/* Don't return complexes with zero imaginary part! Those are reals... */
+	if ( ( (double) (((double*) UVECTOR_DATA(v))[2*i + 1]) ) == 0.0 )
+	    return STk_double2real( (double) (((double*) UVECTOR_DATA(v))[2*i]) );
+	else
+	    return Cmake_complex(STk_double2real(((double *) UVECTOR_DATA(v))[2*i]),
+				 STk_double2real(((double *) UVECTOR_DATA(v))[2*i + 1]));
   }
   return STk_void; /* never reached */
 }
@@ -309,7 +417,7 @@ SCM STk_uvector_get(SCM v, long i)      /* public version of uvector_ref */
  * Uniform vector constructor
  *
  */
-static SCM makeuvect(int type, int len, SCM init)
+SCM makeuvect(int type, int len, SCM init)
 {
   long i, size = 1;
   SCM  z;
@@ -320,7 +428,7 @@ static SCM makeuvect(int type, int len, SCM init)
    * without boxing whereas S64 are represeneted by a bignum
    * (even on 64 machines where we can do better). Furthermore, we
    * suppose that C floats and doubles correspond to single and
-   * double IEEE-754 reals
+   * double IEEE-754 reals.
    */
   switch (type) {
     case UVECT_S8:  case UVECT_U8:  size = 1;           break;
@@ -329,6 +437,8 @@ static SCM makeuvect(int type, int len, SCM init)
     case UVECT_S64: case UVECT_U64: size = sizeof(SCM); break;
     case UVECT_F32:                 size = 4;           break;
     case UVECT_F64:                 size = 8;           break;
+    case UVECT_C64:                 size = 8;           break;
+    case UVECT_C128:                size = 16;          break;
   }
   NEWCELL_WITH_LEN(z, uvector, sizeof(struct uvector_obj) + size*len - 1);
   UVECTOR_TYPE(z) = type;
@@ -356,6 +466,8 @@ SCM STk_list2uvector(int type, SCM l)
   return z;
 }
 
+
+
 /*===========================================================================*\
  *
  * User primitives on uniform vectors.
@@ -368,8 +480,8 @@ DEFINE_PRIMITIVE("%make-uvector", make_uvector, subr3,(SCM type, SCM len, SCM in
   long l   = STk_integer_value(len);
   long tip = STk_integer_value(type);
 
-  if (l < 0)                             error_bad_length(len);
-  if (tip < UVECT_S8 || tip > UVECT_F64) error_bad_uniform_type(type);
+  if (l < 0)                              error_bad_length(len);
+  if (tip < UVECT_S8 || tip > UVECT_C128) error_bad_uniform_type(type);
 
   return makeuvect(tip, l, init);
 }
@@ -384,7 +496,7 @@ DEFINE_PRIMITIVE("%uvector", uvector, subr2, (SCM type, SCM values))
 {
   long tip = STk_integer_value(type);
 
-  if (tip < UVECT_S8 || tip > UVECT_F64) error_bad_uniform_type(type);
+  if (tip < UVECT_S8 || tip > UVECT_C128) error_bad_uniform_type(type);
   return STk_list2uvector(tip, values);
 }
 
@@ -392,7 +504,7 @@ DEFINE_PRIMITIVE("%uvector-length", uvector_length, subr2, (SCM type, SCM v))
 {
   long tip = STk_integer_value(type);
 
-  if (tip < UVECT_S8 || tip > UVECT_F64)        error_bad_uniform_type(type);
+  if (tip < UVECT_S8 || tip > UVECT_C128)        error_bad_uniform_type(type);
   if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_uvector(v, tip);
 
   return MAKE_INT(UVECTOR_SIZE(v));
@@ -404,7 +516,7 @@ DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr3, (SCM type, SCM v, SCM index
   long tip = STk_integer_value(type);
 
   if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip))  error_bad_vector(v);
-  if (tip < UVECT_S8 || tip > UVECT_F64)         error_bad_uniform_type(type);
+  if (tip < UVECT_S8 || tip > UVECT_C128)        error_bad_uniform_type(type);
   if (i < 0 || i >= UVECTOR_SIZE(v))             error_bad_index(index);
 
   return uvector_ref(v, i);
@@ -417,7 +529,7 @@ DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr4,
   long tip = STk_integer_value(type);
 
   if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_vector(v);
-  if (tip < UVECT_S8 || tip > UVECT_F64)        error_bad_uniform_type(type);
+  if (tip < UVECT_S8 || tip > UVECT_C128)       error_bad_uniform_type(type);
   if (BOXED_INFO(v) & VECTOR_CONST)             error_change_const_vector(v);
   if (i < 0 || i >= UVECTOR_SIZE(v))            error_bad_index(index);
 
@@ -431,7 +543,7 @@ DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr2, (SCM type, SCM v))
   long i, len, tip = STk_integer_value(type);
   SCM z, tmp;
 
-  if (tip < UVECT_S8 || tip > UVECT_F64)        error_bad_uniform_type(type);
+  if (tip < UVECT_S8 || tip > UVECT_C128)        error_bad_uniform_type(type);
   if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_vector(v);
 
   len = UVECTOR_SIZE(v);
@@ -449,9 +561,10 @@ DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM type, SCM l))
 {
   long tip = STk_integer_value(type);
 
-  if (tip < UVECT_S8 || tip > UVECT_F64) error_bad_uniform_type(type);
+  if (tip < UVECT_S8 || tip > UVECT_C128) error_bad_uniform_type(type);
   return STk_list2uvector(tip, l);
 }
+
 
 DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
 {

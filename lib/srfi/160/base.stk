@@ -1,0 +1,128 @@
+;;;;
+;;;; 160/base.stk         -- SRFI-160: Homogeneous numeric vector libraries
+;;;;                                   (base sublibrary)
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 17-Jun-2022 09:03
+;;;; Last file update: 20-Jun-2022 12:31 (jpellegrini)
+;;;;
+
+
+(select-module srfi/160/base)
+
+;; The srfi requires us to offer uvectors for *all* types,
+;; so we load SRFI 4.
+(import (srfi 4)
+        (srfi 128))
+
+(export s8vector? make-s8vector s8vector s8vector-length s8vector-ref
+        s8vector-set! s8vector->list list->s8vector
+
+        u8vector? make-u8vector u8vector u8vector-length u8vector-ref
+        u8vector-set! u8vector->list list->u8vector
+
+        s16vector? make-s16vector s16vector s16vector-length s16vector-ref
+        s16vector-set! s16vector->list list->s16vector
+
+        u16vector? make-u16vector u16vector u16vector-length u16vector-ref
+        u16vector-set! u16vector->list list->u16vector
+
+        s32vector? make-s32vector s32vector s32vector-length s32vector-ref
+        s32vector-set! s32vector->list list->s32vector
+
+        u32vector? make-u32vector u32vector u32vector-length u32vector-ref
+        u32vector-set! u32vector->list list->u32vector
+
+        s64vector? make-s64vector s64vector s64vector-length s64vector-ref
+        s64vector-set! s64vector->list list->s64vector
+
+        u64vector?  make-u64vector u64vector u64vector-length u64vector-ref
+        u64vector-set! u64vector->list list->u64vector
+
+        f32vector?  make-f32vector f32vector f32vector-length f32vector-ref
+        f32vector-set! f32vector->list list->f32vector
+
+        f64vector?  make-f64vector f64vector f64vector-length f64vector-ref
+        f64vector-set! f64vector->list list->f64vector
+
+        c64vector?  make-c64vector c64vector c64vector-length c64vector-ref
+        c64vector-set! c64vector->list list->c64vector
+
+        c128vector?  make-c128vector c128vector c128vector-length c128vector-ref
+        c128vector-set! c128vector->list list->c128vector)
+
+
+(%compile-time-define %list->uvector %uvector->list)
+
+;; FIXME: we are re-defining a macro already defined in SRFI-4...
+(define-macro (%uniform-vector-functions tag type)
+  (let ((pred   (string->symbol (format #f "~Avector?" tag)))
+        (make   (string->symbol (format #f "make-~Avector" tag)))
+        (constr (string->symbol (format #f "~Avector" tag)))
+        (len    (string->symbol (format #f "~Avector-length" tag)))
+        (ref    (string->symbol (format #f "~Avector-ref" tag)))
+        (set    (string->symbol (format #f "~Avector-set!" tag)))
+        (v->l   (string->symbol (format #f "~Avector->list" tag)))
+        (l->v   (string->symbol (format #f "list->~Avector" tag)))
+        (dfl    (cond ((memv tag '(f32 f64)) 0.0)
+                      ((memv tag '(c64 c128)) 0.0+0.0i)
+                      (else 0))))
+    `(begin
+       ;; (TAGvector? obj)
+       (define (,pred obj)
+         (%uvector? ,type obj))
+
+       ;; (make-TAGvector n [ TAGvalue ])
+       (define (,make size :optional (default ,dfl))
+         (%make-uvector ,type size default))
+
+       ;; (TAGvector TAGvalue...)
+       (define (,constr . l)
+         (%uvector ,type l))
+
+       ;; (TAGvector-length TAGvect)
+       (define (,len vect)
+         (%uvector-length ,type vect))
+
+       ;; (TAGvector-ref TAGvect i)
+       (define (,ref vect i)
+         (%uvector-ref ,type vect i))
+
+       ;; (TAGvector-set! TAGvect i TAGvalue)
+       (define (,set vect i val)
+         (%uvector-set! ,type vect i val))
+
+       ;; (set! (setter TAGvector-ref) TAGvector-set!)
+       (set! (setter ,ref) ,set)
+
+       ;; (TAGvector->list TAGvect)
+       (define (,v->l vect)
+         (%uvector->list ,type vect))
+
+       ;; (list->TAGvector TAGlist)
+       (define (,l->v lst)
+         (%list->uvector ,type lst)))))
+
+(%uniform-vector-functions c64  10)
+(%uniform-vector-functions c128 11)
+
+
+(provide "srfi-160/base")
