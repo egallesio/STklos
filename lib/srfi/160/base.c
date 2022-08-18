@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 17-Jun-2022 09:10
- * Last file update: 18-Aug-2022 18:01 (eg)
+ * Last file update: 18-Aug-2022 18:07 (eg)
  */
 
 #include <float.h>
@@ -361,7 +361,7 @@ DEFINE_PRIMITIVE("%uvector-unfold", uvector_unfold, vsubr, (int argc, SCM *argv)
         ? vec
         : STk_makeuvect(INT_VAL(type), end, NULL);
 
-    long stride = STk_vector_element_size(UVECTOR_TYPE(to));
+    // long stride = STk_vector_element_size(UVECTOR_TYPE(to));
 
     /* the srfi says that f will return two VALUES, so we need a vector to
        hold them... */
@@ -745,7 +745,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
         /* And set cdr: */
         CDR(&args[i]) = &args[i+1];
     }
-    CAR(&args[arity-1]) = MAKE_INT(- 999);
+    CAR(&args[arity-1]) = MAKE_INT(- 999UL);
     CDR(&args[arity-1]) = STk_nil;
 
     int op = INT_VAL(oper);
@@ -868,7 +868,7 @@ DEFINE_PRIMITIVE("%uvector-iterate", uvector_iterate, vsubr, (int argc, SCM* arg
     case REMOVE:    return resize_uvector(w, left_idx, stride);
     case FOR_EACH:  return STk_void;
     }
-    return MAKE_INT(-1); /* just to check if we ever get here... */
+    return MAKE_INT(-1UL); /* just to check if we ever get here... */
 }
 
 
