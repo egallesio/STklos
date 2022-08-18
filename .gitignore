@@ -120,8 +120,14 @@ gtklos/gtklosconf.h
 lib/Lalr.d/calc
 lib/boot-callcc.stk
 lib/srfis-data.scm
+
+#                  ... generated Scheme files
+lib/srfi/160/*.stk
+
 #                  ... generated C files
 *incl.c         
+
+
 
 # Pcre directory
 pcre/.libs
