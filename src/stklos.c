@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  3-Sep-2022 11:49 (eg)
+ * Last file update:  4-Sep-2022 19:16 (eg)
  */
 
 #include "stklos.h"
@@ -193,7 +193,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_SCM_OPTION(Idirs,            "prepend-dirs");
   ADD_SCM_OPTION(Adirs,            "append-dirs");
 
-  STk_define_variable(STk_intern("*%program-args*"), options,
+  STk_define_variable(STk_intern("*%system-state-plist*"), options,
                       STk_STklos_module);
 }
 
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  /* Place the interpreter arguments in the Scheme variable *%program-args* */
+  /* Place CLI arguments in the Scheme variable *%system-state-plist* */
   build_scheme_args(argc, argv, argv0);
 
   /* Boot the VM */

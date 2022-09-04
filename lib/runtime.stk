@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update:  3-Sep-2022 11:53 (eg)
+;;;; Last file update:  4-Sep-2022 19:14 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -179,11 +179,6 @@ doc>
 |#
 (define stklos-debug-level
   (make-parameter 0))
-
-;; ----------------------------------------------------------------------
-;;      *%system-state-plist* ...
-;; ----------------------------------------------------------------------
-(define *%system-state-plist* *%program-args*))
 
 ;; ----------------------------------------------------------------------
 ;;      management of globals ...
