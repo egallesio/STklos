@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 27-Jun-2022 20:43 (eg)
+;;;; Last file update:  3-Sep-2022 09:48 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -246,7 +246,7 @@
 ;;
 ;; Register the options given as program args in the system state plist
 ;;
-(set! *%system-state-plist* (append *%system-state-plist* *%program-args*))
+;(set! *%system-state-plist* (append *%system-state-plist* *%program-args*))
 
 
 ;; ----------------------------------------------------------------------

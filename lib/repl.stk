@@ -1,7 +1,7 @@
 ;;;;
 ;;;; repl.stk   -- STklos REPL
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - Universite de Nice <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  4-Jun-2022 20:47 (eg)
+;;;; Last file update:  4-Sep-2022 18:17 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -322,7 +322,7 @@ doc>
 ;;      main-repl ...
 ;; ----------------------------------------------------------------------
 (define (main-repl)
-  ;; Initialize signals suitable for  a REPL session (e.g.be immune to ^C)
+  ;; Initialize signals suitable for a REPL session (e.g. be immune to ^C)
   (%initialize-signals)
   (when interactive?
     ;; Use classic theme if the user has not set a theme in his/her init file

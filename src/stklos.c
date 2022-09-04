@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 27-Nov-2021 18:42 (eg)
+ * Last file update:  3-Sep-2022 11:49 (eg)
  */
 
 #include "stklos.h"
@@ -33,19 +33,23 @@
                                 STk_makekey(k),                 \
                                 STk_Cstring2string(o));         \
 }while(0)
+
 #define ADD_BOOL_OPTION(o, k)                        do{\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
                         MAKE_BOOLEAN(o));               \
 }while(0)
+
 #define ADD_INT_OPTION(o, k)                         do{\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
                         MAKE_INT(o));                   \
 }while(0)
+
 #define ADD_SCM_OPTION(o, k)                         do{\
   options = STk_key_set(options, STk_makekey(k),o);     \
 }while(0)
+
 /*=============================================================================
  *
  * Program arguments
@@ -173,6 +177,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
     l = STk_cons(STk_Cstring2string(argv[i]), l);
 
   options = LIST2(STk_makekey("argv"), l);
+  ADD_OPTION("STklos",             "name");
   ADD_OPTION(argv0,                "program-name");
   ADD_OPTION(program_file,         "file");
   ADD_OPTION(load_file,            "load");
