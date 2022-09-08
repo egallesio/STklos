@@ -1,7 +1,7 @@
 ;;;;
 ;;;; module.stk -- Module stuff
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 10-Aug-2022 18:50 (eg)
+;;;; Last file update:  8-Sep-2022 08:49 (eg)
 ;;;;
 
 ;;=============================================================================
@@ -81,8 +81,11 @@ doc>
 (define-macro (select-module name)
   ;; HACK: try to register the symbols definined in chosen module to make
   ;; them known to the compiler (and avoid messages about undefined)
-  (let* ((mod    (find-module name #f))
-         (newmod (or mod (%module-create name))))
+  (let* ((compfile (in-module STKLOS-COMPILER *compiling-file*))
+         (mod      (find-module name #f))
+         (newmod   (or mod (if compfile
+                               (%module-create name)
+                               (error 'select-module "module ~s does not exists" name)))))
     (when (and mod (not (eq? name 'STklos)))
       (register-new-globals! (module-symbols mod)))
 
