@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  4-Sep-2022 19:07 (eg)
+;;;; Last file update: 11-Sep-2022 17:05 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -310,7 +310,8 @@
   (cond
     ;; "--file" option
     (file (with-handler
-            (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
+           (lambda (c) (%simple-fatal-exception-handler "executing command"
+                                                   (cons file (command-args)) c 2))
             (load file)
             ;; Try to execute the main procedure with the given arguments
             (let ((ret-code (main (cons (program-name) (command-args)))))
