@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 29-Jul-2022 17:27 (eg)
+# Last file update:  8-Sep-2022 09:25 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme stklos streams srfi
@@ -192,6 +192,11 @@ compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
 recette.ostk: pretty-print.ostk
 slib.ostk: slib.stk STklos.init
+
+lib/scheme: lib
+lib/stklos: lib
+lib/streams: lib
+lib/srfi: lib/scheme lib/stklos lib/streams
 
 readline-complete.@SH_SUFFIX@: readline-complete.c 
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \

@@ -1,6 +1,6 @@
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,22 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  8-Jun-2022 11:52 (eg)
+# Last file update:  8-Sep-2022 19:41 (eg)
 
 #-======================================================================
-
-# We have SUBDIRS_SRFIS and SUBDIRS.
-#
-# SUBDIRS_SRFIS must *not* include the current directory,
-# otherwise the clean target enters an infinite loop.
-# But SUBDIRS *does* need to include the current directory.
-# We can control the build order in the SUBDIRS variable.
-#
-# NOTE: 160.ostk needs the sublibraries to be built first.
-#
-SUBDIRS_SRFIS = 160
-# Build this directory before others:
-SUBDIRS = $(SUBDIRS_SRFIS) .
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -270,7 +257,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 #======================================================================
 # Dependencies
-DEPEND_1:  51.ostk 134.ostk 171.ostk 189.ostk 196.ostk 207.ostk
+DEPEND_1:  51.ostk 117.ostk 134.ostk 171.ostk 189.ostk 196.ostk 207.ostk
 DEPEND_9:  37.ostk  64.ostk 113.ostk 117.ostk 128.ostk 134.ostk 135.ostk 154.ostk \
 	      161.ostk 171.ostk 173.ostk 180.ostk 189.ostk 196.ostk 207.ostk 230.ostk
 
@@ -279,20 +266,27 @@ $(DEPEND_9): 9.ostk
 13.ostk: 14.ostk
 37.ostk: 13.ostk
 41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
+51.ostk: 1.ostk
+64.ostk: 35.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
 95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
 130.ostk: 13.ostk
-133.ostk: ../stklos/itrie.so
+133.ostk: ../stklos/itrie.$(SO)
 134.ostk: 158.ostk
-135.ostk: 129.ostk
-152.ostk: 130.ostk
-160.ostk: 160
+135.ostk: 9.ostk 129.ostk
+151.ostk: 60.ostk
+152.ostk: 13.ostk
+160.ostk: 160-subdir 
+171.ostk: 69.ostk
 190.ostk: 158.ostk
+195.ostk: 35.ostk
+207.ostk: 13.ostk 151.ostk 158.ostk
 216.ostk: 27.$(SO)
-217.ostk: ../stklos/itrie.so
+217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
+224.ostk: 128.ostk
 
 
 25.$(SO):  25-incl.c  25.c
@@ -304,41 +298,28 @@ $(DEPEND_9): 9.ostk
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
 
+160-subdir: 128.ostk 
+	(cd 160; $(MAKE) $(AM_MAKEFLAGS))
+
 #======================================================================
+
+install-data-hook:
+	(cd 160; $(MAKE) install)
 
 install-sources:
+	(cd 160; $(MAKE) install-sources)
 	install $(srfi_sources) $(srfidir)
 
-#======================================================================
-# CLEAN
-#
-# SUBDIRS_SRFIS is the list of subdirectories, *excluding* this
-# one (so we don't enter an infinite loop).
-SUBCLEAN = $(addsuffix .clean,$(SUBDIRS_SRFIS) )
-SUBDISTCLEAN = $(addsuffix .distclean,$(SUBDIRS_SRFIS) )
-.PHONY: clean distclean $(SUBCLEAN) $(SUBDISTCLEAN)
-
-### CLEAN
-# How to clean each subdir:
-$(SUBCLEAN): %.clean:
-	$(MAKE) -C $* clean
-
-# To clean this one, first clean the subdirs, then execute
-# our clean rule:
-clean: $(SUBCLEAN)
+clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
+	(cd 160; $(MAKE) clean)
 
-### DISTCLEAN
-# How to clean each subdir:
-$(SUBDISTCLEAN): %.distclean:
-	$(MAKE) -C $* distclean
-
-distclean: $(SUBDISTCLEAN) clean
+distclean: clean
 	/bin/rm -f Makefile
-
-#======================================================================
+	(cd 160; $(MAKE) distclean)
 
 uninstall-hook:
+	(cd 160; $(MAKE) uninstall)
 	(cd $(srfidir); rm -f $(srfi_sources))
 	rmdir $(srfidir) || true
 

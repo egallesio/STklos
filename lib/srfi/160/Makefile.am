@@ -20,7 +20,7 @@
 #
 #           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 #    Creation date: 20-Jun-2022 09:24 (jpellegrini)
-# Last file update: 21-Jun-2022 08:47 (jpellegrini)
+# Last file update:  8-Sep-2022 16:21 (eg)
 
 #-======================================================================
 
@@ -97,7 +97,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # a new file "s8.stk", "u8.stk" etc.
 s8.stk  u8.stk  s16.stk u16.stk \
 s32.stk u32.stk s64.stk u64.stk \
-f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.so
+f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
 	sed 's/TAG/$(basename $@)/g'   tagvector-template.stk > $@
 
 #======================================================================
@@ -120,23 +120,23 @@ base.$(SO): base-incl.c base.c
 
 #======================================================================
 
-
 install-sources:
-	install $(srfi_sources) $(srfidir)
+	mkdir -p $(srfidir)
+	cp $(srfi_sources) $(srfi_interm) $(srfidir)
 
 # we also clean the TAG.stk files -- $(srfi-interm) --, which are NOT
 # srfi_OBJS (should not be installed with other objects):
 clean:
-	rm -f $(srfi_OBJS) *-incl.c *~ $(srfi_interm)
+	rm -f $(srfi_OBJS) *-incl.c *~
 
 distclean: clean
-	/bin/rm -f Makefile
+	/bin/rm -f Makefile $(srfi_interm)
 
 uninstall-hook:
-	(cd $(srfidir); rm -f $(srfi_sources))
+	(cd $(srfidir); rm -f $(srfi_sources) $(srfi_interm))
 	rmdir $(srfidir) || true
-
-# no docs...
-# doc:
-# 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-# 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+##
+## # no docs...
+## # doc:
+## # 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+## # 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
