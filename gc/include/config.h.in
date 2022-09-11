@@ -17,6 +17,9 @@
 /* Define to force debug headers on all objects. */
 #undef DBG_HDRS_ALL
 
+/* Do not use user32.dll import library (Win32). */
+#undef DONT_USE_USER32_DLL
+
 /* Define to enable eCos target support. */
 #undef ECOS
 
@@ -32,7 +35,7 @@
 /* Define to enable atomic uncollectible allocation. */
 #undef GC_ATOMIC_UNCOLLECTABLE
 
-/* Use C11 (GCC) atomic intrinsics instead of libatomic_ops primitives. */
+/* Use GCC atomic intrinsics instead of libatomic_ops primitives. */
 #undef GC_BUILTIN_ATOMIC
 
 /* Define to build dynamic libraries with only API symbols exposed. */
@@ -107,11 +110,21 @@
 /* libatomic_ops AO_or primitive implementation is lock-free. */
 #undef HAVE_LOCKFREE_AO_OR
 
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to use 'pthread_setname_np(const char*)' function. */
+#undef HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID
+
+/* Define to use 'pthread_setname_np(pthread_t, const char*)' function. */
+#undef HAVE_PTHREAD_SETNAME_NP_WITH_TID
+
+/* Define to use 'pthread_setname_np(pthread_t, const char*, void *)'
+   function. */
+#undef HAVE_PTHREAD_SETNAME_NP_WITH_TID_AND_ARG
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdio.h> header file. */
-#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -215,9 +228,7 @@
 /* See the comment in gcconfig.h. */
 #undef SOLARIS25_PROC_VDB_BUG_FIXED
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
-   required in a freestanding environment). This macro is provided for
-   backward compatibility; new code need not use it. */
+/* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* Define to work around a Solaris 5.3 bug (see dyn_load.c). */
