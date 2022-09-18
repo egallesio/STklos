@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 23-Jun-2022 09:02 (eg)
+ * Last file update: 18-Sep-2022 16:31 (eg)
  */
 
 
@@ -1065,10 +1065,9 @@ int STk_init_port(void);
  ****           Port global variables
  ****/
 
-extern char *STk_current_filename;               /* Name of the file we read */
-
-extern SCM STk_stdin, STk_stdout, STk_stderr;             /* unredirected ports   */
-extern int STk_interactive;                     /* We are in intearctive mode */
+extern char *STk_current_filename;              /* Name of the file we read   */
+extern SCM STk_stdin, STk_stdout, STk_stderr;   /* unredirected ports         */
+extern int STk_interactive;                     /* We are in interactive mode */
 
 /*
   ------------------------------------------------------------------------------

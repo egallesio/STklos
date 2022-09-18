@@ -1,7 +1,7 @@
 /*
  * s p o r t . c                        -- String ports management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  9-Jan-2022 18:15 (eg)
+ * Last file update: 18-Sep-2022 19:04 (eg)
  *
  */
 
@@ -104,7 +104,7 @@ static Inline int Sputc(int c, void *stream)
 
   if (PORT_PTR(stream) >= PORT_END(stream)) {
     if (PORT_END(stream) == PORT_BASE(stream) + PORT_BUFSIZE(stream)) {
-      /* No more room => allocate a new buffer */
+      /* No more room => enlarge buffer */
       tmp         = PORT_BUFSIZE(stream);
       tmp        += tmp/2;
       PORT_BASE(stream)= STk_must_realloc(PORT_BASE(stream), tmp);
@@ -121,14 +121,18 @@ static Inline int Sputc(int c, void *stream)
 
 static Inline int Swrite(void *stream, const void *buffer, int count)
 {
-  int tmp, pos;
+  size_t tmp, pos;
+  char *right = PORT_PTR(stream) + count;
 
-  if (PORT_PTR(stream) + count >= PORT_END(stream)) {
-    tmp = PORT_BUFSIZE(stream) + count + START_ALLOC_SIZE;
-    pos = PORT_PTR(stream) - PORT_BASE(stream);
-    PORT_BASE(stream) = STk_must_realloc(PORT_BASE(stream), tmp);
-    PORT_PTR(stream)  = PORT_BASE(stream)+ pos; /* base can move */
-    PORT_BUFSIZE(stream) = tmp;
+  if (right >= PORT_END(stream)) {
+    if (right >= PORT_BASE(stream) + PORT_BUFSIZE(stream)) {
+      /* No more room => enlarge buffer */
+      tmp = PORT_BUFSIZE(stream) + 3 * count + START_ALLOC_SIZE;
+      pos = PORT_PTR(stream) - PORT_BASE(stream);
+      PORT_BASE(stream) = STk_must_realloc(PORT_BASE(stream), tmp);
+      PORT_PTR(stream)  = PORT_BASE(stream)+ pos; /* base can move */
+      PORT_BUFSIZE(stream) = tmp;
+    }
     PORT_END(stream) = PORT_PTR(stream) + count;
   }
   memcpy(PORT_PTR(stream), buffer, count);
