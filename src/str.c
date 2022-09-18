@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 16-Jul-2022 17:20 (eg)
+ * Last file update: 18-Sep-2022 19:11 (eg)
  */
 
 #include <ctype.h>
@@ -704,7 +704,7 @@ doc>
 DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
 {
   int i;
-  unsigned total_size, total_length;
+  unsigned total_size=0, total_length; // initialize for compiler
   char *q; /* first string */
   char *p; /* others (chars or strings) */
 
