@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  8-Sep-2022 19:41 (eg)
+# Last file update: 19-Sep-2022 22:57 (eg)
 
 #-======================================================================
 
@@ -902,7 +902,7 @@ install-data-hook:
 
 install-sources:
 	(cd 160; $(MAKE) install-sources)
-	install $(srfi_sources) $(srfidir)
+	cp $(srfi_sources) $(srfidir)
 
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
