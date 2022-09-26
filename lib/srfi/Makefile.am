@@ -85,6 +85,7 @@ SRC_STK   = 1.stk   \
             113.stk \
             117.stk \
             118.stk \
+            125.stk \
             127.stk \
             128.stk \
             129.stk \
@@ -180,6 +181,7 @@ SRC_OSTK =  1.ostk   \
             117.ostk \
             118.ostk \
             113.ostk \
+            125.ostk \
             127.ostk \
             128.ostk \
             129.ostk \
@@ -272,6 +274,7 @@ $(DEPEND_9): 9.ostk
 94.ostk: 60.ostk
 95.ostk:  132.ostk 132.$(SO)
 113.ostk: 128.ostk
+125.ostk: 128.ostk
 130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.$(SO)
 134.ostk: 158.ostk

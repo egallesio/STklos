@@ -163,7 +163,7 @@
     ;; 122  Nonempty Intervals and Generalized Arrays
     ;; 123  Generic accessor and modifier operators
     ;; 124  Ephemerons
-    ;; 125  Intermediate hash tables
+    (125 "Intermediate hash tables" (hash-table) "srfi-125")
     ;; 126  R6RS-based hashtables
     (127 "Lazy Sequences" (lazy-sequences) "srfi-127")
     (128 "Comparators (reduced)" (comparators-reduced) "srfi-128")

@@ -826,6 +826,26 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("hash-table-clear!", hash_clear, subr1, (SCM ht))
+{
+  if (!HASHP(ht)) error_bad_hash_table(ht);
+
+  /* We could either clear the fields that are not to be kept from the
+     hashtable, one at a time, or select the fields to be kept,
+     re-initialize and restore what needs to be restored. We chose
+     the second approach. */
+  hash_type type = HASH_TYPE(ht);
+  SCM comparison = HASH_COMPAR(ht);
+  SCM hash_fct   = HASH_HASH(ht);
+
+  STk_hashtable_init ((struct hash_table_obj *)ht, BOXED_INFO(ht));
+
+  HASH_TYPE(ht)   = type;
+  HASH_COMPAR(ht) = comparison;
+  HASH_HASH(ht)   = hash_fct;
+
+  return STk_void;
+}
 
 
 /*
@@ -981,6 +1001,7 @@ int STk_init_hash(void)
   ADD_PRIMITIVE(hash_existp);
 
   ADD_PRIMITIVE(hash_delete);
+  ADD_PRIMITIVE(hash_clear);
 
   ADD_PRIMITIVE(hash_for_each);
   ADD_PRIMITIVE(hash_map);
