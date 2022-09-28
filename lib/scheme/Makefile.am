@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 28-Sep-2022 11:19 (eg)
+# Last file update: 28-Sep-2022 16:04 (eg)
 
 #======================================================================
 
@@ -43,6 +43,7 @@ SRC_STK = base.stk            \
           repl.stk            \
           time.stk            \
           write.stk           \
+          list.stk            \
           hash-table.stk
 
 scheme_OBJS = base.ostk            \
@@ -61,6 +62,7 @@ scheme_OBJS = base.ostk            \
               repl.ostk            \
               time.ostk            \
               write.ostk           \
+              list.ostk            \
               hash-table.ostk
 
 #======================================================================
@@ -75,7 +77,15 @@ SUFFIXES = .stk .ostk
 
 .scm.ostk:
 	$(COMP) -o $*.ostk $*.scm
+
 #======================================================================
+# Dependencies
+#======================================================================
+# LIST library
+list.ostk: ../srfi/1.ostk
+../srfi/1.ostk:
+	(cd ../srfi; $(MAKE)  $@)
+
 
 # HASH-TABLE library 
 hash-table.ostk: ../srfi/125.ostk
