@@ -2,7 +2,7 @@
 ;;;;
 ;;;; library.stk         -- R7RS define-library
 ;;;;
-;;;; Copyright © 2019-2022 Erick Gallesio <eg@unice.fr>
+;;;; Copyright © 2019-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 12-May-2022 15:54 (eg)
+;;;; Last file update: 28-Sep-2022 11:39 (eg)
 ;;;;
 
 
@@ -30,7 +30,8 @@
         ;; FIXME
         %library-name->symbol
         %symbol->library-name
-        %module-define-and-export)
+        %module-define-and-export
+        %make-copy-module)
 
 ;;
 ;; library name conversion functions
@@ -68,6 +69,17 @@
   `(begin
      ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)
      (export ,@lst)))
+
+;;
+;; Define a module which exports all the exported module of another
+;; FIXME: find another name for this macro.
+;;
+(define-macro (%make-copy-module old new)
+  (%%import (compiler-current-module) (list old))
+  `(define-module ,new
+     (import ,old)
+     (export ,@(map cdr
+                    (module-exports (find-module (%library-name->symbol old)))))))
 
 
 ;; ======================================================================

@@ -1,6 +1,6 @@
 # Makefile for the R7RS Scheme standard libraries
 #
-# Copyright © 2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 10-Oct-2021 14:43 (eg)
+# Last file update: 28-Sep-2022 11:19 (eg)
 
 #======================================================================
 
@@ -42,7 +42,8 @@ SRC_STK = base.stk            \
           read.stk            \
           repl.stk            \
           time.stk            \
-          write.stk
+          write.stk           \
+          hash-table.stk
 
 scheme_OBJS = base.ostk            \
               case-lambda.ostk     \
@@ -59,7 +60,8 @@ scheme_OBJS = base.ostk            \
               read.ostk            \
               repl.ostk            \
               time.ostk            \
-              write.ostk
+              write.ostk           \
+              hash-table.ostk
 
 #======================================================================
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
@@ -74,6 +76,14 @@ SUFFIXES = .stk .ostk
 .scm.ostk:
 	$(COMP) -o $*.ostk $*.scm
 #======================================================================
+
+# HASH-TABLE library 
+hash-table.ostk: ../srfi/125.ostk
+
+../srfi/125.ostk:
+	(cd ../srfi; $(MAKE)  $@)
+
+# ======================================================================
 
 install-sources:
 	install $(scheme_sources) $(schemedir)
