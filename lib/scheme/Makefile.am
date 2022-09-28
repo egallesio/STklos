@@ -19,13 +19,17 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 28-Sep-2022 16:04 (eg)
+# Last file update: 28-Sep-2022 18:00 (eg)
 
 #======================================================================
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
+
+
+
+
 
 SRC_STK = base.stk            \
           case-lambda.stk     \
@@ -44,6 +48,8 @@ SRC_STK = base.stk            \
           time.stk            \
           write.stk           \
           list.stk            \
+          charset.stk         \
+          streams.stk         \
           hash-table.stk
 
 scheme_OBJS = base.ostk            \
@@ -63,6 +69,8 @@ scheme_OBJS = base.ostk            \
               time.ostk            \
               write.ostk           \
               list.ostk            \
+              charset.ostk         \
+              streams.ostk         \
               hash-table.ostk
 
 #======================================================================
@@ -81,15 +89,23 @@ SUFFIXES = .stk .ostk
 #======================================================================
 # Dependencies
 #======================================================================
-# LIST library
+# (scheme list)  library  -- based on (srfi 1)
 list.ostk: ../srfi/1.ostk
 ../srfi/1.ostk:
 	(cd ../srfi; $(MAKE)  $@)
 
+# (scheme charset) library -- based on (srfi 14)
+charset.ostk: ../srfi/14.ostk
+../srfi/14.ostk:
+	(cd ../srfi; $(MAKE)  $@)
 
-# HASH-TABLE library 
+# (scheme streams) library --based on (srfi 41)
+streams.ostk: ../srfi/41.ostk
+../srfi/41.ostk:
+	(cd ../srfi; $(MAKE)  $@)
+
+# (scheme hash-table) library  --based on (srfi 125)
 hash-table.ostk: ../srfi/125.ostk
-
 ../srfi/125.ostk:
 	(cd ../srfi; $(MAKE)  $@)
 

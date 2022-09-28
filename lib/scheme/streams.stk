@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; hash-table.stk         -- The R7RS large hash-table library
+;;;; streams.stk         -- The R7RS large list library
 ;;;;
 ;;;; Copyright © 2022 Erick Gallesio <eg@ <eg@stklos.net>
 ;;;;
@@ -21,12 +21,12 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date: 26-Sep-2022 19:37
-;;;; Last file update: 28-Sep-2022 17:48 (eg)
+;;;;    Creation date: 28-Sep-2022 18:06
+;;;; Last file update: 28-Sep-2022 18:08 (eg)
 ;;;;
 
 
-;; NOTE: Hash tables are implemented in SRFI-125. Consequently, we can
-;; implement this module by just importing (srfi 125) and reexporting all its
-;; public symbols. 
-(%make-copy-module  (srfi 125) hash-table)
+;; NOTE: This module is implemented in SRFI-41. Consequently, we can implement
+;; this module by just importing (srfi 41) and reexporting all its public
+;; symbols.
+(%make-copy-module  (srfi 41) stream)

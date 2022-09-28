@@ -22,11 +22,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Sep-2022 15:37
-;;;; Last file update: 28-Sep-2022 15:57 (eg)
+;;;; Last file update: 28-Sep-2022 18:06 (eg)
 ;;;;
 
 
 ;; NOTE: This module is implemented in SRFI-1. Consequently, we can implement
 ;; this module by just importing (srfi 1) and reexporting all its public
 ;; symbols.
-(make-copy-module  (srfi 1) list)
+(%make-copy-module  (srfi 1) list)
