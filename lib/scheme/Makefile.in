@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 29-Sep-2022 18:40 (eg)
+# Last file update: 29-Sep-2022 19:21 (eg)
 
 #======================================================================
 
@@ -327,7 +327,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 STKLOS_FLAGS = --no-init-file --case-sensitive
-SRC_STK = base.stk            \
+R7_STK = base.stk            \
           case-lambda.stk     \
           char.stk            \
           complex.stk         \
@@ -342,17 +342,9 @@ SRC_STK = base.stk            \
           read.stk            \
           repl.stk            \
           time.stk            \
-          write.stk           \
-          list.stk            \
-          charset.stk         \
-          stream.stk          \
-          box.stk             \
-          set.stk             \
-          ilist.stk           \
-          list-queue.stk      \
-          hash-table.stk
+          write.stk
 
-scheme_OBJS = base.ostk            \
+R7_OBJS = base.ostk            \
               case-lambda.ostk     \
               char.ostk            \
               complex.ostk         \
@@ -367,8 +359,20 @@ scheme_OBJS = base.ostk            \
               read.ostk            \
               repl.ostk            \
               time.ostk            \
-              write.ostk           \
-              list.ostk            \
+              write.ostk
+
+
+# ----------------------------------------------------------------------
+LARGE_STK = list.stk            \
+            charset.stk         \
+            stream.stk          \
+            box.stk             \
+            set.stk             \
+            ilist.stk           \
+            list-queue.stk      \
+            hash-table.stk
+
+LARGE_OBJS = list.ostk            \
               charset.ostk         \
               stream.ostk          \
               box.ostk             \
@@ -378,6 +382,10 @@ scheme_OBJS = base.ostk            \
               hash-table.ostk
 
 
+#----------------------------------------------------------------------
+SRC_STK = $(R7_STK) $(LARGE_STK)
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
+
 #======================================================================
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
 scheme_sources = $(SRC_STK)
@@ -385,6 +393,14 @@ scheme_DATA = $(scheme_OBJS)
 
 #======================================================================
 SUFFIXES = .stk .ostk
+
+#======================================================================
+# Dependencies
+#======================================================================
+DEPS = ../srfi/1.ostk    ../srfi/14.ostk  ../srfi/41.ostk  \
+       ../srfi/111.ostk ../srfi/113.ostk ../srfi/116.ostk \
+       ../srfi/117.ostk ../srfi/125.ostk
+
 all: all-am
 
 .SUFFIXES:
@@ -603,52 +619,20 @@ STKLOS_BINARY ?= ../src/stklos
 .scm.ostk:
 	$(COMP) -o $*.ostk $*.scm
 
-#======================================================================
-# Dependencies
-#======================================================================
-# (scheme list)  library  -- based on (srfi 1)
-list.ostk: ../srfi/1.ostk
-../srfi/1.ostk:
+$(DEPS):
 	(cd ../srfi; $(MAKE)  $@)
 
-# (scheme charset) library -- based on (srfi 14)
-charset.ostk: ../srfi/14.ostk
-../srfi/14.ostk:
-	(cd ../srfi; $(MAKE)  $@)
-
-# (scheme streams) library --based on (srfi 41)
-streams.ostk: ../srfi/41.ostk
-../srfi/41.ostk:
-	(cd ../srfi; $(MAKE)  $@)
-
-# (scheme box) library --based on (srfi 111)
-box.ostk: ../srfi/111.ostk
-../srfi/111.ostk:
-	(cd ../srfi; $(MAKE)  $@)
-
-# (scheme set) library --based on (srfi 113)
-streams.ostk: ../srfi/113.ostk
-../srfi/113.ostk:
-	(cd ../srfi; $(MAKE)  $@)
-
-# (scheme ilist) library --based on (srfi 116)
-ilist.ostk: ../srfi/116.ostk
-../srfi/116.ostk:
-	(cd ../srfi; $(MAKE)  $@)
-
-# (scheme list-queue) library --based on (srfi 117)
-streams.ostk: ../srfi/117.ostk
-../srfi/117.ostk:
-	(cd ../srfi; $(MAKE)  $@)
-
-# (scheme hash-table) library  --based on (srfi 125)
+list.ostk:       ../srfi/1.ostk
+charset.ostk:    ../srfi/14.ostk
+stream.ostk:     ../srfi/41.ostk
+box.ostk:        ../srfi/111.ostk
+set.ostk:        ../srfi/113.ostk
+ilist.ostk:      ../srfi/116.ostk
+list-queue.ostk: ../srfi/117.ostk
 hash-table.ostk: ../srfi/125.ostk
-../srfi/125.ostk:
-	(cd ../srfi; $(MAKE)  $@)
 
 # ======================================================================
-
-install-sources:
+mainstall-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
