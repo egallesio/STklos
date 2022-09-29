@@ -1,16 +1,18 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date:  3-Feb-2022 11:16 (eg)
-// Last file update:  4-Feb-2022 10:47 (eg)
+// Last file update: 29-Sep-2022 19:23 (eg)
 
 ==  STklos Libraries
 
 This section describes the standard libraries provided by {{stklos}}.
 
-=== The (scheme ...) libraries
+=== The (scheme ...) Libraries
+
+==== {{rseven}} libraries
 
 {{stklos}} offers all the libraries defined by {{rseven}}:
 
@@ -33,7 +35,23 @@ This section describes the standard libraries provided by {{stklos}}.
 
 See the <<R7RS>> document for more information.
 
-=== The (srfi ...) libraries
+==== {{rseven}} Large Libraries
+
+{{stklos}} supports some libraries of the (under development) {{rseven}} Large editions.
+
+For now, supported libraries of the *Red edition* are
+
+- list
+- charset
+- stream
+- box
+- set
+- ilist
+- list-queue
+- hash-table
+
+
+=== The (srfi ...) Libraries
 
 All the SRFI supported by {{stklos}} are placed under
 the `srfi` meta library and their name is SRFI number. Hence, to use
@@ -42,14 +60,14 @@ the exported symbols of {{quick-link-srfi 1}}, you'll have to import the
 
 See  _<<_srfis>>_ for more information
 
-=== The (stklos ...) libraries
+=== The (stklos ...) Libraries
 
 This section describes the standard libraries which are placed under
 the `stklos` meta library. Note that {{stklos}} extensions can add
 some libraries in the `stklos` meta library; they will be described in
 the extension documentation.
 
-==== (stklos itrie) library
+==== (stklos itrie) Library
 
 This library was designed by Jerônimo Pellegrini
 (https://github.com/jpellegrini[@jpellegrini]).
@@ -107,6 +125,6 @@ The symbols exported by `(stklos itrie)` are described below:
 {{insertdoc 'make-range-iset}}
 
 
-==== (stklos preproc) library
+==== (stklos preproc) Library
 
 IMPORTANT: This library  must be described
