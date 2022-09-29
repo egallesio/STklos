@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 19-Sep-2022 22:57 (eg)
+# Last file update: 29-Sep-2022 20:14 (eg)
 
 #-======================================================================
 
@@ -272,7 +272,7 @@ $(DEPEND_9): 9.ostk
 64.ostk: 35.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
-95.ostk:  132.ostk 132.$(SO)
+95.ostk:  132.$(SO)
 113.ostk: 128.ostk
 125.ostk: 128.ostk
 130.ostk: 13.ostk

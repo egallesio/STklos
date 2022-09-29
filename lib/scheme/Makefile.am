@@ -19,13 +19,14 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 29-Sep-2022 19:21 (eg)
+# Last file update: 29-Sep-2022 20:17 (eg)
 
 #======================================================================
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
+SO = @SH_SUFFIX@
 
 R7_STK=   base.stk            \
           case-lambda.stk     \
@@ -100,19 +101,19 @@ SUFFIXES = .stk .ostk
 #======================================================================
 # Dependencies
 #======================================================================
-DEPS= ../srfi/1.ostk    ../srfi/14.ostk  ../srfi/41.ostk  \
-       ../srfi/111.ostk ../srfi/113.ostk ../srfi/116.ostk \
+DEPS= ../srfi/1.ostk    ../srfi/14.ostk  ../srfi/41.ostk   \
+       ../srfi/111.ostk ../srfi/113.ostk ../srfi/116.$(SO) \
        ../srfi/117.ostk ../srfi/125.ostk
 
 $(DEPS):
-	(cd ../srfi; $(MAKE)  $@)
+	(cd ../srfi; $(MAKE)  `basename $@`)
 
 list.ostk:       ../srfi/1.ostk
 charset.ostk:    ../srfi/14.ostk
 stream.ostk:     ../srfi/41.ostk
 box.ostk:        ../srfi/111.ostk
 set.ostk:        ../srfi/113.ostk
-ilist.ostk:      ../srfi/116.ostk
+ilist.ostk:      ../srfi/116.$(SO)
 list-queue.ostk: ../srfi/117.ostk
 hash-table.ostk: ../srfi/125.ostk
 
