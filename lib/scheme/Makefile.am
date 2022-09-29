@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 28-Sep-2022 18:00 (eg)
+# Last file update: 29-Sep-2022 18:01 (eg)
 
 #======================================================================
 
@@ -49,7 +49,9 @@ SRC_STK = base.stk            \
           write.stk           \
           list.stk            \
           charset.stk         \
-          streams.stk         \
+          stream.stk          \
+          box.stk             \
+          set.stk             \
           hash-table.stk
 
 scheme_OBJS = base.ostk            \
@@ -70,7 +72,9 @@ scheme_OBJS = base.ostk            \
               write.ostk           \
               list.ostk            \
               charset.ostk         \
-              streams.ostk         \
+              stream.ostk          \
+			  box.ostk             \
+              set.ostk             \
               hash-table.ostk
 
 #======================================================================
@@ -103,6 +107,17 @@ charset.ostk: ../srfi/14.ostk
 streams.ostk: ../srfi/41.ostk
 ../srfi/41.ostk:
 	(cd ../srfi; $(MAKE)  $@)
+
+# (scheme box) library --based on (srfi 111)
+box.ostk: ../srfi/111.ostk
+../srfi/111.ostk:
+	(cd ../srfi; $(MAKE)  $@)
+
+# (scheme set) library --based on (srfi 113)
+streams.ostk: ../srfi/113.ostk
+../srfi/113.ostk:
+	(cd ../srfi; $(MAKE)  $@)
+
 
 # (scheme hash-table) library  --based on (srfi 125)
 hash-table.ostk: ../srfi/125.ostk

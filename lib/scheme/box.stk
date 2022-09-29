@@ -1,8 +1,8 @@
 ;;;;
 ;;;;
-;;;; streams.stk         -- The R7RS large list library
+;;;; box.stk         -- R7RS large (scheme box) library
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio <eg@ <eg@stklos.net>
+;;;; Copyright © 2022 Erick Gallesio - I3 <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,12 +21,13 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date: 28-Sep-2022 18:06
-;;;; Last file update: 28-Sep-2022 18:08 (eg)
+;;;;    Creation date: 29-Sep-2022 17:52
+;;;; Last file update: 29-Sep-2022 17:58 (eg)
 ;;;;
 
 
-;; NOTE: This module is implemented in SRFI-41. Consequently, we can implement
-;; this module by just importing (srfi 41) and reexporting all its public
+
+;; NOTE: This module is implemented in SRFI-111. Consequently, we can implement
+;; this module by just importing (srfi 111) and reexporting all its public
 ;; symbols.
-(%make-copy-module  (srfi 41) stream)
+(%make-copy-module  (srfi 111) box)
