@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 29-Sep-2022 20:17 (eg)
+# Last file update: 29-Sep-2022 21:00 (eg)
 
 #======================================================================
 
@@ -105,6 +105,7 @@ DEPS= ../srfi/1.ostk    ../srfi/14.ostk  ../srfi/41.ostk   \
        ../srfi/111.ostk ../srfi/113.ostk ../srfi/116.$(SO) \
        ../srfi/117.ostk ../srfi/125.ostk
 
+
 $(DEPS):
 	(cd ../srfi; $(MAKE)  `basename $@`)
 
@@ -116,6 +117,14 @@ set.ostk:        ../srfi/113.ostk
 ilist.ostk:      ../srfi/116.$(SO)
 list-queue.ostk: ../srfi/117.ostk
 hash-table.ostk: ../srfi/125.ostk
+
+# This is weird to add these dependencies here, but they seem needed for
+# massive parallel $(MAKE)
+41.ostk: ../streams/derived.ostk
+../streams/derived.osk:
+	(cd ../streams; $(MAKE) derived.ostk)
+
+
 
 # ======================================================================
 mainstall-sources:

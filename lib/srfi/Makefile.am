@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 29-Sep-2022 20:14 (eg)
+# Last file update: 29-Sep-2022 20:47 (eg)
 
 #-======================================================================
 
@@ -267,7 +267,7 @@ $(DEPEND_1): 1.ostk
 $(DEPEND_9): 9.ostk
 13.ostk: 14.ostk
 37.ostk: 13.ostk
-41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
+41.ostk: ../streams/derived.ostk
 51.ostk: 1.ostk
 64.ostk: 35.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
@@ -281,7 +281,7 @@ $(DEPEND_9): 9.ostk
 135.ostk: 9.ostk 129.ostk
 151.ostk: 60.ostk
 152.ostk: 13.ostk
-160.ostk: 160-subdir 
+160.ostk: 160-subdir
 171.ostk: 69.ostk
 190.ostk: 158.ostk
 195.ostk: 35.ostk
@@ -301,7 +301,10 @@ $(DEPEND_9): 9.ostk
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
 
-160-subdir: 128.ostk 
+../streams/derived.ostk:
+	(cd ../streams; $(MAKE) derived.ostk)
+
+160-subdir: 128.ostk
 	(cd 160; $(MAKE) $(AM_MAKEFLAGS))
 
 #======================================================================
