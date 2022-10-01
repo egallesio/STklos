@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  1-Oct-2022 22:53 (eg)
+# Last file update:  1-Oct-2022 23:49 (eg)
 
 #======================================================================
 
@@ -73,6 +73,7 @@ R7_OBJS =     base.ostk            \
 #             hash-table.stk
 
 LARGE_STK = list.stk      \
+            charset.stk   \
             stream.stk
 
 # LARGE_OBJS =  list.ostk            \
@@ -85,6 +86,7 @@ LARGE_STK = list.stk      \
 #               hash-table.ostk
 
 LARGE_OBJS =    list.ostk    \
+                charset.ostk \
                 stream.ostk
 
 #----------------------------------------------------------------------

@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  1-Oct-2022 22:27 (eg)
+# Last file update:  1-Oct-2022 23:58 (eg)
 
 #-======================================================================
 
@@ -861,6 +861,9 @@ DEPEND_9:  37.ostk  64.ostk 113.ostk 117.ostk 128.ostk 134.ostk 135.ostk 154.ost
 1.ostk: ../scheme/list.ostk
 ../scheme/list.ostk:
 	(cd ../scheme; $(MAKE) list.ostk)
+
+14.ostk: ../scheme/charset.ostk
+	(cd ../scheme; $(MAKE) charset.ostk)
 
 $(DEPEND_1): 1.ostk
 $(DEPEND_9): 9.ostk
