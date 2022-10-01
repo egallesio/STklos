@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  1-Oct-2022 21:49 (eg)
+# Last file update:  1-Oct-2022 22:53 (eg)
 
 #======================================================================
 
@@ -45,7 +45,7 @@ R7_STK=   base.stk            \
           time.stk            \
           write.stk
 
-R7_OBJS = base.ostk            \
+R7_OBJS =     base.ostk            \
               case-lambda.ostk     \
               char.ostk            \
               complex.ostk         \
@@ -72,7 +72,8 @@ R7_OBJS = base.ostk            \
 #             list-queue.stk      \
 #             hash-table.stk
 
-LARGE_STK = stream.stk
+LARGE_STK = list.stk      \
+            stream.stk
 
 # LARGE_OBJS =  list.ostk            \
 #               charset.ostk         \
@@ -82,7 +83,10 @@ LARGE_STK = stream.stk
 #               ilist.ostk           \
 #               list-queue.ostk      \
 #               hash-table.ostk
-LARGE_OBJS =    stream.ostk   
+
+LARGE_OBJS =    list.ostk    \
+                stream.ostk
+
 #----------------------------------------------------------------------
 SRC_STK     = $(R7_STK) $(LARGE_STK)
 scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
@@ -103,20 +107,20 @@ SUFFIXES = .stk .ostk
 #======================================================================
 # Dependencies
 #======================================================================
-DEPS= ../srfi/1.ostk    ../srfi/14.ostk  ../srfi/41.ostk   \
-       ../srfi/111.ostk ../srfi/113.ostk ../srfi/116.$(SO) \
-       ../srfi/117.ostk ../srfi/125.ostk
+# DEPS= ../srfi/1.ostk    ../srfi/14.ostk  ../srfi/41.ostk   \
+#        ../srfi/111.ostk ../srfi/113.ostk ../srfi/116.$(SO) \
+#        ../srfi/117.ostk ../srfi/125.ostk
+#
+#
+# $(DEPS):
+# 	(cd ../srfi; $(MAKE)  `basename $@`)
 
-
-$(DEPS):
-	(cd ../srfi; $(MAKE)  `basename $@`)
-
-#list.ostk:       ../srfi/1.ostk
 #charset.ostk:    ../srfi/14.ostk
 
-stream.ostk:     ../streams/derived.ostk
+stream.ostk:     list.ostk ../streams/derived.ostk
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
+
 #box.ostk:        ../srfi/111.ostk
 #set.ostk:        ../srfi/113.ostk
 #ilist.ostk:      ../srfi/116.$(SO)
@@ -126,10 +130,6 @@ stream.ostk:     ../streams/derived.ostk
 # This is weird to add these dependencies here, but they seem needed for
 # massive parallel $(MAKE)
 41.ostk: ../streams/derived.ostk
-../streams/derived.osk:
-	(cd ../streams; $(MAKE) derived.ostk)
-
-
 
 # ======================================================================
 mainstall-sources:

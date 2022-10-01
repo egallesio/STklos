@@ -1,6 +1,6 @@
 # Makefile for the STklos specific  libraries
 #
-# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  3-Mar-2022 16:14 (eg)
+# Last file update:  1-Oct-2022 22:58 (eg)
 
 #======================================================================
 
@@ -70,7 +70,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	/bin/rm -f $*.o
 #======================================================================
 # Dependencies
-derived.ostk: primitive.ostk
+derived.ostk: primitive.ostk ../scheme/list.ostk
+../scheme/list.ostk:
+	(cd ../scheme; $(MAKE) list.ostk)
 
 # ======================================================================
 install-sources:
