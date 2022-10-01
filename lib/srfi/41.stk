@@ -22,10 +22,11 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jul-2020 23:22 (jpellegrini)
-;;;; Last file update: 25-Apr-2022 11:07 (eg)
+;;;; Last file update:  1-Oct-2022 21:42 (eg)
 ;;;;
 
-
+;; NOTE: This module is identical to (scheme stream). We could have used
+;; a %make-copy-module here. Anyway, here it is.
 (define-module srfi/41
   (import (streams primitive) (streams derived))
   (export stream-cons stream-lambda stream-delay stream-lazy

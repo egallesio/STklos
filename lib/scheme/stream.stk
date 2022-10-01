@@ -22,11 +22,26 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Sep-2022 18:06
-;;;; Last file update: 28-Sep-2022 18:12 (eg)
+;;;; Last file update:  1-Oct-2022 21:39 (eg)
 ;;;;
 
 
-;; NOTE: This module is implemented in SRFI-41. Consequently, we can implement
-;; this module by just importing (srfi 41) and reexporting all its public
-;; symbols.
-(%make-copy-module  (srfi 41) stream)
+(define-module scheme/stream
+  (import (streams primitive) (streams derived))
+  (export stream-cons stream-lambda stream-delay stream-lazy
+          make-stream make-stream-pare %stream-eager
+          stream-null stream-cons stream? stream-null? stream-pair?
+          stream-car stream-cdr stream-lambda define-stream
+          list->stream port->stream stream
+          stream->list stream-append stream-concat stream-constant stream-drop
+          stream-drop-while stream-filter stream-fold stream-for-each stream-from
+          stream-iterate stream-length stream-let stream-map stream-match
+          stream-match-next stream-match-one stream-match-body stream-of
+          stream-of-aux stream-of-aux2 stream-range stream-ref stream-reverse
+          stream-scan stream-take stream-take-while stream-unfold
+          stream-unfolds stream-zip)
+) ;; END OF DEFINE-MODULE
+
+(provide "scheme/stream")
+
+
