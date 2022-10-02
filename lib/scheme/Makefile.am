@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  1-Oct-2022 23:49 (eg)
+# Last file update:  2-Oct-2022 00:39 (eg)
 
 #======================================================================
 
@@ -74,7 +74,10 @@ R7_OBJS =     base.ostk            \
 
 LARGE_STK = list.stk      \
             charset.stk   \
-            stream.stk
+            stream.stk    \
+            box.stk       \
+            set.stk
+
 
 # LARGE_OBJS =  list.ostk            \
 #               charset.ostk         \
@@ -87,7 +90,9 @@ LARGE_STK = list.stk      \
 
 LARGE_OBJS =    list.ostk    \
                 charset.ostk \
-                stream.ostk
+                stream.ostk  \
+                box.ostk     \
+                set.ostk
 
 #----------------------------------------------------------------------
 SRC_STK     = $(R7_STK) $(LARGE_STK)
@@ -123,6 +128,15 @@ stream.ostk:     list.ostk ../streams/derived.ostk
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
 
+set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
+../srfi/9.ostk:
+	(cd ../srfi; $(MAKE) 9.ostk)
+../srfi/69.ostk:
+	(cd ../srfi; $(MAKE) 69.ostk)
+../srfi/128.ostk:
+	(cd ../srfi; $(MAKE) 128.ostk)
+
+
 #box.ostk:        ../srfi/111.ostk
 #set.ostk:        ../srfi/113.ostk
 #ilist.ostk:      ../srfi/116.$(SO)
@@ -131,7 +145,7 @@ stream.ostk:     list.ostk ../streams/derived.ostk
 
 # This is weird to add these dependencies here, but they seem needed for
 # massive parallel $(MAKE)
-41.ostk: ../streams/derived.ostk
+#41.ostk: ../streams/derived.ostk
 
 # ======================================================================
 mainstall-sources:

@@ -1,8 +1,8 @@
 ;;;;
 ;;;;
-;;;; box.stk         -- R7RS large (scheme box) library
+;;;; box.stk         -- R7RS large box library
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio - I3 <eg@stklos.net>
+;;;; Copyright © 2022 Erick Gallesio <eg@ <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -20,14 +20,14 @@
 ;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
-;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 29-Sep-2022 17:52
-;;;; Last file update: 29-Sep-2022 17:58 (eg)
+;;;; Last file update:  2-Oct-2022 00:22 (eg)
 ;;;;
 
+(define-module scheme/box
+  (import (only SCHEME box box? unbox set-box!))
+  (export box box? unbox set-box!))
 
+(provide "scheme/box")
 
-;; NOTE: This module is implemented in SRFI-111. Consequently, we can implement
-;; this module by just importing (srfi 111) and reexporting all its public
-;; symbols.
-(%make-copy-module  (srfi 111) box)

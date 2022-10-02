@@ -22,8 +22,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Oct-2022 22:17
-;;;; Last file update:  1-Oct-2022 22:20 (eg)
+;;;; Last file update:  2-Oct-2022 00:45 (eg)
 ;;;;
 
 ;;;; The real implementation is in (scheme list).
 (%make-copy-module scheme/list srfi/1)
+
+(provide "srfi/1")
