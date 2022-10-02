@@ -19,48 +19,51 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  2-Oct-2022 00:39 (eg)
+# Last file update:  2-Oct-2022 19:25 (eg)
 
 #======================================================================
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../src/stklos
+STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
-R7_STK=   base.stk            \
-          case-lambda.stk     \
-          char.stk            \
-          complex.stk         \
-          cxr.stk             \
-          eval.stk            \
-          file.stk            \
-          inexact.stk         \
-          lazy.stk            \
-          load.stk            \
-          process-context.stk \
-          r5rs.stk            \
-          read.stk            \
-          repl.stk            \
-          time.stk            \
-          write.stk
+DOCDB  = ../DOCDB
+BASEDIR= ../..
 
-R7_OBJS =     base.ostk            \
-              case-lambda.ostk     \
-              char.ostk            \
-              complex.ostk         \
-              cxr.ostk             \
-              eval.ostk            \
-              file.ostk            \
-              inexact.ostk         \
-              lazy.ostk            \
-              load.ostk            \
-              process-context.ostk \
-              r5rs.ostk            \
-              read.ostk            \
-              repl.ostk            \
-              time.ostk            \
-              write.ostk
+R7_STK=    base.stk            \
+           case-lambda.stk     \
+           char.stk            \
+           complex.stk         \
+           cxr.stk             \
+           eval.stk            \
+           file.stk            \
+           inexact.stk         \
+           lazy.stk            \
+           load.stk            \
+           process-context.stk \
+           r5rs.stk            \
+           read.stk            \
+           repl.stk            \
+           time.stk            \
+           write.stk
+
+R7_OBJS =  base.ostk            \
+           case-lambda.ostk     \
+           char.ostk            \
+           complex.ostk         \
+           cxr.ostk             \
+           eval.ostk            \
+           file.ostk            \
+           inexact.ostk         \
+           lazy.ostk            \
+           load.ostk            \
+           process-context.ostk \
+           r5rs.ostk            \
+           read.ostk            \
+           repl.ostk            \
+           time.ostk            \
+           write.ostk
 
 # ----------------------------------------------------------------------
 # LARGE_STK = list.stk            \
@@ -94,22 +97,41 @@ LARGE_OBJS =    list.ostk    \
                 box.ostk     \
                 set.ostk
 
+#
+# Libraries written in C and Scheme
+#
+LARGE_C     = ilist.c
+LARGE_C_STK = ilist.stk
+LARGE_SHOBJ = ilist.$(SO)
+
+
 #----------------------------------------------------------------------
-SRC_STK     = $(R7_STK) $(LARGE_STK)
-scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
+SRC_STK     = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
+SRC_C_STK   = $(LARGE_C_STK)
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) $(LARGE_SHOBJ)
+
+SOURCES = $(SRC_STK) $(LARGE_C)
 
 #======================================================================
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
+schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
 scheme_sources  = $(SRC_STK)
 scheme_DATA     = $(scheme_OBJS)
+schemelib_DATA  = $(schemelib_SHOBJ)
 
 #======================================================================
-SUFFIXES = .stk .ostk
+SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
-.scm.ostk:
-	$(COMP) -o $*.ostk $*.scm
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
+
+.c.$(SO) :
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@/bin/rm -f $*.o
+
 
 #======================================================================
 # Dependencies
@@ -137,6 +159,9 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
 	(cd ../srfi; $(MAKE) 128.ostk)
 
 
+ilist.$(SO): ilist-incl.c
+ilist-incl.c: ../srfi/128.ostk
+
 #box.ostk:        ../srfi/111.ostk
 #set.ostk:        ../srfi/113.ostk
 #ilist.ostk:      ../srfi/116.$(SO)
@@ -148,11 +173,11 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
 #41.ostk: ../streams/derived.ostk
 
 # ======================================================================
-mainstall-sources:
-	install $(scheme_sources) $(schemedir)
+install-sources:
+	cp $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS)  *~
+	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
 	/bin/rm -f Makefile
@@ -160,3 +185,7 @@ distclean: clean
 uninstall-hook:
 	(cd $(schemedir); rm -f $(scheme_sources))
 	rmdir $(schemedir) || true
+
+doc:
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)

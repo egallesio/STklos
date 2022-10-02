@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  2-Oct-2022 00:52 (eg)
+# Last file update:  2-Oct-2022 19:31 (eg)
 
 #-======================================================================
 
@@ -83,6 +83,7 @@ SRC_STK   = 1.stk   \
             100.stk \
             111.stk \
             113.stk \
+            116.stk \
             117.stk \
             118.stk \
             125.stk \
@@ -178,6 +179,7 @@ SRC_OSTK =  1.ostk   \
             96.ostk  \
             100.ostk \
             111.ostk \
+            116.ostk \
             117.ostk \
             118.ostk \
             113.ostk \
@@ -226,9 +228,9 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c     116.c     132.c     133.c      144.c      170.c      175.c
-SRC_C_STK = 25.stk   27.stk   116.stk   132.stk   133.stk    144.stk    170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 116.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
+SRC_C     = 25.c     27.c     132.c     133.c      144.c      170.c      175.c
+SRC_C_STK = 25.stk   27.stk   132.stk   133.stk    144.stk    170.stk    175.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -269,10 +271,15 @@ DEPEND_9:  37.ostk  64.ostk 117.ostk 128.ostk 134.ostk 135.ostk 154.ostk \
 	(cd ../scheme; $(MAKE) list.ostk)
 
 14.ostk: ../scheme/charset.ostk
+../scheme/charset.ostk:
 	(cd ../scheme; $(MAKE) charset.ostk)
 
 113.ostk: ../scheme/set.ostk
+../scheme/set.ostk:
 	(cd ../scheme; $(MAKE) set.ostk)
+
+../scheme/ilist.$(SO):
+	(cd ../scheme; $(MAKE) ilist.$(SO))
 
 $(DEPEND_1): 1.ostk
 $(DEPEND_9): 9.ostk
@@ -284,7 +291,7 @@ $(DEPEND_9): 9.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
 95.ostk:  132.$(SO)
-
+116.ostk: ../scheme/ilist.$(SO)
 125.ostk: 128.ostk
 130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.$(SO)
@@ -316,7 +323,7 @@ $(DEPEND_9): 9.ostk
 	(cd ../streams; $(MAKE) derived.ostk)
 
 160-subdir: 128.ostk
-	(cd 160; $(MAKE) $(AM_MAKEFLAGS))
+	(cd 160; $(MAKE))
 
 #======================================================================
 

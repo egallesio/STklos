@@ -1,4 +1,8 @@
 
+(define-syntax iq
+  (syntax-rules ()
+    ((iq . tree) (gtree->itree 'tree))))
+
 
 ;; Constructors
 

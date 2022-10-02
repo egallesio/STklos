@@ -1,8 +1,7 @@
 ;;;;
+;;;; ilist.stk         -- SRFI-116: Immutable List Library
 ;;;;
-;;;; ilist.stk         -- The R7RS large ilist library
-;;;;
-;;;; Copyright © 2022 Erick Gallesio <eg@ <eg@stklos.net>
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -20,13 +19,2124 @@
 ;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
-;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date: 29-Sep-2022 18:30
-;;;; Last file update: 29-Sep-2022 18:31 (eg)
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by John Cowan, which is copyrighted as:
 ;;;;
+;;;;;;  Copyright (c) 2014 John Cowan
+;;;;;;  Permission is hereby granted, free of charge, to any person
+;;;;;;  obtaining a copy of this software and associated documentation
+;;;;;;  files (the "Software"), to deal in the Software without
+;;;;;;  restriction, including without limitation the rights to use,
+;;;;;;  copy, modify, merge, publish, distribute, sublicense, and/or
+;;;;;;  sell copies of the Software, and to permit persons to whom the
+;;;;;;  Software is furnished to do so, subject to the following
+;;;;;;  conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice shall be
+;;;;;; included in all copies or substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 02-May-2022 12:41
+;;;; Last file update:  2-Oct-2022 17:50 (eg)
 
 
-;; NOTE: This module is implemented in SRFI-116. Consequently, we can implement
-;; this module by just importing (srfi 116) and reexporting all its public
-;; symbols.
-(%make-copy-module  (srfi 116) ilist)
+;;; STKLOS IMPLEMENTATION:
+;;; =====================
+;;;
+;;; A fundamental part of the SRFI (and some other procedures) is written
+;;; in C. The rest is in this file.
+;;; Here there is a large part of the reference implementation, with some
+;;; ad-hoc procedures for STklos.
+;;;
+;;; * STklos has immutable list literals, so some names are bound to
+;;;   already existent primitives (for example, ifor-each is bound to
+;;;   for-each).
+;;;
+;;; * The idelete-duplicates procedure works in expected linear time
+;;;   (the reference implementation has a simpler procedure that runs in
+;;;   quadratic time).
+;;;
+;;; * The list-immutable+! procedure is used to change a list, in-place, so
+;;;   it becomes immutable.
+
+
+;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;
+
+;; FIXME: this should be inside the module!
+(define-syntax iq
+  (syntax-rules ()
+    ((iq . tree) (gtree->itree 'tree))))
+
+(select-module scheme/ilist)
+
+(export ;;;
+        ;;; CONSTRUCTORS
+        ;;;
+        ;; ipair (C)
+        ;; ilist (C)
+        xipair
+        ;; ipair* (C)
+         make-ilist
+        ilist-tabulate
+        ilist-copy
+        iiota
+
+        ;;;
+        ;;; PREDICATES
+        ;;;
+        ;; ipair? (C)
+        proper-ilist?
+        ilist?
+        null-ilist?
+        dotted-ilist?
+        not-ipair?
+        null-ilist?
+        ilist=
+
+        ;;;
+        ;;; SELECTORS
+        ;;;
+        icar
+        icdr
+
+        icaar icadr icdar icddr
+        icaaar icaadr icadar icaddr icdaar icdadr icddar icdddr
+        icaaaar icaaadr icaadar icaaddr icadaar icadadr icaddar icadddr icdaaar icdaadr icdadar icdaddr icddaar icddadr icdddar icddddr
+        ilist-ref
+        ifirst isecond ithird ifourth ififth isixth iseventh ieighth ininth itenth
+        ;; icar+icdr (C)
+        itake
+        idrop ilist-tail
+        itake-right idrop-right
+        isplit-at
+        ilast
+        last-ipair
+
+        ;;;
+        ;;; MISCELLANEOUS: LENGTH, APPEND, CONCATENATE, REVERSE, ZIP & COUNT
+        ;;;
+        ilength
+        ;; iappend (C)
+        iconcatenate
+        ireverse
+        iappend-reverse
+        izip
+        iunzip1
+        iunzip2
+        iunzip3
+        iunzip4
+        iunzip5
+        icount
+
+        ;;;
+        ;;; FOLD, UNFOLD & MAP
+        ;;;
+        imap
+        ifor-each
+        ifold
+        iunfold
+        ipair-fold
+        ireduce
+        ifold-right
+        iunfold-right
+        ipair-fold-right
+        ireduce-right
+        iappend-map
+        ipair-for-each
+        ifilter-map
+        imap-in-order
+
+        ;;;
+        ;;; FILTERING AND PARTITIONING
+        ;;;
+        ifilter
+        ipartition
+        iremove
+
+        ;;;
+        ;;; SEARCHING
+        ;;;
+        imember
+        imemq
+        imemv
+        ifind
+        ifind-tail
+        iany
+        ievery
+        ilist-index
+        itake-while
+        idrop-while
+        ispan ibreak
+
+        ;;;
+        ;;; DELETION
+        ;;;
+        idelete
+        idelete-duplicates
+
+        ;;;
+        ;;; IMMUTABLE ASSOCIATION LISTS
+        ;;;
+        iassoc
+        iassq
+        iassv
+        ialist-cons
+        ialist-delete
+
+        ;;;
+        ;;; REPLACEMENT
+        ;;;
+        ;; replace-icar (C)
+        ;; replace-icdr (C)
+
+        ;;;
+        ;;; CONVERSION
+        ;;;
+        ;; pair->ipair  ipair->pair (C)
+        ;; list->ilist  ilist->list (C)
+        ;; tree->itree  itree->tree (C)
+        gtree->itree gtree->tree
+
+
+        ;;;
+        ;;; PROCEDURE APPLICATION
+        ;;;
+        iapply
+
+        ;;;
+        ;;; COMPARATORS
+        ;;;
+        ipair-comparator
+        ilist-comparator
+        make-ipair-comparator
+        make-ilist-comparator
+        make-improper-ilist-comparator
+        make-icar-comparator
+        make-icdr-comparator
+        )
+
+;; We borrow some comparators from SRFI 128.
+(import (rename (srfi 128)
+                (make-pair-comparator make-ipair-comparator)
+                (make-list-comparator make-ilist-comparator))
+        (only (srfi 128)
+              comparator-type-test-predicate
+              comparator-equality-predicate
+              comparator-ordering-predicate
+              comparator-hash-function))
+
+
+;; Avoid warnings when compiling this file
+(%compile-time-define ipair ilist  ipair* ipair? icar+icdr
+                      iappend ireplace-icar ireplace-icdr
+                      ipair->pair pair->ipair
+                      ilist->list list->ilist
+                      tree->itree itree->tree
+                      list-immutable+!)
+
+;;;
+;;; UTILITIES FROM THE REFRENCE IMPLEMENTATION
+;;;
+
+(define-syntax opt
+  (syntax-rules ()
+    ((_ rest default)
+     (cond
+       ((null? rest) default)
+       ((null? (cdr rest)) (car rest))
+       (else (error "Too many arguments"))))))
+
+(define (check-arg pred val caller)
+  (let lp ((val val))
+    (if (pred val) val (lp (error "Bad argument" val pred caller)))))
+
+(define (%cdrs lists)
+  (call-with-current-continuation
+    (lambda (abort)
+      (let recur ((lists lists))
+        (if (pair? lists)
+            (let ((lis (car lists)))
+              (if (null? lis) (abort '())
+                  (cons (icdr lis) (recur (cdr lists)))))
+            '())))))
+
+(define (%cars+ lists last-elt) ; (append (map icar lists) (list last-elt))
+  (let recur ((lists lists))
+    (if (pair? lists)
+        (cons (icar (car lists)) (recur (cdr lists)))
+        (list last-elt))))
+
+(define (%cars+cdrs ilists)
+  (call-with-current-continuation
+    (lambda (abort)
+      (let recur ((ilists ilists))
+        (if (pair? ilists)
+            (let ((ilist (car ilists))
+                  (other-ilists (cdr ilists)))
+              (if (null? ilist) (abort '() '()) ; LIST is empty -- bail out
+                  (let ((a (icar ilist))
+                        (d (icdr ilist)))
+                    (receive (icars icdrs) (recur other-ilists)
+                      (values (cons a icars) (cons d icdrs))))))
+            (values '() '()))))))
+
+(define (%cars+cdrs+ ilists cars-final)
+  (call-with-current-continuation
+    (lambda (abort)
+      (let recur ((ilists ilists))
+        (if (pair? ilists)
+            (let ((ilist (car ilists))
+                  (other-ilists (cdr ilists)))
+              (if (null? ilist) (abort '() '()) ; LIST is empty -- bail out
+                  (receive (a d) (icar+icdr ilist)
+                    (receive (cars cdrs) (recur other-ilists)
+                      (values (cons a cars) (cons d cdrs))))))
+            (values (list cars-final) '()))))))
+
+
+
+
+;; CONSTRUCTORS
+
+#|
+<doc EXT xipair
+ * (xipair d a)
+ *
+ * The same as |(lambda (d a) (ipair a d))|
+ *
+ * Of utility only as a value to be conveniently passed to
+ * higher-order procedures.
+ *
+ * @lisp
+ * (xipair (iq b c) 'a) => (a b c)
+ * @end lisp
+ *
+ * The name stands for "eXchanged Immutable PAIR."
+doc>
+|#
+(define (xipair d a) (ipair a d))
+
+#|
+<doc EXT make-ilist
+ * (make-ilist n [fill])
+ *
+ * Returns an n-element ilist, whose elements are all the value
+ * fill. If the fill argument is not given, the elements of the
+ * ilist may be arbitrary values.
+ *
+ * @lisp
+ * (make-ilist 4 'c) => (c c c c)
+ * @end lisp
+doc>
+|#
+(define (make-ilist n :optional (fill #void))
+  (list-immutable+! (make-list n fill)))
+
+
+#|
+<doc EXT ilist-tabulate
+ * (ilist-tabulate n init-proc)
+ *
+ * Returns an n-element ilist. Element i of the ilist,
+ * where 0 <= i < n, is produced by |(init-proc i)|.
+ * No guarantee is made about the dynamic order in which
+ * |init-proc| is applied to these indices.
+ *
+ * @lisp
+ * (ilist-tabulate 4 values) => (0 1 2 3)
+ * @end lisp
+doc>
+|#
+(define (ilist-tabulate len proc)
+  (check-arg (lambda (n) (and (integer? n) (>= n 0))) len ilist-tabulate)
+  (check-arg procedure? proc ilist-tabulate)
+  (do ((i (- len 1) (- i 1))
+       (ans '() (ipair (proc i) ans)))
+      ((< i 0) ans)))
+
+#|
+<doc EXT ilist-copy
+ * (ilist-copy lst)
+ *
+ * Copies the spine of the argument, including the ilist tail.
+doc>
+|#
+(define (ilist-copy x) (list-immutable+! (list-copy x)))
+
+#|
+<doc EXT iiota
+ * (iiota count [ start step ]
+ *
+ * Returns an ilist containing the elements
+ *
+ * |(start start+step ... start+(count-1)*step)|
+ *
+ * The |start| and |step| parameters default to 0 and 1,
+ * respectively. This procedure takes its name from the APL
+ * primitive.
+ *
+ * @lisp
+ * (iiota 5) => (0 1 2 3 4)
+ * (iiota 5 0 -0.1) => (0 -0.1 -0.2 -0.3 -0.4)
+ * @end lisp
+doc>
+|#
+(define (iiota count . maybe-start+step)
+  (check-arg integer? count iiota)
+  (if (< count 0) (error "Negative step count" iiota count))
+  (let ((start (if (pair? maybe-start+step) (car maybe-start+step) 0))
+        (step (if (and (pair? maybe-start+step)
+                        (pair? (cdr maybe-start+step)))
+                 (cadr maybe-start+step)
+                 1)))
+    (check-arg number? start iiota)
+    (check-arg number? step iiota)
+    (let loop ((n 0) (r '()))
+      (if (= n count)
+          (ireverse r)
+          (loop (+ 1 n)
+                (ipair (+ start (* n step)) r))))))
+
+;; PREDICATES
+
+#|
+<doc EXT null-ilist?
+ * (null-ilist? lst)
+ *
+ * Ilist is a proper ilist. This procedure returns true if the argument
+ * is the empty list |()|, and false otherwise. It is an error to pass this
+ * procedure a value which is not a proper ilist. This procedure is
+ * recommended as the termination condition for ilist-processing
+ * procedures that are not defined on dotted ilists.
+doc>
+|#
+(define null-ilist? null?)
+
+#|
+<doc EXT not-ipair?
+ * (not-ipair? x)
+ *
+ * This is the same as |(lambda (x) (not (ipair? x)))|
+ *
+ * Provided as a procedure as it can be useful as the termination
+ * condition for ilist-processing procedures that wish to handle
+ * all ilists, both proper and dotted.
+doc>
+|#
+(define (not-ipair? x) (not (ipair? x)))
+
+#|
+<doc EXT proper-ilist? ilist?
+ * (proper-ilist? x)
+ * (ilist? x)
+ *
+ * These identifiers are bound either to the same procedure.
+ * In either case, true is returned iff |x| is a proper ilist
+ * — a ()-terminated ilist.
+ *
+ * More carefully: The empty list is a proper ilist. An ipair
+ * whose icdr is a proper ilist is also a proper ilist. Everything
+ * else is a dotted ilist. This includes non-ipair, non-() values
+ * (e.g. symbols, numbers, mutable pairs), which are considered to
+ * be dotted ilists of length 0.
+doc>
+|#
+(define (ilist? x)
+  (cond ((null? x) #t)
+        ((and (ipair? x)
+              (ilist? (icdr x)))
+         #t)
+        (else #f)))
+
+(define proper-ilist? ilist?)
+
+
+#|
+<doc EXT dotted-ilist?
+ * (dotted-ilist? x)
+ *
+ * Returns true if |x| is a finite, non-nil-terminated ilist. That is,
+ * there exists an n >= 0 such that |icdrn(x)| is neither an ipair nor
+ * |()|. This includes non-ipair, non-() values (e.g. symbols, numbers),
+ * which are considered to be dotted ilists of length 0.
+ *
+ * @lisp
+ * (dotted-ilist? x) = (not (proper-ilist? x))
+ * @end lisp
+doc>
+|#
+(define (dotted-ilist? x)
+  (not (proper-ilist? x)))
+
+#|
+<doc EXT ilist=
+ * (ilist= elt= ilist1 ...)
+ *
+ * Determines ilist equality, given an element-equality procedure. Proper
+ * ilist A equals proper ilist B if they are of the same length, and
+ * their corresponding elements are equal, as determined by |elt=|. If the
+ * element-comparison procedure's first argument is from ilisti, then
+ * its second argument is from ilisti+1, i.e. it is always called as
+ * |(elt= a b)| for |a| an element of ilist A, and |b| an element of ilist B.
+ *
+ * In the n-ary case, every ilisti is compared to ilisti+1 (as opposed,
+ * for example, to comparing ilist1 to ilisti, for i>1). If there are no
+ * ilist arguments at all, |ilist=| simply returns true.
+ *
+ * It is an error to apply ilist= to anything except proper ilists. It
+ * cannot reasonably be extended to dotted ilists, as it provides no way
+ * to specify an equality procedure for comparing the ilist terminators.
+ *
+ * Note that the dynamic order in which the elt= procedure is applied to
+ * pairs of elements is not specified. For example, if ilist= is applied
+ * to three ilists, A, B, and C, it may first completely compare A to B,
+ * then compare B to C, or it may compare the first elements of A and B,
+ * then the first elements of B and C, then the second elements of A and
+ * B, and so forth.
+ *
+ * The equality procedure must be consistent with |eq?|. That is, it must
+ * be the case that
+ *
+ * @lisp
+ * (eq? x y) => (elt= x y)
+ * @end lisp
+ *
+ * Note that this implies that two ilists which are |eq?| are always ilist=,
+ * as well; implementations may exploit this fact to "short-cut" the
+ * element-by-element comparisons.
+ *
+ * @lisp
+ * (ilist= eq?) => #t       ; Trivial cases
+ * (ilist= eq? (iq a)) => #t
+ * @end lisp
+doc>
+|#
+(define (ilist= = . ilists)
+  (or (null? ilists) ; special case
+
+      (let lp1 ((ilist-a (car ilists)) (others (cdr ilists)))
+        (or (null? others)
+            (let ((ilist-b (car others))
+                  (others (cdr others)))
+              (if (eq? ilist-a ilist-b) ; EQ? => LIST=
+                  (lp1 ilist-b others)
+                  (let lp2 ((pair-a ilist-a) (pair-b ilist-b))
+                    (if (null-ilist? pair-a)
+                        (and (null-ilist? pair-b)
+                             (lp1 ilist-b others))
+                        (and (not (null-ilist? pair-b))
+                             (= (icar pair-a) (icar pair-b))
+                             (lp2 (icdr pair-a) (icdr pair-b)))))))))))
+
+;; SELECTORS
+
+#|
+<doc EXT icar icdr
+ * (icar ipair)
+ * (icdr ipair)
+ *
+ * These procedures return the contents of the icar and icdr
+ * field of their argument, respectively. Note that it is an
+ * error to apply them to the empty ilist.
+ *
+ * @lisp
+ * (icar (iq a b c))       =>  a          (icdr (iq a b c))     =>  (b c)
+ * (icar (iq (a) b c d))   =>  (a)        (icdr (iq (a) b c d)) =>  (b c d)
+ * (icar (ipair 1 2))      =>  1          (icdr (ipair 1 2))    =>  2
+ * (icar '())              =>  *error*    (icdr '())            =>  *error*
+ * @end lisp
+doc>
+|#
+(define icar car)
+(define icdr cdr)
+
+;; FIXME: document these
+(define (icaar   x) (icar (icar x)))
+(define (icadr   x) (icar (icdr x)))
+(define (icdar   x) (icdr (icar x)))
+(define (icddr   x) (icdr (icdr x)))
+
+(define (icaaar  x) (icaar (icar x)))
+(define (icaadr  x) (icaar (icdr x)))
+(define (icadar  x) (icadr (icar x)))
+(define (icaddr  x) (icadr (icdr x)))
+(define (icdaar  x) (icdar (icar x)))
+(define (icdadr  x) (icdar (icdr x)))
+(define (icddar  x) (icddr (icar x)))
+(define (icdddr  x) (icddr (icdr x)))
+
+(define (icaaaar x) (icaaar (icar x)))
+(define (icaaadr x) (icaaar (icdr x)))
+(define (icaadar x) (icaadr (icar x)))
+(define (icaaddr x) (icaadr (icdr x)))
+(define (icadaar x) (icadar (icar x)))
+(define (icadadr x) (icadar (icdr x)))
+(define (icaddar x) (icaddr (icar x)))
+(define (icadddr x) (icaddr (icdr x)))
+(define (icdaaar x) (icdaar (icar x)))
+(define (icdaadr x) (icdaar (icdr x)))
+(define (icdadar x) (icdadr (icar x)))
+(define (icdaddr x) (icdadr (icdr x)))
+(define (icddaar x) (icddar (icar x)))
+(define (icddadr x) (icddar (icdr x)))
+(define (icdddar x) (icdddr (icar x)))
+(define (icddddr x) (icdddr (icdr x)))
+
+#|
+<doc EXT ifirst isecond ithird ifourth ififth isixth iseventh ieighth ininth itenth
+ * (ifirst   ipair)
+ * (isecond  ipair)
+ * (ithird   ipair)
+ * (ifourth  ipair)
+ * (ififth   ipair)
+ * (isixth   ipair)
+ * (iseventh ipair)
+ * (ieighth  ipair)
+ * (ininth   ipair)
+ * (itenth   ipair)
+ *
+ * Synonyms for car, cadr, caddr, ...
+ *
+ * @lisp
+ * (ithird '(a b c d e)) => c
+ * @end lisp
+doc>
+|#
+(define ifirst  icar)
+(define isecond icadr)
+(define ithird  icaddr)
+(define ifourth icadddr)
+(define (ififth   x) (icar    (icddddr x)))
+(define (isixth   x) (icadr   (icddddr x)))
+(define (iseventh x) (icaddr  (icddddr x)))
+(define (ieighth  x) (icadddr (icddddr x)))
+(define (ininth   x) (icar  (icddddr (icddddr x))))
+(define (itenth   x) (icadr (icddddr (icddddr x))))
+
+#|
+<doc EXT itake idrop ilist-tail
+ * (itake x i)
+ * (idrop x i)
+ * (ilist-tail x i)
+ *
+ * |itake| returns the first i elements of ilist |x|.
+ * |idrop| returns all but the first i elements of ilist |x|.
+ * |ilist-tail| is either the same procedure as idrop or else a procedure
+ * with the same behavior.
+ *
+ * @lisp
+ *  (itake (iq a b c d e)  2) => (a b)
+ *  (idrop (iq a b c d e)  2) => (c d e)
+ * @end lisp
+ * |x| may be any value — a proper or dotted ilist:
+ *
+ * @lisp
+ * (itake (ipair 1 (ipair 2 (ipair 3 'd)))    => (1 2)
+ * (idrop (ipair 1 (ipair 2 (ipair 3 'd))) 2) => (3 . d)
+ * (itake (ipair 1 (ipair 2 (ipair 3 'd))) 3) => (1 2 3)
+ * (idrop (ipair 1 (ipair 2 (ipair 3 'd))) 3) => d
+ * @end lisp
+ *
+ * For a legal |i|, itake and idrop partition the ilist in a manner
+ * which can be inverted with iappend:
+ *
+ * @lisp
+ * (iappend (itake x i) (idrop x i)) = x
+ * @end lisp
+ *
+ * idrop is exactly equivalent to performing i icdr operations on |x|;
+ * the returned value shares a common tail with |x|.
+doc>
+|#
+(define ilist-ref   list-ref)
+(define idrop       list-tail)
+(define ilist-tail  list-tail)
+
+(define (itake lis k)
+  (check-arg integer? k itake)
+  (let recur ((lis lis) (k k))
+    (if (zero? k) '()
+        (ipair (icar lis)
+              (recur (icdr lis) (- k 1))))))
+
+;; (define (ilist-tail lis k) (idrop lis k))
+;; (define (idrop lis k)
+;;   (check-arg integer? k idrop)
+;;   (let iter ((lis lis) (k k))
+;;     (if (zero? k) lis (iter (icdr lis) (- k 1)))))
+
+
+#|
+<doc EXT itake-right idrop-right
+ * (itake-right dilist i)
+ * (idrop-right dilist i)
+ *
+ * |Itake-right| returns the last |i| elements of |dilist|.
+ * |Idrop-right| returns all but the last |i| elements of |dilist|.
+ *
+ * @lisp
+ * (itake-right (iq a b c d e) 2) => (d e)
+ * (idrop-right (iq a b c d e) 2) => (a b c)
+ * @end lisp
+ *
+ * The returned ilist may share a common tail with the argument |ilist|.
+ *
+ * |dilist| may be any ilist, either proper or dotted:
+ *
+ * @lisp
+ * (itake-right (iq ipair 1 (ipair 2 (ipair 3 'd))) 2) => (2 3 . d)
+ * (idrop-right (ipair 1 (ipair 2 (ipair 3 'd))) 2)    => (1)
+ * (itake-right (ipair 1 (ipair 2 (ipair 3 'd))) 0)    => d
+ * (idrop-right (ipair 1 (ipair 2 (ipair 3 'd))) 0)    => (1 2 3)
+ * @end lisp
+ *
+ * For a legal |i|, |itake-right| and |idrop-right| partition the ilist
+ * in a manner which can be inverted with |iappend|:
+ *
+ * ```
+ * (iappend (itake dilist i) (idrop dilist i)) = dilist
+ * ```
+ *
+ * |Itake-right|++'++s return value is guaranteed to share a common tail
+ * with |dilist|.
+doc>
+|#
+;;; ITAKE-RIGHT and IDROP-RIGHT work by getting two pointers into the ilist,
+;;; off by K, then chasing down the ilist until the lead pointer falls off
+;;; the end.
+(define (itake-right lis k)
+  (check-arg integer? k itake-right)
+  (let lp ((lag lis)  (lead (idrop lis k)))
+    (if (ipair? lead)
+        (lp (icdr lag) (icdr lead))
+        lag)))
+
+(define (idrop-right lis k)
+  (check-arg integer? k idrop-right)
+  (let recur ((lag lis) (lead (idrop lis k)))
+    (if (ipair? lead)
+        (ipair (icar lag) (recur (icdr lag) (icdr lead)))
+        '())))
+
+#|
+<doc EXT isplit-at
+ * (isplit-at  x i)
+ *
+ * |Isplit-at| splits the ilist |x| at index |i|, returning an
+ * ilist of the first |i| elements, and the remaining tail. It is
+ * equivalent to
+ *
+ * @lisp
+ * (values (itake x i) (idrop x i))
+ * @end lisp
+doc>
+|#
+(define (isplit-at x k)
+  (check-arg integer? k isplit-at)
+  (let recur ((lis x) (k k))
+    (if (zero? k) (values '() lis)
+        (receive (prefix suffix) (recur (icdr lis) (- k 1))
+          (values (ipair (icar lis) prefix) suffix)))))
+
+#|
+<doc ilast last-ipair
+ * (ilast ipair)
+ * (last-ipair ipair)
+ *
+ * |Ilast| returns the last element of the non-empty, possibly
+ * dotted, ilist ipair.
+ * |Last-ipair| returns the last ipair in the non-empty ilist pair.
+ *
+ * @lisp
+ * (ilast (iq a b c))      => c
+ * (last-ipair (iq a b c)) => (c)
+ * @end lisp
+doc>
+|#
+(define last-ipair  last-pair)
+(define (ilast lis) (icar (last-ipair lis)))
+
+
+;; MISCELLANEOUS: LENGTH, APPEND, CONCATENATE, REVERSE, ZIP & COUNT
+
+#|
+<doc EXT ilength
+ * (ilength  ilist)
+ *
+ * Returns the length of its argument. It is an error to pass a value
+ * to |ilength| which is not a proper ilist (()-terminated).
+ *
+ * The length of a proper ilist is a non-negative integer n such that
+ * |icdr| applied n times to the ilist produces the empty list.
+doc>
+|#
+(define ilength     length)
+
+#|
+<doc EXT iconcatenate
+ * (iconcatenate  ilist-of-ilists)
+ *
+ * Appends the elements of its argument together. That is, |iconcatenate|
+ * returns the same as
+ *
+ * @lisp
+ * (iapply iappend ilist-of-ilists)
+ * @end lisp
+ *
+ * or, equivalently,
+ *
+ * @lisp
+ * (ireduce-right iappend '() ilist-of-ilists)
+ * @end lisp
+ *
+ * As with |iappend|, the last element of the input list may be any
+ * value at all.
+doc>
+|#
+(define (iconcatenate  ilist-of-ilists)
+  (iapply iappend ilist-of-ilists))
+  ;; or ireduce-right iappend '() ilist-of-ilists)
+
+#|
+<doc EXT ireverse
+ * (ireverse  ilist)
+ *
+ * Returns a newly allocated ilist consisting of the elements of |ilist|
+ * in reverse order.
+ *
+ * @lisp
+ * (ireverse (iq a b c))              =>  (c b a)
+ * (ireverse (iq a (b c) d (e (f))))  =>  ((e (f)) d (b c) a)
+ * @end lisp
+doc>
+|#
+(define (ireverse il) (list-immutable+! (reverse il)))
+
+
+#|
+<doc EXT iappend-reverse
+ * (iappend-reverse  rev-head tail)
+ *
+ * |Iappend-reverse| returns |(iappend (ireverse rev-head) tail)|.
+ * It is provided because it is a common operation — a common list-processing
+ * style calls for this exact operation to transfer values accumulated in
+ * reverse order onto the front of another ilist, and because the
+ * implementation is significantly more efficient than the simple
+ * composition it replaces. (But note that this pattern of iterative
+ * computation followed by a reverse can frequently be rewritten as a
+ * recursion, dispensing with the reverse and iappend-reverse steps, and
+ * shifting temporary, intermediate storage from the heap to the stack,
+ * which is typically a win for reasons of cache locality and eager
+ * storage reclamation.)
+doc>
+|#
+(define (iappend-reverse  rev-head tail)
+  (iappend (ireverse rev-head) tail))
+
+#|
+<doc EXT izip
+ * (izip ilist1 ilist2 ...)
+ *
+ * Returns the same as |(lambda ilists (iapply imap ilist ilists))|
+ *
+ * If |izip| is passed n ilists, it returns an ilist as long as the shortest
+ * of these ilists, each element of which is an n-element ilist comprised of
+ * the corresponding elements from the parameter ilists.
+ *
+ * @lisp
+ * (izip (iq one two three)
+ *      (iq 1 2 3)
+ *      (iq odd even odd even odd even odd even))
+ *     => ((one 1 odd) (two 2 even) (three 3 odd))
+ *
+ * (izip (iq 1 2 3)) => ((1) (2) (3))
+ * @end lisp
+doc>
+|#
+(define (izip . ilists)
+  (iapply imap ilist ilists))
+
+#|
+<doc EXT iunzip1 iunzip2 iunzip3 iunzip4 iunzip5
+ * (iunzip1 ilist)
+ * (iunzip2 ilist)
+ * (iunzip3 ilist)
+ * (iunzip4 ilist)
+ * (iunzip5 ilist)
+ *
+ * |Iunzip1| takes an ilist of ilists, where every ilist must
+ * contain at least one element, and returns an ilist containing
+ * the initial element of each such ilist. That is, it returns
+ * |(imap icar ilists)|. |Iunzip2| takes an ilist of ilists, where
+ * every ilist must contain at least two elements, and returns two
+ * values: an ilist of the first elements, and an ilist of the second
+ * elements. |Iunzip3| does the same for the first three elements of
+ * the ilists, and so forth.
+ *
+ * @lisp
+ * (iunzip2 (iq (1 one) (2 two) (3 three))) =>
+ *     (1 2 3)
+ *     (one two three)
+ * @end lisp
+doc>
+|#
+(define (iunzip1 ilist)
+  (imap icar ilist))
+
+;; This could be more efficient
+(define (iunzip2 ilists)
+  (values (imap icar  ilists)
+          (imap icadr ilists)))
+
+(define (iunzip3 ilists)
+  (values (imap icar   ilists)
+          (imap icadr  ilists)
+          (imap icaddr ilists)))
+
+(define (iunzip4 ilists)
+  (values (imap icar    ilists)
+          (imap icadr   ilists)
+          (imap icaddr  ilists)
+          (imap (lambda (x) (icar (icdddr x))) ilists)))
+
+(define (iunzip5 ilists)
+  (values (imap icar    ilists)
+          (imap icadr   ilists)
+          (imap icaddr  ilists)
+          (imap (lambda (x) (icar (icdddr x))) ilists)
+          (imap (lambda (x) (icar (icdr (icdddr x)))) ilists)))
+
+#|
+<doc EXT icount
+ * (icount pred ilist1 ilist2 ...)
+ *
+ * |Pred| is a procedure taking as many arguments as there are ilists and
+ * returning a single value. It is applied element-wise to the elements
+ * of the ilists, and a count is tallied of the number of elements that
+ * produce a true value. This count is returned. count is "iterative" in
+ * that it is guaranteed to apply pred to the ilist elements in a
+ * left-to-right order. The counting stops when the shortest ilist
+ * expires.
+ *
+ * @lisp
+ * (icount even? (iq 3 1 4 1 5 9 2 5 6))            => 3
+ * (icount < (iq 1 2 4 8) (iq 2 4 6 8 10 12 14 16)) => 3
+ * @end lisp
+doc>
+|#
+(define (icount pred ilist1 . ilists)
+  (check-arg procedure? pred icount)
+  (if (pair? ilists)
+
+      ;; N-ary case
+      (let lp ((ilist1 ilist1) (ilists ilists) (i 0))
+        (if (null-ilist? ilist1) i
+            (receive (as ds) (%cars+cdrs ilists)
+              (if (null? as) i
+                  (lp (icdr ilist1) ds
+                      (if (apply pred (icar ilist1) as) (+ i 1) i))))))
+
+      ;; Fast path
+      (let lp ((lis ilist1) (i 0))
+        (if (null-ilist? lis) i
+            (lp (icdr lis) (if (pred (icar lis)) (+ i 1) i))))))
+
+;; FOLD, UNFOLD & MAP
+
+#|
+<doc EXT ifold
+ * (ifold kons knil ilist1 ilist2 ...)
+ *
+ * The fundamental ilist iterator.
+ *
+ * First, consider the single ilist-parameter case. If
+ * |ilist1| = |(e1 e2 ... en)|, then this procedure returns
+ *
+ * @lisp
+ *   (kons en ... (kons e2 (kons e1 knil)) ... )
+ * @end lisp
+ *
+ * That is, it obeys the (tail) recursion
+ *
+ * @lisp
+ * (ifold kons knil lis) = (ifold kons (kons (icar lis) knil) (icdr lis))
+ * (ifold kons knil '()) = knil
+ * @end lisp
+ *
+ * Examples:
+ *
+ *  @lisp
+ *   (ifold + 0 lis)                    ; Add up the elements of LIS.
+ *   (ifold ipair '() lis)              ; Reverse LIS.
+ *   (ifold ipair tail rev-head)        ; See APPEND-REVERSE.
+ * @end lisp
+ *
+ * @lisp
+ * ;; How many symbols in LIS?
+ * (ifold (lambda (x count) (if (symbol? x) (+ count 1) count))
+ *       0
+ *       lis)
+
+ * ;; Length of the longest string in LIS:
+ * (ifold (lambda (s max-len) (max max-len (string-length s)))
+ *       0
+ *       lis)
+ * @end lisp
+ *
+ * If n |ilist| arguments are provided, then the |kons| function must take
+ * n+1 parameters: one element from each ilist, and the "seed" or fold
+ * state, which is initially knil. The fold operation terminates when the
+ * shortest ilist runs out of values:
+ *
+ * @lisp
+ * (ifold ipair* '() (iq a b c) (iq 1 2 3 4 5)) => (c 3 b 2 a 1)
+ * @end lisp
+doc>
+|#
+(define (ifold kons knil ilis1 . ilists)
+  (check-arg procedure? kons ifold)
+  (if (pair? ilists)
+      (let lp ((ilists (cons ilis1 ilists)) (ans knil)) ; N-ary case
+        (receive (cars+ans cdrs) (%cars+cdrs+ ilists ans)
+          (if (null? cars+ans) ans ; Done.
+              (lp cdrs (apply kons cars+ans)))))
+
+      (let lp ((ilis ilis1) (ans knil))                 ; Fast path
+        (if (null-ilist? ilis) ans
+            (lp (icdr ilis) (kons (icar ilis) ans))))))
+#|
+<doc EXT ifold-right
+ * (ifold-right kons knil ilist1 ilist2 ...)
+ *
+ * The fundamental ilist recursion operator.
+ *
+ * First, consider the single ilist-parameter case. If
+ * |ilist1 = (e1 e2 ... en)|, then this procedure returns
+ * |(kons e1 (kons e2 ... (kons en knil)))|
+ *
+ * That is, it obeys the recursion
+ *
+ * @lisp
+ * (ifold-right kons knil lis) = (kons (icar lis) (ifold-right kons knil (icdr lis)))
+ * (ifold-right kons knil '()) = knil
+ * @end lisp
+ *
+ * Examples:
+ *
+ * @lisp
+ * (ifold-right ipair '() lis)          ; Copy LIS.
+ *
+ * ;; Filter the even numbers out of LIS.
+ * (ifold-right (lambda (x l) (if (even? x) (ipair x l) l)) '() lis))
+ * @end lisp
+ *
+ * If n ilist arguments are provided, then the |kons| procedure must take
+ * n+1 parameters: one element from each ilist, and the "seed" or fold
+ * state, which is initially |knil|. The fold operation terminates when the
+ * shortest ilist runs out of values:
+ *
+ * @lisp
+ * (ifold-right ipair* '() (iq a b c) (iq 1 2 3 4 5)) => (a 1 b 2 c 3)
+ * @end lisp
+doc>
+|#
+(define (ifold-right kons knil ilis1 . ilists)
+  (check-arg procedure? kons ifold-right)
+  (if (pair? ilists)
+      (let recur ((ilists (cons ilis1 ilists)))         ; N-ary case
+        (let ((cdrs (%cdrs ilists)))
+          (if (null? cdrs) knil
+              (apply kons (%cars+ ilists (recur cdrs))))))
+
+      (let recur ((ilis ilis1))                         ; Fast path
+        (if (null? ilis) knil
+            (let ((head (icar ilis)))
+              (kons head (recur (icdr ilis))))))))
+
+#|
+<doc EXT ipair-fold
+ * (ipair-fold kons knil ilist1 ilist2 ...)
+ *
+ * Analogous to fold, but kons is applied to successive sub-ilists of the
+ * ilists, rather than successive elements — that is, kons is applied to
+ * the ipairs making up the lists, giving this (tail) recursion:
+ *
+ * @lisp
+ * (ipair-fold kons knil lis) = (let ((tail (icdr lis)))
+ *                               (ipair-fold kons (kons lis knil) tail))
+ * (ipair-fold kons knil '()) = knil
+ * @end lisp
+ *
+ * Example:
+ *
+ * @lisp
+ * (ipair-fold ipair '() (iq a b c)) => ((c) (b c) (a b c))
+ * @end lisp
+doc>
+|#
+(define (ipair-fold f zero ilis1 . ilists)
+  (check-arg procedure? f ipair-fold)
+  (if (pair? ilists)
+      (let lp ((ilists (cons ilis1 ilists)) (ans zero)) ; N-ary case
+        (let ((tails (%cdrs ilists)))
+          (if (null? tails) ans
+              (lp tails (apply f (append ilists (list ans)))))))
+
+      (let lp ((ilis ilis1) (ans zero))
+        (if (null-ilist? ilis) ans
+            (let ((tail (icdr ilis)))           ; Grab the icdr now,
+              (lp tail (f ilis ans)))))))       ; in case F SET-CDR!s LIS.
+
+
+#|
+<doc EXT ipair-fold-right
+ * (ipair-fold-right kons knil ilist1 ilist2 ...)
+ *
+ * Holds the same relationship with |ifold-right| that |ipair-fold|
+ * holds with |ifold|. Obeys the recursion
+ *
+ * @lisp
+ *  (ipair-fold-right kons knil lis) =
+ *      (kons lis (ipair-fold-right kons knil (icdr lis)))
+ *  (ipair-fold-right kons knil '()) = knil
+ * @end lisp
+ *
+ * Example:
+ *
+ * @lisp
+ * (ipair-fold-right ipair '() (iq a b c)) => ((a b c) (b c) (c))
+ * @end lisp
+doc>
+|#
+(define (ipair-fold-right f zero ilis1 . ilists)
+  (check-arg procedure? f ipair-fold-right)
+  (if (pair? ilists)
+      (let recur ((ilists (cons ilis1 ilists)))         ; N-ary case
+        (let ((cdrs (%cdrs ilists)))
+          (if (null? cdrs) zero
+              (apply f (append ilists (list (recur cdrs)))))))
+
+      (let recur ((ilis ilis1))                         ; Fast path
+        (if (null-ilist? ilis) zero (f ilis (recur (icdr ilis)))))))
+
+
+#|
+<doc EXT ireduce
+ * (ireduce f ridentity ilist)
+ *
+ * |Ireduce| is a variant of |ifold|.
+ *
+ * |Ridentity| should be a "right identity" of the procedure |f|
+ * — that is, for any value |x| acceptable to |f|,
+ * @lisp
+ *  (f x ridentity) = x
+ * @end lisp
+ * |Ireduce| has the following definition:
+ *
+ *      If ilist = (), return ridentity;
+ *      Otherwise, return (ifold f (icar ilist) (icdr ilist)).
+ *
+ * ...in other words, we compute |(ifold f ridentity ilist)|.
+ *
+ * Note that ridentity is used only in the empty-list case. You typically
+ * use ireduce when applying |f| is expensive and you'd like to avoid the
+ * extra application incurred when ifold applies |f| to the head of |ilist|
+ * and the identity value, redundantly producing the same value passed in
+ * to |f|. For example, if |f| involves searching a file directory or
+ * performing a database query, this can be significant. In general,
+ * however, |ifold| is useful in many contexts where |ireduce| is
+ * not (consider the examples given in the ifold definition — only one of
+ * the five folds uses a function with a right identity. The other four
+ * may not be performed with ireduce).
+ *
+ * @lisp
+ * ;; take the max of an ilist of non-negative integers.
+ * (ireduce max 0 nums) ; i.e., (iapply max 0 nums)
+ * @end lisp
+doc>
+|#
+(define (ireduce f ridentity ilis)
+  (check-arg procedure? f ireduce)
+  (if (null-ilist? ilis) ridentity
+      (ifold f (icar ilis) (icdr ilis))))
+
+#|
+<doc EXT ireduce-right
+ * (ireduce-right f ridentity ilist)
+ *
+ * |Ireduce-right| is the |fold-right| variant of |ireduce|. It obeys the
+ * following definition:
+ * @lisp
+ * (ireduce-right f ridentity '()) = ridentity
+ * (ireduce-right f ridentity (iq e1)) = (f e1 ridentity) = e1
+ * (ireduce-right f ridentity (iq e1 e2 ...)) =
+ *     (f e1 (ireduce f ridentity (e2 ...)))
+ * @end lisp
+ * ...in other words, we compute |(ifold-right f ridentity ilist)|.
+ *
+ * @lisp
+ * ;; Append a bunch of ilists together.
+ * ;; I.e., (iapply iappend ilist-of-ilists)
+ * (ireduce-right iappend '() ilist-of-ilists)
+ * @end lisp
+doc>
+|#
+(define (ireduce-right f ridentity ilis)
+  (check-arg procedure? f ireduce-right)
+  (if (null-ilist? ilis) ridentity
+      (let recur ((head (icar ilis)) (ilis (icdr ilis)))
+        (if (ipair? ilis)
+            (f head (recur (icar ilis) (icdr ilis)))
+            head))))
+
+#|
+<doc EXT iunfold
+ * (iunfold p f g seed [tail-gen])
+ *
+ * |Iunfold| is best described by its basic recursion:
+ *
+ * @lisp
+ * (iunfold p f g seed) =
+ *     (if (p seed) (tail-gen seed)
+ *         (ipair (f seed)
+ *               (iunfold p f g (g seed))))
+ * @end lisp
+ *
+ *   p        Determines when to stop unfolding.
+ *   f        Maps each seed value to the corresponding ilist element.
+ *   g        Maps each seed value to next seed value.
+ *   seed     The "state" value for the unfold.
+ *   tail-gen Creates the tail of the ilist; defaults to (lambda (x) '())
+ *
+ * In other words, we use g to generate a sequence of seed values
+ *  seed, g(seed), g2(seed), g3(seed), ...
+ *  These seed values are mapped to ilist elements by f, producing
+ * the elements of the result ilist in a left-to-right order. P says when
+ * to stop.
+ *
+ * |Iunfold| is the fundamental recursive ilist constructor, just as
+ * |ifold-right| is the fundamental recursive ilist consumer. While
+ * |iunfold| may seem a bit abstract to novice functional programmers,
+ * it can be used in a number of ways:
+ *
+ * @lisp
+ * ;; Ilist of squares: 1^2 ... 10^2
+ * (iunfold (lambda (x) (> x 10))
+ *          (lambda (x) (* x x))
+ *          (lambda (x) (+ x 1))
+ *          1)
+ *
+ * (iunfold null-ilist? icar icdr lis) ; Copy a proper ilist.
+ *
+ * ;; Read current input port into an ilist of values.
+ * (iunfold eof-object? values (lambda (x) (read)) (read))
+ *
+ * ;; Copy a possibly non-proper ilist:
+ * (iunfold not-ipair? icar icdr lis
+ *          values)
+ *
+ * ;; Append HEAD onto TAIL:
+ * (iunfold null-ilist? icar icdr head
+ *         (lambda (x) tail))
+ * @end lisp
+ *
+ * Interested functional programmers may enjoy noting that ifold-right and
+ * iunfold are in some sense inverses. That is, given operations |knull?|,
+ * |kar|, |kdr|, |kons|, and |knil| satisfying
+ * @lisp
+ * (kons (kar x) (kdr x)) = x and (knull? knil) = #t
+ * @end lisp
+ * then
+ * @lisp
+ * (ifold-right kons knil (iunfold knull? kar kdr x)) = x
+ * @end lisp
+ * and
+ * @lisp
+ * (iunfold knull? kar kdr (ifold-right kons knil x)) = x.
+ * @end lisp
+ * This combinator sometimes is called an "anamorphism;" when an explicit
+ * tail-gen procedure is supplied, it is called an "apomorphism."
+doc>
+|#
+(define (iunfold p f g seed . maybe-tail-gen)
+  (check-arg procedure? p iunfold)
+  (check-arg procedure? f iunfold)
+  (check-arg procedure? g iunfold)
+  (if (pair? maybe-tail-gen)
+
+      (let ((tail-gen (car maybe-tail-gen)))
+        (if (pair? (cdr maybe-tail-gen))
+            (apply error "Too many arguments" iunfold p f g seed maybe-tail-gen)
+
+            (let recur ((seed seed))
+              (if (p seed) (tail-gen seed)
+                  (ipair (f seed) (recur (g seed)))))))
+
+      (let recur ((seed seed))
+        (if (p seed) '()
+            (ipair (f seed) (recur (g seed)))))))
+
+#|
+<doc ext iunfold-right
+ * (iunfold-right p f g seed [tail])
+ *
+ * |Iunfold-right| constructs an ilist with the following loop:
+ *
+ * @lisp
+ * (let lp ((seed seed) (lis tail))
+ *   (if (p seed) lis
+ *       (lp (g seed)
+ *           (ipair (f seed) lis))))
+ * @end lisp
+ *
+ *   p         Determines when to stop unfolding.
+ *   f         Maps each seed value to the corresponding ilist element.
+ *   g         Maps each seed value to next seed value.
+ *   seed      The "state" value for the unfold.
+ *   tail      ilist terminator; defaults to '().
+ *
+ * In other words, we use g to generate a sequence of seed values
+ * @lisp
+ * seed, g(seed), g2(seed), g3(seed), ...
+ * @end lisp
+ * These seed values are mapped to ilist elements by |f|, producing the
+ * elements of the result ilist in a right-to-left order. P says when to
+ * stop.
+ *
+ * |Iunfold-right| is the fundamental iterative ilist constructor, just as
+ * |ifold| is the fundamental iterative ilist consumer. While |iunfold-right|
+ * may seem a bit abstract to novice functional programmers, it can be
+ * used in a number of ways:
+ *
+ * @lisp
+ * ;; Ilist of squares: 1^2 ... 10^2
+ * (iunfold-right zero?
+ *               (lambda (x) (* x x))
+ *               (lambda (x) (- x 1))
+ *               10)
+ *
+ * ;; Reverse a proper ilist.
+ * (iunfold-right null-ilist? icar icdr lis)
+ *
+ * ;; Read current input port into an ilist of values.
+ * (iunfold-right eof-object? values (lambda (x) (read)) (read))
+ *
+ * ;; (iappend-reverse rev-head tail)
+ * (iunfold-right null-ilist? icar icdr rev-head tail)
+ * @end lisp
+ *
+ * Interested functional programmers may enjoy noting that ifold and
+ * |iunfold-right| are in some sense inverses. That is, given operations
+ * |knull?|, |kar|, |kdr|, |kons|, and |knil| satisfying
+ * @lisp
+ * (kons (kar x) (kdr x)) = x and (knull? knil) = #t
+ * @end lisp
+ * then
+ * @lisp
+ * (ifold kons knil (iunfold-right knull? kar kdr x)) = x
+ * @end lisp
+ * and
+ * @lisp
+ * (iunfold-right knull? kar kdr (ifold kons knil x)) = x.
+ * @end lisp
+doc>
+|#
+(define (iunfold-right p f g seed . maybe-tail)
+  (check-arg procedure? p iunfold-right)
+  (check-arg procedure? f iunfold-right)
+  (check-arg procedure? g iunfold-right)
+  (let lp ((seed seed) (ans (opt maybe-tail '())))
+    (if (p seed) ans
+        (lp (g seed)
+            (ipair (f seed) ans)))))
+
+#|
+<doc EXT imap
+ * (imap proc ilist1 ilist2 ...)
+ *
+ * proc is a procedure taking as many arguments as there are ilist
+ * arguments and returning a single value. imap applies proc element-wise
+ * to the elements of the ilists and returns an ilist of the results, in
+ * order. The dynamic order in which proc is applied to the elements of
+ * the ilists is unspecified.
+ *
+ * @lisp
+ * (imap icadr (iq (a b) (d e) (g h))) =>  (b e h)
+ *
+ * (imap (lambda (n) (expt n n))
+ *      (iq 1 2 3 4 5))
+ *     =>  (1 4 27 256 3125)
+ *
+ * (imap + (iq 1 2 3) (iq 4 5 6)) =>  (5 7 9)
+ *
+ * (let ((count 0))
+ *   (imap (lambda (ignored)
+ *          (set! count (+ count 1))
+ *          count)
+ *        (iq a b))) =>  (1 2) or (2 1)
+ * @end lisp
+doc>
+|#
+(define (imap . args) (list-immutable+! (apply map args)))
+
+#|
+<doc EXT ifor-each
+ * (ifor-each proc ilist1 ilist2 ...)
+ *
+ * The arguments to |ifor-each| are like the arguments to |imap|, but
+ * |ifor-each| calls |proc| for its side effects rather than for its
+ * values. Unlike |imap|, |ifor-each| is guaranteed to call proc on the
+ * elements of the ilists in order from the first element(s) to the last,
+ * and the value returned by |ifor-each| is unspecified.
+ *
+ * @lisp
+ * (let ((v (make-vector 5)))
+ *   (ifor-each (lambda (i)
+ *               (vector-set! v i (* i i)))
+ *             (iq 0 1 2 3 4))
+ *   v)  =>  #(0 1 4 9 16)
+ * @end lisp
+doc>
+|#
+(define ifor-each for-each)
+
+#|
+<doc EXT iappend-map
+ * (iappend-map  f ilist1 ilist2 ...)
+ *
+ * Equivalent to
+ * @lisp
+ * (iapply iappend (imap f ilist1 ilist2 ...))
+ * @end lisp
+ * and
+ * @lisp
+ * (iapply iappend (imap f ilist1 ilist2 ...))
+ * @end lisp
+ * Map f over the elements of the ilists, just as in the |imap|
+ * function. However, the results of the applications are appended
+ * together (using |iappend|) to make the final result.
+ *
+ * The dynamic order in which the various applications of |f| are made is
+ * not specified.
+ *
+ * Example:
+ *
+ * @lisp
+ * (iappend-map (lambda (x) (ilist x (- x))) (iq 1 3 8))
+ *     => (1 -1 3 -3 8 -8)
+ * @end lisp
+doc>
+|#
+(define iappend-map append-map)
+
+#|
+<doc imap-in-order
+ * (imap-in-order f ilist1 ilist2 ...)
+ *
+ * A variant of the |imap| procedure that guarantees to apply |f| across the
+ * elements of the |ilisti| arguments in a left-to-right order. This is
+ * useful for mapping procedures that both have side effects and return
+ * useful values.
+doc>
+|#
+(define (imap-in-order f lis1 . lists)
+  (check-arg procedure? f imap-in-order)
+  (if (pair? lists)
+      (let recur ((lists (cons lis1 lists)))
+        (receive (cars cdrs) (%cars+cdrs lists)
+          (if (pair? cars)
+              (let ((x (apply f cars)))         ; Do head first,
+                (ipair x (recur cdrs)))         ; then tail.
+              '())))
+
+      ;; Fast path.
+      (let recur ((lis lis1))
+        (if (null-ilist? lis) lis
+            (let ((tail (icdr lis))
+                  (x (f (icar lis))))           ; Do head ifirst,
+              (ipair x (recur tail)))))))       ; then tail.
+
+#|
+<doc EXT ipair-for-each
+ * (ipair-for-each f ilist1 ilist2 ...)
+ *
+ * Like |ifor-each|, but |f| is applied to successive sub-ilists of the
+ * argument |ilists|. That is, |f| is applied to the cells of the ilists,
+ * rather than the ilists' elements. These applications occur in
+ * left-to-right order.
+ *
+ * @lisp
+ * (ipair-for-each (lambda (ipair) (display ipair) (newline)) (iq a b c)) ==>
+ *     (a b c)
+ *     (b c)
+ *     (c)
+ * @end lisp
+doc>
+|#
+(define (ipair-for-each proc ilis1 . ilists)
+  (check-arg procedure? proc ipair-for-each)
+  (if (pair? ilists)
+
+      (let lp ((ilists (cons ilis1 ilists)))
+        (let ((itails (%cdrs ilists)))
+          (if (pair? itails)
+              (begin (apply proc ilists)
+                     (lp itails)))))
+
+      ;; Fast path.
+      (let lp ((ilis ilis1))
+        (if (not (null-ilist? ilis))
+            (let ((tail (icdr ilis)))   ; Grab the icdr now,
+              (proc ilis)               ; even though nothing can happen
+              (lp tail))))))
+
+#|
+<doc EXT ifilter-map
+ * (ifilter-map f ilist1 ilist2 ...)
+ *
+ * Like |imap|, but only true values are saved.
+ *
+ * @lisp
+ * (ifilter-map (lambda (x) (and (number? x) (* x x))) (iq a 1 b 3 c 7))
+ *     => (1 9 49)
+ * @end lisp
+ *
+ * The dynamic order in which the various applications of |f| are made is
+ * not specified.
+doc>
+|#
+(define (ifilter-map . args)  (list-immutable+! (apply filter-map args)))
+
+
+;; FILTERING AND PARTITIONING
+
+#|
+<doc EXT ifilter
+ * (ifilter pred ilist )
+ *
+ * Return all the elements of |ilist| that satisfy predicate |pred|. The
+ * ilist is not disordered — elements that appear in the result ilist
+ * occur in the same order as they occur in the argument |ilist|. The
+ * returned ilist may share a common tail with the argument ilist. The
+ * dynamic order in which the various applications of pred are made is
+ * not specified.
+ *
+ * @lisp
+ * (ifilter even? (iq 0 7 8 8 43 -4)) => (0 8 8 -4)
+ * @end lisp
+doc>
+|#
+(define (ifilter p l)
+  (list-immutable+! (filter p l)))
+
+#|
+<doc EXT ipartition
+ * (ipartition pred ilist)
+ *
+ * Partitions the elements of |ilist| with predicate |pred|, and returns two
+ * values: the ilist of in-elements and the ilist of out-elements. The
+ * ilist is not disordered — elements occur in the result ilists in the
+ * same order as they occur in the argument ilist. The dynamic order in
+ * which the various applications of |pred| are made is not specified. One
+ * of the returned ilists may share a common tail with the argument
+ * ilist.
+ *
+ * @lisp
+ * (ipartition symbol? (iq one 2 3 four five 6)) =>
+ *     (one four five)
+ *     (2 3 6)
+ * @end lisp
+doc>
+|#
+(define (ipartition pred lis)
+  (check-arg procedure? pred ipartition)
+  (let recur ((lis lis))
+    (if (null-ilist? lis) (values lis lis)      ; Use NOT-IPAIR? to handle dotted lists.
+        (let ((elt (icar lis))
+              (tail (icdr lis)))
+          (receive (in out) (recur tail)
+            (if (pred elt)
+                (values (if (ipair? out) (ipair elt in) lis) out)
+                (values in (if (ipair? in) (ipair elt out) lis))))))))
+
+#|
+<doc EXT iremove
+ * (iremove pred ilist)
+ *
+ * Returns ilist without the elements that satisfy predicate pred,
+ * similar to
+ *
+ * @lisp
+ * (lambda (pred ilist) (ifilter (lambda (x) (not (pred x))) ilist))
+ * @end lisp
+ *
+ * The ilist is not disordered — elements that appear in the result
+ * ilist occur in the same order as they occur in the argument ilist. The
+ * returned ilist may share a common tail with the argument ilist. The
+ * dynamic order in which the various applications of |pred| are made is
+ * not specified.
+ *
+ * @lisp
+ * (iremove even? (iq 0 7 8 8 43 -4)) => (7 43)
+ * @end lisp
+doc>
+|#
+(define (iremove p l)
+  (list-immutable+! (remove p l)))
+
+;; SEARCHING
+
+#|
+<doc ifind
+ * (ifind pred ilist)
+ *
+ * Return the first element of ilist that satisfies predicate |pred|;
+ * false if no element does.
+ *
+ * @lisp
+ * (ifind even? (iq 3 1 4 1 5 9)) => 4
+ * @end lisp
+ *
+ * Note that ifind has an ambiguity in its lookup semantics — if ifind
+ * returns false, you cannot tell (in general) if it found a false element
+ * that satisfied |pred|, or if it did not find any element at all. In many
+ * situations, this ambiguity cannot arise — either the ilist being
+ * searched is known not to contain any false elements, or the ilist is
+ * guaranteed to have an element satisfying pred. However, in cases where
+ * this ambiguity can arise, you should use |ifind-tail| instead of |ifind|,
+ * since |ifind-tail| has no such ambiguity:
+ *
+ * @lisp
+ * (cond ((ifind-tail pred lis) => (lambda (ipair) ...)) ; Handle (icar ipair)
+ *       (else ...)) ; Search failed.
+ * @end lisp
+doc>
+|#
+(define (ifind pred ilist)
+  (cond ((ifind-tail pred ilist) => icar)
+        (else #f)))
+
+#|
+<doc EXT ifind-tail
+ * (ifind-tail pred ilist)
+ *
+ * Return the first ipair of ilist whose icar satisfies |pred|. If no
+ * ipair does, return false.
+ *
+ * |Ifind-tail| can be viewed as a general-predicate variant of the
+ * |imember| function.
+ *
+ * Examples:
+ *
+ * @lisp
+ * (ifind-tail even? (iq 3 1 37 -8 -5 0 0)) => (-8 -5 0 0)
+ * (ifind-tail even? (iq 3 1 37 -5)) => #f
+ *
+ * ;; IMEMBER X LIS:
+ * (ifind-tail (lambda (elt) (equal? x elt)) lis)
+ * @end lisp
+ *
+ * |Ifind-tail| is essentially |idrop-while|, where the sense of the
+ * predicate is inverted: |Ifind-tail| searches until it finds an element
+ * satisfying the predicate; |idrop-while| searches until it finds an
+ * element that doesn't satisfy the predicate.
+doc>
+|#
+(define (ifind-tail pred ilist)
+  (check-arg procedure? pred ifind-tail)
+  (let lp ((ilist ilist))
+    (and (not (null-ilist? ilist))
+         (if (pred (icar ilist)) ilist
+             (lp (icdr ilist))))))
+
+#|
+<doc EXT itake-while
+ * (itake-while  pred ilist)
+ *
+ * Returns the longest initial prefix of ilist whose elements all
+ * satisfy the predicate |pred|.
+ *
+ * @lisp
+ * (itake-while even? (iq 2 18 3 10 22 9)) => (2 18)
+ * @end lisp
+doc>
+|#
+(define (itake-while pred lis)
+  (check-arg procedure? pred itake-while)
+  (let recur ((lis lis))
+    (if (null-ilist? lis) '()
+        (let ((x (icar lis)))
+          (if (pred x)
+              (ipair x (recur (icdr lis)))
+              '())))))
+
+#|
+<doc EXT idrop-while
+ * (idrop-while pred ilist)
+ *
+ * Drops the longest initial prefix of |ilist| whose elements all
+ * satisfy the predicate |pred|, and returns the rest of the ilist.
+ *
+ * @lisp
+ * (idrop-while even? (iq 2 18 3 10 22 9)) => (3 10 22 9)
+ * @end lisp
+doc>
+|#
+(define (idrop-while pred lis)
+  (check-arg procedure? pred idrop-while)
+  (let lp ((lis lis))
+    (if (null-ilist? lis) '()
+        (if (pred (icar lis))
+            (lp (icdr lis))
+            lis))))
+
+#|
+<doc EXT iany
+ * (iany pred ilist1 ilist2 ...)
+ *
+ * Applies the predicate across the ilists, returning true if the
+ * predicate returns true on any application.
+ *
+ * If there are n ilist arguments |ilist1 ... ilistn|, then |pred| must
+ * be a procedure taking n arguments and returning a boolean result.
+ *
+ * |Iany| applies |pred| to the first elements of the |ilisti|
+ * parameters. If this application returns a true value, iany immediately
+ * returns that value. Otherwise, it iterates, applying pred to the
+ * second elements of the |ilisti| parameters, then the third, and so
+ * forth. The iteration stops when a true value is produced or one of the
+ * ilists runs out of values; in the latter case, iany returns false. The
+ * application of |pred| to the last element of the ilists is a tail call.
+ *
+ * Note the difference between |ifind| and |iany| — |ifind| returns the
+ * element that satisfied the predicate; iany returns the true value that
+ * the predicate produced.
+ *
+ * Like |ievery|, |iany|'s name does not end with a question mark — this
+ * is to indicate that it does not return a simple boolean (true or false),
+ * but a general value.
+ *
+ * @lisp
+ * (iany integer? (iq a 3 b 2.7))   => #t
+ * (iany integer? (iq a 3.1 b 2.7)) => #f
+ * (iany < (iq 3 1 4 1 5)
+ *        (iq 2 7 1 8 2)) => #t
+ * @end lisp
+doc>
+|#
+(define iany any)
+
+#|
+<doc EXT ievery
+ * (ievery pred ilist1 ilist2 ...)
+ *
+ * Applies the predicate across the ilists, returning true if the
+ * predicate returns true on every application.
+ *
+ * If there are n ilist arguments |ilist1 ... ilistn|, then |pred| must be a
+ * procedure taking n arguments and returning a boolean result.
+ *
+ * |Ievery| applies |pred| to the first elements of the |ilisti| parameters. If
+ * this application returns false, ievery immediately returns
+ * false. Otherwise, it iterates, applying pred to the second elements of
+ * the ilisti parameters, then the third, and so forth. The iteration
+ * stops when a false value is produced or one of the ilists runs out of
+ * values. In the latter case, ievery returns the true value produced by
+ * its final application of |pred|. The application of pred to the last
+ * element of the ilists is a tail call.
+ *
+ * If one of the |ilisti| has no elements, ievery simply returns true.
+ *
+ * Like |iany|, |ievery|'s name does not end with a question mark — this is
+ * to indicate that it does not return a simple boolean (true or false), but a
+ * general value.
+doc>
+|#
+(define ievery every)
+
+
+#|
+<doc ilist-index
+ * (ilist-index pred ilist1 ilist2 ...)
+ *
+ * Returns the index of the leftmost element that satisfies |pred|.
+ *
+ * If there are n ilist arguments |ilist1 ... ilistn|, then |pred| must be a
+ * function taking n arguments and returning a boolean result.
+ *
+ * |Ilist-index| applies |pred| to the first elements of the |ilisti|
+ * parameters. If this application returns true, |ilist-index| immediately
+ * returns zero. Otherwise, it iterates, applying |pred| to the second
+ * elements of the |ilisti| parameters, then the third, and so forth. When
+ * it finds a tuple of ilist elements that cause |pred| to return true, it
+ * stops and returns the zero-based index of that position in the ilists.
+ *
+ * The iteration stops when one of the ilists runs out of values; in this
+ * case, |ilist-index| returns false.
+ *
+ * @lisp
+  (ilist-index even? (iq 3 1 4 1 5 9)) => 2
+  (ilist-index < (iq 3 1 4 1 5 9 2 5 6) (iq 2 7 1 8 2)) => 1
+  (ilist-index = (iq 3 1 4 1 5 9 2 5 6) (iq 2 7 1 8 2)) => #f
+ * @end lisp
+doc>
+|#
+(define (ilist-index pred lis1 . lists)
+  (check-arg procedure? pred ilist-index)
+  (if (pair? lists)
+
+      ;; N-ary case
+      (let lp ((lists (cons lis1 lists)) (n 0))
+        (receive (heads tails) (%cars+cdrs lists)
+          (and (pair? heads)
+               (if (apply pred heads) n
+                   (lp tails (+ n 1))))))
+
+      ;; Fast path
+      (let lp ((lis lis1) (n 0))
+        (and (not (null-ilist? lis))
+             (if (pred (icar lis)) n (lp (icdr lis) (+ n 1)))))))
+
+
+#|
+<doc EXT ispan ibreak
+ * (ispan   pred ilist)
+ * (ibreak  pred ilist)
+ *
+ * |Ispan| splits the ilist into the longest initial prefix whose
+ * elements all satisfy |pred|, and the remaining tail. |Ibreak| inverts the
+ * sense of the predicate: the tail commences with the first element of
+ * the input ilist that satisfies the predicate.
+ *
+ * In other words: |ispan| finds the initial span of elements
+ * satisfying |pred|, and |ibreak| breaks the ilist at the first element
+ * satisfying |pred|.
+ *
+ * |Ispan| is equivalent to
+ *
+ * @lisp
+ * (values (itake-while pred ilist)
+ *         (idrop-while pred ilist))
+ *
+ * (ispan even? (iq 2 18 3 10 22 9)) =>
+ *   (2 18)
+ *   (3 10 22 9)
+ *
+ * (ibreak even? (iq 3 1 4 1 5 9)) =>
+ *   (3 1)
+ *   (4 1 5 9)
+ * @end lisp
+doc>
+|#
+(define (ispan pred lis)
+  (check-arg procedure? pred ispan)
+  (let recur ((lis lis))
+    (if (null-ilist? lis) (values '() '())
+        (let ((x (icar lis)))
+          (if (pred x)
+              (receive (prefix suffix) (recur (icdr lis))
+                (values (ipair x prefix) suffix))
+              (values '() lis))))))
+
+(define (ibreak  pred lis) (ispan  (lambda (x) (not (pred x))) lis))
+
+
+#|
+<doc EXT imember imemq imemv
+ * (imember x ilist [=])
+ * (imemq x ilist)
+ * (imemv x ilist)
+ *
+ * These procedures return the first sub-ilist of |ilis|t whose icar is |x|,
+ * where the sub-ilists of ilist are the non-empty ilists returned
+ * by |(idrop ilist i)| for |i| less than the length of ilist. If |x| does not
+ * occur in |ilist|, then false is returned. |Imemq| uses |eq?| to compare |x| with
+ * the elements of |ilist|, while |imemv| uses |eqv?|, and |imember| uses |equal?|.
+ *
+ * @lisp
+ * (imemq 'a (iq a b c))           =>  (a b c)
+ * (imemq 'b (iq a b c))           =>  (b c)
+ * (imemq 'a (iq b c d))           =>  #f
+ * (imemq (list 'a)
+ *         (ilist 'b '(a) 'c))     =>  #f
+ * (imember (list 'a)
+ *         (ilist 'b '(a) 'c)))    =>  ((a) c)
+ * (imemq 101 (iq 100 101 102))    =>  *unspecified*
+ * (imemv 101 (iq 100 101 102))    =>  (101 102)
+ * @end lisp
+ *
+ * The comparison procedure is used to compare the elements |ei| of |ilist|
+ * to the key |x| in this way:
+ *
+ * @lisp
+ * (= x ei) ; ilist is (E1 ... En)
+ * @end lisp
+ *
+ * That is, the first argument is always |x|, and the second argument is
+ * one of the ilist elements. Thus one can reliably find the first
+ * element of ilist that is greater than five with |(imember 5 ilist <)|
+ *
+ * Note that fully general ilist searching may be performed with the
+ * |ifind-tail| and |ifind| procedures, e.g.
+ *
+ * @lisp
+ * (ifind-tail even? ilist) ; Find the first elt with an even key.
+ * @end lisp
+doc>
+|#
+;; We need to check if the result is #f, member/memq/memv
+;; returns #f when the element is not found, but list-immutable+!
+;; expects a list.
+(define (imember x il :optional (e equal?))
+  (let ((lst (member x il e)))
+    (if (list? lst) (list-immutable+! lst) lst)))
+
+(define (imemq x il)
+  (let ((lst (memq x il)))
+    (if (list? lst) (list-immutable+! lst) lst)))
+
+(define (imemv  x il)
+  (let ((lst (memv x il)))
+    (if (list? lst) (list-immutable+! lst) lst)))
+
+
+;; DELETION
+
+#|
+<doc EXT idelete
+ * (idelete  x ilist [=])
+ *
+ * |Idelete| uses the comparison procedure |=|, which defaults to |equal?|,
+ * to find all elements of ilist that are equal to |x|, and deletes them from
+ * |ilist|. The dynamic order in which the various applications of = are
+ * made is not specified.
+ *
+ * The ilist is not disordered — elements that appear in the result
+ * ilist occur in the same order as they occur in the argument ilist. The
+ * result may share a common tail with the argument ilist.
+ *
+ * Note that fully general element deletion can be performed with the
+ * iremove procedures, e.g.:
+ * @lisp
+ * ;; idelete all the even elements from LIS:
+ * (iremove even? lis)
+ * @end lisp
+ * The comparison procedure is used in this way: |(= x ei)|. That is, |x|
+ * is always the first argument, and an ilist element is always the
+ * second argument. The comparison procedure will be used to compare each
+ * element of ilist exactly once; the order in which it is applied to the
+ * various ei is not specified. Thus, one can reliably remove all the
+ * numbers greater than five from an ilist with |(idelete 5 ilist <)|.
+doc>
+|#
+(define (idelete x il :optional (= equal?))
+  (list-immutable+! (delete x il =)))
+
+
+#|
+<doc EXT idelete-duplicates
+ * (idelete-duplicates  ilist [=])
+ *
+ * |Idelete-duplicates| removes duplicate elements from the |ilist|
+ * argument. If there are multiple equal elements in the argument |ilist|,
+ * the result ilist only contains the first or leftmost of these elements
+ * in the result. The order of these surviving elements is the same as in
+ * the original ilist — |idelete-duplicates| does not disorder the
+ * ilist (hence it is useful for "cleaning up" immutable association
+ * lists).
+ *
+ * The |=| parameter is used to compare the elements of the ilist; it
+ * defaults to equal?. If x comes before y in ilist, then the comparison
+ * is performed |(= x y)|. The comparison procedure will be used to compare
+ * each pair of elements in ilist no more than once; the order in which
+ * it is applied to the various pairs is not specified.
+ *
+ * Although  |idelete-duplicates| can be implemented so it runs in time
+ * O(n2) for n-element ilists, the STklos implementation runs in linear
+ * expected time.
+ *
+ * @lisp
+ * (idelete-duplicates (iq a b a c a b c z)) => (a b c z)
+ *
+ * ;; Clean up an ialist:
+ * (idelete-duplicates (iq (a . 3) (b . 7) (a . 9) (c . 1))
+ *                    (lambda (x y) (eq? (icar x) (icar y))))
+ *     => ((a . 3) (b . 7) (c . 1))
+ * @end lisp
+doc>
+|#
+(define (idelete-duplicates il :optional (eq equal?))
+  (unless (list? il) (error "bad list ~S" il))
+
+  (if (null? il)
+      '()
+      ;; delete-duplicates with expected linear time.
+      (let ((h (make-hash-table eq))
+            (mark #(1))) ;; unique reference, guaranteed to
+        ;; not be present in il
+        (let Loop ( (il il) )
+          (if (pair? il)
+              (if (eq? (hash-table-ref/default h (car il) mark) mark)
+                  ;; not found, include it
+                  (begin (hash-table-set! h (car il) #t)
+                         (ipair (car il) (Loop (cdr il))))
+                  ;; found (hash table returned mark), ignore it
+                  (Loop (cdr il)))
+              il)))))
+
+
+;; IMMUTABLE ASSOCIATION LISTS
+
+#|
+<doc EXT iassoc iassq iassv
+ * (iassoc key ialist [=] -> ipair or #f
+ * (iassq key ialist -> ipair or #f
+ * (iassv key ialist -> ipair or #f
+ *
+ * |Ialist| must be an immutable association list — an ilist of
+ * ipairs. These procedures find the first ipair in ialist whose icar
+ * field is key, and returns that ipair. If no ipair in ialist has key as
+ * its icar, then false is returned. |Iassq| uses |eq?| to compare key with the
+ * icar fields of the ipairs in ialist, while |iassv| uses |eqv?| and |iassoc|
+ * uses |equal?|.
+ *
+ * @lisp
+ * (define e (iq (a 1) (b 2) (c 3)))
+ * (iassq 'a e)                               =>  (a 1)
+ * (iassq 'b e)                               =>  (b 2)
+ * (iassq 'd e)                               =>  #f
+ * (iassq (ilist 'a) (iq ((a)) ((b)) ((c))))  =>  #f
+ * (iassoc '(a) (ilist '((a)) '((b)) '((c)))) =>  ((a))
+ * (iassq 5 (iq (2 3) (5 7) (11 13)))         =>  *unspecified*
+ * (iassv 5 (iq (2 3) (5 7) (11 13)))         =>  (5 7)
+ * @end lisp
+ *
+ * The comparison procedure is used to compare the elements |ei| of ilist
+ * to the key parameter in this way:
+ * @lisp
+ * (= key (icar ei)) ; ilist is (E1 ... En)
+ * @end lisp
+ *
+ * That is, the first argument is always key, and the second argument
+ * is one of the ilist elements. Thus one can reliably find the first
+ * entry of ialist whose key is greater than five with
+ * |(iassoc 5 ialist <)|.
+ *
+ * Note that fully general ialist searching may be performed with the
+ * ifind-tail and ifind procedures, e.g.
+ *
+ * @lisp
+ * ;; Look up the first association in ialist with an even key:
+ * (ifind (lambda (a) (even? (icar a))) ialist)
+ * @end lisp
+doc>
+|#
+(define iassoc assoc)
+(define iassq  assq)
+(define iassv  assv)
+
+#|
+<doc EXT ialist-cons
+ * (ialist-cons key datum ialist)
+ *
+ * Constructs a new ialist entry mapping key -> datum onto ialist.
+ * This is the same as
+ * @lisp
+ * (lambda (key datum ialist) (ipair (ipair key datum) ialist))
+ * @end lisp
+doc>
+|#
+(define (ialist-cons key datum alist) (ipair (ipair key datum) alist))
+
+#|
+<doc EXT ialist-delete
+ * (ialist-delete  key ialist [=])
+ *
+ * |Ialist-delete| deletes all associations from ialist with the given
+ * key, using key-comparison procedure |=|, which defaults to |equal?|. The
+ * dynamic order in which the various applications of |=| are made is not
+ * specified.
+ *
+ * Return values may share common tails with the ialist argument. The
+ * ialist is not disordered — elements that appear in the result ialist
+ * occur in the same order as they occur in the argument ialist.
+ *
+ * The comparison procedure is used to compare the element keys ki of
+ * ialist's entries to the key parameter in this way: |(= key ki)|. Thus,
+ * one can reliably remove all entries of ialist whose key is greater
+ * than five with |(ialist-delete 5 ialist <)|
+doc>
+|#
+(define (ialist-delete key alist . maybe-=)
+  (let ((= (opt maybe-= equal?)))
+    (ifilter (lambda (elt) (not (= key (icar elt)))) alist)))
+
+;; REPLACEMENT
+
+;; CONVERSION
+
+#|
+<doc EXT gtree->itree gtree->tree
+ * (gtree->itree object)
+ * (gtree->tree object)
+ *
+ * These procedures walk a generalized tree consisting of pairs,
+ * ipairs, or a combination of both, and make a deep copy of it,
+ * returning an isomorphic tree containing only ipairs or pairs
+ * respectively. The result may share structure with the argument.
+ * If the argument is neither a pair nor an ipair, it is returned.
+doc>
+|#
+(define gtree->tree itree->tree)
+(define gtree->itree tree->itree)
+
+;; PROCEDURE APPLICATION
+
+#|
+<doc EXT iapply
+ * (iapply procedure object ... ilist)
+ *
+ * The |iapply| procedure is an analogue of |apply| whose last argument
+ * is an ilist rather than a list. It is equivalent to
+ * @lisp
+ * (apply procedure object ... (ilist->list ilist))
+ * @end lisp
+doc>
+|#
+(define iapply      apply)  ;; could be more efficient?
+
+;; COMPARATORS
+
+;; From Chibi:
+(define ipair-comparator (make-default-comparator))
+(define ilist-comparator (make-default-comparator))
+(define make-improper-ilist-comparator make-ilist-comparator)
+
+(define (make-field-comparator comparator pred field)
+  (make-comparator
+   (lambda (x)
+     (and (pred x)
+          ((comparator-type-test-predicate comparator) (field x))))
+   (lambda (x y)
+     ((comparator-equality-predicate comparator) (field x) (field y)))
+   (lambda (x y)
+     ((comparator-ordering-predicate comparator) (field x) (field y)))
+   (lambda (x)
+     ((comparator-hash-function comparator) (field x)))))
+(define (make-icar-comparator comparator)
+  (make-field-comparator comparator ipair? icar))
+(define (make-icdr-comparator comparator)
+  (make-field-comparator comparator ipair? icdr))
+
+
+(provide "scheme/ilist")

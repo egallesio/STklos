@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  2-Oct-2022 00:39 (eg)
+# Last file update:  2-Oct-2022 19:25 (eg)
 
 #======================================================================
 
@@ -135,7 +135,6 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-SOURCES =
 DIST_SOURCES =
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -169,9 +168,25 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(schemedir)"
-DATA = $(scheme_DATA)
+am__installdirs = "$(DESTDIR)$(schemedir)" "$(DESTDIR)$(schemelibdir)"
+DATA = $(scheme_DATA) $(schemelib_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+# Read a list of newline-separated strings from the standard input,
+# and print each of them once, without duplicates.  Input order is
+# *not* preserved.
+am__uniquify_input = $(AWK) '\
+  BEGIN { nonempty = 0; } \
+  { items[$$0] = 1; nonempty = 1; } \
+  END { if (nonempty) { for (i in items) print i; }; } \
+'
+# Make sure the list of sources is unique.  This is necessary because,
+# e.g., the same source file might be shared among _SOURCES variables
+# for different programs/libraries.
+am__define_uniq_tagged_files = \
+  list='$(am__tagged_files)'; \
+  unique=`for i in $$list; do \
+    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+  done | $(am__uniquify_input)`
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/mkinstalldirs \
 	README.md
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -328,39 +343,41 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 STKLOS_FLAGS = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
+DOCDB = ../DOCDB
+BASEDIR = ../..
 R7_STK = base.stk            \
-          case-lambda.stk     \
-          char.stk            \
-          complex.stk         \
-          cxr.stk             \
-          eval.stk            \
-          file.stk            \
-          inexact.stk         \
-          lazy.stk            \
-          load.stk            \
-          process-context.stk \
-          r5rs.stk            \
-          read.stk            \
-          repl.stk            \
-          time.stk            \
-          write.stk
+           case-lambda.stk     \
+           char.stk            \
+           complex.stk         \
+           cxr.stk             \
+           eval.stk            \
+           file.stk            \
+           inexact.stk         \
+           lazy.stk            \
+           load.stk            \
+           process-context.stk \
+           r5rs.stk            \
+           read.stk            \
+           repl.stk            \
+           time.stk            \
+           write.stk
 
 R7_OBJS = base.ostk            \
-              case-lambda.ostk     \
-              char.ostk            \
-              complex.ostk         \
-              cxr.ostk             \
-              eval.ostk            \
-              file.ostk            \
-              inexact.ostk         \
-              lazy.ostk            \
-              load.ostk            \
-              process-context.ostk \
-              r5rs.ostk            \
-              read.ostk            \
-              repl.ostk            \
-              time.ostk            \
-              write.ostk
+           case-lambda.ostk     \
+           char.ostk            \
+           complex.ostk         \
+           cxr.ostk             \
+           eval.ostk            \
+           file.ostk            \
+           inexact.ostk         \
+           lazy.ostk            \
+           load.ostk            \
+           process-context.ostk \
+           r5rs.ostk            \
+           read.ostk            \
+           repl.ostk            \
+           time.ostk            \
+           write.ostk
 
 
 # ----------------------------------------------------------------------
@@ -394,21 +411,32 @@ LARGE_OBJS = list.ostk    \
                 set.ostk
 
 
+#
+# Libraries written in C and Scheme
+#
+LARGE_C = ilist.c
+LARGE_C_STK = ilist.stk
+LARGE_SHOBJ = ilist.$(SO)
+
 #----------------------------------------------------------------------
-SRC_STK = $(R7_STK) $(LARGE_STK)
-scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
+SRC_STK = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
+SRC_C_STK = $(LARGE_C_STK)
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) $(LARGE_SHOBJ)
+SOURCES = $(SRC_STK) $(LARGE_C)
 
 #======================================================================
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
+schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
 scheme_sources = $(SRC_STK)
 scheme_DATA = $(scheme_OBJS)
+schemelib_DATA = $(schemelib_SHOBJ)
 
 #======================================================================
-SUFFIXES = .stk .ostk
+SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .stk .ostk .scm
+.SUFFIXES: .stk .ostk .stk -incl.c .$(SO) .c
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -459,12 +487,79 @@ uninstall-schemeDATA:
 	@list='$(scheme_DATA)'; test -n "$(schemedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(schemedir)'; $(am__uninstall_files_from_dir)
-tags TAGS:
+install-schemelibDATA: $(schemelib_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(schemelib_DATA)'; test -n "$(schemelibdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(schemelibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(schemelibdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(schemelibdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(schemelibdir)" || exit $$?; \
+	done
 
-ctags CTAGS:
+uninstall-schemelibDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(schemelib_DATA)'; test -n "$(schemelibdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(schemelibdir)'; $(am__uninstall_files_from_dir)
 
-cscope cscopelist:
+ID: $(am__tagged_files)
+	$(am__define_uniq_tagged_files); mkid -fID $$unique
+tags: tags-am
+TAGS: tags
 
+tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
+	set x; \
+	here=`pwd`; \
+	$(am__define_uniq_tagged_files); \
+	shift; \
+	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
+	  test -n "$$unique" || unique=$$empty_fix; \
+	  if test $$# -gt 0; then \
+	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	      "$$@" $$unique; \
+	  else \
+	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	      $$unique; \
+	  fi; \
+	fi
+ctags: ctags-am
+
+CTAGS: ctags
+ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
+	$(am__define_uniq_tagged_files); \
+	test -z "$(CTAGS_ARGS)$$unique" \
+	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
+	     $$unique
+
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && $(am__cd) $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) "$$here"
+cscopelist: cscopelist-am
+
+cscopelist-am: $(am__tagged_files)
+	list='$(am__tagged_files)'; \
+	case "$(srcdir)" in \
+	  [\\/]* | ?:[\\/]*) sdir="$(srcdir)" ;; \
+	  *) sdir=$(subdir)/$(srcdir) ;; \
+	esac; \
+	for i in $$list; do \
+	  if test -f "$$i"; then \
+	    echo "$(subdir)/$$i"; \
+	  else \
+	    echo "$$sdir/$$i"; \
+	  fi; \
+	done >> $(top_builddir)/cscope.files
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 distdir: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) distdir-am
 
@@ -502,7 +597,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(schemedir)"; do \
+	for dir in "$(DESTDIR)$(schemedir)" "$(DESTDIR)$(schemelibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -537,7 +632,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean-am: clean-generic mostlyclean-am
 
-distclean-am: clean-am distclean-generic
+distclean-am: clean-am distclean-generic distclean-tags
 
 dvi: dvi-am
 
@@ -551,7 +646,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-schemeDATA
+install-data-am: install-schemeDATA install-schemelibDATA
 
 install-dvi: install-dvi-am
 
@@ -595,33 +690,39 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-schemeDATA
+uninstall-am: uninstall-schemeDATA uninstall-schemelibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: install-am install-strip uninstall-am
 
-.PHONY: all all-am check check-am clean clean-generic cscopelist-am \
-	ctags-am distclean distclean-generic distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-schemeDATA install-strip \
+.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
+	cscopelist-am ctags ctags-am distclean distclean-generic \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-schemeDATA install-schemelibDATA install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am tags-am uninstall uninstall-am uninstall-hook \
-	uninstall-schemeDATA
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook uninstall-schemeDATA uninstall-schemelibDATA
 
 .PRECIOUS: Makefile
 
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../src/stklos
+STKLOS_BINARY ?= ../../src/stklos
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
-.scm.ostk:
-	$(COMP) -o $*.ostk $*.scm
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
+
+.c.$(SO) :
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@/bin/rm -f $*.o
 
 #======================================================================
 # Dependencies
@@ -648,6 +749,9 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
 ../srfi/128.ostk:
 	(cd ../srfi; $(MAKE) 128.ostk)
 
+ilist.$(SO): ilist-incl.c
+ilist-incl.c: ../srfi/128.ostk
+
 #box.ostk:        ../srfi/111.ostk
 #set.ostk:        ../srfi/113.ostk
 #ilist.ostk:      ../srfi/116.$(SO)
@@ -659,11 +763,11 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
 #41.ostk: ../streams/derived.ostk
 
 # ======================================================================
-mainstall-sources:
-	install $(scheme_sources) $(schemedir)
+install-sources:
+	cp $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS)  *~
+	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
 	/bin/rm -f Makefile
@@ -671,6 +775,10 @@ distclean: clean
 uninstall-hook:
 	(cd $(schemedir); rm -f $(scheme_sources))
 	rmdir $(schemedir) || true
+
+doc:
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
