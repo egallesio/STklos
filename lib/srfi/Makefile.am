@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  2-Oct-2022 19:31 (eg)
+# Last file update:  2-Oct-2022 21:49 (eg)
 
 #-======================================================================
 
@@ -261,53 +261,43 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 #======================================================================
 # Dependencies
-DEPEND_1:  51.ostk 117.ostk 134.ostk 171.ostk 189.ostk 196.ostk 207.ostk
-DEPEND_9:  37.ostk  64.ostk 117.ostk 128.ostk 134.ostk 135.ostk 154.ostk \
-	      161.ostk 171.ostk 173.ostk 180.ostk 189.ostk 196.ostk 207.ostk \
-          230.ostk
-
 1.ostk: ../scheme/list.ostk
-../scheme/list.ostk:
-	(cd ../scheme; $(MAKE) list.ostk)
-
-14.ostk: ../scheme/charset.ostk
-../scheme/charset.ostk:
-	(cd ../scheme; $(MAKE) charset.ostk)
-
-113.ostk: ../scheme/set.ostk
-../scheme/set.ostk:
-	(cd ../scheme; $(MAKE) set.ostk)
-
-../scheme/ilist.$(SO):
-	(cd ../scheme; $(MAKE) ilist.$(SO))
-
-$(DEPEND_1): 1.ostk
-$(DEPEND_9): 9.ostk
 13.ostk: 14.ostk
-37.ostk: 13.ostk
+14.ostk: ../scheme/charset.ostk
+37.ostk: 9.ostk 13.ostk
 41.ostk: ../streams/derived.ostk
 51.ostk: 1.ostk
-64.ostk: 35.ostk
+64.ostk: 9.ostk 35.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
 95.ostk:  132.$(SO)
+113.ostk: ../scheme/set.ostk
 116.ostk: ../scheme/ilist.$(SO)
+117.ostk: 1.ostk 9.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk
+128.ostk: 9.ostk
 130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.$(SO)
-134.ostk: 158.ostk
+134.ostk: 1.ostk 9.ostk 158.ostk
 135.ostk: 9.ostk 129.ostk
 151.ostk: 60.ostk
 152.ostk: 13.ostk
+154.ostk: 9.ostk
 160.ostk: 160-subdir
-171.ostk: 69.ostk
+161.ostk: 9.ostk
+171.ostk: 1.ostk 9.ostk 69.ostk
+173.ostk: 9.ostk
+180.ostk: 9.ostk
+189.ostk: 1.ostk 9.ostk
 190.ostk: 158.ostk
 195.ostk: 35.ostk
-207.ostk: 13.ostk 151.ostk 158.ostk
+196.ostk: 1.ostk 9.ostk
+207.ostk: 1.ostk 9.ostk 13.ostk 151.ostk 158.ostk
 216.ostk: 27.$(SO)
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
 224.ostk: 128.ostk
+230.ostk: 9.ostk
 
 
 25.$(SO):  25-incl.c  25.c
@@ -321,6 +311,17 @@ $(DEPEND_9): 9.ostk
 
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
+../scheme/list.ostk:
+	(cd ../scheme; $(MAKE) list.ostk)
+../scheme/charset.ostk:
+	(cd ../scheme; $(MAKE) charset.ostk)
+../scheme/set.ostk:
+	(cd ../scheme; $(MAKE) set.ostk)
+../scheme/ilist.$(SO):
+	(cd ../scheme; $(MAKE) ilist.$(SO))
+../scheme/list-queue.ostk:
+	(cd ../scheme; $(MAKE) list.queue.ostk)
+
 
 160-subdir: 128.ostk
 	(cd 160; $(MAKE))

@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  2-Oct-2022 19:25 (eg)
+# Last file update:  2-Oct-2022 21:13 (eg)
 
 #======================================================================
 
@@ -75,11 +75,12 @@ R7_OBJS =  base.ostk            \
 #             list-queue.stk      \
 #             hash-table.stk
 
-LARGE_STK = list.stk      \
-            charset.stk   \
-            stream.stk    \
-            box.stk       \
-            set.stk
+LARGE_STK = list.stk       \
+            charset.stk    \
+            stream.stk     \
+            box.stk        \
+            set.stk        \
+            list-queue.stk
 
 
 # LARGE_OBJS =  list.ostk            \
@@ -91,11 +92,12 @@ LARGE_STK = list.stk      \
 #               list-queue.ostk      \
 #               hash-table.ostk
 
-LARGE_OBJS =    list.ostk    \
-                charset.ostk \
-                stream.ostk  \
-                box.ostk     \
-                set.ostk
+LARGE_OBJS =    list.ostk      \
+                charset.ostk   \
+                stream.ostk    \
+                box.ostk       \
+                set.ostk       \
+                list-queue.ostk
 
 #
 # Libraries written in C and Scheme
@@ -162,10 +164,11 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
 ilist.$(SO): ilist-incl.c
 ilist-incl.c: ../srfi/128.ostk
 
+
 #box.ostk:        ../srfi/111.ostk
 #set.ostk:        ../srfi/113.ostk
 #ilist.ostk:      ../srfi/116.$(SO)
-#list-queue.ostk: ../srfi/117.ostk
+list-queue.ostk:  ../srfi/9.ostk
 #hash-table.ostk: ../srfi/125.ostk
 
 # This is weird to add these dependencies here, but they seem needed for
