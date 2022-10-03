@@ -1,7 +1,7 @@
 ;;;;
 ;;;; do-test.stk        -- The pilot of all tests
 ;;;;
-;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 10-Jun-2022 14:21 (eg)
+;;;; Last file update:  3-Oct-2022 19:32 (eg)
 ;;;;
 
 (load-path `("../lib"
@@ -36,6 +36,7 @@
   (load "test-sport.stk")
   (load "test-fport.stk")
   (load "test-threads.stk")
+  (load "test-hash.stk")
   (load "test-srfi.stk")
   (load "test-json.stk")
   (load "test-md5.stk")
@@ -52,7 +53,6 @@
   (load "test-macros.stk")
   (load "test-misc.stk")
   (load "test-r5rs-pitfall.stk")
-  (load "test-hash.stk")
 )
 
 

@@ -21,12 +21,12 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 26-Jun-2022 10:17 (jpellegrini)
-;;;; Last file update: 26-Jun-2022 20:29 (jpellegrini)
+;;;; Last file update:  3-Oct-2022 19:33 (eg)
 ;;;;
 
 (require "test")
 
-(test-section "Hash tables")
+(test-section "Simple Hash tables")
 
 (test-subsection "Simple hash tables with default parameters")
 
