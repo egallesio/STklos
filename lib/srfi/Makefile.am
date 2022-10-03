@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  2-Oct-2022 21:49 (eg)
+# Last file update:  3-Oct-2022 15:18 (eg)
 
 #-======================================================================
 
@@ -241,7 +241,7 @@ SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
 srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
-srfilibdir    = $(prefi x)/lib/@PACKAGE@/@VERSION@/srfi
+srfilibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)
@@ -274,7 +274,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 113.ostk: ../scheme/set.ostk
 116.ostk: ../scheme/ilist.$(SO)
 117.ostk: 1.ostk 9.ostk ../scheme/list-queue.ostk
-125.ostk: 128.ostk
+125.ostk: 128.ostk ../scheme/hash-table.ostk
 128.ostk: 9.ostk
 130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.$(SO)
@@ -320,7 +320,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 ../scheme/ilist.$(SO):
 	(cd ../scheme; $(MAKE) ilist.$(SO))
 ../scheme/list-queue.ostk:
-	(cd ../scheme; $(MAKE) list.queue.ostk)
+	(cd ../scheme; $(MAKE) list-queue.ostk)
+../scheme/hash-table.ostk:
+	(cd ../scheme; $(MAKE) hash-table.ostk)
 
 
 160-subdir: 128.ostk
