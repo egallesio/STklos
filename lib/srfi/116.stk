@@ -2,7 +2,7 @@
 ;;;;
 ;;;; 116.stk         -- Implementation of SRFI-116 (ilist)
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio  <eg <eg@stklos.net>
+;;;; Copyright © 2022 Erick Gallesio  <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify

@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  3-Oct-2022 15:18 (eg)
+# Last file update:  7-Oct-2022 18:48 (eg)
 
 #-======================================================================
 
@@ -275,6 +275,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 116.ostk: ../scheme/ilist.$(SO)
 117.ostk: 1.ostk 9.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
+127.ostk: ../scheme/lseq.ostk
 128.ostk: 9.ostk
 130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.$(SO)
@@ -323,6 +324,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) list-queue.ostk)
 ../scheme/hash-table.ostk:
 	(cd ../scheme; $(MAKE) hash-table.ostk)
+../scheme/lseq.ostk:
+	(cd ../scheme; $(MAKE) lseq.ostk)
 
 
 160-subdir: 128.ostk

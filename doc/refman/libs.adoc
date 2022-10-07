@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date:  3-Feb-2022 11:16 (eg)
-// Last file update: 29-Sep-2022 19:23 (eg)
+// Last file update:  7-Oct-2022 18:59 (eg)
 
 ==  STklos Libraries
 
@@ -12,7 +12,7 @@ This section describes the standard libraries provided by {{stklos}}.
 
 === The (scheme ...) Libraries
 
-==== {{rseven}} libraries
+==== {{rseven}} Small Libraries
 
 {{stklos}} offers all the libraries defined by {{rseven}}:
 
@@ -41,14 +41,16 @@ See the <<R7RS>> document for more information.
 
 For now, supported libraries of the *Red edition* are
 
-- list
-- charset
-- stream
-- box
-- set
-- ilist
-- list-queue
-- hash-table
+
+- box _(srfi 111)_
+- charset _(srfi 14)_
+- hash-table _(srfi 125)_
+- ilist _(srfi 116)_
+- list _(srfi 1)_
+- list-queue _(srfi 117)_
+- lseq _(srfi 127)_
+- set _(srfi 113)_
+- stream _(srfi 41)_
 
 
 === The (srfi ...) Libraries

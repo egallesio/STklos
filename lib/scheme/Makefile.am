@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  3-Oct-2022 13:09 (eg)
+# Last file update:  7-Oct-2022 18:42 (eg)
 
 #======================================================================
 
@@ -31,6 +31,9 @@ SO = @SH_SUFFIX@
 DOCDB  = ../DOCDB
 BASEDIR= ../..
 
+# ----------------------------------------------------------------------
+# R7RS Small Support
+# ----------------------------------------------------------------------
 R7_STK=    base.stk            \
            case-lambda.stk     \
            char.stk            \
@@ -66,40 +69,25 @@ R7_OBJS =  base.ostk            \
            write.ostk
 
 # ----------------------------------------------------------------------
-# LARGE_STK = list.stk            \
-#             charset.stk         \
-#             stream.stk          \
-#             box.stk             \
-#             set.stk             \
-#             ilist.stk           \
-#             list-queue.stk      \
-#             hash-table.stk
+# R7RS Large Support
+# ----------------------------------------------------------------------
+LARGE_STK  = list.stk       \
+             charset.stk    \
+             stream.stk     \
+             box.stk        \
+             set.stk        \
+             list-queue.stk \
+             hash-table.stk \
+             lseq.stk
 
-LARGE_STK = list.stk       \
-            charset.stk    \
-            stream.stk     \
-            box.stk        \
-            set.stk        \
-            list-queue.stk \
-            hash-table.stk
-
-
-# LARGE_OBJS =  list.ostk            \
-#               charset.ostk         \
-#               stream.ostk          \
-#               box.ostk             \
-#               set.ostk             \
-#               ilist.ostk           \
-#               list-queue.ostk      \
-#               hash-table.ostk
-
-LARGE_OBJS =    list.ostk       \
-                charset.ostk    \
-                stream.ostk     \
-                box.ostk        \
-                set.ostk        \
-                list-queue.ostk \
-                hash-table.ostk
+LARGE_OBJS = list.ostk       \
+             charset.ostk    \
+             stream.ostk     \
+             box.ostk        \
+             set.ostk        \
+             list-queue.ostk \
+             hash-table.ostk \
+             lseq.ostk
 
 LARGE_C     = ilist.c
 LARGE_C_STK = ilist.stk
