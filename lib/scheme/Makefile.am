@@ -78,7 +78,8 @@ LARGE_STK  = list.stk       \
              set.stk        \
              list-queue.stk \
              hash-table.stk \
-             lseq.stk
+             lseq.stk       \
+             rlist.stk
 
 LARGE_OBJS = list.ostk       \
              charset.ostk    \
@@ -87,11 +88,12 @@ LARGE_OBJS = list.ostk       \
              set.ostk        \
              list-queue.ostk \
              hash-table.ostk \
-             lseq.ostk
+             lseq.ostk       \
+             rlist.ostk
 
-LARGE_C     = ilist.c
-LARGE_C_STK = ilist.stk
-LARGE_SHOBJ = ilist.$(SO)
+LARGE_C     = ilist.c     rlist.c
+LARGE_C_STK = ilist.stk   rlist.stk
+LARGE_SHOBJ = ilist.$(SO) rlist.$(SO)
 
 
 #----------------------------------------------------------------------
@@ -149,6 +151,9 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
 
 ilist.$(SO): ilist-incl.c
 ilist-incl.c: ../srfi/128.ostk
+
+rlist.$(SO): rlist-incl.c
+rlist-incl.c: ../srfi/101.ostk
 
 
 #box.ostk:        ../srfi/111.ostk

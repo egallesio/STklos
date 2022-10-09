@@ -25,11 +25,11 @@
  */
 
 #include <stklos.h>
-#include "101-incl.c"
+#include "rlist-incl.c"
 
 /*
   This is an implementation of the data structure described in
-  
+
    Okasaki, Chris. "Purely Functional Random-Access Lists"
    Functional Programming Languages and Computer Architecture,
    June 1995, pages 86-95.
@@ -59,7 +59,7 @@ static int tc_rlist;
 
   RLIST_TREE
   ==========
-  
+
   An rlist is represented as a linked list of trees (hence a
   forest). The rlist_tree structure below represents one
   tree (a simple binary tree - data, left, right).
@@ -87,7 +87,7 @@ typedef struct rlist_tree_obj* TREE;
 
   RLIST
   =====
-  
+
   This is the linked list of trees that represent and rtree.
 
  **************************************************************/
@@ -166,7 +166,7 @@ static void
 STk_debug_rtree(TREE t, int level, SCM port) {
     for(int i=0; i < (level*4); i++)
         STk_putc(' ', port);
-    
+
     STk_print(TREE_DATA(t), port, DSP_MODE);
     STk_putc('\n', port);
     if (TREE_LEFT(t) != STk_nil)   STk_debug_rtree(TREE_LEFT(t),  level+1, port);
@@ -240,7 +240,7 @@ STk_rlist_leafp(SCM list) {
    does to a list.
 
    COMPLEXITY: O(1)
-   
+
    CAUTION: type cheking should be done BEFORE calling this function!
    a MUST be a tree. */
 static SCM
@@ -257,7 +257,7 @@ rforest_cons (long size, TREE a, SCM b) {
 /* Returns -1 for improper lists and the length for proper lists
 
    COMPLEXITY: O(log(n))   n = size of the rlist
-   
+
    CAUTION: type cheking should be done BEFORE calling this function!
    x MUST be an rlist. */
 static inline long
@@ -297,7 +297,7 @@ rlist_update(SCM list, long idx, SCM proc, SCM e, SCM *old) {
 
 	/* Out of bounds: */
 	if (next == STk_false) return STk_false;
-	
+
 	return rforest_cons(TREE_SIZE(list),
 			    FIRST(list),
 			    next);
@@ -319,7 +319,7 @@ DEFINE_PRIMITIVE("%debug-rlist", srfi101_debug_rlist, subr1, (SCM rlist))
     check_rlist(rlist);
 
     SCM port = STk_stderr;
-    
+
     if (rlist == STk_nil) {
         STk_print(rlist, port, DSP_MODE);
         return STk_void;
@@ -400,7 +400,7 @@ DEFINE_PRIMITIVE("srfi101:cdr", srfi101_cdr, subr1, (SCM list))
 /*
 <doc EXT srfi101:cons
  * (cons obj1 obj2)
- * 
+ *
  * Returns a newly allocated rpair whose |rcar| is |obj1| and whose |rcdr| is |obj2|.
  * The pair is guaranteed to be different (in the sense of |eqv?|) from every
  * existing object.  This operation takes O(1) time.
@@ -417,12 +417,12 @@ doc>
 DEFINE_PRIMITIVE("srfi101:cons", srfi101_cons, subr2, (SCM a, SCM list))
 {
     TREE t;
-    
+
     if ( ( !NULLP(list) )     &&
-	 RLISTP(list)         && 
+	 RLISTP(list)         &&
 	 RLISTP(REST(list))   && /* at least two trees */
 	 TREE_SIZE(list) == TREE_SIZE(REST(list))) {      /* two first trees with same size */
-	
+
         t = STk_rlist_make_tree(a,
                                 FIRST(list),
                                 FIRST(REST(list)));
@@ -526,7 +526,7 @@ DEFINE_PRIMITIVE("srfi101:list", srfi101_list, vsubr, (int argc, SCM *things))
 
     for (tmp = things-argc+1; tmp <= things; tmp++)
         l = STk_srfi101_cons(*tmp, l);
-    
+
     return l;
 }
 
@@ -576,7 +576,7 @@ DEFINE_PRIMITIVE("srfi101:make-list", srfi101_make_list, subr12, (SCM k, SCM fil
  * (srfi101:length '())                              => 0
  * @end lisp
 doc>
-*/   
+*/
 DEFINE_PRIMITIVE("srfi101:length", srfi101_length, subr1, (SCM x))
 {
     check_rlist(x);
@@ -612,13 +612,13 @@ DEFINE_PRIMITIVE("srfi101:length<=?", srfi101_length_le, subr2, (SCM list, SCM k
     if (bound == 0) return STk_true;
 
     check_rlist(list);
-    
+
     long len = 0;
     for(SCM ptr = list; RLISTP(ptr); ptr = REST(ptr)) {
 	len += TREE_SIZE(ptr);
         if (len >= bound) return STk_true;
-    }   
-    
+    }
+
   return STk_false;
 }
 
@@ -632,7 +632,7 @@ srfi_101_append2(SCM a, SCM b) {
     /* Case 1. a is an rlist with one single element */
     if (STk_srfi101_cdr(a) == STk_nil)
 	return STk_srfi101_cons(STk_srfi101_car(a), b);
-    
+
     /* Case 2. a is an improper pair (ERROR) */
     if (!RLISTP(STk_srfi101_cdr(a)))
 	STk_error("cannot append to end of improper rlist ~S", a);
@@ -687,7 +687,7 @@ doc>
 DEFINE_PRIMITIVE("srfi101:append", srfi101_append, vsubr, (int argc, SCM* argv))
 {
     while (argc && NULLP(*argv)) { argv--; argc--; }
-    
+
     SCM *ptr = argv;
     for (int i=0; i < argc - 1; i++)
 	check_rlist(*ptr--);
@@ -716,7 +716,7 @@ DEFINE_PRIMITIVE("srfi101:reverse", srfi101_reverse, subr1, (SCM list))
 {
     SCM result = STk_nil;
     SCM ptr = list;
-    
+
     while(RLISTP(ptr)) {
         result = STk_srfi101_cons(STk_srfi101_car(ptr), result);
         ptr = STk_srfi101_cdr(ptr);
@@ -749,7 +749,7 @@ DEFINE_PRIMITIVE("srfi101:list-ref", srfi101_list_ref, subr2, (SCM list, SCM k))
     check_integer(k);
     check_rlist(list);
     long idx = INT_VAL(k);
-    
+
     if (TREE_SIZE(list) == 0) STk_error("empty rlist");
     if (idx < 0)              STk_error("index %d out of bounds", idx);
 
@@ -807,7 +807,7 @@ DEFINE_PRIMITIVE("srfi101:list-set", srfi101_list_set, subr3, (SCM list, SCM k, 
  *
  * Returns the same results as:
  * @lisp
- * (values (list-ref pair k) 
+ * (values (list-ref pair k)
  *         (list-set pair k (proc (list-ref pair k))))
  * @end lisp
  *
@@ -853,12 +853,12 @@ static inline SCM
 iterate_aux(SCM proc, struct cons_obj *args, SCM *lists, int arity, int output_size, int map) {
     if (output_size == 0) return STk_nil;
     SCM res;
-    
+
 	/* Copy one element from each list into 'args': */
 	for (int i=0; i < arity; i++) {
 	    CAR(&args[i]) = STk_srfi101_car(lists[i]);
 	}
-	
+
 	/* Do the real work! :) */
 	res = STk_C_apply_list(proc, (SCM)&args[0]);
 	/* One step forward in each rlist: */
@@ -895,13 +895,13 @@ srfi101_iterate(SCM proc, int map, SCM *rlists, long arity) {
     /* NOTE: we do NOT check the arity of proc, since
              1. it will be checked anyway when it is applied
 	     2. it could be variable */
-   
+
     SCM *lists = STk_must_malloc(arity * sizeof(SCM));
 
     ptr = rlists;
     for (int i=0; i < arity; i++)
 	lists[i] = *ptr--;
-    
+
     /*
       arity       = # of arguments to proc, AND # of rlists
       output_size = # of elements to process
@@ -938,7 +938,7 @@ srfi101_iterate(SCM proc, int map, SCM *rlists, long arity) {
                     passed to apply
     */
 
-    
+
     struct cons_obj *args = STk_must_malloc(arity * sizeof(struct cons_obj));
         /* Adust CDR pointers */
     int i;
@@ -992,10 +992,10 @@ doc>
 DEFINE_PRIMITIVE("srfi101:map", srfi101_map, vsubr, (int argc, SCM *argv))
 {
     if (argc < 2) STk_error("at least two arguments needed, %d given", argc);
-    
+
     SCM proc = *argv--;
     check_procedure(proc);
-    
+
     return srfi101_iterate(proc, 1, argv, argc-1);
 }
 
@@ -1023,11 +1023,11 @@ DEFINE_PRIMITIVE("srfi101:map", srfi101_map, vsubr, (int argc, SCM *argv))
  * (srfi101:for-each even? '())                  =>  unspecified
  * @end lisp
 doc>
- */ 
+ */
 DEFINE_PRIMITIVE("srfi101:for-each", srfi101_for_each, vsubr, (int argc, SCM *argv))
 {
     if (argc < 2) STk_error("at least two arguments needed, %d given", argc);
-    
+
     SCM proc = *argv--;
     check_procedure(proc);
 
@@ -1076,7 +1076,7 @@ static SCM test_equal_rlist(SCM x, SCM y)
     SCM ptr_x = x;
     SCM ptr_y = y;
     while (RLISTP(ptr_x) && RLISTP(ptr_y)) {
-	
+
 	if (TREE_SIZE(ptr_x) != TREE_SIZE(ptr_y))
 	    return STk_false;
 
@@ -1117,9 +1117,9 @@ static struct extended_type_descr xtype_rlist = {
 
  ***************************************************************/
 
-MODULE_ENTRY_START("srfi/101")
+MODULE_ENTRY_START("scheme/rlist")
 {
-    SCM module =  STk_create_module(STk_intern("srfi/101"));
+    SCM module =  STk_create_module(STk_intern("scheme/rlist"));
 
     /* Create a new type for rlist */
     tc_rlist = STk_new_user_type(&xtype_rlist);
