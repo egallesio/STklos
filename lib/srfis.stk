@@ -270,6 +270,9 @@
     ;; 228 A further comparator library (draft)
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
+    ;; 231 Intervals and Generalized Arrays (Updated^2) (draft)
+    ;; 232 Flexible Curried Procedures
+    (233 "INI files" (ini-files) "srfi-233")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file

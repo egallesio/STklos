@@ -126,7 +126,8 @@ SRC_STK   = 1.stk   \
             223.stk \
             224.stk \
             229.stk \
-            230.stk
+            230.stk \
+            233.stk
 
 SRC_OSTK =  1.ostk   \
             2.ostk   \
@@ -223,7 +224,8 @@ SRC_OSTK =  1.ostk   \
             223.ostk \
             224.ostk \
             229.ostk \
-            230.ostk
+            230.ostk \
+            233.ostk
 
 #
 # SRFIs written in C and Scheme
