@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  7-Oct-2022 18:42 (eg)
+# Last file update: 19-Oct-2022 17:41 (eg)
 
 #======================================================================
 
@@ -78,7 +78,8 @@ LARGE_STK  = list.stk       \
              set.stk        \
              list-queue.stk \
              hash-table.stk \
-             lseq.stk
+             lseq.stk       \
+             comparator.stk
 
 LARGE_OBJS = list.ostk       \
              charset.ostk    \
@@ -87,7 +88,8 @@ LARGE_OBJS = list.ostk       \
              set.ostk        \
              list-queue.ostk \
              hash-table.ostk \
-             lseq.ostk
+             lseq.ostk       \
+             comparator.ostk
 
 LARGE_C     = ilist.c
 LARGE_C_STK = ilist.stk
@@ -138,7 +140,7 @@ stream.ostk:     list.ostk ../streams/derived.ostk
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
 
-set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
+set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 ../srfi/9.ostk:
 	(cd ../srfi; $(MAKE) 9.ostk)
 ../srfi/69.ostk:
@@ -148,14 +150,16 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
 
 
 ilist.$(SO): ilist-incl.c
-ilist-incl.c: ../srfi/128.ostk
+ilist-incl.c: comparator.ostk
 
 
 #box.ostk:        ../srfi/111.ostk
 #set.ostk:        ../srfi/113.ostk
 #ilist.ostk:      ../srfi/116.$(SO)
-list-queue.ostk:  ../srfi/9.ostk
-hash-table.ostk: ../srfi/128.ostk
+list-queue.ostk: ../srfi/9.ostk
+hash-table.ostk: comparator.ostk
+comparator.ostk: ../srfi/9.ostk
+
 
 # This is weird to add these dependencies here, but they seem needed for
 # massive parallel $(MAKE)

@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  7-Oct-2022 18:48 (eg)
+# Last file update: 19-Oct-2022 17:30 (eg)
 
 #-======================================================================
 
@@ -278,7 +278,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 117.ostk: 1.ostk 9.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
 127.ostk: ../scheme/lseq.ostk
-128.ostk: 9.ostk
+128.ostk: ../scheme/comparator.ostk
 130.ostk: 13.ostk
 133.ostk: ../stklos/itrie.$(SO)
 134.ostk: 1.ostk 9.ostk 158.ostk

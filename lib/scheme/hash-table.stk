@@ -45,13 +45,13 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 23-Jun-2022 10:11 (jpellegrini)
-;;;; Last file update:  3-Oct-2022 13:08 (eg)
+;;;; Last file update: 19-Oct-2022 17:40 (eg)
 ;;;;
 
 
 
 (define-module scheme/hash-table
-  (import (srfi 128))
+  (import (scheme comparator))
 
   (export
 
@@ -138,9 +138,9 @@
 
 (define s125:hash-table-mutable? (symbol-value 'hash-table-mutable?    scheme))
 
-(define s128:default-hash        (symbol-value 'default-hash    (find-module 'srfi/128)))
-(define s128:string-hash         (symbol-value 'string-hash     (find-module 'srfi/128)))
-(define s128:string-ci-hash      (symbol-value 'string-ci-hash  (find-module 'srfi/128)))
+(define s128:default-hash        (symbol-value 'default-hash    (find-module 'scheme/comparator)))
+(define s128:string-hash         (symbol-value 'string-hash     (find-module 'scheme/comparator)))
+(define s128:string-ci-hash      (symbol-value 'string-ci-hash  (find-module 'scheme/comparator)))
 
 (define s:hash-table-equivalence-function
   (symbol-value 'hash-table-equivalence-function scheme))
