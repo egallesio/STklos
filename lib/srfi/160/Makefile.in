@@ -36,7 +36,7 @@
 #
 #           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 #    Creation date: 20-Jun-2022 09:24 (jpellegrini)
-# Last file update:  8-Sep-2022 16:21 (eg)
+# Last file update: 19-Oct-2022 18:39 (eg)
 
 #-======================================================================
 
@@ -704,7 +704,10 @@ f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
 #======================================================================
 # Dependencies
 
-base.$(SO): base-incl.c base.c
+../../scheme/comparator.ostk:
+	(cd ../../scheme; $(MAKE) comparator.ostk)
+
+base.$(SO): ../../scheme/comparator.ostk base-incl.c base.c
 
 #======================================================================
 

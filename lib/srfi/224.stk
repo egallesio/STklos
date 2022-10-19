@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Jan-2022 11:03
-;;;; Last file update: 12-Mar-2022 19:42 (eg)
+;;;; Last file update: 19-Oct-2022 18:35 (eg)
 ;;;;
 
 ;;; The comments before each section explain how each procedure was
@@ -33,7 +33,7 @@
 
 (define-module srfi/224
   (import (stklos itrie)
-          (srfi 128))
+          (scheme comparator))
 
   (%compile-time-define %fxmapping-intersection
                         %fxmapping-difference

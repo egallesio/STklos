@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 19-Oct-2022 17:30 (eg)
+# Last file update: 19-Oct-2022 18:35 (eg)
 
 #-======================================================================
 
@@ -299,7 +299,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 216.ostk: 27.$(SO)
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
-224.ostk: 128.ostk
+224.ostk: ../scheme/comparator.ostk
 230.ostk: 9.ostk
 
 
