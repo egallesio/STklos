@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 19-Oct-2022 17:41 (eg)
+# Last file update: 10-Nov-2022 19:30 (eg)
 
 #======================================================================
 
@@ -108,7 +108,7 @@ schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
 schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
 scheme_sources  = $(SRC_STK)
 scheme_DATA     = $(scheme_OBJS)
-schemelib_DATA  = $(schemelib_SHOBJ)
+schemelib_DATA  = $(LARGE_SHOBJ)
 
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
