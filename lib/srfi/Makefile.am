@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 15:41 (eg)
+# Last file update: 11-Nov-2022 16:00 (eg)
 
 #-======================================================================
 
@@ -92,6 +92,7 @@ SRC_STK   = 1.stk   \
             129.stk \
             130.stk \
             132.stk \
+            133.stk \
             134.stk \
             135.stk \
             137.stk \
@@ -191,6 +192,7 @@ SRC_OSTK =  1.ostk   \
             129.ostk \
             130.ostk \
             132.ostk \
+            133.ostk \
             134.ostk \
             135.ostk \
             137.ostk \
@@ -232,9 +234,9 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c     133.c      144.c      170.c      175.c
-SRC_C_STK = 25.stk   27.stk   133.stk    144.stk    170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
+SRC_C     = 25.c     27.c     144.c      170.c      175.c
+SRC_C_STK = 25.stk   27.stk   144.stk    170.stk    175.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 144.$(SO)  170.$(SO)  175.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -283,7 +285,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 128.ostk: ../scheme/comparator.ostk
 130.ostk: 13.ostk
 132.ostk: ../scheme/sort.$(SO)
-133.ostk: ../stklos/itrie.$(SO)
+133.ostk: ../scheme/vector.$(SO)
 134.ostk: 1.ostk 9.ostk 158.ostk
 135.ostk: 9.ostk 129.ostk
 151.ostk: 60.ostk
@@ -309,7 +311,6 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
 116.$(SO): 128.ostk 116-incl.c 116.c
-133.$(SO): 133-incl.c 133.c
 144.$(SO): 144-incl.c 144.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c

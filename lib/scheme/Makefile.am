@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 15:34 (eg)
+# Last file update: 11-Nov-2022 15:57 (eg)
 
 #======================================================================
 
@@ -91,9 +91,9 @@ LARGE_OBJS = list.ostk       \
              lseq.ostk       \
              comparator.ostk
 
-LARGE_C     = ilist.c     sort.c
-LARGE_C_STK = ilist.stk   sort.stk
-LARGE_SHOBJ = ilist.$(SO) sort.$(SO)
+LARGE_C     = ilist.c     sort.c     vector.c
+LARGE_C_STK = ilist.stk   sort.stk   vector.stk
+LARGE_SHOBJ = ilist.$(SO) sort.$(SO) vector.$(SO)
 
 
 #----------------------------------------------------------------------
@@ -154,6 +154,9 @@ ilist-incl.c: comparator.ostk
 
 sort.$(SO): sort-incl.c
 sort-incl.c: sort.stk
+
+vector.$(SO): vector-incl.c
+vector-incl.c: vector.stk
 
 
 #box.ostk:        ../srfi/111.ostk

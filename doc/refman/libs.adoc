@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date:  3-Feb-2022 11:16 (eg)
-// Last file update: 11-Nov-2022 15:43 (eg)
+// Last file update: 11-Nov-2022 16:04 (eg)
 
 ==  STklos Libraries
 
@@ -53,6 +53,7 @@ For now, supported libraries of the *Red edition* are
 - set _(srfi 113)_
 - sort _(srfi 132)_
 - stream _(srfi 41)_
+- vector _(srfi 133)_
 
 
 === The (srfi ...) Libraries
