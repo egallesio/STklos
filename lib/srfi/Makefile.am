@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 16:23 (eg)
+# Last file update: 11-Nov-2022 16:51 (eg)
 
 #-======================================================================
 
@@ -286,7 +286,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 130.ostk: 13.ostk
 132.ostk: ../scheme/sort.$(SO)
 133.ostk: ../scheme/vector.$(SO)
-134.ostk: 1.ostk 9.ostk 158.ostk
+134.ostk: ../scheme/ideque.ostk
 135.ostk: 9.ostk 129.ostk
 151.ostk: 60.ostk
 152.ostk: 13.ostk
@@ -336,6 +336,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) sort.$(SO))
 ../scheme/generator.ostk:
 	(cd ../scheme; $(MAKE) generator.ostk)
+../scheme/ideque.ostk:
+	(cd ../scheme; $(MAKE) ideque.ostk)
 
 
 160-subdir: 128.ostk
@@ -366,3 +368,8 @@ uninstall-hook:
 doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+
+
+# Local Variables:
+# tab-width: 8
+# End:

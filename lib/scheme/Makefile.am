@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 16:20 (eg)
+# Last file update: 11-Nov-2022 16:46 (eg)
 
 #======================================================================
 
@@ -80,7 +80,8 @@ LARGE_STK  = list.stk       \
              hash-table.stk \
              lseq.stk       \
              comparator.stk \
-             generator.stk
+             generator.stk  \
+             ideque.stk
 
 LARGE_OBJS = list.ostk       \
              charset.ostk    \
@@ -91,7 +92,8 @@ LARGE_OBJS = list.ostk       \
              hash-table.ostk \
              lseq.ostk       \
              comparator.ostk \
-             generator.ostk
+             generator.ostk  \
+             ideque.ostk
 
 LARGE_C     = ilist.c     sort.c     vector.c
 LARGE_C_STK = ilist.stk   sort.stk   vector.stk
@@ -167,11 +169,9 @@ vector-incl.c: vector.stk
 list-queue.ostk: ../srfi/9.ostk
 hash-table.ostk: comparator.ostk
 comparator.ostk: ../srfi/9.ostk
+ideque.ostk: ../srfi/9.ostk generator.ostk list.ostk
 
 
-# This is weird to add these dependencies here, but they seem needed for
-# massive parallel $(MAKE)
-#41.ostk: ../streams/derived.ostk
 
 # ======================================================================
 install-sources:
@@ -190,3 +190,7 @@ uninstall-hook:
 doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+
+# Local Variables:
+# tab-width: 8
+# End:
