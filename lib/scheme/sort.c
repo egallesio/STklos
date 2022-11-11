@@ -21,11 +21,11 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 08-Aug-2021 13:40
- * Last file update: 24-Jun-2022 14:55 (eg)
+ * Last file update: 11-Nov-2022 13:34 (eg)
  */
 
 #include <stklos.h>
-#include "132-incl.c"
+#include "sort-incl.c"
 
 static void error_bad_list(SCM x)
 {
@@ -1188,7 +1188,7 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
     memmove(&VECTOR_DATA(w)[0],
             &VECTOR_DATA(v)[cstart],
             (cend-cstart) * sizeof(SCM));
-    
+
     if (VECTOR_SIZE(v)<2) return w;
 
     long dups = srfi_132_vector_del_dups_aux(w, eq, 0, cend-cstart);
@@ -1202,9 +1202,9 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
     return u;
 }
 
-MODULE_ENTRY_START("srfi/132")
+MODULE_ENTRY_START("scheme/sort")
 {
-    SCM module =  STk_create_module(STk_intern("srfi/132"));
+    SCM module =  STk_create_module(STk_intern("scheme/sort"));
 
     ADD_PRIMITIVE_IN_MODULE(list_sorted,module);
     ADD_PRIMITIVE_IN_MODULE(vector_sorted,module);
