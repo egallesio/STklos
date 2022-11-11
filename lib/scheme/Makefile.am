@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 16:46 (eg)
+# Last file update: 11-Nov-2022 18:00 (eg)
 
 #======================================================================
 
@@ -81,7 +81,8 @@ LARGE_STK  = list.stk       \
              lseq.stk       \
              comparator.stk \
              generator.stk  \
-             ideque.stk
+             ideque.stk     \
+             text.stk
 
 LARGE_OBJS = list.ostk       \
              charset.ostk    \
@@ -93,7 +94,8 @@ LARGE_OBJS = list.ostk       \
              lseq.ostk       \
              comparator.ostk \
              generator.ostk  \
-             ideque.ostk
+             ideque.ostk     \
+             text.ostk
 
 LARGE_C     = ilist.c     sort.c     vector.c
 LARGE_C_STK = ilist.stk   sort.stk   vector.stk
@@ -151,6 +153,8 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 	(cd ../srfi; $(MAKE) 69.ostk)
 ../srfi/128.ostk:
 	(cd ../srfi; $(MAKE) 128.ostk)
+../srfi/129.ostk:
+	(cd ../srfi; $(MAKE) 129.ostk)
 
 
 ilist.$(SO): ilist-incl.c
@@ -170,7 +174,7 @@ list-queue.ostk: ../srfi/9.ostk
 hash-table.ostk: comparator.ostk
 comparator.ostk: ../srfi/9.ostk
 ideque.ostk: ../srfi/9.ostk generator.ostk list.ostk
-
+text.ostk: ../srfi/9.ostk ../srfi/129.ostk
 
 
 # ======================================================================
