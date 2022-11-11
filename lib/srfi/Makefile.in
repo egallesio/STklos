@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 16:00 (eg)
+# Last file update: 11-Nov-2022 16:23 (eg)
 
 #-======================================================================
 
@@ -886,6 +886,7 @@ STKLOS_BINARY ?= ../../src/stklos
 151.ostk: 60.ostk
 152.ostk: 13.ostk
 154.ostk: 9.ostk
+158.ostk: ../scheme/generator.ostk
 160.ostk: 160-subdir
 161.ostk: 9.ostk
 171.ostk: 1.ostk 9.ostk 69.ostk
@@ -927,6 +928,8 @@ STKLOS_BINARY ?= ../../src/stklos
 	(cd ../scheme; $(MAKE) lseq.ostk)
 ../scheme/sort.$(SO):
 	(cd ../scheme; $(MAKE) sort.$(SO))
+../scheme/generator.ostk:
+	(cd ../scheme; $(MAKE) generator.ostk)
 
 160-subdir: 128.ostk
 	(cd 160; $(MAKE))
