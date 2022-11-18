@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 18-Nov-2022 16:06 (eg)
+# Last file update: 18-Nov-2022 16:30 (eg)
 
 #-======================================================================
 
@@ -98,6 +98,7 @@ SRC_STK   = 1.stk   \
             137.stk \
             141.stk \
             143.stk \
+            144.stk \
             151.stk \
             152.stk \
             154.stk \
@@ -197,6 +198,7 @@ SRC_OSTK =  1.ostk   \
             135.ostk \
             137.ostk \
             141.ostk \
+            144.ostk \
             143.ostk \
             151.ostk \
             152.ostk \
@@ -234,9 +236,9 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c     144.c      170.c      175.c
-SRC_C_STK = 25.stk   27.stk   144.stk    170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 144.$(SO)  170.$(SO)  175.$(SO)
+SRC_C     = 25.c     27.c     170.c      175.c
+SRC_C_STK = 25.stk   27.stk   170.stk    175.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -288,7 +290,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 133.ostk: ../scheme/vector.$(SO)
 134.ostk: ../scheme/ideque.ostk
 135.ostk: ../scheme/text.ostk
-141.ostk: ../scheme/division.stk
+141.ostk: ../scheme/division.ostk
+144.ostk: ../scheme/flonum.$(SO)
 151.ostk: 60.ostk
 152.ostk: 13.ostk
 154.ostk: 9.ostk
@@ -313,7 +316,6 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
 116.$(SO): 128.ostk 116-incl.c 116.c
-144.$(SO): 144-incl.c 144.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
 
@@ -341,6 +343,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) ideque.ostk)
 ../scheme/division.ostk:
 	(cd ../scheme; $(MAKE) division.ostk)
+../scheme/flonum.$(SO):
+	(cd ../scheme; $(MAKE) division.$(SO))
 
 
 160-subdir: 128.ostk

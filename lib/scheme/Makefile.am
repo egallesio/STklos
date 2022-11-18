@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 18-Nov-2022 16:08 (eg)
+# Last file update: 18-Nov-2022 16:43 (eg)
 
 #======================================================================
 
@@ -85,6 +85,7 @@ LARGE_STK  = list.stk       \
              text.stk       \
              division.stk
 
+
 LARGE_OBJS = list.ostk       \
              charset.ostk    \
              stream.ostk     \
@@ -99,9 +100,9 @@ LARGE_OBJS = list.ostk       \
              text.ostk       \
              division.ostk
 
-LARGE_C     = ilist.c     sort.c     vector.c
-LARGE_C_STK = ilist.stk   sort.stk   vector.stk
-LARGE_SHOBJ = ilist.$(SO) sort.$(SO) vector.$(SO)
+LARGE_C     = ilist.c     flonum.c     sort.c     vector.c
+LARGE_C_STK = ilist.stk   flonum.stk   sort.stk   vector.stk
+LARGE_SHOBJ = ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO)
 
 
 #----------------------------------------------------------------------
@@ -161,6 +162,9 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 
 ilist.$(SO): ilist-incl.c
 ilist-incl.c: comparator.ostk
+
+flonum.$(SO): flonum-incl.c
+flonum-incl.c: flonum.stk
 
 sort.$(SO): sort-incl.c
 sort-incl.c: sort.stk
