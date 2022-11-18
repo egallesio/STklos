@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 18:11 (eg)
+# Last file update: 18-Nov-2022 16:06 (eg)
 
 #-======================================================================
 
@@ -288,6 +288,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 133.ostk: ../scheme/vector.$(SO)
 134.ostk: ../scheme/ideque.ostk
 135.ostk: ../scheme/text.ostk
+141.ostk: ../scheme/division.stk
 151.ostk: 60.ostk
 152.ostk: 13.ostk
 154.ostk: 9.ostk
@@ -338,6 +339,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) generator.ostk)
 ../scheme/ideque.ostk:
 	(cd ../scheme; $(MAKE) ideque.ostk)
+../scheme/division.ostk:
+	(cd ../scheme; $(MAKE) division.ostk)
 
 
 160-subdir: 128.ostk

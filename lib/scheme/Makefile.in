@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Nov-2022 18:00 (eg)
+# Last file update: 18-Nov-2022 16:08 (eg)
 
 #======================================================================
 
@@ -398,7 +398,8 @@ LARGE_STK = list.stk       \
              comparator.stk \
              generator.stk  \
              ideque.stk     \
-             text.stk
+             text.stk       \
+             division.stk
 
 LARGE_OBJS = list.ostk       \
              charset.ostk    \
@@ -411,7 +412,8 @@ LARGE_OBJS = list.ostk       \
              comparator.ostk \
              generator.ostk  \
              ideque.ostk     \
-             text.ostk
+             text.ostk       \
+             division.ostk
 
 LARGE_C = ilist.c     sort.c     vector.c
 LARGE_C_STK = ilist.stk   sort.stk   vector.stk
