@@ -752,9 +752,9 @@ pre.rouge {
 <li><a href="#_adding_simple_modules_and_srfis">5. Adding simple modules and SRFIs</a>
 <ul class="sectlevel2">
 <li><a href="#_adding_modules">5.1. Adding modules</a></li>
-<li><a href="#_adding_srfis">5.2. Adding SRFIs</a></li>
-<li><a href="#_mixed_srfis_scheme_and_c">5.3. Mixed SRFIs (Scheme and C)</a></li>
-<li><a href="#_content_of_the_c_file">5.4. Content of the C file</a></li>
+<li><a href="#_module_placement_in_the_tree">5.2. Module placement in the tree</a></li>
+<li><a href="#_adding_srfis">5.3. Adding SRFIs</a></li>
+<li><a href="#_mixed_srfis_scheme_and_c">5.4. Mixed SRFIs (Scheme and C)</a></li>
 <li><a href="#_documentation">5.5. Documentation</a></li>
 </ul>
 </li>
@@ -767,7 +767,8 @@ pre.rouge {
 <li><a href="#_unboxed_types">6.5. Unboxed types</a></li>
 <li><a href="#_boxed_types">6.6. Boxed types</a></li>
 <li><a href="#_dynamically_loadable_modules">6.7. Dynamically loadable modules</a></li>
-<li><a href="#_creating_new_types">6.8. Creating new types</a></li>
+<li><a href="#_input_and_output_from_c">6.8. Input and output from C</a></li>
+<li><a href="#_creating_new_types">6.9. Creating new types</a></li>
 </ul>
 </li>
 <li><a href="#_the_virtual_machine">7. The virtual machine</a></li>
@@ -831,7 +832,8 @@ on the same project across various editors and IDEs).</p>
 </li>
 <li>
 <p><code>lib</code> – Scheme files, including from basic things like the boot
-program up to high-level things like modules implementing SRFIs</p>
+program up to high-level things like modules implementing libraries and
+SRFIs</p>
 </li>
 <li>
 <p><code>pcre</code> – <code>libpcre</code> (a local copy)</p>
@@ -1011,7 +1013,8 @@ edit <code>lib/boot.stk</code>.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>add your <code>fantastic-module.stk</code> to <code>lib/</code></p>
+<p>add your <code>fantastic-module.stk</code> to <code>lib/SUBDIR</code>, where <code>SUBDIR</code>
+could be <code>scheme</code>, <code>srfi</code> or <code>stklos</code> (see nect subsection)</p>
 </li>
 <li>
 <p>include <code>fantastic-module.stk</code> and <code>fantastic-module.ostk</code> in the
@@ -1025,7 +1028,23 @@ directory and include it in the list of loaded files in <code>do-test.stk</code>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_adding_srfis">5.2. Adding SRFIs</h3>
+<h3 id="_module_placement_in_the_tree">5.2. Module placement in the tree</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>STklos modules go into <code>lib/stklos</code></p>
+</li>
+<li>
+<p>Scheme (R7RS small or large) libraries go into <code>lib/scheme</code></p>
+</li>
+<li>
+<p>SRFIs go into <code>lib/srfi</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_adding_srfis">5.3. Adding SRFIs</h3>
 <div class="paragraph">
 <p>In order to add SRFI 9999 to STklos,</p>
 </div>
@@ -1067,7 +1086,7 @@ update</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_mixed_srfis_scheme_and_c">5.3. Mixed SRFIs (Scheme and C)</h3>
+<h3 id="_mixed_srfis_scheme_and_c">5.4. Mixed SRFIs (Scheme and C)</h3>
 <div class="paragraph">
 <p>To add a mixed SRFI 8888,</p>
 </div>
@@ -1087,7 +1106,7 @@ written in C and Scheme'' (variables `SRC_C</code>, <code>SRC_C_STK</code>, and
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_content_of_the_scheme_file">5.3.1. Content of the Scheme file</h4>
+<h4 id="_content_of_the_scheme_file">5.4.1. Content of the Scheme file</h4>
 <div class="paragraph">
 <p>The Scheme file will be compiled as a byte-code stream embedded in C.
 Here, the compiled file will be called <code>$DIR/srfi-170-incl.c</code>. It is
@@ -1107,9 +1126,8 @@ command produces a C file instead of a byte-code file.</p>
 of this file.</p>
 </div>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_content_of_the_c_file">5.4. Content of the C file</h3>
+<div class="sect3">
+<h4 id="_content_of_the_c_file">5.4.2. Content of the C file</h4>
 <div class="paragraph">
 <p>The C file must follow the conventions of dynamically loadable code as
 shown in the example in the <code>/etc</code> directory.</p>
@@ -1170,6 +1188,7 @@ compiler warning about an unresolved reference.</p>
 </div>
 <div class="paragraph">
 <p>See SRFI-25, SRFI-27 and SRFI-170 as a reference.</p>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -1634,7 +1653,70 @@ used by several files use them, so they’re included with
 </div>
 </div>
 <div class="sect2">
-<h3 id="_creating_new_types">6.8. Creating new types</h3>
+<h3 id="_input_and_output_from_c">6.8. Input and output from C</h3>
+<div class="paragraph">
+<p>The input and output functions are defined in <code>sio.c</code>, and
+declared in <code>stklos.h</code>. For example,</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>STk_getc(SCM port)</code> for printing a single character</p>
+</li>
+<li>
+<p><code>STk_get_character(SCM port)</code> for printing a single character (result may be a wide char)</p>
+</li>
+<li>
+<p><code>STk_putc(int c, SCM port)</code> for printing a single character</p>
+</li>
+<li>
+<p><code>STk_put_character(int c, SCM port)</code> for printing a single character (maybe a wide char)</p>
+</li>
+<li>
+<p><code>STk_puts(const char *s, SCM port)</code> for printing a C string</p>
+</li>
+<li>
+<p><code>STk_putstring(const char *s, SCM port)</code> for printing a Scheme string</p>
+</li>
+<li>
+<p><code>STk_print(SCM exp, SCM port, int mode)</code> for printing Scheme objects</p>
+</li>
+<li>
+<p><code>STk_print_star(SCM exp, SCM port, int mode)</code> for circular structures</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All printing procedures have a <code>port</code> argument. This should be a Scheme
+object of the type <code>port</code>, and there are also already defined ports for
+standard output and error, <code>STk_stdout</code> and <code>STk_stderr</code>. For
+reading there is also <code>STk_input</code>. These standard ports are defined in
+<code>fport.c</code>, and declared (as <code>extern</code>) in <code>stklos.h</code>. They are all initialized
+in the function <code>STk_init_fport</code> in <code>fport.c</code>.</p>
+</div>
+<div class="paragraph">
+<p>Some printing procedures have a <code>mode</code> argument. The two allowed values
+for this are <code>WRT_MODE</code> and <code>DSP_MODE</code>, which correspond to "write mode"
+(which will write the raw representation of objects) and "display mode"
+(which will do pretty-printing). The difference can be clearly seen in
+the <code>printstring</code> function in <code>print.c</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">static</span> <span class="kt">void</span> <span class="nf">printstring</span><span class="p">(</span><span class="n">SCM</span> <span class="n">s</span><span class="p">,</span> <span class="n">SCM</span> <span class="n">port</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mode</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="n">DSP_MODE</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">STk_putstring</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">port</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="cm">/* lots of code dealing with character escapes */</span>
+  <span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_creating_new_types">6.9. Creating new types</h3>
+<div class="sect3">
+<h4 id="_example_srfi_25">6.9.1. Example: SRFI-25</h4>
 <div class="paragraph">
 <p>We’ll be using SRFI-25 as an example. In that SRFI, am <code>array</code> type is
 created.</p>
@@ -1810,6 +1892,35 @@ a reader procedure:</p>
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_more_about_creating_new_types">6.9.2. More about creating new types</h4>
+<div class="paragraph">
+<p>The structure for extended type descriptors is defined in <code>stklos.h</code>,
+in section "EXTEND.C":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">struct</span> <span class="n">extended_type_descr</span> <span class="p">{</span>
+  <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">;</span>
+  <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">print</span><span class="p">)(</span><span class="n">SCM</span> <span class="n">exp</span><span class="p">,</span> <span class="n">SCM</span> <span class="n">port</span><span class="p">,</span> <span class="kt">int</span> <span class="n">mode</span><span class="p">);</span>
+  <span class="n">SCM</span>  <span class="p">(</span><span class="o">*</span><span class="n">equal</span><span class="p">)(</span><span class="n">SCM</span> <span class="n">o1</span><span class="p">,</span> <span class="n">SCM</span> <span class="n">o2</span><span class="p">);</span>
+  <span class="n">SCM</span>  <span class="p">(</span><span class="o">*</span><span class="n">eqv</span><span class="p">)(</span><span class="n">SCM</span> <span class="n">o1</span><span class="p">,</span> <span class="n">SCM</span> <span class="n">o2</span><span class="p">);</span>
+  <span class="n">SCM</span>  <span class="n">class_of</span><span class="p">;</span>
+  <span class="n">SCM</span>  <span class="n">describe_proc</span><span class="p">;</span>
+<span class="p">};</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As can be seen, there are other fields besides <code>name</code>, <code>print</code> and <code>equal</code>
+that can be customized. For example, the <code>describe</code> behavior, which was
+defined in Scheme for SRFI-25, could have been implemented in C.</p>
+</div>
+<div class="paragraph">
+<p>Immediately below the definition of this structure, there are also some
+useful macros and function declarations for dealing with extended types.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1970,7 +2081,7 @@ will be called when the object at <code>ptr</code> is collected.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-09-04 19:18:34 +0200
+Last updated 2022-11-19 09:31:37 -0300
 </div>
 </div>
 </body>

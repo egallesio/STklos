@@ -45,7 +45,8 @@ The subdirectories in the STklos source tree are:
 * `gc` – the Boehm-Demers-Weiser garbage collector, libgc (a local copy)
 * `gmp` – a slow compatible GNU MP
 * `lib` – Scheme files, including from basic things like the boot
-program up to high-level things like modules implementing SRFIs
+program up to high-level things like modules implementing libraries and
+SRFIs
 * `pcre` – `libpcre` (a local copy)
 * `pkgman` – the package manager
 * `src` – the STklos core, written in C
@@ -152,11 +153,18 @@ edit `lib/boot.stk`.
 
 === Adding modules
 
-* add your `fantastic-module.stk` to `lib/`
+* add your `fantastic-module.stk` to `lib/SUBDIR`, where `SUBDIR`
+  could be `scheme`, `srfi` or `stklos` (see nect subsection)
 * include `fantastic-module.stk` and `fantastic-module.ostk` in the
 variables `SRC_STK` and `scheme_OBJS`, in `lib/Makefile.am`
 * Tests reside in the `tests` directory. Create a new file in `tests`
 directory and include it in the list of loaded files in `do-test.stk`
+
+=== Module placement in the tree
+
+* STklos modules go into `lib/stklos`
+* Scheme (R7RS small or large) libraries go into `lib/scheme`
+* SRFIs go into `lib/srfi`
 
 === Adding SRFIs
 
@@ -204,7 +212,7 @@ command produces a C file instead of a byte-code file.
 You don’t have to pay attention to any particular point in the writing
 of this file.
 
-=== Content of the C file
+==== Content of the C file
 
 The C file must follow the conventions of dynamically loadable code as
 shown in the example in the `/etc` directory.
@@ -581,7 +589,48 @@ EXTERN_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
 
 See some examples in `etc/`
 
+=== Input and output from C
+
+The input and output functions are defined in `sio.c`, and
+declared in `stklos.h`. For example,
+
+* `STk_getc(SCM port)` for printing a single character
+* `STk_get_character(SCM port)` for printing a single character (result may be a wide char)
+* `STk_putc(int c, SCM port)` for printing a single character
+* `STk_put_character(int c, SCM port)` for printing a single character (maybe a wide char)
+* `STk_puts(const char *s, SCM port)` for printing a C string
+* `STk_putstring(const char *s, SCM port)` for printing a Scheme string
+* `STk_print(SCM exp, SCM port, int mode)` for printing Scheme objects
+* `STk_print_star(SCM exp, SCM port, int mode)` for circular structures
+
+All printing procedures have a `port` argument. This should be a Scheme
+object of the type `port`, and there are also already defined ports for
+standard output and error, `STk_stdout` and `STk_stderr`. For
+reading there is also `STk_input`. These standard ports are defined in
+`fport.c`, and declared (as `extern`) in `stklos.h`. They are all initialized
+in the function `STk_init_fport` in `fport.c`.
+
+Some printing procedures have a `mode` argument. The two allowed values
+for this are `WRT_MODE` and `DSP_MODE`, which correspond to "write mode"
+(which will write the raw representation of objects) and "display mode"
+(which will do pretty-printing). The difference can be clearly seen in
+the `printstring` function in `print.c`:
+
+[source,c]
+----
+static void printstring(SCM s, SCM port, int mode)
+{
+  if (mode == DSP_MODE) {
+    STk_putstring(s, port);
+  } else {
+    /* lots of code dealing with character escapes */
+  }
+----
+
+
 === Creating new types
+
+==== Example: SRFI-25
 
 We’ll be using SRFI-25 as an example. In that SRFI, am `array` type is
 created.
@@ -721,6 +770,31 @@ a reader procedure:
   (lambda args
     (apply array (apply shape (car args)) (cdr args))))
 ----
+
+==== More about creating new types
+
+The structure for extended type descriptors is defined in `stklos.h`,
+in section "EXTEND.C":
+
+[source,c]
+----
+struct extended_type_descr {
+  char *name;
+  void (*print)(SCM exp, SCM port, int mode);
+  SCM  (*equal)(SCM o1, SCM o2);
+  SCM  (*eqv)(SCM o1, SCM o2);
+  SCM  class_of;
+  SCM  describe_proc;
+};
+----
+
+As can be seen, there are other fields besides `name`, `print` and `equal`
+that can be customized. For example, the `describe` behavior, which was
+defined in Scheme for SRFI-25, could have been implemented in C.
+
+Immediately below the definition of this structure, there are also some
+useful macros and function declarations for dealing with extended types.
+
 
 == The virtual machine
 
