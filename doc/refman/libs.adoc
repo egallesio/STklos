@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date:  3-Feb-2022 11:16 (eg)
-// Last file update: 18-Nov-2022 16:44 (eg)
+// Last file update: 20-Nov-2022 15:50 (eg)
 
 ==  STklos Libraries
 
@@ -59,6 +59,7 @@ For now, supported libraries of the *Red edition* are
 
 For now, supported libraries of the *Tangerine edition* are
 
+- bitwise _(srfi 151)_
 - division _(srfi 141)_
 - flonum _(srfi 144)_
 - generator _(srfi 158)_
