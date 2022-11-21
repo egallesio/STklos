@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date:  3-Feb-2022 11:16 (eg)
-// Last file update: 20-Nov-2022 15:50 (eg)
+// Last file update: 21-Nov-2022 16:18 (eg)
 
 ==  STklos Libraries
 
@@ -44,7 +44,7 @@ For now, supported libraries of the *Red edition* are
 
 - box _(srfi 111)_
 - charset _(srfi 14)_
-- comparor _(srfi 128)_
+- comparator _(srfi 128)_
 - hash-table _(srfi 125)_
 - ideque _(srfi 134)_
 - ilist _(srfi 116)_
