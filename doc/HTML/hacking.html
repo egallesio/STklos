@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <meta name="author" content="Jeronimo Pellegrini">
 <title>Hacking STklos</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -1661,10 +1661,10 @@ declared in <code>stklos.h</code>. For example,</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>STk_getc(SCM port)</code> for printing a single character</p>
+<p><code>STk_getc(SCM port)</code> for reading a single character</p>
 </li>
 <li>
-<p><code>STk_get_character(SCM port)</code> for printing a single character (result may be a wide char)</p>
+<p><code>STk_get_character(SCM port)</code> for reading a single character (result may be a wide char)</p>
 </li>
 <li>
 <p><code>STk_putc(int c, SCM port)</code> for printing a single character</p>
@@ -1690,7 +1690,7 @@ declared in <code>stklos.h</code>. For example,</p>
 <p>All printing procedures have a <code>port</code> argument. This should be a Scheme
 object of the type <code>port</code>, and there are also already defined ports for
 standard output and error, <code>STk_stdout</code> and <code>STk_stderr</code>. For
-reading there is also <code>STk_input</code>. These standard ports are defined in
+reading there is also <code>STk_stdin</code>. These standard ports are defined in
 <code>fport.c</code>, and declared (as <code>extern</code>) in <code>stklos.h</code>. They are all initialized
 in the function <code>STk_init_fport</code> in <code>fport.c</code>.</p>
 </div>
@@ -2081,7 +2081,7 @@ will be called when the object at <code>ptr</code> is collected.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-11-19 09:31:37 -0300
+Last updated 2022-11-21 15:26:04 +0100
 </div>
 </div>
 </body>

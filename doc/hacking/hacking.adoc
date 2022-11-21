@@ -4,7 +4,7 @@
 //
 //           Author: Jeronimo Pellegrini <j_p@aleph0.info>
 //    Creation date:  4-Feb-2022 09:48
-// Last file update:  4-Sep-2022 19:18 (eg)
+// Last file update: 21-Nov-2022 15:20 (eg)
 
 = Hacking STklos
 :authors: Jeronimo Pellegrini
@@ -594,8 +594,8 @@ See some examples in `etc/`
 The input and output functions are defined in `sio.c`, and
 declared in `stklos.h`. For example,
 
-* `STk_getc(SCM port)` for printing a single character
-* `STk_get_character(SCM port)` for printing a single character (result may be a wide char)
+* `STk_getc(SCM port)` for reading a single character
+* `STk_get_character(SCM port)` for reading a single character (result may be a wide char)
 * `STk_putc(int c, SCM port)` for printing a single character
 * `STk_put_character(int c, SCM port)` for printing a single character (maybe a wide char)
 * `STk_puts(const char *s, SCM port)` for printing a C string
@@ -606,7 +606,7 @@ declared in `stklos.h`. For example,
 All printing procedures have a `port` argument. This should be a Scheme
 object of the type `port`, and there are also already defined ports for
 standard output and error, `STk_stdout` and `STk_stderr`. For
-reading there is also `STk_input`. These standard ports are defined in
+reading there is also `STk_stdin`. These standard ports are defined in
 `fport.c`, and declared (as `extern`) in `stklos.h`. They are all initialized
 in the function `STk_init_fport` in `fport.c`.
 
