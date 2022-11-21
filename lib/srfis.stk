@@ -200,7 +200,7 @@
     ;; 159  Combinator Formatting
     (160 "Homogeneous numeric vector libraries" () "srfi-160")
     (161 "Unifiable Boxes" () "srfi-161")
-    ;; 162  Comparators sublibrary
+    (162 "Comparators sublibrary" () "srfi-128") ;; this is included in SRFI-128 implementation
     ;; 163  Enhanced array literals
     ;; 164  Enhanced multi-dimensional Arrays
     ;; 165  The Environment Monad
