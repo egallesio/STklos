@@ -48,6 +48,7 @@
 ;each case.
 
 (define-module srfi/60
+  (import SCHEME)
   (export logand logior logxor lognot bitwise-if logtest logcount
           integer-length log2-binary-factors logbit? copy-bit
           bit-field copy-bit-field arithmetic-shift
@@ -98,14 +99,7 @@
 ;;      integer-length ...
 ;; ----------------------------------------------------------------------
 (define integer-length
-  (letrec ((intlen (lambda (n tot)
-                     (case n
-                       ((0 -1) (+ 0 tot))
-                       ((1 -2) (+ 1 tot))
-                       ((2 3 -3 -4) (+ 2 tot))
-                       ((4 5 6 7 -5 -6 -7 -8) (+ 3 tot))
-                       (else (intlen (bit-shift n -4) (+ 4 tot)))))))
-    (lambda (n) (intlen n 0))))
+  (symbol-value 'integer-length (find-module 'SCHEME)))
 
 ;; ----------------------------------------------------------------------
 ;;      log2-binary-factors ...
