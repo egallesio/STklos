@@ -1,9 +1,36 @@
+/*
+ *  flonum.c         -- Implementation of (scheme flonum) aka SRFI-144
+ *
+ *  Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
+ *
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ *  USA.
+ *
+ *            Author: Jeronimo Pellegrini [j_p@aleph0.info]
+ *     Creation date: 03-Dec-2021 00:00 (jpellegrini)
+ *  Last file update: 18-Nov-2022 17:17 (eg)
+ *
+ */
+
 #include <stklos.h>
 #include <gmp.h>
 #include <math.h>
 #include <float.h>
 
-#include "144-incl.c"
+#include "flonum-incl.c"
 
 /* FIXME: will fail to compile if NAN is not supported.
    we should generate a NaN by some other means in that case. */
@@ -147,7 +174,7 @@ void STk_srfi_144_define_constants(SCM module) {
    DBL_MIN / 4.0:
    [ 0 | 00000000000 | 0100000000000000000000000000000000000000000000000000 ]
    Signal = 0, Exponent = 0, Mantissa = 2^51.
-   
+
    DBL_TRUE_MIN:
    [ 0 | 00000000000 | 0000000000000000000000000000000000000000000000000001 ]
    Signal = 0, Exponent = 0, Mantissa = 1.
@@ -950,9 +977,9 @@ DEFINE_PRIMITIVE("flerfc", srfi_144_flerfc, subr1, (SCM x))
  *  MODULE SRFI-144  *
 \*********************/
 
-MODULE_ENTRY_START("srfi/144")
+MODULE_ENTRY_START("scheme/flonum")
 {
-  SCM module =  STk_create_module(STk_intern("srfi/144"));
+  SCM module =  STk_create_module(STk_intern("scheme/flonum"));
 
   /* FIXME: this should exist outside of this SRFI... */
   SCM_NaN = double2real(NAN);

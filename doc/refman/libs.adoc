@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date:  3-Feb-2022 11:16 (eg)
-// Last file update:  7-Oct-2022 18:59 (eg)
+// Last file update: 21-Nov-2022 16:18 (eg)
 
 ==  STklos Libraries
 
@@ -44,14 +44,25 @@ For now, supported libraries of the *Red edition* are
 
 - box _(srfi 111)_
 - charset _(srfi 14)_
+- comparator _(srfi 128)_
 - hash-table _(srfi 125)_
+- ideque _(srfi 134)_
 - ilist _(srfi 116)_
 - list _(srfi 1)_
 - list-queue _(srfi 117)_
 - lseq _(srfi 127)_
 - set _(srfi 113)_
+- sort _(srfi 132)_
 - stream _(srfi 41)_
+- text _(srfi 135)_
+- vector _(srfi 133)_
 
+For now, supported libraries of the *Tangerine edition* are
+
+- bitwise _(srfi 151)_
+- division _(srfi 141)_
+- flonum _(srfi 144)_
+- generator _(srfi 158)_
 
 === The (srfi ...) Libraries
 

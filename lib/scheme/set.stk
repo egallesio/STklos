@@ -23,7 +23,7 @@
 (define-module scheme/set
   (import (srfi 9))
   (import (srfi 69))
-  (import (srfi 128))
+  (import (scheme comparator))
   
   ;(import (only chicken
   ;  include define-record-type define-record-printer

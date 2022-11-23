@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 17-Jun-2022 09:03
-;;;; Last file update: 18-Aug-2022 19:41 (eg)
+;;;; Last file update: 19-Oct-2022 18:36 (eg)
 ;;;;
 
 
@@ -31,7 +31,7 @@
 ;; The srfi requires us to offer uvectors for *all* types,
 ;; so we load SRFI 4.
 (import (srfi 4)
-        (srfi 128))
+        (scheme comparator))
 
 (export s8vector? make-s8vector s8vector s8vector-length s8vector-ref
         s8vector-set! s8vector->list list->s8vector

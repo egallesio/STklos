@@ -32,10 +32,9 @@ PCRE: Perl-Compatible Regular Expression library
 
 libffi - a portable foreign function interface library
 ======================================================
-        - Version 3.4.2
+        - Version 3.4.4
         - License: Free (BSD like)
-        - Home Page: http://sourceware.org/libffi/
-
+        - Home Page: https://sourceware.org/libffi/
 
 SILex: The Dany Dubé Scheme Implementation of Lex
 =================================================

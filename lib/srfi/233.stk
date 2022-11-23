@@ -1,0 +1,212 @@
+;;;;
+;;;; srfi-223.stk         -- SRFI-223: INI files
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 13-Oct-2022 18:11
+;;;; Last file update: 19-Oct-2022 15:46 (eg)
+;;;;
+
+(define-module srfi/233
+
+  (import (scheme base)
+          (scheme write))
+  (export make-ini-file-generator
+          make-ini-file-accumulator)
+
+(define make-ini-file-accumulator
+  (case-lambda
+    ((port)
+     (make-accumulator port #\= #\;))
+    ((port key-value-sep)
+     (make-accumulator port key-value-sep #\;))
+    ((port key-value-sep comment-delim)
+     (make-accumulator port key-value-sep comment-delim))))
+
+(define (make-accumulator port key-value-sep comment-delim)
+  (define current-section '||)
+
+  (define (write-comment str)
+    (display comment-delim port)
+    (display " " port)
+    (display str port)
+    (newline port))
+
+  (define (write-data section key value)
+    (unless (equal? section current-section)
+      (set! current-section section)
+      (display "[" port)
+      (display section port)
+      (display "]" port)
+      (newline port))
+    (display key port)
+    (display key-value-sep port)
+    (display value port)
+    (newline port))
+
+  (define (data-triple? arg)
+    (and (list? arg)
+         (= 3 (length arg))
+         (symbol? (list-ref arg 0))
+         (symbol? (list-ref arg 1))
+         (string? (list-ref arg 2))))
+
+  (lambda (arg)
+    (cond
+     ((eof-object? arg) (eof-object))
+     ((string? arg) (write-comment arg))
+     ((data-triple? arg) (apply write-data arg))
+     (else (error "Unexpected input")))))
+
+(define make-ini-file-generator
+  (case-lambda
+    ((port)
+     (make-generator port #\= #\;))
+    ((port key-value-sep)
+     (make-generator port key-value-sep #\;))
+    ((port key-value-sep comment-delim)
+     (make-generator port key-value-sep comment-delim))))
+
+(define (make-generator port key-value-sep comment-delim)
+
+  ;; remove whitespace from the start of the line
+  (define (trim-head line)
+    (let loop ((chars (string->list line)))
+      (cond
+       ((null? chars) "")
+       ((equal? #\space (car chars)) (loop (cdr chars)))
+       (else (list->string chars)))))
+
+  ;; remove whitespace from the end of the line
+  (define (trim-tail line)
+    (let loop ((chars (string->list line))
+               (chars/rev '())
+               (spaces '()))
+      (cond
+       ((null? chars)
+        (list->string (reverse chars/rev)))
+       ((equal? #\space (car chars))
+        (loop (cdr chars)
+              chars/rev
+              (cons #\space spaces)))
+       (else (loop (cdr chars)
+                   (append (list (car chars)) spaces chars/rev)
+                   '())))))
+
+  (define (trim line)
+    (trim-tail (trim-head line)))
+
+  ;; return #t if the line is a comment,
+  ;; #f otherwise
+  (define (comment line)
+    (let loop ((chars (string->list line)))
+      (cond
+       ((null? chars) #f)
+       ((equal? (car chars) #\space) (loop (cdr chars)))
+       ((equal? (car chars) comment-delim) #t)
+       (else #f))))
+
+  ;; return section name as a symbol the line is a section declaration,
+  ;; #f otheriwse
+  (define (section line)
+    (define chars (string->list line))
+    (define first (car chars))
+    (if (equal? first #\[)
+        (let loop ((chars (cdr chars))
+                   (chars/rev '()))
+          (cond
+           ((null? chars) #f)
+           ((and (null? (cdr chars))
+                 (equal? (car chars) #\]))
+            (string->symbol (list->string (reverse chars/rev))))
+           (else (loop (cdr chars)
+                       (cons (car chars) chars/rev)))))
+        #f))
+
+  ;; return pair of key and value
+  ;;
+  ;; if line has a separator char,
+  ;; key is a (whitespace trimmed) symbol up to first separator char, value is a (whitespace trimmed) string
+  ;;
+  ;; if line doesn't have a separator char
+  ;; key is a #f, value is the entire line
+  ;;
+  ;; if separator char is encounted multiple times, only first one is used to distinguish key from value
+  (define (key-value line)
+    (let loop ((chars (string->list line))
+               (key-parsed #f)
+               (first-reversed '())
+               (second-reversed '()))
+      (cond
+       ;; line parsed, return
+       ((null? chars)
+        (if key-parsed
+          (cons (string->symbol (trim-tail (list->string (reverse first-reversed))))
+                (trim-head (list->string (reverse second-reversed))))
+          (cons #f (list->string (reverse first-reversed)))))
+       ;; encountered separator for first time
+       ((and (equal? (car chars) key-value-sep)
+             (not key-parsed))
+        (loop (cdr chars)
+              #t
+              first-reversed
+              second-reversed))
+       ;; append char to either first or second, depending on if separator was seen
+       (else (loop (cdr chars)
+                   key-parsed
+                   (if key-parsed
+                       first-reversed
+                       (cons (car chars) first-reversed))
+                   (if key-parsed
+                       (cons (car chars) second-reversed)
+                       second-reversed))))))
+
+  (define current-section '||)
+  (define eof #f)
+
+  (lambda ()
+    (call/cc
+     (lambda (k)
+       (when eof
+         (k (eof-object)))
+       (let loop ()
+         (define line (read-line port))
+         (when (eof-object? line)
+           (begin
+             (set! eof #t)
+             (k (eof-object))))
+         (let ((trimmed-line (trim line)))
+           (cond
+            ((= 0 (string-length trimmed-line))
+             (loop))
+            ((comment trimmed-line)
+             (loop))
+            ((section trimmed-line) => (lambda (section)
+                                         (set! current-section section)
+                                         (loop)))
+            ((key-value trimmed-line) => (lambda (key-value-pair)
+                                           (list current-section
+                                                 (car key-value-pair)
+                                                 (cdr key-value-pair)))))))))))
+
+)
+
+(provide "srfi/233")

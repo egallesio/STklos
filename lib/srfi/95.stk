@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  3-Dec-2021 12:01
-;;;; Last file update:  3-Dec-2021 12:35 (jpellegrini)
+;;;; Last file update: 11-Nov-2022 15:41 (eg)
 ;;;;
 
 ;; This is SRFI-95 written on top of SRFI-132.
@@ -30,7 +30,7 @@
 ;; to all procedures. But it's here, nevertheless!
 
 (define-module srfi/95
-  (import (srfi 132)) ;; the heavy work is there!
+  (import (scheme sort)) ;; the heavy work is there!
   (export sorted?
           merge
           merge!
@@ -48,7 +48,7 @@
                         list-merge
                         list-sorted?
                         vector-sorted?)
-  
+
 (define (string-sorted? less? str)
   (vector-sorted? less? (string->vector str)))
 

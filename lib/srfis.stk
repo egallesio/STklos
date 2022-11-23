@@ -200,7 +200,7 @@
     ;; 159  Combinator Formatting
     (160 "Homogeneous numeric vector libraries" () "srfi-160")
     (161 "Unifiable Boxes" () "srfi-161")
-    ;; 162  Comparators sublibrary
+    (162 "Comparators sublibrary" () "srfi-128") ;; this is included in SRFI-128 implementation
     ;; 163  Enhanced array literals
     ;; 164  Enhanced multi-dimensional Arrays
     ;; 165  The Environment Monad
@@ -270,6 +270,9 @@
     ;; 228 A further comparator library (draft)
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
+    ;; 231 Intervals and Generalized Arrays (Updated^2) (draft)
+    ;; 232 Flexible Curried Procedures
+    (233 "INI files" (ini-files) "srfi-233")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file

@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 02-May-2022 12:41
-;;;; Last file update:  2-Oct-2022 17:50 (eg)
+;;;; Last file update: 19-Oct-2022 17:36 (eg)
 
 
 ;;; STKLOS IMPLEMENTATION:
@@ -226,10 +226,10 @@
         )
 
 ;; We borrow some comparators from SRFI 128.
-(import (rename (srfi 128)
+(import (rename (scheme comparator)
                 (make-pair-comparator make-ipair-comparator)
                 (make-list-comparator make-ilist-comparator))
-        (only (srfi 128)
+        (only (scheme comparator)
               comparator-type-test-predicate
               comparator-equality-predicate
               comparator-ordering-predicate

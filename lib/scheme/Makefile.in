@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  7-Oct-2022 18:42 (eg)
+# Last file update: 18-Nov-2022 17:39 (eg)
 
 #======================================================================
 
@@ -395,7 +395,13 @@ LARGE_STK = list.stk       \
              list-queue.stk \
              hash-table.stk \
              lseq.stk       \
-             rlist.stk
+             rlist.stk      \
+             comparator.stk \
+             generator.stk  \
+             ideque.stk     \
+             text.stk       \
+             division.stk   \
+             bitwise.stk
 
 LARGE_OBJS = list.ostk       \
              charset.ostk    \
@@ -407,9 +413,16 @@ LARGE_OBJS = list.ostk       \
              lseq.ostk       \
              rlist.ostk
 
-LARGE_C = ilist.c     rlist.c
-LARGE_C_STK = ilist.stk   rlist.stk
-LARGE_SHOBJ = ilist.$(SO) rlist.$(SO)
+             comparator.ostk \
+             generator.ostk  \
+             ideque.ostk     \
+             text.ostk       \
+             division.ostk   \
+             bitwise.ostk
+
+LARGE_C =     ilist.c     flonum.c     sort.c     vector.c     rlist.c
+LARGE_C_STK = ilist.stk   flonum.stk   sort.stk   vector.stk   rlist.stk
+LARGE_SHOBJ = ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) rlist.$(SO)
 
 #----------------------------------------------------------------------
 SRC_STK = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
@@ -422,7 +435,7 @@ schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
 schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
 scheme_sources = $(SRC_STK)
 scheme_DATA = $(scheme_OBJS)
-schemelib_DATA = $(schemelib_SHOBJ)
+schemelib_DATA = $(LARGE_SHOBJ)
 
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
@@ -732,16 +745,29 @@ stream.ostk:     list.ostk ../streams/derived.ostk
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
 
-set.ostk: ../srfi/9.ostk ../srfi/69.ostk ../srfi/128.ostk
+set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 ../srfi/9.ostk:
 	(cd ../srfi; $(MAKE) 9.ostk)
 ../srfi/69.ostk:
 	(cd ../srfi; $(MAKE) 69.ostk)
 ../srfi/128.ostk:
 	(cd ../srfi; $(MAKE) 128.ostk)
+../srfi/129.ostk:
+	(cd ../srfi; $(MAKE) 129.ostk)
+../srfi/60.ostk:
+	(cd ../srfi; $(MAKE) 60.ostk)
 
 ilist.$(SO): ilist-incl.c
-ilist-incl.c: ../srfi/128.ostk
+ilist-incl.c: comparator.ostk
+
+flonum.$(SO): flonum-incl.c
+flonum-incl.c: flonum.stk
+
+sort.$(SO): sort-incl.c
+sort-incl.c: sort.stk
+
+vector.$(SO): vector-incl.c
+vector-incl.c: vector.stk
 
 rlist.$(SO): rlist-incl.c
 rlist-incl.c: ../srfi/101.ostk
@@ -749,12 +775,12 @@ rlist-incl.c: ../srfi/101.ostk
 #box.ostk:        ../srfi/111.ostk
 #set.ostk:        ../srfi/113.ostk
 #ilist.ostk:      ../srfi/116.$(SO)
-list-queue.ostk:  ../srfi/9.ostk
-hash-table.ostk: ../srfi/128.ostk
-
-# This is weird to add these dependencies here, but they seem needed for
-# massive parallel $(MAKE)
-#41.ostk: ../streams/derived.ostk
+list-queue.ostk: ../srfi/9.ostk
+hash-table.ostk: comparator.ostk
+comparator.ostk: ../srfi/9.ostk
+ideque.ostk: ../srfi/9.ostk generator.ostk list.ostk
+text.ostk: ../srfi/9.ostk ../srfi/129.ostk
+bitwise.ostk: ../srfi/60.ostk
 
 # ======================================================================
 install-sources:
@@ -773,6 +799,10 @@ uninstall-hook:
 doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+
+# Local Variables:
+# tab-width: 8
+# End:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
