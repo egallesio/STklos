@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  8-Jan-2022 14:45 (eg)
+ * Last file update: 23-Nov-2022 21:54 (eg)
  */
 
 
@@ -1432,13 +1432,13 @@ doc>
  */
 DEFINE_PRIMITIVE("integer-length", integer_length, subr1, (SCM z))
 {
-  switch (TYPEOF(z)) {
-    case tc_integer:
-	long n = INT_VAL(z);
-	if (n == -1 || n == 0) return MAKE_INT(0);
-	if (n>0)  return MAKE_INT( (long) log2( (float) n) + 1 ); /* n >  0 */
-	return MAKE_INT( (long) log2( (float) labs(n+1) ) + 1 );  /* n < -1 */
-
+   switch (TYPEOF(z)) {
+    case tc_integer:{ 
+      long n = INT_VAL(z);
+      if (n == -1 || n == 0) return MAKE_INT(0);
+      if (n>0)  return MAKE_INT( (long) log2( (float) n) + 1 ); /* n >  0 */
+      return MAKE_INT( (long) log2( (float) labs(n+1) ) + 1 );  /* n < -1 */
+    }
     case tc_bignum:  return MAKE_INT(mpz_sizeinbase(BIGNUM_VAL(z),2));
 
     default: STk_error ("bad integer ~S", z);
