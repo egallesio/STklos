@@ -5065,6 +5065,37 @@ satisfy:</p>
                     <span class="nv">=&gt;</span> <span class="mf">-1.234</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(integer-length n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Integer-length</code> returns the necessary number of bits to represent <code>n</code>
+in 2&#8217;s complement, assuming a leading 1 bit when <code>n</code> is negative. When
+<code>n</code> is zero, the procedure returns zero.
+This procedure works for any type of integer (fixnums and bignums).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-3</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-2</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-1</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">0</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">1</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">2</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">3</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">5000</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">5001</span></code></pre>
+</div>
+</div>
 <div class="sect3">
 <h4 id="_fixnums">4.2.1. Fixnums</h4>
 <div class="paragraph">
@@ -29042,7 +29073,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-11-21 16:19:28 +0100
+Last updated 2022-11-23 21:47:27 +0100
 </div>
 </div>
 </body>
