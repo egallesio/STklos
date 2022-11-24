@@ -270,9 +270,19 @@
     ;; 228 A further comparator library (draft)
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
-    ;; 231 Intervals and Generalized Arrays (Updated^2) (draft)
+    ;; 231 Intervals and Generalized Arrays (Updated^2)
     ;; 232 Flexible Curried Procedures
     (233 "INI files" (ini-files) "srfi-233")
+    ;; 234 Topological sorting (draft)
+    ;; 235 Compinators (draft)
+    (236 "Evaluating expressions in an unspecified order" () "srfi-236")
+    ;; 237 R6RS Records (refined) (draft)
+    ;; 238 Codesets (draft)
+    ;; 239 Destructuring lists (draft)
+    ;; 240 Reconciled records (draft)
+    ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data (drafr)
+    ;; 242 The CFG Langauge (draft)
+    ;; 243 Unreadable objects (draft)
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
