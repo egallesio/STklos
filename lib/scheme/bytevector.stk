@@ -20,9 +20,12 @@
 ;;;; USA.
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Jul-2022 21:02
-;;;; Last file update: 24-Nov-2022 22:50 (eg)
+;;;; Last file update: 24-Nov-2022 22:55 (eg)
 
 (select-module scheme/bytevector)
+
+(%compile-time-define bytevector-sint-ref bytevector-sint-set!
+                      bytevector-uint-ref bytevector-uint-set!)
 
 
 ;; Some of the procedures are mandatory in R7RS, so they are
@@ -164,7 +167,7 @@ doc>
 
 (define (uint-list->bytevector lst end size)
   (when (not (list? lst))
-    (error "bad bytevector ~S" b))
+    (error "bad list ~S" lst))
   (when (not (memq end '(little big)))
     (error "bad endianness ~S" end))
   (when (not (and (integer? size)
@@ -185,7 +188,7 @@ doc>
 
 (define (sint-list->bytevector lst end size)
   (when (not (list? lst))
-    (error "bad bytevector ~S" b))
+    (error "bad list ~S" lst))
   (when (not (memq end '(little big)))
     (error "bad endianness ~S" end))
   (when (not (and (integer? size)
