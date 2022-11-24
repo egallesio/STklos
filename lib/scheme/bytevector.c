@@ -43,8 +43,10 @@ struct bignum_obj {
 #define BIGNUM_VAL(p)   (((struct bignum_obj *) (p))->val)
 
 #define LONG_FITS_INTEGER(_l) \
-  (((uint64_t)INT_MIN_VAL) <= (_l) && \
-   (_l) <= ((uint64_t) INT_MAX_VAL))
+  (((int64_t)INT_MIN_VAL) <= (_l) && \
+   (_l) <= ((int64_t) INT_MAX_VAL))
+
+#define ULONG_FITS_INTEGER(_l)  ((_l) <= ((uint64_t) INT_MAX_VAL))
 
 /* Reals... */
 static inline SCM double2real(double x)
@@ -853,7 +855,7 @@ DEFINE_PRIMITIVE("bytevector-u64-ref", bytevector_u64_ref, subr3,
       z = be64toh (z);
   else STk_error("bad endianness symbol ~S", endianness);
 
-  return (LONG_FITS_INTEGER(z))
+  return (ULONG_FITS_INTEGER(z))
       ? MAKE_INT(z)
       : STk_ulong2integer(z);
 }
@@ -869,14 +871,15 @@ DEFINE_PRIMITIVE("bytevector-s64-ref", bytevector_s64_ref, subr3,
 
   uint64_t z = * ((uint64_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
   if (STk_eq(endianness,STk_intern("little"))==STk_true)
-      z = (int64_t) le64toh (z);
+      z =  le64toh (z);
   else if (STk_eq(endianness,STk_intern("big"))==STk_true)
-      z = (int64_t) be64toh (z);
+      z =  be64toh (z);
   else STk_error("bad endianness symbol ~S", endianness);
 
-  return (LONG_FITS_INTEGER(z))
-    ? MAKE_INT((long) z)
-    : STk_long2integer((long) z);
+  int64_t *w = ((int64_t *) &z);
+  return (LONG_FITS_INTEGER(*w))
+    ? MAKE_INT((long) *w)
+    : STk_long2integer((long) *w);
 }
 
 
@@ -930,7 +933,7 @@ DEFINE_PRIMITIVE("bytevector-u64-native-ref", bytevector_u64_native_ref, subr2,
 
   uint64_t z = * ((uint64_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
 
-  return (LONG_FITS_INTEGER(z))
+  return (ULONG_FITS_INTEGER(z))
       ? MAKE_INT(z)
       : STk_ulong2integer(z);
 }
@@ -942,8 +945,7 @@ DEFINE_PRIMITIVE("bytevector-s64-native-ref", bytevector_s64_native_ref, subr2,
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
-  uint64_t z = * ((uint64_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
-  z = (int64_t) z;
+  int64_t z = * ((int64_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
 
   return (LONG_FITS_INTEGER(z))
       ? MAKE_INT((long) z)
