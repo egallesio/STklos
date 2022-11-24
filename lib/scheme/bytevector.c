@@ -42,7 +42,9 @@ struct bignum_obj {
 
 #define BIGNUM_VAL(p)   (((struct bignum_obj *) (p))->val)
 
-#define LONG_FITS_INTEGER(_l)    (INT_MIN_VAL <= (_l) && (_l) <= INT_MAX_VAL)
+#define LONG_FITS_INTEGER(_l) \
+  (((uint64_t)INT_MIN_VAL) <= (_l) && \
+   (_l) <= ((uint64_t) INT_MAX_VAL))
 
 /* Reals... */
 static inline SCM double2real(double x)
@@ -154,12 +156,12 @@ DEFINE_PRIMITIVE("bytevector-fill!", bytevector_fill, subr2,
 {
   check_bytevector(b);
   check_integer(x);
-  
+
   long vali = INT_VAL(x);
-  
+
   if (vali >= 256 || vali < -128)
       STk_error("value ~S is out of bounds or incorrect for a bytevector", x);
-  
+
   if (vali < 0)
       for (long i=0; i<UVECTOR_SIZE(b); i++)
           ((char *) UVECTOR_DATA(b))[i] = (char) vali;
@@ -195,7 +197,7 @@ doc>
 DEFINE_PRIMITIVE("bytevector-s8-ref", bytevector_s8_ref, subr2,
                  (SCM b, SCM i))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
 
   return MAKE_INT(((char *) UVECTOR_DATA(b))[INT_VAL(i)]);
@@ -255,10 +257,10 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
     uint8_t *tmp; /* points into the *result long integer!*  */
     if (sig)  tmp = (uint8_t*) &res;
     else      tmp = (uint8_t*) &ures;
-    
+
     if (end == end_little) ptr = &(((char *) UVECTOR_DATA(b))[idx]);
     else                   ptr = &(((char *) UVECTOR_DATA(b))[idx]) + size - 1;
-    for (int i=0; i < size; i++) {
+    for (size_t i=0; i < size; i++) {
       *tmp = *ptr;
       tmp++;
       if (end == end_little) ptr++;
@@ -289,10 +291,10 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
     return sig
 	? STk_long2integer(res)
 	: STk_ulong2integer(ures);
-    
+
   } else {
       /*** BIGNUMS ***/
-      
+
       if (sig &&
 	  ( (  (end == end_big) &&
 	       (((char *) UVECTOR_DATA(b))[idx]) < 0)
@@ -314,7 +316,7 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
 	  memcpy(tmp,&(((char *) UVECTOR_DATA(b))[idx]),size);
 
 	  /* Negate the bits */
-	  for (int i=0; i<size; i++)
+	  for (size_t i=0; i<size; i++)
 	      tmp[i] = ~tmp[i];
 
 	  /* import into a GMP number: */
@@ -338,7 +340,7 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
 	  NEWCELL(z, bignum);
 	  mpz_set(BIGNUM_VAL(z), num);
 	  return z;
-	
+
       } else {
 	  /***
 	      Positive case: the GMP already has a function for that!
@@ -354,7 +356,7 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
 		      e,                                   /* endianness within words */
 		      0,                                   /* nails (skipped bits)    */
 		      &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
-	
+
 	  NEWCELL(z, bignum);
 	  mpz_set(BIGNUM_VAL(z), num);
 	  return z;
@@ -388,7 +390,7 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
  *
  * For bytevector-sint-set!, n must be an exact integer
  * object in the interval |{−256^size /2, ... , 256^size /2 − 1}|.
- * |Bytevector-sint-set!| stores the two’s-complement 
+ * |Bytevector-sint-set!| stores the two’s-complement
  * representation of size |size| and specified by |endianness|
  * into |bytevector| at indices |k , ... , k + size − 1|.
  *
@@ -430,8 +432,8 @@ DEFINE_PRIMITIVE("bytevector-uint-ref", bytevector_uint_ref, subr4,
   check_integer(i);
   check_integer(s);
 
-  unsigned long idx = INT_VAL(i);
-  unsigned long size = INT_VAL(s);
+  long idx = INT_VAL(i);
+  long size = INT_VAL(s);
 
   if (idx < 0)
       STk_error("negative index %d", idx);
@@ -440,9 +442,9 @@ DEFINE_PRIMITIVE("bytevector-uint-ref", bytevector_uint_ref, subr4,
   if (idx + size > UVECTOR_SIZE(b))
       STk_error("index %d plus size %d out of bounds for bytevector of length %d",
                 idx, size, UVECTOR_SIZE(b));
-  
+
   endianness_t end = get_endianness(endianness);
-   
+
   return bytevector_uint_ref_aux(b, end, idx, size, 0);
 }
 
@@ -454,8 +456,8 @@ DEFINE_PRIMITIVE("bytevector-sint-ref", bytevector_sint_ref, subr4,
   check_integer(i);
   check_integer(s);
 
-  unsigned long idx = INT_VAL(i);
-  unsigned long size = INT_VAL(s);
+  long idx = INT_VAL(i);
+  long size = INT_VAL(s);
 
   if (idx < 0)
       STk_error("negative index %d", idx);
@@ -464,9 +466,9 @@ DEFINE_PRIMITIVE("bytevector-sint-ref", bytevector_sint_ref, subr4,
   if (idx + size > UVECTOR_SIZE(b))
       STk_error("index %d plus size %d out of bounds for bytevector of length %d",
                 idx, size, UVECTOR_SIZE(b));
-  
+
   endianness_t end = get_endianness(endianness);
-   
+
   return bytevector_uint_ref_aux(b, end, idx, size, 1);
 }
 
@@ -480,8 +482,8 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
   check_integer(s);
   if (!(INTP(n)||BIGNUMP(n))) STk_error("bad integer ~S", n);
 
-  unsigned long idx  = INT_VAL(i);
-  unsigned long size = INT_VAL(s);
+  long idx  = INT_VAL(i);
+  long size = INT_VAL(s);
 
   endianness_t end = get_endianness(endianness);
 
@@ -494,7 +496,7 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
                 idx, size, UVECTOR_SIZE(b));
 
   if (INTP(n)) {
-      int j;
+      long j;
       long val  = INT_VAL(n);
 
       /* This is the uint version, so no negatives: */
@@ -504,7 +506,7 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
       /* The value must fit the 'size' bytes, which means it should
          be less than (256)^size.  The bounds are explicit in the
          spec. */
-      if (val >= ((unsigned long) 1 << (size * 8)))
+      if ((unsigned long) val >= ((unsigned long) 1 << (size * 8)))
           STk_error("value %d does not fit in %d bytes", val, size);
 
       char *ptr;
@@ -527,9 +529,9 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
                               e,                  /* endianness within words */
                               0,                  /* nails                   */
                               BIGNUM_VAL(n));     /* from */
-      if (count > size)
+      if ((long)count > size)
           STk_error("bignum ~S does not fit in ~S bytes", n, size);
-          
+
       if (end == end_little) {
           memcpy(&(((char *) UVECTOR_DATA(b))[idx]),
                  ptr,
@@ -551,7 +553,7 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
   return STk_void;
 }
 
- 
+
 
 /******
        INT16
@@ -579,9 +581,9 @@ DEFINE_PRIMITIVE("bytevector-u16-ref", bytevector_u16_ref, subr3,
 DEFINE_PRIMITIVE("bytevector-s16-ref", bytevector_s16_ref, subr3,
                  (SCM b, SCM i, SCM endianness))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
-  
+
   unsigned long idx = INT_VAL(i);
 
   uint16_t *z = (uint16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
@@ -606,7 +608,7 @@ DEFINE_PRIMITIVE("bytevector-u16-set!", bytevector_u16_set, subr4,
 
   if (vali < +65536) {
       uint16_t *z = (uint16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-      
+
       if (STk_eq(endianness,STk_intern("little"))==STk_true) {
           *z = htole16(vali);
       } else if (STk_eq(endianness,STk_intern("big"))==STk_true) {
@@ -622,10 +624,10 @@ DEFINE_PRIMITIVE("bytevector-s16-set!", bytevector_s16_set, subr4,
   check_integer(i);
   unsigned long idx = INT_VAL(i);
   long vali = STk_integer_value(byte);
-  
+
   if (vali < +32768 && vali >= -32768) {
       int16_t *z = (int16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-      
+
       if (STk_eq(endianness,STk_intern("little"))==STk_true) {
           *z = (int16_t) htole16((uint16_t) vali);
       } else if (STk_eq(endianness,STk_intern("big"))==STk_true) {
@@ -643,13 +645,13 @@ DEFINE_PRIMITIVE("bytevector-u16-native-ref", bytevector_u16_native_ref, subr2,
 {
   check_bytevector(b);
   check_integer(i);
-    
+
   unsigned long idx = INT_VAL(i);
-    
+
   uint16_t *z = (uint16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
   return MAKE_INT(*z);
 }
-                 
+
 
 DEFINE_PRIMITIVE("bytevector-s16-native-ref", bytevector_s16_native_ref, subr2,
                  (SCM b, SCM i))
@@ -667,7 +669,7 @@ DEFINE_PRIMITIVE("bytevector-s16-native-ref", bytevector_s16_native_ref, subr2,
 DEFINE_PRIMITIVE("bytevector-u16-native-set!", bytevector_u16_native_set, subr3,
                  (SCM b, SCM i, SCM val))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
   unsigned long vali = STk_integer_value(val);
@@ -682,7 +684,7 @@ DEFINE_PRIMITIVE("bytevector-u16-native-set!", bytevector_u16_native_set, subr3,
 DEFINE_PRIMITIVE("bytevector-s16-native-set!", bytevector_s16_native_set, subr3,
                  (SCM b, SCM i, SCM val))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
   long vali = STk_integer_value(val);
@@ -701,12 +703,12 @@ DEFINE_PRIMITIVE("bytevector-s16-native-set!", bytevector_s16_native_set, subr3,
 DEFINE_PRIMITIVE("bytevector-u32-ref", bytevector_u32_ref, subr3,
                  (SCM b, SCM i, SCM endianness))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
   uint32_t z = *((uint32_t *) &(((char *) UVECTOR_DATA(b))[idx++]));
-  
+
   if (STk_eq(endianness,STk_intern("little"))==STk_true)
       z = (uint32_t) le32toh (z);
   else if (STk_eq(endianness,STk_intern("big"))==STk_true)
@@ -721,12 +723,12 @@ DEFINE_PRIMITIVE("bytevector-u32-ref", bytevector_u32_ref, subr3,
 DEFINE_PRIMITIVE("bytevector-s32-ref", bytevector_s32_ref, subr3,
                  (SCM b, SCM i, SCM endianness))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
   uint32_t z = *( (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
-  
+
   if (STk_eq(endianness,STk_intern("little"))==STk_true)
       return MAKE_INT((int32_t)le32toh (z));
   else if (STk_eq(endianness,STk_intern("big"))==STk_true)
@@ -748,7 +750,7 @@ DEFINE_PRIMITIVE("bytevector-u32-set!", bytevector_u32_set, subr4,
 
   if (vali < +4294967296) {
       uint32_t *z = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-      
+
       if (STk_eq(endianness,STk_intern("little"))==STk_true) {
           *z = htole32(vali);
       } else if (STk_eq(endianness,STk_intern("big"))==STk_true) {
@@ -764,10 +766,10 @@ DEFINE_PRIMITIVE("bytevector-s32-set!", bytevector_s32_set, subr4,
   check_integer(i);
   unsigned long idx = INT_VAL(i);
   long vali = STk_integer_value(byte);
-  
+
   if (vali <= +2147483647 && vali >= -2147483648) {
       int32_t *z = (int32_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-      
+
       if (STk_eq(endianness,STk_intern("little"))==STk_true) {
           *z = (int32_t) htole32((uint32_t) vali);
       } else if (STk_eq(endianness,STk_intern("big"))==STk_true) {
@@ -784,24 +786,24 @@ DEFINE_PRIMITIVE("bytevector-s32-set!", bytevector_s32_set, subr4,
 DEFINE_PRIMITIVE("bytevector-u32-native-ref", bytevector_u32_native_ref, subr2,
                  (SCM b, SCM i))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
   uint32_t z = *((uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]));
-  
+
   return MAKE_INT((unsigned long) z);
 }
 
 DEFINE_PRIMITIVE("bytevector-s32-native-ref", bytevector_s32_native_ref, subr2,
                  (SCM b, SCM i))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
   int32_t z = *((int32_t *) &(((char *) UVECTOR_DATA(b))[idx]) );
-  
+
   return MAKE_INT((int32_t) z);
 }
 
@@ -820,14 +822,14 @@ DEFINE_PRIMITIVE("bytevector-u32-native-set!", bytevector_u32_native_set, subr3,
   return STk_void;
 }
 
-      
+
 DEFINE_PRIMITIVE("bytevector-s32-native-set!", bytevector_s32_native_set, subr3,
                  (SCM b, SCM i, SCM byte))
 {
   check_integer(i);
   unsigned long idx = INT_VAL(i);
   long vali = STk_integer_value(byte);
-  
+
   if (vali <= +2147483647 && vali >= -2147483648) {
       int32_t *z = (int32_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
       *z = (int32_t) vali;
@@ -844,7 +846,7 @@ DEFINE_PRIMITIVE("bytevector-s32-native-set!", bytevector_s32_native_set, subr3,
 DEFINE_PRIMITIVE("bytevector-u64-ref", bytevector_u64_ref, subr3,
                  (SCM b, SCM i, SCM endianness))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
@@ -865,7 +867,7 @@ DEFINE_PRIMITIVE("bytevector-u64-ref", bytevector_u64_ref, subr3,
 DEFINE_PRIMITIVE("bytevector-s64-ref", bytevector_s64_ref, subr3,
                  (SCM b, SCM i, SCM endianness))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
@@ -877,8 +879,8 @@ DEFINE_PRIMITIVE("bytevector-s64-ref", bytevector_s64_ref, subr3,
   else STk_error("bad endianness symbol ~S", endianness);
 
   return (LONG_FITS_INTEGER(z))
-      ? MAKE_INT((long) z)
-      : STk_long2integer((long) z);
+    ? MAKE_INT((long) z)
+    : STk_long2integer((long) z);
 }
 
 
@@ -893,7 +895,7 @@ DEFINE_PRIMITIVE("bytevector-u64-set!", bytevector_u64_set, subr4,
 
   if (vali < +65536) {
       uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-      
+
       if (STk_eq(endianness,STk_intern("little"))==STk_true) {
           *z = htole64(vali);
       } else if (STk_eq(endianness,STk_intern("big"))==STk_true) {
@@ -907,12 +909,12 @@ DEFINE_PRIMITIVE("bytevector-s64-set!", bytevector_s64_set, subr4,
                  (SCM b, SCM i, SCM byte, SCM endianness))
 {
   check_integer(i);
-  unsigned long idx = INT_VAL(i);
-  unsigned long vali = STk_integer_value(byte);
-  
+  long idx = INT_VAL(i);
+  long vali = STk_integer_value(byte);
+
   if (vali < +64768 && vali >= -64768) {
       int64_t *z = (int64_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-      
+
       if (STk_eq(endianness,STk_intern("little"))==STk_true) {
           *z = (int64_t) htole64((uint64_t) vali);
       } else if (STk_eq(endianness,STk_intern("big"))==STk_true) {
@@ -926,7 +928,7 @@ DEFINE_PRIMITIVE("bytevector-s64-set!", bytevector_s64_set, subr4,
 DEFINE_PRIMITIVE("bytevector-u64-native-ref", bytevector_u64_native_ref, subr2,
                  (SCM b, SCM i))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
@@ -940,7 +942,7 @@ DEFINE_PRIMITIVE("bytevector-u64-native-ref", bytevector_u64_native_ref, subr2,
 DEFINE_PRIMITIVE("bytevector-s64-native-ref", bytevector_s64_native_ref, subr2,
                  (SCM b, SCM i))
 {
-  check_bytevector(b);  
+  check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
 
@@ -972,7 +974,7 @@ DEFINE_PRIMITIVE("bytevector-s64-native-set!", bytevector_s64_native_set, subr3,
   check_integer(i);
   unsigned long idx = INT_VAL(i);
   unsigned long vali = STk_integer_value(val);
-  
+
   int64_t *z = (int64_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
   *z = (int64_t) vali;
 
@@ -1007,7 +1009,7 @@ ieee_8_ref(SCM b, unsigned int idx, endianness_t end) {
 }
 
 void
-ieee_4_set(uint32_t *place, unsigned int idx, endianness_t end,  void *val) {
+ieee_4_set(uint32_t *place, endianness_t end,  void *val) {
   if (end == end_little)
       *place = htole32( *((uint32_t*) val));
   else if (end == end_big)
@@ -1015,7 +1017,7 @@ ieee_4_set(uint32_t *place, unsigned int idx, endianness_t end,  void *val) {
 }
 
 void
-ieee_8_set(uint64_t *place, unsigned int idx, endianness_t end,  void *val) {
+ieee_8_set(uint64_t *place, endianness_t end,  void *val) {
   if (end == end_little)
       *place = htole64( *((uint64_t*) val));
   else if (end == end_big)
@@ -1036,7 +1038,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-ref", bytevector_ieee_single_ref, subr3
 
   check_integer(i);
   unsigned long idx = INT_VAL(i);
-  
+
   switch (sizeof(float)) {
   case 4:
       uint32_t  w4 = ieee_4_ref(b, idx, end);
@@ -1056,7 +1058,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-ref", bytevector_ieee_single_nat
   check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
-  
+
   switch (sizeof(float)) {
   case 4:
       uint32_t  w4 = ieee_4_ref(b, idx, native_endianness);
@@ -1132,11 +1134,11 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-set!", bytevector_ieee_single_set, subr
   switch (sizeof(float)) {
   case 4:
       uint32_t *z4 = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_4_set(z4, idx, end, &valf);
+      ieee_4_set(z4, end, &valf);
       break;
   case 8:
       uint64_t *z8 = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z8, idx, end, &valf);
+      ieee_8_set(z8, end, &valf);
       break;
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
@@ -1155,11 +1157,11 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-set!", bytevector_ieee_single_na
   switch (sizeof(float)) {
   case 4:
       uint32_t *z4 = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_4_set(z4, idx, native_endianness, &valf);
+      ieee_4_set(z4, native_endianness, &valf);
       break;
   case 8:
       uint64_t *z8 = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z8, idx, native_endianness, &valf);
+      ieee_8_set(z8, native_endianness, &valf);
       break;
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
@@ -1185,7 +1187,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
   switch (sizeof(double)) {
   case 8:
       uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z, idx, end, &valf);
+      ieee_8_set(z, end, &valf);
       break;
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
@@ -1204,7 +1206,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-set!", bytevector_ieee_double_na
   switch (sizeof(double)) {
   case 8:
       uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z, idx, native_endianness, &valf);
+      ieee_8_set(z, native_endianness, &valf);
       break;
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
@@ -1219,12 +1221,12 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-set!", bytevector_ieee_double_na
 endianness_t
 get_bom_16(SCM vec, endianness_t default_end, int *bom_bytes) {
     *bom_bytes = 0;
-    
+
     if (UVECTOR_SIZE(vec) < 2) return default_end;
-    
+
     uint8_t a = ((uint8_t *)UVECTOR_DATA(vec))[0];
     uint8_t b = ((uint8_t *)UVECTOR_DATA(vec))[1];
-    
+
     if (a == 0xff && b == 0xfe) {
         *bom_bytes = 2;
         return end_little;
@@ -1242,13 +1244,13 @@ get_bom_16(SCM vec, endianness_t default_end, int *bom_bytes) {
 DEFINE_PRIMITIVE("utf16->string", utf162string, subr23, (SCM vec, SCM end, SCM bbom))
 {
     if (bbom != NULL && !BOOLEANP(bbom)) STk_error ("bad boolean ~S", bbom);
-    
+
     int bom = (bbom == STk_true)? 0 : 1;
     int bom_bytes = 0;
-    
+
     check_bytevector(vec);
     unsigned long len = UVECTOR_SIZE(vec);
-    
+
 
     endianness_t endianness = get_endianness(end);
     if (bom) endianness = get_bom_16(vec, endianness, &bom_bytes);
@@ -1266,17 +1268,14 @@ DEFINE_PRIMITIVE("utf16->string", utf162string, subr23, (SCM vec, SCM end, SCM b
             w1 |= ((uint8_t *) UVECTOR_DATA(vec))[i++];
         }
 
-	if (w1 > 0x10FFFF) STk_error("character with value ~S outside of Unicode range",
-				     MAKE_INT(w1));
-
-	if (w1 >= 0xd800 &&
-	    w1 <= 0xdfff) {
-	    if (i == len-1)
-		STk_error("bad UTF16 encoding (bytevector ~S ends in half byte pair)", vec);
-	    size++;
-            i+=2; /* w2 */
-	} else
-	    size++;
+        if (w1 >= 0xd800 &&
+            w1 <= 0xdfff) {
+          if (i == len-1)
+            STk_error("bad UTF16 encoding (bytevector ~S ends in half byte pair)", vec);
+          size++;
+          i+=2; /* w2 */
+        } else
+          size++;
     }
     SCM s = STk_makestring(size,NULL);
 
@@ -1290,24 +1289,24 @@ DEFINE_PRIMITIVE("utf16->string", utf162string, subr23, (SCM vec, SCM end, SCM b
             w1  = ((uint8_t *) UVECTOR_DATA(vec))[idx_v++] << 8;
             w1 |= ((uint8_t *) UVECTOR_DATA(vec))[idx_v++];
         }
-        
-	if (w1 < 0xd800 || w1 > 0xdfff)
-	    STk_string_set(s, MAKE_INT(idx_s), MAKE_CHARACTER(w1));
+
+        if (w1 < 0xd800 || w1 > 0xdfff)
+          STk_string_set(s, MAKE_INT(idx_s), MAKE_CHARACTER(w1));
         else {
-         if (endianness == end_little) {
+          if (endianness == end_little) {
             w2  = ((uint8_t *) UVECTOR_DATA(vec))[idx_v++];
             w2 |= (uint16_t) (((uint8_t *) UVECTOR_DATA(vec))[idx_v++]) << 8;
-         } else {
-             w2  = (uint16_t) (((uint8_t *) UVECTOR_DATA(vec))[idx_v++]) << 8;
-             w2 |= ((uint8_t *) UVECTOR_DATA(vec))[idx_v++];
-         }
+          } else {
+            w2  = (uint16_t) (((uint8_t *) UVECTOR_DATA(vec))[idx_v++]) << 8;
+            w2 |= ((uint8_t *) UVECTOR_DATA(vec))[idx_v++];
+          }
 
-            u = (((uint32_t) (w2 & 0x3ff)) |
-                 ((uint32_t) ((w1 & 0x3ff)<< 10)));
+          u = (((uint32_t) (w2 & 0x3ff)) |
+               ((uint32_t) ((w1 & 0x3ff)<< 10)));
 
-	    u += 0x10000;
-	    STk_string_set(s, MAKE_INT(idx_s), MAKE_CHARACTER(u));
-	}
+          u += 0x10000;
+          STk_string_set(s, MAKE_INT(idx_s), MAKE_CHARACTER(u));
+        }
     }
     return s;
 }
@@ -1322,11 +1321,11 @@ DEFINE_PRIMITIVE("string->utf16", string2utf16, vsubr, (int argc, SCM *argv))
 
     check_string(str);
     if (bbom != NULL && !BOOLEANP(bbom)) STk_error ("bad boolean ~S", bbom);
-    
+
     int bom = (bbom == STk_true)? 1 : 0;
 
     if (STRING_LENGTH(str) == 0) return STk_make_C_bytevector(0);
-    
+
     endianness_t endianness = get_endianness(end);
 
     unsigned long len = STRING_LENGTH(str);
@@ -1342,7 +1341,7 @@ DEFINE_PRIMITIVE("string->utf16", string2utf16, vsubr, (int argc, SCM *argv))
                                       MAKE_INT(val));
         if (val >= 0x10000) dst_len += 2;
     }
-        
+
     SCM dest = STk_make_C_bytevector(dst_len + 2 * bom);
 
     unsigned long dest_idx = 0;
@@ -1356,7 +1355,7 @@ DEFINE_PRIMITIVE("string->utf16", string2utf16, vsubr, (int argc, SCM *argv))
 	    ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xff;
 	}
     }
-    
+
     for (unsigned long i=0; i<len; i++) {
 
         SCM ch = STk_string_ref(str,MAKE_INT(i));
@@ -1374,7 +1373,7 @@ DEFINE_PRIMITIVE("string->utf16", string2utf16, vsubr, (int argc, SCM *argv))
         } else {
 
             val -= 0x10000;
-            
+
             uint16_t w1;
             uint16_t w2;
 
@@ -1419,7 +1418,7 @@ get_bom_32(SCM vec, endianness_t default_end, int *bom_bytes) {
   uint8_t b = ((uint8_t *)UVECTOR_DATA(vec))[1];
   uint8_t c = ((uint8_t *)UVECTOR_DATA(vec))[2];
   uint8_t d = ((uint8_t *)UVECTOR_DATA(vec))[3];
-  
+
   if (a == 0xff && b == 0xfe &&
       c == 0x00 && d == 0x00) {
       *bom_bytes = 4;
@@ -1437,16 +1436,16 @@ get_bom_32(SCM vec, endianness_t default_end, int *bom_bytes) {
 DEFINE_PRIMITIVE("utf32->string", utf322string, subr23, (SCM vec, SCM end, SCM bbom))
 {
     if (bbom != NULL && !BOOLEANP(bbom)) STk_error ("bad boolean ~S", bbom);
-    
+
     int bom = (bbom == STk_true)? 0 : 1;
     int bom_bytes = 0;
-    
+
     check_bytevector(vec);
     unsigned long len = UVECTOR_SIZE(vec);
 
     endianness_t endianness = get_endianness(end);
     if (bom) endianness = get_bom_32(vec, endianness, &bom_bytes);
-    
+
     if (len%4) STk_error("bad bytevector length %d for UTF32 string", len);
 
     SCM str = STk_makestring((len - bom_bytes)/4, NULL);
@@ -1473,7 +1472,7 @@ DEFINE_PRIMITIVE("string->utf32", string2utf32, vsubr, (int argc, SCM *argv))
     SCM str = *argv--;
     SCM end  = (argc > 1) ? *argv-- : NULL;
     SCM bbom = (argc > 2) ? *argv-- : NULL;
-    
+
     check_string(str);
 
     if (bbom != NULL && !BOOLEANP(bbom)) STk_error ("bad boolean ~S", bbom);
@@ -1545,7 +1544,7 @@ MODULE_ENTRY_START("scheme/bytevector")
     ADD_PRIMITIVE_IN_MODULE(bytevector_s16_native_ref,  module);
     ADD_PRIMITIVE_IN_MODULE(bytevector_u16_native_set,  module);
     ADD_PRIMITIVE_IN_MODULE(bytevector_s16_native_set,  module);
-    
+
     ADD_PRIMITIVE_IN_MODULE(bytevector_u32_ref,  module);
     ADD_PRIMITIVE_IN_MODULE(bytevector_s32_ref,  module);
     ADD_PRIMITIVE_IN_MODULE(bytevector_u32_set,  module);
