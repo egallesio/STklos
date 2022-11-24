@@ -63,10 +63,6 @@ check_integer(SCM x) {
   if (!INTP(x)) STk_error("bad integer ~S", x);
 }
 static inline void
-check_list(SCM x) {
-    if (! ( CONSP(x) || NULLP(x) ) ) STk_error("bad list ~S", x);
-}
-static inline void
 check_string(SCM x) {
   if (!STRINGP(x)) STk_error("bad string ~S", x);
 }
@@ -989,23 +985,27 @@ DEFINE_PRIMITIVE("bytevector-s64-native-set!", bytevector_s64_native_set, subr3,
 uint32_t
 ieee_4_ref(SCM b, unsigned int idx, endianness_t end) {
   uint32_t *z = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-  uint32_t w;
+  uint32_t w = 0;
   if (end == end_little)
-      w = le32toh (*z);
+    w = le32toh (*z);
   else if (end == end_big)
-      w = be32toh (*z);
+    w = be32toh (*z);
+  else
+    STk_error("wrong endianness!");
   return w;
 }
 
 uint64_t
 ieee_8_ref(SCM b, unsigned int idx, endianness_t end) {
   uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-  uint64_t w;
+  uint64_t w = 0;
   if (end == end_little)
       w = le64toh (*z);
   else if (end == end_big)
       w = be64toh (*z);
-  return w;
+  else
+    STk_error("wrong endianness!");
+ return w;
 }
 
 void
@@ -1029,7 +1029,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-ref", bytevector_ieee_single_ref, subr3
                  (SCM b, SCM i, SCM endianness))
 {
   check_bytevector(b);
-  endianness_t end;
+  endianness_t end = end_little;
   if (STk_eq(endianness,STk_intern("little"))==STk_true)
       end = end_little;
   else if (STk_eq(endianness,STk_intern("big"))==STk_true)
@@ -1040,12 +1040,14 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-ref", bytevector_ieee_single_ref, subr3
   unsigned long idx = INT_VAL(i);
 
   switch (sizeof(float)) {
-  case 4:
-      uint32_t  w4 = ieee_4_ref(b, idx, end);
-      return double2real(*((float*) (&w4)));
-  case 8:
-      uint64_t  w8 = ieee_8_ref(b, idx, end);
-      return double2real(*((float*) (&w8)));
+  case 4: {
+    uint32_t  w4 = ieee_4_ref(b, idx, end);
+    return double2real(*((float*) (&w4)));
+  }
+  case 8: {
+    uint64_t  w8 = ieee_8_ref(b, idx, end);
+    return double2real(*((float*) (&w8)));
+  }
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
   }
@@ -1060,12 +1062,14 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-ref", bytevector_ieee_single_nat
   unsigned long idx = INT_VAL(i);
 
   switch (sizeof(float)) {
-  case 4:
-      uint32_t  w4 = ieee_4_ref(b, idx, native_endianness);
-      return double2real(*((float*) (&w4)));
-  case 8:
-      uint64_t  w8 = ieee_8_ref(b, idx, native_endianness);
-      return double2real(*((float*) (&w8)));
+  case 4: {
+    uint32_t  w4 = ieee_4_ref(b, idx, native_endianness);
+    return double2real(*((float*) (&w4)));
+  }
+  case 8: {
+    uint64_t  w8 = ieee_8_ref(b, idx, native_endianness);
+    return double2real(*((float*) (&w8)));
+  }
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
   }
@@ -1077,7 +1081,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-ref", bytevector_ieee_double_ref, subr3
                  (SCM b, SCM i, SCM endianness))
 {
   check_bytevector(b);
-  endianness_t end;
+  endianness_t end = end_little;
   if (STk_eq(endianness,STk_intern("little"))==STk_true)
       end = end_little;
   else if (STk_eq(endianness,STk_intern("big"))==STk_true)
@@ -1088,9 +1092,10 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-ref", bytevector_ieee_double_ref, subr3
   unsigned long idx = INT_VAL(i);
 
   switch (sizeof(double)) {
-  case 8:
-      uint64_t  w8 = ieee_8_ref(b, idx, end);
-      return double2real(*((double*) (&w8)));
+  case 8: {
+    uint64_t  w8 = ieee_8_ref(b, idx, end);
+    return double2real(*((double*) (&w8)));
+  }
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
   }
@@ -1105,9 +1110,10 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-ref", bytevector_ieee_double_nat
   unsigned long idx = INT_VAL(i);
 
   switch (sizeof(double)) {
-  case 8:
-      uint64_t  w8 = ieee_8_ref(b, idx, native_endianness);
-      return double2real(*((double*) (&w8)));
+  case 8: {
+    uint64_t  w8 = ieee_8_ref(b, idx, native_endianness);
+    return double2real(*((double*) (&w8)));
+  }
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
   }
@@ -1121,7 +1127,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-set!", bytevector_ieee_single_set, subr
 {
   check_integer(i);
 
-  endianness_t end;
+  endianness_t end = end_little;
   if (STk_eq(endianness,STk_intern("little"))==STk_true)
       end = end_little;
   else if (STk_eq(endianness,STk_intern("big"))==STk_true)
@@ -1132,14 +1138,16 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-set!", bytevector_ieee_single_set, subr
   float valf = REAL_VAL(val);
 
   switch (sizeof(float)) {
-  case 4:
-      uint32_t *z4 = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_4_set(z4, end, &valf);
-      break;
-  case 8:
-      uint64_t *z8 = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z8, end, &valf);
-      break;
+  case 4: {
+    uint32_t *z4 = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]);
+    ieee_4_set(z4, end, &valf);
+    break;
+  }
+  case 8: {
+    uint64_t *z8 = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
+    ieee_8_set(z8, end, &valf);
+    break;
+  }
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
   }
@@ -1155,14 +1163,16 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-set!", bytevector_ieee_single_na
   float valf = REAL_VAL(val);
 
   switch (sizeof(float)) {
-  case 4:
-      uint32_t *z4 = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_4_set(z4, native_endianness, &valf);
-      break;
-  case 8:
-      uint64_t *z8 = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z8, native_endianness, &valf);
-      break;
+  case 4: {
+    uint32_t *z4 = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx]);
+    ieee_4_set(z4, native_endianness, &valf);
+    break;
+  }
+  case 8: {
+    uint64_t *z8 = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
+    ieee_8_set(z8, native_endianness, &valf);
+    break;
+  }
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
   }
@@ -1174,7 +1184,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
 {
   check_integer(i);
 
-  endianness_t end;
+  endianness_t end = 0;
   if (STk_eq(endianness,STk_intern("little"))==STk_true)
       end = end_little;
   else if (STk_eq(endianness,STk_intern("big"))==STk_true)
@@ -1185,10 +1195,11 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
   double valf = REAL_VAL(val);
 
   switch (sizeof(double)) {
-  case 8:
-      uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z, end, &valf);
-      break;
+  case 8: {
+    uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
+    ieee_8_set(z, end, &valf);
+    break;
+  }
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
   }
@@ -1204,10 +1215,11 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-set!", bytevector_ieee_double_na
   double valf = REAL_VAL(val);
 
   switch (sizeof(double)) {
-  case 8:
-      uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
-      ieee_8_set(z, native_endianness, &valf);
-      break;
+  case 8: {
+    uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx]);
+    ieee_8_set(z, native_endianness, &valf);
+    break;
+  }
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
   }
