@@ -20,7 +20,7 @@
 ;;;; USA.
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Jul-2022 21:02
-;;;; Last file update: 08-Jul-2022 14:12 (jpellegrini)
+;;;; Last file update: 24-Nov-2022 22:50 (eg)
 
 (select-module scheme/bytevector)
 
@@ -202,4 +202,4 @@ doc>
                 (bytevector-sint-set! b i (car ptr) end size)
                 (loop (fx+ i size) (cdr ptr)))))))))
 
-(provide "scheme-bytevector")
+(provide "scheme/bytevector")
