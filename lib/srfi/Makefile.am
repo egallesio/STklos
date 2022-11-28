@@ -127,6 +127,7 @@ SRC_STK   = 1.stk   \
             217.stk \
             219.stk \
             221.stk \
+            222.stk \
             223.stk \
             224.stk \
             229.stk \
@@ -230,6 +231,7 @@ SRC_OSTK =  1.ostk   \
             217.ostk \
             219.ostk \
             221.ostk \
+            222.ostk \
             223.ostk \
             224.ostk \
             229.ostk \
