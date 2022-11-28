@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 07-Jul-2022 22:40
- * Last file update: 28-Nov-2022 16:34 (eg)
+ * Last file update: 28-Nov-2022 16:57 (eg)
  */
 
 #include <gmp.h>
@@ -97,9 +97,9 @@ static inline endianness_t
 get_endianness(SCM endianness) {
   if (!endianness) return end_big;
   if (!SYMBOLP(endianness)) STk_error ("bad symbol ~S", endianness);
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       return end_little;
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       return end_big;
   else STk_error("bad endianness symbol ~S", endianness);
   return end_little; /* Never reached */
@@ -567,9 +567,9 @@ DEFINE_PRIMITIVE("bytevector-u16-ref", bytevector_u16_ref, subr3,
   unsigned long idx = INT_VAL(i);
 
   uint16_t *z = (uint16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       return MAKE_INT(le16toh (*z));
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       return MAKE_INT(be16toh (*z));
   else STk_error("bad endianness symbol ~S", endianness);
   return STk_void; /* Never reached */
@@ -586,9 +586,9 @@ DEFINE_PRIMITIVE("bytevector-s16-ref", bytevector_s16_ref, subr3,
   unsigned long idx = INT_VAL(i);
 
   uint16_t *z = (uint16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       return MAKE_INT((int16_t)le16toh (*z));
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       return MAKE_INT((int16_t)be16toh (*z));
   else STk_error("bad endianness symbol ~S", endianness);
   return STk_void; /* Never reached */
@@ -608,9 +608,9 @@ DEFINE_PRIMITIVE("bytevector-u16-set!", bytevector_u16_set, subr4,
   if (vali < +65536) {
       uint16_t *z = (uint16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
 
-      if (STk_eq(endianness,symb_little)==STk_true) {
+      if (endianness == symb_little) {
           *z = htole16(vali);
-      } else if (STk_eq(endianness,symb_big)==STk_true) {
+      } else if (endianness == symb_big) {
           *z = htobe16(vali);
       } else STk_error("bad endianness symbol ~S", endianness);
   } else STk_error("value ~S is out of bounds or incorrect for a bytevector", val);
@@ -627,9 +627,9 @@ DEFINE_PRIMITIVE("bytevector-s16-set!", bytevector_s16_set, subr4,
   if (vali < +32768 && vali >= -32768) {
       int16_t *z = (int16_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
 
-      if (STk_eq(endianness,symb_little)==STk_true) {
+      if (endianness == symb_little) {
           *z = (int16_t) htole16((uint16_t) vali);
-      } else if (STk_eq(endianness,symb_big)==STk_true) {
+      } else if (endianness == symb_big) {
           *z = (int16_t) htobe16((uint16_t) vali);
       } else STk_error("bad endianness symbol ~S", endianness);
   } else STk_error("value ~S is out of bounds or incorrect for a bytevector", byte);
@@ -708,9 +708,9 @@ DEFINE_PRIMITIVE("bytevector-u32-ref", bytevector_u32_ref, subr3,
 
   uint32_t z = *((uint32_t *) &(((char *) UVECTOR_DATA(b))[idx++]));
 
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       z = (uint32_t) le32toh (z);
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       z = (uint32_t) be32toh (z);
   else STk_error("bad endianness symbol ~S", endianness);
 
@@ -728,9 +728,9 @@ DEFINE_PRIMITIVE("bytevector-s32-ref", bytevector_s32_ref, subr3,
 
   uint32_t z = *( (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
 
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       return MAKE_INT((int32_t)le32toh (z));
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       return MAKE_INT((int32_t)be32toh (z));
   else STk_error("bad endianness symbol ~S", endianness);
 
@@ -750,9 +750,9 @@ DEFINE_PRIMITIVE("bytevector-u32-set!", bytevector_u32_set, subr4,
   if (vali < +4294967296) {
       uint32_t *z = (uint32_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
 
-      if (STk_eq(endianness,symb_little)==STk_true) {
+      if (endianness == symb_little) {
           *z = htole32(vali);
-      } else if (STk_eq(endianness,symb_big)==STk_true) {
+      } else if (endianness == symb_big) {
           *z = htobe32(vali);
       } else STk_error("bad endianness symbol ~S", endianness);
   } else STk_error("value ~S is out of bounds or incorrect for a bytevector", val);
@@ -769,9 +769,9 @@ DEFINE_PRIMITIVE("bytevector-s32-set!", bytevector_s32_set, subr4,
   if (vali <= +2147483647 && vali >= -2147483648) {
       int32_t *z = (int32_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
 
-      if (STk_eq(endianness,symb_little)==STk_true) {
+      if (endianness == symb_little) {
           *z = (int32_t) htole32((uint32_t) vali);
-      } else if (STk_eq(endianness,symb_big)==STk_true) {
+      } else if (endianness == symb_big) {
           *z = (int32_t) htobe32((uint32_t) vali);
       } else STk_error("bad endianness symbol ~S", endianness);
   } else STk_error("value ~S is out of bounds or incorrect for a bytevector", byte);
@@ -850,9 +850,9 @@ DEFINE_PRIMITIVE("bytevector-u64-ref", bytevector_u64_ref, subr3,
   unsigned long idx = INT_VAL(i);
 
   uint64_t z = * ((uint64_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       z = le64toh (z);
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       z = be64toh (z);
   else STk_error("bad endianness symbol ~S", endianness);
 
@@ -871,9 +871,9 @@ DEFINE_PRIMITIVE("bytevector-s64-ref", bytevector_s64_ref, subr3,
   unsigned long idx = INT_VAL(i);
 
   uint64_t z = * ((uint64_t *) &(((char *) UVECTOR_DATA(b))[idx++]) );
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       z =  le64toh (z);
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       z =  be64toh (z);
   else STk_error("bad endianness symbol ~S", endianness);
 
@@ -896,9 +896,9 @@ DEFINE_PRIMITIVE("bytevector-u64-set!", bytevector_u64_set, subr4,
   if (vali < +65536) {
       uint64_t *z = (uint64_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
 
-      if (STk_eq(endianness,symb_little)==STk_true) {
+      if (endianness == symb_little) {
           *z = htole64(vali);
-      } else if (STk_eq(endianness,symb_big)==STk_true) {
+      } else if (endianness == symb_big) {
           *z = htobe64(vali);
       } else STk_error("bad endianness symbol ~S", endianness);
   } else STk_error("value ~S is out of bounds or incorrect for a bytevector", val);
@@ -915,9 +915,9 @@ DEFINE_PRIMITIVE("bytevector-s64-set!", bytevector_s64_set, subr4,
   if (vali < +64768 && vali >= -64768) {
       int64_t *z = (int64_t *) &(((char *) UVECTOR_DATA(b))[idx++]);
 
-      if (STk_eq(endianness,symb_little)==STk_true) {
+      if (endianness == symb_little) {
           *z = (int64_t) htole64((uint64_t) vali);
-      } else if (STk_eq(endianness,symb_big)==STk_true) {
+      } else if (endianness == symb_big) {
           *z = (int64_t) htobe64((uint64_t) vali);
       } else STk_error("bad endianness symbol ~S", endianness);
   } else STk_error("value ~S is out of bounds or incorrect for a bytevector", byte);
@@ -1033,9 +1033,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-ref", bytevector_ieee_single_ref, subr3
 {
   check_bytevector(b);
   endianness_t end = end_little;
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       end = end_little;
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       end = end_big;
   else STk_error("bad endianness symbol ~S", endianness);
 
@@ -1090,9 +1090,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-ref", bytevector_ieee_double_ref, subr3
 {
   check_bytevector(b);
   endianness_t end = end_little;
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       end = end_little;
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       end = end_big;
   else STk_error("bad endianness symbol ~S", endianness);
 
@@ -1138,9 +1138,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-set!", bytevector_ieee_single_set, subr
   check_integer(i);
 
   endianness_t end = end_little;
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       end = end_little;
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       end = end_big;
   else STk_error("bad endianness symbol ~S", endianness);
 
@@ -1195,9 +1195,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
   check_integer(i);
 
   endianness_t end = 0;
-  if (STk_eq(endianness,symb_little)==STk_true)
+  if (endianness == symb_little)
       end = end_little;
-  else if (STk_eq(endianness,symb_big)==STk_true)
+  else if (endianness == symb_big)
       end = end_big;
   else STk_error("bad endianness symbol ~S", endianness);
 
