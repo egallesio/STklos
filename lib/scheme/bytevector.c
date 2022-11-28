@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 07-Jul-2022 22:40
- * Last file update: 08-Jul-2022 14:15 (jpellegrini)
+ * Last file update: 28-Nov-2022 16:17 (eg)
  */
 
 #include <gmp.h>
@@ -269,95 +269,95 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
        we filled part of the number. If we also have a negative number,
        we need to finish filling the most significative part with ones. */
     if (sig && (*(tmp-1) >= 128)) {
-	memset(tmp, 0xff, sizeof(long)-size);
+    memset(tmp, 0xff, sizeof(long)-size);
     }
 
     /* We have built the long integer result as if the machine was little endian.
        If it is big endian, we swap everything: */
     switch (sizeof(long)) {
     case 4:
-	res  = le32toh(res);
-	ures = le32toh(ures);
-	break;
+    res  = le32toh(res);
+    ures = le32toh(ures);
+    break;
     case 8:
-	res  = le64toh(res);
-	ures = le64toh(ures);
-	break;
+    res  = le64toh(res);
+    ures = le64toh(ures);
+    break;
     default: STk_error("STklos does not support long integers with %d bytes", sizeof(long));
     }
 
     return sig
-	? STk_long2integer(res)
-	: STk_ulong2integer(ures);
+    ? STk_long2integer(res)
+    : STk_ulong2integer(ures);
 
   } else {
       /*** BIGNUMS ***/
 
       if (sig &&
-	  ( (  (end == end_big) &&
-	       (((char *) UVECTOR_DATA(b))[idx]) < 0)
-	    ||
-	    (  (end == end_little) &&
-	       (((char *) UVECTOR_DATA(b))[idx+size-1]) < 0))) {
-	  /***
-	      Negtive case: we do this:
-	      - copy the bits to tmp
-	      - invert all bits
-	      - import into GMP
-	      - add one
-	      I have tried to not use the tmp buffer, and inverting the bits
-	      after they were in a GMP number, but that didn't work for some
-	      reason.
-	  ***/
+      ( (  (end == end_big) &&
+           (((char *) UVECTOR_DATA(b))[idx]) < 0)
+        ||
+        (  (end == end_little) &&
+           (((char *) UVECTOR_DATA(b))[idx+size-1]) < 0))) {
+      /***
+          Negtive case: we do this:
+          - copy the bits to tmp
+          - invert all bits
+          - import into GMP
+          - add one
+          I have tried to not use the tmp buffer, and inverting the bits
+          after they were in a GMP number, but that didn't work for some
+          reason.
+      ***/
 
-	  char *tmp = STk_must_malloc(size);
-	  memcpy(tmp,&(((char *) UVECTOR_DATA(b))[idx]),size);
+      char *tmp = STk_must_malloc(size);
+      memcpy(tmp,&(((char *) UVECTOR_DATA(b))[idx]),size);
 
-	  /* Negate the bits */
-	  for (size_t i=0; i<size; i++)
-	      tmp[i] = ~tmp[i];
+      /* Negate the bits */
+      for (size_t i=0; i<size; i++)
+          tmp[i] = ~tmp[i];
 
-	  /* import into a GMP number: */
-	  SCM z;
-	  mpz_t num, num2;
-	  mpz_init(num);
-	  mpz_init(num2);
-	  int e = (end == end_little) ? -1 : +1;
-	  mpz_import (num,                                 /* destination             */
-		      size,                                /* word count              */
-		      e,                                   /* order (endianness)      */
-		      1,                                   /* word size               */
-		      e,                                   /* endianness within words */
-		      0,                                   /* nails (skipped bits)    */
-		      tmp);                                /* from                    */
+      /* import into a GMP number: */
+      SCM z;
+      mpz_t num, num2;
+      mpz_init(num);
+      mpz_init(num2);
+      int e = (end == end_little) ? -1 : +1;
+      mpz_import (num,                                 /* destination             */
+              size,                                /* word count              */
+              e,                                   /* order (endianness)      */
+              1,                                   /* word size               */
+              e,                                   /* endianness within words */
+              0,                                   /* nails (skipped bits)    */
+              tmp);                                /* from                    */
 
-	  /* Add one, to finish the conversion from 2's complement: */
-	  mpz_add_ui(num2,num,1);
-	  mpz_neg(num,num2);
+      /* Add one, to finish the conversion from 2's complement: */
+      mpz_add_ui(num2,num,1);
+      mpz_neg(num,num2);
 
-	  NEWCELL(z, bignum);
-	  mpz_set(BIGNUM_VAL(z), num);
-	  return z;
+      NEWCELL(z, bignum);
+      mpz_set(BIGNUM_VAL(z), num);
+      return z;
 
       } else {
-	  /***
-	      Positive case: the GMP already has a function for that!
-	  ***/
-	  SCM z;
-	  mpz_t num;
-	  mpz_init(num);
-	  int e = (end == end_little) ? -1 : +1;
-	  mpz_import (num,                                 /* destination             */
-		      size,                                /* word count              */
-		      e,                                   /* order (endianness)      */
-		      1,                                   /* word size               */
-		      e,                                   /* endianness within words */
-		      0,                                   /* nails (skipped bits)    */
-		      &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
+      /***
+          Positive case: the GMP already has a function for that!
+      ***/
+      SCM z;
+      mpz_t num;
+      mpz_init(num);
+      int e = (end == end_little) ? -1 : +1;
+      mpz_import (num,                                 /* destination             */
+              size,                                /* word count              */
+              e,                                   /* order (endianness)      */
+              1,                                   /* word size               */
+              e,                                   /* endianness within words */
+              0,                                   /* nails (skipped bits)    */
+              &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
 
-	  NEWCELL(z, bignum);
-	  mpz_set(BIGNUM_VAL(z), num);
-	  return z;
+      NEWCELL(z, bignum);
+      mpz_set(BIGNUM_VAL(z), num);
+      return z;
       }
   }
 }
@@ -1043,12 +1043,14 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-ref", bytevector_ieee_single_ref, subr3
 
   switch (sizeof(float)) {
   case 4: {
-    uint32_t  w4 = ieee_4_ref(b, idx, end);
-    return double2real(*((float*) (&w4)));
+    union { uint32_t w4; float f; } tmp;
+    tmp.w4 = ieee_4_ref(b, idx, end);
+    return double2real(tmp.f);
   }
   case 8: {
-    uint64_t  w8 = ieee_8_ref(b, idx, end);
-    return double2real(*((float*) (&w8)));
+    union { uint64_t w8; float f; } tmp;
+    tmp.w8 = ieee_8_ref(b, idx, end);
+    return double2real(tmp.f);
   }
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
@@ -1065,12 +1067,15 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-ref", bytevector_ieee_single_nat
 
   switch (sizeof(float)) {
   case 4: {
-    uint32_t  w4 = ieee_4_ref(b, idx, native_endianness);
-    return double2real(*((float*) (&w4)));
+    union { uint32_t w4; float f; } tmp;
+    tmp.w4 = ieee_4_ref(b, idx, native_endianness);
+    return double2real(tmp.f);
   }
   case 8: {
-    uint64_t  w8 = ieee_8_ref(b, idx, native_endianness);
-    return double2real(*((float*) (&w8)));
+    union { uint64_t w8; float f; } tmp;
+    tmp.w8 = ieee_8_ref(b, idx, native_endianness);
+    return double2real(tmp.f);
+
   }
   default:
       STk_error("floats of %d bytes are not supported in STklos", sizeof(float));
@@ -1095,8 +1100,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-ref", bytevector_ieee_double_ref, subr3
 
   switch (sizeof(double)) {
   case 8: {
-    uint64_t  w8 = ieee_8_ref(b, idx, end);
-    return double2real(*((double*) (&w8)));
+    union { uint64_t w8; double d;} tmp;
+    tmp.w8 = ieee_8_ref(b, idx, end);
+    return double2real(tmp.d);
   }
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
@@ -1113,8 +1119,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-ref", bytevector_ieee_double_nat
 
   switch (sizeof(double)) {
   case 8: {
-    uint64_t  w8 = ieee_8_ref(b, idx, native_endianness);
-    return double2real(*((double*) (&w8)));
+    union { uint64_t w8; double d;} tmp;
+    tmp.w8 = ieee_8_ref(b, idx, native_endianness);
+    return double2real(tmp.d);
   }
   default:
       STk_error("doubles of %d bytes are not supported in STklos", sizeof(double));
@@ -1351,7 +1358,7 @@ DEFINE_PRIMITIVE("string->utf16", string2utf16, vsubr, (int argc, SCM *argv))
         ch = STk_string_ref(str,MAKE_INT(i));
         val = CHARACTER_VAL(ch);
         dst_len += 2;
-	if (val > 0x10FFFF) STk_error("character with value ~S outside of Unicode range",
+    if (val > 0x10FFFF) STk_error("character with value ~S outside of Unicode range",
                                       MAKE_INT(val));
         if (val >= 0x10000) dst_len += 2;
     }
@@ -1361,13 +1368,13 @@ DEFINE_PRIMITIVE("string->utf16", string2utf16, vsubr, (int argc, SCM *argv))
     unsigned long dest_idx = 0;
 
     if (bom) {
-	if (endianness == end_little) {
-	    ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xff;
-	    ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xfe;
-	} else {
-	    ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xfe;
-	    ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xff;
-	}
+    if (endianness == end_little) {
+        ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xff;
+        ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xfe;
+    } else {
+        ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xfe;
+        ((uint8_t *) UVECTOR_DATA(dest))[dest_idx++] = 0xff;
+    }
     }
 
     for (unsigned long i=0; i<len; i++) {
@@ -1502,17 +1509,17 @@ DEFINE_PRIMITIVE("string->utf32", string2utf32, vsubr, (int argc, SCM *argv))
     unsigned long j=0; /* index for the destination uvector */
 
     if (bom) {
-	if (endianness == end_little) {
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xff;
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xfe;
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
-	} else {
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xfe;
-	    ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xff;
-	}
+    if (endianness == end_little) {
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xff;
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xfe;
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
+    } else {
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0x00;
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xfe;
+        ((uint8_t *) UVECTOR_DATA(dest))[j++] = 0xff;
+    }
     }
 
     for (unsigned long i=0; i<len; i++) {
