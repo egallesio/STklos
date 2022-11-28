@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Jun-2021 09:02 (eg)
+# Last file update:  8-Sep-2022 09:25 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
-		  srfi-25 srfi-27 srfi-133 srfi-144 srfi-170 srfi-175
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
+	      scheme stklos streams srfi
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -40,6 +40,7 @@ scheme_BOOT = assembler.stk \
           equiv.stk         \
           expand.pp         \
           ffi.stk           \
+          library.stk       \
           load.stk          \
           logical.stk       \
           mbe.stk           \
@@ -55,6 +56,7 @@ scheme_BOOT = assembler.stk \
           repl.stk          \
           repl-readline.stk \
           runtime.stk       \
+          runtime-macros.stk\
           srfis-data.scm    \
           srfi-0.stk        \
           str.stk           \
@@ -66,11 +68,11 @@ scheme_extra = STklos.init
 SRC_STK = bigloo-support.stk  \
           bigmatch.stk        \
           compfile.stk        \
+          conditions.stk      \
           describe.stk        \
           env.stk             \
           expand.ss           \
           full-syntax.stk     \
-          full-conditions.stk \
           getopt.stk          \
           help.stk            \
           http.stk            \
@@ -79,75 +81,14 @@ SRC_STK = bigloo-support.stk  \
           pretty-print.stk    \
           recette.stk         \
           slib.stk            \
-          streams-primitive.stk \
-          streams-derived.stk \
-          srfi-1.stk          \
-          srfi-2.stk          \
-          srfi-4.stk          \
-          srfi-5.stk          \
-          srfi-7.stk          \
-          srfi-9.stk          \
-          srfi-11.stk         \
-          srfi-13.stk         \
-          srfi-14.stk         \
-          srfi-17.stk         \
-          srfi-26.stk         \
-          srfi-29.stk         \
-          srfi-31.stk         \
-          srfi-35.stk         \
-          srfi-36.stk         \
-          srfi-37.stk         \
-          srfi-41.stk         \
-          srfi-48.stk         \
-          srfi-51.stk         \
-          srfi-54.stk         \
-          srfi-59.stk         \
-          srfi-60.stk         \
-          srfi-61.stk         \
-          srfi-64.stk         \
-          srfi-66.stk         \
-          srfi-69.stk         \
-          srfi-70.stk         \
-          srfi-74.stk         \
-          srfi-89.stk         \
-          srfi-94.stk         \
-          srfi-96.stk         \
-          srfi-100.stk        \
-          srfi-113.stk        \
-          srfi-117.stk        \
-          srfi-127.stk        \
-          srfi-128.stk        \
-          srfi-129.stk        \
-          srfi-130.stk        \
-          srfi-134.stk        \
-          srfi-135.stk        \
-          srfi-137.stk        \
-          srfi-141.stk        \
-          srfi-151.stk        \
-          srfi-156.stk        \
-          srfi-158.stk        \
-          srfi-161.stk        \
-          srfi-171.stk        \
-          srfi-173.stk        \
-          srfi-174.stk        \
-          srfi-180.stk        \
-          srfi-185.stk        \
-          srfi-189.stk        \
-          srfi-190.stk        \
-          srfi-196.stk        \
-          srfi-207.stk        \
-          srfi-216.stk        \
-          srfi-217.stk        \
-          srfi-222.stk        \
-          trie.stk            \
           tar.stk             \
           trace.stk
 
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
+          conditions.ostk       \
           full-syntax.ostk      \
-          full-conditions.ostk  \
           describe.ostk         \
           env.ostk              \
           getopt.ostk           \
@@ -157,69 +98,12 @@ scheme_OBJS = compfile.ostk     \
           pretty-print.ostk     \
           recette.ostk          \
           slib.ostk             \
-          streams-primitive.ostk \
-          streams-derived.ostk   \
-          srfi-1.ostk           \
-          srfi-2.ostk           \
-          srfi-4.ostk           \
-          srfi-5.ostk           \
-          srfi-7.ostk           \
-          srfi-9.ostk           \
-          srfi-11.ostk          \
-          srfi-13.ostk          \
-          srfi-14.ostk          \
-          srfi-17.ostk          \
-          srfi-26.ostk          \
-          srfi-29.ostk          \
-          srfi-31.ostk          \
-          srfi-35.ostk          \
-          srfi-36.ostk          \
-          srfi-37.ostk          \
-          srfi-41.ostk          \
-          srfi-48.ostk          \
-          srfi-51.ostk          \
-          srfi-54.ostk          \
-          srfi-59.ostk          \
-          srfi-60.ostk          \
-          srfi-61.ostk          \
-          srfi-64.ostk          \
-          srfi-66.ostk          \
-          srfi-69.ostk          \
-          srfi-70.ostk          \
-          srfi-74.ostk          \
-          srfi-89.ostk          \
-          srfi-94.ostk          \
-          srfi-96.ostk          \
-          srfi-100.ostk         \
-          srfi-113.ostk         \
-          srfi-117.ostk         \
-          srfi-127.ostk         \
-          srfi-128.ostk         \
-          srfi-129.ostk         \
-          srfi-130.ostk         \
-          srfi-134.ostk         \
-          srfi-135.ostk         \
-          srfi-137.ostk         \
-          srfi-141.ostk         \
-          srfi-151.ostk         \
-          srfi-156.ostk         \
-          srfi-158.ostk         \
-          srfi-161.ostk         \
-          srfi-171.ostk         \
-          srfi-173.ostk         \
-          srfi-174.ostk         \
-          srfi-180.ostk         \
-          srfi-185.ostk         \
-          srfi-189.ostk         \
-          srfi-190.ostk         \
-          srfi-196.ostk         \
-          srfi-207.ostk         \
-          srfi-216.ostk         \
-          srfi-217.ostk         \
-          srfi-222.ostk         \
-          trie.ostk             \
           tar.ostk              \
           trace.ostk
+
+SRC_C         = readline-complete.c
+SRC_C_STK     =
+scheme_SOLIBS = readline-complete.@SH_SUFFIX@
 
 
 DOCDB       = DOCDB
@@ -230,16 +114,19 @@ BASEDIR     = ..
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA  = $(scheme_SOLIBS)
+schemelib_DATA  = $(scheme_SOLIBS) 
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
-SUFFIXES = .stk .ostk .scm .c
+SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
 .scm.ostk:
 	$(COMP) -o $*.ostk $*.scm
+
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
@@ -303,17 +190,19 @@ install-sources:
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
-full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
-srfi-13.ostk: srfi-14.ostk
-srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
-srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
-streams-derived.ostk: srfi-1.ostk streams-primitive.ostk
-srfi-113.ostk: srfi-128.ostk
-srfi-134.ostk: srfi-158.ostk
-srfi-217.ostk: trie.ostk
 
+lib/scheme: lib
+lib/stklos: lib
+lib/streams: lib
+lib/srfi: lib/scheme lib/stklos lib/streams
+
+readline-complete.@SH_SUFFIX@: readline-complete.c 
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
+	-c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@ @RDLINE@
+	/bin/rm -f $*.o
 
 #
 # SRFIs support

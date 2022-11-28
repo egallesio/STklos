@@ -42,7 +42,7 @@
 #  include <unistd.h>
 #  include <pwd.h>
 #  define ISDIRSEP(ch) 	 ((ch)=='/')
-#  define ISABSOLUTE(s) (ISDIRSEP(*s))
+#  define ISABSOLUTE(s) (ISDIRSEP(*(s)))
 #  define DIRSEP 	 '/'
 #  define SDIRSEP  	 "/"
 #  define PATHSEP	 ':'

@@ -75,7 +75,7 @@
 #  define IN_EQV               70
 #  define IN_EQUAL             71
 #  define IN_APPLY             72
-#  define MAKE_EXPANDER        73
+#  define UNUSED_2             73
 #  define SET_CUR_MOD          74
 #  define DOCSTRG              75
 #  define FORMALS              76
@@ -163,8 +163,14 @@
 #  define IN_SINT_FXSUB2       158
 #  define IN_SINT_FXMUL2       159
 #  define IN_SINT_FXDIV2       160
+#  define IN_FXEQ              161
+#  define IN_FXLT              162
+#  define IN_FXGT              163
+#  define IN_FXLE              164
+#  define IN_FXGE              165
+#  define IN_FXDIFF            166
 
-#  define NB_VM_INSTR (IN_SINT_FXDIV2      +1)
+#  define NB_VM_INSTR (IN_FXDIFF           +1)
 #endif
 
 
@@ -244,7 +250,7 @@ static void *jump_table[] = {
   &&lab_IN_EQV              ,
   &&lab_IN_EQUAL            ,
   &&lab_IN_APPLY            ,
-  &&lab_MAKE_EXPANDER       ,
+  &&lab_UNUSED_2            ,
   &&lab_SET_CUR_MOD         ,
   &&lab_DOCSTRG             ,
   &&lab_FORMALS             ,
@@ -332,6 +338,12 @@ static void *jump_table[] = {
   &&lab_IN_SINT_FXSUB2      ,
   &&lab_IN_SINT_FXMUL2      ,
   &&lab_IN_SINT_FXDIV2      ,
+  &&lab_IN_FXEQ             ,
+  &&lab_IN_FXLT             ,
+  &&lab_IN_FXGT             ,
+  &&lab_IN_FXLE             ,
+  &&lab_IN_FXGE             ,
+  &&lab_IN_FXDIFF           ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -413,7 +425,7 @@ static char *name_table[] = {
   "IN_EQV              ",
   "IN_EQUAL            ",
   "IN_APPLY            ",
-  "MAKE_EXPANDER       ",
+  "UNUSED_2            ",
   "SET_CUR_MOD         ",
   "DOCSTRG             ",
   "FORMALS             ",
@@ -501,6 +513,12 @@ static char *name_table[] = {
   "IN_SINT_FXSUB2      ",
   "IN_SINT_FXMUL2      ",
   "IN_SINT_FXDIV2      ",
+  "IN_FXEQ             ",
+  "IN_FXLT             ",
+  "IN_FXGT             ",
+  "IN_FXLE             ",
+  "IN_FXGE             ",
+  "IN_FXDIFF           ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

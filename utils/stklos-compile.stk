@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,12 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 31-May-2021 11:55 (eg)
+;;;; Last file update: 20-May-2022 18:57 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
 
 (define *output* "a.out")
+(define *prepend-code* '())
 (define *c-code* #f)
 (define *expr* #f)
 
@@ -81,7 +82,7 @@
         (let* ((c1 (read-byte in))
                (c2 (read-byte in)))
           (format out
-                  "~5f"
+                  "~a"
                   (string-append
                    "0x"
                    (number->string (bit-or (bit-shift c1 8) c2)
@@ -98,17 +99,17 @@
 ;; ----------------------------------------------------------------------
 ;;      compile-to-bytecode ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-bytecode file out)
-  (compile-file file out)
+(define (compile-to-bytecode file out prepend)
+  (compile-file file out :prepend prepend)
   (chmod out #o755))
 
 ;; ----------------------------------------------------------------------
 ;;      compile-to-C-code ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-C-code file out)
+(define (compile-to-C-code file out prepend)
   (let ((tmp  (create-temp-file))
         (name (file-prefix (basename file))))
-    (compile-to-bytecode file tmp)
+    (compile-to-bytecode file tmp prepend)
     (convert-to-C tmp out name)
     (remove-file tmp)))
 
@@ -144,18 +145,26 @@
      (("evaluate" :alternate "e" :arg expr
        :help "Evaluate <expr> before compiling file")
       (set! *expr* expr))
+     (("prepend-code" :alternate "k" :arg expr
+       :help "Insert <expr> before file contents")
+      (set! *prepend-code* (append *prepend-code* (list expr))))
+     (("define-feature" :alternate "D" :arg name
+       :help "Add <name> to known features (SRFI 138)")
+      (with-handler (lambda (c)
+                      (die (format "Error in --define-feature ~A option" name)))
+                    (srfi0-register-feature! (string->symbol name))))
      (("line-info" :alternate "l" :help "Insert line numbers in generated file")
         (compiler:gen-line-number #t))
      (("show-instructions" :alternate "S" :help "Show instructions in generated file")
         (compiler:show-assembly-code #t))
 
      "Path options"
-     (("prepend-load-path" :alternate "L" :arg dir
+     (("prepend-load-path" :alternate "I" :arg dir
        :help "Prepend <dir> to the loading path")
       (set! (load-path) (cons dir (load-path))))
-     (("append-load-path"  :arg dir
+     (("append-load-path"  :alternate "A" :arg dir
        :help "Append <dir> to the loading path")
-      (set! (load-path) (cons (load-path) (list dir))))
+      (set! (load-path) (append (load-path) (list dir))))
 
      "Misc. options"
      (("no-time" :help "Don't display compilation time")
@@ -174,9 +183,14 @@
               (eval (read-from-string *expr*)
                     (interaction-environment))))
          ;; Produce code
+         (set! *prepend-code*
+           (map (lambda (s)
+                       (read-from-string s))
+                     *prepend-code*))
+
          (if *c-code*
-             (compile-to-C-code (car other-arguments) *output*)
-             (compile-to-bytecode (car other-arguments) *output*))
+             (compile-to-C-code   (car other-arguments) *output* *prepend-code*)
+             (compile-to-bytecode (car other-arguments) *output* *prepend-code*))
          (exit 0))
         (else
           (arg-usage (current-error-port))

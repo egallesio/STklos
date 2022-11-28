@@ -1,0 +1,82 @@
+;;;; -*- coding: utf-8 -*-
+;;;;
+;;;; fuse.stk   -- FUSE support for STklos
+;;;;
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  7-Dec-2005 16:24 (eg)
+;;;; Last file update:  1-Feb-2022 17:23 (eg)
+;;;;
+
+(select-module stklos/fuse)
+
+(%compile-time-define %fuse-mount *all-errno-symbols*)
+
+
+;; ----------------------------------------------------------------------
+;;      fuse-mount ...
+;; ----------------------------------------------------------------------
+(define (fuse-mount args :key getattr readlink mknod mkdir
+                              unlink rmdir symlink rename link
+                              chmod chown truncate utime open
+                              read write statfs flush release
+                              fsync setxattr getxattr listxattr
+                              removexattr opendir readdir releasedir
+                              fsyncdir init  destroy)
+
+  (let ((lst (list getattr readlink mknod mkdir
+                   unlink rmdir symlink rename link
+                   chmod chown truncate utime open
+                   read write statfs flush release
+                   fsync setxattr getxattr listxattr
+                   removexattr opendir readdir releasedir
+                   fsyncdir init  destroy))
+        (names '(getattr readlink mknod mkdir
+                   unlink rmdir symlink rename link
+                   chmod chown truncate utime open
+                   read write statfs flush release
+                   fsync setxattr getxattr listxattr
+                   removexattr opendir readdir releasedir
+                   fsyncdir init  destroy)))
+    ; Verify type of parameters
+    (for-each (lambda (x y)
+                (unless (or (boolean? x) (procedure? x))
+                  (error "bad procedure for ~A: ~S" y x)))
+              lst names)
+
+    ;; We have a problem with multi-threaded mode since
+    ;; fuse threads are not seen by the GC. We can recompile
+    ;; the library to include <gc/gc.h> or we can impose to
+    ;; be single threaded. This what we do here
+    (let ((args (append! args '("-s"))))
+      (%fuse-mount (list->vector args) (list->vector lst)))))
+
+
+;;;
+;;; Exports
+;;;
+(export fuse-mount
+       S_IFSOCK S_IFLNK S_IFREG S_IFBLK S_IFDIR S_IFCHR S_IFIFO S_ISUID
+       S_ISGID  S_ISVTX S_IRWXU S_IRUSR S_IWUSR S_IXUSR S_IRWXG S_IRGRP
+       S_IWGRP  S_IXGRP S_IRWXO S_IROTH S_IWOTH S_IXOTH)
+
+(eval `(export ,@*all-errno-symbols*))
+
+(provide "stklos/fuse")

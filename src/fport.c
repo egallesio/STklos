@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 10-May-2021 18:01 (eg)
+ * Last file update:  9-Jan-2022 19:19 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -40,7 +40,7 @@
 
 int STk_interactive = 0;                  /* We are in interactive mode */
 SCM STk_stdin, STk_stdout, STk_stderr;    /* The unredirected ports */
-MUT_DECL(all_fports_mutex)
+MUT_DECL(all_fports_mutex);
 
 /*
  * Implementation of our own popen/pclose. We use her file descriptor, instad
@@ -50,7 +50,7 @@ MUT_DECL(all_fports_mutex)
  * for the redirection. This pid is stored in the internal file port
  * representation to wait on it during the fd_pclose.
  */
-static int fd_popen(char *cmd, char *mode, int *pid)
+static int fd_popen(const char *cmd, const char *mode, int *pid)
 {
   int p[2];
 
@@ -166,7 +166,7 @@ void STk_close_all_ports(void)
   }
   MUT_UNLOCK(all_fports_mutex);
 
-  /* Finally close error and output port (must be done last) */
+  /* Finally, close error and output port (must be done last) */
   STk_close(eport);
   STk_close(oport);
 }
@@ -347,7 +347,7 @@ static Inline int Fputc(int c, void *stream)
 }
 
 
-static Inline int Fwrite(void *stream, void *buff, int count)
+static Inline int Fwrite(void *stream, const void *buff, int count)
 {
   /* Flush (eventually) chars which are already in the buffer before writing  */
   if (PORT_CNT(stream)) {
@@ -363,7 +363,7 @@ static Inline int Fwrite(void *stream, void *buff, int count)
 }
 
 
-static Inline int Fnputs(void *stream, char *s, int len)
+static Inline int Fnputs(void *stream, const char *s, int len)
 {
   int res, flush = (PORT_STREAM_FLAGS(stream) & STK_IOLBF);
 
@@ -403,7 +403,7 @@ static Inline int Fnputs(void *stream, char *s, int len)
 }
 
 
-static Inline int Fputs(char *s, void *stream)
+static Inline int Fputs(const char *s, void *stream)
 {
   return Fnputs(stream, s, strlen(s));
 }
@@ -424,10 +424,10 @@ static void fport_print(SCM obj, SCM port)      /* Generic printing of file port
 {
   char buffer[MAX_PATH_LENGTH + 40];
 
-  sprintf(buffer, "#[%s-port '%s' (%d)%s]",
-          IPORTP(obj) ? "input" : "output",
-          PORT_FNAME(obj), PORT_FD(PORT_STREAM(obj)),
-          PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
+  snprintf(buffer, sizeof(buffer), "#[%s-port '%s' (%d)%s]",
+           IPORTP(obj) ? "input" : "output",
+           PORT_FNAME(obj), PORT_FD(PORT_STREAM(obj)),
+           PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
   STk_puts(buffer, port);
 }
 
@@ -441,7 +441,7 @@ static void fport_finalizer(struct port_obj *port, void _UNUSED(*client_data))
 
 
 static struct port_obj *
-make_fport(char *fname, int fd, int flags)
+make_fport(const char *fname, int fd, int flags)
 {
   struct fstream  *fs = STk_must_malloc(sizeof(struct fstream));
   int n, mode;
@@ -460,7 +460,7 @@ make_fport(char *fname, int fd, int flags)
   /* keep the indication that file is opened in read in the stream part */
   if (flags & (PORT_READ | PORT_RW)) mode |= STK_IOREAD;
 
-  /* Set the case sensitive bit */
+  /* Set the case-sensitive bit */
   if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
 
   /* Initialize the stream part */
@@ -534,7 +534,7 @@ static char *convert_for_win32(char *mode)
 }
 #endif
 
-static int convert_mode(char* mode) {
+static int convert_mode(const char *mode) {
   char first = *mode;
 
   if (mode[1] == 'b')
@@ -561,9 +561,9 @@ static int convert_mode(char* mode) {
 }
 
 
-static SCM open_file_port(SCM filename, char *mode, int flags, int error)
+static SCM open_file_port(SCM filename, const char *mode, int flags, int error)
 {
-  char *full_name, *name;
+  const char *full_name, *name;
   SCM z;
   int fd;
 
@@ -603,7 +603,7 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
 
 
 
-SCM STk_fd2scheme_port(int fd, char *mode, char *identification)
+SCM STk_fd2scheme_port(int fd, const char *mode, char *identification)
 {
   int flags;
 
@@ -662,10 +662,10 @@ void STk_set_line_buffered_mode(SCM port)
  * Takes a string naming an existing file and returns an input port capable
  * of delivering characters from the file. If the file cannot be opened,
  * an error is signalled.
- * @l
- * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")),
- * this procedure returns a pipe port. Consequently, it is not possible to
- * open a file whose name starts with those two characters.
+ *
+ * NOTE: if |filename| starts with the string `"| "`, this procedure returns a pipe port.
+ * Consequently, it is not possible to open a file whose name starts with those two
+ * characters.
 doc>
  */
 DEFINE_PRIMITIVE("open-input-file", open_input_file, subr1, (SCM filename))
@@ -688,10 +688,10 @@ DEFINE_PRIMITIVE("open-binary-input-file", open_binary_ifile, subr1, (SCM filena
  * port capable of writing characters to a new file by that name. If the file
  * cannot be opened, an error is signalled. If a file with the given name
  * already exists, it is rewritten.
- * @l
- * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")),
- * this procedure returns a pipe port. Consequently, it is not possible to
- * open a file whose name starts with those two characters.
+ *
+ * NOTE: if |filename| starts with the string `"| "`, this procedure returns a pipe port.
+ * Consequently, it is not possible to open a file whose name starts with those two
+ * characters.
 doc>
  */
 DEFINE_PRIMITIVE("open-output-file", open_output_file, subr1, (SCM filename))
@@ -713,7 +713,7 @@ DEFINE_PRIMITIVE("open-binary-output-file", open_binary_ofile, subr1, (SCM filen
  * (output-file-port? obj)
  *
  * Returns |#t| if |obj| is a file input port or a file output port respectively,
- * otherwise returns #f.
+ * otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-file-port?", input_fportp, subr1, (SCM port))
@@ -733,28 +733,28 @@ DEFINE_PRIMITIVE("output-file-port?", output_fportp, subr1, (SCM port))
  *
  * Opens the file whose name is |filename| with the specified string
  * |mode| which can be:
- * ,(itemize
- * (item [|"r"| to open file for reading. The stream is positioned at
- * the beginning of the file.])
  *
- * (item [|"r+"| to open file for reading and writing.  The stream is
- * positioned at the beginning of the file.])
+ * - |"r"| to open file for reading. The stream is positioned at
+ *   the beginning of the file.
  *
- * (item [|"w"| to truncate file to zero length or create file for writing.
- * The stream is positioned at the beginning of the file.])
+ * - |"r+"| to open file for reading and writing.  The stream is
+ *   positioned at the beginning of the file.
  *
- * (item [|"w+"| to open  file for reading and writing. The file is created
- * if it does not exist, otherwise it is truncated. The stream is positioned
- * at the beginning of the file.])
+ * - |"w"| to truncate file to zero length or create file for writing.
+ *   The stream is positioned at the beginning of the file.
  *
- * (item [|"a"| to open for writing.  The file is created if  it  does
- * not exist. The stream is positioned at the end of the file.])
+ * - |"w+"| to open  file for reading and writing. The file is created
+ *   if it does not exist, otherwise it is truncated. The stream is positioned
+ *   at the beginning of the file.
  *
- * (item [|"a+"| to open file for reading and writing. The file is created
- * if it does not exist. The stream is positioned at the end of the file.])
- * )
+ * - |"a"| to open for writing.  The file is created if  it  does
+ *   not exist. The stream is positioned at the end of the file.
+ *
+ * - |"a+"| to open file for reading and writing. The file is created
+ *   if it does not exist. The stream is positioned at the end of the file.
+ *
  * If the file can be opened, |open-file| returns the textual port associated
- * with the given file, otherwise it returns |#f|. Here again, the ``magic''
+ * with the given file, otherwise it returns |#f|. Here again, the *_magic_*
  * string "@pipe " permits to open a pipe port (in this case mode can only be
  * |"r"| or |"w"|).
 doc>
@@ -894,15 +894,17 @@ static SCM load_file(SCM filename)
 <doc load
  * (load filename)
  *
+ * (((load-path)))
+ * (((load-suffixes)))
  * |Filename| should be a string naming an existing file containing Scheme
  * expressions. |Load| has been extended in STklos to allow loading of
- * file containing Scheme compiled code as well as object files
- * (,(emph "aka") shared objects). The loading of object files is not available on
- * all architectures. The value returned by |load| is ,(emph "void").
- * @l
+ * file containing Scheme compiled code as well as object files (_aka_
+ * shared objects). The loading of object files is not available on
+ * all architectures. The value returned by |load| is *_void_*.
+ *
  * If the file whose name is |filename| cannot be located, |load| will try
- * to find it in one of the directories given by ,(code (ref :mark "load-path"))
- * with the suffixes given by ,(code (ref :mark "load-suffixes")).
+ * to find it in one of the directories given by `"load-path"`
+ * with the suffixes given by `"load-suffixes"`.
 doc>
  */
 DEFINE_PRIMITIVE("load", scheme_load, subr1, (SCM filename))
@@ -947,7 +949,7 @@ DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
     f = STk_open_file(fname, "r");
     if (f != STk_false) {
       int type  = find_file_nature(f);
-      char* str = "";
+      char *str = "";
 
       switch (type) {
         case FILE_IS_SOURCE: str = "source"; break;

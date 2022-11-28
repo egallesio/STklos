@@ -99,7 +99,8 @@ The following program `loop.c` is a trivial example:
             assert(*p == 0);
             *p = (int *) GC_REALLOC(q, 2 * sizeof(int));
             if (i % 100000 == 0)
-                printf("Heap size = %d\n", GC_get_heap_size());
+                printf("Heap size = %lu bytes\n",
+                       (unsigned long)GC_get_heap_size());
         }
         return 0;
     }
@@ -136,8 +137,8 @@ The collector includes some _alternate interfaces_ to make that easier.
 
 Additional debug checks can be performed by defining `GC_DEBUG` before
 including `gc.h`. Additional options are available if the collector is also
-built with `--enable-gc-debug` (`--enable-full-debug` in some older versions)
-and all allocations are performed with `GC_DEBUG` defined.
+built with `--enable-gc-debug` and all allocations are performed with
+`GC_DEBUG` defined.
 
 ### What if I can't rewrite/recompile my program?
 

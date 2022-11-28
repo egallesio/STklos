@@ -1,0 +1,47 @@
+;;;;
+;;;;
+;;;; stream.stk         -- The R7RS large stream library
+;;;;
+;;;; Copyright © 2022 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 28-Sep-2022 18:06
+;;;; Last file update:  1-Oct-2022 21:39 (eg)
+;;;;
+
+
+(define-module scheme/stream
+  (import (streams primitive) (streams derived))
+  (export stream-cons stream-lambda stream-delay stream-lazy
+          make-stream make-stream-pare %stream-eager
+          stream-null stream-cons stream? stream-null? stream-pair?
+          stream-car stream-cdr stream-lambda define-stream
+          list->stream port->stream stream
+          stream->list stream-append stream-concat stream-constant stream-drop
+          stream-drop-while stream-filter stream-fold stream-for-each stream-from
+          stream-iterate stream-length stream-let stream-map stream-match
+          stream-match-next stream-match-one stream-match-body stream-of
+          stream-of-aux stream-of-aux2 stream-range stream-ref stream-reverse
+          stream-scan stream-take stream-take-while stream-unfold
+          stream-unfolds stream-zip)
+) ;; END OF DEFINE-MODULE
+
+(provide "scheme/stream")
+
+

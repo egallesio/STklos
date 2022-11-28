@@ -1,7 +1,7 @@
 ;;;;
 ;;;; compfile.stk       -- STklos File Compiler
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,12 +21,29 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 11-May-2021 19:24 (eg)
+;;;; Last file update:  8-Sep-2022 08:13 (eg)
 ;;;;
 
 (select-module STKLOS-COMPILER)
 
-(define (compile-file input output)
+#|
+<doc EXT compile-file
+ * (compile-file input output)
+ * (compile-file input output :prepend cmds)
+ *
+ * Compiles the file whose name is |input| into a bytecode executable
+ * whose name is |output|.
+ *
+ * If the |:prepend| keyword argument is given, it must be a list of
+ * expressions, which will be compiled before the rest of the input
+ * file. This can be used to define variables that the compiled program
+ * will use (but it does not affect the compiler itself).
+ *
+ * This procedure will not set the executable bit on the generated file.
+doc>
+|#
+
+(define (compile-file input output :key (prepend '() has-prepend?))
 
   (define (compute-file-informations initial-globals)
     (let ((globs (let loop ((lst (compiler-known-globals))
@@ -42,7 +59,7 @@
       ;; Return informations
       (list :version   (version)
             :globals   globs
-            :expanders (expander-published-sources))))
+            :macros    (file-module-list-expanders))))
 
   (let ((out      (open-output-file output))
         (globs    (compiler-known-globals))
@@ -50,15 +67,26 @@
         (copts    (compiler:warn-use-undefined-postpone)))
 
     ;; Clear the list containing  macros sources
-    (expander-published-reset!)
+    (file-module-list-reset!)
 
     ;; Defer warning til the end of the compilation of file
     ;(compiler:warn-use-undefined-postpone #t)
 
     (fluid-let ((*code-instr* '())
-                (*code-constants* '()))
+                (*code-constants* '())
+                (*compiling-file* #t))
+
+      ;; SRFI 138, -D option:
+      (when has-prepend?
+        (unless (list? prepend)
+          (error 'compile-file "prepend should be a list: ~S" prepend))
+        ;; whatever the list is, if we wrap it in a BEGIN form,
+        ;; it will be compiled sequentially:
+        (let ((exprs (cons 'begin prepend)))
+          (compile exprs #f exprs #f)))
+
       ;; Read the source file
-      (include-file input)
+      (%include-file input)
       (emit 'END-OF-CODE)
 
       ;; Write the header

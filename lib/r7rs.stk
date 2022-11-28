@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2020 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,48 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 15-Oct-2020 18:53 (eg)
+;;;; Last file update: 12-May-2022 15:52 (eg)
 ;;;;
+
+
+(export write-shared write-simple
+        letrec* let-values let*-values
+        delay delay-force lazy make-promise eager
+        define-values
+        equal-simple?
+        exact-integer?
+        floor-quotient floor/ truncate/ truncate-quotient
+        truncate-remainder floor-remainder
+        square exact-integer-sqrt exact inexact
+        boolean=?
+        make-list member-simple assoc-simple member assoc
+        symbol=?
+        string=?     %string2=?
+        string<?     %string2<?
+        string<=?    %string2<=?
+        string>?     %string2>?
+        string>=?    %string2>=?
+        string-ci=?  %string-ci2=?
+        string-ci<?  %string-ci2<?
+        string-ci<=? %string-ci2<=?
+        string-ci>?  %string-ci2>?
+        string-ci>=? %string-ci2>=?
+        string->list string-copy!
+        string-fill! %string-fill2!
+        vector->list vector-copy! vector->string string->vector
+        make-bytevector bytevector? bytevector bytevector-length
+        bytevector-u8-ref bytevector-u8-set! bytevector-copy!
+        string-map vector-map
+        string-for-each vector-for-each
+        error-object? error-object-message error-object-irritants
+        read-error? file-error?
+        call-with-port input-port-open? output-port-open?
+        read-string read-u8 peek-u8 read-bytevector!
+        write-string write-u8 write-bytevector
+        with-exception-handler raise-continuable guard
+        current-jiffy jiffies-per-second features
+        %continuable-exception?  %continuable-exception-value;; FIXME
+        )
 
 
 ;;;; Aliases
@@ -41,7 +81,7 @@
  * <bindings> should have the form as in |let| and body is a sequence
  * of zero or more definitions followed by one or more expressions.
 
- * The |<variable>|s are bound to fresh locations, each |variable| is
+ * The `|<variable>|`s are bound to fresh locations, each |variable| is
  * assigned in left-to-right order to the result of evaluating the
  * corresponding |init|, the |body| is evaluated in the resulting
  * environment, and the values of the last expression in |body| are
@@ -83,9 +123,9 @@ doc>
  *
  * Each |<formals>| should be a formal arguments list as for a |lambda| expression.
  *
- * The |<expression>|s are evaluated in the current environment,
+ * The `|<expression>|`s are evaluated in the current environment,
  * the variables of the |<formals>| are bound to fresh locations, the return
- * values of the |<expression>|s are stored in the variables, the |<body>| is
+ * values of the `|<expression>|`s are stored in the variables, the |<body>| is
  * evaluated in the extended environment, and the values of the last expression
  * of |<body>| are returned.
  *
@@ -139,7 +179,8 @@ is
       ;; Verify that the binding seem correct
       (unless (and (list? binding)
                    (= (length binding) 2)
-                   (pair? (car binding)))
+                   (or (pair? (car binding))
+                       (symbol? (car binding))))
         (error 'let-values "incorrect binding ~S" binding))
       ;; Verify that the defined variables are unique
       (for-each* (lambda (x)
@@ -189,13 +230,13 @@ doc>
  * (delay <expression>)
  *
  * The |delay| construct is used together with the procedure |force|
- * to implement ,(emph "lazy evaluation") or ,(emph "call by need"). |(delay
- * <expression>)| returns an object called a ,(emph "promise") which at some
+ * to implement *_lazy evaluation_* or *_call by need_*. |(delay
+ * <expression>)| returns an object called a *_promise_*) which at some
  * point in the future may be asked (by the |force| procedure) to
  * evaluate |<expression>|, and deliver the resulting value.
  * The effect of |<expression>| returning multiple values is unpredictable.
  *
- * See the description of |force| (@pxref{force}) for a more complete
+ * See the description of |force| for a more complete
  * description of |delay|.
 doc>
 |#
@@ -215,7 +256,7 @@ doc>
  * |delay| and |force| can be rewritten using |delay-force| to prevent consuming
  * unbounded space during evaluation.
  *
- * The special form |delay-force| appears with name |lazy| in SRFI-45.
+ * The special form |delay-force| appears with name |lazy| in {{link-srfi 45}}.
  *
 doc>
 |#
@@ -267,7 +308,7 @@ doc>
  * (let ()
  *    (define-values (x y) (values 1 2))
  *    (+ x y))                     => 3
- * 
+ *
  * (let ()
  *    (define-values (x . y) (values 1 2 3))
  *    (list x y)                  => (1 (2 3))
@@ -275,21 +316,23 @@ doc>
 doc>
 |#
 (define-macro (define-values formals expr)
-  (cond
-   ((symbol? formals)
-    `(define ,formals (call-with-values (lambda () ,expr) list)))
-   ((null? formals)
-    `(call-with-values (lambda () ,expr) void))
-   ((pair? formals)
-    (let ((first (car formals)))
-      `(begin
-         (define ,first (call-with-values (lambda () ,expr) list))
-         (define-values ,(cdr formals) (apply values (cdr ,first)))
-         (set! ,first (car ,first))
-         ;; return a (values (void) ...) for the REPL
-         (values (void) ',formals))))
-   (else (error "bad formal list in define-values ~S" ',formals))))
+  (define (flat lst)
+    (cond
+     ((null? lst) lst)
+     ((pair? lst) (cons (car lst) (flat (cdr lst))))
+     (else        (list lst))))
 
+  (if (null? formals)
+      `(call-with-values (lambda () ,expr) void)
+      (let* ((tmps (map* (lambda(x) (gensym)) formals))
+             (ff   (flat formals))
+             (ft   (flat tmps)))
+        `(begin
+           ,@(map (lambda (x) `(define ,x #void)) ff)
+           (call-with-values (lambda () ,expr)
+             (lambda ,tmps ,@(map (lambda (x y) `(set! ,x ,y)) ff ft)))
+           ;; return a (values (void) ...) for the REPL
+           (values (void) ',formals)))))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.1 Equivalence predicate
@@ -332,7 +375,7 @@ doc>
  * the other procedures return an integer.  All the procedures compute a
  * quotient |q| and remainder |r| such that |n1=n2*q+r|.
  *
- *  See R7RS for more information.
+ * See R7RS for more information.
  *
  * @lisp
  * (floor/ 5 2)         => 2 1
@@ -394,10 +437,20 @@ doc>
 |#
 (define (exact-integer-sqrt k)
   (define (isqrt n)
-    (let loop ((xn 1))
+    ;; Compute integer square root using Newton's method.
+    
+    ;; We take special care when picking the initial guess, which
+    ;; is computed in the 'xn' argument to the named let below:
+    ;; this is a very good estimate (much better than the usual
+    ;; textbook "n/2" guess), and safe:
+    ;;
+    ;; (expt 2 (+ 1 (quotient (integer-length n) 2)))
+    ;;
+    ;; which is the least power of two bigger than SQRT(n).
+    (let loop ((xn (expt 2 (+ 1 (quotient (integer-length n) 2)))))
       (let ((xn1 (quotient (+ xn (quotient n xn)) 2)))
-        (if (= xn1 xn)
-            xn1
+        (if (>= xn1 xn)
+            xn
             (loop xn1)))))
 
   (unless (and (exact-integer? k)(>= k 0))
@@ -407,6 +460,7 @@ doc>
                  (if (exact? v) v (inexact->exact (floor v))))
                (isqrt k))))
     (values s (- k (* s s)))))
+
 
 #|
 <doc R7RS exact inexact
@@ -429,7 +483,7 @@ doc>
 <doc boolean=?
  * (boolean=? boolean1 boolean2  ...)
  *
- * Returns #t if all the arguments are booleans and all are #t or all are #f.
+ * Returns `#t` if all the arguments are booleans and all are `#t` or all are `#f`.
  *
 doc>
 |#
@@ -549,7 +603,7 @@ doc>
  * (string-copy! to at from start)
  * (string-copy! to at from start end)
  *
- *  Copies the characters of |string| from between |start| and |end|
+ * Copies the characters of |string| from between |start| and |end|
  * to string |to|, starting at |at|. The order in which characters are copied
  * is unspecified, except that if the source and destination overlap,
  * copying takes place as if the source is first copied into a temporary
@@ -629,7 +683,7 @@ doc>
 ;;;; ----------------------------------------------------------------------
 
 ;;
-;; Generalized string->list
+;; Generalized vector->list
 ;;
 (let ((v->l vector->list)) ;; v->l is the R5RS function
   (set! vector->list
@@ -814,7 +868,7 @@ doc>
  * range [0..255]. It is an error if |k| is not a valid index of |bytevector|.
  *
  * @lisp
- * (bytevector-u8-ref ’#u8(1 1 2 3 5 8 13 21) 5    => 8
+ * (bytevector-u8-ref #u8(1 1 2 3 5 8 13 21) 5    => 8
  * @end lisp
 doc>
 |#
@@ -1130,6 +1184,7 @@ doc>
  * will never again be used for a read or write operation.
  *
  * It is an error if proc does not accept one argument.
+doc>
 |#
 (define (call-with-port port proc)
   #;(unless (port? port)
@@ -1206,7 +1261,7 @@ doc>
  * bytes are available, an end-of-file object is returned.
  *
  * @l
- * ,(bold "Note"): This function is similar to the |read-byte|
+ * NOTE: This function is similar to the |read-byte|
  * function, excepted that it can be used only on  a binary port.
 doc>
 |#
@@ -1229,7 +1284,7 @@ doc>
  * is returned.
  *
  * @l
- * ,(bold "Note"): This function is similar to the |peek-byte|
+ * NOTE: This function is similar to the |peek-byte|
  * function, excepted that it can be used only on  a binary port.
 doc>
 |#
@@ -1333,9 +1388,9 @@ doc>
 ;;;; ----------------------------------------------------------------------
 #|
 <doc EXT-SYNTAX with-handler
- * (with-handler <handler> <expr1> ... <exprn>)
+ * (with-handler <handler> <expr~1~> ... <expr~n~>)
  *
- * Evaluates the sequences of expressions |<expr1>| to |<exprn>|.
+ * Evaluates the sequences of expressions |<expr~1~>| to |<expr~n~>|.
  * |<handler>| must be a procedure that accepts one argument. It is installed
  * as the current exception handler for the dynamic extent (as determined by
  * dynamic-wind) of the evaluations of the expressions
@@ -1352,8 +1407,8 @@ doc>
 <doc R7RS with-exception-handler
  * (with-exception-handler <handler> <thunk>)
  *
- * This form is similar to |with-handler|. It uses a ,(emph "thunk") instead of
- * a sequence of expressions. It is conform to ,(link-srfi 34).
+ * This form is similar to |with-handler|. It uses a *_thunk_* instead of
+ * a sequence of expressions. It is conform to {{link-srfi 34}}.
  * In fact,
  * @lisp
  * (with-handler <handler> <expr1> ... <exprn>)
@@ -1368,20 +1423,18 @@ doc>
 
 (define-struct %continuable-exception value)
 
-(define-macro (with-exception-handler handler thunk)
-  (let ((v   (gensym))
-        (res (gensym))
-        (err (gensym)))
-    `(let ((,res (with-handler (lambda(,v)
-                                 (if (%continuable-exception? ,v)
-                                    (,handler (%continuable-exception-value ,v))
-                                    (begin
-                                      (,handler ,v)
-                                      ',err)))
-                                 (,thunk))))
-       (if (eq? ,res ',err)
-           (error "exception handler returned on non-continuable exception")
-          ,res))))
+(define (with-exception-handler handler thunk)
+  (let* ((err (gensym))
+         (res (with-handler (lambda(v)
+                              (if (%continuable-exception? v)
+                                  (handler (%continuable-exception-value v))
+                                 (begin
+                                   (handler v)
+                                   err)))
+                            (thunk))))
+    (if (eq? res err)
+        (error "exception handler returned on non-continuable exception")
+        res)))
 
 #|
 <doc R7RS raise-continuable
@@ -1425,27 +1478,27 @@ doc>
  * binding evaluates the clauses as if they were the clauses of a cond
  * expression. That implicit cond  expression is evaluated with the
  * continuation and dynamic environment of the |guard| expression.
- * If every |<clause>|'s test evaluates to false and there is no |else|
- * clause, then |raise|  is re-invoked on the raised object within the
+ * If every `|<clause>|`s test evaluates to false and there is no |else|
+ * clause, then |raise| is re-invoked on the raised object within the
  * dynamic environment of the original call to |raise| except that the
  * current exception handler is that of the |guard| expression.
  *
  * @lisp
  * (guard (condition
- *          ((assq 'a condition) =\> cdr)
+ *          ((assq 'a condition) => cdr)
  *          ((assq 'b condition)))
  *   (raise (list (cons 'a 42))))
  *          => 42
  *
  * (guard (condition
- *          ((assq 'a condition) =\> cdr)
+ *          ((assq 'a condition) => cdr)
  *          ((assq 'b condition)))
  *   (raise (list (cons 'b 23))))
  *          => (b . 23)
  *
  * (with-handler (lambda (c) (format "value ~A was raised" c))
  *   (guard (condition
- *        ((assq 'a condition) =\> cdr)
+ *        ((assq 'a condition) => cdr)
  *        ((assq 'b condition)))
  *       (raise (list (cons 'x 0)))))
  *          => "value ((x . 0)) was raised"
@@ -1488,7 +1541,7 @@ doc>
 <doc R7RS current-jiffy
  * (current-jiffy)
  *
- * Returns the number of ,(emph "jiffies") as an exact integer that
+ * Returns the number of _jiffies_ as an exact integer that
  * have elapsed since an arbitrary, implementation-defined
  * epoch. A jiffy is an implementation-defined fraction of
  * a second which is defined by the return value of the
@@ -1533,13 +1586,12 @@ doc>
  * (features)
  *
  * Returns a list of the feature identifiers which |cond-expand|
- * treats as true. It is an error to modify this list. Here is an
+ * treats as true. Here is an
  * example of what |features| might return:
  *
  * @lisp
- * (features) => (STklos STklos-1.20  almost-r7rs
- *                exact-complex ieee-float full-unicode
- *                ratios little-endian)
+ * (features) => (STklos STklos-{{version}} exact-complex
+*                 ieee-float full-unicode ratios little-endian ...)
  * @end lisp
 doc>
 |#

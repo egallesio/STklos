@@ -675,13 +675,6 @@
           (reverse res))))
 
 
-
-(define-syntax push!
-  (syntax-rules ()
-    ((_ e lst)
-     (set! lst (cons e lst)))))
-
-
 (let ((shp (shape 1 3 10 12)))
   (let ((arr2 (make-array shp 'x)))
     (let ((res '()))
@@ -1058,3 +1051,9 @@
        (b (array (shape 0 4) (list 'a 'b) -3 -5 -7))
        (c (share-array a (shape 0 4) (lambda (x) (* x 2)))))
   (test "srfi-25 jp.equal?.2" #t (equal? b c)))
+
+(test "srfi-25 jp.array-setter"
+      #,(<array> (0 4) (a b) -3 50 -7)
+      (let ((a (array (shape 0 4) (list 'a 'b) -3 -5 -7)))
+        (set! (array-ref a 2) 50)
+        a))

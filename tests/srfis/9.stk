@@ -1,0 +1,17 @@
+;;;;
+;;;; 9.stk
+;;;;
+
+(define-record-type my-pair
+  (kons x y)
+  my-pair?
+  (x kar set-kar!)
+  (y kdr))
+
+(test "my-pair?.1" #t (my-pair? (kons 1 2)))
+(test "my-pair?.2" #f (my-pair? (cons 1 2)))
+(test "kar"        1  (kar (kons 1 2)))
+(test "kdr"        2  (kdr (kons 1 2)))
+(let ((k (kons 1 2)))
+  (set-kar! k 3)
+  (test "set-kar!" 3 (kar k)))

@@ -1,7 +1,7 @@
 /*
  * socket.c                             -- Socket acess for STklos
  *
- * Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 10-Apr-2021 18:46 (eg)
+ * Last file update: 10-Jan-2022 21:07 (eg)
  */
 
 #include <sys/types.h>
@@ -46,10 +46,10 @@ static void print_socket(SCM sock, SCM port, int _UNUSED(mode))
   char buffer[1000];
   SCM name = SOCKET_HOSTNAME(sock);
 
-  sprintf(buffer, "#[%s-socket %s:%ld (%d)]",
-          (SOCKET_TYPE(sock) == SOCKET_SERVER) ? "server" : "client",
-          ((name == STk_false) ?  "*none*" : (char *) STRING_CHARS(name)),
-          SOCKET_PORTNUM(sock), SOCKET_FD(sock));
+  snprintf(buffer, sizeof(buffer), "#[%s-socket %s:%ld (%d)]",
+           (SOCKET_TYPE(sock) == SOCKET_SERVER) ? "server" : "client",
+           ((name == STk_false) ?  "*none*" : (char *) STRING_CHARS(name)),
+           SOCKET_PORTNUM(sock), SOCKET_FD(sock));
   STk_puts(buffer, port);
 }
 
@@ -97,11 +97,13 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
 {
   int s, t;
   char *hostname, *fname;
+  unsigned long len;
   SCM in, out;
 
   hostname = STRING_CHARS(SOCKET_HOSTNAME(sock));
-  fname    = STk_must_malloc_atomic(strlen(hostname) + 30);
-  sprintf(fname, "%s:%ld", hostname, SOCKET_PORTNUM(sock));
+  len      = strlen(hostname) + 50;
+  fname    = STk_must_malloc_atomic(len);
+  snprintf(fname, len, "%s:%ld", hostname, SOCKET_PORTNUM(sock));
 
   s   = SOCKET_FD(sock);
   t   = dup(s);
@@ -214,15 +216,15 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
 
 /*
 <doc EXT make-client-socket
- *  (make-client-socket hostname port-number)
- *  (make-client-socket hostname port_number line-buffered)
+ * (make-client-socket hostname port-number)
+ * (make-client-socket hostname port_number line-buffered)
  *
  * |make-client-socket| returns a new socket object. This socket
  * establishes a link between the running program and the application
  * listening on port |port-number| of |hostname|.  If  the optional argument
  * |line-buffered| has a true value, a line buffered policy is used when writing
  * to the client socket (i.e. characters on the socket are tranmitted as soon
- * as a ,(code "#\\newline") character is encountered). The default value of
+ * as a `"#\newline` character is encountered). The default value of
  * |line-buffered| is |#t|.
  *
 doc>
@@ -314,7 +316,7 @@ DEFINE_PRIMITIVE("make-client-socket", make_client_socket, subr23,
  * |Socket-shutdown| shutdowns the connection associated to
  * |socket|. If the socket is a server socket, |socket-shutdown| is called
  * on all the client sockets connected to this server.
- * |Close| indicates if the the socket must be closed or not, when
+ * |Close| indicates if the socket must be closed or not, when
  * the connection is destroyed. Closing the socket forbids further
  * connections on the same port with the |socket-accept| procedure.
  * Omitting a value for |close| implies the closing of socket.
@@ -356,7 +358,7 @@ DEFINE_PRIMITIVE("socket-shutdown", socket_shutdown, subr12, (SCM sock, SCM clos
   }
 
   /*
-   * Warning: input and output can have already be garbaged: if the
+   * Warning: input and output can have already been garbaged: if the
    * socket is no more used, the input and output are not marked as
    * used and can (eventually) be released before the call to shutdown
    * by the socket finalizer.
@@ -408,17 +410,15 @@ static void socket_finalizer(SCM socket, void _UNUSED(*client_data))
  * with |make-server-socket|. The result of |socket-accept| is undefined.
  * |Line-buffered| indicates if the port should be considered as a
  * line buffered. If |line-buffered| is omitted, it defaults to |#t|.
- * @l
+ *
  * The following example is a simple server which waits for a connection
- * on the port 12345 ,(footnote [Under Unix, you can simply connect to
- * a listening socket with the |telnet| command. With the given
- * example, this can be achieved by typing the following command in a
- * window shell:
- * ,(raw-code "$ telnet localhost 12345")]).
- *  Once the connection with the
- * distant program is established, we read a line on the input port
- * associated to the socket and we write the length of this line on its
- * output port.
+ * on the port 12345 footnote:[Under Unix, you can simply connect to
+ * a listening socket with the |telnet| of |netcat| command. For the given
+ * example, this can be achieved with `netcat localhost 12345`]
+ *
+ * Once the connection with the distant program is established, we read
+ * a line on the input port associated to the socket, and we write the
+ * length of this line on its output port.
  * @lisp
  * (let* ((server (make-server-socket 12345))
  *        (client (socket-accept server))
@@ -428,7 +428,7 @@ static void socket_finalizer(SCM socket, void _UNUSED(*client_data))
  *   (socket-shutdown server))
  * @end lisp
  *
- *  Note that shutting down the |server| socket suffices here to close
+ * Note that shutting down the |server| socket suffices here to close
  * also the connection to |client|.
 doc>
 */
@@ -547,10 +547,10 @@ DEFINE_PRIMITIVE("socket-port-number", socket_port_number, subr1, (SCM sock))
  * these functions return |#f|.
  *
  * The following example shows how to make a client socket. Here we
- * create a socket on port 13 of the machine |kaolin.unice.fr|,(footnote
- * [Port 13 is generally used for testing:
+ * create a socket on port 13 of the machine 
+ * |kaolin.unice.fr| footnote:[Port 13, if open, can be used for testing:
  * making a connection to it permits to know the distant system's idea
- * of the time of day.]):
+ * of the time of day.]:
  * @lisp
  * (let ((s (make-client-socket "kaolin.unice.fr" 13)))
  *   (format #t "Time is: ~A~%" (read-line (socket-input s)))

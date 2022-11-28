@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
-;;;; Copyright © 2011-2021 Erick Gallesio - Polytech Nice Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2022 Erick Gallesio - Polytech Nice Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,13 +22,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  7-Jan-2021 17:04 (eg)
+;;;; Last file update: 11-Aug-2022 12:15 (eg)
 ;;;;
 
 (require "test")
 
 (test-section "R7RS")
-
 
 (test-subsection "4.2 Derived expression types")
 
@@ -158,6 +157,16 @@
 (test "let-values.6"
       1
       (let-values () 1))
+(test "let-values.7"   ;; Issue #257
+      '(1 2 3)
+      (let-values ((x (values 1 2 3)))
+        x))
+(test "let-values.8"
+      '((1 2 3) 100)
+      (let ((x 100))
+        (let-values ((x (values 1 2 3))
+                     (y x))
+          (cons x y))))
 ;;;; ----------
 (test "let*-values.1" 35
       (let*-values (((root rem) (exact-integer-sqrt 32)))
@@ -186,6 +195,17 @@
           (define x 'in)
           x)
         x))
+(test "let*-values.8"
+      '((1 2 3) 4 5 6)
+      (let*-values ((x (values 1 2 3))
+                    (y (values 4 5 6)))
+        (cons x y)))
+(test "let*-values.9"
+      '(#0=(1 2 3) #0#)
+      (let*-values ((x (values 1 2 3))
+                    (y x))
+        (cons x y)))
+
 
 
 ;;;
@@ -684,6 +704,16 @@
                                 (list q r))
                               equal?)
 
+;; The following test case was failing because of a small glitch in the isqrt internal
+;; function:
+(test "exact-integer-sqrt.4"
+      '(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+        .
+        19999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999998)
+      (receive (root rem)
+          (exact-integer-sqrt 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999)
+        (cons root rem)))
+
 ;; -----------------------------------------------------------------
 (test-subsection "6.3 Booleans")
 
@@ -1160,6 +1190,10 @@ a")
 ;;------------------------------------------------------------------
 (test-subsection "6.10 Control features")
 
+;;; SRFI-13 redefines R7RS string-map in an incompatible way. Redefine
+;;; string-map here to the R7RS version
+(define string-map (in-module SCHEME string-map))
+
 (test "string-map 1"  "abdegh"  (string-map char-downcase "AbdEgH"))
 (test "string-map 2"  "IBM"     (string-map (lambda (c)
                                               (integer->char (+ 1 (char->integer c))))
@@ -1614,6 +1648,74 @@ a")
          (let ((x (guard (e (else aaa)) (foo))))
            (list x aaa))))
 
+
+;;======================================================================
+(test-subsection "6.12 Environments and evaluation")
+
+(let ((scheme (find-module 'SCHEME)))
+  (test "eval.scheme.1" -1   (eval -1 (scheme-report-environment 5)))
+  (test "eval.scheme.2"
+        (symbol-value 'display scheme)
+        (eval 'display (scheme-report-environment 5)))
+  (let ((display print))
+    (test "eval.scheme.3"
+          (symbol-value 'display scheme)
+          (eval 'display (scheme-report-environment 5))))
+  (test/error "eval.null.1"  (eval -1 (null-environment 5))))
+
+ (define-library (testing x y)
+   (export x) ;; but not y!
+   (begin (define x -1)
+          (define y -2)))
+
+ (define-module testing-d
+   (export d)
+   (define d "ddd"))
+
+ (define-module testing-a-b-c-d
+   (import testing-d)
+   (export a b d)
+   (define a "aaa")
+   (define b "bbb")
+   (define c "ccc"))
+
+ ;; without name
+ (define e (environment '(testing x y)    ; user lib
+                        'testing-a-b-c-d  ; user module
+                        '(scheme write))) ; system lib
+
+
+ ;; All modules have names now...
+ (test "environment.0" #f (module-name e))
+ (test "environment.1" "aaa" (eval 'a e))
+ (test "environment.2" "bbb" (eval 'b e))
+ (test/error "environment.3" (eval 'c e))
+ (test "environment.4" "ddd" (eval 'd e))
+ (test "environment.5" -1 (eval 'x e))
+ (test/error "environment.6" (eval 'y e))
+
+;; null
+(test "environment.null.1"
+      #t
+      (eq? (null-environment)
+           (environment)))
+
+(test/error "environment.null.2" (eval 'car (null-environment)))
+
+;; bad arguments to environment
+(test/error "environment.badargs.1" (environment 1))     ; 1 not module
+(test/error "environment.badargs.2" (environment e 1))   ; 1 not module (2nd arg)
+(test/error "environment.badargs.3" (environment e "n")) ; name should be first arg
+
+
+;; less simpler import specs
+(define e1 (environment '(only (scheme base) + -) '(only (scheme write) display)))
+(define e2 (environment '(prefix (only (scheme base) + -) |foo:|)))
+
+(test "environment only" 3 (length (module-symbols e1)))
+(test "environment only+prefix"  #t (let ((symbs (module-symbols e2)))
+                                      (or (equal? symbs '(foo:+ foo:-))
+                                          (equal? symbs '(foo:- foo:+)))))
 
 
 ;;======================================================================

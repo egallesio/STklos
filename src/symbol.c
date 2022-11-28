@@ -2,7 +2,7 @@
  *
  * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update:  1-May-2021 20:00 (eg)
+ * Last file update: 19-May-2022 17:07 (eg)
  */
 
 #include <ctype.h>
@@ -42,28 +42,33 @@ static void error_bad_string(SCM str)
   STk_error("bad string ~S", str);
 }
 
-int STk_symbol_flags(register char *s)
+int STk_symbol_flags(register const char *s)
 {
-  int res = 0;
+  if (!*s || (*s == '.' && !s[1])) {
+    /* Special symbols || and |.| which always need bars */
+    return SYMBOL_NEEDS_BARS;
+  } else {
+    int res = 0;
 
-  if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
+    if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
 
-  for ( ;*s; s++) {
-    if (isupper(*s)) {
-      res |= SYMBOL_HAS_UPPER;
-      continue;
+    for ( ;*s; s++) {
+      if (isupper(*s)) {
+        res |= SYMBOL_HAS_UPPER;
+        continue;
+      }
+      if (!strchr(valid_symbol_chars, *s)) {
+        res |= SYMBOL_NEEDS_BARS;
+        break;
+      }
     }
-    if (!strchr(valid_symbol_chars, *s)) {
-      res |= SYMBOL_NEEDS_BARS;
-      break;
-    }
+
+    if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS; // seems to be a keyword
+    return res;
   }
-
-  if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS; // seems to be a keyword
-  return res;
 }
 
-SCM STk_make_uninterned_symbol(char *name)
+SCM STk_make_uninterned_symbol(const char *name)
 {
   SCM z;
 
@@ -130,7 +135,7 @@ doc>
 DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
 {
   SCM str;
-  char *s;
+  const char *s;
 
   if (!SYMBOLP(symbol)) STk_error("bad symbol ~S", symbol);
 
@@ -150,17 +155,15 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
  * because in some implementations of Scheme they cannot be read as themselves.
  *
  * @lisp
- *    (eq? 'mISSISSIppi 'mississippi)     =>  #t
- *    (string->symbol "mISSISSIppi")      =>  @pipemISSISSIppi@pipe
- *    (eq? 'bitBlt (string->symbol "bitBlt"))
- *                                        =>  #f
+ *    (eq? 'mISSISSIppi 'mississippi)                   =>  #t
+ *    (string->symbol "mISSISSIppi")                    =>  @pipemISSISSIppi@pipe
+ *    (eq? 'bitBlt (string->symbol "bitBlt"))           =>  #f
  *    (eq? 'JollyWog
  *         (string->symbol
- *           (symbol->string 'JollyWog))) =>  #t
+ *           (symbol->string 'JollyWog)))               =>  #t
  *    (string=? "K. Harper, M.D."
  *              (symbol->string
- *                (string->symbol "K. Harper, M.D.")))
- *                                        =>  #t
+ *                (string->symbol "K. Harper, M.D.")))  =>  #t
  * @end lisp
 doc>
  */
@@ -176,7 +179,7 @@ DEFINE_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string))
  * (string->unterned-symbol string)
  *
  * Returns the symbol whose print name is made from the characters of
- * |string|. This symbol is guaranteed to be ,(emph "unique") (i.e. not
+ * |string|. This symbol is guaranteed to be _unique_ (i.e. not
  * |eq?| to any other symbol):
  * @lisp
  * (let ((ua (string->uninterned-symbol "a")))

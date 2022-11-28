@@ -1,5 +1,5 @@
 ;; ----------------------------------------------------------------------
-;;  SRFI 71 ...
+;;  SRFI 70 ...
 ;; ----------------------------------------------------------------------
 
 (test "complex?" #t (complex? +inf.0))
@@ -53,3 +53,13 @@
 (test "string->number.2" -inf.0 (string->number "-inf.0"))
 (test "number->string.1" "+inf.0" (number->string +inf.0))
 (test "number->string.2" "-inf.0" (number->string -inf.0))
+
+
+(test "expr.1" 1.0    (expt 10 0.0))
+(test "expr.2" 1      (expt 10 0))
+(test "expr.3" 1.0    (expt (sqrt 2) 0.0))
+(test "expr.4" 1      (expt (sqrt 3) 0))
+(test "expt.5" +inf.0 (expt 0.0 -4))
+
+
+

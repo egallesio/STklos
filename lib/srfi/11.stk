@@ -1,0 +1,92 @@
+;;;;
+;;;; srfi-11.stk        -- LET-VALUES and LET*-VALUES
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 28-May-2002 09:47 (eg)
+;;;; Last file update: 21-Nov-2021 12:11 (eg)
+;;;;
+
+
+;; let-syntax and let*-values are now R7RS. This file is kept for compatibility
+;; (in case it is required by some old code)
+
+(define-module srfi/11)    ;; In case we have an (import (srfi 11))
+
+(provide "srfi/11")
+
+;; Old implementation was the code provided in the SRFI
+
+
+;;// (define-syntax let-values
+;;//   (syntax-rules ()
+;;//     ((let-values (?binding ...) ?body0 ?body1 ...)
+;;//      (let-values "bind" (?binding ...) () (begin ?body0 ?body1 ...)))
+;;//
+;;//     ((let-values "bind" () ?tmps ?body)
+;;//      (let ?tmps ?body))
+;;//
+;;//     ((let-values "bind" ((?b0 ?e0) ?binding ...) ?tmps ?body)
+;;//      (let-values "mktmp" ?b0 ?e0 () (?binding ...) ?tmps ?body))
+;;//
+;;//     ((let-values "mktmp" () ?e0 ?args ?bindings ?tmps ?body)
+;;//      (call-with-values
+;;//        (lambda () ?e0)
+;;//        (lambda ?args
+;;//          (let-values "bind" ?bindings ?tmps ?body))))
+;;//
+;;//     ((let-values "mktmp" (?a . ?b) ?e0 (?arg ...) ?bindings (?tmp ...) ?body)
+;;//      (let-values "mktmp" ?b ?e0 (?arg ... %%x) ?bindings (?tmp ... (?a %%x)) ?body))
+;;//
+;;//     ((let-values "mktmp" ?a ?e0 (?arg ...) ?bindings (?tmp ...) ?body)
+;;//      (call-with-values
+;;//        (lambda () ?e0)
+;;//        (lambda (?arg ... . %%x)
+;;//          (let-values "bind" ?bindings (?tmp ... (?a %%x)) ?body))))))
+;;//
+;;// (define-syntax let*-values
+;;//   (syntax-rules ()
+;;//     ((let*-values () ?body0 ?body1 ...)
+;;//      (begin ?body0 ?body1 ...))
+;;//
+;;//     ((let*-values (?binding0 ?binding1 ...) ?body0 ?body1 ...)
+;;//      (let-values (?binding0)
+;;//        (let*-values (?binding1 ...) ?body0 ?body1 ...)))))
+;;//
+;;//
+;;// (export-syntax let-values let*-values)
+
+
+#|
+Usage examples:
+
+(let-values (((a b . c) (values 1 2 3 4)))
+            (list a b c))
+
+(let ((a 'a) (b 'b) (x 'x) (y 'y))
+  (let-values (((a b) (values x y))
+               ((x y) (values a b)))
+              (list a b x y)))
+
+(let ((a 'a) (b 'b) (x 'x) (y 'y))
+  (let*-values (((a b) (values x y))
+                ((x y) (values a b)))
+               (list a b x y)))
+|#

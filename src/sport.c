@@ -1,7 +1,7 @@
 /*
  * s p o r t . c                        -- String ports management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 30-Apr-2021 14:19 (eg)
+ * Last file update: 18-Sep-2022 19:04 (eg)
  *
  */
 
@@ -104,7 +104,7 @@ static Inline int Sputc(int c, void *stream)
 
   if (PORT_PTR(stream) >= PORT_END(stream)) {
     if (PORT_END(stream) == PORT_BASE(stream) + PORT_BUFSIZE(stream)) {
-      /* No more room => allocate a new buffer */
+      /* No more room => enlarge buffer */
       tmp         = PORT_BUFSIZE(stream);
       tmp        += tmp/2;
       PORT_BASE(stream)= STk_must_realloc(PORT_BASE(stream), tmp);
@@ -119,16 +119,20 @@ static Inline int Sputc(int c, void *stream)
 }
 
 
-static Inline int Swrite(void *stream, void *buffer, int count)
+static Inline int Swrite(void *stream, const void *buffer, int count)
 {
-  int tmp, pos;
+  size_t tmp, pos;
+  char *right = PORT_PTR(stream) + count;
 
-  if (PORT_PTR(stream) + count >= PORT_END(stream)) {
-    tmp = PORT_BUFSIZE(stream) + count + START_ALLOC_SIZE;
-    pos = PORT_PTR(stream) - PORT_BASE(stream);
-    PORT_BASE(stream) = STk_must_realloc(PORT_BASE(stream), tmp);
-    PORT_PTR(stream)  = PORT_BASE(stream)+ pos; /* base can move */
-    PORT_BUFSIZE(stream) = tmp;
+  if (right >= PORT_END(stream)) {
+    if (right >= PORT_BASE(stream) + PORT_BUFSIZE(stream)) {
+      /* No more room => enlarge buffer */
+      tmp = PORT_BUFSIZE(stream) + 3 * count + START_ALLOC_SIZE;
+      pos = PORT_PTR(stream) - PORT_BASE(stream);
+      PORT_BASE(stream) = STk_must_realloc(PORT_BASE(stream), tmp);
+      PORT_PTR(stream)  = PORT_BASE(stream)+ pos; /* base can move */
+      PORT_BUFSIZE(stream) = tmp;
+    }
     PORT_END(stream) = PORT_PTR(stream) + count;
   }
   memcpy(PORT_PTR(stream), buffer, count);
@@ -137,7 +141,7 @@ static Inline int Swrite(void *stream, void *buffer, int count)
   return count;
 }
 
-static Inline int Sputs(char *s, void *stream)
+static Inline int Sputs(const char *s, void *stream)
 {
   return Swrite(stream, s, strlen(s));
 }
@@ -147,7 +151,7 @@ static Inline int Sputstring(SCM s, void *stream)
   return Swrite(stream, STRING_CHARS(s), STRING_SIZE(s));
 }
 
-static Inline int Snputs(void *stream, char *s, int len)
+static Inline int Snputs(void *stream, const char *s, int len)
 {
   return Swrite(stream, s, len);
 }
@@ -160,7 +164,7 @@ static Inline int Sflush(void _UNUSED(*stream))
 
 static off_t Sseek(void *stream, off_t offset, int whence)
 {
-  char* p;
+  char *p;
 
   switch (whence) {
   case SEEK_SET:
@@ -185,10 +189,10 @@ static off_t Sseek(void *stream, off_t offset, int whence)
 
 static void sport_print(SCM obj, SCM port)   /* Generic printing of string ports */
 {
-  char buffer[MAX_PATH_LENGTH + 20];
+  char buffer[MAX_PATH_LENGTH + 100];
   int flags = PORT_FLAGS(obj);
 
-  sprintf(buffer, "#[%s-%s-port %lx%s]",
+  snprintf(buffer, sizeof(buffer), "#[%s-%s-port %lx%s]",
           (flags & PORT_READ)   ? "input" : "output",
           (flags & PORT_BINARY) ? "bytevector" : "string",
           (unsigned long) obj,
@@ -219,7 +223,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
 
   /* Initialize the stream part */
   switch (kind) {
-    case PREAD:   /* this is a input string */
+    case PREAD:   /* this is an input string */
                   {
                     char *s = STRING_CHARS(str);
 
@@ -228,7 +232,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
                     PORT_STR(ss)  = str;
                     break;
                   }
-    case PREAD_C: /* this is a input string (from a C string) */
+    case PREAD_C: /* this is an input string (from a C string) */
                   PORT_BASE(ss) = (char *) str;
                   PORT_END(ss)  = (char *) str + init_len;
                   PORT_STR(ss)  = str;
@@ -242,7 +246,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_PTR(ss)     = PORT_BASE(ss);
   PORT_BUFSIZE(ss) = init_len;
 
-  /* Set the case sensitive bit */
+  /* Set the case-sensitive bit */
   if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
 
   /* Initialize now the port itself */
@@ -287,7 +291,7 @@ make_bport(enum kind_port kind,  SCM str, int init_len, int flags)
 
   /* Initialize the stream part */
   switch (kind) {
-    case PREAD:   /* this is a input bytevector */
+    case PREAD:   /* this is an input bytevector */
                   {
                     char *s = UVECTOR_DATA(str);
 
@@ -341,7 +345,7 @@ make_bport(enum kind_port kind,  SCM str, int init_len, int flags)
 /*
  * open-input-string with a C string ...
  */
-SCM STk_open_C_string(char *str)
+SCM STk_open_C_string(const char *str)
 {
   return (SCM) make_sport(PREAD_C, (SCM) str, strlen(str),
                           PORT_IS_STRING | PORT_READ | PORT_TEXTUAL);
@@ -469,7 +473,7 @@ DEFINE_PRIMITIVE("get-output-bytevector", get_output_bytevector, subr1, (SCM por
  * (output-string-port? obj)
  *
  * Returns |#t| if |obj| is an input string port or output string port
- * respectively, otherwise returns #f.
+ * respectively, otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-string-port?", input_string_portp, subr1, (SCM port))
@@ -488,7 +492,7 @@ DEFINE_PRIMITIVE("output-string-port?", output_string_portp, subr1, (SCM port))
  * (output-bytevector-port? obj)
  *
  * Returns |#t| if |obj| is an input bytevector port or output bytevector port
- * respectively, otherwise returns #f.
+ * respectively, otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-bytevector-port?", input_bytevector_portp, subr1, (SCM port))

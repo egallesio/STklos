@@ -1,0 +1,245 @@
+;; Tests from the reference implementation.
+
+(define (vector-cdr vec)
+  (let* ((len (vector-length vec))
+         (result (make-vector (- len 1))))
+    (let loop ((n 1))
+      (cond
+        ((= n len) result)
+        (else (vector-set! result (- n 1) (vector-ref vec n))
+              (loop (+ n 1)))))))
+
+(test "SRFI-162-test 1" '#(2 3 4) (vector-cdr '#(1 2 3 4)))
+(test "SRFI-162-test 2" '#() (vector-cdr '#(1)))
+
+
+
+(define degenerate-comparator (make-comparator (lambda (x) #t) equal? #f #f))
+(define bool-pair-comparator (make-pair-comparator boolean-comparator boolean-comparator))
+(define num-list-comparator
+  (make-list-comparator real-comparator list? null? car cdr))
+(define num-vector-comparator
+  (make-vector-comparator real-comparator vector? vector-length vector-ref))
+(define vector-qua-list-comparator
+  (make-list-comparator
+   real-comparator
+   vector?
+   (lambda (vec) (= 0 (vector-length vec)))
+   (lambda (vec) (vector-ref vec 0))
+   vector-cdr))
+(define list-qua-vector-comparator
+  (make-vector-comparator default-comparator list? length list-ref))
+(define symbol-comparator
+  (make-comparator
+   symbol?
+   eq?
+   (lambda (a b) (string<? (symbol->string a) (symbol->string b)))
+   symbol-hash))
+
+(test "SRFI-162-test-3" #t (comparator? real-comparator))
+(test "SRFI-162-test-4" #t (not (comparator? =)))
+(test "SRFI-162-test-5" #t (comparator-ordered? real-comparator))
+(test "SRFI-162-test-6" #t (comparator-hashable? real-comparator))
+(test "SRFI-162-test-7" #t (not (comparator-ordered? degenerate-comparator)))
+(test "SRFI-162-test-8" #t (not (comparator-hashable? degenerate-comparator)))
+
+
+(define bool-pair (cons #t #f))
+(define bool-pair-2 (cons #t #f))
+(define reverse-bool-pair (cons #f #t))
+(test "SRFI-162-test-9" #t (=? boolean-comparator #t #t))
+(test "SRFI-162-test-10" #t (not (=? boolean-comparator #t #f)))
+(test "SRFI-162-test-11" #t (<? boolean-comparator #f #t))
+(test "SRFI-162-test-12" #t (not (<? boolean-comparator #t #t)))
+(test "SRFI-162-test-13" #t (not (<? boolean-comparator #t #f)))
+
+(test "SRFI-162-test-14" #t (comparator-test-type bool-pair-comparator '(#t . #f)))
+(test "SRFI-162-test-15" #t (not (comparator-test-type bool-pair-comparator 32)))
+(test "SRFI-162-test-16" #t (not (comparator-test-type bool-pair-comparator '(32 . #f))))
+(test "SRFI-162-test-17" #t (not (comparator-test-type bool-pair-comparator '(#t . 32))))
+(test "SRFI-162-test-18" #t (not (comparator-test-type bool-pair-comparator '(32 . 34))))
+(test "SRFI-162-test-19" #t (=? bool-pair-comparator '(#t . #t) '(#t . #t)))
+(test "SRFI-162-test-20" #t (not (=? bool-pair-comparator '(#t . #t) '(#f . #t))))
+(test "SRFI-162-test-21" #t (not (=? bool-pair-comparator '(#t . #t) '(#t . #f))))
+(test "SRFI-162-test-22" #t (<? bool-pair-comparator '(#f . #t) '(#t . #t)))
+(test "SRFI-162-test-23" #t (<? bool-pair-comparator '(#t . #f) '(#t . #t)))
+(test "SRFI-162-test-24" #t (not (<? bool-pair-comparator '(#t . #t) '(#t . #t))))
+(test "SRFI-162-test-25" #t (not (<? bool-pair-comparator '(#t . #t) '(#f . #t))))
+(test "SRFI-162-test-26" #t (not (<? bool-pair-comparator '(#f . #t) '(#f . #f))))
+
+(test "SRFI-162-test-27" #t (comparator-test-type num-vector-comparator '#(1 2 3)))
+(test "SRFI-162-test-28" #t (comparator-test-type num-vector-comparator '#()))
+(test "SRFI-162-test-29" #t (not (comparator-test-type num-vector-comparator 1)))
+(test "SRFI-162-test-30" #t (not (comparator-test-type num-vector-comparator '#(a 2 3))))
+(test "SRFI-162-test-31" #t (not (comparator-test-type num-vector-comparator '#(1 b 3))))
+(test "SRFI-162-test-32" #t (not (comparator-test-type num-vector-comparator '#(1 2 c))))
+(test "SRFI-162-test-33" #t (=? num-vector-comparator '#(1 2 3) '#(1 2 3)))
+(test "SRFI-162-test-34" #t (not (=? num-vector-comparator '#(1 2 3) '#(4 5 6))))
+(test "SRFI-162-test-35" #t (not (=? num-vector-comparator '#(1 2 3) '#(1 5 6))))
+(test "SRFI-162-test-36" #t (not (=? num-vector-comparator '#(1 2 3) '#(1 2 6))))
+(test "SRFI-162-test-37" #t (<? num-vector-comparator '#(1 2) '#(1 2 3)))
+(test "SRFI-162-test-38" #t (<? num-vector-comparator '#(1 2 3) '#(2 3 4)))
+(test "SRFI-162-test-39" #t (<? num-vector-comparator '#(1 2 3) '#(1 3 4)))
+(test "SRFI-162-test-40" #t (<? num-vector-comparator '#(1 2 3) '#(1 2 4)))
+(test "SRFI-162-test-41" #t (<? num-vector-comparator '#(3 4) '#(1 2 3)))
+(test "SRFI-162-test-42" #t (not (<? num-vector-comparator '#(1 2 3) '#(1 2 3))))
+(test "SRFI-162-test-43" #t (not (<? num-vector-comparator '#(1 2 3) '#(1 2))))
+(test "SRFI-162-test-44" #t (not (<? num-vector-comparator '#(1 2 3) '#(0 2 3))))
+(test "SRFI-162-test-45" #t (not (<? num-vector-comparator '#(1 2 3) '#(1 1 3))))
+
+(test "SRFI-162-test-46" #t (not (<? vector-qua-list-comparator '#(3 4) '#(1 2 3))))
+(test "SRFI-162-test-47" #t (<? list-qua-vector-comparator '(3 4) '(1 2 3)))
+
+(test "SRFI-162-test-48" #t (=? eq-comparator #t #t))
+(test "SRFI-162-test-49" #t (not (=? eq-comparator #f #t)))
+(test "SRFI-162-test-50" #t (=? eqv-comparator bool-pair bool-pair))
+(test "SRFI-162-test-51" #t (not (=? eqv-comparator bool-pair bool-pair-2)))
+(test "SRFI-162-test-52" #t (=? equal-comparator bool-pair bool-pair-2))
+(test "SRFI-162-test-53" #t (not (=? equal-comparator bool-pair reverse-bool-pair)))
+
+
+(test "SRFI-162-test-54" #t (exact-integer? (boolean-hash #f)))
+(test "SRFI-162-test-55" #t (not (negative? (boolean-hash #t))))
+(test "SRFI-162-test-56" #t (exact-integer? (char-hash #\a)))
+(test "SRFI-162-test-57" #t (not (negative? (char-hash #\b))))
+(test "SRFI-162-test-58" #t (exact-integer? (char-ci-hash #\a)))
+(test "SRFI-162-test-59" #t (not (negative? (char-ci-hash #\b))))
+(test "SRFI-162-test-60" #t (= (char-ci-hash #\a) (char-ci-hash #\A)))
+(test "SRFI-162-test-61" #t (exact-integer? (string-hash "f")))
+(test "SRFI-162-test-62" #t (not (negative? (string-hash "g"))))
+(test "SRFI-162-test-63" #t (exact-integer? (string-ci-hash "f")))
+(test "SRFI-162-test-64" #t (not (negative? (string-ci-hash "g"))))
+(test "SRFI-162-test-65" #t (= (string-ci-hash "f") (string-ci-hash "F")))
+(test "SRFI-162-test-66" #t (exact-integer? (symbol-hash 'f)))
+(test "SRFI-162-test-67" #t (not (negative? (symbol-hash 't))))
+(test "SRFI-162-test-68" #t (exact-integer? (number-hash 3)))
+(test "SRFI-162-test-69" #t (not (negative? (number-hash 3))))
+(test "SRFI-162-test-70" #t (exact-integer? (number-hash -3)))
+(test "SRFI-162-test-71" #t (not (negative? (number-hash -3))))
+(test "SRFI-162-test-72" #t (exact-integer? (number-hash 3.0)))
+(test "SRFI-162-test-73" #t (not (negative? (number-hash 3.0))))
+
+
+
+
+(test "SRFI-162-test-74" #t (<? default-comparator '() '(a)))
+(test "SRFI-162-test-75" #t (not (=? default-comparator '() '(a))))
+(test "SRFI-162-test-76" #t (=? default-comparator #t #t))
+(test "SRFI-162-test-77" #t (not (=? default-comparator #t #f)))
+(test "SRFI-162-test-78" #t (<? default-comparator #f #t))
+(test "SRFI-162-test-79" #t (not (<? default-comparator #t #t)))
+(test "SRFI-162-test-80" #t (=? default-comparator #\a #\a))
+(test "SRFI-162-test-81" #t (<? default-comparator #\a #\b))
+
+(test "SRFI-162-test-82" #t (comparator-test-type default-comparator '()))
+(test "SRFI-162-test-83" #t (comparator-test-type default-comparator #t))
+(test "SRFI-162-test-84" #t (comparator-test-type default-comparator #\t))
+(test "SRFI-162-test-85" #t (comparator-test-type default-comparator '(a)))
+(test "SRFI-162-test-86" #t (comparator-test-type default-comparator 'a))
+(test "SRFI-162-test-87" #t (comparator-test-type default-comparator (make-bytevector 10)))
+(test "SRFI-162-test-88" #t (comparator-test-type default-comparator 10))
+(test "SRFI-162-test-89" #t (comparator-test-type default-comparator 10.0))
+(test "SRFI-162-test-90" #t (comparator-test-type default-comparator "10.0"))
+(test "SRFI-162-test-91" #t (comparator-test-type default-comparator '#(10)))
+
+(test "SRFI-162-test-92" #t (=? default-comparator '(#t . #t) '(#t . #t)))
+(test "SRFI-162-test-93" #t (not (=? default-comparator '(#t . #t) '(#f . #t))))
+(test "SRFI-162-test-94" #t (not (=? default-comparator '(#t . #t) '(#t . #f))))
+(test "SRFI-162-test-95" #t (<? default-comparator '(#f . #t) '(#t . #t)))
+(test "SRFI-162-test-96" #t (<? default-comparator '(#t . #f) '(#t . #t)))
+(test "SRFI-162-test-97" #t (not (<? default-comparator '(#t . #t) '(#t . #t))))
+(test "SRFI-162-test-98" #t (not (<? default-comparator '(#t . #t) '(#f . #t))))
+(test "SRFI-162-test-99" #t (not (<? default-comparator '#(#f #t) '#(#f #f))))
+
+(test "SRFI-162-test-100" #t (=? default-comparator '#(#t #t) '#(#t #t)))
+(test "SRFI-162-test-101" #t (not (=? default-comparator '#(#t #t) '#(#f #t))))
+(test "SRFI-162-test-102" #t (not (=? default-comparator '#(#t #t) '#(#t #f))))
+(test "SRFI-162-test-103" #t (<? default-comparator '#(#f #t) '#(#t #t)))
+(test "SRFI-162-test-104" #t (<? default-comparator '#(#t #f) '#(#t #t)))
+(test "SRFI-162-test-105" #t (not (<? default-comparator '#(#t #t) '#(#t #t))))
+(test "SRFI-162-test-106" #t (not (<? default-comparator '#(#t #t) '#(#f #t))))
+(test "SRFI-162-test-107" #t (not (<? default-comparator '#(#f #t) '#(#f #f))))
+
+(test "SRFI-162-test-108" #t (= (comparator-hash default-comparator #t) (boolean-hash #t)))
+(test "SRFI-162-test-109" #t (= (comparator-hash default-comparator #\t) (char-hash #\t)))
+(test "SRFI-162-test-110" #t (= (comparator-hash default-comparator "t") (string-hash "t")))
+(test "SRFI-162-test-111" #t (= (comparator-hash default-comparator 't) (symbol-hash 't)))
+(test "SRFI-162-test-112" #t (= (comparator-hash default-comparator 10) (number-hash 10)))
+(test "SRFI-162-test-113" #t (= (comparator-hash default-comparator 10.0) (number-hash 10.0)))
+
+(comparator-register-default!
+ (make-comparator procedure? (lambda (a b) #t) (lambda (a b) #f) (lambda (obj) 200)))
+
+(test "SRFI-162-test-114" #t (=? default-comparator (lambda () #t) (lambda () #f)))
+(test "SRFI-162-test-115" #t (not (<? default-comparator (lambda () #t) (lambda () #f))))
+(test "SRFI-162-test-116" 200 (comparator-hash default-comparator (lambda () #t)))
+
+
+
+
+(define x1 0)
+(define x2 0)
+(define x3 0)
+(define x4 0)
+(define ttp (lambda (x) (set! x1 111) #t))
+(define eqp (lambda (x y) (set! x2 222) #t))
+(define orp (lambda (x y) (set! x3 333) #t))
+(define hf (lambda (x) (set! x4 444) 0))
+(define comp (make-comparator ttp eqp orp hf))
+(test "SRFI-162-test-117" #t (and ((comparator-type-test-predicate comp) x1)   (= x1 111)))
+(test "SRFI-162-test-118" #t (and ((comparator-equality-predicate comp) x1 x2) (= x2 222)))
+(test "SRFI-162-test-119" #t (and ((comparator-ordering-predicate comp) x1 x3) (= x3 333)))
+(test "SRFI-162-test-120" #t (and (zero? ((comparator-hash-function comp) x1)) (= x4 444)))
+
+
+
+(test "SRFI-162-test-121" #t (comparator-test-type real-comparator 3))
+(test "SRFI-162-test-122" #t (comparator-test-type real-comparator 3.0))
+(test "SRFI-162-test-123" #t (not (comparator-test-type real-comparator "3.0")))
+(test "SRFI-162-test-124" #t (comparator-check-type boolean-comparator #t))
+(test/error "SRFI-162-test-125" (comparator-check-type boolean-comparator 't))
+
+
+
+(test "SRFI-162-test-126" #t (=? real-comparator 2 2.0 2))
+(test "SRFI-162-test-127" #t (<? real-comparator 2 3.0 4))
+(test "SRFI-162-test-128" #t (>? real-comparator 4.0 3.0 2))
+(test "SRFI-162-test-129" #t (<=? real-comparator 2.0 2 3.0))
+(test "SRFI-162-test-130" #t (>=? real-comparator 3 3.0 2))
+(test "SRFI-162-test-131" #t (not (=? real-comparator 1 2 3)))
+(test "SRFI-162-test-132" #t (not (<? real-comparator 3 1 2)))
+(test "SRFI-162-test-133" #t (not (>? real-comparator 1 2 3)))
+(test "SRFI-162-test-134" #t (not (<=? real-comparator 4 3 3)))
+(test "SRFI-162-test-135" #t (not (>=? real-comparator 3 4 4.0)))
+
+
+
+
+(test "SRFI-162-test-136" 'less (comparator-if<=> real-comparator 1 2 'less 'equal 'greater))
+(test "SRFI-162-test-137" 'equal (comparator-if<=> real-comparator 1 1 'less 'equal 'greater))
+(test "SRFI-162-test-138" 'greater (comparator-if<=> real-comparator 2 1 'less 'equal 'greater))
+(test "SRFI-162-test-139" 'less (comparator-if<=> "1" "2" 'less 'equal 'greater))
+(test "SRFI-162-test-140" 'equal (comparator-if<=> "1" "1" 'less 'equal 'greater))
+(test "SRFI-162-test-141" 'greater (comparator-if<=> "2" "1" 'less 'equal 'greater))
+
+
+(test "SRFI-162-test-142" #t (exact-integer? (hash-bound)))
+(test "SRFI-162-test-143" #t (exact-integer? (hash-salt)))
+(test "SRFI-162-test-144" #t (< (hash-salt) (hash-bound)))
+
+
+
+(test "SRFI-162-test-145" 5 (comparator-max real-comparator 1 5 3 2 -2))
+(test "SRFI-162-test-146" -2 (comparator-min real-comparator 1 5 3 2 -2))
+(test "SRFI-162-test-147" 5 (comparator-max-in-list real-comparator '(1 5 3 2 -2)))
+(test "SRFI-162-test-148" -2 (comparator-min-in-list real-comparator '(1 5 3 2 -2)))
+
+;; Most of the variables have been tested above.
+(test "SRFI-162-test-149" #t (=? char-comparator #\C #\C))
+(test "SRFI-162-test-150" #t (=? char-ci-comparator #\c #\C))
+(test "SRFI-162-test-151" #t (=? string-comparator "ABC" "ABC"))
+(test "SRFI-162-test-152" #t (=? string-ci-comparator "abc" "ABC"))
+(test "SRFI-162-test-153" #t (=? eq-comparator 32 32))
+(test "SRFI-162-test-154" #t (=? eqv-comparator 32 32))
+(test "SRFI-162-test-155" #t (=? equal-comparator "ABC" "ABC"))
+

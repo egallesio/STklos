@@ -1,0 +1,144 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update: 26-Jan-2022 13:16 (eg)
+
+{{chapter "Expressions"}}
+
+This chapter describes the main forms available in {{stklos}}. {{rfive}}
+constructions are given
+very succinctly here for reference. See <<R5RS>> for a complete
+description.
+
+
+=== Literal expressions
+{{insertdoc 'quote}}
+
+=== Procedures
+(((":optional parameter")))
+(((":rest parameter")))
+(((":key parameter")))
+((("procedure parameter")))
+((("procedure parameter", ":optional")))
+((("procedure parameter", ":key")))
+((("procedure parameter", ":rest")))
+((("keyword parameter")))
+((("procedure")))
+((("closure")))
+{{insertdoc 'lambda}}
+{{insertdoc 'closure?}}
+{{insertdoc 'case-lambda}}
+
+=== Assignments
+((("assignment")))
+{{insertdoc 'set!}}
+{{insertdoc 'setter}}
+
+=== Conditionals
+((("conditional")))
+{{insertdoc 'if}}
+{{insertdoc 'cond}}
+{{insertdoc 'case}}
+{{insertdoc 'and}}
+{{insertdoc 'or}}
+{{insertdoc 'when}}
+{{insertdoc 'unless}}
+
+=== Binding Constructs
+((("binding constructs")))
+The three binding constructs `let`, `let*`, and
+`letrec` are available in STklos.
+These constructs differ in the regions they establish for
+their variable bindings.  In a `let` expression, the initial values are
+computed before any of the variables become bound; in a `let*`
+expression, the bindings and evaluations are performed sequentially; while in a
+`letrec` expression, all the bindings are in effect while their initial
+values are being computed, thus allowing mutually recursive definitions.
+
+
+{{stklos}} also provides a `fluid-let` form which is described below.
+
+{{insertdoc 'let}}
+{{insertdoc 'let*}}
+{{insertdoc 'letrec}}
+{{insertdoc 'letrec*}}
+{{insertdoc 'let-values}}
+{{insertdoc 'let*-values}}
+{{insertdoc 'define-values}}
+{{insertdoc 'fluid-let}}
+
+=== Sequencing
+{{insertdoc 'begin}}
+{{insertdoc '->}}
+
+=== Iterations
+{{insertdoc 'do}}
+{{insertdoc 'dotimes}}
+{{insertdoc 'repeat}}
+{{insertdoc 'while}}
+{{insertdoc 'until}}
+
+=== Delayed Evaluation
+((("call by need")))
+((("lazy evaluation")))
+((("promise")))
+[#delay]
+{{insertdoc 'delay}}
+{{insertdoc 'delay-force}}
+[#force]
+{{insertdoc 'force}}
+{{insertdoc 'promise?}}
+{{insertdoc 'make-promise}}
+
+=== Quasiquotation
+((("quasiquote")))
+((("backquote")))
+((("unquote")))
+((("unquote-splicing")))
+(((", in quasiquote")))
+(((",@ in quasiquote")))
+{{insertdoc 'quasiquote}}
+
+=== Macros
+((("macros")))
+((("hygienic macros")))
+((("low level macros")))
+STklos supports hygienic macros such as the ones defined in {{rfive}} as
+well as low level macros.
+
+((("SLIB")))
+Low level macros are defined with `define-macro` whereas {{rfive}} macros are
+defined with `define-syntax`.footnote:[Documentation about hygienic macros has
+been stolen in the SLIB manual].  Hygienic macros use the implementation
+called *_Macro by Example_* (Eugene Kohlbecker, {{rfour}}) done by Dorai
+Sitaram. This implementation generates low level STklos macros. This
+implementation of hygienic macros is not expensive.
+
+The major drawback of this implementation is that the macros are not
+*_referentially transparent_* (see section *Macros* in {{rfour}} for
+details). Lexically scoped macros (i.e., `let-syntax` and
+`letrec-syntax` are not supported). In any case, the problem of
+referential transparency gains poignancy only when `let-syntax` and
+`letrec-syntax` are used. So you will not be courting large-scale
+disaster unless you're using system-function names as local variables
+with unintuitive bindings that the macro can't use. However, if you
+must have the full {{rfive}} macro functionality, you can do
+ 
+```scheme
+(require "full-syntax")
+```
+
+to have access to the more featureful (but also more expensive)
+versions of *syntax-rules*. Requiring `"full-syntax"` loads the
+version 2.1 of an implementation of hygienic macros by Robert Hieb
+and R. Kent Dybvig.
+
+{{insertdoc 'define-macro}}
+{{insertdoc 'define-syntax}}
+{{insertdoc 'syntax-rules}}
+{{insertdoc 'let-syntax}}
+{{insertdoc 'letrec-syntax}}
+{{insertdoc 'macro-expand}}

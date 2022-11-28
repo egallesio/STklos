@@ -1,0 +1,99 @@
+;;;;
+;;;; srfi-36.stk    -- SRFI-36 support (I/O Conditions)
+;;;;
+;;;; Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  1-Jun-2004 12:33 (eg)
+;;;; Last file update: 19-Apr-2022 16:39 (eg)
+;;;;
+
+(define-module srfi/36
+  (import (only SCHEME
+                %define-condition-type-accessors
+                &i/o-closed-error                 &i/o-error
+                &i/o-file-already-exists-error    &i/o-file-is-read-only-error
+                &i/o-file-protection-error        &i/o-filename-error
+                &i/o-malformed-filename-error     &i/o-no-such-file-error
+                &i/o-port-error                   &i/o-read-error
+                &i/o-write-error                  &read-error))
+  
+  (export &i/o-error i/o-error?
+          &i/o-port-error i/o-port-error? i/o-error-port
+          &i/o-read-error i/o-read-error?
+          &i/o-write-error i/o-write-error?
+          &i/o-closed-error i/o-closed-error?
+          &i/o-filename-error i/o-filename-error? i/o-error-filename
+          &i/o-malformed-filename-error i/o-malformed-filename-error?
+          &i/o-file-protection-error i/o-file-protection-error?
+          &i/o-file-is-read-only-error i/o-file-is-read-only-error?
+          &i/o-file-already-exists-error i/o-file-already-exists-error?
+          &i/o-no-such-file-error i/o-no-such-file-error?
+          &read-error read-error? read-error-line read-error-column
+                      read-error-position read-error-span)
+
+  ;;
+  ;; SRFI-36: "I/O conditions"
+  ;;
+  (%define-condition-type-accessors &i/o-error &error
+                                    i/o-error?)
+
+  (%define-condition-type-accessors &i/o-port-error &i/o-error
+                                    i/o-port-error?
+                                    (port i/o-error-port))
+
+  (%define-condition-type-accessors &i/o-read-error &i/o-port-error
+                                    i/o-read-error?)
+
+  (%define-condition-type-accessors &i/o-write-error &i/o-port-error
+                                    i/o-write-error?)
+
+  (%define-condition-type-accessors &i/o-closed-error &i/o-port-error
+                                    i/o-closed-error?)
+
+  (%define-condition-type-accessors &i/o-filename-error &i/o-error
+                                    i/o-filename-error?
+                                    (filename i/o-error-filename))
+
+  (%define-condition-type-accessors &i/o-malformed-filename-error &i/o-filename-error
+                                    i/o-malformed-filename-error?)
+
+  (%define-condition-type-accessors &i/o-file-protection-error &i/o-filename-error
+                                    i/o-file-protection-error?)
+
+  (%define-condition-type-accessors &i/o-file-is-read-only-error &i/o-file-protection-error
+                                    i/o-file-is-read-only-error?)
+
+  (%define-condition-type-accessors &i/o-file-already-exists-error &i/o-filename-error
+                                    i/o-file-already-exists-error?)
+
+  (%define-condition-type-accessors &i/o-no-such-file-error &i/o-filename-error
+                                    i/o-no-such-file-error?)
+
+  (%define-condition-type-accessors &read-error &error
+                                    read-error?
+                                    (line read-error-line)
+                                    (column read-error-column)
+                                    (position read-error-position)
+                                    (span read-error-span))
+)
+
+
+
+(provide "srfi/36")

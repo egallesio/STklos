@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,61 +21,119 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 10-Jun-2021 19:01 (eg)
+;;;; Last file update: 11-Sep-2022 17:05 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
-(include "runtime.stk")         ; Definition necessary for the bootstrap
+
+;;
+;; Following code is in the STklos module and is needed to ensure STklos
+:; bootstap
+;;
+(include "runtime.stk")         ; Definitions necessary for the bootstrap
+(include "runtime-macros.stk")  ; Macros necessary for the bootstrap
 (include "module.stk")          ; All the macros for defining modules
-(include "r5rs.stk")            ; R5RS stuff written in Scheme
-(include "str.stk")             ; String functions UTF-8 aware
-(include "callcc.stk")          ; Call/cc support
-(include "struct.stk")          ; STklos structures
-(include "bonus.stk")           ; Extended functions and syntaxes
-(include "load.stk")            ; Extended load dealing with paths and suffixes
-(include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
-(include "srfi-0.stk")          ; Implementation of SRFI-0
-(include "mbe.stk")             ; A simple R5RS macro system
-(include "regexp.stk")          ; Regular expressions
-(include "process.stk")         ; Processes from Scheme
-(include "equiv.stk")           ; equivalence of circular structures
-(include "compiler.stk")        ; VM Compiler
+
+;; ----------------------------------------------------------------------
+;;      SCHEME Module
+;; ----------------------------------------------------------------------
+;;
+;; Start to build the SCHEME module. This module contains a copy of the STklos
+;; module before the user may have the possibility to modify standard
+;; bindings. If a module needs to be sure to have the original bindings, it
+;; can import this module which will be visible before the STklos module.
+;; Note that module SCHEME was already created in C, before loading this file<
+
+;; 1. Populate the Scheme module with STklos bindings (C primitives, and runtime
+;;    bindings)
+;; 2. Set the export list of SCHEME to the one of STklos
+(%populate-scheme-module)
+(%module-exports-set! (find-module 'SCHEME)
+                      (module-exports (find-module 'STklos)))
+
+;; NOTE: This include MUST be done early (and not earlier). See why.
+(include "compiler.stk")        ; VM Compiler (this include MUST be done early)
+
+
+(define-module SCHEME
+  (include "r5rs.stk")            ; R5RS stuff written in Scheme
+  (include "str.stk")             ; String functions UTF-8 aware
+  (include "callcc.stk")          ; Call/cc support
+  (include "struct.stk")          ; STklos structures
+  (include "bonus.stk")           ; Extended functions and syntaxes
+  (include "regexp.stk")          ; Regular expressions
+  (include "process.stk")         ; Processes from Scheme
+  (include "equiv.stk")           ; equivalence of circular structures
+  (include "date.stk")            ; Dates
+  (include "logical.stk")         ; Logical operations
+  (include "thread.stk")          ; Thread support
+  (include "ffi.stk")             ; FFI support
+  (include "r7rs.stk")            ; Support of R7RS
+  (include "load.stk")            ; Extended load dealing with paths and suffixes
+  (include "library.stk")         ; R7RS define-library
+  (include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
+)
+
+;;
+;; The following included files (except "autoloads.stk") define their own
+;; module. Autoloaods must be in a non locked module since, relay functions
+;; are overloaded by their "true" definition.
+;;
 (include "object.stk")          ; CLOS like object system
-(include "date.stk")            ; Dates
-(include "logical.stk")         ; Logical operations
-(include "thread.stk")          ; Thread support
-(include "ffi.stk")             ; FFI support
-(include "r7rs.stk")            ; Preliminary support of R7RS
-(include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
+(include "mbe.stk")             ; A simple R5RS macro system
+(include "srfi-0.stk")          ; Implementation of SRFI-0
 (include "repl.stk")            ; Read Eval Print Loop
 (include "readline.stk")        ; Readline support
-(include "repl-readline.stk")   ; REL + readline
-(import REPL REPL-READLINE)
+(include "repl-readline.stk")   ; REPL + readline
+(include "autoloads.stk")       ; Autoloads functions
 
-;==============================================================================
-(autoload        "compfile"       compile-file)
-(autoload        "describe"       describe)
-(syntax-autoload "bigmatch"       match-case match-lambda)
-(autoload        "getopt"         %print-usage)
-(syntax-autoload "getopt"         parse-arguments)
-(syntax-autoload "trace"          trace untrace)
-(autoload        "pretty-print"   pp pretty-print)
-(autoload        "env"            null-environment scheme-report-environment
-                                  interaction-environment)
-(autoload        "help"           help)
-(autoload        "lex-rt"         lexer-next-token)
-(syntax-autoload "scmpkg-support" interface)
-(autoload        "srfi-27"        random-integer random-real)
-(syntax-autoload "srfi-35"        define-condition-type condition)
-(autoload        "srfi-48"        srfi48:help srfi48:format-fixed)
+;;
+;; Import these new modules in STklos
+;;
+(import STKLOS-OBJECT MBE SRFI-0 REPL REPL-READLINE)
 
-;==============================================================================
+;;
+;; Add all the exported bindings in SCHEME module to STklos. Don't use import
+;; here, since import makes new bindings read-only (and we want that bindings
+;; in STklos can be broken if needed).
+;;
+(let ((STklos (find-module 'STklos))
+      (SCHEME (find-module 'SCHEME)))
+  (for-each (lambda(x)
+              (let ((v (cdr x)))
+                (%symbol-define v (symbol-value v SCHEME) STklos)))
+            (module-exports SCHEME)))
+
+;;
+;; Define common standard libraries to minimize file accesses at runtime
+;;
+(include "./scheme/base.stk")
+(include "./scheme/write.stk")
+
+;;
+;; It's time to lock the SCHEME module, that is make bindings in it read-only
+;; and forbid further definitions.
+(define-module SCHEME
+  (import STKLOS-COMPILER STKLOS-OBJECT MBE SRFI-0 REPL REPL-READLINE)
+
+  ;; During he bootstap, the module SCHEME is present and all the definitions
+  ;; made above (yes above!!), need an unlocked SCHEME module. So, the module
+  ;; SCHEME is closed only for user programs (in this case STKLOS_BUILDING is
+  ;; not defined)
+  (unless (getenv "STKLOS_BUILDING")
+    ;; We are not bootstapping
+    (module-immutable! (current-module))))
+
+
+;; ======================================================================
+;;
+;; Define exception handlers, analyze options
+;;
 ;; Execute the REPL only if a file was not given on the command line
+;; ======================================================================
+
 (define %before-exit-hook void)
-
-;; A main function which will probably overloaded by the user
-(define main void)
-
+(define main void) ;; A main function which will probably overloaded by the user
 
 ;; ----------------------------------------------------------------------
 ;;      %display-backtrace ...
@@ -186,37 +244,22 @@
 
 
 ;; ----------------------------------------------------------------------
-;;      Scheme Module
+;;      Set the default module for the compiler to (current-module)
 ;; ----------------------------------------------------------------------
-;; The SCHEME module is a copy of the STklos module before the user
-;;; may have the possibility to modify standard bindings.
-;;; If a module needs to be sure to have the original bindings, it
-;;; can import this module which will be visible before the STklos
-;;; module. Note that this is only partially true since bindings
-;;; in SCHEME module are mutable
-;;; Note that module SCHEME was already created before bootstrap
-
-(let ((STklos (find-module 'STklos))
-      (Scheme (find-module 'SCHEME)))
-
-  ;; Register the options given as program args in the system state plist
-  (set! *%system-state-plist* (append *%system-state-plist* *%program-args*))
-
-  (%redefine-module-exports STklos Scheme)
-  (%module-exports-set! Scheme (module-exports STklos)))
+(compiler-current-module (current-module))
 
 ;; ----------------------------------------------------------------------
 ;;      option analysis and REPL launching
 ;; ----------------------------------------------------------------------
-(let ((no-init (key-get *%program-args* :no-init-file #f))
-      (ld      (key-get *%program-args* :load  #f))
-      (s176    (key-get *%program-args* :srfi-176 #f))
-      (file    (key-get *%program-args* :file #f))
-      (expr    (key-get *%program-args* :sexpr #f))
-      (confdir (key-get *%program-args* :conf-dir #f))
-      (debug   (key-get *%program-args* :debug 0))
-      (Idirs   (key-get *%program-args* :prepend-dirs '()))
-      (Adirs   (key-get *%program-args* :append-dirs '())))
+(let ((no-init (key-get *%system-state-plist* :no-init-file #f))
+      (ld      (key-get *%system-state-plist* :load  #f))
+      (s176    (key-get *%system-state-plist* :srfi-176 #f))
+      (file    (key-get *%system-state-plist* :file #f))
+      (expr    (key-get *%system-state-plist* :sexpr #f))
+      (confdir (key-get *%system-state-plist* :conf-dir #f))
+      (debug   (key-get *%system-state-plist* :debug 0))
+      (Idirs   (key-get *%system-state-plist* :prepend-dirs '()))
+      (Adirs   (key-get *%system-state-plist* :append-dirs '())))
 
   ;; Test if we have the -V flag (SRFI-176 version flag)
   (when s176
@@ -267,10 +310,11 @@
   (cond
     ;; "--file" option
     (file (with-handler
-            (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
+           (lambda (c) (%simple-fatal-exception-handler "executing command"
+                                                   (cons file (command-args)) c 2))
             (load file)
             ;; Try to execute the main procedure with the given arguments
-            (let ((ret-code (main (cons (program-name) (argv)))))
+            (let ((ret-code (main (cons (program-name) (command-args)))))
               (%before-exit-hook)
               (if (integer? ret-code) ret-code 0))))
     ;; "--expression" option
@@ -281,6 +325,5 @@
     (else  ;; Try to initialize GNU readline and starts the main REPL
            (try-initialize-repl-with-readline)
            (main-repl))))
-
 
 ; LocalWords:  VM EVAL SRFI REPL

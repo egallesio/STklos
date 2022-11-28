@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 10-Apr-2021 18:45 (eg)
+ * Last file update: 10-Jun-2022 16:59 (eg)
  */
 
 #include "stklos.h"
@@ -62,12 +62,19 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
 }
 
 
-static void print_lambda(SCM closure, SCM port, int _UNUSED(mode))
+static void print_lambda(SCM closure, SCM port, int mode)
 {
   if (CLOSURE_NAME(closure) != STk_false)
-    STk_fprintf(port, "#[closure %s]", SYMBOL_PNAME(CLOSURE_NAME(closure)));
+    STk_fprintf(port, "#[closure %s", SYMBOL_PNAME(CLOSURE_NAME(closure)));
   else
-    STk_fprintf(port, "#[closure %lx]", (unsigned long) closure);
+    STk_fprintf(port, "#[closure %lx", (unsigned long) closure);
+
+  SCM formals = CLOSURE_FORMALS(closure);
+  if (formals != STk_false) {
+    STk_nputs(port, " ", 1);
+    STk_print(formals, port, mode);
+  }
+  STk_nputs(port,"]", 1);
 }
 
 
@@ -169,8 +176,8 @@ DEFINE_PRIMITIVE("%set-procedure-name!", set_procedure_name, subr2, (SCM obj, SC
 <doc EXT closure?
  * (closure? obj)
  *
- * Returns |#t| if |obj| is a procedure created with the |lambda| syntax and
- * |#f| otherwise.
+ * Returns {{true}} if |obj| is a procedure created with the |lambda| syntax and
+ * {{false}} otherwise.
 doc>
  */
 DEFINE_PRIMITIVE("closure?", closurep, subr1, (SCM obj))
@@ -275,6 +282,12 @@ DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
   return CLOSURE_FORMALS(proc);
 }
 
+DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) return STk_false;
+  return CLOSURE_ENV(proc);
+}
+
 /*===========================================================================*\
  *
  *                      M A P   &   F O R - E A C H
@@ -364,7 +377,7 @@ DEFINE_PRIMITIVE("map", map, vsubr, (int argc, SCM* argv))
  * calls proc for its side effects rather than for its values.
  * Unlike |map|, |for-each| is guaranteed to call proc on the elements of
  * the lists in order from the first element(s) to the last, and the value
- * returned by |for-each| is ,(emph "void").
+ * returned by |for-each| is *_void_*.
  * @lisp
  * (let ((v (make-vector 5)))
  *   (for-each (lambda (i)
@@ -406,6 +419,7 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(procedure_name);
   ADD_PRIMITIVE(set_procedure_name);
   ADD_PRIMITIVE(proc_signature);
+  ADD_PRIMITIVE(proc_env);
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);

@@ -1,0 +1,104 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update:  2-Jun-2022 16:55 (eg)
+
+= STklos Reference Manual : (version {{version}})
+:authors: Erick Gallesio
+:email: eg@unice.fr
+:logo: images/dice.png
+:doctype: book
+:source-highlighter: rouge
+:rouge-style: monokai
+:icons: font
+:toc: left
+:toclevels: 2
+:sectnums:
+:xrefstyle: short
+:pdf-style: ../lib/theme/stklos.yml
+:docinfodir: ../lib/theme
+:docinfo: shared
+
+
+{{load "adoc-lib.stk"}}
+
+[preface]
+== Preface
+
+This document provides a complete list of procedures and special forms
+implemented in version *{{version}}* of {{stklos}}. The language
+implemented by {{stklos}} is nearly compliant with the language
+described in the Revised^5^ Report on the Algorithmic Language Scheme
+(aka {{rfive}}) <<R5RS>>.
+
+However, since version 1.30, the goal is to make it more compliant
+with {{rseven}} <<R7RS>>. This document states the compliance of each
+construction relatively to these reports, or if it is a {{stklos}}
+extension.
+
+=== Licences
+
+* {{stklos}} program and supporting files are published under the terms of the
+_GNU General Public Licence version 2 or later_. This licence is available at the 
+following URL: https://www.gnu.org/licenses/gpl-3.0.html
+
+* The manual you’re now reading is published under the terms of the
+_GNU Free Documentation License or later_ (see <<FDL>>).
+
+
+{{If (eq? doc-fmt 'pdf)}}{{empty-line 14}} {{End}}
+
+****
+Copyright © 1999-{{date-year (current-date)}} Erick Gallesio
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled <<FDL, "GNU
+Free Documentation License">>.
+****
+
+
+{{Include* "intro.adoc"}}
+{{Include* "expr.adoc"}}
+{{Include* "progstruct.adoc"}}
+{{Include* "stdproc.adoc"}}
+{{Include* "regexp.adoc"}}
+{{Include* "match.adoc"}}
+{{Include* "cond.adoc"}}
+{{Include* "object.adoc"}}
+{{Include* "threads.adoc"}}
+{{Include* "custom.adoc"}}
+{{Include* "scmpkg.adoc"}}
+{{Include* "ffi.adoc"}}
+{{Include* "slib.adoc"}}
+{{Include* "srfi.adoc"}}
+{{Include* "biblio.adoc"}}
+
+[appendix]
+[#_libraries]
+{{Include* "libs.adoc"}}
+
+[appendix]
+[appendix]
+[#FDL]
+{{Include* "licence.adoc"}}
+
+//
+// The index (produced only when we are building the PDF documentation)
+//
+{{If (eq? doc-fmt 'pdf)}}
+[index]
+== Index
+{{End}}
+
+
+//
+// Show undocumented symbols (i.e. symbols have doc but are not in the manual)
+//
+
+{{show-undocumented}}

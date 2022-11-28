@@ -37,21 +37,20 @@ In general the following guidelines should be followed:
   recently used logically open files. Any other needed files would be closed
   after saving their state. They would then be reopened on demand.
   Finalization would logically close the file, closing the real descriptor
-  only if it happened to be cached.) Note that most modern systems (e.g. Irix)
-  allow hundreds or thousands of open files, and this is typically not
-  an issue.
+  only if it happened to be cached.) Note that most modern systems allow
+  thousands of open files, and this is typically not an issue.
   * Finalization code may be run anyplace an allocation or other call to the
   collector takes place. In multi-threaded programs, finalizers have to obey
   the normal locking conventions to ensure safety. Code run directly from
   finalizers should not acquire locks that may be held during allocation.
-  This restriction can be easily circumvented by registering a finalizer which
-  enqueues the real action for execution in a separate thread.
+  This restriction can be easily circumvented by calling
+  `GC_set_finalize_on_demand(1)` at program start and creating a separate
+  thread dedicated to periodic invocation of `GC_invoke_finalizers()`.
 
-In single-threaded code, it is also often easiest to have finalizers queue
-actions, which are then explicitly run during an explicit call by the user's
-program.
+In single-threaded code, it is also often easiest to have finalizers queued
+and, then to have them explicitly executed by `GC_invoke_finalizers()`.
 
-# Topologically Ordered Finalization
+## Topologically ordered finalization
 
 Our _conservative garbage collector_ supports a form of finalization (with
 `GC_register_finalizer`) in which objects are finalized in topological order.
@@ -67,7 +66,7 @@ making it accessible again. Or it may mutate the rest of the chain.
 
 Cycles involving one or more finalizable objects are never finalized.
 
-#  Why topological ordering?
+## Why topological ordering?
 
 It is important to keep in mind that the choice of finalization ordering
 matters only in relatively rare cases. In spite of the fact that it has
@@ -123,7 +122,7 @@ finalization simply extends this to object finalization; an finalizable object
 reachable from another finalizer via a pointer chain is presumed to be
 accessible by the finalizer, and thus should not be finalized.
 
-# Programming with topological finalization
+## Programming with topological finalization
 
 Experience with Cedar has shown that cycles or long chains of finalizable
 objects are typically not a problem. Finalizable objects are typically rare.
@@ -141,7 +140,7 @@ cleared by the finalization procedure that deallocates the resource). If any
 references are still left at process exit, they can be explicitly deallocated
 then.
 
-# Getting around topological finalization ordering
+## Getting around topological finalization ordering
 
 There are certain situations in which cycles between finalizable objects are
 genuinely unavoidable. Most notably, C++ compilers introduce self-cycles

@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update: 14-Dec-2020 16:39 (eg)
+;;;; Last file update:  8-Jun-2022 13:23 (eg)
 ;;;;
 
 (require "test")
@@ -224,6 +224,72 @@ b|)
 (test "really anonymous lambda doc - sig not generated, with docstring"
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
+
+(test-subsection "tagbody and repeat")
+
+(test "tagbody without goto"
+      3
+      (tagbody 1 2 3))
+
+(test "tagbody loop"
+      "01234"
+      (call-with-output-string
+       (lambda (p)
+         (let ((v 0))           ;; equivalent to (dotimes (v 5) (display v))
+           (tagbody
+            #:top (when (< v 5)
+                    (display v p)
+                    (set! v (fx+ v 1))
+                    (-> #:top)))))))
+
+(test "convoluted tagbody"
+      "1234"
+      (call-with-output-string
+       (lambda (p)
+         (tagbody (display 1 p)
+             (tagbody (display 2 p)
+                      (-> #:inner)
+                      (display "never printed" p)
+                      #:inner
+                      (display 3 p)
+                      (-> #:outer)
+                      (display "never printed too"p))
+             #:outer
+             (display "4" p)))))
+
+(test/error "tagbody absent label"
+            (tagbody (-> #:absent)))
+
+(test "repeat.1"
+      (make-string 100 #\.)
+      (call-with-output-string (lambda (p)
+                                 (repeat 100 (display "." p)))))
+
+(test "repeat.2"
+      ""
+      (call-with-output-string (lambda (p)
+                                 (repeat -4 (display "." p)))))
+(test/error "repeat.3"
+            (repeat 'not-a-number (display "." p)))
+
+;;----------------------------------------------------------------------
+(test-subsection "(void)")
+
+(test "void.1" #t (eq? (void) #void))
+(test "void.2" #t (eq? (void 1 2 3) #void))
+(test "void.3"
+      '(-1 20 #void)
+      (let ((x 1)
+            (y 2))
+        (let ((z (void (set! x -1)
+                       (set! y (* y 10)))))
+          (list x y z))))
+
+;;----------------------------------------------------------------------
+(test-subsection "syntax names in environment")
+
+(test "syntax in env.1" '(1 2 3) (lambda (begin) (begin 1 2 3)) (lambda lambda lambda))
+(test "syntax in env.2" 3 (lambda (_) (begin 1 2 3)) (lambda lambda lambda))
 
 
 ;;------------------------------------------------------------------

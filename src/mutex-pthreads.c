@@ -1,7 +1,7 @@
 /*
  * mutex-pthreads.c     -- Pthread Mutexes in Scheme
  *
- * Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update:  4-Jun-2021 10:39 (eg)
+ * Last file update: 12-Jan-2022 14:23 (eg)
  */
 
 #include <unistd.h>
@@ -58,15 +58,16 @@ void STk_make_sys_mutex(SCM z)
  *
  * Returns information about the state of the |mutex|. The possible results
  * are:
- * ,(itemize
- *  (item [,(bold "thread T"): the mutex is in the locked/owned state and
- *     thread T is the owner of the mutex])
- *  (item [,(bold "symbol not-owned"): the mutex is in the locked/not-owned
- *     state])
- *  (item [,(bold "symbol abandoned"): the mutex is in the unlocked/abandoned
- *      state])
- *  (item [,(bold "symbol not-abandoned"): the mutex is in the
- *      unlocked/not-abandoned state]))
+ * 
+ *  * a thread *T*: the mutex is in the locked/owned state and
+ *    thread *T* is the owner of the mutex
+ *  * the symbol *not-owned*: the mutex is in the locked/not-owned
+ *    state
+ *  * the symbol *abandoned*: the mutex is in the unlocked/abandoned
+ *    state
+ *  * the symbol *not-abandoned*: the mutex is in the
+ *     unlocked/not-abandoned state
+ * 
  * @lisp
  * (mutex-state (make-mutex))  =>  not-abandoned
  *
@@ -115,14 +116,13 @@ DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
  * |mutex| is unlocked, or until the timeout is reached if |timeout| is supplied.
  * If the |timeout| is reached, |mutex-lock!| returns |#f|.
  * Otherwise, the state of the mutex is changed as follows:
- * ,(itemize
- *  (item [if thread is |#f| the mutex becomes locked/not-owned,])
- *  (item [otherwise, let T be thread (or the current thread if thread
- *         is not supplied),
- *         ,(itemize
- *           (item [if T is terminated the mutex becomes unlocked/abandoned,])
- *           (item [otherwise mutex becomes locked/owned with T as the owner.]))]))
- * @l
+ *
+ *  * if thread is |#f| the mutex becomes _locked/not-owned_,
+ *  * otherwise, let T be thread (or the current thread if thread
+ *    is not supplied),
+ *  ** if T is terminated the mutex becomes _unlocked/abandoned_,
+ *  ** otherwise mutex becomes _locked/owned_ with T as the owner.
+ * 
  * After changing the state of the mutex, an "abandoned mutex exception" is
  * raised if the mutex was unlocked/abandoned before the state change,
  * otherwise |mutex-lock!| returns |#t|.

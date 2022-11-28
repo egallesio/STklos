@@ -1,0 +1,174 @@
+;;;;
+;;;;
+;;;; library.stk         -- R7RS define-library
+;;;;
+;;;; Copyright © 2019-2022 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 18-Oct-2019 14:08
+;;;; Last file update: 28-Sep-2022 11:39 (eg)
+;;;;
+
+
+(export define-library library-name
+        ;; FIXME
+        %library-name->symbol
+        %symbol->library-name
+        %module-define-and-export
+        %make-copy-module)
+
+;;
+;; library name conversion functions
+;;
+(define (%library-name->string libname)
+  (define (->string libname)
+    (let* ((str (format #f "~A" libname))
+           (res (substring str 1 (- (string-length str) 1))))
+      (regexp-replace-all " " res "/")))
+
+  (cond
+   ((symbol? libname)                                   ;; STklos
+    (symbol->string libname))
+   ((and (pair? libname)
+         (list? libname)
+         (every (lambda (x)
+                  (or (symbol? x) (and (integer? x)
+                                       (positive? x))))
+                libname)
+         (->string libname)))
+   (else
+    (error "bad library name ~S" libname))))
+
+
+(define (%library-name->symbol libname)
+  (string->symbol (%library-name->string libname)))
+
+(define (%symbol->library-name name)
+  (map string->symbol (string-split (symbol->string name) "/")))
+
+;;
+;; A macro to redefine a symbol in a R7RS module
+;;
+(define-macro (%module-define-and-export . lst)
+  `(begin
+     ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)
+     (export ,@lst)))
+
+;;
+;; Define a module which exports all the exported module of another
+;; FIXME: find another name for this macro.
+;;
+(define-macro (%make-copy-module old new)
+  (%%import (compiler-current-module) (list old))
+  `(define-module ,new
+     (import ,old)
+     (export ,@(map cdr
+                    (module-exports (find-module (%library-name->symbol old)))))))
+
+
+;; ======================================================================
+;;
+;; DEFINE-LIBRARY
+;;
+;; ======================================================================
+(define-macro (define-library name . decls)
+  (let* ((module-name    (%library-name->symbol name))
+         (imports        '())
+         (exports        '())
+         (body           '())
+         (lib            (gensym))
+         (module-restore (symbol-value '%module-restore
+                                       (find-module 'SCHEME))))
+
+    ;; Parse declarations
+    (for-each (lambda (d)
+                (unless (pair? d)
+                  (error 'define-library "bad library declaration clause ~s" d))
+                (let ((key  (car d))
+                      (rest (cdr d)))
+                  (case key
+                    ((import)
+                     (set! imports (append imports rest)))
+                    ((export)
+                     (set! exports (append exports rest)))
+                    ((begin include include-ci)
+                     (set! body (append body (list d))))
+                    (else
+                     (error 'define-library "incorrect directive ~s" d)))))
+              decls)
+    ;;
+    ;; Produce the expansion
+    ;;
+    ;; The difficulty here is that libraries have an empty environment. That
+    ;; means that we cannot expand in a "define-module" and do the imports
+    ;; and the exports in it. Consequently, we work in four phases:
+    ;;  1. First, we create the library as a module and just do the imports and
+    ;;     exports in it. This allows us to use all the expansion code of
+    ;;     of import and exports since the STklos environment is visible.
+    ;;  2. We forge the symbols %module-restore and %make-syntax in the
+    ;;     environment of the module/library. The former is uses at the end of the
+    ;;     expansion of define-module. The latter is used by define-macro.
+    ;;  3. We transform the module in a library (that means more of less that
+    ;;     the STklos module is  deleted from the import list.
+    ;;  4. we evaluate the body in the module (which is now a library)
+    ;;
+    `(begin
+       (define-module ,module-name
+         ;; ①: define the imports and the exports
+         (import ,@imports)
+         (export ,@exports)
+         ;; ②: define useful 'secret" symbols
+         (%symbol-define '%module-restore %module-restore (current-module))
+         (%symbol-define '%make-syntax    %make-syntax    (current-module))
+
+         ;; ③: transform the module in a library
+         (%module->library! ',module-name)
+
+         ;; ④: evaluate the body in the library environment
+         ,@body))))
+
+
+#|
+<doc EXT library-name
+ * (library-name lib)
+ *
+ * Returns the name of |lib| if it was defined as an R7RS library,
+ * and #f if the library is anonymous. If |lib| is not a library,
+ * |library-name| raises an error.
+ *
+ * @lisp
+ * (define-library (example cool-library))
+ * (library-name (find-module 'example/cool-library)) => (example cool-library)
+ * (module-name  (find-module 'example/cool-library)) => example/cool-library
+ *
+ * (define-module example/a-module)
+ * (library-name (find-module 'example/a-module))     => error
+ *
+ * (library-name quotient)                            => error
+ * @end lisp
+doc>
+|#
+(define (library-name lib)
+  (unless (library? lib)
+    (if (module? lib)
+        (error 'library-name "module ~S is not a library" (module-name lib))
+        (error 'library-name "bad module/library ~S" lib)))
+  (let ((name (module-name lib)))
+    (and (not (eq? name #void))
+         (%symbol->library-name (module-name lib)))))

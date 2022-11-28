@@ -1,5 +1,5 @@
 ;;;;
-;;;; http.stk			-- HTTP utilities
+;;;; http.stk                   -- HTTP utilities
 ;;;;
 ;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
@@ -24,18 +24,18 @@
 ;;;; Manuel Serrano.
 ;;;;
 ;;;;    Creation date: 14-May-2007 19:12 (eg)
-;;;; Last file update:  9-Mar-2021 16:40 (eg)
+;;;; Last file update: 12-Nov-2021 17:41 (eg)
 ;;;;
 
 (define-module HTTP-MODULE
   (export http-open
-	  http-parse-status-line
-	  http-parse-header
-	  http-find-body
-	  http-download)
+          http-parse-status-line
+          http-parse-header
+          http-find-body
+          http-download)
 
 ;; -----------------------------------------------------------------------
-;;	display-line ...
+;;      display-line ...
 ;; ----------------------------------------------------------------------
 ;;(define debug #t)
 ;;(define (%display x port)
@@ -45,8 +45,8 @@
 
 (define-macro (display-line . args)
   (let* ((sgra (reverse args))
-	 (port (car sgra))
-	 (vals (reverse (cdr sgra))))
+         (port (car sgra))
+         (vals (reverse (cdr sgra))))
     `(begin
        ,@(map (lambda (a) `(%display ,a ,port)) vals)
        (%display "\r\n" ,port))))
@@ -56,12 +56,12 @@
 ;; -----------------------------------------------------------------------
 (define (generate-http-boundary)
   (let ((s (make-string 42 #\-))
-	(chars "0123456789abcdef"))
+        (chars "0123456789abcdef"))
     (let loop ((i 30))
       (when (< i 42)
-	(let ((num (random-integer 16)))
-	  (string-set! s i (string-ref chars num))
-	  (loop (+ i 1)))))
+        (let ((num (random-integer 16)))
+          (string-set! s i (string-ref chars num))
+          (loop (+ i 1)))))
     s))
 
 ;; -----------------------------------------------------------------------
@@ -70,85 +70,85 @@
 (define (generate-http-post-body boundary args)
   (let ((port (open-output-string)))
     (if (null? args)
-	(begin
-	  (display-line port)
-	  (close-output-port port))
-	(let loop ((args args))
-	  (if (null? args)
-	      (begin
-		(display-line boundary "--" port)
-		(close-output-port port))
-	      (let ((a (car args)))
-		(display-line boundary port)
-		(display-line "Content-Disposition: form-data; name=\""
-			      (car a) "\"" port)
-		(display-line port)
-		(display-line (cadr a) port)
-		(loop (cdr args))))))
+        (begin
+          (display-line port)
+          (close-output-port port))
+        (let loop ((args args))
+          (if (null? args)
+              (begin
+                (display-line boundary "--" port)
+                (close-output-port port))
+              (let ((a (car args)))
+                (display-line boundary port)
+                (display-line "Content-Disposition: form-data; name=\""
+                              (car a) "\"" port)
+                (display-line port)
+                (display-line (cadr a) port)
+                (loop (cdr args))))))
     (get-output-string port)))
 
 ;; -----------------------------------------------------------------------
-;;	http-open ...
+;;      http-open ...
 ;; ----------------------------------------------------------------------
 (define (http-open #!key
-		   (protocol 'http)
-		   (method 'get)
-		   (timeout 0)
-		   (proxy #f)
-		   (host "localhost")
-		   (port 80)
-		   (path "/")
-		   (username #f)
-		   (password #f)
-		   (http-version "HTTP/1.0")
-		   (content-type #f)
-		   (header '())
-		   (args  '()))
+                   (protocol 'http)
+                   (method 'get)
+                   (timeout 0)
+                   (proxy #f)
+                   (host "localhost")
+                   (port 80)
+                   (path "/")
+                   (username #f)
+                   (password #f)
+                   (http-version "HTTP/1.0")
+                   (content-type #f)
+                   (header '())
+                   (args  '()))
 
   (let* ((sock (if (string? proxy)
-		   (let ((x (regexp-match "(.*):([0-9]+)" proxy)))
-		     (if x
-			 (make-client-socket (cadr x) (string->number (caddr x)))
-			 (make-client-socket proxy 80)))
-		   (make-client-socket host port)))
-	 (out  (socket-output sock)))
+                   (let ((x (regexp-match "(.*):([0-9]+)" proxy)))
+                     (if x
+                         (make-client-socket (cadr x) (string->number (caddr x)))
+                         (make-client-socket proxy 80)))
+                   (make-client-socket host port)))
+         (out  (socket-output sock)))
     ;; header line
     (%display (string-upcase (format "~a" method)) out)
     (if (string? proxy)
-	(display-line " http://" host ":" port path " " http-version out)
-	(display-line " " path " " http-version out))
+        (display-line " http://" host ":" port path " " http-version out)
+        (display-line " " path " " http-version out))
     ;; host and port
     (if (= port 80)
       (display-line "Host: " host out)
       (display-line "Host: " host ":" port out))
     ;; user additional header
     (for-each (lambda (h)
-		(display-line (keyword->string (car h)) ": " (cadr h) out))
-	      header)
+                (display-line (keyword->string (car h)) ": " (cadr h) out))
+              header)
     ;; authentication
     (when (and (string? username) (string? password))
       (let ((uinfo (base64-encode (string-append username ":" password))))
-	(display-line "Authorization: Basic " uinfo out)))
+        (display-line "Authorization: Basic " uinfo out)))
     ;; connection keep-alive
     ;; (display-line "Keep-Alive: 300" out)
     ;; (display-line "Connection: keep-alive" out)
     ;; post method
     (if (eq? method 'post)
       (if (eq? content-type 'multipart/form-data)
-	(let* ((boundary (generate-http-boundary))
-	       (content  (generate-http-post-body boundary args)))
-	  (display-line "Content-Length: " (string-length content) out)
-	  (display-line "Content-Type: multipart/form-data; boundary="
-			(substring boundary 2 (string-length boundary))
-			out)
-	  (display-line out)
-	  (%display content out))
-	(let ((content (x-www-form-urlencode args)))
-	  (display-line "Content-Type: application/x-www-form-urlencoded" out)
-	  (display-line "Content-Length: " (string-length content) out)
-	  (display-line out)
-	  (%display content out)
-	  (display-line out)))
+        (let* ((boundary (generate-http-boundary))
+               (content  (generate-http-post-body boundary args)))
+          (display-line "Content-Length: " (string-length content) out)
+          (display-line "Content-Type: multipart/form-data; boundary="
+                        (substring boundary 2 (string-length boundary))
+                        out)
+          (display-line out)
+          (%display content out))
+        (let ((content (x-www-form-urlencode args)))
+          (display-line "Content-Type: application/x-www-form-urlencoded" out)
+          (display-line "Content-Length: " (string-length content) out)
+          (display-line out)
+          (%display content out)
+          (display-line out)))
       (display-line out))
 
     (flush-output-port out)
@@ -158,118 +158,126 @@
       in)))
 
 ;; -----------------------------------------------------------------------
-;;	http-parse-status-line ...
+;;      http-parse-status-line ...
 ;; ----------------------------------------------------------------------
 (define *status-line-regexp*
   (string->regexp "([Hh][Tt][Tt][Pp][Ss]?.*) +([0-9]+) +(.*)"))
 
 (define (http-parse-status-line ip)
   (let* ((line (read-line ip))
-	 (match (regexp-match *status-line-regexp* line)))
+         (match (regexp-match *status-line-regexp* line)))
     (if match
-	(values (cadr match)
-		(string->number (caddr match))
-		(cadddr match))
-	(error "illegal status line syntax ~s" line))))
+        (values (cadr match)
+                (string->number (caddr match))
+                (cadddr match))
+        (error "illegal status line syntax ~s" line))))
 
 ;; -----------------------------------------------------------------------
-;;	http-parse-header ...
+;;      http-parse-header ...
 ;; ----------------------------------------------------------------------
 (define *header-assoc-regexp* (string->regexp "([^:]+): *(.*)"))
 
 (define (http-parse-header ip)
   (let ((hostname #f)
-	(port #f)
-	(content-length -1)
-	(transfer-encoding #f)
-	(authorization #f)
-	(proxy-authorization #f)
-	(connection #f))
+        (port #f)
+        (content-length -1)
+        (transfer-encoding #f)
+        (authorization #f)
+        (proxy-authorization #f)
+        (connection #f))
 
     (let loop ((line    (read-line ip))
-	       (header '()))
+               (header '()))
       (if (or (eof-object? line) (string=? line ""))
-	  (values (reverse! header)
-		  hostname
-		  port
-		  content-length
-		  transfer-encoding
-		  authorization
-		  proxy-authorization
-		  connection)
-	  (let ((ln (regexp-match *header-assoc-regexp* line)))
-	    (if ln
-		(let ((key (make-keyword (string-downcase (cadr ln))))
-		      (val (caddr ln)))
-		  (case key
-		    ((host:)
-		     (let ((x (regexp-match "(.*):([0-9]+)" val)))
-		       (if x
-			   (begin
-			     (set! hostname (cadr x))
-			     (set! port (string->number (caddr x)))
-			     (loop (read-line ip)
-				   (list* (cons port: port)
-					  (cons host: hostname)
-					  header))))))
-		    ((content-length:)
-		     (set! content-length (string->number val))
-		     (loop (read-line ip)
-			   (cons (cons content-length: content-length) header)))
-		    ((transfer-encoding:)
-		     (set! transfer-encoding (string->symbol (string-downcase val)))
-		     (loop (read-line ip)
-			   (cons (cons transfer-encoding: transfer-encoding)
-				 header)))
-		    ((authorization:)
-		     (set! authorization val)
-		     (loop (read-line ip)
-			   (cons (cons authorization: authorization) header)))
-		    ((proxy-authorization:)
-		     (set! proxy-authorization val)
-		     ;; don't store the proxy-authorization in the header
-		     (loop (read-line ip) header))
-		    ((connection:)
-		     (set! connection (string->symbol (string-downcase val)))
-		     (loop (read-line ip)
-			   (cons (cons connection: connection) header)))
-		    (else
-		     (loop (read-line ip)
-			   (cons (cons key val) header)))))
-		(error "incorrect header line format ~S" line)))))))
+          (values (reverse! header)
+                  hostname
+                  port
+                  content-length
+                  transfer-encoding
+                  authorization
+                  proxy-authorization
+                  connection)
+          (let ((ln (regexp-match *header-assoc-regexp* line)))
+            (if ln
+                (let ((key (make-keyword (string-downcase (cadr ln))))
+                      (val (caddr ln)))
+                  (case key
+                    ((host:)
+                     (let ((x (regexp-match "(.*):([0-9]+)" val)))
+                       (if x
+                           (begin
+                             (set! hostname (cadr x))
+                             (set! port (string->number (caddr x)))
+                             (loop (read-line ip)
+                                   (list* (cons port: port)
+                                          (cons host: hostname)
+                                          header))))))
+                    ((content-length:)
+                     (set! content-length (string->number val))
+                     (loop (read-line ip)
+                           (cons (cons content-length: content-length) header)))
+                    ((transfer-encoding:)
+                     (set! transfer-encoding (string->symbol (string-downcase val)))
+                     (loop (read-line ip)
+                           (cons (cons transfer-encoding: transfer-encoding)
+                                 header)))
+                    ((authorization:)
+                     (set! authorization val)
+                     (loop (read-line ip)
+                           (cons (cons authorization: authorization) header)))
+                    ((proxy-authorization:)
+                     (set! proxy-authorization val)
+                     ;; don't store the proxy-authorization in the header
+                     (loop (read-line ip) header))
+                    ((connection:)
+                     (set! connection (string->symbol (string-downcase val)))
+                     (loop (read-line ip)
+                           (cons (cons connection: connection) header)))
+                    (else
+                     (loop (read-line ip)
+                           (cons (cons key val) header)))))
+                (error "incorrect header line format ~S" line)))))))
 
 ;; -----------------------------------------------------------------------
-;;	http-find-body ...
+;;      http-find-body ...
 ;; ----------------------------------------------------------------------
 (define (http-find-body ip)
   (receive (_ status-code explain)
-	   (http-parse-status-line ip)
+           (http-parse-status-line ip)
      (receive (header _host _port _clen tenc _aut _paut _conn)
-	      (http-parse-header ip)
+              (http-parse-header ip)
        (case status-code
-	 ((204 304)
-	  ;; no message body
-	  (close-input-port ip)
-	  (open-input-string ""))
-	 ((301 302 307)
-	  ;; redirection
-	  (let ((loc (assq location: header)))
-	    (if (not (pair? loc))
-		(error "no URL for redirection!")
-		(list 'redirection ip (cdr loc)))))
-	 ((200)
-	  ;; ok
-	  (cond
-	    ((eq? tenc 'chunked)
-	     (error "chunked transfer not implemented yet"))
-	    (else
-	     ip)))
-	 (else
-	  (error "bad status code ~a: ~A" status-code explain))))))
+         ((204 304)
+          ;; no message body
+          (close-input-port ip)
+          (open-input-string ""))
+         ((301 302 307)
+          ;; redirection
+          (let ((loc (assq location: header)))
+            (if (not (pair? loc))
+                (error "no URL for redirection!")
+                (list 'redirection ip (cdr loc)))))
+         ((200)
+          ;; ok
+          (cond
+            ((eq? tenc 'chunked)
+             (error "chunked transfer not implemented yet"))
+            (else
+             ip)))
+         (else
+          (error "bad status code ~a: ~A" status-code explain))))))
 
 ;; ----------------------------------------------------------------------
-;;	http-download ...
+;;      http-download ...
 ;; ----------------------------------------------------------------------
+#|
+<doc EXT http-download
+ * (http-download url dest)
+ *
+ * Downloads the contents at |url| using HTTP, and sends the result to
+ * |dest|, which must be an output port.
+doc>
+|#
 (define (http-download url dest)
 
   (define (get-username str)
@@ -282,99 +290,99 @@
 
   (define (open-url url)
     (let* ((uri      (uri-parse url))
-	   (protocol (key-get uri :scheme))
-	   (userinfo (key-get uri :user))
-	   (host     (key-get uri :host))
-	   (port     (key-get uri :port))
-	   (pth      (key-get uri :path))
-	   (query    (key-get uri :query))
-	   (path     (if (equal? query "") pth (format "~a?~a" pth query))))
+           (protocol (key-get uri :scheme))
+           (userinfo (key-get uri :user))
+           (host     (key-get uri :host))
+           (port     (key-get uri :port))
+           (pth      (key-get uri :path))
+           (query    (key-get uri :query))
+           (path     (if (equal? query "") pth (format "~a?~a" pth query))))
       (let ((pt (http-find-body (http-open :protocol protocol
-					   :username (get-username userinfo)
-					   :password (get-password userinfo)
-					   :host host
-					   :port port
-					   :path path))))
-	(cond
-	  ((input-port? pt)
-	   pt)
-	  ((and (list? pt) (= (length pt) 3) (eq? (car pt) 'redirection))
-	   ;; We have a redirection     (redirection old-port new-url)
-	   (let* ((old-port (cadr pt))
-		  (new-url  (caddr pt))
-		  (uri      (uri-parse new-url)))
-	     (close-input-port old-port)
-	     (let ((url (if (equal? (key-get uri :scheme #f) "http")
-			    new-url
-			    (format "http://~a:~a~a" host port new-url))))
-	       (open-url url))))
-	  (else
-	   (error 'http-download "unexpected result ~S" pt))))))
+                                           :username (get-username userinfo)
+                                           :password (get-password userinfo)
+                                           :host host
+                                           :port port
+                                           :path path))))
+        (cond
+          ((input-port? pt)
+           pt)
+          ((and (list? pt) (= (length pt) 3) (eq? (car pt) 'redirection))
+           ;; We have a redirection     (redirection old-port new-url)
+           (let* ((old-port (cadr pt))
+                  (new-url  (caddr pt))
+                  (uri      (uri-parse new-url)))
+             (close-input-port old-port)
+             (let ((url (if (equal? (key-get uri :scheme #f) "http")
+                            new-url
+                            (format "http://~a:~a~a" host port new-url))))
+               (open-url url))))
+          (else
+           (error 'http-download "unexpected result ~S" pt))))))
 
   (let ((port (open-url url)))
     (cond
       ((string? dest)
        (let ((out (open-file dest "w")))
-	 (unless out
-	   (error "cannot open output file ~s" dest))
-	 (copy-port port out)
-	 (close-port out)))
+         (unless out
+           (error "cannot open output file ~s" dest))
+         (copy-port port out)
+         (close-port out)))
       ((output-port? dest)
        (copy-port port dest))
       (else
        (error 'http-download "destination must be a path or an output port"
-	      dest)))
+              dest)))
     (close-input-port port)))
 
 ;; ----------------------------------------------------------------------
-;;	form-urlencode ...
+;;      form-urlencode ...
 ;; ----------------------------------------------------------------------
 (define (form-urlencode args sep)
 
   (define (encode-char c port)
     (let ((n (char->integer c)))
       (if (fx<? n 16)
-	  (fprintf port "%0~x" n)
-	  (fprintf port "%~x" n))))
+          (fprintf port "%0~x" n)
+          (fprintf port "%~x" n))))
 
   (define (encode-string str port)
     (dotimes (i (string-length str))
       (let ((c (string-ref str i)))
-	(case c
-	  ((#\; #\& #\= #\# #\" #\' #\+ #\% #\? #\: #\| #\~)
-	   (encode-char c port))
-	  ((#\space)
-	   (write-char #\+ port))
-	  (else
-	   (if (or (char>=? c (integer->char 128)) (char<? c (integer->char 032)))
-	       (encode-char c port)
-	       (write-char c port)))))))
+        (case c
+          ((#\; #\& #\= #\# #\" #\' #\+ #\% #\? #\: #\| #\~)
+           (encode-char c port))
+          ((#\space)
+           (write-char #\+ port))
+          (else
+           (if (or (char>=? c (integer->char 128)) (char<? c (integer->char 032)))
+               (encode-char c port)
+               (write-char c port)))))))
 
   (define (encode-arg arg port)
     (encode-string (car arg) port)
     (unless  (or (null? (cdr arg))
-		 (eq? (cadr arg) (void)))
+                 (eq? (cadr arg) (void)))
       (write-char #\= port)
       (encode-string (cadr arg) port)))
 
   (let ((port (open-output-string)))
     (let loop ((a args))
       (if (null? a)
-	  (get-output-string port)
-	  (begin
-	    (encode-arg (car a) port)
-	    (unless (null? (cdr a))
-	      (write-char sep port))
-	    (loop (cdr a)))))))
+          (get-output-string port)
+          (begin
+            (encode-arg (car a) port)
+            (unless (null? (cdr a))
+              (write-char sep port))
+            (loop (cdr a)))))))
 
 ;; ----------------------------------------------------------------------
-;;	www-form-urlencode ...
+;;      www-form-urlencode ...
 ;; ----------------------------------------------------------------------
 (define (www-form-urlencode args)
   (form-urlencode args #\;))
 
 ;; ----------------------------------------------------------------------
-;;	x-www-form-urlencode ...
+;;      x-www-form-urlencode ...
 ;; ----------------------------------------------------------------------
 (define (x-www-form-urlencode args)
   (form-urlencode args #\&))
@@ -382,7 +390,7 @@
 ;; End of HTTP-MODULE
 )
 
-(%redefine-module-exports (find-module 'HTTP-MODULE)
-			  (find-module 'STklos))
+(select-module STklos)
+(import HTTP-MODULE)
 
 (provide "http")

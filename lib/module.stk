@@ -1,7 +1,7 @@
 ;;;;
-;;;; module.stk	-- Module stuff
+;;;; module.stk -- Module stuff
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,46 +21,32 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 27-May-2011 23:05 (eg)
+;;;; Last file update:  8-Sep-2022 08:49 (eg)
 ;;;;
-
 
 ;;=============================================================================
 ;;
-;; 				SYMBOL-VALUE*
+;;                              MODULE-SYMBOLS*
 ;;
 ;;=============================================================================
 #|
-<doc EXT symbol-value*
- * (symbol-value* symbol module)
- * (symbol-value* symbol module default)
+<doc EXT module-symbols*
+ * (module-symbols+++*+++ module)
  *
- * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
- * an error is signaled if no |default| is provided, otherwise |symbol-value|
- * returns |default|.
- * @l
- * Note that this function searches the value of |symbol| in |module|
- * ,(bold "and") all the modules it imports whereas |symbol-value| searches
- * only in |module|.
+ * Returns the the list of symbols acessible in |module| (that is the symbols
+ * defined in |module| and the one defined in the |STklos| module if module
+ * is not a R7RS library.
 doc>
 |#
-(define (symbol-value* name module :optional (default #f default?))
-  (let ((absent (gensym)))
-    (let Loop ((all-mods (cons module (module-imports module))))
-      (if (null? all-mods)
-	  ;; Symbol was absent in the module and its imported modules
-	  (if default?
-	      default
-	      (error 'symbol-value* "symbol ``~S'' not found" name))
-	  ;; Let's see
-	  (let ((val (symbol-value name (car all-mods) absent)))
-	    (if (eq? val absent)
-		(Loop (cdr all-mods))
-		val))))))
+(define (module-symbols* module)
+  (append (module-symbols (current-module))
+          (if (library? module)
+              '()
+              (module-symbols (find-module 'STklos)))))
 
 ;;=============================================================================
 ;;
-;; 				SELECT-MODULE
+;;                              SELECT-MODULE
 ;;
 ;;=============================================================================
 #|
@@ -71,13 +57,13 @@ doc>
  * The expressions evaluated after |select-module| will take place in
  * module |name| environment.  Module |name| must have been created
  * previously by a |define-module|. The result of |select-module| is
- * ,(emph "void").
+ * *_void_*.
  * |Select-module| is particularly useful when debugging since it
  * allows to place toplevel evaluation in a particular module. The
  * following transcript shows an usage of |select-module|.
- * ,(footnote [This transcript uses the default toplevel loop
- * 	       which displays the name of the current module in the evaluator
- * 	       prompt.]):
+ * footnote:[This transcript uses the default toplevel loop
+ *             which displays the name of the current module in the evaluator
+ *             prompt.]):
  * @lisp
  * stklos> (define foo 1)
  * stklos> (define-module bar
@@ -92,14 +78,24 @@ doc>
  * @end lisp
 doc>
 |#
-
 (define-macro (select-module name)
-  `(%%set-current-module (find-module ',name)))
+  ;; HACK: try to register the symbols definined in chosen module to make
+  ;; them known to the compiler (and avoid messages about undefined)
+  (let* ((compfile (in-module STKLOS-COMPILER *compiling-file*))
+         (mod      (find-module name #f))
+         (newmod   (or mod (if compfile
+                               (%module-create name)
+                               (error 'select-module "module ~s does not exists" name)))))
+    (when (and mod (not (eq? name 'STklos)))
+      (register-new-globals! (module-symbols mod)))
 
-
+  ;; The real expansion of the select-module
+  `(begin
+     (%%set-current-module (find-module ',name))
+     (when-compile (compiler-current-module ,newmod)))))
 ;;=============================================================================
 ;;
-;; 				DEFINE-MODULE
+;;                              DEFINE-MODULE
 ;;
 ;;=============================================================================
 #|
@@ -111,11 +107,12 @@ doc>
  * |Name| must be a valid symbol. If this symbol has not already been used to
  * define a module, a new module, named |name|, is created.
  * Otherwise, the expressions |<expr1>|, |<expr2>| ... are evaluated in
- * the environment of the (old) module |<name>|
- * ,(footnote [In fact |define-module| on a given name
- * 	     defines a new module only the first time it is invoked on this name.
- * 	     By this way, interactively reloading a module does not define
- * 	     a new entity, and the other modules which use it are not altered.]).
+ * the environment of the (old) module `|<name>|`footnote:[In fact
+ * |define-module| on a given name defines a new module
+ * only the first time it is invoked on this name. By this way, interactively
+ * reloading a module does not define a new entity, and the other modules
+ * which use it are not altered.]
+ *
  * Definitions done in a module are local to the module and do not interact with
  * the definitions in other modules. Consider the following definitions,
  * @lisp
@@ -130,48 +127,31 @@ doc>
  * Here, two modules are defined and they both bind the symbol |a| to a
  * value. However, since |a| has been defined in two distinct modules
  * they denote two different locations.
- * @l
+ *
  * The |STklos| module, which is predefined, is a special module which
- * contains all the ,(emph "global variables") of a R5RS program.  A symbol
+ * contains all the *global bindings* of a R5RS program.  A symbol
  * defined in the |STklos| module, if not hidden by a local definition, is
  * always visible from inside a module. So, in the previous exemple, the
  * |x| symbol refers the |x| symbol defined in the |STklos| module.
- * @l
- * The result of |define-module| is ,(emph "void").
+ *
+ * The result of |define-module| is *_void_*.
 doc>
 |#
-(define %modules-stack  '())
-(define %module-create  (lambda (name)
-			  (set! %modules-stack (cons (current-module)
-						     %modules-stack))
-			  (%create-module name)))
-
-(define %module-restore (lambda ()
-			  (let ((previous (car %modules-stack)))
-			    (set! %modules-stack (cdr %modules-stack))
-			    previous)))
-
-(define %module-handler (lambda (c)
-			  (let ((mod (%module-restore)))
-			    ;; Push c on the module stack since env will be broken
-			    ;; by the module reset!
-			    (set! %modules-stack (cons c %modules-stack))
-			    (%%set-current-module mod)
-			    ;; Hack: Here %module-restore will get back the old c
-			    (raise (%module-restore)))))
-
 (define-macro (define-module name . body)
+  (let ((oldmod (compiler-current-module))
+        (newmod (or (find-module name #f) (%module-create name))))
   `(with-handler
       %module-handler
       (%%set-current-module (%module-create ',name))
+      (%%when-compile (compiler-current-module ,newmod))
       ,@body
+      (%%when-compile (compiler-current-module ,oldmod))
       (%%set-current-module (%module-restore))
-      (values (void) ',name)))
-
+      (values (void) ',name))))
 
 ;;=============================================================================
 ;;
-;; 				IMPORT
+;;                              IMPORT
 ;;
 ;;=============================================================================
 #|
@@ -182,13 +162,13 @@ doc>
  * Importing a module makes the symbols it exports visible to the
  * importer, if not hidden by local definitions. When a symbol
  * is exported by several of the imported modules, the location denoted by
- * this symbol in the importer module correspond to the one of the first module
+ * this symbol in the importer module correspond to the one of the last module
  * in the list
  * @lisp
  * (<module1> <module2> ...)
  * @end lisp
  * which exports it.
- * @l
+ *
  * If several |import| clauses appear in a module, the set of
  * imported modules  is determined by appending the various list of modules
  * in their apparition order.
@@ -207,12 +187,11 @@ doc>
  *
  * (define-module M3
  *   (import M1 M2)
- *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
- * @end lisp
+ *   (display (list a b c d)))  @print{} (M1-a M2-b M2-c M2-d)
  *
  * (define-module M4
  *   (import M2 M1)
- *   (display (list a b c d)))  @print{} (M1-a M2-b M2-c M2-d)
+ *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
  * @end lisp
  *
  * It is also possible to import partially (i.e. not all
@@ -224,148 +203,317 @@ doc>
  * @end lisp
  * In this case, only the symbols |c| and |d| are imported from
  * module |M2|.
- * @l
- * ,(bold "Note:") Importations are not ,(emph "transitive"): when
- * the module ,(emph "C") imports the module ,(emph "B") which is an importer
- * of module ,(emph "A") the symbols of ,(emph "A") are not visible
- * from ,(emph "C"), except  by explicitly importing the ,(emph "A")
- * module from ,(emph "C").
- * @l
-* ,(bold "Note:") The module |STklos|, which contains the ,(emph "global
- * variables") is always implicitly imported from a module. Furthermore,
+ *
+ * NOTE: Importations are not "_transitive_": when
+ * the module -C_ imports the module _B_ which is an importer
+ * of module _A_ the symbols of _A_ are not visible
+ * from _C_, except  by explicitly importing the _A_ module from _C_.
+ *
+ * NOTE: The module |STklos|, which contains the _global variables_
+ * is always implicitly imported from a module. Furthermore,
  * this module is always placed at the end of the list of imported modules.
 doc>
 |#
-(define (%module-import importer modules)
-  (let Loop ((l modules)
-	     (res (cdr (reverse! (module-imports importer)))))
-    (if (null? l)
-	(%module-imports-set! importer (reverse res))
-	(let ((mod (find-module (car l) #f)))
-	  (if mod
-	      (Loop (cdr l)
-		      (if (or (eq? mod importer) ; itself
-			      (memq mod res))    ; already imported
-			  res
-			  (cons mod res))) 	 ; add it to our result
-	      (error 'import "module `~S' does not exist" (car l)))))))
+(define (%parse-imports imports)
 
-(define (%module-aliases module-name symbols export?)
-  ;; define aliases in the current module of symbols from module-name
-  (let ((module (find-module module-name #f)))
-    (unless module
-      (error 'import "cannot find module ~S" module-name))
-    (let ((exports (module-exports module)))
-      (for-each (lambda (x)
-		  (if (memq x exports)
-		      (%symbol-alias x x module)
-		      (error 'import "symbol ~S is not exported from module ~S"
-			     x module-name)))
-		symbols)))
-  ;; if export? is true, export the given symbols
-  (when export?
-    (%module-export (current-module) symbols)))
+  (define (parse import-set)
+    ;; Build a key-list of the import-set. If the import-set is
+    ;;       (prefix (only (a b) x y z) foo-),
+    ;; it returns a list of the form
+    ;;       (a/b #:only (x y z) #:prefix foo-)
+    (cond
+     ((list? import-set)
+      (let ((key (car import-set)))
+        (case key
+
+          ((only)
+           (if (>= (length import-set) 3)
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in only clause"
+                          ids key))
+                 `(,@(parse (cadr import-set)) #:only ,ids))
+               (error 'import "bad only clause ~s" import-set)))
+
+          ((except)
+           (if (>= (length import-set) 3)
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in except clause" ids))
+                 `(,@(parse (cadr import-set)) #:except ,ids))
+               (error 'import "bad except clause ~s" import-set)))
+
+          ((prefix)
+           (if (and (= (length import-set) 3)
+                    (symbol? (caddr import-set)))
+               `(,@(parse (cadr import-set)) #:prefix ,(caddr import-set))
+               (error 'import "bad prefix clause ~s" import-set)))
+
+          ((rename)
+           (if (>= (length import-set) 3)
+               (let ((assocs (cddr import-set)))
+                 ;; Verify that all the assocs are well formed
+                 (unless (every (lambda (x)
+                                  (and (list? x) (= (length x) 2)
+                                       (symbol? (car x)) (symbol? (cadr x))))
+                                assocs)
+                   (error 'import "bad list of associations ~s in rename clause"
+                          assocs))
+                 `(,@(parse (cadr import-set)) #:rename ,assocs))
+               (error 'import "bad rename clause ~s" import-set)))
+
+          (else
+           (list (%library-name->symbol import-set))))))
+
+     ((symbol? import-set)
+      ;; a "legacy" STklos module
+      (list import-set))
+
+     (else
+      (error 'import "bad import set ~s" import-set))))
+  ;;
+  ;; Return a list of parsed imports
+  ;;
+  (map parse imports))
 
 
-;;(define-macro (import . modules)
-;;  (if (null? modules)
-;;      '()
-;;      `(%module-import (current-module) ',modules)))
+(define (%do-imports lib clauses only-syntax)
 
+  (define (eventually-load-library name)
+    (let ((module (find-module name #f))
+          (x      (%find-instanciated-module name)))
+      (when (and module (not x))
+        ;; FIXME FIXME
+        ;;(%debug "On a trouvé le module ~S non instancié (~S)" module only-syntax)
+        (unless only-syntax
+          ;;(%debug "Bon ben je vais provoquer son chargement")
+          (set! module #f)))
+      (or module
+          ;; Try to load a file which could define this module
+          (begin
+            (require/provide (symbol->string name))
+
+            ;; Verify that the module was correctly defined in this file
+            (let ((mod (find-module name #f)))
+              (unless mod
+                (error 'import "module/library ~s does not exist"
+                       (%symbol->library-name name)))
+              mod)))))
+
+  (define (not-in-import-set clause symbol)
+    ;; Signal an error only if we are not just importing for syntax.
+    ;; Teh problem comes from the fact that we must do compute the import
+    ;; clause two times (with only-syntax set to #t and #f).
+    ;; In any case, the real import will always signal error, if some symbol
+    ;; is not properly defined.
+    (unless only-syntax
+      (error clause "symbol ~s is not in the import set" symbol)))
+
+  (define (build-import-list lib lst imported)
+    (if (null? lst)
+        imported
+        (let ((key  (car lst))
+              (val  (cadr lst))
+              (rest (cddr lst)))
+          (case key
+            ((#:only)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (unless (memq symb public)
+                             (not-in-import-set 'only symb)))
+                         val))
+             (set! imported (filter! (lambda (x) (memq (cdr x) val)) imported)))
+
+            ((#:except)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (if (memq symb public)
+                               (set! imported (remove (lambda (x) (eq? (cdr x) symb)) imported))
+                               (not-in-import-set 'except symb)))
+                         val)))
+            ((#:rename)
+             (for-each (lambda (pair)
+                         (let ((original (car pair))
+                               (new      (cadr pair)))
+                           (let Loop ((lst imported))
+                             (if (null? lst)
+                                 (not-in-import-set 'rename original)
+                                 (if (eq? (cdar lst) original)
+                                     (set-cdr! (car lst) new)
+                                     (Loop (cdr lst)))))))
+                       val))
+            ((#:prefix)
+             (for-each (lambda (pair)
+                         (set-cdr! pair (symbol-append val (cdr pair))))
+                       imported)))
+          ;; Loop with the rest of lst
+          (build-import-list lib rest imported))))
+
+
+  (define (import-symbols importer name keylist)
+    (let* ((mod       (eventually-load-library name))
+           (imported  (build-import-list mod
+                                         keylist
+                                         (list-copy (module-exports mod)))))
+      ;; Make aliases for all symbols in imported list
+      (if only-syntax
+          (for-each (lambda (pair)
+                      (let ((val (symbol-value* (car pair) mod 'absent)))
+                        (when (%syntax? val)
+                          (%symbol-link (cdr pair) (car pair) lib mod))
+                        (register-new-global! (cdr pair))))
+                      imported)
+          (for-each (lambda (pair)
+                      (%symbol-link (cdr pair) (car pair) lib mod)
+                      (register-new-global! (cdr pair)))
+                    imported))))
+
+  ;; Call import-symbols for each import spec
+  (for-each (lambda (imp)
+              (let ((name     (car imp))
+                    (keylist  (cdr imp)))
+                (import-symbols lib name keylist)))
+            clauses)
+
+  ;; Retain the import list (for module-imports)
+  (%module-imports-set! lib (append (module-imports lib)
+                                    clauses)))
+
+;;;;
+;;;; IMPORT
+;;;;
 (define-macro (import . modules)
+  (let ((imp (%parse-imports modules)))
+    ;; Since imported modules can define macros. We need to grab them
+    ;; in case we are just compiling a file to produce a '.ostk' file
+    (for-each (lambda (x)
+                (%grab-file-information (symbol->string (car x))))
+              imp)
+    ;; Do importation at compile time AND at execution time
+    (%do-imports (compiler-current-module) (list-copy imp) #t)
 
-  (define (split-modules lst)
-    (let loop ((lst modules)
-	       (full '())
-	       (part '()))
-      (cond
-	((null? lst)
-	 (values (reverse! full) (reverse! part)))
-	((symbol? (car lst))
-	 ;; full import
-	 (loop (cdr lst)
-	       (cons (car lst) full)
-	       part))
-	((and (pair? (car lst)) (symbol? (caar lst)) (null? (cdar lst)))
-	 ;; a list which contains only a symbol. This is a full import
-	 (loop (cdr lst)
-	       (cons (caar lst) full)
-	       part))
-	((and (pair? (car lst)) (every symbol? (car lst)))
-	 ;; a partial import
-	 (loop (cdr lst)
-	       full
-	       (cons (car lst) part)))
-	(else (error 'import "bad import clause ~S" (car lst))))))
+    ;; Run time expansion
+    `(%do-imports (current-module) (list-copy ',imp) #f)))
 
-  (if (null? modules)
-      '()
-      (receive (full part)
-	 (split-modules modules)
-	 (cond
-	   ((null? part)
-	    ;; Only full exports
-	    `(%module-import (current-module) ',full))
-	   ((null? full)
-	    ;; Only partial exports
-	    `(begin
-	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
-		      part)))
-	   (else
-	    `(begin
-	       (%module-import (current-module) ',full)
-	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x)))
-		      part)))))))
+(define (%%import lib modules)
+  (let ((imp (%parse-imports modules)))
+    ;; Since imported modules can define macros. We need to grab them
+    ;; in case we are just compiling a file to produce a '.ostk' file
+    (for-each (lambda (x)
+                (%grab-file-information (symbol->string (car x))))
+              imp)
+    ;; Do importation at compile time AND at execution time
+    ;(%do-imports  (compiler-current-module) (list-copy imp) #t)
+    (%do-imports lib (list-copy imp) #f)))
 
 
 ;;=============================================================================
 ;;
-;; 				EXPORT
+;;                              EXPORT
 ;;
 ;;=============================================================================
 #|
 <doc EXT-SYNTAX export
  * (export <symbol1> <symbol2> ...)
  *
- * Specifies the symbols which are exported (i.e. ,(emph "visible")) outside
- * the current module. By default, symbols defined in a module are not
+ * Specifies the symbols which are exported (i.e. *visible* outside
+ * the current module). By default, symbols defined in a module are not
  * visible outside this module, excepted if they appear in an |export|
  * clause.
- * @l
+ *
  * If several |export| clauses appear in a module, the set of
- * exported symbols is determined by ``,(emph "unionizing")'' symbols exported
+ * exported symbols is determined by "_unionizing_" symbols exported
  * in all the |export| clauses.
- * @l
- * The result of |export| is ,(emph "void").
+ *
+ * The result of |export| is *_void_*.
 doc>
 |#
-(define (%module-export exporter symbols)
-  (let Loop ((l symbols) (res (module-exports exporter)))
-    (if (null? l)
-      (%module-exports-set! exporter res)
-      (if (symbol? (car l))
-	(Loop (cdr l)
-	      (if (memq (car l) res)
-		res			; already exported
-		(cons (car l) res)))	; add it to our result
-	(error 'export "bad symbol `~S'" (car l))))))
 
+
+(define (%parse-exports symbols)
+  ;; Used at compile-time: returns a list of pairs ((name . exported-name) ... )
+
+  (let Loop ((l symbols) (res '()))
+    (cond
+     ((null? l)
+          (let ((res (reverse! res)))
+            ;; HACK: register exported symbols to avoid furteher useless
+            ;; compilation messages.
+            (register-new-globals!  (map car res))
+
+            ;; HACK: do the exportations in compiler-current-module to permit
+            ;; the syntax publication in header of `.ostk` files. It means
+            ;; that exportations are done two times when compiling (but only
+            ;; once when loding a file)
+            (%do-exports (compiler-current-module) res)
+            res))
+
+     ((symbol? (car l))
+          ;; export a single identifier
+          (let ((s (car l)))
+            (Loop (cdr l)
+                  (cons (cons s s)
+                        res))))
+
+     ((and (pair? (car l)) (eq? (caar l) 'rename))
+          ;; export with renaming: (rename old new)
+          (let ((symbs (cdar l)))
+            (unless (and (= (length symbs) 2)
+                         (symbol? (car symbs))
+                         (symbol? (cadr symbs)))
+              (error 'export "bad renaming clause ~S" (car l)))
+            (Loop (cdr l)
+                  (cons (cons (car symbs) (cadr symbs))
+                        res))))
+
+     (else
+          (error 'export "bad exportation `~S'" (car l))))))
+
+
+(define (%do-exports lib symbols)
+
+  (define (add-symbol name rename lst)
+    (let ((old (assq name lst)))
+      (if old
+          (let ((old-rename (cdr old)))
+            (unless (or (eq? name old-rename)
+                        (eq? old-rename rename))
+              (error 'export "exported symbol ~s was previously renamed as ~S"
+                     name old-rename))
+            (set-cdr! old rename)
+            lst)
+          (cons (cons name rename) lst))))
+
+  (let Loop ((l symbols) (res (module-exports lib)))
+    (cond
+     ((null? l) (%module-exports-set! lib res))
+     (else
+          (let ((symbs (car l)))
+            (Loop (cdr l)
+                  (add-symbol (car symbs) (cdr symbs) res)))))))
+
+
+;;;;
+;;;; EXPORT
+;;;;
 (define-macro (export . symbols)
-  (if (null? symbols)
-    '()
-    (begin
-      ;; Hack to avoid useless message. This can declare too much symbols
-      (for-each (lambda (x) (when symbol? x) (register-new-global! x))
-		symbols)
-      `(%module-export (current-module) ',symbols))))
+  (let ((s (%parse-exports symbols)))
+    `(%do-exports (current-module) ',s)))
 
+
+;;//;; FIXME: For compatibility (should be deleted soon)
+;;//(define (%module-export module . symbols)
+;;//  (%do-exports module symbols))
+
+
+;;; FIXME:
 (define-macro (export-syntax . arg)
   ;; This is only an approximation. Must be rewritten
   `(%%publish-syntax ,@arg))
 
 ;;=============================================================================
 ;;
-;; 				IN-MODULE
+;;                              IN-MODULE
 ;;
 ;;=============================================================================
 #|
@@ -377,12 +525,12 @@ doc>
  * |mod|. If this symbol is not bound,  an error is signaled if no |default| is
  * provided, otherwise |in-module| returns |default|. Note that the value of |s|
  * is searched in |mod| and all the modules it imports.
- * @l
+ *
  * This form is in fact a shortcut. In effect,
  * @lisp
  * (in-module my-module foo)
  * @end lisp
- * @l
+ *
  * is equivalent to
  * @lisp
  * (symbol-value* 'foo (find-module 'my-module))
@@ -391,5 +539,3 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
-
-

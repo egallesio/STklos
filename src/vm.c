@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 10-Apr-2021 18:48 (eg)
+ * Last file update: 13-Jun-2022 17:23 (eg)
  */
 
 // INLINER values
@@ -59,8 +59,8 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #  define NEXT          continue;/* Be sure to not use continue elsewhere */
 #endif
 
-#define NEXT0           {vm->val = STk_void; vm->valc = 0; NEXT;}
-#define NEXT1           {vm->valc = 1; NEXT;}
+#define NEXT0           do{vm->val = STk_void; vm->valc = 0; NEXT;}while(0)
+#define NEXT1           do{vm->valc = 1; NEXT;}while(0)
 
 
 #ifdef sparc
@@ -73,6 +73,7 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #define MY_SETJMP(jb)           (jb.blocked = get_signal_mask(), setjmp(jb.j))
 #define MY_LONGJMP(jb, val)     (longjmp((jb).j, val))
 
+#define FX(v)                   (STk_fixval(v))
 
 static Inline sigset_t get_signal_mask(void)
 {
@@ -156,7 +157,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 
 #define ACT_RECORD_SIZE    7
 
-#define ACT_VARARG(reg)    ((reg)[0]) /* place holder for &rest parameters */
+#define ACT_VARARG(reg)    ((reg)[0]) /* placeholder for &rest parameters */
 #define ACT_SAVE_ENV(reg)  ((reg)[1])
 #define ACT_SAVE_PC(reg)   ((reg)[2])
 #define ACT_SAVE_CST(reg)  ((reg)[3])
@@ -175,28 +176,28 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 #define VM_STATE_FP(reg)        ((reg)[3])
 #define VM_STATE_JUMP_BUF(reg)  ((reg)[4])
 
-#define SAVE_VM_STATE()                 {               \
+#define SAVE_VM_STATE()               do{               \
   vm->sp                   -= VM_STATE_SIZE;            \
   VM_STATE_PC(vm->sp)       = (SCM) vm->pc;             \
   VM_STATE_CST(vm->sp)      = (SCM) vm->constants;      \
   VM_STATE_ENV(vm->sp)      = (SCM) vm->env;            \
   VM_STATE_FP(vm->sp)       = (SCM) vm->fp;             \
   VM_STATE_JUMP_BUF(vm->sp) = (SCM) vm->top_jmp_buf;    \
-}
+}while(0)
 
-#define FULL_RESTORE_VM_STATE(p)        {                       \
+#define FULL_RESTORE_VM_STATE(p)      do{                       \
   vm->pc                     = (STk_instr *) VM_STATE_PC(p);    \
   RESTORE_VM_STATE(p);                                          \
-}
+}while(0)
 
-#define RESTORE_VM_STATE(p)             {                       \
+#define RESTORE_VM_STATE(p)           do{                       \
   /* pc is not restored here. See FULL_RESTORE_VM_STATE */      \
   vm->constants          = (SCM *)  VM_STATE_CST(p);            \
   vm->env                = (SCM)    VM_STATE_ENV(p);            \
   vm->fp                 = (SCM *)  VM_STATE_FP(p);             \
   vm->top_jmp_buf        = (jbuf *) VM_STATE_JUMP_BUF(p);       \
   vm->sp                += VM_STATE_SIZE;                       \
-}
+}while(0)
 
 
 /*
@@ -210,20 +211,20 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 #define HANDLER_PREV(reg)       ((reg)[2])
 
 
-#define SAVE_HANDLER_STATE(proc, addr)  {               \
+#define SAVE_HANDLER_STATE(proc, addr)  do{             \
   vm->sp                   -= EXCEPTION_HANDLER_SIZE;   \
   HANDLER_PROC(vm->sp)  =  (SCM) (proc);                \
   HANDLER_END(vm->sp)   =  (SCM) (addr);                \
   HANDLER_PREV(vm->sp)  =  (SCM) vm->handlers;          \
   vm->handlers          = vm->sp;                       \
-}
+}while(0)
 
-#define UNSAVE_HANDLER_STATE()  {                       \
+#define UNSAVE_HANDLER_STATE()  do{                     \
   SCM *old = vm->handlers;                              \
                                                         \
   vm->handlers = (SCM *) HANDLER_PREV(vm->handlers);    \
   vm->sp       = old + EXCEPTION_HANDLER_SIZE;          \
-}
+}while(0)
 
 
 /*===========================================================================*\
@@ -232,7 +233,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
  *
 \*===========================================================================*/
 
-#define PREP_CALL() {                                   \
+#define PREP_CALL() do{                                 \
   SCM fp_save = (SCM)(vm->fp);                          \
                                                         \
   /* Push an activation record on the stack */          \
@@ -242,16 +243,16 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   ACT_SAVE_PROC(vm->fp) = STk_false;                    \
   ACT_SAVE_INFO(vm->fp) = STk_false;                    \
   /* Other fields will be initialized later */          \
-}
+}while(0)
 
 
-#define RET_CALL() {                                    \
+#define RET_CALL() do{                                  \
   vm->sp        = vm->fp + ACT_RECORD_SIZE;             \
   vm->env       = ACT_SAVE_ENV(vm->fp);                 \
   vm->pc        = ACT_SAVE_PC(vm->fp);                  \
   vm->constants = ACT_SAVE_CST(vm->fp);                 \
   vm->fp        = ACT_SAVE_FP(vm->fp);                  \
-}
+}while(0)
 
 
 /*
@@ -262,7 +263,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 static SCM** checked_globals;
 static int   checked_globals_len  = CHECK_GLOBAL_INIT_SIZE;
 static int   checked_globals_used = 0;
-MUT_DECL(global_lock)          /* the lock to access checked_globals */
+MUT_DECL(global_lock);          /* the lock to access checked_globals */
 
 
 
@@ -272,34 +273,34 @@ MUT_DECL(global_lock)          /* the lock to access checked_globals */
 
 
 
-#define PUSH_ENV(nargs, func, next_env)  {      \
+#define PUSH_ENV(nargs, func, next_env)  do{    \
     BOXED_TYPE(vm->sp)   = tc_frame;            \
     FRAME_LENGTH(vm->sp) = nargs;               \
     FRAME_NEXT(vm->sp)   = next_env;            \
     FRAME_OWNER(vm->sp)  = func;                \
-}
+}while(0)
 
-#define CALL_CLOSURE(func) {                    \
+#define CALL_CLOSURE(func) do{                  \
     vm->pc        = CLOSURE_BCODE(func);        \
     vm->constants = CLOSURE_CONST(func);        \
     vm->env       = (SCM) vm->sp;               \
-}
+}while(0)
 
-#define CALL_PRIM(v, args) {                    \
+#define CALL_PRIM(v, args) do{                  \
     ACT_SAVE_PROC(vm->fp) = v;                  \
     v = PRIMITIVE_FUNC(v)args;                  \
-}
+}while(0)
 
-#define REG_CALL_PRIM(name) {                           \
-  extern struct primitive_obj CPP_CONCAT(STk_o_, name);         \
-  ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);    \
-}
+#define REG_CALL_PRIM(name) do{                           \
+  extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
+  ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);      \
+}while(0)
 
 
-#define RETURN_FROM_PRIMITIVE() {               \
+#define RETURN_FROM_PRIMITIVE() do{             \
     vm->sp = vm->fp + ACT_RECORD_SIZE;          \
     vm->fp = (SCM *) ACT_SAVE_FP(vm->fp);       \
-}
+}while(0)
 
 static void run_vm(vm_thread_t *vm);
 
@@ -365,7 +366,7 @@ static void patch_environment(vm_thread_t *vm)
   //STk_debug(">>>>>>>>>>");
 }
 
-static void error_bad_arity(SCM func, int arity, short given_args, vm_thread_t *vm)
+static void error_bad_arity(SCM func, int arity, int16_t given_args, vm_thread_t *vm)
 {
    ACT_SAVE_PROC(vm->fp) = func;
   if (arity >= 0)
@@ -377,15 +378,15 @@ static void error_bad_arity(SCM func, int arity, short given_args, vm_thread_t *
 }
 
 
-static Inline short adjust_arity(SCM func, short nargs, vm_thread_t *vm)
+static Inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
 {
-  short arity = CLOSURE_ARITY(func);
+  int16_t arity = CLOSURE_ARITY(func);
 
   if (arity != nargs) {
     if (arity >= 0)
       error_bad_arity(func, arity, nargs, vm);
     else {                                              /* nary procedure call */
-      short min_arity = -arity-1;
+      int16_t min_arity = -arity-1;
 
       if (nargs < min_arity)
         error_bad_arity(func, arity, nargs, vm);
@@ -467,7 +468,7 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
  *                              S T k _ C _ a p p l y
  *
  *
- * Execute a Scheme function from C. This function can be used as a
+ * Execute a Scheme function from C. This function can be used as
  * an "excv" or an "execl" function. If nargs is > 0 it is as a Unix "execl"
  * function:
  *    STk_C_apply(STk_cons, 2, MAKE_INT(1), MAKE_INT(2)) => (1 . 2)
@@ -501,7 +502,7 @@ SCM STk_C_apply(SCM func, int nargs, ...)
   }
   va_end(ap);
 
-  code[1] = (short) nargs;                          /* Patch # of args  */
+  code[1]     = (int16_t) nargs;                    /* Patch # of args  */
   vm->val     = func;                               /* Store fun in VAL */
   vm->pc      = code;
   run_vm(vm);
@@ -568,10 +569,11 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
- * ,(bold "Note:") R5RS imposes to use multiple values in the context of
+ * 
+ * NOTE:  R5RS imposes to use multiple values in the context
  * of a |call-with-values|. In STklos, if |values| is not used with
  * |call-with-values|, only the first value is used (i.e. others values are
- * ,(emph "ignored")).
+ * _ignored_)).
  *
 doc>
 */
@@ -601,41 +603,34 @@ DEFINE_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv))
   return vm->val;
 }
 
-/*
-<doc call-with-values
- * (call-with-values producer consumer)
- *
- * Calls its producer argument with no values and a continuation that,
- * when passed some values, calls the consumer procedure with those values
- * as arguments. The continuation for the call to consumer is the
- * continuation of the call to call-with-values.
- * @lisp
- * (call-with-values (lambda () (values 4 5))
- *                   (lambda (a b) b))                =>  5
- *
- * (call-with-values * -)                             =>  -1
- * @end lisp
-doc>
- */
-DEFINE_PRIMITIVE("call-with-values", call_with_values, subr2, (SCM prod, SCM con))
+
+DEFINE_PRIMITIVE("%call-for-values", call_for_values, subr1, (SCM prod))
 {
   vm_thread_t *vm = STk_get_current_vm();
-  int tmp;
+  int len;
 
-  /* Test on prod and con being good procedure is useless, apply will evtly fail */
-  vm->val  = STk_C_apply(prod, 0);
-  tmp      = vm->valc;
+  /* Don't test that prod is procedure (apply will fail if this not the case) */
+  STk_C_apply(prod, 0);
+  len = vm->valc;
   vm->valc = 1;
 
-  if (tmp == 0)
-    return STk_C_apply(con, 0);
-  else if (tmp == 1)
-    return STk_C_apply(con, 1, vm->val);
-  else if (tmp <= MAX_VALS) {
-    vm->vals[0] = vm->val;
-    return STk_C_apply(con , -tmp, vm->vals);
-  } else {
-    return STk_C_apply(con, -tmp, VECTOR_DATA(vm->vals[0]));
+  /* We don't use STk_values2vector here since we will call apply with the
+   * values produced by "prod" ⟹ buil a list here. There are too much allocation
+   * here :-(
+   */
+  switch (len) {
+    case 0: return STk_nil;
+    case 1: return LIST1(vm->val);
+    default:  {
+                SCM  res = STk_nil;
+                if (len <= MAX_VALS) {
+                  for (int i = len-1; i >= 1; i--)
+                    res = STk_cons(vm->vals[i], res);
+                  return STk_cons(vm->val, res);
+                } else {
+                  return STk_vector2list(vm->vals[0]);
+                }
+              }
   }
 }
 
@@ -680,8 +675,17 @@ SCM STk_values2vector(SCM obj, SCM vect)
 
   if (vect) {
     /* User has provided a vector for storing result */
-    if (!VECTORP(vect) || VECTOR_SIZE(vect) != len)
-      STk_error("bad vector ~S", vect);
+
+    /* "not a vector" is an error on the C side of things;
+       a wrong number of values could be triggered by
+       errors in C or on the Scheme side... We'll give
+       a clear message in this case (expected and given
+       number of values). */
+    if (!VECTORP(vect))
+	STk_error("bad vector ~S", vect);
+    if (VECTOR_SIZE(vect) != len)
+	STk_error("expected %d values, but %d were given",
+		  VECTOR_SIZE(vect), len);
     retval = vect;
   } else {
     /* Allocate a new vector for result */
@@ -858,30 +862,31 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *      operand at [n+1]
  *   4) Thread A resumes, updates operand at [n+1], releases lock
  */
-#define LOCK_AND_RESTART                        \
+#define LOCK_AND_RESTART                     do{\
   if (!have_global_lock) {                      \
     MUT_LOCK(global_lock);                      \
     have_global_lock=1;                         \
     (vm->pc)--;                                 \
     NEXT;                                       \
-  }
-
-#define RELEASE_LOCK                            \
+  }                                             \
+}while(0)
+#define RELEASE_LOCK                         do{\
    {                                            \
     MUT_UNLOCK(global_lock);                    \
     have_global_lock=0;                         \
-   }
-
-#define RELEASE_POSSIBLE_LOCK                   \
+   }                                            \
+}while(0)
+#define RELEASE_POSSIBLE_LOCK                do{\
   if (have_global_lock) {                       \
     MUT_UNLOCK(global_lock);                    \
     have_global_lock=0;                         \
-  }
+  }                                             \
+}while(0)
 
 static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
-  short tailp;
+  int16_t tailp;
   volatile int offset,
                have_global_lock = 0;     /* if true, we're patching the code */
   int nargs=0;
@@ -890,7 +895,7 @@ static void run_vm(vm_thread_t *vm)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
 #else
-   short byteop;
+   int16_t byteop;
 #endif
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
@@ -898,7 +903,7 @@ static void run_vm(vm_thread_t *vm)
   static STk_instr *code_base = NULL;
 #endif
 #if defined(STAT_VM)
-  static short previous_op = NOP;
+  static int16_t previous_op = NOP;
 #endif
 
 #if defined(USE_COMPUTED_GOTO)
@@ -955,7 +960,7 @@ CASE(CONSTANT_PUSH) { push(fetch_const());           NEXT; }
 CASE(PUSH_GLOBAL_REF)
 CASE(GLOBAL_REF) {
   SCM ref = NULL;
-  short orig_opcode;
+  int16_t orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1023,7 +1028,7 @@ CASE(UGLOBAL_REF_PUSH) { /* Never produced by compiler */
 CASE(PUSH_GREF_INVOKE)
 CASE(GREF_INVOKE) {
   SCM ref = NULL;
-  short orig_opcode;
+  int16_t orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1066,7 +1071,7 @@ CASE(UGREF_INVOKE) { /* Never produced by compiler */
 CASE(PUSH_GREF_TAIL_INV)
 CASE(GREF_TAIL_INVOKE) {
   SCM ref = NULL;
-  short orig_opcode;
+  int16_t orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1176,7 +1181,11 @@ CASE(GLOBAL_SET) {
     RELEASE_LOCK;
     error_unbound_variable(orig_operand);
   }
+  if (BOXED_INFO(ref) & CONS_CONST) {
+    RELEASE_LOCK;
+    STk_error("cannot mute the value of ~S in ~S", orig_operand, vm->current_module);
 
+  }
   *BOX_VALUES(CDR(ref)) = vm->val;    /* sure that this box arity is 1 */
   /* patch the code for optimize next accesses */
   vm->pc[-1] = add_global(CDR(ref));
@@ -1436,26 +1445,28 @@ CASE(POP_HANDLER) {
   NEXT;
 }
 
+//FIXME Delete the following code
 
-CASE(MAKE_EXPANDER) {
-  SCM name = fetch_const();
-  SCM ref, val;
 
-  val = STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
-  if ( ! (CONSP(val) &&CONSP(CDR(val)) && (CAR(CAR(val)) == name)) ) {
-    /* We are just compiling this macro, so it is already entered in the
-     * table of expanders by the compiler. Don't add it twice.
-     * Note: if this test is false, this is probably that wa are reading
-     * back a bytecode file and the macro must be entered in the table
-     */
-    /* Note: we are sure that this box arity is 1 */
-    *BOX_VALUES(CDR(ref)) = STk_cons(STk_cons(name, vm->val), val);
-  }
-  vm->valc    = 2;
-  vm->val     = STk_void;
-  vm->vals[1] = name;
-  NEXT;
-}
+//FIXME CASE(MAKE_EXPANDER) {
+//FIXME  SCM name = fetch_const();
+//FIXME  SCM ref, val;
+//FIXME
+//FIXME  val = STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
+//FIXME  if ( ! (CONSP(val) &&CONSP(CDR(val)) && (CAR(CAR(val)) == name)) ) {
+//FIXME    /* We are just compiling this macro, so it is already entered in the
+//FIXME     * table of expanders by the compiler. Don't add it twice.
+//FIXME     * Note: if this test is false, this is probably that wa are reading
+//FIXME     * back a bytecode file and the macro must be entered in the table
+//FIXME     */
+//FIXME    /* Note: we are sure that this box arity is 1 */
+//FIXME    *BOX_VALUES(CDR(ref)) = STk_cons(STk_cons(name, vm->val), val);
+//FIXME  }
+//FIXME  vm->valc    = 2;
+//FIXME  vm->val     = STk_void;
+//FIXME  vm->vals[1] = name;
+//FIXME  NEXT;
+//FIXME}
 
 CASE(FORMALS) {
   SCM formals = fetch_const();
@@ -1488,6 +1499,7 @@ CASE(END_OF_CODE) {
 CASE(DBG_VM)  {
   ;
 }
+CASE(UNUSED_2)
 CASE(UNUSED_3)
 CASE(UNUSED_4)
 CASE(UNUSED_5)
@@ -1580,6 +1592,20 @@ CASE(IN_NUMLE)  { REG_CALL_PRIM(numle);
                   vm->val = MAKE_BOOLEAN(STk_numle2(pop(), vm->val));      NEXT1;}
 CASE(IN_NUMGE)  { REG_CALL_PRIM(numge);
                   vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));      NEXT1;}
+
+CASE(IN_FXEQ)  { REG_CALL_PRIM(fxeq);
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)==0); NEXT1;}
+CASE(IN_FXDIFF){ REG_CALL_PRIM(fxeq);
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)!=0); NEXT1;}
+CASE(IN_FXLT)  { REG_CALL_PRIM(fxlt);
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<0);  NEXT1;}
+CASE(IN_FXGT)  { REG_CALL_PRIM(fxgt);
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>0);  NEXT1;}
+CASE(IN_FXLE)  { REG_CALL_PRIM(fxle);
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<=0); NEXT1;}
+CASE(IN_FXGE)  { REG_CALL_PRIM(fxge);
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>=0); NEXT1;}
+
 
 CASE(IN_INCR)   { REG_CALL_PRIM(plus);
                   vm->val = STk_add2(vm->val, MAKE_INT(1)); NEXT1;}
@@ -1772,7 +1798,7 @@ FUNCALL:  /* (int nargs, int tailp) */
         }
       }
 
-      /* Now we can call call "func" with "nargs" arguments */
+      /* Now we can call "func" with "nargs" arguments */
       vm->val = func;
       goto FUNCALL;
     }
@@ -1883,7 +1909,7 @@ void STk_raise_exception(SCM cond)
   vm->val = STk_C_apply(proc, 1, cond);
 
   /*
-   * Return in the good "run_vm" incarnation
+   * Return to the good "run_vm" incarnation
    */
   MY_LONGJMP(*(vm->top_jmp_buf), 1);
 }
@@ -1923,6 +1949,10 @@ DEFINE_PRIMITIVE("%pop-exception-handler", pop_handler, subr0, (void))
  *                         C O N T I N U A T I O N S
  *
 \*===========================================================================*/
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-pointer"
+
 void STk_get_stack_pointer(void **addr)
 {
   char c;
@@ -2005,8 +2035,9 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Winfinite-recursion"
 
-static void restore_cont_jump(struct continuation_obj *k, void* addr){
+static void restore_cont_jump(struct continuation_obj *k, void *addr){
   char unused_buf[1024];  /* needed here to arbitrarily use some stack space */
   vm_thread_t *vm = STk_get_current_vm();
   int cur_stack_size;
@@ -2060,6 +2091,7 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
   return STk_void;
 }
 
+#pragma GCC diagnostic pop
 
 DEFINE_PRIMITIVE("%continuation?", continuationp, subr1, (SCM obj))
 {
@@ -2127,10 +2159,11 @@ DEFINE_PRIMITIVE("%dump-code", dump_code, subr2, (SCM f, SCM v))
 }
 
 
-static Inline STk_instr* read_code(SCM f, int len) /* read a code phrase */
+static Inline STk_instr* read_code(SCM f, unsigned int len) /* read a code phrase */
 {
   STk_instr *res, *tmp;
-  int i, c1, c2;
+  unsigned int i;
+  int c1, c2;
 
   tmp = res = STk_must_malloc_atomic(len * sizeof(STk_instr));
 
@@ -2263,7 +2296,7 @@ int STk_init_vm()
   ADD_PRIMITIVE(vm_bt);
 
   ADD_PRIMITIVE(values);
-  ADD_PRIMITIVE(call_with_values);
+  ADD_PRIMITIVE(call_for_values);
 
   ADD_PRIMITIVE(current_handler);
   /* ADD_PRIMITIVE(pop_handler); */

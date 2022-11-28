@@ -2,7 +2,7 @@
  *
  * h a s h  . h                 -- Hash Tables
  *
- * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -34,7 +34,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 19-Oct-2018 19:13 (eg)
+ * Last file update: 15-Dec-2021 19:11 (eg)
  */
 
 
@@ -45,6 +45,8 @@
 #define HASH_OBARRAY_FLAG   1   /* Only for the symbol table      */
 #define HASH_VAR_FLAG       2   /* For modules (keys are symbols) */
 #define HASH_SCM_FLAG       3   /* For secheme hash tables        */
+/* 4, '100' means the table is constant. do NOT define macros for 5,6,7. */
+#define HASH_CONST          4
 
 typedef enum {hash_system, hash_eqp, hash_stringp, hash_general} hash_type;
 
@@ -72,6 +74,8 @@ struct hash_table_obj {
 #define HASH_SHIFT(h)           (((struct hash_table_obj *) (h))->down_shift)
 #define HASH_MASK(h)            (((struct hash_table_obj *) (h))->mask)
 
+#define HASH_CONSTP(h)          (BOXED_INFO(h) & HASH_CONST)
+
 #define HASH_TYPE(h)            (((struct hash_table_obj *) (h))->type)
 #define HASH_COMPAR(h)          (((struct hash_table_obj *) (h))->comparison)
 #define HASH_HASH(h)            (((struct hash_table_obj *) (h))->hash_fct)
@@ -86,23 +90,22 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag);
  * little interest except for the obarrays. Don't use it but the
  * higher level interface instead.
  */
-SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s,
-                           SCM (*create)(char *s));
+SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s,
+                           SCM (*create)(const char *s));
 
 /*
  * Function for accessing module hash table. Don't use them but the
  * higher level interface instead.
  */
-SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index);
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value);
-void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value);
+SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v);
+void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define);
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly);
 
 /*
  * Utilities on hash tables
  */
 SCM STk_hash_keys(struct hash_table_obj *h);
 SCM STk_make_basic_hash_table(void);
-SCM STk_hash_table_search(SCM ht, SCM key);
 
 /*
  * Scheme interface

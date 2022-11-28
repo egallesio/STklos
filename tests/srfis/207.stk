@@ -23,7 +23,7 @@
   (syntax-rules (=>)
     ((check expr => expected)
      (test (inc-test-num-str) expected expr))))
-    
+
 ;;;; Utility
 
 ;; Changed the print-header procedure from SRFI-207
@@ -401,4 +401,3 @@
   (check-io))
 
 (check-all-207)
-

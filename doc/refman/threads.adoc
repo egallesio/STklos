@@ -1,0 +1,67 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update: 26-Jan-2022 13:16 (eg)
+
+{{chapter "Threads, Mutexes and Condition Variables"}}
+((("thread")))
+((("mutex")))
+((("lock")))
+((("condition variable")))
+The thread system provides the following data types:
+
+*  Thread (a virtual processor which shares object
+			space with all other threads)
+* Mutex (a mutual exclusion device,
+		      also known as a lock and binary semaphore)
+* Condition variable (a set of blocked threads)
+
+
+The {{stklos}} thread system is conform to {{link-srfi 18}}, and implement
+all the SRFI mechanisms. See this SRFI documentation for a more complete
+description
+
+=== Threads
+[#make-thread]
+{{insertdoc 'make-thread}}
+{{insertdoc 'current-thread}}
+{{insertdoc 'thread-start!}}
+{{insertdoc 'thread-yield!}}
+{{insertdoc 'thread-terminate!}}
+{{insertdoc 'thread-sleep!}}
+[#thread-join]
+{{insertdoc 'thread-join!}}
+{{insertdoc 'thread?}}
+{{insertdoc 'thread-name}}
+{{insertdoc 'thread-stack-size}}
+{{insertdoc 'thread-specific}}
+{{insertdoc 'thread-specific-set!}}
+
+=== Mutexes
+{{insertdoc 'make-mutex}}
+{{insertdoc 'mutex?}}
+{{insertdoc 'mutex-name}}
+{{insertdoc 'mutex-specific}}
+{{insertdoc 'mutex-specific-set!}}
+{{insertdoc 'mutex-state}}
+{{insertdoc 'mutex-lock!}}
+{{insertdoc 'mutex-unlock!}}
+
+=== Condition Variables
+{{insertdoc 'make-condition-variable}}
+{{insertdoc 'condition-variable?}}
+{{insertdoc 'condition-variable-name}}
+{{insertdoc 'condition-variable-specific}}
+{{insertdoc 'condition-variable-specific-set!}}
+{{insertdoc 'condition-variable-signal!}}
+{{insertdoc 'condition-variable-broadcast!}}
+
+=== Conditions
+{{insertdoc 'join-timeout-exception?}}
+{{insertdoc 'abandoned-mutex-exception?}}
+{{insertdoc 'terminated-thread-exception?}}
+{{insertdoc 'uncaught-exception?}}
+{{insertdoc 'uncaught-exception-reason}}

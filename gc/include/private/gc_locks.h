@@ -53,21 +53,17 @@
 #  endif
 
 #  if (!defined(AO_HAVE_test_and_set_acquire) || defined(GC_RTEMS_PTHREADS) \
-       || defined(SN_TARGET_ORBIS) || defined(SN_TARGET_PS3) \
+       || defined(SN_TARGET_PS3) \
        || defined(GC_WIN32_THREADS) || defined(BASE_ATOMIC_OPS_EMULATED) \
        || defined(LINT2)) && defined(GC_PTHREADS)
 #    define USE_PTHREAD_LOCKS
 #    undef USE_SPIN_LOCK
+#    if defined(LINT2) && !defined(NO_PTHREAD_TRYLOCK)
+#      define NO_PTHREAD_TRYLOCK
+#    endif
 #  endif
 
 #  if defined(GC_WIN32_THREADS) && !defined(USE_PTHREAD_LOCKS)
-#    ifndef WIN32_LEAN_AND_MEAN
-#      define WIN32_LEAN_AND_MEAN 1
-#    endif
-#    define NOSERVICE
-     EXTERN_C_END
-#    include <windows.h>
-     EXTERN_C_BEGIN
 #    define NO_THREAD (DWORD)(-1)
      GC_EXTERN CRITICAL_SECTION GC_allocate_ml;
 #    ifdef GC_ASSERTIONS
@@ -183,6 +179,7 @@
        EXTERN_C_BEGIN
        GC_EXTERN pthread_mutex_t GC_allocate_ml;
 #      ifdef GC_ASSERTIONS
+         GC_INNER void GC_lock(void);
 #        define UNCOND_LOCK() { GC_ASSERT(I_DONT_HOLD_LOCK()); \
                                 GC_lock(); SET_LOCK_HOLDER(); }
 #        define UNCOND_UNLOCK() \
@@ -192,6 +189,7 @@
 #        if defined(NO_PTHREAD_TRYLOCK)
 #          define UNCOND_LOCK() pthread_mutex_lock(&GC_allocate_ml)
 #        else
+           GC_INNER void GC_lock(void);
 #          define UNCOND_LOCK() \
               { if (0 != pthread_mutex_trylock(&GC_allocate_ml)) \
                   GC_lock(); }
@@ -225,7 +223,6 @@
 #        define EXIT_GC() (void)(GC_collecting = FALSE)
 #      endif
 #    endif
-     GC_INNER void GC_lock(void);
 #  endif /* GC_PTHREADS */
 #  if defined(GC_ALWAYS_MULTITHREADED) \
       && (defined(USE_PTHREAD_LOCKS) || defined(USE_SPIN_LOCK))

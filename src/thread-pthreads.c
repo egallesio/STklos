@@ -1,7 +1,7 @@
 /*
  * thread-pthreads.c                    -- Threads support in STklos
  *
- * Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  4-Jun-2021 20:10 (eg)
+ * Last file update: 12-Jan-2022 14:13 (eg)
  */
 
 
@@ -38,7 +38,7 @@ static pthread_key_t vm_key;
 
 static void cleanup_vm_specific(void _UNUSED(*p))    /* Nothing to do for now */
 {
-  /* Do nothing */;
+  /* Do nothing */
 }
 
 static void initialize_vm_key(void)
@@ -155,18 +155,19 @@ DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
  * |thread-terminate!| does not return. Otherwise, |thread-terminate!|
  * returns an unspecified value; the termination of the thread will occur
  * before |thread-terminate!| returns.
- * @l
- * ,(bold "Note: ")
- * This operation must be used carefully because it terminates a thread
- * abruptly and it is impossible for that thread to perform any kind of
- * cleanup. This may be a problem if the thread is in the middle of a
- * critical section where some structure has been put in an inconsistent
- * state. However, another thread attempting to enter this critical section
- * will raise an "abandoned mutex exception" because the mutex is
- * unlocked/abandoned.
- * ,(linebreak)
- * On ,(emph "Android"), |thread-terminate!| can be used only to terminate the
- * current thread.  Trying to kill another thread produces an error.
+ * 
+ * [NOTE]
+ * ====
+ * -  This operation must be used carefully because it terminates a thread
+ *    abruptly and it is impossible for that thread to perform any kind of
+ *    cleanup. This may be a problem if the thread is in the middle of a
+ *    critical section where some structure has been put in an inconsistent
+ *    state. However, another thread attempting to enter this critical section
+ *    will raise an "abandoned mutex exception" because the mutex is
+ *    unlocked/abandoned.
+ * -  On _Android_, |thread-terminate!| can be used only to terminate the
+ *    current thread.  Trying to kill another thread produces an error.
+ * ====
 doc>
 */
 DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))

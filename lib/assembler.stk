@@ -1,7 +1,7 @@
 ;;;;
 ;;;; assembler.stk      -- Assember stuff
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 28-Aug-2020 19:40 (eg)
+;;;; Last file update: 13-Jun-2022 17:19 (eg)
 ;;;;
 
 ;;;
@@ -127,7 +127,7 @@
            (IN-EQV              0)
            (IN-EQUAL            0)
            (IN-APPLY            2)
-           (MAKE-EXPANDER       1)
+           (UNUSED-2            0)  ;; NOTE: It was: (MAKE-EXPANDER       1)
            (SET-CUR-MOD         0)
 
            ;; Documentation string
@@ -241,8 +241,12 @@
            (IN-SINT-FXSUB2      1)
            (IN-SINT-FXMUL2      1)
            (IN-SINT-FXDIV2      1)
-
-
+           (IN-FXEQ             0)
+           (IN-FXLT             0)
+           (IN-FXGT             0)
+           (IN-FXLE             0)
+           (IN-FXGE             0)
+           (IN-FXDIFF           0)
 ))))
 
 ;;;;
@@ -388,7 +392,7 @@
  *
  * This function prints on the given port (by default the current output
  * port) the instructions of procedure |proc|. The printed code uses an
- * ,(emph "ad-hoc") instruction set that should be quite understandable.
+ * _ad-hoc_ instruction set that should be quite understandable.
  *
  * @lisp
  * (define (fact n)
@@ -397,7 +401,7 @@
  *       (* n (fact (- n 1)))))
  * @end lisp
  *
- * The call ,(code "(disassemble fact)") will produce the following output:
+ * The call `(disassemble fact)` will produce the following output:
  *
  * @lisp
  *    000:  LOCAL-REF0-PUSH
@@ -413,13 +417,13 @@
  *    015:  IN-MUL2
  *    016:  RETURN
  * @end lisp
- * ,(bold "Notes:")
- * ,(itemize
- *    (item [The code of a procedure may be patched after the first execution
- *           of |proc| to optimize it;])
- *    (item [If |proc| is an anonymous function, you can use the special
- *          notation '#pxxx' to disassemble it:]))
- * @lisp
+ *
+ * IMPORTANT: The code of a procedure may be patched after the first execution
+ * of |proc| to optimize it.
+ *
+ * If |proc| is an anonymous function, you can use the special
+ * notation `#pxxx` to disassemble it:
+ * * @lisp
  * (disassemble #p7fee1dd82f80)  ;; (address-of (lambda() 42))
  *
  *       000:  SMALL-INT            42
@@ -470,8 +474,8 @@ doc>
 #|
 <doc EXT disassemble-expr
  * (disassemble-expr sexpr)
- * (disassemble-expr show-consts)
- * (disassemble-expr show-consts port)
+ * (disassemble-expr sexpr show-consts)
+ * (disassemble-expr sexpr show-consts port)
  *
  * This function prints on the given |port| (by default the current output
  * port) the instructions of the given |sexpr|. If |show-consts| is true,
@@ -504,7 +508,7 @@ doc>
 (define (disassemble-expr expr :optional (show-consts #f)
                                          (port (current-output-port)))
   (define (compile-expression e)
-    (compile e '() e #f)
+    (compile e #f e #f)
     (emit 'END-OF-CODE)
     (assemble (reverse! *code-instr*)))
 
@@ -514,7 +518,7 @@ doc>
       ;; Suppress the last instr. (END-OF-CODE) which is useless and confusing
       (disassemble-code (vector-copy code 0 (- (vector-length code) 1)) port)
       (when show-consts
-        (printf "\nConstants:\n")
+        (fprintf port "\nConstants:\n")
         (let Loop ((i 0)
                    (lst *code-constants*))
           (when (pair? lst)

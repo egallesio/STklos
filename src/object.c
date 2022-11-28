@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c                     -- Objects support
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 29-Apr-2021 19:12 (eg)
+ * Last file update: 10-Jun-2022 17:30 (eg)
  */
 
 #include "stklos.h"
@@ -61,7 +61,7 @@ static SCM Top, Object, Class, Generic, Method, Simple_method, Accessor,
            Procedure_class, Entity_class;
 static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number,
            Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof,
-  Struct_type, Struct, Cond, Cond_type, Box, UnknownClass;
+           Struct_type, Struct, Cond, Cond_type, Box, Syntax, UnknownClass;
 
 
 int STk_oo_initialized = FALSE;
@@ -183,7 +183,7 @@ static int applicablep(SCM actual, SCM formal)
 
   /* We test that (memq formal (slot-ref actual 'cpl))
    * However, we don't call memq here since we already know that
-   * the list is well formed
+   * the list is well-formed
    */
   for (ptr=INST_SLOT(actual, S_cpl); !NULLP(ptr); ptr = CDR(ptr)) {
     if (CAR(ptr) == formal) return TRUE;
@@ -793,7 +793,7 @@ static SCM compute_getters_n_setters(SCM slots)
   /* Build a kind of A-list which is something like
    *     ( .... (slot-name #f . 3) ... )
    * where #f is the slot initialization function and 3 is the offset of a slot
-   * in a the vector of slots
+   * in a vector of slots
    */
   for (  ; !NULLP(slots); slots = CDR(slots))
     res = STk_cons(STk_cons(CAR(slots),
@@ -912,9 +912,10 @@ static void make_standard_classes(void)
   mk_cls(&Struct_type,  "<struct-type>",Class,           Top,       STk_nil);
   mk_cls(&Cond,         "<condition>",  Class,           Top,       STk_nil);
   mk_cls(&Cond_type,    "<condition-type>",Class,        Top,       STk_nil);
-  mk_cls(&Box,          "<ref>",        Class,           Top,       STk_nil);
+  mk_cls(&Box,          "<box>",        Class,           Top,       STk_nil);
   mk_cls(&UnknownClass, "<unknown>",    Class,           Top,       STk_nil);
   mk_cls(&Procedure,    "<procedure>",  Procedure_class, Top,       STk_nil);
+  mk_cls(&Syntax,       "<syntax>",     Class,           Top,       STk_nil);
 }
 
 
@@ -1023,6 +1024,7 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     case tc_struct_type:return (COND_TYPEP(obj)) ? Cond_type: Struct_type;
     case tc_struct:     return (CONDP(obj)) ? Cond : Struct;
     case tc_box:        return Box;
+    case tc_syntax:     return Syntax;
   default: ;
   }
 

@@ -1,0 +1,207 @@
+;;;;
+;;;; 70.stk                     -- SRFI 70: Numbers
+;;;;
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Aubrey Jaffer (SRFI Reference implementation)
+;;;;    Creation date: 12-Sep-2005 14:51 (eg)
+;;;; Last file update: 21-Apr-2022 16:30 (eg)
+;;;;
+;;;;
+;;;; The implementation is taken directly from the SRFI reference implementation.
+;;;; The associated copyright of this implementation is
+;;;;
+;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;; OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+(define-module srfi/70
+  (import (only SCHEME
+                ;; 6.2.3 Implementation restrictions
+                +            -             *
+                quotient     remainder     modulo
+                max          min           abs
+                numerator    denominator   gcd
+                lcm          floor         ceiling
+                truncate     round         rationalize
+                expt
+
+                ;; 6.2.4 Syntax of numerical constants
+                ;; (reader-specific, nothing to export)
+
+                ;; 6.2.5 Numerical operations
+                number?
+                complex?
+                real?
+                rational?
+                integer?
+                exact?
+                inexact?
+
+                = < > <= >=
+
+                finite? infinite?
+                zero?   positive? negative?
+                odd?    even?
+
+                max min
+
+                /
+
+                abs
+
+                exp  log
+                sin  cos  tan
+                asin acos atan
+                sqrt
+
+                make-rectangular make-polar
+                real-part        imag-part
+                magnitude        angle
+
+                exact->inexact
+                inexact->exact
+
+                ;; 6.2.6 Numerical input and output
+                number->string
+                string->number))
+
+  ;; we re-export the R5RS procedures in the SRFI
+  ;; in case they have been changed:
+  (export ;; 6.2.2 Exactness
+          exact-round
+          exact-ceiling
+          exact-floor
+          exact-truncate
+
+          ;; 6.2.2x Infinities
+          ;; (nothing to export)
+
+          ;; 6.2.3 Implementation restrictions
+          +            -             *
+          quotient     remainder     modulo
+          max          min           abs
+          numerator    denominator   gcd
+          lcm          floor         ceiling
+          truncate     round         rationalize
+          expt
+
+          ;; 6.2.4 Syntax of numerical constants
+          ;; (reader-specific, nothing to export)
+
+          ;; 6.2.5 Numerical operations
+          number?
+          complex?
+          real?
+          rational?
+          integer?
+          exact?
+          inexact?
+
+          = < > <= >=
+
+          finite? infinite?
+          zero?   positive? negative?
+          odd?    even?
+
+          max min
+
+          /
+
+          abs
+
+          exp  log
+          sin  cos  tan
+          asin acos atan
+          sqrt
+
+          make-rectangular make-polar
+          real-part        imag-part
+          magnitude        angle
+
+          exact->inexact
+          inexact->exact
+
+          ;; 6.2.6 Numerical input and output
+          number->string
+          string->number)
+
+
+;; NOTE: Code suppressed on 2022/03/18 since primitive expt is correct [eg]
+;;
+;;(define (ipow-by-squaring x n acc proc)
+;;  (cond ((zero? n) acc)
+;;        ((eqv? 1 n) (proc acc x))
+;;        (else (ipow-by-squaring (proc x x)
+;;                                (quotient n 2)
+;;                                (if (even? n) acc (proc acc x))
+;;                                proc))))
+;;
+;;(define (integer-expt x n) (ipow-by-squaring x n (if (exact? x) 1 1.) *))
+;;
+;;(define (expt z1 z2)
+;;  (cond ((and (exact? z2) (not (and (zero? z1) (negative? z2))))
+;;         (integer-expt z1 z2))
+;;        ((zero? z2) (+ 1 (* z1 z2)))
+;;        (else (exp (* (if (zero? z1) (real-part z2) z2) (log z1))))))
+
+(define integer-quotient quotient)
+(define integer-remainder remainder)
+(define integer-modulo modulo)
+
+(define (quotient x1 x2)
+  (if (and (integer? x1) (integer? x2))
+      (integer-quotient x1 x2)
+      (truncate (/ x1 x2))))
+
+(define (remainder x1 x2)
+  (if (and (integer? x1) (integer? x2))
+      (integer-remainder x1 x2)
+      (- x1 (* x2 (quotient x1 x2)))))
+
+(define (modulo x1 x2)
+  (if (and (integer? x1) (integer? x2))
+      (integer-modulo x1 x2)
+      (- x1 (* x2 (floor (/ x1 x2))))))
+
+(define integer-lcm lcm)
+(define integer-gcd gcd)
+
+(define (lcm . args)
+  (/ (apply integer-lcm (map numerator args))
+     (apply integer-gcd (map denominator args))))
+
+(define (gcd . args)
+  (/ (apply integer-gcd (map numerator args))
+     (apply integer-lcm (map denominator args))))
+
+(define (exact-round x) (inexact->exact (round x)))
+(define (exact-floor x) (inexact->exact (floor x)))
+(define (exact-ceiling x) (inexact->exact (ceiling x)))
+(define (exact-truncate x) (inexact->exact (truncate x)))
+)
+
+(provide "srfi/70")

@@ -1,5 +1,6 @@
-STklos (version 1.60)
+STklos (version 1.70)
 =====================
+
 
 **Erick Gallesio** <eg(at)unice.fr>
 
@@ -33,7 +34,7 @@ History
 STklos is the successor of STk, a Scheme interpreter tightly connected
 to the Tk toolkit, that I have developed since September 1993.
 
-STklos is very similar to STk, for the user, but very different in he
+STklos is very similar to STk, for the user, but very different in the
 implementation. Everything has been rewritten and STklos uses now a
 compiler to a byte-code machine, rather than direct interpretation.
 As a consequence, it is a lot faster than STk.  STklos is also better
@@ -46,17 +47,10 @@ easy to port old STk graphical applications (provided that they use
 objects). The GTK+ extension can be loaded at run time and does not
 require a special interpreter as it was the case with STk.
 
-**July 2019**
-The 1.3x versions try to be more R7RS compliant. All the
-R5RS functions which have been extended in R7RS are now conform to
-R7RS (for instance `assoc` and `member` accept now an optional
-parameter which is a compare function, vector->list accepts the
-`start` and `end` parameters, ...)
-
 **June 2020**
 The 1.40 version continues to add R7RS traits to STklos.
 
-**August 2020** 
+**August 2020**
 The 1.50 version has been ported on various architectures (in
 particular on `small" systems running on 32 bits little as well as big
 endian) and a port on Android.  This version brings also the support
@@ -64,15 +58,19 @@ of 23 new SRFIs. For a complete list of supported SRFIs, see
 https://www.stklos.net/srfi.html
 
 
-**February 2021** 
-Support for 16 new [**SRFIs**](https://www.stklos.net/srfi.html)
-giving a total of 103 supported SRFIs.
+**February 2021**
+Support for 16 new [**SRFIs**](https://www.stklos.net/srfi.html).
+
+**November 2021**
+The 1.70 version supports 14 new [**SRFIs**](https://www.stklos.net/srfi.html)
+(we have now 98 SRFIs supported). The (new) `extensions` directory contains 
+an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit. 
 
 
 SRFI Support
 ------------
 
-Current version of STklos supports some SRFIs (a complete list of
+Current version of STklos supports several SRFIs (a complete list of
 implemented SRFIs is available in the file SUPPORTED-SRFIS in the
 distribution). The goal is to support as much as possible final
 SRFIs. Any help on implementing other SRFIs on STklos is welcome.

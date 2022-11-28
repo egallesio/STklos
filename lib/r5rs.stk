@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r5rs.stk   -- R5RS function written in Scheme
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,16 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 15-Aug-2020 17:43 (eg)
+;;;; Last file update: 12-May-2022 15:38 (eg)
 ;;;;
 
-
+(export with-input-from-file with-output-to-file with-error-to-file
+        with-input-from-string with-output-to-string 
+        with-input-from-port with-output-to-port with-error-to-port
+        %call-with ;; FIXME
+        call-with-input-file call-with-output-file
+        rationalize
+        call-with-values)
 #|
 <doc EXT-SYNTAX lambda
  * (lambda <formals> <body>)
@@ -32,64 +38,45 @@
  * A lambda expression evaluates to a procedure. STklos lambda expression
  * have been extended to allow a optional and keyword parameters.
  * |<formals>| should have one of the following forms:
- * ,(itemize
- * (item [
- * |(<variable1> ...)|
- * ,(linebreak)
- * The procedure takes a fixed number of arguments;
+ *
+ * `(<variable~1~> ...)`:: The procedure takes a fixed number of arguments;
  * when the procedure is called, the arguments will be stored in the
  * bindings of the corresponding variables.  This form is identical to
  * R5RS.
- * ])
  *
- * (item [
- * |<variable>|
- * ,(linebreak)
- * The procedure takes any number of arguments; when the
+ * `<variable>`:: The procedure takes any number of arguments; when the
  * procedure is called, the sequence of actual arguments is converted into
  * a newly allocated list, and the list is stored in the binding of the
  * |<variable>|. This form is identical to R5RS.
- * ])
  *
- * (item [
- * |(<variable1> ... <variablen> . <variablen+1>)|
- * ,(linebreak)
- * If a space-delimited
+ * `(<variable~1~> ... <variable~n~> . <variable~n+1~>)`:: If a space-delimited
  * period precedes the last variable, then the procedure takes n or more
  *  arguments, where n is the number of formal arguments before the period
  * (there must be at least one). The value stored in the binding of the
  * last variable will be a newly allocated list of the actual arguments left
  * over after all the other actual arguments have been matched up against
  * the other formal arguments. This form is identical to R5RS.
- * ])
  *
- * (item [
- * |(<variable1 ... <variablen> \[:optional ...\] \[:rest ...\] \[:key ...\])|
- * ,(linebreak)
+ *
+ * `(<variable~1~ ... <variable~n~> [:optional ...] [:rest ...] [:key ...])`::
  * This form is specific to STklos and allows to have procedure with
  * optional and keyword parameters. The form |:optional| allows to specify
  * optional parameters. All the parameters specified after |:optional| to the end
  * of |<formals>| (or until a |:rest| or |:key|) are optional parameters. An
  * optional parameter can declared as:
- * ,(itemize
- * (item [
- * |variable|: if a value is passed when the procedure is called, it will be
+ *
+ * ** |variable|: if a value is passed when the procedure is called, it will be
  * stored in the binding of the corresponding variable, otherwise the value |%f|
  * will be stored in it.
- * ])
- * (item [
- * |(variable value)|: if a value is passed when the procedure is called, it
+ *
+ * ** |(variable value)|: if a value is passed when the procedure is called, it
  * will be stored in the binding of the corresponding variable, otherwise |value|
  * will be stored in it.
- * ])
- * (item [
- * |(variable value test?)|: if a value is passed when the procedure is called, it
+ *
+ * ** |(variable value test?)|: if a value is passed when the procedure is called, it
  * will be stored in the binding of the corresponding variable, otherwise |value|
  * will be stored in it. Furthermore, |test?| will be given the value |%t| if
  * a value is passed for the given variable, otherwise |test?| is set to |%f|
- * ])
- * )
- * @l
  *
  * Hereafter are some examples using |:optional| parameters
  * @lisp
@@ -126,6 +113,7 @@
  * ((lambda (a :key (b 100 b?) c) (list a b c b?)) 1 :c 2)
  *                             => (1 100 2 #f)
  * @end lisp
+ *
  * At last, here is an example showing |:optional| |:rest| and |:key| parameters
  * @lisp
  * (define f (lambda (a :optional b :rest c :key d e)
@@ -136,8 +124,6 @@
  * (f 1 2 :d 3 :e 4)           => (1 2 (:d 3 :e 4) 3 4)
  * (f 1 :d 3 :e 4)             => (1 #f (:d 3 :e 4) 3 4)
  * @end lisp
- * ])
- * )
 doc>
 |#
 
@@ -147,7 +133,7 @@ doc>
  * (set! (<proc> <arg> ...) <expression>)
  *
  * The first form of |set!| is the R5RS one:
- * @l
+ *
  * |<Expression>| is evaluated, and the resulting value is stored in
  * the location to which |<variable>| is bound. |<Variable>| must be bound
  * either in some region enclosing the |set!| expression or at top level.
@@ -159,8 +145,8 @@ doc>
  * (+ x 1)                   =>  5
  * @end lisp
  *
- * The second form of |set!| is defined in ,(link-srfi 17):
- * @l
+ * The second form of |set!| is defined in {{link-srfi 17}}:
+ *
  * This special form |set!|
  * is extended so the first operand can be a procedure application, and not
  * just a variable. The procedure is typically one that extracts a component
@@ -176,7 +162,7 @@ doc>
  * @end lisp
  *
  * Each procedure that may be used as the first operand to |set!| must have
- * a corresponding ,(emph "setter") procedure. The procedure |setter| (see below)
+ * a corresponding *_setter_* procedure. The procedure |setter| (see below)
  * takes a procedure and returns the corresponding setter procedure.
  * So,
  * @lisp
@@ -202,7 +188,7 @@ doc>
  * evaluated and its value(s) is(are) returned.  Otherwise |<alternate>|
  * is evaluated and its value(s) is(are) returned.  If |<test>| yields a
  * false value and no |<alternate>| is specified, then the result of the
- * expression is ,(emph "void").
+ * expression is *_void_*.
  *
  * @lisp
  *   (if (> 3 2) 'yes 'no)           =>  yes
@@ -238,23 +224,23 @@ doc>
  * @end lisp
  *
  * A cond expression is evaluated by evaluating the |<test>| expressions
- * of successive |<clause>|s in order until one of them evaluates to a
+ * of successive ``<clause>``s in order until one of them evaluates to a
  * true value When a |<test>| evaluates to a true value, then the
- * remaining |<expression>|s in its |<clause>| are evaluated in order,
+ * remaining ``<expression>``s in its |<clause>| are evaluated in order,
  * and the result(s) of the last |<expression>| in the |<clause>| is(are)
  * returned as the result(s) of the entire cond expression.  If the
  * selected |<clause>| contains only the |<test>| and no |<expression>|s,
  * then the value of the |<test>| is returned as the result.  If the
- * selected |<clause>| uses the => alternate form, then the
+ * selected |<clause>| uses the `=>` alternate form, then the
  * |<expression>| is evaluated.  Its value must be a procedure that
  * accepts one argument; this procedure is then called on the value of
  * the |<test>| and the value(s) returned by this procedure is(are)
  * returned by the cond expression.
- * @l
- * If all |<test>|s evaluate to false
+ *
+ * If all `|<test>|`s evaluate to false
  * values, and there is no else clause, then the result of the
- * conditional expression is ,(emph "void"); if there is an else clause,
- * then its |<expression>|s are evaluated, and the value(s) of the last
+ * conditional expression is *_void_*; if there is an else clause,
+ * then its `|<expression>|`s are evaluated, and the value(s) of the last
  * one is(are) returned.
  *
  * @lisp
@@ -301,7 +287,7 @@ doc>
  * expression.  If the result of evaluating |<key>| is different from
  * every |<datum>|, then if there is an else clause its expressions are
  * evaluated and the result(s) of the last is(are) the result(s) of the
- * case expression; otherwise the result of the case expression is ,(emph "void").
+ * case expression; otherwise the result of the case expression is *_void_*.
  *
  * If the selected |<clause>| or else clause uses the |=>| alternate
  * form, then the |expression| is evaluated. It is an error if
@@ -335,9 +321,9 @@ doc>
 <doc EXT-SYNTAX when
  * (when <test> <expression1> <expression2> ...)
  *
- * If the |<test>| expression yields a true value, the |<expression>|s are
+ * If the |<test>| expression yields a true value, the `|<expression>|`s are
  * evaluated from left to right and the value of the last |<expression>| is
- * returned. Otherwise, |when| returns ,(emph "void").
+ * returned. Otherwise, |when| returns *_void_*.
 doc>
 |#
 
@@ -346,9 +332,9 @@ doc>
 <doc EXT-SYNTAX unless
  * (unless <test> <expression1> <expression2> ...)
  *
- * If the |<test>| expression yields a false value, the |<expression>|s are
+ * If the |<test>| expression yields a false value, the `|<expression>|`s are
  * evaluated from left to right and the value of the last |<expression>| is
- * returned. Otherwise, |unless| returns ,(emph "void").
+ * returned. Otherwise, |unless| returns *_void_*.
 doc>
 |#
 
@@ -364,12 +350,12 @@ doc>
  * ((<variable1> <init1>) ...)
  * @end lisp
  *
- * where each |<init>| is an expression, and |<body>| should be a sequence of one or
+ * where each |<init~i~>| is an expression, and |<body>| should be a sequence of one or
  * more expressions.  It is an error for a |<variable>| to appear more than once in
  * the list of variables being bound.
- * @l
- * The |<init>|s are evaluated in the current environment (in some
- * unspecified order), the |<variable>|s are bound to fresh locations holding the
+ *
+ * The `|<init>|`s are evaluated in the current environment (in some
+ * unspecified order), the `|<variable>|`s are bound to fresh locations holding the
  * results, the |<body>| is evaluated in the extended environment, and the value(s)
  * of the last expression of |<body>| is(are) returned.  Each binding of a
  * |<variable>| has |<body>| as its region.
@@ -384,9 +370,9 @@ doc>
  *     (* z x)))                   =>  35
  * @end lisp
  *
- * The second form of |let|, which is generally called a ,(emph "named let"),
+ * The second form of |let|, which is generally called a *_named let_*,
  * is a variant on the syntax of let which provides a more general
- * looping construct than |do| (@pxref{do}) and may also be used to
+ * looping construct than |do| and may also be used to
  * express recursions. It has the same syntax and semantics as ordinary
  * let except that |<variable>| is bound within |<body>| to a procedure whose
  * formal arguments are the bound variables and whose body is |<body>|.
@@ -442,8 +428,8 @@ doc>
  *
  * <bindings> should have the form as in |let|.
  *
- * The |<variable>|s are bound to fresh locations holding undefined
- * values, the |<init>|s are evaluated in the resulting environment (in
+ * The `|<variable>|`s are bound to fresh locations holding undefined
+ * values, the `|<init>|`s are evaluated in the resulting environment (in
  * some unspecified order), each |<variable>| is assigned to the result
  * of the corresponding |<init>|, the |<body>| is evaluated in the
  * resulting environment, and the value(s) of the last expression in
@@ -470,7 +456,7 @@ doc>
 <doc syntax begin
  * (begin <expression1> <expression2> ...)
  *
- * The |<expression>|s are evaluated sequentially from left to right, and the
+ * The `|<expression>|`s are evaluated sequentially from left to right, and the
  * value(s) of the last |<expression>| is(are) returned.  This expression type is
  * used to sequence side effects such as input and output.
  *
@@ -494,30 +480,30 @@ doc>
  * |Do| is an iteration construct.  It specifies a set of variables to be
  * bound, how they are to be initialized at the start, and how they are
  * to be updated on each iteration.  When a termination condition is met,
- * the loop exits after evaluating the |<expr>|s.
- * @l
+ * the loop exits after evaluating the `|<expr>|`s.
+ *
  * |Do| expressions are evaluated as follows: The |<init>| expressions
- * are evaluated (in some unspecified order), the |<var>|s are bound
+ * are evaluated (in some unspecified order), the `|<var>|`s are bound
  * to fresh locations, the results of the |<init>| expressions are stored
- * in the bindings of the |<var>|s, and then the iteration phase
+ * in the bindings of the `|<var>|`s, and then the iteration phase
  * begins.
- * @l
+ *
  * Each iteration begins by evaluating |<test>|; if the result is false
  * then the |<command>| expressions are evaluated in order for effect,
  * the |<step>| expressions are evaluated in some unspecified order, the
- * |<var>|s are bound to fresh locations, the results of the |<step>|s
- * are stored in the bindings of the |<var>|s, and the next iteration
+ * `|<var>|`s are bound to fresh locations, the results of the `|<step>|`s
+ * are stored in the bindings of the `|<var>|`s, and the next iteration
  * begins.
- * @l
- * If |<test>| evaluates to a true value, then the |<expr>|s are
+ *
+ * If |<test>| evaluates to a true value, then the `|<expr>|`s are
  * evaluated from left to right and the value(s) of the last |<expr>|
- * is(are) returned.  If no |<expr>|s are present, then the value of
- * the do expression is ,(emph "void").
- * @l
+ * is(are) returned.  If no `|<expr>|`s are present, then the value of
+ * the do expression is *_void_*.
+ *
  * The region of the binding of a |<var>| consists of the entire do
- * expression except for the |<init>|s.  It is an error for a |<var>| to
+ * expression except for the `|<init>|`s.  It is an error for a |<var>| to
  * appear more than once in the list of do variables.
- * @l
+ *
  * A |<step>| may be omitted, in which case the effect is the same as if
  * @lisp
  * (<var> <init> <var>)
@@ -558,14 +544,14 @@ doc>
  * a list or vector |<template>|.
  *
  * @lisp
- * `(list \,(+ 1 2) 4)  =>  (list 3 4)
+ * `(list ,(+ 1 2) 4)  =>  (list 3 4)
  * (let ((name 'a)) `(list ,name ',name))
  *                     =>  (list a (quote a))
- * `(a \,(+ 1 2) ,@(map abs '(4 -5 6)) b)
+ * `(a ,(+ 1 2) ,@(map abs '(4 -5 6)) b)
  *                     =>  (a 3 4 5 6 b)
- * `((foo \,(- 10 3)) ,@(cdr '(c)) . ,(car '(cons)))
+ * `((foo ,(- 10 3)) ,@(cdr '(c)) . ,(car '(cons)))
  *                     =>  ((foo 7) . cons)
- * `#(10 5 \,(sqrt 4) ,@(map sqrt '(16 9)) 8)
+ * `#(10 5 ,(sqrt 4) ,@(map sqrt '(16 9)) 8)
  *                     =>  #(10 5 2 4 3 8)
  * @end lisp
  *
@@ -575,8 +561,8 @@ doc>
  * and decreases by one inside each unquotation.
  *
  * @lisp
- * `(a `(b \,(+ 1 2) \,(foo \,(+ 1 3) d) e) f)
- *           =>  (a `(b \,(+ 1 2) \,(foo 4 d) e) f)
+ * `(a `(b ,(+ 1 2) ,(foo ,(+ 1 3) d) e) f)
+ *           =>  (a `(b ,(+ 1 2) ,(foo 4 d) e) f)
  * (let ((name1 'x)
  *       (name2 'y))
  *   `(a `(b ,,name1 ,',name2 d) e))
@@ -586,7 +572,6 @@ doc>
  * The two notations |`<template>| and |(quasiquote <template>)| are identical
  * in all respects.  |,<expression>| is identical to |(unquote <expression>)|, and
  * |,@<expression>| is identical to |(unquote-splicing <expression>)|.
- *
  *
 doc>
 |#
@@ -614,7 +599,7 @@ doc>
  *   (cond
  *    ((null? exprs)        #t)
  *    ((= (length exprs) 1) (car exprs))
- *    (else                 `(if \,(car exprs)
+ *    (else                 `(if ,(car exprs)
  *                            (my-and ,@(cdr exprs))
  *                            #f))))
  * (macro-expand '(my-and a b c))
@@ -625,21 +610,6 @@ doc>
 
 
 #|
-<doc EXT macro-expand
- * (macro-expand form)
- *
- * Returns the macro expansion of |form| if it is a macro call,
- * otherwise |form| is returned unchanged.
- *
- * @lisp
- * (define-macro (incr x) `(set! ,x (+ ,x 1)))
- * (macro-expand '(incr foo)) => (set! foo (+ foo 1))
- * (macro-expand '(car bar))  => (car bar)
- * @end lisp
-doc>
-|#
-
-#|
 <doc eval
  * (eval expression environment)
  * (eval expression)
@@ -648,7 +618,7 @@ doc>
  * value. |Expression| must be a valid Scheme expression represented
  * as data. |Environment| may be a R5RS environment-specifier
  * (|interaction-environment|, |scheme-report-environment| or
- * |null-environment|) or a ,(stklos) module.
+ * |null-environment|) or a {{stklos}} module.
  * @lisp
  * (eval '(* 7 3) (scheme-report-environment 5))
  *               => 21
@@ -663,8 +633,6 @@ doc>
  * @end lisp
 doc>
 |#
-
-
 
 #|
 <doc caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr
@@ -683,36 +651,6 @@ doc>
  * There are twenty-eight of these procedures in all.
 doc>
 |#
-
-(define caar   (lambda (x) (car (car x))))
-(define cdar   (lambda (x) (cdr (car x))))
-(define cadr   (lambda (x) (car (cdr x))))
-(define cddr   (lambda (x) (cdr (cdr x))))
-(define caaar  (lambda (x) (car (car (car x)))))
-(define cdaar  (lambda (x) (cdr (car (car x)))))
-(define cadar  (lambda (x) (car (cdr (car x)))))
-(define cddar  (lambda (x) (cdr (cdr (car x)))))
-(define caadr  (lambda (x) (car (car (cdr x)))))
-(define cdadr  (lambda (x) (cdr (car (cdr x)))))
-(define caddr  (lambda (x) (car (cdr (cdr x)))))
-(define cdddr  (lambda (x) (cdr (cdr (cdr x)))))
-(define caaaar (lambda (x) (car (car (car (car x))))))
-(define cdaaar (lambda (x) (cdr (car (car (car x))))))
-(define cadaar (lambda (x) (car (cdr (car (car x))))))
-(define cddaar (lambda (x) (cdr (cdr (car (car x))))))
-(define caadar (lambda (x) (car (car (cdr (car x))))))
-(define cdadar (lambda (x) (cdr (car (cdr (car x))))))
-(define caddar (lambda (x) (car (cdr (cdr (car x))))))
-(define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
-(define caaadr (lambda (x) (car (car (car (cdr x))))))
-(define cdaadr (lambda (x) (cdr (car (car (cdr x))))))
-(define cadadr (lambda (x) (car (cdr (car (cdr x))))))
-(define cddadr (lambda (x) (cdr (cdr (car (cdr x))))))
-(define caaddr (lambda (x) (car (car (cdr (cdr x))))))
-(define cdaddr (lambda (x) (cdr (car (cdr (cdr x))))))
-(define cadddr (lambda (x) (car (cdr (cdr (cdr x))))))
-(define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
-
 
 #|
 <doc with-input-from-file with-output-to-file
@@ -877,8 +815,8 @@ doc>
  * be opened, an error is signaled. If |proc| returns, then the port is closed
  * automatically and the value(s) yielded by the proc is(are) returned.
  * If proc does not return, then the port will not be closed automatically.
- * @l
- * ,(bold "Rationale:") Because Scheme's escape procedures have unlimited extent,
+ *
+ * IMPORTANT: Because Scheme's escape procedures have unlimited extent,
  * it is possible to escape from the current continuation but later to escape
  * back in. If implementations were permitted to close the port on any escape
  * from the current continuation, then it would be impossible to write portable
@@ -951,5 +889,35 @@ doc>
      (if (< y x)
          (simplest-rational y x)
          (simplest-rational x y))))
+
+
+#|
+<doc call-with-values
+ * (call-with-values producer consumer)
+ *
+ * Calls its producer argument with no values and a continuation that,
+ * when passed some values, calls the consumer procedure with those values
+ * as arguments. The continuation for the call to consumer is the
+ * continuation of the call to call-with-values.
+ * @lisp
+ * (call-with-values (lambda () (values 4 5))
+ *                   (lambda (a b) b))                =>  5
+ *
+ * (call-with-values * -)                             =>  -1
+ * @end lisp
+doc>
+|#
+(define (call-with-values prod con)
+  ;; A version of call-with-value where con is called in tail position.
+  (let ((vals (%call-for-values prod)))
+    ;; Avoid to use apply which is costly.  Don't change the order of the
+    ;; tests in the case below (2 is probably more current than 1, if a user
+    ;; calls this function.
+    (case (length vals)
+      ((2) (con (car vals) (cadr vals)))
+      ((1) (con (car vals)))
+      ((0) (con))
+      (else (apply con vals)))))
+
 
 ; LocalWords:  noindent EXT

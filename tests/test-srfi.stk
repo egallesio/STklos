@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-srfi.stk  -- Test of various SRFIs
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 26-Apr-2021 17:23 (eg)
+;;;; Last file update: 18-Mar-2022 14:52 (eg)
 ;;;;
 
 (require "srfi-48")   ;; for ~F format
@@ -57,8 +57,9 @@
           ;; Add a subsection title (and a trace)
           (test-subsection (format "SRFI ~S - ~S ..." nb (%srfi-title desc)))
           (trace-srfi nb)
-          ;; Require the SRFI and run the tests
-          (require-feature nb)
+          ;; Require the SRFI by importing it and run its tests
+          ;; (require-feature nb)
+          (eval `(import (srfi ,nb)) (current-module))
           (load test-file))))))
 
 (trace-srfi #f)

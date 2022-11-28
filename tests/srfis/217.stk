@@ -22,7 +22,7 @@
 ;;;; This file is a derivative work from the  implementation of
 ;;;; this SRFI by Wolfgang Corcoran-Mathe, it is copyrighted as:
 ;;;;
-;;;;; Copyright (C) 2020 Wolfgang Corcoran-Mathe
+;;;;;; Copyright (C) 2020 Wolfgang Corcoran-Mathe
 ;;;;;;
 ;;;;;; Permission is hereby granted, free of charge, to any person obtaining a
 ;;;;;; copy of this software and associated documentation files (the
@@ -45,24 +45,25 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 15-Feb-2021 09:16 (jpellegrini)
-;;;; Last file update: 16-Mar-2021 08:21 (jpellegrini)
+;;;; Last file update: 22-Apr-2022 16:54 (eg)
 ;;;;
 
+(import (srfi 1))
 
 (define-syntax test-assert
   (syntax-rules ()
     ((_ expr)
-     (test "" #t expr))))
+     (test "srfi-217-assert.nonumber" #t expr))))
 
 (define-syntax test-not
   (syntax-rules ()
     ((_ expr)
-     (test "" #f expr))))
+     (test "srfi-217-not.nonumber" #f expr))))
 
 (define-syntax test-equal
   (syntax-rules ()
     ((_ equal expected expr)
-     (test "" expected expr))))
+     (test "srfi-217-equal.nonumber" expected expr))))
 
 ;; The test-values which comes with the original implementation works on
 ;; Chibi, but not on Kawa, Racket and STklos, because Chibi allows
@@ -70,7 +71,7 @@
 ;; explicit list of arguments. It was easier to reimplement with
 ;; define-macro. -- jpellegrini
 (define-macro (test-values expected expr)
-  `(test "" 
+  `(test "srfi-217-values.nonumber"
          (call-with-values (lambda () ,expected) list)
          (call-with-values (lambda () ,expr) list)))
   
@@ -123,11 +124,11 @@
 
   ;;; iset->list
 
-  (test "" '() (iset->list (iset)))
-  (test "" pos-seq (iset->list pos-set))
-  (test "" neg-seq (iset->list neg-set))
-  (test "" mixed-seq (iset->list mixed-set))
-  (test "" sparse-seq (iset->list sparse-set))
+  (test "srfi-217.1" '() (iset->list (iset)))
+  (test "srfi-217.2" pos-seq (iset->list pos-set))
+  (test "srfi-217.3" neg-seq (iset->list neg-set))
+  (test "srfi-217.4" mixed-seq (iset->list mixed-set))
+  (test "srfi-217.5" sparse-seq (iset->list sparse-set))
 
   (test-equal iset=? (iset 1) (list->iset! (iset) '(1)))
   (test-equal iset=?
@@ -175,26 +176,26 @@
 (define (check-accessors)
   (print-header "Accessors")
 
-  (test "" 103 (iset-member pos-set 103 #f))
-  (test "" 'z (iset-member pos-set 104 'z))
+  (test "srfi-217.6" 103 (iset-member pos-set 103 #f))
+  (test "srfi-217.7" 'z (iset-member pos-set 104 'z))
 
   (test-not (iset-min (iset)))
-  (test "" 1 (iset-min (iset 1 2 3)))
-  (test "" (car pos-seq) (iset-min pos-set))
-  (test "" (car neg-seq) (iset-min neg-set))
-  (test "" (car mixed-seq) (iset-min mixed-set))
+  (test "srfi-217.8" 1 (iset-min (iset 1 2 3)))
+  (test "srfi-217.9" (car pos-seq) (iset-min pos-set))
+  (test "srfi-217.10" (car neg-seq) (iset-min neg-set))
+  (test "srfi-217.11" (car mixed-seq) (iset-min mixed-set))
 
   (test-not (iset-max (iset)))
   (test "" 3 (iset-max (iset 1 2 3)))
-  (test "" (last pos-seq) (iset-max pos-set))
-  (test "" (last neg-seq) (iset-max neg-set))
-  (test "" (last mixed-seq) (iset-max mixed-set))
+  (test "srfi-217.12" (last pos-seq) (iset-max pos-set))
+  (test "srfi-217.13" (last neg-seq) (iset-max neg-set))
+  (test "srfi-217.14" (last mixed-seq) (iset-max mixed-set))
   )
 
 (define (check-updaters)
   (print-header "Updaters")
 
-  (test "" '(1) (iset->list (iset-adjoin (iset) 1)))
+  (test "srfi-217.15" '(1) (iset->list (iset-adjoin (iset) 1)))
   (test-assert (iset-contains? (iset-adjoin neg-set 10) 10))
   (test-assert (iset-contains? (iset-adjoin dense-set 100) 100))
   (test-assert (iset-contains? (iset-adjoin sparse-set 100) 100))
@@ -202,7 +203,7 @@
               (list->iset (cons -3 (iota 20 100 3)))
               (iset-adjoin pos-set -3))
 
-  (test "" '() (iset->list (iset-delete (iset 1) 1)))
+  (test "srfi-217.16" '() (iset->list (iset-delete (iset 1) 1)))
   (test-not (iset-contains? (iset-delete neg-set 10) 10))
   (test-not (iset-contains? (iset-delete dense-set 1033) 1033))
   (test-not (iset-contains? (iset-delete sparse-set 30) 30))
@@ -210,7 +211,7 @@
               (list->iset (cdr (iota 20 100 3)))
               (iset-delete pos-set 100))
 
-  (test-assert (iset-empty? (iset-delete-all (iset) '())))
+  (test-assert (iset-empty? (iset-delete-all (iset) '()))) 
   (test-equal iset=? pos-set (iset-delete-all pos-set '()))
   (test-equal iset=?
               (iset 100 103 106)
@@ -272,49 +273,49 @@
   (test-values (values #t #t)
                (let-values (((n mixed-set*) (iset-delete-min mixed-set)))
                  (values (= n (car mixed-seq))
-                         (iset=? mixed-set* (list->iset (cdr mixed-seq))))))
+                         (iset=? mixed-set* (list->iset (cdr mixed-seq)))))) ;; FAIL
   (test-values (values #t #t)
                (let-values (((n sparse-set*) (iset-delete-min sparse-set)))
                  (values (= n (car sparse-seq))
-                         (iset=? sparse-set* (list->iset (cdr sparse-seq))))))
+                         (iset=? sparse-set* (list->iset (cdr sparse-seq)))))) ;; FAIL
 
   (test-values (values #t #t)
                (let-values (((n mixed-set*) (iset-delete-max mixed-set)))
                  (values (= n (last mixed-seq))
-                         (iset=? mixed-set* (list->iset (init mixed-seq))))))
+                         (iset=? mixed-set* (list->iset (init mixed-seq)))))) ;; FAIL
   (test-values (values #t #t)
                (let-values (((n sparse-set*) (iset-delete-max sparse-set)))
                  (values (= n (last sparse-seq))
-                         (iset=? sparse-set* (list->iset (init sparse-seq))))))
+                         (iset=? sparse-set* (list->iset (init sparse-seq)))))) ;; FAIL
   )
 
 (define (check-whole-set)
   (print-header "Whole set operations")
 
-  (test "" 0 (iset-size (iset)))
-  (test "" (length pos-seq) (iset-size pos-set))
-  (test "" (length mixed-seq) (iset-size mixed-set))
-  (test "" (length sparse-seq) (iset-size sparse-set))
+  (test "srfi-217.17" 0 (iset-size (iset)))
+  (test "srfi-217.18" (length pos-seq) (iset-size pos-set))
+  (test "srfi-217.19" (length mixed-seq) (iset-size mixed-set))
+  (test "srfi-217.20" (length sparse-seq) (iset-size sparse-set))
 
-  (test "" 8 (iset-find even? (iset 1 3 5 7 8 9 10) (lambda () #f)))
-  (test "" 'z (iset-find negative? pos-set (lambda () 'z)))
+  (test "srfi-217.21" 8 (iset-find even? (iset 1 3 5 7 8 9 10) (lambda () #f)))
+  (test "srfi-217.22" 'z (iset-find negative? pos-set (lambda () 'z)))
 
-  (test "" #f (iset-any? even? (iset)))
+  (test "srfi-217.23" #f (iset-any? even? (iset)))
   (test-assert (iset-any? even? pos-set))
   (test-not (iset-any? negative? pos-set))
   (test-assert (iset-any? (lambda (n) (> n 100)) sparse-set))
   (test-not (iset-any? (lambda (n) (> n 100)) dense-set))
 
-  (test "" #t (iset-every? even? (iset)))
+  (test "srfi-217.24" #t (iset-every? even? (iset)))
   (test-not (iset-every? even? pos-set))
   (test-assert (iset-every? negative? neg-set))
   (test-not (iset-every? (lambda (n) (> n 100)) sparse-set))
   (test-assert (iset-every? (lambda (n) (< n 100)) dense-set))
 
-  (test "" 0 (iset-count even? (iset)))
-  (test "" (count even? pos-seq) (iset-count even? pos-set))
-  (test "" (count even? neg-seq) (iset-count even? neg-set))
-  (test "" (count even? sparse-seq) (iset-count even? sparse-set))
+  (test "srfi-217.25" 0 (iset-count even? (iset)))
+  (test "srfi-217.26" (count even? pos-seq) (iset-count even? pos-set))
+  (test "srfi-217.27" (count even? neg-seq) (iset-count even? neg-set))
+  (test "srfi-217.28" (count even? sparse-seq) (iset-count even? sparse-set))
   )
 
 (define (check-iterators)
@@ -322,17 +323,17 @@
 
   ;;; folds
 
-  (test "" (fold + 0 pos-seq) (iset-fold + 0 pos-set))
-  (test "" (fold + 0 sparse-seq) (iset-fold + 0 sparse-set))
-  (test "" (iset-size neg-set) (iset-fold (lambda (_ c) (+ c 1)) 0 neg-set))
-  (test "" (reverse pos-seq) (iset-fold cons '() pos-set))
-  (test "" (reverse mixed-seq) (iset-fold cons '() mixed-set))
+  (test "srfi-217.29" (fold + 0 pos-seq) (iset-fold + 0 pos-set))
+  (test "srfi-217.30" (fold + 0 sparse-seq) (iset-fold + 0 sparse-set))
+  (test "srfi-217.31" (iset-size neg-set) (iset-fold (lambda (_ c) (+ c 1)) 0 neg-set))
+  (test "srfi-217.32" (reverse pos-seq) (iset-fold cons '() pos-set))
+  (test "srfi-217.33" (reverse mixed-seq) (iset-fold cons '() mixed-set))
 
-  (test "" (fold + 0 pos-seq) (iset-fold-right + 0 pos-set))
-  (test "" (fold + 0 sparse-seq) (iset-fold-right + 0 sparse-set))
-  (test "" (iset-size neg-set) (iset-fold-right (lambda (_ c) (+ c 1)) 0 neg-set))
-  (test "" pos-seq (iset-fold-right cons '() pos-set))
-  (test "" mixed-seq (iset-fold-right cons '() mixed-set))
+  (test "srfi-217.34" (fold + 0 pos-seq) (iset-fold-right + 0 pos-set))
+  (test "srfi-217.35" (fold + 0 sparse-seq) (iset-fold-right + 0 sparse-set))
+  (test "srfi-217.36" (iset-size neg-set) (iset-fold-right (lambda (_ c) (+ c 1)) 0 neg-set))
+  (test "srfi-217.37" pos-seq (iset-fold-right cons '() pos-set))
+  (test "srfi-217.38" mixed-seq (iset-fold-right cons '() mixed-set))
 
   ;;; iset-map
 
@@ -345,15 +346,15 @@
 
   ;;; iset-for-each
 
-  (test "" (iset-size mixed-set)
+  (test "srfi-217.39" (iset-size mixed-set)
         (let ((n 0))
           (iset-for-each (lambda (_) (set! n (+ n 1))) mixed-set)
           n))
-  (test "" (fold + 0 sparse-seq)
+  (test "srfi-217.40" (fold + 0 sparse-seq)
         (let ((sum 0))
           (iset-for-each (lambda (n) (set! sum (+ sum n))) sparse-set)
           sum))
-  (test "" (reverse mixed-seq)
+  (test "srfi-217.41" (reverse mixed-seq)
         (let ((xs '()))
           (iset-for-each (lambda (n) (set! xs (cons n xs))) mixed-set)
           xs))
@@ -537,6 +538,29 @@
   (test-assert (iset-empty? (isubset>= mixed-set 50)))
   )
 
+;; extra tests
+;; --jpellegrini
+(define (extra-tests)
+  ;; errors
+  (test/error "srfi-217 iset non-integer.1" (iset 2 1.5 0))
+  (test/error "srfi-217 iset non-integer.2" (iset 2 'a 0))
+              
+  (test/error "srfi-217 make-range-iset zero step" (make-range-iset -10 10 0))
+  (test/error "srfi-217 make-range-iset non-integer step" (make-range-iset -10 10 1.5))
+
+  (test/error "srfi-217 iset-delete-min empty set" (iset-delete-min (iset)))
+  (test/error "srfi-217 iset-delete-max empty set" (iset-delete-max (iset)))
+
+  (test/error "srfi-217 iset-map proc returns non-fixnum" (iset-map (lambda (x) 'a) (iset 1 2)))
+
+  ;; equal?
+  (test "srfi-217 equal?.1" #t (equal? (iset -1 -2 -100 -101 -5000 -5001 -20000 1 2 200 201 2000 30000)
+                                       (iset -1 -2 -100 -101 -5000 -5001 -20000 1 2 200 201 2000 30000)))
+  (test "srfi-217 equal?.2" #t (equal? mixed-set (iset-copy mixed-set)))
+  (test "srfi-217 equal?.2" #f (equal? mixed-set (iset-delete-min mixed-set)))
+  (test "srfi-217 equal?.2" #f (equal? mixed-set (iset-delete-max mixed-set)))
+  )
+
 (define (check-all)
   (check-iset=?)
   (check-copying-and-conversion)
@@ -549,6 +573,7 @@
   (check-comparison)
   (check-set-theory)
   (check-subsets)
+  (extra-tests)
   )
 
 (check-all)

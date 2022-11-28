@@ -1,0 +1,168 @@
+;;;;
+;;;; test-base64.stk		-- Testing hash tables
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 26-Jun-2022 10:17 (jpellegrini)
+;;;; Last file update:  3-Oct-2022 19:33 (eg)
+;;;;
+
+(require "test")
+
+(test-section "Simple Hash tables")
+
+(test-subsection "Simple hash tables with default parameters")
+
+;; comparison = eq?
+;; hash = hash-table-hash
+(let ((h (make-hash-table))
+      (c "a string"))
+  (test "hash-table?" #t (hash-table? h))
+  (test "hash-table-set!.return" (void) (hash-table-set! h 'a 10))
+  (hash-table-set! h 'b 20)
+  (hash-table-set! h  c 30)
+  (test "hash-table-ref"
+        '(10 20 30)
+        (map (lambda (x) (hash-table-ref h x))
+             (list 'a 'b c)))
+  (test "hash-table-exists?.yes"
+        #t
+         (hash-table-exists? h c))
+   (test "hash-table-exists?.no"
+         #f
+         (hash-table-exists? h 'd))
+   (test/error "hash-table-ref.not-found"
+               (hash-table-ref h 'd))
+   (test "hash-table-ref/default"
+        -1
+         (hash-table-ref/default h 'd -1)))
+
+(test-subsection "Custom comparison predicate")
+
+(let ((h (make-hash-table (lambda (x y) (< (abs (- x y)) 0.1)))))
+  (test "hash-table?.0" #t (hash-table? h))
+  (test "hash-table-set!.return.0" (void) (hash-table-set! h 0.01 10))
+  (hash-table-set! h 2    20)
+  (hash-table-set! h 3    30)
+  (test "hash-table->alist.0"
+        '((0.01 . 10) (2 . 20) (3 . 30))
+        (hash-table->alist h))
+  (test "hash-table-ref.0"
+        '(10 20 30)
+        (map (lambda (x) (hash-table-ref h x))
+             (list 0.011 2.0 2.99)))
+  (test "hash-table-exists?.yes.0"
+        #t
+        (hash-table-exists? h 3.09))
+  (test "hash-table-exists?.no.0"
+        #f
+        (hash-table-exists? h 3.2))
+  (test/error "hash-table-ref.not-found.0"
+              (hash-table-ref h 2.5))
+  (test "hash-table-ref/default.0"
+        -1
+        (hash-table-ref/default h 2.5 -1)))
+
+(test-subsection "Custom comparison predicate and custom hash function")
+
+(let ((h (make-hash-table (lambda (x y) (<= (abs (- (abs x) (abs y))) 0.1))
+                          (lambda (x) (exact (floor (square x)))))))
+  (test "hash-table?.2" #t (hash-table? h))
+  (test "hash-table-set!.return.1" (void) (hash-table-set! h -0.01 10))
+  (hash-table-set! h  2    20)
+  (hash-table-set! h -3    30)
+  (test "hash-table->alist.2"
+        '((-0.01 . 10) (2 . 20) (-3 . 30))
+        (hash-table->alist h))
+  (test "hash-table-ref.2"
+        '(10 20 30)
+        (map (lambda (x) (hash-table-ref h x))
+             (list 0.03 2.09 3)))
+  (test "hash-table-exists?.yes.2"
+        #t
+        (hash-table-exists? h 3.05))
+  (test "hash-table-exists?.no.2"
+        #f
+        (hash-table-exists? h -4))
+  (test/error "hash-table-ref.not-found.2"
+              (hash-table-ref h -4))
+  (test "hash-table-ref/default.2"
+        -1
+        (hash-table-ref/default h 4 -1)))
+
+(test-subsection "General hash procedures")
+
+;; alist conversion, map, merge!...
+(let ((h (alist->hash-table '((a . 10)
+                              (b . 20)
+                              (c . 30))))
+      (g (alist->hash-table '((a . 10)
+                              (b . 200)
+                              (d . 40)))))
+  (test "hash-table->alist.3"
+        '((a . 10) (b . 20)  (c . 30))
+        (sort (hash-table->alist h)
+              (lambda (x y) (< (cdr x) (cdr y) ))))
+  (test "hash-table->alist.4"
+        '((a . 10) (d . 40) (b . 200))
+        (sort (hash-table->alist g)
+              (lambda (x y) (< (cdr x) (cdr y) ))))
+  (hash-table-merge! h g)
+  (test "hash-table-merge!.1"
+        '((a . 10) (c . 30) (d . 40) (b . 200))
+        (sort (hash-table->alist h)
+              (lambda (x y) (< (cdr x) (cdr y) ))))
+  (test "hash-table-merge!.2"
+        '((a . 10) (d . 40) (b . 200))
+        (sort (hash-table->alist g)
+              (lambda (x y) (< (cdr x) (cdr y) ))))
+  (test "hash-table-map"
+        '(-200 -40 -10)
+        (sort (hash-table-map g (lambda (a b) (- b))) <)))
+
+;; fold
+(let ((h (alist->hash-table '((2 . 20) (4 . 40)))))
+  (test "hash-table-fold"
+        300
+        (hash-table-fold h (lambda (k v x) (+ x (* k v))) 100)))
+
+;; delete!
+(let ((h (alist->hash-table '((2 . 20) (4 . 40)))))
+  (hash-table-delete! h 4)
+  (test "hash-table-delete!"
+        '((2 . 20))
+        (hash-table->alist h)))
+
+;; stats
+(let* ((h (alist->hash-table '((2 . 20) (4 . 40))))
+       (ret h))
+  (let ((s (with-output-to-string
+             (lambda ()
+               (set! ret (hash-table-stats h))))))
+    (test "hash-table-stats.1"
+          #t
+          (string-find? "Hash table statistics" s))
+    (test "hash-table-stats.2"
+          (void)
+          ret)))
+
+    
+
+(test-section-end)

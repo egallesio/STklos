@@ -68,19 +68,31 @@ case $os in
       esac
       OS=FREEBSD
       SH_COMP_FLAGS='-fpic'
-          SH_LOAD_FLAGS='-shared -o'
-          SH_LOADER="$LD"
-          SH_SUFFIX='so'
-          SH_LIB_SUFFIX='so'
-          SH_MAIN_LOAD_FLAGS="-rdynamic"
+      SH_LOAD_FLAGS='-shared -o'
+      SH_LOADER="$LD"
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
+      SH_MAIN_LOAD_FLAGS="-rdynamic"
+      ;;
+  OpenBSD*)
+      case $machine in
+        i*86) machine=ix86;;
+      esac
+      OS=OPENBSD
+      SH_COMP_FLAGS='-fpic'
+      SH_LOAD_FLAGS='-shared -o'
+      SH_LOADER="$LD"
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
+      SH_MAIN_LOAD_FLAGS="-rdynamic"
       ;;
   HP*)
-          OS=HPUX
-          SH_COMP_FLAGS="+Z"
-          SH_LOAD_FLAGS="-b -o"
-          SH_LOADER="$LD"
-          SH_SUFFIX='sl'
-          SH_LIB_SUFFIX='sl'
+      OS=HPUX
+      SH_COMP_FLAGS="+Z"
+      SH_LOAD_FLAGS="-b -o"
+      SH_LOADER="$LD"
+      SH_SUFFIX='sl'
+      SH_LIB_SUFFIX='sl'
       SH_MAIN_LOAD_FLAGS="-Wl,-E"
       ;;
   IRIX*)
@@ -94,7 +106,7 @@ case $os in
       SH_LOAD_FLAGS="-shared -o"
       SH_LOADER="$CC"
       SH_SUFFIX='so'
-          SH_LIB_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
       ;;
   Linux*)
       case $version in
@@ -109,28 +121,28 @@ case $os in
       esac
       OS=LINUX
       SH_COMP_FLAGS='-fpic -nostdlib'
-          SH_LOAD_FLAGS='-shared -o'
-          SH_LOADER="$LD"
-          SH_SUFFIX='so'
-          SH_LIB_SUFFIX='so'
-          SH_MAIN_LOAD_FLAGS="-rdynamic"
+      SH_LOAD_FLAGS='-shared -o'
+      SH_LOADER="$LD"
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
+      SH_MAIN_LOAD_FLAGS="-rdynamic"
       ;;
   NetBSD*)
       OS=NETBSD
       SH_COMP_FLAGS="-fpic"
-          SH_LOAD_FLAGS="-Bshareable -o"
-          SH_LOADER="$LD"
-          SH_SUFFIX='so'
-          SH_LIB_SUFFIX='so'
+      SH_LOAD_FLAGS="-Bshareable -o"
+      SH_LOADER="$LD"
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
       ;;
   OSF*)
       OS=OSF
       if [ "$CC" = "gcc" ] ;then
          SH_COMP_FLAGS="-fpic"
-             SH_LOAD_FLAGS="-shared -o"
-             SH_LOADER="$LD"
+         SH_LOAD_FLAGS="-shared -o"
+         SH_LOADER="$LD"
          SH_SUFFIX='so'
-             SH_LIB_SUFFIX='so'
+         SH_LIB_SUFFIX='so'
        else
          die "I do not know how to dynamically load on $os with $CC"
        fi
@@ -144,17 +156,17 @@ case $os in
 #     SH_LOAD_FLAGS='-G -z text -h'
       SH_COMP_FLAGS="-fpic"
       SH_LOAD_FLAGS='-shared -o'
-          SH_LOADER="$LD"
-          SH_SUFFIX='so'
-          SH_LIB_SUFFIX='so'
+      SH_LOADER="$LD"
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
       ;;
   Darwin*)
       OS=DARWIN;
-          SH_COMP_FLAGS="-fPIC -fno-common"
+      SH_COMP_FLAGS="-fPIC -fno-common"
       SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress -o'
-          SH_LOADER="$CC"
-          SH_SUFFIX='so'
-          SH_LIB_SUFFIX='dylib'
+      SH_LOADER="$CC"
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='dylib'
       ;;
   CYGWIN*)
       # Since I cannot figure yet how to use shared libraries in Cygwin
@@ -162,11 +174,11 @@ case $os in
       OS=CYGWIN;
       OS_FLAVOUR=WIN32;
       SH_COMP_FLAGS=
-          SH_LOAD_FLAGS='-shared -o'
-          SH_LOADER='true'
-          SH_SUFFIX='so'
-          SH_LIB_SUFFIX='so'
-          SH_MAIN_LOAD_FLAGS=""
+      SH_LOAD_FLAGS='-shared -o'
+      SH_LOADER='true'
+      SH_SUFFIX='so'
+      SH_LIB_SUFFIX='so'
+      SH_MAIN_LOAD_FLAGS=""
       ;;
   *)      OS=UNKNOWN;;
 esac

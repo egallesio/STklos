@@ -130,7 +130,7 @@ void GC_print_hblkfreelist(void)
 
       if (0 != h) GC_printf("Free list %u (total size %lu):\n",
                             i, (unsigned long)GC_free_bytes[i]);
-      while (h != 0) {
+      while (h /* != NULL */) { /* CPPCHECK */
         hdr * hhdr = HDR(h);
 
         GC_printf("\t%p size %lu %s black listed\n",
@@ -326,8 +326,8 @@ GC_INLINE void GC_remove_from_fl(hdr *hhdr)
   GC_remove_from_fl_at(hhdr, GC_hblk_fl_from_blocks(divHBLKSZ(hhdr->hb_sz)));
 }
 
-/* Return a pointer to the free block ending just before h, if any.     */
-STATIC struct hblk * GC_free_block_ending_at(struct hblk *h)
+/* Return a pointer to the block ending just before h, if any.  */
+static struct hblk * get_block_ending_at(struct hblk *h)
 {
     struct hblk * p = h - 1;
     hdr * phdr;
@@ -338,16 +338,27 @@ STATIC struct hblk * GC_free_block_ending_at(struct hblk *h)
         phdr = HDR(p);
     }
     if (0 != phdr) {
-        if(HBLK_IS_FREE(phdr)) {
-            return p;
-        } else {
-            return 0;
-        }
+        return p;
     }
     p = GC_prev_block(h - 1);
-    if (0 != p) {
-      phdr = HDR(p);
-      if (HBLK_IS_FREE(phdr) && (ptr_t)p + phdr -> hb_sz == (ptr_t)h) {
+    if (p) {
+        phdr = HDR(p);
+        if ((ptr_t)p + phdr -> hb_sz == (ptr_t)h) {
+            return p;
+        }
+    }
+    return NULL;
+}
+
+/* Return a pointer to the free block ending just before h, if any.     */
+STATIC struct hblk * GC_free_block_ending_at(struct hblk *h)
+{
+    struct hblk * p = get_block_ending_at(h);
+
+    if (p /* != NULL */) { /* CPPCHECK */
+      hdr * phdr = HDR(p);
+
+      if (HBLK_IS_FREE(phdr)) {
         return p;
       }
     }
@@ -378,7 +389,7 @@ STATIC void GC_add_to_fl(struct hblk *h, hdr *hhdr)
     GC_ASSERT(GC_free_bytes[index] <= GC_large_free_bytes);
     hhdr -> hb_next = second;
     hhdr -> hb_prev = 0;
-    if (0 != second) {
+    if (second /* != NULL */) { /* CPPCHECK */
       hdr * second_hdr;
 
       GET_HDR(second, second_hdr);
@@ -395,14 +406,74 @@ STATIC void GC_add_to_fl(struct hblk *h, hdr *hhdr)
 
 GC_INNER int GC_unmap_threshold = MUNMAP_THRESHOLD;
 
-/* Unmap blocks that haven't been recently touched.  This is the only way */
-/* way blocks are ever unmapped.                                          */
+#ifdef COUNT_UNMAPPED_REGIONS
+  /* GC_unmap_old will avoid creating more than this many unmapped regions, */
+  /* but an unmapped region may be split again so exceeding the limit.      */
+
+  /* Return the change in number of unmapped regions if the block h swaps   */
+  /* from its current state of mapped/unmapped to the opposite state.       */
+  static int calc_num_unmapped_regions_delta(struct hblk *h, hdr *hhdr)
+  {
+    struct hblk * prev = get_block_ending_at(h);
+    struct hblk * next;
+    GC_bool prev_unmapped = FALSE;
+    GC_bool next_unmapped = FALSE;
+
+    next = GC_next_block((struct hblk *)((ptr_t)h + hhdr->hb_sz), TRUE);
+    /* Ensure next is contiguous with h.        */
+    if ((ptr_t)next != GC_unmap_end((ptr_t)h, (size_t)hhdr->hb_sz)) {
+      next = NULL;
+    }
+    if (prev != NULL) {
+      hdr * prevhdr = HDR(prev);
+      prev_unmapped = !IS_MAPPED(prevhdr);
+    }
+    if (next != NULL) {
+      hdr * nexthdr = HDR(next);
+      next_unmapped = !IS_MAPPED(nexthdr);
+    }
+
+    if (prev_unmapped && next_unmapped) {
+      /* If h unmapped, merge two unmapped regions into one.    */
+      /* If h remapped, split one unmapped region into two.     */
+      return IS_MAPPED(hhdr) ? -1 : 1;
+    }
+    if (!prev_unmapped && !next_unmapped) {
+      /* If h unmapped, create an isolated unmapped region.     */
+      /* If h remapped, remove it.                              */
+      return IS_MAPPED(hhdr) ? 1 : -1;
+    }
+    /* If h unmapped, merge it with previous or next unmapped region.   */
+    /* If h remapped, reduce either previous or next unmapped region.   */
+    /* In either way, no change to the number of unmapped regions.      */
+    return 0;
+  }
+#endif /* COUNT_UNMAPPED_REGIONS */
+
+/* Update GC_num_unmapped_regions assuming the block h changes      */
+/* from its current state of mapped/unmapped to the opposite state. */
+GC_INLINE void GC_adjust_num_unmapped(struct hblk *h GC_ATTR_UNUSED,
+                                      hdr *hhdr GC_ATTR_UNUSED)
+{
+# ifdef COUNT_UNMAPPED_REGIONS
+    GC_num_unmapped_regions += calc_num_unmapped_regions_delta(h, hhdr);
+# endif
+}
+
+/* Unmap blocks that haven't been recently touched.  This is the only   */
+/* way blocks are ever unmapped.                                        */
 GC_INNER void GC_unmap_old(void)
 {
     int i;
 
     if (GC_unmap_threshold == 0)
       return; /* unmapping disabled */
+# ifdef COUNT_UNMAPPED_REGIONS
+    /* Skip unmapping if we have already exceeded the soft limit.       */
+    /* This forgoes any opportunities to merge unmapped regions though. */
+    if (GC_num_unmapped_regions >= GC_UNMAPPED_REGIONS_SOFT_LIMIT)
+      return;
+# endif
 
     for (i = 0; i <= N_HBLK_FLS; ++i) {
       struct hblk * h;
@@ -416,30 +487,25 @@ GC_INNER void GC_unmap_old(void)
         /* truncated counter value wrapping is handled correctly).      */
         if ((unsigned short)(GC_gc_no - hhdr->hb_last_reclaimed) >
                 (unsigned short)GC_unmap_threshold) {
+#         ifdef COUNT_UNMAPPED_REGIONS
+            /* Continue with unmapping the block only if it will not    */
+            /* create too many unmapped regions, or if unmapping        */
+            /* reduces the number of regions.                           */
+            int delta = calc_num_unmapped_regions_delta(h, hhdr);
+            signed_word regions = GC_num_unmapped_regions + delta;
+
+            if (delta >= 0 && regions >= GC_UNMAPPED_REGIONS_SOFT_LIMIT) {
+              GC_COND_LOG_PRINTF("Unmapped regions limit reached!\n");
+              return;
+            }
+            GC_num_unmapped_regions = regions;
+#         endif
           GC_unmap((ptr_t)h, (size_t)hhdr->hb_sz);
           hhdr -> hb_flags |= WAS_UNMAPPED;
         }
       }
     }
 }
-
-# ifdef MPROTECT_VDB
-    GC_INNER GC_bool GC_has_unmapped_memory(void)
-    {
-      int i;
-
-      for (i = 0; i <= N_HBLK_FLS; ++i) {
-        struct hblk * h;
-        hdr * hhdr;
-
-        for (h = GC_hblkfreelist[i]; h != NULL; h = hhdr -> hb_next) {
-          hhdr = HDR(h);
-          if (!IS_MAPPED(hhdr)) return TRUE;
-        }
-      }
-      return FALSE;
-    }
-# endif /* MPROTECT_VDB */
 
 /* Merge all unmapped blocks that are adjacent to other free            */
 /* blocks.  This may involve remapping, since all blocks are either     */
@@ -472,17 +538,21 @@ GC_INNER void GC_merge_unmapped(void)
             if (IS_MAPPED(hhdr) && !IS_MAPPED(nexthdr)) {
               /* make both consistent, so that we can merge */
                 if (size > nextsize) {
+                  GC_adjust_num_unmapped(next, nexthdr);
                   GC_remap((ptr_t)next, nextsize);
                 } else {
+                  GC_adjust_num_unmapped(h, hhdr);
                   GC_unmap((ptr_t)h, size);
                   GC_unmap_gap((ptr_t)h, size, (ptr_t)next, nextsize);
                   hhdr -> hb_flags |= WAS_UNMAPPED;
                 }
             } else if (IS_MAPPED(nexthdr) && !IS_MAPPED(hhdr)) {
               if (size > nextsize) {
+                GC_adjust_num_unmapped(next, nexthdr);
                 GC_unmap((ptr_t)next, nextsize);
                 GC_unmap_gap((ptr_t)h, size, (ptr_t)next, nextsize);
               } else {
+                GC_adjust_num_unmapped(h, hhdr);
                 GC_remap((ptr_t)h, size);
                 hhdr -> hb_flags &= ~WAS_UNMAPPED;
                 hhdr -> hb_last_reclaimed = nexthdr -> hb_last_reclaimed;
@@ -499,7 +569,7 @@ GC_INNER void GC_merge_unmapped(void)
             GC_add_to_fl(h, hhdr);
             /* Start over at beginning of list */
             h = GC_hblkfreelist[i];
-          } else /* not mergable with successor */ {
+          } else /* not mergeable with successor */ {
             h = hhdr -> hb_next;
           }
       } /* while (h != 0) ... */
@@ -571,12 +641,12 @@ STATIC void GC_split_block(struct hblk *h, hdr *hhdr, struct hblk *n,
       nhdr -> hb_next = next;
       nhdr -> hb_sz = total_size - h_size;
       nhdr -> hb_flags = 0;
-      if (0 != prev) {
+      if (prev /* != NULL */) { /* CPPCHECK */
         HDR(prev) -> hb_next = n;
       } else {
         GC_hblkfreelist[index] = n;
       }
-      if (0 != next) {
+      if (next /* != NULL */) {
         HDR(next) -> hb_prev = n;
       }
       GC_ASSERT(GC_free_bytes[index] > h_size);
@@ -613,6 +683,7 @@ GC_allochblk(size_t sz, int kind, unsigned flags/* IGNORE_OFF_PAGE or 0 */)
     int split_limit; /* Highest index of free list whose blocks we      */
                      /* split.                                          */
 
+    GC_ASSERT(I_HOLD_LOCK());
     GC_ASSERT((sz & (GRANULE_BYTES - 1)) == 0);
     blocks = OBJ_SZ_TO_BLOCKS_CHECKED(sz);
     if ((signed_word)(blocks * HBLKSIZE) < 0) {
@@ -681,7 +752,11 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
         for (hbp = GC_hblkfreelist[n];; hbp = hhdr -> hb_next) {
             signed_word size_avail; /* bytes available in this block */
 
-            if (NULL == hbp) return NULL;
+            if (hbp /* != NULL */) {
+              /* CPPCHECK */
+            } else {
+              return NULL;
+            }
             GET_HDR(hbp, hhdr); /* set hhdr value */
             size_avail = (signed_word)hhdr->hb_sz;
             if (size_avail < size_needed) continue;
@@ -691,7 +766,7 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
               /* This prevents us from disassembling a single large     */
               /* block to get tiny blocks.                              */
               thishbp = hhdr -> hb_next;
-              if (thishbp != 0) {
+              if (thishbp /* != NULL */) { /* CPPCHECK */
                 signed_word next_size;
 
                 GET_HDR(thishbp, thishdr);
@@ -731,6 +806,7 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
                   /* Make sure it's mapped before we mangle it. */
 #                   ifdef USE_MUNMAP
                       if (!IS_MAPPED(hhdr)) {
+                        GC_adjust_num_unmapped(hbp, hhdr);
                         GC_remap((ptr_t)hbp, (size_t)hhdr->hb_sz);
                         hhdr -> hb_flags &= ~WAS_UNMAPPED;
                       }
@@ -805,6 +881,7 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
             if( size_avail >= size_needed ) {
 #               ifdef USE_MUNMAP
                   if (!IS_MAPPED(hhdr)) {
+                    GC_adjust_num_unmapped(hbp, hhdr);
                     GC_remap((ptr_t)hbp, (size_t)hhdr->hb_sz);
                     hhdr -> hb_flags &= ~WAS_UNMAPPED;
                     /* Note: This may leave adjacent, mapped free blocks. */
@@ -862,7 +939,7 @@ GC_INNER void GC_freehblk(struct hblk *hbp)
 
     GET_HDR(hbp, hhdr);
     size = HBLKSIZE * OBJ_SZ_TO_BLOCKS(hhdr->hb_sz);
-    if ((signed_word)size <= 0)
+    if ((size & SIGNB) != 0)
       ABORT("Deallocating excessively large block.  Too large an allocation?");
       /* Probably possible if we try to allocate more than half the address */
       /* space at once.  If we don't catch it here, strange things happen   */
@@ -893,7 +970,7 @@ GC_INNER void GC_freehblk(struct hblk *hbp)
         GC_remove_header(next);
       }
     /* Coalesce with predecessor, if possible. */
-      if (0 != prev) {
+      if (prev /* != NULL */) { /* CPPCHECK */
         prevhdr = HDR(prev);
         if (IS_MAPPED(prevhdr)
             && (signed_word)(hhdr -> hb_sz + prevhdr -> hb_sz) > 0) {

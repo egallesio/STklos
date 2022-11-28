@@ -1,7 +1,7 @@
 /*
  * p a t h . c          -- Path names management
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,17 +21,14 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update:  2-Jun-2020 09:49 (eg)
+ * Last file update: 24-Sep-2021 09:08 (eg)
  */
 
 #include "stklos.h"
 #include "path.h"
 #ifdef HAVE_GLOB
 #  include <glob.h>
-#else
-#  include "gnu-glob.h"
 #endif
-
 
 /*===========================================================================*\
  *
@@ -39,15 +36,14 @@
  *
 \*===========================================================================*/
 
-static char *tilde_expand(char *name, char *result)
+static void tilde_expand(const char *name, char *result, size_t result_len)
 {
-  char *p;
+  const char *p;
   struct passwd *pwPtr;
-  register int len;
 
   if (name[0] != '~') {
-    strcpy(result, name);
-    return name;
+    snprintf(result, result_len, "%s", name);
+    return;
   }
 
   if (ISDIRSEP(name[1]) || name[1] == '\0') {
@@ -60,23 +56,23 @@ static char *tilde_expand(char *name, char *result)
     } else
       dir =  pwPtr->pw_dir;
 
-    sprintf(result, "%s%s", dir, name+1);
+    snprintf(result, result_len, "%s%s", dir, name+1);
   }
   else {
-    for (p=&name[1]; (*p != 0) && (*p != '/'); p++) {
-      /* Null body;  just find end of name. */
-    }
-    len = p-(name+1);
-    strncpy(result, name+1, (size_t) len);
-    result[len] = '\0';
+    char user[100];             // 100 should be sufficient
+    register size_t i = 0;      // ~user will be truncated if it doesn't fit.
 
-    pwPtr = getpwnam(result);
-    if (pwPtr == NULL) {
-      STk_error("user %S does not exist", result);
+    for (p=&name[1]; (*p != 0) && (*p != '/'); p++) {
+      if (i < sizeof(user)-1) user[i++] = *p; // keep room for final NUL
     }
-    sprintf(result, "%s%s", pwPtr->pw_dir, p);
+    user[i] = '\0';
+
+    pwPtr = getpwnam(user);
+    if (pwPtr == NULL) {
+      STk_error("user %S does not exist", user);
+    }
+    snprintf(result, result_len, "%s%s", pwPtr->pw_dir, p);
   }
-  return result;
 }
 
 
@@ -148,7 +144,7 @@ static void absolute(char *s, char *pathname)
 \*===========================================================================*/
 #define MAXLINK 50  /* Number max of link before declaring we have a loop */
 
-SCM STk_resolve_link(char *path, int count)
+SCM STk_resolve_link(const char *path, int count)
 {
 #ifdef WIN32
   return STk_Cstring2string(STk_expand_file_name(path));
@@ -177,7 +173,7 @@ SCM STk_resolve_link(char *path, int count)
                  /* d points the place where the link must be placed */
                  if (d - dst + strlen(link) + strlen(s) < MAX_PATH_LENGTH - 1) {
                    /* we have enough room */
-                   sprintf(d, "%s%s", link, s);
+                   snprintf(d, MAX_PATH_LENGTH, "%s%s", link, s);
                    /* Recurse. Be careful for loops (a->b and b->a) */
                    if (count < MAXLINK)
                      return STk_resolve_link(dst, count+1);
@@ -207,16 +203,16 @@ SCM STk_resolve_link(char *path, int count)
  * STk_expand_file_name
  *
 \*===========================================================================*/
-char *STk_expand_file_name(char *s)
+char *STk_expand_file_name(const char *s)
 {
   char expanded[2 * MAX_PATH_LENGTH], abs[2 * MAX_PATH_LENGTH];
   /* Warning: absolute makes no control about path overflow. Hence the "2 *" */
 
 #ifdef WIN32
   cygwin_conv_to_full_posix_path(s, abs);
-  tilde_expand(abs, expanded);
+  tilde_expand(abs, expanded, sizeof(expanded));
 #else
-  tilde_expand(s, expanded);
+  tilde_expand(s, expanded, sizeof(expanded));
 #endif
   absolute(expanded, abs);
   return STk_strdup(abs);
@@ -230,6 +226,13 @@ char *STk_expand_file_name(char *s)
 \*===========================================================================*/
 SCM STk_do_glob(int argc, SCM *argv)
 {
+#ifndef HAVE_GLOB
+  (void)argc; (void)argv;
+
+  /* Not having glob should be rare now: it is in POSIX since 2001 */
+  STk_warning("glob is not supported on this system");
+  return STk_nil;
+#else
   int i, n, flags;
   glob_t buff;
   char expanded[2 * MAX_PATH_LENGTH];
@@ -245,7 +248,7 @@ SCM STk_do_glob(int argc, SCM *argv)
     if (!STRINGP(*argv)) STk_error("~S is a bad pathname", *argv);
     if (i == 1) flags |= GLOB_APPEND; /* append after the 1st argument done */
 
-    tilde_expand(STRING_CHARS(*argv), expanded);
+    tilde_expand(STRING_CHARS(*argv), expanded, sizeof(expanded));
     glob(expanded, flags, NULL, &buff);
     /* ignore the return value of glob */
   }
@@ -258,5 +261,5 @@ SCM STk_do_glob(int argc, SCM *argv)
 
   globfree(&buff);
   return res;
+#endif
 }
-

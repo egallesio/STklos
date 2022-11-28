@@ -1,0 +1,91 @@
+;;;;
+;;;; 69.stk	-- Basic Hash-tables Implementation
+;;;;
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 27-Oct-2005 23:09 (eg)
+;;;; Last file update: 21-Apr-2022 16:22 (eg)
+;;;;
+
+(define-module srfi/69
+  (import SCHEME)
+  (export     ;; Type constructors and predicate
+              make-hash-table hash-table? alist->hash-table
+              ;; Reflective queries
+              hash-table-equivalence-function hash-table-hash-function
+              ;; Dealing with single elements
+              hash-table-ref hash-table-ref/default
+              hash-table-set! hash-table-delete! hash-table-exists?
+              hash-table-update! hash-table-update!/default 
+              ;; Dealing with the whole contents
+              hash-table-size hash-table-keys hash-table-values
+              hash-table-walk hash-table-fold hash-table->alist
+              hash-table-copy hash-table-merge! 
+              ;; Hashing
+              hash string-hash string-ci-hash hash-by-identity
+              ;; Previous STklos hashtables
+              stklos:make-hash-table
+              stklos:alist->hash-table)
+  
+(define *%default-hash-size* (expt 2 29))
+
+;; ======================================================================
+;; The SRFI-69 hash functions
+;; They are not defined by default since
+;;    - they are not prefixed by hash-table
+;;    - string-hash conflicts with SRFI-13
+;;    - the bound default parameter is a weird idea
+;;    - string-hash is useless with STklos standard hash-table-hash function
+
+(define (hash obj :optional (bound *%default-hash-size*))
+  (modulo (hash-table-hash obj) bound))
+
+(define (string-hash obj :optional (bound *%default-hash-size*))
+  (if (string? obj)
+      (modulo (hash-table-hash obj) bound)
+      (error "bad string ~S" obj)))
+
+(define (string-ci-hash obj :optional (bound *%default-hash-size*))
+  (if (string? obj)
+      (modulo (hash-table-hash (string-downcase obj)) bound)
+      (error "bad string ~S" obj)))
+
+(define (hash-by-identity obj :optional (bound *%default-hash-size*))
+  (modulo (address-of obj) bound))
+
+;; ======================================================================
+;; Redefine make-hash-table and alist->hash-table to use equal? instead of
+;; eq? as default comparison function
+
+(define stklos:make-hash-table (in-module STklos make-hash-table))
+(define stklos:alist->hash-table (in-module STklos alist->hash-table))
+
+(define (make-hash-table :optional (comp equal?) (hash hash))
+  (stklos:make-hash-table comp hash))
+
+(define (alist->hash-table lst :optional (comp equal?) (hash hash-table-hash))
+  (stklos:alist->hash-table lst comp hash))
+
+;; hash-table-for-each is called hash-table-walk in SRFI-69
+(define hash-table-walk hash-table-for-each) ;; Name used in srfi69
+
+)
+
+(provide "srfi/69")

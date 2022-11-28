@@ -1,7 +1,7 @@
 ;;;;
 ;;;; frame.stk  -- GTklos Frame Demo
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 29-Jul-2001 18:17 (eg)
-;;;; Last file update: 29-Jun-2021 12:32 (eg)
+;;;; Last file update: 31-Jan-2022 20:12 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -48,7 +48,7 @@ Furthermore, we use here various shadows for the frame.
   (let* ((win (make <demo-window> #:title "Frame Demo" #:width 450
                     #:file "frame" #:border-width 10
                     #:message *message* #:padding 5))
-         (box (make <box> #:padding 5 #:parent win)))
+         (box (make <vbox> #:padding 5 #:parent win)))
 
     ;; Build several frames
     (make-frame box 'in #f 0.0)

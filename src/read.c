@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 30-Apr-2021 15:41 (eg)
+ * Last file update:  3-Feb-2022 11:58 (eg)
  *
  */
 
@@ -65,7 +65,7 @@ int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 #define COLON_AFTER  0x2
 #define COLON_BOTH   0x3
 
-static char colon_pos;
+static char colon_pos = COLON_BOTH;
 
 /*===========================================================================*\
  *
@@ -102,9 +102,9 @@ static void error_key_not_defined(SCM port, SCM key)
   signal_error(port, "key ``#~a='' not defined", key);
 }
 
-static void error_bad_dotted_list(SCM port)
+static void error_bad_dotted_list(SCM port, int line)
 {
-  signal_error(port, "bad dotted list", STk_nil);
+  signal_error(port, "bad dotted list (near line ~A)", MAKE_INT(line));
 }
 
 static void error_bad_inline_hexa_sequence(SCM port, char *str, int in_symbol)
@@ -148,7 +148,7 @@ static void warning_bad_escaped_sequence(SCM port, int c)
 }
 
 
-static int colon_position_value(char *str)
+static int colon_position_value(const char *str)
 {
   if      (strcmp(str, "none")   == 0) return COLON_NONE;
   else if (strcmp(str, "before") == 0) return COLON_BEFORE;
@@ -178,7 +178,7 @@ static int flush_spaces(SCM port, char *message, SCM file)
 }
 
 
-static int read_hex_sequence(SCM port, char* utf8_seq, int use_utf8) // ⇒ -1 if incorrect
+static int read_hex_sequence(SCM port, char *utf8_seq, int use_utf8) // ⇒ -1 if incorrect
 {
   char buffer[MAX_HEX_SEQ_LEN];
   char *end;   /* normally max value is 10FFFFF */
@@ -215,7 +215,7 @@ static int read_hex_sequence(SCM port, char* utf8_seq, int use_utf8) // ⇒ -1 i
       }
   }
  bad_sequence:
-  strcpy(utf8_seq, buffer); /* for a better error message */
+  snprintf(utf8_seq, MAX_HEX_SEQ_LEN, "%s", buffer); /* for a better error message */
   return -1;
 }
 
@@ -225,69 +225,76 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
 {
   static char *eof_seen = "end of file encountered on ~S";
   int c, line;
-  SCM tmp, cell, cdr;
+  SCM cur, start, last;
 
-  line = PORT_LINE(port);
-  c    = flush_spaces(port, eof_seen, port);
+  start = last = STk_nil;
 
-  if (c == delim) return(STk_nil);
-Top:
-  /* Read the car */
-  STk_ungetc(c, port);
-  tmp = read_rec(port, ctx, TRUE);
-
-  /* See if we don't have a special car */
-  if (tmp == STk_close_par) {
-    /* We are here when reading a list such as (1 ..... #;XXX) */
-    c = STk_getc(port);
-    if (c == delim)
-      return STk_nil;
-    else {
-      warning_parenthesis(port);
-      c = delim;
-      goto Top;
-    }
-  }
-
-  if (tmp == STk_dot) {
-    tmp = read_rec(port, ctx, TRUE);
-    if (tmp == STk_close_par)
-      error_bad_dotted_list(port);
-
+  for ( ; ; ) {
     c = flush_spaces(port, eof_seen, port);
-    if (c == '#') {
+    STk_ungetc(c, port);
+
+    line = PORT_LINE(port);
+    cur  = read_rec(port, ctx, TRUE);
+
+    if (cur == STk_close_par) {
+      c = STk_getc(port);
+      if (c != delim) warning_parenthesis(port);
+      return start;
+    }
+
+    if (cur == STk_dot) {
+      if (last == STk_nil)
+        error_bad_dotted_list(port, line);  // dot before an element
+
+      cur = read_rec(port, ctx, TRUE);
+      if (cur == STk_close_par)
+        error_bad_dotted_list(port, line); // dot not followed by an element
+
+      c = flush_spaces(port, eof_seen, port);
+      if (c == '#') {   // could be a (a . b #;commented-expr)
+        SCM tmp;
+
+        STk_ungetc(c, port);
+        tmp = read_rec(port, ctx, TRUE);
+
+        if (tmp != STk_close_par) STk_error("closing parenthesis expected");
+        c = flush_spaces(port, eof_seen, port);
+      }
+      if (c != delim)
+        error_bad_dotted_list(port, line); // dot not befor last element
+      CDR(last) = cur;
+      return start;
+    }
+
+    /* Build a new pair with "cur" in car and append it of list pointed by
+     * "start" ("last" denotes the last-pair)
+     */
+    {
       SCM tmp;
 
-      STk_ungetc(c, port);
-      tmp = read_rec(port, ctx, TRUE);
-      if (tmp != STk_close_par) warning_parenthesis(port);
-      c = flush_spaces(port, eof_seen, port);
+      if (ctx->constant) {
+         /* Constant read uses extended cons instead of cons */
+         tmp = STk_econs(cur, STk_nil, PORT_FNAME(port), line, PORT_POS(port));
+         BOXED_INFO(tmp) |= CONS_CONST;
+       }
+       else {
+         tmp = STk_cons(cur, STk_nil);
+       }
+
+       if (start == STk_nil)
+         start = last = tmp;
+       else {
+         CDR(last)= tmp;
+         last = CDR(last);
+       }
     }
-    if (c != delim)
-      STk_warning("missing close parenthesis (line %d)", PORT_LINE(port));
-    return(tmp);
   }
-
-  /* OK, read now the cdr */
-  cdr = read_list(port, delim, ctx);
-  if (cdr == STk_close_par)
-    error_bad_dotted_list(port);
-
-  if (ctx->constant) {
-    /* Constant read uses extended cons instead of cons */
-    cell = STk_econs(tmp, cdr, PORT_FNAME(port), line, PORT_POS(port));
-    BOXED_INFO(cell) |= CONS_CONST;
-  } else {
-    cell = STk_cons(tmp, cdr);
-  }
-
-  return cell;
 }
 
-
-static int read_word(SCM port, int c, char *tok, int case_significant, int *last)
+static int read_word(SCM port, int c, char *tok, int case_significant, int *last,
+                     int *seen_pipe)
 // read an item whose 1st char is in c. Return its length
-// At exit "last", if not NULL,  contains the last character read for thi item
+// At exit "last", if not NULL,  contains the last character read for this item
 {
   register int j = 0;
   int allchars   = 0;
@@ -295,8 +302,11 @@ static int read_word(SCM port, int c, char *tok, int case_significant, int *last
 
   for( ; ; ) {
     allchars  ^= (c == '|');
+
     if (c != '|')
       tok[j++]  = (allchars || case_significant) ? c : tolower(c);
+    else
+      if (seen_pipe) *seen_pipe = 1;
 
     if (c == '\\') {
       int k = j-1;
@@ -358,14 +368,15 @@ static int read_word(SCM port, int c, char *tok, int case_significant, int *last
 static SCM read_token(SCM port, int c, int case_significant)
 {
   char tok[MAX_TOKEN_SIZE];
-  SCM z;
-  int len, last;
+  int len, last, seen_pipe=0;
 
-  len = read_word(port, c, tok, case_significant, &last);
-  z   = STk_Cstr2number(tok, 10L);
+  len = read_word(port, c, tok, case_significant, &last, &seen_pipe);
+  if (!seen_pipe) {
+    SCM z = STk_Cstr2number(tok, 10L);
 
-  if (z != STk_false)
-    return z;
+    if (z != STk_false)
+      return z;
+  }
 
   /* It is not a number */
   if (*tok == '#') {
@@ -433,7 +444,7 @@ static SCM read_address(SCM port)
   char *end, tok[MAX_TOKEN_SIZE] = "0";
   unsigned long address;
 
-  read_word(port, 'x', tok+1, FALSE, NULL);
+  read_word(port, 'x', tok+1, FALSE, NULL, NULL);
   address = strtoul(tok, &end, 16);
   if (*end)
     signal_error(port, "bad address specifier #p~a", STk_Cstring2string(tok+2));
@@ -594,7 +605,7 @@ static SCM read_string(SCM port, int constant)
 
   j    = 0;
   len  = 100;
-  p    = buffer = STk_must_malloc(len);
+  p    = buffer = STk_must_malloc_atomic(len);
 
   while(((c = STk_getc(port)) != '"') && (c != EOF)) {
     if (c == '\\') {
@@ -785,14 +796,14 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
   int tag, len;
   SCM v;
 
-  len = read_word(port, c, tok, ctx->case_significant, NULL);
+  len = read_word(port, c, tok, ctx->case_significant, NULL, NULL);
 
   if (strcasecmp(tok, "f") ==0 || strcasecmp(tok, "false") ==0) {
     /* This is the #f constant */
     return STk_false;
   } else {
     if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
-        (STk_uvectors_allowed && (len == 2 || len == 3))) {
+        (STk_uvectors_allowed && (len >= 2 || len <= 4))) {
       c = STk_getc(port);
       if (c == '"')
         return read_srfi207_bytevector(port, ctx->constant);
@@ -847,7 +858,8 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           STk_ungetc(c, port);
           return STk_C_apply(read_brace_func, 1, port);
         }
-        goto default_case;
+        goto default_case;                   //FIXME
+        //return read_list(port, '}', ctx);
       }
 
       case ')':
@@ -878,6 +890,10 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           case 'f' : if (STk_uvectors_allowed)
                        return maybe_read_uniform_vector(port, c, ctx);
                      goto default_sharp;
+          case 'C' :
+          case 'c' : if (STk_uvectors_allowed)
+                       return maybe_read_uniform_vector(port, c, ctx);
+                     goto default_sharp;
           case '\\': return read_char(port, STk_getc(port));
           case '(' : return read_vector(port, ctx);
           case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
@@ -886,7 +902,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                          SCM word = read_token(port, c, FALSE);
 
                          if (SYMBOLP(word)) {
-                           char *s = SYMBOL_PNAME(word);
+                           const char *s = SYMBOL_PNAME(word);
 
                            /* Try to see if it is a DSSL keyword */
                            if ((strcmp(s, "optional") == 0) ||
@@ -1032,6 +1048,10 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           SCM tmp = read_token(port, c, ctx->case_significant);
           if (tmp != sym_dot)
             return tmp;
+
+          if (c == '|')
+            return STk_intern(".");
+
           if (inlist)
             return STk_dot;
           signal_error(port, "dot outside of list", STk_nil);
@@ -1154,9 +1174,9 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive value)
  *
  * This parameter object permits to change the default behaviour of
- * the |read| primitive when reading a symbol. If this parameter has a
+ * the |read| primitive when reading a symbol. If this parameter has
  * a true value a symbol is not converted to a default case when interned.
- * Since ,(rseven) requires that symbol are case insignificant, the default
+ * Since R7RS requires that symbol are case insignificant, the default
  * value  of this parameter is |#t|.
  * @lisp
  * (read-case-sensitive)        => |#t|
@@ -1164,12 +1184,12 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive #f)
  * (read-from-string "ABC")     => abc
  * @end lisp
- * ,(bold "Note:")  Default behaviour can be changed for a whole execution
- * with the |--case-sensitive| or |case-insensitive| options.
- * @l
- * ,(bold "Note:") See also syntax for ,(ref :mark "bar-in-symbol" :text
- * [special characters]) in symbols.
- *
+ * [NOTE]
+ * ====
+ * *  Default behaviour can be changed for a whole execution
+ *    with the |--case-sensitive| or |case-insensitive| options.
+ * *  See also syntax for _<<_symbols, special characters>>_ in symbols.
+ * ====
 doc>
 */
 static SCM read_case_sensitive_conv(SCM value)
@@ -1185,14 +1205,13 @@ static SCM read_case_sensitive_conv(SCM value)
  * (keyword-colon-position value)
  *
  * This parameter object indicates the convention used by the reader to
- * denote keywords. The allowed values are
- * ,(itemize
- *     (item [none, to forbid a symbol with colon to be interpreted as a
- *           keyword])
- *     (item [before, to read symbols starting with a colon as keywords])
- *     (item [after, to read symbols ending with a colon as keywords])
- *     (item [both, to read symbols starting or ending with a colon as
- *            keywords]))
+ * denote keywords. The allowed values are:
+ *
+ * - *none*, to forbid a symbol with colon to be interpreted as a keyword,
+ * - *before*, to read symbols starting with a colon as keywords,
+ * - *after*, to read symbols ending with a colon as keywords,
+ * - *both*,  to read symbols starting or ending with a colon as keywords.
+ *
  * Note that the notation |#:key| is always read as a keyword independently
  * of the value of |keyword-colon-position|. Hence, we have
  * @lisp
@@ -1235,6 +1254,23 @@ int STk_keyword_colon_convention(void)
   return colon_pos;
 }
 
+
+DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
+{
+  struct read_context ctx;
+
+  if (!PORTP(port)) STk_error_bad_port(port);
+  if (!CHARACTERP(end_delim)) STk_error("bad character ~s", end_delim);
+
+  ctx.cycles           = STk_nil;
+  ctx.inner_refs       = STk_nil;
+  ctx.comment_level    = 0;
+  ctx.case_significant = PORT_CASE_SENSITIVEP(port);
+  ctx.constant         = TRUE;
+
+  return read_list(port, CHARACTER_VAL(end_delim), &ctx);
+}
+
 /*===========================================================================*\
  *
  *                      I n i t i a l i z a t i o n
@@ -1274,5 +1310,10 @@ int STk_init_reader(void)
                         keyword_colon_position_get,
                         keyword_colon_position_set,
                         STk_STklos_module);
+
+  /* Add primitive for reading a list whose first character is already read */
+  /* This is useful to add specialized reader on [] and {} */
+  ADD_PRIMITIVE(user_read_list);
+
   return TRUE;
 }

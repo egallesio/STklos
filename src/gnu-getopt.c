@@ -91,7 +91,7 @@ static void getopt_fprintf(FILE* f, const char *format, ...)
 
 void STk_start_getopt_from_scheme(void)
 {
-  we_are_in_scheme = TRUE; /* Don't use anymore fprintf for reportin errors */
+  we_are_in_scheme = TRUE; /* Don't use fprintf anymore for reporting errors */
 }
 
 
@@ -150,7 +150,7 @@ void STk_start_getopt_from_scheme(void)
    to intersperse the options with the other arguments.
 
    As `getopt' works, it permutes the elements of ARGV so that,
-   when it is done, all the options precede everything else.  Thus
+   when it is done, all the options precede everything else.  Thus,
    all application programs are extended to handle flexible argument order.
 
    Setting the environment variable POSIXLY_CORRECT disables permutation.
@@ -535,7 +535,7 @@ _getopt_initialize (argc, argv, optstring)
    OPTSTRING is a string containing the legitimate option characters.
    If an option character is seen that is not listed in OPTSTRING,
    return '?' after printing an error message.  If you set `opterr' to
-   zero, the error message is suppressed but we still return '?'.
+   zero, the error message is suppressed, but we still return '?'.
 
    If a char in OPTSTRING is followed by a colon, that means it wants an arg,
    so the following text in the same ARGV-element, or the text of the following
@@ -684,7 +684,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 
      If long_only and the ARGV-element has the form "-f", where f is
      a valid short option, don't consider it an abbreviated form of
-     a long option that starts with f.  Otherwise there would be no
+     a long option that starts with f.  Otherwise, there would be no
      way to give the -f short option.
 
      On the other hand, if there's a long option "fubar" and

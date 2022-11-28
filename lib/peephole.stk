@@ -1,7 +1,7 @@
 ;;;;
 ;;;; peephole.stk       -- Peephole Optimiser fro the STklos VM
 ;;;;
-;;;; Copyright © 2001-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 20:32 (eg)
-;;;; Last file update:  5-Oct-2018 18:09 (eg)
+;;;; Last file update: 20-Aug-2021 18:35 (eg)
 ;;;;
 
 ; ======================================================================
@@ -111,6 +111,8 @@
 
              ;; [IN-NUMEQ ; IN-NOT]     => IN-NUMDIFF
              ;; [IN-NUMDIFF; IN-NOT]    => IN-EQ
+             ;; [IN-FXEQ; IN-NOT]       => IN-FIXDIFF
+             ;; [IN-FXDIFF; IN-NOT]     => IN-FIXDIFF
              ;; [IN-NUMLT ; IN-NOT]     => IN-NUMGE
              ;; [IN-NUMLE ; IN-NOT]     => IN-NUMGT
              ;; [IN-NUMGT ; IN-NOT]     => IN-NUMLE
@@ -119,6 +121,7 @@
              ;; [IN-EQV; IN-NOT]        => IN-NOT-EQV
              ;; [IN-EQUAL; IN-NOT]      => IN-NOT-EQUAL
              ((and (eq? i2 'IN-NOT) (memq i1 '(IN-NUMEQ IN-NUMDIFF
+                                               IN-FXEQ IN-FXDIFF
                                                IN-NUMLT IN-NUMGT
                                                IN-NUMLE IN-NUMGE
                                                IN-EQ IN-EQV IN-EQUAL)))
@@ -126,6 +129,8 @@
                                (list (case i1
                                        ((IN-NUMEQ)   'IN-NUMDIFF)
                                        ((IN-NUMDIFF) 'IN-NUMEQ)
+                                       ((IN-FXEQ)    'IN-FXDIFF)
+                                       ((IN-FXDIFF)  'IN-FXEQ)
                                        ((IN-NUMLT)   'IN-NUMGE)
                                        ((IN-NUMGT)   'IN-NUMLE)
                                        ((IN-NUMLE)   'IN-NUMGT)

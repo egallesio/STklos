@@ -1,7 +1,7 @@
 ;;;;
 ;;;; entry1.stk                 -- GTklos Entry Demo
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-Aug-2000 11:25 (eg)
-;;;; Last file update: 17-Jun-2021 08:55 (eg)
+;;;; Last file update: 31-Jan-2022 19:57 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -46,8 +46,7 @@ in the entry visible/invisible.
                    #:max-length 50
                    #:value "Hello, world"
                    #:parent window))
-         (hbox   (make <box>
-                   #:orientation 'horizontal
+         (hbox   (make <hbox>
                    #:parent window))
          (check1 (make <check-button>
                    #:text "Editable"

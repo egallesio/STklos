@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 10-Apr-2021 18:45 (eg)
+ * Last file update: 13-Jan-2022 17:34 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -62,7 +62,7 @@ struct process_obj {
   SCM streams[3];               /* standard ports for the process */
   int exited;                   /* Process is terminated */
   int exit_status;              /* Exit status of the processus */
-  int waited_on;                /* non zero if the process is being
+  int waited_on;                /* non-zero if the process is being
                                    waited on by a waitpid(..,..,0) */
 };
 
@@ -81,12 +81,12 @@ static SCM all_processes = STk_nil;
 #endif
 
 #ifdef USE_SIGCHLD
-#  define PURGE_PROCESS_TABLE()                             /* Nothing to do */
+#  define PURGE_PROCESS_TABLE()   (void)0                          /* Nothing to do */
 #else
 #  define PURGE_PROCESS_TABLE() process_terminate_handler(0)/* Simulate a SIGCHLD */
 #endif
 
-MUT_DECL(process_table_mutex)
+MUT_DECL(process_table_mutex);
 
 /******************************************************************************/
 
@@ -131,7 +131,7 @@ static void process_terminate_handler(int _UNUSED(sig)) /* called when a child d
   /* Delete the processes which are not alive from the global list
    * This loop may delete nobody if this the process has been deleted
    * before (a previous call to this function may have deleted more than
-   * one process.
+   * one process).
    * Note: No assumption is made on the process which has terminated;
    * we act blindly here since it does not seem that there is a POSIX way
    * to find the id of the process which died.
@@ -175,7 +175,7 @@ static void close_all_files(int pipes[3][2])
   }
 }
 
-static int same_files(char* f1, char* f2)
+static int same_files(char *f1, char *f2)
 {
   struct stat s1, s2;
 
@@ -358,7 +358,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
 
                  close(pipes[i][i == 0 ? 0 : 1]);
                  /* Make a new file descriptor to access the pipe */
-                 sprintf(buffer, "pipe-%s-%d", stdStreams[i], pid);
+                 snprintf(buffer, sizeof(buffer), "pipe-%s-%d", stdStreams[i], pid);
                  port = (i == 0) ?
                                 STk_fd2scheme_port(pipes[i][1], "w", buffer) :
                                 STk_fd2scheme_port(pipes[i][0], "r", buffer);
@@ -398,12 +398,12 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
  * call which permits to create a new (heavy) process.
  * When called without parameter, this procedure returns two times
  * (one time in the parent process and one time in the child process).
- * The value returned in the parent process is a process object
- * representing the child process and the value returned in the child
+ * The value returned to the parent process is a process object
+ * representing the child process and the value returned to the child
  * process is always the value |#f|.
  * When called with a parameter (which must be a thunk), the new process
  * excutes |thunk| and terminate it execution when |thunk| returns. The
- * value returned in the parent process is a process object representing
+ * value returned to the parent process is a process object representing
  * the child process.
 doc>
 */
@@ -724,8 +724,8 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
  *
  * Sends the integer signal |sig| to |proc|. Since value of |sig| is system
  * dependant, use the symbolic defined signal constants to make your program
- * independant of the running system (see ,(ref :mark "signals")).
- * The result of |process-signal| is ,(emph "void").
+ * independant of the running system (see <<_signals>>).
+ * The result of |process-signal| is *_void_*.
 doc>
 */
 DEFINE_PRIMITIVE("process-signal", proc_signal, subr2, (SCM proc, SCM sig))
@@ -746,7 +746,7 @@ static void print_process(SCM p, SCM port, int _UNUSED(mode))
 {
   char buffer[100];
 
-  sprintf(buffer, "#<process PID=%d>", PROCESS_PID(p));
+  snprintf(buffer, sizeof(buffer), "#<process PID=%d>", PROCESS_PID(p));
   STk_puts(buffer, port);
 }
 

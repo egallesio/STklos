@@ -1,0 +1,100 @@
+;;;;
+;;;; 185.stk        -- Implementation of SRFI-185
+;;;;
+;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by John Cowan (most of it is Johns code actually),
+;;;; it is copyrighted as:
+;;;;
+;;;;;;  Copyright (c) 2015  John Cowan, 2019
+;;;;;;  Permission is hereby granted, free of charge, to any person
+;;;;;;  obtaining a copy of this software and associated documentation
+;;;;;;  files (the "Software"), to deal in the Software without
+;;;;;;  restriction, including without limitation the rights to use,
+;;;;;;  copy, modify, merge, publish, distribute, sublicense, and/or
+;;;;;;  sell copies of the Software, and to permit persons to whom the
+;;;;;;  Software is furnished to do so, subject to the following
+;;;;;;  conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice shall be
+;;;;;; included in all copies or substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 31-Jul-2020 09:12 (jpellegrini)
+;;;; Last file update: 25-Apr-2022 17:59 (eg)
+;;;;
+
+(define-module srfi/185
+  (import (only (SCHEME) string-append! string-replace!))
+  (export string-append-linear!
+          string-replace-linear!
+          string-append!
+          string-replace!)
+
+  ;; define the procedures required by the SRFI.
+  ;; these are already built-in, so no problem.
+  (define string-append-linear! string-append!)
+  (define string-replace-linear! string-replace!)
+
+  ;; define new syntax, as per SRFI-185.
+  ;; see that the original procedures are still available,
+  ;; WITH THE SAME NAMES:
+  ;;
+  ;; stklos> (eq? string-append! string-append-linear!)
+  ;; #t
+  ;;
+  ;; but what we get when we call string-append! now is the
+  ;; new macro:
+  ;;
+  ;; stklos> (string-append! "a" "b")
+  ;; **** Error:
+  ;; string-append!: changing the constant string "a" is not allowed
+  ;;  (type ",help" for more information)
+  ;; stklos> (require "srfi-185")
+  ;; "srfi-185"
+  ;; stklos>  (string-append! "a" "b")
+  ;; **** Error:
+  ;; error: set!: "a" is a bad symbol
+  ;;  (type ",help" for more information)
+  ;;
+  ;; This is according to the SRFI specification.
+  ;;
+  (define-syntax string-append!
+    (syntax-rules ()
+      ((_ place . args)
+       (set! place (string-append-linear! place . args)))))
+
+  (define-syntax string-replace!
+    (syntax-rules ()
+      ((_ place . args)
+       (set! place (string-replace-linear! place . args)))))
+
+  )
+
+(provide "srfi/185")

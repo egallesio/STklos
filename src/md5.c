@@ -1,7 +1,7 @@
 /*
- * md5.c			-- MD5 algorithm
+ * md5.c            -- MD5 algorithm
  *
- * Copyright © 2007-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-May-2007 22:21 (eg)
- * Last file update:  3-Dec-2011 15:11 (eg)
+ * Last file update: 11-Jan-2022 16:43 (eg)
  */
 
 /*
@@ -45,21 +45,21 @@ struct md5_context
 
 
 
-#define GET_UINT32(n,b,i)                                       \
-{                                                               \
-    (n) = (uint32) ((uint8 *) b)[(i)]                           \
-      | (((uint32) ((uint8 *) b)[(i)+1]) <<  8)                 \
-      | (((uint32) ((uint8 *) b)[(i)+2]) << 16)                 \
-      | (((uint32) ((uint8 *) b)[(i)+3]) << 24);                \
-}
+#define GET_UINT32(n,b,i)                                         \
+do{                                                               \
+    (n) = (uint32) ((uint8 *) (b))[(i)]                           \
+      | (((uint32) ((uint8 *) (b))[(i)+1]) <<  8)                 \
+      | (((uint32) ((uint8 *) (b))[(i)+2]) << 16)                 \
+      | (((uint32) ((uint8 *) (b))[(i)+3]) << 24);                \
+}while(0)
 
-#define PUT_UINT32(n,b,i)                                       \
-{                                                               \
-    (((uint8 *) b)[(i)]  ) = (uint8) (((n)      ) & 0xFF);      \
-    (((uint8 *) b)[(i)+1]) = (uint8) (((n) >>  8) & 0xFF);      \
-    (((uint8 *) b)[(i)+2]) = (uint8) (((n) >> 16) & 0xFF);      \
-    (((uint8 *) b)[(i)+3]) = (uint8) (((n) >> 24) & 0xFF);      \
-}
+#define PUT_UINT32(n,b,i)                                         \
+do{                                                               \
+    (((uint8 *) (b))[(i)]  ) = (uint8) (((n)      ) & 0xFF);      \
+    (((uint8 *) (b))[(i)+1]) = (uint8) (((n) >>  8) & 0xFF);      \
+    (((uint8 *) (b))[(i)+2]) = (uint8) (((n) >> 16) & 0xFF);      \
+    (((uint8 *) (b))[(i)+3]) = (uint8) (((n) >> 24) & 0xFF);      \
+}while(0)
 
 static void md5_starts( struct md5_context *ctx )
 {
@@ -71,7 +71,7 @@ static void md5_starts( struct md5_context *ctx )
     ctx->state[3] = 0x10325476;
 }
 
-static void md5_process( struct md5_context *ctx, uint8 data[64] )
+static void md5_process( struct md5_context *ctx, const uint8 data[static 64] )
 {
     uint32 A, B, C, D, X[16];
 
@@ -261,35 +261,42 @@ static void md5_finish( struct md5_context *ctx, uint8 digest[16] )
 
 /*===========================================================================*\
  *
- * 	Scheme Primitive ...
+ *  Scheme Primitive ...
  *
 \*===========================================================================*/
 
 #include "stklos.h"
 #define MD5BUFSIZ 8192
 
+static inline char hexchar(unsigned int v)
+{
+  return (v < 10) ? (v + '0'): (v-10 + 'a');
+}
+
+
+
+
 /*
 <doc EXT md5sum
  * (md5sum obj)
  *
- * Return a string contening the md5 dum of |obj|. The given parameter can
+ * Return a string contening the md5 sum of |obj|. The given parameter can
  * be a string or an open input port.
 doc>
 */
 DEFINE_PRIMITIVE("md5sum", md5sum, subr1, (SCM obj))
 {
   struct md5_context ctx;
-  unsigned char md5sum[16];
+  unsigned char md5sum[16], *psum;
   char output[33];
   int i;
 
-
   md5_starts(&ctx);
 
-  if (STRINGP(obj)) {					/* string */
+  if (STRINGP(obj)) {                   /* string */
     md5_update(&ctx, (uint8 *) STRING_CHARS(obj), STRING_SIZE(obj));
   }
-  else if (IPORTP(obj)) {				/* input port */
+  else if (IPORTP(obj)) {               /* input port */
     char buffer[MD5BUFSIZ];
     int n;
 
@@ -297,21 +304,24 @@ DEFINE_PRIMITIVE("md5sum", md5sum, subr1, (SCM obj))
       md5_update(&ctx, (uint8 *)buffer, n);
     }
   }
-  else 					/* neither string or port => error */
+  else                  /* neither string or port => error */
     STk_error("bad object ~S", obj);
 
   md5_finish(&ctx, md5sum);
 
   /* Build the Scheme result */
-  for(i = 0; i < 16; i++) {
-    sprintf(output + i * 2, "%02x", md5sum[i]);
+  for(i=0, psum=md5sum; i < 32; i+=2, psum++) {
+    output[i]   = hexchar(*psum / 16);
+    output[i+1] = hexchar(*psum % 16);
   }
+  output[32] = '\0';
+
   return STk_Cstring2string(output);
 }
 
 /*===========================================================================*\
  *
- * 	Initialization code
+ *  Initialization code
  *
 \*===========================================================================*/
 int STk_init_md5(void)
@@ -319,4 +329,3 @@ int STk_init_md5(void)
   ADD_PRIMITIVE(md5sum);
   return TRUE;
 }
-

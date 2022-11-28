@@ -1,7 +1,7 @@
 /*
  * vport.c                                      -- Virtual Ports
  *
- * Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 17-Aug-2005 08:31 (eg)
- * Last file update: 30-Apr-2021 14:19 (eg)
+ * Last file update:  9-Jan-2022 18:29 (eg)
  */
 
 #include "stklos.h"
@@ -55,12 +55,12 @@ static void verify_proc(SCM proc, int arity)
 
 static void vport_print(SCM obj, SCM port)   /* Generic printing of virtual ports */
 {
-  char buffer[MAX_PATH_LENGTH + 20];
+  char buffer[MAX_PATH_LENGTH + 100];
 
-  sprintf(buffer, "#[%s-virtual-port %lx%s]",
-          IVPORTP(obj) ? "input" : "output",
-          (unsigned long) obj,
-          PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
+  snprintf(buffer, sizeof(buffer), "#[%s-virtual-port %lx%s]",
+           IVPORTP(obj) ? "input" : "output",
+           (unsigned long) obj,
+           PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
   STk_puts(buffer, port);
 }
 
@@ -123,7 +123,7 @@ static int call_user_close(void *stream)
  */
 
 static int call_user_putstring(SCM s, void *stream);
-static int vport_nputs(void *stream, char *s, int len);
+static int vport_nputs(void *stream, const char *s, int len);
 
 static int call_user_putc(int c, void *stream)
 {
@@ -184,10 +184,10 @@ static int vport_read(void *stream, void *buf, int count)
 }
 
 
-static int vport_write(void *stream, void *buf, int count)
+static int vport_write(void *stream, const void *buf, int count)
 {
   int i;
-  char *s = buf;
+  const char *s = buf;
 
   for (i = 0; i < count; i++) {
     int c = call_user_putc(*s++, stream);
@@ -204,7 +204,7 @@ static off_t vport_seek(void  _UNUSED(*stream),
   return 0;
 }
 
-static int vport_nputs(void *stream, char *s, int len)
+static int vport_nputs(void *stream, const char *s, int len)
 {
   int i;
 
@@ -213,7 +213,7 @@ static int vport_nputs(void *stream, char *s, int len)
   return len;
 }
 
-static int vport_puts(char *s, void *stream)
+static int vport_puts(const char *s, void *stream)
 {
   return vport_nputs(stream, s, strlen(s));
 }
@@ -231,18 +231,18 @@ static int vport_puts(char *s, void *stream)
  * Returns a virtual port using the |read-char| procedure to read a
  * character from the port, |ready?| to know if there is any data to
  * read from the port, |eof?| to know if the end of file is reached
- * on the port and finally |close| to close the port. All theses
+ * on the port and finally |close| to close the port. All these
  * procedure takes one parameter which is the port from which the input
  * takes place.  |Open-input-virtual| accepts also the special value
  * |#f| for the I/O procedures with the following conventions:
- * ,(itemize
- *    (item [if |read-char| or |eof?| is |#f|, any attempt to read
- * the virtual port will return an eof object;])
- *    (item [if |ready?| is |#f|, the file is always  ready
- * for reading;])
- *    (item [if |close| is |#f|, no action is done when the port is
- * closed.]))
- * @l
+ *
+ * - if |read-char| or |eof?| is |#f|, any attempt to read
+ *   the virtual port will return an eof object;
+ *
+ * - if |ready?| is |#f|, the file is always  ready for reading;
+ *
+ * - if |close| is |#f|, no action is done when the port is closed.
+ *
  * Hereafter is a possible implementation of |open-input-string|
  * using virtual ports:
  * @lisp
@@ -250,10 +250,10 @@ static int vport_puts(char *s, void *stream)
  *   (let ((index 0))
  *     (open-input-virtual
  *        :read-char (lambda (p)
- *                  ;; test on eof is already done by the system
- *                  (let ((res (string-ref str index)))
- *                    (set! index (+ index 1))
- *                    res))
+ *                     ;; test on eof is already done by the system
+ *                     (let ((res (string-ref str index)))
+ *                       (set! index (+ index 1))
+ *                       res))
  *        :eof? (lambda (p) (>= index (string-length str))))))
  * @end lisp
 doc>
@@ -318,8 +318,8 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  * |Open-output-virtual| accepts also the special value |#f|
  * for the I/O procedures. If a procedure is |#f| nothing is done
  * on the corresponding action.
- * @l
- * Hereafter is an (very inefficient) implementation of a variant of
+ *
+ * Hereafter is a (very inefficient) implementation of a variant of
  * |open-output-string| using virtual ports. The value of the output
  * string is printed when the port is closed:
  * @lisp
@@ -327,17 +327,18 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  *   (let ((str ""))
  *     (open-output-virtual
  *        :write-char (lambda (c p)
- *                   (set! str (string-append str (string c))))
+ *                      (set! str (string-append str (string c))))
  *        :write-string (lambda (s p)
- *                     (set! str (string-append str s)))
+ *                        (set! str (string-append str s)))
  *        :close (lambda (p) (write str) (newline)))))
  * @end lisp
- * ,(bold "Note:") |write-string| is mainly used for writing strings and is
+ *
+ * NOTE: |write-string| is mainly used for writing strings and is
  * generally more efficient than writing the string character by character.
  * However, if |write-string| is not provided, strings are printed with
  * |write-char|.  On the other hand, if |write-char| is absent,
  * characters are written by successive allocation of one character strings.
- * @l
+ *
  * Hereafter is another example: a virtual file port where all characters
  * are converted to upper case:
  * @lisp
@@ -402,7 +403,7 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
  * (output-virtual-port? obj)
  *
  * Returns |#t| if |obj| is a virtual input port or a virtual output port
- * respectively, otherwise returns #f.
+ * respectively, otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-virtual-port?", input_vportp, subr1, (SCM obj))
@@ -425,4 +426,3 @@ int STk_init_vport(void)
   ADD_PRIMITIVE(output_vportp);
   return TRUE;
 }
-

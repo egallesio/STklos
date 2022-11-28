@@ -2,7 +2,7 @@
 
 ## CAVEAT: thread-kill! is limited on Android
 
-This is because pthread_cancel is not implemented on Android.
+This is because `pthread_cancel` is not implemented on Android.
 `thread-kill!` is restricted so it can only kill its own thread
 (that is, a thread can kill itself), and threads that are not in
 running state.
@@ -19,6 +19,7 @@ is needed:
 It is possible to do everything in the android device, typing all commands on
 Termux, but we also assume you will want to access the device via ssh, which
 is more comfortable.
+
 
 ## Install adb
 
@@ -177,3 +178,98 @@ stklos>
 ```
 
 `stklos-pkg` and `stklos-compile` should also work.
+
+
+-------------------------------------------------
+
+## Installing STklos on an virtual Android device
+
+Installing STklos on an *emulated* Android device can also be useful for testing/developing purpose. You can use
+
+- an emulator such as anbox (Android in a box)
+- a VM running an X86 Android (such as Bliss-OS which is based on Android 10 version)
+
+### Running on anbox
+
+#### Download and install `anbox`
+
+In Debian, you may just `sudo apt install anbox`.
+
+Get an Android image for your architecture (for example amd64) and place it in
+`/var/lib/anbox`.
+
+```
+wget https://build.anbox.io/android-images/2018/07/19/android_amd64.img
+cp android_amd64.img /var/lib/anbox/android.img
+```
+
+Start the anbox service:
+
+```
+sudo systemctl start anbox-container-manager.service
+systemctl --user start anbox-session-manager.service
+```
+
+Use anbox to launch the app manager, where you will be able to see a screen with
+all pre-installed apps:
+
+```
+anbox launch --package=org.anbox.appmgr --component=org.anbox.appmgr.AppViewActivity
+```
+#### Install FDroid and Termux
+
+Install F-droid using adb (you can install any `.apk` file via adb, actually):
+
+```
+wget https://f-droid.org/FDroid.apk
+adb install FDroid.apk
+```
+
+```
+anbox launch --package=org.anbox.appmgr --component=org.anbox.appmgr.AppViewActivity
+```
+
+Open FDroid, update its package list, then install Termux (and any other apps you'd like!)
+
+Open Termux from the emulator and do the following:
+
+```
+pkg update
+pkg upgrade
+```
+
+#### Compile and install STklos
+
+Now, either follow the instructions given above for compiling STklos (be aware that Termux has no access to your desktop's clipboard, so you cannot copy and paste between them).
+
+Install the dependencies:
+
+```
+apt install libgc libpcreposix make clang git autoconf automake
+```
+
+Clone STklos repository:
+
+```
+git clone https://github.com/egallesio/STklos
+```
+
+Configure, `make`, `make test` and `make install`:
+
+```
+./configure --prefix=/data/data/com.termux/files/usr/
+make
+make test
+make install
+```
+
+(Do NOT use `sudo` to install; it is not necessary in this Termux setup)
+
+
+
+### Running an x86 Android OS on a VM
+
+Download an ISO file of an x86 Android OS and install it on your preferred VM system.
+Once you have it running, you should have access to the Google Play Store. Then, you can install a version of `termux` on your running OS. Compiling and running STklos, can be done as explained before with the anbox tool or a native  installation. 
+
+Have fun

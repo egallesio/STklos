@@ -1,7 +1,7 @@
 ;;;;
-;;;; process.stk	-- Process management for STklos
+;;;; process.stk    -- Process management for STklos
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can reistribute it and/or modify
@@ -21,8 +21,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 12-Dec-2000 14:04 (eg)
-;;;; Last file update: 27-May-2011 23:05 (eg)
+;;;; Last file update: 12-May-2022 15:46 (eg)
 ;;;;
+
+(export run-process process-kill process-stop process-continue)
+
 
 #|
 <doc EXT run-process
@@ -31,42 +34,42 @@
  * |run-process| creates a new process and run the executable
  * specified in |command|. The |p| correspond to the command line
  * arguments. The following values of |p| have a special meaning:
- * ,(itemize
- * (item [|:input| permits to redirect the standard input file of the
+ *
+ * - |:input| permits to redirect the standard input file of the
  * process. Redirection can come from a file or from a pipe. To redirect
  * the standard input from a file, the name of this file must be
  * specified after |:input|. Use the special keyword |:pipe| to
- * redirect the standard input from a pipe.])
+ * redirect the standard input from a pipe.
  *
- * (item [|:output| permits to redirect the standard output file of the
+ * - |:output| permits to redirect the standard output file of the
  * process. Redirection can go to a file or to a pipe. To redirect
  * the standard output to a file, the name of this file must be
  * specified after |:output|. Use the special keyword |:pipe| to
- * redirect the standard output to a pipe.])
+ * redirect the standard output to a pipe.
  *
- * (item [|:error| permits to redirect the standard error file of the
+ * - |:error| permits to redirect the standard error file of the
  * process. Redirection can go to a file or to a pipe. To redirect
  * the standard error to a file, the name of this file must be
  * specified after |error|. Use the special keyword |:pipe| to
- * redirect the standard error to a pipe.])
+ * redirect the standard error to a pipe.
  *
- * (item [|:wait| must be followed by a boolean value. This value
+ * - |:wait| must be followed by a boolean value. This value
  * specifies if the process must be run asynchronously or not. By
- * default, the process is run asynchronously (i.e. |:wait| is |%f|).])
+ * default, the process is run asynchronously (i.e. |:wait| is |%f|).
  *
- * (item [|:host| must be followed by a string. This string represents
+ * - |:host| must be followed by a string. This string represents
  * the name of the machine on which the command must be executed. This
  * option uses the external command |rsh|. The shell variable
  * |PATH| must be correctly set for accessing it without specifying its
- * abolute path.])
+ * abolute path.
  *
- * (item [|:fork| must be followed by a boolean value. This value
- * specifies if a ,(emph "fork") system call must be done before running
- * the process. If the process is run without ,(emph "fork") the Scheme
+ * - |:fork| must be followed by a boolean value. This value
+ * specifies if a _fork"_ system call must be done before running
+ * the process. If the process is run without _fork_ the Scheme
  * program is lost. This feature mimics the ``|exec|'' primitive of the
  * Unix shells. By default, a fork is executed before running the process
- * (i.e. |:fork| is |%t|). This option works on Unix implementations only.])
- * )
+ * (i.e. |:fork| is |%t|). This option works on Unix implementations only.
+ *
  *
  * The following example launches a process which executes the
  * Unix command |ls| with the arguments |-l| and |/bin|. The lines
@@ -80,12 +83,12 @@ doc>
   (define (filter-key-list l)
     (let Loop ((l l) (key '()) (other '()))
       (cond
-        ((null? l)
-	    (values (reverse! key) (reverse! other)))
-	((keyword? (car l))
-	    (if (null? (cdr l)) (error "value expected after keyword ~S" (car l)))
-	    (Loop (cddr l) (cons (cadr l) (cons (car l) key)) other))
-	(else (Loop (cdr l) key (cons (car l) other))))))
+       ((null? l)
+        (values (reverse! key) (reverse! other)))
+       ((keyword? (car l))
+        (if (null? (cdr l)) (error "value expected after keyword ~S" (car l)))
+        (Loop (cddr l) (cons (cadr l) (cons (car l) key)) other))
+       (else (Loop (cdr l) key (cons (car l) other))))))
 
   (define (run-process-parse :key input output error wait (fork #t) (args '()))
     ;; Call the C function
@@ -95,15 +98,15 @@ doc>
   ;; Code of the function RUN-PROCESS starts here
   ;;
   (call-with-values
-     (lambda () (filter-key-list l))
-     (lambda (key other) (values (apply run-process-parse :args other key)))))
+      (lambda () (filter-key-list l))
+    (lambda (key other) (values (apply run-process-parse :args other key)))))
 
 #|
 <doc EXT process-kill
  * (process-kill proc)
  *
  * Kills (brutally) |process|. The result of |process-kill|
- * is ,(emph"void"). This procedure is equivalent to
+ * is _void_. This procedure is equivalent to
  * @lisp
  * (process-signal process 'SIGTERM)
  * @end lisp

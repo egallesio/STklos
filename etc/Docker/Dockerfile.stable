@@ -4,14 +4,14 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  3-Jun-2019 11:28
-# Last file update: 16-Jun-2020 11:50 (eg)
+# Last file update:  3-Dec-2021 18:40 (eg)
 
 # The image is created from a released version of STklos
 # The version number must be passed on the command line
 #
-# To build an image on your machine of STklos version 1.40,
+# To build an image on your machine of STklos version 1.XY,
 # place yourself in this directory and type (don't forget the final dot)
-#    $ VERS=1.40
+#    $ VERS=1.XY
 #    $ docker build --build-arg version=$VERS -f Dockerfile.stable -t stklos:$VERS .
 #
 # To run the image:
@@ -19,7 +19,7 @@
 #
 
 # ---------- Build stage
-FROM alpine:3.11 AS build
+FROM alpine:3.15 AS build
 RUN apk update && \
     apk add build-base gc-dev gmp-dev libffi-dev pcre-dev git
 
@@ -37,11 +37,11 @@ RUN env CFLAGS=-O3 ./configure \
 RUN env TERM="dumb" make all tests install
 
 # ---------- Running stage
-FROM alpine:latest
+FROM alpine:3.15
 RUN apk update && \
     apk add gc gmp libffi pcre readline
 COPY --from=build /usr/local/ /usr/local/
-RUN ln -s /usr/lib/libreadline.so.8.0 /usr/lib/libreadline.so
+RUN ln -s /usr/lib/libreadline.so.8.1 /usr/lib/libreadline.so
 WORKDIR /home
 CMD ["stklos", "--utf8-encoding=yes"]
 

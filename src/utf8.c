@@ -1,7 +1,7 @@
 /*
  * utf8.c               -- UTF-8 support functions
  *
- * Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ * Copyright © 2011-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update:  9-Jun-2019 19:51 (eg)
+ * Last file update: 10-Sep-2021 11:40 (eg)
  */
 
 #include "stklos.h"
@@ -29,10 +29,10 @@
 int STk_use_utf8 = -1;
 
 
-static void error_bad_sequence(char *str)
+static void error_bad_sequence(const char *str)
 {
   int i;
-  char *buffer = STk_must_malloc(strlen(str) + 1);
+  char *buffer = STk_must_malloc_atomic(strlen(str) + 1);
 
   for (i = 0; *str; i++, str++) {
     buffer[i] = ((' ' < *str) && (*str < 0x7f)) ? *str : '.';
@@ -68,8 +68,8 @@ char *STk_utf8_grab_char(char *str, uint32_t *c) /* result = pos. after current 
     return str + 3;
   }
 
-  *c = ((buff[0] & 0x0f) << 16) +
-       ((buff[1] & 0x3f) <<  6) +
+  *c = ((buff[0] & 0x07) << 18) +
+       ((buff[1] & 0x3f) << 12) +
        ((buff[2] & 0x3f) <<  6) +
         (buff[3] & 0x3f);
   return str + 4;
@@ -80,7 +80,7 @@ int STk_utf8_read_char(SCM port)
   int c = STk_getc(port);
 
   if (STk_use_utf8 && (c >= 0x80)) {
-    /* Read an UTF-8 character */
+    /* Read a UTF-8 character */
     if ((c < 0xc0) || (c > 0xf7))
       return UTF8_INCORRECT_SEQUENCE;
     else if (c < 0xe0) {
@@ -141,9 +141,9 @@ int STk_utf8_char_bytes_needed(unsigned int ch)
   return 1; /* to avoid infinite loop, but obiously incorrect */
 }
 
-int STk_utf8_sequence_length(char *str)
+int STk_utf8_sequence_length(const char *str)
 {
-  /* return length of a the UTF-8 sequence starting at given address */
+  /* return length of the UTF-8 sequence starting at given address */
   uint8_t c = *((uint8_t *) str);
 
   if (c < 0x80)                         return 1;
@@ -154,10 +154,10 @@ int STk_utf8_sequence_length(char *str)
 }
 
 
-int STk_utf8_strlen(char *s, int max)
+int STk_utf8_strlen(const char *s, int max)
 {
   int len;
-  char *start = s, *end = s + max;
+  const char *start = s, *end = s + max;
 
   for (len = 0;  s < end; len++) {
     int sz =  STk_utf8_sequence_length(s);

@@ -6,8 +6,7 @@ as scanning the stack(s), that are not possible in portable C code.
 
 All of the following assumes that the collector is being ported to
 a byte-addressable 32- or 64-bit machine. Currently all successful ports
-to 64-bit machines involve LP64 targets. The code base includes some
-provisions for P64 targets (notably Win64), but that has not been tested. You
+to 64-bit machines involve LP64 and LLP64 targets (notably Win64). You
 are hereby discouraged from attempting a port to non-byte-addressable,
 or 8-bit, or 16-bit machines.
 
@@ -47,6 +46,7 @@ The `gcconfig.h` file consists of three sections:
   RISC variants.) On GNU-based systems, `cpp -dM empty_source_file.c` seems
   to generate a set of predefined macros. On some other systems, the "verbose"
   compiler option may do so, or the manual page may list them.
+
   2. A section that defines a small number of platform-specific macros, which
   are then used directly by the collector. For simple ports, this is where
   most of the effort is required. We describe the macros below. This section
@@ -84,7 +84,7 @@ operating system:
   trace all memory between `DATASTART` and `DATAEND` for root pointers.
   On some platforms, this can be defined to a constant address, though
   experience has shown that to be risky. Ideally the linker will define
-  a symbol (e.g. `_data` whose address is the beginning of the data segment.
+  a symbol (e.g. `_data`) whose address is the beginning of the data segment.
   Sometimes the value can be computed using the `GC_SysVGetDataStart`
   function. Not used if either the next macro is defined, or if dynamic
   loading is supported, and the dynamic loading support defines a function
@@ -95,7 +95,7 @@ operating system:
   is found. This often works on Posix-like platforms. It makes it harder
   to debug client programs, since startup involves generating and catching
   a segmentation fault, which tends to confuse users.
-  * `DATAEND` - Set to the end of the main data segment. Defaults to `end`,
+  * `DATAEND` - Set to the end of the main data segment. Defaults to `_end`,
   where that is declared as an array. This works in some cases, since the
   linker introduces a suitable symbol.
   * `DATASTART2`, `DATAEND2` - Some platforms have two discontiguous main data
@@ -106,20 +106,21 @@ operating system:
   architecture has more than one stack per thread, and is not supported yet,
   you will need to do more work. Grep for "IA64" in the source for an
   example.)
-  * `STACKBOTTOM` - Defined to be the cool end of the stack, which is usually
-  the highest address in the stack. It must bound the region of the stack that
-  contains pointers into the GC heap. With thread support, this must be the
-  cold end of the main stack, which typically cannot be found in the same way
-  as the other thread stacks. If this is not defined and none of the following
-  three macros is defined, client code must explicitly set `GC_stackbottom`
-  to an appropriate value before calling `GC_INIT` or any other `GC_` routine.
+  * `STACKBOTTOM` - Defined to be the cold end of the stack, which is usually
+  (i.e. when the stacks grow down) the highest address in the stack. It must
+  bound the region of the stack that contains pointers into the GC heap. With
+  thread support, this must be the cold end of the main stack, which typically
+  cannot be found in the same way as the other thread stacks. If this is not
+  defined and none of the following three macros is defined, client code must
+  explicitly set `GC_stackbottom` to an appropriate value before calling
+  `GC_INIT` or any other `GC_` routine.
   * `LINUX_STACKBOTTOM` - May be defined instead of `STACKBOTTOM`. If defined,
-  then the cold end of the stack will be determined Currently we usually read
-  it from `/proc`.
+  then the cold end of the stack will be determined, we usually read it from
+  `/proc`.
   * `HEURISTIC1` - May be defined instead of `STACKBOTTOM`. `STACK_GRAN`
   should generally also be redefined. The cold end of the stack is determined
   by taking an address inside `GC_init`s frame, and rounding it up to the next
-  multiple of `STACK_GRAN`. This works well if the stack base is always
+  multiple of `STACK_GRAN`. This works well if the stack bottom is always
   aligned to a large power of two. (`STACK_GRAN` is predefined to 0x1000000,
   which is rarely optimal.)
   * `HEURISTIC2` - May be defined instead of `STACKBOTTOM`. The cold end
@@ -127,14 +128,16 @@ operating system:
   incrementing it repeatedly in small steps (decrement if `STACK_GROWS_UP`),
   and reading the value at each location. We remember the value when the first
   Segmentation violation or Bus error is signaled, round that to the nearest
-  plausible page boundary, and use that as the stack base.
+  plausible page boundary, and use that as the stack bottom.
   * `DYNAMIC_LOADING` - Should be defined if `dyn_load.c` has been updated for
   this platform and tracing of dynamic library roots is supported.
-  * `MPROTECT_VDB`, `PROC_VDB` - May be defined if the corresponding
-  _virtual dirty bit_ implementation in `os_dep.c` is usable on this platform.
-  This allows incremental/generational garbage collection. `MPROTECT_VDB`
-  identifies modified pages by write protecting the heap and catching faults.
-  `PROC_VDB` uses the /proc primitives to read dirty bits.
+  * `GWW_VDB`, `MPROTECT_VDB`, `PROC_VDB`, `SOFT_VDB` - May be defined if the
+  corresponding _virtual dirty bit_ implementation in `os_dep.c` is usable on
+  this platform. This allows incremental/generational garbage collection.
+  (`GWW_VDB` uses the Win32 `GetWriteWatch` function to read dirty bits,
+  `MPROTECT_VDB` identifies modified pages by write protecting the heap and
+  catching faults. `PROC_VDB` and `SOFT_VDB` use the /proc pseudo-files to
+  read dirty bits.)
   * `PREFETCH`, `GC_PREFETCH_FOR_WRITE` - The collector uses `PREFETCH(x)`
   to preload the cache with the data at _x_ address. This defaults to a no-op.
   * `CLEAR_DOUBLE` - If `CLEAR_DOUBLE` is defined, then `CLEAR_DOUBLE(x)`
@@ -152,18 +155,16 @@ contents that the collector must trace from are copied to the stack. Typically
 this can be done portably, but on some platforms it may require assembly code,
 or just tweaking of conditional compilation tests.
 
-For GC v7, if your platform supports `getcontext`, then defining the macro
+If your platform supports `getcontext` then defining the macro
 `UNIX_LIKE` for your OS in `gcconfig.h` (if it is not defined there yet)
-is likely to solve the problem. otherwise, if you are using gcc,
+is likely to solve the problem. Otherwise, if you are using gcc,
 `_builtin_unwind_init` will be used, and should work fine. If that is not
 applicable either, the implementation will try to use `setjmp`. This will work
 if your `setjmp` implementation saves all possibly pointer-valued registers
 into the buffer, as opposed to trying to unwind the stack at `longjmp` time.
 The `setjmp_test` test tries to determine this, but often does not get it
-right.
-
-In GC v6.x versions of the collector, tracing of registers was more commonly
-handled with assembly code. In GC v7, this is generally to be avoided.
+right. Registers tracing handled with an assembly code is generally to be
+avoided.
 
 Most commonly `os_dep.c` will not require attention, but see below.
 
@@ -197,7 +198,7 @@ stopped with signals. In this case, the changes involve:
   be automatically defined by `gc_config_macros.h` in the right cases.
   It should also result in a definition of `GC_PTHREADS`, as for the existing
   cases.
-  2. For GC v7, ensuring that the `atomic_ops` package at least minimally
+  2. Ensuring that the `atomic_ops` package at least minimally
   supports the platform. If incremental GC is needed, or if pthread locks
   do not perform adequately as the allocation lock, you will probably need
   to ensure that a sufficient `atomic_ops` port exists for the platform
@@ -210,7 +211,7 @@ stopped with signals. In this case, the changes involve:
   workarounds are common.  Non-preemptive threads packages will probably
   require further work. Similarly thread-local allocation and parallel marking
   requires further work in `pthread_support.c`, and may require better
-  `atomic_ops` support.
+  `atomic_ops` support for the designed platform.
 
 ## Dynamic library support
 
@@ -226,7 +227,7 @@ If dynamic library data sections must also be traced, then:
   `gcconfig.h`.
   * An appropriate versions of the functions `GC_register_dynamic_libraries`
   should be defined in `dyn_load.c`. This function should invoke
-  `GC_cond_add_roots(_region_start, region_end_, TRUE)` on each dynamic
+  `GC_cond_add_roots(region_start, region_end, TRUE)` on each dynamic
   library data section.
 
 Implementations that scan for writable data segments are error prone,
@@ -244,7 +245,7 @@ locking behavior in this case.
 
 For incremental and generational collection to work, `os_dep.c` must contain
 a suitable _virtual dirty bit_ implementation, which allows the collector
-to track which heap pages (assumed to be a multiple of the collectors block
+to track which heap pages (assumed to be a multiple of the collector's block
 size) have been written during a certain time interval. The collector provides
 several implementations, which might be adapted. The default (`DEFAULT_VDB`)
 is a placeholder which treats all pages as having been written. This ensures
@@ -253,7 +254,7 @@ useless.
 
 ## Stack traces for debug support
 
-If stack traces in objects are need for debug support, `GC_dave_callers` and
+If stack traces in objects are needed for debug support, `GC_save_callers` and
 `GC_print_callers` must be implemented.
 
 ## Disclaimer

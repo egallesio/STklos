@@ -125,10 +125,10 @@
 (test/error "modulo args" (modulo 1.0 2.0))
 (test/error "remainder args" (remainder 2.0 1.0))
 
-;; SRFI-94 changes the semantics of these, and they are tested later, so we need
-;; to get their previous definitions:
-(define make-rectangular %make-rectangular)
-(define make-polar %make-polar)
-(define quotient %quotient)
-(define remainder %remainder)
-(define modulo %modulo)
+;;// ;; SRFI-94 changes the semantics of these, and they are tested later, so we need
+;;// ;; to get their previous definitions:
+;;// (define make-rectangular %make-rectangular)
+;;// (define make-polar %make-polar)
+;;// (define quotient %quotient)
+;;// (define remainder %remainder)
+;;// (define modulo %modulo)

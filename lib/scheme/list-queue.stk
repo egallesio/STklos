@@ -1,0 +1,257 @@
+;;;;
+;;;; list-queue.stk   -- Implementation of (srfi list-queue) aka SRFI-117
+;;;;
+;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by John Cowan, it is copyrighted as:
+;;;;
+;;;;;;  Copyright (c) 2014 John Cowan.
+;;;;;;  Permission is hereby granted, free of charge, to any person
+;;;;;;  obtaining a copy of this software and associated documentation
+;;;;;;  files (the "Software"), to deal in the Software without
+;;;;;;  restriction, including without limitation the rights to use,
+;;;;;;  copy, modify, merge, publish, distribute, sublicense, and/or
+;;;;;;  sell copies of the Software, and to permit persons to whom the
+;;;;;;  Software is furnished to do so, subject to the following
+;;;;;;  conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice shall be
+;;;;;; included in all copies or substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 30-Jun-2020 05:01 (jpellegrini)
+;;;; Last file update:  2-Oct-2022 21:10 (eg)
+;;;;
+
+(define-module scheme/list-queue
+  (import (srfi 9))
+  (export make-list-queue list-queue list-queue-copy list-queue-unfold list-queue-unfold-right
+          list-queue? list-queue-empty?
+          list-queue-front list-queue-back list-queue-list list-queue-first-last
+          list-queue-add-front! list-queue-add-back! list-queue-remove-front! list-queue-remove-back!
+          list-queue-remove-all! list-queue-set-list!
+          list-queue-append list-queue-append! list-queue-concatenate
+          list-queue-map list-queue-map! list-queue-for-each)
+
+;; The only procedure from SRFI-1 we'd need is map!, so instead
+;; of requireing SRFI-1, we define a simpler version of map! here,
+;; unless SRFI-1 is already provided.
+(define srfi-117:map!
+        (let ((srfi-1 (find-module 'srfi/1 #f)))
+          (if srfi-1
+              (symbol-value 'map! srfi-1)
+              (lambda (f lis)
+                (let lp ((lis lis))
+                  (if (pair? lis)
+                    (begin
+                      (set-car! lis (f (car lis)))
+                      (lp (cdr lis)))))))))
+
+;;; The list-queue record
+;;; The invariant is that either first is (the first pair of) a list
+;;; and last is the last pair, or both of them are the empty list.
+
+(define-record-type <list-queue> (raw-make-list-queue first last) list-queue?
+  (first get-first set-first!)
+  (last get-last set-last!))
+
+;;; Constructors
+
+(define make-list-queue
+  (case-lambda
+    ((list)
+     (if (null? list)
+       (raw-make-list-queue '() '())
+       (raw-make-list-queue list (last-pair list))))
+    ((list last)
+     (raw-make-list-queue list last))))
+
+(define (list-queue . objs)
+  (make-list-queue objs))
+
+(define (list-queue-copy list-queue)
+  (make-list-queue (list-copy (get-first list-queue))))
+
+;;; Predicates
+
+(define (list-queue-empty? list-queue)
+  (null? (get-first list-queue)))
+
+;;; Accessors
+
+(define (list-queue-front list-queue)
+  (if (list-queue-empty? list-queue)
+    (error "Empty list-queue")
+    (car (get-first list-queue))))
+
+(define (list-queue-back list-queue)
+  (if (list-queue-empty? list-queue)
+    (error "Empty list-queue")
+    (car (get-last list-queue))))
+
+;;; Mutators (which carefully maintain the invariant)
+
+(define (list-queue-add-front! list-queue elem)
+  (let ((new-first (cons elem (get-first list-queue))))
+    (if (list-queue-empty? list-queue)
+      (set-last! list-queue new-first))
+    (set-first! list-queue new-first)))
+
+(define (list-queue-add-back! list-queue elem)
+  (let ((new-last (list elem)))
+    (if (list-queue-empty? list-queue)
+      (set-first! list-queue new-last)
+      (set-cdr! (get-last list-queue) new-last))
+    (set-last! list-queue new-last)))
+
+(define (list-queue-remove-front! list-queue)
+  (if (list-queue-empty? list-queue)
+    (error "Empty list-queue"))
+  (let* ((old-first (get-first list-queue))
+         (elem (car old-first))
+         (new-first (cdr old-first)))
+    (if (null? new-first)
+      (set-last! list-queue '()))
+    (set-first! list-queue new-first)
+    elem))
+
+(define (list-queue-remove-back! list-queue)
+  (if (list-queue-empty? list-queue)
+    (error "Empty list-queue"))
+  (let* ((old-last (get-last list-queue))
+         (elem (car old-last))
+         (new-last (penult-pair (get-first list-queue))))
+    (if (null? new-last)
+      (set-first! list-queue '())
+      (set-cdr! new-last '()))
+    (set-last! list-queue new-last)
+    elem))
+
+(define (list-queue-remove-all! list-queue)
+   (let ((result (get-first list-queue)))
+      (set-first! list-queue '())
+      (set-last! list-queue '())
+      result))
+
+;; Return the next to last pair of lis, or nil if there is none
+
+(define (penult-pair lis)
+  (let lp ((lis lis))
+    (cond
+     ;((null? lis) (error "Empty list-queue"))
+      ((null? (cdr lis)) '())
+      ((null? (cddr lis)) lis)
+      (else (lp (cdr lis))))))
+
+;;; The whole list-queue
+
+
+;; Because append does not copy its back argument, we cannot use it
+(define (list-queue-append . list-queues)
+  (list-queue-concatenate list-queues))
+
+(define (list-queue-concatenate list-queues)
+  (let ((result (list-queue)))
+    (for-each
+      (lambda (list-queue)
+        (for-each (lambda (elem) (list-queue-add-back! result elem)) (get-first list-queue)))
+      list-queues)
+     result))
+
+(define list-queue-append!
+  (case-lambda
+    (() (list-queue))
+    ((queue) queue)
+    (queues
+      (for-each (lambda (queue) (list-queue-join! (car queues) queue))
+                (cdr queues))
+      (car queues))))
+
+; Forcibly join two queues, destroying the second
+(define (list-queue-join! queue1 queue2)
+  (set-cdr! (get-last queue1) (get-first queue2)))
+
+(define (list-queue-map proc list-queue)
+  (make-list-queue (map proc (get-first list-queue))))
+
+(define list-queue-unfold
+  (case-lambda
+    ((stop? mapper successor seed queue)
+     (list-queue-unfold* stop? mapper successor seed queue))
+    ((stop? mapper successor seed)
+     (list-queue-unfold* stop? mapper successor seed (list-queue)))))
+
+(define (list-queue-unfold* stop? mapper successor seed queue)
+  (let loop ((seed seed))
+    (if (not (stop? seed))
+      (list-queue-add-front! (loop (successor seed)) (mapper seed)))
+    queue))
+
+(define list-queue-unfold-right
+  (case-lambda
+    ((stop? mapper successor seed queue)
+     (list-queue-unfold-right* stop? mapper successor seed queue))
+    ((stop? mapper successor seed)
+     (list-queue-unfold-right* stop? mapper successor seed (list-queue)))))
+
+(define (list-queue-unfold-right* stop? mapper successor seed queue)
+  (let loop ((seed seed))
+    (if (not (stop? seed))
+      (list-queue-add-back! (loop (successor seed)) (mapper seed)))
+    queue))
+
+(define (list-queue-map! proc list-queue)
+  (srfi-117:map! proc (get-first list-queue)))
+
+(define (list-queue-for-each proc list-queue)
+  (for-each proc (get-first list-queue)))
+
+;;; Conversion
+
+(define (list-queue-list list-queue)
+  (get-first list-queue))
+
+(define (list-queue-first-last list-queue)
+  (values (get-first list-queue) (get-last list-queue)))
+
+(define list-queue-set-list!
+  (case-lambda
+    ((list-queue first)
+     (set-first! list-queue first)
+     (if (null? first)
+       (set-last! list-queue '())
+       (set-last! list-queue (last-pair first))))
+    ((list-queue first last)
+     (set-first! list-queue first)
+     (set-last! list-queue last))))
+
+) ;; END OF DEFINE-MODULE
+;;;; ======================================================================
+
+(provide "scheme/list-queue")

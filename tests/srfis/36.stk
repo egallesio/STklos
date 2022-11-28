@@ -1,0 +1,17 @@
+;;;;
+;;;; 36.stk
+;;;;
+
+;; This is very minimal
+(test "srfi-36.0"  #t (condition-type? &i/o-error))
+(test "srfi-36.1"  #t (condition-type? &i/o-port-error))
+(test "srfi-36.2"  #t (condition-type? &i/o-read-error))
+(test "srfi-36.3"  #t (condition-type? &i/o-write-error))
+(test "srfi-36.4"  #t (condition-type? &i/o-closed-error))
+(test "srfi-36.5"  #t (condition-type? &i/o-filename-error))
+(test "srfi-36.6"  #t (condition-type? &i/o-malformed-filename-error))
+(test "srfi-36.7"  #t (condition-type? &i/o-file-protection-error))
+(test "srfi-36.8"  #t (condition-type? &i/o-file-is-read-only-error))
+(test "srfi-36.9"  #t (condition-type? &i/o-file-already-exists-error))
+(test "srfi-36.10" #t (condition-type? &i/o-no-such-file-error))
+(test "srfi-36.11" #t (condition-type? &read-error))

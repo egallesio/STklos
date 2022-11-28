@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  4-Jun-2021 15:52 (eg)
+ * Last file update: 29-Jul-2022 14:51 (eg)
  */
 
 #include "stklos.h"
@@ -29,7 +29,9 @@
 #include "git-info.h"
 
 #ifdef STK_DEBUG
-#include <execinfo.h>
+  #ifdef HAVE_BACKTRACE
+     #include <execinfo.h>
+  #endif
 
 int STk_interactive_debug = 0;
 #endif
@@ -45,9 +47,10 @@ char *STk_strdup(const char *s)
 {
   /* Like standard strdup but with our allocator */
   char *res;
+  register size_t len = strlen(s);
 
-  res = STk_must_malloc_atomic(strlen(s) + 1);
-  strcpy(res, s);
+  res = STk_must_malloc_atomic(len + 1);
+  memcpy(res, s, len+1);
   return res;
 }
 
@@ -71,7 +74,7 @@ void STk_add_primitive_in_module(struct primitive_obj *o, SCM module)
 
 
 
-SCM STk_eval_C_string(char *str, SCM module)
+SCM STk_eval_C_string(const char *str, SCM module)
 {
   SCM ref, eval = STk_lookup(STk_intern("eval-from-string"),
                              module,
@@ -81,7 +84,7 @@ SCM STk_eval_C_string(char *str, SCM module)
 }
 
 
-SCM STk_read_from_C_string(char *str)
+SCM STk_read_from_C_string(const char *str)
 {
   return STk_read(STk_open_C_string(str), STk_read_case_sensitive);
 }
@@ -100,7 +103,7 @@ SCM STk_read_from_C_string(char *str)
  * Returns a string identifying the current version of the system. A
  * version is constituted of two numbers separated by a point: the version
  * and the release numbers. Note that |implementation-version| corresponds
- * to the ,(srfi 112) name of this function.
+ * to the {{link-srfi 112}} name of this function.
 doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))
@@ -128,7 +131,7 @@ DEFINE_PRIMITIVE("%stklos-git", stklos_git, subr0, (void))
  * (void)
  * (void arg1 ...)
  *
- * Returns the special ,(emph "void") object. If arguments are passed to |void|,
+ * Returns the special *_void_* object. If arguments are passed to |void|,
  * they are evalued and simply ignored.
 doc>
  */
@@ -149,7 +152,8 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
 {
   char buffer[50];     /* should be sufficient for a while */
 
-  sprintf(buffer, "%lx", (unsigned long) object); /* not very efficient ... */
+  snprintf(buffer, sizeof(buffer),
+           "%lx", (unsigned long) object); /* not very efficient ... */
   return STk_Cstr2number(buffer, 16L);
 }
 
@@ -209,8 +213,8 @@ DEFINE_PRIMITIVE("%initialize-getopt", init_getopt, subr3, (SCM argv, SCM s, SCM
   int i, len;
 
   STk_start_getopt_from_scheme();
-  optind = 1;    /* Initialize optind, since it has already be used
-                  * by ouserlves  before initializing the VM.
+  optind = 1;    /* Initialize optind, since it has already been used
+                  * by ourselves before initializing the VM.
                   */
 
   /*
@@ -311,33 +315,36 @@ static char URI_regexp[] =
 <doc EXT uri-parse
  * (uri-parse str)
  *
- * Parses the string |str| as a RFC-2396 URI and return a keyed list with the
+ * Parses the string |str| as an RFC-2396 URI and return a keyed list with the
  * following components
- * ,(itemize
- * (item [|scheme| : the scheme used as a string (defaults to |"file"|)])
- * (item [|user|: the user information (generally expressed as
- *      |login:password|)])
- * (item [|host| : the host as a string (defaults to "")])
- * (item [|port| : the port as an integer (0 if no port specified)])
- * (item [|path| : the path ])
- * (item [|query| : the qury part of the URI as a string (defaults to the
- * empty string)])
- * (item [|fragment| : the fragment of the URI as a string (defaults to the
- * empty string)])
- * )
+ *
+ * - |scheme| : the scheme used as a string (defaults to |"file"|)
+ * - |user|: the user information (generally expressed as |login:password|)
+ * - |host| : the host as a string (defaults to "")
+ * - |port| : the port as an integer (0 if no port specified)
+ * - |path| : the path
+ * - |query| : the qury part of the URI as a string (defaults to the
+ *    empty string)
+ * - |fragment| : the fragment of the URI as a string (defaults to the
+ *   empty string)
+ *
  * @lisp
- * (uri-parse "http://google.com")
- *     => (:scheme "http" :user "" :host "google.com" :port 80
+ * (uri-parse "http://google.com") 
+{*    => (:scheme "http" :user "" :host "google.com" :port 80 
  *         :path "/" :query "" :fragment "")
+ *
  * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
  *     => (:scheme "http" :user "" :host "stklos.net" :port 8080
  *         :path "/a/file" :query "x=1;y=2" :fragment "end")
+ *
  * (uri-parse "http://foo:secret@stklos.net:2000/a/file")
  *     => (:scheme "http" :user "foo:secret" :host "stklos.net"
  *         :port 2000  :path "/a/file" :query "" :fragment "")
+ * 
  * (uri-parse "/a/file")
  *    => (:scheme "file" :user "" :host "" :port 0 :path "/a/file"
  *        :query "" :fragment "")
+ * 
  * (uri-parse "")
  *    => (:scheme "file"  :user "" :host "" :port 0 :path ""
  *        :query "" :fragment "")
@@ -379,7 +386,7 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
     for (start = url; *url && *url != '/' && *url != '@'; url++) {
     }
     if (*url == '@') {
-      /* We have an user */
+      /* We have a user */
       user = STk_makestring(url-start, start);
       /* read the host now */
       for (start = ++url; *url && *url != '/' && *url != ':'; url++) {
@@ -456,7 +463,7 @@ Error:
  * (string->html str)
  *
  * This primitive is a convenience function; it returns a string where
- * the HTML special chars are properly translated. It can easily written
+ * the HTML special chars are properly translated. It can easily be written
  * in Scheme, but this version is fast.
  * @lisp
  * (string->html "Just a <test>")
@@ -552,7 +559,7 @@ DEFINE_PRIMITIVE("get-password", getpass, subr0, (void))
 
 #define BACKTRACE_SIZE 1024
 
-DEFINE_PRIMITIVE("%debug", set_debug, subr0, (void))
+DEFINE_PRIMITIVE("%%debug", set_debug, subr0, (void))
 {
   STk_interactive_debug = !STk_interactive_debug;
   STk_debug("Debug mode %d", STk_interactive_debug);
@@ -567,6 +574,7 @@ DEFINE_PRIMITIVE("%test", test, subr1, (SCM s))
 
 DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 {
+# ifdef HAVE_BACKTRACE
   void *buffer[BACKTRACE_SIZE];
   int n;
 
@@ -576,6 +584,9 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
   }
 
   backtrace_symbols_fd(buffer, n, 2);
+#else
+  STk_debug("backtrace is not available on this system. Sorry.");
+#endif
   return STk_void;
 }
 #endif

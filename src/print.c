@@ -1,7 +1,7 @@
 /*
  * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 29-Apr-2021 16:12 (eg)
+ * Last file update: 20-May-2022 18:56 (eg)
  *
  */
 #include <ctype.h>
@@ -33,7 +33,7 @@ static int pretty_quotes = 1;
 static void printlist(SCM exp, SCM port, int mode)
 {
   register SCM tmp;
-  char *s;
+  const char *s;
 
   if (pretty_quotes) {
     /* Special case for pretty printing of quoted expressions */
@@ -62,7 +62,7 @@ static void printlist(SCM exp, SCM port, int mode)
 
 static Inline void printsymbol(SCM symb, SCM port, int mode)
 {
-  char *s = SYMBOL_PNAME(symb);
+  const char *s = SYMBOL_PNAME(symb);
 
   if ((mode==WRT_MODE) &&
       ((BOXED_INFO(symb) & SYMBOL_NEEDS_BARS) ||
@@ -90,12 +90,12 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
    }
     STk_putc('|', port);
   } else
-    STk_puts(*s ? s: "||", port); /* print bars around the "null" symbol */
+    STk_puts(s, port);
 }
 
 static Inline void printkeyword(SCM key, SCM port, int mode)
 {
-  char *s = KEYWORD_PNAME(key);
+  const char *s = KEYWORD_PNAME(key);
 
   if (mode==WRT_MODE) {
     if ((BOXED_INFO(key) & SYMBOL_NEEDS_BARS) ||
@@ -157,7 +157,7 @@ static void printstring(SCM s, SCM port, int mode)
                       if (printable)
                         *buff++ = *p;
                       else {
-                        /* Non printable char. (It works only for char < 0xFF !!) */
+                        /* Non-printable char. (It works only for char < 0xFF !!) */
                         *buff++ = '\\';
                         *buff++ = 'x';
                         *buff++ = printhexa((unsigned char) *p / 16);
@@ -177,7 +177,7 @@ static void printstring(SCM s, SCM port, int mode)
 
 void STk_print(SCM exp, SCM port, int mode)
 {
-  char buffer[100]; /* for small results */
+  char buffer[512]; /* for small results */
 
   if (SCONSTP(exp)) {
     /* Expression is a small constant */
@@ -192,7 +192,7 @@ void STk_print(SCM exp, SCM port, int mode)
   }
 
   if (INTP(exp)) {
-    int len = sprintf(buffer, "%ld", INT_VAL(exp));
+    int len = snprintf(buffer, sizeof(buffer), "%ld", INT_VAL(exp));
     STk_nputs(port, buffer, len);
     return;
   }
@@ -227,7 +227,7 @@ void STk_print(SCM exp, SCM port, int mode)
       printlist(exp, port, mode);
       return;
     case tc_real:
-      STk_double2Cstr(buffer, REAL_VAL(exp));
+      STk_double2Cstr(buffer, sizeof(buffer), REAL_VAL(exp));
       STk_puts(buffer, port);
       return;
     case tc_symbol:
@@ -246,18 +246,19 @@ void STk_print(SCM exp, SCM port, int mode)
         STk_print_star(*BOX_VALUES(exp), port, mode);
       }
       else {
-        sprintf(buffer, "#[box (%d) %lx]", BOX_ARITY(exp), (unsigned long) exp);
+        snprintf(buffer, sizeof(buffer),
+                 "#[box (%d) %lx]", BOX_ARITY(exp), (unsigned long) exp);
         STk_puts(buffer, port);
       }
       return;
     case tc_pointer:
       if (CPOINTER_TYPE(exp) == STk_void) {
-        sprintf(buffer, "#[C-pointer %lx @ %lx]",
+        snprintf(buffer, sizeof(buffer), "#[C-pointer %lx @ %lx]",
                 (unsigned long) CPOINTER_VALUE(exp), (unsigned long) exp);
       } else {
         STk_puts("#[", port);
         STk_print(CPOINTER_TYPE(exp), port, mode);
-        sprintf(buffer, "-pointer %lx @ %lx]", (unsigned long) CPOINTER_VALUE(exp),
+        snprintf(buffer, sizeof(buffer), "-pointer %lx @ %lx]", (unsigned long) CPOINTER_VALUE(exp),
                 (unsigned long) exp);
       }
       STk_puts(buffer, port);
@@ -284,7 +285,7 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_putc(']', port);
       return;
     case tc_callback:
-      sprintf(buffer, "#[callback %lx]", (unsigned long) exp);
+      snprintf(buffer, sizeof(buffer), "#[callback %lx]", (unsigned long) exp);
       STk_puts(buffer, port);
       return;
 #endif
@@ -300,7 +301,8 @@ void STk_print(SCM exp, SCM port, int mode)
             p(exp, port, mode);
           else {
             /* No print function. Try to display something useful */
-            sprintf(buffer, "#[%s %lx]", XTYPE_NAME(xdescr), (unsigned long) exp);
+            snprintf(buffer, sizeof(buffer),
+                     "#[%s %lx]", XTYPE_NAME(xdescr), (unsigned long) exp);
             STk_puts(buffer, port);
           }
         }
@@ -351,7 +353,7 @@ static void printlist_star(SCM exp, SCM port, int mode, cycles *c)
   if (pretty_quotes) {
     /* Special case for pretty printing of quoted expressions */
     s = STk_quote2str(CAR(exp));
-    if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
+    if (s && !NULLP(CDR(exp)) && CONSP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
       STk_puts(s, port);
       print_cycle(CAR(CDR(exp)), port, mode, c);
       return;

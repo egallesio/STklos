@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  4-Jun-2021 17:12 (eg)
+ * Last file update: 18-Sep-2022 16:31 (eg)
  */
 
 
@@ -80,15 +80,12 @@ extern "C"
 #  define TRUE (!FALSE)
 #endif
 
-#ifdef _POSIX_PATH_MAX
-#  define MAX_PATH_LENGTH        _POSIX_PATH_MAX
+#ifdef PATH_MAX
+#  define MAX_PATH_LENGTH     PATH_MAX
 #else
-#  ifdef PATH_MAX
-#    define MAX_PATH_LENGTH     PATH_MAX
-#  else
-#    define MAX_PATH_LENGTH        4096
-#  endif
+#  define MAX_PATH_LENGTH        4096
 #endif
+
 
 #define MAX_TOKEN_SIZE          1024            /* max size of a token */
 
@@ -99,6 +96,9 @@ extern "C"
 #define AS_LONG(x)              ((unsigned long) (x))
 #define AS_SCM(x)               ((SCM) ((unsigned long) (x)))
 
+/* UNTAG removes the tag bits. It is useful in optimized fixnum
+   operations (see fixnum.c). --jpellegrini */
+#define UNTAG(x)                (((long) x) & (~ ((unsigned long) 3)))
 
 /*===========================================================================*\
  *
@@ -112,11 +112,11 @@ extern "C"
 #  define MUT_LOCK(lck)
 #  define MUT_UNLOCK(lck)
 #else
-#  define MUT_DECL(lck)    static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER;
+#  define MUT_DECL(lck)    static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER
 #  define MUT_FIELD(lck)   pthread_mutex_t lck
-#  define MUT_INIT(lck)    { pthread_mutex_init(&lck, NULL); }
-#  define MUT_LOCK(lck)    { pthread_mutex_lock(&lck); }
-#  define MUT_UNLOCK(lck)  { pthread_mutex_unlock(&lck); }
+#  define MUT_INIT(lck)    pthread_mutex_init(&lck, NULL)
+#  define MUT_LOCK(lck)    pthread_mutex_lock(&lck)
+#  define MUT_UNLOCK(lck)  pthread_mutex_unlock(&lck)
 #endif
 
 /*===========================================================================*\
@@ -129,7 +129,7 @@ extern "C"
    * functions of the GC used in the interpreter must be declared here since
    * the file <gc.h> is not included in the source file in order to simplify
    * header file management (i.e. only this header file is necessary to use
-   * the stklos library.
+   * the stklos library)).
    * Don't use the functions GC_* they can be changed. The only allocation
    * functions that must be used are functions of the form STk_*
    */
@@ -190,6 +190,7 @@ typedef enum {
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,      /* 30 */
   tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex,            /* 35 */
   tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,               /* 40 */
+  tc_syntax,                                                            /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -218,7 +219,7 @@ typedef struct {
    * on the compiler. If you change this definition, change DEFINE_PRIMITIVE
    * accordingly
    */
-  short type, cell_info;
+  int16_t type, cell_info;
 } stk_header;
 
 
@@ -229,23 +230,23 @@ typedef struct {
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
-#define NEWCELL(_var, _type)    {                                               \
+#define NEWCELL(_var, _type)    do{                                             \
         _var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));    \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                              \
         BOXED_INFO(_var) = 0;                                                   \
-        }
+        }while(0)
 
-#define NEWCELL_WITH_LEN(_var, _type, _len)     {       \
+#define NEWCELL_WITH_LEN(_var, _type, _len)     do{     \
         _var = (SCM) STk_must_malloc(_len);             \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
-        }
+        }while(0)
 
-#define NEWCELL_ATOMIC(_var, _type, _len)       {       \
+#define NEWCELL_ATOMIC(_var, _type, _len)       do{     \
         _var = (SCM) STk_must_malloc_atomic(_len);      \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
-        }
+        }while(0)
 
   /*
    * PRIMITIVES
@@ -352,18 +353,6 @@ int STk_init_box(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ----                      B Y T E V E C T O R . C
-  ----
-  ------------------------------------------------------------------------------
-*/
-SCM STk_bytevector2u8list(SCM obj);
-SCM STk_u8list2bytevector(SCM obj);
-int STk_init_bytevector(void);
-
-
-/*
-  ------------------------------------------------------------------------------
-  ----
   ----                            C H A R  . C
   ----
   ------------------------------------------------------------------------------
@@ -379,10 +368,6 @@ int STk_init_bytevector(void);
 #define CHARACTER_VAL(n)  ((AS_LONG(n) >> 3))
 #define CHARACTERP(n)     ((AS_LONG(n) & 7) == 6)
 
-
-/* Comparison of characters. No test on types */
-int STk_charcomp(SCM c1, SCM c2);
-int STk_charcompi(SCM c1, SCM c2);
 
 /* Simple  character conversion functions */
 uint32_t STk_to_upper(uint32_t c);
@@ -512,6 +497,8 @@ struct frame_obj {
 #define FRAME_LOCAL(p, i)       (FRAME_LOCALS(p)[i])
 #define FRAMEP(p)               (BOXED_TYPE_EQ((p), tc_frame))
 
+#define MODULE_CONST            (1 << 0)
+
 /* modules are defined in env.c but are private */
 #define MODULEP(p)              (BOXED_TYPE_EQ((p), tc_module))
 
@@ -591,12 +578,17 @@ int STk_init_ffi(void);
   ----
   ------------------------------------------------------------------------------
 */
+long STk_fixval(SCM v);
+long STk_fixnum_cmp(SCM a, SCM b);
+unsigned int STk_bit_count(unsigned long n);
 EXTERN_PRIMITIVE("fx+",        fxplus,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx-",        fxminus, subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx*",        fxtime,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fxquotient", fxdiv,   subr2, (SCM o1, SCM o2));
 int STk_init_fixnum(void);
 
+/* TAG_FIXNUM forces a fixnum tag on x. */
+#define TAG_FIXNUM(x)      ((UNTAG(x)) | 1)
 
 /*
   ------------------------------------------------------------------------------
@@ -607,7 +599,7 @@ int STk_init_fixnum(void);
 */
 struct keyword_obj {
   stk_header header;
-  char *pname;                  /* must be at the same offset than for symbols */
+  const char *pname;            /* must be at the same offset as for symbols */
 };
 
 #define KEYWORD_PNAME(p)        (((struct keyword_obj *) (p))->pname)
@@ -619,7 +611,7 @@ struct keyword_obj {
 EXTERN_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val));
 EXTERN_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt));
 
-SCM STk_makekey(char *tok);
+SCM STk_makekey(const char *token);
 int STk_init_keyword(void);
 
 /*
@@ -718,8 +710,8 @@ extern int STk_interactive_debug;
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
-SCM STk_eval_C_string(char *str, SCM module);
-SCM STk_read_from_C_string(char *str);
+SCM STk_eval_C_string(const char *str, SCM module);
+SCM STk_read_from_C_string(const char *str);
 
 int STk_init_misc(void);
 
@@ -815,6 +807,7 @@ SCM             STk_double2real(double d);
 double          STk_number2double(SCM n);
 long            STk_integer2int32(SCM n, int *overflow);
 unsigned long   STk_integer2uint32(SCM n, int *overflow);
+EXTERN_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base));
 
   /****
    **** Arithmetic
@@ -830,11 +823,16 @@ long STk_numlt2(SCM o1, SCM o2);
 long STk_numgt2(SCM o1, SCM o2);
 long STk_numle2(SCM o1, SCM o2);
 long STk_numge2(SCM o1, SCM o2);
-void STk_double2Cstr(char *buffer, double n);
-EXTERN_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base));
+void STk_double2Cstr(char *buffer, size_t buuflen, double n);
+
+
+  /****
+   **** Predicate
+   ****/
+int STk_real_isoddp(SCM n);   /* n MUST be a real */
+
 
 int    STk_init_number(void);
-
 
 #define NUMBERP(x)      (INTP(x) || BIGNUMP(x) || REALP(x) || RATIONALP(x) || \
                          COMPLEXP(x))
@@ -877,9 +875,9 @@ SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_valu
   ----
   ------------------------------------------------------------------------------
 */
-char *STk_expand_file_name(char *s);
+char *STk_expand_file_name(const char *s);
 SCM STk_do_glob(int argc, SCM *argv);
-SCM STk_resolve_link(char *path, int count);
+SCM STk_resolve_link(const char *path, int count);
 
 
 /*
@@ -892,7 +890,7 @@ SCM STk_resolve_link(char *path, int count);
   ------------------------------------------------------------------------------
 */
 
-  /* Code for port is splitted in several files:
+  /* Code for port is split in several files:
    *    - s contains the low level IO functions which mimic the C IO. All
    *      these functions take Scheme ports as parameter instead of FILE *
    *    - fport.c contains the specific code for port associated to files
@@ -919,17 +917,17 @@ struct port_obj {
   int   (*cgetc)     (void *stream);
   int   (*ceofp)     (void *stream);
   int   (*cclose)    (void *stream);
-  int   (*cputc)     (int c, void * stream);
-  int   (*cputs)     (char *s, void * stream);
-  int   (*cnputs)    (void *stream, char *str, int len);
+  int   (*cputc)     (int c, void *stream);
+  int   (*cputs)     (const char *s, void *stream);
+  int   (*cnputs)    (void *stream, const char *str, int len);
   int   (*cputstring)(void *stream, SCM str);
   int   (*cflush)    (void *stream);
   int   (*read_buff) (void *stream, void *buf, int count);
-  int   (*write_buff)(void *stream, void *buf, int count);
+  int   (*write_buff)(void *stream, const void *buf, int count);
   off_t (*seek)      (void *stream, off_t offset, int whence);
 };
 
-#define PORT_MAX_PRINTF 1024    /* max size for sprintf buffer */
+#define PORT_MAX_PRINTF 4096    /* max size for snprintf buffer */
 
 #define PORT_READ               (1<<0)
 #define PORT_WRITE              (1<<1)
@@ -1007,9 +1005,9 @@ int STk_ungetc(int c, SCM port);
 int STk_close(SCM port);
 int STk_putc(int c, SCM port);
 int STk_put_character(int c, SCM port);   /* c may be a wide char */
-int STk_puts(char *s, SCM port);
+int STk_puts(const char *s, SCM port);
 int STk_putstring(SCM s, SCM port);
-int STk_nputs(SCM port, char *s, int len);
+int STk_nputs(SCM port, const char *s, int len);
 off_t STk_seek(SCM port, off_t offset, int whence);
 off_t STk_tell(SCM port);
 void STk_rewind(SCM port);
@@ -1023,10 +1021,9 @@ int STk_write_buffer(SCM port, void *buff, int count);
 /****
  ****           fport.h primitives
  ****/
-SCM STk_rewind_file_port(SCM port);
 SCM STk_open_file(char *filename, char *mode);
 SCM STk_add_port_idle(SCM port, SCM idle_func);
-SCM STk_fd2scheme_port(int fd, char *mode, char *identification);
+SCM STk_fd2scheme_port(int fd, const char *mode, char *identification);
 void STk_set_line_buffered_mode(SCM port);
 int STk_init_fport(void);
 SCM STk_current_input_port(void);
@@ -1040,7 +1037,7 @@ void STk_close_all_ports(void);
  ****/
 EXTERN_PRIMITIVE("open-output-string", open_output_string, subr0, (void));
 SCM STk_get_output_string(SCM port);
-SCM STk_open_C_string(char *str);
+SCM STk_open_C_string(const char *str);
 int STk_init_sport(void);
 
 /****
@@ -1068,10 +1065,9 @@ int STk_init_port(void);
  ****           Port global variables
  ****/
 
-extern char *STk_current_filename;               /* Name of the file we read */
-
-extern SCM STk_stdin, STk_stdout, STk_stderr;             /* unredirected ports   */
-extern int STk_interactive;                     /* We are in intearctive mode */
+extern char *STk_current_filename;              /* Name of the file we read   */
+extern SCM STk_stdin, STk_stdout, STk_stderr;   /* unredirected ports         */
+extern int STk_interactive;                     /* We are in interactive mode */
 
 /*
   ------------------------------------------------------------------------------
@@ -1116,12 +1112,12 @@ int STk_init_promise(void);
   ------------------------------------------------------------------------------
 */
 
-typedef short STk_instr;
+typedef int16_t STk_instr;
 
 struct closure_obj {
   stk_header header;
-  short arity;
-  unsigned short code_size;
+  int16_t arity;
+  uint16_t code_size;
   SCM formals;
   SCM env;
   SCM plist;
@@ -1227,8 +1223,8 @@ struct string_obj {
 
 #define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
-SCM STk_makestring(int len, char *init);
-SCM STk_Cstring2string(char *str);           /* Embed a C string in Scheme world  */
+SCM STk_makestring(int len, const char *init);
+SCM STk_Cstring2string(const char *str);           /* Embed a C string in Scheme world  */
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
@@ -1254,8 +1250,8 @@ int STk_init_struct(void);
   ------------------------------------------------------------------------------
 */
 struct symbol_obj {
-  stk_header header;    /* must be at the same offset than for keywords */
-  char *pname;
+  stk_header header;    /* must be at the same offset as for keywords */
+  const char *pname;
 };
 
 #define SYMBOL_PNAME(p) (((struct symbol_obj *) (p))->pname)
@@ -1266,11 +1262,19 @@ struct symbol_obj {
 
 EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
-int STk_symbol_flags(char *s);
+int STk_symbol_flags(const char *s);
 SCM STk_intern(char *name);
-SCM STk_make_uninterned_symbol(char *name);
+SCM STk_make_uninterned_symbol(const char *name);
 int STk_init_symbol(void);
 
+  /*
+  ------------------------------------------------------------------------------
+  ----
+  ----                           S Y N T A X  . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+int STk_init_syntax(void);
 
 /*
   ------------------------------------------------------------------------------
@@ -1321,9 +1325,9 @@ extern int STk_use_utf8;
 
 char *STk_utf8_grab_char(char *str, uint32_t *c);/* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
-int STk_utf8_strlen(char *s, int max);
+int STk_utf8_strlen(const char *s, int max);
 int STk_utf8_read_char(SCM port);
-int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
+int STk_utf8_sequence_length(const char *str); /* # of bytes of sequence starting at str */
 int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
 int STk_utf8_verify_sequence(char *s, int len); /* s constitutes a valid UTF8? */
 char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
@@ -1357,10 +1361,12 @@ struct uvector_obj {
 #define UVECT_U64       7
 #define UVECT_F32       8
 #define UVECT_F64       9
+#define UVECT_C64       10
+#define UVECT_C128      11
 
 /*
  * 64 bits values are always represented with bignums even on 64 bits machines
- * Here are the intersting maxima for 64 bits.
+ * Here are the interesting maxima for 64 bits.
  */
 #define S64_MIN "-9223372036854775808"
 #define S64_MAX  "9223372036854775807"
@@ -1379,9 +1385,11 @@ extern int STk_uvectors_allowed;
 int STk_uniform_vector_tag(char *s);
 int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
+SCM STk_uvector_get(SCM v, long i);
+void STk_uvector_put(SCM v, long i, SCM value);
 int STk_init_uniform_vector(void);
 
-  SCM STk_make_C_bytevector(int len);
+SCM STk_make_C_bytevector(int len);
 SCM STk_make_bytevector_from_C_string(char *str, long len);
 
 
@@ -1423,7 +1431,6 @@ int STk_init_vector(void);
 */
 #define DEFAULT_STACK_SIZE 100000
 
-void STk_execute_current_handler(SCM kind, SCM location, SCM message);
 void STk_raise_exception(SCM cond);
 SCM STk_C_apply(SCM func, int nargs, ...);
 SCM STk_C_apply_list(SCM func, SCM l);

@@ -1,7 +1,7 @@
 ;;;;
-;;;; regexp.stk				-- STklos Regular Expressions
+;;;; regexp.stk                         -- STklos Regular Expressions
 ;;;;
-;;;; Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  9-Nov-1994 13:24 (eg)
-;;;; Last file update: 27-Jul-2011 22:53 (eg)
+;;;; Last file update: 12-May-2022 15:46 (eg)
 ;;;;
+
+
+(export regexp-replace regexp-replace-all)
 
 
 
@@ -36,26 +39,26 @@
  * |pattern| is replaced by the |substitution| string. If there is no
  * match, |regexp-replace| returns |string| unmodified. Note that the
  * given |pattern| could be here either a string or a regular expression.
- * ,(linebreak)
- * If |pattern| contains |\\n| where ,(bold "n") is a digit between 1 and 9,
+ *
+ * If |pattern| contains |\n| where *n* is a digit between 1 and 9,
  * then it is replaced in the substitution with the portion of string that
- * matched the ,(bold "n")-th parenthesized subexpression of |pattern|. If
- * ,(bold "n") is equal to 0, then it is replaced in |substitution|
+ * matched the *n*-th parenthesized subexpression of |pattern|. If
+ * *n* is equal to 0, then it is replaced in |substitution|
  * with the portion of |string| that matched |pattern|.
- * ,(linebreak)
+ *
  * |Regexp-replace| replaces the first occurrence of |pattern| in |string|.
- * To replace ,(bold "all") the occurrences of |pattern|, use |regexp-replace-all|.
+ * To replace _all_ the occurrences of |pattern|, use |regexp-replace-all|.
  *
  * @lisp
  * (regexp-replace "a*b" "aaabbcccc" "X")
  *                    => "Xbcccc"
  * (regexp-replace (string->regexp "a*b") "aaabbcccc" "X")
  *                    => "Xbcccc"
- * (regexp-replace "(a*)b" "aaabbcccc" "X\\\\1Y")
+ * (regexp-replace "(a*)b" "aaabbcccc" "X\\1Y")
  *                    => "XaaaYbcccc"
- * (regexp-replace "f(.*)r" "foobar" "\\\\1 \\\\1")
+ * (regexp-replace "f(.*)r" "foobar" "\\1 \\1")
  *                    => "ooba ooba"
- * (regexp-replace "f(.*)r" "foobar" "\\\\0 \\\\0")
+ * (regexp-replace "f(.*)r" "foobar" "\\0 \\0")
  *                    => "foobar foobar"
  *
  * (regexp-replace "a*b" "aaabbcccc" "X")
@@ -66,8 +69,8 @@
 doc>
 |#
 
-(define regexp-replace		#f)
-(define regexp-replace-all	#f)
+(define regexp-replace          #f)
+(define regexp-replace-all      #f)
 
 (let ()
 
@@ -75,63 +78,63 @@ doc>
   ;; Simple replacement function
   (define (replace-string string ind1 ind2 new)
     (string-append (substring string 0 ind1)
-		   new
-		   (substring string ind2 (string-length string))))
+                   new
+                   (substring string ind2 (string-length string))))
 
   ;; Utility function
   ;; Given a string  and a set of substitutions, return the substituted string
   (define (replace-submodels string subst match)
     (if (= (length match) 1)
-	;; There is no sub-model
-	subst
-	;; There are at least one sub-model to replace
-	(let Loop ((subst subst))
-	  (let ((pos (regexp-match-positions "\\\\[0-9]" subst)))
-	    (if pos
-		;; At least one \x in the substitution string
-		(let* ((index (+ (caar pos) 1))
-		       (val   (string->number (substring subst index (+ index 1)))))
-		  (if (>= val (length match))
-		      (error 'regexp-replace "cannot match \\~A in model" val)
-		      ;; Build a new subst with the current \x remplaced by
-		      ;; its value. Iterate for further \x
-		      (Loop (replace-string subst
-					    (caar pos)
-					    (cadar pos)
-					    (apply substring string
-						   (list-ref match val))))))
-		;; No \x in substitution string
-		subst)))))
+        ;; There is no sub-model
+        subst
+        ;; There are at least one sub-model to replace
+        (let Loop ((subst subst))
+          (let ((pos (regexp-match-positions "\\\\[0-9]" subst)))
+            (if pos
+                ;; At least one \x in the substitution string
+                (let* ((index (+ (caar pos) 1))
+                       (val   (string->number (substring subst index (+ index 1)))))
+                  (if (>= val (length match))
+                      (error 'regexp-replace "cannot match \\~A in model" val)
+                      ;; Build a new subst with the current \x remplaced by
+                      ;; its value. Iterate for further \x
+                      (Loop (replace-string subst
+                                            (caar pos)
+                                            (cadar pos)
+                                            (apply substring string
+                                                   (list-ref match val))))))
+                ;; No \x in substitution string
+                subst)))))
 
 
   ;; If there is a match, call replace-submodels; otherwise return
   ;; string unmodified
   (set! regexp-replace
-	(lambda (pat str subst)
-	  (let ((match (regexp-match-positions pat str)))
-	    (if match
-		;; There was a match
-		(replace-string str
-				(caar match)
-				(cadar match)
-				(replace-submodels str subst match))
-		;; No match, return the original string
-		str))))
+        (lambda (pat str subst)
+          (let ((match (regexp-match-positions pat str)))
+            (if match
+                ;; There was a match
+                (replace-string str
+                                (caar match)
+                                (cadar match)
+                                (replace-submodels str subst match))
+                ;; No match, return the original string
+                str))))
 
 
   (set! regexp-replace-all
-	(lambda (pat str subst)
-	  (letrec ((regexp-replace-all-r
-		    (lambda (regexp str subst)
-		      (let ((match (regexp-match-positions regexp str)))
-			(if match
-			    (string-append (substring str 0 (caar match))
-					   (replace-submodels str subst match)
-					   (regexp-replace-all-r
-					            regexp
-						    (substring str
-							       (cadar match)
-							       (string-length str))
-						    subst))
-			    str)))))
-	    (regexp-replace-all-r pat str subst)))))
+        (lambda (pat str subst)
+          (letrec ((regexp-replace-all-r
+                    (lambda (regexp str subst)
+                      (let ((match (regexp-match-positions regexp str)))
+                        (if match
+                            (string-append (substring str 0 (caar match))
+                                           (replace-submodels str subst match)
+                                           (regexp-replace-all-r
+                                                    regexp
+                                                    (substring str
+                                                               (cadar match)
+                                                               (string-length str))
+                                                    subst))
+                            str)))))
+            (regexp-replace-all-r pat str subst)))))

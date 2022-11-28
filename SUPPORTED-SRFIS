@@ -22,13 +22,14 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-4: Homogeneous numeric vector datatypes
     - SRFI-5: A compatible let form with signatures and rest arguments
     - SRFI-6: Basic String Ports
-    - SRFI-7: Feature-based program configuration language 
+    - SRFI-7: Feature-based program configuration language
     - SRFI-8: Receive: Binding to multiple values
     - SRFI-9: Defining Record Types
     - SRFI-10: Sharp Comma External Form
     - SRFI-11: Syntax for receiving multiple values
     - SRFI-13: String Library
     - SRFI-14: Character-Set Library
+    - SRFI-15: Syntax for dynamic scoping (withdrawn)
     - SRFI-16: Syntax for procedures of variable arity
     - SRFI-17: Generalized set!
     - SRFI-18: Multithreading support
@@ -66,30 +67,39 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-88: Keyword Objects
     - SRFI-89: Optional Positional and Named Parameters
     - SRFI-94: Type-Restricted Numerical Functions
+    - SRFI-95: Sorting and Merging
     - SRFI-96: SLIB Prerequisites
     - SRFI-98: Interface to access environment variables
     - SRFI-100: define-lambda-object
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
     - SRFI-113: Sets and Bags
+    - SRFI-116: Immutable List Library
     - SRFI-117: Queues based on lists
-    - SRFI-118: Simple adjustable-size strings 
+    - SRFI-118: Simple adjustable-size strings
+    - SRFI-125: Intermediate hash tables
     - SRFI-127: Lazy Sequences
     - SRFI-128: Comparators (reduced)
     - SRFI-129: Titlecase procedures
     - SRFI-130: Cursor-based string library
+    - SRFI-132: Sort Libraries
     - SRFI-133: Vector Library (R7RS-compatible)
     - SRFI-134: Immutable Deques
     - SRFI-135: Immutable Texts
     - SRFI-137: Minimal Unique Types
+    - SRFI-138: Compiling Scheme programs to executables
     - SRFI-141: Integer Division
     - SRFI-143: Fixnums
     - SRFI-144: Flonums
     - SRFI-145: Assumptions
     - SRFI-151: Bitwise Operations
+    - SRFI-152: String Library (reduced)
+    - SRFI-154: First-class dynamic extents
     - SRFI-156: Syntactic combiners for binary predicates
     - SRFI-158: Generators and Accumulators
+    - SRFI-160: Homogeneous numeric vector libraries
     - SRFI-161: Unifiable Boxes
+    - SRFI-162: Comparators sublibrary
     - SRFI-169: Underscores in numbers
     - SRFI-170: POSIX API
     - SRFI-171: Transducers
@@ -107,7 +117,16 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-196: Range Objects
     - SRFI-207: String-notated bytevectors
     - SRFI-208: NaN procedures
+    - SRFI-214: Flexvectors
+    - SRFI-215: Central Log Exchange
     - SRFI-216: SICP Prerequisites (Portable)
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda
+    - SRFI-221: Generator/accumulator sub-library
     - SRFI-222: Compound objects
+    - SRFI-223: Generalized binary search procedures
+    - SRFI-224: Integer Mappings
+    - SRFI-229: Tagged Procedures
+    - SRFI-230: Atomic Operations
+    - SRFI-233: INI files
+    - SRFI-236: Evaluating expressions in an unspecified order

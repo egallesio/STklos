@@ -1,0 +1,141 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update:  4-Mar-2022 18:57 (eg)
+
+{{chapter "Exceptions and Conditions"}}
+
+
+=== Exceptions
+(((exception)))
+The following text is extracted from {{link-srfi 34}}, from which
+{{stklos}} exceptions are derived. Note that exceptions are now part of {{rseven}}.
+
+Exception handlers are one-argument procedures that determine the action the
+program takes when an exceptional situation is signalled. The system
+implicitly maintains a current exception handler.
+
+The program raises an exception by invoking the current exception handler,
+passing to it an object encapsulating information about the exception. Any
+procedure accepting one argument may serve as an exception handler and any
+object may be used to represent an exception.
+
+The system maintains the current exception handler as part of the dynamic
+environment of the program, akin to the current input or output port, or the
+context for dynamic-wind. The dynamic environment can be thought of as that
+part of a continuation that does not specify the destination of any returned
+values. It includes the current input and output ports, the dynamic-wind
+context, and this SRFI's current exception handler.
+
+{{insertdoc 'with-handler}}
+{{insertdoc 'with-exception-handler}}
+{{insertdoc 'raise}}
+{{insertdoc 'raise-continuable}}
+{{insertdoc 'guard}}
+{{insertdoc 'current-exception-handler}}
+
+
+=== Conditions
+((("condition")))
+The following text is extracted from {{link-srfi 35}}, from which
+{{stklos}} conditions are derived.
+
+Conditions are values that communicate information about exceptional
+situations between parts of a program. Code that detects an exception may be
+in a different part of the program than the code that handles
+it. In fact, the former may have been written independently from the
+latter. Consequently, to facilitate effective handling of exceptions,
+conditions must communicate as much information as possible as
+accurately as possible, and still allow effective handling by code
+that did not precisely anticipate the nature of the exception that
+occurred.
+
+Conditions available in {{stklos}} are derived from *SRFI-35* and in this SRFI
+two mechanisms to enable this kind of communication are provided:
+
+
+
+* subtyping among condition types allows handling code to
+determine the general nature of an exception even though it does
+not anticipate its exact nature,
+* compound conditions allow an exceptional situation to be
+described in multiple ways.
+
+Conditions are structures with named slots. Each condition belongs to
+one condition type (a condition type can be made from several
+condition types). Each condition type specifies a set of
+slot names. A condition belonging to a condition type includes a
+value for each of the type's slot names. These values can be
+extracted from the condition by using the appropriate slot name.
+
+((("&condition")))
+There is a tree of condition types with the distinguished `&condition`
+as its root. All other condition types have a parent condition type.
+
+Conditions are implemented with {{stklos}} structures (with a special bit
+indicating that there are conditions). Of course, condition types are
+implemented with structure types. As a consequence, functions on
+structures or structures types are available on conditions or
+conditions types (the contrary is not true). For instance, if C is a
+condition, the expression
+```scheme
+(struct->list C)
+```
+is a simple way to see it's slots and their associated value.
+
+{{insertdoc 'make-condition-type}}
+{{insertdoc 'condition-type?}}
+{{insertdoc 'make-compound-condition-type}}
+{{insertdoc 'make-condition}}
+{{insertdoc 'condition?}}
+{{insertdoc 'condition-has-type?}}
+{{insertdoc 'condition-ref}}
+{{insertdoc 'condition-set!}}
+{{insertdoc 'make-compound-condition}}
+{{insertdoc 'extract-condition}}
+
+=== Predefined Conditions
+((("SRFI-35")))
+((("SRFI-36")))
+{{stklos}} implements all the conditions types which are defined in
+{{link-srfi 35}} and {{link-srfi 36}}.
+However, the access functions which are (implicitely) defined
+in those SRFIs are only available if the file `"conditions"` is
+required. This can be done with the call:
+
+```scheme
+(require "conditions")
+```
+
+Another way to have access to the hierarchy of the {{link-srfi 35}}
+and {{link-srfi 36}} condition:
+
+```scheme
+(require-extension conditions)
+```
+
+The following hierarchy of conditions is predefined:
+
+```
+&condition
+   &message (has "message" slot)
+   &serious
+   &error
+      &error-message (has *message*, "location" and "backtrace" slots)
+      &i/o-error
+         &i/o-port-error (has a "port" slot)
+            &i/o-read-error
+            &i/o-write-error
+            &i/o-closed-error
+        &i/o-filename-error (has a "filename" slots)
+            &i/o-malformed-filename-error
+            &i/o-file-protection-error
+                &i/o-file-is-read-only-error
+            &i/o-file-already-exists-error
+            &i/o-no-such-file-error
+     &read-error (has the "line", "column", "position" and "span" slots)
+```
+

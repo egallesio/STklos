@@ -2,7 +2,7 @@
  *
  * c h a r . c                          -- Characters management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,15 +23,11 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update:  2-Jun-2020 10:47 (eg)
+ * Last file update: 20-May-2022 20:07 (eg)
  */
 
 #include <ctype.h>
 #include "stklos.h"
-
-
-SCM STk_char_foldcase(SCM c);
-
 
 struct charelem {
   char *name;
@@ -181,10 +177,6 @@ static int charcompi(SCM c1, SCM c2)
            tolower((unsigned char) CHARACTER_VAL(c2)));
 }
 
-/* Comparison of characters. No test on types */
-int STk_charcomp(SCM c1, SCM c2)  { return charcomp(c1,  c2);  }
-int STk_charcompi(SCM c1, SCM c2) { return charcompi(c1,  c2); }
-
 
 int STk_string2char(char *s)
 /* converts a char name to a char */
@@ -192,7 +184,7 @@ int STk_string2char(char *s)
   register struct charelem *p;
   uint32_t val;
 
-  /* Try to see if it is a multi-byte character */
+  /* Try to see if it is a multibyte character */
   if (* (STk_utf8_grab_char(s, &val)) == '\0') return val;
 
   if (*s == 'x') {
@@ -254,12 +246,12 @@ doc>
  *
  * These procedures impose a total ordering on the set of characters.
  * It is guaranteed that under this ordering:
- * ,(itemize
- * (item [The upper case characters are in order.])
- * (item [The lower case characters are in order.])
- * (item [The digits are in order.])
- * (item [Either all the digits precede all the upper case letters, or vice versa.])
- * (item [Either all the digits precede all the lower case letters, or vice versa.])
+ *
+ * - The upper case characters are in order.
+ * - The lower case characters are in order.
+ * - The digits are in order.
+ * - Either all the digits precede all the upper case letters, or vice versa.
+ * - Either all the digits precede all the lower case letters, or vice versa.
  * )
 doc>
  */
@@ -388,7 +380,7 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c)) {
  * (digit-value #\3)        => 3
  * (digit-value #\x0664)    => 4
  * (digit-value #\x0AE6)    => 0
- * (digit-value #\x0EA6)    #f
+ * (digit-value #\x0EA6)    => #f
  * @end lisp
 doc>
  */
@@ -422,7 +414,7 @@ DEFINE_PRIMITIVE("digit-value", digit_value, subr1, (SCM c))
  * ordering and some subset of the integers under the |<=|
  * ordering. That is, if
  * @lisp
- *    (char<=? a b) => #t  ,(bold "and")  (<= x y) => #t
+ *    (char<=? a b) => #t  and  (<= x y) => #t
  * @end lisp
  * and x and y are in the domain of |integer->char|, then
  * @lisp
@@ -433,8 +425,8 @@ DEFINE_PRIMITIVE("digit-value", digit_value, subr1, (SCM c))
  *            (integer->char y))     =>  #t
  * @end lisp
  * |integer->char| accepts an exact number between 0 and #xD7FFF or between
- * #xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise it accepts a
- * number between0 and #xFF.
+ * #xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise, it accepts a
+ * number between 0 and #xFF.
 doc>
  */
 DEFINE_PRIMITIVE("char->integer", char2integer, subr1, (SCM c))
@@ -517,7 +509,7 @@ doc>
 uint32_t STk_to_fold(uint32_t c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, fold_table, fold_table_length);
-    return (res <=0) ? STk_to_lower(c) : (uint32_t) res; 
+    return (res <=0) ? STk_to_lower(c) : (uint32_t) res;
   } else
     return tolower(c);
 }

@@ -2,7 +2,7 @@
 ;;;; readline.stk       -- Access to the GNU-readline lib
 ;;;;                       (or libedit if absent :-<)
 ;;;;
-;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,14 +22,17 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update: 17-Jun-2021 18:57 (eg)
+;;;; Last file update:  8-Jun-2022 09:07 (eg)
 ;;;;
 
 (define-module READLINE
+  (import SCHEME)
   (export try-initialize-readline
           readline add-history read-history
           write-history read-with-history
-          rl-event-hook rl-input-timeout)
+          rl-event-hook rl-input-timeout
+          rl-completer-function)
+
 
 ;;;; In module READLINE
 (define readline             #f)
@@ -102,13 +105,80 @@
      #t))
 
 
+;; ======================================================================
+;;
+;; Completion support (heavily inspired from PR#373)
+;;
+;; ======================================================================
+
+;; A default completer function, which completes on the symbols usable
+;; at the global level of the current REPL module.
+(define (default-complete-function str)
+  (if (zero? (string-length str))
+      '()
+      ;; We just compare the prefix.
+      (let* ((symbols (module-symbols* (current-module)))
+             (size (string-length str))
+             (match (lambda (s)
+                      (and (>= (string-length s) size)
+                           (string=? str (substring s 0 size))))))
+        (filter match (map symbol->string symbols)))))
+
+;; The parameter rl-completer-function contains the function used
+;; to complete strings It defaults to default-complete-function
+(define rl-completer-function (make-parameter default-complete-function))
+
+#|
+  As an example, here is another compter function. This one tries to find
+  if str is a substring of a symbol defined at global level
+
+    (define (substring-complete-function str)
+      (if (zero? (string-length str))
+          '()
+          (let ((symbols (module-symbols* (current-module)))
+                (match (lambda (s) (string-find? str s))))
+            (filter match (map symbol->string symbols)))))
+|#
+
+
+;; readline-completion-generator is a generator of string completions.
+;; It takes as argument a string, 'str' and a state indicator, 'state'.
+;;
+;; - Completions will be searched for 'str'.
+;; - When state is #f a fresh list of completions is searched, and the first
+;; item is returned.
+;; - When state is #t the next of the current list is returned.
+;;
+;; This is written this way to match the expected behavior of the readline
+;; function rl_completion_matches.
+(define readline-completion-generator
+  (let ((ans '()))
+    (lambda (str state)
+      (when (not state)
+        (set! ans ((rl-completer-function) str)))
+      (if (null? ans)
+          ans
+          (let ((s (car ans)))
+            (set! ans (cdr ans))
+            s)))))
+
+
+;; ======================================================================
+;;
+;; Initialization
+;;
+;; ======================================================================
+(%compile-time-define %init-readline-completion-function)
+
 (define (try-initialize-readline)
-  (let ((suffix (%shared-library-suffix)))
-    ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
-    (or (try-initialize (string-append "libreadline." suffix))
-        (try-initialize (string-append "libedit."  suffix)))))
+  ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
+  (let* ((suffix (%shared-library-suffix))
+         (res (or (try-initialize (string-append "libreadline." suffix))
+                  (try-initialize (string-append "libedit."  suffix)))))
+    (when (and res (try-load (string-append "readline-complete." suffix)))
+      ;; We have found a readline library. Try to load completion support
+      (%init-readline-completion-function readline-completion-generator))
+    res))
 
-;; End of module READLINE
-)
+) ;; End of module READLINE
 
-(provide "readline")

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; text.stk   -- GTK+ Text Widget Demo
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Oct-2000 17:20 (eg)
-;;;; Last file update:  1-Jul-2021 10:56 (eg)
+;;;; Last file update: 31-Jan-2022 20:00 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -45,7 +45,7 @@ Aliquam erat volutpat.  Nunc eleifend leo vitae magna.  In id erat non orci comm
                      #:height 600 #:border-width 10 #:expand #t #:fill #t
                      #:homogeneous #f #:message *text-msg*))
          (txt  (make <text> #:parent win #:value *text-value*))
-         (hbox (make <box> #:orientation 'horizontal))
+         (hbox (make <hbox>))
          (wrap (make <check-button> #:text "Wrap Text" #:parent hbox #:value #t
                      #:command (lambda (w e) (set! (text-wrap txt) (not (value w))))))
          (lab  (make <label> #:text "    <b>Justify:</b> " #:parent hbox))

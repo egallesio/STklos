@@ -1,0 +1,235 @@
+;;;;
+;;;;
+;;;; test-macros.stk         -- Test on macros (non hygienic and hygienic)
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 27-Jul-2021 13:24 (jpellegrini)
+;;;; Last file update: 17-Jun-2022 19:58 (eg)
+;;;;
+
+;;;
+;;; The tests for non hygienic macros are an adaptation of the tests from
+;;; @jpellegrini PR#239
+;;;
+
+(require "test")
+
+(test-section "Macros")
+
+(test-subsection "Non-hygienic macros")
+
+(define-module test-lex-macros)   ; used for testing modules
+(define-module test-lex-macros-2) ; used for testing modules
+
+
+;;;
+;;; global define-macro
+;;;
+(define-macro test-syntax-1 (lambda form -1))
+
+(test "lex-scope macros 1"
+      #t
+      (%syntax? test-syntax-1))
+
+(test "lex-scope macros 2"
+      -1
+      (test-syntax-1))
+
+(test "lex-scope macros 3"
+      -1
+      (macro-expand '(test-syntax-1 a b c)))
+
+(define-macro test-1 (lambda (x) `(- ,x)))
+
+(test "lex-scope macros 4"
+       10
+       (test-1 -10))
+
+
+;; Define a macro in one module; it should not be visible in the other.
+(select-module test-lex-macros-2)
+(define-macro test-syntax-2 (lambda form -1))
+(select-module test-lex-macros)
+
+(test/error "lex-scope macros 5" (test-syntax-2))
+
+
+;; Define a variable in one module, and a global macro in
+;; a different module. The variable binding in the previous module
+;; should not be affected
+(define test-syntax-3 "a string")
+
+(select-module test-lex-macros-2)
+(define-macro test-syntax-3 (lambda form -2))
+(select-module test-lex-macros)
+
+(test "lex-scope macros 6"
+      "a string"
+      test-syntax-3)
+
+;;;
+;;; local %let-syntax
+;;;
+
+;;  %let-syntax should not mess with lexical levels
+(test "lex-scope macros 7"
+      -1
+      (let ((a -1))
+        (%let-syntax ((f (lambda (x) 1))
+                      (g -2))       ; %let-syntax doesn't care if "-2"
+                                    ; is used as transformer
+           a)))
+
+;; %let-syntax with empty environment should not mess with lexical levels
+(test "lex-scope macros 8"
+      -1
+      (let ((a -1))
+        (%let-syntax ()
+           a)))
+
+;; basic %let-syntax
+(test "lex-scope macros 9"
+      -2
+      (let ((a -1))
+        (%let-syntax ((f (lambda form -2)))
+          (f))))
+
+;; %let-syntax
+(test "lex-scope macros 10"
+      -2
+      (%let-syntax ((g (lambda form -2)))
+        (let ((a -1))
+          (%let-syntax ((f (lambda form '(g))))
+            (f)))))
+
+(test "lex-scope macros 11"
+      -2
+      (let ((g (lambda () -1)))
+        (%let-syntax ((g (lambda form -2)))
+          (g))))
+
+(test "lex-scope macros 12"
+      -1
+      (%let-syntax ((g (lambda form -2)))
+        (let ((g (lambda () -1)))
+          (g))))
+
+(test "lex-scope macros 13"
+      42
+      (%let-syntax ((f (lambda form 42)))
+        (let ((g (lambda () -1)))
+          (let ((h -2))
+            (let ((i -3))
+              (f))))))
+
+(%let-syntax ((f (lambda form 42)))
+  (test "lex-scope macros 14"
+        42
+        (let ((g (lambda () -1)))
+          (let ((h -2))
+            (let ((i -3))
+              (f))))))
+
+(test/error "lex-scope macros 15"
+            (%let-syntax ((g (lambda form -2)))
+              g))
+
+(test "lex-scope macros 16"
+      -1
+      (%let-syntax ((g (lambda form -2)))
+        (%let-syntax ((g (lambda form -1)))
+          (g))))
+
+(test "lex-scope macros 17"
+      -2
+      (%let-syntax ((g (lambda form -2)))
+        (let ((f (lambda () (g))))
+          (%let-syntax ((g (lambda form -1)))
+            (f)))))
+
+(test "lex-scope macros 18"
+      -1
+      (%let-syntax ((g (lambda form -2)))
+        (%let-syntax ((g (lambda form -1)))
+          (let ((f (lambda () (g))))
+            (f)))))
+
+(test "lex-scope macros 19"
+      -1
+      (%let-syntax ((g (lambda form -1)))
+        (begin
+          (g))))
+
+
+;; %let-syntax is NOT hygienic; we capture a variable in
+;; this example.
+(define (test-syntax-function x)
+  (let ((one 1))
+    (%let-syntax ((plus-one (lambda (k) `(+ one ,k))))
+      (plus-one x))))
+
+(test "lex-scope macros 20"
+      -2
+      (test-syntax-function -3))
+
+
+;;;
+(define-macro test-syntax-4 (lambda form -1))
+
+(test "lex-scope macros 21"
+      -1
+      (let ((a -3))
+        (%let-syntax ((g (lambda form -2)))
+          (let ((f (lambda () (test-syntax-4))))
+            (f)))))
+
+(select-module STklos)
+
+
+;;; Hygienic Macros  subsection 
+
+(test-subsection "hygienic macros")
+
+(define-syntax swap!
+  (syntax-rules ()
+    ((_ a b)
+     (let ((temp a))
+       (set! a b)
+       (set! b temp)))))
+
+(let ((a 1)
+      (b 2)
+      (temp 3))
+
+  (test "simple hygienic.1"
+        '(2 1)
+        (begin (swap! a b) (list a b)))
+
+  (test "simple hygienic.2"   ;; using "temp" name
+        '(3 1)
+        (begin (swap! b temp) (list b temp))))
+
+;;FIXME: Add more tests !!!!!!!!!
+
+
+
+
+(test-section-end)

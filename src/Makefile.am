@@ -1,6 +1,6 @@
 # Makefile.am for STklos source file
 #
-# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Jun-2021 19:36 (eg)
+# Last file update:  8-Apr-2022 18:20 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -61,11 +61,11 @@ endif
 
 stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  cond.c  cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
- fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
+ fport.c gnu-getopt.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
- signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
+ signal.c sio.c socket.c sport.c stklos.c str.c struct.c symbol.c \
+ syntax.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
 # HACK:  Normally BUILT_SOURCES contains the files that must be generated before
 # starting the construction of the main target. We use it with a fictive target
@@ -135,7 +135,7 @@ $(DOCDB): $(stklos_SOURCES)
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b boot.img -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean-am:
-	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok
+	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok stklos
 
 distclean: clean
 	/bin/rm -f boot.keep Makefile extraconf.h stklos stamp-h1 stklosconf.h

@@ -1,0 +1,46 @@
+;;;; 7.stk                              -- SRFI-7 (PROGRAM)
+;;;;
+;;;; Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This is an implementation of SRFI-7 (Richard Kelsey). This implementation
+;;;; corresponds to the second implementation given in the reference document.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 31-Aug-1999 16:10 (eg)
+;;;; Last file update: 19-Apr-2022 14:52 (eg)
+
+
+(define-module srfi/7
+  (export program)
+
+  (define-syntax program
+    (syntax-rules (requires files code feature-cond)
+      ((program)
+       (begin))
+      ((program (requires feature-id ...) more ...)
+       (begin (cond-expand ((and feature-id ...) 'okay)) (program more ...)))
+      ((program (files filename ...) more ...)
+       (begin (load filename) ... (program more ...)))
+      ((program (code stuff ...) more ...)
+       (begin stuff ... (program more ...)))
+      ((program (feature-cond (requirement stuff ...) ...) more ...)
+       (begin (cond-expand (requirement (program stuff ...)) ...)
+                  (program more ...))))))
+
+
+(provide "srfi/7")

@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,30 +21,34 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 29-Apr-2021 18:34 (eg)
+ * Last file update:  4-Sep-2022 19:16 (eg)
  */
 
 #include "stklos.h"
 #include <langinfo.h>
 #include "gnu-getopt.h"
 
-#define ADD_OPTION(o, k)                                        \
+#define ADD_OPTION(o, k)                                     do{\
   if (*o) options = STk_key_set(options,                        \
                                 STk_makekey(k),                 \
-                                STk_Cstring2string(o));
+                                STk_Cstring2string(o));         \
+}while(0)
 
-#define ADD_BOOL_OPTION(o, k)                           \
+#define ADD_BOOL_OPTION(o, k)                        do{\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
-                        MAKE_BOOLEAN(o));
+                        MAKE_BOOLEAN(o));               \
+}while(0)
 
-#define ADD_INT_OPTION(o, k)                            \
+#define ADD_INT_OPTION(o, k)                         do{\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
-                        MAKE_INT(o));
+                        MAKE_INT(o));                   \
+}while(0)
 
-#define ADD_SCM_OPTION(o, k)                            \
-  options = STk_key_set(options, STk_makekey(k),o);
+#define ADD_SCM_OPTION(o, k)                         do{\
+  options = STk_key_set(options, STk_makekey(k),o);     \
+}while(0)
 
 /*=============================================================================
  *
@@ -63,7 +67,7 @@ static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
 static int  line_editor   = 1;
 static int  srfi_176      = 0;
-static char* script_file  = "";
+static char *script_file  = "";
 static SCM  Idirs         = STk_nil;
 static SCM  Adirs         = STk_nil;
 
@@ -72,6 +76,8 @@ static struct option long_options [] =
 {
   {"version",           no_argument,       NULL, 'v'},
   {"file",              required_argument, NULL, 'f'},
+  {"prepend-load-path", required_argument, NULL, 'I'},
+  {"append-load-path",  required_argument, NULL, 'A'},
   {"load",              required_argument, NULL, 'l'},
   {"execute",           required_argument, NULL, 'e'},
   {"boot-file",         required_argument, NULL, 'b'},
@@ -100,24 +106,24 @@ static void Usage(FILE *stream)
   fprintf(stream, "Usage: stklos [option ...] [--] [arg ... ]");
   fprintf(stream, "\n"
 "Possible options:\n"
-"   -l file, --load=file        load 'file' before going interactive\n"
-"   -f file, --file=file        use 'file' as program\n"
-"   -e sexpr, --execute=sexpr   evaluate the given sexpr and exit\n"
-"   -b file, --boot-file=file   use 'file' to boot the system\n"
-"   -D dir, --conf-dir=dir      change configuration dir (default: ~/.stklos)\n"
-"   -I dir                      prepend 'dir' to the load path list.\n"
-"   -A dir                      append 'dir' to the load path list.\n"
-"   -q, --no-init-file          quiet: do not load the user init file\n"
-"   -i, --interactive           interactive mode\n"
-"   -n, --no-line-editor        don't use line editor\n"
-"   -d, --debug                 add information to ease debugging\n"
-"   -s, --stack-size=n          use a stack of size n (default %d)\n"
-"   -c, --case-sensitive        be case sensitive by default\n"
-"       --case-insensitive      be case insensitive by default\n"
-"   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (instead of default)\n"
-"   -v, --version               show version and exit (simple)\n"
-"   -V                          show version and exit (detailed, SRFI-176)\n"
-"   -h, --help                  show this help and exit\n"
+"   -l file, --load=file            load 'file' before going interactive\n"
+"   -f file, --file=file            use 'file' as program\n"
+"   -e sexpr, --execute=sexpr       evaluate the given sexpr and exit\n"
+"   -b file, --boot-file=file       use 'file' to boot the system\n"
+"   -D dir, --conf-dir=dir          change configuration dir (default: ~/.stklos)\n"
+"   -I dir, --prepend-load-path=dir prepend 'dir' to the load path list.\n"
+"   -A dir, --append-load-path=dir  append 'dir' to the load path list.\n"
+"   -q, --no-init-file              quiet: do not load the user init file\n"
+"   -i, --interactive               interactive mode\n"
+"   -n, --no-line-editor            don't use line editor\n"
+"   -d, --debug                     add information to ease debugging\n"
+"   -s, --stack-size=n              use a stack of size n (default %d)\n"
+"   -c, --case-sensitive            be case sensitive by default\n"
+"       --case-insensitive          be case insensitive by default\n"
+"   -u, --utf8-encoding=yes|no      use/don't use UTF-8 encoding\n"
+"   -v, --version                   show version and exit (simple)\n"
+"   -V                              show version and exit (detailed, SRFI-176)\n"
+"   -h, --help                      show this help and exit\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
@@ -171,6 +177,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
     l = STk_cons(STk_Cstring2string(argv[i]), l);
 
   options = LIST2(STk_makekey("argv"), l);
+  ADD_OPTION("STklos",             "name");
   ADD_OPTION(argv0,                "program-name");
   ADD_OPTION(program_file,         "file");
   ADD_OPTION(load_file,            "load");
@@ -186,7 +193,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_SCM_OPTION(Idirs,            "prepend-dirs");
   ADD_SCM_OPTION(Adirs,            "append-dirs");
 
-  STk_define_variable(STk_intern("*%program-args*"), options,
+  STk_define_variable(STk_intern("*%system-state-plist*"), options,
                       STk_STklos_module);
 }
 
@@ -227,7 +234,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  /* Place the interpreter arguments in the Scheme variable *%program-args* */
+  /* Place CLI arguments in the Scheme variable *%system-state-plist* */
   build_scheme_args(argc, argv, argv0);
 
   /* Boot the VM */
