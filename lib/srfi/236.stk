@@ -1,0 +1,57 @@
+;;;;
+;;;; 236.stk         -- Implementation of SRFI-236
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info> and
+;;;;                  Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;          Authors: Jeronimo Pelelgrini [j_p@aleph0.info]
+;;;;                   Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 23-Nov-2022 09:51
+;;;; Last file update: 23-Nov-2022 22:43
+;;;;
+
+
+(define-module srfi/236
+  (export independently)
+
+  (begin
+
+    ;; This implementation (by jpellegrini) is simpler than the SRFI
+    ;; reference implementation.  We just need to append a (void) to
+    ;; the expression being evaluated, and wrap it with begin.
+    ;; We keep it here as reference only, since the other one (below)
+    ;; will be used.
+    ;;
+    ;; (define-syntax independently
+    ;;   (syntax-rules ()
+	;; ((independently expr ...)
+    ;;      (begin expr ... (void)))))
+
+    ;; This implementation (by egallesio) shuffles the expressions to
+    ;; make sure that the user cannot tell how evaluation will be done.
+    ;;
+    (define-macro  (independently . body)
+      (let ((shuffle (lambda (lst)
+                       (map cdr
+                            (sort (map (lambda (x) (cons (random-real) x)) lst)
+                                  (lambda (x y) (< (car x) (car y))))))))
+        `(begin ,@(shuffle body) (void))))
+    ))
+
+(provide "srfi/236")

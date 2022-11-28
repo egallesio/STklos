@@ -38,6 +38,7 @@
   (load "test-threads.stk")
   (load "test-hash.stk")
   (load "test-srfi.stk")
+  (load "test-libs.stk")
   (load "test-json.stk")
   (load "test-md5.stk")
   (load "test-base64.stk")

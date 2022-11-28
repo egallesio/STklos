@@ -460,6 +460,17 @@
 (test "eqv?" #t (eqv? 20 (inexact->exact 20.0)))
 (test "eqv?" #f (eqv? 20 20.0))
 
+(test "integer-length" 2 (integer-length -3))
+(test "integer-length" 1 (integer-length -2))
+(test "integer-length" 0 (integer-length -1))
+(test "integer-length" 0 (integer-length  0))
+(test "integer-length" 1 (integer-length  1))
+(test "integer-length" 2 (integer-length  2))
+(test "integer-length" 2 (integer-length  3))
+(test "integer-length" 3 (integer-length  4))
+(test "integer-length" 3 (integer-length  5))
+(test "integer-length" 5001 (integer-length (expt 2 5000)))
+
 ;;==================================================================
 ;; Arithmetics
 ;;

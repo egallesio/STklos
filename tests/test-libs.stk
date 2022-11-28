@@ -1,0 +1,5 @@
+(test-section "libs")
+
+(load "lib/scheme/bytevector")
+
+(test-section-end)

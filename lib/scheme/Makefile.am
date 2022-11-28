@@ -102,9 +102,9 @@ LARGE_OBJS = list.ostk       \
              division.ostk   \
              bitwise.ostk
 
-LARGE_C     = ilist.c     flonum.c     sort.c     vector.c     rlist.c
-LARGE_C_STK = ilist.stk   flonum.stk   sort.stk   vector.stk   rlist.stk
-LARGE_SHOBJ = ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) rlist.$(SO)
+LARGE_C     = ilist.c     flonum.c     sort.c     vector.c     bytevector.c     rlist.c
+LARGE_C_STK = ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk   rlist.stk
+LARGE_SHOBJ = ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO) rlist.$(SO)
 
 
 #----------------------------------------------------------------------
@@ -163,6 +163,7 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 ../srfi/60.ostk:
 	(cd ../srfi; $(MAKE) 60.ostk)
 
+bytevector.$(SO): bytevector-incl.c bytevector.c
 
 ilist.$(SO): ilist-incl.c
 ilist-incl.c: comparator.ostk

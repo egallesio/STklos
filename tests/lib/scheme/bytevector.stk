@@ -1,0 +1,475 @@
+
+;;; TESTS for (scheme bytevector).
+;;; The tests are performed inside a module, because the library
+;;; overrides a standard R7RS procedure, changing its signature.
+
+(define-module test-scheme/bytevector
+  (import (scheme bytevector))
+  (export run)
+
+(define epsilon 0.00001)
+
+(define-syntax test/approx
+  (syntax-rules ()
+    ((_ name ex1 ex2)
+     (let* ((e1 ex1)
+            (e2 ex2)
+            (dif (if (finite? e1)
+                     (abs (- e1 e2))
+                     (if (= e1 e2) 0 +nan.0))))
+       (test name #t (< dif epsilon))))))
+
+
+(define (run)
+
+(test "native-endianness"
+      #t
+      (not (not (memq (native-endianness) '(little big)))))
+
+(test "bytevector=?.1"
+      #t
+      (bytevector=? #u8(1 2 3) #u8(1 2 3)))
+
+(test "bytevector=?.2"
+      #f
+      (bytevector=? #u8(1 2 3 4) #u8(1 2 3)))
+
+(test "bytevector=?.3"
+      #f
+      (bytevector=? #u8(1 2 1) #u8(1 2 3)))
+
+(test "bytevector=?.4"
+      #t
+      (bytevector=? (bytevector 1 2 1) #u8(1 2 1)))
+
+(test "bytevector-copy!.1"
+      '(1 2 3 1 2 3 4 8)
+      (let ((b (u8-list->bytevector '(1 2 3 4 5 6 7 8))))
+        (bytevector-copy! b 0 b 3 4)
+        (bytevector->u8-list b)))
+
+(test "bytevector-fill!"
+      #u8(5 5 5 5)
+      (let ((b (bytevector 1 2 3 4)))
+        (bytevector-fill! b 5)
+        b))
+
+(test "bytevector-{u,s}8-ref"
+      '(-127 129 -1 255)
+      (let ((b1 (make-bytevector 16 -127))
+            (b2 (make-bytevector 16 255)))
+        (list
+         (bytevector-s8-ref b1 0)
+         (bytevector-u8-ref b1 0)
+         (bytevector-s8-ref b2 0)
+         (bytevector-u8-ref b2 0))))
+
+(test "bytevector-s8-ref"
+      '(-1 -2 0 1)
+      (let ((b (bytevector 255 254 0 1)))
+        (list (bytevector-s8-ref b 0)
+              (bytevector-s8-ref b 1)
+              (bytevector-s8-ref b 2)
+              (bytevector-s8-ref b 3))))
+
+(test "bytevector-u8-ref"
+      '(255 254 0 1)
+      (let ((b (bytevector 255 254 0 1)))
+        (list (bytevector-u8-ref b 0)
+              (bytevector-u8-ref b 1)
+              (bytevector-u8-ref b 2)
+              (bytevector-u8-ref b 3))))
+
+(test "bytevector-s8-set!"
+      #u8(10 20 246 236) 
+      (let ((b (bytevector 1 1 1 1)))
+        (bytevector-s8-set! b 0  10)
+        (bytevector-s8-set! b 1  20)
+        (bytevector-s8-set! b 2 -10)
+        (bytevector-s8-set! b 3 -20)
+        b))
+
+(test "bytevector-u8-set!"
+      #u8(10 20 30 40)
+      (let ((b (bytevector 1 1 1 1)))
+        (bytevector-u8-set! b 0  10)
+        (bytevector-u8-set! b 1  20)
+        (bytevector-u8-set! b 2  30)
+        (bytevector-u8-set! b 3  40)
+        b))
+
+
+(test/error "bytevector-s8-set!.error"
+            (let ((b (bytevector 1 1 1 1)))
+              (bytevector-u8-set! b 0 -10)))
+
+
+(test "bytevector-uint-ref.fixnum.2-bytes.LE"
+      769
+      (let ((b #u8(1 1 3 4)))
+        (bytevector-uint-ref b 1 'little 2)))
+
+(test "bytevector-uint-ref.fixnum.2-bytes.BE"
+      259
+      (let ((b #u8(1 1 3 4)))
+        (bytevector-uint-ref b 1 'big 2)))
+
+
+(test "bytevector-uint-ref.fixnum.3-bytes.LE"
+      196865
+      (let ((b #u8(1 1 3 4)))
+        (bytevector-uint-ref b 0 'little 3)))
+
+(test "bytevector-uint-ref.fixnum.3-bytes.BE"
+      65795
+      (let ((b #u8(1 1 3 4)))
+        (bytevector-uint-ref b 0 'big 3)))
+
+(test "bytevector-uint-ref.bignum.10-bytes.LE"
+      9444805024432857023233
+      (let ((b #u8(1 1 3 4 1 0 1 0 1 0 2 3)))
+        (bytevector-uint-ref b 1 'little 10)))
+
+(test "bytevector-uint-ref.bignum.10-bytes.BE"
+      4741030526724903796992      
+      (let ((b #u8(1 1 3 4 1 0 1 0 1 0 2 3)))
+        (bytevector-uint-ref b 0 'big 10)))
+
+(let ((v (make-bytevector 16)))
+  (test "bytevector-ieee-double-set!"
+        #u8(11 42 170 126 165 64 95 64 0 0 0 0 0 0 0 0)
+        (begin (bytevector-ieee-double-set! v 0 125.010101 'little)
+               v))
+  (test "bytevector-ieee-double-ref"
+        125.010101
+        (bytevector-ieee-double-ref v 0 'little)))
+
+;;;
+;;;
+
+
+(test "string->utf16.basic.little"
+      #u8(97 0 98 0 99 0)
+      (string->utf16 "abc" 'little))
+
+(test "string->utf16.basic.big"
+      #u8(0 97 0 98 0 99)
+      (string->utf16 "abc" 'big))
+
+(let ((s (string-copy "abcd")))
+  (string-set! s 2 (integer->char 65599))
+
+  (test "string->utf16.large.little"
+        #u8(97 0 98 0 0 216 63 220 100 0)
+        (string->utf16 s 'little))
+  
+  (test "string->utf16.large.big"
+        #u8(0 97 0 98 216 0 220 63 0 100)
+        (string->utf16 s 'big)))
+
+(let ((s (string-copy "axbd")))
+  (string-set! s 1 (integer->char 65599))
+
+  (test "utf16->string.1.little"
+        s
+        (utf16->string #u8(97 0 0 216 63 220 98 0 100 0) 'little))
+
+  (test "utf16->string.1.big"
+        s
+        (utf16->string #u8(0 97 216 0 220 63 0 98 0 100) 'big)))
+
+
+
+;;;
+;;;
+
+(test "string->utf32.basic.little"
+      #u8(97 0 0 0 98 0 0 0 99 0 0 0)
+      (string->utf32 "abc" 'little))
+
+(test "string->utf32.basic.big"
+      #u8(0 0 0 97 0 0 0 98 0 0 0 99)
+      (string->utf32 "abc" 'big))
+
+
+
+
+;;;
+;;; From Sagittarius
+;;;
+
+    (test "1" (endianness little) 'little)
+    (test "2" (endianness big) 'big)
+    (test "3" (symbol? (native-endianness)) #t)
+
+    (test "4" (bytevector? #u8(1 2 3)) #t)
+    (test "5" (bytevector? "123") #f)
+
+    (test "6" (bytevector-length #u8(1 2 3)) 3)
+    (test "7" (bytevector-length (make-bytevector 10)) 10)
+    (test "8" (bytevector-length (make-bytevector 10 3)) 10)
+    (test "9" (bytevector-u8-ref (make-bytevector 10 3) 0) 3)
+    (test "10" (bytevector-u8-ref (make-bytevector 10 3) 5) 3)
+    (test "11" (bytevector-u8-ref (make-bytevector 10 3) 9) 3)
+    (test "12" (bytevector-u8-ref (make-bytevector 10 255) 9) 255)
+    (test "13" (bytevector-u8-ref (make-bytevector 10 -1) 9) 255)
+    (test "14" (bytevector-u8-ref (make-bytevector 10 -128) 9) 128)
+    (let ([v (make-bytevector 5 2)])
+      (test "15" (void) (bytevector-fill! v -1))
+      (test "16" v #u8(255 255 255 255 255))
+      (test "17" (void) (bytevector-fill! v 17))
+      (test "18" v #u8(17 17 17 17 17))
+      (test "19" (void) (bytevector-fill! v 255))
+      (test "20" v #u8(255 255 255 255 255)))
+
+    (test "21" (let ((b (u8-list->bytevector '(1 2 3 4 5 6 7 8))))
+            (bytevector-copy! b 0 b 3 4)
+            (bytevector->u8-list b))
+          '(1 2 3 1 2 3 4 8))
+
+    (test "22" (bytevector-copy #u8(1 2 3)) #u8(1 2 3))
+
+    (test "23" (let ((b1 (make-bytevector 16 -127))
+                     (b2 (make-bytevector 16 255)))
+                 (list
+                  (bytevector-s8-ref b1 0)
+                  (bytevector-u8-ref b1 0)
+                  (bytevector-s8-ref b2 0)
+                  (bytevector-u8-ref b2 0)))
+          '(-127 129 -1 255))
+
+    (test "24" (let ((b (make-bytevector 16 -127)))
+                 (bytevector-s8-set! b 0 -126)
+                 (bytevector-u8-set! b 1 246)
+                 
+            (list
+             (bytevector-s8-ref b 0)
+             (bytevector-u8-ref b 0)
+             (bytevector-s8-ref b 1)
+             (bytevector-u8-ref b 1)))
+          '(-126 130 -10 246))
+
+    (test "25" (bytevector->u8-list #u8(1 2 3)) '(1 2 3))
+    (test "26" (bytevector->u8-list #u8(255 255 255)) '(255 255 255))
+    (test "27" (u8-list->bytevector '(1 2 3)) #u8(1 2 3))
+    (test "28" (u8-list->bytevector '()) #u8())
+
+    (let ([b (make-bytevector 16 -127)])
+      (test "29"
+            (void)
+            (bytevector-uint-set! b 0 (- (expt 2 128) 3)
+                                  (endianness little) 16))
+
+      (test "30" (bytevector-uint-ref b 0 (endianness little) 16)
+            #xfffffffffffffffffffffffffffffffd)
+
+      (test "31" (bytevector-sint-ref b 0 (endianness little) 16)
+            -3)
+      (test "32" (bytevector->u8-list b)
+            '(253 255 255 255 255 255 255 255
+                  255 255 255 255 255 255 255 255))
+      
+      (test "33"
+            (void)
+            (bytevector-uint-set! b 0 (- (expt 2 128) 3)
+                                  (endianness big) 16))
+      (test "34" (bytevector-uint-ref b 0 (endianness big) 16)
+            #xfffffffffffffffffffffffffffffffd)
+      
+      (test "35" (bytevector-sint-ref b 0 (endianness big) 16) -3)
+      
+      (test "36" (bytevector->u8-list b)
+            '(255 255 255 255 255 255 255 255
+                  255 255 255 255 255 255 255 253))
+      (test "37"
+       (let ((b (u8-list->bytevector '(1 2 3 255 1 2 1 2))))
+         (bytevector->sint-list b (endianness little) 2))
+       '(513 -253 513 513))
+
+      (test "38" (let ((b (u8-list->bytevector '(1 2 3 255 1 2 1 2))))
+              (bytevector->uint-list b (endianness little) 2))
+            '(513 65283 513 513)))
+
+
+      
+(let ((b (u8-list->bytevector
+          '(255 255 255 255 255 255 255 255
+                255 255 255 255 255 255 255 253))))
+  
+  (test "39"   65023 (bytevector-u16-ref b 14 'little))
+  (test "40"    -513 (bytevector-s16-ref b 14 'little))
+  (test "41"   65533 (bytevector-u16-ref b 14 'big))
+  (test "42"      -3 (bytevector-s16-ref b 14 'big))
+  
+  (test "43" (void) (bytevector-u16-set! b 0 12345 'little))
+  (test "44" 12345 (bytevector-u16-ref b 0 'little))
+  
+  (test "45.16" (void) (bytevector-u16-native-set! b 0 12005))
+  (test "46.16" 12005  (bytevector-u16-native-ref b 0))
+  (test "47.16" #t (not (not (memq 12005
+                                (list (bytevector-u16-ref b 0 'little)
+                                      (bytevector-u16-ref b 0 'big))))))
+
+  (test "45.32" (void) (bytevector-u32-native-set! b 0 32005))
+  (test "46.32" 32005  (bytevector-u32-native-ref b 0))
+  (test "47.32" #t (not (not (memq 32005
+                                   (list (bytevector-u32-ref b 0 'little)
+                                         (bytevector-u32-ref b 0 'big))))))
+
+  (test "45.64" (void) (bytevector-u64-native-set! b 0 101010102020))
+  (test "46.64" 101010102020 (bytevector-u64-native-ref b 0))
+  (test "47.64" #t (not (not (memq 101010102020
+                                   (list (bytevector-u64-ref b 0 'little)
+                                         (bytevector-u64-ref b 0 'big))))))
+
+  (test "45.16.s-" (void) (bytevector-s16-native-set! b 0 -12005))
+  (test "46.16.s-" -12005  (bytevector-s16-native-ref b 0))
+  (test "47.16.s-" #t (not (not (memq -12005
+                                (list (bytevector-s16-ref b 0 'little)
+                                      (bytevector-s16-ref b 0 'big))))))
+
+  (test "45.32.s-" (void) (bytevector-s32-native-set! b 0 -32005))
+  (test "46.32.s-" -32005  (bytevector-s32-native-ref b 0))
+  (test "47.32.s-" #t (not (not (memq -32005
+                                   (list (bytevector-s32-ref b 0 'little)
+                                         (bytevector-s32-ref b 0 'big))))))
+
+  (test "45.64.s-" (void) (bytevector-s64-native-set! b 0 -101010102020))
+  (test "46.64.s-" -101010102020 (bytevector-s64-native-ref b 0))
+  (test "47.64.s-" #t (not (not (memq -101010102020
+                                      (list (bytevector-s64-ref b 0 'little)
+                                            (bytevector-s64-ref b 0 'big))))))
+
+  (test "45.16.s+" (void) (bytevector-s16-native-set! b 0 12005))
+  (test "46.16.s+" 12005  (bytevector-s16-native-ref b 0))
+  (test "47.16.s+" #t (not (not (memq 12005
+                                (list (bytevector-s16-ref b 0 'little)
+                                      (bytevector-s16-ref b 0 'big))))))
+
+  (test "45.32.s+" (void) (bytevector-s32-native-set! b 0 +32005))
+  (test "46.32.s+" 32005  (bytevector-s32-native-ref b 0))
+  (test "47.32.s+" #t (not (not (memq 32005
+                                   (list (bytevector-s32-ref b 0 'little)
+                                         (bytevector-s32-ref b 0 'big))))))
+
+  (test "45.64.s+" (void) (bytevector-s64-native-set! b 0 101010102020))
+  (test "46.64.s+" 101010102020 (bytevector-s64-native-ref b 0))
+  (test "47.64.s+" #t (not (not (memq 101010102020
+                                      (list (bytevector-s64-ref b 0 'little)
+                                            (bytevector-s64-ref b 0 'big)))))))
+
+(let ((b (u8-list->bytevector
+          '(255 255 255 255 255 255 255 255
+                255 255 255 255 255 255 255 253))))
+  
+  (test "48" (bytevector-u32-ref b 12 (endianness little)) 4261412863)
+  (test "49" (bytevector-s32-ref b 12 (endianness little)) -33554433)
+  (test "50" (bytevector-u32-ref b 12 (endianness big)) 4294967293)
+  (test "51" (bytevector-s32-ref b 12 (endianness big)) -3))
+
+(let ((b (u8-list->bytevector
+          '(255 255 255 255 255 255 255 255
+                255 255 255 255 255 255 255 253))))
+  (test "52" (bytevector-u64-ref b 8 (endianness little)) 18302628885633695743)
+  (test "53" (bytevector-s64-ref b 8 (endianness little)) -144115188075855873)
+  (test "54" (bytevector-u64-ref b 8 (endianness big)) 18446744073709551613)
+  (test "55" (bytevector-s64-ref b 8 (endianness big)) -3))
+
+
+(for-each
+ (lambda (k)
+   (for-each
+    (lambda (n)
+      (if (zero? (fxand k 3))
+          (let ([b (make-bytevector 12)])
+            (test "56" (void) (bytevector-ieee-single-native-set! b k n))
+            (test/approx "57" (bytevector-ieee-single-native-ref b k) n))
+          (let ([b (make-bytevector 12)])
+            (test/error "58" (bytevector-ieee-single-native-set! b k n))
+            (test/error "59" (bytevector-ieee-single-native-ref b k))))
+      (let ([b (make-bytevector 12)])
+        (test "60" (void) (bytevector-ieee-single-set! b k n 'big))
+        (test/approx "61" (bytevector-ieee-single-ref b k 'big) n))
+      (let ([b (make-bytevector 12)])
+        (test "62" (void) (bytevector-ieee-single-set! b k n 'little))
+        (test/approx "63" (bytevector-ieee-single-ref b k 'little) n))
+      (if (zero? (fxand k 7))
+          (let ([b (make-bytevector 12)])
+            (test "64" (void) (bytevector-ieee-double-native-set! b k n))
+            (test/approx "65" (bytevector-ieee-double-native-ref b k) n))
+          (let ([b (make-bytevector 12)])
+            (test/error "66" (bytevector-ieee-double-native-set! b k n))
+            (test/error "67" (bytevector-ieee-double-native-ref b k))))
+      (let ([b (make-bytevector 12)])
+        (test "68" (void) (bytevector-ieee-double-set! b k n 'big))
+        (test/approx "69" (bytevector-ieee-double-ref b k 'big) n))
+      (let ([b (make-bytevector 12)])
+        (test "70" (void) (bytevector-ieee-double-set! b k n 'little))
+        (test/approx "71" (bytevector-ieee-double-ref b k 'little) n)))
+    '(1.0 25.78 +inf.0 -inf.0 +nan.0)))
+ '(0 1 2 3 4))
+
+
+    (test "72" (string->utf8 "apple") #u8(97 112 112 108 101))
+    (test "73" (string->utf8 "app\x3BB;e") #u8(97 112 112 206 187 101))
+    (test "74" (string->utf16 "app\x3BB;e" 'little) #u8(97 0 112 0 112 0 #xBB #x3 101 0))
+    (test "75" (string->utf16 "app\x3BB;e" 'big) #u8(0 97 0 112 0 112 #x3 #xBB 0 101))
+    (test "76" (string->utf16 "app\x3BB;e") #u8(0 97 0 112 0 112 #x3 #xBB 0 101))
+    (test "77" (string->utf32 "app\x3BB;e" 'little) #u8(97 0 0 0 112 0 0 0 112 0 0 0 #xBB #x3 0 0 101 0 0 0))
+    (test "78" (string->utf32 "app\x3BB;e" 'big) #u8(0 0 0 97 0 0 0 112 0 0 0 112 0 0 #x3 #xBB 0 0 0 101))
+    (test "79" (string->utf32 "app\x3BB;e") #u8(0 0 0 97 0 0 0 112 0 0 0 112 0 0 #x3 #xBB 0 0 0 101))
+    
+    (let ([bv-append
+           (lambda (bv1 bv2)
+             (let ([bv (make-bytevector (+ (bytevector-length bv1)
+                                           (bytevector-length bv2)))])
+               (bytevector-copy! bv1 0 bv 0  (bytevector-length bv1))
+               (bytevector-copy! bv2 0 bv (bytevector-length bv1) (bytevector-length bv2))
+               bv))])
+      (for-each
+       (lambda (str)
+         (test "80" (utf8->string (string->utf8 str)) str)
+         (test "81" (utf16->string (string->utf16 str 'big) 'big) str)
+         (test "82" (utf16->string (string->utf16 str 'little) 'little) str)
+         (test "83" (utf16->string (bv-append #u8(#xFF #xFE) (string->utf16 str 'little)) 'big) str)
+         (test "84" (utf16->string (bv-append #u8(#xFE #xFF) (string->utf16 str 'big)) 'little) str)
+         
+         (test "85"
+               (utf16->string (bv-append #u8(#xFF #xFE) (string->utf16 str 'little)) 'little #t)
+               (string-append "\xFEFF;" str))
+         (test "86"
+               (utf16->string (bv-append #u8(#xFE #xFF) (string->utf16 str 'little)) 'little #t)
+               (string-append "\xFFFE;" str))
+         (test "87"
+               (utf16->string (bv-append #u8(#xFE #xFF) (string->utf16 str 'big)) 'big #t)
+               (string-append "\xFEFF;" str))
+         (test "88"
+               (utf16->string (bv-append #u8(#xFF #xFE) (string->utf16 str 'big)) 'big #t)
+               (string-append "\xFFFE;" str))
+         
+         (test "89" (utf32->string (string->utf32 str 'big) 'big) str)
+         (test "90" (utf32->string (string->utf32 str 'little) 'little) str)
+         (test "91" (utf32->string (bv-append #u8(#xFF #xFE 0 0) (string->utf32 str 'little)) 'big) str)
+         (test "92" (utf32->string (bv-append #u8(0 0 #xFE #xFF) (string->utf32 str 'big)) 'little) str)
+         (test "93"
+               (utf32->string (bv-append #u8(#xFF #xFE 0 0)
+                                         (string->utf32 str 'little))
+                              'little #t)
+               (string-append "\xFEFF;" str))
+         (test "94" (utf32->string (bv-append #u8(#xFE #xFF 0 0) (string->utf32 str 'little)) 'little #t)
+               (string-append "\xFFFE;" str))
+         (test "95" (utf32->string (bv-append #u8(0 0 #xFE #xFF) (string->utf32 str 'big)) 'big #t)
+               (string-append "\xFEFF;" str))
+         (test "96" (utf32->string (bv-append #u8(0 0 #xFF #xFE) (string->utf32 str 'big)) 'big #t)
+               (string-append "\xFFFE;" str)))
+       (list "apple"
+             "app\x3BB;e"
+             "\x0;\x1;\x80;\xFF;\xD7FF;\xE000;\x10FFFF;")))
+             ;; (list->string (map integer->char (list 0 1 #x80 #xff #xd7ff #xe000 #x10ffff)))
+    )
+)
+
+(select-module test-scheme/bytevector)
+(run)
+(select-module STklos)
+

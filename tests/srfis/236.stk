@@ -1,0 +1,52 @@
+;;; Adapted from the SRFI tests contributed by Shiro Kawai
+
+
+;; just to test edge case
+(test "srfi-236-1"
+      'ok
+      (let ((v 'ok))
+        (independently)
+        v))
+
+(test "srfi-236-2"
+      '(ok . #f)
+      (let ((v (cons #f #f)))
+        (independently
+         (set-car! v 'ok))
+        v))
+
+
+(define (set-car+cdr! p x y)
+  (independently
+   (set-car! p x)
+   (set-cdr! p y)))
+
+(test "srfi-236-3"
+      '(10 . 20)
+      (let ((p (cons 1 2)))
+        (set-car+cdr! p 10 20)
+        p))
+
+
+(test "srfi-236-4"
+      '#(10 20 30)
+ (let ((v (vector 1 2 3)))
+   (independently
+    (vector-set! v 0 10)
+    (vector-set! v 1 20)
+    (vector-set! v 2 30))
+   v))
+
+(test "srfi-236-5"
+      3
+      (let ((x '()))
+        (independently
+         (set! x (cons 1 x))
+         (set! x (cons 2 x)))
+        (apply + x)))
+
+(test "srfi-236-6"
+      10
+      (let ((x -1))
+        (independently (independently (set! x 10)))
+        x))
