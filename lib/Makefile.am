@@ -34,6 +34,7 @@ scheme_BOOT = assembler.stk \
           bonus.stk         \
           boot.stk          \
           callcc.stk        \
+          compfile.stk      \
           compiler.stk      \
           computils.stk     \
           date.stk          \
