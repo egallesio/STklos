@@ -7509,7 +7509,7 @@ else $as_nop
   HAVE_LIBEDIT="no"
 fi
 
-                if [ "$HAVE_LIBEDIT" = "yes" ] ;then
+                if test "$HAVE_LIBEDIT" = "yes" ;then
                    RDLINE="-ledit";
                 fi
             fi;;

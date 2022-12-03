@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 29-Jul-2022 17:20 (eg)
+### Last file update:  3-Dec-2022 17:50 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -536,7 +536,7 @@ case $UNAME_O in
               RDLINE="-lreadline";
             else
                 AC_CHECK_LIB(edit, readline, HAVE_LIBEDIT="yes", HAVE_LIBEDIT="no", $LIBS)
-                if "$HAVE_LIBEDIT" = "yes" ;then
+                if test "$HAVE_LIBEDIT" = "yes" ;then
                    RDLINE="-ledit";
                 fi
             fi;;
@@ -585,7 +585,7 @@ AC_SUBST(PCREPKG)
 AC_SUBST(FFI)
 AC_SUBST(FFILIB)
 AC_SUBST(FFIINC)
-# readline completion support 
+# readline completion support
 AC_SUBST(RDLINE)
 
 AC_SUBST(THREADS)
