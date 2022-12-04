@@ -2,7 +2,7 @@
  *
  * s i g n a l . c          -- Signal handling
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update: 24-May-2021 19:44 (eg)
+ * Last file update:  4-Dec-2022 21:47 (eg)
  *
  */
 
@@ -37,79 +37,79 @@ struct signal_info {
 
 static struct signal_info signal_set[] = {
   /* Posix.1 signals */
-  {"sighup",    SIGHUP},
-  {"sigint",    SIGINT},
-  {"sigquit",   SIGQUIT},
-  {"sigill",    SIGILL},
-  {"sigabrt",   SIGABRT},
-  {"sigfpe",    SIGFPE},
-  {"sigkill",   SIGKILL},
-  {"sigsegv",   SIGSEGV},
-  {"sigpipe",   SIGPIPE},
-  {"sigalrm",   SIGALRM},
-  {"sigterm",   SIGTERM},
-  {"sigusr1",   SIGUSR1},
-  {"sigusr2",   SIGUSR2},
-  {"sigchld",   SIGCHLD},
-  {"sigcont",   SIGCONT},
-  {"sigstop",   SIGSTOP},
-  {"sigtstp",   SIGTSTP},
-  {"sigttin",   SIGTTIN},
-  {"sigttou",   SIGTTOU},
+  {"SIGHUP",    SIGHUP},
+  {"SIGINT",    SIGINT},
+  {"SIGQUIT",   SIGQUIT},
+  {"SIGILL",    SIGILL},
+  {"SIGABRT",   SIGABRT},
+  {"SIGFPE",    SIGFPE},
+  {"SIGKILL",   SIGKILL},
+  {"SIGSEGV",   SIGSEGV},
+  {"SIGPIPE",   SIGPIPE},
+  {"SIGALRM",   SIGALRM},
+  {"SIGTERM",   SIGTERM},
+  {"SIGUSR1",   SIGUSR1},
+  {"SIGUSR2",   SIGUSR2},
+  {"SIGCHLD",   SIGCHLD},
+  {"SIGCONT",   SIGCONT},
+  {"SIGSTOP",   SIGSTOP},
+  {"SIGTSTP",   SIGTSTP},
+  {"SIGTTIN",   SIGTTIN},
+  {"SIGTTOU",   SIGTTOU},
   /* Non Posix.1 signals stolen on Linux and Solaris */
 #ifdef SIGBUS
-  {"sigbus",    SIGBUS},
+  {"SIGBUS",    SIGBUS},
 #endif
 #ifdef SIGPOLL
-  {"sigpoll",   SIGPOLL},
+  {"SIGPOLL",   SIGPOLL},
 #endif
 #ifdef SIGPROF
-  {"sigprof",   SIGPROF},
+  {"SIGPROF",   SIGPROF},
 #endif
 #ifdef SIGSYS
-  {"sigsys",    SIGSYS},
+  {"SIGSYS",    SIGSYS},
 #endif
 #ifdef SIGTRAP
-  {"sigtrap",   SIGTRAP},
+  {"SIGTRAP",   SIGTRAP},
 #endif
 #ifdef SIGURG
-  {"sigurg",    SIGURG},
+  {"SIGURG",    SIGURG},
 #endif
 #ifdef SIGVTALRM
-  {"sigvtalrm", SIGVTALRM},
+  {"SIGVTALRM", SIGVTALRM},
 #endif
 #ifdef SIGXCPU
-  {"sigxcpu",   SIGXCPU},
+  {"SIGXCPU",   SIGXCPU},
 #endif
 #ifdef SIGXFSZ
-  {"sigxfsz",   SIGXFSZ},
+  {"SIGXFSZ",   SIGXFSZ},
 #endif
 #ifdef SIGIOT
-  {"sigiot",    SIGIOT},
+  {"SIGIOT",    SIGIOT},
 #endif
 #ifdef SIGEMT
-  {"sigemt",    SIGEMT},
+  {"SIGEMT",    SIGEMT},
 #endif
 #ifdef SIGSTKFLT
-  {"sigstkflt", SIGSTKFLT},
+  {"SIGSTKFLT", SIGSTKFLT},
 #endif
 #ifdef SIGIO
-  {"sigio",     SIGIO},
+  {"SIGIO",     SIGIO},
 #endif
 #ifdef SIGCLD
-  {"sigcld",    SIGCLD},
+  {"SIGCLD",    SIGCLD},
 #endif
 #ifdef SIGPWR
-  {"sigpwr",    SIGPWR},
+  {"SIGPWR",    SIGPWR},
 #endif
 #ifdef SIGINFO
-  {"siginfo",   SIGINFO},
+  {"SIGINFO",   SIGINFO},
 #endif
 #ifdef SIGLOST
-  {"siglost",   SIGLOST},
+  {"SIGLOST",   SIGLOST},
 #endif
 #ifdef SIGWINCH
-  {"sigwinch",  SIGWINCH},
+  {"SIGWINCH",  SIGWINCH},
 #endif
   {NULL, 0}
 };
@@ -140,7 +140,7 @@ static void sighup(int _UNUSED(i))
 static void sigabort(int _UNUSED(i))
 {
   /* GMP uses abort() whan it detects problems (mainly number too try).  Try
-   * to trap SIGABRT signals, hoping that next GC will recoverthe memory used
+   * to trap SIGABRT signals, hoping that next GC will recover the memory used
    */
   STk_error("Received a SIGABRT signal.");
 }
