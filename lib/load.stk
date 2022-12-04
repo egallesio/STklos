@@ -46,7 +46,7 @@
 
 
 (define *path-separator*        (if (eqv? (running-os) 'windows) ";" ":"))
-(define *load-suffixes*         (list "so" "ostk" "sld" "spi" "stk" "scm"))
+(define *load-suffixes*         (list "so" "ostk" "spi" "stk" "sld" "scm"))
 (define *load-verbose*          #f)
 (define *load-path*             '()) ;; initialized  later
 
