@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update:  9-Dec-2022 18:34 (eg)
+ * Last file update:  9-Dec-2022 19:09 (eg)
  *
  */
 
@@ -256,7 +256,7 @@ DEFINE_PRIMITIVE("set-signal-handler!", set_sig_hdlr, subr2, (SCM sig, SCM proc)
 
   if (s <= 0 || s >= NSIG) error_bad_signal_number(sig);
 
-  if (BOOLEANP(proc)) 
+  if (BOOLEANP(proc))
     p = (proc == STk_true)? SIG_DFL: SIG_IGN;
   else {
     if (STk_procedurep(proc) == STk_false)
@@ -278,6 +278,20 @@ DEFINE_PRIMITIVE("get-signal-handler", get_sig_hdlr, subr1, (SCM sig))
 }
 
 
+DEFINE_PRIMITIVE("send-signal", send_signal, subr12, (SCM sig, SCM process))
+{
+  long s    = STk_integer_value(sig);
+  long pid = (process != NULL)? STk_integer_value(process): (long) getpid();
+
+
+  if (s <= 0 || s >= NSIG) error_bad_signal_number(sig);
+  if (pid == LONG_MIN)     STk_error("bad process number ~S", process);
+
+  kill((pid_t) pid, s);
+  return STk_void;
+}
+
+
 int STk_init_signal()
 {
   // Initialize the signals table
@@ -293,6 +307,7 @@ int STk_init_signal()
   ADD_PRIMITIVE(initialize_signals);
   ADD_PRIMITIVE(set_sig_hdlr);
   ADD_PRIMITIVE(get_sig_hdlr);
+  ADD_PRIMITIVE(send_signal);
 
   return TRUE;
 }
