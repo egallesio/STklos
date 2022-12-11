@@ -1,0 +1,101 @@
+;;; Tests for SRFI-228
+;;; Adapted from the reference implementation -- jpellegrini
+
+;; Let's test inside a module so we don't pollute the global namespace
+
+(define-module srfi-228-test
+  (import (srfi 1)
+          (srfi 9)
+          (srfi 128)
+          (only (srfi 132) list-sort)
+
+          (srfi 228))
+
+  (export run-srfi-228-tests)
+
+  (define-record-type Person
+    (make-person first-name last-name)
+    person?
+    (first-name person-first-name)
+    (last-name person-last-name))
+
+  (define person-name-comparator
+    (make-product-comparator
+     (make-wrapper-comparator person? person-last-name string-ci-comparator)
+     (make-wrapper-comparator person? person-first-name string-ci-comparator)))
+
+  (define (run-tests-simple)
+    (test "srfi-228.1"
+          #t
+          (<? person-name-comparator
+              (make-person "John" "Cowan")
+              (make-person "Daphne" "Preston-Kendal")))
+
+    (test "srfi-228-2"
+          #t
+          (>? person-name-comparator
+              (make-person "Tom" "Smith")
+              (make-person "John" "Smith"))))
+
+
+  (define-record-type Book
+    (make-book author title)
+    book?
+    (author book-author)
+    (title book-title))
+
+  (define-record-type CD
+    (make-cd artist title)
+    cd?
+    (artist cd-artist)
+    (title cd-title))
+
+  (define book-comparator
+    (make-product-comparator
+     (make-wrapper-comparator book? book-author person-name-comparator)
+     (make-wrapper-comparator book? book-title string-ci-comparator)))
+
+
+  (define cd-comparator
+    (make-product-comparator
+     (make-wrapper-comparator cd? cd-artist person-name-comparator)
+     (make-wrapper-comparator cd? cd-title string-ci-comparator)))
+
+  (define item-comparator
+    (make-sum-comparator book-comparator cd-comparator))
+
+
+  (define (run-tests-nested)
+    (let* ((beatles (make-person "The" "Beatles"))
+           (abbey-road (make-cd beatles "Abbey Road"))
+           (deutsche-grammatik
+            (make-book (make-person "Jacob" "Grimm") "Deutsche Grammatik"))
+           (sonnets (make-book (make-person "William" "Shakespeare") "Sonnets"))
+           (mnd (make-book (make-person "William" "Shakespeare")
+                           "A Midsummer Night’s Dream"))
+           (bob (make-cd (make-person "Bob" "Dylan") "Blonde on Blonde"))
+           (revolver (make-cd (make-person "The" "Beatles") "Revolver")))
+      (test "srfi-228.3"
+            (list deutsche-grammatik
+                  mnd
+                  sonnets
+                  abbey-road
+                  revolver
+                  bob)
+            (list-sort
+             (lambda (a b) (<? item-comparator a b))
+             (list abbey-road
+                   deutsche-grammatik
+                   sonnets
+                   mnd
+                   bob
+                   revolver)))))
+
+  (define (run-srfi-228-tests)
+    (run-tests-simple)
+    (run-tests-nested))
+
+) ;; module
+
+(import srfi-228-test)
+(run-srfi-228-tests)

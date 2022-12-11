@@ -267,7 +267,7 @@
     ;; 225 Dictionaries (draft)
     ;; 226 Control Features (draft)
     ;; 227 Optional Arguments
-    ;; 228 A further comparator library (draft)
+    (228 "A further comparator library" () "srfi-228")
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
     ;; 231 Intervals and Generalized Arrays (Updated^2)
