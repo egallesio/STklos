@@ -264,10 +264,10 @@
     ;; 222 Compound objects
     (223 "Generalized binary search procedures" () "srfi-223")
     (224 "Integer Mappings" () "srfi-224")
-    ;; 225 Dictionaries (draft)
+    ;; 225 Dictionaries
     ;; 226 Control Features (draft)
     ;; 227 Optional Arguments
-    ;; 228 A further comparator library (draft)
+    (228 "A further comparator library" () "srfi-228")
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
     ;; 231 Intervals and Generalized Arrays (Updated^2)
@@ -283,6 +283,7 @@
     ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data (drafr)
     ;; 242 The CFG Langauge (draft)
     ;; 243 Unreadable objects (draft)
+    ;; 244 Multiple-value definitions (draft)
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
