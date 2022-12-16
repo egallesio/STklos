@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -1158,7 +1158,7 @@ a symbol introduces a keyword.  Keywords are described in section
 Keywords (see _<a href="#_keywords">Section 4.14</a>).</p>
 </li>
 <li>
-<p><code>&#35;n=</code>
+<p><code>&#35;n=</code> 
  is used to represent circular structures.  The value given of <code>n</code>
 must be a number. It is used as a label, which can be referenced
 later by a <code>&#35;n&#35;</code> notation
@@ -9050,52 +9050,6 @@ the contents of each element is 0.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(bytevector-u8-ref bytevector k)</code></strong><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the byte at index <code>k</code> of <code>bytevector</code> as an exact integer in the
-range [0..255]. It is an error if <code>k</code> is not a valid index of <code>bytevector</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">8</span> <span class="mi">13</span> <span class="mi">21</span><span class="p">)</span> <span class="mi">5</span>    <span class="nv">=&gt;</span> <span class="mi">8</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><strong><code>(bytevector-u8-ref bytevector k byte)</code></strong><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Stores byte as the k th byte of bytevector. It is an error if <code>k</code>
-is not a valid index of <code>bytevector</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">bv</span> <span class="p">(</span><span class="nf">bytevector</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)))</span>
-  <span class="p">(</span><span class="nf">bytevector-u8-set!</span> <span class="nv">bv</span> <span class="mi">1</span> <span class="mi">3</span><span class="p">)</span>
-  <span class="nv">bv</span><span class="p">)</span>                             <span class="nv">=&gt;</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
 <p><strong><code>(bytevector-copy bytevector)</code></strong><br>
 <strong><code>(bytevector-copy bytevector start)</code></strong><br>
 <strong><code>(bytevector-copy bytevector start end)</code></strong><br></p>
@@ -16848,17 +16802,109 @@ create a socket on port 13 of the machine
 </div>
 <div class="sect2">
 <h3 id="_signals">4.20. Signals</h3>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-This section needs to be written
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> permits to associate handlers to POSIX.1 signals. When a
+signal handler is called, the integer value of this signal is passed
+to it as (the only) parameter.</p>
+</div>
+<div class="paragraph">
+<p>The following POXIX.1 values for signal numbers are defined:
+<code>SIGABRT</code> <code>SIGALRM</code>, <code>SIGFPE</code>, <code>SIGHUP</code>,<code>SIGILL</code>, <code>SIGINT</code>, <code>SIGKILL</code>,
+<code>SIGPIPE</code>, <code>SIGQUIT</code>, <code>SIGSEGV</code>, <code>SIGTERM</code>, <code>SIGUSR1</code>, <code>SIGUSR2</code>,
+<code>SIGCHLD</code>, <code>SIGCONT</code>, <code>SIGSTOP</code>, <code>SIGTSTP</code>, <code>SIGTTIN</code>, <code>SIGTTOU</code>.
+Moreover, the following constants, which are often available on most
+systems are also defined (if supported by the running system):
+<code>SIGTRAP</code>, <code>SIGIOT</code>, <code>SIGEMT</code>, <code>SIGBUS</code>, <code>SIGSYS</code>, <code>SIGURG</code>, <code>SIGCLD</code>,
+<code>SIGIO</code>, <code>SIGPOLL</code>, <code>SIGXCPU</code>, <code>SIGXFSZ</code>, <code>SIGVTALRM</code>, <code>SIGPROF</code>,
+<code>SIGWINCH</code>, <code>SIGLOST</code>.</p>
+</div>
+<div class="paragraph">
+<p>See your Unix documentation for the exact meaning of each constant or
+<a href="#POSIX">[POSIX]</a>. Use symbolic constants rather than their numeric value if
+you plan to port your program on another system.</p>
+</div>
+<div id="set-signal-handler!" class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(set-signal-handler! sig handler)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace the handler for integer signal <code>sig</code> with <code>handler</code>.
+The value of <code>handler</code> can be:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#t</code> to reset the signal handler for <code>sig</code> to the
+default system handler.</p>
+</li>
+<li>
+<p><code>#f</code> to  ignore the <code>sig</code> signal. Note that POSIX states that
+<code>SIGKILL</code> and <code>SIGSTOP</code> cannot be ignored or caught.</p>
+</li>
+<li>
+<p>a one parameter procedure, which will be called when the
+processus  receives the signal <code>sig</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This procedure returns <strong><em>void</em></strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">x</span> <span class="no">#f</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">set-signal-handler!</span> <span class="nv">SIGUSR1</span>
+                       <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">i</span><span class="p">)</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">x</span> <span class="no">#t</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">send-signal</span> <span class="nv">SIGUSR1</span><span class="p">)</span>
+  <span class="nv">x</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(get-signal-handler! sig)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the handler for integer signal <code>sig</code>.
+The value of <code>handler</code> can be a boolean value or a procedure.
+See <a href="#set-signal-handler!">primitive <code>set-signal-handler!</code></a> for
+more information.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(send-signal sig)</code></strong><br>
+<strong><code>(send-signal sig pid)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Send the integer signal <code>sig</code> to the process with <code>pid</code> process id.
+If the second parameter is absent, it deaults to the one of the running
+program.</p>
 </div>
 </div>
 <div class="sect2">
@@ -27078,6 +27124,9 @@ Specification Languages (DSSSL)</strong>&#8201;&#8212;&#8201;10179:1996(E), ISO,
 Home page.</p>
 </li>
 <li>
+<p><a id="POSIX"></a>[POSIX] POSIX Committee&#8201;&#8212;&#8201;<strong>System Application Program Interface (API) [C Language]</strong>&#8201;&#8212;&#8201;2017.</p>
+</li>
+<li>
 <p><a id="QuG92"></a>[QuG92] C. Queinnec and J-M. Geffroy&#8201;&#8212;&#8201;<strong>Partial Evaluation Applied to Symbolic Pattern Matching
 with Intelligent Backtrack</strong>&#8201;&#8212;&#8201;Workshop in Static Analysis, Bigre, (81&#8212;&#8203;82), Bordeaux (France), September, 1992.</p>
 </li>
@@ -29074,7 +29123,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-11-23 22:52:34 -0300
+Last updated 2022-12-16 11:53:17 +0100
 </div>
 </div>
 </body>

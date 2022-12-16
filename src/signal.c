@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update:  9-Dec-2022 19:09 (eg)
+ * Last file update: 16-Dec-2022 11:53 (eg)
  *
  */
 
@@ -248,7 +248,31 @@ DEFINE_PRIMITIVE("%initialize-signals", initialize_signals, subr0, (void))
   return STk_void;
 }
 
-
+/*
+<doc EXT set-signal-handler!
+ * (set-signal-handler! sig handler)
+ *
+ * Replace the handler for integer signal |sig| with |handler|.
+ * The value of |handler| can be:
+ *
+ * - |#t| to reset the signal handler for |sig| to the
+ *    default system handler.
+ * - |#f| to  ignore the |sig| signal. Note that POSIX states that
+ *   `SIGKILL` and `SIGSTOP` cannot be ignored or caught.
+ * - a one parameter procedure, which will be called when the
+ *   processus  receives the signal |sig|.
+ *
+ * This procedure returns *_void_*.
+ *
+ * @lisp
+ * (let ((x #f))
+ *   (set-signal-handler! SIGUSR1
+ *                        (lambda (i) (set! x #t)))
+ *   (send-signal SIGUSR1)
+ *   x)    => #t
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("set-signal-handler!", set_sig_hdlr, subr2, (SCM sig, SCM proc))
 {
   void(*p)(int);
@@ -269,6 +293,16 @@ DEFINE_PRIMITIVE("set-signal-handler!", set_sig_hdlr, subr2, (SCM sig, SCM proc)
   return STk_void;
 }
 
+/*
+<doc EXT get-signal-handler
+ * (get-signal-handler! sig)
+ *
+ * Return the handler for integer signal |sig|.
+ * The value of |handler| can be a boolean value or a procedure.
+ * See <<set-signal-handler!, primitive `set-signal-handler!`>> for
+ * more information.
+doc>
+*/
 DEFINE_PRIMITIVE("get-signal-handler", get_sig_hdlr, subr1, (SCM sig))
 {
   long s = STk_integer_value(sig);
@@ -278,6 +312,16 @@ DEFINE_PRIMITIVE("get-signal-handler", get_sig_hdlr, subr1, (SCM sig))
 }
 
 
+/*
+<doc EXT send-signal
+ * (send-signal sig)
+ * (send-signal sig pid)
+ *
+ * Send the integer signal |sig| to the process with |pid| process id.
+ * If the second parameter is absent, it deaults to the one of the running
+ * program.
+doc>
+*/
 DEFINE_PRIMITIVE("send-signal", send_signal, subr12, (SCM sig, SCM process))
 {
   long s    = STk_integer_value(sig);
