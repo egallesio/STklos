@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2022 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 13-Jan-2022 17:34 (eg)
+ * Last file update: 16-Dec-2022 22:39 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -730,12 +730,12 @@ doc>
 */
 DEFINE_PRIMITIVE("process-signal", proc_signal, subr2, (SCM proc, SCM sig))
 {
-  int S;
-  PURGE_PROCESS_TABLE();
+  long int S = STk_integer_value(sig);
 
   if (!PROCESSP(proc)) error_bad_process(proc);
-  S = STk_get_signal_value(sig);
+  if (S == LONG_MIN) STk_error("bad signal value ~S", sig);
 
+  PURGE_PROCESS_TABLE();
   kill(PROCESS_PID(proc), S);
   return STk_void;
 }

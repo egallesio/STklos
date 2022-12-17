@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update: 16-Dec-2022 11:53 (eg)
+ * Last file update: 16-Dec-2022 18:23 (eg)
  *
  */
 
@@ -191,15 +191,14 @@ Error:
   return 0; /* never reached */
 }
 
-
-static void exec_signal_handler(int i) // Run a Scheme procedure for signal i
+static void exec_signal_handler(int sig) // Run a Scheme proc. for signal sig
 {
-  SCM proc = signals[i];
+  SCM proc = signals[sig];
 
   if (STk_procedurep(proc)) {
-    STk_C_apply(signals[i], 1, MAKE_INT(i));
+    STk_C_apply(signals[sig], 1, MAKE_INT(sig));
   }
-  else STk_panic("PROBLEM sith signal %d", i);
+  else STk_panic("PROBLEM sith signal %d", sig);
 }
 
 
