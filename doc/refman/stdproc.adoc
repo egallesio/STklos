@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 23-Nov-2022 21:47 (eg)
+// Last file update: 17-Dec-2022 12:13 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -867,7 +867,7 @@ the standard files of the process are redirected.
 {{insertdoc 'process-error}}
 {{insertdoc 'process-wait}}
 {{insertdoc 'process-exit-status}}
-{{insertdoc 'process-signal}}
+{{insertdoc 'process-send-signal}}
 {{insertdoc 'process-kill}}
 {{insertdoc 'process-continue}}
 {{insertdoc 'process-list}}
@@ -895,7 +895,29 @@ applications.
 
 === Signals
 
-WARNING: This section needs to be written
+{{stklos}} permits to associate handlers to POSIX.1 signals. When a
+signal handler is called, the integer value of this signal is passed
+to it as (the only) parameter.
+
+The following POXIX.1 values for signal numbers are defined:
+`SIGABRT` `SIGALRM`, `SIGFPE`, `SIGHUP`,`SIGILL`, `SIGINT`, `SIGKILL`,
+`SIGPIPE`, `SIGQUIT`, `SIGSEGV`, `SIGTERM`, `SIGUSR1`, `SIGUSR2`,
+`SIGCHLD`, `SIGCONT`, `SIGSTOP`, `SIGTSTP`, `SIGTTIN`, `SIGTTOU`.
+Moreover, the following constants, which are often available on most
+systems are also defined (if supported by the running system):
+`SIGTRAP`, `SIGIOT`, `SIGEMT`, `SIGBUS`, `SIGSYS`, `SIGURG`, `SIGCLD`,
+`SIGIO`, `SIGPOLL`, `SIGXCPU`, `SIGXFSZ`, `SIGVTALRM`, `SIGPROF`,
+`SIGWINCH`, `SIGLOST`.
+
+See your Unix documentation for the exact meaning of each constant or
+<<POSIX>>. Use symbolic constants rather than their numeric value if
+you plan to port your program on another system.
+
+[#set-signal-handler!]
+{{insertdoc 'set-signal-handler!}}
+{{insertdoc 'get-signal-handler}}
+{{insertdoc 'send-signal}}
+
 
 === Parameter Objects
 {{stklos}} parameters correspond to the ones defined in {{link-srfi 39}}.

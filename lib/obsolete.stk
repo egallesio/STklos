@@ -2,7 +2,7 @@
 ;;;; obsolete.stk       -- Definition of functions which are obsolete.
 ;;;;                       Function defined here are candidate to disappear.
 ;;;;
-;;;; Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 12-May-2022 15:55 (eg)
+;;;; Last file update: 17-Dec-2022 12:19 (eg)
 ;;;;
 
 (export string-lower string-upper
@@ -36,7 +36,8 @@
         make-box make-constant-box box-set!
         string-index argv
         fxdiv fxrem fxmod fx< fx<= fx> fx>= fx=
-        make-directory make-directories )
+        make-directory make-directories
+        process-signal)
 
 
 ;;; 11-Jun-2002 (v0.53)
@@ -120,3 +121,6 @@
 ;; 02-Apr-2021
 (define make-directory   create-directory)
 (define make-directories create-directories)
+
+;; 17-Dec-2022
+(define process-signal process-send-signal)
