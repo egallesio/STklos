@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update: 16-Dec-2022 18:23 (eg)
+ * Last file update: 17-Dec-2022 13:04 (eg)
  *
  */
 
@@ -175,22 +175,6 @@ static void sigabort(int _UNUSED(i))
 }
 
 /* ====================================================================== */
-int STk_get_signal_value(SCM sig)
-{
-  const char *s;
-  struct signal_info *p;
-
-  if (!SYMBOLP(sig)) goto Error;
-
-  /* Search sig in the table of signal names */
-  s = SYMBOL_PNAME(sig);
-  for (p = signal_names; p->name; p++)
-    if (strcasecmp(s, p->name) == 0) return p->value;
-Error:
-  STk_error("bad signal name ~S", sig);
-  return 0; /* never reached */
-}
-
 static void exec_signal_handler(int sig) // Run a Scheme proc. for signal sig
 {
   SCM proc = signals[sig];
