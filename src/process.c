@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 16-Dec-2022 22:39 (eg)
+ * Last file update: 17-Dec-2022 12:15 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -719,16 +719,16 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
 }
 
 /*
-<doc EXT process-signal
- * (process-signal proc sig)
+<doc EXT process-send-signal
+ * (process-send-signal proc sig)
  *
  * Sends the integer signal |sig| to |proc|. Since value of |sig| is system
  * dependant, use the symbolic defined signal constants to make your program
  * independant of the running system (see <<_signals>>).
- * The result of |process-signal| is *_void_*.
+ * The result of |process-send-signal| is *_void_*.
 doc>
 */
-DEFINE_PRIMITIVE("process-signal", proc_signal, subr2, (SCM proc, SCM sig))
+DEFINE_PRIMITIVE("process-send-signal", proc_signal, subr2, (SCM proc, SCM sig))
 {
   long int S = STk_integer_value(sig);
 

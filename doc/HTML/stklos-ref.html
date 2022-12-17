@@ -16401,7 +16401,7 @@ returns <code>#f</code> otherwise.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(process-signal proc sig)</code></strong><br></p>
+<p><strong><code>(process-send-signal proc sig)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -16409,7 +16409,7 @@ returns <code>#f</code> otherwise.</p>
 <p>Sends the integer signal <code>sig</code> to <code>proc</code>. Since value of <code>sig</code> is system
 dependant, use the symbolic defined signal constants to make your program
 independant of the running system (see <a href="#_signals">Section 4.20</a>).
-The result of <code>process-signal</code> is <strong><em>void</em></strong>.</p>
+The result of <code>process-send-signal</code> is <strong><em>void</em></strong>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -16430,7 +16430,7 @@ is <em>void</em>. This procedure is equivalent to</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-signal</span> <span class="nv">process</span> <span class="ss">'SIGTERM</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-send-signal</span> <span class="nv">process</span> <span class="nv">SIGTERM</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -16454,8 +16454,8 @@ its execution. They are equivalent, respectively, to</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-signal</span> <span class="nv">process</span> <span class="ss">'SIGSTOP</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">process-signal</span> <span class="nv">process</span> <span class="ss">'SIGCONT</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-send-signal</span> <span class="nv">process</span> <span class="nv">SIGSTOP</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">process-send-signal</span> <span class="nv">process</span> <span class="nv">SIGCONT</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -29123,7 +29123,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-12-16 11:53:17 +0100
+Last updated 2022-12-17 12:20:59 +0100
 </div>
 </div>
 </body>

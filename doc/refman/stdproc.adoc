@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 16-Dec-2022 11:48 (eg)
+// Last file update: 17-Dec-2022 12:13 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -867,7 +867,7 @@ the standard files of the process are redirected.
 {{insertdoc 'process-error}}
 {{insertdoc 'process-wait}}
 {{insertdoc 'process-exit-status}}
-{{insertdoc 'process-signal}}
+{{insertdoc 'process-send-signal}}
 {{insertdoc 'process-kill}}
 {{insertdoc 'process-continue}}
 {{insertdoc 'process-list}}

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 12-Dec-2000 14:04 (eg)
-;;;; Last file update: 16-Dec-2022 22:43 (eg)
+;;;; Last file update: 17-Dec-2022 12:16 (eg)
 ;;;;
 
 (export run-process process-kill process-stop process-continue)
@@ -108,11 +108,11 @@ doc>
  * Kills (brutally) |process|. The result of |process-kill|
  * is _void_. This procedure is equivalent to
  * @lisp
- * (process-signal process SIGTERM)
+ * (process-send-signal process SIGTERM)
  * @end lisp
 doc>
 |#
-(define (process-kill proc) (process-signal proc SIGTERM))
+(define (process-kill proc) (process-send-signal proc SIGTERM))
 
 #|
 <doc EXT process-stop process-continue
@@ -122,12 +122,12 @@ doc>
  * |Process-stop| stops the execution of |proc| and |process-continue| resumes
  * its execution. They are equivalent, respectively, to
  * @lisp
- * (process-signal process SIGSTOP)
- * (process-signal process SIGCONT)
+ * (process-send-signal process SIGSTOP)
+ * (process-send-signal process SIGCONT)
  * @end lisp
 doc>
 |#
-(define (process-stop proc)     (process-signal proc SIGSTOP))
-(define (process-continue proc) (process-signal proc SIGCONT))
+(define (process-stop proc)     (process-send-signal proc SIGSTOP))
+(define (process-continue proc) (process-send-signal proc SIGCONT))
 
 ; LocalWords:  SIGSTOP SIGCONT
