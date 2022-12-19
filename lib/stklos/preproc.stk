@@ -1,7 +1,7 @@
 ;;;;
 ;;;; preproc.stk     -- various stuff for pre-processing Text file with STlklos
 ;;;;
-;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update: 17-Jan-2022 17:53 (eg)
+;;;; Last file update: 19-Dec-2022 21:06 (eg)
 ;;;;
 
 
@@ -31,7 +31,7 @@
   ;; document or with metadata definitions
 
   ;; Predefined functions/variables
-  (define (stklos-pp-version) "0.1")
+  (define (stklos-pp-version) "0.2")
 )
 
 ;; ----------------------------------------------------------------------
@@ -98,30 +98,37 @@
   ;;;;
   ;;;; parse-metadata
   ;;;;
-  (define (parse-metadata str)
-    (with-input-from-string str
-      (lambda ()
-        (let* ((var (read))
-               (val (read))
-               (end (read)))
-          (unless (keyword? var)    (error "bad key when reading ~S" str))
-          (when   (eof-object? val) (set! val ""))
-          (unless (eof-object? end) (error "too mush values in ~S" str))
-          ;; Store it as a definition in the (stklos preproc) environment
-          (eval `(define ,(string->symbol (keyword->string var)) ,val)
-                *md-env*)))))
+  (define (parse-metadata port :optional (test-end-markup? #t))
+    (let Loop ((var (read port)))
+      (cond
+       ((eof-object? var)
+        (when test-end-markup?
+          (error "markup '---' absent to close the header")))
+       ((equal? var '|---|)
+        (unless (eq? (peek-char port) #\newline)
+          (error "newline expected after the closing '---' markup"))
+        (read-char port))
+       ((keyword? var)
+        (let ((value (read port)))
+          (when (eof-object? value) (error " no value for ~a" var))
+          ;; Simulate a definition in the (stklos preproc) environment
+          (eval `(define ,(string->symbol (keyword->string var)) ,value)
+                *md-env*))
+        (Loop (read port))))))
 
   ;;;;
   ;;;; read-header
   ;;;;
   (define (read-header port)
-    (let ((ch (peek-char port)))
-      (when (eq? ch #\%)
-        (read-char port)  ;; to skip the '%'
-        (parse-metadata (read-line port))
-        (read-header port))))
+    ;; FIXME: This code doesn't permit to use mustaches in the first 4 characters
+    ;;        of a file 
+    (let ((str (read-string 4 port)))
+      (if (equal? str "---\n")
+          (parse-metadata port)
+          (unless (eof-object? str)
+            (display str)))))
 
-  ;;;;
+   ;;;;
   ;;;; read-command
   ;;;;
   (define (read-command port open close)
@@ -136,7 +143,7 @@
       (let ((ch (read-char port)))
         (unless (char=? ch close)
           (error "expected closing ~S" close))
-        ;; skip a newline if it just follows a end delimiter (bad idea. FIXME?)
+        ;; skip a newline if it just follows a end delimiter (bad idea)
         #;(let ((ch (peek-char port)))
           (when (and (not (eof-object? ch)) (char=? ch #\newline))
             (read-char port)))))
@@ -235,13 +242,13 @@
   (define (read-brace port)
     ;; skip opening brace which has been pushed back by the reader
     (read-char port)
-    ;; read a liste finisched by a closing brace
+    ;; read a list finished by a closing brace
     (%read-list port #\}))
 
   ;; Change the STklos reader for braces
   (eval `(define %read-brace ,read-brace)
         (find-module 'STklos))
-  
+
 ) ;; End of module preproc
 
 (provide "stklos/preproc")
