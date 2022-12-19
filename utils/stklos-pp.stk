@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jan-2022 15:00
-;;;; Last file update: 19-Dec-2022 20:52 (eg)
+;;;; Last file update: 19-Dec-2022 21:07 (eg)
 ;;;;
 
 
@@ -35,7 +35,7 @@
       "A simple preprocessor for text documents"
       ""
       (("define" :alternate "D" :arg str :help "Define new metadata")
-       (pp-parse-metadata (open-input-string str)))
+       (pp-parse-metadata (open-input-string str) #f))
 
       (("output" :alternate "o" :arg file :help "Output in <file>")
        (set! output file))
