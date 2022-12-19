@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update: 19-Dec-2022 21:06 (eg)
+;;;; Last file update: 19-Dec-2022 20:55 (eg)
 ;;;;
 
 
@@ -98,12 +98,11 @@
   ;;;;
   ;;;; parse-metadata
   ;;;;
-  (define (parse-metadata port :optional (test-end-markup? #t))
+  (define (parse-metadata port)
     (let Loop ((var (read port)))
       (cond
-       ((eof-object? var)
-        (when test-end-markup?
-          (error "markup '---' absent to close the header")))
+       #;((eof-object? var)
+        (error "markup '---' absent to close the header"))
        ((equal? var '|---|)
         (unless (eq? (peek-char port) #\newline)
           (error "newline expected after the closing '---' markup"))
