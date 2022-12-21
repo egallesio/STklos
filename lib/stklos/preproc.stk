@@ -121,7 +121,7 @@
   ;;;;
   (define (read-header port)
     ;; FIXME: This code doesn't permit to use mustaches in the first 4 characters
-    ;;        of a file 
+    ;;        of a file
     (let ((str (read-string 4 port)))
       (if (equal? str "---\n")
           (parse-metadata port)
@@ -148,6 +148,14 @@
           (when (and (not (eof-object? ch)) (char=? ch #\newline))
             (read-char port)))))
 
+    (define (evaluate expr)
+      (with-handler
+       (lambda (x)
+         (fprintf (current-error-port) "~a:~a: " (port-file-name port) (port-current-line port))
+         (fprintf (current-error-port) "warning when evaluating embedded expression '~s'\n" expr)
+         (fprintf (current-error-port) "    message was ~s\n" (condition-message x))
+         #f)
+       (eval expr *md-env*)))
 
     ;; Fist delimiter is already read
     (let ((ch (peek-char port)))
@@ -162,14 +170,14 @@
 
              ((= (length expr) 1)
               ;; A single component in the command
-              (let ((res (eval (car expr) *md-env*)))
-                (if (procedure? res)                ;; FIXME: add handler
+              (let ((res (evaluate (car expr))))
+                (if (procedure? res)
                     (set! res (apply res '())))
                 res))
 
              (else
               ;; a function/macro call
-              (let ((res (eval expr *md-env*)))     ;; FIXME: add handler
+              (let ((res (evaluate expr)))
                 res))))
           ;; A single opening delimiter
           open)))
