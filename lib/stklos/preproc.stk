@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update: 21-Dec-2022 20:01 (eg)
+;;;; Last file update: 21-Dec-2022 20:55 (eg)
 ;;;;
 
 
@@ -218,6 +218,20 @@
         (do-read (open-input-string str)))))
 
   (define (translate file)
+
+    (define (call-document-processor cmd body)
+      (let ((tmpfile (create-temp-file)))
+        (%debug "===> ~S" tmpfile)
+        (with-handler (lambda (e) e)
+          ;; Send the body string to the processor command
+          (with-output-to-file (format "| ~a > ~a" cmd tmpfile)
+            (lambda () (display body)))
+
+          ;; Copy the tmpfile to current-output-port
+          (with-input-from-file tmpfile
+            (lambda () (copy-port (current-input-port) (current-output-port)))))
+        (delete-file tmpfile)))
+
     ;; First process the user file since it contains metadata definitions
     (let ((body (process-file file))
           (pre  "")                     ;; content of prelude template
@@ -235,13 +249,15 @@
             (set! pre  (process-file prelude-file))
             (set! post (process-file postlude-file)))))
 
-      ;; display pre + body sent to the external document processor + post
-      ;; external document processor can be pandoc, markdown, asciidoc ...
-      (display pre)
-      (let ((cmd  (symbol-value 'process-command *md-env* "/bin/cat"))
+      ;; Display pre + body (eventually sent to an external document processor) + post
+      ;; External document processor can be pandoc, markdown, asciidoc ...
+      (let ((cmd  (symbol-value 'process-command *md-env* #f))
             (args (symbol-value 'process-args *md-env* "")))
-        (with-output-to-file (string-append "| " cmd " " args)
-          (lambda () (display body))))
+        (display pre)
+        (if cmd
+            (call-document-processor (string-append cmd " " args) body)
+            (display body))
+        (display post))
       (display post)))
 
   ;;

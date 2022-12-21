@@ -22,11 +22,19 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jan-2022 15:00
-;;;; Last file update: 19-Dec-2022 21:07 (eg)
+;;;; Last file update: 21-Dec-2022 20:28 (eg)
 ;;;;
 
 
 (import (prefix (stklos preproc) pp-))
+
+
+(define (translate input output)
+  ;; avoid redirection if not necessary
+  (if (string=? output "-")
+      (pp-translate input)
+      (with-output-to-file output
+        (lambda () (pp-translate input)))))
 
 (define (main args)
   (let ((output "-"))
@@ -52,10 +60,10 @@
       (else
        (case (length other-arguments)
          ((0)                ;; No argument: use stdin
-          (pp-translate "-")
+          (translate "-" output)
           (exit 0))
          ((1)               ;; One argument: use it as input
-          (pp-translate (car other-arguments))
+          (translate (car other-arguments) output)
           (exit 0))
          (else              ;; Error
           (arg-usage (current-error-port))
