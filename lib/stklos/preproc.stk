@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update: 19-Dec-2022 21:06 (eg)
+;;;; Last file update: 21-Dec-2022 20:01 (eg)
 ;;;;
 
 
@@ -230,9 +230,9 @@
       ;; display pre + body sent to the external document processor + post
       ;; external document processor can be pandoc, markdown, asciidoc ...
       (display pre)
-      (let ((md-cmd  (symbol-value 'md-command *md-env* "/bin/cat"))
-            (md-args (symbol-value 'md-args *md-env* "")))
-        (with-output-to-file (string-append "| " md-cmd " " md-args)
+      (let ((cmd  (symbol-value 'process-command *md-env* "/bin/cat"))
+            (args (symbol-value 'process-args *md-env* "")))
+        (with-output-to-file (string-append "| " cmd " " args)
           (lambda () (display body))))
       (display post)))
 
