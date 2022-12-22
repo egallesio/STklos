@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  3-Dec-2022 17:50 (eg)
+### Last file update: 22-Dec-2022 12:36 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -57,6 +57,7 @@ AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
+AC_C_BIGENDIAN
 
 ### Checks for library functions.
 AC_FUNC_ALLOCA
