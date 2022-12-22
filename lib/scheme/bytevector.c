@@ -21,12 +21,11 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 07-Jul-2022 22:40
- * Last file update: 28-Nov-2022 16:57 (eg)
+ * Last file update: 22-Dec-2022 12:12 (eg)
  */
 
 #include <gmp.h>
 #include <sys/param.h>
-#include <endian.h>
 #include <stklos.h>
 #include "bytevector-incl.c"
 
