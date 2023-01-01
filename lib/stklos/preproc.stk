@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  1-Jan-2023 09:56 (eg)
+;;;; Last file update:  1-Jan-2023 22:10 (eg)
 ;;;;
 
 
@@ -123,15 +123,19 @@
   ;;;; read-header
   ;;;;
   (define (read-header port)
-    ;; FIXME: This code doesn't permit to use mustaches in the first 4 characters
-    ;;        of a file
-    (let ((str (read-string 4 port)))
-      (if (equal? str "---\n")
+    (when (eq? (peek-char port) #\-)
+      ;; NOTE: This code doesn't permit to use mustaches in the first
+      ;; four characters of an "interactive" port (other ports are
+      ;; rewinded if we don't have a header
+      (let ((str (read-string 4 port)))
+        (if (equal? str "---\n")
           (parse-metadata port)
           (unless (eof-object? str)
-            (display str)))))
+            (if (interactive-port? port)
+                (display str)
+                (rewind-file-port port)))))))
 
-   ;;;;
+  ;;;;
   ;;;; read-command
   ;;;;
   (define (read-command port open close)
