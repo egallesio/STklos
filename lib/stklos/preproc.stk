@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  1-Jan-2023 22:10 (eg)
+;;;; Last file update:  2-Jan-2023 07:49 (eg)
 ;;;;
 
 
@@ -31,7 +31,7 @@
   ;; document or with metadata definitions
 
   ;; Predefined functions/variables
-  (define (stklos-pp-version) "0.2")
+  (define (stklos-pp-version) "0.3")
 )
 
 ;; ----------------------------------------------------------------------
@@ -40,12 +40,21 @@
 ;;
 ;; ______________________________________________________________________
 (define-module stklos/preproc
-  (export parse-metadata process-file process-string translate)
+  (export verbosity parse-metadata process-file process-string translate)
 
   (define *printing*      #t)
   (define *print-stack*   '())
   (define *md-env*        (find-module 'stklos/preproc/env))
   (define *command-chars* '(#\{ #\}))
+
+  (define verbosity (make-parameter 0 (lambda (x)
+                                        (if (integer? x)
+                                            x
+                                            (error "bad integer" x)))))
+
+  (define (tprintf lvl fmt . args)  ;; eventually print a trace
+    (when (>= (verbosity) lvl)
+      (apply eprintf fmt args)))
 
   ;;
   ;; Utilities
@@ -116,6 +125,7 @@
                 (val (regexp-replace "^ *(.*)([^ ]) *"    ;; A simple trim regexp
                                      value
                                      "\\1\\2")))
+            (tprintf 2 "*** defining variable ~s to ~s\n" var val)
             (eval `(define ,var ,val) *md-env*))
         (Loop (read port)))))))
 
@@ -227,6 +237,7 @@
   (define (translate file)
 
     (define (call-document-processor cmd body)
+      (tprintf 1 "*** call document processor: ~S\n" cmd)
       (let ((tmpfile (create-temp-file)))
         (with-handler (lambda (e) e)
           ;; Send the body string to the processor command
@@ -246,6 +257,7 @@
       ;; Eventually load a global config file
       (let ((conf-file (symbol-value* 'conf-file       *md-env* #f)))
         (when conf-file
+          (tprintf 1 "*** loading file ~s\n" conf-file)
           (load conf-file)))
 
       (let ((template  (symbol-value* 'template        *md-env* #f))
