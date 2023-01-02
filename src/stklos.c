@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  4-Sep-2022 19:16 (eg)
+ * Last file update:  2-Jan-2023 08:24 (eg)
  */
 
 #include "stklos.h"
@@ -212,6 +212,13 @@ int main(int argc, char *argv[])
   ret = process_program_arguments(argc, argv);
   argc -= ret;
   argv += ret;
+
+  if (!*program_file && argc) {
+    /* We have at least an argument. Use it as if we had a -f option */
+    program_file = *argv++;
+    argc-=1;
+    script_file = STk_expand_file_name(program_file);
+  }
 
   /* See if we use UTF8 encoding */
   if (!setlocale(LC_ALL, "")) {
