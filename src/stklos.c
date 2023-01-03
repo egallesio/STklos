@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  2-Jan-2023 08:24 (eg)
+ * Last file update:  3-Jan-2023 15:28 (eg)
  */
 
 #include "stklos.h"
@@ -129,11 +129,20 @@ DEFAULT_STACK_SIZE);
 }
 
 
-static int process_program_arguments(int argc, char *argv[])
+static int process_program_arguments(int argc, char *argv[], int *pos)
 {
   extern char *optarg;
   extern int optind;
   int c;
+
+  // Retain the initial position of the first "--" (if any) BEFORE the getopt
+  // function eventually displaces it to the left in the argv array (since it
+  // reorders the arguments to place the options before parameters. 
+  *pos = -1;
+  for (int i =0; i < argc; i++) { /* Retain the position of a "--" in the arg list */
+    if (strcmp(argv[i], "--") == 0) { *pos = i; break; }
+  }
+
 
   for ( ; ; ) {
     c = getopt_long(argc, argv, "qidnvVhcf:l:e:b:s:D:I:A:u:", long_options, NULL);
@@ -173,9 +182,9 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   SCM options, l = STk_nil;
   int i;
 
-  for (i = argc-1; i >= 0; i--)
+  for (i = argc-1; i >= 0; i--) {
     l = STk_cons(STk_Cstring2string(argv[i]), l);
-
+  }
   options = LIST2(STk_makekey("argv"), l);
   ADD_OPTION("STklos",             "name");
   ADD_OPTION(argv0,                "program-name");
@@ -201,6 +210,7 @@ int main(int argc, char *argv[])
 {
   int ret;
   char *argv0 = *argv;
+  int pos__ = -1;  // position of first "--"  in arguments
 
   /* Initialize the Garbage Collector */
 #if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
@@ -209,15 +219,21 @@ int main(int argc, char *argv[])
   STk_gc_init();
 
   /* Process command arguments */
-  ret = process_program_arguments(argc, argv);
+  ret = process_program_arguments(argc, argv, &pos__);
   argc -= ret;
   argv += ret;
 
   if (!*program_file && argc) {
-    /* We have at least an argument. Use it as if we had a -f option */
-    program_file = *argv++;
-    argc-=1;
-    script_file = STk_expand_file_name(program_file);
+    // We have at least one argument. Use it as if we had a -f option
+    // (except if a "--" was just before the first argument).
+    // Hence, "stklos -- foo.stk 1 2" will not call foo.stk, whereas
+    // "stklos foo.stk -- 1 2" will.
+    if (pos__ + 1 != ret) {
+      /* the "--" was not before the script name (before getopt reordering) */
+      program_file = *argv++;
+      argc-=1;
+      script_file = STk_expand_file_name(program_file);
+    }
   }
 
   /* See if we use UTF8 encoding */
