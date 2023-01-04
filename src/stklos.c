@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  3-Jan-2023 15:28 (eg)
+ * Last file update:  4-Jan-2023 18:19 (eg)
  */
 
 #include "stklos.h"
@@ -129,20 +129,11 @@ DEFAULT_STACK_SIZE);
 }
 
 
-static int process_program_arguments(int argc, char *argv[], int *pos)
+static int process_program_arguments(int argc, char *argv[])
 {
   extern char *optarg;
   extern int optind;
   int c;
-
-  // Retain the initial position of the first "--" (if any) BEFORE the getopt
-  // function eventually displaces it to the left in the argv array (since it
-  // reorders the arguments to place the options before parameters. 
-  *pos = -1;
-  for (int i =0; i < argc; i++) { /* Retain the position of a "--" in the arg list */
-    if (strcmp(argv[i], "--") == 0) { *pos = i; break; }
-  }
-
 
   for ( ; ; ) {
     c = getopt_long(argc, argv, "qidnvVhcf:l:e:b:s:D:I:A:u:", long_options, NULL);
@@ -210,7 +201,6 @@ int main(int argc, char *argv[])
 {
   int ret;
   char *argv0 = *argv;
-  int pos__ = -1;  // position of first "--"  in arguments
 
   /* Initialize the Garbage Collector */
 #if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
@@ -219,21 +209,19 @@ int main(int argc, char *argv[])
   STk_gc_init();
 
   /* Process command arguments */
-  ret = process_program_arguments(argc, argv, &pos__);
+  ret = process_program_arguments(argc, argv);
   argc -= ret;
   argv += ret;
 
   if (!*program_file && argc) {
-    // We have at least one argument. Use it as if we had a -f option
-    // (except if a "--" was just before the first argument).
-    // Hence, "stklos -- foo.stk 1 2" will not call foo.stk, whereas
-    // "stklos foo.stk -- 1 2" will.
-    if (pos__ + 1 != ret) {
-      /* the "--" was not before the script name (before getopt reordering) */
-      program_file = *argv++;
-      argc-=1;
+    // We have at least one argument
+    if (strcmp(*argv, "-") != 0) {
+      // argv[0] is not "-", program is not on stdin => simulate a '-f' option.
+      program_file = *argv;
       script_file = STk_expand_file_name(program_file);
     }
+    argv+=1;
+    argc-=1;
   }
 
   /* See if we use UTF8 encoding */
