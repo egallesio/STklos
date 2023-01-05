@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  5-Jan-2023 17:26 (eg)
+;;;; Last file update:  5-Jan-2023 19:48 (eg)
 ;;;;
 
 
@@ -50,6 +50,19 @@
   (define *md-env*        (find-module 'stklos/preproc/env))
   (define *command-chars* '(#\{ #\}))
 
+  ;;
+  ;; Utilities
+  ;;
+  (define (tprintf lvl fmt . args)  ;; eventually print a trace
+    (when (>= (verbosity) lvl)
+      (apply eprintf fmt args)))
+
+  (define (alphabetic? obj)
+    (and (not (eof-object? obj))
+         (char? obj)
+         (char-alphabetic? obj)))
+
+  ;; ----------------------------------------------------------------------
   (define (version) (stklos-pp-version))
 
   (define verbosity (make-parameter 0 (lambda (x)
@@ -57,12 +70,8 @@
                                             x
                                             (error "bad integer" x)))))
 
-  (define (tprintf lvl fmt . args)  ;; eventually print a trace
-    (when (>= (verbosity) lvl)
-      (apply eprintf fmt args)))
-
   ;;
-  ;; Utilities
+  ;; stklos-pp predefined functions
   ;;
   (define (Include file)
     (let ((port (open-input-file file)))
@@ -113,42 +122,59 @@
   ;;;; parse-metadata
   ;;;;
   (define (parse-metadata port :optional (test-end-markup? #t))
-    (let Loop ((var (read port)))
-      (cond
-       ((eof-object? var)
-        (when test-end-markup?
-          (error "markup '---' absent to close the header")))
-       ((equal? var '|---|)
-        (unless (eq? (peek-char port) #\newline)
-          (error "newline expected after the closing '---' markup"))
-        (read-char port))
-       ((keyword? var)
-        (let ((value (read-line port)))
-          (when (eof-object? value) (error " no value for ~a" var))
-          ;; Simulate a variable definition in the (stklos preproc) environment
-          (let ((var (string->symbol (keyword->string var)))
-                (val (regexp-replace "^ *(.*)([^ ]) *"    ;; A simple trim regexp
-                                     value
-                                     "\\1\\2")))
-            (tprintf 2 "*** defining variable ~s to ~s\n" var val)
-            (eval `(define ,var ,val) *md-env*))
-        (Loop (read port)))))))
+    (let ((seen-end? #f))  ;; Seen the final '---'
+
+      (let Loop ((var (read port)))
+        (cond
+         ((eof-object? var)
+          #void)
+
+         ((equal? var '|---|)
+          (unless (eq? (peek-char port) #\newline)
+            (error "newline expected after the closing '---' markup"))
+          (read-char port)
+          (set! seen-end? #t))
+
+         ((keyword? var)
+          (let ((value (read-line port)))
+            (when (eof-object? value) (error " no value for ~a" var))
+            ;; Simulate a variable definition in the (stklos preproc) environment
+            (let ((var (string->symbol (keyword->string var)))
+                  (val (regexp-replace "^ *(.*)([^ ]) *"    ;; A simple trim regexp
+                                       value
+                                       "\\1\\2")))
+              (tprintf 2 "*** defining variable ~s to ~s\n" var val)
+              (eval `(define ,var ,val) *md-env*))
+            (when (alphabetic? (peek-char port))
+              (Loop (read port)))))
+
+         (else ;; Not a keyword rewrite what we have read
+          (write var))))
+
+      (when (and test-end-markup? (not seen-end?))
+        (error "markup '---' absent to close the header"))))
+
 
   ;;;;
   ;;;; read-header
   ;;;;
   (define (read-header port)
-    (when (eq? (peek-char port) #\-)
-      ;; NOTE: This code doesn't permit to use mustaches in the first
-      ;; four characters of an "interactive" port (other ports are
-      ;; rewinded if we don't have a header
-      (let ((str (read-string 4 port)))
-        (if (equal? str "---\n")
-          (parse-metadata port)
-          (unless (eof-object? str)
-            (if (interactive-port? port)
-                (display str)
-                (rewind-file-port port)))))))
+    (let ((ch (peek-char port)))
+      (cond
+       ((eq? ch #\-)
+        ;; NOTE: This code doesn't permit to use mustaches in the first
+        ;; four characters of an "interactive" port (other ports are
+        ;; rewinded if we don't have a header)
+        (let ((str (read-string 4 port)))
+          (if (equal? str "---\n")
+              (parse-metadata port)
+              (unless (eof-object? str)
+                (if (interactive-port? port)
+                    (display str)
+                    (rewind-file-port port))))))
+
+       ((alphabetic? ch)
+        (parse-metadata port #f)))))
 
   ;;;;
   ;;;; read-command
