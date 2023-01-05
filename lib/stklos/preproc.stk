@@ -21,11 +21,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  2-Jan-2023 07:49 (eg)
+;;;; Last file update:  5-Jan-2023 17:26 (eg)
 ;;;;
 
 
 (define-module stklos/preproc/env
+  (export stklos-pp-version)
   ;; This module contains the variables accessible from the document
   ;; environment. New bindings can be added with defines embedded in the
   ;; document or with metadata definitions
@@ -40,12 +41,16 @@
 ;;
 ;; ______________________________________________________________________
 (define-module stklos/preproc
-  (export verbosity parse-metadata process-file process-string translate)
+  (import (stklos preproc env))
+  (export version verbosity parse-metadata process-file process-string
+          translate)
 
   (define *printing*      #t)
   (define *print-stack*   '())
   (define *md-env*        (find-module 'stklos/preproc/env))
   (define *command-chars* '(#\{ #\}))
+
+  (define (version) (stklos-pp-version))
 
   (define verbosity (make-parameter 0 (lambda (x)
                                         (if (integer? x)

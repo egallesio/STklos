@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jan-2022 15:00
-;;;; Last file update:  2-Jan-2023 08:00 (eg)
+;;;; Last file update:  5-Jan-2023 17:20 (eg)
 ;;;;
 
 
@@ -42,6 +42,10 @@
       "Usage: stklos-pp [options] document"
       "A simple preprocessor for text documents"
       ""
+      (("version" :alternate "v" :help "Show version and exit")
+       (printf "stklos-pp ~A\n" (pp-version))
+       (exit 0))
+
       (("define" :alternate "D" :arg str :help "Define new metadata")
        (pp-parse-metadata (open-input-string str) #f))
 
