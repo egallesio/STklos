@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  4-Jan-2023 18:19 (eg)
+ * Last file update:  5-Jan-2023 11:31 (eg)
  */
 
 #include "stklos.h"
@@ -144,8 +144,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'V': srfi_176        = 1;                                    break;
       case 'I': Idirs = STk_cons(STk_Cstring2string(optarg), Idirs);    break;
       case 'A': Adirs = STk_cons(STk_Cstring2string(optarg), Adirs);    break;
-      case 'f': program_file    = optarg;
-                script_file     = STk_expand_file_name(optarg);         break;
+      case 'f': program_file    = optarg;                               break;
       case 'l': load_file       = optarg;                               break;
       case 'e': sexpr           = optarg;                               break;
       case 'b': boot_file       = optarg;                               break;
@@ -214,14 +213,19 @@ int main(int argc, char *argv[])
   argv += ret;
 
   if (!*program_file && argc) {
-    // We have at least one argument
-    if (strcmp(*argv, "-") != 0) {
-      // argv[0] is not "-", program is not on stdin => simulate a '-f' option.
-      program_file = *argv;
-      script_file = STk_expand_file_name(program_file);
-    }
+    // We have at least one argument and we don't have set the -f option
+    program_file = *argv;
     argv+=1;
     argc-=1;
+  }
+
+  if (*program_file) {
+    if (strcmp(program_file, "-") == 0)
+      /* Use stdin as input => reset program_file to "" */
+      program_file = "";
+    else
+      /* Set script_file to for SRFI-196 */
+      script_file = STk_expand_file_name(program_file);
   }
 
   /* See if we use UTF8 encoding */
