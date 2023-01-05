@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  5-Jan-2023 11:31 (eg)
+ * Last file update:  5-Jan-2023 15:27 (eg)
  */
 
 #include "stklos.h"
@@ -136,7 +136,7 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "qidnvVhcf:l:e:b:s:D:I:A:u:", long_options, NULL);
+    c = getopt_long(argc, argv, "+qidnvVhcf:l:e:b:s:D:I:A:u:", long_options, NULL);
     if (c == -1) break;
 
     switch (c) {
