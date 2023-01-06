@@ -9,7 +9,7 @@ The files in this directory show some examples in STklos:
   with `./hello`. As a rule of thumb, any STklos program can be used
   as a script by adding the line
 
-        #!/usr/bin/env stklos-script
+        #!/usr/bin/env stklos
 
   at the top of the file, and adding the execution bit on the file.
   You can also compile the file with the `stklos-compile` command.

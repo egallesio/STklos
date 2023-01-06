@@ -901,7 +901,7 @@ pre.rouge {
 <div class="sectionbody">
 <div class="paragraph">
 <p>This document provides a complete list of procedures and special forms
-implemented in version <strong>1.70</strong> of <strong><em>STklos</em></strong>. The language
+implemented in version <strong>0.3</strong> of <strong><em>STklos</em></strong>. The language
 implemented by <strong><em>STklos</em></strong> is nearly compliant with the language
 described in the Revised<sup>5</sup> Report on the Algorithmic Language Scheme
 (aka R<sup>5</sup>RS) <a href="#R5RS">[R5RS]</a>.</p>
@@ -930,7 +930,7 @@ following URL: <a href="https://www.gnu.org/licenses/gpl-3.0.html" class="bare">
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph">
-<p>Copyright © 1999-2022 Erick Gallesio</p>
+<p>Copyright © 1999-2023 Erick Gallesio</p>
 </div>
 <div class="paragraph">
 <p>Permission is granted to copy, distribute and/or modify this document
@@ -13756,7 +13756,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mi">70</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-0</span><span class="o">.</span><span class="mi">3</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -14142,7 +14142,7 @@ list of the arguments which are not options.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos-script</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos</span>
 
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">main</span> <span class="nv">args</span><span class="p">)</span>
   <span class="p">(</span><span class="nf">parse-arguments</span> <span class="nv">args</span>
@@ -24045,19 +24045,15 @@ script via a /usr/bin/env trampoline, like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>#!/usr/bin/env &lt;executable&gt;</code></pre>
+<pre class="rouge highlight"><code>#!/usr/bin/env stklos</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>where <code>&lt;executable&gt;</code> can recover several specified names.  <strong><em>STklos</em></strong> uses
-only the name <code>stklos-script</code> for <code>&lt;executable&gt;</code>.</p>
 </div>
 <div class="paragraph">
 <p>Here is an example of the classical <code>echo</code> command (without option) in Scheme:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos-script</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos</span>
 
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">main</span> <span class="nv">arguments</span><span class="p">)</span>
   <span class="p">(</span><span class="nb">for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="sc">#\space</span><span class="p">))</span>
@@ -29124,7 +29120,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-12-17 13:23:14 +0100
+Last updated 2023-01-06 12:30:18 +0100
 </div>
 </div>
 </body>
