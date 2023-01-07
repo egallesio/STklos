@@ -18,15 +18,20 @@
 .SH NAME
 stklos-script \- Wrapper for running STklos code as scripts on Unix
 
+.SH IMPORTANT NOTE
+This command is no more useful. You can now use the name
+.I stklos
+in place of
+.I stklos-script.
+The command is kept for compatibility with older scripts.
+
 .SH DESCRIPTION
+
 SRFI-22 (Running Scheme Scripts on Unix) recommends to invoke the Scheme script
 interpreter from the script via a \fI/usr/bin/env\fR trampoline, like this:
 .PP
-.B #!/usr/bin/env <executable>
-.PP
-where \fB<executable>\fR can recover several specified names. STklos uses only the name 
-.B stklos-script
-for \fB<executable>\fR.
+.B #!/usr/bin/env stklos-script
+
 .PP
 Here is an example of the classical echo command (without option) in Scheme:
 .PP
