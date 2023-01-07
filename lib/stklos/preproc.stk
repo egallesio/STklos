@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  5-Jan-2023 19:58 (eg)
+;;;; Last file update:  7-Jan-2023 16:59 (eg)
 ;;;;
 
 
@@ -138,7 +138,7 @@
          ((keyword? var)
           (let ((value (read-line port)))
             ;; Simulate a variable definition in the (stklos preproc) environment
-            (let ((var (string->symbol (keyword->string var)))
+            (let ((var (string->symbol (string-lower (keyword->string var))))
                   (val (regexp-replace "^ *(.*)([^ ]) *"    ;; A simple trim regexp
                                        value
                                        "\\1\\2")))
