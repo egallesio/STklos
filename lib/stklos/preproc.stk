@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  7-Jan-2023 16:59 (eg)
+;;;; Last file update:  7-Jan-2023 17:11 (eg)
 ;;;;
 
 
@@ -62,6 +62,10 @@
          (char? obj)
          (char-alphabetic? obj)))
 
+  (define (warning port fmt . args)
+    (fprintf (current-error-port) "~a:~a: warning " (port-file-name port) (port-current-line port))
+    (apply fprintf (current-error-port) fmt args))
+  
   ;; ----------------------------------------------------------------------
   (define (version) (stklos-pp-version))
 
@@ -131,7 +135,7 @@
 
          ((equal? var '|---|)
           (unless (eq? (peek-char port) #\newline)
-            (error "newline expected after the closing '---' markup"))
+            (warning port "newline expected after the closing '---' markup"))
           (read-char port)
           (set! seen-end? #t))
 
@@ -151,7 +155,7 @@
           (write var))))
 
       (when (and test-end-markup? (not seen-end?))
-        (error "markup '---' absent to close the header"))))
+        (warning port "markup '---' absent to close the header"))))
 
 
   ;;;;
@@ -189,7 +193,7 @@
     (define (verify-close)
       (let ((ch (read-char port)))
         (unless (char=? ch close)
-          (error "expected closing ~S" close))
+          (warning  port "expected closing ~S" close))
         ;; skip a newline if it just follows a end delimiter (bad idea)
         #;(let ((ch (peek-char port)))
           (when (and (not (eof-object? ch)) (char=? ch #\newline))
