@@ -43,7 +43,6 @@
    vector-set!
    vector-swap!
    vector-fill!
-   vector-reverse!
    vector-copy!                    vector-reverse-copy!
    vector-reverse!
 
