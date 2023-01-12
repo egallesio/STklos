@@ -20,7 +20,7 @@
 #
 #           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 #    Creation date: 20-Jun-2022 09:24 (jpellegrini)
-# Last file update: 19-Oct-2022 18:39 (eg)
+# Last file update: 12-Jan-2023 16:43 (eg)
 
 #-======================================================================
 
@@ -98,7 +98,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 s8.stk  u8.stk  s16.stk u16.stk \
 s32.stk u32.stk s64.stk u64.stk \
 f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
-	sed 's/TAG/$(basename $@)/g'   tagvector-template.stk > $@
+	sed 's/TAG/`basename $@`/g'   tagvector-template.stk > $@
 
 #======================================================================
 
