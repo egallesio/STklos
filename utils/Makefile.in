@@ -16,7 +16,7 @@
 
 # Makefile.am for STklos/utils source file
 #
-# Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+# Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 19-Dec-2022 20:43 (eg)
+# Last file update: 12-Jan-2023 12:20 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -189,6 +189,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
 CPP = @CPP@
@@ -270,6 +271,7 @@ STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
+SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
@@ -557,7 +559,7 @@ uninstall-am: uninstall-binSCRIPTS
 COMP ?= ./tmpcomp
 
 all-am:
-	chmod a+x stklos-script
+	chmod a+x stklos-config stklos-script
 
 stklos-compile: stklos-compile.stk
 	$(COMP) -o stklos-compile stklos-compile.stk

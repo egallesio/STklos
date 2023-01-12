@@ -1,6 +1,5 @@
 #!/bin/sh
 #                                                       -*- shell-script -*-
-
 #
 # s t k l o s - c o n f i g
 #
@@ -22,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 23:58 (eg)
-# Last file update: 23-Jul-2020 18:54 (eg)
+# Last file update: 12-Jan-2023 11:56 (eg)
 
 
 prefix=@prefix@
@@ -45,8 +44,8 @@ Options:
                                 platform
         [--threads | -t ]       Display the name of the valiable thread
                                 system
-        [--libraries |-L ]      Display a summary of used and compiled
-                                libraries
+        [--libraries |-L ]      Display a summary of used libraries
+        [--compiled-libraries]  Display a summary of compiled libraries
         [--help | -h | -?]      Show a list of options
 EOF
     exit $1
@@ -88,7 +87,10 @@ while test $# -gt 0; do
             echo @THREADS@
             ;;
         --libraries|-L)
-            echo "@LIB_SUMMARY@"
+            echo @SYST_LIBS@
+            ;;
+        --compiled-libraries)
+            echo @COMP_LIBS@
             ;;
         --help|-h|-\?)
             usage 0 1>&2

@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 22-Dec-2022 12:36 (eg)
+### Last file update: 12-Jan-2023 11:35 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -594,6 +594,9 @@ AC_SUBST(CONF_SUMMARY)
 AC_SUBST(DEFAULT_CS)
 AC_SUBST(CONTROL_FX_PARAMETERS)
 AC_SUBST(DLLIBS)
+AC_SUBST(SYST_LIBS)
+AC_SUBST(COMP_LIBS)
+
 
 # DOC
 AC_SUBST(ASCIIDOCTOR)
