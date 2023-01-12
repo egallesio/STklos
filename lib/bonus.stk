@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  4-Sep-2022 19:08 (eg)
+;;;; Last file update: 12-Jan-2023 17:04 (eg)
 ;;;;
 
 
@@ -2302,6 +2302,8 @@ doc>
       (scheme.path ,@(load-path))
       (build.configure ,@(key-get conf :configure #f))
       ,@git-alist
+      (c.version ,(key-get conf :c-version "unknown"))
+      (c.type-bits ,@(key-get conf :c-type-bits '()))
       (stklos.threads ,(%thread-system))
       (stklos.system-libs ,@(key-get conf :system #f))
       (stklos.compiled-libs ,@(key-get conf :compiled #f))

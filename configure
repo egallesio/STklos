@@ -654,6 +654,7 @@ GOOCANV
 GTK_CFLAGS
 HAVE_CANVAS
 HAVE_GTK
+C_VERSION
 COMP_LIBS
 SYST_LIBS
 DLLIBS
@@ -7619,6 +7620,12 @@ then
    HAVE_CANVAS=1
    GOOCANV=present
 fi
+
+###
+### SFI-176 stuff
+###
+C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
+
 
 ###
 ### Finishing ...

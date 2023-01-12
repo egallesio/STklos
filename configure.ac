@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 12-Jan-2023 11:35 (eg)
+### Last file update: 12-Jan-2023 16:40 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -496,6 +496,12 @@ then
 fi
 
 ###
+### SFI-176 stuff
+###
+C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
+
+
+###
 ### Finishing ...
 ###
 
@@ -596,7 +602,7 @@ AC_SUBST(CONTROL_FX_PARAMETERS)
 AC_SUBST(DLLIBS)
 AC_SUBST(SYST_LIBS)
 AC_SUBST(COMP_LIBS)
-
+AC_SUBST(C_VERSION)
 
 # DOC
 AC_SUBST(ASCIIDOCTOR)

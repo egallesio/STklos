@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,10 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 29-Jul-2022 14:51 (eg)
+ * Last file update: 12-Jan-2023 17:03 (eg)
  */
 
+#include <limits.h>
 #include "stklos.h"
 #include "gnu-getopt.h"
 #include "git-info.h"
@@ -36,6 +37,7 @@
 int STk_interactive_debug = 0;
 #endif
 
+#define BSIZEOF(t) ((int) (sizeof(t) * CHAR_BIT))
 
 static void error_bad_string(SCM str)
 {
@@ -118,7 +120,25 @@ DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
 
 DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
 {
-  return STk_read_from_C_string(CONF_SUMMARY);
+  char buffer[2000];
+  SCM z = STk_nil;
+
+  /* The SRFI-176 c.version property */
+  z = STk_append2(z, LIST2(STk_makekey("c-version"), STk_Cstring2string(C_VERSION)));
+  
+  /* The SRFI-176 c.type-bits property */
+  snprintf(buffer,
+           sizeof(buffer),
+           "(:c-type-bits ((char %d) (short %d) (int %d) (long %d) "
+           "(float %d) (double %d) (pointer %d)))",
+           BSIZEOF(char), BSIZEOF(short), BSIZEOF(int), BSIZEOF(long),
+           BSIZEOF(float), BSIZEOF(double), BSIZEOF(SCM));
+  z = STk_append2(z, STk_read_from_C_string(buffer));
+
+  /* Add information gathered during configuration */
+  z = STk_append2(z, STk_read_from_C_string(CONF_SUMMARY));
+
+  return z;
 }
 
 DEFINE_PRIMITIVE("%stklos-git", stklos_git, subr0, (void))
@@ -329,8 +349,8 @@ static char URI_regexp[] =
  *   empty string)
  *
  * @lisp
- * (uri-parse "http://google.com") 
-{*    => (:scheme "http" :user "" :host "google.com" :port 80 
+ * (uri-parse "http://google.com")
+{*    => (:scheme "http" :user "" :host "google.com" :port 80
  *         :path "/" :query "" :fragment "")
  *
  * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
@@ -340,11 +360,11 @@ static char URI_regexp[] =
  * (uri-parse "http://foo:secret@stklos.net:2000/a/file")
  *     => (:scheme "http" :user "foo:secret" :host "stklos.net"
  *         :port 2000  :path "/a/file" :query "" :fragment "")
- * 
+ *
  * (uri-parse "/a/file")
  *    => (:scheme "file" :user "" :host "" :port 0 :path "/a/file"
  *        :query "" :fragment "")
- * 
+ *
  * (uri-parse "")
  *    => (:scheme "file"  :user "" :host "" :port 0 :path ""
  *        :query "" :fragment "")
