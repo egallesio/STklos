@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 13-Jan-2023 09:19 (eg)
+### Last file update: 13-Jan-2023 09:35 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -502,7 +502,7 @@ C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
 C_COMPILE=""
 C_LINK=""
 
-for arg in ${CC} ${CFLAGS}
+for arg in ${CC} ${CFLAGS} ${SH_MAIN_LOAD_FLAGS}
 do
     C_COMPILE="${C_COMPILE}\\\"${arg}\\\" "
 done

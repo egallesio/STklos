@@ -7630,7 +7630,7 @@ C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
 C_COMPILE=""
 C_LINK=""
 
-for arg in ${CC} ${CFLAGS}
+for arg in ${CC} ${CFLAGS} ${SH_MAIN_LOAD_FLAGS}
 do
     C_COMPILE="${C_COMPILE}\\\"${arg}\\\" "
 done
