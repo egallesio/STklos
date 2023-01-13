@@ -1,7 +1,7 @@
 /*
  * simple-module.c  -- A simple C module for STklos
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 22-Jul-2000 12:10 (eg)
- * Last file update: 28-Jul-2020 14:24 (eg)
+ * Last file update: 13-Jan-2023 11:01 (eg)
  */
 
 /* This module defines two simple primitives called "test" and "add".
@@ -41,7 +41,7 @@
  * To test this module: just enter in a terminal:
  *
  *      $ $(stklos-config -c) -c -o simple-module.o simple-module.c
- *      $ $(stklos-config -l) simple-module.$(stklos-config -s) simple-module.o
+ *      $ $(stklos-config -l) -o simple-module.$(stklos-config -s) simple-module.o
  *
  * File can be loaded from the interpreter by doing
  *

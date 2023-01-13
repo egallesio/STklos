@@ -20,7 +20,7 @@
 #
 #           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 #    Creation date: 20-Jun-2022 09:24 (jpellegrini)
-# Last file update: 12-Jan-2023 17:42 (eg)
+# Last file update: 13-Jan-2023 10:54 (eg)
 
 #-======================================================================
 
@@ -110,7 +110,7 @@ f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
 
 .c.$(SO) :
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 #======================================================================

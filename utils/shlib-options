@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update:  8-Aug-2020 18:48 (eg)
+# Last file update: 13-Jan-2023 10:49 (eg)
 
 
 #
@@ -68,7 +68,7 @@ case $os in
       esac
       OS=FREEBSD
       SH_COMP_FLAGS='-fpic'
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -80,7 +80,7 @@ case $os in
       esac
       OS=OPENBSD
       SH_COMP_FLAGS='-fpic'
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -89,7 +89,7 @@ case $os in
   HP*)
       OS=HPUX
       SH_COMP_FLAGS="+Z"
-      SH_LOAD_FLAGS="-b -o"
+      SH_LOAD_FLAGS="-b"
       SH_LOADER="$LD"
       SH_SUFFIX='sl'
       SH_LIB_SUFFIX='sl'
@@ -103,7 +103,7 @@ case $os in
       else
         SH_COMP_FLAGS="-KPIC"
       fi
-      SH_LOAD_FLAGS="-shared -o"
+      SH_LOAD_FLAGS="-shared"
       SH_LOADER="$CC"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -121,7 +121,7 @@ case $os in
       esac
       OS=LINUX
       SH_COMP_FLAGS='-fpic -nostdlib'
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -130,7 +130,7 @@ case $os in
   NetBSD*)
       OS=NETBSD
       SH_COMP_FLAGS="-fpic"
-      SH_LOAD_FLAGS="-Bshareable -o"
+      SH_LOAD_FLAGS="-Bshareable"
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -139,7 +139,7 @@ case $os in
       OS=OSF
       if [ "$CC" = "gcc" ] ;then
          SH_COMP_FLAGS="-fpic"
-         SH_LOAD_FLAGS="-shared -o"
+         SH_LOAD_FLAGS="-shared"
          SH_LOADER="$LD"
          SH_SUFFIX='so'
          SH_LIB_SUFFIX='so'
@@ -152,10 +152,8 @@ case $os in
         sun4*) machine=sun4;;
       esac
       OS=SUNOS
-#         SH_COMP_FLAGS="-K pic"
-#     SH_LOAD_FLAGS='-G -z text -h'
       SH_COMP_FLAGS="-fpic"
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -163,7 +161,7 @@ case $os in
   Darwin*)
       OS=DARWIN;
       SH_COMP_FLAGS="-fPIC -fno-common"
-      SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress -o'
+      SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress'
       SH_LOADER="$CC"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='dylib'
@@ -174,7 +172,7 @@ case $os in
       OS=CYGWIN;
       OS_FLAVOUR=WIN32;
       SH_COMP_FLAGS=
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER='true'
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'

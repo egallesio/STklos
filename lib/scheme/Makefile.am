@@ -1,6 +1,6 @@
 # Makefile for the R7RS Scheme standard libraries
 #
-# Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 18-Nov-2022 17:39 (eg)
+# Last file update: 13-Jan-2023 10:53 (eg)
 
 #======================================================================
 
@@ -131,7 +131,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 .c.$(SO) :
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 
