@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 12-Jan-2023 17:04 (eg)
+;;;; Last file update: 13-Jan-2023 09:21 (eg)
 ;;;;
 
 
@@ -2302,7 +2302,9 @@ doc>
       (scheme.path ,@(load-path))
       (build.configure ,@(key-get conf :configure #f))
       ,@git-alist
-      (c.version ,(key-get conf :c-version "unknown"))
+      (c.version ,(key-get conf :c-version "<unknown<"))
+      (c.compile ,@(key-get conf :c-compile "<unknown>"))
+      (c.link ,@(key-get conf :c-link "<unknown>"))
       (c.type-bits ,@(key-get conf :c-type-bits '()))
       (stklos.threads ,(%thread-system))
       (stklos.system-libs ,@(key-get conf :system #f))

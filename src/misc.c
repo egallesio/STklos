@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 12-Jan-2023 17:03 (eg)
+ * Last file update: 13-Jan-2023 09:21 (eg)
  */
 
 #include <limits.h>
@@ -124,8 +124,17 @@ DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
   SCM z = STk_nil;
 
   /* The SRFI-176 c.version property */
-  z = STk_append2(z, LIST2(STk_makekey("c-version"), STk_Cstring2string(C_VERSION)));
-  
+  z = STk_append2(z, LIST2(STk_makekey("c-version"),
+                           STk_Cstring2string(C_VERSION)));
+
+  /* The SRFI6176 c.compile property */
+  z = STk_append2(z, LIST2(STk_makekey("c-compile"),
+                           STk_read_from_C_string(C_COMPILE)));
+
+  /* The SRFI6176 c.link property */
+  z = STk_append2(z, LIST2(STk_makekey("c-link"),
+                           STk_read_from_C_string(C_LINK)));
+
   /* The SRFI-176 c.type-bits property */
   snprintf(buffer,
            sizeof(buffer),
@@ -134,6 +143,7 @@ DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
            BSIZEOF(char), BSIZEOF(short), BSIZEOF(int), BSIZEOF(long),
            BSIZEOF(float), BSIZEOF(double), BSIZEOF(SCM));
   z = STk_append2(z, STk_read_from_C_string(buffer));
+
 
   /* Add information gathered during configuration */
   z = STk_append2(z, STk_read_from_C_string(CONF_SUMMARY));

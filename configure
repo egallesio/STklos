@@ -654,6 +654,8 @@ GOOCANV
 GTK_CFLAGS
 HAVE_CANVAS
 HAVE_GTK
+C_LINK
+C_COMPILE
 C_VERSION
 COMP_LIBS
 SYST_LIBS
@@ -7625,7 +7627,18 @@ fi
 ### SFI-176 stuff
 ###
 C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
+C_COMPILE=""
+C_LINK=""
 
+for arg in ${CC} ${CFLAGS}
+do
+    C_COMPILE="${C_COMPILE}\\\"${arg}\\\" "
+done
+
+for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRELIB} ${FFILIB} ${GCLIB} -lm
+do
+    C_LINK="${C_LINK}\\\"${arg}\\\" "
+done
 
 ###
 ### Finishing ...
@@ -7801,6 +7814,8 @@ esac
 
 
 # readline completion support
+
+
 
 
 
