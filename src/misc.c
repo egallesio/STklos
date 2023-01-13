@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 13-Jan-2023 09:21 (eg)
+ * Last file update: 13-Jan-2023 10:21 (eg)
  */
 
 #include <limits.h>
@@ -144,6 +144,18 @@ DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
            BSIZEOF(float), BSIZEOF(double), BSIZEOF(SCM));
   z = STk_append2(z, STk_read_from_C_string(buffer));
 
+  /* The SRFI-176 stklos.shlib.compile property */
+  z = STk_append2(z, LIST2(STk_makekey("shlib-compile"),
+                           STk_read_from_C_string(SHARED_LIB_COMPILE)));
+
+  /* The SRFI-176 stklos.shlib.link property */
+  z = STk_append2(z, LIST2(STk_makekey("shlib-link"),
+                           STk_read_from_C_string(SHARED_LIB_LINK)));
+
+  /* The SRFI-176 stklos.shlib.suffix property */
+  z = STk_append2(z, LIST2(STk_makekey("shlib-suffix"),
+                           STk_Cstring2string(SHARED_LIB_SUFFIX)));
+  
 
   /* Add information gathered during configuration */
   z = STk_append2(z, STk_read_from_C_string(CONF_SUMMARY));

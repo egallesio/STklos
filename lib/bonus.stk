@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 13-Jan-2023 09:21 (eg)
+;;;; Last file update: 13-Jan-2023 10:23 (eg)
 ;;;;
 
 
@@ -2302,13 +2302,16 @@ doc>
       (scheme.path ,@(load-path))
       (build.configure ,@(key-get conf :configure #f))
       ,@git-alist
-      (c.version ,(key-get conf :c-version "<unknown<"))
+      (c.version ,(key-get conf :c-version "<unknown>"))
       (c.compile ,@(key-get conf :c-compile "<unknown>"))
       (c.link ,@(key-get conf :c-link "<unknown>"))
       (c.type-bits ,@(key-get conf :c-type-bits '()))
       (stklos.threads ,(%thread-system))
       (stklos.system-libs ,@(key-get conf :system #f))
       (stklos.compiled-libs ,@(key-get conf :compiled #f))
+      (stklos.shlib.compile ,@(key-get conf :shlib-compile #f))
+      (stklos.shlib.lib ,@(key-get conf :shlib-link #f))
+      (stklos.shlib.suffix ,(key-get conf :shlib-suffix #f))
       (stklos.srfi.count ,(length srfis))
       (os.uname ,(vector-ref u 0) ,(vector-ref u 2) ,(vector-ref u 4))
       (os.env.LANG ,(or (getenv "LANG") ""))

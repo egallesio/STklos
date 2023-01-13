@@ -654,6 +654,8 @@ GOOCANV
 GTK_CFLAGS
 HAVE_CANVAS
 HAVE_GTK
+SH_LIB_LINK
+SH_LIB_COMPILE
 C_LINK
 C_COMPILE
 C_VERSION
@@ -7630,15 +7632,34 @@ C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
 C_COMPILE=""
 C_LINK=""
 
+# c.compile property
 for arg in ${CC} ${CFLAGS} ${SH_MAIN_LOAD_FLAGS}
 do
     C_COMPILE="${C_COMPILE}\\\"${arg}\\\" "
 done
 
+# c.link property
 for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRELIB} ${FFILIB} ${GCLIB} -lm
 do
     C_LINK="${C_LINK}\\\"${arg}\\\" "
 done
+
+SH_LIB_COMPILE=""
+SH_LIB_LINK=""
+
+# stklos.shlib.compile property
+inc=-I${prefix}/include/$PACKAGE
+for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc ${EXTRA_COMP_FLAGS}
+do
+    SH_LIB_COMPILE="${SH_LIB_COMPILE}\\\"${arg}\\\" "
+done
+
+# stklos.shlib.link property
+for arg in ${SH_LOADER} ${SH_LOAD_FLAGS}
+do
+    SH_LIB_LINK="${SH_LIB_LINK}\\\"${arg}\\\" "
+done
+
 
 ###
 ### Finishing ...
@@ -7814,6 +7835,10 @@ esac
 
 
 # readline completion support
+
+
+
+
 
 
 

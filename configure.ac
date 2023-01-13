@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 13-Jan-2023 09:35 (eg)
+### Last file update: 13-Jan-2023 10:01 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -502,15 +502,34 @@ C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
 C_COMPILE=""
 C_LINK=""
 
+# c.compile property
 for arg in ${CC} ${CFLAGS} ${SH_MAIN_LOAD_FLAGS}
 do
     C_COMPILE="${C_COMPILE}\\\"${arg}\\\" "
 done
 
+# c.link property
 for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRELIB} ${FFILIB} ${GCLIB} -lm
 do
     C_LINK="${C_LINK}\\\"${arg}\\\" "
 done
+
+SH_LIB_COMPILE=""
+SH_LIB_LINK=""
+
+# stklos.shlib.compile property
+inc=-I${prefix}/include/$PACKAGE
+for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc ${EXTRA_COMP_FLAGS}
+do
+    SH_LIB_COMPILE="${SH_LIB_COMPILE}\\\"${arg}\\\" "
+done
+
+# stklos.shlib.link property
+for arg in ${SH_LOADER} ${SH_LOAD_FLAGS}
+do
+    SH_LIB_LINK="${SH_LIB_LINK}\\\"${arg}\\\" "
+done
+
 
 ###
 ### Finishing ...
@@ -615,6 +634,10 @@ AC_SUBST(SYST_LIBS)
 AC_SUBST(COMP_LIBS)
 AC_SUBST(C_VERSION)
 AC_SUBST(C_COMPILE)
+AC_SUBST(C_LINK)
+AC_SUBST(SH_LIB_COMPILE)
+AC_SUBST(SH_LIB_LINK)
+
 AC_SUBST(C_LINK)
 
 # DOC
