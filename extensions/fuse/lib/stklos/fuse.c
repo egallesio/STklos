@@ -2,7 +2,7 @@
  *
  * fuse.c                       -- Interface wrapper for FUSE
  *
- * Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Dec-2005 11:30 (eg)
- * Last file update: 19-Feb-2022 16:18 (eg)
+ * Last file update: 13-Jan-2023 11:18 (eg)
  */
 
 
@@ -34,7 +34,7 @@
 #include <fuse.h>
 
 /* ---------------------------------------------------------------------- */
-#include <stklos
+#include <stklos.h>
 #include "fuse-incl.c"
 
 static struct user_operations {
