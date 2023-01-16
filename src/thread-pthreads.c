@@ -1,7 +1,7 @@
 /*
  * thread-pthreads.c                    -- Threads support in STklos
  *
- * Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 12-Jan-2022 14:13 (eg)
+ * Last file update: 16-Jan-2023 18:01 (eg)
  */
 
 
@@ -288,7 +288,7 @@ DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
 
 DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
 {
-  return STk_intern("pthread");
+  return STk_intern("pthreads");
 }
 
 /* ======================================================================

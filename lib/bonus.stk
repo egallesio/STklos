@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 16-Jan-2023 14:16 (eg)
+;;;; Last file update: 16-Jan-2023 18:11 (eg)
 ;;;;
 
 
@@ -2298,8 +2298,9 @@ doc>
       (install-dir ,(%library-prefix))
       (website "https://stklos.net")
       (scheme.features ,@(features))
-      (scheme.srfi ,@srfis)
       (scheme.path ,@(load-path))
+      (scheme.srfi ,@srfis)
+      (scheme.srfi.count ,(length srfis))
       (build.configure ,@(key-get conf :configure #f))
       ,@git-alist
       (c.version ,(key-get conf :c-version "<unknown>"))
@@ -2312,7 +2313,6 @@ doc>
       (stklos.threads ,(%thread-system))
       (stklos.system-libs ,@(key-get conf :system #f))
       (stklos.compiled-libs ,@(key-get conf :compiled #f))
-      (stklos.srfi.count ,(length srfis))
       (os.uname ,(vector-ref u 0) ,(vector-ref u 2) ,(vector-ref u 4))
       (os.env.LANG ,(or (getenv "LANG") ""))
       (os.env.TERM ,(or (getenv "TERM") "")))))

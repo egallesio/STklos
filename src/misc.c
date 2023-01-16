@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 13-Jan-2023 10:21 (eg)
+ * Last file update: 16-Jan-2023 18:32 (eg)
  */
 
 #include <limits.h>
@@ -154,8 +154,8 @@ DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
 
   /* The SRFI-176 stklos.shlib.suffix property */
   z = STk_append2(z, LIST2(STk_makekey("shlib-suffix"),
-                           STk_Cstring2string(SHARED_LIB_SUFFIX)));
-  
+                           STk_Cstring2string(SHARED_SUFFIX)));
+
 
   /* Add information gathered during configuration */
   z = STk_append2(z, STk_read_from_C_string(CONF_SUMMARY));
