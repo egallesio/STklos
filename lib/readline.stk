@@ -2,7 +2,7 @@
 ;;;; readline.stk       -- Access to the GNU-readline lib
 ;;;;                       (or libedit if absent :-<)
 ;;;;
-;;;; Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update:  8-Jun-2022 09:07 (eg)
+;;;; Last file update: 16-Jan-2023 14:13 (eg)
 ;;;;
 
 (define-module READLINE
@@ -173,9 +173,9 @@
 (define (try-initialize-readline)
   ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
   (let* ((suffix (%shared-library-suffix))
-         (res (or (try-initialize (string-append "libreadline." suffix))
-                  (try-initialize (string-append "libedit."  suffix)))))
-    (when (and res (try-load (string-append "readline-complete." suffix)))
+         (res (or (try-initialize (string-append "libreadline" suffix))
+                  (try-initialize (string-append "libedit"  suffix)))))
+    (when (and res (try-load (string-append "readline-complete" suffix)))
       ;; We have found a readline library. Try to load completion support
       (%init-readline-completion-function readline-completion-generator))
     res))
