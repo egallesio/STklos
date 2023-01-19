@@ -52,13 +52,26 @@ static SCM signals[NSIG];
 
 
 /* ====================================================================== */
-struct signal_info {
-  char *name;
-  int value;
-};
 
+#define HAVE_STRSIGNAL 1  /* TODO: Use configure */
 
-static struct signal_info signal_names[] = {
+static char *our_strsignal(int sig) {
+  char *message = NULL;
+
+#if HAVE_STRSIGNAL
+  message = strsignal(sig);
+  if (message) {
+    char *tail;
+    if ((tail = strchr(message, ':'))) {
+      /* MacOS repeats signal number in message, e.g. "Interrupt: 2" */
+      *tail = '\0';
+    }
+  }
+#endif
+  return message;
+}
+
+static struct codeset_code signal_codes[] = {
   /* Posix.1 signals */
   {"SIGHUP",    SIGHUP},
   {"SIGINT",    SIGINT},
@@ -137,6 +150,9 @@ static struct signal_info signal_names[] = {
   {NULL, 0}
 };
 
+struct codeset signal_codeset = {
+  "signal", &signal_codes[0], our_strsignal, 0, 0, 0
+};
 
 static void error_bad_signal_number(SCM sig)
 {
@@ -321,14 +337,19 @@ DEFINE_PRIMITIVE("send-signal", send_signal, subr12, (SCM sig, SCM process))
 
 int STk_init_signal()
 {
+  struct codeset_code *code;
+
   // Initialize the signals table
   for (int i=0; i < NSIG; i++) {
     signals[i] = STk_true;
   }
 
   // Define the symbols assiocated to signal names
-  for (struct signal_info *p = signal_names; p->name; p++) {
-    STk_define_variable(STk_intern(p->name), MAKE_INT(p->value), STk_STklos_module);
+  codeset_init(&signal_codeset);
+  for (code = signal_codeset.codes; code->number; code++) {
+    STk_define_variable(STk_intern((char *)code->name),
+                        MAKE_INT(code->number),
+                        STk_STklos_module);
   }
 
   ADD_PRIMITIVE(initialize_signals);

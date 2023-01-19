@@ -54,6 +54,291 @@ static SCM *temp_file_prefix;
 
 /******************************************************************************
  *
+ * Codesets (SRFI 238)
+ *
+ ******************************************************************************/
+
+/*
+ * Notes on the implementation:
+ *
+ * - Codes are sorted in numerical order internally, and returned in
+ *   numerical order by `codeset-symbols`. Documentation tends to list
+ *   them in this order so it is likely to be intuitive to users.
+ *
+ * - We could use binary search to find a code by number. But linear
+ *   search is currently fast enough.
+ *
+ * - All messages of a codeset are fetched the first time the user
+ *   requests any message. Messages tend to come from APIs that are
+ *   not thread-safe. Locking is simpler and faster if we fetch
+ *   everything at once.
+ *
+ * - Each codeset has a `messages` buffer which caches each message as
+ *   a null-terminated string. Using one buffer saves memory over
+ *   malloc()ing each message separately. Fast string search is used
+ *   to count null terminators until we find the n'th message.
+ */
+
+static int codeset_compare(const void *a_void, const void *b_void) {
+    const struct codeset_code *a = a_void;
+    const struct codeset_code *b = b_void;
+
+    if (a->number < b->number) return -1;
+    if (a->number > b->number) return 1;
+    return 0;
+}
+
+void codeset_init(struct codeset *codeset) {
+    struct codeset_code *code;
+    size_t n;
+
+    if (codeset->count) return;
+    n = 0;
+    for (code = codeset->codes; code->number; code++) {
+      code->symbol = STk_intern((char *)code->name);
+      n++;
+    }
+    qsort(codeset->codes, n, sizeof(*code), codeset_compare);
+    codeset->count = n;
+}
+
+static void codeset_init_messages(struct codeset *codeset) {
+    struct codeset_code *code;
+    char *buffer;
+    char *append;
+    char *message;
+    size_t capacity;
+
+    /* TODO: Grow the string buffer on demand. */
+    if (codeset->messages) return;
+    codeset_init(codeset);
+    capacity = 4096;
+    buffer = malloc(capacity);  /* TODO: Catch malloc failure */
+    append = buffer;
+    for (code = codeset->codes; code->number; code++)  {
+        message = codeset->get_message(code->number);
+        if (!message) message = "";
+        /* TODO: Use something simpler than printf */
+        snprintf(append,
+                 capacity - (append - buffer),
+                 "%s",
+                 message);
+        append = strchr(append, '\0') + 1;
+    }
+    codeset->messages = buffer;
+    codeset->messages_limit = append;
+}
+
+static const char *codeset_nth_message(struct codeset *codeset,
+                                       size_t n) {
+    char *p;
+
+    codeset_init_messages(codeset);
+    p = codeset->messages;
+    for (;;) {
+        if (p >= codeset->messages_limit) return NULL;
+        if (!n) break;
+        n--;
+        p = strchr(p, '\0') + 1;
+    }
+    return p;
+}
+
+SCM codeset_number_to_symbol(struct codeset *codeset,
+                             int number) {
+    struct codeset_code *code;
+
+    codeset_init(codeset);
+    for (code = codeset->codes; code->number; code++) {
+        if (code->number >= number)
+            break;
+    }
+    if (code->number == number)
+        return code->symbol;
+    return NULL;
+
+}
+
+const char *codeset_number_to_message(struct codeset *codeset,
+                                      int number) {
+    struct codeset_code *code;
+    size_t n;
+
+    n = 0;
+    codeset_init(codeset);
+    for (code = codeset->codes; code->number; code++) {
+        if (code->number >= number)
+            break;
+        n++;
+    }
+    if (code->number == number)
+        return codeset_nth_message(codeset, n);
+    return NULL;
+}
+
+int codeset_symbol_to_number(struct codeset *codeset,
+                             SCM symbol) {
+    struct codeset_code *code;
+
+    codeset_init(codeset);
+    for (code = codeset->codes; code->number; code++) {
+        if (code->symbol == symbol)
+            return code->number;
+    }
+    return 0;
+}
+
+const char *codeset_symbol_to_message(struct codeset *codeset,
+                                      SCM symbol) {
+    struct codeset_code *code;
+    size_t n;
+
+    n = 0;
+    codeset_init(codeset);
+    for (code = codeset->codes; code->number; code++) {
+        if (code->symbol == symbol)
+            return codeset_nth_message(codeset, n);
+        n++;
+    }
+    return NULL;
+}
+
+static void codeset_bad_code(SCM code_object) {
+  STk_error("~S is a bad codeset code", code_object);
+}
+
+static struct codeset *codesets[] = {
+  &errno_codeset,
+  &signal_codeset,
+  NULL
+};
+
+struct codeset *parse_codeset(SCM codeset_object) {
+  struct codeset **codesetp;
+  struct codeset *codeset;
+  const char *name;
+
+  if (!SYMBOLP(codeset_object))
+    STk_error("~S is a bad codeset", codeset_object);
+  name = SYMBOL_PNAME(codeset_object);
+  for (codesetp = codesets; (codeset = *codesetp); codesetp++)
+    if (!strcmp(codeset->name, name))
+      return codeset;
+  return NULL;
+}
+
+/* This procedure is not in SRFI 238. */
+DEFINE_PRIMITIVE("codeset-list", codeset_list,
+                 subr0, (void))
+{
+  struct codeset **codesetp;
+  struct codeset *codeset;
+  SCM res = STk_nil;
+
+  for (codesetp = codesets; (codeset = *codesetp); codesetp++)
+    res = STk_cons(STk_intern((char *)(codeset->name)), res);
+  return res;
+}
+
+DEFINE_PRIMITIVE("codeset?", codeset_p,
+                 subr1, (SCM object))
+{
+  struct codeset *codeset;
+
+  if (SYMBOLP(object)) {
+    if (parse_codeset(object))
+      return STk_true;
+  }
+  return STk_false;
+}
+
+DEFINE_PRIMITIVE("codeset-symbols", codeset_symbols,
+                 subr1, (SCM codeset_object))
+{
+  struct codeset *codeset;
+  struct codeset_code *code;
+  SCM res;
+  size_t n;
+
+  res = STk_nil;
+  codeset = parse_codeset(codeset_object);
+  if (codeset) {
+    codeset_init(codeset);
+    n = codeset->count;
+    while (n) {
+      code = &codeset->codes[--n];
+      res = STk_cons(code->symbol, res);
+    }
+  }
+  return res;
+}
+
+DEFINE_PRIMITIVE("codeset-symbol", codeset_symbol,
+                 subr2, (SCM codeset_object, SCM code_object))
+{
+  struct codeset *codeset;
+  SCM symbol;
+  int number;
+
+  symbol = NULL;
+  codeset = parse_codeset(codeset_object);
+  if (SYMBOLP(code_object)) {
+    symbol = code_object;
+  } else if (INTP(code_object)) {
+    number = INT_VAL(code_object);
+    symbol = codeset_number_to_symbol(codeset, number);
+  } else if (!BIGNUMP(code_object)) {
+    codeset_bad_code(code_object);
+  }
+  return SYMBOLP(symbol) ? symbol : STk_false;
+}
+
+DEFINE_PRIMITIVE("codeset-number", codeset_number,
+                 subr2, (SCM codeset_object, SCM code_object))
+{
+  struct codeset *codeset;
+  SCM symbol;
+  int number;
+
+  number = 0;
+  codeset = parse_codeset(codeset_object);
+  if (SYMBOLP(code_object)) {
+    symbol = code_object;
+    number = codeset_symbol_to_number(codeset, symbol);
+  } else if (INTP(code_object) || BIGNUMP(code_object)) {
+    return code_object;
+  } else {
+    codeset_bad_code(code_object);
+  }
+  return number ? MAKE_INT(number) : STk_false;
+}
+
+DEFINE_PRIMITIVE("codeset-message", codeset_message,
+                 subr2, (SCM codeset_object, SCM code_object))
+{
+  struct codeset *codeset;
+  const char *message;
+  SCM symbol;
+  int number;
+
+  message = NULL;
+  codeset = parse_codeset(codeset_object);
+  if (SYMBOLP(code_object)) {
+    symbol = code_object;
+    if (codeset)
+      message = codeset_symbol_to_message(codeset, symbol);
+  } else if (INTP(code_object)) {
+    number = INT_VAL(code_object);
+    if (codeset)
+      message = codeset_number_to_message(codeset, number);
+  } else if (!BIGNUMP(code_object)) {
+    codeset_bad_code(code_object);
+  }
+  return message ? STk_Cstring2string(message) : STk_false;
+}
+
+/******************************************************************************
+ *
  * Utilities
  *
  ******************************************************************************/
@@ -189,13 +474,9 @@ int STk_dirp(const char *path)
  *  SRFI 170 support
  *
  ******************************************************************************/
-#define CASE_ERRNO(x)    case x: err = #x; break;
+#define CASE_ERRNO(x) { #x , x },
 
-static SCM get_posix_error_name (int n)
-{
-  char *err = "";
-
-  switch (n) {
+static struct codeset_code errno_codes[] = {
 #ifdef E2BIG
     CASE_ERRNO(E2BIG)
 #endif
@@ -595,9 +876,20 @@ static SCM get_posix_error_name (int n)
       CASE_ERRNO(EDEADLOCK)
   #endif
 #endif
-    default:            err = "UNKNOWN_NAME";break;
-  }
-  return STk_intern(err);
+  {NULL, 0}
+};
+
+struct codeset errno_codeset = {
+  "errno", &errno_codes[0], strerror, 0, 0, 0
+};
+
+static SCM get_posix_error_name (int n)
+{
+  SCM symbol;
+
+  symbol = codeset_number_to_symbol(&errno_codeset, n);
+  if (!symbol) symbol = STk_intern("UNKNOWN_NAME");
+  return symbol;
 }
 
 
@@ -1005,7 +1297,7 @@ DEFINE_PRIMITIVE("file-size", file_size, subr1, (SCM f))
  *
  * |Glob| differs from csh globbing in two ways:
  *
- * 1. it does not  sort its result list (use the |sort| procedure 
+ * 1. it does not  sort its result list (use the |sort| procedure
  * if you want the list  sorted).
  * 2. |glob| only returns the names of files that actually exist;
  *    in csh no check for existence is made unless a pattern contains a
@@ -1442,7 +1734,7 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
  * measured in seconds.
- * 
+ *
  * NOTE: This {{stklos}} function should not be confused with
  * the R7RS  primitive |current-second| which returns an inexact number
  * and whose result is expressed using  the International Atomic Time
@@ -1941,5 +2233,13 @@ int STk_init_system(void)
   ADD_PRIMITIVE(big_endianp);
   ADD_PRIMITIVE(get_locale);
   ADD_PRIMITIVE(uname);
+
+  ADD_PRIMITIVE(codeset_p);
+  ADD_PRIMITIVE(codeset_list);
+  ADD_PRIMITIVE(codeset_symbols);
+  ADD_PRIMITIVE(codeset_symbol);
+  ADD_PRIMITIVE(codeset_number);
+  ADD_PRIMITIVE(codeset_message);
+
   return TRUE;
 }

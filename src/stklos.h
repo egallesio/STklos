@@ -1185,6 +1185,8 @@ EXTERN_PRIMITIVE("regexp-match", regexec, subr2, (SCM re, SCM str));
   ----
   ------------------------------------------------------------------------------
 */
+extern struct codeset signal_codeset;
+
 int STk_get_signal_value(SCM sig);
 int STk_init_signal(void);
 
@@ -1283,6 +1285,29 @@ int STk_init_syntax(void);
   ----
   ------------------------------------------------------------------------------
 */
+
+struct codeset_code {
+    const char *name;
+    int number;
+    SCM symbol;
+};
+
+struct codeset {
+    const char *name;
+    struct codeset_code *codes;
+    char *(*get_message)(int);
+    size_t count;
+    char *messages;
+    char *messages_limit;
+};
+
+void codeset_init(struct codeset *codeset);
+SCM codeset_number_to_symbol(struct codeset *codeset, int number);
+const char *codeset_number_to_message(struct codeset *codeset, int number);
+int codeset_symbol_to_number(struct codeset *codeset, SCM symbol);
+const char *codeset_name_to_message(struct codeset *codeset, const char *name);
+
+extern struct codeset errno_codeset;
 
 extern SCM  STk_posix_error_condition;  /* condition type &posix-error */
 
