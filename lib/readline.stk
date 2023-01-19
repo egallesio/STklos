@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update: 16-Jan-2023 14:13 (eg)
+;;;; Last file update: 19-Jan-2023 15:44 (eg)
 ;;;;
 
 (define-module READLINE
@@ -86,12 +86,16 @@
                                                   :int
                                                   libname))
 
-     (set! rl-input-timeout (make-external-function "rl_set_keyboard_input_timeout"
-                                                    '(:int)
-                                                    :int
-                                                    libname))
-
-     (set! rl-event-hook (%get-symbol-address "rl_event_hook" libname))
+     (when (%get-symbol-address "rl_set_keyboard_input_timeout" "")
+       ;; NOTE: The libedit version shipped with recent MasOS version doesn't
+       ;; provide the functions "rl_set_keyboard_input_timeout" and "rl_event_hook"
+       ;; These functions are used by the GTK extension when building GUI under the
+       ;; REPL.
+       (set! rl-input-timeout (make-external-function "rl_set_keyboard_input_timeout"
+                                                      '(:int)
+                                                      :int
+                                                      libname))
+       (set! rl-event-hook (%get-symbol-address "rl_event_hook" libname)))
 
      (let ((support (if (%get-symbol-address "el_set" "")
                         ;; We have found a realine library which is in fact
@@ -173,12 +177,11 @@
 (define (try-initialize-readline)
   ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
   (let* ((suffix (%shared-library-suffix))
-         (res (or (try-initialize (string-append "libreadline" suffix))
-                  (try-initialize (string-append "libedit"  suffix)))))
-    (when (and res (try-load (string-append "readline-complete" suffix)))
+         (res (or (try-initialize (string-append "libreadline." suffix))
+                  (try-initialize (string-append "libedit."  suffix)))))
+    (when (and res (try-load (string-append "readline-complete." suffix)))
       ;; We have found a readline library. Try to load completion support
       (%init-readline-completion-function readline-completion-generator))
     res))
 
 ) ;; End of module READLINE
-

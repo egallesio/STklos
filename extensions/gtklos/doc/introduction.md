@@ -92,7 +92,7 @@ As we cans see, the *width* and the *height* of this window are reflected in the
 
 
 ```scheme
-stklos> (start-interactive-gtk)   ;; to develop the GUI in the REPLREPL
+stklos> (start-interactive-gtk)   ;; to develop the GUI in the REPL
 ;; Setting the width to 400
 stklos> (slot-set! w 'width 400)
 ;; reading back the value

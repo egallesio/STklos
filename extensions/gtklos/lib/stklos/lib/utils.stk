@@ -1,7 +1,7 @@
 ;;;;
 ;;;; utils.stk  -- Utilities
 ;;;;
-;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 23-Aug-2007 15:03 (eg)
-;;;; Last file update:  5-Jul-2021 19:41 (eg)
+;;;; Last file update: 19-Jan-2023 09:35 (eg)
 ;;;;
 
 
@@ -101,9 +101,11 @@
     (case readline-flavor
       ((readline libedit)
        ;; We are using a line editor. Use a hook function to poll the
-       ;; editor input
-       (rl-input-timeout 0)
-       (%readline-idle-hook rl-event-hook))
+       ;; editor input. NOTE: MacOS libedit doesn't provide rl-event-hook
+       ;; FIXME: Print a warning for MacOS?
+       (when rl-event-hook
+         (rl-input-timeout 0)
+         (%readline-idle-hook rl-event-hook)))
       (else
        ;; no editor. Use a file-port hook
        (port-idle-register! (current-input-port)
