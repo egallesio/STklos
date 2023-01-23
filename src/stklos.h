@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 18-Sep-2022 16:31 (eg)
+ * Last file update: 23-Jan-2023 12:26 (eg)
  */
 
 
@@ -1185,6 +1185,14 @@ EXTERN_PRIMITIVE("regexp-match", regexec, subr2, (SCM re, SCM str));
   ----
   ------------------------------------------------------------------------------
 */
+struct codeset_code {   // Used by SRFI 238
+  const char* name;
+  int code;
+};
+
+extern struct codeset_code STk_signal_names[];
+
+
 int STk_get_signal_value(SCM sig);
 int STk_init_signal(void);
 
@@ -1283,10 +1291,11 @@ int STk_init_syntax(void);
   ----
   ------------------------------------------------------------------------------
 */
+extern struct codeset_code STk_errno_names[];
 
 extern SCM  STk_posix_error_condition;  /* condition type &posix-error */
 
-  void STk_error_posix(int err,char *proc_name, SCM arg1, SCM arg2);
+void STk_error_posix(int err,char *proc_name, SCM arg1, SCM arg2);
 
 int STk_dirp(const char *path);
 int STk_init_system(void);
