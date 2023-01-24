@@ -21,7 +21,7 @@
  *
  *          Authors: Erick Gallesio
  *    Creation date: 22-Jan-2023 09:36
- * Last file update: 24-Jan-2023 13:12 (eg)
+ * Last file update: 24-Jan-2023 16:59 (eg)
  */
 
 #include "stklos.h"
@@ -96,10 +96,16 @@ static void make_C_codeset(SCM name, struct codeset_code *table,
   MUT_LOCK(srfi238_mutex);    // We could be more fine grain ....
   for (struct codeset_code *p=table; p->name; p++) {
     SCM n     = MAKE_INT(p->code);
-    char *msg = get_message(p->code);
 
+    // add code in symbol lists
     slist = STk_cons(STk_cons(n, STk_intern((char *) p->name)), slist);
-    mlist = STk_cons(STk_cons(n, STk_Cstring2string(msg)), mlist);
+
+    // add code in messages lists
+    if (STk_assq(n, mlist) == STk_false) {
+      //Code is a duplicate.  Don't add it in mlist
+      char *msg = get_message(p->code);
+      mlist = STk_cons(STk_cons(n, STk_Cstring2string(msg)), mlist);
+    }
   }
   MUT_UNLOCK(srfi238_mutex);
 
@@ -183,6 +189,7 @@ DEFINE_PRIMITIVE("%make-user-codeset", make_user_codeset, subr3,
 
   return z;
 }
+
 
 // ======================================================================
 MODULE_ENTRY_START("srfi/238")
