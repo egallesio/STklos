@@ -21,15 +21,17 @@
  *
  *          Authors: Erick Gallesio
  *    Creation date: 22-Jan-2023 09:36
- * Last file update: 24-Jan-2023 12:58 (eg)
+ * Last file update: 24-Jan-2023 13:12 (eg)
  */
 
 #include "stklos.h"
 #include "238-incl.c"
 #include <string.h>
 
+MUT_DECL(srfi238_mutex);
 static int tc_codeset;
-static SCM all_codesets= STk_nil; //FIXME: Use a mutex to acess it
+static SCM all_codesets= STk_nil;
+
 
 //
 // New Scheme type codeset
@@ -63,13 +65,15 @@ static struct extended_type_descr xtype_codeset = {
  *
  * ======================================================================
  */
-static void error_bad_codeset_element(SCM obj) {
-  STk_error("bad codeset element ~S", obj);
+static void error_bad_codeset(SCM obj) {
+  STk_error("bad codeset ~S", obj);
 }
 
-static void register_codeset(SCM cs)    // FIXME: MUTEX
+static void register_codeset(SCM cs)
 {
+  MUT_LOCK(srfi238_mutex);
   all_codesets = STk_cons(STk_cons(CODESET_NAME(cs), cs), all_codesets);
+  MUT_UNLOCK(srfi238_mutex);
 }
 
 
@@ -88,18 +92,18 @@ static void make_C_codeset(SCM name, struct codeset_code *table,
   SCM slist = STk_nil;   /* list of symbols */
   SCM mlist = STk_nil;   /* list of messages */
 
-  //FIXME: MUTEX
+  /* Build the symbol list and the message list */
+  MUT_LOCK(srfi238_mutex);    // We could be more fine grain ....
   for (struct codeset_code *p=table; p->name; p++) {
     SCM n     = MAKE_INT(p->code);
     char *msg = get_message(p->code);
 
-    /* populate the symbol list */
     slist = STk_cons(STk_cons(n, STk_intern((char *) p->name)), slist);
-
-    /* populate the message list */
     mlist = STk_cons(STk_cons(n, STk_Cstring2string(msg)), mlist);
   }
+  MUT_UNLOCK(srfi238_mutex);
 
+  /* Build a codeset object */
   NEWCELL(z, codeset);
   CODESET_NAME(z)     = name;
   CODESET_SYMBOLS(z)  = slist;
@@ -107,6 +111,7 @@ static void make_C_codeset(SCM name, struct codeset_code *table,
 
   register_codeset(z);
 }
+
 
 /* ======================================================================
  *
@@ -118,11 +123,14 @@ static void make_C_codeset(SCM name, struct codeset_code *table,
 /* This procedure is not in SRFI 238. */
 DEFINE_PRIMITIVE("codeset-list", codeset_list,
                  subr0, (void))
-{ //FIXME: MUTEX
+{
   SCM res = STk_nil;
 
+  MUT_LOCK(srfi238_mutex);
   for (SCM l = all_codesets; !NULLP(l); l = CDR(l))
     res = STk_cons(CAR(CAR(l)), res);
+  MUT_UNLOCK(srfi238_mutex);
+
   return res;
 }
 
@@ -142,8 +150,7 @@ DEFINE_PRIMITIVE("%find-codeset", find_codeset, subr1, (SCM obj))
   else {
     SCM res = STk_assq(obj, all_codesets);
 
-    if (res == STk_false)
-      STk_error("bad codset ~s", obj);
+    if (res == STk_false) error_bad_codeset(obj);
     return CDR(res);
   }
 }
@@ -151,14 +158,14 @@ DEFINE_PRIMITIVE("%find-codeset", find_codeset, subr1, (SCM obj))
 
 DEFINE_PRIMITIVE("%codeset-symbols", codeset_symbols, subr1, (SCM cs))
 {
-  if (!CODESETP(cs)) STk_error("bad codeset ~s", cs); // already verified in Scheme
+  if (!CODESETP(cs)) error_bad_codeset(cs); // already verified in Scheme normally
   return CODESET_SYMBOLS(cs);
 }
 
 
 DEFINE_PRIMITIVE("%codeset-messages", codeset_messages, subr1, (SCM cs))
 {
-  if (!CODESETP(cs)) STk_error("bad codeset ~s", cs); // already verified in Scheme
+  if (!CODESETP(cs)) error_bad_codeset(cs); // already verified in Scheme normally
   return CODESET_MESSAGES(cs);
 }
 
