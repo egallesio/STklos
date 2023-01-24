@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 16-Jan-2023 18:11 (eg)
+;;;; Last file update: 24-Jan-2023 10:12 (eg)
 ;;;;
 
 
@@ -1727,18 +1727,18 @@ doc>
 
 #|
 <doc EXT with-mutex
- * (with-mutex mtx <body>)
+ * (with-mutex mtx <thunk>)
  *
- * Executes |body|, protected by mutex |mtx|. The mutex will
+ * Executes |thunk|, protected by mutex |mtx|. The mutex will
  * be locked before and released after execution of |body|, and
  * also on entrance or departure of its dynamic context
- * (lock and unlock are used with |dynamic-wind|).
+ * (lock and unlock are used within |dynamic-wind|).
 doc>
 |#
 (define (with-mutex mtx  proc)
   (dynamic-wind
       (lambda () (mutex-lock! mtx))
-      (proc)
+      proc
       (lambda () (mutex-unlock! mtx))))
 
 
