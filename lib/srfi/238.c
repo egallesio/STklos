@@ -21,11 +21,12 @@
  *
  *          Authors: Erick Gallesio
  *    Creation date: 22-Jan-2023 09:36
- * Last file update: 23-Jan-2023 13:38 (eg)
+ * Last file update: 24-Jan-2023 12:58 (eg)
  */
 
 #include "stklos.h"
 #include "238-incl.c"
+#include <string.h>
 
 static int tc_codeset;
 static SCM all_codesets= STk_nil; //FIXME: Use a mutex to acess it
@@ -33,20 +34,17 @@ static SCM all_codesets= STk_nil; //FIXME: Use a mutex to acess it
 //
 // New Scheme type codeset
 // NOTE: codes and messages are represented by A-lists.
-// FIXME? Use hash-tables?
 //
 struct codeset_obj {
   stk_header header;
   SCM name;
   SCM symbols;
-  SCM messages; // Unused for errno and signal */
-  char *(*get_message)(SCM, SCM);
+  SCM messages;
 };
 
 #define CODESETP(p)           (BOXED_TYPE_EQ((p), tc_codeset))
 #define CODESET_NAME(p)       (((struct codeset_obj *) (p))->name)
 #define CODESET_SYMBOLS(p)    (((struct codeset_obj *) (p))->symbols)
-#define CODESET_GET_MSG(p)    (((struct codeset_obj *) (p))->get_message)
 #define CODESET_MESSAGES(p)   (((struct codeset_obj *) (p))->messages)
 
 static void print_codeset(SCM codeset, SCM port, int _UNUSED(mode))
@@ -59,24 +57,14 @@ static struct extended_type_descr xtype_codeset = {
   .print = print_codeset
 };
 
-//
-// Utilities
-//
+/* ======================================================================
+ *
+ * Utilities
+ *
+ * ======================================================================
+ */
 static void error_bad_codeset_element(SCM obj) {
   STk_error("bad codeset element ~S", obj);
-}
-
-static char* general_get_message(SCM cs, SCM n) {
-  SCM res = STk_assq(n, CODESET_MESSAGES(cs));
-  return res == STk_false? res : CDR(res);
-}
-
-static char* errno_get_message(SCM _UNUSED(cs), SCM n) {
-  return STk_Cstring2string(strerror(INT_VAL(n)));
-}
-
-static char* signal_get_message(SCM _UNUSED(cs), SCM n) {
-  return STk_Cstring2string(strsignal(INT_VAL(n)));
 }
 
 static void register_codeset(SCM cs)    // FIXME: MUTEX
@@ -85,28 +73,60 @@ static void register_codeset(SCM cs)    // FIXME: MUTEX
 }
 
 
+// Build a codeset, given a correspondence table and a function to access
+// the messages in C. This is used to build the errno and signal codesets.
+//
+// Since the C functions strerror and strsignal are not thread safe, we cache
+// the messages in the codeset_object. Note that even if a reentrant version of
+// strerror exists (strerror_r), this is not the case for strsignal. Furthermore,
+// these function incur a non negligible time penalty.
+
 static void make_C_codeset(SCM name, struct codeset_code *table,
-                           char* (*get_message)(SCM, SCM))
+                           char* (*get_message)(int))
 {
   SCM z;
-  SCM alist= STk_nil;
+  SCM slist = STk_nil;   /* list of symbols */
+  SCM mlist = STk_nil;   /* list of messages */
+
+  //FIXME: MUTEX
+  for (struct codeset_code *p=table; p->name; p++) {
+    SCM n     = MAKE_INT(p->code);
+    char *msg = get_message(p->code);
+
+    /* populate the symbol list */
+    slist = STk_cons(STk_cons(n, STk_intern((char *) p->name)), slist);
+
+    /* populate the message list */
+    mlist = STk_cons(STk_cons(n, STk_Cstring2string(msg)), mlist);
+  }
 
   NEWCELL(z, codeset);
   CODESET_NAME(z)     = name;
-  CODESET_SYMBOLS(z)  = STk_nil;
-  CODESET_GET_MSG(z)  = get_message;
-
-  /* populate the symbol table */
-  for (struct codeset_code *p=table; p->name; p++) {
-    alist = STk_cons(STk_cons(MAKE_INT(p->code), STk_intern((char *) p->name)),
-                     alist);
-  }
-  CODESET_SYMBOLS(z) = alist;
+  CODESET_SYMBOLS(z)  = slist;
+  CODESET_MESSAGES(z) = mlist;
 
   register_codeset(z);
 }
 
-// ======================================================================
+/* ======================================================================
+ *
+ * Primitives
+ *
+ * ======================================================================
+ */
+
+/* This procedure is not in SRFI 238. */
+DEFINE_PRIMITIVE("codeset-list", codeset_list,
+                 subr0, (void))
+{ //FIXME: MUTEX
+  SCM res = STk_nil;
+
+  for (SCM l = all_codesets; !NULLP(l); l = CDR(l))
+    res = STk_cons(CAR(CAR(l)), res);
+  return res;
+}
+
+
 DEFINE_PRIMITIVE("codeset?", codesetp, subr1, (SCM obj))
 {
   return CODESETP(obj) ?
@@ -142,13 +162,6 @@ DEFINE_PRIMITIVE("%codeset-messages", codeset_messages, subr1, (SCM cs))
   return CODESET_MESSAGES(cs);
 }
 
-DEFINE_PRIMITIVE("%codeset-message", codeset_message, subr2, (SCM cs, SCM number))
-{
-  if (!CODESETP(cs)) STk_error("bad codeset ~s", cs); // already verified in Scheme
-  if (!INTP(number)) STk_error("bad number ~s", cs);  // already verified in Scheme
-  return CODESET_GET_MSG(cs)(cs, number);
-}
-
 
 DEFINE_PRIMITIVE("%make-user-codeset", make_user_codeset, subr3,
                  (SCM name, SCM codes, SCM messages))
@@ -159,7 +172,6 @@ DEFINE_PRIMITIVE("%make-user-codeset", make_user_codeset, subr3,
   CODESET_NAME(z) = name;
   CODESET_SYMBOLS(z)  = codes;
   CODESET_MESSAGES(z) = messages;
-  CODESET_GET_MSG(z)  = general_get_message;
   register_codeset(z);
 
   return z;
@@ -172,19 +184,16 @@ MODULE_ENTRY_START("srfi/238")
 
   tc_codeset = STk_new_user_type(&xtype_codeset);
 
+  ADD_PRIMITIVE_IN_MODULE(codeset_list, module);
   ADD_PRIMITIVE_IN_MODULE(codesetp, module);
   ADD_PRIMITIVE_IN_MODULE(find_codeset, module);
   ADD_PRIMITIVE_IN_MODULE(codeset_symbols,module);
   ADD_PRIMITIVE_IN_MODULE(codeset_messages,module);
-  ADD_PRIMITIVE_IN_MODULE(codeset_message,module);
-
   ADD_PRIMITIVE_IN_MODULE(make_user_codeset, module);
 
   /* Create the errno & signal codesets */
-  make_C_codeset(STk_intern("errno"),  STk_errno_names,  errno_get_message);
-  make_C_codeset(STk_intern("signal"), STk_signal_names, signal_get_message);
-
-
+  make_C_codeset(STk_intern("errno"),  STk_errno_names,  strerror);
+  make_C_codeset(STk_intern("signal"), STk_signal_names, strsignal);
 
   /* Execute Scheme code */
   STk_execute_C_bytecode(__module_consts, __module_code);

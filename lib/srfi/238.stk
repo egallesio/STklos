@@ -22,13 +22,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio
 ;;;;    Creation date: 22-Jan-2023 09:44
-;;;; Last file update: 23-Jan-2023 13:14 (eg)
+;;;; Last file update: 24-Jan-2023 11:59 (eg)
 ;;;;
 
 (select-module srfi/238)
 
 (export codeset? codeset-symbols codeset-symbol codeset-number codeset-message
-        make-codeset) ;; STklos "extension" to build codesets in Scheme
+        codeset-list make-codeset) ;; STklos "extensions"
 
 (define (codeset-symbols cs)
   (let ((cs (%find-codeset cs)))
@@ -60,10 +60,12 @@
      ((integer? code) code)
      (else            (error "bad codeset code ~s" code)))))
 
-
 (define (codeset-message cs code)
-  (let ((cs (%find-codeset cs)))
-     (%codeset-message cs (codeset-number cs code))))
+  (let* ((cs  (%find-codeset cs))
+         (msg (assq (codeset-number cs code) (%codeset-messages cs))))
+    (and msg (cdr msg))))
+
+
 
 
 ;; ======================================================================
