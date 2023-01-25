@@ -1,0 +1,126 @@
+;;;;
+;;;;
+;;;; 238.stk         -- SRFI-238 (Codesets)
+;;;;
+;;;; Copyright © 2023 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Lassi Kortela & Erick Gallesio
+;;;;    Creation date: 22-Jan-2023 09:44
+;;;; Last file update: 25-Jan-2023 11:04 (eg)
+;;;;
+
+(select-module srfi/238)
+
+(export codeset? codeset-symbols codeset-symbol codeset-number codeset-message
+        codeset-list make-codeset) ;; STklos "extensions"
+
+(define (codeset-symbols cs)
+  (let ((cs (%find-codeset cs)))
+    (map cdr (%codeset-symbols cs))))
+
+
+(define (codeset-symbol cs code)
+  (define (find code alist)
+    (let ((tmp (assq code alist)))
+      (and tmp (cdr tmp))))
+
+  (let ((cs (%find-codeset cs)))
+    (cond
+     ((symbol? code)  code)
+     ((integer? code) (find code (%codeset-symbols cs)))
+     (else (error "bad codeset code ~s" code)))))
+
+
+(define (codeset-number cs code)
+  (define (find code alist)
+    (cond
+     ((null? alist) #f)
+     ((eq? code (cdar alist)) (caar alist))
+     (else (find code (cdr alist)))))
+
+  (let ((cs (%find-codeset cs)))
+    (cond
+     ((symbol? code)  (find code (%codeset-symbols cs)))
+     ((integer? code) code)
+     (else            (error "bad codeset code ~s" code)))))
+
+(define (codeset-message cs code)
+  (%codeset-message (%find-codeset cs)
+                    (codeset-number cs code)))
+
+
+
+;; ======================================================================
+;;  EXTENSION: (make-codeset name lst)
+;;
+;; lst is a list of triplet (code-number symbol message)
+;; symbol and message can be #f if  code-number has no name or no message
+;;
+;; (define cs
+;;   (make-codeset 'foo
+;;                 '((1   OK    "Everything is OK")
+;;                   (1   YES   #f)                            ; Other name for OK
+;;                   (2   KO    "We have a problem")
+;;                   (2   NO    #f)                            ; Other name for KO
+;;                   (3   MAYBE "To be determined")
+;;                   (404 #f    "Not found")))
+;;
+;; ======================================================================
+(define (make-codeset name lst)
+  (unless (symbol? name)
+    (error "bad codeset name ~s" name))
+  (unless (list? lst)
+    (error "bad codeset definition ~s" lst))
+
+  (let Loop ((lst lst)
+             (codes '())
+             (messages '()))
+    (cond
+     ((null?  lst)
+      (%make-user-codeset name
+                          (sort codes (lambda (a b) (< (car a) (car b))))
+                          messages))
+     ((pair? lst)
+      (let ((head (car lst)))
+        (unless (and (list? head) (= (length head) 3))
+          (error "codeset element must be a list of length 3. It was ~s" head))
+        (let ((code (car head))
+              (name (cadr head))
+              (msg  (caddr head)))
+          (unless (and (integer? code)
+                       (or (not name) (symbol? name))
+                       (or (not msg)  (string? msg)))
+            (error "bad codeset element ~s" head))
+
+          ;; Add the codeset element to codes and messages
+          (Loop (cdr lst)
+                (if name
+                    (cons (cons code name) codes)
+                    codes)
+                (if msg
+                    (cons (cons code msg) messages)
+                    messages)))))
+     (else
+      (error "bad codeset ~s" lst)))))
+
+
+;;;
+;;; module initialization
+;;;
+(%create-system-codesets! (lambda (a b) (< (car a) (car b)))) ; create errno and signal codesets

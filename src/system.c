@@ -2,7 +2,7 @@
  *
  * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 10-Jan-2022 20:20 (eg)
+ * Last file update: 23-Jan-2023 13:32 (eg)
  */
 
 #include <unistd.h>
@@ -189,415 +189,418 @@ int STk_dirp(const char *path)
  *  SRFI 170 support
  *
  ******************************************************************************/
-#define CASE_ERRNO(x)    case x: err = #x; break;
+
+#define CODESET_ERRNO(x) { #x, x },
+
+struct codeset_code STk_errno_names[] = {
+#ifdef E2BIG
+    CODESET_ERRNO(E2BIG)
+#endif
+#ifdef EACCES
+    CODESET_ERRNO(EACCES)
+#endif
+#ifdef EADDRINUSE
+    CODESET_ERRNO(EADDRINUSE)
+#endif
+#ifdef EADDRNOTAVAIL
+    CODESET_ERRNO(EADDRNOTAVAIL)
+#endif
+#ifdef EAFNOSUPPORT
+    CODESET_ERRNO(EAFNOSUPPORT)
+#endif
+#ifdef EAGAIN
+    CODESET_ERRNO(EAGAIN)
+#endif
+#ifdef EALREADY
+    CODESET_ERRNO(EALREADY)
+#endif
+#ifdef EBADE
+    CODESET_ERRNO(EBADE)
+#endif
+#ifdef EBADF
+    CODESET_ERRNO(EBADF)
+#endif
+#ifdef EBADFD
+    CODESET_ERRNO(EBADFD)
+#endif
+#ifdef EBADMSG
+    CODESET_ERRNO(EBADMSG)
+#endif
+#ifdef EBADR
+    CODESET_ERRNO(EBADR)
+#endif
+#ifdef EBADRQC
+    CODESET_ERRNO(EBADRQC)
+#endif
+#ifdef EBADSLT
+    CODESET_ERRNO(EBADSLT)
+#endif
+#ifdef EBUSY
+    CODESET_ERRNO(EBUSY)
+#endif
+#ifdef ECANCELED
+    CODESET_ERRNO(ECANCELED)
+#endif
+#ifdef ECHILD
+    CODESET_ERRNO(ECHILD)
+#endif
+#ifdef ECHRNG
+    CODESET_ERRNO(ECHRNG)
+#endif
+#ifdef ECOMM
+    CODESET_ERRNO(ECOMM)
+#endif
+#ifdef ECONNABORTED
+    CODESET_ERRNO(ECONNABORTED)
+#endif
+#ifdef ECONNREFUSED
+    CODESET_ERRNO(ECONNREFUSED)
+#endif
+#ifdef ECONNRESET
+    CODESET_ERRNO(ECONNRESET)
+#endif
+#ifdef EDEADLK
+    CODESET_ERRNO(EDEADLK)
+#endif
+#ifdef EDESTADDRREQ
+    CODESET_ERRNO(EDESTADDRREQ)
+#endif
+#ifdef EDOM
+    CODESET_ERRNO(EDOM)
+#endif
+#ifdef EDQUOT
+    CODESET_ERRNO(EDQUOT)
+#endif
+#ifdef EEXIST
+    CODESET_ERRNO(EEXIST)
+#endif
+#ifdef EFAULT
+    CODESET_ERRNO(EFAULT)
+#endif
+#ifdef EFBIG
+    CODESET_ERRNO(EFBIG)
+#endif
+#ifdef EHOSTDOWN
+    CODESET_ERRNO(EHOSTDOWN)
+#endif
+#ifdef EHOSTUNREACH
+    CODESET_ERRNO(EHOSTUNREACH)
+#endif
+#ifdef EHWPOISON
+    CODESET_ERRNO(EHWPOISON)
+#endif
+#ifdef EIDRM
+    CODESET_ERRNO(EIDRM)
+#endif
+#ifdef EILSEQ
+    CODESET_ERRNO(EILSEQ)
+#endif
+#ifdef EINPROGRESS
+    CODESET_ERRNO(EINPROGRESS)
+#endif
+#ifdef EINTR
+    CODESET_ERRNO(EINTR)
+#endif
+#ifdef EINVAL
+    CODESET_ERRNO(EINVAL)
+#endif
+#ifdef EIO
+    CODESET_ERRNO(EIO)
+#endif
+#ifdef EISCONN
+    CODESET_ERRNO(EISCONN)
+#endif
+#ifdef EISDIR
+    CODESET_ERRNO(EISDIR)
+#endif
+#ifdef EISNAM
+    CODESET_ERRNO(EISNAM)
+#endif
+#ifdef EKEYEXPIRED
+    CODESET_ERRNO(EKEYEXPIRED)
+#endif
+#ifdef EKEYREJECTED
+    CODESET_ERRNO(EKEYREJECTED)
+#endif
+#ifdef EKEYREVOKED
+    CODESET_ERRNO(EKEYREVOKED)
+#endif
+#ifdef EL2HLT
+    CODESET_ERRNO(EL2HLT)
+#endif
+#ifdef EL2NSYNC
+    CODESET_ERRNO(EL2NSYNC)
+#endif
+#ifdef EL3HLT
+    CODESET_ERRNO(EL3HLT)
+#endif
+#ifdef EL3RST
+    CODESET_ERRNO(EL3RST)
+#endif
+#ifdef ELIBACC
+    CODESET_ERRNO(ELIBACC)
+#endif
+#ifdef ELIBBAD
+    CODESET_ERRNO(ELIBBAD)
+#endif
+#ifdef ELIBMAX
+    CODESET_ERRNO(ELIBMAX)
+#endif
+#ifdef ELIBSCN
+    CODESET_ERRNO(ELIBSCN)
+#endif
+#ifdef ELIBEXEC
+    CODESET_ERRNO(ELIBEXEC)
+#endif
+#ifdef ELNRANGE
+    CODESET_ERRNO(ELNRANGE)
+#endif
+#ifdef ELOOP
+    CODESET_ERRNO(ELOOP)
+#endif
+#ifdef EMEDIUMTYPE
+    CODESET_ERRNO(EMEDIUMTYPE)
+#endif
+#ifdef EMFILE
+    CODESET_ERRNO(EMFILE)
+#endif
+#ifdef EMLINK
+    CODESET_ERRNO(EMLINK)
+#endif
+#ifdef EMSGSIZE
+    CODESET_ERRNO(EMSGSIZE)
+#endif
+#ifdef EMULTIHOP
+    CODESET_ERRNO(EMULTIHOP)
+#endif
+#ifdef ENAMETOOLONG
+    CODESET_ERRNO(ENAMETOOLONG)
+#endif
+#ifdef ENETDOWN
+    CODESET_ERRNO(ENETDOWN)
+#endif
+#ifdef ENETRESET
+    CODESET_ERRNO(ENETRESET)
+#endif
+#ifdef ENETUNREACH
+    CODESET_ERRNO(ENETUNREACH)
+#endif
+#ifdef ENFILE
+    CODESET_ERRNO(ENFILE)
+#endif
+#ifdef ENOANO
+    CODESET_ERRNO(ENOANO)
+#endif
+#ifdef ENOBUFS
+    CODESET_ERRNO(ENOBUFS)
+#endif
+#ifdef ENODATA
+    CODESET_ERRNO(ENODATA)
+#endif
+#ifdef ENODEV
+    CODESET_ERRNO(ENODEV)
+#endif
+#ifdef ENOENT
+    CODESET_ERRNO(ENOENT)
+#endif
+#ifdef ENOEXEC
+    CODESET_ERRNO(ENOEXEC)
+#endif
+#ifdef ENOKEY
+    CODESET_ERRNO(ENOKEY)
+#endif
+#ifdef ENOLCK
+    CODESET_ERRNO(ENOLCK)
+#endif
+#ifdef ENOLINK
+    CODESET_ERRNO(ENOLINK)
+#endif
+#ifdef ENOMEDIUM
+    CODESET_ERRNO(ENOMEDIUM)
+#endif
+#ifdef ENOMEM
+    CODESET_ERRNO(ENOMEM)
+#endif
+#ifdef ENOMSG
+    CODESET_ERRNO(ENOMSG)
+#endif
+#ifdef ENONET
+    CODESET_ERRNO(ENONET)
+#endif
+#ifdef ENOPKG
+    CODESET_ERRNO(ENOPKG)
+#endif
+#ifdef ENOPROTOOPT
+    CODESET_ERRNO(ENOPROTOOPT)
+#endif
+#ifdef ENOSPC
+    CODESET_ERRNO(ENOSPC)
+#endif
+#ifdef ENOSR
+    CODESET_ERRNO(ENOSR)
+#endif
+#ifdef ENOSTR
+    CODESET_ERRNO(ENOSTR)
+#endif
+#ifdef ENOSYS
+    CODESET_ERRNO(ENOSYS)
+#endif
+#ifdef ENOTBLK
+    CODESET_ERRNO(ENOTBLK)
+#endif
+#ifdef ENOTCONN
+    CODESET_ERRNO(ENOTCONN)
+#endif
+#ifdef ENOTDIR
+    CODESET_ERRNO(ENOTDIR)
+#endif
+#ifdef ENOTEMPTY
+    CODESET_ERRNO(ENOTEMPTY)
+#endif
+#ifdef ENOTRECOVERABLE
+    CODESET_ERRNO(ENOTRECOVERABLE)
+#endif
+#ifdef ENOTSOCK
+    CODESET_ERRNO(ENOTSOCK)
+#endif
+#ifdef ENOTSUP
+    CODESET_ERRNO(ENOTSUP)
+#endif
+#ifdef ENOTTY
+    CODESET_ERRNO(ENOTTY)
+#endif
+#ifdef ENOTUNIQ
+    CODESET_ERRNO(ENOTUNIQ)
+#endif
+#ifdef ENXIO
+    CODESET_ERRNO(ENXIO)
+#endif
+#ifdef EOVERFLOW
+    CODESET_ERRNO(EOVERFLOW)
+#endif
+#ifdef EOWNERDEAD
+    CODESET_ERRNO(EOWNERDEAD)
+#endif
+#ifdef EPERM
+    CODESET_ERRNO(EPERM)
+#endif
+#ifdef EPFNOSUPPORT
+    CODESET_ERRNO(EPFNOSUPPORT)
+#endif
+#ifdef EPIPE
+    CODESET_ERRNO(EPIPE)
+#endif
+#ifdef EPROTO
+    CODESET_ERRNO(EPROTO)
+#endif
+#ifdef EPROTONOSUPPORT
+    CODESET_ERRNO(EPROTONOSUPPORT)
+#endif
+#ifdef EPROTOTYPE
+    CODESET_ERRNO(EPROTOTYPE)
+#endif
+#ifdef ERANGE
+    CODESET_ERRNO(ERANGE)
+#endif
+#ifdef EREMCHG
+    CODESET_ERRNO(EREMCHG)
+#endif
+#ifdef EREMOTE
+    CODESET_ERRNO(EREMOTE)
+#endif
+#ifdef EREMOTEIO
+    CODESET_ERRNO(EREMOTEIO)
+#endif
+#ifdef ERESTART
+    CODESET_ERRNO(ERESTART)
+#endif
+#ifdef ERFKILL
+    CODESET_ERRNO(ERFKILL)
+#endif
+#ifdef EROFS
+    CODESET_ERRNO(EROFS)
+#endif
+#ifdef ESHUTDOWN
+    CODESET_ERRNO(ESHUTDOWN)
+#endif
+#ifdef ESPIPE
+    CODESET_ERRNO(ESPIPE)
+#endif
+#ifdef ESOCKTNOSUPPORT
+    CODESET_ERRNO(ESOCKTNOSUPPORT)
+#endif
+#ifdef ESRCH
+    CODESET_ERRNO(ESRCH)
+#endif
+#ifdef ESTALE
+    CODESET_ERRNO(ESTALE)
+#endif
+#ifdef ESTRPIPE
+    CODESET_ERRNO(ESTRPIPE)
+#endif
+#ifdef ETIME
+    CODESET_ERRNO(ETIME)
+#endif
+#ifdef ETIMEDOUT
+    CODESET_ERRNO(ETIMEDOUT)
+#endif
+#ifdef ETOOMANYREFS
+    CODESET_ERRNO(ETOOMANYREFS)
+#endif
+#ifdef ETXTBSY
+    CODESET_ERRNO(ETXTBSY)
+#endif
+#ifdef EUCLEAN
+    CODESET_ERRNO(EUCLEAN)
+#endif
+#ifdef EUNATCH
+    CODESET_ERRNO(EUNATCH)
+#endif
+#ifdef EUSERS
+    CODESET_ERRNO(EUSERS)
+#endif
+#ifdef EXDEV
+    CODESET_ERRNO(EXDEV)
+#endif
+#ifdef EXFULL
+    CODESET_ERRNO(EXFULL)
+#endif
+
+
+#ifdef EOPNOTSUPP
+    CODESET_ERRNO(EOPNOTSUPP)
+#endif
+#ifdef ENOTSUP
+    CODESET_ERRNO(EOPNOTSUPP)
+#endif
+
+
+#ifdef EWOULDBLOCK
+    CODESET_ERRNO(EWOULDBLOCK)
+#endif
+#ifdef EAGAIN
+    CODESET_ERRNO(EAGAIN)
+#endif
+
+
+#ifdef EDEADLOCK
+    CODESET_ERRNO(EDEADLOCK)
+#endif
+#ifdef EDEADLK
+    CODESET_ERRNO(EDEADLOCK)
+#endif
+    {NULL, 0}
+};
+
 
 static SCM get_posix_error_name (int n)
 {
-  char *err = "";
-
-  switch (n) {
-#ifdef E2BIG
-    CASE_ERRNO(E2BIG)
-#endif
-#ifdef EACCES
-    CASE_ERRNO(EACCES)
-#endif
-#ifdef EADDRINUSE
-    CASE_ERRNO(EADDRINUSE)
-#endif
-#ifdef EADDRNOTAVAIL
-    CASE_ERRNO(EADDRNOTAVAIL)
-#endif
-#ifdef EAFNOSUPPORT
-    CASE_ERRNO(EAFNOSUPPORT)
-#endif
-#ifdef EAGAIN
-    CASE_ERRNO(EAGAIN)
-#endif
-#ifdef EALREADY
-    CASE_ERRNO(EALREADY)
-#endif
-#ifdef EBADE
-    CASE_ERRNO(EBADE)
-#endif
-#ifdef EBADF
-    CASE_ERRNO(EBADF)
-#endif
-#ifdef EBADFD
-    CASE_ERRNO(EBADFD)
-#endif
-#ifdef EBADMSG
-    CASE_ERRNO(EBADMSG)
-#endif
-#ifdef EBADR
-    CASE_ERRNO(EBADR)
-#endif
-#ifdef EBADRQC
-    CASE_ERRNO(EBADRQC)
-#endif
-#ifdef EBADSLT
-    CASE_ERRNO(EBADSLT)
-#endif
-#ifdef EBUSY
-    CASE_ERRNO(EBUSY)
-#endif
-#ifdef ECANCELED
-    CASE_ERRNO(ECANCELED)
-#endif
-#ifdef ECHILD
-    CASE_ERRNO(ECHILD)
-#endif
-#ifdef ECHRNG
-    CASE_ERRNO(ECHRNG)
-#endif
-#ifdef ECOMM
-    CASE_ERRNO(ECOMM)
-#endif
-#ifdef ECONNABORTED
-    CASE_ERRNO(ECONNABORTED)
-#endif
-#ifdef ECONNREFUSED
-    CASE_ERRNO(ECONNREFUSED)
-#endif
-#ifdef ECONNRESET
-    CASE_ERRNO(ECONNRESET)
-#endif
-#ifdef EDEADLK
-    CASE_ERRNO(EDEADLK)
-#endif
-#ifdef EDESTADDRREQ
-    CASE_ERRNO(EDESTADDRREQ)
-#endif
-#ifdef EDOM
-    CASE_ERRNO(EDOM)
-#endif
-#ifdef EDQUOT
-    CASE_ERRNO(EDQUOT)
-#endif
-#ifdef EEXIST
-    CASE_ERRNO(EEXIST)
-#endif
-#ifdef EFAULT
-    CASE_ERRNO(EFAULT)
-#endif
-#ifdef EFBIG
-    CASE_ERRNO(EFBIG)
-#endif
-#ifdef EHOSTDOWN
-    CASE_ERRNO(EHOSTDOWN)
-#endif
-#ifdef EHOSTUNREACH
-    CASE_ERRNO(EHOSTUNREACH)
-#endif
-#ifdef EHWPOISON
-    CASE_ERRNO(EHWPOISON)
-#endif
-#ifdef EIDRM
-    CASE_ERRNO(EIDRM)
-#endif
-#ifdef EILSEQ
-    CASE_ERRNO(EILSEQ)
-#endif
-#ifdef EINPROGRESS
-    CASE_ERRNO(EINPROGRESS)
-#endif
-#ifdef EINTR
-    CASE_ERRNO(EINTR)
-#endif
-#ifdef EINVAL
-    CASE_ERRNO(EINVAL)
-#endif
-#ifdef EIO
-    CASE_ERRNO(EIO)
-#endif
-#ifdef EISCONN
-    CASE_ERRNO(EISCONN)
-#endif
-#ifdef EISDIR
-    CASE_ERRNO(EISDIR)
-#endif
-#ifdef EISNAM
-    CASE_ERRNO(EISNAM)
-#endif
-#ifdef EKEYEXPIRED
-    CASE_ERRNO(EKEYEXPIRED)
-#endif
-#ifdef EKEYREJECTED
-    CASE_ERRNO(EKEYREJECTED)
-#endif
-#ifdef EKEYREVOKED
-    CASE_ERRNO(EKEYREVOKED)
-#endif
-#ifdef EL2HLT
-    CASE_ERRNO(EL2HLT)
-#endif
-#ifdef EL2NSYNC
-    CASE_ERRNO(EL2NSYNC)
-#endif
-#ifdef EL3HLT
-    CASE_ERRNO(EL3HLT)
-#endif
-#ifdef EL3RST
-    CASE_ERRNO(EL3RST)
-#endif
-#ifdef ELIBACC
-    CASE_ERRNO(ELIBACC)
-#endif
-#ifdef ELIBBAD
-    CASE_ERRNO(ELIBBAD)
-#endif
-#ifdef ELIBMAX
-    CASE_ERRNO(ELIBMAX)
-#endif
-#ifdef ELIBSCN
-    CASE_ERRNO(ELIBSCN)
-#endif
-#ifdef ELIBEXEC
-    CASE_ERRNO(ELIBEXEC)
-#endif
-#ifdef ELNRANGE
-    CASE_ERRNO(ELNRANGE)
-#endif
-#ifdef ELOOP
-    CASE_ERRNO(ELOOP)
-#endif
-#ifdef EMEDIUMTYPE
-    CASE_ERRNO(EMEDIUMTYPE)
-#endif
-#ifdef EMFILE
-    CASE_ERRNO(EMFILE)
-#endif
-#ifdef EMLINK
-    CASE_ERRNO(EMLINK)
-#endif
-#ifdef EMSGSIZE
-    CASE_ERRNO(EMSGSIZE)
-#endif
-#ifdef EMULTIHOP
-    CASE_ERRNO(EMULTIHOP)
-#endif
-#ifdef ENAMETOOLONG
-    CASE_ERRNO(ENAMETOOLONG)
-#endif
-#ifdef ENETDOWN
-    CASE_ERRNO(ENETDOWN)
-#endif
-#ifdef ENETRESET
-    CASE_ERRNO(ENETRESET)
-#endif
-#ifdef ENETUNREACH
-    CASE_ERRNO(ENETUNREACH)
-#endif
-#ifdef ENFILE
-    CASE_ERRNO(ENFILE)
-#endif
-#ifdef ENOANO
-    CASE_ERRNO(ENOANO)
-#endif
-#ifdef ENOBUFS
-    CASE_ERRNO(ENOBUFS)
-#endif
-#ifdef ENODATA
-    CASE_ERRNO(ENODATA)
-#endif
-#ifdef ENODEV
-    CASE_ERRNO(ENODEV)
-#endif
-#ifdef ENOENT
-    CASE_ERRNO(ENOENT)
-#endif
-#ifdef ENOEXEC
-    CASE_ERRNO(ENOEXEC)
-#endif
-#ifdef ENOKEY
-    CASE_ERRNO(ENOKEY)
-#endif
-#ifdef ENOLCK
-    CASE_ERRNO(ENOLCK)
-#endif
-#ifdef ENOLINK
-    CASE_ERRNO(ENOLINK)
-#endif
-#ifdef ENOMEDIUM
-    CASE_ERRNO(ENOMEDIUM)
-#endif
-#ifdef ENOMEM
-    CASE_ERRNO(ENOMEM)
-#endif
-#ifdef ENOMSG
-    CASE_ERRNO(ENOMSG)
-#endif
-#ifdef ENONET
-    CASE_ERRNO(ENONET)
-#endif
-#ifdef ENOPKG
-    CASE_ERRNO(ENOPKG)
-#endif
-#ifdef ENOPROTOOPT
-    CASE_ERRNO(ENOPROTOOPT)
-#endif
-#ifdef ENOSPC
-    CASE_ERRNO(ENOSPC)
-#endif
-#ifdef ENOSR
-    CASE_ERRNO(ENOSR)
-#endif
-#ifdef ENOSTR
-    CASE_ERRNO(ENOSTR)
-#endif
-#ifdef ENOSYS
-    CASE_ERRNO(ENOSYS)
-#endif
-#ifdef ENOTBLK
-    CASE_ERRNO(ENOTBLK)
-#endif
-#ifdef ENOTCONN
-    CASE_ERRNO(ENOTCONN)
-#endif
-#ifdef ENOTDIR
-    CASE_ERRNO(ENOTDIR)
-#endif
-#ifdef ENOTEMPTY
-    CASE_ERRNO(ENOTEMPTY)
-#endif
-#ifdef ENOTRECOVERABLE
-    CASE_ERRNO(ENOTRECOVERABLE)
-#endif
-#ifdef ENOTSOCK
-    CASE_ERRNO(ENOTSOCK)
-#endif
-#ifdef ENOTSUP
-    CASE_ERRNO(ENOTSUP)
-#endif
-#ifdef ENOTTY
-    CASE_ERRNO(ENOTTY)
-#endif
-#ifdef ENOTUNIQ
-    CASE_ERRNO(ENOTUNIQ)
-#endif
-#ifdef ENXIO
-    CASE_ERRNO(ENXIO)
-#endif
-#ifdef EOVERFLOW
-    CASE_ERRNO(EOVERFLOW)
-#endif
-#ifdef EOWNERDEAD
-    CASE_ERRNO(EOWNERDEAD)
-#endif
-#ifdef EPERM
-    CASE_ERRNO(EPERM)
-#endif
-#ifdef EPFNOSUPPORT
-    CASE_ERRNO(EPFNOSUPPORT)
-#endif
-#ifdef EPIPE
-    CASE_ERRNO(EPIPE)
-#endif
-#ifdef EPROTO
-    CASE_ERRNO(EPROTO)
-#endif
-#ifdef EPROTONOSUPPORT
-    CASE_ERRNO(EPROTONOSUPPORT)
-#endif
-#ifdef EPROTOTYPE
-    CASE_ERRNO(EPROTOTYPE)
-#endif
-#ifdef ERANGE
-    CASE_ERRNO(ERANGE)
-#endif
-#ifdef EREMCHG
-    CASE_ERRNO(EREMCHG)
-#endif
-#ifdef EREMOTE
-    CASE_ERRNO(EREMOTE)
-#endif
-#ifdef EREMOTEIO
-    CASE_ERRNO(EREMOTEIO)
-#endif
-#ifdef ERESTART
-    CASE_ERRNO(ERESTART)
-#endif
-#ifdef ERFKILL
-    CASE_ERRNO(ERFKILL)
-#endif
-#ifdef EROFS
-    CASE_ERRNO(EROFS)
-#endif
-#ifdef ESHUTDOWN
-    CASE_ERRNO(ESHUTDOWN)
-#endif
-#ifdef ESPIPE
-    CASE_ERRNO(ESPIPE)
-#endif
-#ifdef ESOCKTNOSUPPORT
-    CASE_ERRNO(ESOCKTNOSUPPORT)
-#endif
-#ifdef ESRCH
-    CASE_ERRNO(ESRCH)
-#endif
-#ifdef ESTALE
-    CASE_ERRNO(ESTALE)
-#endif
-#ifdef ESTRPIPE
-    CASE_ERRNO(ESTRPIPE)
-#endif
-#ifdef ETIME
-    CASE_ERRNO(ETIME)
-#endif
-#ifdef ETIMEDOUT
-    CASE_ERRNO(ETIMEDOUT)
-#endif
-#ifdef ETOOMANYREFS
-    CASE_ERRNO(ETOOMANYREFS)
-#endif
-#ifdef ETXTBSY
-    CASE_ERRNO(ETXTBSY)
-#endif
-#ifdef EUCLEAN
-    CASE_ERRNO(EUCLEAN)
-#endif
-#ifdef EUNATCH
-    CASE_ERRNO(EUNATCH)
-#endif
-#ifdef EUSERS
-    CASE_ERRNO(EUSERS)
-#endif
-#ifdef EXDEV
-    CASE_ERRNO(EXDEV)
-#endif
-#ifdef EXFULL
-    CASE_ERRNO(EXFULL)
-#endif
-#ifdef EOPNOTSUPP
-  #ifdef ENOTSUP
-     #if ENOTSUP != EOPNOTSUPP
-       CASE_ERRNO(EOPNOTSUPP)
-     #endif
-  #else
-      CASE_ERRNO(EOPNOTSUPP)
-  #endif
-#endif
-#ifdef EWOULDBLOCK
-  #ifdef EAGAIN
-     #if EAGAIN != EWOULDBLOCK
-       CASE_ERRNO(EWOULDBLOCK)
-     #endif
-  #else
-      CASE_ERRNO(EWOULDBLOCK)
-  #endif
-#endif
-#ifdef EDEADLOCK
-  #ifdef EDEADLK
-     #if EDEADLK != EDEADLOCK
-       CASE_ERRNO(EDEADLOCK)
-     #endif
-  #else
-      CASE_ERRNO(EDEADLOCK)
-  #endif
-#endif
-    default:            err = "UNKNOWN_NAME";break;
+  /* Search in STk_errno_names. */
+  for (struct codeset_code *p=STk_errno_names; p->name; p++) {
+    if (p->code == n) 
+      return STk_intern((char *) p->name);
   }
-  return STk_intern(err);
+  return STk_intern("UNKNOWN_NAME");
 }
 
 
@@ -1005,7 +1008,7 @@ DEFINE_PRIMITIVE("file-size", file_size, subr1, (SCM f))
  *
  * |Glob| differs from csh globbing in two ways:
  *
- * 1. it does not  sort its result list (use the |sort| procedure 
+ * 1. it does not  sort its result list (use the |sort| procedure
  * if you want the list  sorted).
  * 2. |glob| only returns the names of files that actually exist;
  *    in csh no check for existence is made unless a pattern contains a
@@ -1442,7 +1445,7 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
  * measured in seconds.
- * 
+ *
  * NOTE: This {{stklos}} function should not be confused with
  * the R7RS  primitive |current-second| which returns an inexact number
  * and whose result is expressed using  the International Atomic Time

@@ -2,7 +2,7 @@
  *
  * s i g n a l . c          -- Signal handling
  *
- * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update: 17-Dec-2022 13:04 (eg)
+ * Last file update: 23-Jan-2023 12:16 (eg)
  *
  */
 
@@ -52,13 +52,7 @@ static SCM signals[NSIG];
 
 
 /* ====================================================================== */
-struct signal_info {
-  char *name;
-  int value;
-};
-
-
-static struct signal_info signal_names[] = {
+struct codeset_code STk_signal_names[] = {
   /* Posix.1 signals */
   {"SIGHUP",    SIGHUP},
   {"SIGINT",    SIGINT},
@@ -327,8 +321,9 @@ int STk_init_signal()
   }
 
   // Define the symbols assiocated to signal names
-  for (struct signal_info *p = signal_names; p->name; p++) {
-    STk_define_variable(STk_intern(p->name), MAKE_INT(p->value), STk_STklos_module);
+  for (struct codeset_code *p = STk_signal_names; p->name; p++) {
+    STk_define_variable(STk_intern((char *)p->name), MAKE_INT(p->code),
+                        STk_STklos_module);
   }
 
   ADD_PRIMITIVE(initialize_signals);
