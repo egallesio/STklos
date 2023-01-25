@@ -20,9 +20,9 @@
 ;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
-;;;;           Author: Erick Gallesio
+;;;;           Author: Lassi Kortela & Erick Gallesio
 ;;;;    Creation date: 22-Jan-2023 09:44
-;;;; Last file update: 24-Jan-2023 11:59 (eg)
+;;;; Last file update: 25-Jan-2023 11:04 (eg)
 ;;;;
 
 (select-module srfi/238)
@@ -61,10 +61,8 @@
      (else            (error "bad codeset code ~s" code)))))
 
 (define (codeset-message cs code)
-  (let* ((cs  (%find-codeset cs))
-         (msg (assq (codeset-number cs code) (%codeset-messages cs))))
-    (and msg (cdr msg))))
-
+  (%codeset-message (%find-codeset cs)
+                    (codeset-number cs code)))
 
 
 
@@ -82,7 +80,7 @@
 ;;                   (2   NO    #f)                            ; Other name for KO
 ;;                   (3   MAYBE "To be determined")
 ;;                   (404 #f    "Not found")))
-;; 
+;;
 ;; ======================================================================
 (define (make-codeset name lst)
   (unless (symbol? name)
@@ -95,7 +93,9 @@
              (messages '()))
     (cond
      ((null?  lst)
-      (%make-user-codeset name codes messages))
+      (%make-user-codeset name
+                          (sort codes (lambda (a b) (< (car a) (car b))))
+                          messages))
      ((pair? lst)
       (let ((head (car lst)))
         (unless (and (list? head) (= (length head) 3))
@@ -118,3 +118,9 @@
                     messages)))))
      (else
       (error "bad codeset ~s" lst)))))
+
+
+;;;
+;;; module initialization
+;;;
+(%create-system-codesets! (lambda (a b) (< (car a) (car b)))) ; create errno and signal codesets

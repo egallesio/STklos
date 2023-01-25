@@ -19,35 +19,59 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
- *          Authors: Erick Gallesio
+ *          Authors: Lassi Kortela & Erick Gallesio
  *    Creation date: 22-Jan-2023 09:36
- * Last file update: 24-Jan-2023 16:59 (eg)
+ * Last file update: 25-Jan-2023 11:18 (eg)
  */
 
 #include "stklos.h"
 #include "238-incl.c"
 #include <string.h>
 
+
+/*
+ * Notes on the implementation:
+ *
+ * - This implementation is based on a Lassi Kortela Pull Request.
+ *
+ * - Codes are sorted in numerical order internally, and returned in
+ *   numerical order by `codeset-symbols`. Documentation tends to list
+ *   them in this order so it is likely to be intuitive to users.
+ *
+ * - All messages of a system codeset are fetched the first time the user
+ *   requests any message. Messages tend to come from APIs that are not
+ *   thread-safe. Locking is simpler and faster if we fetch everything at
+ *   once.
+ *
+ * - The messages are ket in an A-list,it could be changed to a hash-table
+ *   if necessary.
+ *
+ * - A codeset can be defined in Scheme with the make-codeset primitive
+ *
+ */
+
 MUT_DECL(srfi238_mutex);
 static int tc_codeset;
 static SCM all_codesets= STk_nil;
+EXTERN_PRIMITIVE("sort", sort, subr2, (SCM obj, SCM test));
 
 
 //
 // New Scheme type codeset
-// NOTE: codes and messages are represented by A-lists.
 //
 struct codeset_obj {
   stk_header header;
   SCM name;
   SCM symbols;
-  SCM messages;
+  SCM messages;   // NULL if the cache is not built yet
+  char *(*get_message)(int);
 };
 
 #define CODESETP(p)           (BOXED_TYPE_EQ((p), tc_codeset))
 #define CODESET_NAME(p)       (((struct codeset_obj *) (p))->name)
 #define CODESET_SYMBOLS(p)    (((struct codeset_obj *) (p))->symbols)
 #define CODESET_MESSAGES(p)   (((struct codeset_obj *) (p))->messages)
+#define CODESET_GET_MSG(p)    (((struct codeset_obj *) (p))->get_message)
 
 static void print_codeset(SCM codeset, SCM port, int _UNUSED(mode))
 {
@@ -84,37 +108,26 @@ static void register_codeset(SCM cs)
 // the messages in the codeset_object. Note that even if a reentrant version of
 // strerror exists (strerror_r), this is not the case for strsignal. Furthermore,
 // these function incur a non negligible time penalty.
+// NOTE: the cache is built during the first access
 
 static void make_C_codeset(SCM name, struct codeset_code *table,
-                           char* (*get_message)(int))
+                           char* (*get_message)(int), SCM comparator)
 {
-  SCM z;
   SCM slist = STk_nil;   /* list of symbols */
-  SCM mlist = STk_nil;   /* list of messages */
 
-  /* Build the symbol list and the message list */
-  MUT_LOCK(srfi238_mutex);    // We could be more fine grain ....
+  /* Build the symbol list */
   for (struct codeset_code *p=table; p->name; p++) {
-    SCM n     = MAKE_INT(p->code);
-
-    // add code in symbol lists
-    slist = STk_cons(STk_cons(n, STk_intern((char *) p->name)), slist);
-
-    // add code in messages lists
-    if (STk_assq(n, mlist) == STk_false) {
-      //Code is a duplicate.  Don't add it in mlist
-      char *msg = get_message(p->code);
-      mlist = STk_cons(STk_cons(n, STk_Cstring2string(msg)), mlist);
-    }
+    slist = STk_cons(STk_cons(MAKE_INT(p->code), STk_intern((char *) p->name)),
+                     slist);
   }
-  MUT_UNLOCK(srfi238_mutex);
 
-  /* Build a codeset object */
+  /* Build a codeset object and register it*/
+  SCM z;
   NEWCELL(z, codeset);
   CODESET_NAME(z)     = name;
-  CODESET_SYMBOLS(z)  = slist;
-  CODESET_MESSAGES(z) = mlist;
-
+  CODESET_SYMBOLS(z)  = STk_sort(slist, comparator); // sort the list
+  CODESET_MESSAGES(z) = NULL; // NULL: cache is not populated yet
+  CODESET_GET_MSG(z)  = get_message;
   register_codeset(z);
 }
 
@@ -169,10 +182,30 @@ DEFINE_PRIMITIVE("%codeset-symbols", codeset_symbols, subr1, (SCM cs))
 }
 
 
-DEFINE_PRIMITIVE("%codeset-messages", codeset_messages, subr1, (SCM cs))
+DEFINE_PRIMITIVE("%codeset-message", codeset_message, subr2, (SCM cs, SCM number))
 {
-  if (!CODESETP(cs)) error_bad_codeset(cs); // already verified in Scheme normally
-  return CODESET_MESSAGES(cs);
+  if (!CODESETP(cs)) STk_error("bad codeset ~s", cs); // already verified in Scheme
+  if (!INTP(number)) STk_error("bad number ~s", cs);  // already verified in Scheme
+
+  if (!CODESET_MESSAGES(cs)) {    // Build a cache of all messages at once. 
+    SCM mlist = STk_nil;
+
+    MUT_LOCK(srfi238_mutex);
+    for (SCM l = CODESET_SYMBOLS(cs); !NULLP(l); l = CDR(l)) {
+      SCM code = CAR(CAR(l));
+
+      if (STk_assq(code, mlist) == STk_false) {
+      // Code isn't a duplicate.  Add it to mlist
+        char *msg = CODESET_GET_MSG(cs)(INT_VAL(code));
+        mlist = STk_cons(STk_cons(code, STk_Cstring2string(msg)), mlist);
+      }
+    }
+    MUT_UNLOCK(srfi238_mutex);
+    CODESET_MESSAGES(cs) = mlist;
+  }
+
+  SCM res = STk_assq(number, CODESET_MESSAGES(cs));
+  return res == STk_false? res : CDR(res);
 }
 
 
@@ -185,10 +218,20 @@ DEFINE_PRIMITIVE("%make-user-codeset", make_user_codeset, subr3,
   CODESET_NAME(z) = name;
   CODESET_SYMBOLS(z)  = codes;
   CODESET_MESSAGES(z) = messages;
+  CODESET_GET_MSG(z)  = NULL; 
   register_codeset(z);
 
   return z;
 }
+
+
+DEFINE_PRIMITIVE("%create-system-codesets!", create_sys_codesets, subr1, (SCM comparator))
+{
+  make_C_codeset(STk_intern("errno"),  STk_errno_names,  strerror,  comparator);
+  make_C_codeset(STk_intern("signal"), STk_signal_names, strsignal, comparator);
+  return STk_void;
+}
+
 
 
 // ======================================================================
@@ -202,12 +245,9 @@ MODULE_ENTRY_START("srfi/238")
   ADD_PRIMITIVE_IN_MODULE(codesetp, module);
   ADD_PRIMITIVE_IN_MODULE(find_codeset, module);
   ADD_PRIMITIVE_IN_MODULE(codeset_symbols,module);
-  ADD_PRIMITIVE_IN_MODULE(codeset_messages,module);
+  ADD_PRIMITIVE_IN_MODULE(codeset_message,module);
   ADD_PRIMITIVE_IN_MODULE(make_user_codeset, module);
-
-  /* Create the errno & signal codesets */
-  make_C_codeset(STk_intern("errno"),  STk_errno_names,  strerror);
-  make_C_codeset(STk_intern("signal"), STk_signal_names, strsignal);
+  ADD_PRIMITIVE_IN_MODULE(create_sys_codesets, module);
 
   /* Execute Scheme code */
   STk_execute_C_bytecode(__module_consts, __module_code);
