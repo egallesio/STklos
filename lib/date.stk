@@ -219,12 +219,12 @@ doc>
 ;; UTC time.
 (define (%leap-second-delta utc-seconds)
   (letrec ( (lsd (lambda (table)
-		   (cond ((>= utc-seconds (caar table))
-			  (cdar table))
-			 (else (lsd (cdr table)))))) )
+                   (cond ((>= utc-seconds (caar table))
+                          (cdar table))
+                         (else (lsd (cdr table)))))) )
     (if (< utc-seconds  (* (- 1972 1970) 365 %sid)) ;; 63072000, last table entry
         0
-	(lsd %leap-second-table))))
+        (lsd %leap-second-table))))
 
 
 ;; This funtion receives a number of seconds and returns the number of
@@ -232,13 +232,13 @@ doc>
 ;; UTC.
 (define (%leap-second-neg-delta tai-seconds)
   (letrec ( (lsd (lambda (table)
-		   (cond ((null? table) 0)
-			 ((<= (cdar table) (- tai-seconds (caar table)))
-			  (cdar table))
-			 (else (lsd (cdr table)))))) )
+                   (cond ((null? table) 0)
+                         ((<= (cdar table) (- tai-seconds (caar table)))
+                          (cdar table))
+                         (else (lsd (cdr table)))))) )
     (if (< tai-seconds  (* (- 1972 1970) 365 %sid)) ;; 63072000, last table entry
         0
-	(lsd %leap-second-table))))
+        (lsd %leap-second-table))))
 
 
 
@@ -253,8 +253,8 @@ doc>
   (set-time-type! time-out 'time-utc)
   (set-time-nanosecond! time-out (time-nanosecond time-in))
   (set-time-second!     time-out (- (time-second time-in)
-				    (%leap-second-neg-delta
-				     (time-second time-in))))
+                                    (%leap-second-neg-delta
+                                     (time-second time-in))))
   time-out)
 
 #|
@@ -286,8 +286,8 @@ doc>
   (set-time-type! time-out 'time-tai)
   (set-time-nanosecond! time-out (time-nanosecond time-in))
   (set-time-second!     time-out (+ (time-second time-in)
-				    (%leap-second-delta
-				     (time-second time-in))))
+                                    (%leap-second-delta
+                                     (time-second time-in))))
   time-out)
 
 #|
@@ -343,7 +343,7 @@ doc>
 |#
 (define (%current-time-tai)
   (receive (seconds ms) (%get-time-of-day)
-	   (make-time  'time-tai
+           (make-time  'time-tai
                        (exact (floor (* ms %nano)))
                        seconds )))
 
@@ -362,9 +362,9 @@ Slots are:
 |#
 (define (%current-time-utc)
   (receive (seconds ms) (%get-time-of-day)
-	   (make-time 'time-utc
+           (make-time 'time-utc
                       (exact (floor (* ms %nano)))
-		      (- seconds (%leap-second-delta seconds)))))
+                      (- seconds (%leap-second-delta seconds)))))
 
 
 #|
