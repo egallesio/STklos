@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 11-Sep-2022 17:05 (eg)
+;;;; Last file update: 26-Jan-2023 18:16 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -64,7 +64,7 @@
   (include "regexp.stk")          ; Regular expressions
   (include "process.stk")         ; Processes from Scheme
   (include "equiv.stk")           ; equivalence of circular structures
-  (include "date.stk")            ; Dates
+  (include "time.stk")            ; Dates & Time
   (include "logical.stk")         ; Logical operations
   (include "thread.stk")          ; Thread support
   (include "ffi.stk")             ; FFI support
