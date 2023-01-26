@@ -1,10 +1,10 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 17-Dec-2022 12:13 (eg)
+// Last file update: 26-Jan-2023 17:45 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -804,12 +804,17 @@ also be represented with date structures.
 {{insertdoc 'current-second}}
 {{insertdoc 'current-seconds}}
 {{insertdoc 'current-time}}
+{{insertdoc 'make-time}}
+{{insertdoc 'set-time-nanosecond!}}
 {{insertdoc 'time?}}
 {{insertdoc 'time->seconds}}
 {{insertdoc 'seconds->time}}
+{{insertdoc 'time-utc->time-tai!}}
+{{insertdoc 'time-tai->time-utc!}}
 {{insertdoc 'current-date}}
 {{insertdoc 'make-date}}
 {{insertdoc 'date?}}
+{{insertdoc 'date-nanosecond}}
 {{insertdoc 'date-second}}
 {{insertdoc 'date-minute}}
 {{insertdoc 'date-hour}}
@@ -821,6 +826,7 @@ also be represented with date structures.
 [#datedst]
 {{insertdoc 'date-dst}}
 {{insertdoc 'date-tz}}
+{{insertdoc 'local-timezone-offset}}
 {{insertdoc 'date->seconds}}
 {{insertdoc 'date->string}}
 {{insertdoc 'seconds->date}}

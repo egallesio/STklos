@@ -1,7 +1,7 @@
 ;;;;
 ;;;; thread.stk             -- Threads support
 ;;;;
-;;;; Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 12-May-2022 15:50 (eg)
+;;;; Last file update: 26-Jan-2023 11:31 (eg)
 ;;;;
 
 
@@ -34,11 +34,11 @@
 
 (define (%thread-timeout->seconds timeout)
   (cond
-    ((time? timeout) (time->seconds timeout))
-    ((not timeout)   timeout)
-    ((real? timeout) (+ (time->seconds (current-time))
-            timeout))
-    (else (error "bad timeout ~S" timeout))))
+   ((time? timeout) (time->seconds timeout))
+   ((not timeout)   timeout)
+   ((real? timeout) (+ (time->seconds (current-time))
+                       timeout))
+   (else (error "bad timeout ~S" timeout))))
 
 #|
 <doc EXT make-thread
@@ -69,25 +69,25 @@
 doc>
 |#
 (define (make-thread thunk :optional (name (symbol->string (gensym "thread")))
-                             stack-size)
+                     stack-size)
 
   (define (show-thread-error c)
     (when (and (condition? c)
-           (condition-has-type? c &error-message))
+               (condition-has-type? c &error-message))
       (let* ((name (thread-name (current-thread)))
-         (who  (condition-ref c 'location))
-         (msg  (condition-ref c 'message))
-         (bt   (condition-ref c 'backtrace))
-         (loc  (%build-error-location who bt)))
-    (display (do-color 'bold 'red
-               "**** Error "
-               'blue
-               (format "(in thread ~S):\n" name)
-               'bold 'red
-               (format "~A: ~A\n" (car loc) msg)
-               'normal
-               "    (this error may be signaled again later)\n")
-         (current-error-port)))))
+             (who  (condition-ref c 'location))
+             (msg  (condition-ref c 'message))
+             (bt   (condition-ref c 'backtrace))
+             (loc  (%build-error-location who bt)))
+        (display (do-color 'bold 'red
+                           "**** Error "
+                           'blue
+                           (format "(in thread ~S):\n" name)
+                           'bold 'red
+                           (format "~A: ~A\n" (car loc) msg)
+                           'normal
+                           "    (this error may be signaled again later)\n")
+                 (current-error-port)))))
 
   (define (thread-handler c)
     (%thread-end-exception-set! (current-thread) c)
@@ -98,10 +98,10 @@ doc>
     c)
 
   (%make-thread (lambda ()
-          (with-handler thread-handler
-               (thunk)))
-          name
-          stack-size))
+                  (with-handler thread-handler
+                                (thunk)))
+                name
+                stack-size))
 
 #|
 <doc EXT thread-handler-error-show
@@ -131,21 +131,21 @@ doc>
   (if (and (eq? thread (current-thread)) (not timeout))
       (error 'thread-join! "cannot join on myself (deadlock will occur)")
       (let ((join (%thread-join! thread
-                 (%thread-timeout->seconds timeout))))
-    (cond
-      (join
-         ;; We had a timeout
-        (if timeout-val?
-        timeout-val
-        (raise (make-condition &thread-join-timeout))))
-      ((%thread-end-exception thread)
-         ;; We had an exception in thread. Raise an uncaught-exception
-         (let ((old-exception  (%thread-end-exception thread)))
-           (raise (make-condition &uncaught-exception
-                       'reason old-exception))))
-      (else
-       ;; No exception. Return the thread-result
-       (%thread-end-result thread))))))
+                                 (%thread-timeout->seconds timeout))))
+        (cond
+         (join
+          ;; We had a timeout
+          (if timeout-val?
+              timeout-val
+              (raise (make-condition &thread-join-timeout))))
+         ((%thread-end-exception thread)
+          ;; We had an exception in thread. Raise an uncaught-exception
+          (let ((old-exception  (%thread-end-exception thread)))
+            (raise (make-condition &uncaught-exception
+                                   'reason old-exception))))
+         (else
+          ;; No exception. Return the thread-result
+          (%thread-end-result thread))))))
 
 ;; **********************************************************************
 ;;
@@ -160,8 +160,8 @@ doc>
     ;;  - #f: we had a timeout
     ;;  - #t: otherwise
     (if (thread? res)
-    (make-condition &thread-abandonned-mutex)
-    res)))
+        (make-condition &thread-abandonned-mutex)
+        res)))
 
 (define (mutex-unlock! mtx :optional condv timeout)
   (%mutex-unlock! mtx condv timeout))
@@ -173,13 +173,13 @@ doc>
 ;; **********************************************************************
 
 (%define-condition-type-accessors &thread-join-timeout  &condition
-  join-timeout-exception?)
+                                  join-timeout-exception?)
 
 (%define-condition-type-accessors &thread-abandonned-mutex  &condition
-  abandoned-mutex-exception?)
+                                  abandoned-mutex-exception?)
 
 (%define-condition-type-accessors &thread-terminated  &condition
-  terminated-thread-exception?)
+                                  terminated-thread-exception?)
 
 
 ;; The following definitions correspond to the macro-expansion of the form
@@ -194,8 +194,8 @@ doc>
                                                  '(reason)))
 
 (%define-condition-type-accessors &uncaught-exception &condition
-   uncaught-exception?
-   (reason uncaught-exception-reason))
+                                  uncaught-exception?
+                                  (reason uncaught-exception-reason))
 
 
 #|

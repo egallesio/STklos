@@ -57,7 +57,7 @@
     (16 "Syntax for procedures of variable arity" (case-lambda))
     (17 "Generalized set!" () "srfi-17")
     (18 "Multithreading support")
-    ;;  19 Time Data Types and Procedures
+    (19 "Time Data Types and Procedures" () "srfi-19")
     ;;  20 ........ Withdrawn
     ;;  21  Real-time multithreading support
     (22 "Running Scheme Scripts on Unix")
@@ -278,7 +278,7 @@
     (236 "Evaluating expressions in an unspecified order" () "srfi-236")
     ;; 237 R6RS Records (refined) (draft)
     (238 "Codesets" () "srfi-238")
-    ;; 239 Destructuring lists (draft)
+    ;; 239 Destructuring lists
     ;; 240 Reconciled records (draft)
     ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data (drafr)
     ;; 242 The CFG Language (draft)

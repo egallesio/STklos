@@ -15415,7 +15415,7 @@ second later.</p>
 </div>
 <div class="paragraph">
 <p>Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
-measured in seconds.</p>
+measured in seconds in the Coordinated Universal Time (UTC) scale.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -15441,12 +15441,87 @@ instead of UTC.
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(current-time)</code></strong><br></p>
+<p><strong><code>(current-time)</code></strong><br>
+<strong><code>(current-time type)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns a time object corresponding to the current time.</p>
+<p>Return the current time as time object. The type can be <code>time-utc</code> or <code>time-tai</code>.
+If omitted, <code>type</code> is <code>time-utc</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+To use more time types, such as <code>time-monotonic</code> and <code>time-process</code>, please
+load <strong><a href="http://srfi.schemers.org/srfi-19/srfi-19.html">SRFI-19</a></strong>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(make-time nanosecond second)</code></strong><br>
+<strong><code>(make-time type nanosecond second)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Creates a time structure with the given <code>nanosecond</code> and <code>second</code>.
+If <code>type</code> is passed, it must be a symbol representing one of the
+supported time types (<code>time-tai</code>, <code>time-utc</code>, <code>time-monotonic</code>,
+<code>time-process</code> and <code>time-duration</code>).</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>time-monotonic</code>, <code>time-process</code> and <code>time-duration</code> can
+be created, but operations on them are only available when SRFI-19 is
+loaded.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-type t)</code></strong><br>
+<strong><code>(set-time-type! t v)</code></strong><br>
+<strong><code>(time-second t)</code></strong><br>
+<strong><code>(set-time-second! t s)</code></strong><br>
+<strong><code>(time-nanosecond t)</code></strong><br>
+<strong><code>(set-time-nanosecond! t n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These are accessors for time structures.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -15510,6 +15585,52 @@ of seconds elapsed since the Epoch.</p>
 </div>
 </div>
 <div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-utc&#8594;time-tai t)</code></strong><br>
+<strong><code>(time-utc&#8594;time-tai! t)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Converts <code>t</code>, which must be of type <code>time-utc</code>, to the type
+<code>time-tai</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Time-utc&#8594;time-tai</code> creates a new object, while <code>time-utc&#8594;time-tai</code>
+can use <code>t</code> to build the returned object.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-tai&#8594;time-utc t)</code></strong><br>
+<strong><code>(time-tai&#8594;time-utc! t)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Converts <code>t</code>, which must be of type <code>time-tai</code>, to the type
+<code>time-utc</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Time-tai&#8594;time-utc</code> creates a new object, while <code>time-tai&#8594;time-utc</code>
+can use <code>t</code> to build the returned object.</p>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -15534,13 +15655,14 @@ of seconds elapsed since the Epoch.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(make-date :key second minute hour day month year)</code></strong><br></p>
+<p><strong><code>(make-date :key      nanosecond second minute hour day month year zone-offset)</code></strong><br>
+<strong><code>(make-date :optional nanosecond second minute hour day month year zone-offset)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Build a date from its argument. <code>hour</code>, <code>minute</code>, <code>second</code> default to 0;
-<code>day</code> and <code>month</code> default to 1; <code>year</code> defaults to 1970</p>
+<p>Build a date from its argument. <code>hour</code>, <code>minute</code>, <code>second</code>, <code>nanosecond</code>
+default to 0; <code>day</code> and <code>month</code> default to 1; <code>year</code> defaults to 1970.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -15557,6 +15679,22 @@ of seconds elapsed since the Epoch.</p>
 </div>
 <div class="paragraph">
 <p>Return <code>#t</code> if <code>obj</code> is a date, and otherwise returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(date-nanosecond d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the nanosecond of date <code>d</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -15701,7 +15839,7 @@ of seconds elapsed since the Epoch.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Return an indication about daylight saving adjustment:</p>
+<p>Return an indication about daylight saving adjustment of date <code>d</code>:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -15741,12 +15879,26 @@ of seconds elapsed since the Epoch.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(date&#8594;seconds d)</code></strong><br></p>
+<p><strong><code>(local-timezone-offset)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Convert the date <code>d</code> to the number of seconds since the <em>Epoch"</em>.</p>
+<p>Returns the local timezone offset, in seconds.</p>
+</div>
+<div class="paragraph">
+<p>For example, for GMT+2 it will be <code>2 * 60 * 60</code> = <code>7200</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">local-timezone-offset</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">0</span>        <span class="c1">;; for GMT</span>
+<span class="p">(</span><span class="nf">local-timezone-offset</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">7200</span>     <span class="c1">;; for GMT+2</span>
+<span class="p">(</span><span class="nf">local-timezone-offset</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">-10800</span>   <span class="c1">;; for GMT-3</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The timezone is searched for in the environment variable <code>TZ</code>. If this
+variable does not appear in the environment, the system timezone is used.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -15757,14 +15909,38 @@ of seconds elapsed since the Epoch.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(date&#8594;string format d)</code></strong><br></p>
+<p><strong><code>(date&#8594;seconds d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Convert the date <code>d</code> to the number of seconds since the <em>Epoch</em>,
+1970-01-01 00:00:00 +0000 (UTC).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">date-&gt;seconds</span> <span class="p">(</span><span class="nf">make-date</span> <span class="mi">0</span> <span class="mi">37</span> <span class="mi">53</span> <span class="mi">1</span> <span class="mi">26</span> <span class="mi">10</span> <span class="mi">2012</span> <span class="mi">0</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="mf">1351216417.0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(date&#8594;string d)</code></strong><br>
+<strong><code>(date&#8594;string d format)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Convert the date <code>d</code> using the string <code>format</code> as a
 specification. Conventions for format are the same as the one
-of <em><a href="#seconds2string">primitive <code>seconds&#8594;string</code></a></em>.</p>
+of <em><a href="#seconds2string">primitive <code>seconds&#8594;string</code></a></em>.
+If <code>format</code> is omitted, it defaults to <code>"~c"</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -15780,8 +15956,17 @@ of <em><a href="#seconds2string">primitive <code>seconds&#8594;string</code></a>
 </div>
 </div>
 <div class="paragraph">
-<p>Convert the date <code>n</code> expressed as a number of seconds since the Epoch
-to a date.</p>
+<p>Convert the date <code>n</code> expressed as a number of seconds since the <em>Epoch</em>,
+1970-01-01 00:00:00 +0000 (UTC) into a date.
+<code>n</code> can be an exact integer or an inexact real.</p>
+</div>
+<div class="paragraph">
+<p>This is equivalent to converting time-UTC to date.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">seconds-&gt;date</span> <span class="mi">1351216417</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">date</span> <span class="mi">2012-10-26</span> <span class="mi">1</span><span class="nv">:53:37</span><span class="p">]</span></code></pre>
+</div>
 </div>
 <div id="seconds2string" class="paragraph">
 <p></p>
@@ -15937,6 +16122,9 @@ Epoch). The keyed values returned are</p>
 <div class="ulist">
 <ul>
 <li>
+<p>nanosecond : 0 to 999999</p>
+</li>
+<li>
 <p>second : 0 to 59 (but can be up to 61 to allow for leap seconds)</p>
 </li>
 <li>
@@ -15973,7 +16161,7 @@ Epoch). The keyed values returned are</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">seconds-&gt;list</span> <span class="p">(</span><span class="nf">current-second</span><span class="p">))</span>
-       <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:second</span> <span class="mi">21</span> <span class="o">#</span><span class="nv">:minute</span> <span class="mi">35</span> <span class="o">#</span><span class="nv">:hour</span> <span class="mi">20</span> <span class="o">#</span><span class="nv">:day</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">:month</span> <span class="mi">1</span>
+       <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:nanosecond</span> <span class="mi">182726</span> <span class="o">#</span><span class="nv">:second</span> <span class="mi">21</span> <span class="o">#</span><span class="nv">:minute</span> <span class="mi">35</span> <span class="o">#</span><span class="nv">:hour</span> <span class="mi">20</span> <span class="o">#</span><span class="nv">:day</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">:month</span> <span class="mi">1</span>
            <span class="o">#</span><span class="nv">:year</span> <span class="mi">2022</span> <span class="o">#</span><span class="nv">:week-day</span> <span class="mi">1</span> <span class="o">#</span><span class="nv">:year-day</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">:dst</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:tz</span> <span class="mi">-3600</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -23573,7 +23761,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>115</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>117</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -23601,6 +23789,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-16/srfi-16.html">SRFI-16</a></strong>&#8201;&#8212;&#8201;<em>Syntax for procedures of variable arity</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-17/srfi-17.html">SRFI-17</a></strong>&#8201;&#8212;&#8201;<em>Generalized set!</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a></strong>&#8201;&#8212;&#8201;<em>Multithreading support</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-19/srfi-19.html">SRFI-19</a></strong>&#8201;&#8212;&#8201;<em>Time Data Types and Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-22/srfi-22.html">SRFI-22</a></strong>&#8201;&#8212;&#8201;<em>Running Scheme Scripts on Unix</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong>&#8201;&#8212;&#8201;<em>Error reporting mechanism</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-25/srfi-25.html">SRFI-25</a></strong>&#8201;&#8212;&#8201;<em>Multi-dimensional Arrays</em><br>
@@ -23698,7 +23887,8 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-229/srfi-229.html">SRFI-229</a></strong>&#8201;&#8212;&#8201;<em>Tagged Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-233/srfi-233.html">SRFI-233</a></strong>&#8201;&#8212;&#8201;<em>INI files</em><br>
--  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br></p>
+-  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong>&#8201;&#8212;&#8201;<em>Codesets</em><br></p>
 </div>
 </div>
 <div class="sect2">
@@ -23764,7 +23954,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-236</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-236</code> <code>srfi-238</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -29121,7 +29311,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-01-13 11:30:31 +0100
+Last updated 2023-01-26 18:18:11 +0100
 </div>
 </div>
 </body>
