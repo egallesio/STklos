@@ -21,16 +21,21 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 12-May-2022 15:49 (eg)
+;;;; Last file update: 28-Jun-2022 19:05 (eg)
 ;;;;
 
-
 (export time? time->seconds seconds->time make-date date? seconds->date
-        date-second date-minute date-hour
+        date-nanosecond date-second date-minute date-hour
         date-day date-month date-year
         date-week-day date-year-day
         date-dst date-tz
-        seconds->list current-date seconds->string date->string)
+        seconds->list current-date current-time seconds->string date->string
+        time-nanosecond set-time-nanosecond! time-second set-time-second!
+        time-type set-time-type! make-time
+
+        time-tai->time-utc time-tai->time-utc!
+        time-utc->time-tai time-utc->time-tai!
+        %leap-second-table)
 
 
 ;;;; ======================================================================
@@ -39,16 +44,80 @@
 ;;;;
 ;;;; ======================================================================
 
+
+#|
+<doc EXT make-time
+ * (make-time nanosecond second)
+ * (make-time type nanosecond second)
+ *
+ * Creates a time structure with the given |nanosecond| and |second|.
+ * If |type| is passed, it must be a symbol representing one of the
+ * supported time types (|time-tai|, |time-utc|, |time-monotonic|,
+ * |time-process| and |time-duration|).
+ * Note that  |time-monotonic|, |time-process| and |time-duration| can
+ * be created, but operations on them are only available when SRFI-19 is
+ * loaded.
+doc>
+|#
+(define (make-time a b :optional (c #f))
+  (cond ((symbol? a)
+         ;; a = type
+         ;; b = nano
+         ;; c = sec -> c necessary
+         (unless c
+           (error "since first argument is symbol, 3 args (type, nanosecond and second) required, only 2 given"))
+         (unless (memq a '(time-tai time-utc time-monotonic time-process time-duration))
+           (error "bad time type ~S" a))
+         (unless (integer? b) (error "bad integer ~S" b))
+         (unless (integer? c) (error "bad integer ~S" c))
+         (make-struct %time a b c))
+        ((integer? a)
+         ;; a = nano
+         ;; b = sec -> c NOT allowed
+         (when c (error "since first argument is integer, 2 args (nanosecond and second) required, but 3 given"))
+         (unless (integer? b) (error "bad integer ~S" b))
+         (make-struct %time 'time-utc a b))
+        (else (error "bad symbol or integer ~S" a))))
+
+#|
+<doc EXT time-type set-time-type! time-second set-time-second! time-nanosecond set-time-nanosecond!
+ * (time-type t)
+ * (set-time-type! t v)
+ * (time-second t)
+ * (set-time-second! t s)
+ * (time-nanosecond t)
+ * (set-time-nanosecond! t n)
+ *
+ * These are accessors and setters for time structures.
+doc>
+|#
+(define (time-type t) (struct-ref t 'type))
+(define (set-time-type! t v) (struct-set! t 'type v))
+
+(define (time-second t) (struct-ref t 'second))
+(define (set-time-second! t s) (struct-set! t 'second s))
+
+(define (time-nanosecond t) (struct-ref t 'nanosecond))
+(define (set-time-nanosecond! t n) (struct-set! t 'nanosecond n))
+
 #|
 <doc EXT time?
  * (time? obj)
  *
- * Return |%t| if |obj| is a time object, othererwise returns |%f|.
+ * Return `#t` if |obj| is a time object, othererwise returns `#f`.
 doc>
 |#
 (define (time? obj)
   (and (struct? obj) (eq? (struct-type obj) %time)))
 
+
+(define %nano #e1e9)
+(define %sid  86400)    ; seconds in a day
+
+
+;;;
+;;; CONVERSIONS SECONDS <-> TIME
+;;;
 
 #|
 <doc EXT time->seconds
@@ -63,9 +132,9 @@ doc>
 |#
 (define (time->seconds time)
   (if (time? time)
-      (exact->inexact (+ (%fast-struct-ref time %time 'second 1)
-                         (/ (%fast-struct-ref time %time 'nanosecond 2)
-                            #e1e9)))
+      (exact->inexact (+ (%fast-struct-ref time %time 'second 2)
+                         (/ (%fast-struct-ref time %time 'nanosecond 1)
+                            %nano)))
       (error 'time-seconds "bad time ~S" time)))
 
 
@@ -86,13 +155,255 @@ doc>
       (cond
         ((real? x)
          (let ((n (inexact->exact (round (* x #e1e9)))))
-           (make-struct %time :time-utc (quotient n #e1e9) (remainder n #e1e9))))
+           (make-struct %time :time-utc  (remainder n %nano) (quotient n %nano))))
         ((integer? x)
-         (make-struct %time  x 0))
+         (make-struct %time 0 x))
         (else
          (error 'seconds->time "cannot convert ~S to a time" x)))
       (error 'seconds->time "bad number ~S" x)))
 
+
+;;;
+;;; CONVERSIONS TAI <-> UTC
+;;;
+
+;;
+;; each entry is ( seconds since epoch . # seconds to add for tai )
+;; note they go higher to lower, and end in 1972.
+;;
+;; NOTE: the correct way to use this is to take the integer number of seconds
+;;       from UTC time, find if it is >= than the CAR, then add the number in
+;;       the CDR to obtain the TAI seconds,
+;;       OR
+;;       take the number of seconds in TAI time, subtract it from the CDR, then
+;;       see it it would ne >= the CAR, and if so, subtract it from the original
+;;       number to obtain the number of UTC seconds.
+;;
+;; FIXME: can we have a reliable URL to get an updated table when a more entries
+;;        are added?
+;;        Maybe https://www.ietf.org/timezones/data/leap-seconds.list ?
+;;
+(define %leap-second-table
+  '((1483228800 . 37)  ;; 1 Jan 2017
+    (1435708800 . 36)  ;; 1 Jul 2015
+    (1341100800 . 35)  ;; 1 Jul 2012
+    (1230768000 . 34)  ;; 1 Jan 2009
+    (1136073600 . 33)  ;; 1 Jan 2006
+    (915148800 . 32)   ;; 1 Jan 1999
+    (867715200 . 31)   ;; 1 Jul 1997
+    (820454400 . 30)   ;; 1 Jan 1996
+    (773020800 . 29)   ;; 1 Jul 1994
+    (741484800 . 28)   ;; 1 Jul 1993
+    (709948800 . 27)   ;; 1 Jul 1992
+    (662688000 . 26)   ;; 1 Jan 1991
+    (631152000 . 25)   ;; 1 Jan 1990
+    (567993600 . 24)   ;; 1 Jan 1988
+    (489024000 . 23)   ;; 1 Jul 1985
+    (425865600 . 22)   ;; 1 Jul 1983
+    (394329600 . 21)   ;; 1 Jul 1982
+    (362793600 . 20)   ;; 1 Jul 1981
+    (315532800 . 19)   ;; 1 Jan 1980
+    (283996800 . 18)   ;; 1 Jan 1979
+    (252460800 . 17)   ;; 1 Jan 1978
+    (220924800 . 16)   ;; 1 Jan 1977
+    (189302400 . 15)   ;; 1 Jan 1976
+    (157766400 . 14)   ;; 1 Jan 1975
+    (126230400 . 13)   ;; 1 Jan 1974
+    (94694400  . 12)   ;; 1 Jan 1973
+    (78796800  . 11)   ;; 1 Jul 1972
+    (63072000  . 10))) ;; 1 Jan 1972
+
+
+;; This funtion receives a number of seconds and returns the number of
+;; seconds (the delta) to be added from UTC to get the equivalent
+;; UTC time.
+(define (%leap-second-delta utc-seconds)
+  (letrec ( (lsd (lambda (table)
+		   (cond ((>= utc-seconds (caar table))
+			  (cdar table))
+			 (else (lsd (cdr table)))))) )
+    (if (< utc-seconds  (* (- 1972 1970) 365 %sid)) ;; 63072000, last table entry
+        0
+	(lsd %leap-second-table))))
+
+
+;; This funtion receives a number of seconds and returns the number of
+;; seconds (the delta) to be subtracted from TAI to get the equivalent
+;; UTC.
+(define (%leap-second-neg-delta tai-seconds)
+  (letrec ( (lsd (lambda (table)
+		   (cond ((null? table) 0)
+			 ((<= (cdar table) (- tai-seconds (caar table)))
+			  (cdar table))
+			 (else (lsd (cdr table)))))) )
+    (if (< tai-seconds  (* (- 1972 1970) 365 %sid)) ;; 63072000, last table entry
+        0
+	(lsd %leap-second-table))))
+
+
+
+;;
+;; TAI -> UTC
+;;
+
+(define (%time-tai->time-utc! time-in time-out caller)
+  (when (not (eq? (time-type time-in) 'time-tai))
+    (error 'caller "bad TAI time ~S" time-in))
+  ;;(%time-error caller 'incompatible-time-types time-in))
+  (set-time-type! time-out 'time-utc)
+  (set-time-nanosecond! time-out (time-nanosecond time-in))
+  (set-time-second!     time-out (- (time-second time-in)
+				    (%leap-second-neg-delta
+				     (time-second time-in))))
+  time-out)
+
+#|
+<doc EXT time-tai->time-utc time-tai->time-utc!
+ * (time-tai->time-utc t)
+ * (time-tai->time-utc! t)
+ *
+ * Converts |t|, which must be of type |time-tai|, to the type
+ * |time-utc|.
+ *
+ * |Time-tai->time-utc| creates a new object, while |time-tai->time-utc|
+ * can use |t| to build the returned object.
+doc>
+|#
+(define (time-tai->time-utc time-in)
+  (%time-tai->time-utc! time-in (make-time 'time-utc 0 0) 'time-tai->time-utc))
+
+(define (time-tai->time-utc! time-in)
+  (%time-tai->time-utc! time-in time-in 'time-tai->time-utc!))
+
+;;
+;; UTC -> TAI
+;;
+
+(define (%time-utc->time-tai! time-in time-out caller)
+  (when (not (eq? (time-type time-in) 'time-utc))
+    (error 'caller "bad UTC time ~S" time-in))
+      ;;(%time-error caller 'incompatible-time-types time-in))
+  (set-time-type! time-out 'time-tai)
+  (set-time-nanosecond! time-out (time-nanosecond time-in))
+  (set-time-second!     time-out (+ (time-second time-in)
+				    (%leap-second-delta
+				     (time-second time-in))))
+  time-out)
+
+#|
+<doc EXT time-utc->time-tai time-utc->time-tai!
+ * (time-utc->time-tai t)
+ * (time-utc->time-tai! t)
+ *
+ * Converts |t|, which must be of type |time-utc|, to the type
+ * |time-tai|.
+ *
+ * |Time-utc->time-tai| creates a new object, while |time-utc->time-tai|
+ * can use |t| to build the returned object.
+doc>
+|#
+
+(define (time-utc->time-tai time-in)
+  (%time-utc->time-tai! time-in (make-time 'time-tai 0 0) 'time-utc->time-tai))
+
+(define (time-utc->time-tai! time-in)
+  (%time-utc->time-tai! time-in time-in 'time-utc->time-tai!))
+
+
+;;;
+;;; CURRENT TIME
+;;;
+
+;;;
+;;; %get-time-of-day is now implementeed using (current-second)
+;;; and splitting seconds and nanoseconds.
+;;;
+;;; This returns TAI!
+;;;
+;;; --jpellegrini
+;;;
+(define (%get-time-of-day)
+  (let* ((t (current-second)) ; inexact TAI
+         (s (exact (floor t)))
+         (n (- t s)))
+    (values s n))) ;; exact TAI second,
+                   ;; inexact TAI nanosecond
+
+#|
+ Current TAI
+
+ RETURNS: time structure.
+
+ stklos> (describe  (%current-time-tai))
+ #[struct %time 140482687955760] is an instance of the structure type %time.
+ Slots are:
+      type = time-tai
+      nanosecond = 484885931
+      second = 1653363174
+|#
+(define (%current-time-tai)
+  (receive (seconds ms) (%get-time-of-day)
+	   (make-time  'time-tai
+                       (exact (floor (* ms %nano)))
+                       seconds )))
+
+
+#|
+ Current UTC
+
+ RETURNS: time structure.
+
+ stklos> (describe  (%current-time-utc))
+#[struct %time 140482687990160] is an instance of the structure type %time.
+Slots are:
+     type = time-utc
+     nanosecond = 876263856
+     second = 1653363215
+|#
+(define (%current-time-utc)
+  (receive (seconds ms) (%get-time-of-day)
+	   (make-time 'time-utc
+                      (exact (floor (* ms %nano)))
+		      (- seconds (%leap-second-delta seconds)))))
+
+
+#|
+<doc EXT current-time
+ * (current-time [type])
+ *
+ * Current time, of type time, which defaults to TIME-UTC.
+ *
+ * @lisp
+ * (describe (current-time))
+ *
+ * #[struct %time 140482689969104] is an instance of the structure type %time.
+ * Slots are:
+ *      type = time-utc
+ *      nanosecond = 833635568
+ *      second = 1653363915
+ *
+ * (describe (current-time 'time-tai))
+ *
+ *  #[struct %time 140482689994944] is an instance of the structure type %time.
+ * Slots are:
+ *      type = time-tai
+ *      nanosecond = 175448417
+ *      second = 1653363957
+ * @end lisp
+ *
+ * To use more time types, such as time-monotonic and time-process, please
+ * load SRFI 19.
+doc>
+|#
+(define (current-time . type)
+  (cond ((or (null? type) (eq? (car type) 'time-utc))
+         (%current-time))
+        ((> (length type) 1)
+         (error "too many arguments (0 or 1 expected, ~S given)"
+                (length type)))
+        ((eq? (car type) 'time-tai)
+         (time-utc->time-tai (%current-time)))
+        (else (error "unsupported time type ~S" (car type)))))
 
 ;;;; ======================================================================
 ;;;;
@@ -101,18 +412,52 @@ doc>
 ;;;; ======================================================================
 #|
 <doc EXT make-date
- * (make-date :key second minute hour day month year)
+ * (make-date :key      nanosecond second minute hour day month year zone-offset)
+ * (make-date :optional nanosecond second minute hour day month year zone-offset)
  *
- * Build a date from its argument. |hour|, |minute|, |second| default to 0;
- * |day| and |month| default to 1; |year| defaults to 1970
+ * Build a date from its argument. |hour|, |minute|, |second|, |nanosecond|
+ * default to 0; |day| and |month| default to 1; |year| defaults to 1970.
 doc>
 |#
-(define (make-date :key (second 0) (minute 0) (hour 0)
-                        (day 1) (month 1) (year 1970))
-  (let ((tmp (make-struct %date second minute hour day month year)))
-    ;; tmp is probably partially initialized convert it to seconds and back
-    ;; to a date
-    (seconds->date (date->seconds tmp))))
+(define (make-date . args)
+  (if (and (pair? args) (keyword? (car args)))
+      (apply %make-date-key args)
+      (apply %make-date-opt args)))
+
+(define (%make-date-key :key (nanosecond 0) (second 0) (minute 0) (hour 0)
+                        (day 1) (month 1) (year 1970) (zone-offset #f))
+  (%make-date nanosecond second minute hour day month year zone-offset))
+
+(define (%make-date-opt :optional (nanosecond 0) (second 0) (minute 0) (hour 0)
+                        (day 1) (month 1) (year 1970) (zone-offset #f))
+  (%make-date nanosecond second minute hour day month year zone-offset))
+
+(define (%make-date   nanosecond second minute hour day month year zone-offset)
+  (let ((res (make-struct %date
+                          nanosecond
+                          second
+                          minute
+                          hour
+                          day
+                          month
+                          year
+                          #void          ;; week-day
+                          #void          ;; year-day
+                          -1             ;; dst
+                          zone-offset)))
+    ;; week-day, year-day and dst will be filled automaticallyby seconds->date,
+    ;; which call localtime(3).
+
+    ;; sec-offset is how much the second count is above 59.
+    ;; FIXME: should use the leap table instead?
+    (let ((sec-offset (max 0 (- second 59))))
+      (let ((tmp (seconds->date (-  (date->seconds res) sec-offset)))
+            (offset (if zone-offset zone-offset (local-timezone-offset))))
+        (struct-set! res 'week-day (date-week-day tmp))
+        (struct-set! res 'year-day (date-year-day tmp))
+        (struct-set! res 'dst      (date-dst tmp))
+        (struct-set! res 'tz       offset)
+        res))))
 
 #|
 <doc EXT date?
@@ -124,8 +469,36 @@ doc>
 (define (date? obj)
   (and (struct? obj) (eq? (struct-type obj) %date)))
 
+(define (time-zone-name date)
+  (let ((offset (date-tz date)))
+    (if (zero? offset)
+        "Z"
+        (let* ((hours   (abs (quotient  offset 3600)))
+               (minutes (abs (quotient (remainder offset 3600) 60)))
+               (signal  (if (negative? offset) #\- #\+))
+               (str     (format #f "~a~2f:~2f" signal hours minutes)))
+          (string-map (lambda (x) (if (eq? x #\space) #\0 x)) str)))))
 
+;;;
+;;; DATE <-> TIME CONVERSION
+;;;
 
+#|
+<doc EXT seconds->date
+ * (seconds->date n)
+ *
+ * Convert the date |n| expressed as a number of seconds since the _Epoch_,
+ * 1970-01-01 00:00:00 +0000 (UTC) into a date.
+ * |n| can be an exact integer or an inexact real.
+ *
+ * This is equivalent to converting time-UTC to date.
+ * @lisp
+ * (%seconds->date 1351216417)           => #[date 2012-10-26 1:53:37]
+ * (time-utc->date
+ *   (make-time 'time-utc 0 1351216417)) => #[date 2012-10-26 1:53:37]
+ * @end lisp
+doc>
+|#
 (define (seconds->date s)
   (%seconds->date (if (real? s) (inexact->exact (round s)) s)))
 
@@ -141,6 +514,11 @@ doc>
 
 
 #|
+<doc EXT date-nanosecond
+ * (date-nanosecond d)
+ *
+ * Return the nanosecond of date |d|.
+doc>
 <doc EXT date-second
  * (date-second d)
  *
@@ -197,19 +575,20 @@ doc>
  * Return the time zone of date |d|.
 doc>
 |#
-(define (date-second d)         (%fast-struct-ref d %date 'date-second 0))
-(define (date-minute d)         (%fast-struct-ref d %date 'date-minute 1))
-(define (date-hour d)           (%fast-struct-ref d %date 'date-hour 2))
+(define (date-nanosecond d)     (%fast-struct-ref d %date 'date-nanosecond 0))
+(define (date-second d)         (%fast-struct-ref d %date 'date-second 1))
+(define (date-minute d)         (%fast-struct-ref d %date 'date-minute 2))
+(define (date-hour d)           (%fast-struct-ref d %date 'date-hour 3))
 
-(define (date-day d)            (%fast-struct-ref d %date 'date-day 3))
-(define (date-month d)          (%fast-struct-ref d %date 'date-month 4))
-(define (date-year d)           (%fast-struct-ref d %date 'date-year 5))
+(define (date-day d)            (%fast-struct-ref d %date 'date-day 4))
+(define (date-month d)          (%fast-struct-ref d %date 'date-month 5))
+(define (date-year d)           (%fast-struct-ref d %date 'date-year 6))
 
-(define (date-week-day d)       (%fast-struct-ref d %date 'date-week-day 6))
-(define (date-year-day d)       (%fast-struct-ref d %date 'date-year-day 7))
+(define (date-week-day d)       (%fast-struct-ref d %date 'date-week-day 7))
+(define (date-year-day d)       (%fast-struct-ref d %date 'date-year-day 8))
 
-(define (date-dst d)            (%fast-struct-ref d %date 'date-dst 8))
-(define (date-tz d)             (%fast-struct-ref d %date 'date-tz 9))
+(define (date-dst d)            (%fast-struct-ref d %date 'date-dst 9))
+(define (date-tz d)             (%fast-struct-ref d %date 'date-tz 10))
 
 
 #|
@@ -219,6 +598,7 @@ doc>
  * Returns a keyword list for the date given by |sec| (a date based on the
  * Epoch). The keyed values returned are
  *
+ * - nanosecond : 0 to 999999
  * - second : 0 to 59 (but can be up to 61 to allow for leap seconds)
  * - minute : 0 to 59
  * - hour : 0 to 23
@@ -234,7 +614,7 @@ doc>
  *
  * @lisp
  * (seconds->list (current-second))
- *        => (#:second 21 #:minute 35 #:hour 20 #:day 10 #:month 1
+ *        => (#:nanosecond 182726 #:second 21 #:minute 35 #:hour 20 #:day 10 #:month 1
  *            #:year 2022 #:week-day 1 #:year-day 10 #:dst 0 #:tz -3600)
  * @end lisp
 doc>

@@ -1553,12 +1553,12 @@ doc>
 (define current-jiffy
   ;; This implementation probably allocates bignums on 32 bits machines
   ;; Therefore, the resolution should be lowered on these architectures.
-  (let ((initial-time (current-time))
+  (let ((initial-time (%current-time))
         (time->jiffy  (lambda (t)
                         (+ (* (struct-ref t 'second) #e1e9)
                            (struct-ref t 'nanosecond)))))
     (lambda ()
-      (- (time->jiffy (current-time))
+      (- (time->jiffy (%current-time))
          (time->jiffy initial-time)))))
 
 #|

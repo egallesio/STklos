@@ -36,7 +36,7 @@
   (cond
     ((time? timeout) (time->seconds timeout))
     ((not timeout)   timeout)
-    ((real? timeout) (+ (time->seconds (current-time))
+    ((real? timeout) (+ (time->seconds (%current-time))
             timeout))
     (else (error "bad timeout ~S" timeout))))
 
