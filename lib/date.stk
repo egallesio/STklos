@@ -1,7 +1,7 @@
 ;;;;
 ;;;; date.stk                   -- Date and Time Operations
 ;;;;
-;;;; Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 28-Jun-2022 19:05 (eg)
+;;;; Last file update: 26-Jan-2023 17:49 (eg)
 ;;;;
 
 (export time? time->seconds seconds->time make-date date? seconds->date
@@ -54,7 +54,8 @@
  * If |type| is passed, it must be a symbol representing one of the
  * supported time types (|time-tai|, |time-utc|, |time-monotonic|,
  * |time-process| and |time-duration|).
- * Note that  |time-monotonic|, |time-process| and |time-duration| can
+ *
+ * NOTE:  |time-monotonic|, |time-process| and |time-duration| can
  * be created, but operations on them are only available when SRFI-19 is
  * loaded.
 doc>
@@ -88,7 +89,7 @@ doc>
  * (time-nanosecond t)
  * (set-time-nanosecond! t n)
  *
- * These are accessors and setters for time structures.
+ * These are accessors for time structures.
 doc>
 |#
 (define (time-type t) (struct-ref t 'type))
@@ -369,30 +370,14 @@ Slots are:
 
 #|
 <doc EXT current-time
- * (current-time [type])
+ * (current-time)
+ * (current-time type)
  *
- * Current time, of type time, which defaults to TIME-UTC.
+ * Return the current time as time object. The type can be |time-utc| or |time-tai|.
+ * If omitted, |type| is |time-utc|.
  *
- * @lisp
- * (describe (current-time))
- *
- * #[struct %time 140482689969104] is an instance of the structure type %time.
- * Slots are:
- *      type = time-utc
- *      nanosecond = 833635568
- *      second = 1653363915
- *
- * (describe (current-time 'time-tai))
- *
- *  #[struct %time 140482689994944] is an instance of the structure type %time.
- * Slots are:
- *      type = time-tai
- *      nanosecond = 175448417
- *      second = 1653363957
- * @end lisp
- *
- * To use more time types, such as time-monotonic and time-process, please
- * load SRFI 19.
+ * NOTE: To use more time types, such as |time-monotonic| and |time-process|, please
+ * load {{quick-link-srfi 19}}.
 doc>
 |#
 (define (current-time . type)
@@ -493,9 +478,7 @@ doc>
  *
  * This is equivalent to converting time-UTC to date.
  * @lisp
- * (%seconds->date 1351216417)           => #[date 2012-10-26 1:53:37]
- * (time-utc->date
- *   (make-time 'time-utc 0 1351216417)) => #[date 2012-10-26 1:53:37]
+ * (seconds->date 1351216417)           => #[date 2012-10-26 1:53:37]
  * @end lisp
 doc>
 |#
@@ -563,7 +546,7 @@ doc>
 <doc EXT date-dst
  * (date-dst d)
  *
- * Return an indication about daylight saving adjustment:
+ * Return an indication about daylight saving adjustment of date |d|:
  *
  * - 0 if no daylight saving adjustment
  * - 1 if daylight saving adjustment
@@ -717,14 +700,16 @@ doc>
 
 #|
 <doc EXT date->string
- * (date->string format d)
+ * (date->string d)
+ * (date->string d format)
  *
  * Convert the date |d| using the string |format| as a
  * specification. Conventions for format are the same as the one
  * of _<<seconds2string, primitive `seconds->string`>>_.
+ * If |format| is omitted, it defaults to |"~c"|.
 doc>
 |#
-(define (date->string format date)
+(define (date->string date :optional (format "~c"))
   (unless (string? format)
     (error 'date->string "bad string ~S" format))
 

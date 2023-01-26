@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 26-Jan-2023 10:15 (eg)
+ * Last file update: 26-Jan-2023 17:19 (eg)
  */
 
 #include <unistd.h>
@@ -598,7 +598,7 @@ static SCM get_posix_error_name (int n)
 {
   /* Search in STk_errno_names. */
   for (struct codeset_code *p=STk_errno_names; p->name; p++) {
-    if (p->code == n) 
+    if (p->code == n)
       return STk_intern((char *) p->name);
   }
   return STk_intern("UNKNOWN_NAME");
@@ -1446,7 +1446,7 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
  * measured in seconds in the Coordinated Universal Time (UTC) scale.
- * 
+ *
  * NOTE: This {{stklos}} function should not be confused with
  * the R7RS  primitive |current-second| which returns an inexact number
  * and whose result is expressed using  the International Atomic Time
@@ -1489,14 +1489,7 @@ DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
 }
 
 
-/*
-<doc EXT %current-time
- * (%current-time)
- *
- * Returns a time object corresponding to the current time
- * (UTC).
-doc>
-*/
+/* Return a time object corresponding to the current time  (UTC). */
 DEFINE_PRIMITIVE("%current-time", current_time, subr0, (void))
 {
   struct timespec now;
@@ -1560,27 +1553,14 @@ DEFINE_PRIMITIVE("local-timezone-offset", local_timezone_offset, subr0, ())
   /* Init the timezone: */
   time_t tt = (time_t) 0L;
   struct tm *t __attribute__ ((unused)) = localtime(&tt);
-  
+
   /* For some strange reason, timezone contains the offset seconds with the
      opposite sign as one would usually see, so we swap it here. */
   return STk_long2integer(-timezone);
 }
 
-/*
-<doc EXT %seconds->date
- * (%seconds->date n)
- *
- * Convert the date |n| expressed as a number of seconds since the _Epoch_,
- * 1970-01-01 00:00:00 +0000 (UTC) into a date.
- *
- * This is equivalent to converting time-UTC to date.
- * @lisp
- * (%seconds->date 1351216417)           => #[date 2012-10-26 1:53:37]
- * (time-utc->date
- *   (make-time 'time-utc 0 1351216417)) => #[date 2012-10-26 1:53:37]
- * @end lisp
-doc>
-*/
+
+/* Convert the date in seconds since the Epoch into a date object */
 DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 {
   int overflow;
@@ -1597,14 +1577,14 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
       tt = (time_t) STk_integer2int32(MAKE_INT((long)floor(sec)), &overflow);
       if (overflow) STk_error("bad number ~S (or out of range)",seconds);
       /* There doesn't seem to be an easy way to portably detect the maximum
-	 value for time_t, so we have to assume it's *at least* the same as
+         value for time_t, so we have to assume it's *at least* the same as
          a long int... If time_t is a float or double, it could hold larger
          numbers, but then we'd have to detect the typt of time_t, and the
          magnitude of the times represented doesn't seem like something one'd
          actually need.
          --jpellegrini */
       if (tt > INT_MAX_VAL || tt < INT_MIN_VAL)
-	  STk_error("seconds value out of representable bounds ~S", seconds);
+          STk_error("seconds value out of representable bounds ~S", seconds);
       nsec = (sec - tt) * 1000000000;
   } else STk_error("bad integer or real ~S", seconds);
 
@@ -1638,12 +1618,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
  * Convert the date |d| to the number of seconds since the _Epoch_,
  * 1970-01-01 00:00:00 +0000 (UTC).
  *
- * Since we are converting into a number of seconds, this is equivalent
- * to converting a date to time-UTC.
- *
  * @lisp
- * (time-second
- * (date->time-utc (make-date 0 37 53 1 26 10 2012 0))) => 1351216417
  * (date->seconds (make-date 0 37 53 1 26 10 2012 0))   => 1351216417.0
  * @end lisp
 doc>
@@ -1654,7 +1629,7 @@ DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
   time_t n;
   SCM *p;
   double nanoseconds;
-  
+
   if (!STRUCTP(date) || STRUCT_TYPE(date) != date_type)
     STk_error("bad date ~S", date);
 
@@ -1926,17 +1901,17 @@ int STk_init_system(void)
   /* Create the system-date structure-type */
   date_type =  STk_make_struct_type(STk_intern("%date"),
                                     STk_false,
-				    STk_cons(STk_intern("nanosecond"),
-					     LIST10(STk_intern("second"),
-						    STk_intern("minute"),
-						    STk_intern("hour"),
-						    STk_intern("day"),
-						    STk_intern("month"),
-						    STk_intern("year"),
-						    STk_intern("week-day"),
-						    STk_intern("year-day"),
-						    STk_intern("dst"),
-						    STk_intern("tz"))));
+                                    STk_cons(STk_intern("nanosecond"),
+                                             LIST10(STk_intern("second"),
+                                                    STk_intern("minute"),
+                                                    STk_intern("hour"),
+                                                    STk_intern("day"),
+                                                    STk_intern("month"),
+                                                    STk_intern("year"),
+                                                    STk_intern("week-day"),
+                                                    STk_intern("year-day"),
+                                                    STk_intern("dst"),
+                                                    STk_intern("tz"))));
   STk_define_variable(STk_intern("%date"), date_type, current_module);
 
   /* Create the time structure-type */
