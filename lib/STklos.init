@@ -4,7 +4,7 @@
 ;;;
 ;;; This code is in the public domain.
 ;;;
-;;; Last file update: 10-Mar-2022 18:24 (eg)
+;;; Last file update: 26-Jan-2023 11:01 (eg)
 ;;;
 
 ;;;
@@ -121,7 +121,7 @@
         system                          ;posix (system <string>)
         getenv                          ;posix (getenv <string>)
         program-arguments               ;returns list of strings (argv)
-;;;     %current-time                    ;returns time in seconds since 1/1/1970
+;;;     current-time                    ;returns time in seconds since 1/1/1970
 
                   ;; Implementation Specific features
 
