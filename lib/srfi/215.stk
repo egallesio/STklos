@@ -76,7 +76,7 @@
 (define (dequeue! q)
   (let ((first-pair (car q)))
     (if (null? first-pair)
-        (error "attempt to dequeue an empty queue"))
+        (error 'enqueue! "attempt to dequeue an empty queue"))
     (let ((first-cdr (cdr first-pair)))
       (set-car! q first-cdr)
       (when (null? first-cdr)
@@ -101,14 +101,14 @@
     (cond ((null? fields)
            '())
           ((or (not (pair? fields)) (not (pair? (cdr fields))))
-           (error "short field list" plist))
+           (error 'field-list->alist "short field list ~S" plist))
           (else
            (let ((k (car fields)) (v (cadr fields)))
              (if (not v)
                  (f (cddr fields))
                  (let ((k^ (cond ((symbol? k) k)
                                  (else
-                                  (error "invalid key" k plist))))
+                                  (error 'field-list->alist "invalid key -- bad symbol ~S" k))))
                        (v^ (cond ((string? v) v)
                                  ((and (integer? v) (exact? v)) v)
                                  ((bytevector? v) v)
@@ -137,7 +137,7 @@
                           (set! num-pending-logs (+ num-pending-logs 1))))
                     (lambda (hook)
                       (unless (procedure? hook)
-                        (error "current-log-hook: expected a procedure" hook))
+                        (error 'current-log-hook "bad procedure ~S" hook))
                       (let ((q pending-logs))
                         (set! num-pending-logs 0)
                         (set! pending-logs (make-queue))
@@ -150,12 +150,13 @@
 ;; Send a log entry with the given severity and message. This
 ;; procedure also takes a list of extra keys and values.
 (define (send-log severity message . plist)
-  (unless (and (exact? severity) (integer? severity) (<= 0 severity 7))
-    (error "send-log: expected a severity from 0 to 7"
-           severity message plist))
+  (unless (and (integer? severity)
+               (exact? severity)
+               (<= 0 severity 7))
+    (error 'send-log "severity -- bad integer ~S (should be between 0 and 7)"
+           severity))
   (unless (string? message)
-    (error "send-log: expected message to be a string"
-           severity message plist))
+    (error 'send-log "message -- bad string ~S" message))
   (let* ((fields (append plist (current-log-fields)))
          (alist (field-list->alist fields)))
     ((current-log-callback) `((SEVERITY . ,severity)
