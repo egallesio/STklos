@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 26-Jan-2023 17:19 (eg)
+ * Last file update: 27-Jan-2023 12:12 (eg)
  */
 
 #include <unistd.h>
@@ -1499,8 +1499,8 @@ DEFINE_PRIMITIVE("%current-time", current_time, subr0, (void))
 
   argv[3] = time_type;
   argv[2] = STk_intern("time-utc");
-  argv[1] = STk_long2integer(now.tv_sec);
-  argv[0] = STk_long2integer(now.tv_nsec);
+  argv[1] = STk_long2integer(now.tv_nsec);
+  argv[0] = STk_long2integer(now.tv_sec);
   return STk_make_struct(4, &argv[3]);
 }
 
