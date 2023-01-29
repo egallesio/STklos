@@ -1,7 +1,7 @@
 ;;;;
 ;;;; tar.stk	-- Implementation of untar for STklos
 ;;;;
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,11 +21,12 @@
 ;;;;
 ;;;;           Author: Manuel Serrano
 ;;;;    Creation date:  8-Jan-2007 11:33 (eg)
-;;;; Last file update: 10-May-2007 17:03 (eg)
+;;;; Last file update: 28-Jan-2023 19:22 (eg)
 ;;;;
 ;;;;
 ;;;;   Based on Chicken's tar implementation (Felix L. Winkelmann).
 
+(import (srfi 35))
 ;(define-module TAR
   (export tar-header
 	  tar-read-header

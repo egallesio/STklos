@@ -21,21 +21,23 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 26-Jan-2023 17:49 (eg)
+;;;; Last file update: 30-Jan-2023 08:43 (eg)
 ;;;;
 
 (export time? time->seconds seconds->time make-date date? seconds->date
         date-nanosecond date-second date-minute date-hour
         date-day date-month date-year
         date-week-day date-year-day
-        date-dst date-tz
+        date-dst date-tz time-zone-name
         seconds->list current-date current-time seconds->string date->string
         time-nanosecond set-time-nanosecond! time-second set-time-second!
         time-type set-time-type! make-time
 
         time-tai->time-utc time-tai->time-utc!
         time-utc->time-tai time-utc->time-tai!
-        %leap-second-table)
+
+        ;; internal symbols used by SRFI-19
+        %leap-second-table %time-tai->time-utc! %time-utc->time-tai!)
 
 
 ;;;; ======================================================================

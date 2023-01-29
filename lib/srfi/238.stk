@@ -22,13 +22,18 @@
 ;;;;
 ;;;;           Author: Lassi Kortela & Erick Gallesio
 ;;;;    Creation date: 22-Jan-2023 09:44
-;;;; Last file update: 25-Jan-2023 11:04 (eg)
+;;;; Last file update: 28-Jan-2023 18:51 (eg)
 ;;;;
 
 (select-module srfi/238)
 
 (export codeset? codeset-symbols codeset-symbol codeset-number codeset-message
         codeset-list make-codeset) ;; STklos "extensions"
+
+;; Avoid warnings about symbols defined in C
+(%compile-time-define %create-system-codesets! %make-user-codeset %codeset-message
+                      %find-codeset %codeset-symbols)
+
 
 (define (codeset-symbols cs)
   (let ((cs (%find-codeset cs)))
