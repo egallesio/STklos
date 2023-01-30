@@ -1,7 +1,7 @@
 /*
  * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 20-May-2022 18:56 (eg)
+ * Last file update: 30-Jan-2023 09:34 (eg)
  *
  */
 #include <ctype.h>
@@ -294,7 +294,7 @@ void STk_print(SCM exp, SCM port, int mode)
         struct extended_type_descr *xdescr = BOXED_XTYPE(exp);
 
         if (xdescr) {
-          void (*p)() = XTYPE_PRINT(xdescr);
+          void (*p)(SCM, SCM, int) = XTYPE_PRINT(xdescr);
 
           if (p)
             /* Use the defined function */

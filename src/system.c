@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 27-Jan-2023 12:12 (eg)
+ * Last file update: 30-Jan-2023 12:38 (eg)
  */
 
 #include <unistd.h>
@@ -588,7 +588,7 @@ struct codeset_code STk_errno_names[] = {
     CODESET_ERRNO(EDEADLOCK)
 #endif
 #ifdef EDEADLK
-    CODESET_ERRNO(EDEADLOCK)
+    CODESET_ERRNO(EDEADLK)
 #endif
     {NULL, 0}
 };

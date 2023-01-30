@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 30-Jan-2023 10:55 (eg)
+ * Last file update: 30-Jan-2023 11:14 (eg)
  */
 
 // INLINER values
@@ -1979,8 +1979,10 @@ DEFINE_PRIMITIVE("%pop-exception-handler", pop_handler, subr0, (void))
  *
 \*===========================================================================*/
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdangling-pointer"
+#ifndef __clang__
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdangling-pointer"
+#endif
 
 void STk_get_stack_pointer(void **addr)
 {
@@ -2120,7 +2122,9 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
   return STk_void;
 }
 
-#pragma GCC diagnostic pop
+#ifndef __clang__
+#  pragma GCC diagnostic pop
+#endif
 
 DEFINE_PRIMITIVE("%continuation?", continuationp, subr1, (SCM obj))
 {
