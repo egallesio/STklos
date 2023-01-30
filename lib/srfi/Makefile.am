@@ -19,9 +19,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 22-Jan-2023 09:51 (eg)
+# Last file update: 30-Jan-2023 16:39 (eg)
 
 #-======================================================================
+
+SUBDIRS=160
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -307,7 +309,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 152.ostk: 13.ostk
 154.ostk: 9.ostk
 158.ostk: ../scheme/generator.ostk
-160.ostk: 160-subdir
+160.ostk: 4.ostk 128.ostk 
 161.ostk: 9.ostk
 171.ostk: 1.ostk 9.ostk 69.ostk
 173.ostk: 9.ostk
@@ -360,9 +362,6 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 ../scheme/bitwise.$(SO):
 	(cd ../scheme; $(MAKE) bitwise.ostk)
 
-
-160-subdir: 128.ostk
-	(cd 160; $(MAKE))
 
 #======================================================================
 
