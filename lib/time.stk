@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 30-Jan-2023 08:43 (eg)
+;;;; Last file update: 30-Jan-2023 09:03 (eg)
 ;;;;
 
 (export time? time->seconds seconds->time make-date date? seconds->date
@@ -37,7 +37,8 @@
         time-utc->time-tai time-utc->time-tai!
 
         ;; internal symbols used by SRFI-19
-        %leap-second-table %time-tai->time-utc! %time-utc->time-tai!)
+        %leap-second-table %leap-second-delta
+        %time-tai->time-utc! %time-utc->time-tai!)
 
 
 ;;;; ======================================================================
@@ -251,7 +252,7 @@ doc>
 
 (define (%time-tai->time-utc! time-in time-out caller)
   (when (not (eq? (time-type time-in) 'time-tai))
-    (error 'caller "bad TAI time ~S" time-in))
+    (error caller "bad TAI time ~S" time-in))
   ;;(%time-error caller 'incompatible-time-types time-in))
   (set-time-type! time-out 'time-utc)
   (set-time-nanosecond! time-out (time-nanosecond time-in))
@@ -284,7 +285,7 @@ doc>
 
 (define (%time-utc->time-tai! time-in time-out caller)
   (when (not (eq? (time-type time-in) 'time-utc))
-    (error 'caller "bad UTC time ~S" time-in))
+    (error caller "bad UTC time ~S" time-in))
       ;;(%time-error caller 'incompatible-time-types time-in))
   (set-time-type! time-out 'time-tai)
   (set-time-nanosecond! time-out (time-nanosecond time-in))
