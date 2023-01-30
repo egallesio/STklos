@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  3-Feb-2022 11:58 (eg)
+ * Last file update: 30-Jan-2023 11:11 (eg)
  *
  */
 
@@ -803,7 +803,7 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
     return STk_false;
   } else {
     if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
-        (STk_uvectors_allowed && (len >= 2 || len <= 4))) {
+        (STk_uvectors_allowed && (len >= 2 && len <= 4))) {
       c = STk_getc(port);
       if (c == '"')
         return read_srfi207_bytevector(port, ctx->constant);
