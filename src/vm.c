@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 13-Jun-2022 17:23 (eg)
+ * Last file update: 30-Jan-2023 10:55 (eg)
  */
 
 // INLINER values
@@ -286,10 +286,39 @@ MUT_DECL(global_lock);          /* the lock to access checked_globals */
     vm->env       = (SCM) vm->sp;               \
 }while(0)
 
+
+
+typedef SCM (*prim0)(void);
+typedef SCM (*prim1)(SCM);
+typedef SCM (*prim2)(SCM,SCM);
+typedef SCM (*prim3)(SCM,SCM,SCM);
+typedef SCM (*prim4)(SCM,SCM,SCM,SCM);
+typedef SCM (*prim5)(SCM,SCM,SCM,SCM,SCM);
+typedef SCM (*primv)(int,SCM*);
+
+
 #define CALL_PRIM(v, args) do{                  \
     ACT_SAVE_PROC(vm->fp) = v;                  \
     v = PRIMITIVE_FUNC(v)args;                  \
 }while(0)
+
+
+
+#define CALL_PRIMITIVE(type, v, args) do{       \
+    ACT_SAVE_PROC(vm->fp) = v;                  \
+    v = (* (type) PRIMITIVE_FUNC(v))args;       \
+}while(0)
+
+#define CALL_PRIM0(v, args) CALL_PRIMITIVE(prim0, v, args)
+#define CALL_PRIM1(v, args) CALL_PRIMITIVE(prim1, v, args)
+#define CALL_PRIM2(v, args) CALL_PRIMITIVE(prim2, v, args)
+#define CALL_PRIM3(v, args) CALL_PRIMITIVE(prim3, v, args)
+#define CALL_PRIM4(v, args) CALL_PRIMITIVE(prim4, v, args)
+#define CALL_PRIM5(v, args) CALL_PRIMITIVE(prim5, v, args)
+#define CALL_PRIMV(v, args) CALL_PRIMITIVE(primv, v, args)
+
+
+
 
 #define REG_CALL_PRIM(name) do{                           \
   extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
@@ -1804,43 +1833,43 @@ FUNCALL:  /* (int nargs, int tailp) */
     }
 
     case tc_subr0:
-      if (nargs == 0) { CALL_PRIM(vm->val, ());                          break;}
+      if (nargs == 0) { CALL_PRIM0(vm->val, ());                          break;}
       goto error_invoke;
     case tc_subr1:
-      if (nargs == 1) { CALL_PRIM(vm->val, (vm->sp[0]));                 break;}
+      if (nargs == 1) { CALL_PRIM1(vm->val, (vm->sp[0]));                 break;}
       goto error_invoke;
     case tc_subr2:
-      if (nargs == 2) { CALL_PRIM(vm->val, (vm->sp[1], vm->sp[0]));      break;}
+      if (nargs == 2) { CALL_PRIM2(vm->val, (vm->sp[1], vm->sp[0]));      break;}
       goto error_invoke;
-    case tc_subr3:
-      if (nargs == 3) { CALL_PRIM(vm->val, (vm->sp[2], vm->sp[1],
-                                            vm->sp[0]));                 break;}
+  case tc_subr3:
+      if (nargs == 3) { CALL_PRIM3(vm->val, (vm->sp[2], vm->sp[1],
+                                             vm->sp[0]));                 break;}
       goto error_invoke;
     case tc_subr4:
-      if (nargs==4) { CALL_PRIM(vm->val, (vm->sp[3], vm->sp[2],
-                                          vm->sp[1], vm->sp[0]));        break;}
+      if (nargs==4) { CALL_PRIM4(vm->val, (vm->sp[3], vm->sp[2],
+                                           vm->sp[1], vm->sp[0]));        break;}
       goto error_invoke;
     case tc_subr5:
-      if (nargs==5) { CALL_PRIM(vm->val, (vm->sp[4], vm->sp[3],
-                                          vm->sp[2], vm->sp[1],
-                                          vm->sp[0]));                   break;}
+      if (nargs==5) { CALL_PRIM5(vm->val, (vm->sp[4], vm->sp[3],
+                                           vm->sp[2], vm->sp[1],
+                                           vm->sp[0]));                   break;}
       goto error_invoke;
 
     case tc_subr01:
-      if (nargs == 0) { CALL_PRIM(vm->val, ((SCM) NULL));                break;}
-      if (nargs == 1) { CALL_PRIM(vm->val, (vm->sp[0]));                 break;}
+      if (nargs == 0) { CALL_PRIM1(vm->val, ((SCM) NULL));                break;}
+      if (nargs == 1) { CALL_PRIM1(vm->val, (vm->sp[0]));                 break;}
       goto error_invoke;
     case tc_subr12:
-      if (nargs == 1) { CALL_PRIM(vm->val, (vm->sp[0], (SCM) NULL));     break;}
-      if (nargs == 2) { CALL_PRIM(vm->val, (vm->sp[1], vm->sp[0]));      break;}
+      if (nargs == 1) { CALL_PRIM2(vm->val, (vm->sp[0], (SCM) NULL));     break;}
+      if (nargs == 2) { CALL_PRIM2(vm->val, (vm->sp[1], vm->sp[0]));      break;}
       goto error_invoke;
     case tc_subr23:
-      if (nargs == 2) { CALL_PRIM(vm->val, (vm->sp[1], vm->sp[0],
-                                            (SCM)NULL));                 break;}
-      if (nargs == 3) { CALL_PRIM(vm->val, (vm->sp[2], vm->sp[1],
-                                            vm->sp[0]));                 break;}
+      if (nargs == 2) { CALL_PRIM3(vm->val, (vm->sp[1], vm->sp[0],
+                                             (SCM)NULL));                 break;}
+      if (nargs == 3) { CALL_PRIM3(vm->val, (vm->sp[2], vm->sp[1],
+                                             vm->sp[0]));                 break;}
       goto error_invoke;
-    case tc_vsubr: CALL_PRIM(vm->val, (nargs, vm->sp+nargs-1));          break;
+    case tc_vsubr: CALL_PRIMV(vm->val, (nargs, vm->sp+nargs-1));          break;
 
     case tc_parameter:
       if (nargs == 0) {vm->val = STk_get_parameter(vm->val);            break;}
