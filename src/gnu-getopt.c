@@ -1,17 +1,17 @@
 /*
  * gnu-getopt.c         -- Adaptation of the GNU getopt function for STklos
  *
- * Copyright © 2001-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
- * Last file update:  2-Jun-2020 12:55 (eg)
+ * Last file update: 30-Jan-2023 09:29 (eg)
  *
  * The following code is constituted of the GNU getopt, getopt_long
  * and getopt_long_only implementation. Code is slightly modified (all
  * modifications are tagged with the string "STklos"). The
  * modifications permit to use the Sheme IO function instead of the
- * standard C fprintf
+ * standard C fprintf (plus ANSIfication of some K&R function definitions)
  */
 
 
@@ -360,9 +360,9 @@ text_set_element (__libc_subinit, store_args_and_env);
 static void exchange (char **);
 #endif
 
+//STklos: make de definition C-ANSI
 static void
-exchange (argv)
-     char **argv;
+exchange (char **argv)
 {
   int bottom = first_nonopt;
   int middle = last_nonopt;
@@ -445,11 +445,12 @@ exchange (argv)
 #if defined __STDC__ && __STDC__
 static const char *_getopt_initialize (int, char *const *, const char *);
 #endif
+//STklos: make de definition C-ANSI
 static const char *
-_getopt_initialize (argc, argv, optstring)
-     int argc;
-     char *const *argv;
-     const char *optstring;
+_getopt_initialize (
+                    int argc,
+                    char *const *argv,
+                    const char *optstring)
 {
   (void) (argc);
   (void) (argv);
@@ -570,14 +571,15 @@ _getopt_initialize (argc, argv, optstring)
    If LONG_ONLY is nonzero, '-' as well as '--' can introduce
    long-named options.  */
 
+//STklos: make de definition C-ANSI
 int
-_getopt_internal (argc, argv, optstring, longopts, longind, long_only)
-     int argc;
-     char *const *argv;
-     const char *optstring;
-     const struct option *longopts;
-     int *longind;
-     int long_only;
+_getopt_internal (
+                  int argc,
+                  char *const *argv,
+                  const char *optstring,
+                  const struct option *longopts,
+                  int *longind,
+                  int long_only)
 {
   optarg = NULL;
 
@@ -1026,11 +1028,12 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
   }
 }
 
+//STklos: make de definition C-ANSI
 int
-getopt (argc, argv, optstring)
-     int argc;
-     char *const *argv;
-     const char *optstring;
+getopt (
+        int argc,
+        char *const *argv,
+        const char *optstring)
 {
   return _getopt_internal (argc, argv, optstring,
                            (const struct option *) 0,
@@ -1049,13 +1052,14 @@ getopt (argc, argv, optstring)
  */
 
 
+//STklos: make de definition C-ANSI
 int
-getopt_long (argc, argv, options, long_options, opt_index)
-     int argc;
-     char *const *argv;
-     const char *options;
-     const struct option *long_options;
-     int *opt_index;
+getopt_long (
+             int argc,
+             char *const *argv,
+             const char *options,
+             const struct option *long_options,
+             int *opt_index)
 {
   return _getopt_internal (argc, argv, options, long_options, opt_index, 0);
 }
@@ -1065,13 +1069,14 @@ getopt_long (argc, argv, options, long_options, opt_index)
    but does match a short option, it is parsed as a short option
    instead.  */
 
+//STklos: make de definition C-ANSI
 int
-getopt_long_only (argc, argv, options, long_options, opt_index)
-     int argc;
-     char *const *argv;
-     const char *options;
-     const struct option *long_options;
-     int *opt_index;
+getopt_long_only (
+                  int argc,
+                  char *const *argv,
+                  const char *options,
+                  const struct option *long_options,
+                  int *opt_index)
 {
   return _getopt_internal (argc, argv, options, long_options, opt_index, 1);
 }
