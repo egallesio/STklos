@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 02-Jan-2022 18:41
- * Last file update: 11-Mar-2022 09:51 (eg)
+ * Last file update: 30-Jan-2023 09:09 (eg)
  */
 
 
@@ -486,10 +486,10 @@ trie_fixnum2bitmap(long x) {
 }
 
 
-static inline long
-trie_bitmap_delete(long b, long k) {
-    return b & (~ trie_fixnum2bitmap(k));
-}
+//UNUSED: static inline long
+//UNUSED: trie_bitmap_delete(long b, long k) {
+//UNUSED:     return b & (~ trie_fixnum2bitmap(k));
+//UNUSED: }
 
 static inline long
 trie_bitmap_delete_min(long b) {
