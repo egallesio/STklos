@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 17-Jan-2023 11:52 (eg)
+;;;; Last file update: 31-Jan-2023 17:57 (eg)
 ;;;;
 
 (export build-path-from-shell-variable
@@ -37,12 +37,9 @@
         ;; FIXME
         %stklos-conf-dir
         %stklos-conf-file
-        %try-load-tmp
+        %try-load-conditions 
         %do-include
         %%require)
-
-
-(define %try-load-tmp '())   ;; Use a global when restoring environment
 
 
 (define *path-separator*        (if (eqv? (running-os) 'windows) ";" ":"))
@@ -245,6 +242,19 @@ doc>
 ;=============================================================================
 (define %primitive-try-load try-load)
 
+
+;; When %try-load handler restore the calling module, we lost the current environment
+;; In fact we have a habdler which is
+;;   (lambda (c)
+;;      <some code>
+;;      (%%set-current-module mod)
+;;      ;; <== now c is lost
+;;      (raise c))
+;; As a consequence we use the global parameter object %try-load-conditions as a stack
+;; to save/restore the current condition
+(define %try-load-conditions
+  (make-parameter '() (lambda (v) v)))      ;; will be used as a stack
+
 (define (%try-load fn load-path load-suffixes)
   (let ((path (%guess-pathname fn load-path load-suffixes))
         (oldp (current-loading-file))
@@ -254,14 +264,14 @@ doc>
     (when (and path (not (file-is-directory? path)))
       (current-loading-file path)
       (with-handler (lambda (c)
-                      ;; (set! %try-load-tmp (cons c %try-load-tmp))
+                      (%try-load-conditions (cons c (%try-load-conditions)))
                       (current-loading-file oldp)
                       (%%set-current-module mod)
-                      ;;               ;; We have lost current environment :-<
-                      ;;               (let ((c (car %try-load-tmp)))
-                      ;;                 (set! %try-load-tmp (cdr %try-load-tmp))
-                      ;;                 (raise c)))
-                      (raise c))
+                      ;; We have lost current environment, an then the value of c :-<
+                      (let ((c (car (%try-load-conditions))))
+                        (%try-load-conditions (cdr (%try-load-conditions)))
+                        (raise c)))
+
           (when *load-verbose* (format out ";; Loading file ~S.\n" path))
           (set! res             (%primitive-try-load path))
           (when *load-verbose* (format out ";; File ~S loaded.\n" path))
