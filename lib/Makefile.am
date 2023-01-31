@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Jan-2023 18:17 (eg)
+# Last file update: 31-Jan-2023 11:32 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme stklos streams srfi
@@ -191,7 +191,13 @@ $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
 recette.ostk: pretty-print.ostk
+
+# SLIB
 slib.ostk: slib.stk STklos.init
+STklos.init: srfi/59.stk
+srfi/59.ostk:
+	(cd srfi; make 59.ostk)
+
 
 lib/scheme: lib
 lib/stklos: lib

@@ -4,7 +4,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio using code from Aubrey Jaffer
 ;;;;    Creation date:  8-Mar-2005
-;;;; Last file update: 10-Mar-2022 12:38 (eg)
+;;;; Last file update: 31-Jan-2023 11:52 (eg)
 ;;;;
 
 (define-module srfi/59
@@ -46,9 +46,7 @@
             (let ((path (find-path "require.scm" *slib-possible-paths*)))
               (if path
                   (dirname path)
-                  (error
-                   (string-append "Unable to locate the SLIB library.\n"
-                                  "Define SCHEME_LIBRARY_PATH shell variable")))))))
+                  "")))))
       (lambda () library-path)))
 
   ;; (home-vicinity) should return the vicinity of the user's HOME
