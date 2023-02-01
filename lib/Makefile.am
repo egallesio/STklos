@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 31-Jan-2023 11:32 (eg)
+# Last file update:  1-Feb-2023 13:02 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme stklos streams srfi
@@ -34,7 +34,6 @@ scheme_BOOT = assembler.stk \
           bonus.stk         \
           boot.stk          \
           callcc.stk        \
-          compfile.stk      \
           compiler.stk      \
           computils.stk     \
           equiv.stk         \
