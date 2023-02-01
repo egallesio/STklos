@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 31-Jan-2023 11:32 (eg)
+# Last file update:  1-Feb-2023 13:02 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -925,7 +925,7 @@ readline-complete.@SH_SUFFIX@: readline-complete.c
 #
 # If ./srfis.stk we must rebuild
 #     - srfis-data.scm (used by SRFI0 and features)
-srfis-data.scm: srfis.stk
+srfis-data.scm: srfis.stk getopt.ostk
 	$(STKLOS_BINARY) -q -l srfis.stk \
 	                 -f ../utils/update-srfi-list.stk \
                      -- --internal > $@
