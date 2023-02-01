@@ -2,7 +2,7 @@
 ;;;;
 ;;;; autoloads.stk         -- Defines some autoload functions fo STklos
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 12-May-2022 16:35
-;;;; Last file update: 10-Aug-2022 18:45 (eg)
+;;;; Last file update:  1-Feb-2023 13:13 (eg)
 ;;;;
 
 (define-macro (trace . args)
@@ -41,7 +41,6 @@
   `((match-lambda  ,@clauses) ,expr))
 
 
-(autoload "compfile"     compile-file)
 (autoload "describe"     describe)
 (autoload "bigmatch"     expand-match-lambda)
 (autoload "getopt"       %parse-arguments-expand %print-usage)

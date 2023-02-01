@@ -21,10 +21,42 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update:  6-Jan-2023 12:17 (eg)
+;;;; Last file update:  1-Feb-2023 13:16 (eg)
 ;;;;
 
-(select-module STKLOS-COMPILER)
+
+; modules seen in a file (used by compile-file)
+(define *file-module-list* '())
+
+(define (file-module-list-reset!)
+  (set! *file-module-list* '()))
+
+(define add-file-module-list!
+  (let ((stklos (find-module 'stklos)))
+    (lambda (mod)
+      (unless (or (eq? mod stklos) (memq mod *file-module-list*))
+        (set! *file-module-list* (cons mod *file-module-list*))))))
+
+(define (file-module-list-expanders)
+  ;; Build the list of all exported macros of the modules(s) in
+  ;; the current file processed by current compile-file
+  (apply append
+         (map (lambda (mod)
+                (let Loop ((lst (module-exports mod))
+                           (res '()))
+                  (if (null? lst)
+                      res
+                      (let* ((symb (caar lst))
+                             (val  (symbol-value* symb mod #f)))
+                        ;; XXXX (%debug "symbol ~S syntax? ~S" symb (%syntax? val))
+                        (Loop (cdr lst)
+                              (if (%syntax? val)
+                                  (cons (list (car lst)
+                                              (module-name mod)
+                                              (%syntax-source val))
+                                        res)
+                                  res))))))
+              *file-module-list*)))
 
 #|
 <doc EXT compile-file
@@ -121,8 +153,4 @@ doc>
     ;; Restore Compiler flags
     (compiler:warn-use-undefined-postpone copts)))
 
-;; ======================================================================
-(select-module STklos)
-(define compile-file (in-module STKLOS-COMPILER compile-file))
-
-(provide "compfile")
+(export compile-file)

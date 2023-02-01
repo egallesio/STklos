@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Feb-2023 13:02 (eg)
+# Last file update:  1-Feb-2023 13:39 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme stklos streams srfi
@@ -35,6 +35,7 @@ scheme_BOOT = assembler.stk \
           boot.stk          \
           callcc.stk        \
           compiler.stk      \
+          compfile.stk      \
           computils.stk     \
           equiv.stk         \
           expand.pp         \
@@ -67,7 +68,6 @@ scheme_extra = STklos.init
 
 SRC_STK = bigloo-support.stk  \
           bigmatch.stk        \
-          compfile.stk        \
           conditions.stk      \
           describe.stk        \
           env.stk             \
@@ -85,8 +85,7 @@ SRC_STK = bigloo-support.stk  \
           trace.stk
 
 
-scheme_OBJS = compfile.ostk     \
-          bigmatch.ostk         \
+scheme_OBJS = bigmatch.ostk     \
           conditions.ostk       \
           full-syntax.ostk      \
           describe.ostk         \
@@ -136,7 +135,7 @@ SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c
 
 #======================================================================
 
-all-recursive: boot generate-git-info compfile.ostk
+all-recursive: boot generate-git-info
 
 boot:	../src/boot.img
 
@@ -188,7 +187,6 @@ install-sources:
 
 # Explicit some dependencies here to avoid some warnings when compiling files
 $(SCHEME_OBJS): ../src/boot.img
-compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
 recette.ostk: pretty-print.ostk
 
