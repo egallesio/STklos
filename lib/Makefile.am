@@ -34,6 +34,7 @@ scheme_BOOT = assembler.stk \
           bonus.stk         \
           boot.stk          \
           callcc.stk        \
+          compfile.stk      \
           compiler.stk      \
           computils.stk     \
           equiv.stk         \
@@ -215,7 +216,7 @@ readline-complete.@SH_SUFFIX@: readline-complete.c
 #
 # If ./srfis.stk we must rebuild
 #     - srfis-data.scm (used by SRFI0 and features)
-srfis-data.scm: srfis.stk
+srfis-data.scm: srfis.stk getopt.ostk
 	$(STKLOS_BINARY) -q -l srfis.stk \
 	                 -f ../utils/update-srfi-list.stk \
                      -- --internal > $@
