@@ -68,6 +68,11 @@
                          (fx<=?          . ,fx<=?)
                          (fx>?           . ,fx>?)
                          (fx>=?          . ,fx>=?)
+                         (fx=            . ,fx=?)
+                         (fx<            . ,fx<?)
+                         (fx<=           . ,fx<=?)
+                         (fx>            . ,fx>?)
+                         (fx>=           . ,fx>=?)
                          (cons           . ,cons)
                          (car            . ,car)
                          (cdr            . ,cdr)
@@ -1143,16 +1148,17 @@ doc>
                                 ((>=) 'IN-NUMGE))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
 
-      ((fx=? fx<? fx>? fx<=? fx>=?)
+      ((fx=? fx<? fx>? fx<=? fx>=?
+        fx=  fx<  fx>  fx<=  fx>= )
                 (case len
                 ((O)   (compiler-error fct epair
                                         "needs at least one argument" fct))
                 ((2)   (comp2 (case fct
-                                ((fx=?)  'IN-FXEQ)
-                                ((fx<?)  'IN-FXLT)
-                                ((fx>?)  'IN-FXGT)
-                                ((fx<=?) 'IN-FXLE)
-                                ((fx>=?) 'IN-FXGE))))
+                                ((fx=?  fx=)  'IN-FXEQ)
+                                ((fx<?  fx<)  'IN-FXLT)
+                                ((fx>?  fx>)  'IN-FXGT)
+                                ((fx<=? fx<=) 'IN-FXLE)
+                                ((fx>=? fx>=) 'IN-FXGE))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
 
       ((cons)   (comp2 'IN-CONS))
