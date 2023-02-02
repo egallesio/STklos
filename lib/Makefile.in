@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Feb-2023 13:39 (eg)
+# Last file update:  2-Feb-2023 10:52 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -389,7 +389,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
+SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
 
 STKLOS_FLAGS = --no-init-file --case-sensitive

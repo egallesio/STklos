@@ -20,9 +20,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Feb-2023 13:39 (eg)
+# Last file update:  2-Feb-2023 10:52 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
+SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
 
 COMP ?= ../utils/tmpcomp
