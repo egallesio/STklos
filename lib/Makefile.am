@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Feb-2023 11:07 (eg)
+# Last file update:  2-Feb-2023 14:06 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
@@ -75,7 +75,6 @@ SRC_STK = bigloo-support.stk  \
           full-syntax.stk     \
           getopt.stk          \
           help.stk            \
-          http.stk            \
           lex-rt.stk          \
           make-C-boot.stk     \
           pretty-print.stk    \
@@ -90,7 +89,6 @@ scheme_OBJS = bigmatch.ostk     \
           env.ostk              \
           getopt.ostk           \
           help.ostk             \
-          http.ostk             \
           lex-rt.ostk           \
           pretty-print.ostk     \
           slib.ostk             \
