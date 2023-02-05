@@ -1219,7 +1219,7 @@ doc>
          (actuals (cdr args))
          (len     (length actuals)))
     (if (and (pair? fct) (or (eq? (car fct) 'lambda)
-                          (eq? (car fct) '|λ|)))
+                             (eq? (car fct) '|λ|)))
         ;; fct is (lambda (...) ...)
         ;;    if fct is not an epair, it is probably because it has been
         ;;    built programmatically. Anyway its body is probably an epair
@@ -1227,7 +1227,30 @@ doc>
                     ((%epair? fct) fct)
                     ((>= (length fct) 3) (cddr fct))
                     (else fct))))
-          (compile-lambda-call fct actuals len env ep tail?))
+
+          ;; If we're applying a lambda without arguments, ((lambda () ...)), we may
+          ;; transform it into (begin ...), which is much more efficient. Given
+          ;; how common it is to pass chunks to procedures, this can speed up
+          ;; execution considerably:
+          ;;
+          ;; (disassemble-expr '((lambda () a b)))
+          ;;
+          ;; 000:  PREPARE-CALL             <==
+          ;; 001:  ENTER-LET            0   <==
+          ;; 003:  GLOBAL-REF           0
+          ;; 005:  GLOBAL-REF           1
+          ;; 007:  LEAVE-LET                <==
+          ;;
+          ;; The PREPARE-CALL, ENTER-LET and LEAVE-LET instructions are not necessary,
+          ;; and will not be generated if we actually transform the lambda into a begin.
+          ;;
+          ;; However, we do not transform if the CDDR to be null, since (lambda ()) is not
+          ;; allowed.
+          (if (and (null? (cadr fct))
+                   (not (null? (cddr fct))))
+              (compile-body (cddr fct) env args tail?)
+              (compile-lambda-call fct actuals len env ep tail?)))
+
         (if (can-be-inlined? fct env)
             (compile-primitive-call fct actuals len env args tail?)
             (compile-normal-call    fct actuals len env args tail?)))))
