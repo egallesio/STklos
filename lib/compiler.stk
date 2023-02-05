@@ -1214,6 +1214,35 @@ doc>
         (compiler-error 'lambda epair "bad number of parameters ~S" actuals))))
 
 
+;; DEFINING-FORM? is used in COMPILE-CALL.
+;;
+;; We need to be able to tell if a defining for is at the beginning of
+;; a lambda form. We avoid converting
+;;
+;; ( (lambda () (define ...) ...) )
+;;
+;; into
+;;
+;; (begin (define ...) ...)
+;;
+;; because the first form is wrong (internal defines are not allowed in
+;; a lambda-form), and we'd be transforming it into a correct form.
+;;
+;; We also disallow (begin ...), since
+;;
+;; (begin (begin (define ...) ...) ...)
+;;
+;; would also be correct, although
+;;
+;; ( (lambda () (begin (define ...) ...) ... ) )
+;;
+;; is not.
+;;
+;; For that, we need the DEFINING-FORM? procedure:
+(define (defining-form? f)
+  ;; Problem: what if the user shadows "define" or similar?
+  (memq f '(define begin define-syntax define-macro)))
+
 (define (compile-call args env tail?)
   (let* ((fct     (car args))
          (actuals (cdr args))
@@ -1247,7 +1276,8 @@ doc>
           ;; However, we do not transform if the CDDR to be null, since (lambda ()) is not
           ;; allowed.
           (if (and (null? (cadr fct))
-                   (not (null? (cddr fct))))
+                   (not (null? (cddr fct)))
+                   (not (defining-form? (caddr fct))))
               (compile-body (cddr fct) env args tail?)
               (compile-lambda-call fct actuals len env ep tail?)))
 
