@@ -122,11 +122,11 @@
     ;;     exports in it. This allows us to use all the expansion code of
     ;;     of import and exports since the STklos environment is visible.
     ;;  2. We forge the symbols %module-restore and %make-syntax in the
-    ;;     environment of the module/library. The former is uses at the end of the
+    ;;     environment of the module/library. The former is used at the end of the
     ;;     expansion of define-module. The latter is used by define-macro.
-    ;;  3. We transform the module in a library (that means more of less that
+    ;;  3. We transform the module in a library (that means more or less that
     ;;     the STklos module is  deleted from the import list.
-    ;;  4. we evaluate the body in the module (which is now a library)
+    ;;  4. We evaluate the body in the module (which is now a library)
     ;;
     `(begin
        (define-module ,module-name

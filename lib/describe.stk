@@ -47,7 +47,7 @@
  *   #\A is a character, ascii value is 65.
  * @end lisp
  *
- * *Using `describe on a class*
+ * *Using `describe` on a class*
  * @lisp
  * (describe <integer>)
  *   <integer> is a class. It's an instance of <class>.
