@@ -96,7 +96,7 @@
 (define *code-instr*            #f)
 (define *code-constants*        '())
 (define *code-labels*           0)
-(define *compiling-file*       #f)  ;; is #t wen we are compiling a file
+(define *compiling-file*        #f)  ;; is #t when we are compiling a file
 
 (include "peephole.stk")
 (include "assembler.stk")

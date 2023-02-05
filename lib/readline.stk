@@ -133,7 +133,7 @@
 (define rl-completer-function (make-parameter default-complete-function))
 
 #|
-  As an example, here is another compter function. This one tries to find
+  As an example, here is another completer function. This one tries to find
   if str is a substring of a symbol defined at global level
 
     (define (substring-complete-function str)
