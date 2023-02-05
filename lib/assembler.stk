@@ -298,7 +298,6 @@
 ;;;;
 ;;;;======================================================================
 
-(define old+ +)    ;;// A virer des que le code est bien protégé contre les redef
 
 
 (define (assemble code)
