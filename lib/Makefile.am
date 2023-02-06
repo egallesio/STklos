@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Feb-2023 14:06 (eg)
+# Last file update:  6-Feb-2023 19:36 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
@@ -66,8 +66,7 @@ scheme_BOOT = assembler.stk \
 
 scheme_extra = STklos.init
 
-SRC_STK = bigloo-support.stk  \
-          bigmatch.stk        \
+SRC_STK = bigmatch.stk        \
           conditions.stk      \
           describe.stk        \
           env.stk             \
