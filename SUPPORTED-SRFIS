@@ -133,3 +133,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-233: INI files
     - SRFI-236: Evaluating expressions in an unspecified order
     - SRFI-238: Codesets
+    - SRFI-244: Multiple-value definitions
