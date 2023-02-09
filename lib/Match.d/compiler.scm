@@ -1,36 +1,9 @@
 ;*---------------------------------------------------------------------*/
-;*    Copyright (c) 1997 by Manuel Serrano. All rights reserved.       */
-;*                                                                     */
-;*                                     ,--^,                           */
-;*                               _ ___/ /|/                            */
-;*                           ,;'( )__, ) '                             */
-;*                          ;;  //   L__.                              */
-;*                          '   \    /  '                              */
-;*                               ^   ^                                 */
-;*                                                                     */
-;*                                                                     */
-;*    This program is distributed in the hope that it will be useful.  */
-;*    Use and copying of this software and preparation of derivative   */
-;*    works based upon this software are permitted, so long as the     */
-;*    following conditions are met:                                    */
-;*           o credit to the authors is acknowledged following         */
-;*             current academic behaviour                              */
-;*           o no fees or compensation are charged for use, copies,    */
-;*             or access to this software                              */
-;*           o this copyright notice is included intact.               */
-;*      This software is made available AS IS, and no warranty is made */
-;*      about the software or its performance.                         */
-;*                                                                     */
-;*      Bug descriptions, use reports, comments or suggestions are     */
-;*      welcome Send them to                                           */
-;*        Manuel Serrano -- Manuel.Serrano@cui.unige.ch                */
-;*---------------------------------------------------------------------*/
-;*---------------------------------------------------------------------*/
-;*    serrano/prgm/project/bigloo/runtime1.8/Match/compiler.scm        */
+;*    .../prgm/project/bigloo/bigloo/runtime/Match/compiler.scm        */
 ;*                                                                     */
 ;*    Author      :  Jean-Marie Geffroy                                */
 ;*    Creation    :  Thu Jan 14 10:29:50 1993                          */
-;*    Last change :  Mon Jul 10 14:28:12 1995 (serrano)                */
+;*    Last change :  Sun Aug 25 09:16:40 2019 (serrano)                */
 ;*                                                                     */
 ;*---------------------------------------------------------------------*/
 ;*    A hand-written pattern "compiler"                                */
@@ -54,42 +27,50 @@
    
    (export  (pcompile f))
 
-   (import  (__error                   "Llib/error.scm")
-            (__match_s2cfun            "Match/s2cfun.scm")
-            (__match_descriptions      "Match/descr.scm"))
+   (import  __error
+            __match_s2cfun
+            __match_descriptions
+            __param)
 
-   (use     (__type                    "Llib/type.scm")
-            (__bigloo                  "Llib/bigloo.scm")
-            (__tvector                 "Llib/tvector.scm")
-            (__structure               "Llib/struct.scm")
-            (__tvector                 "Llib/tvector.scm")
-            (__rgc                     "Rgc/runtime.scm")
-            (__r4_numbers_6_5          "Ieee/number.scm")
-            (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
-            (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
-            (__r4_characters_6_6       "Ieee/char.scm")
-            (__r4_equivalence_6_2      "Ieee/equiv.scm")
-            (__r4_booleans_6_1         "Ieee/boolean.scm")
-            (__r4_symbols_6_4          "Ieee/symbol.scm")
-            (__r4_strings_6_7          "Ieee/string.scm")
-            (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
-            (__r4_input_6_10_2         "Ieee/input.scm")
-            (__r4_control_features_6_9 "Ieee/control.scm")
-            (__r4_vectors_6_8          "Ieee/vector.scm")
-            (__r4_ports_6_10_1         "Ieee/port.scm")
-            (__r4_output_6_10_3        "Ieee/output.scm")
-            (__evenv                   "Eval/evenv.scm")))
+   (use     __type
+            __bigloo
+            __tvector
+            __structure
+            __tvector
+            __bexit
+            __bignum
+            __object
+            __thread
+            __rgc
+            __bit
+
+            __r4_numbers_6_5
+            __r4_numbers_6_5_fixnum
+            __r4_numbers_6_5_flonum
+            __r4_numbers_6_5_flonum_dtoa
+            __r4_characters_6_6
+            __r4_equivalence_6_2
+            __r4_booleans_6_1
+            __r4_symbols_6_4
+            __r4_strings_6_7
+            __r4_pairs_and_lists_6_3
+            __r4_input_6_10_2
+            __r4_control_features_6_9
+            __r4_vectors_6_8
+            __r4_ports_6_10_1
+            __r4_output_6_10_3
+            __evenv))
             
 (define (pcompile f)
    (let ((s (jim-gensym "E-")))
    `(lambda (,s)
-       ,(compile f s r.init m.init
-                 k.init z.init d.init))))
+       ,(compile f s r-init m-init
+                 k-init z-init d-init))))
 
 (define (compile f e r m k z d)
    (cond
-      [(more-precise? d f) (k r z d)]
-      [(compatible? d f)
+      ((more-precise? d f) (k r z d))
+      ((compatible? d f)
        (case (car f)
           ((any)      (compile-any e r m k z d))
           ((check)    (compile-check (cadr f) e r m k z d))
@@ -115,9 +96,9 @@
                                               e r m k z d))
           ((vector-times) (compile-vector-times (cadr f) (caddr f) (cadddr f)
                                                 e r m k z d))
-;STk      ((struct-pat) (compile-struct-pat f e r m k z d))
-          (else       (wrong "Unrecognized pattern" f)))]
-      [#t (z d) ] ))
+; STklos  ((struct-pat) (compile-struct-pat f e r m k z d))
+          (else       (wrong "Unrecognized pattern" f))))
+      (#t (z d) ) ))
    
 
 (define (compile-any e r m k z d)
@@ -132,8 +113,30 @@
        ,(k r z d)  
        ,(z d)))
 
+(define (build-atom-equality-test e const)
+   (cond
+      ;; John Malecki improvement (15 aug 2003)
+      ((null? const)
+       `(null? ,e))
+      ((or (fixnum? const)
+           (char? const)
+           (boolean? const)
+           (symbol? const))
+       `(eq? ,e (quote ,const)))
+;STklos 
+;     ((flonum? const)
+;       `(and (flonum? ,e) (=fl ,e ,const)))
+      ((number? const)
+       `(and (number? ,e) (= ,e ,const)))
+      ((string? const)
+       `(and (string? ,e) (string=? ,e ,const)))
+      ((null? const)
+       `(null? ,e))
+      (else
+       `(equal? ,e (quote ,const)))))
+
 (define (compile-quote f e r m k z d)
-  (build-if `(eq? ,e (quote ,(cadr f)))
+   (build-if (build-atom-equality-test e (cadr f))
             (k r z `(quote ,(cadr f)))
             (z (pattern-minus d f))))
 
@@ -180,7 +183,7 @@
 (define (isDirectCall? e)
    (and (pair? e)
         (let ((pr (car e)))
-           (and (symbol? e)
+           (and (symbol? pr)
                 (let ((s (symbol->string pr)))
                    (and (>fx (string-length s) 3)
                         (let ((s (substring s 0 3)))
@@ -265,20 +268,6 @@
                  (lambda (c2) (z (list 'cons c2 (pattern-cdr c))))
                  (pattern-car c) ) ) )
       (build-let *car* *cdr* e body) ) )
-
-;*        (body (compile   */
-;*               f1 `(car ,e) r m  */
-;*               (lambda (r2 z2 c2)  */
-;*                  (compile f2 `(cdr ,e) r2 m  */
-;*                           (lambda (r3 z3 c3)   */
-;*                              (k r3 z3 (list 'cons c2 c3) ) )  */
-;*                           (lambda (c3) (z (list 'cons c2 c3)))  */
-;*                           (pattern-cdr c)) )  */
-;*               (lambda (c2) (z (list 'cons c2 (pattern-cdr c))))  */
-;*               (pattern-car c) ) )  */
-;*        )  */
-;*        body))  */
-
 
 ;*---------------------------------------------------------------------*/
 ;*    Instanciate-try may be re-written in order to avoid generating   */
@@ -396,19 +385,18 @@
 ;*---------------------------------------------------------------------*/
 ;*    Pattern matching on structures                                   */
 ;*---------------------------------------------------------------------*/
-#|STk
+#|STklos
 (define (compile-struct-pat f e r m k z d)
    (let* ((nom (cadr f))
-          (p*  (cddr f))
+          (pred (caddr f))
+          (p*  (cdddr f))
           (*k* (jim-gensym "KAP-"))
           (*vars* (pattern-variables f))
           (*call* `(,*k* ,@*vars*))
           (success-form (k (extend* r *vars*) z d))
           (failure-form (z d))
           (indexes (integers 0 (- (length p*) 1))))
-      (build-if `(,(string->symbol (string-append
-                              (symbol->string nom)
-                              "?"))
+      (build-if `(,pred
                   ,e)
                 (compile* p* indexes e r m
                                     (lambda (r z d) success-form)
@@ -435,16 +423,16 @@
            (look-for-descr d (cdr D-env)))))
 
 
-(define (k.init r z d) #t)
+(define (k-init r z d) #t)
 
-(define (z.init d) #f)
+(define (z-init d) #f)
 
-(define d.init '(any))
+(define d-init '(any))
 
 ;*---------------------------------------------------------------------*/
 ;*    We do not need anything better...                                */
 ;*---------------------------------------------------------------------*/
-(define r.init '())
+(define r-init '())
 
 (define (extend-alist l pt im)
    `((,pt . ,im) ,@l))
@@ -462,7 +450,7 @@
 
                'dummy)))
 
-(define (m.init n)  
+(define (m-init n)  
    (lambda (e r k z c)
       (wrong "No current repetition named" n) ) )
 
@@ -479,7 +467,8 @@
 
 
 (define (extend fn pt im)
-   (lambda (x) (if (eq? x pt) im (fn x))))
+   (lambda (x)
+      (if (eq? x pt) im (fn x))))
 
 (define (build-if tst then else)
    (cond

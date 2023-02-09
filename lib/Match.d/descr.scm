@@ -1,30 +1,3 @@
-;*---------------------------------------------------------------------*/
-;*    Copyright (c) 1997 by Manuel Serrano. All rights reserved.       */
-;*                                                                     */
-;*                                     ,--^,                           */
-;*                               _ ___/ /|/                            */
-;*                           ,;'( )__, ) '                             */
-;*                          ;;  //   L__.                              */
-;*                          '   \    /  '                              */
-;*                               ^   ^                                 */
-;*                                                                     */
-;*                                                                     */
-;*    This program is distributed in the hope that it will be useful.  */
-;*    Use and copying of this software and preparation of derivative   */
-;*    works based upon this software are permitted, so long as the     */
-;*    following conditions are met:                                    */
-;*           o credit to the authors is acknowledged following         */
-;*             current academic behaviour                              */
-;*           o no fees or compensation are charged for use, copies,    */
-;*             or access to this software                              */
-;*           o this copyright notice is included intact.               */
-;*      This software is made available AS IS, and no warranty is made */
-;*      about the software or its performance.                         */
-;*                                                                     */
-;*      Bug descriptions, use reports, comments or suggestions are     */
-;*      welcome Send them to                                           */
-;*        Manuel Serrano -- Manuel.Serrano@cui.unige.ch                */
-;*---------------------------------------------------------------------*/
 ;;;--------------------------------------------------------------------*/
 ;;;   geffroy/Match3.0/descriptions.scm ...                            */
 ;;;   Author      :  Jean-Marie Geffroy                                */
@@ -37,6 +10,39 @@
 ;;;--------------------------------------------------------------------*/
 
 (module __match_descriptions
+
+   (import  __error
+            __match_s2cfun
+            __param
+            __bexit
+            __object
+            __thread)
+  
+   (use     __type
+            __bigloo
+            __tvector
+            __structure
+            __tvector
+            __bignum
+            __rgc
+            __bit
+
+            __r4_numbers_6_5
+            __r4_numbers_6_5_fixnum
+            __r4_numbers_6_5_flonum
+            __r4_numbers_6_5_flonum_dtoa
+            __r4_characters_6_6
+            __r4_equivalence_6_2
+            __r4_booleans_6_1
+            __r4_symbols_6_4
+            __r4_strings_6_7
+            __r4_pairs_and_lists_6_3
+            __r4_input_6_10_2
+            __r4_control_features_6_9
+            __r4_vectors_6_8
+            __r4_ports_6_10_1
+            __r4_output_6_10_3
+            __evenv)
 
    (export  (pattern-variables f)
             (pattern-car p)
@@ -70,62 +76,46 @@
             (inline isVector? c)
             (inline isVector-begin? c)
             (inline isVector-end? c)
-            (inline isTree? c) )
-
-   (import  (__error                   "Llib/error.scm")
-            (__match_s2cfun            "Match/s2cfun.scm"))
-
-   (use     (__type                    "Llib/type.scm")
-            (__bigloo                  "Llib/bigloo.scm")
-            (__tvector                 "Llib/tvector.scm")
-            (__structure               "Llib/struct.scm")
-            (__tvector                 "Llib/tvector.scm")
-            (__rgc                     "Rgc/runtime.scm")
-            (__r4_numbers_6_5          "Ieee/number.scm")
-            (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
-            (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
-            (__r4_characters_6_6       "Ieee/char.scm")
-            (__r4_equivalence_6_2      "Ieee/equiv.scm")
-            (__r4_booleans_6_1         "Ieee/boolean.scm")
-            (__r4_symbols_6_4          "Ieee/symbol.scm")
-            (__r4_strings_6_7          "Ieee/string.scm")
-            (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
-            (__r4_input_6_10_2         "Ieee/input.scm")
-            (__r4_control_features_6_9 "Ieee/control.scm")
-            (__r4_vectors_6_8          "Ieee/vector.scm")
-            (__r4_ports_6_10_1         "Ieee/port.scm")
-            (__r4_output_6_10_3        "Ieee/output.scm")
-            (__evenv                   "Eval/evenv.scm")))
+            (inline isTree? c) ) )
 
 ;;;--------------------------------------------------------------------*/
 ;;;   Renvoie la liste des variables apparaissant dans un filtre       */
 ;;;--------------------------------------------------------------------*/
 (define (pattern-variables f)
    (cond
-      ((eq? (car f) 'or)      (pattern-variables (cadr f)))
-      ((eq? (car f) 't-or)    (pattern-variables (cadr f)))
-      ((eq? (car f) 'and)     (union (pattern-variables (cadr f))
-                                     (pattern-variables (caddr f))))
+      ((eq? (car f) 'or)
+       (pattern-variables (cadr f)))
+      ((eq? (car f) 't-or)
+       (pattern-variables (cadr f)))
+      ((eq? (car f) 'and)
+       (union (pattern-variables (cadr f)) (pattern-variables (caddr f))))
       ((memq (car f) '(cons vector-cons))
-       (union (pattern-variables (cadr f))
-              (pattern-variables (caddr f))))
+       (union (pattern-variables (cadr f)) (pattern-variables (caddr f))))
       ((memq (car f) '(tree times))
-       (union (pattern-variables (caddr f))
-              (pattern-variables (cadddr f))))
-      ((eq? (car f) 'var)     (cdr f))
+       (union (pattern-variables (caddr f)) (pattern-variables (cadddr f))))
+      ((eq? (car f) 'var)
+       (cdr f))
       ((eq? (car f) 'vector-begin)
        (pattern-variables (caddr f)) )
       ((eq? (car f) 'vector-end)
        '() )
-#|STk
+#|STklos
       ((eq? (car f) 'struct-pat)
-       (let loop ((p* (cddr f)))
+       ;; MS FIX 11 april 2007.
+       ;; Used to be
+       ;;        (let loop ((p* (cdddr f)))
+       ;; which is erroneous because f looks like:
+       ;;        (struct-pat int-point int-point? (var x) (var y))
+       ;; for a structure defined as:
+       ;;        (define-struct int-point x y)
+       (let loop ((p* (cdddr f)))
           (if (null? p*)
               '()
               (union (pattern-variables (car p*))
                      (loop (cdr p*))))))
 |#
-      (else '()) ) )
+      (else
+        '())))
 
 (define (union l1 l2)
    (if (null? l1) l2
@@ -304,7 +294,7 @@
             (more-precise? (caddr descr) (caddr f))))
 
       ((eqv? (car f) 'vector-begin)
-       #f) ;;;(and (isVector? descr)
+       #f) ;;;(and (isVector? descr))
 
 
       (else #f)))
@@ -387,7 +377,7 @@
       ((and (isVar? descr) (isVar? pat))
        (if (eq? (env (cadr descr)) 'unbound)
            (if (eq? (env (cadr pat)) 'unbound)
-               (let ((s (list 'quote (jim-gensym))))
+               (let ((s (list 'var (jim-gensym "VAR-")))) ;;; johnm
                   (k (extend (extend env (cadr descr) s)
                              (cadr pat)
                              s)))
@@ -434,11 +424,11 @@
 ;;;   Filtrage d'une expression par une DESCRIPION                     */
 ;;;--------------------------------------------------------------------*/
 (define (match d e env k z)
-
    (case (car d)
       ((any)   (k env))
 
-      ((quote) (if (eq? e (cadr d)) (k env) (z env)))
+      ((quote) (if (or (eq? e (cadr d)) (and (string? e) (string=? e (cadr d))))
+                   (k env) (z env)))
 
       ((and)   (match (cadr d) e env
                       (lambda (env)
@@ -457,7 +447,7 @@
       ((not)
        (if (isVar? (cadr d))
            (let ((s (jim-gensym "VAR-")))
-              (k (extend env (cadadr d) `(not (quote s)))))
+              (k (extend env (cadadr d) `(not (quote ,s))))) ;;; johnm
            (match (cadr d) e env z k)))
 
 ;;;-- Le cas ou la descr. est un vector et le filtre un vector-begin --*/
@@ -494,15 +484,13 @@
                (env (lambda (x) 'unbound))
                (k (lambda (f e) f)) )
       (cond
-         ((or (boolean? f) (symbol? f) (string? f) (integer? f) )
-          (k f env))
-         ((null? f)
+         ((not (pair? f))
           (k f env))
          ((equal? (car f) 'quote)
           (k f env))
          ((eq? (car f) 'var)
           (if (eq? (env (cadr f)) 'unbound)
-              (let ((s (jim-gensym)))
+              (let ((s (jim-gensym "ALPHA-")))
                  (k (list 'var s) (extend env (cadr f) s)))
               (k (list 'var (env (cadr f))) env)))
          (else (loop (car f) env
