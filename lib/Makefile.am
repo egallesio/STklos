@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  6-Feb-2023 19:36 (eg)
+# Last file update:  9-Feb-2023 20:04 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
@@ -178,10 +178,11 @@ install-sources:
 	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
 
 
-# Explicit some dependencies here to avoid some warnings when compiling files
+# Explicit some dependencies here 
 $(SCHEME_OBJS): ../src/boot.img
 ffi.ostk: bigmatch.ostk
-recette.ostk: pretty-print.ostk
+bigmatch.ostk: Match.d/compiler.scm Match.d/descr.scm Match.d/mexpand.scm \
+               Match.d/normalize.scm Match.d/s2cfun.scm
 
 # SLIB
 slib.ostk: slib.stk STklos.init
