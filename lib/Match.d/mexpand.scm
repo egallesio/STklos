@@ -51,39 +51,43 @@
 ;;;   expands into ((lambda (e) ...) e)                                */
 ;;;--------------------------------------------------------------------*/
 
+;; NOTE: Modification by eg for STklos.  Renamed extend in this file by
+;; extend-it (we have an extend function in compiler.scm, which prevent to
+;; place all the files of this directory in a unique module (instead of 5)
+
 (module __match_expand
 
    (export  (expand-match-case   exp)
-	    (expand-match-lambda exp))
+            (expand-match-lambda exp))
 
    (import  (__error                   "Llib/error.scm")
-	    (__match_compiler          "Match/compiler.scm")
-	    (__match_descriptions      "Match/descr.scm")
-	    (__match_normalize         "Match/normalize.scm")
-	    (__match_s2cfun            "Match/s2cfun.scm"))
-   
+            (__match_compiler          "Match/compiler.scm")
+            (__match_descriptions      "Match/descr.scm")
+            (__match_normalize         "Match/normalize.scm")
+            (__match_s2cfun            "Match/s2cfun.scm"))
+
    (use     (__type                    "Llib/type.scm")
-	    (__bigloo                  "Llib/bigloo.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__structure               "Llib/struct.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__rgc                     "Rgc/runtime.scm")
-	    (__r4_numbers_6_5          "Ieee/number.scm")
-	    (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
-	    (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
-	    (__r4_characters_6_6       "Ieee/char.scm")
-	    (__r4_equivalence_6_2      "Ieee/equiv.scm")
-	    (__r4_booleans_6_1         "Ieee/boolean.scm")
-	    (__r4_symbols_6_4          "Ieee/symbol.scm")
-	    (__r4_strings_6_7          "Ieee/string.scm")
-	    (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
-	    (__r4_input_6_10_2         "Ieee/input.scm")
-	    (__r4_control_features_6_9 "Ieee/control.scm")
-	    (__r4_vectors_6_8          "Ieee/vector.scm")
-	    (__r4_ports_6_10_1         "Ieee/port.scm")
-	    (__r4_output_6_10_3        "Ieee/output.scm")
-	    (__evenv                   "Eval/evenv.scm")))
-	    
+            (__bigloo                  "Llib/bigloo.scm")
+            (__tvector                 "Llib/tvector.scm")
+            (__structure               "Llib/struct.scm")
+            (__tvector                 "Llib/tvector.scm")
+            (__rgc                     "Rgc/runtime.scm")
+            (__r4_numbers_6_5          "Ieee/number.scm")
+            (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
+            (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
+            (__r4_characters_6_6       "Ieee/char.scm")
+            (__r4_equivalence_6_2      "Ieee/equiv.scm")
+            (__r4_booleans_6_1         "Ieee/boolean.scm")
+            (__r4_symbols_6_4          "Ieee/symbol.scm")
+            (__r4_strings_6_7          "Ieee/string.scm")
+            (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
+            (__r4_input_6_10_2         "Ieee/input.scm")
+            (__r4_control_features_6_9 "Ieee/control.scm")
+            (__r4_vectors_6_8          "Ieee/vector.scm")
+            (__r4_ports_6_10_1         "Ieee/port.scm")
+            (__r4_output_6_10_3        "Ieee/output.scm")
+            (__evenv                   "Eval/evenv.scm")))
+
 ;;;--------------------------------------------------------------------*/
 ;;;   Technical note: the clauses->pattern function returns two        */
 ;;;   results:                                                         */
@@ -93,66 +97,65 @@
 ;;;--------------------------------------------------------------------*/
 (define (expand-match-lambda exp)
    (labels ((clauses->pattern
-	     (clauses k)
-	     (if (null? clauses)
-		 (k '(not (any)) *the-empty-env*)
-		 (let ((pattern (caar clauses))
-		       (actions (cdar clauses))
-		       (rest    (cdr clauses)))
-		    (let ((tag (jim-gensym "TAG-")))
-		       (if (eq? pattern 'else)
-			   (k `(tagged-or (any) ,tag (not (any)))
-			      (extend *the-empty-env* tag actions))
-			   (clauses->pattern
-			    rest
-			    (lambda (pat env)
-			       (k `(tagged-or ,(normalize-pattern pattern)
-					      ,tag     
-					      ,pat)
-				  (extend env tag actions))))))))))
-;;; 	     (match-case clauses  */
-;;; 		(() (k '(not (any)) *the-empty-env*))  */
-;;; 		(( (?pattern . ?actions) . ?rest )  */
-;;; 		 (let ((tag (jim-gensym "TAG-")))  */
-;;; 		    (if (eq? pattern 'else)  */
-;;; 			(k `(tagged-or (any) ,tag (not (any)))  */
-;;; 			   (extend *the-empty-env* tag actions))  */
-;;; 			(clauses->pattern  */
-;;; 			 rest  */
-;;; 			 (lambda (pat env)  */
-;;; 			    (k `(tagged-or ,(normalize-pattern pattern)  */
-;;; 					   ,tag       */
-;;; 					   ,pat)  */
-;;; 			       (extend env tag actions))))))))))  */
+             (clauses k)
+             (if (null? clauses)
+                 (k '(not (any)) *the-empty-env*)
+                 (let ((pattern (caar clauses))
+                       (actions (cdar clauses))
+                       (rest    (cdr clauses)))
+                    (let ((tag (jim-gensym "TAG-")))
+                       (if (eq? pattern 'else)
+                           (k `(tagged-or (any) ,tag (not (any)))
+                              (extend-it *the-empty-env* tag actions))
+                           (clauses->pattern
+                            rest
+                            (lambda (pat env)
+                               (k `(tagged-or ,(normalize-pattern pattern)
+                                              ,tag
+                                              ,pat)
+                                  (extend-it env tag actions))))))))))
+;;;          (match-case clauses  */
+;;;             (() (k '(not (any)) *the-empty-env*))  */
+;;;             (( (?pattern . ?actions) . ?rest )  */
+;;;              (let ((tag (jim-gensym "TAG-")))  */
+;;;                 (if (eq? pattern 'else)  */
+;;;                     (k `(tagged-or (any) ,tag (not (any)))  */
+;;;                        (extend-it *the-empty-env* tag actions))  */
+;;;                     (clauses->pattern  */
+;;;                      rest  */
+;;;                      (lambda (pat env)  */
+;;;                         (k `(tagged-or ,(normalize-pattern pattern)  */
+;;;                                        ,tag       */
+;;;                                        ,pat)  */
+;;;                            (extend-it env tag actions))))))))))  */
       (clauses->pattern
        (cdr exp)
        (lambda (pat env)
-	  (let ((compiled-pat (pcompile pat))
-		(prototypes   (fetch-prototypes pat)) )
-	         ;; We build a (labels ((tag1 (x ...) actions1)) ...)
-		 ;; You may change it to build a letrec
-	     `(labels
-		    (,@(map
-			(lambda (prototype)
-			   (cons (car prototype)
-				 (cons (cadr prototype)
-				       (cdr (assq (car prototype)
-						  env)))))
-			prototypes))
-		 ,compiled-pat))))))
+          (let ((compiled-pat (pcompile pat))
+                (prototypes   (fetch-prototypes pat)) )
+                 ;; We build a (labels ((tag1 (x ...) actions1)) ...)
+                 ;; You may change it to build a letrec
+             `(labels
+                    (,@(map
+                        (lambda (prototype)
+                           (cons (car prototype)
+                                 (cons (cadr prototype)
+                                       (cdr (assq (car prototype)
+                                                  env)))))
+                        prototypes))
+                 ,compiled-pat))))))
 
 (define (fetch-prototypes pat)
    (if (memq (car pat) '(t-or tagged-or))
        (cons `(,(caddr pat) ,(pattern-variables (cadr pat)))
-	     (fetch-prototypes (cadddr pat)))
+             (fetch-prototypes (cadddr pat)))
        '()))
 
 (define (expand-match-case exp)
   (list (expand-match-lambda `(match-lambda . ,(cddr exp)))
         (cadr exp)))
 
-(define (extend env pt im)
+(define (extend-it env pt im)
    (cons (cons pt im) env))
 
 (define *the-empty-env* '())
-
