@@ -29,33 +29,33 @@
 (module __match_normalize
 
    (import  (__error                   "Llib/error.scm")
-	    (__match_s2cfun            "Match/s2cfun.scm"))
+            (__match_s2cfun            "Match/s2cfun.scm"))
    
    (use     (__type                    "Llib/type.scm")
-	    (__bigloo                  "Llib/bigloo.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__structure               "Llib/struct.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__rgc                     "Rgc/runtime.scm")
-	    (__r4_numbers_6_5          "Ieee/number.scm")
-	    (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
-	    (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
-	    (__r4_characters_6_6       "Ieee/char.scm")
-	    (__r4_equivalence_6_2      "Ieee/equiv.scm")
-	    (__r4_booleans_6_1         "Ieee/boolean.scm")
-	    (__r4_symbols_6_4          "Ieee/symbol.scm")
-	    (__r4_strings_6_7          "Ieee/string.scm")
-	    (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
-	    (__r4_input_6_10_2         "Ieee/input.scm")
-	    (__r4_control_features_6_9 "Ieee/control.scm")
-	    (__r4_vectors_6_8          "Ieee/vector.scm")
-	    (__r4_ports_6_10_1         "Ieee/port.scm")
-	    (__r4_output_6_10_3        "Ieee/output.scm")
-	    (__evenv                   "Eval/evenv.scm"))
+            (__bigloo                  "Llib/bigloo.scm")
+            (__tvector                 "Llib/tvector.scm")
+            (__structure               "Llib/struct.scm")
+            (__tvector                 "Llib/tvector.scm")
+            (__rgc                     "Rgc/runtime.scm")
+            (__r4_numbers_6_5          "Ieee/number.scm")
+            (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
+            (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
+            (__r4_characters_6_6       "Ieee/char.scm")
+            (__r4_equivalence_6_2      "Ieee/equiv.scm")
+            (__r4_booleans_6_1         "Ieee/boolean.scm")
+            (__r4_symbols_6_4          "Ieee/symbol.scm")
+            (__r4_strings_6_7          "Ieee/string.scm")
+            (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
+            (__r4_input_6_10_2         "Ieee/input.scm")
+            (__r4_control_features_6_9 "Ieee/control.scm")
+            (__r4_vectors_6_8          "Ieee/vector.scm")
+            (__r4_ports_6_10_1         "Ieee/port.scm")
+            (__r4_output_6_10_3        "Ieee/output.scm")
+            (__evenv                   "Eval/evenv.scm"))
    
    (export  (normalize-pattern pat)
-;STk	    (match-define-structure! exp)
-	    (extend.r.macro-env name fun)))
+;STk        (match-define-structure! exp)
+            (extend.r.macro-env name fun)))
 
 ;;;===========================================================4
 ;;; The standardizer converts patterns with an 
@@ -171,15 +171,15 @@
 (define (standardize-patterns e*)
   (if (pair? e*)
       (cond ((macro-pattern? e*) (standardize-macro-pattern e*))
-	    ((eq? (car e*) '??-) (standardize-any (cdr e*)))
-	    ((eq? (car e*) '???-) (standardize-lispish-any (cdr e*)))
-	    ((lispish-segment-variable? (car e*))
-	     (standardize-lispish-segment-variable (car e*) (cdr e*)) )
-	    ((segment-variable? (car e*))
-	     (standardize-segment-variable (car e*) (cdr e*)) )
-	    ((tree-variable? (car e*))
-	     (standardize-tree-variable (car e*) (cadr e*) (caddr e*)) )
-	    (else (standardize-cons (car e*) (cdr e*))) )
+            ((eq? (car e*) '??-) (standardize-any (cdr e*)))
+            ((eq? (car e*) '???-) (standardize-lispish-any (cdr e*)))
+            ((lispish-segment-variable? (car e*))
+             (standardize-lispish-segment-variable (car e*) (cdr e*)) )
+            ((segment-variable? (car e*))
+             (standardize-segment-variable (car e*) (cdr e*)) )
+            ((tree-variable? (car e*))
+             (standardize-tree-variable (car e*) (cadr e*) (caddr e*)) )
+            (else (standardize-cons (car e*) (cdr e*))) )
       (standardize-quote e*) ) )
 
 (define (standardize-repetition e e*)
@@ -191,9 +191,9 @@
         rr
         (lambda (f* rrr)
           (let ((label (jim-gensym "g")))
-	     (c `(times ,label
-			(cons ,f (hole ,label ,(jim-gensym "HOLE-")))
-			 ,f* )
+             (c `(times ,label
+                        (cons ,f (hole ,label ,(jim-gensym "HOLE-")))
+                         ,f* )
                   rrr ) ) ) ) ) ) ) )
 
 (define (standardize-sexp)
@@ -204,16 +204,16 @@
   (if (and (pair? f*) (eq? (car f*) '...))
       (standardize-repetition f (cdr f*))
       (if (*prefer-xcons* 'value)
-	  (standardize-real-xcons f f*)
-	  (standardize-real-cons f f*) ) ) )
+          (standardize-real-xcons f f*)
+          (standardize-real-cons f f*) ) ) )
 
 (define (make-toggle)
   (let ((value #f))
     (lambda (msg)
       (case msg
-	((value) value)
-	((on) (set! value #t))
-	((off) (set! value #f))))))
+        ((value) value)
+        ((on) (set! value #t))
+        ((off) (set! value #f))))))
 
 (define *prefer-xcons* (make-toggle))
 
@@ -241,7 +241,7 @@
 (define (standardize-term-variable e)
   (lambda (r c)
      (let ((name (term-variable-true-name e)))
-	(c `(var ,name) r) ) ) )
+        (c `(var ,name) r) ) ) )
 
 ;(define (standardize-term-variable e)
 ;  (lambda (r c)
@@ -271,9 +271,9 @@
                (c `(ssetq-append 
                     ,name 
                     (tree ,label
-			  (cons (any) (hole ,label ,(jim-gensym "HOLE-")))
-			  (end-ssetq ,name) )
-		    ,pattern )
+                          (cons (any) (hole ,label ,(jim-gensym "HOLE-")))
+                          (end-ssetq ,name) )
+                    ,pattern )
                   rr ) ) ) )
           ((standardize-patterns f*)
            r
@@ -286,20 +286,20 @@
       ((standardize-pattern f1)
        (extend-alist r name 'tree)
        (lambda (hole-pattern rr)
-	 ((standardize-pattern f2)
-	  rr
-	  (lambda (patterns rrr)
-	     (if (> (oc-count name patterns) 1)
-		 (c `(tree ,name ,patterns ,hole-pattern) rrr)
-		 (c `(times ,name ,patterns ,hole-pattern) rrr))) ) ) ) ) ) )
+         ((standardize-pattern f2)
+          rr
+          (lambda (patterns rrr)
+             (if (> (oc-count name patterns) 1)
+                 (c `(tree ,name ,patterns ,hole-pattern) rrr)
+                 (c `(times ,name ,patterns ,hole-pattern) rrr))) ) ) ) ) ) )
 
 (define (oc-count name pattern)
    (cond
       ((null? pattern) 0)
       ((eq? (car pattern) 'hole)
        (if (eq? (cadr pattern) name)
-	   1
-	   0))
+           1
+           0))
       ((memq (car pattern) '(or and t-or tagged-or cons not))
        (apply + (map (lambda (pat) (oc-count name pat)) (cdr pattern))))
       (else 0)))
@@ -320,15 +320,15 @@
      r
      (lambda (pattern rr)
        (let ((label (jim-gensym "g")))
-	 (if (*prefer-xcons* 'value)
-	     (c `(times ,label
-			(xcons (any) (hole ,label ,(jim-gensym "HOLE-")))
-			,pattern )
-		rr ) 
-	     (c `(times ,label
-			(cons (any) (hole ,label ,(jim-gensym "HOLE-")))
-			,pattern )
-		rr ) ) ) ) ) ) )
+         (if (*prefer-xcons* 'value)
+             (c `(times ,label
+                        (xcons (any) (hole ,label ,(jim-gensym "HOLE-")))
+                        ,pattern )
+                rr ) 
+             (c `(times ,label
+                        (cons (any) (hole ,label ,(jim-gensym "HOLE-")))
+                        ,pattern )
+                rr ) ) ) ) ) ) )
 
 (define (standardize-lispish-any f*)
   (if (null? f*)
@@ -357,16 +357,16 @@
 
 (define (extend.r.macro-env name fun)
    (set! r.macro-pattern
-	 (extend-alist r.macro-pattern
-		       name
-		       fun)))
+         (extend-alist r.macro-pattern
+                       name
+                       fun)))
 
 (define-macro (defmacro-pattern name variables body)
   `(begin
 ;*     (set! r.macro-pattern  */
 ;*          (extend-alist r.macro-pattern  */
-;* 		       ',name  */
-;* 		       (lambda ,variables ,body) ) )  */
+;*                     ',name  */
+;*                     (lambda ,variables ,body) ) )  */
       (extend.r.macro-env ',name (lambda ,variables ,body))
     ',name ) )
 
@@ -377,77 +377,77 @@
 (defmacro-pattern atom (e . e*)
    (lambda (r c)
       (if (pair? e*)
-	  (match-wrong "Too many patterns provided for atom")
-	  ((standardize-pattern e)
-	   r
-	   (lambda (pattern rr)
-	      (c `(and (not (cons (any) (any)))
-		       ,pattern)
-		 rr))))))
+          (match-wrong "Too many patterns provided for atom")
+          ((standardize-pattern e)
+           r
+           (lambda (pattern rr)
+              (c `(and (not (cons (any) (any)))
+                       ,pattern)
+                 rr))))))
 
 (defmacro-pattern or (e . e*)
    (lambda (r c)
-	     (if (pair? e*)
-		 ((standardize-pattern e)
-		  r
-		  (lambda (pattern1 rr)
-		     ((standardize-pattern `(or . ,e*))
-		      r
-		      (lambda (pattern2 rrr)
-			 (if (and (coherent-environment? rr rrr)
-				  (coherent-environment? rrr rr))
-			     (c `(or ,pattern1 ,pattern2) rrr)
-			     (match-wrong "Incompatible alternative"))))))
-		 ((standardize-pattern e) r c))))
+             (if (pair? e*)
+                 ((standardize-pattern e)
+                  r
+                  (lambda (pattern1 rr)
+                     ((standardize-pattern `(or . ,e*))
+                      r
+                      (lambda (pattern2 rrr)
+                         (if (and (coherent-environment? rr rrr)
+                                  (coherent-environment? rrr rr))
+                             (c `(or ,pattern1 ,pattern2) rrr)
+                             (match-wrong "Incompatible alternative"))))))
+                 ((standardize-pattern e) r c))))
 
 ;;; (defmacro-pattern tagged-or (e l . e*)  */
 ;;;    (lambda (r c)  */
-;;; 	     (if (pair? e*)  */
-;;; 		 ((standardize-pattern e)  */
-;;; 		  r  */
-;;; 		  (lambda (pattern1 rr)  */
-;;; 		     ((standardize-pattern `(tagged-or . ,e*))  */
-;;; 		      r  */
-;;; 		      (lambda (pattern2 rrr)  */
-;;; 			 (if (and (coherent-environment? rr rrr)  */
-;;; 				  (coherent-environment? rrr rr))  */
-;;; 			     (c `(tagged-or ,pattern1 ,l ,pattern2) rrr)  */
-;;; 			     (match-wrong "Incompatible alternative"))))))  */
-;;; 		 ((standardize-pattern e) r c) ) ) )  */
+;;;          (if (pair? e*)  */
+;;;              ((standardize-pattern e)  */
+;;;               r  */
+;;;               (lambda (pattern1 rr)  */
+;;;                  ((standardize-pattern `(tagged-or . ,e*))  */
+;;;                   r  */
+;;;                   (lambda (pattern2 rrr)  */
+;;;                      (if (and (coherent-environment? rr rrr)  */
+;;;                               (coherent-environment? rrr rr))  */
+;;;                          (c `(tagged-or ,pattern1 ,l ,pattern2) rrr)  */
+;;;                          (match-wrong "Incompatible alternative"))))))  */
+;;;              ((standardize-pattern e) r c) ) ) )  */
 
 (defmacro-pattern t-or (e . e*)
    (lambda (r c)
-	     (if (pair? e*)
-		 ((standardize-pattern e)
-		  r
-		  (lambda (pattern1 rr)
-		     ((standardize-pattern `(t-or . ,e*))
-		      r
-		      (lambda (pattern2 rrr)
-			 (if (and (coherent-environment? rr rrr)
-				  (coherent-environment? rrr rr))
-			     (c `(t-or ,pattern1 ,pattern2) rrr)
-			     (match-wrong "Incompatible alternative"))))))
-		 ((standardize-pattern e) r c) ) ) )
+             (if (pair? e*)
+                 ((standardize-pattern e)
+                  r
+                  (lambda (pattern1 rr)
+                     ((standardize-pattern `(t-or . ,e*))
+                      r
+                      (lambda (pattern2 rrr)
+                         (if (and (coherent-environment? rr rrr)
+                                  (coherent-environment? rrr rr))
+                             (c `(t-or ,pattern1 ,pattern2) rrr)
+                             (match-wrong "Incompatible alternative"))))))
+                 ((standardize-pattern e) r c) ) ) )
 
 (defmacro-pattern and (e . e*)
    (lambda (r c)
-	   (if (pair? e*)
-	       ((standardize-pattern e)
-		r
-		(lambda (pattern1 rr)
-		   ((standardize-pattern `(and . ,e*))
-	 	    rr
-		    (lambda (pattern2 rrr)
-		       (c `(and ,pattern1 ,pattern2) rrr) ) ) ) )
-	       ((standardize-pattern e) r c))))
+           (if (pair? e*)
+               ((standardize-pattern e)
+                r
+                (lambda (pattern1 rr)
+                   ((standardize-pattern `(and . ,e*))
+                    rr
+                    (lambda (pattern2 rrr)
+                       (c `(and ,pattern1 ,pattern2) rrr) ) ) ) )
+               ((standardize-pattern e) r c))))
 
 (defmacro-pattern not (e)
    (lambda (r c)
-	  ((standardize-pattern e)  
-	   r
-	   (lambda (pattern rr)
-	      (c `(not ,pattern) r) ) ) ) )
+          ((standardize-pattern e)  
+           r
+           (lambda (pattern rr)
+              (c `(not ,pattern) r) ) ) ) )
 
 (defmacro-pattern ? (e)
    (lambda (r c)
@@ -462,9 +462,9 @@
 ;;; while (match-lambda (or (?x ?y) (?y ?x)) t) is coherent.
 (define (coherent-environment? r rr)
   (labels ((look (n r)
-		 (and (pair? r)
-		      (or (eq? (caar r) n)
-			  (look n (cdr r)) ) ) ))
+                 (and (pair? r)
+                      (or (eq? (caar r) n)
+                          (look n (cdr r)) ) ) ))
     (if (pair? r)
         (and (look (caar r) rr)
              (coherent-environment? (cdr r) rr) )
@@ -491,27 +491,27 @@
    ; e is known to be a vector
    (let ((tmp (normalize-pattern (vector->list e))))
       (labels ((vectorify
-		(p)
-		(cond
-		   ((eq? (car p) 'cons)
-		    `(vector-cons ,(cadr p)
-				  ,(if (equal? (caddr p) '(any))
-				       '(vector-any)
-				       (vectorify (caddr p)))))
-		   ((equal? p '(quote ()))
-		    '(vector-end))
-		   ((memq (car p) '(and or not))
-		    (list (car p)
-			  (vectorify (cadr p))
-			  (vectorify (caddr p))))
-		   ((memq (car p) '(times tree))
-		    (list 'vector-times (cadr p)
-			  (vectorify (caddr p))
-			  (vectorify (cadddr p))))
-		   (else p))))
-	 (lambda (r c)
-	    (c `(vector-begin ,(pattern-length (vector->list e))
-			      ,(vectorify tmp)) r) ) ) ) )
+                (p)
+                (cond
+                   ((eq? (car p) 'cons)
+                    `(vector-cons ,(cadr p)
+                                  ,(if (equal? (caddr p) '(any))
+                                       '(vector-any)
+                                       (vectorify (caddr p)))))
+                   ((equal? p '(quote ()))
+                    '(vector-end))
+                   ((memq (car p) '(and or not))
+                    (list (car p)
+                          (vectorify (cadr p))
+                          (vectorify (caddr p))))
+                   ((memq (car p) '(times tree))
+                    (list 'vector-times (cadr p)
+                          (vectorify (caddr p))
+                          (vectorify (cadddr p))))
+                   (else p))))
+         (lambda (r c)
+            (c `(vector-begin ,(pattern-length (vector->list e))
+                              ,(vectorify tmp)) r) ) ) ) )
 
 (define (pattern-length p)
    (cond

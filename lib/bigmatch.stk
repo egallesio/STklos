@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update:  6-Feb-2023 19:34 (eg)
+;;;; Last file update:  9-Feb-2023 18:30 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA
@@ -86,14 +86,6 @@ doc>
 ;;(define-macro (match-case expr . clauses)
 ;;  `((match-lambda  ,@clauses) ,expr))
 
-
-;;;
-;;; define-inline
-;;;
-(define-macro (define-inline args . body)
-  `(define ,args ,@body))
-
-
 ;;;
 ;;; labels
 ;;;
@@ -106,66 +98,39 @@ doc>
   `(letrec ,(map expand bindings)
      ,@body))
 
-;;;
-;;; fx functions
-;;;
-(define-macro (=fx a b ) `(= ,a ,b))
-(define-macro (>=fx a b) `(>= ,a ,b))
-(define-macro (<=fx a b) `(<= ,a ,b))
-(define-macro (<fx a b)  `(<  ,a ,b))
-(define-macro (>fx a b)  `(>  ,a ,b))
+(define-module MATCH
+   (export  expand-match-case expand-match-lambda)
 
-(define-macro (+fx a b) `(+ ,a ,b))
-(define-macro (-fx a b) `(- ,a ,b))
-(define-macro (*fx a b) `(* ,a ,b))
-(define-macro (/fx a b) `(truncate (/ ,a ,b)))
+   ;; define-inline
+   (define-macro (define-inline args . body)
+     `(define ,args ,@body))
 
+   ;; define-module
+   (define-macro (module name . clauses)
+     `(void))
 
-;;;
-;;; A macro for parsing the Bigloo MODULE directive
-;;; This macro has been written for the MATCH-CASE and MATCH-LAMBDA
-;;; primitives.
-;;; Alas, the problem is that we don't have match-case here :-)
-;;;
+   ;; fx functions
+   (define =fx  fx=)
+   (define >=fx fx>=)
+   (define <=fx fx<=)
+   (define <fx  fx<)
+   (define >fx  fx>)
 
-(define-macro (module name . clauses)
-  (define (import-directive x)
-    `(import ,@(map (lambda (x) (if (pair? x) (car x) x)) x)))
+   (define +fx fx+)
+   (define -fx fx-)
+   (define *fx fx*)
+   (define /fx fxdiv)
 
-  (define (export-directive x)
-    `(export ,@(map (lambda (x)
-              (if (pair? x)
-              ( (if (eq? (car x) 'inline) cadr car)  x)
-              x))
-            x)))
-
-  `(begin
-     (define-module ,name
-       ,@(map (lambda (clause)
-                (case (car clause)
-                  ((export) (export-directive (cdr clause)))
-                  ((import) (import-directive (cdr clause)))
-                  ((use)    '())
-                  (else     (error 'module "Unknown clause"
-                                   (cons name clause)))))
-              clauses))
-     (select-module ,name)))
-
-
-(define-module __error)
-
-
-
-;;;;
-;;;; WARNING: Order is important
-;;;;
-(include-file "Match.d/s2cfun.scm")
-(include-file "Match.d/normalize.scm")
-(include-file "Match.d/descr.scm")
-(include-file "Match.d/compiler.scm")
-(include-file "Match.d/mexpand.scm")
+   ;;
+   ;; WARNING: Order is important
+   ;;
+   (include-file "Match.d/s2cfun.scm")
+   (include-file "Match.d/normalize.scm")
+   (include-file "Match.d/descr.scm")
+   (include-file "Match.d/compiler.scm")
+   (include-file "Match.d/mexpand.scm"))
 
 (select-module STklos)
-(import __match_expand)
+(import MATCH)
 
 (provide "bigmatch")
