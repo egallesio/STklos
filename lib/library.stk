@@ -23,7 +23,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 10-Feb-2023 14:32 (robby)
+;;;; Last file update: 10-Feb-2023 15:54 (robby)
 ;;;;
 
 
@@ -123,6 +123,18 @@
 					      (loop (append exprs (list next))
 						    (read port))))))))
 				 rest))
+		      ((cond-expand)
+		       (parse-declarations
+			(eval (cons 'cond-expand
+				    (map
+				     (lambda (clause)
+				       (cons (car clause)
+					     ;; pretty gnarly. This will convert the body of the cond-expand
+					     ;; to a list of s-expressions, such that evaluating the cond-expand
+					     ;; will return the list of forms to splice into the library
+					     ;; definition.
+					     `((list ,@(map (lambda (body) `',body) (cdr clause))))))
+				     rest)))))
 		      (else
 		       (error 'define-library "incorrect directive ~s" d)))))
 		decls))
