@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update:  9-Feb-2023 18:30 (eg)
+;;;; Last file update: 10-Feb-2023 17:39 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA
@@ -86,20 +86,17 @@ doc>
 ;;(define-macro (match-case expr . clauses)
 ;;  `((match-lambda  ,@clauses) ,expr))
 
-;;;
-;;; labels
-;;;
-(define-macro (labels bindings . body)
-  (define (expand binding)
-    (when (< (length binding) 3)
-      (error 'labels "bad binding ~S" binding))
-    `(,(car binding) (lambda ,(cadr binding) ,@(cddr binding))))
-
-  `(letrec ,(map expand bindings)
-     ,@body))
-
 (define-module MATCH
    (export  expand-match-case expand-match-lambda)
+
+   ;; labels
+   (define-macro (labels bindings . body)
+     (define (expand binding)
+       (when (< (length binding) 3)
+         (error 'labels "bad binding ~S" binding))
+       `(,(car binding) (lambda ,(cadr binding) ,@(cddr binding))))
+     `(letrec ,(map expand bindings)
+        ,@body))
 
    ;; define-inline
    (define-macro (define-inline args . body)

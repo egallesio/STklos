@@ -101,20 +101,32 @@
       (clauses->pattern
        (cdr exp)
        (lambda (pat env)
-          (let ((compiled-pat (pcompile pat))
-                (prototypes   (fetch-prototypes pat)) )
-                 ;; We build a (labels ((tag1 (x ...) actions1)) ...)
-                 ;; You may change it to build a letrec
-             `(labels
-                    (,@(map
-                        (lambda (prototype)
-                           (let ((body (cdr (assq (car prototype) env))))
-                              (if (null? body)
-                                  (error 'match-case "Illegal expression" exp)
-                           (cons (car prototype)
-                                        (cons (cadr prototype) body)))))
-                        prototypes))
-                 ,compiled-pat))))))
+         (let ((compiled-pat (pcompile pat))
+               (prototypes   (fetch-prototypes pat)) )
+            ;; We build a (labels ((tag1 (x ...) actions1)) ...)
+            ;;
+            ;; STklos: replace the `labels` produced here by a `letrec`
+            ;; to avoid to export labels
+            ;;
+            ;; Original code follows
+            ;; You may change it to build a letrec
+            ;; `(labels
+            ;;   (,@(map
+            ;;       (lambda (prototype)
+            ;;         (let ((body (cdr (assq (car prototype) env))))
+            ;;           (if (null? body)
+            ;;               (error 'match-case "Illegal expression" exp)
+            ;;               (cons (car prototype)
+            ;;                     (cons (cadr prototype) body)))))
+            ;;       prototypes))
+            ;;   ,compiled-pat)
+            `(letrec ,(map (lambda (prototype)
+                             (let ((body (cdr (assq (car prototype) env))))
+                               (if (null? body)
+                                   (error 'match-case "Illegal expression" exp)
+                                   (list (car prototype) `(lambda ,(cadr prototype) ,@body)))))
+                           prototypes)
+               ,compiled-pat))))))
 
 (define (fetch-prototypes pat)
    (if (memq (car pat) '(t-or tagged-or))

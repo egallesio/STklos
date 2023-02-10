@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update:  6-Feb-2023 17:37 (eg)
+;;;; Last file update: 10-Feb-2023 17:46 (eg)
 ;;;;
 
 (require "test")
@@ -307,6 +307,12 @@ b|)
       (match-case '(a (b c) d)
                   ((?x ?y) (list 'length=2 y x))
                   ((?x ?y ?z) (list 'length=3 z y x))))
+
+(test "match-case.3"
+      'bar
+      (match-case '(a b c)
+                  ((a (not (kwote b)) c) 'foo)
+                  ((a (or (kwote a) (kwote b)) c) 'bar)))
 
 (test "match-lambda.1"
       'bar
