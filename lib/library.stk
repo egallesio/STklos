@@ -97,23 +97,33 @@
                                        (find-module 'SCHEME))))
 
     ;; Parse declarations
-    (define (parse-declarations dels)
+    (define (parse-declarations decls)
       (for-each (lambda (d)
-                  (unless (pair? d)
-                    (error 'define-library "bad library declaration clause ~s" d))
-                  (let ((key  (car d))
+		  (unless (pair? d)
+		    (error 'define-library "bad library declaration clause ~s" d))
+		  (let ((key  (car d))
 			(rest (cdr d)))
-                    (case key
-                      ((import)
-                       (set! imports (append imports rest)))
-                      ((export)
-                       (set! exports (append exports rest)))
-                      ((begin include include-ci)
-                       (set! body (append body (list d))))
+		    (case key
+		      ((import)
+		       (set! imports (append imports rest)))
+		      ((export)
+		       (set! exports (append exports rest)))
+		      ((begin include include-ci)
+		       (set! body (append body (list d))))
 		      ((include-library-declarations)
-		       (parse-declarations (eval `(include ,@rest))))
-                      (else
-                       (error 'define-library "incorrect directive ~s" d)))))
+		       (for-each (lambda (path)
+				   (parse-declarations
+				    (call-with-input-file (or (find-path path) path)
+				      (lambda (port)
+					(let loop ((exprs '())
+						   (next (read port)))
+					  (if (eof-object? next)
+					      exprs
+					      (loop (append exprs (list next))
+						    (read port))))))))
+				 rest))
+		      (else
+		       (error 'define-library "incorrect directive ~s" d)))))
 		decls))
     (parse-declarations decls)
     ;;
