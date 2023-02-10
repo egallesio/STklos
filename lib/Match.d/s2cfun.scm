@@ -52,24 +52,28 @@
 (define (atom? e)
   (not (pair? e)) )
 
-(define (concat . args)
-  (string->symbol 
-   (apply string-append
-          (map (lambda (s)
-                    (cond ((string? s) s)
-                          ((symbol? s) (symbol->string s))
-                          ((number? s) (number->string s))
-                          (else (error 'concat "" args)) ) )
-                  args ) ) ) )
+;; STklos: replaced jim-gensym by the standard gensym
+;;
+;;(define (concat . args)
+;;  (string->symbol 
+;;   (apply string-append
+;;          (map (lambda (s)
+;;                    (cond ((string? s) s)
+;;                          ((symbol? s) (symbol->string s))
+;;                          ((number? s) (number->string s))
+;;                          (else (error 'concat "" args)) ) )
+;;                  args ) ) ) )
+;;
+;;(define jim-gensym
+;;  (let ((counter 100))
+;;    (lambda args
+;;      (set! counter (+ counter 1))
+;;      (let ((symbol (concat (if (pair? args) (car args) 'G) counter ) ) )
+;;         ;; mark-symbol-non-user! (inside the ast_ident module).
+;;         ;STklos (putprop! symbol 'non-user #t)
+;;         symbol))))
+(define jim-gensym gensym)
 
-(define jim-gensym
-  (let ((counter 100))
-    (lambda args
-      (set! counter (+ counter 1))
-      (let ((symbol (concat (if (pair? args) (car args) 'G) counter ) ) )
-         ;; mark-symbol-non-user! (inside the ast_ident module).
-         ;STklos (putprop! symbol 'non-user #t)
-         symbol))))
 
 (define (andmap p . args)
   ;; use "first-finish" rule
