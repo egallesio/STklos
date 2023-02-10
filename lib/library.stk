@@ -3,6 +3,7 @@
 ;;;; library.stk         -- R7RS define-library
 ;;;;
 ;;;; Copyright © 2019-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2023 Robby Zambito <contact@robbyzambito.me>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +23,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 28-Sep-2022 11:39 (eg)
+;;;; Last file update: 10-Feb-2023 14:32 (robby)
 ;;;;
 
 
