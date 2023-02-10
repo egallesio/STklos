@@ -97,21 +97,25 @@
                                        (find-module 'SCHEME))))
 
     ;; Parse declarations
-    (for-each (lambda (d)
-                (unless (pair? d)
-                  (error 'define-library "bad library declaration clause ~s" d))
-                (let ((key  (car d))
-                      (rest (cdr d)))
-                  (case key
-                    ((import)
-                     (set! imports (append imports rest)))
-                    ((export)
-                     (set! exports (append exports rest)))
-                    ((begin include include-ci)
-                     (set! body (append body (list d))))
-                    (else
-                     (error 'define-library "incorrect directive ~s" d)))))
-              decls)
+    (define (parse-declarations dels)
+      (for-each (lambda (d)
+                  (unless (pair? d)
+                    (error 'define-library "bad library declaration clause ~s" d))
+                  (let ((key  (car d))
+			(rest (cdr d)))
+                    (case key
+                      ((import)
+                       (set! imports (append imports rest)))
+                      ((export)
+                       (set! exports (append exports rest)))
+                      ((begin include include-ci)
+                       (set! body (append body (list d))))
+		      ((include-library-declarations)
+		       (parse-declarations (eval `(include ,@rest))))
+                      (else
+                       (error 'define-library "incorrect directive ~s" d)))))
+		decls))
+    (parse-declarations decls)
     ;;
     ;; Produce the expansion
     ;;
