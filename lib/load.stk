@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 31-Jan-2023 17:57 (eg)
+;;;; Last file update:  2-Feb-2023 11:41 (eg)
 ;;;;
 
 (export build-path-from-shell-variable
@@ -43,8 +43,7 @@
 
 
 (define *path-separator*        (if (eqv? (running-os) 'windows) ";" ":"))
-(define *load-suffixes*         (list (%shared-suffix) "ostk"
-                                      "spi" "stk" "sld" "scm"))
+(define *load-suffixes*         (list (%shared-suffix) "ostk" "stk" "sld" "scm"))
 (define *load-verbose*          #f)
 (define *load-path*             '()) ;; initialized  later
 

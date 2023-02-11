@@ -25,7 +25,6 @@ The salient points of STklos are:
  - a full tower of numbers implementation, as defined in R5RS,
  - easy connection to the GTK+ toolkit,
  - a Perl compatible regular expressions thanks to the PCRE package,
- - easily extensible with its ScmPkg mechanism,
  - it implements properly tail recursive calls.
 
 History

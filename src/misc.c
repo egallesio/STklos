@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 17-Jan-2023 12:08 (eg)
+ * Last file update:  2-Feb-2023 12:17 (eg)
  */
 
 #include <limits.h>
@@ -371,11 +371,11 @@ static char URI_regexp[] =
  *   empty string)
  *
  * @lisp
- * (uri-parse "http://google.com")
-{*    => (:scheme "http" :user "" :host "google.com" :port 80
+ * (uri-parse "https://stklos.net")
+{*    => (:scheme "https" :user "" :host "stklos.net" :port 443
  *         :path "/" :query "" :fragment "")
  *
- * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
+ * (uri-parse "https://stklos.net:8080/a/file?x=1;y=2#end")
  *     => (:scheme "http" :user "" :host "stklos.net" :port 8080
  *         :path "/a/file" :query "x=1;y=2" :fragment "end")
  *
@@ -454,8 +454,9 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
     } else {
       char *scm = STRING_CHARS(scheme);
 
-      if (strcmp(scm, "http") == 0) port = MAKE_INT(80); else
-      if (strcmp(scm, "ftp") == 0) port = MAKE_INT(21);
+      if (strcmp(scm, "http") == 0)       port = MAKE_INT(80);
+      else if (strcmp(scm, "https") == 0) port = MAKE_INT(443); 
+      else if (strcmp(scm, "ftp") == 0)   port = MAKE_INT(21);
       else port = MAKE_INT(0);
     }
     if (*url) url += 1;

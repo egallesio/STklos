@@ -20,9 +20,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Feb-2023 13:39 (eg)
+# Last file update:  9-Feb-2023 20:04 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
+SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
 
 COMP ?= ../utils/tmpcomp
@@ -66,8 +66,7 @@ scheme_BOOT = assembler.stk \
 
 scheme_extra = STklos.init
 
-SRC_STK = bigloo-support.stk  \
-          bigmatch.stk        \
+SRC_STK = bigmatch.stk        \
           conditions.stk      \
           describe.stk        \
           env.stk             \
@@ -75,13 +74,10 @@ SRC_STK = bigloo-support.stk  \
           full-syntax.stk     \
           getopt.stk          \
           help.stk            \
-          http.stk            \
           lex-rt.stk          \
           make-C-boot.stk     \
           pretty-print.stk    \
-          recette.stk         \
           slib.stk            \
-          tar.stk             \
           trace.stk
 
 
@@ -92,12 +88,9 @@ scheme_OBJS = bigmatch.ostk     \
           env.ostk              \
           getopt.ostk           \
           help.ostk             \
-          http.ostk             \
           lex-rt.ostk           \
           pretty-print.ostk     \
-          recette.ostk          \
           slib.ostk             \
-          tar.ostk              \
           trace.ostk
 
 SRC_C         = readline-complete.c
@@ -185,10 +178,11 @@ install-sources:
 	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
 
 
-# Explicit some dependencies here to avoid some warnings when compiling files
+# Explicit some dependencies here 
 $(SCHEME_OBJS): ../src/boot.img
 ffi.ostk: bigmatch.ostk
-recette.ostk: pretty-print.ostk
+bigmatch.ostk: Match.d/compiler.scm Match.d/descr.scm Match.d/mexpand.scm \
+               Match.d/normalize.scm Match.d/s2cfun.scm
 
 # SLIB
 slib.ostk: slib.stk STklos.init

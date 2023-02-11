@@ -6,7 +6,11 @@ This is a dump of the image in file /home/eg/Projects/STklos/lib/boot.img3
 
 #include "stklos.h"
 
+<<<<<<< HEAD
 char* STk_boot_consts = "#(current-input-port original-input-port #:|| caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr pair? car map apply map* cdr for-each* filter filter-map append append-map append! append-map! generic? parameter? %procedure-plist #:setter key-get setter \"no setter defined for ~S\" error key-set! %set-procedure-plist! set-car! set-cdr! vector-ref vector-set! string-ref string-set! slot-ref slot-set! struct-ref struct-set! \"\" string->symbol \"~a\" format string-append symbol-append make-parameter stklos-debug-level compiler-known-globals memq register-new-global! for-each register-new-globals! %modules-stack current-module %create-module %module-create %module-restore raise %module-handler current-error-port \"\\x1b;[33m\" display \"\\x1b;[0m\" newline %debug STklos find-module when (lambda args (if (<= (length args) 1) (syntax-error 'when \"bad syntax in ~S\" `(when ,@args)) `(if ,(car args) (begin ,@(cdr args))))) length \"bad syntax in ~S\" %syntax-error if begin stklos %make-syntax unless (lambda args (if (<= (length args) 1) (syntax-error 'unless \"bad syntax in ~S\" `(unless ,@args)) `(if (not ,(car args)) (begin ,@(cdr args))))) \"bad syntax in ~S\" not set! (lambda args `(%%set! ,@args)) %%set! %claim-error (lambda (owner . body) (let ((x (gensym))) `(with-handler (lambda (,x) (error ,owner (condition-ref ,x 'message))) ,@body))) gensym with-handler lambda condition-ref quote message syntax-error (lambda args (if (zero? (length args)) (error 'syntax-error \"needs at least one argument\") `(%syntax-error ,@args))) zero? \"needs at least one argument\" define-syntax (lambda (macro-name syn-rules) (if (or (not (pair? syn-rules)) (not (eq? (car syn-rules) 'syntax-rules))) (error 'define-syntax \"in `~S', bad syntax-rules ~S\" macro-name syn-rules) (let ((keywords (cons macro-name (cadr syn-rules))) (clauses (cddr syn-rules)) (find-clause (symbol-value 'find-clause (find-module 'MBE)))) `(define-macro (,macro-name . args) (%find-macro-clause ',macro-name args ',keywords ',clauses))))) syntax-rules \"in `~S', bad syntax-rules ~S\" find-clause MBE symbol-value define-macro args %find-macro-clause module-symbols library? module-symbols* select-module (lambda (name) (let* ((compfile (in-module STKLOS-COMPILER *compiling-file*)) (mod (find-module name #f)) (newmod (or mod (if compfile (%module-create name) (error 'select-module \"module ~s does not exists\" name))))) (when (and mod (not (eq? name 'STklos))) (register-new-globals! (module-symbols mod))) `(begin (%%set-current-module (find-module ',name)) (when-compile (compiler-current-module ,newmod))))) symbol-value* *compiling-file* STKLOS-COMPILER \"module ~s does not exists\" %%set-current-module when-compile compiler-current-module define-module (lambda (name . body) (let ((oldmod (compiler-current-module)) (newmod (or (find-module name #f) (%module-create name)))) `(with-handler %module-handler (%%set-current-module (%module-create ',name)) (%%when-compile (compiler-current-module ,newmod)) ,@body (%%when-compile (compiler-current-module ,oldmod)) (%%set-current-module (%module-restore)) (values (void) ',name)))) %%when-compile values void list? only symbol? every import \"bad list of symbols ~s in only clause\" #:only \"bad only clause ~s\" except \"bad list of symbols ~s in except clause\" #:except \"bad except clause ~s\" prefix #:prefix \"bad prefix clause ~s\" rename \"bad list of associations ~s in rename clause\" #:rename \"bad rename clause ~s\" %library-name->symbol \"bad import set ~s\" %parse-imports %find-instanciated-module symbol->string require/provide \"module/library ~s does not exist\" %symbol->library-name \"symbol ~s is not in the import set\" filter! remove module-exports list-copy absent %syntax? %symbol-link module-imports %module-imports-set! %do-imports (lambda modules (let ((imp (%parse-imports modules))) (for-each (lambda (x) (%grab-file-information (symbol->string (car x)))) imp) (%do-imports (compiler-current-module) (list-copy imp) #t) `(%do-imports (current-module) (list-copy ',imp) #f))) %grab-file-information %%import reverse! %do-exports export \"bad renaming clause ~S\" \"bad exportation `~S'\" %parse-exports assq \"exported symbol ~s was previously renamed as ~S\" %module-exports-set! (lambda symbols (let ((s (%parse-exports symbols))) `(%do-exports (current-module) ',s))) export-syntax (lambda arg `(%%publish-syntax ,@arg)) %%publish-syntax in-module (lambda (mod symb . default) `(apply symbol-value* ',symb (find-module ',mod) ',default)) %populate-scheme-module SCHEME ((SCHEME)) ((eval . eval) (disassemble . disassemble) (disassemble-expr . disassemble-expr) (compiler:time-display . compiler:time-display) (compiler:gen-line-number . compiler:gen-line-number) (compiler:warn-use-undefined . compiler:warn-use-undefined) (compiler:warn-use-undefined-postpone . compiler:warn-use-undefined-postpone) (compiler:show-assembly-code . compiler:show-assembly-code) (compiler:generate-signature . compiler:generate-signature) (compiler:inline-common-functions . compiler:inline-common-functions) (%grab-file-information . %grab-file-information) (%compiler-new-label . %compiler-new-label) (%macro-expand . %macro-expand) (compiler-current-module . compiler-current-module) (when-compile . when-compile) (when-load-and-compile . when-load-and-compile) (%syntax-error . %syntax-error) (%compile-time-define . %compile-time-define)) *compiler-port* + - * / fx+ fx- fx* fxquotient = < <= > >= fx=? fx<? fx<=? fx>? fx>=? fx= fx< fx<= fx> fx>= cons null? list eq? eqv? equal? *inline-table* *inline-symbols* (%set-current-module %%set-current-module %%execute %%execute-handler) *always-inlined* *code-instr* *code-constants* *code-labels* integer? label? NOP this-instr next-instr this-arg1 this-arg2 next-arg1 next-arg2 GOTO RETURN PUSH (IM-FALSE IM-TRUE IM-NIL IM-MINUS1 IM-ZERO IM-ONE IM-VOID) IM-FALSE FALSE-PUSH IM-TRUE TRUE-PUSH IM-NIL NIL-PUSH IM-MINUS1 MINUS1-PUSH IM-ZERO ZERO-PUSH IM-ONE ONE-PUSH IM-VOID VOID-PUSH SMALL-INT INT-PUSH CONSTANT CONSTANT-PUSH DEEP-LOCAL-REF DEEP-LOC-REF-PUSH IN-NOT (IN-NUMEQ IN-NUMDIFF IN-FXEQ IN-FXDIFF IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL) IN-NUMEQ IN-NUMDIFF IN-FXEQ IN-FXDIFF IN-NUMLT IN-NUMGE IN-NUMGT IN-NUMLE IN-EQ IN-NOT-EQ IN-EQV IN-NOT-EQV IN-EQUAL IN-NOT-EQUAL JUMP-FALSE (IN-NUMEQ IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL IN-NOT) JUMP-NUMDIFF JUMP-NUMEQ JUMP-NUMGE JUMP-NUMGT JUMP-NUMLE JUMP-NUMLT JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL JUMP-TRUE GLOBAL-REF GLOBAL-REF-PUSH PUSH-GLOBAL-REF INVOKE PUSH-GREF-INVOKE TAIL-INVOKE PUSH-GREF-TAIL-INV PREPARE-CALL PUSH-PREPARE-CALL GREF-INVOKE GREF-TAIL-INVOKE (LOCAL-REF0 LOCAL-REF1 LOCAL-REF2 LOCAL-REF3 LOCAL-REF4) LOCAL-REF0 LOCAL-REF0-PUSH LOCAL-REF1 LOCAL-REF1-PUSH LOCAL-REF2 LOCAL-REF2-PUSH LOCAL-REF3 LOCAL-REF3-PUSH LOCAL-REF4 LOCAL-REF4-PUSH peephole ((NOP 0) (IM-FALSE 0) (IM-TRUE 0) (IM-NIL 0) (IM-MINUS1 0) (IM-ZERO 0) (IM-ONE 0) (IM-VOID 0) (SMALL-INT 1) (CONSTANT 1) (GLOBAL-REF 1) (UGLOBAL-REF 1) (LOCAL-REF0 0) (LOCAL-REF1 0) (LOCAL-REF2 0) (LOCAL-REF3 0) (LOCAL-REF4 0) (LOCAL-REF 1) (DEEP-LOCAL-REF 1) (GLOBAL-SET 1) (UGLOBAL-SET 1) (LOCAL-SET0 0) (LOCAL-SET1 0) (LOCAL-SET2 0) (LOCAL-SET3 0) (LOCAL-SET4 0) (LOCAL-SET 1) (DEEP-LOCAL-SET 1) (GOTO 1) (JUMP-FALSE 1) (JUMP-TRUE 1) (DEFINE-SYMBOL 1) (POP 0) (PUSH 0) (DBG-VM 1) (CREATE-CLOSURE 2) (RETURN 0) (PREPARE-CALL 0) (INVOKE 1) (TAIL-INVOKE 1) (ENTER-LET-STAR 1) (ENTER-LET 1) (ENTER-TAIL-LET-STAR 1) (ENTER-TAIL-LET 1) (LEAVE-LET 0) (PUSH-HANDLER 1) (POP-HANDLER 0) (END-OF-CODE 0) (IN-ADD2 0) (IN-SUB2 0) (IN-MUL2 0) (IN-DIV2 0) (IN-NUMEQ 0) (IN-NUMLT 0) (IN-NUMGT 0) (IN-NUMLE 0) (IN-NUMGE 0) (IN-INCR 0) (IN-DECR 0) (IN-CONS 0) (IN-NULLP 0) (IN-CAR 0) (IN-CDR 0) (IN-LIST 1) (IN-NOT 0) (IN-VREF 0) (IN-VSET 0) (IN-SREF 0) (IN-SSET 0) (IN-EQ 0) (IN-EQV 0) (IN-EQUAL 0) (IN-APPLY 2) (UNUSED-2 0) (SET-CUR-MOD 0) (DOCSTRG 1) (FORMALS 1) (FALSE-PUSH 0) (TRUE-PUSH 0) (NIL-PUSH 0) (MINUS1-PUSH 0) (ZERO-PUSH 0) (ONE-PUSH 0) (VOID-PUSH 0) (INT-PUSH 1) (CONSTANT-PUSH 1) (GREF-INVOKE 2) (UGREF-INVOKE 2) (IN-NUMDIFF 0) (IN-NOT-EQ 0) (IN-NOT-EQV 0) (IN-NOT-EQUAL 0) (JUMP-NUMDIFF 1) (JUMP-NUMEQ 1) (JUMP-NUMLT 1) (JUMP-NUMLE 1) (JUMP-NUMGT 1) (JUMP-NUMGE 1) (JUMP-NOT-EQ 1) (JUMP-NOT-EQV 1) (JUMP-NOT-EQUAL 1) (LOCAL-REF0-PUSH 0) (LOCAL-REF1-PUSH 0) (LOCAL-REF2-PUSH 0) (LOCAL-REF3-PUSH 0) (LOCAL-REF4-PUSH 0) (GLOBAL-REF-PUSH 1) (UGLOBAL-REF-PUSH 1) (GREF-TAIL-INVOKE 2) (UGREF-TAIL-INVOKE 2) (PUSH-PREPARE-CALL 0) (PUSH-GLOBAL-REF 1) (PUSH-UGLOBAL-REF 1) (PUSH-GREF-INVOKE 2) (PUSH-UGREF-INVOKE 2) (PUSH-GREF-TAIL-INV 2) (PUSH-UGREF-TAIL-INV 2) (DEEP-LOC-REF-PUSH 1) (UNUSED-3 0) (UNUSED-4 0) (UNUSED-5 0) (UNUSED-6 0) (UNUSED-7 0) (UNUSED-8 0) (UNUSED-9 0) (UNUSED-10 0) (UNUSED-11 0) (UNUSED-12 0) (UNUSED-13 0) (UNUSED-14 0) (UNUSED-15 0) (UNUSED-16 0) (UNUSED-17 0) (UNUSED-18 0) (UNUSED-19 0) (IN-SINT-ADD2 1) (IN-SINT-SUB2 1) (IN-SINT-MUL2 1) (IN-SINT-DIV2 1) (UNUSED-20 0) (UNUSED-21 0) (UNUSED-22 0) (UNUSED-23 0) (UNUSED-24 0) (UNUSED-25 0) (UNUSED-26 0) (UNUSED-27 0) (UNUSED-28 0) (CALL-LOCATION 1) (DEEP-LOC-REF-FAR 1) (DEEP-LOC-SET-FAR 1) (CREATE-CLOSURE-FAR 2) (PUSH-HANDLER-FAR 1) (IN-FXADD2 0) (IN-FXSUB2 0) (IN-FXMUL2 0) (IN-FXDIV2 0) (IN-SINT-FXADD2 1) (IN-SINT-FXSUB2 1) (IN-SINT-FXMUL2 1) (IN-SINT-FXDIV2 1) (IN-FXEQ 0) (IN-FXLT 0) (IN-FXGT 0) (IN-FXLE 0) (IN-FXGE 0) (IN-FXDIFF 0)) INSTRUCTION-SET \"non existent opcode ~S\" panic info-opcode (GOTO JUMP-FALSE JUMP-TRUE JUMP-NUMDIFF JUMP-NUMGE JUMP-NUMGT JUMP-NUMGE JUMP-NUMLT JUMP-NUMLE JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL CREATE-CLOSURE CREATE-CLOSURE-FAR PUSH-HANDLER PUSH-HANDLER-FAR) use-address? string-upcase string-length #\\space make-string pretty-mnemonic \"Cannot decode ~S opcode\" find-instruction-infos CREATE-CLOSURE CREATE-CLOSURE-FAR PUSH-HANDLER PUSH-HANDLER-FAR \"No FAR version of instruction ~S\" find-far-codeop old+ make-vector small-integer-constant? (CREATE-CLOSURE-FAR PUSH-HANDLER-FAR) memv fetch-constant \"Instr. using a big constant as 2nd operand ~S\" \"Instruction with more than 2 parameters ~S\" assemble \"~A~A~A\" quotient remainder \"\\t;; ==> ~A\" vector-length \"\\n~A:  ~A\" \" ~A\" \" ~S ~S\" \"cannot disassemble instruction (~S)\" \"\\n~A:\\n\" disassemble-code current-output-port \"too many optional parameters: ~a\" %procedure-code disassemble \"cannot disassemble ~S\" compile END-OF-CODE emit vector-copy \"\\nConstants:\\n\" fprintf \"~A: ~W\\n\" dynamic-wind disassemble-expr \"*** PANIC *** \" getcwd string-position substring %path-without-cwd \"\" \"~A: \" %epair? \"~A:~A: \" %epair-file %epair-line \"\" \"~AError: ~A~A\\n\" compiler-error \"\" \"~A: \" \"~A:~A: \" \"\" \"~Awarning: ~A~A\\n\" \"**** Warning;\\n~A~A\\n\" compiler-warning unquote \"used outside of a quasiquote context\" unquote-splicing \"used outside of a quasiquote context\" string? \"bad parameters ~S\" \"bad parameters ~S\" *file-module-list* file-module-list-reset! add-file-module-list! module-name %syntax-source file-module-list-expanders #:prepend G32 #:version version #:globals #:macros open-output-file clock compiler:warn-use-undefined-postpone compile-file \"prepend should be a list: ~S\" %include-file \"#!/usr/bin/env stklos\\n\" \"; A -*- Scheme -*- generated file *DO NOT EDIT**\\n\" \"STklos ~S\\n\" compiler:show-assembly-code \"\\n#|\\n\" \"\\n~S\\n|#\\n\" \"#~S\\n\" %dump-code close-output-port compiler-show-undefined-symbols interactive-port? compiler:time-display \"Compilation time ~S ms\\n\" round exact ((compile-file . compile-file)) scope (locals mlocals parent) make-struct-type make-struct make-scope struct? struct-is-a? scope? scope-locals %fast-struct-ref scope-mlocals scope-parent %fast-struct-set! find-symbol-in-env \"***SCOPE*** ~S\\n\" \"   ==> locals= ~S mlocals= ~S parent =~S\" %debug-scope find-syntax-in-env %macro-expand quasiquote %syntax-expander compiler:gen-line-number compiler:warn-use-undefined compiler:generate-signature compiler:inline-common-functions module? \"bad module parameter ~s\" new-label %compiler-new-label emit-label expt exact? compile-constant \"bad usage in ~S\" compile-quote *forward-globals* symbol-bound? known-var? \"reference to undefined symbol ~S\" compiler-warn-undef verify-global define define->lambda \"ill formed definition ~S\" \"bad definition\" DEFINE-SYMBOL \"bad variable name ~S\" \"internal define forbidden here ~S\" compile-define GLOBAL-SET LOCAL-SET0 LOCAL-SET1 LOCAL-SET2 LOCAL-SET3 LOCAL-SET4 LOCAL-REF LOCAL-SET DEEP-LOCAL-SET DEEP-LOC-REF-FAR DEEP-LOC-SET-FAR compile-access compile-reference \"~S is a bad symbol\" \"bad assignment syntax in ~S\" compile-set! \"bad syntax in ~S\" compile-if extended-lambda->lambda eval %symbol-define \"bad variable name ~S\" \"internal define-macro forbidden here ~S\" compile-define-macro compile-and compile-or compile-begin compute-arity extend-env \"body is empty\" let compile-body FORMALS DOCSTRG compile-user-lambda ext-lambda-key-get and keyword? or 'lambda make-keyword \"too many optional parameters: ~a\" let* build-let* \"illegal ~a parameter: ~a\" \"optional\" \"keyword\" (#:optional #:key #:rest) reverse \"duplicate parameter ~S\" \"bad class name ~S\" \"bad procedure parameter ~S\" last-pair #:rest #:optional #:key \"illegal lambda list ending with ~a\" \"rest parameter must be a single symbol\" parse-parameter-list rewrite-params-and-body method \"bad definition ~S\" compile-lambda compile-args compile-var-args CALL-LOCATION %maybe-generate-line-information generate-PREPARE-CALL compile-normal-call assoc can-be-inlined? \"1 argument required (~A provided)\" \"2 arguments required (~A provided)\" \"3 arguments required (~A provided)\" SET-CUR-MOD \"1 arg. only (~S)\" %%execute-handler EXEC-HANDLER number? IN-INCR IN-SINT-ADD2 IN-ADD2 \"needs at least one argument\" IN-SINT-SUB2 IN-DECR IN-SUB2 IN-SINT-MUL2 IN-MUL2 \"needs at least one argument\" IN-SINT-DIV2 IN-DIV2 (fx+ fx- fx* fxquotient) fixnum? (fx+ fx*) IN-SINT-FXADD2 IN-SINT-FXMUL2 IN-SINT-FXSUB2 IN-SINT-FXDIV2 IN-FXADD2 IN-FXSUB2 IN-FXMUL2 IN-FXDIV2 (= < > <= >=) O \"needs at least one argument\" (fx=? fx<? fx>? fx<=? fx>=? fx= fx< fx> fx<= fx>=) \"needs at least one argument\" (fx=? fx=) (fx<? fx<) IN-FXLT (fx>? fx>) IN-FXGT (fx<=? fx<=) IN-FXLE (fx>=? fx>=) IN-FXGE IN-CONS IN-CAR IN-CDR IN-NULLP IN-LIST IN-VREF IN-VSET IN-SREF IN-SSET \"unimplemented inline primitive ~S\" compile-primitive-call negative? ENTER-TAIL-LET ENTER-LET LEAVE-LET \"bad number of parameters ~S\" compile-lambda-call |λ| compile-call \"duplicate binding ~S\" \"malformed binding ~S\" valid-let-bindings? letrec \"ill formed letrec ~S\" compile-letrec \"ill formed named let ~S\" compile-named-let \"ill formed let ~S\" compile-let \"ill formed let* ~S\" ENTER-TAIL-LET-STAR ENTER-LET-STAR compile-let* cond \"invalid clause ~S\" else \"else not in last clause ~S\" => rewrite-cond-clauses \"bad '=>' clause syntax ~S\" compile-cond ok case \"duplicate case value ~S in ~S\" \"ill formed case clause ~S\" \"invalid clause syntax in ~S\" \"ill formed else clause ~S\" \"ill formed clause ~S\" rewrite-case-clauses \"no key given\" compile-case do \"bad binding ~S\" rewrite-do \"bad syntax\" compile-do 'quasiquote backquotify 'unquote 'unquote-splicing vector? list->vector vector->list \"bad syntax\" compile-quasiquote POP-HANDLER \"bad syntax\" compile-with-handler open-input-file eof-object? %read close-port include \"bad include directive ~S\" compile-include include-ci \"bad include directive ~S\" read-case-sensitive compile-include-ci %let-syntax \"ill formed %let-syntax ~S\" \"ill formed binding ~S\" compile-%let-syntax create-temp-file %file-informations remove-file #:nature source %library-prefix \"share\" \"stklos\" make-path load-path find-path unknown find-file-informations member import-file-informations boolean? compile-require \"*** Exception on when-compile form of ~S\\n\" eprintf compile-when-compile (lambda body `(begin (%%when-compile ,@body) (void))) when-load-and-compile (lambda body `(begin (%%when-compile ,@body) ,@body (void))) %%label \"bad usage ~S\" compile-%%label %%goto \"bad usage ~S\" compile-%%goto compile-%%source-pos (lambda |λ|) (let %let) %%require %%include %%include-ci %%source-pos %execute %compile-time-define (lambda symbs `(when-compile ,@(map (lambda (x) `(define ,x #void)) symbs))) ((STKLOS-COMPILER)) ((with-input-from-file . with-input-from-file) (with-output-to-file . with-output-to-file) (with-error-to-file . with-error-to-file) (with-input-from-string . with-input-from-string) (with-output-to-string . with-output-to-string) (with-input-from-port . with-input-from-port) (with-output-to-port . with-output-to-port) (with-error-to-port . with-error-to-port) (%call-with . %call-with) (call-with-input-file . call-with-input-file) (call-with-output-file . call-with-output-file) (rationalize . rationalize) (call-with-values . call-with-values)) open-file &i/o-filename-error location \"cannot open file ~S\" backtrace %vm-backtrace filename make-condition %make-with-file with-input-from-file \"r\" with-output-to-file \"w\" with-error-to-file \"w\" open-input-string with-input-from-string open-output-string get-output-string with-output-to-string %port-file-fd %make-with-port \"r\" with-input-from-port \"w\" with-output-to-port \"w\" with-error-to-port call-with-values %call-with call-with-input-file call-with-output-file rationalize \"bad rational ~S\" floor positive? 0.0 rational? %call-for-values %use-utf8? string-split string-blit! string-titlecase string-titlecase! \"bad string ~S\" \" \\t\\n\" %string-use-utf8? string->list \"bad offset ~S\" string-mutable? \"changing the constant string ~S is not allowed\" \"bad starting index ~S\" \"bad ending index ~S\" char-alphabetic? char-upcase char-downcase \"bad starting index ~S\" \"bad ending index ~S\" ((call/cc . call/cc) (call-with-current-continuation . call-with-current-continuation) (dynamic-wind . dynamic-wind)) %make-continuation %fresh-continuation? %restore-continuation %call/cc call/cc %thread-dynwind-stack %thread-dynwind-stack-set! procedure? \"bad procedure ~S\" %set-procedure-name! call-with-current-continuation ((define-struct . define-struct)) define-struct (lambda (name . slots) (define (compute-offset slot slots) (let ((sublist (memq slot slots))) (- (length slots) (length sublist)))) (let* ((pred (string->symbol (format \"~a?\" name))) (arg (gensym)) (val (gensym))) `(begin (define ,name (make-struct-type ',name #f ',slots)) (define (,(string->symbol (format \"make-~a\" name)) unquote arg) (apply make-struct ,name ,arg)) (define (,pred ,arg) (and (struct? ,arg) (struct-is-a? ,arg ,name))) ,@(map (lambda (x) (let ((fname (string->symbol (format \"~a-~a\" name x)))) `(define ,fname (lambda (,arg) (%fast-struct-ref ,arg ,name ',fname ,(compute-offset x slots)))))) slots) ,@(map (lambda (x) (let ((fname (string->symbol (format \"~a-~a\" name x)))) `(set! (setter ,fname) (lambda (,arg ,val) (%fast-struct-set! ,arg ,name ',fname ,(compute-offset x slots) ,val))))) slots) (values (void) ',name)))) \"~a?\" \"make-~a\" \"~a-~a\" \"~a-~a\" ((read-chars . read-chars) (read-chars! . read-chars!) (display-shared . display-shared) (gensym . gensym) (macro-expand . macro-expand) (macro-expand* . macro-expand*) (remove . remove) (remove! . remove!) (delete . delete) (delete! . delete!) (every . every) (any . any) (call-with-input-string . call-with-input-string) (call-with-output-string . call-with-output-string) (open-input-virtual . open-input-virtual) (open-output-virtual . open-output-virtual) (read-from-string . read-from-string) (eval-from-string . eval-from-string) (command-line . command-line) (program-name . program-name) (create-directories . create-directories) (ensure-directories-exist . ensure-directories-exist) (posix-error? . posix-error?) (posix-error-name . posix-error-name) (posix-error-message . posix-error-message) (posix-error-errno . posix-error-errno) (posix-error-procedure . posix-error-procedure) (posix-error-arguments . posix-error-arguments) (make-hash-table . make-hash-table) (hash-table->alist . hash-table->alist) (alist->hash-table . alist->hash-table) (hash-table-update! . hash-table-update!) (hash-table-update!/default . hash-table-update!/default) (hash-table-keys . hash-table-keys) (hash-table-values . hash-table-values) (hash-table-fold . hash-table-fold) (hash-table-merge! . hash-table-merge!) (hash-table-copy . hash-table-copy) (fluid-let . fluid-let) (time . time) (tagbody . tagbody) (dotimes . dotimes) (repeat . repeat) (while . while) (until . until) (call/ec . call/ec) (base64-encode-string . base64-encode-string) (base64-decode-string . base64-decode-string) (md5sum-file . md5sum-file) (ansi-color . ansi-color) (ansi-color-protect . ansi-color-protect) (do-color . do-color) (port->string . port->string) (port->sexp-list . port->sexp-list) (port->string-list . port->string-list) (print . print) (printerr . printerr) (eprintf . eprintf) (printf . printf) (fprintf . fprintf) (declare-new-error . declare-new-error) (exec . exec) (exec-list . exec-list) (apropos . apropos) (die . die) (decompose-file-name . decompose-file-name) (dirname . dirname) (basename . basename) (file-separator . file-separator) (make-path . make-path) (file-suffix . file-suffix) (file-prefix . file-prefix) (port-idle-register! . port-idle-register!) (port-idle-unregister! . port-idle-unregister!) (port-idle-reset! . port-idle-reset!) (chmod . chmod) (with-mutex . with-mutex) (error-object-location . error-object-location) (%push-id . %push-id) (define-constant . define-constant) (receive . receive) (case-lambda . case-lambda) (%define-condition-type-accessors . %define-condition-type-accessors) (message-condition? . message-condition?) (condition-message . condition-message) (serious-condition? . serious-condition?) (error? . error?) (error-message? . error-message?) (error-location . error-location) (error-message . error-message) (read-with-shared-structure . read-with-shared-structure) (read/ss . read/ss) (write-with-shared-structure . write-with-shared-structure) (write/ss . write/ss) (parameterize . parameterize) (require-extension . require-extension) (string->keyword . string->keyword) (get-environment-variable . get-environment-variable) (get-environment-variables . get-environment-variables) (implementation-name . implementation-name) (implementation-version . implementation-version) (cpu-architecture . cpu-architecture) (machine-name . machine-name) (os-name . os-name) (os-version . os-version) (fx-width . fx-width) (fx-greatest . fx-greatest) (fx-least . fx-least) (assume . assume) (version-alist . version-alist) (port-has-port-position? . port-has-port-position?) (port-position . port-position) (port-has-set-port-position!? . port-has-set-port-position!?) (set-port-position! . set-port-position!) (make-i/o-invalid-position-error . make-i/o-invalid-position-error) (i/o-invalid-position-error? . i/o-invalid-position-error?) (command-name . command-name) (command-args . command-args) (argc . argc) (script-file . script-file) (script-directory . script-directory) (make-nan . make-nan)) read-bytes read-chars read-bytes! read-chars! display-shared \"G\" \"bad gensym prefix ~S\" number->string string->uninterned-symbol macro-expand macro-expand* remove! delete delete! \"bad procedure\" any \"bad procedure\" call-with-input-string call-with-output-string #:read-char #:ready? #:eof? #:close vector %open-input-virtual open-input-virtual #:write-char #:write-string #:flush %open-output-virtual open-output-virtual read read-from-string eval-from-string *%system-state-plist* #:script-file \"\" \"\" \"\" #:program-name \"\" #:argv \"bad command line ~S\" command-line program-name dirname file-is-directory? create-directories create-directory ensure-directories-exist condition? &posix-error condition-has-type? posix-error? \"expected a posix-error condition\" %posix-error-condition-ref errname posix-error-name r7rs-msg posix-error-message errno posix-error-errno posix-error-procedure r7rs-irritants posix-error-arguments hash-table-hash %make-hash-table make-hash-table hash-table-map hash-table->alist hash-table-exists? hash-table-set! alist->hash-table hash-table-ref hash-table-update! hash-table-ref/default hash-table-update!/default hash-table-keys hash-table-values hash-table-for-each hash-table-fold hash-table-merge! hash-table-equivalence-function hash-table-hash-function hash-table-copy fluid-let (lambda (bindings . body) (let* ((vars (map car bindings)) (vals (map cadr bindings)) (tmps (map (lambda (x) (gensym)) vars))) `(let ,(map list tmps vars) (dynamic-wind (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars vals)) (lambda () ,@body) (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps)))))) \"no setter defined for ~S\" time (lambda args (let ((tmp1 (gensym)) (tmp2 (gensym))) `(let* ((,tmp1 (clock)) (,tmp2 (begin ,@args))) (format (current-error-port) \"Elapsed time: ~S ms\\n\" (- (clock) ,tmp1)) ,tmp2))) \"Elapsed time: ~S ms\\n\" tagbody (lambda body (let ((tags (map (lambda (x) (cons x (%compiler-new-label))) (filter keyword? body)))) (define (replace code) (if (pair? code) (if (and (eq? (car code) '->) (= (length code) 2)) (let ((t (assq (cadr code) tags))) (if t `(%%goto ,(cdr t)) code)) (map replace code)) code)) (define (verify code) (if (pair? code) (cond ((and (eq? (car code) '->) (= (length code) 2)) (error 'tagbody \"destination label ~S not defined\\n\" (cadr code))) ((eq? (car code) 'tagbody) #void) (else (map verify code))))) (let ((new-body (map (lambda (x) (if (keyword? x) `(%%label ,(cdr (assq x tags))) (replace x))) body))) (verify new-body) `(begin ,@new-body)))) -> \"destination label ~S not defined\\n\" dotimes (lambda (bindings . body) (apply (lambda (var count . result) (let ((limit (gensym)) (result (if (null? result) (list '(void)) result))) `(let ((,limit ,count)) (do ((,var 0 (+ ,var 1))) ((>= ,var ,limit) ,@result) ,@body)))) bindings)) (void) repeat (lambda (expr . body) (let ((var (gensym))) `(let ((,var ,expr)) (tagbody #:top (when (> ,var 0) (set! ,var (- ,var 1)) ,@body (-> #:top)))))) #:top while (lambda (test . body) (let ((lab (gensym))) `(let ,lab () (when ,test ,@body (,lab))))) until (lambda (test . body) (let ((lab (gensym))) `(let ,lab () (unless ,test ,@body (,lab))))) \"call/ec\" call/ec base64-encode-string base64-decode-string base64-encode base64-decode \"r\" md5sum close-input-port \"cannot read file ~s\" md5sum-file ansi-color ansi-color-protect \"\\x1b;[\" \"m\" ((normal . \"0\") (bold . \"1\") (no-bold . \"21\") (italic . \"2\") (no-italic . \"22\") (underline . \"4\") (no-underline . \"24\") (blink . \"5\") (no-blink . \"25\") (reverse . \"7\") (no-reverse . \"27\") (black . \"30\") (bg-black . \"40\") (red . \"31\") (bg-red . \"41\") (green . \"32\") (bg-green . \"42\") (yellow . \"33\") (bg-yellow . \"43\") (blue . \"34\") (bg-blue . \"44\") (magenta . \"35\") (bg-magenta . \"45\") (cyan . \"36\") (bg-cyan . \"46\") (white . \"37\") (bg-white . \"47\")) \"\" \"\\x1b;[\" \"m\" \"\" \"\" \";\" \"38;5;~a\" \"48;5;~a\" \";\" \"bad command ~S\" \"TERM\" getenv \"\" #:interactive regexp-match (\"rxvt\" \"xterm\" \"xterm-color\" \"linux\" \"cygwin\" \"cons25\") \"\" do-color input-port? port->list \"bad port ~S\" %port->list \"bad port ~S\" copy-port port->string port->sexp-list read-line port->string-list print printerr flush-output-port printf declare-new-error (lambda (name) (let ((cond-name (string->symbol (format \"&~a\" name))) (predicate (string->symbol (format \"&~a?\" name))) (args (gensym))) `(begin (define-condition-type ,cond-name &error-message ,predicate) (define (,name unquote args) (if (and (not (null? ,args)) (symbol? (car ,args))) (apply signal-error ,cond-name ,args) (apply signal-error ,cond-name ',name ,args)))))) \"&~a\" \"&~a?\" define-condition-type &error-message signal-error \"| \" exec \"| \" exec-list string<? apropos \"bad module ~S\" sort string-find? \"**** ~A\\n**** EXIT\\n\" exit die running-os cygwin-windows posixify-file-name #\\/ char=? \"/\" \".\" \"/\" decompose-file-name \"^(.*)/(.+)$\" \"\\\\1\" regexp-replace \"\" string=? \"/\" \".\" \"^(.*)/(.*)$\" \"\\\\2\" basename \"/\" \".\" \"/\" \"^(.*)/(.+)$\" \"\\\\1\" \"\" \"/\" \".\" \"^(.*)/(.*)$\" \"\\\\2\" (unix cygwin-windows android) windows #\\\\ #\\? file-separator \"~A~A~A\" #\\. file-suffix file-prefix port-idle-register! \"bad procedure ~S\" %port-idle port-idle-unregister! \"bad procedure ~S\" port-idle-reset! expand-file-name %chmod bit-or write execute chmod \"bad option ~S\" \"bad option ~S\" mutex-lock! mutex-unlock! with-mutex error-object? \"bad error object: ~S\" error-object-location %stklos-git #:commit \"\" \"\" \"stable-\" %push-id define-constant (lambda args (define (rewrite l) (if (<= (length l) 1) (error \"bad constant definition\")) (let ((bind (car l)) (body (cdr l))) (if (pair? bind) (rewrite `(,(car bind) (lambda ,(cdr bind) ,@body))) l))) (let ((args (rewrite args))) (if (= (length args) 2) `(begin (define ,@args) (symbol-immutable! ',(car args))) (error \"bad constant definition ~S\" `(define-constant ,@args))))) \"bad constant definition\" symbol-immutable! \"bad constant definition ~S\" receive (lambda (vars producer . body) `(call-with-values (lambda () ,producer) (lambda ,vars ,@body))) case-lambda (lambda clauses (let ((len (gensym)) (args (gensym)) (compute-arity (in-module STKLOS-COMPILER compute-arity))) `(lambda ,args (let ((,len (length ,args))) (cond ,@(map (lambda (x) (unless (>= (length x) 2) (error 'case-lambda \"bad clause ~S\" x)) (let* ((formals (car x)) (body (cdr x)) (arity (compute-arity formals))) (cond ((positive? arity) `((= ,len ,arity) (apply (lambda ,formals ,@body) ,args))) ((zero? arity) `((= ,len ,arity) ,@body)) (else `((>= ,len ,(- (- arity) 1)) (apply (lambda ,formals ,@body) ,args)))))) clauses) (else (error 'case-lambda \"no matching clause in list ~S for ~S\" ',(map car clauses) ,args))))))) \"bad clause ~S\" \"no matching clause in list ~S for ~S\" %define-condition-type-accessors (lambda (name supertype predicate . slots) (let ((obj (gensym))) `(begin (define (,predicate ,obj) (and (condition? ,obj) (condition-has-type? ,obj ,name))) ,@(map (lambda (x) `(define (,(cadr x) ,obj) (unless (,predicate ,obj) (error ',(cadr x) \"bad type for condition ~S\" ,obj)) (condition-ref ,obj ',(car x)))) slots)))) \"bad type for condition ~S\" &message message-condition? condition-message &serious serious-condition? &error error? error-message? error-location error-message read-with-shared-structure write* write-with-shared-structure read/ss write/ss parameterize (lambda (bindings . body) (let ((tmp1 (map (lambda (_) (gensym)) bindings)) (tmp2 (map (lambda (_) (gensym)) bindings))) `(let (,@(map (lambda (x y) (list y (cadr x))) bindings tmp1) ,@(map (lambda (x y) (list y (list (car x)))) bindings tmp2)) (dynamic-wind (lambda () ,@(map (lambda (x y) `(,(car x) ,y)) bindings tmp1)) (lambda () ,@body) (lambda () ,@(map (lambda (x y) `(,(car x) ,y)) bindings tmp2)))))) require-extension (lambda args (%find-macro-clause 'require-extension args '(require-extension srfi) '(((_ \"internal\" (srfi id ...)) (begin (require-feature id) ...)) ((_ \"internal\" (x ...)) (import (x ...))) ((_ \"internal\" id) (cond-expand (id #void) (else (error \"cannot require extension named '~s'\" 'id)))) ((_ clause ...) (begin (require-extension \"internal\" clause) ...))))) (require-extension srfi) (((_ \"internal\" (srfi id ...)) (begin (require-feature id) ...)) ((_ \"internal\" (x ...)) (import (x ...))) ((_ \"internal\" id) (cond-expand (id #void) (else (error \"cannot require extension named '~s'\" 'id)))) ((_ clause ...) (begin (require-extension \"internal\" clause) ...))) \"bad string ~S\" string->keyword get-environment-variable get-environment-variables \"STklos\" implementation-name implementation-version %uname cpu-architecture machine-name os-name \" \" os-version fixnum-width fx-width greatest-fixnum fx-greatest least-fixnum fx-least assume (lambda (expr . args) (if (positive? (stklos-debug-level)) (let* ((efile (and (%epair? expr) (%epair-file expr))) (eline (and (%epair? expr) (%epair-line expr))) (fmt (string-append (if efile (format \"in ~A:~A, \" efile eline) \"\") \"invalid assumption:\"))) `(or ,expr (error ,fmt ',expr ,@args))) #void)) \"in ~A:~A, \" \"\" \"invalid assumption:\" \"srfi-\" string->number %stklos-configure features #:use-utf8 command \"stklos\" scheme.id languages scheme r5rs r7rs encodings (utf-8) threads %thread-system install-dir website \"https://stklos.net\" scheme.features scheme.path scheme.srfi scheme.srfi.count build.configure #:configure build.git.tag #:tag build.git.branch #:branch build.git.commit build.git.modified #:modified c.version #:c-version c.compile #:c-compile c.link #:c-link c.type-bits #:c-type-bits c.library.compile #:shlib-compile c.library.link #:shlib-link c.library.extension #:shlib-suffix stklos.system-libs #:system stklos.compiled-libs #:compiled os.uname os.env.LANG \"LANG\" \"\" os.env.TERM \"TERM\" \"\" version-alist port? port-has-port-position? \"Not a port: ~A\" port-current-position port-position port-has-set-port-position!? \"Not a port: ~A\" output-port? flush port-seek set-port-position! &i/o-bad-parameter parameter make-i/o-invalid-position-error obj i/o-invalid-position-error? \"\" *load-suffixes* command-name command-args argc \"\" \"\" script-file \"\" \"\" \"/\" script-directory %make-nan make-nan ((regexp-replace . regexp-replace) (regexp-replace-all . regexp-replace-all)) regexp-replace-all \"\\\\\\\\[0-9]\" regexp-match-positions \"cannot match \\\\~A in model\" list-ref ((run-process . run-process) (process-kill . process-kill) (process-stop . process-stop) (process-continue . process-continue)) \"value expected after keyword ~S\" #:input #:output #:error #:wait #:fork #:args %run-process run-process SIGTERM process-send-signal process-kill SIGSTOP process-stop SIGCONT process-continue ((%equiv? . %equiv?)) %equiv? %equal-try ((time? . time?) (time->seconds . time->seconds) (seconds->time . seconds->time) (make-date . make-date) (date? . date?) (seconds->date . seconds->date) (date-nanosecond . date-nanosecond) (date-second . date-second) (date-minute . date-minute) (date-hour . date-hour) (date-day . date-day) (date-month . date-month) (date-year . date-year) (date-week-day . date-week-day) (date-year-day . date-year-day) (date-dst . date-dst) (date-tz . date-tz) (time-zone-name . time-zone-name) (seconds->list . seconds->list) (current-date . current-date) (current-time . current-time) (seconds->string . seconds->string) (date->string . date->string) (time-nanosecond . time-nanosecond) (set-time-nanosecond! . set-time-nanosecond!) (time-second . time-second) (set-time-second! . set-time-second!) (time-type . time-type) (set-time-type! . set-time-type!) (make-time . make-time) (time-tai->time-utc . time-tai->time-utc) (time-tai->time-utc! . time-tai->time-utc!) (time-utc->time-tai . time-utc->time-tai) (time-utc->time-tai! . time-utc->time-tai!) (%leap-second-table . %leap-second-table) (%leap-second-delta . %leap-second-delta) (%time-tai->time-utc! . %time-tai->time-utc!) (%time-utc->time-tai! . %time-utc->time-tai!)) \"since first argument is symbol, 3 args (type, nanosecond and second) required, only 2 given\" (time-tai time-utc time-monotonic time-process time-duration) \"bad time type ~S\" \"bad integer ~S\" \"bad integer ~S\" %time \"since first argument is integer, 2 args (nanosecond and second) required, but 3 given\" \"bad integer ~S\" time-utc \"bad symbol or integer ~S\" make-time type time-type set-time-type! second time-second set-time-second! nanosecond time-nanosecond set-time-nanosecond! struct-type time? 1000000000 %nano 86400 %sid exact->inexact time-seconds \"bad time ~S\" time->seconds real? inexact->exact #:time-utc seconds->time \"cannot convert ~S to a time\" \"bad number ~S\" ((1483228800 . 37) (1435708800 . 36) (1341100800 . 35) (1230768000 . 34) (1136073600 . 33) (915148800 . 32) (867715200 . 31) (820454400 . 30) (773020800 . 29) (741484800 . 28) (709948800 . 27) (662688000 . 26) (631152000 . 25) (567993600 . 24) (489024000 . 23) (425865600 . 22) (394329600 . 21) (362793600 . 20) (315532800 . 19) (283996800 . 18) (252460800 . 17) (220924800 . 16) (189302400 . 15) (157766400 . 14) (126230400 . 13) (94694400 . 12) (78796800 . 11) (63072000 . 10)) %leap-second-table %leap-second-delta %leap-second-neg-delta time-tai \"bad TAI time ~S\" %time-tai->time-utc! time-tai->time-utc time-tai->time-utc! \"bad UTC time ~S\" %time-utc->time-tai! time-utc->time-tai time-utc->time-tai! current-second %get-time-of-day %current-time-tai %current-time-utc %current-time \"too many arguments (0 or 1 expected, ~S given)\" \"unsupported time type ~S\" current-time %make-date-key %make-date-opt make-date #:nanosecond #:second #:minute #:hour #:day #:month #:year #:zone-offset %make-date %date max date->seconds seconds->date local-timezone-offset week-day date-week-day year-day date-year-day dst date-dst tz date? date-tz \"Z\" abs #\\- #\\+ \"~a~2f:~2f\" #\\0 string-map time-zone-name %seconds->date \"#[date ~A-~A-~A ~A:~A:~A]\" year month day hour minute struct-type-change-writer! date-nanosecond date-second date-minute date-hour date-day date-month date-year struct->list seconds->list current-date seconds->string \"bad string ~S\" #\\% \"%%\" #\\~ %seconds->string \"~c\" date->string \"bad string ~S\" ((bit-and . bit-and) (bit-or . bit-or) (bit-xor . bit-xor) (bit-not . bit-not) (bit-shift . bit-shift)) bit-and bit-xor #(#(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15) #(1 0 3 2 5 4 7 6 9 8 11 10 13 12 15 14) #(2 3 0 1 6 7 4 5 10 11 8 9 14 15 12 13) #(3 2 1 0 7 6 5 4 11 10 9 8 15 14 13 12) #(4 5 6 7 0 1 2 3 12 13 14 15 8 9 10 11) #(5 4 7 6 1 0 3 2 13 12 15 14 9 8 11 10) #(6 7 4 5 2 3 0 1 14 15 12 13 10 11 8 9) #(7 6 5 4 3 2 1 0 15 14 13 12 11 10 9 8) #(8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7) #(9 8 11 10 13 12 15 14 1 0 3 2 5 4 7 6) #(10 11 8 9 14 15 12 13 2 3 0 1 6 7 4 5) #(11 10 9 8 15 14 13 12 3 2 1 0 7 6 5 4) #(12 13 14 15 8 9 10 11 4 5 6 7 0 1 2 3) #(13 12 15 14 9 8 11 10 5 4 7 6 1 0 3 2) #(14 15 12 13 10 11 8 9 6 7 4 5 2 3 0 1) #(15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0)) #(#(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0) #(0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1) #(0 0 2 2 0 0 2 2 0 0 2 2 0 0 2 2) #(0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3) #(0 0 0 0 4 4 4 4 0 0 0 0 4 4 4 4) #(0 1 0 1 4 5 4 5 0 1 0 1 4 5 4 5) #(0 0 2 2 4 4 6 6 0 0 2 2 4 4 6 6) #(0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7) #(0 0 0 0 0 0 0 0 8 8 8 8 8 8 8 8) #(0 1 0 1 0 1 0 1 8 9 8 9 8 9 8 9) #(0 0 2 2 0 0 2 2 8 8 10 10 8 8 10 10) #(0 1 2 3 0 1 2 3 8 9 10 11 8 9 10 11) #(0 0 0 0 4 4 4 4 8 8 8 8 12 12 12 12) #(0 1 0 1 4 5 4 5 8 9 8 9 12 13 12 13) #(0 0 2 2 4 4 6 6 8 8 10 10 12 12 14 14) #(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)) modulo bit-not bit-shift ((make-thread . make-thread) (thread-handler-error-show . thread-handler-error-show) (thread-sleep! . thread-sleep!) (thread-join! . thread-join!) (mutex-lock! . mutex-lock!) (mutex-unlock! . mutex-unlock!) (join-timeout-exception? . join-timeout-exception?) (abandoned-mutex-exception? . abandoned-mutex-exception?) (terminated-thread-exception? . terminated-thread-exception?) (&uncaught-exception . &uncaught-exception) (uncaught-exception? . uncaught-exception?) (uncaught-exception-reason . uncaught-exception-reason)) \"bad timeout ~S\" %thread-timeout->seconds \"thread\" current-thread thread-name %build-error-location bold red \"**** Error \" blue \"(in thread ~S):\\n\" \"~A: ~A\\n\" normal \"    (this error may be signaled again later)\\n\" %thread-end-exception-set! thread-handler-error-show %make-thread make-thread thread-sleep! \"cannot used #f as timeout\" %thread-sleep! thread-join! \"cannot join on myself (deadlock will occur)\" %thread-join! &thread-join-timeout %thread-end-exception &uncaught-exception reason %thread-end-result %mutex-lock! thread? &thread-abandonned-mutex %mutex-unlock! join-timeout-exception? abandoned-mutex-exception? &thread-terminated terminated-thread-exception? &condition (reason) make-condition-type uncaught-exception? uncaught-exception-reason ((make-external-function . make-external-function) (make-callback . make-callback) (define-external . define-external)) make-external-function make-callback ((#:void 0) (#:char 1) (#:short 2) (#:ushort 3) (#:int 4) (#:uint 5) (#:long 6) (#:ulong 7) (#:lonlong 8) (#:ulonlong 9) (#:float 10) (#:double 11) (#:boolean 12) (#:pointer 13) (#:string 14) (#:int8 15) (#:int16 16) (#:int32 17) (#:int64 18) (#:obj 19)) define-external \"parameter of type :void are forbidden\" \"bad type name ~S\" \"bad parameter description: ~S\" \"bad parameter description: ~S\" %make-ext-func %make-callback (lambda (name parameters . args) (let* ((lib (key-get args #:library-name \"\")) (lib-name (if (and (equal? lib \"\") (equal? (running-os) 'cygwin-windows)) \"cygwin1.dll\" lib)) (entry-name (key-get args #:entry-name (symbol->string name))) (return-type (key-get args #:return-type #:void))) `(define ,name (make-external-function ,entry-name ',parameters ,return-type ,lib-name)))) #:library-name \"\" \"\" \"cygwin1.dll\" #:entry-name #:return-type #:void ((write-shared . write-shared) (write-simple . write-simple) (letrec* . letrec*) (let-values . let-values) (let*-values . let*-values) (delay . delay) (delay-force . delay-force) (lazy . lazy) (make-promise . make-promise) (eager . eager) (define-values . define-values) (equal-simple? . equal-simple?) (exact-integer? . exact-integer?) (floor-quotient . floor-quotient) (floor/ . floor/) (truncate/ . truncate/) (truncate-quotient . truncate-quotient) (truncate-remainder . truncate-remainder) (floor-remainder . floor-remainder) (square . square) (exact-integer-sqrt . exact-integer-sqrt) (exact . exact) (inexact . inexact) (boolean=? . boolean=?) (make-list . make-list) (member-simple . member-simple) (assoc-simple . assoc-simple) (member . member) (assoc . assoc) (symbol=? . symbol=?) (string=? . string=?) (%string2=? . %string2=?) (string<? . string<?) (%string2<? . %string2<?) (string<=? . string<=?) (%string2<=? . %string2<=?) (string>? . string>?) (%string2>? . %string2>?) (string>=? . string>=?) (%string2>=? . %string2>=?) (string-ci=? . string-ci=?) (%string-ci2=? . %string-ci2=?) (string-ci<? . string-ci<?) (%string-ci2<? . %string-ci2<?) (string-ci<=? . string-ci<=?) (%string-ci2<=? . %string-ci2<=?) (string-ci>? . string-ci>?) (%string-ci2>? . %string-ci2>?) (string-ci>=? . string-ci>=?) (%string-ci2>=? . %string-ci2>=?) (string->list . string->list) (string-copy! . string-copy!) (string-fill! . string-fill!) (%string-fill2! . %string-fill2!) (vector->list . vector->list) (vector-copy! . vector-copy!) (vector->string . vector->string) (string->vector . string->vector) (make-bytevector . make-bytevector) (bytevector? . bytevector?) (bytevector . bytevector) (bytevector-length . bytevector-length) (bytevector-u8-ref . bytevector-u8-ref) (bytevector-u8-set! . bytevector-u8-set!) (bytevector-copy! . bytevector-copy!) (string-map . string-map) (vector-map . vector-map) (string-for-each . string-for-each) (vector-for-each . vector-for-each) (error-object? . error-object?) (error-object-message . error-object-message) (error-object-irritants . error-object-irritants) (read-error? . read-error?) (file-error? . file-error?) (call-with-port . call-with-port) (input-port-open? . input-port-open?) (output-port-open? . output-port-open?) (read-string . read-string) (read-u8 . read-u8) (peek-u8 . peek-u8) (read-bytevector! . read-bytevector!) (write-string . write-string) (write-u8 . write-u8) (write-bytevector . write-bytevector) (with-exception-handler . with-exception-handler) (raise-continuable . raise-continuable) (guard . guard) (current-jiffy . current-jiffy) (jiffies-per-second . jiffies-per-second) (features . features) (%continuable-exception? . %continuable-exception?) (%continuable-exception-value . %continuable-exception-value)) write-shared write-simple letrec* (lambda (bindings . body) (if (list? bindings) (for-each (lambda (x) (unless (and (list? x) (= (length x) 2)) (error 'letrec* \"incorrect binding ~S\" x))) bindings) (error 'letrec* \"incorrect bindings ~S\" bindings)) `(let ,(map (lambda (x) (list (car x) #f)) bindings) ,@(map (lambda (x) `(set! ,@x)) bindings) (let () ,@body))) \"incorrect binding ~S\" \"incorrect bindings ~S\" let-values (lambda (bindings . body) (let ((tmps '())) (define (expand-once bindings tmps) (let ((first (car bindings))) `(call-with-values (lambda () ,(cadr first)) (lambda ,(map* (lambda (x) (cadr (assoc x tmps))) (car first)) ,(if (= (length bindings) 1) `(let ,tmps ,@body) (expand-once (cdr bindings) tmps)))))) (define (parse-binding binding) (unless (and (list? binding) (= (length binding) 2) (or (pair? (car binding)) (symbol? (car binding)))) (error 'let-values \"incorrect binding ~S\" binding)) (for-each* (lambda (x) (if (assoc x tmps) (error 'let-values \"duplicate binding ~s\" x) (set! tmps (cons (list x (gensym)) tmps)))) (car binding))) (for-each parse-binding bindings) (if (null? tmps) `(let () ,@body) (expand-once bindings tmps)))) \"incorrect binding ~S\" \"duplicate binding ~s\" let*-values (lambda (bindings . body) (if (> (length bindings) 1) `(let-values (,(car bindings)) (let*-values ,(cdr bindings) ,@body)) `(let-values ,bindings ,@body))) delay (lambda (exp) `(delay-force (%make-promise (list ,exp)))) delay-force %make-promise (lambda (exp) `(%make-promise (lambda () ,exp))) lazy (lambda (expr) `(delay-force ,expr)) promise? make-promise eager define-values (lambda (formals expr) (define (flat lst) (cond ((null? lst) lst) ((pair? lst) (cons (car lst) (flat (cdr lst)))) (else (list lst)))) (if (null? formals) `(call-with-values (lambda () ,expr) void) (let* ((tmps (map* (lambda (x) (gensym)) formals)) (ff (flat formals)) (ft (flat tmps))) `(begin ,@(map (lambda (x) `(define ,x #void)) ff) (call-with-values (lambda () ,expr) (lambda ,tmps ,@(map (lambda (x y) `(set! ,x ,y)) ff ft))) (values (void) ',formals))))) equal-simple? exact-integer? floor-quotient floor-remainder floor/ truncate/ truncate-quotient truncate-remainder square integer-length \"non negative integer expected. It was: ~S\" sqrt exact-integer-sqrt inexact boolean=? make-list member-simple assoc-simple symbol=? %generalize-string-compare (lambda (func func2) `(begin (define ,func2 ,func) (set! ,func (lambda (first . l) (letrec ((compare (lambda (first . l) (or (null? l) (and (,func2 first (car l)) (apply compare l)))))) (unless (string? first) (error \"bad string ~W\" first)) (apply compare first l)))) (%set-procedure-name! ,func ',func))) first l compare \"bad string ~W\" %string2=? %string2<? string<=? %string2<=? string>? %string2>? string>=? %string2>=? string-ci=? %string-ci2=? string-ci<? %string-ci2<? string-ci<=? %string-ci2<=? string-ci>? %string-ci2>? string-ci>=? %string-ci2>=? string-copy! \"bad string ~S\" \"bad string ~S\" \"bad destination index ~S\" \"bad integer for start index ~S\" \"bad integer for end index ~S\" \"not enough room in destination string ~S\" string-fill! %string-fill2! vector-copy! \"bad vector ~S\" \"bad vector ~S\" \"bad destination index ~S\" \"bad integer for start index ~S\" \"bad integer for end index ~S\" \"not enough room in destination vector ~S\" \"bad vector ~S\" vector->string char? \"element at index ~S of ~S must be a character\" \"bad string ~S\" string->vector make-bytevector %make-uvector %uvector? bytevector? bytevector %uvector bytevector-length %uvector-length bytevector-u8-ref %uvector-ref bytevector-u8-set! %uvector-set! bytevector-copy! \"bad bytevector ~S\" \"bad bytevector ~S\" \"bad destination index ~S\" \"bad integer for start index ~S\" \"bad integer for end index ~S\" \"not enough room in destination bytevector ~S\" \"bad string ~S\" \"bad character in ~S\" list->string vector-map \"bad list of vectors ~S\" string-for-each \"bad string ~S\" vector-for-each \"bad list of vectors ~S\" \"bad error object: ~S\" error-object-message \"bad error object: ~S\" error-object-irritants &read-error read-error? file-error? call-with-port \"bad input port ~S\" port-closed? input-port-open? \"bad output port ~S\" output-port-open? read-string \"parameter must be a positive integer. It was: ~S\" textual-port? \"bad textual input port ~S\" read-char eof-object read-u8 binary-port? \"bad binary port ~S\" read-byte peek-u8 \"bad binary port ~S\" peek-byte read-bytevector! \"bad bytevector ~S\" %read-bytevector! write-string %write-string write-u8 \"bad binary port ~S\" write-byte write-bytevector \"bad bytevector ~S\" \"bad binary port ~S\" %continuable-exception (value) make-%continuable-exception %continuable-exception? %continuable-exception-value \"exception handler returned on non-continuable exception\" with-exception-handler current-exception-handler raise-continuable guard (lambda (clauses . body) (let* ((var (car clauses)) (last (last-pair clauses)) (ex (gensym)) (old-hdlr (gensym)) (reraised (gensym)) (res (gensym))) `(let ((,old-hdlr (current-exception-handler))) (with-handler (lambda (,ex) (let* ((,var (if (%continuable-exception? ,ex) (%continuable-exception-value ,ex) ,ex)) (,reraised #f) (,res (cond ,@(cdr clauses) ,@(if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else)) '() `((else (set! ,reraised #t) (,old-hdlr ,ex))))))) (if ,reraised ,res (if (%continuable-exception? ,ex) (raise ,res) ,res)))) ,@body)))) current-jiffy jiffies-per-second *all-features* SRFI-0 ((build-path-from-shell-variable . build-path-from-shell-variable) (load-path . load-path) (load-suffixes . load-suffixes) (load-verbose . load-verbose) (current-loading-file . current-loading-file) (try-load . try-load) (load . load) (find-path . find-path) (require . require) (provide . provide) (provided? . provided?) (require/provide . require/provide) (warning-when-not-provided . warning-when-not-provided) (require-library . require-library) (require-for-syntax . require-for-syntax) (include . include) (include-ci . include-ci) (include-file . include-file) (autoload . autoload) (%stklos-conf-dir . %stklos-conf-dir) (%stklos-conf-file . %stklos-conf-file) (%try-load-conditions . %try-load-conditions) (%do-include . %do-include) (%%require . %%require)) \";\" \":\" *path-separator* %shared-suffix \"ostk\" \"spi\" \"stk\" \"sld\" \"scm\" *load-verbose* *load-path* \"STKLOS_CONFDIR\" \"HOME\" \".stklos\" %stklos-conf-dir %stklos-conf-file build-path-from-shell-variable \"STKLOS_LOAD_PATH\" \".\" \"pkg\" \"lib\" \"ext\" \"lib\" \"stklos\" \"share\" \"stklos\" \"bad list of path names ~S\" \"bad path name ~S\" \"bad list of suffixes ~S\" \"bad path name ~S\" load-suffixes load-verbose current-loading-file \"%guess-pathname: trying ~S\\n\" file-exists? file-is-readable? \".\" \"/\" %guess-pathname \"path must be a string (it was ~s)\" \".?.?/\" try-load %primitive-try-load %try-load-conditions \";; Loading file ~S.\\n\" \";; File ~S loaded.\\n\" %try-load load \"cannot load file ~S\" \"cannot load file\" %cannot-load %load require provide provided? warning-when-not-provided \"^srfi-([1-9][0-9]*)$\" \"srfi/~a\" %rewrite-require-spec \"STKLOS_BUILDING\" \"share\" \"stklos\" \"WARNING: ~S was not provided~%\" (lambda (what) (if (string? what) (let ((spec (%rewrite-require-spec what (load-path) (load-suffixes)))) (if (and spec (cdr spec)) `(begin (define-module STklos (import ,(cdr spec))) (provide ,what)) `(%%require ,what #f))) `(%%require ,what #f))) require-library (lambda (what) `(%%require ,what #t)) require-for-syntax (lambda (file) `(%%require4syntax ,file)) %%require4syntax %do-include (lambda (kind files) (let ((inc (string->symbol (format \"%%~a\" kind)))) (if (null? files) (error kind \"at least one parameter must be provided\") `(,inc ,@(map (lambda (x) (or (find-path x) x)) files))))) \"%%~a\" \"at least one parameter must be provided\" (lambda files `(%do-include include ,files)) (lambda files `(%do-include include-ci ,files)) include-file (lambda (file) `(%%include ,file)) autoload (lambda (file . symbols) (let ((args (gensym)) (old (gensym))) `(begin ,@(map (lambda (x) `(define ,x (lambda ,args (let ((,old ,x)) (require ,file) (if (eq? ,old ,x) (error 'autoload \"~S has not been defined in ~S\" ',x ,file) (apply ,x ,args)))))) symbols)))) \"~S has not been defined in ~S\" ((define-library . define-library) (library-name . library-name) (%library-name->symbol . %library-name->symbol) (%symbol->library-name . %symbol->library-name) (%module-define-and-export . %module-define-and-export) (%make-copy-module . %make-copy-module)) \"~A\" \" \" \"/\" \"bad library name ~S\" %library-name->string \"/\" %module-define-and-export (lambda lst `(begin ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst) (export ,@lst))) %make-copy-module (lambda (old new) (%%import (compiler-current-module) (list old)) `(define-module ,new (import ,old) (export ,@(map cdr (module-exports (find-module (%library-name->symbol old))))))) define-library (lambda (name . decls) (let* ((module-name (%library-name->symbol name)) (imports '()) (exports '()) (body '()) (lib (gensym)) (module-restore (symbol-value '%module-restore (find-module 'SCHEME)))) (for-each (lambda (d) (unless (pair? d) (error 'define-library \"bad library declaration clause ~s\" d)) (let ((key (car d)) (rest (cdr d))) (case key ((import) (set! imports (append imports rest))) ((export) (set! exports (append exports rest))) ((begin include include-ci) (set! body (append body (list d)))) (else (error 'define-library \"incorrect directive ~s\" d))))) decls) `(begin (define-module ,module-name (import ,@imports) (export ,@exports) (%symbol-define '%module-restore %module-restore (current-module)) (%symbol-define '%make-syntax %make-syntax (current-module)) (%module->library! ',module-name) ,@body)))) \"bad library declaration clause ~s\" (begin include include-ci) \"incorrect directive ~s\" %module->library! library-name \"module ~S is not a library\" \"bad module/library ~S\" ((string-lower . string-lower) (string-upper . string-upper) (set-load-path! . set-load-path!) (set-load-suffixes! . set-load-suffixes!) (flush . flush) (rewind-file-port . rewind-file-port) (hash-table->list . hash-table->list) (hash-table-put! . hash-table-put!) (hash-table-get . hash-table-get) (hash-table-remove! . hash-table-remove!) (stklos-pragma . stklos-pragma) (remove-directory . remove-directory) (%build-path-from-shell-variable . %build-path-from-shell-variable) (copy-tree . copy-tree) (%set-std-port! . %set-std-port!) (make-box . make-box) (make-constant-box . make-constant-box) (box-set! . box-set!) (string-index . string-index) (argv . argv) (fxdiv . fxdiv) (fxrem . fxrem) (fxmod . fxmod) (fx< . fx<) (fx<= . fx<=) (fx> . fx>) (fx>= . fx>=) (fx= . fx=) (make-directory . make-directory) (make-directories . make-directories) (process-signal . process-signal)) string-downcase string-lower string-upper \"*** Obsolete function set-load-path!. Use load-path instead.\\n\" set-load-path! \"*** Obsolete function set-load-suffixes!. Use load-suffixes instead.\\n\" set-load-suffixes! port-rewind rewind-file-port hash-table->list hash-table-put! hash-table-get hash-table-delete! hash-table-remove! \"Don't use anymore pragma, but compiler:warn-use-undef parameter\" stklos-pragma pragma define-reader-ctor delete-directory remove-directory %build-path-from-shell-variable copy-tree %set-std-port! \"bad port number\" box make-box constant-box make-constant-box set-box! box-set! string-index argv fxdiv fxremainder fxrem fxmodulo fxmod make-directory make-directories process-signal STKLOS-OBJECT ((SCHEME)) ((find-class . find-class) (is-a? . is-a?) (ensure-metaclass . ensure-metaclass) (ensure-metaclass-with-supers . ensure-metaclass-with-supers) (ensure-class . ensure-class) (ensure-generic-function . ensure-generic-function) (ensure-method . ensure-method) (add-method! . add-method!) (object-eqv? . object-eqv?) (object-equal? . object-equal?) (write-object . write-object) (display-object . display-object) (slot-unbound . slot-unbound) (slot-missing . slot-missing) (slot-definition-name . slot-definition-name) (slot-definition-options . slot-definition-options) (slot-definition-allocation . slot-definition-allocation) (slot-definition-getter . slot-definition-getter) (slot-definition-setter . slot-definition-setter) (slot-definition-accessor . slot-definition-accessor) (slot-definition-init-form . slot-definition-init-form) (slot-definition-init-keyword . slot-definition-init-keyword) (slot-init-function . slot-init-function) (class-slot-definition . class-slot-definition) (compute-get-n-set . compute-get-n-set) (allocate-instance . allocate-instance) (initialize . initialize) (make-instance . make-instance) (make . make) (no-next-method . no-next-method) (no-applicable-method . no-applicable-method) (no-method . no-method) (change-class . change-class) (change-object-class . change-object-class) (shallow-clone . shallow-clone) (deep-clone . deep-clone) (apply-generic . apply-generic) (apply-method . apply-method) (apply-methods . apply-methods) (compute-applicable-methods . compute-applicable-methods) (method-more-specific? . method-more-specific?) (sort-applicable-methods . sort-applicable-methods) (method-procedure . method-procedure) (method-specializers . method-specializers) (method-generic-function . method-generic-function) (method-specializers-equal? . method-specializers-equal?) (class-subclasses . class-subclasses) (class-methods . class-methods) (class-name . class-name) (class-direct-supers . class-direct-supers) (class-direct-subclasses . class-direct-subclasses) (class-precedence-list . class-precedence-list) (class-direct-methods . class-direct-methods) (class-direct-slots . class-direct-slots) (class-slots . class-slots) (generic-function-name . generic-function-name) (generic-function-methods . generic-function-methods) (generic-function-documentation . generic-function-documentation) (slot-value . slot-value) (define-class . define-class) (define-generic . define-generic) (method . method) (define-method . define-method)) class-redefinition \"bad class ~S\" %error-bad-class \"bad generic function ~S\" %error-bad-generic \"bad method ~S\" %error-bad-method make-closure <top> specializers formals slot-definition-getter slot-definition-setter slot-definition-accessor declare-slots <generic> generic #:name ??? %make <method> #:generic-function #:specializers #:procedure basic-make \"cannot make ~S with ~S\" make class? name class-name direct-supers class-direct-supers direct-slots class-direct-slots direct-subclasses class-direct-subclasses direct-methods class-direct-methods cpl class-precedence-list slots class-slots slot-definition-name slot-definition-options #:instance #:allocation slot-definition-allocation #:getter #:accessor #:init-form slot-definition-init-form #:init-keyword slot-definition-init-keyword getters-n-setters slot-init-function class-slot-definition generic-function-name methods generic-function-methods documentation generic-function-documentation method? generic-function method-generic-function method-specializers procedure method-procedure class-of is-a? <class> find-class \"bad class ~S\" compute-slots \"bad slot name ~S\" %compute-slots #:dsupers #:slots \"metaclass\" ensure-metaclass-with-supers ensure-metaclass define-class (lambda (name supers slots . options) `(define ,name (ensure-class ',name ',supers ',(declare-slots slots) ,(or (key-get options #:metaclass #f) `(ensure-metaclass ',supers)) ,@options))) ensure-class #:metaclass <object> \"super class ~S is duplicated in class ~S\" \"slot ~S is duplicated in class ~S\" define-generic (lambda (gf #:optional (meta '<generic>) #:key (documentation #f)) `(define ,gf (ensure-generic-function ',gf ,meta ,documentation))) #:documentation ensure-generic-function #:default %method-specializers-equal? method-specializers-equal? add-method-in-classes! remove-method-in-classes! compute-new-list-of-methods add-method! next-method ensure-method (lambda (args . body) (ensure-method #f args body)) define-method (lambda (name args . body) (let ((gf (gensym \"gf\"))) `(let ((,gf (ensure-generic-function ',name))) (add-method! ,gf ,(ensure-method gf args body)) (values (void) ',name)))) \"gf\" object-eqv? (<top> <top>) object-equal? (<top> <top>) write-object (<top> <top>) \"#[instance ~A]\" address-of (<object> <top>) slot-bound? \"#[~A ~A]\" (<class> <top>) \"#[~A ~A ~A]\" (<generic> <top>) \"#[~A ~A (~A)]\" display-object (<top> <top>) slot-unbound (<class> <object> <top>) \"slot ~S is unbound in #p~A (an object of class ~S)\" slot-missing (<class> <object> <top> . <top>) \"no slot with name `~S' in #p~A (an object of class ~S)\" no-next-method (<generic> <top> <top>) \"no next method for ~S in call ~S\" no-applicable-method (<generic> <top>) \"no applicable method for ~S\\nin call ~S\" no-method (<generic> <top>) \"no method defined for ~S\" shallow-clone (<object>) %allocate-instance deep-clone (<object>) instance? remove-class-accessors update-direct-method update-direct-subclass (<class>) <accessor-method> (<method> <class> <class>) (<class> <class> <class>) (<class> <class>) redefined %find-inherited-get-n-set %direct-slot? #:before-slot-ref #:after-slot-ref #:before-slot-set! #:after-slot-set! %fast-slot-ref %fast-slot-set! %make-active-getter-n-setter compute-get-n-set (<class> <top>) nfields #:class #:each-subclass #:virtual #:slot-ref #:slot-set! \"a :slot-ref and a :slot-set! must be supplied in ~S\" #:active (<object> <top>) \"allocation type \\\"~S\\\" is unknown\" compute-slot-accessors %slot-ref closure? %procedure-arity \"bad getter closure for slot `~S' in ~S: ~S\" \"bad setter closure for slot `~S' in ~S: ~S\" list* compute-getters-n-setters compute-cpl initialize (<object> <top>) %initialize-object (<class> <top>) (<generic> <top>) (<method> <top>) allocate-instance (<class> <top>) make-instance (<class> . <top>) slot-exists-using-class? slot-bound-using-class? slot-ref-using-class slot-set-using-class! %modify-instance change-object-class change-class (<object> <class>) compute-applicable-methods (<generic> <top>) find-method method-more-specific? (<method> <method> <top>) %method-more-specific? sort-applicable-methods (<generic> <top> <top>) apply-method (<generic> <top> <top> <top>) %set-next-method! apply-methods (<generic> <list> <top>) apply-generic (<generic> <top>) (<generic> <top> <top>) class-subclasses class-methods slot-value (<object> <top>) (<object> <top> <top>) %object-system-initialized ((STKLOS-OBJECT)) ((SCHEME)) ((let-syntax . let-syntax) (letrec-syntax . letrec-syntax)) \"cannot be used here. You must load the file \\\"full-syntax\\\" to access it:\" %not-implemented letrec-syntax (lambda args (%not-implemented 'letrec-syntax ',args)) ,args some split \"list is too short\" hyg:untag-no-tags hyg:untag-vanilla hyg:untag-lambda hyg:untag-letrec hyg:untag-named-let hyg:untag-let hyg:untag-let* hyg:untag-do hyg:untag-list hyg:untag-list* hyg:untag-quasiquote hyg:flatten mbe:ellipsis? mbe:split-at-ellipsis mbe:get-ellipsis-nestings mbe:ellipsis-sub-envs mbe:contained-in? hyg:rassq hyg:tag ... hyg:untag (if begin) (set! define) \"takes exactly one expression\" \"invalid context within quasiquote\" \"takes exactly one expression\" list-tail \"%%\" mbe:position mbe:append-map mbe:matches-pattern? mbe:get-bindings mbe:expand-pattern \"no matching clause for ~S\" let-syntax (lambda (bindings . body) `(%let-syntax ,(map (lambda (x) (let* ((macro-name (car x)) (syn-rules (cadr x)) (keywords (cons macro-name (cadr syn-rules))) (clauses (cddr syn-rules))) `(,macro-name (lambda args (%find-macro-clause ',macro-name args ',keywords ',clauses))))) bindings) ,@body)) ((SCHEME)) ((srfi0-register-feature! . srfi0-register-feature!) (srfi-0-feature-implementation-file . srfi-0-feature-implementation-file) (require-feature . require-feature) (cond-expand . cond-expand)) (srfi-0 (srfi-1 . \"srfi-1\") (lists . \"srfi-1\") (srfi-2 . \"srfi-2\") (and-let* . \"srfi-2\") (srfi-4 . \"srfi-4\") (hvectors . \"srfi-4\") (srfi-5 . \"srfi-5\") srfi-6 (srfi-7 . \"srfi-7\") (program . \"srfi-7\") srfi-8 (srfi-9 . \"srfi-9\") (records . \"srfi-9\") srfi-10 srfi-11 (srfi-13 . \"srfi-13\") (srfi-14 . \"srfi-14\") srfi-15 srfi-16 case-lambda (srfi-17 . \"srfi-17\") srfi-18 (srfi-19 . \"srfi-19\") srfi-22 srfi-23 error (srfi-25 . \"srfi-25\") (srfi-26 . \"srfi-26\") (srfi-27 . \"srfi-27\") (random . \"srfi-27\") srfi-28 (srfi-29 . \"srfi-29\") srfi-30 srfi-31 srfi-34 (srfi-35 . \"srfi-35\") (srfi-36 . \"srfi-36\") (srfi-37 . \"srfi-37\") (args-fold . \"srfi-37\") srfi-38 srfi-39 parameters (srfi-41 . \"srfi-41\") (streams . \"srfi-41\") (srfi-43 . \"srfi-43\") srfi-45 (srfi-48 . \"srfi-48\") (srfi-51 . \"srfi-51\") (rest-list . \"srfi-51\") (srfi-54 . \"srfi-54\") (formatting . \"srfi-54\") srfi-55 (srfi-59 . \"srfi-59\") (srfi-60 . \"srfi-60\") (srfi-61 . \"srfi-61\") srfi-62 (srfi-64 . \"srfi-64\") (testing . \"srfi-64\") (srfi-66 . \"srfi-66\") (srfi-69 . \"srfi-69\") (hash-tables . \"srfi-69\") srfi-70 (srfi-74 . \"srfi-74\") srfi-87 srfi-88 (srfi-89 . \"srfi-89\") (srfi-94 . \"srfi-94\") (srfi-95 . \"srfi-95\") (srfi-96 . \"srfi-96\") srfi-98 (srfi-100 . \"srfi-100\") srfi-111 boxes srfi-112 (srfi-113 . \"srfi-113\") (sets-bags . \"srfi-113\") (srfi-116 . \"srfi-116\") (immutable-lists . \"srfi-116\") (srfi-117 . \"srfi-117\") (queues-as-lists . \"srfi-117\") srfi-118 adjustable-strings (srfi-125 . \"srfi-125\") (hash-table . \"srfi-125\") (srfi-127 . \"srfi-127\") (lazy-sequences . \"srfi-127\") (srfi-128 . \"srfi-128\") (comparators-reduced . \"srfi-128\") (srfi-129 . \"srfi-129\") (titlecase . \"srfi-129\") (srfi-130 . \"srfi-130\") (srfi-132 . \"srfi-132\") (sort . \"srfi-132\") (srfi-133 . \"srfi-133\") (vector . \"srfi-133\") (srfi-134 . \"srfi-134\") (immutable-deques . \"srfi-134\") (srfi-135 . \"srfi-135\") (immutable-texts . \"srfi-135\") (srfi-137 . \"srfi-137\") srfi-138 (srfi-141 . \"srfi-141\") (integer-division . \"srfi-141\") srfi-143 (srfi-144 . \"srfi-144\") srfi-145 (srfi-151 . \"srfi-151\") (bitwise-ops . \"srfi-151\") (srfi-152 . \"srfi-152\") (srfi-154 . \"srfi-154\") (srfi-156 . \"srfi-156\") (srfi-158 . \"srfi-158\") (srfi-160 . \"srfi-160\") (srfi-161 . \"srfi-161\") (srfi-162 . \"srfi-128\") srfi-169 (srfi-170 . \"srfi-170\") (posix . \"srfi-170\") (srfi-171 . \"srfi-171\") (transducers . \"srfi-171\") (srfi-173 . \"srfi-173\") (hooks . \"srfi-173\") (srfi-174 . \"srfi-174\") (posix-timespecs . \"srfi-174\") (srfi-175 . \"srfi-175\") (ascii . \"srfi-175\") srfi-176 (srfi-180 . \"srfi-180\") (JSON . \"srfi-180\") (json . \"srfi-180\") (srfi-185 . \"srfi-185\") (srfi-189 . \"srfi-189\") (maybe-either . \"srfi-189\") (srfi-190 . \"srfi-190\") srfi-192 srfi-193 srfi-195 (srfi-196 . \"srfi-196\") (srfi-207 . \"srfi-207\") srfi-208 (srfi-214 . \"srfi-214\") (srfi-215 . \"srfi-215\") (srfi-216 . \"srfi-216\") (srfi-217 . \"srfi-217\") srfi-219 (srfi-221 . \"srfi-221\") (srfi-223 . \"srfi-223\") (srfi-224 . \"srfi-224\") (srfi-228 . \"srfi-228\") (srfi-229 . \"srfi-229\") (srfi-230 . \"srfi-230\") (srfi-233 . \"srfi-233\") (ini-files . \"srfi-233\") (srfi-236 . \"srfi-236\") (srfi-238 . \"srfi-238\") (conditions \"srfi-35\" \"srfi-36\") (generators \"srfi-158\" \"srfi-190\")) %srfi-feature-list \"STklos-\" \"id-\" #:debug (debug) almost-r7rs exact-complex ieee-float (full-unicode utf-8 UTF-8) ratios %big-endian? big-endian little-endian srfi0-register-feature! \"feature ~S is not supported\" srfi-0-feature-implementation-file srfi- \"bad feature\" \"srfi-[0-9]+\" \"srfi/~a\" require-feature %load-implementation %find-feature cond-expand \"no clause match\" \"bad clause ~S\" \"invalid 'not' clause\" \"bad clause ~S\" \"~a\" %srfi-0-expand (lambda clauses (%srfi-0-expand clauses)) REPL ((SCHEME)) ((main-repl . main-repl) (repl . repl) (repl-prompt . repl-prompt) (repl-make-prompt . repl-make-prompt) (repl-display-prompt . repl-display-prompt) (repl-prompt-use-color? . repl-prompt-use-color?) (repl-change-default-ports . repl-change-default-ports) (main-repl-hook . main-repl-hook) (repl-theme . repl-theme) (get-repl-color . get-repl-color)) interactive? repl-level repl-backtrace default-in default-out default-err classic #:prompt magenta #:help-prompt green #:help #:repl-depth yellow #:info monochrome minimal underline *repl-themes* repl-theme \"\" get-repl-color \"^[ \\t]*\" \"\" (help h ?) \"Available Commands:\\n- ,backtrace ,bt   Show the stack when last error occurred\\n- ,cd              Change current directory\\n- ,pwd             Print working directory\\n- ,quit ,q         Exit STklos\\n- ,shell ,!        Run a shell command\\n- ,help ,? ,h      This help\\n\" (quit q) (backtrace bt) %display-backtrace (shell !) system cd chdir pwd \"~S\\n\" \"bad command name: ~S. Type ,help for some help\\n\" do-repl-command %other-error-handlers %try-matching-condition %add-error-to-repl-handler \" (near line ~a in file ~s)\" \"\" \"**** Error~A:\\n~A: ~A\\n\" \"\\t(type \\\"\" \",help\" \"\\\" for more information)\\n\" display-error-message repl-handler &exit-r7rs retcode %pre-exit emergency-exit \"**** Unknown condition raised.\\n\" \"Condition type: ~A\\n\" struct-type-name \"Condition slots: ~S\\n\" \"**** The following non-condition was raised: ~S\\n\" \"\" repl-prompt repl-prompt-use-color? \"[~A] \" \"\" \"~A>\" \" \" \" \" make-prompt repl-make-prompt display-prompt repl-display-prompt main-repl-hook #:in G466 #:out G467 #:err G468 repl-change-default-ports G473 G474 G475 \"\\n\" \";; ~A\\n\" repl %initialize-signals \"STklos version ~A  (Id: ~A)\\n\" \"Copyright (C) 1999-2023 Erick Gallesio <eg@stklos.net>\\n\" \"[~a/~a/~a/~a]\\n\" machine-type #:readline no-readline utf8 no-utf8 \"Type ',h' for help\\n\" \"  \\\\    \" \"   \\\\   \" \"  / \\\\  \" \" /   \\\\ \" main-repl READLINE ((SCHEME)) ((try-initialize-readline . try-initialize-readline) (readline . readline) (add-history . add-history) (read-history . read-history) (write-history . write-history) (read-with-history . read-with-history) (rl-event-hook . rl-event-hook) (rl-input-timeout . rl-input-timeout) (rl-completer-function . rl-completer-function)) readline add-history read-history write-history rl-event-hook rl-input-timeout \"> \" \"\" read-with-history \"readline\" (#:string) #:pointer #eof cpointer->string free-bytes \"add_history\" (#:string) \"read_history\" (#:string) #:int \"write_history\" (#:string) \"rl_set_keyboard_input_timeout\" \"\" %get-symbol-address \"rl_set_keyboard_input_timeout\" (#:int) \"rl_event_hook\" \"el_set\" \"\" libedit try-initialize default-complete-function rl-completer-function readline-completion-generator %shared-library-suffix \"libreadline.\" \"libedit.\" \"readline-complete.\" %init-readline-completion-function try-initialize-readline REPL-READLINE ((SCHEME) (REPL) (READLINE)) ((try-initialize-repl-with-readline . try-initialize-repl-with-readline)) \"history\" \"\\x01;\" \"\\x02;\" \"\" \"\" nothing register-exit-function! #() %string->bytes \"\" #() #\\newline integer->char repl-readline-integration #:line-editor try-initialize-repl-with-readline trace (lambda args (%trace-expand args)) %trace-expand untrace (lambda args (%untrace-expand args)) %untrace-expand parse-arguments (lambda (argv . clauses) (%parse-arguments-expand argv clauses)) %parse-arguments-expand match-lambda (lambda clauses (expand-match-lambda (cons '() clauses))) expand-match-lambda match-case (lambda (expr . clauses) `((match-lambda ,@clauses) ,expr)) describe \"describe\" \"~S has not been defined in ~S\" \"bigmatch\" \"getopt\" %print-usage \"trace\" pp \"pretty-print\" pretty-print help \"help\" lexer-next-token \"lex-rt\" random-integer \"srfi/27\" random-real srfi48:help \"srfi/48\" srfi48:format-fixed environment \"env\" null-environment scheme-report-environment interaction-environment ((STKLOS-OBJECT) (MBE) (SRFI-0) (REPL) (REPL-READLINE)) scheme/base %define-here (lambda lst `(begin ,@(map (lambda (symb) `(define ,symb #void)) lst))) _ define-record-type assv bytevector-append bytevector-copy ceiling char->integer char-ready? char<=? char<? char>=? char>? complex? denominator even? gcd get-output-bytevector inexact? lcm list-set! min numerator odd? open-input-bytevector open-output-bytevector peek-char read-bytevector string string->utf8 string-copy truncate u8-ready? utf8->string vector-append vector-fill! write-char ((* . *) (+ . +) (- . -) (... . ...) (/ . /) (< . <) (<= . <=) (= . =) (=> . =>) (> . >) (>= . >=) (_ . _) (abs . abs) (and . and) (append . append) (apply . apply) (assoc . assoc) (assq . assq) (assv . assv) (begin . begin) (binary-port? . binary-port?) (boolean=? . boolean=?) (boolean? . boolean?) (bytevector . bytevector) (bytevector-append . bytevector-append) (bytevector-copy . bytevector-copy) (bytevector-copy! . bytevector-copy!) (bytevector-length . bytevector-length) (bytevector-u8-ref . bytevector-u8-ref) (bytevector-u8-set! . bytevector-u8-set!) (bytevector? . bytevector?) (caar . caar) (cadr . cadr) (call-with-current-continuation . call-with-current-continuation) (call-with-port . call-with-port) (call-with-values . call-with-values) (call/cc . call/cc) (car . car) (case . case) (cdar . cdar) (cddr . cddr) (cdr . cdr) (ceiling . ceiling) (char->integer . char->integer) (char-ready? . char-ready?) (char<=? . char<=?) (char<? . char<?) (char=? . char=?) (char>=? . char>=?) (char>? . char>?) (char? . char?) (close-input-port . close-input-port) (close-output-port . close-output-port) (close-port . close-port) (complex? . complex?) (cond . cond) (cond-expand . cond-expand) (cons . cons) (current-error-port . current-error-port) (current-input-port . current-input-port) (current-output-port . current-output-port) (define . define) (define-record-type . define-record-type) (define-syntax . define-syntax) (define-values . define-values) (denominator . denominator) (do . do) (dynamic-wind . dynamic-wind) (else . else) (eof-object . eof-object) (eof-object? . eof-object?) (eq? . eq?) (equal? . equal?) (eqv? . eqv?) (error . error) (error-object-irritants . error-object-irritants) (error-object-message . error-object-message) (error-object? . error-object?) (even? . even?) (exact . exact) (exact-integer-sqrt . exact-integer-sqrt) (exact-integer? . exact-integer?) (exact? . exact?) (expt . expt) (features . features) (file-error? . file-error?) (floor . floor) (floor-quotient . floor-quotient) (floor-remainder . floor-remainder) (floor/ . floor/) (flush-output-port . flush-output-port) (for-each . for-each) (gcd . gcd) (get-output-bytevector . get-output-bytevector) (get-output-string . get-output-string) (guard . guard) (if . if) (include . include) (include-ci . include-ci) (inexact . inexact) (inexact? . inexact?) (input-port-open? . input-port-open?) (input-port? . input-port?) (integer->char . integer->char) (integer? . integer?) (lambda . lambda) (lcm . lcm) (length . length) (let . let) (let* . let*) (let*-values . let*-values) (let-syntax . let-syntax) (let-values . let-values) (letrec . letrec) (letrec* . letrec*) (letrec-syntax . letrec-syntax) (list . list) (list->string . list->string) (list->vector . list->vector) (list-copy . list-copy) (list-ref . list-ref) (list-set! . list-set!) (list-tail . list-tail) (list? . list?) (make-bytevector . make-bytevector) (make-list . make-list) (make-parameter . make-parameter) (make-string . make-string) (make-vector . make-vector) (map . map) (max . max) (member . member) (memq . memq) (memv . memv) (min . min) (modulo . modulo) (negative? . negative?) (newline . newline) (not . not) (null? . null?) (number->string . number->string) (number? . number?) (numerator . numerator) (odd? . odd?) (open-input-bytevector . open-input-bytevector) (open-input-string . open-input-string) (open-output-bytevector . open-output-bytevector) (open-output-string . open-output-string) (or . or) (output-port-open? . output-port-open?) (output-port? . output-port?) (pair? . pair?) (parameterize . parameterize) (peek-char . peek-char) (peek-u8 . peek-u8) (port? . port?) (positive? . positive?) (procedure? . procedure?) (quasiquote . quasiquote) (quote . quote) (quotient . quotient) (raise . raise) (raise-continuable . raise-continuable) (rational? . rational?) (rationalize . rationalize) (read-bytevector . read-bytevector) (read-bytevector! . read-bytevector!) (read-char . read-char) (read-error? . read-error?) (read-line . read-line) (read-string . read-string) (read-u8 . read-u8) (real? . real?) (remainder . remainder) (reverse . reverse) (round . round) (set! . set!) (set-car! . set-car!) (set-cdr! . set-cdr!) (square . square) (string . string) (string->list . string->list) (string->number . string->number) (string->symbol . string->symbol) (string->utf8 . string->utf8) (string->vector . string->vector) (string-append . string-append) (string-copy . string-copy) (string-copy! . string-copy!) (string-fill! . string-fill!) (string-for-each . string-for-each) (string-length . string-length) (string-map . string-map) (string-ref . string-ref) (string-set! . string-set!) (string<=? . string<=?) (string<? . string<?) (string=? . string=?) (string>=? . string>=?) (string>? . string>?) (string? . string?) (substring . substring) (symbol->string . symbol->string) (symbol=? . symbol=?) (symbol? . symbol?) (syntax-error . syntax-error) (syntax-rules . syntax-rules) (textual-port? . textual-port?) (truncate . truncate) (truncate-quotient . truncate-quotient) (truncate-remainder . truncate-remainder) (truncate/ . truncate/) (u8-ready? . u8-ready?) (unless . unless) (unquote . unquote) (unquote-splicing . unquote-splicing) (utf8->string . utf8->string) (values . values) (vector . vector) (vector->list . vector->list) (vector->string . vector->string) (vector-append . vector-append) (vector-copy . vector-copy) (vector-copy! . vector-copy!) (vector-fill! . vector-fill!) (vector-for-each . vector-for-each) (vector-length . vector-length) (vector-map . vector-map) (vector-ref . vector-ref) (vector-set! . vector-set!) (vector? . vector?) (when . when) (with-exception-handler . with-exception-handler) (write-bytevector . write-bytevector) (write-char . write-char) (write-string . write-string) (write-u8 . write-u8) (zero? . zero?)) \"scheme/base\" scheme/write ((display . display) (write . write) (write-shared . write-shared) (write-simple . write-simple)) \"scheme/write\" ((STKLOS-COMPILER) (STKLOS-OBJECT) (MBE) (SRFI-0) (REPL) (REPL-READLINE)) \"STKLOS_BUILDING\" module-immutable! %before-exit-hook main \"STKLOS_FRAMES\" \"  - ...\\nSet shell variable STKLOS_FRAMES to set visible frames\\n\" \"  - \" %procedure-name \"<<let/call>>\" \" @ [~A:~A]\\n\" \"???\" \"**** Error while ~A ~S\\n\" \"\\t Where: in ~A\" \" (near line ~a in file ~s)\" \"\\tReason: ~A\\n\" \"EXIT\\n\" %simple-fatal-exception-handler #:no-init-file #:load #:srfi-176 #:file #:sexpr #:conf-dir #:prepend-dirs #:append-dirs \"Warning: cannot create configuration directory ~S\\n\" \"stklosrc\" \"loading file\" \"executing command\" \"evaluating\")";
+=======
+char* STk_boot_consts = "#(current-input-port original-input-port #:|| caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr pair? car map apply map* cdr for-each* filter filter-map append append-map append! append-map! generic? parameter? %procedure-plist #:setter key-get setter \"no setter defined for ~S\" error key-set! %set-procedure-plist! set-car! set-cdr! vector-ref vector-set! string-ref string-set! slot-ref slot-set! struct-ref struct-set! \"\" string->symbol \"~a\" format string-append symbol-append make-parameter stklos-debug-level compiler-known-globals memq register-new-global! for-each register-new-globals! %modules-stack current-module %create-module %module-create %module-restore raise %module-handler current-error-port \"\\x1b;[33m\" display \"\\x1b;[0m\" newline %debug STklos find-module when (lambda args (if (<= (length args) 1) (syntax-error 'when \"bad syntax in ~S\" `(when ,@args)) `(if ,(car args) (begin ,@(cdr args))))) length \"bad syntax in ~S\" %syntax-error if begin stklos %make-syntax unless (lambda args (if (<= (length args) 1) (syntax-error 'unless \"bad syntax in ~S\" `(unless ,@args)) `(if (not ,(car args)) (begin ,@(cdr args))))) \"bad syntax in ~S\" not set! (lambda args `(%%set! ,@args)) %%set! %claim-error (lambda (owner . body) (let ((x (gensym))) `(with-handler (lambda (,x) (error ,owner (condition-ref ,x 'message))) ,@body))) gensym with-handler lambda condition-ref quote message syntax-error (lambda args (if (zero? (length args)) (error 'syntax-error \"needs at least one argument\") `(%syntax-error ,@args))) zero? \"needs at least one argument\" define-syntax (lambda (macro-name syn-rules) (if (or (not (pair? syn-rules)) (not (eq? (car syn-rules) 'syntax-rules))) (error 'define-syntax \"in `~S', bad syntax-rules ~S\" macro-name syn-rules) (let ((keywords (cons macro-name (cadr syn-rules))) (clauses (cddr syn-rules)) (find-clause (symbol-value 'find-clause (find-module 'MBE)))) `(define-macro (,macro-name . args) (%find-macro-clause ',macro-name args ',keywords ',clauses))))) syntax-rules \"in `~S', bad syntax-rules ~S\" find-clause MBE symbol-value define-macro args %find-macro-clause module-symbols library? module-symbols* select-module (lambda (name) (let* ((compfile (in-module STKLOS-COMPILER *compiling-file*)) (mod (find-module name #f)) (newmod (or mod (if compfile (%module-create name) (error 'select-module \"module ~s does not exists\" name))))) (when (and mod (not (eq? name 'STklos))) (register-new-globals! (module-symbols mod))) `(begin (%%set-current-module (find-module ',name)) (when-compile (compiler-current-module ,newmod))))) symbol-value* *compiling-file* STKLOS-COMPILER \"module ~s does not exists\" %%set-current-module when-compile compiler-current-module define-module (lambda (name . body) (let ((oldmod (compiler-current-module)) (newmod (or (find-module name #f) (%module-create name)))) `(with-handler %module-handler (%%set-current-module (%module-create ',name)) (%%when-compile (compiler-current-module ,newmod)) ,@body (%%when-compile (compiler-current-module ,oldmod)) (%%set-current-module (%module-restore)) (values (void) ',name)))) %%when-compile values void list? only symbol? every import \"bad list of symbols ~s in only clause\" #:only \"bad only clause ~s\" except \"bad list of symbols ~s in except clause\" #:except \"bad except clause ~s\" prefix #:prefix \"bad prefix clause ~s\" rename \"bad list of associations ~s in rename clause\" #:rename \"bad rename clause ~s\" %library-name->symbol \"bad import set ~s\" %parse-imports %find-instanciated-module symbol->string require/provide \"module/library ~s does not exist\" %symbol->library-name \"symbol ~s is not in the import set\" filter! remove module-exports list-copy absent %syntax? %symbol-link module-imports %module-imports-set! %do-imports (lambda modules (let ((imp (%parse-imports modules))) (for-each (lambda (x) (%grab-file-information (symbol->string (car x)))) imp) (%do-imports (compiler-current-module) (list-copy imp) #t) `(%do-imports (current-module) (list-copy ',imp) #f))) %grab-file-information %%import reverse! %do-exports export \"bad renaming clause ~S\" \"bad exportation `~S'\" %parse-exports assq \"exported symbol ~s was previously renamed as ~S\" %module-exports-set! (lambda symbols (let ((s (%parse-exports symbols))) `(%do-exports (current-module) ',s))) export-syntax (lambda arg `(%%publish-syntax ,@arg)) %%publish-syntax in-module (lambda (mod symb . default) `(apply symbol-value* ',symb (find-module ',mod) ',default)) %populate-scheme-module SCHEME ((SCHEME)) ((eval . eval) (disassemble . disassemble) (disassemble-expr . disassemble-expr) (compiler:time-display . compiler:time-display) (compiler:gen-line-number . compiler:gen-line-number) (compiler:warn-use-undefined . compiler:warn-use-undefined) (compiler:warn-use-undefined-postpone . compiler:warn-use-undefined-postpone) (compiler:show-assembly-code . compiler:show-assembly-code) (compiler:generate-signature . compiler:generate-signature) (compiler:inline-common-functions . compiler:inline-common-functions) (%grab-file-information . %grab-file-information) (%compiler-new-label . %compiler-new-label) (%macro-expand . %macro-expand) (compiler-current-module . compiler-current-module) (when-compile . when-compile) (when-load-and-compile . when-load-and-compile) (%syntax-error . %syntax-error) (%compile-time-define . %compile-time-define)) *compiler-port* + - * / fx+ fx- fx* fxquotient = < <= > >= fx=? fx<? fx<=? fx>? fx>=? cons null? list eq? eqv? equal? *inline-table* *inline-symbols* (%set-current-module %%set-current-module %%execute %%execute-handler) *always-inlined* *code-instr* *code-constants* *code-labels* integer? label? NOP this-instr next-instr this-arg1 this-arg2 next-arg1 next-arg2 GOTO RETURN PUSH (IM-FALSE IM-TRUE IM-NIL IM-MINUS1 IM-ZERO IM-ONE IM-VOID) IM-FALSE FALSE-PUSH IM-TRUE TRUE-PUSH IM-NIL NIL-PUSH IM-MINUS1 MINUS1-PUSH IM-ZERO ZERO-PUSH IM-ONE ONE-PUSH IM-VOID VOID-PUSH SMALL-INT INT-PUSH CONSTANT CONSTANT-PUSH DEEP-LOCAL-REF DEEP-LOC-REF-PUSH IN-NOT (IN-NUMEQ IN-NUMDIFF IN-FXEQ IN-FXDIFF IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL) IN-NUMEQ IN-NUMDIFF IN-FXEQ IN-FXDIFF IN-NUMLT IN-NUMGE IN-NUMGT IN-NUMLE IN-EQ IN-NOT-EQ IN-EQV IN-NOT-EQV IN-EQUAL IN-NOT-EQUAL JUMP-FALSE (IN-NUMEQ IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL IN-NOT) JUMP-NUMDIFF JUMP-NUMEQ JUMP-NUMGE JUMP-NUMGT JUMP-NUMLE JUMP-NUMLT JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL JUMP-TRUE GLOBAL-REF GLOBAL-REF-PUSH PUSH-GLOBAL-REF INVOKE PUSH-GREF-INVOKE TAIL-INVOKE PUSH-GREF-TAIL-INV PREPARE-CALL PUSH-PREPARE-CALL GREF-INVOKE GREF-TAIL-INVOKE (LOCAL-REF0 LOCAL-REF1 LOCAL-REF2 LOCAL-REF3 LOCAL-REF4) LOCAL-REF0 LOCAL-REF0-PUSH LOCAL-REF1 LOCAL-REF1-PUSH LOCAL-REF2 LOCAL-REF2-PUSH LOCAL-REF3 LOCAL-REF3-PUSH LOCAL-REF4 LOCAL-REF4-PUSH peephole ((NOP 0) (IM-FALSE 0) (IM-TRUE 0) (IM-NIL 0) (IM-MINUS1 0) (IM-ZERO 0) (IM-ONE 0) (IM-VOID 0) (SMALL-INT 1) (CONSTANT 1) (GLOBAL-REF 1) (UGLOBAL-REF 1) (LOCAL-REF0 0) (LOCAL-REF1 0) (LOCAL-REF2 0) (LOCAL-REF3 0) (LOCAL-REF4 0) (LOCAL-REF 1) (DEEP-LOCAL-REF 1) (GLOBAL-SET 1) (UGLOBAL-SET 1) (LOCAL-SET0 0) (LOCAL-SET1 0) (LOCAL-SET2 0) (LOCAL-SET3 0) (LOCAL-SET4 0) (LOCAL-SET 1) (DEEP-LOCAL-SET 1) (GOTO 1) (JUMP-FALSE 1) (JUMP-TRUE 1) (DEFINE-SYMBOL 1) (POP 0) (PUSH 0) (DBG-VM 1) (CREATE-CLOSURE 2) (RETURN 0) (PREPARE-CALL 0) (INVOKE 1) (TAIL-INVOKE 1) (ENTER-LET-STAR 1) (ENTER-LET 1) (ENTER-TAIL-LET-STAR 1) (ENTER-TAIL-LET 1) (LEAVE-LET 0) (PUSH-HANDLER 1) (POP-HANDLER 0) (END-OF-CODE 0) (IN-ADD2 0) (IN-SUB2 0) (IN-MUL2 0) (IN-DIV2 0) (IN-NUMEQ 0) (IN-NUMLT 0) (IN-NUMGT 0) (IN-NUMLE 0) (IN-NUMGE 0) (IN-INCR 0) (IN-DECR 0) (IN-CONS 0) (IN-NULLP 0) (IN-CAR 0) (IN-CDR 0) (IN-LIST 1) (IN-NOT 0) (IN-VREF 0) (IN-VSET 0) (IN-SREF 0) (IN-SSET 0) (IN-EQ 0) (IN-EQV 0) (IN-EQUAL 0) (IN-APPLY 2) (UNUSED-2 0) (SET-CUR-MOD 0) (DOCSTRG 1) (FORMALS 1) (FALSE-PUSH 0) (TRUE-PUSH 0) (NIL-PUSH 0) (MINUS1-PUSH 0) (ZERO-PUSH 0) (ONE-PUSH 0) (VOID-PUSH 0) (INT-PUSH 1) (CONSTANT-PUSH 1) (GREF-INVOKE 2) (UGREF-INVOKE 2) (IN-NUMDIFF 0) (IN-NOT-EQ 0) (IN-NOT-EQV 0) (IN-NOT-EQUAL 0) (JUMP-NUMDIFF 1) (JUMP-NUMEQ 1) (JUMP-NUMLT 1) (JUMP-NUMLE 1) (JUMP-NUMGT 1) (JUMP-NUMGE 1) (JUMP-NOT-EQ 1) (JUMP-NOT-EQV 1) (JUMP-NOT-EQUAL 1) (LOCAL-REF0-PUSH 0) (LOCAL-REF1-PUSH 0) (LOCAL-REF2-PUSH 0) (LOCAL-REF3-PUSH 0) (LOCAL-REF4-PUSH 0) (GLOBAL-REF-PUSH 1) (UGLOBAL-REF-PUSH 1) (GREF-TAIL-INVOKE 2) (UGREF-TAIL-INVOKE 2) (PUSH-PREPARE-CALL 0) (PUSH-GLOBAL-REF 1) (PUSH-UGLOBAL-REF 1) (PUSH-GREF-INVOKE 2) (PUSH-UGREF-INVOKE 2) (PUSH-GREF-TAIL-INV 2) (PUSH-UGREF-TAIL-INV 2) (DEEP-LOC-REF-PUSH 1) (UNUSED-3 0) (UNUSED-4 0) (UNUSED-5 0) (UNUSED-6 0) (UNUSED-7 0) (UNUSED-8 0) (UNUSED-9 0) (UNUSED-10 0) (UNUSED-11 0) (UNUSED-12 0) (UNUSED-13 0) (UNUSED-14 0) (UNUSED-15 0) (UNUSED-16 0) (UNUSED-17 0) (UNUSED-18 0) (UNUSED-19 0) (IN-SINT-ADD2 1) (IN-SINT-SUB2 1) (IN-SINT-MUL2 1) (IN-SINT-DIV2 1) (UNUSED-20 0) (UNUSED-21 0) (UNUSED-22 0) (UNUSED-23 0) (UNUSED-24 0) (UNUSED-25 0) (UNUSED-26 0) (UNUSED-27 0) (UNUSED-28 0) (CALL-LOCATION 1) (DEEP-LOC-REF-FAR 1) (DEEP-LOC-SET-FAR 1) (CREATE-CLOSURE-FAR 2) (PUSH-HANDLER-FAR 1) (IN-FXADD2 0) (IN-FXSUB2 0) (IN-FXMUL2 0) (IN-FXDIV2 0) (IN-SINT-FXADD2 1) (IN-SINT-FXSUB2 1) (IN-SINT-FXMUL2 1) (IN-SINT-FXDIV2 1) (IN-FXEQ 0) (IN-FXLT 0) (IN-FXGT 0) (IN-FXLE 0) (IN-FXGE 0) (IN-FXDIFF 0)) INSTRUCTION-SET \"non existent opcode ~S\" panic info-opcode (GOTO JUMP-FALSE JUMP-TRUE JUMP-NUMDIFF JUMP-NUMGE JUMP-NUMGT JUMP-NUMGE JUMP-NUMLT JUMP-NUMLE JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL CREATE-CLOSURE CREATE-CLOSURE-FAR PUSH-HANDLER PUSH-HANDLER-FAR) use-address? string-upcase string-length #\\space make-string pretty-mnemonic \"Cannot decode ~S opcode\" find-instruction-infos CREATE-CLOSURE CREATE-CLOSURE-FAR PUSH-HANDLER PUSH-HANDLER-FAR \"No FAR version of instruction ~S\" find-far-codeop old+ make-vector small-integer-constant? (CREATE-CLOSURE-FAR PUSH-HANDLER-FAR) memv fetch-constant \"Instr. using a big constant as 2nd operand ~S\" \"Instruction with more than 2 parameters ~S\" assemble \"~A~A~A\" quotient remainder \"\\t;; ==> ~A\" vector-length \"\\n~A:  ~A\" \" ~A\" \" ~S ~S\" \"cannot disassemble instruction (~S)\" \"\\n~A:\\n\" disassemble-code current-output-port \"too many optional parameters: ~a\" %procedure-code disassemble \"cannot disassemble ~S\" compile END-OF-CODE emit vector-copy \"\\nConstants:\\n\" fprintf \"~A: ~W\\n\" dynamic-wind disassemble-expr \"*** PANIC *** \" getcwd string-position substring %path-without-cwd \"\" \"~A: \" %epair? \"~A:~A: \" %epair-file %epair-line \"\" \"~AError: ~A~A\\n\" compiler-error \"\" \"~A: \" \"~A:~A: \" \"\" \"~Awarning: ~A~A\\n\" \"**** Warning;\\n~A~A\\n\" compiler-warning unquote \"used outside of a quasiquote context\" unquote-splicing \"used outside of a quasiquote context\" string? \"bad parameters ~S\" \"bad parameters ~S\" *file-module-list* file-module-list-reset! add-file-module-list! module-name %syntax-source file-module-list-expanders #:prepend G32 #:version version #:globals #:macros open-output-file clock compiler:warn-use-undefined-postpone compile-file \"prepend should be a list: ~S\" %include-file \"#!/usr/bin/env stklos\\n\" \"; A -*- Scheme -*- generated file *DO NOT EDIT**\\n\" \"STklos ~S\\n\" compiler:show-assembly-code \"\\n#|\\n\" \"\\n~S\\n|#\\n\" \"#~S\\n\" %dump-code close-output-port compiler-show-undefined-symbols interactive-port? compiler:time-display \"Compilation time ~S ms\\n\" round exact ((compile-file . compile-file)) scope (locals mlocals parent) make-struct-type make-struct make-scope struct? struct-is-a? scope? scope-locals %fast-struct-ref scope-mlocals scope-parent %fast-struct-set! find-symbol-in-env \"***SCOPE*** ~S\\n\" \"   ==> locals= ~S mlocals= ~S parent =~S\" %debug-scope find-syntax-in-env %macro-expand quasiquote %syntax-expander compiler:gen-line-number compiler:warn-use-undefined compiler:generate-signature compiler:inline-common-functions module? \"bad module parameter ~s\" new-label %compiler-new-label emit-label expt exact? compile-constant \"bad usage in ~S\" compile-quote *forward-globals* symbol-bound? known-var? \"reference to undefined symbol ~S\" compiler-warn-undef verify-global define define->lambda \"ill formed definition ~S\" \"bad definition\" DEFINE-SYMBOL \"bad variable name ~S\" \"internal define forbidden here ~S\" compile-define GLOBAL-SET LOCAL-SET0 LOCAL-SET1 LOCAL-SET2 LOCAL-SET3 LOCAL-SET4 LOCAL-REF LOCAL-SET DEEP-LOCAL-SET DEEP-LOC-REF-FAR DEEP-LOC-SET-FAR compile-access compile-reference \"~S is a bad symbol\" \"bad assignment syntax in ~S\" compile-set! \"bad syntax in ~S\" compile-if extended-lambda->lambda eval %symbol-define \"bad variable name ~S\" \"internal define-macro forbidden here ~S\" compile-define-macro compile-and compile-or compile-begin compute-arity extend-env \"body is empty\" let compile-body FORMALS DOCSTRG compile-user-lambda ext-lambda-key-get and keyword? or 'lambda make-keyword \"too many optional parameters: ~a\" let* build-let* \"illegal ~a parameter: ~a\" \"optional\" \"keyword\" (#:optional #:key #:rest) reverse \"duplicate parameter ~S\" \"bad class name ~S\" \"bad procedure parameter ~S\" last-pair #:rest #:optional #:key \"illegal lambda list ending with ~a\" \"rest parameter must be a single symbol\" parse-parameter-list rewrite-params-and-body method \"bad definition ~S\" compile-lambda compile-args compile-var-args CALL-LOCATION %maybe-generate-line-information generate-PREPARE-CALL compile-normal-call assoc can-be-inlined? \"1 argument required (~A provided)\" \"2 arguments required (~A provided)\" \"3 arguments required (~A provided)\" SET-CUR-MOD \"1 arg. only (~S)\" %%execute-handler EXEC-HANDLER number? IN-INCR IN-SINT-ADD2 IN-ADD2 \"needs at least one argument\" IN-SINT-SUB2 IN-DECR IN-SUB2 IN-SINT-MUL2 IN-MUL2 \"needs at least one argument\" IN-SINT-DIV2 IN-DIV2 (fx+ fx- fx* fxquotient) fixnum? (fx+ fx*) IN-SINT-FXADD2 IN-SINT-FXMUL2 IN-SINT-FXSUB2 IN-SINT-FXDIV2 IN-FXADD2 IN-FXSUB2 IN-FXMUL2 IN-FXDIV2 (= < > <= >=) O \"needs at least one argument\" (fx=? fx<? fx>? fx<=? fx>=?) \"needs at least one argument\" IN-FXLT IN-FXGT IN-FXLE IN-FXGE IN-CONS IN-CAR IN-CDR IN-NULLP IN-LIST IN-VREF IN-VSET IN-SREF IN-SSET \"unimplemented inline primitive ~S\" compile-primitive-call negative? ENTER-TAIL-LET ENTER-LET LEAVE-LET \"bad number of parameters ~S\" compile-lambda-call |λ| compile-call \"duplicate binding ~S\" \"malformed binding ~S\" valid-let-bindings? letrec \"ill formed letrec ~S\" compile-letrec \"ill formed named let ~S\" compile-named-let \"ill formed let ~S\" compile-let \"ill formed let* ~S\" ENTER-TAIL-LET-STAR ENTER-LET-STAR compile-let* cond \"invalid clause ~S\" else \"else not in last clause ~S\" => rewrite-cond-clauses \"bad '=>' clause syntax ~S\" compile-cond ok case \"duplicate case value ~S in ~S\" \"ill formed case clause ~S\" \"invalid clause syntax in ~S\" \"ill formed else clause ~S\" \"ill formed clause ~S\" rewrite-case-clauses \"no key given\" compile-case do \"bad binding ~S\" rewrite-do \"bad syntax\" compile-do 'quasiquote backquotify 'unquote 'unquote-splicing vector? list->vector vector->list \"bad syntax\" compile-quasiquote POP-HANDLER \"bad syntax\" compile-with-handler open-input-file eof-object? %read close-port include \"bad include directive ~S\" compile-include include-ci \"bad include directive ~S\" read-case-sensitive compile-include-ci %let-syntax \"ill formed %let-syntax ~S\" \"ill formed binding ~S\" compile-%let-syntax create-temp-file %file-informations remove-file #:nature source %library-prefix \"share\" \"stklos\" make-path load-path find-path unknown find-file-informations member import-file-informations boolean? compile-require \"*** Exception on when-compile form of ~S\\n\" eprintf compile-when-compile (lambda body `(begin (%%when-compile ,@body) (void))) when-load-and-compile (lambda body `(begin (%%when-compile ,@body) ,@body (void))) %%label \"bad usage ~S\" compile-%%label %%goto \"bad usage ~S\" compile-%%goto compile-%%source-pos (lambda |λ|) (let %let) %%require %%include %%include-ci %%source-pos %execute %compile-time-define (lambda symbs `(when-compile ,@(map (lambda (x) `(define ,x #void)) symbs))) ((STKLOS-COMPILER)) ((with-input-from-file . with-input-from-file) (with-output-to-file . with-output-to-file) (with-error-to-file . with-error-to-file) (with-input-from-string . with-input-from-string) (with-output-to-string . with-output-to-string) (with-input-from-port . with-input-from-port) (with-output-to-port . with-output-to-port) (with-error-to-port . with-error-to-port) (%call-with . %call-with) (call-with-input-file . call-with-input-file) (call-with-output-file . call-with-output-file) (rationalize . rationalize) (call-with-values . call-with-values)) open-file &i/o-filename-error location \"cannot open file ~S\" backtrace %vm-backtrace filename make-condition %make-with-file with-input-from-file \"r\" with-output-to-file \"w\" with-error-to-file \"w\" open-input-string with-input-from-string open-output-string get-output-string with-output-to-string %port-file-fd %make-with-port \"r\" with-input-from-port \"w\" with-output-to-port \"w\" with-error-to-port call-with-values %call-with call-with-input-file call-with-output-file rationalize \"bad rational ~S\" floor positive? 0.0 rational? %call-for-values %use-utf8? string-split string-blit! string-titlecase string-titlecase! \"bad string ~S\" \" \\t\\n\" %string-use-utf8? string->list \"bad offset ~S\" string-mutable? \"changing the constant string ~S is not allowed\" \"bad starting index ~S\" \"bad ending index ~S\" char-alphabetic? char-upcase char-downcase \"bad starting index ~S\" \"bad ending index ~S\" ((call/cc . call/cc) (call-with-current-continuation . call-with-current-continuation) (dynamic-wind . dynamic-wind)) %make-continuation %fresh-continuation? %restore-continuation %call/cc call/cc %thread-dynwind-stack %thread-dynwind-stack-set! procedure? \"bad procedure ~S\" %set-procedure-name! call-with-current-continuation ((define-struct . define-struct)) define-struct (lambda (name . slots) (define (compute-offset slot slots) (let ((sublist (memq slot slots))) (- (length slots) (length sublist)))) (let* ((pred (string->symbol (format \"~a?\" name))) (arg (gensym)) (val (gensym))) `(begin (define ,name (make-struct-type ',name #f ',slots)) (define (,(string->symbol (format \"make-~a\" name)) unquote arg) (apply make-struct ,name ,arg)) (define (,pred ,arg) (and (struct? ,arg) (struct-is-a? ,arg ,name))) ,@(map (lambda (x) (let ((fname (string->symbol (format \"~a-~a\" name x)))) `(define ,fname (lambda (,arg) (%fast-struct-ref ,arg ,name ',fname ,(compute-offset x slots)))))) slots) ,@(map (lambda (x) (let ((fname (string->symbol (format \"~a-~a\" name x)))) `(set! (setter ,fname) (lambda (,arg ,val) (%fast-struct-set! ,arg ,name ',fname ,(compute-offset x slots) ,val))))) slots) (values (void) ',name)))) \"~a?\" \"make-~a\" \"~a-~a\" \"~a-~a\" ((read-chars . read-chars) (read-chars! . read-chars!) (display-shared . display-shared) (gensym . gensym) (macro-expand . macro-expand) (macro-expand* . macro-expand*) (remove . remove) (remove! . remove!) (delete . delete) (delete! . delete!) (every . every) (any . any) (call-with-input-string . call-with-input-string) (call-with-output-string . call-with-output-string) (open-input-virtual . open-input-virtual) (open-output-virtual . open-output-virtual) (read-from-string . read-from-string) (eval-from-string . eval-from-string) (command-line . command-line) (program-name . program-name) (create-directories . create-directories) (ensure-directories-exist . ensure-directories-exist) (posix-error? . posix-error?) (posix-error-name . posix-error-name) (posix-error-message . posix-error-message) (posix-error-errno . posix-error-errno) (posix-error-procedure . posix-error-procedure) (posix-error-arguments . posix-error-arguments) (make-hash-table . make-hash-table) (hash-table->alist . hash-table->alist) (alist->hash-table . alist->hash-table) (hash-table-update! . hash-table-update!) (hash-table-update!/default . hash-table-update!/default) (hash-table-keys . hash-table-keys) (hash-table-values . hash-table-values) (hash-table-fold . hash-table-fold) (hash-table-merge! . hash-table-merge!) (hash-table-copy . hash-table-copy) (fluid-let . fluid-let) (time . time) (tagbody . tagbody) (dotimes . dotimes) (repeat . repeat) (while . while) (until . until) (call/ec . call/ec) (base64-encode-string . base64-encode-string) (base64-decode-string . base64-decode-string) (md5sum-file . md5sum-file) (ansi-color . ansi-color) (ansi-color-protect . ansi-color-protect) (do-color . do-color) (port->string . port->string) (port->sexp-list . port->sexp-list) (port->string-list . port->string-list) (print . print) (printerr . printerr) (eprintf . eprintf) (printf . printf) (fprintf . fprintf) (declare-new-error . declare-new-error) (exec . exec) (exec-list . exec-list) (apropos . apropos) (die . die) (decompose-file-name . decompose-file-name) (dirname . dirname) (basename . basename) (file-separator . file-separator) (make-path . make-path) (file-suffix . file-suffix) (file-prefix . file-prefix) (port-idle-register! . port-idle-register!) (port-idle-unregister! . port-idle-unregister!) (port-idle-reset! . port-idle-reset!) (chmod . chmod) (with-mutex . with-mutex) (error-object-location . error-object-location) (%push-id . %push-id) (define-constant . define-constant) (receive . receive) (case-lambda . case-lambda) (%define-condition-type-accessors . %define-condition-type-accessors) (message-condition? . message-condition?) (condition-message . condition-message) (serious-condition? . serious-condition?) (error? . error?) (error-message? . error-message?) (error-location . error-location) (error-message . error-message) (read-with-shared-structure . read-with-shared-structure) (read/ss . read/ss) (write-with-shared-structure . write-with-shared-structure) (write/ss . write/ss) (parameterize . parameterize) (require-extension . require-extension) (string->keyword . string->keyword) (get-environment-variable . get-environment-variable) (get-environment-variables . get-environment-variables) (implementation-name . implementation-name) (implementation-version . implementation-version) (cpu-architecture . cpu-architecture) (machine-name . machine-name) (os-name . os-name) (os-version . os-version) (fx-width . fx-width) (fx-greatest . fx-greatest) (fx-least . fx-least) (assume . assume) (version-alist . version-alist) (port-has-port-position? . port-has-port-position?) (port-position . port-position) (port-has-set-port-position!? . port-has-set-port-position!?) (set-port-position! . set-port-position!) (make-i/o-invalid-position-error . make-i/o-invalid-position-error) (i/o-invalid-position-error? . i/o-invalid-position-error?) (command-name . command-name) (command-args . command-args) (argc . argc) (script-file . script-file) (script-directory . script-directory) (make-nan . make-nan)) read-bytes read-chars read-bytes! read-chars! display-shared \"G\" \"bad gensym prefix ~S\" number->string string->uninterned-symbol macro-expand macro-expand* remove! delete delete! \"bad procedure\" any \"bad procedure\" call-with-input-string call-with-output-string #:read-char #:ready? #:eof? #:close vector %open-input-virtual open-input-virtual #:write-char #:write-string #:flush %open-output-virtual open-output-virtual read read-from-string eval-from-string *%system-state-plist* #:script-file \"\" \"\" \"\" #:program-name \"\" #:argv \"bad command line ~S\" command-line program-name dirname file-is-directory? create-directories create-directory ensure-directories-exist condition? &posix-error condition-has-type? posix-error? \"expected a posix-error condition\" %posix-error-condition-ref errname posix-error-name r7rs-msg posix-error-message errno posix-error-errno posix-error-procedure r7rs-irritants posix-error-arguments hash-table-hash %make-hash-table make-hash-table hash-table-map hash-table->alist hash-table-exists? hash-table-set! alist->hash-table hash-table-ref hash-table-update! hash-table-ref/default hash-table-update!/default hash-table-keys hash-table-values hash-table-for-each hash-table-fold hash-table-merge! hash-table-equivalence-function hash-table-hash-function hash-table-copy fluid-let (lambda (bindings . body) (let* ((vars (map car bindings)) (vals (map cadr bindings)) (tmps (map (lambda (x) (gensym)) vars))) `(let ,(map list tmps vars) (dynamic-wind (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars vals)) (lambda () ,@body) (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps)))))) \"no setter defined for ~S\" time (lambda args (let ((tmp1 (gensym)) (tmp2 (gensym))) `(let* ((,tmp1 (clock)) (,tmp2 (begin ,@args))) (format (current-error-port) \"Elapsed time: ~S ms\\n\" (- (clock) ,tmp1)) ,tmp2))) \"Elapsed time: ~S ms\\n\" tagbody (lambda body (let ((tags (map (lambda (x) (cons x (%compiler-new-label))) (filter keyword? body)))) (define (replace code) (if (pair? code) (if (and (eq? (car code) '->) (= (length code) 2)) (let ((t (assq (cadr code) tags))) (if t `(%%goto ,(cdr t)) code)) (map replace code)) code)) (define (verify code) (if (pair? code) (cond ((and (eq? (car code) '->) (= (length code) 2)) (error 'tagbody \"destination label ~S not defined\\n\" (cadr code))) ((eq? (car code) 'tagbody) #void) (else (map verify code))))) (let ((new-body (map (lambda (x) (if (keyword? x) `(%%label ,(cdr (assq x tags))) (replace x))) body))) (verify new-body) `(begin ,@new-body)))) -> \"destination label ~S not defined\\n\" dotimes (lambda (bindings . body) (apply (lambda (var count . result) (let ((limit (gensym)) (result (if (null? result) (list '(void)) result))) `(let ((,limit ,count)) (do ((,var 0 (+ ,var 1))) ((>= ,var ,limit) ,@result) ,@body)))) bindings)) (void) repeat (lambda (expr . body) (let ((var (gensym))) `(let ((,var ,expr)) (tagbody #:top (when (> ,var 0) (set! ,var (- ,var 1)) ,@body (-> #:top)))))) #:top while (lambda (test . body) (let ((lab (gensym))) `(let ,lab () (when ,test ,@body (,lab))))) until (lambda (test . body) (let ((lab (gensym))) `(let ,lab () (unless ,test ,@body (,lab))))) \"call/ec\" call/ec base64-encode-string base64-decode-string base64-encode base64-decode \"r\" md5sum close-input-port \"cannot read file ~s\" md5sum-file ansi-color ansi-color-protect \"\\x1b;[\" \"m\" ((normal . \"0\") (bold . \"1\") (no-bold . \"21\") (italic . \"2\") (no-italic . \"22\") (underline . \"4\") (no-underline . \"24\") (blink . \"5\") (no-blink . \"25\") (reverse . \"7\") (no-reverse . \"27\") (black . \"30\") (bg-black . \"40\") (red . \"31\") (bg-red . \"41\") (green . \"32\") (bg-green . \"42\") (yellow . \"33\") (bg-yellow . \"43\") (blue . \"34\") (bg-blue . \"44\") (magenta . \"35\") (bg-magenta . \"45\") (cyan . \"36\") (bg-cyan . \"46\") (white . \"37\") (bg-white . \"47\")) \"\" \"\\x1b;[\" \"m\" \"\" \"\" \";\" \"38;5;~a\" \"48;5;~a\" \";\" \"bad command ~S\" \"TERM\" getenv \"\" #:interactive regexp-match (\"rxvt\" \"xterm\" \"xterm-color\" \"linux\" \"cygwin\" \"cons25\") \"\" do-color input-port? port->list \"bad port ~S\" %port->list \"bad port ~S\" copy-port port->string port->sexp-list read-line port->string-list print printerr flush-output-port printf declare-new-error (lambda (name) (let ((cond-name (string->symbol (format \"&~a\" name))) (predicate (string->symbol (format \"&~a?\" name))) (args (gensym))) `(begin (define-condition-type ,cond-name &error-message ,predicate) (define (,name unquote args) (if (and (not (null? ,args)) (symbol? (car ,args))) (apply signal-error ,cond-name ,args) (apply signal-error ,cond-name ',name ,args)))))) \"&~a\" \"&~a?\" define-condition-type &error-message signal-error \"| \" exec \"| \" exec-list string<? apropos \"bad module ~S\" sort string-find? \"**** ~A\\n**** EXIT\\n\" exit die running-os cygwin-windows posixify-file-name #\\/ char=? \"/\" \".\" \"/\" decompose-file-name \"^(.*)/(.+)$\" \"\\\\1\" regexp-replace \"\" string=? \"/\" \".\" \"^(.*)/(.*)$\" \"\\\\2\" basename \"/\" \".\" \"/\" \"^(.*)/(.+)$\" \"\\\\1\" \"\" \"/\" \".\" \"^(.*)/(.*)$\" \"\\\\2\" (unix cygwin-windows android) windows #\\\\ #\\? file-separator \"~A~A~A\" #\\. file-suffix file-prefix port-idle-register! \"bad procedure ~S\" %port-idle port-idle-unregister! \"bad procedure ~S\" port-idle-reset! expand-file-name %chmod bit-or write execute chmod \"bad option ~S\" \"bad option ~S\" mutex-lock! mutex-unlock! with-mutex error-object? \"bad error object: ~S\" error-object-location %stklos-git #:commit \"\" \"\" \"stable-\" %push-id define-constant (lambda args (define (rewrite l) (if (<= (length l) 1) (error \"bad constant definition\")) (let ((bind (car l)) (body (cdr l))) (if (pair? bind) (rewrite `(,(car bind) (lambda ,(cdr bind) ,@body))) l))) (let ((args (rewrite args))) (if (= (length args) 2) `(begin (define ,@args) (symbol-immutable! ',(car args))) (error \"bad constant definition ~S\" `(define-constant ,@args))))) \"bad constant definition\" symbol-immutable! \"bad constant definition ~S\" receive (lambda (vars producer . body) `(call-with-values (lambda () ,producer) (lambda ,vars ,@body))) case-lambda (lambda clauses (let ((len (gensym)) (args (gensym)) (compute-arity (in-module STKLOS-COMPILER compute-arity))) `(lambda ,args (let ((,len (length ,args))) (cond ,@(map (lambda (x) (unless (>= (length x) 2) (error 'case-lambda \"bad clause ~S\" x)) (let* ((formals (car x)) (body (cdr x)) (arity (compute-arity formals))) (cond ((positive? arity) `((= ,len ,arity) (apply (lambda ,formals ,@body) ,args))) ((zero? arity) `((= ,len ,arity) ,@body)) (else `((>= ,len ,(- (- arity) 1)) (apply (lambda ,formals ,@body) ,args)))))) clauses) (else (error 'case-lambda \"no matching clause in list ~S for ~S\" ',(map car clauses) ,args))))))) \"bad clause ~S\" \"no matching clause in list ~S for ~S\" %define-condition-type-accessors (lambda (name supertype predicate . slots) (let ((obj (gensym))) `(begin (define (,predicate ,obj) (and (condition? ,obj) (condition-has-type? ,obj ,name))) ,@(map (lambda (x) `(define (,(cadr x) ,obj) (unless (,predicate ,obj) (error ',(cadr x) \"bad type for condition ~S\" ,obj)) (condition-ref ,obj ',(car x)))) slots)))) \"bad type for condition ~S\" &message message-condition? condition-message &serious serious-condition? &error error? error-message? error-location error-message read-with-shared-structure write* write-with-shared-structure read/ss write/ss parameterize (lambda (bindings . body) (let ((tmp1 (map (lambda (_) (gensym)) bindings)) (tmp2 (map (lambda (_) (gensym)) bindings))) `(let (,@(map (lambda (x y) (list y (cadr x))) bindings tmp1) ,@(map (lambda (x y) (list y (list (car x)))) bindings tmp2)) (dynamic-wind (lambda () ,@(map (lambda (x y) `(,(car x) ,y)) bindings tmp1)) (lambda () ,@body) (lambda () ,@(map (lambda (x y) `(,(car x) ,y)) bindings tmp2)))))) require-extension (lambda args (%find-macro-clause 'require-extension args '(require-extension srfi) '(((_ \"internal\" (srfi id ...)) (begin (require-feature id) ...)) ((_ \"internal\" (x ...)) (import (x ...))) ((_ \"internal\" id) (cond-expand (id #void) (else (error \"cannot require extension named '~s'\" 'id)))) ((_ clause ...) (begin (require-extension \"internal\" clause) ...))))) (require-extension srfi) (((_ \"internal\" (srfi id ...)) (begin (require-feature id) ...)) ((_ \"internal\" (x ...)) (import (x ...))) ((_ \"internal\" id) (cond-expand (id #void) (else (error \"cannot require extension named '~s'\" 'id)))) ((_ clause ...) (begin (require-extension \"internal\" clause) ...))) \"bad string ~S\" string->keyword get-environment-variable get-environment-variables \"STklos\" implementation-name implementation-version %uname cpu-architecture machine-name os-name \" \" os-version fixnum-width fx-width greatest-fixnum fx-greatest least-fixnum fx-least assume (lambda (expr . args) (if (positive? (stklos-debug-level)) (let* ((efile (and (%epair? expr) (%epair-file expr))) (eline (and (%epair? expr) (%epair-line expr))) (fmt (string-append (if efile (format \"in ~A:~A, \" efile eline) \"\") \"invalid assumption:\"))) `(or ,expr (error ,fmt ',expr ,@args))) #void)) \"in ~A:~A, \" \"\" \"invalid assumption:\" \"srfi-\" string->number %stklos-configure features #:use-utf8 command \"stklos\" scheme.id languages scheme r5rs r7rs encodings (utf-8) threads %thread-system install-dir website \"https://stklos.net\" scheme.features scheme.path scheme.srfi scheme.srfi.count build.configure #:configure build.git.tag #:tag build.git.branch #:branch build.git.commit build.git.modified #:modified c.version #:c-version c.compile #:c-compile c.link #:c-link c.type-bits #:c-type-bits c.library.compile #:shlib-compile c.library.link #:shlib-link c.library.extension #:shlib-suffix stklos.system-libs #:system stklos.compiled-libs #:compiled os.uname os.env.LANG \"LANG\" \"\" os.env.TERM \"TERM\" \"\" version-alist port? port-has-port-position? \"Not a port: ~A\" port-current-position port-position port-has-set-port-position!? \"Not a port: ~A\" output-port? flush port-seek set-port-position! &i/o-bad-parameter parameter make-i/o-invalid-position-error obj i/o-invalid-position-error? \"\" *load-suffixes* command-name command-args argc \"\" \"\" script-file \"\" \"\" \"/\" script-directory %make-nan make-nan ((regexp-replace . regexp-replace) (regexp-replace-all . regexp-replace-all)) regexp-replace-all \"\\\\\\\\[0-9]\" regexp-match-positions \"cannot match \\\\~A in model\" list-ref ((run-process . run-process) (process-kill . process-kill) (process-stop . process-stop) (process-continue . process-continue)) \"value expected after keyword ~S\" #:input #:output #:error #:wait #:fork #:args %run-process run-process SIGTERM process-send-signal process-kill SIGSTOP process-stop SIGCONT process-continue ((%equiv? . %equiv?)) %equiv? %equal-try ((time? . time?) (time->seconds . time->seconds) (seconds->time . seconds->time) (make-date . make-date) (date? . date?) (seconds->date . seconds->date) (date-nanosecond . date-nanosecond) (date-second . date-second) (date-minute . date-minute) (date-hour . date-hour) (date-day . date-day) (date-month . date-month) (date-year . date-year) (date-week-day . date-week-day) (date-year-day . date-year-day) (date-dst . date-dst) (date-tz . date-tz) (time-zone-name . time-zone-name) (seconds->list . seconds->list) (current-date . current-date) (current-time . current-time) (seconds->string . seconds->string) (date->string . date->string) (time-nanosecond . time-nanosecond) (set-time-nanosecond! . set-time-nanosecond!) (time-second . time-second) (set-time-second! . set-time-second!) (time-type . time-type) (set-time-type! . set-time-type!) (make-time . make-time) (time-tai->time-utc . time-tai->time-utc) (time-tai->time-utc! . time-tai->time-utc!) (time-utc->time-tai . time-utc->time-tai) (time-utc->time-tai! . time-utc->time-tai!) (%leap-second-table . %leap-second-table) (%leap-second-delta . %leap-second-delta) (%time-tai->time-utc! . %time-tai->time-utc!) (%time-utc->time-tai! . %time-utc->time-tai!)) \"since first argument is symbol, 3 args (type, nanosecond and second) required, only 2 given\" (time-tai time-utc time-monotonic time-process time-duration) \"bad time type ~S\" \"bad integer ~S\" \"bad integer ~S\" %time \"since first argument is integer, 2 args (nanosecond and second) required, but 3 given\" \"bad integer ~S\" time-utc \"bad symbol or integer ~S\" make-time type time-type set-time-type! second time-second set-time-second! nanosecond time-nanosecond set-time-nanosecond! struct-type time? 1000000000 %nano 86400 %sid exact->inexact time-seconds \"bad time ~S\" time->seconds real? inexact->exact #:time-utc seconds->time \"cannot convert ~S to a time\" \"bad number ~S\" ((1483228800 . 37) (1435708800 . 36) (1341100800 . 35) (1230768000 . 34) (1136073600 . 33) (915148800 . 32) (867715200 . 31) (820454400 . 30) (773020800 . 29) (741484800 . 28) (709948800 . 27) (662688000 . 26) (631152000 . 25) (567993600 . 24) (489024000 . 23) (425865600 . 22) (394329600 . 21) (362793600 . 20) (315532800 . 19) (283996800 . 18) (252460800 . 17) (220924800 . 16) (189302400 . 15) (157766400 . 14) (126230400 . 13) (94694400 . 12) (78796800 . 11) (63072000 . 10)) %leap-second-table %leap-second-delta %leap-second-neg-delta time-tai \"bad TAI time ~S\" %time-tai->time-utc! time-tai->time-utc time-tai->time-utc! \"bad UTC time ~S\" %time-utc->time-tai! time-utc->time-tai time-utc->time-tai! current-second %get-time-of-day %current-time-tai %current-time-utc %current-time \"too many arguments (0 or 1 expected, ~S given)\" \"unsupported time type ~S\" current-time %make-date-key %make-date-opt make-date #:nanosecond #:second #:minute #:hour #:day #:month #:year #:zone-offset %make-date %date max date->seconds seconds->date local-timezone-offset week-day date-week-day year-day date-year-day dst date-dst tz date? date-tz \"Z\" abs #\\- #\\+ \"~a~2f:~2f\" #\\0 string-map time-zone-name %seconds->date \"#[date ~A-~A-~A ~A:~A:~A]\" year month day hour minute struct-type-change-writer! date-nanosecond date-second date-minute date-hour date-day date-month date-year struct->list seconds->list current-date seconds->string \"bad string ~S\" #\\% \"%%\" #\\~ %seconds->string \"~c\" date->string \"bad string ~S\" ((bit-and . bit-and) (bit-or . bit-or) (bit-xor . bit-xor) (bit-not . bit-not) (bit-shift . bit-shift)) bit-and bit-xor #(#(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15) #(1 0 3 2 5 4 7 6 9 8 11 10 13 12 15 14) #(2 3 0 1 6 7 4 5 10 11 8 9 14 15 12 13) #(3 2 1 0 7 6 5 4 11 10 9 8 15 14 13 12) #(4 5 6 7 0 1 2 3 12 13 14 15 8 9 10 11) #(5 4 7 6 1 0 3 2 13 12 15 14 9 8 11 10) #(6 7 4 5 2 3 0 1 14 15 12 13 10 11 8 9) #(7 6 5 4 3 2 1 0 15 14 13 12 11 10 9 8) #(8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7) #(9 8 11 10 13 12 15 14 1 0 3 2 5 4 7 6) #(10 11 8 9 14 15 12 13 2 3 0 1 6 7 4 5) #(11 10 9 8 15 14 13 12 3 2 1 0 7 6 5 4) #(12 13 14 15 8 9 10 11 4 5 6 7 0 1 2 3) #(13 12 15 14 9 8 11 10 5 4 7 6 1 0 3 2) #(14 15 12 13 10 11 8 9 6 7 4 5 2 3 0 1) #(15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0)) #(#(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0) #(0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1) #(0 0 2 2 0 0 2 2 0 0 2 2 0 0 2 2) #(0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3) #(0 0 0 0 4 4 4 4 0 0 0 0 4 4 4 4) #(0 1 0 1 4 5 4 5 0 1 0 1 4 5 4 5) #(0 0 2 2 4 4 6 6 0 0 2 2 4 4 6 6) #(0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7) #(0 0 0 0 0 0 0 0 8 8 8 8 8 8 8 8) #(0 1 0 1 0 1 0 1 8 9 8 9 8 9 8 9) #(0 0 2 2 0 0 2 2 8 8 10 10 8 8 10 10) #(0 1 2 3 0 1 2 3 8 9 10 11 8 9 10 11) #(0 0 0 0 4 4 4 4 8 8 8 8 12 12 12 12) #(0 1 0 1 4 5 4 5 8 9 8 9 12 13 12 13) #(0 0 2 2 4 4 6 6 8 8 10 10 12 12 14 14) #(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)) modulo bit-not bit-shift ((make-thread . make-thread) (thread-handler-error-show . thread-handler-error-show) (thread-sleep! . thread-sleep!) (thread-join! . thread-join!) (mutex-lock! . mutex-lock!) (mutex-unlock! . mutex-unlock!) (join-timeout-exception? . join-timeout-exception?) (abandoned-mutex-exception? . abandoned-mutex-exception?) (terminated-thread-exception? . terminated-thread-exception?) (&uncaught-exception . &uncaught-exception) (uncaught-exception? . uncaught-exception?) (uncaught-exception-reason . uncaught-exception-reason)) \"bad timeout ~S\" %thread-timeout->seconds \"thread\" current-thread thread-name %build-error-location bold red \"**** Error \" blue \"(in thread ~S):\\n\" \"~A: ~A\\n\" normal \"    (this error may be signaled again later)\\n\" %thread-end-exception-set! thread-handler-error-show %make-thread make-thread thread-sleep! \"cannot used #f as timeout\" %thread-sleep! thread-join! \"cannot join on myself (deadlock will occur)\" %thread-join! &thread-join-timeout %thread-end-exception &uncaught-exception reason %thread-end-result %mutex-lock! thread? &thread-abandonned-mutex %mutex-unlock! join-timeout-exception? abandoned-mutex-exception? &thread-terminated terminated-thread-exception? &condition (reason) make-condition-type uncaught-exception? uncaught-exception-reason ((make-external-function . make-external-function) (make-callback . make-callback) (define-external . define-external)) make-external-function make-callback ((#:void 0) (#:char 1) (#:short 2) (#:ushort 3) (#:int 4) (#:uint 5) (#:long 6) (#:ulong 7) (#:lonlong 8) (#:ulonlong 9) (#:float 10) (#:double 11) (#:boolean 12) (#:pointer 13) (#:string 14) (#:int8 15) (#:int16 16) (#:int32 17) (#:int64 18) (#:obj 19)) define-external \"parameter of type :void are forbidden\" \"bad type name ~S\" \"bad parameter description: ~S\" \"bad parameter description: ~S\" %make-ext-func %make-callback (lambda (name parameters . args) (let* ((lib (key-get args #:library-name \"\")) (lib-name (if (and (equal? lib \"\") (equal? (running-os) 'cygwin-windows)) \"cygwin1.dll\" lib)) (entry-name (key-get args #:entry-name (symbol->string name))) (return-type (key-get args #:return-type #:void))) `(define ,name (make-external-function ,entry-name ',parameters ,return-type ,lib-name)))) #:library-name \"\" \"\" \"cygwin1.dll\" #:entry-name #:return-type #:void ((write-shared . write-shared) (write-simple . write-simple) (letrec* . letrec*) (let-values . let-values) (let*-values . let*-values) (delay . delay) (delay-force . delay-force) (lazy . lazy) (make-promise . make-promise) (eager . eager) (define-values . define-values) (equal-simple? . equal-simple?) (exact-integer? . exact-integer?) (floor-quotient . floor-quotient) (floor/ . floor/) (truncate/ . truncate/) (truncate-quotient . truncate-quotient) (truncate-remainder . truncate-remainder) (floor-remainder . floor-remainder) (square . square) (exact-integer-sqrt . exact-integer-sqrt) (exact . exact) (inexact . inexact) (boolean=? . boolean=?) (make-list . make-list) (member-simple . member-simple) (assoc-simple . assoc-simple) (member . member) (assoc . assoc) (symbol=? . symbol=?) (string=? . string=?) (%string2=? . %string2=?) (string<? . string<?) (%string2<? . %string2<?) (string<=? . string<=?) (%string2<=? . %string2<=?) (string>? . string>?) (%string2>? . %string2>?) (string>=? . string>=?) (%string2>=? . %string2>=?) (string-ci=? . string-ci=?) (%string-ci2=? . %string-ci2=?) (string-ci<? . string-ci<?) (%string-ci2<? . %string-ci2<?) (string-ci<=? . string-ci<=?) (%string-ci2<=? . %string-ci2<=?) (string-ci>? . string-ci>?) (%string-ci2>? . %string-ci2>?) (string-ci>=? . string-ci>=?) (%string-ci2>=? . %string-ci2>=?) (string->list . string->list) (string-copy! . string-copy!) (string-fill! . string-fill!) (%string-fill2! . %string-fill2!) (vector->list . vector->list) (vector-copy! . vector-copy!) (vector->string . vector->string) (string->vector . string->vector) (make-bytevector . make-bytevector) (bytevector? . bytevector?) (bytevector . bytevector) (bytevector-length . bytevector-length) (bytevector-u8-ref . bytevector-u8-ref) (bytevector-u8-set! . bytevector-u8-set!) (bytevector-copy! . bytevector-copy!) (string-map . string-map) (vector-map . vector-map) (string-for-each . string-for-each) (vector-for-each . vector-for-each) (error-object? . error-object?) (error-object-message . error-object-message) (error-object-irritants . error-object-irritants) (read-error? . read-error?) (file-error? . file-error?) (call-with-port . call-with-port) (input-port-open? . input-port-open?) (output-port-open? . output-port-open?) (read-string . read-string) (read-u8 . read-u8) (peek-u8 . peek-u8) (read-bytevector! . read-bytevector!) (write-string . write-string) (write-u8 . write-u8) (write-bytevector . write-bytevector) (with-exception-handler . with-exception-handler) (raise-continuable . raise-continuable) (guard . guard) (current-jiffy . current-jiffy) (jiffies-per-second . jiffies-per-second) (features . features) (%continuable-exception? . %continuable-exception?) (%continuable-exception-value . %continuable-exception-value)) write-shared write-simple letrec* (lambda (bindings . body) (if (list? bindings) (for-each (lambda (x) (unless (and (list? x) (= (length x) 2)) (error 'letrec* \"incorrect binding ~S\" x))) bindings) (error 'letrec* \"incorrect bindings ~S\" bindings)) `(let ,(map (lambda (x) (list (car x) #f)) bindings) ,@(map (lambda (x) `(set! ,@x)) bindings) (let () ,@body))) \"incorrect binding ~S\" \"incorrect bindings ~S\" let-values (lambda (bindings . body) (let ((tmps '())) (define (expand-once bindings tmps) (let ((first (car bindings))) `(call-with-values (lambda () ,(cadr first)) (lambda ,(map* (lambda (x) (cadr (assoc x tmps))) (car first)) ,(if (= (length bindings) 1) `(let ,tmps ,@body) (expand-once (cdr bindings) tmps)))))) (define (parse-binding binding) (unless (and (list? binding) (= (length binding) 2) (or (pair? (car binding)) (symbol? (car binding)))) (error 'let-values \"incorrect binding ~S\" binding)) (for-each* (lambda (x) (if (assoc x tmps) (error 'let-values \"duplicate binding ~s\" x) (set! tmps (cons (list x (gensym)) tmps)))) (car binding))) (for-each parse-binding bindings) (if (null? tmps) `(let () ,@body) (expand-once bindings tmps)))) \"incorrect binding ~S\" \"duplicate binding ~s\" let*-values (lambda (bindings . body) (if (> (length bindings) 1) `(let-values (,(car bindings)) (let*-values ,(cdr bindings) ,@body)) `(let-values ,bindings ,@body))) delay (lambda (exp) `(delay-force (%make-promise (list ,exp)))) delay-force %make-promise (lambda (exp) `(%make-promise (lambda () ,exp))) lazy (lambda (expr) `(delay-force ,expr)) promise? make-promise eager define-values (lambda (formals expr) (define (flat lst) (cond ((null? lst) lst) ((pair? lst) (cons (car lst) (flat (cdr lst)))) (else (list lst)))) (if (null? formals) `(call-with-values (lambda () ,expr) void) (let* ((tmps (map* (lambda (x) (gensym)) formals)) (ff (flat formals)) (ft (flat tmps))) `(begin ,@(map (lambda (x) `(define ,x #void)) ff) (call-with-values (lambda () ,expr) (lambda ,tmps ,@(map (lambda (x y) `(set! ,x ,y)) ff ft))) (values (void) ',formals))))) equal-simple? exact-integer? floor-quotient floor-remainder floor/ truncate/ truncate-quotient truncate-remainder square integer-length \"non negative integer expected. It was: ~S\" sqrt exact-integer-sqrt inexact boolean=? make-list member-simple assoc-simple symbol=? %generalize-string-compare (lambda (func func2) `(begin (define ,func2 ,func) (set! ,func (lambda (first . l) (letrec ((compare (lambda (first . l) (or (null? l) (and (,func2 first (car l)) (apply compare l)))))) (unless (string? first) (error \"bad string ~W\" first)) (apply compare first l)))) (%set-procedure-name! ,func ',func))) first l compare \"bad string ~W\" %string2=? %string2<? string<=? %string2<=? string>? %string2>? string>=? %string2>=? string-ci=? %string-ci2=? string-ci<? %string-ci2<? string-ci<=? %string-ci2<=? string-ci>? %string-ci2>? string-ci>=? %string-ci2>=? string-copy! \"bad string ~S\" \"bad string ~S\" \"bad destination index ~S\" \"bad integer for start index ~S\" \"bad integer for end index ~S\" \"not enough room in destination string ~S\" string-fill! %string-fill2! vector-copy! \"bad vector ~S\" \"bad vector ~S\" \"bad destination index ~S\" \"bad integer for start index ~S\" \"bad integer for end index ~S\" \"not enough room in destination vector ~S\" \"bad vector ~S\" vector->string char? \"element at index ~S of ~S must be a character\" \"bad string ~S\" string->vector make-bytevector %make-uvector %uvector? bytevector? bytevector %uvector bytevector-length %uvector-length bytevector-u8-ref %uvector-ref bytevector-u8-set! %uvector-set! bytevector-copy! \"bad bytevector ~S\" \"bad bytevector ~S\" \"bad destination index ~S\" \"bad integer for start index ~S\" \"bad integer for end index ~S\" \"not enough room in destination bytevector ~S\" \"bad string ~S\" \"bad character in ~S\" list->string vector-map \"bad list of vectors ~S\" string-for-each \"bad string ~S\" vector-for-each \"bad list of vectors ~S\" \"bad error object: ~S\" error-object-message \"bad error object: ~S\" error-object-irritants &read-error read-error? file-error? call-with-port \"bad input port ~S\" port-closed? input-port-open? \"bad output port ~S\" output-port-open? read-string \"parameter must be a positive integer. It was: ~S\" textual-port? \"bad textual input port ~S\" read-char eof-object read-u8 binary-port? \"bad binary port ~S\" read-byte peek-u8 \"bad binary port ~S\" peek-byte read-bytevector! \"bad bytevector ~S\" %read-bytevector! write-string %write-string write-u8 \"bad binary port ~S\" write-byte write-bytevector \"bad bytevector ~S\" \"bad binary port ~S\" %continuable-exception (value) make-%continuable-exception %continuable-exception? %continuable-exception-value \"exception handler returned on non-continuable exception\" with-exception-handler current-exception-handler raise-continuable guard (lambda (clauses . body) (let* ((var (car clauses)) (last (last-pair clauses)) (ex (gensym)) (old-hdlr (gensym)) (reraised (gensym)) (res (gensym))) `(let ((,old-hdlr (current-exception-handler))) (with-handler (lambda (,ex) (let* ((,var (if (%continuable-exception? ,ex) (%continuable-exception-value ,ex) ,ex)) (,reraised #f) (,res (cond ,@(cdr clauses) ,@(if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else)) '() `((else (set! ,reraised #t) (,old-hdlr ,ex))))))) (if ,reraised ,res (if (%continuable-exception? ,ex) (raise ,res) ,res)))) ,@body)))) current-jiffy jiffies-per-second *all-features* SRFI-0 ((build-path-from-shell-variable . build-path-from-shell-variable) (load-path . load-path) (load-suffixes . load-suffixes) (load-verbose . load-verbose) (current-loading-file . current-loading-file) (try-load . try-load) (load . load) (find-path . find-path) (require . require) (provide . provide) (provided? . provided?) (require/provide . require/provide) (warning-when-not-provided . warning-when-not-provided) (require-library . require-library) (require-for-syntax . require-for-syntax) (include . include) (include-ci . include-ci) (include-file . include-file) (autoload . autoload) (%stklos-conf-dir . %stklos-conf-dir) (%stklos-conf-file . %stklos-conf-file) (%try-load-conditions . %try-load-conditions) (%do-include . %do-include) (%%require . %%require)) \";\" \":\" *path-separator* %shared-suffix \"ostk\" \"stk\" \"sld\" \"scm\" *load-verbose* *load-path* \"STKLOS_CONFDIR\" \"HOME\" \".stklos\" %stklos-conf-dir %stklos-conf-file build-path-from-shell-variable \"STKLOS_LOAD_PATH\" \".\" \"pkg\" \"lib\" \"ext\" \"lib\" \"stklos\" \"share\" \"stklos\" \"bad list of path names ~S\" \"bad path name ~S\" \"bad list of suffixes ~S\" \"bad path name ~S\" load-suffixes load-verbose current-loading-file \"%guess-pathname: trying ~S\\n\" file-exists? file-is-readable? \".\" \"/\" %guess-pathname \"path must be a string (it was ~s)\" \".?.?/\" try-load %primitive-try-load %try-load-conditions \";; Loading file ~S.\\n\" \";; File ~S loaded.\\n\" %try-load load \"cannot load file ~S\" \"cannot load file\" %cannot-load %load require provide provided? warning-when-not-provided \"^srfi-([1-9][0-9]*)$\" \"srfi/~a\" %rewrite-require-spec \"STKLOS_BUILDING\" \"share\" \"stklos\" \"WARNING: ~S was not provided~%\" (lambda (what) (if (string? what) (let ((spec (%rewrite-require-spec what (load-path) (load-suffixes)))) (if (and spec (cdr spec)) `(begin (define-module STklos (import ,(cdr spec))) (provide ,what)) `(%%require ,what #f))) `(%%require ,what #f))) require-library (lambda (what) `(%%require ,what #t)) require-for-syntax (lambda (file) `(%%require4syntax ,file)) %%require4syntax %do-include (lambda (kind files) (let ((inc (string->symbol (format \"%%~a\" kind)))) (if (null? files) (error kind \"at least one parameter must be provided\") `(,inc ,@(map (lambda (x) (or (find-path x) x)) files))))) \"%%~a\" \"at least one parameter must be provided\" (lambda files `(%do-include include ,files)) (lambda files `(%do-include include-ci ,files)) include-file (lambda (file) `(%%include ,file)) autoload (lambda (file . symbols) (let ((args (gensym)) (old (gensym))) `(begin ,@(map (lambda (x) `(define ,x (lambda ,args (let ((,old ,x)) (require ,file) (if (eq? ,old ,x) (error 'autoload \"~S has not been defined in ~S\" ',x ,file) (apply ,x ,args)))))) symbols)))) \"~S has not been defined in ~S\" ((define-library . define-library) (library-name . library-name) (%library-name->symbol . %library-name->symbol) (%symbol->library-name . %symbol->library-name) (%module-define-and-export . %module-define-and-export) (%make-copy-module . %make-copy-module)) \"~A\" \" \" \"/\" \"bad library name ~S\" %library-name->string \"/\" %module-define-and-export (lambda lst `(begin ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst) (export ,@lst))) %make-copy-module (lambda (old new) (%%import (compiler-current-module) (list old)) `(define-module ,new (import ,old) (export ,@(map cdr (module-exports (find-module (%library-name->symbol old))))))) define-library (lambda (name . decls) (let* ((module-name (%library-name->symbol name)) (imports '()) (exports '()) (body '()) (lib (gensym)) (module-restore (symbol-value '%module-restore (find-module 'SCHEME)))) (for-each (lambda (d) (unless (pair? d) (error 'define-library \"bad library declaration clause ~s\" d)) (let ((key (car d)) (rest (cdr d))) (case key ((import) (set! imports (append imports rest))) ((export) (set! exports (append exports rest))) ((begin include include-ci) (set! body (append body (list d)))) (else (error 'define-library \"incorrect directive ~s\" d))))) decls) `(begin (define-module ,module-name (import ,@imports) (export ,@exports) (%symbol-define '%module-restore %module-restore (current-module)) (%symbol-define '%make-syntax %make-syntax (current-module)) (%module->library! ',module-name) ,@body)))) \"bad library declaration clause ~s\" (begin include include-ci) \"incorrect directive ~s\" %module->library! library-name \"module ~S is not a library\" \"bad module/library ~S\" ((string-lower . string-lower) (string-upper . string-upper) (set-load-path! . set-load-path!) (set-load-suffixes! . set-load-suffixes!) (flush . flush) (rewind-file-port . rewind-file-port) (hash-table->list . hash-table->list) (hash-table-put! . hash-table-put!) (hash-table-get . hash-table-get) (hash-table-remove! . hash-table-remove!) (stklos-pragma . stklos-pragma) (remove-directory . remove-directory) (%build-path-from-shell-variable . %build-path-from-shell-variable) (copy-tree . copy-tree) (%set-std-port! . %set-std-port!) (make-box . make-box) (make-constant-box . make-constant-box) (box-set! . box-set!) (string-index . string-index) (argv . argv) (fxdiv . fxdiv) (fxrem . fxrem) (fxmod . fxmod) (fx< . fx<) (fx<= . fx<=) (fx> . fx>) (fx>= . fx>=) (fx= . fx=) (make-directory . make-directory) (make-directories . make-directories) (process-signal . process-signal)) string-downcase string-lower string-upper \"*** Obsolete function set-load-path!. Use load-path instead.\\n\" set-load-path! \"*** Obsolete function set-load-suffixes!. Use load-suffixes instead.\\n\" set-load-suffixes! port-rewind rewind-file-port hash-table->list hash-table-put! hash-table-get hash-table-delete! hash-table-remove! \"Don't use anymore pragma, but compiler:warn-use-undef parameter\" stklos-pragma pragma define-reader-ctor delete-directory remove-directory %build-path-from-shell-variable copy-tree %set-std-port! \"bad port number\" box make-box constant-box make-constant-box set-box! box-set! string-index argv fxdiv fxremainder fxrem fxmodulo fxmod fx< fx<= fx> fx>= fx= make-directory make-directories process-signal STKLOS-OBJECT ((SCHEME)) ((find-class . find-class) (is-a? . is-a?) (ensure-metaclass . ensure-metaclass) (ensure-metaclass-with-supers . ensure-metaclass-with-supers) (ensure-class . ensure-class) (ensure-generic-function . ensure-generic-function) (ensure-method . ensure-method) (add-method! . add-method!) (object-eqv? . object-eqv?) (object-equal? . object-equal?) (write-object . write-object) (display-object . display-object) (slot-unbound . slot-unbound) (slot-missing . slot-missing) (slot-definition-name . slot-definition-name) (slot-definition-options . slot-definition-options) (slot-definition-allocation . slot-definition-allocation) (slot-definition-getter . slot-definition-getter) (slot-definition-setter . slot-definition-setter) (slot-definition-accessor . slot-definition-accessor) (slot-definition-init-form . slot-definition-init-form) (slot-definition-init-keyword . slot-definition-init-keyword) (slot-init-function . slot-init-function) (class-slot-definition . class-slot-definition) (compute-get-n-set . compute-get-n-set) (allocate-instance . allocate-instance) (initialize . initialize) (make-instance . make-instance) (make . make) (no-next-method . no-next-method) (no-applicable-method . no-applicable-method) (no-method . no-method) (change-class . change-class) (change-object-class . change-object-class) (shallow-clone . shallow-clone) (deep-clone . deep-clone) (apply-generic . apply-generic) (apply-method . apply-method) (apply-methods . apply-methods) (compute-applicable-methods . compute-applicable-methods) (method-more-specific? . method-more-specific?) (sort-applicable-methods . sort-applicable-methods) (method-procedure . method-procedure) (method-specializers . method-specializers) (method-generic-function . method-generic-function) (method-specializers-equal? . method-specializers-equal?) (class-subclasses . class-subclasses) (class-methods . class-methods) (class-name . class-name) (class-direct-supers . class-direct-supers) (class-direct-subclasses . class-direct-subclasses) (class-precedence-list . class-precedence-list) (class-direct-methods . class-direct-methods) (class-direct-slots . class-direct-slots) (class-slots . class-slots) (generic-function-name . generic-function-name) (generic-function-methods . generic-function-methods) (generic-function-documentation . generic-function-documentation) (slot-value . slot-value) (define-class . define-class) (define-generic . define-generic) (method . method) (define-method . define-method)) class-redefinition \"bad class ~S\" %error-bad-class \"bad generic function ~S\" %error-bad-generic \"bad method ~S\" %error-bad-method make-closure <top> specializers formals slot-definition-getter slot-definition-setter slot-definition-accessor declare-slots <generic> generic #:name ??? %make <method> #:generic-function #:specializers #:procedure basic-make \"cannot make ~S with ~S\" make class? name class-name direct-supers class-direct-supers direct-slots class-direct-slots direct-subclasses class-direct-subclasses direct-methods class-direct-methods cpl class-precedence-list slots class-slots slot-definition-name slot-definition-options #:instance #:allocation slot-definition-allocation #:getter #:accessor #:init-form slot-definition-init-form #:init-keyword slot-definition-init-keyword getters-n-setters slot-init-function class-slot-definition generic-function-name methods generic-function-methods documentation generic-function-documentation method? generic-function method-generic-function method-specializers procedure method-procedure class-of is-a? <class> find-class \"bad class ~S\" compute-slots \"bad slot name ~S\" %compute-slots #:dsupers #:slots \"metaclass\" ensure-metaclass-with-supers ensure-metaclass define-class (lambda (name supers slots . options) `(define ,name (ensure-class ',name ',supers ',(declare-slots slots) ,(or (key-get options #:metaclass #f) `(ensure-metaclass ',supers)) ,@options))) ensure-class #:metaclass <object> \"super class ~S is duplicated in class ~S\" \"slot ~S is duplicated in class ~S\" define-generic (lambda (gf #:optional (meta '<generic>) #:key (documentation #f)) `(define ,gf (ensure-generic-function ',gf ,meta ,documentation))) #:documentation ensure-generic-function #:default %method-specializers-equal? method-specializers-equal? add-method-in-classes! remove-method-in-classes! compute-new-list-of-methods add-method! next-method ensure-method (lambda (args . body) (ensure-method #f args body)) define-method (lambda (name args . body) (let ((gf (gensym \"gf\"))) `(let ((,gf (ensure-generic-function ',name))) (add-method! ,gf ,(ensure-method gf args body)) (values (void) ',name)))) \"gf\" object-eqv? (<top> <top>) object-equal? (<top> <top>) write-object (<top> <top>) \"#[instance ~A]\" address-of (<object> <top>) slot-bound? \"#[~A ~A]\" (<class> <top>) \"#[~A ~A ~A]\" (<generic> <top>) \"#[~A ~A (~A)]\" display-object (<top> <top>) slot-unbound (<class> <object> <top>) \"slot ~S is unbound in #p~A (an object of class ~S)\" slot-missing (<class> <object> <top> . <top>) \"no slot with name `~S' in #p~A (an object of class ~S)\" no-next-method (<generic> <top> <top>) \"no next method for ~S in call ~S\" no-applicable-method (<generic> <top>) \"no applicable method for ~S\\nin call ~S\" no-method (<generic> <top>) \"no method defined for ~S\" shallow-clone (<object>) %allocate-instance deep-clone (<object>) instance? remove-class-accessors update-direct-method update-direct-subclass (<class>) <accessor-method> (<method> <class> <class>) (<class> <class> <class>) (<class> <class>) redefined %find-inherited-get-n-set %direct-slot? #:before-slot-ref #:after-slot-ref #:before-slot-set! #:after-slot-set! %fast-slot-ref %fast-slot-set! %make-active-getter-n-setter compute-get-n-set (<class> <top>) nfields #:class #:each-subclass #:virtual #:slot-ref #:slot-set! \"a :slot-ref and a :slot-set! must be supplied in ~S\" #:active (<object> <top>) \"allocation type \\\"~S\\\" is unknown\" compute-slot-accessors %slot-ref closure? %procedure-arity \"bad getter closure for slot `~S' in ~S: ~S\" \"bad setter closure for slot `~S' in ~S: ~S\" list* compute-getters-n-setters compute-cpl initialize (<object> <top>) %initialize-object (<class> <top>) (<generic> <top>) (<method> <top>) allocate-instance (<class> <top>) make-instance (<class> . <top>) slot-exists-using-class? slot-bound-using-class? slot-ref-using-class slot-set-using-class! %modify-instance change-object-class change-class (<object> <class>) compute-applicable-methods (<generic> <top>) find-method method-more-specific? (<method> <method> <top>) %method-more-specific? sort-applicable-methods (<generic> <top> <top>) apply-method (<generic> <top> <top> <top>) %set-next-method! apply-methods (<generic> <list> <top>) apply-generic (<generic> <top>) (<generic> <top> <top>) class-subclasses class-methods slot-value (<object> <top>) (<object> <top> <top>) %object-system-initialized ((STKLOS-OBJECT)) ((SCHEME)) ((let-syntax . let-syntax) (letrec-syntax . letrec-syntax)) \"cannot be used here. You must load the file \\\"full-syntax\\\" to access it:\" %not-implemented letrec-syntax (lambda args (%not-implemented 'letrec-syntax ',args)) ,args some split \"list is too short\" hyg:untag-no-tags hyg:untag-vanilla hyg:untag-lambda hyg:untag-letrec hyg:untag-named-let hyg:untag-let hyg:untag-let* hyg:untag-do hyg:untag-list hyg:untag-list* hyg:untag-quasiquote hyg:flatten mbe:ellipsis? mbe:split-at-ellipsis mbe:get-ellipsis-nestings mbe:ellipsis-sub-envs mbe:contained-in? hyg:rassq hyg:tag ... hyg:untag (if begin) (set! define) \"takes exactly one expression\" \"invalid context within quasiquote\" \"takes exactly one expression\" list-tail \"%%\" mbe:position mbe:append-map mbe:matches-pattern? mbe:get-bindings mbe:expand-pattern \"no matching clause for ~S\" let-syntax (lambda (bindings . body) `(%let-syntax ,(map (lambda (x) (let* ((macro-name (car x)) (syn-rules (cadr x)) (keywords (cons macro-name (cadr syn-rules))) (clauses (cddr syn-rules))) `(,macro-name (lambda args (%find-macro-clause ',macro-name args ',keywords ',clauses))))) bindings) ,@body)) ((SCHEME)) ((srfi0-register-feature! . srfi0-register-feature!) (srfi-0-feature-implementation-file . srfi-0-feature-implementation-file) (require-feature . require-feature) (cond-expand . cond-expand)) (srfi-0 (srfi-1 . \"srfi-1\") (lists . \"srfi-1\") (srfi-2 . \"srfi-2\") (and-let* . \"srfi-2\") (srfi-4 . \"srfi-4\") (hvectors . \"srfi-4\") (srfi-5 . \"srfi-5\") srfi-6 (srfi-7 . \"srfi-7\") (program . \"srfi-7\") srfi-8 (srfi-9 . \"srfi-9\") (records . \"srfi-9\") srfi-10 srfi-11 (srfi-13 . \"srfi-13\") (srfi-14 . \"srfi-14\") srfi-15 srfi-16 case-lambda (srfi-17 . \"srfi-17\") srfi-18 (srfi-19 . \"srfi-19\") srfi-22 srfi-23 error (srfi-25 . \"srfi-25\") (srfi-26 . \"srfi-26\") (srfi-27 . \"srfi-27\") (random . \"srfi-27\") srfi-28 (srfi-29 . \"srfi-29\") srfi-30 srfi-31 srfi-34 (srfi-35 . \"srfi-35\") (srfi-36 . \"srfi-36\") (srfi-37 . \"srfi-37\") (args-fold . \"srfi-37\") srfi-38 srfi-39 parameters (srfi-41 . \"srfi-41\") (streams . \"srfi-41\") (srfi-43 . \"srfi-43\") srfi-45 (srfi-48 . \"srfi-48\") (srfi-51 . \"srfi-51\") (rest-list . \"srfi-51\") (srfi-54 . \"srfi-54\") (formatting . \"srfi-54\") srfi-55 (srfi-59 . \"srfi-59\") (srfi-60 . \"srfi-60\") (srfi-61 . \"srfi-61\") srfi-62 (srfi-64 . \"srfi-64\") (testing . \"srfi-64\") (srfi-66 . \"srfi-66\") (srfi-69 . \"srfi-69\") (hash-tables . \"srfi-69\") srfi-70 (srfi-74 . \"srfi-74\") srfi-87 srfi-88 (srfi-89 . \"srfi-89\") (srfi-94 . \"srfi-94\") (srfi-95 . \"srfi-95\") (srfi-96 . \"srfi-96\") srfi-98 (srfi-100 . \"srfi-100\") srfi-111 boxes srfi-112 (srfi-113 . \"srfi-113\") (sets-bags . \"srfi-113\") (srfi-116 . \"srfi-116\") (immutable-lists . \"srfi-116\") (srfi-117 . \"srfi-117\") (queues-as-lists . \"srfi-117\") srfi-118 adjustable-strings (srfi-125 . \"srfi-125\") (hash-table . \"srfi-125\") (srfi-127 . \"srfi-127\") (lazy-sequences . \"srfi-127\") (srfi-128 . \"srfi-128\") (comparators-reduced . \"srfi-128\") (srfi-129 . \"srfi-129\") (titlecase . \"srfi-129\") (srfi-130 . \"srfi-130\") (srfi-132 . \"srfi-132\") (sort . \"srfi-132\") (srfi-133 . \"srfi-133\") (vector . \"srfi-133\") (srfi-134 . \"srfi-134\") (immutable-deques . \"srfi-134\") (srfi-135 . \"srfi-135\") (immutable-texts . \"srfi-135\") (srfi-137 . \"srfi-137\") srfi-138 (srfi-141 . \"srfi-141\") (integer-division . \"srfi-141\") srfi-143 (srfi-144 . \"srfi-144\") srfi-145 (srfi-151 . \"srfi-151\") (bitwise-ops . \"srfi-151\") (srfi-152 . \"srfi-152\") (srfi-154 . \"srfi-154\") (srfi-156 . \"srfi-156\") (srfi-158 . \"srfi-158\") (srfi-160 . \"srfi-160\") (srfi-161 . \"srfi-161\") (srfi-162 . \"srfi-128\") srfi-169 (srfi-170 . \"srfi-170\") (posix . \"srfi-170\") (srfi-171 . \"srfi-171\") (transducers . \"srfi-171\") (srfi-173 . \"srfi-173\") (hooks . \"srfi-173\") (srfi-174 . \"srfi-174\") (posix-timespecs . \"srfi-174\") (srfi-175 . \"srfi-175\") (ascii . \"srfi-175\") srfi-176 (srfi-180 . \"srfi-180\") (JSON . \"srfi-180\") (json . \"srfi-180\") (srfi-185 . \"srfi-185\") (srfi-189 . \"srfi-189\") (maybe-either . \"srfi-189\") (srfi-190 . \"srfi-190\") srfi-192 srfi-193 srfi-195 (srfi-196 . \"srfi-196\") (srfi-207 . \"srfi-207\") srfi-208 (srfi-214 . \"srfi-214\") (srfi-215 . \"srfi-215\") (srfi-216 . \"srfi-216\") (srfi-217 . \"srfi-217\") srfi-219 (srfi-221 . \"srfi-221\") (srfi-223 . \"srfi-223\") (srfi-224 . \"srfi-224\") (srfi-228 . \"srfi-228\") (srfi-229 . \"srfi-229\") (srfi-230 . \"srfi-230\") (srfi-233 . \"srfi-233\") (ini-files . \"srfi-233\") (srfi-236 . \"srfi-236\") (srfi-238 . \"srfi-238\") (conditions \"srfi-35\" \"srfi-36\") (generators \"srfi-158\" \"srfi-190\")) %srfi-feature-list \"STklos-\" \"id-\" #:debug (debug) almost-r7rs exact-complex ieee-float (full-unicode utf-8 UTF-8) ratios %big-endian? big-endian little-endian srfi0-register-feature! \"feature ~S is not supported\" srfi-0-feature-implementation-file srfi- \"bad feature\" \"srfi-[0-9]+\" \"srfi/~a\" require-feature %load-implementation %find-feature cond-expand \"no clause match\" \"bad clause ~S\" \"invalid 'not' clause\" \"bad clause ~S\" \"~a\" %srfi-0-expand (lambda clauses (%srfi-0-expand clauses)) REPL ((SCHEME)) ((main-repl . main-repl) (repl . repl) (repl-prompt . repl-prompt) (repl-make-prompt . repl-make-prompt) (repl-display-prompt . repl-display-prompt) (repl-prompt-use-color? . repl-prompt-use-color?) (repl-change-default-ports . repl-change-default-ports) (main-repl-hook . main-repl-hook) (repl-theme . repl-theme) (get-repl-color . get-repl-color)) interactive? repl-level repl-backtrace default-in default-out default-err classic #:prompt magenta #:help-prompt green #:help #:repl-depth yellow #:info monochrome minimal underline *repl-themes* repl-theme \"\" get-repl-color \"^[ \\t]*\" \"\" (help h ?) \"Available Commands:\\n- ,backtrace ,bt   Show the stack when last error occurred\\n- ,cd              Change current directory\\n- ,pwd             Print working directory\\n- ,quit ,q         Exit STklos\\n- ,shell ,!        Run a shell command\\n- ,help ,? ,h      This help\\n\" (quit q) (backtrace bt) %display-backtrace (shell !) system cd chdir pwd \"~S\\n\" \"bad command name: ~S. Type ,help for some help\\n\" do-repl-command %other-error-handlers %try-matching-condition %add-error-to-repl-handler \" (near line ~a in file ~s)\" \"\" \"**** Error~A:\\n~A: ~A\\n\" \"\\t(type \\\"\" \",help\" \"\\\" for more information)\\n\" display-error-message repl-handler &exit-r7rs retcode %pre-exit emergency-exit \"**** Unknown condition raised.\\n\" \"Condition type: ~A\\n\" struct-type-name \"Condition slots: ~S\\n\" \"**** The following non-condition was raised: ~S\\n\" \"\" repl-prompt repl-prompt-use-color? \"[~A] \" \"\" \"~A>\" \" \" \" \" make-prompt repl-make-prompt display-prompt repl-display-prompt main-repl-hook #:in G466 #:out G467 #:err G468 repl-change-default-ports G473 G474 G475 \"\\n\" \";; ~A\\n\" repl %initialize-signals \"STklos version ~A  (Id: ~A)\\n\" \"Copyright (C) 1999-2023 Erick Gallesio <eg@stklos.net>\\n\" \"[~a/~a/~a/~a]\\n\" machine-type #:readline no-readline utf8 no-utf8 \"Type ',h' for help\\n\" \"  \\\\    \" \"   \\\\   \" \"  / \\\\  \" \" /   \\\\ \" main-repl READLINE ((SCHEME)) ((try-initialize-readline . try-initialize-readline) (readline . readline) (add-history . add-history) (read-history . read-history) (write-history . write-history) (read-with-history . read-with-history) (rl-event-hook . rl-event-hook) (rl-input-timeout . rl-input-timeout) (rl-completer-function . rl-completer-function)) readline add-history read-history write-history rl-event-hook rl-input-timeout \"> \" \"\" read-with-history \"readline\" (#:string) #:pointer #eof cpointer->string free-bytes \"add_history\" (#:string) \"read_history\" (#:string) #:int \"write_history\" (#:string) \"rl_set_keyboard_input_timeout\" \"\" %get-symbol-address \"rl_set_keyboard_input_timeout\" (#:int) \"rl_event_hook\" \"el_set\" \"\" libedit try-initialize default-complete-function rl-completer-function readline-completion-generator %shared-library-suffix \"libreadline.\" \"libedit.\" \"readline-complete.\" %init-readline-completion-function try-initialize-readline REPL-READLINE ((SCHEME) (REPL) (READLINE)) ((try-initialize-repl-with-readline . try-initialize-repl-with-readline)) \"history\" \"\\x01;\" \"\\x02;\" \"\" \"\" nothing register-exit-function! #() %string->bytes \"\" #() #\\newline integer->char repl-readline-integration #:line-editor try-initialize-repl-with-readline trace (lambda args (%trace-expand args)) %trace-expand untrace (lambda args (%untrace-expand args)) %untrace-expand parse-arguments (lambda (argv . clauses) (%parse-arguments-expand argv clauses)) %parse-arguments-expand match-lambda (lambda clauses (expand-match-lambda (cons '() clauses))) expand-match-lambda match-case (lambda (expr . clauses) `((match-lambda ,@clauses) ,expr)) describe \"describe\" \"~S has not been defined in ~S\" \"bigmatch\" \"getopt\" %print-usage \"trace\" pp \"pretty-print\" pretty-print help \"help\" lexer-next-token \"lex-rt\" random-integer \"srfi/27\" random-real srfi48:help \"srfi/48\" srfi48:format-fixed environment \"env\" null-environment scheme-report-environment interaction-environment ((STKLOS-OBJECT) (MBE) (SRFI-0) (REPL) (REPL-READLINE)) scheme/base %define-here (lambda lst `(begin ,@(map (lambda (symb) `(define ,symb #void)) lst))) _ define-record-type assv bytevector-append bytevector-copy ceiling char->integer char-ready? char<=? char<? char>=? char>? complex? denominator even? gcd get-output-bytevector inexact? lcm list-set! min numerator odd? open-input-bytevector open-output-bytevector peek-char read-bytevector string string->utf8 string-copy truncate u8-ready? utf8->string vector-append vector-fill! write-char ((* . *) (+ . +) (- . -) (... . ...) (/ . /) (< . <) (<= . <=) (= . =) (=> . =>) (> . >) (>= . >=) (_ . _) (abs . abs) (and . and) (append . append) (apply . apply) (assoc . assoc) (assq . assq) (assv . assv) (begin . begin) (binary-port? . binary-port?) (boolean=? . boolean=?) (boolean? . boolean?) (bytevector . bytevector) (bytevector-append . bytevector-append) (bytevector-copy . bytevector-copy) (bytevector-copy! . bytevector-copy!) (bytevector-length . bytevector-length) (bytevector-u8-ref . bytevector-u8-ref) (bytevector-u8-set! . bytevector-u8-set!) (bytevector? . bytevector?) (caar . caar) (cadr . cadr) (call-with-current-continuation . call-with-current-continuation) (call-with-port . call-with-port) (call-with-values . call-with-values) (call/cc . call/cc) (car . car) (case . case) (cdar . cdar) (cddr . cddr) (cdr . cdr) (ceiling . ceiling) (char->integer . char->integer) (char-ready? . char-ready?) (char<=? . char<=?) (char<? . char<?) (char=? . char=?) (char>=? . char>=?) (char>? . char>?) (char? . char?) (close-input-port . close-input-port) (close-output-port . close-output-port) (close-port . close-port) (complex? . complex?) (cond . cond) (cond-expand . cond-expand) (cons . cons) (current-error-port . current-error-port) (current-input-port . current-input-port) (current-output-port . current-output-port) (define . define) (define-record-type . define-record-type) (define-syntax . define-syntax) (define-values . define-values) (denominator . denominator) (do . do) (dynamic-wind . dynamic-wind) (else . else) (eof-object . eof-object) (eof-object? . eof-object?) (eq? . eq?) (equal? . equal?) (eqv? . eqv?) (error . error) (error-object-irritants . error-object-irritants) (error-object-message . error-object-message) (error-object? . error-object?) (even? . even?) (exact . exact) (exact-integer-sqrt . exact-integer-sqrt) (exact-integer? . exact-integer?) (exact? . exact?) (expt . expt) (features . features) (file-error? . file-error?) (floor . floor) (floor-quotient . floor-quotient) (floor-remainder . floor-remainder) (floor/ . floor/) (flush-output-port . flush-output-port) (for-each . for-each) (gcd . gcd) (get-output-bytevector . get-output-bytevector) (get-output-string . get-output-string) (guard . guard) (if . if) (include . include) (include-ci . include-ci) (inexact . inexact) (inexact? . inexact?) (input-port-open? . input-port-open?) (input-port? . input-port?) (integer->char . integer->char) (integer? . integer?) (lambda . lambda) (lcm . lcm) (length . length) (let . let) (let* . let*) (let*-values . let*-values) (let-syntax . let-syntax) (let-values . let-values) (letrec . letrec) (letrec* . letrec*) (letrec-syntax . letrec-syntax) (list . list) (list->string . list->string) (list->vector . list->vector) (list-copy . list-copy) (list-ref . list-ref) (list-set! . list-set!) (list-tail . list-tail) (list? . list?) (make-bytevector . make-bytevector) (make-list . make-list) (make-parameter . make-parameter) (make-string . make-string) (make-vector . make-vector) (map . map) (max . max) (member . member) (memq . memq) (memv . memv) (min . min) (modulo . modulo) (negative? . negative?) (newline . newline) (not . not) (null? . null?) (number->string . number->string) (number? . number?) (numerator . numerator) (odd? . odd?) (open-input-bytevector . open-input-bytevector) (open-input-string . open-input-string) (open-output-bytevector . open-output-bytevector) (open-output-string . open-output-string) (or . or) (output-port-open? . output-port-open?) (output-port? . output-port?) (pair? . pair?) (parameterize . parameterize) (peek-char . peek-char) (peek-u8 . peek-u8) (port? . port?) (positive? . positive?) (procedure? . procedure?) (quasiquote . quasiquote) (quote . quote) (quotient . quotient) (raise . raise) (raise-continuable . raise-continuable) (rational? . rational?) (rationalize . rationalize) (read-bytevector . read-bytevector) (read-bytevector! . read-bytevector!) (read-char . read-char) (read-error? . read-error?) (read-line . read-line) (read-string . read-string) (read-u8 . read-u8) (real? . real?) (remainder . remainder) (reverse . reverse) (round . round) (set! . set!) (set-car! . set-car!) (set-cdr! . set-cdr!) (square . square) (string . string) (string->list . string->list) (string->number . string->number) (string->symbol . string->symbol) (string->utf8 . string->utf8) (string->vector . string->vector) (string-append . string-append) (string-copy . string-copy) (string-copy! . string-copy!) (string-fill! . string-fill!) (string-for-each . string-for-each) (string-length . string-length) (string-map . string-map) (string-ref . string-ref) (string-set! . string-set!) (string<=? . string<=?) (string<? . string<?) (string=? . string=?) (string>=? . string>=?) (string>? . string>?) (string? . string?) (substring . substring) (symbol->string . symbol->string) (symbol=? . symbol=?) (symbol? . symbol?) (syntax-error . syntax-error) (syntax-rules . syntax-rules) (textual-port? . textual-port?) (truncate . truncate) (truncate-quotient . truncate-quotient) (truncate-remainder . truncate-remainder) (truncate/ . truncate/) (u8-ready? . u8-ready?) (unless . unless) (unquote . unquote) (unquote-splicing . unquote-splicing) (utf8->string . utf8->string) (values . values) (vector . vector) (vector->list . vector->list) (vector->string . vector->string) (vector-append . vector-append) (vector-copy . vector-copy) (vector-copy! . vector-copy!) (vector-fill! . vector-fill!) (vector-for-each . vector-for-each) (vector-length . vector-length) (vector-map . vector-map) (vector-ref . vector-ref) (vector-set! . vector-set!) (vector? . vector?) (when . when) (with-exception-handler . with-exception-handler) (write-bytevector . write-bytevector) (write-char . write-char) (write-string . write-string) (write-u8 . write-u8) (zero? . zero?)) \"scheme/base\" scheme/write ((display . display) (write . write) (write-shared . write-shared) (write-simple . write-simple)) \"scheme/write\" ((STKLOS-COMPILER) (STKLOS-OBJECT) (MBE) (SRFI-0) (REPL) (REPL-READLINE)) \"STKLOS_BUILDING\" module-immutable! %before-exit-hook main \"STKLOS_FRAMES\" \"  - ...\\nSet shell variable STKLOS_FRAMES to set visible frames\\n\" \"  - \" %procedure-name \"<<let/call>>\" \" @ [~A:~A]\\n\" \"???\" \"**** Error while ~A ~S\\n\" \"\\t Where: in ~A\" \" (near line ~a in file ~s)\" \"\\tReason: ~A\\n\" \"EXIT\\n\" %simple-fatal-exception-handler #:no-init-file #:load #:srfi-176 #:file #:sexpr #:conf-dir #:prepend-dirs #:append-dirs \"Warning: cannot create configuration directory ~S\\n\" \"stklosrc\" \"loading file\" \"executing command\" \"evaluating\")";
+>>>>>>> no-scmpkg
 
 STk_instr STk_boot_code [] = { 
 0x25,
@@ -18231,7 +18235,7 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x53,
 0x2d,
-0x626b,
+0x6269,
 0x25,
 0x55,
 0xcc,
@@ -40642,15 +40646,20 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x632,
 0x55,
+<<<<<<< HEAD
 0x633,
 0x55,
 0x634,
+=======
+0x629,
+>>>>>>> no-scmpkg
 0x3f,
-0x6,
+0x5,
 0x1f,
 0x49d,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x635,
 0x3,
 0x1f,
@@ -40659,6 +40668,16 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x55,
 0x637,
+=======
+0x62a,
+0x3,
+0x1f,
+0x62b,
+0x25,
+0x25,
+0x55,
+0x62c,
+>>>>>>> no-scmpkg
 0x56,
 0x3af,
 0x1,
@@ -40667,13 +40686,21 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x638,
+=======
+0x62d,
+>>>>>>> no-scmpkg
 0x56,
 0x3af,
 0x1,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x639,
+=======
+0x62e,
+>>>>>>> no-scmpkg
 0x56,
 0x2bc,
 0x2,
@@ -40686,14 +40713,22 @@ STk_instr STk_boot_code [] = {
 0x46,
 0x2,
 0x1f,
+<<<<<<< HEAD
 0x63a,
+=======
+0x62f,
+>>>>>>> no-scmpkg
 0x23,
 0xc,
 0x1,
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x63a,
+=======
+0x62f,
+>>>>>>> no-scmpkg
 0x0,
 0x21,
 0x65,
@@ -40702,7 +40737,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x63b,
+=======
+0x630,
+>>>>>>> no-scmpkg
 0x23,
 0x44,
 0xfffe,
@@ -40774,6 +40813,7 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x63c,
 0x25,
 0x25,
@@ -40781,6 +40821,15 @@ STk_instr STk_boot_code [] = {
 0x63d,
 0x56,
 0x63c,
+=======
+0x631,
+0x25,
+0x25,
+0x55,
+0x632,
+0x56,
+0x631,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -40802,6 +40851,7 @@ STk_instr STk_boot_code [] = {
 0x29,
 0x2,
 0x55,
+<<<<<<< HEAD
 0x63e,
 0x25,
 0x25,
@@ -40809,10 +40859,20 @@ STk_instr STk_boot_code [] = {
 0x63f,
 0x55,
 0x640,
+=======
+0x633,
+0x25,
+0x25,
+0x55,
+0x634,
+0x55,
+0x635,
+>>>>>>> no-scmpkg
 0x56,
 0x2bc,
 0x2,
 0x71,
+<<<<<<< HEAD
 0x63b,
 0x1,
 0x6e,
@@ -40820,13 +40880,28 @@ STk_instr STk_boot_code [] = {
 0x641,
 0x56,
 0x63b,
+=======
+0x630,
+0x1,
+0x6e,
+0x55,
+0x636,
+0x56,
+0x630,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x642,
 0x55,
 0x643,
+=======
+0x637,
+0x55,
+0x638,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x2bc,
@@ -40834,9 +40909,15 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x644,
 0x55,
 0x645,
+=======
+0x639,
+0x55,
+0x63a,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x2bc,
@@ -40850,10 +40931,17 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x2c,
 0x13,
+<<<<<<< HEAD
 0x636,
 0x25,
 0x6a,
 0x636,
+=======
+0x62b,
+0x25,
+0x6a,
+0x62b,
+>>>>>>> no-scmpkg
 0x23,
 0x35,
 0x1,
@@ -40868,6 +40956,7 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x2bd,
 0x55,
+<<<<<<< HEAD
 0x646,
 0x65,
 0x56,
@@ -40893,6 +40982,33 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x647,
 0x65,
+=======
+0x63b,
+0x65,
+0x56,
+0x33,
+0x3,
+0x1c,
+0x1,
+0x7,
+0x25,
+0x23,
+0x14,
+0x1,
+0x25,
+0x65,
+0x56,
+0x192,
+0x1,
+0x1e,
+0xa,
+0x25,
+0x55,
+0x2b3,
+0x55,
+0x63c,
+0x65,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x3,
@@ -40906,7 +41022,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0xc,
 0x13,
+<<<<<<< HEAD
 0x636,
+=======
+0x62b,
+>>>>>>> no-scmpkg
 0xc,
 0x24,
 0x71,
@@ -40931,7 +41051,11 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x2bd,
 0x55,
+<<<<<<< HEAD
 0x648,
+=======
+0x63d,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x33,
@@ -40954,7 +41078,11 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x2bd,
 0x55,
+<<<<<<< HEAD
 0x649,
+=======
+0x63e,
+>>>>>>> no-scmpkg
 0x65,
 0x6c,
 0x33,
@@ -40976,10 +41104,17 @@ STk_instr STk_boot_code [] = {
 0x46,
 0x2,
 0x1f,
+<<<<<<< HEAD
 0x64a,
 0x25,
 0x6a,
 0x635,
+=======
+0x63f,
+0x25,
+0x6a,
+0x62a,
+>>>>>>> no-scmpkg
 0x23,
 0xd,
 0x1,
@@ -40991,22 +41126,36 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x1,
 0x13,
+<<<<<<< HEAD
 0x635,
 0xa,
 0x635,
+=======
+0x62a,
+0xa,
+0x62a,
+>>>>>>> no-scmpkg
 0x24,
 0x71,
 0x46,
 0x2,
 0x1f,
+<<<<<<< HEAD
 0x64b,
+=======
+0x640,
+>>>>>>> no-scmpkg
 0x25,
 0x4d,
 0x56,
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x64c,
+=======
+0x641,
+>>>>>>> no-scmpkg
 0x23,
 0x10e,
 0x3,
@@ -41030,7 +41179,11 @@ STk_instr STk_boot_code [] = {
 0x9,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x64d,
+=======
+0x642,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x2c6,
@@ -41041,14 +41194,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x64e,
+=======
+0x643,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x10,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x64f,
+=======
+0x644,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x9,
@@ -41088,7 +41249,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x55,
+<<<<<<< HEAD
 0x650,
+=======
+0x645,
+>>>>>>> no-scmpkg
 0xc,
 0x3d,
 0x71,
@@ -41151,7 +41316,11 @@ STk_instr STk_boot_code [] = {
 0x3d,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x651,
+=======
+0x646,
+>>>>>>> no-scmpkg
 0x75,
 0x202,
 0x56,
@@ -41215,9 +41384,15 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x652,
 0x55,
 0x653,
+=======
+0x647,
+0x55,
+0x648,
+>>>>>>> no-scmpkg
 0x75,
 0x102,
 0x56,
@@ -41228,7 +41403,11 @@ STk_instr STk_boot_code [] = {
 0x7,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x654,
+=======
+0x649,
+>>>>>>> no-scmpkg
 0x75,
 0x102,
 0x56,
@@ -41280,11 +41459,19 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x652,
 0xa,
 0x655,
 0x1f,
 0x656,
+=======
+0x647,
+0xa,
+0x64a,
+0x1f,
+0x64b,
+>>>>>>> no-scmpkg
 0x25,
 0x4f,
 0x23,
@@ -41296,7 +41483,11 @@ STk_instr STk_boot_code [] = {
 0x46,
 0x2,
 0x1f,
+<<<<<<< HEAD
 0x657,
+=======
+0x64c,
+>>>>>>> no-scmpkg
 0x23,
 0x8e,
 0x3,
@@ -41306,11 +41497,19 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x652,
 0x3,
 0x6e,
 0x56,
 0x64c,
+=======
+0x647,
+0x3,
+0x6e,
+0x56,
+0x641,
+>>>>>>> no-scmpkg
 0x0,
 0x21,
 0x4d,
@@ -41342,7 +41541,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x69,
 0x56,
+<<<<<<< HEAD
 0x64c,
+=======
+0x641,
+>>>>>>> no-scmpkg
 0x1,
 0x23,
 0x2c,
@@ -41351,17 +41554,29 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x657,
 0x0,
 0x3b,
 0x71,
 0x657,
+=======
+0x64c,
+0x0,
+0x3b,
+0x71,
+0x64c,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x75,
 0x103,
 0x56,
+<<<<<<< HEAD
 0x64c,
+=======
+0x641,
+>>>>>>> no-scmpkg
 0x1,
 0x12,
 0x100,
@@ -41369,7 +41584,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x657,
+=======
+0x64c,
+>>>>>>> no-scmpkg
 0x0,
 0x3d,
 0x21,
@@ -41378,11 +41597,19 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x657,
 0x0,
 0x3e,
 0x71,
 0x657,
+=======
+0x64c,
+0x0,
+0x3e,
+0x71,
+0x64c,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x65,
@@ -41393,7 +41620,32 @@ STk_instr STk_boot_code [] = {
 0x2d,
 0x2c,
 0xa,
+<<<<<<< HEAD
 0x635,
+=======
+0x62a,
+0x1d,
+0xa,
+0x25,
+0x66,
+0x55,
+0x64d,
+0x69,
+0x56,
+0x43,
+0x3,
+0x1c,
+0x1,
+0x7,
+0x25,
+0x69,
+0x56,
+0x64b,
+0x1,
+0x17,
+0xa,
+0x62a,
+>>>>>>> no-scmpkg
 0x1d,
 0xa,
 0x25,
@@ -41408,6 +41660,7 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x7,
 0x25,
+<<<<<<< HEAD
 0x69,
 0x56,
 0x656,
@@ -41432,6 +41685,11 @@ STk_instr STk_boot_code [] = {
 0x68,
 0x56,
 0x64c,
+=======
+0x68,
+0x56,
+0x641,
+>>>>>>> no-scmpkg
 0x1,
 0xc,
 0x4a,
@@ -41442,7 +41700,11 @@ STk_instr STk_boot_code [] = {
 0xe,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x65a,
+=======
+0x64f,
+>>>>>>> no-scmpkg
 0x23,
 0xf,
 0x1,
@@ -41454,6 +41716,7 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x56,
+<<<<<<< HEAD
 0x64a,
 0x0,
 0x73,
@@ -41462,6 +41725,16 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x13,
 0x655,
+=======
+0x63f,
+0x0,
+0x73,
+0x64f,
+0x3,
+0x24,
+0x13,
+0x64a,
+>>>>>>> no-scmpkg
 0x23,
 0x2d,
 0x1,
@@ -41472,12 +41745,20 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x2df,
 0x55,
+<<<<<<< HEAD
 0x65b,
+=======
+0x650,
+>>>>>>> no-scmpkg
 0x55,
 0x73,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x65c,
+=======
+0x651,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x43,
@@ -41496,7 +41777,11 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x365,
 0x55,
+<<<<<<< HEAD
 0x65d,
+=======
+0x652,
+>>>>>>> no-scmpkg
 0x55,
 0x36a,
 0x65,
@@ -41510,7 +41795,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x65e,
+=======
+0x653,
+>>>>>>> no-scmpkg
 0x23,
 0x16,
 0x3,
@@ -41519,7 +41808,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x65a,
+=======
+0x64f,
+>>>>>>> no-scmpkg
 0x3,
 0x1d,
 0x6,
@@ -41532,11 +41825,19 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x67,
 0x6c,
+<<<<<<< HEAD
 0x65e,
 0x1,
 0x24,
 0x1f,
 0x65f,
+=======
+0x653,
+0x1,
+0x24,
+0x1f,
+0x654,
+>>>>>>> no-scmpkg
 0x23,
 0xf,
 0x1,
@@ -41548,6 +41849,7 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x56,
+<<<<<<< HEAD
 0x64a,
 0x0,
 0x73,
@@ -41556,6 +41858,16 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x65b,
+=======
+0x63f,
+0x0,
+0x73,
+0x654,
+0x3,
+0x24,
+0x1f,
+0x650,
+>>>>>>> no-scmpkg
 0x23,
 0x4f,
 0xfffe,
@@ -41567,7 +41879,11 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x4,
 0xa,
+<<<<<<< HEAD
 0x636,
+=======
+0x62b,
+>>>>>>> no-scmpkg
 0x1c,
 0xe,
 0x25,
@@ -41634,7 +41950,11 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x66,
 0x6c,
+<<<<<<< HEAD
 0x652,
+=======
+0x647,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x1f,
@@ -41644,15 +41964,25 @@ STk_instr STk_boot_code [] = {
 0x2d4,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x660,
+=======
+0x655,
+0x1,
+0x1f,
+0x656,
+>>>>>>> no-scmpkg
 0x1,
 0x1f,
 0x661,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x662,
 0x1,
 0x1f,
+=======
+>>>>>>> no-scmpkg
 0xab,
 0x25,
 0x4e,
@@ -41660,14 +41990,22 @@ STk_instr STk_boot_code [] = {
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x663,
+=======
+0x658,
+>>>>>>> no-scmpkg
 0x23,
 0x66,
 0x3,
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x664,
+=======
+0x659,
+>>>>>>> no-scmpkg
 0x67,
 0x56,
 0x3b2,
@@ -41682,7 +42020,11 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x665,
+=======
+0x65a,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x100,
@@ -41766,12 +42108,20 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x666,
+=======
+0x65b,
+>>>>>>> no-scmpkg
 0x25,
 0x4f,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x667,
+=======
+0x65c,
+>>>>>>> no-scmpkg
 0x56,
 0x3af,
 0x1,
@@ -41812,9 +42162,15 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x668,
 0x55,
 0x669,
+=======
+0x65d,
+0x55,
+0x65e,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x1a3,
@@ -41834,7 +42190,11 @@ STk_instr STk_boot_code [] = {
 0x15,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x64a,
+=======
+0x63f,
+>>>>>>> no-scmpkg
 0x0,
 0x16,
 0x25,
@@ -41843,7 +42203,11 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x666,
+=======
+0x65b,
+>>>>>>> no-scmpkg
 0x3,
 0x17,
 0xe,
@@ -41863,7 +42227,11 @@ STk_instr STk_boot_code [] = {
 0x4f,
 0x4f,
 0x56,
+<<<<<<< HEAD
 0x65f,
+=======
+0x654,
+>>>>>>> no-scmpkg
 0x3,
 0xc,
 0x1d,
@@ -41891,7 +42259,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x56,
+<<<<<<< HEAD
 0x661,
+=======
+0x656,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -41903,7 +42275,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x65e,
+=======
+0x653,
+>>>>>>> no-scmpkg
 0x1,
 0x2c,
 0x1c,
@@ -41911,7 +42287,11 @@ STk_instr STk_boot_code [] = {
 0x7,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x663,
+=======
+0x658,
+>>>>>>> no-scmpkg
 0x0,
 0x1d,
 0xa,
@@ -41935,7 +42315,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x66a,
+=======
+0x65f,
+>>>>>>> no-scmpkg
 0x66,
 0x56,
 0x43,
@@ -41961,7 +42345,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x13,
+<<<<<<< HEAD
 0x660,
+=======
+0x655,
+>>>>>>> no-scmpkg
 0x23,
 0x20,
 0x1,
@@ -41982,10 +42370,17 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x56,
+<<<<<<< HEAD
 0x64a,
 0x0,
 0x71,
 0x65f,
+=======
+0x63f,
+0x0,
+0x71,
+0x654,
+>>>>>>> no-scmpkg
 0x3,
 0x1c,
 0x1,
@@ -41993,7 +42388,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x661,
+=======
+0x656,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x13,
@@ -42022,7 +42421,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x24,
 0x13,
+<<<<<<< HEAD
 0x661,
+=======
+0x656,
+>>>>>>> no-scmpkg
 0x23,
 0xe,
 0x1,
@@ -42040,6 +42443,7 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x13,
+<<<<<<< HEAD
 0x662,
 0x2c,
 0x25,
@@ -42047,6 +42451,15 @@ STk_instr STk_boot_code [] = {
 0x660,
 0x55,
 0x66b,
+=======
+0x657,
+0x2c,
+0x25,
+0x55,
+0x655,
+0x55,
+0x660,
+>>>>>>> no-scmpkg
 0x23,
 0x58,
 0x1,
@@ -42066,10 +42479,17 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x56,
+<<<<<<< HEAD
 0x64a,
 0x0,
 0x71,
 0x666,
+=======
+0x63f,
+0x0,
+0x71,
+0x65b,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x2b,
@@ -42105,7 +42525,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x661,
+=======
+0x656,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x3,
@@ -42144,12 +42568,21 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x660,
 0x25,
 0x55,
 0x66c,
 0x55,
 0x66d,
+=======
+0x655,
+0x25,
+0x55,
+0x661,
+0x55,
+0x662,
+>>>>>>> no-scmpkg
 0x23,
 0xa,
 0x1,
@@ -42169,17 +42602,30 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x66c,
 0x25,
 0x55,
 0x66e,
 0x55,
 0x66f,
+=======
+0x661,
+0x25,
+0x55,
+0x663,
+0x55,
+0x664,
+>>>>>>> no-scmpkg
 0x23,
 0x8,
 0x1,
 0x55,
+<<<<<<< HEAD
 0x670,
+=======
+0x665,
+>>>>>>> no-scmpkg
 0x65,
 0x3,
 0x3b,
@@ -42192,12 +42638,21 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x66e,
 0x25,
 0x55,
 0x671,
 0x55,
 0x672,
+=======
+0x663,
+0x25,
+0x55,
+0x666,
+0x55,
+0x667,
+>>>>>>> no-scmpkg
 0x23,
 0x37,
 0x2,
@@ -42205,7 +42660,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x673,
+=======
+0x668,
+>>>>>>> no-scmpkg
 0x66,
 0x56,
 0x43,
@@ -42225,7 +42684,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x674,
+=======
+0x669,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x2,
@@ -42262,19 +42725,26 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x671,
+=======
+0x666,
+>>>>>>> no-scmpkg
 0x25,
 0x55,
 0x2a9,
 0x55,
+<<<<<<< HEAD
 0x675,
+=======
+0x66a,
 0x23,
 0xb,
 0xffff,
 0x55,
-0x671,
+0x666,
 0x55,
-0x2a9,
+0x29f,
 0x65,
 0x3,
 0x3b,
@@ -42288,6 +42758,40 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+0x29f,
+0x25,
+0x55,
+0x2a2,
+0x55,
+0x66b,
+>>>>>>> no-scmpkg
+0x23,
+0xb,
+0xffff,
+0x55,
+<<<<<<< HEAD
+0x671,
+0x55,
+0x2a9,
+=======
+0x666,
+0x55,
+0x2a2,
+>>>>>>> no-scmpkg
+0x65,
+0x3,
+0x3b,
+0x3b,
+0x3b,
+0x24,
+0x21,
+0x55,
+0xcc,
+0x56,
+0x64,
+0x4,
+0x1f,
+<<<<<<< HEAD
 0x2a9,
 0x25,
 0x55,
@@ -42320,6 +42824,14 @@ STk_instr STk_boot_code [] = {
 0x677,
 0x55,
 0x678,
+=======
+0x2a2,
+0x25,
+0x55,
+0x66c,
+0x55,
+0x66d,
+>>>>>>> no-scmpkg
 0x23,
 0x8,
 0x1,
@@ -42337,12 +42849,21 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x677,
 0x25,
 0x55,
 0x679,
 0x55,
 0x67a,
+=======
+0x66c,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x66f,
+>>>>>>> no-scmpkg
 0x23,
 0x7e,
 0xfffe,
@@ -42384,7 +42905,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x660,
+=======
+0x655,
+>>>>>>> no-scmpkg
 0x75,
 0x201,
 0x3,
@@ -42408,13 +42933,21 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x72,
 0x55,
+<<<<<<< HEAD
 0x679,
+=======
+0x66e,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x67b,
+=======
+0x670,
+>>>>>>> no-scmpkg
 0x55,
 0x72,
 0x65,
@@ -42478,7 +43011,11 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x679,
+=======
+0x66e,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x56,
@@ -42486,7 +43023,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x67c,
+=======
+0x671,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
@@ -42505,7 +43046,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x4d,
 0x55,
+<<<<<<< HEAD
 0x67d,
+=======
+0x672,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x56,
@@ -42527,10 +43072,17 @@ STk_instr STk_boot_code [] = {
 0x16,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x67e,
 0x66,
 0x55,
 0x67f,
+=======
+0x673,
+0x66,
+0x55,
+0x674,
+>>>>>>> no-scmpkg
 0x6c,
 0x4ab,
 0x3,
@@ -42623,7 +43175,11 @@ STk_instr STk_boot_code [] = {
 0xb,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x680,
+=======
+0x675,
+>>>>>>> no-scmpkg
 0x75,
 0x200,
 0x6c,
@@ -42635,7 +43191,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x681,
+=======
+0x676,
+>>>>>>> no-scmpkg
 0x23,
 0xb,
 0x1,
@@ -42643,7 +43203,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x681,
+=======
+0x676,
+>>>>>>> no-scmpkg
 0x1,
 0x73,
 0x41,
@@ -42665,7 +43229,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x682,
+=======
+0x677,
+>>>>>>> no-scmpkg
 0x56,
 0x305,
 0x2,
@@ -42677,9 +43245,15 @@ STk_instr STk_boot_code [] = {
 0xad,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x683,
 0x55,
 0x684,
+=======
+0x678,
+0x55,
+0x679,
+>>>>>>> no-scmpkg
 0x23,
 0x29,
 0xffff,
@@ -42730,12 +43304,21 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x683,
 0x25,
 0x55,
 0x685,
 0x55,
 0x686,
+=======
+0x678,
+0x25,
+0x55,
+0x67a,
+0x55,
+0x67b,
+>>>>>>> no-scmpkg
 0x23,
 0x34,
 0x2,
@@ -42797,12 +43380,21 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x685,
 0x25,
 0x55,
 0x687,
 0x55,
 0x688,
+=======
+0x67a,
+0x25,
+0x55,
+0x67c,
+0x55,
+0x67d,
+>>>>>>> no-scmpkg
 0x23,
 0xe1,
 0xfffe,
@@ -42853,9 +43445,15 @@ STk_instr STk_boot_code [] = {
 0xb,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x687,
 0x55,
 0x689,
+=======
+0x67c,
+0x55,
+0x67e,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x33,
@@ -42906,7 +43504,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x68a,
+=======
+0x67f,
+>>>>>>> no-scmpkg
 0x56,
 0x160,
 0x2,
@@ -42928,9 +43530,15 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x687,
 0x55,
 0x68b,
+=======
+0x67c,
+0x55,
+0x680,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x6c,
@@ -43005,7 +43613,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x68c,
+=======
+0x681,
+>>>>>>> no-scmpkg
 0x55,
 0x72,
 0x65,
@@ -43037,7 +43649,11 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x687,
+=======
+0x67c,
+>>>>>>> no-scmpkg
 0x23,
 0x45,
 0x1,
@@ -43057,9 +43673,15 @@ STk_instr STk_boot_code [] = {
 0xf,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x68d,
 0x55,
 0x68e,
+=======
+0x682,
+0x55,
+0x683,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -43072,9 +43694,15 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x68d,
 0x55,
 0x68f,
+=======
+0x682,
+0x55,
+0x684,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x33,
@@ -43110,7 +43738,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x68d,
+=======
+0x682,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x56,
@@ -43118,11 +43750,16 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x690,
+=======
+0x685,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
 0xa,
+<<<<<<< HEAD
 0x691,
 0x1f,
 0x692,
@@ -43130,6 +43767,15 @@ STk_instr STk_boot_code [] = {
 0x14f,
 0x1f,
 0x693,
+=======
+0x686,
+0x1f,
+0x687,
+0xa,
+0x14a,
+0x1f,
+0x688,
+>>>>>>> no-scmpkg
 0x23,
 0x12,
 0x1,
@@ -43140,18 +43786,30 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x694,
+=======
+0x689,
+>>>>>>> no-scmpkg
 0x56,
 0x43,
 0x2,
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x2bd,
 0x1,
 0x24,
 0x1f,
 0x695,
+=======
+0x2b3,
+0x1,
+0x24,
+0x1f,
+0x68a,
+>>>>>>> no-scmpkg
 0x23,
 0x12,
 0x1,
@@ -43162,13 +43820,18 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x696,
+=======
+0x68b,
+>>>>>>> no-scmpkg
 0x56,
 0x43,
 0x2,
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x64a,
 0x1,
 0x24,
@@ -43190,6 +43853,29 @@ STk_instr STk_boot_code [] = {
 0x372,
 0x1f,
 0x69b,
+=======
+0x63f,
+0x1,
+0x24,
+0x1f,
+0x68c,
+0xa,
+0x3b8,
+0x1f,
+0x48a,
+0xa,
+0x68d,
+0x1f,
+0x68e,
+0xa,
+0x366,
+0x1f,
+0x68f,
+0xa,
+0x368,
+0x1f,
+0x690,
+>>>>>>> no-scmpkg
 0x23,
 0x48,
 0xfffd,
@@ -43265,22 +43951,35 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x69c,
 0xa,
 0x69d,
 0x1f,
 0x69e,
+=======
+0x691,
+0xa,
+0x692,
+0x1f,
+0x693,
+>>>>>>> no-scmpkg
 0x23,
 0x8,
 0xffff,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x69f,
+=======
+0x694,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6a0,
 0x25,
 0x55,
@@ -43292,9 +43991,27 @@ STk_instr STk_boot_code [] = {
 0x2,
 0xa,
 0x6a3,
+=======
+0x695,
+0x25,
+0x55,
+0x696,
+0x6a,
+0x695,
+0x56,
+0x697,
+0x2,
+0xa,
+0x698,
+0x1f,
+0x699,
+0xa,
+0x631,
+>>>>>>> no-scmpkg
 0x1f,
 0x6a4,
 0xa,
+<<<<<<< HEAD
 0x63c,
 0x1f,
 0x6a5,
@@ -43302,6 +44019,11 @@ STk_instr STk_boot_code [] = {
 0xb2,
 0x1f,
 0x6a6,
+=======
+0xb2,
+0x1f,
+0x69b,
+>>>>>>> no-scmpkg
 0x23,
 0x2c,
 0x2,
@@ -43340,16 +44062,54 @@ STk_instr STk_boot_code [] = {
 0x9,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x6a7,
 0x55,
 0x6a8,
+=======
+0x69c,
+0x55,
+0x69d,
+>>>>>>> no-scmpkg
 0x66,
 0x6c,
 0x33,
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6a7,
+=======
+0x69c,
+0xa,
+0x69e,
+0x1f,
+0x69f,
+0xa,
+0x6a0,
+0x1f,
+0x6a1,
+0xa,
+0x6a2,
+0x1f,
+0x6a3,
+0xa,
+0x17b,
+0x1f,
+0x6a4,
+0xa,
+0x495,
+0x1f,
+0x6a5,
+0xa,
+0xd7,
+0x1f,
+0x6a6,
+0xa,
+0x6a7,
+0x1f,
+0x6a8,
+>>>>>>> no-scmpkg
 0xa,
 0x6a9,
 0x1f,
@@ -43357,24 +44117,33 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x6ab,
 0x1f,
+0x6ab,
+0xa,
+<<<<<<< HEAD
+0x6ad,
+=======
+0xdf,
+0x1f,
 0x6ac,
 0xa,
-0x6ad,
+0xe0,
+>>>>>>> no-scmpkg
 0x1f,
-0x6ae,
+0x6ad,
 0xa,
 0x180,
 0x1f,
-0x6af,
+0x6ae,
 0xa,
 0x49f,
 0x1f,
-0x6b0,
+0x6af,
 0xa,
 0xd7,
 0x1f,
-0x6b1,
+0x6b0,
 0xa,
+<<<<<<< HEAD
 0x6b2,
 0x1f,
 0x6b3,
@@ -43414,6 +44183,15 @@ STk_instr STk_boot_code [] = {
 0x4bb,
 0x1f,
 0x6b8,
+=======
+0x350,
+0x1f,
+0x6b1,
+0xa,
+0x4b1,
+0x1f,
+0x6b2,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x51,
@@ -43433,7 +44211,11 @@ STk_instr STk_boot_code [] = {
 0x2f,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x6b9,
+=======
+0x6b3,
+>>>>>>> no-scmpkg
 0x56,
 0x50,
 0x1,
@@ -43445,7 +44227,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x6ba,
+=======
+0x6b4,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -43461,7 +44247,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6bb,
+=======
+0x6b5,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
@@ -43473,14 +44263,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x6b9,
+=======
+0x6b3,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2e,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x6b9,
+=======
+0x6b3,
+>>>>>>> no-scmpkg
 0x56,
 0x5b,
 0x1,
@@ -43506,21 +44304,65 @@ STk_instr STk_boot_code [] = {
 0x1ff,
 0x7,
 0x1f,
+<<<<<<< HEAD
 0x6bc,
+=======
+0x6b6,
+>>>>>>> no-scmpkg
 0x23,
 0xa,
 0x2,
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x6bd,
+=======
+0x6b7,
 0x65,
 0x6c,
 0x33,
 0x3,
 0x24,
 0x1f,
+0x6b8,
+0x23,
+0xa,
+0x2,
+0x25,
+0x66,
+0x55,
+0x6b9,
+0x65,
+0x6c,
+0x33,
+0x3,
+0x24,
+0x1f,
+0x6ba,
+0x23,
+0xa,
+0x2,
+0x25,
+0x66,
+0x55,
+0x6bb,
+>>>>>>> no-scmpkg
+0x65,
+0x6c,
+0x33,
+0x3,
+0x24,
+0x1f,
+<<<<<<< HEAD
 0x6be,
+=======
+0x6bc,
+0xa,
+0x1fb,
+0x1f,
+0x6bd,
+>>>>>>> no-scmpkg
 0x23,
 0xa,
 0x2,
@@ -43585,21 +44427,36 @@ STk_instr STk_boot_code [] = {
 0x1c,
 0x2,
 0x9,
+<<<<<<< HEAD
 0x6c4,
+=======
+0x6be,
+>>>>>>> no-scmpkg
 0x6e,
 0xc,
 0x3e,
 0x71,
+<<<<<<< HEAD
 0x6c5,
+=======
+0x6bf,
+>>>>>>> no-scmpkg
 0x1,
 0x3b,
 0x1c,
 0x2,
 0x9,
+<<<<<<< HEAD
 0x6c4,
 0x24,
 0x1f,
 0x6c5,
+=======
+0x6be,
+0x24,
+0x1f,
+0x6bf,
+>>>>>>> no-scmpkg
 0x23,
 0x23,
 0x1,
@@ -43631,14 +44488,22 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x3e,
 0x71,
+<<<<<<< HEAD
 0x6c6,
+=======
+0x6c0,
+>>>>>>> no-scmpkg
 0x1,
 0x3b,
 0x24,
 0xc,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6c6,
+=======
+0x6c0,
+>>>>>>> no-scmpkg
 0x23,
 0x40,
 0x1,
@@ -43650,18 +44515,30 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6c7,
+=======
+0x6c1,
+0x1,
+0x6e,
+0x65,
+0x56,
+0x6c2,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x65,
 0x56,
 0x6c8,
 0x1,
+<<<<<<< HEAD
 0x6e,
 0x65,
 0x56,
 0x6c9,
 0x1,
+=======
+>>>>>>> no-scmpkg
 0x21,
 0x2b,
 0x3,
@@ -43706,18 +44583,27 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6ca,
+=======
+0x6c4,
+>>>>>>> no-scmpkg
 0x23,
 0x4b,
 0xfffe,
 0x66,
 0xa,
+<<<<<<< HEAD
 0x6cb,
+=======
+0x6c5,
+>>>>>>> no-scmpkg
 0x62,
 0x11,
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x6cc,
 0x25,
 0x65,
@@ -43725,16 +44611,33 @@ STk_instr STk_boot_code [] = {
 0x6cd,
 0x55,
 0x6ce,
+=======
+0x6c6,
+0x25,
+0x65,
+0x55,
+0x6c7,
+0x55,
+0x6c8,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
 0x73,
+<<<<<<< HEAD
 0x6cf,
+=======
+0x6c9,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x66,
 0xa,
+<<<<<<< HEAD
 0x6d0,
+=======
+0x6ca,
+>>>>>>> no-scmpkg
 0x62,
 0x24,
 0x25,
@@ -43744,7 +44647,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6d1,
+=======
+0x6cb,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -43752,11 +44659,24 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6d2,
+=======
+0x6cc,
 0x4f,
 0x56,
 0x30,
 0x3,
+0x6e,
+0x65,
+0x55,
+0x6cd,
+>>>>>>> no-scmpkg
+0x4f,
+0x56,
+0x30,
+0x3,
+<<<<<<< HEAD
 0x6e,
 0x65,
 0x55,
@@ -43765,19 +44685,31 @@ STk_instr STk_boot_code [] = {
 0x56,
 0x30,
 0x3,
+=======
+>>>>>>> no-scmpkg
 0x21,
 0x3f,
 0x3,
 0x73,
+<<<<<<< HEAD
 0x6cf,
+=======
+0x6c9,
+>>>>>>> no-scmpkg
 0x3,
 0x1c,
 0xa,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x6d4,
 0x55,
 0x6d5,
+=======
+0x6ce,
+0x55,
+0x6cf,
+>>>>>>> no-scmpkg
 0x66,
 0x65,
 0x6c,
@@ -43785,14 +44717,106 @@ STk_instr STk_boot_code [] = {
 0x4,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6d6,
+=======
+0x6d0,
 0x23,
 0x18,
 0x1,
 0x25,
 0x65,
 0x56,
+0x6d1,
+0x1,
+0x1d,
+0x8,
+0x25,
+0x65,
+0x55,
+0x6d2,
+0x6c,
+0x3c,
+0x2,
+0x24,
+0x25,
+0x55,
+0x6d3,
+0x65,
+0x6c,
+0x6b8,
+0x2,
+0x24,
+0x1f,
+0x6d3,
+0x23,
+0x18,
+0x1,
+0x25,
+0x65,
+0x56,
+0x6d1,
+0x1,
+0x1d,
+0x8,
+0x25,
+0x65,
+0x55,
+0x6d4,
+0x6c,
+0x3c,
+0x2,
+0x24,
+0x25,
+0x55,
+0x6d5,
+0x65,
+0x6c,
+0x6b8,
+0x2,
+0x24,
+0x1f,
+0x6d5,
+>>>>>>> no-scmpkg
+0x23,
+0x18,
+0x1,
+0x25,
+0x65,
+0x56,
+<<<<<<< HEAD
 0x6d7,
+=======
+0x6d1,
+0x1,
+0x1d,
+0x8,
+0x25,
+0x65,
+0x55,
+0x6d6,
+0x6c,
+0x3c,
+0x2,
+0x24,
+0x25,
+0x55,
+0x6d7,
+0x65,
+0x6c,
+0x6b8,
+0x2,
+0x24,
+0x1f,
+0x6d7,
+0x23,
+0x18,
+0x1,
+0x25,
+0x65,
+0x56,
+0x6d1,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x8,
@@ -43809,7 +44833,11 @@ STk_instr STk_boot_code [] = {
 0x6d9,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x6be,
+=======
+0x6b8,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x1f,
@@ -43820,7 +44848,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6d7,
+=======
+0x6d1,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x8,
@@ -43837,7 +44869,11 @@ STk_instr STk_boot_code [] = {
 0x6db,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x6be,
+=======
+0x6b8,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x1f,
@@ -43848,7 +44884,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6d7,
+=======
+0x6d1,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x8,
@@ -43865,7 +44905,11 @@ STk_instr STk_boot_code [] = {
 0x6dd,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x6be,
+=======
+0x6b8,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x1f,
@@ -43876,7 +44920,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6d7,
+=======
+0x6d1,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x8,
@@ -43893,11 +44941,16 @@ STk_instr STk_boot_code [] = {
 0x6df,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x6be,
+=======
+0x6b8,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x1f,
 0x6df,
+<<<<<<< HEAD
 0x23,
 0x18,
 0x1,
@@ -43982,6 +45035,8 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x6e5,
+=======
+>>>>>>> no-scmpkg
 0x23,
 0xd,
 0x1,
@@ -43998,7 +45053,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x23,
 0xd,
 0x1,
@@ -44015,7 +45074,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6e7,
+=======
+0x6e1,
+>>>>>>> no-scmpkg
 0x23,
 0x17,
 0x1,
@@ -44027,22 +45090,36 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x3,
 0x9,
+<<<<<<< HEAD
 0x6e8,
+=======
+0x6e2,
+>>>>>>> no-scmpkg
 0x24,
 0x25,
 0xc,
 0x3e,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6e9,
 0x55,
 0x6e8,
+=======
+0x6e3,
+0x55,
+0x6e2,
+>>>>>>> no-scmpkg
 0x6c,
 0x30,
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6ea,
+=======
+0x6e4,
+>>>>>>> no-scmpkg
 0x23,
 0x15,
 0x1,
@@ -44058,7 +45135,36 @@ STk_instr STk_boot_code [] = {
 0x3e,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6eb,
+=======
+0x6e5,
+0x4d,
+0x6c,
+0x30,
+0x3,
+0x24,
+0x1,
+0x24,
+0x1f,
+0x6c1,
+0x23,
+0x15,
+0x1,
+0x25,
+0x65,
+0x56,
+0x1f,
+0x1,
+0x1d,
+0xb,
+0x25,
+0xc,
+0x3e,
+0x21,
+0x55,
+0x2f,
+>>>>>>> no-scmpkg
 0x4d,
 0x6c,
 0x30,
@@ -44083,7 +45189,7 @@ STk_instr STk_boot_code [] = {
 0x3e,
 0x21,
 0x55,
-0x2f,
+0x6e6,
 0x4d,
 0x6c,
 0x30,
@@ -44108,6 +45214,7 @@ STk_instr STk_boot_code [] = {
 0x3e,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6ec,
 0x4d,
 0x6c,
@@ -44134,6 +45241,9 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x55,
 0x6ed,
+=======
+0x6e7,
+>>>>>>> no-scmpkg
 0x53,
 0x6c,
 0x30,
@@ -44142,7 +45252,11 @@ STk_instr STk_boot_code [] = {
 0x7,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6ee,
+=======
+0x6e8,
+>>>>>>> no-scmpkg
 0x23,
 0x15,
 0x1,
@@ -44158,7 +45272,11 @@ STk_instr STk_boot_code [] = {
 0x3e,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6ef,
+=======
+0x6e9,
+>>>>>>> no-scmpkg
 0x4d,
 0x6c,
 0x30,
@@ -44167,7 +45285,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6f0,
+=======
+0x6ea,
+>>>>>>> no-scmpkg
 0x23,
 0x1c,
 0x2,
@@ -44175,7 +45297,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -44187,7 +45313,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6f1,
+=======
+0x6eb,
+>>>>>>> no-scmpkg
 0x56,
 0x3c,
 0x2,
@@ -44199,7 +45329,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6f2,
+=======
+0x6ec,
+>>>>>>> no-scmpkg
 0x23,
 0xc,
 0x2,
@@ -44208,20 +45342,113 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6e5,
+=======
+0x6df,
+>>>>>>> no-scmpkg
 0x1,
 0x73,
 0xc2,
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x6f3,
+=======
+0x6ed,
 0x23,
 0x18,
 0x1,
 0x25,
 0x65,
 0x56,
+0x2c,
+0x1,
+0x1d,
+0x8,
+0x25,
+0x65,
+0x55,
+0x6d2,
+0x6c,
+0x3c,
+0x2,
+0x24,
+0x25,
+0x55,
+0x6ee,
+0x65,
+0x6c,
+0x6ba,
+0x2,
+0x24,
+0x1f,
+0x6ee,
+0x23,
+0x18,
+0x1,
+0x25,
+0x65,
+0x56,
+0x2c,
+0x1,
+0x1d,
+0x8,
+0x25,
+0x65,
+0x55,
+0x6ef,
+0x6c,
+0x3c,
+0x2,
+0x24,
+0x25,
+0x55,
+0x6f0,
+0x65,
+0x6c,
+0x6ba,
+0x2,
+0x24,
+0x1f,
+0x6f0,
+0x23,
+0x18,
+0x1,
+0x25,
+0x65,
+0x56,
+0x2c,
+0x1,
+0x1d,
+0x8,
+0x25,
+0x65,
+0x55,
+0x6f1,
+0x6c,
+0x3c,
+0x2,
+0x24,
+0x25,
+0x55,
+0x6f2,
+0x65,
+0x6c,
+0x6ba,
+0x2,
+0x24,
+0x1f,
+0x6f2,
+>>>>>>> no-scmpkg
+0x23,
+0x18,
+0x1,
+0x25,
+0x65,
+0x56,
+<<<<<<< HEAD
 0x2c,
 0x1,
 0x1d,
@@ -44251,13 +45478,44 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x56,
 0x2c,
+=======
+0x6f3,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x8,
 0x25,
 0x65,
 0x55,
+0x6f4,
+0x6c,
+0x3c,
+0x2,
+0x24,
+0x25,
+0x55,
 0x6f5,
+0x65,
+0x6c,
+0x6bc,
+0x2,
+0x24,
+0x1f,
+0x6f5,
+0x23,
+0x18,
+0x1,
+0x25,
+0x65,
+0x56,
+0x6f3,
+0x1,
+0x1d,
+0x8,
+0x25,
+0x65,
+0x55,
+0x6bf,
 0x6c,
 0x3c,
 0x2,
@@ -44267,7 +45525,11 @@ STk_instr STk_boot_code [] = {
 0x6f6,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x6c0,
+=======
+0x6bc,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x1f,
@@ -44278,7 +45540,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x2c,
+=======
+0x6f3,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x8,
@@ -44293,6 +45559,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x55,
 0x6f8,
+<<<<<<< HEAD
 0x65,
 0x6c,
 0x6c0,
@@ -44384,6 +45651,15 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x6fe,
+=======
+0x65,
+0x6c,
+0x6bc,
+0x2,
+0x24,
+0x1f,
+0x6f8,
+>>>>>>> no-scmpkg
 0x23,
 0x15,
 0x2,
@@ -44393,10 +45669,17 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6ff,
 0x1,
 0x71,
 0x6e3,
+=======
+0x6f9,
+0x1,
+0x71,
+0x6dd,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x49,
@@ -44408,7 +45691,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x700,
+=======
+0x6fa,
+>>>>>>> no-scmpkg
 0x23,
 0x6c,
 0xfffe,
@@ -44492,9 +45779,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x6a,
+<<<<<<< HEAD
 0x701,
 0x56,
 0x700,
+=======
+0x6fb,
+0x56,
+0x6fa,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x2,
@@ -44510,9 +45803,15 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x702,
 0x55,
 0x703,
+=======
+0x6fc,
+0x55,
+0x6fd,
+>>>>>>> no-scmpkg
 0x75,
 0x201,
 0x6c,
@@ -44520,7 +45819,11 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x702,
+=======
+0x6fc,
+>>>>>>> no-scmpkg
 0x23,
 0xe4,
 0x1,
@@ -44544,7 +45847,11 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x3d,
 0x71,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -44558,9 +45865,15 @@ STk_instr STk_boot_code [] = {
 0xb,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x704,
 0x55,
 0x705,
+=======
+0x6fe,
+0x55,
+0x6ff,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x33,
@@ -44628,7 +45941,11 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x3d,
 0x71,
+<<<<<<< HEAD
 0x6dd,
+=======
+0x6d7,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x65,
@@ -44680,11 +45997,19 @@ STk_instr STk_boot_code [] = {
 0xe,
 0x3d,
 0x71,
+<<<<<<< HEAD
 0x6ea,
 0x1,
 0x21,
 0x9,
 0x6e8,
+=======
+0x6e4,
+0x1,
+0x21,
+0x9,
+0x6e2,
+>>>>>>> no-scmpkg
 0x62,
 0x11,
 0x25,
@@ -44739,7 +46064,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x6e3,
+=======
+0x6dd,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x4f,
@@ -44752,7 +46081,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x706,
+=======
+0x700,
+>>>>>>> no-scmpkg
 0x25,
 0x4f,
 0x29,
@@ -44780,6 +46113,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x701,
 0x55,
 0x707,
@@ -44793,11 +46127,30 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x55,
 0x709,
+=======
+0x6fb,
+0x55,
+0x701,
+0x75,
+0x100,
+0x55,
+0x702,
+0x4f,
+0x55,
+0x6c7,
+0x25,
+0x55,
+0x703,
+>>>>>>> no-scmpkg
 0x56,
 0x6e,
 0x1,
 0x71,
+<<<<<<< HEAD
 0x6d6,
+=======
+0x6d0,
+>>>>>>> no-scmpkg
 0x7,
 0x21,
 0x2b,
@@ -44817,7 +46170,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x1f,
+<<<<<<< HEAD
 0x70a,
+=======
+0x704,
+>>>>>>> no-scmpkg
 0x23,
 0x83,
 0x1,
@@ -44827,9 +46184,15 @@ STk_instr STk_boot_code [] = {
 0x7,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x701,
 0x6c,
 0x702,
+=======
+0x6fb,
+0x6c,
+0x6fc,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x2a,
@@ -44841,9 +46204,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x6a,
+<<<<<<< HEAD
 0x701,
 0x56,
 0x700,
+=======
+0x6fb,
+0x56,
+0x6fa,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x2,
@@ -44853,10 +46222,17 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x702,
 0x1,
 0x73,
 0x6ff,
+=======
+0x6fc,
+0x1,
+0x73,
+0x6f9,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x21,
@@ -44876,7 +46252,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e3,
+=======
+0x6dd,
+>>>>>>> no-scmpkg
 0x1,
 0x3e,
 0x24,
@@ -44947,17 +46327,30 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x67,
 0x6c,
+<<<<<<< HEAD
 0x70a,
+=======
+0x704,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x70b,
 0x25,
 0x55,
 0x70c,
 0x55,
 0x70d,
+=======
+0x705,
+0x25,
+0x55,
+0x706,
+0x55,
+0x707,
+>>>>>>> no-scmpkg
 0x23,
 0x45,
 0xfffc,
@@ -44965,7 +46358,11 @@ STk_instr STk_boot_code [] = {
 0x1e5,
 0x68,
 0x55,
+<<<<<<< HEAD
 0x70e,
+=======
+0x708,
+>>>>>>> no-scmpkg
 0x55,
 0x72,
 0x68,
@@ -44985,7 +46382,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6ca,
+=======
+0x6c4,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x3,
@@ -44994,7 +46395,11 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x70f,
+=======
+0x709,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -45002,7 +46407,11 @@ STk_instr STk_boot_code [] = {
 0x1e,
 0xf,
 0x55,
+<<<<<<< HEAD
 0x70b,
+=======
+0x705,
+>>>>>>> no-scmpkg
 0x55,
 0x72,
 0x67,
@@ -45031,12 +46440,20 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6b9,
+=======
+0x6b3,
+>>>>>>> no-scmpkg
 0x56,
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x70c,
+=======
+0x706,
+>>>>>>> no-scmpkg
 0x23,
 0xac,
 0xfffb,
@@ -45085,14 +46502,22 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x6,
 0x6a,
+<<<<<<< HEAD
 0x710,
+=======
+0x70a,
+>>>>>>> no-scmpkg
 0x3f,
 0x1,
 0x1c,
 0x8,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x702,
+=======
+0x6fc,
+>>>>>>> no-scmpkg
 0x75,
 0x103,
 0x56,
@@ -45116,9 +46541,15 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x70c,
 0x55,
 0x711,
+=======
+0x706,
+0x55,
+0x70b,
+>>>>>>> no-scmpkg
 0x65,
 0x75,
 0x304,
@@ -45133,7 +46564,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x75,
 0x202,
 0x56,
@@ -45152,9 +46587,15 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x70c,
 0x55,
 0x712,
+=======
+0x706,
+0x55,
+0x70c,
+>>>>>>> no-scmpkg
 0x65,
 0x75,
 0x304,
@@ -45171,6 +46612,7 @@ STk_instr STk_boot_code [] = {
 0x204,
 0x4d,
 0x56,
+<<<<<<< HEAD
 0x702,
 0x2,
 0x6e,
@@ -45187,6 +46629,24 @@ STk_instr STk_boot_code [] = {
 0x202,
 0x55,
 0x6cd,
+=======
+0x6fc,
+0x2,
+0x6e,
+0x6a,
+0x6d0,
+0x75,
+0x201,
+0x55,
+0x701,
+0x65,
+0x55,
+0x702,
+0x75,
+0x202,
+0x55,
+0x6c7,
+>>>>>>> no-scmpkg
 0x75,
 0x204,
 0x75,
@@ -45204,7 +46664,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6bc,
+=======
+0x6b6,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x1,
@@ -45212,12 +46676,21 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x70e,
 0x25,
 0x55,
 0x713,
 0x55,
 0x714,
+=======
+0x708,
+0x25,
+0x55,
+0x70d,
+0x55,
+0x70e,
+>>>>>>> no-scmpkg
 0x23,
 0x4c,
 0xfffe,
@@ -45241,7 +46714,11 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x6cb,
+=======
+0x6c5,
+>>>>>>> no-scmpkg
 0x1c,
 0xe,
 0x25,
@@ -45263,7 +46740,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x715,
+=======
+0x70f,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -45274,7 +46755,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x716,
+=======
+0x710,
+>>>>>>> no-scmpkg
 0x55,
 0x72,
 0x75,
@@ -45298,12 +46783,20 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6b9,
+=======
+0x6b3,
+>>>>>>> no-scmpkg
 0x56,
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x713,
+=======
+0x70d,
+>>>>>>> no-scmpkg
 0x23,
 0x88,
 0xfffe,
@@ -45315,7 +46808,11 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x4,
 0xa,
+<<<<<<< HEAD
 0x6cb,
+=======
+0x6c5,
+>>>>>>> no-scmpkg
 0x1c,
 0xe,
 0x25,
@@ -45410,11 +46907,19 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x6cd,
 0x75,
 0x201,
 0x55,
 0x717,
+=======
+0x6c7,
+0x75,
+0x201,
+0x55,
+0x711,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -45428,11 +46933,19 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x715,
 0x75,
 0x101,
 0x56,
 0x6d6,
+=======
+0x70f,
+0x75,
+0x101,
+0x56,
+0x6d0,
+>>>>>>> no-scmpkg
 0x7,
 0x6e,
 0x56,
@@ -45443,7 +46956,11 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x716,
+=======
+0x710,
+>>>>>>> no-scmpkg
 0x23,
 0x10,
 0x3,
@@ -45451,23 +46968,39 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6fc,
+=======
+0x6f6,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6fc,
+=======
+0x6f6,
+>>>>>>> no-scmpkg
 0x1,
 0x73,
 0xec,
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x718,
 0xa,
 0x718,
 0x1f,
 0x719,
+=======
+0x712,
+0xa,
+0x712,
+0x1f,
+0x713,
+>>>>>>> no-scmpkg
 0x23,
 0x2f,
 0x1,
@@ -45479,7 +47012,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e1,
+=======
+0x6db,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -45497,7 +47034,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x6e0,
+=======
+0x6da,
+>>>>>>> no-scmpkg
 0x75,
 0x200,
 0xc,
@@ -45511,14 +47052,22 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6fc,
+=======
+0x6f6,
+>>>>>>> no-scmpkg
 0x1,
 0x73,
 0x25,
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x71a,
+=======
+0x714,
+>>>>>>> no-scmpkg
 0x23,
 0x23,
 0x1,
@@ -45529,14 +47078,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6e0,
+=======
+0x6da,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x100,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e1,
+=======
+0x6db,
+>>>>>>> no-scmpkg
 0x1,
 0x6f,
 0xea,
@@ -45550,14 +47107,22 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6fc,
+=======
+0x6f6,
+>>>>>>> no-scmpkg
 0x1,
 0x73,
 0x25,
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x71b,
+=======
+0x715,
+>>>>>>> no-scmpkg
 0x23,
 0x51,
 0x2,
@@ -45565,7 +47130,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6f6,
+=======
+0x6f0,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -45599,7 +47168,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x300,
 0x56,
+<<<<<<< HEAD
 0x719,
+=======
+0x713,
+>>>>>>> no-scmpkg
 0x3,
 0x1d,
 0x11,
@@ -45607,7 +47180,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x3d,
 0x71,
+<<<<<<< HEAD
 0x71b,
+=======
+0x715,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x65,
@@ -45642,19 +47219,31 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x71c,
+=======
+0x716,
+>>>>>>> no-scmpkg
 0x23,
 0x15,
 0x2,
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x6f5,
+=======
+0x6ef,
+>>>>>>> no-scmpkg
 0x25,
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x71c,
+=======
+0x716,
+>>>>>>> no-scmpkg
 0x2,
 0x71,
 0x3d,
@@ -45662,12 +47251,20 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x71a,
+=======
+0x714,
+>>>>>>> no-scmpkg
 0x1,
 0xc,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x71d,
+=======
+0x717,
+>>>>>>> no-scmpkg
 0x23,
 0x9e,
 0xfffc,
@@ -45745,18 +47342,27 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x17,
 0x55,
+<<<<<<< HEAD
 0x6d6,
+=======
+0x6d0,
+>>>>>>> no-scmpkg
 0x12,
 0x100,
 0x1e,
 0x5,
 0x9,
+<<<<<<< HEAD
 0x6d0,
+=======
+0x6ca,
+>>>>>>> no-scmpkg
 0x1e,
 0x1,
 0x1,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d1,
 0x75,
 0x203,
@@ -45766,12 +47372,27 @@ STk_instr STk_boot_code [] = {
 0x23,
 0x55,
 0x702,
+=======
+0x6cb,
+0x75,
+0x203,
+0x55,
+0x6cc,
+0x55,
+0x23,
+0x55,
+0x6fc,
+>>>>>>> no-scmpkg
 0x55,
 0x72,
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6c5,
+=======
+0x6bf,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x3,
@@ -45784,11 +47405,19 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x55,
 0x20b,
 0x55,
+<<<<<<< HEAD
 0x71e,
+=======
+0x718,
+>>>>>>> no-scmpkg
 0x55,
 0x92,
 0x3,
@@ -45806,7 +47435,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6c6,
+=======
+0x6c0,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0xe,
@@ -45829,12 +47462,20 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x71f,
+=======
+0x719,
+>>>>>>> no-scmpkg
 0x25,
 0x55,
 0x229,
 0x55,
+<<<<<<< HEAD
 0x720,
+=======
+0x71a,
+>>>>>>> no-scmpkg
 0x23,
 0x9,
 0xfffe,
@@ -45843,12 +47484,20 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x71f,
+=======
+0x719,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6b9,
+=======
+0x6b3,
+>>>>>>> no-scmpkg
 0x56,
 0x64,
 0x4,
@@ -45856,16 +47505,26 @@ STk_instr STk_boot_code [] = {
 0x229,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x721,
 0x55,
 0x722,
+=======
+0x71b,
+0x55,
+0x71c,
+>>>>>>> no-scmpkg
 0x23,
 0x4f,
 0xfffd,
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x723,
+=======
+0x71d,
+>>>>>>> no-scmpkg
 0x56,
 0x6e,
 0x1,
@@ -45876,7 +47535,11 @@ STk_instr STk_boot_code [] = {
 0x20b,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x716,
+=======
+0x710,
+>>>>>>> no-scmpkg
 0x55,
 0x72,
 0x75,
@@ -45897,7 +47560,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x71d,
+=======
+0x717,
+>>>>>>> no-scmpkg
 0x65,
 0x25,
 0x65,
@@ -45906,7 +47573,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x71f,
+=======
+0x719,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x3,
@@ -45942,11 +47613,16 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6b9,
+=======
+0x6b3,
+>>>>>>> no-scmpkg
 0x56,
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x721,
 0x25,
 0x25,
@@ -45954,6 +47630,15 @@ STk_instr STk_boot_code [] = {
 0x724,
 0x56,
 0x716,
+=======
+0x71b,
+0x25,
+0x25,
+0x55,
+0x71e,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -45962,6 +47647,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -45973,12 +47659,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x725,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x71f,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -45990,15 +47693,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x724,
+=======
+0x71e,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46006,9 +47720,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x726,
 0x56,
 0x716,
+=======
+0x720,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46017,6 +47737,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46028,12 +47749,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x727,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x721,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46047,15 +47785,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x726,
+=======
+0x720,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46063,9 +47812,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x728,
 0x56,
 0x716,
+=======
+0x722,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46074,6 +47829,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46085,12 +47841,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x729,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x723,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46101,12 +47874,20 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x72a,
+=======
+0x724,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x72b,
+=======
+0x725,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x54,
@@ -46120,15 +47901,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x728,
+=======
+0x722,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46136,9 +47928,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x728,
 0x56,
 0x716,
+=======
+0x722,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46147,6 +47945,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46158,12 +47957,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x72c,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x726,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46175,7 +47991,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6ff,
+=======
+0x6f9,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -46183,9 +48003,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6d8,
 0x56,
 0x72d,
+=======
+0x6d2,
+0x56,
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x1b,
@@ -46193,18 +48019,30 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x72e,
 0x25,
 0x65,
 0x56,
 0x6d9,
+=======
+0x728,
+0x25,
+0x65,
+0x56,
+0x6d3,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x25,
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x72b,
+=======
+0x725,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x54,
@@ -46224,15 +48062,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x728,
+=======
+0x722,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46240,9 +48089,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x728,
 0x56,
 0x716,
+=======
+0x722,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46251,6 +48106,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46262,12 +48118,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x72f,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x729,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46279,7 +48152,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6ff,
+=======
+0x6f9,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -46288,18 +48165,30 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6d8,
 0x56,
 0x72d,
+=======
+0x6d2,
+0x56,
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x9,
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6d8,
 0x56,
 0x72d,
+=======
+0x6d2,
+0x56,
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x1,
@@ -46310,24 +48199,40 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x730,
 0x25,
 0x65,
 0x56,
 0x6d9,
+=======
+0x72a,
+0x25,
+0x65,
+0x56,
+0x6d3,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x6d9,
+=======
+0x6d3,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x25,
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x72b,
+=======
+0x725,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x54,
@@ -46347,15 +48252,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x728,
+=======
+0x722,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46363,9 +48279,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x728,
 0x56,
 0x716,
+=======
+0x722,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46374,6 +48296,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46385,12 +48308,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x731,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x72b,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46402,7 +48342,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6ff,
+=======
+0x6f9,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -46411,18 +48355,30 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6d8,
 0x56,
 0x72d,
+=======
+0x6d2,
+0x56,
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x13,
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6d8,
 0x56,
 0x72d,
+=======
+0x6d2,
+0x56,
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0xa,
@@ -46430,9 +48386,15 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6f5,
 0x56,
 0x72d,
+=======
+0x6ef,
+0x56,
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x1,
@@ -46443,24 +48405,40 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x732,
 0x25,
 0x65,
 0x56,
 0x6d9,
+=======
+0x72c,
+0x25,
+0x65,
+0x56,
+0x6d3,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x6f4,
+=======
+0x6ee,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x25,
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x6f6,
+=======
+0x6f0,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x5e,
@@ -46477,15 +48455,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x728,
+=======
+0x722,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46493,9 +48482,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x733,
 0x56,
 0x716,
+=======
+0x72d,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46504,6 +48499,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46515,12 +48511,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x734,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x72e,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46532,20 +48545,35 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x728,
+=======
+0x722,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x733,
+=======
+0x72d,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46553,9 +48581,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x735,
 0x56,
 0x716,
+=======
+0x72f,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46564,6 +48598,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46575,12 +48610,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x736,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x730,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46590,13 +48642,21 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x737,
+=======
+0x731,
+>>>>>>> no-scmpkg
 0x65,
 0x25,
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x72b,
+=======
+0x725,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x54,
@@ -46612,15 +48672,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x735,
+=======
+0x72f,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46628,9 +48699,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x738,
 0x56,
 0x716,
+=======
+0x732,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46639,6 +48716,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46650,12 +48728,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x739,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x733,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46711,7 +48806,11 @@ STk_instr STk_boot_code [] = {
 0x7,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x73a,
+=======
+0x734,
+>>>>>>> no-scmpkg
 0x75,
 0x101,
 0x25,
@@ -46719,7 +48818,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x102,
 0x56,
+<<<<<<< HEAD
 0x72b,
+=======
+0x725,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x54,
@@ -46736,15 +48839,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x738,
+=======
+0x732,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46752,9 +48866,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x73b,
 0x56,
 0x716,
+=======
+0x735,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46763,6 +48883,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46774,12 +48895,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x73c,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x736,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46789,12 +48927,20 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x73d,
+=======
+0x737,
+>>>>>>> no-scmpkg
 0x66,
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x6f4,
+=======
+0x6ee,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0xc,
@@ -46805,15 +48951,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x73b,
+=======
+0x735,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46821,9 +48978,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x73e,
 0x56,
 0x716,
+=======
+0x738,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46832,6 +48995,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46843,12 +49007,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x73f,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x739,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46858,12 +49039,20 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x740,
+=======
+0x73a,
+>>>>>>> no-scmpkg
 0x66,
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6f4,
+=======
+0x6ee,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0xc,
@@ -46874,15 +49063,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x73e,
+=======
+0x738,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46890,9 +49090,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x741,
 0x56,
 0x716,
+=======
+0x73b,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46901,6 +49107,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46912,12 +49119,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x742,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x73c,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46927,7 +49151,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x743,
+=======
+0x73d,
+>>>>>>> no-scmpkg
 0x66,
 0x6c,
 0x33,
@@ -46935,15 +49163,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x741,
+=======
+0x73b,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -46951,9 +49190,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x744,
 0x56,
 0x716,
+=======
+0x73e,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -46962,6 +49207,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -46973,12 +49219,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x745,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x73f,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -46991,6 +49254,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6ff,
 0x1,
 0x71,
@@ -46999,14 +49263,31 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x6a,
 0x6e6,
+=======
+0x6f9,
+0x1,
+0x71,
+0x740,
+0x1,
+0x6e,
+0x6a,
+0x6e0,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6ff,
 0x1,
 0x71,
 0x6e5,
+=======
+0x6f9,
+0x1,
+0x71,
+0x6df,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x21,
@@ -47023,7 +49304,11 @@ STk_instr STk_boot_code [] = {
 0x200,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x72d,
+=======
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0xf,
@@ -47053,15 +49338,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x744,
+=======
+0x73e,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -47069,9 +49365,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x747,
 0x56,
 0x716,
+=======
+0x741,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -47080,6 +49382,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -47091,12 +49394,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x748,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x742,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -47109,6 +49429,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6ff,
 0x1,
 0x71,
@@ -47117,14 +49438,31 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x6a,
 0x6e6,
+=======
+0x6f9,
+0x1,
+0x71,
+0x740,
+0x1,
+0x6e,
+0x6a,
+0x6e0,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6ff,
 0x1,
 0x71,
 0x6e5,
+=======
+0x6f9,
+0x1,
+0x71,
+0x6df,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x21,
@@ -47141,7 +49479,11 @@ STk_instr STk_boot_code [] = {
 0x200,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x72d,
+=======
+0x727,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x23,
@@ -47163,14 +49505,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x749,
+=======
+0x743,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x7,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x747,
+=======
+0x741,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -47191,27 +49541,58 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x747,
+=======
+0x741,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2c,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x74a,
 0x6a,
 0x6cb,
 0x4d,
 0x56,
 0x716,
+=======
+0x744,
+0x6a,
+0x6c5,
+0x4d,
+0x56,
+0x710,
+0x3,
+0x1f,
+0x744,
+0x25,
+0x55,
+0x745,
+0x6a,
+0x6c5,
+0x4d,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x3,
 0x1f,
 0x74a,
@@ -47219,14 +49600,22 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x74b,
 0x6a,
+<<<<<<< HEAD
 0x6cb,
 0x4d,
 0x56,
 0x716,
+=======
+0x6c5,
+0x4d,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x3,
 0x1f,
 0x74b,
 0x25,
+<<<<<<< HEAD
 0x55,
 0x74c,
 0x6a,
@@ -47243,6 +49632,13 @@ STk_instr STk_boot_code [] = {
 0x74a,
 0x56,
 0x716,
+=======
+0x25,
+0x55,
+0x744,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -47251,6 +49647,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -47262,12 +49659,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x74d,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x747,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -47282,16 +49696,26 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x6a,
+<<<<<<< HEAD
 0x74e,
 0x56,
 0x700,
+=======
+0x748,
+0x56,
+0x6fa,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x6,
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x71b,
+=======
+0x715,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x7,
@@ -47299,7 +49723,11 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e1,
+=======
+0x6db,
+>>>>>>> no-scmpkg
 0x1,
 0x73,
 0x4b,
@@ -47307,15 +49735,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x74a,
+=======
+0x744,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -47323,9 +49762,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x74b,
 0x56,
 0x716,
+=======
+0x745,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -47334,6 +49779,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -47345,12 +49791,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x74f,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x749,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -47362,7 +49825,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x6fc,
+=======
+0x6f6,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x4d,
@@ -47421,15 +49888,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x74b,
+=======
+0x745,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -47437,9 +49915,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x74c,
 0x56,
 0x716,
+=======
+0x746,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -47448,6 +49932,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -47459,12 +49944,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x750,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x74a,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -47490,7 +49992,11 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x6db,
+=======
+0x6d5,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x21,
@@ -47503,7 +50009,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x102,
 0x56,
+<<<<<<< HEAD
 0x6d9,
+=======
+0x6d3,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x65,
@@ -47511,29 +50021,51 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x102,
 0x56,
+<<<<<<< HEAD
 0x6dd,
+=======
+0x6d7,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x75,
 0x102,
 0x56,
+<<<<<<< HEAD
 0x6ff,
 0x1,
 0x73,
 0x70e,
+=======
+0x6f9,
+0x1,
+0x73,
+0x708,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x74c,
+=======
+0x746,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -47541,9 +50073,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x6bc,
 0x56,
 0x716,
+=======
+0x6b6,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -47552,6 +50090,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -47563,12 +50102,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x751,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x74b,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -47579,13 +50135,21 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x74a,
+=======
+0x744,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6e1,
+=======
+0x6db,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -47601,7 +50165,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x74b,
+=======
+0x745,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -47613,7 +50181,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x6e0,
+=======
+0x6da,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x3d,
@@ -47626,14 +50198,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6de,
+=======
+0x6d8,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x101,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6df,
+=======
+0x6d9,
+>>>>>>> no-scmpkg
 0x1,
 0x6f,
 0xea,
@@ -47647,7 +50227,11 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6db,
+=======
+0x6d5,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x4b,
@@ -47663,13 +50247,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x74c,
+=======
+0x746,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x6e,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6df,
+=======
+0x6d9,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x4b,
@@ -47677,7 +50269,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x752,
+=======
+0x74c,
+>>>>>>> no-scmpkg
 0x65,
 0x6c,
 0x3d,
@@ -47685,15 +50281,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x6bc,
+=======
+0x6b6,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -47705,7 +50312,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e3,
+=======
+0x6dd,
+>>>>>>> no-scmpkg
 0x1,
 0x3e,
 0x6e,
@@ -47725,7 +50336,11 @@ STk_instr STk_boot_code [] = {
 0x3d,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6f1,
+=======
+0x6eb,
+>>>>>>> no-scmpkg
 0x56,
 0x3c,
 0x2,
@@ -47767,7 +50382,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x753,
+=======
+0x74d,
+>>>>>>> no-scmpkg
 0x23,
 0x12,
 0x2,
@@ -47775,11 +50394,19 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6e6,
 0x25,
 0x65,
 0x56,
 0x6dd,
+=======
+0x6e0,
+0x25,
+0x65,
+0x56,
+0x6d7,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x21,
@@ -47789,7 +50416,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x754,
+=======
+0x74e,
+>>>>>>> no-scmpkg
 0x23,
 0xdb,
 0x2,
@@ -47798,13 +50429,33 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x755,
+=======
+0x74f,
 0x4d,
 0x56,
 0x30,
 0x3,
 0x71,
+0x6bd,
+0x1,
+0x6e,
+0x25,
+0x65,
+0x55,
+0x750,
+>>>>>>> no-scmpkg
+0x4d,
+0x56,
+0x30,
+0x3,
+0x71,
+<<<<<<< HEAD
 0x6c3,
+=======
+0x6bd,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x25,
@@ -47816,7 +50467,11 @@ STk_instr STk_boot_code [] = {
 0x30,
 0x3,
 0x71,
+<<<<<<< HEAD
 0x6c3,
+=======
+0x6bd,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x25,
@@ -47828,6 +50483,7 @@ STk_instr STk_boot_code [] = {
 0x30,
 0x3,
 0x71,
+<<<<<<< HEAD
 0x6c3,
 0x1,
 0x6e,
@@ -47841,6 +50497,9 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x71,
 0x6c3,
+=======
+0x6bd,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -47866,7 +50525,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x56,
+<<<<<<< HEAD
 0x759,
+=======
+0x753,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -47901,7 +50564,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x56,
+<<<<<<< HEAD
 0x759,
+=======
+0x753,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -47951,7 +50618,11 @@ STk_instr STk_boot_code [] = {
 0x201,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x75a,
+=======
+0x754,
+>>>>>>> no-scmpkg
 0x3,
 0x12,
 0x100,
@@ -47975,7 +50646,11 @@ STk_instr STk_boot_code [] = {
 0x201,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x75a,
+=======
+0x754,
+>>>>>>> no-scmpkg
 0x3,
 0x12,
 0x100,
@@ -47994,6 +50669,7 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x755,
 0x68,
 0x55,
@@ -48004,6 +50680,18 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x55,
 0x758,
+=======
+0x74f,
+0x68,
+0x55,
+0x750,
+0x67,
+0x55,
+0x751,
+0x66,
+0x55,
+0x752,
+>>>>>>> no-scmpkg
 0x65,
 0x3f,
 0x8,
@@ -48012,6 +50700,7 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x75b,
 0x25,
 0x25,
@@ -48019,6 +50708,15 @@ STk_instr STk_boot_code [] = {
 0x75c,
 0x56,
 0x716,
+=======
+0x755,
+0x25,
+0x25,
+0x55,
+0x756,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -48027,6 +50725,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -48038,12 +50737,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x75d,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x757,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -48055,7 +50771,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -48065,14 +50785,22 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x6ea,
+=======
+0x6e4,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
 0x1,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x6e8,
+=======
+0x6e2,
+>>>>>>> no-scmpkg
 0x63,
 0x19,
 0x25,
@@ -48080,7 +50808,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x55,
+<<<<<<< HEAD
 0x75e,
+=======
+0x758,
+>>>>>>> no-scmpkg
 0x56,
 0x3c,
 0x2,
@@ -48091,7 +50823,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x301,
 0x55,
+<<<<<<< HEAD
 0x75e,
+=======
+0x758,
+>>>>>>> no-scmpkg
 0xc,
 0x39,
 0x71,
@@ -48102,7 +50838,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x75f,
+=======
+0x759,
+>>>>>>> no-scmpkg
 0x63,
 0x2c,
 0x25,
@@ -48111,7 +50851,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x56,
+<<<<<<< HEAD
 0x754,
+=======
+0x74e,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x18,
@@ -48145,13 +50889,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x6c,
+<<<<<<< HEAD
 0x753,
+=======
+0x74d,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0xc7,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x760,
+=======
+0x75a,
+>>>>>>> no-scmpkg
 0x63,
 0x18,
 0x25,
@@ -48180,7 +50932,11 @@ STk_instr STk_boot_code [] = {
 0xaa,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x761,
+=======
+0x75b,
+>>>>>>> no-scmpkg
 0x63,
 0x52,
 0x25,
@@ -48189,7 +50945,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x56,
+<<<<<<< HEAD
 0x754,
+=======
+0x74e,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x3e,
@@ -48199,13 +50959,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x300,
 0x56,
+<<<<<<< HEAD
 0x6e7,
+=======
+0x6e1,
+>>>>>>> no-scmpkg
 0x1,
 0x15,
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x762,
+=======
+0x75c,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -48214,7 +50982,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x763,
+=======
+0x75d,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -48231,7 +51003,11 @@ STk_instr STk_boot_code [] = {
 0x9,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x764,
+=======
+0x75e,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x33,
@@ -48242,12 +51018,20 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6c3,
+=======
+0x6bd,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x6c3,
+=======
+0x6bd,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x3f,
@@ -48261,13 +51045,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x6c,
+<<<<<<< HEAD
 0x753,
+=======
+0x74d,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x53,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x765,
+=======
+0x75f,
+>>>>>>> no-scmpkg
 0x63,
 0x49,
 0x25,
@@ -48275,7 +51067,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x55,
+<<<<<<< HEAD
 0x75e,
+=======
+0x758,
+>>>>>>> no-scmpkg
 0x56,
 0x3c,
 0x2,
@@ -48286,7 +51082,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x301,
 0x55,
+<<<<<<< HEAD
 0x75e,
+=======
+0x758,
+>>>>>>> no-scmpkg
 0xc,
 0x39,
 0x71,
@@ -48298,7 +51098,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x301,
 0x56,
+<<<<<<< HEAD
 0x754,
+=======
+0x74e,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0xc,
@@ -48308,10 +51112,17 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x300,
 0x56,
+<<<<<<< HEAD
 0x6e7,
 0x1,
 0x73,
 0x75b,
+=======
+0x6e1,
+0x1,
+0x73,
+0x755,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x25,
@@ -48321,7 +51132,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x301,
 0x56,
+<<<<<<< HEAD
 0x753,
+=======
+0x74d,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -48337,7 +51152,11 @@ STk_instr STk_boot_code [] = {
 0x4af,
 0x2,
 0x73,
+<<<<<<< HEAD
 0x75b,
+=======
+0x755,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x24,
@@ -48351,15 +51170,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x75c,
+=======
+0x756,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -48367,9 +51197,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x75c,
 0x56,
 0x716,
+=======
+0x756,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -48378,6 +51214,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -48389,12 +51226,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x766,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x760,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -48404,11 +51258,19 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x767,
 0x25,
 0x65,
 0x56,
 0x6ea,
+=======
+0x761,
+0x25,
+0x65,
+0x56,
+0x6e4,
+>>>>>>> no-scmpkg
 0x1,
 0x73,
 0x33,
@@ -48416,15 +51278,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x75c,
+=======
+0x756,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -48444,7 +51317,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x716,
+=======
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -48453,19 +51330,32 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x74e,
 0x55,
 0x6d1,
 0x65,
 0x55,
 0x6d2,
+=======
+0x748,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+>>>>>>> no-scmpkg
 0x75,
 0x301,
 0x3f,
 0x1,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x23,
 0x9,
 0x1,
@@ -48478,10 +51368,17 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x73,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x73,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x16,
@@ -48492,7 +51389,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x716,
+=======
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -48501,6 +51402,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x74e,
 0x55,
 0x6d1,
@@ -48511,11 +51413,27 @@ STk_instr STk_boot_code [] = {
 0x301,
 0x6a,
 0x6c4,
+=======
+0x748,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x75,
+0x301,
+0x6a,
+0x6be,
+>>>>>>> no-scmpkg
 0x3f,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x23,
 0xa,
 0x2,
@@ -48529,10 +51447,17 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x73,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x73,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x15,
@@ -48544,7 +51469,16 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+0x1,
+0x6e,
+0x65,
+0x56,
+0x6c1,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x65,
@@ -48556,11 +51490,14 @@ STk_instr STk_boot_code [] = {
 0x56,
 0x6c8,
 0x1,
+<<<<<<< HEAD
 0x6e,
 0x65,
 0x56,
 0x6c9,
 0x1,
+=======
+>>>>>>> no-scmpkg
 0x21,
 0x2b,
 0x4,
@@ -48618,7 +51555,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x768,
+=======
+0x762,
+>>>>>>> no-scmpkg
 0x23,
 0x130,
 0x2,
@@ -48634,7 +51575,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6ee,
+=======
+0x6e8,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -48649,11 +51594,19 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x6ea,
 0x1,
 0x21,
 0x9,
 0x75f,
+=======
+0x6e4,
+0x1,
+0x21,
+0x9,
+0x759,
+>>>>>>> no-scmpkg
 0x62,
 0x59,
 0x25,
@@ -48661,7 +51614,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x56,
@@ -48685,7 +51642,11 @@ STk_instr STk_boot_code [] = {
 0x20b,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x769,
+=======
+0x763,
+>>>>>>> no-scmpkg
 0x66,
 0x55,
 0x72,
@@ -48740,7 +51701,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x3b,
 0x73,
+<<<<<<< HEAD
 0x6c3,
+=======
+0x6bd,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x1c,
@@ -48762,7 +51727,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x3b,
 0x73,
+<<<<<<< HEAD
 0x6c3,
+=======
+0x6bd,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x16,
@@ -48790,14 +51759,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x76a,
+=======
+0x764,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0xa,
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x76b,
+=======
+0x765,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x6,
@@ -48809,7 +51786,11 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x76c,
+=======
+0x766,
+>>>>>>> no-scmpkg
 0x75,
 0x101,
 0x75,
@@ -48824,14 +51805,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x76a,
+=======
+0x764,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0xb,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x76b,
+=======
+0x765,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x8,
@@ -48844,7 +51833,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x76d,
+=======
+0x767,
+>>>>>>> no-scmpkg
 0x75,
 0x101,
 0x75,
@@ -48888,13 +51881,21 @@ STk_instr STk_boot_code [] = {
 0x301,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x75c,
+=======
+0x756,
+>>>>>>> no-scmpkg
 0x2,
 0x16,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x1,
 0x17,
 0x25,
@@ -48915,7 +51916,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x66,
 0x6c,
+<<<<<<< HEAD
 0x76e,
+=======
+0x768,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -48926,7 +51931,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x76f,
+=======
+0x769,
+>>>>>>> no-scmpkg
 0x23,
 0x136,
 0x1,
@@ -49204,7 +52213,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x6da,
+=======
+0x6d4,
+>>>>>>> no-scmpkg
 0x56,
 0x3c,
 0x2,
@@ -49222,7 +52235,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6e2,
+=======
+0x6dc,
+>>>>>>> no-scmpkg
 0x6c,
 0x3c,
 0x2,
@@ -49240,6 +52257,7 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x770,
 0x25,
 0x25,
@@ -49247,6 +52265,15 @@ STk_instr STk_boot_code [] = {
 0x771,
 0x56,
 0x716,
+=======
+0x76a,
+0x25,
+0x25,
+0x55,
+0x76b,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -49255,6 +52282,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -49266,12 +52294,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x772,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x76c,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -49283,20 +52328,35 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x773,
+=======
+0x76d,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x771,
+=======
+0x76b,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -49304,9 +52364,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x771,
 0x56,
 0x716,
+=======
+0x76b,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -49315,6 +52381,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -49326,12 +52393,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x774,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x76e,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -49348,7 +52432,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x708,
+=======
+0x702,
+>>>>>>> no-scmpkg
 0x4f,
 0x56,
 0x30,
@@ -49356,7 +52444,11 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x707,
+=======
+0x701,
+>>>>>>> no-scmpkg
 0x4f,
 0x56,
 0x30,
@@ -49368,14 +52460,24 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6d8,
+=======
+0x6d2,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x6cd,
 0x55,
 0x6ce,
+=======
+0x6c7,
+0x55,
+0x6c8,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
@@ -49386,7 +52488,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6da,
+=======
+0x6d4,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x3d,
@@ -49395,7 +52501,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6dc,
+=======
+0x6d6,
+>>>>>>> no-scmpkg
 0x66,
 0x56,
 0x3d,
@@ -49404,7 +52514,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6de,
+=======
+0x6d8,
+>>>>>>> no-scmpkg
 0x4f,
 0x56,
 0x3d,
@@ -49413,7 +52527,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6e0,
+=======
+0x6da,
+>>>>>>> no-scmpkg
 0x4f,
 0x56,
 0x3d,
@@ -49422,12 +52540,20 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6e2,
+=======
+0x6dc,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x770,
+=======
+0x76a,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x3d,
@@ -49436,7 +52562,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x752,
+=======
+0x74c,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x3d,
@@ -49446,7 +52576,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x706,
+=======
+0x700,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -49455,7 +52589,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x55,
+<<<<<<< HEAD
 0x6e4,
+=======
+0x6de,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x3d,
@@ -49464,7 +52602,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x55,
+<<<<<<< HEAD
 0x75e,
+=======
+0x758,
+>>>>>>> no-scmpkg
 0x51,
 0x56,
 0x3d,
@@ -49473,13 +52615,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x55,
+<<<<<<< HEAD
 0x6f1,
+=======
+0x6eb,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x201,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x76f,
+=======
+0x769,
+>>>>>>> no-scmpkg
 0x2,
 0x71,
 0x3d,
@@ -49492,13 +52642,21 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6de,
+=======
+0x6d8,
+>>>>>>> no-scmpkg
 0x75,
 0x201,
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x6de,
+=======
+0x6d8,
+>>>>>>> no-scmpkg
 0x56,
 0x3c,
 0x2,
@@ -49517,20 +52675,35 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x66,
 0x6c,
+<<<<<<< HEAD
 0x768,
+=======
+0x762,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x771,
+=======
+0x76b,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -49538,9 +52711,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x771,
 0x56,
 0x716,
+=======
+0x76b,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -49549,6 +52728,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -49560,12 +52740,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x775,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x76f,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -49577,7 +52774,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x717,
+=======
+0x711,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -49585,7 +52786,11 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x715,
+=======
+0x70f,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -49602,14 +52807,24 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6d8,
+=======
+0x6d2,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x6cd,
 0x55,
 0x6ce,
+=======
+0x6c7,
+0x55,
+0x6c8,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
@@ -49620,7 +52835,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6f5,
+=======
+0x6ef,
+>>>>>>> no-scmpkg
 0x25,
 0x66,
 0x56,
@@ -49630,6 +52849,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d2,
@@ -49641,6 +52861,19 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x55,
 0x6d3,
+=======
+0x6ca,
+0x55,
+0x6cc,
+0x6a,
+0x6be,
+0x55,
+0x6cb,
+0x75,
+0x101,
+0x55,
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x4d,
 0x29,
@@ -49658,7 +52891,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
+=======
+0x6d0,
+>>>>>>> no-scmpkg
 0x7,
 0x21,
 0x3f,
@@ -49673,7 +52910,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x6f7,
+=======
+0x6f1,
+>>>>>>> no-scmpkg
 0x65,
 0x6c,
 0x3d,
@@ -49681,15 +52922,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x771,
+=======
+0x76b,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -49697,9 +52949,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x771,
 0x56,
 0x716,
+=======
+0x76b,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -49708,6 +52966,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -49719,12 +52978,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x776,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x770,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -49740,11 +53016,19 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x6fa,
 0x25,
 0x65,
 0x55,
 0x6d1,
+=======
+0x6f4,
+0x25,
+0x65,
+0x55,
+0x6cb,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -49755,11 +53039,19 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x6c5,
 0x25,
 0x65,
 0x55,
 0x6d2,
+=======
+0x6bf,
+0x25,
+0x65,
+0x55,
+0x6cc,
+>>>>>>> no-scmpkg
 0x4f,
 0x56,
 0x30,
@@ -49770,11 +53062,19 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x6fd,
 0x25,
 0x65,
 0x55,
 0x6d3,
+=======
+0x6f7,
+0x25,
+0x65,
+0x55,
+0x6cd,
+>>>>>>> no-scmpkg
 0x23,
 0x3,
 0xffff,
@@ -49789,15 +53089,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x771,
+=======
+0x76b,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -49805,9 +53116,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x777,
 0x56,
 0x716,
+=======
+0x771,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -49816,6 +53133,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -49827,12 +53145,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x778,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x772,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -49843,20 +53178,35 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x6c,
+<<<<<<< HEAD
 0x746,
+=======
+0x740,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x777,
+=======
+0x771,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -49864,9 +53214,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x779,
 0x56,
 0x716,
+=======
+0x773,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -49875,6 +53231,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -49886,12 +53243,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x77a,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x774,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -49904,7 +53278,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x777,
+=======
+0x771,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -49914,29 +53292,50 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x771,
+=======
+0x76b,
+>>>>>>> no-scmpkg
 0x2,
 0xc,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x779,
+=======
+0x773,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2c,
 0xa,
+<<<<<<< HEAD
 0x779,
 0x1f,
 0x6d6,
+=======
+0x773,
+0x1f,
+0x6d0,
+>>>>>>> no-scmpkg
 0x23,
 0x75,
 0x3,
@@ -49945,7 +53344,11 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x4f,
 0x56,
+<<<<<<< HEAD
 0x777,
+=======
+0x771,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -49961,7 +53364,11 @@ STk_instr STk_boot_code [] = {
 0x202,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x77b,
+=======
+0x775,
+>>>>>>> no-scmpkg
 0x3,
 0x1d,
 0x20,
@@ -49972,7 +53379,11 @@ STk_instr STk_boot_code [] = {
 0x202,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x77c,
+=======
+0x776,
+>>>>>>> no-scmpkg
 0x3,
 0x1d,
 0x13,
@@ -49989,10 +53400,17 @@ STk_instr STk_boot_code [] = {
 0x202,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x77d,
 0x3,
 0x73,
 0x77e,
+=======
+0x777,
+0x3,
+0x73,
+0x778,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x7,
@@ -50003,7 +53421,11 @@ STk_instr STk_boot_code [] = {
 0x200,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6f2,
+=======
+0x6ec,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -50025,7 +53447,11 @@ STk_instr STk_boot_code [] = {
 0x26,
 0x1,
 0x73,
+<<<<<<< HEAD
 0x77e,
+=======
+0x778,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x7,
@@ -50033,12 +53459,20 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x6e,
 0x6a,
+<<<<<<< HEAD
 0x6e6,
+=======
+0x6e0,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x6e5,
+=======
+0x6df,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x21,
@@ -50051,12 +53485,17 @@ STk_instr STk_boot_code [] = {
 0x102,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x77f,
+=======
+0x779,
+>>>>>>> no-scmpkg
 0x2,
 0x12,
 0x102,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x780,
 0x25,
 0x25,
@@ -50064,6 +53503,15 @@ STk_instr STk_boot_code [] = {
 0x781,
 0x56,
 0x716,
+=======
+0x77a,
+0x25,
+0x25,
+0x55,
+0x77b,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50072,6 +53520,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50083,12 +53532,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x782,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x77c,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50101,25 +53567,44 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6ff,
+=======
+0x6f9,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x780,
+=======
+0x77a,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x781,
+=======
+0x77b,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50127,9 +53612,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x783,
 0x56,
 0x716,
+=======
+0x77d,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50138,6 +53629,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50149,12 +53641,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x784,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x77e,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50164,7 +53673,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x785,
+=======
+0x77f,
+>>>>>>> no-scmpkg
 0x66,
 0x65,
 0x6c,
@@ -50173,15 +53686,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x783,
+=======
+0x77d,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50189,9 +53713,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x786,
 0x56,
 0x716,
+=======
+0x780,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50200,6 +53730,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50211,12 +53742,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x787,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x781,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50229,20 +53777,35 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x788,
+=======
+0x782,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x786,
+=======
+0x780,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50250,9 +53813,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x789,
 0x56,
 0x716,
+=======
+0x783,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50261,6 +53830,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50272,12 +53842,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x78a,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x784,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50288,7 +53875,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6ff,
+=======
+0x6f9,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x21,
@@ -50308,7 +53899,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x786,
+=======
+0x780,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x73,
@@ -50317,15 +53912,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x789,
+=======
+0x783,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50333,9 +53939,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x78b,
 0x56,
 0x716,
+=======
+0x785,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50344,6 +53956,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50355,12 +53968,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x78c,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x786,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50373,7 +54003,11 @@ STk_instr STk_boot_code [] = {
 0xe,
 0x3d,
 0x71,
+<<<<<<< HEAD
 0x6fe,
+=======
+0x6f8,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -50390,7 +54024,11 @@ STk_instr STk_boot_code [] = {
 0x26,
 0x2,
 0x71,
+<<<<<<< HEAD
 0x78d,
+=======
+0x787,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x65,
@@ -50402,15 +54040,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x78b,
+=======
+0x785,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50418,9 +54067,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x78e,
 0x56,
 0x716,
+=======
+0x788,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50429,6 +54084,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50440,12 +54096,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x78f,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x789,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50492,7 +54165,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x73b,
+=======
+0x735,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x25,
@@ -50506,7 +54183,11 @@ STk_instr STk_boot_code [] = {
 0x300,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x78b,
+=======
+0x785,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x24,
@@ -50526,20 +54207,35 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x78b,
+=======
+0x785,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x78e,
+=======
+0x788,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50547,9 +54243,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x790,
 0x56,
 0x716,
+=======
+0x78a,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50558,6 +54260,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50569,12 +54272,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x791,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x78b,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50585,7 +54305,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x6f6,
+=======
+0x6f0,
+>>>>>>> no-scmpkg
 0x1,
 0x3c,
 0x1d,
@@ -50594,7 +54318,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x741,
+=======
+0x73b,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x1,
@@ -50604,7 +54332,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x783,
+=======
+0x77d,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -50622,13 +54354,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x789,
+=======
+0x783,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x78e,
+=======
+0x788,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x25,
@@ -50637,20 +54377,35 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x73e,
+=======
+0x738,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x790,
+=======
+0x78a,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50658,9 +54413,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x719,
 0x56,
 0x716,
+=======
+0x713,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50669,6 +54430,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50680,12 +54442,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x792,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x78c,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50698,30 +54477,52 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x718,
+=======
+0x712,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x719,
+=======
+0x713,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2c,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x793,
 0x1,
 0x1f,
 0x794,
+=======
+0x78d,
+0x1,
+0x1f,
+0x78e,
+>>>>>>> no-scmpkg
 0x25,
 0x4d,
 0x4d,
@@ -50859,7 +54660,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6df,
+=======
+0x6d9,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x12,
@@ -50890,19 +54695,31 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x13,
+<<<<<<< HEAD
 0x793,
+=======
+0x78d,
+>>>>>>> no-scmpkg
 0x23,
 0x17,
 0x1,
 0x25,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6e1,
+=======
+0x6db,
+>>>>>>> no-scmpkg
 0x65,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x793,
+=======
+0x78d,
+>>>>>>> no-scmpkg
 0x1,
 0x3b,
 0x21,
@@ -50917,14 +54734,24 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x13,
+<<<<<<< HEAD
 0x794,
+=======
+0x78e,
+>>>>>>> no-scmpkg
 0x2c,
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x795,
 0x56,
 0x716,
+=======
+0x78f,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50933,6 +54760,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -50944,12 +54772,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x796,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x790,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -50966,15 +54811,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x795,
+=======
+0x78f,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -50982,9 +54838,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x795,
 0x56,
 0x716,
+=======
+0x78f,
+0x56,
+0x710,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
@@ -50993,6 +54855,7 @@ STk_instr STk_boot_code [] = {
 0x65,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x6d0,
 0x55,
 0x6d1,
@@ -51004,12 +54867,29 @@ STk_instr STk_boot_code [] = {
 0x702,
 0x55,
 0x797,
+=======
+0x6ca,
+0x55,
+0x6cb,
+0x65,
+0x55,
+0x6cc,
+0x25,
+0x6a,
+0x6fc,
+0x55,
+0x791,
+>>>>>>> no-scmpkg
 0x56,
 0x23,
 0x2,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x6d3,
+=======
+0x6cd,
+>>>>>>> no-scmpkg
 0x25,
 0x53,
 0x29,
@@ -51027,22 +54907,37 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x71,
+<<<<<<< HEAD
 0x6d6,
 0x7,
 0x71,
 0x71d,
+=======
+0x6d0,
+0x7,
+0x71,
+0x717,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x795,
+=======
+0x78f,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2c,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x798,
+=======
+0x792,
+>>>>>>> no-scmpkg
 0x0,
 0x25,
 0x55,
@@ -51059,7 +54954,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x799,
+=======
+0x793,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -51086,7 +54985,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x79a,
+=======
+0x794,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -51102,7 +55005,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x79b,
+=======
+0x795,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
@@ -51112,7 +55019,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x79c,
+=======
+0x796,
+>>>>>>> no-scmpkg
 0x66,
 0xc,
 0x3b,
@@ -51121,22 +55032,39 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x79d,
 0x25,
 0x55,
 0x79e,
 0x55,
 0x79f,
+=======
+0x797,
+0x25,
+0x55,
+0x798,
+0x55,
+0x799,
+>>>>>>> no-scmpkg
 0x23,
 0xa,
 0xffff,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x79e,
 0x55,
 0x7a0,
 0x6c,
 0x79d,
+=======
+0x798,
+0x55,
+0x79a,
+0x6c,
+0x797,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x21,
@@ -51146,11 +55074,19 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x79e,
+=======
+0x798,
+>>>>>>> no-scmpkg
 0xa,
 0x33a,
 0x1f,
+<<<<<<< HEAD
 0x7a1,
+=======
+0x79b,
+>>>>>>> no-scmpkg
 0x23,
 0x46,
 0x2,
@@ -51185,9 +55121,15 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7a2,
 0x55,
 0x7a3,
+=======
+0x79c,
+0x55,
+0x79d,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x2,
@@ -51224,6 +55166,24 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
+=======
+0x79c,
+0x1,
+0x1f,
+0x79e,
+0x1,
+0x1f,
+0x79f,
+0x1,
+0x1f,
+0x7a0,
+0x1,
+0x1f,
+0x7a1,
+0x1,
+0x1f,
+>>>>>>> no-scmpkg
 0x7a2,
 0x1,
 0x1f,
@@ -51258,6 +55218,7 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x1f,
 0x7ae,
+<<<<<<< HEAD
 0x1,
 0x1f,
 0x7af,
@@ -51276,6 +55237,8 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x1f,
 0x7b4,
+=======
+>>>>>>> no-scmpkg
 0x23,
 0x37,
 0x2,
@@ -51334,7 +55297,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7b5,
+=======
+0x7af,
+>>>>>>> no-scmpkg
 0x23,
 0x9d,
 0x3,
@@ -51357,7 +55324,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7b6,
+=======
+0x7b0,
+>>>>>>> no-scmpkg
 0x3,
 0x15,
 0x25,
@@ -51370,7 +55341,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x3e,
 0x71,
+<<<<<<< HEAD
 0x7b6,
+=======
+0x7b0,
+>>>>>>> no-scmpkg
 0x3,
 0x16,
 0xc,
@@ -51403,7 +55378,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7b6,
+=======
+0x7b0,
+>>>>>>> no-scmpkg
 0x3,
 0x73,
 0x29e,
@@ -51419,11 +55398,19 @@ STk_instr STk_boot_code [] = {
 0x49,
 0x67,
 0x9,
+<<<<<<< HEAD
 0x7b7,
 0x62,
 0x6,
 0x55,
 0x7b7,
+=======
+0x7b1,
+0x62,
+0x6,
+0x55,
+0x7b1,
+>>>>>>> no-scmpkg
 0xc,
 0x3b,
 0x1c,
@@ -51446,7 +55433,11 @@ STk_instr STk_boot_code [] = {
 0x67,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7b5,
+=======
+0x7af,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -51495,7 +55486,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7b6,
+=======
+0x7b0,
+>>>>>>> no-scmpkg
 0x23,
 0x1d6,
 0x3,
@@ -51514,7 +55509,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x2b,
@@ -51538,7 +55537,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x6c,
+<<<<<<< HEAD
 0x7a4,
+=======
+0x79e,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x65,
@@ -51560,7 +55563,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7ae,
+=======
+0x7a8,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x3f,
@@ -51570,7 +55577,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x7b9,
+=======
+0x7b3,
+>>>>>>> no-scmpkg
 0x56,
 0x160,
 0x2,
@@ -51588,7 +55599,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -51604,7 +55619,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x7ba,
+=======
+0x7b4,
+>>>>>>> no-scmpkg
 0x56,
 0x160,
 0x2,
@@ -51624,7 +55643,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7a5,
+=======
+0x79f,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0x23,
@@ -51637,7 +55660,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x6e,
@@ -51677,7 +55704,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x7a6,
+=======
+0x7a0,
+>>>>>>> no-scmpkg
 0x4,
 0x1c,
 0x106,
@@ -51705,7 +55736,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x7a7,
+=======
+0x7a1,
+>>>>>>> no-scmpkg
 0x4,
 0x1c,
 0xea,
@@ -51751,7 +55786,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7a8,
+=======
+0x7a2,
+>>>>>>> no-scmpkg
 0x5,
 0x24,
 0x25,
@@ -51768,7 +55807,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7a9,
+=======
+0x7a3,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x1c,
@@ -51797,7 +55840,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x7aa,
+=======
+0x7a4,
+>>>>>>> no-scmpkg
 0x4,
 0x1c,
 0x8e,
@@ -51831,7 +55878,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x7ab,
+=======
+0x7a5,
+>>>>>>> no-scmpkg
 0x5,
 0x1c,
 0x6c,
@@ -51855,7 +55906,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7a5,
+=======
+0x79f,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0x23,
@@ -51870,7 +55925,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x56,
+<<<<<<< HEAD
 0x7a5,
+=======
+0x79f,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0xc,
@@ -51881,7 +55940,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x24,
@@ -51916,7 +55979,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -51940,7 +56007,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x24,
@@ -51955,7 +56026,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7ad,
+=======
+0x7a7,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x24,
@@ -51965,11 +56040,19 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x7a5,
 0x3,
 0x24,
 0x1f,
 0x7b8,
+=======
+0x79f,
+0x3,
+0x24,
+0x1f,
+0x7b2,
+>>>>>>> no-scmpkg
 0x23,
 0x15,
 0x3,
@@ -51984,7 +56067,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -51994,7 +56081,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x23,
 0x3d,
 0x3,
@@ -52024,7 +56115,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x56,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0xc,
@@ -52043,7 +56138,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -52059,7 +56158,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7ad,
+=======
+0x7a7,
+>>>>>>> no-scmpkg
 0x23,
 0x50,
 0x2,
@@ -52076,7 +56179,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7a4,
+=======
+0x79e,
+>>>>>>> no-scmpkg
 0x2,
 0x6e,
 0xd,
@@ -52084,7 +56191,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7a4,
+=======
+0x79e,
+>>>>>>> no-scmpkg
 0x2,
 0x3b,
 0x24,
@@ -52105,7 +56216,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7a4,
+=======
+0x79e,
+>>>>>>> no-scmpkg
 0x2,
 0x73,
 0x29e,
@@ -52143,7 +56258,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7a4,
+=======
+0x79e,
+>>>>>>> no-scmpkg
 0x23,
 0x190,
 0x3,
@@ -52222,7 +56341,11 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x193,
 0x55,
+<<<<<<< HEAD
 0x7bb,
+=======
+0x7b5,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x2,
@@ -52246,7 +56369,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x400,
 0x56,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x3f,
@@ -52322,7 +56449,11 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x195,
 0x55,
+<<<<<<< HEAD
 0x7bc,
+=======
+0x7b6,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x2,
@@ -52393,7 +56524,11 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x195,
 0x55,
+<<<<<<< HEAD
 0x7bd,
+=======
+0x7b7,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x2,
@@ -52420,7 +56555,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x500,
 0x56,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x1c,
 0xf,
@@ -52531,7 +56670,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x201,
 0x6c,
+<<<<<<< HEAD
 0x7a4,
+=======
+0x79e,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x21,
@@ -52547,7 +56690,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7ae,
+=======
+0x7a8,
+>>>>>>> no-scmpkg
 0x23,
 0x20,
 0x4,
@@ -52556,7 +56703,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x68,
 0x56,
+<<<<<<< HEAD
 0x7af,
+=======
+0x7a9,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x65,
@@ -52577,13 +56728,21 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7a6,
+=======
+0x7a0,
+>>>>>>> no-scmpkg
 0x23,
 0x3f,
 0x4,
@@ -52624,7 +56783,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x3,
@@ -52644,13 +56807,21 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7a7,
+=======
+0x7a1,
+>>>>>>> no-scmpkg
 0x23,
 0x3f,
 0x4,
@@ -52691,7 +56862,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x56,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x3,
@@ -52711,13 +56886,21 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7a9,
+=======
+0x7a3,
+>>>>>>> no-scmpkg
 0x23,
 0x44,
 0x5,
@@ -52762,7 +56945,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x56,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x3,
@@ -52782,14 +56969,22 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7a8,
+=======
+0x7a2,
+>>>>>>> no-scmpkg
 0x23,
 0x76,
 0x4,
@@ -52862,10 +57057,17 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7be,
 0x2,
 0x71,
 0x7b8,
+=======
+0x7b8,
+0x2,
+0x71,
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x3,
@@ -52905,13 +57107,21 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7aa,
+=======
+0x7a4,
+>>>>>>> no-scmpkg
 0x23,
 0x4b,
 0x5,
@@ -52957,7 +57167,11 @@ STk_instr STk_boot_code [] = {
 0x300,
 0x3b,
 0x71,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x24,
@@ -52974,7 +57188,11 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0x75,
@@ -52983,14 +57201,22 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7ac,
+=======
+0x7a6,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
 0x3b,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7ab,
+=======
+0x7a5,
+>>>>>>> no-scmpkg
 0x23,
 0x90,
 0x3,
@@ -53008,7 +57234,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7a5,
+=======
+0x79f,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0xe,
@@ -53017,7 +57247,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7a5,
+=======
+0x79f,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x24,
@@ -53039,7 +57273,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7a5,
+=======
+0x79f,
+>>>>>>> no-scmpkg
 0x3,
 0x73,
 0x29e,
@@ -53115,7 +57353,11 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7bf,
+=======
+0x7b9,
+>>>>>>> no-scmpkg
 0x56,
 0x3e4,
 0x2,
@@ -53138,7 +57380,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7a5,
+=======
+0x79f,
+>>>>>>> no-scmpkg
 0x23,
 0x3c,
 0x1,
@@ -53202,7 +57448,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7af,
+=======
+0x7a9,
+>>>>>>> no-scmpkg
 0x23,
 0x3b,
 0x2,
@@ -53265,7 +57515,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7c0,
+=======
+0x7ba,
+>>>>>>> no-scmpkg
 0x23,
 0x32,
 0x2,
@@ -53319,14 +57573,22 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7c1,
+=======
+0x7bb,
+>>>>>>> no-scmpkg
 0x23,
 0xb0,
 0x3,
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x7b0,
+=======
+0x7aa,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x5f,
@@ -53362,7 +57624,11 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x7b1,
+=======
+0x7ab,
+>>>>>>> no-scmpkg
 0x2,
 0x17,
 0xe,
@@ -53370,7 +57636,11 @@ STk_instr STk_boot_code [] = {
 0x34,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7b7,
+=======
+0x7b1,
+>>>>>>> no-scmpkg
 0x66,
 0x56,
 0x49,
@@ -53397,7 +57667,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x300,
 0x6c,
+<<<<<<< HEAD
 0x7c2,
+=======
+0x7bc,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -53414,7 +57688,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7c2,
+=======
+0x7bc,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x1,
@@ -53448,7 +57726,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7c2,
+=======
+0x7bc,
+>>>>>>> no-scmpkg
 0x3,
 0x1d,
 0xd,
@@ -53461,7 +57743,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x7c2,
+=======
+0x7bc,
+>>>>>>> no-scmpkg
 0x3,
 0x1c,
 0x20,
@@ -53499,14 +57785,22 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7c2,
+=======
+0x7bc,
+>>>>>>> no-scmpkg
 0x23,
 0x88,
 0x3,
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x7b0,
+=======
+0x7aa,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x41,
@@ -53528,7 +57822,11 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x7b1,
+=======
+0x7ab,
+>>>>>>> no-scmpkg
 0x2,
 0x17,
 0xe,
@@ -53542,7 +57840,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7b2,
+=======
+0x7ac,
+>>>>>>> no-scmpkg
 0x2,
 0x6e,
 0x23,
@@ -53555,7 +57857,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7c3,
+=======
+0x7bd,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -53570,7 +57876,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7c3,
+=======
+0x7bd,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x24,
@@ -53592,7 +57902,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7c3,
+=======
+0x7bd,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0xe,
@@ -53603,7 +57917,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7c3,
+=======
+0x7bd,
+>>>>>>> no-scmpkg
 0x3,
 0x73,
 0x28,
@@ -53639,14 +57957,22 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7c3,
+=======
+0x7bd,
+>>>>>>> no-scmpkg
 0x23,
 0x8f,
 0x3,
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x7b0,
+=======
+0x7aa,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x42,
@@ -53662,7 +57988,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x7b2,
+=======
+0x7ac,
+>>>>>>> no-scmpkg
 0x2,
 0x16,
 0x25,
@@ -53670,7 +58000,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x56,
+<<<<<<< HEAD
 0x7b3,
+=======
+0x7ad,
+>>>>>>> no-scmpkg
 0x2,
 0x17,
 0x25,
@@ -53691,7 +58025,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x6c,
+<<<<<<< HEAD
 0x7c4,
+=======
+0x7be,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x21,
@@ -53710,7 +58048,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7c4,
+=======
+0x7be,
+>>>>>>> no-scmpkg
 0x3,
 0x73,
 0x28,
@@ -53730,7 +58072,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7c4,
+=======
+0x7be,
+>>>>>>> no-scmpkg
 0x3,
 0x6e,
 0xe,
@@ -53739,7 +58085,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7c4,
+=======
+0x7be,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x1c,
@@ -53786,7 +58136,11 @@ STk_instr STk_boot_code [] = {
 0xe,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7c4,
+=======
+0x7be,
+>>>>>>> no-scmpkg
 0x23,
 0x6a,
 0x2,
@@ -53803,7 +58157,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7b0,
+=======
+0x7aa,
+>>>>>>> no-scmpkg
 0x1,
 0x1d,
 0x15,
@@ -53896,7 +58254,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7b2,
+=======
+0x7ac,
+>>>>>>> no-scmpkg
 0x23,
 0xa1,
 0x2,
@@ -53938,7 +58300,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x3d,
 0x71,
+<<<<<<< HEAD
 0x7b4,
+=======
+0x7ae,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x8,
@@ -54014,7 +58380,11 @@ STk_instr STk_boot_code [] = {
 0xe8,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x7a1,
+=======
+0x79b,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x6,
@@ -54037,7 +58407,11 @@ STk_instr STk_boot_code [] = {
 0x20,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x7c1,
+=======
+0x7bb,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0xc,
@@ -54061,7 +58435,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7b3,
+=======
+0x7ad,
+>>>>>>> no-scmpkg
 0x23,
 0x33,
 0x2,
@@ -54099,24 +58477,40 @@ STk_instr STk_boot_code [] = {
 0x100,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x7b4,
+=======
+0x7ae,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x21,
 0x75,
 0x100,
 0x6c,
+<<<<<<< HEAD
 0x7a1,
+=======
+0x79b,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x21,
 0x66,
 0x6c,
+<<<<<<< HEAD
 0x7a1,
 0x2,
 0x24,
 0x1f,
 0x7b4,
+=======
+0x79b,
+0x2,
+0x24,
+0x1f,
+0x7ae,
+>>>>>>> no-scmpkg
 0x23,
 0x1e,
 0x2,
@@ -54144,13 +58538,21 @@ STk_instr STk_boot_code [] = {
 0x101,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x7a2,
+=======
+0x79c,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7b1,
+=======
+0x7ab,
+>>>>>>> no-scmpkg
 0x23,
 0x1c,
 0x1,
@@ -54176,13 +58578,21 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x21,
 0x9,
+<<<<<<< HEAD
 0x7b7,
+=======
+0x7b1,
+>>>>>>> no-scmpkg
 0x45,
 0x24,
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7b0,
+=======
+0x7aa,
+>>>>>>> no-scmpkg
 0x23,
 0x87,
 0x4,
@@ -54212,7 +58622,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x303,
 0x55,
+<<<<<<< HEAD
 0x7c5,
+=======
+0x7bf,
+>>>>>>> no-scmpkg
 0x75,
 0x200,
 0x6c,
@@ -54240,7 +58654,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x401,
 0x56,
+<<<<<<< HEAD
 0x7c2,
+=======
+0x7bc,
+>>>>>>> no-scmpkg
 0x3,
 0x1d,
 0x35,
@@ -54251,7 +58669,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x7af,
+=======
+0x7a9,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x75,
@@ -54262,7 +58684,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x4f,
 0x56,
+<<<<<<< HEAD
 0x7b6,
+=======
+0x7b0,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x2b,
@@ -54279,13 +58705,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x501,
 0x56,
+<<<<<<< HEAD
 0x7c3,
+=======
+0x7bd,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0x75,
 0x501,
 0x56,
+<<<<<<< HEAD
 0x7c4,
+=======
+0x7be,
+>>>>>>> no-scmpkg
 0x3,
 0x21,
 0xc,
@@ -54293,7 +58727,11 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x4f,
 0x6c,
+<<<<<<< HEAD
 0x7b8,
+=======
+0x7b2,
+>>>>>>> no-scmpkg
 0x3,
 0x24,
 0x24,
@@ -54324,9 +58762,15 @@ STk_instr STk_boot_code [] = {
 0x7c,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7c6,
 0x55,
 0x7c7,
+=======
+0x7c0,
+0x55,
+0x7c1,
+>>>>>>> no-scmpkg
 0x23,
 0x5a,
 0xfffe,
@@ -54426,7 +58870,11 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x7c6,
+=======
+0x7c0,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x51,
@@ -54472,7 +58920,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x7c8,
+=======
+0x7c2,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -54488,14 +58940,24 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7c9,
+=======
+0x7c3,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
 0x9,
+<<<<<<< HEAD
 0x7ca,
 0x1f,
 0x7cb,
+=======
+0x7c4,
+0x1f,
+0x7c5,
+>>>>>>> no-scmpkg
 0x55,
 0x63,
 0x55,
@@ -54503,7 +58965,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7cc,
+=======
+0x7c6,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x1a3,
@@ -54517,7 +58983,11 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7cd,
+=======
+0x7c7,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x416,
@@ -54534,7 +59004,11 @@ STk_instr STk_boot_code [] = {
 0x6a,
 0x34d,
 0x55,
+<<<<<<< HEAD
 0x7ce,
+=======
+0x7c8,
+>>>>>>> no-scmpkg
 0x51,
 0x56,
 0x30,
@@ -54545,17 +59019,29 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x7cf,
+=======
+0x7c9,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0x3,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7d0,
 0x55,
 0x7d1,
 0x55,
 0x7d2,
+=======
+0x7ca,
+0x55,
+0x7cb,
+0x55,
+0x7cc,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x56,
@@ -54564,24 +59050,37 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x7d3,
+=======
+0x7cd,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0x3,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7d4,
+=======
+0x7ce,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x3d7,
 0x0,
 0x6e,
 0x56,
+<<<<<<< HEAD
 0x7d5,
+=======
+0x7cf,
+>>>>>>> no-scmpkg
 0x0,
 0x1d,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x7d6,
 0x1c,
 0x2,
@@ -54589,6 +59088,15 @@ STk_instr STk_boot_code [] = {
 0x7d7,
 0x6f,
 0x7cb,
+=======
+0x7d0,
+0x1c,
+0x2,
+0x9,
+0x7d1,
+0x6f,
+0x7c5,
+>>>>>>> no-scmpkg
 0x3b,
 0x3b,
 0x3b,
@@ -54618,7 +59126,11 @@ STk_instr STk_boot_code [] = {
 0x629,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7d8,
+=======
+0x7d2,
+>>>>>>> no-scmpkg
 0x23,
 0x6a,
 0x1,
@@ -54639,7 +59151,11 @@ STk_instr STk_boot_code [] = {
 0x9,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7d9,
+=======
+0x7d3,
+>>>>>>> no-scmpkg
 0x75,
 0x200,
 0x6c,
@@ -54728,7 +59244,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7da,
+=======
+0x7d4,
+>>>>>>> no-scmpkg
 0x23,
 0x8c,
 0x1,
@@ -54772,7 +59292,11 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7db,
+=======
+0x7d5,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x56,
@@ -54782,7 +59306,11 @@ STk_instr STk_boot_code [] = {
 0x8,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7dc,
+=======
+0x7d6,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x56,
@@ -54792,7 +59320,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7da,
+=======
+0x7d4,
+>>>>>>> no-scmpkg
 0x1,
 0x16,
 0xd,
@@ -54804,7 +59336,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7dd,
+=======
+0x7d7,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x3b2,
@@ -54814,7 +59350,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7de,
+=======
+0x7d8,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x54,
@@ -54836,7 +59376,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x662,
+=======
+0x657,
+>>>>>>> no-scmpkg
 0x1,
 0x1e,
 0xd,
@@ -54850,7 +59394,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x661,
+=======
+0x656,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x7,
@@ -54872,7 +59420,11 @@ STk_instr STk_boot_code [] = {
 0x7,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7df,
+=======
+0x7d9,
+>>>>>>> no-scmpkg
 0x23,
 0x12,
 0x1,
@@ -54894,7 +59446,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7e0,
+=======
+0x7da,
+>>>>>>> no-scmpkg
 0x23,
 0x53,
 0x1,
@@ -54981,7 +59537,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7e1,
+=======
+0x7db,
+>>>>>>> no-scmpkg
 0x23,
 0x155,
 0x1,
@@ -54991,9 +59551,15 @@ STk_instr STk_boot_code [] = {
 0x9,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7e2,
 0x55,
 0x7e3,
+=======
+0x7dc,
+0x55,
+0x7dd,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x2,
@@ -55008,9 +59574,15 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7e2,
 0x55,
 0x7e4,
+=======
+0x7dc,
+0x55,
+0x7de,
+>>>>>>> no-scmpkg
 0xc,
 0x3d,
 0x73,
@@ -55071,7 +59643,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x24,
 0x55,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -55079,7 +59655,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x55,
 0x211,
 0x25,
@@ -55123,7 +59703,11 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x8,
 0x55,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x12,
 0x200,
 0x3e,
@@ -55131,7 +59715,11 @@ STk_instr STk_boot_code [] = {
 0x1c,
 0x6b,
 0x55,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -55191,16 +59779,26 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7e2,
 0x55,
 0x7e5,
+=======
+0x7dc,
+0x55,
+0x7df,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x2,
 0x1c,
 0x26,
 0x55,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -55208,7 +59806,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x12,
 0x200,
 0x3e,
@@ -55232,9 +59834,15 @@ STk_instr STk_boot_code [] = {
 0x1c,
 0x6,
 0x9,
+<<<<<<< HEAD
 0x7e2,
 0x9,
 0x7e6,
+=======
+0x7dc,
+0x9,
+0x7e0,
+>>>>>>> no-scmpkg
 0x12,
 0x100,
 0x24,
@@ -55252,12 +59860,20 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x7e1,
+=======
+0x7db,
+>>>>>>> no-scmpkg
 0x1,
 0x16,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7e7,
+=======
+0x7e1,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x43,
@@ -55276,7 +59892,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x662,
+=======
+0x657,
+>>>>>>> no-scmpkg
 0x1,
 0x1e,
 0x1,
@@ -55286,7 +59906,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x7e0,
+=======
+0x7da,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x66,
@@ -55298,7 +59922,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x661,
+=======
+0x656,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x4,
@@ -55317,7 +59945,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x24,
 0x55,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x12,
 0x200,
 0x3e,
@@ -55326,19 +59958,32 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x7e8,
 0x25,
 0x55,
 0x7e2,
 0x55,
 0x7e9,
+=======
+0x7e2,
+0x25,
+0x55,
+0x7dc,
+0x55,
+0x7e3,
+>>>>>>> no-scmpkg
 0x23,
 0x7,
 0xffff,
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x7e8,
+=======
+0x7e2,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x21,
@@ -55348,7 +59993,11 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x51,
@@ -55368,7 +60017,11 @@ STk_instr STk_boot_code [] = {
 0x62e,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7ea,
+=======
+0x7e4,
+>>>>>>> no-scmpkg
 0x56,
 0x50,
 0x1,
@@ -55380,7 +60033,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x7eb,
+=======
+0x7e5,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -55396,7 +60053,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7ec,
+=======
+0x7e6,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
@@ -55409,6 +60070,7 @@ STk_instr STk_boot_code [] = {
 0x1b6,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x7ed,
 0x5,
 0x1f,
@@ -55416,23 +60078,41 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x1f,
 0x7ef,
+=======
+0x7e7,
+0x5,
+0x1f,
+0x7e8,
+0x3,
+0x1f,
+0x7e9,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x0,
 0x0,
 0x1f,
+<<<<<<< HEAD
 0x7f0,
+=======
+0x7ea,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x170,
 0x0,
 0x1f,
+<<<<<<< HEAD
 0x7f1,
+=======
+0x7eb,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x54,
 0x0,
 0x1f,
+<<<<<<< HEAD
 0x7f2,
 0x55,
 0x7f3,
@@ -55457,6 +60137,64 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+=======
+0x7ec,
+0x55,
+0x7ed,
+0x55,
+0x4aa,
+0x55,
+0x540,
+0x55,
+0x541,
+0x3,
+0x3b,
+0x3b,
+0x21,
+0x55,
+0x4a8,
+0x55,
+0x546,
+0x55,
+0x540,
+0x3,
+0x3b,
+0x3b,
+0x21,
+0x55,
+0x7ee,
+0x55,
+0x540,
+0x55,
+0x7ef,
+0x3,
+0x3b,
+0x3b,
+0x21,
+0x55,
+0x7f0,
+0x55,
+0x540,
+0x55,
+0x7f1,
+0x3,
+0x3b,
+0x3b,
+0x21,
+0x55,
+0x7f2,
+0x55,
+0x540,
+0x55,
+0x543,
+0x3,
+0x3b,
+0x3b,
+0x21,
+0x55,
+0x7f3,
+0x55,
+>>>>>>> no-scmpkg
 0x7f4,
 0x55,
 0x54a,
@@ -55467,17 +60205,44 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7f6,
 0x55,
 0x54a,
+=======
+0x540,
 0x55,
-0x7f7,
+0x543,
+0x3,
+0x3b,
+0x3b,
+0x21,
+0x3,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x3b,
+0x21,
+>>>>>>> no-scmpkg
+0x55,
+0x7f6,
 0x3,
 0x3b,
 0x3b,
 0x21,
 0x55,
-0x7f8,
+0x7f7,
 0x55,
 0x54a,
 0x55,
@@ -55487,6 +60252,7 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x7f9,
 0x55,
 0x7fa,
@@ -55538,6 +60304,11 @@ STk_instr STk_boot_code [] = {
 0x7f4,
 0x55,
 0x7fe,
+=======
+0x7ee,
+0x55,
+0x7f8,
+>>>>>>> no-scmpkg
 0x3,
 0x3b,
 0x3b,
@@ -55550,7 +60321,11 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x3b,
 0x1f,
+<<<<<<< HEAD
 0x7ff,
+=======
+0x7f9,
+>>>>>>> no-scmpkg
 0x25,
 0x4d,
 0x23,
@@ -55567,7 +60342,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x6a,
+<<<<<<< HEAD
 0x7ff,
+=======
+0x7f9,
+>>>>>>> no-scmpkg
 0x56,
 0x232,
 0x2,
@@ -55589,25 +60368,41 @@ STk_instr STk_boot_code [] = {
 0x46,
 0x2,
 0x1f,
+<<<<<<< HEAD
 0x800,
+=======
+0x7fa,
+>>>>>>> no-scmpkg
 0x23,
 0xe,
 0x1,
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x800,
+=======
+0x7fa,
+>>>>>>> no-scmpkg
 0x0,
 0x21,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x801,
+=======
+0x7fb,
+>>>>>>> no-scmpkg
 0x6c,
 0x30,
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x802,
+=======
+0x7fc,
+>>>>>>> no-scmpkg
 0x23,
 0xb2,
 0x1,
@@ -55620,10 +60415,17 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x803,
 0x65,
 0x55,
 0x804,
+=======
+0x7fd,
+0x65,
+0x55,
+0x7fe,
+>>>>>>> no-scmpkg
 0x6c,
 0x3e2,
 0x3,
@@ -55639,7 +60441,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x805,
+=======
+0x7ff,
+>>>>>>> no-scmpkg
 0x56,
 0x160,
 0x2,
@@ -55649,6 +60455,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7f8,
 0x56,
 0x802,
@@ -55656,6 +60463,15 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x55,
 0x806,
+=======
+0x7f2,
+0x56,
+0x7fc,
+0x1,
+0x6e,
+0x55,
+0x800,
+>>>>>>> no-scmpkg
 0x56,
 0x43,
 0x1,
@@ -55684,7 +60500,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x807,
+=======
+0x801,
+>>>>>>> no-scmpkg
 0x56,
 0x160,
 0x2,
@@ -55700,7 +60520,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x808,
+=======
+0x802,
+>>>>>>> no-scmpkg
 0x56,
 0x160,
 0x2,
@@ -55708,18 +60532,30 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x7ef,
 0x54,
 0x6,
 0x6c,
 0x809,
+=======
+0x7e9,
+0x54,
+0x6,
+0x6c,
+0x803,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x47,
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x80a,
+=======
+0x804,
+>>>>>>> no-scmpkg
 0x56,
 0x160,
 0x2,
@@ -55731,13 +60567,21 @@ STk_instr STk_boot_code [] = {
 0x3be,
 0x0,
 0x73,
+<<<<<<< HEAD
 0x80b,
+=======
+0x805,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x34,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x80c,
+=======
+0x806,
+>>>>>>> no-scmpkg
 0x63,
 0x10,
 0x25,
@@ -55752,18 +60596,30 @@ STk_instr STk_boot_code [] = {
 0x26,
 0x1,
 0x73,
+<<<<<<< HEAD
 0x80d,
+=======
+0x807,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1f,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x80e,
+=======
+0x808,
+>>>>>>> no-scmpkg
 0x63,
 0xc,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x80f,
+=======
+0x809,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x17f,
@@ -55780,7 +60636,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x810,
+=======
+0x80a,
+>>>>>>> no-scmpkg
 0x12,
 0x200,
 0x3d,
@@ -55789,17 +60649,28 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x811,
 0x3,
 0x1f,
 0x812,
+=======
+0x80b,
+0x3,
+0x1f,
+0x80c,
+>>>>>>> no-scmpkg
 0x23,
 0x12,
 0x1,
 0x25,
 0x65,
 0x6a,
+<<<<<<< HEAD
 0x812,
+=======
+0x80c,
+>>>>>>> no-scmpkg
 0x23,
 0x7,
 0x2,
@@ -55814,7 +60685,11 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x813,
+=======
+0x80d,
+>>>>>>> no-scmpkg
 0x23,
 0xa,
 0x2,
@@ -55822,6 +60697,7 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x3b,
 0x6f,
+<<<<<<< HEAD
 0x812,
 0x3b,
 0x13,
@@ -55829,6 +60705,15 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x814,
+=======
+0x80c,
+0x3b,
+0x13,
+0x80c,
+0x24,
+0x1f,
+0x80e,
+>>>>>>> no-scmpkg
 0x23,
 0x53,
 0x4,
@@ -55852,7 +60737,11 @@ STk_instr STk_boot_code [] = {
 0x12,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x815,
+=======
+0x80f,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -55869,7 +60758,11 @@ STk_instr STk_boot_code [] = {
 0x1c,
 0x2,
 0x9,
+<<<<<<< HEAD
 0x816,
+=======
+0x810,
+>>>>>>> no-scmpkg
 0x16,
 0x25,
 0x25,
@@ -55877,11 +60770,19 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x4b4,
 0x56,
+<<<<<<< HEAD
 0x802,
 0x1,
 0x6e,
 0x55,
 0x817,
+=======
+0x7fc,
+0x1,
+0x6e,
+0x55,
+0x811,
+>>>>>>> no-scmpkg
 0x66,
 0xc,
 0x3d,
@@ -55895,6 +60796,7 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x550,
 0x55,
+<<<<<<< HEAD
 0x818,
 0x55,
 0x7fe,
@@ -55904,6 +60806,17 @@ STk_instr STk_boot_code [] = {
 0x550,
 0x55,
 0x81a,
+=======
+0x812,
+0x55,
+0x7f8,
+0x55,
+0x813,
+0x55,
+0x546,
+0x55,
+0x814,
+>>>>>>> no-scmpkg
 0x56,
 0x3b5,
 0x8,
@@ -55915,7 +60828,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x81b,
+=======
+0x815,
+>>>>>>> no-scmpkg
 0x23,
 0xcc,
 0x2,
@@ -55967,11 +60884,19 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x81b,
 0x4,
 0xc,
 0x13,
 0x7ef,
+=======
+0x815,
+0x4,
+0xc,
+0x13,
+0x7e9,
+>>>>>>> no-scmpkg
 0x24,
 0x24,
 0x25,
@@ -56015,14 +60940,22 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x81c,
+=======
+0x816,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x44,
 0x25,
 0x66,
 0x6a,
+<<<<<<< HEAD
 0x81d,
+=======
+0x817,
+>>>>>>> no-scmpkg
 0x56,
 0x35f,
 0x2,
@@ -56032,7 +60965,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x81e,
+=======
+0x818,
+>>>>>>> no-scmpkg
 0x56,
 0x71,
 0x2,
@@ -56042,12 +60979,20 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x81f,
+=======
+0x819,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x820,
+=======
+0x81a,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x1c,
@@ -56055,14 +61000,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x821,
+=======
+0x81b,
+>>>>>>> no-scmpkg
 0x56,
 0x43,
 0x2,
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x822,
+=======
+0x81c,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x66,
@@ -56070,7 +61023,11 @@ STk_instr STk_boot_code [] = {
 0x4d9,
 0x1,
 0x71,
+<<<<<<< HEAD
 0x823,
+=======
+0x81d,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x43,
@@ -56078,7 +61035,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x824,
+=======
+0x81e,
+>>>>>>> no-scmpkg
 0x25,
 0x66,
 0x56,
@@ -56092,7 +61053,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x813,
+=======
+0x80d,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -56114,7 +61079,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x825,
+=======
+0x81f,
+>>>>>>> no-scmpkg
 0x75,
 0x101,
 0x6c,
@@ -56123,46 +61092,78 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x81c,
 0x25,
 0x55,
 0x826,
+=======
+0x816,
+0x25,
+0x55,
+0x820,
+>>>>>>> no-scmpkg
 0x56,
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x827,
+=======
+0x821,
+>>>>>>> no-scmpkg
 0x25,
 0x4e,
 0x56,
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x828,
+=======
+0x822,
+>>>>>>> no-scmpkg
 0x23,
 0x5f,
 0x1,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x7ee,
+=======
+0x7e8,
+>>>>>>> no-scmpkg
 0x6,
 0x5f,
 0xa,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x829,
 0x6a,
 0x7ee,
+=======
+0x823,
+0x6a,
+0x7e8,
+>>>>>>> no-scmpkg
 0x56,
 0x43,
 0x2,
 0x1c,
 0x2,
 0x9,
+<<<<<<< HEAD
 0x82a,
 0x6e,
 0x55,
 0x82b,
+=======
+0x824,
+0x6e,
+0x55,
+0x825,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -56177,7 +61178,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x828,
+=======
+0x822,
+>>>>>>> no-scmpkg
 0x0,
 0x1d,
 0x2b,
@@ -56185,9 +61190,15 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7f9,
 0x56,
 0x802,
+=======
+0x7f3,
+0x56,
+0x7fc,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x66,
@@ -56199,9 +61210,15 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7f4,
 0x56,
 0x802,
+=======
+0x7ee,
+0x56,
+0x7fc,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x65,
@@ -56211,14 +61228,22 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x4b2,
 0x56,
+<<<<<<< HEAD
 0x802,
+=======
+0x7fc,
+>>>>>>> no-scmpkg
 0x1,
 0x71,
 0x3b5,
 0x4,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x82c,
+=======
+0x826,
+>>>>>>> no-scmpkg
 0x56,
 0x44,
 0x3,
@@ -56228,11 +61253,16 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x82d,
+=======
+0x827,
+>>>>>>> no-scmpkg
 0x56,
 0x44,
 0x3,
 0x73,
+<<<<<<< HEAD
 0x827,
 0x1,
 0x24,
@@ -56241,18 +61271,36 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x6a,
 0x82e,
+=======
+0x821,
+0x1,
+0x24,
+0x1f,
+0x828,
+0x25,
+0x6a,
+0x828,
+>>>>>>> no-scmpkg
 0x56,
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x82f,
+=======
+0x829,
+>>>>>>> no-scmpkg
 0x23,
 0xf,
 0x1,
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x827,
+=======
+0x821,
+>>>>>>> no-scmpkg
 0x0,
 0x71,
 0x56,
@@ -56264,15 +61312,26 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x830,
 0x25,
 0x6a,
 0x830,
+=======
+0x82a,
+0x25,
+0x6a,
+0x82a,
+>>>>>>> no-scmpkg
 0x56,
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x831,
+=======
+0x82b,
+>>>>>>> no-scmpkg
 0x25,
 0x6a,
 0x92,
@@ -56280,7 +61339,11 @@ STk_instr STk_boot_code [] = {
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x832,
+=======
+0x82c,
+>>>>>>> no-scmpkg
 0x23,
 0x51,
 0xffff,
@@ -56290,20 +61353,34 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x833,
 0x55,
 0x834,
+=======
+0x82d,
+0x55,
+0x82e,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
 0x15,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x834,
 0x62,
 0x4,
 0xa,
 0x7f0,
+=======
+0x82e,
+0x62,
+0x4,
+0xa,
+0x7ea,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0xc,
@@ -56312,20 +61389,34 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x835,
 0x55,
 0x836,
+=======
+0x82f,
+0x55,
+0x830,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
 0x17,
 0x67,
 0x9,
+<<<<<<< HEAD
 0x836,
 0x62,
 0x4,
 0xa,
 0x7f1,
+=======
+0x830,
+0x62,
+0x4,
+0xa,
+0x7eb,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0xe,
@@ -56334,20 +61425,34 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x837,
 0x55,
 0x838,
+=======
+0x831,
+0x55,
+0x832,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
 0x19,
 0x69,
 0x9,
+<<<<<<< HEAD
 0x838,
 0x62,
 0x4,
 0xa,
 0x7f2,
+=======
+0x832,
+0x62,
+0x4,
+0xa,
+0x7ec,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0x10,
@@ -56355,6 +61460,7 @@ STk_instr STk_boot_code [] = {
 0x5,
 0xd,
 0x13,
+<<<<<<< HEAD
 0x7f0,
 0xf,
 0x13,
@@ -56366,6 +61472,19 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x839,
+=======
+0x7ea,
+0xf,
+0x13,
+0x7eb,
+0x11,
+0x5,
+0x13,
+0x7ec,
+0x24,
+0x1f,
+0x833,
+>>>>>>> no-scmpkg
 0x23,
 0x15c,
 0xffff,
@@ -56375,20 +61494,34 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x833,
 0x55,
 0x83a,
+=======
+0x82d,
+0x55,
+0x834,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
 0x15,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x83a,
 0x62,
 0x4,
 0xa,
 0x7f0,
+=======
+0x834,
+0x62,
+0x4,
+0xa,
+0x7ea,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0xc,
@@ -56397,20 +61530,34 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x835,
 0x55,
 0x83b,
+=======
+0x82f,
+0x55,
+0x835,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
 0x17,
 0x67,
 0x9,
+<<<<<<< HEAD
 0x83b,
 0x62,
 0x4,
 0xa,
 0x7f1,
+=======
+0x835,
+0x62,
+0x4,
+0xa,
+0x7eb,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0xe,
@@ -56419,20 +61566,34 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x837,
 0x55,
 0x83c,
+=======
+0x831,
+0x55,
+0x836,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
 0x19,
 0x69,
 0x9,
+<<<<<<< HEAD
 0x83c,
 0x62,
 0x4,
 0xa,
 0x7f2,
+=======
+0x836,
+0x62,
+0x4,
+0xa,
+0x7ec,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0x10,
@@ -56443,10 +61604,17 @@ STk_instr STk_boot_code [] = {
 0x2b,
 0x1,
 0xa,
+<<<<<<< HEAD
 0x7ee,
 0x39,
 0x13,
 0x7ee,
+=======
+0x7e8,
+0x39,
+0x13,
+0x7e8,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x4d,
@@ -56464,13 +61632,21 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x405,
 0x6c,
+<<<<<<< HEAD
 0x81c,
+=======
+0x816,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x2d,
 0xdf,
 0xa,
+<<<<<<< HEAD
 0x7ed,
+=======
+0x7e7,
+>>>>>>> no-scmpkg
 0x1d,
 0x16,
 0x25,
@@ -56480,7 +61656,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x56,
+<<<<<<< HEAD
 0x82f,
+=======
+0x829,
+>>>>>>> no-scmpkg
 0x0,
 0x26,
 0x1,
@@ -56489,7 +61669,11 @@ STk_instr STk_boot_code [] = {
 0x305,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x831,
+=======
+0x82b,
+>>>>>>> no-scmpkg
 0x0,
 0x26,
 0x1,
@@ -56524,16 +61708,27 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x1c,
 0xa,
+<<<<<<< HEAD
 0x7ee,
 0x3a,
 0x13,
 0x7ee,
+=======
+0x7e8,
+0x3a,
+0x13,
+0x7e8,
+>>>>>>> no-scmpkg
 0x2,
 0x1b,
 0x300,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x83d,
+=======
+0x837,
+>>>>>>> no-scmpkg
 0x56,
 0x56,
 0x1,
@@ -56573,7 +61768,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x3e,
 0x71,
+<<<<<<< HEAD
 0x811,
+=======
+0x80b,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x71,
@@ -56593,7 +61792,11 @@ STk_instr STk_boot_code [] = {
 0x60,
 0xffff,
 0xa,
+<<<<<<< HEAD
 0x7ed,
+=======
+0x7e7,
+>>>>>>> no-scmpkg
 0x1d,
 0x59,
 0xc,
@@ -56623,6 +61826,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7fb,
 0x56,
 0x802,
@@ -56630,6 +61834,15 @@ STk_instr STk_boot_code [] = {
 0x6e,
 0x55,
 0x83e,
+=======
+0x7f5,
+0x56,
+0x7fc,
+0x1,
+0x6e,
+0x55,
+0x838,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -56717,29 +61930,50 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x83f,
+=======
+0x839,
+>>>>>>> no-scmpkg
 0x23,
 0xd5,
 0x0,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x840,
 0x0,
 0xa,
 0x7ed,
+=======
+0x83a,
+0x0,
+0xa,
+0x7e7,
+>>>>>>> no-scmpkg
 0x1d,
 0xba,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x800,
+=======
+0x7fa,
+>>>>>>> no-scmpkg
 0x0,
 0x1e,
 0x8,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7f3,
 0x56,
 0x800,
+=======
+0x7ed,
+0x56,
+0x7fa,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -56758,7 +61992,11 @@ STk_instr STk_boot_code [] = {
 0x15,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x841,
+=======
+0x83b,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x1a3,
@@ -56772,6 +62010,7 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x16,
 0x9,
+<<<<<<< HEAD
 0x842,
 0x17,
 0x25,
@@ -56780,6 +62019,16 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x56,
 0x844,
+=======
+0x83c,
+0x17,
+0x25,
+0x55,
+0x83d,
+0x25,
+0x56,
+0x83e,
+>>>>>>> no-scmpkg
 0x0,
 0x6e,
 0x56,
@@ -56789,9 +62038,15 @@ STk_instr STk_boot_code [] = {
 0x6a,
 0x34d,
 0x55,
+<<<<<<< HEAD
 0x845,
 0x55,
 0x846,
+=======
+0x83f,
+0x55,
+0x840,
+>>>>>>> no-scmpkg
 0x56,
 0x30,
 0x3,
@@ -56800,31 +62055,53 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x847,
 0x1c,
 0x2,
 0x9,
 0x848,
+=======
+0x841,
+0x1c,
+0x2,
+0x9,
+0x842,
+>>>>>>> no-scmpkg
 0x71,
 0x43,
 0x5,
 0x18,
 0x9,
+<<<<<<< HEAD
 0x849,
+=======
+0x843,
+>>>>>>> no-scmpkg
 0x19,
 0x25,
 0x55,
 0x4b2,
 0x56,
+<<<<<<< HEAD
 0x802,
+=======
+0x7fc,
+>>>>>>> no-scmpkg
 0x1,
 0x1a,
 0x5,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7fb,
 0x56,
 0x802,
+=======
+0x7f5,
+0x56,
+0x7fc,
+>>>>>>> no-scmpkg
 0x1,
 0x1a,
 0x6,
@@ -56836,7 +62113,11 @@ STk_instr STk_boot_code [] = {
 0x5,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x84a,
+=======
+0x844,
+>>>>>>> no-scmpkg
 0x11,
 0x6,
 0x21,
@@ -56857,7 +62138,11 @@ STk_instr STk_boot_code [] = {
 0x5,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x84b,
+=======
+0x845,
+>>>>>>> no-scmpkg
 0x11,
 0x6,
 0x21,
@@ -56878,7 +62163,11 @@ STk_instr STk_boot_code [] = {
 0x5,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x84c,
+=======
+0x846,
+>>>>>>> no-scmpkg
 0x11,
 0x6,
 0x21,
@@ -56899,7 +62188,11 @@ STk_instr STk_boot_code [] = {
 0x5,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x84d,
+=======
+0x847,
+>>>>>>> no-scmpkg
 0x11,
 0x6,
 0x21,
@@ -56919,22 +62212,38 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x832,
+=======
+0x82c,
+>>>>>>> no-scmpkg
 0x0,
 0x26,
 0x0,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x83f,
+=======
+0x839,
+>>>>>>> no-scmpkg
 0x0,
 0x25,
 0x51,
 0x6c,
+<<<<<<< HEAD
 0x81f,
 0x1,
 0x24,
 0x1f,
 0x84e,
+=======
+0x819,
+0x1,
+0x24,
+0x1f,
+0x848,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x51,
@@ -56943,7 +62252,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x7ea,
+=======
+0x7e4,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -56954,7 +62267,11 @@ STk_instr STk_boot_code [] = {
 0x21d,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x84f,
+=======
+0x849,
+>>>>>>> no-scmpkg
 0x56,
 0x50,
 0x1,
@@ -56966,7 +62283,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x850,
+=======
+0x84a,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -56982,12 +62303,17 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x851,
+=======
+0x84b,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x852,
 0x1,
 0x1f,
@@ -57004,6 +62330,24 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x1f,
 0x857,
+=======
+0x84c,
+0x1,
+0x1f,
+0x84d,
+0x1,
+0x1f,
+0x84e,
+0x1,
+0x1f,
+0x84f,
+0x1,
+0x1f,
+0x850,
+0x1,
+0x1f,
+0x851,
+>>>>>>> no-scmpkg
 0x23,
 0x53,
 0xffff,
@@ -57013,7 +62357,11 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x858,
+=======
+0x852,
+>>>>>>> no-scmpkg
 0x1c,
 0xd,
 0x25,
@@ -57055,7 +62403,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x852,
+=======
+0x84c,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -57070,7 +62422,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x55,
+<<<<<<< HEAD
 0x859,
+=======
+0x853,
+>>>>>>> no-scmpkg
 0x56,
 0xec,
 0x2,
@@ -57082,7 +62438,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x853,
+=======
+0x84d,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -57090,7 +62450,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x85a,
+=======
+0x854,
+>>>>>>> no-scmpkg
 0x23,
 0xb0,
 0x1,
@@ -57104,11 +62468,19 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x85b,
 0x55,
 0x85c,
 0x55,
 0x85d,
+=======
+0x855,
+0x55,
+0x856,
+0x55,
+0x857,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x56f,
@@ -57134,13 +62506,21 @@ STk_instr STk_boot_code [] = {
 0x62,
 0x3,
 0x9,
+<<<<<<< HEAD
 0x85e,
+=======
+0x858,
+>>>>>>> no-scmpkg
 0x24,
 0x25,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x85f,
+=======
+0x859,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -57149,19 +62529,68 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x860,
+=======
+0x85a,
+>>>>>>> no-scmpkg
 0x1,
 0xc,
 0x24,
 0x24,
 0x13,
+<<<<<<< HEAD
 0x852,
+=======
+0x84c,
 0x25,
+0x55,
+0x85b,
+0x55,
+0x85c,
+0x55,
+0x576,
+0x75,
+0x100,
+0x56,
+0x565,
+0x4,
+0x13,
+0x84d,
+0x25,
+0x55,
+0x85d,
+0x55,
+0x85e,
+0x55,
+0x85f,
+0x75,
+0x100,
+0x56,
+0x565,
+0x4,
+0x13,
+0x84e,
+0x25,
+0x55,
+0x860,
 0x55,
 0x861,
 0x55,
+0x85f,
+0x75,
+0x100,
+0x56,
+0x565,
+0x4,
+0x13,
+0x84f,
+>>>>>>> no-scmpkg
+0x25,
+0x55,
 0x862,
 0x55,
+<<<<<<< HEAD
 0x580,
 0x75,
 0x100,
@@ -57184,19 +62613,34 @@ STk_instr STk_boot_code [] = {
 0x4,
 0x13,
 0x854,
+=======
+0x863,
+0x56,
+0x864,
+0x2,
+0x1d,
+0x1a,
+>>>>>>> no-scmpkg
 0x25,
+0x55,
+0x865,
 0x55,
 0x866,
 0x55,
+<<<<<<< HEAD
 0x867,
 0x55,
 0x865,
+=======
+0x85f,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x56,
 0x56f,
 0x4,
 0x13,
+<<<<<<< HEAD
 0x855,
 0x25,
 0x55,
@@ -57232,26 +62676,55 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x13,
 0x856,
+=======
+0x851,
+0x25,
+0x55,
+0x867,
+0x75,
+0x100,
+0x56,
+0x864,
+0x2,
+0x13,
+0x850,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0x7,
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x86e,
 0x55,
 0x86f,
 0x56,
 0x86a,
+=======
+0x868,
+0x55,
+0x869,
+0x56,
+0x864,
+>>>>>>> no-scmpkg
 0x2,
 0x1d,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x870,
 0x1c,
 0x2,
 0x9,
 0x852,
+=======
+0x86a,
+0x1c,
+0x2,
+0x9,
+0x84c,
+>>>>>>> no-scmpkg
 0x21,
 0x29,
 0x1,
@@ -57259,7 +62732,11 @@ STk_instr STk_boot_code [] = {
 0x6a,
 0x34d,
 0x55,
+<<<<<<< HEAD
 0x845,
+=======
+0x83f,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x34,
@@ -57270,7 +62747,11 @@ STk_instr STk_boot_code [] = {
 0x2e,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x871,
+=======
+0x86b,
+>>>>>>> no-scmpkg
 0x23,
 0x4d,
 0x1,
@@ -57351,15 +62832,26 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x872,
 0x25,
 0x6a,
 0x872,
+=======
+0x86c,
+0x25,
+0x6a,
+0x86c,
+>>>>>>> no-scmpkg
 0x56,
 0x46,
 0x1,
 0x1f,
+<<<<<<< HEAD
 0x873,
+=======
+0x86d,
+>>>>>>> no-scmpkg
 0x25,
 0x4f,
 0x29,
@@ -57374,7 +62866,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x873,
+=======
+0x86d,
+>>>>>>> no-scmpkg
 0x0,
 0x26,
 0x1,
@@ -57408,7 +62904,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x2c,
 0x1f,
+<<<<<<< HEAD
 0x874,
+=======
+0x86e,
+>>>>>>> no-scmpkg
 0x7,
 0x23,
 0x42,
@@ -57417,18 +62917,40 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x875,
+=======
+0x86f,
+>>>>>>> no-scmpkg
 0x0,
 0x15,
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x876,
+=======
+0x870,
 0x65,
 0x56,
 0x44,
 0x2,
 0x71,
+0x86b,
+0x1,
+0x1e,
+0xe,
+0x25,
+0x25,
+0x55,
+0x871,
+>>>>>>> no-scmpkg
+0x65,
+0x56,
+0x44,
+0x2,
+0x71,
+<<<<<<< HEAD
 0x871,
 0x1,
 0x1e,
@@ -57443,6 +62965,9 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x71,
 0x871,
+=======
+0x86b,
+>>>>>>> no-scmpkg
 0x1,
 0x1e,
 0x1,
@@ -57454,13 +62979,21 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x878,
+=======
+0x872,
+>>>>>>> no-scmpkg
 0x65,
 0x56,
 0x44,
 0x2,
 0x71,
+<<<<<<< HEAD
 0x655,
+=======
+0x64a,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -57469,9 +63002,15 @@ STk_instr STk_boot_code [] = {
 0x8,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x874,
 0x56,
 0x879,
+=======
+0x86e,
+0x56,
+0x873,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -57479,7 +63018,11 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x87a,
+=======
+0x874,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x51,
@@ -57488,7 +63031,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x84f,
+=======
+0x849,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
@@ -57499,7 +63046,11 @@ STk_instr STk_boot_code [] = {
 0x190,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x87b,
+=======
+0x875,
+>>>>>>> no-scmpkg
 0x56,
 0x50,
 0x1,
@@ -57511,7 +63062,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x87c,
+=======
+0x876,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -57527,7 +63082,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x87d,
+=======
+0x877,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
@@ -57537,6 +63096,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x82f,
 0x0,
 0x6e,
@@ -57544,12 +63104,25 @@ STk_instr STk_boot_code [] = {
 0x87e,
 0x56,
 0x63b,
+=======
+0x829,
+0x0,
+0x6e,
+0x55,
+0x878,
+0x56,
+0x630,
+>>>>>>> no-scmpkg
 0x1,
 0x6e,
 0x6a,
 0x34d,
 0x55,
+<<<<<<< HEAD
 0x845,
+=======
+0x83f,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x30,
@@ -57559,13 +63132,21 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x65,
 0x9,
+<<<<<<< HEAD
 0x870,
+=======
+0x86a,
+>>>>>>> no-scmpkg
 0x62,
 0x7,
 0x25,
 0x4d,
 0x56,
+<<<<<<< HEAD
 0x828,
+=======
+0x822,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1e,
@@ -57575,9 +63156,15 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x87f,
 0x55,
 0x880,
+=======
+0x879,
+0x55,
+0x87a,
+>>>>>>> no-scmpkg
 0x56,
 0x3a0,
 0x2,
@@ -57589,30 +63176,51 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x881,
 0x55,
 0x882,
+=======
+0x87b,
+0x55,
+0x87c,
+>>>>>>> no-scmpkg
 0x6c,
 0x3a0,
 0x2,
 0x24,
 0x71,
+<<<<<<< HEAD
 0x82f,
+=======
+0x829,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x23,
 0x4,
 0x1,
 0x9,
+<<<<<<< HEAD
 0x883,
 0x24,
 0x71,
 0x831,
+=======
+0x87d,
+0x24,
+0x71,
+0x82b,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x66,
 0x56,
+<<<<<<< HEAD
 0x854,
+=======
+0x84e,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x23,
@@ -57622,16 +63230,28 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x6c,
+<<<<<<< HEAD
 0x855,
 0x1,
 0x24,
 0x71,
 0x884,
+=======
+0x84f,
+0x1,
+0x24,
+0x71,
+0x87e,
+>>>>>>> no-scmpkg
 0x1,
 0x2a,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x885,
+=======
+0x87f,
+>>>>>>> no-scmpkg
 0x15,
 0x4,
 0x16,
@@ -57642,10 +63262,17 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x827,
 0x0,
 0x71,
 0x85a,
+=======
+0x821,
+0x0,
+0x71,
+0x854,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -57663,7 +63290,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x886,
+=======
+0x880,
+>>>>>>> no-scmpkg
 0x1,
 0x1b,
 0x200,
@@ -57672,10 +63303,17 @@ STk_instr STk_boot_code [] = {
 0x201,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x887,
 0x25,
 0x6a,
 0x827,
+=======
+0x881,
+0x25,
+0x6a,
+0x821,
+>>>>>>> no-scmpkg
 0x56,
 0x31,
 0x1,
@@ -57707,14 +63345,22 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0xa,
 0x9,
+<<<<<<< HEAD
 0x888,
+=======
+0x882,
+>>>>>>> no-scmpkg
 0x1b,
 0x300,
 0x4,
 0x1b,
 0x301,
 0x9,
+<<<<<<< HEAD
 0x85e,
+=======
+0x858,
+>>>>>>> no-scmpkg
 0x24,
 0x75,
 0x301,
@@ -57732,7 +63378,11 @@ STk_instr STk_boot_code [] = {
 0x1b,
 0x301,
 0x9,
+<<<<<<< HEAD
 0x889,
+=======
+0x883,
+>>>>>>> no-scmpkg
 0x1c,
 0x36,
 0x25,
@@ -57786,7 +63436,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x88a,
+=======
+0x884,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x24,
@@ -57822,7 +63476,11 @@ STk_instr STk_boot_code [] = {
 0x26,
 0x0,
 0x9,
+<<<<<<< HEAD
 0x85e,
+=======
+0x858,
+>>>>>>> no-scmpkg
 0x24,
 0x1,
 0x24,
@@ -57837,6 +63495,7 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x833,
 0x68,
 0x6c,
@@ -57845,6 +63504,16 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x88b,
+=======
+0x82d,
+0x68,
+0x6c,
+0x833,
+0x2,
+0x24,
+0x1f,
+0x885,
+>>>>>>> no-scmpkg
 0x23,
 0x23,
 0x0,
@@ -57853,7 +63522,11 @@ STk_instr STk_boot_code [] = {
 0x6a,
 0x34d,
 0x55,
+<<<<<<< HEAD
 0x88c,
+=======
+0x886,
+>>>>>>> no-scmpkg
 0x4e,
 0x56,
 0x30,
@@ -57866,7 +63539,11 @@ STk_instr STk_boot_code [] = {
 0x6,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x87a,
+=======
+0x874,
+>>>>>>> no-scmpkg
 0x0,
 0x1c,
 0x1,
@@ -57875,15 +63552,25 @@ STk_instr STk_boot_code [] = {
 0x7,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x88b,
 0x6c,
 0x832,
+=======
+0x885,
+0x6c,
+0x82c,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x7,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x88d,
+=======
+0x887,
+>>>>>>> no-scmpkg
 0x25,
 0x56,
 0x51,
@@ -57892,16 +63579,69 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x87b,
+=======
+0x875,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2e,
 0x25,
 0x55,
+<<<<<<< HEAD
+0x88e,
+=======
+0x888,
+0x55,
+0x889,
+0x23,
+0x7,
+0xffff,
+0x25,
+0x65,
+0x6c,
+0x88a,
+0x1,
+0x24,
+0x21,
+0x55,
+0x63,
+0x56,
+0x64,
+0x4,
+0x1f,
+0x888,
+0x25,
+0x55,
+0x88b,
+0x55,
+0x88c,
+0x23,
+0x7,
+0xffff,
+0x25,
+0x65,
+0x6c,
+0x88d,
+0x1,
+0x24,
+0x21,
+0x55,
+0x63,
+0x56,
+0x64,
+0x4,
+0x1f,
+0x88b,
+0x25,
+>>>>>>> no-scmpkg
+0x55,
 0x88e,
 0x55,
 0x88f,
+<<<<<<< HEAD
 0x23,
 0x7,
 0xffff,
@@ -57946,6 +63686,8 @@ STk_instr STk_boot_code [] = {
 0x894,
 0x55,
 0x895,
+=======
+>>>>>>> no-scmpkg
 0x23,
 0x8,
 0xfffe,
@@ -57953,7 +63695,11 @@ STk_instr STk_boot_code [] = {
 0x66,
 0x65,
 0x6c,
+<<<<<<< HEAD
 0x896,
+=======
+0x890,
+>>>>>>> no-scmpkg
 0x2,
 0x24,
 0x21,
@@ -57963,12 +63709,21 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x894,
 0x25,
 0x55,
 0x897,
 0x55,
 0x898,
+=======
+0x88e,
+0x25,
+0x55,
+0x891,
+0x55,
+0x892,
+>>>>>>> no-scmpkg
 0x23,
 0x9,
 0xffff,
@@ -57977,7 +63732,11 @@ STk_instr STk_boot_code [] = {
 0xc,
 0x3b,
 0x73,
+<<<<<<< HEAD
 0x899,
+=======
+0x893,
+>>>>>>> no-scmpkg
 0x1,
 0x24,
 0x21,
@@ -57987,17 +63746,30 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x897,
 0x25,
 0x55,
 0x89a,
 0x55,
 0x89b,
+=======
+0x891,
+0x25,
+0x55,
+0x894,
+0x55,
+0x895,
+>>>>>>> no-scmpkg
 0x23,
 0xb,
 0xfffe,
 0x55,
+<<<<<<< HEAD
 0x897,
+=======
+0x891,
+>>>>>>> no-scmpkg
 0xc,
 0x3b,
 0x21,
@@ -58013,43 +63785,342 @@ STk_instr STk_boot_code [] = {
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x89a,
+=======
+0x894,
 0x23,
 0x28,
 0xffff,
 0x25,
 0x6a,
-0x89c,
+0x896,
 0x2b,
 0x1,
 0x25,
+0x55,
+0x897,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x896,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x896,
+0x55,
+0x897,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x896,
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+0x896,
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+0x893,
+0x2b,
+0x1,
+0x25,
+0x55,
+0x899,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x893,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x893,
+0x55,
+0x899,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x893,
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+0x893,
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+0x890,
+0x2b,
+0x1,
+0x25,
+0x55,
+0x89a,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x890,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x890,
+0x55,
+0x89a,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x890,
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+0x890,
+>>>>>>> no-scmpkg
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+<<<<<<< HEAD
+0x89c,
+=======
+0x89b,
+>>>>>>> no-scmpkg
+0x2b,
+0x1,
+0x25,
+0x55,
+<<<<<<< HEAD
+0x89d,
+=======
+0x89a,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x89b,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x89b,
+0x55,
+0x89a,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x89b,
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+0x89b,
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+0x88a,
+0x2b,
+0x1,
+0x25,
+0x55,
+0x89c,
+>>>>>>> no-scmpkg
+0x4d,
+0x56,
+0x2d4,
+0x2,
+0x65,
+0xa,
+<<<<<<< HEAD
+0x89c,
+=======
+0x88a,
+>>>>>>> no-scmpkg
+0x62,
+0xd,
+0x25,
+0x55,
+<<<<<<< HEAD
+0x679,
+0x55,
+0x89e,
+0x55,
+0x89c,
+=======
+0x66e,
+0x55,
+0x898,
+0x55,
+0x88a,
+>>>>>>> no-scmpkg
+0x55,
+0x89c,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+<<<<<<< HEAD
+0x89c,
+=======
+0x88a,
+>>>>>>> no-scmpkg
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+<<<<<<< HEAD
+0x89c,
+=======
+0x88a,
+>>>>>>> no-scmpkg
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+<<<<<<< HEAD
+0x899,
+=======
+0x88d,
+0x2b,
+0x1,
+0x25,
+0x55,
+0x89c,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x88d,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x88d,
+0x55,
+0x89c,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x88d,
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+0x88d,
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+0x89d,
+0x2b,
+0x1,
+0x25,
+0x55,
+0x89e,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x89d,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
 0x55,
 0x89d,
-0x4d,
-0x56,
-0x2d4,
-0x2,
-0x65,
-0xa,
-0x89c,
-0x62,
-0xd,
-0x25,
-0x55,
-0x679,
 0x55,
 0x89e,
-0x55,
-0x89c,
-0x55,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
 0x89d,
-0x6c,
-0x33,
-0x4,
-0x24,
-0x25,
-0x6a,
-0x89c,
 0x75,
 0x100,
 0x6c,
@@ -58057,18 +64128,36 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
-0x89c,
+0x89d,
 0x23,
 0x28,
 0xffff,
 0x25,
 0x6a,
-0x899,
+0x89f,
+>>>>>>> no-scmpkg
 0x2b,
 0x1,
 0x25,
+0x55,
+0x89e,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x89f,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
 0x55,
 0x89f,
+<<<<<<< HEAD
 0x4d,
 0x56,
 0x2d4,
@@ -58087,13 +64176,21 @@ STk_instr STk_boot_code [] = {
 0x899,
 0x55,
 0x89f,
+=======
+0x55,
+0x89e,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x4,
 0x24,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x899,
+=======
+0x89f,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x6c,
@@ -58101,7 +64198,11 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x899,
+=======
+0x89f,
+>>>>>>> no-scmpkg
 0x23,
 0x28,
 0xffff,
@@ -58112,6 +64213,7 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8a0,
 0x4d,
 0x56,
@@ -58151,11 +64253,53 @@ STk_instr STk_boot_code [] = {
 0xffff,
 0x25,
 0x6a,
+=======
+>>>>>>> no-scmpkg
 0x8a1,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x8a0,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x8a0,
+0x55,
+0x8a1,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x8a0,
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+0x8a0,
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+0x8a2,
 0x2b,
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8a0,
 0x4d,
 0x56,
@@ -58164,10 +64308,21 @@ STk_instr STk_boot_code [] = {
 0x65,
 0xa,
 0x8a1,
+=======
+0x8a3,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x8a2,
+>>>>>>> no-scmpkg
 0x62,
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x679,
 0x55,
 0x89e,
@@ -58226,6 +64381,22 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x6a,
 0x890,
+=======
+0x66e,
+0x55,
+0x898,
+0x55,
+0x8a2,
+0x55,
+0x8a3,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x8a2,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x6c,
@@ -58233,6 +64404,7 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x890,
 0x23,
 0x28,
@@ -58278,17 +64450,37 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x893,
+=======
+0x8a2,
+>>>>>>> no-scmpkg
 0x23,
 0x28,
 0xffff,
 0x25,
 0x6a,
-0x8a3,
+0x8a4,
 0x2b,
 0x1,
 0x25,
 0x55,
+0x8a5,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
 0x8a4,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x8a4,
+<<<<<<< HEAD
 0x4d,
 0x56,
 0x2d4,
@@ -58306,14 +64498,17 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x8a3,
 0x55,
-0x8a4,
+=======
+0x55,
+0x8a5,
 0x6c,
 0x33,
 0x4,
 0x24,
 0x25,
 0x6a,
-0x8a3,
+>>>>>>> no-scmpkg
+0x8a4,
 0x75,
 0x100,
 0x6c,
@@ -58321,51 +64516,7 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
-0x8a3,
-0x23,
-0x28,
-0xffff,
-0x25,
-0x6a,
-0x8a5,
-0x2b,
-0x1,
-0x25,
-0x55,
 0x8a4,
-0x4d,
-0x56,
-0x2d4,
-0x2,
-0x65,
-0xa,
-0x8a5,
-0x62,
-0xd,
-0x25,
-0x55,
-0x679,
-0x55,
-0x89e,
-0x55,
-0x8a5,
-0x55,
-0x8a4,
-0x6c,
-0x33,
-0x4,
-0x24,
-0x25,
-0x6a,
-0x8a5,
-0x75,
-0x100,
-0x6c,
-0x22,
-0x2,
-0x24,
-0x1f,
-0x8a5,
 0x23,
 0x28,
 0xffff,
@@ -58375,26 +64526,120 @@ STk_instr STk_boot_code [] = {
 0x2b,
 0x1,
 0x25,
+0x55,
+<<<<<<< HEAD
+0x8a4,
+0x4d,
+0x56,
+0x2d4,
+0x2,
+0x65,
+0xa,
+=======
+0x8a5,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x8a6,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
+0x55,
+0x8a6,
+0x55,
+>>>>>>> no-scmpkg
+0x8a5,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+<<<<<<< HEAD
+0x55,
+0x679,
+0x55,
+0x89e,
+0x55,
+0x8a5,
+0x55,
+0x8a4,
+0x6c,
+0x33,
+0x4,
+0x24,
+0x25,
+0x6a,
+0x8a5,
+=======
+0x6a,
+0x8a6,
+>>>>>>> no-scmpkg
+0x75,
+0x100,
+0x6c,
+0x22,
+0x2,
+0x24,
+0x1f,
+<<<<<<< HEAD
+0x8a5,
+=======
+0x8a6,
+>>>>>>> no-scmpkg
+0x23,
+0x28,
+0xffff,
+0x25,
+0x6a,
+<<<<<<< HEAD
+0x8a6,
+=======
+0x8a7,
+>>>>>>> no-scmpkg
+0x2b,
+0x1,
+0x25,
+0x55,
+<<<<<<< HEAD
+0x8a7,
+=======
+0x8a8,
+>>>>>>> no-scmpkg
+0x4d,
+0x56,
+0x2d4,
+0x2,
+0x65,
+0xa,
+0x8a6,
+0x62,
+0xd,
+0x25,
+0x55,
+<<<<<<< HEAD
+0x679,
+0x55,
+0x89e,
+0x55,
+0x8a6,
 0x55,
 0x8a7,
-0x4d,
-0x56,
-0x2d4,
-0x2,
-0x65,
-0xa,
-0x8a6,
-0x62,
-0xd,
-0x25,
+=======
+0x66e,
 0x55,
-0x679,
-0x55,
-0x89e,
-0x55,
-0x8a6,
+0x898,
 0x55,
 0x8a7,
+0x55,
+0x8a8,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x4,
@@ -58415,22 +64660,45 @@ STk_instr STk_boot_code [] = {
 0xffff,
 0x25,
 0x6a,
-0x8a8,
+0x8a9,
 0x2b,
 0x1,
 0x25,
+0x55,
+0x8a8,
+0x4d,
+0x56,
+0x2ca,
+0x2,
+0x65,
+0xa,
+0x8a9,
+0x62,
+0xd,
+0x25,
+0x55,
+0x66e,
+0x55,
+0x898,
 0x55,
 0x8a9,
+<<<<<<< HEAD
 0x4d,
 0x56,
 0x2d4,
 0x2,
 0x65,
 0xa,
+=======
+0x55,
+>>>>>>> no-scmpkg
 0x8a8,
-0x62,
-0xd,
+0x6c,
+0x33,
+0x4,
+0x24,
 0x25,
+<<<<<<< HEAD
 0x55,
 0x679,
 0x55,
@@ -58438,22 +64706,22 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x8a8,
 0x55,
+=======
+0x6a,
+>>>>>>> no-scmpkg
 0x8a9,
+0x75,
+0x100,
 0x6c,
-0x33,
-0x4,
+0x22,
+0x2,
 0x24,
-0x25,
-0x6a,
+0x1f,
+<<<<<<< HEAD
 0x8a8,
-0x75,
-0x100,
-0x6c,
-0x22,
-0x2,
-0x24,
-0x1f,
-0x8a8,
+=======
+0x8a9,
+>>>>>>> no-scmpkg
 0x23,
 0x28,
 0xffff,
@@ -58476,9 +64744,15 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x679,
 0x55,
 0x89e,
+=======
+0x66e,
+0x55,
+0x898,
+>>>>>>> no-scmpkg
 0x55,
 0x8aa,
 0x55,
@@ -58520,9 +64794,15 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x679,
 0x55,
 0x89e,
+=======
+0x66e,
+0x55,
+0x898,
+>>>>>>> no-scmpkg
 0x55,
 0x8ac,
 0x55,
@@ -58552,7 +64832,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8ae,
+=======
+0x8ab,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x2d4,
@@ -58564,6 +64848,7 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x679,
 0x55,
 0x89e,
@@ -58571,6 +64856,15 @@ STk_instr STk_boot_code [] = {
 0x8ad,
 0x55,
 0x8ae,
+=======
+0x66e,
+0x55,
+0x898,
+0x55,
+0x8ad,
+0x55,
+0x8ab,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x4,
@@ -58596,7 +64890,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8ae,
+=======
+0x8ab,
+>>>>>>> no-scmpkg
 0x4d,
 0x56,
 0x2d4,
@@ -58608,6 +64906,7 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x679,
 0x55,
 0x89e,
@@ -58615,6 +64914,15 @@ STk_instr STk_boot_code [] = {
 0x8af,
 0x55,
 0x8ae,
+=======
+0x66e,
+0x55,
+0x898,
+0x55,
+0x8ae,
+0x55,
+0x8ab,
+>>>>>>> no-scmpkg
 0x6c,
 0x33,
 0x4,
@@ -58629,6 +64937,7 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x8af,
 0x23,
 0x28,
@@ -58806,6 +65115,9 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x1f,
 0x8b4,
+=======
+0x8ae,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x56,
@@ -58813,7 +65125,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x8b5,
+=======
+0x8af,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -58879,16 +65195,26 @@ STk_instr STk_boot_code [] = {
 0x830,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8b6,
+=======
+0x8b0,
+>>>>>>> no-scmpkg
 0x56,
 0x50,
 0x1,
 0x4a,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8b7,
 0x55,
 0x8b8,
+=======
+0x8b1,
+0x55,
+0x8b2,
+>>>>>>> no-scmpkg
 0x23,
 0x17,
 0xffff,
@@ -58916,21 +65242,36 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x8b6,
+=======
+0x8b0,
+>>>>>>> no-scmpkg
 0x56,
 0x64,
 0x4,
 0x1f,
+<<<<<<< HEAD
 0x8b7,
 0x7,
 0x1f,
 0x7b7,
+=======
+0x8b1,
+0x7,
+0x1f,
+0x7b1,
+>>>>>>> no-scmpkg
 0x7,
 0x1f,
 0x286,
 0x7,
 0x1f,
+<<<<<<< HEAD
 0x8b9,
+=======
+0x8b3,
+>>>>>>> no-scmpkg
 0x7,
 0x1f,
 0x211,
@@ -58945,13 +65286,21 @@ STk_instr STk_boot_code [] = {
 0x282,
 0x7,
 0x1f,
+<<<<<<< HEAD
 0x7e2,
+=======
+0x7dc,
+>>>>>>> no-scmpkg
 0x7,
 0x1f,
 0x1e5,
 0x7,
 0x1f,
+<<<<<<< HEAD
 0x8ba,
+=======
+0x8b4,
+>>>>>>> no-scmpkg
 0x7,
 0x1f,
 0x78,
@@ -58993,7 +65342,11 @@ STk_instr STk_boot_code [] = {
 0x58c,
 0x7,
 0x1f,
+<<<<<<< HEAD
 0x7c6,
+=======
+0x7c0,
+>>>>>>> no-scmpkg
 0x7,
 0x1f,
 0x588,
@@ -59005,7 +65358,11 @@ STk_instr STk_boot_code [] = {
 0x584,
 0x7,
 0x1f,
+<<<<<<< HEAD
 0x79e,
+=======
+0x798,
+>>>>>>> no-scmpkg
 0x7,
 0x1f,
 0x213,
@@ -59071,9 +65428,15 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x7b7,
 0x6a,
 0x7b7,
+=======
+0x7b1,
+0x6a,
+0x7b1,
+>>>>>>> no-scmpkg
 0x56,
 0x201,
 0x2,
@@ -59131,7 +65494,267 @@ STk_instr STk_boot_code [] = {
 0x6a,
 0xdc,
 0x56,
+<<<<<<< HEAD
 0x201,
+=======
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8b3,
+0x6a,
+0x8b3,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x50f,
+0x6a,
+0x50f,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x20c,
+0x6a,
+0x20c,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x28,
+0x6a,
+0x28,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x22,
+0x6a,
+0x22,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x22d,
+0x6a,
+0x22d,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xc2,
+0x6a,
+0xc2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8b5,
+0x6a,
+0x8b5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x62,
+0x6a,
+0x62,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x601,
+0x6a,
+0x601,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x59e,
+0x6a,
+0x59e,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2b9,
+0x6a,
+0x2b9,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5d5,
+0x6a,
+0x5d5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8b6,
+0x6a,
+0x8b6,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8b7,
+0x6a,
+0x8b7,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5dd,
+0x6a,
+0x5dd,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5d7,
+0x6a,
+0x5d7,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5d9,
+0x6a,
+0x5d9,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5db,
+0x6a,
+0x5db,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5d4,
+0x6a,
+0x5d4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3,
+0x6a,
+0x3,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5,
+0x6a,
+0x5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x318,
+0x6a,
+0x318,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5f4,
+0x6a,
+0x5f4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2ef,
+0x6a,
+0x2ef,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x312,
+0x6a,
+0x312,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x20,
+0x6a,
+0x20,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x281,
+0x6a,
+0x281,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x4,
+0x6a,
+0x4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x6,
+0x6a,
+0x6,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x24,
+0x6a,
+0x24,
+0x56,
+0x1fc,
+>>>>>>> no-scmpkg
+0x2,
+0x25,
+0x55,
+0x8b8,
+0x6a,
+0x8b8,
+0x56,
+0x1fc,
 0x2,
 0x25,
 0x55,
@@ -59247,11 +65870,1450 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x55,
+<<<<<<< HEAD
+=======
+0x3d1,
+0x6a,
+0x3d1,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+>>>>>>> no-scmpkg
 0x8bd,
 0x6a,
 0x8bd,
 0x56,
+<<<<<<< HEAD
 0x201,
+=======
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8be,
+0x6a,
+0x8be,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5cd,
+0x6a,
+0x5cd,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x392,
+0x6a,
+0x392,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1af,
+0x6a,
+0x1af,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x29e,
+0x6a,
+0x29e,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8bf,
+0x6a,
+0x8bf,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x278,
+0x6a,
+0x278,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x7dc,
+0x6a,
+0x7dc,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xe2,
+0x6a,
+0xe2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x54,
+0x6a,
+0x54,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x0,
+0x6a,
+0x0,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x16b,
+0x6a,
+0x16b,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1e0,
+0x6a,
+0x1e0,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8b4,
+0x6a,
+0x8b4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x78,
+0x6a,
+0x78,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x58e,
+0x6a,
+0x58e,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c0,
+0x6a,
+0x8c0,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x28a,
+0x6a,
+0x28a,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x177,
+0x6a,
+0x177,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x27a,
+0x6a,
+0x27a,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5ff,
+0x6a,
+0x5ff,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x29c,
+0x6a,
+0x29c,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xe5,
+0x6a,
+0xe5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xe7,
+0x6a,
+0xe7,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xe6,
+0x6a,
+0xe6,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x33,
+0x6a,
+0x33,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5f0,
+0x6a,
+0x5f0,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5ee,
+0x6a,
+0x5ee,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x404,
+0x6a,
+0x404,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c1,
+0x6a,
+0x8c1,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1b5,
+0x6a,
+0x1b5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x59c,
+0x6a,
+0x59c,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x591,
+0x6a,
+0x591,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1d6,
+0x6a,
+0x1d6,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1d5,
+0x6a,
+0x1d5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x44b,
+0x6a,
+0x44b,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5f3,
+0x6a,
+0x5f3,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2f5,
+0x6a,
+0x2f5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x592,
+0x6a,
+0x592,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x593,
+0x6a,
+0x593,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x594,
+0x6a,
+0x594,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3b8,
+0x6a,
+0x3b8,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x4b,
+0x6a,
+0x4b,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c2,
+0x6a,
+0x8c2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c3,
+0x6a,
+0x8c3,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2e5,
+0x6a,
+0x2e5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x61b,
+0x6a,
+0x61b,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x61,
+0x6a,
+0x61,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x29f,
+0x6a,
+0x29f,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2a2,
+0x6a,
+0x2a2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x59d,
+0x6a,
+0x59d,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c4,
+0x6a,
+0x8c4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5f7,
+0x6a,
+0x5f7,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3ac,
+0x6a,
+0x3ac,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x884,
+0x6a,
+0x884,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xef,
+0x6a,
+0xef,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x70,
+0x6a,
+0x70,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c5,
+0x6a,
+0x8c5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5e,
+0x6a,
+0x5e,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x206,
+0x6a,
+0x206,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x212,
+0x6a,
+0x212,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x582,
+0x6a,
+0x582,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x7c0,
+0x6a,
+0x7c0,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x57e,
+0x6a,
+0x57e,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x26d,
+0x6a,
+0x26d,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x57a,
+0x6a,
+0x57a,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x798,
+0x6a,
+0x798,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xe4,
+0x6a,
+0xe4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5e6,
+0x6a,
+0x5e6,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x294,
+0x6a,
+0x294,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xb2,
+0x6a,
+0xb2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x4a5,
+0x6a,
+0x4a5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c6,
+0x6a,
+0x8c6,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x7b8,
+0x6a,
+0x7b8,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x93,
+0x6a,
+0x93,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5d1,
+0x6a,
+0x5d1,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x59f,
+0x6a,
+0x59f,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x46,
+0x6a,
+0x46,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x14d,
+0x6a,
+0x14d,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x158,
+0x6a,
+0x158,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x21,
+0x6a,
+0x21,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x501,
+0x6a,
+0x501,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2b7,
+0x6a,
+0x2b7,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x49,
+0x6a,
+0x49,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x15b,
+0x6a,
+0x15b,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c7,
+0x6a,
+0x8c7,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x536,
+0x6a,
+0x536,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x262,
+0x6a,
+0x262,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x58,
+0x6a,
+0x58,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x68,
+0x6a,
+0x68,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xe3,
+0x6a,
+0xe3,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x328,
+0x6a,
+0x328,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x236,
+0x6a,
+0x236,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c8,
+0x6a,
+0x8c8,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8c9,
+0x6a,
+0x8c9,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8ca,
+0x6a,
+0x8ca,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2e2,
+0x6a,
+0x2e2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8cb,
+0x6a,
+0x8cb,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2e4,
+0x6a,
+0x2e4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x20e,
+0x6a,
+0x20e,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5f9,
+0x6a,
+0x5f9,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x489,
+0x6a,
+0x489,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1f,
+0x6a,
+0x1f,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x42a,
+0x6a,
+0x42a,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8cc,
+0x6a,
+0x8cc,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x604,
+0x6a,
+0x604,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x482,
+0x6a,
+0x482,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2f6,
+0x6a,
+0x2f6,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x315,
+0x6a,
+0x315,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1ca,
+0x6a,
+0x1ca,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x72,
+0x6a,
+0x72,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x161,
+0x6a,
+0x161,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x52,
+0x6a,
+0x52,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x61a,
+0x6a,
+0x61a,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2f8,
+0x6a,
+0x2f8,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x2f3,
+0x6a,
+0x2f3,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8cd,
+0x6a,
+0x8cd,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x607,
+0x6a,
+0x607,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5fe,
+0x6a,
+0x5fe,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5f2,
+0x6a,
+0x5f2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3b4,
+0x6a,
+0x3b4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5fa,
+0x6a,
+0x5fa,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x600,
+0x6a,
+0x600,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x4d9,
+0x6a,
+0x4d9,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x162,
+0x6a,
+0x162,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x218,
+0x6a,
+0x218,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x1b4,
+0x6a,
+0x1b4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x69,
+0x6a,
+0x69,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x36,
+0x6a,
+0x36,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x37,
+0x6a,
+0x37,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x598,
+0x6a,
+0x598,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8ce,
+0x6a,
+0x8ce,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x302,
+0x6a,
+0x302,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x449,
+0x6a,
+0x449,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x41,
+0x6a,
+0x41,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8cf,
+0x6a,
+0x8cf,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5d0,
+0x6a,
+0x5d0,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x44,
+0x6a,
+0x44,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8d0,
+0x6a,
+0x8d0,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5bb,
+0x6a,
+0x5bb,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5c2,
+0x6a,
+0x5c2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5e9,
+0x6a,
+0x5e9,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x14b,
+0x6a,
+0x14b,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x514,
+0x6a,
+0x514,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3a,
+0x6a,
+0x3a,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3b,
+0x6a,
+0x3b,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5ab,
+0x6a,
+0x5ab,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3c5,
+0x6a,
+0x3c5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x3da,
+0x6a,
+0x3da,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5af,
+0x6a,
+0x5af,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5ad,
+0x6a,
+0x5ad,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x192,
+0x6a,
+0x192,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x17c,
+0x6a,
+0x17c,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0xaa,
+0x6a,
+0xaa,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5a2,
+0x6a,
+0x5a2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x95,
+0x6a,
+0x95,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x74,
+0x6a,
+0x74,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x7a,
+0x6a,
+0x7a,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5fc,
+0x6a,
+0x5fc,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8d1,
+0x6a,
+0x8d1,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x596,
+0x6a,
+0x596,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x597,
+0x6a,
+0x597,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x595,
+0x6a,
+0x595,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8d2,
+0x6a,
+0x8d2,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x65,
+0x6a,
+0x65,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x18e,
+0x6a,
+0x18e,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x190,
+0x6a,
+0x190,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8d3,
+0x6a,
+0x8d3,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x91,
+0x6a,
+0x91,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x338,
+0x6a,
+0x338,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x295,
+0x6a,
+0x295,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5cc,
+0x6a,
+0x5cc,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8d4,
+0x6a,
+0x8d4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x173,
+0x6a,
+0x173,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5c4,
+0x6a,
+0x5c4,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x8d5,
+0x6a,
+0x8d5,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x5eb,
+0x6a,
+0x5eb,
+0x56,
+0x1fc,
+0x2,
+0x25,
+0x55,
+0x164,
+0x6a,
+0x164,
+0x56,
+0x1fc,
+>>>>>>> no-scmpkg
 0x2,
 0x25,
 0x55,
@@ -59311,9 +67373,15 @@ STk_instr STk_boot_code [] = {
 0x2,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x322,
 0x6a,
 0x322,
+=======
+0x8d6,
+0x6a,
+0x8d6,
+>>>>>>> no-scmpkg
 0x56,
 0x201,
 0x2,
@@ -60956,7 +69024,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x8dd,
+=======
+0x8d7,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
@@ -60968,16 +69040,26 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x8b6,
+=======
+0x8b0,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2e,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8de,
 0x56,
 0x661,
+=======
+0x8d8,
+0x56,
+0x656,
+>>>>>>> no-scmpkg
 0x1,
 0xa,
 0x53,
@@ -60985,7 +69067,11 @@ STk_instr STk_boot_code [] = {
 0x3f,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8df,
+=======
+0x8d9,
+>>>>>>> no-scmpkg
 0x56,
 0x50,
 0x1,
@@ -61029,7 +69115,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x21,
 0x55,
+<<<<<<< HEAD
 0x8e0,
+=======
+0x8da,
+>>>>>>> no-scmpkg
 0x56,
 0xbd,
 0x2,
@@ -61041,16 +69131,26 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x53,
 0x55,
+<<<<<<< HEAD
 0x8df,
+=======
+0x8d9,
+>>>>>>> no-scmpkg
 0x56,
 0x91,
 0x2,
 0x2e,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8e1,
 0x56,
 0x661,
+=======
+0x8db,
+0x56,
+0x656,
+>>>>>>> no-scmpkg
 0x1,
 0xa,
 0x53,
@@ -61070,7 +69170,11 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x6e,
 0x55,
+<<<<<<< HEAD
 0x8e2,
+=======
+0x8dc,
+>>>>>>> no-scmpkg
 0x56,
 0xb2,
 0x1,
@@ -61081,7 +69185,11 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8e3,
+=======
+0x8dd,
+>>>>>>> no-scmpkg
 0x56,
 0x3af,
 0x1,
@@ -61093,7 +69201,11 @@ STk_instr STk_boot_code [] = {
 0x4e,
 0x0,
 0x71,
+<<<<<<< HEAD
 0x8e4,
+=======
+0x8de,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -61114,11 +69226,19 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x92,
 0x1f,
+<<<<<<< HEAD
 0x8e5,
 0xa,
 0x92,
 0x1f,
 0x8e6,
+=======
+0x8df,
+0xa,
+0x92,
+0x1f,
+0x8e0,
+>>>>>>> no-scmpkg
 0x23,
 0xff,
 0x2,
@@ -61153,7 +69273,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x200,
 0x56,
+<<<<<<< HEAD
 0x7be,
+=======
+0x7b8,
+>>>>>>> no-scmpkg
 0x2,
 0x21,
 0x2b,
@@ -61182,7 +69306,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8e7,
+=======
+0x8e1,
+>>>>>>> no-scmpkg
 0x56,
 0x3af,
 0x1,
@@ -61230,7 +69358,11 @@ STk_instr STk_boot_code [] = {
 0x16,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8e8,
+=======
+0x8e2,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x75,
@@ -61243,7 +69375,11 @@ STk_instr STk_boot_code [] = {
 0xd,
 0x31,
 0x71,
+<<<<<<< HEAD
 0x7be,
+=======
+0x7b8,
+>>>>>>> no-scmpkg
 0x2,
 0x3b,
 0x73,
@@ -61283,7 +69419,11 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8e9,
+=======
+0x8e3,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x56,
@@ -61306,7 +69446,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x8ea,
+=======
+0x8e4,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x8,
@@ -61314,7 +69458,11 @@ STk_instr STk_boot_code [] = {
 0x1e,
 0x4,
 0x9,
+<<<<<<< HEAD
 0x8eb,
+=======
+0x8e5,
+>>>>>>> no-scmpkg
 0x1c,
 0x1,
 0xc,
@@ -61333,7 +69481,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x55,
+<<<<<<< HEAD
 0x8ec,
+=======
+0x8e6,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -61377,7 +69529,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x24,
 0x1f,
+<<<<<<< HEAD
 0x809,
+=======
+0x803,
+>>>>>>> no-scmpkg
 0x23,
 0x9f,
 0x2,
@@ -61417,7 +69573,11 @@ STk_instr STk_boot_code [] = {
 0x1d,
 0x6,
 0x55,
+<<<<<<< HEAD
 0x8ed,
+=======
+0x8e7,
+>>>>>>> no-scmpkg
 0x4d,
 0x3f,
 0x2,
@@ -61441,7 +69601,11 @@ STk_instr STk_boot_code [] = {
 0x3,
 0x1,
 0x71,
+<<<<<<< HEAD
 0x8ea,
+=======
+0x8e4,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x2b,
@@ -61554,7 +69718,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x6a,
+<<<<<<< HEAD
 0x81d,
+=======
+0x817,
+>>>>>>> no-scmpkg
 0x56,
 0x35f,
 0x2,
@@ -61567,7 +69735,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x81e,
+=======
+0x818,
+>>>>>>> no-scmpkg
 0x56,
 0x71,
 0x2,
@@ -61577,12 +69749,20 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x81f,
+=======
+0x819,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x820,
+=======
+0x81a,
+>>>>>>> no-scmpkg
 0x1,
 0x2c,
 0x1c,
@@ -61600,7 +69780,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x8ee,
+=======
+0x8e8,
+>>>>>>> no-scmpkg
 0x75,
 0x103,
 0x75,
@@ -61649,7 +69833,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x8ef,
+=======
+0x8e9,
+>>>>>>> no-scmpkg
 0xc,
 0x3d,
 0x71,
@@ -61666,7 +69854,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x101,
 0x55,
+<<<<<<< HEAD
 0x8f0,
+=======
+0x8ea,
+>>>>>>> no-scmpkg
 0x25,
 0x65,
 0x56,
@@ -61706,7 +69898,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x8f1,
+=======
+0x8eb,
+>>>>>>> no-scmpkg
 0x25,
 0x75,
 0x101,
@@ -61737,7 +69933,11 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x100,
 0x56,
+<<<<<<< HEAD
 0x809,
+=======
+0x803,
+>>>>>>> no-scmpkg
 0x2,
 0x1c,
 0x1,
@@ -61745,7 +69945,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x66,
 0x55,
+<<<<<<< HEAD
 0x8f2,
+=======
+0x8ec,
+>>>>>>> no-scmpkg
 0x56,
 0x43,
 0x2,
@@ -61753,11 +69957,19 @@ STk_instr STk_boot_code [] = {
 0x54,
 0x46,
 0x6c,
+<<<<<<< HEAD
 0x820,
 0x1,
 0x24,
 0x1f,
 0x8f3,
+=======
+0x81a,
+0x1,
+0x24,
+0x1f,
+0x8ed,
+>>>>>>> no-scmpkg
 0x25,
 0x25,
 0x56,
@@ -61769,6 +69981,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x6a,
+<<<<<<< HEAD
 0x34d,
 0x55,
 0x8f4,
@@ -61826,6 +70039,65 @@ STk_instr STk_boot_code [] = {
 0x34d,
 0x55,
 0x7ce,
+=======
+0x343,
+0x55,
+0x8ee,
+0x4d,
+0x56,
+0x30,
+0x3,
+0x6e,
+0x6a,
+0x343,
+0x55,
+0x8ef,
+0x4d,
+0x56,
+0x30,
+0x3,
+0x6e,
+0x6a,
+0x343,
+0x55,
+0x8f0,
+0x4d,
+0x56,
+0x30,
+0x3,
+0x6e,
+0x6a,
+0x343,
+0x55,
+0x8f1,
+0x4d,
+0x56,
+0x30,
+0x3,
+0x6e,
+0x6a,
+0x343,
+0x55,
+0x8f2,
+0x4d,
+0x56,
+0x30,
+0x3,
+0x6e,
+0x6a,
+0x343,
+0x55,
+0x8f3,
+0x4d,
+0x56,
+0x30,
+0x3,
+0x6e,
+0x6a,
+0x343,
+0x55,
+0x7c8,
+>>>>>>> no-scmpkg
 0x51,
 0x56,
 0x30,
@@ -61834,7 +70106,11 @@ STk_instr STk_boot_code [] = {
 0x6a,
 0x34d,
 0x55,
+<<<<<<< HEAD
 0x8fa,
+=======
+0x8f4,
+>>>>>>> no-scmpkg
 0x4f,
 0x56,
 0x30,
@@ -61843,7 +70119,11 @@ STk_instr STk_boot_code [] = {
 0x6a,
 0x34d,
 0x55,
+<<<<<<< HEAD
 0x8fb,
+=======
+0x8f5,
+>>>>>>> no-scmpkg
 0x4f,
 0x56,
 0x30,
@@ -61887,7 +70167,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x51,
 0x56,
+<<<<<<< HEAD
 0x820,
+=======
+0x81a,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -61898,7 +70182,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x68,
 0x56,
+<<<<<<< HEAD
 0x63a,
+=======
+0x62f,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -61966,7 +70254,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x67,
 0x56,
+<<<<<<< HEAD
 0x64b,
+=======
+0x640,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x4,
@@ -61977,7 +70269,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x63a,
+=======
+0x62f,
+>>>>>>> no-scmpkg
 0x0,
 0x21,
 0x29,
@@ -61994,7 +70290,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8fc,
+=======
+0x8f6,
+>>>>>>> no-scmpkg
 0x75,
 0x100,
 0x6c,
@@ -62006,7 +70306,11 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x65,
 0x56,
+<<<<<<< HEAD
 0x6b7,
+=======
+0x6b1,
+>>>>>>> no-scmpkg
 0x1,
 0x2e,
 0x1c,
@@ -62020,12 +70324,21 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8fd,
 0x56,
 0x63b,
 0x1,
 0x71,
 0x655,
+=======
+0x8f7,
+0x56,
+0x630,
+0x1,
+0x71,
+0x64a,
+>>>>>>> no-scmpkg
 0x1,
 0x1c,
 0x1,
@@ -62039,14 +70352,22 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8fe,
+=======
+0x8f8,
+>>>>>>> no-scmpkg
 0x75,
 0x107,
 0x65,
 0x54,
 0x7,
 0x6c,
+<<<<<<< HEAD
 0x8f3,
+=======
+0x8ed,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x2d,
@@ -62055,7 +70376,11 @@ STk_instr STk_boot_code [] = {
 0x11,
 0x7,
 0x71,
+<<<<<<< HEAD
 0x65b,
+=======
+0x650,
+>>>>>>> no-scmpkg
 0x1,
 0x2e,
 0x1c,
@@ -62070,7 +70395,11 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x8ff,
+=======
+0x8f9,
+>>>>>>> no-scmpkg
 0x75,
 0x105,
 0x25,
@@ -62083,7 +70412,11 @@ STk_instr STk_boot_code [] = {
 0x54,
 0x2,
 0x6c,
+<<<<<<< HEAD
 0x8f3,
+=======
+0x8ed,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x2d,
@@ -62092,7 +70425,11 @@ STk_instr STk_boot_code [] = {
 0x11,
 0x5,
 0x71,
+<<<<<<< HEAD
 0x65b,
+=======
+0x650,
+>>>>>>> no-scmpkg
 0x1,
 0x25,
 0x25,
@@ -62106,14 +70443,22 @@ STk_instr STk_boot_code [] = {
 0x0,
 0x3b,
 0x71,
+<<<<<<< HEAD
 0x8e6,
+=======
+0x8e0,
+>>>>>>> no-scmpkg
 0x1,
 0x21,
 0x29,
 0x1,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x8e5,
+=======
+0x8df,
+>>>>>>> no-scmpkg
 0x0,
 0x25,
 0x65,
@@ -62138,14 +70483,22 @@ STk_instr STk_boot_code [] = {
 0x1,
 0x25,
 0x55,
+<<<<<<< HEAD
 0x900,
+=======
+0x8fa,
+>>>>>>> no-scmpkg
 0x75,
 0x104,
 0x65,
 0x54,
 0x4,
 0x6c,
+<<<<<<< HEAD
 0x8f3,
+=======
+0x8ed,
+>>>>>>> no-scmpkg
 0x4,
 0x24,
 0x2d,
@@ -62165,11 +70518,19 @@ STk_instr STk_boot_code [] = {
 0x8,
 0x25,
 0x56,
+<<<<<<< HEAD
 0x88d,
 0x0,
 0x25,
 0x56,
 0x84e,
+=======
+0x887,
+0x0,
+0x25,
+0x56,
+0x848,
+>>>>>>> no-scmpkg
 0x0,
 0x2c,
 0x2f};

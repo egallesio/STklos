@@ -1,30 +1,3 @@
-;*---------------------------------------------------------------------*/
-;*    Copyright (c) 1997 by Manuel Serrano. All rights reserved.       */
-;*                                                                     */
-;*                                     ,--^,                           */
-;*                               _ ___/ /|/                            */
-;*                           ,;'( )__, ) '                             */
-;*                          ;;  //   L__.                              */
-;*                          '   \    /  '                              */
-;*                               ^   ^                                 */
-;*                                                                     */
-;*                                                                     */
-;*    This program is distributed in the hope that it will be useful.  */
-;*    Use and copying of this software and preparation of derivative   */
-;*    works based upon this software are permitted, so long as the     */
-;*    following conditions are met:                                    */
-;*           o credit to the authors is acknowledged following         */
-;*             current academic behaviour                              */
-;*           o no fees or compensation are charged for use, copies,    */
-;*             or access to this software                              */
-;*           o this copyright notice is included intact.               */
-;*      This software is made available AS IS, and no warranty is made */
-;*      about the software or its performance.                         */
-;*                                                                     */
-;*      Bug descriptions, use reports, comments or suggestions are     */
-;*      welcome Send them to                                           */
-;*        Manuel Serrano -- Manuel.Serrano@cui.unige.ch                */
-;*---------------------------------------------------------------------*/
 ;;;--------------------------------------------------------------------*/
 ;;;   geffroy/Match3.0/expand.scm ...                                  */
 ;;;                                                                    */
@@ -34,7 +7,6 @@
 ;;;                                                                    */
 ;;;   An expanser for the MATCH-LAMBDA and MATCH-CASE forms            */
 ;;;--------------------------------------------------------------------*/
-
 
 ;;;--------------------------------------------------------------------*/
 ;;;    (match-lambda                                                   */
@@ -51,39 +23,51 @@
 ;;;   expands into ((lambda (e) ...) e)                                */
 ;;;--------------------------------------------------------------------*/
 
+;; NOTE: Modification by eg for STklos.  Renamed extend in this file by
+;; extend-it (we have an extend function in compiler.scm, which prevent to
+;; place all the files of this directory in a unique module (instead of 5)
+
 (module __match_expand
 
-   (export  (expand-match-case   exp)
-	    (expand-match-lambda exp))
+   (import  __error
+            __match_compiler
+            __match_descriptions
+            __match_normalize
+            __match_s2cfun
+            __param
+            __bexit
+            __object
+            __thread)
 
-   (import  (__error                   "Llib/error.scm")
-	    (__match_compiler          "Match/compiler.scm")
-	    (__match_descriptions      "Match/descr.scm")
-	    (__match_normalize         "Match/normalize.scm")
-	    (__match_s2cfun            "Match/s2cfun.scm"))
-   
-   (use     (__type                    "Llib/type.scm")
-	    (__bigloo                  "Llib/bigloo.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__structure               "Llib/struct.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__rgc                     "Rgc/runtime.scm")
-	    (__r4_numbers_6_5          "Ieee/number.scm")
-	    (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
-	    (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
-	    (__r4_characters_6_6       "Ieee/char.scm")
-	    (__r4_equivalence_6_2      "Ieee/equiv.scm")
-	    (__r4_booleans_6_1         "Ieee/boolean.scm")
-	    (__r4_symbols_6_4          "Ieee/symbol.scm")
-	    (__r4_strings_6_7          "Ieee/string.scm")
-	    (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
-	    (__r4_input_6_10_2         "Ieee/input.scm")
-	    (__r4_control_features_6_9 "Ieee/control.scm")
-	    (__r4_vectors_6_8          "Ieee/vector.scm")
-	    (__r4_ports_6_10_1         "Ieee/port.scm")
-	    (__r4_output_6_10_3        "Ieee/output.scm")
-	    (__evenv                   "Eval/evenv.scm")))
-	    
+   (use     __type
+            __bigloo
+            __tvector
+            __structure
+            __tvector
+            __bignum
+            __rgc
+            __bit
+
+            __r4_numbers_6_5
+            __r4_numbers_6_5_fixnum
+            __r4_numbers_6_5_flonum
+            __r4_numbers_6_5_flonum_dtoa
+            __r4_characters_6_6
+            __r4_equivalence_6_2
+            __r4_booleans_6_1
+            __r4_symbols_6_4
+            __r4_strings_6_7
+            __r4_pairs_and_lists_6_3
+            __r4_input_6_10_2
+            __r4_control_features_6_9
+            __r4_vectors_6_8
+            __r4_ports_6_10_1
+            __r4_output_6_10_3
+            __evenv)
+
+   (export  (expand-match-case   exp)
+            (expand-match-lambda exp)))
+
 ;;;--------------------------------------------------------------------*/
 ;;;   Technical note: the clauses->pattern function returns two        */
 ;;;   results:                                                         */
@@ -93,66 +77,76 @@
 ;;;--------------------------------------------------------------------*/
 (define (expand-match-lambda exp)
    (labels ((clauses->pattern
-	     (clauses k)
-	     (if (null? clauses)
-		 (k '(not (any)) *the-empty-env*)
-		 (let ((pattern (caar clauses))
-		       (actions (cdar clauses))
-		       (rest    (cdr clauses)))
-		    (let ((tag (jim-gensym "TAG-")))
-		       (if (eq? pattern 'else)
-			   (k `(tagged-or (any) ,tag (not (any)))
-			      (extend *the-empty-env* tag actions))
-			   (clauses->pattern
-			    rest
-			    (lambda (pat env)
-			       (k `(tagged-or ,(normalize-pattern pattern)
-					      ,tag     
-					      ,pat)
-				  (extend env tag actions))))))))))
-;;; 	     (match-case clauses  */
-;;; 		(() (k '(not (any)) *the-empty-env*))  */
-;;; 		(( (?pattern . ?actions) . ?rest )  */
-;;; 		 (let ((tag (jim-gensym "TAG-")))  */
-;;; 		    (if (eq? pattern 'else)  */
-;;; 			(k `(tagged-or (any) ,tag (not (any)))  */
-;;; 			   (extend *the-empty-env* tag actions))  */
-;;; 			(clauses->pattern  */
-;;; 			 rest  */
-;;; 			 (lambda (pat env)  */
-;;; 			    (k `(tagged-or ,(normalize-pattern pattern)  */
-;;; 					   ,tag       */
-;;; 					   ,pat)  */
-;;; 			       (extend env tag actions))))))))))  */
+             (clauses k)
+             (cond
+                ((null? clauses)
+                 (k '(not (any)) *the-empty-env*))
+                ((not (pair? (car clauses)))
+                 (error 'match-case "Illegal expression" exp))
+                (else
+                 (let ((pattern (caar clauses))
+                       (actions (cdar clauses))
+                       (rest    (cdr clauses)))
+                    (let ((tag (jim-gensym "TAG-")))
+                       (if (eq? pattern 'else)
+                           (k `(tagged-or (any) ,tag (not (any)))
+                              (extend-it *the-empty-env* tag actions))
+                           (clauses->pattern
+                            rest
+                            (lambda (pat env)
+                               (k `(tagged-or ,(normalize-pattern pattern)
+                                              ,tag
+                                              ,pat)
+                                  (extend-it env tag actions)))))))))))
       (clauses->pattern
        (cdr exp)
        (lambda (pat env)
-	  (let ((compiled-pat (pcompile pat))
-		(prototypes   (fetch-prototypes pat)) )
-	         ;; We build a (labels ((tag1 (x ...) actions1)) ...)
-		 ;; You may change it to build a letrec
-	     `(labels
-		    (,@(map
-			(lambda (prototype)
-			   (cons (car prototype)
-				 (cons (cadr prototype)
-				       (cdr (assq (car prototype)
-						  env)))))
-			prototypes))
-		 ,compiled-pat))))))
+         (let ((compiled-pat (pcompile pat))
+               (prototypes   (fetch-prototypes pat)) )
+            ;; We build a (labels ((tag1 (x ...) actions1)) ...)
+            ;;
+            ;; STklos: replace the `labels` produced here by a `letrec`
+            ;; to avoid to export labels
+            ;;
+            ;; Original code follows
+            ;; You may change it to build a letrec
+            ;; `(labels
+            ;;   (,@(map
+            ;;       (lambda (prototype)
+            ;;         (let ((body (cdr (assq (car prototype) env))))
+            ;;           (if (null? body)
+            ;;               (error 'match-case "Illegal expression" exp)
+            ;;               (cons (car prototype)
+            ;;                     (cons (cadr prototype) body)))))
+            ;;       prototypes))
+            ;;   ,compiled-pat)
+            `(letrec ,(map (lambda (prototype)
+                             (let ((body (cdr (assq (car prototype) env))))
+                               (if (null? body)
+                                   (error 'match-case "Illegal expression" exp)
+                                   (list (car prototype) `(lambda ,(cadr prototype) ,@body)))))
+                           prototypes)
+               ,compiled-pat))))))
 
 (define (fetch-prototypes pat)
    (if (memq (car pat) '(t-or tagged-or))
        (cons `(,(caddr pat) ,(pattern-variables (cadr pat)))
-	     (fetch-prototypes (cadddr pat)))
+             (fetch-prototypes (cadddr pat)))
        '()))
 
+#|STklos: replaced by identity
+(define (epairify p ep)
+   (if (epair? ep)
+       (econs (car p) (cdr p) (cer ep))
+       p))
+|#
+(define (epairify p ep) p)
+
 (define (expand-match-case exp)
-  (list (expand-match-lambda `(match-lambda . ,(cddr exp)))
+  (list (expand-match-lambda (epairify `(match-lambda . ,(cddr exp)) exp))
         (cadr exp)))
 
-(define (extend env pt im)
+(define (extend-it env pt im)
    (cons (cons pt im) env))
 
 (define *the-empty-env* '())
-

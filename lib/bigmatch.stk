@@ -1,7 +1,7 @@
 ;;;;
 ;;;; b i g m a t c h  . s t k       -- The bigloo match-case and match-lambda
 ;;;;
-;;;; Copyright © 1997-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1997-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update: 11-May-2022 15:43 (eg)
+;;;; Last file update: 10-Feb-2023 17:39 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA
@@ -86,19 +86,48 @@ doc>
 ;;(define-macro (match-case expr . clauses)
 ;;  `((match-lambda  ,@clauses) ,expr))
 
+(define-module MATCH
+   (export  expand-match-case expand-match-lambda)
 
-(include "bigloo-support.stk")
+   ;; labels
+   (define-macro (labels bindings . body)
+     (define (expand binding)
+       (when (< (length binding) 3)
+         (error 'labels "bad binding ~S" binding))
+       `(,(car binding) (lambda ,(cadr binding) ,@(cddr binding))))
+     `(letrec ,(map expand bindings)
+        ,@body))
 
-;;;;
-;;;; WARNING: Order is important
-;;;;
-(include-file "Match.d/s2cfun.scm")
-(include-file "Match.d/normalize.scm")
-(include-file "Match.d/descr.scm")
-(include-file "Match.d/compiler.scm")
-(include-file "Match.d/mexpand.scm")
+   ;; define-inline
+   (define-macro (define-inline args . body)
+     `(define ,args ,@body))
+
+   ;; define-module
+   (define-macro (module name . clauses)
+     `(void))
+
+   ;; fx functions
+   (define =fx  fx=)
+   (define >=fx fx>=)
+   (define <=fx fx<=)
+   (define <fx  fx<)
+   (define >fx  fx>)
+
+   (define +fx fx+)
+   (define -fx fx-)
+   (define *fx fx*)
+   (define /fx fxdiv)
+
+   ;;
+   ;; WARNING: Order is important
+   ;;
+   (include-file "Match.d/s2cfun.scm")
+   (include-file "Match.d/normalize.scm")
+   (include-file "Match.d/descr.scm")
+   (include-file "Match.d/compiler.scm")
+   (include-file "Match.d/mexpand.scm"))
 
 (select-module STklos)
-(import __match_expand)
+(import MATCH)
 
 (provide "bigmatch")

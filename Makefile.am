@@ -1,6 +1,6 @@
 # Makefile.am for STklos
 #
-# Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  6-Jul-2021 12:21 (eg)
+# Last file update:  2-Feb-2023 10:14 (eg)
 
 
 EXTRA_DIST   =
 # INSTDIRS contains the dirs which need to be installed
-INSTDIRS     =  @GC@ src utils lib examples pkgman
+INSTDIRS     =  @GC@ src utils lib examples
 SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS) doc tests
 
 STKLOS_BINARY= ./src/stklos

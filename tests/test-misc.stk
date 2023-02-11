@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update:  8-Jun-2022 13:23 (eg)
+;;;; Last file update: 10-Feb-2023 17:46 (eg)
 ;;;;
 
 (require "test")
@@ -291,6 +291,43 @@ b|)
 (test "syntax in env.1" '(1 2 3) (lambda (begin) (begin 1 2 3)) (lambda lambda lambda))
 (test "syntax in env.2" 3 (lambda (_) (begin 1 2 3)) (lambda lambda lambda))
 
+
+;;----------------------------------------------------------------------
+(test-subsection "match-case & match-lambda")
+
+
+(test "match-case.1"
+      'bar
+      (match-case '(a b a)
+                  ((?x ?x) 'foo)
+                  ((?x ?- ?x) 'bar)))
+
+(test "match-case.2"
+      '(length=3 d (b c) a)
+      (match-case '(a (b c) d)
+                  ((?x ?y) (list 'length=2 y x))
+                  ((?x ?y ?z) (list 'length=3 z y x))))
+
+(test "match-case.3"
+      'bar
+      (match-case '(a b c)
+                  ((a (not (kwote b)) c) 'foo)
+                  ((a (or (kwote a) (kwote b)) c) 'bar)))
+
+(test "match-lambda.1"
+      'bar
+      ((match-lambda
+         ((?x ?x) 'foo)
+         ((?x ?- ?x) 'bar))
+       '(a b a)))
+
+
+(test "match-lambda.2"
+      '(length=3 d (b c) a)
+      ((match-lambda
+         ((?x ?y) (list 'length=2 y x))
+         ((?x ?y ?z) (list 'length=3 z y x)))
+       '(a (b c) d)))
 
 ;;------------------------------------------------------------------
 (test-section-end)
