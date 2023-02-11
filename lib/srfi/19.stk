@@ -205,10 +205,7 @@
 ;;;
 
 (define (copy-time time)
-  (let ((type (time-type time))
-        (second (time-second time))
-        (nanosecond (time-nanosecond time)))
-    (make-time type nanosecond second)))
+  (make-time (time-type time) (time-nanosecond time) (time-second time)))
 
 ;;;
 ;;; CURRENT-TIME VARIATIONS
