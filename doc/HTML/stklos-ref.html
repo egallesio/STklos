@@ -17711,7 +17711,7 @@ internal structure will be shown.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>Using `describe on a class</strong></p>
+<p><strong>Using <code>describe</code> on a class</strong></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -18045,11 +18045,11 @@ empty string)</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"http://google.com"</span><span class="p">)</span>
-   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">:scheme</span> <span class="s">"http"</span> <span class="nv">:user</span> <span class="s">""</span> <span class="nv">:host</span> <span class="s">"google.com"</span> <span class="nv">:port</span> <span class="mi">80</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"https://stklos.net"</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">:scheme</span> <span class="s">"https"</span> <span class="nv">:user</span> <span class="s">""</span> <span class="nv">:host</span> <span class="s">"stklos.net"</span> <span class="nv">:port</span> <span class="mi">443</span>
         <span class="nv">:path</span> <span class="s">"/"</span> <span class="nv">:query</span> <span class="s">""</span> <span class="nv">:fragment</span> <span class="s">""</span><span class="p">)</span>
 
-<span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"http://stklos.net:8080/a/file?x=1;y=2#end"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"https://stklos.net:8080/a/file?x=1;y=2#end"</span><span class="p">)</span>
     <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">:scheme</span> <span class="s">"http"</span> <span class="nv">:user</span> <span class="s">""</span> <span class="nv">:host</span> <span class="s">"stklos.net"</span> <span class="nv">:port</span> <span class="mi">8080</span>
         <span class="nv">:path</span> <span class="s">"/a/file"</span> <span class="nv">:query</span> <span class="s">"x=1;y=2"</span> <span class="nv">:fragment</span> <span class="s">"end"</span><span class="p">)</span>
 
@@ -23761,7 +23761,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>117</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>118</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -23888,7 +23888,8 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-233/srfi-233.html">SRFI-233</a></strong>&#8201;&#8212;&#8201;<em>INI files</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br>
--  <strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong>&#8201;&#8212;&#8201;<em>Codesets</em><br></p>
+-  <strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong>&#8201;&#8212;&#8201;<em>Codesets</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-244/srfi-244.html">SRFI-244</a></strong>&#8201;&#8212;&#8201;<em>Multiple-value definitions</em><br></p>
 </div>
 </div>
 <div class="sect2">
@@ -23942,7 +23943,7 @@ and permits to ignore if the SRFI is embedded).</p>
 </div>
 <div class="paragraph">
 <p><strong>List of embedded SRFIs:</strong>
- <code>srfi-0</code> <code>srfi-6</code> <code>srfi-8</code> <code>srfi-10</code> <code>srfi-11</code> <code>srfi-15</code> <code>srfi-16</code> <code>srfi-18</code> <code>srfi-22</code> <code>srfi-23</code> <code>srfi-28</code> <code>srfi-30</code> <code>srfi-31</code> <code>srfi-34</code> <code>srfi-38</code> <code>srfi-39</code> <code>srfi-45</code> <code>srfi-55</code> <code>srfi-62</code> <code>srfi-70</code> <code>srfi-87</code> <code>srfi-88</code> <code>srfi-98</code> <code>srfi-111</code> <code>srfi-112</code> <code>srfi-118</code> <code>srfi-138</code> <code>srfi-143</code> <code>srfi-145</code> <code>srfi-169</code> <code>srfi-176</code> <code>srfi-192</code> <code>srfi-193</code> <code>srfi-195</code> <code>srfi-208</code> <code>srfi-219</code></p>
+ <code>srfi-0</code> <code>srfi-6</code> <code>srfi-8</code> <code>srfi-10</code> <code>srfi-11</code> <code>srfi-15</code> <code>srfi-16</code> <code>srfi-18</code> <code>srfi-22</code> <code>srfi-23</code> <code>srfi-28</code> <code>srfi-30</code> <code>srfi-31</code> <code>srfi-34</code> <code>srfi-38</code> <code>srfi-39</code> <code>srfi-45</code> <code>srfi-55</code> <code>srfi-62</code> <code>srfi-70</code> <code>srfi-87</code> <code>srfi-88</code> <code>srfi-98</code> <code>srfi-111</code> <code>srfi-112</code> <code>srfi-118</code> <code>srfi-138</code> <code>srfi-143</code> <code>srfi-145</code> <code>srfi-169</code> <code>srfi-176</code> <code>srfi-192</code> <code>srfi-193</code> <code>srfi-195</code> <code>srfi-208</code> <code>srfi-219</code> <code>srfi-244</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -29311,7 +29312,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-01-26 18:18:11 +0100
+Last updated 2023-02-11 19:13:52 +0100
 </div>
 </div>
 </body>
