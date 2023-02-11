@@ -56,7 +56,6 @@
         #t
         (time=? t4 (time-difference t2 t1))))
 
-
 (define (test-one-utc-tai-edge utc tai-diff tai-last-diff)
   (let* (;; right on the edge they should be the same
          (utc-basic (make-time 'time-utc 0 utc))
@@ -201,3 +200,107 @@
                                       0)
                            "~V"))))
    dates))
+
+
+;; Some extra tests
+;; -- jpellegrini
+;;
+
+(test "srfi-19 current time increases monotonically"
+      #t
+      (time<? (current-time 'time-monotonic)
+              (current-time 'time-monotonic)))
+
+(let ((d (make-date 05     ; nano
+                    10     ; sec
+                    15     ; min
+                    20     ; hour
+                    25     ; day
+                    06     ; month
+                    2000   ; year
+                   -10800))) ; offset
+  (test "srfi-19 date?" #t (date? d))
+  (test "srfi-19 date nanosecond" 05 (date-nanosecond d))
+  (test "srfi-19 date second"     10 (date-second d))
+  (test "srfi-19 date minute"     15 (date-minute d))
+  (test "srfi-19 date hour"       20 (date-hour d))
+  (test "srfi-19 date day"        25 (date-day d))
+  (test "srfi-19 date month"      06 (date-month d))
+  (test "srfi-19 date year"     2000 (date-year d))
+  (test "srfi-19 date offset" -10800 (date-zone-offset d))
+
+  (let ((m (date->time-monotonic d)))
+    (test "srfi 19 date conversions 1" #t (time? m))
+    (test "srfi 19 date conversions 2" 'time-monotonic (time-type m))
+    (test "srfi 19 date conversions 3" #t (equal? d (time-monotonic->date m)))
+    (test "srfi 19 date conversions 4" #t (time? (time-monotonic->time-tai m)))
+    (test "srfi 19 date conversions 5" 'time-tai (time-type (time-monotonic->time-tai m)))
+    (test "srfi 19 date conversions 6" #t (equal? (time-tai->date (time-monotonic->time-tai m))
+                                                  d)))
+  (let ((m (date->time-utc d)))
+    (test "srfi 19 date conversions 7" #t (time? m))
+    (test "srfi 19 date conversions 8" 'time-utc (time-type m))
+    (test "srfi 19 date conversions 9" #t (equal? d (time-utc->date m)))
+    (test "srfi 19 date conversions 10" #t (time? (time-utc->time-tai m)))
+    (test "srfi 19 date conversions 11" 'time-tai (time-type (time-utc->time-tai m)))
+    (test "srfi 19 date conversions 12" #t (equal? (time-tai->date (time-utc->time-tai m))
+                                                  d)))
+  (let ((m (date->time-tai d)))
+    (test "srfi 19 date conversions 13" #t (time? m))
+    (test "srfi 19 date conversions 14" 'time-tai (time-type m))
+    (test "srfi 19 date conversions 15" #t (equal? d (time-tai->date m)))
+    (test "srfi 19 date conversions 16" #t (time? (time-tai->time-utc m)))
+    (test "srfi 19 date conversions 17" 'time-utc (time-type (time-tai->time-utc m)))
+    (test "srfi 19 date conversions 18" #t (equal? (time-utc->date (time-tai->time-utc m))
+                                                  d))))
+
+
+(test/error "srfi 19 wrong args to make-date 1"
+            (make-date 05     ; nano
+                       10     ; sec
+                       90     ; min   -- WRONG
+                       20     ; hour
+                       25     ; day
+                       06     ; month
+                       2000   ; year
+                       -10800))
+
+(test/error "srfi 19 wrong args to make-date 2"
+            (make-date 05     ; nano
+                       10     ; sec
+                       15     ; min
+                       20     ; hour
+                       25     ; day
+                       20     ; month - -WRONG
+                       2000   ; year
+                       -10800))
+
+(test/error "srfi 19 wrong args to make-date 3"
+            (make-date 05     ; nano
+                       10     ; sec
+                       'a     ; min  -- WRONG
+                       20     ; hour
+                       25     ; day
+                       06     ; month
+                       2000   ; year
+                       -10800))
+
+(test/error "srfi 19 wrong args to make-date 3"
+            (make-date 05     ; nano
+                       10     ; sec
+                       15     ; min
+                       1+1i   ; hour -- WRONG
+                       25     ; day
+                       06     ; month
+                       2000   ; year
+                       -10800))
+
+(test/error "srfi 19 wrong args to make-date 3"
+            (make-date 05     ; nano
+                       10     ; sec
+                       15     ; min
+                       20     ; hour
+                       25     ; day
+                       2/3    ; month -- WRONG
+                       2000   ; year
+                       -10800))
