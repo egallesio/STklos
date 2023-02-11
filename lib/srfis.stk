@@ -283,7 +283,7 @@
     ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data (drafr)
     ;; 242 The CFG Language (draft)
     ;; 243 Unreadable objects (draft)
-    ;; 244 Multiple-value definitions (draft)
+    (244 "Multiple-value definitions")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
