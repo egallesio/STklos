@@ -420,7 +420,22 @@ doc>
                         (day 1) (month 1) (year 1970) (zone-offset #f))
   (%make-date nanosecond second minute hour day month year zone-offset))
 
+(define (check name arg min max)
+  (unless (and (integer? arg)
+               (<= min arg max))
+    (error "bad ~s ~s" name arg)))
+
 (define (%make-date   nanosecond second minute hour day month year zone-offset)
+  (check 'nanosecond nanosecond 0 999999999)
+  (check 'second second 0 60)
+  (check 'minute minute 0 59)
+  (check 'hour hour 0 23)
+  (check 'day day 1 31)
+  (check 'month month 1 12)
+  (unless (integer? year) (error "bad year ~s" year))
+  (unless (or (integer? zone-offset)
+              (not zone-offset))
+    (error "bad zone offset ~s" zone-offset))
   (let ((res (make-struct %date
                           nanosecond
                           second

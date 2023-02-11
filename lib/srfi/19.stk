@@ -205,11 +205,10 @@
 ;;;
 
 (define (copy-time time)
-  (let ((ntime (make-time #f #f #f)))
-    (set-time-type! ntime (time-type time))
-    (set-time-second! ntime (time-second time))
-    (set-time-nanosecond! ntime (time-nanosecond time))
-    ntime))
+  (let ((type (time-type time))
+        (second (time-second time))
+        (nanosecond (time-nanosecond time)))
+    (make-time type nanosecond second)))
 
 ;;;
 ;;; CURRENT-TIME VARIATIONS
@@ -701,8 +700,11 @@ doc>
   (tm:time->date time tz-offset time-utc))
 
 ;; again, time-monotonic is the same as time tai
+;; we just use time-tai->date
 (define (time-monotonic->date time . tz-offset)
-  (tm:time->date time tz-offset time-monotonic))
+  (if (null? tz-offset)
+      (time-tai->date (time-monotonic->time-tai time))
+      (time-tai->date (time-monotonic->time-tai time) (car tz-offset))))
 
 
 ;;;
