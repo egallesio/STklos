@@ -3,6 +3,7 @@
 ;;;; library.stk         -- R7RS define-library
 ;;;;
 ;;;; Copyright © 2019-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2023 Robby Zambito <contact@robbyzambito.me>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +23,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 28-Sep-2022 11:39 (eg)
+;;;; Last file update: 10-Feb-2023 14:32 (robby)
 ;;;;
 
 
@@ -97,21 +98,35 @@
                                        (find-module 'SCHEME))))
 
     ;; Parse declarations
-    (for-each (lambda (d)
-                (unless (pair? d)
-                  (error 'define-library "bad library declaration clause ~s" d))
-                (let ((key  (car d))
-                      (rest (cdr d)))
-                  (case key
-                    ((import)
-                     (set! imports (append imports rest)))
-                    ((export)
-                     (set! exports (append exports rest)))
-                    ((begin include include-ci)
-                     (set! body (append body (list d))))
-                    (else
-                     (error 'define-library "incorrect directive ~s" d)))))
-              decls)
+    (define (parse-declarations decls)
+      (for-each (lambda (d)
+		  (unless (pair? d)
+		    (error 'define-library "bad library declaration clause ~s" d))
+		  (let ((key  (car d))
+			(rest (cdr d)))
+		    (case key
+		      ((import)
+		       (set! imports (append imports rest)))
+		      ((export)
+		       (set! exports (append exports rest)))
+		      ((begin include include-ci)
+		       (set! body (append body (list d))))
+		      ((include-library-declarations)
+		       (for-each (lambda (path)
+				   (parse-declarations
+				    (call-with-input-file (or (find-path path) path)
+				      (lambda (port)
+					(let loop ((exprs '())
+						   (next (read port)))
+					  (if (eof-object? next)
+					      exprs
+					      (loop (append exprs (list next))
+						    (read port))))))))
+				 rest))
+		      (else
+		       (error 'define-library "incorrect directive ~s" d)))))
+		decls))
+    (parse-declarations decls)
     ;;
     ;; Produce the expansion
     ;;
