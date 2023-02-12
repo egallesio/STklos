@@ -202,9 +202,28 @@
    dates))
 
 
+
+;; EG: Comparisons function on date (must be in SRFI-19)
+;;
+(define (%date-test comparator)
+  (lambda (d1 d2)
+    (unless (date? d1) (error "bad date ~s" d1))
+    (unless (date? d2) (error "bad date ~s" d2))
+    (comparator (date->time-tai d1)
+                (date->time-tai d2))))
+
+(define date=?  (%date-test time=?))
+(define date<?  (%date-test time<?))
+(define date>?  (%date-test time>?))
+(define date<=? (%date-test time<=?))
+(define date>=? (%date-test time>=?))
+
+
 ;; Some extra tests
 ;; -- jpellegrini
 ;;
+
+
 
 (test "srfi-19 current time increases monotonically"
       #t
@@ -240,19 +259,19 @@
   (let ((m (date->time-utc d)))
     (test "srfi 19 date conversions 7" #t (time? m))
     (test "srfi 19 date conversions 8" 'time-utc (time-type m))
-    #;(test "srfi 19 date conversions 9" #t (equal? d (time-utc->date m)))
+    (test "srfi 19 date conversions 9" #t (date=? d (time-utc->date m)))
     (test "srfi 19 date conversions 10" #t (time? (time-utc->time-tai m)))
     (test "srfi 19 date conversions 11" 'time-tai (time-type (time-utc->time-tai m)))
-    #;(test "srfi 19 date conversions 12" #t (equal? (time-tai->date (time-utc->time-tai m))
-                                                  d)))
+    (test "srfi 19 date conversions 12" #t (date=? (time-tai->date (time-utc->time-tai m))
+                                                   d)))
   (let ((m (date->time-tai d)))
     (test "srfi 19 date conversions 13" #t (time? m))
     (test "srfi 19 date conversions 14" 'time-tai (time-type m))
-    #;(test "srfi 19 date conversions 15" #t (equal? d (time-tai->date m)))
+    (test "srfi 19 date conversions 15" #t (date=? d (time-tai->date m)))
     (test "srfi 19 date conversions 16" #t (time? (time-tai->time-utc m)))
     (test "srfi 19 date conversions 17" 'time-utc (time-type (time-tai->time-utc m)))
-    #;(test "srfi 19 date conversions 18" #t (equal? (time-utc->date (time-tai->time-utc m))
-                                                  d))))
+    (test "srfi 19 date conversions 18" #t (date=? (time-utc->date (time-tai->time-utc m))
+                                                   d))))
 
 
 (test/error "srfi 19 wrong args to make-date 1"
