@@ -131,7 +131,7 @@ are given <<feature_identifiers>>.
 
 
 === Misc. Information
-//desactivate numbering 
+//desactivate numbering
 :sectnums!:
 Previous section described the general way to use the SRFIS implemented in
 {{stklos}}.  This section concentrates on information not given above.
@@ -183,6 +183,16 @@ this document (see _<<readerctor, primitive `define-reader-ctor`>>_).
 {{quick-link-srfi 17}} is fully supported. See the documentation of procedures `set!`
 and `setter`. However, requiring explicitly `srfi-17` permits
 to define the setters for the (numerous) `cXXXXr` list procedures.
+
+
+// **** SRFI-19
+{{srfi-subsection 19}}
+((("time")))
+{{quick-link-srfi 19}} is fully supported. STklos offers, as an extension,
+the procedures `date=?`, `date<?`, `date>?`, `date<=?` and `date>=?`. These
+will compare dates by first normalizing them to make the time zone offset
+irrelevant, so "2000 Nov 12 03:30:10 GMT-2" will be taken as equal to
+"2000 Nov 12 02:30:10 GMT-1".
 
 
 
@@ -292,7 +302,7 @@ load this file.
 {{srfi-subsection 55}}
 ((("require-extension")))
 {{quick-link-srfi 55}} is fully supported. Furthermore, {{stklos}}
-also accepts the symbols defined in <<feature_identifiers>> 
+also accepts the symbols defined in <<feature_identifiers>>
 in a _require-extension_ clause.
 
 
@@ -420,7 +430,7 @@ use with `cond-expand` in the compiled code only. It will not include
 // **** SRFI-145
 {{srfi-subsection 145}}
 (((assume)))
-{{quick-link-srfi 145}} is fully supported. See the 
+{{quick-link-srfi 145}} is fully supported. See the
 _<<assume,`assume` special form>>_.
 
 

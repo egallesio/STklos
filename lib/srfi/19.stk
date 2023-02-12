@@ -113,7 +113,14 @@
           time-tai->modified-julian-day
           time-tai->time-monotonic time-tai->time-monotonic!
           time-tai->time-utc time-tai->time-utc!
-          date->string string->date)
+          date->string string->date
+
+          ;; added by EG as an extension to SRFI-19
+          date=?
+          date<?
+          date>?
+          date<=?
+          date>=?)
 
 ;; Save the original definition of current-time since it will be changed later
 (define %stklos-current-time (symbol-value 'current-time (find-module 'SCHEME)))
@@ -1532,6 +1539,21 @@ doc>
         (tm:time-error 'string->date 'bad-date-format-string
                        (list "Incomplete date read. " newdate template-string)))))
 
+
+;; EG: Comparisons function on date (must be in SRFI-19)
+;;
+(define (%date-test compare?)
+  (lambda (d1 d2)
+    (unless (date? d1) (error "bad date ~s" d1))
+    (unless (date? d2) (error "bad date ~s" d2))
+    (compare? (date->time-tai d1)
+              (date->time-tai d2))))
+
+(define date=?  (%date-test time=?))
+(define date<?  (%date-test time<?))
+(define date>?  (%date-test time>?))
+(define date<=? (%date-test time<=?))
+(define date>=? (%date-test time>=?))
 
 ) ;; END of module srfi/19
 
