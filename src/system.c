@@ -1530,6 +1530,33 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
   return STk_void;
 }
 
+/* this will calculate the offset in seconds
+   of the given time
+   slightly adapted from a StackOverflow question
+   ( https://stackoverflow.com/questions/32424125/c-code-to-get-local-time-offset-in-minutes-relative-to-utc/32433990#32433990 )
+   Code posted on StackOverflow is licensed CC-BY-SA, so the attribution:
+   By: StackOverflow user Serge Ballesta (https://stackoverflow.com/users/3545273/serge-ballesta)
+*/
+long tz_offset(time_t t) {
+  struct tm local = *localtime(&t);
+  struct tm utc = *gmtime(&t);
+
+  long offset = ((local.tm_hour - utc.tm_hour) * 60 +
+                 (local.tm_min - utc.tm_min))  * 60L +
+                (local.tm_sec - utc.tm_sec);
+
+  int offset_day = local.tm_mday - utc.tm_mday;
+
+  /* end of month? */
+  if ((offset_day == 1) || (offset_day < -1)) {
+    offset += 24L * 3600;
+  } else if ((offset_day == -1) || (offset_day > 1)) {
+    offset -= 24L * 3600;
+  }
+  return offset;
+}
+
+
 /*
 <doc EXT local-timezone-offset
  * (local-timezone-offset)
@@ -1554,9 +1581,9 @@ DEFINE_PRIMITIVE("local-timezone-offset", local_timezone_offset, subr0, ())
   time_t tt = (time_t) 0L;
   struct tm *t __attribute__ ((unused)) = localtime(&tt);
 
-  /* For some strange reason, timezone contains the offset seconds with the
-     opposite sign as one would usually see, so we swap it here. */
-  return STk_long2integer(-timezone);
+  /* We used to use "- timezone" to get the offset in seconds, but it's not
+     portable, so we use the tz_offset function: */
+  return STk_long2integer(tz_offset(tt));
 }
 
 
@@ -1605,7 +1632,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 #else
   /* For some strange reason, timezone contains the offset seconds with the
      opposite sign as one would usually see, so we swap it here. */
-  argv[0]  = STk_long2integer(-timezone);
+  argv[0]  = STk_long2integer(tz_offset(tt));
 #endif
   return STk_make_struct(12, &argv[11]);
 }
