@@ -1052,12 +1052,18 @@ PUSH_GREF_INVOKE
 PUSH_GREF_TAIL_INV
 ....
 
-These are handled in the VM as states in the state machine (they are
-labels used in the `CASE`s in `vm/.c`).
-
 * `PREPARE-CALL` pushes an activation record on the stack.
 * `INVOKE` opcodes call procedures – local or global; in tail position or not.
    The ones with the `PUSH_` prefix also push an argument onto the stack.
+
+These are handled in the VM as states in the state machine (they are
+labels used in the `CASE`s in `vm/.c`).
+
+In `vm.c`, all these instructions end up sending the control to the
+`FUNCALL:` label, which will then check what to do depending on the
+type of call (`tc_instance`, `tc_closure`, `tc_next_method`, `tc_apply`,
+or some primitive, `tc_subr...`)
+
 
 The peephole optimizer will combine `PUSH`, `GLOBAL-REF` `INVOKE` instructions,
 yielding combined instructions. The following is an excerpt from `peephole.stk`
