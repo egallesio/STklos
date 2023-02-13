@@ -1043,15 +1043,46 @@ Examples:
 The following opcodes are used to make procedure calls:
 
 ....
-PREPARE-CALL
+PREPARE-CALL        ( PREP_CALL() in vm.c )
 INVOKE
 TAIL_INVOKE
 GREF-INVOKE
 GREF-TAIL-INVOKE
+PUSH_GREF_INVOKE
+PUSH_GREF_TAIL_INV
 ....
 
-`PREPARE_CALL` pushes an activation record on the stack. The `INVOKE`
-opcodes call procedures – local or global; in tail position or not.
+These are handled in the VM as states in the state machine (they are
+labels used in the `CASE`s in `vm/.c`).
+
+* `PREPARE-CALL` pushes an activation record on the stack.
+* `INVOKE` opcodes call procedures – local or global; in tail position or not.
+   The ones with the `PUSH_` prefix also push an argument onto the stack.
+
+The peephole optimizer will combine `PUSH`, `GLOBAL-REF` `INVOKE` instructions,
+yielding combined instructions. The following is an excerpt from `peephole.stk`
+where these transformations are documented:
+
+[source, scheme]
+----
+;; [GLOBAL-REF, PUSH] => GLOBAL-REF-PUSH
+;; [PUSH GLOBAL-REF] => PUSH-GLOBAL-REF
+;; [PUSH-GLOBAL-REF, INVOKE] => PUSH-GREF-INVOKE
+;; [PUSH-GLOBAL-REF, TAIL-INVOKE] => PUSH-GREF-TAIL-INV
+;; [PUSH, PREPARE-CALL] => PUSH-PREPARE-CALL
+;; [GLOBAL-REF, INVOKE] => GREF-INVOKE
+;; [GLOBAL-REF, INVOKE] => GREF-INVOKE
+;; [GLOBAL-REF, TAIL-INVOKE] => GREF-TAIL-INVOKE
+;; [LOCAL-REFx, PUSH] => LOCAL-REFx-PUSH
+----
+
+The arguments to the `INVOKE`-like instructions are:
+
+* `INVOKE`: `n_args` (the procedure address is the first item on the stack, so
+  it is not passed as argument in the code)
+* `GREF-INVOKE`: `proc_addr`, `n_args`
+* `PUSH-GREF-INVOKE`: `first_arg`, `proc_addr`, `n_args` (pushes the first and calls
+  the procedure with `n_args` arguments form the stack
 
 [source,scheme]
 ----
@@ -1076,27 +1107,34 @@ opcodes call procedures – local or global; in tail position or not.
 006:  RETURN
 ....
 
+In the next example, `GREF-INVOKE` is called with arguments 0
+and 0. The *first* value 0 is the address of the procedure in the
+stack. The `IN-SINT-ADD2` procedure is called afterwards to sum 3 with
+the return from `f`.
+
 [source,scheme]
 ----
-(disassemble (lambda () (+ 2 (f))))
+(disassemble (lambda () (+ 3 (f))))
 ----
 
 ....
 000:  PREPARE-CALL
 001:  GREF-INVOKE          0 0
-004:  IN-SINT-ADD2         2
+004:  IN-SINT-ADD2         3
 006:  RETURN
 ....
 
-In the next example, `GREF-INVOKE` is called with arguments 0 and 2. The
-value 2 is the address of the procedure in the stack. The `IN-SINT-ADD2`
-procedure is called afterwards to sum 1 with the return from `f`.
+In the next example, `GREF-INVOKE` is called with arguments 0
+and 2. The value 0 is the address of the procedure in the
+stack; 2 is the number of arguments given in this procedure call.
+The `IN-SINT-ADD2` procedure is called afterwards to sum 5 with
+the return from `f`.
 
 [source,scheme]
 ----
 (disassemble
  (lambda (x)
-   (+ 1 (f x #f))))
+   (+ 5 (f x #f))))
 ----
 
 ....
@@ -1104,19 +1142,25 @@ procedure is called afterwards to sum 1 with the return from `f`.
 001:  LOCAL-REF0-PUSH
 002:  FALSE-PUSH
 003:  GREF-INVOKE          0 2
-006:  IN-SINT-ADD2         1
+006:  IN-SINT-ADD2         5
 008:  RETURN
 ....
 
 Now the next example shows how `INVOKE` is used to call a procedure that
-is non-global (it is in the local environment):
+is non-global (it is in the local environment).
+The `INVOKE` instruction will use the first value on the stack as the
+address of the procedure (it's `DEEP-LOCAL-REF 256`, since `f` is defined
+inside the `let`). The other two arguments to be popped from the stack are
+`#f` (pushed by the `FALSE-PUSH` instruction) and the global variable `y`
+(pushed by the instruction `GLOBAL-REF-PUSH 0`). After `INVOKE` calls `f`,
+the instruction `IN-SINT-ADD2 3` will sum `3` to the result.
 
 [source,scheme]
 ----
 (let ((f (lambda (x) x)))
   (disassemble
    (lambda ()
-     (+ 1 (f x #f)))))
+     (+ 3 (f y #f)))))
 ----
 
 ....
@@ -1125,7 +1169,7 @@ is non-global (it is in the local environment):
 003:  FALSE-PUSH
 004:  DEEP-LOCAL-REF       256
 006:  INVOKE               2
-008:  IN-SINT-ADD2         1
+008:  IN-SINT-ADD2         3
 010:  RETURN
 ....
 
