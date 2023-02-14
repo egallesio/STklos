@@ -718,12 +718,13 @@ static SCM test_equal_array(SCM x, SCM y)
    Code that retruns STk_true if x and y are to be considered `equal?`,
    and STk_false othereise.
 
-   NOTE: remember to NOT return 0 or 1. THe return value should be a Scheme
-         object, not a C with the intended boolean value. This is particularly
-         important because the compiler will NOT warn you if you return "0":
-         - SCM is defined as a pointer to void
+   NOTE: remember to *NOT* return 0 or 1. The return value should be a Scheme
+         object, not a C value with the intended boolean value. This is
+         particularly important because the compiler will *NOT* warn you if you
+         return "0":
+         - `SCM` is defined as a pointer to `void`
          - '0' can be interpreted as a pointer, so the compiler thinks it's OK
-         - '0' is *not* the same as STk_void
+         - '0' is *not* the same as `STk_void`
   */
 }
 ----
