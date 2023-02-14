@@ -1249,3 +1249,94 @@ Constants:
 Constants:
 0: a
 ....
+
+
+== `vm.c`
+
+An important observation:
+
+* `apply` : there *is* a `DEFINE_PRIMITIVE("apply", ...)`, but it is *not*
+  used. It is necessary just so there is a primitive of the type `tc_apply`.
+  When the VM finds a primitive of this kind, it'll treat it differently.
+
+Some basic functions in the VM:
+
+* `push(v)`: pushes `v` on the stack (the stack pointer is decreased)
+* `pop()`: pops a value from the stack (the stack pointer is increased)
+* `fetch_next()`  fetches the *next* opcode, increasing the PC
+* `fetch_const()` fetches the *next* opcode and uses it as index for a constant
+* `look_const()` looks at the *current* opcode and uses it as index for a constant
+* `fetch_global()` fetches the *next* opcode and uses it as index for a global variable
+* `add_global(ref)` adds `ref` to the list of global variables, and returns its index.
+  If it was already there, the old index is returned. If it was not, a place is allocated
+  for it, and the new index is returned.
+
+Already covered before:
+
+* `SCM STk_C_apply(SCM func, int nargs, ...)`: applies `func`, with `nargs` arguments
+* `SCM STk_C_apply_list(SCM func, SCM l)`: applies `func`, with a list of arguments
+* `SCM STk_n_values(int n, ...)`: prepares `n` values in the VM (for the next instruction), and
+  returns a pointer to the `vm->val` register
+* `SCM STk_values2vector(SCM obj, SCM vect)`: turns a `values` object into an array with the values
+
+=== The global lock
+
+There is one global mutex lock for STklos, called `global_lock`, declared in `vm.c`:
+
+`MUT_DECL(global_lock);          /* the lock to access checked_globals */`
+
+As per the comment, its purpose is to discipline access to global variables.
+
+
+Three macros are used to control the global lock (a mutex):
+
+* `LOCK_AND_RESTART` will acquire the lock, and decrease the program counter.
+It will also set a flag that signals that the lock has been acquired by this thread,
+and then call `NEXT`.
+The name "`AND_RESTART`" reflects the fact that it decreases the PC and calls `NEXT`
+(for the next instruction) -- so the effect is to start again operating on this
+instruction, but this time with the lock.
+
+* `RELEASE_LOCK` will release the lock, regardless of the thread having it or not. The flag indicating ownership by this thread is cleared.
+
+* `RELEASE_POSSIBLE_LOCK` will release the lock *if* this thread has it.
+
+=== `run_vm(vm_thread *vm)`
+
+After some initial setup, this function will operate as a state machine.
+Its basic structure is shown below.
+
+The `CASE` symbol is defined differently, depending on the system, but `CASE(x)` semantically
+simialar to `case x:` (if computed GOTOs are better, then it's defined as a label instead --
+see its definition in `vm.c`).
+
+[source, scheme]
+----
+for ( ; ; ) {
+
+  byteop = fetch_next();  /* next instruction */
+
+  switch (byteop) {
+
+    CASE(NOP) { NEXT; }
+    CASE(IM_FALSE)  { vm->val = STk_false;       NEXT1;}
+    CASE(IM_TRUE)   { vm->val = STk_true;        NEXT1;}
+
+    ...
+
+    CASE(PUSH_GLOBAL_REF)
+    CASE(GLOBAL_REF) {
+      ...
+    }
+
+    ... (several cases here)
+
+    FUNCALL:  /* we "goto" here for procedure invoking from
+                 other places in the VM */
+    {
+      ...
+    }
+    STk_panic("abnormal exit from the VM"); /* went through the switch(byteop) */
+  }
+
+----
