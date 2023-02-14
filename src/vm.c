@@ -359,6 +359,10 @@ void STk_print_vm_registers(char *msg, STk_instr *code)
 #endif
 
 
+/* listify_top (n, vm):
+  Pops n values from the stack of virtual machine vm
+  and returns a list with them.  The CAR of the list
+  will be the element that was deepest on the stack. */
 static Inline SCM listify_top(int n, vm_thread_t *vm)
 {
   SCM *p, res = STk_nil;
@@ -407,6 +411,28 @@ static void error_bad_arity(SCM func, int arity, int16_t given_args, vm_thread_t
 }
 
 
+/* adjust_arity (func, nargs, vm):
+   This function has one side effect and one result:
+   SIDE EFFECT:
+   - if arity >= 0 then nargs must be equal to it, or this is an error
+   - if arity <  0 then the procedure was defined as (f a b . rest),
+     and there is a minimum number of arguments; the rest should be
+     passed as a list. The stack is then transformed:
+
+     +---+---+---+---+---       +---+---+---
+     | 1 | 2 | 3 | 4 | 5    ->  | 1 | 2 | L
+     +---+---+---+---+---       +---+---+---
+
+     L = (3 4 5)
+
+     So the arguments seen inside the function are (as expected)
+     a=1, b=2, rest=(3 4 5).
+
+   RETURN VALUE:
+   - The return value is the adjusted arity: if arity >= 0,
+     it is returned. If arity < 0, then it is because the arity is not
+     fixed, and the procedure can take several arguments, but at least
+     k are mandatory. Then k is returned.                              */
 static Inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
 {
   int16_t arity = CLOSURE_ARITY(func);
@@ -420,9 +446,7 @@ static Inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
       if (nargs < min_arity)
         error_bad_arity(func, arity, nargs, vm);
       else { /* Make a list from the arguments which are on the stack. */
-        SCM res = STk_nil;
-
-        while (nargs-- > min_arity) res = STk_cons(pop(), res);
+        SCM res = listify_top( nargs - min_arity, vm);
         push(res);
       }
       return -arity;
