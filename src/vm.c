@@ -1541,6 +1541,15 @@ CASE(DOCSTRG) {
   NEXT;
 }
 
+CASE(SOURCE) {
+  SCM str = fetch_const();
+
+  if (vm->valc == 1 && CLOSUREP(vm->val))
+    CLOSURE_SOURCE(vm->val) = str;
+
+  NEXT;
+}
+
 CASE(CALL_LOCATION) {
    ACT_SAVE_INFO(vm->fp) = STk_cons(pop(),                   /* file */
                                     MAKE_INT(fetch_next())); /* line */
