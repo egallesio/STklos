@@ -598,7 +598,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
- * 
+ *
  * NOTE:  R5RS imposes to use multiple values in the context
  * of a |call-with-values|. In STklos, if |values| is not used with
  * |call-with-values|, only the first value is used (i.e. others values are
@@ -1511,6 +1511,15 @@ CASE(DOCSTRG) {
 
   if (vm->valc == 1 && CLOSUREP(vm->val))
     CLOSURE_DOC(vm->val) = str;
+
+  NEXT;
+}
+
+CASE(SOURCE) {
+  SCM str = fetch_const();
+
+  if (vm->valc == 1 && CLOSUREP(vm->val))
+    CLOSURE_SOURCE(vm->val) = str;
 
   NEXT;
 }
