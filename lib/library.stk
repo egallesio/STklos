@@ -23,7 +23,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 13-Feb-2023 22:24 (eg)
+;;;; Last file update: 15-Feb-2023 23:53 (eg)
 ;;;;
 
 
@@ -90,6 +90,7 @@
 ;; ======================================================================
 (define-macro (define-library name . decls)
   (let* ((module-name    (%library-name->symbol name))
+         (conds          '())
          (imports        '())
          (exports        '())
          (body           '())
@@ -107,16 +108,23 @@
                     (case key
                       ((import)
                        (set! imports (append imports rest)))
+
                       ((export)
                        (set! exports (append exports rest)))
+
                       ((begin include include-ci)
                        (set! body (append body (list d))))
+
                       ((include-library-declarations)
                        (for-each (lambda (path)
                                    (parse-declarations
                                     (call-with-input-file (or (find-path path) path)
                                       port->sexp-list)))
                                  rest))
+
+                      ((cond-expand)
+                       (set! conds (cons d conds)))
+
                       (else
                        (error 'define-library "incorrect directive ~s" d)))))
                 decls))
@@ -126,30 +134,37 @@
     ;;
     ;; The difficulty here is that libraries have an empty environment. That
     ;; means that we cannot expand in a "define-module" and do the imports
-    ;; and the exports in it. Consequently, we work in four phases:
-    ;;  1. First, we create the library as a module and just do the imports and
-    ;;     exports in it. This allows us to use all the expansion code of
-    ;;     of import and exports since the STklos environment is visible.
-    ;;  2. We forge the symbols %module-restore and %make-syntax in the
-    ;;     environment of the module/library. The former is used at the end of the
-    ;;     expansion of define-module. The latter is used by define-macro.
-    ;;  3. We transform the module in a library (that means more or less that
+    ;; and the exports in it. Consequently, we work in five phases:
+    ;;  1. First, we create the library as a module and  just expand all the
+    ;;     the cond-expand at the top of the module, as required by R7RS report.
+    ;;  2. After that, we just do the imports and exports in the module. Note
+    ;;     that this point and previous one can use the  expansion code of
+    ;;     of cond-expand ir import/export since the STklos environment is
+    ;;     visible.
+    ;;  3. We forge the symbols %module-restore and %make-syntax in the
+    ;;     environment of the module/library. The former is used at the end
+    ;;     of the expansion of define-module. The latter is used by define-macro.
+    ;;  4. We transform the module in a library (that means more or less that
     ;;     the STklos module is  deleted from the import list.
-    ;;  4. We evaluate the body in the module (which is now a library)
+    ;;  5. We evaluate the body in the module (which is now a library).
     ;;
     `(begin
        (define-module ,module-name
-         ;; ①: define the imports and the exports
+         ;; ①: start by expanding in place all the library cond-expand
+         (begin ,@(reverse! conds))
+
+         ;; ②: define the imports and the exports
          (import ,@imports)
          (export ,@exports)
-         ;; ②: define useful 'secret" symbols
+
+         ;; ③: define useful 'secret" symbols
          (%symbol-define '%module-restore %module-restore (current-module))
          (%symbol-define '%make-syntax    %make-syntax    (current-module))
 
-         ;; ③: transform the module in a library
+         ;; ④: transform the module in a library
          (%module->library! ',module-name)
 
-         ;; ④: evaluate the body in the library environment
+         ;; ⑤: evaluate the body in the library environment
          ,@body))))
 
 
