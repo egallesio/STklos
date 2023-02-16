@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 16-Feb-2023 16:09 (eg)
+;;;; Last file update: 16-Feb-2023 17:30 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -168,19 +168,17 @@ doc>
          ((pair? (car c))
           ;; Clause is ((AND..)..) ((OR..)..) ((NOT...)) ((LIBRARY ...))
           (let ((test (car c)))
-            (cond
-              ;; ---------- AND
-              ((eq? (car test) 'and)
+            (case (car test)
+              ((and)                            ;; ---------- AND
                (if (null? (cdr test))
-                  `(begin ,@(cdr c))
-                  `(cond-expand
-                    (,(cadr test) (cond-expand
-                                   ((and ,@(cddr test)) ,@(cdr c))
-                                   ,@(cdr clauses)))
-                    ,@(cdr clauses))))
+                   `(begin ,@(cdr c))
+                   `(cond-expand
+                     (,(cadr test) (cond-expand
+                                    ((and ,@(cddr test)) ,@(cdr c))
+                                    ,@(cdr clauses)))
+                     ,@(cdr clauses))))
 
-              ;; ---------- OR
-              ((eq? (car test) 'or)
+              ((or)                             ;; ---------- OR
                (if (null? (cdr test))
                    `(cond-expand ,@(cdr clauses))
                    `(cond-expand
@@ -188,16 +186,16 @@ doc>
                      ((or ,@(cddr test)) ,@(cdr c))
                      ,@(cdr clauses))))
 
-              ;; ---------- NOT
-              ((eq? (car test) 'not)
+              ((not)                            ;; ---------- NOT
                (if (or (null? (cdr test))
                        (not (null? (cddr test))))
                    (error 'cond-expand "invalid 'not' clause")
                    `(cond-expand
                      (,(cadr test) (cond-expand ,@(cdr clauses)))
                      (else ,@(cdr c)))))
-              ;; ---------- LIBRARY
-              ((eq? (car test) 'library)
+
+
+              ((library)                        ;; ---------- LIBRARY
                (if (or (null? (cdr test))
                        (not (null? (cddr test))))
                    (error 'cond-expand "invalid 'library' clause")
@@ -207,8 +205,10 @@ doc>
                      (if data
                          `(begin ,@(cdar clauses))
                          `(cond-expand ,@(cdr clauses))))))
-              ;; ----------
-              (else 'cond-expand "bad clause ~S" c))))
+
+              (else                             ;; ----------
+               (error 'cond-expand "bad clause ~S" c)))))
+
          (else
           ;; Clause is (FEATURE ...)
           (let* ((name  (caar clauses))
