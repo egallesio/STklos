@@ -718,12 +718,13 @@ static SCM test_equal_array(SCM x, SCM y)
    Code that retruns STk_true if x and y are to be considered `equal?`,
    and STk_false othereise.
 
-   NOTE: remember to NOT return 0 or 1. THe return value should be a Scheme
-         object, not a C with the intended boolean value. This is particularly
-         important because the compiler will NOT warn you if you return "0":
-         - SCM is defined as a pointer to void
+   NOTE: remember to *NOT* return 0 or 1. The return value should be a Scheme
+         object, not a C value with the intended boolean value. This is
+         particularly important because the compiler will *NOT* warn you if you
+         return "0":
+         - `SCM` is defined as a pointer to `void`
          - '0' can be interpreted as a pointer, so the compiler thinks it's OK
-         - '0' is *not* the same as STk_void
+         - '0' is *not* the same as `STk_void`
   */
 }
 ----
@@ -795,6 +796,65 @@ defined in Scheme for SRFI-25, could have been implemented in C.
 Immediately below the definition of this structure, there are also some
 useful macros and function declarations for dealing with extended types.
 
+== Continuations
+
+One macro and two functions are declared in `vm.h` that can be used to
+capture, check and restore continuations:
+
+* `CONTP(k)` verifies (as expected) wether `k` is a continuation object
+* `SCM STk_make_continuation(void)` returns the current continuation
+* `SCM STk_restore_cont(SCM cont, SCM val)` restores continuation `cont`, passing it
+   the value `val`
+
+There is also one function in `vm.c` which is not exported:
+
+[source, scheme]
+----
+DEFINE_PRIMITIVE("%fresh-continuation?", fresh_continuationp, subr1, (SCM obj))
+{
+  return MAKE_BOOLEAN(CONTP(obj) && (((struct continuation_obj *) obj)->fresh));
+}
+----
+
+Their behavior is better illustrated by an example in Scheme:
+
+[source, scheme]
+----
+stklos> (define c #f)  ; to be set later
+(let ((a 1)
+      (b 2))
+  (format #t "start~%")
+  (set! c (%make-continuation))
+  (set! a (+ 1 a))
+  (format #t "~a ~a~%" a b))
+
+start
+2 2
+
+stklos> (%continuation? c)
+#t
+
+stklos> c
+#[continuation (C=3992 S=1512) c069e000]
+
+stklos> (%fresh-continuation? c)
+#t
+
+stklos> (%restore-continuation c c)
+3 2
+
+stklos> (%fresh-continuation? c)
+#f
+
+stklos> (%restore-continuation c c)
+4 2
+
+stklos> (%restore-continuation c c)
+5 2
+
+stklos> (%restore-continuation c c)
+6 2
+----
 
 == The virtual machine
 

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <meta name="author" content="Jeronimo Pellegrini">
 <title>The STklos Virtual Machine</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -767,6 +767,13 @@ pre.rouge {
 </ul>
 </li>
 <li><a href="#_modules">11. Modules</a></li>
+<li><a href="#_vm_c">12. <code>vm.c</code></a>
+<ul class="sectlevel2">
+<li><a href="#_the_global_lock">12.1. The global lock</a></li>
+<li><a href="#_run_vmvm_thread_vm">12.2. <code>run_vm(vm_thread *vm)</code></a></li>
+</ul>
+</li>
+<li><a href="#_continuations">13. Continuations</a></li>
 </ul>
 </div>
 </div>
@@ -2018,16 +2025,71 @@ be executed, so the VM wull jump over it)</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>PREPARE-CALL
+<pre>PREPARE-CALL        ( PREP_CALL() in vm.c )
 INVOKE
 TAIL_INVOKE
 GREF-INVOKE
-GREF-TAIL-INVOKE</pre>
+GREF-TAIL-INVOKE
+PUSH_GREF_INVOKE
+PUSH_GREF_TAIL_INV</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>PREPARE-CALL</code> pushes an activation record on the stack.</p>
+</li>
+<li>
+<p><code>INVOKE</code> opcodes call procedures – local or global; in tail position or not.
+The ones with the <code>PUSH_</code> prefix also push an argument onto the stack.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These are handled in the VM as states in the state machine (they are
+labels used in the <code>CASE`s in `vm/.c</code>).</p>
+</div>
+<div class="paragraph">
+<p>In <code>vm.c</code>, all these instructions end up sending the control to the
+<code>FUNCALL:</code> label, which will then check what to do depending on the
+type of call (<code>tc_instance</code>, <code>tc_closure</code>, <code>tc_next_method</code>, <code>tc_apply</code>,
+or some primitive, <code>tc_subr&#8230;&#8203;</code>)</p>
+</div>
+<div class="paragraph">
+<p>The peephole optimizer will combine <code>PUSH</code>, <code>GLOBAL-REF</code> <code>INVOKE</code> instructions,
+yielding combined instructions. The following is an excerpt from <code>peephole.stk</code>
+where these transformations are documented:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; [GLOBAL-REF, PUSH] =&gt; GLOBAL-REF-PUSH</span>
+<span class="c1">;; [PUSH GLOBAL-REF] =&gt; PUSH-GLOBAL-REF</span>
+<span class="c1">;; [PUSH-GLOBAL-REF, INVOKE] =&gt; PUSH-GREF-INVOKE</span>
+<span class="c1">;; [PUSH-GLOBAL-REF, TAIL-INVOKE] =&gt; PUSH-GREF-TAIL-INV</span>
+<span class="c1">;; [PUSH, PREPARE-CALL] =&gt; PUSH-PREPARE-CALL</span>
+<span class="c1">;; [GLOBAL-REF, INVOKE] =&gt; GREF-INVOKE</span>
+<span class="c1">;; [GLOBAL-REF, INVOKE] =&gt; GREF-INVOKE</span>
+<span class="c1">;; [GLOBAL-REF, TAIL-INVOKE] =&gt; GREF-TAIL-INVOKE</span>
+<span class="c1">;; [LOCAL-REFx, PUSH] =&gt; LOCAL-REFx-PUSH</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>PREPARE_CALL</code> pushes an activation record on the stack. The <code>INVOKE</code>
-opcodes call procedures – local or global; in tail position or not.</p>
+<p>The arguments to the <code>INVOKE</code>-like instructions are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>INVOKE</code>: <code>n_args</code> (the procedure address is the first item on the stack, so
+it is not passed as argument in the code)</p>
+</li>
+<li>
+<p><code>GREF-INVOKE</code>: <code>proc_addr</code>, <code>n_args</code></p>
+</li>
+<li>
+<p><code>PUSH-GREF-INVOKE</code>: <code>first_arg</code>, <code>proc_addr</code>, <code>n_args</code> (pushes the first and calls
+the procedure with <code>n_args</code> arguments form the stack</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2054,29 +2116,37 @@ opcodes call procedures – local or global; in tail position or not.</p>
 006:  RETURN</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>In the next example, <code>GREF-INVOKE</code> is called with arguments 0
+and 0. The <strong>first</strong> value 0 is the address of the procedure in the
+stack. The <code>IN-SINT-ADD2</code> procedure is called afterwards to sum 3 with
+the return from <code>f</code>.</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">f</span><span class="p">))))</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">3</span> <span class="p">(</span><span class="nf">f</span><span class="p">))))</span></code></pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
 <pre>000:  PREPARE-CALL
 001:  GREF-INVOKE          0 0
-004:  IN-SINT-ADD2         2
+004:  IN-SINT-ADD2         3
 006:  RETURN</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>In the next example, <code>GREF-INVOKE</code> is called with arguments 0 and 2. The
-value 2 is the address of the procedure in the stack. The <code>IN-SINT-ADD2</code>
-procedure is called afterwards to sum 1 with the return from <code>f</code>.</p>
+<p>In the next example, <code>GREF-INVOKE</code> is called with arguments 0
+and 2. The value 0 is the address of the procedure in the
+stack; 2 is the number of arguments given in this procedure call.
+The <code>IN-SINT-ADD2</code> procedure is called afterwards to sum 5 with
+the return from <code>f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble</span>
  <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span>
-   <span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="no">#f</span><span class="p">))))</span></code></pre>
+   <span class="p">(</span><span class="nb">+</span> <span class="mi">5</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="no">#f</span><span class="p">))))</span></code></pre>
 </div>
 </div>
 <div class="literalblock">
@@ -2085,20 +2155,26 @@ procedure is called afterwards to sum 1 with the return from <code>f</code>.</p>
 001:  LOCAL-REF0-PUSH
 002:  FALSE-PUSH
 003:  GREF-INVOKE          0 2
-006:  IN-SINT-ADD2         1
+006:  IN-SINT-ADD2         5
 008:  RETURN</pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Now the next example shows how <code>INVOKE</code> is used to call a procedure that
-is non-global (it is in the local environment):</p>
+is non-global (it is in the local environment).
+The <code>INVOKE</code> instruction will use the first value on the stack as the
+address of the procedure (it&#8217;s <code>DEEP-LOCAL-REF 256</code>, since <code>f</code> is defined
+inside the <code>let</code>). The other two arguments to be popped from the stack are
+<code>#f</code> (pushed by the <code>FALSE-PUSH</code> instruction) and the global variable <code>y</code>
+(pushed by the instruction <code>GLOBAL-REF-PUSH 0</code>). After <code>INVOKE</code> calls <code>f</code>,
+the instruction <code>IN-SINT-ADD2 3</code> will sum <code>3</code> to the result.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">f</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="nv">x</span><span class="p">)))</span>
   <span class="p">(</span><span class="nf">disassemble</span>
    <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
-     <span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="no">#f</span><span class="p">)))))</span></code></pre>
+     <span class="p">(</span><span class="nb">+</span> <span class="mi">3</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">y</span> <span class="no">#f</span><span class="p">)))))</span></code></pre>
 </div>
 </div>
 <div class="literalblock">
@@ -2108,7 +2184,7 @@ is non-global (it is in the local environment):</p>
 003:  FALSE-PUSH
 004:  DEEP-LOCAL-REF       256
 006:  INVOKE               2
-008:  IN-SINT-ADD2         1
+008:  IN-SINT-ADD2         3
 010:  RETURN</pre>
 </div>
 </div>
@@ -2200,10 +2276,222 @@ Constants:
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_vm_c">12. <code>vm.c</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An important observation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>apply</code> : there <strong>is</strong> a <code>DEFINE_PRIMITIVE("apply", &#8230;&#8203;)</code>, but it is <strong>not</strong>
+used. It is necessary just so there is a primitive of the type <code>tc_apply</code>.
+When the VM finds a primitive of this kind, it&#8217;ll treat it differently.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Some basic functions in the VM:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>push(v)</code>: pushes <code>v</code> on the stack (the stack pointer is decreased)</p>
+</li>
+<li>
+<p><code>pop()</code>: pops a value from the stack (the stack pointer is increased)</p>
+</li>
+<li>
+<p><code>fetch_next()</code>  fetches the <strong>next</strong> opcode, increasing the PC</p>
+</li>
+<li>
+<p><code>fetch_const()</code> fetches the <strong>next</strong> opcode and uses it as index for a constant</p>
+</li>
+<li>
+<p><code>look_const()</code> looks at the <strong>current</strong> opcode and uses it as index for a constant</p>
+</li>
+<li>
+<p><code>fetch_global()</code> fetches the <strong>next</strong> opcode and uses it as index for a global variable</p>
+</li>
+<li>
+<p><code>add_global(ref)</code> adds <code>ref</code> to the list of global variables, and returns its index.
+If it was already there, the old index is returned. If it was not, a place is allocated
+for it, and the new index is returned.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Already covered before:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>SCM STk_C_apply(SCM func, int nargs, &#8230;&#8203;)</code>: applies <code>func</code>, with <code>nargs</code> arguments</p>
+</li>
+<li>
+<p><code>SCM STk_C_apply_list(SCM func, SCM l)</code>: applies <code>func</code>, with a list of arguments</p>
+</li>
+<li>
+<p><code>SCM STk_n_values(int n, &#8230;&#8203;)</code>: prepares <code>n</code> values in the VM (for the next instruction), and
+returns a pointer to the <code>vm&#8594;val</code> register</p>
+</li>
+<li>
+<p><code>SCM STk_values2vector(SCM obj, SCM vect)</code>: turns a <code>values</code> object into an array with the values</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_the_global_lock">12.1. The global lock</h3>
+<div class="paragraph">
+<p>There is one global mutex lock for STklos, called <code>global_lock</code>, declared in <code>vm.c</code>:</p>
+</div>
+<div class="paragraph">
+<p><code>MUT_DECL(global_lock);          /* the lock to access checked_globals */</code></p>
+</div>
+<div class="paragraph">
+<p>As per the comment, its purpose is to discipline access to global variables.</p>
+</div>
+<div class="paragraph">
+<p>Three macros are used to control the global lock (a mutex):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>LOCK_AND_RESTART</code> will acquire the lock, and decrease the program counter.
+It will also set a flag that signals that the lock has been acquired by this thread,
+and then call <code>NEXT</code>.
+The name &#8220;AND_RESTART&#8221; reflects the fact that it decreases the PC and calls <code>NEXT</code>
+(for the next instruction)&#8201;&#8212;&#8201;so the effect is to start again operating on this
+instruction, but this time with the lock.</p>
+</li>
+<li>
+<p><code>RELEASE_LOCK</code> will release the lock, regardless of the thread having it or not. The flag indicating ownership by this thread is cleared.</p>
+</li>
+<li>
+<p><code>RELEASE_POSSIBLE_LOCK</code> will release the lock <strong>if</strong> this thread has it.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_vmvm_thread_vm">12.2. <code>run_vm(vm_thread *vm)</code></h3>
+<div class="paragraph">
+<p>After some initial setup, this function will operate as a state machine.
+Its basic structure is shown below.</p>
+</div>
+<div class="paragraph">
+<p>The <code>CASE</code> symbol is defined differently, depending on the system, but <code>CASE(x)</code> semantically
+simialar to <code>case x:</code> (if computed GOTOs are better, then it&#8217;s defined as a label instead&#8201;&#8212;&#8201;see its definition in <code>vm.c</code>).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">for</span> <span class="p">(</span> <span class="c1">; ; ) {</span>
+
+  <span class="nv">byteop</span> <span class="nv">=</span> <span class="nv">fetch_next</span><span class="p">()</span><span class="c1">;  /* next instruction */</span>
+
+  <span class="nv">switch</span> <span class="p">(</span><span class="nf">byteop</span><span class="p">)</span> <span class="err">{</span>
+
+    <span class="nv">CASE</span><span class="p">(</span><span class="nf">NOP</span><span class="p">)</span> <span class="err">{</span> <span class="nv">NEXT</span><span class="c1">; }</span>
+    <span class="nv">CASE</span><span class="p">(</span><span class="nf">IM_FALSE</span><span class="p">)</span>  <span class="err">{</span> <span class="nv">vm-&gt;val</span> <span class="nv">=</span> <span class="nv">STk_false</span><span class="c1">;       NEXT1;}</span>
+    <span class="nv">CASE</span><span class="p">(</span><span class="nf">IM_TRUE</span><span class="p">)</span>   <span class="err">{</span> <span class="nv">vm-&gt;val</span> <span class="nv">=</span> <span class="nv">STk_true</span><span class="c1">;        NEXT1;}</span>
+
+    <span class="o">...</span>
+
+    <span class="nv">CASE</span><span class="p">(</span><span class="nf">PUSH_GLOBAL_REF</span><span class="p">)</span>
+    <span class="nv">CASE</span><span class="p">(</span><span class="nf">GLOBAL_REF</span><span class="p">)</span> <span class="err">{</span>
+      <span class="o">...</span>
+    <span class="err">}</span>
+
+    <span class="o">...</span> <span class="p">(</span><span class="nf">several</span> <span class="nv">cases</span> <span class="nv">here</span><span class="p">)</span>
+
+    <span class="nv">FUNCALL:</span>  <span class="nv">/*</span> <span class="nv">we</span> <span class="s">"goto"</span> <span class="nv">here</span> <span class="nv">for</span> <span class="nv">procedure</span> <span class="nv">invoking</span> <span class="nv">from</span>
+                 <span class="nv">other</span> <span class="nv">places</span> <span class="nv">in</span> <span class="nv">the</span> <span class="nv">VM</span> <span class="nv">*/</span>
+    <span class="err">{</span>
+      <span class="o">...</span>
+    <span class="err">}</span>
+    <span class="nv">STk_panic</span><span class="p">(</span><span class="s">"abnormal exit from the VM"</span><span class="p">)</span><span class="c1">; /* went through the switch(byteop) */</span>
+  <span class="err">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_continuations">13. Continuations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are undocumented primitives in <code>vm.c</code> that can be used to capture
+and restore continuations. They are listed here with their undocumented Scheme
+counterparts:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>STk_make_continuation()</code>&#8201;&#8212;&#8201;<code>(%make-continuation)</code></p>
+</li>
+<li>
+<p><code>STk_restore_cont(SCM cont, SCM value)</code>&#8201;&#8212;&#8201;<code>(%restore-continuation cont value)</code></p>
+</li>
+<li>
+<p><code>STk_continuationp(SCM obj)</code>&#8201;&#8212;&#8201;<code>(%continuation? obj)</code></p>
+</li>
+<li>
+<p><code>STk_fresh_continuationp(SCM obj)</code>&#8201;&#8212;&#8201;<code>(%fresh-continuation? obj)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Continuation is a native type (<code>tc_continuation</code>). A continuation object (defined
+in <code>vm.h</code>) contains pointers to the C stack, the Scheme stack and several other
+data.</p>
+</div>
+<div class="paragraph">
+<p>Capturing a continuation is carried ou tby the following step (these are
+the actual comments in the function <code>STk_make_continuation</code>):</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Determine the size of the C stack and the start address</p>
+</li>
+<li>
+<p>Determine the size of the Scheme stack</p>
+</li>
+<li>
+<p>Allocate a continuation object</p>
+</li>
+<li>
+<p>Save the Scheme stack</p>
+</li>
+<li>
+<p>Save the C stack</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Restoring is easier:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Restore the Scheme stack</p>
+</li>
+<li>
+<p>Restore the C stack</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>And, when the C stack is restored, the Vm is back to its original state, except
+for the global variables.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 19:27:14 +0100
+Last updated 2023-02-19 16:12:37 +0100
 </div>
 </div>
 </body>
