@@ -1043,15 +1043,52 @@ Examples:
 The following opcodes are used to make procedure calls:
 
 ....
-PREPARE-CALL
+PREPARE-CALL        ( PREP_CALL() in vm.c )
 INVOKE
 TAIL_INVOKE
 GREF-INVOKE
 GREF-TAIL-INVOKE
+PUSH_GREF_INVOKE
+PUSH_GREF_TAIL_INV
 ....
 
-`PREPARE_CALL` pushes an activation record on the stack. The `INVOKE`
-opcodes call procedures – local or global; in tail position or not.
+* `PREPARE-CALL` pushes an activation record on the stack.
+* `INVOKE` opcodes call procedures – local or global; in tail position or not.
+   The ones with the `PUSH_` prefix also push an argument onto the stack.
+
+These are handled in the VM as states in the state machine (they are
+labels used in the `CASE`s in `vm/.c`).
+
+In `vm.c`, all these instructions end up sending the control to the
+`FUNCALL:` label, which will then check what to do depending on the
+type of call (`tc_instance`, `tc_closure`, `tc_next_method`, `tc_apply`,
+or some primitive, `tc_subr...`)
+
+
+The peephole optimizer will combine `PUSH`, `GLOBAL-REF` `INVOKE` instructions,
+yielding combined instructions. The following is an excerpt from `peephole.stk`
+where these transformations are documented:
+
+[source, scheme]
+----
+;; [GLOBAL-REF, PUSH] => GLOBAL-REF-PUSH
+;; [PUSH GLOBAL-REF] => PUSH-GLOBAL-REF
+;; [PUSH-GLOBAL-REF, INVOKE] => PUSH-GREF-INVOKE
+;; [PUSH-GLOBAL-REF, TAIL-INVOKE] => PUSH-GREF-TAIL-INV
+;; [PUSH, PREPARE-CALL] => PUSH-PREPARE-CALL
+;; [GLOBAL-REF, INVOKE] => GREF-INVOKE
+;; [GLOBAL-REF, INVOKE] => GREF-INVOKE
+;; [GLOBAL-REF, TAIL-INVOKE] => GREF-TAIL-INVOKE
+;; [LOCAL-REFx, PUSH] => LOCAL-REFx-PUSH
+----
+
+The arguments to the `INVOKE`-like instructions are:
+
+* `INVOKE`: `n_args` (the procedure address is the first item on the stack, so
+  it is not passed as argument in the code)
+* `GREF-INVOKE`: `proc_addr`, `n_args`
+* `PUSH-GREF-INVOKE`: `first_arg`, `proc_addr`, `n_args` (pushes the first and calls
+  the procedure with `n_args` arguments form the stack
 
 [source,scheme]
 ----
@@ -1076,27 +1113,34 @@ opcodes call procedures – local or global; in tail position or not.
 006:  RETURN
 ....
 
+In the next example, `GREF-INVOKE` is called with arguments 0
+and 0. The *first* value 0 is the address of the procedure in the
+stack. The `IN-SINT-ADD2` procedure is called afterwards to sum 3 with
+the return from `f`.
+
 [source,scheme]
 ----
-(disassemble (lambda () (+ 2 (f))))
+(disassemble (lambda () (+ 3 (f))))
 ----
 
 ....
 000:  PREPARE-CALL
 001:  GREF-INVOKE          0 0
-004:  IN-SINT-ADD2         2
+004:  IN-SINT-ADD2         3
 006:  RETURN
 ....
 
-In the next example, `GREF-INVOKE` is called with arguments 0 and 2. The
-value 2 is the address of the procedure in the stack. The `IN-SINT-ADD2`
-procedure is called afterwards to sum 1 with the return from `f`.
+In the next example, `GREF-INVOKE` is called with arguments 0
+and 2. The value 0 is the address of the procedure in the
+stack; 2 is the number of arguments given in this procedure call.
+The `IN-SINT-ADD2` procedure is called afterwards to sum 5 with
+the return from `f`.
 
 [source,scheme]
 ----
 (disassemble
  (lambda (x)
-   (+ 1 (f x #f))))
+   (+ 5 (f x #f))))
 ----
 
 ....
@@ -1104,19 +1148,25 @@ procedure is called afterwards to sum 1 with the return from `f`.
 001:  LOCAL-REF0-PUSH
 002:  FALSE-PUSH
 003:  GREF-INVOKE          0 2
-006:  IN-SINT-ADD2         1
+006:  IN-SINT-ADD2         5
 008:  RETURN
 ....
 
 Now the next example shows how `INVOKE` is used to call a procedure that
-is non-global (it is in the local environment):
+is non-global (it is in the local environment).
+The `INVOKE` instruction will use the first value on the stack as the
+address of the procedure (it's `DEEP-LOCAL-REF 256`, since `f` is defined
+inside the `let`). The other two arguments to be popped from the stack are
+`#f` (pushed by the `FALSE-PUSH` instruction) and the global variable `y`
+(pushed by the instruction `GLOBAL-REF-PUSH 0`). After `INVOKE` calls `f`,
+the instruction `IN-SINT-ADD2 3` will sum `3` to the result.
 
 [source,scheme]
 ----
 (let ((f (lambda (x) x)))
   (disassemble
    (lambda ()
-     (+ 1 (f x #f)))))
+     (+ 3 (f y #f)))))
 ----
 
 ....
@@ -1125,7 +1175,7 @@ is non-global (it is in the local environment):
 003:  FALSE-PUSH
 004:  DEEP-LOCAL-REF       256
 006:  INVOKE               2
-008:  IN-SINT-ADD2         1
+008:  IN-SINT-ADD2         3
 010:  RETURN
 ....
 
@@ -1199,3 +1249,129 @@ Constants:
 Constants:
 0: a
 ....
+
+
+== `vm.c`
+
+An important observation:
+
+* `apply` : there *is* a `DEFINE_PRIMITIVE("apply", ...)`, but it is *not*
+  used. It is necessary just so there is a primitive of the type `tc_apply`.
+  When the VM finds a primitive of this kind, it'll treat it differently.
+
+Some basic functions in the VM:
+
+* `push(v)`: pushes `v` on the stack (the stack pointer is decreased)
+* `pop()`: pops a value from the stack (the stack pointer is increased)
+* `fetch_next()`  fetches the *next* opcode, increasing the PC
+* `fetch_const()` fetches the *next* opcode and uses it as index for a constant
+* `look_const()` looks at the *current* opcode and uses it as index for a constant
+* `fetch_global()` fetches the *next* opcode and uses it as index for a global variable
+* `add_global(ref)` adds `ref` to the list of global variables, and returns its index.
+  If it was already there, the old index is returned. If it was not, a place is allocated
+  for it, and the new index is returned.
+
+Already covered before:
+
+* `SCM STk_C_apply(SCM func, int nargs, ...)`: applies `func`, with `nargs` arguments
+* `SCM STk_C_apply_list(SCM func, SCM l)`: applies `func`, with a list of arguments
+* `SCM STk_n_values(int n, ...)`: prepares `n` values in the VM (for the next instruction), and
+  returns a pointer to the `vm->val` register
+* `SCM STk_values2vector(SCM obj, SCM vect)`: turns a `values` object into an array with the values
+
+=== The global lock
+
+There is one global mutex lock for STklos, called `global_lock`, declared in `vm.c`:
+
+`MUT_DECL(global_lock);          /* the lock to access checked_globals */`
+
+As per the comment, its purpose is to discipline access to global variables.
+
+
+Three macros are used to control the global lock (a mutex):
+
+* `LOCK_AND_RESTART` will acquire the lock, and decrease the program counter.
+It will also set a flag that signals that the lock has been acquired by this thread,
+and then call `NEXT`.
+The name "`AND_RESTART`" reflects the fact that it decreases the PC and calls `NEXT`
+(for the next instruction) -- so the effect is to start again operating on this
+instruction, but this time with the lock.
+
+* `RELEASE_LOCK` will release the lock, regardless of the thread having it or not. The flag indicating ownership by this thread is cleared.
+
+* `RELEASE_POSSIBLE_LOCK` will release the lock *if* this thread has it.
+
+=== `run_vm(vm_thread *vm)`
+
+After some initial setup, this function will operate as a state machine.
+Its basic structure is shown below.
+
+The `CASE` symbol is defined differently, depending on the system, but `CASE(x)` semantically
+simialar to `case x:` (if computed GOTOs are better, then it's defined as a label instead --
+see its definition in `vm.c`).
+
+[source, scheme]
+----
+for ( ; ; ) {
+
+  byteop = fetch_next();  /* next instruction */
+
+  switch (byteop) {
+
+    CASE(NOP) { NEXT; }
+    CASE(IM_FALSE)  { vm->val = STk_false;       NEXT1;}
+    CASE(IM_TRUE)   { vm->val = STk_true;        NEXT1;}
+
+    ...
+
+    CASE(PUSH_GLOBAL_REF)
+    CASE(GLOBAL_REF) {
+      ...
+    }
+
+    ... (several cases here)
+
+    FUNCALL:  /* we "goto" here for procedure invoking from
+                 other places in the VM */
+    {
+      ...
+    }
+    STk_panic("abnormal exit from the VM"); /* went through the switch(byteop) */
+  }
+
+----
+
+
+== Continuations
+
+There are undocumented primitives in `vm.c` that can be used to capture
+and restore continuations. They are listed here with their undocumented Scheme
+counterparts:
+
+* `STk_make_continuation()` -- `(%make-continuation)`
+* `STk_restore_cont(SCM cont, SCM value)` -- `(%restore-continuation cont value)`
+* `STk_continuationp(SCM obj)` -- `(%continuation? obj)`
+* `STk_fresh_continuationp(SCM obj)` -- `(%fresh-continuation? obj)`
+
+Continuation is a native type (`tc_continuation`). A continuation object (defined
+in `vm.h`) contains pointers to the C stack, the Scheme stack and several other
+data.
+
+Capturing a continuation is carried ou tby the following step (these are
+the actual comments in the function `STk_make_continuation`):
+
+[arabic]
+. Determine the size of the C stack and the start address
+. Determine the size of the Scheme stack
+. Allocate a continuation object
+. Save the Scheme stack
+. Save the C stack
+
+Restoring is easier:
+
+[arabic]
+. Restore the Scheme stack
+. Restore the C stack
+
+And, when the C stack is restored, the Vm is back to its original state, except
+for the global variables.
