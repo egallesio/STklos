@@ -1230,7 +1230,7 @@ SCM STk_Cstr2number(char *str, long base)
         if (*p == 'i') {
           num1 = make_complex(num1, num2);
           p += 1;
-        } else STk_error("bad number %s", str);
+        } else return STk_false;
       }
     }
   } else if (*p == 'i' && is_signed) {
