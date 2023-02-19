@@ -90,8 +90,8 @@
 (test "integer-expt 0^0" 1 (integer-expt 0 0))
 (test/error "integer-expt args 6" (integer-expt 0 -1))
 
-(test/error "real-expt args 1" (real-expt 1+01 1))
-(test/error "real-expt args 2" (real-expt 1 1+01))
+(test/error "real-expt args 1" (real-expt 1+0i 1))
+(test/error "real-expt args 2" (real-expt 1 1+0i))
 (test/error "real-expt args 3" (real-expt 0.0 -1))
 (test "real-expt" 2.25 (real-expt 1.5 2.0))
 
