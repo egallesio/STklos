@@ -1,10 +1,10 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 26-Jan-2022 13:16 (eg)
+// Last file update: 19-Feb-2023 16:40 (eg)
 
 {{chapter "Pattern Matching"}}
 (((pattern Matching)))
@@ -14,11 +14,11 @@ programming languages since it allows clean and secure code to be
 written. Internally, "pattern-matching forms" should be translated
 (compiled) into cascades of "elementary tests" where code is made as
 efficient as possible, avoiding redundant tests; {{stklos}} "pattern
-matching compiler" provides this :footnote[The "pattern matching
+matching compiler" provides this footnote:[The "pattern matching
 compiler" has been written by Jean-Marie Geffroy and is part of the
-Manuel Serrano's Bigloo compiler since several years <<Bigloo>>. The
+Manuel Serrano's Bigloo compiler since several years <<Bigloo>>]. The
 code (and documentation) included in {{stklos}} has been stolen from
-the Bigloo package v2.4 (the only difference between both package is
+the Bigloo package v4.5 (the only difference between both package is
 the pattern matching of structures which is absent in {{stklos}}.
 
 The technique used is described in details in C. Queinnec and
