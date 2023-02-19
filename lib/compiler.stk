@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  1-Feb-2023 13:35 (eg)
+;;;; Last file update: 19-Feb-2023 15:28 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1199,18 +1199,24 @@ doc>
          (arity   (compute-arity formals)))
     (if (or (= arity len)
             (and (negative? arity) (>= len (- (- arity) 1))))
-        (let ((kind    (if tail? 'ENTER-TAIL-LET 'ENTER-LET))
-              (new-env (extend-env env formals)))
-          (generate-PREPARE-CALL epair)
-          (if (negative? arity)
-              (begin
-                (compile-var-args actuals (- (- arity) 1) env)
-                (emit kind (- arity)))
-              (begin
-                (compile-args actuals env)
-                (emit kind len)))
-          (compile-body body new-env epair tail?)
-          (emit (if tail? 'RETURN 'LEAVE-LET)))
+        (if (zero? len)
+            ;; ([lambda () ...]) or (let() ...)
+            ;; ==> (begin ...)
+            ;; NOTE: compile-body takes care of internal defines
+            (compile-body body env epair tail?)
+            ;; len > 0 ==> produce an ENTER-LET
+            (let ((kind    (if tail? 'ENTER-TAIL-LET 'ENTER-LET))
+                  (new-env (extend-env env formals)))
+              (generate-PREPARE-CALL epair)
+              (if (negative? arity)
+                  (begin
+                    (compile-var-args actuals (- (- arity) 1) env)
+                    (emit kind (- arity)))
+                  (begin
+                    (compile-args actuals env)
+                    (emit kind len)))
+              (compile-body body new-env epair tail?)
+              (emit (if tail? 'RETURN 'LEAVE-LET))))
         (compiler-error 'lambda epair "bad number of parameters ~S" actuals))))
 
 
