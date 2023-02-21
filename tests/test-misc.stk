@@ -124,8 +124,6 @@ b|)
 ;;----------------------------------------------------------------------
 (test-subsection "Arity, docstrings, signatures and sources")
 
-(import STKLOS-COMPILER)
-
 (let ((f (lambda () (void)))
       (g (lambda (a) (void)))
       (h (lambda (a b c d) (void)))
