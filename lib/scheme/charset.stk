@@ -1,7 +1,7 @@
 <;;;;
 ;;;; srfi-14.stk        -- Implementation of SRFI-14
 ;;;;
-;;;; Copyright © 2002-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2002-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jun-2002 21:36 (eg)
-;;;; Last file update:  1-Oct-2022 23:56 (eg)
+;;;; Last file update: 21-Feb-2023 17:57 (eg)
 ;;;;
 
 ;;;
@@ -490,29 +490,33 @@
 (define char-set-intersection
   (%char-set-setop 'char-set-intersection %full-set-val bit-and))
 
+
 (define (char-set-difference! cset1 . csets)
-  ;; FIXME: must be implemented
-  ;;  (%char-set-algebra (%char-set:s/check cset1 char-set-difference!)
-  ;;                     csets %minus! char-set-difference!)
-  ;;  cset1)
-  (error 'char-set-difference! "must be implemented"))
+  (check-arg char-set? cset1 'char-set-difference!)
+  (for-each (lambda (cs)
+              (check-arg char-set? cs 'char-set-difference!)
+              (apply char-set-delete! cset1 (char-set->list cs)))
+            csets)
+  cset1)
 
 
 (define (char-set-difference cs1 . csets)
-  (if (pair? csets)
-      ;;FIXME: must be implemented
-      ;;      (let ((s (%string-copy (%char-set:s/check cs1 char-set-difference))))
-      ;;             (%char-set-algebra s csets %minus! char-set-difference)
-      ;;             (make-char-set s))
-      (error 'char-set-difference "must be implemented")
-      (char-set-copy cs1)))
+  (check-arg char-set? cs1 'char-set-difference)
+  (let ((cs1 (char-set-copy cs1)))
+    (for-each (lambda (cs)
+                (check-arg char-set? cs 'char-set-difference)
+                (apply char-set-delete! cs1 (char-set->list cs)))
+              csets)
+    cs1))
 
 
 (define char-set-xor
   (%char-set-setop 'char-set-xor 0 bit-xor))
 
 (define (char-set-diff+intersection cs1 . cs)
-  (char-set-intersection cs1 (apply char-set-union cs)))
+  ;; FIXME: could be implemented more efficiently
+  (values (apply char-set-difference cs1 cs)
+          (char-set-intersection cs1 (apply char-set-union cs))))
 
 (define (char-set-complement! cs)
   (let ((v (%char-set-val cs 'char-set-complement)))
@@ -529,7 +533,9 @@
   (%char-set-setop! 'char-set-xor! 0 bit-xor))
 
 (define (char-set-diff+intersection! cs1 . cs)
-  (char-set-intersection! cs1 (apply char-set-union! cs)))
+  (let ((inter (char-set-intersection cs1 (apply char-set-union cs))))
+    (values (apply char-set-difference! cs1 cs)
+            inter)))
 
 ;;;; ======================================================================
 ;;;;
