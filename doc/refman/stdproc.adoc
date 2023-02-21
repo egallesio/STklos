@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 26-Jan-2023 17:45 (eg)
+// Last file update: 21-Feb-2023 11:25 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -938,6 +938,7 @@ See SRFI document for more information.
 {{insertdoc 'gc}}
 (((void)))
 {{insertdoc 'void}}
+{{insertdoc 'void?}}
 ((("SRFI-23")))
 {{insertdoc 'error}}
 {{insertdoc 'signal-error}}
