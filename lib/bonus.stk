@@ -57,6 +57,7 @@
         with-mutex
         error-object-location %push-id
         define-constant
+        void?
         receive case-lambda
 
         %define-condition-type-accessors
@@ -1800,6 +1801,26 @@ doc>
            (define ,@args)
            (symbol-immutable! ',(car args)))
         (error "bad constant definition ~S" `(define-constant ,@args)))))
+
+#|
+<doc EXT void?
+ * (void? obj)
+ *
+ * Returns `#t` is |obj| is `#void`, and `#f` otherwise.
+ * The usual "unspecified" result in Scheme standard and in SRFIs is `#void`
+ * in STklos, and it is also returned by the procedure |void|.
+ *
+ * @lisp
+ * (void? (void))                    => #t
+ * (define x (if #f 'nope))
+ * (void? x)                         => #t
+ * (void? '())                       => #f
+ * (void? 'something)                => #f
+ * (void? (for-each print '(1 2 3))) => #t
+ * @end lisp
+doc>
+|#
+(define (void? obj) (eq? obj #void))
 
 ;;;; ======================================================================
 ;;;;
