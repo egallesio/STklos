@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update:  6-Jan-2023 12:23 (eg)
+// Last file update: 21-Feb-2023 12:43 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -440,5 +440,15 @@ underscores in numbers.
 `stream-null?` which are incompatible with the ones defined in the `(stream primitive)` library used by
 {{quick-link-srfi 41}} or {{quick-link-srfi 221}}. Prefix the imported symbols of this SRFI, if you plan to
 use it with one of the previous libraries.
+
+// **** SRFI-238
+{{srfi-subsection 238}}
+
+{{quick-link-srfi 238}} is fully supported. Furthermore, {{stklos}}
+adds the functions `codeset-list` and `make-codeset`. 
+
+{{insertdoc 'codeset-list}}
+{{insertdoc 'make-codeset}}
+
 
 :sectnums:

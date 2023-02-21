@@ -27304,6 +27304,67 @@ underscores in numbers.</p>
 use it with one of the previous libraries.</p>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_srfi_238codesets">srfi-238&#8201;&#8212;&#8201;Codesets</h4>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph">
+<p><strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong> is fully supported. Furthermore, <strong><em>STklos</em></strong>
+adds the functions <code>codeset-list</code> and <code>make-codeset</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(codeset-list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retuns a list of known codeset names.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">codeset-list</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">errno</span> <span class="nv">signal</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(make-codeset name lst)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>returns a new codeset object of the given <code>name</code> (a symbol). The  list <code>lst</code>
+is a list of triplets (code-number symbol message) where <code>symbol</code> and
+<code>message</code>  can be <code>#f</code> if <code>code-number</code> has no associated name or message.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="k">define</span> <span class="nv">cs</span>
+     <span class="p">(</span><span class="nf">make-codeset</span> <span class="ss">'foo</span>
+                   <span class="o">'</span><span class="p">((</span><span class="nf">1</span>   <span class="nv">OK</span>    <span class="s">"Everything is OK"</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">1</span>   <span class="nv">YES</span>   <span class="no">#f</span><span class="p">)</span>                  <span class="c1">; Other name for OK</span>
+                     <span class="p">(</span><span class="nf">2</span>   <span class="nv">KO</span>    <span class="s">"We have a problem"</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">2</span>   <span class="nv">NO</span>    <span class="no">#f</span><span class="p">)</span>                  <span class="c1">; Other name for KO</span>
+                     <span class="p">(</span><span class="nf">3</span>   <span class="nv">MAYBE</span> <span class="s">"To be determined"</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">404</span> <span class="no">#f</span>    <span class="s">"Not found"</span><span class="p">))))</span>      <span class="c1">; No symbolic name</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -29341,7 +29402,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-21 11:25:33 +0100
+Last updated 2023-02-21 12:46:37 +0100
 </div>
 </div>
 </body>

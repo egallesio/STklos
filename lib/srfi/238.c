@@ -21,7 +21,7 @@
  *
  *          Authors: Lassi Kortela & Erick Gallesio
  *    Creation date: 22-Jan-2023 09:36
- * Last file update: 21-Feb-2023 12:06 (eg)
+ * Last file update: 21-Feb-2023 12:42 (eg)
  */
 
 #include "stklos.h"
@@ -139,7 +139,17 @@ static void make_C_codeset(SCM name, struct codeset_code *table,
  * ======================================================================
  */
 
-/* This procedure is not in SRFI 238. */
+/*
+<doc EXT codeset-list
+ * (codeset-list)
+ *
+ * Retuns a list of known codeset names.
+ *
+ * @lisp
+ * (codeset-list) => (errno signal)
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("codeset-list", codeset_list,
                  subr0, (void))
 {

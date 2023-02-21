@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Lassi Kortela & Erick Gallesio
 ;;;;    Creation date: 22-Jan-2023 09:44
-;;;; Last file update: 28-Jan-2023 18:51 (eg)
+;;;; Last file update: 21-Feb-2023 12:33 (eg)
 ;;;;
 
 (select-module srfi/238)
@@ -71,22 +71,26 @@
 
 
 
-;; ======================================================================
-;;  EXTENSION: (make-codeset name lst)
-;;
-;; lst is a list of triplet (code-number symbol message)
-;; symbol and message can be #f if  code-number has no name or no message
-;;
-;; (define cs
-;;   (make-codeset 'foo
-;;                 '((1   OK    "Everything is OK")
-;;                   (1   YES   #f)                            ; Other name for OK
-;;                   (2   KO    "We have a problem")
-;;                   (2   NO    #f)                            ; Other name for KO
-;;                   (3   MAYBE "To be determined")
-;;                   (404 #f    "Not found")))
-;;
-;; ======================================================================
+#|
+<doc EXT make-codeset
+ * (make-codeset name lst)
+ *
+ * returns a new codeset object of the given |name| (a symbol). The  list |lst|
+ * is a list of triplets (code-number symbol message) where |symbol| and
+ * |message|  can be `#f` if |code-number| has no associated name or message.
+ *
+ * @lisp
+ *  (define cs
+ *      (make-codeset 'foo
+ *                    '((1   OK    "Everything is OK")
+ *                      (1   YES   #f)                  ; Other name for OK
+ *                      (2   KO    "We have a problem")
+ *                      (2   NO    #f)                  ; Other name for KO
+ *                      (3   MAYBE "To be determined")
+ *                      (404 #f    "Not found"))))      ; No symbolic name
+ * @end lisp
+doc>
+|#
 (define (make-codeset name lst)
   (unless (symbol? name)
     (error "bad codeset name ~s" name))
