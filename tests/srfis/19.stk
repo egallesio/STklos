@@ -203,20 +203,6 @@
 
 
 
-;; EG: Comparisons function on date (must be in SRFI-19)
-;;
-(define (%date-test comparator)
-  (lambda (d1 d2)
-    (unless (date? d1) (error "bad date ~s" d1))
-    (unless (date? d2) (error "bad date ~s" d2))
-    (comparator (date->time-tai d1)
-                (date->time-tai d2))))
-
-(define date=?  (%date-test time=?))
-(define date<?  (%date-test time<?))
-(define date>?  (%date-test time>?))
-(define date<=? (%date-test time<=?))
-(define date>=? (%date-test time>=?))
 
 
 ;; Some extra tests
