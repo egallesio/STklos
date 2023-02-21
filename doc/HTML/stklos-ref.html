@@ -17258,6 +17258,34 @@ the <code>&lt;body&gt;</code>.</p>
 they are evalued and simply ignored.</p>
 </div>
 <div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(void? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is <code>#void</code>, and <code>#f</code> otherwise.
+The usual "unspecified" result in Scheme standard and in SRFIs is <code>#void</code>
+in STklos, and it is also returned by the procedure <code>void</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">void?</span> <span class="p">(</span><span class="nf">void</span><span class="p">))</span>                    <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="p">(</span><span class="k">if</span> <span class="no">#f</span> <span class="ss">'nope</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="nv">x</span><span class="p">)</span>                         <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="o">'</span><span class="p">())</span>                       <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="ss">'something</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="p">(</span><span class="nb">for-each</span> <span class="nv">print</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>
 </p>
 </div>
@@ -19972,11 +20000,9 @@ programming languages since it allows clean and secure code to be
 written. Internally, "pattern-matching forms" should be translated
 (compiled) into cascades of "elementary tests" where code is made as
 efficient as possible, avoiding redundant tests; <strong><em>STklos</em></strong> "pattern
-matching compiler" provides this :footnote[The "pattern matching
-compiler" has been written by Jean-Marie Geffroy and is part of the
-Manuel Serrano&#8217;s Bigloo compiler since several years <a href="#Bigloo">[Bigloo]</a>. The
+matching compiler" provides this <sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>. The
 code (and documentation) included in <strong><em>STklos</em></strong> has been stolen from
-the Bigloo package v2.4 (the only difference between both package is
+the Bigloo package v4.5 (the only difference between both package is
 the pattern matching of structures which is absent in <strong><em>STklos</em></strong>.</p>
 </div>
 <div class="paragraph">
@@ -21270,7 +21296,7 @@ The order of slots is not significant.
 <p></p>
 </div>
 <div class="paragraph">
-<p>A class may have more than one superclass <sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>.</p>
+<p>A class may have more than one superclass <sup class="footnote">[<a id="_footnoteref_7" class="footnote" href="#_footnotedef_7" title="View footnote.">7</a>]</sup>.</p>
 </div>
 <div class="paragraph">
 <p>With single inheritance (only one superclass), it is easy to order the super
@@ -29307,12 +29333,15 @@ their use in free software.</p>
 <a href="#_footnoteref_5">5</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
 </div>
 <div class="footnote" id="_footnotedef_6">
-<a href="#_footnoteref_6">6</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
+<a href="#_footnoteref_6">6</a>. The "pattern matching compiler" has been written by Jean-Marie Geffroy and is part of the Manuel Serrano&#8217;s Bigloo compiler since several years <a href="#Bigloo">[Bigloo]</a>
+</div>
+<div class="footnote" id="_footnotedef_7">
+<a href="#_footnoteref_7">7</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-11 19:13:52 +0100
+Last updated 2023-02-21 11:25:33 +0100
 </div>
 </div>
 </body>
