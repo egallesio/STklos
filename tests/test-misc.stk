@@ -132,9 +132,31 @@ b|)
 (test "read only 3 octal digits" "S45" (guard (e (else 'wrong)) (read-from-string "\"\\012345\"")))
 
 ;;----------------------------------------------------------------------
-(test-subsection "Docstrings, signatures and sources")
+(test-subsection "Arity, docstrings, signatures and sources")
 
 (import STKLOS-COMPILER)
+
+(let ((f (lambda () (void)))
+      (g (lambda (a) (void)))
+      (h (lambda (a b c d) (void)))
+      (i (lambda args (void)))
+      (j (lambda (a b c . rest) void))
+      (k (lambda (a b :optional c d) (void)))
+      (l (lambda (a b :key e f) (void)))
+      (m (lambda (a b :optional c d :rest r :key e f) (void))))
+  (test "arity zero"  0 (%procedure-arity f))
+  (test "arity one"   1 (%procedure-arity g))
+  (test "arity four"  4 (%procedure-arity h))
+  (test "arity args" -1 (%procedure-arity i))
+  (test "arity rest" -4 (%procedure-arity j))
+  (test "arity opke" -3 (%procedure-arity k))
+  (test "arity opke" -3 (%procedure-arity l))
+  (test "arity opke" -3 (%procedure-arity m)))
+
+(test "arity nil"  #f (%procedure-arity '()))
+(test "arity 5"    #f (%procedure-arity 5))
+(test "arity code" #f (%procedure-arity '(lambda () -1)))
+
 (compiler:generate-signature #t)
 
 (define (d) 1)
