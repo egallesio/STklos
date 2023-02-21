@@ -1230,7 +1230,7 @@ SCM STk_Cstr2number(char *str, long base)
         if (*p == 'i') {
           num1 = make_complex(num1, num2);
           p += 1;
-        }
+        } else return STk_false;
       }
     }
   } else if (*p == 'i' && is_signed) {
@@ -1433,7 +1433,7 @@ doc>
 DEFINE_PRIMITIVE("integer-length", integer_length, subr1, (SCM z))
 {
    switch (TYPEOF(z)) {
-    case tc_integer:{ 
+    case tc_integer:{
       long n = INT_VAL(z);
       if (n == -1 || n == 0) return MAKE_INT(0);
       if (n>0)  return MAKE_INT( (long) log2( (float) n) + 1 ); /* n >  0 */
