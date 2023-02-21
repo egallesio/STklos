@@ -142,7 +142,7 @@
 
 (test "rational reader" '(1 #t) (rational-test (string->number "3/03")))
 (test/error "rational reader" (string->number "3/0"))
-(test/error "rational reader" '3/3/4)            
+(test/error "rational reader" '3/3/4)
 (test/error "rational reader" (rational-test (string->number "1/2.")))
 (test/error "rational reader" (rational-test (string->number "1.3/2")))
 
@@ -256,7 +256,6 @@
 (test "flonum from ratio reader" '(-1234.0 #t) (flonum-test '#i-1234/1))
 (test "flonum from ratio reader" '(-0.125 #t)  (flonum-test '#i-4/32))
 
-
 ;;------------------------------------------------------------------
 (test-subsection "complex reader")
 
@@ -324,6 +323,41 @@
 (test "complex from ratio reader (polar)" (make-polar #i2 #i5/-2)      '#i2@5/-2)
 (test "complex from ratio reader (polar)" (make-polar #i0 #i0)         '#i0/1@0/1)
 (test "complex from ratio reader (polar)" (make-polar #i-1/2 #i1/2)    '#i-1/2@1/2)
+
+;; missing "i" at the end of a complex number:
+(test/error "complex missing i 1" 2+3)
+(test/error "complex missing i 2" 2-3)
+(test/error "complex missing i 3" 2_2+3_3)
+(test/error "complex missing i 4" 2/3+4/5)
+(test/error "complex missing i 5" 2/3-4/5)
+(test/error "complex missing i 6" 1+1.0)
+(test/error "complex missing i 7" 1-1.0)
+
+;; these do trigger errors, but they also break the tests...
+;; (test/error "complex missing i 8" '#x2+2)
+;; (test/error "complex missing i 9" '#x2-2)
+;; (test/error "complex missing i 10" '#b11+11)
+;; (test/error "complex missing i 11" '#b11-11)
+
+;; complexes can be written in hex or binary.
+(test "complex hex ++"    '(#xab #x+c2)    (decompose-complex '#xab+c2i))
+(test "complex hex +-"    '(#xab #x-c2)    (decompose-complex '#xab-c2i))
+(test "complex hex -+"    '(#x-ab #x+c2)   (decompose-complex '#x-ab+c2i))
+(test "complex hex --"    '(#x-ab #x-c2)   (decompose-complex '#x-ab-c2i))
+(test "complex binary ++" '(#b101 #b111)   (decompose-complex '#b101+111i))
+(test "complex binary +-" '(#b101 #b-111)  (decompose-complex '#b101-111i))
+(test "complex binary -+" '(#b-101 #b111)  (decompose-complex '#b-101+111i))
+(test "complex binary --" '(#b-101 #b-111) (decompose-complex '#b-101-111i))
+
+(test "complex hex polar ++"    (make-polar #xa #xb)       #xa@b)
+(test "complex hex polar +-"    (make-polar #x-a #xb)      #x-a@b)
+(test "complex hex polar -+"    (make-polar #xa #x-b)      #xa@-b)
+(test "complex hex polar --"    (make-polar #x-a #x-b)     #x-a@-b)
+(test "complex binary polar ++" (make-polar #b101 #b111)   #b101@111)
+(test "complex binary polar +-" (make-polar #b-101 #b111)  #b-101@111)
+(test "complex binary polar -+" (make-polar #b101 #b-111)  #b101@-111)
+(test "complex binary polar --" (make-polar #b-101 #b-111) #b-101@-111)
+
 
 ;;------------------------------------------------------------------
 (test-subsection "integer writer syntax")
@@ -1321,7 +1355,7 @@
              (i (imag-part z)))
         (and (<  1.99999999 r  2.00000001)
              (< -3.00000001 i -2.99999999))))
-       
+
 (test "sin 1-1i"
       #t
       (let* ((z (sin 1-1i))
