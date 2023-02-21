@@ -21,7 +21,7 @@
  *
  *          Authors: Lassi Kortela & Erick Gallesio
  *    Creation date: 22-Jan-2023 09:36
- * Last file update: 25-Jan-2023 11:18 (eg)
+ * Last file update: 21-Feb-2023 12:06 (eg)
  */
 
 #include "stklos.h"
@@ -187,7 +187,7 @@ DEFINE_PRIMITIVE("%codeset-message", codeset_message, subr2, (SCM cs, SCM number
   if (!CODESETP(cs)) STk_error("bad codeset ~s", cs); // already verified in Scheme
   if (!INTP(number)) STk_error("bad number ~s", cs);  // already verified in Scheme
 
-  if (!CODESET_MESSAGES(cs)) {    // Build a cache of all messages at once. 
+  if (!CODESET_MESSAGES(cs)) {    // Build a cache of all messages at once.
     SCM mlist = STk_nil;
 
     MUT_LOCK(srfi238_mutex);
@@ -218,17 +218,32 @@ DEFINE_PRIMITIVE("%make-user-codeset", make_user_codeset, subr3,
   CODESET_NAME(z) = name;
   CODESET_SYMBOLS(z)  = codes;
   CODESET_MESSAGES(z) = messages;
-  CODESET_GET_MSG(z)  = NULL; 
+  CODESET_GET_MSG(z)  = NULL;
   register_codeset(z);
 
   return z;
 }
 
+static char *strsig(int sig)
+{
+  char *message = strsignal(sig);
+
+#ifdef DARWIN
+  if (message) {
+    char *tail;
+    if ((tail = strchr(message, ':'))) {
+      /* MacOS repeats signal number in message, e.g. "Interrupt: 2" */
+      *tail = '\0';
+    }
+  }
+#endif
+  return message;
+}
 
 DEFINE_PRIMITIVE("%create-system-codesets!", create_sys_codesets, subr1, (SCM comparator))
 {
   make_C_codeset(STk_intern("errno"),  STk_errno_names,  strerror,  comparator);
-  make_C_codeset(STk_intern("signal"), STk_signal_names, strsignal, comparator);
+  make_C_codeset(STk_intern("signal"), STk_signal_names, strsig,    comparator);
   return STk_void;
 }
 
