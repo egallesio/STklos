@@ -24236,6 +24236,18 @@ to define the setters for the (numerous) <code>cXXXXr</code> list procedures.</p
 </div>
 </div>
 <div class="sect3">
+<h4 id="_srfi_19time_data_types_and_procedures">srfi-19&#8201;&#8212;&#8201;Time Data Types and Procedures</h4>
+<div class="paragraph">
+<p>
+
+<strong><a href="http://srfi.schemers.org/srfi-19/srfi-19.html">SRFI-19</a></strong> is fully supported. STklos offers, as an extension,
+the procedures <code>date=?</code>, <code>date&lt;?</code>, <code>date&gt;?</code>, <code>date&#8656;?</code> and <code>date&gt;=?</code>. These
+will compare dates by first normalizing them to make the time zone offset
+irrelevant, so "2000 Nov 12 03:30:10 GMT-2" will be taken as equal to
+"2000 Nov 12 02:30:10 GMT-1".</p>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_srfi_22running_scheme_scripts_on_unix">srfi-22&#8201;&#8212;&#8201;Running Scheme Scripts on Unix</h4>
 <div class="paragraph">
 <p>
@@ -29402,7 +29414,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-21 12:46:37 +0100
+Last updated 2023-02-21 18:43:06 +0100
 </div>
 </div>
 </body>
