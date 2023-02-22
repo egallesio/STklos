@@ -1142,7 +1142,7 @@ EXTERN_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc));
 SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env);
 int STk_init_proc(void);
 
-extern SCM STk_key_source, STk_key_formals, STk_key_doc;
+extern SCM STk_key_source, STk_key_formals, STk_key_doc, STk_key_opt, STk_key_key;
 
 /*
   ------------------------------------------------------------------------------

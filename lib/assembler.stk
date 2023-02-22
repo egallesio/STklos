@@ -252,6 +252,7 @@
 
            ;; Misc
            (INSCHEME            0)  ; Symbol value in SCHEME module
+           (CLOSURE-SET-OPT-KEY 2)
 ))))
 
 ;;;;
