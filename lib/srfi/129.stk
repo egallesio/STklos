@@ -1,5 +1,5 @@
 ;;;;
-;;;; 129.stk		-- Implementation of SRFI-129
+;;;; 129.stk            -- Implementation of SRFI-129
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -48,7 +48,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 04-Jul-2020 07:22 (jpellegrini)
-;;;; Last file update: 04-Dec-2021 10:42 (jpellegrini)
+;;;; Last file update: 23-Feb-2023 20:39 (eg)
 ;;;;
 
 (define-module srfi/129
@@ -219,13 +219,6 @@
                (loop (+ n 1) (reverse-push (list (char->integer (char-downcase ch))) result)))))))))
 
 ) ;; END OF DEFINE-MODULE
-;;;; ======================================================================
 
-;; If we just define the new string-titlecase in  SRFI-129
-;; and import it, STklos will still use the old definition,
-;; so we define %string-titlecase and explicitly redefine
-;; string-titlecase here:
-;;(define %string-titlecase string-titlecase)
-;;(define string-titlecase (in-module SRFI-129 string-titlecase))
 
 (provide "srfi/129")
