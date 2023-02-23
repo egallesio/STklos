@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 23-Nov-2022 21:54 (eg)
+ * Last file update: 23-Feb-2023 20:58 (eg)
  */
 
 
@@ -2730,7 +2730,7 @@ transcendental(acos)
 /* ========== HYPERBOLIC */
 
 /*
-<doc sinh asinh cosh acosh tanh atanh
+<doc EXT sinh asinh cosh acosh tanh atanh
  * (sinh z)
  * (cosh z)
  * (tanh z)
@@ -2761,7 +2761,7 @@ transcendental(acos)
  * (sinh (asinh 0+1i)) => 0.0+1.0i
  * (cosh (acosh 0+1i)) => 8.65956056235493e-17+1.0i
  * (tanh (atanh 0+1i)) => 0.0+1.0i
- * @enb lisp
+ * @end lisp
  *
  * These functions will always return an exact result for the following
  * arguments:
@@ -2800,6 +2800,7 @@ static SCM my_cosh(SCM z)
                   double2real(2.0));
   default:          error_bad_number(z);
   }
+  return STk_void; // for the compiler
 }
 
 static SCM my_sinh(SCM z)
@@ -2827,6 +2828,7 @@ static SCM my_sinh(SCM z)
                   double2real(2.0));
   default:          error_bad_number(z);
   }
+  return STk_void; // for the compiler
 }
 
 
@@ -2854,6 +2856,7 @@ static SCM my_tanh(SCM z)
                   add2 (ez, inv_ez));
   default:          error_bad_number(z);
   }
+  return STk_void; // for the compiler
 }
 
 
@@ -2871,6 +2874,7 @@ static SCM my_asinh(SCM z) {
   case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
   default:          error_bad_number(z);
   }
+  return STk_void; // for the compiler
 }
 
 
@@ -2906,6 +2910,7 @@ static SCM my_acosh(SCM z) {
   case tc_rational: return my_log(add2(z, STk_sqrt(sub2(mul2(z,z), MAKE_INT(1)))));
   default:          error_bad_number(z);
   }
+  return STk_void; // for the compiler
 }
 
 
@@ -2978,6 +2983,7 @@ static SCM my_atanh(SCM z) {
   }
   default:          error_bad_number(z);
   }
+  return STk_void; // for the compiler
 }
 
 
