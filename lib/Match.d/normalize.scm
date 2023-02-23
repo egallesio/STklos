@@ -7,7 +7,7 @@
             __bexit
             __object
             __thread)
-   
+
    (use     __type
             __bigloo
             __tvector
@@ -16,7 +16,7 @@
             __bignum
             __rgc
             __bit
-            
+
             __r4_numbers_6_5
             __r4_numbers_6_5_fixnum
             __r4_numbers_6_5_flonum
@@ -33,17 +33,17 @@
             __r4_ports_6_10_1
             __r4_output_6_10_3
             __evenv)
-   
+
    (export  (normalize-pattern pat)
             (match-define-structure! exp)
             (match-define-record-type! exp)
             (extend-r-macro-env name fun)))
 
 ;;;===========================================================4
-;;; The standardizer converts patterns with an 
+;;; The standardizer converts patterns with an
 ;;; extended syntax into pattern within the reduced pattern set.
 ;;; The extended language use the following approximate grammar:
-;;; pat     := ( patlist ) 
+;;; pat     := ( patlist )
 ;;;          | ?- | ?x | <constant>
 ;;; patlist := ( pat . patlist ) | <nothing> | pat ...
 ;;;          | ??- | ??x | ???- | ???x
@@ -59,13 +59,12 @@
 ;;; A macro-pattern is simply rewritten into another pattern.
 
 ;;; Extended on March 10, to recognize patterns such as:
-;;; 
+;;;
 ;;; (!1 (f x) (or (^1 a) (a ^1)))
 ;;; (!1 a (a ?- (!2 b (d ^1 ^2) (c ^2 ^1))))
 
 ;; STklos
-(cond-expand 
-  (stklos (define symbol->string! symbol->string)))
+(define symbol->string! symbol->string)
 
 ;;;===============================================================5
 ;;; Standardization of patterns (very weak for now)
@@ -125,7 +124,7 @@
 ;;; The normalization of the pattern extended syntax.
 
 (define (normalize-pattern e)
-  ((standardize-pattern e) 
+  ((standardize-pattern e)
    r-macro-pattern
    (lambda (pattern rr) pattern) ) )
 
@@ -150,7 +149,7 @@
 ;(define (standardize-patterns e*)
 ;  (match-case (car e*)
 ;    ( (quote ??-) (standardize-any (cdr e*)) )
-;    ( (check segment-variable?) 
+;    ( (check segment-variable?)
 ;      (standardize-segment-variable (car e*) (cdr e*)) )
 ;    ( (any)
 ;      (standardize-cons (car e*) (cdr e*)) ) ) )
@@ -170,7 +169,7 @@
       (standardize-quote e*) ) )
 
 (define (standardize-repetition e e*)
-  (lambda (r c) 
+  (lambda (r c)
     ((standardize-pattern e)
      r
      (lambda (f rr)
@@ -214,7 +213,7 @@
         rr
         (lambda (pattern2 rrr)
           (c `(cons ,pattern1 ,pattern2) rrr) ) ) ) ) ) )
- 
+
 (define (standardize-real-xcons f f*)
   (lambda (r c)
     ((standardize-patterns f*)
@@ -234,7 +233,7 @@
 ;  (lambda (r c)
 ;    (let ((name (term-variable-true-name e)))
 ;      (if (eq? (lookup r name) unbound-pattern)
-;          (c `(ref ,name (any)) 
+;          (c `(ref ,name (any))
 ;             (extend-alist r name 'term) )
 ;          (c `(ref ,name) r) ) ) ) )
 
@@ -255,8 +254,8 @@
            (extend-alist r name 'segment)
            (lambda (pattern rr)
              (let ((label (jim-gensym "g")))
-               (c `(ssetq-append 
-                    ,name 
+               (c `(ssetq-append
+                    ,name
                     (tree ,label
                           (cons (any) (hole ,label ,(jim-gensym "HOLE-")))
                           (end-ssetq ,name) )
@@ -311,7 +310,7 @@
              (c `(times ,label
                         (xcons (any) (hole ,label ,(jim-gensym "HOLE-")))
                         ,pattern )
-                rr ) 
+                rr )
              (c `(times ,label
                         (cons (any) (hole ,label ,(jim-gensym "HOLE-")))
                         ,pattern )
@@ -450,7 +449,7 @@
        (match-wrong "Illegal `not'" l)
        (let ((e (car l)))
    (lambda (r c)
-          ((standardize-pattern e)  
+          ((standardize-pattern e)
            r
            (lambda (pattern rr)
                  (c `(not ,pattern) r) ) ) ) ) ) )
@@ -532,7 +531,7 @@
       ((memq (car p) '(??- ???-)) 0)
       ((memq (car p) '(or and t-or tagged-or)) (pattern-length (cadr p)))
       (else (+ 1 (pattern-length (cdr p))))))
-      
+
 ;*---------------------------------------------------------------------*/
 ;*    XXX-match-define-structure! updates a global environment         */
 ;*    mapping structure names to their lists of fields:                */

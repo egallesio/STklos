@@ -31,7 +31,7 @@
 ;;; by Eugene Kohlbecker and in R4RS Appendix.
 ;;;
 ;;;
-;;; Last file update: 10-Jun-2022 18:50 (eg)
+;;; Last file update: 23-Feb-2023 11:13 (eg)
 
 #|
                         STklos Implementation Notes
@@ -128,14 +128,11 @@ doc>
   (import SCHEME)
   (export let-syntax letrec-syntax)
 
-  (define (%not-implemented name args)
-    (error name
-      "cannot be used here. You must load the file \"full-syntax\" to access it:"
-      (cons name args)))
+  (define-macro (letrec-syntax . args)
+    (error 'letrec-syntax
+           "cannot be used here. You must load the file \"full-syntax\" to access it:"
+           (cons 'letrec-syntax args)))
 
-  (define-macro (letrec-syntax . args)(%not-implemented 'letrec-syntax ',args))
-
-  
 
 ;;;
 ;;; Scheme utilities
@@ -628,9 +625,9 @@ doc>
 
 
 ;; find-clause will find the clause to be used in order to expand a macro.
-;; 
+;;
 ;; Example:
-;; 
+;;
 ;; (define-syntax2 f
 ;;   (syntax-rules ()
 ;;     ((f a b)   (+ a b))
@@ -663,7 +660,7 @@ doc>
 
 
 ;;
-;; A very simple implementation od let-syntax. 
+;; A very simple implementation od let-syntax.
 ;; FIXME: Need some work
 ;;
 (define-macro (let-syntax bindings . body)
@@ -695,7 +692,7 @@ doc>
 ;;MAC   (if (or (not (pair? syn-rules))
 ;;MAC           (not (eq? (car syn-rules) 'syntax-rules)))
 ;;MAC     (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
-;;MAC 
+;;MAC
 ;;MAC     (let ((keywords    (cons macro-name (cadr syn-rules)))
 ;;MAC           (clauses     (cddr syn-rules))
 ;;MAC           (find-clause (symbol-value 'find-clause (find-module 'MBE))))
