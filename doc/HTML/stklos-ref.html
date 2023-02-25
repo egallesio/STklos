@@ -4669,6 +4669,74 @@ The two-argument variant of <code>log</code> computes the logarithm of x in base
 argument.</p>
 </div>
 <div class="paragraph">
+<p>
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(sinh z)</code></strong><br>
+<strong><code>(cosh z)</code></strong><br>
+<strong><code>(tanh z)</code></strong><br>
+<strong><code>(asinh z)</code></strong><br>
+<strong><code>(acosh z)</code></strong><br>
+<strong><code>(atanh z)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures compute the hyperbolic trigonometric functions.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">sinh</span> <span class="mi">1</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mf">1.1752011936438</span>
+<span class="p">(</span><span class="nf">sinh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+0</span><span class="o">.</span><span class="mi">841470984807897</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="mi">1</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mf">1.54308063481524</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">0.54030230586814</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="mi">1</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mf">0.761594155955765</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5574077246549</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">asinh</span> <span class="mi">1</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mf">0.881373587019543</span>
+<span class="p">(</span><span class="nf">asinh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5707963267949</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">acosh</span> <span class="mi">0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5707963267949</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">acosh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23340311751122</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5707963267949</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">atanh</span> <span class="mi">1</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="nv">error</span>
+<span class="p">(</span><span class="nf">atanh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+0</span><span class="o">.</span><span class="mi">785398163397448</span><span class="nv">i</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In general, <code>(asinh (sinh x))</code> and similar compositions should be
+equal to <code>x</code>, except for inexactness due to the internal floating
+point number approximation for real numbers.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">sinh</span> <span class="p">(</span><span class="nf">asinh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="p">(</span><span class="nf">acosh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">8.65956056235493</span><span class="nv">e-17+1</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="p">(</span><span class="nf">atanh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These functions will always return an exact result for the following
+arguments:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">sinh</span> <span class="mf">0.0</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="mf">0.0</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="mf">0.0</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">asinh</span> <span class="mf">0.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">acosh</span> <span class="mf">1.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">atanh</span> <span class="mf">0.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -29414,7 +29482,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-21 18:43:06 +0100
+Last updated 2023-02-25 19:38:22 +0100
 </div>
 </div>
 </body>
