@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 19-Feb-2023 15:46 (eg)
+;;;; Last file update: 26-Feb-2023 20:40 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -650,7 +650,7 @@ doc>
   ;; rewrite the body to transform internal define to letrec
   (compile (rewrite-body body) env epair tail?))
 
-(define (compile-user-lambda formals body arity env)    ; i.e R5RS ones
+(define (compile-user-lambda formals body arity env src)  ; i.e R5RS ones
   (let* ((env  (extend-env env formals))
          (lab  (new-label))
          (doc  (if (and (> (length body) 1) (string? (car body)))
@@ -672,8 +672,7 @@ doc>
       (emit 'DOCSTRG (fetch-constant doc)))
 
     (when (compiler:keep-source)
-      (let ((source (cons 'lambda (cons formals body))))
-        (emit 'SOURCE (fetch-constant source))))))
+      (emit 'SOURCE (fetch-constant src)))))
 
 
 ;;; EXTENDED LAMBDAS
@@ -919,7 +918,7 @@ doc>
          (formals     (cadr r5rs-lambda))
          (body        (cddr r5rs-lambda))
          (arity       (compute-arity formals)))
-    (compile-user-lambda formals body arity env)))
+    (compile-user-lambda formals body arity env args)))
 
 ;;;;
 ;;;; APPLICATION
