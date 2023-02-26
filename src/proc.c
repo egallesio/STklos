@@ -21,14 +21,15 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 26-Feb-2023 20:19 (eg)
+ * Last file update: 26-Feb-2023 21:18 (eg)
  */
 
 #include "stklos.h"
 #include "object.h"
 
 
-SCM STk_key_source, STk_key_formals; /* to avoid call Stk_makekey */
+/* Keywords used in procedure plists */
+SCM STk_key_source, STk_key_formals, STk_key_doc;
 
 
 /*===========================================================================*\
@@ -60,7 +61,6 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
   CLOSURE_CONST(z) = cst;
   CLOSURE_BCODE(z) = code;
   CLOSURE_SIZE(z)  = size;
-  CLOSURE_DOC(z)   = STk_false;
   return z;
 }
 
@@ -276,7 +276,7 @@ DEFINE_PRIMITIVE("%procedure-code", proc_code, subr1, (SCM proc))
 DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
-  return CLOSURE_DOC(proc);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_key_doc, STk_false);
 }
 
 DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
@@ -403,24 +403,12 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
 }
 
 
-#ifdef FIXME
-// DEFINE_PRIMITIVE("make-expander", make_expander, subr1, (SCM form))
-// {
-//   SCM eval, compiled_form, ref;
-//
-//   eval               = STk_lookup(STk_intern("eval"), STk_current_module, &ref);
-//   compiled_form = STk_C_apply(eval, 1 , form);
-//
-//   return compiled_form;
-// }
-#endif
-
 int STk_init_proc(void)
 {
   // Define some keywords to avoid calls to STk_makekey (which uses a mutex!)
   STk_key_source  = STk_makekey("source");
   STk_key_formals = STk_makekey("formals");
-
+  STk_key_doc     = STk_makekey("documentation");
 
   DEFINE_XTYPE(closure, &xtype_closure);
   ADD_PRIMITIVE(procedurep);

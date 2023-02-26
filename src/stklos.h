@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 26-Feb-2023 20:24 (eg)
+ * Last file update: 26-Feb-2023 21:17 (eg)
  */
 
 
@@ -1122,7 +1122,6 @@ struct closure_obj {
   SCM plist;
   SCM name;
   SCM* constants;
-  SCM doc;
   STk_instr *bcode;
 };
 
@@ -1132,7 +1131,6 @@ struct closure_obj {
 #define CLOSURE_PLIST(p)        (((struct closure_obj *) (p))->plist)
 #define CLOSURE_NAME(p)         (((struct closure_obj *) (p))->name)
 #define CLOSURE_CONST(p)        (((struct closure_obj *) (p))->constants)
-#define CLOSURE_DOC(p)          (((struct closure_obj *) (p))->doc)
 #define CLOSURE_BCODE(p)        (((struct closure_obj *) (p))->bcode)
 #define CLOSUREP(p)             (BOXED_TYPE_EQ((p), tc_closure))
 
@@ -1143,7 +1141,7 @@ EXTERN_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc));
 SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env);
 int STk_init_proc(void);
 
-extern SCM STk_key_source, STk_key_formals; 
+extern SCM STk_key_source, STk_key_formals, STk_key_doc;
 
 /*
   ------------------------------------------------------------------------------
