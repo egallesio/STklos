@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 23-Nov-2022 21:54 (eg)
+ * Last file update: 23-Feb-2023 20:58 (eg)
  */
 
 
@@ -51,6 +51,10 @@ static int real_precision = REAL_FORMAT_SIZE;
 static unsigned int log10_maxint;
 
 #define FINITE_REALP(n) isfinite(REAL_VAL(n))
+
+/* Complex i:
+   will be used as a constant when computing some functions. */
+static SCM complex_i;
 
 /* Forward declarations */
 static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder);
@@ -2456,6 +2460,16 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
   return STk_void; /* never reached */
 }
 
+/* ============== TRANSCENDENTALS */
+
+
+#define transcendental(name)                            \
+  DEFINE_PRIMITIVE(#name, name, subr1, (SCM z))         \
+  {                                                     \
+     return my_##name(z);                               \
+  }
+
+
 /*
 <doc  exp log sin cos tan asin acos atan
  * (exp z)
@@ -2705,21 +2719,284 @@ static SCM my_atan2(SCM y, SCM x)
                            REAL_VAL(exact2inexact(STk_real_part(x)))));
 }
 
-
-/*=============================================================================*/
-
-#define transcendental(name)                            \
-  DEFINE_PRIMITIVE(#name, name, subr1, (SCM z))         \
-  {                                                     \
-     return my_##name(z);                               \
-  }
-
 transcendental(exp)
 transcendental(sin)
 transcendental(cos)
 transcendental(tan)
 transcendental(asin)
 transcendental(acos)
+
+
+/* ========== HYPERBOLIC */
+
+/*
+<doc EXT sinh asinh cosh acosh tanh atanh
+ * (sinh z)
+ * (cosh z)
+ * (tanh z)
+ * (asinh z)
+ * (acosh z)
+ * (atanh z)
+ *
+ * These procedures compute the hyperbolic trigonometric functions.
+ * @lisp
+ * (sinh 1)     => 1.1752011936438
+ * (sinh 0+1i)  => 0.0+0.841470984807897i
+ * (cosh 1)     => 1.54308063481524
+ * (cosh 0+1i)  => 0.54030230586814
+ * (tanh 1)     => 0.761594155955765
+ * (tanh 0+1i)  => 0.0+1.5574077246549i
+ * (asinh 1)    => 0.881373587019543
+ * (asinh 0+1i) => 0+1.5707963267949i
+ * (acosh 0)    => 0+1.5707963267949i
+ * (acosh 0+1i) => 1.23340311751122+1.5707963267949i
+ * (atanh 1)    => error
+ * (atanh 0+1i) => 0.0+0.785398163397448i
+ * @end lisp
+ *
+ * In general, |(asinh (sinh x))| and similar compositions should be
+ * equal to |x|, except for inexactness due to the internal floating
+ * point number approximation for real numbers.
+ * @lisp
+ * (sinh (asinh 0+1i)) => 0.0+1.0i
+ * (cosh (acosh 0+1i)) => 8.65956056235493e-17+1.0i
+ * (tanh (atanh 0+1i)) => 0.0+1.0i
+ * @end lisp
+ *
+ * These functions will always return an exact result for the following
+ * arguments:
+ * @lisp
+ * (sinh 0.0)     => 0
+ * (cosh 0.0)     => 1
+ * (tanh 0.0)     => 0
+ * (asinh 0.0)    => 0
+ * (acosh 1.0)    => 0
+ * (atanh 0.0)    => 0
+ * @end lisp
+doc>
+*/
+
+static SCM my_cosh(SCM z)
+{
+  switch (TYPEOF(z)) {
+  /* 1. fastest for reals/fixnums is to use C 'cosh'.
+
+     2. cosh(z) = [  1 + exp(-2x)  ] /  2exp(-x)
+                = [ exp(x) + exp(-x) ] / 2
+        faster for the rest.
+
+     3. cosh(z) = cos(i z),
+        but it's always slow. (not used) */
+  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(1);
+                    return double2real(cosh(REAL_VAL(z)));
+  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(1);
+                    return double2real(cosh(INT_VAL(z)));
+  case tc_complex:
+  case tc_bignum:
+  case tc_rational:
+      SCM ez = my_exp(z);
+      SCM inv_ez = div2 (MAKE_INT(1), ez);
+      return div2(add2(ez,inv_ez),
+                  double2real(2.0));
+  default:          error_bad_number(z);
+  }
+  return STk_void; // for the compiler
+}
+
+static SCM my_sinh(SCM z)
+{
+  /* 1. fastest for reals/fixnums is to use C 'sinh'.
+
+     2. cosh(z) = [  1 - exp(-2x)  ] /  2exp(-x)
+                = [ exp(x) - exp(-x) ] / 2
+        (faster for all but reals/fixnums)
+
+     3. sinh(z) = -i sin(i z),
+        but it is almost always faster to use exponentials
+        (not used) */
+  switch (TYPEOF(z)) {
+  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
+                    return double2real(sinh(REAL_VAL(z)));
+  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                    return double2real(sinh(INT_VAL(z)));
+  case tc_complex:
+  case tc_bignum:
+  case tc_rational:
+      SCM ez = my_exp(z);
+      SCM inv_ez = div2 (MAKE_INT(1), ez);
+      return div2(sub2(ez,inv_ez),
+                  double2real(2.0));
+  default:          error_bad_number(z);
+  }
+  return STk_void; // for the compiler
+}
+
+
+static SCM my_tanh(SCM z)
+{
+  /* 1. fastest for reals/fixnums is to use C 'tanh'.
+
+     2. tanh(z) = [  exp(2x) - 1  ] /  [ exp(2x) + 1  ]
+        (faster for all but reals/fixnums)
+
+     3. tanh(z) = -i tan(i z)
+        but this is always slower than using exponentials...
+        (not used) */
+  switch (TYPEOF(z)) {
+  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
+                    return double2real(tanh(REAL_VAL(z)));
+  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                    return double2real(tanh(INT_VAL(z)));
+  case tc_complex:
+  case tc_bignum:
+  case tc_rational:
+      SCM ez = my_exp(z);
+      SCM inv_ez = div2 (MAKE_INT(1), ez);
+      return div2(sub2 (ez, inv_ez),
+                  add2 (ez, inv_ez));
+  default:          error_bad_number(z);
+  }
+  return STk_void; // for the compiler
+}
+
+
+/* asinh is defined for all real numbers, so we can safely use
+   the C function "asinh". */
+static SCM my_asinh(SCM z) {
+  /* asinh(z) = ln (z + SQRT(z^2 + 1)) */
+  switch (TYPEOF(z)) {
+  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
+                    return double2real(asinh(REAL_VAL(z)));
+  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                    return double2real(asinh(INT_VAL(z)));
+  case tc_complex:
+  case tc_bignum:
+  case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
+  default:          error_bad_number(z);
+  }
+  return STk_void; // for the compiler
+}
+
+
+/* acosh_aux computes acosh of *non-complex* z (zz), using fast C
+   math but reverting to my_log, add2 and STk_sqrt for values less
+   than +1, which will produce a NaN from the C library. */
+static inline SCM
+acosh_aux(SCM z, double zz) {
+    double r = zz*zz - 1;
+    if (!isinf(r) && r >= 0) { /* can be too large for a double if
+                                zz is too large; can be negative if
+                                zz is in (0,+1). */
+        double zzz = sqrt(r) + zz;
+        if (!isinf(zzz)) /* did it overflow when we summed zz? */
+            return double2real(log(zzz));
+    }
+    return my_log(add2(z, STk_sqrt(sub2(mul2(z,z), MAKE_INT(1)))));
+}
+
+static SCM my_acosh(SCM z) {
+  /* acosh(z) = ln (z + SQRT(z^2 - 1)) */
+  switch (TYPEOF(z)) {
+  case tc_real:     {
+      if (fpclassify(REAL_VAL(z)-1.0) == FP_ZERO) return MAKE_INT(0);
+      return acosh_aux(z, REAL_VAL(z));
+  }
+  case tc_integer:  {
+      if (INT_VAL(z) == 1) return MAKE_INT(0);
+      return acosh_aux(z, (double)INT_VAL(z));
+  }
+  case tc_complex:
+  case tc_bignum:
+  case tc_rational: return my_log(add2(z, STk_sqrt(sub2(mul2(z,z), MAKE_INT(1)))));
+  default:          error_bad_number(z);
+  }
+  return STk_void; // for the compiler
+}
+
+
+/*
+  atanh_aux computes
+  (1/2) [ ln (numer) - ln (denom) ],
+  which is the value of atanh(z) when
+  numer = 1+z
+  denom = 1-z
+  This avoids NaNs when z is outside (-1,+1).
+*/
+static inline SCM
+atanh_aux(double numer, double denom) {
+      if (numer > 0.0 && denom > 0)
+          return double2real((log(numer) -
+                              log(denom)) / 2.0);
+      SCM l = sub2(my_log(double2real(numer)),
+                   my_log(double2real(denom)));
+      if (REALP(l)) return double2real(REAL_VAL(l)/2.0);
+      return div2(l, double2real(2.0));
+}
+
+static SCM my_atanh(SCM z) {
+  /* When z=1 or z=-1:
+     Chez, Gambit and most Common Lisp implementations signal an error, because
+     the argument is out of range.
+     Gauche, Guile, Kawa return +inf.0 or -inf.0.
+     We do the same as Chez and Gambit */
+
+  /* We do not use atanh from C for values outside the interval (-1,1)
+     even if the argument is native double or long, because the C
+     implementation doesn't handle complex numbers, and the value returned
+     can be a NaN (but Scheme implementations will define atanh for all
+     numbers). */
+
+  /* atanh(z) = (1/2) ln [ (1+z) / (1-z) ]
+              = (1/2) [ ln (1+z) - ln (1-z) ] */
+  switch (TYPEOF(z)) {
+  case tc_real:    {
+      double zz = REAL_VAL(z);
+      if (zz == -1.0 || zz == +1.0)
+          STk_error("argument out of range ~s", z);
+      if (fpclassify(zz) == FP_ZERO) return MAKE_INT(0);
+      return atanh_aux(1.0 + zz, 1.0 - zz);
+  }
+  case tc_integer:  {
+      long zz = INT_VAL(z);
+      if (zz == -1 || zz == +1)
+          STk_error("argument out of range ~s", z);
+      if (zz == 0) return MAKE_INT(0);
+      return atanh_aux(1.0 + zz, 1.0 - zz);
+  }
+  case tc_complex:
+  case tc_bignum:
+  case tc_rational: {
+      SCM numer = add2(MAKE_INT(1),z);
+      SCM denom = sub2(MAKE_INT(1),z);
+      if (zerop(numer) || zerop(denom))
+          STk_error("argument out of range ~s", z);
+      /* Too slow to use div2 here, since my_log will return
+         inexact, except when log returns zero or a complex.
+         Also, log(a)-log(b) is twice as fast as log(a/b)
+         when working with bignums!
+         However, zero will never happen, since numer = denom+2,
+         and log(x) is never log(x-2), so we don't check for
+         zero. */
+      SCM l = sub2(my_log(numer), my_log(denom));
+      if (REALP(l)) return double2real(REAL_VAL(l)/2.0);
+      return div2(l, double2real(2.0));
+  }
+  default:          error_bad_number(z);
+  }
+  return STk_void; // for the compiler
+}
+
+
+transcendental(cosh)
+transcendental(sinh)
+transcendental(tanh)
+transcendental(acosh)
+transcendental(asinh)
+transcendental(atanh)
+
+
+
+/*=============================================================================*/
 
 DEFINE_PRIMITIVE("log", log, subr12, (SCM x, SCM b))
 {
@@ -3366,6 +3643,8 @@ int STk_init_number(void)
   minus_inf = -HUGE_VAL;
   STk_NaN   =  strtod("NAN", NULL);
 
+  complex_i = make_complex(MAKE_INT(0),MAKE_INT(1));
+
   /* Force the LC_NUMERIC locale to "C", since Scheme definition
      imposes that decimal numbers use a '.'
   */
@@ -3447,6 +3726,13 @@ int STk_init_number(void)
   ADD_PRIMITIVE(asin);
   ADD_PRIMITIVE(acos);
   ADD_PRIMITIVE(atan);
+
+  ADD_PRIMITIVE(cosh);
+  ADD_PRIMITIVE(sinh);
+  ADD_PRIMITIVE(tanh);
+  ADD_PRIMITIVE(acosh);
+  ADD_PRIMITIVE(asinh);
+  ADD_PRIMITIVE(atanh);
 
   ADD_PRIMITIVE(sqrt);
   ADD_PRIMITIVE(expt);

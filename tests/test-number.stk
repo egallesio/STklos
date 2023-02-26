@@ -1471,6 +1471,121 @@
       1.0
       (atan (tan 1) 1))
 
+;; hyperbolic trigs
+
+(test "sinh 5"
+      #t
+      (< 74.20321057770000
+         (sinh 5)
+         74.20321057780000))
+
+(test "cosh 0.5"
+      #t
+      (< 1.1276259650000000
+         (cosh 0.5)
+         1.1276259660000000))
+
+(test "sinh 0.5"
+      #t
+      (< 0.521095305000000
+         (sinh 0.5)
+         0.521095306000000))
+
+(test "cosh 7"
+      #t
+      (< 548.31703515400000
+         (cosh 7)
+         548.31703515600000))
+
+(test "tanh 0.5"
+      #t
+      (< 0.4621171572000000
+         (tanh 0.5)
+         0.4621171573000000))
+
+(test "tanh 2"
+      #t
+      (< 0.9640275800000000
+         (tanh 2)
+         0.9640275801000000))
+
+
+(test "sinh asinh 2"
+      #t
+      (< 1.9999999999
+         (sinh (asinh 2))
+         2.0000000001))
+
+(test "cosh acosh 2"
+      #t
+      (< 1.9999999999
+         (cosh (acosh 2))
+         2.0000000001))
+
+
+(test "tanh atanh 1/2"
+      #t
+      (< 0.4999999999
+         (tanh (atanh 1/2))
+         0.5000000001))
+
+
+(test "asinh 2"
+      #t
+      (< 1.4436354751000000
+         (asinh 2)
+         1.4436354752000000))
+
+(test "asinh 2^75"
+      #t
+      (< 52.67918572000000
+         (asinh (expt 2 75))
+         52.67918573000000))
+
+(test "acosh 3"
+      #t
+      (< 1.7627471740000000
+         (acosh 3)
+         1.7627471750000000))
+
+(test "acosh 2^75"
+      #t
+      (< 52.67918572000000
+         (acosh (expt 2 75))
+         52.67918573000000))
+
+(test "asinh 1"
+      #t
+      (< 0.8813735870000000
+         (asinh 1)
+         0.8813735880000000))
+
+;; Domain error:
+(test/error "atanh 1"    (atanh +1))
+(test/error "atanh -1"   (atanh -1))
+(test/error "atanh 1.0"  (atanh +1.0))
+(test/error "atanh -1.0" (atanh -1.0))
+
+(test "atanh 1/2"
+      #t
+      (< 0.5493061440000000
+         (atanh 1/2)
+         0.5493061450000000))
+
+;; These should return exact results:
+(test "sinh 0.0"  0 (sinh  0.0))
+(test "cosh 0.0"  1 (cosh  0.0))
+(test "tanh 0.0"  0 (tanh  0.0))
+(test "asinh 0.0" 0 (asinh 0.0))
+(test "acosh 1.0" 0 (acosh 1.0))
+(test "atanh 0.0" 0 (atanh 0.0))
+(test "sinh 0"    0 (sinh  0))
+(test "cosh 0"    1 (cosh  0))
+(test "tanh 0"    0 (tanh  0))
+(test "asinh 0"   0 (asinh 0))
+(test "acosh 1"   0 (acosh 1))
+(test "atanh 0"   0 (atanh 0))
+
 ;;------------------------------------------------------------------
 (test-subsection "Misc")
 
