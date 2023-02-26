@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 10-Jun-2022 16:59 (eg)
+ * Last file update: 26-Feb-2023 18:33 (eg)
  */
 
 #include "stklos.h"
@@ -58,7 +58,6 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
   CLOSURE_BCODE(z) = code;
   CLOSURE_SIZE(z)  = size;
   CLOSURE_DOC(z)   = STk_false;
-  CLOSURE_SOURCE(z) = STk_false;
   return z;
 }
 
@@ -286,7 +285,7 @@ DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
 DEFINE_PRIMITIVE("%procedure-source", proc_source, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
-  return CLOSURE_SOURCE(proc);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_makekey("source"), STk_false);
 }
 
 DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
