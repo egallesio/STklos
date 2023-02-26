@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 23-Jan-2023 12:26 (eg)
+ * Last file update: 26-Feb-2023 19:24 (eg)
  */
 
 
@@ -1118,7 +1118,6 @@ struct closure_obj {
   stk_header header;
   int16_t arity;
   uint16_t code_size;
-  SCM formals;
   SCM env;
   SCM plist;
   SCM name;
@@ -1127,14 +1126,8 @@ struct closure_obj {
   STk_instr *bcode;
 };
 
-/* FIXME:
-#define CLOSURE_FORMALS(p)      (((struct closure_obj *) (p))->formals)
-#define CLOSURE_CODE(p)         (((struct closure_obj *) (p))->code)
-*/
-
 #define CLOSURE_ARITY(p)        (((struct closure_obj *) (p))->arity)
 #define CLOSURE_SIZE(p)         (((struct closure_obj *) (p))->code_size)
-#define CLOSURE_FORMALS(p)      (((struct closure_obj *) (p))->formals)
 #define CLOSURE_ENV(p)          (((struct closure_obj *) (p))->env)
 #define CLOSURE_PLIST(p)        (((struct closure_obj *) (p))->plist)
 #define CLOSURE_NAME(p)         (((struct closure_obj *) (p))->name)

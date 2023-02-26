@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 26-Feb-2023 18:33 (eg)
+ * Last file update: 26-Feb-2023 19:27 (eg)
  */
 
 #include "stklos.h"
@@ -50,7 +50,6 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
 
   NEWCELL(z, closure);
   CLOSURE_ENV(z)   = env;
-  CLOSURE_FORMALS(z) = STk_false;
   CLOSURE_PLIST(z) = STk_nil;
   CLOSURE_NAME(z)  = STk_false;
   CLOSURE_ARITY(z) = arity;
@@ -69,7 +68,7 @@ static void print_lambda(SCM closure, SCM port, int mode)
   else
     STk_fprintf(port, "#[closure %lx", (unsigned long) closure);
 
-  SCM formals = CLOSURE_FORMALS(closure);
+  SCM formals = STk_key_get(CLOSURE_PLIST(closure), STk_makekey("formals"), STk_false);
   if (formals != STk_false) {
     STk_nputs(port, " ", 1);
     STk_print(formals, port, mode);
@@ -279,7 +278,7 @@ DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
 DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
-  return CLOSURE_FORMALS(proc);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_makekey("formals"), STk_false);
 }
 
 DEFINE_PRIMITIVE("%procedure-source", proc_source, subr1, (SCM proc))
