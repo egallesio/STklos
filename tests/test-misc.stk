@@ -132,9 +132,29 @@ b|)
 (test "read only 3 octal digits" "S45" (guard (e (else 'wrong)) (read-from-string "\"\\012345\"")))
 
 ;;----------------------------------------------------------------------
-(test-subsection "Docstrings and signatures")
+(test-subsection "Arity, docstrings, signatures and sources")
 
-(import STKLOS-COMPILER)
+(let ((f (lambda () (void)))
+      (g (lambda (a) (void)))
+      (h (lambda (a b c d) (void)))
+      (i (lambda args (void)))
+      (j (lambda (a b c . rest) void))
+      (k (lambda (a b :optional c d) (void)))
+      (l (lambda (a b :key e f) (void)))
+      (m (lambda (a b :optional c d :rest r :key e f) (void))))
+  (test "arity zero"  0 (%procedure-arity f))
+  (test "arity one"   1 (%procedure-arity g))
+  (test "arity four"  4 (%procedure-arity h))
+  (test "arity args" -1 (%procedure-arity i))
+  (test "arity rest" -4 (%procedure-arity j))
+  (test "arity opke" -3 (%procedure-arity k))
+  (test "arity opke" -3 (%procedure-arity l))
+  (test "arity opke" -3 (%procedure-arity m)))
+
+(test "arity nil"  #f (%procedure-arity '()))
+(test "arity 5"    #f (%procedure-arity 5))
+(test "arity code" #f (%procedure-arity '(lambda () -1)))
+
 (compiler:generate-signature #t)
 
 (define (d) 1)
@@ -235,6 +255,77 @@ b|)
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
 
+;; source
+(compiler:keep-source #t)
+
+(define (cube x) (* x x x))
+(test "source cube"
+      '(lambda (x) (* x x x))
+      (%procedure-source cube))
+
+(test "source cube different var"
+      #f ;; the *exact* source is returned.
+      (equal? (%procedure-source cube)
+              '(lambda (y) (* y y y))))
+
+(let ((f (lambda (a b c) (list c b a))))
+  (test "source f"
+        '(lambda (a b c) (list c b a))
+        (%procedure-source f)))
+
+(let ((f (lambda args (print args))))
+  (test "source lambda args"
+        '(lambda args (print args))
+        (%procedure-source f)))
+
+;; not testing key and optionals, because the source of the
+;; optional/keyword processing is included.
+;; (let ((f (lambda (a b :optional c d :rest r :key e f)
+;;            (values r (list a b c d e f)))))
+;;   ...
+
+(let ((f #f)
+      (g #f))
+  (let loop ( (a 1)
+              (b 2) )
+    (set! g (list b a))
+    (set! f loop))
+  (test "source named let"
+        '(lambda (a b) (set! g (list b a)) (set! f loop))
+        (%procedure-source f)))
+
+(letrec ((f (lambda (n) (if (positive? n)
+                       (* n (f (- n 1)))
+                       1))))
+  (test "source letrec"
+        '(lambda (n) (if (positive? n) (* n (f (- n 1))) 1))
+        (%procedure-source f)))
+
+(test "source 1"    #f (%procedure-source 1))
+(test "source void" #f (%procedure-source #void))
+(test "source nil"  #f (%procedure-source '()))
+(test "source code" #f (%procedure-source '(lambda (a) (- a))))
+
+
+;; Disable and see if it's really off
+(compiler:keep-source #f)
+
+(define (cube x) (* x x x))
+(test "source cube"
+      #f
+      (%procedure-source cube))
+
+(test "source cube different var"
+      #f
+      (equal? (%procedure-source cube)
+              '(lambda (y) (* y y y))))
+
+(let ((f (lambda (a b c) (list c b a))))
+  (test "source f"
+        #f
+        (%procedure-source f)))
+
+;;----------------------------------------------------------------------
 (test-subsection "tagbody and repeat")
 
 (test "tagbody without goto"

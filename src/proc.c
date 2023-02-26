@@ -58,6 +58,7 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
   CLOSURE_BCODE(z) = code;
   CLOSURE_SIZE(z)  = size;
   CLOSURE_DOC(z)   = STk_false;
+  CLOSURE_SOURCE(z) = STk_false;
   return z;
 }
 
@@ -282,6 +283,12 @@ DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
   return CLOSURE_FORMALS(proc);
 }
 
+DEFINE_PRIMITIVE("%procedure-source", proc_source, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) return STk_false;
+  return CLOSURE_SOURCE(proc);
+}
+
 DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
@@ -415,6 +422,7 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(set_proc_plist);
   ADD_PRIMITIVE(proc_code);
   ADD_PRIMITIVE(proc_doc);
+  ADD_PRIMITIVE(proc_source);
   ADD_PRIMITIVE(proc_arity);
   ADD_PRIMITIVE(procedure_name);
   ADD_PRIMITIVE(set_procedure_name);
