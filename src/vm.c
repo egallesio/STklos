@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Feb-2023 19:15 (eg)
+ * Last file update: 26-Feb-2023 20:25 (eg)
  */
 
 // INLINER values
@@ -1528,7 +1528,7 @@ CASE(FORMALS) {
 
   if (vm->valc == 1 && CLOSUREP(vm->val)) {
     CLOSURE_PLIST(vm->val) = STk_key_set(CLOSURE_PLIST(vm->val),
-                                         STk_makekey("formals"),
+                                         STk_key_formals,
                                          formals);
   }
   NEXT;
@@ -1548,7 +1548,7 @@ CASE(SOURCE) {
 
   if (vm->valc == 1 && CLOSUREP(vm->val)) {
     CLOSURE_PLIST(vm->val) = STk_key_set(CLOSURE_PLIST(vm->val),
-                                         STk_makekey("source"),
+                                         STk_key_source,
                                          src);
   }
   NEXT;

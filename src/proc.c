@@ -21,11 +21,15 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 26-Feb-2023 19:27 (eg)
+ * Last file update: 26-Feb-2023 20:19 (eg)
  */
 
 #include "stklos.h"
 #include "object.h"
+
+
+SCM STk_key_source, STk_key_formals; /* to avoid call Stk_makekey */
+
 
 /*===========================================================================*\
  *
@@ -68,7 +72,7 @@ static void print_lambda(SCM closure, SCM port, int mode)
   else
     STk_fprintf(port, "#[closure %lx", (unsigned long) closure);
 
-  SCM formals = STk_key_get(CLOSURE_PLIST(closure), STk_makekey("formals"), STk_false);
+  SCM formals = STk_key_get(CLOSURE_PLIST(closure), STk_key_formals, STk_false);
   if (formals != STk_false) {
     STk_nputs(port, " ", 1);
     STk_print(formals, port, mode);
@@ -278,13 +282,13 @@ DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
 DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
-  return STk_key_get(CLOSURE_PLIST(proc), STk_makekey("formals"), STk_false);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_key_formals, STk_false);
 }
 
 DEFINE_PRIMITIVE("%procedure-source", proc_source, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
-  return STk_key_get(CLOSURE_PLIST(proc), STk_makekey("source"), STk_false);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_key_source, STk_false);
 }
 
 DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
@@ -413,6 +417,11 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
 
 int STk_init_proc(void)
 {
+  // Define some keywords to avoid calls to STk_makekey (which uses a mutex!)
+  STk_key_source  = STk_makekey("source");
+  STk_key_formals = STk_makekey("formals");
+
+
   DEFINE_XTYPE(closure, &xtype_closure);
   ADD_PRIMITIVE(procedurep);
   ADD_PRIMITIVE(closurep);

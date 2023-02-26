@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 26-Feb-2023 19:24 (eg)
+ * Last file update: 26-Feb-2023 20:24 (eg)
  */
 
 
@@ -1143,6 +1143,7 @@ EXTERN_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc));
 SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env);
 int STk_init_proc(void);
 
+extern SCM STk_key_source, STk_key_formals; 
 
 /*
   ------------------------------------------------------------------------------
