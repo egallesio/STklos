@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 27-Feb-2023 10:33 (eg)
+;;;; Last file update: 27-Feb-2023 10:51 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -663,16 +663,18 @@ doc>
     (emit 'RETURN)
     (emit-label lab)
 
-    (when (compiler:generate-signature)
-      ;; emit signature
-      (emit 'FORMALS (fetch-constant (cadr src))))
-
     (when doc
       ;; emit the docstring
       (emit 'DOCSTRG (fetch-constant doc)))
 
-    (when (compiler:keep-source)
-      (emit 'SOURCE (fetch-constant src)))))
+    (if (compiler:keep-source)
+        ;; emit the code source (in fact signature + body)
+        (begin
+          (emit 'FORMALS (fetch-constant (cadr src)))
+          (emit 'SOURCE  (fetch-constant  (cddr src))))
+        (when (compiler:generate-signature)
+          ;; emit signature
+          (emit 'FORMALS (fetch-constant (cadr src)))))))
 
 
 ;;; EXTENDED LAMBDAS

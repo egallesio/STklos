@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 26-Feb-2023 21:18 (eg)
+ * Last file update: 27-Feb-2023 11:00 (eg)
  */
 
 #include "stklos.h"
@@ -287,8 +287,17 @@ DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
 
 DEFINE_PRIMITIVE("%procedure-source", proc_source, subr1, (SCM proc))
 {
-  if (!CLOSUREP(proc)) return STk_false;
-  return STk_key_get(CLOSURE_PLIST(proc), STk_key_source, STk_false);
+  if (CLOSUREP(proc)) {
+    SCM args = STk_key_get(CLOSURE_PLIST(proc), STk_key_formals, STk_false);
+    SCM body = STk_key_get(CLOSURE_PLIST(proc), STk_key_source,  STk_false);
+
+    if (args != STk_false && body != STk_false) {
+      return STk_cons(STk_intern("lambda"),
+                      STk_cons(args, body));
+    }
+  }
+  return STk_false;
+
 }
 
 DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
