@@ -586,6 +586,13 @@ doc>
 ;;;;
 ;;;; LAMBDA
 ;;;;
+
+;; Computes the arity of a formal parameter list.
+;;
+;; (compute-arity '() )          => 0
+;; (compute-arity '(a b) )       => 2
+;; (compute-arity '(a b c . d) ) => -4
+;; (compute-arity args )         => -1
 (define (compute-arity l)
   (let loop ((l l) (n 0))
     (cond
@@ -705,6 +712,33 @@ doc>
           ;; emit signature
           (emit 'FORMALS (fetch-constant (cadr src)))))))
 
+(define (compile-user-Lambda formals opt key body arity env)    ; i.e R5RS ones
+
+  (let* ((env  (extend-env env formals))
+         (lab  (new-label))
+         (doc  (if (and (> (length body) 1) (string? (car body)))
+                   (car body)
+                   #f))
+         (body (if doc (cdr body) body)))
+
+    (emit 'CREATE-CLOSURE lab arity)
+    (compile-body body env body #t)
+    (emit 'RETURN)
+    (emit-label lab)
+
+    (when (compiler:generate-signature)
+      ;; emit signature
+      (emit 'FORMALS (fetch-constant formals)))
+
+    (when doc
+      ;; emit the docstring
+      (emit 'DOCSTRG (fetch-constant doc)))
+
+    (when (not (and (null? opt) (null? key)))
+      (emit 'CLOSURE-SET-OPT-KEY
+            (fetch-constant opt)
+            (fetch-constant key)))))
+
 
 ;;; EXTENDED LAMBDAS
 ;;;
@@ -804,10 +838,23 @@ doc>
        ,@error-check
        (let () ,@body))))
 
+
+;; parse-parameter-list
+;;
+;; Read the incoming lambda (or method) list, return a list of four lists,
+;; the required, optional, keyword, and rest, in that order.
+;; The last three elements can be #f if not present.
+;; (parse-parameter-list #f '())         => ( () #f #f #f )
+;; (parse-parameter-list #f '(a))        => ( (a) #f #f #f )
+;; (parse-parameter-list #f '(a . b))    => ( (a) #f #f b )
+;; (parse-parameter-list #f r)           => ( () #f #f r )
+;; (parse-parameter-list #f '(a :key b)) => ( (a) #f ((b #f #f)) #f )
+;; (parse-parameter-list #f '(a b : optional c (d -10 d?) :rest r :key x (y -20 y?)))
+;;                                   => ( (a b)
+;;                                        ((c #f #f) (d -10 d?))
+;;                                        ((x #f #f) (y -20 y?))
+;;                                        r )
 (define (parse-parameter-list method? x)
-  ;; Read the incoming lambda (or method) list, return a list of four lists,
-  ;; the required, optional, keyword, and rest, in that order.
-  ;; The last three elements can be #f if not present.
   ;; (Don't look too closely, this function isn't very nice.)
   (define required '())
   (define optional '())
@@ -904,10 +951,99 @@ doc>
   (list required optional keywords rest))
 
 
+;; x:rewrite-params-and-body
+;;
+;; Rewrite the extended form as an ordinary (though headless) lambda form.
+;;
+;; Returns FOUR values:
+;;
+;; 1. The headless lambda form, with all arguments in proper order, BUT
+;;    turning optionals & key arguments and their tests into ordinary
+;;    arguments, as if they were mandatory
+;; 2. The list of optionals, ALWAYS with a default (#f if not supplied),
+;;    and with the test (#f if not supplied)
+;; 3. The list of keyword arguments (similar to the list of optionals).
+;; 4. The adjusted arity of this lambda.
+;;
+;; Examples:
+;;
+;; (x:rewrite-params-and-body #f '() '(BODY))     => (() BODY)
+;;                                                => ()
+;;                                                => ()
+;;                                                => 0
+;;
+;; (x:rewrite-params-and-body  #f 'r '(BODY))     => (() BODY)
+;;                                                => ()
+;;                                                => ()
+;;                                                => -1
+;;
+;; (x:rewrite-params-and-body  #f '(a b) '(BODY)) => ((a b) BODY)
+;;                                                => ()
+;;                                                => ()
+;;                                                => 2
+;;
+;; (x:rewrite-params-and-body  #f '(a . b) '(BODY)) => ((a b) BODY)
+;;                                                => ()
+;;                                                => ()
+;;                                                => -2
+;;
+;; (x:rewrite-params-and-body  #f '(a :optional b :key (c 2 c?)) '(BODY))
+;;                                                => ((a b #:c c?) BODY)
+;;                                                => ((b #f #f))
+;;                                                => ((c 2 c?))
+;;                                                => -2
+;;
+;; (x:rewrite-params-and-body  #f '(a b :optional (c  -1) (d -2 d?) :rest r :key (e 10 e?) f) '(BODY))
+;;                                                => ((a b c d d? #:e #:f e? r) BODY)
+;;                                                => ((c -1 #f) (d -2 d?))
+;;                                                => ((e 10 e?) (f #f #f))
+;;                                                => -3
+;;
+(define (x:rewrite-params-and-body method? formals body)
+  (let* ((params (parse-parameter-list method? formals))
+         (req    (car params))
+         (opt    (or (cadr params)   '()))
+         (key    (or (caddr params)  '()))
+         (rest   (or (cadddr params) (gensym 'REST))))
+    (let* ((opt-names (map car opt))
+           (opt-tests (filter symbol? (map caddr opt)))
+           (key-names (map car key))
+           (key-tests (filter symbol? (map caddr key))))
+      (let ((arity (if (not (and (null? opt) (null? key)))
+                       (- 0 (length req) 1)
+                       (compute-arity formals))))
+        (values
+         ;; 1. the new formals list
+         (if (not (and (null? opt) (null? key)))
+             ;; We have a :optional or a :key keyword
+             (let ((new-formals (append req
+                                        opt-names
+                                        opt-tests
+                                        key-names
+                                        key-tests
+                                        (list rest))))
+               (cons new-formals body))
+             ;; "Normal" lambda
+             (begin (if rest
+                        (if (null? req)
+                            (set! req rest)
+                            (set-cdr! (last-pair req) rest)))
+                    `(,req  ,@body)))
+         ;; 2. The list of optional arguments
+         opt
+         ;; 3. The list of keyword arguments.
+         ;;    We turn the symbols into keywords here, so that
+         ;;    the parser in the VM can recognize them properly
+         (map (lambda (k) (cons (make-keyword (car k))
+                           (cdr k)))
+              key)
+         ;; 4. The arity
+         arity)))))
+
+;; Rewrite the extended form as an ordinary (though headless) lambda form.
+;; In a spurious attempt at efficiency, no LET* is generated
+;; unless at least one of :optional and :key is used.
 (define (rewrite-params-and-body method? formals body)
-  ;; Rewrite the extended form as an ordinary (though headless) lambda form.
-  ;; In a spurious attempt at efficiency, no LET* is generated
-  ;; unless at least one of :optional and :key is used.
   (let* ((params (parse-parameter-list method? formals))
          (req    (car params))
          (opt    (cadr params))
@@ -945,6 +1081,28 @@ doc>
           `(lambda ,new-args ,@new-body)))
       (compiler-error 'lambda el "bad definition ~S" el)))
 
+(define (extended-Lambda->lambda el)    ;; STklos lambda => R5RS lambda
+  (if (> (length el) 2)
+      (let* ((method? (eq? (car el) 'method))
+             (formals (cadr el))
+             (body    (cddr el))
+             (doc     (and (> (length body) 1) (string? (car body)) (car body))))
+        ;; Receive four values from x:rewrite-params-and-body:
+        ;; the new formals, the list of optionals, the list of
+        ;; keywords and the arity
+        (let-values (( (new opt key arity)
+                       (x:rewrite-params-and-body method?
+                                                formals
+                                                (if doc (cdr body) body))))
+                ;(format #t "new ~a~%opt ~a key ~a~%" new opt key)
+
+          (values (if doc
+                      `(lambda ,(car new)
+                         ,doc
+                         ,@(cdr new))
+                      `(lambda ,@new))
+                  opt key arity)))
+      (compiler-error 'lambda el "bad definition ~S" el)))
 
 (define (compile-lambda args env tail?)
   (let* ((r5rs-lambda (extended-lambda->lambda args))
@@ -952,6 +1110,12 @@ doc>
          (body        (cddr r5rs-lambda))
          (arity       (compute-arity formals)))
     (compile-user-lambda formals body arity env args)))
+
+(define (compile-Lambda args env tail?)
+  (let-values (( (r5rs-lambda opt key arity) (extended-Lambda->lambda args) ))
+    (let* ((formals     (cadr r5rs-lambda))
+           (body        (cddr r5rs-lambda)))
+      (compile-user-Lambda formals opt key body arity env))))
 
 ;;;;
 ;;;; APPLICATION
@@ -1900,6 +2064,7 @@ both forms.
           ((if)                 (compile-if             e env tail?))
           ((define)             (compile-define         e env tail?))
           ((begin)              (compile-begin          e env tail?))
+          ((Lambda)             (compile-Lambda         e env tail?))
           ((lambda λ)                (compile-lambda         e env tail?))
           ((let %let)           (compile-let            e env tail?))
           ((let*)               (compile-let*           e env tail?))
