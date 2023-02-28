@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 28-Feb-2023 20:43 (eg)
+;;;; Last file update: 28-Feb-2023 20:54 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -277,7 +277,7 @@
 
   ;; Set compiler flags
   (when cflags
-    (%compiler-set-flags (string-split cflags ",")))
+    (%compiler-set-flags cflags))
 
   ;; Add the paths given in the -I and -A options
   (unless (and (null? Idirs) (null? Adirs))

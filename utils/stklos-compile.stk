@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 28-Feb-2023 20:45 (eg)
+;;;; Last file update: 28-Feb-2023 20:54 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -158,7 +158,7 @@
      (("show-instructions" :alternate "S" :help "Show instructions in generated file")
          (compiler:show-assembly-code #t))
      (("compiler-flags" :alternate "F" :arg flags :help "Add (+) or suppress (-) compiler flags")
-      (%compiler-set-flags (string-split flags ",")))
+      (%compiler-set-flags flags))
 
      "Path options"
      (("prepend-load-path" :alternate "I" :arg dir
