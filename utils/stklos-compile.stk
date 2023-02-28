@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 20-May-2022 18:57 (eg)
+;;;; Last file update: 27-Feb-2023 23:49 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -112,6 +112,27 @@
     (compile-to-bytecode file tmp prepend)
     (convert-to-C tmp out name)
     (remove-file tmp)))
+;; ----------------------------------------------------------------------
+;;      analyze-compiler-flags ...
+;; ----------------------------------------------------------------------
+(define (analyze-compiler-flags flags)
+  (for-each (lambda (flag)
+              (let* ((sign (string-ref flag 0))
+                     (opt  (substring flag 1 (string-length flag)))
+                     (val  (case sign
+                             ((#\+) #t)
+                             ((#\-) #f)
+                             (else (error "flag ~s must begin with '+' or '-'"
+                                          flag)))))
+                (case (string->symbol opt)
+                  ((line-info)         (compiler:gen-line-number val))
+                  ((time-display)      (compiler:time-display val))
+                  ((keep-formals)      (compiler:generate-signature val))
+                  ((keep-source)       (compiler:keep-source val))
+                  ((inline-usuals)     (compiler:inline-common-functions val))
+                  ((show-instructions) (compiler:show-assembly-code val))
+                  (else (error "bad flag ~s" flag)))))
+            flags))
 
 ;; ----------------------------------------------------------------------
 ;;      main ...
@@ -156,7 +177,9 @@
      (("line-info" :alternate "l" :help "Insert line numbers in generated file")
         (compiler:gen-line-number #t))
      (("show-instructions" :alternate "S" :help "Show instructions in generated file")
-        (compiler:show-assembly-code #t))
+         (compiler:show-assembly-code #t))
+     (("compiler-flags" :alternate "F" :arg flags :help "Add (+) or suppress (-) compiler flags")
+      (analyze-compiler-flags (string-split flags ",")))
 
      "Path options"
      (("prepend-load-path" :alternate "I" :arg dir
@@ -167,12 +190,23 @@
       (set! (load-path) (append (load-path) (list dir))))
 
      "Misc. options"
-     (("no-time" :help "Don't display compilation time")
+     (("no-time" :help "Don't display file compilation time")
         (compiler:time-display #f))
      (("help" :alternate "h" :help "This help")
         (arg-usage (current-output-port))
         (exit 0))
 
+     "\nCompiler flags (option -F)"
+     "  They are of the form +xxx or -xxx separated by commas, such as"
+     "      -compiler-flags '+line-info,+show-instructions,-time-display'"
+     "  Possible flags:"
+     "    line-info          Insert line numbers in generated file (as -l option)"
+     "    time-display       Print file compilation time"
+     "    keep-formals       Keep formal arguments in closures"
+     "    keep-source        Keep source code in closures"
+     "    inline-usuals      Inline usual functions"
+     "    show-instructions  Show instructions in generated file (as -S option)"
+     
      (else
       (cond
         ((= (length other-arguments) 1)
