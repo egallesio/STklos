@@ -4,7 +4,7 @@
 //
 //           Author: Jeronimo Pellegrini <j_p@aleph0.info>
 //    Creation date:  4-Feb-2022 09:48
-// Last file update: 28-Feb-2023 18:43 (eg)
+// Last file update: 28-Feb-2023 18:55 (eg)
 
 = The STklos Virtual Machine
 :authors: Jeronimo Pellegrini
@@ -948,7 +948,7 @@ list instead of a string.
 
 [source,scheme]
 ----
-((in-module STKLOS-COMPILER compiler:keep-formals) #t)
+(compiler:keep-formals #t)
 
 (disassemble-expr '(define (f a b . c)
                      "A well-documented function"
