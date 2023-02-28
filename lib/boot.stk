@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 28-Feb-2023 18:41 (eg)
+;;;; Last file update: 28-Feb-2023 20:43 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -258,6 +258,7 @@
       (expr    (key-get *%system-state-plist* :sexpr #f))
       (confdir (key-get *%system-state-plist* :conf-dir #f))
       (debug   (key-get *%system-state-plist* :debug 0))
+      (cflags  (key-get *%system-state-plist* :comp-flags #f))
       (Idirs   (key-get *%system-state-plist* :prepend-dirs '()))
       (Adirs   (key-get *%system-state-plist* :append-dirs '())))
 
@@ -270,9 +271,13 @@
     (flush-output-port (current-output-port))
     (emergency-exit 0))
 
-  ;; Set the configuration if needed
+  ;; Set the configuration directory if needed
   (when confdir
     (%stklos-conf-dir confdir))
+
+  ;; Set compiler flags
+  (when cflags
+    (%compiler-set-flags (string-split cflags ",")))
 
   ;; Add the paths given in the -I and -A options
   (unless (and (null? Idirs) (null? Adirs))

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; utils.stk  -- Compiler Utilities
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update: 14-Apr-2022 15:52 (eg)
+;;;; Last file update: 28-Feb-2023 20:45 (eg)
 ;;;;
 
 
@@ -99,6 +99,29 @@
 ;;//(define (compiler-warning where fmt . l)
 ;;//  (%compiler-message "warning" where fmt l))
 
+;; ----------------------------------------------------------------------
+;;      %compiler-set-flags ...
+;; ----------------------------------------------------------------------
+(define (%compiler-set-flags flags)
+  (for-each (lambda (flag)
+              (let* ((sign (string-ref flag 0))
+                     (opt  (substring flag 1 (string-length flag)))
+                     (val  (case sign
+                             ((#\+) #t)
+                             ((#\-) #f)
+                             (else (error "flag ~s must begin with '+' or '-'"
+                                          flag)))))
+                (case (string->symbol opt)
+                  ((line-info)         (compiler:gen-line-number val))
+                  ((time-display)      (compiler:time-display val))
+                  ((keep-formals)      (compiler:generate-signature val))
+                  ((keep-source)       (compiler:keep-source val))
+                  ((inline-usuals)     (compiler:inline-common-functions val))
+                  ((show-instructions) (compiler:show-assembly-code val))
+                  (else (error "bad flag ~s" flag)))))
+            flags))
+
+;; ----------------------------------------------------------------------
 (define (unquote . l)
   (error 'unquote "used outside of a quasiquote context"))
 

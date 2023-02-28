@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 28-Feb-2023 18:47 (eg)
+;;;; Last file update: 28-Feb-2023 20:43 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -37,6 +37,7 @@
           compiler:keep-source
           compiler:inline-common-functions
 
+          %compiler-set-flags
           %grab-file-information
           %compiler-new-label
           %macro-expand
