@@ -2,7 +2,7 @@
 ;;;; obsolete.stk       -- Definition of functions which are obsolete.
 ;;;;                       Function defined here are candidate to disappear.
 ;;;;
-;;;; Copyright © 2002-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2002-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 17-Dec-2022 12:19 (eg)
+;;;; Last file update: 28-Feb-2023 18:48 (eg)
 ;;;;
 
 (export string-lower string-upper
@@ -37,7 +37,8 @@
         string-index argv
         fxdiv fxrem fxmod fx< fx<= fx> fx>= fx=
         make-directory make-directories
-        process-signal)
+        process-signal
+        compiler:generate-signature)
 
 
 ;;; 11-Jun-2002 (v0.53)
@@ -124,3 +125,6 @@
 
 ;; 17-Dec-2022
 (define process-signal process-send-signal)
+
+;; 28-Feb-2023
+(define compiler:generate-signature compiler:keep-formals)

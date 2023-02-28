@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 27-Feb-2023 10:51 (eg)
+;;;; Last file update: 28-Feb-2023 18:47 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -33,7 +33,7 @@
           compiler:warn-use-undefined
           compiler:warn-use-undefined-postpone
           compiler:show-assembly-code
-          compiler:generate-signature
+          compiler:keep-formals
           compiler:keep-source
           compiler:inline-common-functions
 
@@ -198,7 +198,7 @@
 (define compiler:warn-use-undefined             (make-parameter #f))
 (define compiler:warn-use-undefined-postpone    (make-parameter #t))
 (define compiler:show-assembly-code             (make-parameter #f))
-(define compiler:generate-signature             (make-parameter #f))
+(define compiler:keep-formals                   (make-parameter #f))
 (define compiler:keep-source                    (make-parameter #f))
 
 (define compiler:inline-common-functions
@@ -672,7 +672,7 @@ doc>
         (begin
           (emit 'FORMALS (fetch-constant (cadr src)))
           (emit 'SOURCE  (fetch-constant  (cddr src))))
-        (when (compiler:generate-signature)
+        (when (compiler:keep-formals)
           ;; emit signature
           (emit 'FORMALS (fetch-constant (cadr src)))))))
 

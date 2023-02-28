@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update: 10-Feb-2023 17:46 (eg)
+;;;; Last file update: 28-Feb-2023 18:46 (eg)
 ;;;;
 
 (require "test")
@@ -155,7 +155,7 @@ b|)
 (test "arity 5"    #f (%procedure-arity 5))
 (test "arity code" #f (%procedure-arity '(lambda () -1)))
 
-(compiler:generate-signature #t)
+(compiler:keep-formals #t)
 
 (define (d) 1)
 (define (e x) 10)
@@ -205,7 +205,7 @@ b|)
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
 
-(compiler:generate-signature #f)
+(compiler:keep-formals #f)
 
 (define (dd) 1)
 (define (ee x) 10)
