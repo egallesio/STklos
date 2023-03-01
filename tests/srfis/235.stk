@@ -1,0 +1,456 @@
+
+;; "Combinators"
+
+(import (only (srfi 1) iota))
+
+;; "constantly"
+
+ (test "srfi-235" '(1 2)
+   (call-with-values
+       (lambda () ((constantly 1 2) 'a 'b))
+     list))
+
+ (test "srfi-235" '(1)
+   (call-with-values
+       (lambda () ((constantly 1) 'a 'b))
+     list))
+
+ (test "srfi-235" '()
+   (call-with-values
+       (lambda () ((constantly) 'a 'b))
+     list))
+
+
+
+;; "complement"
+
+ (test "srfi-235" #f
+   ((complement symbol?) 'a))
+
+ (test "srfi-235" #t
+   ((complement symbol?) 1))
+
+
+
+;; "swap"
+
+ (test "srfi-235" '(2 1 3 4)
+   ((swap list) 1 2 3 4))
+
+
+
+;; "flip"
+
+ (test "srfi-235" '(4 3 2 1)
+   ((flip list) 1 2 3 4))
+
+
+;; "on-left"
+
+ (test "srfi-235" '(1)
+   ((on-left list) 1 2))
+
+
+
+;; "on-right"
+
+ (test "srfi-235" '(2)
+   ((on-right list) 1 2))
+
+
+
+;; "conjoin"
+
+ (test "srfi-235" #t
+     ((conjoin number? exact?)))
+
+ (test "srfi-235" #t
+     ((conjoin number? exact?) 1 2))
+
+ (test "srfi-235" #t
+     (not ((conjoin number? exact?) 1 2.)))
+
+ (test "srfi-235" #t
+     ((conjoin) 1 2))
+
+
+
+;; "disjoin"
+
+ (test "srfi-235" #t
+     ((disjoin number? string?)))
+
+ (test "srfi-235" #t
+     ((disjoin number? string?) 1 "a"))
+
+ (test "srfi-235" #t
+     (not ((disjoin number? string?) 'a 'b)))
+
+ (test "srfi-235" #t
+     (not ((disjoin) 1 2)))
+
+
+
+;; "each-of"
+
+ (let ((r1 #f)
+       (r2 #f))
+   ((each-of
+     (lambda args (set! r1 args))
+     (lambda args (set! r2 args)))
+    1 2)
+   (test "srfi-235" r1 '(1 2))
+   (test "srfi-235" r2 '(1 2)))
+
+
+
+;; "all-of"
+
+ (test "srfi-235" #t
+     ((all-of string?) '()))
+
+ (test "srfi-235" #t
+     ((all-of string?) '("a" "b")))
+
+ (test "srfi-235"
+   "b"
+   ((all-of values) '("a" "b")))
+
+ (test "srfi-235" #t
+     (not ((all-of string?) '("a" b))))
+
+ (test "srfi-235" #t
+     (not ((all-of (lambda (x)
+                     (when (equal? x 'c)
+                       ;; should short circuit before this point
+                       (test "srfi-235" #t  #f))
+                     (string? x)))
+           '("a" b c))))
+
+
+
+;; "any-of"
+
+ (test "srfi-235" #t
+     (not ((any-of string?) '())))
+
+ (test "srfi-235" #t
+     ((any-of string?) '("a" b)))
+
+ (test "srfi-235"
+   "a"
+   ((any-of values) '("a" "b")))
+
+ (test "srfi-235" #t
+     (not ((any-of string?) '(a b))))
+
+ (test "srfi-235" #t
+     ((any-of (lambda (x)
+                (when (equal? x 'b)
+                  ;; should short circuit before this point
+                  (test "srfi-235" #t  #f))
+                (string? x)))
+      '("a" b)))
+
+
+
+;; "on"
+
+ (test "srfi-235" '(2 3 4)
+   ((on list (lambda (x) (+ 1 x))) 1 2 3))
+
+
+
+;; "left-section"
+
+ (test "srfi-235" '(1 2 3 4)
+   ((left-section list 1 2) 3 4))
+
+
+
+;; "right-section"
+
+ (test "srfi-235" '(3 4 2 1)
+   ((right-section list 1 2) 3 4))
+
+
+
+;;  "apply-chain"
+(define cadr* (apply-chain car cdr))
+  (define factorial ;;test multivalue
+    (apply-chain
+     *
+     (lambda (n) (apply values (cdr (iota (+ 1 n)))))))
+
+(test "srfi-235" 2 (cadr* (list 1 2 3)))
+(test "srfi-235" 120 (factorial 5))
+
+
+
+;;  "arguments-drop"
+
+  (test "srfi-235"
+    '(4)
+    ((arguments-drop list 3) 1 2 3 4))
+
+
+
+;;  "arguments-drop-right"
+
+  (test "srfi-235"
+    '(1)
+    ((arguments-drop-right list 3) 1 2 3 4))
+
+
+
+;;  "arguments-take"
+
+  (test "srfi-235"
+    '(1 2 3)
+    ((arguments-take list 3) 1 2 3 4))
+
+
+
+;;  "arguments-take-right"
+
+  (test "srfi-235"
+    '(2 3 4)
+    ((arguments-take-right list 3) 1 2 3 4))
+
+
+;;  "group-by"
+
+  (test "srfi-235"
+    '((1 3)
+      (2 4))
+    ((group-by odd?) '(1 2 3 4)))
+
+  (test "srfi-235"
+    '(("aa" "ab")
+      ("ba" "bb"))
+    ((group-by (lambda (str) (string-ref str 0))
+               char=?)
+     (list "aa" "ba" "bb" "ab")))
+
+
+
+
+;; "begin-procedure"
+
+ (test "srfi-235" 2
+   (begin-procedure
+    (lambda () 1)
+    (lambda () 2)))
+
+
+
+;; "if-procedure"
+
+ (test "srfi-235" 1
+   (if-procedure #t
+                 (lambda () 1)
+                 (lambda () (test "srfi-235" #t  #f))))
+
+ (test "srfi-235" 2
+   (if-procedure #f
+                 (lambda () (test "srfi-235" #t  #f))
+                 (lambda () 2)))
+
+
+
+;; "when-procedure"
+
+ (define lst1 '())
+ (define lst2 '())
+
+ (when-procedure #t
+                 (lambda () (set! lst1 (cons 1 lst1)))
+                 (lambda () (set! lst1 (cons 2 lst1))))
+
+ (when-procedure #f
+                 (lambda () (set! lst2 (cons 1 lst2)))
+                 (lambda () (set! lst2 (cons 2 lst2))))
+
+ (test "srfi-235" '(2 1) lst1)
+ (test "srfi-235" '() lst2)
+
+
+
+;; "unless-procedure"
+
+ (define lst1 '())
+ (define lst2 '())
+
+ (unless-procedure #t
+                 (lambda () (set! lst1 (cons 1 lst1)))
+                 (lambda () (set! lst1 (cons 2 lst1))))
+
+ (unless-procedure #f
+                 (lambda () (set! lst2 (cons 1 lst2)))
+                 (lambda () (set! lst2 (cons 2 lst2))))
+
+ (test "srfi-235" '() lst1)
+ (test "srfi-235" '(2 1) lst2)
+
+
+
+;; "value-procedure"
+
+ (test "srfi-235" "1"
+   (value-procedure 1
+                    number->string
+                    (lambda () (test "srfi-235" #t  #f))))
+
+ (test "srfi-235" 2
+   (value-procedure #f
+                    (lambda args (test "srfi-235" #t  #f))
+                    (lambda () 2)))
+
+
+
+;; "case-procedure"
+
+ (test "srfi-235" 2
+   (case-procedure 'b
+                   `((a . ,(lambda () 1))
+                     (b . ,(lambda () 2)))))
+
+ (test "srfi-235" 3
+   (case-procedure 'c
+                   `((a . ,(lambda () 1))
+                     (b . ,(lambda () 2)))
+                   (lambda () 3)))
+
+
+
+;; "and-procedure"
+
+ (test "srfi-235" #t
+     (and-procedure))
+
+ (test "srfi-235" 2
+   (and-procedure (lambda () 1)
+                       (lambda () 2)))
+
+ (test "srfi-235" #t
+     (not (and-procedure (lambda () #f)
+                              (lambda () (test "srfi-235" #t  #f)))))
+
+
+
+;; "eager-and-procedure"
+
+ (test "srfi-235" #t
+     (eager-and-procedure))
+
+ (test "srfi-235" 2
+   (eager-and-procedure (lambda () 1)
+                        (lambda () 2)))
+
+ (let ((second-called? #f))
+  (test "srfi-235" #t
+     (not (eager-and-procedure (lambda () #f)
+                               (lambda ()
+                                 (set! second-called? #t)
+                                 #t))))
+  (test "srfi-235" #t  second-called?))
+
+
+
+;; "or-procedure"
+
+ (test "srfi-235" #t
+     (not (or-procedure)))
+
+ (test "srfi-235" 2
+   (or-procedure (lambda () #f)
+                 (lambda () 2)))
+
+;;; slightly modified:
+(test "srfi-235" #f
+      (not (or-procedure (lambda () 1)
+                         (lambda () (test "srfi-235" #t  #f)))))
+
+
+
+;; "eager-or-procedure"
+
+ (test "srfi-235" #t
+     (not (eager-or-procedure)))
+
+ (test "srfi-235" 2
+   (eager-or-procedure (lambda () #f)
+                       (lambda () 2)))
+
+ (let ((second-called? #f))
+  (test "srfi-235" 1
+     (eager-or-procedure (lambda () 1)
+                        (lambda ()
+                          (set! second-called? #t)
+                          #f)))
+  (test "srfi-235" #t  second-called?))
+
+;; "funcall-procedure"
+
+ (test "srfi-235" 1
+    (funcall-procedure (lambda () 1)))
+
+;; "loop-procedure"
+
+ (call/cc (lambda (k)
+            (define v 0)
+            (define (thunk)
+              (when (> v 5)
+                (k #t))
+              (set! v (+ 1 v)))
+            (loop-procedure thunk)
+            (test "srfi-235" #t  #t)))
+
+
+
+;; "while-procedure"
+
+ (define v 0)
+ (define (thunk)
+   (set! v (+ 1 v))
+   (< v 5))
+ (while-procedure thunk)
+ (test "srfi-235" 5 v)
+
+
+
+;; "until-procedure"
+
+ (define v 0)
+ (define (thunk)
+   (set! v (+ 1 v))
+   (>= v 5))
+ (until-procedure thunk)
+ (test "srfi-235" 5 v)
+
+
+;; "always"
+
+ (test "srfi-235" #t  (always))
+ (test "srfi-235" #t  (always 'a))
+
+
+
+;; "never"
+
+ (test "srfi-235" #t  (not (never)))
+ (test "srfi-235" #t  (not (never 'a)))
+
+
+
+;; "boolean"
+
+ (test "srfi-235" #t (boolean 1))
+ (test "srfi-235" #f (boolean #f))
+
+
+
+;; "values"
+
+ (test "srfi-235" 1 (values 1))
+ (test "srfi-235" 'a (values 'a))

@@ -137,6 +137,7 @@ SRC_STK   = 1.stk   \
             229.stk \
             230.stk \
             233.stk \
+            235.stk \
             236.stk \
             244.stk
 
@@ -244,6 +245,7 @@ SRC_OSTK =  1.ostk   \
             229.ostk \
             230.ostk \
             233.ostk \
+            235.ostk \
             236.ostk \
             244.ostk
 
@@ -311,7 +313,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 152.ostk: 13.ostk
 154.ostk: 9.ostk
 158.ostk: ../scheme/generator.ostk
-160.ostk: 4.ostk 128.ostk 
+160.ostk: 4.ostk 128.ostk
 161.ostk: 9.ostk
 171.ostk: 1.ostk 9.ostk 69.ostk
 173.ostk: 9.ostk
@@ -326,6 +328,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 221.ostk: 41.ostk 158.ostk
 224.ostk: ../scheme/comparator.ostk
 230.ostk: 9.ostk
+235.ostk: 1.ostk
 
 
 25.$(SO):  25-incl.c  25.c
