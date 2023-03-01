@@ -466,7 +466,7 @@ doc>
 <doc EXT date?
  * (date? obj)
  *
- * Return |%t| if |obj| is a date, and otherwise returns |%f|.
+ * Return `#t` if |obj| is a date, and otherwise returns `#f`.
 doc>
 |#
 (define (date? obj)

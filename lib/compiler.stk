@@ -476,7 +476,7 @@ doc>
  * value of the first expression that evaluates to a false value is
  * returned.  Any remaining expressions are not evaluated.  If all the
  * expressions evaluate to true values, the value of the last expression
- * is returned.  If there are no expressions then |%t| is returned.
+ * is returned.  If there are no expressions then `#t` is returned.
  *
  * @lisp
  *   (and (= 2 2) (> 2 1))           =>  #t
@@ -517,7 +517,7 @@ doc>
  * value of the first expression that evaluates to a true value is
  * returned.  Any remaining expressions are not evaluated.  If all
  * expressions evaluate to false values, the value of the last expression
- * is returned.  If there are no expressions then |%f| is returned.
+ * is returned.  If there are no expressions then `#f` is returned.
  *
  * @lisp
  *   (or (= 2 2) (> 2 1))            =>  #t
