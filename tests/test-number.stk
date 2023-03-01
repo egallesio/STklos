@@ -971,7 +971,105 @@
 (test "mersenne prime? 100" #f (mersenne-prime? 100))
 (test "mersenne prime? (* 61 19)" #f (mersenne-prime? (* 61 19)))
 
+;;------------------------------------------------------------------
+(test-subsection "gcd and lcm")
 
+(test "gcd" 0   (gcd))
+(test "gcd" 5   (gcd 0 5))
+(test "gcd" 5   (gcd 0 -5))
+(test "gcd" 5.0 (gcd 0.0 -5))
+(test "gcd" 1   (gcd 11 7))
+(test "gcd" 1   (gcd 1 10))
+(test "gcd" 1   (gcd -1 10))
+(test "gcd" 4   (gcd 20 8))
+(test "gcd" 4   (gcd -20 8))
+(test "gcd" 4.0 (gcd 20.0 8))
+(test "gcd" 4.0 (gcd 20 4.0))
+(test "gcd" 1   (gcd 1208925819614629174706189 929192))   ; first is prime
+(test "gcd" 1.0 (gcd 1208925819614629174706189 929192.0)) ; first is prime
+
+(test "gcd with real turned into bignum"
+      1.0
+      (gcd 20000000000000000000.0 3))
+
+(test "gcd 2 bignums -> fixnum"
+      4857223
+      ;; first: 2^65 * 7^5 * 17^2
+      ;; second: 7^5 * 17^50
+      (gcd 179199899179871458857844736
+           559675465285191576525278231414576190110023838138985405765037623943))
+
+(test "gcd 2 bignums -> bignum"
+      569468379011812486801
+      (gcd 21009674891402273592944939027143256440832
+           460916811707362526506357210533854319331779361732494458019956379934890049))
+
+(test "gcd"
+      4
+      (gcd 1099511627776 ;; 2^40
+           274877906944  ;; 2^38
+           10000         ;; 2^4 5^4
+           44444))       ;; 2^2 41 271
+
+
+(test/error "gcd" (gcd 1.2  1))
+(test/error "gcd" (gcd 1/2  1))
+(test/error "gcd" (gcd 1+2i 1))
+(test/error "gcd" (gcd 'a   1))
+(test/error "gcd" (gcd #\a  1))
+(test/error "gcd" (gcd "a"  1))
+(test/error "gcd" (gcd gcd  1))
+
+(test "gcd" fx-greatest (gcd 0 fx-greatest))
+
+(test "gcd" (+ fx-greatest 1) (gcd 0 (+ fx-greatest 1)))
+(test "gcd" (- fx-least)      (gcd 0 fx-least))
+(test "gcd"
+      (- (- fx-least 1))
+      (gcd 0 (- fx-least 1)))
+
+(test "gcd" 15.0 (gcd -15.0))
+
+
+(test "lcm" 1    (lcm))
+(test "lcm" 11   (lcm 11))
+(test "lcm" 11.0 (lcm 11.0))
+(test "lcm" 6    (lcm 2 3))
+(test "lcm" 60   (lcm 12 20))
+(test "lcm" 60   (lcm -12 20))
+(test "lcm" 60.0 (lcm 12.0 20))
+
+(test "lcm"
+      3298534883328        ;; 2^30 * 3
+      (lcm 824633720832    ;; 2^38 * 3
+           1099511627776)) ;; 2^40
+
+(test "lcm"
+      7635421060136960000 ;; 2^40  5^4 41 271
+      (lcm 1099511627776  ;; 2^40
+           274877906944   ;; 2^38
+           10000          ;; 2^4 5^4
+           44444))        ;; 2^2 41 271
+
+(test "lcm"
+      687194767360000.0   ;; 2^40 5^4
+      (lcm 1099511627776  ;; 2^40
+           274877906944   ;; 2^38
+           10000.0))      ;; 2^4 5^4
+
+(test "lcm"
+      189054653969025946927236298201845439024134660015551794280371585024       ;; 2^200 7^6
+      (lcm 120472576                                                           ;; 2^10  7^6
+           27007807709860849561033756885977919860590665716507399182910226432)) ;; 2^200 7^5
+
+
+(test/error "lcm" (lcm 1.2  1))
+(test/error "lcm" (lcm 1/2  1))
+(test/error "lcm" (lcm 1+2i 1))
+(test/error "lcm" (lcm 'a   1))
+(test/error "lcm" (lcm #\a  1))
+(test/error "lcm" (lcm "a"  1))
+(test/error "lcm" (lcm lcm  1))
 
 ;;------------------------------------------------------------------
 (test-subsection "expt")
