@@ -2261,9 +2261,133 @@ DEFINE_PRIMITIVE("modulo", modulo, subr2, (SCM n1, SCM n2))
  * @end lisp
 doc>
  */
+
+static SCM gcd2_fixnums(SCM n1, SCM n2)
+{
+  /* If one of the arguments was inexact, we force the result
+     to be inexact also... */
+  if (zerop(n2)) {
+
+    return (isexactp(n1) && (!isexactp(n2)))
+      ? exact2inexact(n1)
+      : n1;
+
+  } else return gcd2_fixnums(n2, STk_modulo(n1, n2));
+}
+
+
+/* In the specific case we have bignums, GMP is absolutely faster than
+   doing it ourselves. gcd2_bignum computes the GCD of two numbers,
+   assuming that the first one is a bignum, while the second may be a
+   bignum or a fixnum (no type check is done here -- this is done in
+   the gcd2 function. */
+static SCM gcd2_bignum(SCM n1, SCM n2) {
+  int exact = 1;
+
+  SCM orig_n1 = n1;
+  SCM orig_n2 = n2;
+
+  mpz_t r;
+  mpz_init_set_si(r,0);
+
+
+  /****************************************************/
+  /* CONVERT REALS INTO INTEGERS (FIXNUMS OR BIGNUMS) */
+  /****************************************************/
+
+  if (REALP(n1)) {
+    exact = 0;
+    n1 = double2rational(REAL_VAL(n1));
+    if (! (INTP(n1) || BIGNUMP(n1) ))
+      STk_error("exact or inexact integer required, got ~s", orig_n1);
+  }
+
+  if (REALP(n2)) {
+    exact = 0;
+    n2 = double2rational(REAL_VAL(n2));
+    if (! (INTP(n2) || BIGNUMP(n2) ))
+      STk_error("exact or inexact integer required, got ~s", orig_n2);
+  }
+
+
+  /*******************************************************/
+  /* SPECIAL CASE: TWO REALS REPRESENTING TWO SMALL INTS */
+  /*******************************************************/
+
+  /* Oops, the user requested two small integres, represented
+     as inexact reals. We already truned them into fixnums, so
+     we can just call gcd2_fixnums!
+     However, we use orig_n1 and orig_n2, because n1 and n2 are
+     fixnums, and originally, one of them was inexact (and we
+     want gcd2_fixnums to return an inexact in this case). */
+  if (INTP(n1) && (INTP(n2))) return gcd2_fixnums(orig_n1, orig_n2);
+
+
+  /********************************************/
+  /* COMPUTE THE GCD WITH AT LEAST ONE BIGNUM */
+  /*                                          */
+  /* Three cases:                             */
+  /* - fixnum - bignum                        */
+  /* - bignum - fixnum                        */
+  /* - bignum - bignum                        */
+  /********************************************/
+
+  if (BIGNUMP(n1) && INTP(n2)) /* n1:BIG n2:FIX */
+
+    /* GMP requires an unsigned long for the second arg
+       (there's no "si" version for this function) -- so
+       we need to call labs(). */
+    mpz_gcd_ui(r, BIGNUM_VAL(n1), labs(INT_VAL(n2)));
+
+  else if (INTP(n1) && BIGNUMP(n2)) /* n1:FIX n2:BIG */
+    mpz_gcd_ui(r, BIGNUM_VAL(n2), labs(INT_VAL(n1)));
+
+  else if (BIGNUMP(n1) && BIGNUMP(n2)) /*  n1:BIG n2:BIG */
+    mpz_gcd(r, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
+
+  else {
+    if (!(INTP(n1) || BIGNUMP(n1)))
+      STk_error("exact or inexact integer required, got ~s", n1);
+    else /* it's n2! */
+      STk_error("exact or inexact integer required, got ~s", n2);
+  }
+
+
+  /****************************************/
+  /* CHECK EXACTNESS OF RESULT AND RETURN */
+  /****************************************/
+
+  /* If both arguments were exact e'll return either a fixnum
+     or a bignum, which is what bignum2number returns: */
+  if (exact) return bignum2number(r);
+
+  /* So, if one of the arguments was inexact, AND the result fits
+     in a double (that is, the result of bignum2number is not inf
+     or nan), then we return an inexact. Otherwise, we return an
+     exact number, in order to give the user a correct result. */
+  double x = bignum2double(r);
+  if (isinf(x) || isnan(x)) return bignum2number(r);
+  return double2real(x);
+}
+
+
 static SCM gcd2(SCM n1, SCM n2)
 {
-  return zerop(n2) ? n1 : gcd2(n2, STk_modulo(n1, n2));
+  /* Delegate to GMP when we have bignums or flonums (which can be
+     large enough to be converted to bignums). */
+  if (BIGNUMP(n1) || BIGNUMP(n2) ||
+      REALP(n1) || REALP(n2) )
+    return gcd2_bignum(n1,n2);
+
+  /* Both are either fixnums or illegal.
+     If they're fixnums, GMP may or may not be faster, and in this
+     case we just compute the GCD using successive divisions.
+     We have a separate gcd2_fixnums for this, because it is recursive
+     and we don't want to keep doing the BIGNUMP checks above at
+     each recursive call.
+     If one argument is illegal, STk_modulo (called inside gcd2fixnums)
+     will trigger an error. */
+  return gcd2_fixnums(n1, n2);
 }
 
 DEFINE_PRIMITIVE("gcd", gcd, vsubr, (int argc, SCM *argv))
@@ -2271,12 +2395,12 @@ DEFINE_PRIMITIVE("gcd", gcd, vsubr, (int argc, SCM *argv))
   SCM res;
 
   if (argc == 0) return MAKE_INT(0);
-  if (argc == 1) return gcd2(*argv, MAKE_INT(0));
+  if (argc == 1) return absolute(gcd2(*argv, MAKE_INT(0)));
 
   for (res = *argv--; --argc; argv--)
-    res = absolute(gcd2(res, *argv));
+    res = gcd2(res, *argv);
 
-  return res;
+  return absolute(res);
 }
 
 DEFINE_PRIMITIVE("lcm", lcm, vsubr, (int argc, SCM *argv))
