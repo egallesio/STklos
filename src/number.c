@@ -437,35 +437,6 @@ static SCM double2integer(double n)     /* small or big depending on n's size */
   return z;
 }
 
-static SCM double2rational(double d)
-{
-  double fraction, i;
-  SCM int_part, num, den, res;
-  int negative = 0;
-
-  if (d < 0.0) { negative = 1; d = -d; }
-  fraction = modf(d, &i);
-  int_part = double2integer(i);
-
-  if (!fraction) {
-    res = int_part;
-  } else {
-    num = MAKE_INT(0);
-    den = MAKE_INT(1);
-
-    while (fraction) {
-      num      = mul2(num, MAKE_INT(2));
-      den      = mul2(den, MAKE_INT(2));
-      fraction = modf(ldexp(fraction, 1), &i);
-      if (i)
-        num = add2(num, MAKE_INT(1));
-    }
-    res = add2(int_part, div2(num, den));
-  }
-
-  return negative? mul2(res, MAKE_INT((unsigned long) -1)): res;
-}
-
 static Inline SCM bignum2scheme_bignum(mpz_t n)
 {
   SCM z;
@@ -484,6 +455,41 @@ static Inline SCM bignum2number(mpz_t n)  /* => int or bignum */
 {
   return (BIGNUM_FITS_INTEGER(n)) ? bignum2integer(n): bignum2scheme_bignum(n);
 }
+
+static SCM double2rational(double d)
+{
+  double fraction, i;
+  SCM int_part, num, den, res;
+  int negative = 0;
+
+  if (d < 0.0) { negative = 1; d = -d; }
+  fraction = modf(d, &i);
+
+  if (!fraction) {
+    /* d represents an integer! TO maximize precision, we
+       call bignum2number on it. */
+    mpz_t r;
+    mpz_init_set_d(r, d);
+    res = bignum2number(r);
+  } else {
+    num = MAKE_INT(0);
+    den = MAKE_INT(1);
+
+    int_part = double2integer(i);
+
+    while (fraction) {
+      num      = mul2(num, MAKE_INT(2));
+      den      = mul2(den, MAKE_INT(2));
+      fraction = modf(ldexp(fraction, 1), &i);
+      if (i)
+        num = add2(num, MAKE_INT(1));
+    }
+    res = add2(int_part, div2(num, den));
+  }
+
+  return negative? mul2(res, MAKE_INT((unsigned long) -1)): res;
+}
+
 
 static Inline double bignum2double(mpz_t n)
 {
