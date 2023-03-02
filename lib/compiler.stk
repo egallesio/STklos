@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 28-Feb-2023 20:43 (eg)
+;;;; Last file update:  2-Mar-2023 14:56 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -194,6 +194,125 @@
 ;; ----------------------------------------------------------------------
 ;;      Compiler parameters ...
 ;; ----------------------------------------------------------------------
+
+#|
+<doc EXT compiler:time-display
+ * (compiler:time-display)
+ * (compiler:time-display bool)
+ *
+ * This parameter controls if the time used for compiling a file must be
+ * displayed or not. It defaults to `#t`.
+ *
+doc>
+<doc
+<doc EXT compiler:gen-line-number
+ * (compiler:gen-line-number)
+ * (compiler:gen-line-number bool)
+ *
+ * This parameter controls if the compiled code must embed indications of
+ * the file location of the  of the source expressions. When set, this
+ * parameter makes programs slower and bigger. However, it can be useful
+ * when debugging a program. This parameter defaults to `#f` (but is set to
+ * ``#t` when {{stklos}} is launched in debug mode).
+doc>
+<doc EXT compiler:show-assembly-code
+ * (compiler:show-assembly-code)
+ * (compiler:show-assembly-code bool)
+ *
+ * This parameter controls if the object files produced by the {{stklos}} compiler
+ * code must embed a readable version of the code. The code is placed at the beginning
+ * of the produced file. This parameter defaults to `#f`.
+doc>
+<doc EXT compiler:inline-common-functions
+ * (compiler:inline-common-functions)
+ * (compiler:inline-common-functions bool)
+ *
+ * This parameter controls if the compiler must try to inline the most common Scheme
+ * primitives (simple arithmetic, main list or vector functions, ...). Code produced
+ * when this parameter is set is more efficient. Note that the compiler can sometimes be
+ * misleaded if those functions are redefined, hence the existence of this parameter.
+ * |compiler:inline-common-functions| is set by default to `#t`.
+ * @lisp
+ * > (compiler:inline-common-functions #t)
+ * > (disassemble-expr '(begin (car '(1 2 3)) (+ a 1)) #t)
+ *
+ * 000:  CONSTANT             0
+ * 002:  IN-CAR
+ * 003:  GLOBAL-REF           1
+ * 005:  IN-INCR
+ * 006:
+ *
+ * Constants:
+ * 0: (1 2 3)
+ * 1: a
+ * @end lisp
+ *
+ * @lisp
+ * > (compiler:inline-common-functions #f)
+ * > (disassemble-expr '(begin (car '(1 2 3)) (+ a 1)) #t)
+ *
+ * 000:  PREPARE-CALL
+ * 001:  CONSTANT-PUSH        0
+ * 003:  GREF-INVOKE          1 1
+ * 006:  PREPARE-CALL
+ * 007:  GLOBAL-REF-PUSH      2
+ * 009:  ONE-PUSH
+ * 010:  GREF-INVOKE          3 2
+ * 013:
+ *
+ * Constants:
+ * 0: (1 2 3)
+ * 1: car
+ * 2: a
+ * 3: +
+ * @end lisp
+doc>
+<doc EXT compiler:keep-formals
+ * (compiler:keep-formals)
+ * (compiler:keep-formals bool)
+ *
+ * This parameter controls if the formal parameters of a user procedure is kept
+ * at runtime. The formal parameters can be accessed with the primitive
+ * <<procedure-formals>>.
+ * Default value for |compiler:keep-formals| is `#f`.
+ * @lisp
+ * > (compiler:keep-formals #f)
+ * > (define (foo a b) ( + a b 1))
+ * > foo
+ * #[closure foo]
+ * > (procedure-formals foo)
+ * #f
+ * @end lisp
+ * @lisp
+ * > (compiler:keep-formals #t)
+ * > (define (foo a b) ( + a b 1))
+ * > foo
+ * #[closure foo (a b)]
+ * > (procedure-formals foo)
+ * (a b)
+ * @end lisp
+doc>
+<doc EXT compiler:keep-source
+ * (compiler:keep-source)
+ * (compiler:keep-source bool)
+ *
+ * This parameter controls if the source of a user procedure is kept
+ * at runtime. The source of a procedure can be accessed with the primitive <<procedure-source>>.
+ * Default value for |compiler:keep-source| is `#f`.
+ *
+ * @lisp
+ * > (compiler:keep-source #t)
+ * > (define fib
+ *      (lambda (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2))))))
+ * > (pretty-print (procedure-source fib))
+ * (lambda (n)
+ *   (if (< n 2)
+ *     n
+ *     (+ (fib (- n 1))
+ *        (fib (- n 2)))))
+ * @end lisp
+doc>
+|#
 (define compiler:time-display                   (make-parameter #t))
 (define compiler:gen-line-number                (make-parameter #f))
 (define compiler:warn-use-undefined             (make-parameter #f))
