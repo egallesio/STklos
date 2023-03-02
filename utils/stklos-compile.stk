@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 28-Feb-2023 20:54 (eg)
+;;;; Last file update:  2-Mar-2023 19:14 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -127,7 +127,7 @@
      (("case-insensitive" :alternate "i"  :help "Be case insensitive on symbols")
       (read-case-sensitive #f))
      (("colon-position" :alternate "p" :arg pos
-       :help "allowed position of ':' for keywords")
+       :help "Allowed position of ':' for keywords")
       (cond
        ((member pos '("none" "before" "after" "both"))
         (keyword-colon-position (string->symbol pos)))
