@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 28-Feb-2023 19:21 (eg)
+ * Last file update:  2-Mar-2023 19:03 (eg)
  */
 
 #include "stklos.h"
@@ -133,12 +133,11 @@ static void Usage(FILE *stream)
 "      --compiler-flags='+line-info,+show-instructions,-time-display'\n"
 "  Possible flags:\n"
 "    line-info          Insert line numbers in generated file (as -l option)\n"
-"    show-instructions  Show instructions in generated file (as -S option)\n"
+"    show-instructions  Show instructions in generated file\n"
 "    time-display       Print file compilation time\n"
 "    keep-formals       Keep formal arguments in closures\n"
 "    keep-source        Keep source code in closures\n"
 "    inline-usuals      Inline usual functions\n"
-"    show-instructions  Show instructions in generated file (as -S option)\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
