@@ -108,6 +108,40 @@ strings.
 The \fI--utf8-encoding\fR permits to force the encoding used. Note
 that if \fILC_ALL\fR is unset and this option is not used, UTF-8
 encoding will be used.
+
+.IP "-F, --compiler-flags=list"
+permits to set compiler flags to the to the values given in \fIlist\fR.
+Each flag must begin by a '+' or a '-' character to indicate if the flag is set
+or unset. Flags are separated by the ',' character. For instance, the following
+list \fI-F=+line-info,-time-display\fR sets the \fIline-info\fR option and
+unset the \fItime-display\fR option. The following flags can be used with
+this option:
+.IP "" 10
+- \fIline-info\fR insert line numbers in the generated file. Setting this flag
+is equivalent to the \fI-l\fR option. This flag uses the parameter
+\fIcompiler:gen-line-number\fR. 
+.IP "" 10
+- \fIshow-instructions\fR can be used to insert the textual instructions
+into compiled files. This flag uses the parameter
+\fIcompiler:show-assembly-code\fR.
+.IP "" 10
+- \fItime-display\fR can be used to display or not the time used to compile
+a file. This flag uses the parameter
+\fIcompiler:time-display\fR.
+.IP "" 10
+- \fIkeep-formals\fR can be used to control if formal arguments are stored in
+user procedures. This flag uses the parameter
+\fIcompiler:keep-formal\fR.
+.IP "" 10
+- \fIkeep-source\fR can be used to control if the source code is  stored in
+user procedures. This flag uses the parameter
+\fIcompiler:keep-source\fR.
+.IP "" 10
+- \fIinline-usuals\fR can be used to control if the usual functions are inlined
+in produced code. This flag uses the parameter
+\fIcompiler:inline-common-functions\fR.
+
+
 .IP "-v, --version"
 print program version and exit.
 .IP "-V"

@@ -63,6 +63,11 @@ Prepend the directory <dir> to the compiler loading path.
 Append the directory <dir> to the compiler loading path.
 .IP "--no-time"
 Do not display the compilation time
+.IP "-F, --compiler-flags=list"
+permits to set compiler flags to the to the values given in \fIlist\fR. This
+option isidentical to the one provided by the \fBSTklos\fR command. See
+.BR stklos(1)
+for more information.
 .IP "--help | -h | -?"
 Show help.
 

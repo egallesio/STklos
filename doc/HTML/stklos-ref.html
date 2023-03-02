@@ -29051,8 +29051,9 @@ misleaded if those functions are redefined, hence the existence of this paramete
 </div>
 <div class="paragraph">
 <p>This parameter controls if the formal parameters of a user procedure is kept
-at runtime. The formal parameters can be accessed with the primitive &lt;<a href="#procedure-formals">[procedure-formals]</a>&gt;.
-Default value for <code>compiler:keep-formals</code> defaults to <code>#f</code>.</p>
+at runtime. The formal parameters can be accessed with the primitive
+<a href="#procedure-formals">[procedure-formals]</a>.
+Default value for <code>compiler:keep-formals</code> is <code>#f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -29091,14 +29092,14 @@ Default value for <code>compiler:keep-formals</code> defaults to <code>#f</code>
 <div class="paragraph">
 <p>This parameter controls if the source of a user procedure is kept
 at runtime. The source of a procedure can be accessed with the primitive <a href="#procedure-source">[procedure-source]</a>.
-Default value for <code>compiler:keep-source</code> defaults to <code>#f</code>.</p>
+Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:keep-source</span> <span class="no">#t</span><span class="p">)</span>
 <span class="nv">&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">fib</span>
      <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">n</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">))</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">))))))</span>
-<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">pretty-print</span> <span class="p">(</span><span class="nf">%procedure-source</span> <span class="nv">fib</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">pretty-print</span> <span class="p">(</span><span class="nf">procedure-source</span> <span class="nv">fib</span><span class="p">))</span>
 <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span>
   <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)</span>
     <span class="nv">n</span>
@@ -29677,7 +29678,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-03-02 14:54:30 +0100
+Last updated 2023-03-02 18:59:55 +0100
 </div>
 </div>
 </body>
