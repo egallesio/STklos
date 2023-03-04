@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 23-Feb-2023 20:58 (eg)
+ * Last file update:  4-Mar-2023 23:46 (eg)
  */
 
 
@@ -1582,13 +1582,18 @@ static Inline int is_even_odd(SCM n, int odd)
                      break;
     case tc_bignum:  res = mpz_odd_p(BIGNUM_VAL(n));
                      break;
-    case tc_real:    double x = REAL_VAL(n);
-                     if (x != round(x)) return FALSE; /* Non-integers are neither even nor odd! */
-                     res = STk_real_isoddp(n);
-                     break;
+    case tc_real:   {
+                      double x = REAL_VAL(n);
+
+                      if ((x == minus_inf) || (x == plus_inf) || (x != round(x)))
+                        return 0;
+                      else
+                        res = STk_real_isoddp(n);
+                      break;
+                    }
     case tc_rational:
-    case tc_complex: return FALSE;
-    default:         STk_error("bad number ~s", n);
+    case tc_complex: return 0;
+    default:         error_bad_number(n);
   }
   return odd ? res : !res;
 }
