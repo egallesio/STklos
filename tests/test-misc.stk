@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update: 28-Feb-2023 18:46 (eg)
+;;;; Last file update:  4-Mar-2023 11:11 (eg)
 ;;;;
 
 (require "test")
@@ -167,13 +167,13 @@ b|)
 
 (test "empty signature"
       '()
-      (%procedure-signature d))
+      (procedure-formals d))
 (test "no-docstring"
       #f
       (%procedure-doc e))
 (test "no-docstring, but signature"
       '(x)
-      (%procedure-signature e))
+      (procedure-formals e))
 (test "docstring"
       "docstring abc"
       (%procedure-doc f))
@@ -182,25 +182,25 @@ b|)
       (%procedure-doc g))
 (test "signature"
       '(a b)
-      (%procedure-signature f))
+      (procedure-formals f))
 (test "signature g"
       '(a b)
-      (%procedure-signature g))
+      (procedure-formals g))
 (test "docstring h"
       "h doc"
       (%procedure-doc h))
 (test "signature h"
       '(x y)
-      (%procedure-signature h))
+      (procedure-formals h))
 (test "signature i"
       '(w z)
-      (%procedure-signature i))
+      (procedure-formals i))
 (test "really anonymous lambda - sig"
       '(l i s p)
-      (%procedure-signature (lambda (l i s p) (+ l i s p))))
+      (procedure-formals (lambda (l i s p) (+ l i s p))))
 (test "really anonymous lambda sig, with docstring"
       '(l i s p)
-      (%procedure-signature (lambda (l i s p) "Hello!" (+ l i s p))))
+      (procedure-formals (lambda (l i s p) "Hello!" (+ l i s p))))
 (test "really anonymous lambda - docstring"
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
@@ -217,13 +217,13 @@ b|)
 
 (test "empty signature, not generated"
       #f
-      (%procedure-signature dd))
+      (procedure-formals dd))
 (test "no-docstring"
       #f
       (%procedure-doc ee))
 (test "no-docstring, but sig, not generated"
       #f
-      (%procedure-signature ee))
+      (procedure-formals ee))
 (test "docstring"
       "docstring abcd"
       (%procedure-doc ff))
@@ -232,25 +232,25 @@ b|)
       (%procedure-doc gg))
 (test "signature"
       #f
-      (%procedure-signature ff))
+      (procedure-formals ff))
 (test "signature gg"
       #f
-      (%procedure-signature gg))
+      (procedure-formals gg))
 (test "docstring hh"
       "hh doc"
       (%procedure-doc hh))
 (test "signature hh"
       #f
-      (%procedure-signature hh))
+      (procedure-formals hh))
 (test "signature ii"
       #f
-      (%procedure-signature ii))
+      (procedure-formals ii))
 (test "really anonymous lambda - sig (not generated)"
       #f
-      (%procedure-signature (lambda (l i s p) (+ l i s p))))
+      (procedure-formals (lambda (l i s p) (+ l i s p))))
 (test "really anonymous lambda sig - sig not generated, with docstring"
       #f
-      (%procedure-signature (lambda (l i s p) "Hello!" (+ l i s p))))
+      (procedure-formals (lambda (l i s p) "Hello!" (+ l i s p))))
 (test "really anonymous lambda doc - sig not generated, with docstring"
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
@@ -261,22 +261,22 @@ b|)
 (define (cube x) (* x x x))
 (test "source cube"
       '(lambda (x) (* x x x))
-      (%procedure-source cube))
+      (procedure-source cube))
 
 (test "source cube different var"
       #f ;; the *exact* source is returned.
-      (equal? (%procedure-source cube)
+      (equal? (procedure-source cube)
               '(lambda (y) (* y y y))))
 
 (let ((f (lambda (a b c) (list c b a))))
   (test "source f"
         '(lambda (a b c) (list c b a))
-        (%procedure-source f)))
+        (procedure-source f)))
 
 (let ((f (lambda args (print args))))
   (test "source lambda args"
         '(lambda args (print args))
-        (%procedure-source f)))
+        (procedure-source f)))
 
 ;; not testing key and optionals, because the source of the
 ;; optional/keyword processing is included.
@@ -292,19 +292,19 @@ b|)
     (set! f loop))
   (test "source named let"
         '(lambda (a b) (set! g (list b a)) (set! f loop))
-        (%procedure-source f)))
+        (procedure-source f)))
 
 (letrec ((f (lambda (n) (if (positive? n)
                        (* n (f (- n 1)))
                        1))))
   (test "source letrec"
         '(lambda (n) (if (positive? n) (* n (f (- n 1))) 1))
-        (%procedure-source f)))
+        (procedure-source f)))
 
-(test "source 1"    #f (%procedure-source 1))
-(test "source void" #f (%procedure-source #void))
-(test "source nil"  #f (%procedure-source '()))
-(test "source code" #f (%procedure-source '(lambda (a) (- a))))
+(test/error "source 1"    (procedure-source 1))
+(test/error "source void" (procedure-source #void))
+(test/error "source nil"  (procedure-source '()))
+(test/error "source code" (procedure-source '(lambda (a) (- a))))
 
 
 ;; Disable and see if it's really off
@@ -313,17 +313,17 @@ b|)
 (define (cube x) (* x x x))
 (test "source cube"
       #f
-      (%procedure-source cube))
+      (procedure-source cube))
 
 (test "source cube different var"
       #f
-      (equal? (%procedure-source cube)
+      (equal? (procedure-source cube)
               '(lambda (y) (* y y y))))
 
 (let ((f (lambda (a b c) (list c b a))))
   (test "source f"
         #f
-        (%procedure-source f)))
+        (procedure-source f)))
 
 ;;----------------------------------------------------------------------
 (test-subsection "tagbody and repeat")

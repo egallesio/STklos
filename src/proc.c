@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 27-Feb-2023 11:00 (eg)
+ * Last file update:  4-Mar-2023 11:06 (eg)
  */
 
 #include "stklos.h"
@@ -279,15 +279,43 @@ DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
   return STk_key_get(CLOSURE_PLIST(proc), STk_key_doc, STk_false);
 }
 
-DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
+DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
+  return CLOSURE_ENV(proc);
+}
+
+/*
+<doc EXT procedure-formals
+ * (procedure-formals proc)
+ *
+ * Returns the formal parameters of procedure |proc|.
+ * Note that procedure formal parameters are kept in memory only if
+ * the compiler flag <<compiler:keep-formals>> is set at its creation.
+ * If |proc| formal parameters are not available, |procedure-formals|
+ * returns |#f|.
+doc>
+ */
+DEFINE_PRIMITIVE("procedure-formals", proc_formals, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) error_bad_procedure(proc);
   return STk_key_get(CLOSURE_PLIST(proc), STk_key_formals, STk_false);
 }
 
-DEFINE_PRIMITIVE("%procedure-source", proc_source, subr1, (SCM proc))
+/*
+<doc EXT procedure-source
+ * (procedure-source proc)
+ *
+ * Returns the source form used to define procedure |proc|.
+ * Note that procedure source is kept in memory only if the compiler flag
+ * <<compiler:keep-source>> is set at its creation. If |proc| source is
+ * not available, |procedure-source| returns |#f|.
+doc>
+ */
+DEFINE_PRIMITIVE("procedure-source", proc_source, subr1, (SCM proc))
 {
-  if (CLOSUREP(proc)) {
+  if (!CLOSUREP(proc)) error_bad_procedure(proc);
+  else {
     SCM args = STk_key_get(CLOSURE_PLIST(proc), STk_key_formals, STk_false);
     SCM body = STk_key_get(CLOSURE_PLIST(proc), STk_key_source,  STk_false);
 
@@ -297,13 +325,6 @@ DEFINE_PRIMITIVE("%procedure-source", proc_source, subr1, (SCM proc))
     }
   }
   return STk_false;
-
-}
-
-DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
-{
-  if (!CLOSUREP(proc)) return STk_false;
-  return CLOSURE_ENV(proc);
 }
 
 /*===========================================================================*\
@@ -430,11 +451,10 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(proc_arity);
   ADD_PRIMITIVE(procedure_name);
   ADD_PRIMITIVE(set_procedure_name);
-  ADD_PRIMITIVE(proc_signature);
+  ADD_PRIMITIVE(proc_formals);
   ADD_PRIMITIVE(proc_env);
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);
-  /* //FIXME  ADD_PRIMITIVE(make_expander); */
   return TRUE;
 }
