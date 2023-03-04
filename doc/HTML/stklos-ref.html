@@ -868,11 +868,10 @@ pre.rouge {
 </ul>
 </li>
 <li><a href="#_bibliography">Bibliography</a></li>
-<li><a href="#_libraries">Appendix A: STklos Libraries</a>
+<li><a href="#_libraries">Appendix A: STklos Idiosyncrasies</a>
 <ul class="sectlevel2">
-<li><a href="#_the_scheme_libraries">A.1. The (scheme &#8230;&#8203;) Libraries</a></li>
-<li><a href="#_the_srfi_libraries">A.2. The (srfi &#8230;&#8203;) Libraries</a></li>
-<li><a href="#_the_stklos_libraries">A.3. The (stklos &#8230;&#8203;) Libraries</a></li>
+<li><a href="#_stklos_libraries">A.1. STklos libraries</a></li>
+<li><a href="#_stklos_compiler_flags">A.2. STklos compiler flags</a></li>
 </ul>
 </li>
 <li><a href="#FDL">Appendix B: GNU Free Documentation License</a>
@@ -17916,6 +17915,45 @@ output goes to the current output port and if <code>port</code> is <code>#f</cod
 is returned as a string by <code>pretty-print</code>.
 Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(procedure-formals proc)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the formal parameters of procedure <code>proc</code>.
+Note that procedure formal parameters are kept in memory only if
+the compiler flag &lt;&lt;"compiler:keep-formals"&gt;&gt; is set at its creation.
+If <code>proc</code> formal parameters are not available, <code>procedure-formals</code>
+returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(procedure-source proc)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the source form used to define procedure <code>proc</code>.
+Note that procedure source is kept in memory only if the compiler flag
+&lt;&lt;"compiler:keep-source"&gt;&gt; is set at its creation. If <code>proc</code> source is
+not available, <code>procedure-source</code> returns <code>#f</code>.</p>
+</div>
 <div id="ansicolor" class="paragraph">
 <p></p>
 </div>
@@ -27517,15 +27555,17 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_libraries">Appendix A: STklos Libraries</h2>
+<h2 id="_libraries">Appendix A: STklos Idiosyncrasies</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_stklos_libraries">A.1. STklos libraries</h3>
 <div class="paragraph">
 <p>This section describes the standard libraries provided by <strong><em>STklos</em></strong>.</p>
 </div>
-<div class="sect2">
-<h3 id="_the_scheme_libraries">A.1. The (scheme &#8230;&#8203;) Libraries</h3>
 <div class="sect3">
-<h4 id="_r7rs_small_libraries">A.1.1. R<sup>7</sup>RS Small Libraries</h4>
+<h4 id="_the_scheme_libraries">A.1.1. The (scheme &#8230;&#8203;) Libraries</h4>
+<div class="sect4">
+<h5 id="_r7rs_small_libraries">R<sup>7</sup>RS Small Libraries</h5>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> offers all the libraries defined by R<sup>7</sup>RS:</p>
 </div>
@@ -27585,8 +27625,8 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 <p>See the <a href="#R7RS">[R7RS]</a> document for more information.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_r7rs_large_libraries">A.1.2. R<sup>7</sup>RS Large Libraries</h4>
+<div class="sect4">
+<h5 id="_r7rs_large_libraries">R<sup>7</sup>RS Large Libraries</h5>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> supports some libraries of the (under development) R<sup>7</sup>RS Large editions.</p>
 </div>
@@ -27660,8 +27700,8 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_the_srfi_libraries">A.2. The (srfi &#8230;&#8203;) Libraries</h3>
+<div class="sect3">
+<h4 id="_the_srfi_libraries">A.1.2. The (srfi &#8230;&#8203;) Libraries</h4>
 <div class="paragraph">
 <p>All the SRFI supported by <strong><em>STklos</em></strong> are placed under
 the <code>srfi</code> meta library and their name is SRFI number. Hence, to use
@@ -27672,16 +27712,16 @@ the exported symbols of <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.
 <p>See  <em><a href="#_srfis">Chapter 14</a></em> for more information</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_the_stklos_libraries">A.3. The (stklos &#8230;&#8203;) Libraries</h3>
+<div class="sect3">
+<h4 id="_the_stklos_libraries">A.1.3. The (stklos &#8230;&#8203;) Libraries</h4>
 <div class="paragraph">
 <p>This section describes the standard libraries which are placed under
 the <code>stklos</code> meta library. Note that <strong><em>STklos</em></strong> extensions can add
 some libraries in the <code>stklos</code> meta library; they will be described in
 the extension documentation.</p>
 </div>
-<div class="sect3">
-<h4 id="_stklos_itrie_library">A.3.1. (stklos itrie) Library</h4>
+<div class="sect4">
+<h5 id="_stklos_itrie_library">(stklos itrie) Library</h5>
 <div class="paragraph">
 <p>This library was designed by Jerônimo Pellegrini
 (<a href="https://github.com/jpellegrini">@jpellegrini</a>).</p>
@@ -28896,8 +28936,8 @@ is negative. It is an error if <code>step</code> is zero.</p>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_stklos_preproc_library">A.3.2. (stklos preproc) Library</h4>
+<div class="sect4">
+<h5 id="_stklos_preproc_library">(stklos preproc) Library</h5>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -28909,6 +28949,202 @@ This library  must be described
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_stklos_compiler_flags">A.2. STklos compiler flags</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> compiler behaviour can be customized by several parameters. Those parameters are described below.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:time-display)</code></strong><br>
+<strong><code>(compiler:time-display bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the time used for compiling a file must be
+displayed or not. It defaults to <code>#t</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:gen-line-number)</code></strong><br>
+<strong><code>(compiler:gen-line-number bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the compiled code must embed indications of
+the file location of the  of the source expressions. When set, this
+parameter makes programs slower and bigger. However, it can be useful
+when debugging a program. This parameter defaults to <code>#f</code> (but is set to
+<code>`#t</code> when <strong><em>STklos</em></strong> is launched in debug mode).</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:show-assembly-code)</code></strong><br>
+<strong><code>(compiler:show-assembly-code bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the object files produced by the <strong><em>STklos</em></strong> compiler
+code must embed a readable version of the code. The code is placed at the beginning
+of the produced file. This parameter defaults to <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:inline-common-functions)</code></strong><br>
+<strong><code>(compiler:inline-common-functions bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the compiler must try to inline the most common Scheme
+primitives (simple arithmetic, main list or vector functions, &#8230;&#8203;). Code produced
+when this parameter is set is more efficient. Note that the compiler can sometimes be
+misleaded if those functions are redefined, hence the existence of this parameter.
+<code>compiler:inline-common-functions</code> is set by default to <code>#t</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:inline-common-functions</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="mi">1</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">CONSTANT</span>             <span class="mi">0</span>
+<span class="mi">002</span><span class="nv">:</span>  <span class="nv">IN-CAR</span>
+<span class="mi">003</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF</span>           <span class="mi">1</span>
+<span class="mi">005</span><span class="nv">:</span>  <span class="nv">IN-INCR</span>
+<span class="mi">006</span><span class="nv">:</span>
+
+<span class="nv">Constants:</span>
+<span class="mi">0</span><span class="nv">:</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="mi">1</span><span class="nv">:</span> <span class="nv">a</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:inline-common-functions</span> <span class="no">#f</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="mi">1</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">PREPARE-CALL</span>
+<span class="mi">001</span><span class="nv">:</span>  <span class="nv">CONSTANT-PUSH</span>        <span class="mi">0</span>
+<span class="mi">003</span><span class="nv">:</span>  <span class="nv">GREF-INVOKE</span>          <span class="mi">1</span> <span class="mi">1</span>
+<span class="mi">006</span><span class="nv">:</span>  <span class="nv">PREPARE-CALL</span>
+<span class="mi">007</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF-PUSH</span>      <span class="mi">2</span>
+<span class="mi">009</span><span class="nv">:</span>  <span class="nv">ONE-PUSH</span>
+<span class="mi">010</span><span class="nv">:</span>  <span class="nv">GREF-INVOKE</span>          <span class="mi">3</span> <span class="mi">2</span>
+<span class="mi">013</span><span class="nv">:</span>
+
+<span class="nv">Constants:</span>
+<span class="mi">0</span><span class="nv">:</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="mi">1</span><span class="nv">:</span> <span class="nv">car</span>
+<span class="mi">2</span><span class="nv">:</span> <span class="nv">a</span>
+<span class="mi">3</span><span class="nv">:</span> <span class="nv">+</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:keep-formals)</code></strong><br>
+<strong><code>(compiler:keep-formals bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the formal parameters of a user procedure is kept
+at runtime. The formal parameters can be accessed with the primitive
+&lt;&lt;"procedure-formals"&gt;&gt;.
+Default value for <code>compiler:keep-formals</code> is <code>#f</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:keep-formals</span> <span class="no">#f</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">foo</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span> <span class="nv">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="nv">foo</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">foo</span><span class="p">]</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">procedure-formals</span> <span class="nv">foo</span><span class="p">)</span>
+<span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:keep-formals</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">foo</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span> <span class="nv">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="nv">foo</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">foo</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)]</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">procedure-formals</span> <span class="nv">foo</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:keep-source)</code></strong><br>
+<strong><code>(compiler:keep-source bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the source of a user procedure is kept
+at runtime. The source of a procedure can be accessed with the primitive
+&lt;&lt;"procedure-source"&gt;&gt;.
+Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:keep-source</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">fib</span>
+     <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">n</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">))</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">))))))</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">pretty-print</span> <span class="p">(</span><span class="nf">procedure-source</span> <span class="nv">fib</span><span class="p">))</span>
+<span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="nv">n</span>
+    <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">))</span>
+       <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)))))</span></code></pre>
 </div>
 </div>
 </div>
@@ -29482,7 +29718,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-25 19:38:22 +0100
+Last updated 2023-03-04 11:56:49 +0100
 </div>
 </div>
 </body>

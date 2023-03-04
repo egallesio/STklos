@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 21-Feb-2023 11:43 (eg)
+ * Last file update: 26-Feb-2023 21:17 (eg)
  */
 
 // INLINER values
@@ -1500,44 +1500,37 @@ CASE(POP_HANDLER) {
   NEXT;
 }
 
-//FIXME Delete the following code
-
-
-//FIXME CASE(MAKE_EXPANDER) {
-//FIXME  SCM name = fetch_const();
-//FIXME  SCM ref, val;
-//FIXME
-//FIXME  val = STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
-//FIXME  if ( ! (CONSP(val) &&CONSP(CDR(val)) && (CAR(CAR(val)) == name)) ) {
-//FIXME    /* We are just compiling this macro, so it is already entered in the
-//FIXME     * table of expanders by the compiler. Don't add it twice.
-//FIXME     * Note: if this test is false, this is probably that wa are reading
-//FIXME     * back a bytecode file and the macro must be entered in the table
-//FIXME     */
-//FIXME    /* Note: we are sure that this box arity is 1 */
-//FIXME    *BOX_VALUES(CDR(ref)) = STk_cons(STk_cons(name, vm->val), val);
-//FIXME  }
-//FIXME  vm->valc    = 2;
-//FIXME  vm->val     = STk_void;
-//FIXME  vm->vals[1] = name;
-//FIXME  NEXT;
-//FIXME}
 
 CASE(FORMALS) {
   SCM formals = fetch_const();
 
-  if (vm->valc == 1 && CLOSUREP(vm->val))
-    CLOSURE_FORMALS(vm->val) = formals;
-
+  if (vm->valc == 1 && CLOSUREP(vm->val)) {
+    CLOSURE_PLIST(vm->val) = STk_key_set(CLOSURE_PLIST(vm->val),
+                                         STk_key_formals,
+                                         formals);
+  }
   NEXT;
 }
 
 CASE(DOCSTRG) {
   SCM str = fetch_const();
 
-  if (vm->valc == 1 && CLOSUREP(vm->val))
-    CLOSURE_DOC(vm->val) = str;
+  if (vm->valc == 1 && CLOSUREP(vm->val)) {
+    CLOSURE_PLIST(vm->val) = STk_key_set(CLOSURE_PLIST(vm->val),
+                                         STk_key_doc,
+                                         str);
+  }
+  NEXT;
+}
 
+CASE(SOURCE) {
+  SCM src = fetch_const();
+
+  if (vm->valc == 1 && CLOSUREP(vm->val)) {
+    CLOSURE_PLIST(vm->val) = STk_key_set(CLOSURE_PLIST(vm->val),
+                                         STk_key_source,
+                                         src);
+  }
   NEXT;
 }
 

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Oct-2001 08:40 (eg)
-;;;; Last file update:  6-Jan-2023 12:22 (eg)
+;;;; Last file update:  2-Mar-2023 19:11 (eg)
 ;;;;
 
 ;;;;
@@ -59,11 +59,11 @@ doc>
                                                         ">")
                                          ""))))))
       (if help
-          ; We have an help string, return something like ("--long, -l" . "help")
+          ; We have an help string, return something like ("-l ,--long" . "help")
           (cons
            (if alt
-               (format #f "~A, ~A" (pretty opt arg) (pretty alt arg))
-               (format #f "~A" (pretty opt arg)))
+               (format #f "~A, ~A" (pretty alt arg) (pretty opt arg))
+               (format #f "    ~A" (pretty opt arg)))
            help)
           ; No help string
           '())))

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  5-Jan-2023 15:27 (eg)
+ * Last file update:  2-Mar-2023 19:03 (eg)
  */
 
 #include "stklos.h"
@@ -62,6 +62,7 @@ static char *program_file = "";
 static char *load_file    = "";
 static char *conf_dir     = "";
 static char *sexpr        = "";
+static char *cflags       = "";
 static int  vanilla       = 0;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
@@ -72,12 +73,14 @@ static SCM  Idirs         = STk_nil;
 static SCM  Adirs         = STk_nil;
 
 
+
 static struct option long_options [] =
 {
   {"version",           no_argument,       NULL, 'v'},
   {"file",              required_argument, NULL, 'f'},
   {"prepend-load-path", required_argument, NULL, 'I'},
   {"append-load-path",  required_argument, NULL, 'A'},
+  {"compiler-flags",    required_argument, NULL, 'F'},
   {"load",              required_argument, NULL, 'l'},
   {"execute",           required_argument, NULL, 'e'},
   {"boot-file",         required_argument, NULL, 'b'},
@@ -121,9 +124,20 @@ static void Usage(FILE *stream)
 "   -c, --case-sensitive            be case sensitive by default\n"
 "       --case-insensitive          be case insensitive by default\n"
 "   -u, --utf8-encoding=yes|no      use/don't use UTF-8 encoding\n"
+"   -F list, --compiler-flags=list  set/unset compiler flags (see below)\n"
 "   -v, --version                   show version and exit (simple)\n"
 "   -V                              show version and exit (detailed, SRFI-176)\n"
 "   -h, --help                      show this help and exit\n"
+"Compiler flags:\n"
+"  They are of the form +xxx or -xxx separated by commas, such as\n"
+"      --compiler-flags='+line-info,+show-instructions,-time-display'\n"
+"  Possible flags:\n"
+"    line-info          Insert line numbers in generated file (as -l option)\n"
+"    show-instructions  Show instructions in generated file\n"
+"    time-display       Print file compilation time\n"
+"    keep-formals       Keep formal arguments in closures\n"
+"    keep-source        Keep source code in closures\n"
+"    inline-usuals      Inline usual functions\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
@@ -136,7 +150,7 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "+qidnvVhcf:l:e:b:s:D:I:A:u:", long_options, NULL);
+    c = getopt_long(argc, argv, "+qidnvVhcF:f:l:e:b:s:D:I:A:u:", long_options, NULL);
     if (c == -1) break;
 
     switch (c) {
@@ -144,6 +158,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'V': srfi_176        = 1;                                    break;
       case 'I': Idirs = STk_cons(STk_Cstring2string(optarg), Idirs);    break;
       case 'A': Adirs = STk_cons(STk_Cstring2string(optarg), Adirs);    break;
+      case 'F': cflags          = optarg;                               break;
       case 'f': program_file    = optarg;                               break;
       case 'l': load_file       = optarg;                               break;
       case 'e': sexpr           = optarg;                               break;
@@ -182,6 +197,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_OPTION(load_file,            "load");
   ADD_OPTION(sexpr,                "sexpr");
   ADD_OPTION(conf_dir,             "conf-dir");
+  ADD_OPTION(cflags,               "comp-flags");
   ADD_BOOL_OPTION(srfi_176,        "srfi-176");
   ADD_BOOL_OPTION(vanilla,         "no-init-file");
   ADD_BOOL_OPTION(STk_interactive, "interactive");

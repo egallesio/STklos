@@ -1,7 +1,7 @@
 ;;;;
 ;;;; utils.stk  -- Compiler Utilities
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update: 14-Apr-2022 15:52 (eg)
+;;;; Last file update:  4-Mar-2023 11:48 (eg)
 ;;;;
 
 
@@ -99,6 +99,7 @@
 ;;//(define (compiler-warning where fmt . l)
 ;;//  (%compiler-message "warning" where fmt l))
 
+;; ----------------------------------------------------------------------
 (define (unquote . l)
   (error 'unquote "used outside of a quasiquote context"))
 
@@ -125,3 +126,4 @@ doc>
 
    (else
     (error 'syntax-error "bad parameters ~S" (cons msg args)))))
+

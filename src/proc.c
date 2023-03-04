@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,16 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 10-Jun-2022 16:59 (eg)
+ * Last file update:  4-Mar-2023 11:43 (eg)
  */
 
 #include "stklos.h"
 #include "object.h"
+
+
+/* Keywords used in procedure plists */
+SCM STk_key_source, STk_key_formals, STk_key_doc;
+
 
 /*===========================================================================*\
  *
@@ -50,14 +55,12 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
 
   NEWCELL(z, closure);
   CLOSURE_ENV(z)   = env;
-  CLOSURE_FORMALS(z) = STk_false;
   CLOSURE_PLIST(z) = STk_nil;
   CLOSURE_NAME(z)  = STk_false;
   CLOSURE_ARITY(z) = arity;
   CLOSURE_CONST(z) = cst;
   CLOSURE_BCODE(z) = code;
   CLOSURE_SIZE(z)  = size;
-  CLOSURE_DOC(z)   = STk_false;
   return z;
 }
 
@@ -69,7 +72,7 @@ static void print_lambda(SCM closure, SCM port, int mode)
   else
     STk_fprintf(port, "#[closure %lx", (unsigned long) closure);
 
-  SCM formals = CLOSURE_FORMALS(closure);
+  SCM formals = STk_key_get(CLOSURE_PLIST(closure), STk_key_formals, STk_false);
   if (formals != STk_false) {
     STk_nputs(port, " ", 1);
     STk_print(formals, port, mode);
@@ -273,19 +276,55 @@ DEFINE_PRIMITIVE("%procedure-code", proc_code, subr1, (SCM proc))
 DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
-  return CLOSURE_DOC(proc);
-}
-
-DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
-{
-  if (!CLOSUREP(proc)) return STk_false;
-  return CLOSURE_FORMALS(proc);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_key_doc, STk_false);
 }
 
 DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
 {
   if (!CLOSUREP(proc)) return STk_false;
   return CLOSURE_ENV(proc);
+}
+
+/*
+<doc EXT procedure-formals
+ * (procedure-formals proc)
+ *
+ * Returns the formal parameters of procedure |proc|.
+ * Note that procedure formal parameters are kept in memory only if
+ * the compiler flag <<"compiler:keep-formals">> is set at its creation.
+ * If |proc| formal parameters are not available, |procedure-formals|
+ * returns |#f|.
+doc>
+ */
+DEFINE_PRIMITIVE("procedure-formals", proc_formals, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) error_bad_procedure(proc);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_key_formals, STk_false);
+}
+
+/*
+<doc EXT procedure-source
+ * (procedure-source proc)
+ *
+ * Returns the source form used to define procedure |proc|.
+ * Note that procedure source is kept in memory only if the compiler flag
+ * <<"compiler:keep-source">> is set at its creation. If |proc| source is
+ * not available, |procedure-source| returns |#f|.
+doc>
+ */
+DEFINE_PRIMITIVE("procedure-source", proc_source, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) error_bad_procedure(proc);
+  else {
+    SCM args = STk_key_get(CLOSURE_PLIST(proc), STk_key_formals, STk_false);
+    SCM body = STk_key_get(CLOSURE_PLIST(proc), STk_key_source,  STk_false);
+
+    if (args != STk_false && body != STk_false) {
+      return STk_cons(STk_intern("lambda"),
+                      STk_cons(args, body));
+    }
+  }
+  return STk_false;
 }
 
 /*===========================================================================*\
@@ -394,20 +433,13 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
 }
 
 
-#ifdef FIXME
-// DEFINE_PRIMITIVE("make-expander", make_expander, subr1, (SCM form))
-// {
-//   SCM eval, compiled_form, ref;
-//
-//   eval               = STk_lookup(STk_intern("eval"), STk_current_module, &ref);
-//   compiled_form = STk_C_apply(eval, 1 , form);
-//
-//   return compiled_form;
-// }
-#endif
-
 int STk_init_proc(void)
 {
+  // Define some keywords to avoid calls to STk_makekey (which uses a mutex!)
+  STk_key_source  = STk_makekey("source");
+  STk_key_formals = STk_makekey("formals");
+  STk_key_doc     = STk_makekey("documentation");
+
   DEFINE_XTYPE(closure, &xtype_closure);
   ADD_PRIMITIVE(procedurep);
   ADD_PRIMITIVE(closurep);
@@ -415,14 +447,14 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(set_proc_plist);
   ADD_PRIMITIVE(proc_code);
   ADD_PRIMITIVE(proc_doc);
+  ADD_PRIMITIVE(proc_source);
   ADD_PRIMITIVE(proc_arity);
   ADD_PRIMITIVE(procedure_name);
   ADD_PRIMITIVE(set_procedure_name);
-  ADD_PRIMITIVE(proc_signature);
+  ADD_PRIMITIVE(proc_formals);
   ADD_PRIMITIVE(proc_env);
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);
-  /* //FIXME  ADD_PRIMITIVE(make_expander); */
   return TRUE;
 }

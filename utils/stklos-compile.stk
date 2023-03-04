@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 20-May-2022 18:57 (eg)
+;;;; Last file update:  2-Mar-2023 19:14 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -127,7 +127,7 @@
      (("case-insensitive" :alternate "i"  :help "Be case insensitive on symbols")
       (read-case-sensitive #f))
      (("colon-position" :alternate "p" :arg pos
-       :help "allowed position of ':' for keywords")
+       :help "Allowed position of ':' for keywords")
       (cond
        ((member pos '("none" "before" "after" "both"))
         (keyword-colon-position (string->symbol pos)))
@@ -156,7 +156,9 @@
      (("line-info" :alternate "l" :help "Insert line numbers in generated file")
         (compiler:gen-line-number #t))
      (("show-instructions" :alternate "S" :help "Show instructions in generated file")
-        (compiler:show-assembly-code #t))
+         (compiler:show-assembly-code #t))
+     (("compiler-flags" :alternate "F" :arg flags :help "Add (+) or suppress (-) compiler flags")
+      (%compiler-set-flags flags))
 
      "Path options"
      (("prepend-load-path" :alternate "I" :arg dir
@@ -167,11 +169,22 @@
       (set! (load-path) (append (load-path) (list dir))))
 
      "Misc. options"
-     (("no-time" :help "Don't display compilation time")
+     (("no-time" :help "Don't display file compilation time")
         (compiler:time-display #f))
      (("help" :alternate "h" :help "This help")
         (arg-usage (current-output-port))
         (exit 0))
+
+     "\nCompiler flags (option -F)"
+     "  They are of the form +xxx or -xxx separated by commas, such as"
+     "      -compiler-flags '+line-info,+show-instructions,-time-display'"
+     "  Possible flags:"
+     "    line-info          Insert line numbers in generated file (as -l option)"
+     "    time-display       Print file compilation time"
+     "    keep-formals       Keep formal arguments in closures"
+     "    keep-source        Keep source code in closures"
+     "    inline-usuals      Inline usual functions"
+     "    show-instructions  Show instructions in generated file (as -S option)"
 
      (else
       (cond
