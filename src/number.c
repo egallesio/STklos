@@ -2277,10 +2277,11 @@ static SCM gcd2_fixnums(SCM n1, SCM n2)
 
 
 /* In the specific case we have bignums, GMP is absolutely faster than
-   doing it ourselves. gcd2_bignum computes the GCD of two numbers,
-   assuming that the first one is a bignum, while the second may be a
-   bignum or a fixnum (no type check is done here -- this is done in
-   the gcd2 function. */
+   doing it ourselves. gcd2_bignum computes the GCD of two numbers.
+   The function expects n1 and n2 to be either reals, bignums or fixnums.
+   When it happens that two reals end up being converted to two FIXNUMS
+   (or if two FIXNUMS were passed as arguments -- which doesn't make much
+   sense, and we don't anyway), then gcd2_fixnums() is called. */
 static SCM gcd2_bignum(SCM n1, SCM n2) {
   int exact = 1;
 
