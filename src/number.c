@@ -2090,7 +2090,7 @@ doc>
 DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
-    case tc_integer:  if (INT_VAL(x) == (unsigned long)INT_MIN_VAL)
+    case tc_integer:  if (INT_VAL(x) == (long)INT_MIN_VAL)
                         return long2scheme_bignum(-INT_VAL(x));
                       return (INT_VAL(x) < 0) ? MAKE_INT(-INT_VAL(x)) : x;
     case tc_bignum:   if (mpz_cmp_ui(BIGNUM_VAL(x), 0L) < 0) {
