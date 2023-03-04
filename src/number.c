@@ -2793,11 +2793,12 @@ static SCM my_cosh(SCM z)
                     return double2real(cosh(INT_VAL(z)));
   case tc_complex:
   case tc_bignum:
-  case tc_rational:
+  case tc_rational: {
       SCM ez = my_exp(z);
       SCM inv_ez = div2 (MAKE_INT(1), ez);
       return div2(add2(ez,inv_ez),
                   double2real(2.0));
+  }
   default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
@@ -2821,11 +2822,12 @@ static SCM my_sinh(SCM z)
                     return double2real(sinh(INT_VAL(z)));
   case tc_complex:
   case tc_bignum:
-  case tc_rational:
+  case tc_rational: {
       SCM ez = my_exp(z);
       SCM inv_ez = div2 (MAKE_INT(1), ez);
       return div2(sub2(ez,inv_ez),
                   double2real(2.0));
+  }
   default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
@@ -2849,11 +2851,12 @@ static SCM my_tanh(SCM z)
                     return double2real(tanh(INT_VAL(z)));
   case tc_complex:
   case tc_bignum:
-  case tc_rational:
+  case tc_rational: {
       SCM ez = my_exp(z);
       SCM inv_ez = div2 (MAKE_INT(1), ez);
       return div2(sub2 (ez, inv_ez),
                   add2 (ez, inv_ez));
+  }
   default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
