@@ -1545,14 +1545,52 @@ int STk_real_isoddp(SCM n)   /* n MUST be a real */
   return (fpclassify(REAL_VAL(r)) != FP_ZERO);
 }
 
-static Inline int is_oddp(SCM n)
+/* is_even_odd(SCM n, int odd):
+
+   Returns 1 = true, 0 = false.
+
+   When the argument "odd" is one, the question is
+   "is this number, n, odd?"
+
+   When the argument "odd" is zero, the question is
+   "is this number, n, even?"
+
+   If n is not a number, we call STk_error.
+
+   Note that the function will disregard the "odd"
+   argument if, for example, n is complex, rational,
+   or a real that does not correspond to an integer:
+
+   (1,    0) => 0
+   (1,    1) => 1
+   (4,    0) => 1
+   (4,    1) => 0
+   (1/2,  0) => 0
+   (1/2,  1) => 0
+   (1.5,  0) => 0
+   (1.5,  1) => 0
+   (1+1i, 0) => 0
+   (1+1i, 0) => 0
+
+   (Non-integers are neither even nor odd)
+ */
+static Inline int is_even_odd(SCM n, int odd)
 {
+  int res = 0;
   switch (TYPEOF(n)) {
-    case tc_integer: return INT_VAL(n) & 1;
-    case tc_bignum:  return mpz_odd_p(BIGNUM_VAL(n));
-    case tc_real:    return STk_real_isoddp(n);
+    case tc_integer: res = INT_VAL(n) & 1;
+                     break;
+    case tc_bignum:  res = mpz_odd_p(BIGNUM_VAL(n));
+                     break;
+    case tc_real:    double x = REAL_VAL(n);
+                     if (x != round(x)) return FALSE; /* Non-integers are neither even nor odd! */
+                     res = STk_real_isoddp(n);
+                     break;
+    case tc_rational:
+    case tc_complex: return FALSE;
+    default:         STk_error("bad number ~s", n);
   }
-  return FALSE; /* never reached */
+  return odd ? res : !res;
 }
 
 static int zerop(SCM n)
@@ -1654,13 +1692,13 @@ DEFINE_PRIMITIVE("negative?", negativep, subr1, (SCM n))
 
 DEFINE_PRIMITIVE("odd?", oddp, subr1, (SCM n))
 {
-  return MAKE_BOOLEAN(is_oddp(n));
+  return MAKE_BOOLEAN(is_even_odd(n,1));
 }
 
 
 DEFINE_PRIMITIVE("even?", evenp, subr1, (SCM n))
 {
-  return MAKE_BOOLEAN(!is_oddp(n));
+  return MAKE_BOOLEAN(is_even_odd(n,0));
 }
 
 /*
