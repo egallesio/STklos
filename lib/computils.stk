@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update: 28-Feb-2023 20:53 (eg)
+;;;; Last file update:  4-Mar-2023 11:48 (eg)
 ;;;;
 
 
@@ -100,29 +100,6 @@
 ;;//  (%compiler-message "warning" where fmt l))
 
 ;; ----------------------------------------------------------------------
-;;      %compiler-set-flags ...
-;; ----------------------------------------------------------------------
-(define (%compiler-set-flags str-flags)
-  ;; str-flags is something like "+xxx,-yyy,+zzz"
-  (for-each (lambda (flag)
-              (let* ((sign (string-ref flag 0))
-                     (opt  (substring flag 1 (string-length flag)))
-                     (val  (case sign
-                             ((#\+) #t)
-                             ((#\-) #f)
-                             (else (error "flag ~s must begin with '+' or '-'"
-                                          flag)))))
-                (case (string->symbol opt)
-                  ((line-info)         (compiler:gen-line-number val))
-                  ((time-display)      (compiler:time-display val))
-                  ((keep-formals)      (compiler:generate-signature val))
-                  ((keep-source)       (compiler:keep-source val))
-                  ((inline-usuals)     (compiler:inline-common-functions val))
-                  ((show-instructions) (compiler:show-assembly-code val))
-                  (else (error "bad flag ~s" flag)))))
-            (string-split str-flags ",")))
-
-;; ----------------------------------------------------------------------
 (define (unquote . l)
   (error 'unquote "used outside of a quasiquote context"))
 
@@ -149,3 +126,4 @@ doc>
 
    (else
     (error 'syntax-error "bad parameters ~S" (cons msg args)))))
+

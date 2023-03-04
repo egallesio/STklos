@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  9-Feb-2023 20:04 (eg)
+# Last file update:  4-Mar-2023 11:53 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -400,6 +400,7 @@ scheme_BOOT = assembler.stk \
           callcc.stk        \
           compiler.stk      \
           compfile.stk      \
+          compflags.stk     \
           computils.stk     \
           equiv.stk         \
           expand.pp         \
