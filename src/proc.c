@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update:  4-Mar-2023 11:06 (eg)
+ * Last file update:  4-Mar-2023 11:43 (eg)
  */
 
 #include "stklos.h"
@@ -291,7 +291,7 @@ DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
  *
  * Returns the formal parameters of procedure |proc|.
  * Note that procedure formal parameters are kept in memory only if
- * the compiler flag <<compiler:keep-formals>> is set at its creation.
+ * the compiler flag <<"compiler:keep-formals">> is set at its creation.
  * If |proc| formal parameters are not available, |procedure-formals|
  * returns |#f|.
 doc>
@@ -308,7 +308,7 @@ DEFINE_PRIMITIVE("procedure-formals", proc_formals, subr1, (SCM proc))
  *
  * Returns the source form used to define procedure |proc|.
  * Note that procedure source is kept in memory only if the compiler flag
- * <<compiler:keep-source>> is set at its creation. If |proc| source is
+ * <<"compiler:keep-source">> is set at its creation. If |proc| source is
  * not available, |procedure-source| returns |#f|.
 doc>
  */

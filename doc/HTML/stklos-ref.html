@@ -17915,6 +17915,45 @@ output goes to the current output port and if <code>port</code> is <code>#f</cod
 is returned as a string by <code>pretty-print</code>.
 Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(procedure-formals proc)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the formal parameters of procedure <code>proc</code>.
+Note that procedure formal parameters are kept in memory only if
+the compiler flag &lt;&lt;"compiler:keep-formals"&gt;&gt; is set at its creation.
+If <code>proc</code> formal parameters are not available, <code>procedure-formals</code>
+returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(procedure-source proc)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the source form used to define procedure <code>proc</code>.
+Note that procedure source is kept in memory only if the compiler flag
+&lt;&lt;"compiler:keep-source"&gt;&gt; is set at its creation. If <code>proc</code> source is
+not available, <code>procedure-source</code> returns <code>#f</code>.</p>
+</div>
 <div id="ansicolor" class="paragraph">
 <p></p>
 </div>
@@ -29052,7 +29091,7 @@ misleaded if those functions are redefined, hence the existence of this paramete
 <div class="paragraph">
 <p>This parameter controls if the formal parameters of a user procedure is kept
 at runtime. The formal parameters can be accessed with the primitive
-<a href="#procedure-formals">[procedure-formals]</a>.
+&lt;&lt;"procedure-formals"&gt;&gt;.
 Default value for <code>compiler:keep-formals</code> is <code>#f</code>.</p>
 </div>
 <div class="listingblock">
@@ -29091,7 +29130,8 @@ Default value for <code>compiler:keep-formals</code> is <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p>This parameter controls if the source of a user procedure is kept
-at runtime. The source of a procedure can be accessed with the primitive <a href="#procedure-source">[procedure-source]</a>.
+at runtime. The source of a procedure can be accessed with the primitive
+&lt;&lt;"procedure-source"&gt;&gt;.
 Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
 </div>
 <div class="listingblock">
@@ -29678,7 +29718,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-03-02 18:59:55 +0100
+Last updated 2023-03-04 11:56:49 +0100
 </div>
 </div>
 </body>

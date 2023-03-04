@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 25-Feb-2023 19:38 (eg)
+// Last file update:  4-Mar-2023 11:32 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -962,6 +962,8 @@ See SRFI document for more information.
 {{insertdoc 'trace}}
 {{insertdoc 'untrace}}
 {{insertdoc 'pp}}
+{{insertdoc 'procedure-formals}}
+{{insertdoc 'procedure-source}}
 [#ansicolor]
 {{insertdoc 'ansi-color}}
 {{insertdoc 'disassemble}}
