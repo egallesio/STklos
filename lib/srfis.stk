@@ -274,7 +274,7 @@
     ;; 232 Flexible Curried Procedures
     (233 "INI files" (ini-files) "srfi-233")
     ;; 234 Topological sorting (draft)
-    ;; 235 Compinators (draft)
+    (235 "Combinators" (combinators) "srfi-235")
     (236 "Evaluating expressions in an unspecified order" () "srfi-236")
     ;; 237 R6RS Records (refined) (draft)
     (238 "Codesets" () "srfi-238")
