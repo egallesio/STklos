@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 23-Feb-2023 20:58 (eg)
+ * Last file update:  5-Mar-2023 16:30 (eg)
  */
 
 
@@ -1545,14 +1545,25 @@ int STk_real_isoddp(SCM n)   /* n MUST be a real */
   return (fpclassify(REAL_VAL(r)) != FP_ZERO);
 }
 
-static Inline int is_oddp(SCM n)
+static Inline int number_parity(SCM n)
 {
+  /* result -1 (odd), 0 (non integer), +1 (even). Error if n is not a number. */
   switch (TYPEOF(n)) {
-    case tc_integer: return INT_VAL(n) & 1;
-    case tc_bignum:  return mpz_odd_p(BIGNUM_VAL(n));
-    case tc_real:    return STk_real_isoddp(n);
-  }
-  return FALSE; /* never reached */
+    case tc_integer:  return (INT_VAL(n) & 1)? -1: +1;
+    case tc_bignum:   return mpz_odd_p(BIGNUM_VAL(n))? -1: +1;
+    case tc_real:     {
+                        double x = REAL_VAL(n);
+
+                        if ((x == minus_inf) || (x == plus_inf) || (x != round(x)))
+                          return 0;
+                        else
+                          return STk_real_isoddp(n) ? -1: +1;
+                      }
+    case tc_rational:
+    case tc_complex:  return 0;
+    default:          error_bad_number(n);
+   }
+  return 0;  /* for the compiler */
 }
 
 static int zerop(SCM n)
@@ -1654,14 +1665,15 @@ DEFINE_PRIMITIVE("negative?", negativep, subr1, (SCM n))
 
 DEFINE_PRIMITIVE("odd?", oddp, subr1, (SCM n))
 {
-  return MAKE_BOOLEAN(is_oddp(n));
+  return MAKE_BOOLEAN(number_parity(n) < 0);
 }
 
 
 DEFINE_PRIMITIVE("even?", evenp, subr1, (SCM n))
 {
-  return MAKE_BOOLEAN(!is_oddp(n));
+  return MAKE_BOOLEAN(number_parity(n) >0);
 }
+
 
 /*
 <doc R7RS nan?
