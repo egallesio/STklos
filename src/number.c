@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  5-Mar-2023 16:30 (eg)
+ * Last file update:  5-Mar-2023 18:19 (eg)
  */
 
 
@@ -2095,14 +2095,14 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
  * |Abs| returns the absolute value of its argument.
  * @lisp
  * (abs -7)                =>  7
- * (abs -inf.0)            => +inf.0
+ * (abs -inf.0)            => +inf.0m
  * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
-    case tc_integer:  if (INT_VAL(x) == (unsigned long)INT_MIN_VAL)
+    case tc_integer:  if (INT_VAL(x) == INT_MIN_VAL)
                         return long2scheme_bignum(-INT_VAL(x));
                       return (INT_VAL(x) < 0) ? MAKE_INT(-INT_VAL(x)) : x;
     case tc_bignum:   if (mpz_cmp_ui(BIGNUM_VAL(x), 0L) < 0) {
