@@ -218,7 +218,7 @@ doc>
  * a procedure taking n arguments and returning a boolean result.
  * @l
  * |every| applies pred to the first elements of the |listi| parameters. If
- * this application returns false, every immediately returns |%f|.
+ * this application returns false, every immediately returns `#f`.
  * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
  * parameters, then the third, and so forth. The iteration stops when a
  * false value is produced or one of the lists runs out of values.
@@ -226,10 +226,10 @@ doc>
  * application of pred. The application of pred to the last element of the
  * lists is a tail call.
  * @l
- * If one of the |listi| has no elements, |every| simply returns |%t|.
+ * If one of the |listi| has no elements, |every| simply returns `#t`.
  * @l
- * Like |any|, every's name does not end with a question mark -- this is to
- * indicate that it does not return a simple boolean (|%t| or |%f|), but a
+ * Like |any|, |every|'s name does not end with a question mark -- this is to
+ * indicate that it does not return a simple boolean (`#t` or `#f`), but a
  * general value.
 doc>
 |#
@@ -275,11 +275,11 @@ doc>
  * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
  * parameters, then the third, and so forth. The iteration stops when a true
  * value is produced or one of the lists runs out of values; in the latter case,
- * any returns |%f|. The application of |pred| to the last element of the
+ * any returns `#f`. The application of |pred| to the last element of the
  * lists is a tail call.
  *
- * Like every, |any|'s name does not end with a question mark -- this is
- * to indicate that it does not return a simple boolean (|%t| or |%f|), but
+ * Like |every|, |any|'s name does not end with a question mark -- this is
+ * to indicate that it does not return a simple boolean (`#t` or `#f`), but
  * a general value.
  *
  * @lisp
@@ -946,7 +946,7 @@ doc>
  * and the value(s) of the last <expression> is(are) returned as in a
  * |begin| form. Within a |tagbody| form expressions which are keywords
  * are considered as tags and the special form |(-> tag)| is used to
- * transfer execution to the given tag. This is a **very low level"**
+ * transfer execution to the given tag. This is a **very low level**
  * form which is inspired on |tabgody| Common Lisp's form. It can be useful
  * for defining new syntaxes, and should probably not used as is.
  *
@@ -1102,7 +1102,7 @@ doc>
  * |call/ec| is an short name for |call-with-escape-continuation|. |call/ec|
  * calls |proc| with one parameter, which is the current escape continuation
  * (a continuation which can only be used to abort a computation and hence
- * cannot be "re-enterered".
+ * cannot be "re-enterered").
  *
  * @lisp
  * (list 1
@@ -1135,7 +1135,7 @@ doc>
 doc>
 
 <doc EXT base64-decode-string
- * (base64-encode-string str)
+ * (base64-decode-string str)
  *
  * Decode the contents of |str| expressed in Base64.
 doc>
@@ -1596,7 +1596,7 @@ doc>
  * (file-suffix pathname)
  *
  * Returns the suffix of given |pathname|. If no suffix is found, |file-suffix|
- * returns #f.
+ * returns `#f`.
  * @lisp
  * (file-suffix "./foo.tar.gz") => "gz"
  * (file-suffix "./a.b/c")      => #f
@@ -1699,7 +1699,7 @@ doc>
  * The options must be composed of either an integer or one of the
  * following symbols |read|, |write| or |execute|. Giving no option to |chmod|
  * is equivalent to pass it the integer |0|. If the operation succeeds,
- * |chmod| returns |%t|; otherwise it returns |%f|.
+ * |chmod| returns `#t`; otherwise it returns `#f`.
  *
  * @lisp
  * (chmod "~/.stklos/stklosrc" 'read 'execute)
@@ -1748,7 +1748,7 @@ doc>
  * (error-object-location error-object)
  *
  * Returns the location encapsulated by |error-object| if it exists.
- * Returns #f otherwise. The location corresponds generally to the name
+ * Returns `#f` otherwise. The location corresponds generally to the name
  * of the procedure which raised the error.
  * @lisp
  * (guard (cnd
@@ -2151,7 +2151,7 @@ doc>
  * (get-environment-variable name)
  *
  * Returns the value of the named environment variable as a string, or
- * |%f| if the named environment variable is not found. The name argument
+ * `#f` if the named environment variable is not found. The name argument
  * is expected to be a string. This function is similar to the |getenv|. It
  * has been added to be  support {{link-srfi 98}}.
 doc>
@@ -2348,8 +2348,8 @@ doc>
 <doc EXT port-has-port-position?
  * (port-has-port-position? port)
  *
- * The port-has-port-position? procedure returns #t if the port
- * supports the port-position operation, and #f otherwise. If the port
+ * The port-has-port-position? procedure returns `#t` if the port
+ * supports the port-position operation, and `#f` otherwise. If the port
  * does not support the operation, port-position signals an error.
 doc>
 |#
@@ -2379,8 +2379,8 @@ doc>
 <doc EXT port-has-set-port-position!?
  * (port-has-set-port-position!? port)
  *
- * The port-has-set-port-position!? procedure returns #t if the port supports
- * the set-port-position! operation, and #f otherwise.
+ * The port-has-set-port-position!? procedure returns `#t` if the port supports
+ * the set-port-position! operation, and `#f` otherwise.
 doc>
 |#
 (define (port-has-set-port-position!? port)
@@ -2457,7 +2457,7 @@ doc>
 <doc EXT command-name
  * (command-name)
  *
- * Returnd the name of the running program if it is a standalone and #f
+ * Returnd the name of the running program if it is a standalone and `#f`
  * otherwise. This function is defined in {{link-srfi 193}}.
 doc>
 |#
@@ -2499,7 +2499,7 @@ doc>
  * (script-file)
  *
  * Returns the absolute path of the current script.
- * If the calling program is not a script, #f is returned.
+ * If the calling program is not a script, `#f` is returned.
  * This function is defined in {{link-srfi 193}}.
 doc>
 |#
@@ -2529,9 +2529,9 @@ doc>
  * (make-nan negative? quiet? payload)
  * (make-nan negative? quiet? payload float)
  *
- * Returns a NaN whose sign bit is equal to |negative?|  (|%t| for negative,
- * |%f| for positive), whose quiet bit is equal to quiet? (|%t| for quiet,
- * |%f| for signaling), and whose payload is the positive exact integer payload.
+ * Returns a NaN whose sign bit is equal to |negative?|  (`#t` for negative,
+ * `#f` for positive), whose quiet bit is equal to quiet? (`#t` for quiet,
+ * `#f` for signaling), and whose payload is the positive exact integer payload.
  * It is an error if payload is larger than a NaN can hold.
  *
  * The optional parameter |float|, is never used in {{stklos}}.

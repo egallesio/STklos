@@ -127,11 +127,11 @@ DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
   z = STk_append2(z, LIST2(STk_makekey("c-version"),
                            STk_Cstring2string(C_VERSION)));
 
-  /* The SRFI6176 c.compile property */
+  /* The SRFI-176 c.compile property */
   z = STk_append2(z, LIST2(STk_makekey("c-compile"),
                            STk_read_from_C_string(C_COMPILE)));
 
-  /* The SRFI6176 c.link property */
+  /* The SRFI-176 c.link property */
   z = STk_append2(z, LIST2(STk_makekey("c-link"),
                            STk_read_from_C_string(C_LINK)));
 
@@ -455,7 +455,7 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
       char *scm = STRING_CHARS(scheme);
 
       if (strcmp(scm, "http") == 0)       port = MAKE_INT(80);
-      else if (strcmp(scm, "https") == 0) port = MAKE_INT(443); 
+      else if (strcmp(scm, "https") == 0) port = MAKE_INT(443);
       else if (strcmp(scm, "ftp") == 0)   port = MAKE_INT(21);
       else port = MAKE_INT(0);
     }

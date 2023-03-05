@@ -34,8 +34,8 @@
  * This function tries to obtain a pretty-printed representation of |sexpr|.
  * The pretty-printed form is written on |port| with lines which are no
  * more long than |width| characters. If |port| is omitted if defaults to
- * the current error port. As a special convention, if |port| is |%t|,
- * output goes to the current output port and if |port| is |%f|, the output
+ * the current error port. As a special convention, if |port| is `#t`,
+ * output goes to the current output port and if |port| is `#f`, the output
  * is returned as a string by |pretty-print|.
  * Note that |pp| is another name for |pretty-print|.
  *

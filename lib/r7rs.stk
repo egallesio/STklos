@@ -348,7 +348,7 @@ doc>
 <doc R7RS exact-integer?
  * (exact->integer? z)
  *
- * Returns  #t if z is both exact and an integer; otherwise returns #f.
+ * Returns  `#t` if z is both exact and an integer; otherwise returns `#f`.
  *
  * @lisp
  * (exact-integer? 32)   => #t
@@ -438,7 +438,7 @@ doc>
 (define (exact-integer-sqrt k)
   (define (isqrt n)
     ;; Compute integer square root using Newton's method.
-    
+
     ;; We take special care when picking the initial guess, which
     ;; is computed in the 'xn' argument to the named let below:
     ;; this is a very good estimate (much better than the usual
@@ -529,7 +529,7 @@ doc>
 <doc symbol=?
  * (symbol=? symbol1 symbol2  ...)
  *
- * Returns #t if all the arguments are symbols and all have the same name in
+ * Returns `#t` if all the arguments are symbols and all have the same name in
  * the sense of |string=?|.
 doc>
 |#
@@ -695,7 +695,7 @@ doc>
                  (do ((i (- end 1) (- i 1))
                       (result '() (cons (vector-ref v i) result)))
                      ((< i start) result))))
-              ;; R5RS function (without start or endà
+              ;; R5RS function (without start or end)
               (v->l v))))
   (%set-procedure-name! vector->list 'vector->list))
 
@@ -1108,8 +1108,8 @@ doc>
 <doc R7RS error-object?
  * (error-object? obj )
  *
- * Returns #t if obj is an object created by error. Otherwise,
- * it returns #f.
+ * Returns `#t` if |obj| is an object created by error. Otherwise,
+ * it returns `#f`.
 doc>
 |#
 (define (error-object? obj)
@@ -1149,10 +1149,10 @@ doc>
  * (file-error? obj)
  *
 
- * Error type predicates. Returns #t if |obj| is an object raised
+ * Error type predicates. Returns `#t` if |obj| is an object raised
  * by the read procedure or by the inability to open an input or
- * output port on a file, respectively. Otherwise, it returns #f.
-  *
+ * output port on a file, respectively. Otherwise, it returns `#f`.
+ *
 doc>
 |#
 (define (read-error? obj)
@@ -1204,8 +1204,8 @@ doc>
  * (input-port-open? port)
  * (output-port-open? port)
  *
- * Returns #t if port is still open and capable of performing
- * input or output, respectively, and #f otherwise.
+ * Returns `#t` if port is still open and capable of performing
+ * input or output, respectively, and `#f` otherwise.
 doc>
 |#
 (define (input-port-open? port)

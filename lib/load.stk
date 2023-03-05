@@ -37,7 +37,7 @@
         ;; FIXME
         %stklos-conf-dir
         %stklos-conf-file
-        %try-load-conditions 
+        %try-load-conditions
         %do-include
         %%require)
 
@@ -168,7 +168,7 @@ doc>
  * |load-verbose| is a parameter object. It permits to display the
  * path name of the files which are loaded by |load| or |try-load| on
  * the current error port, when set to a true value. If |load-verbose|
- * is set to |%f|, no message is printed.
+ * is set to `#f`, no message is printed.
 doc>
 |#
 (define load-verbose
@@ -324,7 +324,7 @@ doc>
  * The other forms of |find-path| are more general and allow to give a path
  * list (a list of strings representing supposed directories) and a set
  * of suffixes (given as a list of strings too) to try for finding a file.
- * If no file is found, |find-path| returns |%f|.
+ * If no file is found, |find-path| returns `#f`.
  * @l
  * For instance, on a "classical" Unix box:
  * @lisp

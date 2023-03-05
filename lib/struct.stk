@@ -41,8 +41,8 @@
  *   are |n| slots defined). Each parameter is assigned to the corresponding
  *   field (in the definition order).
  *
- * - |<name>?| is a predicate which returns |%t| when applied to an
- *   instance of the |<name>| structure type and |%f| otherwise
+ * - |<name>?| is a predicate which returns `#t` when applied to an
+ *   instance of the |<name>| structure type and `#f` otherwise
  *
  * - |<name>-<slot>| (one for each defined |<slot>|) to read the
  *   content of an instance of the |<name>| structure type. Writting the
@@ -100,4 +100,3 @@ doc>
 
        ;; Build the toplevel result
        (values (void) ',name))))
-

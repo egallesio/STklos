@@ -55,7 +55,7 @@
  *
  * - |:wait| must be followed by a boolean value. This value
  * specifies if the process must be run asynchronously or not. By
- * default, the process is run asynchronously (i.e. |:wait| is |%f|).
+ * default, the process is run asynchronously (i.e. |:wait| is `#f`).
  *
  * - |:host| must be followed by a string. This string represents
  * the name of the machine on which the command must be executed. This
@@ -68,7 +68,7 @@
  * the process. If the process is run without _fork_ the Scheme
  * program is lost. This feature mimics the ``|exec|'' primitive of the
  * Unix shells. By default, a fork is executed before running the process
- * (i.e. |:fork| is |%t|). This option works on Unix implementations only.
+ * (i.e. |:fork| is `#t`). This option works on Unix implementations only.
  *
  *
  * The following example launches a process which executes the

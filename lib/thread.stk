@@ -114,7 +114,7 @@ doc>
  * Setting the |thread-handler-error-show| parameter permits to see
  * error message as soon as possible, even without joining the thread.
  * This makes debugging easier. By default, this parameter is set to
- * |%t|.
+ * `#t`.
 doc>
 |#
 (define thread-handler-error-show (make-parameter #t))

@@ -25,7 +25,7 @@
 ;;;;
 
 (export with-input-from-file with-output-to-file with-error-to-file
-        with-input-from-string with-output-to-string 
+        with-input-from-string with-output-to-string
         with-input-from-port with-output-to-port with-error-to-port
         %call-with ;; FIXME
         call-with-input-file call-with-output-file
@@ -66,7 +66,7 @@
  * optional parameter can declared as:
  *
  * ** |variable|: if a value is passed when the procedure is called, it will be
- * stored in the binding of the corresponding variable, otherwise the value |%f|
+ * stored in the binding of the corresponding variable, otherwise the value `#f`
  * will be stored in it.
  *
  * ** |(variable value)|: if a value is passed when the procedure is called, it
@@ -75,8 +75,8 @@
  *
  * ** |(variable value test?)|: if a value is passed when the procedure is called, it
  * will be stored in the binding of the corresponding variable, otherwise |value|
- * will be stored in it. Furthermore, |test?| will be given the value |%t| if
- * a value is passed for the given variable, otherwise |test?| is set to |%f|
+ * will be stored in it. Furthermore, |test?| will be given the value `#t` if
+ * a value is passed for the given variable, otherwise |test?| is set to `#f`.
  *
  * Hereafter are some examples using |:optional| parameters
  * @lisp
