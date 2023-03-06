@@ -88,9 +88,14 @@ static Inline void set_signal_mask(sigset_t mask)
   sigprocmask(SIG_SETMASK, &mask, NULL);
 }
 
-static void error_unbound_variable(SCM symbol)
+EXTERN_PRIMITIVE("module-name", module_name, subr1, (SCM module));
+EXTERN_PRIMITIVE("library?", libraryp, subr1, (SCM obj));
+static void error_unbound_variable(SCM symbol, SCM module)
 {
-  STk_error("variable ~S unbound", symbol);
+  if (STk_libraryp(module) == STk_true)
+    STk_error("variable ~S unbound in library ~S", symbol, STk_module_name(module));
+  else
+    STk_error("variable ~S unbound in module ~S",  symbol, STk_module_name(module));
 }
 
 
@@ -1027,7 +1032,7 @@ CASE(GLOBAL_REF) {
   vm->val= STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    error_unbound_variable(orig_operand, vm->current_module);
   }
 
   /* patch the code for optimize next accesses */
@@ -1058,7 +1063,7 @@ CASE(GLOBAL_REF_PUSH) {
   res = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    error_unbound_variable(orig_operand, vm->current_module);
   }
 
   push(res);
@@ -1095,7 +1100,7 @@ CASE(GREF_INVOKE) {
   vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    error_unbound_variable(orig_operand, vm->current_module);
   }
 
   nargs = fetch_next();
@@ -1138,7 +1143,7 @@ CASE(GREF_TAIL_INVOKE) {
   vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    error_unbound_variable(orig_operand, vm->current_module);
   }
 
   nargs = fetch_next();
@@ -1233,7 +1238,7 @@ CASE(GLOBAL_SET) {
   STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    error_unbound_variable(orig_operand, vm->current_module);
   }
   if (BOXED_INFO(ref) & CONS_CONST) {
     RELEASE_LOCK;
