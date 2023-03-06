@@ -155,8 +155,8 @@ extern "C"
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
 
-#define STk_must_malloc(size)           GC_MALLOC(size)
-#define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
+#define STk_must_malloc(size)           STk_must_malloc_real(size)
+#define STk_must_malloc_atomic(size)    STk_must_malloc_atomic_real(size)
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
 #define STk_free(ptr)                   GC_FREE(ptr)
 #define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
@@ -1450,6 +1450,18 @@ SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
 int STk_init_vm(void);
 
 /*****************************************************************************/
+
+void thread_inc_allocs(SCM thr, int size);
+extern SCM STk_primordial_thread;
+
+static inline void* STk_must_malloc_real(size_t size) {
+  if (STk_primordial_thread) thread_inc_allocs(STk_current_thread(), size);
+  return GC_MALLOC(size);
+}
+static inline void* STk_must_malloc_atomic_real(size_t size) {
+  if (STk_primordial_thread) thread_inc_allocs(STk_current_thread(), size);
+  return GC_MALLOC_ATOMIC(size);
+}
 
 extern char *STk_boot_consts;
 extern STk_instr STk_boot_code[];
