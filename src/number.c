@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  5-Mar-2023 18:19 (eg)
+ * Last file update:  6-Mar-2023 22:42 (eg)
  */
 
 
@@ -146,7 +146,6 @@ static void error_not_a_real_number(SCM n)
     error_bad_number(n);
 }
 
-
 static void error_at_least_1(void)
 {
   STk_error("expects at least one argument");
@@ -165,6 +164,11 @@ static void error_divide_by_0(SCM n)
 static void error_incorrect_radix(SCM r)
 {
   STk_error("base must be 2, 8, 10 or 16. It was ~S", r);
+}
+
+static void error_not_an_integer(SCM n)
+{
+  STk_error("exact or inexact integer required, got ~s", n);
 }
 
 union binary64 {
@@ -2095,7 +2099,7 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
  * |Abs| returns the absolute value of its argument.
  * @lisp
  * (abs -7)                =>  7
- * (abs -inf.0)            => +inf.0m
+ * (abs -inf.0)            => +inf.0
  * @end lisp
 doc>
  */
@@ -2275,22 +2279,89 @@ DEFINE_PRIMITIVE("modulo", modulo, subr2, (SCM n1, SCM n2))
  * @end lisp
 doc>
  */
+
+static SCM gcd2_fixnum(SCM n1, SCM n2) /* special version for fixnums */
+{
+  long l1 = INT_VAL(n1);
+  long l2 = INT_VAL(n2);
+
+  if (l1 < 0) l1 = -l1;
+  if (l2 < 0) l2 = -l2;
+
+  while (l2) {
+    long tmp = l1;
+    l1 = l2;
+    l2 = tmp % l2;
+  }
+  return MAKE_INT(l1);
+}
+
+
+
 static SCM gcd2(SCM n1, SCM n2)
 {
-  return zerop(n2) ? n1 : gcd2(n2, STk_modulo(n1, n2));
+  int exactp = 1;
+
+  if (STk_integerp(n1) == STk_false) error_not_an_integer(n1);
+  if (STk_integerp(n1) == STk_false) error_not_an_integer(n2);
+
+  if (REALP(n1)) {
+    n1 = inexact2exact(n1);
+    exactp = 0;
+  }
+  if (REALP(n2)) {
+    n2 = inexact2exact(n2);
+    exactp = 0;
+  }
+
+  /* In the specific case we have bignums, GMP is absolutely faster than
+   * doing it ourselves. So try to use specialized GMP functions in this
+   * case (and use a simple algorithm with C longs, otherwise)
+   */
+  if (INTP(n1) && INTP(n2)) {
+    SCM res = gcd2_fixnum(n1, n2);
+    return exactp ? res: exact2inexact(res);
+  }
+  else {
+    /* COMPUTE THE GCD WITH AT LEAST ONE BIGNUM
+     * Three cases:
+     * - fixnum - bignum
+     * - bignum - fixnum
+     * - bignum - bignum
+     */
+    mpz_t r;
+    mpz_init_set_si(r,0);
+
+    if (BIGNUMP(n1) && INTP(n2)) /* n1:BIG n2:FIX */
+      /* GMP requires an unsigned long for the second arg
+         (there's no "si" version for this function) -- so
+         we need to call labs(). */
+      mpz_gcd_ui(r, BIGNUM_VAL(n1), labs(INT_VAL(n2)));
+    else if (INTP(n1) && BIGNUMP(n2)) /* n1:FIX n2:BIG */
+      mpz_gcd_ui(r, BIGNUM_VAL(n2), labs(INT_VAL(n1)));
+    else if (BIGNUMP(n1) && BIGNUMP(n2)) /*  n1:BIG n2:BIG */
+      mpz_gcd(r, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
+
+    /* NOTE: we are sure to not here a NaN or an infinity since
+     * at most r is equal to n1 or n2, which has been accepted by
+     * predicate integer? when entering this function
+     */
+    return (exactp) ? bignum2number(r): double2real(bignum2double(r));
+  }
 }
+
 
 DEFINE_PRIMITIVE("gcd", gcd, vsubr, (int argc, SCM *argv))
 {
   SCM res;
 
   if (argc == 0) return MAKE_INT(0);
-  if (argc == 1) return gcd2(*argv, MAKE_INT(0));
+  if (argc == 1) return absolute(gcd2(*argv, MAKE_INT(0)));
 
   for (res = *argv--; --argc; argv--)
-    res = absolute(gcd2(res, *argv));
+    res = gcd2(res, *argv);
 
-  return res;
+  return absolute(res);
 }
 
 DEFINE_PRIMITIVE("lcm", lcm, vsubr, (int argc, SCM *argv))
