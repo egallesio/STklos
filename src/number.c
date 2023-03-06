@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  6-Mar-2023 11:03 (eg)
+ * Last file update:  6-Mar-2023 22:42 (eg)
  */
 
 
@@ -2280,9 +2280,20 @@ DEFINE_PRIMITIVE("modulo", modulo, subr2, (SCM n1, SCM n2))
 doc>
  */
 
-static long gcd2_long(long n1, long n2) /* special version for fixnums */
+static SCM gcd2_fixnum(SCM n1, SCM n2) /* special version for fixnums */
 {
-  return n2 ? gcd2_long(n2, n1 % n2): n1;
+  long l1 = INT_VAL(n1);
+  long l2 = INT_VAL(n2);
+
+  if (l1 < 0) l1 = -l1;
+  if (l2 < 0) l2 = -l2;
+
+  while (l2) {
+    long tmp = l1;
+    l1 = l2;
+    l2 = tmp % l2;
+  }
+  return MAKE_INT(l1);
 }
 
 
@@ -2308,13 +2319,7 @@ static SCM gcd2(SCM n1, SCM n2)
    * case (and use a simple algorithm with C longs, otherwise)
    */
   if (INTP(n1) && INTP(n2)) {
-    SCM res;
-    long l1 = INT_VAL(n1);
-    long l2 = INT_VAL(n2);
-
-    if (l1 < 0) l1 = -l1;
-    if (l2 < 0) l2 = -l2;
-    res = MAKE_INT(gcd2_long(l1, l2));
+    SCM res = gcd2_fixnum(n1, n2);
     return exactp ? res: exact2inexact(res);
   }
   else {
