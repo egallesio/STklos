@@ -118,7 +118,6 @@ gtklos/gtklosconf.h
 
 # Lib directory
 lib/Lalr.d/calc
-lib/boot-callcc.stk
 lib/srfis-data.scm
 
 #                  ... generated Scheme files
@@ -160,7 +159,7 @@ src/.STklos.prcs_aux
 src/HOWTO-WIN32
 src/TAGS
 src/TODO
-src/boot.keep
+src/boot.img
 src/extraconf.h
 src/stamp-h1
 src/stklos
