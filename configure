@@ -6779,7 +6779,7 @@ done
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
-### Determine the options necessary for dynamic loading (even if disbaled later)
+### Determine the options necessary for dynamic loading (even if disabled later)
 if test X$LD = X
 then
    LD="ld"
@@ -6801,16 +6801,16 @@ case $OS_NAME_VERSION in
      ;;
   UNKNOWN*)
     echo ""
-    echo "**** STklos has no support for your system (`uname -s`)"
-    echo "**** Please modify the script \"utils/shlib-options\" to add"
-    echo "**** support for your system (it's easy) and restart installation process."
+    echo "**** STklos has no support for your system (`uname -s`)."
+    echo "**** Please modify the script \"utils/shlib-options\" to add support"
+    echo "**** for your system (it's easy) and rerun the configure script."
     echo "**** Thanks for sending your modifications to <bugs _at_ stklos.net>"
     exit 1
     ;;
 esac
 
 
-### Initilize the extra conf file in src
+### Initialize the extra conf file in src
 SCMDIR=$prefix/share/$PACKAGE/$VERSION
 EXECDIR=$prefix/lib/$PACKAGE/$VERSION
 PREFIX=$prefix
@@ -6925,7 +6925,7 @@ esac
 
 
 ###
-### To thread or not to thread ?
+### To thread or not to thread?
 ###
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthread" >&5
 printf %s "checking for pthread_create in -lpthread... " >&6; }
@@ -7141,7 +7141,7 @@ fi
 
 fi
 
-# Test if the user want to force with our GC lib
+# Test if the user wants to force the use of our GC lib
 
 # Check whether --with-provided-gc was given.
 if test ${with_provided_gc+y}
@@ -7287,7 +7287,7 @@ fi
 
 fi
 
-# Test if the user want to force with our GMP lib
+# Test if the user wants to force the use of our GMP lib
 # (2 names available for that  --with-provided-bignum or (legacy) --with-gmp-light
 
 # Check whether --with-provided-bignum was given.
@@ -7389,7 +7389,7 @@ fi
 
 fi
 
-# Test if the user want to force with our PCRE lib
+# Test if the user wants to force the use of our PCRE lib
 
 # Check whether --with-provided-regexp was given.
 if test ${with_provided_regexp+y}
@@ -7487,7 +7487,7 @@ fi
 
 fi
 
-# Test if the user want to force with our FFI lib
+# Test if the user wants to force the use of our FFI lib
 
 # Check whether --with-provided-ffi was given.
 if test ${with_provided_ffi+y}
@@ -7662,7 +7662,7 @@ fi
 
 CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
 
-# Determmine the STRIP command to use
+# Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
    STRIPCMD=strip
 else
@@ -9351,7 +9351,7 @@ printf "%s\n" "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2
 fi
 
 
-# Add a src/git-config.h if we dont have one
+# Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
 chmod 0755 utils/stklos-config utils/stklos-script
@@ -9364,7 +9364,7 @@ echo "*******"
 echo "               System: " $BUILD_OS
 echo "              OS nick: " $OS_NAME_VERSION
 echo "              OS type: " $OS_FLAVOUR
-echo "      Install prefix : " $prefix
+echo "       Install prefix: " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD

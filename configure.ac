@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  7-Mar-2023 10:23 (ryandesign)
+### Last file update:  7-Mar-2023 21:58 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -81,7 +81,7 @@ AC_CHECK_FUNCS(backtrace, , AC_CHECK_LIB(execinfo, backtrace))
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
-### Determine the options necessary for dynamic loading (even if disbaled later)
+### Determine the options necessary for dynamic loading (even if disabled later)
 if test X$LD = X
 then
    LD="ld"
@@ -103,16 +103,16 @@ case $OS_NAME_VERSION in
      ;;
   UNKNOWN*)
     echo ""
-    echo "**** STklos has no support for your system (`uname -s`)"
-    echo "**** Please modify the script \"utils/shlib-options\" to add"
-    echo "**** support for your system (it's easy) and restart installation process."
+    echo "**** STklos has no support for your system (`uname -s`)."
+    echo "**** Please modify the script \"utils/shlib-options\" to add support"
+    echo "**** for your system (it's easy) and rerun the configure script."
     echo "**** Thanks for sending your modifications to <bugs _at_ stklos.net>"
     exit 1
     ;;
 esac
 
 
-### Initilize the extra conf file in src
+### Initialize the extra conf file in src
 SCMDIR=$prefix/share/$PACKAGE/$VERSION
 EXECDIR=$prefix/lib/$PACKAGE/$VERSION
 PREFIX=$prefix
@@ -175,7 +175,7 @@ esac
 
 
 ###
-### To thread or not to thread ?
+### To thread or not to thread?
 ###
 AC_CHECK_LIB(pthread, pthread_create, deflt_threads=pthreads, deflt_threads=none)
 
@@ -236,7 +236,7 @@ else
    AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
 fi
 
-# Test if the user want to force with our GC lib
+# Test if the user wants to force the use of our GC lib
 AC_ARG_WITH(provided-gc,
        [  --with-provided-gc      use the provided Boehm GC library],
        PROV_GC="$withval", PROV_GC="no")
@@ -292,7 +292,7 @@ if test "$HAVE_GMP" = "no" ;then
   AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
 fi
 
-# Test if the user want to force with our GMP lib
+# Test if the user wants to force the use of our GMP lib
 # (2 names available for that  --with-provided-bignum or (legacy) --with-gmp-light
 AC_ARG_WITH(provided-bignum,
        [  --with-provided-bignum  use the provided Bignum (GMPlite) library],
@@ -339,7 +339,7 @@ else
    AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
 fi
 
-# Test if the user want to force with our PCRE lib
+# Test if the user wants to force the use of our PCRE lib
 AC_ARG_WITH(provided-regexp,
        [  --with-provided-regexp  use the provided Regexp (PCRE) library],
        PROV_PCRE="$withval", PROV_PCRE="no")
@@ -388,7 +388,7 @@ else
   AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
 fi
 
-# Test if the user want to force with our FFI lib
+# Test if the user wants to force the use of our FFI lib
 AC_ARG_WITH(provided-ffi,
        [  --with-provided-ffi     use the provided FFI library],
        PROV_FFI="$withval", PROV_FFI="no")
@@ -532,7 +532,7 @@ fi
 
 CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
 
-# Determmine the STRIP command to use
+# Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
    STRIPCMD=strip
 else
@@ -668,7 +668,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
 ])
 AC_OUTPUT
 
-# Add a src/git-config.h if we dont have one
+# Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
 chmod 0755 utils/stklos-config utils/stklos-script
@@ -681,7 +681,7 @@ echo "*******"
 echo "               System: " $BUILD_OS
 echo "              OS nick: " $OS_NAME_VERSION
 echo "              OS type: " $OS_FLAVOUR
-echo "      Install prefix : " $prefix
+echo "       Install prefix: " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD
