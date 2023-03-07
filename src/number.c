@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  6-Mar-2023 22:42 (eg)
+ * Last file update:  7-Mar-2023 10:41 (eg)
  */
 
 
@@ -449,20 +449,16 @@ static Inline SCM bignum2number(mpz_t n)  /* => int or bignum */
 
 static SCM double2integer(double n)     /* small or big depending on n's size */
 {
-  unsigned int i, j;
-  size_t size = 30;
-  char *tmp = NULL;
-  SCM z;
-
   /* Try first to convert n to a long */
   if (((double) INT_MIN_VAL <= n) && (n <= (double) INT_MAX_VAL))
     return MAKE_INT((long) n);
+  else {
+    /* n doesn't fit in a long => build a bignum. */
+    mpz_t r;
 
-  /* n doesn't fit in a long => build a bignum. */
-  mpz_t r;
-  mpz_init_set_d(r, n);
-  z = bignum2number(r);
-  return z;
+    mpz_init_set_d(r, n);
+    return bignum2number(r);
+  }
 }
 
 static SCM double2rational(double d)
