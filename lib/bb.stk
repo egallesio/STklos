@@ -95,4 +95,5 @@
 
 (case (argc)
   ((2) (apply make-boot-file (argv)))
-  (else (error "Two arguments required for creating a boot file")))
+  (else (error "Two arguments required for creating a boot file, but ~S given"
+               argc)))
