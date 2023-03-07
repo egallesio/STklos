@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update: 13-Jan-2023 10:49 (eg)
+# Last file update:  7-Mar-2023 07:55 (ryandesign)
 
 
 #
@@ -110,13 +110,13 @@ case $os in
       ;;
   Linux*)
       case $version in
-            2.0.*) version=2.0.x;;
+        2.0.*) version=2.0.x;;
         2.1.*) version=2.1.x;;
         2.2.*) version=2.2.x;;
         2.3.*) version=2.3.x;;
         2.4.*) version=2.4.x;;
-          esac
-          case $machine in
+      esac
+      case $machine in
         i*86) machine=ix86;;
       esac
       OS=LINUX
