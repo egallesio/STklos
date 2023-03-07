@@ -1,8 +1,8 @@
-### configure.in for STklos
+### configure.ac for STklos
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  2-Feb-2023 10:58 (eg)
+### Last file update:  7-Mar-2023 07:19 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -452,8 +452,8 @@ fi
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
 ###
-AC_RUN_IFELSE([AC_LANG_SOURCE([[ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
-             void main () { char foo; inner (&foo); } ]])],[STACK_DIRECTION="DOWN"],[STACK_DIRECTION="UP"],[echo "Stack direction is not detected when cross compiling for now"])
+AC_RUN_IFELSE([AC_LANG_SOURCE([[ int inner (char *foo) { char bar; return !(foo >= &bar); }
+             int main (void) { char foo; return inner (&foo); } ]])],[STACK_DIRECTION="DOWN"],[STACK_DIRECTION="UP"],[echo "Stack direction is not detected when cross compiling for now"])
 
 
 

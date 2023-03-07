@@ -7571,8 +7571,8 @@ then :
 else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
- void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
-             void main () { char foo; inner (&foo); }
+ int inner (char *foo) { char bar; return !(foo >= &bar); }
+             int main (void) { char foo; return inner (&foo); }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"
 then :
