@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  7-Mar-2023 07:19 (ryandesign)
+### Last file update:  7-Mar-2023 10:23 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -130,7 +130,6 @@ case $OS in
       case $version in
          9*)  OS_NAME_VERSION=DARWIN_9;;
          10*) OS_NAME_VERSION=DARWIN_10;;
-         11*) OS_NAME_VERSION=DARWIN_11;;
          *)   OS_NAME_VERSION=DARWIN_OLD;;
       esac
       ;;
@@ -229,19 +228,6 @@ AM_CONDITIONAL(NO_THREAD, test "$THREADS" = none)
 echo "*****"
 echo "***** GC support"
 echo "*****"
-
-# Patch code for OSX Lion
-case $OS_NAME_VERSION in
-     DARWIN_11)
-       if test ! -f gc/stklos-patch-applied
-       then
-              echo "**** Patching GC library";
-              patch -p1 < etc/lion.patch
-              touch  gc/stklos-patch-applied
-       fi
-       ;;
-esac
-
 
 # Try to determine if libgc is installed
 if ${PKGCONFIG} --exists bdw-gc ;then
