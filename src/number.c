@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  6-Mar-2023 22:42 (eg)
+ * Last file update:  7-Mar-2023 10:41 (eg)
  */
 
 
@@ -405,40 +405,60 @@ static Inline SCM double2real(double x)
   return z;
 }
 
-static SCM double2integer(double n)     /* small or big depending on n's size */
+static Inline SCM bignum2integer(mpz_t n)
 {
-  unsigned int i, j;
-  size_t size = 30;
-  char *tmp = NULL;
+  return MAKE_INT(mpz_get_si(n));
+}
+
+
+static Inline double bignum2double(mpz_t n)
+{
+  /* I do not use the function mpz_get_d since it gives an unspecified value
+   * when converting a number which is +inf or -inf
+   */
+ char *s = STk_must_malloc_atomic(mpz_sizeinbase(n, 10) + 2);
+ return atof(mpz_get_str(s, 10, n));
+}
+
+
+static Inline double scheme_bignum2double(SCM b)
+{
+  return bignum2double(BIGNUM_VAL(b));
+}
+
+
+static Inline SCM scheme_bignum2real(SCM bn)
+{
+  return double2real(scheme_bignum2double(bn));
+}
+
+static Inline SCM bignum2scheme_bignum(mpz_t n)
+{
   SCM z;
 
+  NEWCELL(z, bignum);
+  mpz_init_set(BIGNUM_VAL(z), n);
+  return z;
+}
+
+static Inline SCM bignum2number(mpz_t n)  /* => int or bignum */
+{
+  return (BIGNUM_FITS_INTEGER(n)) ? bignum2integer(n): bignum2scheme_bignum(n);
+}
+
+
+static SCM double2integer(double n)     /* small or big depending on n's size */
+{
   /* Try first to convert n to a long */
   if (((double) INT_MIN_VAL <= n) && (n <= (double) INT_MAX_VAL))
     return MAKE_INT((long) n);
+  else {
+    /* n doesn't fit in a long => build a bignum. */
+    mpz_t r;
 
-  /* n doesn't fit in a long => build a bignum. THIS IS VERY INEFFICIENT */
-  tmp = STk_must_malloc_atomic(size);
-  i = 0;
-  if (n < 0.0) { tmp[i++] = '-'; n = -n; }
-  do {
-    if (i >= size) tmp = STk_must_realloc(tmp, size *= 2);
-    tmp[i++] = (int) fmod(n, (double) 10) + '0';
-    n = floor(n / 10.0);
+    mpz_init_set_d(r, n);
+    return bignum2number(r);
   }
-  while (n > 0.0);
-  tmp[i] = 0;
-
-  /* Reverse the content of string tmp */
-  for (i=i-1, j=(tmp[0]=='-'); i > j; i--, j++) {
-    char c = tmp[i];
-    tmp[i] = tmp[j];
-    tmp[j] = c;
-  }
-
-  /* tmp contains a textual representation of n. Convert it to a bignum */
-  z = STk_Cstr2number(tmp, 10L);
-  if (tmp) STk_free(tmp);
-  return z;
 }
 
 static SCM double2rational(double d)
@@ -470,45 +490,6 @@ static SCM double2rational(double d)
   return negative? mul2(res, MAKE_INT((unsigned long) -1)): res;
 }
 
-static Inline SCM bignum2scheme_bignum(mpz_t n)
-{
-  SCM z;
-
-  NEWCELL(z, bignum);
-  mpz_init_set(BIGNUM_VAL(z), n);
-  return z;
-}
-
-static Inline SCM bignum2integer(mpz_t n)
-{
-  return MAKE_INT(mpz_get_si(n));
-}
-
-static Inline SCM bignum2number(mpz_t n)  /* => int or bignum */
-{
-  return (BIGNUM_FITS_INTEGER(n)) ? bignum2integer(n): bignum2scheme_bignum(n);
-}
-
-static Inline double bignum2double(mpz_t n)
-{
-  /* I do not use the function mpz_get_d since it gives an unspecified value
-   * when converting a number which is +inf or -inf
-   */
- char *s = STk_must_malloc_atomic(mpz_sizeinbase(n, 10) + 2);
- return atof(mpz_get_str(s, 10, n));
-}
-
-
-static Inline double scheme_bignum2double(SCM b)
-{
-  return bignum2double(BIGNUM_VAL(b));
-}
-
-
-static Inline SCM scheme_bignum2real(SCM bn)
-{
-  return double2real(scheme_bignum2double(bn));
-}
 
 
 
