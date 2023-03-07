@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 13-Jan-2023 09:40 (eg)
+# Last file update:  7-Mar-2023 20:28 (eg)
 
 
 VPATH = @srcdir@
@@ -982,7 +982,7 @@ clean-am:
 	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok stklos
 
 distclean: clean
-	/bin/rm -f boot.keep Makefile extraconf.h stklos stamp-h1 stklosconf.h
+	/bin/rm -f boot.img Makefile extraconf.h stklos stamp-h1 stklosconf.h
 
 uninstall-hook:
 	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@

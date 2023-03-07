@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 13-Jan-2023 09:40 (eg)
+# Last file update:  7-Mar-2023 20:28 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here (anyway CFLAGS is implied here)
@@ -134,7 +134,7 @@ clean-am:
 	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok stklos
 
 distclean: clean
-	/bin/rm -f boot.keep Makefile extraconf.h stklos stamp-h1 stklosconf.h
+	/bin/rm -f boot.img Makefile extraconf.h stklos stamp-h1 stklosconf.h
 
 
 uninstall-hook:

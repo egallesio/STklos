@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  4-Mar-2023 11:53 (eg)
+# Last file update:  7-Mar-2023 20:24 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
@@ -107,7 +107,7 @@ BASEDIR     = ..
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA  = $(scheme_SOLIBS) 
+schemelib_DATA  = $(scheme_SOLIBS)
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
@@ -143,7 +143,7 @@ generate-git-info:
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
 	(export STKLOS_BUILDING=1; \
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img -f bb.stk boot.img0 instr0)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f bb.stk boot.img0 instr0)
 	@echo "*** Boot 1"; \
 	(export STKLOS_BUILDING=1; \
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ./boot.img0     -f bb.stk boot.img1 instr1)
@@ -153,22 +153,21 @@ generate-git-info:
 	@echo "*** Boot 3"; \
 	(export STKLOS_BUILDING=1; \
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ./boot.img2     -f bb.stk boot.img3 instr3)
-	@if cmp ./boot.img2 ./boot.img3 ;then 				\
-	   echo "*** New boot file created";  				\
-	   cp ../src/boot.img ../src/boot.keep;				\
-	   cp ./boot.img3 ../src/boot.img;    				\
-	   cp ./instr3    ../src/vm-instr.h;  				\
-	   echo "*** Create new boot.c";				\
-	   (export STKLOS_BUILDING=1;					\
-	    $(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img  	\
-		-f make-C-boot.stk -- boot.img3 ../src/boot.c);		\
-	   echo "*** Recompile STklos";					\
-	   (cd ../src; $(MAKE) stklos);					\
-	   echo "*** Cleaning useless images";				\
-	   /bin/rm boot.img[0-3] instr[0-3];  				\
-	else 								\
-	   echo "*** Boot file creation failed"; 			\
-	   exit 1; 							\
+	@if cmp ./boot.img2 ./boot.img3 ;then                      \
+	   echo "*** New boot file created";                       \
+	   cp ./boot.img3 ../src/boot.img;                         \
+	   cp ./instr3    ../src/vm-instr.h;                       \
+	   echo "*** Create new boot.c";                           \
+	   (export STKLOS_BUILDING=1;                              \
+		$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img    \
+		-f make-C-boot.stk -- boot.img3 ../src/boot.c);        \
+	   echo "*** Recompile STklos";                            \
+	   (cd ../src; $(MAKE) stklos);                            \
+	   echo "*** Cleaning useless images";                     \
+	   /bin/rm boot.img[0-3] instr[0-3];                       \
+	else                                                       \
+	   echo "*** Boot file creation failed";                   \
+	   exit 1;                                                 \
 	fi;
 
 # Installation of *.stk files
@@ -179,7 +178,7 @@ install-sources:
 	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
 
 
-# Explicit some dependencies here 
+# Explicit some dependencies here
 $(SCHEME_OBJS): ../src/boot.img
 ffi.ostk: bigmatch.ostk
 bigmatch.ostk: Match.d/compiler.scm Match.d/descr.scm Match.d/mexpand.scm \
@@ -197,7 +196,7 @@ lib/stklos: lib
 lib/streams: lib
 lib/srfi: lib/scheme lib/stklos lib/streams
 
-readline-complete.@SH_SUFFIX@: readline-complete.c 
+readline-complete.@SH_SUFFIX@: readline-complete.c
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
 	-c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ @RDLINE@
