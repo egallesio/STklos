@@ -134,3 +134,13 @@ Project Home
 ------------
 
 STklos home page is is located at http://stklos.net
+
+License
+-------
+
+STklos: Copyright (C) Erick Gallesio. Most STklos source files are distributed under the GNU General Public License version 2 or any later version (SPDX GPL-2.0-or-later); some are distributed under different licenses -- please see each file for its specific license.
+
+STklos documentation: Copyright (C) Erick Gallesio. The documentation is distributed under the GNU Free Documentation License version 1.3 or any later version (SPDX GFDL-1.3-or-later).
+
+HACKING amd vm.md: Copyright (C) 2020 Jerônimo Pellegrini. These documents are distributed under the GNU Free Documentation License version 1.3 or any later version (SPDX GFDL-1.3-or-later).
+
