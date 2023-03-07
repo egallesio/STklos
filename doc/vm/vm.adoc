@@ -434,6 +434,123 @@ Constants:
 0: my-cool-global-variable
 ....
 
+=== UGLOBAL_{REF,SET} and the checked global table
+
+The instructions `GLOBAL_REF` and `GLOBAL_SET` do the following:
+
+1. Acquire the mutex
+2. Fetch the index of the global variable
+3. Lookup the variable in the current environment (that is, consult a hash table
+   in  amodule)
+4. Verify if the variable is mutable or not
+5. Finally, do the real get or set operation
+6. Release the lock
+
+Steps 1-4 are quite expensive, and shouldn't need to be done every time the
+variable is accessed. Thus, the STklos VM keeps a table with *checked globals*.
+The first time a variable is referenced, the VM goes through all those steps,
+but before releasing the lock there is another step:
+
+5'. **Patch the code**, changing the `GLOBAL_REF` or `GLOBAL_SET` insrtuction
+     into a `UGLOBAL_REF` or `UGLOBAL_SET`.
+
+For example, in `GLOBAL_SET` this step is performed by the following two lines:
+
+[source,c]
+----
+  /* patch the code for optimize next accesses */
+  vm->pc[-1] = add_global(CDR(ref));
+  vm->pc[-2] = UGLOBAL_SET;
+----
+
+See that what is being changed are the two previous bytecode elements,
+`pc[-1]` and `pc[-2]`.
+
+So the code
+
+[source,scheme]
+----
+(set! a 2)
+----
+
+would perhaps be translated into
+
+----
+000:  SMALL-INT            2
+002:  GLOBAL-SET           5
+----
+
+where `5` is the index of the variable `a` (as a global).
+
+Then after the first time the `GLOBAL_SET` instruction is performed, the
+code will **patch itself** and change into
+
+----
+000:  SMALL-INT            2
+002:  UGLOBAL-SET          n
+----
+
+where `n` is the index of this global variable **in a local table**.
+
+The instruction `GLOBAL_SET` takes two integers to be represented, so
+when `pc[-1]` and `pc[-2]` are changed, what is being changed is the
+previous argument (`5` -> `n`) and the previous instruction
+(`GLOBAL_SET` -> `UGLOBAL_SET`).
+
+*And*, of course, the `n`-th element of the table contains the address
+of the variable to be set. This is made clear in the code of `UGLOBAL_SET`:
+
+[source,c]
+----
+CASE(UGLOBAL_SET) { /* Never produced by compiler */
+  /* Because of optimization, we may get re-dispatched to here. */
+  RELEASE_POSSIBLE_LOCK;
+
+  fetch_global() = vm->val; NEXT0;
+}
+----
+
+The checked globals table is defined earlier in `vm.c`:
+
+[source,c]
+----
+static SCM** checked_globals;
+...
+#define fetch_global()  (*(checked_globals[(unsigned) fetch_next()]))
+----
+
+and the function `add_global(SCM ref)` will add a global to the table.
+
+Of course, this is also done in all other `UGREF_*` instructions in a
+similar way.
+
+That is why, even using a hash table, access to global variables happens
+with speed not too far from that of access to local variables in STklos.
+This can be seen in the following rudimentary benchmark:
+
+[source,scheme]
+----
+;;;
+;;; Using locals: runs in about 3900ms
+;;;
+(let ((a 0)
+      (b 2))
+  (time
+    (repeat 100_000_000
+      (set! a b))))
+
+;;;
+;;; Using globals: in the same system, runs in about 4000ms
+;;;
+(define a 0)
+(define b 2)
+
+(time
+  (repeat 100_000_000
+     (set! a b)))
+----
+
+
 == Operations
 
 === Arithmetic
