@@ -127,6 +127,11 @@ doc>
                             (format port "an empty string")
                             (format port "a string of length ~s"
                                     (string-length x))))
+     ((bytevector? x)   (let ((n (bytevector-length x)))
+                          (if (zero? n)
+                              (format port "an empty bytevector")
+                              (format port "a bytevector of length ~s"
+                                      n))))
      ((vector?  x)      (if (eqv? x '#())
                             (format port "an empty vector")
                             (format port "a vector of length ~s"
