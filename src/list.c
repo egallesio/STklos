@@ -67,6 +67,10 @@ static void error_not_exact_positive(SCM x)
 {
   STk_error("index ~W is not an exact positive integer", x);
 }
+static void error_bad_comparison_function(SCM x)
+{
+  STk_error("bad comparison function ~S", x);
+}
 
 int STk_int_length(SCM l)
 {
@@ -346,7 +350,7 @@ SCM STk_append2(SCM l1, SCM l2)
   CDR(prev) = l2;
   return res;
 Error:
-  STk_error("argument ~S is not a list", l1);
+  error_bad_list(l1);
   return STk_void; /* never reached */
 }
 
@@ -413,13 +417,13 @@ DEFINE_PRIMITIVE("list-tail", list_tail, subr2, (SCM list, SCM k))
   x = STk_integer_value(k);
   if (x >= 0) {
     for (l=list; x > 0; x--) {
-      if (NULLP(l) || !CONSP(l)) STk_error("list ~S too short", list);
+      if (NULLP(l) || !CONSP(l)) error_too_short(list);
       l = CDR(l);
     }
     return l;
   }
 
-  STk_error("index ~S is not an exact positive integer", k);
+  error_not_exact_positive(k);
   return STk_void; /* never reached */
 }
 
@@ -512,7 +516,7 @@ DEFINE_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj))
  * |(list-tail list k)| for |k| less than the length of list.
  * If |obj| does not occur in |list|, then |#f| (not the empty list) is
  * returned. |Memq| uses |eq?| to compare obj with the elements of list,
- * while |memv| uses |eqv?| and |member| uses |compare|, if given, and 
+ * while |memv| uses |eqv?| and |member| uses |compare|, if given, and
  * |equal?| otherwise.
  *
  * @lisp
@@ -571,7 +575,7 @@ DEFINE_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp))
 {
   if (cmp) {
     if (STk_procedurep(cmp) != STk_true)
-      STk_error("bad comparison function ~S", cmp);
+      error_bad_comparison_function(cmp);
 
     LMEMBER(PTR_CMPGEN);
   } else {
@@ -646,7 +650,7 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
 {
   if (cmp) {
     if (STk_procedurep(cmp) != STk_true)
-      STk_error("bad comparison function ~S", cmp);
+      error_bad_comparison_function(cmp);
 
     LASSOC(PTR_CMPGEN);
  } else {
@@ -887,7 +891,7 @@ DEFINE_PRIMITIVE("reverse!", dreverse, subr1, (SCM l))
   SCM tmp, p, prev;
 
   for(p=l, prev=STk_nil; !NULLP(p); prev=p, p=tmp) {
-    if (!CONSP(p)) STk_error("bad list ~W", l);
+    if (!CONSP(p)) error_bad_list(l);
     if (BOXED_INFO(p) & CONS_CONST) error_const_cell(p);
     tmp = CDR(p);
     CDR(p) = prev;
@@ -1029,7 +1033,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(assv);
   ADD_PRIMITIVE(assoc);
   ADD_PRIMITIVE(list_copy);
- 
+
   ADD_PRIMITIVE(pair_mutable);
   ADD_PRIMITIVE(list_star);
   ADD_PRIMITIVE(last_pair);

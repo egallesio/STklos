@@ -146,6 +146,11 @@ static void error_not_a_real_number(SCM n)
     error_bad_number(n);
 }
 
+static void error_out_of_range(SCM x)
+{
+  STk_error("argument out of range ~s", x);
+}
+
 static void error_at_least_1(void)
 {
   STk_error("expects at least one argument");
@@ -2766,7 +2771,7 @@ static SCM my_atan(SCM z)
                         SCM a;
 
                         if ((r == MAKE_INT(1)) && (zerop(i)))
-                          STk_error("value ~S is out of range", z);
+                          error_out_of_range(z);
                         a = STk_make_rectangular(sub2(MAKE_INT(0), r), i);
                         return div2(sub2(my_log(add2(a, MAKE_INT(1))),
                                          my_log(sub2(MAKE_INT(1), a))),
@@ -3021,14 +3026,14 @@ static SCM my_atanh(SCM z) {
   case tc_real:    {
       double zz = REAL_VAL(z);
       if (zz == -1.0 || zz == +1.0)
-          STk_error("argument out of range ~s", z);
+        error_out_of_range(z);
       if (fpclassify(zz) == FP_ZERO) return MAKE_INT(0);
       return atanh_aux(1.0 + zz, 1.0 - zz);
   }
   case tc_integer:  {
       long zz = INT_VAL(z);
       if (zz == -1 || zz == +1)
-          STk_error("argument out of range ~s", z);
+        error_out_of_range(z);
       if (zz == 0) return MAKE_INT(0);
       return atanh_aux(1.0 + zz, 1.0 - zz);
   }
@@ -3038,7 +3043,7 @@ static SCM my_atanh(SCM z) {
       SCM numer = add2(MAKE_INT(1),z);
       SCM denom = sub2(MAKE_INT(1),z);
       if (zerop(numer) || zerop(denom))
-          STk_error("argument out of range ~s", z);
+        error_out_of_range(z);
       /* Too slow to use div2 here, since my_log will return
          inexact, except when log returns zero or a complex.
          Also, log(a)-log(b) is twice as fast as log(a/b)
@@ -3572,8 +3577,8 @@ DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
   SCM tmp;
   int exp, sign=0;
 
-  if (!NUMBERP(n)) error_bad_number(n);
-  if (COMPLEXP(n)) STk_error("real number expected. It was ~S", n);
+  if (!NUMBERP(n) || COMPLEXP(n)) error_not_a_real_number(n);
+
   if (EXACTP(n)) n = exact2inexact(n);
 
   tmp = decode_flonum(REAL_VAL(n), &exp, &sign);
