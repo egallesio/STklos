@@ -61,7 +61,7 @@
     (set! str (regexp-replace-all "\\|([^|]+)\\|" str (format "~a\\1~a" hc nc)))
     (set! str (regexp-replace-all "`([^`]+)`"     str (format "~a\\1~a" hc nc)))
 
-    ;; Colorize => 
+    ;; Colorize =>
     (set! str (regexp-replace-all "=>"            str (format "~a=>~a" ac hc)))
 
     ;; Some function calls
@@ -170,8 +170,8 @@ doc>
 ;; (f x y), or
 ;; (_ x y)  if it is unnamed.
 (define (%help-signature obj)
-  (if (procedure? obj)
-      (let* ((sig (%procedure-signature obj)))
+  (if (closure? obj) ;; procedures don't have formals available for now
+      (let* ((sig (procedure-formals obj)))
         (if sig
             (cons (%get-object-name obj '_) sig)
             #f))

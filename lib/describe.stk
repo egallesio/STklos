@@ -131,10 +131,15 @@ doc>
                             (format port "an empty vector")
                             (format port "a vector of length ~s"
                                     (vector-length x))))
-     ((procedure? x)    (if (%procedure-signature x)
-                            (format port "a procedure, whose arguments are ~s"
-                                    (%procedure-signature x))
-                            (format port "a procedure")))
+     ((closure? x)      (format port "a procedure")
+                        ;; We don't need to show the formals, because they're already
+                        ;; displayed in the object. For example, [closure g (a b)].
+                        ;; But we offer the user a way to read the source, if it is
+                        ;; available.
+                        (when (procedure-source x)
+                          (format port
+                                  ".~%The source code is available -- call `procedure-source` on it")))
+     ((procedure? x)    (format port "a primitive procedure"))
      ((eof-object? x)   (format port "the end-of-file object"))
      ((struct-type? x)  (format port "the type structure named ~A"
                                 (struct-type-name x)))
