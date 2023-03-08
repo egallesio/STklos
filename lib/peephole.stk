@@ -232,5 +232,3 @@
 
   ;; return the optimized code
   all-code)
-
-;(define (peephole c) c)

@@ -469,7 +469,7 @@ doc>
   (let ((code (%procedure-code proc)))
     (if code
         (disassemble-code code port)
-        (error 'disassemble "cannot disassemble ~S" proc))))
+        (error 'disassemble "cannot disassemble ~S (not a closure with bytecode)" proc))))
 
 #|
 <doc EXT disassemble-expr

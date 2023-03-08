@@ -28,7 +28,7 @@
 
 ;;
 ;; Following code is in the STklos module and is needed to ensure STklos
-:; bootstap
+;; bootstrap
 ;;
 (include "runtime.stk")         ; Definitions necessary for the bootstrap
 (include "runtime-macros.stk")  ; Macros necessary for the bootstrap

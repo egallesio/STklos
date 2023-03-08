@@ -77,7 +77,7 @@ doc>
 
 
   ;;=============================================================================
-  :;
+  ;;
   ;; Class <Traced-generic>
   ;;
   ;; Trace of a generic function is done using MOP.
