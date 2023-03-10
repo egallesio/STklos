@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  7-Mar-2023 21:58 (ryandesign)
+### Last file update: 10-Mar-2023 11:15 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -92,16 +92,12 @@ DLLIBS=""
 
 eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
-case $OS_NAME_VERSION in
-  SUNOS*)
+case $OS in
+  SUNOS)
     CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
-  DARWIN_10)
-     GCINC="GCINC -D_XOPEN_SOURCE"
-     EXTRA_COMP_FLAGS="-I/opt/local/include"
-     ;;
-  UNKNOWN*)
+  UNKNOWN)
     echo ""
     echo "**** STklos has no support for your system (`uname -s`)."
     echo "**** Please modify the script \"utils/shlib-options\" to add support"
@@ -129,7 +125,6 @@ case $OS in
    DARWIN)
       case $version in
          9*)  OS_NAME_VERSION=DARWIN_9;;
-         10*) OS_NAME_VERSION=DARWIN_10;;
          *)   OS_NAME_VERSION=DARWIN_OLD;;
       esac
       ;;
@@ -244,14 +239,7 @@ AC_ARG_WITH(provided-gc,
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
 then
      echo "... Configuring libgc"
-
-     case $OS_NAME_VERSION in
-       DARWIN_10)
-          cflags="${CFLAGS} -D_XOPEN_SOURCE";;
-       *)
-          cflags="${CFLAGS}";;
-     esac
-     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix --enable-static \
+     (cd gc; CC=${CC} CFLAGS=${CFLAGS} ./configure --prefix=$prefix --enable-static \
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
@@ -307,7 +295,7 @@ fi
 if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
 then
      echo "... Configuring libgmp"
-     (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
+     (cd gmp; CC=${CC} CFLAGS="${CFLAGS} -I../src -DFOR_STKLOS=1" ./configure \
               --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
      GMPINC='-I$(BASEDIR)/gmp'
@@ -505,7 +493,7 @@ SH_LIB_LINK=""
 
 # stklos.shlib.compile property
 inc=-I${prefix}/include/$PACKAGE
-for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc ${EXTRA_COMP_FLAGS}
+for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc
 do
     SH_LIB_COMPILE="${SH_LIB_COMPILE}\\\"${arg}\\\" "
 done
@@ -582,7 +570,6 @@ AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)
 AC_SUBST(OS_NAME_VERSION)
-AC_SUBST(EXTRA_COMP_FLAGS)
 AC_SUBST(SH_COMP_FLAGS)
 AC_SUBST(SH_LOAD_FLAGS)
 AC_SUBST(SH_LOADER)
