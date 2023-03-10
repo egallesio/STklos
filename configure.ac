@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  7-Mar-2023 21:58 (ryandesign)
+### Last file update: 10-Mar-2023 09:55 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -98,7 +98,6 @@ case $OS_NAME_VERSION in
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
   DARWIN_10)
-     GCINC="GCINC -D_XOPEN_SOURCE"
      EXTRA_COMP_FLAGS="-I/opt/local/include"
      ;;
   UNKNOWN*)
@@ -244,14 +243,7 @@ AC_ARG_WITH(provided-gc,
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
 then
      echo "... Configuring libgc"
-
-     case $OS_NAME_VERSION in
-       DARWIN_10)
-          cflags="${CFLAGS} -D_XOPEN_SOURCE";;
-       *)
-          cflags="${CFLAGS}";;
-     esac
-     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix --enable-static \
+     (cd gc; CC=${CC} CFLAGS=${CFLAGS} ./configure --prefix=$prefix --enable-static \
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
@@ -307,7 +299,7 @@ fi
 if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
 then
      echo "... Configuring libgmp"
-     (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
+     (cd gmp; CC=${CC} CFLAGS="${CFLAGS} -I../src -DFOR_STKLOS=1" ./configure \
               --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
      GMPINC='-I$(BASEDIR)/gmp'
