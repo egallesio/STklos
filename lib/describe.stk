@@ -132,6 +132,9 @@ doc>
                               (format port "an empty bytevector")
                               (format port "a bytevector of length ~s"
                                       n))))
+     ((is-a? x
+             <uvector>) (format port "an uniform vector of type ~s"
+                                (%uvector-type x)))
      ((vector?  x)      (if (eqv? x '#())
                             (format port "an empty vector")
                             (format port "a vector of length ~s"
