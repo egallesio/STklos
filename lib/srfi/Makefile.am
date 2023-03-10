@@ -338,7 +338,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 175.$(SO): 175-incl.c 175.c
 238.$(SO): 238-incl.c 238.c
 
-../streams/derived.ostk:
+../streams/derived.ostk: 1.ostk
 	(cd ../streams; $(MAKE) derived.ostk)
 ../scheme/list.ostk:
 	(cd ../scheme; $(MAKE) list.ostk)
