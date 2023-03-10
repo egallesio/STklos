@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 10-Mar-2023 09:55 (ryandesign)
+### Last file update: 10-Mar-2023 10:20 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -97,9 +97,6 @@ case $OS_NAME_VERSION in
     CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
-  DARWIN_10)
-     EXTRA_COMP_FLAGS="-I/opt/local/include"
-     ;;
   UNKNOWN*)
     echo ""
     echo "**** STklos has no support for your system (`uname -s`)."
@@ -128,7 +125,6 @@ case $OS in
    DARWIN)
       case $version in
          9*)  OS_NAME_VERSION=DARWIN_9;;
-         10*) OS_NAME_VERSION=DARWIN_10;;
          *)   OS_NAME_VERSION=DARWIN_OLD;;
       esac
       ;;
@@ -497,7 +493,7 @@ SH_LIB_LINK=""
 
 # stklos.shlib.compile property
 inc=-I${prefix}/include/$PACKAGE
-for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc ${EXTRA_COMP_FLAGS}
+for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc
 do
     SH_LIB_COMPILE="${SH_LIB_COMPILE}\\\"${arg}\\\" "
 done
@@ -574,7 +570,6 @@ AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)
 AC_SUBST(OS_NAME_VERSION)
-AC_SUBST(EXTRA_COMP_FLAGS)
 AC_SUBST(SH_COMP_FLAGS)
 AC_SUBST(SH_LOAD_FLAGS)
 AC_SUBST(SH_LOADER)

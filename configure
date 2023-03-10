@@ -689,7 +689,6 @@ SH_SUFFIX
 SH_LOADER
 SH_LOAD_FLAGS
 SH_COMP_FLAGS
-EXTRA_COMP_FLAGS
 OS_NAME_VERSION
 OS_NAME
 BUILD_ARCH
@@ -6795,9 +6794,6 @@ case $OS_NAME_VERSION in
     CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
-  DARWIN_10)
-     EXTRA_COMP_FLAGS="-I/opt/local/include"
-     ;;
   UNKNOWN*)
     echo ""
     echo "**** STklos has no support for your system (`uname -s`)."
@@ -6826,7 +6822,6 @@ case $OS in
    DARWIN)
       case $version in
          9*)  OS_NAME_VERSION=DARWIN_9;;
-         10*) OS_NAME_VERSION=DARWIN_10;;
          *)   OS_NAME_VERSION=DARWIN_OLD;;
       esac
       ;;
@@ -7627,7 +7622,7 @@ SH_LIB_LINK=""
 
 # stklos.shlib.compile property
 inc=-I${prefix}/include/$PACKAGE
-for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc ${EXTRA_COMP_FLAGS}
+for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc
 do
     SH_LIB_COMPILE="${SH_LIB_COMPILE}\\\"${arg}\\\" "
 done
@@ -7771,7 +7766,6 @@ fi
 esac
 
 ### Output files
-
 
 
 
