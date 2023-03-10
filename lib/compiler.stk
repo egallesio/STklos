@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  4-Mar-2023 11:50 (eg)
+;;;; Last file update: 10-Mar-2023 18:54 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -318,7 +318,7 @@ doc>
                 (unless (known-var? symbol)
                   (compiler-warn-undef symbol where)
                   (register-new-global! symbol)))) ;; to avoid multiple warnings
-            *forward-globals*)
+            (reverse *forward-globals*))
   (set! *forward-globals* '()))
 
 
