@@ -123,6 +123,7 @@ doc>
                             (lambda (e) (out))
                             (format port ", with ~amutable binding"
                                     (if (symbol-mutable? x) "" "im"))))))
+     ((keyword? x)      (format port "a keyword"))
      ((pair?    x)      (format port "a non-empty list"))
      ((string?  x)      (if (eqv? x "")
                             (format port "an empty string")
