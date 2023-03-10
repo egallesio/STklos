@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 23:58 (eg)
-# Last file update: 12-Jan-2023 11:56 (eg)
+# Last file update: 10-Mar-2023 10:20 (ryandesign)
 
 
 prefix=@prefix@
@@ -66,7 +66,7 @@ while test $# -gt 0; do
             ;;
         --compile|-c)
             inc=-I${prefix}/include/@PACKAGE@
-            echo @CC@ @SH_COMP_FLAGS@ $inc $inc/gc @EXTRA_COMP_FLAGS@
+            echo @CC@ @SH_COMP_FLAGS@ $inc $inc/gc
             ;;
         --link|-l)
             echo @SH_LOADER@ @SH_LOAD_FLAGS@
