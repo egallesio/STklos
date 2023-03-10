@@ -21,21 +21,21 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 10-May-2021 16:56 (eg)
+ * Last file update: 10-Mar-2023 12:43 (ryandesign)
  *
- * This implementation is built by reverse engineering on an old SUNOS 4.1.1
+ * This implementation is built by reverse engineering an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
- * non buffered file are not implemented. Anyway this is faster than an
- * implementation using the C buffered IO (at least on glibc)
+ * non-buffered files are not implemented. Anyway this is faster than an
+ * implementation using the C buffered IO (at least on glibc).
  *
  */
 
 #define TTY_BUFSIZE     256
 #define OTHER_BUFSIZE   4096
 
-#define STK_IOFBF   (1 << 0) /* Full buffered*/
-#define STK_IOLBF   (1 << 1) /* Line buffered */
-#define STK_IONBF   (1 << 2) /* Non buffered (unused for now) */
+#define STK_IOFBF   (1 << 0) /* Full-buffered */
+#define STK_IOLBF   (1 << 1) /* Line-buffered */
+#define STK_IONBF   (1 << 2) /* Non-buffered (unused for now) */
 #define STK_IOEOF   (1 << 3) /* EOF encountered on this file */
 #define STK_IOREAD  (1 << 4) /* File is opened in read */
 
