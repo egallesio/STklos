@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 18-Aug-2022 18:33 (eg)
+ * Last file update: 10-Mar-2023 17:36 (eg)
  */
 
 #include <float.h>
@@ -448,7 +448,7 @@ static SCM makeuvect(int type, int len, SCM init)
 
 
 // public version of makeuvect (used by srfi-160)
-SCM STk_makeuvect(int type, int len, SCM init) 
+SCM STk_makeuvect(int type, int len, SCM init)
 {
   return makeuvect(type, len, init);
 }
@@ -566,6 +566,12 @@ DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM type, SCM l))
 
   if (tip < UVECT_S8 || tip > UVECT_C128) error_bad_uniform_type(type);
   return STk_list2uvector(tip, l);
+}
+
+DEFINE_PRIMITIVE("%uvector-type", uvector_type, subr1, (SCM v))
+{
+  if (!UVECTORP(v)) error_bad_vector(v);
+  return STk_intern(type_vector(UVECTOR_TYPE(v)));
 }
 
 
@@ -759,6 +765,7 @@ int STk_init_uniform_vector(void)
   ADD_PRIMITIVE(uvector_length);
   ADD_PRIMITIVE(uvector_ref);
   ADD_PRIMITIVE(uvector_set);
+  ADD_PRIMITIVE(uvector_type);
 
   /* R7RS specific bytevectors primitives */
   ADD_PRIMITIVE(bytevector_copy);
