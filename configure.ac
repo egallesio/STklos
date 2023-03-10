@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 10-Mar-2023 10:20 (ryandesign)
+### Last file update: 10-Mar-2023 11:15 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -92,12 +92,12 @@ DLLIBS=""
 
 eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
-case $OS_NAME_VERSION in
-  SUNOS*)
+case $OS in
+  SUNOS)
     CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
-  UNKNOWN*)
+  UNKNOWN)
     echo ""
     echo "**** STklos has no support for your system (`uname -s`)."
     echo "**** Please modify the script \"utils/shlib-options\" to add support"

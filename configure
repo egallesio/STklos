@@ -6789,12 +6789,12 @@ DLLIBS=""
 
 eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
-case $OS_NAME_VERSION in
-  SUNOS*)
+case $OS in
+  SUNOS)
     CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
-  UNKNOWN*)
+  UNKNOWN)
     echo ""
     echo "**** STklos has no support for your system (`uname -s`)."
     echo "**** Please modify the script \"utils/shlib-options\" to add support"
