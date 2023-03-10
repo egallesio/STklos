@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c                     -- Objects support
  *
- * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 10-Jun-2022 17:30 (eg)
+ * Last file update: 10-Mar-2023 17:20 (eg)
  */
 
 #include "stklos.h"
@@ -61,7 +61,8 @@ static SCM Top, Object, Class, Generic, Method, Simple_method, Accessor,
            Procedure_class, Entity_class;
 static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number,
            Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof,
-           Struct_type, Struct, Cond, Cond_type, Box, Syntax, UnknownClass;
+           Struct_type, Struct, Cond, Cond_type, Box, Syntax, Uvector,
+           Bytevector, UnknownClass;
 
 
 int STk_oo_initialized = FALSE;
@@ -901,6 +902,8 @@ static void make_standard_classes(void)
   mk_cls(&String,       "<string>",     Class,           Top,       STk_nil);
   mk_cls(&Symbol,       "<symbol>",     Class,           Top,       STk_nil);
   mk_cls(&Vector,       "<vector>",     Class,           Top,       STk_nil);
+  mk_cls(&Uvector,      "<uvector>",    Class,           Top,       STk_nil);
+  mk_cls(&Bytevector,   "<bytevector>", Class,           Uvector,   STk_nil);
   mk_cls(&Number,       "<number>",     Class,           Top,       STk_nil);
   mk_cls(&Complex,      "<complex>",    Class,           Number,    STk_nil);
   mk_cls(&Real,         "<real>",       Class,           Complex,   STk_nil);
@@ -1025,7 +1028,9 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     case tc_struct:     return (CONDP(obj)) ? Cond : Struct;
     case tc_box:        return Box;
     case tc_syntax:     return Syntax;
-  default: ;
+    case tc_uvector:    return (UVECTOR_TYPE(obj) == UVECT_U8) ?
+                               Bytevector: Uvector;
+    default: ;
   }
 
   if (STk_procedurep(obj) == STk_true)
