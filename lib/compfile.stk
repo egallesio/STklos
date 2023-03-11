@@ -62,6 +62,7 @@
 <doc EXT compile-file
  * (compile-file input output)
  * (compile-file input output :prepend cmds)
+ * (compile-file input output :delete-and-exit-on-failure del-and-exit)
  *
  * Compiles the file whose name is |input| into a bytecode executable
  * whose name is |output|.
@@ -71,11 +72,20 @@
  * file. This can be used to define variables that the compiled program
  * will use (but it does not affect the compiler itself).
  *
+ * If the |:delete-and-exit-on-failure| keyword argument is given, it
+ * is used to decide what to do after a possible error during
+ * compilation: if the value is `#f`, then compilation continues even
+ * after the error. Otherwise, the output file is deleted and STklos
+ * immediately exits to the operating system with a negative
+ * status.
+ *
  * This procedure will not set the executable bit on the generated file.
 doc>
 |#
 
-(define (compile-file input output :key (prepend '() has-prepend?))
+(define (compile-file input output :key
+                      (prepend '() has-prepend?)
+                      (delete-and-exit-on-failure #t))
 
   (define (compute-file-informations initial-globals)
     (let ((globs (let loop ((lst (compiler-known-globals))
@@ -104,11 +114,12 @@ doc>
                         (eprintf "*** Error while compiling: ~a~%" (condition-message cnd))
                         (eprintf "Backtrace:~%")
                         (%display-backtrace (condition-ref cnd 'backtrace) 10)
-                        (eprintf "Trying to output file... ")
-                        (when (file-exists? output)
-                          (delete-file output))
-                        (eprintf "Done.~%")
-                        (exit -1))))
+                        (when delete-and-exit-on-failure
+                          (eprintf "Trying to output file... ")
+                          (when (file-exists? output)
+                            (delete-file output))
+                          (eprintf "Done.~%")
+                          (exit -1)))))
 
       ;; Clear the list containing  macros sources
       (file-module-list-reset!)
