@@ -23,10 +23,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Nov-2020 17:10
-;;;; Last file update: 13-Dec-2021 19:25 (eg)
+;;;; Last file update: 11-Mar-2023 13:18 (ryandesign)
 ;;;;
 
-;; WARNING: This scipt is useful for STklos development, it will not
+;; WARNING: This script is useful for STklos development; it will not
 ;; be installed. Furthermore, the list of SRFIs must be loaded before
 ;; the script is run.
 
@@ -49,7 +49,7 @@
    *srfi-database*))
 
 ;;
-;; Print the SRFI list in an intenal format to be used by STKlos
+;; Print the SRFI list in an internal format to be used by STklos
 ;; implementation
 ;;
 (define (build-srfi-features)
