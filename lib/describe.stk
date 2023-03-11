@@ -112,6 +112,7 @@ doc>
                               ((complex? x)  (format port
                                                      "an inexact complex number")))))
      ((null?    x)      (format port "the empty list"))
+     ((void?    x)      (format port "the unspecified (void) object"))
      ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
      ((char?    x)      (format port "a character whose Unicode code point ~a is ~s"
                                 (if (<= (char->integer x) 127) "(and ASCII value)" "")
