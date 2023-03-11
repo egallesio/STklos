@@ -77,8 +77,6 @@ STk_init_library(int _UNUSED(*argc), char _UNUSED(***argv), int stack_size)
     STk_init_box()                              &&
     STk_init_ffi()                              &&
     STk_init_syntax()                           &&
-#ifdef STK_DEBUG
     STk_init_utf8()                             &&
-#endif
     (STk_library_initialized = TRUE);
 }
