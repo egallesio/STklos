@@ -22,7 +22,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  1-Jan-2002 18:57 (eg)
-# Last file update: 10-Mar-2023 18:04 (ryandesign)
+# Last file update: 11-Mar-2023 08:11 (ryandesign)
 #
 
 # This script is only used to compile the different components of the
@@ -82,14 +82,16 @@ export STKLOS_LOAD_PATH STKLOS_BUILDING
 
 ${prefix}/src/stklos -c -q -b ${prefix}/src/boot.img \
      -f ${prefix}/utils/stklos-compile.stk -- \
-     --no-time $Copt --output=$out $in
+     --no-time $Copt --output="$out.$$" "$in"
 
 status=$?
 if test $status -gt 0
 then
-    rm -f "$out"
+    rm -f "$out.$$"
     exit $status
 fi
+
+test -e "$out.$$" && mv "$out.$$" "$out"
 
 if test X$Copt = X -a -e $out
 then
