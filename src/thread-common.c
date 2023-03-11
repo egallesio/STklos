@@ -139,6 +139,7 @@ DEFINE_PRIMITIVE("%make-thread", make_thread, subr3,(SCM thunk, SCM name, SCM ss
     /* If no size is specified, use primordial thread stack size */
     stack_size = THREAD_STACK_SIZE(STk_primordial_thread);
   else {
+    if (!INTP(stack_size)) STk_error("bad integer ~S", ssize);
     stack_size = STk_integer_value(ssize);
     if (stack_size < 0)
       STk_error("bad stack size ~S", ssize);
