@@ -98,59 +98,71 @@ doc>
         (tm       (clock))
         (copts    (compiler:warn-use-undefined-postpone)))
 
-    ;; Clear the list containing  macros sources
-    (file-module-list-reset!)
+    ;; If anything goes wrong during compilation, print the error or condition
+    ;; message, remove the output file and exit with a -1 status.
+    (guard (cnd (else (begin
+                        (eprintf "*** Error while compiling: ~a~%" (condition-message cnd))
+                        (eprintf "Backtrace:~%")
+                        (%display-backtrace (condition-ref cnd 'backtrace) 10)
+                        (eprintf "Trying to output file... ")
+                        (when (file-exists? output)
+                          (delete-file output))
+                        (eprintf "Done.~%")
+                        (exit -1))))
 
-    ;; Defer warning til the end of the compilation of file
-    ;(compiler:warn-use-undefined-postpone #t)
+      ;; Clear the list containing  macros sources
+      (file-module-list-reset!)
 
-    (fluid-let ((*code-instr* '())
-                (*code-constants* '())
-                (*compiling-file* #t))
+      ;; Defer warning til the end of the compilation of file
+      ;(compiler:warn-use-undefined-postpone #t)
 
-      ;; SRFI 138, -D option:
-      (when has-prepend?
-        (unless (list? prepend)
-          (error 'compile-file "prepend should be a list: ~S" prepend))
-        ;; whatever the list is, if we wrap it in a BEGIN form,
-        ;; it will be compiled sequentially:
-        (let ((exprs (cons 'begin prepend)))
-          (compile exprs #f exprs #f)))
+      (fluid-let ((*code-instr* '())
+                  (*code-constants* '())
+                  (*compiling-file* #t))
 
-      ;; Read the source file
-      (%include-file input)
-      (emit 'END-OF-CODE)
+        ;; SRFI 138, -D option:
+        (when has-prepend?
+          (unless (list? prepend)
+            (error 'compile-file "prepend should be a list: ~S" prepend))
+          ;; whatever the list is, if we wrap it in a BEGIN form,
+          ;; it will be compiled sequentially:
+          (let ((exprs (cons 'begin prepend)))
+            (compile exprs #f exprs #f)))
 
-      ;; Write the header
-      (format out "#!/usr/bin/env stklos\n")
-      (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
-      (format out "STklos ~S\n" (compute-file-informations globs))
+        ;; Read the source file
+        (%include-file input)
+        (emit 'END-OF-CODE)
 
-      (let ((code (assemble (reverse! *code-instr*))))
-        (when (compiler:show-assembly-code)
-          ;;Write the assembly code and code vector
-          (format out "\n#|\n")
-          (disassemble-code code out)
-          (format out "\n~S\n|\#\n" code))
+        ;; Write the header
+        (format out "#!/usr/bin/env stklos\n")
+        (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
+        (format out "STklos ~S\n" (compute-file-informations globs))
 
-        ;; Write new constants as a vector
-        (format out "#~S\n" *code-constants*)
+        (let ((code (assemble (reverse! *code-instr*))))
+          (when (compiler:show-assembly-code)
+            ;;Write the assembly code and code vector
+            (format out "\n#|\n")
+            (disassemble-code code out)
+            (format out "\n~S\n|\#\n" code))
 
-        ;; Write byte-code
-        (%dump-code out code))
+          ;; Write new constants as a vector
+          (format out "#~S\n" *code-constants*)
 
-      ;; Close file
-      (close-output-port out))
+          ;; Write byte-code
+          (%dump-code out code))
 
-    ;; Show undefined symbols
-    (compiler-show-undefined-symbols)
+        ;; Close file
+        (close-output-port out))
 
-    ;; Display time used to compile file
-    (when (and (interactive-port? (current-input-port))
-               (compiler:time-display))
-      (format #t "Compilation time ~S ms\n" (exact (round (- (clock) tm)))))
+      ;; Show undefined symbols
+      (compiler-show-undefined-symbols)
 
-    ;; Restore Compiler flags
-    (compiler:warn-use-undefined-postpone copts)))
+      ;; Display time used to compile file
+      (when (and (interactive-port? (current-input-port))
+                 (compiler:time-display))
+        (format #t "Compilation time ~S ms\n" (exact (round (- (clock) tm)))))
+
+      ;; Restore Compiler flags
+      (compiler:warn-use-undefined-postpone copts))))
 
 (export compile-file)
