@@ -1868,7 +1868,7 @@ FUNCALL:  /* (int nargs, int tailp) */
     case tc_subr2:
       if (nargs == 2) { CALL_PRIM2(vm->val, (vm->sp[1], vm->sp[0]));      break;}
       goto error_invoke;
-  case tc_subr3:
+    case tc_subr3:
       if (nargs == 3) { CALL_PRIM3(vm->val, (vm->sp[2], vm->sp[1],
                                              vm->sp[0]));                 break;}
       goto error_invoke;
