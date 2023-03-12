@@ -36,6 +36,7 @@
           compiler:keep-formals
           compiler:keep-source
           compiler:inline-common-functions
+          compiler:unroll-iterations
 
           %compiler-set-flags
           %grab-file-information

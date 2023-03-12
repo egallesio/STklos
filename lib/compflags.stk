@@ -149,6 +149,14 @@ doc>
  *        (fib (- n 2)))))
  * @end lisp
 doc>
+<doc EXT compiler:unroll-iterations
+ * (compiler:unroll-iterations)
+ * (compiler:unroll-iterations n)
+ *
+ * This parameter controls the number of iterations to be unrolled in
+ * loops. Currently, only |repeat| loops are unrolled. The argument
+ * |n| must be a positive integer.
+doc>
 |#
 (define compiler:time-display                   (make-parameter #t))
 (define compiler:gen-line-number                (make-parameter #f))
@@ -157,6 +165,7 @@ doc>
 (define compiler:show-assembly-code             (make-parameter #f))
 (define compiler:keep-formals                   (make-parameter #f))
 (define compiler:keep-source                    (make-parameter #f))
+(define compiler:unroll-iterations              (make-parameter 3))
 
 
 

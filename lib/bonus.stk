@@ -40,7 +40,7 @@
         hash-table-keys hash-table-values hash-table-fold
         hash-table-merge! hash-table-copy
         fluid-let time tagbody
-        dotimes repeat while until
+        dotimes %repeat repeat while until
         call/ec
         base64-encode-string base64-decode-string
         md5sum-file
@@ -1032,13 +1032,40 @@ doc>
 doc>
 |#
 (define-macro (dotimes bindings . body)
+  ;; In the lambda passed to the apply, below:
+  ;; If count is a number (not a variable), don't include a
+  ;; LET for it -- it won't change anyway!
+  ;;
+  ;; For example:
+  ;; (macro-expand '(dotimes (i MAX) 'work))
+  ;;    => (let ((G77 MAX)) (do ((i 0 (+ i 1))) ((>= i G77) (void)) 'work))
+  ;;
+  ;; (macro-expand '(dotimes2 (i 10) 'work))
+  ;;    => (begin (do ((i 0 (fx+ i 1))) ((fx>= i 10) (void)) 'work))
+  ;;
+  ;; The second case will be faster for nested DOTIMEs, because it
+  ;; avoids access to a local variable *and* entering-and-leaving
+  ;; a LET.
+
+  ;; Also - if count is constant *and* a fixnum, we can use
+  ;; fx- and fx>, even though the speed difference is not
+  ;; that great.
+  ;;
+  ;; When count is not a fixnum, we use + and >= :
+  ;; (macro-expand '(dotimes (i 1180591620717411303424) 'work))
+  ;;   => (begin (do ((i 0 (+ i 1))) ((>= i 1180591620717411303424) (void)) 'work))
+  ;;
   (apply (lambda (var count . result)
-           (let ((limit  (gensym))
-                 (result (if (null? result) (list '(void)) result)))
-             `(let ((,limit ,count))
-                (do ((,var 0 (+ ,var 1)))
-                    ((>= ,var ,limit) ,@result)
-                  ,@body))))
+           (let* ((result (if (null? result) (list '(void)) result))
+                  (limit (if (number? count) count (gensym)))
+                  (head  (if (number? count)
+                             '(begin)
+                             `(let ((,limit ,count)))))
+                  (plus (if (fixnum? count) 'fx+ '+))
+                  (ge   (if (fixnum? count) 'fx>= '>=)))
+             `(,@head (do ((,var 0 (,plus ,var 1)))
+                          ((,ge ,var ,limit) ,@result)
+                        ,@body))))
          bindings))
 
 #|
@@ -1058,15 +1085,51 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (repeat expr . body)
-  (let ((var (gensym)))
+
+;; %repeat is an internal macro which does not do loop-unrolling.
+;;
+(define-macro  (%repeat expr . body)
+  ;; If expr is constant *and* a fixnum, we can use
+  ;; fx- and fx>, even though the speed difference is not
+  ;; that great.
+  (let ((var (gensym))
+        (minus (if (fixnum? expr) 'fx- '-))
+        (gt    (if (fixnum? expr) 'fx> '>)))
+
     `(let ((,var ,expr))
        (tagbody
         #:top
-        (when (> ,var 0)
-          (set! ,var (- ,var 1))
+        (when (,gt ,var 0)
+          (set! ,var (,minus ,var 1))
           ,@body
           (-> #:top))))))
+
+;; Multiplies a list...
+;; (%multiply-list '(a b c) 3) => (a b c a b c a b c)
+(define (%multiply-list L k)
+  (cond ((fx=? k 0) '())
+        ((fx=? k 1) (list-copy L))
+        (else (append (list-copy L)
+                      (%multiply-list L (fx- k 1))))))
+
+(define-macro (repeat count . body)
+  (if (fixnum? count)
+      ;; In the unlikely situation when the user requested "one"
+      ;; or "zero" iterations (maybe this is generated code?), we don't
+      ;; even create a let binding...
+      (cond ((fx< count 1) '(void))
+            ((eq? count 1) `(begin ,@body))
+            (else
+             (when (not (and (integer? (compiler:unroll-iterations))
+                             (positive? (compiler:unroll-iterations))))
+               (error "compiler:unroll-iterations must be a positive integer; it is ~S"
+                      (compiler:unroll-iterations)))
+             (let ((q (quotient  count (compiler:unroll-iterations)))
+                   (r (remainder count (compiler:unroll-iterations))))
+               (let ((inside (%multiply-list body (compiler:unroll-iterations))))
+                 `(begin (%repeat ,q ,@inside)
+                         ,@(%multiply-list body r))))))
+      `(%repeat ,count ,@body)))
 
 #|
 <doc EXT-SYNTAX while
