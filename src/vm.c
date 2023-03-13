@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Feb-2023 21:17 (eg)
+ * Last file update: 13-Mar-2023 19:46 (eg)
  */
 
 // INLINER values
@@ -1860,7 +1860,7 @@ FUNCALL:  /* (int nargs, int tailp) */
     case tc_subr2:
       if (nargs == 2) { CALL_PRIM2(vm->val, (vm->sp[1], vm->sp[0]));      break;}
       goto error_invoke;
-  case tc_subr3:
+    case tc_subr3:
       if (nargs == 3) { CALL_PRIM3(vm->val, (vm->sp[2], vm->sp[1],
                                              vm->sp[0]));                 break;}
       goto error_invoke;
@@ -1887,6 +1887,12 @@ FUNCALL:  /* (int nargs, int tailp) */
                                              (SCM)NULL));                 break;}
       if (nargs == 3) { CALL_PRIM3(vm->val, (vm->sp[2], vm->sp[1],
                                              vm->sp[0]));                 break;}
+       goto error_invoke;
+    case tc_subr34:
+      if (nargs == 3) { CALL_PRIM4(vm->val, (vm->sp[2], vm->sp[1],
+                                             vm->sp[0], (SCM) NULL));     break;}
+      if (nargs == 4) { CALL_PRIM4(vm->val, (vm->sp[3], vm->sp[2],
+                                             vm->sp[1], vm->sp[0]));      break;}
       goto error_invoke;
     case tc_vsubr: CALL_PRIMV(vm->val, (nargs, vm->sp+nargs-1));          break;
 

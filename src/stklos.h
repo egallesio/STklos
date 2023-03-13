@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 26-Feb-2023 21:17 (eg)
+ * Last file update: 13-Mar-2023 19:22 (eg)
  */
 
 
@@ -185,12 +185,12 @@ typedef enum {
   tc_complex, tc_symbol, tc_keyword, tc_string, tc_module,              /* 5 */
   tc_instance, tc_closure, tc_subr0, tc_subr1, tc_subr2,                /* 10 */
   tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,                   /* 15 */
-  tc_subr23, tc_vsubr, tc_apply, tc_vector, tc_uvector,                 /* 20 */
-  tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise,         /* 25 */
-  tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,      /* 30 */
-  tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex,            /* 35 */
-  tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,               /* 40 */
-  tc_syntax,                                                            /* 45 */
+  tc_subr23, tc_subr34, tc_vsubr, tc_apply, tc_vector,                  /* 20 */
+  tc_uvector, tc_hash_table, tc_port, tc_frame, tc_next_method,         /* 25 */
+  tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
+  tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
+  tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
+  tc_callback, tc_syntax,                                               /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
