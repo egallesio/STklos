@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 10-Mar-2023 17:36 (eg)
+ * Last file update: 14-Mar-2023 10:07 (eg)
  */
 
 #include <float.h>
@@ -478,7 +478,7 @@ SCM STk_list2uvector(int type, SCM l)
  *
 \*===========================================================================*/
 
-DEFINE_PRIMITIVE("%make-uvector", make_uvector, subr3,(SCM type, SCM len, SCM init))
+DEFINE_PRIMITIVE("%make-uvector", make_uvector, subr3, (SCM len, SCM init, SCM type))
 {
   long l   = STk_integer_value(len);
   long tip = STk_integer_value(type);
@@ -489,13 +489,13 @@ DEFINE_PRIMITIVE("%make-uvector", make_uvector, subr3,(SCM type, SCM len, SCM in
   return makeuvect(tip, l, init);
 }
 
-DEFINE_PRIMITIVE("%uvector?", uvectorp, subr2, (SCM type, SCM vect))
+DEFINE_PRIMITIVE("%uvector?", uvectorp, subr2, (SCM vect, SCM type))
 {
   long tip = STk_integer_value(type);
   return MAKE_BOOLEAN(UVECTORP(vect) && UVECTOR_TYPE(vect) == tip);
 }
 
-DEFINE_PRIMITIVE("%uvector", uvector, subr2, (SCM type, SCM values))
+DEFINE_PRIMITIVE("%uvector", uvector, subr2, (SCM values, SCM type))
 {
   long tip = STk_integer_value(type);
 
@@ -503,7 +503,7 @@ DEFINE_PRIMITIVE("%uvector", uvector, subr2, (SCM type, SCM values))
   return STk_list2uvector(tip, values);
 }
 
-DEFINE_PRIMITIVE("%uvector-length", uvector_length, subr2, (SCM type, SCM v))
+DEFINE_PRIMITIVE("%uvector-length", uvector_length, subr2, (SCM v, SCM type))
 {
   long tip = STk_integer_value(type);
 
@@ -513,7 +513,7 @@ DEFINE_PRIMITIVE("%uvector-length", uvector_length, subr2, (SCM type, SCM v))
   return MAKE_INT(UVECTOR_SIZE(v));
 }
 
-DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr3, (SCM type, SCM v, SCM index))
+DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr3, (SCM v, SCM index, SCM type))
 {
   long i   = STk_integer_value(index);
   long tip = STk_integer_value(type);
@@ -526,7 +526,7 @@ DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr3, (SCM type, SCM v, SCM index
 }
 
 DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr4,
-                 (SCM type, SCM v, SCM index, SCM value))
+                 (SCM v, SCM index, SCM value, SCM type))
 {
   long i   = STk_integer_value(index);
   long tip = STk_integer_value(type);
@@ -541,7 +541,7 @@ DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr4,
 }
 
 
-DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr2, (SCM type, SCM v))
+DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr2, (SCM v, SCM type))
 {
   long i, len, tip = STk_integer_value(type);
   SCM z, tmp;
@@ -560,7 +560,7 @@ DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr2, (SCM type, SCM v))
   return z;
 }
 
-DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM type, SCM l))
+DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM l, SCM type))
 {
   long tip = STk_integer_value(type);
 
