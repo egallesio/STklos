@@ -1721,4 +1721,100 @@
 (test "denominator.7" 2.0 (denominator (inexact (/ -6 4))))
 
 
+;; decode-float
+
+
+(define (test-decode-float val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "decode-float"
+          val
+          (exact->inexact (* sign signif (expt 2 ex))))))
+
+(import (only (srfi 144)
+              flnormalized?
+              fl-least fl-greatest
+              fl-e fl-e-euler fl-phi
+              fl-sqrt-2 fl-sqrt-5
+              fl-sin-1 fl-pi))
+
+
+(test-decode-float 0.0)
+(test-decode-float 1.0)
+(test-decode-float -1.0)
+(test-decode-float fl-e)
+(test-decode-float (- fl-e))
+(test-decode-float fl-e-euler)
+(test-decode-float (- fl-e-euler))
+(test-decode-float fl-phi)
+(test-decode-float (- fl-phi))
+(test-decode-float fl-sqrt-2)
+(test-decode-float (- fl-sqrt-2))
+(test-decode-float fl-sqrt-5)
+(test-decode-float (- fl-sqrt-5))
+(test-decode-float fl-sin-1)
+(test-decode-float (- fl-sin-1))
+(test-decode-float fl-pi)
+(test-decode-float (- fl-pi))
+(test-decode-float fl-least)
+(test-decode-float (* fl-least 101))    ; subnormal
+(test-decode-float (* fl-least 2))      ; subnormal
+(test-decode-float (* fl-least 100000)) ; subnormal
+(test-decode-float (* fl-least -98))    ; subnormal
+(test-decode-float fl-greatest)
+
+
+(define (test-subnormal-decode val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "subnormal?" #f (flnormalized? val))
+    (test "subnormal-exponent"
+          (float-min-exponent)
+          ex)))
+
+(test-subnormal-decode (* fl-least))        ; subnormal
+(test-subnormal-decode (* fl-least 101))    ; subnormal
+(test-subnormal-decode (* fl-least 2))      ; subnormal
+(test-subnormal-decode (* fl-least 100000)) ; subnormal
+(test-subnormal-decode (* fl-least -98))    ; subnormal
+
+
+(define (test-re-encode-float val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "re-encode-float"
+          val
+          (exact->inexact (encode-float signif ex sign)))))
+
+(test-re-encode-float 0.0)
+(test-re-encode-float 1.0)
+(test-re-encode-float -1.0)
+(test-re-encode-float fl-e)
+(test-re-encode-float (- fl-e))
+(test-re-encode-float fl-e-euler)
+(test-re-encode-float (- fl-e-euler))
+(test-re-encode-float fl-phi)
+(test-re-encode-float (- fl-phi))
+(test-re-encode-float fl-sqrt-2)
+(test-re-encode-float (- fl-sqrt-2))
+(test-re-encode-float fl-sqrt-5)
+(test-re-encode-float (- fl-sqrt-5))
+(test-re-encode-float fl-sin-1)
+(test-re-encode-float (- fl-sin-1))
+(test-re-encode-float fl-pi)
+(test-re-encode-float (- fl-pi))
+(test-re-encode-float fl-least)            ; subnormal
+(test-re-encode-float (* fl-least 101))    ; subnormal
+(test-re-encode-float (* fl-least 2))      ; subnormal
+(test-re-encode-float (* fl-least 100000)) ; subnormal
+(test-re-encode-float (* fl-least -98))    ; subnormal
+(test-re-encode-float fl-greatest)
+
+
+(test/error "encode > max exponent"
+            (encode-float 1 (+ (float-max-exponent) 1) 1))
+
+(test/error "encode < min exponent"
+            (encode-float 1 (- (float-min-exponent) 1) 1))
+
+(test/error "encode > max significand"
+            (encode-float (+ (float-max-significand) 1) 1 1))
+
 (test-section-end)
