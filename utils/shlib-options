@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update:  7-Mar-2023 07:55 (ryandesign)
+# Last file update: 16-Mar-2023 22:28 (ryandesign)
 
 
 #
@@ -161,7 +161,7 @@ case $os in
   Darwin*)
       OS=DARWIN;
       SH_COMP_FLAGS="-fPIC -fno-common"
-      SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress'
+      SH_LOAD_FLAGS='-bundle -undefined dynamic_lookup'
       SH_LOADER="$CC"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='dylib'
