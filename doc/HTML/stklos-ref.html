@@ -24314,6 +24314,7 @@ additional <strong>c64vector</strong> and <strong>c128vector</strong> types of <
 
 
 
+
 </p>
 </div>
 <div class="paragraph text-right">
@@ -24326,19 +24327,23 @@ additional <strong>c64vector</strong> and <strong>c128vector</strong> types of <
 <strong><code>(uvector-length uv)</code></strong><br>
 <strong><code>(uvector-ref uv k)</code></strong><br>
 <strong><code>(uvector-set! uv k val)</code></strong><br>
-<strong><code>(uvector&#8594;list uv)</code></strong><br></p>
+<strong><code>(uvector&#8594;list uv)</code></strong><br>
+<strong><code>(uvector-tag uv)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>These primitives extend <strong><a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong>. They can be called with any type
-of uniform (or homogeneous) vector.</p>
+of uniform (homogeneous) vector.  The primitive <code>uvector-tag</code> returns the tag
+of the uniform vector, as a symbol</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">uvector?</span> <span class="o">#</span><span class="nv">s16</span><span class="p">(</span><span class="nf">-1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>    <span class="nv">=&gt;</span> <span class="no">#t</span>
 <span class="p">(</span><span class="nf">uvector-length</span> <span class="o">#</span><span class="nv">u32</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
-<span class="p">(</span><span class="nf">uvector-length</span> <span class="o">#</span><span class="nv">s64</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span></code></pre>
+<span class="p">(</span><span class="nf">uvector-length</span> <span class="o">#</span><span class="nv">s64</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="nv">u8</span>
+<span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">c32</span><span class="p">())</span>       <span class="nv">=&gt;</span> <span class="nv">c32</span></code></pre>
 </div>
 </div>
 </div>
@@ -29752,7 +29757,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-03-16 19:44:00 +0100
+Last updated 2023-03-17 17:30:45 +0100
 </div>
 </div>
 </body>

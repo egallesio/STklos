@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 16-Mar-2023 19:43 (eg)
+// Last file update: 16-Mar-2023 20:37 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -156,7 +156,7 @@ running on.
 (((SRFI-160")))
 {{quick-link-srfi 4}} is fully supported and is extended to provide the
 additional *c64vector* and *c128vector* types of {{link-srfi 160}}.
-{{insertdoc 'uvector->list}}
+{{insertdoc 'uvector-tag}}
 
 
 // **** SRFI-10

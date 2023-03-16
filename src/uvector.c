@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 14-Mar-2023 16:39 (eg)
+ * Last file update: 16-Mar-2023 20:32 (eg)
  */
 
 #include <float.h>
@@ -591,7 +591,7 @@ DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM l, SCM type))
   return STk_list2uvector(tip, l);
 }
 
-DEFINE_PRIMITIVE("%uvector-type", uvector_type, subr1, (SCM v))
+DEFINE_PRIMITIVE("uvector-tag", uvector_tag, subr1, (SCM v))
 {
   check_uvector(v);
   return STk_intern(type_vector(UVECTOR_TYPE(v)));
@@ -788,7 +788,7 @@ int STk_init_uniform_vector(void)
   ADD_PRIMITIVE(uvector_length);
   ADD_PRIMITIVE(uvector_ref);
   ADD_PRIMITIVE(uvector_set);
-  ADD_PRIMITIVE(uvector_type);
+  ADD_PRIMITIVE(uvector_tag);
 
   /* R7RS specific bytevectors primitives */
   ADD_PRIMITIVE(bytevector_copy);

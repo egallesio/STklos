@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Apr-2001 11:36 (eg)
-;;;; Last file update: 16-Mar-2023 19:42 (eg)
+;;;; Last file update: 17-Mar-2023 17:30 (eg)
 ;;;;
 
 
@@ -166,19 +166,23 @@
 (%uniform-vector-functions c128 11)
 
 #|
-<doc EXT uvector? uvector-length uvector-ref uvector-set! uvector->list
+<doc EXT uvector? uvector-length uvector-ref uvector-set! uvector->list uvector-tag
  * (uvector? uv)
  * (uvector-length uv)
  * (uvector-ref uv k)
  * (uvector-set! uv k val)
  * (uvector->list uv)
+ * (uvector-tag uv)
  *
  * These primitives extend {{quick-link-srfi 4}}. They can be called with any type
- * of uniform (or homogeneous) vector.
+ * of uniform (homogeneous) vector.  The primitive |uvector-tag| returns the tag
+ * of the uniform vector, as a symbol
  * @lisp
  * (uvector? #s16(-1 2 3))    => #t
  * (uvector-length #u32(1 2)) => 2
  * (uvector-length #s64(1 2)) => 2
+ * (uvector-tag #u8(1 2 3))   => u8
+ * (uvector-tag #c32())       => c32
  * @end lisp
 doc>
 |#
@@ -187,8 +191,7 @@ doc>
 (define (uvector-ref uv k)      (%uvector-ref uv k))
 (define (uvector-set! uv k val) (%uvector-set! uv k val))
 (define (uvector->list uv)      (%uvector->list uv))
-
-
+;; uvector-tag is implemented in C
 
 
 ) ;; End of module
