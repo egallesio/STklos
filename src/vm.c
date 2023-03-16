@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Feb-2023 21:17 (eg)
+ * Last file update: 16-Mar-2023 02:06 (ryandesign)
  */
 
 // INLINER values
@@ -49,7 +49,7 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 
 
 #if defined(__GNUC__) && !defined(DEBUG_VM)
-   /* Use computed gotos to have better performances */
+   /* Use computed gotos to have better performance */
 #  define USE_COMPUTED_GOTO
 #  define CASE(x)       lab_##x:
 #  define NEXT          goto *jump_table[fetch_next()]
@@ -470,7 +470,7 @@ static int add_global(SCM ref)
   }
 
   /* Not present yet */
-  if (checked_globals_used >= checked_globals_len) { /* resize the checked  array */
+  if (checked_globals_used >= checked_globals_len) { /* resize the checked array */
     checked_globals_len += checked_globals_len / 2;
     checked_globals      = STk_must_realloc(checked_globals,
                                             checked_globals_len * sizeof(SCM*));
@@ -524,7 +524,7 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
  *
  *
  * Execute a Scheme function from C. This function can be used as
- * an "excv" or an "execl" function. If nargs is > 0 it is as a Unix "execl"
+ * an "execv" or an "execl" function. If nargs is > 0 it is as a Unix "execl"
  * function:
  *    STk_C_apply(STk_cons, 2, MAKE_INT(1), MAKE_INT(2)) => (1 . 2)
  * If nargs is < 0, we have something similar to an "execv" function
@@ -670,8 +670,8 @@ DEFINE_PRIMITIVE("%call-for-values", call_for_values, subr1, (SCM prod))
   vm->valc = 1;
 
   /* We don't use STk_values2vector here since we will call apply with the
-   * values produced by "prod" ⟹ buil a list here. There are too much allocation
-   * here :-(
+   * values produced by "prod" ⟹ build a list here. There is too much allocation
+   * here. :-(
    */
   switch (len) {
     case 0: return STk_nil;
@@ -775,17 +775,17 @@ SCM STk_values2vector(SCM obj, SCM vect)
 
 /* Add support for debugging
  * vm_debug is called with the kind of desired support and sp. It returns
- * the number of elements used on the stack
+ * the number of elements used on the stack.
  */
 
 // static void vm_debug(int kind, vm_thread_t *vm)
 // {
 //   switch (kind) {
-//   case 0: /* old trace code position. Don't use it anymode */
+//   case 0: /* old trace code position. Don't use it anymore. */
 //     {
 //       SCM line = vm->val;
 //       SCM file = pop();
-//       STk_panic("Recompile code in file ~S (contains obsolete line informations)",
+//       STk_panic("Recompile code in file ~S (contains obsolete line information)",
 //                 file, line);
 //       break;
 //     }
@@ -848,8 +848,8 @@ static void patch_environment(vm_thread_t *vm);
 DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*argv)))
 {
   /*
-   * This function is just a placeholder for debugging the VM. It's body is
-   * changed depending of the current bug to track
+   * This function is just a placeholder for debugging the VM. Its body is
+   * changed depending on the current bug to track.
    */
 
   //  patch_environment(STk_get_current_vm());
@@ -1942,7 +1942,7 @@ void STk_raise_exception(SCM cond)
   }
 
   /*
-   * Grab the handler infos
+   * Grab the handler info
    */
   proc   = (SCM)         HANDLER_PROC(vm->handlers);
   vm->pc = (STk_instr *) HANDLER_END(vm->handlers);
@@ -2075,13 +2075,13 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   } else {
     /* We come back and restore the continuation */
     /* Since we are not sure of the way locals are allocated by the compiler
-     * we cannot be sure that vm has kept its value. So we  get back another
-     * time the current vm data*/
+     * we cannot be sure that the vm has kept its value. So we get the current
+     * vm data again. */
     return STk_get_current_vm()->val;
   }
 }
 
-#define CALL_CC_SPACE   1024    /* Add some space for restoration bookeepping */
+#define CALL_CC_SPACE   1024    /* Add some space for restoration bookkeeping */
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -2245,11 +2245,11 @@ SCM STk_load_bcode_file(SCM f)
   /* Save machine state */
   save_pc = vm->pc; save_constants = vm->constants; save_env = vm->env;
 
-  /* Signature has been skipped during file type analysis (but not informations) */
-  STk_read(f, TRUE); /* skip infos */
+  /* Signature has been skipped during file type analysis (but not information) */
+  STk_read(f, TRUE); /* skip info */
 
   for ( ; ; ) {
-    consts = STk_read_constant(f, TRUE);                   /* Read  the constants */
+    consts = STk_read_constant(f, TRUE);                   /* Read the constants */
     if (consts == STk_eof) break;
 
     code_size = STk_read(f, PORT_CASE_SENSITIVEP(f));      /* Read the code size */
