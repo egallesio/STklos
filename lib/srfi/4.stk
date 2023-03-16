@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Apr-2001 11:36 (eg)
-;;;; Last file update: 14-Mar-2023 10:18 (eg)
+;;;; Last file update: 16-Mar-2023 19:42 (eg)
 ;;;;
 
 
@@ -61,7 +61,11 @@
           c64vector-set! c64vector->list list->c64vector
 
           c128vector?  make-c128vector c128vector c128vector-length c128vector-ref
-          c128vector-set! c128vector->list list->c128vector)
+          c128vector-set! c128vector->list list->c128vector
+
+          ;; STklos extensions
+          uvector? uvector-length uvector-ref uvector-set! uvector->list
+          )
 
 
 ;; Following two definitions have been added here to avoid compilation warnings
@@ -160,6 +164,30 @@
 
 (%uniform-vector-functions c64  10)
 (%uniform-vector-functions c128 11)
+
+#|
+<doc EXT uvector? uvector-length uvector-ref uvector-set! uvector->list
+ * (uvector? uv)
+ * (uvector-length uv)
+ * (uvector-ref uv k)
+ * (uvector-set! uv k val)
+ * (uvector->list uv)
+ *
+ * These primitives extend {{quick-link-srfi 4}}. They can be called with any type
+ * of uniform (or homogeneous) vector.
+ * @lisp
+ * (uvector? #s16(-1 2 3))    => #t
+ * (uvector-length #u32(1 2)) => 2
+ * (uvector-length #s64(1 2)) => 2
+ * @end lisp
+doc>
+|#
+(define (uvector? uv)           (%uvector? uv))
+(define (uvector-length uv)     (%uvector-length uv))
+(define (uvector-ref uv k)      (%uvector-ref uv k))
+(define (uvector-set! uv k val) (%uvector-set! uv k val))
+(define (uvector->list uv)      (%uvector->list uv))
+
 
 
 
