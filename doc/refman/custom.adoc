@@ -47,5 +47,5 @@ The following variables can be used to customize {{stklos}}:
 
 - (((STKLOS_CONFDIR)))**STKLOS-CONFDIR**: This variable can be used to
   designate the directory used by {{stklos}} to store its configuration or
-  packages files. It not set, the default {{stklos}} configuration directory
+  packages files. If not set, the default {{stklos}} configuration directory
   is by default `~/.stklos`.

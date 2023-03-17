@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-May-2022 09:22
- * Last file update: 31-May-2022 15:06 (eg)
+ * Last file update: 11-Mar-2023 13:18 (ryandesign)
  */
 
 #include <stklos.h>
@@ -29,16 +29,16 @@
 //
 // Readline interface for completion
 //
-// When using completion we need some variables and function from
-// "readline/readline.h" However, since we don't use autoconf for locating the
+// When using completion we need some variables and functions from
+// "readline/readline.h". However, since we don't use autoconf for locating the
 // installation directory of readline (or libedit), we just declare what we need
-// here. It permits also to compile this file, without libredline or libedit.
+// here. It also permits to compile this file without libreadline or libedit.
 //
 // NOTE: STklos does not try to link the GNU readline library since on BSD
-// system, it is generally not present (plus the complex interaction of LGPL
-// and GPL). Hence, autoconf doesn't try to locate any editing library and,
-// the REPL just tries to link against a line editing library,at runtime, if
-// it finds one such lib.
+// systems, it is generally not present (plus the complex interaction of LGPL
+// and GPL). Hence, autoconf doesn't try to locate any editing library and
+// the REPL just tries to link against a line editing library at runtime if it
+// finds one.
 
 /* Readline typedefs for the completion system */
 typedef char *rl_compentry_func_t(const char *, int);
@@ -50,11 +50,11 @@ extern char **rl_completion_matches(const char *, rl_compentry_func_t *);
 /* Readline variables used */
 extern char *rl_line_buffer;                    // The line buffer
 extern int rl_attempted_completion_over;        // 1 to suppress filename completion
-extern char *rl_completer_word_break_characters;// word deparator. Normally "n\"\\'`@$>"
-extern rl_completion_func_t *rl_attempted_completion_function; // Pointer on our completion func
+extern char *rl_completer_word_break_characters;// word separator. Normally "n\"\\'`@$>"
+extern rl_completion_func_t *rl_attempted_completion_function; // Pointer to our completion func
 
 
-static SCM gen;                 // A pointer on the Scheme generator function
+static SCM gen;                 // A pointer to the Scheme generator function
 
 /*
   Calls the generator (gen) with two arguments:
@@ -87,15 +87,15 @@ generator(const char *text, int state) {
 /* scheme_completion is the function passed to libreadline to do tab
    completion. Its arguments are
    - The partially typed string
-   - The start and end positions, (end position is ignored here)
-   The actualy work is done by the generator function in this file,
+   - The start and end positions (end position is ignored here)
+   The actual work is done by the generator function in this file,
    which in turn calls the Scheme procedure complete in
    readline-complete.stk.
 */
 static char **
 scheme_completion(const char *str, int start, int _UNUSED(end)) {
 
-  // We want path completion when we are after a double quote If the character
+  // We want path completion when we are after a double quote. If the character
   // preceding the first char of str is a '"' (we search it in the complete
   // line buffer), we inhibit path completion by setting
   // rl_attempted_completion_over to 0.
@@ -119,8 +119,8 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,s
   gen = generator;
   /* The word break chars are by default " \t\n\"\\'`@$><=;|&{(".
      We adapt those here so they make sense in a Scheme environment.
-     It's not perfect, though: we'll ignore variables names starting
-     with \t, \n, ; etc, because if we matched them we'd have trouble
+     It's not perfect, though: we'll ignore variable names starting
+     with \t, \n, ; etc., because if we matched them we'd have trouble
      with separating tokens. */
   rl_completer_word_break_characters = " \t\n\"'`;|(";
   rl_attempted_completion_function = scheme_completion;
