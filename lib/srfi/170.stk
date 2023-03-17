@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 25-Nov-2021 14:19 (eg)
+;;;; Last file update: 11-Mar-2023 13:18 (ryandesign)
 ;;;;
 
 (select-module srfi/170)
@@ -56,7 +56,7 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Everything is already present in core STKlos
+;; Everything is already present in core STklos
 
 ;;;;;;;;;;;;;;;;;;;
 ;;;
