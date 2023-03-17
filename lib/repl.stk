@@ -330,7 +330,10 @@ doc>
       (repl-theme 'classic))
     ;; Show banner
     (let* ((utf8?  (key-get *%system-state-plist* :use-utf8 #f))
-           (line1   (format "STklos version ~A  (Id: ~A)\n" (version) (%push-id)))
+           (version-string (if (stklos-stable?)
+                               (format "version ~a" (version))
+                               (format "version post-~a (git commit ~A)" (version) (%push-id))))
+           (line1   (format "STklos ~a\n" version-string))
            (line2  "Copyright (C) 1999-2023 Erick Gallesio <eg@stklos.net>\n")
            (line3 (format "[~a/~a/~a/~a]\n"
                           (machine-type)

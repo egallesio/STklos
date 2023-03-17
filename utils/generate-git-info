@@ -1,22 +1,31 @@
 #!/bin/sh
 
-# detect git tag, branch, commit, and wether the repository is dirty
-# when not in a git repository, all the strings will be empty,
-# and STklos will be able to detect this.
-git_tag="$(git describe --tags --abbrev=0 2>/dev/null || true)"
-git_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-git_commit="$(git rev-parse --short HEAD 2>/dev/null || true)"
-git_modified="$(git diff-index --name-only HEAD 2>/dev/null |  xargs -n 1 printf ' \\"%s\\"')"
+if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" = "true" ]
+then
+    # detect git tag, branch, commit, and wether the repository is dirty
+    # when not in a git repository, all the strings will be empty,
+    # and STklos will be able to detect this.
+    git_tag="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+    git_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+    git_commit="$(git rev-parse --short HEAD 2>/dev/null || true)"
+    git_modified="$(git diff-index --name-only HEAD 2>/dev/null |  xargs -n 1 printf ' \\"%s\\"')"
+    git_stable="$(git tag --contains $git_commit)"
 
-cat > new-git-info.h <<EOF
-#define GIT_SUMMARY  "(#:branch \"$git_branch\" #:commit \"$git_commit\" #:tag \"$git_tag\" #:modified ($git_modified))"
+    cat > new-git-info.h <<EOF
+#define GIT_SUMMARY  "(#:branch \"$git_branch\" #:commit \"$git_commit\" #:tag \"$git_tag\" #:modified ($git_modified) #:stable \"$git_stable\")"
 EOF
 
-if cmp --quiet new-git-info.h git-info.h 2>/dev/null
-then
-     rm new-git-info.h
+    if cmp --quiet new-git-info.h git-info.h 2>/dev/null
+    then
+        rm new-git-info.h
+    else
+        echo "*** Updating git-info.h"
+        mv new-git-info.h git-info.h
+    fi
 else
-    echo "*** Updating git-info.h"
-    mv new-git-info.h git-info.h
+    echo "*** Not inside a checkout from git"
+    cat > git-info.h <<EOF
+#define GIT_SUMMARY  "()"
+EOF
 fi
 

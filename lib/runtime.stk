@@ -235,3 +235,22 @@ doc>
     (newline out)))
 
 
+;; ----------------------------------------------------------------------
+;; ----------------------------------------------------------------------
+
+#|
+<doc stklos-stable?
+ * (stklos-stable?)
+ *
+ * Returns `#t` if the running STklos installation was compiled from a stable
+ * release, and `#f` otherwise.
+doc>
+|#
+(define (stklos-stable?)
+  ;; Checking if the source wqas mdified is a bit tricky:
+  ;; Usually the Makefile.in files *will* be modified by
+  ;; autotools. We can enhance this later.
+  (let ((info (%stklos-git)))
+    (if (null? info)
+        #t
+        (not (zero? (string-length (key-get info #:stable 2)))))))
