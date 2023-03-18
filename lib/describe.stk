@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 17-Mar-2023 18:14 (eg)
+;;;; Last file update: 18-Mar-2023 14:52 (eg)
 ;;;;
 
 
@@ -114,8 +114,8 @@ doc>
      ((null?    x)      (format port "the empty list"))
      ((void?    x)      (format port "the unspecified (void) object"))
      ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
-     ((char?    x)      (format port "a character whose Unicode code point ~a is ~s"
-                                (if (<= (char->integer x) 127) "(and ASCII value)" "")
+     ((char?    x)      (format port "a character whose Unicode code point~a is ~s"
+                                (if (<= (char->integer x) 127) " (and ASCII value)" "")
                                 (char->integer x)))
      ((symbol?  x)      (format port "a symbol")
                         (call/cc
