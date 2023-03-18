@@ -6816,19 +6816,15 @@ BUILD_ARCH=`uname -m`
 OS_NAME=$OS
 case $OS in
    LINUX)
-      v=`echo $version | sed -e 's/\([0-9]*\)\.\([0-9\]*\).*/\1_\2/'`
-      OS_NAME_VERSION=LINUX_$v
+      v=`echo $version | sed -e 's/^\([0-9]*\)\.\([0-9\]*\).*/\1_\2/'`
       ;;
    DARWIN)
-      case $version in
-         9*)  OS_NAME_VERSION=DARWIN_9;;
-         *)   OS_NAME_VERSION=DARWIN_OLD;;
-      esac
+      v=`echo $version | sed -e 's/^\([0-9]*\).*/\1/'`
       ;;
   *)
       v=`echo $version | sed -e 's/[^0-9]/_/g'`
-      OS_NAME_VERSION=$OS\_$v;
 esac
+OS_NAME_VERSION=${OS}_$v;
 
 
 ###

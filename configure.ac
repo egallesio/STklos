@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 10-Mar-2023 11:15 (ryandesign)
+### Last file update: 11-Mar-2023 06:40 (ryandesign)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -119,19 +119,15 @@ BUILD_ARCH=`uname -m`
 OS_NAME=$OS
 case $OS in
    LINUX)
-      v=`echo $version | sed -e 's/\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
-      OS_NAME_VERSION=LINUX_$v
+      v=`echo $version | sed -e 's/^\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
       ;;
    DARWIN)
-      case $version in
-         9*)  OS_NAME_VERSION=DARWIN_9;;
-         *)   OS_NAME_VERSION=DARWIN_OLD;;
-      esac
+      v=`echo $version | sed -e 's/^\([[0-9]]*\).*/\1/'`
       ;;
   *)
       v=`echo $version | sed -e 's/[[^0-9]]/_/g'`
-      OS_NAME_VERSION=$OS\_$v;
 esac
+OS_NAME_VERSION=${OS}_$v;
 
 
 ###
