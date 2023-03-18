@@ -1592,7 +1592,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
   int overflow;
   SCM argv[12];
   struct tm *t;
-  time_t tt;
+  time_t tt = (time_t) 0L;
   long nsec = 0L;
 
   if (INTP(seconds)) {
