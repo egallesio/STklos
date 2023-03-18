@@ -882,7 +882,7 @@ doc>
 
 #|
 <doc EXT bytevector-u8-set!
- * (bytevector-u8-ref bytevector k byte)
+ * (bytevector-u8-set! bytevector k byte)
  *
  * Stores byte as the k th byte of bytevector. It is an error if |k|
  * is not a valid index of |bytevector|.
