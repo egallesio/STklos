@@ -112,8 +112,10 @@ doc>
                               ((complex? x)  (format port
                                                      "an inexact complex number")))))
      ((null?    x)      (format port "the empty list"))
+     ((void?    x)      (format port "the unspecified (void) object"))
      ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
-     ((char?    x)      (format port "a character, ascii value is ~s"
+     ((char?    x)      (format port "a character whose Unicode code point ~a is ~s"
+                                (if (<= (char->integer x) 127) "(and ASCII value)" "")
                                 (char->integer x)))
      ((symbol?  x)      (format port "a symbol")
                         (call/cc
@@ -122,6 +124,7 @@ doc>
                             (lambda (e) (out))
                             (format port ", with ~amutable binding"
                                     (if (symbol-mutable? x) "" "im"))))))
+     ((keyword? x)      (format port "a keyword"))
      ((pair?    x)      (format port "a non-empty list"))
      ((string?  x)      (if (eqv? x "")
                             (format port "an empty string")
