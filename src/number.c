@@ -2586,6 +2586,86 @@ static SCM my_exp(SCM z)
 }
 
 
+/*****************************************************************************
+  The code for calculating logarithms of bignums uses mpz_get_d_2exp,
+  which is available in the large GMP but not in the mini GMP. So, if
+  we are using the mini GMP, we provide limited support for logs of
+  bignums (if the bignum doesn't fit a double, +inf.0 will be
+  returned).
+
+   For that, we compile conditionally here
+ *****************************************************************************/
+
+#ifdef __MINI_GMP_H__ /* BEGIN code for compiling WITH MINI GMP */
+
+static inline double my_bignum_log(SCM z) {
+  /* Will return +inf.0, except for the bignums that fit
+     a double: */
+  return log(scheme_bignum2double(z));
+}
+static inline double my_bignum_rational_log(SCM z) {
+  /* Will return +inf.0, except for the bignums that fit
+     a double: */
+  return log(rational2double(z));
+}
+
+#else  /* BEGIN code for compiling WITH FULL GMP */
+
+static double my_bignum_log(SCM z) {
+  /* The GMP function mpz_get_d_2exp is similar to the C library
+     function frexp: it returns a float D between 0.5 and 1.0,
+     and sets an exponent E. Then,
+     N = D * 2^E
+     is the (possibly truncated) value of the original number.
+     Then calculating the log is simple:
+
+     log(N) = log(D*2^E)
+            = log(D) + log(2^E)
+            = log(D) + log(2) * E                               */
+  long   expo;
+  double d = mpz_get_d_2exp(&expo, BIGNUM_VAL(z));
+  return log(d) + log(2) * (double) expo;
+}
+
+
+static SCM my_log(SCM z); /* Forward declaration needed, because my_bignum_rational_log
+                             and my_log are mutually recursive */
+static double my_bignum_rational_log(SCM z) {
+  double log_num, log_den;
+
+  SCM num = RATIONAL_NUM(z);
+  SCM den = RATIONAL_DEN(z);
+
+  /* For both the numerator and denominator:
+
+     - If it is a bignum AND fits a double, then just
+       converto to double and take the log.
+     - If it is a bignum and does NOT fit a double,
+       use my_bignum_log.
+     - It may be that only one of numerator or denominator
+       is a bignum. Then the other won't be, and we just
+       take the log of it with my_log.                     */
+  if (BIGNUMP(num))
+    if (BIGNUM_FITS_INTEGER(BIGNUM_VAL(num)))
+      log_num = log(scheme_bignum2double(num));
+    else
+      log_num = my_bignum_log(num);
+  else
+    log_num = STk_number2double(my_log(num));
+
+  if (BIGNUMP(den))
+    if (BIGNUM_FITS_INTEGER(BIGNUM_VAL(den)))
+      log_den = log(scheme_bignum2double(den));
+    else
+      log_den = my_bignum_log(den);
+  else
+    log_den = STk_number2double(my_log(den));
+
+  /* Now use log(a/b) = log(a) - log(b): */
+  return log_num - log_den;
+}
+#endif /* __MINI_GMP_H__ */
+
 static SCM my_log(SCM z)
 {
   if (!COMPLEXP(z) && negativep(z) && finitep(z))
@@ -2596,8 +2676,15 @@ static SCM my_log(SCM z)
     case tc_integer:  if (z == MAKE_INT(0)) STk_error("value is not defined for 0");
                       if (z == MAKE_INT(1)) return MAKE_INT(0);
                       return double2real(log((double) INT_VAL(z)));
-    case tc_bignum:   return double2real(log(scheme_bignum2double(z)));
-    case tc_rational: return double2real(log(rational2double(z)));
+    case tc_bignum:   if (BIGNUM_FITS_INTEGER(BIGNUM_VAL(z)))
+                        return double2real(log(scheme_bignum2double(z)));
+                      else
+                        return double2real(my_bignum_log(z));
+  case tc_rational:   if (!BIGNUMP(RATIONAL_NUM(z)) &&
+                          !BIGNUMP(RATIONAL_DEN(z)))
+                        return double2real(log(rational2double(z)));
+                      else
+                        return double2real(my_bignum_rational_log(z));
     case tc_real:     return double2real(log(REAL_VAL(z)));
     case tc_complex:  return make_complex(my_log(STk_magnitude(z)),
                                           STk_angle(z));
@@ -3699,6 +3786,15 @@ DEFINE_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2)) {
   return MAKE_BOOLEAN(tmp1.u ==tmp2.u);
 }
 
+DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
+{
+#ifdef  __MINI_GMP_H__
+  return STk_false;
+#else
+  return STk_true;
+#endif
+}
+
 /*
  *
  * Initialization
@@ -3833,6 +3929,8 @@ int STk_init_number(void)
   ADD_PRIMITIVE(nan_quietp);
   ADD_PRIMITIVE(nan_payload);
   ADD_PRIMITIVE(nan_equalp);
+
+  ADD_PRIMITIVE(has_gmp);
 
   /* Add parameter for float numbers precision */
   STk_make_C_parameter("real-precision",
