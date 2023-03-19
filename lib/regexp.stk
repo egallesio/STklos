@@ -137,4 +137,6 @@ doc>
                                                                (string-length str))
                                                     subst))
                             str)))))
-            (regexp-replace-all-r pat str subst)))))
+            (regexp-replace-all-r pat str subst))))
+  (%set-procedure-name! regexp-replace 'regexp-replace)
+  (%set-procedure-name! regexp-replace-all 'regexp-replace-all))
