@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 19-Mar-2023 14:59 (eg)
+;;;; Last file update: 19-Mar-2023 18:47 (eg)
 ;;;;
 
 
@@ -64,12 +64,14 @@
  * (compile-file input output :prepend cmds)
  *
  * Compiles the file whose name is |input| into a bytecode executable
- * whose name is |output|.
+ * whose name is |output| (if |compile-file| fails, |output| file is
+ * deleted).
  *
  * If the |:prepend| keyword argument is given, it must be a list of
  * expressions, which will be compiled before the rest of the input
  * file. This can be used to define variables that the compiled program
  * will use (but it does not affect the compiler itself).
+ *
  *
  * This procedure will not set the executable bit on the generated file.
 doc>
@@ -159,9 +161,16 @@ doc>
   ;; atomic (useful for parallel makes)
   (let ((template (make-path (dirname output) "stk-tmp.")))
     (let-values (((tmp out) (create-temp-file template)))
-      ;;(%debug "out = ~s" out)
-      (do-compile out)
-      (rename-file tmp output))))
+      ;; Compile file in 'input' into file in 'tmp'
+      (with-handler
+       (lambda (c)
+         ;; Compiler yields an (probably involuntary) error. Delete the
+         ;; temporary file and re-raise error
+         (when (file-exists? tmp) (delete-file tmp))
+         (raise c))
+
+       (do-compile out)
+       (rename-file tmp output)))))
 
 
 

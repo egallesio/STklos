@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update:  2-Mar-2023 19:14 (eg)
+;;;; Last file update: 19-Mar-2023 18:59 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -197,13 +197,16 @@
                     (interaction-environment))))
          ;; Produce code
          (set! *prepend-code*
-           (map (lambda (s)
-                       (read-from-string s))
-                     *prepend-code*))
-
-         (if *c-code*
-             (compile-to-C-code   (car other-arguments) *output* *prepend-code*)
-             (compile-to-bytecode (car other-arguments) *output* *prepend-code*))
+           (map (lambda (s) (read-from-string s))
+                *prepend-code*))
+         ;; Compile
+         (let ((in (car other-arguments)))
+           (with-handler (lambda (c)
+                           (eprintf "~a:0: Error: ~a\n" in (condition-message c))
+                           (emergency-exit 1))
+              (if *c-code*
+                  (compile-to-C-code   in *output* *prepend-code*)
+                  (compile-to-bytecode in *output* *prepend-code*))))
          (exit 0))
         (else
           (arg-usage (current-error-port))
