@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 12-Jan-2023 12:20 (eg)
+# Last file update: 20-Mar-2023 11:57 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -119,7 +119,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
-CONFIG_CLEAN_FILES = stklos-config stklos-script
+CONFIG_CLEAN_FILES = stklos-config stklos-script tmpcomp
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -171,7 +171,8 @@ am__can_run_installinfo = \
   esac
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/stklos-config.in \
-	$(srcdir)/stklos-script.in $(top_srcdir)/mkinstalldirs
+	$(srcdir)/stklos-script.in $(srcdir)/tmpcomp.in \
+	$(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -189,6 +190,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
 COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
@@ -367,6 +369,8 @@ $(am__aclocal_m4_deps):
 stklos-config: $(top_builddir)/config.status $(srcdir)/stklos-config.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 stklos-script: $(top_builddir)/config.status $(srcdir)/stklos-script.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+tmpcomp: $(top_builddir)/config.status $(srcdir)/tmpcomp.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
@@ -563,7 +567,7 @@ uninstall-am: uninstall-binSCRIPTS
 COMP ?= ./tmpcomp
 
 all-am:
-	chmod a+x stklos-config stklos-script
+	chmod a+x stklos-config stklos-script tmpcomp
 
 stklos-compile: stklos-compile.stk
 	$(COMP) -o stklos-compile stklos-compile.stk

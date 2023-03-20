@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 11-Mar-2023 06:40 (ryandesign)
+### Last file update: 20-Mar-2023 11:55 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -550,6 +550,9 @@ case $UNAME_O in
   *) DLLIBS="";;
 esac
 
+# Get configure/compilation directory
+COMP_DIR=`pwd`
+
 ### Output files
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
@@ -578,6 +581,7 @@ AC_SUBST(STACK_DIRECTION)
 AC_SUBST(HAVE_GNOME)
 AC_SUBST(LDAP_LIB)
 AC_SUBST(STRIPCMD)
+AC_SUBST(COMP_DIR)
 #GC
 AC_SUBST(GC)
 AC_SUBST(GCLIB)
@@ -622,7 +626,7 @@ AC_SUBST(GOOVERS)
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script examples/Makefile
+          utils/stklos-script utils/tmpcomp examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/scheme/Makefile lib/srfi/Makefile
           lib/stklos/Makefile lib/streams/Makefile
@@ -654,7 +658,7 @@ AC_OUTPUT
 # Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
-chmod 0755 utils/stklos-config utils/stklos-script
+chmod 0755 utils/stklos-config utils/stklos-script utils/tmpcomp
 
 
 echo " "

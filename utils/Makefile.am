@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 12-Jan-2023 12:20 (eg)
+# Last file update: 20-Mar-2023 11:57 (eg)
 
 scmbin      = stklos-compile stklos-genlex stklos-pp
 bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
@@ -27,7 +27,7 @@ bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
 COMP ?= ./tmpcomp
 
 all-am:
-	chmod a+x stklos-config stklos-script
+	chmod a+x stklos-config stklos-script tmpcomp
 
 stklos-compile: stklos-compile.stk
 	$(COMP) -o stklos-compile stklos-compile.stk
