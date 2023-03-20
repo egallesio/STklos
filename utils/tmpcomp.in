@@ -62,7 +62,7 @@ case $# in
        ;;
 esac
 
-prefix="/home/eg/Projects/STklos"
+prefix="@COMP_DIR@"
 
 STKLOS_LOAD_PATH=".:../lib:${prefix}/lib:"
 STKLOS_BUILDING=1
