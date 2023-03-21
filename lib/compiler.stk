@@ -376,10 +376,32 @@ doc>
 
 (define (compile-access name env epair ref)
 
+  ;; STklos organizes local environments as this: each level has a
+  ;; maximum of 256 variables. However, the "(+ (* v1 256) v2)"
+  ;; formula here does *not* mean that the variables are stored
+  ;; linearly in frames that are 256 bytes apart.
+  ;; The "256v1+v2" is actually an encoding in two bytes: 2*256 + 03 =
+  ;; 0x0203. The first byte, 0x02, identifies the level, and the second
+  ;; byte, 0x03, identifies the variable.
+  ;; Later, the VM will, for example, do the following to access
+  ;; a local variable in previous levels:
+  ;;
+  ;; for (level = FIRST_BYTE(info); level; level--)
+  ;;   e = (SCM) FRAME_NEXT(e);
+  ;; vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
+  ;;
+  ;; FIRST_BYTE gets the level; SECOND_BYTE gets the var address.
+  ;;
+  ;; make-word builds a 16-bit word that encodes level v1 and
+  ;; variable v2.
   (define (make-word v1 v2)               ;; FIXME: Add control
     (+ (* v1 256) v2))
 
 
+  ;; The argument 'ref' determines if this is a set or a reference
+  ;; (#f = set, #t = ref). So 'em' is used to simplify emmitting the
+  ;; code: i1 is the instruction for ref, i2 is the instruction for
+  ;; set.
   (define (em i1 i2 . args)
     (apply emit (if ref i1 i2) args))
 

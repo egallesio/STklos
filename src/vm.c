@@ -1173,6 +1173,13 @@ CASE(DEEP_LOCAL_REF) {
   int level, info = fetch_next();
   SCM e = vm->env;
 
+  /* STklos organizes local environments as this: each level has a
+     maximum of 256 variables. Both the level and the address of local
+     variables are encoded in a single 16-bit integer, as "256v1+v2".
+     For example, 2*256 + 03 = 0x0203. The first byte, 0x02,
+     identifies the level, and the second byte, 0x03, identifies the
+     variable.  */
+
   /* Go down in the dynamic environment */
   for (level = FIRST_BYTE(info); level; level--)
     e = (SCM) FRAME_NEXT(e);
