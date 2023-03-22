@@ -1,7 +1,7 @@
 /*
  * curl.c                       -- Interface wrapper for cURL
  *
- * Copyright © 2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Feb-2022 15:55 (eg)
- * Last file update: 15-Feb-2022 21:18 (eg)
+ * Last file update: 22-Mar-2023 13:12 (eg)
  */
 
 #include <stklos.h>
@@ -174,7 +174,7 @@ DEFINE_PRIMITIVE("curl-set-option", curl_set_opt, subr3, (SCM h, SCM opt, SCM va
   if (!KEYWORDP(opt)) STk_error("bad keyword for curl option ~S", opt);
 
   {
-    char *name = KEYWORD_PNAME(opt);
+    const char *name = KEYWORD_PNAME(opt);
     CURL *curl = CURL_HANDLER(h);
     const struct curl_easyoption *copt = curl_easy_option_by_name(name);
     CURLcode code = CURLE_OK;  // for the compiler;
