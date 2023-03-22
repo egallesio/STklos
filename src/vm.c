@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 16-Mar-2023 02:06 (ryandesign)
+ * Last file update: 22-Mar-2023 19:00 (eg)
  */
 
 // INLINER values
@@ -1519,6 +1519,15 @@ CASE(DOCSTRG) {
     CLOSURE_PLIST(vm->val) = STk_key_set(CLOSURE_PLIST(vm->val),
                                          STk_key_doc,
                                          str);
+  }
+  NEXT;
+}
+
+ CASE(PROCNAME) {
+   SCM name = fetch_const();
+
+   if (vm->valc == 1 && CLOSUREP(vm->val)) {
+     CLOSURE_NAME(vm->val) = name;
   }
   NEXT;
 }
