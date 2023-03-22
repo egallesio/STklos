@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 20-Mar-2023 11:55 (eg)
+### Last file update: 22-Mar-2023 12:25 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -265,15 +265,18 @@ echo "*****"
 echo "***** GMP support"
 echo "*****"
 
+
 # Try to determine if libgmp is installed
-# No pkg-config for gmp yet
-
-# check for GMP pre-version 3.0
-AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
-
-# check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+if ${PKGCONFIG} --exists gmp ;then
+   HAVE_GMP="yes"
+   GMPKG="present"
+else
+   # check for GMP pre-version 3.0
+   AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+   # check for GMP version post 3.0
+   if test "$HAVE_GMP" = "no" ;then
+      AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+   fi
 fi
 
 # Test if the user wants to force the use of our GMP lib
@@ -300,8 +303,13 @@ then
 else
      echo "... Using system libgmp library"
      GMP=""
-     GMPINC=""
-     GMPLIB="-lgmp"
+     if $PKGCONFIG --exists gmp ;then
+        GMPINC="$($PKGCONFIG --cflags gmp)"
+        GMPLIB="$($PKGCONFIG --libs gmp)"
+     else
+        GMPINC=""
+        GMPLIB="-lgmp"
+     fi
      DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
      SYST_LIBS="libgmp $SYST_LIBS"

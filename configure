@@ -7178,11 +7178,14 @@ echo "*****"
 echo "***** GMP support"
 echo "*****"
 
-# Try to determine if libgmp is installed
-# No pkg-config for gmp yet
 
-# check for GMP pre-version 3.0
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
+# Try to determine if libgmp is installed
+if ${PKGCONFIG} --exists gmp ;then
+   HAVE_GMP="yes"
+   GMPKG="present"
+else
+   # check for GMP pre-version 3.0
+   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
 printf %s "checking for mpz_init_set in -lgmp... " >&6; }
 if test ${ac_cv_lib_gmp_mpz_init_set+y}
 then :
@@ -7224,10 +7227,9 @@ else $as_nop
   HAVE_GMP="no"
 fi
 
-
-# check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
+   # check for GMP version post 3.0
+   if test "$HAVE_GMP" = "no" ;then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
 printf %s "checking for __gmpz_init_set in -lgmp... " >&6; }
 if test ${ac_cv_lib_gmp___gmpz_init_set+y}
 then :
@@ -7269,6 +7271,7 @@ else $as_nop
   HAVE_GMP="no"
 fi
 
+   fi
 fi
 
 # Test if the user wants to force the use of our GMP lib
@@ -7307,8 +7310,13 @@ then
 else
      echo "... Using system libgmp library"
      GMP=""
-     GMPINC=""
-     GMPLIB="-lgmp"
+     if $PKGCONFIG --exists gmp ;then
+        GMPINC="$($PKGCONFIG --cflags gmp)"
+        GMPLIB="$($PKGCONFIG --libs gmp)"
+     else
+        GMPINC=""
+        GMPLIB="-lgmp"
+     fi
      DLLIBS="$DLLIBS $GMPLIB"
 
 printf "%s\n" "#define HAVE_GMP 1" >>confdefs.h
