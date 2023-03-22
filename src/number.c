@@ -3642,7 +3642,7 @@ static void deallocate_function(void * ptr, size_t _UNUSED(sz))
 }
 
 /*
- * SRFI 28: NaN procedures
+ * SRFI 208: NaN procedures
  */
 
 static void verify_NaN(SCM n) {
