@@ -339,6 +339,7 @@ doc>
 ;;;; ----------------------------------------------------------------------
 (define equal-simple? equal?)
 (set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
+(%set-procedure-name! equal? 'equal?)
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.2 Numbers

@@ -1150,7 +1150,10 @@ doc>
                            (get-output-string out))))))
 
   (set! base64-encode-string (encode/decode base64-encode))
-  (set! base64-decode-string (encode/decode base64-decode)))
+  (set! base64-decode-string (encode/decode base64-decode))
+
+  (%set-procedure-name! base64-encode-string 'base64-encode-string)
+  (%set-procedure-name! base64-decode-string 'base64-decode-string))
 
 ;; ======================================================================
 ;;      md5sum ...
@@ -1274,7 +1277,10 @@ doc>
              (Loop (append (car args) (cdr args))
                    str-prev?
                    res))
-          (else (error 'ansi-color "bad command ~S" args)))))))
+          (else (error 'ansi-color "bad command ~S" args))))))
+
+  (%set-procedure-name! ansi-color 'ansi-color)
+  (%set-procedure-name! ansi-color-protect 'ansi-color-protect))
 
 (define do-color
   (let ((term (or (getenv "TERM") "")))
