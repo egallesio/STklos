@@ -11,8 +11,7 @@ Purpose
 STklos is a free Scheme system compliant with the languages features
 defined in R7RS. The aim of this implementation is to be fast as well
 as light. The implementation is based on an ad-hoc Virtual
-Machine. STklos can also be compiled as a library and embedded in an
-application.
+Machine. 
 
 The salient points of STklos are:
 

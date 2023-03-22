@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update:  4-Mar-2023 11:43 (eg)
+ * Last file update: 13-Mar-2023 19:35 (eg)
  */
 
 #include "stklos.h"
@@ -119,6 +119,7 @@ DEFINE_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
     case tc_subr01:
     case tc_subr12:
     case tc_subr23:
+    case tc_subr34:
     case tc_vsubr:
     case tc_apply:
     case tc_next_method:
@@ -153,6 +154,7 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
     case tc_subr01:
     case tc_subr12:
     case tc_subr23:
+    case tc_subr34:
     case tc_vsubr:
     case tc_apply:    return STk_Cstring2string(PRIMITIVE_NAME(obj));
 #ifdef HAVE_FFI
@@ -201,6 +203,7 @@ DEFINE_PRIMITIVE("%procedure-plist", proc_plist, subr1, (SCM obj))
     case tc_subr01:
     case tc_subr12:
     case tc_subr23:
+    case tc_subr34:
     case tc_vsubr:   return PRIMITIVE_PLIST(obj);
     case tc_closure: return CLOSURE_PLIST(obj);
     default:         error_bad_procedure(obj);
@@ -220,6 +223,7 @@ DEFINE_PRIMITIVE("%set-procedure-plist!", set_proc_plist, subr2, (SCM obj, SCM v
     case tc_subr01:
     case tc_subr12:
     case tc_subr23:
+    case tc_subr34:
     case tc_vsubr:   PRIMITIVE_PLIST(obj) = v; break;
     case tc_closure: CLOSURE_PLIST(obj)   = v; break;
     default:         error_bad_procedure(obj);
@@ -242,6 +246,7 @@ DEFINE_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc))
     case tc_subr01:       res = -1; break;
     case tc_subr12:       res = -2; break;
     case tc_subr23:       res = -3; break;
+    case tc_subr34:       res = -4; break;
     case tc_vsubr:        res = -1; break;
     case tc_apply:        res = -1; break;
       /*  case tc_next_method: */

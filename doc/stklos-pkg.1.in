@@ -142,7 +142,7 @@ The \fISTklos\fR system ScmPkg repository here
 
 .IP "STKLOS_CONFDIR"
 This variable can be used to designate the directory used by \fBstklos\fR
-to store its configuration or packages files. It not set, the default
+to store its configuration or packages files. If not set, the default
 \fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
 
 

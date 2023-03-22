@@ -1327,7 +1327,7 @@ will be stored in it.</p>
 <p><code>(variable value test?)</code>: if a value is passed when the procedure is called, it
 will be stored in the binding of the corresponding variable, otherwise <code>value</code>
 will be stored in it. Furthermore, <code>test?</code> will be given the value <code>#t</code> if
-a value is passed for the given variable, otherwise <code>test?</code> is set to <code>#f</code></p>
+a value is passed for the given variable, otherwise <code>test?</code> is set to <code>#f</code>.</p>
 </li>
 </ul>
 </div>
@@ -2300,7 +2300,7 @@ used to sequence side effects such as input and output.</p>
 and the value(s) of the last &lt;expression&gt; is(are) returned as in a
 <code>begin</code> form. Within a <code>tagbody</code> form expressions which are keywords
 are considered as tags and the special form <code>(&#8594; tag)</code> is used to
-transfer execution to the given tag. This is a <strong>very low level"</strong>
+transfer execution to the given tag. This is a <strong>very low level</strong>
 form which is inspired on <code>tabgody</code> Common Lisp&#8217;s form. It can be useful
 for defining new syntaxes, and should probably not used as is.</p>
 </div>
@@ -3952,7 +3952,7 @@ and <code>inexact&#8594;exact</code> procedure respectively</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns  #t if z is both exact and an integer; otherwise returns #f.</p>
+<p>Returns  <code>#t</code> if z is both exact and an integer; otherwise returns <code>#f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -6754,7 +6754,7 @@ the identifier <code>λ</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns #t if all the arguments are symbols and all have the same name in
+<p>Returns <code>#t</code> if all the arguments are symbols and all have the same name in
 the sense of <code>string=?</code>.</p>
 </div>
 <div class="paragraph">
@@ -9548,8 +9548,8 @@ lists is a tail call.</p>
 <p>If one of the <code>listi</code> has no elements, <code>every</code> simply returns <code>#t</code>.</p>
 </div>
 <div class="paragraph">
-<p>Like <code>any</code>, every&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is to
-indicate that it does not return a simple boolean (<code>#t</code> or <code>#f</code>), but a
+<p>Like <code>any</code>, <code>every&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is to
+indicate that it does not return a simple boolean (</code>#t` or <code>#f</code>), but a
 general value.</p>
 </div>
 <div class="paragraph">
@@ -9583,7 +9583,7 @@ any returns <code>#f</code>. The application of <code>pred</code> to the last el
 lists is a tail call.</p>
 </div>
 <div class="paragraph">
-<p>Like every, <code>any&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is
+<p>Like <code>every</code>, <code>any&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is
 to indicate that it does not return a simple boolean (</code>#t` or <code>#f</code>), but
 a general value.</p>
 </div>
@@ -9727,7 +9727,7 @@ like the current continuation.</p>
 <p><code>call/ec</code> is an short name for <code>call-with-escape-continuation</code>. <code>call/ec</code>
 calls <code>proc</code> with one parameter, which is the current escape continuation
 (a continuation which can only be used to abort a computation and hence
-cannot be "re-enterered".</p>
+cannot be "re-enterered").</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -10905,28 +10905,28 @@ are converted to upper case:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>"r"</code> to open file for reading. The stream is positioned at
+<p><code>"r"</code> to open the file for reading. The stream is positioned at
 the beginning of the file.</p>
 </li>
 <li>
-<p><code>"r+"</code> to open file for reading and writing.  The stream is
+<p><code>"r+"</code> to open the file for reading and writing. The stream is
 positioned at the beginning of the file.</p>
 </li>
 <li>
-<p><code>"w"</code> to truncate file to zero length or create file for writing.
+<p><code>"w"</code> to truncate the file to zero length or create the file for writing.
 The stream is positioned at the beginning of the file.</p>
 </li>
 <li>
-<p><code>"w+"</code> to open  file for reading and writing. The file is created
+<p><code>"w+"</code> to open the file for reading and writing. The file is created
 if it does not exist, otherwise it is truncated. The stream is positioned
 at the beginning of the file.</p>
 </li>
 <li>
-<p><code>"a"</code> to open for writing.  The file is created if  it  does
+<p><code>"a"</code> to open the file for writing. The file is created if it does
 not exist. The stream is positioned at the end of the file.</p>
 </li>
 <li>
-<p><code>"a+"</code> to open file for reading and writing. The file is created
+<p><code>"a+"</code> to open the file for reading and writing. The file is created
 if it does not exist. The stream is positioned at the end of the file.</p>
 </li>
 </ul>
@@ -10934,8 +10934,8 @@ if it does not exist. The stream is positioned at the end of the file.</p>
 <div class="paragraph">
 <p>If the file can be opened, <code>open-file</code> returns the textual port associated
 with the given file, otherwise it returns <code>#f</code>. Here again, the <strong><em>magic</em></strong>
-string "| " permits to open a pipe port (in this case mode can only be
-<code>"r"</code> or <code>"w"</code>).</p>
+string "| " permits to open a pipe port. (In this case mode can only be
+<code>"r"</code> or <code>"w"</code>.)</p>
 </div>
 <div class="paragraph">
 <p>
@@ -11283,8 +11283,8 @@ the first time <code>port</code> is closed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The port-has-port-position? procedure returns #t if the port
-supports the port-position operation, and #f otherwise. If the port
+<p>The port-has-port-position? procedure returns <code>#t</code> if the port
+supports the port-position operation, and <code>#f</code> otherwise. If the port
 does not support the operation, port-position signals an error.</p>
 </div>
 <div class="paragraph">
@@ -11324,8 +11324,8 @@ away.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The port-has-set-port-position!? procedure returns #t if the port supports
-the set-port-position! operation, and #f otherwise.</p>
+<p>The port-has-set-port-position!? procedure returns <code>#t</code> if the port supports
+the set-port-position! operation, and <code>#f</code> otherwise.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -12549,7 +12549,7 @@ that STklos supports.</p>
 
 <code>Filename</code> should be a string naming an existing file containing Scheme
 expressions. <code>Load</code> has been extended in STklos to allow loading of
-file containing Scheme compiled code as well as object files (<em>aka</em>
+files containing Scheme compiled code as well as object files (<em>aka</em>
 shared objects). The loading of object files is not available on
 all architectures. The value returned by <code>load</code> is <strong><em>void</em></strong>.</p>
 </div>
@@ -12572,11 +12572,11 @@ with the suffixes given by <code>"load-suffixes"</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>try-load</code> tries to load the file named <code>filename</code>. As <code>load</code>,
+<p><code>try-load</code> tries to load the file named <code>filename</code>. As with <code>load</code>,
 <code>try-load</code> tries to find the file given the current load path
 and a set of suffixes if <code>filename</code> cannot be loaded. If <code>try-load</code>
 is able to find a readable file, it is loaded, and <code>try-load</code> returns
-<code>#t</code>. Otherwise,  <code>try-load</code> retuns <code>#f</code>.</p>
+<code>#t</code>. Otherwise, <code>try-load</code> retuns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -13284,7 +13284,7 @@ name given in <code>str</code>.</p>
 </div>
 <div class="paragraph">
 <p>Returns the suffix of given <code>pathname</code>. If no suffix is found, <code>file-suffix</code>
-returns #f.</p>
+returns <code>#f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -13894,7 +13894,7 @@ name.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returnd the name of the running program if it is a standalone and #f
+<p>Returnd the name of the running program if it is a standalone and <code>#f</code>
 otherwise. This function is defined in <strong><a href="http://srfi.schemers.org/srfi-193/srfi-193.html">SRFI-193</a></strong> (<em>Command line</em>).</p>
 </div>
 <div class="paragraph">
@@ -13968,7 +13968,7 @@ This function always returns a string whereas the <code>command-name</code> proc
 </div>
 <div class="paragraph">
 <p>Returns the absolute path of the current script.
-If the calling program is not a script, #f is returned.
+If the calling program is not a script, <code>#f</code> is returned.
 This function is defined in <strong><a href="http://srfi.schemers.org/srfi-193/srfi-193.html">SRFI-193</a></strong> (<em>Command line</em>).</p>
 </div>
 <div class="paragraph">
@@ -17196,8 +17196,7 @@ environment is returned. When it is called with one argument, the
 content of the cell bound to this parameter object in the current
 dynamic environment is set to the result of the call
 <code>(converter arg)</code>, where <code>arg</code> is the argument passed to the
-parameter object, and
-an unspecified value is returned.</p>
+parameter object, and an unspecified value is returned.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -17459,9 +17458,9 @@ condition which inherits from <code>&amp;error-message</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Error type predicates. Returns #t if <code>obj</code> is an object raised
+<p>Error type predicates. Returns <code>#t</code> if <code>obj</code> is an object raised
 by the read procedure or by the inability to open an input or
-output port on a file, respectively. Otherwise, it returns #f.</p>
+output port on a file, respectively. Otherwise, it returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -17477,8 +17476,8 @@ output port on a file, respectively. Otherwise, it returns #f.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns #t if obj is an object created by error. Otherwise,
-it returns #f.</p>
+<p>Returns <code>#t</code> if <code>obj</code> is an object created by error. Otherwise,
+it returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -17527,7 +17526,7 @@ it returns #f.</p>
 </div>
 <div class="paragraph">
 <p>Returns the location encapsulated by <code>error-object</code> if it exists.
-Returns #f otherwise. The location corresponds generally to the name
+Returns <code>#f</code> otherwise. The location corresponds generally to the name
 of the procedure which raised the error.</p>
 </div>
 <div class="listingblock">
@@ -18337,7 +18336,7 @@ encoded format.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(base64-encode-string str)</code></strong><br></p>
+<p><strong><code>(base64-decode-string str)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -22782,16 +22781,65 @@ parmaters are listed below.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This parameter object permits to change the default precision used
+<p>This parameter object allows changing the default precision used
 to print real numbers.</p>
+</div>
+<div class="paragraph">
+<p>By precision when printing a number we mean the number of significant
+digits&#8201;&#8212;&#8201;that is, excluding the leading and trailing zeros in
+decimal representation. (This is exactly the same as the number
+for the <code>g</code> specifier for <code>printf</code> in the C language).</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">15</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="mi">15</span>
 <span class="p">(</span><span class="k">define</span> <span class="nv">f</span> <span class="mf">0.123456789</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mf">0.123456789</span>
+<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mf">0.123456789</span>
 <span class="p">(</span><span class="nf">real-precision</span> <span class="mi">3</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mf">0.123</span></code></pre>
+<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mf">0.123</span>
+<span class="p">(</span><span class="nb">display</span>   <span class="mf">1.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">1.12</span>
+<span class="p">(</span><span class="nb">display</span>  <span class="mf">12.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">12.1</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">123.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">123.0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the last example, only three significant digits were printed (123),
+and the zero only marks this number as inexact.</p>
+</div>
+<div class="paragraph">
+<p>If the number won&#8217;t fit using the usual decimal format, it will be
+printed in scientific notation, but still using the specified number
+of significant digits:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">display</span>     <span class="mf">1234.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+03</span>
+<span class="p">(</span><span class="nb">display</span>    <span class="mf">12345.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+04</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12345678.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+07</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Repeating the three examples above with precision equal to one results
+in the following.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span>     <span class="mf">1234.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+03</span>
+<span class="p">(</span><span class="nb">display</span>    <span class="mf">12345.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+04</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12345678.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+07</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the number is only printed up to its n-th digit, then the printed nth
+digit will be n rounded up or down, according to the digit that comes
+after it.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">12.12</span>  <span class="c1">;; "123..." rounded to "12"</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12.987654321</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">12.99</span>  <span class="c1">;; "987..." rounded to "99"</span></code></pre>
 </div>
 </div>
 <div id="srfi169" class="paragraph">
@@ -23121,7 +23169,7 @@ the value 0 for an unlimited backtrace.</p>
 <li>
 <p><strong>STKLOS-CONFDIR</strong>: This variable can be used to
 designate the directory used by <strong><em>STklos</em></strong> to store its configuration or
-packages files. It not set, the default <strong><em>STklos</em></strong> configuration directory
+packages files. If not set, the default <strong><em>STklos</em></strong> configuration directory
 is by default <code>~/.stklos</code>.</p>
 </li>
 </ul>
@@ -23893,7 +23941,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>118</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>119</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -24019,6 +24067,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-229/srfi-229.html">SRFI-229</a></strong>&#8201;&#8212;&#8201;<em>Tagged Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-233/srfi-233.html">SRFI-233</a></strong>&#8201;&#8212;&#8201;<em>INI files</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-235/srfi-235.html">SRFI-235</a></strong>&#8201;&#8212;&#8201;<em>Combinators</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong>&#8201;&#8212;&#8201;<em>Codesets</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-244/srfi-244.html">SRFI-244</a></strong>&#8201;&#8212;&#8201;<em>Multiple-value definitions</em><br></p>
@@ -24087,7 +24136,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-236</code> <code>srfi-238</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -24262,6 +24311,10 @@ are given <a href="#feature_identifiers">Table 2</a>.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-233</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">combinators</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">srfi-235</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">conditions</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-35 srfi-36</p></td>
 </tr>
@@ -24305,7 +24358,42 @@ running on.</p>
 <p>
 
 <strong><a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong> is fully supported and is extended to provide the
-additional <strong>c64vector</strong> and <strong>c128vector</strong> types of <strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong> (<em>Homogeneous numeric vector libraries</em>).</p>
+additional <strong>c64vector</strong> and <strong>c128vector</strong> types of <strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong> (<em>Homogeneous numeric vector libraries</em>).
+
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(uvector? uv)</code></strong><br>
+<strong><code>(uvector-length uv)</code></strong><br>
+<strong><code>(uvector-ref uv k)</code></strong><br>
+<strong><code>(uvector-set! uv k val)</code></strong><br>
+<strong><code>(uvector&#8594;list uv)</code></strong><br>
+<strong><code>(uvector-tag uv)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These primitives extend <strong><a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong>. They can be called with any type
+of uniform (homogeneous) vector.  The primitive <code>uvector-tag</code> returns the tag
+of the uniform vector, as a symbol</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">uvector?</span> <span class="o">#</span><span class="nv">s16</span><span class="p">(</span><span class="nf">-1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>    <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">uvector-length</span> <span class="o">#</span><span class="nv">u32</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">uvector-length</span> <span class="o">#</span><span class="nv">s64</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="nv">u8</span>
+<span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">c32</span><span class="p">())</span>       <span class="nv">=&gt;</span> <span class="nv">c32</span></code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -29718,7 +29806,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-03-04 11:56:49 +0100
+Last updated 2023-03-22 14:57:31 +0100
 </div>
 </div>
 </body>

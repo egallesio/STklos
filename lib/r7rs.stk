@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 26-Jan-2023 11:04 (eg)
+;;;; Last file update: 14-Mar-2023 12:44 (eg)
 ;;;;
 
 
@@ -822,7 +822,7 @@ doc>
 |#
 (define (make-bytevector size :optional (default 0))
   (%claim-error 'make-bytevector
-                (%make-uvector 1 size default)))
+                (%make-uvector size default 1)))
 
 #|
 <doc R7RS bytevector?
@@ -832,7 +832,7 @@ doc>
 doc>
 |#
 (define (bytevector? obj)
-  (%uvector? 1 obj))
+  (%uvector? obj 1))
 
 #|
 <doc R7RS bytevector
@@ -846,7 +846,7 @@ doc>
 doc>
 |#
 (define (bytevector . lst)
-  (%claim-error 'bytevector (%uvector 1 lst)))
+  (%claim-error 'bytevector (%uvector lst 1)))
 
 
 #|
@@ -857,7 +857,7 @@ doc>
 doc>
 |#
 (define (bytevector-length bv)
-  (%claim-error 'bytevector-length (%uvector-length 1 bv)))
+  (%claim-error 'bytevector-length (%uvector-length bv 1)))
 
 
 #|
@@ -873,7 +873,7 @@ doc>
 doc>
 |#
 (define (bytevector-u8-ref bv idx)
-  (%claim-error 'bytevector-u8-ref (%uvector-ref 1 bv idx)))
+  (%claim-error 'bytevector-u8-ref (%uvector-ref bv idx 1)))
 
 
 #|
@@ -891,7 +891,7 @@ doc>
 doc>
 |#
 (define (bytevector-u8-set! bv idx val)
-  (%claim-error 'bytevector-u8-set! (%uvector-set! 1 bv idx val)))
+  (%claim-error 'bytevector-u8-set! (%uvector-set! bv idx val 1)))
 
 
 #|

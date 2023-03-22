@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 30-Jan-2023 09:34 (eg)
+ * Last file update: 13-Mar-2023 18:54 (eg)
  *
  */
 #include <ctype.h>
@@ -272,6 +272,7 @@ void STk_print(SCM exp, SCM port, int mode)
     case tc_subr01:
     case tc_subr12:
     case tc_subr23:
+    case tc_subr34:
     case tc_vsubr:
     case tc_apply:
       STk_puts("#[primitive ", port);

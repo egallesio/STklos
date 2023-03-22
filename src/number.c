@@ -213,14 +213,50 @@ static double make_nan(int neg, int quiet, unsigned long pay)
  * (real-precision)
  * (real-precision value)
  *
- * This parameter object permits to change the default precision used
+ * This parameter object allows changing the default precision used
  * to print real numbers.
+ *
+ * By precision when printing a number we mean the number of significant
+ * digits -- that is, excluding the leading and trailing zeros in
+ * decimal representation. (This is exactly the same as the number
+ * for the `g` specifier for `printf` in the C language).
+ *
  * @lisp
- * (real-precision)        => 15
+ * (real-precision)         => 15
  * (define f 0.123456789)
- * (display f)             => 0.123456789
+ * (display f)              => 0.123456789
  * (real-precision 3)
- * (display f)             => 0.123
+ * (display f)              => 0.123
+ * (display   1.123456789)  => 1.12
+ * (display  12.123456789)  => 12.1
+ * (display 123.123456789)  => 123.0
+ * @end lisp
+ * In the last example, only three significant digits were printed (123),
+ * and the zero only marks this number as inexact.
+ *
+ * If the number won't fit using the usual decimal format, it will be
+ * printed in scientific notation, but still using the specified number
+ * of significant digits:
+ * @lisp
+ * (display     1234.123456789) => 1.23e+03
+ * (display    12345.123456789) => 1.23e+04
+ * (display 12345678.123456789) => 1.23e+07
+ * @end lisp
+ * Repeating the three examples above with precision equal to one results
+ * in the following.
+ * @lisp
+ * (real-precision 1)
+ * (display     1234.123456789) => 1e+03
+ * (display    12345.123456789) => 1e+04
+ * (display 12345678.123456789) => 1e+07
+ * @end lisp
+ * If the number is only printed up to its n-th digit, then the printed nth
+ * digit will be n rounded up or down, according to the digit that comes
+ * after it.
+ * @lisp
+ * (real-precision 4)
+ * (display 12.123456789) => 12.12  ;; "123..." rounded to "12"
+ * (display 12.987654321) => 12.99  ;; "987..." rounded to "99"
  * @end lisp
 doc>
 */

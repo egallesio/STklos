@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 23:58 (eg)
-# Last file update: 10-Mar-2023 10:20 (ryandesign)
+# Last file update: 11-Mar-2023 13:18 (ryandesign)
 
 
 prefix=@prefix@
@@ -34,15 +34,15 @@ Options:
         [--prefix | -p]         Prefix that was given during the build
         [--version | -v]        Version of STklos that is installed
         [--compile | -c]        Command that should be run to compile
-                                shared libraries.
+                                shared libraries
         [--link | -l]           Command that should be used to link shared
                                 libraries
-        [--cc]                  CC used for building STKlos
+        [--cc]                  CC used for building STklos
         [--cflags]              CFLAGS used for building STklos
         [--ldflags]             LDFLAGS used for building STklos
         [--shared-suffix | -s]  Suffix for shared libraries on current
                                 platform
-        [--threads | -t ]       Display the name of the valiable thread
+        [--threads | -t ]       Display the name of the available thread
                                 system
         [--libraries |-L ]      Display a summary of used libraries
         [--compiled-libraries]  Display a summary of compiled libraries

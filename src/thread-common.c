@@ -1,7 +1,7 @@
 /*
  * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 17-Jan-2022 09:34 (eg)
+ * Last file update: 17-Mar-2023 21:28 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -131,7 +131,7 @@ static SCM do_make_thread(SCM thunk, SCM name, int stack_size)
 DEFINE_PRIMITIVE("%make-thread", make_thread, subr3,(SCM thunk, SCM name, SCM ssize))
 {
   SCM z;
-  int stack_size;
+  long stack_size;
 
   if (STk_procedurep(thunk) == STk_false)
     STk_error("bad thunk ~S", thunk);

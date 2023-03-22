@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 10-Mar-2023 11:15 (ryandesign)
+### Last file update: 22-Mar-2023 12:25 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -119,19 +119,15 @@ BUILD_ARCH=`uname -m`
 OS_NAME=$OS
 case $OS in
    LINUX)
-      v=`echo $version | sed -e 's/\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
-      OS_NAME_VERSION=LINUX_$v
+      v=`echo $version | sed -e 's/^\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
       ;;
    DARWIN)
-      case $version in
-         9*)  OS_NAME_VERSION=DARWIN_9;;
-         *)   OS_NAME_VERSION=DARWIN_OLD;;
-      esac
+      v=`echo $version | sed -e 's/^\([[0-9]]*\).*/\1/'`
       ;;
   *)
       v=`echo $version | sed -e 's/[[^0-9]]/_/g'`
-      OS_NAME_VERSION=$OS\_$v;
 esac
+OS_NAME_VERSION=${OS}_$v;
 
 
 ###
@@ -269,15 +265,18 @@ echo "*****"
 echo "***** GMP support"
 echo "*****"
 
+
 # Try to determine if libgmp is installed
-# No pkg-config for gmp yet
-
-# check for GMP pre-version 3.0
-AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
-
-# check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+if ${PKGCONFIG} --exists gmp ;then
+   HAVE_GMP="yes"
+   GMPKG="present"
+else
+   # check for GMP pre-version 3.0
+   AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+   # check for GMP version post 3.0
+   if test "$HAVE_GMP" = "no" ;then
+      AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+   fi
 fi
 
 # Test if the user wants to force the use of our GMP lib
@@ -304,8 +303,13 @@ then
 else
      echo "... Using system libgmp library"
      GMP=""
-     GMPINC=""
-     GMPLIB="-lgmp"
+     if $PKGCONFIG --exists gmp ;then
+        GMPINC="$($PKGCONFIG --cflags gmp)"
+        GMPLIB="$($PKGCONFIG --libs gmp)"
+     else
+        GMPINC=""
+        GMPLIB="-lgmp"
+     fi
      DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
      SYST_LIBS="libgmp $SYST_LIBS"
@@ -554,6 +558,9 @@ case $UNAME_O in
   *) DLLIBS="";;
 esac
 
+# Get configure/compilation directory
+COMP_DIR=`pwd`
+
 ### Output files
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
@@ -582,6 +589,7 @@ AC_SUBST(STACK_DIRECTION)
 AC_SUBST(HAVE_GNOME)
 AC_SUBST(LDAP_LIB)
 AC_SUBST(STRIPCMD)
+AC_SUBST(COMP_DIR)
 #GC
 AC_SUBST(GC)
 AC_SUBST(GCLIB)
@@ -626,7 +634,7 @@ AC_SUBST(GOOVERS)
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script examples/Makefile
+          utils/stklos-script utils/tmpcomp examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/scheme/Makefile lib/srfi/Makefile
           lib/stklos/Makefile lib/streams/Makefile
@@ -658,7 +666,7 @@ AC_OUTPUT
 # Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
-chmod 0755 utils/stklos-config utils/stklos-script
+chmod 0755 utils/stklos-config utils/stklos-script utils/tmpcomp
 
 
 echo " "

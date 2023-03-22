@@ -24,12 +24,9 @@ System
 
 .SH DESCRIPTION
 .B STklos
-is a free Scheme System (nearly) conforming to R5RS. The aim of this
+is a free Scheme System (nearly) conforming to R7RS. The aim of this
 implementation is to be fast as well as light. The implementation is
 based on an ad-hoc Virtual Machine.
-.B STklos
-can also be compiled as a library, so that one can easily embed it
-in an application.
 .LP
 The salient points of STklos are:
 .IP "" 4
@@ -45,7 +42,7 @@ The salient points of STklos are:
 .IP "" 4
 - a simple to use module system
 .IP "" 4
-- implementing the full tower of numbers defined in R5RS
+- implementing the full tower of numbers defined in R7RS
 .IP "" 4
 - an easy connection to the GTK+ toolkit
 .IP "" 4
@@ -172,7 +169,7 @@ back-trace.
 
 .IP "STKLOS_CONFDIR"
 This variable can be used to designate the directory used by \fBstklos\fR
-to store its configuration or packages files. It not set, the default
+to store its configuration or packages files. If not set, the default
 \fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
 
 .SH FILES

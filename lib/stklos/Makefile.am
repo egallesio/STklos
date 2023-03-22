@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update: 13-Jan-2023 10:53 (eg)
+# Last file update: 20-Mar-2023 11:03 (eg)
 
 #======================================================================
 
@@ -89,5 +89,5 @@ uninstall-hook:
 	rmdir $(schemedir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \
+					$(SOURCES) >> $(DOCDB)

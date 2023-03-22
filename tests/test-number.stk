@@ -1817,4 +1817,60 @@
 (test/error "encode > max significand"
             (encode-float (+ (float-max-significand) 1) 1 1))
 
+;; real-precision.
+;; This one is interesting. We're actually testing C's printf... :)
+
+(test/error "real-precision.0"
+      (parameterize ((real-precision 0)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test/error "real-precision.51"
+      (parameterize ((real-precision 51)) (with-output-to-string (lambda () (display 10.001)))))
+
+
+(test "real-precision.1"
+      "1e+01"
+      (parameterize ((real-precision 1)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.2"
+      "10.0"
+      (parameterize ((real-precision 2)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.3"
+      "10.0"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.4"
+      "10.0"
+      (parameterize ((real-precision 4)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test "real-precision.5"
+      "10.001"
+      (parameterize ((real-precision 5)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test "real-precision..3"
+      "0.123"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 0.1234567890123456789)))))
+(test "real-precision..3"
+      "1.12"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 1.1234567890123456789)))))
+
+(test "real-precision..10"
+      "0.123456789"
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 0.1234567890123456789)))))
+
+(test "real-precision..10"
+      "1.123456789"
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 1.1234567890123456789)))))
+
+
+(test "real-precision..3"
+      "123.0"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "real-precision..10"
+      "123.1234568" ;; last digit is 7, will be rounded to the closest one
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "real-precision..6"
+      "123.123"
+      (parameterize ((real-precision 6)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+
 (test-section-end)
