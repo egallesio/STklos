@@ -21,7 +21,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 18-Jun-2021 08:18
-# Last file update: 20-Feb-2023 11:04 (eg)
 #
 VPATH = @srcdir@
 am__is_gnu_make = { \

@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Apr-2022 15:55
-;;;; Last file update: 27-Apr-2022 16:46 (eg)
 ;;;;
 
 ;; NOTE: Force the module to STklos (this is the case by default, EXCEPT that

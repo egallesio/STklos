@@ -4,7 +4,6 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 16-Mar-2023 20:37 (eg)
 
 {{chapter "SRFIs"}}
 

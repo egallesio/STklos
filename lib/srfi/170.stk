@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 11-Mar-2023 13:18 (ryandesign)
 ;;;;
 
 (select-module srfi/170)

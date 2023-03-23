@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Jul-2020 18:41
- * Last file update: 25-Nov-2021 17:24 (eg)
  */
 
 #include <stklos.h>

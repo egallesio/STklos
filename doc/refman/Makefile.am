@@ -2,7 +2,6 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  2-Mar-2023 15:04 (eg)
 
 
 ADOC=@ASCIIDOCTOR@

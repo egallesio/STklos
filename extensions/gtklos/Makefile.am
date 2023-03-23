@@ -5,7 +5,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 18-Jun-2021 08:18
-# Last file update: 20-Feb-2023 11:04 (eg)
 #
 
 SUBDIRS=lib/stklos demos

@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 12-Dec-2000 14:04 (eg)
-;;;; Last file update: 17-Dec-2022 12:16 (eg)
 ;;;;
 
 (export run-process process-kill process-stop process-continue)

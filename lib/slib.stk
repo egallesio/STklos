@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  8-Sep-1994 11:45
-;;;; Last file update: 31-Jan-2023 18:41 (eg)
 ;;;;
 
 (%compile-time-define  slib:require slib:eval-load)

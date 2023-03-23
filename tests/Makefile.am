@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 23-May-2005 14:52 (eg)
-# Last file update: 26-Nov-2020 15:00 (eg)
 
 all:
 	@echo "Use \"make test\" for testing STklos."

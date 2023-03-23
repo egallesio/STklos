@@ -4,7 +4,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio using code from Aubrey Jaffer
 ;;;;    Creation date:  8-Mar-2005
-;;;; Last file update: 31-Jan-2023 11:52 (eg)
 ;;;;
 
 (define-module srfi/59

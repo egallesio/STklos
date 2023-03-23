@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 22-Jul-2000 12:10 (eg)
- * Last file update: 13-Jan-2023 11:01 (eg)
  */
 
 /* This module defines two simple primitives called "test" and "add".

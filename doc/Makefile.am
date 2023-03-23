@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-Mar-2022 18:50 (eg)
 
 .PHONY: subdoc docdb extradoc
 

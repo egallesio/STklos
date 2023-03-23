@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  5-Jan-2023 20:24 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything

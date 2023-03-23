@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 23-Mar-2023 10:56 (eg)
 ;;;;
 
 (export build-path-from-shell-variable

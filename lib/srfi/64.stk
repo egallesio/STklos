@@ -52,7 +52,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 24-Apr-2022 19:14 (eg)
 ;;;;
 
 (define-module srfi/64

@@ -21,7 +21,6 @@
  *
  *          Authors: Lassi Kortela & Erick Gallesio
  *    Creation date: 22-Jan-2023 09:36
- * Last file update: 21-Feb-2023 12:42 (eg)
  */
 
 #include "stklos.h"

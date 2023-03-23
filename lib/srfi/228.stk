@@ -48,7 +48,6 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 11-Dec-2022 08:12
-;;;; Last file update: 11-Dec-2022 15:39 (eg)
 ;;;;
 
 (define-library (srfi 228)

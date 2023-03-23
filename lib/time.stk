@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 30-Jan-2023 09:03 (eg)
 ;;;;
 
 (export time? time->seconds seconds->time make-date date? seconds->date
