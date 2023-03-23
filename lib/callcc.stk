@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2006 12:27 (eg)
-;;;; Last file update: 23-Mar-2023 10:30 (eg)
 ;;;;
 
 (export call/cc call-with-current-continuation dynamic-wind)

@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update: 14-Jul-2004 16:15 (eg)
  */
 
 #ifdef OLD_WIN32

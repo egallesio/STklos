@@ -36,7 +36,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 23-Jun-2022 09:22 (eg)
  */
 
 #include "stklos.h"

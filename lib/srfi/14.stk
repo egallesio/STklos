@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Oct-2022 22:17
-;;;; Last file update:  2-Oct-2022 00:46 (eg)
 ;;;;
 
 ;;;; The real implementation is in (scheme list).

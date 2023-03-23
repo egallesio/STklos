@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 19-Mar-2023 18:59 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)

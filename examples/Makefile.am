@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: ??? 
-# Last file update: 21-Sep-2020 11:46 (eg)
 
 schemedemodir       = $(prefix)/share/@PACKAGE@/@VERSION@/Demos.d
 schemedemo_DATA	    = fork-test.stk hello.stk secho.stk \

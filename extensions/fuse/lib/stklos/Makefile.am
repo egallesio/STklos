@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 13-Jan-2023 11:14 (eg)
 
 EXTENSION=fuse
 

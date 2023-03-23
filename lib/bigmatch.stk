@@ -20,7 +20,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update: 10-Feb-2023 17:39 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA

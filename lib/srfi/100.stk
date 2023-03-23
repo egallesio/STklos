@@ -26,7 +26,6 @@
 ;;;;
 ;;;;           Author: Joo ChurlSoo.
 ;;;;    Creation date: ??-???-2009 ??:??
-;;;; Last file update: 25-Apr-2022 09:12 (eg)
 ;;;;
 
 ;; **STklos**: check-duplicate check-field and field-key are part of the macro expansion

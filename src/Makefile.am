@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Mar-2023 20:28 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here (anyway CFLAGS is implied here)

@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 29-Sep-2022 17:52
-;;;; Last file update:  2-Oct-2022 00:22 (eg)
 ;;;;
 
 (define-module scheme/box

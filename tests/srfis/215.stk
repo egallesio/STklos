@@ -47,7 +47,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 16-Mar-2021 16:11 (jpellegrini)
-;;;; Last file update: 16-Mar-2021 16:21 (jpellegrini)
 ;;;;
 
 (current-log-fields '(FACILITY 1))

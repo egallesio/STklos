@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 12-May-2022 16:35
-;;;; Last file update:  1-Feb-2023 13:13 (eg)
 ;;;;
 
 (define-macro (trace . args)

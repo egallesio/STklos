@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 18-Mar-2005 11:28 (eg)
  */
 
 #ifndef _STKLOS_SOCKETS

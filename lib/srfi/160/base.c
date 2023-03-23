@@ -22,7 +22,6 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 17-Jun-2022 09:10
- * Last file update: 18-Aug-2022 18:41 (eg)
  */
 
 #include <float.h>

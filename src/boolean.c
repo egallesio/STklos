@@ -22,7 +22,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 13-Mar-2023 19:42 (eg)
  */
 #include <sys/resource.h>
 #include "stklos.h"

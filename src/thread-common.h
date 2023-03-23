@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update: 21-Sep-2018 09:19 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H

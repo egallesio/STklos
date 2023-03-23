@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 17-Mar-2023 21:28 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"

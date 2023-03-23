@@ -20,7 +20,6 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 18-Sep-2022 19:04 (eg)
  *
  */
 

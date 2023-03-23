@@ -20,7 +20,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 19-Nov-1993 16:12
- * Last file update: 30-Apr-2021 14:51 (eg)
  */
 
 #include "stklos.h"

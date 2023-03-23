@@ -21,7 +21,6 @@
  *
  *           Author: Stephane Epardaud [stephane.epardaud@inria.fr]
  *    Creation date: 23-Jan-2006 12:14 (se)
- * Last file update: 27-Oct-2006 14:55 (eg)
  */
 
 #include "thread-common.h"

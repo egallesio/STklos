@@ -22,7 +22,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 30-Jan-2023 12:38 (eg)
  */
 
 #include <unistd.h>

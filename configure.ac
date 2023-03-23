@@ -2,7 +2,6 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 22-Mar-2023 12:25 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])

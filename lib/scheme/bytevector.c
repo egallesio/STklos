@@ -21,7 +21,6 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 07-Jul-2022 22:40
- * Last file update: 31-Dec-2022 09:33 (eg)
  */
 
 #include <gmp.h>

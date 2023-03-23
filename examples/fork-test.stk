@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 10-Jan-2004 15:48 (eg)
-;;;; Last file update: 13-Jan-2004 11:26 (eg)
 ;;;;
 
 (define (main args)

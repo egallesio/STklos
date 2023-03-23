@@ -46,7 +46,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-Jul-2020 16:21 (jpellegrini)
-;;;; Last file update: 18-Nov-2022 17:40 (eg)
 ;;;;
 
 (define-module scheme/bitwise

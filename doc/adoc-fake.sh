@@ -6,7 +6,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jan-2022 10:51
-# Last file update: 27-Jan-2022 10:59 (eg)
 
 cat >&2 <<EOF
 ***

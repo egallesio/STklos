@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update:  3-Oct-2022 19:32 (eg)
 ;;;;
 
 (load-path `("../lib"
