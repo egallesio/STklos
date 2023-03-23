@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 20-May-2022 18:55 (eg)
+ * Last file update: 23-Mar-2023 15:29 (eg)
  *
  */
 
@@ -831,7 +831,7 @@ doc>
 */
 DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
 {
-  int b = STk_integer_value(byte);
+  long b = STk_integer_value(byte);
 
   if ((b < 0) || (b > 255))
     STk_error_bad_io_param("bad byte value ~S", byte);
