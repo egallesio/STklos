@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 24-Jan-2023 10:12 (eg)
+;;;; Last file update: 23-Mar-2023 10:23 (eg)
 ;;;;
 
 
@@ -1142,15 +1142,19 @@ doc>
 |#
 (define base64-encode-string #f)
 (define base64-decode-string #f)
-(let ((encode/decode (lambda (op)
+(let ((encode/decode (lambda (op name)
                        (lambda (str)
+                         (unless (string? str)
+                           (error name "bad string ~s" str))
                          (let ((in  (open-input-string str))
                                (out (open-output-string)))
                            (op in out)
                            (get-output-string out))))))
 
-  (set! base64-encode-string (encode/decode base64-encode))
-  (set! base64-decode-string (encode/decode base64-decode)))
+  (set! base64-encode-string
+        (encode/decode base64-encode 'base64-encode-string))
+  (set! base64-decode-string
+        (encode/decode base64-decode 'base64-decode-string)))
 
 ;; ======================================================================
 ;;      md5sum ...
@@ -1236,15 +1240,17 @@ doc>
   ;; ansi-color-protect ...
   (set! ansi-color-protect
     (lambda (start stop)
+      #:ansi-color-protect
       (set! ansi-color-start (string-append start "\e["))
       (set! ansi-color-stop  (string-append "m" stop))))
 
   ;; ansi-color ...
   (set! ansi-color
     (lambda  args
-      (let Loop ((args        args)
+      #:ansi-color
+      (let Loop ((args       args)
                  (str-prev?  #t)
-                 (res         ""))
+                 (res        ""))
         (cond
           ((null? args)
              (if str-prev?
@@ -1275,6 +1281,7 @@ doc>
                    str-prev?
                    res))
           (else (error 'ansi-color "bad command ~S" args)))))))
+
 
 (define do-color
   (let ((term (or (getenv "TERM") "")))

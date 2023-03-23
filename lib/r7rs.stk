@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 14-Mar-2023 12:44 (eg)
+;;;; Last file update: 23-Mar-2023 11:02 (eg)
 ;;;;
 
 
@@ -340,6 +340,7 @@ doc>
 (define equal-simple? equal?)
 (set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
 
+
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.2 Numbers
 ;;;; ----------------------------------------------------------------------
@@ -562,14 +563,16 @@ doc>
      (define ,func2 ,func)
      ;; define the generalized function
      (set! ,func (lambda (first . l)
+                   ;; Set the name of the function for better error messages
+                   ,(string->keyword (symbol->string func))
+                   ;; Fuction body
                    (letrec ((compare (lambda (first . l)
                                        (or (null? l)
                                           (and (,func2 first (car l))
                                              (apply compare l))))))
                      (unless (string? first) (error "bad string ~W" first))
-                     (apply compare first l))))
-     ;; Set the name of the new function to the old one for better error messages
-     (%set-procedure-name! ,func ',func)))
+                     (apply compare first l))))))
+
 
 (%generalize-string-compare string=?     %string2=?)
 (%generalize-string-compare string<?     %string2<?)
@@ -589,12 +592,13 @@ doc>
 (let ((s->l string->list)) ;; s->l is the R5RS function
   (set! string->list
         (lambda (str :optional (start 0 start?) (end 0 end?))
+          #:string->list  ;; set procedure name
           (if start?
               (let ((end (if end? end (string-length str))))
                 (%claim-error 'string->list
                               (s->l (substring str start end))))
-              (s->l str))))
-  (%set-procedure-name! string->list 'string->list))
+              (s->l str)))))
+
 
 
 #|
@@ -661,6 +665,7 @@ doc>
 (define %string-fill2! string-fill!)
 ;; Implement the one with 2 to 4 parameters
 (let ((fill (lambda (str char :optional (start 0 start?) (end 0 end?))
+              #:string-fill! 
               (%claim-error
                  'string-fill!
                  (if start?
@@ -674,8 +679,8 @@ doc>
                            (Loop (+ i 1)))))
                      ;; R5RS string-fill!
                      (%string-fill2! str char))))))
-  (set! string-fill! fill)
-  (%set-procedure-name! string-fill! 'string-fill!))
+  (set! string-fill! fill))
+
 
 
 ;;;; ----------------------------------------------------------------------
@@ -688,6 +693,7 @@ doc>
 (let ((v->l vector->list)) ;; v->l is the R5RS function
   (set! vector->list
         (lambda (v :optional (start 0 start?) (end 0 end?))
+          #:vector->list  ; set procedure name
           (if start?
               (let ((end (if end? end (vector-length v))))
                 (%claim-error
@@ -696,8 +702,7 @@ doc>
                       (result '() (cons (vector-ref v i) result)))
                      ((< i start) result))))
               ;; R5RS function (without start or end)
-              (v->l v))))
-  (%set-procedure-name! vector->list 'vector->list))
+              (v->l v)))))
 
 
 

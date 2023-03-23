@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 22-Mar-2023 19:00 (eg)
+ * Last file update: 23-Mar-2023 15:37 (eg)
  */
 
 // INLINER values
@@ -2254,7 +2254,7 @@ SCM STk_load_bcode_file(SCM f)
 {
   SCM consts, code_size, *save_constants, save_env;
   STk_instr *save_pc;
-  int size;
+  long size;
   vm_thread_t *vm = STk_get_current_vm();
 
   /* Save machine state */

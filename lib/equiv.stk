@@ -2,7 +2,7 @@
 ;;;;
 ;;;; equiv.stk         -- Equal on circular structures
 ;;;;
-;;;; Copyright © 2018-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2018-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 ;;;;    Original author: William D Clinger
 ;;;;  STklos adaptation: Erick Gallesio
 ;;;;      Creation date: 27-Nov-2018 11:26
-;;;;   Last file update: 12-May-2022 15:48 (eg)
+;;;;   Last file update: 22-Mar-2023 21:29 (eg)
 ;;;;
 
 ;;; This code uses some parts of the implementation of William
@@ -107,6 +107,9 @@
       (%assoc  assoc))
 
   (define (equiv? x y)
+
+    #:equal?   ;; Set the name of external procedure
+
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;;
     ;; Tables mapping objects to their equivalence classes.

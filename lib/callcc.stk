@@ -1,7 +1,7 @@
 ;;;;
 ;;;; callcc.stk -- R5RS call/cc function written in Scheme
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2006 12:27 (eg)
-;;;; Last file update: 12-May-2022 15:41 (eg)
+;;;; Last file update: 23-Mar-2023 10:30 (eg)
 ;;;;
 
 (export call/cc call-with-current-continuation dynamic-wind)
@@ -135,7 +135,7 @@ doc>
  * - It is also exited when execution is within the dynamic
  *   extent and a continuation is invoked that was captured while not within
  *   the dynamic extent.
- * 
+ *
  * If a second call to |dynamic-wind| occurs within the dynamic extent
  * of the call to |thunk| and then a continuation is invoked in such a
  * way that the afters from these two invocations of |dynamic-wind|
@@ -221,6 +221,8 @@ doc>
   ;;
   (set! dynamic-wind
     (lambda (before during after)
+      #:dynamic-wind
+
       (define (verify-proc p)
         (unless (procedure? p)  ; Should test it is a thunk
           (error 'dynamic-wind "bad procedure ~S" p)))
@@ -237,7 +239,6 @@ doc>
                       (call-with-values during
                         (lambda results (reroot! here) (apply values results))))))))
 
-(%set-procedure-name! dynamic-wind 'dynamic-wind)   ;; for debug and documentation
 ;;
 ;; call-with-current-continuation
 ;;
