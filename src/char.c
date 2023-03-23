@@ -23,7 +23,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 23-Mar-2023 15:33 (eg)
  */
 
 #include <ctype.h>

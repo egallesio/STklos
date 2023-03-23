@@ -47,7 +47,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Apr-2021 17:20
-;;;; Last file update: 07-Apr-2021 17:30 (jpellegrini)
 
 (test "Dynamic extents"
       #t

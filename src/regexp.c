@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update:  9-Jan-2022 23:24 (eg)
  */
 
 #include "stklos.h"

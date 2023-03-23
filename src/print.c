@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 13-Mar-2023 18:54 (eg)
  *
  */
 #include <ctype.h>

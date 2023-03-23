@@ -35,7 +35,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: ??? 
-# Last file update: 21-Sep-2020 11:46 (eg)
 
 
 VPATH = @srcdir@

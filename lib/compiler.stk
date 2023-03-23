@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 23-Mar-2023 11:40 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
