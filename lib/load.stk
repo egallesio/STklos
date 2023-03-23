@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update:  2-Feb-2023 11:41 (eg)
+;;;; Last file update: 23-Mar-2023 10:56 (eg)
 ;;;;
 
 (export build-path-from-shell-variable
@@ -285,9 +285,8 @@ doc>
 ;; load-suffixes
 ;;
 (set! try-load (lambda (fn)
+                 #:try-load
                  (%try-load fn (load-path) (load-suffixes))))
-
-(%set-procedure-name! try-load 'try-load)
 
 ;=============================================================================
 ;
@@ -436,11 +435,13 @@ doc>
 
   (set! require
     (lambda (what)
+      #:require
       (%%require what (load-path))))
 
 
   (set! require/provide
     (lambda (what)
+      #:require/provide
       (unless (member what provided)
         (%load what (load-path) (load-suffixes)))
       (provide what)))
@@ -448,6 +449,7 @@ doc>
 
   (set! provide
     (lambda (what)
+      #:provide
       (unless (member what provided)
         (set! provided (cons what provided)))
       what))
@@ -455,11 +457,9 @@ doc>
 
   (set! provided?
     (lambda (what)
-      (and (member what provided) #t)))
+      #:provided
+      (and (member what provided) #t))))
 
-  (%set-procedure-name! require/provide 'require/provide)
-  (%set-procedure-name! provide 'provide)
-  (%set-procedure-name! provided? 'provided?))
 
 ;; Overload require with a macro to let the compiler deal with globals
 (define-macro (require what)
@@ -540,3 +540,4 @@ doc>
               symbols))))
 
 ; LocalWords:  repl autoload prepended
+

@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 23-Mar-2023 10:13 (eg)
+;;;; Last file update: 23-Mar-2023 10:23 (eg)
 ;;;;
 
 
@@ -1240,15 +1240,17 @@ doc>
   ;; ansi-color-protect ...
   (set! ansi-color-protect
     (lambda (start stop)
+      #:ansi-color-protect
       (set! ansi-color-start (string-append start "\e["))
       (set! ansi-color-stop  (string-append "m" stop))))
 
   ;; ansi-color ...
   (set! ansi-color
     (lambda  args
-      (let Loop ((args        args)
+      #:ansi-color
+      (let Loop ((args       args)
                  (str-prev?  #t)
-                 (res         ""))
+                 (res        ""))
         (cond
           ((null? args)
              (if str-prev?
@@ -1278,10 +1280,8 @@ doc>
              (Loop (append (car args) (cdr args))
                    str-prev?
                    res))
-          (else (error 'ansi-color "bad command ~S" args))))))
+          (else (error 'ansi-color "bad command ~S" args)))))))
 
-  (%set-procedure-name! ansi-color 'ansi-color)
-  (%set-procedure-name! ansi-color-protect 'ansi-color-protect))
 
 (define do-color
   (let ((term (or (getenv "TERM") "")))
