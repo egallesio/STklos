@@ -1140,9 +1140,11 @@ doc>
 doc>
 |#
 (define-macro (while test . body)
-  (let ((lab (gensym)))
-    `(let ,lab ()
-          (when ,test ,@body (,lab)))))
+  `(tagbody
+    #:top
+    (when ,test
+      (begin ,@body
+             (-> #:top)))))
 
 #|
 <doc EXT-SYNTAX until
@@ -1153,10 +1155,11 @@ doc>
 doc>
 |#
 (define-macro (until test . body)
-  (let ((lab (gensym)))
-    `(let ,lab ()
-          (unless ,test ,@body (,lab)))))
-
+  `(tagbody
+    #:top
+    (unless ,test
+      (begin ,@body
+             (-> #:top)))))
 
 #|
 <doc EXT call/ec
