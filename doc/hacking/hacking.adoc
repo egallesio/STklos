@@ -991,12 +991,25 @@ Another example is `GOTO` optimization:
 The procedure `optimize-goto-code`, also in the file `peephole.stk`,
 will perform the transformations indicated in the comments.
 
-The input code is represented as a list. Some relevant definitions are
-in the beginning of the file:
+The input code is represented as a list of the form
 
 [source,scheme]
 ----
-(label? code)      ; is thecurrent instruction a label?
+( (instruction1 op1 op2)    ;; one instruction with two operands
+  (instruction2 op1)        ;; one instruction with one operand
+  (instruction3)            ;; one instruction with no operands
+  ...
+  (instruction10 op1 op2)
+  10                        ;; this is a label!
+  (instruction11)
+  ... )
+----
+
+Some relevant definitions are in the beginning of the file:
+
+[source,scheme]
+----
+(label? code)      ; is the current instruction a label?
 (this-instr code)  ; the current instruction (reference to a position in the list)
 (next-instr code)  ; the next instruction (cdr of the current one)
 (this-arg1 code)   ; argument 1 of current instruction
@@ -1004,6 +1017,25 @@ in the beginning of the file:
 (next-arg1 code)   ; argument 1 of next instruction
 (next-arg2 code)   ; argument 2 of next instruction
 ----
+
+There are only procedures for dealing with the current and the next
+instruction because the peephole optimizer currently only substitutes
+sequences of two instructions. It is an interesting exercise to try to
+implement three-instruction peephole operation. As a suggestion, the
+reader can try the following:
+
+* Implement `third-instr`. Be careful to not try to take the `cdr` of
+  an empty list...
+* Include one more optimization clause in the optimizer that performs the
+  substitution
+  `[IN-CDR; IN-CDR; IN-CDR] => IN-CDDDR`
+* And of course, implement `IN-CDDR`:
+  - Change `lib/assembler.stk`
+  - Change `src/vm-instr.h`
+  - Add one more case to the VM state machine (use the case for `IN_CDR`
+    as a starting point).
+* Finally, write some benchmark to verify if the new optimization is worth
+  the trouble (and the use of a new opcode).
 
 == Garbage collection
 
