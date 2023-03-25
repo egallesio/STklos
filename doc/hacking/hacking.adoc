@@ -37,7 +37,7 @@ on the same project across various editors and IDEs).
 
 The subdirectories in the STklos source tree are:
 
-* `doc` – documentation, written mostly in Skribe
+* `doc` – documentation, written mostly in asciidoctor
 * `etc` – various sample files for specific needs
 * `examples` – examples (oh, who could tell?)
 * `ffi` – `libffi` (a local copy)
@@ -260,11 +260,11 @@ See SRFI-25, SRFI-27 and SRFI-170 as a reference.
 
 === Documentation
 
-==== Documenting SRFIs in `srfi.skb`
+==== Documenting SRFIs in `srfi.adoc`
 
 General documentation is automatically generated for SRFIs. If you need
 to give a precision specific to a given SRFI, add it to the end of the
-`doc/skb/srfi.skb` file using the `gen-srfi-documentation` function.
+`doc/refman/srfi.adoc` file using the `gen-srfi-documentation` function.
 
 Note that the documentation is written in Skribe tool which is no more
 maintained. Consequently, the documentation will not be generated. The
@@ -1029,7 +1029,7 @@ reader can try the following:
 * Include one more optimization clause in the optimizer that performs the
   substitution
   `[IN-CDR; IN-CDR; IN-CDR] => IN-CDDDR`
-* And of course, implement `IN-CDDR`:
+* And of course, implement `IN-CDDDR`:
   - Change `lib/assembler.stk`
   - Change `src/vm-instr.h`
   - Add one more case to the VM state machine (use the case for `IN_CDR`
