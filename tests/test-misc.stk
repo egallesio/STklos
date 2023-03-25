@@ -374,6 +374,49 @@ b|)
             (repeat 'not-a-number (display "." p)))
 
 ;;----------------------------------------------------------------------
+(test-subsection "while and until")
+
+(test "while.1"
+      10
+      (let ((a 1)) (while (< a 10) (set! a (fx+ 1 a))) a))
+
+(test "while.2"
+      (void)
+      (while #f #f))
+
+(test "while.3"
+      '()
+      (let ((x '(1 2 3)))
+        (while (pair? x) (set! x (cdr x)))
+        x))
+
+(test "while.4"
+      '(3)
+      (let ((x '(1 2 3)))
+        (while (pair? (cdr x)) (set! x (cdr x)))
+        x))
+
+(test "until.1"
+      0
+      (let ((a 10)) (until (= a 0) (set! a (fx- a 1))) a))
+
+(test "until.2"
+      (void)
+      (until #t #f))
+
+(test "until.3"
+      '()
+      (let ((x '(1 2 3)))
+        (until (null? x) (set! x (cdr x)))
+        x))
+
+(test "until.4"
+      '(3)
+      (let ((x '(1 2 3)))
+        (until (null? (cdr x)) (set! x (cdr x)))
+        x))
+
+;;----------------------------------------------------------------------
 (test-subsection "(void)")
 
 (test "void.1" #t (eq? (void) #void))
