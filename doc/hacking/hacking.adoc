@@ -805,7 +805,8 @@ capture, check and restore continuations:
 * `SCM STk_restore_cont(SCM cont, SCM val)` restores continuation `cont`, passing it
    the value `val`
 
-There is also one function in `vm.c` which is not exported:
+There is also one function in `vm.c` which is not exported by `vm.h`, but is available
+as a Scheme primitive:
 
 [source, scheme]
 ----
