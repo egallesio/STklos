@@ -818,9 +818,67 @@ DEFINE_PRIMITIVE("%fresh-continuation?", fresh_continuationp, subr1, (SCM obj))
 
 Their Scheme counterparts, `%continuation?`, `%make-continuation`, and
 `%restore-continuation` are used to implement the Scheme procedure
-`call/cc` (in `lib/callcc.stk`).
+`call/cc` (in `lib/callcc.stk`). The implementation of `call/cc` is
+actually complex because it needs to be interwined with the
+implementation of `dynamic-wind`, but in the same file there is
+another procedure, `%call/cc`, which does not do winding, and is
+therefore very simple (and it should be the starting point to
+understand the full-blown `call/cc`). We reproduce it here with some
+comments.
 
-Their behavior is better illustrated by an example in Scheme:
+[source, scheme]
+----
+(define (%call/cc proc)
+  (let ((k  (%make-continuation)))
+    (if  (%fresh-continuation? k)
+
+         ;; In the first time we get here, we create a closure (the lambda
+         ;; below) that will take a value v and restore the continuation
+         ;; k with it. So when we call
+         ;; (%call/cc (lambda (kont) ... (kont x) ...)),
+         ;; 'proc' below is the '(lambda (kont) ...)' in our code. And the
+         ;; '(lambda v ...)' below is kont. 'v' is the argument that will be
+         ;; given to kont.
+
+         (proc (lambda v (%restore-continuation k v)))
+
+         ;; Next time and everytime again, we just return values applied to k,
+         ;; because in this case, k will *not* be a continuation, but a list
+         ;; with the values passed (this is because the lambda above accepts
+         ;; 'v' as the arg list, and this list is passed to %restore-continuation
+         ;; as the value to be returned).
+         (apply values k))))
+----
+
+The `%call/cc` procedure is used in the same way the Scheme `call/cc`
+is used:
+
+[source, scheme]
+----
+stklos> (define c #f)
+(let ((a 1)
+      (b 2))
+  (format #t "start~%")
+  (set! b (%call/cc (lambda (k)
+                      (set! c k)
+                      -1)))
+  (set! a (+ 1 a))
+  (format #t "~a ~a ~a~%" a b c))
+
+start
+2 -1 #[closure 7fbcd9a122c0]
+
+stklos> (c 15)
+3 15 #[closure 7fbcd9a122c0]
+
+stklos> (c 'x)
+4 x #[closure 7fbcd9a122c0]
+----
+
+The behavior of the fundamental continuation procedures is better
+illustrated by an example in Scheme, which mimics the example of
+`%call/cc` given above, *ecxept* that it does not have the return
+value of `%call/cc`, so it does not set the value of `b`:
 
 [source, scheme]
 ----
@@ -830,7 +888,7 @@ stklos> (define c #f)  ; to be set later
   (format #t "start~%")
   (set! c (%make-continuation))
   (set! a (+ 1 a))
-  (format #t "~a ~a~%" a b))
+  (format #t "~a ~a ~a~%" a b c))
 
 start
 2 2
@@ -848,19 +906,19 @@ stklos> (%fresh-continuation? c)
 stklos> (%restore-continuation c c)          ;; since this is the continuation of
                                              ;; "(set! c ...)", we put "c" as value,
                                              ;; so we can use the continuation again
-3 2
+3 2 #[continuation (C=3992 S=1512) c069e000]
 
 stklos> (%fresh-continuation? c)
 #f
 
 stklos> (%restore-continuation c c)
-4 2
+4 2 #[continuation (C=3992 S=1512) c069e000]
 
 stklos> (%restore-continuation c c)
-5 2
+5 2 #[continuation (C=3992 S=1512) c069e000]
 
 stklos> (%restore-continuation c c)
-6 2
+6 2 #[continuation (C=3992 S=1512) c069e000]
 ----
 
 == The virtual machine
