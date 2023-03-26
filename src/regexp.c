@@ -1,7 +1,7 @@
 /*
  * regexp.c -- STklos Regexps
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,47 +25,8 @@
 
 #include "stklos.h"
 
-/*
- * All the complexity comes from MAC OS. I don't remember why I had to do
- * this, but I remember the culprit !!!
- */
-
-#ifdef HAVE_PCRE
-#  define PCRE_regexec  regexec
-#  define PCRE_regcomp  regcomp
-#  define PCRE_regerror regerror
-#  define PCRE_regfree  regfree
-#else
-#  define regexec  PCRE_regexec
-#  define regcomp  PCRE_regcomp
-#  define regerror PCRE_regerror
-#  define regfree  PCRE_regfree
-#endif
-
 /* ---------------------------------------------------------------------- */
-#ifdef PCRE_PKG_CONFIG
-#  include <pcreposix.h>
-#else
-/* Here again Mac Os problems.
- * Here, we used to have a #include <pcreposix.h>
- * However, on a fresh 10.6 install, there is a pcre lib which is
- * installed, but the "pcreposix.h" file isn't.
- *
- * So what we do here is potentially FALSE. However, it is unlikely
- * that the code include in STklos is not compatible with the one
- * used to compile the installed library (this file seems to have
- * been always "semantically" compatible). The only point where we
- * can have difference should be the definition of regmatch_t type
- */
-#  include "../pcre/pcreposix.h"
-#endif
-
-#ifdef REG_UTF8
-#  define PCRE_COMP_FLAG REG_UTF8
-#else
-#  define PCRE_COMP_FLAG 0
-#endif
-
+#include <pcre2posix.h>
 
 /* ---------------------------------------------------------------------- */
 
@@ -75,10 +36,10 @@ struct regexp_obj {
   regex_t buffer;
 };
 
-#define REGEXPP(p)      (BOXED_TYPE_EQ((p), tc_regexp))
+#define REGEXPP(p)          (BOXED_TYPE_EQ((p), tc_regexp))
 #define REGEXP_SRC(p)       (((struct regexp_obj *) (p))->src)
 #define REGEXP_BUFFER(p)    (((struct regexp_obj *) (p))->buffer)
-#define REGEXP_DEPTH(p) ((((struct regexp_obj *) (p))->buffer).re_nsub)
+#define REGEXP_DEPTH(p)     ((((struct regexp_obj *) (p))->buffer).re_nsub)
 
 
 static void error_bad_string(SCM obj)
@@ -93,18 +54,18 @@ static void signal_regexp_error(int code, regex_t *buffer)
   char *msg;
 
   /* First call regerror with a null buffer to get the message length */
-  len = PCRE_regerror(code, buffer, NULL, 0);
+  len = pcre2_regerror(code, buffer, NULL, 0);
 
   /* Call again regerror with a freshly allocated buffer */
   msg = STk_must_malloc_atomic(len+2); /* ??? */
-  PCRE_regerror(code, buffer, msg, len+1);
+  pcre2_regerror(code, buffer, msg, len+1);
 
   STk_error("%s", msg);
 }
 
 static void regexp_finalizer(SCM re, void _UNUSED(*client_data))
 {
-  PCRE_regfree(&REGEXP_BUFFER(re));
+  pcre2_regfree(&REGEXP_BUFFER(re));
 }
 
 static void print_regexp(SCM obj, SCM port, int _UNUSED(mode))
@@ -136,9 +97,7 @@ DEFINE_PRIMITIVE("string->regexp", str2regexp, subr1, (SCM re))
   if (!STRINGP(re)) error_bad_string(re);
   NEWCELL(z, regexp);
 
-  ret = PCRE_regcomp(&REGEXP_BUFFER(z),
-             STRING_CHARS(re),
-             STk_use_utf8? PCRE_COMP_FLAG: 0);
+  ret = pcre2_regcomp(&REGEXP_BUFFER(z), STRING_CHARS(re), 0);
   REGEXP_SRC(z) = re;
   if (ret) signal_regexp_error(ret, &REGEXP_BUFFER(z));
   STk_register_finalizer(z, regexp_finalizer);
@@ -209,7 +168,7 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
 
   if (!STRINGP(str)) error_bad_string(str);
 
-  ret = PCRE_regexec(&REGEXP_BUFFER(re), STRING_CHARS(str), MAX_PMATCH, pmatch, 0);
+  ret = pcre2_regexec(&REGEXP_BUFFER(re), STRING_CHARS(str), MAX_PMATCH, pmatch, 0);
 
   if (ret) {
     if (ret == REG_NOMATCH) /* No match ==> #f */ return STk_false;

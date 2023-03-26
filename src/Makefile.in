@@ -350,10 +350,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -477,18 +477,18 @@ gmp = @GMP@
 gmplib = @GMPLIB@
 gmpinc = @GMPINC@
 
-# PCRE LIBRARY
-pcre = @PCRE@
-pcrelib = @PCRELIB@
-pcreinc = @PCREINC@
+# PCRE2 LIBRARY
+pcre2 = @PCRE2@
+pcre2lib = @PCRE2LIB@
+pcre2inc = @PCRE2INC@
 
 # FFI LIBRARY
 ffi = @FFI@
 ffilib = @FFILIB@
 ffiinc = @FFIINC@
-stklos_LDADD = $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
+stklos_LDADD = $(gmplib) $(pcre2lib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-AM_CPPFLAGS = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+AM_CPPFLAGS = $(gmpinc) $(pcre2inc) $(ffiinc) $(gcinc)
 all: $(BUILT_SOURCES) stklosconf.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

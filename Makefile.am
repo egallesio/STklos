@@ -24,7 +24,7 @@
 EXTRA_DIST   =
 # INSTDIRS contains the dirs which need to be installed
 INSTDIRS     =  @GC@ src utils lib examples
-SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS) doc tests
+SUBDIRS      =  @PCRE2@ @GMP@ @FFI@ $(INSTDIRS) doc tests
 
 STKLOS_BINARY= ./src/stklos
 STKLOS_FLAGS = --no-init-file --case-sensitive
