@@ -23,9 +23,9 @@ GC: The Boehm's conservative garbage collector for C and C++
     - Home Page: https://www.hboehm.info/gc/
 
 
-PCRE: Perl-Compatible Regular Expression library
+PCRE2: Perl-Compatible Regular Expression library
 ================================================
-    - Version: 8.45
+    - Version: 10.42
     - License: BSD
     - Home: http://www.pcre.org/
 
@@ -50,6 +50,6 @@ LALR: The Dominique Boucher LALR Package
 
                  +++++++++++++++++++++++++++++++++++
 
-The GC, PCRE, LIBFFI and GMP libraries provided with STklos are only
+The GC, PCRE2, LIBFFI and GMP libraries provided with STklos are only
 used if there are no identical (or higher) versions of these libraries
 already installed on the system at configuration time.

@@ -337,18 +337,14 @@ AC_ARG_WITH(provided-regexp,
 
 if test "$HAVE_PCRE2" = "no" -o "$PROV_PCRE2" = "yes"
 then
-     echo "... Configuring libpcre"
-     PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-                 -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-     (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
-           --enable-utf8 \
+     echo "... Configuring libpcre2"
+     (cd pcre2; CC=${CC} CFLAGS="${CFLAGS}" ./configure \
            --prefix=$prefix --disable-shared --disable-cpp) || \
-           { echo "Cannot configure PCRE"; exit; }
-     PCRE=pcre
-     PCREINC="-I../pcre"
-     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-     DEF_PCRE=""
-     COMP_LIBS="libpcre $COMP_LIBS"
+           { echo "Cannot configure PCRE2"; exit; }
+     PCRE2=pcre2
+     PCRE2INC="-I../pcre2"
+     PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
+     COMP_LIBS="libpcre2 $COMP_LIBS"
 else
      echo "... Using system libpcre2 library"
      if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
