@@ -95,19 +95,19 @@ gmp	        = @GMP@
 gmplib          = @GMPLIB@
 gmpinc	        = @GMPINC@
 
-# PCRE LIBRARY
-pcre		= @PCRE@
-pcrelib		= @PCRELIB@
-pcreinc		= @PCREINC@
+# PCRE2 LIBRARY
+pcre2		= @PCRE2@
+pcre2lib	= @PCRE2LIB@
+pcre2inc	= @PCRE2INC@
 
 # FFI LIBRARY
 ffi		= @FFI@
 ffilib		= @FFILIB@
 ffiinc		= @FFIINC@
 
-stklos_LDADD   = $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
+stklos_LDADD   = $(gmplib) $(pcre2lib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-AM_CPPFLAGS    = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+AM_CPPFLAGS    = $(gmpinc) $(pcre2inc) $(ffiinc) $(gcinc)
 
 
 struct.o cond.o: struct.h

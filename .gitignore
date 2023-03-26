@@ -128,28 +128,22 @@ lib/srfi/160/*.stk
 
 
 
-# Pcre directory
-pcre/.libs
-pcre/RunTest
-pcre/chartables.c
-pcre/config.h
-pcre/configure.lineno
-pcre/dftables
-pcre/libpcre.pc
-pcre/libpcrecpp.pc
-pcre/pcre-config
-pcre/pcre.h
-pcre/pcre_chartables.c
-pcre/pcre_stringpiece.h
-pcre/pcrecpparg.h
-pcre/pcredemo
-pcre/pcregrep
-pcre/pcretest
-pcre/stamp-h1
-pcre/testNinput
-pcre/testsavedregex
-pcre/teststderr
-pcre/testtry
+# Pcre2 directory
+pcre2/.libs/
+pcre2/libpcre2-16.pc
+pcre2/libpcre2-32.pc
+pcre2/libpcre2-8.pc
+pcre2/libpcre2-posix.pc
+pcre2/pcre2-config
+pcre2/pcre2grep
+pcre2/pcre2posix_test
+pcre2/pcre2test
+pcre2/src/.dirstamp
+pcre2/src/config.h
+pcre2/src/pcre2.h
+pcre2/src/pcre2_chartables.c
+pcre2/src/stamp-h1
+
 
 # pkgman
 pkgman/stklos-pkg

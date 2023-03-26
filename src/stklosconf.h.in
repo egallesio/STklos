@@ -125,7 +125,7 @@
 #undef HAVE_NLIST_H
 
 /* We use our version of pcre */
-#undef HAVE_PCRE
+#undef HAVE_PCRE2
 
 /* Define to 1 if you have the `pthread_cancel' function. */
 #undef HAVE_PTHREAD_CANCEL

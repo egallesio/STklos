@@ -1,4 +1,4 @@
-### configure.ac for STklos
+reges### configure.ac for STklos
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
@@ -316,52 +316,47 @@ fi
 
 
 # ----------------------------------------------------------------------
-# PCRE support
+# PCRE2 support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** Regexp support"
 echo "*****"
 
-# Try to determine if libpcre is installed
-if ${PKGCONFIG} --exists libpcre ;then
-   HAVE_PCRE="yes"
-   PCREPKG="present"
+# Try to determine if libpcre2 is installed
+if ${PKGCONFIG} --exists libpcre2-8 libpcre2-posix ;then
+   HAVE_PCRE2="yes"
+   PCRE2PKG="present"
 else
-   AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
+    AC_CHECK_LIB(pcre2-8, pcre2_config_8, HAVE_PCRE2="yes", HAVE_PCRE2="no", $LIBS)
 fi
 
-# Test if the user wants to force the use of our PCRE lib
+# Test if the user wants to force the use of our PCRE2 lib
 AC_ARG_WITH(provided-regexp,
-       [  --with-provided-regexp  use the provided Regexp (PCRE) library],
-       PROV_PCRE="$withval", PROV_PCRE="no")
+       [  --with-provided-regexp  use the provided Regexp (PCRE2) library],
+       PROV_PCRE2="$withval", PROV_PCRE2="no")
 
-if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
+if test "$HAVE_PCRE2" = "no" -o "$PROV_PCRE2" = "yes"
 then
-     echo "... Configuring libpcre"
-     PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-                 -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-     (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
-           --enable-utf8 \
+     echo "... Configuring libpcre2"
+     (cd pcre2; CC=${CC} CFLAGS="${CFLAGS}" ./configure \
            --prefix=$prefix --disable-shared --disable-cpp) || \
-           { echo "Cannot configure PCRE"; exit; }
-     PCRE=pcre
-     PCREINC="-I../pcre"
-     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-     DEF_PCRE=""
-     COMP_LIBS="libpcre $COMP_LIBS"
+           { echo "Cannot configure PCRE2"; exit; }
+     PCRE2=pcre2
+     PCRE2INC="-I../pcre2"
+     PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
+     COMP_LIBS="libpcre2 $COMP_LIBS"
 else
-     echo "... Using system libpcre library"
-     PCRE=""
-     if $PKGCONFIG --exists libpcre ;then
-        PCREINC="$($PKGCONFIG --cflags libpcre)"
-        PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
+     echo "... Using system libpcre2 library"
+     if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
+        PCRE2INC="$($PKGCONFIG --cflags libpcre2-8 libpcre2-posix) "
+        PCRE2LIB="$($PKGCONFIG --libs   libpcre2-8 libpcre2-posix)"
      else
-        PCREINC=""
-        PCRELIB="-lpcre -lpcreposix"
+        PCRE2INC=""
+        PCRE2LIB="-lpcre-8 -lpcre2-posix"
      fi
-     DLLIBS="$DLLIBS $PCRELIB"
-     AC_DEFINE(HAVE_PCRE, 1 , [We use our version of pcre])
-     SYST_LIBS="libpcre $SYST_LIBS"
+     DLLIBS="$DLLIBS $PCRE2LIB"
+     AC_DEFINE(HAVE_PCRE2, 1 , [We use our version of pcre])
+     SYST_LIBS="libpcre2 $SYST_LIBS"
 fi
 
 
@@ -486,7 +481,7 @@ do
 done
 
 # c.link property
-for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRELIB} ${FFILIB} ${GCLIB} -lm
+for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRE2LIB} ${FFILIB} ${GCLIB} -lm
 do
     C_LINK="${C_LINK}\\\"${arg}\\\" "
 done
@@ -593,11 +588,11 @@ AC_SUBST(COMP_DIR)
 AC_SUBST(GC)
 AC_SUBST(GCLIB)
 AC_SUBST(GCINC)
-# PCRE
-AC_SUBST(PCRE)
-AC_SUBST(PCRELIB)
-AC_SUBST(PCREINC)
-AC_SUBST(PCREPKG)
+# PCRE2
+AC_SUBST(PCRE2)
+AC_SUBST(PCRE2LIB)
+AC_SUBST(PCRE2INC)
+AC_SUBST(PCRE2PKG)
 # FFI
 AC_SUBST(FFI)
 AC_SUBST(FFILIB)
