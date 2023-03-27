@@ -46,7 +46,7 @@ The subdirectories in the STklos source tree are:
 * `lib` – Scheme files, including from basic things like the boot
 program up to high-level things like modules implementing libraries and
 SRFIs
-* `pcre` – `libpcre` (a local copy)
+* `pcre2` – `libpcre` (a local copy)
 * `pkgman` – the package manager
 * `src` – the STklos core, written in C
 * `tests` – the tests, of course!
