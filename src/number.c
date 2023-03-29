@@ -1589,7 +1589,7 @@ static int zerop(SCM n)
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) == 0);
     case tc_real:     return (fpclassify(REAL_VAL(n)) == FP_ZERO);
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) == 0);
+    case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(n)) == 0);
     case tc_complex:  return zerop(COMPLEX_REAL(n)) && zerop(COMPLEX_IMAG(n));
     case tc_rational: return zerop(RATIONAL_NUM(n));
     default:          error_bad_number(n);
@@ -1602,7 +1602,7 @@ static int positivep(SCM n)
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) > 0);
     case tc_real:     return (REAL_VAL(n) > 0.0);
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) > 0);
+    case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(n)) > 0);
     case tc_rational: return positivep(RATIONAL_NUM(n));
     default:          error_not_a_real_number(n);
   }
@@ -1615,7 +1615,7 @@ static int negativep(SCM n)
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) < 0);
     case tc_real:     return (REAL_VAL(n) < 0.0);
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) < 0);
+    case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(n)) < 0);
     case tc_rational: return negativep(RATIONAL_NUM(n));
     default:          error_not_a_real_number(n);
   }
@@ -2123,7 +2123,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_integer:  if (INT_VAL(x) == INT_MIN_VAL)
                         return long2scheme_bignum(-INT_VAL(x));
                       return (INT_VAL(x) < 0) ? MAKE_INT(-INT_VAL(x)) : x;
-    case tc_bignum:   if (mpz_cmp_ui(BIGNUM_VAL(x), 0L) < 0) {
+    case tc_bignum:   if (mpz_sgn(BIGNUM_VAL(x)) < 0) {
                         mpz_t tmp;
 
                         mpz_init(tmp);
