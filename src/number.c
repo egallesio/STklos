@@ -2515,10 +2515,7 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
 DEFINE_PRIMITIVE("truncate", truncate, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
-    case tc_real:     {
-                        double d = REAL_VAL(x);
-                        return double2real(d < 0.0 ? ceil(d): floor(d));
-                      }
+    case tc_real:     return double2real(trunc(REAL_VAL(x)));
     case tc_rational: return STk_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
     case tc_bignum:
     case tc_integer:  return x;
