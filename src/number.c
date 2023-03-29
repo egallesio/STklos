@@ -26,6 +26,7 @@
 
 
 #include <math.h>
+#include <float.h>
 #include <ctype.h>
 #include <locale.h>
 #include "stklos.h"
@@ -446,11 +447,80 @@ static Inline SCM bignum2integer(mpz_t n)
 
 static Inline double bignum2double(mpz_t n)
 {
-  /* I do not use the function mpz_get_d since it gives an unspecified value
-   * when converting a number which is +inf or -inf
-   */
- char *s = STk_must_malloc_atomic(mpz_sizeinbase(n, 10) + 2);
- return atof(mpz_get_str(s, 10, n));
+    /* If the result does not fit a double, we return (+/-)inf.0
+       We don't use the result of mpz_get_d because it does not
+       guarantee that an inf will be returned in this case.
+
+       The most positive and most negative flonums are (+/-) DBL_MAX,
+       so we only call the GMP function mpz_cmpabs_d once (no need to
+       test for both > +DBL_MAX and < -DBL_MAX).                 */
+    if (mpz_cmpabs_d((n), +DBL_MAX) > 0)
+        return (mpz_sgn(n)>0)
+            ? plus_inf
+            : minus_inf;
+
+    /* A very large integer may not be representable as a float.
+
+       mpz_get_d always "rounds towards zero" -- that is, it returns
+       the closest float to n ***that is between 0 and n***, but
+       R7RS requires 'inexact' to return the *closest* number.
+       So we need to adapt.
+
+       Suppose there are two representable integers around n, but n
+       itself is not representable. Call those integers 'below' and
+       'above':
+
+           0                        below       n  above
+        ---|--------------------------|---------|----|-----
+                                      v
+                                   returned
+                                    by GMP
+
+        As the figure shows, even if there is an integer 'above'
+        that is closer to n, the number 'below' (closer to 0) will be
+        returned.  Note that the whole picture could be reflected
+        around zero if n is negative, so "above" actually means
+        "farthest from zero" but not "largest":
+
+           above  n       below                        0
+        -----|----|---------|--------------------------|---
+                                                       |
+                                                neg <--+--> pos
+
+        We of course can be sure that there is no integer between
+        'below' and 'above'.
+
+        So we do the following:
+
+        1. Get the next integer representable as double with nextafter (the
+           one starting from below, but *away from zero*). We call this
+           one 'above'
+        2. Convert both below and above back into bignums (!), as 'zbelow'
+           and 'zabove'
+        3. Measure (using the GMP) the distances ABS(zabove-n) and ABS(n-zbelow)
+           and if n is closer to zabove, we return ceil(above) or floor(above),
+           depending on the sign. If it's closer to below, we return below.     */
+    double below = mpz_get_d(n);
+
+    /* Use ceil or floor, since we want the next *integer* representable as
+       double -- and that's exactly what ceil and floor do! */
+    double above = (below>0)
+        ? ceil(nextafter(below, plus_inf))
+        : floor(nextafter(below, minus_inf));
+
+    /* the *_set_d functions in GMP are *exact*, so no precision islost here: */
+    mpz_t zbelow, zabove;
+    mpz_init_set_d(zabove, above);
+    mpz_init_set_d(zbelow, below);
+
+    /* zabove <- distance(zabove, n)
+       zbelow <- distance(n, zbelow)   */
+    mpz_sub(zabove, zabove, n);
+    mpz_sub(zbelow, n, zbelow);
+
+    return (mpz_cmpabs(zabove, zbelow) >= 0)
+        ? below
+        : above;
 }
 
 
