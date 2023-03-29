@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -179,6 +179,35 @@ static SCM make_export_list(SCM symbols)
 }
 
 
+static SCM normalize_library_name(SCM obj) /* return a library name as a symbol */
+{
+  if (SYMBOLP(obj))
+    return obj;
+  else if (CONSP(obj) && STk_int_length(obj) > 0) { /* (list? obj) is true */
+    SCM res = STk_open_output_string();
+
+    for (SCM tmp = obj; !NULLP(tmp); tmp = CDR(tmp)) {
+      SCM head = CAR(tmp);
+
+      if (SYMBOLP(head))
+        STk_print(head, res, DSP_MODE);
+      else {
+        long val = STk_integer_value(head);
+
+        if (val >= 0)
+          STk_print(head, res, DSP_MODE);
+        else
+          STk_error("bad library name component ~S", head);
+      }
+      if (!NULLP(CDR(tmp))) /* not the last component */
+        STk_putc('/', res);
+    }
+    return STk_intern(STRING_CHARS(STk_get_output_string(res)));   // FIXME: avoid allocation
+  }
+  error_bad_module_name(obj);
+  return STk_void;            /* for the compiler */
+}
+
 void STk_export_all_symbols(SCM module)
 {
   if (!MODULEP(module)) error_bad_module(module);
@@ -193,19 +222,21 @@ DEFINE_PRIMITIVE("%make-empty-environment", make_empty_env, subr0, (void))
 }
 
 
+DEFINE_PRIMITIVE("%normalize-library-name",normalize_name, subr1, (SCM obj))
+{
+  return normalize_library_name(obj);
+}
+
+
 DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
 {
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-  return find_module(name, TRUE);
+  return find_module(normalize_library_name(name), TRUE);
 }
 
 
 DEFINE_PRIMITIVE("%find-instanciated-module", find_inst_module, subr1, (SCM name))
 {
-  SCM z;
-
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-  z = find_module(name, FALSE);
+  SCM z = find_module(normalize_library_name((name)), FALSE);
 
   return  ((z != STk_void) && MODULE_IS_INSTANCIATED(z))? z: STk_false;
 }
@@ -213,11 +244,8 @@ DEFINE_PRIMITIVE("%find-instanciated-module", find_inst_module, subr1, (SCM name
 
 DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
 {
-  SCM z;
+  SCM z = find_module(normalize_library_name(name), FALSE);
 
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-
-  z = find_module(name, FALSE);
   if (z == STk_void) error_bad_module_name(name);
 
   MODULE_IS_LIBRARY(z) = TRUE;
@@ -337,11 +365,8 @@ doc>
 */
 DEFINE_PRIMITIVE("find-module", scheme_find_module, subr12, (SCM name, SCM def))
 {
-  SCM module;
+  SCM module = find_module(normalize_library_name(name), FALSE);
 
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-
-  module = find_module(name, FALSE);
   if (module == STk_void) {
     if (!def) error_not_exist(name);
     return def;
@@ -881,5 +906,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);
 
+  ADD_PRIMITIVE(normalize_name);
   return TRUE;
 }

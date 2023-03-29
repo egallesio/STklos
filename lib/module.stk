@@ -1,7 +1,7 @@
 ;;;;
 ;;;; module.stk -- Module stuff
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -262,7 +262,7 @@ doc>
                (error 'import "bad rename clause ~s" import-set)))
 
           (else
-           (list (%library-name->symbol import-set))))))
+           (list (%normalize-library-name import-set))))))
 
      ((symbol? import-set)
       ;; a "legacy" STklos module

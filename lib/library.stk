@@ -28,36 +28,9 @@
 
 (export define-library library-name
         ;; FIXME
-        %library-name->symbol
         %symbol->library-name
         %module-define-and-export
         %make-copy-module)
-
-;;
-;; library name conversion functions
-;;
-(define (%library-name->string libname)
-  (define (->string libname)
-    (let* ((str (format #f "~A" libname))
-           (res (substring str 1 (- (string-length str) 1))))
-      (regexp-replace-all " " res "/")))
-
-  (cond
-   ((symbol? libname)                                   ;; STklos
-    (symbol->string libname))
-   ((and (pair? libname)
-         (list? libname)
-         (every (lambda (x)
-                  (or (symbol? x) (and (integer? x)
-                                       (positive? x))))
-                libname)
-         (->string libname)))
-   (else
-    (error "bad library name ~S" libname))))
-
-
-(define (%library-name->symbol libname)
-  (string->symbol (%library-name->string libname)))
 
 (define (%symbol->library-name name)
   (map string->symbol (string-split (symbol->string name) "/")))
@@ -79,7 +52,7 @@
   `(define-module ,new
      (import ,old)
      (export ,@(map cdr
-                    (module-exports (find-module (%library-name->symbol old)))))))
+                    (module-exports (find-module old))))))
 
 
 ;; ======================================================================
@@ -88,7 +61,7 @@
 ;;
 ;; ======================================================================
 (define-macro (define-library name . decls)
-  (let* ((module-name    (%library-name->symbol name))
+  (let* ((module-name    (%normalize-library-name name))
          (conds          '())
          (imports        '())
          (exports        '())
@@ -177,8 +150,10 @@
  *
  * @lisp
  * (define-library (example cool-library))
- * (library-name (find-module 'example/cool-library)) => (example cool-library)
- * (module-name  (find-module 'example/cool-library)) => example/cool-library
+ * (library-name (find-module 'example/cool-library))   => (example cool-library)
+ * (library-name (find-module '(example cool-library))) => (example cool-library)
+ * (module-name  (find-module 'example/cool-library))   => example/cool-library
+ * (module-name  (find-module '(example cool-library))) => example/cool-library
  *
  * (define-module example/a-module)
  * (library-name (find-module 'example/a-module))     => error

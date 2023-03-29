@@ -200,10 +200,8 @@ doc>
                (if (or (null? (cdr test))
                        (not (null? (cddr test))))
                    (error 'cond-expand "invalid 'library' clause")
-                   (let* ((name (cadr test))
-                          (lib  (%library-name->symbol name))
-                          (data (find-module lib #f)))
-                     (if data
+                   (let ((name (cadr test)))
+                     (if (find-module name #f)
                          `(begin ,@(cdar clauses))
                          `(cond-expand ,@(cdr clauses))))))
 
