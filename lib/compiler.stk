@@ -115,7 +115,8 @@
                          (caaddr         . ,caaddr)
                          (cdaddr         . ,cdaddr)
                          (cadddr         . ,cadddr)
-                         (cddddr         . ,cddddr)))
+                         (cddddr         . ,cddddr)
+                         (list-ref       . ,list-ref)))
 
 (define *inline-symbols* (map car *inline-table*))
 
@@ -1257,6 +1258,12 @@ doc>
         caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr)
                         (begin (compile (car actuals) env epair #f)
                                (cxr fct)))
+      ((list-ref)       (case (cadr actuals)
+                          ((0) (compile `(car ,(car actuals)) env epair #f))
+                          ((1) (compile `(cadr ,(car actuals)) env epair #f))
+                          ((2) (compile `(caddr ,(car actuals)) env epair #f))
+                          ((3) (compile `(cadddr ,(car actuals)) env epair #f))
+                          (else  (compile-normal-call fct actuals len env epair #f))))
       (else             (panic "unimplemented inline primitive ~S" fct)))))
 
 
