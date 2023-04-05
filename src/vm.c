@@ -1147,14 +1147,14 @@ static time_t    previous_time = 0;
 static time_t    current_time  = 0;
 
 void tick(STk_instr b) {
+  current_time = clock();
   couple_instr[previous_op][b]++;
   cpt_inst[b]++;
   previous_op = b;
 
-  current_time = clock();
   if (previous_time > 0)
       time_inst[b] += ((double)(current_time - previous_time)) / CLOCKS_PER_SEC;
-  previous_time = current_time;
+  previous_time = clock();
 }
 #endif
 
