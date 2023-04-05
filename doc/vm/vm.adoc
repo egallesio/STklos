@@ -1616,15 +1616,18 @@ code will be enabled. You can enable it, for example, by configuring STklos as
 ./configure CFLAGS="-DSTAT_VM" ...
 ----
 
-When the code has been compiled as this, the VM will, at the end of each iteration,
-check the instruction that was just executed and update:
+When the code has been compiled as this, the VM will, at the end of
+each iteration, check the instruction that was just executed and
+update:
 
 * The number of times that this instruction was executed
-* The number of times that this instruction was executed after the previous one
-  (so it's possible to tell what pairs of instructions are more common)
+* The number of times that this instruction was executed after the
+  previous one (so it's possible to tell what pairs of instructions
+  are more common)
 * The time taken to execute this instruction
 
-This is done in the `tick()` C function (which is compiled conditionally on `STAT_VM`):
+This is done in the `tick()` C function (which is compiled
+conditionally on `STAT_VM`):
 
 [source,c]
 ----
@@ -1650,10 +1653,11 @@ Five Scheme primitives are then available:
   readable from Scheme. This S-expression is an alist, documented in
   the file itself (see below).
 * `(%vm-reset-stats)` will reset all counters.
-* `(%vm-collecting-stats?)` returns true when the system is collecting statistics
-  (that is, whenthe variable `collect_stats` is one), and false otherwise.
-* `(%vm-collect-stats-start)` and `(%vm-collect-stats-stop)` wil turn collecting on
-  and off, respectively.
+* `(%vm-collecting-stats?)` returns true when the system is collecting
+  statistics (that is, when the variable `collect_stats` is one -- see
+  `vm.c`), and false otherwise.
+* `(%vm-collect-stats-start)` and `(%vm-collect-stats-stop)` will turn
+  collecting on and off, respectively.
 
 Collecting statistics is off by default, especially because compiling STklos
 is very slow with statistics gathering. It should be turned on before profiling.
@@ -1682,11 +1686,12 @@ shown below.
 ;;   (INS2 countk timek avgtimek ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) )
 ----
 
-The C code for printing the instructions is in the functions `dump_couple_instr_csv` and
-`dump_couple_instr_scm`.
+The C code for printing the instructions is in the functions
+`dump_couple_instr_csv` and `dump_couple_instr_scm`.
 
-There is also one primitive that can be used to determine if the system has been compiled with the profiling code:
-`(%vm-has-stats)` will be either true or false.
+There is also one primitive that can be used to determine if the
+system has been compiled with the profiling code: `(%vm-has-stats)`
+will be either true or false.
 
 To profile some specific code there is the `%with-profile-data` macro:
 

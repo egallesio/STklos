@@ -41,7 +41,7 @@
    * cpt_inst[a] will count the number of occurrences of instrution a
      individually.
 
-   * time_inst will count the time spent on each instruction.
+   * time_inst[a] will count the time spent on instruction a.
 
    The function tick() will be called after each VM iteration in order
    to update the statistics (see the definitions for the NEXT macro
