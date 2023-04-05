@@ -51,15 +51,12 @@ static int couple_instr[NB_VM_INSTR][NB_VM_INSTR];
 static int cpt_inst[NB_VM_INSTR];
 static double time_inst[NB_VM_INSTR];
 static int collect_stats = 0;
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time);
 #endif
 
 #ifdef DEBUG_VM
 static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
-
-/* byteop will not be used only with USE_COMPUTED_GOTO *and*
-   without STAT_VM... We declare it anyway. */
-STk_instr byteop;
 
 /*  We compile conditionally: if __GNUC__ is defined and we're not
     debugging the VM, we use computed GOTOs, otherwise a standard
@@ -73,7 +70,10 @@ STk_instr byteop;
 #  define USE_COMPUTED_GOTO
 #  define CASE(x)       lab_##x:
 #  if defined(STAT_VM)
-#    define NEXT          { if (collect_stats) tick(byteop); byteop = fetch_next(); goto *jump_table[byteop]; }
+#    define NEXT          { if (collect_stats)                           \
+                              tick(byteop, &previous_op, &previous_time); \
+                            byteop = fetch_next();                       \
+                            goto *jump_table[byteop]; }
 #  else
 #    define NEXT          goto *jump_table[fetch_next()];
 #endif
@@ -1117,6 +1117,20 @@ MUT_DECL(global_code_lock);  /* Lock to permit code patching */
   }                                             \
 }while(0)
 
+/* The function tick() will collect statistics when STAT_VM is defined. */
+#if defined(STAT_VM)
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time) {
+  static clock_t current_time;
+  current_time = clock();
+  couple_instr[*previous_op][b]++;
+  cpt_inst[b]++;
+  *previous_op = b;
+
+  if (*previous_time > 0)
+      time_inst[b] += ((double)(current_time - *previous_time)) / CLOCKS_PER_SEC;
+  *previous_time = clock();
+}
+#endif
 
 static void run_vm(vm_thread_t *vm)
 {
@@ -1134,6 +1148,7 @@ static void run_vm(vm_thread_t *vm)
 #  include "vm-instr.h"
 #endif
 
+  volatile STk_instr byteop = NOP;
 
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
@@ -1142,28 +1157,23 @@ static void run_vm(vm_thread_t *vm)
 #endif
 
 #if defined(STAT_VM)
-static STk_instr previous_op = NOP;
-static time_t    previous_time = 0;
-static time_t    current_time  = 0;
-
-void tick(STk_instr b) {
-  current_time = clock();
-  couple_instr[previous_op][b]++;
-  cpt_inst[b]++;
-  previous_op = b;
-
-  if (previous_time > 0)
-      time_inst[b] += ((double)(current_time - previous_time)) / CLOCKS_PER_SEC;
-  previous_time = clock();
-}
+STk_instr previous_op = NOP;
+time_t    previous_time = 0;
 #endif
+
 
 #if defined(USE_COMPUTED_GOTO)
   NEXT;
 #else
   for ( ; ; ) {
   VM_LOOP_TOP:     /* Execution loop */
-    byteop = fetch_next();
+
+    /* Update the statistics after each loop: */
+#   if defined(STAT_VM)
+      if (collect_stats) tick(byteop, &previous_op, &previous_time);
+#   endif
+
+   byteop = fetch_next();
 
 #  ifdef DEBUG_VM
     if (debug_level > 1)
@@ -1232,7 +1242,8 @@ CASE(GLOBAL_REF) {
 }
 
 CASE(PUSH_UGLOBAL_REF)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGLOBAL_REF) {     /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
@@ -1303,7 +1314,8 @@ CASE(GREF_INVOKE) {
 }
 
 CASE(PUSH_UGREF_INVOKE)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGREF_INVOKE) { /* Never produced by compiler */
 
   /* Because of optimization, we may get re-dispatched to here. */
@@ -1347,7 +1359,8 @@ CASE(GREF_TAIL_INVOKE) {
 }
 
 CASE(PUSH_UGREF_TAIL_INV)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
@@ -1954,7 +1967,6 @@ FUNCALL:  /* (int nargs, int tailp) */
         nm       = STk_make_next_method(vm->val, nargs, argv, methods);
         vm->val  = INST_SLOT(CAR(methods), S_procedure);
         SET_NEXT_METHOD(vm->val, nm);
-        /* FALLTHROUGH */
       } else {
         SCM gf, args;
 
@@ -2151,12 +2163,6 @@ end_funcall:
 #ifndef USE_COMPUTED_GOTO
       default: { STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop); }
     } /* switch (byteop) */
-
-/* Update the statistics after each loop: */
-#  if defined(STAT_VM)
-    if (collect_stats) tick(byteop);
-#  endif
-
   } /* for ( ; ; ) */
 
 #endif
