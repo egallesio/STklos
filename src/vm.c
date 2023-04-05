@@ -50,12 +50,16 @@
 static int couple_instr[NB_VM_INSTR][NB_VM_INSTR];
 static int cpt_inst[NB_VM_INSTR];
 static double time_inst[NB_VM_INSTR];
+static int collect_stats = 0;
 #endif
 
 #ifdef DEBUG_VM
 static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
+/* byteop will not be used only with USE_COMPUTED_GOTO *and*
+   without STAT_VM... We declare it anyway. */
+STk_instr byteop;
 
 /*  We compile conditionally: if __GNUC__ is defined and we're not
     debugging the VM, we use computed GOTOs, otherwise a standard
@@ -69,7 +73,7 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #  define USE_COMPUTED_GOTO
 #  define CASE(x)       lab_##x:
 #  if defined(STAT_VM)
-#    define NEXT          { tick(byteop); byteop = fetch_next(); goto *jump_table[byteop]; }
+#    define NEXT          { if (collect_stats) tick(byteop); byteop = fetch_next(); goto *jump_table[byteop]; }
 #  else
 #    define NEXT          goto *jump_table[fetch_next()];
 #endif
@@ -966,6 +970,22 @@ static void dump_couple_instr_scm(const char *fname)
   fclose(dump);
 }
 
+DEFINE_PRIMITIVE("%vm-collecting-stats?", vm_collecting_stats, subr0, ()) {
+    return collect_stats
+        ? STk_true
+        : STk_false;
+}
+
+DEFINE_PRIMITIVE("%vm-collect-stats-start", vm_stats_start, subr0, ()) {
+    collect_stats = 1;
+    return STk_void;
+}
+
+DEFINE_PRIMITIVE("%vm-collect-stats-stop", vm_stats_stop, subr0, ()) {
+    collect_stats = 0;
+    return STk_void;
+}
+
 DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ()) {
     for (int i = NOP; i < NB_VM_INSTR; i++) {
         cpt_inst[i] = 0;
@@ -1114,7 +1134,6 @@ static void run_vm(vm_thread_t *vm)
 #  include "vm-instr.h"
 #endif
 
-  STk_instr byteop;
 
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
@@ -2135,7 +2154,7 @@ end_funcall:
 
 /* Update the statistics after each loop: */
 #  if defined(STAT_VM)
-    tick(byteop);
+    if (collect_stats) tick(byteop);
 #  endif
 
   } /* for ( ; ; ) */
@@ -2588,6 +2607,9 @@ int STk_late_init_vm()
 #ifdef STAT_VM
   ADD_PRIMITIVE(vm_dump_stat);
   ADD_PRIMITIVE(vm_reset_stat);
+  ADD_PRIMITIVE(vm_collecting_stats);
+  ADD_PRIMITIVE(vm_stats_start);
+  ADD_PRIMITIVE(vm_stats_stop);
 #endif
   ADD_PRIMITIVE(vm_has_stats);
   return TRUE;

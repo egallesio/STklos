@@ -1640,7 +1640,7 @@ void tick(STk_instr b) {
 }
 ----
 
-Two Scheme primitives are then available:
+Five Scheme primitives are then available:
 
 * `(%vm-dump-stats fname format)` will dump the statistics to a file
   whose name is `fname`. This is *NOT* a Scheme port, but a Scheme
@@ -1649,7 +1649,18 @@ Two Scheme primitives are then available:
   otherwise, there will be one single S-expression in the file,
   readable from Scheme. This S-expression is an alist, documented in
   the file itself (see below).
-* `%vm-reset-stats` will reset all counters.
+* `(%vm-reset-stats)` will reset all counters.
+* `(%vm-collecting-stats?)` returns true when the system is collecting statistics
+  (that is, whenthe variable `collect_stats` is one), and false otherwise.
+* `(%vm-collect-stats-start)` and `(%vm-collect-stats-stop)` wil turn collecting on
+  and off, respectively.
+
+Collecting statistics is off by default, especially because compiling STklos
+is very slow with statistics gathering. It should be turned on before profiling.
+
+The status of "collecting" or "not collecting" reflects what happens internaly in the
+statistics gathering code, *when it is compiled in*. If STklos was compiled without
+`STAT_VM`, then those procedures are just not available at all.
 
 The documentation for the Scheme format for the dumped instructions is
 shown below.
