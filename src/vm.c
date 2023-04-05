@@ -978,16 +978,24 @@ DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ()) {
 }
 
 DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format)) {
-  if (!STRINGP(fname))              STk_error("bad string ~S", fname);
-  if (format && (!SYMBOLP(format))) STk_error("bad symbol ~S", format);
+  if (!STRINGP(fname))               STk_error("bad string ~S", fname);
+  if (format && (!KEYWORDP(format))) STk_error("bad keyword ~S", format);
 
-  if (format && STk_eq(STk_intern("csv"), format))
+  if (format && STk_eq(STk_makekey("csv"), format))
     dump_couple_instr_csv(STRING_CHARS(fname));
   else
     dump_couple_instr_scm(STRING_CHARS(fname));
   return STk_void;
 }
 # endif
+
+DEFINE_PRIMITIVE("%vm-has-stats?", vm_has_stats, subr0, ()) {
+#if defined(STAT_VM)
+  return STk_true;
+#else
+  return STk_false;
+#endif
+}
 
 
 #ifdef STK_DEBUG
@@ -2581,5 +2589,6 @@ int STk_late_init_vm()
   ADD_PRIMITIVE(vm_dump_stat);
   ADD_PRIMITIVE(vm_reset_stat);
 #endif
+  ADD_PRIMITIVE(vm_has_stats);
   return TRUE;
 }

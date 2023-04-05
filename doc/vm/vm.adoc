@@ -1645,7 +1645,7 @@ Two Scheme primitives are then available:
 * `(%vm-dump-stats fname format)` will dump the statistics to a file
   whose name is `fname`. This is *NOT* a Scheme port, but a Scheme
   string. The file will be open using plain `fopen`. When the `format`
-  argument is the symbol `'csv`, then the output is in CSV format;
+  argument is the keyword `:csv`, then the output is in CSV format;
   otherwise, there will be one single S-expression in the file,
   readable from Scheme. This S-expression is an alist, documented in
   the file itself (see below).
@@ -1673,3 +1673,34 @@ shown below.
 
 The C code for printing the instructions is in the functions `dump_couple_instr_csv` and
 `dump_couple_instr_scm`.
+
+There is also one primitive that can be used to determine if the system has been compiled with the profiling code:
+`(%vm-has-stats)` will be either true or false.
+
+To profile some specific code there is the `%with-profile-data` macro:
+
+
+[source,scheme]
+----
+(%with-profile-data "file-name.csv" :csv
+  (display a)
+  (newline)
+  (values 1 2 3))
+----
+
+This will expand to
+
+[source,scheme]
+----
+(receive
+  result-4
+  (begin (%vm-reset-stats)
+         (display a)
+         (newline)
+         (values 1 2 3))
+         (begin (%vm-dump-stats "file-name.csv" #:csv)
+                (apply values result-4)))
+----
+
+So the macro will return the same values that the coude would, and will profile only
+that part of the code.
