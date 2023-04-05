@@ -1604,3 +1604,72 @@ Restoring is easier:
 
 And, when the C stack is restored, the VM is back to its original state, except
 for the global variables.
+
+== Collecting statistics
+
+The code in `vm.c` can optionally be compiled to collect statistics.
+If the symbol `STAT_VM` is defined during compilation, then the statistics-collecting
+code will be enabled. You can enable it, for example, by configuring STklos as
+
+[source]
+----
+./configure CFLAGS="-DSTAT_VM" ...
+----
+
+When the code has been compiled as this, the VM will, at the end of each iteration,
+check the instruction that was just executed and update:
+
+* The number of times that this instruction was executed
+* The number of times that this instruction was executed after the previous one
+  (so it's possible to tell what pairs of instructions are more common)
+* The time taken to execute this instruction
+
+This is done in the `tick()` C function (which is compiled conditionally on `STAT_VM`):
+
+[source,c]
+----
+void tick(STk_instr b) {
+  couple_instr[previous_op][b]++;
+  cpt_inst[b]++;
+  previous_op = b;
+
+  current_time = clock();
+  if (previous_time > 0)
+      time_inst[b] += ((double)(current_time - previous_time)) / CLOCKS_PER_SEC;
+  previous_time = current_time;
+}
+----
+
+Two Scheme primitives are then available:
+
+* `(%vm-dump-stats fname format)` will dump the statistics to a file
+  whose name is `fname`. This is *NOT* a Scheme port, but a Scheme
+  string. The file will be open using plain `fopen`. When the `format`
+  argument is the symbol `'csv`, then the output is in CSV format;
+  otherwise, there will be one single S-expression in the file,
+  readable from Scheme. This S-expression is an alist, documented in
+  the file itself (see below).
+* `%vm-reset-stats` will reset all counters.
+
+The documentation for the Scheme format for the dumped instructions is
+shown below.
+
+[source,scheme]
+----
+;; STklos VM statistics. It can be read in Scheme, and it represents one single
+;; object: an alist with the names of instructions, and each CDR is a list containing:
+;;
+;; * count (the number of times this instruction was executed)
+;; * time (the total time the program spent on this instruction)
+;; * avg time (the average number of time spent on each execution of this instruction)
+;; * an alist containing, for each OTHER instruction, the number of times they appeared\n"
+;;   together in the code.
+;;
+;; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn)))
+;;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn)))
+;;   ...
+;;   (INS2 countk timek avgtimek ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) )
+----
+
+The C code for printing the instructions is in the functions `dump_couple_instr_csv` and
+`dump_couple_instr_scm`.
