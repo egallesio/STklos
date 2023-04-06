@@ -38,7 +38,7 @@
 doc>
 |#
 (define (module-symbols* module)
-  (append (module-symbols (current-module))
+  (append (module-symbols module)
           (if (library? module)
               '()
               (module-symbols (find-module 'STklos)))))
@@ -222,10 +222,35 @@ doc>
  *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
  * @end lisp
  *
+ * @lisp
+ * (define-module M1
+ *   (export a b c d)
+ *   (define a 1)
+ *   (define b 2)
+ *   (define c 3)
+ *   (define d 4))
+ *
+ * (define-module M2
+ *   (import (prefix (rename (except M1 a)
+ *                           (b bb) (c cc))
+ *                   M1-))
+ *   (display (module-symbols (current-module))))
+ *                              @print{} (M1-bb M1-cc M1-d)
+ * @end lisp
+ *
+ * Here, |M1| module exports the symbols |a|, |b|, |c| and |d|. In the
+ * |M2| module, the |except| rule permits to import only |b|, |c| and
+ * |d|. With |rename|, identifiers |b| and |c| of |M1| are renamed |bb|
+ * and |cc|. Finally, with |prefix| alls identifier names are prefixed
+ * by |M1-|.
+ *
+ * NOTE: the |import| form in {{stklos}} modules is compatible with the
+ * |import| clause in {{rseven}} libraries.
  *
  * NOTE: The module |STklos|, which contains the _global variables_
  * is always implicitly imported from a module. Furthermore,
- * this module is always placed at the end of the list of imported modules.
+ * this module is always placed at the end of the list of imported
+ * modules.
 doc>
 |#
 (define (%parse-imports imports)

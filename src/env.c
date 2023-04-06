@@ -39,11 +39,6 @@ static void error_bad_module(SCM obj)
   STk_error("bad module ~S", obj);
 }
 
-static void error_not_exist(SCM obj)
-{
-  STk_error("module with name ~S does not exist", obj);
-}
-
 static void error_bad_list(SCM obj)
 {
   STk_error("bad list ~S", obj);
@@ -54,11 +49,10 @@ static void error_unbound_variable(SCM symbol, SCM modname)
   STk_error("variable ~S unbound in ~S", symbol, modname);
 }
 
-static void error_bad_symbol(SCM symbol)
+static void verify_symbol(SCM obj)
 {
-  STk_error("bad symbol ~S", symbol);
+  if (!SYMBOLP(obj)) STk_error("bad symbol ~S", obj);
 }
-
 
 /*===========================================================================*\
  *
@@ -161,6 +155,19 @@ static SCM find_module(SCM name, int create)
   /* module does not exists */
   return (create) ? make_module(name) : STk_void;
 }
+
+
+static Inline SCM ensure_module(SCM module) // -> a module given a module or a name
+{
+  if (MODULEP(module))
+    return module;
+  else {
+    SCM mod = find_module(module, FALSE);
+    if (mod == STk_void) error_bad_module_name(module);
+    return mod;
+  }
+}
+
 
 /*===========================================================================*\
  *
@@ -270,7 +277,7 @@ DEFINE_PRIMITIVE("%module-name-set!", module_name_set, subr2,
                  (SCM module, SCM name))
 {
   if (!MODULEP(module)) error_bad_module(module);
-  if (!SYMBOLP(name))   error_bad_symbol(name);
+  verify_symbol(name);
 
   MODULE_NAME(module) = name;
   MODULE_IS_INSTANCIATED(module) = TRUE;
@@ -368,7 +375,7 @@ DEFINE_PRIMITIVE("find-module", scheme_find_module, subr12, (SCM name, SCM def))
   SCM module = find_module(normalize_library_name(name), FALSE);
 
   if (module == STk_void) {
-    if (!def) error_not_exist(name);
+    if (!def) STk_error("module with name ~S does not exist", name);
     return def;
   }
   return module;
@@ -458,13 +465,13 @@ DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
 <doc EXT module-symbols
  * (module-symbols module)
  *
- * Returns the list of symbols already defined in |module|.
+ * Returns the list of symbols defined or imported in |module|. |Module|
+ * can be an object module or a module name.
 doc>
  */
 DEFINE_PRIMITIVE("module-symbols", module_symbols, subr1,  (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
-  return STk_hash_keys(&MODULE_HASH_TABLE(module));
+  return STk_hash_keys(&MODULE_HASH_TABLE(ensure_module(module)));
 }
 
 /*
@@ -554,7 +561,7 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
 {
   SCM tmp;
 
-  if (!SYMBOLP(symb)) error_bad_symbol(symb);
+  verify_symbol(symb);
   if (!module)
     module = STk_current_module();
   else
@@ -587,7 +594,7 @@ DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM m
 {
   SCM tmp;
 
-  if (!SYMBOLP(symb)) error_bad_symbol(symb);
+  verify_symbol(symb);
   if (!module)
     module = STk_current_module();
   else
@@ -617,14 +624,14 @@ static Inline SCM find_symbol_value(SCM symbol, SCM module)
  *
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
  * an error is signaled if no |default| is provided, otherwise |symbol-value|
- * returns |default|.
+ * returns |default|. |Module| can be an object module or a module name.
 doc>
  */
 DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
                  (SCM symbol, SCM module, SCM default_value))
 {
-  if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_symbol(symbol);
+  module = ensure_module(module);
 
   SCM res = find_symbol_value(symbol, module);
   if (!res) {
@@ -650,8 +657,8 @@ doc>
 DEFINE_PRIMITIVE("symbol-value*", symbol_value_all, subr23,
                  (SCM symbol, SCM module, SCM default_value))
 {
-  if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_symbol(symbol);
+  module = ensure_module(module);
 
   SCM res = find_symbol_value(symbol, module);
   if (!res) { /* Symbol not found */
@@ -752,7 +759,7 @@ void STk_define_variable(SCM symbol, SCM value, SCM module)
 DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr23,
                  (SCM symbol, SCM value, SCM module))
 {
-  if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
+  verify_symbol(symbol);
   if (module) {
     if (!MODULEP(module)) error_bad_module(module);
   }
@@ -768,8 +775,8 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 {
   SCM res, mod = STk_current_module();
 
-  if (!SYMBOLP(new)) error_bad_symbol(new);
-  if (!SYMBOLP(old)) error_bad_symbol(old);
+  verify_symbol(new);
+  verify_symbol(old);
   if (!module)
     module = mod;
   else
@@ -788,8 +795,8 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 {
   SCM res;
 
-  if (!SYMBOLP(new)) error_bad_symbol(new);
-  if (!SYMBOLP(old)) error_bad_symbol(old);
+  verify_symbol(new);
+  verify_symbol(old);
   if (!MODULEP(new_module)) error_bad_module(new_module);
   if (!MODULEP(old_module)) error_bad_module(old_module);
 

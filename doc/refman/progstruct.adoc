@@ -41,13 +41,12 @@ Consequently, {{stklos}} offers both systems: modules and libraries
 
 {{insertdoc 'symbol-value}}
 {{insertdoc 'symbol-value*}}
-
+{{insertdoc 'module-symbols}}
+{{insertdoc 'module-symbols*}}
 
 {{insertdoc 'export}}
 {{insertdoc 'import}}
 {{insertdoc 'module-imports}}
 {{insertdoc 'module-exports}}
-{{insertdoc 'module-symbols}}
-{{insertdoc 'module-symbols*}}
 {{insertdoc 'all-modules}}
 {{insertdoc 'in-module}}
