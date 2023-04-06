@@ -51,8 +51,7 @@
   (%%import (compiler-current-module) (list old))
   `(define-module ,new
      (import ,old)
-     (export ,@(map cdr
-                    (%module-exports (find-module old))))))
+     (export ,@(module-exports (find-module old)))))
 
 
 ;; ======================================================================

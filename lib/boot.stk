@@ -98,10 +98,8 @@
 ;;
 (let ((STklos (find-module 'STklos))
       (SCHEME (find-module 'SCHEME)))
-  (for-each (lambda(x)
-              (let ((v (cdr x)))
-                (%symbol-define v (symbol-value v SCHEME) STklos)))
-            (%module-exports SCHEME)))
+  (for-each (lambda(v) (%symbol-define v (symbol-value v SCHEME) STklos))
+            (module-exports SCHEME)))
 
 ;;
 ;; Define common standard libraries to minimize file accesses at runtime
