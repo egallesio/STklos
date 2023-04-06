@@ -41,7 +41,7 @@
 ;; ______________________________________________________________________
 (define-module stklos/preproc
   (import (stklos preproc env))
-  (export version verbosity parse-metadata process-file process-string
+  (export stklos-pp-version verbosity parse-metadata process-file process-string
           translate)
 
   (define *printing*      #t)
@@ -64,9 +64,8 @@
   (define (warning port fmt . args)
     (fprintf (current-error-port) "~a:~a: warning " (port-file-name port) (port-current-line port))
     (apply fprintf (current-error-port) fmt args))
-  
+
   ;; ----------------------------------------------------------------------
-  (define (version) (stklos-pp-version))
 
   (define verbosity (make-parameter 0 (lambda (x)
                                         (if (integer? x)

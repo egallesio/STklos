@@ -734,12 +734,12 @@ pre.rouge {
 <h1>STklos Reference Manual : (version 1.70)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_preface">Preface</a>
+<li><a href="#_preface_1_70">Preface 1.70</a>
 <ul class="sectlevel2">
 <li><a href="#_licences">Licences</a></li>
 </ul>
@@ -764,7 +764,11 @@ pre.rouge {
 <li><a href="#_macros">2.10. Macros</a></li>
 </ul>
 </li>
-<li><a href="#_program_structure">3. Program structure</a></li>
+<li><a href="#_program_structure">3. Program structure</a>
+<ul class="sectlevel2">
+<li><a href="#_modules">3.1. Modules</a></li>
+</ul>
+</li>
 <li><a href="#_standard_procedures">4. Standard Procedures</a>
 <ul class="sectlevel2">
 <li><a href="#_equivalence_predicates">4.1. Equivalence predicates</a></li>
@@ -896,20 +900,26 @@ pre.rouge {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_preface">Preface</h2>
+<h2 id="_preface_1_70">Preface 1.70</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This document provides a complete list of procedures and special forms
-implemented in version <strong>0.3</strong> of <strong><em>STklos</em></strong>. The language
-implemented by <strong><em>STklos</em></strong> is nearly compliant with the language
-described in the Revised<sup>5</sup> Report on the Algorithmic Language Scheme
-(aka R<sup>5</sup>RS) <a href="#R5RS">[R5RS]</a>.</p>
+implemented in version <strong>1.70</strong> of <strong><em>STklos</em></strong>. Originally, the
+language implemented by <strong><em>STklos</em></strong> was (nearly) compliant with the
+language described in the Revised<sup>5</sup> Report on the Algorithmic
+Language Scheme (aka R<sup>5</sup>RS) <a href="#R5RS">[R5RS]</a>. The fist public release of
+<strong><em>STklos</em></strong> was published in January 2001.</p>
 </div>
 <div class="paragraph">
-<p>However, since version 1.30, the goal is to make it more compliant
-with R<sup>7</sup>RS <a href="#R7RS">[R7RS]</a>. This document states the compliance of each
-construction relatively to these reports, or if it is a <strong><em>STklos</em></strong>
-extension.</p>
+<p>Since the first <strong><em>STklos</em></strong> release, Scheme evolved and is now defined
+in the R<sup>7</sup>RS report <a href="#R7RS">[R7RS]</a>. Consequently, the current version
+of <strong><em>STklos</em></strong> is compliant to this iteration of the language. Furthermore,
+<strong><em>STklos</em></strong> also offers most of the libraries defined in <em>R<sup>7</sup>RS large</em>,
+a set of <em>standard</em> libraries.</p>
+</div>
+<div class="paragraph">
+<p>This document states the compliance of each construction relatively to
+these reports, or if it is a <strong><em>STklos</em></strong> extension.</p>
 </div>
 <div class="sect2">
 <h3 id="_licences">Licences</h3>
@@ -1079,7 +1089,7 @@ if the first line of a script looks like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>#!/usr/local/bin/stklos -file</code></pre>
+<pre class="rouge highlight"><code>#!/usr/bin/env  stklos</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3094,22 +3104,28 @@ the macro-expansion, while the expanded form contains macro calls.</p>
 
 
 
-R<sup>5</sup>RS discusses how to structure programs. Everything which is
-defined in Section 5 of R<sup>5</sup>RS applies also to <strong><em>STklos</em></strong>. To make
-things shorter, this aspects will not be described here (see R<sup>5</sup>RS
-for complete information).</p>
+</p>
 </div>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> modules can be used to organize a program into separate
-environments (or <strong><em>name spaces</em></strong>). Modules provide a clean way to
-organize and enforce the barriers between the components of a program.</p>
+<p>Since its origin, <strong><em>STklos</em></strong> offers a module system which can be used
+to organize a program into separate environments (or <strong><em>name
+spaces</em></strong>). The module system is directly inherited from <strong><em>STk</em></strong>. This
+module system is largely inspired from the one of Tung and
+Dybvig exposed in Tung and Dybvig paper <a href="#TuD96">[TuD96]</a>. As this module
+system, <strong><em>STk</em></strong> and <strong><em>STklos</em></strong> modules are defined to be easily used
+in an interactive environment.</p>
 </div>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> provides a simple module system which is largely inspired from
-the one of Tung and Dybvig exposed in Tung and Dybvig paper <a href="#TuD96">[TuD96]</a>. As their
-modules system, <strong><em>STklos</em></strong> modules are defined to be easily used in an
-interactive environment.</p>
+<p><strong><em>STklos</em></strong> modules provide a clean way to organize and enforce the
+barriers between the components of a program. At this time, the
+current version of Scheme was R<sup>5</sup>RS which didn&#8217;t define a module
+system. However, since then, R<sup>7</sup>RS has defined the notion of
+libraries, which are similar, in the intent, to <strong><em>STklos</em></strong> modules.
+Consequently, <strong><em>STklos</em></strong> offers both systems: modules and libraries
+(the latter being implemented on top of the former).</p>
 </div>
+<div class="sect2">
+<h3 id="_modules">3.1. Modules</h3>
 <div class="paragraph">
 <p></p>
 </div>
@@ -3126,9 +3142,9 @@ interactive environment.</p>
 <div class="paragraph">
 <p><code>Define-module</code> evaluates the expressions <code>&lt;expr1&gt;</code>, <code>&lt;expr2&gt;</code> &#8230;&#8203; which
 constitute the body of the module <code>&lt;name&gt;</code> in the environment of that module.
-<code>Name</code> must be a valid symbol. If this symbol has not already been used to
-define a module, a new module, named <code>name</code>, is created.
-Otherwise, the expressions <code>&lt;expr1&gt;</code>, <code>&lt;expr2&gt;</code> &#8230;&#8203; are evaluated in
+<code>Name</code> must be a valid symbol or a list constitued of symbols or positive integers.
+If <code>name</code> has not already been used to define a module, a new module, named <code>name</code>,
+is created.  Otherwise, the expressions <code>&lt;expr1&gt;</code>, <code>&lt;expr2&gt;</code> &#8230;&#8203; are evaluated in
 the environment of the (old) module <code>&lt;name&gt;</code><sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
 </div>
 <div class="paragraph">
@@ -3142,47 +3158,43 @@ the definitions in other modules. Consider the following definitions,</p>
 
 <span class="p">(</span><span class="nf">define-module</span> <span class="nv">M2</span>
   <span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="mi">2</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="nv">x</span><span class="p">)))</span></code></pre>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="nv">x</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">define-module</span> <span class="p">(</span><span class="nf">M2</span> <span class="nv">m</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="mi">100</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="mi">200</span><span class="p">))</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Here, two modules are defined and they both bind the symbol <code>a</code> to a
-value. However, since <code>a</code> has been defined in two distinct modules
-they denote two different locations.</p>
+<p>Here, three modules are defined and they all bind the symbol <code>a</code> to a
+value. However, since <code>a</code> has been defined in distinct modules
+they denote three different locations.</p>
 </div>
 <div class="paragraph">
 <p>The <code>STklos</code> module, which is predefined, is a special module which
-contains all the <strong>global bindings</strong> of a R<sup>5</sup>RS program.  A symbol
+contains all the <strong>global bindings</strong> of a R<sup>7</sup>RS program.  A symbol
 defined in the <code>STklos</code> module, if not hidden by a local definition, is
 always visible from inside a module. So, in the previous exemple, the
-<code>x</code> symbol refers the <code>x</code> symbol defined in the <code>STklos</code> module.</p>
+<code>x</code> symbol refers the <code>x</code> symbol defined in the <code>STklos</code> module, which is
+of course different of the one defined in the module <code>(M2 m)</code>.</p>
 </div>
 <div class="paragraph">
 <p>The result of <code>define-module</code> is <strong><em>void</em></strong>.</p>
 </div>
-<div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><strong><code>(current-module)</code></strong><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the current module.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">M</span>
-  <span class="p">(</span><span class="nb">display</span>
-      <span class="p">(</span><span class="nb">cons</span> <span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nf">current-module</span><span class="p">)</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'M</span><span class="p">))</span>
-            <span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nf">current-module</span><span class="p">)</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'STklos</span><span class="p">)))))</span>  <span class="nv">|-</span> <span class="p">(</span><span class="no">#t</span> <span class="o">.</span> <span class="no">#f</span><span class="p">)</span></code></pre>
-</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Internally, modules name are always represented by a symbol. If the module
+name is given as a list, the internal name is built by appending all the components
+of the list, separated by a <code>'/'</code> symbol. So the third module can be referenced with the
+name <code>(M2 m)</code> of <code>M2/m</code>.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -3200,7 +3212,7 @@ always visible from inside a module. So, in the previous exemple, the
 </div>
 <div class="paragraph">
 <p>STklos modules are first class objects and <code>find-module</code> returns the
-module associated to <code>name</code> if it exists. If there is no module
+module object associated to <code>name</code>, if it exists. If there is no module
 associated to <code>name</code>, an error is signaled if no <code>default</code> is
 provided, otherwise <code>find-module</code> returns <code>default</code>.</p>
 </div>
@@ -3231,128 +3243,52 @@ provided, otherwise <code>find-module</code> returns <code>default</code>.</p>
 <p></p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> syntax</span></p>
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(export &lt;symbol1&gt; &lt;symbol2&gt; &#8230;&#8203;)</code></strong><br></p>
+<p><strong><code>(module-name module)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Specifies the symbols which are exported (i.e. <strong>visible</strong> outside
-the current module). By default, symbols defined in a module are not
-visible outside this module, excepted if they appear in an <code>export</code>
-clause.</p>
+<p>Returns the internal name (a symbol) associated to a <code>module</code>. As said before,
+module name is always represented as a symbol, even if expressed as a list.</p>
 </div>
-<div class="paragraph">
-<p>If several <code>export</code> clauses appear in a module, the set of
-exported symbols is determined by "<em>unionizing</em>" symbols exported
-in all the <code>export</code> clauses.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="p">(</span><span class="nf">M</span> <span class="nv">a</span><span class="p">)</span> <span class="p">)</span>   <span class="c1">; or M/a</span>
+<span class="p">(</span><span class="nf">define-module</span> <span class="p">(</span><span class="nf">M</span> <span class="nv">b</span><span class="p">)</span> <span class="p">)</span>   <span class="c1">; or M/b</span>
+<span class="p">(</span><span class="nf">define-module</span> <span class="nv">M/c</span>   <span class="p">)</span>   <span class="c1">; or (M c)</span>
+
+<span class="p">(</span><span class="nb">map</span> <span class="p">(</span><span class="k">lambda</span><span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">module-name</span> <span class="p">(</span><span class="nf">find-module</span> <span class="nv">x</span><span class="p">)))</span> <span class="o">'</span><span class="p">(</span> <span class="p">(</span><span class="nf">M</span> <span class="nv">a</span><span class="p">)</span> <span class="nv">M/b</span> <span class="p">(</span><span class="nf">M</span> <span class="nv">c</span><span class="p">)</span> <span class="p">))</span>
+                       <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">M/a</span> <span class="nv">M/b</span> <span class="nv">M/c</span><span class="p">)</span></code></pre>
 </div>
-<div class="paragraph">
-<p>The result of <code>export</code> is <strong><em>void</em></strong>.</p>
 </div>
 <div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> syntax</span></p>
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(import &lt;module1&gt; &lt;module2&gt; &#8230;&#8203;)</code></strong><br></p>
+<p><strong><code>(current-module)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Specifies the modules which are imported by the current module.
-Importing a module makes the symbols it exports visible to the
-importer, if not hidden by local definitions. When a symbol
-is exported by several of the imported modules, the location denoted by
-this symbol in the importer module correspond to the one of the last module
-in the list</p>
+<p>Returns the current module.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">&lt;module1&gt;</span> <span class="nv">&lt;module2&gt;</span> <span class="o">...</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">M</span>
+  <span class="p">(</span><span class="nb">display</span>
+      <span class="p">(</span><span class="nb">cons</span> <span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nf">current-module</span><span class="p">)</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'M</span><span class="p">))</span>
+            <span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nf">current-module</span><span class="p">)</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'STklos</span><span class="p">)))))</span>  <span class="nv">|-</span> <span class="p">(</span><span class="no">#t</span> <span class="o">.</span> <span class="no">#f</span><span class="p">)</span></code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>which exports it.</p>
-</div>
-<div class="paragraph">
-<p>If several <code>import</code> clauses appear in a module, the set of
-imported modules  is determined by appending the various list of modules
-in their apparition order.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">M1</span>
-  <span class="p">(</span><span class="nf">export</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="ss">'M1-a</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="ss">'M1-b</span><span class="p">))</span>
-
-<span class="p">(</span><span class="nf">define-module</span> <span class="nv">M2</span>
-  <span class="p">(</span><span class="nf">export</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="ss">'M2-b</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">define</span> <span class="nv">c</span> <span class="ss">'M2-c</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">define</span> <span class="nv">d</span> <span class="ss">'M2-d</span><span class="p">))</span>
-
-<span class="p">(</span><span class="nf">define-module</span> <span class="nv">M3</span>
-  <span class="p">(</span><span class="nf">import</span> <span class="nv">M1</span> <span class="nv">M2</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)))</span>  <span class="nv">|-</span> <span class="p">(</span><span class="nf">M1-a</span> <span class="nv">M2-b</span> <span class="nv">M2-c</span> <span class="nv">M2-d</span><span class="p">)</span>
-
-<span class="p">(</span><span class="nf">define-module</span> <span class="nv">M4</span>
-  <span class="p">(</span><span class="nf">import</span> <span class="nv">M2</span> <span class="nv">M1</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)))</span>  <span class="nv">|-</span> <span class="p">(</span><span class="nf">M1-a</span> <span class="nv">M1-b</span> <span class="nv">M2-c</span> <span class="nv">M2-d</span><span class="p">)</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It is also possible to import partially (i.e. not all
-exported symbols) from a module, as shown below:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">M5</span>
-  <span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">M2</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)</span> <span class="nv">M1</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)))</span>  <span class="nv">|-</span> <span class="p">(</span><span class="nf">M1-a</span> <span class="nv">M1-b</span> <span class="nv">M2-c</span> <span class="nv">M2-d</span><span class="p">)</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In this case, only the symbols <code>c</code> and <code>d</code> are imported from
-module <code>M2</code>.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Importations are not "<em>transitive</em>": when
-the module -C_ imports the module <em>B</em> which is an importer
-of module <em>A</em> the symbols of <em>A</em> are not visible
-from <em>C</em>, except  by explicitly importing the <em>A</em> module from <em>C</em>.
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The module <code>STklos</code>, which contains the <em>global variables</em>
-is always implicitly imported from a module. Furthermore,
-this module is always placed at the end of the list of imported modules.
-</td>
-</tr>
-</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -3372,8 +3308,10 @@ this module is always placed at the end of the list of imported modules.
 The expressions evaluated after <code>select-module</code> will take place in
 module <code>name</code> environment.  Module <code>name</code> must have been created
 previously by a <code>define-module</code>. The result of <code>select-module</code> is
-<strong><em>void</em></strong>.
-<code>Select-module</code> is particularly useful when debugging since it
+<strong><em>void</em></strong>.</p>
+</div>
+<div class="paragraph">
+<p><code>Select-module</code> is particularly useful when debugging since it
 allows to place toplevel evaluation in a particular module. The
 following transcript shows an usage of <code>select-module</code>.
 <sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>):</p>
@@ -3381,8 +3319,7 @@ following transcript shows an usage of <code>select-module</code>.
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">foo</span> <span class="mi">1</span><span class="p">)</span>
-<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">define-module</span> <span class="nv">bar</span>
-          <span class="p">(</span><span class="k">define</span> <span class="nv">foo</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">define-module</span> <span class="nv">bar</span> <span class="p">(</span><span class="k">define</span> <span class="nv">foo</span> <span class="mi">2</span><span class="p">))</span>
 <span class="nv">stklos&gt;</span> <span class="nv">foo</span>
 <span class="mi">1</span>
 <span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">select-module</span> <span class="nv">bar</span><span class="p">)</span>
@@ -3438,17 +3375,166 @@ returns <code>default</code>.</p>
 <p></p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+<p><span class="rmargin small"><em>STklos</em> syntax</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(module-name module)</code></strong><br></p>
+<p><strong><code>(export &lt;export spec1&gt; &lt;export spec2&gt; &#8230;&#8203;)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns the name (a symbol) associated to a <code>module</code>.</p>
+<p>Specifies the symbols which are exported (i.e. <strong>visible</strong> outside
+the current module). By default, symbols defined in a module are not
+visible outside this module, excepted if they appear in an <code>export</code>
+clause.</p>
+</div>
+<div class="paragraph">
+<p>An <code>&lt;export spec&gt;</code> takes one of the following forms:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>&lt;identifier&gt;</code></p>
+</li>
+<li>
+<p><code>(rename &lt;identifier1&gt; &lt;identifier2&gt;)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the first form, <code>&lt;identifier&gt;</code> names a single binding defined within or
+imported into the module, where the external name for the export is the same
+as the name of the binding  within the module.</p>
+</div>
+<div class="paragraph">
+<p>In the second form,  the binding defined within or imported into the module and
+named by <code>&lt;identifier1&gt;</code> in each <code>(&lt;identifier1&gt; &lt;identifier2&gt;)</code> pairing,
+using <code>&lt;identifier2&gt;</code> as the external name.</p>
+</div>
+<div class="paragraph">
+<p>The result of <code>export</code> is <strong><em>void</em></strong>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+the <code>export</code> form in <strong><em>STklos</em></strong> modules is compatible with the <code>export</code>
+clause in R<sup>7</sup>RS libraries.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(import &lt;import set1&gt; &lt;import set2&gt; &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>An import declaration provides a way to import identifiers
+exported by a module.  Each <code>&lt;import set&gt;</code> names a set of bindings
+from a module and possibly specifies local names for the
+imported bindings. It takes one of the following forms:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>&lt;module name&gt;</code></p>
+</li>
+<li>
+<p><code>(only &lt;import set&gt; &lt;identifier&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(except &lt;import set&gt; &lt;identifier&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(prefix &lt;import set&gt; &lt;identifier&gt;)</code></p>
+</li>
+<li>
+<p><code>(rename &lt;import set&gt; (&lt;identifier1&gt; &lt;identifier2&gt;) &#8230;&#8203;)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In the first form, all of the identifiers in the named
+module&#8217;s export clauses are imported with the same names
+(or the exported names if exported with <code>rename</code>).</p>
+</div>
+<div class="paragraph">
+<p>The additional <code>import set</code> forms modify this set as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>only</code> produces a subset of the given &lt;import set&gt;} including
+only the listed identifiers (after any renaming).  It is an
+error if any of the listed identifiers are not found in the
+original set.</p>
+</li>
+<li>
+<p><code>except</code> produces a subset of the given <code>&lt;import set&gt;</code>, excluding
+the listed identifiers (after any renaming). It is an error if
+any of the listed identifiers are not found in the original set.</p>
+</li>
+<li>
+<p><code>rename</code> modifies the given <code>&lt;import set&gt;</code>, replacing each
+instance of <code>&lt;identifier1&gt;</code> with <code>&lt;identifier2&gt;</code>. It is an
+error if any of the listed <code>&lt;identifiers&gt;</code> are not found in
+the original set.</p>
+</li>
+<li>
+<p><code>prefix</code> automatically renames all identifiers in the given
+<code>&lt;import set&gt;</code>, prefixing each with the specified <code>&lt;identifier&gt;</code>.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">M1</span>
+  <span class="p">(</span><span class="nf">export</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="ss">'M1-a</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="ss">'M1-b</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-module</span> <span class="nv">M2</span>
+  <span class="p">(</span><span class="nf">export</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="ss">'M2-b</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">c</span> <span class="ss">'M2-c</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">define</span> <span class="nv">d</span> <span class="ss">'M2-d</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-module</span> <span class="nv">M3</span>
+  <span class="p">(</span><span class="nf">import</span> <span class="nv">M1</span> <span class="nv">M2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)))</span>  <span class="nv">|-</span> <span class="p">(</span><span class="nf">M1-a</span> <span class="nv">M2-b</span> <span class="nv">M2-c</span> <span class="nv">M2-d</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">define-module</span> <span class="nv">M4</span>
+  <span class="p">(</span><span class="nf">import</span> <span class="nv">M2</span> <span class="nv">M1</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)))</span>  <span class="nv">|-</span> <span class="p">(</span><span class="nf">M1-a</span> <span class="nv">M1-b</span> <span class="nv">M2-c</span> <span class="nv">M2-d</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The module <code>STklos</code>, which contains the <em>global variables</em>
+is always implicitly imported from a module. Furthermore,
+this module is always placed at the end of the list of imported modules.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -3568,6 +3654,7 @@ is searched in <code>mod</code> and all the modules it imports.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">symbol-value*</span> <span class="ss">'foo</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'my-module</span><span class="p">))</span></code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -13823,7 +13910,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-0</span><span class="o">.</span><span class="mi">3</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mi">70</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -29806,7 +29893,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-03-22 14:57:31 +0100
+Last updated 2023-04-06 12:34:25 +0200
 </div>
 </div>
 </body>
