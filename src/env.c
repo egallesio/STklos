@@ -317,6 +317,15 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("%module-exports", module_exports, subr1, (SCM module))
+{
+  verify_module(module);
+
+  /* STklos module is special: everything is exported ==> module-symbols */
+  return (module == STk_STklos_module) ?
+                make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
+                MODULE_EXPORTS(module);
+}
 
 /*
 <doc EXT module?
@@ -441,25 +450,6 @@ DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))
   return MODULE_IMPORTS(module);
 }
 
-
-/*
-<doc EXT module-exports
- * (module-exports module)
- *
- * Returns the list of symbols exported by |module|. Note that this function
- * returns the list of symbols given in the module |export| clause and that
- * some of these symbols can be not yet defined.
-doc>
- */
-DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
-{
-  verify_module(module);
-
-  /* STklos module is special: everything is exported ==> module-symbols */
-  return (module == STk_STklos_module) ?
-                make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
-                MODULE_EXPORTS(module);
-}
 
 /*
 <doc EXT module-symbols

@@ -52,7 +52,7 @@
   `(define-module ,new
      (import ,old)
      (export ,@(map cdr
-                    (module-exports (find-module old))))))
+                    (%module-exports (find-module old))))))
 
 
 ;; ======================================================================

@@ -45,6 +45,31 @@ doc>
 
 ;;=============================================================================
 ;;
+;;                              MODULE-EXPORTS
+;;
+;;=============================================================================
+#|
+<doc EXT module-exports
+ * (module-exports module)
+ *
+ * Returns the list of symbols exported by |module|. Note that this function
+ * returns the list of symbols given in the module |export| clause and that
+ * some of these symbols can be not yet defined.
+ *
+ * @lisp
+ * (define-module M
+ *   (export a b (rename c M-c))
+ *   (display (module-exports (current-module))))
+ *                          @print{} (a b M-c)
+ * @end lisp
+doc>
+|#
+(define (module-exports mod)
+  (let ((module (if (module? mod) mod (find-module mod))))
+    (map cdr (%module-exports module))))
+
+;;=============================================================================
+;;
 ;;                              SELECT-MODULE
 ;;
 ;;=============================================================================
@@ -393,7 +418,7 @@ doc>
     (let* ((mod       (eventually-load-library name))
            (imported  (build-import-list mod
                                          keylist
-                                         (list-copy (module-exports mod)))))
+                                         (list-copy (%module-exports mod)))))
       ;; Make aliases for all symbols in imported list
       (if only-syntax
           (for-each (lambda (pair)
@@ -534,7 +559,7 @@ doc>
             lst)
           (cons (cons name rename) lst))))
 
-  (let Loop ((l symbols) (res (module-exports lib)))
+  (let Loop ((l symbols) (res (%module-exports lib)))
     (cond
      ((null? l) (%module-exports-set! lib res))
      (else
