@@ -34,11 +34,6 @@ static void error_bad_module_name(SCM obj)
   STk_error("bad module name ~S", obj);
 }
 
-static void error_bad_module(SCM obj)
-{
-  STk_error("bad module ~S", obj);
-}
-
 static void error_bad_list(SCM obj)
 {
   STk_error("bad list ~S", obj);
@@ -52,6 +47,11 @@ static void error_unbound_variable(SCM symbol, SCM modname)
 static void verify_symbol(SCM obj)
 {
   if (!SYMBOLP(obj)) STk_error("bad symbol ~S", obj);
+}
+
+static void verify_module(SCM obj)
+{
+  if (!MODULEP(obj)) STk_error("bad module ~S", obj);
 }
 
 /*===========================================================================*\
@@ -217,7 +217,7 @@ static SCM normalize_library_name(SCM obj) /* return a library name as a symbol 
 
 void STk_export_all_symbols(SCM module)
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   if (module != STk_STklos_module)
     MODULE_EXPORTS(module) = make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module)));
 }
@@ -266,7 +266,7 @@ DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 {
   vm_thread_t *vm = STk_get_current_vm();
 
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   MODULE_IS_INSTANCIATED(module) = TRUE;
   vm->current_module= module;
   return STk_void;
@@ -276,7 +276,7 @@ DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 DEFINE_PRIMITIVE("%module-name-set!", module_name_set, subr2,
                  (SCM module, SCM name))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   verify_symbol(name);
 
   MODULE_NAME(module) = name;
@@ -290,7 +290,7 @@ DEFINE_PRIMITIVE("%module-name-set!", module_name_set, subr2,
 DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
                  (SCM importer,SCM imported))
 {
-  if (!MODULEP(importer)) error_bad_module(importer);
+  verify_module(importer);
 
   if (CONSP(imported)) {
     /* STklos modules implicitely import STklos, but R7RS library don't */
@@ -310,7 +310,7 @@ DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
 DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
                  (SCM exporter,SCM exported))
 {
-  if (!MODULEP(exporter)) error_bad_module(exporter);
+  verify_module(exporter);
   if (!NULLP(exported) && !CONSP(exported)) error_bad_list(exported);
 
   MODULE_EXPORTS(exporter) = exported;
@@ -423,7 +423,7 @@ doc>
  */
 DEFINE_PRIMITIVE("module-name", module_name, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   return MODULE_NAME(module);
 }
 
@@ -437,7 +437,7 @@ doc>
  */
 DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   return MODULE_IMPORTS(module);
 }
 
@@ -453,7 +453,7 @@ doc>
  */
 DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
 
   /* STklos module is special: everything is exported ==> module-symbols */
   return (module == STk_STklos_module) ?
@@ -501,7 +501,7 @@ doc>
  */
 DEFINE_PRIMITIVE("module-immutable!", module_immutable, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
 
   if (BOXED_INFO(module) & MODULE_CONST) return STk_void;  /* already immutable */
 
@@ -532,7 +532,7 @@ doc>
 */
 DEFINE_PRIMITIVE("module-mutable?", module_immutablep, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   return MAKE_BOOLEAN(!(BOXED_INFO(module) & MODULE_CONST));
 }
 
@@ -565,7 +565,7 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
   if (!module)
     module = STk_current_module();
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
   if (!tmp)
@@ -598,7 +598,7 @@ DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM m
   if (!module)
     module = STk_current_module();
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
 
@@ -689,7 +689,7 @@ DEFINE_PRIMITIVE("symbol-bound?", symbol_boundp, subr12, (SCM symbol, SCM module
   if (!module)
     module = STk_current_module();
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   SCM res = find_symbol_value(symbol, module);
   if (!res) { /* Symbol not found */
@@ -760,11 +760,10 @@ DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr23,
                  (SCM symbol, SCM value, SCM module))
 {
   verify_symbol(symbol);
-  if (module) {
-    if (!MODULEP(module)) error_bad_module(module);
-  }
-  else
+  if (!module)
     module = STk_current_module();
+  else
+    verify_module(module);
 
   STk_define_variable(symbol, value, module);
   return value;
@@ -780,7 +779,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
   if (!module)
     module = mod;
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
   if (!res)
@@ -797,8 +796,8 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 
   verify_symbol(new);
   verify_symbol(old);
-  if (!MODULEP(new_module)) error_bad_module(new_module);
-  if (!MODULEP(old_module)) error_bad_module(old_module);
+  verify_module(new_module);
+  verify_module(old_module);
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old);
   if (!res)
