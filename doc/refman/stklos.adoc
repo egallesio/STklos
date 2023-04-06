@@ -7,7 +7,7 @@
 
 = STklos Reference Manual : (version {{version}})
 :authors: Erick Gallesio
-:email: eg@unice.fr
+:email: eg@stklos.net
 :logo: images/dice.png
 :doctype: book
 :source-highlighter: rouge
@@ -28,15 +28,20 @@
 == Preface
 
 This document provides a complete list of procedures and special forms
-implemented in version *{{version}}* of {{stklos}}. The language
-implemented by {{stklos}} is nearly compliant with the language
-described in the Revised^5^ Report on the Algorithmic Language Scheme
-(aka {{rfive}}) <<R5RS>>.
+implemented in version *{{version}}* of {{stklos}}. Originally, the
+language implemented by {{stklos}} was (nearly) compliant with the
+language described in the Revised^5^ Report on the Algorithmic
+Language Scheme (aka {{rfive}}) <<R5RS>>. The fist public release of
+{{stklos}} was published in January 2001.
 
-However, since version 1.30, the goal is to make it more compliant
-with {{rseven}} <<R7RS>>. This document states the compliance of each
-construction relatively to these reports, or if it is a {{stklos}}
-extension.
+Since the first {{stklos}} release, Scheme evolved and is now defined
+in the {{rseven}} report <<R7RS>>. Consequently, the current version
+of {{stklos}} is compliant to this iteration of the language. Furthermore,
+{{stklos}} also offers most of the libraries defined in {{rseven}}-large,
+a set of _standard_ libraries. 
+
+This document states the compliance of each construction relatively to
+these reports, or if it is a {{stklos}} extension.
 
 === Licences
 

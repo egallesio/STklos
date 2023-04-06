@@ -358,7 +358,7 @@ DEFINE_PRIMITIVE("library?", libraryp, subr1, (SCM obj))
  * (find-module name default)
  *
  * STklos modules are first class objects and |find-module| returns the
- * module associated to |name| if it exists. If there is no module
+ * module object associated to |name|, if it exists. If there is no module
  * associated to |name|, an error is signaled if no |default| is
  * provided, otherwise |find-module| returns |default|.
 doc>
@@ -402,7 +402,16 @@ DEFINE_PRIMITIVE("current-module", current_module, subr0, (void))
 <doc EXT module-name
  * (module-name module)
  *
- * Returns the name (a symbol) associated to a |module|.
+ * Returns the internal name (a symbol) associated to a |module|. As said before,
+ * module name is always represented as a symbol, even if expressed as a list.
+ * @lisp
+ * (define-module (M a) )   ; or M/a
+ * (define-module (M b) )   ; or M/b
+ * (define-module M/c   )   ; or (M c)
+ *
+ * (map (lambda(x) (module-name (find-module x))) '( (M a) M/b (M c) ))
+ *                        => (M/a M/b M/c)
+ * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("module-name", module_name, subr1, (SCM module))
