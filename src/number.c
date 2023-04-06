@@ -2627,7 +2627,11 @@ static SCM my_log(SCM z)
                       return double2real(log((double) INT_VAL(z)));
     case tc_bignum:   return double2real(log(scheme_bignum2double(z)));
     case tc_rational: return double2real(log(rational2double(z)));
-    case tc_real:     return double2real(log(REAL_VAL(z)));
+        
+    case tc_real:     if ( (REAL_VAL(z) == 0.0) && signbit(REAL_VAL(z)) )
+                          return make_complex(double2real(minus_inf), double2real(MY_PI));
+                      else
+                          return double2real(log(REAL_VAL(z)));
     case tc_complex:  return make_complex(my_log(STk_magnitude(z)),
                                           STk_angle(z));
     default:          error_bad_number(z);
