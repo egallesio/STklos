@@ -3181,7 +3181,10 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
 {
   mpz_t res;
 
-  if (zerop(y)) return MAKE_INT(1);
+  if (zerop(y))
+      return (isexactp(x) && isexactp(y))
+          ? MAKE_INT(1)
+          : double2real(1.0);
   if (zerop(x) || (x == MAKE_INT(1))) return x;
 
   if (TYPEOF(y) == tc_bignum)
@@ -3223,7 +3226,15 @@ static SCM my_expt(SCM x, SCM y)
     case tc_real:     if (zerop(y)) return double2real(1.0);
                       if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
                       /* FALLTHROUGH */
-    case tc_complex:  return my_exp(mul2(my_log(x),y));
+    case tc_complex:  if (zerop(x)) {
+                          /* R7RS: The value of 0^z is 1 if (zero? z), 0 if
+                             (real-part z) is positive, and an error otherwise.
+                             Similarly for 0.0^z, with inexact results.*/
+                        if (positivep(COMPLEX_REAL(y))) {
+                          return isexactp(x) ? MAKE_INT(0) : double2real(0.0);
+                        } else STk_error("power of zero to a complex exponent with negative real part ~S", y);
+                      } else return my_exp(mul2(my_log(x),y));
+                      /* FALLTHROUGH */
     default:          error_cannot_operate("expt", x, y);
   }
   return STk_void; /* never reached */
@@ -3232,8 +3243,9 @@ static SCM my_expt(SCM x, SCM y)
 
 DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
 {
-  if (negativep(y)) return div2(MAKE_INT(1),
-                                my_expt(x, sub2(MAKE_INT(0), y)));
+  if (!COMPLEXP(y) && negativep(y))
+    return div2(MAKE_INT(1),
+                my_expt(x, sub2(MAKE_INT(0), y)));
   return my_expt(x, y);
 }
 
