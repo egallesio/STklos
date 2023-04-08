@@ -504,7 +504,7 @@ static SCM double2integer(double n)     /* small or big depending on n's size */
 static SCM double2rational(double d)
 {
   double fraction, i;
-  SCM int_part, num, den, res;
+  SCM int_part, res;
   int negative = 0;
 
   if (d < 0.0) { negative = 1; d = -d; }
@@ -512,8 +512,12 @@ static SCM double2rational(double d)
   int_part = double2integer(i);
 
   if (!fraction) {
-    res = int_part;
+    res = negative ? sub2(MAKE_INT(0), int_part) : int_part;
   } else {
+
+#ifdef __MINI_GMP_H__
+    /* BEGIN code for compiling WITH MINI GMP (*no* rationals!) */
+    SCM num, den;
     num = MAKE_INT(0);
     den = MAKE_INT(1);
 
@@ -524,10 +528,33 @@ static SCM double2rational(double d)
       if (i)
         num = add2(num, MAKE_INT(1));
     }
+    if (negative) num = sub2(MAKE_INT(0), num);
     res = add2(int_part, div2(num, den));
-  }
+#else
+    /* BEGIN code for compiling WITH FULL GMP (*with* rationals!) */
 
-  return negative? mul2(res, MAKE_INT((unsigned long) -1)): res;
+    /* We just create a rational from a double using the GMP, then
+       get back the numerator and denominator. According to the
+       GMP documentation, this conversion is exact -- there is no
+       rounding. */
+    mpz_t num, den;
+    mpq_t q;
+    mpz_init(num);
+    mpz_init(den);
+    mpq_init(q);
+    mpq_set_d(q, d);
+
+    mpq_get_num(num, q);
+    mpq_get_den(den, q);
+    if (negative) mpz_neg(num,num);
+    res = Cmake_rational(bignum2number(num), bignum2number(den));
+    mpq_clear(q);
+    mpz_clear(num);
+    mpz_clear(den);
+#endif /* __MINI_GMP_H__ */
+
+  }
+  return res;
 }
 
 
