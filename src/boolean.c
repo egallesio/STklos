@@ -277,7 +277,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
  * (eq? :foo :bar)                 =>  #f
  * (eq? '() '())                   =>  #t
  * (eq? 2 2)                       =>  unspecified
- * (eq? #A #A)                     =>  #t (unspecified in r5rs)
+ * (eq? #\A #\A)                   =>  #t (unspecified in r5rs)
  * (eq? car car)                   =>  #t
  * (let ((n (+ 2 3)))
  *   (eq? n n))                    =>  #t (unspecified in r5rs)
