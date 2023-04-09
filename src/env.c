@@ -344,12 +344,12 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
  * also modules.
  * @lisp
  * (define-module a)
- * (define-library b)
+ * (define-library (b))
  *
- * (module? (find-module 'a))   => #t
- * (module? (find-module 'b))   => #t
- * (library? (find-module 'a))  => #f
- * (library? (find-module 'b))  => #t
+ * (module? (find-module 'a))     => #t
+ * (module? (find-module '(b)))   => #t
+ * (library? (find-module 'a))    => #f
+ * (library? (find-module '(b)))  => #t
  * @end lisp
 doc>
 */
@@ -459,7 +459,8 @@ DEFINE_PRIMITIVE("module-symbols", module_symbols, subr1,  (SCM module))
 <doc EXT all-modules
  * (all-modules)
  *
- * Returns the list of all the living modules.
+ * Returns the list of all the living modules (or libraries). Use
+ * |module-list| to obtain a list of modules without libraries. 
 doc>
  */
 DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))

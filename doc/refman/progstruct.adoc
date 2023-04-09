@@ -50,5 +50,18 @@ Consequently, {{stklos}} offers both systems: modules and libraries
 {{insertdoc 'module-exports}}
 {{insertdoc 'module-immutable!}}
 {{insertdoc 'module-mutable?}}
-{{insertdoc 'all-modules}}
 {{insertdoc 'in-module}}
+{{insertdoc 'all-modules}}
+{{insertdoc 'module-list}}
+
+=== Libraries
+
+The library concept is defined in {{rseven}} ans is supported in {{stklos}}.
+As said before, libraries are implemented with modules. Briefly
+stated, the library |(lib a b)| will be implemented with a module whose name
+is |lib/a/b| and the |STklos| module has been deleted from the import list.
+
+{{insertdoc 'define-library}}
+{{insertdoc 'library?}}
+{{insertdoc 'library-name}}
+{{insertdoc 'library-list}}

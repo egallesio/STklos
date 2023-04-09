@@ -767,6 +767,7 @@ pre.rouge {
 <li><a href="#_program_structure">3. Program structure</a>
 <ul class="sectlevel2">
 <li><a href="#_modules">3.1. Modules</a></li>
+<li><a href="#_libraries">3.2. Libraries</a></li>
 </ul>
 </li>
 <li><a href="#_standard_procedures">4. Standard Procedures</a>
@@ -872,7 +873,7 @@ pre.rouge {
 </ul>
 </li>
 <li><a href="#_bibliography">Bibliography</a></li>
-<li><a href="#_libraries">Appendix A: STklos Idiosyncrasies</a>
+<li><a href="#_idiosync">Appendix A: STklos Idiosyncrasies</a>
 <ul class="sectlevel2">
 <li><a href="#_stklos_libraries">A.1. STklos libraries</a></li>
 <li><a href="#_stklos_compiler_flags">A.2. STklos compiler flags</a></li>
@@ -3610,6 +3611,22 @@ modules.
 </table>
 </div>
 <div class="paragraph">
+<p>Note that importing a module will try to load a file if the module
+is not already defined. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">M</span>
+   <span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">foo</span> <span class="nv">bar</span> <span class="nv">baz</span><span class="p">))</span>
+    <span class="o">...</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will load the file <code>srfi/1</code> and <code>foo/bar/baz</code> modules (or libraries) if
+they are not yet defined (habitual rules on the load paths and the load
+suffixes applies to find  those files).</p>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -3623,7 +3640,8 @@ modules.
 </div>
 </div>
 <div class="paragraph">
-<p>Returns the list of modules that <code>module</code> (fully) imports.</p>
+<p>Returns the list of modules that <code>module</code> imports (that is, the ones
+it depends on).</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -3660,12 +3678,38 @@ some of these symbols can be not yet defined.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(all-modules)</code></strong><br></p>
+<p><strong><code>(module-immutable! mod)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns the list of all the living modules.</p>
+<p>Makes the module <code>mod</code> immutable, so that it will be impossible
+to define new symbols in it or change the value of already defined ones.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(module-mutable? mod)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>mod</code> is an immutable module and <code>#f</code>  otherwise.  Note that the
+<code>SCHEME</code> module, which contains the original bindings of the STklos at boot
+time, is immutable. The parameter <code>mod</code> can be a module object or a module name.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">module-mutable?</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'STklos</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">module-mutable?</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'SCHEME</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">module-mutable?</span> <span class="ss">'SCHEME</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p></p>
@@ -3701,6 +3745,179 @@ is searched in <code>mod</code> and all the modules it imports.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">symbol-value*</span> <span class="ss">'foo</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'my-module</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(all-modules)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the list of all the living modules (or libraries). Use
+<code>module-list</code> to obtain a list of modules without libraries.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(module-list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Returns the list of all the living modules.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_libraries">3.2. Libraries</h3>
+<div class="paragraph">
+<p>The library concept is defined in R<sup>7</sup>RS ans is supported in <strong><em>STklos</em></strong>.
+As said before, libraries are implemented with modules. Briefly
+stated, the library |(lib a b)| will be implemented with a module whose name
+is |lib/a/b| and the |STklos| module has been deleted from the import list.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(define-library &lt;library name&gt; &lt;library declaration&gt; &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The form <code>define-library</code> is defined in R<sup>7</sup>RS. The <code>&lt;library name&gt;</code> can be
+a symbol or a list (as modules).</p>
+</div>
+<div class="paragraph">
+<p>A <code>&lt;library declaration&gt;</code> is any of</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(export &lt;export spec&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(import &lt;import set&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(begin &lt;command or definition&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(include &lt;filename1&gt; &lt;filename2&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(include-ci &lt;filename1&gt; &lt;filename2&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(include-library-declarations &lt;filename1&gt; &lt;filename2&gt; &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(cond-expand &lt;clause1&gt; &lt;clause2&gt; &#8230;&#8203;)</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See R<sup>7</sup>RS for more information (or the sepcific entries in this document)
+about each <code>&lt;library declaration&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(library? object)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>object</code> is a module defined as a R<sup>7</sup>RS library and <code>#f</code> otherwise.
+Note that R<sup>7</sup>RS libraries, since they are implemented using <strong><em>STklos</em></strong> modules, are
+also modules.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">a</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">define-library</span> <span class="p">(</span><span class="nf">b</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">module?</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'a</span><span class="p">))</span>     <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">module?</span> <span class="p">(</span><span class="nf">find-module</span> <span class="o">'</span><span class="p">(</span><span class="nf">b</span><span class="p">)))</span>   <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">library?</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'a</span><span class="p">))</span>    <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">library?</span> <span class="p">(</span><span class="nf">find-module</span> <span class="o">'</span><span class="p">(</span><span class="nf">b</span><span class="p">)))</span>  <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(library-name lib)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the name of <code>lib</code> if it was defined as an R<sup>7</sup>RS library,
+and <code>#f</code> if the library is anonymous. If <code>lib</code> is not a library,
+<code>library-name</code> raises an error. If a name is returned, it is
+as a list.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-library</span> <span class="p">(</span><span class="nf">example</span> <span class="nv">cool-library</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">library-name</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'example/cool-library</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">example</span> <span class="nv">cool-library</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">library-name</span> <span class="p">(</span><span class="nf">find-module</span> <span class="o">'</span><span class="p">(</span><span class="nf">example</span> <span class="nv">cool-library</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">example</span> <span class="nv">cool-library</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">module-name</span>  <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'example/cool-library</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="nv">example/cool-library</span>
+<span class="p">(</span><span class="nf">module-name</span>  <span class="p">(</span><span class="nf">find-module</span> <span class="o">'</span><span class="p">(</span><span class="nf">example</span> <span class="nv">cool-library</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="nv">example/cool-library</span>
+
+<span class="p">(</span><span class="nf">define-module</span> <span class="nv">example/a-module</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">library-name</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'example/a-module</span><span class="p">))</span>     <span class="nv">=&gt;</span> <span class="nv">error</span>
+
+<span class="p">(</span><span class="nf">library-name</span> <span class="nv">quotient</span><span class="p">)</span>                            <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(library-list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Returns the list of all the living libraries.</pre>
 </div>
 </div>
 </div>
@@ -27777,7 +27994,7 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_libraries">Appendix A: STklos Idiosyncrasies</h2>
+<h2 id="_idiosync">Appendix A: STklos Idiosyncrasies</h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_stklos_libraries">A.1. STklos libraries</h3>
@@ -29940,7 +30157,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-04-06 18:29:52 +0200
+Last updated 2023-04-09 21:43:04 +0200
 </div>
 </div>
 </body>

@@ -278,6 +278,17 @@ doc>
  * is always implicitly imported from a module. Furthermore,
  * this module is always placed at the end of the list of imported
  * modules.
+ *
+ * Note that importing a module will try to load a file if the module
+ * is not already defined. For instance,
+ * @lisp
+ * (define-module M
+ *    (import (srfi 1) (foo bar baz))
+ *     ...)
+ * @end lisp
+ * will load the file |srfi/1| and |foo/bar/baz| modules (or libraries) if
+ * they are not yet defined (habitual rules on the load paths and the load
+ * suffixes applies to find  those files).
 doc>
 |#
 (define (%parse-imports imports)
@@ -624,3 +635,19 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
+
+
+;;=============================================================================
+;;
+;;                              MODULE-LIST
+;;
+;;=============================================================================
+#|
+<doc EXT module-list
+ * (module-list)
+ *
+ *  Returns the list of all the living modules.
+doc>
+|#
+(define (module-list)
+  (filter module? (all-modules)))
