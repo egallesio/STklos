@@ -1016,14 +1016,14 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
   if (p3) *p3 = '\0';
 
   if (p1) {             /* compute integer part */
-    if (mpz_init_set_str(tmp, s, 10L) < 0) return STk_false;
+    if (mpz_init_set_str(tmp, s, 10L) < 0) { mpz_clear(tmp); return STk_false; }
     int_part = bignum2number(tmp);
   }
 
   if (p3 > p2) {        /* compute decimal part as a rational 0.12 => 6/5 */
     SCM num, den;
 
-    if (mpz_init_set_str(tmp, p2, 10L) < 0) return STk_false;
+    if (mpz_init_set_str(tmp, p2, 10L) < 0) { mpz_clear(tmp); return STk_false; }
     num = bignum2number(tmp);
 
     mpz_ui_pow_ui(tmp, 10UL, strlen(p2));
@@ -1045,6 +1045,7 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
     }
   }
 
+  mpz_clear(tmp);
   /* now return (int_part + fract_part) * exp_part */
   return mul2(add2(int_part, fract_part), exp_part);
 }
@@ -2394,7 +2395,9 @@ static SCM gcd2(SCM n1, SCM n2)
      * at most r is equal to n1 or n2, which has been accepted by
      * predicate integer? when entering this function
      */
-    return (exactp) ? bignum2number(r): double2real(bignum2double(r));
+    SCM res = (exactp) ? bignum2number(r): double2real(bignum2double(r));
+    mpz_clear(r);
+    return res;
   }
 }
 
@@ -3225,7 +3228,9 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
     case tc_integer:
       mpz_init_set_si(res, INT_VAL(x));
       mpz_pow_ui(res, res, INT_VAL(y));
-      return bignum2number(res);
+      SCM scm_res = bignum2number(res);
+      mpz_clear(res);
+      return scm_res;
     case tc_bignum:
       mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
       return bignum2number(res);
