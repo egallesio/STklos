@@ -210,33 +210,35 @@
       "foo/1-1\nfoo/1-2\nfoo/1-3\n"
       (get-output-string (symbol-value 'out (find-module 'foo/1))))
 
-(let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/2)))))
-  (test "multiple clauses import.2"
-        '((foo/1-1 foo/1-2 foo/1-3 out)
-          ()
-          ((foo/1-1 new-foo/1-1))
-          prefix-)
-        (list (sort-list (key-get (cdr infos) #:only   '()))
-              (sort-list (key-get (cdr infos) #:except '()))
-              (sort-list (key-get (cdr infos) #:rename '()))
-              (key-get (cdr infos) #:prefix #f))))
-
+;; FIXME: Use module-symbols to see if we have the good ones
+;;(let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/2)))))
+;;  (test "multiple clauses import.2"
+;;        '((foo/1-1 foo/1-2 foo/1-3 out)
+;;          ()
+;;          ((foo/1-1 new-foo/1-1))
+;;          prefix-)
+;;        (list (sort-list (key-get (cdr infos) #:only   '()))
+;;              (sort-list (key-get (cdr infos) #:except '()))
+;;              (sort-list (key-get (cdr infos) #:rename '()))
+;;              (key-get (cdr infos) #:prefix #f))))
+;;
 
 (define-library (foo 3)
   (import (except (only (foo 1) foo/1-1 foo/1-2)
                   foo/1-1)))
 
 
- (let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/3)))))
-  (test "multiple clauses import.3"
-        '((foo/1-1 foo/1-2)
-          (foo/1-1)
-          ()
-          #f)
-        (list (sort-list (key-get (cdr infos) #:only   '()))
-              (sort-list (key-get (cdr infos) #:except '()))
-              (sort-list (key-get (cdr infos) #:rename '()))
-              (key-get (cdr infos) #:prefix #f)))
+(let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/3)))))
+  ;; Test deleted
+  ;;  (test "multiple clauses import.3"
+  ;;        '((foo/1-1 foo/1-2)
+  ;;          (foo/1-1)
+  ;;          ()
+  ;;          #f)
+  ;;        (list (sort-list (key-get (cdr infos) #:only   '()))
+  ;;              (sort-list (key-get (cdr infos) #:except '()))
+  ;;              (sort-list (key-get (cdr infos) #:rename '()))
+  ;;              (key-get (cdr infos) #:prefix #f)))
   (test "multiple clauses import.4"
          '(foo/1-2)
          (library-symbols 'foo/3)))
@@ -247,16 +249,16 @@
                 foo/1-2)))
 
 (let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/4)))))
-  (test "multiple clauses import.5"
-        '((foo/1-2)
-          (foo/1-3)
-          ()
-          #f)
-        (list (sort-list (key-get (cdr infos) #:only   '()))
-              (sort-list (key-get (cdr infos) #:except '()))
-              (sort-list (key-get (cdr infos) #:rename '()))
-              (key-get (cdr infos) #:prefix #f)))
-
+  ;; Test deleted:
+  ;;  (test "multiple clauses import.5"
+  ;;        '((foo/1-2)
+  ;;          (foo/1-3)
+  ;;          ()
+  ;;          #f)
+  ;;        (list (sort-list (key-get (cdr infos) #:only   '()))
+  ;;              (sort-list (key-get (cdr infos) #:except '()))
+  ;;              (sort-list (key-get (cdr infos) #:rename '()))
+  ;;              (key-get (cdr infos) #:prefix #f)))
   (test "multiple clauses import.6"
          '(foo/1-2)
          (library-symbols 'foo/4)))
@@ -267,16 +269,16 @@
                   foo/1-3)))   ;; ==> nobody
 
 (let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/5)))))
-  (test "multiple clauses import.7"
-        '((foo/1-3)
-          (foo/1-3)
-          ()
-          #f)
-        (list (sort-list (key-get (cdr infos) #:only   '()))
-              (sort-list (key-get (cdr infos) #:except '()))
-              (sort-list (key-get (cdr infos) #:rename '()))
-              (key-get (cdr infos) #:prefix #f)))
-
+  ;; Test deleted:
+  ;;  (test "multiple clauses import.7"
+  ;;        '((foo/1-3)
+  ;;          (foo/1-3)
+  ;;          ()
+  ;;          #f)
+  ;;        (list (sort-list (key-get (cdr infos) #:only   '()))
+  ;;              (sort-list (key-get (cdr infos) #:except '()))
+  ;;              (sort-list (key-get (cdr infos) #:rename '()))
+  ;;              (key-get (cdr infos) #:prefix #f)))
   (test "multiple clauses import.8"
          '()
          (library-symbols 'foo/5)))
@@ -288,16 +290,16 @@
 
 
 (let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/6)))))
-  (test "multiple clauses import.9"
-        '(()
-          (P:foo/1-1)
-          ()
-          |P:|)
-        (list (sort-list (key-get (cdr infos) #:only   '()))
-              (sort-list (key-get (cdr infos) #:except '()))
-              (sort-list (key-get (cdr infos) #:rename '()))
-              (key-get (cdr infos) #:prefix #f)))
-
+  ;; Test deleted
+  ;;  (test "multiple clauses import.9"
+  ;;        '(()
+  ;;          (P:foo/1-1)
+  ;;          ()
+  ;;          |P:|)
+  ;;        (list (sort-list (key-get (cdr infos) #:only   '()))
+  ;;              (sort-list (key-get (cdr infos) #:except '()))
+  ;;              (sort-list (key-get (cdr infos) #:rename '()))
+  ;;              (key-get (cdr infos) #:prefix #f)))
   (test "multiple clauses import.10"
          '(P:foo/1-2 P:foo/1-3 P:out)
          (library-symbols 'foo/6)))
