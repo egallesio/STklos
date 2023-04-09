@@ -68,6 +68,9 @@ doc>
   (let ((module (if (module? mod) mod (find-module mod))))
     (map cdr (%module-exports module))))
 
+
+
+
 ;;=============================================================================
 ;;
 ;;                              SELECT-MODULE
@@ -432,6 +435,16 @@ doc>
                       (register-new-global! (cdr pair)))
                     imported))))
 
+  (define (add-imports lst imports)
+    ;; add all the modules of lst in the import list (if not yet present)
+    (let Loop ((lst (reverse lst)) ; to keep original order
+               (names (map module-name imports)))
+      (cond
+       ((null? lst)             (map find-module names))
+       ((memq (caar lst) names) (Loop (cdr lst) names))
+       (else                    (Loop (cdr lst)
+                                      (cons (list (caar lst)) names))))))
+
   ;; Call import-symbols for each import spec
   (for-each (lambda (imp)
               (let ((name     (car imp))
@@ -440,8 +453,7 @@ doc>
             clauses)
 
   ;; Retain the import list (for module-imports)
-  (%module-imports-set! lib (append (module-imports lib)
-                                    clauses)))
+  (%module-imports-set! lib (add-imports clauses (module-imports lib))))
 
 ;;;;
 ;;;; IMPORT

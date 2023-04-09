@@ -34,11 +34,6 @@ static void error_bad_module_name(SCM obj)
   STk_error("bad module name ~S", obj);
 }
 
-static void error_bad_list(SCM obj)
-{
-  STk_error("bad list ~S", obj);
-}
-
 static void error_unbound_variable(SCM symbol, SCM modname)
 {
   STk_error("variable ~S unbound in ~S", symbol, modname);
@@ -52,6 +47,11 @@ static void verify_symbol(SCM obj)
 static void verify_module(SCM obj)
 {
   if (!MODULEP(obj)) STk_error("bad module ~S", obj);
+}
+
+static void verify_list(SCM obj)
+{
+  if (!NULLP(obj) && !CONSP(obj)) STk_error("bad list ~S", obj);
 }
 
 /*===========================================================================*\
@@ -157,18 +157,6 @@ static SCM find_module(SCM name, int create)
 }
 
 
-static Inline SCM ensure_module(SCM module) // -> a module given a module or a name
-{
-  if (MODULEP(module))
-    return module;
-  else {
-    SCM mod = find_module(module, FALSE);
-    if (mod == STk_void) error_bad_module_name(module);
-    return mod;
-  }
-}
-
-
 /*===========================================================================*\
  *
  * Module primitives
@@ -215,6 +203,21 @@ static SCM normalize_library_name(SCM obj) /* return a library name as a symbol 
   return STk_void;            /* for the compiler */
 }
 
+
+static Inline SCM ensure_module(SCM module) // -> a module given a module or a name
+{
+  if (MODULEP(module))
+    return module;
+  else {
+    SCM mod = find_module(normalize_library_name(module), FALSE);
+    if (mod == STk_void) error_bad_module_name(module);
+    return mod;
+  }
+}
+
+
+
+
 void STk_export_all_symbols(SCM module)
 {
   verify_module(module);
@@ -243,7 +246,7 @@ DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
 
 DEFINE_PRIMITIVE("%find-instanciated-module", find_inst_module, subr1, (SCM name))
 {
-  SCM z = find_module(normalize_library_name((name)), FALSE);
+  SCM z = find_module(normalize_library_name(name), FALSE);             // FIXME: normalize???
 
   return  ((z != STk_void) && MODULE_IS_INSTANCIATED(z))? z: STk_false;
 }
@@ -251,7 +254,7 @@ DEFINE_PRIMITIVE("%find-instanciated-module", find_inst_module, subr1, (SCM name
 
 DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
 {
-  SCM z = find_module(normalize_library_name(name), FALSE);
+  SCM z = find_module(normalize_library_name(name), FALSE);            // FIXME: normalize?
 
   if (z == STk_void) error_bad_module_name(name);
 
@@ -291,19 +294,8 @@ DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
                  (SCM importer,SCM imported))
 {
   verify_module(importer);
-
-  if (CONSP(imported)) {
-    /* STklos modules implicitely import STklos, but R7RS library don't */
-    if (MODULE_IS_LIBRARY(importer)) {
-      MODULE_IMPORTS(importer) = imported;
-    }
-    else
-      MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
-  }
-  else if (NULLP(imported))
-    MODULE_IMPORTS(importer) = STk_nil;
-  else error_bad_list(imported);
-
+  verify_list(imported);
+  MODULE_IMPORTS(importer) = imported;
   return STk_void;
 }
 
@@ -311,8 +303,7 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
                  (SCM exporter,SCM exported))
 {
   verify_module(exporter);
-  if (!NULLP(exported) && !CONSP(exported)) error_bad_list(exported);
-
+  verify_list(exported);
   MODULE_EXPORTS(exporter) = exported;
   return STk_void;
 }
@@ -446,8 +437,7 @@ doc>
  */
 DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))
 {
-  verify_module(module);
-  return MODULE_IMPORTS(module);
+  return MODULE_IMPORTS(ensure_module(module));
 }
 
 
