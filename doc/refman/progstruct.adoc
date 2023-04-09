@@ -30,7 +30,7 @@ libraries, which are similar, in the intent, to {{stklos}} modules.
 Consequently, {{stklos}} offers both systems: modules and libraries
 (the latter being implemented on top of the former).
 
-=== Modules 
+=== Modules
 
 {{insertdoc 'define-module}}
 {{insertdoc 'find-module}}
@@ -48,5 +48,7 @@ Consequently, {{stklos}} offers both systems: modules and libraries
 {{insertdoc 'import}}
 {{insertdoc 'module-imports}}
 {{insertdoc 'module-exports}}
+{{insertdoc 'module-immutable!}}
+{{insertdoc 'module-mutable?}}
 {{insertdoc 'all-modules}}
 {{insertdoc 'in-module}}

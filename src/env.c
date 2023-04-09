@@ -432,7 +432,8 @@ DEFINE_PRIMITIVE("module-name", module_name, subr1, (SCM module))
 <doc EXT module-imports
  * (module-imports module)
  *
- * Returns the list of modules that |module| (fully) imports.
+ * Returns the list of modules that |module| imports (that is, the ones
+ * it depends on).
 doc>
  */
 DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))
@@ -472,16 +473,15 @@ DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
 
 /*
 <doc EXT module-immutable!
- * (module-immutable! module)
+ * (module-immutable! mod)
  *
- * Makes the module |module| immutable, so that it will be impossible
+ * Makes the module |mod| immutable, so that it will be impossible
  * to define new symbols in it or change the value of already defined ones.
- *
 doc>
  */
 DEFINE_PRIMITIVE("module-immutable!", module_immutable, subr1, (SCM module))
 {
-  verify_module(module);
+  module = ensure_module(module);
 
   if (BOXED_INFO(module) & MODULE_CONST) return STk_void;  /* already immutable */
 
@@ -502,18 +502,18 @@ DEFINE_PRIMITIVE("module-immutable!", module_immutable, subr1, (SCM module))
  *
  * Returns |#t| if |mod| is an immutable module and |#f|  otherwise.  Note that the
  * |SCHEME| module, which contains the original bindings of the STklos at boot
- * time, is immutable.
+ * time, is immutable. The parameter |mod| can be a module object or a module name.
  *
  * @lisp
  * (module-mutable? (find-module 'STklos)) => #t
  * (module-mutable? (find-module 'SCHEME)) => #f
+ * (module-mutable? 'SCHEME)               => #f
  * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("module-mutable?", module_immutablep, subr1, (SCM module))
 {
-  verify_module(module);
-  return MAKE_BOOLEAN(!(BOXED_INFO(module) & MODULE_CONST));
+  return MAKE_BOOLEAN(!(BOXED_INFO(ensure_module(module)) & MODULE_CONST));
 }
 
 
