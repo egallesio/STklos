@@ -1757,7 +1757,7 @@ both forms.
                   ;; that an import clause can retrieve it at compile time
                   ;; when we produce a .ostk file. This is not necessary for
                   ;; import of source file, but mandatory for file compilation.
-                  (let ((exports (module-exports module)))
+                  (let ((exports (%module-exports module)))
                     (unless (member names exports)
                       (%module-exports-set! module (cons names exports))))))
               (key-get infos :macros '()))))

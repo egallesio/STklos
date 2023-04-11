@@ -41,7 +41,7 @@
   ;; the current file processed by current compile-file
   (apply append
          (map (lambda (mod)
-                (let Loop ((lst (module-exports mod))
+                (let Loop ((lst (%module-exports mod))
                            (res '()))
                   (if (null? lst)
                       res

@@ -28,36 +28,9 @@
 
 (export define-library library-name
         ;; FIXME
-        %library-name->symbol
         %symbol->library-name
         %module-define-and-export
         %make-copy-module)
-
-;;
-;; library name conversion functions
-;;
-(define (%library-name->string libname)
-  (define (->string libname)
-    (let* ((str (format #f "~A" libname))
-           (res (substring str 1 (- (string-length str) 1))))
-      (regexp-replace-all " " res "/")))
-
-  (cond
-   ((symbol? libname)                                   ;; STklos
-    (symbol->string libname))
-   ((and (pair? libname)
-         (list? libname)
-         (every (lambda (x)
-                  (or (symbol? x) (and (integer? x)
-                                       (positive? x))))
-                libname)
-         (->string libname)))
-   (else
-    (error "bad library name ~S" libname))))
-
-
-(define (%library-name->symbol libname)
-  (string->symbol (%library-name->string libname)))
 
 (define (%symbol->library-name name)
   (map string->symbol (string-split (symbol->string name) "/")))
@@ -78,8 +51,7 @@
   (%%import (compiler-current-module) (list old))
   `(define-module ,new
      (import ,old)
-     (export ,@(map cdr
-                    (module-exports (find-module (%library-name->symbol old)))))))
+     (export ,@(module-exports (find-module old)))))
 
 
 ;; ======================================================================
@@ -87,8 +59,29 @@
 ;; DEFINE-LIBRARY
 ;;
 ;; ======================================================================
+#|
+<doc R7RS-SYNTAX define-library
+ * (define-library <library name> <library declaration> ...)
+ *
+ * The form |define-library| is defined in R7RS. The |<library name>| can be
+ * a symbol or a list (as modules).
+ *
+ * A |<library declaration>| is any of
+ *
+ * * |(export <export spec> ...)|
+ * * |(import <import set> ...)|
+ * * |(begin <command or definition> ...)|
+ * * |(include <filename1> <filename2> ...)|
+ * * |(include-ci <filename1> <filename2> ...)|
+ * * |(include-library-declarations <filename1> <filename2> ...)|
+ * * |(cond-expand <clause1> <clause2> ...)|
+ *
+ * See {{rseven}} for more information (or the sepcific entries in this document)
+ * about each |<library declaration>|.
+doc>
+|#
 (define-macro (define-library name . decls)
-  (let* ((module-name    (%library-name->symbol name))
+  (let* ((module-name    (%normalize-library-name name))
          (conds          '())
          (imports        '())
          (exports        '())
@@ -172,13 +165,16 @@
  * (library-name lib)
  *
  * Returns the name of |lib| if it was defined as an R7RS library,
- * and #f if the library is anonymous. If |lib| is not a library,
- * |library-name| raises an error.
+ * and `#f` if the library is anonymous. If |lib| is not a library,
+ * |library-name| raises an error. If a name is returned, it is
+ * as a list.
  *
  * @lisp
  * (define-library (example cool-library))
- * (library-name (find-module 'example/cool-library)) => (example cool-library)
- * (module-name  (find-module 'example/cool-library)) => example/cool-library
+ * (library-name (find-module 'example/cool-library))   => (example cool-library)
+ * (library-name (find-module '(example cool-library))) => (example cool-library)
+ * (module-name  (find-module 'example/cool-library))   => example/cool-library
+ * (module-name  (find-module '(example cool-library))) => example/cool-library
  *
  * (define-module example/a-module)
  * (library-name (find-module 'example/a-module))     => error
@@ -195,3 +191,14 @@ doc>
   (let ((name (module-name lib)))
     (and (not (eq? name #void))
          (%symbol->library-name (module-name lib)))))
+
+
+#|
+<doc EXT library-list
+ * (library-list)
+ *
+ *  Returns the list of all the living libraries.
+doc>
+|#
+(define (library-list)
+  (filter library? (all-modules)))
