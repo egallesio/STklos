@@ -3327,8 +3327,9 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
 
       /* Put back the sign, if needed (that is, if sign (of x) < 0 and the exponent is odd): */
       if (sign<0 && ((INT_VAL(y)) & 1UL)) mpz_neg(res,res);
-
-      return bignum2number(res);
+      SCM scm_res = bignum2number(res);
+      mpz_clear(res);
+      return scm_res;
     case tc_bignum:
       mpz_init(res);
       mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
