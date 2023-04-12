@@ -14174,7 +14174,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mi">70</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1108</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -14356,9 +14356,14 @@ As with <code>script-file</code>, this is an absolute pathname.</p>
 </div>
 <div class="paragraph">
 <p>Returns a string identifying the current version of the system. A
-version is constituted of two numbers separated by a point: the version
-and the release numbers. Note that <code>implementation-version</code> corresponds
-to the <strong><a href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a></strong> (<em>Environment Inquiry</em>) name of this function.</p>
+version is constituted of two (or three) numbers separated by a point:
+the version, the release numbers and, eventually, a patch number. The
+patch number is used for development version only; it is absent for stable
+releases.</p>
+</div>
+<div class="paragraph">
+<p>Note that <code>implementation-version</code> corresponds to the <strong><a href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a></strong> (<em>Environment Inquiry</em>) name of
+this function.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -30157,7 +30162,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-04-12 10:35:16 +0200
+Last updated 2023-04-12 14:11:52 +0200
 </div>
 </div>
 </body>

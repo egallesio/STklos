@@ -85,6 +85,7 @@ SRC_STK   = 1.stk   \
             96.stk  \
             100.stk \
             111.stk \
+            112.stk \
             113.stk \
             116.stk \
             117.stk \
@@ -193,6 +194,7 @@ SRC_OSTK =  1.ostk   \
             96.ostk  \
             100.ostk \
             111.ostk \
+            112.ostk \
             116.ostk \
             117.ostk \
             118.ostk \
