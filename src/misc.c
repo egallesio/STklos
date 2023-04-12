@@ -112,11 +112,6 @@ DEFINE_PRIMITIVE("version", version, subr0, (void))
   return STk_Cstring2string(FULL_VERSION);
 }
 
-DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
-{
-  return STk_Cstring2string("abcdef");
-}
-
 DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
 {
   char buffer[2000];
@@ -641,7 +636,6 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 int STk_init_misc(void)
 {
   ADD_PRIMITIVE(version);
-  ADD_PRIMITIVE(push_id);
   ADD_PRIMITIVE(stklos_configure);
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);
