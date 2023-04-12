@@ -102,14 +102,23 @@ SCM STk_read_from_C_string(const char *str)
  * (implementation-version)
  *
  * Returns a string identifying the current version of the system. A
- * version is constituted of two numbers separated by a point: the version
- * and the release numbers. Note that |implementation-version| corresponds
- * to the {{link-srfi 112}} name of this function.
+ * version is constituted of two (or three) numbers separated by a point:
+ * the version, the release numbers and, eventually, a patch number. The
+ * patch number is used for developments version only; it is absent for stable
+ * releases.
+ *
+ * Note that |implementation-version| corresponds to the {{link-srfi 112}} name of
+ * this function.
 doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))
 {
   return STk_Cstring2string(FULL_VERSION);
+}
+
+DEFINE_PRIMITIVE("%short-version", short_version, subr0, (void))
+{
+  return STk_Cstring2string(VERSION);  // version without patch number
 }
 
 DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
@@ -636,6 +645,7 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 int STk_init_misc(void)
 {
   ADD_PRIMITIVE(version);
+  ADD_PRIMITIVE(short_version);
   ADD_PRIMITIVE(stklos_configure);
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);
