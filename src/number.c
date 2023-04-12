@@ -25,13 +25,6 @@
  */
 
 
-/* workaround for bad optimisations done in glibc2.1. Thanks to  Andreas Jaeger
- * <aj@suse.de> for it
- */
-#ifndef __NO_MATH_INLINES
-#  define __NO_MATH_INLINES
-#endif
-
 #include <math.h>
 #include <ctype.h>
 #include <locale.h>
