@@ -570,14 +570,17 @@ FULL_VERSION=$VERSION
 if test $VERSION_STATUS = "unstable"
 then
   # This code duplicates some code from "utils/generate-git-info"
-  # but it makes things simpler 
+  # but it makes things simpler
   git_version=`git --version 2>/dev/null || true`
 
   if test "$git_version" != ""
   then
     # Git is installed
     git_patch="`git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/'`"
-    FULL_VERSION="$VERSION.$git_patch"
+    if test "X$git_patch" != "X"
+    then
+      FULL_VERSION="$VERSION.$git_patch"
+    fi
   else
     FULL_VERSION=$VERSION-unstable
   fi
