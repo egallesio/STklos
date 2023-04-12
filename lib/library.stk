@@ -26,7 +26,7 @@
 ;;;;
 
 
-(export define-library library-name
+(export define-library library-name library-list
         ;; FIXME
         %symbol->library-name
         %module-define-and-export
