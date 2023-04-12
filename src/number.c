@@ -518,9 +518,16 @@ static Inline double bignum2double(mpz_t n)
     mpz_sub(zabove, zabove, n);
     mpz_sub(zbelow, n, zbelow);
 
-    return (mpz_cmpabs(zabove, zbelow) >= 0)
+    /* First store res, then clear zbelow amd zabove, and THEN
+       return! */
+    double res = (mpz_cmpabs(zabove, zbelow) >= 0)
         ? below
         : above;
+
+    mpz_clear(zbelow);
+    mpz_clear(zabove);
+
+    return res;
 }
 
 
