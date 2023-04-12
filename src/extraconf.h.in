@@ -47,9 +47,14 @@
 #define SHARED_SUFFIX           "@SH_SUFFIX@"
 #define SHARED_EXTENSION        ".@SH_SUFFIX@"
 
+/* Full STklos (that is with commit number */
+#define FULL_VERSION            "@FULL_VERSION@"
+#define VERSION_STATUS          "@VERSION_STATUS@"  /* stable or unstable */
+
 
 /* Various stuff */
 #define @OS_FLAVOUR@ 1
 #define @UNAME_O@    1           /* result of uname -o */
 #define DEFAULT_CASE_SENSITIVE  @DEFAULT_CS@
 #define CONTROL_FX_PARAMETERS   @CONTROL_FX_PARAMETERS@
+

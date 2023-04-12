@@ -109,7 +109,7 @@ doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))
 {
-  return STk_Cstring2string(VERSION);
+  return STk_Cstring2string(FULL_VERSION);
 }
 
 DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
