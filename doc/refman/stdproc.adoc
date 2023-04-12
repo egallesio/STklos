@@ -698,6 +698,7 @@ primivitives to acess environment variables.
 {{insertdoc 'script-file}}
 {{insertdoc 'script-directory}}
 {{insertdoc 'version}}
+{{insertdoc 'short-version}}
 {{insertdoc 'machine-type}}
 {{insertdoc 'implementation-name}}
 {{insertdoc 'cpu-architecture}}

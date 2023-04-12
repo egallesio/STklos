@@ -91,7 +91,7 @@ doc>
       (let ((user-path (build-path-from-shell-variable "STKLOS_LOAD_PATH")))
         (if (null? user-path)
             (let ((prefix  (%library-prefix))
-                  (release (version)))
+                  (release (short-version)))
               (list "."
                     (%stklos-conf-file (make-path "pkg" "lib"))
                     (%stklos-conf-file "ext")
@@ -411,7 +411,8 @@ doc>
 
       (unless (member what provided)
         (let* ((path (if lib-only?
-                         (list (make-path (%library-prefix) "share" "stklos" (version)))
+                         (list (make-path (%library-prefix) "share" "stklos"
+                                          (short-version)))
                          (load-path)))
                (suff (load-suffixes))
                (file (%rewrite-require-spec what path suff)))

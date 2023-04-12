@@ -116,10 +116,20 @@ DEFINE_PRIMITIVE("version", version, subr0, (void))
   return STk_Cstring2string(FULL_VERSION);
 }
 
-DEFINE_PRIMITIVE("%short-version", short_version, subr0, (void))
+
+/*
+<doc EXT short-version
+ * (short-version)
+ *
+ * Returns a string identifying the current version of the system without
+ * its eventual patch number. 
+doc>
+*/
+DEFINE_PRIMITIVE("short-version", short_version, subr0, (void))
 {
   return STk_Cstring2string(VERSION);  // version without patch number
 }
+
 
 DEFINE_PRIMITIVE("%stable-version?", stable_versionp, subr0, (void))
 {
