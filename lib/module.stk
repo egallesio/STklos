@@ -650,4 +650,5 @@ doc>
 doc>
 |#
 (define (module-list)
-  (filter module? (all-modules)))
+  (filter (lambda(x) (not (library? x)))
+          (all-modules)))
