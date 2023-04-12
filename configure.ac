@@ -1,10 +1,11 @@
-reges### configure.ac for STklos
+### configure.ac for STklos
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.70])
+AC_INIT([stklos],[1.70])   # Set also VERSION_STATUS to stable when changing version
+VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
 # Grab configure options before it is too late
@@ -516,7 +517,14 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
 
-CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
+STABLE="#f"
+if test "$VERSION_STATUS" == "stable"
+then
+   STABLE="#t"
+fi
+
+
+CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT) :stable $STABLE)"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
@@ -555,9 +563,35 @@ esac
 # Get configure/compilation directory
 COMP_DIR=`pwd`
 
+
+# Add information to VERSION
+FULL_VERSION=$VERSION
+
+if test $VERSION_STATUS = "unstable"
+then
+  # This code duplicates some code from "utils/generate-git-info"
+  # but it makes things simpler
+  git_version=`git --version 2>/dev/null || true`
+
+  if test "$git_version" != ""
+  then
+    # Git is installed
+    git_patch="`git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/'`"
+    if test "X$git_patch" != "X"
+    then
+      FULL_VERSION="$VERSION.$git_patch"
+    fi
+  else
+    FULL_VERSION=$VERSION-unstable
+  fi
+fi
+
+
 ### Output files
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
+AC_SUBST(FULL_VERSION)
+AC_SUBST(VERSION_STATUS)
 AC_SUBST(HAVE_DLOPEN)
 AC_SUBST(OS_FLAVOUR)
 AC_SUBST(UNAME_O)

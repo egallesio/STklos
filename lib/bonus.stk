@@ -54,7 +54,7 @@
         port-idle-register! port-idle-unregister! port-idle-reset!
         chmod
         with-mutex
-        error-object-location %push-id
+        error-object-location %push-id %stable-version?
         define-constant
         void?
         receive case-lambda
@@ -1768,14 +1768,6 @@ doc>
       (condition-ref obj 'location)
       (error "bad error object: ~S" obj)))
 
-
-(define (%push-id)
-  (let ((value (key-get (%stklos-git) :commit "")))
-    (if (string=? value "")
-        (string-append "stable-" (version))
-        value)))
-
-
 #|
 <doc EXT define-constant
  * (define-constant name expr)
@@ -1827,6 +1819,23 @@ doc>
 doc>
 |#
 (define (void? obj) (eq? obj #void))
+
+
+
+;;;
+;;; Misc
+;;;
+
+(define (%stable-version?)
+  (key-get (%stklos-git) :stable #f))
+
+(define (%push-id)
+  (if (%stable-version?)
+      "stable"
+      (let ((commit (key-get (%stklos-git) :commit #f)))
+        (if commit
+            (format "unstable -- ~a" commit)
+            "unstable"))))
 
 ;;;; ======================================================================
 ;;;;

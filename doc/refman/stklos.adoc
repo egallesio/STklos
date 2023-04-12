@@ -5,7 +5,7 @@
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
 
-= STklos Reference Manual : (version {{version}})
+= STklos Reference Manual : (version {{%short-version}})
 :authors: Erick Gallesio
 :email: eg@stklos.net
 :logo: images/dice.png
@@ -28,7 +28,7 @@
 == Preface
 
 This document provides a complete list of procedures and special forms
-implemented in version *{{version}}* of {{stklos}}. Originally, the
+implemented in version *{{%short-version}}* of {{stklos}}. Originally, the
 language implemented by {{stklos}} was (nearly) compliant with the
 language described in the Revised^5^ Report on the Algorithmic
 Language Scheme (aka {{rfive}}) <<R5RS>>. The fist public release of

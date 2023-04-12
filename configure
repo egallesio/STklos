@@ -703,6 +703,8 @@ GMP
 UNAME_O
 OS_FLAVOUR
 HAVE_DLOPEN
+VERSION_STATUS
+FULL_VERSION
 STKCFLAGS
 NO_THREAD_FALSE
 NO_THREAD_TRUE
@@ -2672,7 +2674,8 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
+   # Set also VERSION_STATUS to stable when changing version
+VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
 # Grab configure options before it is too late
@@ -7647,7 +7650,14 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
 
-CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
+STABLE="#f"
+if test "$VERSION_STATUS" == "stable"
+then
+   STABLE="#t"
+fi
+
+
+CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT) :stable $STABLE)"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
@@ -7768,7 +7778,33 @@ esac
 # Get configure/compilation directory
 COMP_DIR=`pwd`
 
+
+# Add information to VERSION
+FULL_VERSION=$VERSION
+
+if test $VERSION_STATUS = "unstable"
+then
+  # This code duplicates some code from "utils/generate-git-info"
+  # but it makes things simpler
+  git_version=`git --version 2>/dev/null || true`
+
+  if test "$git_version" != ""
+  then
+    # Git is installed
+    git_patch="`git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/'`"
+    if test "X$git_patch" != "X"
+    then
+      FULL_VERSION="$VERSION.$git_patch"
+    fi
+  else
+    FULL_VERSION=$VERSION-unstable
+  fi
+fi
+
+
 ### Output files
+
+
 
 
 
