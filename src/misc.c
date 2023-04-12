@@ -121,6 +121,11 @@ DEFINE_PRIMITIVE("%short-version", short_version, subr0, (void))
   return STk_Cstring2string(VERSION);  // version without patch number
 }
 
+DEFINE_PRIMITIVE("%stable-version?", stable_versionp, subr0, (void))
+{
+  return MAKE_BOOLEAN(strcmp(VERSION_STATUS, "stable") == 0);
+}
+
 DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
 {
   char buffer[2000];
@@ -646,6 +651,7 @@ int STk_init_misc(void)
 {
   ADD_PRIMITIVE(version);
   ADD_PRIMITIVE(short_version);
+  ADD_PRIMITIVE(stable_versionp);
   ADD_PRIMITIVE(stklos_configure);
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);

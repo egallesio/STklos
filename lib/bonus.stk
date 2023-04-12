@@ -1825,10 +1825,6 @@ doc>
 ;;;
 ;;; Misc
 ;;;
-
-(define (%stable-version?)
-  (key-get (%stklos-git) :stable #f))
-
 (define (%push-id)
   (if (%stable-version?)
       "stable"

@@ -517,14 +517,7 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
 
-STABLE="#f"
-if test "$VERSION_STATUS" == "stable"
-then
-   STABLE="#t"
-fi
-
-
-CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT) :stable $STABLE)"
+CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
