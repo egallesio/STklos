@@ -28,12 +28,8 @@
 
 (export define-library library-name library-list
         ;; FIXME
-        %symbol->library-name
         %module-define-and-export
         %make-copy-module)
-
-(define (%symbol->library-name name)
-  (map string->symbol (string-split (symbol->string name) "/")))
 
 ;;
 ;; A macro to redefine a symbol in a R7RS module

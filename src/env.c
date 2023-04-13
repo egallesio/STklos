@@ -29,30 +29,6 @@
 #include "vm.h"
 #include "thread-common.h"
 
-static void error_bad_module_name(SCM obj)
-{
-  STk_error("bad module name ~S", obj);
-}
-
-static void error_unbound_variable(SCM symbol, SCM modname)
-{
-  STk_error("variable ~S unbound in ~S", symbol, modname);
-}
-
-static void verify_symbol(SCM obj)
-{
-  if (!SYMBOLP(obj)) STk_error("bad symbol ~S", obj);
-}
-
-static void verify_module(SCM obj)
-{
-  if (!MODULEP(obj)) STk_error("bad module ~S", obj);
-}
-
-static void verify_list(SCM obj)
-{
-  if (!NULLP(obj) && !CONSP(obj)) STk_error("bad list ~S", obj);
-}
 
 /*===========================================================================*\
  *
@@ -80,6 +56,11 @@ struct module_obj {
 SCM STk_STklos_module;          /* The module whose name is STklos */
 static SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
+
+
+/*************/
+/* Utilities */
+/*************/
 
 static void print_module(SCM module, SCM port, int mode)
 {
@@ -157,6 +138,61 @@ static SCM find_module(SCM name, int create)
 }
 
 
+static char *pretty_library_name(const char *name)
+{
+  char *res, *tmp;
+
+  /* allocate a new string */
+  tmp = res = STk_must_malloc_atomic(strlen(name) + 3); // '('+')'+nul
+
+  /* transform "foo/bar/baz" in "(foo bar baz)" */
+  *tmp++ = '(';
+  for (char *p = (char *) name; *p; p++) {
+    *tmp++ = (*p == '/') ? ' ': *p;
+  }
+  *tmp++ = ')';
+  *tmp   = '\0';
+
+  return res;
+}
+
+/*******************/
+/* Error functions */
+/*******************/
+
+static void error_bad_module_name(SCM obj)
+{
+  STk_error("bad module or library name ~S", obj);
+}
+
+static void verify_symbol(SCM obj)
+{
+  if (!SYMBOLP(obj)) STk_error("bad symbol ~S", obj);
+}
+
+static void verify_module(SCM obj)
+{
+  if (!MODULEP(obj)) STk_error("bad module ~S", obj);
+}
+
+static void verify_list(SCM obj)
+{
+  if (!NULLP(obj) && !CONSP(obj)) STk_error("bad list ~S", obj);
+}
+
+void STk_error_unbound_variable(SCM symbol, SCM module)
+{
+  if (MODULE_IS_LIBRARY(module)) {
+    SCM name = MODULE_NAME(module);
+    STk_error("symbol ~S unbound in library %s", symbol,
+              pretty_library_name(SYMBOL_PNAME(name)));
+  } else {
+    STk_error("symbol ~S unbound in module ~S",  symbol,
+              MODULE_NAME(module));
+  }
+}
+
+
 /*===========================================================================*\
  *
  * Module primitives
@@ -214,8 +250,6 @@ static Inline SCM ensure_module(SCM module) // -> a module given a module or a n
     return mod;
   }
 }
-
-
 
 
 void STk_export_all_symbols(SCM module)
@@ -317,6 +351,13 @@ DEFINE_PRIMITIVE("%module-exports", module_exports, subr1, (SCM module))
                 make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
                 MODULE_EXPORTS(module);
 }
+
+DEFINE_PRIMITIVE("%symbol->library-name", symb2libname, subr1, (SCM symbol))
+{
+  verify_symbol(symbol);
+  return STk_read_from_C_string(pretty_library_name(SYMBOL_PNAME(symbol)));
+}
+
 
 /*
 <doc EXT module?
@@ -460,7 +501,7 @@ DEFINE_PRIMITIVE("module-symbols", module_symbols, subr1,  (SCM module))
  * (all-modules)
  *
  * Returns the list of all the living modules (or libraries). Use
- * |module-list| to obtain a list of modules without libraries. 
+ * |module-list| to obtain a list of modules without libraries.
 doc>
  */
 DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
@@ -549,8 +590,9 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
     verify_module(module);
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
-  if (!tmp)
-    STk_error("symbol ~S is not bound in ~a", symb, module);
+
+  if (!tmp) STk_error_unbound_variable(symb,module);
+
   return MAKE_BOOLEAN(!(BOXED_INFO(tmp) & CONS_CONST));
 }
 
@@ -583,7 +625,7 @@ DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM m
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
 
-  if (!tmp) STk_error("symbol ~S is not bound in ~S", symb, module);
+  if (!tmp) STk_error_unbound_variable(symb,module);
 
   BOXED_INFO(tmp) |= CONS_CONST;
   return STk_void;
@@ -617,7 +659,7 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
   SCM res = find_symbol_value(symbol, module);
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, MODULE_NAME(module));
+    STk_error_unbound_variable(symbol, module);
   }
   return res;
 }
@@ -650,7 +692,7 @@ DEFINE_PRIMITIVE("symbol-value*", symbol_value_all, subr23,
   }
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, MODULE_NAME(module));
+    STk_error_unbound_variable(symbol, module);
   }
   return res;
 }
@@ -764,7 +806,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
   if (!res)
-    error_unbound_variable(old, MODULE_NAME(module));
+    STk_error_unbound_variable(old, module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
   return STk_void;
@@ -782,7 +824,7 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old);
   if (!res)
-    error_unbound_variable(old, MODULE_NAME(old_module));
+    STk_error_unbound_variable(old, old_module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
   return STk_void;
@@ -817,8 +859,8 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
 
   /* It definitively does not exists  :-< */
-  if (err_if_unbound)
-    STk_error("variable ~S unbound", symbol);
+  if (err_if_unbound) STk_error_unbound_variable(symbol, env);
+
   return STk_void;
 }
 
@@ -878,6 +920,8 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_name_set);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
+  ADD_PRIMITIVE(module_exports);
+  ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
 
   /* ==== User primitives ==== */
@@ -887,7 +931,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);
   ADD_PRIMITIVE(module_imports);
-  ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(module_symbols);
   ADD_PRIMITIVE(all_modules);
   ADD_PRIMITIVE(module_immutable);
