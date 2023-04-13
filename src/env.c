@@ -58,39 +58,6 @@ static SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
 
 
-/*******************/
-/* Error functions */
-/*******************/
-
-static void error_bad_module_name(SCM obj)
-{
-  STk_error("bad module or library name ~S", obj);
-}
-
-static void verify_symbol(SCM obj)
-{
-  if (!SYMBOLP(obj)) STk_error("bad symbol ~S", obj);
-}
-
-static void verify_module(SCM obj)
-{
-  if (!MODULEP(obj)) STk_error("bad module ~S", obj);
-}
-
-static void verify_list(SCM obj)
-{
-  if (!NULLP(obj) && !CONSP(obj)) STk_error("bad list ~S", obj);
-}
-
-static void error_unbound_variable(SCM symbol, SCM module)
-{
-    if (MODULE_IS_LIBRARY(module))
-      STk_error("symbol ~S unbound in library ~S", symbol, MODULE_NAME(module));
-    else
-      STk_error("symbol ~S unbound in module ~S",  symbol, MODULE_NAME(module));
-}
-
-
 /*************/
 /* Utilities */
 /*************/
@@ -168,6 +135,59 @@ static SCM find_module(SCM name, int create)
   }
   /* module does not exists */
   return (create) ? make_module(name) : STk_void;
+}
+
+
+static char *pretty_library_name(SCM library)
+{
+  char *res, *tmp;
+
+  /* allocate a new string */
+  tmp = res = STk_must_malloc_atomic(strlen(MODULE_NAME(library)) + 3); // '('+')'+nul
+
+  /* transform "foo/bar/baz" in "(foo bar baz)" */
+  *tmp++ = '(';
+  for (char *p = MODULE_NAME(library); *p; p++) {
+    *tmp++ = (*p == '/') ? ' ': *p;
+  }
+  *tmp++ = ')';
+  *tmp   = '\0';
+
+  return res;
+}
+
+/*******************/
+/* Error functions */
+/*******************/
+
+static void error_bad_module_name(SCM obj)
+{
+  STk_error("bad module or library name ~S", obj);
+}
+
+static void verify_symbol(SCM obj)
+{
+  if (!SYMBOLP(obj)) STk_error("bad symbol ~S", obj);
+}
+
+static void verify_module(SCM obj)
+{
+  if (!MODULEP(obj)) STk_error("bad module ~S", obj);
+}
+
+static void verify_list(SCM obj)
+{
+  if (!NULLP(obj) && !CONSP(obj)) STk_error("bad list ~S", obj);
+}
+
+void STk_error_unbound_variable(SCM symbol, SCM module)
+{
+  if (MODULE_IS_LIBRARY(module))
+    STk_error("symbol ~S unbound in library %s", symbol,
+              pretty_library_name(MODULE_NAME(module)));
+  else
+    STk_error("symbol ~S unbound in module ~S",  symbol,
+              MODULE_NAME(module));
 }
 
 
@@ -564,7 +584,7 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
 
-  if (!tmp) error_unbound_variable(symb,module);
+  if (!tmp) STk_error_unbound_variable(symb,module);
 
   return MAKE_BOOLEAN(!(BOXED_INFO(tmp) & CONS_CONST));
 }
@@ -598,7 +618,7 @@ DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM m
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
 
-  if (!tmp) error_unbound_variable(symb,module);
+  if (!tmp) STk_error_unbound_variable(symb,module);
 
   BOXED_INFO(tmp) |= CONS_CONST;
   return STk_void;
@@ -632,7 +652,7 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
   SCM res = find_symbol_value(symbol, module);
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, module);
+    STk_error_unbound_variable(symbol, module);
   }
   return res;
 }
@@ -665,7 +685,7 @@ DEFINE_PRIMITIVE("symbol-value*", symbol_value_all, subr23,
   }
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, module);
+    STk_error_unbound_variable(symbol, module);
   }
   return res;
 }
@@ -779,7 +799,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
   if (!res)
-    error_unbound_variable(old, module);
+    STk_error_unbound_variable(old, module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
   return STk_void;
@@ -797,7 +817,7 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old);
   if (!res)
-    error_unbound_variable(old, old_module);
+    STk_error_unbound_variable(old, old_module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
   return STk_void;
@@ -832,7 +852,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
 
   /* It definitively does not exists  :-< */
-  if (err_if_unbound) error_unbound_variable(symbol, env);
+  if (err_if_unbound) STk_error_unbound_variable(symbol, env);
 
   return STk_void;
 }
