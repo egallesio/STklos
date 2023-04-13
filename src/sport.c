@@ -63,29 +63,29 @@ struct sstream {
 #define PORT_BUFSIZE(x) (((struct sstream *) (x))->bufsize)
 #define PORT_STR(x)     (((struct sstream *) (x))->str)
 
-static Inline int Sgetc(void *stream)
+static inline int Sgetc(void *stream)
 {
   return (PORT_PTR(stream) < PORT_END(stream)) ?
     ((unsigned char) *PORT_PTR(stream)++) : EOF;
 }
 
 
-static Inline int Seof(void * stream)
+static inline int Seof(void * stream)
 {
   return (PORT_PTR(stream) >= PORT_END(stream));
 }
 
-static Inline int Sreadyp(void *stream)
+static inline int Sreadyp(void *stream)
 {
   return !Seof(stream);
 }
 
-static Inline int Sclose(void _UNUSED(*stream))
+static inline int Sclose(void _UNUSED(*stream))
 {
   return 0;
 }
 
-static Inline int Sread(void *stream, void *buffer, int count)
+static inline int Sread(void *stream, void *buffer, int count)
 {
   int avail = PORT_END(stream) - PORT_PTR(stream);
 
@@ -97,7 +97,7 @@ static Inline int Sread(void *stream, void *buffer, int count)
   return count;
 }
 
-static Inline int Sputc(int c, void *stream)
+static inline int Sputc(int c, void *stream)
 {
   register unsigned int tmp;
 
@@ -118,7 +118,7 @@ static Inline int Sputc(int c, void *stream)
 }
 
 
-static Inline int Swrite(void *stream, const void *buffer, int count)
+static inline int Swrite(void *stream, const void *buffer, int count)
 {
   size_t tmp, pos;
   char *right = PORT_PTR(stream) + count;
@@ -140,22 +140,22 @@ static Inline int Swrite(void *stream, const void *buffer, int count)
   return count;
 }
 
-static Inline int Sputs(const char *s, void *stream)
+static inline int Sputs(const char *s, void *stream)
 {
   return Swrite(stream, s, strlen(s));
 }
 
-static Inline int Sputstring(SCM s, void *stream)
+static inline int Sputstring(SCM s, void *stream)
 {
   return Swrite(stream, STRING_CHARS(s), STRING_SIZE(s));
 }
 
-static Inline int Snputs(void *stream, const char *s, int len)
+static inline int Snputs(void *stream, const char *s, int len)
 {
   return Swrite(stream, s, len);
 }
 
-static Inline int Sflush(void _UNUSED(*stream))
+static inline int Sflush(void _UNUSED(*stream))
 {
   return 0;
 }

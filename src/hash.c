@@ -303,7 +303,7 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag)
  *
 \*===========================================================================*/
 
-static Inline SCM hash_get_symbol(struct hash_table_obj *h, const char *s, int *index)
+static inline SCM hash_get_symbol(struct hash_table_obj *h, const char *s, int *index)
 {
   register SCM l;
 
@@ -615,7 +615,7 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
   if (!HASHP(ht)) error_bad_hash_table(ht);
 
   if (HASH_CONSTP(ht)) error_hash_immutable(ht);
-  
+
   switch (HASH_TYPE(ht)) {
     case hash_eqp:
       index = RANDOM_INDEX(ht, key);
@@ -681,7 +681,7 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
  * @end lisp
 doc>
 */
-static Inline SCM hash_table_search(SCM ht, SCM key)
+static inline SCM hash_table_search(SCM ht, SCM key)
 {
   int index = 0;
   SCM func, l = STk_nil;

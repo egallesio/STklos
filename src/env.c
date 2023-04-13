@@ -114,7 +114,7 @@ static void register_module(SCM mod)
 }
 
 
-static Inline SCM make_empty_environment(SCM name)
+static inline SCM make_empty_environment(SCM name)
 {
   register SCM z;
 
@@ -130,7 +130,7 @@ static Inline SCM make_empty_environment(SCM name)
 }
 
 
-static Inline SCM make_module(SCM name)
+static inline SCM make_module(SCM name)
 {
   register SCM z = make_empty_environment(name);
 
@@ -590,7 +590,7 @@ DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM m
 }
 
 /*===========================================================================*/
-static Inline SCM find_symbol_value(SCM symbol, SCM module)
+static inline SCM find_symbol_value(SCM symbol, SCM module)
 {
   SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
   if (res)

@@ -411,7 +411,7 @@ DEFINE_PRIMITIVE("%method-more-specific?", method_more_specificp, subr3,
  *
 \*===========================================================================*/
 
-static Inline SCM test_change_class(SCM obj)
+static inline SCM test_change_class(SCM obj)
 {
   SCM classe = INST_CLASS_OF(obj);
 
@@ -422,7 +422,7 @@ static Inline SCM test_change_class(SCM obj)
 
 
 
-static Inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
+static inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
 {
   SCM l;
 
@@ -443,7 +443,7 @@ static Inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
   return CALL_GF3("slot-missing", classe, obj, slot_name);
 }
 
-static Inline SCM set_slot_value(SCM classe, SCM obj, SCM slot_name, SCM value)
+static inline SCM set_slot_value(SCM classe, SCM obj, SCM slot_name, SCM value)
 {
   register SCM l;
 
@@ -550,7 +550,7 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
  * initialize-object
  *
  ******************************************************************************/
-// static void Inline set_slot_value_if_unbound
+// static void inline set_slot_value_if_unbound
 //                      (SCM classe, SCM obj, SCM slot_name, SCM val)
 // {
 // #ifdef FIXME
