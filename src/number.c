@@ -504,11 +504,19 @@ static Inline double bignum2double(mpz_t n)
 
     /* Use ceil or floor, since we want the next *integer* representable as
        double -- and that's exactly what ceil and floor do! */
-    double above = (below>0)
+    double above = (below > 0)
         ? ceil(nextafter(below, plus_inf))
         : floor(nextafter(below, minus_inf));
 
-    /* the *_set_d functions in GMP are *exact*, so no precision islost here: */
+    /* So, if going further we get to infinity, we return 'below'. This
+       is our interpretation: "infinity" is always farther to 'n' than
+       'below'. (And the GMP may crash without this, if we try to
+       initialize a number with an infinite double!)
+       'Below' is guaranteed to NOT be infinite (it was the first
+       thing we did in this function!)                              */
+    if (isinf(above)) return below;
+
+    /* the *_set_d functions in GMP are *exact*, so no precision is lost here: */
     mpz_t zbelow, zabove;
     mpz_init_set_d(zabove, above);
     mpz_init_set_d(zbelow, below);
