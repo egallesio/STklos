@@ -138,16 +138,16 @@ static SCM find_module(SCM name, int create)
 }
 
 
-static char *pretty_library_name(SCM library)
+static char *pretty_library_name(const char *name)
 {
   char *res, *tmp;
 
   /* allocate a new string */
-  tmp = res = STk_must_malloc_atomic(strlen(MODULE_NAME(library)) + 3); // '('+')'+nul
+  tmp = res = STk_must_malloc_atomic(strlen(name) + 3); // '('+')'+nul
 
   /* transform "foo/bar/baz" in "(foo bar baz)" */
   *tmp++ = '(';
-  for (char *p = MODULE_NAME(library); *p; p++) {
+  for (char *p = (char *) name; *p; p++) {
     *tmp++ = (*p == '/') ? ' ': *p;
   }
   *tmp++ = ')';
@@ -182,12 +182,14 @@ static void verify_list(SCM obj)
 
 void STk_error_unbound_variable(SCM symbol, SCM module)
 {
-  if (MODULE_IS_LIBRARY(module))
+  if (MODULE_IS_LIBRARY(module)) {
+    SCM name = MODULE_NAME(module);
     STk_error("symbol ~S unbound in library %s", symbol,
-              pretty_library_name(MODULE_NAME(module)));
-  else
+              pretty_library_name(SYMBOL_PNAME(name)));
+  } else {
     STk_error("symbol ~S unbound in module ~S",  symbol,
               MODULE_NAME(module));
+  }
 }
 
 
@@ -248,8 +250,6 @@ static Inline SCM ensure_module(SCM module) // -> a module given a module or a n
     return mod;
   }
 }
-
-
 
 
 void STk_export_all_symbols(SCM module)
@@ -351,6 +351,13 @@ DEFINE_PRIMITIVE("%module-exports", module_exports, subr1, (SCM module))
                 make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
                 MODULE_EXPORTS(module);
 }
+
+DEFINE_PRIMITIVE("%symbol->library-name", symb2libname, subr1, (SCM symbol))
+{
+  verify_symbol(symbol);
+  return STk_read_from_C_string(pretty_library_name(SYMBOL_PNAME(symbol)));
+}
+
 
 /*
 <doc EXT module?
@@ -913,6 +920,8 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_name_set);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
+  ADD_PRIMITIVE(module_exports);
+  ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
 
   /* ==== User primitives ==== */
@@ -922,7 +931,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);
   ADD_PRIMITIVE(module_imports);
-  ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(module_symbols);
   ADD_PRIMITIVE(all_modules);
   ADD_PRIMITIVE(module_immutable);
