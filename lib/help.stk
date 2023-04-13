@@ -44,7 +44,7 @@
           '()))))
 
 (define *the-doc*
-  (read-database (make-path (%library-prefix) "share" "stklos" (version) "DOCDB")))
+  (read-database (make-path (%library-prefix) "share" "stklos" (short-version) "DOCDB")))
 
 
 ;; ----------------------------------------------------------------------
