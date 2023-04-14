@@ -3504,59 +3504,59 @@ DEFINE_PRIMITIVE("string->number", string2number, subr12, (SCM str, SCM base))
  * @end lisp
 doc>
 */
-SCM
-decode(SCM num) {
+static SCM decode(SCM num)
+{
   /* Decodes floating-point numbers. As portable as it was possible to make,
      and using no arithmetic on Scheme numbers. */
 
-    double d = REAL_VAL(num);
+  double d = REAL_VAL(num);
 
-    /* Special cases */
-    if (isnan(d)) return STk_n_values(3, STk_false, MAKE_INT(0), MAKE_INT(0));
-    if (isinf(d)) return STk_n_values(3, STk_true, MAKE_INT(0), MAKE_INT(0));
+  /* Special cases */
+  if (isnan(d)) return STk_n_values(3, STk_false, MAKE_INT(0), MAKE_INT(0));
+  if (isinf(d)) return STk_n_values(3, STk_true, MAKE_INT(0), MAKE_INT(0));
 
-    SCM exponent;
-    SCM significand;
-    SCM sign = MAKE_INT( (signbit(d)) ? -1 : +1 );
+  SCM exponent;
+  SCM significand;
+  SCM sign = MAKE_INT( (signbit(d)) ? -1 : +1 );
 
-    if (signbit(d)) d = -d;
+  if (signbit(d)) d = -d;
 
-    if (d == 0.0) {
-        exponent = MAKE_INT(0);
-        significand = MAKE_INT(0);
-    } else {
-      int e = 1;
-      /* We'll obtain the exponent. There are two cases:
+  if (d == 0.0) {
+    exponent = MAKE_INT(0);
+    significand = MAKE_INT(0);
+  } else {
+    int e = 1;
+    /* We'll obtain the exponent. There are two cases:
 
-         1. NORMAL: we calculate the exponent. This is the same that ECL does
-           (and which only works for normal numbers).
+       1. NORMAL: we calculate the exponent. This is the same that ECL does
+       (and which only works for normal numbers).
 
-           frexp will return a double DD (which we ignore) such that
+       frexp will return a double DD (which we ignore) such that
 
-           d = DD * 2^e
+       d = DD * 2^e
 
-           We know that 1/2 <= DD < 1, so the computed 'e' is unique. This 'e'
-           is the one we need.
+       We know that 1/2 <= DD < 1, so the computed 'e' is unique. This 'e'
+       is the one we need.
 
-         2. SUBNORMAL: the exponent is fixed in DBL_MIN_EXP. */
-      if (isnormal(d)) frexp(d,&e);
-      else             e = DBL_MIN_EXP;
+       2. SUBNORMAL: the exponent is fixed in DBL_MIN_EXP. */
+    if (isnormal(d)) frexp(d,&e);
+    else             e = DBL_MIN_EXP;
 
 
-      /* We subtract DBL_MANT_DIG from the exponent (the C macro does not
-         take this into account, so we need to compensate). */
-      e -= DBL_MANT_DIG;
+    /* We subtract DBL_MANT_DIG from the exponent (the C macro does not
+       take this into account, so we need to compensate). */
+    e -= DBL_MANT_DIG;
 
-      /* To obtain the significand, we only need to "undo" the operation
-         d = significand * 2^(exponent).
-         Which is the same as calculating
-         d * 2(-exponent).
-         Which, then, is the same as calculating
-         ldexp(d,-e).                                                       */
-      significand = double2integer(ldexp(d, -e));
-      exponent = MAKE_INT((unsigned long) e);
-    }
-    return STk_n_values(3, significand, exponent, sign);
+    /* To obtain the significand, we only need to "undo" the operation
+       d = significand * 2^(exponent).
+       Which is the same as calculating
+       d * 2(-exponent).
+       Which, then, is the same as calculating
+       ldexp(d,-e).                                                       */
+    significand = double2integer(ldexp(d, -e));
+    exponent = MAKE_INT((unsigned long) e);
+  }
+  return STk_n_values(3, significand, exponent, sign);
 }
 
 /*
@@ -3570,7 +3570,8 @@ decode(SCM num) {
  * the |encode-float| procedure.
 doc>
  */
-DEFINE_PRIMITIVE("float-max-significand", float_max_signif, subr0, ()){
+DEFINE_PRIMITIVE("float-max-significand", float_max_signif, subr0, ())
+{
   return STk_ulong2integer((unsigned long) pow(FLT_RADIX, DBL_MANT_DIG)
                            -1);
 }
@@ -3585,10 +3586,11 @@ DEFINE_PRIMITIVE("float-max-exponent", float_max_exp, subr0, ())
   return MAKE_INT(DBL_MAX_EXP - DBL_MANT_DIG);
 }
 
-DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n)) {
-    if (!NUMBERP(n) || COMPLEXP(n)) error_not_a_real_number(n);
-    if (EXACTP(n)) n = exact2inexact(n);
-    return decode(n);
+DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
+{
+  if (!NUMBERP(n) || COMPLEXP(n)) error_not_a_real_number(n);
+  if (EXACTP(n)) n = exact2inexact(n);
+  return decode(n);
 }
 
 /*
@@ -3627,7 +3629,8 @@ DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n)) {
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM exponent, SCM sign))
+DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM exponent,
+                                                       SCM sign))
 {
   if (STk_integerp(exponent) == STk_false)  error_not_an_integer(exponent);
   if (STk_integerp(sign) == STk_false)      error_not_an_integer(sign);
@@ -3642,11 +3645,10 @@ DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM expo
 
   /* Significand */
   if (STk_integerp(significand) == STk_false) error_not_an_integer(significand);
-  SCM max_signif =  STk_ulong2integer((unsigned long) pow(FLT_RADIX, DBL_MANT_DIG)-1);
+  SCM max_signif = STk_ulong2integer((unsigned long) pow(FLT_RADIX, DBL_MANT_DIG)-1);
   if (negativep(significand)) STk_error("negative significand ~S", significand);
-  if (STk_numgt2(significand, max_signif)) STk_error("significand ~S above maximum ~S",
-                                                     significand,
-                                                     max_signif);
+  if (STk_numgt2(significand, max_signif))
+    STk_error("significand ~S above maximum ~S", significand, max_signif);
 
   /* Exponent */
   long e = INT_VAL(inexact2exact(exponent));
@@ -3663,6 +3665,7 @@ DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM expo
   SCM res = STk_mul2(sign, significand);
   return STk_mul2(res, STk_expt (MAKE_INT(2), exponent));
 }
+
 
 /*
  *
