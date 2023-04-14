@@ -3181,10 +3181,10 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
 {
   mpz_t res;
 
-  if (zerop(y))
-      return (isexactp(x) && isexactp(y))
-          ? MAKE_INT(1)
-          : double2real(1.0);
+  /* y is already known to be exact; so if it is zero,
+     return exact one. */
+  if (zerop(y)) return MAKE_INT(1);
+
   if (zerop(x) || (x == MAKE_INT(1))) return x;
 
   if (TYPEOF(y) == tc_bignum)

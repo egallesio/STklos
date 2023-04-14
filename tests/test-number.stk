@@ -1096,10 +1096,10 @@
 (test "exact expt" 1 (expt 1 720000))
 (test "exact expt" 1 (expt -1 720000))
 (test "exact expt" -1 (expt -1 720001))
-(test "0^0" 1 (expt 0 0))
-(test "0^0" 1.0 (expt 0.0 0))
-(test "0^0" 1.0 (expt 0 0.0))
-(test "0^0" 1.0 (expt 0.0 0.0))
+(test "0^0" 1 (expt 0 0))        ; exact exponent, exact 1
+(test "0^0" 1 (expt 0.0 0))      ; exact exponent, exact 1
+(test "0^0" 1.0 (expt 0 0.0))    ; inexact exponent, inexact 1.0
+(test "0^0" 1.0 (expt 0.0 0.0))  ; inexact exponent, inexact 1.0
 (test "complex expt"
       #t
       (let* ((z (expt 2 -3+4i))
