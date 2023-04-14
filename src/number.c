@@ -3488,8 +3488,8 @@ DEFINE_PRIMITIVE("string->number", string2number, subr12, (SCM str, SCM base))
  * (decode-float n)
  *
  * |decode-float| returns three exact integers: |significand|, |exponent|
- * and |sign| (where |-1 <= sign <= 1|). The values returned by |decode-float|
- * satisfy:
+ * and |sign| (where |-1 \<= sign \<= 1|). The values returned by
+ * |decode-float| satisfy:
  * @lisp
  * n = (* sign significand (expt 2 exponent))
  * @end lisp
@@ -3612,9 +3612,10 @@ DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
  *
  * Both |significand| and |exponent| must be within their proper ranges:
  *
- * 0 < |significand| <= |float-max-significand|, and
+ * 0 < |significand| \<= |float-max-significand|, and
  *
- * |float-min-exponent| <= |exponent| <=  |float-max-exponent|.
+ * |float-min-exponent| \<= |exponent| \<=  |float-max-exponent|.
+ *
  *
  * @lisp
  * (encode-float (#t 0  1)) => +inf.0
@@ -3625,7 +3626,7 @@ DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
  * => 5764607523034235
  * => -59
  * => -1
- * (inexact (encode-float 5764607523034235 -59 -1)) => 0.01
+ * (inexact (encode-float 5764607523034235 -59 -1)) => -0.01
  * @end lisp
 doc>
 */
