@@ -5422,11 +5422,11 @@ is shifted left by <code>m</code> bits; If <code>m</code> is negative, <code>n</
 </div>
 </div>
 <div class="paragraph">
-<p>Return an integer in the range \[0, &#8230;&#8203;, <code>n</code>\[.  Subsequent results of
+<p>Return an integer in the range [0, &#8230;&#8203;, <code>n</code>[.  Subsequent results of
 this procedure appear to be independent uniformly distributed over
-the range \[0, &#8230;&#8203;, <code>n</code>\[. The argument <code>n</code> must be a positive integer,
+the range [0, &#8230;&#8203;, <code>n</code>[. The argument <code>n</code> must be a positive integer,
 otherwise an error is signaled. This function is equivalent to the eponym
-function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
+function of <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a></strong> (<em>Source of random bits</em>).</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -5445,7 +5445,7 @@ function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
 <p>Return a real number <code>r</code> such that <code>0 &lt; r &lt; 1</code>.
 Subsequent results of this procedure appear to be independent uniformly
 distributed. This function is equivalent to the eponym
-function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
+function of  <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a></strong> (<em>Source of random bits</em>).</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -5462,8 +5462,8 @@ function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
 </div>
 <div class="paragraph">
 <p><code>decode-float</code> returns three exact integers: <code>significand</code>, <code>exponent</code>
-and <code>sign</code> (where <code>-1 &#8656; sign &#8656; 1</code>). The values returned by <code>decode-float</code>
-satisfy:</p>
+and <code>sign</code> (where <code>-1 &lt;= sign &lt;= 1</code>). The values returned by
+<code>decode-float</code> satisfy:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -5482,6 +5482,81 @@ satisfy:</p>
                     <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">-52</span><span class="p">)))</span>
                     <span class="nv">=&gt;</span> <span class="mf">-1.234</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(encode-float significand exponent sign)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>encode-float</code> does the inverse work of <code>decode-float</code>: it accepts three
+numbers, <code>significand</code>, <code>exponent</code> and <code>sign</code>, and returns the floating
+point number represented by them.</p>
+</div>
+<div class="paragraph">
+<p>When <code>significand</code> is <code>#f</code>, a NaN will be returned.
+When <code>significand</code> is <code>#t</code>, positive or negative infinity is returned,
+depending on the value of <code>sign</code>.</p>
+</div>
+<div class="paragraph">
+<p>Otherwise, the number returned is</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">n</span> <span class="nv">=</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">sign</span> <span class="nv">significand</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="nv">exponent</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Both <code>significand</code> and <code>exponent</code> must be within their proper ranges:</p>
+</div>
+<div class="paragraph">
+<p>0 &lt; <code>significand</code> &lt;= <code>float-max-significand</code>, and</p>
+</div>
+<div class="paragraph">
+<p><code>float-min-exponent</code> &lt;= <code>exponent</code> &lt;=  <code>float-max-exponent</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">encode-float</span> <span class="p">(</span><span class="no">#t</span> <span class="mi">0</span>  <span class="mi">1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="m">+inf.0</span>
+<span class="p">(</span><span class="nf">encode-float</span> <span class="p">(</span><span class="no">#t</span> <span class="mi">0</span> <span class="mi">-1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="m">-inf.0</span>
+<span class="p">(</span><span class="nf">encode-float</span> <span class="p">(</span><span class="no">#f</span> <span class="mi">0</span>  <span class="mi">1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="nv">+nan</span><span class="o">.</span><span class="mi">0</span>
+
+<span class="p">(</span><span class="nf">decode-float</span> <span class="mf">-0.01</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="mi">5764607523034235</span>
+<span class="nv">=&gt;</span> <span class="mi">-59</span>
+<span class="nv">=&gt;</span> <span class="mi">-1</span>
+<span class="p">(</span><span class="nf">inexact</span> <span class="p">(</span><span class="nf">encode-float</span> <span class="mi">5764607523034235</span> <span class="mi">-59</span> <span class="mi">-1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">-0.01</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(float-max-significand)</code></strong><br>
+<strong><code>(float-min-exponent)</code></strong><br>
+<strong><code>(float-max-exponent)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return the maximum significand value and the
+minimum and maximum values for the exponent when calling
+the <code>encode-float</code> procedure.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -30179,7 +30254,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-04-12 16:41:13 +0200
+Last updated 2023-04-14 23:18:46 +0200
 </div>
 </div>
 </body>
