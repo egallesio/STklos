@@ -58,8 +58,7 @@
 (test "expr.1" 1.0    (expt 10 0.0))
 (test "expr.2" 1      (expt 10 0))
 (test "expr.3" 1.0    (expt (sqrt 2) 0.0))
-(test "expr.4" 1      (expt (sqrt 3) 0))
+(test "expr.4" 1      (expt (sqrt 3) 0)) ; sqrt(3) is inexact, but exponent exact
+(test "expr.5" 1      (expt (sqrt 4) 0)) ; sqrt(4) is exact, but exponent exact
+(test "expr.5" 1      (expt +inf.0 0))   ; all Schemes do compute ∞^0 = one...
 (test "expt.5" +inf.0 (expt 0.0 -4))
-
-
-

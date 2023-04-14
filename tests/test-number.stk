@@ -1096,7 +1096,19 @@
 (test "exact expt" 1 (expt 1 720000))
 (test "exact expt" 1 (expt -1 720000))
 (test "exact expt" -1 (expt -1 720001))
-
+(test "0^0" 1 (expt 0 0))        ; exact exponent, exact 1
+(test "0^0" 1 (expt 0.0 0))      ; exact exponent, exact 1
+(test "0^0" 1.0 (expt 0 0.0))    ; inexact exponent, inexact 1.0
+(test "0^0" 1.0 (expt 0.0 0.0))  ; inexact exponent, inexact 1.0
+(test "complex expt"
+      #t
+      (let* ((z (expt 2 -3+4i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (< -0.116585885  r -0.116585884)
+             (<  0.045085823 i   0.045085824))))
+(test/error "0^-a+bi" (expt 0   -2+1i))
+(test/error "0^-a+bi" (expt 0.0 -2+1i))
 
 ;;------------------------------------------------------------------
 (test-subsection "sqrt")
