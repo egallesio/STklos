@@ -922,23 +922,32 @@ general_diff:
 
 
 static SCM int_quotient(SCM x, SCM y)
-/* Specialized version for rationals. Accepts only integer or bignums as params */
+/* Specialized version for creating rationals.
+   Accepts only integer or bignums as params */
 {
-  mpz_t q, r;
+  mpz_t q;
+  SCM res;
 
-  if (INTP(x)) {
-    if (INTP(y))
-      return MAKE_INT(INT_VAL(x)/INT_VAL(y));
-    else
-      x = long2scheme_bignum(INT_VAL(x));
-  } else {
-    if (INTP(y))
-      y = long2scheme_bignum(INT_VAL(y));
-  }
-  /* Here x and y are both bignum */
-  mpz_init(q); mpz_init(r);
-  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y));
-  return bignum2number(q);
+  if (INTP(x) && INTP(y))
+    return MAKE_INT(INT_VAL(x)/INT_VAL(y));
+
+  mpz_init(q);
+
+  if (INTP(x)) /* && BIGNUMP(y), of course! */
+    return MAKE_INT(0); /* int / BIGNUM = 0... */
+
+  if (INTP(y)) /* && BIGNUMP(x), of course! */
+    /* The sign is in the numerator, so it's OK to use the '_ui' variant
+       from the GMP.  */
+    mpz_tdiv_q_ui(q, BIGNUM_VAL(x), INT_VAL(y));
+  else /* Here x and y are both bignums */
+    mpz_tdiv_q(q, BIGNUM_VAL(x), BIGNUM_VAL(y));
+
+  res = bignum2number(q);
+
+  mpz_clear(q);
+
+  return res;
 }
 
 static int digitp(char c, long base)
