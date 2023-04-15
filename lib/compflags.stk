@@ -177,7 +177,7 @@ doc>
 (define compiler:unroll-iterations
   (make-parameter 3
                   (lambda (v)
-                    (unless (and (fixnum? v) (fx>? v 0))
+                    (unless (and (fixnum? v) (positive? v))
                       (error 'compiler:unroll-iterations
                              "must be a positive fixnum. It was ~s" v))
                     v)))
