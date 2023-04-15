@@ -27,16 +27,7 @@
   (import SCHEME)
   (export eval
           disassemble disassemble-expr
-          compiler:time-display
-          compiler:gen-line-number
-          compiler:warn-use-undefined
-          compiler:warn-use-undefined-postpone
-          compiler:show-assembly-code
-          compiler:keep-formals
-          compiler:keep-source
-          compiler:inline-common-functions
-          compiler:unroll-iterations
-
+          
           %compiler-set-flags
           %grab-file-information
           %compiler-new-label

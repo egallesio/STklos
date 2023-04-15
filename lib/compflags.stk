@@ -30,6 +30,16 @@
 ;;      Compiler parameters ...
 ;; ----------------------------------------------------------------------
 
+(export compiler:time-display
+        compiler:gen-line-number
+        compiler:warn-use-undefined
+        compiler:warn-use-undefined-postpone
+        compiler:show-assembly-code
+        compiler:keep-formals
+        compiler:keep-source
+        compiler:inline-common-functions
+        compiler:unroll-iterations)
+
 #|
 <doc EXT compiler:time-display
  * (compiler:time-display)
@@ -171,9 +181,6 @@ doc>
                       (error 'compiler:unroll-iterations
                              "must be a positive fixnum. It was ~s" v))
                     v)))
-
-
-
 
 ;; ----------------------------------------------------------------------
 ;;      %compiler-set-flags ...
