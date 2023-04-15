@@ -1119,10 +1119,6 @@ doc>
       (cond ((fx< count 1) '(void))
             ((eq? count 1) `(begin ,@body))
             (else
-             (when (not (and (integer? (compiler:unroll-iterations))
-                             (positive? (compiler:unroll-iterations))))
-               (error "compiler:unroll-iterations must be a positive integer; it is ~S"
-                      (compiler:unroll-iterations)))
              (let ((q (quotient  count (compiler:unroll-iterations)))
                    (r (remainder count (compiler:unroll-iterations))))
                (let ((inside (%multiply-list body (compiler:unroll-iterations))))

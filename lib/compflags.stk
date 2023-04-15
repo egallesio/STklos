@@ -164,7 +164,14 @@ doc>
 (define compiler:show-assembly-code             (make-parameter #f))
 (define compiler:keep-formals                   (make-parameter #f))
 (define compiler:keep-source                    (make-parameter #f))
-(define compiler:unroll-iterations              (make-parameter 3))
+(define compiler:unroll-iterations
+  (make-parameter 3
+                  (lambda (v)
+                    (unless (and (fixnum? v) (fx>? v 0))
+                      (error 'compiler:unroll-iterations
+                             "must be a positive fixnum. It was ~s" v))
+                    v)))
+
 
 
 
