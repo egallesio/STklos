@@ -922,8 +922,10 @@ general_diff:
 
 
 static SCM int_quotient(SCM x, SCM y)
-/* Specialized version for creating rationals.
-   Accepts only integer or bignums as params */
+/* Specialized version for rationals.
+   Accepts only integer or bignums as params, and not inexacts as
+   int_divide. Also, *only* computes and returns the quotient,
+   not the remainder. */
 {
   mpz_t q;
   SCM res;
@@ -2548,7 +2550,7 @@ DEFINE_PRIMITIVE("floor", floor, subr1, (SCM x))
                                  sub2(RATIONAL_NUM(x),
                                       sub2(RATIONAL_DEN(x), MAKE_INT(1))):
                                  RATIONAL_NUM(x);
-                        return STk_quotient(tmp, RATIONAL_DEN(x));
+                        return int_quotient(tmp, RATIONAL_DEN(x));
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -2568,7 +2570,7 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
                                 RATIONAL_NUM(x) :
                                 add2(RATIONAL_NUM(x),
                                      sub2(RATIONAL_DEN(x), MAKE_INT(1)));
-                        return STk_quotient(tmp, RATIONAL_DEN(x));
+                        return int_quotient(tmp, RATIONAL_DEN(x));
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -2585,7 +2587,7 @@ DEFINE_PRIMITIVE("truncate", truncate, subr1, (SCM x))
                         double d = REAL_VAL(x);
                         return double2real(d < 0.0 ? ceil(d): floor(d));
                       }
-    case tc_rational: return STk_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
+    case tc_rational: return int_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
     case tc_bignum:
     case tc_integer:  return x;
     default:          error_not_a_real_number(x);
@@ -2611,7 +2613,7 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
                           tmp = (negativep(RATIONAL_NUM(x))) ?
                                    sub2(RATIONAL_NUM(x), MAKE_INT(1)):
                                    add2(RATIONAL_NUM(x), MAKE_INT(1));
-                          return mul2(STk_quotient(tmp, MAKE_INT(4)), MAKE_INT(2));
+                          return mul2(int_quotient(tmp,MAKE_INT(4)), MAKE_INT(2));
                         }
                         tmp = make_rational(add2(mul2(RATIONAL_NUM(x), MAKE_INT(2)),
                                                  RATIONAL_DEN(x)),
@@ -3272,7 +3274,7 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
 
       while (y != MAKE_INT(1)) {
         nx = mul2(x, x);
-        ny = STk_quotient(y, MAKE_INT(2));
+        ny = int_quotient(y, MAKE_INT(2));
         if (STk_evenp(y) == STk_false) val = mul2(x, val);
         x = nx;
         y = ny;
