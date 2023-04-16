@@ -2261,12 +2261,29 @@ static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
   } else {
     if (quotient)  mpz_init(q);
     if (remainder) mpz_init(r);
-
-    if (!quotient)        mpz_tdiv_r(r, BIGNUM_VAL(x), BIGNUM_VAL(y));
-    else if (!remainder)  mpz_tdiv_q(q, BIGNUM_VAL(x), BIGNUM_VAL(y));
-    else                  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y));
-
-    big_q = big_r = 1;
+    /* mpz_cmpabs seems fast enough to not make much of a difference,
+       so we can call it here -- and it makes the dividing SMALL / BIG
+       and N / N cases much faster (I wonder why the GMP doesn't do
+       this internally): */
+    int cmp = mpz_cmpabs(BIGNUM_VAL(x), BIGNUM_VAL(y));
+    if (cmp < 0) {
+      /* SMALL / BIG -> quotient 0, remainder x */
+      if (quotient)  quo = 0;
+      if (remainder) mpz_set(r, BIGNUM_VAL(x));
+      big_r = 1;
+    } else if (cmp == 0) {
+      /* (+-)N / (+-)N -> quotient (signX * signY), remainder 0 */
+      long xsign = mpz_sgn(BIGNUM_VAL(x));
+      long ysign = mpz_sgn(BIGNUM_VAL(x));
+      if (quotient)  quo = xsign * ysign;
+      if (remainder) rem = 0;
+    } else {
+      /* BIG / SMALL -> call a division GMP function */
+      if (!quotient)        mpz_tdiv_r(r, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      else if (!remainder)  mpz_tdiv_q(q, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      else                  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      big_q = big_r = 1;
+    }
   }
   /*** END OF CASES ***/
 
