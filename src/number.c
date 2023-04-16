@@ -2607,18 +2607,20 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
                         return double2real(res);
                       }
     case tc_rational: {
-                        SCM tmp;
-
-                        if (RATIONAL_DEN(x) == MAKE_INT(2)) {
-                          tmp = (negativep(RATIONAL_NUM(x))) ?
-                                   sub2(RATIONAL_NUM(x), MAKE_INT(1)):
-                                   add2(RATIONAL_NUM(x), MAKE_INT(1));
-                          return mul2(int_quotient(tmp,MAKE_INT(4)), MAKE_INT(2));
-                        }
-                        tmp = make_rational(add2(mul2(RATIONAL_NUM(x), MAKE_INT(2)),
-                                                 RATIONAL_DEN(x)),
-                                            mul2(RATIONAL_DEN(x), MAKE_INT(2)));
-                        return STk_floor(tmp);
+                        SCM q, r;
+                        int_divide(RATIONAL_NUM(x),
+                                   RATIONAL_DEN(x),
+                                   &q, &r, 1);
+                        /* abs(r) is between 0 and denom-1,
+                           so we can compare if r/2 <= denom. Or
+                           if 2 <= 2denom. */
+                        if (STk_numge2(mul2(absolute(r),MAKE_INT(2)),
+                                       RATIONAL_DEN(x)))
+                            return negativep(RATIONAL_NUM(x))
+                                ? sub2(q, MAKE_INT(1))
+                                : add2(q, MAKE_INT(1));
+                        else
+                            return q;
                       }
     case tc_bignum:
     case tc_integer:  return x;
