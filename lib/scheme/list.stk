@@ -960,18 +960,40 @@ written in C, in STklos core!
         (lp (cdr lis) (kons (car lis) ans))))))
 
 
+;; FOLD-RIGHT: the single list case has been changed:
+;; to avoid exhausting the stack AND to obtain better
+;; performance, instead of a recursive procedure we
+;; call list->vector and process the vector from the
+;; end towards the beginning.
+;; This avoids wrong results due to stack overflow
+;; in the following case:
+;; (define L (iota 1_000_000))
+;; (fold - 0 L)
+;; (With the default STklos stack size)
+;;
+;; This is a big less efficient for the N-ary cse, since
+;; we'd have to compute the minimum size of all lists
+;; (or vectors), potentially traversing the larger list
+;; (that could perhaps be a million times larger than the
+;; others). It would also probably require some more uses
+;; of apply.
 (define (fold-right kons knil lis1 . lists)
   (check-arg procedure? kons fold-right)
   (if (pair? lists)
       (let recur ((lists (cons lis1 lists)))        ; N-ary case
-    (let ((cdrs (%cdrs lists)))
-      (if (null? cdrs) knil
-          (apply kons (%cars+ lists (recur cdrs))))))
+        (let ((cdrs (%cdrs lists)))
+          (if (null? cdrs) knil
+              (apply kons (%cars+ lists (recur cdrs))))))
 
-      (let recur ((lis lis1))               ; Fast path
-    (if (null-list? lis) knil
-        (let ((head (car lis)))
-          (kons head (recur (cdr lis))))))))
+      (if (null-list? lis1) knil                    ; Fast path
+          (let* ((V (list->vector lis1))
+                 (n (- (vector-length V) 1))
+                 (x (kons (vector-ref V n) knil))
+                 (i (- n 1)))
+            (repeat n
+                    (set! x (kons (vector-ref V i) x))
+                    (set! i (- i 1)))
+            x))))
 
 
 (define (pair-fold-right f zero lis1 . lists)
