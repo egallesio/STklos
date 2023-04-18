@@ -831,6 +831,11 @@
 
 ;;; Return (map cdr lists).
 ;;; However, if any element of LISTS is empty, just abort and return '().
+
+#|
+%cars+, %cdrs, %cars+cdrs, %cars+cdrs+, %cars+cdrs/no-test are primitives
+written in C, in STklos core!
+
 (define (%cdrs lists)
   (call/ec
     (lambda (abort)
@@ -884,6 +889,7 @@
         (receive (cars cdrs) (recur other-lists)
           (values (cons a cars) (cons d cdrs)))))
     (values '() '()))))
+|#
 
 ;;; count
 ;;;;;;;;;
@@ -1483,7 +1489,7 @@ FILTER an FILTER! are primitives in STklos
                          (cons (car lis) (Loop (cdr lis))))
                   ;; found (hash table returned mark), ignore it
                   (Loop (cdr lis)))
-              lis))))) 
+              lis)))))
 
 ;; The reference implementation had duplicated code for these two procedures.
 ;; We can just make on alias to the other.
