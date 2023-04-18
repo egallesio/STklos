@@ -430,16 +430,19 @@
 ;;; Note that this definition rules out circular lists -- and this
 ;;; function is required to detect this case and return false.
 
-(define (proper-list? x)
-  (let lp ((x x) (lag x))
-    (if (pair? x)
-    (let ((x (cdr x)))
-      (if (pair? x)
-          (let ((x   (cdr x))
-            (lag (cdr lag)))
-        (and (not (eq? x lag)) (lp x lag)))
-          (null? x)))
-    (null? x))))
+;; The primitive list? does exactly the same.
+(define proper-list? (in-module SCHEME list?))
+
+;; (define (proper-list? x)
+;;   (let lp ((x x) (lag x))
+;;     (if (pair? x)
+;;     (let ((x (cdr x)))
+;;       (if (pair? x)
+;;           (let ((x   (cdr x))
+;;             (lag (cdr lag)))
+;;         (and (not (eq? x lag)) (lp x lag)))
+;;           (null? x)))
+;;     (null? x))))
 
 
 ;;; A dotted list is a finite list (possibly of length 0) terminated
@@ -1722,7 +1725,7 @@ FILTER an FILTER! are primitives in STklos
 ;;; file. However, in order to keep a list of exported symbol which is coherent
 ;;; with the text of the SRFI
 (define-macro (redefine symb)
-  `(define ,symb (in-module |STklos| ,symb)))
+  `(define ,symb (in-module SCHEME ,symb)))
 
 (redefine every)
 (redefine any)
