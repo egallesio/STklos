@@ -58,6 +58,7 @@
         define-constant
         void?
         default-browser open-in-browser manual man
+        exact-integer-log
         receive case-lambda
         radians->degrees degrees->radians
 
@@ -1850,6 +1851,58 @@ doc>
 doc>
 |#
 (define (void? obj) (eq? obj #void))
+
+#|
+
+<doc exact-integer-log
+ * (exact-integer-log n b)
+ *
+ * |Exact-integer-log| is to |log| what |exact-integer-sqrt| is to |sqrt|.
+ *
+ * Returns two values: the first value is the largest integer number less
+ * than or equal to the logarithm of |n| in base |b|. The second value is
+ * the difference between |n| and |(expt b k)|, where |k| is the first value.
+ *
+ * Both arguments must be exact, and the resulting values are exact integers.
+ * Also, both arguments are mandatory, since it is no meaningful in this context
+ * to use base *e*.
+ *
+ * @lisp
+ * (exact-integer-log 8 2)  => 3,0
+ * (exact-integer-log 11 2) => 3,3
+ * (exact-integer-log
+ *          (expt 3 5)
+ *          (expt 3 4))     => 1, 162
+ * (exact-integer-log 16 2) => 4, 0
+ * (exact-integer-log 19 1) => 4, 3
+ * (exact-integer-log
+ *          (expt 6 10000)
+ *          (expt 6 1000)) => 10, 0
+ * (exact-integer-log 2 1) => error
+ * (exact-integer-log 0 5) => error
+ * (exact-integer-log 0 0) => error
+ * @end lisp
+doc>
+|#
+(define (exact-integer-log n b)
+  (unless (and (exact-integer? n) (positive? n))
+    (error "log exponent ~S is not a positive exact integer" n))
+  (unless (and (exact-integer? b) (> b 1))
+    (error "log base ~S is not exact integer greater than one" b))
+  ;; This is easier and faster than R7RS exact-integer-sqrt, since:
+  ;; * log(n b) = log_2(n) / log_2(b).
+  ;; * integer-length(n) = floor(log_2(n)) + 1
+  ;; We just put it all together.
+  (let ((log2-n (- (integer-length n) 1))
+        (log2-b (- (integer-length b) 1)))
+    (let ((L (quotient log2-n log2-b)))
+      ;; Ok, so FLOOR(a/b) can be smaller than FLOOR(a)/FLOOR(b).
+      ;; That means we may have overestimated L -- but we should be
+      ;; close. If we overestimated, then (expt b L) will be larger
+      ;; than n, and we can subtract from it until we find the correct
+      ;; number.
+      (while (> (expt b L) n) (set! L (- L 1)))
+      (values L (- n (expt b L))))))
 
 #|
 <doc EXT radians->degrees degrees->radians
