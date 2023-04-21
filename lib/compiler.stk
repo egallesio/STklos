@@ -464,6 +464,16 @@ doc>
 ;;;;
 ;;;; IF
 ;;;;
+;;
+;; (if cond expr1 expr2) =>
+;;
+;; [ cond ]       * tail? = #f
+;; JUMP-FALSE L1
+;; [ expr1 ]
+;; GOTO L2
+;; L1:
+;; [ expr2 ] -or- IM-VOID
+;; L2:
 (define (compile-if args env tail?)
   (let ((len (length (cdr args)))
         (l1  (new-label))
