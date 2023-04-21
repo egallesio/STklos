@@ -625,15 +625,17 @@ doc>
        ((pair? l) (loop (cdr l) (+ n 1)))
        (else      (- (- n) 1)))))
 
+;; (extend-env env '(a b . c))  =>  scope (c b a) '() env)
+;; (extend-env env 'x)          =>  scope (x)     '() env)
 (define (extend-env env formals)
   (letrec ((aux (lambda (l res)
                   (cond
                      ((null? l) res)
                      ((pair? l) (aux (cdr l) (cons (car l) res)))
                      (else      (cons l res))))))
-    (make-scope (aux formals '())
-                '()
-                env)))
+    (make-scope (aux formals '()) ; locals
+                '()               ; mlocals
+                env)))            ; parent
 
 (define (extract-doc-and-name doc name body)
   ;; extract the doc string and and name of the prcedure if present in body
