@@ -1594,6 +1594,18 @@ doc>
 ;;
 ;; DO
 ;;
+;; (do ((a a0 a+)
+;;      (b b0 b+))
+;;     (test fin)
+;;   (body)) =>
+;;
+;; (letrec ((NAME
+;;           (lambda (a b ...)
+;;             (if test
+;;                 (begin fin)
+;;                 (begin body
+;;                        (name a+ b+ ...))))))
+;;  (NAME a0 b0 ...))
 (define (rewrite-do inits test body)
   (let ((loop-name (gensym)))
     `(letrec ((,loop-name
@@ -1615,7 +1627,7 @@ doc>
                                        inits)))))))
        (,loop-name ,@(map cadr inits)))))
 
-
+;; Just calls rewrite-do with tail? = #f
 (define (compile-do e env tail?)
   (if (>= (length e) 3)
       (compile (rewrite-do (cadr e) (caddr e) (cdddr e))
