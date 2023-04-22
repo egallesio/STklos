@@ -1118,17 +1118,21 @@ doc>
          (r      (gensym)))
     (if (fixnum? count)
         ;; We can compute the number of loops at compile time and produce
-        ;; simpler code. We can also use fx functions
-        (if (= it 1)
+        ;; simpler code. We can also use fx functions.
+        (if (and (= it 1) (positive? count))
             ;; No loop unrolling
             `(let ((,c ,count)) ,(%repeat c body #t))
-            ;; Unroll the loop
-            `(let ((,q ,(quotient count it))
-                   (,r ,(remainder count it)))
-               ,(%repeat q inside #t)
-               ,(%repeat r body #t)))
+            ;; Unroll the loop.
+            (let ((valq (quotient count it))
+                  (valr (remainder count it)))
+               `(begin
+                  ,(if (positive? valq) ;; We have a "big" loop
+                      `(let ((,q ,valq)) ,(%repeat q inside #t))
+                      `(void))
+                  ,(if (positive? valr);; we have a "small" loop
+                       `(let ((,r ,valr)) ,(%repeat r body #t))
+                       `(void)))))
         ;; count is not a fixnum.  Compute modulo and reminder at runtime
-        ;; Use standard '-' and '>'
         (if (= it 1)
             ;; No loop unrolling.
             `(let ((,c ,count)) ,(%repeat c body #f))
