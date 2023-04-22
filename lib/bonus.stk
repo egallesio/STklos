@@ -1086,20 +1086,19 @@ doc>
 |#
 (define-macro (repeat count . body)
 
-  (define (%repeat expr body)
-    ;; Repeat without loop unrolling.
+  (define (%repeat n body use-fx?)
+    ;; Repeat without loop unrolling (n must be a variable)
     ;; If expr is constant *and* a fixnum, we can use fx- and fx>,
     ;; even though the speed difference is not that great.
-    (let ((var (gensym))
-          (minus (if (fixnum? expr) 'fx- '-))
-          (gt    (if (fixnum? expr) 'fx> '>)))
-      `(let ((,var ,expr))
-         (tagbody
+    (let ((minus (if use-fx? 'fx- '-))
+          (gt    (if use-fx? 'fx> '>)))
+      `(tagbody
           #:top
-          (when (,gt ,var 0)
-            (set! ,var (,minus ,var 1))
+          (when (,gt ,n 0)
+            (set! ,n (,minus ,n 1))
             ,@body
-            (-> #:top))))))
+            (-> #:top)))))
+
 
   (define (%multiply-list L k)
     ;; Multiplies a list...
@@ -1112,21 +1111,33 @@ doc>
   ;;
   ;; body of repeat starts here
   ;;
-  (if (fixnum? count)
-      ;; In the unlikely situation when the user requested "one"
-      ;; or "zero" iterations (maybe this is generated code?), we don't
-      ;; even create a let binding...
-      (cond
-       ((fx< count 1) '(void))
-       ((eq? count 1) `(begin ,@body))
-       (else          (let* ((it     (compiler:unroll-iterations))
-                             (q      (quotient  count it))
-                             (r      (remainder count it))
-                             (inside (%multiply-list body it)))
-                        `(begin ,(%repeat q inside)
-                                ,@(%multiply-list body r)))))
-      ;; count is not a fixnum
-      (%repeat count body)))
+  (let* ((it     (compiler:unroll-iterations))
+         (inside (%multiply-list body it))
+         (c      (gensym))
+         (q      (gensym))
+         (r      (gensym)))
+    (if (fixnum? count)
+        ;; We can compute the number of loops at compile time and produce
+        ;; simpler code. We can also use fx functions
+        (if (= it 1)
+            ;; No loop unrolling
+            `(let ((,c ,count)) ,(%repeat c body #t))
+            ;; Unroll the loop
+            `(let ((,q ,(quotient count it))
+                   (,r ,(remainder count it)))
+               ,(%repeat q inside #t)
+               ,(%repeat r body #t)))
+        ;; count is not a fixnum.  Compute modulo and reminder at runtime
+        ;; Use standard '-' and '>'
+        (if (= it 1)
+            ;; No loop unrolling.
+            `(let ((,c ,count)) ,(%repeat c body #f))
+            ;; Unroll the loop
+            `(let* ((,c ,count)
+                    (,q (quotient ,c ,it))
+                    (,r (remainder ,c ,it)))
+               ,(%repeat q inside #f)
+               ,(%repeat r body #f))))))
 
 #|
 <doc EXT-SYNTAX while
