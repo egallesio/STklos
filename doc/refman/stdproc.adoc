@@ -57,6 +57,7 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'rationalize}}
 {{insertdoc 'atan}}
 {{insertdoc 'atanh}}
+{{insertdoc 'radians->degrees}}
 {{insertdoc 'sqrt}}
 {{insertdoc 'square}}
 {{insertdoc 'exact-integer-sqrt}}
@@ -978,4 +979,3 @@ See SRFI document for more information.
 {{insertdoc 'base64-decode}}
 {{insertdoc 'base64-encode-string}}
 {{insertdoc 'base64-decode-string}}
-
