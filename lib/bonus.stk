@@ -1831,10 +1831,12 @@ doc>
 doc>
 |#
 (define (radians->degrees r)
+  (unless (real? r) (error "bad real number ~S" r))
   (/ (* r 180)
      3.141592653589793115997963468544185161590576171875)) ; pi
 
 (define (degrees->radians d)
+  (unless (real? d) (error "bad real number ~S" d))
   (* (/ d 180)
      3.141592653589793115997963468544185161590576171875)) ; pi
 
