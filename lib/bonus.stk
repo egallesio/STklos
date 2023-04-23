@@ -1045,7 +1045,7 @@ doc>
   ;; The second case will be faster for nested DOTIMEs, because it
   ;; avoids access to a local variable *and* entering-and-leaving
   ;; a LET.
-
+  ;;
   ;; Also - if count is constant *and* a fixnum, we can use
   ;; fx- and fx>, even though the speed difference is not
   ;; that great.
@@ -1066,6 +1066,21 @@ doc>
                           ((,ge ,var ,limit) ,@result)
                         ,@body))))
          bindings))
+
+;; NOTE: I (eg) have tried to implement dotimes using a repeat, to inherit loop
+;; unrolling. It's really faster, ... but not thread-safe :-<. The correction to make
+;; the expansion thread safe is slower than the previous implementation.
+;;
+;;(define-macro (dotimes bindings . body)
+;;  (apply (lambda (var count . result)
+;;           (let* ((result (if (null? result) (list '(void)) result))
+;;                  (plus   (if (fixnum? count) 'fx+ '+)))
+;;             `(let ((,var 0))
+;;                (repeat ,count
+;;                        ,@body ;; thread safe version: (let ((,var ,var)) ,@body)
+;;                        (set! ,var (,plus ,var 1)))
+;;                ,@result)))
+;;         bindings))
 
 #|
 <doc EXT-SYNTAX repeat

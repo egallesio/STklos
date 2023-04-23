@@ -141,7 +141,8 @@ in produced code. This flag uses the parameter
 \fIcompiler:inline-common-functions\fR.
 .IP "" 10
 - \fIunroll-iterations\fR can be used to set the number of iterations to be unrolled
-in . This flag uses the parameter \fIcompiler:unroll-iterations\fR.
+in loops. This flag uses the parameter \fIcompiler:unroll-iterations\fR and its
+default value is 4.
 
 
 .IP "-v, --version"

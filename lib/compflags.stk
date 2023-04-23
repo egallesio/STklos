@@ -175,7 +175,7 @@ doc>
 (define compiler:keep-formals                   (make-parameter #f))
 (define compiler:keep-source                    (make-parameter #f))
 (define compiler:unroll-iterations
-  (make-parameter 3
+  (make-parameter 4
                   (lambda (v)
                     (unless (and (fixnum? v) (positive? v))
                       (error 'compiler:unroll-iterations
