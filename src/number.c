@@ -3224,8 +3224,25 @@ static SCM my_expt(SCM x, SCM y)
     case tc_integer:
     case tc_bignum:   return exact_exponent_expt(x, y);
     case tc_rational:
-    case tc_real:     if (zerop(y)) return double2real(1.0);
-                      if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
+    case tc_real:     { if (zerop(y)) return double2real(1.0);
+                        if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
+                        if (REALP(y)) {
+                            if (REALP(x)) {
+                                /* real ^ real, see if we can use pow: */
+                                double r = pow(REAL_VAL(x),REAL_VAL(y));
+                                if (!isinf(r) || /* no overflow, return r */
+                                    (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not really overflow, one argument was inf! */
+                                    return double2real(r);
+                            }
+                            if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
+                                /* It represents an integer precisely! Turn the exponent into
+                                   an exact number and call exact_exponent_expt: */
+                                return exact2inexact(exact_exponent_expt(x, (inexact2exact(y))));
+                            /* Either r overflowed, or y didn't represent an integer perfectly.
+                               Fall through to use STklos' arithmetic version of
+                               exp(log(x) * y)                                                  */
+                        }
+                      }
                       /* FALLTHROUGH */
     case tc_complex:  if (zerop(x)) {
                           /* R7RS: The value of 0^z is 1 if (zero? z), 0 if
