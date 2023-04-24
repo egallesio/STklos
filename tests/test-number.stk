@@ -1707,6 +1707,7 @@
 (test "acosh 1"   0 (acosh 1))
 (test "atanh 0"   0 (atanh 0))
 
+
 ;;------------------------------------------------------------------
 (test-subsection "Misc")
 
@@ -1883,5 +1884,38 @@
       "123.123"
       (parameterize ((real-precision 6)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
 
+(test "degrees->radians 0"
+      0.0
+      (degrees->radians 0))
+
+(test "degrees->radians 180"
+      #t
+      (< 3.14159265
+         (degrees->radians 180)
+         3.14159266))
+
+(test "degrees->radians 10"
+      #t
+      (< 0.17453292
+         (degrees->radians 10)
+         0.17453293))
+
+(let ((pi 3.141592653589793115997963468544185161590576171875))
+
+  (test "radians->degrees 0"
+        0.0
+        (radians->degrees 0))
+
+  (test "radians->degrees pi"
+        #t
+        (< 179.99999
+           (radians->degrees pi)
+           180.00001))
+
+  (test "radians->degrees 10"
+        #t
+        (< 35.99999
+           (radians->degrees (/ pi 5))
+           36.00001)))
 
 (test-section-end)

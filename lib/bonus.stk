@@ -58,6 +58,7 @@
         define-constant
         void?
         receive case-lambda
+        radians->degrees degrees->radians
 
         %define-condition-type-accessors
         message-condition? condition-message
@@ -1914,7 +1915,24 @@ doc>
 |#
 (define (void? obj) (eq? obj #void))
 
+#|
+<doc EXT radians->degrees degrees->radians
+ * (radians->degrees r)
+ * (degrees->radians d)
+ *
+ * These procedures convert angles from radians into degrees and
+ * from degrees into radians.
+doc>
+|#
+(define (radians->degrees r)
+  (unless (real? r) (error "bad real number ~S" r))
+  (/ (* r 180)
+     3.141592653589793115997963468544185161590576171875)) ; pi
 
+(define (degrees->radians d)
+  (unless (real? d) (error "bad real number ~S" d))
+  (* (/ d 180)
+     3.141592653589793115997963468544185161590576171875)) ; pi
 
 ;;;
 ;;; Misc
