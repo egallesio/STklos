@@ -57,7 +57,7 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'rationalize}}
 {{insertdoc 'atan}}
 {{insertdoc 'atanh}}
-{{insertdoc 'radians->degrees}}
+{{insertdoc 'degrees->radians}}
 {{insertdoc 'sqrt}}
 {{insertdoc 'square}}
 {{insertdoc 'exact-integer-sqrt}}
