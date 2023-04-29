@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 16-Mar-2023 02:06 (ryandesign)
  */
 
 // INLINER values
@@ -88,12 +87,6 @@ static Inline void set_signal_mask(sigset_t mask)
 {
   sigprocmask(SIG_SETMASK, &mask, NULL);
 }
-
-static void error_unbound_variable(SCM symbol)
-{
-  STk_error("variable ~S unbound", symbol);
-}
-
 
 /*===========================================================================*\
  *
@@ -1028,7 +1021,7 @@ CASE(GLOBAL_REF) {
   vm->val= STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    STk_error_unbound_variable(orig_operand, vm->current_module);
   }
 
   /* patch the code for optimize next accesses */
@@ -1059,7 +1052,7 @@ CASE(GLOBAL_REF_PUSH) {
   res = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    STk_error_unbound_variable(orig_operand, vm->current_module);
   }
 
   push(res);
@@ -1096,7 +1089,7 @@ CASE(GREF_INVOKE) {
   vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    STk_error_unbound_variable(orig_operand, vm->current_module);
   }
 
   nargs = fetch_next();
@@ -1139,7 +1132,7 @@ CASE(GREF_TAIL_INVOKE) {
   vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    STk_error_unbound_variable(orig_operand, vm->current_module);
   }
 
   nargs = fetch_next();
@@ -1234,7 +1227,7 @@ CASE(GLOBAL_SET) {
   STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
-    error_unbound_variable(orig_operand);
+    STk_error_unbound_variable(orig_operand, vm->current_module);
   }
   if (BOXED_INFO(ref) & CONS_CONST) {
     RELEASE_LOCK;
@@ -1519,6 +1512,15 @@ CASE(DOCSTRG) {
     CLOSURE_PLIST(vm->val) = STk_key_set(CLOSURE_PLIST(vm->val),
                                          STk_key_doc,
                                          str);
+  }
+  NEXT;
+}
+
+ CASE(PROCNAME) {
+   SCM name = fetch_const();
+
+   if (vm->valc == 1 && CLOSUREP(vm->val)) {
+     CLOSURE_NAME(vm->val) = name;
   }
   NEXT;
 }
@@ -2245,7 +2247,7 @@ SCM STk_load_bcode_file(SCM f)
 {
   SCM consts, code_size, *save_constants, save_env;
   STk_instr *save_pc;
-  int size;
+  long size;
   vm_thread_t *vm = STk_get_current_vm();
 
   /* Save machine state */

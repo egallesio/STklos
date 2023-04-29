@@ -2,10 +2,10 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 11-Mar-2023 06:40 (ryandesign)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.70])
+AC_INIT([stklos],[1.70])   # Set also VERSION_STATUS to stable when changing version
+VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
 # Grab configure options before it is too late
@@ -265,15 +265,18 @@ echo "*****"
 echo "***** GMP support"
 echo "*****"
 
+
 # Try to determine if libgmp is installed
-# No pkg-config for gmp yet
-
-# check for GMP pre-version 3.0
-AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
-
-# check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+if ${PKGCONFIG} --exists gmp ;then
+   HAVE_GMP="yes"
+   GMPKG="present"
+else
+   # check for GMP pre-version 3.0
+   AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+   # check for GMP version post 3.0
+   if test "$HAVE_GMP" = "no" ;then
+      AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+   fi
 fi
 
 # Test if the user wants to force the use of our GMP lib
@@ -300,8 +303,13 @@ then
 else
      echo "... Using system libgmp library"
      GMP=""
-     GMPINC=""
-     GMPLIB="-lgmp"
+     if $PKGCONFIG --exists gmp ;then
+        GMPINC="$($PKGCONFIG --cflags gmp)"
+        GMPLIB="$($PKGCONFIG --libs gmp)"
+     else
+        GMPINC=""
+        GMPLIB="-lgmp"
+     fi
      DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
      SYST_LIBS="libgmp $SYST_LIBS"
@@ -309,52 +317,47 @@ fi
 
 
 # ----------------------------------------------------------------------
-# PCRE support
+# PCRE2 support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** Regexp support"
 echo "*****"
 
-# Try to determine if libpcre is installed
-if ${PKGCONFIG} --exists libpcre ;then
-   HAVE_PCRE="yes"
-   PCREPKG="present"
+# Try to determine if libpcre2 is installed
+if ${PKGCONFIG} --exists libpcre2-8 libpcre2-posix ;then
+   HAVE_PCRE2="yes"
+   PCRE2PKG="present"
 else
-   AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
+    AC_CHECK_LIB(pcre2-8, pcre2_config_8, HAVE_PCRE2="yes", HAVE_PCRE2="no", $LIBS)
 fi
 
-# Test if the user wants to force the use of our PCRE lib
+# Test if the user wants to force the use of our PCRE2 lib
 AC_ARG_WITH(provided-regexp,
-       [  --with-provided-regexp  use the provided Regexp (PCRE) library],
-       PROV_PCRE="$withval", PROV_PCRE="no")
+       [  --with-provided-regexp  use the provided Regexp (PCRE2) library],
+       PROV_PCRE2="$withval", PROV_PCRE2="no")
 
-if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
+if test "$HAVE_PCRE2" = "no" -o "$PROV_PCRE2" = "yes"
 then
-     echo "... Configuring libpcre"
-     PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-                 -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-     (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
-           --enable-utf8 \
+     echo "... Configuring libpcre2"
+     (cd pcre2; CC=${CC} CFLAGS="${CFLAGS}" ./configure \
            --prefix=$prefix --disable-shared --disable-cpp) || \
-           { echo "Cannot configure PCRE"; exit; }
-     PCRE=pcre
-     PCREINC="-I../pcre"
-     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-     DEF_PCRE=""
-     COMP_LIBS="libpcre $COMP_LIBS"
+           { echo "Cannot configure PCRE2"; exit; }
+     PCRE2=pcre2
+     PCRE2INC="-I../pcre2"
+     PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
+     COMP_LIBS="libpcre2 $COMP_LIBS"
 else
-     echo "... Using system libpcre library"
-     PCRE=""
-     if $PKGCONFIG --exists libpcre ;then
-        PCREINC="$($PKGCONFIG --cflags libpcre)"
-        PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
+     echo "... Using system libpcre2 library"
+     if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
+        PCRE2INC="$($PKGCONFIG --cflags libpcre2-8 libpcre2-posix) "
+        PCRE2LIB="$($PKGCONFIG --libs   libpcre2-8 libpcre2-posix)"
      else
-        PCREINC=""
-        PCRELIB="-lpcre -lpcreposix"
+        PCRE2INC=""
+        PCRE2LIB="-lpcre-8 -lpcre2-posix"
      fi
-     DLLIBS="$DLLIBS $PCRELIB"
-     AC_DEFINE(HAVE_PCRE, 1 , [We use our version of pcre])
-     SYST_LIBS="libpcre $SYST_LIBS"
+     DLLIBS="$DLLIBS $PCRE2LIB"
+     AC_DEFINE(HAVE_PCRE2, 1 , [We use our version of pcre])
+     SYST_LIBS="libpcre2 $SYST_LIBS"
 fi
 
 
@@ -479,7 +482,7 @@ do
 done
 
 # c.link property
-for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRELIB} ${FFILIB} ${GCLIB} -lm
+for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRE2LIB} ${FFILIB} ${GCLIB} -lm
 do
     C_LINK="${C_LINK}\\\"${arg}\\\" "
 done
@@ -514,7 +517,7 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
 
-CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
+CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
@@ -550,9 +553,38 @@ case $UNAME_O in
   *) DLLIBS="";;
 esac
 
+# Get configure/compilation directory
+COMP_DIR=`pwd`
+
+
+# Add information to VERSION
+FULL_VERSION=$VERSION
+
+if test $VERSION_STATUS = "unstable"
+then
+  # This code duplicates some code from "utils/generate-git-info"
+  # but it makes things simpler
+  git_version=`git --version 2>/dev/null || true`
+
+  if test "$git_version" != ""
+  then
+    # Git is installed
+    git_patch="`git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/'`"
+    if test "X$git_patch" != "X"
+    then
+      FULL_VERSION="$VERSION.$git_patch"
+    fi
+  else
+    FULL_VERSION=$VERSION-unstable
+  fi
+fi
+
+
 ### Output files
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
+AC_SUBST(FULL_VERSION)
+AC_SUBST(VERSION_STATUS)
 AC_SUBST(HAVE_DLOPEN)
 AC_SUBST(OS_FLAVOUR)
 AC_SUBST(UNAME_O)
@@ -578,15 +610,16 @@ AC_SUBST(STACK_DIRECTION)
 AC_SUBST(HAVE_GNOME)
 AC_SUBST(LDAP_LIB)
 AC_SUBST(STRIPCMD)
+AC_SUBST(COMP_DIR)
 #GC
 AC_SUBST(GC)
 AC_SUBST(GCLIB)
 AC_SUBST(GCINC)
-# PCRE
-AC_SUBST(PCRE)
-AC_SUBST(PCRELIB)
-AC_SUBST(PCREINC)
-AC_SUBST(PCREPKG)
+# PCRE2
+AC_SUBST(PCRE2)
+AC_SUBST(PCRE2LIB)
+AC_SUBST(PCRE2INC)
+AC_SUBST(PCRE2PKG)
 # FFI
 AC_SUBST(FFI)
 AC_SUBST(FFILIB)
@@ -622,7 +655,7 @@ AC_SUBST(GOOVERS)
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script examples/Makefile
+          utils/stklos-script utils/tmpcomp examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/scheme/Makefile lib/srfi/Makefile
           lib/stklos/Makefile lib/streams/Makefile
@@ -654,7 +687,7 @@ AC_OUTPUT
 # Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
-chmod 0755 utils/stklos-config utils/stklos-script
+chmod 0755 utils/stklos-config utils/stklos-script utils/tmpcomp
 
 
 echo " "

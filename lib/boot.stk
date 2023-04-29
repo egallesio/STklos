@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 28-Feb-2023 20:54 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -49,7 +48,7 @@
 ;; 2. Set the export list of SCHEME to the one of STklos
 (%populate-scheme-module)
 (%module-exports-set! (find-module 'SCHEME)
-                      (module-exports (find-module 'STklos)))
+                      (%module-exports (find-module 'STklos)))
 
 ;; NOTE: This include MUST be done early (and not earlier). See why.
 (include "compiler.stk")        ; VM Compiler (this include MUST be done early)
@@ -99,9 +98,7 @@
 ;;
 (let ((STklos (find-module 'STklos))
       (SCHEME (find-module 'SCHEME)))
-  (for-each (lambda(x)
-              (let ((v (cdr x)))
-                (%symbol-define v (symbol-value v SCHEME) STklos)))
+  (for-each (lambda(v) (%symbol-define v (symbol-value v SCHEME) STklos))
             (module-exports SCHEME)))
 
 ;;

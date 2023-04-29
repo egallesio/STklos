@@ -17,11 +17,10 @@
 #
 #  Makefile.in 	-- Makefile for Curl Extension
 #
-# Copyright © 2021-2022 Erick Gallesio - Polytech Nice-Sophia <eg@unice.fr>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 18-Jun-2021 08:18
-# Last file update: 10-Feb-2022 16:55 (eg)
 #
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -203,6 +202,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
 COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
@@ -227,6 +227,7 @@ EXEEXT = @EXEEXT@
 FFI = @FFI@
 FFIINC = @FFIINC@
 FFILIB = @FFILIB@
+FULL_VERSION = @FULL_VERSION@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -265,10 +266,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -293,6 +294,7 @@ SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
+VERSION_STATUS = @VERSION_STATUS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -652,6 +654,7 @@ clean-am:
 	rm -f *~
 
 distclean-am: clean-am
+	(cd demos; make distclean)
 	rm -f Makefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

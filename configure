@@ -670,13 +670,14 @@ RDLINE
 FFIINC
 FFILIB
 FFI
-PCREPKG
-PCREINC
-PCRELIB
-PCRE
+PCRE2PKG
+PCRE2INC
+PCRE2LIB
+PCRE2
 GCINC
 GCLIB
 GC
+COMP_DIR
 STRIPCMD
 LDAP_LIB
 HAVE_GNOME
@@ -702,6 +703,8 @@ GMP
 UNAME_O
 OS_FLAVOUR
 HAVE_DLOPEN
+VERSION_STATUS
+FULL_VERSION
 STKCFLAGS
 NO_THREAD_FALSE
 NO_THREAD_TRUE
@@ -1475,7 +1478,7 @@ Optional Packages:
   --with-provided-gc      use the provided Boehm GC library
   --with-provided-bignum  use the provided Bignum (GMPlite) library
   --with-gmp-light        a synonym for --with-provided-bignum
-  --with-provided-regexp  use the provided Regexp (PCRE) library
+  --with-provided-regexp  use the provided Regexp (PCRE2) library
   --with-provided-ffi     use the provided FFI library
   --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums
 
@@ -2671,7 +2674,8 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
+   # Set also VERSION_STATUS to stable when changing version
+VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
 # Grab configure options before it is too late
@@ -7177,11 +7181,14 @@ echo "*****"
 echo "***** GMP support"
 echo "*****"
 
-# Try to determine if libgmp is installed
-# No pkg-config for gmp yet
 
-# check for GMP pre-version 3.0
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
+# Try to determine if libgmp is installed
+if ${PKGCONFIG} --exists gmp ;then
+   HAVE_GMP="yes"
+   GMPKG="present"
+else
+   # check for GMP pre-version 3.0
+   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
 printf %s "checking for mpz_init_set in -lgmp... " >&6; }
 if test ${ac_cv_lib_gmp_mpz_init_set+y}
 then :
@@ -7223,10 +7230,9 @@ else $as_nop
   HAVE_GMP="no"
 fi
 
-
-# check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
+   # check for GMP version post 3.0
+   if test "$HAVE_GMP" = "no" ;then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
 printf %s "checking for __gmpz_init_set in -lgmp... " >&6; }
 if test ${ac_cv_lib_gmp___gmpz_init_set+y}
 then :
@@ -7268,6 +7274,7 @@ else $as_nop
   HAVE_GMP="no"
 fi
 
+   fi
 fi
 
 # Test if the user wants to force the use of our GMP lib
@@ -7306,8 +7313,13 @@ then
 else
      echo "... Using system libgmp library"
      GMP=""
-     GMPINC=""
-     GMPLIB="-lgmp"
+     if $PKGCONFIG --exists gmp ;then
+        GMPINC="$($PKGCONFIG --cflags gmp)"
+        GMPLIB="$($PKGCONFIG --libs gmp)"
+     else
+        GMPINC=""
+        GMPLIB="-lgmp"
+     fi
      DLLIBS="$DLLIBS $GMPLIB"
 
 printf "%s\n" "#define HAVE_GMP 1" >>confdefs.h
@@ -7317,101 +7329,96 @@ fi
 
 
 # ----------------------------------------------------------------------
-# PCRE support
+# PCRE2 support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** Regexp support"
 echo "*****"
 
-# Try to determine if libpcre is installed
-if ${PKGCONFIG} --exists libpcre ;then
-   HAVE_PCRE="yes"
-   PCREPKG="present"
+# Try to determine if libpcre2 is installed
+if ${PKGCONFIG} --exists libpcre2-8 libpcre2-posix ;then
+   HAVE_PCRE2="yes"
+   PCRE2PKG="present"
 else
-   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pcre_fullinfo in -lpcre" >&5
-printf %s "checking for pcre_fullinfo in -lpcre... " >&6; }
-if test ${ac_cv_lib_pcre_pcre_fullinfo+y}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pcre2_config_8 in -lpcre2-8" >&5
+printf %s "checking for pcre2_config_8 in -lpcre2-8... " >&6; }
+if test ${ac_cv_lib_pcre2_8_pcre2_config_8+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpcre $LIBS $LIBS"
+LIBS="-lpcre2-8 $LIBS $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char pcre_fullinfo ();
+char pcre2_config_8 ();
 int
 main (void)
 {
-return pcre_fullinfo ();
+return pcre2_config_8 ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_pcre_pcre_fullinfo=yes
+  ac_cv_lib_pcre2_8_pcre2_config_8=yes
 else $as_nop
-  ac_cv_lib_pcre_pcre_fullinfo=no
+  ac_cv_lib_pcre2_8_pcre2_config_8=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcre_pcre_fullinfo" >&5
-printf "%s\n" "$ac_cv_lib_pcre_pcre_fullinfo" >&6; }
-if test "x$ac_cv_lib_pcre_pcre_fullinfo" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcre2_8_pcre2_config_8" >&5
+printf "%s\n" "$ac_cv_lib_pcre2_8_pcre2_config_8" >&6; }
+if test "x$ac_cv_lib_pcre2_8_pcre2_config_8" = xyes
 then :
-  HAVE_PCRE="yes"
+  HAVE_PCRE2="yes"
 else $as_nop
-  HAVE_PCRE="no"
+  HAVE_PCRE2="no"
 fi
 
 fi
 
-# Test if the user wants to force the use of our PCRE lib
+# Test if the user wants to force the use of our PCRE2 lib
 
 # Check whether --with-provided-regexp was given.
 if test ${with_provided_regexp+y}
 then :
-  withval=$with_provided_regexp; PROV_PCRE="$withval"
+  withval=$with_provided_regexp; PROV_PCRE2="$withval"
 else $as_nop
-  PROV_PCRE="no"
+  PROV_PCRE2="no"
 fi
 
 
-if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
+if test "$HAVE_PCRE2" = "no" -o "$PROV_PCRE2" = "yes"
 then
-     echo "... Configuring libpcre"
-     PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-                 -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-     (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
-           --enable-utf8 \
+     echo "... Configuring libpcre2"
+     (cd pcre2; CC=${CC} CFLAGS="${CFLAGS}" ./configure \
            --prefix=$prefix --disable-shared --disable-cpp) || \
-           { echo "Cannot configure PCRE"; exit; }
-     PCRE=pcre
-     PCREINC="-I../pcre"
-     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-     DEF_PCRE=""
-     COMP_LIBS="libpcre $COMP_LIBS"
+           { echo "Cannot configure PCRE2"; exit; }
+     PCRE2=pcre2
+     PCRE2INC="-I../pcre2"
+     PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
+     COMP_LIBS="libpcre2 $COMP_LIBS"
 else
-     echo "... Using system libpcre library"
-     PCRE=""
-     if $PKGCONFIG --exists libpcre ;then
-        PCREINC="$($PKGCONFIG --cflags libpcre)"
-        PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
+     echo "... Using system libpcre2 library"
+     if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
+        PCRE2INC="$($PKGCONFIG --cflags libpcre2-8 libpcre2-posix) "
+        PCRE2LIB="$($PKGCONFIG --libs   libpcre2-8 libpcre2-posix)"
      else
-        PCREINC=""
-        PCRELIB="-lpcre -lpcreposix"
+        PCRE2INC=""
+        PCRE2LIB="-lpcre-8 -lpcre2-posix"
      fi
-     DLLIBS="$DLLIBS $PCRELIB"
+     DLLIBS="$DLLIBS $PCRE2LIB"
 
-printf "%s\n" "#define HAVE_PCRE 1 " >>confdefs.h
+printf "%s\n" "#define HAVE_PCRE2 1 " >>confdefs.h
 
-     SYST_LIBS="libpcre $SYST_LIBS"
+     SYST_LIBS="libpcre2 $SYST_LIBS"
 fi
 
 
@@ -7608,7 +7615,7 @@ do
 done
 
 # c.link property
-for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRELIB} ${FFILIB} ${GCLIB} -lm
+for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRE2LIB} ${FFILIB} ${GCLIB} -lm
 do
     C_LINK="${C_LINK}\\\"${arg}\\\" "
 done
@@ -7643,7 +7650,7 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
 
-CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
+CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
@@ -7761,7 +7768,37 @@ fi
   *) DLLIBS="";;
 esac
 
+# Get configure/compilation directory
+COMP_DIR=`pwd`
+
+
+# Add information to VERSION
+FULL_VERSION=$VERSION
+
+if test $VERSION_STATUS = "unstable"
+then
+  # This code duplicates some code from "utils/generate-git-info"
+  # but it makes things simpler
+  git_version=`git --version 2>/dev/null || true`
+
+  if test "$git_version" != ""
+  then
+    # Git is installed
+    git_patch="`git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/'`"
+    if test "X$git_patch" != "X"
+    then
+      FULL_VERSION="$VERSION.$git_patch"
+    fi
+  else
+    FULL_VERSION=$VERSION-unstable
+  fi
+fi
+
+
 ### Output files
+
+
+
 
 
 
@@ -7793,7 +7830,7 @@ esac
 
 
 
-# PCRE
+# PCRE2
 
 
 
@@ -7830,7 +7867,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script utils/tmpcomp examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8574,6 +8611,7 @@ do
     "utils/Makefile") CONFIG_FILES="$CONFIG_FILES utils/Makefile" ;;
     "utils/stklos-config") CONFIG_FILES="$CONFIG_FILES utils/stklos-config" ;;
     "utils/stklos-script") CONFIG_FILES="$CONFIG_FILES utils/stklos-script" ;;
+    "utils/tmpcomp") CONFIG_FILES="$CONFIG_FILES utils/tmpcomp" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
     "lib/Match.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Match.d/Makefile" ;;
     "lib/SILex.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/SILex.d/Makefile" ;;
@@ -9336,7 +9374,7 @@ fi
 # Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
-chmod 0755 utils/stklos-config utils/stklos-script
+chmod 0755 utils/stklos-config utils/stklos-script utils/tmpcomp
 
 
 echo " "

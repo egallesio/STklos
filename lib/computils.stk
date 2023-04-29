@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update:  4-Mar-2023 11:48 (eg)
 ;;;;
 
 
@@ -68,7 +67,7 @@
                             (%path-without-cwd (%epair-file who))
                             (%epair-line who))
                     "")))
-    (if (or #t *compiler-port*)
+    (if (or #t *compiler-port*)   ;; FIXME 
         ;; Compiling a file
         (apply format
                (current-error-port)

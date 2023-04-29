@@ -4,7 +4,6 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 19-Feb-2023 16:40 (eg)
 
 {{chapter "Pattern Matching"}}
 (((pattern Matching)))

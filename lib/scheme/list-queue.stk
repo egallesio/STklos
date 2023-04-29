@@ -46,7 +46,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 30-Jun-2020 05:01 (jpellegrini)
-;;;; Last file update:  2-Oct-2022 21:10 (eg)
 ;;;;
 
 (define-module scheme/list-queue

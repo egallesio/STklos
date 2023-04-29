@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 11-Feb-2023 19:03
-;;;; Last file update: 11-Feb-2023 19:12 (eg)
 ;;;;
 
 (define-library (srfi 244)

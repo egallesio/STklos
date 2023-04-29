@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 14:29 (eg)
-;;;; Last file update: 18-May-2021 18:00 (eg)
 ;;;;
 
 ;;;; Most of theses tests were stolen in Gauche Scheme distribution
@@ -1097,7 +1096,19 @@
 (test "exact expt" 1 (expt 1 720000))
 (test "exact expt" 1 (expt -1 720000))
 (test "exact expt" -1 (expt -1 720001))
-
+(test "0^0" 1 (expt 0 0))        ; exact exponent, exact 1
+(test "0^0" 1 (expt 0.0 0))      ; exact exponent, exact 1
+(test "0^0" 1.0 (expt 0 0.0))    ; inexact exponent, inexact 1.0
+(test "0^0" 1.0 (expt 0.0 0.0))  ; inexact exponent, inexact 1.0
+(test "complex expt"
+      #t
+      (let* ((z (expt 2 -3+4i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (< -0.116585885  r -0.116585884)
+             (<  0.045085823 i   0.045085824))))
+(test/error "0^-a+bi" (expt 0   -2+1i))
+(test/error "0^-a+bi" (expt 0.0 -2+1i))
 
 ;;------------------------------------------------------------------
 (test-subsection "sqrt")
@@ -1414,6 +1425,17 @@
 (test "log 1.0"
       0.0
       (log 1.0))
+
+(test "log 0.0"
+      -inf.0
+      (log 0.0))
+
+(test "log -0.0" ;; R7RS says (log -0.0) should be "-inf + i*pi".
+      #t
+      (let ((z (log -0.0)))
+        (infinite? (real-part z))
+        (negative? (real-part z))
+        (< 3.14159265350 (imag-part z) 3.14159265360)))
 
 (test "log 2/3"
       #t
@@ -1749,6 +1771,7 @@
 (test "acosh 1"   0 (acosh 1))
 (test "atanh 0"   0 (atanh 0))
 
+
 ;;------------------------------------------------------------------
 (test-subsection "Misc")
 
@@ -1773,5 +1796,190 @@
 (test "numerator.7"  -3.0 (numerator (inexact (/ -6 4))))
 (test "denominator.7" 2.0 (denominator (inexact (/ -6 4))))
 
+
+;; decode-float
+
+
+(define (test-decode-float val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "decode-float"
+          val
+          (exact->inexact (* sign signif (expt 2 ex))))))
+
+(import (only (srfi 144)
+              flnormalized?
+              fl-least fl-greatest
+              fl-e fl-e-euler fl-phi
+              fl-sqrt-2 fl-sqrt-5
+              fl-sin-1 fl-pi))
+
+
+(test-decode-float 0.0)
+(test-decode-float 1.0)
+(test-decode-float -1.0)
+(test-decode-float fl-e)
+(test-decode-float (- fl-e))
+(test-decode-float fl-e-euler)
+(test-decode-float (- fl-e-euler))
+(test-decode-float fl-phi)
+(test-decode-float (- fl-phi))
+(test-decode-float fl-sqrt-2)
+(test-decode-float (- fl-sqrt-2))
+(test-decode-float fl-sqrt-5)
+(test-decode-float (- fl-sqrt-5))
+(test-decode-float fl-sin-1)
+(test-decode-float (- fl-sin-1))
+(test-decode-float fl-pi)
+(test-decode-float (- fl-pi))
+(test-decode-float fl-least)
+(test-decode-float (* fl-least 101))    ; subnormal
+(test-decode-float (* fl-least 2))      ; subnormal
+(test-decode-float (* fl-least 100000)) ; subnormal
+(test-decode-float (* fl-least -98))    ; subnormal
+(test-decode-float fl-greatest)
+
+
+(define (test-subnormal-decode val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "subnormal?" #f (flnormalized? val))
+    (test "subnormal-exponent"
+          (float-min-exponent)
+          ex)))
+
+(test-subnormal-decode (* fl-least))        ; subnormal
+(test-subnormal-decode (* fl-least 101))    ; subnormal
+(test-subnormal-decode (* fl-least 2))      ; subnormal
+(test-subnormal-decode (* fl-least 100000)) ; subnormal
+(test-subnormal-decode (* fl-least -98))    ; subnormal
+
+
+(define (test-re-encode-float val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "re-encode-float"
+          val
+          (exact->inexact (encode-float signif ex sign)))))
+
+(test-re-encode-float 0.0)
+(test-re-encode-float 1.0)
+(test-re-encode-float -1.0)
+(test-re-encode-float fl-e)
+(test-re-encode-float (- fl-e))
+(test-re-encode-float fl-e-euler)
+(test-re-encode-float (- fl-e-euler))
+(test-re-encode-float fl-phi)
+(test-re-encode-float (- fl-phi))
+(test-re-encode-float fl-sqrt-2)
+(test-re-encode-float (- fl-sqrt-2))
+(test-re-encode-float fl-sqrt-5)
+(test-re-encode-float (- fl-sqrt-5))
+(test-re-encode-float fl-sin-1)
+(test-re-encode-float (- fl-sin-1))
+(test-re-encode-float fl-pi)
+(test-re-encode-float (- fl-pi))
+(test-re-encode-float fl-least)            ; subnormal
+(test-re-encode-float (* fl-least 101))    ; subnormal
+(test-re-encode-float (* fl-least 2))      ; subnormal
+(test-re-encode-float (* fl-least 100000)) ; subnormal
+(test-re-encode-float (* fl-least -98))    ; subnormal
+(test-re-encode-float fl-greatest)
+
+
+(test/error "encode > max exponent"
+            (encode-float 1 (+ (float-max-exponent) 1) 1))
+
+(test/error "encode < min exponent"
+            (encode-float 1 (- (float-min-exponent) 1) 1))
+
+(test/error "encode > max significand"
+            (encode-float (+ (float-max-significand) 1) 1 1))
+
+;; real-precision.
+;; This one is interesting. We're actually testing C's printf... :)
+
+(test/error "real-precision.0"
+      (parameterize ((real-precision 0)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test/error "real-precision.51"
+      (parameterize ((real-precision 51)) (with-output-to-string (lambda () (display 10.001)))))
+
+
+(test "real-precision.1"
+      "1e+01"
+      (parameterize ((real-precision 1)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.2"
+      "10.0"
+      (parameterize ((real-precision 2)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.3"
+      "10.0"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.4"
+      "10.0"
+      (parameterize ((real-precision 4)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test "real-precision.5"
+      "10.001"
+      (parameterize ((real-precision 5)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test "real-precision..3"
+      "0.123"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 0.1234567890123456789)))))
+(test "real-precision..3"
+      "1.12"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 1.1234567890123456789)))))
+
+(test "real-precision..10"
+      "0.123456789"
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 0.1234567890123456789)))))
+
+(test "real-precision..10"
+      "1.123456789"
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 1.1234567890123456789)))))
+
+
+(test "real-precision..3"
+      "123.0"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "real-precision..10"
+      "123.1234568" ;; last digit is 7, will be rounded to the closest one
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "real-precision..6"
+      "123.123"
+      (parameterize ((real-precision 6)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "degrees->radians 0"
+      0.0
+      (degrees->radians 0))
+
+(test "degrees->radians 180"
+      #t
+      (< 3.14159265
+         (degrees->radians 180)
+         3.14159266))
+
+(test "degrees->radians 10"
+      #t
+      (< 0.17453292
+         (degrees->radians 10)
+         0.17453293))
+
+(let ((pi 3.141592653589793115997963468544185161590576171875))
+
+  (test "radians->degrees 0"
+        0.0
+        (radians->degrees 0))
+
+  (test "radians->degrees pi"
+        #t
+        (< 179.99999
+           (radians->degrees pi)
+           180.00001))
+
+  (test "radians->degrees 10"
+        #t
+        (< 35.99999
+           (radians->degrees (/ pi 5))
+           36.00001)))
 
 (test-section-end)

@@ -1,6 +1,6 @@
 # Makefile for lib/Lalr
 #
-# Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2004-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 25-Oct-2004 16:43 (eg)
-# Last file update: 27-Jan-2022 11:11 (eg)
 
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = lalr.ostk
@@ -42,7 +41,7 @@ uninstall-hook:
 
 calc: calc.stk
 	echo "#!/bin/sh" > calc
-	echo "../../src/stklos -b ../../src/boot.img -f calc.stk" >> calc
+	echo "../../src/stklos -f calc.stk" >> calc
 	chmod a+x calc
 
 clean: 

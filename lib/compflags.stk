@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date:  4-Mar-2023 11:48
-;;;; Last file update:  4-Mar-2023 11:51 (eg)
 ;;;;
 
 
@@ -30,6 +29,16 @@
 ;; ----------------------------------------------------------------------
 ;;      Compiler parameters ...
 ;; ----------------------------------------------------------------------
+
+(export compiler:time-display
+        compiler:gen-line-number
+        compiler:warn-use-undefined
+        compiler:warn-use-undefined-postpone
+        compiler:show-assembly-code
+        compiler:keep-formals
+        compiler:keep-source
+        compiler:inline-common-functions
+        compiler:unroll-iterations)
 
 #|
 <doc EXT compiler:time-display
@@ -149,6 +158,14 @@ doc>
  *        (fib (- n 2)))))
  * @end lisp
 doc>
+<doc EXT compiler:unroll-iterations
+ * (compiler:unroll-iterations)
+ * (compiler:unroll-iterations n)
+ *
+ * This parameter controls the number of iterations to be unrolled in
+ * loops. Currently, only |repeat| loops are unrolled. The argument
+ * |n| must be a positive integer.
+doc>
 |#
 (define compiler:time-display                   (make-parameter #t))
 (define compiler:gen-line-number                (make-parameter #f))
@@ -157,30 +174,48 @@ doc>
 (define compiler:show-assembly-code             (make-parameter #f))
 (define compiler:keep-formals                   (make-parameter #f))
 (define compiler:keep-source                    (make-parameter #f))
-
-
+(define compiler:unroll-iterations
+  (make-parameter 4
+                  (lambda (v)
+                    (unless (and (fixnum? v) (positive? v))
+                      (error 'compiler:unroll-iterations
+                             "must be a positive fixnum. It was ~s" v))
+                    v)))
 
 ;; ----------------------------------------------------------------------
 ;;      %compiler-set-flags ...
 ;; ----------------------------------------------------------------------
 (define (%compiler-set-flags str-flags)
-  ;; str-flags is something like "+xxx,-yyy,+zzz"
-  (for-each (lambda (flag)
-              (let* ((sign (string-ref flag 0))
-                     (opt  (substring flag 1 (string-length flag)))
-                     (val  (case sign
-                             ((#\+) #t)
-                             ((#\-) #f)
-                             (else (error "flag ~s must begin with '+' or '-'"
-                                          flag)))))
-                (case (string->symbol opt)
-                  ((line-info)         (compiler:gen-line-number val))
-                  ((time-display)      (compiler:time-display val))
-                  ((keep-formals)      (compiler:generate-signature val))
-                  ((keep-source)       (compiler:keep-source val))
-                  ((inline-usuals)     (compiler:inline-common-functions val))
-                  ((show-instructions) (compiler:show-assembly-code val))
-                  (else (error "bad flag ~s" flag)))))
-            (string-split str-flags ",")))
-
-
+  ;; str-flags is something like "+xxx,-yyy,+zzz,www=42"
+  (with-handler (lambda (c)
+                  ;; when flags are analysed we don't hav set a handler
+                  (eprintf "Fatal error: ~a\nABORT\n" (condition-message c))
+                  (emergency-exit 1))
+    (for-each (lambda (flag)
+                (let ((sign (string-ref flag 0)))
+                  (if (memv sign '(#\+ #\-))
+                      ;; boolean flag
+                      (let ((opt (substring flag 1 (string-length flag)))
+                            (val  (char=? sign #\+)))
+                        (case (string->symbol opt)
+                          ((line-info)         (compiler:gen-line-number val))
+                          ((time-display)      (compiler:time-display val))
+                          ((keep-formals)      (compiler:generate-signature val))
+                          ((keep-source)       (compiler:keep-source val))
+                          ((inline-usuals)     (compiler:inline-common-functions val))
+                          ((show-instructions) (compiler:show-assembly-code val))
+                          (else (error "bad boolean flag ~s" flag))))
+                      ;; valued flag
+                      (let* ((lst  (string-split flag "=")))
+                        (if (= (length lst) 2)
+                            (let ((f (string->symbol (car lst)))
+                                  (v (string->number (cadr lst))))
+                              (case f
+                                ((unroll-iterations)
+                                 (if v
+                                     (compiler:unroll-iterations v)
+                                     (error "bad value for unroll-iteration ~s" (cadr lst))))
+                                (else
+                                 (error "bad flag name ~s" f))))
+                            (error "bad valued flag ~s" flag))))))
+              (string-split str-flags ","))))

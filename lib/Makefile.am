@@ -20,7 +20,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Mar-2023 20:24 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
@@ -218,10 +217,14 @@ doc: $(DOCDB)
 	   (cd $$i; $(MAKE) doc)\
 	done
 
+all-am: prepare
+
+#  For some reason, tmpcomp is not always executable (!!). Force the chmod here
+prepare:
+		chmod +x $(COMP)
 
 $(DOCDB): $(scheme_sources)
-	$(STKLOS_BINARY) -q -c -b ../src/boot.img -f ../doc/extract-doc \
-	$(scheme_sources) > $(DOCDB)
+	$(STKLOS_BINARY) -q -c -f ../doc/extract-doc $(scheme_sources) > $(DOCDB)
 
 clean:
 	/bin/rm -f $(scheme_OBJS) $(scheme_SOLIBS) ./srfis-data.scm

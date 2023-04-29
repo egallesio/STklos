@@ -47,7 +47,6 @@
 ;;;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 29-Mar-2021 22:21 (jpellegrini)
-;;;; Last file update: 27-Apr-2021 12:33 (eg)
 
 (define (tail n)
   (if (< n (length (past)))

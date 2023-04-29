@@ -35,7 +35,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Mar-2023 20:28 (eg)
 
 
 VPATH = @srcdir@
@@ -288,6 +287,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
 COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
@@ -312,6 +312,7 @@ EXEEXT = @EXEEXT@
 FFI = @FFI@
 FFIINC = @FFIINC@
 FFILIB = @FFILIB@
+FULL_VERSION = @FULL_VERSION@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -350,10 +351,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -383,6 +384,7 @@ SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
+VERSION_STATUS = @VERSION_STATUS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -477,18 +479,18 @@ gmp = @GMP@
 gmplib = @GMPLIB@
 gmpinc = @GMPINC@
 
-# PCRE LIBRARY
-pcre = @PCRE@
-pcrelib = @PCRELIB@
-pcreinc = @PCREINC@
+# PCRE2 LIBRARY
+pcre2 = @PCRE2@
+pcre2lib = @PCRE2LIB@
+pcre2inc = @PCRE2INC@
 
 # FFI LIBRARY
 ffi = @FFI@
 ffilib = @FFILIB@
 ffiinc = @FFIINC@
-stklos_LDADD = $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
+stklos_LDADD = $(gmplib) $(pcre2lib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-AM_CPPFLAGS = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+AM_CPPFLAGS = $(gmpinc) $(pcre2inc) $(ffiinc) $(gcinc)
 all: $(BUILT_SOURCES) stklosconf.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

@@ -4,7 +4,6 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update:  4-Mar-2023 11:32 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -58,6 +57,7 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'rationalize}}
 {{insertdoc 'atan}}
 {{insertdoc 'atanh}}
+{{insertdoc 'degrees->radians}}
 {{insertdoc 'sqrt}}
 {{insertdoc 'square}}
 {{insertdoc 'exact-integer-sqrt}}
@@ -70,6 +70,8 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'random-integer}}
 {{insertdoc 'random-real}}
 {{insertdoc 'decode-float}}
+{{insertdoc 'encode-float}}
+{{insertdoc 'float-max-exponent}}
 {{insertdoc 'integer-length}}
 
 ==== Fixnums
@@ -699,6 +701,7 @@ primivitives to acess environment variables.
 {{insertdoc 'script-file}}
 {{insertdoc 'script-directory}}
 {{insertdoc 'version}}
+{{insertdoc 'short-version}}
 {{insertdoc 'machine-type}}
 {{insertdoc 'implementation-name}}
 {{insertdoc 'cpu-architecture}}
@@ -976,4 +979,3 @@ See SRFI document for more information.
 {{insertdoc 'base64-decode}}
 {{insertdoc 'base64-encode-string}}
 {{insertdoc 'base64-decode-string}}
-

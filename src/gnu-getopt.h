@@ -5,7 +5,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
- * Last file update:  3-Dec-2011 15:56 (eg)
  *
  * The following code is constituted of the GNU getopt, getopt_long
  * and getopt_long_only implementation. Code is slightly modified (all

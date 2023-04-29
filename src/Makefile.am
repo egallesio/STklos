@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Mar-2023 20:28 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here (anyway CFLAGS is implied here)
@@ -96,19 +95,19 @@ gmp	        = @GMP@
 gmplib          = @GMPLIB@
 gmpinc	        = @GMPINC@
 
-# PCRE LIBRARY
-pcre		= @PCRE@
-pcrelib		= @PCRELIB@
-pcreinc		= @PCREINC@
+# PCRE2 LIBRARY
+pcre2		= @PCRE2@
+pcre2lib	= @PCRE2LIB@
+pcre2inc	= @PCRE2INC@
 
 # FFI LIBRARY
 ffi		= @FFI@
 ffilib		= @FFILIB@
 ffiinc		= @FFIINC@
 
-stklos_LDADD   = $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
+stklos_LDADD   = $(gmplib) $(pcre2lib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-AM_CPPFLAGS    = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+AM_CPPFLAGS    = $(gmpinc) $(pcre2inc) $(ffiinc) $(gcinc)
 
 
 struct.o cond.o: struct.h

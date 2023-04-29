@@ -21,7 +21,6 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 13-Jul-2021 19:39 (eg)
  */
 
 #include <limits.h>

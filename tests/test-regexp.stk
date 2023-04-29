@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 27-Sep-2009 13:23 (eg)
-;;;; Last file update: 27-Sep-2009 18:53 (eg)
 ;;;;
 
 (require "test")

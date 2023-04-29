@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update:  1-Feb-2023 13:16 (eg)
 ;;;;
 
 
@@ -42,7 +41,7 @@
   ;; the current file processed by current compile-file
   (apply append
          (map (lambda (mod)
-                (let Loop ((lst (module-exports mod))
+                (let Loop ((lst (%module-exports mod))
                            (res '()))
                   (if (null? lst)
                       res
@@ -64,12 +63,14 @@
  * (compile-file input output :prepend cmds)
  *
  * Compiles the file whose name is |input| into a bytecode executable
- * whose name is |output|.
+ * whose name is |output| (if |compile-file| fails, |output| file is
+ * deleted).
  *
  * If the |:prepend| keyword argument is given, it must be a list of
  * expressions, which will be compiled before the rest of the input
  * file. This can be used to define variables that the compiled program
  * will use (but it does not affect the compiler itself).
+ *
  *
  * This procedure will not set the executable bit on the generated file.
 doc>
@@ -93,64 +94,83 @@ doc>
             :globals   globs
             :macros    (file-module-list-expanders))))
 
-  (let ((out      (open-output-file output))
-        (globs    (compiler-known-globals))
-        (tm       (clock))
-        (copts    (compiler:warn-use-undefined-postpone)))
+  (define (do-compile out)
+    (let ((globs    (compiler-known-globals))
+          (tm       (clock))
+          (copts    (compiler:warn-use-undefined-postpone)))
 
-    ;; Clear the list containing  macros sources
-    (file-module-list-reset!)
+      ;; Clear the list containing  macros sources
+      (file-module-list-reset!)
 
-    ;; Defer warning til the end of the compilation of file
-    ;(compiler:warn-use-undefined-postpone #t)
+      ;; Defer warning til the end of the compilation of file
+                                        ;(compiler:warn-use-undefined-postpone #t)
 
-    (fluid-let ((*code-instr* '())
-                (*code-constants* '())
-                (*compiling-file* #t))
+      (fluid-let ((*code-instr* '())
+                  (*code-constants* '())
+                  (*compiling-file* #t))
 
-      ;; SRFI 138, -D option:
-      (when has-prepend?
-        (unless (list? prepend)
-          (error 'compile-file "prepend should be a list: ~S" prepend))
-        ;; whatever the list is, if we wrap it in a BEGIN form,
-        ;; it will be compiled sequentially:
-        (let ((exprs (cons 'begin prepend)))
-          (compile exprs #f exprs #f)))
+        ;; SRFI 138, -D option:
+        (when has-prepend?
+          (unless (list? prepend)
+            (error 'compile-file "prepend should be a list: ~S" prepend))
+          ;; whatever the list is, if we wrap it in a BEGIN form,
+          ;; it will be compiled sequentially:
+          (let ((exprs (cons 'begin prepend)))
+            (compile exprs #f exprs #f)))
 
-      ;; Read the source file
-      (%include-file input)
-      (emit 'END-OF-CODE)
+        ;; Read the source file
+        (%include-file input)
+        (emit 'END-OF-CODE)
 
-      ;; Write the header
-      (format out "#!/usr/bin/env stklos\n")
-      (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
-      (format out "STklos ~S\n" (compute-file-informations globs))
+        ;; Write the header
+        (format out "#!/usr/bin/env stklos\n")
+        (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
+        (format out "STklos ~S\n" (compute-file-informations globs))
 
-      (let ((code (assemble (reverse! *code-instr*))))
-        (when (compiler:show-assembly-code)
-          ;;Write the assembly code and code vector
-          (format out "\n#|\n")
-          (disassemble-code code out)
-          (format out "\n~S\n|\#\n" code))
+        (let ((code (assemble (reverse! *code-instr*))))
+          (when (compiler:show-assembly-code)
+            ;;Write the assembly code and code vector
+            (format out "\n#|\n")
+            (disassemble-code code out)
+            (format out "\n~S\n|\#\n" code))
 
-        ;; Write new constants as a vector
-        (format out "#~S\n" *code-constants*)
+          ;; Write new constants as a vector
+          (format out "#~S\n" *code-constants*)
 
-        ;; Write byte-code
-        (%dump-code out code))
+          ;; Write byte-code
+          (%dump-code out code))
 
-      ;; Close file
-      (close-output-port out))
+        ;; Close file
+        (close-output-port out))
 
-    ;; Show undefined symbols
-    (compiler-show-undefined-symbols)
+      ;; Show undefined symbols
+      (compiler-show-undefined-symbols)
 
-    ;; Display time used to compile file
-    (when (and (interactive-port? (current-input-port))
-               (compiler:time-display))
-      (format #t "Compilation time ~S ms\n" (exact (round (- (clock) tm)))))
+      ;; Display time used to compile file
+      (when (and (interactive-port? (current-input-port))
+                 (compiler:time-display))
+        (format #t "Compilation time ~S ms\n" (exact (round (- (clock) tm)))))
 
-    ;; Restore Compiler flags
-    (compiler:warn-use-undefined-postpone copts)))
+      ;; Restore Compiler flags
+      (compiler:warn-use-undefined-postpone copts)))
+
+  ;; ----------------------------------------------------------------------
+  ;; Make the compilation in a temporary file in output's directory. We use
+  ;; here the same directory to permit the use of `rename-file` which is
+  ;; atomic (useful for parallel makes)
+  (let ((template (make-path (dirname output) "stk-tmp.")))
+    (let-values (((tmp out) (create-temp-file template)))
+      ;; Compile file in 'input' into file in 'tmp'
+      (with-handler
+       (lambda (c)
+         ;; Compiler yields an (probably involuntary) error. Delete the
+         ;; temporary file and re-raise error
+         (when (file-exists? tmp) (delete-file tmp))
+         (raise c))
+
+       (do-compile out)
+       (rename-file tmp output)))))
+
+
 
 (export compile-file)

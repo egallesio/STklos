@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-May-2004 10:13 (eg)
-;;;; Last file update: 21-Apr-2022 15:57 (eg)
 ;;;;
 
 (define-module srfi/35

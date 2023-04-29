@@ -2,7 +2,7 @@
  *
  * c h a r . c                          -- Characters management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 20-May-2022 20:07 (eg)
  */
 
 #include <ctype.h>
@@ -438,7 +437,7 @@ DEFINE_PRIMITIVE("char->integer", char2integer, subr1, (SCM c))
 
 DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
 {
-  int c = STk_integer_value(i);
+  long c = STk_integer_value(i);
 
   if (STk_use_utf8) {
     /* Unicode defines characters in the range [0, #xd7FF] U [#xE000, #x10FFFF] */

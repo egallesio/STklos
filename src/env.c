@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,43 +22,12 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 10-Aug-2022 18:33 (eg)
  */
 
 #include "stklos.h"
 #include "hash.h"
 #include "vm.h"
 #include "thread-common.h"
-
-static void error_bad_module_name(SCM obj)
-{
-  STk_error("bad module name ~S", obj);
-}
-
-static void error_bad_module(SCM obj)
-{
-  STk_error("bad module ~S", obj);
-}
-
-static void error_not_exist(SCM obj)
-{
-  STk_error("module with name ~S does not exist", obj);
-}
-
-static void error_bad_list(SCM obj)
-{
-  STk_error("bad list ~S", obj);
-}
-
-static void error_unbound_variable(SCM symbol, SCM modname)
-{
-  STk_error("variable ~S unbound in ~S", symbol, modname);
-}
-
-static void error_bad_symbol(SCM symbol)
-{
-  STk_error("bad symbol ~S", symbol);
-}
 
 
 /*===========================================================================*\
@@ -87,6 +56,11 @@ struct module_obj {
 SCM STk_STklos_module;          /* The module whose name is STklos */
 static SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
+
+
+/*************/
+/* Utilities */
+/*************/
 
 static void print_module(SCM module, SCM port, int mode)
 {
@@ -163,6 +137,62 @@ static SCM find_module(SCM name, int create)
   return (create) ? make_module(name) : STk_void;
 }
 
+
+static char *pretty_library_name(const char *name)
+{
+  char *res, *tmp;
+
+  /* allocate a new string */
+  tmp = res = STk_must_malloc_atomic(strlen(name) + 3); // '('+')'+nul
+
+  /* transform "foo/bar/baz" in "(foo bar baz)" */
+  *tmp++ = '(';
+  for (char *p = (char *) name; *p; p++) {
+    *tmp++ = (*p == '/') ? ' ': *p;
+  }
+  *tmp++ = ')';
+  *tmp   = '\0';
+
+  return res;
+}
+
+/*******************/
+/* Error functions */
+/*******************/
+
+static void error_bad_module_name(SCM obj)
+{
+  STk_error("bad module or library name ~S", obj);
+}
+
+static void verify_symbol(SCM obj)
+{
+  if (!SYMBOLP(obj)) STk_error("bad symbol ~S", obj);
+}
+
+static void verify_module(SCM obj)
+{
+  if (!MODULEP(obj)) STk_error("bad module ~S", obj);
+}
+
+static void verify_list(SCM obj)
+{
+  if (!NULLP(obj) && !CONSP(obj)) STk_error("bad list ~S", obj);
+}
+
+void STk_error_unbound_variable(SCM symbol, SCM module)
+{
+  if (MODULE_IS_LIBRARY(module)) {
+    SCM name = MODULE_NAME(module);
+    STk_error("symbol ~S unbound in library %s", symbol,
+              pretty_library_name(SYMBOL_PNAME(name)));
+  } else {
+    STk_error("symbol ~S unbound in module ~S",  symbol,
+              MODULE_NAME(module));
+  }
+}
+
+
 /*===========================================================================*\
  *
  * Module primitives
@@ -180,9 +210,51 @@ static SCM make_export_list(SCM symbols)
 }
 
 
+static SCM normalize_library_name(SCM obj) /* return a library name as a symbol */
+{
+  if (SYMBOLP(obj))
+    return obj;
+  else if (CONSP(obj) && STk_int_length(obj) > 0) { /* (list? obj) is true */
+    SCM res = STk_open_output_string();
+
+    for (SCM tmp = obj; !NULLP(tmp); tmp = CDR(tmp)) {
+      SCM head = CAR(tmp);
+
+      if (SYMBOLP(head))
+        STk_print(head, res, DSP_MODE);
+      else {
+        long val = STk_integer_value(head);
+
+        if (val >= 0)
+          STk_print(head, res, DSP_MODE);
+        else
+          STk_error("bad library name component ~S", head);
+      }
+      if (!NULLP(CDR(tmp))) /* not the last component */
+        STk_putc('/', res);
+    }
+    return STk_intern(STRING_CHARS(STk_get_output_string(res)));   // FIXME: avoid allocation
+  }
+  error_bad_module_name(obj);
+  return STk_void;            /* for the compiler */
+}
+
+
+static Inline SCM ensure_module(SCM module) // -> a module given a module or a name
+{
+  if (MODULEP(module))
+    return module;
+  else {
+    SCM mod = find_module(normalize_library_name(module), FALSE);
+    if (mod == STk_void) error_bad_module_name(module);
+    return mod;
+  }
+}
+
+
 void STk_export_all_symbols(SCM module)
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   if (module != STk_STklos_module)
     MODULE_EXPORTS(module) = make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module)));
 }
@@ -194,19 +266,21 @@ DEFINE_PRIMITIVE("%make-empty-environment", make_empty_env, subr0, (void))
 }
 
 
+DEFINE_PRIMITIVE("%normalize-library-name",normalize_name, subr1, (SCM obj))
+{
+  return normalize_library_name(obj);
+}
+
+
 DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
 {
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-  return find_module(name, TRUE);
+  return find_module(normalize_library_name(name), TRUE);
 }
 
 
 DEFINE_PRIMITIVE("%find-instanciated-module", find_inst_module, subr1, (SCM name))
 {
-  SCM z;
-
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-  z = find_module(name, FALSE);
+  SCM z = find_module(normalize_library_name(name), FALSE);             // FIXME: normalize???
 
   return  ((z != STk_void) && MODULE_IS_INSTANCIATED(z))? z: STk_false;
 }
@@ -214,11 +288,8 @@ DEFINE_PRIMITIVE("%find-instanciated-module", find_inst_module, subr1, (SCM name
 
 DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
 {
-  SCM z;
+  SCM z = find_module(normalize_library_name(name), FALSE);            // FIXME: normalize?
 
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-
-  z = find_module(name, FALSE);
   if (z == STk_void) error_bad_module_name(name);
 
   MODULE_IS_LIBRARY(z) = TRUE;
@@ -232,7 +303,7 @@ DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 {
   vm_thread_t *vm = STk_get_current_vm();
 
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   MODULE_IS_INSTANCIATED(module) = TRUE;
   vm->current_module= module;
   return STk_void;
@@ -242,8 +313,8 @@ DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 DEFINE_PRIMITIVE("%module-name-set!", module_name_set, subr2,
                  (SCM module, SCM name))
 {
-  if (!MODULEP(module)) error_bad_module(module);
-  if (!SYMBOLP(name))   error_bad_symbol(name);
+  verify_module(module);
+  verify_symbol(name);
 
   MODULE_NAME(module) = name;
   MODULE_IS_INSTANCIATED(module) = TRUE;
@@ -256,31 +327,35 @@ DEFINE_PRIMITIVE("%module-name-set!", module_name_set, subr2,
 DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
                  (SCM importer,SCM imported))
 {
-  if (!MODULEP(importer)) error_bad_module(importer);
-
-  if (CONSP(imported)) {
-    /* STklos modules implicitely import STklos, but R7RS library don't */
-    if (MODULE_IS_LIBRARY(importer)) {
-      MODULE_IMPORTS(importer) = imported;
-    }
-    else
-      MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
-  }
-  else if (NULLP(imported))
-    MODULE_IMPORTS(importer) = STk_nil;
-  else error_bad_list(imported);
-
+  verify_module(importer);
+  verify_list(imported);
+  MODULE_IMPORTS(importer) = imported;
   return STk_void;
 }
 
 DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
                  (SCM exporter,SCM exported))
 {
-  if (!MODULEP(exporter)) error_bad_module(exporter);
-  if (!NULLP(exported) && !CONSP(exported)) error_bad_list(exported);
-
+  verify_module(exporter);
+  verify_list(exported);
   MODULE_EXPORTS(exporter) = exported;
   return STk_void;
+}
+
+DEFINE_PRIMITIVE("%module-exports", module_exports, subr1, (SCM module))
+{
+  verify_module(module);
+
+  /* STklos module is special: everything is exported ==> module-symbols */
+  return (module == STk_STklos_module) ?
+                make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
+                MODULE_EXPORTS(module);
+}
+
+DEFINE_PRIMITIVE("%symbol->library-name", symb2libname, subr1, (SCM symbol))
+{
+  verify_symbol(symbol);
+  return STk_read_from_C_string(pretty_library_name(SYMBOL_PNAME(symbol)));
 }
 
 
@@ -310,12 +385,12 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
  * also modules.
  * @lisp
  * (define-module a)
- * (define-library b)
+ * (define-library (b))
  *
- * (module? (find-module 'a))   => #t
- * (module? (find-module 'b))   => #t
- * (library? (find-module 'a))  => #f
- * (library? (find-module 'b))  => #t
+ * (module? (find-module 'a))     => #t
+ * (module? (find-module '(b)))   => #t
+ * (library? (find-module 'a))    => #f
+ * (library? (find-module '(b)))  => #t
  * @end lisp
 doc>
 */
@@ -331,20 +406,17 @@ DEFINE_PRIMITIVE("library?", libraryp, subr1, (SCM obj))
  * (find-module name default)
  *
  * STklos modules are first class objects and |find-module| returns the
- * module associated to |name| if it exists. If there is no module
+ * module object associated to |name|, if it exists. If there is no module
  * associated to |name|, an error is signaled if no |default| is
  * provided, otherwise |find-module| returns |default|.
 doc>
 */
 DEFINE_PRIMITIVE("find-module", scheme_find_module, subr12, (SCM name, SCM def))
 {
-  SCM module;
+  SCM module = find_module(normalize_library_name(name), FALSE);
 
-  if (!SYMBOLP(name)) error_bad_module_name(name);
-
-  module = find_module(name, FALSE);
   if (module == STk_void) {
-    if (!def) error_not_exist(name);
+    if (!def) STk_error("module with name ~S does not exist", name);
     return def;
   }
   return module;
@@ -378,12 +450,21 @@ DEFINE_PRIMITIVE("current-module", current_module, subr0, (void))
 <doc EXT module-name
  * (module-name module)
  *
- * Returns the name (a symbol) associated to a |module|.
+ * Returns the internal name (a symbol) associated to a |module|. As said before,
+ * module name is always represented as a symbol, even if expressed as a list.
+ * @lisp
+ * (define-module (M a) )   ; or M/a
+ * (define-module (M b) )   ; or M/b
+ * (define-module M/c   )   ; or (M c)
+ *
+ * (map (lambda(x) (module-name (find-module x))) '( (M a) M/b (M c) ))
+ *                        => (M/a M/b M/c)
+ * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("module-name", module_name, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_module(module);
   return MODULE_NAME(module);
 }
 
@@ -392,53 +473,35 @@ DEFINE_PRIMITIVE("module-name", module_name, subr1, (SCM module))
 <doc EXT module-imports
  * (module-imports module)
  *
- * Returns the list of modules that |module| (fully) imports.
+ * Returns the list of modules that |module| imports (that is, the ones
+ * it depends on).
 doc>
  */
 DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
-  return MODULE_IMPORTS(module);
+  return MODULE_IMPORTS(ensure_module(module));
 }
 
-
-/*
-<doc EXT module-exports
- * (module-exports module)
- *
- * Returns the list of symbols exported by |module|. Note that this function
- * returns the list of symbols given in the module |export| clause and that
- * some of these symbols can be not yet defined.
-doc>
- */
-DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
-{
-  if (!MODULEP(module)) error_bad_module(module);
-
-  /* STklos module is special: everything is exported ==> module-symbols */
-  return (module == STk_STklos_module) ?
-                make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
-                MODULE_EXPORTS(module);
-}
 
 /*
 <doc EXT module-symbols
  * (module-symbols module)
  *
- * Returns the list of symbols already defined in |module|.
+ * Returns the list of symbols defined or imported in |module|. |Module|
+ * can be an object module or a module name.
 doc>
  */
 DEFINE_PRIMITIVE("module-symbols", module_symbols, subr1,  (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
-  return STk_hash_keys(&MODULE_HASH_TABLE(module));
+  return STk_hash_keys(&MODULE_HASH_TABLE(ensure_module(module)));
 }
 
 /*
 <doc EXT all-modules
  * (all-modules)
  *
- * Returns the list of all the living modules.
+ * Returns the list of all the living modules (or libraries). Use
+ * |module-list| to obtain a list of modules without libraries.
 doc>
  */
 DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
@@ -452,16 +515,15 @@ DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
 
 /*
 <doc EXT module-immutable!
- * (module-immutable! module)
+ * (module-immutable! mod)
  *
- * Makes the module |module| immutable, so that it will be impossible
+ * Makes the module |mod| immutable, so that it will be impossible
  * to define new symbols in it or change the value of already defined ones.
- *
 doc>
  */
 DEFINE_PRIMITIVE("module-immutable!", module_immutable, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
+  module = ensure_module(module);
 
   if (BOXED_INFO(module) & MODULE_CONST) return STk_void;  /* already immutable */
 
@@ -482,18 +544,18 @@ DEFINE_PRIMITIVE("module-immutable!", module_immutable, subr1, (SCM module))
  *
  * Returns |#t| if |mod| is an immutable module and |#f|  otherwise.  Note that the
  * |SCHEME| module, which contains the original bindings of the STklos at boot
- * time, is immutable.
+ * time, is immutable. The parameter |mod| can be a module object or a module name.
  *
  * @lisp
  * (module-mutable? (find-module 'STklos)) => #t
  * (module-mutable? (find-module 'SCHEME)) => #f
+ * (module-mutable? 'SCHEME)               => #f
  * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("module-mutable?", module_immutablep, subr1, (SCM module))
 {
-  if (!MODULEP(module)) error_bad_module(module);
-  return MAKE_BOOLEAN(!(BOXED_INFO(module) & MODULE_CONST));
+  return MAKE_BOOLEAN(!(BOXED_INFO(ensure_module(module)) & MODULE_CONST));
 }
 
 
@@ -521,15 +583,16 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
 {
   SCM tmp;
 
-  if (!SYMBOLP(symb)) error_bad_symbol(symb);
+  verify_symbol(symb);
   if (!module)
     module = STk_current_module();
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
-  if (!tmp)
-    STk_error("symbol ~S is not bound in ~a", symb, module);
+
+  if (!tmp) STk_error_unbound_variable(symb,module);
+
   return MAKE_BOOLEAN(!(BOXED_INFO(tmp) & CONS_CONST));
 }
 
@@ -554,15 +617,15 @@ DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM m
 {
   SCM tmp;
 
-  if (!SYMBOLP(symb)) error_bad_symbol(symb);
+  verify_symbol(symb);
   if (!module)
     module = STk_current_module();
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
 
-  if (!tmp) STk_error("symbol ~S is not bound in ~S", symb, module);
+  if (!tmp) STk_error_unbound_variable(symb,module);
 
   BOXED_INFO(tmp) |= CONS_CONST;
   return STk_void;
@@ -584,19 +647,19 @@ static Inline SCM find_symbol_value(SCM symbol, SCM module)
  *
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
  * an error is signaled if no |default| is provided, otherwise |symbol-value|
- * returns |default|.
+ * returns |default|. |Module| can be an object module or a module name.
 doc>
  */
 DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
                  (SCM symbol, SCM module, SCM default_value))
 {
-  if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_symbol(symbol);
+  module = ensure_module(module);
 
   SCM res = find_symbol_value(symbol, module);
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, MODULE_NAME(module));
+    STk_error_unbound_variable(symbol, module);
   }
   return res;
 }
@@ -617,8 +680,8 @@ doc>
 DEFINE_PRIMITIVE("symbol-value*", symbol_value_all, subr23,
                  (SCM symbol, SCM module, SCM default_value))
 {
-  if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
-  if (!MODULEP(module)) error_bad_module(module);
+  verify_symbol(symbol);
+  module = ensure_module(module);
 
   SCM res = find_symbol_value(symbol, module);
   if (!res) { /* Symbol not found */
@@ -629,7 +692,7 @@ DEFINE_PRIMITIVE("symbol-value*", symbol_value_all, subr23,
   }
   if (!res) {
     if (default_value) return default_value;
-    error_unbound_variable(symbol, MODULE_NAME(module));
+    STk_error_unbound_variable(symbol, module);
   }
   return res;
 }
@@ -649,7 +712,7 @@ DEFINE_PRIMITIVE("symbol-bound?", symbol_boundp, subr12, (SCM symbol, SCM module
   if (!module)
     module = STk_current_module();
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   SCM res = find_symbol_value(symbol, module);
   if (!res) { /* Symbol not found */
@@ -719,12 +782,11 @@ void STk_define_variable(SCM symbol, SCM value, SCM module)
 DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr23,
                  (SCM symbol, SCM value, SCM module))
 {
-  if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
-  if (module) {
-    if (!MODULEP(module)) error_bad_module(module);
-  }
-  else
+  verify_symbol(symbol);
+  if (!module)
     module = STk_current_module();
+  else
+    verify_module(module);
 
   STk_define_variable(symbol, value, module);
   return value;
@@ -735,16 +797,16 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 {
   SCM res, mod = STk_current_module();
 
-  if (!SYMBOLP(new)) error_bad_symbol(new);
-  if (!SYMBOLP(old)) error_bad_symbol(old);
+  verify_symbol(new);
+  verify_symbol(old);
   if (!module)
     module = mod;
   else
-    if (!MODULEP(module)) error_bad_module(module);
+    verify_module(module);
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
   if (!res)
-    error_unbound_variable(old, MODULE_NAME(module));
+    STk_error_unbound_variable(old, module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
   return STk_void;
@@ -755,14 +817,14 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 {
   SCM res;
 
-  if (!SYMBOLP(new)) error_bad_symbol(new);
-  if (!SYMBOLP(old)) error_bad_symbol(old);
-  if (!MODULEP(new_module)) error_bad_module(new_module);
-  if (!MODULEP(old_module)) error_bad_module(old_module);
+  verify_symbol(new);
+  verify_symbol(old);
+  verify_module(new_module);
+  verify_module(old_module);
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old);
   if (!res)
-    error_unbound_variable(old, MODULE_NAME(old_module));
+    STk_error_unbound_variable(old, old_module);
 
   STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
   return STk_void;
@@ -797,8 +859,8 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
 
   /* It definitively does not exists  :-< */
-  if (err_if_unbound)
-    STk_error("variable ~S unbound", symbol);
+  if (err_if_unbound) STk_error_unbound_variable(symbol, env);
+
   return STk_void;
 }
 
@@ -858,6 +920,8 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_name_set);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
+  ADD_PRIMITIVE(module_exports);
+  ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
 
   /* ==== User primitives ==== */
@@ -867,7 +931,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);
   ADD_PRIMITIVE(module_imports);
-  ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(module_symbols);
   ADD_PRIMITIVE(all_modules);
   ADD_PRIMITIVE(module_immutable);
@@ -882,5 +945,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);
 
+  ADD_PRIMITIVE(normalize_name);
   return TRUE;
 }

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; module.stk -- Module stuff
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  8-Sep-2022 08:49 (eg)
 ;;;;
 
 ;;=============================================================================
@@ -39,10 +38,37 @@
 doc>
 |#
 (define (module-symbols* module)
-  (append (module-symbols (current-module))
+  (append (module-symbols module)
           (if (library? module)
               '()
               (module-symbols (find-module 'STklos)))))
+
+;;=============================================================================
+;;
+;;                              MODULE-EXPORTS
+;;
+;;=============================================================================
+#|
+<doc EXT module-exports
+ * (module-exports module)
+ *
+ * Returns the list of symbols exported by |module|. Note that this function
+ * returns the list of symbols given in the module |export| clause and that
+ * some of these symbols can be not yet defined.
+ *
+ * @lisp
+ * (define-module M
+ *   (export a b (rename c M-c))
+ *   (display (module-exports (current-module))))
+ *                          @print{} (a b M-c)
+ * @end lisp
+doc>
+|#
+(define (module-exports mod)
+  (let ((module (if (module? mod) mod (find-module mod))))
+    (map cdr (%module-exports module))))
+
+
 
 ;;=============================================================================
 ;;
@@ -58,6 +84,7 @@ doc>
  * module |name| environment.  Module |name| must have been created
  * previously by a |define-module|. The result of |select-module| is
  * *_void_*.
+ *
  * |Select-module| is particularly useful when debugging since it
  * allows to place toplevel evaluation in a particular module. The
  * following transcript shows an usage of |select-module|.
@@ -66,8 +93,7 @@ doc>
  *             prompt.]):
  * @lisp
  * stklos> (define foo 1)
- * stklos> (define-module bar
- *           (define foo 2))
+ * stklos> (define-module bar (define foo 2))
  * stklos> foo
  * 1
  * stklos> (select-module bar)
@@ -104,9 +130,9 @@ doc>
  *
  * |Define-module| evaluates the expressions |<expr1>|, |<expr2>| ... which
  * constitute the body of the module |<name>| in the environment of that module.
- * |Name| must be a valid symbol. If this symbol has not already been used to
- * define a module, a new module, named |name|, is created.
- * Otherwise, the expressions |<expr1>|, |<expr2>| ... are evaluated in
+ * |Name| must be a valid symbol or a list constitued of symbols or positive integers.
+ * If |name| has not already been used to define a module, a new module, named |name|,
+ * is created.  Otherwise, the expressions |<expr1>|, |<expr2>| ... are evaluated in
  * the environment of the (old) module `|<name>|`footnote:[In fact
  * |define-module| on a given name defines a new module
  * only the first time it is invoked on this name. By this way, interactively
@@ -122,19 +148,29 @@ doc>
  * (define-module M2
  *   (define a 2)
  *   (define b (* 2 x)))
+ *
+ * (define-module (M2 m)
+ *   (define a 100)
+ *   (define x 200))
  * @end lisp
  *
- * Here, two modules are defined and they both bind the symbol |a| to a
- * value. However, since |a| has been defined in two distinct modules
- * they denote two different locations.
+ * Here, three modules are defined and they all bind the symbol |a| to a
+ * value. However, since |a| has been defined in distinct modules
+ * they denote three different locations.
  *
  * The |STklos| module, which is predefined, is a special module which
- * contains all the *global bindings* of a R5RS program.  A symbol
+ * contains all the *global bindings* of a {{rseven}} program.  A symbol
  * defined in the |STklos| module, if not hidden by a local definition, is
  * always visible from inside a module. So, in the previous exemple, the
- * |x| symbol refers the |x| symbol defined in the |STklos| module.
+ * |x| symbol refers the |x| symbol defined in the |STklos| module, which is
+ * of course different of the one defined in the module |(M2 m)|.
  *
  * The result of |define-module| is *_void_*.
+ *
+ * NOTE: Internally, modules name are always represented by a symbol. If the module
+ * name is given as a list, the internal name is built by appending all the components
+ * of the list, separated by a `'/'` symbol. So the third module can be referenced with the
+ * name |(M2 m)| of |M2/m|.
 doc>
 |#
 (define-macro (define-module name . body)
@@ -156,22 +192,41 @@ doc>
 ;;=============================================================================
 #|
 <doc EXT-SYNTAX import
- * (import <module1> <module2> ...)
+ * (import <import set1> <import set2> ...)
  *
- * Specifies the modules which are imported by the current module.
- * Importing a module makes the symbols it exports visible to the
- * importer, if not hidden by local definitions. When a symbol
- * is exported by several of the imported modules, the location denoted by
- * this symbol in the importer module correspond to the one of the last module
- * in the list
- * @lisp
- * (<module1> <module2> ...)
- * @end lisp
- * which exports it.
+ * An import declaration provides a way to import identifiers
+ * exported by a module.  Each |<import set>| names a set of bindings
+ * from a module and possibly specifies local names for the
+ * imported bindings. It takes one of the following forms:
  *
- * If several |import| clauses appear in a module, the set of
- * imported modules  is determined by appending the various list of modules
- * in their apparition order.
+ * * |<module name>|
+ * * |(only <import set> <identifier> ...)|
+ * * |(except <import set> <identifier> ...)|
+ * * |(prefix <import set> <identifier>)|
+ * * |(rename <import set> (<identifier1> <identifier2>) ...)|
+ *
+ * In the first form, all of the identifiers in the named
+ * module's export clauses are imported with the same names
+ * (or the exported names if exported with |rename|).
+ *
+ * The additional |import set| forms modify this set as follows:
+ *
+ * * |only| produces a subset of the given <import set>} including
+ *   only the listed identifiers (after any renaming).  It is an
+ *   error if any of the listed identifiers are not found in the
+ *   original set.
+ *
+ * * |except| produces a subset of the given |<import set>|, excluding
+ *   the listed identifiers (after any renaming). It is an error if
+ *   any of the listed identifiers are not found in the original set.
+ *
+ * * |rename| modifies the given |<import set>|, replacing each
+ *   instance of |<identifier1>| with |<identifier2>|. It is an
+ *   error if any of the listed |<identifiers>| are not found in
+ *   the original set.
+ *
+ * * |prefix| automatically renames all identifiers in the given
+ *   |<import set>|, prefixing each with the specified |<identifier>|.
  *
  * @lisp
  * (define-module M1
@@ -194,24 +249,46 @@ doc>
  *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
  * @end lisp
  *
- * It is also possible to import partially (i.e. not all
- * exported symbols) from a module, as shown below:
  * @lisp
- * (define-module M5
- *   (import (M2 c d) M1)
- *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
- * @end lisp
- * In this case, only the symbols |c| and |d| are imported from
- * module |M2|.
+ * (define-module M1
+ *   (export a b c d)
+ *   (define a 1)
+ *   (define b 2)
+ *   (define c 3)
+ *   (define d 4))
  *
- * NOTE: Importations are not "_transitive_": when
- * the module -C_ imports the module _B_ which is an importer
- * of module _A_ the symbols of _A_ are not visible
- * from _C_, except  by explicitly importing the _A_ module from _C_.
+ * (define-module M2
+ *   (import (prefix (rename (except M1 a)
+ *                           (b bb) (c cc))
+ *                   M1-))
+ *   (display (module-symbols (current-module))))
+ *                              @print{} (M1-bb M1-cc M1-d)
+ * @end lisp
+ *
+ * Here, |M1| module exports the symbols |a|, |b|, |c| and |d|. In the
+ * |M2| module, the |except| rule permits to import only |b|, |c| and
+ * |d|. With |rename|, identifiers |b| and |c| of |M1| are renamed |bb|
+ * and |cc|. Finally, with |prefix| alls identifier names are prefixed
+ * by |M1-|.
+ *
+ * NOTE: the |import| form in {{stklos}} modules is compatible with the
+ * |import| clause in {{rseven}} libraries.
  *
  * NOTE: The module |STklos|, which contains the _global variables_
  * is always implicitly imported from a module. Furthermore,
- * this module is always placed at the end of the list of imported modules.
+ * this module is always placed at the end of the list of imported
+ * modules.
+ *
+ * Note that importing a module will try to load a file if the module
+ * is not already defined. For instance,
+ * @lisp
+ * (define-module M
+ *    (import (srfi 1) (foo bar baz))
+ *     ...)
+ * @end lisp
+ * will load the file |srfi/1| and |foo/bar/baz| modules (or libraries) if
+ * they are not yet defined (habitual rules on the load paths and the load
+ * suffixes applies to find  those files).
 doc>
 |#
 (define (%parse-imports imports)
@@ -263,7 +340,7 @@ doc>
                (error 'import "bad rename clause ~s" import-set)))
 
           (else
-           (list (%library-name->symbol import-set))))))
+           (list (%normalize-library-name import-set))))))
 
      ((symbol? import-set)
       ;; a "legacy" STklos module
@@ -354,7 +431,7 @@ doc>
     (let* ((mod       (eventually-load-library name))
            (imported  (build-import-list mod
                                          keylist
-                                         (list-copy (module-exports mod)))))
+                                         (list-copy (%module-exports mod)))))
       ;; Make aliases for all symbols in imported list
       (if only-syntax
           (for-each (lambda (pair)
@@ -368,6 +445,16 @@ doc>
                       (register-new-global! (cdr pair)))
                     imported))))
 
+  (define (add-imports lst imports)
+    ;; add all the modules of lst in the import list (if not yet present)
+    (let Loop ((lst (reverse lst)) ; to keep original order
+               (names (map module-name imports)))
+      (cond
+       ((null? lst)             (map find-module names))
+       ((memq (caar lst) names) (Loop (cdr lst) names))
+       (else                    (Loop (cdr lst)
+                                      (cons (list (caar lst)) names))))))
+
   ;; Call import-symbols for each import spec
   (for-each (lambda (imp)
               (let ((name     (car imp))
@@ -376,8 +463,7 @@ doc>
             clauses)
 
   ;; Retain the import list (for module-imports)
-  (%module-imports-set! lib (append (module-imports lib)
-                                    clauses)))
+  (%module-imports-set! lib (add-imports clauses (module-imports lib))))
 
 ;;;;
 ;;;; IMPORT
@@ -414,22 +500,33 @@ doc>
 ;;=============================================================================
 #|
 <doc EXT-SYNTAX export
- * (export <symbol1> <symbol2> ...)
+ * (export <export spec1> <export spec2> ...)
  *
  * Specifies the symbols which are exported (i.e. *visible* outside
  * the current module). By default, symbols defined in a module are not
  * visible outside this module, excepted if they appear in an |export|
  * clause.
  *
- * If several |export| clauses appear in a module, the set of
- * exported symbols is determined by "_unionizing_" symbols exported
- * in all the |export| clauses.
+ * An |<export spec>| takes one of the following forms:
+ *
+ * * |<identifier>|
+ * * |(rename <identifier1> <identifier2>)|
+ *
+ * In the first form, |<identifier>| names a single binding defined within or
+ * imported into the module, where the external name for the export is the same
+ * as the name of the binding  within the module.
+ *
+ * In the second form,  the binding defined within or imported into the module and
+ * named by |<identifier1>| in each |(<identifier1> <identifier2>)| pairing,
+ * using |<identifier2>| as the external name.
  *
  * The result of |export| is *_void_*.
+ *
+ * NOTE: the |export| form in {{stklos}} modules is compatible with the |export|
+ * clause in {{rseven}} libraries.
+ *
 doc>
 |#
-
-
 (define (%parse-exports symbols)
   ;; Used at compile-time: returns a list of pairs ((name . exported-name) ... )
 
@@ -484,7 +581,7 @@ doc>
             lst)
           (cons (cons name rename) lst))))
 
-  (let Loop ((l symbols) (res (module-exports lib)))
+  (let Loop ((l symbols) (res (%module-exports lib)))
     (cond
      ((null? l) (%module-exports-set! lib res))
      (else
@@ -499,7 +596,6 @@ doc>
 (define-macro (export . symbols)
   (let ((s (%parse-exports symbols)))
     `(%do-exports (current-module) ',s)))
-
 
 ;;//;; FIXME: For compatibility (should be deleted soon)
 ;;//(define (%module-export module . symbols)
@@ -539,3 +635,20 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
+
+
+;;=============================================================================
+;;
+;;                              MODULE-LIST
+;;
+;;=============================================================================
+#|
+<doc EXT module-list
+ * (module-list)
+ *
+ *  Returns the list of all the living modules.
+doc>
+|#
+(define (module-list)
+  (filter (lambda(x) (not (library? x)))
+          (all-modules)))

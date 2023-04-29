@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Nov-2022 17:35
-;;;; Last file update: 18-Nov-2022 17:37 (eg)
 ;;;;
 
 ;;;; The real implementation is in (scheme bitwise).

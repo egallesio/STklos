@@ -21,22 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 10-Mar-2023 18:54 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
   (import SCHEME)
   (export eval
           disassemble disassemble-expr
-          compiler:time-display
-          compiler:gen-line-number
-          compiler:warn-use-undefined
-          compiler:warn-use-undefined-postpone
-          compiler:show-assembly-code
-          compiler:keep-formals
-          compiler:keep-source
-          compiler:inline-common-functions
-
+          
           %compiler-set-flags
           %grab-file-information
           %compiler-new-label
@@ -582,6 +573,19 @@ doc>
                 '()
                 env)))
 
+(define (extract-doc-and-name doc name body)
+  ;; extract the doc string and and name of the prcedure if present in body
+  ;; doc is a string and name is a keyword. They muts be at the start of body
+  ;; retuns a list of the form (doc name body). doc and name are #f is absent
+  (if (> (length body) 1)
+      (let ((head (car body))
+            (rest (cdr body)))
+        (if (and (not doc) (string? head))
+            (extract-doc-and-name head name rest)
+            (if (and (not name) (keyword? head))
+                (extract-doc-and-name doc head rest)
+                (list doc name body))))
+      (list doc name body)))
 
 ;;//(define (extend-current-env env symbol)
 ;;//  ;; Add just symbol to the current environment (used by let*)
@@ -645,19 +649,22 @@ doc>
 (define (compile-user-lambda formals body arity env src)  ; i.e R5RS ones
   (let* ((env  (extend-env env formals))
          (lab  (new-label))
-         (doc  (if (and (> (length body) 1) (string? (car body)))
-                   (car body)
-                   #f))
-         (body (if doc (cdr body) body)))
+         (info (extract-doc-and-name #f #f body))
+         (doc  (car info))
+         (name (cadr info))
+         (body (caddr info)))
 
     (emit 'CREATE-CLOSURE lab arity)
     (compile-body body env body #t)
     (emit 'RETURN)
     (emit-label lab)
 
-    (when doc
-      ;; emit the docstring
+    (when doc ;; emit the docstring
       (emit 'DOCSTRG (fetch-constant doc)))
+
+    (when name ;; emit the procedure name
+      (emit 'PROCNAME
+            (fetch-constant (string->symbol (keyword->string name)))))
 
     (if (compiler:keep-source)
         ;; emit the code source (in fact signature + body)
@@ -894,16 +901,18 @@ doc>
   (if (> (length el) 2)
       (let* ((method? (eq? (car el) 'method))
              (formals (cadr el))
-             (body    (cddr el))
-             (doc     (and (> (length body) 1) (string? (car body)) (car body)))
-             (new     (rewrite-params-and-body method?
-                                               formals
-                                               (if doc (cdr body) body))))
-        (if doc
-            `(lambda ,(car new)
-               ,doc
-               ,@(cdr new))
-            `(lambda ,@new)))
+             (info    (extract-doc-and-name #f #f (cddr el)))
+             (doc     (car info))
+             (name    (cadr info))
+             (body    (caddr info))
+             (new     (rewrite-params-and-body method? formals body)))
+        ;; new is a list with the arguments followed by the function body
+        (let ((new-args (car new))
+              (new-body (cdr new)))
+          (when doc  (set! new-body (cons doc new-body)))  ;; add documentation
+          (when name (set! new-body (cons name new-body))) ;; add proc-name
+          ;; Build the final lambda
+          `(lambda ,new-args ,@new-body)))
       (compiler-error 'lambda el "bad definition ~S" el)))
 
 
@@ -1740,7 +1749,7 @@ both forms.
                   ;; that an import clause can retrieve it at compile time
                   ;; when we produce a .ostk file. This is not necessary for
                   ;; import of source file, but mandatory for file compilation.
-                  (let ((exports (module-exports module)))
+                  (let ((exports (%module-exports module)))
                     (unless (member names exports)
                       (%module-exports-set! module (cons names exports))))))
               (key-get infos :macros '()))))

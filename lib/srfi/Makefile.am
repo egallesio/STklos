@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 11-Feb-2023 19:06 (eg)
 
 #-======================================================================
 
@@ -86,6 +85,7 @@ SRC_STK   = 1.stk   \
             96.stk  \
             100.stk \
             111.stk \
+            112.stk \
             113.stk \
             116.stk \
             117.stk \
@@ -194,6 +194,7 @@ SRC_OSTK =  1.ostk   \
             96.ostk  \
             100.ostk \
             111.ostk \
+            112.ostk \
             116.ostk \
             117.ostk \
             118.ostk \
@@ -391,8 +392,8 @@ uninstall-hook:
 	rmdir $(srfidir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \
+			$(SOURCES) >> $(DOCDB)
 
 
 # Local Variables:

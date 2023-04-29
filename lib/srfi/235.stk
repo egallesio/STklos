@@ -25,7 +25,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 01-Mar-2023 00:01
-;;;; Last file update: 01-Mar-2023 00:24
 ;;;;
 (define-library (srfi 235)
     (import (scheme base)

@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-Aug-2008 11:48 (eg)
-;;;; Last file update: 10-Mar-2022 14:18 (eg)
 ;;;;
 
 (define-module srfi/96

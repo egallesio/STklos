@@ -22,18 +22,11 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  7-Mar-2023 10:41 (eg)
  */
 
-
-/* workaround for bad optimisations done in glibc2.1. Thanks to  Andreas Jaeger
- * <aj@suse.de> for it
- */
-#ifndef __NO_MATH_INLINES
-#  define __NO_MATH_INLINES
-#endif
 
 #include <math.h>
+#include <float.h>
 #include <ctype.h>
 #include <locale.h>
 #include "stklos.h"
@@ -212,14 +205,50 @@ static double make_nan(int neg, int quiet, unsigned long pay)
  * (real-precision)
  * (real-precision value)
  *
- * This parameter object permits to change the default precision used
+ * This parameter object allows changing the default precision used
  * to print real numbers.
+ *
+ * By precision when printing a number we mean the number of significant
+ * digits -- that is, excluding the leading and trailing zeros in
+ * decimal representation. (This is exactly the same as the number
+ * for the `g` specifier for `printf` in the C language).
+ *
  * @lisp
- * (real-precision)        => 15
+ * (real-precision)         => 15
  * (define f 0.123456789)
- * (display f)             => 0.123456789
+ * (display f)              => 0.123456789
  * (real-precision 3)
- * (display f)             => 0.123
+ * (display f)              => 0.123
+ * (display   1.123456789)  => 1.12
+ * (display  12.123456789)  => 12.1
+ * (display 123.123456789)  => 123.0
+ * @end lisp
+ * In the last example, only three significant digits were printed (123),
+ * and the zero only marks this number as inexact.
+ *
+ * If the number won't fit using the usual decimal format, it will be
+ * printed in scientific notation, but still using the specified number
+ * of significant digits:
+ * @lisp
+ * (display     1234.123456789) => 1.23e+03
+ * (display    12345.123456789) => 1.23e+04
+ * (display 12345678.123456789) => 1.23e+07
+ * @end lisp
+ * Repeating the three examples above with precision equal to one results
+ * in the following.
+ * @lisp
+ * (real-precision 1)
+ * (display     1234.123456789) => 1e+03
+ * (display    12345.123456789) => 1e+04
+ * (display 12345678.123456789) => 1e+07
+ * @end lisp
+ * If the number is only printed up to its n-th digit, then the printed nth
+ * digit will be n rounded up or down, according to the digit that comes
+ * after it.
+ * @lisp
+ * (real-precision 4)
+ * (display 12.123456789) => 12.12  ;; "123..." rounded to "12"
+ * (display 12.987654321) => 12.99  ;; "987..." rounded to "99"
  * @end lisp
 doc>
 */
@@ -2680,12 +2709,15 @@ static SCM my_log(SCM z)
                         return double2real(log(scheme_bignum2double(z)));
                       else
                         return double2real(my_bignum_log(z));
-  case tc_rational:   if (!BIGNUMP(RATIONAL_NUM(z)) &&
+    case tc_rational: if (!BIGNUMP(RATIONAL_NUM(z)) &&
                           !BIGNUMP(RATIONAL_DEN(z)))
                         return double2real(log(rational2double(z)));
                       else
                         return double2real(my_bignum_rational_log(z));
-    case tc_real:     return double2real(log(REAL_VAL(z)));
+    case tc_real:     if ( (REAL_VAL(z) == 0.0) && signbit(REAL_VAL(z)) )
+                          return make_complex(double2real(minus_inf), double2real(MY_PI));
+                      else
+                          return double2real(log(REAL_VAL(z)));
     case tc_complex:  return make_complex(my_log(STk_magnitude(z)),
                                           STk_angle(z));
     default:          error_bad_number(z);
@@ -3240,7 +3272,10 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
 {
   mpz_t res;
 
+  /* y is already known to be exact; so if it is zero,
+     return exact one. */
   if (zerop(y)) return MAKE_INT(1);
+
   if (zerop(x) || (x == MAKE_INT(1))) return x;
 
   if (TYPEOF(y) == tc_bignum)
@@ -3282,7 +3317,15 @@ static SCM my_expt(SCM x, SCM y)
     case tc_real:     if (zerop(y)) return double2real(1.0);
                       if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
                       /* FALLTHROUGH */
-    case tc_complex:  return my_exp(mul2(my_log(x),y));
+    case tc_complex:  if (zerop(x)) {
+                          /* R7RS: The value of 0^z is 1 if (zero? z), 0 if
+                             (real-part z) is positive, and an error otherwise.
+                             Similarly for 0.0^z, with inexact results.*/
+                        if (positivep(COMPLEX_REAL(y))) {
+                          return isexactp(x) ? MAKE_INT(0) : double2real(0.0);
+                        } else STk_error("power of zero to a complex exponent with negative real part ~S", y);
+                      } else return my_exp(mul2(my_log(x),y));
+                      /* FALLTHROUGH */
     default:          error_cannot_operate("expt", x, y);
   }
   return STk_void; /* never reached */
@@ -3291,8 +3334,9 @@ static SCM my_expt(SCM x, SCM y)
 
 DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
 {
-  if (negativep(y)) return div2(MAKE_INT(1),
-                                my_expt(x, sub2(MAKE_INT(0), y)));
+  if (!COMPLEXP(y) && negativep(y))
+    return div2(MAKE_INT(1),
+                my_expt(x, sub2(MAKE_INT(0), y)));
   return my_expt(x, y);
 }
 
@@ -3542,109 +3586,12 @@ DEFINE_PRIMITIVE("string->number", string2number, subr12, (SCM str, SCM base))
 
 
 /*
- * The decode_flonum function is taken from Shiro Kawai Gauche
- * implementation
- *   Copyright (c) 2000-2004 Shiro Kawai, All rights reserved.
- *
- * Decompose flonum D into an integer mantissa F and exponent E, where
- *   -1022 <= E <= 1023,
- *    0 <= abs(F) < 2^53
- *    D = F * 2^(E - 53)
- * Some special cases:
- *    F = 0, E = 0 if D = 0.0 or -0.0
- *    F = #t if D is infinity (positive or negative)
- *    F = #f if D is NaN.
- * If D is normalized number, F >= 2^52.
- *
- * Cf. IEEE 754 Reference
- * http://babbage.cs.qc.edu/courses/cs341/IEEE-754references.html
- */
-union ieee_double {
-    double d;
-    struct {
-#ifdef WORDS_BIGENDIAN
-#if SIZEOF_LONG >= 8
-        unsigned int sign:1;
-        unsigned int exp:11;
-        unsigned long mant:52;
-#else  /*SIZEOF_LONG < 8*/
-        unsigned int sign:1;
-        unsigned int exp:11;
-        unsigned long mant0:20;
-        unsigned long mant1:32;
-#endif /*SIZEOF_LONG < 8*/
-#else  /*!WORDS_BIGENDIAN*/
-#if SIZEOF_LONG >= 8
-        unsigned long mant:52;
-        unsigned int  exp:11;
-        unsigned int  sign:1;
-#else  /*SIZEOF_LONG < 8*/
-        unsigned long mant1:32;
-        unsigned long mant0:20;
-        unsigned int  exp:11;
-        unsigned int  sign:1;
-#endif /*SIZEOF_LONG < 8*/
-#endif /*!WORDS_BIGENDIAN*/
-    } components;
-};
-
-static SCM decode_flonum(double d, int *exp, int *sign)
-{
-  union ieee_double dd;
-  SCM f;
-
-  dd.d = d;
-
-  /* Check exceptional cases */
-  if (dd.components.exp == 0x7ff) {
-    *exp = 0;
-    if (
-#if SIZEOF_LONG >= 8
-        dd.components.mant == 0
-#else
-        dd.components.mant0 == 0 && dd.components.mant1 == 0
-#endif
-        ) {
-      return STk_true;  /* infinity */
-    } else {
-      return STk_false; /* NaN */
-    }
-  }
-
-  *exp  = (dd.components.exp? dd.components.exp - 0x3ff - 52 : -0x3fe - 52);
-  *sign = (dd.components.sign? -1 : 1);
-
-#if SIZEOF_LONG >= 8
-  {
-    unsigned long lf = dd.components.mant;
-    if (dd.components.exp > 0) {
-      lf += (1L<<52);     /* hidden bit */
-    }
-    f = STk_ulong2integer(lf);
-  }
-#else
-  {
-    unsigned long v0 = dd.components.mant0;
-    unsigned long v1 = dd.components.mant1;
-
-    if (dd.components.exp > 0) {
-      v0 += (1L<<20); /* hidden bit */
-    }
-    f = add2(mul2(STk_ulong2integer(v0),
-                  STk_mul2(MAKE_INT(1<<16), MAKE_INT(1<<16))), /* (expt 2 32) */
-             STk_ulong2integer(v1));
-  }
-#endif
-  return f;
-}
-
-/*
 <doc EXT decode-float
  * (decode-float n)
  *
  * |decode-float| returns three exact integers: |significand|, |exponent|
- * and |sign| (where |-1 <= sign <= 1|). The values returned by |decode-float|
- * satisfy:
+ * and |sign| (where |-1 \<= sign \<= 1|). The values returned by
+ * |decode-float| satisfy:
  * @lisp
  * n = (* sign significand (expt 2 exponent))
  * @end lisp
@@ -3659,20 +3606,167 @@ static SCM decode_flonum(double d, int *exp, int *sign)
  * @end lisp
 doc>
 */
+static SCM decode(SCM num)
+{
+  /* Decodes floating-point numbers. As portable as it was possible to make,
+     and using no arithmetic on Scheme numbers. */
+
+  double d = REAL_VAL(num);
+
+  /* Special cases */
+  if (isnan(d)) return STk_n_values(3, STk_false, MAKE_INT(0), MAKE_INT(0));
+  if (isinf(d)) return STk_n_values(3, STk_true, MAKE_INT(0), MAKE_INT(0));
+
+  SCM exponent;
+  SCM significand;
+  SCM sign = MAKE_INT( (signbit(d)) ? -1 : +1 );
+
+  if (signbit(d)) d = -d;
+
+  if (d == 0.0) {
+    exponent = MAKE_INT(0);
+    significand = MAKE_INT(0);
+  } else {
+    int e = 1;
+    /* We'll obtain the exponent. There are two cases:
+
+       1. NORMAL: we calculate the exponent. This is the same that ECL does
+       (and which only works for normal numbers).
+
+       frexp will return a double DD (which we ignore) such that
+
+       d = DD * 2^e
+
+       We know that 1/2 <= DD < 1, so the computed 'e' is unique. This 'e'
+       is the one we need.
+
+       2. SUBNORMAL: the exponent is fixed in DBL_MIN_EXP. */
+    if (isnormal(d)) frexp(d,&e);
+    else             e = DBL_MIN_EXP;
+
+
+    /* We subtract DBL_MANT_DIG from the exponent (the C macro does not
+       take this into account, so we need to compensate). */
+    e -= DBL_MANT_DIG;
+
+    /* To obtain the significand, we only need to "undo" the operation
+       d = significand * 2^(exponent).
+       Which is the same as calculating
+       d * 2(-exponent).
+       Which, then, is the same as calculating
+       ldexp(d,-e).                                                       */
+    significand = double2integer(ldexp(d, -e));
+    exponent = MAKE_INT((unsigned long) e);
+  }
+  return STk_n_values(3, significand, exponent, sign);
+}
+
+/*
+<doc EXT float-max-significand float-min-exponent float-max-exponent
+ * (float-max-significand)
+ * (float-min-exponent)
+ * (float-max-exponent)
+ *
+ * These procedures return the maximum significand value and the
+ * minimum and maximum values for the exponent when calling
+ * the |encode-float| procedure.
+doc>
+ */
+DEFINE_PRIMITIVE("float-max-significand", float_max_signif, subr0, ())
+{
+  return STk_ulong2integer((unsigned long) pow(FLT_RADIX, DBL_MANT_DIG)
+                           -1);
+}
+
+DEFINE_PRIMITIVE("float-min-exponent", float_min_exp, subr0, ())
+{
+  return MAKE_INT((unsigned long)(DBL_MIN_EXP - DBL_MANT_DIG));
+}
+
+DEFINE_PRIMITIVE("float-max-exponent", float_max_exp, subr0, ())
+{
+  return MAKE_INT(DBL_MAX_EXP - DBL_MANT_DIG);
+}
+
 DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
 {
-  SCM tmp;
-  int exp, sign=0;
-
   if (!NUMBERP(n) || COMPLEXP(n)) error_not_a_real_number(n);
-
   if (EXACTP(n)) n = exact2inexact(n);
+  return decode(n);
+}
 
-  tmp = decode_flonum(REAL_VAL(n), &exp, &sign);
-  return STk_n_values(3,
-                      tmp,
-                      MAKE_INT(exp),
-                      MAKE_INT(sign));
+/*
+<doc EXT encode-float
+ * (encode-float significand exponent sign)
+ *
+ * |encode-float| does the inverse work of |decode-float|: it accepts three
+ * numbers, |significand|, |exponent| and |sign|, and returns the floating
+ * point number represented by them.
+ *
+ * When |significand| is `#f`, a NaN will be returned.
+ * When |significand| is `#t`, positive or negative infinity is returned,
+ * depending on the value of |sign|.
+ *
+ * Otherwise, the number returned is
+ * @lisp
+ * n = (* sign significand (expt 2 exponent))
+ * @end lisp
+ *
+ * Both |significand| and |exponent| must be within their proper ranges:
+ *
+ * 0 < |significand| \<= |float-max-significand|, and
+ *
+ * |float-min-exponent| \<= |exponent| \<=  |float-max-exponent|.
+ *
+ *
+ * @lisp
+ * (encode-float (#t 0  1)) => +inf.0
+ * (encode-float (#t 0 -1)) => -inf.0
+ * (encode-float (#f 0  1)) => +nan.0
+ *
+ * (decode-float -0.01)
+ * => 5764607523034235
+ * => -59
+ * => -1
+ * (inexact (encode-float 5764607523034235 -59 -1)) => -0.01
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM exponent,
+                                                       SCM sign))
+{
+  if (STk_integerp(exponent) == STk_false)  error_not_an_integer(exponent);
+  if (STk_integerp(sign) == STk_false)      error_not_an_integer(sign);
+  int g = INT_VAL(inexact2exact(sign));
+
+  /* #f => NaN,
+     #t =? inf  */
+  if (significand == STk_false) return double2real(make_nan(0,0,0));
+  if (significand == STk_true)  return (g >= 0)
+                                  ? double2real(plus_inf)
+                                  : double2real(minus_inf);
+
+  /* Significand */
+  if (STk_integerp(significand) == STk_false) error_not_an_integer(significand);
+  SCM max_signif = STk_ulong2integer((unsigned long) pow(FLT_RADIX, DBL_MANT_DIG)-1);
+  if (negativep(significand)) STk_error("negative significand ~S", significand);
+  if (STk_numgt2(significand, max_signif))
+    STk_error("significand ~S above maximum ~S", significand, max_signif);
+
+  /* Exponent */
+  long e = INT_VAL(inexact2exact(exponent));
+  if (e < DBL_MIN_EXP - DBL_MANT_DIG)
+    STk_error("exponent ~S below minimum ~S",
+              exponent,
+              MAKE_INT((unsigned long) DBL_MIN_EXP));
+  if (e > DBL_MAX_EXP - DBL_MANT_DIG)
+    STk_error("exponent ~S above maximum ~S",
+              exponent,
+              MAKE_INT(DBL_MAX_EXP));
+
+  /* Done! */
+  SCM res = STk_mul2(sign, significand);
+  return STk_mul2(res, STk_expt (MAKE_INT(2), exponent));
 }
 
 
@@ -3922,6 +4016,10 @@ int STk_init_number(void)
   ADD_PRIMITIVE(string2number);
 
   ADD_PRIMITIVE(decode_float);
+  ADD_PRIMITIVE(encode_float);
+  ADD_PRIMITIVE(float_max_signif);
+  ADD_PRIMITIVE(float_min_exp);
+  ADD_PRIMITIVE(float_max_exp);
 
   /* SRFI 208: NaN procedures */
   ADD_PRIMITIVE(make_nan);

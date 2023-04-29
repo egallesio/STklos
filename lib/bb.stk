@@ -1,8 +1,8 @@
 ;;;;
-;;;; b b . s t k 	-- Build the distribution boot file
-;;;;			   (Not necessary in the boot itself)
+;;;; b b . s t k    -- Build the distribution boot file
+;;;;                   (Not necessary in the boot itself)
 ;;;;
-;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,32 +22,31 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  6-Jun-2000 22:05 (eg)
-;;;; Last file update:  8-Nov-2006 11:08 (eg)
 ;;;;
 
 
 (select-module STKLOS-COMPILER)
 
 (define (generate-C-header file INSTRUCTION-SET)
-  (let ((out 	    (open-output-file file))
-	(last-mnemo ""))
+  (let ((out        (open-output-file file))
+        (last-mnemo ""))
     ;; Generation of the mnemonics equivalences
     (format out "/* This file was generated automatically. DO NOT EDIT */\n\n")
 
     (format out "#ifndef _VM_H\n")
     (format out "#define _VM_H\n")
     (for-each (lambda (x)
-		(let* ((mnemo (pretty-mnemonic (car x)))
-		       (len   (string-length mnemo)))
-		  ;; Transform '-' to '_' for C language
-		  (do ((i 0 (+ i 1)))
-		      ((= i len))
-		    (if (char=? (string-ref mnemo i) #\-)
-			(string-set! mnemo i #\_)))
-		  (set! last-mnemo mnemo)
-		  ;; Write a C define
-		  (format out "#  define ~A ~A\n" mnemo (cadr x))))
-	      INSTRUCTION-SET)
+                (let* ((mnemo (pretty-mnemonic (car x)))
+                       (len   (string-length mnemo)))
+                  ;; Transform '-' to '_' for C language
+                  (do ((i 0 (+ i 1)))
+                      ((= i len))
+                    (if (char=? (string-ref mnemo i) #\-)
+                        (string-set! mnemo i #\_)))
+                  (set! last-mnemo mnemo)
+                  ;; Write a C define
+                  (format out "#  define ~A ~A\n" mnemo (cadr x))))
+              INSTRUCTION-SET)
     (format out "\n#  define NB_VM_INSTR (~A+1)\n" last-mnemo)
     (format out "#endif\n\n")
 
@@ -55,16 +54,16 @@
     (format out "\n\n#ifdef DEFINE_JUMP_TABLE\n")
     (format out "static void *jump_table[] = {\n")
     (for-each (lambda (x)
-		(let* ((mnemo (pretty-mnemonic (car x)))
-		       (len   (string-length mnemo)))
-		  ;; Transform '-' to '_' for C language
-		  (do ((i 0 (+ i 1)))
-		      ((= i len))
-		    (if (char=? (string-ref mnemo i) #\-)
-			(string-set! mnemo i #\_)))
-		  ;; Write a GCC address
-		  (format out "  &&lab_~A,\n" mnemo)))
-	      INSTRUCTION-SET)
+                (let* ((mnemo (pretty-mnemonic (car x)))
+                       (len   (string-length mnemo)))
+                  ;; Transform '-' to '_' for C language
+                  (do ((i 0 (+ i 1)))
+                      ((= i len))
+                    (if (char=? (string-ref mnemo i) #\-)
+                        (string-set! mnemo i #\_)))
+                  ;; Write a GCC address
+                  (format out "  &&lab_~A,\n" mnemo)))
+              INSTRUCTION-SET)
     (format out "  NULL};\n")
     (format out "#endif\n")
     (format out "#undef DEFINE_JUMP_TABLE\n\n")
@@ -73,24 +72,28 @@
     (format out "\n\n#ifdef DEFINE_NAME_TABLE\n")
     (format out "static char *name_table[] = {\n")
     (for-each (lambda (x)
-		(let* ((mnemo (pretty-mnemonic (car x)))
-		       (len   (string-length mnemo)))
-		  ;; Transform '-' to '_' for C language
-		  (do ((i 0 (+ i 1)))
-		      ((= i len))
-		    (if (char=? (string-ref mnemo i) #\-)
-			(string-set! mnemo i #\_)))
-		  ;; Write a C string
-		  (format out "  \"~A\",\n" mnemo)))
-	      INSTRUCTION-SET)
+                (let* ((mnemo (pretty-mnemonic (car x)))
+                       (len   (string-length mnemo)))
+                  ;; Transform '-' to '_' for C language
+                  (do ((i 0 (+ i 1)))
+                      ((= i len))
+                    (if (char=? (string-ref mnemo i) #\-)
+                        (string-set! mnemo i #\_)))
+                  ;; Write a C string
+                  (format out "  \"~A\",\n" mnemo)))
+              INSTRUCTION-SET)
     (format out "  NULL};\n")
     (format out "#endif\n")
     (format out "#undef DEFINE_NAME_TABLE\n")
     (close-output-port out)))
 
 (define (make-boot-file image instr)
-  (compile-file "../lib/boot.stk" image)
-  (generate-C-header instr INSTRUCTION-SET))
+  (with-handler (lambda (c)
+                  ;; Print an error message in GNU format
+                  (eprintf "boot.stk:0: Error: ~a\n" (condition-message c))
+                  (emergency-exit 1))
+    (compile-file "../lib/boot.stk" image)
+    (generate-C-header instr INSTRUCTION-SET)))
 
 
 (case (argc)

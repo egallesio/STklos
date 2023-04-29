@@ -22,7 +22,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 30-Jan-2023 12:38 (eg)
  */
 
 #include <unistd.h>
@@ -263,6 +262,9 @@ struct codeset_code STk_errno_names[] = {
 #ifdef EDEADLK
     CODESET_ERRNO(EDEADLK)
 #endif
+#ifdef EDEADLOCK
+    CODESET_ERRNO(EDEADLOCK)
+#endif
 #ifdef EDESTADDRREQ
     CODESET_ERRNO(EDESTADDRREQ)
 #endif
@@ -344,14 +346,14 @@ struct codeset_code STk_errno_names[] = {
 #ifdef ELIBBAD
     CODESET_ERRNO(ELIBBAD)
 #endif
+#ifdef ELIBEXEC
+    CODESET_ERRNO(ELIBEXEC)
+#endif
 #ifdef ELIBMAX
     CODESET_ERRNO(ELIBMAX)
 #endif
 #ifdef ELIBSCN
     CODESET_ERRNO(ELIBSCN)
-#endif
-#ifdef ELIBEXEC
-    CODESET_ERRNO(ELIBEXEC)
 #endif
 #ifdef ELNRANGE
     CODESET_ERRNO(ELNRANGE)
@@ -476,6 +478,9 @@ struct codeset_code STk_errno_names[] = {
 #ifdef ENXIO
     CODESET_ERRNO(ENXIO)
 #endif
+#ifdef EOPNOTSUPP
+    CODESET_ERRNO(EOPNOTSUPP)
+#endif
 #ifdef EOVERFLOW
     CODESET_ERRNO(EOVERFLOW)
 #endif
@@ -524,11 +529,11 @@ struct codeset_code STk_errno_names[] = {
 #ifdef ESHUTDOWN
     CODESET_ERRNO(ESHUTDOWN)
 #endif
-#ifdef ESPIPE
-    CODESET_ERRNO(ESPIPE)
-#endif
 #ifdef ESOCKTNOSUPPORT
     CODESET_ERRNO(ESOCKTNOSUPPORT)
+#endif
+#ifdef ESPIPE
+    CODESET_ERRNO(ESPIPE)
 #endif
 #ifdef ESRCH
     CODESET_ERRNO(ESRCH)
@@ -560,35 +565,14 @@ struct codeset_code STk_errno_names[] = {
 #ifdef EUSERS
     CODESET_ERRNO(EUSERS)
 #endif
+#ifdef EWOULDBLOCK
+    CODESET_ERRNO(EWOULDBLOCK)
+#endif
 #ifdef EXDEV
     CODESET_ERRNO(EXDEV)
 #endif
 #ifdef EXFULL
     CODESET_ERRNO(EXFULL)
-#endif
-
-
-#ifdef EOPNOTSUPP
-    CODESET_ERRNO(EOPNOTSUPP)
-#endif
-#ifdef ENOTSUP
-    CODESET_ERRNO(EOPNOTSUPP)
-#endif
-
-
-#ifdef EWOULDBLOCK
-    CODESET_ERRNO(EWOULDBLOCK)
-#endif
-#ifdef EAGAIN
-    CODESET_ERRNO(EAGAIN)
-#endif
-
-
-#ifdef EDEADLOCK
-    CODESET_ERRNO(EDEADLOCK)
-#endif
-#ifdef EDEADLK
-    CODESET_ERRNO(EDEADLK)
 #endif
     {NULL, 0}
 };

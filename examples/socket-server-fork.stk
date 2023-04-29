@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Sep-2020 12:47 (eg)
-;;;; Last file update: 18-Sep-2020 13:15 (eg)
 ;;;;
 
 ;; A version of socket-server which forks itself when a new connection

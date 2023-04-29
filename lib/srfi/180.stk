@@ -47,7 +47,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 16:36
-;;;; Last file update:  3-Dec-2021 07:14 (jpellegrini)
 ;;;;
 
 (define-module srfi/180

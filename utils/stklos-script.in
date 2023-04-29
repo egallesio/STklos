@@ -22,7 +22,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  4-Nov-2001 19:13 (eg)
-# Last file update: 21-Feb-2020 21:44 (eg)
 #
 
 if test "$#" -eq "0" ;then

@@ -55,7 +55,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Nov-2020 06:15 (jpellegrini)
-;;;; Last file update: 11-Nov-2022 16:34 (eg)
 ;;;;
 
 ;; This implements banker's deque as described in

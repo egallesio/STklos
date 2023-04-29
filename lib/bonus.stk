@@ -20,7 +20,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 24-Jan-2023 10:12 (eg)
 ;;;;
 
 
@@ -55,10 +54,11 @@
         port-idle-register! port-idle-unregister! port-idle-reset!
         chmod
         with-mutex
-        error-object-location %push-id
+        error-object-location %push-id %stable-version?
         define-constant
         void?
         receive case-lambda
+        radians->degrees degrees->radians
 
         %define-condition-type-accessors
         message-condition? condition-message
@@ -1032,14 +1032,56 @@ doc>
 doc>
 |#
 (define-macro (dotimes bindings . body)
+  ;; In the lambda passed to the apply, below:
+  ;; If count is a number (not a variable), don't include a
+  ;; LET for it -- it won't change anyway!
+  ;;
+  ;; For example:
+  ;; (macro-expand '(dotimes (i MAX) 'work))
+  ;;    => (let ((G77 MAX)) (do ((i 0 (+ i 1))) ((>= i G77) (void)) 'work))
+  ;;
+  ;; (macro-expand '(dotimes2 (i 10) 'work))
+  ;;    => (begin (do ((i 0 (fx+ i 1))) ((fx>= i 10) (void)) 'work))
+  ;;
+  ;; The second case will be faster for nested DOTIMEs, because it
+  ;; avoids access to a local variable *and* entering-and-leaving
+  ;; a LET.
+  ;;
+  ;; Also - if count is constant *and* a fixnum, we can use
+  ;; fx- and fx>, even though the speed difference is not
+  ;; that great.
+  ;;
+  ;; When count is not a fixnum, we use + and >= :
+  ;; (macro-expand '(dotimes (i 1180591620717411303424) 'work))
+  ;;   => (begin (do ((i 0 (+ i 1))) ((>= i 1180591620717411303424) (void)) 'work))
+  ;;
   (apply (lambda (var count . result)
-           (let ((limit  (gensym))
-                 (result (if (null? result) (list '(void)) result)))
-             `(let ((,limit ,count))
-                (do ((,var 0 (+ ,var 1)))
-                    ((>= ,var ,limit) ,@result)
-                  ,@body))))
+           (let* ((result (if (null? result) (list '(void)) result))
+                  (limit (if (number? count) count (gensym)))
+                  (head  (if (number? count)
+                             '(begin)
+                             `(let ((,limit ,count)))))
+                  (plus (if (fixnum? count) 'fx+ '+))
+                  (ge   (if (fixnum? count) 'fx>= '>=)))
+             `(,@head (do ((,var 0 (,plus ,var 1)))
+                          ((,ge ,var ,limit) ,@result)
+                        ,@body))))
          bindings))
+
+;; NOTE: I (eg) have tried to implement dotimes using a repeat, to inherit loop
+;; unrolling. It's really faster, ... but not thread-safe :-<. The correction to make
+;; the expansion thread safe is slower than the previous implementation.
+;;
+;;(define-macro (dotimes bindings . body)
+;;  (apply (lambda (var count . result)
+;;           (let* ((result (if (null? result) (list '(void)) result))
+;;                  (plus   (if (fixnum? count) 'fx+ '+)))
+;;             `(let ((,var 0))
+;;                (repeat ,count
+;;                        ,@body ;; thread safe version: (let ((,var ,var)) ,@body)
+;;                        (set! ,var (,plus ,var 1)))
+;;                ,@result)))
+;;         bindings))
 
 #|
 <doc EXT-SYNTAX repeat
@@ -1058,15 +1100,64 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (repeat expr . body)
-  (let ((var (gensym)))
-    `(let ((,var ,expr))
-       (tagbody
-        #:top
-        (when (> ,var 0)
-          (set! ,var (- ,var 1))
-          ,@body
-          (-> #:top))))))
+(define-macro (repeat count . body)
+
+  (define (%repeat n body use-fx?)
+    ;; Repeat without loop unrolling (n must be a variable)
+    ;; If expr is constant *and* a fixnum, we can use fx- and fx>,
+    ;; even though the speed difference is not that great.
+    (let ((minus (if use-fx? 'fx- '-))
+          (gt    (if use-fx? 'fx> '>)))
+      `(tagbody
+          #:top
+          (when (,gt ,n 0)
+            (set! ,n (,minus ,n 1))
+            ,@body
+            (-> #:top)))))
+
+
+  (define (%multiply-list L k)
+    ;; Multiplies a list...
+    ;; (%multiply-list '(a b c) 3) => (a b c a b c a b c)
+    (cond ((fx=? k 0) '())
+          ((fx=? k 1) (list-copy L))
+          (else       (append (list-copy L)
+                              (%multiply-list L (fx- k 1))))))
+
+  ;;
+  ;; body of repeat starts here
+  ;;
+  (let* ((it     (compiler:unroll-iterations))
+         (inside (%multiply-list body it))
+         (c      (gensym))
+         (q      (gensym))
+         (r      (gensym)))
+    (if (fixnum? count)
+        ;; We can compute the number of loops at compile time and produce
+        ;; simpler code. We can also use fx functions.
+        (if (and (= it 1) (positive? count))
+            ;; No loop unrolling
+            `(let ((,c ,count)) ,(%repeat c body #t))
+            ;; Unroll the loop.
+            (let ((valq (quotient count it))
+                  (valr (remainder count it)))
+               `(begin
+                  ,(if (positive? valq) ;; We have a "big" loop
+                      `(let ((,q ,valq)) ,(%repeat q inside #t))
+                      `(void))
+                  ,(if (positive? valr);; we have a "small" loop
+                       `(let ((,r ,valr)) ,(%repeat r body #t))
+                       `(void)))))
+        ;; count is not a fixnum.  Compute modulo and reminder at runtime
+        (if (= it 1)
+            ;; No loop unrolling.
+            `(let ((,c ,count)) ,(%repeat c body #f))
+            ;; Unroll the loop
+            `(let* ((,c ,count)
+                    (,q (quotient ,c ,it))
+                    (,r (remainder ,c ,it)))
+               ,(%repeat q inside #f)
+               ,(%repeat r body #f))))))
 
 #|
 <doc EXT-SYNTAX while
@@ -1077,9 +1168,11 @@ doc>
 doc>
 |#
 (define-macro (while test . body)
-  (let ((lab (gensym)))
-    `(let ,lab ()
-          (when ,test ,@body (,lab)))))
+  `(tagbody
+    #:top
+    (when ,test
+      (begin ,@body
+             (-> #:top)))))
 
 #|
 <doc EXT-SYNTAX until
@@ -1090,10 +1183,11 @@ doc>
 doc>
 |#
 (define-macro (until test . body)
-  (let ((lab (gensym)))
-    `(let ,lab ()
-          (unless ,test ,@body (,lab)))))
-
+  `(tagbody
+    #:top
+    (unless ,test
+      (begin ,@body
+             (-> #:top)))))
 
 #|
 <doc EXT call/ec
@@ -1142,15 +1236,19 @@ doc>
 |#
 (define base64-encode-string #f)
 (define base64-decode-string #f)
-(let ((encode/decode (lambda (op)
+(let ((encode/decode (lambda (op name)
                        (lambda (str)
+                         (unless (string? str)
+                           (error name "bad string ~s" str))
                          (let ((in  (open-input-string str))
                                (out (open-output-string)))
                            (op in out)
                            (get-output-string out))))))
 
-  (set! base64-encode-string (encode/decode base64-encode))
-  (set! base64-decode-string (encode/decode base64-decode)))
+  (set! base64-encode-string
+        (encode/decode base64-encode 'base64-encode-string))
+  (set! base64-decode-string
+        (encode/decode base64-decode 'base64-decode-string)))
 
 ;; ======================================================================
 ;;      md5sum ...
@@ -1236,15 +1334,17 @@ doc>
   ;; ansi-color-protect ...
   (set! ansi-color-protect
     (lambda (start stop)
+      #:ansi-color-protect
       (set! ansi-color-start (string-append start "\e["))
       (set! ansi-color-stop  (string-append "m" stop))))
 
   ;; ansi-color ...
   (set! ansi-color
     (lambda  args
-      (let Loop ((args        args)
+      #:ansi-color
+      (let Loop ((args       args)
                  (str-prev?  #t)
-                 (res         ""))
+                 (res        ""))
         (cond
           ((null? args)
              (if str-prev?
@@ -1275,6 +1375,7 @@ doc>
                    str-prev?
                    res))
           (else (error 'ansi-color "bad command ~S" args)))))))
+
 
 (define do-color
   (let ((term (or (getenv "TERM") "")))
@@ -1762,14 +1863,6 @@ doc>
       (condition-ref obj 'location)
       (error "bad error object: ~S" obj)))
 
-
-(define (%push-id)
-  (let ((value (key-get (%stklos-git) :commit "")))
-    (if (string=? value "")
-        (string-append "stable-" (version))
-        value)))
-
-
 #|
 <doc EXT define-constant
  * (define-constant name expr)
@@ -1821,6 +1914,36 @@ doc>
 doc>
 |#
 (define (void? obj) (eq? obj #void))
+
+#|
+<doc EXT radians->degrees degrees->radians
+ * (radians->degrees r)
+ * (degrees->radians d)
+ *
+ * These procedures convert angles from radians into degrees and
+ * from degrees into radians.
+doc>
+|#
+(define (radians->degrees r)
+  (unless (real? r) (error "bad real number ~S" r))
+  (/ (* r 180)
+     3.141592653589793115997963468544185161590576171875)) ; pi
+
+(define (degrees->radians d)
+  (unless (real? d) (error "bad real number ~S" d))
+  (* (/ d 180)
+     3.141592653589793115997963468544185161590576171875)) ; pi
+
+;;;
+;;; Misc
+;;;
+(define (%push-id)
+  (if (%stable-version?)
+      "stable"
+      (let ((commit (key-get (%stklos-git) :commit #f)))
+        (if commit
+            (format "unstable -- ~a" commit)
+            "unstable"))))
 
 ;;;; ======================================================================
 ;;;;

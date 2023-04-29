@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 13-Mar-2023 19:22 (eg)
  */
 
 
@@ -506,6 +505,7 @@ SCM STk_make_frame(int len);
 SCM STk_clone_frame(SCM f);
 
 SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound);
+void STk_error_unbound_variable(SCM symbol, SCM module);
 void STk_define_variable(SCM symbol, SCM value, SCM module);
 
 

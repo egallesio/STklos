@@ -21,7 +21,6 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Mar-2021 12:14 (jpellegrini)
- * Last file update: 11-Nov-2022 15:51 (eg)
  */
 
 

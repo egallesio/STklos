@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  2-Feb-2023 12:17 (eg)
  */
 
 #include <limits.h>
@@ -103,19 +102,38 @@ SCM STk_read_from_C_string(const char *str)
  * (implementation-version)
  *
  * Returns a string identifying the current version of the system. A
- * version is constituted of two numbers separated by a point: the version
- * and the release numbers. Note that |implementation-version| corresponds
- * to the {{link-srfi 112}} name of this function.
+ * version is constituted of two (or three) numbers separated by a point:
+ * the version, the release numbers and, eventually, a patch number. The
+ * patch number is used for developments version only; it is absent for stable
+ * releases.
+ *
+ * Note that |implementation-version| corresponds to the {{link-srfi 112}} name of
+ * this function.
 doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))
 {
-  return STk_Cstring2string(VERSION);
+  return STk_Cstring2string(FULL_VERSION);
 }
 
-DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
+
+/*
+<doc EXT short-version
+ * (short-version)
+ *
+ * Returns a string identifying the current version of the system without
+ * its eventual patch number. 
+doc>
+*/
+DEFINE_PRIMITIVE("short-version", short_version, subr0, (void))
 {
-  return STk_Cstring2string("abcdef");
+  return STk_Cstring2string(VERSION);  // version without patch number
+}
+
+
+DEFINE_PRIMITIVE("%stable-version?", stable_versionp, subr0, (void))
+{
+  return MAKE_BOOLEAN(strcmp(VERSION_STATUS, "stable") == 0);
 }
 
 DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
@@ -642,7 +660,8 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 int STk_init_misc(void)
 {
   ADD_PRIMITIVE(version);
-  ADD_PRIMITIVE(push_id);
+  ADD_PRIMITIVE(short_version);
+  ADD_PRIMITIVE(stable_versionp);
   ADD_PRIMITIVE(stklos_configure);
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);
