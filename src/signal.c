@@ -146,8 +146,8 @@ static void sigsegv(int _UNUSED(i))
 {
   fprintf(stderr,
       "Received a SIGSEGV signal.\n"
-      "Try to augment stack size (--stack-size option).\n"
-      "If the problem persists, send a mail to <bugs@stklos.net>\n");
+      "Try to augment stack size (--stack-size option). If the problem persists,\n"
+      "fill an issue report on https://github.com/egallesio/STklos/issues\n");
   fflush(stderr);
   _exit(1);
 }
