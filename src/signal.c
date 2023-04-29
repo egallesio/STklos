@@ -145,7 +145,7 @@ static void sigint(int _UNUSED(i))
 static void sigsegv(int _UNUSED(i))
 {
   fprintf(stderr,
-      "Received a SIGSGV signal.\n"
+      "Received a SIGSEGV signal.\n"
       "Try to augment stack size (--stack-size option).\n"
       "If the problem persists, send a mail to <bugs@stklos.net>\n");
   fflush(stderr);
