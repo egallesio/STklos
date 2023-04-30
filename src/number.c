@@ -307,7 +307,7 @@ static Inline SCM Cmake_complex(SCM r, SCM i)
 
 static Inline SCM make_complex(SCM r, SCM i)
 {
-  return (zerop(i)) ? r : Cmake_complex(r, i);
+  return (isexactp(i) && zerop(i)) ? r : Cmake_complex(r, i);
 }
 
 static Inline SCM make_polar(SCM a, SCM m)
@@ -1368,7 +1368,8 @@ DEFINE_PRIMITIVE("complex?", complexp, subr1, (SCM x))
 DEFINE_PRIMITIVE("real?", realp, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
-    case tc_complex: return MAKE_BOOLEAN(zerop(COMPLEX_IMAG(x)));
+    /* a+0i is real; a+0.0i is not */
+    case tc_complex: return MAKE_BOOLEAN(STk_eq(COMPLEX_IMAG(x), MAKE_INT(0)) == STk_true);
     case tc_real:
     case tc_rational:
     case tc_bignum:
