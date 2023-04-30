@@ -77,7 +77,6 @@ Free Documentation License">>.
 {{Include* "object.adoc"}}
 {{Include* "threads.adoc"}}
 {{Include* "custom.adoc"}}
-{{Include* "scmpkg.adoc"}}
 {{Include* "ffi.adoc"}}
 {{Include* "slib.adoc"}}
 {{Include* "srfi.adoc"}}

@@ -1568,6 +1568,7 @@
       #t
       (= (cos 1-1i) (cos -1+1i)))
 
+;; sin, cos
 (test "sin 0.0"
       0.0
       (sin 0.0))

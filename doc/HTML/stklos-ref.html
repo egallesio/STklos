@@ -852,24 +852,18 @@ pre.rouge {
 <li><a href="#_environment_variables">10.2. Environment variables</a></li>
 </ul>
 </li>
-<li><a href="#_the_scmpkg_package_system">11. The ScmPkg Package System</a>
+<li><a href="#_foreign_function_interface">11. Foreign Function Interface</a>
 <ul class="sectlevel2">
-<li><a href="#_scmpkg_tutorial">11.1. <em>ScmPkg</em> "tutorial"</a></li>
-<li><a href="#_stklos_pkg_options">11.2. stklos-pkg options</a></li>
+<li><a href="#_external_functions">11.1. External functions</a></li>
+<li><a href="#_c_pointers">11.2. C pointers</a></li>
 </ul>
 </li>
-<li><a href="#_foreign_function_interface">12. Foreign Function Interface</a>
+<li><a href="#_using_the_slib_package">12. Using the SLIB package</a></li>
+<li><a href="#_srfis">13. SRFIs</a>
 <ul class="sectlevel2">
-<li><a href="#_external_functions">12.1. External functions</a></li>
-<li><a href="#_c_pointers">12.2. C pointers</a></li>
-</ul>
-</li>
-<li><a href="#_using_the_slib_package">13. Using the SLIB package</a></li>
-<li><a href="#_srfis">14. SRFIs</a>
-<ul class="sectlevel2">
-<li><a href="#_supported_srfis">14.1. Supported SRFIs</a></li>
-<li><a href="#_using_a_srfi">14.2. Using a SRFI</a></li>
-<li><a href="#_misc_information">14.3. Misc. Information</a></li>
+<li><a href="#_supported_srfis">13.1. Supported SRFIs</a></li>
+<li><a href="#_using_a_srfi">13.2. Using a SRFI</a></li>
+<li><a href="#_misc_information">13.3. Misc. Information</a></li>
 </ul>
 </li>
 <li><a href="#_bibliography">Bibliography</a></li>
@@ -5085,6 +5079,25 @@ arguments:</p>
 <span class="p">(</span><span class="nf">acosh</span> <span class="mf">1.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
 <span class="p">(</span><span class="nf">atanh</span> <span class="mf">0.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(radians&#8594;degrees r)</code></strong><br>
+<strong><code>(degrees&#8594;radians d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures convert angles from radians into degrees and
+from degrees into radians.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14249,7 +14262,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1118</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1180</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -18064,7 +18077,7 @@ For instance,</p>
 <p>is equivalent to the requiring <code>srfi-1</code> and <code>srfi-2</code>.</p>
 </div>
 <div class="paragraph">
-<p>A list of available symbolic names for features is given in <a href="#_srfis">Chapter 14</a>.</p>
+<p>A list of available symbolic names for features is given in <a href="#_srfis">Chapter 13</a>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -18095,7 +18108,7 @@ Consequently, to use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.htm
 </div>
 </div>
 <div class="paragraph">
-<p>See also <a href="#_srfis">Chapter 14</a> for more information.</p>
+<p>See also <a href="#_srfis">Chapter 13</a> for more information.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -23626,165 +23639,7 @@ is by default <code>~/.stklos</code>.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_scmpkg_package_system">11. The ScmPkg Package System</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>
-<em>ScmPkg</em> is a package distribution system for Scheme. It is
-currently supported by Bigloo and <strong><em>STklos</em></strong>. This package system
-provides new APIs to Scheme (e.g., network programming,
-cryptography, encoding, &#8230;&#8203;) and it manages automatic package
-installation, deinstallation and testing.</p>
-</div>
-<div class="sect2">
-<h3 id="_scmpkg_tutorial">11.1. <em>ScmPkg</em> "tutorial"</h3>
-<div class="paragraph">
-<p><code>stklos-pkg</code> is the command which gives access to <em>ScmPkg</em> in <strong><em>STklos</em></strong>.
-This is the only command necessary to manage <em>ScmPkg</em> packages. For
-instance, this command manages a local cache of the <em>ScmPkg</em> server, permits
-(de)installation of <em>ScmPkg</em> packages, the test of packages, &#8230;&#8203;</p>
-</div>
-<div class="paragraph">
-<p>To start, we can synchronize our local repository with the <em>ScmPkg</em>
-servers. This can be done by the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --sync</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This will download a description of the <em>ScmPkg</em> packages
-which are available. The list of these packages can be displayed with:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --list
-_bigloo-1.0.1 (tuning)
-_bigloo-regexp-0.0.1
-_bigloo-stdlib-0.0.1 (tuning)
-_chicken-0.0.1 (tuning)
-_chicken-net-0.0.1 (tuning)
-_chicken-os-0.0.1
-rfc3339-0.2.0
-srfi1-0.0.1 (tuning)
-$</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Packages whose name start by an underscore are packages needed for
-alien language support (e.g. the package "<em>bigloo" is necessary to
-run a package written in the Bigloo Scheme dialect, or the package
-"_chicken-net" is necessary for the packages using the network
-primitives of the Chicken Scheme dialect). Some packages may offer
-a tuning. A tuned package is a package which has been specially
-tuned for <strong>_STklos</em></strong> (e.g. the generic "srfi1" package which
-implement SRFI-1 has been tuned to be more efficient in STklos)</p>
-</div>
-<div class="paragraph">
-<p>To download a new package (and all its dependencies), one can simply
-issue the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --extract PKG --directory /tmp/Test</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This command downloads the package <em>PKG</em>, its dependencies
-and (eventually) its tuning. It also creates a <code>Makefile</code>
-for compiling the package.  The <code>--directory</code> option
-specifies where the files must be extracted in the <code>/tmp/Test</code>
-directory (instaed of the current directory). The generated <code>Makefile</code>
-offers the following main targets</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>all</strong> : the default target</p>
-</li>
-<li>
-<p><strong>test:</strong> to launch the package tests</p>
-</li>
-<li>
-<p><strong>install:</strong> to install the package for the user</p>
-</li>
-<li>
-<p><strong>system-install:</strong> to install the package system wide (privilegied access
-rights are probably needed)</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>To test a package, one can also use the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>\type{$} stklos-pkg --test PKG</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This downloads the necessary files in a temporary directory,
-and launches the tests of the package <em>PKG</em></p>
-</div>
-<div class="paragraph">
-<p>To install a package, one can also use the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --install PKG</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This command downloads the necessary files in a temporary directory,
-and installs the package <em>PKG</em>.</p>
-</div>
-<div class="paragraph">
-<p>This completes the basis <em>ScmPkg</em> tutorial. See below for
-the list of all stklos-pkg options</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_stklos_pkg_options">11.2. stklos-pkg options</h3>
-<div class="paragraph">
-<p>Here are the options supported by the stklos-pkg command</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>Usage: stklos-pkg [options] [parameter ...]
-Actions
-  --extract=&lt;pkg&gt;, -e &lt;pkg&gt;    Extract &lt;pkg&gt;. Don't install it
-  --test=&lt;pkg&gt;, -t &lt;pkg&gt;       Test &lt;pkg&gt;.
-  --install=&lt;pkg&gt;, -i &lt;pkg&gt;    Extract, compile, Install &lt;pkg&gt;.
-  --uninstall=&lt;pkg&gt;            un-install package &lt;pkg&gt;
-Repository administration
-  --sync, -s                   synchronize with remote server servers
-  --add=&lt;sb&gt;, -a &lt;sb&gt;          Add &lt;sb&gt; pkgball to the local repository
-  --download=&lt;pkg&gt;             download &lt;pkg&gt;
-  --fill-cache                 fill cache with available distant packages
-  --clear-cache                delete packages present in cache
-  --reset                      reset stklos-pkg repository. USE WITH CAUTION
-  --build-sync-file=&lt;dir&gt;      Build a synchronization file from &lt;dir&gt;
-Informations
-  --list, -l                   list available packages
-  --depends=&lt;pkg&gt;              Show all the dependencies of &lt;pkg&gt;
-  --installed                  Show installed packages
-Misc
-  --conf-dir=&lt;dir&gt;, -D &lt;dir&gt;   Use &lt;dir&gt; as stklos main configuration directory
-  --directory=&lt;dir&gt;, -C &lt;dir&gt;  Change to directory &lt;dir&gt; (extract/download)
-  --verbose, -v                be verbose (can be cumulated)
-  --system-wide, -S            do a system wide (de)installation
-  --version, -V                print the version and exit
-  --help, -h                   display this help
-  --options                    display program options
-  --cp                         INTERNAL USE ONLY. Do not use this option</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_foreign_function_interface">12. Foreign Function Interface</h2>
+<h2 id="_foreign_function_interface">11. Foreign Function Interface</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p></p>
@@ -23808,7 +23663,7 @@ the <strong><em>STklos</em></strong> VM when using an external C function.</p>
 evolve in future versions.</strong></p>
 </div>
 <div class="sect2">
-<h3 id="_external_functions">12.1. External functions</h3>
+<h3 id="_external_functions">11.1. External functions</h3>
 <div class="paragraph">
 <p>The definition of an external function is done with the
 <code>define-external</code> special form.  This form takes as arguments
@@ -24106,7 +23961,7 @@ the FFI better!):</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_c_pointers">12.2. C pointers</h3>
+<h3 id="_c_pointers">11.2. C pointers</h3>
 <div class="paragraph">
 <p>It is very common that external functions return pointers, serving as
 handles on internal structures. This pointers, called hereafter
@@ -24303,7 +24158,7 @@ allocated memory (a NULL value for C).</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_using_the_slib_package">13. Using the SLIB package</h2>
+<h2 id="_using_the_slib_package">12. Using the SLIB package</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -24367,7 +24222,7 @@ variable.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_srfis">14. SRFIs</h2>
+<h2 id="_srfis">13. SRFIs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -24387,7 +24242,7 @@ information on each SRFI, please look at the official
 SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
+<h3 id="_supported_srfis">13.1. Supported SRFIs</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> supports <strong>119</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
@@ -24522,7 +24377,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_a_srfi">14.2. Using a SRFI</h3>
+<h3 id="_using_a_srfi">13.2. Using a SRFI</h3>
 <div class="paragraph">
 <p>Using a particular SRFI can be done with the special form
 <code>cond-expand</code> defined in <strong><a href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a></strong> which is fully supported
@@ -24564,7 +24419,7 @@ use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a></st
 <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 <div class="sect3">
-<h4 id="_embedded_srfis">14.2.1. Embedded SRFIs</h4>
+<h4 id="_embedded_srfis">13.2.1. Embedded SRFIs</h4>
 <div class="paragraph">
 <p>As said before, an <em>embedded</em> SRFI can be used directly without loading a
 support file. (Note that using <strong>require-feature</strong> works too
@@ -24576,7 +24431,7 @@ and permits to ignore if the SRFI is embedded).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_external_srfis">14.2.2. External SRFIs</h4>
+<h4 id="_external_srfis">13.2.2. External SRFIs</h4>
 <div class="paragraph">
 <p>An external SRFI needs to load at least one external file. This can be done
 with <strong>require</strong> or <strong>require-feature</strong>. As with embedded SRFIS, using
@@ -24588,7 +24443,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_features">14.2.3. SRFI features</h4>
+<h4 id="_srfi_features">13.2.3. SRFI features</h4>
 <div class="paragraph">
 <p>For some SRFIs, <strong><em>STklos</em></strong> accepts that uses them with a name. This names
 are given <a href="#feature_identifiers">Table 2</a>.</p>
@@ -24775,7 +24630,7 @@ are given <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_misc_information">14.3. Misc. Information</h3>
+<h3 id="_misc_information">13.3. Misc. Information</h3>
 <div class="paragraph">
 <p>Previous section described the general way to use the SRFIS implemented in
 <strong><em>STklos</em></strong>.  This section concentrates on information not given above.</p>
@@ -28245,7 +28100,7 @@ the exported symbols of <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.
 <code>(srfi 1)</code> library.</p>
 </div>
 <div class="paragraph">
-<p>See  <em><a href="#_srfis">Chapter 14</a></em> for more information</p>
+<p>See  <em><a href="#_srfis">Chapter 13</a></em> for more information</p>
 </div>
 </div>
 <div class="sect3">
@@ -30254,7 +30109,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-04-14 23:18:46 +0200
+Last updated 2023-04-30 19:42:42 +0200
 </div>
 </div>
 </body>
