@@ -48,6 +48,8 @@ struct bignum_obj {
 
 #define ULONG_FITS_INTEGER(_l)  ((_l) <= ((uint64_t) INT_MAX_VAL))
 
+#define TYPEOF(n)                (INTP(n)? tc_integer: STYPE(n))
+
 /* Reals... */
 static inline SCM double2real(double x)
 {
@@ -1142,8 +1144,16 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-set!", bytevector_ieee_single_set, subr
       end = end_big;
   else STk_error("bad endianness symbol ~S", endianness);
 
+  float valf;
+  switch (TYPEOF(val)) {
+    case tc_integer:
+    case tc_bignum:
+    case tc_rational:
+    case tc_real:     valf = STk_number2double(val);
+                      break;
+    default:          STk_error("bad real number ~S", val);
+  }
   unsigned long idx = INT_VAL(i);
-  float valf = REAL_VAL(val);
 
   switch (sizeof(float)) {
   case 4: {
@@ -1167,8 +1177,16 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-set!", bytevector_ieee_single_na
 {
   check_integer(i);
 
+  float valf;
+  switch (TYPEOF(val)) {
+    case tc_integer:
+    case tc_bignum:
+    case tc_rational:
+    case tc_real:      valf = STk_number2double(val);
+                       break;
+    default:           STk_error("bad real number ~S", val);
+  }
   unsigned long idx = INT_VAL(i);
-  float valf = REAL_VAL(val);
 
   switch (sizeof(float)) {
   case 4: {
@@ -1192,6 +1210,16 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
 {
   check_integer(i);
 
+  double valf;
+  switch (TYPEOF(val)) {
+    case tc_integer:
+    case tc_bignum:
+    case tc_rational:
+    case tc_real:      valf = STk_number2double(val);
+                       break;
+    default:           STk_error("bad real number ~S", val);
+  }
+
   endianness_t end = 0;
   if (endianness == symb_little)
       end = end_little;
@@ -1200,7 +1228,6 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
   else STk_error("bad endianness symbol ~S", endianness);
 
   unsigned long   idx  = INT_VAL(i);
-  double valf = REAL_VAL(val);
 
   switch (sizeof(double)) {
   case 8: {
@@ -1220,7 +1247,15 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-set!", bytevector_ieee_double_na
   check_integer(i);
 
   unsigned long   idx  = INT_VAL(i);
-  double valf = REAL_VAL(val);
+  double valf;
+  switch (TYPEOF(val)) {
+    case tc_integer:
+    case tc_bignum:
+    case tc_rational:
+    case tc_real:      valf = STk_number2double(val);
+                       break;
+    default:           STk_error("bad real number ~S", val);
+  }
 
   switch (sizeof(double)) {
   case 8: {
