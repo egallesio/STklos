@@ -104,7 +104,7 @@
 
 (test/error "real-expt args 1" (real-expt 1+0.0i 1))
 (test/error "real-expt args 2" (real-expt 1 1+0.0i))
-(test/error "real-expt args 3" (real-expt 0.0 -1))
+(test/error "real-expt args 3" (real-expt -2.0 0.5)) ; result is complex
 (test "real-expt" 2.25 (real-expt 1.5 2.0))
 
 (test/error "quo args" (quo 1 0))
