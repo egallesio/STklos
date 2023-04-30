@@ -2888,7 +2888,7 @@ static Inline SCM acos_complex(SCM z)
 
 static SCM acos_real(double d)
 {
-  return (-1 < d && d < 1) ? double2real(acos(d)) : acos_complex(double2real(d));
+  return (-1 <= d && d <= 1) ? double2real(acos(d)) : acos_complex(double2real(d));
 }
 
 
