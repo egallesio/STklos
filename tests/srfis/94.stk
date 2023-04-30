@@ -68,7 +68,9 @@
 (define (square x) (* x x))
 (test-many real-sqrt square '(0.5 1.0 2.0 4.0 1/3 10.5))
 
-(test/error "integer-sqrt args" (integer-sqrt 2))
+(test/error "integer-sqrt args 1" (integer-sqrt 2.5))
+(test/error "integer-sqrt args 2" (integer-sqrt 7/2))
+(test "integer-sqrt 0" 1 (integer-sqrt 2))
 (test "integer-sqrt 1" 3 (integer-sqrt 9))
 (test "integer-sqrt 2" 3 (integer-sqrt 10))
 
@@ -79,8 +81,6 @@
 (test "integer-log" 3 (integer-log  2 12))
 (test "integer-log" 4 (integer-log  2 16))
 
-(test/error "integer-expt args 1" (integer-expt -1 2))
-(test/error "integer-expt args 2" (integer-expt 1 -2))
 (test/error "integer-expt args 3" (integer-expt (/ 1 2) 2))
 (test/error "integer-expt args 4" (integer-expt 1 1/2))
 (test/error "integer-expt args 5" (integer-expt 0.5 1))
