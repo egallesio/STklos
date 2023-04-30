@@ -498,7 +498,7 @@ static SCM double2integer(double n)     /* small or big depending on n's size */
 static SCM double2rational(double d)
 {
   double fraction, i;
-  SCM int_part, num, den, res;
+  SCM int_part, res;
   int negative = 0;
 
   if (d < 0.0) { negative = 1; d = -d; }
@@ -506,8 +506,12 @@ static SCM double2rational(double d)
   int_part = double2integer(i);
 
   if (!fraction) {
-    res = int_part;
+    res = negative ? sub2(MAKE_INT(0), int_part) : int_part;
   } else {
+
+#ifdef __MINI_GMP_H__
+    /* BEGIN code for compiling WITH MINI GMP (*no* rationals!) */
+    SCM num, den;
     num = MAKE_INT(0);
     den = MAKE_INT(1);
 
@@ -518,10 +522,33 @@ static SCM double2rational(double d)
       if (i)
         num = add2(num, MAKE_INT(1));
     }
+    if (negative) num = sub2(MAKE_INT(0), num);
     res = add2(int_part, div2(num, den));
-  }
+#else
+    /* BEGIN code for compiling WITH FULL GMP (*with* rationals!) */
 
-  return negative? mul2(res, MAKE_INT((unsigned long) -1)): res;
+    /* We just create a rational from a double using the GMP, then
+       get back the numerator and denominator. According to the
+       GMP documentation, this conversion is exact -- there is no
+       rounding. */
+    mpz_t num, den;
+    mpq_t q;
+    mpz_init(num);
+    mpz_init(den);
+    mpq_init(q);
+    mpq_set_d(q, d);
+
+    mpq_get_num(num, q);
+    mpq_get_den(den, q);
+    if (negative) mpz_neg(num,num);
+    res = Cmake_rational(bignum2number(num), bignum2number(den));
+    mpq_clear(q);
+    mpz_clear(num);
+    mpz_clear(den);
+#endif /* __MINI_GMP_H__ */
+
+  }
+  return res;
 }
 
 
@@ -983,14 +1010,14 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
   if (p3) *p3 = '\0';
 
   if (p1) {             /* compute integer part */
-    if (mpz_init_set_str(tmp, s, 10L) < 0) return STk_false;
+    if (mpz_init_set_str(tmp, s, 10L) < 0) { mpz_clear(tmp); return STk_false; }
     int_part = bignum2number(tmp);
   }
 
   if (p3 > p2) {        /* compute decimal part as a rational 0.12 => 6/5 */
     SCM num, den;
 
-    if (mpz_init_set_str(tmp, p2, 10L) < 0) return STk_false;
+    if (mpz_init_set_str(tmp, p2, 10L) < 0) { mpz_clear(tmp); return STk_false; }
     num = bignum2number(tmp);
 
     mpz_ui_pow_ui(tmp, 10UL, strlen(p2));
@@ -1012,6 +1039,7 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
     }
   }
 
+  mpz_clear(tmp);
   /* now return (int_part + fract_part) * exp_part */
   return mul2(add2(int_part, fract_part), exp_part);
 }
@@ -2361,7 +2389,9 @@ static SCM gcd2(SCM n1, SCM n2)
      * at most r is equal to n1 or n2, which has been accepted by
      * predicate integer? when entering this function
      */
-    return (exactp) ? bignum2number(r): double2real(bignum2double(r));
+    SCM res = (exactp) ? bignum2number(r): double2real(bignum2double(r));
+    mpz_clear(r);
+    return res;
   }
 }
 
@@ -3199,7 +3229,9 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
     case tc_integer:
       mpz_init_set_si(res, INT_VAL(x));
       mpz_pow_ui(res, res, INT_VAL(y));
-      return bignum2number(res);
+      SCM scm_res = bignum2number(res);
+      mpz_clear(res);
+      return scm_res;
     case tc_bignum:
       mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
       return bignum2number(res);
