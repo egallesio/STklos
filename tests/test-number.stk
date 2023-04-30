@@ -1490,6 +1490,60 @@
         (and (<  1.99999999 r  2.00000001)
              (< -3.00000001 i -2.99999999))))
 
+
+;; log with bignums
+
+(test "log 2^200" ;; bignum that fits into a double
+      #t
+      (let ((z (log (expt 2 200))))
+        (<  138.6294360 z 138.629437)))
+
+(test "log 2^200 / 3" ;; numerator is a bignum that fits into a double,
+      ;; denominator is a fixnum
+      #t
+      (let ((z (log (/ (expt 2 200) 3))))
+        (<  137.530823 z 137.530824)))
+
+(test "log 2^60 / 3^70" ;; numerator is a fixnum,
+      ;; denominator is a bignum that fits into a double
+      #t
+      (let ((z (log (/ (expt 2 60) (expt 3 70)))))
+        (<  -35.314030 z -35.314029)))
+
+(test "log 2^70 / 3^70" ;; numerator and denominator are bignums that
+      ;; fit into a double
+      #t
+      (let ((z (log (/ (expt 2 70) (expt 3 70)))))
+        (<  -28.3825576 z -28.3825575)))
+
+;; Just being picky:
+(test "%stklos-has-gmp?" #t (boolean? (%stklos-has-gmp?)))
+
+(when (%stklos-has-gmp?)
+
+  (test "log 2^3000"
+        #t
+        (let ((z (log (expt 2 3000))))
+          (<  2079.44154160000 z 2079.44154170000)))
+
+  (test "log_2 2^4000"
+        #t
+        (let ((z (log (expt 2 4000) 2)))
+          (< 3999.9999999 z 4000.0000001)))
+
+  (test "log 10^3000 / 3"
+        #t
+        (let ((z (log (/ (expt 10 3000) 7))))
+          (<  6905.80936 z 6905.80937)))
+
+  (test "log 2^3000 / 3^2500" ;; numerator and denominator are bignums
+        #t
+        (let ((z (log (/ (expt 2 3000) (expt 3 2500)))))
+          (<  -667.089180 z -667.089179)))
+  )
+
+;; sin, cos
+
 (test "sin 1-1i"
       #t
       (let* ((z (sin 1-1i))
@@ -1514,7 +1568,6 @@
       #t
       (= (cos 1-1i) (cos -1+1i)))
 
-;; sin, cos
 (test "sin 0.0"
       0.0
       (sin 0.0))
