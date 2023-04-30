@@ -66,15 +66,23 @@
 (test/error "set!.4"  (begin (set! a (* a 10)) a))
 (test/error "set!.5"  (begin (set! b (* b 10)) b))
 (test/error "set!.6"  (begin (set! c (* c 10)) c))
-(test/error "define.1" (define x 100))  ;; new binding
-(test/error "define.2" (define a 100))  ;; redefinition
+
+;; TEST/ERROR:
+;; Stklos cannot catch compile-time errors
+;; (test/error "define.1" (define x 100))  ;; new binding
+;; (test/error "define.2" (define a 100))  ;; redefinition
 
 (select-module %%unmutability2)
 (test/error "set!.8"       (begin (set! a (* a 10)) a))
 (test       "set!.9"   20  (begin (set! b (* b 10)) b))
 (test       "set!.10"  30  (begin (set! c (* c 10)) c))
 (test       "define.3" 100 (begin (define x 100) x))  ;; new binding
-(test/error "define.4"     (begin (define a 100) a))  ;; redefinition of imported
+
+
+;; TEST/ERROR:
+;; Stklos cannot catch compile-time errors
+;;(test/error "define.4"     (begin (define a 100) a))  ;; redefinition of imported
+
 (test       "define.4" 100 (begin (define b 100) b))  ;; redefinition of b
 
 
