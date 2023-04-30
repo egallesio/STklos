@@ -1098,6 +1098,20 @@
 (test "exact expt" -1 (expt -1 720001))
 (test "exact real" 8 (exact (expt 2 3.0))) ;; 3.0 is precisely representable in
                                            ;; the IEEE standards
+(test "expt -2 0.5" #t
+      (complex? (expt -2.0 0.5)))
+(test "expt -2 1/2" #t
+      (complex? (expt -2.0 1/2)))
+
+(test "expt -2 0.5, expt -2 1/2 (imag part)" #t
+      (< (abs (- (imag-part (expt -2.0 0.5))
+                 (imag-part (expt -2.0 1/2))))
+         0.000001))
+(test "expt -2 0.5, expt -2 1/2 (real part)" #t
+      (< (abs (- (real-part (expt -2.0 0.5))
+                 (real-part (expt -2.0 1/2))))
+         0.000001))
+
 (test "0^0" 1 (expt 0 0))          ;; exact exponent, exact 1
 (test "0^0" 1 (expt 0.0 0))        ;; exact exponent, exact 1
 (test "0^0" 1.0 (expt 0 0.0))      ;; inexact exponent, inexact 1.0
