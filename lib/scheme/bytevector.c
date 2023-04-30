@@ -1065,6 +1065,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-ref", bytevector_ieee_single_nat
   check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
+  if (idx%4) STk_error("index for IEEE single precision bytevector not multiple of 4: ~S", i);
 
   switch (sizeof(float)) {
   case 4: {
@@ -1117,6 +1118,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-ref", bytevector_ieee_double_nat
   check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
+  if (idx%8) STk_error("index for IEEE double precision bytevector not multiple of 8: ~S", i);
 
   switch (sizeof(double)) {
   case 8: {
@@ -1187,6 +1189,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-set!", bytevector_ieee_single_na
     default:           STk_error("bad real number ~S", val);
   }
   unsigned long idx = INT_VAL(i);
+  if (idx%4) STk_error("index for IEEE single precision bytevector not multiple of 4: ~S", i);
 
   switch (sizeof(float)) {
   case 4: {
@@ -1247,6 +1250,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-set!", bytevector_ieee_double_na
   check_integer(i);
 
   unsigned long   idx  = INT_VAL(i);
+  if (idx%8) STk_error("index for IEEE double precision bytevector not multiple of 8: ~S", i);
   double valf;
   switch (TYPEOF(val)) {
     case tc_integer:
