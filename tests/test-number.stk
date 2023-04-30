@@ -141,7 +141,7 @@
 
 (test "rational reader" '(1 #t) (rational-test (string->number "3/03")))
 (test/error "rational reader" (string->number "3/0"))
-(test/error "rational reader" '3/3/4)
+(test/error "rational reader" 3/3/4)
 (test/error "rational reader" (rational-test (string->number "1/2.")))
 (test/error "rational reader" (rational-test (string->number "1.3/2")))
 
