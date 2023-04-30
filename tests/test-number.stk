@@ -314,7 +314,7 @@
 (test "complex from ratio reader" '(1.0 0.4)    (decompose-complex '#i1+2/5i))
 (test "complex from ratio reader" '(0.6 2.0)    (decompose-complex '#i3/5+2i))
 (test "complex from ratio reader" '(2.0 -2.5)   (decompose-complex '#i2+5/-2i))
-(test "complex from ratio reader" 0.0           (decompose-complex '#i0/1+0/1i))
+(test "complex from ratio reader" '(0.0 0.0)    (decompose-complex '#i0/1+0/1i))
 (test "complex from ratio reader" '(-0.5 -0.5)  (decompose-complex '#i-1/2-1/2i))
 
 (test "complex from ratio reader (polar)" (make-polar #i2/5 1.0)       '#i2/5@1)
