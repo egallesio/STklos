@@ -288,7 +288,7 @@
 (test "complex reader" '(1 0.0) (decompose-complex '1+.0i))
 (test "complex reader" '(1 0.0) (decompose-complex '1+0.i))
 (test "complex reader" '(1 0.0) (decompose-complex '1+0.0e-43i))
-(test "complex reader" 100.0 (decompose-complex '1e2+0.0e-43i))
+(test "complex reader" '(100.0 0.0) (decompose-complex '1e2+0.0e-43i))
 
 (test "complex reader" 'i (decompose-complex 'i))
 (test "complex reader" #f (decompose-complex (string->number ".i")))
