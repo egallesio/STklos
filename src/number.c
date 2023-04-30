@@ -522,8 +522,9 @@ static SCM double2rational(double d)
       if (i)
         num = add2(num, MAKE_INT(1));
     }
-    if (negative) num = sub2(MAKE_INT(0), num);
     res = add2(int_part, div2(num, den));
+    if (negative)
+      res = sub2(MAKE_INT(0), res);
 #else
     /* BEGIN code for compiling WITH FULL GMP (*with* rationals!) */
 
