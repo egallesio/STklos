@@ -1,4 +1,16 @@
 
+;; SRFI-94 redefines core bindings, so we test it inside a module
+
+(define-module srfi-94-test
+  (import (except SCHEME
+                  make-rectangular
+                  make-polar
+                  quotient
+                  remainder
+                  modulo)
+          (srfi 94))
+
+
 (define epsilon 0.000001)
 (define (close x y)
   (< (abs (- x y)) epsilon))
@@ -20,6 +32,7 @@
                         (real? (proc arg))))
                 list-args))))
 
+(define (do-test)
 
 (test/error "real-exp args" (real-exp 0+0.0i))
 (test/error "real-ln args" (real-ln  0+0.0i))
@@ -65,7 +78,6 @@
 
 (test/error "real-sqrt args" (real-sqrt -1))
 
-(define (square x) (* x x))
 (test-many real-sqrt square '(0.5 1.0 2.0 4.0 1/3 10.5))
 
 (test/error "integer-sqrt args 1" (integer-sqrt 2.5))
@@ -125,10 +137,7 @@
 (test/error "modulo args" (modulo 1.0 2.0))
 (test/error "remainder args" (remainder 2.0 1.0))
 
-;;// ;; SRFI-94 changes the semantics of these, and they are tested later, so we need
-;;// ;; to get their previous definitions:
-;;// (define make-rectangular %make-rectangular)
-;;// (define make-polar %make-polar)
-;;// (define quotient %quotient)
-;;// (define remainder %remainder)
-;;// (define modulo %modulo)
+) ; do-test
+) ;; module
+
+((in-module srfi-94-test do-test))
