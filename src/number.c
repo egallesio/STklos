@@ -384,7 +384,8 @@ static void print_complex(SCM n, SCM port, int mode)
   SCM imag = COMPLEX_IMAG(n);
 
   STk_print(COMPLEX_REAL(n), port, mode);
-  if (positivep(imag))
+  if (positivep(imag) ||
+      (REALP(imag) && !signbit(REAL_VAL(imag))))
     STk_putc('+', port);
   STk_print(imag, port, mode);
   STk_putc('i', port);
