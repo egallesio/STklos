@@ -3226,38 +3226,46 @@ static SCM my_expt(SCM x, SCM y)
   /* y is >= 0 */
   switch (TYPEOF(y)) {
     case tc_integer:
-    case tc_bignum:   return exact_exponent_expt(x, y);
+    case tc_bignum:
+      return exact_exponent_expt(x, y);
     case tc_rational:
-    case tc_real:     { if (zerop(y)) return double2real(1.0);
-                        if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
-                        if (REALP(y)) {
-                            if (REALP(x)) {
-                                /* real ^ real, see if we can use pow: */
-                                double r = pow(REAL_VAL(x),REAL_VAL(y));
-                                if (!isinf(r) || /* no overflow, return r */
-                                    (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not really overflow, one argument was inf! */
-                                    return double2real(r);
-                            }
-                            if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
-                                /* It represents an integer precisely! Turn the exponent into
-                                   an exact number and call exact_exponent_expt: */
-                                return exact2inexact(exact_exponent_expt(x, (inexact2exact(y))));
-                            /* Either r overflowed, or y didn't represent an integer perfectly.
-                               Fall through to use STklos' arithmetic version of
-                               exp(log(x) * y)                                                  */
-                        }
-                      }
-                      /* FALLTHROUGH */
-    case tc_complex:  if (zerop(x)) {
-                          /* R7RS: The value of 0^z is 1 if (zero? z), 0 if
-                             (real-part z) is positive, and an error otherwise.
-                             Similarly for 0.0^z, with inexact results.*/
-                        if (positivep(COMPLEX_REAL(y))) {
-                          return isexactp(x) ? MAKE_INT(0) : double2real(0.0);
-                        } else STk_error("power of zero to a complex exponent with negative real part ~S", y);
-                      } else return my_exp(mul2(my_log(x),y));
-                      /* FALLTHROUGH */
-    default:          error_cannot_operate("expt", x, y);
+    case tc_real:
+      {
+        if (zerop(y)) return double2real(1.0);
+        if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
+        if (REALP(y)) {
+          if (REALP(x)) {
+            /* real ^ real, see if we can use pow: */
+            double r = pow(REAL_VAL(x),REAL_VAL(y));
+            if (!isinf(r) || /* no overflow, return r */
+                (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not overflow, one arg. was inf! */
+              return double2real(r);
+          }
+          if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
+            /* It represents an integer precisely! Turn the exponent into
+               an exact number and call exact_exponent_expt: */
+            return exact2inexact(exact_exponent_expt(x, (inexact2exact(y))));
+          /* Either r overflowed, or y didn't represent an integer perfectly.
+             Fall through to use STklos' arithmetic version of
+             exp(log(x) * y)                                                  */
+        }
+      }
+      /* FALLTHROUGH */
+    case tc_complex:
+      if (zerop(x)) {
+        /* R7RS: The value of 0^z is 1 if (zero? z), 0 if (real-part z) is positive,
+           and an error otherwise. Similarly for 0.0^z, with inexact results.*/
+        if (positivep(COMPLEX_REAL(y))) {
+          return isexactp(x) ? MAKE_INT(0) : double2real(0.0);
+        }
+        else
+          STk_error("power of zero to a complex exponent with negative real part ~S", y);
+      }
+      else
+        return my_exp(mul2(my_log(x),y));
+      /* FALLTHROUGH */
+    default:
+      error_cannot_operate("expt", x, y);
   }
   return STk_void; /* never reached */
 }
@@ -3736,7 +3744,8 @@ static void verify_NaN(SCM n) {
 
 
 
-DEFINE_PRIMITIVE("%make-nan", make_nan, subr3, (SCM neg, SCM quiet, SCM payload)) {
+DEFINE_PRIMITIVE("%make-nan", make_nan, subr3, (SCM neg, SCM quiet, SCM payload))
+{
   if (!INTP(payload) || ((uint64_t) INT_VAL(payload) > payload_mask))
     STk_error("bad payload ~S", payload);
   return double2real(make_nan(neg != STk_false,
