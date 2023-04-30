@@ -42,7 +42,7 @@ See the <<R7RS>> document for more information.
 
 For now, supported libraries of the *Red edition* are
 
-
+- bytevector ({{rsix}} bytevectors)
 - box _(srfi 111)_
 - charset _(srfi 14)_
 - comparator _(srfi 128)_
