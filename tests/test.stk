@@ -127,9 +127,21 @@
 ;; test/error ...
 ;; ----------------------------------------------------------------------
 
-(define-syntax test/error
-  (syntax-rules ()
-    ((_ str code)
-     (test str *test-failed* result))))
+;; (define-syntax test/error
+;;   (syntax-rules ()
+;;     ((_ str code)
+;;      (test str *test-failed* result))))
+
+(define-macro (test/error message code)
+  (let ((e   (gensym 'e-))
+        (res (gensym 'res-)))
+  `(begin (format *log* "  testing ~A expects failure ==> " ,message)
+          (flush-output-port)
+          (with-handler (lambda (,e) (format *log* "OK.\n"))
+                        (let ((,res ,code))
+                          (set! *test-ko* (+ *test-ko* 1))
+                          (format *log* "ERROR: expected failure, but got ~S.\n" ,res)
+                          (set! *all-errors* (cons (list ,message ,code 'failure ,res)
+                                                   *all-errors*)))))))
 
 (provide "test")

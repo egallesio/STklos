@@ -1660,7 +1660,12 @@ a")
     (test "eval.scheme.3"
           (symbol-value 'display scheme)
           (eval 'display (scheme-report-environment 5))))
-  (test/error "eval.null.1"  (eval -1 (null-environment 5))))
+
+  ;; -1 is -1, doesn't matter where it's evaluated
+  (test "eval.null.1" -1 (eval -1 (null-environment 5)))
+
+  ;; write is not available in the null environment!
+  (test/error "eval.null.2" (eval 'write (null-environment 5))))
 
  (define-library (testing x y)
    (export x) ;; but not y!

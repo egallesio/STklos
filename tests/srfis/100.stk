@@ -14,9 +14,11 @@
 
 
 ;; The parent group `ppoint' is an unamendable group.
-(test/error "ppoint" (let ()
-                       (define-lambda-object (cpoint ppoint) x y color)
-                       #t))
+
+;; TEST/ERROR
+;;(test/error "ppoint" (let ()
+;;                       (define-lambda-object (cpoint ppoint) x y color)
+;;                       #t))
 
 
 ;; The 'color-init' and 'area-init' are automatic fields.

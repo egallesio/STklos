@@ -664,7 +664,7 @@ doc>
 (define %string-fill2! string-fill!)
 ;; Implement the one with 2 to 4 parameters
 (let ((fill (lambda (str char :optional (start 0 start?) (end 0 end?))
-              #:string-fill! 
+              #:string-fill!
               (%claim-error
                  'string-fill!
                  (if start?
@@ -695,6 +695,7 @@ doc>
           #:vector->list  ; set procedure name
           (if start?
               (let ((end (if end? end (vector-length v))))
+                (when (< end start) (error "end index ~S < start index ~S" end start))
                 (%claim-error
                  'vector->list
                  (do ((i (- end 1) (- i 1))
