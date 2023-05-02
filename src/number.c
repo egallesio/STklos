@@ -384,8 +384,7 @@ static void print_complex(SCM n, SCM port, int mode)
   SCM imag = COMPLEX_IMAG(n);
 
   STk_print(COMPLEX_REAL(n), port, mode);
-  if (positivep(imag) ||
-      (REALP(imag) && !signbit(REAL_VAL(imag))))
+  if (positivep(imag) || (REALP(imag) && !signbit(REAL_VAL(imag))))
     STk_putc('+', port);
   STk_print(imag, port, mode);
   STk_putc('i', port);
@@ -1369,8 +1368,11 @@ DEFINE_PRIMITIVE("complex?", complexp, subr1, (SCM x))
 DEFINE_PRIMITIVE("real?", realp, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
-    /* a+0i is real; a+0.0i is not */
-    case tc_complex: return MAKE_BOOLEAN(STk_eq(COMPLEX_IMAG(x), MAKE_INT(0)) == STk_true);
+    case tc_complex:
+      // a+0i is real; a+0.0i is not
+      // return MAKE_BOOLEAN(STk_eq(COMPLEX_IMAG(x), MAKE_INT(0)) == STk_true);
+      // Useless: if it's a complex, IMAG_PART is not #e0
+      return STk_false;
     case tc_real:
     case tc_rational:
     case tc_bignum:
