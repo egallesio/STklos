@@ -44,13 +44,8 @@
 
 (test "positional-named-rest" '(8 7 ()) (optional-named-rest))
 
-;; FIXME:
-;; Both Gauche and STklos return an S-expression and there's no error...
-;; I'm not sure what these tests were trying to catch. --jpellegrini
-;; (test/error "error.1"
-;;             (read-from-string
-;; 	         "(define* (test a b (c 1) (#:v z) f) (list a b c z))"))
+(test/syntax-error "error.1"
+                   (define* (test a b (c 1) (#:v z) f) (list a b c z)))
 
-;; (test/error "error.2"
-;;             (read-from-string
-;; 	         "(define* (test  (#:v z) a b (c 1) (#:f f)) (list a b c z))"))
+ (test/syntax-error "error.2"
+ 	         (define* (test  (#:v z) a b (c 1) (#:f f)) (list a b c z)))

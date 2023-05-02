@@ -357,10 +357,9 @@ b|)
              #:outer
              (display "4" p)))))
 
-;; TEST/ERROR:
-;; STklos cannot detect compile-time errors
-;; (test/error "tagbody absent label"
-;;             (tagbody (-> #:absent)))
+
+ (test/syntax-error "tagbody absent label"
+                    (tagbody (-> #:absent)))
 
 (test "repeat.1"
       (make-string 100 #\.)

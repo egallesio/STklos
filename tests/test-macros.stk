@@ -147,7 +147,7 @@
             (let ((i -3))
               (f))))))
 
-;; The following example was an exepcted failure, but
+;; The following example was an expected failure, but
 ;; it seems that we have defined 'g' before in the tests.
 ;; So we define a macro that writes the same test, but
 ;; using gensym! :)

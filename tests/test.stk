@@ -132,4 +132,10 @@
      ((_ str code)
       (test str *test-failed* code eq?))))
 
+
+(define-syntax test/syntax-error
+  (syntax-rules ()
+    ((_ str code)
+     (test str *test-failed* (eval 'code) eq?))))
+  
 (provide "test")

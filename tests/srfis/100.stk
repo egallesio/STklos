@@ -14,11 +14,8 @@
 
 
 ;; The parent group `ppoint' is an unamendable group.
-
-;; TEST/ERROR
-;;(test/error "ppoint" (let ()
-;;                       (define-lambda-object (cpoint ppoint) x y color)
-;;                       #t))
+;; Use eval here to avoid a "forbidden definition here"
+(test/error "ppoint" (eval '(define-lambda-object (cpoint ppoint) x y color)))
 
 
 ;; The 'color-init' and 'area-init' are automatic fields.

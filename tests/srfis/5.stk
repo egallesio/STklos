@@ -5,12 +5,10 @@
 ;; A binding list must be a sequence of pairs, and with SRFI-5,
 ;; these mayy be followed by a SYMBOL and a free list.
 ;; But it MUST be a symbol!
-;; We can not yet test for syntax errors, as STklos does not have
-;; a mecahnism to catch those
-;; (test/error "error in bindings"
-;;             (let ((a 1)
-;;                   (b 2)
-;;                   3 4 5)))
+(test/syntax-error "error in bindings"
+                   (let ((a 1)
+                         (b 2)
+                         3 4 5)))
 
 (test "Unnamed.0"
       #f
