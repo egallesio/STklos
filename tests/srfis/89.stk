@@ -44,8 +44,8 @@
 
 (test "positional-named-rest" '(8 7 ()) (optional-named-rest))
 
-(test/syntax-error "error.1"
-                   (define* (test a b (c 1) (#:v z) f) (list a b c z)))
+(test/compile-error "error.1"
+                    (define* (test a b (c 1) (#:v z) f) (list a b c z)))
 
- (test/syntax-error "error.2"
- 	         (define* (test  (#:v z) a b (c 1) (#:f f)) (list a b c z)))
+(test/compile-error "error.2"
+ 	                (define* (test  (#:v z) a b (c 1) (#:f f)) (list a b c z)))

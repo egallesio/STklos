@@ -358,8 +358,8 @@ b|)
              (display "4" p)))))
 
 
- (test/syntax-error "tagbody absent label"
-                    (tagbody (-> #:absent)))
+ (test/compile-error "tagbody absent label"
+                     (tagbody (-> #:absent)))
 
 (test "repeat.1"
       (make-string 100 #\.)
