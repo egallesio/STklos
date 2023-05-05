@@ -73,26 +73,36 @@
       `(set! ,*table* (cons (cons (quote ,name) ,name) ,*table*))))
 
 (define-macro (add-list-to-inline-table *table* . names)
+  (when (null? names) (error 'add-list-to-inline-table
+                             "need at least two arguments, onle one given."))
   (cons 'begin
         (map (lambda (n) `(add-entry-to-inline-table ,*table* ,n))
              names)))
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define *inline-table* '())
-(add-list-to-inline-table *inline-table*
-                          + - * /
+(define *inline-math-commutative* '())
+(add-list-to-inline-table *inline-math-commutative*
+                          + * gcd lcm)
+(define *inline-math-general* '())
+(add-list-to-inline-table *inline-math-general*
+                          - /
                           fx+ fx- fx* fxquotient
-                          = < <= > >=
-                          fx=? fx<? fx<=? fx>? fx>=?
-                          ;; The following line associates symbols with values
-                          ;; different from their own (they're aliases):
-                          (fx= fx=?) (fx< fx<?) (fx<= fx=?) (fx> fx>?) (fx>= fx>=?)
                           sin  cos  tan  asin  acos  atan
                           sinh cosh tanh asinh acosh atanh
                           exp log expt
                           sqrt ;; square => square is not available when compiling...
-                          gcd lcm
+                          )
+
+(define *inline-math* (append *inline-math-commutative*
+                              *inline-math-general*))
+
+(define *inline-general* '())
+(add-list-to-inline-table *inline-general*
+                          fx=? fx<? fx<=? fx>? fx>=?
+                          ;; The following line associates symbols with values
+                          ;; different from their own (they're aliases):
+                          (fx= fx=?) (fx< fx<?) (fx<= fx=?) (fx> fx>?) (fx>= fx>=?)
                           cons car cdr null? list
                           not
                           vector-ref vector-set! string-ref string-set!
@@ -101,7 +111,12 @@
                           %cxr
                           list-ref)
 
-(define *inline-symbols* (map car *inline-table*))
+(define *inline-table* (append *inline-math*
+                               *inline-general*))
+
+;; (define *inline-math-commutative-symbols* (map car *inline-math-commutative*))
+;; (define *inline-math-symbols* (map car *inline-math*))
+;; (define *inline-symbols* (map car *inline-table*))
 
 (define *always-inlined*        '(%set-current-module %%set-current-module
                                   %%execute %%execute-handler))
@@ -225,6 +240,19 @@
       (error 'compiler-current-module "bad module parameter ~s" new))
     (add-file-module-list! new)
     new))
+
+(define compiler:inline-common-functions
+  (let ((inlined-math-commutative *inline-math-commutative*)
+        (inlined-math-general     *inline-math-general*)
+        (inlined-math             *inline-math*)
+        (inlined-general          *inline-general*))
+    (make-parameter #t
+                    (lambda (v)
+                      (set! *inline-math-commutative* (if v inlined-math-commutative '()))
+                      (set! *inline-math-general*     (if v inlined-math-general     '()))
+                      (set! *inline-math*             (if v inlined-math             '()))
+                      (set! *inline-general*          (if v inlined-general          '()))
+                      (not (null? *inline-general*))))))
 
 
 ;; ----------------------------------------------------------------------
@@ -1076,16 +1104,95 @@ doc>
 
 (define can-be-inlined?
   (let ((STklos (find-module 'STklos)))
-    (lambda (fct env)
-      ;; Avoid to use *inline-table* on all symbols (assoc is too expensive here)
-      (if (and (memq fct *inline-symbols*)
-               (not (find-symbol-in-env fct env)))
-          (let ((f (assoc fct *inline-table*)))
-            (and f (eq? (symbol-value* fct STklos) (cdr f))))
-          (memq fct *always-inlined*)))))
+    (lambda (fct env . alist)
+      (let* ((table (if (null? alist) *inline-table* (car alist)))
+             (found (assq fct table)))
+        (if (and found
+                 (not (find-symbol-in-env fct env)))
+            (let ((f (cdr found)))
+              (and f (eq? (symbol-value* fct STklos) f)))
+            (and (null? alist) ; if alist was passed, it was a request for THAT alist only
+                 (memq fct *always-inlined*)))))))
+
+;; maybe-fold-constant akes the current environment, a list of
+;; arguments and tries to math-fold them into constants.
+;;
+;; Example:
+;;
+;; (maybe-fold-constant '( 2.0 (log (sin 2)) (f 5) ))
+;; => ( 2.0  -0.0950830360951606  (f 5) )
+;;
+;; * The number 2.0 remains unchanged;
+;; * The expression (log (sin 2)) is evaluated;
+;; * The expression (f 5) remains unchanged.
+;;
+;; (maybe-fold-constant #f '(expt 2 (expt 2 3))) => 256
+;; (maybe-fold-constant #f '(expt x (expt 2 3))) => (expt x 8)
+;; (maybe-fold-constant #f '(expt 2 (expt 2 x))) => (expt 2 (expt 2 x))
+(define (maybe-fold-constant env args)
+  (if (and (pair? args)
+           (can-be-inlined? (car args) env *inline-math*))
+      (let ((new-args (map (lambda (f) (maybe-fold-constant env f)) (cdr args))))
+        (if (every number? new-args)
+            (apply (eval (car args))
+                   (map (lambda (f) (maybe-fold-constant env f)) new-args))
+            (cons (car args) new-args)))
+      args))
+
+;; fold-commutative-args will do constant folding in the arguments
+;; as much as possible, and return a new argumetn list. This of
+;; course should be used only for commutative operations.
+;;
+;; (fold-commutative-args + '(a 2 3 b -1)) => (4 a b)
+;; (fold-commutative-args * '(a 2 3 b -1)) => (-6 a b)
+(define (fold-commutative-args fct args)
+  (let ((nums     (filter number? args))
+        (non-nums (filter (lambda (x) (not (number? x))) args)))
+    (if (null? nums)
+        args
+        (let ((num
+               (let loop ((n (car nums)) (nums (cdr nums)))
+                 (if (not (null? nums))
+                     (loop (fct n (car nums)) (cdr nums))
+                     n))))
+          (cons num non-nums)))))
 
 
+
+;; Before calling %compile-primitive-call, the function
+;; compile-primitive-call will first try to do as much constant folding
+;; as possible, for all math expressions.
+;;
+;; (exp (sqrt 5)) will end up generating:
+;;
+;; 000:  CONSTANT             0
+;;
+;; Constants:
+;; 0: 9.35646901660115
+;;
+;; Also:
+;; (disassemble-expr '(cos (+ 3 (tan 2))) #t)
+;; 000:  CONSTANT             0
+;;
+;; Constants:
+;; 0: 0.685897402427631
 (define (compile-primitive-call fct actuals len env epair tail?)
+  ;; First we call maybe-fold-constant, which will recursively do
+  ;; constant folding on all arguments:
+  (let ((actuals (map (lambda (arg) (maybe-fold-constant env arg)) actuals)))
+    (if (can-be-inlined? fct env *inline-math-commutative*)
+        ;; if the function is commutative:
+        ;; fold-commutative and call %compile-primitive-call
+        (let* ((f-val (cdr (assq fct *inline-math-commutative*)))
+               (actuals (fold-commutative-args f-val actuals))
+               (len (length actuals)))
+          (%compile-primitive-call fct actuals len env epair tail?))
+        ;; otherwise (non-commutative), do not fold-commutative
+        (%compile-primitive-call fct actuals len env epair tail?))))
+
+
+;; %compile-primitive-call takes arguments already folded
+(define (%compile-primitive-call fct actuals len env epair tail?)
   (let ((comp  (lambda (mnemo expr)
                  (compile expr env epair #f)
                  (emit mnemo)))
@@ -1095,7 +1202,7 @@ doc>
                        (compile (car actuals) env epair #f)
                        (emit mnemo))
                      (compiler-error fct epair "1 argument required (~A provided)"
-                                    len))))
+                                     len))))
         (comp2 (lambda (mnemo)
                  (if (= len 2)
                      (begin
@@ -1130,12 +1237,12 @@ doc>
     (case fct
       ;; Always inlined functions
       ((%%set-current-module)
-              (if (= len 1)
-                  (comp1 'SET-CUR-MOD)
-                  (compiler-error '%%set-current-module epair
-                                   "1 arg. only (~S)" len)))
+       (if (= len 1)
+           (comp1 'SET-CUR-MOD)
+           (compiler-error '%%set-current-module epair
+                           "1 arg. only (~S)" len)))
       ((%%execute-handler)
-              (comp3 'EXEC-HANDLER))
+       (comp3 'EXEC-HANDLER))
 
       ;; User functions
       ((+)  (case len
@@ -1145,131 +1252,123 @@ doc>
                         (compile-normal-call fct actuals len env epair #f)))
               ((2)  (let ((a (car actuals))
                           (b (cadr actuals)))
-                      (cond
-                        ((and (number? a) (number? b))
-                         (compile-constant (+ a b) env #f))
-                        ((small-integer-constant? a)
-                         (if (= a 1)
-                             (oper1 'IN-INCR b)
-                             (oper2 'IN-SINT-ADD2 b a)))
-                        ((small-integer-constant? b)
-                         (if (= b 1)
-                             (oper1 'IN-INCR a)
-                             (oper2 'IN-SINT-ADD2 a b)))
-                        (else
-                          (comp2 'IN-ADD2)))))
+                      (if (small-integer-constant? a)
+                          (if (= a 1)
+                              (oper1 'IN-INCR b)
+                              (oper2 'IN-SINT-ADD2 b a))
+                          (comp2 'IN-ADD2))))
               (else (compile-normal-call fct actuals len env epair #f))))
       ((-)  (case len
-                ((0)  (compiler-error '- epair "needs at least one argument"))
-                ((1)  (if (number? (car actuals))
-                          (compile-constant (- (car actuals)) env #f)
-                          (compile-normal-call fct actuals len env epair #f)))
-                ((2)  (let ((a (car actuals))
-                            (b (cadr actuals)))
-                        (cond
-                          ((and (number? a) (number? b))
-                           (compile-constant (- a b) env tail?))
-                          ((small-integer-constant? a)
-                           (oper2 'IN-SINT-SUB2 b a))
-                          ((eq? b 1)
-                           (oper1 'IN-DECR a))
-                          ((and (number? b)
-                                (small-integer-constant? (- b)))
-                           (oper2 'IN-SINT-ADD2 a (- b)))
-                          (else
-                           (comp2 'IN-SUB2)))))
-                (else (compile-normal-call fct actuals len env epair #f))))
-      ((*)    (case len
-                ((0)  (emit 'IM-ONE))
-                ((1)  (if (number? (car actuals))
+              ((0)  (compiler-error '- epair "needs at least one argument"))
+              ((1)  (if (number? (car actuals))
+                        (compile-constant (- (car actuals)) env #f)
+                        (compile-normal-call fct actuals len env epair #f)))
+              ((2)  (let ((a (car actuals))
+                          (b (cadr actuals)))
+                      (cond
+                       ((and (number? a) (number? b))
+                        (compile-constant (- a b) env tail?))
+                       ((small-integer-constant? a)
+                        (oper2 'IN-SINT-SUB2 b a))
+                       ((eq? b 1)
+                        (oper1 'IN-DECR a))
+                       ((and (number? b)
+                             (small-integer-constant? (- b)))
+                        (oper2 'IN-SINT-ADD2 a (- b)))
+                       (else
+                        (comp2 'IN-SUB2)))))
+              (else (compile-normal-call fct actuals len env epair #f))))
+      ((*)  (case len
+              ((0)  (emit 'IM-ONE))
+              ((1)  (if (number? (car actuals))
                         (compile (car actuals) env epair tail?)
                         (compile-normal-call fct actuals len env epair #f)))
-                ((2)  (let ((a (car actuals))
-                            (b (cadr actuals)))
-                        (cond
-                          ((and (number? a) (number? b))
-                           (compile-constant (* a b) env tail?))
-                          ((small-integer-constant? a)
-                           (oper2 'IN-SINT-MUL2 b a))
-                          ((small-integer-constant? b)
-                           (oper2 'IN-SINT-MUL2 a b))
-                          (else
-                           (comp2 'IN-MUL2)))))
-                (else (compile-normal-call fct actuals len env epair #f))))
+              ((2)  (let ((a (car actuals))
+                          (b (cadr actuals)))
+                      (if (small-integer-constant? a)
+                          (oper2 'IN-SINT-MUL2 b a))
+                      (comp2 'IN-MUL2)))
+              (else (compile-normal-call fct actuals len env epair #f))))
       ((/)    (case len
                 ((0)   (compiler-error '/ epair "needs at least one argument"))
                 ((1)   (if (number? (car actuals))
-                          (compile-constant (/ 1 (car actuals)) env #f)
-                          (compile-normal-call fct actuals len env epair #f)))
+                           (compile-constant (/ 1 (car actuals)) env #f)
+                           (compile-normal-call fct actuals len env epair #f)))
                 ((2)  (let ((a (car actuals))
                             (b (cadr actuals)))
                         (cond
-                          ((and (number? a) (number? b))
-                           (compile-constant (/ a b) env tail?))
-                          ((small-integer-constant? b)
-                           (oper2 'IN-SINT-DIV2 a b))
-                          (else
-                           (comp2 'IN-DIV2)))))
+                         ((and (number? a) (number? b))
+                          (compile-constant (/ a b) env tail?))
+                         ((small-integer-constant? b)
+                          (oper2 'IN-SINT-DIV2 a b))
+                         (else
+                          (comp2 'IN-DIV2)))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
       ((fx+ fx- fx* fxquotient)
-                (case len
-                  ((2) (let ((a (car actuals))
-                             (b (cadr actuals)))
-                         (cond
-                           ((and (fixnum? a) (fixnum? b))
-                            (compile-constant (case fct
-                                                ((fx+) (fx+ a b))
-                                                ((fx-) (fx- a b))
-                                                ((fx*) (fx* a b))
-                                                (else  (fxquotient a b)))
-                                              env
-                                              tail?))
-                           ((and (small-integer-constant? a)
-                                 (memq fct '(fx+ fx*))) ; commutative only
-                            (oper2 (if (eq? fct 'fx+)
-                                       'IN-SINT-FXADD2
-                                       'IN-SINT-FXMUL2)
-                                   b a))
-                           ((small-integer-constant? b)
-                            (oper2 (case fct
-                                     ((fx+) 'IN-SINT-FXADD2)
-                                     ((fx-) 'IN-SINT-FXSUB2)
-                                     ((fx*) 'IN-SINT-FXMUL2)
-                                     (else  'IN-SINT-FXDIV2))
-                                   a b))
-                           (else
-                            (comp2 (case fct
-                                     ((fx+) 'IN-FXADD2)
-                                     ((fx-) 'IN-FXSUB2)
-                                     ((fx*) 'IN-FXMUL2)
-                                     (else  'IN-FXDIV2)))))))
-                  (else
-                   (compile-normal-call fct actuals len env epair #f))))
+       (case len
+         ((2) (let ((a (car actuals))
+                    (b (cadr actuals)))
+                (cond
+                 ((and (fixnum? a) (fixnum? b))
+                  (compile-constant (case fct
+                                      ((fx+) (fx+ a b))
+                                      ((fx-) (fx- a b))
+                                      ((fx*) (fx* a b))
+                                      (else  (fxquotient a b)))
+                                    env
+                                    tail?))
+                 ((and (small-integer-constant? a)
+                       (memq fct '(fx+ fx*))) ; commutative only
+                  (oper2 (if (eq? fct 'fx+)
+                             'IN-SINT-FXADD2
+                             'IN-SINT-FXMUL2)
+                         b a))
+                 ((small-integer-constant? b)
+                  (oper2 (case fct
+                           ((fx+) 'IN-SINT-FXADD2)
+                           ((fx-) 'IN-SINT-FXSUB2)
+                           ((fx*) 'IN-SINT-FXMUL2)
+                           (else  'IN-SINT-FXDIV2))
+                         a b))
+                 (else
+                  (comp2 (case fct
+                           ((fx+) 'IN-FXADD2)
+                           ((fx-) 'IN-FXSUB2)
+                           ((fx*) 'IN-FXMUL2)
+                           (else  'IN-FXDIV2)))))))
+         (else
+          (compile-normal-call fct actuals len env epair #f))))
 
       ((= < > <= >=)
-                (case len
-                ((O)   (compiler-error fct epair
-                                        "needs at least one argument" fct))
-                ((2)   (comp2 (case fct
-                                ((=)  'IN-NUMEQ)
-                                ((<)  'IN-NUMLT)
-                                ((>)  'IN-NUMGT)
-                                ((<=) 'IN-NUMLE)
-                                ((>=) 'IN-NUMGE))))
-                (else  (compile-normal-call fct actuals len env epair #f))))
+       (case len
+         ((O)   (compiler-error fct epair
+                                "needs at least one argument" fct))
+         ((2)   (comp2 (case fct
+                         ((=)  'IN-NUMEQ)
+                         ((<)  'IN-NUMLT)
+                         ((>)  'IN-NUMGT)
+                         ((<=) 'IN-NUMLE)
+                         ((>=) 'IN-NUMGE))))
+         (else  (compile-normal-call fct actuals len env epair #f))))
 
       ((fx=? fx<? fx>? fx<=? fx>=?
         fx=  fx<  fx>  fx<=  fx>= )
-                (case len
-                ((O)   (compiler-error fct epair
-                                        "needs at least one argument" fct))
-                ((2)   (comp2 (case fct
-                                ((fx=?  fx=)  'IN-FXEQ)
-                                ((fx<?  fx<)  'IN-FXLT)
-                                ((fx>?  fx>)  'IN-FXGT)
-                                ((fx<=? fx<=) 'IN-FXLE)
-                                ((fx>=? fx>=) 'IN-FXGE))))
-                (else  (compile-normal-call fct actuals len env epair #f))))
+       (case len
+         ((O)   (compiler-error fct epair
+                                "needs at least one argument" fct))
+         ((2)   (comp2 (case fct
+                         ((fx=?  fx=)  'IN-FXEQ)
+                         ((fx<?  fx<)  'IN-FXLT)
+                         ((fx>?  fx>)  'IN-FXGT)
+                         ((fx<=? fx<=) 'IN-FXLE)
+                         ((fx>=? fx>=) 'IN-FXGE))))
+         (else  (compile-normal-call fct actuals len env epair #f))))
+
+      ;; This entry is here just because we declared these functions in the inline table.
+      ;; We don't need to inline them, because they were dealt with in a previous step
+      ;; by fold-commutative-args and maybe-fold-constant.
+      ((sin cos tan asin acos exp log sinh cosh tanh asinh acosh atanh sqrt square expt atan gcd lcm)
+       (compile-normal-call fct actuals len env epair #f))
 
       ((cons)   (comp2 'IN-CONS))
       ((car)    (comp1 'IN-CAR))
@@ -1277,7 +1376,7 @@ doc>
       ((null?)  (comp1 'IN-NULLP))
       ((not)    (comp1 'IN-NOT))
       ((list)   (compile-args actuals env)
-                (emit 'IN-LIST len))
+       (emit 'IN-LIST len))
 ;;//      ((apply)  (case len
 ;;//              ((0)  (compile-error "no argument given to apply"))
 ;;//              ((1)  (compile-primitive-call fct (list (car actuals) '())
