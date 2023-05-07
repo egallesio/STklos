@@ -67,7 +67,7 @@
                             (%path-without-cwd (%epair-file who))
                             (%epair-line who))
                     "")))
-    (if (or #t *compiler-port*)   ;; FIXME 
+    (if *compiler-port*
         ;; Compiling a file
         (apply format
                (current-error-port)

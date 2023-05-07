@@ -99,7 +99,6 @@
         null-ilist?
         dotted-ilist?
         not-ipair?
-        null-ilist?
         ilist=
 
         ;;;
@@ -419,7 +418,9 @@ doc>
  * procedures that are not defined on dotted ilists.
 doc>
 |#
-(define null-ilist? null?)
+(define (null-ilist? obj)
+  (unless (list? obj) (error "bad list ~S" obj))
+  (null? obj))
 
 #|
 <doc EXT not-ipair?

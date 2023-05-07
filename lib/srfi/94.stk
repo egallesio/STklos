@@ -46,8 +46,17 @@
 ;;;;    Creation date: 18-Jul-2020 12:43 (jpellegrini)
 ;;;;
 
-(define-module srfi/94
-(import (srfi 60))    ;ash, integer-length
+(define-library srfi/94
+
+  (import (except SCHEME
+                  make-rectangular
+                  make-polar
+                  quotient
+                  remainder
+                  modulo))
+
+  (import (srfi 60))    ;ash, integer-length
+
 
 (export real-exp
         real-ln
@@ -69,13 +78,21 @@
         rem
         mod
         ln
-        srfi-94:make-rectangular
-        srfi-94:make-polar
+        make-rectangular
+        make-polar
         ;;abs - no need to change, STklos already does it as the SRFI says
-        srfi-94:quotient
-        srfi-94:remainder
-        srfi-94:modulo
+        quotient
+        remainder
+        modulo
         )
+
+(begin
+
+(define scheme:make-rectangular (in-module SCHEME make-rectangular))
+(define scheme:make-polar       (in-module SCHEME make-polar))
+(define scheme:quotient         (in-module SCHEME quotient))
+(define scheme:remainder        (in-module SCHEME remainder))
+(define scheme:modulo           (in-module SCHEME modulo))
 
 
 (define (type-error procedure . args)
@@ -96,16 +113,16 @@
     (cond ((< k b) k)
           (else
            (set! n (+ n m))
-           (let ((q (ilog (+ m m) (* b b) (quotient k b))))
+           (let ((q (ilog (+ m m) (* b b) (scheme:quotient k b))))
              (cond ((< q b) q)
                    (else (set! n (+ m n))
-                         (quotient q b)))))))
+                         (scheme:quotient q b)))))))
   (define n 1)
   (define (eigt? k j) (and (exact? k) (integer? k) (> k j)))
   (cond ((not (and (eigt? base 1) (eigt? k 0)))
          (type-error 'integer-log base k))
         ((< k base) 0)
-        (else (ilog 1 base (quotient k base)) n)))
+        (else (ilog 1 base (scheme:quotient k base)) n)))
 
 ;;;; http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/code/math/isqrt/isqrt.txt
 ;;; Akira Kurihara
@@ -122,13 +139,13 @@
     (lambda (n)
       (define (isqrt n)
         (if (> n 24)
-            (let* ((len/4 (quotient (- (integer-length n) 1) 4))
+            (let* ((len/4 (scheme:quotient (- (integer-length n) 1) 4))
                    (top (isqrt (ash n (* -2 len/4))))
                    (init (ash top len/4))
-                   (q (quotient n init))
-                   (iter (quotient (+ init q) 2)))
+                   (q (scheme:quotient n init))
+                   (iter (scheme:quotient (+ init q) 2)))
               (cond ((odd? q) iter)
-                    ((< (remainder n init) (square (- iter init))) (- iter 1))
+                    ((< (scheme:remainder n init) (square (- iter init))) (- iter 1))
                     (else iter)))
             (vector-ref table n)))
       (if (and (exact? n) (integer? n) (not (negative? n)))
@@ -141,9 +158,9 @@
         (proc n1 n2)
         (type-error name n1 n2))))
 ;@
-(define srfi-94:quotient  (must-be-exact-integer2 'quotient quotient))
-(define srfi-94:remainder (must-be-exact-integer2 'remainder remainder))
-(define srfi-94:modulo    (must-be-exact-integer2 'modulo modulo))
+(define quotient  (must-be-exact-integer2 'quotient scheme:quotient))
+(define remainder (must-be-exact-integer2 'remainder scheme:remainder))
+(define modulo    (must-be-exact-integer2 'modulo scheme:modulo))
 
 ;;;; real-only functions
 ;@
@@ -180,8 +197,8 @@
   (lambda (x1 x2)
     (if (and (real? x1) (real? x2)) (proc x1 x2) (type-error name x1 x2))))
 ;@
-(define srfi-94:make-rectangular (must-be-real2 'make-rectangular make-rectangular))
-(define srfi-94:make-polar       (must-be-real2 'make-polar make-polar))
+(define make-rectangular (must-be-real2 'make-rectangular scheme:make-rectangular))
+(define make-polar       (must-be-real2 'make-polar scheme:make-polar))
 
 ;@
 (define real-log
@@ -208,6 +225,6 @@
         (apply atan y x)
         (apply type-error 'real-atan y x))))
 
-) ;; END OF DEFINE-MODULE
+)) ;; END OF DEFINE-LIBRARY
 
 (provide "srfi/94")

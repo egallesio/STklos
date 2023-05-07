@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test.stk   -- STklos regression testing
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -34,20 +34,21 @@
 ;;  %tester ...
 ;; ----------------------------------------------------------------------
 (define (%tester message expect thunk code compare)
-  (format *log* "  testing ~A expects ~S ==> " message expect)
-  (flush-output-port)
-  (let ((res (with-handler
-              (lambda (c) *test-failed*)
-              (thunk))))
-    (set! *test-counter* (+ *test-counter* 1))
-    (if (compare expect res)
-        (format *log* "OK.\n")
-        (begin
-          (set! *test-ko* (+ *test-ko* 1))
-          (format *log* "ERROR: got ~S.\n" res)
-          (set! *all-errors* (cons (list message code expect res)
-                                   *all-errors*)))))
-  (flush-output-port *log*))
+  (let ((expected (if (equal? expect *test-failed*) 'failure expect)))
+    (format *log* "  testing ~A expects ~S ==> " message expected)
+    (flush-output-port)
+    (let ((res (with-handler
+                (lambda (c) *test-failed*)
+                (thunk))))
+      (set! *test-counter* (+ *test-counter* 1))
+      (if (compare expect res)
+          (format *log* "OK.\n")
+          (begin
+            (set! *test-ko* (+ *test-ko* 1))
+            (format *log* "ERROR: got ~S.\n" res)
+            (set! *all-errors* (cons (list message code expected res)
+                                     *all-errors*)))))
+    (flush-output-port *log*)))
 
 ;; ----------------------------------------------------------------------
 ;;  test-init ...
@@ -126,10 +127,15 @@
 ;; ----------------------------------------------------------------------
 ;; test/error ...
 ;; ----------------------------------------------------------------------
-
 (define-syntax test/error
+   (syntax-rules ()
+     ((_ str code)
+      (test str *test-failed* code eq?))))
+
+
+(define-syntax test/compile-error
   (syntax-rules ()
     ((_ str code)
-     (test str *test-failed* result))))
-
+     (test str *test-failed* (eval 'code) eq?))))
+  
 (provide "test")

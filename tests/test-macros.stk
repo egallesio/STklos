@@ -147,9 +147,22 @@
             (let ((i -3))
               (f))))))
 
-(test/error "lex-scope macros 15"
-            (%let-syntax ((g (lambda form -2)))
-              g))
+;; The following example was an expected failure, but
+;; it seems that we have defined 'g' before in the tests.
+;; So we define a macro that writes the same test, but
+;; using gensym! :)
+(define-macro (%lex-scope-example)
+  (let ((g    (gensym 'g-))
+        (form (gensym 'form-)))
+    `(%let-syntax ((,g (lambda ,form -2)))
+                  ,g)))
+
+(test/error "lex-scope macros 15" (%lex-scope-example))
+
+; version that didn't work:
+;; (test/error "lex-scope macros 15"
+;;             (%let-syntax ((g (lambda form -2)))
+;;               g))
 
 (test "lex-scope macros 16"
       -1
@@ -203,7 +216,7 @@
 (select-module STklos)
 
 
-;;; Hygienic Macros  subsection 
+;;; Hygienic Macros  subsection
 
 (test-subsection "hygienic macros")
 

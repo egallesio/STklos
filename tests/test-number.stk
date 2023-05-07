@@ -141,7 +141,7 @@
 
 (test "rational reader" '(1 #t) (rational-test (string->number "3/03")))
 (test/error "rational reader" (string->number "3/0"))
-(test/error "rational reader" '3/3/4)
+(test/error "rational reader" 3/3/4)
 (test/error "rational reader" (rational-test (string->number "1/2.")))
 (test/error "rational reader" (rational-test (string->number "1.3/2")))
 
@@ -283,11 +283,12 @@
 (test "complex reader" '(0 -1.0) (decompose-complex '-1.i))
 (test "complex reader" '(0 1.0) (decompose-complex '+1.0i))
 (test "complex reader" '(0 -1.0) (decompose-complex '-1.0i))
-(test "complex reader" 1 (decompose-complex '1+0.0i))
-(test "complex reader" 1 (decompose-complex '1+.0i))
-(test "complex reader" 1 (decompose-complex '1+0.i))
-(test "complex reader" 1 (decompose-complex '1+0.0e-43i))
-(test "complex reader" 100.0 (decompose-complex '1e2+0.0e-43i))
+(test "complex reader" 1 (decompose-complex '1+0i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+0.0i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+.0i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+0.i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+0.0e-43i))
+(test "complex reader" '(100.0 0.0) (decompose-complex '1e2+0.0e-43i))
 
 (test "complex reader" 'i (decompose-complex 'i))
 (test "complex reader" #f (decompose-complex (string->number ".i")))
@@ -313,7 +314,7 @@
 (test "complex from ratio reader" '(1.0 0.4)    (decompose-complex '#i1+2/5i))
 (test "complex from ratio reader" '(0.6 2.0)    (decompose-complex '#i3/5+2i))
 (test "complex from ratio reader" '(2.0 -2.5)   (decompose-complex '#i2+5/-2i))
-(test "complex from ratio reader" 0.0           (decompose-complex '#i0/1+0/1i))
+(test "complex from ratio reader" '(0.0 0.0)    (decompose-complex '#i0/1+0/1i))
 (test "complex from ratio reader" '(-0.5 -0.5)  (decompose-complex '#i-1/2-1/2i))
 
 (test "complex from ratio reader (polar)" (make-polar #i2/5 1.0)       '#i2/5@1)
