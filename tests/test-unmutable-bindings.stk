@@ -75,7 +75,7 @@
 (test       "set!.9"   20  (begin (set! b (* b 10)) b))
 (test       "set!.10"  30  (begin (set! c (* c 10)) c))
 (test       "define.3" 100 (begin (define x 100) x))  ;; new binding
-(test/error "define.4"     (begin (define a 100) a))  ;; redefinition of imported
+(test       "define.4" 100 (begin (define a 100) a))  ;; redefinition of imported
 (test       "define.5" 100 (begin (define b 100) b))  ;; redefinition of b
 
 
