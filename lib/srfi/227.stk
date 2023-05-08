@@ -1,0 +1,126 @@
+;;;;
+;;;;
+;;;; 227.stk         -- Implementation od SRF-227 (optional arguments)
+;;;;
+;;;; Copyright © 2023 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@stklos.net]
+;;;;    Creation date:  7-May-2023 22:12
+;;;;
+
+(define-module srfi/227
+  (export opt-lambda  let-optionals  define-optionals
+          opt*-lambda let-optionals* define-optionals*)
+
+  (define (%expand-body-srfi227 kind args body)
+
+  (define (split-parameters lst)
+    (let Loop ((lst lst)
+               (args '())
+               (opt  '()))
+      (cond
+       ((null? lst)
+        (values (reverse args) (reverse opt) '()))
+       ((pair? lst)
+        (let ((head (car lst)))
+          (cond
+           ((symbol? head)
+            (if (null? opt)
+                (Loop (cdr lst) (cons head args) opt)
+                (error kind
+                       "parameter ~s declared after optional parameters"
+                       head)))
+           ((pair? head)
+            (unless (and (list? head) (= (length head) 2))
+              (error kind "bad optional parameter ~s" head))
+            (Loop (cdr lst) args (cons head opt)))
+           (else
+            (error kind "bad parameter ~s" head)))))
+       (else
+        (if (symbol? lst)
+            (values (reverse args) (reverse opt) lst)
+            (error kind "bad rest parameter ~s" lst))))))
+
+  (define (make-bindings fixed opt rest)
+    (let ((tmp (gensym 'tmp)))
+      (append fixed
+              (map (lambda (x)
+                     `(,(car x)
+                       (if (pair? ,rest)
+                           (let ((,tmp (car ,rest)))
+                             (set! ,rest (cdr ,rest)) ,tmp)
+                           ,(cadr x))))
+                   opt))))
+
+  (let-values (((fixed opt rest) (split-parameters args)))
+    (if (null? opt)
+        ;; no optional parameter
+        `(lambda (,@fixed . ,rest) ,@body)
+        ;; We have at least one optional parameter
+        (let ((end      (if (null? rest) (gensym) rest)))
+          (if (eq? kind 'opt-lambda)
+              ;; opt-lambda: use temporaries)
+              (let ((tmpfixed (map gensym fixed)))
+                `(lambda (,@tmpfixed . ,end)
+                   (let ,(make-bindings (map list fixed tmpfixed) opt end)
+                     ;; produce the test on too many params iff no user rest
+                     ,@(if (null?  rest)
+                           `((unless (null? ,end)
+                               (error "too many optional parameters")))
+                           '())
+                     ,@body)))
+              ;; opt*-lambda: be direct
+              `(lambda (,@fixed . ,end)
+                 (let* ,(make-bindings '() opt end)
+                   ;; produce the test on too many params iff no user rest
+                   ,@(if (null?  rest)
+                         `((unless (null? ,end)
+                             (error "too many optional parameters")))
+                         '())
+                   ,@body)))))))
+
+;; ----------------------------------------------------------------------
+(define-macro (opt-lambda args . body)
+  (%expand-body-srfi227 'opt-lambda args body))
+
+(define-macro (define-optionals heading . body)
+  (unless (pair? heading)
+    (error 'define-optionals "bad header ~s" heading))
+  `(define ,(car heading)
+     (opt-lambda ,(cdr heading) ,@body)))
+
+(define-macro (let-optionals expr opts . body)
+  `(apply (opt-lambda ,opts ,@body) ,expr))
+
+;; ----------------------------------------------------------------------
+(define-macro (opt*-lambda args . body)
+  (%expand-body-srfi227 'opt*-lambda args body))
+
+(define-macro (define-optionals* heading . body)
+  (unless (pair? heading)
+    (error 'define-optionals "bad header ~s" heading))
+  `(define ,(car heading)
+     (opt*-lambda ,(cdr heading) ,@body)))
+
+(define-macro (let-optionals* expr opts . body)
+  `(apply (opt*-lambda ,opts ,@body) ,expr))
+
+) ;; End of module srfi/227
+
+(provide "srfi/227")
