@@ -471,6 +471,15 @@ DEFINE_PRIMITIVE("%set-file-owner", posix_chown, subr3, (SCM name, SCM uid, SCM 
 }
 
 
+#ifndef HAVE_UTIMENSAT
+  #ifndef UTIME_NOW
+    #define UTIME_NOW ((1l << 30) - 1l)
+  #endif
+  #ifndef UTIME_OMIT
+    #define UTIME_OMIT ((1l << 30) - 2l)
+  #endif
+#endif
+
 DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
 {
     /* FIXME: this implementation seems overly complicated. There must be easier
@@ -486,6 +495,7 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
     long   nsec1;
     time_t sec2 = 0;        // FIXME: ::EG:: not sure.
     long   nsec2;
+    int e;
 
 
     if (argc==1) {
@@ -524,16 +534,44 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
         }
     }
 
+#ifndef HAVE_UTIMENSAT
     struct timespec t[2];
     t[0].tv_sec  = sec1;
     t[0].tv_nsec = nsec1;
     t[1].tv_sec  = sec2;
     t[1].tv_nsec = nsec2;
+    e = utimensat(AT_FDCWD,cname, t, 0);
+#else
+    // This code is for systems which don't provide utimenstat. In this case, we use
+    // the utimes primitive.
+    // Here, the resolution is the second (can we do better in a portable way?)
+    // Since TIME_NOW and TIME_OMIT conventions cannot be used for utimes, we convert back
+    // by hand.
+    struct stat s;
+    struct timespec tv;
+    struct timeval t[2];
 
-    int e = utimensat(AT_FDCWD,cname, t, 0);
+    // grab the current time in case of UTIME_NOW and inode's dates  in case of UTIME_OMIT
+    e = stat(cname, &s);
+    if (e < 0) STk_error_posix(errno,"set-file-times",name, NULL);
+    gettimeofday(&tv, NULL);
 
-    if (e == -1) STk_error_posix(errno,"set-file-times",STk_argv2list(argc,argv), NULL);
+    if (nsec1 == TIME_NOW)  { sec1 = tv.tv_sec; nsec1 = tv.tv_nsec; }
+    else if (nsec1 == TIME_OMIT) { sec1 = s.st_atime; nsec1 = 0; } // can we have better?
+    else { nsec1 /= 1000; }
 
+    if (nsec2 == TIME_NOW)  { sec2 = tv.tv_sec; nsec2 = tv.tv_nsec; }
+    else if (nsec2 == TIME_OMIT) { sec2 = s.st_mtime; nsec2 = 0; } // can we do better?
+    else {nsec2 /= 1000; }
+
+    t[0].tv_sec  = sec1;
+    t[0].tv_usec = nsec1;
+    t[1].tv_sec  = sec2;
+    t[1].tv_usec = nsec2;
+    e = utimes(cname, t);
+#endif
+
+    if (e == -1) STk_error_posix(errno,"set-file-times",name, NULL);
     return STk_void;
 }
 
