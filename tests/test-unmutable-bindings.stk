@@ -108,5 +108,15 @@
   (test "define-constant.1" 1 cst)
   (test "define-constant.2" #f (symbol-mutable? 'cst)))
 
+(define-constant %%%___unmutable 10)
+
+(test "unmutable value" 10 %%%___unmutable)
+(test/error "set! unmutable" (set! %%%___unmutable 20))
+
+(define %%%___unmutable 20)
+(test "unmutable value" 20 %%%___unmutable)
+(set! %%%___unmutable -1)
+(test "unmutable / new value" -1 %%%___unmutable)
+
 
 (test-section-end)
