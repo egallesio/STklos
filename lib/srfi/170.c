@@ -568,7 +568,7 @@ DEFINE_PRIMITIVE("read-directory", posix_readdir, subr1, (SCM dir) )
     struct dirent *e = readdir(d);
     if (e == 0) {
       if (errno !=0) STk_error_posix(errno,"read-directory",dir, NULL);
-        else return STk_eof;
+      else return STk_eof;
     }
     while (!strcmp(e->d_name,".")  ||
            !strcmp(e->d_name,"..") ||
@@ -576,7 +576,7 @@ DEFINE_PRIMITIVE("read-directory", posix_readdir, subr1, (SCM dir) )
             e = readdir(d);
             if (e == 0) {
               if (errno !=0) STk_error_posix(errno,"read-directory", dir, NULL);
-                else return STk_eof;
+              else return STk_eof;
             }
         }
     return STk_Cstring2string(e->d_name);
@@ -764,7 +764,7 @@ DEFINE_PRIMITIVE("user-info",get_user_info, subr1, (SCM uid_name))
     }
     if (info == 0) {
       if (errno) STk_error_posix(errno,"user-info",uid_name, NULL);     /* <- error */
-        else return STk_false;                                         /* <- no error, user
+      else return STk_false;                                           /* <- no error, user
                                                                           doesn't exist */
     } else {
         SCM argv[8];
@@ -803,7 +803,7 @@ DEFINE_PRIMITIVE("group-info",get_group_info, subr1, (SCM gid_name))
     }
     if (info == 0) {
       if (errno) STk_error_posix(errno,"group-info",gid_name, NULL);    /* <- error */
-        else return STk_false;                                          /* <- no error, group
+      else return STk_false;                                            /* <- no error, group
                                                                            doesn't exist */
     } else {
         SCM argv[3];
@@ -817,6 +817,11 @@ DEFINE_PRIMITIVE("group-info",get_group_info, subr1, (SCM gid_name))
 
 /* 3.10 Time */
 
+#ifndef HAVE_CLOCK_GETTIME
+  #ifndef CLOCK_REALTIME
+    #define  CLOCK_REALTIME 1
+  #endif
+#endif
 DEFINE_PRIMITIVE("posix-time",posix_time, subr0, (void))
 {
     struct timespec ts;
@@ -834,6 +839,7 @@ DEFINE_PRIMITIVE("posix-time",posix_time, subr0, (void))
 
 DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
 {
+#if !defined(HAVE_CLOCK_GETTIME)  || !defined(CLOCK_MONOTONIC)
     struct timespec ts;
     int e = clock_gettime(CLOCK_MONOTONIC, &ts);
 
@@ -845,6 +851,10 @@ DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
     argv[1]=MAKE_INT(ts.tv_sec);
     argv[0]=MAKE_INT(ts.tv_nsec);
     return STk_make_struct(4, &argv[3]);
+#else
+    STk_error("monotonic time is not implemented on this system");
+    return STk_void;
+#endif
 }
 
 /* 3.12 Terminal device control */

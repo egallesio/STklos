@@ -1458,6 +1458,29 @@ doc>
 /* Offset: https://fr.wikipedia.org/wiki/Temps_atomique_international */
 #define TAI_OFFSET +37.0L
 
+#ifndef HAVE_CLOCK_GETTIME
+#  ifndef CLOCK_REALTIME
+#    define CLOCK_REALTIME 1  /* to avoid undeclared identifier later */
+#  endif
+
+int clock_gettime(clockid_t _UNUSED(clockid), struct timespec *tp)
+{
+  /* System doesn't provide clock_gettime. Define ours, which  always
+   * returns a CLOCK_REALTIME time.
+   * NOTE: We cannot have a error if clockid is not CLOCK_REALTIME since
+   * GC is initialized with CLOCK_MONOTONIC. Consequently, the result
+   * with CLOCK_MONOTONIC may in some circumstances go backward.
+   */
+  struct timeval tv;
+
+  gettimeofday(&tv, NULL);
+  tp->tv_sec  = tv.tv_sec;
+  tp->tv_nsec = tv.tv_usec * 1000;
+  return 0;
+}
+#endif
+
+
 DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
 {
   /* R7RS states: Neither high accuracy nor high precision are
