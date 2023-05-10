@@ -534,7 +534,7 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
         }
     }
 
-#ifndef HAVE_UTIMENSAT
+#ifdef HAVE_UTIMENSAT
     struct timespec t[2];
     t[0].tv_sec  = sec1;
     t[0].tv_nsec = nsec1;
@@ -548,20 +548,19 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
     // Since TIME_NOW and TIME_OMIT conventions cannot be used for utimes, we convert back
     // by hand.
     struct stat s;
-    struct timespec tv;
-    struct timeval t[2];
+    struct timespec tv, t[2];
 
     // grab the current time in case of UTIME_NOW and inode's dates  in case of UTIME_OMIT
     e = stat(cname, &s);
     if (e < 0) STk_error_posix(errno,"set-file-times",name, NULL);
     gettimeofday(&tv, NULL);
 
-    if (nsec1 == TIME_NOW)  { sec1 = tv.tv_sec; nsec1 = tv.tv_nsec; }
-    else if (nsec1 == TIME_OMIT) { sec1 = s.st_atime; nsec1 = 0; } // can we have better?
+    if (nsec1 == UTIME_NOW)  { sec1 = tv.tv_sec; nsec1 = tv.tv_nsec; }
+    else if (nsec1 == UTIME_OMIT) { sec1 = s.st_atime; nsec1 = 0; } // can we have better?
     else { nsec1 /= 1000; }
 
-    if (nsec2 == TIME_NOW)  { sec2 = tv.tv_sec; nsec2 = tv.tv_nsec; }
-    else if (nsec2 == TIME_OMIT) { sec2 = s.st_mtime; nsec2 = 0; } // can we do better?
+    if (nsec2 == UTIME_NOW)  { sec2 = tv.tv_sec; nsec2 = tv.tv_nsec; }
+    else if (nsec2 == UTIME_OMIT) { sec2 = s.st_mtime; nsec2 = 0; } // can we do better?
     else {nsec2 /= 1000; }
 
     t[0].tv_sec  = sec1;
