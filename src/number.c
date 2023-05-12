@@ -2351,7 +2351,7 @@ static SCM gcd2(SCM n1, SCM n2)
   int exactp = 1;
 
   if (STk_integerp(n1) == STk_false) error_not_an_integer(n1);
-  if (STk_integerp(n1) == STk_false) error_not_an_integer(n2);
+  if (STk_integerp(n2) == STk_false) error_not_an_integer(n2);
 
   if (REALP(n1)) {
     n1 = inexact2exact(n1);
