@@ -3368,7 +3368,7 @@ static SCM my_expt(SCM x, SCM y)
         if (zerop(y)) return double2real(1.0);
         if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
         if (REALP(y)) {
-          if (REALP(x)) {
+          if (REALP(x) && !negativep(x)) {
             /* real ^ real, see if we can use pow: */
             double r = pow(REAL_VAL(x),REAL_VAL(y));
             if (!isinf(r) || /* no overflow, return r */
