@@ -1103,6 +1103,7 @@
 (test "0^0" 1 (expt 0.0 0))        ;; exact exponent, exact 1
 (test "0^0" 1.0 (expt 0 0.0))      ;; inexact exponent, inexact 1.0
 (test "0^0" 1.0 (expt 0.0 0.0))    ;; inexact exponent, inexact 1.0
+
 (test "complex expt"
       #t
       (let* ((z (expt 2 -3+4i))
@@ -1112,6 +1113,8 @@
              (<  0.045085823 i   0.045085824))))
 (test/error "0^-a+bi" (expt 0   -2+1i))
 (test/error "0^-a+bi" (expt 0.0 -2+1i))
+
+(test "exact expt" 1/1606938044258990275541962092341162602522202993782792835301376 (expt (expt 2 100) -2))
 
 ;;------------------------------------------------------------------
 (test-subsection "sqrt")

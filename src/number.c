@@ -3306,6 +3306,7 @@ doc>
 static Inline SCM exact_exponent_expt(SCM x, SCM y)
 {
   mpz_t res;
+  SCM scm_res;
 
   /* y is already known to be exact; so if it is zero,
      return exact one. */
@@ -3318,14 +3319,24 @@ static Inline SCM exact_exponent_expt(SCM x, SCM y)
 
   switch (TYPEOF(x)) {
     case tc_integer:
-      mpz_init_set_si(res, INT_VAL(x));
-      mpz_pow_ui(res, res, INT_VAL(y));
-      SCM scm_res = bignum2number(res);
+      mpz_init(res);
+      /* Take the sign of the base. The GMP computation will be done
+         without it. */
+      long sign = (INT_VAL(x) < 0) ? -1 : +1;
+
+      mpz_ui_pow_ui(res, (unsigned long) (sign*INT_VAL(x)), (unsigned long) INT_VAL(y));
+
+      /* Put back the sign, if needed (that is, if sign (of x) < 0 and the exponent is odd): */
+      if (sign<0 && ((INT_VAL(y)) & 1UL)) mpz_neg(res,res);
+      scm_res = bignum2number(res);
       mpz_clear(res);
       return scm_res;
     case tc_bignum:
+      mpz_init(res);
       mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
-      return bignum2number(res);
+      scm_res = bignum2number(res);
+      mpz_clear(res);
+      return scm_res;
     case tc_rational:
       return make_rational(exact_exponent_expt(RATIONAL_NUM(x), y),
                            exact_exponent_expt(RATIONAL_DEN(x), y));
