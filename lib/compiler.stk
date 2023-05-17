@@ -79,7 +79,36 @@
                          (eq?            . ,eq?)
                          (eqv?           . ,eqv?)
                          (equal?         . ,equal?)
-                         (void           . ,void)))
+                         (void           . ,void)
+                         (caar           . ,caar)
+                         (cdar           . ,cdar)
+                         (cadr           . ,cadr)
+                         (cddr           . ,cddr)
+                         (caaar          . ,caaar)
+                         (cdaar          . ,cdaar)
+                         (cadar          . ,cadar)
+                         (cddar          . ,cddar)
+                         (caadr          . ,caadr)
+                         (cdadr          . ,cdadr)
+                         (caddr          . ,caddr)
+                         (cdddr          . ,cdddr)
+                         (caaaar         . ,caaaar)
+                         (cdaaar         . ,cdaaar)
+                         (cadaar         . ,cadaar)
+                         (cddaar         . ,cddaar)
+                         (caadar         . ,caadar)
+                         (cdadar         . ,cdadar)
+                         (caddar         . ,caddar)
+                         (cdddar         . ,cdddar)
+                         (caaadr         . ,caaadr)
+                         (cdaadr         . ,cdaadr)
+                         (cadadr         . ,cadadr)
+                         (cddadr         . ,cddadr)
+                         (caaddr         . ,caaddr)
+                         (cdaddr         . ,cdaddr)
+                         (cadddr         . ,cadddr)
+                         (cddddr         . ,cddddr)
+                         (list-ref       . ,list-ref)))
 
 (define *inline-symbols* (map car *inline-table*))
 
@@ -1024,7 +1053,24 @@ doc>
                        (compile (caddr actuals) env epair #f)
                        (emit mnemo))
                      (compiler-error fct epair "3 arguments required (~A provided)"
-                                     len)))))
+                                     len))))
+
+        ;; cxr is used to compile the cxr alises to combinations of CAR and CDR.
+        ;; (cxr 'caadr) will emit:
+        ;; IN-CDR
+        ;; IN-CAR
+        ;; IN-CAR
+        (cxr (lambda (f)
+               (let* ((s (symbol->string f))
+                      (i (fx- (string-length s) 1)) ;; last char (=r), will be ignored
+                      (iter (fx- i 1))
+                      (c #f))
+                 (repeat iter
+                         (set! i (fx- i 1))
+                         (set! c (string-ref s i))
+                         (when (eq? #\a c) (emit 'IN-CAR))
+                         (when (eq? #\d c) (emit 'IN-CDR)))))))
+
     (case fct
       ;; Always inlined functions
       ((%%set-current-module)
@@ -1195,6 +1241,21 @@ doc>
                             (emit 'IM-VOID)
                             (compile (append (cons 'begin actuals) (list (void)))
                                      env epair #f)))
+      ;; The cxr closures are very commonly used, and can be optimized.
+      ;; Instead of calling a procedure, we inline the instructions
+      ;; IN-CAR and IN-CDR here.
+      ((caar cdar cadr cddr
+        caaar cdaar cadar cddar caadr cdadr caddr cdddr
+        caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar
+        caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr)
+                        (begin (compile (car actuals) env epair #f)
+                               (cxr fct)))
+      ((list-ref)       (case (cadr actuals)
+                          ((0) (compile `(car ,(car actuals)) env epair #f))
+                          ((1) (compile `(cadr ,(car actuals)) env epair #f))
+                          ((2) (compile `(caddr ,(car actuals)) env epair #f))
+                          ((3) (compile `(cadddr ,(car actuals)) env epair #f))
+                          (else  (compile-normal-call fct actuals len env epair #f))))
       (else             (panic "unimplemented inline primitive ~S" fct)))))
 
 
