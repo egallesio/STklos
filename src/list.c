@@ -95,7 +95,6 @@ SCM STk_argv2list(int argc, SCM *argv)
 }
 
 
-
 DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM x))
 /*
 <doc pair?
@@ -107,7 +106,6 @@ doc>
 {
   return CONSP(x) ? STk_true : STk_false;
 }
-
 
 
 DEFINE_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y))
@@ -224,6 +222,12 @@ doc>
 
 DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
 {
+  /* Special function to compute cadr, cddr, ...
+   * (%cxr lst "dda") returns the caddr of lst
+   * The key (a string) given indicates the the value of x (reversed)
+   * Using the non reversed value of x is simpler but incurs
+   * a certain time penalty.
+   */
   if (STRINGP(name)) {
     SCM lst   = l;
     char *str = STRING_CHARS(name);

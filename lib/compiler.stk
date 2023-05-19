@@ -1231,11 +1231,13 @@ doc>
         caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar
         caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr)
                        (if (= len 1)
-                           (let ((convert (lambda (name)
-                                            (let ((s (string->list (symbol->string name))))
-                                              (list->string (cdr (reverse (cdr s))))))))
-                             (compile (car actuals) env epair #f)
-                             (emit 'IN-CXR (fetch-constant (convert fct))))
+                           (let ((conv
+                                  (lambda (name)
+                                    (let ((s (string->list (symbol->string name))))
+                                      (list->string (cdr (reverse (cdr s))))))))
+                             (oper2 'IN-CXR
+                                    (car actuals)
+                                    (fetch-constant (conv fct))))
                            (compile-normal-call fct actuals len env epair #f)))
 
       ((list-ref)       (if (= len 2)

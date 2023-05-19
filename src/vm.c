@@ -1698,10 +1698,9 @@ CASE(IN_SSET)   {
   STk_string_set(pop(), index, vm->val);
   NEXT0;
 }
- CASE(IN_CXR) {
-   extern SCM STk_cxr(SCM, SCM);                              // FIXME
-   vm->val= STk_cxr(vm->val, fetch_const());
-   NEXT1;
+CASE(IN_CXR) {
+  vm->val= STk_cxr(vm->val, fetch_const());
+  NEXT1;
  }
  
 CASE(IN_APPLY)   {
