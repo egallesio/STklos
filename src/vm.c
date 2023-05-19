@@ -1549,7 +1549,6 @@ CASE(END_OF_CODE) {
 CASE(DBG_VM)  {
   ;
 }
-CASE(UNUSED_2)
 CASE(UNUSED_3)
 CASE(UNUSED_4)
 CASE(UNUSED_5)
@@ -1699,7 +1698,12 @@ CASE(IN_SSET)   {
   STk_string_set(pop(), index, vm->val);
   NEXT0;
 }
-
+ CASE(IN_CXR) {
+   extern SCM STk_cxr(SCM, SCM);                              // FIXME
+   vm->val= STk_cxr(vm->val, fetch_const());
+   NEXT1;
+ }
+ 
 CASE(IN_APPLY)   {
   STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
   NEXT;

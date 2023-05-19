@@ -75,7 +75,7 @@
 #  define IN_EQV               70
 #  define IN_EQUAL             71
 #  define IN_APPLY             72
-#  define UNUSED_2             73
+#  define IN_CXR               73
 #  define SET_CUR_MOD          74
 #  define DOCSTRG              75
 #  define PROCNAME             76
@@ -252,7 +252,7 @@ static void *jump_table[] = {
   &&lab_IN_EQV              ,
   &&lab_IN_EQUAL            ,
   &&lab_IN_APPLY            ,
-  &&lab_UNUSED_2            ,
+  &&lab_IN_CXR              ,
   &&lab_SET_CUR_MOD         ,
   &&lab_DOCSTRG             ,
   &&lab_PROCNAME            ,
@@ -429,7 +429,7 @@ static char *name_table[] = {
   "IN_EQV              ",
   "IN_EQUAL            ",
   "IN_APPLY            ",
-  "UNUSED_2            ",
+  "IN_CXR              ",
   "SET_CUR_MOD         ",
   "DOCSTRG             ",
   "PROCNAME            ",

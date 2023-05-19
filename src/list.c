@@ -2,7 +2,7 @@
  *
  * l i s t . c                  -- Lists procedures
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -222,6 +222,24 @@ doc>
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
+{
+  if (STRINGP(name)) {
+    SCM lst   = l;
+    char *str = STRING_CHARS(name);
+    for (const char *s = str;  *s; s++) {
+      if (CONSP(lst))
+        lst = (*s == 'a') ? CAR(lst): CDR(lst);
+      else
+        STk_error_with_location(name, "bad list ~s", l);;
+    }
+    return lst;
+  }
+  else {
+    error_wrong_type(name);
+    return STk_void; // to avoid a compiler warning
+  }
+}
 
 DEFINE_PRIMITIVE("null?", nullp, subr1, (SCM x))
 /*
@@ -1016,6 +1034,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(cdr);
   ADD_PRIMITIVE(setcar);
   ADD_PRIMITIVE(setcdr);
+  ADD_PRIMITIVE(cxr);
   ADD_PRIMITIVE(nullp);
   ADD_PRIMITIVE(listp);
   ADD_PRIMITIVE(list);
