@@ -227,6 +227,8 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
    * The key (a string) given indicates the the value of x (reversed)
    * Using the non reversed value of x is simpler but incurs
    * a certain time penalty.
+   * In case of error, we can display a clear message (with some work to
+   * rebuild the original function name)
    */
   if (STRINGP(name)) {
     SCM lst   = l;
@@ -234,8 +236,21 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
     for (const char *s = str;  *s; s++) {
       if (CONSP(lst))
         lst = (*s == 'a') ? CAR(lst): CDR(lst);
-      else
-        STk_error_with_location(name, "bad list ~s", l);;
+      else {
+        int len   = STRING_LENGTH(name);
+        char *loc = STk_must_malloc_atomic(len+3); // 'c' + X + 'r' + \0
+
+        /* build location */
+        loc[0] = 'c';
+        for (int i = 0; i < len; i++) loc[i+1] = str[len-1-i];
+        loc[len+1] = 'r';
+        loc[len+2] = '\0';
+
+        /* display clear error */
+        name = STk_intern(loc);
+        STk_error_with_location(name, "wrong type of argument ~S for c%cr in (~s '~w)",
+                                lst, *s, name, l);
+      }
     }
     return lst;
   }
