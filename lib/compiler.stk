@@ -108,6 +108,7 @@
                          (cdaddr         . ,cdaddr)
                          (cadddr         . ,cadddr)
                          (cddddr         . ,cddddr)
+                         (%cxr           . ,%cxr)
                          (list-ref       . ,list-ref)))
 
 (define *inline-symbols* (map car *inline-table*))
@@ -1234,12 +1235,17 @@ doc>
                            (let ((conv
                                   (lambda (name)
                                     (let ((s (string->list (symbol->string name))))
-                                      (list->string (cdr (reverse (cdr s))))))))
+                                      (string->keyword
+                                            (list->string (cdr (reverse (cdr s)))))))))
                              (oper2 'IN-CXR
                                     (car actuals)
                                     (fetch-constant (conv fct))))
                            (compile-normal-call fct actuals len env epair #f)))
 
+      ;; (%cxr lst #:ada) ==> inline call
+      ((%cxr)           (if (and (= len 2) (keyword? (cadr actuals)))
+                            (oper2 'IN-CXR (car actuals) (fetch-constant (cadr actuals)))
+                            (compile-normal-call fct actuals len env epair #f)))
       ((list-ref)       (if (= len 2)
                             (case (cadr actuals)
                               ((0) (compile `(car ,(car actuals)) env epair #f))

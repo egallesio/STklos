@@ -223,21 +223,26 @@ doc>
 DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
 {
   /* Special function to compute cadr, cddr, ...
-   * (%cxr lst "dda") returns the caddr of lst
-   * The key (a string) given indicates the the value of x (reversed)
+   * (%cxr lst #:dda) returns the caddr of lst
+   * The key given indicates the value of x (reversed)
    * Using the non reversed value of x is simpler but incurs
    * a certain time penalty.
    * In case of error, we can display a clear message (with some work to
-   * rebuild the original function name)
+   * rebuild the original function name), but we have time.
+   * NOTE: using strings (instead of keywords) is less efficient because
+   * the char * is at the end of the object. Using symbols is also fast
+   * (even a bit faster, don't know why), but it is harder  to detect that
+   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
    */
-  if (STRINGP(name)) {
+  if (KEYWORDP(name)) {
     SCM lst   = l;
-    char *str = STRING_CHARS(name);
+    const char *str = KEYWORD_PNAME(name);
+
     for (const char *s = str;  *s; s++) {
       if (CONSP(lst))
         lst = (*s == 'a') ? CAR(lst): CDR(lst);
       else {
-        int len   = STRING_LENGTH(name);
+        int len   = strlen(str);
         char *loc = STk_must_malloc_atomic(len+3); // 'c' + X + 'r' + \0
 
         /* build location */
@@ -248,7 +253,7 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
 
         /* display clear error */
         name = STk_intern(loc);
-        STk_error_with_location(name, "wrong type of argument ~S for c%cr in (~s '~w)",
+        STk_error_with_location(name, "wrongtype of argument ~S for c%cr in (~s '~w)",
                                 lst, *s, name, l);
       }
     }
