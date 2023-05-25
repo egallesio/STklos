@@ -1,7 +1,7 @@
 ;;;;
 ;;;; runtime.stk        -- Stuff necessary for bootstaping the system
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -28,34 +28,34 @@
 ;; List functions
 ;;
 ;; ----------------------------------------------------------------------
-(define caar   (lambda (x) (car (car x))))
-(define cdar   (lambda (x) (cdr (car x))))
-(define cadr   (lambda (x) (car (cdr x))))
-(define cddr   (lambda (x) (cdr (cdr x))))
-(define caaar  (lambda (x) (car (car (car x)))))
-(define cdaar  (lambda (x) (cdr (car (car x)))))
-(define cadar  (lambda (x) (car (cdr (car x)))))
-(define cddar  (lambda (x) (cdr (cdr (car x)))))
-(define caadr  (lambda (x) (car (car (cdr x)))))
-(define cdadr  (lambda (x) (cdr (car (cdr x)))))
-(define caddr  (lambda (x) (car (cdr (cdr x)))))
-(define cdddr  (lambda (x) (cdr (cdr (cdr x)))))
-(define caaaar (lambda (x) (car (car (car (car x))))))
-(define cdaaar (lambda (x) (cdr (car (car (car x))))))
-(define cadaar (lambda (x) (car (cdr (car (car x))))))
-(define cddaar (lambda (x) (cdr (cdr (car (car x))))))
-(define caadar (lambda (x) (car (car (cdr (car x))))))
-(define cdadar (lambda (x) (cdr (car (cdr (car x))))))
-(define caddar (lambda (x) (car (cdr (cdr (car x))))))
-(define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
-(define caaadr (lambda (x) (car (car (car (cdr x))))))
-(define cdaadr (lambda (x) (cdr (car (car (cdr x))))))
-(define cadadr (lambda (x) (car (cdr (car (cdr x))))))
-(define cddadr (lambda (x) (cdr (cdr (car (cdr x))))))
-(define caaddr (lambda (x) (car (car (cdr (cdr x))))))
-(define cdaddr (lambda (x) (cdr (car (cdr (cdr x))))))
-(define cadddr (lambda (x) (car (cdr (cdr (cdr x))))))
-(define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
+(define caar   (lambda (x) (%cxr x #:aa)))
+(define cdar   (lambda (x) (%cxr x #:ad)))
+(define cadr   (lambda (x) (%cxr x #:da)))
+(define cddr   (lambda (x) (%cxr x #:dd)))
+(define caaar  (lambda (x) (%cxr x #:aaa)))
+(define cdaar  (lambda (x) (%cxr x #:aad)))
+(define cadar  (lambda (x) (%cxr x #:ada)))
+(define cddar  (lambda (x) (%cxr x #:add)))
+(define caadr  (lambda (x) (%cxr x #:daa)))
+(define cdadr  (lambda (x) (%cxr x #:dad)))
+(define caddr  (lambda (x) (%cxr x #:dda)))
+(define cdddr  (lambda (x) (%cxr x #:ddd)))
+(define caaaar (lambda (x) (%cxr x #:aaaa)))
+(define cdaaar (lambda (x) (%cxr x #:aaad)))
+(define cadaar (lambda (x) (%cxr x #:aada)))
+(define cddaar (lambda (x) (%cxr x #:aadd)))
+(define caadar (lambda (x) (%cxr x #:adaa)))
+(define cdadar (lambda (x) (%cxr x #:adad)))
+(define caddar (lambda (x) (%cxr x #:adda)))
+(define cdddar (lambda (x) (%cxr x #:addd)))
+(define caaadr (lambda (x) (%cxr x #:daaa)))
+(define cdaadr (lambda (x) (%cxr x #:daad)))
+(define cadadr (lambda (x) (%cxr x #:dada)))
+(define cddadr (lambda (x) (%cxr x #:dadd)))
+(define caaddr (lambda (x) (%cxr x #:ddaa)))
+(define cdaddr (lambda (x) (%cxr x #:ddad)))
+(define cadddr (lambda (x) (%cxr x #:ddda)))
+(define cddddr (lambda (x) (%cxr x #:dddd)))
 
 (define (map* fn . l)           ; A map which accepts dotted lists (arg lists
   (cond                         ; must be "isomorph"

@@ -2,7 +2,7 @@
  *
  * l i s t . c                  -- Lists procedures
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -95,7 +95,6 @@ SCM STk_argv2list(int argc, SCM *argv)
 }
 
 
-
 DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM x))
 /*
 <doc pair?
@@ -107,7 +106,6 @@ doc>
 {
   return CONSP(x) ? STk_true : STk_false;
 }
-
 
 
 DEFINE_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y))
@@ -222,6 +220,50 @@ doc>
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
+{
+  /* Special function to compute cadr, cddr, ...
+   * (%cxr lst #:dda) returns the caddr of lst
+   * The key given indicates the value of x (reversed)
+   * Using the non reversed value of x is simpler but incurs
+   * a certain time penalty.
+   * In case of error, we can display a clear message (with some work to
+   * rebuild the original function name), but we have time.
+   * NOTE: using strings (instead of keywords) is less efficient because
+   * the char * is at the end of the object. Using symbols is also fast
+   * (even a bit faster, don't know why), but it is harder  to detect that
+   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
+   */
+  if (KEYWORDP(name)) {
+    SCM lst   = l;
+    const char *str = KEYWORD_PNAME(name);
+
+    for (const char *s = str;  *s; s++) {
+      if (CONSP(lst))
+        lst = (*s == 'a') ? CAR(lst): CDR(lst);
+      else {
+        int len   = strlen(str);
+        char *loc = STk_must_malloc_atomic(len+3); // 'c' + X + 'r' + \0
+
+        /* build location */
+        loc[0] = 'c';
+        for (int i = 0; i < len; i++) loc[i+1] = str[len-1-i];
+        loc[len+1] = 'r';
+        loc[len+2] = '\0';
+
+        /* display clear error */
+        name = STk_intern(loc);
+        STk_error_with_location(name, "wrongtype of argument ~S for c%cr in (~s '~w)",
+                                lst, *s, name, l);
+      }
+    }
+    return lst;
+  }
+  else {
+    error_wrong_type(name);
+    return STk_void; // to avoid a compiler warning
+  }
+}
 
 DEFINE_PRIMITIVE("null?", nullp, subr1, (SCM x))
 /*
@@ -1016,6 +1058,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(cdr);
   ADD_PRIMITIVE(setcar);
   ADD_PRIMITIVE(setcdr);
+  ADD_PRIMITIVE(cxr);
   ADD_PRIMITIVE(nullp);
   ADD_PRIMITIVE(listp);
   ADD_PRIMITIVE(list);
