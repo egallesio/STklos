@@ -1747,7 +1747,7 @@ FILTER an FILTER! are primitives in STklos
 ;;; file. However, in order to keep a list of exported symbol which is coherent
 ;;; with the text of the SRFI
 (define-macro (redefine symb)
-  `(define ,symb (in-module SCHEME ,symb)))
+  `(define ,symb (in-module |SCHEME| ,symb)))
 
 (redefine every)
 (redefine any)

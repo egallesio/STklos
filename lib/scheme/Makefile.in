@@ -395,8 +395,7 @@ R7_OBJS = base.ostk            \
 # ----------------------------------------------------------------------
 # R7RS Large Support
 # ----------------------------------------------------------------------
-LARGE_STK = list.stk       \
-             charset.stk    \
+LARGE_STK = charset.stk    \
              stream.stk     \
              box.stk        \
              set.stk        \
@@ -410,8 +409,7 @@ LARGE_STK = list.stk       \
              division.stk   \
              bitwise.stk
 
-LARGE_OBJS = list.ostk       \
-             charset.ostk    \
+LARGE_OBJS = charset.ostk    \
              stream.ostk     \
              box.ostk        \
              set.ostk        \
@@ -425,9 +423,9 @@ LARGE_OBJS = list.ostk       \
              division.ostk   \
              bitwise.ostk
 
-LARGE_C = ilist.c     flonum.c     sort.c     vector.c     bytevector.c
-LARGE_C_STK = ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk
-LARGE_SHOBJ = ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO)
+LARGE_C = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c
+LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk
+LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO)
 
 #----------------------------------------------------------------------
 SRC_STK = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
@@ -763,6 +761,9 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 	(cd ../srfi; $(MAKE) 60.ostk)
 
 bytevector.$(SO): bytevector-incl.c bytevector.c
+
+list.$(SO): list-incl.c
+list-incl.c: list.stk
 
 ilist.$(SO): ilist-incl.c
 ilist-incl.c: comparator.ostk
