@@ -223,6 +223,9 @@ doc>
                             ;; Hack: Here %module-restore will get back the old c
                             (raise (%module-restore)))))
 
+(define %in-scheme      (lambda (symbol)
+                          (symbol-value symbol (find-module '|SCHEME|))))
+
 ;; ----------------------------------------------------------------------
 ;;      A trace function, defined early to permit some traces
 ;;----------------------------------------------------------------------
@@ -232,5 +235,4 @@ doc>
     (display (apply format fmt args) out)
     (display  "\x1b;[0m" out)
     (newline out)))
-
 

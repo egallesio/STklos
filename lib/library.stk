@@ -148,7 +148,8 @@ doc>
          ;; ③: define useful 'secret" symbols
          (%symbol-define '%module-restore %module-restore (current-module))
          (%symbol-define '%make-syntax    %make-syntax    (current-module))
-
+         (%symbol-define '%in-scheme      %in-scheme      (current-module))
+         
          ;; ④: transform the module in a library
          (%module->library! ',module-name)
 
