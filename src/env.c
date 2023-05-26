@@ -743,6 +743,20 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
 }
 
 
+DEFINE_PRIMITIVE("%in-scheme", in_scheme, subr1, (SCM symb))
+{
+  SCM mod, val;
+  verify_symbol(symb);
+
+  // Search the value of symb in SCHEME module (or STklos if we  are still booting).
+  mod = (BOXED_INFO(Scheme_module) & MODULE_CONST) ? Scheme_module : STk_STklos_module;
+  val = find_symbol_value(symb, mod);
+  if (!val) STk_error_unbound_variable(symb, mod);
+
+  return val;
+}
+
+
 /*===========================================================================*\
  *
  *              E n v i r o n m e n t   M a n a g e m e n t
@@ -923,6 +937,7 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
+  ADD_PRIMITIVE(in_scheme);
 
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);

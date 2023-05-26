@@ -223,12 +223,6 @@ doc>
                             ;; Hack: Here %module-restore will get back the old c
                             (raise (%module-restore)))))
 
-(define %in-scheme      (lambda (symbol)
-                          ;; Search the value of symbol in SCHEME module (or STklos if we
-                          ;; are still booting).
-                          (let ((mod (if (module-mutable? '|SCHEME|) '|STklos| '|SCHEME|)))
-                            (symbol-value symbol (find-module mod)))))
-
 ;; ----------------------------------------------------------------------
 ;;      A trace function, defined early to permit some traces
 ;;----------------------------------------------------------------------
