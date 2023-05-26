@@ -148,9 +148,8 @@ stream.ostk:     list.ostk ../streams/derived.ostk
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
 
-set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
-../srfi/9.ostk:
-	(cd ../srfi; $(MAKE) 9.ostk)
+set.ostk: ../srfi/69.ostk comparator.ostk
+
 ../srfi/69.ostk:
 	(cd ../srfi; $(MAKE) 69.ostk)
 ../srfi/128.ostk:
@@ -177,15 +176,9 @@ sort-incl.c: sort.stk
 vector.$(SO): vector-incl.c
 vector-incl.c: vector.stk
 
-
-#box.ostk:        ../srfi/111.ostk
-#set.ostk:        ../srfi/113.ostk
-#ilist.ostk:      ../srfi/116.$(SO)
-list-queue.ostk: ../srfi/9.ostk
 hash-table.ostk: comparator.ostk
-comparator.ostk: ../srfi/9.ostk
-ideque.ostk: ../srfi/9.ostk generator.ostk list.ostk
-text.ostk: ../srfi/9.ostk ../srfi/129.ostk
+ideque.ostk: generator.ostk list.ostk
+text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 
 # ======================================================================

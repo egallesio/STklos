@@ -49,7 +49,6 @@
 ;;;;
 
 (define-module scheme/list-queue
-  (import (srfi 9))
   (export make-list-queue list-queue list-queue-copy list-queue-unfold list-queue-unfold-right
           list-queue? list-queue-empty?
           list-queue-front list-queue-back list-queue-list list-queue-first-last

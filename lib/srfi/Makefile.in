@@ -1010,16 +1010,16 @@ STKLOS_BINARY ?= ../../src/stklos
 1.ostk: ../scheme/list.ostk
 13.ostk: 14.ostk
 14.ostk: ../scheme/charset.ostk
-37.ostk: 9.ostk 13.ostk
+37.ostk: 13.ostk
 41.ostk: ../streams/derived.ostk
 51.ostk: 1.ostk
-64.ostk: 9.ostk 35.ostk
+64.ostk: 35.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
 95.ostk:  ../scheme/sort.$(SO)
 113.ostk: ../scheme/set.ostk
 116.ostk: ../scheme/ilist.$(SO)
-117.ostk: 1.ostk 9.ostk ../scheme/list-queue.ostk
+117.ostk: 1.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
 127.ostk: ../scheme/lseq.ostk
 128.ostk: ../scheme/comparator.ostk
@@ -1032,23 +1032,18 @@ STKLOS_BINARY ?= ../../src/stklos
 144.ostk: ../scheme/flonum.$(SO)
 151.ostk: ../scheme/bitwise.ostk
 152.ostk: 13.ostk
-154.ostk: 9.ostk
 158.ostk: ../scheme/generator.ostk
 160.ostk: 4.ostk 128.ostk
-161.ostk: 9.ostk
-171.ostk: 1.ostk 9.ostk 69.ostk
-173.ostk: 9.ostk
-180.ostk: 9.ostk
-189.ostk: 1.ostk 9.ostk
+171.ostk: 1.ostk 69.ostk
+189.ostk: 1.ostk
 190.ostk: 158.ostk
 195.ostk: 35.ostk
-196.ostk: 1.ostk 9.ostk
-207.ostk: 1.ostk 9.ostk 13.ostk 151.ostk 158.ostk
+196.ostk: 1.ostk
+207.ostk: 1.ostk 13.ostk 151.ostk 158.ostk
 216.ostk: 27.$(SO)
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
 224.ostk: ../scheme/comparator.ostk
-230.ostk: 9.ostk
 235.ostk: 1.ostk
 
 25.$(SO):  25-incl.c  25.c

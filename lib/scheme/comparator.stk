@@ -50,7 +50,6 @@
 
 
 (define-module scheme/comparator
-  (import (srfi 9))
   (export
    comparator? comparator-ordered? comparator-hashable?
    make-comparator

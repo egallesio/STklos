@@ -65,7 +65,6 @@
 (define-module scheme/ideque
   ;;(import (scheme base) (scheme case-lambda)
   (import (scheme list)         ;; (srfi 1)
-          (srfi 9)
           (scheme generator))   ;; (srfi 158)
   (export ideque ideque-tabulate ideque-unfold ideque-unfold-right
           ideque? ideque-empty? ideque= ideque-any ideque-every
