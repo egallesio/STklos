@@ -1690,6 +1690,14 @@ doc>
     (for-each %include-file (cdr e))))
 
 
+;; ======================================================================
+(define (compile-in-scheme e env tail)
+  (if (= (length e) 2)
+      (begin
+        (compile (cadr e) env (cadr e) tail)
+        (emit 'INSCHEME))
+      (compiler-error '%%in-scheme "expected one argument")))
+
 ;;;;======================================================================
 ;;;;
 ;;;;            LET-SYNTAX
@@ -1923,6 +1931,7 @@ both forms.
           ((%%when-compile)     (compile-when-compile   e env tail?))
           ((%%include)          (compile-include        e env tail?))
           ((%%include-ci)       (compile-include-ci     e env tail?))
+          ((%%in-scheme)        (compile-in-scheme      e env tail?))
           ((%%source-pos)       (compile-%%source-pos   e env tail?))
           ((%%label)            (compile-%%label        e env tail?))
           ((%%goto)             (compile-%%goto         e env tail?))

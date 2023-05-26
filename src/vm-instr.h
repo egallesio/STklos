@@ -171,8 +171,9 @@
 #  define IN_FXDIFF            166
 #  define SOURCE               167
 #  define FORMALS              168
+#  define INSCHEME             169
 
-#  define NB_VM_INSTR (FORMALS             +1)
+#  define NB_VM_INSTR (INSCHEME            +1)
 #endif
 
 
@@ -348,6 +349,7 @@ static void *jump_table[] = {
   &&lab_IN_FXDIFF           ,
   &&lab_SOURCE              ,
   &&lab_FORMALS             ,
+  &&lab_INSCHEME            ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -525,6 +527,7 @@ static char *name_table[] = {
   "IN_FXDIFF           ",
   "SOURCE              ",
   "FORMALS             ",
+  "INSCHEME            ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

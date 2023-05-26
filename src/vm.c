@@ -1542,9 +1542,17 @@ CASE(CALL_LOCATION) {
   NEXT1;
 }
 
+ CASE(INSCHEME) {
+  extern SCM STk_in_scheme(SCM symb);      //FIXME
+  vm->val = STk_in_scheme(vm->val);
+  NEXT1;
+ }
+
+ 
 CASE(END_OF_CODE) {
-  return;
-}
+   return;
+ }
+
 
 CASE(DBG_VM)  {
   ;

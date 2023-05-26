@@ -249,6 +249,9 @@
 
            (SOURCE              1)
            (FORMALS             1)
+
+           ;; Misc
+           (INSCHEME           1)  ; Symbol value in SCHEME module
 ))))
 
 ;;;;
