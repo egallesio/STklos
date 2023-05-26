@@ -233,6 +233,10 @@
 ;;;
 ;;; The SRFI discussion record contains more discussion on this topic.
 
+;; Avoid compilation warnings
+(%compile-time-define %cars+cdrs %cars+cdrs+ %cdrs %cars+ %cars+cdrs/no-test)
+
+
 ;;;;
 ;;;; STk adaptations
 ;;;;
