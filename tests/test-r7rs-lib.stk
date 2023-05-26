@@ -36,10 +36,8 @@
 
 (define (library-symbols name)
   (let ((symbs  (module-symbols (find-module name))))
-    ;; Delete the symbols %module-symbols and %make-syntax used for module
-    ;; management
-    (sort-list (filter (lambda (x) (not (memq x '(%module-restore %make-syntax))))
-                       symbs))))
+    ;; Delete the symbol %in-scheme for module management
+    (sort-list (delete '%in-scheme symbs))))
 
 (define (library-exports name)
   (sort-list (%module-exports (find-module name))))

@@ -224,7 +224,10 @@ doc>
                             (raise (%module-restore)))))
 
 (define %in-scheme      (lambda (symbol)
-                          (symbol-value symbol (find-module '|SCHEME|))))
+                          ;; Search the value of symbol in SCHEME module (or STklos if we
+                          ;; are still booting).
+                          (let ((mod (if (module-mutable? '|SCHEME|) '|STklos| '|SCHEME|)))
+                            (symbol-value symbol (find-module mod)))))
 
 ;; ----------------------------------------------------------------------
 ;;      A trace function, defined early to permit some traces
@@ -235,4 +238,3 @@ doc>
     (display (apply format fmt args) out)
     (display  "\x1b;[0m" out)
     (newline out)))
-

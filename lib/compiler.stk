@@ -472,10 +472,10 @@ doc>
                  (proc     (caddr l))
                  (mod      (compiler-current-module)))
             (if (symbol? name)
-                (let ((obj `(%make-syntax ',name
-                                          ',proc
-                                          ,proc
-                                          ',(module-name mod))))
+                (let ((obj `( (%in-scheme '%make-syntax) ',name
+                                                         ',proc
+                                                         ,proc
+                                                         ',(module-name mod))))
                   ;; produce code for defining the macro
                   (register-new-global! name)
                   (compile obj #f env #f)
@@ -1736,7 +1736,7 @@ both forms.
                                         "ill formed binding ~S" new))
                       (let* ((name      (car new))
                              (expander  (cadr new))
-                             (new-macro (%make-syntax
+                             (new-macro ((%in-scheme '%make-syntax)
                                             name
                                             expander
                                             (eval expander)
