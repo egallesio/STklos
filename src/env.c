@@ -743,7 +743,7 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
 }
 
 
-DEFINE_PRIMITIVE("%in-scheme", in_scheme, subr1, (SCM symb))
+SCM STk_symb_in_scheme(SCM symb) // value of symb in module SCHEME
 {
   SCM mod, val;
   verify_symbol(symb);
@@ -937,7 +937,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
-  ADD_PRIMITIVE(in_scheme);
 
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);

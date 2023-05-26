@@ -251,7 +251,7 @@
            (FORMALS             1)
 
            ;; Misc
-           (INSCHEME           1)  ; Symbol value in SCHEME module
+           (INSCHEME            0)  ; Symbol value in SCHEME module
 ))))
 
 ;;;;
