@@ -35,9 +35,7 @@
           (string<? (format "~a" s1) (format "~a" s2)))))
 
 (define (library-symbols name)
-  (let ((symbs  (module-symbols (find-module name))))
-    ;; Delete the symbol %in-scheme for module management
-    (sort-list (delete '%in-scheme symbs))))
+  (sort-list (module-symbols (find-module name))))
 
 (define (library-exports name)
   (sort-list (%module-exports (find-module name))))
