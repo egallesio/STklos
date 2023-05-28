@@ -253,7 +253,7 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
 
         /* display clear error */
         name = STk_intern(loc);
-        STk_error_with_location(name, "wrongtype of argument ~S for c%cr in (~s '~w)",
+        STk_error_with_location(name, "wrong type of argument ~S for c%cr in (~s '~w)",
                                 lst, *s, name, l);
       }
     }
