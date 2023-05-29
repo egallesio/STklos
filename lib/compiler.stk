@@ -84,6 +84,7 @@
 (define *inline-math-commutative* '())
 (add-list-to-inline-table *inline-math-commutative*
                           + * gcd lcm)
+
 (define *inline-math-general* '())
 (add-list-to-inline-table *inline-math-general*
                           - /
@@ -91,7 +92,8 @@
                           sin  cos  tan  asin  acos  atan
                           sinh cosh tanh asinh acosh atanh
                           exp log expt
-                          sqrt ;; square => square is not available when compiling...
+                          sqrt
+                          ;; square => square is not available when compiling...
                           )
 
 (define *inline-math* (append *inline-math-commutative*
@@ -113,10 +115,6 @@
 
 (define *inline-table* (append *inline-math*
                                *inline-general*))
-
-;; (define *inline-math-commutative-symbols* (map car *inline-math-commutative*))
-;; (define *inline-math-symbols* (map car *inline-math*))
-;; (define *inline-symbols* (map car *inline-table*))
 
 (define *always-inlined*        '(%set-current-module %%set-current-module
                                   %%execute %%execute-handler))
@@ -1397,7 +1395,7 @@ doc>
                             (compile (append (cons 'begin actuals) (list (void)))
                                      env epair #f)))
 
-      ;; The cxr closures are very commonly used, call the specialized IN-CDR instr.
+      ;; The cxr closures are very commonly used, call the specialized IN-CXR instr.
       ((caar cdar cadr cddr
         caaar cdaar cadar cddar caadr cdadr caddr cdddr
         caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar
