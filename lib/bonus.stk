@@ -1865,18 +1865,20 @@ doc>
 
 #|
 <doc EXT define-constant
- * (define-constant name expr)
- * (define-constant (name param1 param2 ...) body)
+ * (define-constant <variable> <expression>)
+ * (define-constant (<variable> <formals>) body)
+ * (define-constant (<variable> . <formal>) body)
  *
- * Evaluates the expression |expr|, then creates a new, non-mutable
- * binding for |name| with the resulting value. Note that the definition
- * of constant functions can use the notation of {{quick-link-srfi 219}}.
+ * This form is similar to |define|, except the binding of |<variable>| which
+ * is non mutable.
  *
+ * @lisp 
  * (define-constant a 'hello)
  * (set! a 'goodbye)             => error
- * (define a 2)                  => ok (it's a new binding)
- * (define-constant ((foo a) b)  => foo is (lambda (a) (lambda (b) ...)))
+ * (define a 2)                  ; is  ok (it's a new binding)
+ * (define-constant ((foo a) b)  ; foo is (lambda (a) (lambda (b) ...)))
  *     ...)
+ * @end lisp 
 doc>
 |#
 (define-macro (define-constant . args)

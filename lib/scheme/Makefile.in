@@ -742,7 +742,7 @@ STKLOS_BINARY ?= ../../src/stklos
 #
 #
 # $(DEPS):
-# 	(cd ../srfi; $(MAKE)  `basename $@`)#
+# 	(cd ../srfi; $(MAKE)  `basename $@`)
 
 stream.ostk:     list.ostk ../streams/derived.ostk
 ../streams/derived.ostk:

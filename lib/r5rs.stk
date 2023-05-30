@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r5rs.stk   -- R5RS function written in Scheme
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,35 @@
         call-with-input-file call-with-output-file
         rationalize
         call-with-values)
+
+#|
+<doc SYNTAX define
+ * (define <variable> <expresssion>)
+ * (define (<variable> <formals>) <body>)
+ * (define (<variable> . <formal>) <body>)
+ *
+ * Theses forms bind an identifier to a a value.
+ *
+ * The first form binds the |<variable>| to the result of the evaluation of
+ * |<expression>|.
+ *
+ * The second form of |define| is equivalent to
+ * @lisp
+ * (define <variable>
+ *         (lambda (<formals>) body))
+ * @end lisp
+ *
+ * The third |define| form, where |<formal>| is a single variable, is equivalent to
+ * @lisp
+ * (define <variable>
+ *         (lambda <formals> body))
+ * @end lisp
+ *
+ * NOTE: The |define| form accepts also the definition of higher order lambda as
+ * defined in {{link-srfi 219}}.
+doc>
+|#
+
 #|
 <doc EXT-SYNTAX lambda
  * (lambda <formals> <body>)
@@ -153,7 +182,7 @@ doc>
  * first operand of |set!|, it causes the corresponding component to be
  * replaced by the second operand. For example,
  * @lisp
- * (set (vector-ref x i) v)
+ * (set! (vector-ref x i) v)
  * @end lisp
  * would be equivalent to:
  * @lisp

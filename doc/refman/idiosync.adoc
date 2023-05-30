@@ -65,6 +65,17 @@ For now, supported libraries of the *Tangerine edition* are
 - flonum _(srfi 144)_
 - generator _(srfi 158)_
 
+**(scheme bytevector) functions**
+
+Importing `(scheme bytevector)` gives access to the supplemental following
+bytevector functions.
+
+{{insertdoc 'bytevector-s8-ref}}
+{{insertdoc 'bytevector-s8-set!}}
+{{insertdoc 'bytevector-fill!}}
+{{insertdoc 'bytevector=?}}
+{{insertdoc 'bytevector-sint-set!}}
+
 ==== The (srfi ...) Libraries
 
 All the SRFI supported by {{stklos}} are placed under

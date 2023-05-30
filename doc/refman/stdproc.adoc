@@ -795,6 +795,8 @@ SRFI's documentation for more information.
 {{insertdoc 'hash-table-merge!}}
 {{insertdoc 'hash-table-equivalence-function}}
 {{insertdoc 'hash-table-hash-function}}
+{{insertdoc 'hash-mutable?}}
+{{insertdoc 'hash-immutable!}}
 {{insertdoc 'hash-table-size}}
 {{insertdoc 'hash-table-stats}}
 

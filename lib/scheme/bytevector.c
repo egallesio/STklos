@@ -184,12 +184,9 @@ DEFINE_PRIMITIVE("bytevector-fill!", bytevector_fill, subr2,
 }
 
 /*
-<doc EXT bytevector-u8-ref bytevector-s8-ref
- * (bytevector-u8-ref bytevector k)
+<doc EXT bytevector-s8-ref
  * (bytevector-s8-ref bytevector k)
  *
- * The |bytevector-u8-ref| procedure returns the byte at index |k| of
- * |bytevector|, as an octet.
  * The |bytevector-s8-ref| procedure returns the byte at index |k| of
  * |bytevector|, as a signed byte.
  *
@@ -215,16 +212,13 @@ DEFINE_PRIMITIVE("bytevector-s8-ref", bytevector_s8_ref, subr2,
 }
 
 /*
-<doc EXT bytevector-u8-set! bytevector-s8-set!
- * (bytevector-u8-set! bytevector k octet)
+<doc EXT bytevector-s8-set!
  * (bytevector-s8-set! bytevector k byte)
  *
  * |K| must be a valid index of bytevector.
- * The |bytevector-u8-set!| procedure stores octet in element
- * |k| of |bytevector|.
  * The |bytevector-s8-set!| procedure stores the two’s-complement
  * representation of |byte| in element |k| of |bytevector|.
- * Both procedures return unspecified values.
+ * This procedure return an unspecified value.
  *
  * @lisp
  * (let ((b (make-bytevector 16 -127)))
