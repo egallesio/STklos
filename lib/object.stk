@@ -56,7 +56,7 @@
     method-more-specific? sort-applicable-methods
     method-procedure method-specializers method-generic-function
     method-specializers-equal?
-    class-subclasses class-methods class-name class-direct-supers
+    class-subclasses class-methods class-name class-direct-superclasses
     class-direct-subclasses class-precedence-list class-direct-methods
     class-direct-slots class-slots
     generic-function-name generic-function-methods
@@ -175,12 +175,12 @@ doc>
   (if (class? C) (slot-ref C 'name) (%error-bad-class 'class-name C)))
 
 #|
-<doc EXT class-direct-supers class-direct-subclasses class-precedence-list
- * (class-direct-supers c)
+<doc EXT class-direct-superclasses class-direct-subclasses class-precedence-list
+ * (class-direct-superclasses c)
  * (class-direct-subclasses c)
  * (class-precedence-list c)
  *
- * |Class-direct-supers| and |class-direct-subclasses| return a list with
+ * |class-direct-superclasses| and |class-direct-subclasses| return a list with
  * all direct superclasses or subclasses of class |c|.
  *
  * |class-precedence-list| returns the precedence list for class |c|. If
@@ -197,10 +197,10 @@ doc>
  * (define-class <C> (<A> <B>) (slot-one))
  * (define-class <D> (<A>) ())
  *
- * (map class-name (class-direct-supers <C>))     => (<A> <B>)
- * (map class-name (class-direct-supers <D>))     => (<A>)
- * (map class-name (class-direct-subclasses <A>)) => (<D> <C>)
- * (map class-name (class-precedence-list <C>))   => (<C> <A> <B> <object> <top>)
+ * (map class-name (class-direct-superclasses <C>)) => (<A> <B>)
+ * (map class-name (class-direct-superclasses <D>)) => (<A>)
+ * (map class-name (class-direct-subclasses <A>))   => (<D> <C>)
+ * (map class-name (class-precedence-list <C>))     => (<C> <A> <B> <object> <top>)
  * @end lisp
  *
  * |Slot-one| in class |<C>| refers to the slot defined in |<C>| (because
@@ -233,10 +233,10 @@ doc>
  * @end lisp
 doc>
 |#
-(define (class-direct-supers C)
+(define (class-direct-superclasses C)
   (if (class? C)
       (slot-ref C 'direct-supers)
-      (%error-bad-class 'class-direct-supers C)))
+      (%error-bad-class 'class-direct-superclasses C)))
 
 (define (class-direct-slots C)
   (if (class? C)
@@ -481,7 +481,7 @@ doc>
  *
  * (ensure-metaclass (list <B> <A>)) => #[<class> <B> 7fea2b8a3c30]
  * (define m (ensure-metaclass (list <B> <A> <C>)))
- * (class-direct-supers m)
+ * (class-direct-superclasses m)
  *   => (#[<class> <B> 7fea2b8a3c30] #[<class> <C> 7fea2b8afb40])
  * @end lisp
 doc>
@@ -1007,7 +1007,7 @@ doc>
 ;==== Update-direct-subclass
 (define-method update-direct-subclass ((c <class>) (old <class>) (new <class>))
   (let ((new-supers (map (lambda (cls) (if (eq? cls old) new cls))
-                         (class-direct-supers c))))
+                         (class-direct-superclasses c))))
     ;; Create a new class with same name as c. This will automagically call
     ;; class-redefinition on this subclass and redefine all its descent
     (ensure-class (class-name c)
@@ -1030,7 +1030,7 @@ doc>
   ;; Remove the old class from the direct-subclasses list of its super classes
   (for-each (lambda (c) (slot-set! c 'direct-subclasses
                                    (delete! old (class-direct-subclasses c) eq?)))
-            (class-direct-supers old))
+            (class-direct-superclasses old))
 
   ;; Redefine all the subclasses of old to take into account modification
   (for-each

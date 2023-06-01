@@ -229,7 +229,7 @@ doc>
   ;; Super classes
   (format port "Superclasses are:~%")
   (for-each (lambda (class) (format port "    ~A~%" (class-name class)))
-       (class-direct-supers x))
+       (class-direct-superclasses x))
 
   ;; Direct slots
   (let ((slots (class-direct-slots x)))
