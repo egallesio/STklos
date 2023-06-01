@@ -988,6 +988,18 @@ DEFINE_PRIMITIVE("method?", methodp, subr1, (SCM obj))
   return MAKE_BOOLEAN(METHODP(obj));
 }
 
+/*
+<doc EXT class-of
+ * (class-of obj)
+ *
+ * Return the class of object |obj|.
+ * @lisp
+ * (define-class <A> () ())
+ * (class-of (make <A>))     => #[<class> <A> 7f5dc5002a20]
+ * (class-of #t)             => #[<class> <boolean> 7f5dc551ade0]
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
 {
   if (INSTANCEP(obj)) {
