@@ -874,8 +874,8 @@ doc>
 ;=============================================================================
 
 ;==== Methods to compare objects
-(define-method object-eqv?   (x y) #f)
-(define-method object-equal? (x y) (eqv? x y))
+(define-method object-eqv?   (x y) #f)         ; by default
+(define-method object-equal? (x y) (eqv? x y)) ; if they are eqv? they are equal?
 
 
 ;==== Methods to display/write an object
