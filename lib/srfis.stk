@@ -83,7 +83,7 @@
     (43 "Vector library" () "srfi-43")
     ;; 44  Collections
     (45 "Primitives for Expressing Iterative Lazy Algorithms")
-    ;; 46 Basic Syntax-rules Extensions
+    (46 "Basic Syntax-rules Extensions")
     ;; 47 Array
     (48 "Intermediate Format Strings" () "srfi-48")
     ;; 49 Indentation-sensitive syntax (NEVER)
