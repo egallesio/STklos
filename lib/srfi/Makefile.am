@@ -20,6 +20,7 @@
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
 
+
 #-======================================================================
 
 SUBDIRS=160
@@ -64,6 +65,7 @@ SRC_STK   = 1.stk   \
             41.stk  \
             43.stk  \
             45.stk  \
+            46.stk  \
             48.stk  \
             51.stk  \
             54.stk  \
@@ -174,6 +176,7 @@ SRC_OSTK =  1.ostk   \
             41.ostk  \
             43.ostk  \
             45.ostk  \
+            46.ostk  \
             48.ostk  \
             51.ostk  \
             54.ostk  \
@@ -315,7 +318,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 151.ostk: ../scheme/bitwise.ostk
 152.ostk: 13.ostk
 158.ostk: ../scheme/generator.ostk
-160.ostk: 4.ostk 128.ostk
+160.ostk: 4.ostk 128.ostk 
 171.ostk: 1.ostk 69.ostk
 189.ostk: 1.ostk
 190.ostk: 158.ostk
