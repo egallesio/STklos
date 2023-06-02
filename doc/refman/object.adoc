@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -523,7 +523,7 @@ determine the applicability of a method.  Suppose we declare now
 
 
 ```scheme
-`(define-method M ((a <integer>) (b <number>))
+(define-method M ((a <integer>) (b <number>))
     'integer-number)
 
 (define-method M ((a <integer>) (b <real>))
@@ -676,11 +676,30 @@ we could define the following method to compare points:
        (= (point-y a) (point-y b))))
 ```
 
-=== Object System Reference
+=== Object System Main Functions and Syntaxes
 
-WARNING: This section needs to be written.
+==== Classes and Instances
 
-=== Main Functions and sytaxes
 {{insertdoc 'define-class}}
+{{insertdoc 'make-instance}}
+{{insertdoc 'class-name}}
+{{insertdoc 'class-of}}
+{{insertdoc 'class-name}}
 {{insertdoc 'find-class}}
 {{insertdoc 'is-a?}}
+
+==== Generic Functions and Methods
+
+Generic functions and methods are an important part of {{stklos}} object
+system. A generic function is a function which can have several methods with a
+behavior which depends of the type or the number of its parameters.
+
+{{insertdoc 'define-generic}}
+{{insertdoc 'define-method}}
+{{insertdoc 'next-method}}
+
+==== Misc.
+
+{{insertdoc  'class-precedence-list}}
+{{insertdoc  'class-direct-slots}}
+{{insertdoc  'class-slot-definition}}
