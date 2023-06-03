@@ -46,6 +46,7 @@ For now, supported libraries of the *Red edition* are
 - box _(srfi 111)_
 - charset _(srfi 14)_
 - comparator _(srfi 128)_
+- generator _(srfi 158)_ -- Red edition included SRFI 121, but it was superseded by SRFI 158.
 - hash-table _(srfi 125)_
 - ideque _(srfi 134)_
 - ilist _(srfi 116)_
@@ -61,9 +62,12 @@ For now, supported libraries of the *Red edition* are
 For now, supported libraries of the *Tangerine edition* are
 
 - bitwise _(srfi 151)_
+- bytevectors _(scheme bytevector)_- not a SRFI: this one is a chapter from R6RS.
 - division _(srfi 141)_
+- fixnum _(srfi 143)_
 - flonum _(srfi 144)_
 - generator _(srfi 158)_
+- vector @ _(srfi 160)_
 
 **(scheme bytevector) functions**
 

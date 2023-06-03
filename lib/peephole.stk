@@ -220,7 +220,7 @@
                                        ((LOCAL-REF3) 'LOCAL-REF3-PUSH)
                                        ((LOCAL-REF4) 'LOCAL-REF4-PUSH)))))
 
-             ;; [RETURN; RETURN] => [RETURN]
+             ;; [RETURN; RETURN] => RETURN
              ((and (eq? i1 'RETURN) (eq? i2 'RETURN))
               (replace-2-instr code (list 'RETURN)))
 

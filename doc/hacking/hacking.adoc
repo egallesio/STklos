@@ -37,7 +37,7 @@ on the same project across various editors and IDEs).
 
 The subdirectories in the STklos source tree are:
 
-* `doc` – documentation, written mostly in Skribe
+* `doc` – documentation, written mostly in asciidoctor
 * `etc` – various sample files for specific needs
 * `examples` – examples (oh, who could tell?)
 * `ffi` – `libffi` (a local copy)
@@ -46,7 +46,7 @@ The subdirectories in the STklos source tree are:
 * `lib` – Scheme files, including from basic things like the boot
 program up to high-level things like modules implementing libraries and
 SRFIs
-* `pcre` – `libpcre` (a local copy)
+* `pcre2` – `libpcre` (a local copy)
 * `pkgman` – the package manager
 * `src` – the STklos core, written in C
 * `tests` – the tests, of course!
@@ -260,11 +260,11 @@ See SRFI-25, SRFI-27 and SRFI-170 as a reference.
 
 === Documentation
 
-==== Documenting SRFIs in `srfi.skb`
+==== Documenting SRFIs in `srfi.adoc`
 
 General documentation is automatically generated for SRFIs. If you need
 to give a precision specific to a given SRFI, add it to the end of the
-`doc/skb/srfi.skb` file using the `gen-srfi-documentation` function.
+`doc/refman/srfi.adoc` file using the `gen-srfi-documentation` function.
 
 Note that the documentation is written in Skribe tool which is no more
 maintained. Consequently, the documentation will not be generated. The
@@ -805,7 +805,8 @@ capture, check and restore continuations:
 * `SCM STk_restore_cont(SCM cont, SCM val)` restores continuation `cont`, passing it
    the value `val`
 
-There is also one function in `vm.c` which is not exported:
+There is also one function in `vm.c` which is not exported by `vm.h`, but is available
+as a Scheme primitive:
 
 [source, scheme]
 ----
@@ -815,7 +816,69 @@ DEFINE_PRIMITIVE("%fresh-continuation?", fresh_continuationp, subr1, (SCM obj))
 }
 ----
 
-Their behavior is better illustrated by an example in Scheme:
+Their Scheme counterparts, `%continuation?`, `%make-continuation`, and
+`%restore-continuation` are used to implement the Scheme procedure
+`call/cc` (in `lib/callcc.stk`). The implementation of `call/cc` is
+actually complex because it needs to be interwined with the
+implementation of `dynamic-wind`, but in the same file there is
+another procedure, `%call/cc`, which does not do winding, and is
+therefore very simple (and it should be the starting point to
+understand the full-blown `call/cc`). We reproduce it here with some
+comments.
+
+[source, scheme]
+----
+(define (%call/cc proc)
+  (let ((k  (%make-continuation)))
+    (if  (%fresh-continuation? k)
+
+         ;; In the first time we get here, we create a closure (the lambda
+         ;; below) that will take a value v and restore the continuation
+         ;; k with it. So when we call
+         ;; (%call/cc (lambda (kont) ... (kont x) ...)),
+         ;; 'proc' below is the '(lambda (kont) ...)' in our code. And the
+         ;; '(lambda v ...)' below is kont. 'v' is the argument that will be
+         ;; given to kont.
+
+         (proc (lambda v (%restore-continuation k v)))
+
+         ;; Next time and everytime again, we just return values applied to k,
+         ;; because in this case, k will *not* be a continuation, but a list
+         ;; with the values passed (this is because the lambda above accepts
+         ;; 'v' as the arg list, and this list is passed to %restore-continuation
+         ;; as the value to be returned).
+         (apply values k))))
+----
+
+The `%call/cc` procedure is used in the same way the Scheme `call/cc`
+is used:
+
+[source, scheme]
+----
+stklos> (define c #f)
+(let ((a 1)
+      (b 2))
+  (format #t "start~%")
+  (set! b (%call/cc (lambda (k)
+                      (set! c k)
+                      -1)))
+  (set! a (+ 1 a))
+  (format #t "~a ~a ~a~%" a b c))
+
+start
+2 -1 #[closure 7fbcd9a122c0]
+
+stklos> (c 15)
+3 15 #[closure 7fbcd9a122c0]
+
+stklos> (c 'x)
+4 x #[closure 7fbcd9a122c0]
+----
+
+The behavior of the fundamental continuation procedures is better
+illustrated by an example in Scheme, which mimics the example of
+`%call/cc` given above, *ecxept* that it does not have the return
+value of `%call/cc`, so it does not set the value of `b`:
 
 [source, scheme]
 ----
@@ -825,7 +888,7 @@ stklos> (define c #f)  ; to be set later
   (format #t "start~%")
   (set! c (%make-continuation))
   (set! a (+ 1 a))
-  (format #t "~a ~a~%" a b))
+  (format #t "~a ~a ~a~%" a b c))
 
 start
 2 2
@@ -834,25 +897,28 @@ stklos> (%continuation? c)
 #t
 
 stklos> c
-#[continuation (C=3992 S=1512) c069e000]
+#[continuation (C=3992 S=1512) c069e000]     ;; addresses: C stack, Scheme stack,
+                                             ;; continuation object
 
 stklos> (%fresh-continuation? c)
 #t
 
-stklos> (%restore-continuation c c)
-3 2
+stklos> (%restore-continuation c c)          ;; since this is the continuation of
+                                             ;; "(set! c ...)", we put "c" as value,
+                                             ;; so we can use the continuation again
+3 2 #[continuation (C=3992 S=1512) c069e000]
 
 stklos> (%fresh-continuation? c)
 #f
 
 stklos> (%restore-continuation c c)
-4 2
+4 2 #[continuation (C=3992 S=1512) c069e000]
 
 stklos> (%restore-continuation c c)
-5 2
+5 2 #[continuation (C=3992 S=1512) c069e000]
 
 stklos> (%restore-continuation c c)
-6 2
+6 2 #[continuation (C=3992 S=1512) c069e000]
 ----
 
 == The virtual machine
@@ -925,12 +991,25 @@ Another example is `GOTO` optimization:
 The procedure `optimize-goto-code`, also in the file `peephole.stk`,
 will perform the transformations indicated in the comments.
 
-The input code is represented as a list. Some relevant definitions are
-in the beginning of the file:
+The input code is represented as a list of the form
 
 [source,scheme]
 ----
-(label? code)      ; is thecurrent instruction a label?
+( (instruction1 op1 op2)    ;; one instruction with two operands
+  (instruction2 op1)        ;; one instruction with one operand
+  (instruction3)            ;; one instruction with no operands
+  ...
+  (instruction10 op1 op2)
+  10                        ;; this is a label!
+  (instruction11)
+  ... )
+----
+
+Some relevant definitions are in the beginning of the file:
+
+[source,scheme]
+----
+(label? code)      ; is the current instruction a label?
 (this-instr code)  ; the current instruction (reference to a position in the list)
 (next-instr code)  ; the next instruction (cdr of the current one)
 (this-arg1 code)   ; argument 1 of current instruction
@@ -938,6 +1017,25 @@ in the beginning of the file:
 (next-arg1 code)   ; argument 1 of next instruction
 (next-arg2 code)   ; argument 2 of next instruction
 ----
+
+There are only procedures for dealing with the current and the next
+instruction because the peephole optimizer currently only substitutes
+sequences of two instructions. It is an interesting exercise to try to
+implement three-instruction peephole operation. As a suggestion, the
+reader can try the following:
+
+* Implement `third-instr`. Be careful to not try to take the `cdr` of
+  an empty list...
+* Include one more optimization clause in the optimizer that performs the
+  substitution
+  `[IN-CDR; IN-CDR; IN-CDR] => IN-CDDDR`
+* And of course, implement `IN-CDDDR`:
+  - Change `lib/assembler.stk`
+  - Change `src/vm-instr.h`
+  - Add one more case to the VM state machine (use the case for `IN_CDR`
+    as a starting point).
+* Finally, write some benchmark to verify if the new optimization is worth
+  the trouble (and the use of a new opcode).
 
 == Garbage collection
 
