@@ -51,9 +51,6 @@
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
-/* Define to 1 if you have the `utimensat' function. */
-#undef HAVE_UTIMENSAT
-
 /* Use system GC */
 #undef HAVE_GC
 
@@ -210,6 +207,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the `utimensat' function. */
+#undef HAVE_UTIMENSAT
+
 /* Define to 1 if you have the `vfork' function. */
 #undef HAVE_VFORK
 
@@ -279,12 +279,6 @@
 # ifndef WORDS_BIGENDIAN
 #  undef WORDS_BIGENDIAN
 # endif
-#endif
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
 #endif
 
 /* Define to rpl_malloc if the replacement function should be used. */

@@ -295,7 +295,7 @@ static SCM srfi_169_conv(SCM value)
  * Constructor Functions
  *
  ******************************************************************************/
-static Inline SCM Cmake_complex(SCM r, SCM i)
+static inline SCM Cmake_complex(SCM r, SCM i)
 {
   SCM z;
 
@@ -305,18 +305,18 @@ static Inline SCM Cmake_complex(SCM r, SCM i)
   return z;
 }
 
-static Inline SCM make_complex(SCM r, SCM i)
+static inline SCM make_complex(SCM r, SCM i)
 {
   return (isexactp(i) && zerop(i)) ? r : Cmake_complex(r, i);
 }
 
-static Inline SCM make_polar(SCM a, SCM m)
+static inline SCM make_polar(SCM a, SCM m)
 {
   return make_complex(mul2(a, my_cos(m)), mul2(a, my_sin(m)));
 }
 
 
-static Inline SCM Cmake_rational(SCM n, SCM d)
+static inline SCM Cmake_rational(SCM n, SCM d)
 {
   SCM z;
 
@@ -414,7 +414,7 @@ static struct extended_type_descr xtype_rational = {
  *
  ******************************************************************************/
 
-static Inline SCM long2scheme_bignum(long x)
+static inline SCM long2scheme_bignum(long x)
 {
   SCM z;
 
@@ -424,13 +424,13 @@ static Inline SCM long2scheme_bignum(long x)
 }
 
 
-static Inline SCM long2integer(long x)
+static inline SCM long2integer(long x)
 {
   return (INT_MIN_VAL<=x && x<=INT_MAX_VAL) ?  MAKE_INT(x): long2scheme_bignum(x);
 }
 
 
-static Inline SCM double2real(double x)
+static inline SCM double2real(double x)
 {
   SCM z;
 
@@ -439,13 +439,13 @@ static Inline SCM double2real(double x)
   return z;
 }
 
-static Inline SCM bignum2integer(mpz_t n)
+static inline SCM bignum2integer(mpz_t n)
 {
   return MAKE_INT(mpz_get_si(n));
 }
 
 
-static Inline double bignum2double(mpz_t n)
+static inline double bignum2double(mpz_t n)
 {
   /* I do not use the function mpz_get_d since it gives an unspecified value
    * when converting a number which is +inf or -inf
@@ -455,18 +455,18 @@ static Inline double bignum2double(mpz_t n)
 }
 
 
-static Inline double scheme_bignum2double(SCM b)
+static inline double scheme_bignum2double(SCM b)
 {
   return bignum2double(BIGNUM_VAL(b));
 }
 
 
-static Inline SCM scheme_bignum2real(SCM bn)
+static inline SCM scheme_bignum2real(SCM bn)
 {
   return double2real(scheme_bignum2double(bn));
 }
 
-static Inline SCM bignum2scheme_bignum(mpz_t n)
+static inline SCM bignum2scheme_bignum(mpz_t n)
 {
   SCM z;
 
@@ -475,7 +475,7 @@ static Inline SCM bignum2scheme_bignum(mpz_t n)
   return z;
 }
 
-static Inline SCM bignum2number(mpz_t n)  /* => int or bignum */
+static inline SCM bignum2number(mpz_t n)  /* => int or bignum */
 {
   return (BIGNUM_FITS_INTEGER(n)) ? bignum2integer(n): bignum2scheme_bignum(n);
 }
@@ -601,12 +601,12 @@ static double rational2double(SCM r)
   return 0.0; /* never reached */
 }
 
-static Inline SCM rational2real(SCM r)
+static inline SCM rational2real(SCM r)
 {
   return double2real(rational2double(r));
 }
 
-static Inline SCM real2integer(SCM r)
+static inline SCM real2integer(SCM r)
 {
   double v = REAL_VAL(r);
 
@@ -1597,7 +1597,7 @@ int STk_real_isoddp(SCM n)   /* n MUST be a real */
   return (fpclassify(REAL_VAL(r)) != FP_ZERO);
 }
 
-static Inline int number_parity(SCM n)
+static inline int number_parity(SCM n)
 {
   /* result -1 (odd), 0 (non integer), +1 (even). Error if n is not a number. */
   switch (TYPEOF(n)) {
@@ -2876,7 +2876,7 @@ static SCM my_asin(SCM z)
 }
 
 
-static Inline SCM acos_complex(SCM z)
+static inline SCM acos_complex(SCM z)
 {
   return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1UL)),
               my_log(add2(z,
@@ -3300,7 +3300,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 doc>
  */
 
-static Inline SCM exact_exponent_expt(SCM x, SCM y)
+static inline SCM exact_exponent_expt(SCM x, SCM y)
 {
   mpz_t res;
   SCM scm_res;

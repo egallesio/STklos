@@ -90,7 +90,7 @@ extern "C"
 
 
 #define CPP_CONCAT(x, y)        x##y
-#define Inline inline
+
 
 #define AS_LONG(x)              ((unsigned long) (x))
 #define AS_SCM(x)               ((SCM) ((unsigned long) (x)))

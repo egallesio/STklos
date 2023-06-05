@@ -240,7 +240,7 @@ static SCM normalize_library_name(SCM obj) /* return a library name as a symbol 
 }
 
 
-static Inline SCM ensure_module(SCM module) // -> a module given a module or a name
+static inline SCM ensure_module(SCM module) // -> a module given a module or a name
 {
   if (MODULEP(module))
     return module;
