@@ -1851,15 +1851,11 @@ DEFINE_PRIMITIVE("hostname", hostname, subr0, (void))
 <doc EXT pause
  * (pause)
  *
- * Pauses the STklos process untilla a signal is received. This is exactly the
- * Unix |pause| system function.
- *
- * As an example, entering |(pause)| in the REPL makes it unresponsive, because
- * the whole system is pause -- until a signal is sent to the |stklos| process.
- * This can be done, for example, by hitting break (ctrl-C) or, on a Unix system,
- * by sending the |stklos| process a signal using the |kill| program (for example,
- * |kill -2 nnnnn|, where |nnnnnn| is the proces ID of |stklos|).
- *
+ * Pauses the STklos process until the delivery of a signal whose action
+ * is either to execute a signal-catching function or to terminate the
+ * process. If the action is to terminate the process,  |pause| will not
+ * return. If the action is to execute a signal-catching function, |pause|
+ * will terminate after the signal-catching function returns.
 doc>
 */
 DEFINE_PRIMITIVE("pause", pause, subr0, (void))

@@ -2307,7 +2307,7 @@ and the value(s) of the last &lt;expression&gt; is(are) returned as in a
 are considered as tags and the special form <code>(&#8594; tag)</code> is used to
 transfer execution to the given tag. This is a <strong>very low level</strong>
 form which is inspired on <code>tabgody</code> Common Lisp&#8217;s form. It can be useful
-for defining new syntaxes, and should probably not used as is.</p>
+for defining new syntaxes, and should probably not be used as is.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -4273,7 +4273,7 @@ characters and <code>#f</code> otherwise.</p>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">:foo</span> <span class="nv">:bar</span><span class="p">)</span>                 <span class="nv">=&gt;</span>  <span class="no">#f</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="o">'</span><span class="p">()</span> <span class="o">'</span><span class="p">())</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="mi">2</span> <span class="mi">2</span><span class="p">)</span>                       <span class="nv">=&gt;</span>  <span class="nv">unspecified</span>
-<span class="p">(</span><span class="nb">eq?</span> <span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>                     <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="sc">#\A</span> <span class="sc">#\A</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">car</span> <span class="nv">car</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">n</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)))</span>
   <span class="p">(</span><span class="nb">eq?</span> <span class="nv">n</span> <span class="nv">n</span><span class="p">))</span>                    <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
@@ -9738,7 +9738,7 @@ range [0..255]. It is an error if <code>k</code> is not a valid index of <code>b
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(bytevector-u8-ref bytevector k byte)</code></strong><br></p>
+<p><strong><code>(bytevector-u8-set! bytevector k byte)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -10382,7 +10382,7 @@ cannot be "re-enterered").</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>call/ec</code> is cheaper than the full call/cc. It is particularily useful
+<p><code>call/ec</code> is cheaper than the full <code>call/cc</code>. It is particularily useful
 when all the power of <code>call/cc</code> is not needded.</p>
 </div>
 <div id="values" class="paragraph">
@@ -14468,7 +14468,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1275</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1300</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -17862,6 +17862,26 @@ more information.</p>
 <p>Send the integer signal <code>sig</code> to the process with <code>pid</code> process id.
 If the second parameter is absent, it deaults to the one of the running
 program.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(pause)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Pauses the STklos process until the delivery of a signal whose action
+is either to execute a signal-catching function or to terminate the
+process. If the action is to terminate the process,  <code>pause</code> will not
+return. If the action is to execute a signal-catching function, <code>pause</code>
+will terminate after the signal-catching function returns.</p>
 </div>
 </div>
 <div class="sect2">
@@ -28708,6 +28728,9 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 <p>comparator <em>(srfi 128)</em></p>
 </li>
 <li>
+<p>generator <em>(srfi 158)</em>&#8201;&#8212;&#8201;Red edition included SRFI 121, but it was superseded by SRFI 158.</p>
+</li>
+<li>
 <p>hash-table <em>(srfi 125)</em></p>
 </li>
 <li>
@@ -28751,13 +28774,22 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 <p>bitwise <em>(srfi 151)</em></p>
 </li>
 <li>
+<p>bytevector <em>(scheme bytevector)</em>- not a SRFI: this one is a chapter from R6RS.</p>
+</li>
+<li>
 <p>division <em>(srfi 141)</em></p>
+</li>
+<li>
+<p>fixnum <em>(srfi 143)</em></p>
 </li>
 <li>
 <p>flonum <em>(srfi 144)</em></p>
 </li>
 <li>
 <p>generator <em>(srfi 158)</em></p>
+</li>
+<li>
+<p>vector @ <em>(srfi 160)</em></p>
 </li>
 </ul>
 </div>
@@ -30965,7 +30997,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-02 17:17:32 +0200
+Last updated 2023-06-05 21:52:15 +0200
 </div>
 </div>
 </body>

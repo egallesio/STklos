@@ -819,7 +819,7 @@ DEFINE_PRIMITIVE("%fresh-continuation?", fresh_continuationp, subr1, (SCM obj))
 Their Scheme counterparts, `%continuation?`, `%make-continuation`, and
 `%restore-continuation` are used to implement the Scheme procedure
 `call/cc` (in `lib/callcc.stk`). The implementation of `call/cc` is
-actually complex because it needs to be interwined with the
+actually complex because it needs to be intertwined with the
 implementation of `dynamic-wind`, but in the same file there is
 another procedure, `%call/cc`, which does not do winding, and is
 therefore very simple (and it should be the starting point to

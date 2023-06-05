@@ -62,7 +62,7 @@ For now, supported libraries of the *Red edition* are
 For now, supported libraries of the *Tangerine edition* are
 
 - bitwise _(srfi 151)_
-- bytevectors _(scheme bytevector)_- not a SRFI: this one is a chapter from R6RS.
+- bytevector _(scheme bytevector)_- not a SRFI: this one is a chapter from R6RS.
 - division _(srfi 141)_
 - fixnum _(srfi 143)_
 - flonum _(srfi 144)_
