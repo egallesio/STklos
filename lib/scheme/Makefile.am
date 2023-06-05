@@ -144,7 +144,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # 	(cd ../srfi; $(MAKE)  `basename $@`)
 
 
-stream.ostk:     list.ostk ../streams/derived.ostk
+stream.ostk:     list.$(SO) ../streams/derived.ostk
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
 
@@ -177,7 +177,7 @@ vector.$(SO): vector-incl.c
 vector-incl.c: vector.stk
 
 hash-table.ostk: comparator.ostk
-ideque.ostk: generator.ostk list.ostk
+ideque.ostk: generator.ostk list.$(SO)
 text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 
