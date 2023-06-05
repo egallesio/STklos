@@ -44,7 +44,7 @@ static SCM SCM_NaN;
  double lgamma_r(double x, int *signp);
 #endif
 
-static Inline SCM double2real(double x)
+static inline SCM double2real(double x)
 {
   SCM z;
 

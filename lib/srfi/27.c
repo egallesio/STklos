@@ -47,7 +47,7 @@ struct bignum_obj {
 
 #define BIGNUM_VAL(p)   (((struct bignum_obj *) (p))->val)
 
-static Inline SCM bignum2scheme_bignum(mpz_t n)
+static inline SCM bignum2scheme_bignum(mpz_t n)
 {
   SCM z;
 
@@ -56,7 +56,7 @@ static Inline SCM bignum2scheme_bignum(mpz_t n)
   return z;
 }
 
-static Inline SCM double2real(double x)
+static inline SCM double2real(double x)
 {
   SCM z;
 
