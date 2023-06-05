@@ -125,7 +125,7 @@ doc>
                                     (if (symbol-mutable? x) "" "im"))))))
      ((keyword? x)      (format port "a keyword"))
      ((pair?    x)      (format port "a non-empty list"))
-     ((string?  x)      (if (eqv? x "")
+     ((string?  x)      (if (zero? (string-length x))
                             (format port "an empty string")
                             (format port "a string of length ~s"
                                     (string-length x))))

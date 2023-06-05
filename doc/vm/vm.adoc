@@ -1473,7 +1473,7 @@ Continuation is a native type (`tc_continuation`). A continuation object (define
 in `vm.h`) contains pointers to the C stack, the Scheme stack and several other
 data.
 
-Capturing a continuation is carried ou tby the following step (these are
+Capturing a continuation is carried out by the following steps (these are
 the actual comments in the function `STk_make_continuation`):
 
 [arabic]
@@ -1489,5 +1489,5 @@ Restoring is easier:
 . Restore the Scheme stack
 . Restore the C stack
 
-And, when the C stack is restored, the Vm is back to its original state, except
+And, when the C stack is restored, the VM is back to its original state, except
 for the global variables.

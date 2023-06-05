@@ -159,7 +159,7 @@ DEFINE_PRIMITIVE("mutex-specific-set!", mutex_specific_set, subr2, (SCM mtx, SCM
 
 void STk_error_bad_condv(SCM obj)
 {
-  STk_error("bad confdition variable ~S", obj);
+  STk_error("bad condition variable ~S", obj);
 }
 
 

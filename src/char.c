@@ -161,7 +161,7 @@ static void error_bad_char(SCM c)
   STk_error("bad char", c);
 }
 
-static Inline int charcomp(SCM c1, SCM c2)
+static inline int charcomp(SCM c1, SCM c2)
 {
   return (CHARACTER_VAL(c1) - CHARACTER_VAL(c2));
 }

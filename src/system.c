@@ -1600,7 +1600,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
   int overflow;
   SCM argv[12];
   struct tm *t;
-  time_t tt;
+  time_t tt = (time_t) 0L;
   long nsec = 0L;
 
   if (INTP(seconds)) {
@@ -1851,6 +1851,11 @@ DEFINE_PRIMITIVE("hostname", hostname, subr0, (void))
 <doc EXT pause
  * (pause)
  *
+ * Pauses the STklos process until the delivery of a signal whose action
+ * is either to execute a signal-catching function or to terminate the
+ * process. If the action is to terminate the process,  |pause| will not
+ * return. If the action is to execute a signal-catching function, |pause|
+ * will terminate after the signal-catching function returns.
 doc>
 */
 DEFINE_PRIMITIVE("pause", pause, subr0, (void))

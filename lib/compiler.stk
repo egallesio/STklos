@@ -71,7 +71,7 @@
                          (cdr            . ,cdr)
                          (null?          . ,null?)
                          (list           . ,list)
-                         (not              . ,not)
+                         (not            . ,not)
                          (vector-ref     . ,vector-ref)
                          (vector-set!    . ,vector-set!)
                          (string-ref     . ,string-ref)
