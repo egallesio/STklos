@@ -68,10 +68,7 @@
     define-generic
     method
     define-method
-    ))
-
-(select-module STKLOS-OBJECT)
-
+    )
 
 
 (define extended-lambda->lambda         ;; Compiler function used here
@@ -1528,7 +1525,7 @@ doc>
                                                  (class-direct-subclasses c))))))
             (list2set (cdr (allsubs c))))))
   ;; ==== class-methods
-  (set! class-methods
+  (! class-methods
         (lambda (c)
           (list2set (mapappend class-direct-methods
                                (cons c (class-subclasses c)))))))
@@ -1543,6 +1540,8 @@ doc>
 
 ;; Just tell C that the object system is now fully initialized
 (%object-system-initialized)
+
+) ;; end of STKLOS-OBJECT module
 
 ;; ======================================================================
 (select-module STklos)
