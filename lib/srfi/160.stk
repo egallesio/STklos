@@ -193,4 +193,4 @@
   (let ((s (%parse-exports all-symbols)))
     (%do-exports (current-module) s)))
 
-(provide "srfi-160")
+(provide "srfi/160")

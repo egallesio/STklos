@@ -68,4 +68,4 @@
         c128vector?  make-c128vector c128vector c128vector-length c128vector-ref
         c128vector-set! c128vector->list list->c128vector)
 
-(provide "srfi-160/base")
+(provide "srfi/160/base")

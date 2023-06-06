@@ -1556,4 +1556,4 @@ doc>
 
 ) ;; END of module srfi/19
 
-(provide "srfi-19")
+(provide "srfi/19")

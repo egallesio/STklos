@@ -3,7 +3,7 @@
 ;;;; 143.stk         -- A relay for (srfi 143)
 ;;;;                    Note that this SRFI is available by default in STklos
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
