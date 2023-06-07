@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; 143.stk         -- A relay for (srfi 143) or (scheme fixnum)
+;;;; fixnum.stk       -- A relay for (scheme fixnum) -- aka SRFI-143
 ;;;;                    Note that this SRFI is available by default in STklos
 ;;;;
 ;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
@@ -25,10 +25,7 @@
 ;;;;    Creation date: 18-Mar-2022 13:08
 ;;;;
 
-;; We could have used a %make-copy-module here, but since it is a simple relay,
-;; we redefine it as a copy of (scheme fixnum). It avoids a makefile dependency
-
-(define-module srfi/143
+(define-module (scheme fixnum)
   (import (only SCHEME
                  fx-width fx-greatest fx-least
                  fixnum? fx=? fx<? fx>? fx<=? fx>=?
@@ -55,4 +52,4 @@
           fxfirst-set-bit fxbit-field
           fxbit-field-rotate fxbit-field-reverse))
 
-(provide "srfi/143")
+(provide "scheme/fixnum")

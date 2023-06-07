@@ -40,6 +40,7 @@ R7_STK=    base.stk            \
            cxr.stk             \
            eval.stk            \
            file.stk            \
+           fixnum.stk          \
            inexact.stk         \
            lazy.stk            \
            load.stk            \
@@ -57,6 +58,7 @@ R7_OBJS =  base.ostk            \
            cxr.ostk             \
            eval.ostk            \
            file.ostk            \
+           fixnum.ostk          \
            inexact.ostk         \
            lazy.ostk            \
            load.ostk            \
