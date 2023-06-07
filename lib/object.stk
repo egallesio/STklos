@@ -1525,7 +1525,7 @@ doc>
                                                  (class-direct-subclasses c))))))
             (list2set (cdr (allsubs c))))))
   ;; ==== class-methods
-  (! class-methods
+  (set! class-methods
         (lambda (c)
           (list2set (mapappend class-direct-methods
                                (cons c (class-subclasses c)))))))
