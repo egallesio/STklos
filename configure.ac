@@ -656,8 +656,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
           utils/stklos-script utils/tmpcomp examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
-          lib/scheme/Makefile lib/srfi/Makefile
-          lib/stklos/Makefile lib/streams/Makefile
+          lib/scheme/Makefile lib/scheme/vector/Makefile
+          lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile
           tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1

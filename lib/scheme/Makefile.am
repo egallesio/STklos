@@ -21,15 +21,14 @@
 #    Creation date:  8-Oct-2021 11:54 (eg)
 
 #======================================================================
-
+SUBDIRS  = vector
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
-DOCDB  = ../DOCDB
-BASEDIR= ../..
-
+DOCDB   = ../DOCDB
+BASEDIR = ../..
 # ----------------------------------------------------------------------
 # R7RS Small Support
 # ----------------------------------------------------------------------
@@ -109,7 +108,7 @@ LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytev
 #----------------------------------------------------------------------
 SRC_STK     = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
 SRC_C_STK   = $(LARGE_C_STK)
-scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) 
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) $(LARGE_SHOBJ)
 
 SOURCES = $(SRC_STK) $(LARGE_C)
 
@@ -184,13 +183,18 @@ text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 
 # ======================================================================
+install-am:
+	(cd vector; make install)
+
 install-sources:
 	cp $(scheme_sources) $(schemedir)
 
 clean:
+	(cd vector; make clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
+	(cd vector; make distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:

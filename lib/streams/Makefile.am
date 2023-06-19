@@ -70,8 +70,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 #======================================================================
 # Dependencies
 derived.ostk: primitive.ostk ../scheme/list.$(SO)
-../scheme/list.ostk:
-	(cd ../scheme; $(MAKE) list.ostk)
+../scheme/list.$(SO):
+	(cd ../scheme; $(MAKE) list.$(SO))
 
 # ======================================================================
 install-sources:
