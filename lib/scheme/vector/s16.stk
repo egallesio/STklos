@@ -1,0 +1,473 @@
+;;;;
+;;;; 160/s16.stk         -- SRFI-160: Homogeneous numeric vector libraries
+;;;;                                  (s16 sublibrary)
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 17-Jun-2022 15:54
+;;;;
+
+(define-module scheme/vector/s16
+
+  (import (srfi 4)
+          (srfi 128)
+          (scheme vector base))
+  (export
+   ;; Constructors
+   make-s16vector   ;; BASE
+   s16vector        ;; BASE
+   s16vector-unfold
+   s16vector-unfold-right
+   s16vector-copy
+   s16vector-reverse-copy
+   s16vector-append
+   s16vector-concatenate
+   s16vector-append-subvectors
+
+   ;; Predicates
+   s16?              ;; BASE
+   s16vector?        ;; BASE
+   s16vector-empty?
+   s16vector=
+
+   ;; Selectors
+   s16vector-ref     ;; BASE
+   s16vector-length  ;; BASE
+
+   ;; Iteration
+   s16vector-take
+   s16vector-take-right
+   s16vector-drop
+   s16vector-drop-right
+   s16vector-segment
+   s16vector-fold
+   s16vector-fold-right
+   s16vector-map
+   s16vector-map!
+   s16vector-for-each
+   s16vector-count
+   s16vector-cumulate
+
+   ;; Searching
+   s16vector-take-while
+   s16vector-take-while-right
+   s16vector-drop-while
+   s16vector-drop-while-right
+   s16vector-index
+   s16vector-index-right
+   s16vector-skip
+   s16vector-skip-right
+   s16vector-any
+   s16vector-every
+   s16vector-partition
+   s16vector-filter
+   s16vector-remove
+
+   ;; Mutators
+   s16vector-set!            ;; BASE
+   s16vector-swap!
+   s16vector-fill!
+   s16vector-reverse!
+   s16vector-copy!
+   s16vector-reverse-copy!
+   s16vector-unfold!
+   s16vector-unfold-right!
+
+   ;; Conversion
+   s16vector->list           ;; BASE
+   reverse-s16vector->list
+   list->s16vector           ;; BASE
+   reverse-list->s16vector
+   s16vector->vector
+   vector->s16vector
+
+   ;; Generators
+   make-s16vector-generator
+
+   ;; Comparators
+   s16vector-comparator
+
+   ;; Output
+   write-s16vector)
+
+
+;; A case of "macros for performance"... Not the best thing to do, we could
+;; actually have done a more sofisticated job in generating the output from
+;; the template, but this keeps it simple.
+;; The macro (uvector-tag) will expand to s16 in the template.
+;; However, in the generated file, the s16 will be replaed by the tag name.
+;; So the macro will expand to the VALUE of the tag, which is the
+;; fastest thing we can do. Not even access to a global will be done, the
+;; correct constant will be pushed onto the stack.
+;;
+;;  (%s32vector-something (uvector-tag) args)
+;; EXPANDS into
+;;  (u8vector-something 4 args)
+;; and NOT into
+;;  (%u8vector-something s32 args)
+
+(define-macro (uvector-tag)
+  (let ((s8   0)
+        (u8   1)
+        (s16  2)
+        (u16  3)
+        (s32  4)
+        (u32  5)
+        (s64  6)
+        (u64  7)
+        (f32  8)
+        (f64  9)
+        (c64  10)
+        (c128 11))
+    s16))
+
+;; We'll be accessing the base module to get some procedures from it:
+(define base (find-module 'scheme/vector/base))
+
+;; These are implemented in C, and used here to build the actual procedures:
+(define %uvector-unfold            (symbol-value '%uvector-unfold base))
+(define %uvector-copy              (symbol-value '%uvector-copy base))
+(define %uvector-append-subvectors (symbol-value '%uvector-append-subvectors base))
+(define %uvector-empty?            (symbol-value '%uvector-empty? base))
+(define %uvector=                  (symbol-value '%uvector= base))
+(define %uvector-iterate           (symbol-value '%uvector-iterate base))
+(define %uvector-segment           (symbol-value '%uvector-segment base))
+
+;;;
+;;; Constructors OK
+;;;
+
+;; make-vector OK
+;; vector      OK
+
+(define (s16vector-unfold f len seed)
+  (%uvector-unfold (uvector-tag) f #f len seed #f))
+
+(define (s16vector-unfold-right f len seed)
+  (%uvector-unfold (uvector-tag) f #f len seed #t))
+
+(define (s16vector-copy v :optional (start 0) (end (s16vector-length v)))
+  (%uvector-copy (uvector-tag) #f 0 v start end #f))
+
+(define (s16vector-reverse-copy v :optional (start 0) (end (s16vector-length v)))
+  (%uvector-copy (uvector-tag) #f 0 v start end #t))
+
+(define (s16vector-append . vecs)
+  (%uvector-append-subvectors (uvector-tag) #f vecs))
+
+(define (s16vector-concatenate vecs)
+  (%uvector-append-subvectors (uvector-tag) #f vecs))
+
+(define (s16vector-append-subvectors . vecs)
+  (%uvector-append-subvectors (uvector-tag) #t vecs))
+
+;;;
+;;; Predicates OK
+;;;
+
+(define (s16vector-empty? v) (%uvector-empty? (uvector-tag) v))
+
+(define (s16vector= . args) (%uvector= (uvector-tag) args))
+
+;;;
+;;; Selectors OK
+;;;
+
+;; vector-ref    OK
+;; vector-length OK
+
+;; Iteration OK
+
+(define (s16vector-take v n) (s16vector-copy v 0 n))
+(define (s16vector-take-right v n)
+  (s16vector-copy v (- (s16vector-length v) n))) ; FIXME: optimize?
+
+(define (s16vector-drop v n)       (s16vector-copy v n))
+(define (s16vector-drop-right v n)
+  (%uvector-copy (uvector-tag) #f 0 v 0 (- (s16vector-length v) n) #f)) ; FIXME: optimize?
+
+(define (s16vector-segment v n) (%uvector-segment (uvector-tag) v n))
+
+(define (s16vector-fold kons knil v1 . v2)
+  (%uvector-iterate (uvector-tag) kons (cons v1 v2)
+   #f   ;; do NOT mutate
+   10   ;; operation (10 = fold)
+   #f   ;; NOT from-right
+   knil ;; seed
+   ))
+
+(define (s16vector-fold-right kons knil v1 . v2)
+  (%uvector-iterate (uvector-tag) kons (cons v1 v2)
+   #f   ;; do NOT mutate
+   10   ;; operation (10 = fold)
+   #t   ;; YES from-right
+   knil ;; seed
+   ))
+
+(define (s16vector-map proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   0  ;; operation (0 = map)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-map! proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #t ;; DO mutate
+   0  ;; operation (0 = map)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-for-each proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   9  ;; operation (9 = for-each)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-count proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   5  ;; operation (5 = count)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-cumulate kons knil v1)
+  (%uvector-iterate (uvector-tag) kons (list v1)
+   #f   ;; do NOT mutate
+   11   ;; operation (11 = cumulate)
+   #f   ;; NOT from-right
+   knil ;; seed
+   ))
+
+;;;
+;;; Searching OK
+;;;
+
+(define (s16vector-take-while pred? vec)
+  (s16vector-take vec (s16vector-skip pred? vec)))
+
+(define (s16vector-take-while-right pred? vec)
+  (s16vector-drop vec (+ 1 (s16vector-skip-right pred? vec))))
+
+(define (s16vector-drop-while pred? vec)
+  (s16vector-drop vec (s16vector-skip pred? vec)))
+
+(define (s16vector-drop-while-right pred? vec)
+  (s16vector-take vec (+ 1 (s16vector-skip-right pred? vec))))
+
+
+(define (s16vector-index proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   3  ;; operation (3 = index)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-index-right proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   3  ;; operation (3 = index)
+   #t ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-skip proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   4  ;; operation (4 = skip)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-skip-right proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   4  ;; operation (4 = skip)
+   #t ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-any proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   1  ;; operation (1 = any)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-every proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   2  ;; operation (2 = every)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-partition proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   6  ;; operation (6 = partition)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (s16vector-filter proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   7  ;; operation (7 = filter)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+(define (s16vector-remove proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   8  ;; operation (8 = remove)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+
+;;;
+;;; Mutators OK
+;;;
+
+;; vector-set! OK
+
+;; FIXME:
+;; vector-fill! and vector-swap! do not depend on vector type,
+;; but vector-fill! does some type checking for each element
+;; written. Maybe this could be optimized...
+(define s16vector-swap! (symbol-value '%uvector-swap!         base))
+(define s16vector-fill! (symbol-value '%uvector-fill!         base))
+
+(define (s16vector-reverse! v :optional (start 0) (end (s16vector-length v)))
+  (%uvector-copy (uvector-tag) v start v start end #t)
+  #void)
+
+(define (s16vector-copy! to at from :optional (start 0) (end (s16vector-length from)))
+  (%uvector-copy (uvector-tag) to at from start end #f)
+  #void)
+
+(define (s16vector-reverse-copy! to at from :optional (start 0) (end (s16vector-length from)))
+  (%uvector-copy (uvector-tag) to at from start end #t)
+  #void)
+
+(define (s16vector-unfold! f v start end seed)
+  (%uvector-unfold (uvector-tag) f v start end seed #f)
+  #void)
+
+(define (s16vector-unfold-right! f v start end seed)
+  (%uvector-unfold (uvector-tag) f v start end seed #t)
+  #void)
+
+;;;
+;;; Conversion OK
+;;;
+
+(define (vector->s16vector v :optional (start 0) (end (vector-length v)))
+  (let* ((w (make-s16vector (- end start))))
+    (do ((i start (+ i 1)))
+        ((= i end))
+      (s16vector-set! w (- i start) (vector-ref v i)))
+    w))
+
+(define (s16vector->vector v :optional (start 0) (end (s16vector-length v)))
+  (let* ((w (make-vector (- end start))))
+    (do ((i start (+ i 1)))
+        ((= i end))
+      (vector-set! w (- i start) (s16vector-ref v i)))
+    w))
+
+
+(define (s16vector->list v :optional (start 0) (end (s16vector-length v)))
+  (let ((v (s16vector-copy v start end)))
+    (let loop ((i (fx- (s16vector-length v) 1))
+               (lst '()))
+      (if (fx< i 0)
+          lst
+          (loop (fx- i 1) (cons (s16vector-ref v i) lst))))))
+
+
+(define (reverse-list->s16vector lst)
+  (s16vector-reverse-copy (list->s16vector lst)))
+
+(define (reverse-s16vector->list v :optional (start 0) (end (s16vector-length v)))
+  (s16vector->list (s16vector-reverse-copy v start end)))
+
+;;;
+;;; Generators OK
+;;;
+
+(define (make-s16vector-generator v :optional (start 0) (end (s16vector-length v)))
+  (lambda () (if (fx>= start end)
+            (eof-object)
+            (let ((x (s16vector-ref v start)))
+              (set! start (fx+ 1 start))
+              x))))
+
+;;;
+;;; Comparators OK
+;;;
+
+;; Adapted from reference implementation in Chicken:
+(define (s16vector< vec1 vec2)
+     (let ((len1 (s16vector-length vec1))
+           (len2 (s16vector-length vec2)))
+       (cond
+         ((fx< (s16vector-length vec1)
+               (s16vector-length vec2))
+          #t)
+         ((fx> (s16vector-length vec1)
+               (s16vector-length vec2))
+          #f)
+         (else
+          (let loop ((i 0))
+            (cond
+              ((fx= i len1) #f)
+              ((< (s16vector-ref vec1 i) (s16vector-ref vec2 i))
+               #t)
+              ((> (s16vector-ref vec1 i) (s16vector-ref vec2 i))
+               #f)
+              (else
+               (loop (fx+ i 1)))))))))
+
+(define s16vector-comparator
+  (make-comparator s16vector? s16vector= s16vector< hash-table-hash))
+
+;;;
+;;; Output OK
+;;;
+
+(define (write-s16vector v :optional port)
+  (unless ()
+    (error))
+  (if port
+      (write v port)
+      (write v)))
+
+  )
+
+(provide "scheme/vector/s16")

@@ -1,196 +1,29 @@
+;;;;
+;;;; 160.stk         -- SRFI-160: Homogeneous numeric vector libraries
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 17-Jun-2022 15:54
+;;;;
 
-(define-module srfi/160
-
-  ;;;
-  ;;; IMPORTS
-  ;;;
-
-  (import srfi/160/base)
-
-  (import srfi/160/s8)
-  (import srfi/160/u8)
-  (import srfi/160/s16)
-  (import srfi/160/u16)
-  (import srfi/160/s32)
-  (import srfi/160/u32)
-  (import srfi/160/s64)
-  (import srfi/160/u64)
-  (import srfi/160/f32)
-  (import srfi/160/f64)
-  (import srfi/160/c64)
-  (import srfi/160/c128)
-
-  ;;;
-  <;;; EXPORTS
-  ;;;
-
-  ;; We need to reexport everything we imported, but we don't do all that
-  ;; mechanically. The (srfi 160 base) export clause is copied ipsis literis,
-  ;; but the others are exported programatically.
-
-  ;; Re-export symbols from (srfi 160 base)
-  (export s8vector? make-s8vector s8vector s8vector-length s8vector-ref
-        s8vector-set! s8vector->list list->s8vector
-
-        u8vector? make-u8vector u8vector u8vector-length u8vector-ref
-        u8vector-set! u8vector->list list->u8vector
-
-        s16vector? make-s16vector s16vector s16vector-length s16vector-ref
-        s16vector-set! s16vector->list list->s16vector
-
-        u16vector? make-u16vector u16vector u16vector-length u16vector-ref
-        u16vector-set! u16vector->list list->u16vector
-
-        s32vector? make-s32vector s32vector s32vector-length s32vector-ref
-        s32vector-set! s32vector->list list->s32vector
-
-        u32vector? make-u32vector u32vector u32vector-length u32vector-ref
-        u32vector-set! u32vector->list list->u32vector
-
-        s64vector? make-s64vector s64vector s64vector-length s64vector-ref
-        s64vector-set! s64vector->list list->s64vector
-
-        u64vector?  make-u64vector u64vector u64vector-length u64vector-ref
-        u64vector-set! u64vector->list list->u64vector
-
-        f32vector?  make-f32vector f32vector f32vector-length f32vector-ref
-        f32vector-set! f32vector->list list->f32vector
-
-        f64vector?  make-f64vector f64vector f64vector-length f64vector-ref
-        f64vector-set! f64vector->list list->f64vector
-
-        c64vector?  make-c64vector c64vector c64vector-length c64vector-ref
-        c64vector-set! c64vector->list list->c64vector
-
-        c128vector?  make-c128vector c128vector c128vector-length c128vector-ref
-        c128vector-set! c128vector->list list->c128vector)
-
-  ;; This is a list of symbols for all SRFI-160 TAG sublibraries.
-  ;; It is taken literally (copied and pasted) from the
-  ;; tagvector-template.stk file, which is the template used to produce
-  ;; the actual (srfi 160 TAG) libraries.
-  (define symbols
-    '(
-      ;; Constructors
-      make-TAGvector
-      TAGvector
-      TAGvector-unfold
-      TAGvector-unfold-right
-      TAGvector-copy
-      TAGvector-reverse-copy
-      TAGvector-append
-      TAGvector-concatenate
-      TAGvector-append-subvectors
-
-      ;; Predicates
-      TAG?
-      TAGvector?
-      TAGvector-empty?
-      TAGvector=
-
-      ;; Selectors
-      TAGvector-ref
-      TAGvector-length
-
-      ;; Iteration
-      TAGvector-take
-      TAGvector-take-right
-      TAGvector-drop
-      TAGvector-drop-right
-      TAGvector-segment
-      TAGvector-fold
-      TAGvector-fold-right
-      TAGvector-map
-      TAGvector-map!
-      TAGvector-for-each
-      TAGvector-count
-      TAGvector-cumulate
-
-      ;; Searching
-      TAGvector-take-while
-      TAGvector-take-while-right
-      TAGvector-drop-while
-      TAGvector-drop-while-right
-      TAGvector-index
-      TAGvector-index-right
-      TAGvector-skip
-      TAGvector-skip-right
-      TAGvector-any
-      TAGvector-every
-      TAGvector-partition
-      TAGvector-filter
-      TAGvector-remove
-
-      ;; Mutators
-      TAGvector-set!
-      TAGvector-swap!
-      TAGvector-fill!
-      TAGvector-reverse!
-      TAGvector-copy!
-      TAGvector-reverse-copy!
-      TAGvector-unfold!
-      TAGvector-unfold-right!
-
-      ;; Conversion
-      TAGvector->list
-      reverse-TAGvector->list
-      list->TAGvector
-      reverse-list->TAGvector
-      TAGvector->vector
-      vector->TAGvector
-
-      ;; Generators
-      make-TAGvector-generator
-
-      ;; Comparators
-      TAGvector-comparator
-
-      ;; Output
-      write-TAGvector))
-
-
-  ;; symbols-for-tag:
-  ;; Returns the symbols for one homogeneous vector tag.
-  ;; (It reads the 'symbols' list and changes TAG to the
-  ;;  actual tag name)
-  ;;
-  ;; (symbols-for-tag 's32)
-  ;; =>
-  ;;    (make-s32vector
-  ;;     s32vector
-  ;;     ...
-  ;;     s32vector-comparator
-  ;;     write-s32vector)
-  ;;
-  (define (symbols-for-tag symbol-tag)
-    (let ((tag (symbol->string symbol-tag)))
-      (let ((new-template (string-append "\\1" tag "\\2")))
-        (map string->symbol
-             (map (lambda (sym)
-                    (let ((template-name (symbol->string sym)))
-                      (regexp-replace "(.*)TAG(.*)" template-name new-template)))
-                  symbols)))))
-
-  ;; Just the 1-ary case of fold, that we need here...
-  (define (fold1 kons knil lis1)
-    (let lp ((lis lis1) (ans knil))
-      (if (null? lis) ans
-          (lp (cdr lis) (kons (car lis) ans)))))
-
-  (define tags '(s8 u8 s16 u16 s32 u32 s64 u64 f32 f64 c64 c128))
-
-  ;; all-symbols:
-  ;; Some basic map-reduce trick with append and --
-  ;; the magic is done! We have all the 684 symbols!
-  (define all-symbols
-    (fold1 append '() (map symbols-for-tag tags)))
-
-
-  ;; HACK:
-  ;; This is the macro-expansion of 'export', which happens to not
-  ;; need to be a macro *in this case*. We get the list of symbols
-  ;; and export them, as the 'export' macro would itself:
-  (let ((s (%parse-exports all-symbols)))
-    (%do-exports (current-module) s)))
+;;;; The real implementation is in (scheme vector @).
+(%make-copy-module scheme/vector/@ srfi/160)
 
 (provide "srfi/160")

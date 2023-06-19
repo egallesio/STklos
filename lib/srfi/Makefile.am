@@ -292,7 +292,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 #======================================================================
 # Dependencies
-1.ostk: ../scheme/list.ostk
+1.ostk: ../scheme/list.$(SO)
 13.ostk: 14.ostk
 14.ostk: ../scheme/charset.ostk
 37.ostk: 13.ostk
@@ -318,7 +318,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 151.ostk: ../scheme/bitwise.ostk
 152.ostk: 13.ostk
 158.ostk: ../scheme/generator.ostk
-160.ostk: 4.ostk 128.ostk 
+160.ostk: ../scheme/vector/@.ostk
 171.ostk: 1.ostk 69.ostk
 189.ostk: 1.ostk
 190.ostk: 158.ostk
@@ -341,8 +341,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
-../scheme/list.ostk:
-	(cd ../scheme; $(MAKE) list.ostk)
+../scheme/list.$(SO):
+	(cd ../scheme; $(MAKE) list.$(SO))
 ../scheme/charset.ostk:
 	(cd ../scheme; $(MAKE) charset.ostk)
 ../scheme/set.ostk:
@@ -367,6 +367,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) division.$(SO))
 ../scheme/bitwise.$(SO):
 	(cd ../scheme; $(MAKE) bitwise.ostk)
+../scheme/vector/@.ostk:
+	(cd ../scheme/vector; $(MAKE) @.ostk)
 
 
 #======================================================================
