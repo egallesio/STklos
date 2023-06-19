@@ -292,7 +292,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 #======================================================================
 # Dependencies
-1.ostk: ../scheme/list.ostk
+1.ostk: ../scheme/list.$(SO)
 13.ostk: 14.ostk
 14.ostk: ../scheme/charset.ostk
 37.ostk: 13.ostk
@@ -341,8 +341,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
-../scheme/list.ostk:
-	(cd ../scheme; $(MAKE) list.ostk)
+../scheme/list.$(SO):
+	(cd ../scheme; $(MAKE) list.$(SO))
 ../scheme/charset.ostk:
 	(cd ../scheme; $(MAKE) charset.ostk)
 ../scheme/set.ostk:
