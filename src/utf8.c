@@ -216,10 +216,10 @@ int STk_utf8_char_from_byte(char *s, int i, int max) /*  byte index => char inde
   return (s == idx) ? pos : -1;
 }
 
-/* ======================================================================
- *      STklos Primitives
- * ====================================================================== */
 #ifdef STK_DEBUG
+/* ======================================================================
+ *      STklos Primitives (defined only if we are in debug mode)
+ * ====================================================================== */
 DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 {
   SCM lst = STk_nil;
@@ -259,17 +259,14 @@ DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
   return STk_void;
 }
 
-#endif
-
-
 /* ======================================================================
  *      Initialization
  * ====================================================================== */
 int STk_init_utf8(void)
 {
-#ifdef STK_DEBUG
   ADD_PRIMITIVE(char_utf8_encoding);
   ADD_PRIMITIVE(dump_string);
-#endif
   return TRUE;
 }
+
+#endif

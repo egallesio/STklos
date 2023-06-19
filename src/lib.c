@@ -1,7 +1,7 @@
 /*
  * l i b . c                    -- Scheme library
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -77,6 +77,8 @@ STk_init_library(int _UNUSED(*argc), char _UNUSED(***argv), int stack_size)
     STk_init_box()                              &&
     STk_init_ffi()                              &&
     STk_init_syntax()                           &&
+#ifdef STK_DEBUG
     STk_init_utf8()                             &&
+#endif
     (STk_library_initialized = TRUE);
 }
