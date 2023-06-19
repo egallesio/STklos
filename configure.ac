@@ -654,7 +654,7 @@ AC_SUBST(GOOVERS)
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script utils/tmpcomp examples/Makefile
+          utils/stklos-script examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/scheme/Makefile lib/scheme/vector/Makefile
           lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile
@@ -686,7 +686,7 @@ AC_OUTPUT
 # Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
-chmod 0755 utils/stklos-config utils/stklos-script utils/tmpcomp
+chmod 0755 utils/stklos-config utils/stklos-script
 
 
 echo " "

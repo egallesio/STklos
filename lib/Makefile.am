@@ -217,11 +217,6 @@ doc: $(DOCDB)
 	   (cd $$i; $(MAKE) doc)\
 	done
 
-all-am: prepare
-
-#  For some reason, tmpcomp is not always executable (!!). Force the chmod here
-prepare:
-		chmod +x $(COMP)
 
 $(DOCDB): $(scheme_sources)
 	$(STKLOS_BINARY) -q -c -f ../doc/extract-doc $(scheme_sources) > $(DOCDB)
