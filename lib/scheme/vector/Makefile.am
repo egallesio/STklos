@@ -46,7 +46,7 @@ SO = @SH_SUFFIX@
 # tagvector-template.stk.
 
 
-SRC_STK      = @.stk tagvector-template.stk
+SRC_STK      = @.stk
 
 SRC_GEN_OSTK= s8.ostk   \
               u8.ostk   \

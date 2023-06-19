@@ -367,7 +367,7 @@ SO = @SH_SUFFIX@
 #
 # the s8.stk, etc files are generated (with sed) from the file
 # tagvector-template.stk.
-SRC_STK = @.stk tagvector-template.stk
+SRC_STK = @.stk
 SRC_GEN_OSTK = s8.ostk   \
               u8.ostk   \
               s16.ostk  \

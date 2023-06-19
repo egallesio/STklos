@@ -1092,7 +1092,9 @@ install-data-hook:
 	(cd 160; $(MAKE) install)
 
 install-sources:
-	(cd 160; $(MAKE) install-sources)
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) install-sources)\
+	done
 	cp $(srfi_sources) $(srfidir)
 
 clean:

@@ -352,18 +352,18 @@ top_srcdir = @top_srcdir@
 STKLOS_FLAGS = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 SRC_STK = base.stk \
-          s8.ostk  \
-          u8.ostk  \
-          s16.ostk \
-          u16.ostk \
-          s32.ostk \
-          u32.ostk \
-          s64.ostk \
-          u64.ostk \
-          f32.ostk \
-          f64.ostk \
-          c64.ostk \
-          c128.ostk
+          s8.stk   \
+          u8.stk   \
+          s16.stk  \
+          u16.stk  \
+          s32.stk  \
+          u32.stk  \
+          s64.stk  \
+          u64.stk  \
+          f32.stk  \
+          f64.stk  \
+          c64.stk  \
+          c128.stk
 
 SRC_OSTK = base.ostk \
            s8.ostk   \
@@ -696,52 +696,50 @@ c64.ostk:  ../../scheme/vector/c64.ostk
 c128.ostk: ../../scheme/vector/c128.ostk
 
 ../../scheme/vector/base.$(SO):
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/s8.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/u8.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/s16.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/u16.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/s32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/u32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/s64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/u64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/f32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/f64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/c64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 ../../scheme/vector/c128.ostk:
-	(cd ../../scheme/vector; $(MAKE) $*)
+	(cd ../../scheme/vector; $(MAKE) $@)
 
 #======================================================================
 
 install-sources:
 	mkdir -p $(srfidir)
-	cp $(srfi_sources) $(srfi_interm) $(srfidir)
+	cp $(srfi_sources) $(srfidir)
 
-# we also clean the TAG.stk files -- $(srfi-interm) --, which are NOT
-# srfi_OBJS (should not be installed with other objects):
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
 

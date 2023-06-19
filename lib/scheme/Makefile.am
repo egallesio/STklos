@@ -187,6 +187,9 @@ install-am:
 	(cd vector; $(MAKE) install)
 
 install-sources:
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) install-sources)\
+	done
 	cp $(scheme_sources) $(schemedir)
 
 clean:
