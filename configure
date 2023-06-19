@@ -5196,50 +5196,6 @@ fi
 
 
 ### Checks for typedefs, structures, and compiler characteristics.
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
-printf %s "checking for inline... " >&6; }
-if test ${ac_cv_c_inline+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  ac_cv_c_inline=no
-for ac_kw in inline __inline__ __inline; do
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#ifndef __cplusplus
-typedef int foo_t;
-static $ac_kw foo_t static_foo (void) {return 0; }
-$ac_kw foo_t foo (void) {return 0; }
-#endif
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_cv_c_inline=$ac_kw
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  test "$ac_cv_c_inline" != no && break
-done
-
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_inline" >&5
-printf "%s\n" "$ac_cv_c_inline" >&6; }
-
-case $ac_cv_c_inline in
-  inline | yes) ;;
-  *)
-    case $ac_cv_c_inline in
-      no) ac_val=;;
-      *) ac_val=$ac_cv_c_inline;;
-    esac
-    cat >>confdefs.h <<_ACEOF
-#ifndef __cplusplus
-#define inline $ac_val
-#endif
-_ACEOF
-    ;;
-esac
-
 ac_fn_c_check_type "$LINENO" "mode_t" "ac_cv_type_mode_t" "$ac_includes_default"
 if test "x$ac_cv_type_mode_t" = xyes
 then :
@@ -6596,10 +6552,10 @@ then :
   printf "%s\n" "#define HAVE_GETPASS 1" >>confdefs.h
 
 fi
-ac_fn_c_check_func "$LINENO" "gettimeofday" "ac_cv_func_gettimeofday"
-if test "x$ac_cv_func_gettimeofday" = xyes
+ac_fn_c_check_func "$LINENO" "clock_gettime" "ac_cv_func_clock_gettime"
+if test "x$ac_cv_func_clock_gettime" = xyes
 then :
-  printf "%s\n" "#define HAVE_GETTIMEOFDAY 1" >>confdefs.h
+  printf "%s\n" "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
 
 fi
 ac_fn_c_check_func "$LINENO" "glob" "ac_cv_func_glob"
@@ -6714,6 +6670,12 @@ ac_fn_c_check_func "$LINENO" "strtoul" "ac_cv_func_strtoul"
 if test "x$ac_cv_func_strtoul" = xyes
 then :
   printf "%s\n" "#define HAVE_STRTOUL 1" >>confdefs.h
+
+fi
+ac_fn_c_check_func "$LINENO" "utimensat" "ac_cv_func_utimensat"
+if test "x$ac_cv_func_utimensat" = xyes
+then :
+  printf "%s\n" "#define HAVE_UTIMENSAT 1" >>confdefs.h
 
 fi
 
@@ -7867,7 +7829,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script utils/tmpcomp examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script utils/tmpcomp examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/scheme/Makefile lib/scheme/vector/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8617,6 +8579,7 @@ do
     "lib/SILex.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/SILex.d/Makefile" ;;
     "lib/Lalr.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Lalr.d/Makefile" ;;
     "lib/scheme/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/Makefile" ;;
+    "lib/scheme/vector/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/vector/Makefile" ;;
     "lib/srfi/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi/Makefile" ;;
     "lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES lib/stklos/Makefile" ;;
     "lib/streams/Makefile") CONFIG_FILES="$CONFIG_FILES lib/streams/Makefile" ;;

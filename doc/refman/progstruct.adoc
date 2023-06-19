@@ -41,6 +41,7 @@ Consequently, {{stklos}} offers both systems: modules and libraries
 
 {{insertdoc 'symbol-value}}
 {{insertdoc 'symbol-value*}}
+{{insertdoc 'symbol-bound?}}
 {{insertdoc 'module-symbols}}
 {{insertdoc 'module-symbols*}}
 
@@ -65,3 +66,11 @@ is |lib/a/b| and the |STklos| module has been deleted from the import list.
 {{insertdoc 'library?}}
 {{insertdoc 'library-name}}
 {{insertdoc 'library-list}}
+
+=== Variables and Constants
+
+{{insertdoc 'define}}
+{{insertdoc 'define-constant}}
+{{insertdoc 'symbol-immutable!}}
+{{insertdoc 'symbol-mutable?}}
+

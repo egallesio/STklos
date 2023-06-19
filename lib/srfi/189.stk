@@ -49,7 +49,7 @@
 ;;;;
 
 (define-module srfi/189
-  (import (srfi 1) (srfi 9))
+  (import (srfi 1))
   (export maybe? either? just nothing left right nothing? just? maybe= left?
           right? either= either-swap
 

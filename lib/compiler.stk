@@ -27,14 +27,6 @@
   (import SCHEME)
   (export eval
           disassemble disassemble-expr
-          compiler:time-display
-          compiler:gen-line-number
-          compiler:warn-use-undefined
-          compiler:warn-use-undefined-postpone
-          compiler:show-assembly-code
-          compiler:keep-formals
-          compiler:keep-source
-          compiler:inline-common-functions
 
           %compiler-set-flags
           %grab-file-information
@@ -79,7 +71,7 @@
                          (cdr            . ,cdr)
                          (null?          . ,null?)
                          (list           . ,list)
-                         (not              . ,not)
+                         (not            . ,not)
                          (vector-ref     . ,vector-ref)
                          (vector-set!    . ,vector-set!)
                          (string-ref     . ,string-ref)
@@ -87,7 +79,37 @@
                          (eq?            . ,eq?)
                          (eqv?           . ,eqv?)
                          (equal?         . ,equal?)
-                         (void           . ,void)))
+                         (void           . ,void)
+                         (caar           . ,caar)
+                         (cdar           . ,cdar)
+                         (cadr           . ,cadr)
+                         (cddr           . ,cddr)
+                         (caaar          . ,caaar)
+                         (cdaar          . ,cdaar)
+                         (cadar          . ,cadar)
+                         (cddar          . ,cddar)
+                         (caadr          . ,caadr)
+                         (cdadr          . ,cdadr)
+                         (caddr          . ,caddr)
+                         (cdddr          . ,cdddr)
+                         (caaaar         . ,caaaar)
+                         (cdaaar         . ,cdaaar)
+                         (cadaar         . ,cadaar)
+                         (cddaar         . ,cddaar)
+                         (caadar         . ,caadar)
+                         (cdadar         . ,cdadar)
+                         (caddar         . ,caddar)
+                         (cdddar         . ,cdddar)
+                         (caaadr         . ,caaadr)
+                         (cdaadr         . ,cdaadr)
+                         (cadadr         . ,cadadr)
+                         (cddadr         . ,cddadr)
+                         (caaddr         . ,caaddr)
+                         (cdaddr         . ,cdaddr)
+                         (cadddr         . ,cadddr)
+                         (cddddr         . ,cddddr)
+                         (%cxr           . ,%cxr)
+                         (list-ref       . ,list-ref)))
 
 (define *inline-symbols* (map car *inline-table*))
 
@@ -450,10 +472,10 @@ doc>
                  (proc     (caddr l))
                  (mod      (compiler-current-module)))
             (if (symbol? name)
-                (let ((obj `(%make-syntax ',name
-                                          ',proc
-                                          ,proc
-                                          ',(module-name mod))))
+                (let ((obj `( (%%in-scheme '%make-syntax) ',name
+                                                          ',proc
+                                                          ,proc
+                                                          ',(module-name mod))))
                   ;; produce code for defining the macro
                   (register-new-global! name)
                   (compile obj #f env #f)
@@ -1203,6 +1225,36 @@ doc>
                             (emit 'IM-VOID)
                             (compile (append (cons 'begin actuals) (list (void)))
                                      env epair #f)))
+
+      ;; The cxr closures are very commonly used, call the specialized IN-CDR instr.
+      ((caar cdar cadr cddr
+        caaar cdaar cadar cddar caadr cdadr caddr cdddr
+        caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar
+        caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr)
+                       (if (= len 1)
+                           (let ((conv
+                                  (lambda (name)
+                                    (let ((s (string->list (symbol->string name))))
+                                      (string->keyword
+                                            (list->string (cdr (reverse (cdr s)))))))))
+                             (oper2 'IN-CXR
+                                    (car actuals)
+                                    (fetch-constant (conv fct))))
+                           (compile-normal-call fct actuals len env epair #f)))
+
+      ;; (%cxr lst #:ada) ==> inline call
+      ((%cxr)           (if (and (= len 2) (keyword? (cadr actuals)))
+                            (oper2 'IN-CXR (car actuals) (fetch-constant (cadr actuals)))
+                            (compile-normal-call fct actuals len env epair #f)))
+      ((list-ref)       (if (= len 2)
+                            (case (cadr actuals)
+                              ((0) (compile `(car ,(car actuals)) env epair #f))
+                              ((1) (compile `(cadr ,(car actuals)) env epair #f))
+                              ((2) (compile `(caddr ,(car actuals)) env epair #f))
+                              ((3) (compile `(cadddr ,(car actuals)) env epair #f))
+                              (else  (compile-normal-call fct actuals len env epair #f)))
+                            (compile-normal-call fct actuals len env epair #f)))
+
       (else             (panic "unimplemented inline primitive ~S" fct)))))
 
 
@@ -1638,6 +1690,14 @@ doc>
     (for-each %include-file (cdr e))))
 
 
+;; ======================================================================
+(define (compile-in-scheme e env tail)
+  (if (= (length e) 2)
+      (begin
+        (compile (cadr e) env (cadr e) tail)
+        (emit 'INSCHEME))
+      (compiler-error '%%in-scheme "expected one argument")))
+
 ;;;;======================================================================
 ;;;;
 ;;;;            LET-SYNTAX
@@ -1684,11 +1744,11 @@ both forms.
                                         "ill formed binding ~S" new))
                       (let* ((name      (car new))
                              (expander  (cadr new))
-                             (new-macro (%make-syntax
-                                            name
-                                            expander
-                                            (eval expander)
-                                            #f))) ; #f =>  non global macro
+                             (new-macro ( (%%in-scheme '%make-syntax)
+                                          name
+                                          expander
+                                          (eval expander)
+                                          #f))) ; #f =>  non global macro
                         (Loop (cdr bindings)
                               (cons (cons name new-macro)
                                     new-env)))))))))))
@@ -1871,6 +1931,7 @@ both forms.
           ((%%when-compile)     (compile-when-compile   e env tail?))
           ((%%include)          (compile-include        e env tail?))
           ((%%include-ci)       (compile-include-ci     e env tail?))
+          ((%%in-scheme)        (compile-in-scheme      e env tail?))
           ((%%source-pos)       (compile-%%source-pos   e env tail?))
           ((%%label)            (compile-%%label        e env tail?))
           ((%%goto)             (compile-%%goto         e env tail?))

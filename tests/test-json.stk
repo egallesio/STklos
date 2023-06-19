@@ -504,14 +504,30 @@ JSON
            #(+inf.0)
            "[0.4e00669999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999969999999006]")
 
-(test-json-error "i_number_neg_int_huge_exp"
+;; The tests from the SRFI reference implementation imply that we should error
+;; on overflow. Gauche and Chicken don't; and returning infinities is consistent with the
+;; behavior of 'read'.
+(test-json-read "i_number_neg_int_huge_exp"
+                #(-inf.0)
                   "[-1e+9999]")
-(test-json-error "i_number_pos_double_huge_exp"
+(test-json-read "i_number_pos_double_huge_exp"
+                #(+inf.0)
                  "[1.5e+9999]")
-(test-json-error "i_number_real_neg_overflow"
-                 "[-123123e100000]")
-(test-json-error "i_number_real_pos_overflow"
-                  "[123123e100000]")
+(test-json-read "i_number_real_neg_overflow"
+                #(-inf.0)
+                "[-123123e100000]")
+(test-json-read "i_number_real_pos_overflow"
+                #(+inf.0)
+                "[123123e100000]")
+;; Original:
+;; (test-json-error "i_number_neg_int_huge_exp"
+;;                   "[-1e+9999]")
+;; (test-json-error "i_number_pos_double_huge_exp"
+;;                  "[1.5e+9999]")
+;; (test-json-error "i_number_real_neg_overflow"
+;;                  "[-123123e100000]")
+;; (test-json-error "i_number_real_pos_overflow"
+;;                   "[123123e100000]")
 
 (test-json-read "i_number_real_underflow"
            #(0.0)

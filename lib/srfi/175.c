@@ -45,18 +45,18 @@
 #define _LANGLE_       0x3c /* < */
 #define _RANGLE_       0x3e /* } */
 
-static Inline int is_digit(char c) { return (_0_ <= c && c <= _9_); }
-static Inline int is_upper(char c) { return (_A_ <= c && c <= _Z_); }
-static Inline int is_lower(char c) { return (_a_ <= c && c <= _z_); }
-static Inline int is_alpha(char c) { return ((_a_ <= c && c <= _z_) ||
+static inline int is_digit(char c) { return (_0_ <= c && c <= _9_); }
+static inline int is_upper(char c) { return (_A_ <= c && c <= _Z_); }
+static inline int is_lower(char c) { return (_a_ <= c && c <= _z_); }
+static inline int is_alpha(char c) { return ((_a_ <= c && c <= _z_) ||
                                             (_A_ <= c && c <= _Z_)); }
 
-static Inline int is_alnum(char c) { return ((_a_ <= c && c <= _z_) ||
+static inline int is_alnum(char c) { return ((_a_ <= c && c <= _z_) ||
                                             (_A_ <= c && c <= _Z_) ||
                                             (_0_ <= c && c <= _9_)); }
-static Inline int to_lower(char c) { return (_A_ <= c && c <= _Z_) ?
+static inline int to_lower(char c) { return (_A_ <= c && c <= _Z_) ?
                                         (c - _A_ + _a_): c; }
-static Inline int to_upper(char c) { return (0x61 <= c && c <= 0x7a) ?
+static inline int to_upper(char c) { return (0x61 <= c && c <= 0x7a) ?
                                         (c - _a_ + _A_): c; }
 
 

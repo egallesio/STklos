@@ -129,9 +129,9 @@ doc>
 
   (define-macro (letrec-syntax . args)
     (error 'letrec-syntax
-           "cannot be used here. You must load the file \"full-syntax\" to access it:"
+      "cannot be used here. You must load the file \"full-syntax\" to access it:"
            (cons 'letrec-syntax args)))
-
+  
 
 ;;;
 ;;; Scheme utilities
@@ -200,17 +200,17 @@ doc>
 ;; (hyg:tag 1          '(fun x fun oh) '()) => (1)
 ;; (hyg:tag '(f a b c) '(a c)          '((G-something . y))) => ((G1333 a G1334 c) (G1334 . b) (G1333 . f) (G-something . y))
 (define hyg:tag
-  (lambda (e kk al)
+  (lambda (e kk al ellipsis)
     (cond ((pair? e)
-            (let* ((a-te-al (hyg:tag (car e) kk al))
-                    (d-te-al (hyg:tag (cdr e) kk (cdr a-te-al))))
+            (let* ((a-te-al (hyg:tag (car e) kk al ellipsis))
+                    (d-te-al (hyg:tag (cdr e) kk (cdr a-te-al) ellipsis)))
               (cons (cons (car a-te-al) (car d-te-al))
                 (cdr d-te-al))))
       ((vector? e)
         (list->vector
-          (hyg:tag (vector->list e) kk al)))
+          (hyg:tag (vector->list e) kk al ellipsis)))
       ((symbol? e)
-        (cond ((eq? e '...) (cons '... al))
+        (cond ((eq? e ellipsis) (cons ellipsis al))
           ((memq e kk) (cons e al))
           ((hyg:rassq e al) =>
             (lambda (c)
@@ -464,45 +464,46 @@ doc>
 ;; (mbe:matches-pattern? '(f a x b) '(* 2 x 4) '(x)) => #t
 ;; (mbe:matches-pattern? '(f a x b) '(* 2 3 4) '(x)) => #f
 (define mbe:matches-pattern?
-  (lambda (p e k)
-    (cond ((mbe:ellipsis? p)
+  (lambda (p e k ellipsis)
+    (cond ((mbe:ellipsis? p ellipsis)
            (and (or (null? e) (pair? e))
                 (let* ((p-head (car p))
                        (p-tail (cddr p))
                        (e-head=e-tail (mbe:split-at-ellipsis e p-tail)))
                   (and e-head=e-tail
-                       (not (memq '... p-tail)) ; fail on multiple ellipses
+		           (not (memq ellipsis p-tail)) ; fail on multiple ellipses
                        (let ((e-head (car e-head=e-tail))
                              (e-tail (cdr e-head=e-tail)))
                          (and (every
-                               (lambda (x) (mbe:matches-pattern? p-head x k))
+			               (lambda (x) (mbe:matches-pattern? p-head x k ellipsis))
                                e-head)
-                              (mbe:matches-pattern? p-tail e-tail k)))))))
+			              (mbe:matches-pattern? p-tail e-tail k ellipsis)))))))
           ((pair? p)
            (and (pair? e)
-                (mbe:matches-pattern? (car p) (car e) k)
-                (mbe:matches-pattern? (cdr p) (cdr e) k)))
+		        (mbe:matches-pattern? (car p) (car e) k ellipsis)
+		        (mbe:matches-pattern? (cdr p) (cdr e) k ellipsis)))
           ((symbol? p) (if (memq p k) (eq? p e) #t))
           (else (equal? p e)))))
+
 
 ;;; gets the bindings of pattern variables of pattern p for
 ;;; expression e;
 ;;; k is the list of keywords
 (define mbe:get-bindings
-  (lambda (p e k)
-    (cond ((mbe:ellipsis? p)
+  (lambda (p e k ellipsis)
+    (cond ((mbe:ellipsis? p ellipsis)
            (let* ((p-head (car p))
                   (p-tail (cddr p))
                   (e-head=e-tail (mbe:split-at-ellipsis e p-tail))
                   (e-head (car e-head=e-tail))
                   (e-tail (cdr e-head=e-tail)))
-             (cons (cons (mbe:get-ellipsis-nestings p-head k)
-                     (map (lambda (x) (mbe:get-bindings p-head x k))
+	         (cons (cons (mbe:get-ellipsis-nestings p-head k ellipsis)
+		                 (map (lambda (x) (mbe:get-bindings p-head x k ellipsis))
                           e-head))
-               (mbe:get-bindings p-tail e-tail k))))
+	               (mbe:get-bindings p-tail e-tail k ellipsis))))
           ((pair? p)
-           (append (mbe:get-bindings (car p) (car e) k)
-             (mbe:get-bindings (cdr p) (cdr e) k)))
+	       (append (mbe:get-bindings (car p) (car e) k ellipsis)
+	               (mbe:get-bindings (cdr p) (cdr e) k ellipsis)))
           ((symbol? p)
            (if (memq p k) '() (list (cons p e))))
           (else '()))))
@@ -510,18 +511,18 @@ doc>
 ;;; expands pattern p using environment r;
 ;;; k is the list of keywords
 (define mbe:expand-pattern
-  (lambda (p r k)
-    (cond ((mbe:ellipsis? p)
+  (lambda (p r k ellipsis)
+    (cond ((mbe:ellipsis? p ellipsis)
            (append (let* ((p-head (car p))
-                          (nestings (mbe:get-ellipsis-nestings p-head k))
+			              (nestings (mbe:get-ellipsis-nestings p-head k ellipsis))
                           (rr (mbe:ellipsis-sub-envs nestings r)))
                      (map (lambda (r1)
-                            (mbe:expand-pattern p-head (append r1 r) k))
+			                (mbe:expand-pattern p-head (append r1 r) k ellipsis))
                           rr))
-             (mbe:expand-pattern (cddr p) r k)))
+	               (mbe:expand-pattern (cddr p) r k ellipsis)))
           ((pair? p)
-           (cons (mbe:expand-pattern (car p) r k)
-             (mbe:expand-pattern (cdr p) r k)))
+	       (cons (mbe:expand-pattern (car p) r k ellipsis)
+	             (mbe:expand-pattern (cdr p) r k ellipsis)))
           ((symbol? p)
            (if (memq p k) p
              (let ((x (assq p r)))
@@ -531,9 +532,9 @@ doc>
 ;;; returns a list that nests a pattern variable as deeply as it
 ;;; is ellipsed
 (define mbe:get-ellipsis-nestings
-  (lambda (p k)
+  (lambda (p k ellipsis)
     (let sub ((p p))
-      (cond ((mbe:ellipsis? p) (cons (sub (car p)) (sub (cddr p))))
+      (cond ((mbe:ellipsis? p ellipsis) (cons (sub (car p)) (sub (cddr p))))
             ((pair? p) (append (sub (car p)) (sub (cdr p))))
             ((symbol? p) (if (memq p k) '() (list p)))
             (else '())))))
@@ -580,8 +581,8 @@ doc>
 ;;; tests if x is an ellipsing pattern, i.e., of the form
 ;;; (blah ... . blah2)
 (define mbe:ellipsis?
-  (lambda (x)
-    (and (pair? x) (pair? (cdr x)) (eq? (cadr x) '...))))
+  (lambda (x ellipsis)
+    (and (pair? x) (pair? (cdr x)) (eq? (cadr x) ellipsis))))
 
 
 #|
@@ -624,9 +625,9 @@ doc>
 
 
 ;; find-clause will find the clause to be used in order to expand a macro.
-;;
+;; 
 ;; Example:
-;;
+;; 
 ;; (define-syntax2 f
 ;;   (syntax-rules ()
 ;;     ((f a b)   (+ a b))
@@ -637,29 +638,32 @@ doc>
 ;;
 ;; (find-clause 'f '(1 2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))))
 ;; => (* 2 3)
-(define (find-clause macro-name macro-args keywords clauses)
+(define (find-clause macro-name macro-args keywords clauses ellipsis)
   (let ((macro-form (cons macro-name macro-args)))
     (let Loop ((l clauses))
       (if (null? l)
           (error macro-name "no matching clause for ~S" macro-form)
           (let ((in-pattern  (caar  l))
                 (out-pattern (cadar l)))
-            (if (mbe:matches-pattern? in-pattern macro-form keywords)
+            (if (mbe:matches-pattern? in-pattern macro-form keywords ellipsis)
                 (let ((tmp (hyg:tag out-pattern
                                     (append! (hyg:flatten in-pattern) keywords)
-                                    '())))
+                                    '()
+                                    ellipsis)))
                   (hyg:untag (mbe:expand-pattern (car tmp)
                                                  (mbe:get-bindings in-pattern
                                                                    macro-form
-                                                                   keywords)
-                                                 keywords)
+                                                                   keywords
+                                                                   ellipsis)
+                                                 keywords
+                                                 ellipsis)
                              (cdr tmp)
                              '()))
                 (Loop (cdr l))))))))
 
 
 ;;
-;; A very simple implementation od let-syntax.
+;; A very simple implementation of let-syntax. 
 ;; FIXME: Need some work
 ;;
 (define-macro (let-syntax bindings . body)
@@ -691,7 +695,7 @@ doc>
 ;;MAC   (if (or (not (pair? syn-rules))
 ;;MAC           (not (eq? (car syn-rules) 'syntax-rules)))
 ;;MAC     (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
-;;MAC
+;;MAC 
 ;;MAC     (let ((keywords    (cons macro-name (cadr syn-rules)))
 ;;MAC           (clauses     (cddr syn-rules))
 ;;MAC           (find-clause (symbol-value 'find-clause (find-module 'MBE))))

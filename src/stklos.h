@@ -90,7 +90,7 @@ extern "C"
 
 
 #define CPP_CONCAT(x, y)        x##y
-#define Inline inline
+
 
 #define AS_LONG(x)              ((unsigned long) (x))
 #define AS_SCM(x)               ((SCM) ((unsigned long) (x)))
@@ -507,7 +507,7 @@ SCM STk_clone_frame(SCM f);
 SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound);
 void STk_error_unbound_variable(SCM symbol, SCM module);
 void STk_define_variable(SCM symbol, SCM value, SCM module);
-
+SCM STk_symb_in_scheme(SCM symb); // value of symb in module SCHEME
 
 int STk_init_env(void);
 int STk_late_init_env(void); /* must be done after symbol initialization */
@@ -673,6 +673,7 @@ SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
 EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
+EXTERN_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name));
 EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
 EXTERN_PRIMITIVE("reverse", reverse, subr1, (SCM l));

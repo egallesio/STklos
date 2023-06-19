@@ -75,7 +75,7 @@
 #  define IN_EQV               70
 #  define IN_EQUAL             71
 #  define IN_APPLY             72
-#  define UNUSED_2             73
+#  define IN_CXR               73
 #  define SET_CUR_MOD          74
 #  define DOCSTRG              75
 #  define PROCNAME             76
@@ -171,8 +171,9 @@
 #  define IN_FXDIFF            166
 #  define SOURCE               167
 #  define FORMALS              168
+#  define INSCHEME             169
 
-#  define NB_VM_INSTR (FORMALS             +1)
+#  define NB_VM_INSTR (INSCHEME            +1)
 #endif
 
 
@@ -252,7 +253,7 @@ static void *jump_table[] = {
   &&lab_IN_EQV              ,
   &&lab_IN_EQUAL            ,
   &&lab_IN_APPLY            ,
-  &&lab_UNUSED_2            ,
+  &&lab_IN_CXR              ,
   &&lab_SET_CUR_MOD         ,
   &&lab_DOCSTRG             ,
   &&lab_PROCNAME            ,
@@ -348,6 +349,7 @@ static void *jump_table[] = {
   &&lab_IN_FXDIFF           ,
   &&lab_SOURCE              ,
   &&lab_FORMALS             ,
+  &&lab_INSCHEME            ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -429,7 +431,7 @@ static char *name_table[] = {
   "IN_EQV              ",
   "IN_EQUAL            ",
   "IN_APPLY            ",
-  "UNUSED_2            ",
+  "IN_CXR              ",
   "SET_CUR_MOD         ",
   "DOCSTRG             ",
   "PROCNAME            ",
@@ -525,6 +527,7 @@ static char *name_table[] = {
   "IN_FXDIFF           ",
   "SOURCE              ",
   "FORMALS             ",
+  "INSCHEME            ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

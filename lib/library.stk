@@ -129,12 +129,15 @@ doc>
     ;;     that this point and previous one can use the  expansion code of
     ;;     of cond-expand ir import/export since the STklos environment is
     ;;     visible.
-    ;;  3. We forge the symbols %module-restore and %make-syntax in the
-    ;;     environment of the module/library. The former is used at the end
-    ;;     of the expansion of define-module. The latter is used by define-macro.
-    ;;  4. We transform the module in a library (that means more or less that
+    ;;  3. We transform the module in a library (that means more or less that
     ;;     the STklos module is  deleted from the import list.
-    ;;  5. We evaluate the body in the module (which is now a library).
+    ;;  4. We evaluate the body in the module (which is now a library).
+    ;;
+    ;; NOTE: Since the environment of a library is empty, we cannot use the
+    ;; primitives defined in STklos or SCHEME modules. In this case, we can
+    ;; use the special call (%%in-scheme 'xx) to grab the value of xx in
+    ;; SCHEME module (used for instance with %module-restore which
+    ;; is needed at the end of the expansion of define-module
     ;;
     `(begin
        (define-module ,module-name
@@ -145,14 +148,10 @@ doc>
          (import ,@imports)
          (export ,@exports)
 
-         ;; ③: define useful 'secret" symbols
-         (%symbol-define '%module-restore %module-restore (current-module))
-         (%symbol-define '%make-syntax    %make-syntax    (current-module))
-
-         ;; ④: transform the module in a library
+         ;; ③: transform the module in a library
          (%module->library! ',module-name)
 
-         ;; ⑤: evaluate the body in the library environment
+         ;; ④: evaluate the body in the library environment
          ,@body))))
 
 

@@ -986,9 +986,9 @@ DEFINE_PRIMITIVE("%uvector-fill!", uvector_fill, vsubr, (int argc, SCM *argv))
 
 
 
-MODULE_ENTRY_START("srfi/160/base")
+MODULE_ENTRY_START("scheme/vector/base")
 {
-  SCM module =  STk_create_module(STk_intern("srfi/160/base"));
+  SCM module =  STk_create_module(STk_intern("scheme/vector/base"));
 
   ADD_PRIMITIVE_IN_MODULE(s8p,   module);
   ADD_PRIMITIVE_IN_MODULE(u8p,   module);

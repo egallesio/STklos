@@ -182,7 +182,7 @@ doc>
       (%%when-compile (compiler-current-module ,newmod))
       ,@body
       (%%when-compile (compiler-current-module ,oldmod))
-      (%%set-current-module (%module-restore))
+      (%%set-current-module ( (%%in-scheme '%module-restore) ))
       (values (void) ',name))))
 
 ;;=============================================================================

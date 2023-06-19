@@ -57,6 +57,7 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'rationalize}}
 {{insertdoc 'atan}}
 {{insertdoc 'atanh}}
+{{insertdoc 'degrees->radians}}
 {{insertdoc 'sqrt}}
 {{insertdoc 'square}}
 {{insertdoc 'exact-integer-sqrt}}
@@ -794,6 +795,8 @@ SRFI's documentation for more information.
 {{insertdoc 'hash-table-merge!}}
 {{insertdoc 'hash-table-equivalence-function}}
 {{insertdoc 'hash-table-hash-function}}
+{{insertdoc 'hash-mutable?}}
+{{insertdoc 'hash-immutable!}}
 {{insertdoc 'hash-table-size}}
 {{insertdoc 'hash-table-stats}}
 
@@ -926,6 +929,7 @@ you plan to port your program on another system.
 {{insertdoc 'set-signal-handler!}}
 {{insertdoc 'get-signal-handler}}
 {{insertdoc 'send-signal}}
+{{insertdoc 'pause}}
 
 
 === Parameter Objects
@@ -978,4 +982,3 @@ See SRFI document for more information.
 {{insertdoc 'base64-decode}}
 {{insertdoc 'base64-encode-string}}
 {{insertdoc 'base64-decode-string}}
-

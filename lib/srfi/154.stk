@@ -51,7 +51,6 @@
 
 (define-module srfi/154
 
-(import (srfi 9))
 (export dynamic-extent?
         current-dynamic-extent
         with-dynamic-extent

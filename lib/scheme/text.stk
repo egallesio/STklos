@@ -50,8 +50,7 @@
 
 
 (define-module scheme/text
-  (import (srfi 9)
-          (srfi 129))
+  (import (srfi 129))
 
   (export
    ;; Predicates

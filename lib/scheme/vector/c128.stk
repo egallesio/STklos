@@ -1,6 +1,6 @@
 ;;;;
-;;;; 160/TAG.stk         -- SRFI-160: Homogeneous numeric vector libraries
-;;;;                                  (TAG sublibrary)
+;;;; 160/c128.stk         -- SRFI-160: Homogeneous numeric vector libraries
+;;;;                                  (c128 sublibrary)
 ;;;;
 ;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
 ;;;;
@@ -24,95 +24,95 @@
 ;;;;    Creation date: 17-Jun-2022 15:54
 ;;;;
 
-(define-module srfi/160/TAG
+(define-module scheme/vector/c128
 
   (import (srfi 4)
           (srfi 128)
-          (srfi 160 base))
+          (scheme vector base))
   (export
    ;; Constructors
-   make-TAGvector   ;; BASE
-   TAGvector        ;; BASE
-   TAGvector-unfold
-   TAGvector-unfold-right
-   TAGvector-copy
-   TAGvector-reverse-copy
-   TAGvector-append
-   TAGvector-concatenate
-   TAGvector-append-subvectors
+   make-c128vector   ;; BASE
+   c128vector        ;; BASE
+   c128vector-unfold
+   c128vector-unfold-right
+   c128vector-copy
+   c128vector-reverse-copy
+   c128vector-append
+   c128vector-concatenate
+   c128vector-append-subvectors
 
    ;; Predicates
-   TAG?              ;; BASE
-   TAGvector?        ;; BASE
-   TAGvector-empty?
-   TAGvector=
+   c128?              ;; BASE
+   c128vector?        ;; BASE
+   c128vector-empty?
+   c128vector=
 
    ;; Selectors
-   TAGvector-ref     ;; BASE
-   TAGvector-length  ;; BASE
+   c128vector-ref     ;; BASE
+   c128vector-length  ;; BASE
 
    ;; Iteration
-   TAGvector-take
-   TAGvector-take-right
-   TAGvector-drop
-   TAGvector-drop-right
-   TAGvector-segment
-   TAGvector-fold
-   TAGvector-fold-right
-   TAGvector-map
-   TAGvector-map!
-   TAGvector-for-each
-   TAGvector-count
-   TAGvector-cumulate
+   c128vector-take
+   c128vector-take-right
+   c128vector-drop
+   c128vector-drop-right
+   c128vector-segment
+   c128vector-fold
+   c128vector-fold-right
+   c128vector-map
+   c128vector-map!
+   c128vector-for-each
+   c128vector-count
+   c128vector-cumulate
 
    ;; Searching
-   TAGvector-take-while
-   TAGvector-take-while-right
-   TAGvector-drop-while
-   TAGvector-drop-while-right
-   TAGvector-index
-   TAGvector-index-right
-   TAGvector-skip
-   TAGvector-skip-right
-   TAGvector-any
-   TAGvector-every
-   TAGvector-partition
-   TAGvector-filter
-   TAGvector-remove
+   c128vector-take-while
+   c128vector-take-while-right
+   c128vector-drop-while
+   c128vector-drop-while-right
+   c128vector-index
+   c128vector-index-right
+   c128vector-skip
+   c128vector-skip-right
+   c128vector-any
+   c128vector-every
+   c128vector-partition
+   c128vector-filter
+   c128vector-remove
 
    ;; Mutators
-   TAGvector-set!            ;; BASE
-   TAGvector-swap!
-   TAGvector-fill!
-   TAGvector-reverse!
-   TAGvector-copy!
-   TAGvector-reverse-copy!
-   TAGvector-unfold!
-   TAGvector-unfold-right!
+   c128vector-set!            ;; BASE
+   c128vector-swap!
+   c128vector-fill!
+   c128vector-reverse!
+   c128vector-copy!
+   c128vector-reverse-copy!
+   c128vector-unfold!
+   c128vector-unfold-right!
 
    ;; Conversion
-   TAGvector->list           ;; BASE
-   reverse-TAGvector->list
-   list->TAGvector           ;; BASE
-   reverse-list->TAGvector
-   TAGvector->vector
-   vector->TAGvector
+   c128vector->list           ;; BASE
+   reverse-c128vector->list
+   list->c128vector           ;; BASE
+   reverse-list->c128vector
+   c128vector->vector
+   vector->c128vector
 
    ;; Generators
-   make-TAGvector-generator
+   make-c128vector-generator
 
    ;; Comparators
-   TAGvector-comparator
+   c128vector-comparator
 
    ;; Output
-   write-TAGvector)
+   write-c128vector)
 
 
 ;; A case of "macros for performance"... Not the best thing to do, we could
 ;; actually have done a more sofisticated job in generating the output from
 ;; the template, but this keeps it simple.
-;; The macro (uvector-tag) will expand to TAG in the template.
-;; However, in the generated file, the TAG will be replaed by the tag name.
+;; The macro (uvector-tag) will expand to c128 in the template.
+;; However, in the generated file, the c128 will be replaed by the tag name.
 ;; So the macro will expand to the VALUE of the tag, which is the
 ;; fastest thing we can do. Not even access to a global will be done, the
 ;; correct constant will be pushed onto the stack.
@@ -136,10 +136,10 @@
         (f64  9)
         (c64  10)
         (c128 11))
-    TAG))
+    c128))
 
 ;; We'll be accessing the base module to get some procedures from it:
-(define base (find-module 'srfi/160/base))
+(define base (find-module 'scheme/vector/base))
 
 ;; These are implemented in C, and used here to build the actual procedures:
 (define %uvector-unfold            (symbol-value '%uvector-unfold base))
@@ -157,34 +157,34 @@
 ;; make-vector OK
 ;; vector      OK
 
-(define (TAGvector-unfold f len seed)
+(define (c128vector-unfold f len seed)
   (%uvector-unfold (uvector-tag) f #f len seed #f))
 
-(define (TAGvector-unfold-right f len seed)
+(define (c128vector-unfold-right f len seed)
   (%uvector-unfold (uvector-tag) f #f len seed #t))
 
-(define (TAGvector-copy v :optional (start 0) (end (TAGvector-length v)))
+(define (c128vector-copy v :optional (start 0) (end (c128vector-length v)))
   (%uvector-copy (uvector-tag) #f 0 v start end #f))
 
-(define (TAGvector-reverse-copy v :optional (start 0) (end (TAGvector-length v)))
+(define (c128vector-reverse-copy v :optional (start 0) (end (c128vector-length v)))
   (%uvector-copy (uvector-tag) #f 0 v start end #t))
 
-(define (TAGvector-append . vecs)
+(define (c128vector-append . vecs)
   (%uvector-append-subvectors (uvector-tag) #f vecs))
 
-(define (TAGvector-concatenate vecs)
+(define (c128vector-concatenate vecs)
   (%uvector-append-subvectors (uvector-tag) #f vecs))
 
-(define (TAGvector-append-subvectors . vecs)
+(define (c128vector-append-subvectors . vecs)
   (%uvector-append-subvectors (uvector-tag) #t vecs))
 
 ;;;
 ;;; Predicates OK
 ;;;
 
-(define (TAGvector-empty? v) (%uvector-empty? (uvector-tag) v))
+(define (c128vector-empty? v) (%uvector-empty? (uvector-tag) v))
 
-(define (TAGvector= . args) (%uvector= (uvector-tag) args))
+(define (c128vector= . args) (%uvector= (uvector-tag) args))
 
 ;;;
 ;;; Selectors OK
@@ -195,17 +195,17 @@
 
 ;; Iteration OK
 
-(define (TAGvector-take v n) (TAGvector-copy v 0 n))
-(define (TAGvector-take-right v n)
-  (TAGvector-copy v (- (TAGvector-length v) n))) ; FIXME: optimize?
+(define (c128vector-take v n) (c128vector-copy v 0 n))
+(define (c128vector-take-right v n)
+  (c128vector-copy v (- (c128vector-length v) n))) ; FIXME: optimize?
 
-(define (TAGvector-drop v n)       (TAGvector-copy v n))
-(define (TAGvector-drop-right v n)
-  (%uvector-copy (uvector-tag) #f 0 v 0 (- (TAGvector-length v) n) #f)) ; FIXME: optimize?
+(define (c128vector-drop v n)       (c128vector-copy v n))
+(define (c128vector-drop-right v n)
+  (%uvector-copy (uvector-tag) #f 0 v 0 (- (c128vector-length v) n) #f)) ; FIXME: optimize?
 
-(define (TAGvector-segment v n) (%uvector-segment (uvector-tag) v n))
+(define (c128vector-segment v n) (%uvector-segment (uvector-tag) v n))
 
-(define (TAGvector-fold kons knil v1 . v2)
+(define (c128vector-fold kons knil v1 . v2)
   (%uvector-iterate (uvector-tag) kons (cons v1 v2)
    #f   ;; do NOT mutate
    10   ;; operation (10 = fold)
@@ -213,7 +213,7 @@
    knil ;; seed
    ))
 
-(define (TAGvector-fold-right kons knil v1 . v2)
+(define (c128vector-fold-right kons knil v1 . v2)
   (%uvector-iterate (uvector-tag) kons (cons v1 v2)
    #f   ;; do NOT mutate
    10   ;; operation (10 = fold)
@@ -221,7 +221,7 @@
    knil ;; seed
    ))
 
-(define (TAGvector-map proc v1 . vs)
+(define (c128vector-map proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    0  ;; operation (0 = map)
@@ -229,7 +229,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-map! proc v1 . vs)
+(define (c128vector-map! proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #t ;; DO mutate
    0  ;; operation (0 = map)
@@ -237,7 +237,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-for-each proc v1 . vs)
+(define (c128vector-for-each proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    9  ;; operation (9 = for-each)
@@ -245,7 +245,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-count proc v1 . vs)
+(define (c128vector-count proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    5  ;; operation (5 = count)
@@ -253,7 +253,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-cumulate kons knil v1)
+(define (c128vector-cumulate kons knil v1)
   (%uvector-iterate (uvector-tag) kons (list v1)
    #f   ;; do NOT mutate
    11   ;; operation (11 = cumulate)
@@ -265,20 +265,20 @@
 ;;; Searching OK
 ;;;
 
-(define (TAGvector-take-while pred? vec)
-  (TAGvector-take vec (TAGvector-skip pred? vec)))
+(define (c128vector-take-while pred? vec)
+  (c128vector-take vec (c128vector-skip pred? vec)))
 
-(define (TAGvector-take-while-right pred? vec)
-  (TAGvector-drop vec (+ 1 (TAGvector-skip-right pred? vec))))
+(define (c128vector-take-while-right pred? vec)
+  (c128vector-drop vec (+ 1 (c128vector-skip-right pred? vec))))
 
-(define (TAGvector-drop-while pred? vec)
-  (TAGvector-drop vec (TAGvector-skip pred? vec)))
+(define (c128vector-drop-while pred? vec)
+  (c128vector-drop vec (c128vector-skip pred? vec)))
 
-(define (TAGvector-drop-while-right pred? vec)
-  (TAGvector-take vec (+ 1 (TAGvector-skip-right pred? vec))))
+(define (c128vector-drop-while-right pred? vec)
+  (c128vector-take vec (+ 1 (c128vector-skip-right pred? vec))))
 
 
-(define (TAGvector-index proc v1 . vs)
+(define (c128vector-index proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    3  ;; operation (3 = index)
@@ -286,7 +286,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-index-right proc v1 . vs)
+(define (c128vector-index-right proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    3  ;; operation (3 = index)
@@ -294,7 +294,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-skip proc v1 . vs)
+(define (c128vector-skip proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    4  ;; operation (4 = skip)
@@ -302,7 +302,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-skip-right proc v1 . vs)
+(define (c128vector-skip-right proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    4  ;; operation (4 = skip)
@@ -310,7 +310,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-any proc v1 . vs)
+(define (c128vector-any proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    1  ;; operation (1 = any)
@@ -318,7 +318,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-every proc v1 . vs)
+(define (c128vector-every proc v1 . vs)
   (%uvector-iterate (uvector-tag) proc (cons v1 vs)
    #f ;; do NOT mutate
    2  ;; operation (2 = every)
@@ -326,7 +326,7 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-partition proc v1)
+(define (c128vector-partition proc v1)
   (%uvector-iterate (uvector-tag) proc (list v1)
    #f ;; do NOT mutate
    6  ;; operation (6 = partition)
@@ -334,14 +334,14 @@
    #f ;; NO seed
    ))
 
-(define (TAGvector-filter proc v1)
+(define (c128vector-filter proc v1)
   (%uvector-iterate (uvector-tag) proc (list v1)
    #f ;; do NOT mutate
    7  ;; operation (7 = filter)
    #f ;; NOT from-right
    #f ;; NO seed
    ))
-(define (TAGvector-remove proc v1)
+(define (c128vector-remove proc v1)
   (%uvector-iterate (uvector-tag) proc (list v1)
    #f ;; do NOT mutate
    8  ;; operation (8 = remove)
@@ -360,26 +360,26 @@
 ;; vector-fill! and vector-swap! do not depend on vector type,
 ;; but vector-fill! does some type checking for each element
 ;; written. Maybe this could be optimized...
-(define TAGvector-swap! (symbol-value '%uvector-swap!         base))
-(define TAGvector-fill! (symbol-value '%uvector-fill!         base))
+(define c128vector-swap! (symbol-value '%uvector-swap!         base))
+(define c128vector-fill! (symbol-value '%uvector-fill!         base))
 
-(define (TAGvector-reverse! v :optional (start 0) (end (TAGvector-length v)))
+(define (c128vector-reverse! v :optional (start 0) (end (c128vector-length v)))
   (%uvector-copy (uvector-tag) v start v start end #t)
   #void)
 
-(define (TAGvector-copy! to at from :optional (start 0) (end (TAGvector-length from)))
+(define (c128vector-copy! to at from :optional (start 0) (end (c128vector-length from)))
   (%uvector-copy (uvector-tag) to at from start end #f)
   #void)
 
-(define (TAGvector-reverse-copy! to at from :optional (start 0) (end (TAGvector-length from)))
+(define (c128vector-reverse-copy! to at from :optional (start 0) (end (c128vector-length from)))
   (%uvector-copy (uvector-tag) to at from start end #t)
   #void)
 
-(define (TAGvector-unfold! f v start end seed)
+(define (c128vector-unfold! f v start end seed)
   (%uvector-unfold (uvector-tag) f v start end seed #f)
   #void)
 
-(define (TAGvector-unfold-right! f v start end seed)
+(define (c128vector-unfold-right! f v start end seed)
   (%uvector-unfold (uvector-tag) f v start end seed #t)
   #void)
 
@@ -387,44 +387,44 @@
 ;;; Conversion OK
 ;;;
 
-(define (vector->TAGvector v :optional (start 0) (end (vector-length v)))
-  (let* ((w (make-TAGvector (- end start))))
+(define (vector->c128vector v :optional (start 0) (end (vector-length v)))
+  (let* ((w (make-c128vector (- end start))))
     (do ((i start (+ i 1)))
         ((= i end))
-      (TAGvector-set! w (- i start) (vector-ref v i)))
+      (c128vector-set! w (- i start) (vector-ref v i)))
     w))
 
-(define (TAGvector->vector v :optional (start 0) (end (TAGvector-length v)))
+(define (c128vector->vector v :optional (start 0) (end (c128vector-length v)))
   (let* ((w (make-vector (- end start))))
     (do ((i start (+ i 1)))
         ((= i end))
-      (vector-set! w (- i start) (TAGvector-ref v i)))
+      (vector-set! w (- i start) (c128vector-ref v i)))
     w))
 
 
-(define (TAGvector->list v :optional (start 0) (end (TAGvector-length v)))
-  (let ((v (TAGvector-copy v start end)))
-    (let loop ((i (fx- (TAGvector-length v) 1))
+(define (c128vector->list v :optional (start 0) (end (c128vector-length v)))
+  (let ((v (c128vector-copy v start end)))
+    (let loop ((i (fx- (c128vector-length v) 1))
                (lst '()))
       (if (fx< i 0)
           lst
-          (loop (fx- i 1) (cons (TAGvector-ref v i) lst))))))
+          (loop (fx- i 1) (cons (c128vector-ref v i) lst))))))
 
 
-(define (reverse-list->TAGvector lst)
-  (TAGvector-reverse-copy (list->TAGvector lst)))
+(define (reverse-list->c128vector lst)
+  (c128vector-reverse-copy (list->c128vector lst)))
 
-(define (reverse-TAGvector->list v :optional (start 0) (end (TAGvector-length v)))
-  (TAGvector->list (TAGvector-reverse-copy v start end)))
+(define (reverse-c128vector->list v :optional (start 0) (end (c128vector-length v)))
+  (c128vector->list (c128vector-reverse-copy v start end)))
 
 ;;;
 ;;; Generators OK
 ;;;
 
-(define (make-TAGvector-generator v :optional (start 0) (end (TAGvector-length v)))
+(define (make-c128vector-generator v :optional (start 0) (end (c128vector-length v)))
   (lambda () (if (fx>= start end)
             (eof-object)
-            (let ((x (TAGvector-ref v start)))
+            (let ((x (c128vector-ref v start)))
               (set! start (fx+ 1 start))
               x))))
 
@@ -433,35 +433,35 @@
 ;;;
 
 ;; Adapted from reference implementation in Chicken:
-(define (TAGvector< vec1 vec2)
-     (let ((len1 (TAGvector-length vec1))
-           (len2 (TAGvector-length vec2)))
+(define (c128vector< vec1 vec2)
+     (let ((len1 (c128vector-length vec1))
+           (len2 (c128vector-length vec2)))
        (cond
-         ((fx< (TAGvector-length vec1)
-               (TAGvector-length vec2))
+         ((fx< (c128vector-length vec1)
+               (c128vector-length vec2))
           #t)
-         ((fx> (TAGvector-length vec1)
-               (TAGvector-length vec2))
+         ((fx> (c128vector-length vec1)
+               (c128vector-length vec2))
           #f)
          (else
           (let loop ((i 0))
             (cond
               ((fx= i len1) #f)
-              ((< (TAGvector-ref vec1 i) (TAGvector-ref vec2 i))
+              ((< (c128vector-ref vec1 i) (c128vector-ref vec2 i))
                #t)
-              ((> (TAGvector-ref vec1 i) (TAGvector-ref vec2 i))
+              ((> (c128vector-ref vec1 i) (c128vector-ref vec2 i))
                #f)
               (else
                (loop (fx+ i 1)))))))))
 
-(define TAGvector-comparator
-  (make-comparator TAGvector? TAGvector= TAGvector< hash-table-hash))
+(define c128vector-comparator
+  (make-comparator c128vector? c128vector= c128vector< hash-table-hash))
 
 ;;;
 ;;; Output OK
 ;;;
 
-(define (write-TAGvector v :optional port)
+(define (write-c128vector v :optional port)
   (unless ()
     (error))
   (if port
@@ -470,4 +470,4 @@
 
   )
 
-(provide "srfi/160/TAG")
+(provide "scheme/vector/c128")
