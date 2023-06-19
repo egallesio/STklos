@@ -318,7 +318,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 151.ostk: ../scheme/bitwise.ostk
 152.ostk: 13.ostk
 158.ostk: ../scheme/generator.ostk
-160.ostk: 4.ostk 128.ostk 
+160.ostk: ../scheme/vector/@.ostk
 171.ostk: 1.ostk 69.ostk
 189.ostk: 1.ostk
 190.ostk: 158.ostk
@@ -367,6 +367,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) division.$(SO))
 ../scheme/bitwise.$(SO):
 	(cd ../scheme; $(MAKE) bitwise.ostk)
+../scheme/vector/@.ostk:
+	(cd ../scheme/vector; $(MAKE) @.ostk)
 
 
 #======================================================================

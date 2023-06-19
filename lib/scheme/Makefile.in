@@ -897,17 +897,17 @@ bitwise.ostk: ../srfi/60.ostk
 
 # ======================================================================
 install-am:
-	(cd vector; make install)
+	(cd vector; $(MAKE) install)
 
 install-sources:
 	cp $(scheme_sources) $(schemedir)
 
 clean:
-	(cd vector; make clean)
+	(cd vector; $(MAKE) clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
-	(cd vector; make distclean)
+	(cd vector; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:

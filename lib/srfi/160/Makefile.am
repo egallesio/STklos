@@ -29,49 +29,36 @@ STKLOS_BINARY ?= ../../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
-# ORGANIZATION OF SRFI-160 IMPLEMENTATION:
-#
-# - base.c, base.stk: implementation of the base library,
-#   (srfi 160 base), where there's also much code that is
-#   used by the specific s8, u8, etc, libraries.
-#
-# - s8.stk, u8,stk, ..., c128.stk: the specific libraries
-#   (srfi 160 s8), and so on. They have thin wrappers over
-#   procedures defined in base.c
-#
-# - ../160.stk (in the directory above this one): the non-standard
-#   (srfi 160) library. It is useful for the tests.
-#
-# the s8.stk, etc files are generated (with sed) from the file
-# tagvector-template.stk.
-
-
 SRC_STK = base.stk \
-          tagvector-template.stk
+          s8.ostk  \
+          u8.ostk  \
+          s16.ostk \
+          u16.ostk \
+          s32.ostk \
+          u32.ostk \
+          s64.ostk \
+          u64.ostk \
+          f32.ostk \
+          f64.ostk \
+          c64.ostk \
+          c128.ostk
+
 
 SRC_OSTK = base.ostk \
-           s8.ostk \
-           u8.ostk \
-           s16.ostk \
-           u16.ostk \
-           s32.ostk \
-           u32.ostk \
-           s64.ostk \
-           u64.ostk \
-           f32.ostk \
-           f64.ostk \
-           c64.ostk \
+           s8.ostk   \
+           u8.ostk   \
+           s16.ostk  \
+           u16.ostk  \
+           s32.ostk  \
+           u32.ostk  \
+           s64.ostk  \
+           u64.ostk  \
+           f32.ostk  \
+           f64.ostk  \
+           c64.ostk  \
            c128.ostk
 
-SRC_C     = base.c
-SRC_C_STK = base.stk
-SRC_SHOBJ = base.$(SO)
-
-srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
-
-srfi_interm = s8.stk u8.stk s16.stk u16.stk \
-	      s32.stk u32.stk s64.stk u64.stk \
-	      f32.stk f64.stk c64.stk c128.stk
+srfi_OBJS = $(SRC_OSTK)
 
 
 DOCDB  = ../../DOCDB
@@ -88,38 +75,66 @@ srfi_sources  = $(SRC_STK)
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
-# The procedures defined are exactly the same for all data types,
-# only the type changes. So we generate them from a template.
-#
-# We use a multiple-target rule, which calls sed to change the
-# string "TAG" in the template into s8, u8, etc, writing it to
-# a new file "s8.stk", "u8.stk" etc.
-s8.stk  u8.stk  s16.stk u16.stk \
-s32.stk u32.stk s64.stk u64.stk \
-f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
-	sed "s/TAG/$*/g"   tagvector-template.stk > $@
-
 #======================================================================
 
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
-.stk-incl.c:
-	$(COMP) -C -o $*-incl.c $*.stk
-
-.c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
-	@/bin/rm -f $*.o
-
 #======================================================================
 # Dependencies
 
-../../scheme/comparator.ostk:
-	(cd ../../scheme; $(MAKE) comparator.ostk)
+base.ostk: ../../scheme/vector/base.$(SO)
+s8.ostk:   ../../scheme/vector/s8.ostk
+u8.ostk:   ../../scheme/vector/u8.ostk
+s16.ostk:  ../../scheme/vector/s16.ostk
+u16.ostk:  ../../scheme/vector/u16.ostk
+s32.ostk:  ../../scheme/vector/s32.ostk
+u32.ostk:  ../../scheme/vector/u32.ostk
+s64.ostk:  ../../scheme/vector/s64.ostk
+u64.ostk:  ../../scheme/vector/u64.ostk
+f32.ostk:  ../../scheme/vector/f32.ostk
+f64.ostk:  ../../scheme/vector/f64.ostk
+c64.ostk:  ../../scheme/vector/c64.ostk
+c128.ostk: ../../scheme/vector/c128.ostk
 
-base.$(SO): ../../scheme/comparator.ostk base-incl.c base.c
+../../scheme/vector/base.$(SO):
+	(cd ../../scheme/vector; $(MAKE) $*)
 
+../../scheme/vector/s8.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/u8.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/s16.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/u16.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/s32.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/u32.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/s64.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/u64.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/f32.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/f64.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/c64.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
+
+../../scheme/vector/c128.ostk:
+	(cd ../../scheme/vector; $(MAKE) $*)
 
 
 #======================================================================
@@ -128,19 +143,21 @@ install-sources:
 	mkdir -p $(srfidir)
 	cp $(srfi_sources) $(srfi_interm) $(srfidir)
 
-# we also clean the TAG.stk files -- $(srfi-interm) --, which are NOT
-# srfi_OBJS (should not be installed with other objects):
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
 
 distclean: clean
-	/bin/rm -f Makefile $(srfi_interm)
+	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd $(srfidir); rm -f $(srfi_sources) $(srfi_interm))
+	(cd $(srfidir); rm -f $(srfi_sources) )
 	rmdir $(srfidir) || true
 ##
 ## # no docs...
 ## # doc:
 ## # 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
 ## # 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+
+# Local Variables:
+# tab-width: 8
+# End:
