@@ -929,7 +929,6 @@ doc: $(DOCDB)
 	   (cd $$i; $(MAKE) doc)\
 	done
 
-
 $(DOCDB): $(scheme_sources)
 	$(STKLOS_BINARY) -q -c -f ../doc/extract-doc $(scheme_sources) > $(DOCDB)
 

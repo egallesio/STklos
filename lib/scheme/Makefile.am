@@ -145,9 +145,10 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # 	(cd ../srfi; $(MAKE)  `basename $@`)
 
 
-stream.ostk:     list.$(SO) ../streams/derived.ostk
-../streams/derived.ostk:
-	(cd ../streams; $(MAKE) derived.ostk)
+stream.ostk:     ../streams/primitive.ostk ../streams/derived.ostk
+
+../streams/derived.ostk ../streams/primitive.ostk:
+	(cd ../streams; $(MAKE) $@)
 
 set.ostk: ../srfi/69.ostk comparator.ostk
 
