@@ -474,14 +474,14 @@ LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytev
 #----------------------------------------------------------------------
 SRC_STK = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
 SRC_C_STK = $(LARGE_C_STK)
-scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) $(LARGE_SHOBJ)
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) 
 SOURCES = $(SRC_STK) $(LARGE_C)
 
 #======================================================================
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
 schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
 scheme_sources = $(SRC_STK)
-scheme_DATA = $(scheme_OBJS)
+scheme_DATA = $(scheme_OBJS) 
 schemelib_DATA = $(LARGE_SHOBJ)
 
 #======================================================================
@@ -731,6 +731,9 @@ install-exec: install-exec-recursive
 install-data: install-data-recursive
 uninstall: uninstall-recursive
 
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
 installcheck: installcheck-recursive
 install-strip:
 	if test -z '$(STRIP)'; then \
@@ -897,8 +900,8 @@ text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 
 # ======================================================================
-install-am:
-	(cd vector; $(MAKE) install)
+#install-am:
+#	(cd vector; $(MAKE) install)
 
 install-sources:
 	@for i in $(SUBDIRS) ;do \
