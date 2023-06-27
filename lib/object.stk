@@ -603,7 +603,11 @@ doc>
 
   (let ((supers (if (null? supers)
                     (list <object>)
-                    (map find-class supers))))
+                    (map find-class supers)))
+        (slots  (map (lambda (x)
+                       ;; ensure all slot description is a list
+                       (if (pair? x) x (list x)))
+                     slots)))
     ;; Verify that all direct slots are different and that we don't inherit
     ;; several time from the same class
     (let ((tmp (find-duplicate supers)))
