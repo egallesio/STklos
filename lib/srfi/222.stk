@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-222.stk		-- Implementation of SRFI-222
+;;;; 222.stk		-- Implementation of SRFI-222
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -47,12 +47,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 28-Jul-2021 09:15 (jpellegrini)
-;;;; Last file update: 28-Jul-2021 11:46 (jpellegrini)
+;;;; Last file update: 29-Jun-2023 18:47 (eg)
 ;;;;
 
-(require "srfi-9")
-
-(define-module SRFI-222
+(define-module srfi/222
   (export    make-compound
              compound?
              compound-subobjects
@@ -151,8 +149,6 @@
        (else (loop (cdr subobjs))))))
    (else default)))
 
-)
-(select-module STklos)
-(import SRFI-222)
+) ;;; END of module srfi/222
 
-(provide "srfi-222")
+(provide "srfi/222")
