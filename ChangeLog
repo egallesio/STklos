@@ -1359,7 +1359,7 @@
 2019-07-07 Erick Gallesio <eg@unice.fr>
 	- Oops: pcre/missing was a link on the automake file instaead of a copy
 	- Fix in the generation of the .git_meta file
-	- Added meta informations of the source distrbution files in Git
+	- Added meta information of the source distrbution files in Git
 	- Fix: On OSX nl_langinfo returns a codeset in lower case
 
 2019-07-04 Erick Gallesio <eg@unice.fr>
@@ -3546,7 +3546,7 @@
 2007-02-09  Erick Gallesio  <eg@essi.fr>
 
 	* src/fport.c:
-	Added the nature of a file to %file-informations. It can be source,
+	Added the nature of a file to %file-information. It can be source,
 	byte-code or object
 	[39e06f30b4a4]
 
@@ -3597,7 +3597,7 @@
 	lib/snow-support.stk, src/boot.img, src/dynload.c, src/fport.c,
 	src/misc.c, src/sport.c, src/stklos.h, src/struct.c, src/vm.c, utils
 	/stklos-compile.stk:
-	Added file-informations to .so files
+	Added file-information to .so files
 	[ab43472293e7]
 
 2007-01-25  Erick Gallesio  <eg@essi.fr>
@@ -3769,7 +3769,7 @@
 
 	* lib/boot.stk, lib/repl.stk, src/boot.c, src/boot.img:
 	Better error messages when the debug mode is used (or when compiled
-	with line number informations)
+	with line number information)
 	[96301a2d147b]
 
 	* configure, configure.in, lib/Lalr.d/Makefile.in, lib/Makefile.am,
@@ -3948,7 +3948,7 @@
 	* lib/compfile.stk:
 	* lib/compiler.stk
 	* src/fport.c
-	* src/vm.c: Added informations on the global variables in
+	* src/vm.c: Added information on the global variables in
 	compiled bytecode files. This permits to avoid false messages on
 	references to undefined symbols.
 
@@ -4537,7 +4537,7 @@ n
 2005-04-24  Erick Gallesio  <eg@essi.fr>
 
 	* lib/compiler.stk: Line number generation is now embeded in the
-	stack (instead of in a global). This yields better informations
+	stack (instead of in a global). This yields better information
 	on errors and we have now a backtrace which is available when an
 	error occurs.
 
@@ -4940,7 +4940,7 @@ n
 
 2004-07-13  Erick Gallesio  <eg@essi.fr>
 
-	* PORTING-NOTES: Added informations about the port on SGI from
+	* PORTING-NOTES: Added information about the port on SGI from
 	Joshua Boyd
 
 	* lib/boot.stk:
@@ -5715,7 +5715,7 @@ n
 	* doc/Makefile.am: Added man pages for stklos, stklos-config and
 	stklos-compile.
 
-	* utils/stklos-config.in: Added informations when help is
+	* utils/stklos-config.in: Added information when help is
 	requested
 
 	* examples/menu.stk:

@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -934,7 +934,7 @@ DEFINE_PRIMITIVE("try-load", scheme_try_load, subr1, (SCM filename))
 
 
 
-DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
+DEFINE_PRIMITIVE("%file-information", file_information, subr1, (SCM filename))
 {
   SCM f, res = STk_nil;
   char *fname;
@@ -1000,7 +1000,7 @@ int STk_init_fport(void)
   ADD_PRIMITIVE(port_idle);
 
   //  ADD_PRIMITIVE(dbg);
-  ADD_PRIMITIVE(file_informations);
+  ADD_PRIMITIVE(file_information);
   return TRUE;
 }
 

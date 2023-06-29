@@ -91,7 +91,7 @@ doc>
                       :help-prompt (bold green)       ;; help prompt color
                       :help        (bold blue)        ;; help messages
                       :repl-depth  yellow             ;; REPL depth
-                      :info        (bold blue)))      ;; informations
+                      :info        (bold blue)))      ;; information
 
      (monochrome  .  ())
 

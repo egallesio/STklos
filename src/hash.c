@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2023 Erick Gallesio <eg@stklos.net>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -960,7 +960,7 @@ DEFINE_PRIMITIVE("hash-table-hash", hash_hash, subr1, (SCM obj))
  *
  * Prints  overall information about |hash|, such as the number of entries
  * it contains, the number of buckets in its hash array, and the utilization
- * of the buckets. Informations are printed on |port|. If no |port| is given
+ * of the buckets. Information is printed on |port|. If no |port| is given
  * to |hash-table-stats|, information are printed on the current output port
  * (see _<<curroport,`current-output-port` primitive>>_).
 doc>
