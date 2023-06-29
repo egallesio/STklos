@@ -60,7 +60,7 @@
     ;; Skip the symbol STklos
     (read in)
 
-    ;; Write file informations (information is not used for now)
+    ;; Write file information (information is not used for now)
     (let ((info (read in))
           (str  (open-output-string)))
       (write info str)

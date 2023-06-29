@@ -155,12 +155,12 @@ All the information given below are for old versions (pre-1.0) of
 STklos. They are here for the record.
 
 
-This file contains a set of informations for compiling STklos on
-various architectures.
+This file contains information for compiling STklos on various 
+architectures.
 
-If you experience a new port or confirm/infirm/add informations which
+If you experience a new port or confirm/infirm/add information which
 are specified here please send a mail to Erick Gallesio
-'eg(at)unice.fr'
+'eg(at)stklos.net'
 
 For each entry below, you'll find the OS and the version of the C
 compiler used for building the system. The entry Gtklos, tells if the

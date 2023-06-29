@@ -623,7 +623,7 @@ doc>
  * comparing keys. Here, we use the string-length as a (very simple)
  * hashing function. Of course, a function which gives a key depending
  * of the characters composing the string gives a better repartition
- * and should probably enhance performances. For instance, the following
+ * and should probably enhance performance. For instance, the following
  * call to |make-hash-table| should return a more efficient, even if
  * not perfect, hash table:
  * @lisp

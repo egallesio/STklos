@@ -2,7 +2,7 @@
  *
  * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -526,8 +526,8 @@ DEFINE_PRIMITIVE("sort", sort, subr2, (SCM obj, SCM test))
   else                   { STk_error("bad object to sort: ~S", obj); }
 
   /*
-   * Use a shell sort. It has good performances on small arrays
-   * This sort should have better performances than a cleverer one
+   * Use a shell sort. It has good performance on small arrays
+   * This sort should have better performance than a cleverer one
    * for the sorts we'll have to do in practice (which are often small
    * arrays).
    */

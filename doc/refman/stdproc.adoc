@@ -869,9 +869,9 @@ Note that two boxes are `equal?` *_iff_* their content are `equal?`.
 ((("process")))
 ((("PID")))
 {{stklos}} provides access to Unix processes as first class objects.
-Basically, a process contains several informations such as the standard
+Basically, a process contains information such as the standard
 system process identification (aka PID on Unix Systems), the files where
-the standard files of the process are redirected.
+the standard files of the process are redirected, ...
 
 {{insertdoc 'run-process}}
 {{insertdoc 'process?}}

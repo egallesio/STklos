@@ -1754,12 +1754,12 @@ both forms.
 ;;;;
 ;;;; Utilities for REQUIRE / REQUIRE-FOR-SYNTAX
 ;;;;
-(define (find-file-informations file lib-only? eventually-compile?)
+(define (find-file-information file lib-only? eventually-compile?)
 
   (define (compile-and-find-infos path)
     (let ((tmp (create-temp-file)))
       (compile-file path tmp)
-      (let ((infos (%file-informations tmp)))
+      (let ((infos (%file-information tmp)))
         (remove-file tmp)
         (set! infos (key-set! infos :nature 'source))
         infos)))
@@ -1771,7 +1771,7 @@ both forms.
                                               (version)))
                              (load-path)))))
     (if path
-        (let ((infos (%file-informations path)))
+        (let ((infos (%file-information path)))
           (if (and eventually-compile?
                    (eq? (key-get infos :nature 'unknown) 'source))
               ;; We have a source file (i.e. no info, compile it to have them)
@@ -1781,7 +1781,7 @@ both forms.
         '())))
 
 
-(define (import-file-informations infos)
+(define (import-file-information infos)
   (when (pair? infos)
     ;; Register all the global symbols of the file
     (for-each register-new-global! (key-get infos :globals '()))
@@ -1816,8 +1816,8 @@ both forms.
 
 
 (define (%grab-file-information str)
-  (let ((info (find-file-informations str #f #f)))
-    (import-file-informations info)))
+  (let ((info (find-file-information str #f #f)))
+    (import-file-information info)))
 
 ;;;;
 ;;;; REQUIRE
@@ -1830,8 +1830,8 @@ both forms.
   (when (and (= (length e) 3)
              (string? (cadr e))
              (boolean? (caddr e)))
-    (let ((infos (find-file-informations (cadr e) (caddr e) #f)))
-      (import-file-informations infos)))
+    (let ((infos (find-file-information (cadr e) (caddr e) #f)))
+      (import-file-information infos)))
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
 

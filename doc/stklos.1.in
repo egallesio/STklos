@@ -84,7 +84,7 @@ tell the REPL to not use the line editor even if GNU readline or BSD
 libedit libraries are found. This permit to use an external tool such
 as rlwrap(1) instead of the internal line editor support.
 .IP "-d, --debug"
-insert informations to ease debugging (e.g, line numbers, signaling
+insert information to ease debugging (e.g, line numbers, signaling
 usage of undefined symbols, ...). Can be used multiple times to
 increase the debugging level;
 .IP "-s, --stack-size=n"
