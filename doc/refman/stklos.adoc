@@ -53,7 +53,7 @@ following URL: https://www.gnu.org/licenses/gpl-3.0.html
 _GNU Free Documentation License or later_ (see <<FDL>>).
 
 
-{{If (eq? doc-fmt 'pdf)}}{{empty-line 14}} {{End}}
+{{If (equal? doc-fmt "pdf")}}{{empty-line 14}} {{End}}
 
 ****
 Copyright © 1999-{{date-year (current-date)}} Erick Gallesio
@@ -94,7 +94,7 @@ Free Documentation License">>.
 //
 // The index (produced only when we are building the PDF documentation)
 //
-{{If (eq? doc-fmt 'pdf)}}
+{{If (equal? doc-fmt "pdf")}}
 [index]
 == Index
 {{End}}

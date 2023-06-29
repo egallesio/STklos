@@ -85,10 +85,10 @@ extradoc: multi pdf
 
 # ----------------------------------------------------------------------
 tmp-html.txt: $(SOURCES) $(DOCDB)
-	$(SPP) -D "doc-fmt: 'html" stklos.adoc > $@
+	$(SPP) -D "doc-fmt: html" stklos.adoc > $@
 
 tmp-pdf.txt: $(SOURCES) $(DOCDB)
-	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc > $@
+	$(SPP) -D "doc-fmt: pdf" stklos.adoc > $@
 # ----------------------------------------------------------------------
 $(DOCDB):
 	(cd ..; $(MAKE) docdb)
