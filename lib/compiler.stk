@@ -999,7 +999,7 @@ doc>
   (generate-PREPARE-CALL epair)
   (compile-args actuals env)
   (compile fct env actuals #f)
-  (emit (if tail? 'TAIL-INVOKE  'INVOKE)
+  (emit (if tail? 'TAIL-INVOKE 'INVOKE)
         (length actuals)))
 
 (define can-be-inlined?
@@ -1656,14 +1656,6 @@ doc>
 ;;
 ;; INCLUDE
 ;;
-
-#|
-<doc EXT-SYNTAX include
- * (include <string1> <string2> ...)
- *
- * TODO
-doc>
-|#
 (define (%include-file name)
   (let ((port (open-input-file name))
         (old  *compiler-port*))
