@@ -513,6 +513,7 @@ primitives.
 {{insertdoc 'output-string-port?}}
 {{insertdoc 'output-bytevector-port?}}
 {{insertdoc 'output-file-port?}}
+{{insertdoc 'output-port-open?}}
 {{insertdoc 'output-virtual-port?}}
 {{insertdoc 'interactive-port?}}
 [#curroport]

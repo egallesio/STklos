@@ -79,6 +79,8 @@ bytevector functions.
 {{insertdoc 'bytevector-fill!}}
 {{insertdoc 'bytevector=?}}
 {{insertdoc 'bytevector-sint-set!}}
+{{insertdoc 'endianness}}
+{{insertdoc 'native-endianness}}
 
 ==== The (srfi ...) Libraries
 
@@ -168,3 +170,4 @@ IMPORTANT: This library  must be described
 {{insertdoc 'compiler:inline-common-functions}}
 {{insertdoc 'compiler:keep-formals}}
 {{insertdoc 'compiler:keep-source}}
+{{insertdoc 'compiler:unroll-iterations}}

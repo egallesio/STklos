@@ -687,6 +687,7 @@ we could define the following method to compare points:
 {{insertdoc 'class-name}}
 {{insertdoc 'find-class}}
 {{insertdoc 'is-a?}}
+{{insertdoc 'ensure-metaclass}}
 
 ==== Generic Functions and Methods
 
@@ -703,3 +704,4 @@ behavior which depends of the type or the number of its parameters.
 {{insertdoc  'class-precedence-list}}
 {{insertdoc  'class-direct-slots}}
 {{insertdoc  'class-slot-definition}}
+{{insertdoc  'slot-definition-init-keyword}}

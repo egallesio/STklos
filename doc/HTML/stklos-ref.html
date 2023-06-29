@@ -3804,7 +3804,14 @@ stated, the library |(lib a b)| will be implemented with a module whose name
 is |lib/a/b| and the |STklos| module has been deleted from the import list.</p>
 </div>
 <div class="paragraph">
-<p></p>
+<p>
+
+
+
+
+
+
+</p>
 </div>
 <div class="paragraph text-right">
 <p><span class="rmargin small">R<sup>7</sup>RS syntax</span></p>
@@ -3849,8 +3856,22 @@ a symbol or a list (as modules).</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>See R<sup>7</sup>RS for more information (or the sepcific entries in this document)
+<p>See R<sup>7</sup>RS for more information (or the specific entries in this document)
 about each <code>&lt;library declaration&gt;</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS permits to use library declarations only in
+a library definition; <strong><em>STklos</em></strong> permits to use them (except
+<code>include-library-declarations</code>) anywhere at toplevel.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -11061,6 +11082,25 @@ otherwise returns <code>#f</code>.</p>
 </p>
 </div>
 <div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(input-port-open? port)</code></strong><br>
+<strong><code>(output-port-open? port)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if port is still open and capable of performing
+input or output, respectively, and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
 <p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
@@ -14468,7 +14508,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1300</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1325</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -22753,6 +22793,36 @@ a class instance, the <code>default</code> value is returned, if present.</p>
 <div class="paragraph">
 <p>Returns <code>#t</code> if <code>obj</code> is an instance of <code>class</code>, and <code>#f</code> otherwise.</p>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ensure-metaclass class-list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Given a list of classes, returns a class which is a superclass of all
+the classes given. This superclass will be built so that it is a subclass
+of the most specific classes posible.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;B&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span><span class="p">)</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;C&gt;</span> <span class="p">()</span> <span class="p">())</span>
+
+<span class="p">(</span><span class="nf">ensure-metaclass</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">&lt;B&gt;</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;B&gt;</span> <span class="mi">7</span><span class="nv">fea2b8a3c30</span><span class="p">]</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">m</span> <span class="p">(</span><span class="nf">ensure-metaclass</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">&lt;B&gt;</span> <span class="nv">&lt;A&gt;</span> <span class="nv">&lt;C&gt;</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">class-direct-superclasses</span> <span class="nv">m</span><span class="p">)</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;B&gt;</span> <span class="mi">7</span><span class="nv">fea2b8a3c30</span><span class="p">]</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">fea2b8afb40</span><span class="p">])</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_generic_functions_and_methods_2">8.3.2. Generic Functions and Methods</h4>
@@ -23071,6 +23141,48 @@ in class <code>c</code>.</p>
 <span class="p">(</span><span class="nf">class-slots</span> <span class="nv">&lt;A&gt;</span><span class="p">)</span>
   <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">slot-one</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'none</span> <span class="o">#</span><span class="nv">:getter</span> <span class="nv">get-one</span><span class="p">)</span>
       <span class="p">(</span><span class="nf">slot-two</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'nada</span> <span class="o">#</span><span class="nv">:init-keyword</span> <span class="o">#</span><span class="nv">:two</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(slot-definition-name s)</code></strong><br>
+<strong><code>(slot-definition-options s)</code></strong><br>
+<strong><code>(slot-definition-allocation s)</code></strong><br>
+<strong><code>(slot-definition-getter s)</code></strong><br>
+<strong><code>(slot-definition-setter s)</code></strong><br>
+<strong><code>(slot-definition-accessor s)</code></strong><br>
+<strong><code>(slot-definition-init-form s)</code></strong><br>
+<strong><code>(slot-definition-init-keyword s)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures operate on slot definitions (the lists included in class
+definitions). They return the slot name, the list of options, the slot
+allocation, and the getter, setter, accessor, init-form and init-keyword
+of a slot, as returned by <code>class-slots</code> or by <code>class-slot-definition</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">slot-definition-name</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span>  <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span>       <span class="nv">=&gt;</span> <span class="nv">x</span>
+<span class="p">(</span><span class="nf">slot-definition-accessor</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span>  <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="nv">x</span>
+<span class="p">(</span><span class="nf">slot-definition-allocation</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span>  <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="nv">instance</span>
+<span class="p">(</span><span class="nf">slot-definition-options</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -23673,6 +23785,25 @@ supplied). If there are threads waiting to lock this mutex, the scheduler
 selects a thread, the <code>mutex</code> becomes locked/owned or locked/not-owned,
 and the thread is unblocked. <code>mutex-unlock!</code> returns <code>#f</code> when the
 <code>timeout</code> is reached, otherwise it returns <code>#t</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(with-mutex mtx &lt;thunk&gt;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Executes <code>thunk</code>, protected by mutex <code>mtx</code>. The mutex will
+be locked before and released after execution of <code>body</code>, and
+also on entrance or departure of its dynamic context
+(lock and unlock are used within <code>dynamic-wind</code>).</p>
 </div>
 </div>
 <div class="sect2">
@@ -25431,6 +25562,109 @@ the procedures <code>date=?</code>, <code>date&lt;?</code>, <code>date&gt;?</cod
 will compare dates by first normalizing them to make the time zone offset
 irrelevant, so "2000 Nov 12 03:30:10 GMT-2" will be taken as equal to
 "2000 Nov 12 02:30:10 GMT-1".</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-difference time1 time2)</code></strong><br>
+<strong><code>(time-difference! time1 time2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These SRFI-19 procedures return the time duration (as an object of type <code>time-duration</code>)
+between <code>time1</code> and <code>time2</code>. It is an error if <code>time1</code> and <code>time2</code> are of different time types.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>time-difference</code> creates a new time object, while <code>time-difference!</code> may use <code>time1</code> to
+create the resulting object.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time&#8656;? time1 time2)</code></strong><br>
+<strong><code>(time&lt;? time1 time2)</code></strong><br>
+<strong><code>(time=? time1 time2)</code></strong><br>
+<strong><code>(time&gt;=? time1 time2)</code></strong><br>
+<strong><code>(time&gt;? time1 time2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These are SRFI-19 predicates used to compare times. They return:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>time&#8656;?</code> : <code>#t</code> if <code>time1</code> is before or at (less than or equal to) <code>time2</code>,
+<code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&lt;?</code> :  <code>#t</code> if <code>time1</code> is before (less than) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time=?</code> :  <code>#t</code> if <code>time1</code> at (equal) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&gt;=?</code> : <code>#t</code> if <code>time1</code> is at or after (greater than or equal to) <code>time2</code>,
+<code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&gt;?</code> :  <code>#t</code> if <code>time1</code> is after (greater than) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>An attempt to compare times of different type will raise an error.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-resolution [time-type])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Clock resolution, in nanoseconds, of the system clock of type type
+<code>time-type</code>, which defaults to <code>TIME-UTC</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">time-resolution</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mi">1000000</span>
+<span class="p">(</span><span class="nf">time-resolution</span> <span class="nv">time-process</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1000000</span>
+<span class="p">(</span><span class="nf">time-resolution</span> <span class="nv">time-tai</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">1000000</span></code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -28977,6 +29211,45 @@ into <code>bytevector</code> at indices <code>k , &#8230;&#8203; , k + size − 
      <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">253</span><span class="p">))</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(endianness endianness-symbol)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The name of <code>endianness-symbol</code> must be a symbol describing an
+endianness.  An implementation must support at least the symbols big
+and little, but may support other endianness symbols.
+<code>(endianness endianness-symbol)</code> evaluates to the symbol named
+<code>endianness-symbol</code>. Whenever one of the procedures operating on
+bytevectors accepts an endianness as an argument, that argument must
+be one of these symbols. It is a syntax violation for <code>endianness-symbol</code>
+to be anything other than <code>little</code> or <code>big</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(native-endianness)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the endianness symbol of the underlying machine.</p>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -30426,6 +30699,25 @@ Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
        <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)))))</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:unroll-iterations)</code></strong><br>
+<strong><code>(compiler:unroll-iterations n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls the number of iterations to be unrolled in
+loops. Currently, only <code>repeat</code> loops are unrolled. The argument
+<code>n</code> must be a positive integer.</p>
+</div>
 </div>
 </div>
 </div>
@@ -30997,7 +31289,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-05 21:52:15 +0200
+Last updated 2023-06-29 18:26:19 +0200
 </div>
 </div>
 </body>
