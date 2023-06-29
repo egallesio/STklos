@@ -260,7 +260,7 @@
     (219 "Define higher-order lambda")
     ;; 220 ...... withdrawn
     (221 "Generator/accumulator sub-library" () "srfi-221")
-    ;; 222 Compound objects
+    (222 "Compound objects" () "srfi-222")
     (223 "Generalized binary search procedures" () "srfi-223")
     (224 "Integer Mappings" () "srfi-224")
     ;; 225 Dictionaries
