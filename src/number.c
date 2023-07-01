@@ -2266,7 +2266,7 @@ static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
      will later optimize the logic here. */
 
   /* FIXNUM - FIXNUM */
-  if (INTP(x) && INTP(y)) {
+  if (INTP(x) && INTP(y)) { // NOTE: at least one of x or y was originally inexact
     long int i1 = INT_VAL(x);
     long int i2 = INT_VAL(y);
 
@@ -2289,7 +2289,8 @@ static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
          Also, we need labs so GMP will get the expected ulong. */
       long xsign = mpz_sgn(BIGNUM_VAL(x));
       if (!quotient) rem = xsign * (long) mpz_tdiv_ui(BIGNUM_VAL(x), labs(INT_VAL(y)));
-      else rem = xsign * (long) mpz_tdiv_q_ui(q, BIGNUM_VAL(x), labs(INT_VAL(y))); /* rem may or may not be used */
+      else rem = xsign * (long) mpz_tdiv_q_ui(q, BIGNUM_VAL(x),
+                                              labs(INT_VAL(y))); /* rem may or may not be used */
       if (quotient && (INT_VAL(y) < 0)) mpz_neg(q,q); /* Put back the sign of y */
       big_q = 1;
 
@@ -2328,8 +2329,10 @@ static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
       if (quotient)  *quotient  = big_q ? bignum2number(q) : long2integer(quo);
       if (remainder) *remainder = big_r ? bignum2number(r) : long2integer(rem);
   } else {
-      if (quotient)  *quotient  = big_q ? double2real(bignum2double(q)) : double2real((double) quo);
-      if (remainder) *remainder = big_r ? double2real(bignum2double(r)) : double2real((double) rem);
+      if (quotient)  *quotient  = big_q ? double2real(bignum2double(q)) :
+                                          double2real((double) quo);
+      if (remainder) *remainder = big_r ? double2real(bignum2double(r)) :
+                                          double2real((double) rem);
   }
   if (quotient  && big_q) mpz_clear(q);
   if (remainder && big_r) mpz_clear(r);
@@ -2343,9 +2346,18 @@ static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder)
   if (!INTP(y) && !BIGNUMP(y) && !REALP(y)) error_bad_number(y);
   if (zerop(y))                             error_divide_by_0(x);
 
-  if (REALP(x)) { x = real2integer(x); exact = 0; }
-  if (REALP(y)) { y = real2integer(y); exact = 0; }
-  int_divide(x,y,quotient,remainder,exact);
+  if (INTP(x) && INTP(y)) {
+    /* Fast path for the division of two fixnums */
+    long int i1 = INT_VAL(x);
+    long int i2 = INT_VAL(y);
+    if (quotient)  *quotient  = long2integer(i1 / i2);
+    if (remainder) *remainder = long2integer(i1 % i2);
+  } else {
+    /* General case */
+    if (REALP(x)) { x = real2integer(x); exact = 0; }
+    if (REALP(y)) { y = real2integer(y); exact = 0; }
+    int_divide(x, y, quotient, remainder, exact);
+  }
 }
 
 DEFINE_PRIMITIVE("quotient", quotient, subr2, (SCM n1, SCM n2))
@@ -2644,9 +2656,7 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
                       }
     case tc_rational: {
                         SCM q, r;
-                        int_divide(RATIONAL_NUM(x),
-                                   RATIONAL_DEN(x),
-                                   &q, &r, 1);
+                        integer_division(RATIONAL_NUM(x), RATIONAL_DEN(x), &q, &r);
                         /* abs(r) is between 0 and denom-1,
                            so we can compare if r/2 <= denom. Or
                            if 2 <= 2denom. */
