@@ -2242,9 +2242,10 @@ doc>
  */
 static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
 {
+#ifdef STK_DEBUG
   if (!quotient && !remainder)
     STk_panic("integer_division called with no quotient nor reminder pointers");
-
+#endif
   /* Here, x and y can only be integer or bignum (not real) */
 
   /* NOTE about the remainder: the GMP accepts 'unsigned integers' and
