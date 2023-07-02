@@ -950,23 +950,34 @@ general_diff:
 
 
 static SCM int_quotient(SCM x, SCM y)
-/* Specialized version for rationals. Accepts only integer or bignums as params */
+/* Specialized version for rationals.
+   Accepts only integer or bignums as params, and not inexacts as
+   int_divide. Also, *only* computes and returns the quotient,
+   not the remainder. */
 {
-  mpz_t q, r;
+  mpz_t q;
+  SCM res;
 
-  if (INTP(x)) {
-    if (INTP(y))
-      return MAKE_INT(INT_VAL(x)/INT_VAL(y));
-    else
-      x = long2scheme_bignum(INT_VAL(x));
-  } else {
-    if (INTP(y))
-      y = long2scheme_bignum(INT_VAL(y));
-  }
-  /* Here x and y are both bignum */
-  mpz_init(q); mpz_init(r);
-  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y));
-  return bignum2number(q);
+  if (INTP(x) && INTP(y))
+    return MAKE_INT(INT_VAL(x)/INT_VAL(y));
+
+  mpz_init(q);
+
+  if (INTP(x)) /* && BIGNUMP(y), of course! */
+    return MAKE_INT(0); /* int / BIGNUM = 0... */
+
+  if (INTP(y)) /* && BIGNUMP(x), of course! */
+    /* The sign is in the numerator, so it's OK to use the '_ui' variant
+       from the GMP.  */
+    mpz_tdiv_q_ui(q, BIGNUM_VAL(x), INT_VAL(y));
+  else /* Here x and y are both bignums */
+    mpz_tdiv_q(q, BIGNUM_VAL(x), BIGNUM_VAL(y));
+
+  res = bignum2number(q);
+
+  mpz_clear(q);
+
+  return res;
 }
 
 static int digitp(char c, long base)
@@ -1590,9 +1601,9 @@ doc>
 
 int STk_real_isoddp(SCM n)   /* n MUST be a real */
 {
-  SCM q, r;
+  SCM r = 0;
 
-  integer_division(n, MAKE_INT(2), &q, &r);
+  integer_division(n, MAKE_INT(2), NULL, &r);
   /* We are sure here that r is a real */
   return (fpclassify(REAL_VAL(r)) != FP_ZERO);
 }
@@ -2229,80 +2240,149 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
  * @end lisp
 doc>
  */
+static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
+{
+#ifdef STK_DEBUG
+  if (!quotient && !remainder)
+    STk_panic("integer_division called with no quotient nor reminder pointers");
+#endif
+  /* Here, x and y can only be integer or bignum (not real) */
+
+  /* NOTE about the remainder: the GMP accepts 'unsigned integers' and
+     als returns 'unsigned integers' for remainders. We can safely use
+     'long' for these remainders, AND these will always fit a fixnum,
+     because we'll only receive them when we passed fixnums as arguments,
+     and the remainder won't be larger. */
+
+  long quo;              /* temp var for long quotient */
+  long rem = 0;          /* temp var for long remainder */
+  mpz_t q;
+  mpz_t r;
+  int big_q = 0;         /* Is the result quotient a bignum? */
+  int big_r = 0;         /* Is the result remainder a bignum? */
+
+  /* The following sequence of "if"s is written for clarity. Even though
+     it may look like we call INTP more times than necessary, the compiler
+     will later optimize the logic here. */
+
+  /* FIXNUM - FIXNUM */
+  if (INTP(x) && INTP(y)) { // NOTE: at least one of x or y was originally inexact
+    long int i1 = INT_VAL(x);
+    long int i2 = INT_VAL(y);
+
+    if (quotient)  quo = i1 / i2;
+    if (remainder) rem = i1 % i2;
+
+  /* FIXNUM - BIGNUM */
+  } else if (INTP(x)) {
+      /* STklos never stores fixnums as if they were bignums, so
+         we're sure that the quotient for INT/BIG = zero. */
+      if (quotient)  quo = 0;
+      if (remainder) rem = INT_VAL(x);
+
+  /* BIGNUM - FIXNUM */
+  } else  if (INTP(y)) {
+      if (quotient) mpz_init(q);
+      /* The GMP only returns unsigned remainders, so we need to keep track of the
+         sign of x. The easiest way to put back the sign is to initialize rem with
+         it, and multiply by whatever the GPM returns.
+         Also, we need labs so GMP will get the expected ulong. */
+      long xsign = mpz_sgn(BIGNUM_VAL(x));
+      if (!quotient) rem = xsign * (long) mpz_tdiv_ui(BIGNUM_VAL(x), labs(INT_VAL(y)));
+      else rem = xsign * (long) mpz_tdiv_q_ui(q, BIGNUM_VAL(x),
+                                              labs(INT_VAL(y))); /* rem may or may not be used */
+      if (quotient && (INT_VAL(y) < 0)) mpz_neg(q,q); /* Put back the sign of y */
+      big_q = 1;
+
+  /* BIGNUM - BIGNUM */
+  } else {
+    if (quotient)  mpz_init(q);
+    if (remainder) mpz_init(r);
+    /* mpz_cmpabs seems fast enough to not make much of a difference,
+       so we can call it here -- and it makes the dividing SMALL / BIG
+       and N / N cases much faster (I wonder why the GMP doesn't do
+       this internally): */
+    int cmp = mpz_cmpabs(BIGNUM_VAL(x), BIGNUM_VAL(y));
+    if (cmp < 0) {
+      /* SMALL / BIG -> quotient 0, remainder x */
+      if (quotient)  quo = 0;
+      if (remainder) mpz_set(r, BIGNUM_VAL(x));
+      big_r = 1;
+    } else if (cmp == 0) {
+      /* (+-)N / (+-)N -> quotient (signX * signY), remainder 0 */
+      long xsign = mpz_sgn(BIGNUM_VAL(x));
+      long ysign = mpz_sgn(BIGNUM_VAL(x));
+      if (quotient)  quo = xsign * ysign;
+      if (remainder) rem = 0;
+    } else {
+      /* BIG / SMALL -> call a division GMP function */
+      if (!quotient)        mpz_tdiv_r(r, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      else if (!remainder)  mpz_tdiv_q(q, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      else                  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      big_q = big_r = 1;
+    }
+  }
+  /*** END OF CASES ***/
+
+  /* Check exactness and set the result values */
+  if (exact) {
+      if (quotient)  *quotient  = big_q ? bignum2number(q) : long2integer(quo);
+      if (remainder) *remainder = big_r ? bignum2number(r) : long2integer(rem);
+  } else {
+      if (quotient)  *quotient  = big_q ? double2real(bignum2double(q)) :
+                                          double2real((double) quo);
+      if (remainder) *remainder = big_r ? double2real(bignum2double(r)) :
+                                          double2real((double) rem);
+  }
+  if (quotient  && big_q) mpz_clear(q);
+  if (remainder && big_r) mpz_clear(r);
+}
+
 static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder)
 {
-  mpz_t q, r;
   int exact = 1;
 
   if (!INTP(x) && !BIGNUMP(x) && !REALP(x)) error_bad_number(x);
   if (!INTP(y) && !BIGNUMP(y) && !REALP(y)) error_bad_number(y);
   if (zerop(y))                             error_divide_by_0(x);
 
-  if (REALP(x)) { x = real2integer(x); exact = 0; }
-  if (REALP(y)) { y = real2integer(y); exact = 0; }
-
-  /* Here, x and y can only be integer or bignum (not real) */
-  if (INTP(x)) {
-    if (INTP(y)) {
-      long int i1 = INT_VAL(x);
-      long int i2 = INT_VAL(y);
-
-      if (exact) {
-        *quotient  = MAKE_INT(i1 / i2);
-        *remainder = MAKE_INT(i1 % i2);
-      } else {
-        /* Useless casts to long are here for clang-tidy */
-        *quotient  = double2real((double) ((long) (i1 / i2)));
-        *remainder = double2real((double) ((long) (i1 % i2)));
-      }
-      return;
-    }
-    else
-      x = long2scheme_bignum(INT_VAL(x));
+  if (INTP(x) && INTP(y)) {
+    /* Fast path for the division of two fixnums */
+    long int i1 = INT_VAL(x);
+    long int i2 = INT_VAL(y);
+    if (quotient)  *quotient  = long2integer(i1 / i2);
+    if (remainder) *remainder = long2integer(i1 % i2);
   } else {
-    /* x is a bignum */
-    if (INTP(y))
-      y = long2scheme_bignum(INT_VAL(y));
+    /* General case */
+    if (REALP(x)) { x = real2integer(x); exact = 0; }
+    if (REALP(y)) { y = real2integer(y); exact = 0; }
+    int_divide(x, y, quotient, remainder, exact);
   }
-
-  /* Here x and y are both bignum */
-  mpz_init(q); mpz_init(r);
-  mpz_tdiv_qr(q,r,BIGNUM_VAL(x),BIGNUM_VAL(y));
-  if (exact) {
-    *quotient  = bignum2number(q);
-    *remainder = bignum2number(r);
-  } else {
-    /*     *quotient  = double2real(mpz_get_d(q)); */
-    /*     *remainder = double2real(mpz_get_d(r)); */
-    *quotient  = double2real(bignum2double(q));
-    *remainder = double2real(bignum2double(r));
-  }
-  mpz_clear(q); mpz_clear(r);                          /* //FIXME: TESTER */
 }
 
 DEFINE_PRIMITIVE("quotient", quotient, subr2, (SCM n1, SCM n2))
 {
-  SCM q, r;
+  SCM q = 0;
 
-  integer_division(n1, n2, &q, &r);
+  integer_division(n1, n2, &q, NULL);
   return q;
 }
 
 
 DEFINE_PRIMITIVE("remainder", remainder, subr2, (SCM n1, SCM n2))
 {
-  SCM q, r;
+  SCM r = 0;
 
-  integer_division(n1, n2, &q, &r);
+  integer_division(n1, n2, NULL, &r);
   return r;
 }
 
 
 DEFINE_PRIMITIVE("modulo", modulo, subr2, (SCM n1, SCM n2))
 {
-  SCM q, r;
+  SCM r = 0;
 
-  integer_division(n1, n2, &q, &r);
+  integer_division(n1, n2, NULL, &r);
   if (negativep(n1) != negativep(n2) && !zerop(r))
      /*kerch@parc.xerox.com*/
     r = add2(r, n2);
@@ -2518,7 +2598,7 @@ DEFINE_PRIMITIVE("floor", floor, subr1, (SCM x))
                                  sub2(RATIONAL_NUM(x),
                                       sub2(RATIONAL_DEN(x), MAKE_INT(1))):
                                  RATIONAL_NUM(x);
-                        return STk_quotient(tmp, RATIONAL_DEN(x));
+                        return int_quotient(tmp, RATIONAL_DEN(x));
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -2538,7 +2618,7 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
                                 RATIONAL_NUM(x) :
                                 add2(RATIONAL_NUM(x),
                                      sub2(RATIONAL_DEN(x), MAKE_INT(1)));
-                        return STk_quotient(tmp, RATIONAL_DEN(x));
+                        return int_quotient(tmp, RATIONAL_DEN(x));
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -2551,8 +2631,11 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
 DEFINE_PRIMITIVE("truncate", truncate, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
-    case tc_real:     return double2real(trunc(REAL_VAL(x)));
-    case tc_rational: return STk_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
+    case tc_real:     {
+                        double d = REAL_VAL(x);
+                        return double2real(d < 0.0 ? ceil(d): floor(d));
+                      }
+    case tc_rational: return int_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
     case tc_bignum:
     case tc_integer:  return x;
     default:          error_not_a_real_number(x);
@@ -2572,18 +2655,18 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
                         return double2real(res);
                       }
     case tc_rational: {
-                        SCM tmp;
-
-                        if (RATIONAL_DEN(x) == MAKE_INT(2)) {
-                          tmp = (negativep(RATIONAL_NUM(x))) ?
-                                   sub2(RATIONAL_NUM(x), MAKE_INT(1)):
-                                   add2(RATIONAL_NUM(x), MAKE_INT(1));
-                          return mul2(STk_quotient(tmp, MAKE_INT(4)), MAKE_INT(2));
-                        }
-                        tmp = make_rational(add2(mul2(RATIONAL_NUM(x), MAKE_INT(2)),
-                                                 RATIONAL_DEN(x)),
-                                            mul2(RATIONAL_DEN(x), MAKE_INT(2)));
-                        return STk_floor(tmp);
+                        SCM q, r;
+                        integer_division(RATIONAL_NUM(x), RATIONAL_DEN(x), &q, &r);
+                        /* abs(r) is between 0 and denom-1,
+                           so we can compare if r/2 <= denom. Or
+                           if 2 <= 2denom. */
+                        if (STk_numge2(mul2(absolute(r),MAKE_INT(2)),
+                                       RATIONAL_DEN(x)))
+                            return negativep(RATIONAL_NUM(x))
+                                ? sub2(q, MAKE_INT(1))
+                                : add2(q, MAKE_INT(1));
+                        else
+                            return q;
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -3342,7 +3425,7 @@ static inline SCM exact_exponent_expt(SCM x, SCM y)
 
       while (y != MAKE_INT(1)) {
         nx = mul2(x, x);
-        ny = STk_quotient(y, MAKE_INT(2));
+        ny = int_quotient(y, MAKE_INT(2));
         if (STk_evenp(y) == STk_false) val = mul2(x, val);
         x = nx;
         y = ny;
