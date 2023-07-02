@@ -941,6 +941,21 @@ See SRFI document for more information.
 {{insertdoc 'parameterize}}
 {{insertdoc 'parameter?}}
 
+=== Compiler
+
+{{stklos}} always compiles code into bytecode before executing -- it
+is not an interpreter, but a bytecode compiler with an ad-hoc virtual
+machine. The compiler is available as a standalone tool, to be
+used in shell scripts, and also through primitive procedures.
+
+The command `stklos-compile` compiles a file into {{stklos}} bytecode.
+Please refer to its manpage for more information.
+
+Compiling files from Scheme programs can be done with the
+`compile-file` procedure.
+
+{{insertdoc 'compile-file}}
+
 === Misc
 (((Garbage Collector)))
 {{insertdoc 'gc}}
