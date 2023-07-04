@@ -33,7 +33,7 @@
   (import SCHEME)
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
-          repl-theme get-repl-color repl-show-banner)
+          repl-theme get-repl-color repl-show-startup-message)
 
 ;;; In module REPL
 
@@ -241,18 +241,21 @@ doc>
 
 
 #|
-<doc EXT repl-show-banner
- * (repl-show-banner)
- * (repl-show-banner val)
+<doc EXT repl-show-startup-message
+ * (repl-show-startup-message)
+ * (repl-show-startup-message val)
  *
- * If tis parameter is a true value, a banner is printed when {{stklos}} start in
- * interactive mode. Otherwise, no banner is printed. By default, this parameter
+ * If this parameter is a true value, a banner is printed when {{stklos}} starts
+ * in interactive mode. Otherwise, no banner is printed. By default, this parameter
  * is set to `#t`.
  *
- * NOTE: A good place to set this parameter is in the `.stklosrc` file.
+ * NOTE: This parameter can be set to `#f` with the |--no-startup-message| option of
+ * the {{stklos}} command. Otherwise, a good place to set this parameter is in the
+ * `.stklosrc` file.
 doc>
 |#
-(define repl-show-banner (make-parameter #f))
+(define repl-show-startup-message
+  (make-parameter (key-get *%system-state-plist* #:startup-message #t)))
 
 ;; ----------------------------------------------------------------------
 ;;      main-repl-hook ...
@@ -342,7 +345,7 @@ doc>
     ;; Use classic theme if the user has not set a theme in his/her init file
     (unless (repl-theme)
       (repl-theme 'classic))
-    (when (repl-show-banner)
+    (when (repl-show-startup-message)
       (let* ((utf8?  (key-get *%system-state-plist* :use-utf8 #f))
              (line1   (format "STklos version ~a (~a)\n" (version) (%push-id)))
              (line2  "Copyright (C) 1999-2023 Erick Gallesio <eg@stklos.net>\n")
