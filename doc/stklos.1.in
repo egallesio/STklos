@@ -74,7 +74,9 @@ directory is also used to store the packages installed with the
 \fIstklos-pkg(1)\fR command. Note that the shell variable
 \fISTKLOS_CONFDIR\fR can also be used to set this directory (see below).
 .IP "-q, --no-init-file"
-quiet: do not load the user init file
+quiet: do not load the user init file.
+.IP "-Q, --no-startup-message"
+quiet: do not show the startup message. 
 .IP "-i, --interactive"
 be interactive, even if the command finds it is not the case. This
 option is generally useful when used inside emacs since it permits to
