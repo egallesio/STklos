@@ -231,7 +231,7 @@ doc>
 ;;      display-prompt ...
 ;; ----------------------------------------------------------------------
 (define (display-prompt port)
-  (display (repl-prompt))
+  (display (repl-prompt) port)
   (flush-output-port port))
 
 ;; ----------------------------------------------------------------------
