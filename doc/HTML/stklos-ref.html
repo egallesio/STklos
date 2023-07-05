@@ -870,7 +870,7 @@ pre.rouge {
 <li><a href="#_idiosync">Appendix A: STklos Idiosyncrasies</a>
 <ul class="sectlevel2">
 <li><a href="#_stklos_libraries">A.1. STklos libraries</a></li>
-<li><a href="#_stklos_compiler_flags">A.2. STklos compiler flags</a></li>
+<li><a href="#_stklos_compiler">A.2. STklos compiler</a></li>
 </ul>
 </li>
 <li><a href="#FDL">Appendix B: GNU Free Documentation License</a>
@@ -30549,7 +30549,51 @@ This library  must be described
 </div>
 </div>
 <div class="sect2">
-<h3 id="_stklos_compiler_flags">A.2. STklos compiler flags</h3>
+<h3 id="_stklos_compiler">A.2. STklos compiler</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> always compiles code into bytecode before executing&#8201;&#8212;&#8201;it
+is not an interpreter, but a bytecode compiler with an ad-hoc virtual
+machine. The compiler is available as a standalone tool, to be
+used in shell scripts, and also through primitive procedures.</p>
+</div>
+<div class="paragraph">
+<p>The command <code>stklos-compile</code> compiles a file into <strong><em>STklos</em></strong> bytecode.
+Please refer to its manpage for more information.</p>
+</div>
+<div class="paragraph">
+<p>Compiling files from Scheme programs can be done with the
+<code>compile-file</code> procedure.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compile-file input output)</code></strong><br>
+<strong><code>(compile-file input output :prepend cmds)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Compiles the file whose name is <code>input</code> into a bytecode executable
+whose name is <code>output</code> (if <code>compile-file</code> fails, <code>output</code> file is
+deleted).</p>
+</div>
+<div class="paragraph">
+<p>If the <code>:prepend</code> keyword argument is given, it must be a list of
+expressions, which will be compiled before the rest of the input
+file. This can be used to define variables that the compiled program
+will use (but it does not affect the compiler itself).</p>
+</div>
+<div class="paragraph">
+<p>This procedure will not set the executable bit on the generated file.</p>
+</div>
+<div class="sect3">
+<h4 id="_compiler_flags">A.2.1. Compiler flags</h4>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> compiler behaviour can be customized by several parameters. Those parameters are described below.</p>
 </div>
@@ -30760,6 +30804,7 @@ Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
 <p>This parameter controls the number of iterations to be unrolled in
 loops. Currently, only <code>repeat</code> loops are unrolled. The argument
 <code>n</code> must be a positive integer.</p>
+</div>
 </div>
 </div>
 </div>
@@ -31332,7 +31377,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-07-04 17:43:19 +0200
+Last updated 2023-07-05 12:01:06 +0200
 </div>
 </div>
 </body>

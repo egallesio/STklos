@@ -160,7 +160,23 @@ The symbols exported by `(stklos itrie)` are described below:
 
 IMPORTANT: This library  must be described
 
-=== STklos compiler flags
+=== STklos compiler
+
+{{stklos}} always compiles code into bytecode before executing -- it
+is not an interpreter, but a bytecode compiler with an ad-hoc virtual
+machine. The compiler is available as a standalone tool, to be
+used in shell scripts, and also through primitive procedures.
+
+The command `stklos-compile` compiles a file into {{stklos}} bytecode.
+Please refer to its manpage for more information.
+
+Compiling files from Scheme programs can be done with the
+`compile-file` procedure.
+
+{{insertdoc 'compile-file}}
+
+==== Compiler flags 
+
 
 {{stklos}} compiler behaviour can be customized by several parameters. Those parameters are described below.
 
