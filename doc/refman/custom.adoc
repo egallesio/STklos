@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -27,6 +27,8 @@ parmaters are listed below.
 {{insertdoc 'thread-handler-error-show}}
 {{insertdoc 'stklos-debug-level}}
 {{insertdoc 'repl-theme}}
+{{insertdoc 'repl-show-startup-message}}
+
 
 
 
