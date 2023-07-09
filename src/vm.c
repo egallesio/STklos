@@ -55,7 +55,8 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #else
    /* Standard C compiler. Use the classic switch statement */
 #  define CASE(x)       case x:
-#  define NEXT          continue;/* Be sure to not use continue elsewhere */
+#  define NEXT          goto VM_LOOP_END; /* NOT continue, as it interacts badly with the
+                                             do{...}while(0) guards. */
 #endif
 
 #define NEXT0           do{vm->val = STk_void; vm->valc = 0; NEXT;}while(0)
@@ -1547,7 +1548,7 @@ CASE(INSCHEME) {
   NEXT1;
  }
 
- 
+
 CASE(END_OF_CODE) {
    return;
  }
@@ -1709,7 +1710,7 @@ CASE(IN_CXR) {
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
  }
- 
+
 CASE(IN_APPLY)   {
   STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
   NEXT;
@@ -1937,7 +1938,8 @@ end_funcall:
       default:
         STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop);
     }
-  }
+  VM_LOOP_END: /* Where every instruction jumps after executing */
+  } /* for( ; ; ) */
 #endif
   STk_panic("abnormal exit from the VM");
 }
