@@ -125,10 +125,12 @@ doc>
 - ,pwd             Print working directory
 - ,quit ,q         Exit STklos
 - ,shell ,!        Run a shell command
+- ,version ,v      Show version
 - ,help ,? ,h      This help\n")
                                    'normal)
                          (current-error-port))
                         (flush-output-port (current-error-port)))
+    ((version v)        (printf "~A ~A\n" (version) (%push-id)))
     ((quit q)           (exit 0))
     ((backtrace bt)     (%display-backtrace repl-backtrace 6))
     ((shell !)          (system (read-line)))
@@ -146,7 +148,7 @@ doc>
 (define %other-error-handlers '())
 
 (define (%try-matching-condition e)
-  (assoc e %other-error-handlers (lambda(key pred?) (pred? key))))
+  (assoc e %other-error-handlers (lambda (key pred?) (pred? key))))
 
 (define (%add-error-to-repl-handler pred? action)
   ;; Usage exemple:
