@@ -1547,7 +1547,7 @@ CASE(INSCHEME) {
   NEXT1;
  }
 
- 
+
 CASE(END_OF_CODE) {
    return;
  }
@@ -1709,7 +1709,7 @@ CASE(IN_CXR) {
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
  }
- 
+
 CASE(IN_APPLY)   {
   STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
   NEXT;
@@ -2351,6 +2351,31 @@ SCM STk_execute_C_bytecode(SCM all_consts, STk_instr *instr)
   return STk_void;
 }
 
+/*===========================================================================*\
+ *
+ *                       V M   I N T R O S P E C T I O N
+ *
+\*===========================================================================*/
+
+DEFINE_PRIMITIVE("%vm-config",vm_config, subr0, ()) {
+  SCM res = STk_nil;
+
+#ifdef DEBUG_VM
+  res = STk_cons(STk_intern("debug-vm"), res);
+#endif
+
+#ifdef STAT_VM
+  res = STk_cons(STk_intern("stat-vm"), res);
+#endif
+
+#ifdef USE_COMPUTED_GOTO
+  res = STk_cons(STk_intern("computed-goto"), res);
+#else
+  res = STk_cons(STk_intern("switch-case"), res);
+#endif
+  return res;
+}
+
 
 int STk_init_vm()
 {
@@ -2375,6 +2400,8 @@ int STk_init_vm()
   ADD_PRIMITIVE(restore_cont);
   ADD_PRIMITIVE(continuationp);
   ADD_PRIMITIVE(fresh_continuationp);
+
+  ADD_PRIMITIVE(vm_config);
 
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_vm_debug);
