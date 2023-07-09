@@ -112,6 +112,9 @@ doc>
 
 ;;; ======================================================================
 
+(define (pad-with-zero str)
+  (regexp-replace " " str "0"))
+
 (define (do-repl-command l)
   (define (trim-left str)
     (regexp-replace "^[ \t]*" str ""))
@@ -123,6 +126,7 @@ doc>
 - ,backtrace ,bt   Show the stack when last error occurred
 - ,cd              Change current directory
 - ,pwd             Print working directory
+- ,date            Print current date and time
 - ,quit ,q         Exit STklos
 - ,shell ,!        Run a shell command
 - ,version ,v      Show version
@@ -131,6 +135,16 @@ doc>
                          (current-error-port))
                         (flush-output-port (current-error-port)))
     ((version v)        (printf "~A ~A\n" (version) (%push-id)))
+    ((date)             (let ((d (current-date)))
+                          (printf "~A-~A-~A ~A:~A:~A (GMT~A~A)\n"
+                                  (date-year d)
+                                  (date-month d)
+                                  (date-day d)
+                                  (pad-with-zero (format "~2f" (date-hour d)))
+                                  (pad-with-zero (format "~2f" (date-minute d)))
+                                  (pad-with-zero (format "~2f" (date-second d)))
+                                  (if (negative? (date-tz d)) "" "+")
+                                  (pad-with-zero (format "~2f" (/ (date-tz d) 60 60))))))
     ((quit q)           (exit 0))
     ((backtrace bt)     (%display-backtrace repl-backtrace 6))
     ((shell !)          (system (read-line)))
