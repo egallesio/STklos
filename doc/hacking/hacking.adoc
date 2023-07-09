@@ -148,6 +148,60 @@ is.
 In order to include Scheme code for execution during STklos startup,
 edit `lib/boot.stk`.
 
+== C style
+
+=== Multicommand macros
+
+It is common practice to use
+
+[source,c]
+----
+#define SOME_MACRO do{ \
+      ... \
+      ... \
+}while(0)
+----
+
+So that `SOME_MACRO` can be used inside `if` and other C commands.
+
+However, this can lead to problems. The following situation actually
+happened in STklos development.
+
+[source,c]
+----
+#define NEXT continue
+ ...
+
+for(;;) {
+    ...
+
+#define LOCK_AND_RESTART                 do{\
+    if (!have_global_lock) {                   \
+      ...                                      \
+      NEXT;                                    \
+    }                                          \
+}while(0)
+...
+
+} /* for(;;) */
+----
+
+The `NEXT` expands into `continue`, which will break out of the `do`,
+and not continue the `for` loop as intended.
+
+For this reason, we use `if(1){ ... }else{}` for multicommand macros,
+as in the following example:
+
+[source,c]
+----
+#define LOCK_AND_RESTART                 if(1){\
+    if (!have_global_lock) {                   \
+      ...                                      \
+      NEXT;                                    \
+    }                                          \
+}else{}
+----
+
 == Adding simple modules and SRFIs
 
 === Adding modules
