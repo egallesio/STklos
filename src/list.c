@@ -232,7 +232,7 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
    * NOTE: using strings (instead of keywords) is less efficient because
    * the char * is at the end of the object. Using symbols is also fast
    * (even a bit faster, don't know why), but it is harder  to detect that
-   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
+   * that we can inline when we have (%cxr lst 'daa), because of the quote.
    */
   if (KEYWORDP(name)) {
     SCM lst   = l;
@@ -585,7 +585,7 @@ doc>
 
 
 #define LMEMBER(compare)                                        \
-do{                                                             \
+if(1){                                                          \
   register SCM ptr;                                             \
                                                                 \
   if (!CONSP(list) && !NULLP(list)) error_bad_list(list);       \
@@ -599,7 +599,7 @@ do{                                                             \
     if ((ptr=CDR(ptr)) == list) error_circular_list(ptr);       \
   }                                                             \
   return STk_false;                                             \
-}while(0)
+}else{}
 
 
 DEFINE_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list))
@@ -664,7 +664,7 @@ doc>
  */
 
 #define LASSOC(compare)                                         \
-do{                                                             \
+if(1){                                                          \
   register SCM l,tmp;                                           \
                                                                 \
   for(l=alist; CONSP(l); ) {                                    \
@@ -675,7 +675,7 @@ do{                                                             \
   if (NULLP(l)) return(STk_false);                              \
   STk_error("improper list ~W", alist);                         \
   return STk_void; /* never reached */                          \
-}while(0)
+}else{}
 
 DEFINE_PRIMITIVE("assq", assq, subr2, (SCM obj, SCM alist))
 {

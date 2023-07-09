@@ -229,23 +229,23 @@ typedef struct {
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
-#define NEWCELL(_var, _type)    do{                                             \
+#define NEWCELL(_var, _type)    if(1){                                          \
         _var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));    \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                              \
         BOXED_INFO(_var) = 0;                                                   \
-        }while(0)
+        }else{}
 
-#define NEWCELL_WITH_LEN(_var, _type, _len)     do{     \
+#define NEWCELL_WITH_LEN(_var, _type, _len)  if(1){     \
         _var = (SCM) STk_must_malloc(_len);             \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
-        }while(0)
+        }else{}
 
-#define NEWCELL_ATOMIC(_var, _type, _len)       do{     \
+#define NEWCELL_ATOMIC(_var, _type, _len)    if(1){     \
         _var = (SCM) STk_must_malloc_atomic(_len);      \
         BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
         BOXED_INFO(_var) = 0;                           \
-        }while(0)
+        }else{}
 
   /*
    * PRIMITIVES

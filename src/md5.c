@@ -45,20 +45,20 @@ struct md5_context
 
 
 #define GET_UINT32(n,b,i)                                         \
-do{                                                               \
+if(1){                                                            \
     (n) = (uint32) ((uint8 *) (b))[(i)]                           \
       | (((uint32) ((uint8 *) (b))[(i)+1]) <<  8)                 \
       | (((uint32) ((uint8 *) (b))[(i)+2]) << 16)                 \
       | (((uint32) ((uint8 *) (b))[(i)+3]) << 24);                \
-}while(0)
+}else{}
 
 #define PUT_UINT32(n,b,i)                                         \
-do{                                                               \
+if(1){                                                            \
     (((uint8 *) (b))[(i)]  ) = (uint8) (((n)      ) & 0xFF);      \
     (((uint8 *) (b))[(i)+1]) = (uint8) (((n) >>  8) & 0xFF);      \
     (((uint8 *) (b))[(i)+2]) = (uint8) (((n) >> 16) & 0xFF);      \
     (((uint8 *) (b))[(i)+3]) = (uint8) (((n) >> 24) & 0xFF);      \
-}while(0)
+}else{}
 
 static void md5_starts( struct md5_context *ctx )
 {

@@ -27,27 +27,27 @@
 #include <langinfo.h>
 #include "gnu-getopt.h"
 
-#define ADD_OPTION(o, k)                                     do{\
+#define ADD_OPTION(o, k)                                  if(1){\
   if (*o) options = STk_key_set(options,                        \
                                 STk_makekey(k),                 \
                                 STk_Cstring2string(o));         \
-}while(0)
+}else{}
 
-#define ADD_BOOL_OPTION(o, k)                        do{\
+#define ADD_BOOL_OPTION(o, k)                     if(1){\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
                         MAKE_BOOLEAN(o));               \
-}while(0)
+}else{}
 
-#define ADD_INT_OPTION(o, k)                         do{\
+#define ADD_INT_OPTION(o, k)                      if(1){\
   options = STk_key_set(options,                        \
                         STk_makekey(k),                 \
                         MAKE_INT(o));                   \
-}while(0)
+}else{}
 
-#define ADD_SCM_OPTION(o, k)                         do{\
+#define ADD_SCM_OPTION(o, k)                      if(1){\
   options = STk_key_set(options, STk_makekey(k),o);     \
-}while(0)
+}else{}
 
 /*=============================================================================
  *

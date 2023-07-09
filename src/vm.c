@@ -46,7 +46,6 @@ static int cpt_inst[NB_VM_INSTR];
 static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
-
 #if defined(__GNUC__) && !defined(DEBUG_VM)
    /* Use computed gotos to have better performance */
 #  define USE_COMPUTED_GOTO
@@ -58,8 +57,8 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #  define NEXT          continue;/* Be sure to not use continue elsewhere */
 #endif
 
-#define NEXT0           do{vm->val = STk_void; vm->valc = 0; NEXT;}while(0)
-#define NEXT1           do{vm->valc = 1; NEXT;}while(0)
+#define NEXT0           if(1){vm->val = STk_void; vm->valc = 0; NEXT;}else{}
+#define NEXT1           if(1){vm->valc = 1; NEXT;}else{}
 
 
 #ifdef sparc
@@ -169,28 +168,28 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 #define VM_STATE_FP(reg)        ((reg)[3])
 #define VM_STATE_JUMP_BUF(reg)  ((reg)[4])
 
-#define SAVE_VM_STATE()               do{               \
+#define SAVE_VM_STATE()               if(1){            \
   vm->sp                   -= VM_STATE_SIZE;            \
   VM_STATE_PC(vm->sp)       = (SCM) vm->pc;             \
   VM_STATE_CST(vm->sp)      = (SCM) vm->constants;      \
   VM_STATE_ENV(vm->sp)      = (SCM) vm->env;            \
   VM_STATE_FP(vm->sp)       = (SCM) vm->fp;             \
   VM_STATE_JUMP_BUF(vm->sp) = (SCM) vm->top_jmp_buf;    \
-}while(0)
+}else{}
 
-#define FULL_RESTORE_VM_STATE(p)      do{                       \
+#define FULL_RESTORE_VM_STATE(p)      if(1){                    \
   vm->pc                     = (STk_instr *) VM_STATE_PC(p);    \
   RESTORE_VM_STATE(p);                                          \
-}while(0)
+}else{}
 
-#define RESTORE_VM_STATE(p)           do{                       \
+#define RESTORE_VM_STATE(p)           if(1){                    \
   /* pc is not restored here. See FULL_RESTORE_VM_STATE */      \
   vm->constants          = (SCM *)  VM_STATE_CST(p);            \
   vm->env                = (SCM)    VM_STATE_ENV(p);            \
   vm->fp                 = (SCM *)  VM_STATE_FP(p);             \
   vm->top_jmp_buf        = (jbuf *) VM_STATE_JUMP_BUF(p);       \
   vm->sp                += VM_STATE_SIZE;                       \
-}while(0)
+}else{}
 
 
 /*
@@ -204,20 +203,20 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 #define HANDLER_PREV(reg)       ((reg)[2])
 
 
-#define SAVE_HANDLER_STATE(proc, addr)  do{             \
+#define SAVE_HANDLER_STATE(proc, addr)  if(1){          \
   vm->sp                   -= EXCEPTION_HANDLER_SIZE;   \
   HANDLER_PROC(vm->sp)  =  (SCM) (proc);                \
   HANDLER_END(vm->sp)   =  (SCM) (addr);                \
   HANDLER_PREV(vm->sp)  =  (SCM) vm->handlers;          \
   vm->handlers          = vm->sp;                       \
-}while(0)
+}else{}
 
-#define UNSAVE_HANDLER_STATE()  do{                     \
+#define UNSAVE_HANDLER_STATE()  if(1){                  \
   SCM *old = vm->handlers;                              \
                                                         \
   vm->handlers = (SCM *) HANDLER_PREV(vm->handlers);    \
   vm->sp       = old + EXCEPTION_HANDLER_SIZE;          \
-}while(0)
+}else{}
 
 
 /*===========================================================================*\
@@ -226,7 +225,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
  *
 \*===========================================================================*/
 
-#define PREP_CALL() do{                                 \
+#define PREP_CALL() if(1){                              \
   SCM fp_save = (SCM)(vm->fp);                          \
                                                         \
   /* Push an activation record on the stack */          \
@@ -236,16 +235,16 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   ACT_SAVE_PROC(vm->fp) = STk_false;                    \
   ACT_SAVE_INFO(vm->fp) = STk_false;                    \
   /* Other fields will be initialized later */          \
-}while(0)
+}else{}
 
 
-#define RET_CALL() do{                                  \
+#define RET_CALL() if(1){                               \
   vm->sp        = vm->fp + ACT_RECORD_SIZE;             \
   vm->env       = ACT_SAVE_ENV(vm->fp);                 \
   vm->pc        = ACT_SAVE_PC(vm->fp);                  \
   vm->constants = ACT_SAVE_CST(vm->fp);                 \
   vm->fp        = ACT_SAVE_FP(vm->fp);                  \
-}while(0)
+}else{}
 
 
 /*
@@ -266,18 +265,18 @@ MUT_DECL(global_lock);          /* the lock to access checked_globals */
 
 
 
-#define PUSH_ENV(nargs, func, next_env)  do{    \
+#define PUSH_ENV(nargs, func, next_env)  if(1){ \
     BOXED_TYPE(vm->sp)   = tc_frame;            \
     FRAME_LENGTH(vm->sp) = nargs;               \
     FRAME_NEXT(vm->sp)   = next_env;            \
     FRAME_OWNER(vm->sp)  = func;                \
-}while(0)
+}else{}
 
-#define CALL_CLOSURE(func) do{                  \
+#define CALL_CLOSURE(func) if(1){               \
     vm->pc        = CLOSURE_BCODE(func);        \
     vm->constants = CLOSURE_CONST(func);        \
     vm->env       = (SCM) vm->sp;               \
-}while(0)
+}else{}
 
 
 
@@ -290,17 +289,17 @@ typedef SCM (*prim5)(SCM,SCM,SCM,SCM,SCM);
 typedef SCM (*primv)(int,SCM*);
 
 
-#define CALL_PRIM(v, args) do{                  \
+#define CALL_PRIM(v, args) if(1){               \
     ACT_SAVE_PROC(vm->fp) = v;                  \
     v = PRIMITIVE_FUNC(v)args;                  \
-}while(0)
+}else{}
 
 
 
-#define CALL_PRIMITIVE(type, v, args) do{       \
+#define CALL_PRIMITIVE(type, v, args) if(1){    \
     ACT_SAVE_PROC(vm->fp) = v;                  \
     v = (* (type) PRIMITIVE_FUNC(v))args;       \
-}while(0)
+}else{}
 
 #define CALL_PRIM0(v, args) CALL_PRIMITIVE(prim0, v, args)
 #define CALL_PRIM1(v, args) CALL_PRIMITIVE(prim1, v, args)
@@ -313,16 +312,16 @@ typedef SCM (*primv)(int,SCM*);
 
 
 
-#define REG_CALL_PRIM(name) do{                           \
+#define REG_CALL_PRIM(name) if(1){                        \
   extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
   ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);      \
-}while(0)
+}else{}
 
 
-#define RETURN_FROM_PRIMITIVE() do{             \
+#define RETURN_FROM_PRIMITIVE() if(1){          \
     vm->sp = vm->fp + ACT_RECORD_SIZE;          \
     vm->fp = (SCM *) ACT_SAVE_FP(vm->fp);       \
-}while(0)
+}else{}
 
 static void run_vm(vm_thread_t *vm);
 
@@ -910,26 +909,24 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *      operand at [n+1]
  *   4) Thread A resumes, updates operand at [n+1], releases lock
  */
-#define LOCK_AND_RESTART                     do{\
+#define LOCK_AND_RESTART                  if(1){\
   if (!have_global_lock) {                      \
     MUT_LOCK(global_lock);                      \
     have_global_lock=1;                         \
     (vm->pc)--;                                 \
     NEXT;                                       \
   }                                             \
-}while(0)
-#define RELEASE_LOCK                         do{\
-   {                                            \
+}else{}
+#define RELEASE_LOCK                      if(1){\
     MUT_UNLOCK(global_lock);                    \
     have_global_lock=0;                         \
-   }                                            \
-}while(0)
-#define RELEASE_POSSIBLE_LOCK                do{\
+}else{}
+#define RELEASE_POSSIBLE_LOCK             if(1){\
   if (have_global_lock) {                       \
     MUT_UNLOCK(global_lock);                    \
     have_global_lock=0;                         \
   }                                             \
-}while(0)
+}else{}
 
 static void run_vm(vm_thread_t *vm)
 {
@@ -1547,7 +1544,7 @@ CASE(INSCHEME) {
   NEXT1;
  }
 
- 
+
 CASE(END_OF_CODE) {
    return;
  }
@@ -1709,7 +1706,7 @@ CASE(IN_CXR) {
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
  }
- 
+
 CASE(IN_APPLY)   {
   STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
   NEXT;

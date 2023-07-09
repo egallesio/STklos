@@ -55,25 +55,25 @@ long exp_2_fxwidth() {
 }
 
 #if CONTROL_FX_PARAMETERS == 1
-#define ensure_fx(x) do{      \
+#define ensure_fx(x) if(1){   \
   if (!INTP(x))               \
     error_bad_fixnum1(x);     \
-}while(0)
+}else{}
 
-#define ensure_fx2(x, y) do{    \
+#define ensure_fx2(x, y) if(1){ \
   if (!(INTP(x) && INTP(y)))    \
     error_bad_fixnum2(x, y);    \
-}while(0)
+}else{}
 
-#define ensure_fx3(x, y, z) do{         \
+#define ensure_fx3(x, y, z) if(1){      \
   if (!(INTP(x) && INTP(y) && INTP(z))) \
     error_bad_fixnum3(x, y, z);         \
-}while(0)
+}else{}
 
-#define ensure_fx4(x, y, z, w) do{                 \
+#define ensure_fx4(x, y, z, w) if(1){              \
   if (!(INTP(x) && INTP(y) && INTP(z) && INTP(w))) \
     error_bad_fixnum4(x, y, z, w);                 \
-}while(0)
+}else{}
 
 static void error_bad_fixnum1(SCM o1)
 {
