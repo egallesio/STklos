@@ -55,7 +55,7 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #else
    /* Standard C compiler. Use the classic switch statement */
 #  define CASE(x)       case x:
-#  define NEXT          goto VM_LOOP_END /* NOT continue, as it interacts badly with
+#  define NEXT          goto VM_LOOP_TOP /* NOT continue, as it interacts badly with
                                             the do{...}while(0) guards. */
 #endif
 
@@ -932,6 +932,7 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
   }                                             \
 }while(0)
 
+
 static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
@@ -959,7 +960,7 @@ static void run_vm(vm_thread_t *vm)
   NEXT;
 #else
   for ( ; ; ) {
-    /* Execution loop */
+  VM_LOOP_TOP:     /* Execution loop */
     byteop = fetch_next();
 #  ifdef DEBUG_VM
     if (debug_level > 1)
@@ -1938,7 +1939,6 @@ end_funcall:
       default:
         STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop);
     }
-  VM_LOOP_END: /* Where every instruction jumps after executing */
   } /* for( ; ; ) */
 #endif
   STk_panic("abnormal exit from the VM");
