@@ -169,6 +169,11 @@ static void error_not_an_integer(SCM n)
   STk_error("exact or inexact integer required, got ~s", n);
 }
 
+static void error_not_an_exact_integer(SCM n)
+{
+  STk_error("exact integer required, got ~s", n);
+}
+
 union binary64 {
   uint64_t u;
   double   d;
@@ -4006,6 +4011,43 @@ DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM expo
   return STk_mul2(res, STk_expt (MAKE_INT(2), exponent));
 }
 
+/*
+ *
+ * Logical operations
+ *
+ */
+
+static inline SCM bignum_logop(SCM n1, SCM n2,
+                               void (*op)(mpz_t, const mpz_t, const mpz_t))
+{
+  mpz_t r;
+  SCM res;
+
+  mpz_init(r);
+  op(r, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
+  res = bignum2number(r);
+  mpz_clear(r);
+  return res;
+}
+
+#define LOGICAL_OP(sname, name, op, opfct)                         \
+DEFINE_PRIMITIVE(sname, name, subr2, (SCM n1, SCM n2))             \
+{                                                                  \
+  if (!INTP(n1) && !BIGNUMP(n1))  error_not_an_exact_integer(n1);  \
+  if (!INTP(n2) && !BIGNUMP(n2))  error_not_an_exact_integer(n2);  \
+                                                                   \
+  if (INTP(n1) && INTP(n2))                                        \
+    return MAKE_INT(INT_VAL(n1) op INT_VAL(n2));                   \
+                                                                   \
+  if (INTP(n1)) n1 = long2scheme_bignum(INT_VAL(n1));              \
+  if (INTP(n2)) n2 = long2scheme_bignum(INT_VAL(n2));              \
+  return bignum_logop(n1, n2, opfct);                              \
+}
+
+LOGICAL_OP("%bit-and", bit_and, &, mpz_and)
+LOGICAL_OP("%bit-or",  bit_or,  |, mpz_ior)
+LOGICAL_OP("%bit-xor", bit_xor, ^, mpz_xor)
+
 
 /*
  *
@@ -4126,6 +4168,9 @@ DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
   return STk_true;
 #endif
 }
+
+
+
 
 /*
  *
@@ -4259,6 +4304,11 @@ int STk_init_number(void)
   ADD_PRIMITIVE(float_min_exp);
   ADD_PRIMITIVE(float_max_exp);
 
+  ADD_PRIMITIVE(bit_and);
+  ADD_PRIMITIVE(bit_or);
+  ADD_PRIMITIVE(bit_xor);
+
+  
   /* SRFI 208: NaN procedures */
   ADD_PRIMITIVE(make_nan);
   ADD_PRIMITIVE(nan_negativep);

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-60.stk        -- SRFI-60: Integers as Bits
 ;;;;
-;;;; Copyright © 2005-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -56,12 +56,12 @@
           bitwise-and ash bitwise-ior bitwise-xor bitwise-not
           bit-count bit-set? any-bits-set? first-set-bit
           bitwise-merge)
-  
+
 ;; ----------------------------------------------------------------------
 ;;      logand, logior, logxor, lognot ...
 ;; ----------------------------------------------------------------------
 (define logand bit-and)
-(define logior  bit-or)
+(define logior bit-or)
 (define logxor bit-xor)
 (define lognot bit-not)
 
