@@ -48,12 +48,18 @@
 ;;;;    Creation date: 08-Jul-2020 16:21 (jpellegrini)
 ;;;;
 
+;;;; [EG] Use C primitives %bit-{and,or,xor} instead of Scheme functions
+;;;;      bitwise-{and,ior,xor}. 
+
 (define-module scheme/bitwise
-  (import (srfi 60))
+  (import (srfi 60)
+          (only SCHEME %bit-and %bit-or %bit-xor      ;; faster C primitives
+                       bit-not))
+
   (export bitwise-not bitwise-and bitwise-ior bitwise-xor bitwise-eqv
           bitwise-nand bitwise-nor bitwise-andc1 bitwise-andc2
           bitwise-orc1 bitwise-orc2
-          arithmetic-shift bit-count integer-length bitwise-if 
+          arithmetic-shift bit-count integer-length bitwise-if
           bit-set? copy-bit bit-swap any-bit-set? every-bit-set?  first-set-bit
           bit-field bit-field-any? bit-field-every?  bit-field-clear bit-field-set
           bit-field-replace  bit-field-replace-same
@@ -89,20 +95,20 @@
 
 ;;; Olin Shivers is the sole author of this code, and he has placed it in
 ;;; the public domain.
-;;; 
+;;;
 ;;; A good implementation might choose to provide direct compiler/interpreter
 ;;; support for these derived functions, or might simply define them to be
 ;;; integrable -- i.e., inline-expanded.
-;;; 
+;;;
 ;;; The seven non-trivial boolean functions in terms
 ;;; of not, and, or & xor.
 
-(define (bitwise-nand  i j)  (bitwise-not (bitwise-and i j)))
-(define (bitwise-nor   i j)  (bitwise-not (bitwise-ior i j)))
-(define (bitwise-andc1 i j)  (bitwise-and (bitwise-not i) j))	
-(define (bitwise-andc2 i j)  (bitwise-and i (bitwise-not j)))	
-(define (bitwise-orc1  i j)  (bitwise-ior (bitwise-not i) j))
-(define (bitwise-orc2  i j)  (bitwise-ior i (bitwise-not j)))
+(define (bitwise-nand  i j)  (bit-not (%bit-and i j)))
+(define (bitwise-nor   i j)  (bit-not (%bit-or i j)))
+(define (bitwise-andc1 i j)  (%bit-and (bit-not i) j))
+(define (bitwise-andc2 i j)  (%bit-and i (bit-not j)))
+(define (bitwise-orc1  i j)  (%bit-or  (bit-not i) j))
+(define (bitwise-orc2  i j)  (%bit-or  i (bit-not j)))
 
 ;;; This is a general definition, but less than efficient.  It should also
 ;;; receive primitive compiler/interpreter support so that the expensive
@@ -120,16 +126,16 @@
 (define (bitwise-eqv . args)
   (let lp ((args args) (ans -1))
     (if (pair? args)
-        (lp (cdr args) (bitwise-not (bitwise-xor ans (car args))))
+        (lp (cdr args) (bit-not (%bit-xor ans (car args))))
 	ans)))
 
 ;;; Helper function -- make a mask of SIZE 1-bits, e.g. (%MASK 3) = #b111.
 ;;; Suppose your Scheme's fixnums are N bits wide (counting the sign bit,
-;;; not counting any tag bits). This version, due to Marc Feeley, will 
-;;; handle SIZE in the range [0,N-1] without overflowing to bignums. 
+;;; not counting any tag bits). This version, due to Marc Feeley, will
+;;; handle SIZE in the range [0,N-1] without overflowing to bignums.
 ;;; (For SIZE >= N, the correct bignum value is also produced.)
 
-(define (mask start end) (bitwise-not (arithmetic-shift -1 (- end start))))
+(define (mask start end) (bit-not (arithmetic-shift -1 (- end start))))
 
 ;;; This alternate, mathematically-equivalent expression
 ;;;     (- (arithmetic-shift 1 size) 1)
@@ -144,12 +150,12 @@
 ;;; replication of the ones.
 
 ;;; STklos' SRFI60 already has this
-;;;(define (bit-set? index n) 
+;;;(define (bit-set? index n)
 ;;;  (not (zero? (bitwise-and (arithmetic-shift 1 index) n))))
 
-(define (any-bit-set? test-bits n) (not (zero? (bitwise-and test-bits n))))
+(define (any-bit-set? test-bits n) (not (zero? (%bit-and test-bits n))))
 
-(define (every-bit-set? test-bits n) (= test-bits (bitwise-and test-bits n)))
+(define (every-bit-set? test-bits n) (= test-bits (%bit-and test-bits n)))
 
 ;;; Bit-field ops
 
@@ -158,12 +164,12 @@
 ;;;  (bitwise-and (mask start end) (arithmetic-shift n (- start))))
 
 (define (bit-field-any? n start end)
-  (not (zero? (bitwise-and (arithmetic-shift n (- start)) (mask start end)))))
+  (not (zero? (%bit-and (arithmetic-shift n (- start)) (mask start end)))))
 
 ;; Part of Olin's late revisions; code by John Cowan; public domain.
 (define (bit-field-every? n start end)
   (let ((m (mask start end)))
-    (eqv? m (bitwise-and (arithmetic-shift n (- start)) m))))
+    (eqv? m (%bit-and (arithmetic-shift n (- start)) m))))
 
 ;; Integrating i-b-f reduces nicely.
 (define (bit-field-clear n start end)
@@ -180,8 +186,8 @@
 ;;; This three-line version won't fixnum-overflow on fixnum args.
 (define (bit-field-replace n newfield start end)
   (let ((m (mask start end)))
-    (bitwise-ior (bitwise-and n (bitwise-not (arithmetic-shift m start)))
-		 (arithmetic-shift (bitwise-and newfield m) start))))
+    (%bit-or (%bit-and n (bit-not (arithmetic-shift m start)))
+		 (arithmetic-shift (%bit-and newfield m) start))))
 
 (define (bit-field-replace-same to from start end)
   (bitwise-if (arithmetic-shift (mask start end) start) from to))
