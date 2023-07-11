@@ -46,6 +46,12 @@
 ;promotional, or sales literature without prior written consent in
 ;each case.
 
+
+;; Use the binary versions of log-and lor-or (%log-and and %log-or) which are
+;; faster than their n-ary counterpart
+ 
+
+
 (define-module srfi/60
   (import SCHEME)
   (export logand logior logxor lognot bitwise-if logtest logcount
@@ -69,13 +75,13 @@
 ;;      bitwise-if ...
 ;; ----------------------------------------------------------------------
 (define (bitwise-if mask n0 n1)
-  (bit-or (bit-and mask n0)
-          (bit-and (bit-not mask) n1)))
+  (%bit-or (%bit-and mask n0)
+           (%bit-and (bit-not mask) n1)))
 ;; ----------------------------------------------------------------------
 ;;      logtest ...
 ;; ----------------------------------------------------------------------
 (define (logtest n1 n2)
-  (not (zero? (bit-and n1 n2))))
+  (not (zero? (%bit-and n1 n2))))
 
 ;; ----------------------------------------------------------------------
 ;;      logcount ...
@@ -86,8 +92,8 @@
                          tot
                          (logcnt (quotient n 16)
                                  (+ (vector-ref
-                                        '#(0 1 1 2 1 2 2 3 1 2 2 3 2 3 3 4)
-                                        (modulo n 16))
+                                     '#(0 1 1 2 1 2 2 3 1 2 2 3 2 3 3 4)
+                                     (modulo n 16))
                                     tot))))))
     (lambda (n)
       (cond ((negative? n) (logcnt (lognot n) 0))
@@ -97,14 +103,15 @@
 ;; ----------------------------------------------------------------------
 ;;      integer-length ...
 ;; ----------------------------------------------------------------------
-(define integer-length
-  (symbol-value 'integer-length (find-module 'SCHEME)))
+;; Primitive is imported 
+;; (define integer-length
+;;   (symbol-value 'integer-length (find-module 'SCHEME)))
 
 ;; ----------------------------------------------------------------------
 ;;      log2-binary-factors ...
 ;; ----------------------------------------------------------------------
 (define (log2-binary-factors n)
-  (+ -1 (integer-length (bit-and n (- n)))))
+  (+ -1 (integer-length (%bit-and n (- n)))))
 
 ;; ----------------------------------------------------------------------
 ;;      logbit? ...
@@ -117,14 +124,14 @@
 ;; ----------------------------------------------------------------------
 (define (copy-bit index to bool)
   (if bool
-      (bit-or  to (bit-shift 1 index))
-      (bit-and to (bit-not (bit-shift 1 index)))))
+      (%bit-or  to (bit-shift 1 index))
+      (%bit-and to (bit-not (bit-shift 1 index)))))
 
 ;; ----------------------------------------------------------------------
 ;;      bit-field ...
 ;; ----------------------------------------------------------------------
 (define (bit-field n start end)
-  (bit-and (bit-not (bit-shift -1 (- end start)))
+  (%bit-and (bit-not (bit-shift -1 (- end start)))
            (bit-shift n (- start))))
 ;; ----------------------------------------------------------------------
 ;;      copy-bit-field ...
@@ -146,12 +153,12 @@
   (let* ((width (- end start))
          (count (modulo count width))
          (mask  (bit-not (bit-shift -1 width)))
-         (zn    (bit-and mask (bit-shift n (- start)))))
-    (bit-or (bit-shift
-             (bit-or (bit-and mask (bit-shift zn count))
+         (zn    (%bit-and mask (bit-shift n (- start)))))
+    (%bit-or (bit-shift
+             (%bit-or (%bit-and mask (bit-shift zn count))
                      (bit-shift zn (- count width)))
              start)
-            (bit-and (bit-not (bit-shift mask start)) n))))
+            (%bit-and (bit-not (bit-shift mask start)) n))))
 
 ;; ----------------------------------------------------------------------
 ;;      reverse-bit-field ...
@@ -160,15 +167,15 @@
   (define (bit-reverse k n)
     (do ((m (if (negative? n) (bit-not n) n) (bit-shift m -1))
          (k (+ -1 k) (+ -1 k))
-         (rvs 0 (bit-or (bit-shift rvs 1) (bit-and 1 m))))
+         (rvs 0 (%bit-or (bit-shift rvs 1) (%bit-and 1 m))))
         ((negative? k) (if (negative? n) (bit-not rvs) rvs))))
 
 
   (let* ((width (- end start))
          (mask  (bit-not (bit-shift -1 width)))
-         (zn    (bit-and mask (bit-shift n (- start)))))
-    (bit-or (bit-shift (bit-reverse width zn) start)
-            (bit-and (bit-not (bit-shift mask start)) n))))
+         (zn    (%bit-and mask (bit-shift n (- start)))))
+    (%bit-or (bit-shift (bit-reverse width zn) start)
+             (%bit-and (bit-not (bit-shift mask start)) n))))
 
 
 ;; ----------------------------------------------------------------------
@@ -207,9 +214,9 @@
 (define bitwise-ior logior)
 (define bitwise-xor logxor)
 
-(define bitwise-not lognot)
-(define bit-count logcount)
-(define bit-set?   logbit?)
+(define bitwise-not   lognot)
+(define bit-count     logcount)
+(define bit-set?      logbit?)
 (define any-bits-set? logtest)
 (define first-set-bit log2-binary-factors)
 (define bitwise-merge bitwise-if)
