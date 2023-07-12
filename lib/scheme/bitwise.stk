@@ -68,15 +68,6 @@
           bitwise-fold bitwise-for-each bitwise-unfold make-bitwise-generator)
 
 
-   ;; FIXME: Using a library will resove this problem
-  (define-macro (%define-here . lst)
-   `(begin ,@(map (lambda (symb) `(define ,symb ,symb))
-                  lst)))
-
-  (%define-here bit-field first-set-bit copy-bit bit-set? bitwise-if integer-length
-		bit-count arithmetic-shift bitwise-xor bitwise-ior bitwise-and
-		bitwise-not)
-
 ;;; Using SRFI-60
 (define bit-field-rotate rotate-bit-field)
 (define bit-field-reverse reverse-bit-field)
