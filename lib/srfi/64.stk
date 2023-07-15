@@ -55,8 +55,7 @@
 ;;;;
 
 (define-module srfi/64
-  (import (srfi 9)
-          (srfi 35))
+  (import (srfi 35))
 
   ;; List of exported names
   (export
