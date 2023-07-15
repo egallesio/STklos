@@ -106,16 +106,24 @@
   (error 'unquote-splicing "used outside of a quasiquote context"))
 
 #|
-<doc R7RS syntax-error
+<doc R7RS-SYNTAX syntax-error
  * (syntax-error message arg1 ...)
+ * (syntax-error who message arg1 ...)
  *
- * TODO
+ * |Syntax-error| behaves similarly to |error| except that it signals the
+ * error as soon as syntax-error is expanded. This can be use in macros to signal
+ * errors at compile time, without interrupting the compilation process. In
+ * interactive mode, under the REPL, |syntax-error| yields a true error.
+ *
+ * NOTE: {{rseven}} defines only the first form of call (with a string as first
+ * parameter).  {{stklos}} permits to use a symbol as first parameter to specify the
+ * location of the syntax error. It also permits the usage of  _tilde conventions_
+ * as the |error| primitive.
 doc>
 |#
-
 (define (%syntax-error msg . args)
   (cond
-   ((string? msg)              ; R7RS synax-error call: (syntax-error "message " 1 2 3)
+   ((string? msg)              ; R7RS syntax-error call: (syntax-error "message " 1 2 3)
     (apply compiler-error (void) args msg args))
 
    ((symbol? msg)              ; Extension: something like (syntax-error 'foo "not happy ~S" 100)
@@ -125,4 +133,3 @@ doc>
 
    (else
     (error 'syntax-error "bad parameters ~S" (cons msg args)))))
-

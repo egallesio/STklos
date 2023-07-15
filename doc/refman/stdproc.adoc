@@ -950,6 +950,7 @@ See SRFI document for more information.
 ((("SRFI-23")))
 {{insertdoc 'error}}
 {{insertdoc 'signal-error}}
+{{insertdoc 'syntax-error}}
 {{insertdoc 'file-error?}}
 {{insertdoc 'error-object?}}
 {{insertdoc 'error-object-message}}
