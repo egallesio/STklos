@@ -41,11 +41,22 @@
 ;;; ----------------------------------------------------------------------
 (define (compiler-error where who fmt . l)
   (let* ((where (if (eq? where (void)) "" (format "~A: " where)))
-         (loc   (if (%epair? who)
-                    (format "~A:~A: "
-                            (%path-without-cwd (%epair-file who))
-                            (%epair-line who))
-                    "")))
+         (loc   (cond
+                 ((%epair? who)
+                  ;; location should be more accurate especially on generated code
+                  (format "~A:~A: "
+                          (%path-without-cwd (%epair-file who))
+                          (%epair-line who)))
+                 ((and *compiler-port* (%port-file-fd *compiler-port*))
+                  ;; *compiler-port* denotes a file port (probably less precise location
+                  ;; than with an epair)
+                  (format "~A:~A: "
+                          (%path-without-cwd (port-file-name *compiler-port*))
+                          (port-current-line *compiler-port*)))
+                 (else
+                  ;; no information on the location. Be silent
+                  ""))))
+
     (if *compiler-port*
         ;; Compiling a file
         (apply format

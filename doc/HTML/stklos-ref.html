@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.18">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -6353,7 +6350,7 @@ field reversed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns two values: <code>i</code>+<code>j</code>+<code>k</code>, and carry: it is the value of the computation</p>
+<p>Returns two values: <code>i</code>`j`<code>k</code>, and carry: it is the value of the computation</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -14508,7 +14505,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1347</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1373</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -18118,7 +18115,7 @@ in STklos, and it is also returned by the procedure <code>void</code>.</p>
 </p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -18140,13 +18137,15 @@ name of the procedure which raises the error.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The specification string may follow the <em>tilde conventions</em> of
+R<sup>7</sup>RS permits only the fist form of call. Using a symbol as first
+parameter is <strong><em>STklos</em></strong> specific.
+Furthermore, the specification string may follow the <em>tilde conventions</em> of
 <code>format</code> (see <em><a href="#format">primitive <code>format</code></a></em>); in this case this
 procedure builds an error message according to the specification
 given in <code>str</code>. Otherwise,
 this procedure is in conformance with the <code>error</code> procedure defined in
 <strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong> (<em>Error reporting mechanism</em>) and <code>str</code> is printed with the <code>display</code> procedure,
-whereas the <code>obj`s are printed  with the `write</code> procedure.
+whereas the <code>obj</code> parameters are printed  with the <code>write</code> procedure.
 </td>
 </tr>
 </table>
@@ -18203,6 +18202,41 @@ condition which inherits from <code>&amp;error-message</code>.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">signal-error</span> <span class="nv">&amp;error-message</span> <span class="nv">arg</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(syntax-error message arg1 &#8230;&#8203;)</code></strong><br>
+<strong><code>(syntax-error who message arg1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Syntax-error</code> behaves similarly to <code>error</code> except that it signals the
+error as soon as syntax-error is expanded. This can be use in macros to signal
+errors at compile time, without interrupting the compilation process. In
+interactive mode, under the REPL, <code>syntax-error</code> yields a true error.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS defines only the first form of call (with a string as first
+parameter).  <strong><em>STklos</em></strong> permits to use a symbol as first parameter to specify the
+location of the syntax error. It also permits the usage of  <em>tilde conventions</em>
+as the <code>error</code> primitive.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>
@@ -31377,7 +31411,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-07-05 12:01:06 +0200
+Last updated 2023-07-15 18:52:08 +0200
 </div>
 </div>
 </body>
