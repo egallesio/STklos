@@ -232,6 +232,12 @@
 
 ;; ----------------------------------------------------------------------
 
+
+;; A label is just a number. Each instruction in the list *code-instr*
+;; is either:
+;; - a list (instruction + arguments), or
+;; - a label (an integer number)
+
 (define (new-label)
   (let ((lab *code-labels*))
     (set! *code-labels* (+ *code-labels* 1))
@@ -242,6 +248,11 @@
 (define (emit . args)
   (set! *code-instr* (cons args *code-instr*)))
 
+
+;; emit-label will emit the last generated label, but will *not*
+;; increment it (the same label can be emitted several times).  In
+;; order to create a new label, use %compiler-new-label (or
+;; 'new-label')
 (define (emit-label lab)
   (set! *code-instr* (cons lab *code-instr*)))
 
