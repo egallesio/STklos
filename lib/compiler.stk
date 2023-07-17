@@ -263,6 +263,18 @@
 ;
 ; ======================================================================
 
+;; The global variable *code-constants* contains a list of constants for the
+;; code being compiled. Each list in the list is a symbol (and it is searched
+;; with memq).
+;; Why is its index not also kept in the list? Because the index is the position
+;; of the element in the list, and it's calculated when the compiler calls this
+;; function (fetch-constant).
+;;
+;; (define *code-constants* (list-copy '(a b c d e)))
+;; (fetch-constant 'c)  => 2
+;; (fetch-constant 'a)  => 0
+;; (fetch-constant 'x)  => 5   (and x is appended to the end of *code-constants*)
+;;
 (define (fetch-constant c)
   (let ((x (memq c *code-constants*)))
     (unless x
