@@ -1932,16 +1932,19 @@ both forms.
      ,@body
      (void)))
 
+;; The expression, 'e', is of the form '(%%label nnnn)',
+;; where nnnn is an integer that describes this label.
 (define (compile-%%label e env tail)
   (if (= (length e) 2)
       (emit-label (cadr e))
       (compiler-error '%%label e "bad usage ~S" e)))
 
+;; The expression, 'e', is something like '(%%goto nnnn)',
+;; where nnnn is a label.
 (define (compile-%%goto e env tail)
   (if (= (length e) 2)
       (emit 'GOTO (cadr e))
       (compiler-error '%%goto e "bad usage ~S" e)))
-
 
 (define (compile-%%source-pos e env tail)
   (compile (if (%epair? e)
