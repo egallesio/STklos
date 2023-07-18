@@ -148,6 +148,10 @@
   mlocals                       ; #t if symbols are macros
   parent)                       ; parent scope
 
+;; find-symbol-in-env will return:
+;; a symbol, if it is a local variable
+;; a syntax object, if the symbol is bound to syntax
+;; #f otherwise
 (define (find-symbol-in-env symb env)
   (let Loop ((env env))
     (cond
@@ -187,6 +191,17 @@
 ;
 ; ======================================================================
 
+;; find-syntax-in-env returns the syntax object to which symb is bound,
+;; or #f
+;; This is *not* to be used when accessing symbol values; it is to be
+;; used when expanding macros -- to expand a form (S ...), we see if
+;; S is syntax; if it's not, we don't bother doing anything else and
+;; return the form as is.
+;;
+;; This is theusual way (almost all Schemes do this):
+;; (define-syntax f (syntax-rules () ((f) -1)))
+;; (let ((f (lambda () 10))) (macro-expand '(f))) => -1
+;; (let ((f (lambda () 10))) (f))                 => 10
 (define (find-syntax-in-env symb env)
   (and (symbol? symb)
        (let ((val (find-symbol-in-env symb env)))         ; local macro?
