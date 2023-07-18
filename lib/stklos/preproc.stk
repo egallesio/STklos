@@ -146,12 +146,12 @@
                                        "\\1\\2")))
               (tprintf 2 "*** defining variable ~s to ~s\n" var val)
               (eval `(define ,var ,val) *md-env*))
-            (when (alphabetic? (peek-char port))
-              (Loop (read port)))))
+            (let ((ch (peek-char port)))
+              (when (or (alphabetic? ch) (eq? ch #\-))
+                (Loop (read port))))))
 
          (else ;; Not a keyword rewrite what we have read
           (write var))))
-
       (when (and test-end-markup? (not seen-end?))
         (warning port "markup '---' absent to close the header"))))
 
