@@ -59,7 +59,8 @@
   (define (alphabetic? obj)
     (and (not (eof-object? obj))
          (char? obj)
-         (char-alphabetic? obj)))
+         (or (char-alphabetic? obj)
+             (char=? obj #\-))))
 
   (define (warning port fmt . args)
     (fprintf (current-error-port) "~a:~a: warning " (port-file-name port) (port-current-line port))
