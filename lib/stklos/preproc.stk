@@ -59,7 +59,8 @@
   (define (alphabetic? obj)
     (and (not (eof-object? obj))
          (char? obj)
-         (char-alphabetic? obj)))
+         (or (char-alphabetic? obj)
+             (char=? obj #\-))))
 
   (define (warning port fmt . args)
     (fprintf (current-error-port) "~a:~a: warning " (port-file-name port) (port-current-line port))
@@ -146,12 +147,12 @@
                                        "\\1\\2")))
               (tprintf 2 "*** defining variable ~s to ~s\n" var val)
               (eval `(define ,var ,val) *md-env*))
-            (when (alphabetic? (peek-char port))
-              (Loop (read port)))))
+            (let ((ch (peek-char port)))
+              (when (or (alphabetic? ch) (eq? ch #\-))
+                (Loop (read port))))))
 
          (else ;; Not a keyword rewrite what we have read
           (write var))))
-
       (when (and test-end-markup? (not seen-end?))
         (warning port "markup '---' absent to close the header"))))
 
@@ -236,17 +237,27 @@
   ;;;
   (define (do-read port)
     (read-header port)
-    (let Loop ((ch (read-char port)))
+    (let Loop ((ch (read-char port))
+               (prev #\space))
+      (when (eq? ch #\\)
+        ;; We have a protected character
+        (set! prev ch)
+        (set! ch (read-char port)))
+
       (if (eof-object? ch)
           (unless (null? *print-stack*)
             (error "unclosed if/else"))      ;; FIXME: add opening line
-          (begin
-            (let ((val (if (eq? ch (car *command-chars*))
-                           (apply read-command port *command-chars*)
-                           ch)))
-              (when (and *printing* (not (equal? val #void)))
-                (display val))
-              (Loop (read-char port)))))))
+          (let ((val (cond
+                      ((eq? prev #\\)
+                       ch)
+                      ((eq? ch (car *command-chars*))
+                       (apply read-command port *command-chars*))
+                      (else
+                       ch))))
+            (when (and *printing* (not (equal? val #void)))
+              (display val))
+            (Loop (read-char port) ch)))))
+
   ;;;
   ;;; process-file
   ;;;
