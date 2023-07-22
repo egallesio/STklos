@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -733,12 +730,12 @@ pre.rouge {
              .nav-footer{text-align: center; margin-top: auto;}
              .nav-footer > p > a {white-space: nowrap;}</style>
 </head>
-<body id="_libraries" class="book toc2 toc-left">
+<body id="_idiosync" class="book toc2 toc-left">
 <div id="header">
 <h1>STklos Reference Manual : (version 1.70)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -763,25 +760,21 @@ pre.rouge {
 </li>
 <li><a href="_threads_mutexes_and_condition_variables.html">9. Threads, Mutexes and Condition Variables</a>
 </li>
-<li><a href="_customizations.html">10. Customizations</a>
+<li><a href="_stklos_customization.html">10. STklos Customization</a>
 </li>
-<li><a href="_the_scmpkg_package_system.html">11. The ScmPkg Package System</a>
+<li><a href="_foreign_function_interface.html">11. Foreign Function Interface</a>
 </li>
-<li><a href="_foreign_function_interface.html">12. Foreign Function Interface</a>
+<li><a href="_using_the_slib_package.html">12. Using the SLIB package</a>
 </li>
-<li><a href="_using_the_slib_package.html">13. Using the SLIB package</a>
-</li>
-<li><a href="_srfis.html">14. SRFIs</a>
+<li><a href="_srfis.html">13. SRFIs</a>
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
 </li>
-<li><a href="_libraries.html"><span class="toc-current">Appendix C: STklos Libraries</span></a>
+<li><a href="_idiosync.html"><span class="toc-current">Appendix C: STklos Idiosyncrasies</span></a>
 <ul class="sectlevel2">
-<li><a href="_libraries.html#_the_scheme_libraries">A.1. The (scheme &#8230;&#8203;) libraries</a>
+<li><a href="_idiosync.html#_stklos_libraries">A.1. STklos libraries</a>
 </li>
-<li><a href="_libraries.html#_the_srfi_libraries">A.2. The (srfi &#8230;&#8203;) libraries</a>
-</li>
-<li><a href="_libraries.html#_the_stklos_libraries">A.3. The (stklos &#8230;&#8203;) libraries</a>
+<li><a href="_idiosync.html#_stklos_compiler">A.2. STklos compiler</a>
 </li>
 </ul>
 </li>
@@ -792,13 +785,17 @@ pre.rouge {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_libraries">Appendix A: STklos Libraries</h2>
+<h2 id="_idiosync">Appendix A: STklos Idiosyncrasies</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_stklos_libraries">A.1. STklos libraries</h3>
 <div class="paragraph">
 <p>This section describes the standard libraries provided by <strong><em>STklos</em></strong>.</p>
 </div>
-<div class="sect2">
-<h3 id="_the_scheme_libraries">A.1. The (scheme &#8230;&#8203;) libraries</h3>
+<div class="sect3">
+<h4 id="_the_scheme_libraries">A.1.1. The (scheme &#8230;&#8203;) Libraries</h4>
+<div class="sect4">
+<h5 id="_r7rs_small_libraries">R<sup>7</sup>RS Small Libraries</h5>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> offers all the libraries defined by R<sup>7</sup>RS:</p>
 </div>
@@ -858,8 +855,321 @@ pre.rouge {
 <p>See the <a href="_bibliography.html#R7RS">[R7RS]</a> document for more information.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_the_srfi_libraries">A.2. The (srfi &#8230;&#8203;) libraries</h3>
+<div class="sect4">
+<h5 id="_r7rs_large_libraries">R<sup>7</sup>RS Large Libraries</h5>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> supports some libraries of the (under development) R<sup>7</sup>RS Large editions.</p>
+</div>
+<div class="paragraph">
+<p>For now, supported libraries of the <strong>Red edition</strong> are</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>bytevector (R<sup>6</sup>RS bytevectors)</p>
+</li>
+<li>
+<p>box <em>(srfi 111)</em></p>
+</li>
+<li>
+<p>charset <em>(srfi 14)</em></p>
+</li>
+<li>
+<p>comparator <em>(srfi 128)</em></p>
+</li>
+<li>
+<p>generator <em>(srfi 158)</em>&#8201;&#8212;&#8201;Red edition included SRFI 121, but it was superseded by SRFI 158.</p>
+</li>
+<li>
+<p>hash-table <em>(srfi 125)</em></p>
+</li>
+<li>
+<p>ideque <em>(srfi 134)</em></p>
+</li>
+<li>
+<p>ilist <em>(srfi 116)</em></p>
+</li>
+<li>
+<p>list <em>(srfi 1)</em></p>
+</li>
+<li>
+<p>list-queue <em>(srfi 117)</em></p>
+</li>
+<li>
+<p>lseq <em>(srfi 127)</em></p>
+</li>
+<li>
+<p>set <em>(srfi 113)</em></p>
+</li>
+<li>
+<p>sort <em>(srfi 132)</em></p>
+</li>
+<li>
+<p>stream <em>(srfi 41)</em></p>
+</li>
+<li>
+<p>text <em>(srfi 135)</em></p>
+</li>
+<li>
+<p>vector <em>(srfi 133)</em></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For now, supported libraries of the <strong>Tangerine edition</strong> are</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>bitwise <em>(srfi 151)</em></p>
+</li>
+<li>
+<p>bytevector <em>(scheme bytevector)</em>- not a SRFI: this one is a chapter from R6RS.</p>
+</li>
+<li>
+<p>division <em>(srfi 141)</em></p>
+</li>
+<li>
+<p>fixnum <em>(srfi 143)</em></p>
+</li>
+<li>
+<p>flonum <em>(srfi 144)</em></p>
+</li>
+<li>
+<p>generator <em>(srfi 158)</em></p>
+</li>
+<li>
+<p>vector @ <em>(srfi 160)</em></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>(scheme bytevector) functions</strong></p>
+</div>
+<div class="paragraph">
+<p>Importing <code>(scheme bytevector)</code> gives access to the supplemental following
+bytevector functions.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-s8-ref bytevector k)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-s8-ref</code> procedure returns the byte at index <code>k</code> of
+<code>bytevector</code>, as a signed byte.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">b1</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">-127</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">b2</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">255</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nb">list</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b1</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b1</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b2</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b2</span> <span class="mi">0</span><span class="p">)))</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">-127</span> <span class="mi">129</span> <span class="mi">-1</span> <span class="mi">255</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-s8-set! bytevector k byte)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>K</code> must be a valid index of bytevector.
+The <code>bytevector-s8-set!</code> procedure stores the two’s-complement
+representation of <code>byte</code> in element <code>k</code> of <code>bytevector</code>.
+This procedure return an unspecified value.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">b</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">-127</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">bytevector-s8-set!</span> <span class="nv">b</span> <span class="mi">0</span> <span class="mi">-126</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">bytevector-u8-set!</span> <span class="nv">b</span> <span class="mi">1</span> <span class="mi">246</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">list</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">)))</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">-126</span> <span class="mi">130</span> <span class="mi">-10</span> <span class="mi">246</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-fill! bytevector fill )</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>fill</code> argument is as in the description of the make-bytevector
+procedure. The <code>bytevector-fill!</code>  procedure stores <code>fill</code> in every
+element of bytevector and returns unspecified values. Analogous to
+<code>vector-fill!</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector=? bytevector1 bytevector2 )</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns true if <code>bytevector1</code> and <code>bytevector2</code> are equal—that
+is, if they have the same length and equal bytes at all valid
+indices. It returns false otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-uint-ref bytevector k endianness size)</code></strong><br>
+<strong><code>(bytevector-sint-ref bytevector k endianness size)</code></strong><br>
+<strong><code>(bytevector-uint-set! bytevector k n endianness size)</code></strong><br>
+<strong><code>(bytevector-sint-set! bytevector k n endianness size)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-uint-ref</code> procedure retrieves the exact
+integer object corresponding to the unsigned representation
+of size <code>size</code> and specified by <code>endianness</code> at indices
+<code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-sint-ref</code> procedure retrieves the exact
+integer object corresponding to the two’s-complement
+representation of size <code>size</code> and specified by <code>endianness</code>
+at indices <code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>For <code>bytevector-uint-set!</code>, <code>n</code> must be an exact integer
+object in the interval <code>{0, &#8230;&#8203; , 256^size − 1}</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-uint-set!</code> procedure stores the unsigned
+representation of size <code>size</code> and specified by <code>endianness</code>
+into <code>bytevector</code> at indices <code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>For bytevector-sint-set!, n must be an exact integer
+object in the interval <code>{−256^size /2, &#8230;&#8203; , 256^size /2 − 1}</code>.
+<code>Bytevector-sint-set!</code> stores the two’s-complement
+representation of size <code>size</code> and specified by <code>endianness</code>
+into <code>bytevector</code> at indices <code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>&#8230;&#8203;-set!</code> procedures return unspecified values.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">-127</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">bytevector-uint-set!</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">128</span><span class="p">)</span> <span class="mi">3</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">endianness</span> <span class="nv">little</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">bytevector-uint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">little</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="mh">#xfffffffffffffffffffffffffffffffd</span>
+
+<span class="p">(</span><span class="nf">bytevector-sint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">little</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="mi">-3</span>
+
+<span class="p">(</span><span class="nf">bytevector-&gt;u8-list</span> <span class="nv">b</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">253</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+     <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">bytevector-uint-set!</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">128</span><span class="p">)</span> <span class="mi">3</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">endianness</span> <span class="nv">big</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">bytevector-uint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">big</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="mh">#xfffffffffffffffffffffffffffffffd</span>
+
+<span class="p">(</span><span class="nf">bytevector-sint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">big</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;-3</span>
+
+<span class="p">(</span><span class="nf">bytevector-&gt;u8-list</span> <span class="nv">b</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+     <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">253</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(endianness endianness-symbol)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The name of <code>endianness-symbol</code> must be a symbol describing an
+endianness.  An implementation must support at least the symbols big
+and little, but may support other endianness symbols.
+<code>(endianness endianness-symbol)</code> evaluates to the symbol named
+<code>endianness-symbol</code>. Whenever one of the procedures operating on
+bytevectors accepts an endianness as an argument, that argument must
+be one of these symbols. It is a syntax violation for <code>endianness-symbol</code>
+to be anything other than <code>little</code> or <code>big</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(native-endianness)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the endianness symbol of the underlying machine.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_the_srfi_libraries">A.1.2. The (srfi &#8230;&#8203;) Libraries</h4>
 <div class="paragraph">
 <p>All the SRFI supported by <strong><em>STklos</em></strong> are placed under
 the <code>srfi</code> meta library and their name is SRFI number. Hence, to use
@@ -867,19 +1177,19 @@ the exported symbols of <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.
 <code>(srfi 1)</code> library.</p>
 </div>
 <div class="paragraph">
-<p>See  <em><a href="_srfis.html">Chapter 14</a></em> for more information</p>
+<p>See  <em><a href="_srfis.html">Chapter 13</a></em> for more information</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_the_stklos_libraries">A.3. The (stklos &#8230;&#8203;) libraries</h3>
+<div class="sect3">
+<h4 id="_the_stklos_libraries">A.1.3. The (stklos &#8230;&#8203;) Libraries</h4>
 <div class="paragraph">
 <p>This section describes the standard libraries which are placed under
 the <code>stklos</code> meta library. Note that <strong><em>STklos</em></strong> extensions can add
 some libraries in the <code>stklos</code> meta library; they will be described in
 the extension documentation.</p>
 </div>
-<div class="sect3">
-<h4 id="_stklos_itrie_library">A.3.1. (stklos itrie) library</h4>
+<div class="sect4">
+<h5 id="_stklos_itrie_library">(stklos itrie) Library</h5>
 <div class="paragraph">
 <p>This library was designed by Jerônimo Pellegrini
 (<a href="https://github.com/jpellegrini">@jpellegrini</a>).</p>
@@ -2094,8 +2404,8 @@ is negative. It is an error if <code>step</code> is zero.</p>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_stklos_preproc_library">A.3.2. (stklos preproc) library</h4>
+<div class="sect4">
+<h5 id="_stklos_preproc_library">(stklos preproc) Library</h5>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -2107,6 +2417,266 @@ This library  must be described
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_stklos_compiler">A.2. STklos compiler</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> always compiles code into bytecode before executing&#8201;&#8212;&#8201;it
+is not an interpreter, but a bytecode compiler with an ad-hoc virtual
+machine. The compiler is available as a standalone tool, to be
+used in shell scripts, and also through primitive procedures.</p>
+</div>
+<div class="paragraph">
+<p>The command <code>stklos-compile</code> compiles a file into <strong><em>STklos</em></strong> bytecode.
+Please refer to its manpage for more information.</p>
+</div>
+<div class="paragraph">
+<p>Compiling files from Scheme programs can be done with the
+<code>compile-file</code> procedure.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compile-file input output)</code></strong><br>
+<strong><code>(compile-file input output :prepend cmds)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Compiles the file whose name is <code>input</code> into a bytecode executable
+whose name is <code>output</code> (if <code>compile-file</code> fails, <code>output</code> file is
+deleted).</p>
+</div>
+<div class="paragraph">
+<p>If the <code>:prepend</code> keyword argument is given, it must be a list of
+expressions, which will be compiled before the rest of the input
+file. This can be used to define variables that the compiled program
+will use (but it does not affect the compiler itself).</p>
+</div>
+<div class="paragraph">
+<p>This procedure will not set the executable bit on the generated file.</p>
+</div>
+<div class="sect3">
+<h4 id="_compiler_flags">A.2.1. Compiler flags</h4>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> compiler behaviour can be customized by several parameters. Those parameters are described below.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:time-display)</code></strong><br>
+<strong><code>(compiler:time-display bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the time used for compiling a file must be
+displayed or not. It defaults to <code>#t</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:gen-line-number)</code></strong><br>
+<strong><code>(compiler:gen-line-number bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the compiled code must embed indications of
+the file location of the  of the source expressions. When set, this
+parameter makes programs slower and bigger. However, it can be useful
+when debugging a program. This parameter defaults to <code>#f</code> (but is set to
+<code>`#t</code> when <strong><em>STklos</em></strong> is launched in debug mode).</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:show-assembly-code)</code></strong><br>
+<strong><code>(compiler:show-assembly-code bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the object files produced by the <strong><em>STklos</em></strong> compiler
+code must embed a readable version of the code. The code is placed at the beginning
+of the produced file. This parameter defaults to <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:inline-common-functions)</code></strong><br>
+<strong><code>(compiler:inline-common-functions bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the compiler must try to inline the most common Scheme
+primitives (simple arithmetic, main list or vector functions, &#8230;&#8203;). Code produced
+when this parameter is set is more efficient. Note that the compiler can sometimes be
+misleaded if those functions are redefined, hence the existence of this parameter.
+<code>compiler:inline-common-functions</code> is set by default to <code>#t</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:inline-common-functions</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="mi">1</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">CONSTANT</span>             <span class="mi">0</span>
+<span class="mi">002</span><span class="nv">:</span>  <span class="nv">IN-CAR</span>
+<span class="mi">003</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF</span>           <span class="mi">1</span>
+<span class="mi">005</span><span class="nv">:</span>  <span class="nv">IN-INCR</span>
+<span class="mi">006</span><span class="nv">:</span>
+
+<span class="nv">Constants:</span>
+<span class="mi">0</span><span class="nv">:</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="mi">1</span><span class="nv">:</span> <span class="nv">a</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:inline-common-functions</span> <span class="no">#f</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="mi">1</span><span class="p">))</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">PREPARE-CALL</span>
+<span class="mi">001</span><span class="nv">:</span>  <span class="nv">CONSTANT-PUSH</span>        <span class="mi">0</span>
+<span class="mi">003</span><span class="nv">:</span>  <span class="nv">GREF-INVOKE</span>          <span class="mi">1</span> <span class="mi">1</span>
+<span class="mi">006</span><span class="nv">:</span>  <span class="nv">PREPARE-CALL</span>
+<span class="mi">007</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF-PUSH</span>      <span class="mi">2</span>
+<span class="mi">009</span><span class="nv">:</span>  <span class="nv">ONE-PUSH</span>
+<span class="mi">010</span><span class="nv">:</span>  <span class="nv">GREF-INVOKE</span>          <span class="mi">3</span> <span class="mi">2</span>
+<span class="mi">013</span><span class="nv">:</span>
+
+<span class="nv">Constants:</span>
+<span class="mi">0</span><span class="nv">:</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="mi">1</span><span class="nv">:</span> <span class="nv">car</span>
+<span class="mi">2</span><span class="nv">:</span> <span class="nv">a</span>
+<span class="mi">3</span><span class="nv">:</span> <span class="nv">+</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:keep-formals)</code></strong><br>
+<strong><code>(compiler:keep-formals bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the formal parameters of a user procedure is kept
+at runtime. The formal parameters can be accessed with the primitive
+&lt;&lt;"procedure-formals"&gt;&gt;.
+Default value for <code>compiler:keep-formals</code> is <code>#f</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:keep-formals</span> <span class="no">#f</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">foo</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span> <span class="nv">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="nv">foo</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">foo</span><span class="p">]</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">procedure-formals</span> <span class="nv">foo</span><span class="p">)</span>
+<span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:keep-formals</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">foo</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span> <span class="nv">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="nv">foo</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">foo</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)]</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">procedure-formals</span> <span class="nv">foo</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:keep-source)</code></strong><br>
+<strong><code>(compiler:keep-source bool)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the source of a user procedure is kept
+at runtime. The source of a procedure can be accessed with the primitive
+&lt;&lt;"procedure-source"&gt;&gt;.
+Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">compiler:keep-source</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">fib</span>
+     <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">n</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">))</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">))))))</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">pretty-print</span> <span class="p">(</span><span class="nf">procedure-source</span> <span class="nv">fib</span><span class="p">))</span>
+<span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">&lt;</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="nv">n</span>
+    <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">))</span>
+       <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)))))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:unroll-iterations)</code></strong><br>
+<strong><code>(compiler:unroll-iterations n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls the number of iterations to be unrolled in
+loops. Currently, only <code>repeat</code> loops are unrolled. The argument
+<code>n</code> must be a positive integer.</p>
 </div>
 </div>
 </div>
@@ -2131,7 +2701,10 @@ This library  must be described
 <a href="#_footnoteref_1">1</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<a href="#_footnoteref_2">2</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+</div>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. The "pattern matching compiler" has been written by Jean-Marie Geffroy and is part of the Manuel Serrano&#8217;s Bigloo compiler since several years <a href="_bibliography.html#Bigloo">[Bigloo]</a>
 </div>
 <div class="footnote" id="_footnotedef_1">
 <a href="#_footnoteref_1">1</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
@@ -2139,7 +2712,7 @@ This library  must be described
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 18:56:10 +0100
+Last updated 2023-07-22 20:08:25 +0200
 </div>
 </div>
 </body>

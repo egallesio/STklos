@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -733,12 +730,12 @@ pre.rouge {
              .nav-footer{text-align: center; margin-top: auto;}
              .nav-footer > p > a {white-space: nowrap;}</style>
 </head>
-<body id="_customizations" class="book toc2 toc-left">
+<body id="_stklos_customization" class="book toc2 toc-left">
 <div id="header">
 <h1>STklos Reference Manual : (version 1.70)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -763,19 +760,23 @@ pre.rouge {
 </li>
 <li><a href="_threads_mutexes_and_condition_variables.html">9. Threads, Mutexes and Condition Variables</a>
 </li>
-<li><a href="_customizations.html"><span class="toc-current">10. Customizations</span></a>
+<li><a href="_stklos_customization.html"><span class="toc-current">10. STklos Customization</span></a>
+<ul class="sectlevel2">
+<li><a href="_stklos_customization.html#_parameter_objects_2">10.1. Parameter Objects</a>
 </li>
-<li><a href="_the_scmpkg_package_system.html">11. The ScmPkg Package System</a>
+<li><a href="_stklos_customization.html#_environment_variables">10.2. Environment variables</a>
 </li>
-<li><a href="_foreign_function_interface.html">12. Foreign Function Interface</a>
+</ul>
 </li>
-<li><a href="_using_the_slib_package.html">13. Using the SLIB package</a>
+<li><a href="_foreign_function_interface.html">11. Foreign Function Interface</a>
 </li>
-<li><a href="_srfis.html">14. SRFIs</a>
+<li><a href="_using_the_slib_package.html">12. Using the SLIB package</a>
+</li>
+<li><a href="_srfis.html">13. SRFIs</a>
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
 </li>
-<li><a href="_libraries.html">Appendix C: STklos Libraries</a>
+<li><a href="_idiosync.html">Appendix C: STklos Idiosyncrasies</a>
 </li>
 <li><a href="FDL.html">Appendix D: GNU Free Documentation License</a>
 </li>
@@ -784,11 +785,12 @@ pre.rouge {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_customizations">10. Customizations</h2>
+<h2 id="_stklos_customization">10. STklos Customization</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_parameter_objects_2">10.1. Parameter Objects</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> environement can be customized using
-Parameter Objects. These
+<p><strong><em>STklos</em></strong> environement can be customized using Parameter Objects. These
 parmaters are listed below.</p>
 </div>
 <div class="paragraph">
@@ -806,16 +808,65 @@ parmaters are listed below.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This parameter object permits to change the default precision used
+<p>This parameter object allows changing the default precision used
 to print real numbers.</p>
+</div>
+<div class="paragraph">
+<p>By precision when printing a number we mean the number of significant
+digits&#8201;&#8212;&#8201;that is, excluding the leading and trailing zeros in
+decimal representation. (This is exactly the same as the number
+for the <code>g</code> specifier for <code>printf</code> in the C language).</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">15</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="mi">15</span>
 <span class="p">(</span><span class="k">define</span> <span class="nv">f</span> <span class="mf">0.123456789</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mf">0.123456789</span>
+<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mf">0.123456789</span>
 <span class="p">(</span><span class="nf">real-precision</span> <span class="mi">3</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mf">0.123</span></code></pre>
+<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mf">0.123</span>
+<span class="p">(</span><span class="nb">display</span>   <span class="mf">1.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">1.12</span>
+<span class="p">(</span><span class="nb">display</span>  <span class="mf">12.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">12.1</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">123.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">123.0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the last example, only three significant digits were printed (123),
+and the zero only marks this number as inexact.</p>
+</div>
+<div class="paragraph">
+<p>If the number won&#8217;t fit using the usual decimal format, it will be
+printed in scientific notation, but still using the specified number
+of significant digits:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">display</span>     <span class="mf">1234.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+03</span>
+<span class="p">(</span><span class="nb">display</span>    <span class="mf">12345.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+04</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12345678.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+07</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Repeating the three examples above with precision equal to one results
+in the following.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span>     <span class="mf">1234.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+03</span>
+<span class="p">(</span><span class="nb">display</span>    <span class="mf">12345.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+04</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12345678.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+07</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the number is only printed up to its n-th digit, then the printed nth
+digit will be n rounded up or down, according to the digit that comes
+after it.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">12.12</span>  <span class="c1">;; "123..." rounded to "12"</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12.987654321</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">12.99</span>  <span class="c1">;; "987..." rounded to "99"</span></code></pre>
 </div>
 </div>
 <div id="srfi169" class="paragraph">
@@ -864,7 +915,7 @@ underscores are accepted in numbers.</p>
 </div>
 <div class="paragraph">
 <p>This parameter object permits to change the default behaviour of
-the <code>read</code> primitive when reading a symbol. If this parameter has a
+the <code>read</code> primitive when reading a symbol. If this parameter has
 a true value a symbol is not converted to a default case when interned.
 Since R<sup>7</sup>RS requires that symbol are case insignificant, the default
 value  of this parameter is <code>#t</code>.</p>
@@ -931,8 +982,10 @@ By default, this parameter value is set to <code>#t</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>
-</p>
+<p></p>
+</div>
+<div id="loadpath" class="paragraph">
+<p></p>
 </div>
 <div class="paragraph text-right">
 <p><span class="rmargin small"><em>STklos</em> procedure</span></p>
@@ -1046,10 +1099,155 @@ debugging level. The default value of this parameter is 0 (meaning "no debug").
 Note that the debugging level can also be set by the <code>--debug</code> option of the
 <code>stklos(1)</code> command.</p>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(repl-theme)</code></strong><br>
+<strong><code>(repl-theme plist)</code></strong><br>
+<strong><code>(repl-theme name)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <strong><em>STklos</em></strong> REPL colors can be customized using a property list (or a theme
+name) using the <code>repl-theme</code> parameter. The properties that can be used in this
+property list are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#:error</code> for the color of error messages</p>
+</li>
+<li>
+<p><code>#:prompt</code> for the color of the prompt</p>
+</li>
+<li>
+<p><code>#:help-prompt</code> for the color of the help prompt</p>
+</li>
+<li>
+<p><code>#:help</code> for the color of the help messages</p>
+</li>
+<li>
+<p><code>#:repl-depth</code> for the color of the depth indicator for recursive REPLs</p>
+</li>
+<li>
+<p><code>#:info</code> for the color of information messages.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are three default themes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>classic</strong> which is the (colorful) default theme.</p>
+</li>
+<li>
+<p><strong>monochrome</strong> which doesn&#8217;t use colors</p>
+</li>
+<li>
+<p><strong>minimal</strong> where only the prompt and errors are colored.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Colors are expressed using the conventions of
+<a href="_standard_procedures.html#ansicolor">the <code>ansi-color</code> primitive</a>. For instance:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">key-set!</span> <span class="p">(</span><span class="nf">repl-theme</span><span class="p">)</span> <span class="nv">:prompt</span> <span class="o">'</span><span class="p">(</span><span class="nf">bold</span> <span class="nv">green</span><span class="p">))</span> <span class="c1">;; set the prompt to bold green</span>
+
+<span class="p">(</span><span class="nf">repl-theme</span> <span class="ss">'minimal</span><span class="p">)</span>                         <span class="c1">;; to use a sober prompt</span>
+
+<span class="p">(</span><span class="nf">repl-theme</span> <span class="o">'</span><span class="p">(</span><span class="o">#</span><span class="nv">:error</span> <span class="p">(</span><span class="nf">bold</span> <span class="nv">red</span><span class="p">)</span>              <span class="c1">;; explicitly defined theme</span>
+              <span class="o">#</span><span class="nv">:prompt</span> <span class="p">(</span><span class="nf">bold</span> <span class="nv">bg-red</span> <span class="nv">white</span><span class="p">)))</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+A good place to change your theme is the <code>.stklosrc</code> file.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(repl-show-startup-message)</code></strong><br>
+<strong><code>(repl-show-startup-message val)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If this parameter is a true value, a banner is printed when <strong><em>STklos</em></strong> starts
+in interactive mode. Otherwise, no banner is printed. By default, this parameter
+is set to <code>#t</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This parameter can be set to <code>#f</code> with the <code>--no-startup-message</code> option of
+the <strong><em>STklos</em></strong> command. Otherwise, a good place to set this parameter is in the
+<code>.stklosrc</code> file.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_environment_variables">10.2. Environment variables</h3>
+<div class="paragraph">
+<p>The following variables can be used to customize <strong><em>STklos</em></strong>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>STKLOS_LOAD_PATH</strong>: This is a colon-separated list
+of directories in which stklos looks for loading files. It is used by
+primitives such as <code><a href="_standard_procedures.html#load">load</a></code> or <code><a href="_standard_procedures.html#tryload">try-load</a></code>.  See also the
+<code><a href="_stklos_customization.html#loadpath">load-path</a></code> parameter.</p>
+</li>
+<li>
+<p><strong>STKLOS-FRAME</strong>: This variable must contains an integer
+which indicates the number of frames printed on an error. Use
+the value 0 for an unlimited backtrace.</p>
+</li>
+<li>
+<p><strong>STKLOS-CONFDIR</strong>: This variable can be used to
+designate the directory used by <strong><em>STklos</em></strong> to store its configuration or
+packages files. If not set, the default <strong><em>STklos</em></strong> configuration directory
+is by default <code>~/.stklos</code>.</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 <div class="paragraph nav-footer">
-<p>← Previous: <a href="_threads_mutexes_and_condition_variables.html">Threads, Mutexes and Condition Variables</a> | ↑ Up: <a href="stklos-ref-multi.html">STklos Reference Manual : (version 1.70)</a> | Next: <a href="_the_scmpkg_package_system.html">The ScmPkg Package System</a> →</p>
+<p>← Previous: <a href="_threads_mutexes_and_condition_variables.html">Threads, Mutexes and Condition Variables</a> | ↑ Up: <a href="stklos-ref-multi.html">STklos Reference Manual : (version 1.70)</a> | Next: <a href="_foreign_function_interface.html">Foreign Function Interface</a> →</p>
 </div>
 </div>
 <div id="footnotes">
@@ -1067,7 +1265,10 @@ Note that the debugging level can also be set by the <code>--debug</code> option
 <a href="#_footnoteref_1">1</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<a href="#_footnoteref_2">2</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+</div>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. The "pattern matching compiler" has been written by Jean-Marie Geffroy and is part of the Manuel Serrano&#8217;s Bigloo compiler since several years <a href="_bibliography.html#Bigloo">[Bigloo]</a>
 </div>
 <div class="footnote" id="_footnotedef_1">
 <a href="#_footnoteref_1">1</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
@@ -1075,7 +1276,7 @@ Note that the debugging level can also be set by the <code>--debug</code> option
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 18:56:10 +0100
+Last updated 2023-07-22 20:08:25 +0200
 </div>
 </div>
 </body>

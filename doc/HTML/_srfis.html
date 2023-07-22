@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -738,7 +735,7 @@ pre.rouge {
 <h1>STklos Reference Manual : (version 1.70)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -763,27 +760,25 @@ pre.rouge {
 </li>
 <li><a href="_threads_mutexes_and_condition_variables.html">9. Threads, Mutexes and Condition Variables</a>
 </li>
-<li><a href="_customizations.html">10. Customizations</a>
+<li><a href="_stklos_customization.html">10. STklos Customization</a>
 </li>
-<li><a href="_the_scmpkg_package_system.html">11. The ScmPkg Package System</a>
+<li><a href="_foreign_function_interface.html">11. Foreign Function Interface</a>
 </li>
-<li><a href="_foreign_function_interface.html">12. Foreign Function Interface</a>
+<li><a href="_using_the_slib_package.html">12. Using the SLIB package</a>
 </li>
-<li><a href="_using_the_slib_package.html">13. Using the SLIB package</a>
-</li>
-<li><a href="_srfis.html"><span class="toc-current">14. SRFIs</span></a>
+<li><a href="_srfis.html"><span class="toc-current">13. SRFIs</span></a>
 <ul class="sectlevel2">
-<li><a href="_srfis.html#_supported_srfis">14.1. Supported SRFIs</a>
+<li><a href="_srfis.html#_supported_srfis">13.1. Supported SRFIs</a>
 </li>
-<li><a href="_srfis.html#_using_a_srfi">14.2. Using a SRFI</a>
+<li><a href="_srfis.html#_using_a_srfi">13.2. Using a SRFI</a>
 </li>
-<li><a href="_srfis.html#_misc_information">14.3. Misc. Information</a>
+<li><a href="_srfis.html#_misc_information">13.3. Misc. Information</a>
 </li>
 </ul>
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
 </li>
-<li><a href="_libraries.html">Appendix C: STklos Libraries</a>
+<li><a href="_idiosync.html">Appendix C: STklos Idiosyncrasies</a>
 </li>
 <li><a href="FDL.html">Appendix D: GNU Free Documentation License</a>
 </li>
@@ -792,7 +787,7 @@ pre.rouge {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_srfis">14. SRFIs</h2>
+<h2 id="_srfis">13. SRFIs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -812,9 +807,9 @@ information on each SRFI, please look at the official
 SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
+<h3 id="_supported_srfis">13.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>104</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>122</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -842,6 +837,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-16/srfi-16.html">SRFI-16</a></strong>&#8201;&#8212;&#8201;<em>Syntax for procedures of variable arity</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-17/srfi-17.html">SRFI-17</a></strong>&#8201;&#8212;&#8201;<em>Generalized set!</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a></strong>&#8201;&#8212;&#8201;<em>Multithreading support</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-19/srfi-19.html">SRFI-19</a></strong>&#8201;&#8212;&#8201;<em>Time Data Types and Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-22/srfi-22.html">SRFI-22</a></strong>&#8201;&#8212;&#8201;<em>Running Scheme Scripts on Unix</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong>&#8201;&#8212;&#8201;<em>Error reporting mechanism</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-25/srfi-25.html">SRFI-25</a></strong>&#8201;&#8212;&#8201;<em>Multi-dimensional Arrays</em><br>
@@ -858,7 +854,9 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-38/srfi-38.html">SRFI-38</a></strong>&#8201;&#8212;&#8201;<em>External representation of shared structures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-39/srfi-39.html">SRFI-39</a></strong>&#8201;&#8212;&#8201;<em>Parameters objects</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-41/srfi-41.html">SRFI-41</a></strong>&#8201;&#8212;&#8201;<em>Streams</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-43/srfi-43.html">SRFI-43</a></strong>&#8201;&#8212;&#8201;<em>Vector library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-45/srfi-45.html">SRFI-45</a></strong>&#8201;&#8212;&#8201;<em>Primitives for Expressing Iterative Lazy Algorithms</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-46/srfi-46.html">SRFI-46</a></strong>&#8201;&#8212;&#8201;<em>Basic Syntax-rules Extensions</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-48/srfi-48.html">SRFI-48</a></strong>&#8201;&#8212;&#8201;<em>Intermediate Format Strings</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-51/srfi-51.html">SRFI-51</a></strong>&#8201;&#8212;&#8201;<em>Handling rest list</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-54/srfi-54.html">SRFI-54</a></strong>&#8201;&#8212;&#8201;<em>Formatting</em><br>
@@ -876,14 +874,17 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-88/srfi-88.html">SRFI-88</a></strong>&#8201;&#8212;&#8201;<em>Keyword Objects</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-89/srfi-89.html">SRFI-89</a></strong>&#8201;&#8212;&#8201;<em>Optional Positional and Named Parameters</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-94/srfi-94.html">SRFI-94</a></strong>&#8201;&#8212;&#8201;<em>Type-Restricted Numerical Functions</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-95/srfi-95.html">SRFI-95</a></strong>&#8201;&#8212;&#8201;<em>Sorting and Merging</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-96/srfi-96.html">SRFI-96</a></strong>&#8201;&#8212;&#8201;<em>SLIB Prerequisites</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-98/srfi-98.html">SRFI-98</a></strong>&#8201;&#8212;&#8201;<em>Interface to access environment variables</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-100/srfi-100.html">SRFI-100</a></strong>&#8201;&#8212;&#8201;<em>define-lambda-object</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-111/srfi-111.html">SRFI-111</a></strong>&#8201;&#8212;&#8201;<em>Boxes</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a></strong>&#8201;&#8212;&#8201;<em>Environment Inquiry</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-113/srfi-113.html">SRFI-113</a></strong>&#8201;&#8212;&#8201;<em>Sets and Bags</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-116/srfi-116.html">SRFI-116</a></strong>&#8201;&#8212;&#8201;<em>Immutable List Library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-117/srfi-117.html">SRFI-117</a></strong>&#8201;&#8212;&#8201;<em>Queues based on lists</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-118/srfi-118.html">SRFI-118</a></strong>&#8201;&#8212;&#8201;<em>Simple adjustable-size strings</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-125/srfi-125.html">SRFI-125</a></strong>&#8201;&#8212;&#8201;<em>Intermediate hash tables</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-127/srfi-127.html">SRFI-127</a></strong>&#8201;&#8212;&#8201;<em>Lazy Sequences</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-128/srfi-128.html">SRFI-128</a></strong>&#8201;&#8212;&#8201;<em>Comparators (reduced)</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-129/srfi-129.html">SRFI-129</a></strong>&#8201;&#8212;&#8201;<em>Titlecase procedures</em><br>
@@ -899,10 +900,13 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-144/srfi-144.html">SRFI-144</a></strong>&#8201;&#8212;&#8201;<em>Flonums</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-145/srfi-145.html">SRFI-145</a></strong>&#8201;&#8212;&#8201;<em>Assumptions</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-151/srfi-151.html">SRFI-151</a></strong>&#8201;&#8212;&#8201;<em>Bitwise Operations</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-152/srfi-152.html">SRFI-152</a></strong>&#8201;&#8212;&#8201;<em>String Library (reduced)</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-154/srfi-154.html">SRFI-154</a></strong>&#8201;&#8212;&#8201;<em>First-class dynamic extents</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-156/srfi-156.html">SRFI-156</a></strong>&#8201;&#8212;&#8201;<em>Syntactic combiners for binary predicates</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-158/srfi-158.html">SRFI-158</a></strong>&#8201;&#8212;&#8201;<em>Generators and Accumulators</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong>&#8201;&#8212;&#8201;<em>Homogeneous numeric vector libraries</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-161/srfi-161.html">SRFI-161</a></strong>&#8201;&#8212;&#8201;<em>Unifiable Boxes</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-162/srfi-162.html">SRFI-162</a></strong>&#8201;&#8212;&#8201;<em>Comparators sublibrary</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a></strong>&#8201;&#8212;&#8201;<em>Underscores in numbers</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-170/srfi-170.html">SRFI-170</a></strong>&#8201;&#8212;&#8201;<em>POSIX API</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-171/srfi-171.html">SRFI-171</a></strong>&#8201;&#8212;&#8201;<em>Transducers</em><br>
@@ -925,14 +929,23 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-216/srfi-216.html">SRFI-216</a></strong>&#8201;&#8212;&#8201;<em>SICP Prerequisites (Portable)</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-217/srfi-217.html">SRFI-217</a></strong>&#8201;&#8212;&#8201;<em>Integer Sets</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-219/srfi-219.html">SRFI-219</a></strong>&#8201;&#8212;&#8201;<em>Define higher-order lambda</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-221/srfi-221.html">SRFI-221</a></strong>&#8201;&#8212;&#8201;<em>Generator/accumulator sub-library</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-222/srfi-222.html">SRFI-222</a></strong>&#8201;&#8212;&#8201;<em>Compound objects</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-223/srfi-223.html">SRFI-223</a></strong>&#8201;&#8212;&#8201;<em>Generalized binary search procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-224/srfi-224.html">SRFI-224</a></strong>&#8201;&#8212;&#8201;<em>Integer Mappings</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-227/srfi-227.html">SRFI-227</a></strong>&#8201;&#8212;&#8201;<em>Optional Arguments</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-228/srfi-228.html">SRFI-228</a></strong>&#8201;&#8212;&#8201;<em>A further comparator library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-229/srfi-229.html">SRFI-229</a></strong>&#8201;&#8212;&#8201;<em>Tagged Procedures</em><br>
--  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br></p>
+-  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-233/srfi-233.html">SRFI-233</a></strong>&#8201;&#8212;&#8201;<em>INI files</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-235/srfi-235.html">SRFI-235</a></strong>&#8201;&#8212;&#8201;<em>Combinators</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong>&#8201;&#8212;&#8201;<em>Codesets</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-244/srfi-244.html">SRFI-244</a></strong>&#8201;&#8212;&#8201;<em>Multiple-value definitions</em><br></p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_a_srfi">14.2. Using a SRFI</h3>
+<h3 id="_using_a_srfi">13.2. Using a SRFI</h3>
 <div class="paragraph">
 <p>Using a particular SRFI can be done with the special form
 <code>cond-expand</code> defined in <strong><a href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a></strong> which is fully supported
@@ -974,7 +987,7 @@ use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a></st
 <a href="_srfis.html#feature_identifiers">Table 2</a>.</p>
 </div>
 <div class="sect3">
-<h4 id="_embedded_srfis">14.2.1. Embedded SRFIs</h4>
+<h4 id="_embedded_srfis">13.2.1. Embedded SRFIs</h4>
 <div class="paragraph">
 <p>As said before, an <em>embedded</em> SRFI can be used directly without loading a
 support file. (Note that using <strong>require-feature</strong> works too
@@ -982,11 +995,11 @@ and permits to ignore if the SRFI is embedded).</p>
 </div>
 <div class="paragraph">
 <p><strong>List of embedded SRFIs:</strong>
- <code>srfi-0</code> <code>srfi-6</code> <code>srfi-8</code> <code>srfi-10</code> <code>srfi-11</code> <code>srfi-15</code> <code>srfi-16</code> <code>srfi-18</code> <code>srfi-22</code> <code>srfi-23</code> <code>srfi-28</code> <code>srfi-30</code> <code>srfi-31</code> <code>srfi-34</code> <code>srfi-38</code> <code>srfi-39</code> <code>srfi-45</code> <code>srfi-55</code> <code>srfi-62</code> <code>srfi-70</code> <code>srfi-87</code> <code>srfi-88</code> <code>srfi-98</code> <code>srfi-111</code> <code>srfi-112</code> <code>srfi-118</code> <code>srfi-138</code> <code>srfi-143</code> <code>srfi-145</code> <code>srfi-169</code> <code>srfi-176</code> <code>srfi-192</code> <code>srfi-193</code> <code>srfi-195</code> <code>srfi-208</code> <code>srfi-219</code></p>
+ <code>srfi-0</code> <code>srfi-6</code> <code>srfi-8</code> <code>srfi-10</code> <code>srfi-11</code> <code>srfi-15</code> <code>srfi-16</code> <code>srfi-18</code> <code>srfi-22</code> <code>srfi-23</code> <code>srfi-28</code> <code>srfi-30</code> <code>srfi-31</code> <code>srfi-34</code> <code>srfi-38</code> <code>srfi-39</code> <code>srfi-45</code> <code>srfi-46</code> <code>srfi-55</code> <code>srfi-62</code> <code>srfi-70</code> <code>srfi-87</code> <code>srfi-88</code> <code>srfi-98</code> <code>srfi-111</code> <code>srfi-112</code> <code>srfi-118</code> <code>srfi-138</code> <code>srfi-143</code> <code>srfi-145</code> <code>srfi-169</code> <code>srfi-176</code> <code>srfi-192</code> <code>srfi-193</code> <code>srfi-195</code> <code>srfi-208</code> <code>srfi-219</code> <code>srfi-244</code></p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_external_srfis">14.2.2. External SRFIs</h4>
+<h4 id="_external_srfis">13.2.2. External SRFIs</h4>
 <div class="paragraph">
 <p>An external SRFI needs to load at least one external file. This can be done
 with <strong>require</strong> or <strong>require-feature</strong>. As with embedded SRFIS, using
@@ -994,11 +1007,11 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-117</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-161</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-229</code> <code>srfi-230</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code></p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_features">14.2.3. SRFI features</h4>
+<h4 id="_srfi_features">13.2.3. SRFI features</h4>
 <div class="paragraph">
 <p>For some SRFIs, <strong><em>STklos</em></strong> accepts that uses them with a name. This names
 are given <a href="_srfis.html#feature_identifiers">Table 2</a>.</p>
@@ -1085,12 +1098,20 @@ are given <a href="_srfis.html#feature_identifiers">Table 2</a>.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-113</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">immutable-lists</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">srfi-116</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">queues-as-lists</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-117</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">adjustable-strings</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-118</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">hash-table</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">srfi-125</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">lazy-sequences</p></td>
@@ -1157,6 +1178,14 @@ are given <a href="_srfis.html#feature_identifiers">Table 2</a>.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-189</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ini-files</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">srfi-233</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">combinators</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">srfi-235</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">conditions</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-35 srfi-36</p></td>
 </tr>
@@ -1169,7 +1198,7 @@ are given <a href="_srfis.html#feature_identifiers">Table 2</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_misc_information">14.3. Misc. Information</h3>
+<h3 id="_misc_information">13.3. Misc. Information</h3>
 <div class="paragraph">
 <p>Previous section described the general way to use the SRFIS implemented in
 <strong><em>STklos</em></strong>.  This section concentrates on information not given above.</p>
@@ -1192,6 +1221,50 @@ same that the ones defined in <a href="_srfis.html#feature_identifiers">Table 2<
 <p>Furthermore, the feature identifier <strong><em>stklos</em></strong> and <strong><em>STklos</em></strong> are defined for
 applications which need to know on which Scheme implementation they are
 running on.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_srfi_4homogeneous_numeric_vector_datatypes">srfi-4&#8201;&#8212;&#8201;Homogeneous numeric vector datatypes</h4>
+<div class="paragraph">
+<p>
+
+<strong><a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong> is fully supported and is extended to provide the
+additional <strong>c64vector</strong> and <strong>c128vector</strong> types of <strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong> (<em>Homogeneous numeric vector libraries</em>).
+
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(uvector? uv)</code></strong><br>
+<strong><code>(uvector-length uv)</code></strong><br>
+<strong><code>(uvector-ref uv k)</code></strong><br>
+<strong><code>(uvector-set! uv k val)</code></strong><br>
+<strong><code>(uvector&#8594;list uv)</code></strong><br>
+<strong><code>(uvector-tag uv)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These primitives extend <strong><a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong>. They can be called with any type
+of uniform (homogeneous) vector.  The primitive <code>uvector-tag</code> returns the tag
+of the uniform vector, as a symbol</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">uvector?</span> <span class="o">#</span><span class="nv">s16</span><span class="p">(</span><span class="nf">-1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>    <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">uvector-length</span> <span class="o">#</span><span class="nv">u32</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">uvector-length</span> <span class="o">#</span><span class="nv">s64</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="nv">u8</span>
+<span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">c32</span><span class="p">())</span>       <span class="nv">=&gt;</span> <span class="nv">c32</span></code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -1228,6 +1301,121 @@ to define the setters for the (numerous) <code>cXXXXr</code> list procedures.</p
 </div>
 </div>
 <div class="sect3">
+<h4 id="_srfi_19time_data_types_and_procedures">srfi-19&#8201;&#8212;&#8201;Time Data Types and Procedures</h4>
+<div class="paragraph">
+<p>
+
+<strong><a href="http://srfi.schemers.org/srfi-19/srfi-19.html">SRFI-19</a></strong> is fully supported. STklos offers, as an extension,
+the procedures <code>date=?</code>, <code>date&lt;?</code>, <code>date&gt;?</code>, <code>date&#8656;?</code> and <code>date&gt;=?</code>. These
+will compare dates by first normalizing them to make the time zone offset
+irrelevant, so "2000 Nov 12 03:30:10 GMT-2" will be taken as equal to
+"2000 Nov 12 02:30:10 GMT-1".</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-difference time1 time2)</code></strong><br>
+<strong><code>(time-difference! time1 time2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These SRFI-19 procedures return the time duration (as an object of type <code>time-duration</code>)
+between <code>time1</code> and <code>time2</code>. It is an error if <code>time1</code> and <code>time2</code> are of different time types.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>time-difference</code> creates a new time object, while <code>time-difference!</code> may use <code>time1</code> to
+create the resulting object.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time&#8656;? time1 time2)</code></strong><br>
+<strong><code>(time&lt;? time1 time2)</code></strong><br>
+<strong><code>(time=? time1 time2)</code></strong><br>
+<strong><code>(time&gt;=? time1 time2)</code></strong><br>
+<strong><code>(time&gt;? time1 time2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These are SRFI-19 predicates used to compare times. They return:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>time&#8656;?</code> : <code>#t</code> if <code>time1</code> is before or at (less than or equal to) <code>time2</code>,
+<code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&lt;?</code> :  <code>#t</code> if <code>time1</code> is before (less than) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time=?</code> :  <code>#t</code> if <code>time1</code> at (equal) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&gt;=?</code> : <code>#t</code> if <code>time1</code> is at or after (greater than or equal to) <code>time2</code>,
+<code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&gt;?</code> :  <code>#t</code> if <code>time1</code> is after (greater than) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>An attempt to compare times of different type will raise an error.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-resolution [time-type])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Clock resolution, in nanoseconds, of the system clock of type type
+<code>time-type</code>, which defaults to <code>TIME-UTC</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">time-resolution</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mi">1000000</span>
+<span class="p">(</span><span class="nf">time-resolution</span> <span class="nv">time-process</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1000000</span>
+<span class="p">(</span><span class="nf">time-resolution</span> <span class="nv">time-tai</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">1000000</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_srfi_22running_scheme_scripts_on_unix">srfi-22&#8201;&#8212;&#8201;Running Scheme Scripts on Unix</h4>
 <div class="paragraph">
 <p>
@@ -1255,22 +1443,18 @@ script via a /usr/bin/env trampoline, like this:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>#!/usr/bin/env &lt;executable&gt;</code></pre>
+<pre class="rouge highlight"><code>#!/usr/bin/env stklos</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>where <code>&lt;executable&gt;</code> can recover several specified names.  <strong><em>STklos</em></strong> uses
-only the name <code>stklos-script</code> for <code>&lt;executable&gt;</code>.</p>
 </div>
 <div class="paragraph">
 <p>Here is an example of the classical <code>echo</code> command (without option) in Scheme:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos-script</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos</span>
 
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">main</span> <span class="nv">arguments</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="sc">#\space</span><span class="p">))</span>
+  <span class="p">(</span><span class="nb">for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="o">#</span><span class="nv">space</span><span class="p">))</span>
             <span class="p">(</span><span class="nb">cdr</span> <span class="nv">arguments</span><span class="p">))</span>
   <span class="p">(</span><span class="nb">newline</span><span class="p">)</span>
   <span class="mi">0</span><span class="p">)</span></code></pre>
@@ -1962,6 +2146,2299 @@ To obtain the symbol <code>:</code> in <strong><em>STklos</em></strong>, you mus
 </div>
 </div>
 <div class="sect3">
+<h4 id="_srfi_116immutable_list_library">srfi-116&#8201;&#8212;&#8201;Immutable List Library</h4>
+<div class="paragraph">
+<p>
+
+<strong><em>STklos</em></strong> implements the arrays of <strong><a href="http://srfi.schemers.org/srfi-116/srfi-116.html">SRFI-116</a></strong>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipair a d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated <code>ipair</code> whose <code>icar</code> is <code>a</code> and whose <code>icdr</code> is <code>d</code>.
+The ipair is guaranteed to be different (in the sense of <code>eqv?</code>)
+from every existing object.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilist obj &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated ilist of its arguments.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nf">ilist</span> <span class="ss">'a</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span> <span class="ss">'c</span><span class="p">)</span>            <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span> <span class="mi">7</span> <span class="nv">c</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">ilist</span><span class="p">)</span>                          <span class="nv">=&gt;</span>  <span class="p">()</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Being an ilist, its CAR, CDR and all sublists are immutable.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(xipair d a)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The same as <code>(lambda (d a) (ipair a d))</code></p>
+</div>
+<div class="paragraph">
+<p>Of utility only as a value to be conveniently passed to
+higher-order procedures.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">xipair</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="ss">'a</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The name stands for "eXchanged Immutable PAIR."</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipair</strong> obj &#8230;&#8203;)</code>*<br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>ipair*</code> is like <code>ilist</code> except that the last argument to <code>ipair*</code> is
+used as the ,(emph "cdr") of the last pair constructed.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nf">ipair*</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="o">.</span> <span class="mi">3</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">ipair*</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="o">'</span><span class="p">(</span><span class="nf">4</span> <span class="mi">5</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">ipair*</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="p">()</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(make-ilist n [fill])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns an n-element ilist, whose elements are all the value
+fill. If the fill argument is not given, the elements of the
+ilist may be arbitrary values.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">make-ilist</span> <span class="mi">4</span> <span class="ss">'c</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">c</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilist-tabulate n init-proc)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns an n-element ilist. Element i of the ilist,
+where 0 &#8656; i &lt; n, is produced by <code>(init-proc i)</code>.
+No guarantee is made about the dynamic order in which
+<code>init-proc</code> is applied to these indices.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ilist-tabulate</span> <span class="mi">4</span> <span class="nv">values</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilist-copy lst)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Copies the spine of the argument, including the ilist tail.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iiota count [ start step ]</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns an ilist containing the elements</p>
+</div>
+<div class="paragraph">
+<p><code>(start start+step &#8230;&#8203; start+(count-1)*step)</code></p>
+</div>
+<div class="paragraph">
+<p>The <code>start</code> and <code>step</code> parameters default to 0 and 1,
+respectively. This procedure takes its name from the APL
+primitive.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iiota</span> <span class="mi">5</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iiota</span> <span class="mi">5</span> <span class="mi">0</span> <span class="mf">-0.1</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">0</span> <span class="mf">-0.1</span> <span class="mf">-0.2</span> <span class="mf">-0.3</span> <span class="mf">-0.4</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(icar ipair)</code></strong><br>
+<strong><code>(icdr ipair)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return the contents of the icar and icdr
+field of their argument, respectively. Note that it is an
+error to apply them to the empty ilist.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">icar</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>       <span class="nv">=&gt;</span>  <span class="nv">a</span>          <span class="p">(</span><span class="nf">icdr</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>     <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">icar</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span>   <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span><span class="p">)</span>        <span class="p">(</span><span class="nf">icdr</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">icar</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>      <span class="nv">=&gt;</span>  <span class="mi">1</span>          <span class="p">(</span><span class="nf">icdr</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>    <span class="nv">=&gt;</span>  <span class="mi">2</span>
+<span class="p">(</span><span class="nf">icar</span> <span class="o">'</span><span class="p">())</span>              <span class="nv">=&gt;</span>  <span class="nv">*error*</span>    <span class="p">(</span><span class="nf">icdr</span> <span class="o">'</span><span class="p">())</span>            <span class="nv">=&gt;</span>  <span class="nv">*error*</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipair? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns true and only if <code>x</code> is a proper ilist — that is,
+a ()-terminated ilist.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(proper-ilist? x)</code></strong><br>
+<strong><code>(ilist? x)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These identifiers are bound either to the same procedure.
+In either case, true is returned iff <code>x</code> is a proper ilist
+— a ()-terminated ilist.</p>
+</div>
+<div class="paragraph">
+<p>More carefully: The empty list is a proper ilist. An ipair
+whose icdr is a proper ilist is also a proper ilist. Everything
+else is a dotted ilist. This includes non-ipair, non-() values
+(e.g. symbols, numbers, mutable pairs), which are considered to
+be dotted ilists of length 0.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(dotted-ilist? x)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns true if <code>x</code> is a finite, non-nil-terminated ilist. That is,
+there exists an n &gt;= 0 such that <code>icdrn(x)</code> is neither an ipair nor
+<code>()</code>. This includes non-ipair, non-() values (e.g. symbols, numbers),
+which are considered to be dotted ilists of length 0.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">dotted-ilist?</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">=</span> <span class="p">(</span><span class="nb">not</span> <span class="p">(</span><span class="nf">proper-ilist?</span> <span class="nv">x</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(not-ipair? x)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This is the same as <code>(lambda (x) (not (ipair? x)))</code></p>
+</div>
+<div class="paragraph">
+<p>Provided as a procedure as it can be useful as the termination
+condition for ilist-processing procedures that wish to handle
+all ilists, both proper and dotted.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(null-ilist? lst)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Ilist is a proper ilist. This procedure returns true if the argument
+is the empty list <code>()</code>, and false otherwise. It is an error to pass this
+procedure a value which is not a proper ilist. This procedure is
+recommended as the termination condition for ilist-processing
+procedures that are not defined on dotted ilists.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilist= elt= ilist1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Determines ilist equality, given an element-equality procedure. Proper
+ilist A equals proper ilist B if they are of the same length, and
+their corresponding elements are equal, as determined by <code>elt=</code>. If the
+element-comparison procedure&#8217;s first argument is from ilisti, then
+its second argument is from ilisti+1, i.e. it is always called as
+<code>(elt= a b)</code> for <code>a</code> an element of ilist A, and <code>b</code> an element of ilist B.</p>
+</div>
+<div class="paragraph">
+<p>In the n-ary case, every ilisti is compared to ilisti+1 (as opposed,
+for example, to comparing ilist1 to ilisti, for i&gt;1). If there are no
+ilist arguments at all, <code>ilist=</code> simply returns true.</p>
+</div>
+<div class="paragraph">
+<p>It is an error to apply ilist= to anything except proper ilists. It
+cannot reasonably be extended to dotted ilists, as it provides no way
+to specify an equality procedure for comparing the ilist terminators.</p>
+</div>
+<div class="paragraph">
+<p>Note that the dynamic order in which the elt= procedure is applied to
+pairs of elements is not specified. For example, if ilist= is applied
+to three ilists, A, B, and C, it may first completely compare A to B,
+then compare B to C, or it may compare the first elements of A and B,
+then the first elements of B and C, then the second elements of A and
+B, and so forth.</p>
+</div>
+<div class="paragraph">
+<p>The equality procedure must be consistent with <code>eq?</code>. That is, it must
+be the case that</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">eq?</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">elt=</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that this implies that two ilists which are <code>eq?</code> are always ilist=,
+as well; implementations may exploit this fact to "short-cut" the
+element-by-element comparisons.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ilist=</span> <span class="nv">eq?</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="no">#t</span>       <span class="c1">; Trivial cases</span>
+<span class="p">(</span><span class="nf">ilist=</span> <span class="nv">eq?</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(list-immutable+! lst)</code></strong><br>
+<strong><code>(list-immutable! lst)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Destructive versions of <code>list&#8594;ilist</code>: both procedures change their
+argument so it will become an immutable list.
+<code>List-immutable+!</code> returns the list, while <code>list-immutable!</code> returns <code>#void</code>.</p>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifirst   ipair)</code></strong><br>
+<strong><code>(isecond  ipair)</code></strong><br>
+<strong><code>(ithird   ipair)</code></strong><br>
+<strong><code>(ifourth  ipair)</code></strong><br>
+<strong><code>(ififth   ipair)</code></strong><br>
+<strong><code>(isixth   ipair)</code></strong><br>
+<strong><code>(iseventh ipair)</code></strong><br>
+<strong><code>(ieighth  ipair)</code></strong><br>
+<strong><code>(ininth   ipair)</code></strong><br>
+<strong><code>(itenth   ipair)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Synonyms for car, cadr, caddr, &#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ithird</span> <span class="o">'</span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="nv">c</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(icar+icdr ip)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The fundamental ipair deconstructor. Returns two values:
+the icar and the icdrif <code>ip</code>.</p>
+</div>
+<div class="paragraph">
+<p>
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(itake x i)</code></strong><br>
+<strong><code>(idrop x i)</code></strong><br>
+<strong><code>(ilist-tail x i)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>itake</code> returns the first i elements of ilist <code>x</code>.
+<code>idrop</code> returns all but the first i elements of ilist <code>x</code>.
+<code>ilist-tail</code> is either the same procedure as idrop or else a procedure
+with the same behavior.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="nf">itake</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>  <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+ <span class="p">(</span><span class="nf">idrop</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>  <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>x</code> may be any value — a proper or dotted ilist:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">itake</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span>    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">idrop</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">3</span> <span class="o">.</span> <span class="nv">d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">itake</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">3</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">idrop</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">3</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">d</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a legal <code>i</code>, itake and idrop partition the ilist in a manner
+which can be inverted with iappend:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iappend</span> <span class="p">(</span><span class="nf">itake</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="p">(</span><span class="nf">idrop</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>idrop is exactly equivalent to performing i icdr operations on <code>x</code>;
+the returned value shares a common tail with <code>x</code>.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(itake-right dilist i)</code></strong><br>
+<strong><code>(idrop-right dilist i)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Itake-right</code> returns the last <code>i</code> elements of <code>dilist</code>.
+<code>Idrop-right</code> returns all but the last <code>i</code> elements of <code>dilist</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">itake-right</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">d</span> <span class="nv">e</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">idrop-right</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The returned ilist may share a common tail with the argument <code>ilist</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>dilist</code> may be any ilist, either proper or dotted:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">itake-right</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="o">.</span> <span class="nv">d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">idrop-right</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">2</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">itake-right</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="nv">d</span>
+<span class="p">(</span><span class="nf">idrop-right</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">1</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">ipair</span> <span class="mi">3</span> <span class="ss">'d</span><span class="p">)))</span> <span class="mi">0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a legal <code>i</code>, <code>itake-right</code> and <code>idrop-right</code> partition the ilist
+in a manner which can be inverted with <code>iappend</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>(iappend (itake dilist i) (idrop dilist i)) = dilist</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Itake-right</code>'s return value is guaranteed to share a common tail
+with <code>dilist</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(isplit-at  x i)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Isplit-at</code> splits the ilist <code>x</code> at index <code>i</code>, returning an
+ilist of the first <code>i</code> elements, and the remaining tail. It is
+equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">values</span> <span class="p">(</span><span class="nf">itake</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="p">(</span><span class="nf">idrop</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilast ipair)</code></strong><br>
+<strong><code>(last-ipair ipair)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ilast</code> returns the last element of the non-empty, possibly
+dotted, ilist ipair.
+<code>Last-ipair</code> returns the last ipair in the non-empty ilist pair.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ilast</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>      <span class="nv">=&gt;</span> <span class="nv">c</span>
+<span class="p">(</span><span class="nf">last-ipair</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">c</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilength  ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the length of its argument. It is an error to pass a value
+to <code>ilength</code> which is not a proper ilist (()-terminated).</p>
+</div>
+<div class="paragraph">
+<p>The length of a proper ilist is a non-negative integer n such that
+<code>icdr</code> applied n times to the ilist produces the empty list.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iappend ilist1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns an ilist consisting of the elements of ilist1 followed by the elements of the other ilist parameters.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iappend</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">y</span><span class="p">))</span>        <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iappend</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span>    <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iappend</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">b</span><span class="p">))</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">c</span><span class="p">)))</span>  <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span> <span class="p">(</span><span class="nf">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The resulting ilist is always newly allocated, except that it
+shares structure with the final ilisti argument. This last argument
+may be any value at all; an improper ilist results if it is not a
+proper ilist. All other arguments must be proper ilists.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iappend</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">ipair</span> <span class="ss">'c</span> <span class="ss">'d</span><span class="p">))</span>  <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="o">.</span> <span class="nv">d</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iappend</span> <span class="o">'</span><span class="p">()</span> <span class="ss">'a</span><span class="p">)</span>           <span class="nv">=&gt;</span>  <span class="nv">a</span>
+<span class="p">(</span><span class="nf">iappend</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>         <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iappend</span><span class="p">)</span>                  <span class="nv">=&gt;</span>  <span class="p">()</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iconcatenate  ilist-of-ilists)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Appends the elements of its argument together. That is, <code>iconcatenate</code>
+returns the same as</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iapply</span> <span class="nv">iappend</span> <span class="nv">ilist-of-ilists</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or, equivalently,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ireduce-right</span> <span class="nv">iappend</span> <span class="o">'</span><span class="p">()</span> <span class="nv">ilist-of-ilists</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As with <code>iappend</code>, the last element of the input list may be any
+value at all.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ireverse  ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a newly allocated ilist consisting of the elements of <code>ilist</code>
+in reverse order.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ireverse</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>              <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">c</span> <span class="nv">b</span> <span class="nv">a</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">ireverse</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="nv">d</span> <span class="p">(</span><span class="nf">e</span> <span class="p">(</span><span class="nf">f</span><span class="p">))))</span>  <span class="nv">=&gt;</span>  <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="nf">f</span><span class="p">))</span> <span class="nv">d</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="nv">a</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iappend-reverse  rev-head tail)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Iappend-reverse</code> returns <code>(iappend (ireverse rev-head) tail)</code>.
+It is provided because it is a common operation — a common list-processing
+style calls for this exact operation to transfer values accumulated in
+reverse order onto the front of another ilist, and because the
+implementation is significantly more efficient than the simple
+composition it replaces. (But note that this pattern of iterative
+computation followed by a reverse can frequently be rewritten as a
+recursion, dispensing with the reverse and iappend-reverse steps, and
+shifting temporary, intermediate storage from the heap to the stack,
+which is typically a win for reasons of cache locality and eager
+storage reclamation.)</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(izip ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the same as <code>(lambda ilists (iapply imap ilist ilists))</code></p>
+</div>
+<div class="paragraph">
+<p>If <code>izip</code> is passed n ilists, it returns an ilist as long as the shortest
+of these ilists, each element of which is an n-element ilist comprised of
+the corresponding elements from the parameter ilists.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">izip</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">one</span> <span class="nv">two</span> <span class="nv">three</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">iq</span> <span class="nv">odd</span> <span class="nv">even</span> <span class="nv">odd</span> <span class="nv">even</span> <span class="nv">odd</span> <span class="nv">even</span> <span class="nv">odd</span> <span class="nv">even</span><span class="p">))</span>
+    <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">one</span> <span class="mi">1</span> <span class="nv">odd</span><span class="p">)</span> <span class="p">(</span><span class="nf">two</span> <span class="mi">2</span> <span class="nv">even</span><span class="p">)</span> <span class="p">(</span><span class="nf">three</span> <span class="mi">3</span> <span class="nv">odd</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">izip</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">3</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iunzip1 ilist)</code></strong><br>
+<strong><code>(iunzip2 ilist)</code></strong><br>
+<strong><code>(iunzip3 ilist)</code></strong><br>
+<strong><code>(iunzip4 ilist)</code></strong><br>
+<strong><code>(iunzip5 ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Iunzip1</code> takes an ilist of ilists, where every ilist must
+contain at least one element, and returns an ilist containing
+the initial element of each such ilist. That is, it returns
+<code>(imap icar ilists)</code>. <code>Iunzip2</code> takes an ilist of ilists, where
+every ilist must contain at least two elements, and returns two
+values: an ilist of the first elements, and an ilist of the second
+elements. <code>Iunzip3</code> does the same for the first three elements of
+the ilists, and so forth.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iunzip2</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">1</span> <span class="nv">one</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="nv">two</span><span class="p">)</span> <span class="p">(</span><span class="nf">3</span> <span class="nv">three</span><span class="p">)))</span> <span class="nv">=&gt;</span>
+    <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">one</span> <span class="nv">two</span> <span class="nv">three</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(icount pred ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Pred</code> is a procedure taking as many arguments as there are ilists and
+returning a single value. It is applied element-wise to the elements
+of the ilists, and a count is tallied of the number of elements that
+produce a true value. This count is returned. count is "iterative" in
+that it is guaranteed to apply pred to the ilist elements in a
+left-to-right order. The counting stops when the shortest ilist
+expires.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">icount</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span> <span class="mi">2</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">))</span>            <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nf">icount</span> <span class="nv">&lt;</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span> <span class="mi">8</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">4</span> <span class="mi">6</span> <span class="mi">8</span> <span class="mi">10</span> <span class="mi">12</span> <span class="mi">14</span> <span class="mi">16</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">3</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(imap proc ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>proc is a procedure taking as many arguments as there are ilist
+arguments and returning a single value. imap applies proc element-wise
+to the elements of the ilists and returns an ilist of the results, in
+order. The dynamic order in which proc is applied to the elements of
+the ilists is unspecified.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">imap</span> <span class="nv">icadr</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nf">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nf">g</span> <span class="nv">h</span><span class="p">)))</span> <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">b</span> <span class="nv">e</span> <span class="nv">h</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">imap</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">n</span><span class="p">)</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">n</span> <span class="nv">n</span><span class="p">))</span>
+     <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">1</span> <span class="mi">4</span> <span class="mi">27</span> <span class="mi">256</span> <span class="mi">3125</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">imap</span> <span class="nv">+</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span> <span class="mi">9</span><span class="p">)</span>
+
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">count</span> <span class="mi">0</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">imap</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">ignored</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">set!</span> <span class="nv">count</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">count</span> <span class="mi">1</span><span class="p">))</span>
+         <span class="nv">count</span><span class="p">)</span>
+       <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)))</span> <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">or</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">1</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifor-each proc ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The arguments to <code>ifor-each</code> are like the arguments to <code>imap</code>, but
+<code>ifor-each</code> calls <code>proc</code> for its side effects rather than for its
+values. Unlike <code>imap</code>, <code>ifor-each</code> is guaranteed to call proc on the
+elements of the ilists in order from the first element(s) to the last,
+and the value returned by <code>ifor-each</code> is unspecified.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">v</span> <span class="p">(</span><span class="nb">make-vector</span> <span class="mi">5</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">ifor-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">i</span><span class="p">)</span>
+              <span class="p">(</span><span class="nb">vector-set!</span> <span class="nv">v</span> <span class="nv">i</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">i</span> <span class="nv">i</span><span class="p">)))</span>
+            <span class="p">(</span><span class="nf">iq</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))</span>
+  <span class="nv">v</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="o">#</span><span class="p">(</span><span class="nf">0</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">9</span> <span class="mi">16</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifold kons knil ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The fundamental ilist iterator.</p>
+</div>
+<div class="paragraph">
+<p>First, consider the single ilist-parameter case. If
+<code>ilist1</code> = <code>(e1 e2 &#8230;&#8203; en)</code>, then this procedure returns</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">  <span class="p">(</span><span class="nf">kons</span> <span class="nv">en</span> <span class="o">...</span> <span class="p">(</span><span class="nf">kons</span> <span class="nv">e2</span> <span class="p">(</span><span class="nf">kons</span> <span class="nv">e1</span> <span class="nv">knil</span><span class="p">))</span> <span class="o">...</span> <span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That is, it obeys the (tail) recursion</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">ifold</span> <span class="nv">kons</span> <span class="p">(</span><span class="nf">kons</span> <span class="p">(</span><span class="nf">icar</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">knil</span><span class="p">)</span> <span class="p">(</span><span class="nf">icdr</span> <span class="nv">lis</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">ifold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Examples:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">+</span> <span class="mi">0</span> <span class="nv">lis</span><span class="p">)</span>                    <span class="c1">; Add up the elements of LIS.</span>
+  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">)</span>              <span class="c1">; Reverse LIS.</span>
+  <span class="p">(</span><span class="nf">ifold</span> <span class="nv">ipair</span> <span class="nv">tail</span> <span class="nv">rev-head</span><span class="p">)</span>        <span class="c1">; See APPEND-REVERSE.</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; How many symbols in LIS?</span>
+<span class="p">(</span><span class="nf">ifold</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">count</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">symbol?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">count</span> <span class="mi">1</span><span class="p">)</span> <span class="nv">count</span><span class="p">))</span>
+      <span class="mi">0</span>
+      <span class="nv">lis</span><span class="p">)</span>
+
+<span class="c1">;; Length of the longest string in LIS:</span>
+<span class="p">(</span><span class="nf">ifold</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">s</span> <span class="nv">max-len</span><span class="p">)</span> <span class="p">(</span><span class="nb">max</span> <span class="nv">max-len</span> <span class="p">(</span><span class="nb">string-length</span> <span class="nv">s</span><span class="p">)))</span>
+      <span class="mi">0</span>
+      <span class="nv">lis</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If n <code>ilist</code> arguments are provided, then the <code>kons</code> function must take
+n+1 parameters: one element from each ilist, and the "seed" or fold
+state, which is initially knil. The fold operation terminates when the
+shortest ilist runs out of values:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold</span> <span class="nv">ipair*</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">c</span> <span class="mi">3</span> <span class="nv">b</span> <span class="mi">2</span> <span class="nv">a</span> <span class="mi">1</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iunfold p f g seed [tail-gen])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Iunfold</code> is best described by its basic recursion:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iunfold</span> <span class="nv">p</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">seed</span><span class="p">)</span> <span class="nv">=</span>
+    <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">p</span> <span class="nv">seed</span><span class="p">)</span> <span class="p">(</span><span class="nf">tail-gen</span> <span class="nv">seed</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ipair</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">seed</span><span class="p">)</span>
+              <span class="p">(</span><span class="nf">iunfold</span> <span class="nv">p</span> <span class="nv">f</span> <span class="nv">g</span> <span class="p">(</span><span class="nf">g</span> <span class="nv">seed</span><span class="p">))))</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>p        Determines when to stop unfolding.
+f        Maps each seed value to the corresponding ilist element.
+g        Maps each seed value to next seed value.
+seed     The "state" value for the unfold.
+tail-gen Creates the tail of the ilist; defaults to (lambda (x) '())</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In other words, we use g to generate a sequence of seed values
+ seed, g(seed), g2(seed), g3(seed), &#8230;&#8203;
+ These seed values are mapped to ilist elements by f, producing
+the elements of the result ilist in a left-to-right order. P says when
+to stop.</p>
+</div>
+<div class="paragraph">
+<p><code>Iunfold</code> is the fundamental recursive ilist constructor, just as
+<code>ifold-right</code> is the fundamental recursive ilist consumer. While
+<code>iunfold</code> may seem a bit abstract to novice functional programmers,
+it can be used in a number of ways:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; Ilist of squares: 1^2 ... 10^2</span>
+<span class="p">(</span><span class="nf">iunfold</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">&gt;</span> <span class="nv">x</span> <span class="mi">10</span><span class="p">))</span>
+         <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+         <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">x</span> <span class="mi">1</span><span class="p">))</span>
+         <span class="mi">1</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">iunfold</span> <span class="nv">null-ilist?</span> <span class="nv">icar</span> <span class="nv">icdr</span> <span class="nv">lis</span><span class="p">)</span> <span class="c1">; Copy a proper ilist.</span>
+
+<span class="c1">;; Read current input port into an ilist of values.</span>
+<span class="p">(</span><span class="nf">iunfold</span> <span class="nv">eof-object?</span> <span class="nv">values</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">read</span><span class="p">))</span> <span class="p">(</span><span class="nb">read</span><span class="p">))</span>
+
+<span class="c1">;; Copy a possibly non-proper ilist:</span>
+<span class="p">(</span><span class="nf">iunfold</span> <span class="nv">not-ipair?</span> <span class="nv">icar</span> <span class="nv">icdr</span> <span class="nv">lis</span>
+         <span class="nv">values</span><span class="p">)</span>
+
+<span class="c1">;; Append HEAD onto TAIL:</span>
+<span class="p">(</span><span class="nf">iunfold</span> <span class="nv">null-ilist?</span> <span class="nv">icar</span> <span class="nv">icdr</span> <span class="nv">head</span>
+        <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="nv">tail</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Interested functional programmers may enjoy noting that ifold-right and
+iunfold are in some sense inverses. That is, given operations <code>knull?</code>,
+<code>kar</code>, <code>kdr</code>, <code>kons</code>, and <code>knil</code> satisfying</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">kons</span> <span class="p">(</span><span class="nf">kar</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">kdr</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span> <span class="nv">and</span> <span class="p">(</span><span class="nf">knull?</span> <span class="nv">knil</span><span class="p">)</span> <span class="nv">=</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="p">(</span><span class="nf">iunfold</span> <span class="nv">knull?</span> <span class="nv">kar</span> <span class="nv">kdr</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iunfold</span> <span class="nv">knull?</span> <span class="nv">kar</span> <span class="nv">kdr</span> <span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span><span class="o">.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This combinator sometimes is called an "anamorphism;" when an explicit
+tail-gen procedure is supplied, it is called an "apomorphism."</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipair-fold kons knil ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Analogous to fold, but kons is applied to successive sub-ilists of the
+ilists, rather than successive elements — that is, kons is applied to
+the ipairs making up the lists, giving this (tail) recursion:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span> <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">tail</span> <span class="p">(</span><span class="nf">icdr</span> <span class="nv">lis</span><span class="p">)))</span>
+                              <span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">kons</span> <span class="p">(</span><span class="nf">kons</span> <span class="nv">lis</span> <span class="nv">knil</span><span class="p">)</span> <span class="nv">tail</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ipair-fold</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ireduce f ridentity ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ireduce</code> is a variant of <code>ifold</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Ridentity</code> should be a "right identity" of the procedure <code>f</code>
+— that is, for any value <code>x</code> acceptable to <code>f</code>,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="nv">ridentity</span><span class="p">)</span> <span class="nv">=</span> <span class="nv">x</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ireduce</code> has the following definition:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>If ilist = (), return ridentity;
+Otherwise, return (ifold f (icar ilist) (icdr ilist)).</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>&#8230;&#8203;in other words, we compute <code>(ifold f ridentity ilist)</code>.</p>
+</div>
+<div class="paragraph">
+<p>Note that ridentity is used only in the empty-list case. You typically
+use ireduce when applying <code>f</code> is expensive and you&#8217;d like to avoid the
+extra application incurred when ifold applies <code>f</code> to the head of <code>ilist</code>
+and the identity value, redundantly producing the same value passed in
+to <code>f</code>. For example, if <code>f</code> involves searching a file directory or
+performing a database query, this can be significant. In general,
+however, <code>ifold</code> is useful in many contexts where <code>ireduce</code> is
+not (consider the examples given in the ifold definition — only one of
+the five folds uses a function with a right identity. The other four
+may not be performed with ireduce).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; take the max of an ilist of non-negative integers.</span>
+<span class="p">(</span><span class="nf">ireduce</span> <span class="nv">max</span> <span class="mi">0</span> <span class="nv">nums</span><span class="p">)</span> <span class="c1">; i.e., (iapply max 0 nums)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifold-right kons knil ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The fundamental ilist recursion operator.</p>
+</div>
+<div class="paragraph">
+<p>First, consider the single ilist-parameter case. If
+<code>ilist1 = (e1 e2 &#8230;&#8203; en)</code>, then this procedure returns
+<code>(kons e1 (kons e2 &#8230;&#8203; (kons en knil)))</code></p>
+</div>
+<div class="paragraph">
+<p>That is, it obeys the recursion</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">kons</span> <span class="p">(</span><span class="nf">icar</span> <span class="nv">lis</span><span class="p">)</span> <span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="p">(</span><span class="nf">icdr</span> <span class="nv">lis</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Examples:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">)</span>          <span class="c1">; Copy LIS.</span>
+
+<span class="c1">;; Filter the even numbers out of LIS.</span>
+<span class="p">(</span><span class="nf">ifold-right</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">l</span><span class="p">)</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">even?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">ipair</span> <span class="nv">x</span> <span class="nv">l</span><span class="p">)</span> <span class="nv">l</span><span class="p">))</span> <span class="o">'</span><span class="p">()</span> <span class="nv">lis</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If n ilist arguments are provided, then the <code>kons</code> procedure must take
+n+1 parameters: one element from each ilist, and the "seed" or fold
+state, which is initially <code>knil</code>. The fold operation terminates when the
+shortest ilist runs out of values:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold-right</span> <span class="nv">ipair*</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">1</span> <span class="nv">b</span> <span class="mi">2</span> <span class="nv">c</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iunfold-right p f g seed [tail])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Iunfold-right</code> constructs an ilist with the following loop:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="nv">lp</span> <span class="p">((</span><span class="nf">seed</span> <span class="nv">seed</span><span class="p">)</span> <span class="p">(</span><span class="nf">lis</span> <span class="nv">tail</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">p</span> <span class="nv">seed</span><span class="p">)</span> <span class="nv">lis</span>
+      <span class="p">(</span><span class="nf">lp</span> <span class="p">(</span><span class="nf">g</span> <span class="nv">seed</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">ipair</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">seed</span><span class="p">)</span> <span class="nv">lis</span><span class="p">))))</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>p         Determines when to stop unfolding.
+f         Maps each seed value to the corresponding ilist element.
+g         Maps each seed value to next seed value.
+seed      The "state" value for the unfold.
+tail      ilist terminator; defaults to '().</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In other words, we use g to generate a sequence of seed values</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">seed,</span> <span class="nv">g</span><span class="p">(</span><span class="nf">seed</span><span class="p">)</span><span class="o">,</span> <span class="nv">g2</span><span class="p">(</span><span class="nf">seed</span><span class="p">)</span><span class="o">,</span> <span class="nv">g3</span><span class="p">(</span><span class="nf">seed</span><span class="p">)</span><span class="o">,</span> <span class="o">...</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These seed values are mapped to ilist elements by <code>f</code>, producing the
+elements of the result ilist in a right-to-left order. P says when to
+stop.</p>
+</div>
+<div class="paragraph">
+<p><code>Iunfold-right</code> is the fundamental iterative ilist constructor, just as
+<code>ifold</code> is the fundamental iterative ilist consumer. While <code>iunfold-right</code>
+may seem a bit abstract to novice functional programmers, it can be
+used in a number of ways:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; Ilist of squares: 1^2 ... 10^2</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">zero?</span>
+              <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+              <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span> <span class="mi">1</span><span class="p">))</span>
+              <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1">;; Reverse a proper ilist.</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">null-ilist?</span> <span class="nv">icar</span> <span class="nv">icdr</span> <span class="nv">lis</span><span class="p">)</span>
+
+<span class="c1">;; Read current input port into an ilist of values.</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">eof-object?</span> <span class="nv">values</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">read</span><span class="p">))</span> <span class="p">(</span><span class="nb">read</span><span class="p">))</span>
+
+<span class="c1">;; (iappend-reverse rev-head tail)</span>
+<span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">null-ilist?</span> <span class="nv">icar</span> <span class="nv">icdr</span> <span class="nv">rev-head</span> <span class="nv">tail</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Interested functional programmers may enjoy noting that ifold and
+<code>iunfold-right</code> are in some sense inverses. That is, given operations
+<code>knull?</code>, <code>kar</code>, <code>kdr</code>, <code>kons</code>, and <code>knil</code> satisfying</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">kons</span> <span class="p">(</span><span class="nf">kar</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">kdr</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span> <span class="nv">and</span> <span class="p">(</span><span class="nf">knull?</span> <span class="nv">knil</span><span class="p">)</span> <span class="nv">=</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">knull?</span> <span class="nv">kar</span> <span class="nv">kdr</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iunfold-right</span> <span class="nv">knull?</span> <span class="nv">kar</span> <span class="nv">kdr</span> <span class="p">(</span><span class="nf">ifold</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=</span> <span class="nv">x</span><span class="o">.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipair-fold-right kons knil ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Holds the same relationship with <code>ifold-right</code> that <code>ipair-fold</code>
+holds with <code>ifold</code>. Obeys the recursion</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=</span>
+     <span class="p">(</span><span class="nf">kons</span> <span class="nv">lis</span> <span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="p">(</span><span class="nf">icdr</span> <span class="nv">lis</span><span class="p">)))</span>
+ <span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">kons</span> <span class="nv">knil</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">knil</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ipair-fold-right</span> <span class="nv">ipair</span> <span class="o">'</span><span class="p">()</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ireduce-right f ridentity ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ireduce-right</code> is the <code>fold-right</code> variant of <code>ireduce</code>. It obeys the
+following definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ireduce-right</span> <span class="nv">f</span> <span class="nv">ridentity</span> <span class="o">'</span><span class="p">())</span> <span class="nv">=</span> <span class="nv">ridentity</span>
+<span class="p">(</span><span class="nf">ireduce-right</span> <span class="nv">f</span> <span class="nv">ridentity</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">e1</span><span class="p">))</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">e1</span> <span class="nv">ridentity</span><span class="p">)</span> <span class="nv">=</span> <span class="nv">e1</span>
+<span class="p">(</span><span class="nf">ireduce-right</span> <span class="nv">f</span> <span class="nv">ridentity</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">e1</span> <span class="nv">e2</span> <span class="o">...</span><span class="p">))</span> <span class="nv">=</span>
+    <span class="p">(</span><span class="nf">f</span> <span class="nv">e1</span> <span class="p">(</span><span class="nf">ireduce</span> <span class="nv">f</span> <span class="nv">ridentity</span> <span class="p">(</span><span class="nf">e2</span> <span class="o">...</span><span class="p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>&#8230;&#8203;in other words, we compute <code>(ifold-right f ridentity ilist)</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; Append a bunch of ilists together.</span>
+<span class="c1">;; I.e., (iapply iappend ilist-of-ilists)</span>
+<span class="p">(</span><span class="nf">ireduce-right</span> <span class="nv">iappend</span> <span class="o">'</span><span class="p">()</span> <span class="nv">ilist-of-ilists</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iappend-map  f ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iapply</span> <span class="nv">iappend</span> <span class="p">(</span><span class="nf">imap</span> <span class="nv">f</span> <span class="nv">ilist1</span> <span class="nv">ilist2</span> <span class="o">...</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iapply</span> <span class="nv">iappend</span> <span class="p">(</span><span class="nf">imap</span> <span class="nv">f</span> <span class="nv">ilist1</span> <span class="nv">ilist2</span> <span class="o">...</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Map f over the elements of the ilists, just as in the <code>imap</code>
+function. However, the results of the applications are appended
+together (using <code>iappend</code>) to make the final result.</p>
+</div>
+<div class="paragraph">
+<p>The dynamic order in which the various applications of <code>f</code> are made is
+not specified.</p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iappend-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">ilist</span> <span class="nv">x</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span><span class="p">)))</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">-1</span> <span class="mi">3</span> <span class="mi">-3</span> <span class="mi">8</span> <span class="mi">-8</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipair-for-each f ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Like <code>ifor-each</code>, but <code>f</code> is applied to successive sub-ilists of the
+argument <code>ilists</code>. That is, <code>f</code> is applied to the cells of the ilists,
+rather than the ilists' elements. These applications occur in
+left-to-right order.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ipair-for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">ipair</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">ipair</span><span class="p">)</span> <span class="p">(</span><span class="nb">newline</span><span class="p">))</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span> <span class="nv">==&gt;</span>
+    <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">c</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifilter-map f ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Like <code>imap</code>, but only true values are saved.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifilter-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="k">and</span> <span class="p">(</span><span class="nb">number?</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">)))</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="mi">1</span> <span class="nv">b</span> <span class="mi">3</span> <span class="nv">c</span> <span class="mi">7</span><span class="p">))</span>
+    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">9</span> <span class="mi">49</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The dynamic order in which the various applications of <code>f</code> are made is
+not specified.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(imap-in-order f ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>A variant of the <code>imap</code> procedure that guarantees to apply <code>f</code> across the
+elements of the <code>ilisti</code> arguments in a left-to-right order. This is
+useful for mapping procedures that both have side effects and return
+useful values.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifilter pred ilist )</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return all the elements of <code>ilist</code> that satisfy predicate <code>pred</code>. The
+ilist is not disordered — elements that appear in the result ilist
+occur in the same order as they occur in the argument <code>ilist</code>. The
+returned ilist may share a common tail with the argument ilist. The
+dynamic order in which the various applications of pred are made is
+not specified.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifilter</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">0</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">8</span> <span class="mi">43</span> <span class="mi">-4</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">8</span> <span class="mi">8</span> <span class="mi">-4</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ipartition pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Partitions the elements of <code>ilist</code> with predicate <code>pred</code>, and returns two
+values: the ilist of in-elements and the ilist of out-elements. The
+ilist is not disordered — elements occur in the result ilists in the
+same order as they occur in the argument ilist. The dynamic order in
+which the various applications of <code>pred</code> are made is not specified. One
+of the returned ilists may share a common tail with the argument
+ilist.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ipartition</span> <span class="nv">symbol?</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">one</span> <span class="mi">2</span> <span class="mi">3</span> <span class="nv">four</span> <span class="nv">five</span> <span class="mi">6</span><span class="p">))</span> <span class="nv">=&gt;</span>
+    <span class="p">(</span><span class="nf">one</span> <span class="nv">four</span> <span class="nv">five</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span> <span class="mi">6</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iremove pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns ilist without the elements that satisfy predicate pred,
+similar to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">pred</span> <span class="nv">ilist</span><span class="p">)</span> <span class="p">(</span><span class="nf">ifilter</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">not</span> <span class="p">(</span><span class="nf">pred</span> <span class="nv">x</span><span class="p">)))</span> <span class="nv">ilist</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The ilist is not disordered — elements that appear in the result
+ilist occur in the same order as they occur in the argument ilist. The
+returned ilist may share a common tail with the argument ilist. The
+dynamic order in which the various applications of <code>pred</code> are made is
+not specified.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iremove</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">0</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">8</span> <span class="mi">43</span> <span class="mi">-4</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">7</span> <span class="mi">43</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(imember x ilist [=])</code></strong><br>
+<strong><code>(imemq x ilist)</code></strong><br>
+<strong><code>(imemv x ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return the first sub-ilist of <code>ilis`t whose icar is `x</code>,
+where the sub-ilists of ilist are the non-empty ilists returned
+by <code>(idrop ilist i)</code> for <code>i</code> less than the length of ilist. If <code>x</code> does not
+occur in <code>ilist</code>, then false is returned. <code>Imemq</code> uses <code>eq?</code> to compare <code>x</code> with
+the elements of <code>ilist</code>, while <code>imemv</code> uses <code>eqv?</code>, and <code>imember</code> uses <code>equal?</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">imemq</span> <span class="ss">'a</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>           <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">imemq</span> <span class="ss">'b</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>           <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">b</span> <span class="nv">c</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">imemq</span> <span class="ss">'a</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))</span>           <span class="nv">=&gt;</span>  <span class="no">#f</span>
+<span class="p">(</span><span class="nf">imemq</span> <span class="p">(</span><span class="nb">list</span> <span class="ss">'a</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ilist</span> <span class="ss">'b</span> <span class="o">'</span><span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="ss">'c</span><span class="p">))</span>     <span class="nv">=&gt;</span>  <span class="no">#f</span>
+<span class="p">(</span><span class="nf">imember</span> <span class="p">(</span><span class="nb">list</span> <span class="ss">'a</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ilist</span> <span class="ss">'b</span> <span class="o">'</span><span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="ss">'c</span><span class="p">)))</span>    <span class="nv">=&gt;</span>  <span class="p">((</span><span class="nf">a</span><span class="p">)</span> <span class="nv">c</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">imemq</span> <span class="mi">101</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">100</span> <span class="mi">101</span> <span class="mi">102</span><span class="p">))</span>    <span class="nv">=&gt;</span>  <span class="nv">*unspecified*</span>
+<span class="p">(</span><span class="nf">imemv</span> <span class="mi">101</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">100</span> <span class="mi">101</span> <span class="mi">102</span><span class="p">))</span>    <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">101</span> <span class="mi">102</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The comparison procedure is used to compare the elements <code>ei</code> of <code>ilist</code>
+to the key <code>x</code> in this way:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">=</span> <span class="nv">x</span> <span class="nv">ei</span><span class="p">)</span> <span class="c1">; ilist is (E1 ... En)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That is, the first argument is always <code>x</code>, and the second argument is
+one of the ilist elements. Thus one can reliably find the first
+element of ilist that is greater than five with <code>(imember 5 ilist &lt;)</code></p>
+</div>
+<div class="paragraph">
+<p>Note that fully general ilist searching may be performed with the
+<code>ifind-tail</code> and <code>ifind</code> procedures, e.g.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifind-tail</span> <span class="nv">even?</span> <span class="nv">ilist</span><span class="p">)</span> <span class="c1">; Find the first elt with an even key.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifind pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the first element of ilist that satisfies predicate <code>pred</code>;
+false if no element does.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifind</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">4</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that ifind has an ambiguity in its lookup semantics — if ifind
+returns false, you cannot tell (in general) if it found a false element
+that satisfied <code>pred</code>, or if it did not find any element at all. In many
+situations, this ambiguity cannot arise — either the ilist being
+searched is known not to contain any false elements, or the ilist is
+guaranteed to have an element satisfying pred. However, in cases where
+this ambiguity can arise, you should use <code>ifind-tail</code> instead of <code>ifind</code>,
+since <code>ifind-tail</code> has no such ambiguity:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">cond</span> <span class="p">((</span><span class="nf">ifind-tail</span> <span class="nv">pred</span> <span class="nv">lis</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">ipair</span><span class="p">)</span> <span class="o">...</span><span class="p">))</span> <span class="c1">; Handle (icar ipair)</span>
+      <span class="p">(</span><span class="k">else</span> <span class="o">...</span><span class="p">))</span> <span class="c1">; Search failed.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ifind-tail pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the first ipair of ilist whose icar satisfies <code>pred</code>. If no
+ipair does, return false.</p>
+</div>
+<div class="paragraph">
+<p><code>Ifind-tail</code> can be viewed as a general-predicate variant of the
+<code>imember</code> function.</p>
+</div>
+<div class="paragraph">
+<p>Examples:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">ifind-tail</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">37</span> <span class="mi">-8</span> <span class="mi">-5</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">-8</span> <span class="mi">-5</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">ifind-tail</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">37</span> <span class="mi">-5</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+
+<span class="c1">;; IMEMBER X LIS:</span>
+<span class="p">(</span><span class="nf">ifind-tail</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">elt</span><span class="p">)</span> <span class="p">(</span><span class="nb">equal?</span> <span class="nv">x</span> <span class="nv">elt</span><span class="p">))</span> <span class="nv">lis</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ifind-tail</code> is essentially <code>idrop-while</code>, where the sense of the
+predicate is inverted: <code>Ifind-tail</code> searches until it finds an element
+satisfying the predicate; <code>idrop-while</code> searches until it finds an
+element that doesn&#8217;t satisfy the predicate.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iany pred ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Applies the predicate across the ilists, returning true if the
+predicate returns true on any application.</p>
+</div>
+<div class="paragraph">
+<p>If there are n ilist arguments <code>ilist1 &#8230;&#8203; ilistn</code>, then <code>pred</code> must
+be a procedure taking n arguments and returning a boolean result.</p>
+</div>
+<div class="paragraph">
+<p><code>Iany</code> applies <code>pred</code> to the first elements of the <code>ilisti</code>
+parameters. If this application returns a true value, iany immediately
+returns that value. Otherwise, it iterates, applying pred to the
+second elements of the <code>ilisti</code> parameters, then the third, and so
+forth. The iteration stops when a true value is produced or one of the
+ilists runs out of values; in the latter case, iany returns false. The
+application of <code>pred</code> to the last element of the ilists is a tail call.</p>
+</div>
+<div class="paragraph">
+<p>Note the difference between <code>ifind</code> and <code>iany</code> — <code>ifind</code> returns the
+element that satisfied the predicate; iany returns the true value that
+the predicate produced.</p>
+</div>
+<div class="paragraph">
+<p>Like <code>ievery</code>, `iany&#8217;s name does not end with a question mark — this
+is to indicate that it does not return a simple boolean (true or false),
+but a general value.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">iany</span> <span class="nv">integer?</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="mi">3</span> <span class="nv">b</span> <span class="mf">2.7</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">iany</span> <span class="nv">integer?</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="mf">3.1</span> <span class="nv">b</span> <span class="mf">2.7</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">iany</span> <span class="nv">&lt;</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span><span class="p">)</span>
+       <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">7</span> <span class="mi">1</span> <span class="mi">8</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ievery pred ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Applies the predicate across the ilists, returning true if the
+predicate returns true on every application.</p>
+</div>
+<div class="paragraph">
+<p>If there are n ilist arguments <code>ilist1 &#8230;&#8203; ilistn</code>, then <code>pred</code> must be a
+procedure taking n arguments and returning a boolean result.</p>
+</div>
+<div class="paragraph">
+<p><code>Ievery</code> applies <code>pred</code> to the first elements of the <code>ilisti</code> parameters. If
+this application returns false, ievery immediately returns
+false. Otherwise, it iterates, applying pred to the second elements of
+the ilisti parameters, then the third, and so forth. The iteration
+stops when a false value is produced or one of the ilists runs out of
+values. In the latter case, ievery returns the true value produced by
+its final application of <code>pred</code>. The application of pred to the last
+element of the ilists is a tail call.</p>
+</div>
+<div class="paragraph">
+<p>If one of the <code>ilisti</code> has no elements, ievery simply returns true.</p>
+</div>
+<div class="paragraph">
+<p>Like <code>iany</code>, `ievery&#8217;s name does not end with a question mark — this is
+to indicate that it does not return a simple boolean (true or false), but a
+general value.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ilist-index pred ilist1 ilist2 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the index of the leftmost element that satisfies <code>pred</code>.</p>
+</div>
+<div class="paragraph">
+<p>If there are n ilist arguments <code>ilist1 &#8230;&#8203; ilistn</code>, then <code>pred</code> must be a
+function taking n arguments and returning a boolean result.</p>
+</div>
+<div class="paragraph">
+<p><code>Ilist-index</code> applies <code>pred</code> to the first elements of the <code>ilisti</code>
+parameters. If this application returns true, <code>ilist-index</code> immediately
+returns zero. Otherwise, it iterates, applying <code>pred</code> to the second
+elements of the <code>ilisti</code> parameters, then the third, and so forth. When
+it finds a tuple of ilist elements that cause <code>pred</code> to return true, it
+stops and returns the zero-based index of that position in the ilists.</p>
+</div>
+<div class="paragraph">
+<p>The iteration stops when one of the ilists runs out of values; in this
+case, <code>ilist-index</code> returns false.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">ilist-index</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="nv">ilist-index</span> <span class="nv">&lt;</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span> <span class="mi">2</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">7</span> <span class="mi">1</span> <span class="mi">8</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="nv">ilist-index</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span> <span class="mi">2</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">7</span> <span class="mi">1</span> <span class="mi">8</span> <span class="mi">2</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(itake-while  pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the longest initial prefix of ilist whose elements all
+satisfy the predicate <code>pred</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">itake-while</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">18</span> <span class="mi">3</span> <span class="mi">10</span> <span class="mi">22</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">18</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(idrop-while pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Drops the longest initial prefix of <code>ilist</code> whose elements all
+satisfy the predicate <code>pred</code>, and returns the rest of the ilist.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">idrop-while</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">18</span> <span class="mi">3</span> <span class="mi">10</span> <span class="mi">22</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">10</span> <span class="mi">22</span> <span class="mi">9</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ispan   pred ilist)</code></strong><br>
+<strong><code>(ibreak  pred ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ispan</code> splits the ilist into the longest initial prefix whose
+elements all satisfy <code>pred</code>, and the remaining tail. <code>Ibreak</code> inverts the
+sense of the predicate: the tail commences with the first element of
+the input ilist that satisfies the predicate.</p>
+</div>
+<div class="paragraph">
+<p>In other words: <code>ispan</code> finds the initial span of elements
+satisfying <code>pred</code>, and <code>ibreak</code> breaks the ilist at the first element
+satisfying <code>pred</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Ispan</code> is equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">values</span> <span class="p">(</span><span class="nf">itake-while</span> <span class="nv">pred</span> <span class="nv">ilist</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">idrop-while</span> <span class="nv">pred</span> <span class="nv">ilist</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">ispan</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">2</span> <span class="mi">18</span> <span class="mi">3</span> <span class="mi">10</span> <span class="mi">22</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span>
+  <span class="p">(</span><span class="nf">2</span> <span class="mi">18</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">3</span> <span class="mi">10</span> <span class="mi">22</span> <span class="mi">9</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">ibreak</span> <span class="nv">even?</span> <span class="p">(</span><span class="nf">iq</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span><span class="p">))</span> <span class="nv">=&gt;</span>
+  <span class="p">(</span><span class="nf">3</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">4</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">9</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(idelete  x ilist [=])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Idelete</code> uses the comparison procedure <code>=</code>, which defaults to <code>equal?</code>,
+to find all elements of ilist that are equal to <code>x</code>, and deletes them from
+<code>ilist</code>. The dynamic order in which the various applications of = are
+made is not specified.</p>
+</div>
+<div class="paragraph">
+<p>The ilist is not disordered — elements that appear in the result
+ilist occur in the same order as they occur in the argument ilist. The
+result may share a common tail with the argument ilist.</p>
+</div>
+<div class="paragraph">
+<p>Note that fully general element deletion can be performed with the
+iremove procedures, e.g.:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; idelete all the even elements from LIS:</span>
+<span class="p">(</span><span class="nf">iremove</span> <span class="nv">even?</span> <span class="nv">lis</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The comparison procedure is used in this way: <code>(= x ei)</code>. That is, <code>x</code>
+is always the first argument, and an ilist element is always the
+second argument. The comparison procedure will be used to compare each
+element of ilist exactly once; the order in which it is applied to the
+various ei is not specified. Thus, one can reliably remove all the
+numbers greater than five from an ilist with <code>(idelete 5 ilist &lt;)</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ialist-cons key datum ialist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Constructs a new ialist entry mapping key &#8594; datum onto ialist.
+This is the same as</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">key</span> <span class="nv">datum</span> <span class="nv">ialist</span><span class="p">)</span> <span class="p">(</span><span class="nf">ipair</span> <span class="p">(</span><span class="nf">ipair</span> <span class="nv">key</span> <span class="nv">datum</span><span class="p">)</span> <span class="nv">ialist</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(idelete-duplicates  ilist [=])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Idelete-duplicates</code> removes duplicate elements from the <code>ilist</code>
+argument. If there are multiple equal elements in the argument <code>ilist</code>,
+the result ilist only contains the first or leftmost of these elements
+in the result. The order of these surviving elements is the same as in
+the original ilist — <code>idelete-duplicates</code> does not disorder the
+ilist (hence it is useful for "cleaning up" immutable association
+lists).</p>
+</div>
+<div class="paragraph">
+<p>The <code>=</code> parameter is used to compare the elements of the ilist; it
+defaults to equal?. If x comes before y in ilist, then the comparison
+is performed <code>(= x y)</code>. The comparison procedure will be used to compare
+each pair of elements in ilist no more than once; the order in which
+it is applied to the various pairs is not specified.</p>
+</div>
+<div class="paragraph">
+<p>Although  <code>idelete-duplicates</code> can be implemented so it runs in time
+O(n2) for n-element ilists, the STklos implementation runs in linear
+expected time.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">idelete-duplicates</span> <span class="p">(</span><span class="nf">iq</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">a</span> <span class="nv">c</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">z</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">z</span><span class="p">)</span>
+
+<span class="c1">;; Clean up an ialist:</span>
+<span class="p">(</span><span class="nf">idelete-duplicates</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">a</span> <span class="o">.</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="o">.</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">a</span> <span class="o">.</span> <span class="mi">9</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="o">.</span> <span class="mi">1</span><span class="p">))</span>
+                   <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nf">icar</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">icar</span> <span class="nv">y</span><span class="p">))))</span>
+    <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">a</span> <span class="o">.</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="o">.</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="o">.</span> <span class="mi">1</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iassoc key ialist [=] &#8594; ipair or #f</code></strong><br>
+<strong><code>(iassq key ialist &#8594; ipair or #f</code></strong><br>
+<strong><code>(iassv key ialist &#8594; ipair or #f</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ialist</code> must be an immutable association list — an ilist of
+ipairs. These procedures find the first ipair in ialist whose icar
+field is key, and returns that ipair. If no ipair in ialist has key as
+its icar, then false is returned. <code>Iassq</code> uses <code>eq?</code> to compare key with the
+icar fields of the ipairs in ialist, while <code>iassv</code> uses <code>eqv?</code> and <code>iassoc</code>
+uses <code>equal?</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">e</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">c</span> <span class="mi">3</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">iassq</span> <span class="ss">'a</span> <span class="nv">e</span><span class="p">)</span>                               <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">a</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iassq</span> <span class="ss">'b</span> <span class="nv">e</span><span class="p">)</span>                               <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">b</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">iassq</span> <span class="ss">'d</span> <span class="nv">e</span><span class="p">)</span>                               <span class="nv">=&gt;</span>  <span class="no">#f</span>
+<span class="p">(</span><span class="nf">iassq</span> <span class="p">(</span><span class="nf">ilist</span> <span class="ss">'a</span><span class="p">)</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">((</span><span class="nf">a</span><span class="p">))</span> <span class="p">((</span><span class="nf">b</span><span class="p">))</span> <span class="p">((</span><span class="nf">c</span><span class="p">))))</span>  <span class="nv">=&gt;</span>  <span class="no">#f</span>
+<span class="p">(</span><span class="nf">iassoc</span> <span class="o">'</span><span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="p">(</span><span class="nf">ilist</span> <span class="o">'</span><span class="p">((</span><span class="nf">a</span><span class="p">))</span> <span class="o">'</span><span class="p">((</span><span class="nf">b</span><span class="p">))</span> <span class="o">'</span><span class="p">((</span><span class="nf">c</span><span class="p">))))</span> <span class="nv">=&gt;</span>  <span class="p">((</span><span class="nf">a</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">iassq</span> <span class="mi">5</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">11</span> <span class="mi">13</span><span class="p">)))</span>         <span class="nv">=&gt;</span>  <span class="nv">*unspecified*</span>
+<span class="p">(</span><span class="nf">iassv</span> <span class="mi">5</span> <span class="p">(</span><span class="nf">iq</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span> <span class="p">(</span><span class="nf">11</span> <span class="mi">13</span><span class="p">)))</span>         <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">5</span> <span class="mi">7</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The comparison procedure is used to compare the elements <code>ei</code> of ilist
+to the key parameter in this way:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">=</span> <span class="nv">key</span> <span class="p">(</span><span class="nf">icar</span> <span class="nv">ei</span><span class="p">))</span> <span class="c1">; ilist is (E1 ... En)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That is, the first argument is always key, and the second argument
+is one of the ilist elements. Thus one can reliably find the first
+entry of ialist whose key is greater than five with
+<code>(iassoc 5 ialist &lt;)</code>.</p>
+</div>
+<div class="paragraph">
+<p>Note that fully general ialist searching may be performed with the
+ifind-tail and ifind procedures, e.g.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; Look up the first association in ialist with an even key:</span>
+<span class="p">(</span><span class="nf">ifind</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">a</span><span class="p">)</span> <span class="p">(</span><span class="nb">even?</span> <span class="p">(</span><span class="nf">icar</span> <span class="nv">a</span><span class="p">)))</span> <span class="nv">ialist</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ialist-delete  key ialist [=])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Ialist-delete</code> deletes all associations from ialist with the given
+key, using key-comparison procedure <code>=</code>, which defaults to <code>equal?</code>. The
+dynamic order in which the various applications of <code>=</code> are made is not
+specified.</p>
+</div>
+<div class="paragraph">
+<p>Return values may share common tails with the ialist argument. The
+ialist is not disordered — elements that appear in the result ialist
+occur in the same order as they occur in the argument ialist.</p>
+</div>
+<div class="paragraph">
+<p>The comparison procedure is used to compare the element keys ki of
+ialist&#8217;s entries to the key parameter in this way: <code>(= key ki)</code>. Thus,
+one can reliably remove all entries of ialist whose key is greater
+than five with <code>(ialist-delete 5 ialist &lt;)</code></p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(replace-icar ipair object)</code></strong><br>
+<strong><code>(replace-icdr ipair object)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Replace-icar</code> returns an ipair with object in the icar field and
+the icdr of ipair in the icdr field.</p>
+</div>
+<div class="paragraph">
+<p><code>Replace-icdr</code> returns an ipair with object in the icdr field and
+the icar of ipair in the icar field.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(list&#8594;ilist lst)</code></strong><br>
+<strong><code>(ilist&#8594;list lst)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return an ilist and a list respectively that have
+the same elements as the argument. The tails of dotted (i)lists are
+preserved in the result, which makes the procedures not inverses
+when the tail of a dotted ilist is a list or vice versa. The empty
+list is converted to itself.</p>
+</div>
+<div class="paragraph">
+<p>It is an error to apply list&#8594;ilist to a circular list.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(pair&#8594;ipair pair)</code></strong><br>
+<strong><code>(ipair&#8594;pair ipair)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures, which are inverses, return an ipair and
+a pair respectively that have the same (i)car and (i)cdr
+fields as the argument.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(tree&#8594;itree object)</code></strong><br>
+<strong><code>(itree&#8594;tree object)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures walk a tree of pairs or ipairs respectively and
+make a deep copy of it, returning an isomorphic tree containing
+ipairs or pairs respectively. The result may share structure with
+the argument. If the argument is not of the expected type, it is
+returned.</p>
+</div>
+<div class="paragraph">
+<p>These procedures are not inverses in the general case. For example,
+a pair of ipairs would be converted by <code>tree&#8594;itree</code> to an ipair of
+ipairs, which if converted by <code>itree&#8594;tree</code> would produce a pair of
+pairs.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(gtree&#8594;itree object)</code></strong><br>
+<strong><code>(gtree&#8594;tree object)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures walk a generalized tree consisting of pairs,
+ipairs, or a combination of both, and make a deep copy of it,
+returning an isomorphic tree containing only ipairs or pairs
+respectively. The result may share structure with the argument.
+If the argument is neither a pair nor an ipair, it is returned.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(iapply procedure object &#8230;&#8203; ilist)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>iapply</code> procedure is an analogue of <code>apply</code> whose last argument
+is an ilist rather than a list. It is equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">apply</span> <span class="nv">procedure</span> <span class="nv">object</span> <span class="o">...</span> <span class="p">(</span><span class="nf">ilist-&gt;list</span> <span class="nv">ilist</span><span class="p">))</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_srfi_138compiling_scheme_programs_to_executables">srfi-138&#8201;&#8212;&#8201;Compiling Scheme programs to executables</h4>
 <div class="paragraph">
 <p>
@@ -1992,8 +4469,80 @@ use with <code>cond-expand</code> in the compiled code only. It will not include
 
 
 
-<strong><a href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a></strong> is fully supported. See <em><a href="_customizations.html#srfi169">parameter <code>accept-srfi-169-numbers</code></a></em> to eventually forbid the usage of
+<strong><a href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a></strong> is fully supported. See <em><a href="_stklos_customization.html#srfi169">parameter <code>accept-srfi-169-numbers</code></a></em> to eventually forbid the usage of
 underscores in numbers.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_srfi_216sicp_prerequisites_portable">srfi-216&#8201;&#8212;&#8201;SICP Prerequisites (Portable)</h4>
+<div class="paragraph">
+<p>
+
+<strong><a href="http://srfi.schemers.org/srfi-216/srfi-216.html">SRFI-216</a></strong> is fully supported. However, it defines the constant <code>stream-null</code> and the predicate
+<code>stream-null?</code> which are incompatible with the ones defined in the <code>(stream primitive)</code> library used by
+<strong><a href="http://srfi.schemers.org/srfi-41/srfi-41.html">SRFI-41</a></strong> or <strong><a href="http://srfi.schemers.org/srfi-221/srfi-221.html">SRFI-221</a></strong>. Prefix the imported symbols of this SRFI, if you plan to
+use it with one of the previous libraries.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_srfi_238codesets">srfi-238&#8201;&#8212;&#8201;Codesets</h4>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph">
+<p><strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong> is fully supported. Furthermore, <strong><em>STklos</em></strong>
+adds the functions <code>codeset-list</code> and <code>make-codeset</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(codeset-list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retuns a list of known codeset names.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">codeset-list</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">errno</span> <span class="nv">signal</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(make-codeset name lst)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>returns a new codeset object of the given <code>name</code> (a symbol). The  list <code>lst</code>
+is a list of triplets (code-number symbol message) where <code>symbol</code> and
+<code>message</code>  can be <code>#f</code> if <code>code-number</code> has no associated name or message.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="k">define</span> <span class="nv">cs</span>
+     <span class="p">(</span><span class="nf">make-codeset</span> <span class="ss">'foo</span>
+                   <span class="o">'</span><span class="p">((</span><span class="nf">1</span>   <span class="nv">OK</span>    <span class="s">"Everything is OK"</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">1</span>   <span class="nv">YES</span>   <span class="no">#f</span><span class="p">)</span>                  <span class="c1">; Other name for OK</span>
+                     <span class="p">(</span><span class="nf">2</span>   <span class="nv">KO</span>    <span class="s">"We have a problem"</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">2</span>   <span class="nv">NO</span>    <span class="no">#f</span><span class="p">)</span>                  <span class="c1">; Other name for KO</span>
+                     <span class="p">(</span><span class="nf">3</span>   <span class="nv">MAYBE</span> <span class="s">"To be determined"</span><span class="p">)</span>
+                     <span class="p">(</span><span class="nf">404</span> <span class="no">#f</span>    <span class="s">"Not found"</span><span class="p">))))</span>      <span class="c1">; No symbolic name</span></code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -2018,7 +4567,10 @@ underscores in numbers.</p>
 <a href="#_footnoteref_1">1</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<a href="#_footnoteref_2">2</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+</div>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. The "pattern matching compiler" has been written by Jean-Marie Geffroy and is part of the Manuel Serrano&#8217;s Bigloo compiler since several years <a href="_bibliography.html#Bigloo">[Bigloo]</a>
 </div>
 <div class="footnote" id="_footnotedef_1">
 <a href="#_footnoteref_1">1</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
@@ -2026,7 +4578,7 @@ underscores in numbers.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 18:56:10 +0100
+Last updated 2023-07-22 20:08:25 +0200
 </div>
 </div>
 </body>
