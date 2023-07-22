@@ -1,6 +1,6 @@
 # Makefile.am for STklos documentation
 #
-# Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ dochtml_DATA= HTML/stklos-ref.html
 docimgdir   = $(doclocation)/html/images
 docimg_DATA = HTML/images/hierarchy.png
 
-SUBDOCS     = refman
+SUBDOCS     = refman vm hacking pp
 
 all: $(DOCDB)
 	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done

@@ -14,28 +14,10 @@
 
 @SET_MAKE@
 
-# Makefile.am for STklos documentation
+# Makefile for producing STklos documentation (not using autoconf stuff)
 #
-# Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-# USA.
-#
-#           Author: Erick Gallesio [eg@unice.fr]
-#    Creation date: 11-Apr-2000 10:30 (eg)
-
+#           Author: Erick Gallesio [eg@essi.fr]
+#    Creation date:  1-Sep-2004 16:19 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -110,7 +92,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = doc
+subdir = doc/pp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -118,8 +100,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
-CONFIG_CLEAN_FILES = stklos.1 stklos-config.1 stklos-compile.1 \
-	stklos-genlex.1 stklos-pkg.1 stklos-script.1
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -140,45 +121,8 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-man1dir = $(mandir)/man1
-am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(dochtmldir)" \
-	"$(DESTDIR)$(docimgdir)" "$(DESTDIR)$(docpdfdir)" \
-	"$(DESTDIR)$(schemedir)"
-NROFF = nroff
-MANS = $(man_MANS)
-DATA = $(dochtml_DATA) $(docimg_DATA) $(docpdf_DATA) $(scheme_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/stklos-compile.1.in \
-	$(srcdir)/stklos-config.1.in $(srcdir)/stklos-genlex.1.in \
-	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos-script.1.in \
-	$(srcdir)/stklos.1.in $(top_srcdir)/mkinstalldirs
+am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -324,7 +268,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-mandir = $(prefix)/share/man
+mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
@@ -340,23 +284,13 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-man_MANS = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
-	        stklos-pkg.1 stklos-script.1
-
-EXTRA_DIST = $(man_MANS)
-DOCDB = DOCDB
-OTHERDB = ../src/$(DOCDB) ../lib/$(DOCDB)
-ALLDB = $(OTHERDB) ./$(DOCDB)
-schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
-scheme_DATA = DOCDB
-doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
-docpdfdir = $(doclocation)/pdf
-docpdf_DATA = PDF/stklos-ref.pdf
-dochtmldir = $(doclocation)/html
-dochtml_DATA = HTML/stklos-ref.html
-docimgdir = $(doclocation)/html/images
-docimg_DATA = HTML/images/hierarchy.png
-SUBDOCS = refman vm hacking pp
+ADOC = @ASCIIDOCTOR@
+SOURCE = pp.adoc
+DOCDB = 
+SPP = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
+SAMPLE = pp-demo.html
+HTMLMAIN = pp.html
+PDF = pp.pdf
 all: all-am
 
 .SUFFIXES:
@@ -369,9 +303,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/pp/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu doc/Makefile
+	  $(AUTOMAKE) --gnu doc/pp/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -389,145 +323,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-stklos.1: $(top_builddir)/config.status $(srcdir)/stklos.1.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-stklos-config.1: $(top_builddir)/config.status $(srcdir)/stklos-config.1.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-stklos-compile.1: $(top_builddir)/config.status $(srcdir)/stklos-compile.1.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-stklos-genlex.1: $(top_builddir)/config.status $(srcdir)/stklos-genlex.1.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-stklos-pkg.1: $(top_builddir)/config.status $(srcdir)/stklos-pkg.1.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-stklos-script.1: $(top_builddir)/config.status $(srcdir)/stklos-script.1.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-install-man1: $(man_MANS)
-	@$(NORMAL_INSTALL)
-	@list1=''; \
-	list2='$(man_MANS)'; \
-	test -n "$(man1dir)" \
-	  && test -n "`echo $$list1$$list2`" \
-	  || exit 0; \
-	echo " $(MKDIR_P) '$(DESTDIR)$(man1dir)'"; \
-	$(MKDIR_P) "$(DESTDIR)$(man1dir)" || exit 1; \
-	{ for i in $$list1; do echo "$$i"; done;  \
-	if test -n "$$list2"; then \
-	  for i in $$list2; do echo "$$i"; done \
-	    | sed -n '/\.1[a-z]*$$/p'; \
-	fi; \
-	} | while read p; do \
-	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; echo "$$p"; \
-	done | \
-	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
-	sed 'N;N;s,\n, ,g' | { \
-	list=; while read file base inst; do \
-	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
-	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man1dir)/$$inst'"; \
-	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man1dir)/$$inst" || exit $$?; \
-	  fi; \
-	done; \
-	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
-	while read files; do \
-	  test -z "$$files" || { \
-	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man1dir)'"; \
-	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man1dir)" || exit $$?; }; \
-	done; }
-
-uninstall-man1:
-	@$(NORMAL_UNINSTALL)
-	@list=''; test -n "$(man1dir)" || exit 0; \
-	files=`{ for i in $$list; do echo "$$i"; done; \
-	l2='$(man_MANS)'; for i in $$l2; do echo "$$i"; done | \
-	  sed -n '/\.1[a-z]*$$/p'; \
-	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
-	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
-	dir='$(DESTDIR)$(man1dir)'; $(am__uninstall_files_from_dir)
-install-dochtmlDATA: $(dochtml_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(dochtml_DATA)'; test -n "$(dochtmldir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(dochtmldir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(dochtmldir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(dochtmldir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(dochtmldir)" || exit $$?; \
-	done
-
-uninstall-dochtmlDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dochtml_DATA)'; test -n "$(dochtmldir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(dochtmldir)'; $(am__uninstall_files_from_dir)
-install-docimgDATA: $(docimg_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(docimg_DATA)'; test -n "$(docimgdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(docimgdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(docimgdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docimgdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docimgdir)" || exit $$?; \
-	done
-
-uninstall-docimgDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(docimg_DATA)'; test -n "$(docimgdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(docimgdir)'; $(am__uninstall_files_from_dir)
-install-docpdfDATA: $(docpdf_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(docpdf_DATA)'; test -n "$(docpdfdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(docpdfdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(docpdfdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docpdfdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docpdfdir)" || exit $$?; \
-	done
-
-uninstall-docpdfDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(docpdf_DATA)'; test -n "$(docpdfdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(docpdfdir)'; $(am__uninstall_files_from_dir)
-install-schemeDATA: $(scheme_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(scheme_DATA)'; test -n "$(schemedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(schemedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(schemedir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(schemedir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(schemedir)" || exit $$?; \
-	done
-
-uninstall-schemeDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(scheme_DATA)'; test -n "$(schemedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(schemedir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -569,11 +364,8 @@ distdir-am: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(MANS) $(DATA)
+all-am: Makefile
 installdirs:
-	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(dochtmldir)" "$(DESTDIR)$(docimgdir)" "$(DESTDIR)$(docpdfdir)" "$(DESTDIR)$(schemedir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -620,8 +412,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dochtmlDATA install-docimgDATA \
-	install-docpdfDATA install-man install-schemeDATA
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -637,7 +428,7 @@ install-info: install-info-am
 
 install-info-am:
 
-install-man: install-man1
+install-man:
 
 install-pdf: install-pdf-am
 
@@ -657,75 +448,65 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-generic
 
-pdf: pdf-am
-
 pdf-am:
 
 ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dochtmlDATA uninstall-docimgDATA \
-	uninstall-docpdfDATA uninstall-man uninstall-schemeDATA
-	@$(NORMAL_INSTALL)
-	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
-uninstall-man: uninstall-man1
+uninstall-am:
 
-.MAKE: install-am install-strip uninstall-am
+.MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic cscopelist-am \
 	ctags-am distclean distclean-generic distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-dochtmlDATA install-docimgDATA \
-	install-docpdfDATA install-dvi install-dvi-am install-exec \
+	install-data-am install-dvi install-dvi-am install-exec \
 	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-man1 install-pdf \
-	install-pdf-am install-ps install-ps-am install-schemeDATA \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-dochtmlDATA uninstall-docimgDATA \
-	uninstall-docpdfDATA uninstall-hook uninstall-man \
-	uninstall-man1 uninstall-schemeDATA
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
 
-.PHONY: subdoc docdb extradoc
+all-recursive: all
 
-all: $(DOCDB)
-	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
+all: ../HTML/$(HTMLMAIN) ../HTML/$(SAMPLE)
+pdf: ../PDF/$(PDF)
+extradoc: pdf
 
-extradoc: $(DOCDB)
-	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
+# ----------------------------------------------------------------------
+../HTML/$(HTMLMAIN): tmp-html.txt
+	mkdir -p ../HTML
+	$(ADOC) -v -o $@ tmp-html.txt
 
-#
-# Database construction
-#
-$(DOCDB): $(OTHERDB)
-	cat $(OTHERDB) > $(DOCDB)
+../HTML/$(SAMPLE): Resources/mymd-prelude.templ  Resources/mymd-postlude.templ \
+                   Resources/pp-demo.md
+	mkdir -p ../HTML
+	(cd Resources; build-pp-demo.sh)
 
-../src/$(DOCDB):
-	(cd ../src; $(MAKE) doc)
+# ----------------------------------------------------------------------
+../PDF/$(PDF): tmp-pdf.txt
+	mkdir -p ../PDF
+	$(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ tmp-pdf.txt
 
-../lib/$(DOCDB):
-	(cd ../lib; $(MAKE) doc)
+# ----------------------------------------------------------------------
+tmp-html.txt: $(SOURCE) $(DOCDB)
+	$(SPP) -D "doc-fmt: 'html" $(SOURCE) > $@
 
-#
-# Documentation
-#
+tmp-pdf.txt: $(SOURCE) $(DOCDB)
+	$(SPP) -D "doc-fmt: 'pdf" $(SOURCE) > $@
+
+# ----------------------------------------------------------------------
 clean:
-	/bin/rm -f $(ALLDB)  stklos*.1 *~
+	rm -f  tmp-html.txt tmp-pdf.txt  Resources/*~ *~
 
 distclean: clean
-	/bin/rm -f Makefile
-
-uninstall-hook:
-	rmdir $(docpdfdir) $(docimgdir) $(dochtmldir) $(doclocation) || true
-
-# Local Variables:
-# tab-width: 8
-# End:
+	rm -f ../HTML/$(HTMLMAIN) ../HTML/$(SAMPLE)
+	rm -f ../PDF/$(PDF) ../PDF/$(SAMPLE)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
