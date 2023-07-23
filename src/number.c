@@ -384,7 +384,9 @@ static void print_complex(SCM n, SCM port, int mode)
   SCM imag = COMPLEX_IMAG(n);
 
   STk_print(COMPLEX_REAL(n), port, mode);
-  if (positivep(imag) || (REALP(imag) && !signbit(REAL_VAL(imag))))
+  if ((!((REALP(imag) && signbit(REAL_VAL(imag))))) &&
+      (zerop(imag) ||
+       (positivep(imag) && (!(REALP(imag) && isinf(REAL_VAL(imag)))))))
     STk_putc('+', port);
   STk_print(imag, port, mode);
   STk_putc('i', port);
@@ -713,6 +715,7 @@ void STk_double2Cstr(char *buffer, size_t bufflen, double n)
   }
 }
 
+
 /* Convert a number to a C-string. Result must be freed if != from buffer */
 static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
 {
@@ -759,16 +762,22 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
       }
     case tc_complex:
       {
-        char *s1, *s2, *s3, tmp[100];
+        /* We print the realand imaginary parts in re and im, and then
+           glue them together in cplx. tmp is just a temporary buffer for
+           the imaginary part. */
+        char *re, *im, *cplx, tmp[100];
         size_t len;
 
-        s1  = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
-        s2  = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
-        len  = strlen(s1) + strlen(s2) + 3;
-        s3 = STk_must_malloc_atomic(len);
-        snprintf(s3, len, "%s%s%si", s1, ((*s2 == '-') ? "": "+"), s2);
-        if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
-        return s3;
+        re   = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
+        im   = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
+        len  = strlen(re) + strlen(im) + 3;
+        cplx = STk_must_malloc_atomic(len);
+        /* If the imaginary part is negative, infinite, or nan, then its representation
+           will already have the sign (-2.5, +nan.0, -inf.0 etc), so we don't add the
+           sign before the imaginary part. */
+        snprintf(cplx, len, "%s%s%si", re, (isdigit(*im) ? "+" : ""), im);
+        if (im!=tmp) STk_free(im); /* buffer will event. be deallocated by caller */
+        return cplx;
       }
     case tc_real:
       if (base != 10) STk_error("base must be 10 for this number", n);
