@@ -473,5 +473,63 @@ b|)
          ((?x ?y ?z) (list 'length=3 z y x)))
        '(a (b c) d)))
 
+
+;;------------------------------------------------------------------
+(test-subsection "address-of")
+
+(test "addresses-of symbol"
+      #t
+      (integer? (address-of 'a)))
+
+(test "address-of string"
+      #t
+      (integer? (address-of "ABC")))
+
+(test "address-of char"
+      #t
+      (integer? (address-of #\a)))
+
+(test "address-of closure"
+      #t
+      (integer? (address-of (lambda () 2))))
+
+(test "address-of void"
+      #t
+      (integer? (address-of #void)))
+
+
+(test "address-of and read back, symbol"
+      'a
+      (read-from-string (format "#p~x" (address-of 'a))))
+
+(test "address-of and read back, integer"
+      -99
+      (read-from-string (format "#p~x" (address-of -99))))
+
+(test "address-of and read back, real"
+      2.0
+      (read-from-string (format "#p~x" (address-of 2.0))))
+
+(test "address-of and read back, string"
+      "xyz"
+      (read-from-string (format "#p~x" (address-of "xyz"))))
+
+(test "address-of and read back, date"
+      #t
+      (date? (read-from-string (format "#p~x" (address-of (current-date))))))
+
+
+(test "read #pa 1010, ends in 10 but not char"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#pa")))
+
+(test "read #p1f tagged small constant, but too large"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p1f")))
+
+(test "read #p9 = 10 01 = integer '2'"
+      2
+      (with-handler (lambda (x) -1) (read-from-string "#p9")))
+
 ;;------------------------------------------------------------------
 (test-section-end)
