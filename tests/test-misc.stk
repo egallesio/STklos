@@ -531,5 +531,13 @@ b|)
       2
       (with-handler (lambda (x) -1) (read-from-string "#p9")))
 
+(test "read #p0 = 00 = pointer to nowhere"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p0")))
+
+(test "read #p4 = 1 00 = pointer to nowhere"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p4")))
+
 ;;------------------------------------------------------------------
 (test-section-end)
