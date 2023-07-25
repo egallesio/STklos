@@ -448,6 +448,22 @@ static SCM read_address(SCM port)
   if (*end)
     signal_error(port, "bad address specifier #p~a", STk_Cstring2string(tok+2));
 
+  unsigned long tag = address & 3;
+
+  switch(tag) {
+  case 0: break; /* 00 Danger! The Boehm GC doesn't seem to have a method to tell wether
+                       an address is inside an allocated block or not... */
+  case 1: break; /* 01 Integers are always OK */
+  case 2:        /* 10 small object (characters) */
+    /* We only allow characters as small objects */
+    if ((address & 0x7) != 0x6) /* ...110 */
+      signal_error(port, "bad small object address #p~a", STk_Cstring2string(tok+2));
+  case 3:        /* 11 small constant */
+    if ((address>>2) > LAST_SCONST) {
+      signal_error(port, "bad small constant address #p~a", STk_Cstring2string(tok+2));
+    } else break;
+  }
+
   return (SCM) address;
 }
 
