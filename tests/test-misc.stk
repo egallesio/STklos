@@ -539,5 +539,15 @@ b|)
       -1
       (with-handler (lambda (x) -1) (read-from-string "#p4")))
 
+
+(let ((mylist (list #void #f #t '() 0 1 (expt 2 500)
+                    "abc" '(1 2 3) (list 10 20 30) #(1 2 3)
+                    (current-time)
+                    (lambda (x) -x))))
+  (test "address-ref"
+        mylist
+        (map (lambda (thing) (address-ref (address-of thing)))
+             mylist)))
+
 ;;------------------------------------------------------------------
 (test-section-end)

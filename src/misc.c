@@ -122,7 +122,7 @@ DEFINE_PRIMITIVE("version", version, subr0, (void))
  * (short-version)
  *
  * Returns a string identifying the current version of the system without
- * its eventual patch number. 
+ * its eventual patch number.
 doc>
 */
 DEFINE_PRIMITIVE("short-version", short_version, subr0, (void))
@@ -202,10 +202,24 @@ DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 
 
 /*
-<doc EXT address-of
+<doc EXT address-of address-ref
  * (address-of obj)
+ * (address-ref n)
  *
- * Returns the address of the object |obj| as an integer.
+ * |Address-of| returns the address of the object |obj| as an integer.
+ * |Address-ref| returns the object of which |n| is the address.
+ *
+ * @lisp
+ * (address-of "abc")              =>  140053283366272
+ * (address-of "abc")              =>  140053289472288
+ *
+ * (address-of 10)                 => 41
+ * (address-of 10)                 => 41
+ *
+ * (address-ref (address-of "xyz") => "xyz"
+ *
+ * (address-ref 0)                 => error (points to nothing)
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
@@ -217,6 +231,32 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
   return STk_Cstr2number(buffer, 16L);
 }
 
+DEFINE_PRIMITIVE("address-ref", address_ref, subr1, (SCM object))
+{
+  if (!INTP(object)) STk_error("bad integer ~s", object);
+  unsigned long addr =  INT_VAL(object);
+
+  unsigned long tag = (unsigned long)addr & 3;
+
+  switch(tag) {
+  case 0:        /* 00 It's a pointer! */
+      if (!GC_base((SCM)addr)) /* GC_base will return NULL if this address is not
+                                  within a region allocated by the GC. */
+        STk_error("bad object address ~s", object);
+      break;
+  case 1: break; /* 01 Integers are always OK */
+  case 2:        /* 10 Small object (characters) */
+      /* We only allow characters as small objects */
+      if ((addr & 0x7) != 0x6) /* ...110 */
+        STk_error("bad small object address ~s", object);
+      break;
+  case 3:        /* 11 small constant */
+      if ((addr>>2) > LAST_SCONST)
+        STk_error("bad small constant address ~s", object);
+      break;
+  }
+  return (SCM) addr;
+}
 
 /*===========================================================================*\
  *
@@ -666,6 +706,7 @@ int STk_init_misc(void)
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);
   ADD_PRIMITIVE(address_of);
+  ADD_PRIMITIVE(address_ref);
   ADD_PRIMITIVE(scheme_gc);
 
   ADD_PRIMITIVE(init_getopt);
