@@ -1303,7 +1303,10 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
   return STk_false;             /* never reached */
 }
 
-SCM Cstr2simple_number(char **str2, char *str, char *exact, long *base)
+/* STk_Cstr2simple_number will read from str a non-complex number.
+   The function STk_Cstr2number, which reads complexes, uses
+   this one to read the two parts of the number, */
+static inline SCM STk_Cstr2simple_number(char **str2, char *str, char *exact, long *base)
 {
   int i, radix;
   char *p = str;
@@ -1361,6 +1364,7 @@ SCM Cstr2simple_number(char **str2, char *str, char *exact, long *base)
   return num;
 }
 
+/* Reads a number from str in the specified base. */
 SCM STk_Cstr2number(char *str, long base) {
     char *str2 = "";
     char *str3 = "";
@@ -1371,7 +1375,7 @@ SCM STk_Cstr2number(char *str, long base) {
 
     /* First part of the number */
 
-    SCM a = Cstr2simple_number(&str2, str, &exact, &base);
+    SCM a = STk_Cstr2simple_number(&str2, str, &exact, &base);
 
     /* Not even the first part was good -- return #f */
     if (a == STk_false) return STk_false;
@@ -1392,12 +1396,12 @@ SCM STk_Cstr2number(char *str, long base) {
       case '-':
           if (strcmp(str2, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
           if (strcmp(str2, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
-          b = Cstr2simple_number(&str3, str2, &exact, &base);
+          b = STk_Cstr2simple_number(&str3, str2, &exact, &base);
           if (*str3 == 'i') return make_complex(a,b);
           break;
       case '@':
           /* ++str2, because we want to skip the '@' sign: */
-          b = Cstr2simple_number(&str3, ++str2, &exact, &base);
+          b = STk_Cstr2simple_number(&str3, ++str2, &exact, &base);
           if (*str3 == 0) return make_polar(a,b);
           break;
     }
