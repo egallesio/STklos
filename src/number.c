@@ -384,9 +384,24 @@ static void print_complex(SCM n, SCM port, int mode)
   SCM imag = COMPLEX_IMAG(n);
 
   STk_print(COMPLEX_REAL(n), port, mode);
+  /* About the next IF condition:
+     NaNs and infinities do have a signbit and they satisfy REALP, so,
+     specifically for NaNs:
+
+     1) +nan.0 passes the first line in the condition (sign bit is zero).
+        But for the extra plus to be printed, the other two lines
+        require:
+          i) Either zero (it's not), OR:
+         ii) Positive AND not infinity -- but NaNs so not satisfy the
+             STklos C predicate positivep. :)
+        Then theextra + is not printed, and the +nan.0 is printed.
+
+     2) -nan.0 fails the first line, because its sign bit is 1 (negated = 0).
+        Then the + is not printed, and the -nan.0 is printed.                 */
   if ((!((REALP(imag) && signbit(REAL_VAL(imag))))) &&
       (zerop(imag) ||
        (positivep(imag) && (!(REALP(imag) && isinf(REAL_VAL(imag)))))))
+
     STk_putc('+', port);
   STk_print(imag, port, mode);
   STk_putc('i', port);
