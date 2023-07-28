@@ -394,7 +394,7 @@ static void print_complex(SCM n, SCM port, int mode)
           i) Either zero (it's not), OR:
          ii) Positive AND not infinity -- but NaNs so not satisfy the
              STklos C predicate positivep. :)
-        Then theextra + is not printed, and the +nan.0 is printed.
+        Then the extra + is not printed, and the +nan.0 is printed.
 
      2) -nan.0 fails the first line, because its sign bit is 1 (negated = 0).
         Then the + is not printed, and the -nan.0 is printed.                 */
@@ -764,35 +764,35 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
       return s;
     case tc_rational:
       {
-        char *s1, *s2, *s3, tmp[100];
+        char *left, *right, *res, tmp[100];
         size_t len;
 
-        s1  = number2Cstr(RATIONAL_NUM(n), base, buffer, bufflen);
-        s2  = number2Cstr(RATIONAL_DEN(n), base, tmp, sizeof(tmp));
-        len = strlen(s1) + strlen(s2) + 2;
-        s3  = STk_must_malloc_atomic(len);
-        snprintf(s3, len, "%s/%s", s1, s2);
-        if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
-        return s3;
+        left  = number2Cstr(RATIONAL_NUM(n), base, buffer, bufflen);
+        right = number2Cstr(RATIONAL_DEN(n), base, tmp, sizeof(tmp));
+        len   = strlen(left) + strlen(right) + 2;
+        res   = STk_must_malloc_atomic(len);
+        snprintf(res, len, "%s/%s", left, right);
+        if (right!=tmp) STk_free(right); /*buffer will event. be deallocated by caller*/
+        return res;
       }
     case tc_complex:
       {
-        /* We print the realand imaginary parts in re and im, and then
-           glue them together in cplx. tmp is just a temporary buffer for
-           the imaginary part. */
-        char *re, *im, *cplx, tmp[100];
+        /* We print the real and imaginary parts in left (real) and
+           right (imaginary), and then glue them together in res. tmp
+           is just a temporary buffer for the imaginary part. */
+        char *left, *right, *res, tmp[100];
         size_t len;
 
-        re   = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
-        im   = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
-        len  = strlen(re) + strlen(im) + 3;
-        cplx = STk_must_malloc_atomic(len);
+        left  = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
+        right = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
+        len   = strlen(left) + strlen(right) + 3;
+        res   = STk_must_malloc_atomic(len);
         /* If the imaginary part is negative, infinite, or nan, then its representation
            will already have the sign (-2.5, +nan.0, -inf.0 etc), so we don't add the
            sign before the imaginary part. */
-        snprintf(cplx, len, "%s%s%si", re, (isdigit(*im) ? "+" : ""), im);
-        if (im!=tmp) STk_free(im); /* buffer will event. be deallocated by caller */
-        return cplx;
+        snprintf(res, len, "%s%s%si", left, (isdigit(*right) ? "+" : ""), right);
+        if (right!=tmp) STk_free(right); /* buffer will event. be deallocated by caller */
+        return res;
       }
     case tc_real:
       if (base != 10) STk_error("base must be 10 for this number", n);
