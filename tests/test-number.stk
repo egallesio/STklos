@@ -1453,9 +1453,16 @@
 (test "log -0.0" ;; R7RS says (log -0.0) should be "-inf + i*pi".
       #t
       (let ((z (log -0.0)))
-        (infinite? (real-part z))
-        (negative? (real-part z))
-        (< 3.14159265350 (imag-part z) 3.14159265360)))
+        (and (infinite? (real-part z))
+             (negative? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
+
+(test "log -inf.0" ;; The limit when x -> -inf is "+inf + i*pi".
+      #t
+      (let ((z (log -inf.0)))
+        (and (infinite? (real-part z))
+             (positive? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
 
 (test "log 2/3"
       #t

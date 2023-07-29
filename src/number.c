@@ -2915,6 +2915,8 @@ static SCM my_log(SCM z)
                         return double2real(my_bignum_rational_log(z));
     case tc_real:     if ( (REAL_VAL(z) == 0.0) && signbit(REAL_VAL(z)) )
                           return make_complex(double2real(minus_inf), double2real(MY_PI));
+                      else if ( isinf(REAL_VAL(z)) && signbit(REAL_VAL(z)) )
+                          return make_complex(double2real(plus_inf),  double2real(MY_PI));
                       else
                           return double2real(log(REAL_VAL(z)));
     case tc_complex:  return make_complex(my_log(STk_magnitude(z)),
