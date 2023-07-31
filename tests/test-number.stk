@@ -358,6 +358,36 @@
 (test "complex binary polar -+" (make-polar #b101 #b-111)  #b101@-111)
 (test "complex binary polar --" (make-polar #b-101 #b-111) #b-101@-111)
 
+(test "complex inf+n"
+      #t
+      (let ((c +inf.0+1/2i))
+        (and (infinite? (real-part c))
+             (positive? (real-part c))
+             (= 1/2 (imag-part c)))))
+
+(test "complex n-inf"
+      #t
+      (let ((c 3/4-inf.0i))
+        (and (infinite? (imag-part c))
+             (negative? (imag-part c))
+             (= 3/4 (real-part c)))))
+
+(test "complex +inf+inf"
+      #t
+      (let ((c +inf.0-inf.0i))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (positive? (real-part c))
+             (negative? (imag-part c)))))
+
+(test "complex +inf@n"
+      #t
+      (let ((c +inf.0@2))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (negative? (real-part c))
+             (positive? (imag-part c)))))
+
 
 ;;------------------------------------------------------------------
 (test-subsection "integer writer syntax")
