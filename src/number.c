@@ -1403,7 +1403,7 @@ SCM STk_Cstr2number(char *str, long base)
     a = STk_Cstr2simple_number(&str2, str, &exact, &base);
     if (a == STk_false) return STk_false; /* Not even the first part was good */
 
-    /* The possibilities now are:
+    /* Second part of the number; the possibilities now are:
        i)   Non-complex;
        ii)  +bi, -bi;
        iii) a+bi;
@@ -1414,18 +1414,19 @@ SCM STk_Cstr2number(char *str, long base)
       case '\0':
         return a;
       case 'i':
-        if (*str == '+' || *str == '-') return make_complex(MAKE_INT(0),a);
+        if (*str == '+' || *str == '-')
+          if (*(str2+1) == '\0') return make_complex(MAKE_INT(0),a);
         break;
       case '+':
       case '-':
         if (strcmp(str2, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
         if (strcmp(str2, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
         b = STk_Cstr2simple_number(&str3, str2, &exact, &base);
-        if (*str3 == 'i') return make_complex(a,b);
+        if (*str3 == 'i' && *(str3+1) == '\0') return make_complex(a,b);
         break;
       case '@':
-        /* ++str2, because we want to skip the '@' sign: */
-        b = STk_Cstr2simple_number(&str3, ++str2, &exact, &base);
+        /* str2+1, because we want to skip the '@' sign: */
+        b = STk_Cstr2simple_number(&str3, str2+1, &exact, &base);
         if (*str3 == '\0') return make_polar(a,b);
         break;
     }
