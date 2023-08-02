@@ -1332,6 +1332,10 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
   return STk_false;             /* never reached */
 }
 
+/* ----------------------------------------------------------------------
+ * STk_Cstr2number: Read a number form a C string
+ * ---------------------------------------------------------------------- */
+
 /* STk_Cstr2simple_number will read from str a non-complex number.
    The function STk_Cstr2number, which reads complexes, uses
    this one to read the two parts of the number, */
@@ -1341,9 +1345,7 @@ static inline SCM STk_Cstr2simple_number(char **str2, char *str, char *exact, lo
   char *p = str;
   SCM num = STk_false;
 
-  if ((*str == '-' || *str == '+') &&
-      isalpha(str[1])) {
-
+  if ((*str == '-' || *str == '+') && isalpha(str[1])) {
     /* Treat special values "+inf.0" -inf.0 , "+nan.0", "-nan.0" */
     if      (strncmp(str, MINUS_INF,6)==0) num = double2real(minus_inf);
     else if (strncmp(str, PLUS_INF,6)==0)  num = double2real(plus_inf);
@@ -1354,28 +1356,22 @@ static inline SCM STk_Cstr2simple_number(char **str2, char *str, char *exact, lo
         if (str2) *str2 = str + 6;
         return num;
     }
-
-    /* We didn't read inf, nan. It could have been an hex, beginning with
-       a, b, c, d, e or f. */
   }
 
-  /* Should we read in a different basis? */
+  /* Should we read in a different basis or exactness? */
   radix = 0;
-  for (i = 0; i < 2; i++) {
-    if (*p == '#') {
-      p += 1;
-      switch (*p++) {
-        case 'e': if (*exact == ' ')  { *exact = 'e'; break;} else return STk_false;
-        case 'i': if (*exact == ' ')  { *exact = 'i'; break;} else return STk_false;
-        case 'b': if (!radix) {*base = 2;  radix = 1; break;} else return STk_false;
-        case 'o': if (!radix) {*base = 8;  radix = 1; break;} else return STk_false;
-        case 'd': if (!radix) {*base = 10; radix = 1; break;} else return STk_false;
-        case 'x': if (!radix) {*base = 16; radix = 1; break;} else return STk_false;
-        default:  return STk_false;
-      }
-      str += 2;
+  for (i = 0; i < 2 && *p == '#'; i++) { /* two loops laps to permit #i#xff -> 255.0 */
+    p += 1;
+    switch (*p++) {
+      case 'e': if (*exact == ' ')  { *exact = 'e'; break;} else return STk_false;
+      case 'i': if (*exact == ' ')  { *exact = 'i'; break;} else return STk_false;
+      case 'b': if (!radix) {*base = 2;  radix = 1; break;} else return STk_false;
+      case 'o': if (!radix) {*base = 8;  radix = 1; break;} else return STk_false;
+      case 'd': if (!radix) {*base = 10; radix = 1; break;} else return STk_false;
+      case 'x': if (!radix) {*base = 16; radix = 1; break;} else return STk_false;
+      default:  return STk_false;
     }
-    if (*p != '#') break;
+    str += 2;
   }
 
   /* If the user tries to make us read a complex with two different
@@ -1387,29 +1383,26 @@ static inline SCM STk_Cstr2simple_number(char **str2, char *str, char *exact, lo
   if (*p == '/')
     num = read_rational(num, p+1, *base, *exact, &p);
 
-  /* if str2 was passed, the caller wants to know where the number
-     ends. */
-  if (str2) *str2 = p;
+  /* Store in str2 where the number ends. */
+  *str2 = p;
   return num;
 }
 
 /* Reads a number from str in the specified base. */
-SCM STk_Cstr2number(char *str, long base) {
+SCM STk_Cstr2number(char *str, long base)
+{
+  if (strcmp(str, "+i")==0) return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
+  if (strcmp(str, "-i")==0) return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
+  else {
     char *str2 = "";
     char *str3 = "";
     char exact = ' ';
-
-    if (strcmp(str, "+i")==0) return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
-    if (strcmp(str, "-i")==0) return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
+    SCM a, b;
 
     /* First part of the number */
+    a = STk_Cstr2simple_number(&str2, str, &exact, &base);
+    if (a == STk_false) return STk_false; /* Not even the first part was good */
 
-    SCM a = STk_Cstr2simple_number(&str2, str, &exact, &base);
-
-    /* Not even the first part was good -- return #f */
-    if (a == STk_false) return STk_false;
-
-    SCM b;
     /* The possibilities now are:
        i)   Non-complex;
        ii)  +bi, -bi;
@@ -1418,23 +1411,26 @@ SCM STk_Cstr2number(char *str, long base) {
        v)   a@b;
        vi)  not a number */
     switch (*str2) {
-      case   0: return a;
+      case '\0':
+        return a;
       case 'i':
-          if (*str == '+' || *str == '-') return make_complex(MAKE_INT(0),a);
+        if (*str == '+' || *str == '-') return make_complex(MAKE_INT(0),a);
+        break;
       case '+':
       case '-':
-          if (strcmp(str2, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
-          if (strcmp(str2, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
-          b = STk_Cstr2simple_number(&str3, str2, &exact, &base);
-          if (*str3 == 'i') return make_complex(a,b);
-          break;
+        if (strcmp(str2, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
+        if (strcmp(str2, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
+        b = STk_Cstr2simple_number(&str3, str2, &exact, &base);
+        if (*str3 == 'i') return make_complex(a,b);
+        break;
       case '@':
-          /* ++str2, because we want to skip the '@' sign: */
-          b = STk_Cstr2simple_number(&str3, ++str2, &exact, &base);
-          if (*str3 == 0) return make_polar(a,b);
-          break;
+        /* ++str2, because we want to skip the '@' sign: */
+        b = STk_Cstr2simple_number(&str3, ++str2, &exact, &base);
+        if (*str3 == '\0') return make_polar(a,b);
+        break;
     }
     return STk_false;
+  }
 }
 
 /******************************************************************************
