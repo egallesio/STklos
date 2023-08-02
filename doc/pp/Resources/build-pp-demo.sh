@@ -6,7 +6,8 @@
 #
 #           Author: Erick Gallesio [eg@stklos.net]
 #    Creation date: 22-Jul-2023 18:13
-# Last file update: 22-Jul-2023 18:40 (eg)
 
-../../../src/stklos -q -I ../../../lib -f ../../../utils/stklos-pp.stk \
-                    -- -o ../../HTML/pp-demo.html pp-demo.md
+TOP=../../..
+
+${TOP}/src/stklos -q -I ${TOP}/lib -f ${TOP}/utils/stklos-pp.stk \
+                    -- -o ${TOP}/doc/HTML/pp-demo.html pp-demo.md

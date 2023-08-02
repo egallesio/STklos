@@ -486,7 +486,7 @@ extradoc: pdf
 ../HTML/$(SAMPLE): Resources/mymd-prelude.templ  Resources/mymd-postlude.templ \
                    Resources/pp-demo.md
 	mkdir -p ../HTML
-	(cd Resources; build-pp-demo.sh)
+	(cd Resources; ./build-pp-demo.sh)
 
 # ----------------------------------------------------------------------
 ../PDF/$(PDF): tmp-pdf.txt
