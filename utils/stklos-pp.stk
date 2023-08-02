@@ -41,10 +41,6 @@
       "Usage: stklos-pp [options] document"
       "A simple preprocessor for text documents"
       ""
-      (("version" :alternate "v" :help "Show version and exit")
-       (printf "stklos-pp ~A\n" (stklos-pp-version))
-       (exit 0))
-
       (("define" :alternate "D" :arg str :help "Define new metadata")
        (pp-parse-metadata (open-input-string str) #f))
 
@@ -53,6 +49,10 @@
 
       (("debug" :alternate "d" :help "Be more verbose (can be used several times)")
        (pp-verbosity (+ (pp-verbosity) 1)))
+
+      (("version" :alternate "v" :help "Show stklos-pp version and exit")
+       (printf "stklos-pp ~A\n" (stklos-pp-version))
+       (exit 0))
 
       (("help" :alternate "h" :help "This help")
        (arg-usage (current-output-port))
