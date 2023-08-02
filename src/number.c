@@ -3490,8 +3490,20 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
                         return Cmake_complex(MAKE_INT(0),
                                              double2real(sqrt(-REAL_VAL(z))));
                       return double2real(sqrt(REAL_VAL(z)));
-    case tc_complex:  return make_polar(STk_sqrt(STk_magnitude(z)),
-                                        div2(STk_angle(z), MAKE_INT(2)));
+    case tc_complex:  if (zerop(COMPLEX_IMAG(z))) {
+                        // Special cases: (sqrt -1+0.0i) => +i
+                        //                (sqrt -1-0.0i) => -i
+                        SCM im = COMPLEX_IMAG(z);
+                        SCM tmp =  STk_ex2inex(STk_sqrt(COMPLEX_REAL(z)));
+
+                        if (REALP(im) && signbit(REAL_VAL(im))) {
+                          COMPLEX_IMAG(tmp) = double2real(-REAL_VAL(COMPLEX_IMAG(tmp)));
+                        }
+                        return tmp;
+                      } else
+                        return make_polar(STk_sqrt(STk_magnitude(z)),
+                                          div2(STk_angle(z), MAKE_INT(2)));
+
     default:          error_bad_number(z);
   }
   return STk_void; /* never reached */
@@ -4344,7 +4356,7 @@ int STk_init_number(void)
   ADD_PRIMITIVE(bit_or);
   ADD_PRIMITIVE(bit_xor);
 
-  
+
   /* SRFI 208: NaN procedures */
   ADD_PRIMITIVE(make_nan);
   ADD_PRIMITIVE(nan_negativep);
