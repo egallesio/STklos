@@ -49,7 +49,7 @@ As another example, consider the following text file named `fib.txt`
 Running the command `stklos-pp fib.txt` will produce the following input:
 
 ```txt
-{{System "../../src/stklos ../../utils/stklos-pp Resources/fib.txt"}}
+{{System "../../src/stklos -I ../../lib ../../utils/stklos-pp Resources/fib.txt"}}
 ```
 
 == Variables
@@ -91,14 +91,14 @@ variables defined in the header are defined as strings.
 
 Consider the file `fronmatter.txt`:
 
-```txt
+```markdown
 {{Include "Resources/frontmatter.txt"}}
 ```
 
 Running the command ``stklos-pp frontmatter.txt` will produce the following output.
 
 ```txt
-{{System "../../src/stklos ../../utils/stklos-pp Resources/frontmatter.txt"}}
+{{System "../../src/stklos -I ../../lib ../../utils/stklos-pp Resources/frontmatter.txt"}}
 ```
 
 NOTE: As said in the above example, the '---' separators can be
