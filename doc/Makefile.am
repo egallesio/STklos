@@ -47,11 +47,14 @@ docimg_DATA = HTML/images/hierarchy.png
 
 SUBDOCS     = refman vm hacking pp
 
-all: $(DOCDB)
+all: $(DOCDB) ../utils/stklos-pp
 	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
 
 extradoc: $(DOCDB)
 	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
+
+../utils/stklos-pp:
+	(cd ../utils; $(MAKE) stklos-pp)
 
 #
 # Database construction
