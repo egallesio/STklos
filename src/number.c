@@ -1339,14 +1339,14 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
 /* STk_Cstr2simple_number will read from str a non-complex number.
    The function STk_Cstr2number, which reads complexes, uses
    this one to read the two parts of the number, */
-static inline SCM STk_Cstr2simple_number(char **end, char *str, char *exact, long *base)
+static SCM STk_Cstr2simple_number(char *str, char *exact, long *base, char **end)
 {
   int i, radix;
   char *p = str;
   SCM num = STk_false;
 
   if ((*str == '-' || *str == '+') && isalpha(str[1])) {
-    /* Treat special values "+inf.0" -inf.0 , "+nan.0", "-nan.0" */
+    /* Treat special inf "+values.0" -inf.0 , "+nan.0", "-nan.0" */
     if      (strncmp(str, MINUS_INF,6)==0) num = double2real(minus_inf);
     else if (strncmp(str, PLUS_INF,6)==0)  num = double2real(plus_inf);
     else if (strncmp(str, MINUS_NaN,6)==0) num = double2real(make_nan(1,0,0));
@@ -1399,7 +1399,7 @@ SCM STk_Cstr2number(char *str, long base)
     SCM a, b;
 
     /* First part of the number */
-    a = STk_Cstr2simple_number(&end, str, &exact, &base);
+    a = STk_Cstr2simple_number(str, &exact, &base, &end);
     if (a == STk_false) return STk_false; /* Not even the first part was good */
 
     /* Second part of the number; the possibilities now are:
@@ -1419,12 +1419,12 @@ SCM STk_Cstr2number(char *str, long base)
       case '-':
         if (strcmp(end, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
         if (strcmp(end, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
-        b = STk_Cstr2simple_number(&end2, end, &exact, &base);
+        b = STk_Cstr2simple_number(end, &exact, &base, &end2);
         if (*end2 == 'i' && *(end2+1) == '\0') return make_complex(a,b);
         break;
       case '@':
         /* end+1, because we want to skip the '@' sign: */
-        b = STk_Cstr2simple_number(&end2, end+1, &exact, &base);
+        b = STk_Cstr2simple_number(end+1, &exact, &base, &end2);
         if (*end2 == '\0') return make_polar(a,b);
         break;
     }
