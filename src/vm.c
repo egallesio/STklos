@@ -468,7 +468,7 @@ static inline int16_t adjust_stack_get_arity(SCM func, int16_t nargs, vm_thread_
   if (arity != nargs) {
     if (arity >= 0)
       error_bad_arity(func, arity, nargs, vm);
-    else {                                              /* nary procedure call */
+    else {
       int16_t min_arity = -arity-1;
 
       if (nargs < min_arity)
@@ -552,6 +552,9 @@ static inline int16_t adjust_stack_get_arity(SCM func, int16_t nargs, vm_thread_
             ptr = CDR(ptr);
             n_opts++;
         }
+        /* If the user defined a :rest parameter, it should hold the list
+           of parameters *after* the optionals: */
+        rest = ptr;
 
         /* Optionals given by the user are over, so now we push
            defaults for any others that were missing. Since the
