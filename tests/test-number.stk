@@ -1204,6 +1204,30 @@
       (sqrt -1-0.0i))
 
 
+(test "sqrt -1" +1i (sqrt -1))
+
+(test "sqrt -1.0"
+      #t
+      (let ((s (sqrt -1.0)))
+        (zero? (real-part s))
+        (< 0.999999 (imag-part s) 1.00001)
+        (inexact? s)))
+
+(test "sqrt -1+0.0i"
+      #t
+      (let ((s (sqrt -1+0.0i)))
+        (zero? (real-part s))
+        (< 0.999999 (imag-part s) 1.00001)
+        (inexact? s)))
+
+(test "sqrt -1-0.0i"
+      #t
+      (let ((s (sqrt -1-0.0i)))
+        (zero? (real-part s))
+        (> -0.999999 (imag-part s) -1.00001)
+        (inexact? s)))
+
+
 ;;------------------------------------------------------------------
 (test-subsection "logical operations")
 
