@@ -1011,7 +1011,9 @@ doc>
          (req    (car params))
          (opt    (or (cadr params)   '()))
          (key    (or (caddr params)  '()))
-         (rest   (or (cadddr params) (gensym 'REST))))
+         (rest   (cond ((cadddr params) (cadddr params))
+                       ((list? formals) '())
+                       (else (gensym 'REST)))))
     (let* ((opt-names (map car opt))
            (opt-tests (filter symbol? (map caddr opt)))
            (key-names (map car key))
@@ -1092,8 +1094,10 @@ doc>
   (if (> (length el) 2)
       (let* ((method? (eq? (car el) 'method))
              (formals (cadr el))
-             (body    (cddr el))
-             (doc     (and (> (length body) 1) (string? (car body)) (car body))))
+             (info    (extract-doc-and-name #f #f (cddr el)))
+             (doc     (car info))
+             (name    (cadr info))
+             (body    (caddr info)))
         ;; Receive four values from x:rewrite-params-and-body:
         ;; the new formals, the list of optionals, the list of
         ;; keywords and the arity
@@ -1101,12 +1105,11 @@ doc>
                        (x:rewrite-params-and-body method?
                                                 formals
                                                 (if doc (cdr body) body))))
-                ;(format #t "new ~a~%opt ~a key ~a~%" new opt key)
 
           (values (if doc
-                      `(lambda ,(car new)
+                      `(lambda ,(car new)  ; new-args
                          ,doc
-                         ,@(cdr new))
+                         ,@(cdr new)) ; new-body
                       `(lambda ,@new))
                   opt key arity)))
       (compiler-error 'lambda el "bad definition ~S" el)))
@@ -1119,7 +1122,8 @@ doc>
     (compile-user-lambda formals body arity env args)))
 
 (define (compile-Lambda args env tail?)
-  (let-values (( (r5rs-lambda opt key arity) (extended-Lambda->lambda args) ))
+  (let-values (( (r5rs-lambda opt key arity)
+                 (extended-Lambda->lambda args) ))
     (let* ((formals     (cadr r5rs-lambda))
            (body        (cddr r5rs-lambda)))
       (compile-user-Lambda formals opt key body arity env args))))
@@ -2071,8 +2075,8 @@ both forms.
           ((if)                 (compile-if             e env tail?))
           ((define)             (compile-define         e env tail?))
           ((begin)              (compile-begin          e env tail?))
-          ((Lambda)             (compile-Lambda         e env tail?))
-          ((lambda λ)                (compile-lambda         e env tail?))
+          ((Lambda)             (compile-lambda         e env tail?))
+          ((lambda λ)                (compile-Lambda         e env tail?))
           ((let %let)           (compile-let            e env tail?))
           ((let*)               (compile-let*           e env tail?))
           ((letrec)             (compile-letrec         e env tail?))
