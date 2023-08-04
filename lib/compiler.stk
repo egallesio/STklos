@@ -712,27 +712,34 @@ doc>
           ;; emit signature
           (emit 'FORMALS (fetch-constant (cadr src)))))))
 
-(define (compile-user-Lambda formals opt key body arity env)    ; i.e R5RS ones
-
+(define (compile-user-Lambda formals opt key body arity env src)    ; i.e R5RS ones
   (let* ((env  (extend-env env formals))
          (lab  (new-label))
-         (doc  (if (and (> (length body) 1) (string? (car body)))
-                   (car body)
-                   #f))
-         (body (if doc (cdr body) body)))
+         (info (extract-doc-and-name #f #f body))
+         (doc  (car info))
+         (name (cadr info))
+         (body (caddr info)))
 
     (emit 'CREATE-CLOSURE lab arity)
     (compile-body body env body #t)
     (emit 'RETURN)
     (emit-label lab)
 
-    (when (compiler:generate-signature)
-      ;; emit signature
-      (emit 'FORMALS (fetch-constant formals)))
-
-    (when doc
-      ;; emit the docstring
+    (when doc ;; emit the docstring
       (emit 'DOCSTRG (fetch-constant doc)))
+
+    (when name ;; emit the procedure name
+      (emit 'PROCNAME
+            (fetch-constant (string->symbol (keyword->string name)))))
+
+    (if (compiler:keep-source)
+        ;; emit the code source (in fact signature + body)
+        (begin
+          (emit 'FORMALS (fetch-constant (cadr src)))
+          (emit 'SOURCE  (fetch-constant  (cddr src))))
+        (when (compiler:keep-formals)
+          ;; emit signature
+          (emit 'FORMALS (fetch-constant (cadr src)))))
 
     (when (not (and (null? opt) (null? key)))
       (emit 'CLOSURE-SET-OPT-KEY
@@ -1115,7 +1122,7 @@ doc>
   (let-values (( (r5rs-lambda opt key arity) (extended-Lambda->lambda args) ))
     (let* ((formals     (cadr r5rs-lambda))
            (body        (cddr r5rs-lambda)))
-      (compile-user-Lambda formals opt key body arity env))))
+      (compile-user-Lambda formals opt key body arity env args))))
 
 ;;;;
 ;;;; APPLICATION
