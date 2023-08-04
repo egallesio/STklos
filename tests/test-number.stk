@@ -1198,35 +1198,18 @@
       		     (sqrt (* 1452616561298192819 -1452616561298192819)))
 (test "sqrt bignum"  0+1452616561298192819i
       		     (sqrt -2110094874157786375590269875303166761))
+
 (test "sqrt complex with +0.0 imaginary part" 0.0+i
       (sqrt -1+0.0i))
 (test "sqrt complex with +0.0 imaginary part" 0.0-i
       (sqrt -1-0.0i))
 
-
 (test "sqrt -1" +1i (sqrt -1))
-
-(test "sqrt -1.0"
-      #t
+(test "sqrt -1.0" #t
       (let ((s (sqrt -1.0)))
-        (zero? (real-part s))
-        (< 0.999999 (imag-part s) 1.00001)
-        (inexact? s)))
-
-(test "sqrt -1+0.0i"
-      #t
-      (let ((s (sqrt -1+0.0i)))
-        (zero? (real-part s))
-        (< 0.999999 (imag-part s) 1.00001)
-        (inexact? s)))
-
-(test "sqrt -1-0.0i"
-      #t
-      (let ((s (sqrt -1-0.0i)))
-        (zero? (real-part s))
-        (> -0.999999 (imag-part s) -1.00001)
-        (inexact? s)))
-
+        (and (zero? (real-part s))
+             (< 0.999999 (imag-part s) 1.00001)
+             (inexact? s))))
 
 ;;------------------------------------------------------------------
 (test-subsection "logical operations")
