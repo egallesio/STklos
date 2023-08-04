@@ -106,7 +106,10 @@ doc>
                                                      (if (negative? x)
                                                          "negative"
                                                          "positive")))
-                              ((nan? x)      (format port "a non-number (NaN)"))
+                              ((nan? x)      (format port "a ~aquiet, ~anegative non-number (NaN), with payload ~a"
+                                                     (if (nan-quiet? x) "" "non-")
+                                                     (if (nan-negative? x) "" "non-")
+                                                     (nan-payload x)))
                               ((real? x)     (format port "a real number"))
                               ((complex? x)  (format port
                                                      "an inexact complex number")))))
