@@ -3389,6 +3389,11 @@ static SCM my_atanh(SCM z) {
       if (zz == -1.0 || zz == +1.0)
         error_out_of_range(z);
       if (fpclassify(zz) == FP_ZERO) return MAKE_INT(0);
+      /* atanh(inf) is -(i.pi)/2 */
+      if (isinf(zz)) return Cmake_complex(double2real(0.0),
+                                          double2real(MY_PI/(signbit(zz)
+                                                             ? 2.0L
+                                                             : -2.0L)));
       return atanh_aux(1.0 + zz, 1.0 - zz);
   }
   case tc_integer:  {
