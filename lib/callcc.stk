@@ -180,9 +180,9 @@ doc>
   ;; A simple continuation without winding (accepts multiples values)
   (let ((k  (%make-continuation)))
     (if  (%fresh-continuation? k)
-        (proc (lambda v
-                (%restore-continuation k v)))
-        (apply values k))))
+         (proc (lambda v
+                 (%restore-continuation k v)))
+         (apply values k))))
 
 ;(define %dynamic-wind-stack (make-parameter (list #f)))
 

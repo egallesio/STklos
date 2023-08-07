@@ -1,0 +1,473 @@
+;;;;
+;;;; 160/u32.stk         -- SRFI-160: Homogeneous numeric vector libraries
+;;;;                                  (u32 sublibrary)
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 17-Jun-2022 15:54
+;;;;
+
+(define-module scheme/vector/u32
+
+  (import (srfi 4)
+          (srfi 128)
+          (scheme vector base))
+  (export
+   ;; Constructors
+   make-u32vector   ;; BASE
+   u32vector        ;; BASE
+   u32vector-unfold
+   u32vector-unfold-right
+   u32vector-copy
+   u32vector-reverse-copy
+   u32vector-append
+   u32vector-concatenate
+   u32vector-append-subvectors
+
+   ;; Predicates
+   u32?              ;; BASE
+   u32vector?        ;; BASE
+   u32vector-empty?
+   u32vector=
+
+   ;; Selectors
+   u32vector-ref     ;; BASE
+   u32vector-length  ;; BASE
+
+   ;; Iteration
+   u32vector-take
+   u32vector-take-right
+   u32vector-drop
+   u32vector-drop-right
+   u32vector-segment
+   u32vector-fold
+   u32vector-fold-right
+   u32vector-map
+   u32vector-map!
+   u32vector-for-each
+   u32vector-count
+   u32vector-cumulate
+
+   ;; Searching
+   u32vector-take-while
+   u32vector-take-while-right
+   u32vector-drop-while
+   u32vector-drop-while-right
+   u32vector-index
+   u32vector-index-right
+   u32vector-skip
+   u32vector-skip-right
+   u32vector-any
+   u32vector-every
+   u32vector-partition
+   u32vector-filter
+   u32vector-remove
+
+   ;; Mutators
+   u32vector-set!            ;; BASE
+   u32vector-swap!
+   u32vector-fill!
+   u32vector-reverse!
+   u32vector-copy!
+   u32vector-reverse-copy!
+   u32vector-unfold!
+   u32vector-unfold-right!
+
+   ;; Conversion
+   u32vector->list           ;; BASE
+   reverse-u32vector->list
+   list->u32vector           ;; BASE
+   reverse-list->u32vector
+   u32vector->vector
+   vector->u32vector
+
+   ;; Generators
+   make-u32vector-generator
+
+   ;; Comparators
+   u32vector-comparator
+
+   ;; Output
+   write-u32vector)
+
+
+;; A case of "macros for performance"... Not the best thing to do, we could
+;; actually have done a more sofisticated job in generating the output from
+;; the template, but this keeps it simple.
+;; The macro (uvector-tag) will expand to u32 in the template.
+;; However, in the generated file, the u32 will be replaed by the tag name.
+;; So the macro will expand to the VALUE of the tag, which is the
+;; fastest thing we can do. Not even access to a global will be done, the
+;; correct constant will be pushed onto the stack.
+;;
+;;  (%s32vector-something (uvector-tag) args)
+;; EXPANDS into
+;;  (u8vector-something 4 args)
+;; and NOT into
+;;  (%u8vector-something s32 args)
+
+(define-macro (uvector-tag)
+  (let ((s8   0)
+        (u8   1)
+        (s16  2)
+        (u16  3)
+        (s32  4)
+        (u32  5)
+        (s64  6)
+        (u64  7)
+        (f32  8)
+        (f64  9)
+        (c64  10)
+        (c128 11))
+    u32))
+
+;; We'll be accessing the base module to get some procedures from it:
+(define base (find-module 'scheme/vector/base))
+
+;; These are implemented in C, and used here to build the actual procedures:
+(define %uvector-unfold            (symbol-value '%uvector-unfold base))
+(define %uvector-copy              (symbol-value '%uvector-copy base))
+(define %uvector-append-subvectors (symbol-value '%uvector-append-subvectors base))
+(define %uvector-empty?            (symbol-value '%uvector-empty? base))
+(define %uvector=                  (symbol-value '%uvector= base))
+(define %uvector-iterate           (symbol-value '%uvector-iterate base))
+(define %uvector-segment           (symbol-value '%uvector-segment base))
+
+;;;
+;;; Constructors OK
+;;;
+
+;; make-vector OK
+;; vector      OK
+
+(define (u32vector-unfold f len seed)
+  (%uvector-unfold (uvector-tag) f #f len seed #f))
+
+(define (u32vector-unfold-right f len seed)
+  (%uvector-unfold (uvector-tag) f #f len seed #t))
+
+(define (u32vector-copy v :optional (start 0) (end (u32vector-length v)))
+  (%uvector-copy (uvector-tag) #f 0 v start end #f))
+
+(define (u32vector-reverse-copy v :optional (start 0) (end (u32vector-length v)))
+  (%uvector-copy (uvector-tag) #f 0 v start end #t))
+
+(define (u32vector-append . vecs)
+  (%uvector-append-subvectors (uvector-tag) #f vecs))
+
+(define (u32vector-concatenate vecs)
+  (%uvector-append-subvectors (uvector-tag) #f vecs))
+
+(define (u32vector-append-subvectors . vecs)
+  (%uvector-append-subvectors (uvector-tag) #t vecs))
+
+;;;
+;;; Predicates OK
+;;;
+
+(define (u32vector-empty? v) (%uvector-empty? (uvector-tag) v))
+
+(define (u32vector= . args) (%uvector= (uvector-tag) args))
+
+;;;
+;;; Selectors OK
+;;;
+
+;; vector-ref    OK
+;; vector-length OK
+
+;; Iteration OK
+
+(define (u32vector-take v n) (u32vector-copy v 0 n))
+(define (u32vector-take-right v n)
+  (u32vector-copy v (- (u32vector-length v) n))) ; FIXME: optimize?
+
+(define (u32vector-drop v n)       (u32vector-copy v n))
+(define (u32vector-drop-right v n)
+  (%uvector-copy (uvector-tag) #f 0 v 0 (- (u32vector-length v) n) #f)) ; FIXME: optimize?
+
+(define (u32vector-segment v n) (%uvector-segment (uvector-tag) v n))
+
+(define (u32vector-fold kons knil v1 . v2)
+  (%uvector-iterate (uvector-tag) kons (cons v1 v2)
+   #f   ;; do NOT mutate
+   10   ;; operation (10 = fold)
+   #f   ;; NOT from-right
+   knil ;; seed
+   ))
+
+(define (u32vector-fold-right kons knil v1 . v2)
+  (%uvector-iterate (uvector-tag) kons (cons v1 v2)
+   #f   ;; do NOT mutate
+   10   ;; operation (10 = fold)
+   #t   ;; YES from-right
+   knil ;; seed
+   ))
+
+(define (u32vector-map proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   0  ;; operation (0 = map)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-map! proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #t ;; DO mutate
+   0  ;; operation (0 = map)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-for-each proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   9  ;; operation (9 = for-each)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-count proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   5  ;; operation (5 = count)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-cumulate kons knil v1)
+  (%uvector-iterate (uvector-tag) kons (list v1)
+   #f   ;; do NOT mutate
+   11   ;; operation (11 = cumulate)
+   #f   ;; NOT from-right
+   knil ;; seed
+   ))
+
+;;;
+;;; Searching OK
+;;;
+
+(define (u32vector-take-while pred? vec)
+  (u32vector-take vec (u32vector-skip pred? vec)))
+
+(define (u32vector-take-while-right pred? vec)
+  (u32vector-drop vec (+ 1 (u32vector-skip-right pred? vec))))
+
+(define (u32vector-drop-while pred? vec)
+  (u32vector-drop vec (u32vector-skip pred? vec)))
+
+(define (u32vector-drop-while-right pred? vec)
+  (u32vector-take vec (+ 1 (u32vector-skip-right pred? vec))))
+
+
+(define (u32vector-index proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   3  ;; operation (3 = index)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-index-right proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   3  ;; operation (3 = index)
+   #t ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-skip proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   4  ;; operation (4 = skip)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-skip-right proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   4  ;; operation (4 = skip)
+   #t ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-any proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   1  ;; operation (1 = any)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-every proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   2  ;; operation (2 = every)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-partition proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   6  ;; operation (6 = partition)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (u32vector-filter proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   7  ;; operation (7 = filter)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+(define (u32vector-remove proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   8  ;; operation (8 = remove)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+
+;;;
+;;; Mutators OK
+;;;
+
+;; vector-set! OK
+
+;; FIXME:
+;; vector-fill! and vector-swap! do not depend on vector type,
+;; but vector-fill! does some type checking for each element
+;; written. Maybe this could be optimized...
+(define u32vector-swap! (symbol-value '%uvector-swap!         base))
+(define u32vector-fill! (symbol-value '%uvector-fill!         base))
+
+(define (u32vector-reverse! v :optional (start 0) (end (u32vector-length v)))
+  (%uvector-copy (uvector-tag) v start v start end #t)
+  #void)
+
+(define (u32vector-copy! to at from :optional (start 0) (end (u32vector-length from)))
+  (%uvector-copy (uvector-tag) to at from start end #f)
+  #void)
+
+(define (u32vector-reverse-copy! to at from :optional (start 0) (end (u32vector-length from)))
+  (%uvector-copy (uvector-tag) to at from start end #t)
+  #void)
+
+(define (u32vector-unfold! f v start end seed)
+  (%uvector-unfold (uvector-tag) f v start end seed #f)
+  #void)
+
+(define (u32vector-unfold-right! f v start end seed)
+  (%uvector-unfold (uvector-tag) f v start end seed #t)
+  #void)
+
+;;;
+;;; Conversion OK
+;;;
+
+(define (vector->u32vector v :optional (start 0) (end (vector-length v)))
+  (let* ((w (make-u32vector (- end start))))
+    (do ((i start (+ i 1)))
+        ((= i end))
+      (u32vector-set! w (- i start) (vector-ref v i)))
+    w))
+
+(define (u32vector->vector v :optional (start 0) (end (u32vector-length v)))
+  (let* ((w (make-vector (- end start))))
+    (do ((i start (+ i 1)))
+        ((= i end))
+      (vector-set! w (- i start) (u32vector-ref v i)))
+    w))
+
+
+(define (u32vector->list v :optional (start 0) (end (u32vector-length v)))
+  (let ((v (u32vector-copy v start end)))
+    (let loop ((i (fx- (u32vector-length v) 1))
+               (lst '()))
+      (if (fx< i 0)
+          lst
+          (loop (fx- i 1) (cons (u32vector-ref v i) lst))))))
+
+
+(define (reverse-list->u32vector lst)
+  (u32vector-reverse-copy (list->u32vector lst)))
+
+(define (reverse-u32vector->list v :optional (start 0) (end (u32vector-length v)))
+  (u32vector->list (u32vector-reverse-copy v start end)))
+
+;;;
+;;; Generators OK
+;;;
+
+(define (make-u32vector-generator v :optional (start 0) (end (u32vector-length v)))
+  (lambda () (if (fx>= start end)
+            (eof-object)
+            (let ((x (u32vector-ref v start)))
+              (set! start (fx+ 1 start))
+              x))))
+
+;;;
+;;; Comparators OK
+;;;
+
+;; Adapted from reference implementation in Chicken:
+(define (u32vector< vec1 vec2)
+     (let ((len1 (u32vector-length vec1))
+           (len2 (u32vector-length vec2)))
+       (cond
+         ((fx< (u32vector-length vec1)
+               (u32vector-length vec2))
+          #t)
+         ((fx> (u32vector-length vec1)
+               (u32vector-length vec2))
+          #f)
+         (else
+          (let loop ((i 0))
+            (cond
+              ((fx= i len1) #f)
+              ((< (u32vector-ref vec1 i) (u32vector-ref vec2 i))
+               #t)
+              ((> (u32vector-ref vec1 i) (u32vector-ref vec2 i))
+               #f)
+              (else
+               (loop (fx+ i 1)))))))))
+
+(define u32vector-comparator
+  (make-comparator u32vector? u32vector= u32vector< hash-table-hash))
+
+;;;
+;;; Output OK
+;;;
+
+(define (write-u32vector v :optional port)
+  (unless ()
+    (error))
+  (if port
+      (write v port)
+      (write v)))
+
+  )
+
+(provide "scheme/vector/u32")

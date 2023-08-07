@@ -61,7 +61,7 @@ static SCM Top, Object, Class, Generic, Method, Simple_method, Accessor,
 static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number,
            Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof,
            Struct_type, Struct, Cond, Cond_type, Box, Syntax, Uvector,
-           Bytevector, UnknownClass;
+           Bytevector, Port, Input_port, Output_port, Hash_table, UnknownClass;
 
 
 int STk_oo_initialized = FALSE;
@@ -411,7 +411,7 @@ DEFINE_PRIMITIVE("%method-more-specific?", method_more_specificp, subr3,
  *
 \*===========================================================================*/
 
-static Inline SCM test_change_class(SCM obj)
+static inline SCM test_change_class(SCM obj)
 {
   SCM classe = INST_CLASS_OF(obj);
 
@@ -422,7 +422,7 @@ static Inline SCM test_change_class(SCM obj)
 
 
 
-static Inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
+static inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
 {
   SCM l;
 
@@ -443,7 +443,7 @@ static Inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
   return CALL_GF3("slot-missing", classe, obj, slot_name);
 }
 
-static Inline SCM set_slot_value(SCM classe, SCM obj, SCM slot_name, SCM value)
+static inline SCM set_slot_value(SCM classe, SCM obj, SCM slot_name, SCM value)
 {
   register SCM l;
 
@@ -550,7 +550,7 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
  * initialize-object
  *
  ******************************************************************************/
-// static void Inline set_slot_value_if_unbound
+// static void inline set_slot_value_if_unbound
 //                      (SCM classe, SCM obj, SCM slot_name, SCM val)
 // {
 // #ifdef FIXME
@@ -918,6 +918,10 @@ static void make_standard_classes(void)
   mk_cls(&UnknownClass, "<unknown>",    Class,           Top,       STk_nil);
   mk_cls(&Procedure,    "<procedure>",  Procedure_class, Top,       STk_nil);
   mk_cls(&Syntax,       "<syntax>",     Class,           Top,       STk_nil);
+  mk_cls(&Port,         "<port>",       Class,           Top,       STk_nil);
+  mk_cls(&Input_port,   "<input-port>", Class,           Port,      STk_nil);
+  mk_cls(&Output_port,  "<output-port>",Class,           Port,      STk_nil);
+  mk_cls(&Hash_table,   "<hash-table>", Class,           Top,       STk_nil);
 }
 
 
@@ -988,6 +992,18 @@ DEFINE_PRIMITIVE("method?", methodp, subr1, (SCM obj))
   return MAKE_BOOLEAN(METHODP(obj));
 }
 
+/*
+<doc EXT class-of
+ * (class-of obj)
+ *
+ * Return the class of object |obj|.
+ * @lisp
+ * (define-class <A> () ())
+ * (class-of (make <A>))     => #[<class> <A> 7f5dc5002a20]
+ * (class-of #t)             => #[<class> <boolean> 7f5dc551ade0]
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
 {
   if (INSTANCEP(obj)) {
@@ -1029,6 +1045,8 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     case tc_syntax:     return Syntax;
     case tc_uvector:    return (UVECTOR_TYPE(obj) == UVECT_U8) ?
                                Bytevector: Uvector;
+    case tc_port:       return IPORTP(obj)? Input_port: Output_port;
+    case tc_hash_table: return Hash_table;
     default: ;
   }
 

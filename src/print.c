@@ -59,7 +59,7 @@ static void printlist(SCM exp, SCM port, int mode)
 }
 
 
-static Inline void printsymbol(SCM symb, SCM port, int mode)
+static inline void printsymbol(SCM symb, SCM port, int mode)
 {
   const char *s = SYMBOL_PNAME(symb);
 
@@ -84,7 +84,7 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
         STk_putc('\\', port);
         STk_putc(c, port);
       }
-      else 
+      else
         STk_putc(*s, port);
    }
     STk_putc('|', port);
@@ -92,7 +92,7 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
     STk_puts(s, port);
 }
 
-static Inline void printkeyword(SCM key, SCM port, int mode)
+static inline void printkeyword(SCM key, SCM port, int mode)
 {
   const char *s = KEYWORD_PNAME(key);
 
@@ -108,7 +108,7 @@ static Inline void printkeyword(SCM key, SCM port, int mode)
 }
 
 
-static Inline char printhexa(int x)
+static inline char printhexa(int x)
 {
   return (x >= 10) ? (x - 10 + 'a') : (x + '0');
 }

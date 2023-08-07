@@ -126,7 +126,8 @@
            (IN-EQV              0)
            (IN-EQUAL            0)
            (IN-APPLY            2)
-           (UNUSED-2            0)  ;; NOTE: It was: (MAKE-EXPANDER       1)
+           (IN-CXR              1)
+
            (SET-CUR-MOD         0)
 
            ;; Documentation string
@@ -248,6 +249,9 @@
 
            (SOURCE              1)
            (FORMALS             1)
+
+           ;; Misc
+           (INSCHEME            0)  ; Symbol value in SCHEME module
 ))))
 
 ;;;;

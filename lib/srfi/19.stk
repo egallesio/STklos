@@ -368,13 +368,15 @@ doc>
  *
  * These are SRFI-19 predicates used to compare times. They return:
  *
- * time<=? : `#t` if |time1| is before or at (less than or equal to) |time2|, `#f` otherwise.
- * time<? :  `#t` if |time1| is before (less than) |time2|, `#f` otherwise.
- * time=? :  `#t` if |time1| at (equal) |time2|, `#f` otherwise.
- * time>=? : `#t` if |time1| is at or after (greater than or equal to) |time2|, `#f` otherwise.
- * time>? :  `#t` if |time1| is after (greater than) |time2|, `#f` otherwise.
+ * - |time<=?| : `#t` if |time1| is before or at (less than or equal to) |time2|,
+ *   `#f` otherwise.
+ * - |time<?| :  `#t` if |time1| is before (less than) |time2|, `#f` otherwise.
+ * - |time=?| :  `#t` if |time1| at (equal) |time2|, `#f` otherwise.
+ * - |time>=?| : `#t` if |time1| is at or after (greater than or equal to) |time2|,
+ *   `#f` otherwise.
+ * - |time>?| :  `#t` if |time1| is after (greater than) |time2|, `#f` otherwise.
  *
- * An attempt to compare times of different will raise an error.
+ * An attempt to compare times of different type will raise an error.
 doc>
 |#
 (define (time=? time1 time2)
@@ -446,10 +448,10 @@ doc>
  * (time-difference time1 time2)
  * (time-difference! time1 time2)
  *
- * These are SRFI-19 procdures return the time duration (as an object of type |time-duration|)
+ * These SRFI-19 procedures return the time duration (as an object of type |time-duration|)
  * between |time1| and |time2|. It is an error if |time1| and |time2| are of different time types.
  *
- * |Time-Difference| creats a new time object, while |Time-Difference!| may use |time1| to
+ * NOTE: |time-difference| creates a new time object, while |time-difference!| may use |time1| to
  * create the resulting object.
 doc>
 |#
@@ -1556,4 +1558,4 @@ doc>
 
 ) ;; END of module srfi/19
 
-(provide "srfi-19")
+(provide "srfi/19")

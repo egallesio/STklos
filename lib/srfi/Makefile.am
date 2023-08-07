@@ -20,6 +20,7 @@
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
 
+
 #-======================================================================
 
 SUBDIRS=160
@@ -64,6 +65,7 @@ SRC_STK   = 1.stk   \
             41.stk  \
             43.stk  \
             45.stk  \
+            46.stk  \
             48.stk  \
             51.stk  \
             54.stk  \
@@ -131,8 +133,10 @@ SRC_STK   = 1.stk   \
             217.stk \
             219.stk \
             221.stk \
+            222.stk \
             223.stk \
             224.stk \
+            227.stk \
             228.stk \
             229.stk \
             230.stk \
@@ -173,6 +177,7 @@ SRC_OSTK =  1.ostk   \
             41.ostk  \
             43.ostk  \
             45.ostk  \
+            46.ostk  \
             48.ostk  \
             51.ostk  \
             54.ostk  \
@@ -240,8 +245,10 @@ SRC_OSTK =  1.ostk   \
             217.ostk \
             219.ostk \
             221.ostk \
+            222.ostk \
             223.ostk \
             224.ostk \
+            227.ostk \
             228.ostk \
             229.ostk \
             230.ostk \
@@ -287,19 +294,19 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 #======================================================================
 # Dependencies
-1.ostk: ../scheme/list.ostk
+1.ostk: ../scheme/list.$(SO)
 13.ostk: 14.ostk
 14.ostk: ../scheme/charset.ostk
-37.ostk: 9.ostk 13.ostk
+37.ostk: 13.ostk
 41.ostk: ../streams/derived.ostk
 51.ostk: 1.ostk
-64.ostk: 9.ostk 35.ostk
+64.ostk: 35.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
 95.ostk:  ../scheme/sort.$(SO)
 113.ostk: ../scheme/set.ostk
 116.ostk: ../scheme/ilist.$(SO)
-117.ostk: 1.ostk 9.ostk ../scheme/list-queue.ostk
+117.ostk: 1.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
 127.ostk: ../scheme/lseq.ostk
 128.ostk: ../scheme/comparator.ostk
@@ -312,23 +319,18 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 144.ostk: ../scheme/flonum.$(SO)
 151.ostk: ../scheme/bitwise.ostk
 152.ostk: 13.ostk
-154.ostk: 9.ostk
 158.ostk: ../scheme/generator.ostk
-160.ostk: 4.ostk 128.ostk
-161.ostk: 9.ostk
-171.ostk: 1.ostk 9.ostk 69.ostk
-173.ostk: 9.ostk
-180.ostk: 9.ostk
-189.ostk: 1.ostk 9.ostk
+160.ostk: ../scheme/vector/@.ostk
+171.ostk: 1.ostk 69.ostk
+189.ostk: 1.ostk
 190.ostk: 158.ostk
 195.ostk: 35.ostk
-196.ostk: 1.ostk 9.ostk
-207.ostk: 1.ostk 9.ostk 13.ostk 151.ostk 158.ostk
+196.ostk: 1.ostk
+207.ostk: 1.ostk 13.ostk 151.ostk 158.ostk
 216.ostk: 27.$(SO)
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
 224.ostk: ../scheme/comparator.ostk
-230.ostk: 9.ostk
 235.ostk: 1.ostk
 
 
@@ -341,8 +343,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
-../scheme/list.ostk:
-	(cd ../scheme; $(MAKE) list.ostk)
+../scheme/list.$(SO):
+	(cd ../scheme; $(MAKE) list.$(SO))
 ../scheme/charset.ostk:
 	(cd ../scheme; $(MAKE) charset.ostk)
 ../scheme/set.ostk:
@@ -367,6 +369,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) division.$(SO))
 ../scheme/bitwise.$(SO):
 	(cd ../scheme; $(MAKE) bitwise.ostk)
+../scheme/vector/@.ostk:
+	(cd ../scheme/vector; $(MAKE) @.ostk)
 
 
 #======================================================================
@@ -375,7 +379,9 @@ install-data-hook:
 	(cd 160; $(MAKE) install)
 
 install-sources:
-	(cd 160; $(MAKE) install-sources)
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) install-sources)\
+	done
 	cp $(srfi_sources) $(srfidir)
 
 clean:

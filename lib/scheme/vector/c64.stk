@@ -1,0 +1,473 @@
+;;;;
+;;;; 160/c64.stk         -- SRFI-160: Homogeneous numeric vector libraries
+;;;;                                  (c64 sublibrary)
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 17-Jun-2022 15:54
+;;;;
+
+(define-module scheme/vector/c64
+
+  (import (srfi 4)
+          (srfi 128)
+          (scheme vector base))
+  (export
+   ;; Constructors
+   make-c64vector   ;; BASE
+   c64vector        ;; BASE
+   c64vector-unfold
+   c64vector-unfold-right
+   c64vector-copy
+   c64vector-reverse-copy
+   c64vector-append
+   c64vector-concatenate
+   c64vector-append-subvectors
+
+   ;; Predicates
+   c64?              ;; BASE
+   c64vector?        ;; BASE
+   c64vector-empty?
+   c64vector=
+
+   ;; Selectors
+   c64vector-ref     ;; BASE
+   c64vector-length  ;; BASE
+
+   ;; Iteration
+   c64vector-take
+   c64vector-take-right
+   c64vector-drop
+   c64vector-drop-right
+   c64vector-segment
+   c64vector-fold
+   c64vector-fold-right
+   c64vector-map
+   c64vector-map!
+   c64vector-for-each
+   c64vector-count
+   c64vector-cumulate
+
+   ;; Searching
+   c64vector-take-while
+   c64vector-take-while-right
+   c64vector-drop-while
+   c64vector-drop-while-right
+   c64vector-index
+   c64vector-index-right
+   c64vector-skip
+   c64vector-skip-right
+   c64vector-any
+   c64vector-every
+   c64vector-partition
+   c64vector-filter
+   c64vector-remove
+
+   ;; Mutators
+   c64vector-set!            ;; BASE
+   c64vector-swap!
+   c64vector-fill!
+   c64vector-reverse!
+   c64vector-copy!
+   c64vector-reverse-copy!
+   c64vector-unfold!
+   c64vector-unfold-right!
+
+   ;; Conversion
+   c64vector->list           ;; BASE
+   reverse-c64vector->list
+   list->c64vector           ;; BASE
+   reverse-list->c64vector
+   c64vector->vector
+   vector->c64vector
+
+   ;; Generators
+   make-c64vector-generator
+
+   ;; Comparators
+   c64vector-comparator
+
+   ;; Output
+   write-c64vector)
+
+
+;; A case of "macros for performance"... Not the best thing to do, we could
+;; actually have done a more sofisticated job in generating the output from
+;; the template, but this keeps it simple.
+;; The macro (uvector-tag) will expand to c64 in the template.
+;; However, in the generated file, the c64 will be replaed by the tag name.
+;; So the macro will expand to the VALUE of the tag, which is the
+;; fastest thing we can do. Not even access to a global will be done, the
+;; correct constant will be pushed onto the stack.
+;;
+;;  (%s32vector-something (uvector-tag) args)
+;; EXPANDS into
+;;  (u8vector-something 4 args)
+;; and NOT into
+;;  (%u8vector-something s32 args)
+
+(define-macro (uvector-tag)
+  (let ((s8   0)
+        (u8   1)
+        (s16  2)
+        (u16  3)
+        (s32  4)
+        (u32  5)
+        (s64  6)
+        (u64  7)
+        (f32  8)
+        (f64  9)
+        (c64  10)
+        (c128 11))
+    c64))
+
+;; We'll be accessing the base module to get some procedures from it:
+(define base (find-module 'scheme/vector/base))
+
+;; These are implemented in C, and used here to build the actual procedures:
+(define %uvector-unfold            (symbol-value '%uvector-unfold base))
+(define %uvector-copy              (symbol-value '%uvector-copy base))
+(define %uvector-append-subvectors (symbol-value '%uvector-append-subvectors base))
+(define %uvector-empty?            (symbol-value '%uvector-empty? base))
+(define %uvector=                  (symbol-value '%uvector= base))
+(define %uvector-iterate           (symbol-value '%uvector-iterate base))
+(define %uvector-segment           (symbol-value '%uvector-segment base))
+
+;;;
+;;; Constructors OK
+;;;
+
+;; make-vector OK
+;; vector      OK
+
+(define (c64vector-unfold f len seed)
+  (%uvector-unfold (uvector-tag) f #f len seed #f))
+
+(define (c64vector-unfold-right f len seed)
+  (%uvector-unfold (uvector-tag) f #f len seed #t))
+
+(define (c64vector-copy v :optional (start 0) (end (c64vector-length v)))
+  (%uvector-copy (uvector-tag) #f 0 v start end #f))
+
+(define (c64vector-reverse-copy v :optional (start 0) (end (c64vector-length v)))
+  (%uvector-copy (uvector-tag) #f 0 v start end #t))
+
+(define (c64vector-append . vecs)
+  (%uvector-append-subvectors (uvector-tag) #f vecs))
+
+(define (c64vector-concatenate vecs)
+  (%uvector-append-subvectors (uvector-tag) #f vecs))
+
+(define (c64vector-append-subvectors . vecs)
+  (%uvector-append-subvectors (uvector-tag) #t vecs))
+
+;;;
+;;; Predicates OK
+;;;
+
+(define (c64vector-empty? v) (%uvector-empty? (uvector-tag) v))
+
+(define (c64vector= . args) (%uvector= (uvector-tag) args))
+
+;;;
+;;; Selectors OK
+;;;
+
+;; vector-ref    OK
+;; vector-length OK
+
+;; Iteration OK
+
+(define (c64vector-take v n) (c64vector-copy v 0 n))
+(define (c64vector-take-right v n)
+  (c64vector-copy v (- (c64vector-length v) n))) ; FIXME: optimize?
+
+(define (c64vector-drop v n)       (c64vector-copy v n))
+(define (c64vector-drop-right v n)
+  (%uvector-copy (uvector-tag) #f 0 v 0 (- (c64vector-length v) n) #f)) ; FIXME: optimize?
+
+(define (c64vector-segment v n) (%uvector-segment (uvector-tag) v n))
+
+(define (c64vector-fold kons knil v1 . v2)
+  (%uvector-iterate (uvector-tag) kons (cons v1 v2)
+   #f   ;; do NOT mutate
+   10   ;; operation (10 = fold)
+   #f   ;; NOT from-right
+   knil ;; seed
+   ))
+
+(define (c64vector-fold-right kons knil v1 . v2)
+  (%uvector-iterate (uvector-tag) kons (cons v1 v2)
+   #f   ;; do NOT mutate
+   10   ;; operation (10 = fold)
+   #t   ;; YES from-right
+   knil ;; seed
+   ))
+
+(define (c64vector-map proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   0  ;; operation (0 = map)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-map! proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #t ;; DO mutate
+   0  ;; operation (0 = map)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-for-each proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   9  ;; operation (9 = for-each)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-count proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   5  ;; operation (5 = count)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-cumulate kons knil v1)
+  (%uvector-iterate (uvector-tag) kons (list v1)
+   #f   ;; do NOT mutate
+   11   ;; operation (11 = cumulate)
+   #f   ;; NOT from-right
+   knil ;; seed
+   ))
+
+;;;
+;;; Searching OK
+;;;
+
+(define (c64vector-take-while pred? vec)
+  (c64vector-take vec (c64vector-skip pred? vec)))
+
+(define (c64vector-take-while-right pred? vec)
+  (c64vector-drop vec (+ 1 (c64vector-skip-right pred? vec))))
+
+(define (c64vector-drop-while pred? vec)
+  (c64vector-drop vec (c64vector-skip pred? vec)))
+
+(define (c64vector-drop-while-right pred? vec)
+  (c64vector-take vec (+ 1 (c64vector-skip-right pred? vec))))
+
+
+(define (c64vector-index proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   3  ;; operation (3 = index)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-index-right proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   3  ;; operation (3 = index)
+   #t ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-skip proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   4  ;; operation (4 = skip)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-skip-right proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   4  ;; operation (4 = skip)
+   #t ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-any proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   1  ;; operation (1 = any)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-every proc v1 . vs)
+  (%uvector-iterate (uvector-tag) proc (cons v1 vs)
+   #f ;; do NOT mutate
+   2  ;; operation (2 = every)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-partition proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   6  ;; operation (6 = partition)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+(define (c64vector-filter proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   7  ;; operation (7 = filter)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+(define (c64vector-remove proc v1)
+  (%uvector-iterate (uvector-tag) proc (list v1)
+   #f ;; do NOT mutate
+   8  ;; operation (8 = remove)
+   #f ;; NOT from-right
+   #f ;; NO seed
+   ))
+
+
+;;;
+;;; Mutators OK
+;;;
+
+;; vector-set! OK
+
+;; FIXME:
+;; vector-fill! and vector-swap! do not depend on vector type,
+;; but vector-fill! does some type checking for each element
+;; written. Maybe this could be optimized...
+(define c64vector-swap! (symbol-value '%uvector-swap!         base))
+(define c64vector-fill! (symbol-value '%uvector-fill!         base))
+
+(define (c64vector-reverse! v :optional (start 0) (end (c64vector-length v)))
+  (%uvector-copy (uvector-tag) v start v start end #t)
+  #void)
+
+(define (c64vector-copy! to at from :optional (start 0) (end (c64vector-length from)))
+  (%uvector-copy (uvector-tag) to at from start end #f)
+  #void)
+
+(define (c64vector-reverse-copy! to at from :optional (start 0) (end (c64vector-length from)))
+  (%uvector-copy (uvector-tag) to at from start end #t)
+  #void)
+
+(define (c64vector-unfold! f v start end seed)
+  (%uvector-unfold (uvector-tag) f v start end seed #f)
+  #void)
+
+(define (c64vector-unfold-right! f v start end seed)
+  (%uvector-unfold (uvector-tag) f v start end seed #t)
+  #void)
+
+;;;
+;;; Conversion OK
+;;;
+
+(define (vector->c64vector v :optional (start 0) (end (vector-length v)))
+  (let* ((w (make-c64vector (- end start))))
+    (do ((i start (+ i 1)))
+        ((= i end))
+      (c64vector-set! w (- i start) (vector-ref v i)))
+    w))
+
+(define (c64vector->vector v :optional (start 0) (end (c64vector-length v)))
+  (let* ((w (make-vector (- end start))))
+    (do ((i start (+ i 1)))
+        ((= i end))
+      (vector-set! w (- i start) (c64vector-ref v i)))
+    w))
+
+
+(define (c64vector->list v :optional (start 0) (end (c64vector-length v)))
+  (let ((v (c64vector-copy v start end)))
+    (let loop ((i (fx- (c64vector-length v) 1))
+               (lst '()))
+      (if (fx< i 0)
+          lst
+          (loop (fx- i 1) (cons (c64vector-ref v i) lst))))))
+
+
+(define (reverse-list->c64vector lst)
+  (c64vector-reverse-copy (list->c64vector lst)))
+
+(define (reverse-c64vector->list v :optional (start 0) (end (c64vector-length v)))
+  (c64vector->list (c64vector-reverse-copy v start end)))
+
+;;;
+;;; Generators OK
+;;;
+
+(define (make-c64vector-generator v :optional (start 0) (end (c64vector-length v)))
+  (lambda () (if (fx>= start end)
+            (eof-object)
+            (let ((x (c64vector-ref v start)))
+              (set! start (fx+ 1 start))
+              x))))
+
+;;;
+;;; Comparators OK
+;;;
+
+;; Adapted from reference implementation in Chicken:
+(define (c64vector< vec1 vec2)
+     (let ((len1 (c64vector-length vec1))
+           (len2 (c64vector-length vec2)))
+       (cond
+         ((fx< (c64vector-length vec1)
+               (c64vector-length vec2))
+          #t)
+         ((fx> (c64vector-length vec1)
+               (c64vector-length vec2))
+          #f)
+         (else
+          (let loop ((i 0))
+            (cond
+              ((fx= i len1) #f)
+              ((< (c64vector-ref vec1 i) (c64vector-ref vec2 i))
+               #t)
+              ((> (c64vector-ref vec1 i) (c64vector-ref vec2 i))
+               #f)
+              (else
+               (loop (fx+ i 1)))))))))
+
+(define c64vector-comparator
+  (make-comparator c64vector? c64vector= c64vector< hash-table-hash))
+
+;;;
+;;; Output OK
+;;;
+
+(define (write-c64vector v :optional port)
+  (unless ()
+    (error))
+  (if port
+      (write v port)
+      (write v)))
+
+  )
+
+(provide "scheme/vector/c64")

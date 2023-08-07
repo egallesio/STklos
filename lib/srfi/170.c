@@ -471,6 +471,15 @@ DEFINE_PRIMITIVE("%set-file-owner", posix_chown, subr3, (SCM name, SCM uid, SCM 
 }
 
 
+#ifndef HAVE_UTIMENSAT
+  #ifndef UTIME_NOW
+    #define UTIME_NOW ((1l << 30) - 1l)
+  #endif
+  #ifndef UTIME_OMIT
+    #define UTIME_OMIT ((1l << 30) - 2l)
+  #endif
+#endif
+
 DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
 {
     /* FIXME: this implementation seems overly complicated. There must be easier
@@ -486,6 +495,7 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
     long   nsec1;
     time_t sec2 = 0;        // FIXME: ::EG:: not sure.
     long   nsec2;
+    int e;
 
 
     if (argc==1) {
@@ -524,16 +534,43 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
         }
     }
 
+#ifdef HAVE_UTIMENSAT
     struct timespec t[2];
     t[0].tv_sec  = sec1;
     t[0].tv_nsec = nsec1;
     t[1].tv_sec  = sec2;
     t[1].tv_nsec = nsec2;
+    e = utimensat(AT_FDCWD,cname, t, 0);
+#else
+    // This code is for systems which don't provide utimenstat. In this case, we use
+    // the utimes primitive.
+    // Here, the resolution is the second (can we do better in a portable way?)
+    // Since TIME_NOW and TIME_OMIT conventions cannot be used for utimes, we convert back
+    // by hand.
+    struct stat s;
+    struct timespec tv, t[2];
 
-    int e = utimensat(AT_FDCWD,cname, t, 0);
+    // grab the current time in case of UTIME_NOW and inode's dates  in case of UTIME_OMIT
+    e = stat(cname, &s);
+    if (e < 0) STk_error_posix(errno,"set-file-times",name, NULL);
+    gettimeofday(&tv, NULL);
 
-    if (e == -1) STk_error_posix(errno,"set-file-times",STk_argv2list(argc,argv), NULL);
+    if (nsec1 == UTIME_NOW)  { sec1 = tv.tv_sec; nsec1 = tv.tv_nsec; }
+    else if (nsec1 == UTIME_OMIT) { sec1 = s.st_atime; nsec1 = 0; } // can we have better?
+    else { nsec1 /= 1000; }
 
+    if (nsec2 == UTIME_NOW)  { sec2 = tv.tv_sec; nsec2 = tv.tv_nsec; }
+    else if (nsec2 == UTIME_OMIT) { sec2 = s.st_mtime; nsec2 = 0; } // can we do better?
+    else {nsec2 /= 1000; }
+
+    t[0].tv_sec  = sec1;
+    t[0].tv_usec = nsec1;
+    t[1].tv_sec  = sec2;
+    t[1].tv_usec = nsec2;
+    e = utimes(cname, t);
+#endif
+
+    if (e == -1) STk_error_posix(errno,"set-file-times",name, NULL);
     return STk_void;
 }
 
@@ -568,7 +605,7 @@ DEFINE_PRIMITIVE("read-directory", posix_readdir, subr1, (SCM dir) )
     struct dirent *e = readdir(d);
     if (e == 0) {
       if (errno !=0) STk_error_posix(errno,"read-directory",dir, NULL);
-        else return STk_eof;
+      else return STk_eof;
     }
     while (!strcmp(e->d_name,".")  ||
            !strcmp(e->d_name,"..") ||
@@ -576,7 +613,7 @@ DEFINE_PRIMITIVE("read-directory", posix_readdir, subr1, (SCM dir) )
             e = readdir(d);
             if (e == 0) {
               if (errno !=0) STk_error_posix(errno,"read-directory", dir, NULL);
-                else return STk_eof;
+              else return STk_eof;
             }
         }
     return STk_Cstring2string(e->d_name);
@@ -764,7 +801,7 @@ DEFINE_PRIMITIVE("user-info",get_user_info, subr1, (SCM uid_name))
     }
     if (info == 0) {
       if (errno) STk_error_posix(errno,"user-info",uid_name, NULL);     /* <- error */
-        else return STk_false;                                         /* <- no error, user
+      else return STk_false;                                           /* <- no error, user
                                                                           doesn't exist */
     } else {
         SCM argv[8];
@@ -803,7 +840,7 @@ DEFINE_PRIMITIVE("group-info",get_group_info, subr1, (SCM gid_name))
     }
     if (info == 0) {
       if (errno) STk_error_posix(errno,"group-info",gid_name, NULL);    /* <- error */
-        else return STk_false;                                          /* <- no error, group
+      else return STk_false;                                            /* <- no error, group
                                                                            doesn't exist */
     } else {
         SCM argv[3];
@@ -817,6 +854,11 @@ DEFINE_PRIMITIVE("group-info",get_group_info, subr1, (SCM gid_name))
 
 /* 3.10 Time */
 
+#ifndef HAVE_CLOCK_GETTIME
+  #ifndef CLOCK_REALTIME
+    #define  CLOCK_REALTIME 1
+  #endif
+#endif
 DEFINE_PRIMITIVE("posix-time",posix_time, subr0, (void))
 {
     struct timespec ts;
@@ -834,6 +876,7 @@ DEFINE_PRIMITIVE("posix-time",posix_time, subr0, (void))
 
 DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
 {
+#if !defined(HAVE_CLOCK_GETTIME)  || !defined(CLOCK_MONOTONIC)
     struct timespec ts;
     int e = clock_gettime(CLOCK_MONOTONIC, &ts);
 
@@ -845,6 +888,10 @@ DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
     argv[1]=MAKE_INT(ts.tv_sec);
     argv[0]=MAKE_INT(ts.tv_nsec);
     return STk_make_struct(4, &argv[3]);
+#else
+    STk_error("monotonic time is not implemented on this system");
+    return STk_void;
+#endif
 }
 
 /* 3.12 Terminal device control */

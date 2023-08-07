@@ -41,11 +41,22 @@
 ;;; ----------------------------------------------------------------------
 (define (compiler-error where who fmt . l)
   (let* ((where (if (eq? where (void)) "" (format "~A: " where)))
-         (loc   (if (%epair? who)
-                    (format "~A:~A: "
-                            (%path-without-cwd (%epair-file who))
-                            (%epair-line who))
-                    "")))
+         (loc   (cond
+                 ((%epair? who)
+                  ;; location should be more accurate especially on generated code
+                  (format "~A:~A: "
+                          (%path-without-cwd (%epair-file who))
+                          (%epair-line who)))
+                 ((and *compiler-port* (%port-file-fd *compiler-port*))
+                  ;; *compiler-port* denotes a file port (probably less precise location
+                  ;; than with an epair)
+                  (format "~A:~A: "
+                          (%path-without-cwd (port-file-name *compiler-port*))
+                          (port-current-line *compiler-port*)))
+                 (else
+                  ;; no information on the location. Be silent
+                  ""))))
+
     (if *compiler-port*
         ;; Compiling a file
         (apply format
@@ -67,7 +78,7 @@
                             (%path-without-cwd (%epair-file who))
                             (%epair-line who))
                     "")))
-    (if (or #t *compiler-port*)   ;; FIXME 
+    (if *compiler-port*
         ;; Compiling a file
         (apply format
                (current-error-port)
@@ -106,16 +117,24 @@
   (error 'unquote-splicing "used outside of a quasiquote context"))
 
 #|
-<doc R7RS syntax-error
+<doc R7RS-SYNTAX syntax-error
  * (syntax-error message arg1 ...)
+ * (syntax-error who message arg1 ...)
  *
- * TODO
+ * |Syntax-error| behaves similarly to |error| except that it signals the
+ * error as soon as syntax-error is expanded. This can be use in macros to signal
+ * errors at compile time, without interrupting the compilation process. In
+ * interactive mode, under the REPL, |syntax-error| yields a true error.
+ *
+ * NOTE: {{rseven}} defines only the first form of call (with a string as first
+ * parameter).  {{stklos}} permits to use a symbol as first parameter to specify the
+ * location of the syntax error. It also permits the usage of  _tilde conventions_
+ * as the |error| primitive.
 doc>
 |#
-
 (define (%syntax-error msg . args)
   (cond
-   ((string? msg)              ; R7RS synax-error call: (syntax-error "message " 1 2 3)
+   ((string? msg)              ; R7RS syntax-error call: (syntax-error "message " 1 2 3)
     (apply compiler-error (void) args msg args))
 
    ((symbol? msg)              ; Extension: something like (syntax-error 'foo "not happy ~S" 100)
@@ -125,4 +144,3 @@ doc>
 
    (else
     (error 'syntax-error "bad parameters ~S" (cons msg args)))))
-

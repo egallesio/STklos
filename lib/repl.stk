@@ -33,7 +33,7 @@
   (import SCHEME)
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
-          repl-theme get-repl-color)
+          repl-theme get-repl-color repl-show-startup-message)
 
 ;;; In module REPL
 
@@ -81,7 +81,7 @@
  *               #:prompt (bold bg-red white)))
  * @end lisp
  *
- * A good place to change your theme is the `.stklosrc` file.
+ * NOTE: A good place to change your theme is the `.stklosrc` file.
 doc>
 |#
 (define *repl-themes* `(
@@ -91,7 +91,7 @@ doc>
                       :help-prompt (bold green)       ;; help prompt color
                       :help        (bold blue)        ;; help messages
                       :repl-depth  yellow             ;; REPL depth
-                      :info        (bold blue)))      ;; informations
+                      :info        (bold blue)))      ;; information
 
      (monochrome  .  ())
 
@@ -231,13 +231,31 @@ doc>
 ;;      display-prompt ...
 ;; ----------------------------------------------------------------------
 (define (display-prompt port)
-  (display (repl-prompt))
+  (display (repl-prompt) port)
   (flush-output-port port))
 
 ;; ----------------------------------------------------------------------
 ;;      repl-display-prompt ...
 ;; ----------------------------------------------------------------------
 (define repl-display-prompt (make-parameter display-prompt))
+
+
+#|
+<doc EXT repl-show-startup-message
+ * (repl-show-startup-message)
+ * (repl-show-startup-message val)
+ *
+ * If this parameter is a true value, a banner is printed when {{stklos}} starts
+ * in interactive mode. Otherwise, no banner is printed. By default, this parameter
+ * is set to `#t`.
+ *
+ * NOTE: This parameter can be set to `#f` with the |--no-startup-message| option of
+ * the {{stklos}} command. Otherwise, a good place to set this parameter is in the
+ * `.stklosrc` file.
+doc>
+|#
+(define repl-show-startup-message
+  (make-parameter (key-get *%system-state-plist* #:startup-message #t)))
 
 ;; ----------------------------------------------------------------------
 ;;      main-repl-hook ...
@@ -327,22 +345,22 @@ doc>
     ;; Use classic theme if the user has not set a theme in his/her init file
     (unless (repl-theme)
       (repl-theme 'classic))
-    ;; Show banner
-    (let* ((utf8?  (key-get *%system-state-plist* :use-utf8 #f))
-           (line1   (format "STklos version ~a (~a)\n" (version) (%push-id)))
-           (line2  "Copyright (C) 1999-2023 Erick Gallesio <eg@stklos.net>\n")
-           (line3 (format "[~a/~a/~a/~a]\n"
-                          (machine-type)
-                          (%thread-system)
-                          (key-get *%system-state-plist* :readline 'no-readline)
-                          (if utf8? 'utf8 'no-utf8)))
-           (line4  "Type ',h' for help\n")
-           (col1  (get-repl-color :input))
-           (col2  (get-repl-color :info)))
-      (display (do-color 'normal col1 "  \\    " col2 line1 'normal))
-      (display (do-color 'normal col1 "   \\   " col2 line2 'normal))
-      (display (do-color 'normal col1 "  / \\  " col2 line3 'normal))
-      (display (do-color 'normal col1 " /   \\ " col2 line4 'normal))))
+    (when (repl-show-startup-message)
+      (let* ((utf8?  (key-get *%system-state-plist* :use-utf8 #f))
+             (line1   (format "STklos version ~a (~a)\n" (version) (%push-id)))
+             (line2  "Copyright (C) 1999-2023 Erick Gallesio <eg@stklos.net>\n")
+             (line3 (format "[~a/~a/~a/~a]\n"
+                            (machine-type)
+                            (%thread-system)
+                            (key-get *%system-state-plist* :readline 'no-readline)
+                            (if utf8? 'utf8 'no-utf8)))
+             (line4  "Type ',h' for help\n")
+             (col1  (get-repl-color :input))
+             (col2  (get-repl-color :info)))
+        (display (do-color 'normal col1 "  \\    " col2 line1 'normal))
+        (display (do-color 'normal col1 "   \\   " col2 line2 'normal))
+        (display (do-color 'normal col1 "  / \\  " col2 line3 'normal))
+        (display (do-color 'normal col1 " /   \\ " col2 line4 'normal)))))
   ;; Lauch the REPL
   ((main-repl-hook))
   (repl)

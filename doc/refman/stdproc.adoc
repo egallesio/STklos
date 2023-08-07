@@ -57,6 +57,7 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'rationalize}}
 {{insertdoc 'atan}}
 {{insertdoc 'atanh}}
+{{insertdoc 'degrees->radians}}
 {{insertdoc 'sqrt}}
 {{insertdoc 'square}}
 {{insertdoc 'exact-integer-sqrt}}
@@ -512,6 +513,7 @@ primitives.
 {{insertdoc 'output-string-port?}}
 {{insertdoc 'output-bytevector-port?}}
 {{insertdoc 'output-file-port?}}
+{{insertdoc 'output-port-open?}}
 {{insertdoc 'output-virtual-port?}}
 {{insertdoc 'interactive-port?}}
 [#curroport]
@@ -794,6 +796,8 @@ SRFI's documentation for more information.
 {{insertdoc 'hash-table-merge!}}
 {{insertdoc 'hash-table-equivalence-function}}
 {{insertdoc 'hash-table-hash-function}}
+{{insertdoc 'hash-mutable?}}
+{{insertdoc 'hash-immutable!}}
 {{insertdoc 'hash-table-size}}
 {{insertdoc 'hash-table-stats}}
 
@@ -865,9 +869,9 @@ Note that two boxes are `equal?` *_iff_* their content are `equal?`.
 ((("process")))
 ((("PID")))
 {{stklos}} provides access to Unix processes as first class objects.
-Basically, a process contains several informations such as the standard
+Basically, a process contains information such as the standard
 system process identification (aka PID on Unix Systems), the files where
-the standard files of the process are redirected.
+the standard files of the process are redirected, ...
 
 {{insertdoc 'run-process}}
 {{insertdoc 'process?}}
@@ -926,6 +930,7 @@ you plan to port your program on another system.
 {{insertdoc 'set-signal-handler!}}
 {{insertdoc 'get-signal-handler}}
 {{insertdoc 'send-signal}}
+{{insertdoc 'pause}}
 
 
 === Parameter Objects
@@ -945,6 +950,7 @@ See SRFI document for more information.
 ((("SRFI-23")))
 {{insertdoc 'error}}
 {{insertdoc 'signal-error}}
+{{insertdoc 'syntax-error}}
 {{insertdoc 'file-error?}}
 {{insertdoc 'error-object?}}
 {{insertdoc 'error-object-message}}
@@ -978,4 +984,3 @@ See SRFI document for more information.
 {{insertdoc 'base64-decode}}
 {{insertdoc 'base64-encode-string}}
 {{insertdoc 'base64-decode-string}}
-

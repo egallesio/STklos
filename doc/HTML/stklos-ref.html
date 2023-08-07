@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.18">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -768,6 +765,7 @@ pre.rouge {
 <ul class="sectlevel2">
 <li><a href="#_modules">3.1. Modules</a></li>
 <li><a href="#_libraries">3.2. Libraries</a></li>
+<li><a href="#_variables_and_constants">3.3. Variables and Constants</a></li>
 </ul>
 </li>
 <li><a href="#_standard_procedures">4. Standard Procedures</a>
@@ -834,8 +832,7 @@ pre.rouge {
 <ul class="sectlevel2">
 <li><a href="#_introduction_2">8.1. Introduction</a></li>
 <li><a href="#_object_system_tutorial">8.2. Object System Tutorial</a></li>
-<li><a href="#_object_system_reference">8.3. Object System Reference</a></li>
-<li><a href="#_main_functions_and_sytaxes">8.4. Main Functions and sytaxes</a></li>
+<li><a href="#_object_system_main_functions_and_syntaxes">8.3. Object System Main Functions and Syntaxes</a></li>
 </ul>
 </li>
 <li><a href="#_threads_mutexes_and_condition_variables">9. Threads, Mutexes and Condition Variables</a>
@@ -852,31 +849,25 @@ pre.rouge {
 <li><a href="#_environment_variables">10.2. Environment variables</a></li>
 </ul>
 </li>
-<li><a href="#_the_scmpkg_package_system">11. The ScmPkg Package System</a>
+<li><a href="#_foreign_function_interface">11. Foreign Function Interface</a>
 <ul class="sectlevel2">
-<li><a href="#_scmpkg_tutorial">11.1. <em>ScmPkg</em> "tutorial"</a></li>
-<li><a href="#_stklos_pkg_options">11.2. stklos-pkg options</a></li>
+<li><a href="#_external_functions">11.1. External functions</a></li>
+<li><a href="#_c_pointers">11.2. C pointers</a></li>
 </ul>
 </li>
-<li><a href="#_foreign_function_interface">12. Foreign Function Interface</a>
+<li><a href="#_using_the_slib_package">12. Using the SLIB package</a></li>
+<li><a href="#_srfis">13. SRFIs</a>
 <ul class="sectlevel2">
-<li><a href="#_external_functions">12.1. External functions</a></li>
-<li><a href="#_c_pointers">12.2. C pointers</a></li>
-</ul>
-</li>
-<li><a href="#_using_the_slib_package">13. Using the SLIB package</a></li>
-<li><a href="#_srfis">14. SRFIs</a>
-<ul class="sectlevel2">
-<li><a href="#_supported_srfis">14.1. Supported SRFIs</a></li>
-<li><a href="#_using_a_srfi">14.2. Using a SRFI</a></li>
-<li><a href="#_misc_information">14.3. Misc. Information</a></li>
+<li><a href="#_supported_srfis">13.1. Supported SRFIs</a></li>
+<li><a href="#_using_a_srfi">13.2. Using a SRFI</a></li>
+<li><a href="#_misc_information">13.3. Misc. Information</a></li>
 </ul>
 </li>
 <li><a href="#_bibliography">Bibliography</a></li>
 <li><a href="#_idiosync">Appendix A: STklos Idiosyncrasies</a>
 <ul class="sectlevel2">
 <li><a href="#_stklos_libraries">A.1. STklos libraries</a></li>
-<li><a href="#_stklos_compiler_flags">A.2. STklos compiler flags</a></li>
+<li><a href="#_stklos_compiler">A.2. STklos compiler</a></li>
 </ul>
 </li>
 <li><a href="#FDL">Appendix B: GNU Free Documentation License</a>
@@ -1137,7 +1128,7 @@ No escape sequences are recognized between the starting and terminating lines.</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"abc\ndef\n  ghi"</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"abcndefn  ghi"</span></code></pre>
 </div>
 </div>
 </div>
@@ -1528,7 +1519,7 @@ replaced by the second operand. For example,</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">set</span> <span class="p">(</span><span class="nb">vector-ref</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nb">vector-ref</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2313,7 +2304,7 @@ and the value(s) of the last &lt;expression&gt; is(are) returned as in a
 are considered as tags and the special form <code>(&#8594; tag)</code> is used to
 transfer execution to the given tag. This is a <strong>very low level</strong>
 form which is inspired on <code>tabgody</code> Common Lisp&#8217;s form. It can be useful
-for defining new syntaxes, and should probably not used as is.</p>
+for defining new syntaxes, and should probably not be used as is.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -3381,6 +3372,24 @@ returns <code>default</code>.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
+<p><strong><code>(symbol-bound? symb)</code></strong><br>
+<strong><code>(symbol-bound? symb module)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns #t is <code>symb</code> is bound in <code>module</code> and #f otherwise. If <code>module</code> is
+omitted it defaults to the current module.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
 <p><strong><code>(module-symbols module)</code></strong><br></p>
 </div>
 </div>
@@ -3792,7 +3801,14 @@ stated, the library |(lib a b)| will be implemented with a module whose name
 is |lib/a/b| and the |STklos| module has been deleted from the import list.</p>
 </div>
 <div class="paragraph">
-<p></p>
+<p>
+
+
+
+
+
+
+</p>
 </div>
 <div class="paragraph text-right">
 <p><span class="rmargin small">R<sup>7</sup>RS syntax</span></p>
@@ -3837,8 +3853,22 @@ a symbol or a list (as modules).</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>See R<sup>7</sup>RS for more information (or the sepcific entries in this document)
+<p>See R<sup>7</sup>RS for more information (or the specific entries in this document)
 about each <code>&lt;library declaration&gt;</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS permits to use library declarations only in
+a library definition; <strong><em>STklos</em></strong> permits to use them (except
+<code>include-library-declarations</code>) anywhere at toplevel.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -3918,6 +3948,148 @@ as a list.</p>
 <div class="literalblock">
 <div class="content">
 <pre>Returns the list of all the living libraries.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variables_and_constants">3.3. Variables and Constants</h3>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(define &lt;variable&gt; &lt;expresssion&gt;)</code></strong><br>
+<strong><code>(define (&lt;variable&gt; &lt;formals&gt;) &lt;body&gt;)</code></strong><br>
+<strong><code>(define (&lt;variable&gt; . &lt;formal&gt;) &lt;body&gt;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Theses forms bind an identifier to a a value.</p>
+</div>
+<div class="paragraph">
+<p>The first form binds the <code>&lt;variable&gt;</code> to the result of the evaluation of
+<code>&lt;expression&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>The second form of <code>define</code> is equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">&lt;variable&gt;</span>
+        <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">&lt;formals&gt;</span><span class="p">)</span> <span class="nv">body</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The third <code>define</code> form, where <code>&lt;formal&gt;</code> is a single variable, is equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">&lt;variable&gt;</span>
+        <span class="p">(</span><span class="k">lambda</span> <span class="nv">&lt;formals&gt;</span> <span class="nv">body</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <code>define</code> form accepts also the definition of higher order lambda as
+defined in <strong><a href="http://srfi.schemers.org/srfi-219/srfi-219.html">SRFI-219</a></strong> (<em>Define higher-order lambda</em>).
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(define-constant &lt;variable&gt; &lt;expression&gt;)</code></strong><br>
+<strong><code>(define-constant (&lt;variable&gt; &lt;formals&gt;) body)</code></strong><br>
+<strong><code>(define-constant (&lt;variable&gt; . &lt;formal&gt;) body)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This form is similar to <code>define</code>, except the binding of <code>&lt;variable&gt;</code> which
+is non mutable.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-constant</span> <span class="nv">a</span> <span class="ss">'hello</span><span class="p">)</span>
+<span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="ss">'goodbye</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="nv">error</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="mi">2</span><span class="p">)</span>                  <span class="c1">; is  ok (it's a new binding)</span>
+<span class="p">(</span><span class="nf">define-constant</span> <span class="p">((</span><span class="nf">foo</span> <span class="nv">a</span><span class="p">)</span> <span class="nv">b</span><span class="p">)</span>  <span class="c1">; foo is (lambda (a) (lambda (b) ...)))</span>
+    <span class="o">...</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(symbol-immutable! symb)</code></strong><br>
+<strong><code>(symbol-immutable! symb mod)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Makes the symbol <code>symb</code> in module <code>mod</code> immutable. If <code>mod</code> is not specified,
+the current module is used.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">symbol-mutable?</span> <span class="ss">'a</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">symbol-immutable!</span> <span class="ss">'a</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">symbol-mutable?</span> <span class="ss">'a</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="mi">10</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(symbol-mutable? symb)</code></strong><br>
+<strong><code>(symbol-mutable? symb module)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>symb</code> is mutable in <code>module</code> and <code>#f</code> otherwise. If <code>module</code>
+is omitted it defaults to the current module. Note that imported symbols are
+always not mutable.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-module</span> <span class="nv">M</span>
+   <span class="p">(</span><span class="nf">export</span> <span class="nv">x</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">symbol-mutable?</span> <span class="ss">'x</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'M</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">symbol-mutable?</span> <span class="ss">'x</span><span class="p">)</span>                  <span class="nv">=&gt;</span> <span class="nv">error,</span> <span class="nv">if</span> <span class="nv">not</span> <span class="nv">defined</span> <span class="nv">in</span> <span class="nv">current</span> <span class="nv">module</span>
+<span class="p">(</span><span class="nf">import</span> <span class="nv">M</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">symbol-mutable?</span> <span class="ss">'x</span><span class="p">)</span>                  <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
 </div>
@@ -4119,7 +4291,7 @@ characters and <code>#f</code> otherwise.</p>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">:foo</span> <span class="nv">:bar</span><span class="p">)</span>                 <span class="nv">=&gt;</span>  <span class="no">#f</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="o">'</span><span class="p">()</span> <span class="o">'</span><span class="p">())</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="mi">2</span> <span class="mi">2</span><span class="p">)</span>                       <span class="nv">=&gt;</span>  <span class="nv">unspecified</span>
-<span class="p">(</span><span class="nb">eq?</span> <span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>                     <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">car</span> <span class="nv">car</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">n</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)))</span>
   <span class="p">(</span><span class="nb">eq?</span> <span class="nv">n</span> <span class="nv">n</span><span class="p">))</span>                    <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
@@ -5087,6 +5259,25 @@ arguments:</p>
 </div>
 </div>
 <div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(radians&#8594;degrees r)</code></strong><br>
+<strong><code>(degrees&#8594;radians d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures convert angles from radians into degrees and
+from degrees into radians.</p>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -5352,7 +5543,7 @@ NaNs, and non-flonum representations.
 <p>Returns a number of the maximally precise representation expressed by the
 given <code>string</code>. <code>Radix</code> must be an exact integer, either 2, 8, 10, or 16.
 If supplied, <code>radix</code> is a default radix that may be overridden by an explicit
-radix prefix in <code>string</code> (e.g. ,(code "\"#o177\"")). If <code>radix</code> is not
+radix prefix in <code>string</code> (e.g. ,(code ""#o177"")). If <code>radix</code> is not
  supplied, then
 the default radix is 10. If <code>string</code> is not a syntactically valid notation
 for a number, then <code>string&#8594;number</code> returns <code>#f</code>.</p>
@@ -5462,7 +5653,7 @@ function of  <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRF
 </div>
 <div class="paragraph">
 <p><code>decode-float</code> returns three exact integers: <code>significand</code>, <code>exponent</code>
-and <code>sign</code> (where <code>-1 &lt;= sign &lt;= 1</code>). The values returned by
+and <code>sign</code> (where <code>-1 &#8656; sign &#8656; 1</code>). The values returned by
 <code>decode-float</code> satisfy:</p>
 </div>
 <div class="listingblock">
@@ -5518,10 +5709,10 @@ depending on the value of <code>sign</code>.</p>
 <p>Both <code>significand</code> and <code>exponent</code> must be within their proper ranges:</p>
 </div>
 <div class="paragraph">
-<p>0 &lt; <code>significand</code> &lt;= <code>float-max-significand</code>, and</p>
+<p>0 &lt; <code>significand</code> &#8656; <code>float-max-significand</code>, and</p>
 </div>
 <div class="paragraph">
-<p><code>float-min-exponent</code> &lt;= <code>exponent</code> &lt;=  <code>float-max-exponent</code>.</p>
+<p><code>float-min-exponent</code> &#8656; <code>exponent</code> &#8656;  <code>float-max-exponent</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -6159,7 +6350,7 @@ field reversed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns two values: <code>i</code>+<code>j</code>+<code>k</code>, and carry: it is the value of the computation</p>
+<p>Returns two values: <code>i</code>`j`<code>k</code>, and carry: it is the value of the computation</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -7124,8 +7315,8 @@ characters will be written between a pair of <code>|</code>.</p>
 <div class="paragraph">
 <p>In addition, any character can be used within an identifier when
 specified via an inline hex escape . For example, the identifier
-<code>H\x65;llo</code> is the same as the identifier Hello, and, if the
-UTF-8 encoding is used, the identifier <code>\x3BB;</code> is the same as
+<code>Hx65;llo</code> is the same as the identifier Hello, and, if the
+UTF-8 encoding is used, the identifier <code>x3BB;</code> is the same as
 the identifier <code>λ</code>.</p>
 </div>
 <div class="listingblock">
@@ -7476,10 +7667,10 @@ used. Hereafter, are some examples of characters:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="sc">#\A</span>                <span class="nv">=&gt;</span> <span class="nv">uppercase</span> <span class="nv">A</span>
-<span class="sc">#\a</span>                <span class="nv">=&gt;</span> <span class="nv">lowercase</span> <span class="nv">a</span>
-<span class="sc">#\x41</span>              <span class="nv">=&gt;</span> <span class="nv">the</span> <span class="nv">U+0041</span> <span class="nv">character</span> <span class="p">(</span><span class="nf">uppercase</span> <span class="nv">A</span><span class="p">)</span>
-<span class="sc">#\x03bb</span>            <span class="nv">=&gt;</span> <span class="err">λ</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">A</span>                <span class="nv">=&gt;</span> <span class="nv">uppercase</span> <span class="nv">A</span>
+<span class="o">#</span><span class="nv">a</span>                <span class="nv">=&gt;</span> <span class="nv">lowercase</span> <span class="nv">a</span>
+<span class="mh">#x41</span>              <span class="nv">=&gt;</span> <span class="nv">the</span> <span class="nv">U+0041</span> <span class="nv">character</span> <span class="p">(</span><span class="nf">uppercase</span> <span class="nv">A</span><span class="p">)</span>
+<span class="mh">#x03bb</span>            <span class="nv">=&gt;</span> <span class="err">λ</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -7567,7 +7758,7 @@ It is guaranteed that under this ordering:</p>
 <div class="paragraph">
 <p>These procedures are similar to <code>char=?</code> et cetera, but they treat
 upper case and lower case letters as the same. For example,
-<code>(char-ci=? #\A #\a)</code> returns <code>#t</code>.</p>
+<code>(char-ci=? #A #a)</code> returns <code>#t</code>.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -7707,10 +7898,10 @@ returns #t), or #f on any other character.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">digit-value</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="o">#</span><span class="mi">3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
 </div>
@@ -7720,7 +7911,7 @@ returns #t), or #f on any other character.</p>
 <p>
 STklos string constants allow the insertion of arbitrary characters
 by encoding them as escape sequences. An escape sequence is introduced
-by a backslash "$\backslash$".  The valid escape sequences are shown in
+by a backslash "$backslash$".  The valid escape sequences are shown in
 the following table.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch small">
@@ -7736,51 +7927,51 @@ the following table.</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">a</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Alarm</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\b</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">b</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Backspace</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\e</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">e</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Escape</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\n</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Newline</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">t</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Horizontal Tab</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\r</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">r</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Carriage Return</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">doublequote U+0022</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\\</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">backslash U+005C</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\0abc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0abc</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">ASCII character with octal value abc</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\x&lt;hexa value&gt;;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">x&lt;hexa value&gt;;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">ASCII character with given hexadecimal value</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\&lt;intraline whitespace&gt;&lt;newline&gt;&lt;intraline whitespace&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;intraline whitespace&gt;&lt;newline&gt;&lt;intraline whitespace&gt;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">None (permits to enter a string on several lines)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\&lt;other&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;other&gt;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;other&gt;</p></td>
 </tr>
 </tbody>
@@ -7790,14 +7981,14 @@ the following table.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"ab\040\x20;c\nd\
+<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"ab040x20;cnd
          e"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>is the string consisting of the characters
-<code>&#35;\a</code>, <code>&#35;\b</code>, <code>&#35;\space</code>, <code>&#35;\space</code>,
-<code>&#35;\c</code>, <code>&#35;\newline</code>, <code>&#35;\d</code> and <code>&#35;\e</code>.</p>
+<code>&#35;a</code>, <code>&#35;b</code>, <code>&#35;space</code>, <code>&#35;space</code>,
+<code>&#35;c</code>, <code>&#35;newline</code>, <code>&#35;d</code> and <code>&#35;e</code>.</p>
 </div>
 <div class="paragraph">
 <p><strong>Notes:</strong></p>
@@ -7920,11 +8111,11 @@ the contents of the string are unspecified.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">3</span> <span class="o">#</span><span class="err">\</span><span class="nv">*</span><span class="p">))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">3</span> <span class="o">#</span><span class="nv">*</span><span class="p">))</span>
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="s">"***"</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">void</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">error</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nb">symbol-&gt;string</span> <span class="ss">'immutable</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">void</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">error</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nb">symbol-&gt;string</span> <span class="ss">'immutable</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>
                          <span class="nv">=&gt;</span>  <span class="nv">error</span></code></pre>
 </div>
 </div>
@@ -8280,12 +8471,12 @@ the end of <code>s1</code> (in which case a new string is allocated).</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">2</span><span class="p">)</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">2</span><span class="p">)</span>
               <span class="nv">=&gt;</span> <span class="s">"XXabcX"</span>
-<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">10</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">5</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">5</span><span class="p">)</span>
               <span class="nv">=&gt;</span> <span class="s">"XXXXXabcXX"</span>
-<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"a"</span> <span class="mi">10</span><span class="p">)</span>
-              <span class="nv">=&gt;</span> <span class="s">"XXXXXX\0\0\0\0a"</span></code></pre>
+<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"a"</span> <span class="mi">10</span><span class="p">)</span>
+              <span class="nv">=&gt;</span> <span class="s">"XXXXXX0000a"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -8308,7 +8499,7 @@ the end of <code>s1</code> (in which case a new string is allocated).</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-mutable?</span> <span class="s">"abc"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="no">#f</span>
 <span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string-copy</span> <span class="s">"abc"</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string</span> <span class="sc">#\a</span> <span class="sc">#\b</span> <span class="sc">#\c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string</span> <span class="o">#</span><span class="nv">a</span> <span class="o">#</span><span class="nv">b</span> <span class="o">#</span><span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
 <span class="p">(</span><span class="nf">string-mutable?</span> <span class="mi">12</span><span class="p">)</span>                   <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
@@ -8881,8 +9072,8 @@ initialized to the elements of <code>string</code> between <code>start</code> an
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-&gt;vector</span> <span class="s">"ABC"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">(</span><span class="sc">#\A</span> <span class="sc">#\B</span> <span class="sc">#\C</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">vector-&gt;string</span> <span class="o">#</span><span class="p">(</span><span class="sc">#\1</span> <span class="sc">#\2</span> <span class="sc">#\3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="s">"123"</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-&gt;vector</span> <span class="s">"ABC"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">(</span><span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">B</span> <span class="o">#</span><span class="nv">C</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">vector-&gt;string</span> <span class="o">#</span><span class="p">(</span><span class="o">#</span><span class="mi">1</span> <span class="o">#</span><span class="mi">2</span> <span class="o">#</span><span class="mi">3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="s">"123"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -9469,7 +9660,7 @@ need to be quoted in programs.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>!t</code> if <code>obj</code> is a bytevector and returns <code>!f</code> otherwise.</p>
+<p>Returns <code>#t</code> if <code>obj</code> is a bytevector and returns <code>#f</code> otherwise.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -9533,6 +9724,52 @@ the contents of each element is 0.</p>
 </div>
 <div class="paragraph">
 <p>Returns the length of <code>bytevector</code> in bytes as an exact integer.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-u8-ref bytevector k)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the byte at index <code>k</code> of <code>bytevector</code> as an exact integer in the
+range [0..255]. It is an error if <code>k</code> is not a valid index of <code>bytevector</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">8</span> <span class="mi">13</span> <span class="mi">21</span><span class="p">)</span> <span class="mi">5</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">8</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-u8-set! bytevector k byte)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Stores byte as the k th byte of bytevector. It is an error if <code>k</code>
+is not a valid index of <code>bytevector</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">bv</span> <span class="p">(</span><span class="nf">bytevector</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">bytevector-u8-set!</span> <span class="nv">bv</span> <span class="mi">1</span> <span class="mi">3</span><span class="p">)</span>
+  <span class="nv">bv</span><span class="p">)</span>                             <span class="nv">=&gt;</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p></p>
@@ -9794,7 +10031,7 @@ unspecified.</p>
          <span class="nv">=&gt;</span> <span class="s">"IBM"</span>
 
 <span class="p">(</span><span class="nf">string-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">k</span><span class="p">)</span>
-           <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">eqv?</span> <span class="nv">k</span> <span class="sc">#\u</span><span class="p">)</span>
+           <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">eqv?</span> <span class="nv">k</span> <span class="o">#</span><span class="nv">u</span><span class="p">)</span>
                <span class="p">(</span><span class="nb">char-upcase</span> <span class="nv">c</span><span class="p">)</span>
                <span class="p">(</span><span class="nb">char-downcase</span> <span class="nv">c</span><span class="p">)))</span>
          <span class="s">"studlycaps"</span>
@@ -10163,7 +10400,7 @@ cannot be "re-enterered").</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>call/ec</code> is cheaper than the full call/cc. It is particularily useful
+<p><code>call/ec</code> is cheaper than the full <code>call/cc</code>. It is particularily useful
 when all the power of <code>call/cc</code> is not needded.</p>
 </div>
 <div id="values" class="paragraph">
@@ -10842,6 +11079,25 @@ otherwise returns <code>#f</code>.</p>
 </p>
 </div>
 <div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(input-port-open? port)</code></strong><br>
+<strong><code>(output-port-open? port)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if port is still open and capable of performing
+input or output, respectively, and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
 <p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
@@ -11024,7 +11280,7 @@ returns the string containing the text written on the string port.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-output-to-string</span>
-   <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">write</span> <span class="mi">123</span><span class="p">)</span> <span class="p">(</span><span class="nb">write</span> <span class="s">"Hello"</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="s">"123\\"</span><span class="nv">Hello</span><span class="err">\\</span><span class="s">""</span></code></pre>
+   <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">write</span> <span class="mi">123</span><span class="p">)</span> <span class="p">(</span><span class="nb">write</span> <span class="s">"Hello"</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="s">"123\"Hello\""</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -11604,7 +11860,7 @@ repeatedly until a <strong><em>sexpr</em></strong> is read on the current input 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">idle</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Nothing to read!\\n"</span><span class="p">))))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">idle</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Nothing to read!\n"</span><span class="p">))))</span>
   <span class="p">(</span><span class="nf">port-idle-register!</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">)</span> <span class="nv">idle</span><span class="p">)</span>
   <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">result</span> <span class="p">(</span><span class="nb">read</span><span class="p">)))</span>
     <span class="p">(</span><span class="nf">port-idle-unregister!</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">)</span> <span class="nv">idle</span><span class="p">)</span>
@@ -12405,7 +12661,7 @@ file <code>"foo"</code> is formed of two lines which contains respectively the n
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">port-&gt;sexp-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">100</span> <span class="s">"bar"</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">port-&gt;string-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"100"</span> <span class="s">"\"bar\""</span><span class="p">)</span></code></pre>
+<span class="p">(</span><span class="nf">port-&gt;string-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"100"</span> <span class="s">""</span><span class="nv">bar</span><span class="s">""</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -12429,7 +12685,7 @@ file <code>"foo"</code> is formed of two lines which contains respectively the n
 <p>Writes a written representation of <code>obj</code> to the given <code>port</code>. Strings that
 appear in the written representation are enclosed in doublequotes, and
 within those strings backslash and doublequote characters are escaped
-by backslashes. Character objects are written using the ,(emph "#\\") notation.
+by backslashes. Character objects are written using the ,(emph "#\") notation.
 <code>Write</code> returns an unspecified value. The <code>port</code> argument may be omitted, in
 which case it defaults to the value returned by <code>current-output-port</code>.</p>
 </div>
@@ -12835,15 +13091,15 @@ string.  Otherwise, the output is printed on the specified port.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A test."</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="s">"A test."</span>
    <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~a."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A test."</span>
-   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~s."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A \"test\"."</span>
+   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~s."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A "</span><span class="nv">test</span><span class="s">"."</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~8,2F"</span> <span class="mi">1</span><span class="nv">/3</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="s">"    0.33"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~6F"</span> <span class="mi">32</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="s">"    32"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~1,2F"</span> <span class="mi">4321</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="s">"4321.00"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~1,2F"</span> <span class="p">(</span><span class="nb">sqrt</span> <span class="mf">-3.9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="s">"0.00+1.97i"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"#d~d #x~x #o~o #b~b~%"</span> <span class="mi">32</span> <span class="mi">32</span> <span class="mi">32</span> <span class="mi">32</span><span class="p">)</span>
-                                <span class="nv">=&gt;</span> <span class="s">"#d32 #x20 #o40 #b100000\n"</span>
+                                <span class="nv">=&gt;</span> <span class="s">"#d32 #x20 #o40 #b100000n"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"~&amp;1~&amp;~&amp;2~&amp;~&amp;~&amp;3~%"</span><span class="p">)</span>
-                                <span class="nv">=&gt;</span> <span class="s">"\n1\n2\n3\n"</span>
+                                <span class="nv">=&gt;</span> <span class="s">"n1n2n3n"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~a ~? ~a"</span> <span class="ss">'a</span> <span class="s">"~s"</span> <span class="o">'</span><span class="p">(</span><span class="nf">new</span><span class="p">)</span> <span class="ss">'test</span><span class="p">)</span>
                                 <span class="nv">=&gt;</span> <span class="s">"a new test"</span></code></pre>
 </div>
@@ -13139,7 +13395,7 @@ by the GC.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">let-values</span> <span class="p">(((</span><span class="nf">name</span> <span class="nv">port</span><span class="p">)</span> <span class="p">(</span><span class="nf">create-temp-file</span><span class="p">)))</span>
-  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">msg</span> <span class="p">(</span><span class="nf">format</span> <span class="s">"Name: ~s\n"</span> <span class="nv">name</span><span class="p">)))</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">msg</span> <span class="p">(</span><span class="nf">format</span> <span class="s">"Name: ~sn"</span> <span class="nv">name</span><span class="p">)))</span>
     <span class="p">(</span><span class="nb">display</span> <span class="nv">msg</span><span class="p">)</span>
     <span class="p">(</span><span class="nb">display</span> <span class="nv">msg</span> <span class="nv">port</span><span class="p">)</span>
     <span class="p">(</span><span class="nf">close-port</span> <span class="nv">port</span><span class="p">)))</span>     <span class="nv">=&gt;</span> <span class="nv">prints</span> <span class="nv">the</span> <span class="nv">name</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">temp</span><span class="o">.</span> <span class="nv">file</span> <span class="nv">on</span> <span class="nv">the</span>
@@ -13619,10 +13875,10 @@ file name</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">winify-file-name</span> <span class="s">"/tmp"</span><span class="p">)</span>
-    <span class="nv">=&gt;</span> <span class="s">"C:\\cygwin\\tmp"</span>
+    <span class="nv">=&gt;</span> <span class="s">"C:\cygwin\tmp"</span>
 <span class="p">(</span><span class="nb">list</span> <span class="p">(</span><span class="nf">getcwd</span><span class="p">)</span> <span class="p">(</span><span class="nf">winify-file-name</span> <span class="p">(</span><span class="nf">getcwd</span><span class="p">)))</span>
     <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"//saxo/homes/eg/Projects/STklos"</span>
-        <span class="s">"\\\\saxo\\homes\\eg\\Projects\\STklos"</span><span class="p">)</span></code></pre>
+        <span class="s">"\\saxo\homes\eg\Projects\STklos"</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -13647,7 +13903,7 @@ file name</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">posixify-file-name</span> <span class="s">"C:\\cygwin\\tmp"</span><span class="p">)</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">posixify-file-name</span> <span class="s">"C:\cygwin\tmp"</span><span class="p">)</span>
        <span class="nv">=&gt;</span> <span class="s">"/tmp"</span></code></pre>
 </div>
 </div>
@@ -13757,7 +14013,7 @@ returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p>Retuns the operating system file separator as a character. This is typically
-<code>&#35;\/</code> on Unix (or Cygwin) systems and <code>&#35;\\</code> on Windows.</p>
+<code>&#35;/</code> on Unix (or Cygwin) systems and <code>&#35;\</code> on Windows.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -13809,12 +14065,12 @@ the following special characters:</p>
 <p><code>*</code> Matches any sequence of zero or more characters.</p>
 </li>
 <li>
-<p><code>\[chars\]</code> Matches any single character in <code>chars</code>.
+<p><code>[chars]</code> Matches any single character in <code>chars</code>.
 If chars contains a sequence of the form <code>a-b</code> then any character
 between <code>a</code> and <code>b</code> (inclusive) will match.</p>
 </li>
 <li>
-<p><code>\x</code> Matches the character <code>x</code>.</p>
+<p><code>x</code> Matches the character <code>x</code>.</p>
 </li>
 <li>
 <p><code>{a,b,&#8230;&#8203;}</code> Matches any of the strings <code>a</code>, <code>b</code>, etc.
@@ -14249,7 +14505,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1118</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1382</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -14842,7 +15098,7 @@ the output of <code>str</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">exec</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="s">"A\nB\n"</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">exec</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="s">"AnBn"</span>
 <span class="p">(</span><span class="nf">exec-list</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"A"</span> <span class="s">"B"</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -15329,7 +15585,7 @@ registered in the bucket corresponding to the key.</p>
 comparing keys. Here, we use the string-length as a (very simple)
 hashing function. Of course, a function which gives a key depending
 of the characters composing the string gives a better repartition
-and should probably enhance performances. For instance, the following
+and should probably enhance performance. For instance, the following
 call to <code>make-hash-table</code> should return a more efficient, even if
 not perfect, hash table:</p>
 </div>
@@ -15857,6 +16113,41 @@ hash table. This function may modify <code>hash1</code> destructively.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
+<p><strong><code>(hash-mutable? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>obj</code> is an immutable hash table, <code>#f</code> if it
+is a mutable hash table, and raises an error if <code>obj</code> is not a
+hash table.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(hash-immutable! obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If <code>obj</code> is a hash table, makes it immutable. Otherwise, raises
+an error.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
 <p><strong><code>(hash-table-size hash)</code></strong><br></p>
 </div>
 </div>
@@ -15881,7 +16172,7 @@ hash table. This function may modify <code>hash1</code> destructively.</p>
 <div class="paragraph">
 <p>Prints  overall information about <code>hash</code>, such as the number of entries
 it contains, the number of buckets in its hash array, and the utilization
-of the buckets. Informations are printed on <code>port</code>. If no <code>port</code> is given
+of the buckets. Information is printed on <code>port</code>. If no <code>port</code> is given
 to <code>hash-table-stats</code>, information are printed on the current output port
 (see <em><a href="#curroport"><code>current-output-port</code> primitive</a></em>).</p>
 </div>
@@ -16910,9 +17201,9 @@ exact integer between 0 and <code>n</code>-1, when <code>n</code> is the number 
 <p>
 
 <strong><em>STklos</em></strong> provides access to Unix processes as first class objects.
-Basically, a process contains several informations such as the standard
+Basically, a process contains information such as the standard
 system process identification (aka PID on Unix Systems), the files where
-the standard files of the process are redirected.</p>
+the standard files of the process are redirected, &#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -17234,7 +17525,7 @@ establishes a link between the running program and the application
 listening on port <code>port-number</code> of <code>hostname</code>.  If  the optional argument
 <code>line-buffered</code> has a true value, a line buffered policy is used when writing
 to the client socket (i.e. characters on the socket are tranmitted as soon
-as a <code>"#\newline</code> character is encountered). The default value of
+as a <code>"#newline</code> character is encountered). The default value of
 <code>line-buffered</code> is <code>#t</code>.</p>
 </div>
 <div class="paragraph">
@@ -17290,7 +17581,7 @@ go back waiting for further client connections.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">s</span> <span class="p">(</span><span class="nf">make-server-socket</span> <span class="mi">12345</span><span class="p">)))</span>
    <span class="p">(</span><span class="k">let</span> <span class="nv">loop</span> <span class="p">()</span>
       <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">ns</span> <span class="p">(</span><span class="nf">socket-accept</span> <span class="nv">s</span><span class="p">)))</span>
-        <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"I've read: ~A\\n"</span>
+        <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"I've read: ~A\n"</span>
                 <span class="p">(</span><span class="nf">read-line</span> <span class="p">(</span><span class="nf">socket-input</span> <span class="nv">ns</span><span class="p">)))</span>
         <span class="p">(</span><span class="nf">socket-shutdown</span> <span class="nv">ns</span> <span class="no">#f</span><span class="p">)</span>
         <span class="p">(</span><span class="nf">loop</span><span class="p">))))</span></code></pre>
@@ -17336,7 +17627,7 @@ length of this line on its output port.</p>
        <span class="p">(</span><span class="nf">client</span> <span class="p">(</span><span class="nf">socket-accept</span> <span class="nv">server</span><span class="p">))</span>
        <span class="p">(</span><span class="nf">l</span>      <span class="p">(</span><span class="nf">read-line</span> <span class="p">(</span><span class="nf">socket-input</span> <span class="nv">client</span><span class="p">))))</span>
   <span class="p">(</span><span class="nf">format</span> <span class="p">(</span><span class="nf">socket-output</span> <span class="nv">client</span><span class="p">)</span>
-          <span class="s">"Length is: ~a\n"</span> <span class="p">(</span><span class="nb">string-length</span> <span class="nv">l</span><span class="p">))</span>
+          <span class="s">"Length is: ~an"</span> <span class="p">(</span><span class="nb">string-length</span> <span class="nv">l</span><span class="p">))</span>
   <span class="p">(</span><span class="nf">socket-shutdown</span> <span class="nv">server</span><span class="p">))</span></code></pre>
 </div>
 </div>
@@ -17609,6 +17900,26 @@ more information.</p>
 If the second parameter is absent, it deaults to the one of the running
 program.</p>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(pause)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Pauses the STklos process until the delivery of a signal whose action
+is either to execute a signal-catching function or to terminate the
+process. If the action is to terminate the process,  <code>pause</code> will not
+return. If the action is to execute a signal-catching function, <code>pause</code>
+will terminate after the signal-catching function returns.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_parameter_objects">4.21. Parameter Objects</h3>
@@ -17804,7 +18115,7 @@ in STklos, and it is also returned by the procedure <code>void</code>.</p>
 </p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -17826,13 +18137,15 @@ name of the procedure which raises the error.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The specification string may follow the <em>tilde conventions</em> of
+R<sup>7</sup>RS permits only the fist form of call. Using a symbol as first
+parameter is <strong><em>STklos</em></strong> specific.
+Furthermore, the specification string may follow the <em>tilde conventions</em> of
 <code>format</code> (see <em><a href="#format">primitive <code>format</code></a></em>); in this case this
 procedure builds an error message according to the specification
 given in <code>str</code>. Otherwise,
 this procedure is in conformance with the <code>error</code> procedure defined in
 <strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong> (<em>Error reporting mechanism</em>) and <code>str</code> is printed with the <code>display</code> procedure,
-whereas the <code>obj`s are printed  with the `write</code> procedure.
+whereas the <code>obj</code> parameters are printed  with the <code>write</code> procedure.
 </td>
 </tr>
 </table>
@@ -17889,6 +18202,41 @@ condition which inherits from <code>&amp;error-message</code>.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">signal-error</span> <span class="nv">&amp;error-message</span> <span class="nv">arg</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(syntax-error message arg1 &#8230;&#8203;)</code></strong><br>
+<strong><code>(syntax-error who message arg1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Syntax-error</code> behaves similarly to <code>error</code> except that it signals the
+error as soon as syntax-error is expanded. This can be use in macros to signal
+errors at compile time, without interrupting the compilation process. In
+interactive mode, under the REPL, <code>syntax-error</code> yields a true error.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS defines only the first form of call (with a string as first
+parameter).  <strong><em>STklos</em></strong> permits to use a symbol as first parameter to specify the
+location of the syntax error. It also permits the usage of  <em>tilde conventions</em>
+as the <code>error</code> primitive.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>
@@ -18064,7 +18412,7 @@ For instance,</p>
 <p>is equivalent to the requiring <code>srfi-1</code> and <code>srfi-2</code>.</p>
 </div>
 <div class="paragraph">
-<p>A list of available symbolic names for features is given in <a href="#_srfis">Chapter 14</a>.</p>
+<p>A list of available symbolic names for features is given in <a href="#_srfis">Chapter 13</a>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -18095,7 +18443,7 @@ Consequently, to use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.htm
 </div>
 </div>
 <div class="paragraph">
-<p>See also <a href="#_srfis">Chapter 14</a> for more information.</p>
+<p>See also <a href="#_srfis">Chapter 13</a> for more information.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -18248,8 +18596,8 @@ internal structure will be shown.</p>
 <span class="p">(</span><span class="nf">describe</span> <span class="mi">2</span><span class="nv">+3i</span><span class="p">)</span>
   <span class="mi">2</span><span class="nv">+3i</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">complex</span> <span class="nv">number</span><span class="o">.</span>
 
-<span class="p">(</span><span class="nf">describe</span> <span class="sc">#\A</span><span class="p">)</span>
-  <span class="sc">#\A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
+<span class="p">(</span><span class="nf">describe</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>
+  <span class="o">#</span><span class="nv">A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -18810,7 +19158,7 @@ shorter, some of the original documentation as not been reported here. In
 particular some possibilities of PCRE have been completely occulted (those
 whose description was too long and which seems (at least to me), not too
 important). Read the documentation provided with PCRE for a complete
-description \footnote{The latest release of PCRE is available from
+description footnote{The latest release of PCRE is available from
 <a href="http://www.pcre.org/" class="bare">http://www.pcre.org/</a>.</p>
 </div>
 <div class="paragraph">
@@ -18844,7 +19192,7 @@ are as follows:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
+<td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">general escape character with several uses</p></td>
 </tr>
 <tr>
@@ -18864,34 +19212,34 @@ are as follows:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start character class definition</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">|</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start of alternative branch</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">(</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start subpattern</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">end subpattern</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">end subpattern</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">?</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">extends the meaning of '('<br>
 also 0 or 1 quantifier<br>
 also quantifier minimizer</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">*</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0 or more quantifier</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">+</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1 or more quantifier</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 or more quantifier</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">{</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">start min/max quantifier</p></td>
 </tr>
 </tbody>
 </table>
@@ -18906,7 +19254,7 @@ class". In a character class the only meta-characters are:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
+<td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">general escape character</p></td>
 </tr>
 <tr>
@@ -18940,16 +19288,16 @@ outside character classes.</p>
 </div>
 <div class="paragraph">
 <p>For example, if you want to match a <code><strong></code> character, you write
-<code>\</strong></code> in the pattern.  This escaping action applies whether or not
+<code></strong></code> in the pattern.  This escaping action applies whether or not
 the following character would otherwise be interpreted as a
 meta-character, so it is always safe to precede a non-alphameric
 with backslash to specify that it stands for itself. In
-particular, if you want to match a backslash, you write <code>\\</code>.</p>
+particular, if you want to match a backslash, you write <code>\</code>.</p>
 </div>
 <div class="paragraph">
 <p>If you want to remove the special meaning from a sequence of characters, you
-can do so by putting them between <code>\Q</code> and <code>\E</code>. This is different from Perl
-in that <code>$</code> and <code>@</code> are handled as literals in <code>\Q</code>&#8230;&#8203;<code>\E</code> sequences in PCRE,
+can do so by putting them between <code>Q</code> and <code>E</code>. This is different from Perl
+in that <code>$</code> and <code>@</code> are handled as literals in <code>Q</code>&#8230;&#8203;<code>E</code> sequences in PCRE,
 whereas in Perl, <code>`$</code> and <code>@</code> cause variable interpolation. Note the following
 examples:</p>
 </div>
@@ -18968,24 +19316,24 @@ examples:</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc$xyz\E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Qabc$xyzE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc followed by the contents of $xyz</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc\$xyz\E</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">abc\$xyz</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">abc\$xyz</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Qabc$xyzE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc\E\$\Qxyz\E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QabcE$QxyzE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The <code>\Q&#8230;&#8203;\E</code> sequence is recognized both inside and outside character
+<p>The <code>Q&#8230;&#8203;E</code> sequence is recognized both inside and outside character
 classes.</p>
 </div>
 <div class="paragraph">
@@ -19003,48 +19351,48 @@ sequences than the binary character it represents:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">a</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">alarm, that is, the BEL character (hex 07)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\cx</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">cx</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><em>control-x</em>, where x is any character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\e</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">e</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">escape (hex 1B)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\f</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">f</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">formfeed (hex 0C)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\n</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">newline (hex 0A)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\r</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">r</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">carriage return (hex 0D)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">t</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">tab (hex 09)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\ddd</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ddd</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">character with octal code ddd, or backreference</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\xhh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">xhh</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">character with hex code hh</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The precise effect of <code>\x</code> is as follows: if <code>x</code> is a lower case
+<p>The precise effect of <code>x</code> is as follows: if <code>x</code> is a lower case
 letter, it is converted to upper case. Then bit 6 of the character
-(hex 40) is inverted.  Thus <code>\cz</code> becomes hex 1A, but <code>\c{</code> becomes
-hex 3B, while <code>\c;</code> becomes hex 7B.</p>
+(hex 40) is inverted.  Thus <code>cz</code> becomes hex 1A, but <code>c{</code> becomes
+hex 3B, while <code>c;</code> becomes hex 7B.</p>
 </div>
 <div class="paragraph">
 <p>The handling of a backslash followed by a digit other than 0 is
@@ -19065,27 +19413,27 @@ the discussion of parenthesized subpatterns.</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\d</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">d</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any decimal digit</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\D</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">D</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any character that is not a decimal digit</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\s</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">s</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any whitespace character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\S</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any character that is not a whitespace character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\w</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">w</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any <em>word</em> character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\W</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">W</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any <em>non-word</em> character</p></td>
 </tr>
 </tbody>
@@ -19096,9 +19444,9 @@ characters into two disjoint sets. Any given character matches one,
 and only one, of each pair.</p>
 </div>
 <div class="paragraph">
-<p>For compatibility with Perl, <code>\s</code> does not match the VT character
+<p>For compatibility with Perl, <code>s</code> does not match the VT character
 (code 11).  This makes it different from the the POSIX "space"
-class. The <code>\s</code> characters are HT (9), LF (10), FF (12), CR (13), and
+class. The <code>s</code> characters are HT (9), LF (10), FF (12), CR (13), and
 space (32).</p>
 </div>
 <div class="paragraph">
@@ -19107,7 +19455,7 @@ that is, any character which can be part of a Perl <em>word</em>. The
 definition of letters and digits is controlled by PCRE&#8217;s character
 tables, and may vary if locale-specific matching is taking place.  For
 example, in the "fr" (French) locale, some character codes greater
-than 128 are used for accented letters, and these are matched by <code>\w</code>.</p>
+than 128 are used for accented letters, and these are matched by <code>w</code>.</p>
 </div>
 <div class="paragraph">
 <p>These character type sequences can appear both inside and outside
@@ -19129,45 +19477,45 @@ described below. The backslashed assertions are</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\b</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">b</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at a word boundary</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\B</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">B</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches when not at a word boundary</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at start of subject</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Z</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Z</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at end of subject or before newline at end</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\z</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">z</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at end of subject</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\G</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">G</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at first matching position in subject</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
 <p>These assertions may not appear in character classes (but note that
-<code>\b</code> has a different meaning, namely the backspace character, inside a
+<code>b</code> has a different meaning, namely the backspace character, inside a
 character class).</p>
 </div>
 <div class="paragraph">
 <p>A word boundary is a position in the subject string where the current
-character and the previous character do not both match <code>\w</code>
-or <code>\W</code> (i.e. one matches <code>\w</code> and the other matches
-<code>\W</code>), or the start or end of the string if the first or last
-character matches <code>\w</code>, respectively.</p>
+character and the previous character do not both match <code>w</code>
+or <code>W</code> (i.e. one matches <code>w</code> and the other matches
+<code>W</code>), or the start or end of the string if the first or last
+character matches <code>w</code>, respectively.</p>
 </div>
 <div class="paragraph">
-<p>The <code>\A</code>, <code>\Z</code>, and <code>\z</code> assertions differ from the traditional
+<p>The <code>A</code>, <code>Z</code>, and <code>z</code> assertions differ from the traditional
 circumflex and dollar (described below) in that they only ever match
 at the very start and end of the subject string, whatever options
 are set. Thus, they are independent of multiline mode.</p>
@@ -19179,12 +19527,12 @@ character may have. This use of backslash as an escape character applies
 both inside and outside character classes.</p>
 </div>
 <div class="paragraph">
-<p>For example, if you want to match a "*" character, you write "\\*"
+<p>For example, if you want to match a "<strong>" character, you write "\</strong>"
 in the pattern. This applies whether or not the following character
 would otherwise be interpreted as a meta-character, so it is always
-safe to precede a non-alphameric with &#8220;\&#8221; to specify that it stands
+safe to precede a non-alphameric with &#8220;`" to specify that it stands
 for itself. In particular, if you want to match a backslash, you write
-&#8220;\\&#8221;.</p>
+"`\&#8221;.</p>
 </div>
 </div>
 <div class="sect2">
@@ -19220,12 +19568,12 @@ the <em>multiline</em> option is set. When this is the case, they match
 immediately after and immediately before an internal newline
 character, respectively, in addition to matching at the start and end
 of the subject string. For example, the pattern <code>^abc$</code> matches the
-subject string <code>"def\nabc"</code> in multiline mode, but not otherwise.</p>
+subject string <code>"defnabc"</code> in multiline mode, but not otherwise.</p>
 </div>
 <div class="paragraph">
-<p>Note that the sequences <code>\A</code>, <code>\Z</code>, and <code>\z</code> can be used to match the
+<p>Note that the sequences <code>A</code>, <code>Z</code>, and <code>z</code> can be used to match the
 start and end of the subject in both modes, and if all branches of a
-pattern start with <code>\A</code> it is always anchored, whether
+pattern start with <code>A</code> it is always anchored, whether
 <em>multiline</em> is set or not.</p>
 </div>
 </div>
@@ -19293,30 +19641,30 @@ character of a range. A pattern such as <code>[W-]46]</code> is interpreted as a
 class of two characters ("W" and "-") followed by a literal string
 "46]", so it would match "W46]" or "-46]". However, if the "]" is
 escaped with a backslash it is interpreted as the end of range, so
-<code>(W\]46)</code> is interpreted as a single class containing a range followed
+<code>(W]46)</code> is interpreted as a single class containing a range followed
 by two separate characters. The octal or hexadecimal representation of
 "]" can also be used to end a range.</p>
 </div>
 <div class="paragraph">
 <p>Ranges operate in the collating sequence of character values. They can also be
-used for characters specified numerically, for example <code>[\000-\037]</code>.</p>
+used for characters specified numerically, for example <code>[000-037]</code>.</p>
 </div>
 <div class="paragraph">
 <p>If a range that includes letters is used when caseless matching is set, it
 matches the letters in either case. For example, <code>[W-c]</code> is equivalent to
 <code>[][^_`wxyzabc]</code>, matched caselessly, and if character tables for the "fr"
-locale are in use, <code>[\xc8-\xcb]</code> matches accented E characters in both cases.</p>
+locale are in use, <code>[xc8-xcb]</code> matches accented E characters in both cases.</p>
 </div>
 <div class="paragraph">
-<p>The character types <code>\d</code>, <code>\D</code>, <code>\s</code>, <code>\S</code>, '\w`, and <code>\W</code> may also appear in a
+<p>The character types <code>d</code>, <code>D</code>, <code>s</code>, <code>S</code>, 'w`, and <code>W</code> may also appear in a
 character class, and add the characters that they match to the class. For
-example, <code>[\dABCDEF]</code> matches any hexadecimal digit. A circumflex can
+example, <code>[dABCDEF]</code> matches any hexadecimal digit. A circumflex can
 conveniently be used with the upper case character types to specify a more
 restricted set of characters than the matching lower case type. For example,
-the class <code>[^\W_]</code> matches any letter or digit, but not underscore.</p>
+the class <code>[^W_]</code> matches any letter or digit, but not underscore.</p>
 </div>
 <div class="paragraph">
-<p>All non-alphameric characters other than <code>\</code>, <code>-</code>, <code>^</code> (at the start) and the
+<p>All non-alphameric characters other than <code>`, `-</code>, <code>^</code> (at the start) and the
 terminating <code>]</code> are non-special in character classes, but it does no harm if they
 are escaped.</p>
 </div>
@@ -19366,7 +19714,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">digit</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">decimal digits (same as \d</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">decimal digits (same as d</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">graph</p></td>
@@ -19386,7 +19734,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">space</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">white space (not quite the same as \s)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">white space (not quite the same as s)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">upper</p></td>
@@ -19394,7 +19742,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">word"</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><em>word</em> characters (same as \w)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>word</em> characters (same as w)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">xdigit</p></td>
@@ -19405,7 +19753,7 @@ class names are</p>
 <div class="paragraph">
 <p>The <em>space</em> characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
 space (32). Notice that this list includes the VT character (code 11). This
-makes "space" different to $\backslash$s, which does not include VT (for Perl
+makes "space" different to $backslash$s, which does not include VT (for Perl
 compatibility).</p>
 </div>
 <div class="paragraph">
@@ -19535,7 +19883,7 @@ Marking part of a pattern as a subpattern does two things:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>It localizes a set of alternatives. For example, the pattern\</p>
+<p>It localizes a set of alternatives. For example, the pattern</p>
 </li>
 </ul>
 </div>
@@ -19644,10 +19992,10 @@ items:</p>
 <p>the <code>.</code> metacharacter</p>
 </li>
 <li>
-<p>the <code>\C</code> escape sequence</p>
+<p>the <code>C</code> escape sequence</p>
 </li>
 <li>
-<p>escapes such as <code>\d</code> that match single characters</p>
+<p>escapes such as <code>d</code> that match single characters</p>
 </li>
 <li>
 <p>a character class</p>
@@ -19688,7 +20036,7 @@ quantifier specifies an exact number of required matches. Thus</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d{8}</code></pre>
+<pre class="rouge highlight"><code>d{8}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19738,12 +20086,12 @@ match no characters, the loop is forcibly broken.</p>
 possible (up to the maximum number of permitted times), without causing the
 rest of the pattern to fail. The classic example of where this gives problems
 is in trying to match comments in C programs. These appear between the
-sequences <code>/*</code> and <code>*/</code> and within the sequence, individual <code>*</code> and <code>/</code> characters may
+sequences <code>/<strong></code> and <code></strong>/</code> and within the sequence, individual <code>*</code> and <code>/</code> characters may
 appear. An attempt to match C comments by applying the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>/\*.*\*/</code></pre>
+<pre class="rouge highlight"><code>/*.**/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19765,7 +20113,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>/\*.*?*/</code></pre>
+<pre class="rouge highlight"><code>/*.*?*/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19776,7 +20124,7 @@ own right. Because it has two uses, it can sometimes appear doubled, as in</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d??\d</code></pre>
+<pre class="rouge highlight"><code>d??d</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19801,7 +20149,7 @@ to Perl&#8217;s <code>/s</code>) is set, thus allowing the <code>.</code> to mat
 implicitly anchored, because whatever follows will be tried against every
 character position in the subject string, so there is no point in retrying the
 overall match at any position after the first. PCRE normally treats such a
-pattern as though it were preceded by <code>\A</code>.</p>
+pattern as though it were preceded by <code>A</code>.</p>
 </div>
 <div class="paragraph">
 <p>In cases where it is known that the subject string contains no newlines, it is
@@ -19816,7 +20164,7 @@ succeed. Consider, for example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(.*)abc\1</code></pre>
+<pre class="rouge highlight"><code>(.*)abc1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19829,7 +20177,7 @@ that matched the final iteration. For example, after</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(tweedle[dume]{3}\s*)+</code></pre>
+<pre class="rouge highlight"><code>(tweedle[dume]{3}s*)+</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19855,7 +20203,7 @@ it fail earlier than it otherwise might, when the author of the pattern knows
 there is no point in carrying on.</p>
 </div>
 <div class="paragraph">
-<p>Consider, for example, the pattern <code>\d+foo</code> when applied to the subject line</p>
+<p>Consider, for example, the pattern <code>d+foo</code> when applied to the subject line</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -19864,7 +20212,7 @@ there is no point in carrying on.</p>
 </div>
 <div class="paragraph">
 <p>After matching all 6 digits and then failing to match "foo", the normal
-action of the matcher is to try again with only 5 digits matching the <code>\d+</code>
+action of the matcher is to try again with only 5 digits matching the <code>d+</code>
 item, and then with 4, and so on, before ultimately failing. "Atomic grouping"
 (a term taken from Jeffrey Friedl&#8217;s book) provides the means for specifying
 that once a subpattern has matched, it is not to be re-evaluated in this way.</p>
@@ -19876,7 +20224,7 @@ special parenthesis, starting with (<code>?&gt;</code> as in this example:)</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&gt;\d+)foo</code></pre>
+<pre class="rouge highlight"><code>(?&gt;d+)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19894,9 +20242,9 @@ the current point in the subject string.</p>
 <p>Atomic grouping subpatterns are not capturing subpatterns. Simple
 cases such as the above example can be thought of as a maximizing
 repeat that must swallow everything it can. So, while both
-<code>\d+</code> and <code>\d+?</code> are prepared to adjust the number
+<code>d+</code> and <code>d+?</code> are prepared to adjust the number
 of digits they match in order to make the rest of the pattern match,
-<code>(?&gt;\d+)</code> can only match an entire sequence of digits.</p>
+<code>(?&gt;d+)</code> can only match an entire sequence of digits.</p>
 </div>
 <div class="paragraph">
 <p>Atomic groups in general can of course contain arbitrarily complicated
@@ -19908,7 +20256,7 @@ previous example can be rewritten as</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d++bar</code></pre>
+<pre class="rouge highlight"><code>d++bar</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19929,7 +20277,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(\D+|&lt;\d+&gt;)*[!?]</code></pre>
+<pre class="rouge highlight"><code>(D+|&lt;d+&gt;)*[!?]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19953,7 +20301,7 @@ If the pattern is changed to</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>((?&gt;\D+)|&lt;\d+&gt;)*[!?]</code></pre>
+<pre class="rouge highlight"><code>((?&gt;D+)|&lt;d+&gt;)*[!?]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19985,7 +20333,7 @@ the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(sens|respons)e and \1ibility</code></pre>
+<pre class="rouge highlight"><code>(sens|respons)e and 1ibility</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19995,7 +20343,7 @@ back reference, the case of letters is relevant. For example,</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>((?i)rah)\s+\1</code></pre>
+<pre class="rouge highlight"><code>((?i)rah)s+1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20008,7 +20356,7 @@ rewrite the above example as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;p1&gt;(?i)rah)\s+(?P=p1)</code></pre>
+<pre class="rouge highlight"><code>(?&lt;p1&gt;(?i)rah)s+(?P=p1)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20018,7 +20366,7 @@ references to it always fail. For example, the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(a|(bc))\2</code></pre>
+<pre class="rouge highlight"><code>(a|(bc))2</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20031,13 +20379,13 @@ Otherwise an empty comment can be used.</p>
 </div>
 <div class="paragraph">
 <p>A back reference that occurs inside the parentheses to which it refers fails
-when the subpattern is first used, so, for example, (a\1) never matches.
+when the subpattern is first used, so, for example, (a1) never matches.
 However, such references can be useful inside repeated subpatterns. For
 example, the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(a|b\1)+</code></pre>
+<pre class="rouge highlight"><code>(a|b1)+</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20054,7 +20402,7 @@ minimum of zero.</p>
 <div class="paragraph">
 <p>An assertion is a test on the characters following or preceding the current
 matching point that does not actually consume any characters. The simple
-assertions coded as <code>\b</code>, <code>\B</code>, <code>\A</code>, <code>\G</code>, <code>\Z</code>, <code>\z</code>, <code>^</code> and <code>$</code> are described above.
+assertions coded as <code>b</code>, <code>B</code>, <code>A</code>, <code>G</code>, <code>Z</code>, <code>z</code>, <code>^</code> and <code>$</code> are described above.
 More complicated assertions are coded as subpatterns. There are two kinds:
 those that look ahead of the current position in the subject string, and those
 that look behind it.</p>
@@ -20066,7 +20414,7 @@ with <code>(?=</code> for positive assertions and <code>(?!</code> for negative 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\w+(?=;)</code></pre>
+<pre class="rouge highlight"><code>w+(?=;)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20203,7 +20551,7 @@ approach makes a significant difference to the processing time.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3})(?&lt;!999)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3})(?&lt;!999)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20217,7 +20565,7 @@ doesn&#8217;t match "123abcfoo". A pattern to do that is</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3}...)(?&lt;!999)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3}...)(?&lt;!999)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20239,7 +20587,7 @@ preceded by "foo", while</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3}(?!999)...)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3}(?!999)...)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20284,7 +20632,7 @@ it into three parts for ease of discussion:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>( \( )?    [^()]+    (?(1) \) )</code></pre>
+<pre class="rouge highlight"><code>( ( )?    [^()]+    (?(1) ) )</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20312,7 +20660,7 @@ alternatives on the second line:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code>(?(?=`(^a-z)*`(a-z))
-\d{2}-`(a-z){3}-\d{2}  |  \d{2}-\d{2}-\d{2} )</code></pre>
+d{2}-`(a-z){3}-d{2}  |  d{2}-d{2}-d{2} )</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20347,7 +20695,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(sens|respons)e and \1ibility</code></pre>
+<pre class="rouge highlight"><code>(sens|respons)e and 1ibility</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20453,7 +20801,7 @@ in the order of the opening parentheses in pattern.</p>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(a*)(b*)(c*)"</span> <span class="s">"c"</span><span class="p">)</span>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span><span class="p">))</span>
-<span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(?&lt;=\\d{3})(?&lt;!999)foo"</span>
+<span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(?&lt;=\d{3})(?&lt;!999)foo"</span>
                         <span class="s">"999foo and 123foo"</span><span class="p">)</span>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">14</span> <span class="mi">17</span><span class="p">))</span></code></pre>
 </div>
@@ -20481,7 +20829,7 @@ match, <code>regexp-replace</code> returns <code>string</code> unmodified. Note 
 given <code>pattern</code> could be here either a string or a regular expression.</p>
 </div>
 <div class="paragraph">
-<p>If <code>pattern</code> contains <code>\n</code> where <strong>n</strong> is a digit between 1 and 9,
+<p>If <code>pattern</code> contains <code>n</code> where <strong>n</strong> is a digit between 1 and 9,
 then it is replaced in the substitution with the portion of string that
 matched the <strong>n</strong>-th parenthesized subexpression of <code>pattern</code>. If
 <strong>n</strong> is equal to 0, then it is replaced in <code>substitution</code>
@@ -20497,11 +20845,11 @@ To replace <em>all</em> the occurrences of <code>pattern</code>, use <code>regex
                    <span class="nv">=&gt;</span> <span class="s">"Xbcccc"</span>
 <span class="p">(</span><span class="nf">regexp-replace</span> <span class="p">(</span><span class="nf">string-&gt;regexp</span> <span class="s">"a*b"</span><span class="p">)</span> <span class="s">"aaabbcccc"</span> <span class="s">"X"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"Xbcccc"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"(a*)b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X\\1Y"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"(a*)b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X\1Y"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"XaaaYbcccc"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\\1 \\1"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\1 \1"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"ooba ooba"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\\0 \\0"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\0 \0"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"foobar foobar"</span>
 
 <span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"a*b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X"</span><span class="p">)</span>
@@ -20531,7 +20879,7 @@ backslash, so that they safely match only themselves.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"cons"</span><span class="p">)</span>       <span class="nv">=&gt;</span> <span class="s">"cons"</span>
-<span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"list?"</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="s">"list\\?"</span></code></pre>
+<span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"list?"</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="s">"list\?"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20862,7 +21210,7 @@ dynamic-wind) of the evaluations of the expressions</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-handler</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">c</span><span class="p">)</span>
-                <span class="p">(</span><span class="nb">display</span> <span class="s">"Catch an error\\n"</span><span class="p">))</span>
+                <span class="p">(</span><span class="nb">display</span> <span class="s">"Catch an error\n"</span><span class="p">))</span>
    <span class="p">(</span><span class="nb">display</span> <span class="s">"One ... "</span><span class="p">)</span>
    <span class="p">(</span><span class="nb">+</span> <span class="s">"will yield"</span> <span class="s">"an error"</span><span class="p">)</span>
    <span class="p">(</span><span class="nb">display</span> <span class="s">"... Two"</span><span class="p">))</span>
@@ -20925,7 +21273,7 @@ that installed the handler being called.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-handler</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">c</span><span class="p">)</span>
              <span class="p">(</span><span class="nf">format</span> <span class="s">"value ~A was raised"</span> <span class="nv">c</span><span class="p">))</span>
    <span class="p">(</span><span class="nf">raise</span> <span class="ss">'foo</span><span class="p">)</span>
-   <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"never printed\\n"</span><span class="p">))</span>
+   <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"never printed\n"</span><span class="p">))</span>
           <span class="nv">=&gt;</span> <span class="s">"value foo was raised"</span></code></pre>
 </div>
 </div>
@@ -22042,7 +22390,7 @@ determine the applicability of a method.  Suppose we declare now</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="o">`</span><span class="p">(</span><span class="nf">define-method</span> <span class="nv">M</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;integer&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;number&gt;</span><span class="p">))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">M</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;integer&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;number&gt;</span><span class="p">))</span>
     <span class="ss">'integer-number</span><span class="p">)</span>
 
 <span class="p">(</span><span class="nf">define-method</span> <span class="nv">M</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;integer&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;real&gt;</span><span class="p">))</span>
@@ -22234,22 +22582,9 @@ we could define the following method to compare points:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_object_system_reference">8.3. Object System Reference</h3>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-This section needs to be written.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_main_functions_and_sytaxes">8.4. Main Functions and sytaxes</h3>
+<h3 id="_object_system_main_functions_and_syntaxes">8.3. Object System Main Functions and Syntaxes</h3>
+<div class="sect3">
+<h4 id="_classes_and_instances">8.3.1. Classes and Instances</h4>
 <div class="paragraph">
 <p></p>
 </div>
@@ -22341,6 +22676,124 @@ will work with the definition of <code>&lt;point&gt;</code> given above:</p>
 </div>
 </div>
 <div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(allocate-instance c init-args)</code></strong><br>
+<strong><code>(make-instance c)</code></strong><br>
+<strong><code>(make c)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Make-instance</code> creates and initializes an instance of class <code>c</code>.
+<code>Allocate-instance</code> is similar, but only allocates the instance,
+without initializing it.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;X&gt;</span> <span class="p">()</span> <span class="p">((</span><span class="nf">xx</span> <span class="nv">:init-form</span> <span class="mi">10</span><span class="p">)))</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">my-x</span> <span class="p">(</span><span class="nf">make-instance</span> <span class="nv">&lt;X&gt;</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">my-x</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;X&gt;</span> <span class="mi">7</span><span class="nv">fbd2e3075d0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;X&gt;</span><span class="o">.</span>
+<span class="nv">The</span> <span class="nv">only</span> <span class="nv">slot</span> <span class="nv">is:</span>
+  <span class="nv">xx</span> <span class="nv">=</span> <span class="mi">10</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">my-other-x</span> <span class="p">(</span><span class="nf">allocate-instance</span> <span class="nv">&lt;X&gt;</span> <span class="mi">20</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">y</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;X&gt;</span> <span class="mi">7</span><span class="nv">fbd2e2bdab0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;X&gt;</span><span class="o">.</span>
+<span class="nv">The</span> <span class="nv">only</span> <span class="nv">slot</span> <span class="nv">is:</span>
+  <span class="nv">xx</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>make</code> is an alias for <code>make-instance</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(class-name c)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the name of the class <code>c</code>,a s a symbol.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">())</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">class-name</span> <span class="p">(</span><span class="nf">class-of</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="nv">&lt;A&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(class-of obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the class of object <code>obj</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">class-of</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>     <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;A&gt;</span> <span class="mi">7</span><span class="nv">f5dc5002a20</span><span class="p">]</span>
+<span class="p">(</span><span class="nf">class-of</span> <span class="no">#t</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;boolean&gt;</span> <span class="mi">7</span><span class="nv">f5dc551ade0</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(class-name c)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the name of the class <code>c</code>,a s a symbol.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">())</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">class-name</span> <span class="p">(</span><span class="nf">class-of</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="nv">&lt;A&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -22373,6 +22826,399 @@ a class instance, the <code>default</code> value is returned, if present.</p>
 </div>
 <div class="paragraph">
 <p>Returns <code>#t</code> if <code>obj</code> is an instance of <code>class</code>, and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ensure-metaclass class-list)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Given a list of classes, returns a class which is a superclass of all
+the classes given. This superclass will be built so that it is a subclass
+of the most specific classes posible.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;B&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span><span class="p">)</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;C&gt;</span> <span class="p">()</span> <span class="p">())</span>
+
+<span class="p">(</span><span class="nf">ensure-metaclass</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">&lt;B&gt;</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;B&gt;</span> <span class="mi">7</span><span class="nv">fea2b8a3c30</span><span class="p">]</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">m</span> <span class="p">(</span><span class="nf">ensure-metaclass</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">&lt;B&gt;</span> <span class="nv">&lt;A&gt;</span> <span class="nv">&lt;C&gt;</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">class-direct-superclasses</span> <span class="nv">m</span><span class="p">)</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;B&gt;</span> <span class="mi">7</span><span class="nv">fea2b8a3c30</span><span class="p">]</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">fea2b8afb40</span><span class="p">])</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_generic_functions_and_methods_2">8.3.2. Generic Functions and Methods</h4>
+<div class="paragraph">
+<p>Generic functions and methods are an important part of <strong><em>STklos</em></strong> object
+system. A generic function is a function which can have several methods with a
+behavior which depends of the type or the number of its parameters.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(define-generic gf)</code></strong><br>
+<strong><code>(define-generic gf metaclass)</code></strong><br>
+<strong><code>(define-generic gf :documentation str)</code></strong><br>
+<strong><code>(define-generic gf metaclass :documentation str)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This function creates a new generic function named <code>gf</code>. By default, the created
+function is an instance of the class <code>&lt;generic&gt;</code>, except if <code>metaclass</code> is used.
+Using a different metaclass permits to fine tune the way methods are applied.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Generally, it is not necessary to use <code>define-generic</code> to declare a generic
+function, since it is created the first time a method  with the name of that function
+is created. However, for the sake of documentation, or to export a generic function
+from a module which do not define methods, it is possible also to explicitly
+define the generic function before its methods.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>eject-eq</strong> (define-method gf args body)</code>*<br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The primitive <code>define-method</code> creates a generic method that will be added to a
+generic function <code>gf</code>, having arguments <code>args</code> and body <code>body</code>.
+<code>Args</code> is a list of arguments, and each argument can be either a single
+symbol (the argument name) or an argument specification.
+In its simplest form, a generic method behaves a lot like an ordinary
+procedure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">square</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">*</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">square</span> <span class="mi">10</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mi">100</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the above example, <code>x</code> is the only argument to the method, and it is
+specified as a single symbol, which means that <strong><em>any</em></strong> type of argument will
+be matched and this method will be used.</p>
+</div>
+<div class="paragraph">
+<p>An argument may also be specified in the form of a list with two elements:
+the argument name and its class. The method will only be applicable when its
+arguments are of the specified classes (or types).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">++</span> <span class="p">(</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">y</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">string-append</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">++</span> <span class="p">(</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">&lt;number&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">y</span> <span class="nv">&lt;number&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">+</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">++</span> <span class="p">(</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">y</span> <span class="nv">&lt;number&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="p">(</span><span class="nb">string-append</span> <span class="nv">x</span> <span class="s">"~a"</span><span class="p">)</span> <span class="nv">y</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">++</span> <span class="s">"abc"</span> <span class="s">"def"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"abcdef"</span>
+<span class="p">(</span><span class="nf">++</span> <span class="mi">2</span> <span class="mf">3.5</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="mf">5.5</span>
+<span class="p">(</span><span class="nf">++</span> <span class="mi">2</span> <span class="mi">2-3</span><span class="nv">i</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">4-3</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">++</span> <span class="s">"number: "</span> <span class="mi">10</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"number: 10"</span>
+<span class="p">(</span><span class="nf">++</span> <span class="mi">3</span> <span class="s">"wrong"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this example, three methods are added to the generic function <code>++</code>,
+and when the generic function is called, the appropriate method is chosen.
+When no method is applicable, an error is signaled.</p>
+</div>
+<div class="paragraph">
+<p>The classes matched in the example are <code>&lt;string&gt;</code> and <code>&lt;number&gt;</code>, but any
+class can be used. All Scheme types are built-in classes in STklos:</p>
+</div>
+<div class="paragraph">
+<p>&lt;boolean&gt;  &lt;null&gt;
+&lt;char&gt;     &lt;object&gt;
+&lt;class&gt;    &lt;pair&gt;
+&lt;complex&gt;  &lt;procedure&gt;
+&lt;eof&gt;      &lt;rational&gt;
+&lt;integer&gt;  &lt;real&gt;
+&lt;list&gt;     &lt;symbol&gt;
+&lt;vector&gt;  &#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>User-defined classes can also be used (and this is the main original use case
+for generic functions). A very simple example follows.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;figure&gt;</span> <span class="p">()</span>
+  <span class="p">((</span><span class="nf">pos-x</span> <span class="nv">:getter</span> <span class="nv">pos-x</span> <span class="nv">:init-keyword</span> <span class="nv">:pos-x</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">pos-y</span> <span class="nv">:getter</span> <span class="nv">pos-y</span> <span class="nv">:init-keyword</span> <span class="nv">:pos-y</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;circle&gt;</span> <span class="p">(</span><span class="nf">&lt;figure&gt;</span><span class="p">)</span>
+  <span class="p">((</span><span class="nf">radius</span> <span class="nv">:getter</span> <span class="nv">radius</span> <span class="nv">:init-keyword</span> <span class="nv">:radius</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;square&gt;</span> <span class="p">(</span><span class="nf">&lt;figure&gt;</span><span class="p">)</span>
+  <span class="p">((</span><span class="nf">side</span> <span class="nv">:getter</span> <span class="nv">side</span> <span class="nv">:init-keyword</span> <span class="nv">:side</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">describe-figure</span> <span class="p">(</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">&lt;circle&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A circle at (~a, ~a), with radius ~a.~%"</span>
+          <span class="p">(</span><span class="nf">pos-x</span> <span class="nv">c</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">pos-y</span> <span class="nv">c</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">radius</span> <span class="nv">c</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">describe-figure</span> <span class="p">(</span> <span class="p">(</span><span class="nf">s</span> <span class="nv">&lt;square&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A square centered at (~a, ~a), with side ~a.~%"</span>
+          <span class="p">(</span><span class="nf">pos-x</span> <span class="nv">s</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">pos-y</span> <span class="nv">s</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">side</span> <span class="nv">s</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">sq</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;square&gt;</span> <span class="nv">:pos-x</span> <span class="mi">1</span> <span class="nv">:pos-y</span> <span class="mi">2</span> <span class="nv">:side</span> <span class="mi">10</span><span class="p">))</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">ci</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;circle&gt;</span> <span class="nv">:pos-x</span> <span class="mi">2</span> <span class="nv">:pos-y</span> <span class="mi">2</span> <span class="nv">:radius</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe-figure</span> <span class="nv">sq</span><span class="p">)</span>
+  <span class="nv">=&gt;</span> <span class="s">"A square centered at (1, 2), with side 10.n"</span>
+
+<span class="p">(</span><span class="nf">describe-figure</span> <span class="nv">ci</span><span class="p">)</span>
+  <span class="nv">=&gt;</span> <span class="s">"A circle at (2, 2), with radius 5.n"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Generic methods can be created with different number of arguments, and that
+will also be one criterion to match the method.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">process</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">process</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">process</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="mi">6</span>
+<span class="p">(</span><span class="nf">process</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">9</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(next-method)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Inside a method, one can use the <code>(next-method)</code>  to call the next
+applicable method.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">class-list</span> <span class="p">((</span><span class="nf">obj</span> <span class="nv">&lt;integer&gt;</span><span class="p">))</span>  <span class="p">(</span><span class="nb">cons</span> <span class="ss">'integer</span>  <span class="p">(</span><span class="nf">next-method</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">class-list</span> <span class="p">((</span><span class="nf">obj</span> <span class="nv">&lt;rational&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nb">cons</span> <span class="ss">'rational</span> <span class="p">(</span><span class="nf">next-method</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">class-list</span> <span class="p">((</span><span class="nf">obj</span> <span class="nv">&lt;real&gt;</span><span class="p">))</span>     <span class="p">(</span><span class="nb">cons</span> <span class="ss">'real</span>     <span class="p">(</span><span class="nf">next-method</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">class-list</span> <span class="p">((</span><span class="nf">obj</span> <span class="nv">&lt;complex&gt;</span><span class="p">))</span>  <span class="p">(</span><span class="nb">cons</span> <span class="ss">'complex</span>  <span class="p">(</span><span class="nf">next-method</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">class-list</span> <span class="p">((</span><span class="nf">obj</span> <span class="nv">&lt;number&gt;</span><span class="p">))</span>   <span class="p">(</span><span class="nb">cons</span> <span class="ss">'number</span>   <span class="p">(</span><span class="nf">next-method</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">class-list</span> <span class="p">((</span><span class="nf">obj</span> <span class="nv">&lt;top&gt;</span><span class="p">))</span>      <span class="p">(</span><span class="nb">list</span> <span class="ss">'top</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">class-list</span> <span class="mf">2.3</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">real</span> <span class="nv">complex</span> <span class="nv">number</span> <span class="nv">top</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">class-list</span> <span class="mi">2</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">integer</span> <span class="nv">rational</span> <span class="nv">real</span> <span class="nv">complex</span> <span class="nv">number</span> <span class="nv">top</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">class-list</span> <span class="mi">1-2</span><span class="nv">i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">complex</span> <span class="nv">number</span> <span class="nv">top</span><span class="p">)</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_misc_2">8.3.3. Misc.</h4>
+<div class="paragraph">
+<p>
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(class-direct-superclasses c)</code></strong><br>
+<strong><code>(class-direct-subclasses c)</code></strong><br>
+<strong><code>(class-precedence-list c)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>class-direct-superclasses</code> and <code>class-direct-subclasses</code> return a list with
+all direct superclasses or subclasses of class <code>c</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>class-precedence-list</code> returns the precedence list for class <code>c</code>. If
+<code>c</code> is a superclass of several classes, this list shows what precedence
+each superlclass has when resolving names of attributes and methods in
+<code>c</code>.</p>
+</div>
+<div class="paragraph">
+<p>The items returned in the list are classes. Use <code>class-name</code> to obtain
+their names.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">(</span><span class="nf">slot-one</span> <span class="nv">slot-two</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;B&gt;</span> <span class="p">()</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;C&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span> <span class="nv">&lt;B&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">slot-one</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;D&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span><span class="p">)</span> <span class="p">())</span>
+
+<span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-direct-superclasses</span> <span class="nv">&lt;C&gt;</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span> <span class="nv">&lt;B&gt;</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-direct-superclasses</span> <span class="nv">&lt;D&gt;</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-direct-subclasses</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&lt;D&gt;</span> <span class="nv">&lt;C&gt;</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-precedence-list</span> <span class="nv">&lt;C&gt;</span><span class="p">))</span>     <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&lt;C&gt;</span> <span class="nv">&lt;A&gt;</span> <span class="nv">&lt;B&gt;</span> <span class="nv">&lt;object&gt;</span> <span class="nv">&lt;top&gt;</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Slot-one</code> in class <code>&lt;C&gt;</code> refers to the slot defined in <code>&lt;C&gt;</code> (because
+it is present in both <code>&lt;A&gt;</code> and <code>&lt;C&gt;</code>, but <code>&lt;C&gt;</code> has precedence over
+<code>&lt;A&gt;</code>). <code>Slot-two</code> in <code>&lt;C&gt;</code> can only be the one defined in <code>&lt;A&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(class-slots c)</code></strong><br>
+<strong><code>(class-direct-slots c)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Class-slots</code> returns a list of the slots in class <code>c</code>,  including
+those inherited from other classes.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">class-slots</span> <span class="nv">&lt;A&gt;</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">a</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">class-slots</span> <span class="nv">&lt;C&gt;</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">b</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">a</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">3</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Class-direct-slots</code> returns a list with the names of the slots that
+were defined directly in the class (excluding the inherited slots).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">class-direct-slots</span> <span class="nv">&lt;B&gt;</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">a</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">3</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(class-slot-definition c s)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Class-slot-definition</code> returns the definition of slot <code>s</code>
+in class <code>c</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span>
+  <span class="p">((</span><span class="nf">slot-one</span> <span class="nv">:init-form</span> <span class="ss">'none</span> <span class="nv">:getter</span> <span class="nv">get-one</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">slot-two</span> <span class="nv">:init-form</span> <span class="ss">'nada</span> <span class="nv">:init-keyword</span> <span class="nv">:two</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">class-slot-definition</span> <span class="nv">&lt;A&gt;</span> <span class="ss">'slot-two</span><span class="p">)</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">slot-two</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'nada</span> <span class="o">#</span><span class="nv">:init-keyword</span> <span class="o">#</span><span class="nv">:two</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">class-slots</span> <span class="nv">&lt;A&gt;</span><span class="p">)</span>
+  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">slot-one</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'none</span> <span class="o">#</span><span class="nv">:getter</span> <span class="nv">get-one</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">slot-two</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'nada</span> <span class="o">#</span><span class="nv">:init-keyword</span> <span class="o">#</span><span class="nv">:two</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(slot-definition-name s)</code></strong><br>
+<strong><code>(slot-definition-options s)</code></strong><br>
+<strong><code>(slot-definition-allocation s)</code></strong><br>
+<strong><code>(slot-definition-getter s)</code></strong><br>
+<strong><code>(slot-definition-setter s)</code></strong><br>
+<strong><code>(slot-definition-accessor s)</code></strong><br>
+<strong><code>(slot-definition-init-form s)</code></strong><br>
+<strong><code>(slot-definition-init-keyword s)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures operate on slot definitions (the lists included in class
+definitions). They return the slot name, the list of options, the slot
+allocation, and the getter, setter, accessor, init-form and init-keyword
+of a slot, as returned by <code>class-slots</code> or by <code>class-slot-definition</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">slot-definition-name</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span>  <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span>       <span class="nv">=&gt;</span> <span class="nv">x</span>
+<span class="p">(</span><span class="nf">slot-definition-accessor</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span>  <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="nv">x</span>
+<span class="p">(</span><span class="nf">slot-definition-allocation</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span>  <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="nv">instance</span>
+<span class="p">(</span><span class="nf">slot-definition-options</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">)</span></code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -22973,6 +23819,25 @@ supplied). If there are threads waiting to lock this mutex, the scheduler
 selects a thread, the <code>mutex</code> becomes locked/owned or locked/not-owned,
 and the thread is unblocked. <code>mutex-unlock!</code> returns <code>#f</code> when the
 <code>timeout</code> is reached, otherwise it returns <code>#t</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(with-mutex mtx &lt;thunk&gt;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Executes <code>thunk</code>, protected by mutex <code>mtx</code>. The mutex will
+be locked before and released after execution of <code>body</code>, and
+also on entrance or departure of its dynamic context
+(lock and unlock are used within <code>dynamic-wind</code>).</p>
 </div>
 </div>
 <div class="sect2">
@@ -23592,8 +24457,50 @@ property list are:</p>
               <span class="o">#</span><span class="nv">:prompt</span> <span class="p">(</span><span class="nf">bold</span> <span class="nv">bg-red</span> <span class="nv">white</span><span class="p">)))</span></code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+A good place to change your theme is the <code>.stklosrc</code> file.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
-<p>A good place to change your theme is the <code>.stklosrc</code> file.</p>
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(repl-show-startup-message)</code></strong><br>
+<strong><code>(repl-show-startup-message val)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If this parameter is a true value, a banner is printed when <strong><em>STklos</em></strong> starts
+in interactive mode. Otherwise, no banner is printed. By default, this parameter
+is set to <code>#t</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This parameter can be set to <code>#f</code> with the <code>--no-startup-message</code> option of
+the <strong><em>STklos</em></strong> command. Otherwise, a good place to set this parameter is in the
+<code>.stklosrc</code> file.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -23626,165 +24533,7 @@ is by default <code>~/.stklos</code>.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_scmpkg_package_system">11. The ScmPkg Package System</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>
-<em>ScmPkg</em> is a package distribution system for Scheme. It is
-currently supported by Bigloo and <strong><em>STklos</em></strong>. This package system
-provides new APIs to Scheme (e.g., network programming,
-cryptography, encoding, &#8230;&#8203;) and it manages automatic package
-installation, deinstallation and testing.</p>
-</div>
-<div class="sect2">
-<h3 id="_scmpkg_tutorial">11.1. <em>ScmPkg</em> "tutorial"</h3>
-<div class="paragraph">
-<p><code>stklos-pkg</code> is the command which gives access to <em>ScmPkg</em> in <strong><em>STklos</em></strong>.
-This is the only command necessary to manage <em>ScmPkg</em> packages. For
-instance, this command manages a local cache of the <em>ScmPkg</em> server, permits
-(de)installation of <em>ScmPkg</em> packages, the test of packages, &#8230;&#8203;</p>
-</div>
-<div class="paragraph">
-<p>To start, we can synchronize our local repository with the <em>ScmPkg</em>
-servers. This can be done by the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --sync</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This will download a description of the <em>ScmPkg</em> packages
-which are available. The list of these packages can be displayed with:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --list
-_bigloo-1.0.1 (tuning)
-_bigloo-regexp-0.0.1
-_bigloo-stdlib-0.0.1 (tuning)
-_chicken-0.0.1 (tuning)
-_chicken-net-0.0.1 (tuning)
-_chicken-os-0.0.1
-rfc3339-0.2.0
-srfi1-0.0.1 (tuning)
-$</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Packages whose name start by an underscore are packages needed for
-alien language support (e.g. the package "<em>bigloo" is necessary to
-run a package written in the Bigloo Scheme dialect, or the package
-"_chicken-net" is necessary for the packages using the network
-primitives of the Chicken Scheme dialect). Some packages may offer
-a tuning. A tuned package is a package which has been specially
-tuned for <strong>_STklos</em></strong> (e.g. the generic "srfi1" package which
-implement SRFI-1 has been tuned to be more efficient in STklos)</p>
-</div>
-<div class="paragraph">
-<p>To download a new package (and all its dependencies), one can simply
-issue the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --extract PKG --directory /tmp/Test</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This command downloads the package <em>PKG</em>, its dependencies
-and (eventually) its tuning. It also creates a <code>Makefile</code>
-for compiling the package.  The <code>--directory</code> option
-specifies where the files must be extracted in the <code>/tmp/Test</code>
-directory (instaed of the current directory). The generated <code>Makefile</code>
-offers the following main targets</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>all</strong> : the default target</p>
-</li>
-<li>
-<p><strong>test:</strong> to launch the package tests</p>
-</li>
-<li>
-<p><strong>install:</strong> to install the package for the user</p>
-</li>
-<li>
-<p><strong>system-install:</strong> to install the package system wide (privilegied access
-rights are probably needed)</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>To test a package, one can also use the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>\type{$} stklos-pkg --test PKG</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This downloads the necessary files in a temporary directory,
-and launches the tests of the package <em>PKG</em></p>
-</div>
-<div class="paragraph">
-<p>To install a package, one can also use the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --install PKG</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This command downloads the necessary files in a temporary directory,
-and installs the package <em>PKG</em>.</p>
-</div>
-<div class="paragraph">
-<p>This completes the basis <em>ScmPkg</em> tutorial. See below for
-the list of all stklos-pkg options</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_stklos_pkg_options">11.2. stklos-pkg options</h3>
-<div class="paragraph">
-<p>Here are the options supported by the stklos-pkg command</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>Usage: stklos-pkg [options] [parameter ...]
-Actions
-  --extract=&lt;pkg&gt;, -e &lt;pkg&gt;    Extract &lt;pkg&gt;. Don't install it
-  --test=&lt;pkg&gt;, -t &lt;pkg&gt;       Test &lt;pkg&gt;.
-  --install=&lt;pkg&gt;, -i &lt;pkg&gt;    Extract, compile, Install &lt;pkg&gt;.
-  --uninstall=&lt;pkg&gt;            un-install package &lt;pkg&gt;
-Repository administration
-  --sync, -s                   synchronize with remote server servers
-  --add=&lt;sb&gt;, -a &lt;sb&gt;          Add &lt;sb&gt; pkgball to the local repository
-  --download=&lt;pkg&gt;             download &lt;pkg&gt;
-  --fill-cache                 fill cache with available distant packages
-  --clear-cache                delete packages present in cache
-  --reset                      reset stklos-pkg repository. USE WITH CAUTION
-  --build-sync-file=&lt;dir&gt;      Build a synchronization file from &lt;dir&gt;
-Informations
-  --list, -l                   list available packages
-  --depends=&lt;pkg&gt;              Show all the dependencies of &lt;pkg&gt;
-  --installed                  Show installed packages
-Misc
-  --conf-dir=&lt;dir&gt;, -D &lt;dir&gt;   Use &lt;dir&gt; as stklos main configuration directory
-  --directory=&lt;dir&gt;, -C &lt;dir&gt;  Change to directory &lt;dir&gt; (extract/download)
-  --verbose, -v                be verbose (can be cumulated)
-  --system-wide, -S            do a system wide (de)installation
-  --version, -V                print the version and exit
-  --help, -h                   display this help
-  --options                    display program options
-  --cp                         INTERNAL USE ONLY. Do not use this option</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_foreign_function_interface">12. Foreign Function Interface</h2>
+<h2 id="_foreign_function_interface">11. Foreign Function Interface</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p></p>
@@ -23808,7 +24557,7 @@ the <strong><em>STklos</em></strong> VM when using an external C function.</p>
 evolve in future versions.</strong></p>
 </div>
 <div class="sect2">
-<h3 id="_external_functions">12.1. External functions</h3>
+<h3 id="_external_functions">11.1. External functions</h3>
 <div class="paragraph">
 <p>The definition of an external function is done with the
 <code>define-external</code> special form.  This form takes as arguments
@@ -24106,7 +24855,7 @@ the FFI better!):</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_c_pointers">12.2. C pointers</h3>
+<h3 id="_c_pointers">11.2. C pointers</h3>
 <div class="paragraph">
 <p>It is very common that external functions return pointers, serving as
 handles on internal structures. This pointers, called hereafter
@@ -24303,7 +25052,7 @@ allocated memory (a NULL value for C).</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_using_the_slib_package">13. Using the SLIB package</h2>
+<h2 id="_using_the_slib_package">12. Using the SLIB package</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -24367,7 +25116,7 @@ variable.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_srfis">14. SRFIs</h2>
+<h2 id="_srfis">13. SRFIs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -24387,9 +25136,9 @@ information on each SRFI, please look at the official
 SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
+<h3 id="_supported_srfis">13.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>119</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>122</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -24436,6 +25185,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-41/srfi-41.html">SRFI-41</a></strong>&#8201;&#8212;&#8201;<em>Streams</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-43/srfi-43.html">SRFI-43</a></strong>&#8201;&#8212;&#8201;<em>Vector library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-45/srfi-45.html">SRFI-45</a></strong>&#8201;&#8212;&#8201;<em>Primitives for Expressing Iterative Lazy Algorithms</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-46/srfi-46.html">SRFI-46</a></strong>&#8201;&#8212;&#8201;<em>Basic Syntax-rules Extensions</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-48/srfi-48.html">SRFI-48</a></strong>&#8201;&#8212;&#8201;<em>Intermediate Format Strings</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-51/srfi-51.html">SRFI-51</a></strong>&#8201;&#8212;&#8201;<em>Handling rest list</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-54/srfi-54.html">SRFI-54</a></strong>&#8201;&#8212;&#8201;<em>Formatting</em><br>
@@ -24509,8 +25259,10 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-217/srfi-217.html">SRFI-217</a></strong>&#8201;&#8212;&#8201;<em>Integer Sets</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-219/srfi-219.html">SRFI-219</a></strong>&#8201;&#8212;&#8201;<em>Define higher-order lambda</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-221/srfi-221.html">SRFI-221</a></strong>&#8201;&#8212;&#8201;<em>Generator/accumulator sub-library</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-222/srfi-222.html">SRFI-222</a></strong>&#8201;&#8212;&#8201;<em>Compound objects</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-223/srfi-223.html">SRFI-223</a></strong>&#8201;&#8212;&#8201;<em>Generalized binary search procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-224/srfi-224.html">SRFI-224</a></strong>&#8201;&#8212;&#8201;<em>Integer Mappings</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-227/srfi-227.html">SRFI-227</a></strong>&#8201;&#8212;&#8201;<em>Optional Arguments</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-228/srfi-228.html">SRFI-228</a></strong>&#8201;&#8212;&#8201;<em>A further comparator library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-229/srfi-229.html">SRFI-229</a></strong>&#8201;&#8212;&#8201;<em>Tagged Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br>
@@ -24522,7 +25274,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_a_srfi">14.2. Using a SRFI</h3>
+<h3 id="_using_a_srfi">13.2. Using a SRFI</h3>
 <div class="paragraph">
 <p>Using a particular SRFI can be done with the special form
 <code>cond-expand</code> defined in <strong><a href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a></strong> which is fully supported
@@ -24564,7 +25316,7 @@ use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a></st
 <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 <div class="sect3">
-<h4 id="_embedded_srfis">14.2.1. Embedded SRFIs</h4>
+<h4 id="_embedded_srfis">13.2.1. Embedded SRFIs</h4>
 <div class="paragraph">
 <p>As said before, an <em>embedded</em> SRFI can be used directly without loading a
 support file. (Note that using <strong>require-feature</strong> works too
@@ -24572,11 +25324,11 @@ and permits to ignore if the SRFI is embedded).</p>
 </div>
 <div class="paragraph">
 <p><strong>List of embedded SRFIs:</strong>
- <code>srfi-0</code> <code>srfi-6</code> <code>srfi-8</code> <code>srfi-10</code> <code>srfi-11</code> <code>srfi-15</code> <code>srfi-16</code> <code>srfi-18</code> <code>srfi-22</code> <code>srfi-23</code> <code>srfi-28</code> <code>srfi-30</code> <code>srfi-31</code> <code>srfi-34</code> <code>srfi-38</code> <code>srfi-39</code> <code>srfi-45</code> <code>srfi-55</code> <code>srfi-62</code> <code>srfi-70</code> <code>srfi-87</code> <code>srfi-88</code> <code>srfi-98</code> <code>srfi-111</code> <code>srfi-112</code> <code>srfi-118</code> <code>srfi-138</code> <code>srfi-143</code> <code>srfi-145</code> <code>srfi-169</code> <code>srfi-176</code> <code>srfi-192</code> <code>srfi-193</code> <code>srfi-195</code> <code>srfi-208</code> <code>srfi-219</code> <code>srfi-244</code></p>
+ <code>srfi-0</code> <code>srfi-6</code> <code>srfi-8</code> <code>srfi-10</code> <code>srfi-11</code> <code>srfi-15</code> <code>srfi-16</code> <code>srfi-18</code> <code>srfi-22</code> <code>srfi-23</code> <code>srfi-28</code> <code>srfi-30</code> <code>srfi-31</code> <code>srfi-34</code> <code>srfi-38</code> <code>srfi-39</code> <code>srfi-45</code> <code>srfi-46</code> <code>srfi-55</code> <code>srfi-62</code> <code>srfi-70</code> <code>srfi-87</code> <code>srfi-88</code> <code>srfi-98</code> <code>srfi-111</code> <code>srfi-112</code> <code>srfi-118</code> <code>srfi-138</code> <code>srfi-143</code> <code>srfi-145</code> <code>srfi-169</code> <code>srfi-176</code> <code>srfi-192</code> <code>srfi-193</code> <code>srfi-195</code> <code>srfi-208</code> <code>srfi-219</code> <code>srfi-244</code></p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_external_srfis">14.2.2. External SRFIs</h4>
+<h4 id="_external_srfis">13.2.2. External SRFIs</h4>
 <div class="paragraph">
 <p>An external SRFI needs to load at least one external file. This can be done
 with <strong>require</strong> or <strong>require-feature</strong>. As with embedded SRFIS, using
@@ -24584,11 +25336,11 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code></p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_features">14.2.3. SRFI features</h4>
+<h4 id="_srfi_features">13.2.3. SRFI features</h4>
 <div class="paragraph">
 <p>For some SRFIs, <strong><em>STklos</em></strong> accepts that uses them with a name. This names
 are given <a href="#feature_identifiers">Table 2</a>.</p>
@@ -24775,7 +25527,7 @@ are given <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_misc_information">14.3. Misc. Information</h3>
+<h3 id="_misc_information">13.3. Misc. Information</h3>
 <div class="paragraph">
 <p>Previous section described the general way to use the SRFIS implemented in
 <strong><em>STklos</em></strong>.  This section concentrates on information not given above.</p>
@@ -24888,6 +25640,109 @@ will compare dates by first normalizing them to make the time zone offset
 irrelevant, so "2000 Nov 12 03:30:10 GMT-2" will be taken as equal to
 "2000 Nov 12 02:30:10 GMT-1".</p>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-difference time1 time2)</code></strong><br>
+<strong><code>(time-difference! time1 time2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These SRFI-19 procedures return the time duration (as an object of type <code>time-duration</code>)
+between <code>time1</code> and <code>time2</code>. It is an error if <code>time1</code> and <code>time2</code> are of different time types.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>time-difference</code> creates a new time object, while <code>time-difference!</code> may use <code>time1</code> to
+create the resulting object.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time&#8656;? time1 time2)</code></strong><br>
+<strong><code>(time&lt;? time1 time2)</code></strong><br>
+<strong><code>(time=? time1 time2)</code></strong><br>
+<strong><code>(time&gt;=? time1 time2)</code></strong><br>
+<strong><code>(time&gt;? time1 time2)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These are SRFI-19 predicates used to compare times. They return:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>time&#8656;?</code> : <code>#t</code> if <code>time1</code> is before or at (less than or equal to) <code>time2</code>,
+<code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&lt;?</code> :  <code>#t</code> if <code>time1</code> is before (less than) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time=?</code> :  <code>#t</code> if <code>time1</code> at (equal) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&gt;=?</code> : <code>#t</code> if <code>time1</code> is at or after (greater than or equal to) <code>time2</code>,
+<code>#f</code> otherwise.</p>
+</li>
+<li>
+<p><code>time&gt;?</code> :  <code>#t</code> if <code>time1</code> is after (greater than) <code>time2</code>, <code>#f</code> otherwise.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>An attempt to compare times of different type will raise an error.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-resolution [time-type])</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Clock resolution, in nanoseconds, of the system clock of type type
+<code>time-type</code>, which defaults to <code>TIME-UTC</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">time-resolution</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mi">1000000</span>
+<span class="p">(</span><span class="nf">time-resolution</span> <span class="nv">time-process</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1000000</span>
+<span class="p">(</span><span class="nf">time-resolution</span> <span class="nv">time-tai</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">1000000</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_srfi_22running_scheme_scripts_on_unix">srfi-22&#8201;&#8212;&#8201;Running Scheme Scripts on Unix</h4>
@@ -24928,7 +25783,7 @@ script via a /usr/bin/env trampoline, like this:</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos</span>
 
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">main</span> <span class="nv">arguments</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="sc">#\space</span><span class="p">))</span>
+  <span class="p">(</span><span class="nb">for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="o">#</span><span class="nv">space</span><span class="p">))</span>
             <span class="p">(</span><span class="nb">cdr</span> <span class="nv">arguments</span><span class="p">))</span>
   <span class="p">(</span><span class="nb">newline</span><span class="p">)</span>
   <span class="mi">0</span><span class="p">)</span></code></pre>
@@ -28172,6 +29027,9 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 <div class="ulist">
 <ul>
 <li>
+<p>bytevector (R<sup>6</sup>RS bytevectors)</p>
+</li>
+<li>
 <p>box <em>(srfi 111)</em></p>
 </li>
 <li>
@@ -28179,6 +29037,9 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 </li>
 <li>
 <p>comparator <em>(srfi 128)</em></p>
+</li>
+<li>
+<p>generator <em>(srfi 158)</em>&#8201;&#8212;&#8201;Red edition included SRFI 121, but it was superseded by SRFI 158.</p>
 </li>
 <li>
 <p>hash-table <em>(srfi 125)</em></p>
@@ -28224,7 +29085,13 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 <p>bitwise <em>(srfi 151)</em></p>
 </li>
 <li>
+<p>bytevector <em>(scheme bytevector)</em>- not a SRFI: this one is a chapter from R6RS.</p>
+</li>
+<li>
 <p>division <em>(srfi 141)</em></p>
+</li>
+<li>
+<p>fixnum <em>(srfi 143)</em></p>
 </li>
 <li>
 <p>flonum <em>(srfi 144)</em></p>
@@ -28232,7 +29099,233 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 <li>
 <p>generator <em>(srfi 158)</em></p>
 </li>
+<li>
+<p>vector @ <em>(srfi 160)</em></p>
+</li>
 </ul>
+</div>
+<div class="paragraph">
+<p><strong>(scheme bytevector) functions</strong></p>
+</div>
+<div class="paragraph">
+<p>Importing <code>(scheme bytevector)</code> gives access to the supplemental following
+bytevector functions.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-s8-ref bytevector k)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-s8-ref</code> procedure returns the byte at index <code>k</code> of
+<code>bytevector</code>, as a signed byte.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">b1</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">-127</span><span class="p">))</span>
+      <span class="p">(</span><span class="nf">b2</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">255</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nb">list</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b1</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b1</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b2</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b2</span> <span class="mi">0</span><span class="p">)))</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">-127</span> <span class="mi">129</span> <span class="mi">-1</span> <span class="mi">255</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-s8-set! bytevector k byte)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>K</code> must be a valid index of bytevector.
+The <code>bytevector-s8-set!</code> procedure stores the two’s-complement
+representation of <code>byte</code> in element <code>k</code> of <code>bytevector</code>.
+This procedure return an unspecified value.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">b</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">-127</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">bytevector-s8-set!</span> <span class="nv">b</span> <span class="mi">0</span> <span class="mi">-126</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">bytevector-u8-set!</span> <span class="nv">b</span> <span class="mi">1</span> <span class="mi">246</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">list</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-s8-ref</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="nv">b</span> <span class="mi">1</span><span class="p">)))</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">-126</span> <span class="mi">130</span> <span class="mi">-10</span> <span class="mi">246</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-fill! bytevector fill )</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>fill</code> argument is as in the description of the make-bytevector
+procedure. The <code>bytevector-fill!</code>  procedure stores <code>fill</code> in every
+element of bytevector and returns unspecified values. Analogous to
+<code>vector-fill!</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector=? bytevector1 bytevector2 )</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns true if <code>bytevector1</code> and <code>bytevector2</code> are equal—that
+is, if they have the same length and equal bytes at all valid
+indices. It returns false otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(bytevector-uint-ref bytevector k endianness size)</code></strong><br>
+<strong><code>(bytevector-sint-ref bytevector k endianness size)</code></strong><br>
+<strong><code>(bytevector-uint-set! bytevector k n endianness size)</code></strong><br>
+<strong><code>(bytevector-sint-set! bytevector k n endianness size)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-uint-ref</code> procedure retrieves the exact
+integer object corresponding to the unsigned representation
+of size <code>size</code> and specified by <code>endianness</code> at indices
+<code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-sint-ref</code> procedure retrieves the exact
+integer object corresponding to the two’s-complement
+representation of size <code>size</code> and specified by <code>endianness</code>
+at indices <code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>For <code>bytevector-uint-set!</code>, <code>n</code> must be an exact integer
+object in the interval <code>{0, &#8230;&#8203; , 256^size − 1}</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>bytevector-uint-set!</code> procedure stores the unsigned
+representation of size <code>size</code> and specified by <code>endianness</code>
+into <code>bytevector</code> at indices <code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>For bytevector-sint-set!, n must be an exact integer
+object in the interval <code>{−256^size /2, &#8230;&#8203; , 256^size /2 − 1}</code>.
+<code>Bytevector-sint-set!</code> stores the two’s-complement
+representation of size <code>size</code> and specified by <code>endianness</code>
+into <code>bytevector</code> at indices <code>k , &#8230;&#8203; , k + size − 1</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>&#8230;&#8203;-set!</code> procedures return unspecified values.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="p">(</span><span class="nf">make-bytevector</span> <span class="mi">16</span> <span class="mi">-127</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">bytevector-uint-set!</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">128</span><span class="p">)</span> <span class="mi">3</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">endianness</span> <span class="nv">little</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">bytevector-uint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">little</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="mh">#xfffffffffffffffffffffffffffffffd</span>
+
+<span class="p">(</span><span class="nf">bytevector-sint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">little</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="mi">-3</span>
+
+<span class="p">(</span><span class="nf">bytevector-&gt;u8-list</span> <span class="nv">b</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">253</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+     <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">bytevector-uint-set!</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">128</span><span class="p">)</span> <span class="mi">3</span><span class="p">)</span>
+                      <span class="p">(</span><span class="nf">endianness</span> <span class="nv">big</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">bytevector-uint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">big</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="mh">#xfffffffffffffffffffffffffffffffd</span>
+
+<span class="p">(</span><span class="nf">bytevector-sint-ref</span> <span class="nv">b</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">endianness</span> <span class="nv">big</span><span class="p">)</span> <span class="mi">16</span><span class="p">)</span>
+ <span class="nv">=&gt;-3</span>
+
+<span class="p">(</span><span class="nf">bytevector-&gt;u8-list</span> <span class="nv">b</span><span class="p">)</span>
+ <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span>
+     <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">255</span> <span class="mi">253</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(endianness endianness-symbol)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The name of <code>endianness-symbol</code> must be a symbol describing an
+endianness.  An implementation must support at least the symbols big
+and little, but may support other endianness symbols.
+<code>(endianness endianness-symbol)</code> evaluates to the symbol named
+<code>endianness-symbol</code>. Whenever one of the procedures operating on
+bytevectors accepts an endianness as an argument, that argument must
+be one of these symbols. It is a syntax violation for <code>endianness-symbol</code>
+to be anything other than <code>little</code> or <code>big</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(native-endianness)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the endianness symbol of the underlying machine.</p>
 </div>
 </div>
 </div>
@@ -28245,7 +29338,7 @@ the exported symbols of <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.
 <code>(srfi 1)</code> library.</p>
 </div>
 <div class="paragraph">
-<p>See  <em><a href="#_srfis">Chapter 14</a></em> for more information</p>
+<p>See  <em><a href="#_srfis">Chapter 13</a></em> for more information</p>
 </div>
 </div>
 <div class="sect3">
@@ -29490,7 +30583,51 @@ This library  must be described
 </div>
 </div>
 <div class="sect2">
-<h3 id="_stklos_compiler_flags">A.2. STklos compiler flags</h3>
+<h3 id="_stklos_compiler">A.2. STklos compiler</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> always compiles code into bytecode before executing&#8201;&#8212;&#8201;it
+is not an interpreter, but a bytecode compiler with an ad-hoc virtual
+machine. The compiler is available as a standalone tool, to be
+used in shell scripts, and also through primitive procedures.</p>
+</div>
+<div class="paragraph">
+<p>The command <code>stklos-compile</code> compiles a file into <strong><em>STklos</em></strong> bytecode.
+Please refer to its manpage for more information.</p>
+</div>
+<div class="paragraph">
+<p>Compiling files from Scheme programs can be done with the
+<code>compile-file</code> procedure.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compile-file input output)</code></strong><br>
+<strong><code>(compile-file input output :prepend cmds)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Compiles the file whose name is <code>input</code> into a bytecode executable
+whose name is <code>output</code> (if <code>compile-file</code> fails, <code>output</code> file is
+deleted).</p>
+</div>
+<div class="paragraph">
+<p>If the <code>:prepend</code> keyword argument is given, it must be a list of
+expressions, which will be compiled before the rest of the input
+file. This can be used to define variables that the compiled program
+will use (but it does not affect the compiler itself).</p>
+</div>
+<div class="paragraph">
+<p>This procedure will not set the executable bit on the generated file.</p>
+</div>
+<div class="sect3">
+<h4 id="_compiler_flags">A.2.1. Compiler flags</h4>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> compiler behaviour can be customized by several parameters. Those parameters are described below.</p>
 </div>
@@ -29681,6 +30818,26 @@ Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
     <span class="nv">n</span>
     <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">))</span>
        <span class="p">(</span><span class="nf">fib</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">2</span><span class="p">)))))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(compiler:unroll-iterations)</code></strong><br>
+<strong><code>(compiler:unroll-iterations n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls the number of iterations to be unrolled in
+loops. Currently, only <code>repeat</code> loops are unrolled. The argument
+<code>n</code> must be a positive integer.</p>
 </div>
 </div>
 </div>
@@ -30254,7 +31411,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-04-14 23:18:46 +0200
+Last updated 2023-07-22 20:08:25 +0200
 </div>
 </div>
 </body>

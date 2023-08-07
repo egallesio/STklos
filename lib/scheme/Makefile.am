@@ -21,15 +21,14 @@
 #    Creation date:  8-Oct-2021 11:54 (eg)
 
 #======================================================================
-
+SUBDIRS  = vector
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
-DOCDB  = ../DOCDB
-BASEDIR= ../..
-
+DOCDB   = ../DOCDB
+BASEDIR = ../..
 # ----------------------------------------------------------------------
 # R7RS Small Support
 # ----------------------------------------------------------------------
@@ -40,6 +39,7 @@ R7_STK=    base.stk            \
            cxr.stk             \
            eval.stk            \
            file.stk            \
+           fixnum.stk          \
            inexact.stk         \
            lazy.stk            \
            load.stk            \
@@ -57,6 +57,7 @@ R7_OBJS =  base.ostk            \
            cxr.ostk             \
            eval.ostk            \
            file.ostk            \
+           fixnum.ostk          \
            inexact.ostk         \
            lazy.ostk            \
            load.ostk            \
@@ -70,8 +71,7 @@ R7_OBJS =  base.ostk            \
 # ----------------------------------------------------------------------
 # R7RS Large Support
 # ----------------------------------------------------------------------
-LARGE_STK  = list.stk       \
-             charset.stk    \
+LARGE_STK  = charset.stk    \
              stream.stk     \
              box.stk        \
              set.stk        \
@@ -86,8 +86,7 @@ LARGE_STK  = list.stk       \
              bitwise.stk
 
 
-LARGE_OBJS = list.ostk       \
-             charset.ostk    \
+LARGE_OBJS = charset.ostk    \
              stream.ostk     \
              box.ostk        \
              set.ostk        \
@@ -101,15 +100,15 @@ LARGE_OBJS = list.ostk       \
              division.ostk   \
              bitwise.ostk
 
-LARGE_C     = ilist.c     flonum.c     sort.c     vector.c     bytevector.c
-LARGE_C_STK = ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk
-LARGE_SHOBJ = ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO)
+LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c
+LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk
+LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO)
 
 
 #----------------------------------------------------------------------
 SRC_STK     = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
 SRC_C_STK   = $(LARGE_C_STK)
-scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) $(LARGE_SHOBJ)
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
 
 SOURCES = $(SRC_STK) $(LARGE_C)
 
@@ -146,13 +145,13 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # 	(cd ../srfi; $(MAKE)  `basename $@`)
 
 
-stream.ostk:     list.ostk ../streams/derived.ostk
-../streams/derived.ostk:
-	(cd ../streams; $(MAKE) derived.ostk)
+stream.ostk:     ../streams/primitive.ostk ../streams/derived.ostk
 
-set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
-../srfi/9.ostk:
-	(cd ../srfi; $(MAKE) 9.ostk)
+../streams/derived.ostk ../streams/primitive.ostk:
+	(cd ../streams; $(MAKE) $@)
+
+set.ostk: ../srfi/69.ostk comparator.ostk
+
 ../srfi/69.ostk:
 	(cd ../srfi; $(MAKE) 69.ostk)
 ../srfi/128.ostk:
@@ -163,6 +162,9 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 	(cd ../srfi; $(MAKE) 60.ostk)
 
 bytevector.$(SO): bytevector-incl.c bytevector.c
+
+list.$(SO): list-incl.c
+list-incl.c: list.stk
 
 ilist.$(SO): ilist-incl.c
 ilist-incl.c: comparator.ostk
@@ -176,25 +178,24 @@ sort-incl.c: sort.stk
 vector.$(SO): vector-incl.c
 vector-incl.c: vector.stk
 
-
-#box.ostk:        ../srfi/111.ostk
-#set.ostk:        ../srfi/113.ostk
-#ilist.ostk:      ../srfi/116.$(SO)
-list-queue.ostk: ../srfi/9.ostk
 hash-table.ostk: comparator.ostk
-comparator.ostk: ../srfi/9.ostk
-ideque.ostk: ../srfi/9.ostk generator.ostk list.ostk
-text.ostk: ../srfi/9.ostk ../srfi/129.ostk
+ideque.ostk: generator.ostk list.$(SO)
+text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 
 # ======================================================================
 install-sources:
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) install-sources)\
+	done
 	cp $(scheme_sources) $(schemedir)
 
 clean:
+	(cd vector; $(MAKE) clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
+	(cd vector; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:

@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -228,13 +228,13 @@ static int flush_buffer(struct fstream *f)
 /*=============================================================================*/
 
 
-static Inline int Feof(void *stream)
+static inline int Feof(void *stream)
 {
   return PORT_STREAM_FLAGS(stream) & STK_IOEOF;
 }
 
 
-static Inline int Freadyp(void *stream)
+static inline int Freadyp(void *stream)
 {
   if (PORT_CNT(stream) > 0)
     return TRUE;
@@ -250,7 +250,7 @@ static Inline int Freadyp(void *stream)
   }
 }
 
-static Inline int Fgetc(void *stream)
+static inline int Fgetc(void *stream)
 {
   if (PORT_IDLE(stream) != STk_nil) {
     /* There is at least an idle handler */
@@ -272,7 +272,7 @@ static Inline int Fgetc(void *stream)
 }
 
 
-static Inline int Fread(void *stream, void *buff, int count)
+static inline int Fread(void *stream, void *buff, int count)
 {
   int copied, avail;
 
@@ -322,7 +322,7 @@ static off_t Fseek(void *stream, off_t offset, int whence)
 }
 
 
-static Inline int Fputc(int c, void *stream)
+static inline int Fputc(int c, void *stream)
 {
   int ret = c;
 
@@ -346,7 +346,7 @@ static Inline int Fputc(int c, void *stream)
 }
 
 
-static Inline int Fwrite(void *stream, const void *buff, int count)
+static inline int Fwrite(void *stream, const void *buff, int count)
 {
   /* Flush (eventually) chars which are already in the buffer before writing  */
   if (PORT_CNT(stream)) {
@@ -362,7 +362,7 @@ static Inline int Fwrite(void *stream, const void *buff, int count)
 }
 
 
-static Inline int Fnputs(void *stream, const char *s, int len)
+static inline int Fnputs(void *stream, const char *s, int len)
 {
   int res, flush = (PORT_STREAM_FLAGS(stream) & STK_IOLBF);
 
@@ -402,18 +402,18 @@ static Inline int Fnputs(void *stream, const char *s, int len)
 }
 
 
-static Inline int Fputs(const char *s, void *stream)
+static inline int Fputs(const char *s, void *stream)
 {
   return Fnputs(stream, s, strlen(s));
 }
 
-static Inline int Fputstring(SCM s, void *stream)
+static inline int Fputstring(SCM s, void *stream)
 {
   return Fnputs(stream, STRING_CHARS(s), STRING_SIZE(s));
 }
 
 
-static Inline int  Fflush(void *stream)
+static inline int  Fflush(void *stream)
 {
   return flush_buffer(stream);          /* Problem if file opened for reading */
 }
@@ -934,7 +934,7 @@ DEFINE_PRIMITIVE("try-load", scheme_try_load, subr1, (SCM filename))
 
 
 
-DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
+DEFINE_PRIMITIVE("%file-information", file_information, subr1, (SCM filename))
 {
   SCM f, res = STk_nil;
   char *fname;
@@ -1000,7 +1000,7 @@ int STk_init_fport(void)
   ADD_PRIMITIVE(port_idle);
 
   //  ADD_PRIMITIVE(dbg);
-  ADD_PRIMITIVE(file_informations);
+  ADD_PRIMITIVE(file_information);
   return TRUE;
 }
 

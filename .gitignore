@@ -53,7 +53,7 @@ doc/stklos-compile.1
 doc/stklos-config.1
 doc/stklos-genlex.1
 doc/stklos-install.1
-doc/stklos-pkg.1
+doc/stklos-pp.1
 doc/stklos-script.1
 doc/stklos.1
 doc/refman/html
@@ -121,7 +121,18 @@ lib/Lalr.d/calc
 lib/srfis-data.scm
 
 #                  ... generated Scheme files
-lib/srfi/160/*.stk
+lib/scheme/vector/c128.stk
+lib/scheme/vector/c64.stk
+lib/scheme/vector/f32.stk
+lib/scheme/vector/f64.stk
+lib/scheme/vector/s16.stk
+lib/scheme/vector/s32.stk
+lib/scheme/vector/s64.stk
+lib/scheme/vector/s8.stk
+lib/scheme/vector/u16.stk
+lib/scheme/vector/u32.stk
+lib/scheme/vector/u64.stk
+lib/scheme/vector/u8.stk
 
 #                  ... generated C files
 *incl.c         
@@ -171,7 +182,7 @@ utils/stklos-config
 utils/stklos-genlex
 utils/stklos-script
 utils/stklos-pp
-utils/tmpcomp
+
 
 
 # Extensions directory

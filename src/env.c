@@ -95,7 +95,7 @@ static void register_module(SCM mod)
 }
 
 
-static Inline SCM make_empty_environment(SCM name)
+static inline SCM make_empty_environment(SCM name)
 {
   register SCM z;
 
@@ -111,7 +111,7 @@ static Inline SCM make_empty_environment(SCM name)
 }
 
 
-static Inline SCM make_module(SCM name)
+static inline SCM make_module(SCM name)
 {
   register SCM z = make_empty_environment(name);
 
@@ -240,7 +240,7 @@ static SCM normalize_library_name(SCM obj) /* return a library name as a symbol 
 }
 
 
-static Inline SCM ensure_module(SCM module) // -> a module given a module or a name
+static inline SCM ensure_module(SCM module) // -> a module given a module or a name
 {
   if (MODULEP(module))
     return module;
@@ -632,7 +632,7 @@ DEFINE_PRIMITIVE("symbol-immutable!", symbol_immutable, subr12, (SCM symb, SCM m
 }
 
 /*===========================================================================*/
-static Inline SCM find_symbol_value(SCM symbol, SCM module)
+static inline SCM find_symbol_value(SCM symbol, SCM module)
 {
   SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
   if (res)
@@ -740,6 +740,20 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
     STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
   }
   return STk_void;
+}
+
+
+SCM STk_symb_in_scheme(SCM symb) // value of symb in module SCHEME
+{
+  SCM mod, val;
+  verify_symbol(symb);
+
+  // Search the value of symb in SCHEME module (or STklos if we  are still booting).
+  mod = (BOXED_INFO(Scheme_module) & MODULE_CONST) ? Scheme_module : STk_STklos_module;
+  val = find_symbol_value(symb, mod);
+  if (!val) STk_error_unbound_variable(symb, mod);
+
+  return val;
 }
 
 

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk -- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;;
-;;;; Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,7 @@
     method-more-specific? sort-applicable-methods
     method-procedure method-specializers method-generic-function
     method-specializers-equal?
-    class-subclasses class-methods class-name class-direct-supers
+    class-subclasses class-methods class-name class-direct-superclasses
     class-direct-subclasses class-precedence-list class-direct-methods
     class-direct-slots class-slots
     generic-function-name generic-function-methods
@@ -68,10 +68,7 @@
     define-generic
     method
     define-method
-    ))
-
-(select-module STKLOS-OBJECT)
-
+    )
 
 
 (define extended-lambda->lambda         ;; Compiler function used here
@@ -157,13 +154,86 @@
 ;;;
 ;;; Classes
 ;;;
+#|
+<doc EXT class-name
+ * (class-name c)
+ *
+ * Returns the name of the class |c|,a s a symbol.
+ *
+ * @lisp
+ * (define-class <A> () ())
+ * (define x (make <A>))
+ * (class-name (class-of x)) => <A>
+ * @end lisp
+ *
+doc>
+|#
 (define (class-name C)
   (if (class? C) (slot-ref C 'name) (%error-bad-class 'class-name C)))
 
-(define (class-direct-supers C)
+#|
+<doc EXT class-direct-superclasses class-direct-subclasses class-precedence-list
+ * (class-direct-superclasses c)
+ * (class-direct-subclasses c)
+ * (class-precedence-list c)
+ *
+ * |class-direct-superclasses| and |class-direct-subclasses| return a list with
+ * all direct superclasses or subclasses of class |c|.
+ *
+ * |class-precedence-list| returns the precedence list for class |c|. If
+ * |c| is a superclass of several classes, this list shows what precedence
+ * each superlclass has when resolving names of attributes and methods in
+ * |c|.
+ *
+ * The items returned in the list are classes. Use |class-name| to obtain
+ * their names.
+ *
+ * @lisp
+ * (define-class <A> () (slot-one slot-two))
+ * (define-class <B> () ())
+ * (define-class <C> (<A> <B>) (slot-one))
+ * (define-class <D> (<A>) ())
+ *
+ * (map class-name (class-direct-superclasses <C>)) => (<A> <B>)
+ * (map class-name (class-direct-superclasses <D>)) => (<A>)
+ * (map class-name (class-direct-subclasses <A>))   => (<D> <C>)
+ * (map class-name (class-precedence-list <C>))     => (<C> <A> <B> <object> <top>)
+ * @end lisp
+ *
+ * |Slot-one| in class |<C>| refers to the slot defined in |<C>| (because
+ * it is present in both |<A>| and |<C>|, but |<C>| has precedence over
+ * |<A>|). |Slot-two| in |<C>| can only be the one defined in |<A>|.
+doc>
+|#
+
+
+
+
+#|
+<doc EXT class-slots class-direct-slots
+ * (class-slots c)
+ * (class-direct-slots c)
+ *
+ * |Class-slots| returns a list of the slots in class |c|,  including
+ * those inherited from other classes.
+ *
+ * @lisp
+ * (class-slots <A>) => ((a #:init-form 1) (b #:init-form 2))
+ * (class-slots <C>) => ((b #:init-form 2) (a #:init-form 3))
+ * @end lisp
+ *
+ * |Class-direct-slots| returns a list with the names of the slots that
+ * were defined directly in the class (excluding the inherited slots).
+ *
+ * @lisp
+ * (class-direct-slots <B>) => ((a #:init-form 3))
+ * @end lisp
+doc>
+|#
+(define (class-direct-superclasses C)
   (if (class? C)
       (slot-ref C 'direct-supers)
-      (%error-bad-class 'class-direct-supers C)))
+      (%error-bad-class 'class-direct-superclasses C)))
 
 (define (class-direct-slots C)
   (if (class? C)
@@ -193,6 +263,31 @@
 ;;;
 ;;; Slots
 ;;;
+#|
+<doc EXT slot-definition-name slot-definition-options slot-definition-allocation slot-definition-getter slot-definition-setter slot-definition-accessor slot-definition-init-form slot-definition-init-keyword
+ * (slot-definition-name s)
+ * (slot-definition-options s)
+ * (slot-definition-allocation s)
+ * (slot-definition-getter s)
+ * (slot-definition-setter s)
+ * (slot-definition-accessor s)
+ * (slot-definition-init-form s)
+ * (slot-definition-init-keyword s)
+ *
+ * These procedures operate on slot definitions (the lists included in class
+ * definitions). They return the slot name, the list of options, the slot
+ * allocation, and the getter, setter, accessor, init-form and init-keyword
+ * of a slot, as returned by |class-slots| or by |class-slot-definition|.
+ *
+ * @lisp
+ * (slot-definition-name '(x #:init-form 0  #:accessor x))       => x
+ * (slot-definition-accessor '(x #:init-form 0  #:accessor x))   => x
+ * (slot-definition-allocation '(x #:init-form 0  #:accessor x)) => instance
+ * (slot-definition-options '(x #:init-form 0 #:accessor x))
+ *  => (#:init-form 0 #:accessor x)
+ * @end lisp
+doc>
+|#
 (define (slot-definition-name s)
   (if (pair? s) (car s) s))
 
@@ -221,10 +316,33 @@
 (define (slot-definition-init-keyword s)
   (and (pair? s) (key-get (cdr s) :init-keyword #f)))
 
+
+;; TODO: Document slot-init-function.
 (define (slot-init-function c s)
   (let ((s (slot-definition-name s)))
     (cadr (assq s (slot-ref c 'getters-n-setters)))))
 
+#|
+<doc EXT class-slot-definition
+ * (class-slot-definition c s)
+ *
+ * |Class-slot-definition| returns the definition of slot |s|
+ * in class |c|.
+ *
+ * @lisp
+ * (define-class <A> ()
+ *   ((slot-one :init-form 'none :getter get-one)
+ *    (slot-two :init-form 'nada :init-keyword :two)))
+ *
+ * (class-slot-definition <A> 'slot-two)
+ *   => (slot-two #:init-form 'nada #:init-keyword #:two)
+ *
+ * (class-slots <A>)
+ *   => ((slot-one #:init-form 'none #:getter get-one)
+ *       (slot-two #:init-form 'nada #:init-keyword #:two))
+ * @end lisp
+doc>
+|#
 (define (class-slot-definition class slot-name)
   (assq slot-name (class-slots class)))
 
@@ -343,6 +461,28 @@ doc>
 ;                       M e t a c l a s s e s   s t u f f
 ;
 ;=============================================================================
+#| FIXME: insert this documentation when the concept of metaclass is explained
+   in define-class
+
+<doc EXT ensure-metaclass
+ * (ensure-metaclass class-list)
+ *
+ * Given a list of classes, returns a class which is a superclass of all
+ * the classes given. This superclass will be built so that it is a subclass
+ * of the most specific classes posible.
+ *
+ * @lisp
+ * (define-class <A> () ())
+ * (define-class <B> (<A>) ())
+ * (define-class <C> () ())
+ *
+ * (ensure-metaclass (list <B> <A>)) => #[<class> <B> 7fea2b8a3c30]
+ * (define m (ensure-metaclass (list <B> <A> <C>)))
+ * (class-direct-superclasses m)
+ *   => (#[<class> <B> 7fea2b8a3c30] #[<class> <C> 7fea2b8afb40])
+ * @end lisp
+doc>
+|#
 (define ensure-metaclass-with-supers
   (let ((table-of-metas '()))
     (lambda (meta-supers)
@@ -463,7 +603,11 @@ doc>
 
   (let ((supers (if (null? supers)
                     (list <object>)
-                    (map find-class supers))))
+                    (map find-class supers)))
+        (slots  (map (lambda (x)
+                       ;; ensure all slot description is a list
+                       (if (pair? x) x (list x)))
+                     slots)))
     ;; Verify that all direct slots are different and that we don't inherit
     ;; several time from the same class
     (let ((tmp (find-duplicate supers)))
@@ -486,6 +630,25 @@ doc>
 ;
 ;=============================================================================
 
+
+#|
+<doc EXT define-generic
+ * (define-generic gf)
+ * (define-generic gf metaclass)
+ * (define-generic gf :documentation str)
+ * (define-generic gf metaclass :documentation str)
+ *
+ * This function creates a new generic function named |gf|. By default, the created
+ * function is an instance of the class |<generic>|, except if |metaclass| is used.
+ * Using a different metaclass permits to fine tune the way methods are applied.
+ *
+ * NOTE:  Generally, it is not necessary to use |define-generic| to declare a generic
+ * function, since it is created the first time a method  with the name of that function
+ * is created. However, for the sake of documentation, or to export a generic function
+ * from a module which do not define methods, it is possible also to explicitly
+ * define the generic function before its methods.
+doc>
+|#
 ; ==== Define-generic
 (define-macro (define-generic gf :optional (meta '<generic>)
                                  :key      (documentation #f))
@@ -509,6 +672,129 @@ doc>
 ;                       D e f i n e - m e t h o d
 ;
 ;=============================================================================
+
+#|
+<doc EXT-SYNTAX  define-method
+ obeject-eq* (define-method gf args body)
+ *
+ * The primitive |define-method| creates a generic method that will be added to a
+ * generic function |gf|, having arguments |args| and body |body|.
+ * |Args| is a list of arguments, and each argument can be either a single
+ * symbol (the argument name) or an argument specification.
+ * In its simplest form, a generic method behaves a lot like an ordinary
+ * procedure:
+ * @lisp
+ * (define-method square (x)
+ *   (* x x))
+ *
+ * (square 10)  => 100
+ * @end lisp
+ * In the above example, |x| is the only argument to the method, and it is
+ * specified as a single symbol, which means that *_any_* type of argument will
+ * be matched and this method will be used.
+ *
+ * An argument may also be specified in the form of a list with two elements:
+ * the argument name and its class. The method will only be applicable when its
+ * arguments are of the specified classes (or types).
+ * @lisp
+ * (define-method ++ ( (x <string>) (y <string>) )
+ *   (string-append x y))
+ *
+ * (define-method ++ ( (x <number>) (y <number>) )
+ *   (+ x y))
+ *
+ * (define-method ++ ( (x <string>) (y <number>) )
+ *   (format #f (string-append x "~a") y))
+ *
+ * (++ "abc" "def")   => "abcdef"
+ * (++ 2 3.5)         => 5.5
+ * (++ 2 2-3i)        => 4-3i
+ * (++ "number: " 10) => "number: 10"
+ * (++ 3 "wrong")     => error
+ * @end lisp
+ * In this example, three methods are added to the generic function |++|,
+ * and when the generic function is called, the appropriate method is chosen.
+ * When no method is applicable, an error is signaled.
+ *
+ * The classes matched in the example are |<string>| and |<number>|, but any
+ * class can be used. All Scheme types are built-in classes in STklos:
+ *
+ * <boolean>  <null>
+ * <char>     <object>
+ * <class>    <pair>
+ * <complex>  <procedure>
+ * <eof>      <rational>
+ * <integer>  <real>
+ * <list>     <symbol>
+ * <vector>  ...
+ *
+ * User-defined classes can also be used (and this is the main original use case
+ * for generic functions). A very simple example follows.
+ * @lisp
+ * (define-class <figure> ()
+ *   ((pos-x :getter pos-x :init-keyword :pos-x)
+ *    (pos-y :getter pos-y :init-keyword :pos-y)))
+ *
+ * (define-class <circle> (<figure>)
+ *   ((radius :getter radius :init-keyword :radius)))
+ *
+ * (define-class <square> (<figure>)
+ *   ((side :getter side :init-keyword :side)))
+ *
+ * (define-method describe-figure ( (c <circle>) )
+ *   (format #f "A circle at (~a, ~a), with radius ~a.~%"
+ *           (pos-x c)
+ *           (pos-y c)
+ *           (radius c)))
+ *
+ * (define-method describe-figure ( (s <square>) )
+ *   (format #f "A square centered at (~a, ~a), with side ~a.~%"
+ *           (pos-x s)
+ *           (pos-y s)
+ *           (side s)))
+ *
+ * (define sq (make <square> :pos-x 1 :pos-y 2 :side 10))
+ * (define ci (make <circle> :pos-x 2 :pos-y 2 :radius 5))
+ *
+ * (describe-figure sq)
+ *   => "A square centered at (1, 2), with side 10.\n"
+ *
+ * (describe-figure ci)
+ *   => "A circle at (2, 2), with radius 5.\n"
+ * @end lisp
+ * Generic methods can be created with different number of arguments, and that
+ * will also be one criterion to match the method.
+ *
+ * @lisp
+ * (define-method process (a b c) (+ a b c))
+ * (define-method process (a b) (* a b))
+ *
+ * (process 2 3)   => 6
+ * (process 2 3 4) => 9
+ * @end lisp
+doc>
+|#
+
+#|
+<doc EXT next-method
+ * (next-method)
+ *
+ * Inside a method, one can use the |(next-method)|  to call the next
+ * applicable method.
+ * @lisp
+ * (define-method class-list ((obj <integer>))  (cons 'integer  (next-method)))
+ * (define-method class-list ((obj <rational>)) (cons 'rational (next-method)))
+ * (define-method class-list ((obj <real>))     (cons 'real     (next-method)))
+ * (define-method class-list ((obj <complex>))  (cons 'complex  (next-method)))
+ * (define-method class-list ((obj <number>))   (cons 'number   (next-method)))
+ * (define-method class-list ((obj <top>))      (list 'top))
+ *
+ * (class-list 2.3)  => (real complex number top)
+ * (class-list 2)    => (integer rational real complex number top)
+ * (class-list 1-2i) => (complex number top)
+ * @end lisp
+doc>
+|#
 
 ;==== Add-method!
 (define (%method-specializers-equal? gf m1 m2)
@@ -589,8 +875,8 @@ doc>
 ;=============================================================================
 
 ;==== Methods to compare objects
-(define-method object-eqv?   (x y) #f)
-(define-method object-equal? (x y) (eqv? x y))
+(define-method object-eqv?   (x y) #f)         ; by default
+(define-method object-equal? (x y) (eqv? x y)) ; if they are eqv? they are equal?
 
 
 ;==== Methods to display/write an object
@@ -722,7 +1008,7 @@ doc>
 ;==== Update-direct-subclass
 (define-method update-direct-subclass ((c <class>) (old <class>) (new <class>))
   (let ((new-supers (map (lambda (cls) (if (eq? cls old) new cls))
-                         (class-direct-supers c))))
+                         (class-direct-superclasses c))))
     ;; Create a new class with same name as c. This will automagically call
     ;; class-redefinition on this subclass and redefine all its descent
     (ensure-class (class-name c)
@@ -745,7 +1031,7 @@ doc>
   ;; Remove the old class from the direct-subclasses list of its super classes
   (for-each (lambda (c) (slot-set! c 'direct-subclasses
                                    (delete! old (class-direct-subclasses c) eq?)))
-            (class-direct-supers old))
+            (class-direct-superclasses old))
 
   ;; Redefine all the subclasses of old to take into account modification
   (for-each
@@ -1080,6 +1366,33 @@ doc>
 ;
 ;=============================================================================
 
+#|
+<doc EXT allocate-instance make-instance
+ * (allocate-instance c init-args)
+ * (make-instance c)
+ * (make c)
+ *
+ * |Make-instance| creates and initializes an instance of class |c|.
+ * |Allocate-instance| is similar, but only allocates the instance,
+ * without initializing it.
+ *
+ * @lisp
+ * (define-class <X> () ((xx :init-form 10)))
+ * (define my-x (make-instance <X>))
+ * (describe my-x)
+ * #[<X> 7fbd2e3075d0] is an an instance of class <X>.
+ * The only slot is:
+ *   xx = 10
+ *
+ * (define my-other-x (allocate-instance <X> 20))
+ * (describe y)
+ * #[<X> 7fbd2e2bdab0] is an an instance of class <X>.
+ * The only slot is:
+ *   xx = #[unbound]
+ * @end lisp
+ * NOTE: |make| is an alias for |make-instance|.
+doc>
+|#
 (define-method allocate-instance ((class <class>) initargs)
   (%allocate-instance class))
 
@@ -1231,6 +1544,8 @@ doc>
 
 ;; Just tell C that the object system is now fully initialized
 (%object-system-initialized)
+
+) ;; end of STKLOS-OBJECT module
 
 ;; ======================================================================
 (select-module STklos)

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -738,7 +735,7 @@ pre.rouge {
 <h1>STklos Reference Manual : (version 1.70)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -809,19 +806,17 @@ pre.rouge {
 </li>
 <li><a href="_threads_mutexes_and_condition_variables.html">9. Threads, Mutexes and Condition Variables</a>
 </li>
-<li><a href="_customizations.html">10. Customizations</a>
+<li><a href="_stklos_customization.html">10. STklos Customization</a>
 </li>
-<li><a href="_the_scmpkg_package_system.html">11. The ScmPkg Package System</a>
+<li><a href="_foreign_function_interface.html">11. Foreign Function Interface</a>
 </li>
-<li><a href="_foreign_function_interface.html">12. Foreign Function Interface</a>
+<li><a href="_using_the_slib_package.html">12. Using the SLIB package</a>
 </li>
-<li><a href="_using_the_slib_package.html">13. Using the SLIB package</a>
-</li>
-<li><a href="_srfis.html">14. SRFIs</a>
+<li><a href="_srfis.html">13. SRFIs</a>
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
 </li>
-<li><a href="_libraries.html">Appendix C: STklos Libraries</a>
+<li><a href="_idiosync.html">Appendix C: STklos Idiosyncrasies</a>
 </li>
 <li><a href="FDL.html">Appendix D: GNU Free Documentation License</a>
 </li>
@@ -966,7 +961,7 @@ such cases is that the value returned by eqv? must be a boolean.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-In fact, the value returned by STklos depends of
+In fact, the value returned by STklos depends on
 the way code is entered and can yield <code>#t</code> in some cases and <code>#f</code>
 in others.
 </td>
@@ -1025,7 +1020,7 @@ characters and <code>#f</code> otherwise.</p>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">:foo</span> <span class="nv">:bar</span><span class="p">)</span>                 <span class="nv">=&gt;</span>  <span class="no">#f</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="o">'</span><span class="p">()</span> <span class="o">'</span><span class="p">())</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="mi">2</span> <span class="mi">2</span><span class="p">)</span>                       <span class="nv">=&gt;</span>  <span class="nv">unspecified</span>
-<span class="p">(</span><span class="nb">eq?</span> <span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>                     <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">car</span> <span class="nv">car</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">n</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)))</span>
   <span class="p">(</span><span class="nb">eq?</span> <span class="nv">n</span> <span class="nv">n</span><span class="p">))</span>                    <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
@@ -1125,8 +1120,8 @@ infinity), <code>+nan.0</code> (not a number), and <code>-nan.0</code> (not a nu
 <p>These numerical type predicates can be applied to any kind of
 argument, including non-numbers. They return <code>#t</code> if the object is of
 the named type, and otherwise they return <code>#f</code>. In general, if a type
-predicate is true of a number then all higher type predicates are
-also true of that number. Consequently, if a type predicate is
+predicate is true for a number then all higher type predicates are
+also true for that number. Consequently, if a type predicate is
 false of a number, then all lower type predicates are also false of
 that number.</p>
 </div>
@@ -1209,7 +1204,7 @@ and <code>inexact&#8594;exact</code> procedure respectively</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns  #t if z is both exact and an integer; otherwise returns #f.</p>
+<p>Returns  <code>#t</code> if z is both exact and an integer; otherwise returns <code>#f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1925,6 +1920,93 @@ The two-argument variant of <code>log</code> computes the logarithm of x in base
 argument.</p>
 </div>
 <div class="paragraph">
+<p>
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(sinh z)</code></strong><br>
+<strong><code>(cosh z)</code></strong><br>
+<strong><code>(tanh z)</code></strong><br>
+<strong><code>(asinh z)</code></strong><br>
+<strong><code>(acosh z)</code></strong><br>
+<strong><code>(atanh z)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures compute the hyperbolic trigonometric functions.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">sinh</span> <span class="mi">1</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mf">1.1752011936438</span>
+<span class="p">(</span><span class="nf">sinh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+0</span><span class="o">.</span><span class="mi">841470984807897</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="mi">1</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mf">1.54308063481524</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">0.54030230586814</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="mi">1</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mf">0.761594155955765</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5574077246549</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">asinh</span> <span class="mi">1</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mf">0.881373587019543</span>
+<span class="p">(</span><span class="nf">asinh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5707963267949</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">acosh</span> <span class="mi">0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5707963267949</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">acosh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23340311751122</span><span class="nv">+1</span><span class="o">.</span><span class="mi">5707963267949</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">atanh</span> <span class="mi">1</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="nv">error</span>
+<span class="p">(</span><span class="nf">atanh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+0</span><span class="o">.</span><span class="mi">785398163397448</span><span class="nv">i</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In general, <code>(asinh (sinh x))</code> and similar compositions should be
+equal to <code>x</code>, except for inexactness due to the internal floating
+point number approximation for real numbers.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">sinh</span> <span class="p">(</span><span class="nf">asinh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="p">(</span><span class="nf">acosh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">8.65956056235493</span><span class="nv">e-17+1</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="p">(</span><span class="nf">atanh</span> <span class="mi">0</span><span class="nv">+1i</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">0.0</span><span class="nv">+1</span><span class="o">.</span><span class="mi">0</span><span class="nv">i</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These functions will always return an exact result for the following
+arguments:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">sinh</span> <span class="mf">0.0</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">cosh</span> <span class="mf">0.0</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">tanh</span> <span class="mf">0.0</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">asinh</span> <span class="mf">0.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">acosh</span> <span class="mf">1.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">atanh</span> <span class="mf">0.0</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(radians&#8594;degrees r)</code></strong><br>
+<strong><code>(degrees&#8594;radians d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures convert angles from radians into degrees and
+from degrees into radians.</p>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -2190,7 +2272,7 @@ NaNs, and non-flonum representations.
 <p>Returns a number of the maximally precise representation expressed by the
 given <code>string</code>. <code>Radix</code> must be an exact integer, either 2, 8, 10, or 16.
 If supplied, <code>radix</code> is a default radix that may be overridden by an explicit
-radix prefix in <code>string</code> (e.g. ,(code "\"#o177\"")). If <code>radix</code> is not
+radix prefix in <code>string</code> (e.g. ,(code ""#o177"")). If <code>radix</code> is not
  supplied, then
 the default radix is 10. If <code>string</code> is not a syntactically valid notation
 for a number, then <code>string&#8594;number</code> returns <code>#f</code>.</p>
@@ -2260,11 +2342,11 @@ is shifted left by <code>m</code> bits; If <code>m</code> is negative, <code>n</
 </div>
 </div>
 <div class="paragraph">
-<p>Return an integer in the range \[0, &#8230;&#8203;, <code>n</code>\[.  Subsequent results of
+<p>Return an integer in the range [0, &#8230;&#8203;, <code>n</code>[.  Subsequent results of
 this procedure appear to be independent uniformly distributed over
-the range \[0, &#8230;&#8203;, <code>n</code>\[. The argument <code>n</code> must be a positive integer,
+the range [0, &#8230;&#8203;, <code>n</code>[. The argument <code>n</code> must be a positive integer,
 otherwise an error is signaled. This function is equivalent to the eponym
-function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
+function of <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a></strong> (<em>Source of random bits</em>).</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -2283,7 +2365,7 @@ function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
 <p>Return a real number <code>r</code> such that <code>0 &lt; r &lt; 1</code>.
 Subsequent results of this procedure appear to be independent uniformly
 distributed. This function is equivalent to the eponym
-function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
+function of  <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a></strong> (<em>Source of random bits</em>).</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -2300,8 +2382,8 @@ function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
 </div>
 <div class="paragraph">
 <p><code>decode-float</code> returns three exact integers: <code>significand</code>, <code>exponent</code>
-and <code>sign</code> (where <code>-1 &#8656; sign &#8656; 1</code>). The values returned by <code>decode-float</code>
-satisfy:</p>
+and <code>sign</code> (where <code>-1 &#8656; sign &#8656; 1</code>). The values returned by
+<code>decode-float</code> satisfy:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2319,6 +2401,112 @@ satisfy:</p>
                     <span class="mi">5557441940175192</span>
                     <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">-52</span><span class="p">)))</span>
                     <span class="nv">=&gt;</span> <span class="mf">-1.234</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(encode-float significand exponent sign)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>encode-float</code> does the inverse work of <code>decode-float</code>: it accepts three
+numbers, <code>significand</code>, <code>exponent</code> and <code>sign</code>, and returns the floating
+point number represented by them.</p>
+</div>
+<div class="paragraph">
+<p>When <code>significand</code> is <code>#f</code>, a NaN will be returned.
+When <code>significand</code> is <code>#t</code>, positive or negative infinity is returned,
+depending on the value of <code>sign</code>.</p>
+</div>
+<div class="paragraph">
+<p>Otherwise, the number returned is</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">n</span> <span class="nv">=</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">sign</span> <span class="nv">significand</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="nv">exponent</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Both <code>significand</code> and <code>exponent</code> must be within their proper ranges:</p>
+</div>
+<div class="paragraph">
+<p>0 &lt; <code>significand</code> &#8656; <code>float-max-significand</code>, and</p>
+</div>
+<div class="paragraph">
+<p><code>float-min-exponent</code> &#8656; <code>exponent</code> &#8656;  <code>float-max-exponent</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">encode-float</span> <span class="p">(</span><span class="no">#t</span> <span class="mi">0</span>  <span class="mi">1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="m">+inf.0</span>
+<span class="p">(</span><span class="nf">encode-float</span> <span class="p">(</span><span class="no">#t</span> <span class="mi">0</span> <span class="mi">-1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="m">-inf.0</span>
+<span class="p">(</span><span class="nf">encode-float</span> <span class="p">(</span><span class="no">#f</span> <span class="mi">0</span>  <span class="mi">1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="nv">+nan</span><span class="o">.</span><span class="mi">0</span>
+
+<span class="p">(</span><span class="nf">decode-float</span> <span class="mf">-0.01</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="mi">5764607523034235</span>
+<span class="nv">=&gt;</span> <span class="mi">-59</span>
+<span class="nv">=&gt;</span> <span class="mi">-1</span>
+<span class="p">(</span><span class="nf">inexact</span> <span class="p">(</span><span class="nf">encode-float</span> <span class="mi">5764607523034235</span> <span class="mi">-59</span> <span class="mi">-1</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mf">-0.01</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(float-max-significand)</code></strong><br>
+<strong><code>(float-min-exponent)</code></strong><br>
+<strong><code>(float-max-exponent)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return the maximum significand value and the
+minimum and maximum values for the exponent when calling
+the <code>encode-float</code> procedure.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(integer-length n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Integer-length</code> returns the necessary number of bits to represent <code>n</code>
+in 2&#8217;s complement, assuming a leading 1 bit when <code>n</code> is negative. When
+<code>n</code> is zero, the procedure returns zero.
+This procedure works for any type of integer (fixnums and bignums).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-3</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-2</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-1</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">0</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">1</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">2</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">3</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">5000</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">5001</span></code></pre>
 </div>
 </div>
 <div class="sect3">
@@ -2891,7 +3079,7 @@ field reversed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns two values: <code>i</code>+<code>j</code>+<code>k</code>, and carry: it is the value of the computation</p>
+<p>Returns two values: <code>i</code>`j`<code>k</code>, and carry: it is the value of the computation</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -3756,7 +3944,7 @@ the <code>car</code> and <code>cdr</code> of <code>obj</code>, respectively.</p>
 <p><code>Filter</code> returns all the elements of <code>list</code> that satisfy predicate
 <code>pred</code>. The <code>list</code> is not disordered: elements that appear in the
 result list occur in the same order as they occur in the argument
-list. <code>Filter!</code> does the same job than <code>filter</code> by physically
+list. <code>Filter!</code> does the same job as <code>filter</code> by physically
 modifying its <code>list</code> argument</p>
 </div>
 <div class="listingblock">
@@ -3856,8 +4044,8 @@ characters will be written between a pair of <code>|</code>.</p>
 <div class="paragraph">
 <p>In addition, any character can be used within an identifier when
 specified via an inline hex escape . For example, the identifier
-<code>H\x65;llo</code> is the same as the identifier Hello, and, if the
-UTF-8 encoding is used, the identifier <code>\x3BB;</code> is the same as
+<code>Hx65;llo</code> is the same as the identifier Hello, and, if the
+UTF-8 encoding is used, the identifier <code>x3BB;</code> is the same as
 the identifier <code>λ</code>.</p>
 </div>
 <div class="listingblock">
@@ -3912,7 +4100,7 @@ the identifier <code>λ</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns #t if all the arguments are symbols and all have the same name in
+<p>Returns <code>#t</code> if all the arguments are symbols and all have the same name in
 the sense of <code>string=?</code>.</p>
 </div>
 <div class="paragraph">
@@ -4208,10 +4396,10 @@ used. Hereafter, are some examples of characters:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="sc">#\A</span>                <span class="nv">=&gt;</span> <span class="nv">uppercase</span> <span class="nv">A</span>
-<span class="sc">#\a</span>                <span class="nv">=&gt;</span> <span class="nv">lowercase</span> <span class="nv">a</span>
-<span class="sc">#\x41</span>              <span class="nv">=&gt;</span> <span class="nv">the</span> <span class="nv">U+0041</span> <span class="nv">character</span> <span class="p">(</span><span class="nf">uppercase</span> <span class="nv">A</span><span class="p">)</span>
-<span class="sc">#\x03bb</span>            <span class="nv">=&gt;</span> <span class="err">λ</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">A</span>                <span class="nv">=&gt;</span> <span class="nv">uppercase</span> <span class="nv">A</span>
+<span class="o">#</span><span class="nv">a</span>                <span class="nv">=&gt;</span> <span class="nv">lowercase</span> <span class="nv">a</span>
+<span class="mh">#x41</span>              <span class="nv">=&gt;</span> <span class="nv">the</span> <span class="nv">U+0041</span> <span class="nv">character</span> <span class="p">(</span><span class="nf">uppercase</span> <span class="nv">A</span><span class="p">)</span>
+<span class="mh">#x03bb</span>            <span class="nv">=&gt;</span> <span class="err">λ</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -4299,7 +4487,7 @@ It is guaranteed that under this ordering:</p>
 <div class="paragraph">
 <p>These procedures are similar to <code>char=?</code> et cetera, but they treat
 upper case and lower case letters as the same. For example,
-<code>(char-ci=? #\A #\a)</code> returns <code>#t</code>.</p>
+<code>(char-ci=? #A #a)</code> returns <code>#t</code>.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -4374,8 +4562,8 @@ ordering. That is, if</p>
 </div>
 <div class="paragraph">
 <p><code>integer&#8594;char</code> accepts an exact number between 0 and #xD7FFF or between
-#xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise it accepts a
-number between0 and #xFF.</p>
+#xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise, it accepts a
+number between 0 and #xFF.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -4439,10 +4627,10 @@ returns #t), or #f on any other character.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">digit-value</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="o">#</span><span class="mi">3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
 </div>
@@ -4452,7 +4640,7 @@ returns #t), or #f on any other character.</p>
 <p>
 STklos string constants allow the insertion of arbitrary characters
 by encoding them as escape sequences. An escape sequence is introduced
-by a backslash "$\backslash$".  The valid escape sequences are shown in
+by a backslash "$backslash$".  The valid escape sequences are shown in
 the following table.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch small">
@@ -4468,51 +4656,51 @@ the following table.</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">a</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Alarm</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\b</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">b</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Backspace</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\e</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">e</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Escape</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\n</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Newline</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">t</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Horizontal Tab</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\r</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">r</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Carriage Return</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">doublequote U+0022</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\\</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">backslash U+005C</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\0abc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0abc</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">ASCII character with octal value abc</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\x&lt;hexa value&gt;;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">x&lt;hexa value&gt;;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">ASCII character with given hexadecimal value</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\&lt;intraline whitespace&gt;&lt;newline&gt;&lt;intraline whitespace&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;intraline whitespace&gt;&lt;newline&gt;&lt;intraline whitespace&gt;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">None (permits to enter a string on several lines)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\&lt;other&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;other&gt;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;other&gt;</p></td>
 </tr>
 </tbody>
@@ -4522,14 +4710,14 @@ the following table.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"ab\040\x20;c\nd\
+<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"ab040x20;cnd
          e"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>is the string consisting of the characters
-<code>&#35;\a</code>, <code>&#35;\b</code>, <code>&#35;\space</code>, <code>&#35;\space</code>,
-<code>&#35;\c</code>, <code>&#35;\newline</code>, <code>&#35;\d</code> and <code>&#35;\e</code>.</p>
+<code>&#35;a</code>, <code>&#35;b</code>, <code>&#35;space</code>, <code>&#35;space</code>,
+<code>&#35;c</code>, <code>&#35;newline</code>, <code>&#35;d</code> and <code>&#35;e</code>.</p>
 </div>
 <div class="paragraph">
 <p><strong>Notes:</strong></p>
@@ -4652,11 +4840,11 @@ the contents of the string are unspecified.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">3</span> <span class="o">#</span><span class="err">\</span><span class="nv">*</span><span class="p">))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">3</span> <span class="o">#</span><span class="nv">*</span><span class="p">))</span>
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="s">"***"</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">void</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">error</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nb">symbol-&gt;string</span> <span class="ss">'immutable</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">void</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">error</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nb">symbol-&gt;string</span> <span class="ss">'immutable</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>
                          <span class="nv">=&gt;</span>  <span class="nv">error</span></code></pre>
 </div>
 </div>
@@ -5012,12 +5200,12 @@ the end of <code>s1</code> (in which case a new string is allocated).</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">2</span><span class="p">)</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">2</span><span class="p">)</span>
               <span class="nv">=&gt;</span> <span class="s">"XXabcX"</span>
-<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">10</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">5</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">5</span><span class="p">)</span>
               <span class="nv">=&gt;</span> <span class="s">"XXXXXabcXX"</span>
-<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"a"</span> <span class="mi">10</span><span class="p">)</span>
-              <span class="nv">=&gt;</span> <span class="s">"XXXXXX\0\0\0\0a"</span></code></pre>
+<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"a"</span> <span class="mi">10</span><span class="p">)</span>
+              <span class="nv">=&gt;</span> <span class="s">"XXXXXX0000a"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -5040,7 +5228,7 @@ the end of <code>s1</code> (in which case a new string is allocated).</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-mutable?</span> <span class="s">"abc"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="no">#f</span>
 <span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string-copy</span> <span class="s">"abc"</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string</span> <span class="sc">#\a</span> <span class="sc">#\b</span> <span class="sc">#\c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string</span> <span class="o">#</span><span class="nv">a</span> <span class="o">#</span><span class="nv">b</span> <span class="o">#</span><span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
 <span class="p">(</span><span class="nf">string-mutable?</span> <span class="mi">12</span><span class="p">)</span>                   <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
@@ -5276,7 +5464,9 @@ This function is defined in SRFI-118.
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(string-replace! dst dst-start dst-end src [src-start [src-end]])</code></strong><br></p>
+<p><strong><code>(string-replace! dst dst-start dst-end src)</code></strong><br>
+<strong><code>(string-replace! dst dst-start dst-end src src-start)</code></strong><br>
+<strong><code>(string-replace! dst dst-start dst-end src src-start src-end)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -5284,7 +5474,7 @@ This function is defined in SRFI-118.
 <p>Replaces the characters of the variable-size string dst (between
 dst-start and dst-end) with the characters of the string src
 (between src-start and src-end). The number of characters from src
-may be different than the number replaced in dst, so the string may
+may be different from the number replaced in dst, so the string may
 grow or contract. The special case where dst-start is equal to
 dst-end corresponds to insertion; the case where src-start is equal
 to src-end corresponds to deletion. The order in which characters
@@ -5292,7 +5482,7 @@ are copied is unspecified, except that if the source and
 destination overlap, copying takes place as if the source is first
 copied into a temporary string and then into the destination.
 Returns string, appended with the characters form the concatenation
-of the given arguments, which can be wither strings or characters.</p>
+of the given arguments, which can be either strings or characters.</p>
 </div>
 <div class="paragraph">
 <p>It is guaranteed that string-replace! will return the same object that
@@ -5437,7 +5627,7 @@ In STklos, vectors constants don&#8217;t need to be quoted.
 </div>
 <div class="paragraph">
 <p>Returns a newly allocated vector of <code>k</code> elements. If a second argument is
-given, then each element is initialized to <code>fill</code>. Otherwise the initial
+given, then each element is initialized to <code>fill</code>. Otherwise, the initial
 contents of each element is unspecified.</p>
 </div>
 <div class="paragraph">
@@ -5611,8 +5801,8 @@ initialized to the elements of <code>string</code> between <code>start</code> an
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-&gt;vector</span> <span class="s">"ABC"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">(</span><span class="sc">#\A</span> <span class="sc">#\B</span> <span class="sc">#\C</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">vector-&gt;string</span> <span class="o">#</span><span class="p">(</span><span class="sc">#\1</span> <span class="sc">#\2</span> <span class="sc">#\3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="s">"123"</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-&gt;vector</span> <span class="s">"ABC"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">(</span><span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">B</span> <span class="o">#</span><span class="nv">C</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">vector-&gt;string</span> <span class="o">#</span><span class="p">(</span><span class="o">#</span><span class="mi">1</span> <span class="o">#</span><span class="mi">2</span> <span class="o">#</span><span class="mi">3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="s">"123"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -5832,8 +6022,10 @@ field (in the definition order).</p>
 </li>
 <li>
 <p><code>&lt;name&gt;?</code> is a predicate which returns <code>#t</code> when applied to an
-instance of the <code>&lt;name&gt;</code> structure type and <code>#f</code> otherwise
-<code>&lt;name&gt;-&lt;slot&gt;</code> (one for each defined <code>&lt;slot&gt;</code>) to read the
+instance of the <code>&lt;name&gt;</code> structure type and <code>#f</code> otherwise</p>
+</li>
+<li>
+<p><code>&lt;name&gt;-&lt;slot&gt;</code> (one for each defined <code>&lt;slot&gt;</code>) to read the
 content of an instance of the <code>&lt;name&gt;</code> structure type. Writting the
 content of a slot can be done using a generalized <code>set!</code>.</p>
 </li>
@@ -5968,7 +6160,7 @@ or <code>#f</code> otherwise.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Change the default writer associated to structures of type <code>structype</code> to
+<p>Change the default writer associated to structures of type <code>structype</code>
 to the <code>proc</code> procedure. The <code>proc</code> procedure must accept 2 arguments
 (the structure to write and the port wher the structure must be written
 in that order). The value returned by <code>struct-type-change-writer!</code> is the
@@ -6116,7 +6308,7 @@ returned by <code>struct-set!</code> is <strong><em>void</em></strong>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Return a boolean that indicates if the structure <code>s</code> is a of type <code>structype</code>.
+<p>Return a boolean that indicates if the structure <code>s</code> is of type <code>structype</code>.
 Note that if <code>s</code> is an instance of a subtype of <em>S</em>, it is considered
 also as an instance of type <em>S</em>.</p>
 </div>
@@ -6197,7 +6389,7 @@ need to be quoted in programs.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>!t</code> if <code>obj</code> is a bytevector and returns <code>!f</code> otherwise.</p>
+<p>Returns <code>#t</code> if <code>obj</code> is a bytevector and returns <code>#f</code> otherwise.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -6281,7 +6473,7 @@ range [0..255]. It is an error if <code>k</code> is not a valid index of <code>b
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">8</span> <span class="mi">13</span> <span class="mi">21</span><span class="p">)</span> <span class="mi">5</span>    <span class="nv">=&gt;</span> <span class="mi">8</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">bytevector-u8-ref</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">5</span> <span class="mi">8</span> <span class="mi">13</span> <span class="mi">21</span><span class="p">)</span> <span class="mi">5</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">8</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -6293,7 +6485,7 @@ range [0..255]. It is an error if <code>k</code> is not a valid index of <code>b
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(bytevector-u8-ref bytevector k byte)</code></strong><br></p>
+<p><strong><code>(bytevector-u8-set! bytevector k byte)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -6568,7 +6760,7 @@ unspecified.</p>
          <span class="nv">=&gt;</span> <span class="s">"IBM"</span>
 
 <span class="p">(</span><span class="nf">string-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">k</span><span class="p">)</span>
-           <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">eqv?</span> <span class="nv">k</span> <span class="sc">#\u</span><span class="p">)</span>
+           <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">eqv?</span> <span class="nv">k</span> <span class="o">#</span><span class="nv">u</span><span class="p">)</span>
                <span class="p">(</span><span class="nb">char-upcase</span> <span class="nv">c</span><span class="p">)</span>
                <span class="p">(</span><span class="nb">char-downcase</span> <span class="nv">c</span><span class="p">)))</span>
          <span class="s">"studlycaps"</span>
@@ -6748,8 +6940,8 @@ lists is a tail call.</p>
 <p>If one of the <code>listi</code> has no elements, <code>every</code> simply returns <code>#t</code>.</p>
 </div>
 <div class="paragraph">
-<p>Like <code>any</code>, every&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is to
-indicate that it does not return a simple boolean (<code>#t</code> or <code>#f</code>), but a
+<p>Like <code>any</code>, <code>every&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is to
+indicate that it does not return a simple boolean (</code>#t` or <code>#f</code>), but a
 general value.</p>
 </div>
 <div class="paragraph">
@@ -6783,7 +6975,7 @@ any returns <code>#f</code>. The application of <code>pred</code> to the last el
 lists is a tail call.</p>
 </div>
 <div class="paragraph">
-<p>Like every, <code>any&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is
+<p>Like <code>every</code>, <code>any&#8217;s name does not end with a question mark&#8201;&#8212;&#8201;this is
 to indicate that it does not return a simple boolean (</code>#t` or <code>#f</code>), but
 a general value.</p>
 </div>
@@ -6927,7 +7119,7 @@ like the current continuation.</p>
 <p><code>call/ec</code> is an short name for <code>call-with-escape-continuation</code>. <code>call/ec</code>
 calls <code>proc</code> with one parameter, which is the current escape continuation
 (a continuation which can only be used to abort a computation and hence
-cannot be "re-enterered".</p>
+cannot be "re-enterered").</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -6937,7 +7129,7 @@ cannot be "re-enterered".</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>call/ec</code> is cheaper than the full call/cc. It is particularily useful
+<p><code>call/ec</code> is cheaper than the full <code>call/cc</code>. It is particularily useful
 when all the power of <code>call/cc</code> is not needded.</p>
 </div>
 <div id="values" class="paragraph">
@@ -6955,11 +7147,22 @@ when all the power of <code>call/cc</code> is not needded.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Delivers all of its arguments to its continuation.
-,(bold "Note:") R<sup>5</sup>RS imposes to use multiple values in the context of
+<p>Delivers all of its arguments to its continuation.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>5</sup>RS imposes to use multiple values in the context
 of a <code>call-with-values</code>. In STklos, if <code>values</code> is not used with
 <code>call-with-values</code>, only the first value is used (i.e. others values are
-,(emph "ignored")).</p>
+<em>ignored</em>)).
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -7180,6 +7383,53 @@ as data. <code>Environment</code> may be a R<sup>5</sup>RS environment-specifier
 <p></p>
 </div>
 <div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(environment set1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This procedure returns a specifier for the environment that
+results by starting with an empty environment and then
+importing each <strong>set</strong>, considered as an import
+set, into it. The bindings of the environment represented by
+the specifier, as is the environment itself.</p>
+</div>
+<div class="paragraph">
+<p>In STklos,
+- each <code>set</code> argument can be a list (specifying an R<sup>7</sup>RS
+  library) or a symbol (specifying a module).
+- the return environment is an R<sup>7</sup>RS library (which can be
+  passed to <code>eval</code>).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">eval</span> <span class="o">'</span><span class="p">(</span><span class="nb">*</span> <span class="mi">7</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)))</span>    <span class="nv">=&gt;</span> <span class="mi">21</span>
+
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">f</span> <span class="p">(</span><span class="nb">eval</span> <span class="o">'</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+               <span class="p">(</span><span class="nb">null-environment</span> <span class="mi">5</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nf">f</span> <span class="nv">+</span> <span class="mi">10</span><span class="p">))</span>                                     <span class="nv">=&gt;</span> <span class="mi">20</span>
+
+<span class="p">(</span><span class="nb">eval</span> <span class="o">'</span><span class="p">(</span><span class="k">define</span> <span class="nv">foo</span> <span class="mi">32</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)))</span>             <span class="nv">=&gt;</span> <span class="nv">errror</span>
+
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">only</span> <span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)</span> <span class="nv">+</span> <span class="nv">-</span><span class="p">)</span>
+                      <span class="o">'</span><span class="p">(</span><span class="nf">only</span> <span class="p">(</span><span class="nf">scheme</span> <span class="nv">write</span><span class="p">)</span> <span class="nv">display</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nb">length</span> <span class="p">(</span><span class="nf">module-symbols</span> <span class="nv">e</span><span class="p">)))</span>                  <span class="nv">=&gt;</span> <span class="mi">3</span>
+
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="nf">environment</span> <span class="o">'</span><span class="p">(</span><span class="nf">prefix</span> <span class="p">(</span><span class="nf">only</span> <span class="p">(</span><span class="nf">scheme</span> <span class="nv">base</span><span class="p">)</span> <span class="nv">car</span><span class="p">)</span>
+                               <span class="nv">foo-</span><span class="p">))))</span>
+   <span class="p">(</span><span class="nf">module-symbols</span> <span class="nv">e</span><span class="p">))</span>                            <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">foo-car</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
 <p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
@@ -7254,7 +7504,8 @@ without the version number (defaults to 5).
 </div>
 <div class="paragraph">
 <p>This procedure returns the environment in the expression are
-evaluated by default (the <strong><em>STklos</em></strong> module).</p>
+evaluated by default (the <strong><em>STklos</em></strong> module). The returned environment
+is mutable.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -7475,7 +7726,7 @@ otherwise returns <code>#f</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is an textual port or binary port respectively,
+<p>Returns <code>#t</code> if <code>obj</code> is a textual port or binary port respectively,
 otherwise returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
@@ -7551,6 +7802,25 @@ respectively, otherwise returns <code>#f</code>.</p>
 <div class="paragraph">
 <p>Returns <code>#t</code> if <code>obj</code> is a file input port or a file output port respectively,
 otherwise returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(input-port-open? port)</code></strong><br>
+<strong><code>(output-port-open? port)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if port is still open and capable of performing
+input or output, respectively, and <code>#f</code> otherwise.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -7739,7 +8009,7 @@ returns the string containing the text written on the string port.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-output-to-string</span>
-   <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">write</span> <span class="mi">123</span><span class="p">)</span> <span class="p">(</span><span class="nb">write</span> <span class="s">"Hello"</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="s">"123\\"</span><span class="nv">Hello</span><span class="err">\\</span><span class="s">""</span></code></pre>
+   <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">write</span> <span class="mi">123</span><span class="p">)</span> <span class="p">(</span><span class="nb">write</span> <span class="s">"Hello"</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="s">"123\"Hello\""</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -7849,7 +8119,7 @@ delivers bytes from the <code>bytevector</code>.</p>
 <p>Returns a virtual port using the <code>read-char</code> procedure to read a
 character from the port, <code>ready?</code> to know if there is any data to
 read from the port, <code>eof?</code> to know if the end of file is reached
-on the port and finally <code>close</code> to close the port. All theses
+on the port and finally <code>close</code> to close the port. All these
 procedure takes one parameter which is the port from which the input
 takes place.  <code>Open-input-virtual</code> accepts also the special value
 <code>#f</code> for the I/O procedures with the following conventions:</p>
@@ -7978,7 +8248,7 @@ for the I/O procedures. If a procedure is <code>#f</code> nothing is done
 on the corresponding action.</p>
 </div>
 <div class="paragraph">
-<p>Hereafter is an (very inefficient) implementation of a variant of
+<p>Hereafter is a (very inefficient) implementation of a variant of
 <code>open-output-string</code> using virtual ports. The value of the output
 string is printed when the port is closed:</p>
 </div>
@@ -8046,28 +8316,28 @@ are converted to upper case:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>"r"</code> to open file for reading. The stream is positioned at
+<p><code>"r"</code> to open the file for reading. The stream is positioned at
 the beginning of the file.</p>
 </li>
 <li>
-<p><code>"r+"</code> to open file for reading and writing.  The stream is
+<p><code>"r+"</code> to open the file for reading and writing. The stream is
 positioned at the beginning of the file.</p>
 </li>
 <li>
-<p><code>"w"</code> to truncate file to zero length or create file for writing.
+<p><code>"w"</code> to truncate the file to zero length or create the file for writing.
 The stream is positioned at the beginning of the file.</p>
 </li>
 <li>
-<p><code>"w+"</code> to open  file for reading and writing. The file is created
+<p><code>"w+"</code> to open the file for reading and writing. The file is created
 if it does not exist, otherwise it is truncated. The stream is positioned
 at the beginning of the file.</p>
 </li>
 <li>
-<p><code>"a"</code> to open for writing.  The file is created if  it  does
+<p><code>"a"</code> to open the file for writing. The file is created if it does
 not exist. The stream is positioned at the end of the file.</p>
 </li>
 <li>
-<p><code>"a+"</code> to open file for reading and writing. The file is created
+<p><code>"a+"</code> to open the file for reading and writing. The file is created
 if it does not exist. The stream is positioned at the end of the file.</p>
 </li>
 </ul>
@@ -8075,8 +8345,8 @@ if it does not exist. The stream is positioned at the end of the file.</p>
 <div class="paragraph">
 <p>If the file can be opened, <code>open-file</code> returns the textual port associated
 with the given file, otherwise it returns <code>#f</code>. Here again, the <strong><em>magic</em></strong>
-string "| " permits to open a pipe port (in this case mode can only be
-<code>"r"</code> or <code>"w"</code>).</p>
+string "| " permits to open a pipe port. (In this case mode can only be
+<code>"r"</code> or <code>"w"</code>.)</p>
 </div>
 <div class="paragraph">
 <p>
@@ -8244,7 +8514,7 @@ the value returned by <code>current-input-port</code>.</p>
 </td>
 <td class="content">
 The <code>port-seek</code>, <code>read-chars</code> and <code>read-chars!</code> procedures
-generally break the line-number. After using one of theses procedures, the
+generally break the line-number. After using one of these procedures, the
 value returned by <code>port-current-line</code> will be <code>-1</code> (except a <code>port-seek</code>
 at the beginning of the port reinitializes the line counter).
 </td>
@@ -8319,7 +8589,7 @@ repeatedly until a <strong><em>sexpr</em></strong> is read on the current input 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">idle</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Nothing to read!\\n"</span><span class="p">))))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">idle</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Nothing to read!\n"</span><span class="p">))))</span>
   <span class="p">(</span><span class="nf">port-idle-register!</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">)</span> <span class="nv">idle</span><span class="p">)</span>
   <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">result</span> <span class="p">(</span><span class="nb">read</span><span class="p">)))</span>
     <span class="p">(</span><span class="nf">port-idle-unregister!</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">)</span> <span class="nv">idle</span><span class="p">)</span>
@@ -8424,8 +8694,8 @@ the first time <code>port</code> is closed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The port-has-port-position? procedure returns #t if the port
-supports the port-position operation, and #f otherwise. If the port
+<p>The port-has-port-position? procedure returns <code>#t</code> if the port
+supports the port-position operation, and <code>#f</code> otherwise. If the port
 does not support the operation, port-position signals an error.</p>
 </div>
 <div class="paragraph">
@@ -8465,8 +8735,8 @@ away.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The port-has-set-port-position!? procedure returns #t if the port supports
-the set-port-position! operation, and #f otherwise.</p>
+<p>The port-has-set-port-position!? procedure returns <code>#t</code> if the port supports
+the set-port-position! operation, and <code>#f</code> otherwise.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -9047,7 +9317,7 @@ returns <code>#t</code>.</p>
 </div>
 <div class="paragraph">
 <p>Reads the next line available from the input port <code>port</code>. This function
-returns 2 values: the first one is is the string which contains the line
+returns 2 values: the first one is the string which contains the line
 read, and the second one is the end of line delimiter. The end of line
 delimiter can be an end of file object, a character or a string in case
 of a multiple character delimiter. If no more characters are available
@@ -9120,7 +9390,7 @@ file <code>"foo"</code> is formed of two lines which contains respectively the n
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">port-&gt;sexp-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">100</span> <span class="s">"bar"</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">port-&gt;string-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"100"</span> <span class="s">"\"bar\""</span><span class="p">)</span></code></pre>
+<span class="p">(</span><span class="nf">port-&gt;string-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"100"</span> <span class="s">""</span><span class="nv">bar</span><span class="s">""</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -9144,7 +9414,7 @@ file <code>"foo"</code> is formed of two lines which contains respectively the n
 <p>Writes a written representation of <code>obj</code> to the given <code>port</code>. Strings that
 appear in the written representation are enclosed in doublequotes, and
 within those strings backslash and doublequote characters are escaped
-by backslashes. Character objects are written using the ,(emph "#\\") notation.
+by backslashes. Character objects are written using the ,(emph "#\") notation.
 <code>Write</code> returns an unspecified value. The <code>port</code> argument may be omitted, in
 which case it defaults to the value returned by <code>current-output-port</code>.</p>
 </div>
@@ -9550,15 +9820,15 @@ string.  Otherwise, the output is printed on the specified port.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A test."</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="s">"A test."</span>
    <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~a."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A test."</span>
-   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~s."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A \"test\"."</span>
+   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~s."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A "</span><span class="nv">test</span><span class="s">"."</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~8,2F"</span> <span class="mi">1</span><span class="nv">/3</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="s">"    0.33"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~6F"</span> <span class="mi">32</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="s">"    32"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~1,2F"</span> <span class="mi">4321</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="s">"4321.00"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~1,2F"</span> <span class="p">(</span><span class="nb">sqrt</span> <span class="mf">-3.9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="s">"0.00+1.97i"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"#d~d #x~x #o~o #b~b~%"</span> <span class="mi">32</span> <span class="mi">32</span> <span class="mi">32</span> <span class="mi">32</span><span class="p">)</span>
-                                <span class="nv">=&gt;</span> <span class="s">"#d32 #x20 #o40 #b100000\n"</span>
+                                <span class="nv">=&gt;</span> <span class="s">"#d32 #x20 #o40 #b100000n"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"~&amp;1~&amp;~&amp;2~&amp;~&amp;~&amp;3~%"</span><span class="p">)</span>
-                                <span class="nv">=&gt;</span> <span class="s">"\n1\n2\n3\n"</span>
+                                <span class="nv">=&gt;</span> <span class="s">"n1n2n3n"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~a ~? ~a"</span> <span class="ss">'a</span> <span class="s">"~s"</span> <span class="o">'</span><span class="p">(</span><span class="nf">new</span><span class="p">)</span> <span class="ss">'test</span><span class="p">)</span>
                                 <span class="nv">=&gt;</span> <span class="s">"a new test"</span></code></pre>
 </div>
@@ -9670,8 +9940,10 @@ that STklos supports.</p>
 <div class="sect3">
 <h4 id="_loading_code">4.13.1. Loading code</h4>
 <div class="paragraph">
-<p>
-</p>
+<p></p>
+</div>
+<div id="load" class="paragraph">
+<p></p>
 </div>
 <div class="paragraph text-right">
 <p><span class="rmargin small">R<sup>5</sup>RS procedure</span></p>
@@ -9688,7 +9960,7 @@ that STklos supports.</p>
 
 <code>Filename</code> should be a string naming an existing file containing Scheme
 expressions. <code>Load</code> has been extended in STklos to allow loading of
-file containing Scheme compiled code as well as object files (<em>aka</em>
+files containing Scheme compiled code as well as object files (<em>aka</em>
 shared objects). The loading of object files is not available on
 all architectures. The value returned by <code>load</code> is <strong><em>void</em></strong>.</p>
 </div>
@@ -9697,7 +9969,7 @@ all architectures. The value returned by <code>load</code> is <strong><em>void</
 to find it in one of the directories given by <code>"load-path"</code>
 with the suffixes given by <code>"load-suffixes"</code>.</p>
 </div>
-<div class="paragraph">
+<div id="tryload" class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -9711,11 +9983,11 @@ with the suffixes given by <code>"load-suffixes"</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>try-load</code> tries to load the file named <code>filename</code>. As <code>load</code>,
+<p><code>try-load</code> tries to load the file named <code>filename</code>. As with <code>load</code>,
 <code>try-load</code> tries to find the file given the current load path
 and a set of suffixes if <code>filename</code> cannot be loaded. If <code>try-load</code>
 is able to find a readable file, it is loaded, and <code>try-load</code> returns
-<code>#t</code>. Otherwise,  <code>try-load</code> retuns <code>#f</code>.</p>
+<code>#t</code>. Otherwise, <code>try-load</code> retuns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -9852,7 +10124,7 @@ by the GC.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">let-values</span> <span class="p">(((</span><span class="nf">name</span> <span class="nv">port</span><span class="p">)</span> <span class="p">(</span><span class="nf">create-temp-file</span><span class="p">)))</span>
-  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">msg</span> <span class="p">(</span><span class="nf">format</span> <span class="s">"Name: ~s\n"</span> <span class="nv">name</span><span class="p">)))</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">msg</span> <span class="p">(</span><span class="nf">format</span> <span class="s">"Name: ~sn"</span> <span class="nv">name</span><span class="p">)))</span>
     <span class="p">(</span><span class="nb">display</span> <span class="nv">msg</span><span class="p">)</span>
     <span class="p">(</span><span class="nb">display</span> <span class="nv">msg</span> <span class="nv">port</span><span class="p">)</span>
     <span class="p">(</span><span class="nf">close-port</span> <span class="nv">port</span><span class="p">)))</span>     <span class="nv">=&gt;</span> <span class="nv">prints</span> <span class="nv">the</span> <span class="nv">name</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">temp</span><span class="o">.</span> <span class="nv">file</span> <span class="nv">on</span> <span class="nv">the</span>
@@ -10332,10 +10604,10 @@ file name</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">winify-file-name</span> <span class="s">"/tmp"</span><span class="p">)</span>
-    <span class="nv">=&gt;</span> <span class="s">"C:\\cygwin\\tmp"</span>
+    <span class="nv">=&gt;</span> <span class="s">"C:\cygwin\tmp"</span>
 <span class="p">(</span><span class="nb">list</span> <span class="p">(</span><span class="nf">getcwd</span><span class="p">)</span> <span class="p">(</span><span class="nf">winify-file-name</span> <span class="p">(</span><span class="nf">getcwd</span><span class="p">)))</span>
     <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"//saxo/homes/eg/Projects/STklos"</span>
-        <span class="s">"\\\\saxo\\homes\\eg\\Projects\\STklos"</span><span class="p">)</span></code></pre>
+        <span class="s">"\\saxo\homes\eg\Projects\STklos"</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -10360,7 +10632,7 @@ file name</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">posixify-file-name</span> <span class="s">"C:\\cygwin\\tmp"</span><span class="p">)</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">posixify-file-name</span> <span class="s">"C:\cygwin\tmp"</span><span class="p">)</span>
        <span class="nv">=&gt;</span> <span class="s">"/tmp"</span></code></pre>
 </div>
 </div>
@@ -10423,7 +10695,7 @@ name given in <code>str</code>.</p>
 </div>
 <div class="paragraph">
 <p>Returns the suffix of given <code>pathname</code>. If no suffix is found, <code>file-suffix</code>
-returns #f.</p>
+returns <code>#f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -10470,7 +10742,7 @@ returns #f.</p>
 </div>
 <div class="paragraph">
 <p>Retuns the operating system file separator as a character. This is typically
-<code>&#35;\/</code> on Unix (or Cygwin) systems and <code>&#35;\\</code> on Windows.</p>
+<code>&#35;/</code> on Unix (or Cygwin) systems and <code>&#35;\</code> on Windows.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -10522,12 +10794,12 @@ the following special characters:</p>
 <p><code>*</code> Matches any sequence of zero or more characters.</p>
 </li>
 <li>
-<p><code>\[chars\]</code> Matches any single character in <code>chars</code>.
+<p><code>[chars]</code> Matches any single character in <code>chars</code>.
 If chars contains a sequence of the form <code>a-b</code> then any character
 between <code>a</code> and <code>b</code> (inclusive) will match.</p>
 </li>
 <li>
-<p><code>\x</code> Matches the character <code>x</code>.</p>
+<p><code>x</code> Matches the character <code>x</code>.</p>
 </li>
 <li>
 <p><code>{a,b,&#8230;&#8203;}</code> Matches any of the strings <code>a</code>, <code>b</code>, etc.
@@ -10962,7 +11234,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mi">70</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1382</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -11033,7 +11305,7 @@ name.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returnd the name of the running program if it is a standalone and #f
+<p>Returnd the name of the running program if it is a standalone and <code>#f</code>
 otherwise. This function is defined in <strong><a href="http://srfi.schemers.org/srfi-193/srfi-193.html">SRFI-193</a></strong> (<em>Command line</em>).</p>
 </div>
 <div class="paragraph">
@@ -11107,7 +11379,7 @@ This function always returns a string whereas the <code>command-name</code> proc
 </div>
 <div class="paragraph">
 <p>Returns the absolute path of the current script.
-If the calling program is not a script, #f is returned.
+If the calling program is not a script, <code>#f</code> is returned.
 This function is defined in <strong><a href="http://srfi.schemers.org/srfi-193/srfi-193.html">SRFI-193</a></strong> (<em>Command line</em>).</p>
 </div>
 <div class="paragraph">
@@ -11144,9 +11416,31 @@ As with <code>script-file</code>, this is an absolute pathname.</p>
 </div>
 <div class="paragraph">
 <p>Returns a string identifying the current version of the system. A
-version is constituted of two numbers separated by a point: the version
-and the release numbers. Note that <code>implementation-version</code> corresponds
-to the <strong><a href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a></strong> (<em>Environment Inquiry</em>) name of this function.</p>
+version is constituted of two (or three) numbers separated by a point:
+the version, the release numbers and, eventually, a patch number. The
+patch number is used for developments version only; it is absent for stable
+releases.</p>
+</div>
+<div class="paragraph">
+<p>Note that <code>implementation-version</code> corresponds to the <strong><a href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a></strong> (<em>Environment Inquiry</em>) name of
+this function.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(short-version)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns a string identifying the current version of the system without
+its eventual patch number.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -11348,7 +11642,7 @@ list of the arguments which are not options.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos-script</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos</span>
 
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">main</span> <span class="nv">args</span><span class="p">)</span>
   <span class="p">(</span><span class="nf">parse-arguments</span> <span class="nv">args</span>
@@ -11533,7 +11827,7 @@ the output of <code>str</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">exec</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="s">"A\nB\n"</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">exec</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="s">"AnBn"</span>
 <span class="p">(</span><span class="nf">exec-list</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"A"</span> <span class="s">"B"</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -11869,7 +12163,7 @@ If the key is already present in <code>list</code>, the keyword list is
 list. The key can be absent of the list.</p>
 </div>
 <div class="paragraph">
-<p><code>key-delete!</code> does the same job than <code>key-delete</code> by physically
+<p><code>key-delete!</code> does the same job as <code>key-delete</code> by physically
 modifying its <code>list</code> argument.</p>
 </div>
 <div class="listingblock">
@@ -12020,7 +12314,7 @@ registered in the bucket corresponding to the key.</p>
 comparing keys. Here, we use the string-length as a (very simple)
 hashing function. Of course, a function which gives a key depending
 of the characters composing the string gives a better repartition
-and should probably enhance performances. For instance, the following
+and should probably enhance performance. For instance, the following
 call to <code>make-hash-table</code> should return a more efficient, even if
 not perfect, hash table:</p>
 </div>
@@ -12085,7 +12379,7 @@ the <code>hash-table-hash</code> function to speed up hash table retrievals).
 </div>
 <div class="paragraph">
 <p>Computes a hash code for an object and returns this hash code as a
-non negative integer. A property of <code>hash-table-hash</code> is that</p>
+non-negative integer. A property of <code>hash-table-hash</code> is that</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -12093,7 +12387,7 @@ non negative integer. A property of <code>hash-table-hash</code> is that</p>
 </div>
 </div>
 <div class="paragraph">
-<p>as the the Common Lisp <code>sxhash</code> function from which this procedure is
+<p>as the Common Lisp <code>sxhash</code> function from which this procedure is
 modeled.</p>
 </div>
 <div class="paragraph">
@@ -12548,6 +12842,41 @@ hash table. This function may modify <code>hash1</code> destructively.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
+<p><strong><code>(hash-mutable? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>obj</code> is an immutable hash table, <code>#f</code> if it
+is a mutable hash table, and raises an error if <code>obj</code> is not a
+hash table.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(hash-immutable! obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If <code>obj</code> is a hash table, makes it immutable. Otherwise, raises
+an error.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
 <p><strong><code>(hash-table-size hash)</code></strong><br></p>
 </div>
 </div>
@@ -12572,7 +12901,7 @@ hash table. This function may modify <code>hash1</code> destructively.</p>
 <div class="paragraph">
 <p>Prints  overall information about <code>hash</code>, such as the number of entries
 it contains, the number of buckets in its hash array, and the utilization
-of the buckets. Informations are printed on <code>port</code>. If no <code>port</code> is given
+of the buckets. Information is printed on <code>port</code>. If no <code>port</code> is given
 to <code>hash-table-stats</code>, information are printed on the current output port
 (see <em><a href="_standard_procedures.html#curroport"><code>current-output-port</code> primitive</a></em>).</p>
 </div>
@@ -12621,7 +12950,7 @@ second later.</p>
 </div>
 <div class="paragraph">
 <p>Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
-measured in seconds.</p>
+measured in seconds in the Coordinated Universal Time (UTC) scale.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -12647,12 +12976,87 @@ instead of UTC.
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(current-time)</code></strong><br></p>
+<p><strong><code>(current-time)</code></strong><br>
+<strong><code>(current-time type)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns a time object corresponding to the current time.</p>
+<p>Return the current time as time object. The type can be <code>time-utc</code> or <code>time-tai</code>.
+If omitted, <code>type</code> is <code>time-utc</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+To use more time types, such as <code>time-monotonic</code> and <code>time-process</code>, please
+load <strong><a href="http://srfi.schemers.org/srfi-19/srfi-19.html">SRFI-19</a></strong>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(make-time nanosecond second)</code></strong><br>
+<strong><code>(make-time type nanosecond second)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Creates a time structure with the given <code>nanosecond</code> and <code>second</code>.
+If <code>type</code> is passed, it must be a symbol representing one of the
+supported time types (<code>time-tai</code>, <code>time-utc</code>, <code>time-monotonic</code>,
+<code>time-process</code> and <code>time-duration</code>).</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>time-monotonic</code>, <code>time-process</code> and <code>time-duration</code> can
+be created, but operations on them are only available when SRFI-19 is
+loaded.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>
+
+
+
+
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-type t)</code></strong><br>
+<strong><code>(set-time-type! t v)</code></strong><br>
+<strong><code>(time-second t)</code></strong><br>
+<strong><code>(set-time-second! t s)</code></strong><br>
+<strong><code>(time-nanosecond t)</code></strong><br>
+<strong><code>(set-time-nanosecond! t n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These are accessors for time structures.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -12716,6 +13120,52 @@ of seconds elapsed since the Epoch.</p>
 </div>
 </div>
 <div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-utc&#8594;time-tai t)</code></strong><br>
+<strong><code>(time-utc&#8594;time-tai! t)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Converts <code>t</code>, which must be of type <code>time-utc</code>, to the type
+<code>time-tai</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Time-utc&#8594;time-tai</code> creates a new object, while <code>time-utc&#8594;time-tai</code>
+can use <code>t</code> to build the returned object.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(time-tai&#8594;time-utc t)</code></strong><br>
+<strong><code>(time-tai&#8594;time-utc! t)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Converts <code>t</code>, which must be of type <code>time-tai</code>, to the type
+<code>time-utc</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Time-tai&#8594;time-utc</code> creates a new object, while <code>time-tai&#8594;time-utc</code>
+can use <code>t</code> to build the returned object.</p>
+</div>
+<div class="paragraph">
 <p></p>
 </div>
 <div class="paragraph text-right">
@@ -12740,13 +13190,14 @@ of seconds elapsed since the Epoch.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(make-date :key second minute hour day month year)</code></strong><br></p>
+<p><strong><code>(make-date :key      nanosecond second minute hour day month year zone-offset)</code></strong><br>
+<strong><code>(make-date :optional nanosecond second minute hour day month year zone-offset)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Build a date from its argument. <code>hour</code>, <code>minute</code>, <code>second</code> default to 0;
-<code>day</code> and <code>month</code> default to 1; <code>year</code> defaults to 1970</p>
+<p>Build a date from its argument. <code>hour</code>, <code>minute</code>, <code>second</code>, <code>nanosecond</code>
+default to 0; <code>day</code> and <code>month</code> default to 1; <code>year</code> defaults to 1970.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -12763,6 +13214,22 @@ of seconds elapsed since the Epoch.</p>
 </div>
 <div class="paragraph">
 <p>Return <code>#t</code> if <code>obj</code> is a date, and otherwise returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(date-nanosecond d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the nanosecond of date <code>d</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -12907,7 +13374,7 @@ of seconds elapsed since the Epoch.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Return an indication about daylight saving adjustment:</p>
+<p>Return an indication about daylight saving adjustment of date <code>d</code>:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -12947,12 +13414,26 @@ of seconds elapsed since the Epoch.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(date&#8594;seconds d)</code></strong><br></p>
+<p><strong><code>(local-timezone-offset)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Convert the date <code>d</code> to the number of seconds since the <em>Epoch"</em>.</p>
+<p>Returns the local timezone offset, in seconds.</p>
+</div>
+<div class="paragraph">
+<p>For example, for GMT+2 it will be <code>2 * 60 * 60</code> = <code>7200</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">local-timezone-offset</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">0</span>        <span class="c1">;; for GMT</span>
+<span class="p">(</span><span class="nf">local-timezone-offset</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">7200</span>     <span class="c1">;; for GMT+2</span>
+<span class="p">(</span><span class="nf">local-timezone-offset</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">-10800</span>   <span class="c1">;; for GMT-3</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The timezone is searched for in the environment variable <code>TZ</code>. If this
+variable does not appear in the environment, the system timezone is used.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -12963,14 +13444,38 @@ of seconds elapsed since the Epoch.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(date&#8594;string format d)</code></strong><br></p>
+<p><strong><code>(date&#8594;seconds d)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Convert the date <code>d</code> to the number of seconds since the <em>Epoch</em>,
+1970-01-01 00:00:00 +0000 (UTC).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">date-&gt;seconds</span> <span class="p">(</span><span class="nf">make-date</span> <span class="mi">0</span> <span class="mi">37</span> <span class="mi">53</span> <span class="mi">1</span> <span class="mi">26</span> <span class="mi">10</span> <span class="mi">2012</span> <span class="mi">0</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="mf">1351216417.0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(date&#8594;string d)</code></strong><br>
+<strong><code>(date&#8594;string d format)</code></strong><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Convert the date <code>d</code> using the string <code>format</code> as a
 specification. Conventions for format are the same as the one
-of <em><a href="_standard_procedures.html#seconds2string">primitive <code>seconds&#8594;string</code></a></em>.</p>
+of <em><a href="_standard_procedures.html#seconds2string">primitive <code>seconds&#8594;string</code></a></em>.
+If <code>format</code> is omitted, it defaults to <code>"~c"</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -12986,8 +13491,17 @@ of <em><a href="_standard_procedures.html#seconds2string">primitive <code>second
 </div>
 </div>
 <div class="paragraph">
-<p>Convert the date <code>n</code> expressed as a number of seconds since the Epoch
-to a date.</p>
+<p>Convert the date <code>n</code> expressed as a number of seconds since the <em>Epoch</em>,
+1970-01-01 00:00:00 +0000 (UTC) into a date.
+<code>n</code> can be an exact integer or an inexact real.</p>
+</div>
+<div class="paragraph">
+<p>This is equivalent to converting time-UTC to date.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">seconds-&gt;date</span> <span class="mi">1351216417</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">date</span> <span class="mi">2012-10-26</span> <span class="mi">1</span><span class="nv">:53:37</span><span class="p">]</span></code></pre>
+</div>
 </div>
 <div id="seconds2string" class="paragraph">
 <p></p>
@@ -13143,6 +13657,9 @@ Epoch). The keyed values returned are</p>
 <div class="ulist">
 <ul>
 <li>
+<p>nanosecond : 0 to 999999</p>
+</li>
+<li>
 <p>second : 0 to 59 (but can be up to 61 to allow for leap seconds)</p>
 </li>
 <li>
@@ -13179,7 +13696,7 @@ Epoch). The keyed values returned are</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">seconds-&gt;list</span> <span class="p">(</span><span class="nf">current-second</span><span class="p">))</span>
-       <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:second</span> <span class="mi">21</span> <span class="o">#</span><span class="nv">:minute</span> <span class="mi">35</span> <span class="o">#</span><span class="nv">:hour</span> <span class="mi">20</span> <span class="o">#</span><span class="nv">:day</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">:month</span> <span class="mi">1</span>
+       <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:nanosecond</span> <span class="mi">182726</span> <span class="o">#</span><span class="nv">:second</span> <span class="mi">21</span> <span class="o">#</span><span class="nv">:minute</span> <span class="mi">35</span> <span class="o">#</span><span class="nv">:hour</span> <span class="mi">20</span> <span class="o">#</span><span class="nv">:day</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">:month</span> <span class="mi">1</span>
            <span class="o">#</span><span class="nv">:year</span> <span class="mi">2022</span> <span class="o">#</span><span class="nv">:week-day</span> <span class="mi">1</span> <span class="o">#</span><span class="nv">:year-day</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">:dst</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:tz</span> <span class="mi">-3600</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -13413,9 +13930,9 @@ exact integer between 0 and <code>n</code>-1, when <code>n</code> is the number 
 <p>
 
 <strong><em>STklos</em></strong> provides access to Unix processes as first class objects.
-Basically, a process contains several informations such as the standard
+Basically, a process contains information such as the standard
 system process identification (aka PID on Unix Systems), the files where
-the standard files of the process are redirected.</p>
+the standard files of the process are redirected, &#8230;&#8203;</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -13607,7 +14124,7 @@ returns <code>#f</code> otherwise.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(process-signal proc sig)</code></strong><br></p>
+<p><strong><code>(process-send-signal proc sig)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -13615,7 +14132,7 @@ returns <code>#f</code> otherwise.</p>
 <p>Sends the integer signal <code>sig</code> to <code>proc</code>. Since value of <code>sig</code> is system
 dependant, use the symbolic defined signal constants to make your program
 independant of the running system (see <a href="_standard_procedures.html#_signals">Section 4.20</a>).
-The result of <code>process-signal</code> is <strong><em>void</em></strong>.</p>
+The result of <code>process-send-signal</code> is <strong><em>void</em></strong>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -13636,7 +14153,7 @@ is <em>void</em>. This procedure is equivalent to</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-signal</span> <span class="nv">process</span> <span class="ss">'SIGTERM</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-send-signal</span> <span class="nv">process</span> <span class="nv">SIGTERM</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -13660,8 +14177,8 @@ its execution. They are equivalent, respectively, to</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-signal</span> <span class="nv">process</span> <span class="ss">'SIGSTOP</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">process-signal</span> <span class="nv">process</span> <span class="ss">'SIGCONT</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">process-send-signal</span> <span class="nv">process</span> <span class="nv">SIGSTOP</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">process-send-signal</span> <span class="nv">process</span> <span class="nv">SIGCONT</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -13699,12 +14216,12 @@ its execution. They are equivalent, respectively, to</p>
 call which permits to create a new (heavy) process.
 When called without parameter, this procedure returns two times
 (one time in the parent process and one time in the child process).
-The value returned in the parent process is a process object
-representing the child process and the value returned in the child
+The value returned to the parent process is a process object
+representing the child process and the value returned to the child
 process is always the value <code>#f</code>.
 When called with a parameter (which must be a thunk), the new process
 excutes <code>thunk</code> and terminate it execution when <code>thunk</code> returns. The
-value returned in the parent process is a process object representing
+value returned to the parent process is a process object representing
 the child process.</p>
 </div>
 </div>
@@ -13737,7 +14254,7 @@ establishes a link between the running program and the application
 listening on port <code>port-number</code> of <code>hostname</code>.  If  the optional argument
 <code>line-buffered</code> has a true value, a line buffered policy is used when writing
 to the client socket (i.e. characters on the socket are tranmitted as soon
-as a <code>"#\newline</code> character is encountered). The default value of
+as a <code>"#newline</code> character is encountered). The default value of
 <code>line-buffered</code> is <code>#t</code>.</p>
 </div>
 <div class="paragraph">
@@ -13777,7 +14294,7 @@ otherwise, the communication port is chosen by the system.</p>
 <p><code>Socket-shutdown</code> shutdowns the connection associated to
 <code>socket</code>. If the socket is a server socket, <code>socket-shutdown</code> is called
 on all the client sockets connected to this server.
-<code>Close</code> indicates if the the socket must be closed or not, when
+<code>Close</code> indicates if the socket must be closed or not, when
 the connection is destroyed. Closing the socket forbids further
 connections on the same port with the <code>socket-accept</code> procedure.
 Omitting a value for <code>close</code> implies the closing of socket.</p>
@@ -13793,7 +14310,7 @@ go back waiting for further client connections.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">s</span> <span class="p">(</span><span class="nf">make-server-socket</span> <span class="mi">12345</span><span class="p">)))</span>
    <span class="p">(</span><span class="k">let</span> <span class="nv">loop</span> <span class="p">()</span>
       <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">ns</span> <span class="p">(</span><span class="nf">socket-accept</span> <span class="nv">s</span><span class="p">)))</span>
-        <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"I've read: ~A\\n"</span>
+        <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"I've read: ~A\n"</span>
                 <span class="p">(</span><span class="nf">read-line</span> <span class="p">(</span><span class="nf">socket-input</span> <span class="nv">ns</span><span class="p">)))</span>
         <span class="p">(</span><span class="nf">socket-shutdown</span> <span class="nv">ns</span> <span class="no">#f</span><span class="p">)</span>
         <span class="p">(</span><span class="nf">loop</span><span class="p">))))</span></code></pre>
@@ -13830,7 +14347,7 @@ on the port 12345 <sup class="footnote">[<a id="_footnoteref_1" class="footnote"
 </div>
 <div class="paragraph">
 <p>Once the connection with the distant program is established, we read
-a line on the input port  associated to the socket and we write the
+a line on the input port associated to the socket, and we write the
 length of this line on its output port.</p>
 </div>
 <div class="listingblock">
@@ -13839,7 +14356,7 @@ length of this line on its output port.</p>
        <span class="p">(</span><span class="nf">client</span> <span class="p">(</span><span class="nf">socket-accept</span> <span class="nv">server</span><span class="p">))</span>
        <span class="p">(</span><span class="nf">l</span>      <span class="p">(</span><span class="nf">read-line</span> <span class="p">(</span><span class="nf">socket-input</span> <span class="nv">client</span><span class="p">))))</span>
   <span class="p">(</span><span class="nf">format</span> <span class="p">(</span><span class="nf">socket-output</span> <span class="nv">client</span><span class="p">)</span>
-          <span class="s">"Length is: ~a\n"</span> <span class="p">(</span><span class="nb">string-length</span> <span class="nv">l</span><span class="p">))</span>
+          <span class="s">"Length is: ~an"</span> <span class="p">(</span><span class="nb">string-length</span> <span class="nv">l</span><span class="p">))</span>
   <span class="p">(</span><span class="nf">socket-shutdown</span> <span class="nv">server</span><span class="p">))</span></code></pre>
 </div>
 </div>
@@ -14008,17 +14525,129 @@ create a socket on port 13 of the machine
 </div>
 <div class="sect2">
 <h3 id="_signals">4.20. Signals</h3>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-This section needs to be written
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> permits to associate handlers to POSIX.1 signals. When a
+signal handler is called, the integer value of this signal is passed
+to it as (the only) parameter.</p>
+</div>
+<div class="paragraph">
+<p>The following POXIX.1 values for signal numbers are defined:
+<code>SIGABRT</code> <code>SIGALRM</code>, <code>SIGFPE</code>, <code>SIGHUP</code>,<code>SIGILL</code>, <code>SIGINT</code>, <code>SIGKILL</code>,
+<code>SIGPIPE</code>, <code>SIGQUIT</code>, <code>SIGSEGV</code>, <code>SIGTERM</code>, <code>SIGUSR1</code>, <code>SIGUSR2</code>,
+<code>SIGCHLD</code>, <code>SIGCONT</code>, <code>SIGSTOP</code>, <code>SIGTSTP</code>, <code>SIGTTIN</code>, <code>SIGTTOU</code>.
+Moreover, the following constants, which are often available on most
+systems are also defined (if supported by the running system):
+<code>SIGTRAP</code>, <code>SIGIOT</code>, <code>SIGEMT</code>, <code>SIGBUS</code>, <code>SIGSYS</code>, <code>SIGURG</code>, <code>SIGCLD</code>,
+<code>SIGIO</code>, <code>SIGPOLL</code>, <code>SIGXCPU</code>, <code>SIGXFSZ</code>, <code>SIGVTALRM</code>, <code>SIGPROF</code>,
+<code>SIGWINCH</code>, <code>SIGLOST</code>.</p>
+</div>
+<div class="paragraph">
+<p>See your Unix documentation for the exact meaning of each constant or
+<a href="_bibliography.html#POSIX">[POSIX]</a>. Use symbolic constants rather than their numeric value if
+you plan to port your program on another system.</p>
+</div>
+<div id="set-signal-handler!" class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(set-signal-handler! sig handler)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Replace the handler for integer signal <code>sig</code> with <code>handler</code>.
+The value of <code>handler</code> can be:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#t</code> to reset the signal handler for <code>sig</code> to the
+default system handler.</p>
+</li>
+<li>
+<p><code>#f</code> to  ignore the <code>sig</code> signal. Note that POSIX states that
+<code>SIGKILL</code> and <code>SIGSTOP</code> cannot be ignored or caught.</p>
+</li>
+<li>
+<p>a one parameter procedure, which will be called when the
+processus  receives the signal <code>sig</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This procedure returns <strong><em>void</em></strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">x</span> <span class="no">#f</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">set-signal-handler!</span> <span class="nv">SIGUSR1</span>
+                       <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">i</span><span class="p">)</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">x</span> <span class="no">#t</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">send-signal</span> <span class="nv">SIGUSR1</span><span class="p">)</span>
+  <span class="nv">x</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(get-signal-handler! sig)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return the handler for integer signal <code>sig</code>.
+The value of <code>handler</code> can be a boolean value or a procedure.
+See <a href="_standard_procedures.html#set-signal-handler!">primitive <code>set-signal-handler!</code></a> for
+more information.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(send-signal sig)</code></strong><br>
+<strong><code>(send-signal sig pid)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Send the integer signal <code>sig</code> to the process with <code>pid</code> process id.
+If the second parameter is absent, it deaults to the one of the running
+program.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(pause)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Pauses the STklos process until the delivery of a signal whose action
+is either to execute a signal-catching function or to terminate the
+process. If the action is to terminate the process,  <code>pause</code> will not
+return. If the action is to execute a signal-catching function, <code>pause</code>
+will terminate after the signal-catching function returns.</p>
 </div>
 </div>
 <div class="sect2">
@@ -14055,8 +14684,7 @@ environment is returned. When it is called with one argument, the
 content of the cell bound to this parameter object in the current
 dynamic environment is set to the result of the call
 <code>(converter arg)</code>, where <code>arg</code> is the argument passed to the
-parameter object, and
-an unspecified value is returned.</p>
+parameter object, and an unspecified value is returned.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -14184,11 +14812,39 @@ the <code>&lt;body&gt;</code>.</p>
 they are evalued and simply ignored.</p>
 </div>
 <div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(void? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is <code>#void</code>, and <code>#f</code> otherwise.
+The usual "unspecified" result in Scheme standard and in SRFIs is <code>#void</code>
+in STklos, and it is also returned by the procedure <code>void</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">void?</span> <span class="p">(</span><span class="nf">void</span><span class="p">))</span>                    <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="p">(</span><span class="k">if</span> <span class="no">#f</span> <span class="ss">'nope</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="nv">x</span><span class="p">)</span>                         <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="o">'</span><span class="p">())</span>                       <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="ss">'something</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">void?</span> <span class="p">(</span><span class="nb">for-each</span> <span class="nv">print</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>
 </p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -14210,13 +14866,15 @@ name of the procedure which raises the error.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The specification string may follow the <em>tilde conventions</em> of
+R<sup>7</sup>RS permits only the fist form of call. Using a symbol as first
+parameter is <strong><em>STklos</em></strong> specific.
+Furthermore, the specification string may follow the <em>tilde conventions</em> of
 <code>format</code> (see <em><a href="_standard_procedures.html#format">primitive <code>format</code></a></em>); in this case this
 procedure builds an error message according to the specification
 given in <code>str</code>. Otherwise,
-this procedure is conform to the <code>error</code> procedure defined in
-<strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong> (<em>Error reporting mechanism</em>) and  <code>str</code> is printed with the <code>display</code> procedure,
-whereas the <code>obj`s are printed  with the `write</code> procedure.
+this procedure is in conformance with the <code>error</code> procedure defined in
+<strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong> (<em>Error reporting mechanism</em>) and <code>str</code> is printed with the <code>display</code> procedure,
+whereas the <code>obj</code> parameters are printed  with the <code>write</code> procedure.
 </td>
 </tr>
 </table>
@@ -14275,6 +14933,41 @@ condition which inherits from <code>&amp;error-message</code>.</p>
 </div>
 </div>
 <div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(syntax-error message arg1 &#8230;&#8203;)</code></strong><br>
+<strong><code>(syntax-error who message arg1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Syntax-error</code> behaves similarly to <code>error</code> except that it signals the
+error as soon as syntax-error is expanded. This can be use in macros to signal
+errors at compile time, without interrupting the compilation process. In
+interactive mode, under the REPL, <code>syntax-error</code> yields a true error.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS defines only the first form of call (with a string as first
+parameter).  <strong><em>STklos</em></strong> permits to use a symbol as first parameter to specify the
+location of the syntax error. It also permits the usage of  <em>tilde conventions</em>
+as the <code>error</code> primitive.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
 <p>
 </p>
 </div>
@@ -14290,9 +14983,9 @@ condition which inherits from <code>&amp;error-message</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Error type predicates. Returns #t if <code>obj</code> is an object raised
+<p>Error type predicates. Returns <code>#t</code> if <code>obj</code> is an object raised
 by the read procedure or by the inability to open an input or
-output port on a file, respectively. Otherwise, it returns #f.</p>
+output port on a file, respectively. Otherwise, it returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14308,8 +15001,8 @@ output port on a file, respectively. Otherwise, it returns #f.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns #t if obj is an object created by error. Otherwise,
-it returns #f.</p>
+<p>Returns <code>#t</code> if <code>obj</code> is an object created by error. Otherwise,
+it returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14358,7 +15051,7 @@ it returns #f.</p>
 </div>
 <div class="paragraph">
 <p>Returns the location encapsulated by <code>error-object</code> if it exists.
-Returns #f otherwise. The location corresponds generally to the name
+Returns <code>#f</code> otherwise. The location corresponds generally to the name
 of the procedure which raised the error.</p>
 </div>
 <div class="listingblock">
@@ -14448,7 +15141,7 @@ For instance,</p>
 <p>is equivalent to the requiring <code>srfi-1</code> and <code>srfi-2</code>.</p>
 </div>
 <div class="paragraph">
-<p>A list of available symbolic names for features is given in <a href="_srfis.html">Chapter 14</a>.</p>
+<p>A list of available symbolic names for features is given in <a href="_srfis.html">Chapter 13</a>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14479,7 +15172,7 @@ Consequently, to use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.htm
 </div>
 </div>
 <div class="paragraph">
-<p>See also <a href="_srfis.html">Chapter 14</a> for more information.</p>
+<p>See also <a href="_srfis.html">Chapter 13</a> for more information.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14632,12 +15325,12 @@ internal structure will be shown.</p>
 <span class="p">(</span><span class="nf">describe</span> <span class="mi">2</span><span class="nv">+3i</span><span class="p">)</span>
   <span class="mi">2</span><span class="nv">+3i</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">complex</span> <span class="nv">number</span><span class="o">.</span>
 
-<span class="p">(</span><span class="nf">describe</span> <span class="sc">#\A</span><span class="p">)</span>
-  <span class="sc">#\A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
+<span class="p">(</span><span class="nf">describe</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>
+  <span class="o">#</span><span class="nv">A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>Using `describe on a class</strong></p>
+<p><strong>Using <code>describe</code> on a class</strong></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -14745,6 +15438,106 @@ the current error port. As a special convention, if <code>port</code> is <code>#
 output goes to the current output port and if <code>port</code> is <code>#f</code>, the output
 is returned as a string by <code>pretty-print</code>.
 Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(procedure-formals proc)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the formal parameters of procedure <code>proc</code>.
+Note that procedure formal parameters are kept in memory only if
+the compiler flag &lt;&lt;"compiler:keep-formals"&gt;&gt; is set at its creation.
+If <code>proc</code> formal parameters are not available, <code>procedure-formals</code>
+returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(procedure-source proc)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the source form used to define procedure <code>proc</code>.
+Note that procedure source is kept in memory only if the compiler flag
+&lt;&lt;"compiler:keep-source"&gt;&gt; is set at its creation. If <code>proc</code> source is
+not available, <code>procedure-source</code> returns <code>#f</code>.</p>
+</div>
+<div id="ansicolor" class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(ansi-color e1 e2 &#8230;&#8203; en)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>ansi-color</code> permits to build a string which embeds ANSI codes to
+colorize texts on a terminal. Each expression e<sub>i</sub> must be a string,
+a symbol or an integer.</p>
+</div>
+<div class="paragraph">
+<p>Strings constitute the message to be displayed.</p>
+</div>
+<div class="paragraph">
+<p>A symbol can designate</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a color in the set {<code>black</code>, <code>red</code>, <code>green</code>, <code>yellow</code>, <code>blue</code>,
+<code>magenta</code>, <code>cyan</code>, <code>white</code>} for foreground colors</p>
+</li>
+<li>
+<p>a color in the set {<code>bg-black</code>, <code>bg-red</code>, <code>bg-green</code>, <code>bg-yellow</code>,
+<code>bg-blue</code>, <code>bg-magenta</code>, <code>bg-cyan</code>, <code>bg-white</code>} for background colors.</p>
+</li>
+<li>
+<p>a qualifier such as <code>normal</code>, <code>bold</code>, <code>italic</code>, <code>underline</code>, <code>blink</code>,
+<code>reverse</code> or <code>no-bold</code>, <code>no-italic</code>, <code>no-underline</code>, <code>no-blink</code>,
+<code>no-reverse</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Integer values can be used for terminals which are able to display  256 colors.
+If the number is positive, it is used as a foreground color. Otherwise,
+it is uses as a background color. Note that not all the terminals are able to
+use more than eight colors.</p>
+</div>
+<div class="paragraph">
+<p>For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nf">ansi-color</span> <span class="s">"a word in "</span>
+                     <span class="ss">'bold</span> <span class="ss">'red</span> <span class="s">"RED"</span> <span class="ss">'normal</span>
+                     <span class="s">" and another in "</span>
+                     <span class="ss">'reverse</span> <span class="ss">'blue</span> <span class="s">"BLUE"</span> <span class="ss">'normal</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will display the words BLUE and RED in color.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14878,7 +15671,7 @@ the table of the contants used in <code>sexpr</code> is also printed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Parses the string <code>str</code> as a RFC-2396 URI and return a keyed list with the
+<p>Parses the string <code>str</code> as an RFC-2396 URI and return a keyed list with the
 following components</p>
 </div>
 <div class="ulist">
@@ -14910,11 +15703,11 @@ empty string)</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"http://google.com"</span><span class="p">)</span>
-   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">:scheme</span> <span class="s">"http"</span> <span class="nv">:user</span> <span class="s">""</span> <span class="nv">:host</span> <span class="s">"google.com"</span> <span class="nv">:port</span> <span class="mi">80</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"https://stklos.net"</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">:scheme</span> <span class="s">"https"</span> <span class="nv">:user</span> <span class="s">""</span> <span class="nv">:host</span> <span class="s">"stklos.net"</span> <span class="nv">:port</span> <span class="mi">443</span>
         <span class="nv">:path</span> <span class="s">"/"</span> <span class="nv">:query</span> <span class="s">""</span> <span class="nv">:fragment</span> <span class="s">""</span><span class="p">)</span>
 
-<span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"http://stklos.net:8080/a/file?x=1;y=2#end"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">uri-parse</span> <span class="s">"https://stklos.net:8080/a/file?x=1;y=2#end"</span><span class="p">)</span>
     <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">:scheme</span> <span class="s">"http"</span> <span class="nv">:user</span> <span class="s">""</span> <span class="nv">:host</span> <span class="s">"stklos.net"</span> <span class="nv">:port</span> <span class="mi">8080</span>
         <span class="nv">:path</span> <span class="s">"/a/file"</span> <span class="nv">:query</span> <span class="s">"x=1;y=2"</span> <span class="nv">:fragment</span> <span class="s">"end"</span><span class="p">)</span>
 
@@ -14946,7 +15739,7 @@ empty string)</p>
 </div>
 <div class="paragraph">
 <p>This primitive is a convenience function; it returns a string where
-the HTML special chars are properly translated. It can easily written
+the HTML special chars are properly translated. It can easily be written
 in Scheme, but this version is fast.</p>
 </div>
 <div class="listingblock">
@@ -15068,7 +15861,7 @@ encoded format.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(base64-encode-string str)</code></strong><br></p>
+<p><strong><code>(base64-decode-string str)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -15097,12 +15890,12 @@ encoded format.</p>
 <a href="#_footnoteref_1">1</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<a href="#_footnoteref_2">2</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 18:56:10 +0100
+Last updated 2023-07-22 20:08:25 +0200
 </div>
 </div>
 </body>

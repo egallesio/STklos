@@ -106,7 +106,10 @@ doc>
                                                      (if (negative? x)
                                                          "negative"
                                                          "positive")))
-                              ((nan? x)      (format port "a non-number (NaN)"))
+                              ((nan? x)      (format port "a ~aquiet, ~anegative non-number (NaN), with payload ~a"
+                                                     (if (nan-quiet? x) "" "non-")
+                                                     (if (nan-negative? x) "" "non-")
+                                                     (nan-payload x)))
                               ((real? x)     (format port "a real number"))
                               ((complex? x)  (format port
                                                      "an inexact complex number")))))
@@ -125,7 +128,7 @@ doc>
                                     (if (symbol-mutable? x) "" "im"))))))
      ((keyword? x)      (format port "a keyword"))
      ((pair?    x)      (format port "a non-empty list"))
-     ((string?  x)      (if (eqv? x "")
+     ((string?  x)      (if (zero? (string-length x))
                             (format port "an empty string")
                             (format port "a string of length ~s"
                                     (string-length x))))
@@ -229,7 +232,7 @@ doc>
   ;; Super classes
   (format port "Superclasses are:~%")
   (for-each (lambda (class) (format port "    ~A~%" (class-name class)))
-       (class-direct-supers x))
+       (class-direct-superclasses x))
 
   ;; Direct slots
   (let ((slots (class-direct-slots x)))

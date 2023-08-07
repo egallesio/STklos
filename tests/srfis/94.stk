@@ -1,134 +1,143 @@
 
-(define epsilon 0.000001)
-(define (close x y)
-  (< (abs (- x y)) epsilon))
+;; SRFI-94 redefines core bindings, so we test it inside a module
 
-(define (test-many proc inv-proc list-args)
-  (let ((proc-name (with-output-to-string
-                     (lambda ()
-                       (display proc)))))
-    (let ((procs-name (with-output-to-string
-                        (lambda ()
-                          (display inv-proc)
-                          "--" proc-name))))
-      (for-each (lambda (arg)
-                  (test (string-append procs-name " " (number->string arg))
+(define-module srfi-94-test
+  (import (except SCHEME
+                  make-rectangular
+                  make-polar
+                  quotient
+                  remainder
+                  modulo)
+          (srfi 94))
+
+
+  (define epsilon 0.000001)
+  (define (close x y)
+    (< (abs (- x y)) epsilon))
+
+  (define (test-many proc inv-proc list-args)
+    (let ((proc-name (with-output-to-string
+                       (lambda ()
+                         (display proc)))))
+      (let ((procs-name (with-output-to-string
+                          (lambda ()
+                            (display inv-proc)
+                            "--" proc-name))))
+        (for-each (lambda (arg)
+                    (test (string-append procs-name " " (number->string arg))
+                          #t
+                          (close (inv-proc (proc arg)) arg))
+                    (test (string-append proc-name " " (number->string arg) " is real?")
+                          #t
+                          (real? (proc arg))))
+                  list-args))))
+
+  (define (do-test)
+
+    (test/error "real-exp args" (real-exp 0+0.0i))
+    (test/error "real-ln args" (real-ln  0+0.0i))
+    (test/error "real-log args 1" (real-log 0+0.0i 1))
+    (test/error "real-log args 2" (real-log 1 0+0.0i))
+    (test/error "real-sin args" (real-sin 0+0.0i))
+    (test/error "real-cos args" (real-cos 0+0.0i))
+    (test/error "real-tan args" (real-tan 0+0.0i))
+    (test/error "real-asin args" (real-asin 0+0.0i))
+    (test/error "real-acos args" (real-acos 0+0.0i))
+    (test/error "real-atan args" (real-atan 0+0.0i))
+
+    (test-many real-exp real-ln '(0.5 1.0 1.5 1/3 10 20.5))
+    (test-many real-ln real-exp '(0.5 1.0 1.5 1/3 10 20.5))
+
+    (test-many real-sin real-asin '(0.5 1.0 1.5 1/3))
+    (test-many real-sin asin '(0.5 1.0 1.5 1/3))
+    (test-many sin real-asin '(0.5 1.0 1.5 1/3))
+
+    (test-many real-asin real-sin '(0.5 1.0 1/3))
+    (test-many real-asin sin '(0.5 1.0 1/3))
+    (test-many asin real-sin '(0.5 1.0 1/3))
+
+    (test-many real-cos real-acos '(0.5 1.0 1.5 1/3))
+    (test-many real-cos acos '(0.5 1.0 1.5 1/3))
+    (test-many cos real-acos '(0.5 1.0 1.5 1/3))
+
+    (test-many real-acos real-cos '(0.5 1.0 1/3))
+    (test-many real-acos cos '(0.5 1.0 1/3))
+    (test-many acos real-cos '(0.5 1.0 1/3))
+
+    (test-many real-tan real-atan '(0.5 1.0 1.5 1/3))
+    (test-many real-tan atan '(0.5 1.0 1.5 1/3))
+    (test-many tan real-atan '(0.5 1.0 1.5 1/3))
+    (test-many tan atan '(0.5 1.0 1.5 1/3))
+
+    (test-many real-atan real-tan '(0.5 1.0 1.5 1/3))
+    (test-many real-atan tan '(0.5 1.0 1.5 1/3))
+    (test-many atan real-tan '(0.5 1.0 1.5 1/3))
+    (test-many atan tan '(0.5 1.0 1.5 1/3))
+
+    (test/error "atan args" (atan 1 0+0.0i))
+
+    (test/error "real-sqrt args" (real-sqrt -1))
+
+    (test-many real-sqrt square '(0.5 1.0 2.0 4.0 1/3 10.5))
+
+    (test/error "integer-sqrt args 1" (integer-sqrt 2.5))
+    (test/error "integer-sqrt args 2" (integer-sqrt 7/2))
+    (test "integer-sqrt 0" 1 (integer-sqrt 2))
+    (test "integer-sqrt 1" 3 (integer-sqrt 9))
+    (test "integer-sqrt 2" 3 (integer-sqrt 10))
+
+    (test/error "integer-log args 1" (integer-log  -1 2))
+    (test/error "integer-log args 2" (integer-log  1 -2))
+    (test/error "integer-log args 3" (integer-log  (/ 1 2) 2))
+    (test/error "integer-log args 4" (integer-log  3 2/5))
+    (test "integer-log" 3 (integer-log  2 12))
+    (test "integer-log" 4 (integer-log  2 16))
+
+    (test/error "integer-expt args 3" (integer-expt (/ 1 2) 2))
+    (test/error "integer-expt args 4" (integer-expt 1 1/2))
+    (test/error "integer-expt args 5" (integer-expt 0.5 1))
+    (test "integer-expt" 81 (integer-expt 3 4))
+
+    (test "integer-expt 0^n" 0 (integer-expt 0 2))
+    (test "integer-expt 0^0" 1 (integer-expt 0 0))
+    (test/error "integer-expt args 6" (integer-expt 0 -1))
+
+    (test/error "real-expt args 1" (real-expt 1+0.0i 1))
+    (test/error "real-expt args 2" (real-expt 1 1+0.0i))
+    (test/error "real-expt args 3" (real-expt -2.0 0.5)) ; result is complex
+    (test "real-expt" 2.25 (real-expt 1.5 2.0))
+
+    (test/error "quo args" (quo 1 0))
+    (test "quo" 3 (quo 2/3 1/5))
+
+    (test/error "rem args" (rem 1 0))
+
+    (test/error "mod args" (mod 1 0))
+    (test "mod 1" 1/15 (mod 2/3 1/5))
+
+
+    (for-each (lambda (args)
+                (let ((x1 (car args))
+                      (x2 (cadr args)))
+                  (test (string-append "quo-rem" (number->string x1) " " (number->string x2))
                         #t
-                        (close (inv-proc (proc arg)) arg))
-                  (test (string-append proc-name " " (number->string arg) " is real?")
-                        #t
-                        (real? (proc arg))))
-                list-args))))
+                        (= x1 (+ (* x2 (quo x1 x2))
+                                 (rem x1 x2))))))
+              '( (.666 1/5)
+                 (20.1 1/3)
+                 (1/3 1/7)
+                 (4 2)
+                 (1 3)
+                 (0.00000001 5) ))
 
+    (test/error "make-rectangular args" (make-rectangular 2+1i 1.0))
+    (test/error "make-polar args" (make-polar 2+1i 1.0))
 
-(test/error "real-exp args" (real-exp 0+0i))
-(test/error "real-ln args" (real-ln  0+0i))
-(test/error "real-log args 1" (real-log 0+0i 1))
-(test/error "real-log args 2" (real-log 1 0+0i))
-(test/error "real-sin args" (real-sin 0+0i))
-(test/error "real-cos args" (real-cos 0+0i))
-(test/error "real-tan args" (real-tan 0+0i))
-(test/error "real-asin args" (real-asin 0+0i))
-(test/error "real-acos args" (real-acos 0+0i))
-(test/error "real-atan args" (real-atan 0+0i))
+    (test/error "quotient args" (quotient 2.0 1.0))
+    (test/error "modulo args" (modulo 1.0 2.0))
+    (test/error "remainder args" (remainder 2.0 1.0))
 
-(test-many real-exp real-ln '(0.5 1.0 1.5 1/3 10 20.5))
-(test-many real-ln real-exp '(0.5 1.0 1.5 1/3 10 20.5))
+    ) ; do-test
+  ) ;; module
 
-(test-many real-sin real-asin '(0.5 1.0 1.5 1/3))
-(test-many real-sin asin '(0.5 1.0 1.5 1/3))
-(test-many sin real-asin '(0.5 1.0 1.5 1/3))
-
-(test-many real-asin real-sin '(0.5 1.0 1/3))
-(test-many real-asin sin '(0.5 1.0 1/3))
-(test-many asin real-sin '(0.5 1.0 1/3))
-
-(test-many real-cos real-acos '(0.5 1.0 1.5 1/3))
-(test-many real-cos acos '(0.5 1.0 1.5 1/3))
-(test-many cos real-acos '(0.5 1.0 1.5 1/3))
-
-(test-many real-acos real-cos '(0.5 1.0 1/3))
-(test-many real-acos cos '(0.5 1.0 1/3))
-(test-many acos real-cos '(0.5 1.0 1/3))
-
-(test-many real-tan real-atan '(0.5 1.0 1.5 1/3))
-(test-many real-tan atan '(0.5 1.0 1.5 1/3))
-(test-many tan real-atan '(0.5 1.0 1.5 1/3))
-(test-many tan atan '(0.5 1.0 1.5 1/3))
-
-(test-many real-atan real-tan '(0.5 1.0 1.5 1/3))
-(test-many real-atan tan '(0.5 1.0 1.5 1/3))
-(test-many atan real-tan '(0.5 1.0 1.5 1/3))
-(test-many atan tan '(0.5 1.0 1.5 1/3))
-
-(test/error "atan args" (atan 1 0+0i))
-
-(test/error "real-sqrt args" (real-sqrt -1))
-
-(define (square x) (* x x))
-(test-many real-sqrt square '(0.5 1.0 2.0 4.0 1/3 10.5))
-
-(test/error "integer-sqrt args" (integer-sqrt 2))
-(test "integer-sqrt 1" 3 (integer-sqrt 9))
-(test "integer-sqrt 2" 3 (integer-sqrt 10))
-
-(test/error "integer-log args 1" (integer-log  -1 2))
-(test/error "integer-log args 2" (integer-log  1 -2))
-(test/error "integer-log args 3" (integer-log  (/ 1 2) 2))
-(test/error "integer-log args 4" (integer-log  3 2/5))
-(test "integer-log" 3 (integer-log  2 12))
-(test "integer-log" 4 (integer-log  2 16))
-
-(test/error "integer-expt args 1" (integer-expt -1 2))
-(test/error "integer-expt args 2" (integer-expt 1 -2))
-(test/error "integer-expt args 3" (integer-expt (/ 1 2) 2))
-(test/error "integer-expt args 4" (integer-expt 1 1/2))
-(test/error "integer-expt args 5" (integer-expt 0.5 1))
-(test "integer-expt" 81 (integer-expt 3 4))
-
-(test "integer-expt 0^n" 0 (integer-expt 0 2))
-(test "integer-expt 0^0" 1 (integer-expt 0 0))
-(test/error "integer-expt args 6" (integer-expt 0 -1))
-
-(test/error "real-expt args 1" (real-expt 1+0i 1))
-(test/error "real-expt args 2" (real-expt 1 1+0i))
-(test/error "real-expt args 3" (real-expt 0.0 -1))
-(test "real-expt" 2.25 (real-expt 1.5 2.0))
-
-(test/error "quo args" (quo 1 0))
-(test "quo" 3 (quo 2/3 1/5))
-
-(test/error "rem args" (rem 1 0))
-
-(test/error "mod args" (mod 1 0))
-(test "mod 1" 1/15 (mod 2/3 1/5))
-
-
-(for-each (lambda (args)
-            (let ((x1 (car args))
-                  (x2 (cadr args)))
-              (test (string-append "quo-rem" (number->string x1) " " (number->string x2))
-                    #t
-                    (= x1 (+ (* x2 (quo x1 x2))
-                             (rem x1 x2))))))
-          '( (.666 1/5)
-             (20.1 1/3)
-             (1/3 1/7)
-             (4 2)
-             (1 3)
-             (0.00000001 5) ))
-
-(test/error "make-rectangular args" (make-rectangular 2+1i 1.0))
-(test/error "make-polar args" (make-polar 2+1i 1.0))
-
-(test/error "quotient args" (quotient 2.0 1.0))
-(test/error "modulo args" (modulo 1.0 2.0))
-(test/error "remainder args" (remainder 2.0 1.0))
-
-;;// ;; SRFI-94 changes the semantics of these, and they are tested later, so we need
-;;// ;; to get their previous definitions:
-;;// (define make-rectangular %make-rectangular)
-;;// (define make-polar %make-polar)
-;;// (define quotient %quotient)
-;;// (define remainder %remainder)
-;;// (define modulo %modulo)
+((in-module srfi-94-test do-test))

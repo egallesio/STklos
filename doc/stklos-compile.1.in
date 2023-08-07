@@ -52,7 +52,7 @@ or even modules that the compiled file will use.
 Defines <feature> (which should be an unquoted symbol) to be
 recognized by cond-expand in the compiled code.
 .IP "--line-info, -l"
-Generate line informations to ease debugging (incurs a small
+Generate line information to ease debugging (incurs a small
 performance penalty).
 .IP "--show-instructions, -S"
 Produce the VM instructions in the generated file. Actually,

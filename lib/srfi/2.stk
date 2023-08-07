@@ -145,8 +145,18 @@
 
 (define-module srfi/2
   (export and-let*)
-  
-  (define-syntax and-let*
+
+  ;; The original version of this code is below. As a lot of other Scheme,
+  ;; this version accepts expressions such as
+  ;;   (and-let* (#f (a 1)))
+  ;;   (and-let* (2  (a 1)))
+  ;; which tagged as incorrect in the SRFI. On the other side,
+  ;;   (let ((b 10)) (and-let* (b (a 1))))
+  ;; is correct.
+  ;; It is difficult to impose that the first expression be a symbol with
+  ;; syntax-rules. So this code was rewritten with old macros.
+
+  #;(define-syntax and-let*
     (syntax-rules ()
       ((_ ())
        #t)
@@ -166,6 +176,46 @@
       ((_ (id . claw*) . body)
        (and id (and-let* claw* . body)))
       ((_ . _)
-       (syntax-error "ill-formed and-let* form")))))
+       (syntax-error "ill-formed and-let* form"))))
+
+  ;; ----------------------------------------------------------------------
+  ;; The following code is a rewrite of the SLIB implementation of SRFi-2.
+  ;; Added syntax-error messages.
+  ;; (May 2023)
+  ;; ----------------------------------------------------------------------
+  (define-macro (and-let* claws . body)
+    (define (andin claw rest)
+      (if (and (pair? rest) (eq? 'and (car rest)))
+          `(and ,claw ,@(cdr rest))
+          `(and ,claw ,rest)))
+
+    ;; body of and-let*
+    (if (list? claws)
+        (let Loop ((claws (reverse claws))
+                   (res   (cond
+                           ((null? body)       '(and))
+                           ((null? (cdr body)) (car body))
+                           (else               (cons 'begin body)))))
+          (cond
+           ((null? claws)
+            res)
+           ((pair? claws)
+            (let ((claw (car claws))
+                  (rest (cdr claws)))
+              (Loop rest
+                    (cond
+                     ((symbol? claw)
+                      (andin claw res))
+                     ((and (pair? claw) (null? (cdr claw)))
+                      (andin (car claw) res))
+                     (else
+                      (if (pair? claw)
+                          `(let (,claw) ,(andin (car claw) res))
+                          (syntax-error 'and-let* "symbol expected (was ~s)"
+                                        claw)))))))
+           (else (syntax-error 'and-let* "bad form: ~s" claws))))
+        (syntax-error 'and-let* "claws is not a list (was ~s)" claws))))
+
+
 
 (provide "srfi/2")

@@ -2,7 +2,7 @@
 ;;;;
 ;;;; srfi-180.stk         -- Implementation of SRFI-180 (JSON)
 ;;;;
-;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -50,8 +50,7 @@
 ;;;;
 
 (define-module srfi/180
-  (import (srfi 9)
-          (srfi 60))
+  (import (srfi 60))
   (export json-number-of-character-limit
           json-nesting-depth-limit
           json-null?

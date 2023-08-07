@@ -52,7 +52,6 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet
 
 
 ### Checks for typedefs, structures, and compiler characteristics.
-AC_C_INLINE
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
@@ -69,7 +68,7 @@ AC_FUNC_MKTIME
 AC_FUNC_REALLOC
 AC_FUNC_STRCOLL
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday glob inet_ntoa isascii memchr memmove memset mkdir modf putenv rmdir select socket sqrt strcasecmp strchr strerror strrchr strstr strtoul])
+AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname gethostname getpass clock_gettime glob inet_ntoa isascii memchr memmove memset mkdir modf putenv rmdir select socket sqrt strcasecmp strchr strerror strrchr strstr strtoul utimensat])
 
 AC_CHECK_FUNCS(backtrace, , AC_CHECK_LIB(execinfo, backtrace))
 
@@ -654,14 +653,15 @@ AC_SUBST(GOOVERS)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
+          doc/pp/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script utils/tmpcomp examples/Makefile
+          utils/stklos-script examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
-          lib/scheme/Makefile lib/srfi/Makefile
-          lib/stklos/Makefile lib/streams/Makefile
+          lib/scheme/Makefile lib/scheme/vector/Makefile
+          lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile
           tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
-          doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
+          doc/stklos-genlex.1 doc/stklos-pp.1 doc/stklos-script.1
 
           lib/srfi/160/Makefile
 
@@ -687,7 +687,7 @@ AC_OUTPUT
 # Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
-chmod 0755 utils/stklos-config utils/stklos-script utils/tmpcomp
+chmod 0755 utils/stklos-config utils/stklos-script
 
 
 echo " "

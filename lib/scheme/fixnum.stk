@@ -1,0 +1,55 @@
+;;;;
+;;;;
+;;;; fixnum.stk       -- A relay for (scheme fixnum) -- aka SRFI-143
+;;;;                    Note that this SRFI is available by default in STklos
+;;;;
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 18-Mar-2022 13:08
+;;;;
+
+(define-module (scheme fixnum)
+  (import (only SCHEME
+                 fx-width fx-greatest fx-least
+                 fixnum? fx=? fx<? fx>? fx<=? fx>=?
+                 fxzero? fxpositive? fxnegative?
+                 fxodd? fxeven? fxmax fxmin
+                 fx+ fx- fxneg fx* fxquotient fxremainder
+                 fxabs fxsquare fxsqrt
+                 fx+/carry fx-/carry fx*/carry
+                 fxnot fxand fxior fxxor fxarithmetic-shift
+                 fxarithmetic-shift-left fxarithmetic-shift-right
+                 fxbit-count fxlength fxif fxbit-set? fxcopy-bit
+                 fxfirst-set-bit fxbit-field
+                 fxbit-field-rotate fxbit-field-reverse))
+  (export fx-width fx-greatest fx-least
+          fixnum? fx=? fx<? fx>? fx<=? fx>=?
+          fxzero? fxpositive? fxnegative?
+          fxodd? fxeven? fxmax fxmin
+          fx+ fx- fxneg fx* fxquotient fxremainder
+          fxabs fxsquare fxsqrt
+          fx+/carry fx-/carry fx*/carry
+          fxnot fxand fxior fxxor fxarithmetic-shift
+          fxarithmetic-shift-left fxarithmetic-shift-right
+          fxbit-count fxlength fxif fxbit-set? fxcopy-bit
+          fxfirst-set-bit fxbit-field
+          fxbit-field-rotate fxbit-field-reverse))
+
+(provide "scheme/fixnum")

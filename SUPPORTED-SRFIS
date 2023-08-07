@@ -52,6 +52,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-41: Streams
     - SRFI-43: Vector library
     - SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
+    - SRFI-46: Basic Syntax-rules Extensions
     - SRFI-48: Intermediate Format Strings
     - SRFI-51: Handling rest list
     - SRFI-54: Formatting
@@ -125,8 +126,10 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda
     - SRFI-221: Generator/accumulator sub-library
+    - SRFI-222: Compound objects
     - SRFI-223: Generalized binary search procedures
     - SRFI-224: Integer Mappings
+    - SRFI-227: Optional Arguments
     - SRFI-228: A further comparator library
     - SRFI-229: Tagged Procedures
     - SRFI-230: Atomic Operations

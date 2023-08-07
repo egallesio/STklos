@@ -2,7 +2,7 @@
 ;;;;
 ;;;; runtime-macros.stk         -- Macros available at bootstrap
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 
 ;;;;
 ;;;; WHEN/UNLESS
-;;;; 
+;;;;
 (define-macro (when . args)
   (if (<= (length args) 1)
       (syntax-error 'when "bad syntax in ~S" `(when ,@args))
@@ -85,8 +85,24 @@
           (not (eq? (car syn-rules) 'syntax-rules)))
       (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
 
-      (let ((keywords    (cons macro-name (cadr syn-rules)))
-            (clauses     (cddr syn-rules))
-            (find-clause (symbol-value 'find-clause (find-module 'MBE))))
-        `(define-macro (,macro-name . args)
-           (%find-macro-clause ',macro-name args ',keywords ',clauses)))))
+      ;; SRFI-46:
+      ;; Let the user pick the ellipsis symbol. Since STklos does not recognize
+      ;; symbols starting with ":", we test for symbol and keyword here.
+      ;; If we find that the user included a symbol or keyword instead of a list
+      ;; after "SYNTAX-RULES", then it's the ellipsis marker to be used,
+      ;; (SYNTAX-RULES ::: () ((_ (f x :::)) (do-something x :::)))
+      (let ((ellipsis '...))
+        (when (or (symbol?  (cadr syn-rules))
+                  (keyword? (cadr syn-rules)))
+          (set! ellipsis (cadr syn-rules))
+          (set! syn-rules (cdr syn-rules)))
+
+
+        (let ((keywords    (cons macro-name (cadr syn-rules)))
+              (clauses     (cddr syn-rules))
+              (find-clause (symbol-value 'find-clause (find-module 'MBE))))
+          `(define-macro (,macro-name . args)
+             (%find-macro-clause ',macro-name args
+                                 ',keywords
+                                 ',clauses
+                                 ',ellipsis))))))

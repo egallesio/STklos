@@ -36,7 +36,7 @@
    `(begin ,@(map (lambda (symb) `(define ,symb #void))
                   lst)))
 
-  (%define-here ... => _ and begin case cond define define-record-type
+  (%define-here ... => _ and begin case cond define
                 do else if lambda let let* letrec let-syntax letrec-syntax or
                 quasiquote quote syntax-rules unquote unquote-splicing)
   ;; HACK END

@@ -262,6 +262,9 @@ struct codeset_code STk_errno_names[] = {
 #ifdef EDEADLK
     CODESET_ERRNO(EDEADLK)
 #endif
+#ifdef EDEADLOCK
+    CODESET_ERRNO(EDEADLOCK)
+#endif
 #ifdef EDESTADDRREQ
     CODESET_ERRNO(EDESTADDRREQ)
 #endif
@@ -343,14 +346,14 @@ struct codeset_code STk_errno_names[] = {
 #ifdef ELIBBAD
     CODESET_ERRNO(ELIBBAD)
 #endif
+#ifdef ELIBEXEC
+    CODESET_ERRNO(ELIBEXEC)
+#endif
 #ifdef ELIBMAX
     CODESET_ERRNO(ELIBMAX)
 #endif
 #ifdef ELIBSCN
     CODESET_ERRNO(ELIBSCN)
-#endif
-#ifdef ELIBEXEC
-    CODESET_ERRNO(ELIBEXEC)
 #endif
 #ifdef ELNRANGE
     CODESET_ERRNO(ELNRANGE)
@@ -475,6 +478,9 @@ struct codeset_code STk_errno_names[] = {
 #ifdef ENXIO
     CODESET_ERRNO(ENXIO)
 #endif
+#ifdef EOPNOTSUPP
+    CODESET_ERRNO(EOPNOTSUPP)
+#endif
 #ifdef EOVERFLOW
     CODESET_ERRNO(EOVERFLOW)
 #endif
@@ -523,11 +529,11 @@ struct codeset_code STk_errno_names[] = {
 #ifdef ESHUTDOWN
     CODESET_ERRNO(ESHUTDOWN)
 #endif
-#ifdef ESPIPE
-    CODESET_ERRNO(ESPIPE)
-#endif
 #ifdef ESOCKTNOSUPPORT
     CODESET_ERRNO(ESOCKTNOSUPPORT)
+#endif
+#ifdef ESPIPE
+    CODESET_ERRNO(ESPIPE)
 #endif
 #ifdef ESRCH
     CODESET_ERRNO(ESRCH)
@@ -559,35 +565,14 @@ struct codeset_code STk_errno_names[] = {
 #ifdef EUSERS
     CODESET_ERRNO(EUSERS)
 #endif
+#ifdef EWOULDBLOCK
+    CODESET_ERRNO(EWOULDBLOCK)
+#endif
 #ifdef EXDEV
     CODESET_ERRNO(EXDEV)
 #endif
 #ifdef EXFULL
     CODESET_ERRNO(EXFULL)
-#endif
-
-
-#ifdef EOPNOTSUPP
-    CODESET_ERRNO(EOPNOTSUPP)
-#endif
-#ifdef ENOTSUP
-    CODESET_ERRNO(EOPNOTSUPP)
-#endif
-
-
-#ifdef EWOULDBLOCK
-    CODESET_ERRNO(EWOULDBLOCK)
-#endif
-#ifdef EAGAIN
-    CODESET_ERRNO(EAGAIN)
-#endif
-
-
-#ifdef EDEADLOCK
-    CODESET_ERRNO(EDEADLOCK)
-#endif
-#ifdef EDEADLK
-    CODESET_ERRNO(EDEADLK)
 #endif
     {NULL, 0}
 };
@@ -1473,6 +1458,29 @@ doc>
 /* Offset: https://fr.wikipedia.org/wiki/Temps_atomique_international */
 #define TAI_OFFSET +37.0L
 
+#ifndef HAVE_CLOCK_GETTIME
+#  ifndef CLOCK_REALTIME
+#    define CLOCK_REALTIME 1  /* to avoid undeclared identifier later */
+#  endif
+
+int clock_gettime(clockid_t _UNUSED(clockid), struct timespec *tp)
+{
+  /* System doesn't provide clock_gettime. Define ours, which  always
+   * returns a CLOCK_REALTIME time.
+   * NOTE: We cannot have a error if clockid is not CLOCK_REALTIME since
+   * GC is initialized with CLOCK_MONOTONIC. Consequently, the result
+   * with CLOCK_MONOTONIC may in some circumstances go backward.
+   */
+  struct timeval tv;
+
+  gettimeofday(&tv, NULL);
+  tp->tv_sec  = tv.tv_sec;
+  tp->tv_nsec = tv.tv_usec * 1000;
+  return 0;
+}
+#endif
+
+
 DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
 {
   /* R7RS states: Neither high accuracy nor high precision are
@@ -1592,7 +1600,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
   int overflow;
   SCM argv[12];
   struct tm *t;
-  time_t tt;
+  time_t tt = (time_t) 0L;
   long nsec = 0L;
 
   if (INTP(seconds)) {
@@ -1843,6 +1851,11 @@ DEFINE_PRIMITIVE("hostname", hostname, subr0, (void))
 <doc EXT pause
  * (pause)
  *
+ * Pauses the STklos process until the delivery of a signal whose action
+ * is either to execute a signal-catching function or to terminate the
+ * process. If the action is to terminate the process,  |pause| will not
+ * return. If the action is to execute a signal-catching function, |pause|
+ * will terminate after the signal-catching function returns.
 doc>
 */
 DEFINE_PRIMITIVE("pause", pause, subr0, (void))

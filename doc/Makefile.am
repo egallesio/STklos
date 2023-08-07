@@ -1,6 +1,6 @@
 # Makefile.am for STklos documentation
 #
-# Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
-	        stklos-pkg.1 stklos-script.1
+	        stklos-pp.1 stklos-script.1
 EXTRA_DIST    = $(man_MANS)
 
 DOCDB       = DOCDB
@@ -45,13 +45,16 @@ dochtml_DATA= HTML/stklos-ref.html
 docimgdir   = $(doclocation)/html/images
 docimg_DATA = HTML/images/hierarchy.png
 
-SUBDOCS     = refman
+SUBDOCS     = refman vm hacking pp
 
-all: $(DOCDB)
+all: $(DOCDB) ../utils/stklos-pp
 	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
 
 extradoc: $(DOCDB)
 	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
+
+../utils/stklos-pp:
+	(cd ../utils; $(MAKE) stklos-pp)
 
 #
 # Database construction

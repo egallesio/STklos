@@ -35,11 +35,7 @@
           (string<? (format "~a" s1) (format "~a" s2)))))
 
 (define (library-symbols name)
-  (let ((symbs  (module-symbols (find-module name))))
-    ;; Delete the symbols %module-symbols and %make-syntax used for module
-    ;; management
-    (sort-list (filter (lambda (x) (not (memq x '(%module-restore %make-syntax))))
-                       symbs))))
+  (sort-list (module-symbols (find-module name))))
 
 (define (library-exports name)
   (sort-list (%module-exports (find-module name))))
@@ -49,20 +45,21 @@
 
 (test-subsection "Testing library syntax")
 
-(test/error "bad library name.1"
-            (define-library (a (b (c))) (export d) (begin (define d 1000))))
 
-(test/error "bad library name.2"
-            (define-library #(a (b)) (export d) (begin (define d 1000))))
+(test/compile-error "bad library name.1"
+                    (define-library (a (b (c))) (export d) (begin (define d 1000))))
 
-(test/error "bad library name.3"
-            (define-library "a" (export d) (begin (define d 1000))))
+(test/compile-error "bad library name.2"
+                    (define-library #(a (b)) (export d) (begin (define d 1000))))
 
-(test/error "bad library name.4"
-            (define-library 10 (export d) (begin (define d 1000))))
+ (test/compile-error "bad library name.3"
+                    (define-library "a" (export d) (begin (define d 1000))))
 
-(test/error "bad library name.5"
-            (define-library (a . b)))
+(test/compile-error "bad library name.4"
+                    (define-library 10 (export d) (begin (define d 1000))))
+
+(test/compile-error "bad library name.5"
+                    (define-library (a . b)))
 
 (define-library (lib-one lib-two) (export three) (begin (define three 3)))
 

@@ -204,7 +204,7 @@ int STk_uvector_equal(SCM u1, SCM u2)
 
 
 /* Duplicated from number.c: */
-static Inline SCM Cmake_complex(SCM r, SCM i)
+static inline SCM Cmake_complex(SCM r, SCM i)
 {
   SCM z;
 

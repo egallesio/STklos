@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
-<title>STklos Reference Manual : (version 1.70)</title>
+<title>stklos-pp: a STklos Preprocessor</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -728,153 +725,164 @@ pre.rouge {
         handleTocOnResize();
     });
 </script>
-<style>.toc-current{font-weight: bold;} .toc-root{font-family: "Open Sans","DejaVu Sans",sans-serif;
-                       font-size: 0.9em;} #content{display: flex; flex-direction: column; flex: 1 1 auto;}
-             .nav-footer{text-align: center; margin-top: auto;}
-             .nav-footer > p > a {white-space: nowrap;}</style>
 </head>
-<body id="_customizations" class="book toc2 toc-left">
+<body class="book toc2 toc-left">
 <div id="header">
-<h1>STklos Reference Manual : (version 1.70)</h1>
+<h1>stklos-pp: a STklos Preprocessor</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
-<p><span class="toc-root"><a href="stklos-ref-multi.html">STklos Reference Manual : (version 1.70)</a></span></p><ul class="sectlevel1">
-<li><a href="_preface.html">Preface</a>
+<ul class="sectlevel1">
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_variables">Variables</a>
+<ul class="sectlevel2">
+<li><a href="#_variable_definition">Variable Definition</a></li>
+<li><a href="#_special_variables">Special Variables</a></li>
+<li><a href="#_variables_full_example">Variables: Full Example</a></li>
+</ul>
 </li>
-<li><a href="_introduction.html">1. Introduction</a>
-</li>
-<li><a href="_expressions.html">2. Expressions</a>
-</li>
-<li><a href="_program_structure.html">3. Program structure</a>
-</li>
-<li><a href="_standard_procedures.html">4. Standard Procedures</a>
-</li>
-<li><a href="_regular_expressions.html">5. Regular Expressions</a>
-</li>
-<li><a href="_pattern_matching.html">6. Pattern Matching</a>
-</li>
-<li><a href="_exceptions_and_conditions.html">7. Exceptions and Conditions</a>
-</li>
-<li><a href="_stklos_object_system.html">8. STklos Object System</a>
-</li>
-<li><a href="_threads_mutexes_and_condition_variables.html">9. Threads, Mutexes and Condition Variables</a>
-</li>
-<li><a href="_customizations.html"><span class="toc-current">10. Customizations</span></a>
-</li>
-<li><a href="_the_scmpkg_package_system.html">11. The ScmPkg Package System</a>
-</li>
-<li><a href="_foreign_function_interface.html">12. Foreign Function Interface</a>
-</li>
-<li><a href="_using_the_slib_package.html">13. Using the SLIB package</a>
-</li>
-<li><a href="_srfis.html">14. SRFIs</a>
-</li>
-<li><a href="_bibliography.html">Bibliography</a>
-</li>
-<li><a href="_libraries.html">Appendix C: STklos Libraries</a>
-</li>
-<li><a href="FDL.html">Appendix D: GNU Free Documentation License</a>
+<li><a href="#_directives">Directives</a>
+<ul class="sectlevel2">
+<li><a href="#_directives_include_and_include">Directives <code>Include</code> and <code>Include*</code></a></li>
+<li><a href="#_directive_system">Directive <code>System</code></a></li>
+<li><a href="#_directives_if_else_and_end">Directives <code>If</code>, <code>Else</code> and <code>End</code></a></li>
+</ul>
 </li>
 </ul>
 </div>
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_customizations">10. Customizations</h2>
+<h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> environement can be customized using
-Parameter Objects. These
-parmaters are listed below.</p>
+<p>The command <code>stklos-pp</code> is a simple text preprocessor. It takes a text as
+input and produces a text as output. By itself, <code>stklos-pp</code> is language
+agnostic; that means that its input can be in any language (LaTeX, Markdown,
+Asciidoctor, …). Embedded templates in the input file are expressed in
+<strong><em>STklos</em></strong>, using double curly braces.</p>
 </div>
 <div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><strong><code>(real-precision)</code></strong><br>
-<strong><code>(real-precision value)</code></strong><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>This parameter object permits to change the default precision used
-to print real numbers.</p>
+<p>Here is as simple example, using the <code>stklos-pp</code> command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">15</span>
-<span class="p">(</span><span class="k">define</span> <span class="nv">f</span> <span class="mf">0.123456789</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mf">0.123456789</span>
-<span class="p">(</span><span class="nf">real-precision</span> <span class="mi">3</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mf">0.123</span></code></pre>
-</div>
-</div>
-<div id="srfi169" class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><strong><code>(accept-srfi-169-numbers)</code></strong><br>
-<strong><code>(accept-srfi-169-numbers value)</code></strong><br></p>
-</div>
+<pre class="rouge highlight"><code data-lang="sh"><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"A simple computation: 2 + 3 = {{+ 2 3}}."</span> | stklos-pp
+A simple computation: 2 + 3 <span class="o">=</span> 5.</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This parameter object permits to change the behavior of the reader
-with underscores in numbers. Numbers with underscores are defined
-in ,(link-srfi 169). By default, this variable is true, meaning that
-underscores are accepted in numbers.</p>
+<p>As another example, consider the following text file named <code>fib.txt</code></p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">accept-srfi-169-numbers</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nb">symbol?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#f</span>
-<span class="p">(</span><span class="nb">number?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nf">accept-srfi-169-numbers</span> <span class="no">#f</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">symbol?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nb">number?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+<pre class="rouge highlight"><code data-lang="txt">{{define fib  (lambda (n) (if (&lt; n 2) n (+ (fib (- n 1)) (fib (- n 2)))))}}
+
+The first values of Fibonacci function:
+{{for-each (lambda(x) (printf "| ~5f | ~5f |\n" x (fib x)))
+           '(0 1 2 3 4 5 6 7 8 9 10)}}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><strong><code>(read-case-sensitive)</code></strong><br>
-<strong><code>(read-case-sensitive value)</code></strong><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>This parameter object permits to change the default behaviour of
-the <code>read</code> primitive when reading a symbol. If this parameter has a
-a true value a symbol is not converted to a default case when interned.
-Since R<sup>7</sup>RS requires that symbol are case insignificant, the default
-value  of this parameter is <code>#t</code>.</p>
+<p>Running the command <code>stklos-pp fib.txt</code> will produce the following input:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">read-case-sensitive</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="o">`</span><span class="no">#t</span><span class="o">`</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">ABC</span>
-<span class="p">(</span><span class="nf">read-case-sensitive</span> <span class="no">#f</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">abc</span></code></pre>
+<pre class="rouge highlight"><code data-lang="txt">The first values of Fibonacci function:
+|     0 |     0 |
+|     1 |     1 |
+|     2 |     1 |
+|     3 |     2 |
+|     4 |     3 |
+|     5 |     5 |
+|     6 |     8 |
+|     7 |    13 |
+|     8 |    21 |
+|     9 |    34 |
+|    10 |    55 |</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_variables">Variables</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_variable_definition">Variable Definition</h3>
+<div class="paragraph">
+<p><code>stklos-pp</code> permits to define variables in several ways. Variables are defined
+in the module <code>(stklos preproc env)</code>.</p>
+</div>
+<div class="paragraph">
+<p><strong>Definition in Scheme</strong></p>
+</div>
+<div class="paragraph">
+<p>A variable can be defined in a document using the standard Scheme <code>define</code> special form:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">{{define foo 5}}
+The square of foo is {{* foo foo}}.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Definition from the Command Line</strong></p>
+</div>
+<div class="paragraph">
+<p>A variable can also be defined from the command line using the <code>-D</code> option of
+the <code>stklos-pp</code> command. Note that, in this case, variables are defined as
+strings. You have to convert them if this type is not convenient:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sh"><span class="nv">$ </span>stklos-pp <span class="nt">-D</span><span class="s2">"install-dir: /opt/foo"</span> <span class="nt">-D</span><span class="s2">"mode: 0755"</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh">
+The install directory is {{install-dir}} and mode is {{mode}}.
+The mode in decimal is {{string-&gt;number (string-append "#o" mode)}}
+</span><span class="no">EOF
+</span>The <span class="nb">install </span>directory is /opt/foo and mode is 0755
+The mode <span class="k">in </span>decimal is 493</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Frontmatter</strong></p>
+</div>
+<div class="paragraph">
+<p>Variables can also be defined in the header of a file. As command line variables,
+variables defined in the header are defined as strings.</p>
+</div>
+<div class="paragraph">
+<p>Consider the file <code>fronmatter.txt</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="markdown"><span class="nn">---</span>
+<span class="na">author</span><span class="pi">:</span> <span class="s">John Doe</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s">I'm the title of the document</span>
+<span class="na">creation-date</span><span class="pi">:</span> <span class="s">Tue Jul 18 08:08:39 PM CEST </span><span class="m">2023</span>
+<span class="nn">---</span>
+
+Some information about this file:
+<span class="p">  -</span> Title: {{title}}
+<span class="p">  -</span> Author: {{author}}
+<span class="p">  -</span> File Creation Date: {{creation-date}}
+
+Note that the '---' separators can be omitted.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Running the command <code>`stklos-pp frontmatter.txt</code> will produce the following output.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">Some information about this file:
+  - Title: I'm the title of the document
+  - Author: John Doe
+  - File Creation Date: Tue Jul 18 08:08:39 PM CEST 2023
+
+Note that the '---' separators can be omitted.</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -884,198 +892,265 @@ value  of this parameter is <code>#t</code>.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<div class="ulist">
-<ul>
-<li>
-<p>Default behaviour can be changed for a whole execution
-with the <code>--case-sensitive</code> or <code>case-insensitive</code> options.</p>
-</li>
-<li>
-<p>See also syntax for <em><a href="_standard_procedures.html#_symbols">special characters</a></em> in symbols.</p>
-</li>
-</ul>
-</div>
+As said in the above example, the '---' separators can be
+omitted (in this case, let an empty line after the last variable definition).
 </td>
 </tr>
 </table>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_special_variables">Special Variables</h3>
 <div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><strong><code>(write-pretty-quotes)</code></strong><br>
-<strong><code>(write-pretty-quotes value)</code></strong><br></p>
-</div>
-</div>
+<p><strong>stklos-pp-version</strong></p>
 </div>
 <div class="paragraph">
-<p>This parameter object permits to change the default behaviour of
-the <code>display</code> or <code>write</code> primitives when they write a list which starts with
- the symbol quote,  quasiquote, unquote or unquote-splicing. If this parameter
-has a false value, the writer uses the list notation instead of a
-more human-readable value.
-By default, this parameter value is set to <code>#t</code>.</p>
+<p>When <code>stkos-pp</code> starts, there is only one variable defined:
+<code>stklos-pp-version</code>. This variable contains a function which returns the
+version of <code>stklos-pp</code> as a string.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">x</span> <span class="o">'</span><span class="ss">'a</span><span class="p">))</span>
-  <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">display</span> <span class="s">" "</span><span class="p">)</span>
-  <span class="p">(</span><span class="nf">write-pretty-quotes</span> <span class="no">#f</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">))</span>               <span class="nv">|-</span> <span class="ss">'a</span> <span class="p">(</span><span class="k">quote</span> <span class="nv">a</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="txt">STklos version: {{short-version}}
+stklos-pp version: {{stklos-pp-version}}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>
-</p>
+<p>produces</p>
 </div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph small">
-<p><strong><code>(load-path)</code></strong><br>
-<strong><code>(load-path value)</code></strong><br></p>
-</div>
+<pre class="rouge highlight"><code data-lang="txt">STklos version: 1.70
+stklos-pp version: 0.3</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>load-path</code> is a parameter object. It
-returns the current load path. The load path is a list of strings
-which correspond to the directories in which a file must be searched for
-loading. Directories of the load path are ,(emph "prepended") (in
-their apparition
-order) to the file name given to <code>load</code> or <code>try-load</code> until the file
-can be loaded.</p>
+<p><strong>process-command</strong></p>
 </div>
 <div class="paragraph">
-<p>The initial value of the current load path can be set from the shell, by
-setting the <code>STKLOS_LOAD_PATH</code> shell variable.</p>
+<p>The <code>process-command</code> can be used to specify the program to apply to the whole
+text when <code>stklos-pp</code> has built it. If you have set this variable to <code>pandoc</code>
+in the file <code>F.md</code>, running the command</p>
 </div>
-<div class="paragraph">
-<p>Giving a <code>value</code> to the parameter <code>load-path</code> permits to change the
-current list of paths.</p>
-</div>
-<div class="paragraph">
-<p>
-</p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph small">
-<p><strong><code>(load-suffixes)</code></strong><br>
-<strong><code>(load-suffixes value)</code></strong><br></p>
-</div>
+<pre class="rouge highlight"><code data-lang="sh"><span class="nv">$ </span>stklos-pp F.md</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>load-suffixes</code> is a parameter object. It
-returns the list of possible suffixes for a Scheme file. Each suffix,
-must be a string. Suffixes are appended (in their apparition order)
-to a file name  is appended to a file name given to <code>load</code> or <code>try-load</code>
-until the file can be loaded.</p>
+<p>will print the HTML output built by <code>pandoc</code> on the prepossessing of file
+<code>F.md</code>. Without this variable, you&#8217;ll have to run something like</p>
 </div>
-<div class="paragraph">
-<p></p>
-</div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph small">
-<p><strong><code>(load-verbose)</code></strong><br>
-<strong><code>(load-verbose value)</code></strong><br></p>
-</div>
+<pre class="rouge highlight"><code data-lang="sh"><span class="nv">$ </span>stklos-pp F.md | pandoc</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>load-verbose</code> is a parameter object. It permits to display the
-path name of the files which are loaded by <code>load</code> or <code>try-load</code> on
-the current error port, when set to a true value. If <code>load-verbose</code>
-is set to <code>#f</code>, no message is printed.</p>
+<p><strong>process-args</strong></p>
 </div>
 <div class="paragraph">
-<p></p>
+<p>This variable permits to collect the (eventual) arguments that must be passed
+to the command defined to <code>process-command</code>. For instance, if you use
+<code>pandoc</code>, you can define <code>process-args</code> to <code>"--from=markdown --to=latex"</code>, if
+your text is written in Markdown format and you want a result expressed in LaTeX.</p>
 </div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+<div class="paragraph">
+<p><strong>template</strong></p>
 </div>
-<div class="sidebarblock">
+<div class="paragraph">
+<p>The <code>template</code> variable permits to specify the two template files that will be
+combined to build the output. If the value of <code>template</code> is <code>T</code>, the output
+of <code>stklos-pp</code> on file <code>F</code> will contain:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the result of processing the file <code>T-prelude.templ</code>, followed by</p>
+</li>
+<li>
+<p>the result of processing the file <code>F</code>, followed by</p>
+</li>
+<li>
+<p>the result of processing the file <code>T-postlude.templ</code>, followed by</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For instance, using the file <code>my-prelude.templ</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variables_full_example">Variables: Full Example</h3>
+<div class="paragraph">
+<p>Here, we want to produce an HTML file from a Markdown named <code>pp-demo.md</code>
+expressed in Markdown (using GitHub extensions).</p>
+</div>
+<div class="paragraph">
+<p><strong>File <code>pp-demo.md</code></strong></p>
+</div>
+<div class="listingblock">
 <div class="content">
-<div class="paragraph small">
-<p><strong><code>(thread-handler-error-show)</code></strong><br>
-<strong><code>(thread-handler-error-show value)</code></strong><br></p>
-</div>
+<pre class="rouge highlight"><code data-lang="markdown"><span class="nn">---</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s">A simple file in Markdown</span>
+<span class="na">author</span><span class="pi">:</span> <span class="s">John Doe</span>
+<span class="na">date</span><span class="pi">:</span> <span class="s">22-Jul-2023 15:31</span>
+<span class="na">modified</span><span class="pi">:</span> <span class="s">22-Jul-2023 17:57</span>
+<span class="na">template</span><span class="pi">:</span> <span class="s">mymd</span>
+<span class="na">process-command</span><span class="pi">:</span> <span class="s">pandoc</span>
+<span class="na">process-args</span><span class="pi">:</span> <span class="s">--from=gfm --to=html</span>
+<span class="nn">---</span>
+
+<span class="gu">## A First Section</span>
+
+<span class="gu">###  A Subsection</span>
+
+Pellentesque dapibus suscipit ligula.  Donec posuere augue in quam.
+Etiam vel tortor sodales tellus ultricies commodo.  Suspendisse
+potenti.  Aenean in sem ac leo mollis blandit.  Donec neque quam,
+dignissim in, mollis nec, sagittis eu, wisi.
+<span class="p">
+*</span> [ ] Cum sociis natoque penatibus et magnis dis parturient montes, nascetur
+  ridiculus mus.
+<span class="p">*</span> [x] Phasellus purus.
+<span class="p">*</span> [ ] Vivamus id enim.
+
+Praesent augue.  Fusce commodo.  Vestibulum convallis, lorem a tempus
+semper, dui dui euismod elit, vitae placerat urna tortor vitae lacus.
+Nullam libero mauris, consequat quis, varius et, dictum id, arcu.
+Mauris mollis tincidunt felis.</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>When an untrapped error occurs in a thread, it produces an
-<a href="_threads_mutexes_and_condition_variables.html#make-thread"><em>uncaught exception</em></a> which can finally be
-trapped when the thread is <a href="_threads_mutexes_and_condition_variables.html#thread-join"><em>joined</em></a>.
-Setting the <code>thread-handler-error-show</code> parameter permits to see
-error message as soon as possible, even without joining the thread.
-This makes debugging easier. By default, this parameter is set to
-<code>#t</code>.</p>
+<p>This file states that the template is called <code>"mymd"</code>. Hence, we have to define
+the files <code>mymd-prelude.templ</code> and <code>my-postlude.templ</code>.</p>
 </div>
 <div class="paragraph">
-<p></p>
+<p><strong>File <code>mymd-prelude.templ</code></strong></p>
 </div>
-<div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph small">
-<p><strong><code>(stklos-debug-level)</code></strong><br></p>
-</div>
+<pre class="rouge highlight"><code data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Type"</span> <span class="na">content=</span><span class="s">"text/html; charset=utf-8"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"author"</span> <span class="na">content=</span><span class="s">"{{author}}"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"generator"</span> <span class="na">content=</span><span class="s">"stklos-pp (version {{stklos-pp-version}}"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;title&gt;</span>{{title}}<span class="nt">&lt;/title&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+  <span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"text-align:center"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;h1&gt;</span>{{title}}<span class="nt">&lt;/h1&gt;</span>
+      <span class="nt">&lt;h2&gt;</span>{{author}}<span class="nt">&lt;/h2&gt;</span>
+    <span class="nt">&lt;/div&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>stklos-debug-level</code> is a parameter objet. It permits to know the current
-debugging level. The default value of this parameter is 0 (meaning "no debug").
-Note that the debugging level can also be set by the <code>--debug</code> option of the
-<code>stklos(1)</code> command.</p>
+<p><strong>File <code>mymd-postlude.templ</code></strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="html">    <span class="nt">&lt;hr&gt;</span>
+    <span class="nt">&lt;p</span> <span class="na">style=</span><span class="s">'text-align: right; font-size: 70%;'</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;em&gt;</span>Document updated on {{modified}}<span class="nt">&lt;/em&gt;</span>.
+    <span class="nt">&lt;/p&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;html&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Running the command <code>stklos-pp pp-demo.md</code> will produce an HTML file.
+A version of the file is available <a href="../HTML/pp-demo.html">here</a>.</p>
 </div>
 </div>
 </div>
-<div class="paragraph nav-footer">
-<p>← Previous: <a href="_threads_mutexes_and_condition_variables.html">Threads, Mutexes and Condition Variables</a> | ↑ Up: <a href="stklos-ref-multi.html">STklos Reference Manual : (version 1.70)</a> | Next: <a href="_the_scmpkg_package_system.html">The ScmPkg Package System</a> →</p>
+</div>
+<div class="sect1">
+<h2 id="_directives">Directives</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>stklos-pp</code> directives are also delimited a double pair of braces. The list of available
+ directives is given below:</p>
+</div>
+<div class="sect2">
+<h3 id="_directives_include_and_include">Directives <code>Include</code> and <code>Include*</code></h3>
+<div class="paragraph">
+<p>The <code>{{Include pathname}}</code> is replaced by the characters of the file named <code>pathname</code>.
+The <code>{{Include* pathname}}</code> is replaced by the result of pre-processing the characters
+of the file named <code>pathname</code>.</p>
+</div>
+<div class="paragraph">
+<p>Suppose, we  have a file named <code>"included.txt"</code> which contains</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">The square of 1234 is {{* 1234 1234}}.</code></pre>
 </div>
 </div>
-<div id="footnotes">
-<hr>
-<div class="footnote" id="_footnotedef_1">
-<a href="#_footnoteref_1">1</a>. Documentation about hygienic macros has been stolen in the SLIB manual
+<div class="paragraph">
+<p>Using <code>{{Include "included.txt"}}</code> will be replaced by the characters</p>
 </div>
-<div class="footnote" id="_footnotedef_1">
-<a href="#_footnoteref_1">1</a>. In fact <code>define-module</code> on a given name defines a new module only the first time it is invoked on this name. By this way, interactively reloading a module does not define a new entity, and the other modules which use it are not altered.
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">The square of 1234 is {{* 1234 1234}}.</code></pre>
 </div>
-<div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. This transcript uses the default toplevel loop             which displays the name of the current module in the evaluator             prompt.
 </div>
-<div class="footnote" id="_footnotedef_1">
-<a href="#_footnoteref_1">1</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
+<div class="paragraph">
+<p>whereas <code>{{Include* "included.txt"}}</code> will be replaced by</p>
 </div>
-<div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">The square of 1234 is 1522756.</code></pre>
 </div>
-<div class="footnote" id="_footnotedef_1">
-<a href="#_footnoteref_1">1</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_directive_system">Directive <code>System</code></h3>
+<div class="paragraph">
+<p>The directive <code>{{System shell-command}}</code> is replaced by the characters of the
+standard output of <code>shell-command</code>. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">BEGIN {{System "cd /tmp; echo -n ${PWD}"}} END</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will produces the following output:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">BEGIN /tmp END</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_directives_if_else_and_end">Directives <code>If</code>, <code>Else</code> and <code>End</code></h3>
+<div class="paragraph">
+<p>These directives permits to choose the piece of text that must be in the
+output given a (Scheme) boolean value:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="txt">{{If (odd? n)}}
+This text is printed since {{n}} is odd.
+{{Else}}
+another message
+{{End}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, the first message is output when <code>n</code> is odd; otherwise, the second
+message is printed. Of course, the <code>{{Else}</code>} directive can be omitted when
+no output is not needed when the condition is false.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 18:56:10 +0100
+Last updated 2023-08-02 20:24:44 +0200
 </div>
 </div>
 </body>

@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2023 Erick Gallesio <eg@stklos.net>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -303,7 +303,7 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag)
  *
 \*===========================================================================*/
 
-static Inline SCM hash_get_symbol(struct hash_table_obj *h, const char *s, int *index)
+static inline SCM hash_get_symbol(struct hash_table_obj *h, const char *s, int *index)
 {
   register SCM l;
 
@@ -375,10 +375,14 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
 
   if (z) {
     /* Variable already exists. Change its value*/
-    if (BOXED_INFO(z) & CONS_CONST && !define) {
-      STk_error("cannot set or redefine the symbol ~S in ~S",
-                v, STk_current_module());
-    }
+    if (BOXED_INFO(z) & CONS_CONST)
+      if (!define) {
+        STk_error("cannot set or redefine the symbol ~S in ~S",
+                  v, STk_current_module());
+      }
+    /* It's a redefinition, not a new binding, so we not only allow
+       it, but also clear the CONST bit: */
+    BOXED_INFO(z) &= (~CONS_CONST);
     *BOX_VALUES(CDR(z)) = value;
   } else {
     SCM z;
@@ -615,7 +619,7 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
   if (!HASHP(ht)) error_bad_hash_table(ht);
 
   if (HASH_CONSTP(ht)) error_hash_immutable(ht);
-  
+
   switch (HASH_TYPE(ht)) {
     case hash_eqp:
       index = RANDOM_INDEX(ht, key);
@@ -681,7 +685,7 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
  * @end lisp
 doc>
 */
-static Inline SCM hash_table_search(SCM ht, SCM key)
+static inline SCM hash_table_search(SCM ht, SCM key)
 {
   int index = 0;
   SCM func, l = STk_nil;
@@ -956,7 +960,7 @@ DEFINE_PRIMITIVE("hash-table-hash", hash_hash, subr1, (SCM obj))
  *
  * Prints  overall information about |hash|, such as the number of entries
  * it contains, the number of buckets in its hash array, and the utilization
- * of the buckets. Informations are printed on |port|. If no |port| is given
+ * of the buckets. Information is printed on |port|. If no |port| is given
  * to |hash-table-stats|, information are printed on the current output port
  * (see _<<curroport,`current-output-port` primitive>>_).
 doc>

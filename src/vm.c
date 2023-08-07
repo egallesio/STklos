@@ -55,7 +55,8 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #else
    /* Standard C compiler. Use the classic switch statement */
 #  define CASE(x)       case x:
-#  define NEXT          continue;/* Be sure to not use continue elsewhere */
+#  define NEXT          goto VM_LOOP_TOP /* NOT continue, as it interacts badly with
+                                            the do{...}while(0) guards. */
 #endif
 
 #define NEXT0           do{vm->val = STk_void; vm->valc = 0; NEXT;}while(0)
@@ -74,7 +75,7 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 
 #define FX(v)                   (STk_fixval(v))
 
-static Inline sigset_t get_signal_mask(void)
+static inline sigset_t get_signal_mask(void)
 {
   sigset_t new, old;
 
@@ -83,7 +84,7 @@ static Inline sigset_t get_signal_mask(void)
   return old;
 }
 
-static Inline void set_signal_mask(sigset_t mask)
+static inline void set_signal_mask(sigset_t mask)
 {
   sigprocmask(SIG_SETMASK, &mask, NULL);
 }
@@ -357,7 +358,7 @@ void STk_print_vm_registers(char *msg, STk_instr *code)
  *   and returns a list with them.  The CAR of the list
  *   will be the element that was deepest on the stack.
  */
-static Inline SCM listify_top(int n, vm_thread_t *vm)
+static inline SCM listify_top(int n, vm_thread_t *vm)
 {
   SCM *p, res = STk_nil;
 
@@ -367,7 +368,7 @@ static Inline SCM listify_top(int n, vm_thread_t *vm)
 }
 
 
-static Inline SCM clone_env(SCM e, vm_thread_t *vm)
+static inline SCM clone_env(SCM e, vm_thread_t *vm)
 {
   /* clone environment til we find one which is in the heap */
   if (IS_IN_STACKP(e))
@@ -428,7 +429,7 @@ static void error_bad_arity(SCM func, int arity, int16_t given_args, vm_thread_t
  *      fixed, and the procedure can take several arguments, but at least
  *      k are mandatory. Then k is returned.
  */
-static Inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
+static inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
 {
   int16_t arity = CLOSURE_ARITY(func);
 
@@ -931,6 +932,7 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
   }                                             \
 }while(0)
 
+
 static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
@@ -958,7 +960,7 @@ static void run_vm(vm_thread_t *vm)
   NEXT;
 #else
   for ( ; ; ) {
-    /* Execution loop */
+  VM_LOOP_TOP:     /* Execution loop */
     byteop = fetch_next();
 #  ifdef DEBUG_VM
     if (debug_level > 1)
@@ -1542,14 +1544,20 @@ CASE(CALL_LOCATION) {
   NEXT1;
 }
 
+CASE(INSCHEME) {
+  vm->val = STk_symb_in_scheme(vm->val);
+  NEXT1;
+ }
+
+
 CASE(END_OF_CODE) {
-  return;
-}
+   return;
+ }
+
 
 CASE(DBG_VM)  {
   ;
 }
-CASE(UNUSED_2)
 CASE(UNUSED_3)
 CASE(UNUSED_4)
 CASE(UNUSED_5)
@@ -1699,6 +1707,10 @@ CASE(IN_SSET)   {
   STk_string_set(pop(), index, vm->val);
   NEXT0;
 }
+CASE(IN_CXR) {
+  vm->val= STk_cxr(vm->val, fetch_const());
+  NEXT1;
+ }
 
 CASE(IN_APPLY)   {
   STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
@@ -1862,7 +1874,7 @@ FUNCALL:  /* (int nargs, int tailp) */
     case tc_subr2:
       if (nargs == 2) { CALL_PRIM2(vm->val, (vm->sp[1], vm->sp[0]));      break;}
       goto error_invoke;
-  case tc_subr3:
+    case tc_subr3:
       if (nargs == 3) { CALL_PRIM3(vm->val, (vm->sp[2], vm->sp[1],
                                              vm->sp[0]));                 break;}
       goto error_invoke;
@@ -1927,7 +1939,7 @@ end_funcall:
       default:
         STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop);
     }
-  }
+  } /* for( ; ; ) */
 #endif
   STk_panic("abnormal exit from the VM");
 }
@@ -2219,7 +2231,7 @@ DEFINE_PRIMITIVE("%dump-code", dump_code, subr2, (SCM f, SCM v))
 }
 
 
-static Inline STk_instr* read_code(SCM f, unsigned int len) /* read a code phrase */
+static inline STk_instr* read_code(SCM f, unsigned int len) /* read a code phrase */
 {
   STk_instr *res, *tmp;
   unsigned int i;

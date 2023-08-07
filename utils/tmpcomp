@@ -61,7 +61,7 @@ case $# in
        ;;
 esac
 
-prefix="@COMP_DIR@"
+prefix="$(cd -- "$(dirname "$0")/.." >/dev/null 2>&1 && pwd)"
 
 STKLOS_LOAD_PATH=".:../lib:${prefix}/lib:"
 STKLOS_BUILDING=1
