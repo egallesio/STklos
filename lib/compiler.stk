@@ -419,6 +419,13 @@ doc>
 ;;;; REFERENCES & ASSIGNMENT
 ;;;;
 
+;; compile-access will generate code for references and assignments.
+;; The argments:
+;; name: a symbol, the variable name.
+;; env: the environment to be used.
+;; epair: the extended pair (source s-expression) that originated a
+;;        call to compile-acces.
+;; ref: if #t, then it's a reference; if #f, it's an assignment.
 (define (compile-access name env epair ref)
 
   ;; STklos organizes local environments as this: each level has a
@@ -490,6 +497,18 @@ doc>
 (define (compile-reference name env epair tail?)
   (compile-access name env epair #t))
 
+;; compile-set! will just call compile-access, and when doing so, will
+;; set the 'ref' argument to #f. The 'ref' argument to compile-access
+;; means "this is just a reference, not an assignment".
+;; Before calling compile-access, compile-set! will check the syntac
+;; for set! and also extract the variable name.
+;;
+;; (compile-set! (set! a (+ 2 b)))
+;; will make these two calls:
+;; (compile (+ 2 b) env (set! a + 2 b) #f)
+;; (compile-access 'a env (set! a + 2 b) #f)
+;;
+;; The extended set! is treated separately.
 (define (compile-set! args env tail?)
   (let ((len (length (cdr args))))
     (if (= len 2)
