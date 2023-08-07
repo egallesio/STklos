@@ -1855,6 +1855,48 @@
 (test "acosh 1"   0 (acosh 1))
 (test "atanh 0"   0 (atanh 0))
 
+
+(test "cosh +inf"
+      #t
+      (and (infinite? (cosh +inf.0))
+           (positive? (cosh +inf.0))))
+
+(test "cosh -inf"
+      #t
+      (and (infinite? (cosh -inf.0))
+           (positive? (cosh -inf.0))))
+
+(test "sinh +inf"
+      #t
+      (and (infinite? (sinh +inf.0))
+           (positive? (sinh +inf.0))))
+
+(test "sinh -inf"
+      #t
+      (and (infinite? (sinh -inf.0))
+           (negative? (sinh -inf.0))))
+
+
+(test "acosh +inf"
+      #t
+      (and (infinite? (acosh +inf.0))
+           (positive? (acosh +inf.0))))
+
+(test "acosh -inf"
+      #t
+      (and (infinite? (acosh -inf.0))
+           (positive? (acosh -inf.0))))
+
+(test "asinh +inf"
+      #t
+      (and (infinite? (asinh +inf.0))
+           (positive? (asinh +inf.0))))
+
+(test "asinh -inf"
+      #t
+      (and (infinite? (asinh -inf.0))
+           (negative? (asinh -inf.0))))
+
 ;; atanh(+inf) = -(i.pi)/2
 ;; atanh(-inf) = +(i.pi)/2
 (test "atanh -inf"
