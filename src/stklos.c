@@ -142,6 +142,7 @@ static void Usage(FILE *stream)
 "    keep-source        Keep source code in closures\n"
 "    inline-usuals      Inline usual functions\n"
 "    unroll-iterations  Set the number of iterations to be unrolled\n"
+"    peephole-optimizer Use the peephole optimizer\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
