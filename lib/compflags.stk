@@ -39,7 +39,8 @@
         compiler:keep-formals
         compiler:keep-source
         compiler:inline-common-functions
-        compiler:unroll-iterations)
+        compiler:unroll-iterations
+        compiler:peephole-optimizer)
 
 #|
 <doc EXT compiler:time-display
@@ -167,6 +168,40 @@ doc>
  * loops. Currently, only |repeat| loops are unrolled. The argument
  * |n| must be a positive integer.
 doc>
+<doc EXT compiler:peephole-optimizer
+ * (compiler:peephole-optimizer)
+ * (compiler:peephole-optimizer bool)
+ *
+ * This parameter determines if the peephole optimizer is used when compiling.
+ * The default value for this parameter is `#t`. The next example illustrates how
+ * it works.
+ *
+ * @lisp
+ * (compiler:peephole-optimizer #f)
+ * (disassemble-expr '(+ a #f) #t)
+ * @end lisp
+ * will print
+ * @lisp
+ * 000:  GLOBAL-REF           0
+ * 002:  PUSH
+ * 003:  IM-FALSE
+ * 004:  IN-ADD2
+ * 005:
+ * @end lisp
+ * Now, if we change the parameter,
+ * @lisp
+ * (compiler:peephole-optimizer #t)
+ * (disassemble-expr '(+ a #f) #t)
+ * then the result is
+ * @lisp
+ * 000:  GLOBAL-REF-PUSH      0
+ * 002:  IM-FALSE
+ * 003:  IN-ADD2
+ * 004:
+ * @end lisp
+ * See that the `GLOBAL-REF` and `PUSH` were turned by the peephole optimizer
+ * into `GLOBAL-REF-PUSH`.
+doc>
 |#
 (define-parameter compiler:time-display                   #t)
 (define-parameter compiler:gen-line-number                #f)
@@ -190,6 +225,7 @@ doc>
                                     (not (null? *inline-symbols*))))))
     (%set-parameter-name! res 'compiler:inline-common-functions)
     res))
+(define-parameter compiler:peephole-optimizer #t)
 
 ;; ----------------------------------------------------------------------
 ;;      %compiler-set-flags ...
@@ -207,12 +243,13 @@ doc>
                       (let ((opt (substring flag 1 (string-length flag)))
                             (val  (char=? sign #\+)))
                         (case (string->symbol opt)
-                          ((line-info)         (compiler:gen-line-number val))
-                          ((time-display)      (compiler:time-display val))
-                          ((keep-formals)      (compiler:generate-signature val))
-                          ((keep-source)       (compiler:keep-source val))
-                          ((inline-usuals)     (compiler:inline-common-functions val))
-                          ((show-instructions) (compiler:show-assembly-code val))
+                          ((line-info)          (compiler:gen-line-number val))
+                          ((time-display)       (compiler:time-display val))
+                          ((keep-formals)       (compiler:generate-signature val))
+                          ((keep-source)        (compiler:keep-source val))
+                          ((inline-usuals)      (compiler:inline-common-functions val))
+                          ((show-instructions)  (compiler:show-assembly-code val))
+                          ((peephole-optimizer) (compiler:peephole-optimizer val))
                           (else (error "bad boolean flag ~s" flag))))
                       ;; valued flag
                       (let* ((lst  (string-split flag "=")))

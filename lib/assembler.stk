@@ -308,7 +308,7 @@
 (define (assemble code)
   (let ((pc    0)
         (labs '())
-        (code  (peephole code)))
+        (code  (if (compiler:peephole-optimizer) (peephole code) code)))
     ;;
     ;; Pass 1
     ;;
