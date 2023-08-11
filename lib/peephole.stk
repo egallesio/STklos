@@ -47,6 +47,10 @@
     (set-car! code instr)
     (set-cdr! code (cddr code)))
 
+  (define (skip-1-instr code)
+    (set-car! code (cadr code))
+    (set-cdr! code (cddr code)))
+
   (define (optimize-goto code)
     ;;//FIXME: normallement all-code ===> mais c'est très lent
     ;// on devrait avoir (memq (this-arg1 code) code) pour chercher au-dessus.
@@ -166,6 +170,56 @@
                                        ((IN-EQUAL)   'JUMP-NOT-EQUAL)
                                        ((IN-NOT)     'JUMP-TRUE))
                                      (next-arg1 code))))
+
+             ;; [IM-FALSE; JUMP-FALSE] => GOTO
+             ((and (eq? i1 'IM-FALSE) (eq? i2 'JUMP-FALSE))
+              (replace-2-instr code
+                               (list 'GOTO (next-arg1 code))))
+
+             ;; [IM-FALSE; JUMP-TRUE] => []
+             ((and (eq? i1 'IM-FALSE) (eq? i2 'JUMP-TRUE))
+              (skip-1-instr code)
+              (skip-1-instr code)) ; skip 2 instructions
+
+             ;; [IM-TRUE; JUMP-FALSE]      => []
+             ;; [IM-NIL; JUMP-FALSE]       => []
+             ;; [IM-MINUS1; JUMP-FALSE]    => []
+             ;; [IM-ZERO; JUMP-FALSE]      => []
+             ;; [IM-ONE; JUMP-FALSE]       => []
+             ;; [IM-VOID; JUMP-FALSE]      => []
+             ;; [IM-SMALL-INT; JUMP-FALSE] => []
+             ;; [CONSTANT; JUMP-FALSE]     => []
+             ((and (eq? i2 'JUMP-FALSE) (memq i1 '(IM-TRUE
+                                                   IM-NIL
+                                                   IM-MINUS1
+                                                   IM-ZERO
+                                                   IM-ONE
+                                                   IM-VOID
+                                                   SMALL-INT
+                                                   CONSTANT)))
+              (skip-1-instr code)
+              (skip-1-instr code)) ; skip 2 instructions
+
+             ;; ;; [IM-TRUE; JUMP-TRUE]      => GOTO
+             ;; ;; [IM-NIL; JUMP-TRUE]       => GOTO
+             ;; ;; [IM-MINUS1; JUMP-TRUE]    => GOTO
+             ;; ;; [IM-ZERO; JUMP-TRUE]      => GOTO
+             ;; ;; [IM-ONE; JUMP-TRUE]       => GOTO
+             ;; ;; [IM-VOID; JUMP-TRUE]      => GOTO
+             ;; ;; [IM-SMALL-INT; JUMP-TRUE] => GOTO
+             ;; ;; [CONSTANT; JUMP-TRUE]     => GOTO
+             ;; ((and (eq? i2 'JUMP-TRUE) (memq i1 '(IM-TRUE
+             ;;                                      IM-NIL
+             ;;                                      IM-MINUS1
+             ;;                                      IM-ZERO
+             ;;                                      IM-ONE
+             ;;                                      IM-VOID
+             ;;                                      SMALL-INT
+             ;;                                      CONSTANT)))
+             ;;  (replace-2-instr code
+             ;;                   (list 'GOTO (next-arg1 code))))
+
+
              ;; [GLOBAL-REF, PUSH] => GLOBAL-REF-PUSH
              ((and (eq? i1 'GLOBAL-REF) (eq? i2 'PUSH))
               (replace-2-instr code (list 'GLOBAL-REF-PUSH
