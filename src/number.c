@@ -1183,8 +1183,7 @@ static int could_be_a_srfi_169_number(char *str, long base)
     if (*p == '_') {
       // a '_' must be surrounded by digit (or the '#' for R5RS)
       // note: we use base 16 here just for verification, control will be done later
-      if (! ((digitp(prev, base) || (prev == '#')) &&
-             (digitp(next, base) || (next == '#'))))
+      if (!digitp(prev, base) || !digitp(next, base))
         return 0;
     }
     prev = *p;
@@ -1256,14 +1255,6 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
     *p = '\0';
   }
 
-//EG   /* SRFI-169: we have already accepted the number with underscores, now
-//EG    *  remove_underscores will validate their positions and remove them
-//EG    */
-//EG   if (strchr(str, '_')) {
-//EG     if (!use_srfi_169) return STk_false;
-//EG     if (!remove_underscores(str,p,base))
-//EG       return STk_false;
-//EG   }
 
   if (isint) {
     /* We are sure to have an integer. Read it as a bignum and see if we can
