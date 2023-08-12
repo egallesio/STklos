@@ -1170,36 +1170,40 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
 }
 
 
-/*
- * SRFI-169.
- * remove_underscores will remove all underscores from a number represented
- * as string, while also checking wether the string conforms to SRFI-169
- * (no double underscores, no leading or trailing underscores, and no
- * underscore close to anything that is not a digit).
- */
-static int remove_underscores(char *str, const char *end, long base) {
-  char *q;
-  int just_saw_one = 0;
-  for (char *p=str; p<end-1; p++)
-    if (*p=='_') {
+static int could_be_a_srfi_169_number(char *str, long base)
+{
+  char prev = *str;
 
-      /* SRFI-169: no double underscores */
-      if (just_saw_one) return 0;
-      just_saw_one = 1;
+  if (prev == '_')
+    // a number cannot start with a '_'
+    return 0;
 
-      if ((p>str) && (! digitp(*(p-1),base))) return 0; /* SRFI-169: no '_' adjacent to dot. */
-      if (!digitp(*(p+1),base))               return 0; /* SRFI-169: no '_' adjacent to dot. */
-
-      for (q=p; q<end; q++) {
-        *q=*(q+1);
-      }
-      p--;
-      end = q;
-    } else
-      just_saw_one = 0;
-
-  if (*(end-1)=='_') return 0;  /* SRFI-169 forbids trailing '_' */
+  for (char *p=str+1; *p; p++) {
+    char next= *(p+1); /* could be the final '\0' */
+    if (*p == '_') {
+      // a '_' must be surrounded by digit (or the '#' for R5RS)
+      // note: we use base 16 here just for verification, control will be done later
+      if (! ((digitp(prev, base) || (prev == '#')) &&
+             (digitp(next, base) || (next == '#'))))
+        return 0;
+    }
+    prev = *p;
+  }
   return 1;
+}
+
+
+static void clean_srfi_169_number(char *str)
+{
+  char *q = str;
+
+  for (char *p = str; *p; p++) {
+    if (*p != '_') {
+      if (p != q) *q = *p;
+      q++;
+    }
+  }
+  *q = '\0';
 }
 
 
@@ -1214,17 +1218,24 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
 
   if (*p == '-' || *p == '+') p+=1;
   if (*p == '#') return STk_false;
-  if (*p == '_') return STk_false; /* SRFI-169 forbids _ in leading position. */
 
-  /* the  ( || *p=='_' ) in the rest of this function implements SRFI-169. */
-  while(digitp(*p, base) || *p=='_') { p+=1; adigit=1; if (*p == '#') isint = 0; }
+  /* Take care of SRFI-169 numbers */
+  if (use_srfi_169 && strchr(p, '_')) {
+    if (could_be_a_srfi_169_number(p, base))
+      clean_srfi_169_number(p);
+    else
+      /* we have '_' and it it's not a srfi-169 => it's a symbol */
+      return STk_false;
+  }
+
+  while(digitp(*p, base)) { p+=1; adigit=1; if (*p == '#') isint = 0; }
 
   if (adigit) p1 = p;           /* p1 = end of integral part */
 
   if (*p=='.') {
     isint = 0; p += 1;
     p2 = p;
-    while(digitp(*p, base) || *p=='_') { p+=1; adigit=1; }
+    while(digitp(*p, base)) { p+=1; adigit=1; }
     p3 = p;
   }
 
@@ -1235,9 +1246,9 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
     p += 1;
     p4 = p;
     if (*p == '-' || *p == '+') p+=1;
-    if (!(digitp(*p, base)|| *p=='_')) return STk_false;
+    if (!digitp(*p, base)) return STk_false;
     p+=1;
-    while (digitp(*p, base)|| *p=='_') p+=1;
+    while (digitp(*p, base)) p+=1;
   }
   if (*p) {
     /* Patch the end of the number with a '\0' (will be restored on exit) */
@@ -1245,14 +1256,14 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
     *p = '\0';
   }
 
-  /* SRFI-169: we have already accepted the number with underscores, now
-   *  remove_underscores will validate their positions and remove them
-   */
-  if (strchr(str, '_')) {
-    if (!use_srfi_169) return STk_false;
-    if (!remove_underscores(str,p,base))
-      return STk_false;
-  }
+//EG   /* SRFI-169: we have already accepted the number with underscores, now
+//EG    *  remove_underscores will validate their positions and remove them
+//EG    */
+//EG   if (strchr(str, '_')) {
+//EG     if (!use_srfi_169) return STk_false;
+//EG     if (!remove_underscores(str,p,base))
+//EG       return STk_false;
+//EG   }
 
   if (isint) {
     /* We are sure to have an integer. Read it as a bignum and see if we can
@@ -1387,6 +1398,8 @@ static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
   *end = p;
   return num;
 }
+
+
 
 /* Reads a number from str in the specified base. */
 SCM STk_Cstr2number(char *str, long base)
