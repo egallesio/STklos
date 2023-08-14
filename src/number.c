@@ -90,7 +90,7 @@ static double plus_inf, minus_inf;
 double STk_NaN;
 
 /**** forward declarations ****/
-static type_cell convert(SCM *px, SCM *py);
+static type_cell convert(SCM *px, SCM *py, int force);
 
 static int zerop(SCM n);
 static int negativep(SCM n);
@@ -699,7 +699,7 @@ static double rational2double(SCM r)
   SCM num = RATIONAL_NUM(r);
   SCM den = RATIONAL_DEN(r);
 
-  switch (convert(&num, &den)) {
+  switch (convert(&num, &den, 1)) {
     case tc_integer: return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
     case tc_bignum:  return bigrational2double(BIGNUM_VAL(num), BIGNUM_VAL(den));
     default:         STk_panic("bad rational ~S", r);
@@ -811,7 +811,21 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
 
 /*===== The general conversion routine ==== */
 
-static type_cell convert(SCM *px, SCM *py)
+/* Converts both numbers so we can do arithmetic on them.
+   The type of the result is returned.
+
+   If one is complex and one is real, *and* the complex
+   number has an infinite component, then the conversion is
+   NOT done, and tc_not_boxed is returned.
+   This is because, when multiplying "x" real by "a+bi"
+   complex, we would be adding a "+0i" to x, and this zero
+   could bring up a NaN when multiplied by the infinity
+   in the complex operand.
+
+   If 'force' is one, then the conversion is done even
+   in that case (for example, this is not necessary when
+   adding or subtracting).                               */
+static type_cell convert(SCM *px, SCM *py, int force)
 {
   SCM x = *px;
   SCM y = *py;
@@ -820,17 +834,27 @@ static type_cell convert(SCM *px, SCM *py)
   switch (TYPEOF(x)) {
     case tc_complex:
             switch (TYPEOF(y)) {
-              case tc_complex: /*already done */
               case tc_real:
+              case tc_integer:
+                if (!force &&
+                    (REALP(COMPLEX_REAL(x)) && isinf(REAL_VAL(COMPLEX_REAL(x))) ||
+                     REALP(COMPLEX_IMAG(x)) && isinf(REAL_VAL(COMPLEX_IMAG(x)))))
+                  return tc_not_boxed;
+                /* fallthrough */
+              case tc_complex: /*already done */
               case tc_rational:
-              case tc_bignum:
-              case tc_integer:  *py = Cmake_complex(y, MAKE_INT(0)); break;
+              case tc_bignum:   *py = Cmake_complex(y, MAKE_INT(0)); break;
               default:          error_bad_number(y);                 break;
             }
             break;
     case tc_real:
             switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
+              case tc_complex:
+                if (!force &&
+                    (REALP(COMPLEX_REAL(y)) && isinf(REAL_VAL(COMPLEX_REAL(y))) ||
+                     REALP(COMPLEX_IMAG(y)) && isinf(REAL_VAL(COMPLEX_IMAG(y)))))
+          return tc_not_boxed;
+                *px = Cmake_complex(x, MAKE_INT(0));                    break;
               case tc_real:     /* already done */                      break;
               case tc_rational: *py = rational2real(y);                 break;
               case tc_bignum:   *py = scheme_bignum2real(y);            break;
@@ -860,7 +884,13 @@ static type_cell convert(SCM *px, SCM *py)
             break;
     case tc_integer:
             switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
+              case tc_complex: {
+                if (!force &&
+                    (REALP(COMPLEX_REAL(y)) && isinf(REAL_VAL(COMPLEX_REAL(y))) ||
+                     REALP(COMPLEX_IMAG(y)) && isinf(REAL_VAL(COMPLEX_IMAG(y)))))
+                    return tc_not_boxed;
+                *px = Cmake_complex(x, MAKE_INT(0));                    break;
+              }
               case tc_real:     *px = double2real((double) INT_VAL(x)); break;
               case tc_rational: *px = Cmake_rational(x,  MAKE_INT(1));  break;
               case tc_bignum:   *px = long2scheme_bignum(INT_VAL(x));   break;
@@ -1998,7 +2028,7 @@ doc>
  */
 SCM STk_add2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
+    switch (convert(&o1, &o2, 1)) {
     case tc_bignum:
         {
           mpz_t add;
@@ -2066,7 +2096,7 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
+    switch (convert(&o1, &o2, 0)) {
     case tc_bignum:
       mult_bignum:
       {
@@ -2114,6 +2144,21 @@ SCM STk_mul2(SCM o1, SCM o2)
                              mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2)));
           break;
         }
+      case tc_not_boxed:
+        /* This case is for complex and non-complex, where zeros and
+           infinities could end up resulting in NaN, so we did NOT
+           convert the other number to complex, as to not create a
+           '+0i' imaginary part that would complicate operations. */
+        {
+          /* Guaranteed to have a complex and a non-complex! */
+          if ((TYPEOF(o2)) == tc_complex)
+            o1 = make_complex(mul2(o1,COMPLEX_REAL(o2)),
+                              mul2(o1,COMPLEX_IMAG(o2)));
+          else
+            o1 = make_complex(mul2(o2,COMPLEX_REAL(o1)),
+                              mul2(o2,COMPLEX_IMAG(o1)));
+          break;
+        }
       default: error_cannot_operate("multiplication", o1, o2);
   }
   return o1;
@@ -2157,7 +2202,7 @@ doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
+    switch (convert(&o1, &o2, 1)) {
     case tc_bignum:
       {
         mpz_t sub;
@@ -2224,7 +2269,7 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
+    switch (convert(&o1, &o2, 0)) {
     case tc_bignum:
     case tc_integer:
       o1 = make_rational(o1, o2);
@@ -2257,6 +2302,26 @@ SCM STk_div2(SCM o1, SCM o2)
           o1 = make_complex(new_r, new_i);
         }
         break;
+      }
+    case tc_not_boxed:
+      {
+          if (TYPEOF(o1)==tc_complex) {
+              /* x complex, y non-complex -- easy! */
+              o1 = make_complex(div2(COMPLEX_REAL(o1),o2),
+                                div2(COMPLEX_IMAG(o1),o2));
+          } else {
+              /* x non-complex, y complex */
+              SCM tmp, new_r, new_i;
+              tmp = add2(mul2(COMPLEX_REAL(o2),COMPLEX_REAL(o2)),
+                         mul2(COMPLEX_IMAG(o2),COMPLEX_IMAG(o2)));
+              new_r = div2(mul2(o1, COMPLEX_REAL(o2)),
+                           tmp);
+              new_i = div2(sub2(MAKE_INT(0),
+                                mul2(o1, COMPLEX_IMAG(o2))),
+                           tmp);
+              o1 = make_complex(new_r, new_i);
+          }
+          break;
       }
     default: error_cannot_operate("division", o1, o2);
   }
