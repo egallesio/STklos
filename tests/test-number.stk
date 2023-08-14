@@ -2066,4 +2066,29 @@
            (radians->degrees (/ pi 5))
            36.00001)))
 
+(test "abs complex"
+      5
+      (abs -3-4i))
+
+(test "abs complex"
+      5.0
+      (abs -3.0-4i))
+
+(test "abs complex"
+      #t
+      (infinite? (abs -inf.0+4i)))
+
+(test "abs complex"
+      #t
+      (infinite? (abs 2-inf.0i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs -nan.0+4i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs 1-nan.0i)))
+
+
 (test-section-end)
