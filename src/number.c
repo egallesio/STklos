@@ -1209,23 +1209,28 @@ static void clean_srfi_169_number(char *str)
 static SCM read_integer_or_real(char *str, long base, char exact_flag, char **end)
 {
   int adigit=0, isint=1;
-  char saved_char = '\0', *p = str, *p1, *p2, *p3, *p4;
+  char saved_char = '\0', *p, *p1, *p2, *p3, *p4;
   SCM res;
 
-  /* see function compute_exact_real for the meaning of these pointers */
+  if (use_srfi_169 && strchr(str, '_')) {
+    /* See if we have a SRFI-169 number. Since we'll delete the '_' in str (and that we
+     * could see later that str is in fact a symbol -- e.g. 1_2xyz), we work on a copy
+     * of str in this case. This permits to not alter the original parameter if we need
+     * to read it later as a symbol. */
+    if (could_be_a_srfi_169_number(str, base)) {
+      str = STk_strdup(str);
+      clean_srfi_169_number(str);
+    } else
+      /* we have '_' and it it's not a srfi-169 => it's a symbol */
+      return STk_false;
+  }
+
+  /* see function compute_exact_real for the meaning of p1..p4 pointers */
+  p = str;
   p1 = p2 = p3 = p4 = NULL;
 
   if (*p == '-' || *p == '+') p+=1;
   if (*p == '#') return STk_false;
-
-  /* Take care of SRFI-169 numbers */
-  if (use_srfi_169 && strchr(p, '_')) {
-    if (could_be_a_srfi_169_number(p, base))
-      clean_srfi_169_number(p);
-    else
-      /* we have '_' and it it's not a srfi-169 => it's a symbol */
-      return STk_false;
-  }
 
   while(digitp(*p, base)) { p+=1; adigit=1; if (*p == '#') isint = 0; }
 
