@@ -1205,12 +1205,24 @@ static void clean_srfi_169_number(char *str)
   *q = '\0';
 }
 
+static int contain_weird_chars(char *str)
+{
+  for (char *p=str; *p; p++) {
+    switch (*p) {
+    case '#':
+    case 's': case 'S': case 'f': case 'F':
+    case 'd': case 'D': case 'l': case 'L': return 1;
+    }
+  }
+  return 0;
+}
 
 static SCM read_integer_or_real(char *str, long base, char exact_flag, char **end)
 {
   int adigit=0, isint=1;
-  char saved_char = '\0', *p, *p1, *p2, *p3, *p4;
-  SCM res;
+  char saved_char = '\0', *original_str = str;
+  char *p, *p1, *p2, *p3, *p4;
+  SCM res = STk_false;
 
   if (use_srfi_169 && strchr(str, '_')) {
     /* See if we have a SRFI-169 number. Since we'll delete the '_' in str (and that we
@@ -1223,6 +1235,14 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
     } else
       /* we have '_' and it it's not a srfi-169 => it's a symbol */
       return STk_false;
+  }
+
+  if (contain_weird_chars(str) && str == original_str) {
+    /* Float like symbols may be patched too (for instance "12s3" will be rewritten
+     * in 12e3. But "12s3x" is a symbol and we need to duplicate str before patching it
+     * Note: if str != original_str, we have already duplicated the string since it
+     * contains at least an underscore */
+    str = STk_strdup(str);
   }
 
   /* see function compute_exact_real for the meaning of p1..p4 pointers */
