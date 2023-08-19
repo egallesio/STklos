@@ -2066,4 +2066,12 @@
            (radians->degrees (/ pi 5))
            36.00001)))
 
+
+(test "weird number or symbol.1" #t (number? '3s2))
+(test "weird number or symbol.2" #f (number? '3s2x))
+(test "weird number or symbol.3" #t (number? '3#d2+5i))
+(test "weird number or symbol.4" #f (number? '3#d2+5))
+
+
+
 (test-section-end)
