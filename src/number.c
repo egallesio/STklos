@@ -1170,7 +1170,7 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
 }
 
 
-static int could_be_a_srfi_169_number(char *str, long base)
+static int could_be_a_srfi_169_number(char *str, long base) // SRFI-169 syntax OK?
 {
   char prev = *str;
 
@@ -1191,8 +1191,7 @@ static int could_be_a_srfi_169_number(char *str, long base)
   return 1;
 }
 
-
-static void clean_srfi_169_number(char *str)
+static void clean_srfi_169_number(char *str)  // Suppress '_' of a correct SRFI-169
 {
   char *q = str;
 
@@ -1205,7 +1204,7 @@ static void clean_srfi_169_number(char *str)
   *q = '\0';
 }
 
-static int contain_weird_chars(char *str)
+static int contain_weird_chars(char *str) // has characters that'll be patched later?
 {
   for (char *p=str; *p; p++) {
     switch (*p) {
@@ -1222,31 +1221,43 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
   int adigit=0, isint=1;
   char saved_char = '\0', *original_str = str;
   char *p, *p1, *p2, *p3, *p4;
-  SCM res = STk_false;
+  SCM res;
 
+  /* if first char cannot start a number, return #f (not a number => symbol) */
+  if (!digitp(*str, base) && *str != '-' && *str != '+' && *str != '.')
+    return STk_false;
+
+  /* If str contains certain characters, they will be patched later, to passed a correct
+   * string to  standard conversion functions. For instance, "1_2#s3" will be modified
+   * in place to "120e3" before to be sent to the standard strtod function. The problem
+   * is that we can think that we are on a number an see later that it's a symbol (all non
+   * numbers are symbols in STklos). For instance "1_2#s3XY" is a symbol and,
+   * if we don't care, it will be read as symbol "120e3XY".
+   * Consequently, we need to work on a copy of str, when analyzing numbers. Since
+   * allocations for each number slow down significantly the reader, we'll work on
+   * minimizing the number of string duplications.
+   */
+
+  /* suppress eventually '_' of SRFI_169 numbers */
   if (use_srfi_169 && strchr(str, '_')) {
-    /* See if we have a SRFI-169 number. Since we'll delete the '_' in str (and that we
-     * could see later that str is in fact a symbol -- e.g. 1_2xyz), we work on a copy
-     * of str in this case. This permits to not alter the original parameter if we need
-     * to read it later as a symbol. */
     if (could_be_a_srfi_169_number(str, base)) {
       str = STk_strdup(str);
       clean_srfi_169_number(str);
     } else
-      /* we have '_' and it it's not a srfi-169 => it's a symbol */
+      /* we have '_' and it it's not a valid srfi-169 number => it's a symbol */
       return STk_false;
   }
 
+  /* if number contains weird exponent notation or '#' characters, duplicate */
   if (contain_weird_chars(str) && str == original_str) {
-    /* Float like symbols may be patched too (for instance "12s3" will be rewritten
-     * in 12e3. But "12s3x" is a symbol and we need to duplicate str before patching it
-     * Note: if str != original_str, we have already duplicated the string since it
-     * contains at least an underscore */
+     /* Note: if str != original_str, we have already duplicated the string since it
+      * contains at least an underscore */
     str = STk_strdup(str);
   }
 
-  /* see function compute_exact_real for the meaning of p1..p4 pointers */
-  p = str;
+  p = str; // str can be the original string or a copy of it, if we'll patch it
+
+  /* See function compute_exact_real for the meaning of p1..p4 pointers */
   p1 = p2 = p3 = p4 = NULL;
 
   if (*p == '-' || *p == '+') p+=1;
@@ -1339,7 +1350,7 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
 }
 
 
-static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **end)
+static SCM read_rational_den(SCM num, char *str, long base, char exact_flag, char **end)
 {
   SCM den;
 
@@ -1352,7 +1363,7 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
   else if (exact_flag=='i')
     /* We're sure we got here with either fixnums, bignums or reals, so
        div2 will always work. */
-    return  (div2(num,den));
+    return div2(num,den);
 
   STk_error("cannot make rational with ~S and ~S", num, den);
 
@@ -1408,9 +1419,9 @@ static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
   if (num == STk_false) return STk_false;
 
   if (*p == '/')
-    num = read_rational(num, p+1, *base, *exact, &p);
+    num = read_rational_den(num, p+1, *base, *exact, &p);
 
-  /* Store in str2 where the number ends. */
+  /* Store in end where the number ends. */
   *end = p;
   return num;
 }
