@@ -3320,8 +3320,8 @@ static inline SCM
 acosh_aux(SCM z, double zz) {
     double r = zz*zz - 1;
     if (!isinf(r) && r >= 0) { /* can be too large for a double if
-                                zz is too large; can be negative if
-                                zz is in (0,+1). */
+                                  zz is too large; can be negative if
+                                  zz is in (0,+1). */
         double zzz = sqrt(r) + zz;
         if (!isinf(zzz)) /* did it overflow when we summed zz? */
             return double2real(log(zzz));
@@ -4032,7 +4032,7 @@ DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM expo
   int g = INT_VAL(inexact2exact(sign));
 
   /* #f => NaN,
-     #t =? inf  */
+     #t => inf  */
   if (significand == STk_false) return double2real(make_nan(0,0,0));
   if (significand == STk_true)  return (g >= 0)
                                   ? double2real(plus_inf)
@@ -4230,9 +4230,9 @@ DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
 int STk_init_number(void)
 {
   /* For systems without these constants, we can do:
-  plus_inf  = 1.0 / 0.0;
-  minus_inf = -plus_inf;
-  STk_NaN   = strtod("NAN", NULL);
+     plus_inf  = 1.0 / 0.0;
+     minus_inf = -plus_inf;
+     STk_NaN   = strtod("NAN", NULL);
   */
 
   /* initialize  special IEEE 754 values */
