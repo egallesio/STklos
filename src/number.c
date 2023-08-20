@@ -1333,7 +1333,7 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
 }
 
 /* ----------------------------------------------------------------------
- * STk_Cstr2number: Read a number form a C string
+ * STk_Cstr2number: Read a number from a C string
  * ---------------------------------------------------------------------- */
 
 /* STk_Cstr2simple_number will read from str a non-complex number.
