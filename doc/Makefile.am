@@ -16,13 +16,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 # USA.
-#
+#r
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
 
 .PHONY: subdoc docdb extradoc
 
-mandir	      = $(prefix)/share/man
+# mandir      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
 	        stklos-pp.1 stklos-script.1
 EXTRA_DIST    = $(man_MANS)
@@ -34,7 +34,8 @@ ALLDB       = $(OTHERDB) ./$(DOCDB)
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = DOCDB
 
-doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
+#doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
+doclocation = $(docdir)/@VERSION@
 
 docpdfdir   = $(doclocation)/pdf
 docpdf_DATA = PDF/stklos-ref.pdf
@@ -42,7 +43,7 @@ docpdf_DATA = PDF/stklos-ref.pdf
 dochtmldir  = $(doclocation)/html
 dochtml_DATA= HTML/stklos-ref.html
 
-docimgdir   = $(doclocation)/html/images
+docimgdir   = $(dochtmldir)/images
 docimg_DATA = HTML/images/hierarchy.png
 
 SUBDOCS     = refman vm hacking pp
