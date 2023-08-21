@@ -59,6 +59,9 @@
         void?
         receive case-lambda
         radians->degrees degrees->radians
+        1+ 1-
+        pop! push!
+        dolist
 
         %define-condition-type-accessors
         message-condition? condition-message
@@ -1125,6 +1128,86 @@ doc>
              (-> #:top)))))
 
 #|
+<doc EXT 1+ 1-
+ * (1+ x)
+ * (1- x)
+ *
+ * There procedures return |x| plus one and |x| minus one, repsectively.
+ * Being procedures, they do not change the value of the variable |x|.
+ *
+ * @lisp
+ * (define x 10)
+ * (1+ x)          => 11
+ * x               => 10
+ * (1- x)          => 9
+ * x               => 10
+ * @end lisp
+doc>
+|#
+(define (1+ x) (+ x 1))
+(define (1- x) (- x 1))
+
+
+#|
+<doc EXT push! pop!
+ * (push! x lst)
+ * (pop! lst)
+ *
+ * These macros push and pop an element into/from a list, so as to use
+ * it as a stack.
+ *
+ * @lisp
+ * (define S (list 20 30 40))
+ * (push! 10 S)
+ * S                         => (10 20 30 40)
+ * (pop! S)                  => 10
+ * S                         => (20 30 40)
+ * @end lisp
+doc>
+|#
+(define-macro (push! e stack)
+  `(set! ,stack (cons ,e ,stack)))
+
+(define-macro (pop! stack)
+  (let ((x (gensym 'res-)))
+    `(let ((,x (car ,stack)))
+       (set! ,stack (cdr ,stack))
+       ,x)))
+
+
+#|
+<doc EXT dolist
+ * (dolist (x lst) body)
+ *
+ * This macro will iterate over |lst|, executing |body| for each
+ * element |x|. The symbol |x| will be captured and bound in |body|.
+ * This is a convenience wrapper over |for-each|, to make typing the
+ * lambda unnecessary; however, unlike |for-each|, it accepts a single variable
+ * and a single list. It is inspired by the Common Lisp |dolist| macro.
+ *
+ * @lisp
+ * (dolist (x '(10 20 30))
+ *   (display (- x)) (newline))
+ * -10
+ * -20
+ * -30
+ *
+ * (macro-expand '(dolist (x lst) body))
+ *   => (for-each (lambda (x) body) lst)
+ * @end lisp
+doc>
+|#
+(define-macro (dolist var&list . body)
+  (unless (and (pair? var&list)
+               (= 2 (length var&list))
+               (symbol? (car var&list)))
+    (error 'dolist "variable and list expected instead of ~S" var&list))
+  (when (null? body)
+    (error 'dolist "empty body"))
+  `(for-each (lambda (,(car var&list)) ,@body) ,(cadr var&list)))
+
+
+#|
 <doc EXT call/ec
  * (call/ec proc)
  *
@@ -1807,13 +1890,13 @@ doc>
  * This form is similar to |define|, except the binding of |<variable>| which
  * is non mutable.
  *
- * @lisp 
+ * @lisp
  * (define-constant a 'hello)
  * (set! a 'goodbye)             => error
  * (define a 2)                  ; is  ok (it's a new binding)
  * (define-constant ((foo a) b)  ; foo is (lambda (a) (lambda (b) ...)))
  *     ...)
- * @end lisp 
+ * @end lisp
 doc>
 |#
 (define-macro (define-constant . args)
