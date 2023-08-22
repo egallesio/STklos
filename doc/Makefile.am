@@ -22,7 +22,6 @@
 
 .PHONY: subdoc docdb extradoc
 
-# mandir      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
 	        stklos-pp.1 stklos-script.1
 EXTRA_DIST    = $(man_MANS)
@@ -35,12 +34,12 @@ schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = DOCDB
 
 #doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
-doclocation = $(docdir)/@VERSION@
+doclocation = $(docdir)
 
-docpdfdir   = $(doclocation)/pdf
+docpdfdir   = $(pdfdir)
 docpdf_DATA = PDF/stklos-ref.pdf
 
-dochtmldir  = $(doclocation)/html
+dochtmldir  = $(htmldir)
 dochtml_DATA= HTML/stklos-ref.html
 
 docimgdir   = $(dochtmldir)/images

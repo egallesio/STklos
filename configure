@@ -2681,12 +2681,16 @@ VERSION_STATUS=unstable    # and reset it to unstable after releasing
 # Grab configure options before it is too late
 #
 CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""
+PDFDIR="";HTMLDIR=""; DOCDIR=""
 
 for opt in "$@"
 do
   case $opt in
-     CC=*)     HAS_CC=1 ;;
-     CFLAGS=*) HAS_CFLAGS=1;;
+     CC=*)        HAS_CC=1 ;;
+     CFLAGS=*)    HAS_CFLAGS=1;;
+     --docdir=*)  DOCDIR=${docdir};;
+     --pdfdir=*)  PDFDIR=${pdfdir};;
+     --htmldir=*) HTMLDIR=${htmldir};;
   esac
 
   if test "X$opt" = "X--no-create" -o "X$opt" = "X--no-recursion"
@@ -7757,6 +7761,33 @@ then
 fi
 
 
+# Manage standard options --docdir, --pdfdir, --htmldir
+# By default, autoconf uses
+#   docdir = ${prefix}/share/doc/stklos
+#   pdfdir = ${docdir}
+#   htmldir = ${docdir}
+# To permit to have several versions of STklos installed, and to avoid
+# cluttering the doc directory, we use
+#   docdir = ${prefix}/share/doc/stklos/${VERSION}
+#   pdfdir = ${docdir}/pdf
+#   htmldir = ${docdir}/html
+# Of course, if the user specify any option, we use the value he/she gave
+if test "$DOCDIR" == "" ; then
+    # user has not given a "--docdir" option. Use our own convention
+    docdir="${datarootdir}/doc/${PACKAGE_TARNAME}/${VERSION}"
+fi
+
+if test "$PDFDIR" == ""  ; then
+   # user has not given a "--pdfdir" option. Use our own convention
+   pdfdir="${docdir}/pdf"
+fi
+
+if test "$HTMLDIR" == ""  ; then
+   # user has not given a "--htmldir" option. Use our own convention
+   htmldir="${docdir}/html"
+fi
+
+
 ### Output files
 
 
@@ -9345,7 +9376,7 @@ echo " "
 echo "SUMMARY"
 echo "*******"
 echo "               System: " $BUILD_OS
-echo "              OS nick: " $OS_NAME_VERSION
+echo "              OS nick: " $OS#{_NAME_VERSION
 echo "              OS type: " $OS_FLAVOUR
 echo "       Install prefix: " $prefix
 echo "           C compiler: " $CC

@@ -340,8 +340,6 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-
-# mandir      = $(prefix)/share/man
 man_MANS = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
 	        stklos-pp.1 stklos-script.1
 
@@ -353,10 +351,10 @@ schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = DOCDB
 
 #doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
-doclocation = $(docdir)/@VERSION@
-docpdfdir = $(doclocation)/pdf
+doclocation = $(docdir)
+docpdfdir = $(pdfdir)
 docpdf_DATA = PDF/stklos-ref.pdf
-dochtmldir = $(doclocation)/html
+dochtmldir = $(htmldir)
 dochtml_DATA = HTML/stklos-ref.html
 docimgdir = $(dochtmldir)/images
 docimg_DATA = HTML/images/hierarchy.png
