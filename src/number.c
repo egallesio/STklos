@@ -3497,23 +3497,26 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
       SCM a = COMPLEX_REAL(z);
       SCM b = COMPLEX_IMAG(z);
 
-      /* The square root of a complex number,
+      /* Given a, b we will compute A, B such that the square root of
+         the complex number a+bi is
+
          sqrt(a+bi) = A+Bi
 
+         The algorithm:
+
          if a < 0:
-             B := sqrt( (|z|-a) /2) * sign(b)
-             A := b/(2*B).
+             B := sqrt( (|z|-a) / 2) * sign(b)
+             A := b / (2*B).
 
          if a >= 0:
-             A := sqrt( (|z|+a) /2)
+             A := sqrt( (|z|+a) / 2)
              if A != 0:
                  B := (b / (2*A))
              else:
-                 B = 0.0
-      */
+                 B = 0.0                        */
 
       if (negativep(a) ||  /* a < 0 */
-          REALP(a) && signbit(REAL_VAL(a))) { /* negaivep(-0.0) won't work... */
+          REALP(a) && signbit(REAL_VAL(a))) { /* negativep(-0.0) won't work... */
         bb = STk_sqrt(div2(sub2(STk_magnitude(z),a), MAKE_INT(2)));
 
         if (negativep(b) ||
