@@ -112,6 +112,31 @@ case $OS in
     ;;
 esac
 
+# Manage standard options --docdir, --pdfdir, --htmldir
+# By default, autoconf uses
+#   docdir = ${prefix}/share/doc/stklos
+#   pdfdir = ${docdir}
+#   htmldir = ${docdir}
+# To permit to have several versions of STklos installed, and to avoid
+# cluttering the doc directory, we use
+#   docdir = ${prefix}/share/doc/stklos/${VERSION}
+#   pdfdir = ${docdir}/pdf
+#   htmldir = ${docdir}/html
+# Of course, if the user specify any option, we use the value he/she gave
+if test "$DOCDIR" == "" ; then
+    # user has not given a "--docdir" option. Use our own convention
+    docdir="${prefix}/share/doc/${PACKAGE_TARNAME}/${VERSION}"
+fi
+
+if test "$PDFDIR" == ""  ; then
+   # user has not given a "--pdfdir" option. Use our own convention
+   pdfdir="${docdir}/pdf"
+fi
+
+if test "$HTMLDIR" == ""  ; then
+   # user has not given a "--htmldir" option. Use our own convention
+   htmldir="${docdir}/html"
+fi
 
 # Manage standard options --libdir and --datadir
 # If the user doesn't specify these option, we fix
@@ -130,34 +155,6 @@ if test "$DATADIR" == ""  ; then
    # user has not given a "--datadir" option. Use ${prefix}/share/stklos/${VERSION}
    datadir="${prefix}/share/${PACKAGE_TARNAME}/${VERSION}"
 fi
-
-
-# Manage standard options --docdir, --pdfdir, --htmldir
-# By default, autoconf uses
-#   docdir = ${prefix}/share/doc/stklos
-#   pdfdir = ${docdir}
-#   htmldir = ${docdir}
-# To permit to have several versions of STklos installed, and to avoid
-# cluttering the doc directory, we use
-#   docdir = ${prefix}/share/doc/stklos/${VERSION}
-#   pdfdir = ${docdir}/pdf
-#   htmldir = ${docdir}/html
-# Of course, if the user specify any option, we use the value he/she gave
-if test "$DOCDIR" == "" ; then
-    # user has not given a "--docdir" option. Use our own convention
-    docdir="${datadir}/share/doc/${PACKAGE_TARNAME}/${VERSION}"
-fi
-
-if test "$PDFDIR" == ""  ; then
-   # user has not given a "--pdfdir" option. Use our own convention
-   pdfdir="${docdir}/pdf"
-fi
-
-if test "$HTMLDIR" == ""  ; then
-   # user has not given a "--htmldir" option. Use our own convention
-   htmldir="${docdir}/html"
-fi
-
 
 ### Initialize the extra conf file in src
 PREFIX=$prefix

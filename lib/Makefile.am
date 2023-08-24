@@ -103,8 +103,8 @@ BASEDIR     = ..
 
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
+schemedir       = @SCMDIR@
+schemelibdir    = @EXECDIR@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
 schemelib_DATA  = $(scheme_SOLIBS)
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)

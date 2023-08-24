@@ -113,8 +113,8 @@ scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
 SOURCES = $(SRC_STK) $(LARGE_C)
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
+schemedir       = @SCMDIR@/scheme
+schemelibdir    = @EXECDIR@/scheme
 scheme_sources  = $(SRC_STK)
 scheme_DATA     = $(scheme_OBJS)
 schemelib_DATA  = $(LARGE_SHOBJ)

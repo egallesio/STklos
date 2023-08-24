@@ -16,7 +16,7 @@
 
 # Makefile.am for STklos lib
 #
-# Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -331,7 +331,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-scheme_matchdir = $(prefix)/share/@PACKAGE@/@VERSION@/Match.d
+scheme_matchdir = @SCMDIR@/Match.d
 scheme_match_DATA = descr.scm compiler.scm  mexpand.scm normalize.scm s2cfun.scm
 all: all-am
 

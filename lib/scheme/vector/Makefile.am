@@ -80,8 +80,8 @@ SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 
 #======================================================================
-srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/scheme/vector
-srfilibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme/vector
+srfidir       = @SCMDIR@/scheme/vector
+srfilibdir    = @EXECDIR@/scheme/vector
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)

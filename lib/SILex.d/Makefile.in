@@ -301,7 +301,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir = @SCMDIR@
 #scheme_DATA = silex.scm multilex.scm
 SRC = silex.scm multilex.scm
 all: all-am

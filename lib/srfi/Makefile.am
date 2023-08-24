@@ -273,8 +273,8 @@ BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
-srfilibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfidir       = @SCMDIR@/srfi
+srfilibdir    = @EXECDIR@/srfi
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)

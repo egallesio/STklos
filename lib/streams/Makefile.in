@@ -679,7 +679,7 @@ install-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS) *-incl.c  *~
+	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile

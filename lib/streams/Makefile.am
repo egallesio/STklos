@@ -30,8 +30,7 @@ SO = @SH_SUFFIX@
 #
 # Libraries written in Scheme only
 #
-SRC_STK = primitive.stk derived.stk
-
+SRC_STK  = primitive.stk derived.stk
 SRC_OSTK = primitive.ostk derived.ostk
 
 #
@@ -41,15 +40,15 @@ SRC_C     =
 SRC_C_STK =
 SRC_SHOBJ =
 
-scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+ALL_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
 DOCDB  = ../DOCDB
 BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/streams
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/streams
+schemedir       = @SCMDIR@/streams
+schemelibdir    = @EXECDIR@/streams
 scheme_DATA     = $(SRC_OSTK)
 schemelib_DATA  = $(SRC_SHOBJ)
 scheme_sources  = $(SRC_STK)
@@ -78,7 +77,7 @@ install-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS) *-incl.c  *~
+	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile

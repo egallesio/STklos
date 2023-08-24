@@ -30,8 +30,7 @@ SO = @SH_SUFFIX@
 #
 # Libraries written in Scheme only
 #
-SRC_STK = preproc.stk
-
+SRC_STK  = preproc.stk
 SRC_OSTK = preproc.ostk
 
 #
@@ -41,15 +40,16 @@ SRC_C     = itrie.c
 SRC_C_STK = itrie.stk
 SRC_SHOBJ = itrie.$(SO)
 
-scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+# scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+ALL_OBJS    = $(SRC_OSTK) $(SRC_SHOBJ)
 
 DOCDB  = ../DOCDB
 BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+schemedir       = @SCMDIR@/stklos
+schemelibdir    = @EXECDIR@/stklos
 scheme_DATA     = $(SRC_OSTK)
 schemelib_DATA  = $(SRC_SHOBJ)
 scheme_sources  = $(SRC_STK)
@@ -78,7 +78,7 @@ install-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS) *-incl.c  *~
+	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile

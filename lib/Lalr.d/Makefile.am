@@ -20,7 +20,7 @@
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 25-Oct-2004 16:43 (eg)
 
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir   = @SCMDIR@
 scheme_DATA = lalr.ostk
 
 COMP ?= ../utils/tmpcomp

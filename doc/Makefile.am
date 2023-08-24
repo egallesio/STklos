@@ -30,7 +30,7 @@ DOCDB       = DOCDB
 OTHERDB	    = ../src/$(DOCDB) ../lib/$(DOCDB)
 ALLDB       = $(OTHERDB) ./$(DOCDB)
 
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir   = @SCMDIR@
 scheme_DATA = DOCDB
 
 #doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
