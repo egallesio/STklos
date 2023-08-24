@@ -75,7 +75,7 @@ readline-complete.$(SO): readline-complete-incl.c readline-complete.c
 
 # ======================================================================
 install-sources:
-	install $(scheme_sources) $(schemedir)
+	cp $(scheme_sources) $(schemedir)
 
 clean:
 	rm -f $(ALL_OBJS) *-incl.c  *~
