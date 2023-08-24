@@ -405,8 +405,7 @@ doc>
 
       (unless (member what provided)
         (let* ((path (if lib-only?
-                         (list (make-path (%library-prefix) "share" "stklos"
-                                          (short-version)))
+                         (list (%library-prefix 'data))
                          (load-path)))
                (suff (load-suffixes))
                (file (%rewrite-require-spec what path suff)))

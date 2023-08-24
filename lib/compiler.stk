@@ -1766,9 +1766,7 @@ both forms.
 
   (let ((path (find-path file
                          (if lib-only?
-                             (list (make-path (%library-prefix)
-                                              "share" "stklos"
-                                              (version)))
+                             (list (make-path (%library-prefix 'data)))
                              (load-path)))))
     (if path
         (let ((infos (%file-information path)))
