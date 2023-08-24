@@ -90,13 +90,7 @@ doc>
 (set! *load-path*
       (let ((user-path (build-path-from-shell-variable "STKLOS_LOAD_PATH")))
         (if (null? user-path)
-            (let ((prefix  (%library-prefix))
-                  (release (short-version)))
-              (list "."
-                    (%stklos-conf-file (make-path "pkg" "lib"))
-                    (%stklos-conf-file "ext")
-                    (make-path prefix "lib"   "stklos" release)
-                    (make-path prefix "share" "stklos" release)))
+            (list "." (%library-prefix 'lib) (%library-prefix 'data))
             user-path)))
 
 #|
