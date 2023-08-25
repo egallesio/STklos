@@ -26,8 +26,8 @@ SCM_SRCS = curl.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@
-schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
-schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+schemedir      = @SCMDIR@/stklos
+schemelibdir   = @EXECDIR@/stklos
 
 #======================================================================
 BASEDIR= ../../../..
