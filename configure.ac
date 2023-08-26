@@ -10,7 +10,7 @@ VERSION_STATUS=unstable    # and reset it to unstable after releasing
 #
 # Grab configure options before it is too late
 #
-CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""
+CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""; HAS_LDFLAGS=""; HAS_CPPFLAGS=""
 PDFDIR="";HTMLDIR=""; DOCDIR=""; LIBDIR=""; DATADIR="";
 
 for opt in "$@"
@@ -18,6 +18,8 @@ do
   case $opt in
      CC=*)        HAS_CC=1 ;;
      CFLAGS=*)    HAS_CFLAGS=1;;
+     LDLAGS=*)    HAS_LDLAGS=1;;
+     CPPFLAGS=*)  HAS_CPPFLAGS=1;;
      --docdir=*)  DOCDIR=${docdir};;
      --pdfdir=*)  PDFDIR=${pdfdir};;
      --htmldir=*) HTMLDIR=${htmldir};;
@@ -33,6 +35,9 @@ do
      CONF_OPT="$CONF_OPT \\\"$opt\\\""
   fi
 done
+
+# export CC, CFLAGS and all for configure scripts launched by this configure script
+export CC CFLAGS LDFLAGS CPPFLAGS
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
@@ -284,7 +289,7 @@ AC_ARG_WITH(provided-gc,
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
 then
      echo "... Configuring libgc"
-     (cd gc; CC=${CC} CFLAGS=${CFLAGS} ./configure --prefix=$prefix --enable-static \
+     (cd gc; ./configure --prefix=$prefix --enable-static \
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
@@ -388,8 +393,7 @@ AC_ARG_WITH(provided-regexp,
 if test "$HAVE_PCRE2" = "no" -o "$PROV_PCRE2" = "yes"
 then
      echo "... Configuring libpcre2"
-     (cd pcre2; CC=${CC} CFLAGS="${CFLAGS}" ./configure \
-           --prefix=$prefix --disable-shared --disable-cpp) || \
+     (cd pcre2; ./configure --prefix=$prefix --disable-shared --disable-cpp) || \
            { echo "Cannot configure PCRE2"; exit; }
      PCRE2=pcre2
      PCRE2INC="-I../pcre2"
@@ -432,8 +436,7 @@ AC_ARG_WITH(provided-ffi,
 if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
 then
      echo "... Configuring libffi"
-     (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
-           --disable-structs --disable-raw-api --disable-shared \
+     (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
            --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
      FFI="ffi"
      FFIINC="-I../ffi/$(./config.guess)/include"
@@ -557,7 +560,7 @@ done
 ### Finishing ...
 ###
 
-# See if we must add CC and CFLAGS to the arguments stored in $CONF_OPT
+# See if we must add CC, {C,LD,CPP}FLAGS to the arguments stored in $CONF_OPT
 if test "X$HAS_CC" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CC=$CC\\\""
 fi
@@ -565,6 +568,15 @@ fi
 if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
+
+if test "X$HAS_LDFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"LDFLAGS=$LDFLAGS\\\""
+fi
+
+if test "X$HAS_CFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"CPPFLAGS=$CPPFLAGS\\\""
+fi
+
 
 CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
 
