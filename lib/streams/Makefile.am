@@ -62,9 +62,10 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ \
 	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
 	/bin/rm -f $*.o
 #======================================================================
 # Dependencies

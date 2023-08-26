@@ -108,8 +108,9 @@ f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+			-I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 #======================================================================
