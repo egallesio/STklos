@@ -215,7 +215,7 @@
     (175 "ASCII character library" (ascii) "srfi-175")
     (176 "Version flag")
     ;; 177  ....... withdrawn
-    ;; 178  Bitvector library
+    (178 "Bitvector library" () "srfi-178")
     ;; 179  Nonempty Intervals and Generalized Arrays (Updated)
     (180 "JSON" (JSON json)  "srfi-180")
     ;; 181  Custom ports (including transcoded ports)

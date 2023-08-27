@@ -110,6 +110,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-174: POSIX Timespecs
     - SRFI-175: ASCII character library
     - SRFI-176: Version flag
+    - SRFI-178: Bitvector library
     - SRFI-180: JSON
     - SRFI-185: Linear adjustable-length strings
     - SRFI-189: Maybe and Either: optional container types
