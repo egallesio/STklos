@@ -1,6 +1,132 @@
 NEWS
 ====
 
+Version 2.00
+------------
+
+This is a major version of ***STklos***, bringing it from R^5^RS to R^7^RS. It is
+the fruit of nearly two years of development with the help of the following
+persons (in alphabetical order):
+   - Amirouche Boubekki ([@amirouche](https://github.com))
+   - Lassi Kortela ([@lassik](https://github.com/lassik))
+   - Ivan Maidanski ([@ivmai](https://github.com/ivmai))
+   - Tom Niget ([@zdimension](https://github.com/zdimension))
+   - Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
+   - Ryan Schmidt ([@ryandesign](https://github.com/ryandesign))
+   - Ben Taca ([@bentaca](https://github.com/bentaca))
+   - Robby Zambito ([@Zambito1](https://github.com/Zambito1))
+
+The main changes in this version are:
+
+- Support for R⁷RS libraries
+- Macro system hash been rewritten
+- Support for ScmPkg packages has been suppressed
+- New options for the commands *stklos(1)* and  *stklos-compile(1)*
+- Optimizations on numerical operations
+- Documentation is rewritten in `asciidoctor` and has been greatly enhanced
+- Updated the Docker build files
+- New instructions in the VM
+- Fixed some issues in the compilation/installation procedure
+- New extension: `curl` to access the *multiprotocol file transfer library*
+- Better support for macOS
+- `describe` has been enhanced for some type of objects
+- REPL has now tab completiongg
+- Bash and zsh completions for `stklos` and `stklos-compile` commands
+- Better `SLIB` support
+- Use PCRE2 library instead of legacy PCRE
+- New-command `stklos-pp(1)`
+- Better error messages
+- New SRFIS supported
+  - SRFI-19:  Time Data Types and Procedures
+  - SRFI 43: Vector Library
+  - SRFI-95: Sorting and Merging
+  - SRFI 116: Immutable List Library
+  - SRFI 125: Intermediate hash tables
+  - SRFI-138: Compiling Scheme programs to executables
+  - SRFI 152: String Library (reduced)
+  - SRFI-162: Comparators sublibrary
+  - SRFI 154: First-class dynamic extents
+  - SRFI-215: Central Log Exchange
+  - SRFI 217: Integer Sets
+  - SRFI 222: Compound objects
+  - SRFI 224: Integer Mappings - Scheme Requests for Implementation
+  - SRFI-227: Optional Arguments
+  - SRFI 228: Composing Comparators
+  - SRFI-229: Tagged Procedures
+  - SRFI-230: Atomic Operations
+  - SRFI 235: Combinators
+  - SRFI 236: Evaluating expressions in an unspecified order
+  - SRFI-238: Codesets
+  - SRFI 244: Multiple-value Definitions
+- Added support for some R7RS-large libraries
+   - supported libraries of the *Red edition* are
+       - `(scheme bytevector)`
+       - `(scheme box)`
+       - `(scheme charset)`
+       - `(scheme comparator)`
+       - `(scheme generator)`
+       - `(scheme hash-table)`
+       - `(scheme ideque)`
+       - `(scheme ilist)`
+       - `(scheme list)`
+       - `(scheme list-queue)`
+       - `(scheme lseq)`
+       - `(scheme set)`
+       - `(scheme sort)`
+       - `(scheme stream)`
+       - `(scheme text)`
+       - `(scheme vector)`
+    - supported libraries of the *Tangerine edition* are
+      - `(scheme bitwise)`
+      - `(scheme bytevector)`
+      - `(scheme division)`
+      - `(scheme fixnum)`
+      - `(scheme flonum)`
+      - `(scheme generator)`
+      - `(scheme vector @)`
+- New primitives
+  - `library-name`
+  - `library-list`
+  - `module-list`
+  - `module-lock!`
+  - `module-locked?`
+  - `symbol-mutable?`
+  - `define-constant`
+  - `cpointer-null?`
+  - `syntax-error`
+  - `hash-table-clear!`
+  - `environement`
+  - `send-signal`
+  - `set-signal-handler!`
+  - `get-signal-handler`
+  - `void?`
+  - `procedure-source`
+  - `procedure-formals`
+  - `short-version`
+  - `radians->degrees`
+  - `degrees->radians`
+  - `sinh`, `cosh`, ...
+- New compiler options (also parameter objects):
+   - `compiler:gen-line-number`
+   - `compiler:show-assembly-code`
+   - `compiler:time-display`
+   - `compiler:keep-formals`
+   - `compiler-keep-source`
+   - `compiler:inline-common-functions`
+   - `compiler:unroll-iterations`
+   - `repl-show-startup-message`
+- New predefined classes
+  - `<uvector>`
+  - `<bytevector>`
+  - `<hash-table>`
+  - `<port>`
+  - `<input-port>`
+  - `<output-port>`
+- Code cleaning an optimizations
+- Bug fixes
+
+
+
 Version 1.70
 ------------
 
@@ -726,3 +852,9 @@ version 0.50 (released on 2001-01-17)
 -------------------------------------
 
 - First public release
+
+
+
+<!-- Local Variables: -->
+<!-- mode: markdown -->
+<!-- End: -->
