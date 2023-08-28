@@ -2,7 +2,7 @@
  *
  * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -154,7 +154,6 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
  * because in some implementations of Scheme they cannot be read as themselves.
  *
  * @lisp
- *    (eq? 'mISSISSIppi 'mississippi)                   =>  #t
  *    (string->symbol "mISSISSIppi")                    =>  @pipemISSISSIppi@pipe
  *    (eq? 'bitBlt (string->symbol "bitBlt"))           =>  #f
  *    (eq? 'JollyWog
@@ -164,6 +163,10 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
  *              (symbol->string
  *                (string->symbol "K. Harper, M.D.")))  =>  #t
  * @end lisp
+ *
+ * NOTE: The expression `(eq? 'mISSISSIppi 'mississippi)` returns `#f` if
+ * {{stklos}} is running in case-sensitive mode (default), whereas it returns
+ * `#t` otherwise.
 doc>
  */
 DEFINE_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string))
