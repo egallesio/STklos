@@ -93,7 +93,7 @@ SCM STk_read_from_C_string(const char *str)
 
 /*===========================================================================*\
  *
- * Primitives that don't feet anywhere else
+ * Primitives that don't fit anywhere else
  *
 \*===========================================================================*/
 /*
@@ -122,7 +122,7 @@ DEFINE_PRIMITIVE("version", version, subr0, (void))
  * (short-version)
  *
  * Returns a string identifying the current version of the system without
- * its eventual patch number. 
+ * its eventual patch number.
 doc>
 */
 DEFINE_PRIMITIVE("short-version", short_version, subr0, (void))

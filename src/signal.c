@@ -319,7 +319,7 @@ int STk_init_signal()
     signals[i] = STk_true;
   }
 
-  // Define the symbols assiocated to signal names
+  // Define the symbols associated to signal names
   for (struct codeset_code *p = STk_signal_names; p->name; p++) {
     STk_define_variable(STk_intern((char *)p->name), MAKE_INT(p->code),
                         STk_STklos_module);

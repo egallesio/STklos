@@ -154,7 +154,6 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
  * because in some implementations of Scheme they cannot be read as themselves.
  *
  * @lisp
- *    (eq? 'mISSISSIppi 'mississippi)                   =>  #t
  *    (string->symbol "mISSISSIppi")                    =>  @pipemISSISSIppi@pipe
  *    (eq? 'bitBlt (string->symbol "bitBlt"))           =>  #f
  *    (eq? 'JollyWog
@@ -163,6 +162,20 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
  *    (string=? "K. Harper, M.D."
  *              (symbol->string
  *                (string->symbol "K. Harper, M.D.")))  =>  #t
+ * @end lisp
+ *
+ * If STklos is running in case-sensitive mode (with the `--case-sensitive` command
+ * line option, default) then the behavior is as follows.
+ *
+ * @lisp
+ *    (eq? 'mISSISSIppi 'mississippi)                   =>  #f
+ * @end lisp
+ *
+ * If STklos runs in case-insensitive mode (with the `--case-insensitive` command
+ * line option) then the behavior is different:
+ *
+ * @lisp
+ *    (eq? 'mISSISSIppi 'mississippi)                   =>  #t
  * @end lisp
 doc>
  */

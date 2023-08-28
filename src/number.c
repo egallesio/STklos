@@ -2414,7 +2414,7 @@ static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
   /* Here, x and y can only be integer or bignum (not real) */
 
   /* NOTE about the remainder: the GMP accepts 'unsigned integers' and
-     als returns 'unsigned integers' for remainders. We can safely use
+     also returns 'unsigned integers' for remainders. We can safely use
      'long' for these remainders, AND these will always fit a fixnum,
      because we'll only receive them when we passed fixnums as arguments,
      and the remainder won't be larger. */
@@ -2450,8 +2450,8 @@ static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
       if (quotient) mpz_init(q);
       /* The GMP only returns unsigned remainders, so we need to keep track of the
          sign of x. The easiest way to put back the sign is to initialize rem with
-         it, and multiply by whatever the GPM returns.
-         Also, we need labs so GMP will get the expected ulong. */
+         it, and multiply by whatever the GMP returns.
+         Also, we need 'labs' so the GMP will get the expected ulong. */
       long xsign = mpz_sgn(BIGNUM_VAL(x));
       if (!quotient) rem = xsign * (long) mpz_tdiv_ui(BIGNUM_VAL(x), labs(INT_VAL(y)));
       else rem = xsign * (long) mpz_tdiv_q_ui(q, BIGNUM_VAL(x),
@@ -2635,7 +2635,7 @@ static SCM gcd2(SCM n1, SCM n2)
     else if (BIGNUMP(n1) && BIGNUMP(n2)) /*  n1:BIG n2:BIG */
       mpz_gcd(r, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
 
-    /* NOTE: we are sure to not here a NaN or an infinity since
+    /* NOTE: we are sure to not have here a NaN or an infinity since
      * at most r is equal to n1 or n2, which has been accepted by
      * predicate integer? when entering this function
      */
@@ -2948,7 +2948,7 @@ static double my_bignum_rational_log(SCM z) {
   /* For both the numerator and denominator:
 
      - If it is a bignum AND fits a double, then just
-       converto to double and take the log.
+       convert to double and take the log.
      - If it is a bignum and does NOT fit a double,
        use my_bignum_log.
      - It may be that only one of numerator or denominator
@@ -3360,8 +3360,8 @@ static inline SCM
 acosh_aux(SCM z, double zz) {
     double r = zz*zz - 1;
     if (!isinf(r) && r >= 0) { /* can be too large for a double if
-                                zz is too large; can be negative if
-                                zz is in (0,+1). */
+                                  zz is too large; can be negative if
+                                  zz is in (0,+1). */
         double zzz = sqrt(r) + zz;
         if (!isinf(zzz)) /* did it overflow when we summed zz? */
             return double2real(log(zzz));
@@ -4072,7 +4072,7 @@ DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM expo
   int g = INT_VAL(inexact2exact(sign));
 
   /* #f => NaN,
-     #t =? inf  */
+     #t => inf  */
   if (significand == STk_false) return double2real(make_nan(0,0,0));
   if (significand == STk_true)  return (g >= 0)
                                   ? double2real(plus_inf)
@@ -4270,9 +4270,9 @@ DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
 int STk_init_number(void)
 {
   /* For systems without these constants, we can do:
-  plus_inf  = 1.0 / 0.0;
-  minus_inf = -plus_inf;
-  STk_NaN   = strtod("NAN", NULL);
+     plus_inf  = 1.0 / 0.0;
+     minus_inf = -plus_inf;
+     STk_NaN   = strtod("NAN", NULL);
   */
 
   /* initialize  special IEEE 754 values */
