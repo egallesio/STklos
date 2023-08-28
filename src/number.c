@@ -3815,8 +3815,8 @@ DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
 {
   switch (TYPEOF(z)) {
     case tc_complex:  if (REALP(COMPLEX_REAL(z)) || REALP(COMPLEX_IMAG(z)))
-                        return Cmake_complex(inexact2exact(COMPLEX_REAL(z)),
-                                             inexact2exact(COMPLEX_IMAG(z)));
+                        return make_complex(inexact2exact(COMPLEX_REAL(z)),
+                                            inexact2exact(COMPLEX_IMAG(z)));
                       else return z;
     case tc_real:     {
                         register double x = REAL_VAL(z);
