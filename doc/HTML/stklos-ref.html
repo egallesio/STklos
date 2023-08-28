@@ -7427,8 +7427,7 @@ because in some implementations of Scheme they cannot be read as themselves.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nb">eq?</span> <span class="ss">'mISSISSIppi</span> <span class="ss">'mississippi</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
-   <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"mISSISSIppi"</span><span class="p">)</span>                    <span class="nv">=&gt;</span>  <span class="nv">|mISSISSIppi|</span>
+<pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"mISSISSIppi"</span><span class="p">)</span>                    <span class="nv">=&gt;</span>  <span class="nv">|mISSISSIppi|</span>
    <span class="p">(</span><span class="nb">eq?</span> <span class="ss">'bitBlt</span> <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"bitBlt"</span><span class="p">))</span>           <span class="nv">=&gt;</span>  <span class="no">#f</span>
    <span class="p">(</span><span class="nb">eq?</span> <span class="ss">'JollyWog</span>
         <span class="p">(</span><span class="nb">string-&gt;symbol</span>
@@ -7437,6 +7436,20 @@ because in some implementations of Scheme they cannot be read as themselves.</p>
              <span class="p">(</span><span class="nb">symbol-&gt;string</span>
                <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"K. Harper, M.D."</span><span class="p">)))</span>  <span class="nv">=&gt;</span>  <span class="no">#t</span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The expression <code>(eq? 'mISSISSIppi 'mississippi)</code> returns <code>#f</code> if
+<strong><em>STklos</em></strong> is running in case-sensitive mode (default), whereas it returns
+<code>#t</code> otherwise.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14505,7 +14518,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1440</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1447</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -18096,7 +18109,7 @@ they are evalued and simply ignored.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>#t</code> is <code>obj</code> is <code>#void</code>, and <code>#f</code> otherwise.
+<p>Returns <code>#t</code> if <code>obj</code> is <code>#void</code>, and <code>#f</code> otherwise.
 The usual "unspecified" result in Scheme standard and in SRFIs is <code>#void</code>
 in STklos, and it is also returned by the procedure <code>void</code>.</p>
 </div>
@@ -31411,7 +31424,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-27 18:21:32 +0200
+Last updated 2023-08-28 12:43:28 +0200
 </div>
 </div>
 </body>
