@@ -1,30 +1,38 @@
-STklos (version 1.70)
+STklos (version 2.00)
 =====================
 
 
-**Erick Gallesio** <eg(at)unice.fr>
+**Erick Gallesio** <eg(at)stklos.net>
 
 
 Purpose
 -------
+***STklos*** is a free [Scheme](http://www.schemers.org) system
+mostly compliant with the languages features defined in [R⁷RS
+small](http://www.scheme-reports.org/2015/working-group-1.html). The
+aim of this implementation is to be fast as well as light. The
+implementation is based on an ad-hoc *Virtual Machine*.
 
-STklos is a free Scheme system compliant with the languages features
-defined in R7RS. The aim of this implementation is to be fast as well
-as light. The implementation is based on an ad-hoc Virtual
-Machine. 
+<!-- ***STklos*** can also be compiled as a library and embedded
+in an application. -->
 
-The salient points of STklos are:
+The salient points of ***STklos*** are:
 
- - an efficient and powerful object system based on CLOS providing
-    - Multiple Inheritance,
-    - Generic Functions,
-    - Multi-methods
-    - an efficient MOP (Meta Object Protocol)
- - a simple to use module system
- - a full tower of numbers implementation, as defined in R5RS,
- - easy connection to the GTK+ toolkit,
- - a Perl compatible regular expressions thanks to the PCRE package,
- - it implements properly tail recursive calls.
+-   an efficient and powerful object system based on [CLOS](https://en.wikipedia.org/wiki/Common_Lisp_Object_System) (Common Lisp Object System) providing
+    -   Multiple Inheritance,
+    -   Generic Functions,
+    -   Multi-methods
+    -   an efficient MOP (Meta Object Protocol)
+-   a simple to use module system, as well as R⁷RS libraries
+-   a full [Numerical tower](https://en.wikipedia.org/wiki/Numerical_tower), as defined in *R⁷RS*,
+-   a simple [FFI](https://en.wikipedia.org/wiki/Foreign_function_interface) (Foreign Function Interface),
+-   an easy connection to the [GTK+](http://www.gtk.org) toolkit,
+-   a Perl compatible regular expressions thanks to the [PCRE](http://www.pcre.org) package,
+-   [Unicode](https://en.wikipedia.org/wiki/Unicode) support,
+-   native threads built on top of [Posix theads](https://en.wikipedia.org/w/index.php?title=Pthreads),
+-   [Tail Call Optimization](https://en.wikipedia.org/w/index.php?title=Tail_call), as required by R⁷RS,
+-   support for a large number (> 120) of [SRFIs](https://en.wikipedia.org/wiki/Scheme_Requests_for_Implementation).
+
 
 History
 -------
@@ -35,18 +43,17 @@ to the Tk toolkit, that I have developed since September 1993.
 STklos is very similar to STk for the user but very different in the
 implementation. Everything has been rewritten and STklos now uses a
 compiler to a byte-code machine rather than direct interpretation.
-As a consequence, it is a lot faster than STk.  STklos is also better
+As a consequence, it is a lot faster than STk.
+
+<!-- STklos is also better
 designed and should be easily embedded in an application. (This was not
-completely the case with STk.)
+completely the case with STk.) -->
 
 Whereas STk used the Tk toolkit, STklos uses the GTK+ graphical
 toolkit. STklos is not completely compatible with STk but it should be
 easy to port old STk graphical applications (provided that they use
 objects). The GTK+ extension can be loaded at run time and does not
 require a special interpreter as was the case with STk.
-
-**June 2020**
-The 1.40 version continues to add R7RS traits to STklos.
 
 **August 2020**
 The 1.50 version has been ported to various architectures (in
@@ -55,23 +62,29 @@ and a port to Android.  This version also brings support
 of 23 new SRFIs. For a complete list of supported SRFIs, see
 https://www.stklos.net/srfi.html
 
-
 **February 2021**
 Support for 16 new [**SRFIs**](https://www.stklos.net/srfi.html).
 
 **November 2021**
 The 1.70 version supports 14 new [**SRFIs**](https://www.stklos.net/srfi.html).
-(We now have 98 SRFIs supported.) The (new) `extensions` directory contains 
-an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit. 
+(We now have 98 SRFIs supported). The (new) `extensions` directory contains
+an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit.
 
+**August 2023** 
+The 2.00 version is available. This version is conforming to R^7^RS
+(previous versions of STklos used to implement the R^5^RS standard).
+It adds support for 24 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
+support for 122 SRFIs. You can now use the [cURL](https://curl.se/libcurl/) 
+library thanks to the new **curl** extension.
 
 SRFI Support
 ------------
 
-The current version of STklos supports several SRFIs. (A complete list
-of implemented SRFIs is available in the file SUPPORTED-SRFIS in the
-distribution.) The goal is to support as many final SRFIs as possible.
-Any help on implementing other SRFIs on STklos is welcome.
+The current version of STklos supports mre than 120 final SRFIs (a
+complete list of implemented SRFIs is available in the file
+SUPPORTED-SRFIS in the distribution). The goal is to support as many
+final SRFIs as possible.  Any help on implementing other SRFIs on
+STklos is welcome.
 
 IDEs
 ----
@@ -100,7 +113,7 @@ The current version of STklos works on:
 The previous version of STklos (1.10) was known to work on the following
 architectures:
 
-- GNU/Linux 1.6.x (i386/gcc 32 and 64bits)
+- GNU/Linux 1.6.x (i386/gcc 32 and 64 bits)
 - Mac OS X 10.5+ (i386/gcc 32 and 64 bits)
 - FreeBSD 8.x (i386/gcc 32 bits and 64 bits)
 - Win32 (using Cygwin 1.7.x)
