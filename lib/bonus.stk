@@ -48,7 +48,7 @@
         print printerr eprintf printf fprintf
         declare-new-error
         exec exec-list
-        apropos die
+        apropos apropos/alist apropos/pp die
         decompose-file-name dirname basename file-separator
         make-path file-suffix file-prefix
         port-idle-register! port-idle-unregister! port-idle-reset!
@@ -1457,51 +1457,251 @@ doc>
 (define (exec-list command)
   (call-with-input-file (string-append "| " command) port->string-list))
 
-
-
 #|
-<doc EXT apropos
- * (apropos obj)
- * (apropos obj module)
+<doc EXT apropos apropos/alist apropos/pp
+ * (apropos obj :key (internal #f) (imported #f) (exported #t))
+ * (apropos/alist obj :key (internal #f) (imported #f) (exported #t))
+ * (apropos/pp obj :key (internal #f) (imported #f) (exported #t))
+ * (apropos obj :key (internal #f) (imported #f) (exported #t) [ module ...])
+ * (apropos/alist obj :key (internal #f) (imported #f) (exported #t) [ module ...])
+ * (apropos/pp obj :key (internal #f) (imported #f) (exported #t) [ module ...])
  *
- * |Apropos| returns a list of symbols whose print name contains the
- * characters of |obj| as a substring . The given |obj| can be a string or
- * symbol. This function returns the list of matched symbols which can
- * be accessed from the given |module| (defaults to the current module if not
- * provided).
+ * These procedures return the symbols whose print name contains the characters
+ * of |obj| as a substring, in the specified modules.  The given |obj| can be
+ * a string or symbol, and each module argument can be a symbol, a string, or
+ * the module itself.
  *
+ * - If no |module| is provided, the current module is used.
+ * - If modules are given, then these modules are searched.
+ * - If only a single `#t` argument is given for a |module|, then all matching
+ *   symbols from all modules will be searched.
+ *
+ * The keyword arguments are boolean:
+ *
+ * - If |:internal| is true, include the list of symbols defined inside the module
+ * - If |:imported| is true, include the list of symbols imported by the module
+ * - If |:exported| is true, include the symbols exported by the module
+ *
+ * The default is to list only the exported symbols.
+ *
+ * The three variants of |apropos| are:
+ *
+ * - |apropos| returns a flat list of symbols, and no information abotu the
+ *   modules where they are defined.
+ * - |apropos/alist| returns an association list where the key is a module name
+ *   (as a symbol) and the data is a list of matched symbols which can be accessed
+ *   from the given module.
+ * - |apropos/pp| does not have a return value, but prints the symbols on the
+ *   screen, categorized by module.
+ *
+ * Note that using `#t` will bring the same symbols in several different modules,
+ * since modules (as opposed to libraries) inherit all bindings in the |stklos|
+ * module.
+ *
+ * @lisp
+ * (define-library (A)
+ *   (export zeta-one zeta-two zeta-three)
+ *   (begin (define zeta-one 1)
+ *          (define zeta-two 2)
+ *          (define theta-three 3)))
+ * (define-library (B)
+ *   (export zeta-two zeta-three theta-four) ; but not zed
+ *   (begin (define zeta-two 2)
+ *          (define zeta-three 3)
+ *          (define theta-four 4)
+ *          (define zed 5)))
+ * (define-library (C)
+ *   (export zee)
+ *   (import (B))
+ *   (begin (define zee -1)))
+ *
+ * (apropos/alist 'zeta
+ *                'A                      ; a symbol (module name)
+ *                (find-module 'B))       ; and a module
+ *          => ( (A (zeta-one zeta-three zeta-two))
+ *               (B (zeta-three zeta-two)) )
+ *
+ * (apropos/pp 'zeta
+ *                "A"                     ; a string (module name)
+ *                'B)                     ; a symbol (module name)
+ *          => void
+ * And outputs, to the current output port, the following:
+ * Module A:
+ *    zeta-one
+ *    zeta-three
+ *    zeta-two
+ * Module B:
+ *    zeta-three
+ *    zeta-two
+ *
+ * (apropos "x" (find-module 'A))         ; obj is a string
+ *          => ()                         ; no symbol found
+ *
+ * (apropos 'o '(B))                      ; module name can be a list
+ *          => (theta-four zeta-two)      ; sinple list returned by apropos
+ *
+ * (apropos 'o :exported #f '(B))         ; oops, none of the options is active
+ *          => ()                         ; so the result is empty
+ *
+ * (apropos 'o :exported #f               ; we suppressed the externals, so
+ *             :internal #t '(B))         ; internals that are exported are out
+ *          => ()                         ; and the result is empty!
+ *
+ * (apropos/alist 'a #t)
+ *          => <all symbols exported by all modules with "a" in their names>
+ * @end lisp
 doc>
 |#
-(define (apropos str :optional (module (current-module)))
 
+(define apropos #f)       ; will be redefined
+(define apropos/alist #f) ; will be redefined
+(define apropos/pp #f)    ; will be redefined
+
+(let ()
+  ;; list->set is a simple procedure to eliminate duplicates
   (define (list->set lst res)
     (cond
       ((null? lst) res)
       ((memq (car lst) res) (list->set (cdr lst) res))
       (else (list->set (cdr lst) (cons (car lst) res)))))
 
+  ;; set-diff computes the set difference A \ B
+  (define (set-diff A B)
+    (let ((tmp A))
+      (for-each (lambda (x) (set! tmp (delete x tmp eq?))) B)
+      tmp))
+
   (define (symbol<? s1 s2)
     (string<? (symbol->string s1) (symbol->string s2)))
 
-  ;; Sanity check
-  (unless (module? module)
-    (error 'apropos "bad module ~S" module))
+  ;; return-symbols will look for the symbol str in module.
+  ;; The three other parameters tell if we are including
+  ;; symbols that are:
+  ;; - internal (defined in the module)
+  ;; - imported from other modules
+  ;; - exported
+  (define (return-symbols str module internal? imported? exported?)
+    ;; REMINDER:
+    ;; - module-exports is a list of SYMBOLS
+    ;; - module-imports is a list of MODULES
+    ;; - libraries DO have STklos in their import set, so we need to
+    ;;   filter them out.
+    (let* ((s        (if (symbol? str) (symbol->string str) str))
 
-  ;; Here we go
-  (let ((s        (if (symbol? str) (symbol->string str) str))
-        (external (if (library? module)
-                       '()
-                       (module-symbols (find-module 'STklos))))
-        (internal (module-symbols module)))
-    (let Loop ((symbs (list->set (append internal external) '()))
-               (res   '()))
+           ;; exp & imp are the original eport and import sets. They
+           ;; may be modified later when building the 'exported',
+           ;; 'imported' and 'internal' sets.
+           (exp (module-exports module))
+           (imp (list->set
+                 (flatten
+                  (map module-exports
+                       (if (library? module)
+                           (set-diff (module-imports module) (module-exports 'stklos))
+                           (module-imports module)))) '()))
+
+           (exported (if exported? exp '()))
+           (imported (if imported? imp '()))
+           (internal (if internal? (set-diff
+                                    (set-diff
+                                     (set-diff (module-symbols module) exp) imp) (module-exports 'stklos))
+                         '())))
+
+      (let Loop ((symbs (list->set (append exported imported internal) '()))
+                 (res   '()))
+        (cond
+         ((null? symbs)
+          (and (not (null? res)) (sort res symbol<?)))
+         ((string-find? s (symbol->string (car symbs)))
+          (Loop (cdr symbs) (cons (car symbs) res)))
+         (else
+          (Loop (cdr symbs) res))))))
+
+  (define (check-module m)
+    (cond ((module? m) m)
+          ((symbol? m) (find-module m))
+          ((list? m)   (find-module m)) ; module name can be a list...
+          ((string? m) (find-module (string->symbol m)))
+          (else (error 'apropos "bad module ~S" m))))
+
+  (define (apropos-get-modules module-list)
+    ;; Just gets all modules from module-list:
+    (cond ((equal? '(#t) module-list)  (all-modules))
+          ((null? module-list)         (list (current-module)))
+          ((list? module-list)         (map check-module module-list))
+          (else (error 'apropos "bad module list definition ~s" module-list))))
+
+  (define (flatten lst)
+    (let loop ((L lst) (A '()))
       (cond
-        ((null? symbs)
-           (and (not (null? res)) (sort res symbol<?)))
-        ((string-find? s (symbol->string (car symbs)))
-           (Loop (cdr symbs) (cons (car symbs) res)))
-        (else
-           (Loop (cdr symbs) res))))))
+       ((null? L) A)
+       ((pair? L) (loop (car L)
+                        (loop (cdr L) A)))
+       (else (cons L A)))))
+
+  (set! apropos/alist
+    (lambda (str . args)
+      #:apropos/alist
+
+      (let ((int #f)
+            (imp #f)
+            (exp #t)
+            (module-list args))
+
+        ;; We'll walk through the keywords. Directly using :key along
+        ;; with :rest wouldn't work...
+        (while (and (pair? module-list)
+                    (keyword? (car module-list))
+                    (>= (length module-list) 2))
+
+          (case (car module-list)
+            ((#:internal) (begin (set! int (and (cadr module-list) #t))
+                                 (set! module-list (cddr module-list))))
+            ((#:imported) (begin (set! imp (and (cadr module-list) #t))
+                                 (set! module-list (cddr module-list))))
+            ((#:exported) (begin (set! exp (and (cadr module-list) #t))
+                                 (set! module-list (cddr module-list))))
+            (else (error "bad keyword option ~S" (car module-list)))))
+
+        (let ((x (apropos-get-modules module-list)))
+          (filter (lambda (x) (cadr x)) ;; don't include modules that don't have any
+                                   ;; matching symbols
+
+                  ;; the result will be an alist, ( (module1 [list-of-symbols])
+                  ;;                                (module2 [list-of-symbols])
+                  ;;                                ... )
+                  (map (lambda (m) (list (module-name m)
+                                    (return-symbols str m int imp exp)))
+                       x))))))
+
+  ;; It's easy now to build apropos and apropos/pp on top of apropos/alist:
+
+  (set! apropos
+    (lambda (str . module-list)
+      #:apropos
+      (sort
+       (list->set ; because the same symbol could be in more than one module
+        (flatten
+         (map cadr
+              (apply apropos/alist (cons str module-list))))
+        '())
+       symbol<?)))
+
+  (set! apropos/pp
+    (lambda (str . module-list)
+      #:apropos/pp
+      (let ((a (apply apropos/alist (cons str module-list))))
+        (for-each (lambda (module+sylbols)
+                    (let ((m (car module+sylbols))
+                          (syms (cadr module+sylbols)))
+                      ;; m is certainly a symbol, so we can use
+                      ;; find-module on it!
+                      (format #t "~a ~a:~%" (if (library? (find-module m))
+                                                "Library"
+                                                "Module")
+                              m)
+                      (for-each (lambda (s) (format #t "   ~a~%" s)) syms)))
+                  a))))
+  )
 
 #|
 <doc EXT die

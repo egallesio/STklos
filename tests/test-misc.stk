@@ -473,5 +473,70 @@ b|)
          ((?x ?y ?z) (list 'length=3 z y x)))
        '(a (b c) d)))
 
+;;----------------------------------------------------------------------
+(test-subsection "apropos")
+
+(define (symbol<? s1 s2)
+  (string<? (symbol->string s1) (symbol->string s2)))
+
+(define-library (A)
+  (export zeta-one)
+  (begin (define zeta-one 1)
+         (define zeta-two 2)
+         (define theta-three 3)))
+(define-library (B)
+  (export zed)
+  (begin (define zeta-two 2)
+         (define zeta-three 3)
+         (define theta-four 4)
+         (define zed 5)))
+
+(test "apropos.1"
+      '(A B)
+      (sort (map car (apropos/alist 'ze
+                                    'A
+                                    (find-module 'B)))
+            symbol<?))
+
+(test "apropos.2"
+      '(A)
+      (sort (map car (apropos/alist 'zeta
+                                    (find-module 'A)
+                                    "B"))
+            symbol<?))
+
+
+(test "apropos.3"
+      '(2 3)
+      (sort (map length
+                 (map cadr (apropos/alist 'ze :internal #t
+                                          (find-module 'A)
+                                          (find-module 'B))))
+            <))
+
+(test "apropos.4"
+      '(A . 3)
+      (let ((x (apropos/alist "eta" :internal #t (find-module 'A))))
+        (cons (caar x) (length (cadar x)))))
+
+(test "apropos.5"
+      '()
+      (apropos "x" (find-module 'A)
+                   (find-module 'B)))
+
+(test "apropos.6"
+      #f
+      (null? (apropos "a" #t)))
+
+(test/error "apropos.7" (apropos 'a 'b)) ; bad module list
+(test/error "apropos.8" (apropos 5))     ; bad symbol / string
+
+;; apropos/pp should return void:
+(test "apropos.9" #void (let ((x #f))
+                          (with-output-to-string ; suppress output, if any
+                            (lambda ()
+                              (set! x (apropos/pp "___blah___" #t))))
+                          x))
+
 ;;------------------------------------------------------------------
 (test-section-end)
