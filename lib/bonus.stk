@@ -48,6 +48,7 @@
         print printerr eprintf printf fprintf
         declare-new-error
         exec exec-list
+        open-in-browser manual
         apropos die
         decompose-file-name dirname basename file-separator
         make-path file-suffix file-prefix
@@ -1457,6 +1458,58 @@ doc>
 (define (exec-list command)
   (call-with-input-file (string-append "| " command) port->string-list))
 
+#|
+<doc EXT open-in-browser
+ * (open-in-browser url)
+ *
+ * Opens the URL given by the string |url| in the default browser, which is
+ * determined by the string contained in the parameter |default-browser|.
+ *
+ * The parameter |available-browsers| has a list of browsers that will be
+ * searched in the system |PATH|. That parameter can be changed to include
+ * other browsers, or to change the order in which they are tried.
+doc>
+|#
+(define (open-in-browser url)
+  (unless (string? url) (error "bad string ~S" url))
+  (unless (default-browser) (error "the parameter default-browser has not been configured"))
+  (unless (and (string? (default-browser))
+               (file-is-regular? (default-browser))
+               (file-is-executable? (default-browser)))
+    (error "The value of (default-browser) is not an executable: ~S" (default-browser)))
+  ;; FIXME: Unfortunately, this will show the stderr/stdout output of the browser
+  ;; on the REPL. We could redirect, but that would be assuming that we are running
+  ;; on a Unix environment...
+  (system (format #f "~a ~a" (default-browser) url)))
+
+#|
+<doc EXT manual
+ * (manual)
+ *
+ * Opens the STklos manual in a browser.
+ * There are two parameters relevant to this procedure:
+ *
+ * - `default-browser`: this parameter should contain a string
+ *   with the name of the default browser to be used.
+ * - `manual-path`: this parameter should contain a string with
+ *   the path to the STklos manual (the file `stklos-ref.html`).
+ *
+ * STklos tries to set them up automatically, but you may need
+ * to adjust them.
+doc>
+|#
+(define (manual)
+  (unless (manual-path)
+    (error
+     (string-append "Please configure the path to the manual by setting the\n"
+                    "parameter `manual-path`.")))
+  (let ((manual (manual-path)))
+    (unless (and (string? manual)
+                 (file-is-regular? manual)
+                 (file-is-readable? manual))
+      (error "The value of (manual-path) is not a a readable file: ~S" manual))
+    (open-in-browser manual))
+  (void))
 
 
 #|

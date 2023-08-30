@@ -246,6 +246,38 @@
 (compiler-current-module (current-module))
 
 ;; ----------------------------------------------------------------------
+;;      Tries to define (default-browser) and (manual-path)
+;; ----------------------------------------------------------------------
+
+(define default-browser (make-parameter #f))
+(define manual-path     (make-parameter #f))
+(define available-browsers (make-parameter
+                            '("lynx"
+                              "links"
+                              "w3m"
+                              "firefox"
+                              "chromium"
+                              "chrome")))
+
+(when (member (os-name) '("Linux")) ; others?
+  (let ((tentative-path (string-append (%library-prefix)
+                                       "/share/doc/stklos/"
+                                       (short-version)
+                                       "/html/stklos-ref.html")))
+    (when (and (file-is-regular? tentative-path)
+               (file-is-readable? tentative-path))
+      (manual-path tentative-path)))
+  (let ((path (string-split (get-environment-variable "PATH") ":")))
+    (call/ec
+     (lambda (out!)
+       (for-each (lambda (browser)
+                   (let ((x (find-path browser path)))
+                     (when x (begin
+                               (default-browser x)
+                               (out!)))))
+                 (available-browsers))))))
+
+;; ----------------------------------------------------------------------
 ;;      option analysis and REPL launching
 ;; ----------------------------------------------------------------------
 (let ((no-init (key-get *%system-state-plist* :no-init-file #f))
