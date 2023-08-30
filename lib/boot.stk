@@ -248,6 +248,10 @@
 ;; ----------------------------------------------------------------------
 ;;      option analysis and REPL launching
 ;; ----------------------------------------------------------------------
+
+(define repl-last-values (make-parameter (make-vector 3)))
+(define repl-last-expr   (make-parameter (make-vector 3)))
+
 (let ((no-init (key-get *%system-state-plist* :no-init-file #f))
       (ld      (key-get *%system-state-plist* :load  #f))
       (s176    (key-get *%system-state-plist* :srfi-176 #f))

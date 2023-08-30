@@ -115,6 +115,16 @@ doc>
 (define (pad-with-zero str)
   (regexp-replace " " str "0"))
 
+(define (repl-update e v)
+  (let ((vec-v (repl-last-values))
+        (vec-e (repl-last-expr)))
+    (dotimes (i (- (vector-length vec-v) 1))
+      (vector-set! vec-v (+ i 1) (vector-ref vec-v i)))
+    (vector-set! vec-v 0 v)
+    (dotimes (i (- (vector-length vec-e) 1))
+      (vector-set! vec-e (+ i 1) (vector-ref vec-e i)))
+    (vector-set! vec-e 0 e)))
+
 (define (do-repl-command l)
   (define (trim-left str)
     (regexp-replace "^[ \t]*" str ""))
@@ -123,9 +133,16 @@ doc>
     ((help h ?)         (display
                          (do-color (get-repl-color :help)
                                    (format "Available Commands:
+- ,* [n]           Show the result of (the nth) last expression
+- ,+ [n]           Show (the nth) last expression sent to the REPL
 - ,backtrace ,bt   Show the stack when last error occurred
 - ,cd              Change current directory
 - ,pwd             Print working directory
+- ,apropos ,a      Search for symbol in documentation
+- ,describe ,d     Describe an object
+- ,expand ,e       Macroexpand a form
+- ,require ,r      Require a feature
+- ,time ,t         Run the next expression while evaluating the time to do so
 - ,date            Print current date and time
 - ,quit ,q         Exit STklos
 - ,shell ,!        Run a shell command
@@ -150,6 +167,27 @@ doc>
     ((shell !)          (system (read-line)))
     ((cd)               (chdir (trim-left (read-line))))
     ((pwd)              (printf "~S\n" (getcwd)))
+    ((apropos a)        (printf "~S\n" (apropos (read-from-string (read-line)))))
+    ((describe d)       (describe (read-from-string (read-line))))
+    ((expand e)         (printf "~S\n" (macro-expand (read-from-string (read-line)))))
+    ((require r)        (require (read-line)))
+    ((time t)           (eval-from-string (string-append "(time " (read-line) ")")))
+    ((*)                (let ((k (read-from-string (read-line))))
+                          (when (eof-object? k) (set! k 1))
+                          (unless (and (integer? k) (positive? k))
+                            (error "positive integer needed, got ~S" k))
+                          (unless (<= k (vector-length (repl-last-values)))
+                            (error "I only remember ~S values, ~S is too large"
+                                   (vector-length (repl-last-values)) k))
+                          (printf "~A\n" (vector-ref (repl-last-values) (- k 1)))))
+    ((+)                (let ((k (read-from-string (read-line))))
+                          (when (eof-object? k) (set! k 1))
+                          (unless (and (integer? k) (positive? k))
+                            (error "positive integer needed, got ~S" k))
+                          (unless (<= k (vector-length (repl-last-expr)))
+                            (error "I only remember ~S expressions, ~S is too large"
+                                   (vector-length (repl-last-expr)) k))
+                          (printf "~A\n" (vector-ref (repl-last-expr) (- k 1)))))
     (else               (format (current-error-port)
                                 "bad command name: ~S. Type ,help for some help\n"
                                 (car l)))))
@@ -315,6 +353,7 @@ doc>
                   (lambda () (eval e))
                   (lambda v
                     (when interactive?
+                      (repl-update e (if (pair? v) (car v) #void))
                       (cond
                         ((null? v)
                            ;; (values)
