@@ -456,6 +456,7 @@ static inline SCM double2real(double x)
 {
   SCM z;
 
+  if (isnan(x) && signbit(x)) /* convert -nan.0 to +nan.0 */ x = STk_NaN; 
   NEWCELL(z, real);
   REAL_VAL(z) = x;
   return z;
@@ -1384,11 +1385,12 @@ static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
   SCM num = STk_false;
 
   if ((*str == '-' || *str == '+') && isalpha(str[1])) {
-    /* Treat special inf "+values.0" -inf.0 , "+nan.0", "-nan.0" */
+    /* Treat special inf "+values.0" -inf.0 , "+nan.0", "-nan.0"
+     * NOTE: R7RS says that -nan.0 is synonym to +nan.0 */
     if      (strncmp(str, MINUS_INF,6)==0) num = double2real(minus_inf);
     else if (strncmp(str, PLUS_INF,6)==0)  num = double2real(plus_inf);
-    else if (strncmp(str, MINUS_NaN,6)==0) num = double2real(make_nan(1,0,0));
-    else if (strncmp(str, PLUS_NaN,6)==0)  num = double2real(make_nan(0,0,0));
+    else if (strncmp(str, MINUS_NaN,6)==0) num = double2real(STk_NaN);
+    else if (strncmp(str, PLUS_NaN,6)==0)  num = double2real(STk_NaN);
 
     if (num != STk_false) { /* Did we actually read an inf or nan? */
       *end = str + 6;
@@ -4176,12 +4178,17 @@ static void verify_NaN(SCM n) {
 
 DEFINE_PRIMITIVE("%make-nan", make_nan, subr3, (SCM neg, SCM quiet, SCM payload))
 {
+  SCM z;
+
   if (!INTP(payload) || ((uint64_t) INT_VAL(payload) > payload_mask))
     STk_error("bad payload ~S", payload);
-  return double2real(make_nan(neg != STk_false,
-                              quiet != STk_false,
-                              INT_VAL(payload)));
+
+  /* Do not call STk_double2real since it converts -nan.0 to +nan.0 */
+  NEWCELL(z, real);
+  REAL_VAL(z) = make_nan(neg != STk_false, quiet != STk_false, INT_VAL(payload));
+  return z;
 }
+
 
 
 /*
@@ -4278,7 +4285,7 @@ int STk_init_number(void)
   /* initialize  special IEEE 754 values */
   plus_inf  = HUGE_VAL;
   minus_inf = -HUGE_VAL;
-  STk_NaN   =  strtod("NAN", NULL);
+  STk_NaN   = strtod("NAN", NULL); // FIXME: use make_nan(0, 1, 0)
 
   complex_i = make_complex(MAKE_INT(0),MAKE_INT(1));
 
