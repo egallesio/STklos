@@ -137,6 +137,7 @@ doc>
 - ,+ [n]           Show (the nth) last expression sent to the REPL
 - ,backtrace ,bt   Show the stack when last error occurred
 - ,cd              Change current directory
+- ,ls              List entries in current directory
 - ,pwd             Print working directory
 - ,apropos ,a      Search for symbol in documentation
 - ,describe ,d     Describe an object
@@ -166,12 +167,15 @@ doc>
     ((backtrace bt)     (%display-backtrace repl-backtrace 6))
     ((shell !)          (system (read-line)))
     ((cd)               (chdir (trim-left (read-line))))
+    ((ls)               (for-each (lambda (x) (printf "~A\n" x)) (directory-files (getcwd))))
     ((pwd)              (printf "~S\n" (getcwd)))
     ((apropos a)        (printf "~S\n" (apropos (read-from-string (read-line)))))
     ((describe d)       (describe (read-from-string (read-line))))
     ((expand e)         (printf "~S\n" (macro-expand (read-from-string (read-line)))))
-    ((require r)        (require (read-line)))
-    ((time t)           (eval-from-string (string-append "(time " (read-line) ")")))
+    ((require r)        (let ((s (read-line)))
+                          (require (substring s 1 (string-length s)))))
+    ((time t)           (let ((res (eval-from-string (string-append "(time " (read-line) ")"))))
+                          (write-shared res) (newline)))
     ((*)                (let ((k (read-from-string (read-line))))
                           (when (eof-object? k) (set! k 1))
                           (unless (and (integer? k) (positive? k))
