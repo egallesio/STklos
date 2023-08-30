@@ -170,7 +170,7 @@ doc>
     ((ls)               (for-each (lambda (x) (printf "~A\n" x)) (directory-files (getcwd))))
     ((pwd)              (printf "~S\n" (getcwd)))
     ((apropos a)        (printf "~S\n" (apropos (read-from-string (read-line)))))
-    ((describe d)       (describe (read-from-string (read-line))))
+    ((describe d)       (describe (eval (read-from-string (read-line)))))
     ((expand e)         (printf "~S\n" (macro-expand (read-from-string (read-line)))))
     ((require r)        (let ((s (read-line)))
                           (require (substring s 1 (string-length s)))))
