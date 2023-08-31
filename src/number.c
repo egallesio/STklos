@@ -3368,6 +3368,8 @@ static SCM my_asinh(SCM z) {
    than +1, which will produce a NaN from the C library. */
 static inline SCM
 acosh_aux(SCM z, double zz) {
+    /* acosh(+inf) = acosh(-inf) = +inf */
+    if (isinf(zz)) return double2real(plus_inf);
     double r = zz*zz - 1;
     if (!isinf(r) && r >= 0) { /* can be too large for a double if
                                   zz is too large; can be negative if
@@ -3439,6 +3441,11 @@ static SCM my_atanh(SCM z) {
       if (zz == -1.0 || zz == +1.0)
         error_out_of_range(z);
       if (fpclassify(zz) == FP_ZERO) return MAKE_INT(0);
+      /* atanh(inf) is -(i.pi)/2 */
+      if (isinf(zz)) return Cmake_complex(double2real(0.0),
+                                          double2real(MY_PI/(signbit(zz)
+                                                             ? 2.0L
+                                                             : -2.0L)));
       return atanh_aux(1.0 + zz, 1.0 - zz);
   }
   case tc_integer:  {
