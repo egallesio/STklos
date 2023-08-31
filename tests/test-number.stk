@@ -1861,6 +1861,67 @@
 (test "atanh 0"   0 (atanh 0))
 
 
+(test "cosh +inf"
+      #t
+      (and (infinite? (cosh +inf.0))
+           (positive? (cosh +inf.0))))
+
+(test "cosh -inf"
+      #t
+      (and (infinite? (cosh -inf.0))
+           (positive? (cosh -inf.0))))
+
+(test "sinh +inf"
+      #t
+      (and (infinite? (sinh +inf.0))
+           (positive? (sinh +inf.0))))
+
+(test "sinh -inf"
+      #t
+      (and (infinite? (sinh -inf.0))
+           (negative? (sinh -inf.0))))
+
+
+(test "acosh +inf"
+      #t
+      (and (infinite? (acosh +inf.0))
+           (positive? (acosh +inf.0))))
+
+(test "acosh -inf"
+      #t
+      (and (infinite? (acosh -inf.0))
+           (positive? (acosh -inf.0))))
+
+(test "asinh +inf"
+      #t
+      (and (infinite? (asinh +inf.0))
+           (positive? (asinh +inf.0))))
+
+(test "asinh -inf"
+      #t
+      (and (infinite? (asinh -inf.0))
+           (negative? (asinh -inf.0))))
+
+;; atanh(+inf) = -(i.pi)/2
+;; atanh(-inf) = +(i.pi)/2
+(test "atanh -inf"
+      #t
+      (let ((x (atanh -inf.0)))
+        (and (zero? (real-part x))
+             (inexact? (real-part x))
+             (< 1.5707963260     ;; pi/2
+                (imag-part x)
+                1.5707963270))))
+
+(test "atanh +inf"
+      #t
+      (let ((x (atanh +inf.0)))
+        (and (zero? (real-part x))
+             (inexact? (real-part x))
+             (< -1.5707963270     ;; pi/2
+                (imag-part x)
+                -1.5707963260))))
+
 ;;------------------------------------------------------------------
 (test-subsection "Misc")
 
