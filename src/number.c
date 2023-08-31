@@ -4263,6 +4263,7 @@ DEFINE_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2)) {
   return MAKE_BOOLEAN(tmp1.u ==tmp2.u);
 }
 
+
 DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
 {
 #ifdef  __MINI_GMP_H__
@@ -4271,8 +4272,6 @@ DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
   return STk_true;
 #endif
 }
-
-
 
 
 /*

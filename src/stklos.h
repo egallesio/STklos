@@ -832,6 +832,7 @@ void STk_double2Cstr(char *buffer, size_t buuflen, double n);
    ****/
 int STk_real_isoddp(SCM n);   /* n MUST be a real */
 int STk_isnan(SCM z);
+EXTERN_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2));
 
 
 int    STk_init_number(void);
