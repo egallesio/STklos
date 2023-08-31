@@ -2071,11 +2071,27 @@
            (radians->degrees (/ pi 5))
            36.00001)))
 
-
+;;;
+;;; Misc
+;;;
 (test "weird number or symbol.1" #t (number? '3s2))
 (test "weird number or symbol.2" #f (number? '3s2x))
 (test "weird number or symbol.3" #t (number? '3#d2+5i))
 (test "weird number or symbol.4" #f (number? '3#d2+5))
+
+(test "equivalence +nan.0 -nan.0" +nan.0 -nan.0)
+(test "nan and comp.1" #t (eqv? +nan.0 +nan.0))
+(test "nan and comp.2" #t (eqv? +nan.0 -nan.0))
+(test "nan and com.3" #f (= +nan.0 +nan.0))
+(test "nan and comp.4" #f (= +nan.0 -nan.0))
+(test "nan and comp.5" #f (>= +nan.0 +nan.0))
+(test "nan and comp.6" #f (>= +nan.0 -nan.0))
+(test "nan and comp.7" #f (= (%make-nan #f #f 42) (%make-nan #f #f 42)))
+(test "nan and comp.8" #t (eqv? (%make-nan #f #f 42) (%make-nan #f #f 42)))
+(test "nan and comp.9" #f (= (%make-nan #f #f 42) (%make-nan #f #f 0)))
+(test "nan and comp.10" #f (eqv? (%make-nan #f #f 42) (%make-nan #f #f 0)))
+
+
 
 
 
