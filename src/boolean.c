@@ -195,6 +195,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
     case tc_complex:
     case tc_rational:
       if (NUMBERP(y)) {
+        if (STk_isnan(x) && STk_isnan(y)) return STk_true;
         if (EXACTP(x) != EXACTP(y))
           return STk_false;
         return MAKE_BOOLEAN(STk_numeq2(x, y));

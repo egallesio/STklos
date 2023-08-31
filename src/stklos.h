@@ -831,6 +831,7 @@ void STk_double2Cstr(char *buffer, size_t buuflen, double n);
    **** Predicate
    ****/
 int STk_real_isoddp(SCM n);   /* n MUST be a real */
+int STk_isnan(SCM z);
 
 
 int    STk_init_number(void);
