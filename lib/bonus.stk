@@ -1183,7 +1183,12 @@ doc>
   (set! base64-encode-string
         (encode/decode base64-encode 'base64-encode-string))
   (set! base64-decode-string
-        (encode/decode base64-decode 'base64-decode-string)))
+        (encode/decode base64-decode 'base64-decode-string))
+  ;; Can't use the keyword inside lambda to set the procedure names, because
+  ;; it's a single lambda for both procedures, so we force it here with
+  ;; %set-procedure-name!
+  (%set-procedure-name! base64-encode-string 'base64-encode-string)
+  (%set-procedure-name! base64-decode-string 'base64-decode-string))
 
 ;; ======================================================================
 ;;      md5sum ...
