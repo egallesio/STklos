@@ -34,7 +34,6 @@ autom4te.cache
 *.lo
 CVS
 TODO.org
-.beta-number
 bootstrap
 Python
 
