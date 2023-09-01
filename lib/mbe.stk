@@ -487,6 +487,9 @@ doc>
 (define mbe:matches-pattern?
   (lambda (p e k ellipsis)
       (cond ((mbe:ellipsis? p ellipsis)
+             ;; p+, e+ will be the last CDRs of p, e (the improper tail of '())
+             ;; then, p and e will be rebound to a similar list, WITHOUT that tail,
+             ;; if it existed (see split-improper-tail
              (let-values (((p+ p) (split-improper-tail p))
                           ((e+ e) (split-improper-tail e)))
                (and (or (null? e) (pair? e))
@@ -541,6 +544,9 @@ doc>
 (define mbe:get-bindings
   (lambda (p e k ellipsis)
     (cond ((mbe:ellipsis? p ellipsis)
+           ;; p+, e+ will be the last CDRs of p, e (the improper tail of '())
+           ;; then, p and e will be rebound to a similar list, WITHOUT that tail,
+           ;; if it existed (see split-improper-tail
            (let-values (((p+ p) (split-improper-tail p))
                         ((e+ e) (split-improper-tail e)))
              (let* ((p-head (car p))
@@ -554,7 +560,7 @@ doc>
 	                            (mbe:get-bindings p-tail e-tail k ellipsis))))
                  (if (null? p+)
                      res
-                            (append (mbe:get-bindings p+ e+ k ellipsis) res))))))
+                     (append (mbe:get-bindings p+ e+ k ellipsis) res))))))
           ((pair? p)
 	       (append (mbe:get-bindings (car p) (car e) k ellipsis)
 	               (mbe:get-bindings (cdr p) (cdr e) k ellipsis)))
