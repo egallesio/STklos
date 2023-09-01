@@ -149,9 +149,9 @@
   parent)                       ; parent scope
 
 ;; find-symbol-in-env will return:
-;; a symbol, if it is a local variable
-;; a syntax object, if the symbol is bound to syntax
-;; #f otherwise
+;;    - a symbol, if it is a local variable
+;;    - a syntax object, if the symbol is bound to syntax
+;;    - #f otherwise
 (define (find-symbol-in-env symb env)
   (let Loop ((env env))
     (cond
@@ -198,10 +198,10 @@
 ;; S is syntax; if it's not, we don't bother doing anything else and
 ;; return the form as is.
 ;;
-;; This is theusual way (almost all Schemes do this):
-;; (define-syntax f (syntax-rules () ((f) -1)))
-;; (let ((f (lambda () 10))) (macro-expand '(f))) => -1
-;; (let ((f (lambda () 10))) (f))                 => 10
+;; This is the usual way (almost all Schemes do this):
+;;    (define-syntax f (syntax-rules () ((f) -1)))
+;;    (let ((f (lambda () 10))) (macro-expand '(f))) => -1
+;;    (let ((f (lambda () 10))) (f))                 => 10
 (define (find-syntax-in-env symb env)
   (and (symbol? symb)
        (let ((val (find-symbol-in-env symb env)))         ; local macro?
@@ -247,12 +247,10 @@
 
 ;; ----------------------------------------------------------------------
 
-
 ;; A label is just a number. Each instruction in the list *code-instr*
 ;; is either:
-;; - a list (instruction + arguments), or
-;; - a label (an integer number)
-
+;;   - a list (instruction + arguments), or
+;;   - a label (an integer number)
 (define (new-label)
   (let ((lab *code-labels*))
     (set! *code-labels* (+ *code-labels* 1))
@@ -264,10 +262,7 @@
   (set! *code-instr* (cons args *code-instr*)))
 
 
-;; emit-label will emit the last generated label, but will *not*
-;; increment it (the same label can be emitted several times).  In
-;; order to create a new label, use %compiler-new-label (or
-;; 'new-label')
+;; emit-label will emit the label 'lab' (an integer)
 (define (emit-label lab)
   (set! *code-instr* (cons lab *code-instr*)))
 
@@ -279,8 +274,7 @@
 ; ======================================================================
 
 ;; The global variable *code-constants* contains a list of constants for the
-;; code being compiled. Each list in the list is a symbol (and it is searched
-;; with memq).
+;; code being compiled. 
 ;; Why is its index not also kept in the list? Because the index is the position
 ;; of the element in the list, and it's calculated when the compiler calls this
 ;; function (fetch-constant).
@@ -311,8 +305,7 @@
            (<= min-int v max-int)))))
 
 ;; Generates code for small constants.
-;; v is the constant to be produced;
-;; env and tail? are ignored.
+;; v is the constant to be produced; env and tail? are ignored.
 (define (compile-constant v env tail?)
   (cond
     ((eq? v #t)                        (emit 'IM-TRUE))
@@ -421,11 +414,11 @@ doc>
 
 ;; compile-access will generate code for references and assignments.
 ;; The argments:
-;; name: a symbol, the variable name.
-;; env: the environment to be used.
-;; epair: the extended pair (source s-expression) that originated a
-;;        call to compile-acces.
-;; ref: if #t, then it's a reference; if #f, it's an assignment.
+;;    - name: a symbol, the variable name.
+;;    - env: the environment to be used.
+;;    - epair: the extended pair (source s-expression) that originated a
+;;      call to compile-acces.
+;;    - ref: if #t, then it's a reference; if #f, it's an assignment.
 (define (compile-access name env epair ref)
 
   ;; STklos organizes local environments as this: each level has a
@@ -438,14 +431,14 @@ doc>
   ;; Later, the VM will, for example, do the following to access
   ;; a local variable in previous levels:
   ;;
-  ;; for (level = FIRST_BYTE(info); level; level--)
-  ;;   e = (SCM) FRAME_NEXT(e);
-  ;; vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
+  ;;    for (level = FIRST_BYTE(info); level; level--)
+  ;;      e = (SCM) FRAME_NEXT(e);
+  ;;    vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
   ;;
   ;; FIRST_BYTE gets the level; SECOND_BYTE gets the var address.
   ;;
   ;; make-word builds a 16-bit word that encodes level v1 and
-  ;; variable v2.
+  ;; variable at offset v2.
   (define (make-word v1 v2)               ;; FIXME: Add control
     (+ (* v1 256) v2))
 
@@ -500,13 +493,13 @@ doc>
 ;; compile-set! will just call compile-access, and when doing so, will
 ;; set the 'ref' argument to #f. The 'ref' argument to compile-access
 ;; means "this is just a reference, not an assignment".
-;; Before calling compile-access, compile-set! will check the syntac
+;; Before calling compile-access, compile-set! will check the syntax
 ;; for set! and also extract the variable name.
 ;;
-;; (compile-set! (set! a (+ 2 b)))
-;; will make these two calls:
-;; (compile (+ 2 b) env (set! a + 2 b) #f)
-;; (compile-access 'a env (set! a + 2 b) #f)
+;;     (compile-set! '(set! a (+ 2 b)))
+;;      will make these two calls:
+;;        (compile '(+ 2 b) env '(set! a + 2 b) #f)
+;;        (compile-access 'a env '(set! a + 2 b) #f)
 ;;
 ;; The extended set! is treated separately.
 (define (compile-set! args env tail?)
@@ -530,14 +523,13 @@ doc>
 ;;;;
 ;;
 ;; (if cond expr1 expr2) =>
-;;
-;; [ cond ]       * tail? = #f
-;; JUMP-FALSE L1
-;; [ expr1 ]
-;; GOTO L2
-;; L1:
-;; [ expr2 ] -or- IM-VOID
-;; L2:
+;;    [ cond ]       * tail? = #f
+;;    JUMP-FALSE L1
+;;    [ expr1 ]
+;;    GOTO L2
+;;    L1:
+;;    [ expr2 ] -or- IM-VOID
+;;    L2:
 (define (compile-if args env tail?)
   (let ((len (length (cdr args)))
         (l1  (new-label))
@@ -689,9 +681,9 @@ doc>
        ((pair? l) (loop (cdr l) (+ n 1)))
        (else      (- (- n) 1)))))
 
-;; (extend-env env '(a b . c))  =>  scope (c b a) '() env)
-;; (extend-env env 'x)          =>  scope (x)     '() env)
 (define (extend-env env formals)
+  ;; (extend-env env '(a b . c))  =>  scope (c b a) '() env)
+  ;; (extend-env env 'x)          =>  scope (x)     '() env)
   (letrec ((aux (lambda (l res)
                   (cond
                      ((null? l) res)
@@ -1661,17 +1653,17 @@ doc>
 ;; DO
 ;;
 ;; (do ((a a0 a+)
-;;      (b b0 b+))
+;;      (b b0 b+)
+;;      ...)
 ;;     (test fin)
-;;   (body)) =>
+;;   <body>) =>
 ;;
-;; (letrec ((NAME
-;;           (lambda (a b ...)
-;;             (if test
-;;                 (begin fin)
-;;                 (begin body
-;;                        (name a+ b+ ...))))))
-;;  (NAME a0 b0 ...))
+;;      (letrec ((NAME (lambda (a b ...)
+;;                       (if test
+;;                         (begin fin)
+;;                         (begin <body>
+;;                               (name a+ b+ ...))))))
+;;         (NAME a0 b0 ...))
 (define (rewrite-do inits test body)
   (let ((loop-name (gensym)))
     `(letrec ((,loop-name
@@ -1693,7 +1685,7 @@ doc>
                                        inits)))))))
        (,loop-name ,@(map cadr inits)))))
 
-;; Just calls rewrite-do with tail? = #f
+
 (define (compile-do e env tail?)
   (if (>= (length e) 3)
       (compile (rewrite-do (cadr e) (caddr e) (cdddr e))
@@ -1977,6 +1969,7 @@ both forms.
   (if (= (length e) 2)
       (emit 'GOTO (cadr e))
       (compiler-error '%%goto e "bad usage ~S" e)))
+
 
 (define (compile-%%source-pos e env tail)
   (compile (if (%epair? e)
