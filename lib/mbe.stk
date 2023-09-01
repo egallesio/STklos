@@ -131,7 +131,7 @@ doc>
     (error 'letrec-syntax
       "cannot be used here. You must load the file \"full-syntax\" to access it:"
            (cons 'letrec-syntax args)))
-  
+
 
 ;;;
 ;;; Scheme utilities
@@ -455,52 +455,106 @@ doc>
       (if (null? l) '()
           (append (f (car l)) (loop (cdr l)))))))
 
-;;; tests if expression e matches pattern p where k is the list of
-;;; keywords
+
+;; split-improper-tail helps deal with improper lists when matching,
+;; and is used by both mbe:matches-pattern? and mbe:get-bindings.
+;; It will return two values:
+;;
+;; 1. The last CDR (either NIL if it's a proper list, or the improper tail)
+;; 2. The original list WITHOUT the impreper tail.
 ;;
 ;; Examples:
 ;;
-;; (mbe:matches-pattern? '(f a b) '(* 3 4) '())      => #t
-;; (mbe:matches-pattern? '(f a x b) '(* 2 x 4) '(x)) => #t
-;; (mbe:matches-pattern? '(f a x b) '(* 2 3 4) '(x)) => #f
+;; (split-improper-tail '())        => values '(), '()
+;; (split-improper-tail '(1 2 3))   => values '(), '(1 2 3)
+;; (split-improper-tail '(1 2 . 3)) => values '(3), '(1 2)
+(define (split-improper-tail L)
+  (let Loop ((new '())
+             (old L))
+    (if (pair? old)
+        (Loop (cons (car old) new)
+              (cdr old))
+        (values old (reverse new)))))
+
+;;; tests if expression e matches pattern p where k is the list of
+;;; keywords, and 'ellipsis' is the symbol used for the ellipsis.
+;;
+;; Examples:
+;;
+;; (mbe:matches-pattern? '(f a b) '(* 3 4) '() '...)      => #t
+;; (mbe:matches-pattern? '(f a x b) '(* 2 x 4) '(x) '...) => #t
+;; (mbe:matches-pattern? '(f a x b) '(* 2 3 4) '(x) '...) => #f
 (define mbe:matches-pattern?
   (lambda (p e k ellipsis)
-    (cond ((mbe:ellipsis? p ellipsis)
-           (and (or (null? e) (pair? e))
-                (let* ((p-head (car p))
-                       (p-tail (cddr p))
-                       (e-head=e-tail (mbe:split-at-ellipsis e p-tail)))
-                  (and e-head=e-tail
-		           (not (memq ellipsis p-tail)) ; fail on multiple ellipses
-                       (let ((e-head (car e-head=e-tail))
-                             (e-tail (cdr e-head=e-tail)))
-                         (and (every
-			               (lambda (x) (mbe:matches-pattern? p-head x k ellipsis))
-                               e-head)
-			              (mbe:matches-pattern? p-tail e-tail k ellipsis)))))))
-          ((pair? p)
-           (and (pair? e)
-		        (mbe:matches-pattern? (car p) (car e) k ellipsis)
-		        (mbe:matches-pattern? (cdr p) (cdr e) k ellipsis)))
-          ((symbol? p) (if (memq p k) (eq? p e) #t))
-          (else (equal? p e)))))
-
+      (cond ((mbe:ellipsis? p ellipsis)
+             (let-values (((p+ p) (split-improper-tail p))
+                          ((e+ e) (split-improper-tail e)))
+               (and (or (null? e) (pair? e))
+                    (let* ((p-head (car p))
+                           (p-tail (cddr p))
+                           (e-head=e-tail (mbe:split-at-ellipsis e p-tail)))
+                      (and e-head=e-tail
+		                   (not (memq ellipsis p-tail))             ; fail on multiple ellipses
+                           (mbe:matches-pattern?  p+ e+ k ellipsis) ; if improper, match tails
+                           (let ((e-head (car e-head=e-tail))
+                                 (e-tail (cdr e-head=e-tail)))
+                             (and (every
+			                       (lambda (x) (mbe:matches-pattern? p-head x k ellipsis))
+                                   e-head)
+			                      (mbe:matches-pattern? p-tail e-tail k ellipsis))))))))
+            ((pair? p)
+             (and (pair? e)
+		          (mbe:matches-pattern? (car p) (car e) k ellipsis)
+		          (mbe:matches-pattern? (cdr p) (cdr e) k ellipsis)))
+            ((symbol? p) (if (memq p k) (eq? p e) #t))
+            (else (equal? p e)))))
 
 ;;; gets the bindings of pattern variables of pattern p for
-;;; expression e;
-;;; k is the list of keywords
+;;; expression e where k is the list of keywords, and 'ellipsis'
+;;; is the symbol used for the ellipsis.
+;;
+;; Examples:
+;;
+;; (mbe:get-bindings '(f a b) '(* 3 4) '() '...)
+;;   => ((f . *) (a . 3) (b . 4))
+;;
+;; (mbe:get-bindings'(f a x b) '(* 2 x 4) '(x) '...)
+;;   => ((f . *) (a . 2) (b . 4))
+;;
+;; (mbe:get-bindings '(f a x b) '(* 2 3 4) '(x) '...)
+;;   => ((f . *) (a . 2) (b . 4))
+;;
+;; (mbe:get-bindings '(f a . b) '(func 1 2 3) '() '...)
+;;   =>((f . func) (a . 1) (b 2 3))
+;;
+;; (mbe:get-bindings '(f a ...) '(func 1 2) '() '...) ; see how lists are dealt with!
+;;   => ((f . func) ((a) ((a . 1)) ((a . 2))))
+;;
+;; (mbe:get-bindings '(f a ...) '(func 1 2) '() ':::) ; alternative ellipsis
+;;   => ((f . func) (a . 1) (... . 2))
+;;
+;; (mbe:get-bindings '(f a :::) '(func 1 2) '() ':::)  ; alternative ellipsis
+;;   => ((f . func) ((a) ((a . 1)) ((a . 2))))
+;;
+;; (mbe:get-bindings '(f a b ... c) '(func 1 2 3 4 5 6) '() '...)
+;;   => ((f . func) (a . 1) ((b) ((b . 2)) ((b . 3)) ((b . 4)) ((b . 5))) (c . 6))
 (define mbe:get-bindings
   (lambda (p e k ellipsis)
     (cond ((mbe:ellipsis? p ellipsis)
-           (let* ((p-head (car p))
-                  (p-tail (cddr p))
-                  (e-head=e-tail (mbe:split-at-ellipsis e p-tail))
-                  (e-head (car e-head=e-tail))
-                  (e-tail (cdr e-head=e-tail)))
-	         (cons (cons (mbe:get-ellipsis-nestings p-head k ellipsis)
-		                 (map (lambda (x) (mbe:get-bindings p-head x k ellipsis))
-                          e-head))
-	               (mbe:get-bindings p-tail e-tail k ellipsis))))
+           (let-values (((p+ p) (split-improper-tail p))
+                        ((e+ e) (split-improper-tail e)))
+             (let* ((p-head (car p))
+                    (p-tail (cddr p))
+                    (e-head=e-tail (mbe:split-at-ellipsis e p-tail))
+                    (e-head (car e-head=e-tail))
+                    (e-tail (cdr e-head=e-tail)))
+	           (let ((res (cons (cons (mbe:get-ellipsis-nestings p-head k ellipsis)
+		                              (map (lambda (x) (mbe:get-bindings p-head x k ellipsis))
+                                           e-head))
+	                            (mbe:get-bindings p-tail e-tail k ellipsis))))
+                 (if (null? p+)
+                     res
+                            (append (mbe:get-bindings p+ e+ k ellipsis) res))))))
           ((pair? p)
 	       (append (mbe:get-bindings (car p) (car e) k ellipsis)
 	               (mbe:get-bindings (cdr p) (cdr e) k ellipsis)))
@@ -625,9 +679,9 @@ doc>
 
 
 ;; find-clause will find the clause to be used in order to expand a macro.
-;; 
+;;
 ;; Example:
-;; 
+;;
 ;; (define-syntax2 f
 ;;   (syntax-rules ()
 ;;     ((f a b)   (+ a b))
@@ -663,7 +717,7 @@ doc>
 
 
 ;;
-;; A very simple implementation of let-syntax. 
+;; A very simple implementation of let-syntax.
 ;; FIXME: Need some work
 ;;
 (define-macro (let-syntax bindings . body)
@@ -695,7 +749,7 @@ doc>
 ;;MAC   (if (or (not (pair? syn-rules))
 ;;MAC           (not (eq? (car syn-rules) 'syntax-rules)))
 ;;MAC     (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
-;;MAC 
+;;MAC
 ;;MAC     (let ((keywords    (cons macro-name (cadr syn-rules)))
 ;;MAC           (clauses     (cddr syn-rules))
 ;;MAC           (find-clause (symbol-value 'find-clause (find-module 'MBE))))
