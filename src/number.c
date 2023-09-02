@@ -2400,6 +2400,8 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
  * @lisp
  * (abs -7)                =>  7
  * (abs -inf.0)            => +inf.0
+ * (abs -3+4i)             => 5
+ * (abs -3.0-4i)           => 5.0
  * @end lisp
 doc>
  */
@@ -2421,6 +2423,8 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
     case tc_rational: return make_rational(absolute(RATIONAL_NUM(x)),
                                            RATIONAL_DEN(x));
+    case tc_complex:  return STk_sqrt(add2(mul2(COMPLEX_REAL(x),COMPLEX_REAL(x)),
+                                           mul2(COMPLEX_IMAG(x),COMPLEX_IMAG(x))));
     default:          error_not_a_real_number(x);
   }
   return STk_void;      /* never reached */

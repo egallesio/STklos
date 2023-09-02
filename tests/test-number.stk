@@ -1197,7 +1197,7 @@
 (test "sqrt small fixnum" #f (exact? (sqrt -4.0)))
 
 (test "sqrt bignum"  1452616561298192819 (sqrt (* 1452616561298192819
-						                          1452616561298192819)))
+						  1452616561298192819)))
 (test "sqrt bignum"  1452616561298192819 (sqrt 2110094874157786375590269875303166761))
 (test "sqrt bignum"  0+1452616561298192819i
       		     (sqrt (* 1452616561298192819 -1452616561298192819)))
@@ -2158,6 +2158,29 @@
 (test "nan and comp.9" #f (= (%make-nan #f #f 42) (%make-nan #f #f 0)))
 (test "nan and comp.10" #f (eqv? (%make-nan #f #f 42) (%make-nan #f #f 0)))
 
+(test "abs complex"
+      5
+      (abs -3-4i))
+
+(test "abs complex"
+      5.0
+      (abs -3.0-4i))
+
+(test "abs complex"
+      #t
+      (infinite? (abs -inf.0+4i)))
+
+(test "abs complex"
+      #t
+      (infinite? (abs 2-inf.0i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs -nan.0+4i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs 1-nan.0i)))
 
 
 
