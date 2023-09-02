@@ -1197,13 +1197,19 @@
 (test "sqrt small fixnum" #f (exact? (sqrt -4.0)))
 
 (test "sqrt bignum"  1452616561298192819 (sqrt (* 1452616561298192819
-						  1452616561298192819)))
+						                          1452616561298192819)))
 (test "sqrt bignum"  1452616561298192819 (sqrt 2110094874157786375590269875303166761))
 (test "sqrt bignum"  0+1452616561298192819i
       		     (sqrt (* 1452616561298192819 -1452616561298192819)))
 (test "sqrt bignum"  0+1452616561298192819i
       		     (sqrt -2110094874157786375590269875303166761))
 
+;; FIXME: the 700 exponent works for 64 bits, not for smaller floats.
+(test "sqrt bignum" #t ;; the argument is not representable as double, but the
+                       ;; result is!
+      (< 9.0e+210
+         (sqrt (* (expt 2 700) (expt 2 700) 3))
+         9.2e+210))
 (test "sqrt complex with +0.0 imaginary part" 0.0+i
       (sqrt -1+0.0i))
 (test "sqrt complex with +0.0 imaginary part" 0.0-i

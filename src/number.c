@@ -45,9 +45,12 @@ static unsigned int log10_maxint;
 
 #define FINITE_REALP(n) isfinite(REAL_VAL(n))
 
-/* Complex i:
-   will be used as a constant when computing some functions. */
+/* Complex i: will be used as a constant when computing some functions. */
 static SCM complex_i;
+
+/* rational_epsilon: an exact (rational) epsilon which should
+ * be small enough to work as an epsilon for doubles. */
+static SCM rational_epsilon;
 
 /* Forward declarations */
 static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder);
@@ -215,6 +218,69 @@ int STk_isnan(SCM z) {
   case tc_integer:  return 0;
   default:          error_bad_number(z); return 0;
   }
+}
+
+
+double STk_dbl_true_min(void) /* return (or compute) DBL_TRUE_MIN */
+{
+  /* 
+   This function is used here in order to calculate a rational epsilon (for
+   square roots) and also in the (scheme flonum) library.
+
+   Some platforms may not have DBL_TRUE_MIN defined (at this time, OpenBSD
+   doesn't), so we calculate DBL_TRUE_MIN. dbl_truemin is also used in
+   lib/scheme/flonum.c
+
+   DBL_MIN is the least NORMAL positive number represented in IEEE format.
+   DBL_TRUE_MIN is the least SUBNORMAL positive number: the one that, when
+   divided by 2, is equal to zero.
+   Some platforms may not have DBL_TRUE_MIN defined (at this time, OpenBSD
+   doesn't), so we calculate DBL_TRUE_MIN.
+
+   Remark I: Using IEEE 754, the representations of DBL_MIN and DBL_TRUE_MIN
+   are as follows.
+
+   DBL_MIN:
+   [ 0 | 00000000001 | 0000000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 1, Mantissa = 0.
+
+   DBL_MIN / 2.0:
+   [ 0 | 00000000000 | 1000000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 0, Mantissa = 2^52.
+
+   DBL_MIN / 4.0:
+   [ 0 | 00000000000 | 0100000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 0, Mantissa = 2^51.
+
+   DBL_TRUE_MIN:
+   [ 0 | 00000000000 | 0000000000000000000000000000000000000000000000000001 ]
+   Signal = 0, Exponent = 0, Mantissa = 1.
+
+   Each time we divide DBL_MIN by 2.0, we do a right shift on the number.
+   Eventually, it will become zero.
+
+   Note that the first time that DBL_MIN is divided by zero already results in
+   a subnormal number (the exponent becomes zero) -- because DBL_MIN is
+   indeed the least *normal* number.
+
+   Remark II: if we were to assume that numbers are always represented using
+   IEEE format, we could just take positive zero, set its first bit, and
+   that would be the same as DBL_TRUE_MIN. But we'll be more careful and
+   calculate it, dividing DBL_MIN by 2 successfully until it is zero.
+
+   -- jpellegrini
+  */
+#ifdef DBL_TRUE_MIN
+  return DBL_TRUE_MIN;
+#else
+  double x = DBL_MIN;
+  double res = x;
+  while (1) {
+    if (x == 0.0) return res;
+    res = x;
+    x = x / 2.0;
+  }
+#endif
 }
 
 /*
@@ -3511,30 +3577,63 @@ DEFINE_PRIMITIVE("atan", atan, subr12, (SCM y, SCM x))
  * positive real part, or zero real part and non-negative imaginary part.
 doc>
  */
+static SCM my_sqrt_exact(SCM z) {
+  if (zerop(z))     return MAKE_INT(0);
+  if (negativep(z)) return Cmake_complex(MAKE_INT(0),
+                                         my_sqrt_exact(mul2(MAKE_INT(-1UL), z)));
 
-static SCM my_sqrt_exact(SCM x)
-{
-  if (zerop(x))     return MAKE_INT(0);
-  if (negativep(x)) return Cmake_complex(MAKE_INT(0),
-                                         my_sqrt_exact(mul2(MAKE_INT(-1UL), x)));
-  if (INTP(x)) {
-    long   i = INT_VAL(x);
+  if (INTP(z)) {
+    long   i = INT_VAL(z);
     double d = (double) sqrt((double) i);
 
     return ((int) d * (int) d == i)? MAKE_INT((int) d) : double2real(d);
+
   } else { /* This is a bignum */
-    mpz_t root, tmp;
-    SCM res;
 
-    mpz_init(root);
-    mpz_sqrt(root, BIGNUM_VAL(x));
+    mpz_t z0;
+    mpz_init(z0);
 
-    mpz_init(tmp);
-    mpz_mul(tmp, root, root);
-    res = (mpz_cmp(tmp, BIGNUM_VAL(x))==0) ? bignum2number(root) :
-                                             STk_sqrt(scheme_bignum2real(x));
-    mpz_clear(root); mpz_clear(tmp);
-    return res;
+    if (mpz_perfect_square_p(BIGNUM_VAL(z))) {
+      /* We're lucky! It's a perfect square, and the GMP
+         will compute the exact result. */
+      mpz_sqrt(z0,BIGNUM_VAL(z));
+      return bignum2number(z0);
+    }
+
+    /* Does it fit a double? If so, use plain C sqrt. It's not exact
+       anyway, since we checked above with the result from
+       mpz_sqrtrem... */
+    double r = bignum2double(BIGNUM_VAL(z));
+    if (isfinite(r)) return double2real(sqrt(r));
+
+    mpz_sqrt(z0,BIGNUM_VAL(z));
+    SCM x0 = bignum2number(z0);
+    /* If x0 does not fit a double, we don't need to waste time with
+       an approximation. Return infinity. */
+    r = bignum2double(BIGNUM_VAL(x0));
+    if (!isfinite(r)) return double2real(plus_inf);
+
+    /* Ok, we tried everything. There's only the slow path now! */
+    SCM x = x0;
+    SCM x_new = x0;
+    SCM err = x0;
+
+    /* Approximate the square root... Essentially, Newton's method,
+       but coded using STklos' internal sub2, div2, mul2, abs
+       functions.  */
+    while(STk_numgt2(err, rational_epsilon) > 0 &&
+          isfinite(REAL_VAL(exact2inexact(x_new)))) {
+        x_new = sub2(x, div2(sub2(mul2(x, x), z),
+                             mul2(x, MAKE_INT(2))));
+        err = STk_abs(sub2(x_new, x));
+        x = x_new;
+    }
+    /* Return inexact, because if we got here, the square of this
+       result will not equal to z (it's an approximation, so it would
+       be strange to give an "exact" result that is not "exactly" the
+       result of the operation). But for floating-point, it is
+       acceptable to offer an approximation.  */
+    return exact2inexact(x_new);
   }
 }
 
@@ -4327,9 +4426,12 @@ int STk_init_number(void)
   /* initialize  special IEEE 754 values */
   plus_inf  = HUGE_VAL;
   minus_inf = -HUGE_VAL;
-  STk_NaN   = strtod("NAN", NULL); // FIXME: use make_nan(0, 1, 0)
+  STk_NaN   = strtod("NAN", NULL); // FIXME: use make_nan(0, 1, 0)?
 
-  complex_i = make_complex(MAKE_INT(0),MAKE_INT(1));
+  /* Other useful "constants" */
+  complex_i        = make_complex(MAKE_INT(0),MAKE_INT(1));
+  rational_epsilon = div2(inexact2exact(double2real(STk_dbl_true_min())),
+                          MAKE_INT(2));
 
   /* Force the LC_NUMERIC locale to "C", since Scheme definition
      imposes that decimal numbers use a '.'
