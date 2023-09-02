@@ -2,7 +2,6 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  9-Feb-2022 11:46
-# Last file update:  9-Feb-2022 17:28 (eg)
 
 ADOC=@ASCIIDOCTOR@
 
@@ -21,10 +20,6 @@ $(FILE).pdf: $(FILE).adoc
 	$(SPP) $(FILE).adoc > $(FILE).tmp
 	$(ADOC) -r asciidoctor-pdf -b pdf -v -o $@ $(FILE).tmp
 	rm -f $(FILE).tmp
-
-
-
-
 
 clean:
 	rm -f $(FILE).pdf $(FILE).html $(FILE).tmp *~

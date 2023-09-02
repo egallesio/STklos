@@ -21,8 +21,8 @@ four) step process:
 
     You can also choose the compiler and the compiler options to use for building **STklos** with the `CC` and `CFLAGS` parameters:
 
-     ```bash
-     $ ./configure --prefix=/opt --with-provided-gc CC=clang CFLAGS="-O3 -Wall"
+    ```bash
+    $ ./configure --prefix=/opt --with-provided-gc CC=clang CFLAGS="-O3 -Wall"
     ```
     A summary will be printed at the end of the execution of the script as shown below:
 
@@ -40,7 +40,7 @@ four) step process:
          Case sensitivity:  true (by default)
     System libraries used:  libffi libpcre libgmp
        Compiled libraries:  libgc
-   ```
+    ```
 
 
 2. If everything is correct, you can just type `make` now at your shell prompt. Note that

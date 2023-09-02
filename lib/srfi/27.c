@@ -21,7 +21,6 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 03-May-2021 15:22
- * Last file update: 13-Mar-2022 16:59 (eg)
  */
 
 #include <gmp.h>
@@ -48,7 +47,7 @@ struct bignum_obj {
 
 #define BIGNUM_VAL(p)   (((struct bignum_obj *) (p))->val)
 
-static Inline SCM bignum2scheme_bignum(mpz_t n)
+static inline SCM bignum2scheme_bignum(mpz_t n)
 {
   SCM z;
 
@@ -57,7 +56,7 @@ static Inline SCM bignum2scheme_bignum(mpz_t n)
   return z;
 }
 
-static Inline SCM double2real(double x)
+static inline SCM double2real(double x)
 {
   SCM z;
 

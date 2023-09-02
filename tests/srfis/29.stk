@@ -51,7 +51,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Apr-2021 21:33
-;;;; Last file update: 21-Nov-2021 20:02 (eg)
 ;;;;
 
 (test "srfi-29.1" #t (symbol? (current-language)))

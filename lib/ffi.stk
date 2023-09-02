@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 12-May-2022 15:51 (eg)
 ;;;;
 
 (export make-external-function make-callback define-external)

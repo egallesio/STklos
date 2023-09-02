@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,19 +14,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should hcave received a copy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  9-Jan-2022 19:19 (eg)
  *
- * This implementation is built by reverse engineering on an old SUNOS 4.1.1
+ * This implementation is built by reverse engineering an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
- * non buffered file are not implemented. Anyway this is faster than an
- * implementation using the C buffered IO (at least on glibc)
+ * non-buffered files are not implemented. Anyway this is faster than an
+ * implementation using the C buffered IO (at least on glibc).
  *
  */
 #include <ctype.h>
@@ -43,12 +42,12 @@ SCM STk_stdin, STk_stdout, STk_stderr;    /* The unredirected ports */
 MUT_DECL(all_fports_mutex);
 
 /*
- * Implementation of our own popen/pclose. We use her file descriptor, instad
+ * Implementation of our own popen/pclose. We use its file descriptor instead
  * of FILE *.
  *
- * The fd_popen function returns also the pid of the shell process launched
+ * The fd_popen function also returns the pid of the shell process launched
  * for the redirection. This pid is stored in the internal file port
- * representation to wait on it during the fd_pclose.
+ * representation to wait on it during fd_pclose.
  */
 static int fd_popen(const char *cmd, const char *mode, int *pid)
 {
@@ -74,7 +73,7 @@ static int fd_popen(const char *cmd, const char *mode, int *pid)
       execlp("sh", "sh", "-c", cmd, NULL);
       STk_panic("*** shell error in fd_popen");
       return -1; /* for the compiler */
-    default:                                 /* Parent process*/
+    default:                                 /* Parent process */
       if (*mode == 'r') {
         close(p[1]);
         return p[0];
@@ -96,8 +95,8 @@ static int fd_pclose(int fd, int pid) {
 
 
 /*
- * Since we manage ourselves our ports, we need to keep a reference on
- * all the open ports such that all the port are flushed when we exit
+ * Since we manage our ports ourselves, we need to keep a reference to
+ * all the open ports such that all the ports are flushed when we exit
  * from the program. However, to avoid the that the GC "sees" these
  * references, we need to use a list of objects containing "masqueraded"
  * pointers.
@@ -115,7 +114,7 @@ static struct port_list {
 static void nop_release_port(SCM _UNUSED(port))
 {
   /* This function is used as a release procedure when closing all files
-   * at program exit. We use an empty procedure to avoid interferences
+   * at program exit. We use an empty procedure to avoid interference
    * in all_file_ports management
    */
 }
@@ -166,7 +165,7 @@ void STk_close_all_ports(void)
   }
   MUT_UNLOCK(all_fports_mutex);
 
-  /* Finally, close error and output port (must be done last) */
+  /* Finally, close error and output ports (must be done last) */
   STk_close(eport);
   STk_close(oport);
 }
@@ -229,13 +228,13 @@ static int flush_buffer(struct fstream *f)
 /*=============================================================================*/
 
 
-static Inline int Feof(void *stream)
+static inline int Feof(void *stream)
 {
   return PORT_STREAM_FLAGS(stream) & STK_IOEOF;
 }
 
 
-static Inline int Freadyp(void *stream)
+static inline int Freadyp(void *stream)
 {
   if (PORT_CNT(stream) > 0)
     return TRUE;
@@ -251,7 +250,7 @@ static Inline int Freadyp(void *stream)
   }
 }
 
-static Inline int Fgetc(void *stream)
+static inline int Fgetc(void *stream)
 {
   if (PORT_IDLE(stream) != STk_nil) {
     /* There is at least an idle handler */
@@ -273,7 +272,7 @@ static Inline int Fgetc(void *stream)
 }
 
 
-static Inline int Fread(void *stream, void *buff, int count)
+static inline int Fread(void *stream, void *buff, int count)
 {
   int copied, avail;
 
@@ -323,7 +322,7 @@ static off_t Fseek(void *stream, off_t offset, int whence)
 }
 
 
-static Inline int Fputc(int c, void *stream)
+static inline int Fputc(int c, void *stream)
 {
   int ret = c;
 
@@ -347,7 +346,7 @@ static Inline int Fputc(int c, void *stream)
 }
 
 
-static Inline int Fwrite(void *stream, const void *buff, int count)
+static inline int Fwrite(void *stream, const void *buff, int count)
 {
   /* Flush (eventually) chars which are already in the buffer before writing  */
   if (PORT_CNT(stream)) {
@@ -363,12 +362,12 @@ static Inline int Fwrite(void *stream, const void *buff, int count)
 }
 
 
-static Inline int Fnputs(void *stream, const char *s, int len)
+static inline int Fnputs(void *stream, const char *s, int len)
 {
   int res, flush = (PORT_STREAM_FLAGS(stream) & STK_IOLBF);
 
   if (len > TTY_BUFSIZE) {
-    /* This is a long string don't use the buffer and write it directly on stream */
+    /* This is a long string so don't use the buffer; write it directly to the stream */
     res = Fwrite(stream, s, len);
   } else {
     int free, count = len;
@@ -403,18 +402,18 @@ static Inline int Fnputs(void *stream, const char *s, int len)
 }
 
 
-static Inline int Fputs(const char *s, void *stream)
+static inline int Fputs(const char *s, void *stream)
 {
   return Fnputs(stream, s, strlen(s));
 }
 
-static Inline int Fputstring(SCM s, void *stream)
+static inline int Fputstring(SCM s, void *stream)
 {
   return Fnputs(stream, STRING_CHARS(s), STRING_SIZE(s));
 }
 
 
-static Inline int  Fflush(void *stream)
+static inline int  Fflush(void *stream)
 {
   return flush_buffer(stream);          /* Problem if file opened for reading */
 }
@@ -475,7 +474,7 @@ make_fport(const char *fname, int fd, int flags)
   PORT_WEVENT(fs)        = STk_false;
   PORT_IDLE(fs)          = STk_nil;
 
-  /* Initialize now the port itsef */
+  /* Now initialize the port itself */
   NEWCELL(res, port);
 
   PORT_STREAM(res)      = fs;
@@ -515,9 +514,9 @@ make_fport(const char *fname, int fd, int flags)
 #ifdef WIN32_0000
 static char *convert_for_win32(char *mode)
 {
-  /* Things are complicated on Win32 (as always). So we onvert all files
-   * in binaries files. Note that this function is not called when we work
-   * on ports since they only accept version without "b" on Cygwin
+  /* Things are complicated on Win32 (as always) so we convert all files
+   * to binary files. Note that this function is not called when we work
+   * on ports since they only accept versions without "b" on Cygwin.
    */
   switch (*mode) {
     case 'r': if (mode[1] == '\0') return "rb";
@@ -734,29 +733,29 @@ DEFINE_PRIMITIVE("output-file-port?", output_fportp, subr1, (SCM port))
  * Opens the file whose name is |filename| with the specified string
  * |mode| which can be:
  *
- * - |"r"| to open file for reading. The stream is positioned at
+ * - |"r"| to open the file for reading. The stream is positioned at
  *   the beginning of the file.
  *
- * - |"r+"| to open file for reading and writing.  The stream is
+ * - |"r+"| to open the file for reading and writing. The stream is
  *   positioned at the beginning of the file.
  *
- * - |"w"| to truncate file to zero length or create file for writing.
+ * - |"w"| to truncate the file to zero length or create the file for writing.
  *   The stream is positioned at the beginning of the file.
  *
- * - |"w+"| to open  file for reading and writing. The file is created
+ * - |"w+"| to open the file for reading and writing. The file is created
  *   if it does not exist, otherwise it is truncated. The stream is positioned
  *   at the beginning of the file.
  *
- * - |"a"| to open for writing.  The file is created if  it  does
+ * - |"a"| to open the file for writing. The file is created if it does
  *   not exist. The stream is positioned at the end of the file.
  *
- * - |"a+"| to open file for reading and writing. The file is created
+ * - |"a+"| to open the file for reading and writing. The file is created
  *   if it does not exist. The stream is positioned at the end of the file.
  *
  * If the file can be opened, |open-file| returns the textual port associated
  * with the given file, otherwise it returns |#f|. Here again, the *_magic_*
- * string "@pipe " permits to open a pipe port (in this case mode can only be
- * |"r"| or |"w"|).
+ * string "@pipe " permits to open a pipe port. (In this case mode can only be
+ * |"r"| or |"w"|.)
 doc>
  */
 
@@ -898,7 +897,7 @@ static SCM load_file(SCM filename)
  * (((load-suffixes)))
  * |Filename| should be a string naming an existing file containing Scheme
  * expressions. |Load| has been extended in STklos to allow loading of
- * file containing Scheme compiled code as well as object files (_aka_
+ * files containing Scheme compiled code as well as object files (_aka_
  * shared objects). The loading of object files is not available on
  * all architectures. The value returned by |load| is *_void_*.
  *
@@ -920,11 +919,11 @@ DEFINE_PRIMITIVE("load", scheme_load, subr1, (SCM filename))
 <doc EXT try-load
  * (try-load filename)
  *
- * |try-load| tries to load the file named |filename|. As |load|,
+ * |try-load| tries to load the file named |filename|. As with |load|,
  * |try-load| tries to find the file given the current load path
  * and a set of suffixes if |filename| cannot be loaded. If |try-load|
  * is able to find a readable file, it is loaded, and |try-load| returns
- * |#t|. Otherwise,  |try-load| retuns |#f|.
+ * |#t|. Otherwise, |try-load| retuns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("try-load", scheme_try_load, subr1, (SCM filename))
@@ -935,7 +934,7 @@ DEFINE_PRIMITIVE("try-load", scheme_try_load, subr1, (SCM filename))
 
 
 
-DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
+DEFINE_PRIMITIVE("%file-information", file_information, subr1, (SCM filename))
 {
   SCM f, res = STk_nil;
   char *fname;
@@ -1001,7 +1000,7 @@ int STk_init_fport(void)
   ADD_PRIMITIVE(port_idle);
 
   //  ADD_PRIMITIVE(dbg);
-  ADD_PRIMITIVE(file_informations);
+  ADD_PRIMITIVE(file_information);
   return TRUE;
 }
 

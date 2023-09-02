@@ -1,6 +1,6 @@
 # Makefile for STklos GTklos extension
 #
-# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update:  1-Feb-2022 17:29 (eg)
 
 EXTENSION=fuse
 
@@ -27,8 +26,8 @@ SCM_SRCS = fuse.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@
-schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
-schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+schemedir      = @SCMDIR@/stklos
+schemelibdir   = @EXECDIR@/stklos
 
 #======================================================================
 BASEDIR= ../../../..
@@ -44,10 +43,10 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@  @STKCFLAGS@ @SH_COMP_FLAGS@ \
+	@CC@ @CFLAGS@  @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
          -I$(BASEDIR)/src @GCINC@ @GMPINC@ \
          -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
 	/bin/rm -f $*.o
 
 $(EXTENSION)-incl.c: $(EXTENSION).stk $(SCM_SRCS)

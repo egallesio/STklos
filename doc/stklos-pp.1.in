@@ -1,0 +1,51 @@
+.\" -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH STKLOS-COMPILE 1 "version @VERSION@"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+stklos-pp \- A simple text preprocessor
+
+.SH DESCRIPTION
+The
+.B stklos-pp
+command is a simple text preprocessor. It takes a text as input and
+produces a text as output. By itself, stklos-pp is language agnostic;
+that means that its input can be in any language (LaTeX, Markdown,
+Asciidoctor, ...) Embedded templates in the input file are expressed in
+STklos, using double curly braces.
+
+.SH OPTIONS
+Here are the options available in the version @VERSION@ of
+.B stklos.
+
+.IP "--define=<str>, -D <str>"
+Define a new metadata. For instance \fI-D dir:/usr/local\fR permits to define
+the variable \fIdir\fR to \fI/usr/local\fR.
+.IP "--output=<file>, -o <file>"
+Output the compiled code in the given file instead of the standard output.
+.IP "--debug, -d"
+print debugging information. Can be used multiple times to
+increase the debugging level.
+.IP "--version, -v"
+print program version and exit.
+.IP "--help | -h | -?"
+Show help.
+
+See the Reference Manual of \fBstklos-pp\fR for more detailled information and exemples.
+
+.SH "SEE ALSO"
+.BR stklos (1)
+.

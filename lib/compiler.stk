@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,21 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  8-Sep-2022 08:14 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
   (import SCHEME)
   (export eval
           disassemble disassemble-expr
-          compiler:time-display
-          compiler:gen-line-number
-          compiler:warn-use-undefined
-          compiler:warn-use-undefined-postpone
-          compiler:show-assembly-code
-          compiler:generate-signature
-          compiler:inline-common-functions
 
+          %compiler-set-flags
           %grab-file-information
           %compiler-new-label
           %macro-expand
@@ -46,6 +39,7 @@
           when-load-and-compile
           %syntax-error
           %compile-time-define)
+
 
 (define *compiler-port* #f)
 
@@ -67,12 +61,17 @@
                          (fx<=?          . ,fx<=?)
                          (fx>?           . ,fx>?)
                          (fx>=?          . ,fx>=?)
+                         (fx=            . ,fx=?)
+                         (fx<            . ,fx<?)
+                         (fx<=           . ,fx<=?)
+                         (fx>            . ,fx>?)
+                         (fx>=           . ,fx>=?)
                          (cons           . ,cons)
                          (car            . ,car)
                          (cdr            . ,cdr)
                          (null?          . ,null?)
                          (list           . ,list)
-                         (not              . ,not)
+                         (not            . ,not)
                          (vector-ref     . ,vector-ref)
                          (vector-set!    . ,vector-set!)
                          (string-ref     . ,string-ref)
@@ -80,7 +79,37 @@
                          (eq?            . ,eq?)
                          (eqv?           . ,eqv?)
                          (equal?         . ,equal?)
-                         (void           . ,void)))
+                         (void           . ,void)
+                         (caar           . ,caar)
+                         (cdar           . ,cdar)
+                         (cadr           . ,cadr)
+                         (cddr           . ,cddr)
+                         (caaar          . ,caaar)
+                         (cdaar          . ,cdaar)
+                         (cadar          . ,cadar)
+                         (cddar          . ,cddar)
+                         (caadr          . ,caadr)
+                         (cdadr          . ,cdadr)
+                         (caddr          . ,caddr)
+                         (cdddr          . ,cdddr)
+                         (caaaar         . ,caaaar)
+                         (cdaaar         . ,cdaaar)
+                         (cadaar         . ,cadaar)
+                         (cddaar         . ,cddaar)
+                         (caadar         . ,caadar)
+                         (cdadar         . ,cdadar)
+                         (caddar         . ,caddar)
+                         (cdddar         . ,cdddar)
+                         (caaadr         . ,caaadr)
+                         (cdaadr         . ,cdaadr)
+                         (cadadr         . ,cadadr)
+                         (cddadr         . ,cddadr)
+                         (caaddr         . ,caaddr)
+                         (cdaddr         . ,cdaddr)
+                         (cadddr         . ,cadddr)
+                         (cddddr         . ,cddddr)
+                         (%cxr           . ,%cxr)
+                         (list-ref       . ,list-ref)))
 
 (define *inline-symbols* (map car *inline-table*))
 
@@ -90,12 +119,13 @@
 (define *code-instr*            #f)
 (define *code-constants*        '())
 (define *code-labels*           0)
-(define *compiling-file*       #f)  ;; is #t wen we are compiling a file
+(define *compiling-file*        #f)  ;; is #t when we are compiling a file
 
 (include "peephole.stk")
 (include "assembler.stk")
 (include "computils.stk")
-
+(include "compfile.stk")
+(include "compflags.stk")
 
 ;; ----------------------------------------------------------------------
 ;; Debbugging support
@@ -182,54 +212,7 @@
                       (apply (%syntax-expander val) (cdr form))
                       (map-expander form))))))))
 
-
-
-
-
-;; FIXME: This code should be in compfile
-
-; modules seen in a file (used by compile-file)
-(define *file-module-list* '())
-
-(define (file-module-list-reset!)
-  (set! *file-module-list* '()))
-
-(define add-file-module-list!
-  (let ((stklos (find-module 'stklos)))
-    (lambda (mod)
-      (unless (or (eq? mod stklos) (memq mod *file-module-list*))
-        (set! *file-module-list* (cons mod *file-module-list*))))))
-
-(define (file-module-list-expanders)
-  ;; Build the list of all exported macros of the modules(s) in
-  ;; the current file processed by current compile-file
-  (apply append
-         (map (lambda (mod)
-                (let Loop ((lst (module-exports mod))
-                           (res '()))
-                  (if (null? lst)
-                      res
-                      (let* ((symb (caar lst))
-                             (val  (symbol-value* symb mod #f)))
-                        ;; XXXX (%debug "symbol ~S syntax? ~S" symb (%syntax? val))
-                        (Loop (cdr lst)
-                              (if (%syntax? val)
-                                  (cons (list (car lst)
-                                              (module-name mod)
-                                              (%syntax-source val))
-                                        res)
-                                  res))))))
-              *file-module-list*)))
-
-;; ----------------------------------------------------------------------
-;;      Compiler parameters ...
-;; ----------------------------------------------------------------------
-(define compiler:time-display                   (make-parameter #t))
-(define compiler:gen-line-number                (make-parameter #f))
-(define compiler:warn-use-undefined             (make-parameter #f))
-(define compiler:warn-use-undefined-postpone    (make-parameter #t))
-(define compiler:show-assembly-code             (make-parameter #f))
-(define compiler:generate-signature             (make-parameter #f))
+;; ======================================================================
 
 (define compiler:inline-common-functions
   (let ((inlined *inline-symbols*))
@@ -356,7 +339,7 @@ doc>
                 (unless (known-var? symbol)
                   (compiler-warn-undef symbol where)
                   (register-new-global! symbol)))) ;; to avoid multiple warnings
-            *forward-globals*)
+            (reverse *forward-globals*))
   (set! *forward-globals* '()))
 
 
@@ -489,10 +472,10 @@ doc>
                  (proc     (caddr l))
                  (mod      (compiler-current-module)))
             (if (symbol? name)
-                (let ((obj `(%make-syntax ',name
-                                          ',proc
-                                          ,proc
-                                          ',(module-name mod))))
+                (let ((obj `( (%%in-scheme '%make-syntax) ',name
+                                                          ',proc
+                                                          ,proc
+                                                          ',(module-name mod))))
                   ;; produce code for defining the macro
                   (register-new-global! name)
                   (compile obj #f env #f)
@@ -514,7 +497,7 @@ doc>
  * value of the first expression that evaluates to a false value is
  * returned.  Any remaining expressions are not evaluated.  If all the
  * expressions evaluate to true values, the value of the last expression
- * is returned.  If there are no expressions then |%t| is returned.
+ * is returned.  If there are no expressions then `#t` is returned.
  *
  * @lisp
  *   (and (= 2 2) (> 2 1))           =>  #t
@@ -555,7 +538,7 @@ doc>
  * value of the first expression that evaluates to a true value is
  * returned.  Any remaining expressions are not evaluated.  If all
  * expressions evaluate to false values, the value of the last expression
- * is returned.  If there are no expressions then |%f| is returned.
+ * is returned.  If there are no expressions then `#f` is returned.
  *
  * @lisp
  *   (or (= 2 2) (> 2 1))            =>  #t
@@ -620,6 +603,19 @@ doc>
                 '()
                 env)))
 
+(define (extract-doc-and-name doc name body)
+  ;; extract the doc string and and name of the prcedure if present in body
+  ;; doc is a string and name is a keyword. They muts be at the start of body
+  ;; retuns a list of the form (doc name body). doc and name are #f is absent
+  (if (> (length body) 1)
+      (let ((head (car body))
+            (rest (cdr body)))
+        (if (and (not doc) (string? head))
+            (extract-doc-and-name head name rest)
+            (if (and (not name) (keyword? head))
+                (extract-doc-and-name doc head rest)
+                (list doc name body))))
+      (list doc name body)))
 
 ;;//(define (extend-current-env env symbol)
 ;;//  ;; Add just symbol to the current environment (used by let*)
@@ -680,26 +676,34 @@ doc>
   ;; rewrite the body to transform internal define to letrec
   (compile (rewrite-body body) env epair tail?))
 
-(define (compile-user-lambda formals body arity env)    ; i.e R5RS ones
+(define (compile-user-lambda formals body arity env src)  ; i.e R5RS ones
   (let* ((env  (extend-env env formals))
          (lab  (new-label))
-         (doc  (if (and (> (length body) 1) (string? (car body)))
-                   (car body)
-                   #f))
-         (body (if doc (cdr body) body)))
+         (info (extract-doc-and-name #f #f body))
+         (doc  (car info))
+         (name (cadr info))
+         (body (caddr info)))
 
     (emit 'CREATE-CLOSURE lab arity)
     (compile-body body env body #t)
     (emit 'RETURN)
     (emit-label lab)
 
-    (when (compiler:generate-signature)
-      ;; emit signature
-      (emit 'FORMALS (fetch-constant formals)))
+    (when doc ;; emit the docstring
+      (emit 'DOCSTRG (fetch-constant doc)))
 
-    (when doc
-      ;; emit the docstring
-      (emit 'DOCSTRG (fetch-constant doc)))))
+    (when name ;; emit the procedure name
+      (emit 'PROCNAME
+            (fetch-constant (string->symbol (keyword->string name)))))
+
+    (if (compiler:keep-source)
+        ;; emit the code source (in fact signature + body)
+        (begin
+          (emit 'FORMALS (fetch-constant (cadr src)))
+          (emit 'SOURCE  (fetch-constant  (cddr src))))
+        (when (compiler:keep-formals)
+          ;; emit signature
+          (emit 'FORMALS (fetch-constant (cadr src)))))))
 
 
 ;;; EXTENDED LAMBDAS
@@ -927,16 +931,18 @@ doc>
   (if (> (length el) 2)
       (let* ((method? (eq? (car el) 'method))
              (formals (cadr el))
-             (body    (cddr el))
-             (doc     (and (> (length body) 1) (string? (car body)) (car body)))
-             (new     (rewrite-params-and-body method?
-                                               formals
-                                               (if doc (cdr body) body))))
-        (if doc
-            `(lambda ,(car new)
-               ,doc
-               ,@(cdr new))
-            `(lambda ,@new)))
+             (info    (extract-doc-and-name #f #f (cddr el)))
+             (doc     (car info))
+             (name    (cadr info))
+             (body    (caddr info))
+             (new     (rewrite-params-and-body method? formals body)))
+        ;; new is a list with the arguments followed by the function body
+        (let ((new-args (car new))
+              (new-body (cdr new)))
+          (when doc  (set! new-body (cons doc new-body)))  ;; add documentation
+          (when name (set! new-body (cons name new-body))) ;; add proc-name
+          ;; Build the final lambda
+          `(lambda ,new-args ,@new-body)))
       (compiler-error 'lambda el "bad definition ~S" el)))
 
 
@@ -945,7 +951,7 @@ doc>
          (formals     (cadr r5rs-lambda))
          (body        (cddr r5rs-lambda))
          (arity       (compute-arity formals)))
-    (compile-user-lambda formals body arity env)))
+    (compile-user-lambda formals body arity env args)))
 
 ;;;;
 ;;;; APPLICATION
@@ -993,7 +999,7 @@ doc>
   (generate-PREPARE-CALL epair)
   (compile-args actuals env)
   (compile fct env actuals #f)
-  (emit (if tail? 'TAIL-INVOKE  'INVOKE)
+  (emit (if tail? 'TAIL-INVOKE 'INVOKE)
         (length actuals)))
 
 (define can-be-inlined?
@@ -1180,16 +1186,17 @@ doc>
                                 ((>=) 'IN-NUMGE))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
 
-      ((fx=? fx<? fx>? fx<=? fx>=?)
+      ((fx=? fx<? fx>? fx<=? fx>=?
+        fx=  fx<  fx>  fx<=  fx>= )
                 (case len
                 ((O)   (compiler-error fct epair
                                         "needs at least one argument" fct))
                 ((2)   (comp2 (case fct
-                                ((fx=?)  'IN-FXEQ)
-                                ((fx<?)  'IN-FXLT)
-                                ((fx>?)  'IN-FXGT)
-                                ((fx<=?) 'IN-FXLE)
-                                ((fx>=?) 'IN-FXGE))))
+                                ((fx=?  fx=)  'IN-FXEQ)
+                                ((fx<?  fx<)  'IN-FXLT)
+                                ((fx>?  fx>)  'IN-FXGT)
+                                ((fx<=? fx<=) 'IN-FXLE)
+                                ((fx>=? fx>=) 'IN-FXGE))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
 
       ((cons)   (comp2 'IN-CONS))
@@ -1218,6 +1225,36 @@ doc>
                             (emit 'IM-VOID)
                             (compile (append (cons 'begin actuals) (list (void)))
                                      env epair #f)))
+
+      ;; The cxr closures are very commonly used, call the specialized IN-CDR instr.
+      ((caar cdar cadr cddr
+        caaar cdaar cadar cddar caadr cdadr caddr cdddr
+        caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar
+        caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr)
+                       (if (= len 1)
+                           (let ((conv
+                                  (lambda (name)
+                                    (let ((s (string->list (symbol->string name))))
+                                      (string->keyword
+                                            (list->string (cdr (reverse (cdr s)))))))))
+                             (oper2 'IN-CXR
+                                    (car actuals)
+                                    (fetch-constant (conv fct))))
+                           (compile-normal-call fct actuals len env epair #f)))
+
+      ;; (%cxr lst #:ada) ==> inline call
+      ((%cxr)           (if (and (= len 2) (keyword? (cadr actuals)))
+                            (oper2 'IN-CXR (car actuals) (fetch-constant (cadr actuals)))
+                            (compile-normal-call fct actuals len env epair #f)))
+      ((list-ref)       (if (= len 2)
+                            (case (cadr actuals)
+                              ((0) (compile `(car ,(car actuals)) env epair #f))
+                              ((1) (compile `(cadr ,(car actuals)) env epair #f))
+                              ((2) (compile `(caddr ,(car actuals)) env epair #f))
+                              ((3) (compile `(cadddr ,(car actuals)) env epair #f))
+                              (else  (compile-normal-call fct actuals len env epair #f)))
+                            (compile-normal-call fct actuals len env epair #f)))
+
       (else             (panic "unimplemented inline primitive ~S" fct)))))
 
 
@@ -1230,18 +1267,24 @@ doc>
          (arity   (compute-arity formals)))
     (if (or (= arity len)
             (and (negative? arity) (>= len (- (- arity) 1))))
-        (let ((kind    (if tail? 'ENTER-TAIL-LET 'ENTER-LET))
-              (new-env (extend-env env formals)))
-          (generate-PREPARE-CALL epair)
-          (if (negative? arity)
-              (begin
-                (compile-var-args actuals (- (- arity) 1) env)
-                (emit kind (- arity)))
-              (begin
-                (compile-args actuals env)
-                (emit kind len)))
-          (compile-body body new-env epair tail?)
-          (emit (if tail? 'RETURN 'LEAVE-LET)))
+        (if (zero? len)
+            ;; ([lambda () ...]) or (let() ...)
+            ;; ==> (begin ...)
+            ;; NOTE: compile-body takes care of internal defines
+            (compile-body body env epair tail?)
+            ;; len > 0 ==> produce an ENTER-LET
+            (let ((kind    (if tail? 'ENTER-TAIL-LET 'ENTER-LET))
+                  (new-env (extend-env env formals)))
+              (generate-PREPARE-CALL epair)
+              (if (negative? arity)
+                  (begin
+                    (compile-var-args actuals (- (- arity) 1) env)
+                    (emit kind (- arity)))
+                  (begin
+                    (compile-args actuals env)
+                    (emit kind len)))
+              (compile-body body new-env epair tail?)
+              (emit (if tail? 'RETURN 'LEAVE-LET))))
         (compiler-error 'lambda epair "bad number of parameters ~S" actuals))))
 
 
@@ -1332,11 +1375,9 @@ doc>
               ;; Transform named let in letrec
               (compile-named-let bindings (car body) (cdr body) len args env tail?)
               (when (valid-let-bindings? bindings #t)
-                (if (null? bindings)
-                    (compile-body body env args tail?)
-                    (compile `((lambda ,(map car bindings) ,@body)
-                               ,@(map cadr bindings))
-                             env args tail?))))))))
+                (compile `((lambda ,(map car bindings) ,@body)
+                           ,@(map cadr bindings))
+                         env args tail?)))))))
 
 ;;
 ;; LET*
@@ -1615,14 +1656,6 @@ doc>
 ;;
 ;; INCLUDE
 ;;
-
-#|
-<doc EXT-SYNTAX include
- * (include <string1> <string2> ...)
- *
- * TODO
-doc>
-|#
 (define (%include-file name)
   (let ((port (open-input-file name))
         (old  *compiler-port*))
@@ -1649,6 +1682,14 @@ doc>
     (for-each %include-file (cdr e))))
 
 
+;; ======================================================================
+(define (compile-in-scheme e env tail)
+  (if (= (length e) 2)
+      (begin
+        (compile (cadr e) env (cadr e) tail)
+        (emit 'INSCHEME))
+      (compiler-error '%%in-scheme "expected one argument")))
+
 ;;;;======================================================================
 ;;;;
 ;;;;            LET-SYNTAX
@@ -1663,7 +1704,7 @@ For instance,
       (cons x (m 17)))))    => (inner inner 17)
 
 It should probably produce (outer inner 17) if we want to be coherent with
-the R7RS form 
+the R7RS form
 (let ((x 'outer))
   (let-syntax ((m (syntax-rules () ((m a) (list x a)))))
     (let ((x 'inner))
@@ -1695,11 +1736,11 @@ both forms.
                                         "ill formed binding ~S" new))
                       (let* ((name      (car new))
                              (expander  (cadr new))
-                             (new-macro (%make-syntax
-                                            name
-                                            expander
-                                            (eval expander)
-                                            #f))) ; #f =>  non global macro
+                             (new-macro ( (%%in-scheme '%make-syntax)
+                                          name
+                                          expander
+                                          (eval expander)
+                                          #f))) ; #f =>  non global macro
                         (Loop (cdr bindings)
                               (cons (cons name new-macro)
                                     new-env)))))))))))
@@ -1713,24 +1754,22 @@ both forms.
 ;;;;
 ;;;; Utilities for REQUIRE / REQUIRE-FOR-SYNTAX
 ;;;;
-(define (find-file-informations file lib-only? eventually-compile?)
+(define (find-file-information file lib-only? eventually-compile?)
 
   (define (compile-and-find-infos path)
     (let ((tmp (create-temp-file)))
       (compile-file path tmp)
-      (let ((infos (%file-informations tmp)))
+      (let ((infos (%file-information tmp)))
         (remove-file tmp)
         (set! infos (key-set! infos :nature 'source))
         infos)))
 
   (let ((path (find-path file
                          (if lib-only?
-                             (list (make-path (%library-prefix)
-                                              "share" "stklos"
-                                              (version)))
+                             (list (%library-prefix 'data))
                              (load-path)))))
     (if path
-        (let ((infos (%file-informations path)))
+        (let ((infos (%file-information path)))
           (if (and eventually-compile?
                    (eq? (key-get infos :nature 'unknown) 'source))
               ;; We have a source file (i.e. no info, compile it to have them)
@@ -1740,7 +1779,7 @@ both forms.
         '())))
 
 
-(define (import-file-informations infos)
+(define (import-file-information infos)
   (when (pair? infos)
     ;; Register all the global symbols of the file
     (for-each register-new-global! (key-get infos :globals '()))
@@ -1768,15 +1807,15 @@ both forms.
                   ;; that an import clause can retrieve it at compile time
                   ;; when we produce a .ostk file. This is not necessary for
                   ;; import of source file, but mandatory for file compilation.
-                  (let ((exports (module-exports module)))
+                  (let ((exports (%module-exports module)))
                     (unless (member names exports)
                       (%module-exports-set! module (cons names exports))))))
               (key-get infos :macros '()))))
 
 
 (define (%grab-file-information str)
-  (let ((info (find-file-informations str #f #f)))
-    (import-file-informations info)))
+  (let ((info (find-file-information str #f #f)))
+    (import-file-information info)))
 
 ;;;;
 ;;;; REQUIRE
@@ -1789,8 +1828,8 @@ both forms.
   (when (and (= (length e) 3)
              (string? (cadr e))
              (boolean? (caddr e)))
-    (let ((infos (find-file-informations (cadr e) (caddr e) #f)))
-      (import-file-informations infos)))
+    (let ((infos (find-file-information (cadr e) (caddr e) #f)))
+      (import-file-information infos)))
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
 
@@ -1882,6 +1921,7 @@ both forms.
           ((%%when-compile)     (compile-when-compile   e env tail?))
           ((%%include)          (compile-include        e env tail?))
           ((%%include-ci)       (compile-include-ci     e env tail?))
+          ((%%in-scheme)        (compile-in-scheme      e env tail?))
           ((%%source-pos)       (compile-%%source-pos   e env tail?))
           ((%%label)            (compile-%%label        e env tail?))
           ((%%goto)             (compile-%%goto         e env tail?))

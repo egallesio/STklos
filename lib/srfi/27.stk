@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 28-Apr-2021 02:01
-;;;; Last file update: 21-Nov-2021 11:40 (eg)
 ;;;;
 
 (select-module srfi/27)
@@ -259,11 +258,11 @@
 <doc EXT random-integer
  * (random-integer n)
  *
- * Return an integer in the range \[0, ..., |n|\[.  Subsequent results of
+ * Return an integer in the range [0, ..., |n|[.  Subsequent results of
  * this procedure appear to be independent uniformly distributed over
- * the range \[0, ..., |n|\[. The argument |n| must be a positive integer,
+ * the range [0, ..., |n|[. The argument |n| must be a positive integer,
  * otherwise an error is signaled. This function is equivalent to the eponym
- * function of SRFI-27 (see ,(link-srfi 27) definition for more details).
+ * function of {{link-srfi 27}}.
 doc>
 
 <doc EXT random-real
@@ -272,7 +271,7 @@ doc>
  * Return a real number |r| such that |0 < r < 1|.
  * Subsequent results of this procedure appear to be independent uniformly
  * distributed. This function is equivalent to the eponym
- * function of SRFI-27 (see ,(link-srfi 27) definition for more details).
+ * function of  {{link-srfi 27}}.
 doc>
 |#
 

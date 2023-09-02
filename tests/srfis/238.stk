@@ -1,0 +1,65 @@
+;;;;
+;;;; SRFI-238
+;;;;
+
+(test "codeset?.1"
+      #t
+      (codeset? 'errno))
+
+(test "codeset?.2"
+      #f
+      (codeset? "a"))
+
+(test "codeset-symbols.1"
+      #t
+      (list? (member 'EPERM (codeset-symbols 'errno))))
+
+(test "codeset-symbols.2"
+      #t
+      (list? (member 'ENXIO (codeset-symbols 'errno))))
+
+(test/error "codeset-symbols.3"
+            (codeset-symbols "a"))
+(test "codeset-symbol.1"
+      'EPERM
+      (codeset-symbol 'errno 'EPERM))
+
+(test "codeset-symbol.2"                        ;; Should work on most systems
+      'EPERM
+      (codeset-symbol 'errno 1))
+
+(test/error "codeset-symbol.3"
+            (codeset-symbol 'errno "a"))
+
+(test/error "codeset-symbol.4"
+            (codeset-symbol "a" 'EPERM))
+
+
+(test "codeset-number.1"                        ;; Should work on most systems
+      1
+      (codeset-number 'errno 'EPERM))
+
+(test "codeset-number.2"
+      1
+      (codeset-number 'errno 1))
+
+(test/error "codeset-number.3"
+            (codeset-number 'errno "a"))
+(test/error "codeset-number.4"
+            (codeset-number "a" 'EPERM))
+
+(test "codeset-message.1"
+      #t
+      (string? (codeset-message 'errno 'EPERM)))
+
+(test "codeset-message.2"
+      #t
+      (not (equal? "" (codeset-message 'errno 'EPERM))))
+
+(test "codeset-message.3"                      ;; Should work on most systems
+      #t
+      (string=? (codeset-message 'errno 'EPERM)
+                (codeset-message 'errno 1)))
+
+(test/error "codeset-message.4"
+            (codeset-message "a" 'EPERM))

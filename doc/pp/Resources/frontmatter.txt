@@ -1,0 +1,12 @@
+---
+author: John Doe
+title: I'm the title of the document
+creation-date: Tue Jul 18 08:08:39 PM CEST 2023
+---
+
+Some information about this file:
+  - Title: {{title}}
+  - Author: {{author}}
+  - File Creation Date: {{creation-date}}
+
+Note that the '---' separators can be omitted.

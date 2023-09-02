@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Aubrey Jaffer (SRFI Reference implementation)
 ;;;;    Creation date: 12-Sep-2005 14:51 (eg)
-;;;; Last file update: 21-Apr-2022 16:30 (eg)
 ;;;;
 ;;;;
 ;;;; The implementation is taken directly from the SRFI reference implementation.

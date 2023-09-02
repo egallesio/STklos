@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 18-Sep-2022 16:31 (eg)
  */
 
 
@@ -91,7 +90,7 @@ extern "C"
 
 
 #define CPP_CONCAT(x, y)        x##y
-#define Inline inline
+
 
 #define AS_LONG(x)              ((unsigned long) (x))
 #define AS_SCM(x)               ((SCM) ((unsigned long) (x)))
@@ -130,7 +129,7 @@ extern "C"
    * the file <gc.h> is not included in the source file in order to simplify
    * header file management (i.e. only this header file is necessary to use
    * the stklos library)).
-   * Don't use the functions GC_* they can be changed. The only allocation
+   * Don't use the functions GC_*, as they can be changed. The only allocation
    * functions that must be used are functions of the form STk_*
    */
 
@@ -185,19 +184,19 @@ typedef enum {
   tc_complex, tc_symbol, tc_keyword, tc_string, tc_module,              /* 5 */
   tc_instance, tc_closure, tc_subr0, tc_subr1, tc_subr2,                /* 10 */
   tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,                   /* 15 */
-  tc_subr23, tc_vsubr, tc_apply, tc_vector, tc_uvector,                 /* 20 */
-  tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise,         /* 25 */
-  tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,      /* 30 */
-  tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex,            /* 35 */
-  tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,               /* 40 */
-  tc_syntax,                                                            /* 45 */
+  tc_subr23, tc_subr34, tc_vsubr, tc_apply, tc_vector,                  /* 20 */
+  tc_uvector, tc_hash_table, tc_port, tc_frame, tc_next_method,         /* 25 */
+  tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
+  tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
+  tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
+  tc_callback, tc_syntax,                                               /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
 
   /*
-   * Internal representation of SCM object. Object use the two least
-   * significant bit as tag. We have the following representation
+   * Internal representation of SCM objects. Objects use the two least
+   * significant bits as tag. We have the following representation
    *
    *     .........00            pointer on an object descriptor (a box)
    *     .........01            integer
@@ -506,8 +505,9 @@ SCM STk_make_frame(int len);
 SCM STk_clone_frame(SCM f);
 
 SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound);
+void STk_error_unbound_variable(SCM symbol, SCM module);
 void STk_define_variable(SCM symbol, SCM value, SCM module);
-
+SCM STk_symb_in_scheme(SCM symb); // value of symb in module SCHEME
 
 int STk_init_env(void);
 int STk_late_init_env(void); /* must be done after symbol initialization */
@@ -528,7 +528,7 @@ void STk_export_all_symbols(SCM module);
   ------------------------------------------------------------------------------
 */
   /* The `extended_type_descr' structure is used for the types which need
-   *  more information (such as modules, ports, ....). All the extended
+   * more information (such as modules, ports, ...). All the extended
    * descriptors are stored in the STk_xtypes array.
    */
 struct extended_type_descr {
@@ -673,6 +673,7 @@ SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
 EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
+EXTERN_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name));
 EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
 EXTERN_PRIMITIVE("reverse", reverse, subr1, (SCM l));
@@ -761,7 +762,7 @@ extern double STk_NaN;          /* IEEE NaN special value */
   /****
    **** Bignum
    ****/
-struct bignum_obj;      /* complete deflaration is in number.c */
+struct bignum_obj;      /* complete declaration is in number.c */
 
 #define BIGNUMP(p)      (BOXED_TYPE_EQ((p), tc_bignum))
 
@@ -1118,28 +1119,19 @@ struct closure_obj {
   stk_header header;
   int16_t arity;
   uint16_t code_size;
-  SCM formals;
   SCM env;
   SCM plist;
   SCM name;
   SCM* constants;
-  SCM doc;
   STk_instr *bcode;
 };
 
-/* FIXME:
-#define CLOSURE_FORMALS(p)      (((struct closure_obj *) (p))->formals)
-#define CLOSURE_CODE(p)         (((struct closure_obj *) (p))->code)
-*/
-
 #define CLOSURE_ARITY(p)        (((struct closure_obj *) (p))->arity)
 #define CLOSURE_SIZE(p)         (((struct closure_obj *) (p))->code_size)
-#define CLOSURE_FORMALS(p)      (((struct closure_obj *) (p))->formals)
 #define CLOSURE_ENV(p)          (((struct closure_obj *) (p))->env)
 #define CLOSURE_PLIST(p)        (((struct closure_obj *) (p))->plist)
 #define CLOSURE_NAME(p)         (((struct closure_obj *) (p))->name)
 #define CLOSURE_CONST(p)        (((struct closure_obj *) (p))->constants)
-#define CLOSURE_DOC(p)          (((struct closure_obj *) (p))->doc)
 #define CLOSURE_BCODE(p)        (((struct closure_obj *) (p))->bcode)
 #define CLOSUREP(p)             (BOXED_TYPE_EQ((p), tc_closure))
 
@@ -1150,6 +1142,7 @@ EXTERN_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc));
 SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env);
 int STk_init_proc(void);
 
+extern SCM STk_key_source, STk_key_formals, STk_key_doc;
 
 /*
   ------------------------------------------------------------------------------
@@ -1162,7 +1155,7 @@ SCM   STk_read(SCM port, int case_significant);
 SCM   STk_read_constant(SCM port, int case_significant);
 char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
-int   STk_keyword_colon_convention(void); // pos. of ':' in symbolro make a  keyword
+int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 extern int STk_read_case_sensitive;
 
 
@@ -1185,6 +1178,14 @@ EXTERN_PRIMITIVE("regexp-match", regexec, subr2, (SCM re, SCM str));
   ----
   ------------------------------------------------------------------------------
 */
+struct codeset_code {   // Used by SRFI 238
+  const char* name;
+  int code;
+};
+
+extern struct codeset_code STk_signal_names[];
+
+
 int STk_get_signal_value(SCM sig);
 int STk_init_signal(void);
 
@@ -1283,10 +1284,11 @@ int STk_init_syntax(void);
   ----
   ------------------------------------------------------------------------------
 */
+extern struct codeset_code STk_errno_names[];
 
 extern SCM  STk_posix_error_condition;  /* condition type &posix-error */
 
-  void STk_error_posix(int err,char *proc_name, SCM arg1, SCM arg2);
+void STk_error_posix(int err,char *proc_name, SCM arg1, SCM arg2);
 
 int STk_dirp(const char *path);
 int STk_init_system(void);
@@ -1323,14 +1325,14 @@ extern int STk_use_utf8;
   ((0 <= (c)  && (c) <=  0xd7ff) || (0xE000 <=(c) && (c) <= 0x10FFFF))
 
 
-char *STk_utf8_grab_char(char *str, uint32_t *c);/* result = pos. after current one */
+char *STk_utf8_grab_char(char *str, uint32_t *c); /* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(const char *s, int max);
 int STk_utf8_read_char(SCM port);
 int STk_utf8_sequence_length(const char *str); /* # of bytes of sequence starting at str */
-int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
+int STk_utf8_char_bytes_needed(unsigned int ch); /* # of bytes needed to represent ch*/
 int STk_utf8_verify_sequence(char *s, int len); /* s constitutes a valid UTF8? */
-char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
+char *STk_utf8_index(char *s, int i, int max); /* return the address of ith char of s*/
 int STk_utf8_char_from_byte(char *s, int i, int max); /*  byte index => char index */
 
 int STk_init_utf8(void);

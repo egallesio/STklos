@@ -47,7 +47,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 16-Mar-2021 16:11 (jpellegrini)
-;;;; Last file update: 16-Mar-2021 16:21 (jpellegrini)
 ;;;;
 
 (current-log-fields '(FACILITY 1))
@@ -87,7 +86,9 @@
                        (equal? "bar"
                                (cond ((assq 'FOO msg) => cdr)
                                      (else #f)))))
-                msgs))))
+                msgs))
+    (test/error "bad number" (send-log "bad number" "third message"))
+    (test/error "bad string" (send-log "bad number" 'bad-string))))
 
 
 ;; Check that the example from the document works

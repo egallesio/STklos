@@ -1,2 +1,41 @@
-main author: 	Erick Gallesio <eg at unice.fr>
-LURC support:	Stephane Epardaud <Stephane.Epardaud at sophia.inria.fr>
+
+## Main author:
+   Erick Gallesio ([@egallesio](https://github.com/egallesio))
+
+## Contributors:
+
+- Stéphane Épardaud  ([@FroMage](https://github.com/FroMage))
+   LURC support (now discontinued) and debug of threads support
+
+- Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
+  A tremendous number of things: SRFIs implementation, Documentation,
+  Bug fixes, Ideas
+
+- Ryan Schmidt ([@ryandesign](https://github.com/ryandesign))
+  Build process cleaning, macOS adaptations, MacPorts packages
+
+- Lassi Kortela ([@lassik](https://github.com/lassik))
+  Bug fixes, Ideas, SRFIs
+
+- Tom Niget ([@zdimension](https://github.com/zdimension))
+  Bug fixes, Code refactoring
+
+- Amirouche Boubekki ([@amirouche](https://github.com))
+  Bug fixes
+
+- Robby Zambito ([@Zambito1](https://github.com/Zambito1))
+  Bug fixes
+
+- Ivan Maidanski ([@ivmai](https://github.com/ivmai))
+  Bug fixes
+
+* Ben Taca ([@bentaca](https://github.com/bentaca))
+  Documentation
+
+* Okuoku ([@okuoku](https://github.com/okuoku))
+  Bug fixes
+
+
+<!-- Local Variables: -->
+<!-- mode: markdown -->
+<!-- End: -->

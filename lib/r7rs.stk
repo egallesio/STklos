@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 12-May-2022 15:52 (eg)
 ;;;;
 
 
@@ -29,6 +28,7 @@
         letrec* let-values let*-values
         delay delay-force lazy make-promise eager
         define-values
+        define-record-type
         equal-simple?
         exact-integer?
         floor-quotient floor/ truncate/ truncate-quotient
@@ -335,10 +335,75 @@ doc>
            (values (void) ',formals)))))
 
 ;;;; ----------------------------------------------------------------------
+;;;; 5.5 Record-type definitions
+;;;; ----------------------------------------------------------------------
+
+;; Implementation of R7RS define-record-type using the internal STklos structs
+
+(define-macro (define-record-type name constructor predicate . fields)
+  (let ((struct-type      (gensym))
+        (tmp              (gensym))
+        (val              (gensym)))
+    `(begin
+       ;; Define the constructor, the predicates and the accessors as global
+       (define ,(car constructor) #f)
+       (define ,predicate #f)
+       ,@(map (lambda (x)
+                (case (length x)
+                  ((2) `(define ,(cadr x) #f))
+                  ((3) `(begin
+                          (define  ,(cadr x) #f)
+                          (define ,(caddr x) #f)))
+                  (else (error 'define-record-type
+                               "bad field specification ~S" x))))
+              fields)
+       ;; Grab the STklos struct functions to be independent of SCHEME module
+       ;; at runtime
+       (let ((make-struct-type (%%in-scheme 'make-struct-type))
+             (make-struct      (%%in-scheme 'make-struct))
+             (struct?          (%%in-scheme 'struct?))
+             (struct-is-a?     (%%in-scheme 'struct-is-a?))
+             (struct-ref       (%%in-scheme 'struct-ref))
+             (struct-set!      (%%in-scheme 'struct-set!)))
+         ;;
+         ;; Build the record using STklos structs
+         ;;
+         (let ((,struct-type (make-struct-type ',name #f ',(map car fields))))
+
+               ;; Make the constructor
+               (set! ,(car constructor)
+                     (lambda ,(cdr constructor)
+                       (let ((,tmp (make-struct ,struct-type)))
+                         ,@(map (lambda (x) `(struct-set! ,tmp ',x ,x))
+                                (cdr constructor))
+                         ,tmp)))
+
+               ;; Make the predicate
+               (set! ,predicate
+                     (lambda (,tmp) (and (struct? ,tmp) (struct-is-a? ,tmp ,struct-type))))
+
+               ;; Make the accessors
+               ,@(map (lambda (x)
+                        (if (= (length x) 2)
+                            `(set! ,(cadr x) (lambda (,tmp)
+                                               (struct-ref ,tmp ',(car x))))
+                            ;; length = 3 (otherwise error was detected before)
+                            `(begin
+                               (set! ,(cadr x) (lambda (,tmp)
+                                                 (struct-ref ,tmp ',(car x))))
+                               (set! ,(caddr x) (lambda (,tmp ,val)
+                                                  (struct-set! ,tmp ',(car x) ,val))))))
+                      fields)
+               ;; Result for toplevel (if any)
+               (values (void) ',name))))))
+
+
+;;;; ----------------------------------------------------------------------
 ;;;; 6.1 Equivalence predicate
 ;;;; ----------------------------------------------------------------------
 (define equal-simple? equal?)
 (set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.2 Numbers
@@ -348,7 +413,7 @@ doc>
 <doc R7RS exact-integer?
  * (exact->integer? z)
  *
- * Returns  #t if z is both exact and an integer; otherwise returns #f.
+ * Returns  `#t` if z is both exact and an integer; otherwise returns `#f`.
  *
  * @lisp
  * (exact-integer? 32)   => #t
@@ -438,7 +503,7 @@ doc>
 (define (exact-integer-sqrt k)
   (define (isqrt n)
     ;; Compute integer square root using Newton's method.
-    
+
     ;; We take special care when picking the initial guess, which
     ;; is computed in the 'xn' argument to the named let below:
     ;; this is a very good estimate (much better than the usual
@@ -529,7 +594,7 @@ doc>
 <doc symbol=?
  * (symbol=? symbol1 symbol2  ...)
  *
- * Returns #t if all the arguments are symbols and all have the same name in
+ * Returns `#t` if all the arguments are symbols and all have the same name in
  * the sense of |string=?|.
 doc>
 |#
@@ -562,14 +627,16 @@ doc>
      (define ,func2 ,func)
      ;; define the generalized function
      (set! ,func (lambda (first . l)
+                   ;; Set the name of the function for better error messages
+                   ,(string->keyword (symbol->string func))
+                   ;; Fuction body
                    (letrec ((compare (lambda (first . l)
                                        (or (null? l)
                                           (and (,func2 first (car l))
                                              (apply compare l))))))
                      (unless (string? first) (error "bad string ~W" first))
-                     (apply compare first l))))
-     ;; Set the name of the new function to the old one for better error messages
-     (%set-procedure-name! ,func ',func)))
+                     (apply compare first l))))))
+
 
 (%generalize-string-compare string=?     %string2=?)
 (%generalize-string-compare string<?     %string2<?)
@@ -589,12 +656,13 @@ doc>
 (let ((s->l string->list)) ;; s->l is the R5RS function
   (set! string->list
         (lambda (str :optional (start 0 start?) (end 0 end?))
+          #:string->list  ;; set procedure name
           (if start?
               (let ((end (if end? end (string-length str))))
                 (%claim-error 'string->list
                               (s->l (substring str start end))))
-              (s->l str))))
-  (%set-procedure-name! string->list 'string->list))
+              (s->l str)))))
+
 
 
 #|
@@ -661,6 +729,7 @@ doc>
 (define %string-fill2! string-fill!)
 ;; Implement the one with 2 to 4 parameters
 (let ((fill (lambda (str char :optional (start 0 start?) (end 0 end?))
+              #:string-fill!
               (%claim-error
                  'string-fill!
                  (if start?
@@ -674,8 +743,8 @@ doc>
                            (Loop (+ i 1)))))
                      ;; R5RS string-fill!
                      (%string-fill2! str char))))))
-  (set! string-fill! fill)
-  (%set-procedure-name! string-fill! 'string-fill!))
+  (set! string-fill! fill))
+
 
 
 ;;;; ----------------------------------------------------------------------
@@ -688,16 +757,17 @@ doc>
 (let ((v->l vector->list)) ;; v->l is the R5RS function
   (set! vector->list
         (lambda (v :optional (start 0 start?) (end 0 end?))
+          #:vector->list  ; set procedure name
           (if start?
               (let ((end (if end? end (vector-length v))))
+                (when (< end start) (error "end index ~S < start index ~S" end start))
                 (%claim-error
                  'vector->list
                  (do ((i (- end 1) (- i 1))
                       (result '() (cons (vector-ref v i) result)))
                      ((< i start) result))))
-              ;; R5RS function (without start or endà
-              (v->l v))))
-  (%set-procedure-name! vector->list 'vector->list))
+              ;; R5RS function (without start or end)
+              (v->l v)))))
 
 
 
@@ -822,17 +892,17 @@ doc>
 |#
 (define (make-bytevector size :optional (default 0))
   (%claim-error 'make-bytevector
-                (%make-uvector 1 size default)))
+                (%make-uvector size default 1)))
 
 #|
 <doc R7RS bytevector?
  * (bytevector? obj)
  *
- * Returns |!t| if |obj| is a bytevector and returns |!f| otherwise.
+ * Returns `#t` if |obj| is a bytevector and returns `#f` otherwise.
 doc>
 |#
 (define (bytevector? obj)
-  (%uvector? 1 obj))
+  (%uvector? obj 1))
 
 #|
 <doc R7RS bytevector
@@ -846,7 +916,7 @@ doc>
 doc>
 |#
 (define (bytevector . lst)
-  (%claim-error 'bytevector (%uvector 1 lst)))
+  (%claim-error 'bytevector (%uvector lst 1)))
 
 
 #|
@@ -857,7 +927,7 @@ doc>
 doc>
 |#
 (define (bytevector-length bv)
-  (%claim-error 'bytevector-length (%uvector-length 1 bv)))
+  (%claim-error 'bytevector-length (%uvector-length bv 1)))
 
 
 #|
@@ -868,17 +938,17 @@ doc>
  * range [0..255]. It is an error if |k| is not a valid index of |bytevector|.
  *
  * @lisp
- * (bytevector-u8-ref #u8(1 1 2 3 5 8 13 21) 5    => 8
+ * (bytevector-u8-ref #u8(1 1 2 3 5 8 13 21) 5)    => 8
  * @end lisp
 doc>
 |#
 (define (bytevector-u8-ref bv idx)
-  (%claim-error 'bytevector-u8-ref (%uvector-ref 1 bv idx)))
+  (%claim-error 'bytevector-u8-ref (%uvector-ref bv idx 1)))
 
 
 #|
 <doc EXT bytevector-u8-set!
- * (bytevector-u8-ref bytevector k byte)
+ * (bytevector-u8-set! bytevector k byte)
  *
  * Stores byte as the k th byte of bytevector. It is an error if |k|
  * is not a valid index of |bytevector|.
@@ -891,7 +961,7 @@ doc>
 doc>
 |#
 (define (bytevector-u8-set! bv idx val)
-  (%claim-error 'bytevector-u8-set! (%uvector-set! 1 bv idx val)))
+  (%claim-error 'bytevector-u8-set! (%uvector-set! bv idx val 1)))
 
 
 #|
@@ -1108,8 +1178,8 @@ doc>
 <doc R7RS error-object?
  * (error-object? obj )
  *
- * Returns #t if obj is an object created by error. Otherwise,
- * it returns #f.
+ * Returns `#t` if |obj| is an object created by error. Otherwise,
+ * it returns `#f`.
 doc>
 |#
 (define (error-object? obj)
@@ -1149,10 +1219,10 @@ doc>
  * (file-error? obj)
  *
 
- * Error type predicates. Returns #t if |obj| is an object raised
+ * Error type predicates. Returns `#t` if |obj| is an object raised
  * by the read procedure or by the inability to open an input or
- * output port on a file, respectively. Otherwise, it returns #f.
-  *
+ * output port on a file, respectively. Otherwise, it returns `#f`.
+ *
 doc>
 |#
 (define (read-error? obj)
@@ -1204,8 +1274,8 @@ doc>
  * (input-port-open? port)
  * (output-port-open? port)
  *
- * Returns #t if port is still open and capable of performing
- * input or output, respectively, and #f otherwise.
+ * Returns `#t` if port is still open and capable of performing
+ * input or output, respectively, and `#f` otherwise.
 doc>
 |#
 (define (input-port-open? port)

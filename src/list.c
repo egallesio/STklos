@@ -2,7 +2,7 @@
  *
  * l i s t . c                  -- Lists procedures
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 17-Jan-2022 09:35 (eg)
  */
 
 #include "stklos.h"
@@ -67,6 +66,10 @@ static void error_not_exact_positive(SCM x)
 {
   STk_error("index ~W is not an exact positive integer", x);
 }
+static void error_bad_comparison_function(SCM x)
+{
+  STk_error("bad comparison function ~S", x);
+}
 
 int STk_int_length(SCM l)
 {
@@ -92,7 +95,6 @@ SCM STk_argv2list(int argc, SCM *argv)
 }
 
 
-
 DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM x))
 /*
 <doc pair?
@@ -104,7 +106,6 @@ doc>
 {
   return CONSP(x) ? STk_true : STk_false;
 }
-
 
 
 DEFINE_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y))
@@ -219,6 +220,50 @@ doc>
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
+{
+  /* Special function to compute cadr, cddr, ...
+   * (%cxr lst #:dda) returns the caddr of lst
+   * The key given indicates the value of x (reversed)
+   * Using the non reversed value of x is simpler but incurs
+   * a certain time penalty.
+   * In case of error, we can display a clear message (with some work to
+   * rebuild the original function name), but we have time.
+   * NOTE: using strings (instead of keywords) is less efficient because
+   * the char * is at the end of the object. Using symbols is also fast
+   * (even a bit faster, don't know why), but it is harder  to detect that
+   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
+   */
+  if (KEYWORDP(name)) {
+    SCM lst   = l;
+    const char *str = KEYWORD_PNAME(name);
+
+    for (const char *s = str;  *s; s++) {
+      if (CONSP(lst))
+        lst = (*s == 'a') ? CAR(lst): CDR(lst);
+      else {
+        int len   = strlen(str);
+        char *loc = STk_must_malloc_atomic(len+3); // 'c' + X + 'r' + \0
+
+        /* build location */
+        loc[0] = 'c';
+        for (int i = 0; i < len; i++) loc[i+1] = str[len-1-i];
+        loc[len+1] = 'r';
+        loc[len+2] = '\0';
+
+        /* display clear error */
+        name = STk_intern(loc);
+        STk_error_with_location(name, "wrong type of argument ~S for c%cr in (~s '~w)",
+                                lst, *s, name, l);
+      }
+    }
+    return lst;
+  }
+  else {
+    error_wrong_type(name);
+    return STk_void; // to avoid a compiler warning
+  }
+}
 
 DEFINE_PRIMITIVE("null?", nullp, subr1, (SCM x))
 /*
@@ -346,7 +391,7 @@ SCM STk_append2(SCM l1, SCM l2)
   CDR(prev) = l2;
   return res;
 Error:
-  STk_error("argument ~S is not a list", l1);
+  error_bad_list(l1);
   return STk_void; /* never reached */
 }
 
@@ -413,13 +458,13 @@ DEFINE_PRIMITIVE("list-tail", list_tail, subr2, (SCM list, SCM k))
   x = STk_integer_value(k);
   if (x >= 0) {
     for (l=list; x > 0; x--) {
-      if (NULLP(l) || !CONSP(l)) STk_error("list ~S too short", list);
+      if (NULLP(l) || !CONSP(l)) error_too_short(list);
       l = CDR(l);
     }
     return l;
   }
 
-  STk_error("index ~S is not an exact positive integer", k);
+  error_not_exact_positive(k);
   return STk_void; /* never reached */
 }
 
@@ -512,7 +557,7 @@ DEFINE_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj))
  * |(list-tail list k)| for |k| less than the length of list.
  * If |obj| does not occur in |list|, then |#f| (not the empty list) is
  * returned. |Memq| uses |eq?| to compare obj with the elements of list,
- * while |memv| uses |eqv?| and |member| uses |compare|, if given, and 
+ * while |memv| uses |eqv?| and |member| uses |compare|, if given, and
  * |equal?| otherwise.
  *
  * @lisp
@@ -571,7 +616,7 @@ DEFINE_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp))
 {
   if (cmp) {
     if (STk_procedurep(cmp) != STk_true)
-      STk_error("bad comparison function ~S", cmp);
+      error_bad_comparison_function(cmp);
 
     LMEMBER(PTR_CMPGEN);
   } else {
@@ -646,7 +691,7 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
 {
   if (cmp) {
     if (STk_procedurep(cmp) != STk_true)
-      STk_error("bad comparison function ~S", cmp);
+      error_bad_comparison_function(cmp);
 
     LASSOC(PTR_CMPGEN);
  } else {
@@ -887,7 +932,7 @@ DEFINE_PRIMITIVE("reverse!", dreverse, subr1, (SCM l))
   SCM tmp, p, prev;
 
   for(p=l, prev=STk_nil; !NULLP(p); prev=p, p=tmp) {
-    if (!CONSP(p)) STk_error("bad list ~W", l);
+    if (!CONSP(p)) error_bad_list(l);
     if (BOXED_INFO(p) & CONS_CONST) error_const_cell(p);
     tmp = CDR(p);
     CDR(p) = prev;
@@ -1013,6 +1058,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(cdr);
   ADD_PRIMITIVE(setcar);
   ADD_PRIMITIVE(setcdr);
+  ADD_PRIMITIVE(cxr);
   ADD_PRIMITIVE(nullp);
   ADD_PRIMITIVE(listp);
   ADD_PRIMITIVE(list);
@@ -1029,7 +1075,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(assv);
   ADD_PRIMITIVE(assoc);
   ADD_PRIMITIVE(list_copy);
- 
+
   ADD_PRIMITIVE(pair_mutable);
   ADD_PRIMITIVE(list_star);
   ADD_PRIMITIVE(last_pair);

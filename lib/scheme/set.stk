@@ -21,7 +21,6 @@
 
 
 (define-module scheme/set
-  (import (srfi 9))
   (import (srfi 69))
   (import (scheme comparator))
   

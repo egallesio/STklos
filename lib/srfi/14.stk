@@ -2,7 +2,7 @@
 ;;;;
 ;;;; 14.stk         -- Implementation of SRFI-14
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio  <eg@stklos.net>
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,10 +22,9 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Oct-2022 22:17
-;;;; Last file update:  2-Oct-2022 00:46 (eg)
 ;;;;
 
-;;;; The real implementation is in (scheme list).
+;;;; The real implementation is in (scheme charset).
 (%make-copy-module scheme/charset srfi/14)
 
 (provide "srfi/14")

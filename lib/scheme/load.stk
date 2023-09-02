@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  8-Oct-2021 11:15
-;;;; Last file update:  8-Oct-2021 11:27 (eg)
 ;;;;
 
 (define-module scheme/load

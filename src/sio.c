@@ -22,7 +22,6 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ????
- * Last file update: 27-Aug-2021 20:23 (eg)
  *
  *
  * Completely rewritten for the STklos version (Jan. 2000)

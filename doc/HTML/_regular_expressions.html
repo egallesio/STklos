@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -738,7 +735,7 @@ pre.rouge {
 <h1>STklos Reference Manual : (version 1.70)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -799,19 +796,17 @@ pre.rouge {
 </li>
 <li><a href="_threads_mutexes_and_condition_variables.html">9. Threads, Mutexes and Condition Variables</a>
 </li>
-<li><a href="_customizations.html">10. Customizations</a>
+<li><a href="_stklos_customization.html">10. STklos Customization</a>
 </li>
-<li><a href="_the_scmpkg_package_system.html">11. The ScmPkg Package System</a>
+<li><a href="_foreign_function_interface.html">11. Foreign Function Interface</a>
 </li>
-<li><a href="_foreign_function_interface.html">12. Foreign Function Interface</a>
+<li><a href="_using_the_slib_package.html">12. Using the SLIB package</a>
 </li>
-<li><a href="_using_the_slib_package.html">13. Using the SLIB package</a>
-</li>
-<li><a href="_srfis.html">14. SRFIs</a>
+<li><a href="_srfis.html">13. SRFIs</a>
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
 </li>
-<li><a href="_libraries.html">Appendix C: STklos Libraries</a>
+<li><a href="_idiosync.html">Appendix C: STklos Idiosyncrasies</a>
 </li>
 <li><a href="FDL.html">Appendix D: GNU Free Documentation License</a>
 </li>
@@ -835,7 +830,7 @@ shorter, some of the original documentation as not been reported here. In
 particular some possibilities of PCRE have been completely occulted (those
 whose description was too long and which seems (at least to me), not too
 important). Read the documentation provided with PCRE for a complete
-description \footnote{The latest release of PCRE is available from
+description footnote{The latest release of PCRE is available from
 <a href="http://www.pcre.org/" class="bare">http://www.pcre.org/</a>.</p>
 </div>
 <div class="paragraph">
@@ -869,7 +864,7 @@ are as follows:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
+<td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">general escape character with several uses</p></td>
 </tr>
 <tr>
@@ -889,34 +884,34 @@ are as follows:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start character class definition</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">|</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start of alternative branch</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">(</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start subpattern</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">end subpattern</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">end subpattern</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">?</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">extends the meaning of '('<br>
 also 0 or 1 quantifier<br>
 also quantifier minimizer</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">*</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0 or more quantifier</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">+</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1 or more quantifier</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 or more quantifier</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">{</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">start min/max quantifier</p></td>
 </tr>
 </tbody>
 </table>
@@ -931,7 +926,7 @@ class". In a character class the only meta-characters are:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
+<td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">general escape character</p></td>
 </tr>
 <tr>
@@ -965,16 +960,16 @@ outside character classes.</p>
 </div>
 <div class="paragraph">
 <p>For example, if you want to match a <code><strong></code> character, you write
-<code>\</strong></code> in the pattern.  This escaping action applies whether or not
+<code></strong></code> in the pattern.  This escaping action applies whether or not
 the following character would otherwise be interpreted as a
 meta-character, so it is always safe to precede a non-alphameric
 with backslash to specify that it stands for itself. In
-particular, if you want to match a backslash, you write <code>\\</code>.</p>
+particular, if you want to match a backslash, you write <code>\</code>.</p>
 </div>
 <div class="paragraph">
 <p>If you want to remove the special meaning from a sequence of characters, you
-can do so by putting them between <code>\Q</code> and <code>\E</code>. This is different from Perl
-in that <code>$</code> and <code>@</code> are handled as literals in <code>\Q</code>&#8230;&#8203;<code>\E</code> sequences in PCRE,
+can do so by putting them between <code>Q</code> and <code>E</code>. This is different from Perl
+in that <code>$</code> and <code>@</code> are handled as literals in <code>Q</code>&#8230;&#8203;<code>E</code> sequences in PCRE,
 whereas in Perl, <code>`$</code> and <code>@</code> cause variable interpolation. Note the following
 examples:</p>
 </div>
@@ -993,24 +988,24 @@ examples:</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc$xyz\E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Qabc$xyzE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc followed by the contents of $xyz</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc\$xyz\E</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">abc\$xyz</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">abc\$xyz</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Qabc$xyzE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc\E\$\Qxyz\E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QabcE$QxyzE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The <code>\Q&#8230;&#8203;\E</code> sequence is recognized both inside and outside character
+<p>The <code>Q&#8230;&#8203;E</code> sequence is recognized both inside and outside character
 classes.</p>
 </div>
 <div class="paragraph">
@@ -1028,48 +1023,48 @@ sequences than the binary character it represents:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">a</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">alarm, that is, the BEL character (hex 07)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\cx</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">cx</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><em>control-x</em>, where x is any character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\e</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">e</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">escape (hex 1B)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\f</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">f</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">formfeed (hex 0C)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\n</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">newline (hex 0A)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\r</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">r</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">carriage return (hex 0D)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">t</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">tab (hex 09)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\ddd</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ddd</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">character with octal code ddd, or backreference</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\xhh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">xhh</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">character with hex code hh</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The precise effect of <code>\x</code> is as follows: if <code>x</code> is a lower case
+<p>The precise effect of <code>x</code> is as follows: if <code>x</code> is a lower case
 letter, it is converted to upper case. Then bit 6 of the character
-(hex 40) is inverted.  Thus <code>\cz</code> becomes hex 1A, but <code>\c{</code> becomes
-hex 3B, while <code>\c;</code> becomes hex 7B.</p>
+(hex 40) is inverted.  Thus <code>cz</code> becomes hex 1A, but <code>c{</code> becomes
+hex 3B, while <code>c;</code> becomes hex 7B.</p>
 </div>
 <div class="paragraph">
 <p>The handling of a backslash followed by a digit other than 0 is
@@ -1090,27 +1085,27 @@ the discussion of parenthesized subpatterns.</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\d</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">d</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any decimal digit</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\D</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">D</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any character that is not a decimal digit</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\s</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">s</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any whitespace character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\S</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any character that is not a whitespace character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\w</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">w</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any <em>word</em> character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\W</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">W</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any <em>non-word</em> character</p></td>
 </tr>
 </tbody>
@@ -1121,9 +1116,9 @@ characters into two disjoint sets. Any given character matches one,
 and only one, of each pair.</p>
 </div>
 <div class="paragraph">
-<p>For compatibility with Perl, <code>\s</code> does not match the VT character
+<p>For compatibility with Perl, <code>s</code> does not match the VT character
 (code 11).  This makes it different from the the POSIX "space"
-class. The <code>\s</code> characters are HT (9), LF (10), FF (12), CR (13), and
+class. The <code>s</code> characters are HT (9), LF (10), FF (12), CR (13), and
 space (32).</p>
 </div>
 <div class="paragraph">
@@ -1132,7 +1127,7 @@ that is, any character which can be part of a Perl <em>word</em>. The
 definition of letters and digits is controlled by PCRE&#8217;s character
 tables, and may vary if locale-specific matching is taking place.  For
 example, in the "fr" (French) locale, some character codes greater
-than 128 are used for accented letters, and these are matched by <code>\w</code>.</p>
+than 128 are used for accented letters, and these are matched by <code>w</code>.</p>
 </div>
 <div class="paragraph">
 <p>These character type sequences can appear both inside and outside
@@ -1154,45 +1149,45 @@ described below. The backslashed assertions are</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\b</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">b</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at a word boundary</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\B</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">B</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches when not at a word boundary</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at start of subject</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Z</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Z</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at end of subject or before newline at end</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\z</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">z</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at end of subject</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\G</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">G</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at first matching position in subject</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
 <p>These assertions may not appear in character classes (but note that
-<code>\b</code> has a different meaning, namely the backspace character, inside a
+<code>b</code> has a different meaning, namely the backspace character, inside a
 character class).</p>
 </div>
 <div class="paragraph">
 <p>A word boundary is a position in the subject string where the current
-character and the previous character do not both match <code>\w</code>
-or <code>\W</code> (i.e. one matches <code>\w</code> and the other matches
-<code>\W</code>), or the start or end of the string if the first or last
-character matches <code>\w</code>, respectively.</p>
+character and the previous character do not both match <code>w</code>
+or <code>W</code> (i.e. one matches <code>w</code> and the other matches
+<code>W</code>), or the start or end of the string if the first or last
+character matches <code>w</code>, respectively.</p>
 </div>
 <div class="paragraph">
-<p>The <code>\A</code>, <code>\Z</code>, and <code>\z</code> assertions differ from the traditional
+<p>The <code>A</code>, <code>Z</code>, and <code>z</code> assertions differ from the traditional
 circumflex and dollar (described below) in that they only ever match
 at the very start and end of the subject string, whatever options
 are set. Thus, they are independent of multiline mode.</p>
@@ -1204,12 +1199,12 @@ character may have. This use of backslash as an escape character applies
 both inside and outside character classes.</p>
 </div>
 <div class="paragraph">
-<p>For example, if you want to match a "*" character, you write "\\*"
+<p>For example, if you want to match a "<strong>" character, you write "\</strong>"
 in the pattern. This applies whether or not the following character
 would otherwise be interpreted as a meta-character, so it is always
-safe to precede a non-alphameric with &#8220;\&#8221; to specify that it stands
+safe to precede a non-alphameric with &#8220;`" to specify that it stands
 for itself. In particular, if you want to match a backslash, you write
-&#8220;\\&#8221;.</p>
+"`\&#8221;.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1245,12 +1240,12 @@ the <em>multiline</em> option is set. When this is the case, they match
 immediately after and immediately before an internal newline
 character, respectively, in addition to matching at the start and end
 of the subject string. For example, the pattern <code>^abc$</code> matches the
-subject string <code>"def\nabc"</code> in multiline mode, but not otherwise.</p>
+subject string <code>"defnabc"</code> in multiline mode, but not otherwise.</p>
 </div>
 <div class="paragraph">
-<p>Note that the sequences <code>\A</code>, <code>\Z</code>, and <code>\z</code> can be used to match the
+<p>Note that the sequences <code>A</code>, <code>Z</code>, and <code>z</code> can be used to match the
 start and end of the subject in both modes, and if all branches of a
-pattern start with <code>\A</code> it is always anchored, whether
+pattern start with <code>A</code> it is always anchored, whether
 <em>multiline</em> is set or not.</p>
 </div>
 </div>
@@ -1318,30 +1313,30 @@ character of a range. A pattern such as <code>[W-]46]</code> is interpreted as a
 class of two characters ("W" and "-") followed by a literal string
 "46]", so it would match "W46]" or "-46]". However, if the "]" is
 escaped with a backslash it is interpreted as the end of range, so
-<code>(W\]46)</code> is interpreted as a single class containing a range followed
+<code>(W]46)</code> is interpreted as a single class containing a range followed
 by two separate characters. The octal or hexadecimal representation of
 "]" can also be used to end a range.</p>
 </div>
 <div class="paragraph">
 <p>Ranges operate in the collating sequence of character values. They can also be
-used for characters specified numerically, for example <code>[\000-\037]</code>.</p>
+used for characters specified numerically, for example <code>[000-037]</code>.</p>
 </div>
 <div class="paragraph">
 <p>If a range that includes letters is used when caseless matching is set, it
 matches the letters in either case. For example, <code>[W-c]</code> is equivalent to
 <code>[][^_`wxyzabc]</code>, matched caselessly, and if character tables for the "fr"
-locale are in use, <code>[\xc8-\xcb]</code> matches accented E characters in both cases.</p>
+locale are in use, <code>[xc8-xcb]</code> matches accented E characters in both cases.</p>
 </div>
 <div class="paragraph">
-<p>The character types <code>\d</code>, <code>\D</code>, <code>\s</code>, <code>\S</code>, '\w`, and <code>\W</code> may also appear in a
+<p>The character types <code>d</code>, <code>D</code>, <code>s</code>, <code>S</code>, 'w`, and <code>W</code> may also appear in a
 character class, and add the characters that they match to the class. For
-example, <code>[\dABCDEF]</code> matches any hexadecimal digit. A circumflex can
+example, <code>[dABCDEF]</code> matches any hexadecimal digit. A circumflex can
 conveniently be used with the upper case character types to specify a more
 restricted set of characters than the matching lower case type. For example,
-the class <code>[^\W_]</code> matches any letter or digit, but not underscore.</p>
+the class <code>[^W_]</code> matches any letter or digit, but not underscore.</p>
 </div>
 <div class="paragraph">
-<p>All non-alphameric characters other than <code>\</code>, <code>-</code>, <code>^</code> (at the start) and the
+<p>All non-alphameric characters other than <code>`, `-</code>, <code>^</code> (at the start) and the
 terminating <code>]</code> are non-special in character classes, but it does no harm if they
 are escaped.</p>
 </div>
@@ -1391,7 +1386,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">digit</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">decimal digits (same as \d</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">decimal digits (same as d</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">graph</p></td>
@@ -1411,7 +1406,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">space</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">white space (not quite the same as \s)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">white space (not quite the same as s)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">upper</p></td>
@@ -1419,7 +1414,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">word"</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><em>word</em> characters (same as \w)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>word</em> characters (same as w)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">xdigit</p></td>
@@ -1430,7 +1425,7 @@ class names are</p>
 <div class="paragraph">
 <p>The <em>space</em> characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
 space (32). Notice that this list includes the VT character (code 11). This
-makes "space" different to $\backslash$s, which does not include VT (for Perl
+makes "space" different to $backslash$s, which does not include VT (for Perl
 compatibility).</p>
 </div>
 <div class="paragraph">
@@ -1560,7 +1555,7 @@ Marking part of a pattern as a subpattern does two things:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>It localizes a set of alternatives. For example, the pattern\</p>
+<p>It localizes a set of alternatives. For example, the pattern</p>
 </li>
 </ul>
 </div>
@@ -1669,10 +1664,10 @@ items:</p>
 <p>the <code>.</code> metacharacter</p>
 </li>
 <li>
-<p>the <code>\C</code> escape sequence</p>
+<p>the <code>C</code> escape sequence</p>
 </li>
 <li>
-<p>escapes such as <code>\d</code> that match single characters</p>
+<p>escapes such as <code>d</code> that match single characters</p>
 </li>
 <li>
 <p>a character class</p>
@@ -1713,7 +1708,7 @@ quantifier specifies an exact number of required matches. Thus</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d{8}</code></pre>
+<pre class="rouge highlight"><code>d{8}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1763,12 +1758,12 @@ match no characters, the loop is forcibly broken.</p>
 possible (up to the maximum number of permitted times), without causing the
 rest of the pattern to fail. The classic example of where this gives problems
 is in trying to match comments in C programs. These appear between the
-sequences <code>/*</code> and <code>*/</code> and within the sequence, individual <code>*</code> and <code>/</code> characters may
+sequences <code>/<strong></code> and <code></strong>/</code> and within the sequence, individual <code>*</code> and <code>/</code> characters may
 appear. An attempt to match C comments by applying the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>/\*.*\*/</code></pre>
+<pre class="rouge highlight"><code>/*.**/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1790,7 +1785,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>/\*.*?*/</code></pre>
+<pre class="rouge highlight"><code>/*.*?*/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1801,7 +1796,7 @@ own right. Because it has two uses, it can sometimes appear doubled, as in</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d??\d</code></pre>
+<pre class="rouge highlight"><code>d??d</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1826,7 +1821,7 @@ to Perl&#8217;s <code>/s</code>) is set, thus allowing the <code>.</code> to mat
 implicitly anchored, because whatever follows will be tried against every
 character position in the subject string, so there is no point in retrying the
 overall match at any position after the first. PCRE normally treats such a
-pattern as though it were preceded by <code>\A</code>.</p>
+pattern as though it were preceded by <code>A</code>.</p>
 </div>
 <div class="paragraph">
 <p>In cases where it is known that the subject string contains no newlines, it is
@@ -1841,7 +1836,7 @@ succeed. Consider, for example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(.*)abc\1</code></pre>
+<pre class="rouge highlight"><code>(.*)abc1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1854,7 +1849,7 @@ that matched the final iteration. For example, after</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(tweedle[dume]{3}\s*)+</code></pre>
+<pre class="rouge highlight"><code>(tweedle[dume]{3}s*)+</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1880,7 +1875,7 @@ it fail earlier than it otherwise might, when the author of the pattern knows
 there is no point in carrying on.</p>
 </div>
 <div class="paragraph">
-<p>Consider, for example, the pattern <code>\d+foo</code> when applied to the subject line</p>
+<p>Consider, for example, the pattern <code>d+foo</code> when applied to the subject line</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1889,7 +1884,7 @@ there is no point in carrying on.</p>
 </div>
 <div class="paragraph">
 <p>After matching all 6 digits and then failing to match "foo", the normal
-action of the matcher is to try again with only 5 digits matching the <code>\d+</code>
+action of the matcher is to try again with only 5 digits matching the <code>d+</code>
 item, and then with 4, and so on, before ultimately failing. "Atomic grouping"
 (a term taken from Jeffrey Friedl&#8217;s book) provides the means for specifying
 that once a subpattern has matched, it is not to be re-evaluated in this way.</p>
@@ -1901,7 +1896,7 @@ special parenthesis, starting with (<code>?&gt;</code> as in this example:)</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&gt;\d+)foo</code></pre>
+<pre class="rouge highlight"><code>(?&gt;d+)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1919,9 +1914,9 @@ the current point in the subject string.</p>
 <p>Atomic grouping subpatterns are not capturing subpatterns. Simple
 cases such as the above example can be thought of as a maximizing
 repeat that must swallow everything it can. So, while both
-<code>\d+</code> and <code>\d+?</code> are prepared to adjust the number
+<code>d+</code> and <code>d+?</code> are prepared to adjust the number
 of digits they match in order to make the rest of the pattern match,
-<code>(?&gt;\d+)</code> can only match an entire sequence of digits.</p>
+<code>(?&gt;d+)</code> can only match an entire sequence of digits.</p>
 </div>
 <div class="paragraph">
 <p>Atomic groups in general can of course contain arbitrarily complicated
@@ -1933,7 +1928,7 @@ previous example can be rewritten as</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d++bar</code></pre>
+<pre class="rouge highlight"><code>d++bar</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1954,7 +1949,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(\D+|&lt;\d+&gt;)*[!?]</code></pre>
+<pre class="rouge highlight"><code>(D+|&lt;d+&gt;)*[!?]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1978,7 +1973,7 @@ If the pattern is changed to</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>((?&gt;\D+)|&lt;\d+&gt;)*[!?]</code></pre>
+<pre class="rouge highlight"><code>((?&gt;D+)|&lt;d+&gt;)*[!?]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2010,7 +2005,7 @@ the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(sens|respons)e and \1ibility</code></pre>
+<pre class="rouge highlight"><code>(sens|respons)e and 1ibility</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2020,7 +2015,7 @@ back reference, the case of letters is relevant. For example,</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>((?i)rah)\s+\1</code></pre>
+<pre class="rouge highlight"><code>((?i)rah)s+1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2033,7 +2028,7 @@ rewrite the above example as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;p1&gt;(?i)rah)\s+(?P=p1)</code></pre>
+<pre class="rouge highlight"><code>(?&lt;p1&gt;(?i)rah)s+(?P=p1)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2043,7 +2038,7 @@ references to it always fail. For example, the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(a|(bc))\2</code></pre>
+<pre class="rouge highlight"><code>(a|(bc))2</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2056,13 +2051,13 @@ Otherwise an empty comment can be used.</p>
 </div>
 <div class="paragraph">
 <p>A back reference that occurs inside the parentheses to which it refers fails
-when the subpattern is first used, so, for example, (a\1) never matches.
+when the subpattern is first used, so, for example, (a1) never matches.
 However, such references can be useful inside repeated subpatterns. For
 example, the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(a|b\1)+</code></pre>
+<pre class="rouge highlight"><code>(a|b1)+</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2079,7 +2074,7 @@ minimum of zero.</p>
 <div class="paragraph">
 <p>An assertion is a test on the characters following or preceding the current
 matching point that does not actually consume any characters. The simple
-assertions coded as <code>\b</code>, <code>\B</code>, <code>\A</code>, <code>\G</code>, <code>\Z</code>, <code>\z</code>, <code>^</code> and <code>$</code> are described above.
+assertions coded as <code>b</code>, <code>B</code>, <code>A</code>, <code>G</code>, <code>Z</code>, <code>z</code>, <code>^</code> and <code>$</code> are described above.
 More complicated assertions are coded as subpatterns. There are two kinds:
 those that look ahead of the current position in the subject string, and those
 that look behind it.</p>
@@ -2091,7 +2086,7 @@ with <code>(?=</code> for positive assertions and <code>(?!</code> for negative 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\w+(?=;)</code></pre>
+<pre class="rouge highlight"><code>w+(?=;)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2228,7 +2223,7 @@ approach makes a significant difference to the processing time.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3})(?&lt;!999)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3})(?&lt;!999)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2242,7 +2237,7 @@ doesn&#8217;t match "123abcfoo". A pattern to do that is</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3}...)(?&lt;!999)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3}...)(?&lt;!999)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2264,7 +2259,7 @@ preceded by "foo", while</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3}(?!999)...)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3}(?!999)...)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2309,7 +2304,7 @@ it into three parts for ease of discussion:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>( \( )?    [^()]+    (?(1) \) )</code></pre>
+<pre class="rouge highlight"><code>( ( )?    [^()]+    (?(1) ) )</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2337,7 +2332,7 @@ alternatives on the second line:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code>(?(?=`(^a-z)*`(a-z))
-\d{2}-`(a-z){3}-\d{2}  |  \d{2}-\d{2}-\d{2} )</code></pre>
+d{2}-`(a-z){3}-d{2}  |  d{2}-d{2}-d{2} )</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2372,7 +2367,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(sens|respons)e and \1ibility</code></pre>
+<pre class="rouge highlight"><code>(sens|respons)e and 1ibility</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2454,7 +2449,7 @@ otherwise <code>regexp</code> returns <code>#f</code>.</p>
 <p>These functions attempt to match <code>pattern</code> (a string or a regexp value)
 to <code>str</code>. If the match fails, <code>#f</code> is returned. If the match succeeds,
 a list (containing strings for <code>regexp-match</code> and positions for
-<code>regexp-match-positions</code> is returned. The first string (or positions) in
+<code>regexp-match-positions</code>) is returned. The first string (or positions) in
 this list is the portion of string that matched pattern. If two portions
 of string can match pattern, then the earliest and longest match is found,
 by default.</p>
@@ -2478,7 +2473,7 @@ in the order of the opening parentheses in pattern.</p>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(a*)(b*)(c*)"</span> <span class="s">"c"</span><span class="p">)</span>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span><span class="p">))</span>
-<span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(?&lt;=\\d{3})(?&lt;!999)foo"</span>
+<span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(?&lt;=\d{3})(?&lt;!999)foo"</span>
                         <span class="s">"999foo and 123foo"</span><span class="p">)</span>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">14</span> <span class="mi">17</span><span class="p">))</span></code></pre>
 </div>
@@ -2506,7 +2501,7 @@ match, <code>regexp-replace</code> returns <code>string</code> unmodified. Note 
 given <code>pattern</code> could be here either a string or a regular expression.</p>
 </div>
 <div class="paragraph">
-<p>If <code>pattern</code> contains <code>\n</code> where <strong>n</strong> is a digit between 1 and 9,
+<p>If <code>pattern</code> contains <code>n</code> where <strong>n</strong> is a digit between 1 and 9,
 then it is replaced in the substitution with the portion of string that
 matched the <strong>n</strong>-th parenthesized subexpression of <code>pattern</code>. If
 <strong>n</strong> is equal to 0, then it is replaced in <code>substitution</code>
@@ -2522,11 +2517,11 @@ To replace <em>all</em> the occurrences of <code>pattern</code>, use <code>regex
                    <span class="nv">=&gt;</span> <span class="s">"Xbcccc"</span>
 <span class="p">(</span><span class="nf">regexp-replace</span> <span class="p">(</span><span class="nf">string-&gt;regexp</span> <span class="s">"a*b"</span><span class="p">)</span> <span class="s">"aaabbcccc"</span> <span class="s">"X"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"Xbcccc"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"(a*)b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X\\1Y"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"(a*)b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X\1Y"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"XaaaYbcccc"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\\1 \\1"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\1 \1"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"ooba ooba"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\\0 \\0"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\0 \0"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"foobar foobar"</span>
 
 <span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"a*b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X"</span><span class="p">)</span>
@@ -2556,7 +2551,7 @@ backslash, so that they safely match only themselves.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"cons"</span><span class="p">)</span>       <span class="nv">=&gt;</span> <span class="s">"cons"</span>
-<span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"list?"</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="s">"list\\?"</span></code></pre>
+<span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"list?"</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="s">"list\?"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2585,12 +2580,12 @@ a mix of regexp strings and verbatim strings.</p>
 <a href="#_footnoteref_1">1</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<a href="#_footnoteref_2">2</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 18:56:10 +0100
+Last updated 2023-07-22 20:08:25 +0200
 </div>
 </div>
 </body>

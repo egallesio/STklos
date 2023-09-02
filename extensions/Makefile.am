@@ -5,7 +5,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  6-Jul-2021 11:53
-# Last file update: 19-Feb-2022 18:10 (eg)
 #
 
 

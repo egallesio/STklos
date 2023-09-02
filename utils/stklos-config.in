@@ -1,6 +1,5 @@
 #!/bin/sh
 #                                                       -*- shell-script -*-
-
 #
 # s t k l o s - c o n f i g
 #
@@ -22,7 +21,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 23:58 (eg)
-# Last file update: 23-Jul-2020 18:54 (eg)
 
 
 prefix=@prefix@
@@ -35,18 +33,19 @@ Options:
         [--prefix | -p]         Prefix that was given during the build
         [--version | -v]        Version of STklos that is installed
         [--compile | -c]        Command that should be run to compile
-                                shared libraries.
+                                shared libraries
         [--link | -l]           Command that should be used to link shared
                                 libraries
-        [--cc]                  CC used for building STKlos
+        [--cc]                  CC used for building STklos
         [--cflags]              CFLAGS used for building STklos
         [--ldflags]             LDFLAGS used for building STklos
+        [--cppflags]            CPPFLAGS used for building STklos
         [--shared-suffix | -s]  Suffix for shared libraries on current
                                 platform
-        [--threads | -t ]       Display the name of the valiable thread
+        [--threads | -t ]       Display the name of the available thread
                                 system
-        [--libraries |-L ]      Display a summary of used and compiled
-                                libraries
+        [--libraries |-L ]      Display a summary of used libraries
+        [--compiled-libraries]  Display a summary of compiled libraries
         [--help | -h | -?]      Show a list of options
 EOF
     exit $1
@@ -67,7 +66,7 @@ while test $# -gt 0; do
             ;;
         --compile|-c)
             inc=-I${prefix}/include/@PACKAGE@
-            echo @CC@ @SH_COMP_FLAGS@ $inc $inc/gc @EXTRA_COMP_FLAGS@
+            echo @CC@ @SH_COMP_FLAGS@ $inc $inc/gc
             ;;
         --link|-l)
             echo @SH_LOADER@ @SH_LOAD_FLAGS@
@@ -81,6 +80,9 @@ while test $# -gt 0; do
         --ldflags)
             echo @LDFLAGS@
             ;;
+        --cppflags)
+            echo @LDFLAGS@
+            ;;
         --shared-suffix|-s)
             echo @SH_SUFFIX@
             ;;
@@ -88,7 +90,10 @@ while test $# -gt 0; do
             echo @THREADS@
             ;;
         --libraries|-L)
-            echo "@LIB_SUMMARY@"
+            echo @SYST_LIBS@
+            ;;
+        --compiled-libraries)
+            echo @COMP_LIBS@
             ;;
         --help|-h|-\?)
             usage 0 1>&2

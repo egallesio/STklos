@@ -16,7 +16,7 @@
 
 # Makefile.am for STklos documentation
 #
-# Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,10 +32,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 # USA.
-#
+#r
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-Mar-2022 18:50 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -120,7 +119,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
 CONFIG_CLEAN_FILES = stklos.1 stklos-config.1 stklos-compile.1 \
-	stklos-genlex.1 stklos-pkg.1 stklos-script.1
+	stklos-genlex.1 stklos-pp.1 stklos-script.1
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -178,7 +177,7 @@ DATA = $(dochtml_DATA) $(docimg_DATA) $(docpdf_DATA) $(scheme_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/stklos-compile.1.in \
 	$(srcdir)/stklos-config.1.in $(srcdir)/stklos-genlex.1.in \
-	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos-script.1.in \
+	$(srcdir)/stklos-pp.1.in $(srcdir)/stklos-script.1.in \
 	$(srcdir)/stklos.1.in $(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -197,6 +196,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
+COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
 CPP = @CPP@
@@ -204,6 +205,9 @@ CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
 CYGPATH_W = @CYGPATH_W@
+C_COMPILE = @C_COMPILE@
+C_LINK = @C_LINK@
+C_VERSION = @C_VERSION@
 DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -214,10 +218,10 @@ ECHO_T = @ECHO_T@
 ETAGS = @ETAGS@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
-EXTRA_COMP_FLAGS = @EXTRA_COMP_FLAGS@
 FFI = @FFI@
 FFIINC = @FFIINC@
 FFILIB = @FFILIB@
+FULL_VERSION = @FULL_VERSION@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -256,10 +260,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -269,6 +273,8 @@ SCMDIR = @SCMDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SH_COMP_FLAGS = @SH_COMP_FLAGS@
+SH_LIB_COMPILE = @SH_LIB_COMPILE@
+SH_LIB_LINK = @SH_LIB_LINK@
 SH_LIB_SUFFIX = @SH_LIB_SUFFIX@
 SH_LOADER = @SH_LOADER@
 SH_LOAD_FLAGS = @SH_LOAD_FLAGS@
@@ -278,9 +284,11 @@ STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
+SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
+VERSION_STATUS = @VERSION_STATUS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -316,7 +324,7 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-mandir = $(prefix)/share/man
+mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
@@ -333,22 +341,24 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 man_MANS = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
-	        stklos-pkg.1 stklos-script.1
+	        stklos-pp.1 stklos-script.1
 
 EXTRA_DIST = $(man_MANS)
 DOCDB = DOCDB
 OTHERDB = ../src/$(DOCDB) ../lib/$(DOCDB)
 ALLDB = $(OTHERDB) ./$(DOCDB)
-schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir = @SCMDIR@
 scheme_DATA = DOCDB
-doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
-docpdfdir = $(doclocation)/pdf
+
+#doclocation = $(prefix)/share/doc/@PACKAGE@-@VERSION@
+doclocation = $(docdir)
+docpdfdir = $(pdfdir)
 docpdf_DATA = PDF/stklos-ref.pdf
-dochtmldir = $(doclocation)/html
+dochtmldir = $(htmldir)
 dochtml_DATA = HTML/stklos-ref.html
-docimgdir = $(doclocation)/html/images
+docimgdir = $(dochtmldir)/images
 docimg_DATA = HTML/images/hierarchy.png
-SUBDOCS = refman
+SUBDOCS = refman vm hacking pp
 all: all-am
 
 .SUFFIXES:
@@ -389,7 +399,7 @@ stklos-compile.1: $(top_builddir)/config.status $(srcdir)/stklos-compile.1.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 stklos-genlex.1: $(top_builddir)/config.status $(srcdir)/stklos-genlex.1.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-stklos-pkg.1: $(top_builddir)/config.status $(srcdir)/stklos-pkg.1.in
+stklos-pp.1: $(top_builddir)/config.status $(srcdir)/stklos-pp.1.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 stklos-script.1: $(top_builddir)/config.status $(srcdir)/stklos-script.1.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
@@ -685,11 +695,14 @@ uninstall-man: uninstall-man1
 
 .PHONY: subdoc docdb extradoc
 
-all: $(DOCDB)
+all: $(DOCDB) ../utils/stklos-pp
 	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
 
 extradoc: $(DOCDB)
 	for d in $(SUBDOCS); do (cd $$d; $(MAKE) $@); done
+
+../utils/stklos-pp:
+	(cd ../utils; $(MAKE) stklos-pp)
 
 #
 # Database construction

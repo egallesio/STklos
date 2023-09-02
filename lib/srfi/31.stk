@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-Dec-2002 21:31 (eg)
-;;;; Last file update: 19-Apr-2022 16:25 (eg)
 ;;;;
 
 ;;; The implementation given in the SRFI-31 document

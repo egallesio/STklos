@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2-Aug-2001 06:51 (eg)
-;;;; Last file update: 31-Jan-2022 20:00 (eg)
 ;;;;
 
 (include "demos-utils.stk")

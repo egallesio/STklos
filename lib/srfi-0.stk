@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-0.stk                                 -- SRFI-0 aka cond-expand
 ;;;;
-;;;; Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  4-Sep-2022 19:06 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -29,7 +28,9 @@
   (export srfi0-register-feature!
           srfi-0-feature-implementation-file
           require-feature
-          cond-expand)
+          cond-expand
+          %srfi-0-expand ;; FIXME: try to avoid this exportation
+          )
 
 (include "srfis-data.scm") ;; Generated information on implemented SRFIs for SRFI-0
 
@@ -166,21 +167,19 @@ doc>
           `(begin ,@(cdr c)))
 
          ((pair? (car c))
-          ;; Clause is ((AND..)..) ((OR..)..) ((NOT...))
+          ;; Clause is ((AND..)..) ((OR..)..) ((NOT...)) ((LIBRARY ...))
           (let ((test (car c)))
-            (cond
-              ;; ---------- AND
-              ((eq? (car test) 'and)
+            (case (car test)
+              ((and)                            ;; ---------- AND
                (if (null? (cdr test))
-                  `(begin ,@(cdr c))
-                  `(cond-expand
-                    (,(cadr test) (cond-expand
-                                   ((and ,@(cddr test)) ,@(cdr c))
-                                   ,@(cdr clauses)))
-                    ,@(cdr clauses))))
+                   `(begin ,@(cdr c))
+                   `(cond-expand
+                     (,(cadr test) (cond-expand
+                                    ((and ,@(cddr test)) ,@(cdr c))
+                                    ,@(cdr clauses)))
+                     ,@(cdr clauses))))
 
-              ;; ---------- OR
-              ((eq? (car test) 'or)
+              ((or)                             ;; ---------- OR
                (if (null? (cdr test))
                    `(cond-expand ,@(cdr clauses))
                    `(cond-expand
@@ -188,16 +187,27 @@ doc>
                      ((or ,@(cddr test)) ,@(cdr c))
                      ,@(cdr clauses))))
 
-              ;; ---------- NOT
-              ((eq? (car test) 'not)
+              ((not)                            ;; ---------- NOT
                (if (or (null? (cdr test))
                        (not (null? (cddr test))))
                    (error 'cond-expand "invalid 'not' clause")
                    `(cond-expand
                      (,(cadr test) (cond-expand ,@(cdr clauses)))
                      (else ,@(cdr c)))))
-              ;; ----------
-              (else 'cond-expand "bad clause ~S" c))))
+
+
+              ((library)                        ;; ---------- LIBRARY
+               (if (or (null? (cdr test))
+                       (not (null? (cddr test))))
+                   (error 'cond-expand "invalid 'library' clause")
+                   (let ((name (cadr test)))
+                     (if (find-module name #f)
+                         `(begin ,@(cdar clauses))
+                         `(cond-expand ,@(cdr clauses))))))
+
+              (else                             ;; ----------
+               (error 'cond-expand "bad clause ~S" c)))))
+
          (else
           ;; Clause is (FEATURE ...)
           (let* ((name  (caar clauses))

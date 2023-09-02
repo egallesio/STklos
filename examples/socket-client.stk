@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 27-Jan-2003 22:20 (eg)
-;;;; Last file update: 18-Sep-2020 11:27 (eg)
 ;;;;
 
 (define (port-idle-register! port proc)

@@ -47,7 +47,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Jul-2020 15:12 (jpellegrini)
-;;;; Last file update: 25-Apr-2022 10:36 (eg)
 ;;;;
 
 (define-module streams/primitive

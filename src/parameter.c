@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 17-Jan-2022 09:49 (eg)
  */
 
 
@@ -156,8 +155,7 @@ SCM STk_make_C_parameter2(SCM symbol, SCM (*getter)(void), SCM (*conv)(SCM new_v
  * content of the cell bound to this parameter object in the current
  * dynamic environment is set to the result of the call
  * |(converter arg)|, where |arg| is the argument passed to the
- * parameter object, and
- * an unspecified value is returned.
+ * parameter object, and an unspecified value is returned.
  *
  * @lisp
  * (define radix

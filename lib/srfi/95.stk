@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  3-Dec-2021 12:01
-;;;; Last file update: 11-Nov-2022 15:41 (eg)
 ;;;;
 
 ;; This is SRFI-95 written on top of SRFI-132.

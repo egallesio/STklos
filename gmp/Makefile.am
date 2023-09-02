@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: ???? 2009
-# Last file update: 20-May-2021 18:15 (eg)
 
 
 noinst_LIBRARIES = libgmp.a

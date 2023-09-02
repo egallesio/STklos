@@ -16,7 +16,7 @@
 
 # Makefile for the STklos specific  libraries
 #
-# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  2-Jun-2022 15:37 (eg)
 
 #======================================================================
 
@@ -205,6 +204,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
+COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
 CPP = @CPP@
@@ -212,6 +213,9 @@ CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
 CYGPATH_W = @CYGPATH_W@
+C_COMPILE = @C_COMPILE@
+C_LINK = @C_LINK@
+C_VERSION = @C_VERSION@
 DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -222,10 +226,10 @@ ECHO_T = @ECHO_T@
 ETAGS = @ETAGS@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
-EXTRA_COMP_FLAGS = @EXTRA_COMP_FLAGS@
 FFI = @FFI@
 FFIINC = @FFIINC@
 FFILIB = @FFILIB@
+FULL_VERSION = @FULL_VERSION@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -264,10 +268,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -277,6 +281,8 @@ SCMDIR = @SCMDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SH_COMP_FLAGS = @SH_COMP_FLAGS@
+SH_LIB_COMPILE = @SH_LIB_COMPILE@
+SH_LIB_LINK = @SH_LIB_LINK@
 SH_LIB_SUFFIX = @SH_LIB_SUFFIX@
 SH_LOADER = @SH_LOADER@
 SH_LOAD_FLAGS = @SH_LOAD_FLAGS@
@@ -286,9 +292,11 @@ STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
+SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
+VERSION_STATUS = @VERSION_STATUS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -355,14 +363,16 @@ SRC_OSTK = preproc.ostk
 SRC_C = itrie.c
 SRC_C_STK = itrie.stk
 SRC_SHOBJ = itrie.$(SO)
-scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+
+# scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+ALL_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 DOCDB = ../DOCDB
 BASEDIR = ../..
 SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
-schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+schemedir = @SCMDIR@/stklos
+schemelibdir = @EXECDIR@/stklos
 scheme_DATA = $(SRC_OSTK)
 schemelib_DATA = $(SRC_SHOBJ)
 scheme_sources = $(SRC_STK)
@@ -656,9 +666,9 @@ STKLOS_BINARY ?= ../../src/stklos
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
-	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	/bin/rm -f $*.o
 #======================================================================
 # Dependencies
@@ -668,10 +678,10 @@ readline-complete.$(SO): readline-complete-incl.c readline-complete.c
 
 # ======================================================================
 install-sources:
-	install $(scheme_sources) $(schemedir)
+	cp $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS) *-incl.c  *~
+	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile
@@ -681,8 +691,8 @@ uninstall-hook:
 	rmdir $(schemedir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \
+					$(SOURCES) >> $(DOCDB)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

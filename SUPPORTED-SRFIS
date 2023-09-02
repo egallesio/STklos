@@ -33,6 +33,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-16: Syntax for procedures of variable arity
     - SRFI-17: Generalized set!
     - SRFI-18: Multithreading support
+    - SRFI-19: Time Data Types and Procedures
     - SRFI-22: Running Scheme Scripts on Unix
     - SRFI-23: Error reporting mechanism
     - SRFI-25: Multi-dimensional Arrays
@@ -49,7 +50,9 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-38: External representation of shared structures
     - SRFI-39: Parameters objects
     - SRFI-41: Streams
+    - SRFI-43: Vector library
     - SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
+    - SRFI-46: Basic Syntax-rules Extensions
     - SRFI-48: Intermediate Format Strings
     - SRFI-51: Handling rest list
     - SRFI-54: Formatting
@@ -124,9 +127,15 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda
     - SRFI-221: Generator/accumulator sub-library
+    - SRFI-222: Compound objects
     - SRFI-223: Generalized binary search procedures
     - SRFI-224: Integer Mappings
+    - SRFI-227: Optional Arguments
+    - SRFI-228: A further comparator library
     - SRFI-229: Tagged Procedures
     - SRFI-230: Atomic Operations
     - SRFI-233: INI files
+    - SRFI-235: Combinators
     - SRFI-236: Evaluating expressions in an unspecified order
+    - SRFI-238: Codesets
+    - SRFI-244: Multiple-value definitions

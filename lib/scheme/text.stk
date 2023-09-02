@@ -46,13 +46,11 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 19-Nov-2020 10:11 (jpellegrini)
-;;;; Last file update: 11-Nov-2022 17:57 (eg)
 ;;;;
 
 
 (define-module scheme/text
-  (import (srfi 9)
-          (srfi 129))
+  (import (srfi 129))
 
   (export
    ;; Predicates

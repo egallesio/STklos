@@ -16,7 +16,7 @@
 
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 21-Nov-2022 16:10 (eg)
 
 #-======================================================================
 
@@ -136,6 +135,14 @@ am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
 DIST_SOURCES =
+RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
+	ctags-recursive dvi-recursive html-recursive info-recursive \
+	install-data-recursive install-dvi-recursive \
+	install-exec-recursive install-html-recursive \
+	install-info-recursive install-pdf-recursive \
+	install-ps-recursive install-recursive installcheck-recursive \
+	installdirs-recursive pdf-recursive ps-recursive \
+	tags-recursive uninstall-recursive
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -170,6 +177,14 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"
 DATA = $(srfi_DATA) $(srfilib_DATA)
+RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
+  distclean-recursive maintainer-clean-recursive
+am__recursive_targets = \
+  $(RECURSIVE_TARGETS) \
+  $(RECURSIVE_CLEAN_TARGETS) \
+  $(am__extra_recursive_targets)
+AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
+	distdir distdir-am
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -187,8 +202,34 @@ am__define_uniq_tagged_files = \
   unique=`for i in $$list; do \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
+DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+am__relativize = \
+  dir0=`pwd`; \
+  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
+  sed_rest='s,^[^/]*/*,,'; \
+  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
+  sed_butlast='s,/*[^/]*$$,,'; \
+  while test -n "$$dir1"; do \
+    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
+    if test "$$first" != "."; then \
+      if test "$$first" = ".."; then \
+        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
+        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
+      else \
+        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
+        if test "$$first2" = "$$first"; then \
+          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
+        else \
+          dir2="../$$dir2"; \
+        fi; \
+        dir0="$$dir0"/"$$first"; \
+      fi; \
+    fi; \
+    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
+  done; \
+  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
@@ -205,6 +246,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
+COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
 CPP = @CPP@
@@ -212,6 +255,9 @@ CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
 CYGPATH_W = @CYGPATH_W@
+C_COMPILE = @C_COMPILE@
+C_LINK = @C_LINK@
+C_VERSION = @C_VERSION@
 DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -222,10 +268,10 @@ ECHO_T = @ECHO_T@
 ETAGS = @ETAGS@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
-EXTRA_COMP_FLAGS = @EXTRA_COMP_FLAGS@
 FFI = @FFI@
 FFIINC = @FFIINC@
 FFILIB = @FFILIB@
+FULL_VERSION = @FULL_VERSION@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -264,10 +310,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -277,6 +323,8 @@ SCMDIR = @SCMDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SH_COMP_FLAGS = @SH_COMP_FLAGS@
+SH_LIB_COMPILE = @SH_LIB_COMPILE@
+SH_LIB_LINK = @SH_LIB_LINK@
 SH_LIB_SUFFIX = @SH_LIB_SUFFIX@
 SH_LOADER = @SH_LOADER@
 SH_LOAD_FLAGS = @SH_LOAD_FLAGS@
@@ -286,9 +334,11 @@ STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
+SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
+VERSION_STATUS = @VERSION_STATUS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -340,6 +390,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+SUBDIRS = 160
 STKLOS_FLAGS = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
@@ -362,6 +413,7 @@ SRC_STK = 1.stk   \
             16.stk  \
             17.stk  \
             18.stk  \
+            19.stk  \
             22.stk  \
             23.stk  \
             26.stk  \
@@ -375,7 +427,9 @@ SRC_STK = 1.stk   \
             38.stk  \
             39.stk  \
             41.stk  \
+            43.stk  \
             45.stk  \
+            46.stk  \
             48.stk  \
             51.stk  \
             54.stk  \
@@ -397,6 +451,7 @@ SRC_STK = 1.stk   \
             96.stk  \
             100.stk \
             111.stk \
+            112.stk \
             113.stk \
             116.stk \
             117.stk \
@@ -442,12 +497,17 @@ SRC_STK = 1.stk   \
             217.stk \
             219.stk \
             221.stk \
+            222.stk \
             223.stk \
             224.stk \
+            227.stk \
+            228.stk \
             229.stk \
             230.stk \
             233.stk \
-            236.stk
+            235.stk \
+            236.stk \
+            244.stk
 
 SRC_OSTK = 1.ostk   \
             2.ostk   \
@@ -465,6 +525,7 @@ SRC_OSTK = 1.ostk   \
             16.ostk  \
             17.ostk  \
             18.ostk  \
+            19.ostk  \
             22.ostk  \
             23.ostk  \
             26.ostk  \
@@ -478,7 +539,9 @@ SRC_OSTK = 1.ostk   \
             38.ostk  \
             39.ostk  \
             41.ostk  \
+            43.ostk  \
             45.ostk  \
+            46.ostk  \
             48.ostk  \
             51.ostk  \
             54.ostk  \
@@ -500,6 +563,7 @@ SRC_OSTK = 1.ostk   \
             96.ostk  \
             100.ostk \
             111.ostk \
+            112.ostk \
             116.ostk \
             117.ostk \
             118.ostk \
@@ -545,34 +609,39 @@ SRC_OSTK = 1.ostk   \
             217.ostk \
             219.ostk \
             221.ostk \
+            222.ostk \
             223.ostk \
             224.ostk \
+            227.ostk \
+            228.ostk \
             229.ostk \
             230.ostk \
             233.ostk \
-            236.ostk
+            235.ostk \
+            236.ostk \
+            244.ostk
 
 
 #
 # SRFIs written in C and Scheme
 #
-SRC_C = 25.c     27.c     170.c      175.c
-SRC_C_STK = 25.stk   27.stk   170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)
+SRC_C = 25.c     27.c     170.c      175.c      238.c
+SRC_C_STK = 25.stk   27.stk   170.stk    175.stk    238.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)  238.$(SO)
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 DOCDB = ../DOCDB
 BASEDIR = ../..
 SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
-srfilibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfidir = @SCMDIR@/srfi
+srfilibdir = @EXECDIR@/srfi
 srfi_DATA = $(SRC_OSTK)
 srfilib_DATA = $(SRC_SHOBJ)
 srfi_sources = $(SRC_STK)
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
-all: all-am
+all: all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .stk .ostk .stk -incl.c .$(SO) .c
@@ -648,14 +717,61 @@ uninstall-srfilibDATA:
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(srfilibdir)'; $(am__uninstall_files_from_dir)
 
+# This directory's subdirectories are mostly independent; you can cd
+# into them and run 'make' without going through this Makefile.
+# To change the values of 'make' variables: instead of editing Makefiles,
+# (1) if the variable is set in 'config.status', edit 'config.status'
+#     (which will cause the Makefiles to be regenerated when you run 'make');
+# (2) otherwise, pass the desired values on the 'make' command line.
+$(am__recursive_targets):
+	@fail=; \
+	if $(am__make_keepgoing); then \
+	  failcom='fail=yes'; \
+	else \
+	  failcom='exit 1'; \
+	fi; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
+	case "$@" in \
+	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
+	  *) list='$(SUBDIRS)' ;; \
+	esac; \
+	for subdir in $$list; do \
+	  echo "Making $$target in $$subdir"; \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
+	  || eval $$failcom; \
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
+
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
-tags: tags-am
+tags: tags-recursive
 TAGS: tags
 
 tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	set x; \
 	here=`pwd`; \
+	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
+	  include_option=--etags-include; \
+	  empty_fix=.; \
+	else \
+	  include_option=--include; \
+	  empty_fix=; \
+	fi; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    test ! -f $$subdir/TAGS || \
+	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
+	  fi; \
+	done; \
 	$(am__define_uniq_tagged_files); \
 	shift; \
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
@@ -668,7 +784,7 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	      $$unique; \
 	  fi; \
 	fi
-ctags: ctags-am
+ctags: ctags-recursive
 
 CTAGS: ctags
 ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
@@ -681,7 +797,7 @@ GTAGS:
 	here=`$(am__cd) $(top_builddir) && pwd` \
 	  && $(am__cd) $(top_srcdir) \
 	  && gtags -i $(GTAGS_ARGS) "$$here"
-cscopelist: cscopelist-am
+cscopelist: cscopelist-recursive
 
 cscopelist-am: $(am__tagged_files)
 	list='$(am__tagged_files)'; \
@@ -732,22 +848,48 @@ distdir-am: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
+	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	  if test "$$subdir" = .; then :; else \
+	    $(am__make_dryrun) \
+	      || test -d "$(distdir)/$$subdir" \
+	      || $(MKDIR_P) "$(distdir)/$$subdir" \
+	      || exit 1; \
+	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
+	    $(am__relativize); \
+	    new_distdir=$$reldir; \
+	    dir1=$$subdir; dir2="$(top_distdir)"; \
+	    $(am__relativize); \
+	    new_top_distdir=$$reldir; \
+	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
+	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
+	    ($(am__cd) $$subdir && \
+	      $(MAKE) $(AM_MAKEFLAGS) \
+	        top_distdir="$$new_top_distdir" \
+	        distdir="$$new_distdir" \
+		am__remove_distdir=: \
+		am__skip_length_check=: \
+		am__skip_mode_fix=: \
+	        distdir) \
+	      || exit 1; \
+	  fi; \
+	done
 check-am: all-am
-check: check-am
+check: check-recursive
 all-am: Makefile $(DATA)
-installdirs:
+installdirs: installdirs-recursive
+installdirs-am:
 	for dir in "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
-install-data: install-data-am
-uninstall: uninstall-am
+install: install-recursive
+install-exec: install-exec-recursive
+install-data: install-data-recursive
+uninstall: uninstall-recursive
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-am
+installcheck: installcheck-recursive
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -773,81 +915,82 @@ clean-am: clean-generic mostlyclean-am
 
 distclean-am: clean-am distclean-generic distclean-tags
 
-dvi: dvi-am
+dvi: dvi-recursive
 
 dvi-am:
 
-html: html-am
+html: html-recursive
 
 html-am:
 
-info: info-am
+info: info-recursive
 
 info-am:
 
 install-data-am: install-srfiDATA install-srfilibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
-install-dvi: install-dvi-am
+install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
 install-exec-am:
 
-install-html: install-html-am
+install-html: install-html-recursive
 
 install-html-am:
 
-install-info: install-info-am
+install-info: install-info-recursive
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-am
+install-pdf: install-pdf-recursive
 
 install-pdf-am:
 
-install-ps: install-ps-am
+install-ps: install-ps-recursive
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-am
+maintainer-clean: maintainer-clean-recursive
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-am
+mostlyclean: mostlyclean-recursive
 
 mostlyclean-am: mostlyclean-generic
 
-pdf: pdf-am
+pdf: pdf-recursive
 
 pdf-am:
 
-ps: ps-am
+ps: ps-recursive
 
 ps-am:
 
 uninstall-am: uninstall-srfiDATA uninstall-srfilibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
-.MAKE: install-am install-data-am install-strip uninstall-am
+.MAKE: $(am__recursive_targets) install-am install-data-am \
+	install-strip uninstall-am
 
-.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	cscopelist-am ctags ctags-am distclean distclean-generic \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-data-hook install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-srfiDATA install-srfilibDATA \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-hook uninstall-srfiDATA \
-	uninstall-srfilibDATA
+.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
+	check-am clean clean-generic cscopelist-am ctags ctags-am \
+	distclean distclean-generic distclean-tags distdir dvi dvi-am \
+	html html-am info info-am install install-am install-data \
+	install-data-am install-data-hook install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-srfiDATA \
+	install-srfilibDATA install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook uninstall-srfiDATA uninstall-srfilibDATA
 
 .PRECIOUS: Makefile
 
@@ -862,25 +1005,26 @@ STKLOS_BINARY ?= ../../src/stklos
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 #======================================================================
 # Dependencies
-1.ostk: ../scheme/list.ostk
+1.ostk: ../scheme/list.$(SO)
 13.ostk: 14.ostk
 14.ostk: ../scheme/charset.ostk
-37.ostk: 9.ostk 13.ostk
+37.ostk: 13.ostk
 41.ostk: ../streams/derived.ostk
 51.ostk: 1.ostk
-64.ostk: 9.ostk 35.ostk
+64.ostk: 35.ostk
 74.ostk: 4.ostk 26.ostk 60.ostk 66.ostk
 94.ostk: 60.ostk
 95.ostk:  ../scheme/sort.$(SO)
 113.ostk: ../scheme/set.ostk
 116.ostk: ../scheme/ilist.$(SO)
-117.ostk: 1.ostk 9.ostk ../scheme/list-queue.ostk
+117.ostk: 1.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
 127.ostk: ../scheme/lseq.ostk
 128.ostk: ../scheme/comparator.ostk
@@ -893,23 +1037,19 @@ STKLOS_BINARY ?= ../../src/stklos
 144.ostk: ../scheme/flonum.$(SO)
 151.ostk: ../scheme/bitwise.ostk
 152.ostk: 13.ostk
-154.ostk: 9.ostk
 158.ostk: ../scheme/generator.ostk
-160.ostk: 160-subdir
-161.ostk: 9.ostk
-171.ostk: 1.ostk 9.ostk 69.ostk
-173.ostk: 9.ostk
-180.ostk: 9.ostk
-189.ostk: 1.ostk 9.ostk
+160.ostk: ../scheme/vector/@.ostk
+171.ostk: 1.ostk 69.ostk
+189.ostk: 1.ostk
 190.ostk: 158.ostk
 195.ostk: 35.ostk
-196.ostk: 1.ostk 9.ostk
-207.ostk: 1.ostk 9.ostk 13.ostk 151.ostk 158.ostk
+196.ostk: 1.ostk
+207.ostk: 1.ostk 13.ostk 151.ostk 158.ostk
 216.ostk: 27.$(SO)
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
 224.ostk: ../scheme/comparator.ostk
-230.ostk: 9.ostk
+235.ostk: 1.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
@@ -917,11 +1057,12 @@ STKLOS_BINARY ?= ../../src/stklos
 116.$(SO): 128.ostk 116-incl.c 116.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
+238.$(SO): 238-incl.c 238.c
 
 ../streams/derived.ostk:
 	(cd ../streams; $(MAKE) derived.ostk)
-../scheme/list.ostk:
-	(cd ../scheme; $(MAKE) list.ostk)
+../scheme/list.$(SO):
+	(cd ../scheme; $(MAKE) list.$(SO))
 ../scheme/charset.ostk:
 	(cd ../scheme; $(MAKE) charset.ostk)
 ../scheme/set.ostk:
@@ -946,9 +1087,8 @@ STKLOS_BINARY ?= ../../src/stklos
 	(cd ../scheme; $(MAKE) division.$(SO))
 ../scheme/bitwise.$(SO):
 	(cd ../scheme; $(MAKE) bitwise.ostk)
-
-160-subdir: 128.ostk
-	(cd 160; $(MAKE))
+../scheme/vector/@.ostk:
+	(cd ../scheme/vector; $(MAKE) @.ostk)
 
 #======================================================================
 
@@ -956,7 +1096,9 @@ install-data-hook:
 	(cd 160; $(MAKE) install)
 
 install-sources:
-	(cd 160; $(MAKE) install-sources)
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) install-sources)\
+	done
 	cp $(srfi_sources) $(srfidir)
 
 clean:
@@ -973,8 +1115,8 @@ uninstall-hook:
 	rmdir $(srfidir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \
+			$(SOURCES) >> $(DOCDB)
 
 # Local Variables:
 # tab-width: 8

@@ -1,6 +1,6 @@
 # Makefile.am for STklos source file
 #
-# Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Apr-2022 18:20 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
-# CFLAGS is used here
+# CFLAGS is used here (anyway CFLAGS is implied here)
 CC	   	 = @CC@
-AM_CFLAGS	 = @CFLAGS@ @STKCFLAGS@
+AM_CFLAGS	 = @STKCFLAGS@
 
 # In order to use strip when cross-compiling, we need it to be settable
 # as an env variable. Setting it in configure.ac doesn't seem to make the
@@ -85,10 +84,6 @@ BUILT_SOURCES = generate-git-info
 ###
 ### stklos_SOURCES = stklos.c
 
-# gtklib		= @GTK_CONFIG_LIBS@
-
-# COMPAT LIB
-#compatlib       = -L$(top_srcdir)/compat -lcompat
 
 # GC LIBRARY
 gc              = @GC@
@@ -100,19 +95,19 @@ gmp	        = @GMP@
 gmplib          = @GMPLIB@
 gmpinc	        = @GMPINC@
 
-# PCRE LIBRARY
-pcre		= @PCRE@
-pcrelib		= @PCRELIB@
-pcreinc		= @PCREINC@
+# PCRE2 LIBRARY
+pcre2		= @PCRE2@
+pcre2lib	= @PCRE2LIB@
+pcre2inc	= @PCRE2INC@
 
 # FFI LIBRARY
 ffi		= @FFI@
 ffilib		= @FFILIB@
 ffiinc		= @FFIINC@
 
-stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
+stklos_LDADD   = $(gmplib) $(pcre2lib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-AM_CPPFLAGS    = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+AM_CPPFLAGS    = $(gmpinc) $(pcre2inc) $(ffiinc) $(gcinc)
 
 
 struct.o cond.o: struct.h
@@ -138,7 +133,7 @@ clean-am:
 	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok stklos
 
 distclean: clean
-	/bin/rm -f boot.keep Makefile extraconf.h stklos stamp-h1 stklosconf.h
+	/bin/rm -f boot.img Makefile extraconf.h stklos stamp-h1 stklosconf.h
 
 
 uninstall-hook:

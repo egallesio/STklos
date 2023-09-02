@@ -1,3 +1,6 @@
+2023-08-28 Erick Gallesio <eg@stklos.net>
+	Updated the version of mini-gmp (6.2.1 -> 6.3.0)
+
 2021-05-20  Erick Gallesio  <eg@unice.fr>
 
 	* This version uses now the mini-gmp implementation (a small

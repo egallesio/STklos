@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 12-Jan-2022 14:24 (eg)
  */
 
 #include <unistd.h>
@@ -160,7 +159,7 @@ DEFINE_PRIMITIVE("mutex-specific-set!", mutex_specific_set, subr2, (SCM mtx, SCM
 
 void STk_error_bad_condv(SCM obj)
 {
-  STk_error("bad confdition variable ~S", obj);
+  STk_error("bad condition variable ~S", obj);
 }
 
 

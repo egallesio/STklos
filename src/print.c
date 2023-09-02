@@ -1,7 +1,7 @@
 /*
  * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 20-May-2022 18:56 (eg)
  *
  */
 #include <ctype.h>
@@ -60,7 +59,7 @@ static void printlist(SCM exp, SCM port, int mode)
 }
 
 
-static Inline void printsymbol(SCM symb, SCM port, int mode)
+static inline void printsymbol(SCM symb, SCM port, int mode)
 {
   const char *s = SYMBOL_PNAME(symb);
 
@@ -85,7 +84,7 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
         STk_putc('\\', port);
         STk_putc(c, port);
       }
-      else 
+      else
         STk_putc(*s, port);
    }
     STk_putc('|', port);
@@ -93,7 +92,7 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
     STk_puts(s, port);
 }
 
-static Inline void printkeyword(SCM key, SCM port, int mode)
+static inline void printkeyword(SCM key, SCM port, int mode)
 {
   const char *s = KEYWORD_PNAME(key);
 
@@ -109,7 +108,7 @@ static Inline void printkeyword(SCM key, SCM port, int mode)
 }
 
 
-static Inline char printhexa(int x)
+static inline char printhexa(int x)
 {
   return (x >= 10) ? (x - 10 + 'a') : (x + '0');
 }
@@ -272,6 +271,7 @@ void STk_print(SCM exp, SCM port, int mode)
     case tc_subr01:
     case tc_subr12:
     case tc_subr23:
+    case tc_subr34:
     case tc_vsubr:
     case tc_apply:
       STk_puts("#[primitive ", port);
@@ -294,7 +294,7 @@ void STk_print(SCM exp, SCM port, int mode)
         struct extended_type_descr *xdescr = BOXED_XTYPE(exp);
 
         if (xdescr) {
-          void (*p)() = XTYPE_PRINT(xdescr);
+          void (*p)(SCM, SCM, int) = XTYPE_PRINT(xdescr);
 
           if (p)
             /* Use the defined function */

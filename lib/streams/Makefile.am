@@ -1,6 +1,6 @@
 # Makefile for the STklos specific  libraries
 #
-# Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  1-Oct-2022 23:47 (eg)
 
 #======================================================================
 
@@ -31,8 +30,7 @@ SO = @SH_SUFFIX@
 #
 # Libraries written in Scheme only
 #
-SRC_STK = primitive.stk derived.stk
-
+SRC_STK  = primitive.stk derived.stk
 SRC_OSTK = primitive.ostk derived.ostk
 
 #
@@ -42,15 +40,15 @@ SRC_C     =
 SRC_C_STK =
 SRC_SHOBJ =
 
-scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+ALL_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
 DOCDB  = ../DOCDB
 BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/streams
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/streams
+schemedir       = @SCMDIR@/streams
+schemelibdir    = @EXECDIR@/streams
 scheme_DATA     = $(SRC_OSTK)
 schemelib_DATA  = $(SRC_SHOBJ)
 scheme_sources  = $(SRC_STK)
@@ -64,22 +62,23 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ \
 	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
 	/bin/rm -f $*.o
 #======================================================================
 # Dependencies
-derived.ostk: primitive.ostk ../scheme/list.ostk
-../scheme/list.ostk:
-	(cd ../scheme; $(MAKE) list.ostk)
+derived.ostk: primitive.ostk ../scheme/list.$(SO)
+../scheme/list.$(SO):
+	(cd ../scheme; $(MAKE) list.$(SO))
 
 # ======================================================================
 install-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS) *-incl.c  *~
+	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile

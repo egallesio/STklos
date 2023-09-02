@@ -18,7 +18,6 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  6-Apr-2022 18:07 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -156,6 +155,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
+COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
 CPP = @CPP@
@@ -163,6 +164,9 @@ CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
 CYGPATH_W = @CYGPATH_W@
+C_COMPILE = @C_COMPILE@
+C_LINK = @C_LINK@
+C_VERSION = @C_VERSION@
 DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -173,10 +177,10 @@ ECHO_T = @ECHO_T@
 ETAGS = @ETAGS@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
-EXTRA_COMP_FLAGS = @EXTRA_COMP_FLAGS@
 FFI = @FFI@
 FFIINC = @FFIINC@
 FFILIB = @FFILIB@
+FULL_VERSION = @FULL_VERSION@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -215,10 +219,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -228,6 +232,8 @@ SCMDIR = @SCMDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SH_COMP_FLAGS = @SH_COMP_FLAGS@
+SH_LIB_COMPILE = @SH_LIB_COMPILE@
+SH_LIB_LINK = @SH_LIB_LINK@
 SH_LIB_SUFFIX = @SH_LIB_SUFFIX@
 SH_LOADER = @SH_LOADER@
 SH_LOAD_FLAGS = @SH_LOAD_FLAGS@
@@ -237,9 +243,11 @@ STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
+SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
+VERSION_STATUS = @VERSION_STATUS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -292,10 +300,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ADOC = @ASCIIDOCTOR@
-SOURCES = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc      \
-           intro.adoc libs.adoc licence.adoc match.adoc object.adoc  \
-           progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc         \
-           srfi.adoc stdproc.adoc stklos.adoc threads.adoc
+SOURCES = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc          \
+           idiosync.adoc intro.adoc licence.adoc match.adoc object.adoc  \
+           progstruct.adoc regexp.adoc slib.adoc srfi.adoc stdproc.adoc  \
+           stklos.adoc threads.adoc
 
 DOCDB = ../DOCDB
 SPP = $(STKLOS_BINARY) -q -I ../../lib -f ../../utils/stklos-pp.stk --
@@ -315,7 +323,6 @@ MULTI_AUX = FDL.html                                        \
             _srfis.html                                     \
             _standard_procedures.html                       \
             _stklos_object_system.html                      \
-            _the_scmpkg_package_system.html                 \
             _threads_mutexes_and_condition_variables.html   \
             _using_the_slib_package.html
 
@@ -598,10 +605,10 @@ extradoc: multi pdf
 
 # ----------------------------------------------------------------------
 tmp-html.txt: $(SOURCES) $(DOCDB)
-	$(SPP) -D "doc-fmt: 'html" stklos.adoc > $@
+	$(SPP) -D "doc-fmt: html" stklos.adoc > $@
 
 tmp-pdf.txt: $(SOURCES) $(DOCDB)
-	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc > $@
+	$(SPP) -D "doc-fmt: pdf" stklos.adoc > $@
 # ----------------------------------------------------------------------
 $(DOCDB):
 	(cd ..; $(MAKE) docdb)

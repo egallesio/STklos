@@ -1,10 +1,9 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 18-Aug-2022 20:56 (eg)
 
 {{chapter "SRFIs"}}
 
@@ -131,7 +130,7 @@ are given <<feature_identifiers>>.
 
 
 === Misc. Information
-//desactivate numbering 
+//desactivate numbering
 :sectnums!:
 Previous section described the general way to use the SRFIS implemented in
 {{stklos}}.  This section concentrates on information not given above.
@@ -156,6 +155,7 @@ running on.
 (((SRFI-160")))
 {{quick-link-srfi 4}} is fully supported and is extended to provide the
 additional *c64vector* and *c128vector* types of {{link-srfi 160}}.
+{{insertdoc 'uvector-tag}}
 
 
 // **** SRFI-10
@@ -184,6 +184,21 @@ this document (see _<<readerctor, primitive `define-reader-ctor`>>_).
 and `setter`. However, requiring explicitly `srfi-17` permits
 to define the setters for the (numerous) `cXXXXr` list procedures.
 
+
+// **** SRFI-19
+{{srfi-subsection 19}}
+((("time")))
+{{quick-link-srfi 19}} is fully supported. STklos offers, as an extension,
+the procedures `date=?`, `date<?`, `date>?`, `date<=?` and `date>=?`. These
+will compare dates by first normalizing them to make the time zone offset
+irrelevant, so "2000 Nov 12 03:30:10 GMT-2" will be taken as equal to
+"2000 Nov 12 02:30:10 GMT-1".
+
+{{insertdoc 'time-difference}}
+{{insertdoc 'time>?}}
+{{insertdoc 'time-resolution}}
+
+
 
 
 // **** SRFI-22
@@ -201,17 +216,14 @@ programs as Unix scripts in a uniform way. Specifically, it describes:
 script via a /usr/bin/env trampoline, like this:
 
 ```
-#!/usr/bin/env <executable>
+#!/usr/bin/env stklos
 ```
-
-where `<executable>` can recover several specified names.  {{stklos}} uses
-only the name `stklos-script` for `<executable>`.
 
 Here is an example of the classical `echo` command (without option) in Scheme:
 
 
 ```scheme
-#!/usr/bin/env stklos-script
+#!/usr/bin/env stklos
 
 (define (main arguments)
   (for-each (lambda (x) (display x) (display #\space))
@@ -295,7 +307,7 @@ load this file.
 {{srfi-subsection 55}}
 ((("require-extension")))
 {{quick-link-srfi 55}} is fully supported. Furthermore, {{stklos}}
-also accepts the symbols defined in <<feature_identifiers>> 
+also accepts the symbols defined in <<feature_identifiers>>
 in a _require-extension_ clause.
 
 
@@ -423,7 +435,7 @@ use with `cond-expand` in the compiled code only. It will not include
 // **** SRFI-145
 {{srfi-subsection 145}}
 (((assume)))
-{{quick-link-srfi 145}} is fully supported. See the 
+{{quick-link-srfi 145}} is fully supported. See the
 _<<assume,`assume` special form>>_.
 
 
@@ -443,5 +455,15 @@ underscores in numbers.
 `stream-null?` which are incompatible with the ones defined in the `(stream primitive)` library used by
 {{quick-link-srfi 41}} or {{quick-link-srfi 221}}. Prefix the imported symbols of this SRFI, if you plan to
 use it with one of the previous libraries.
+
+// **** SRFI-238
+{{srfi-subsection 238}}
+
+{{quick-link-srfi 238}} is fully supported. Furthermore, {{stklos}}
+adds the functions `codeset-list` and `make-codeset`. 
+
+{{insertdoc 'codeset-list}}
+{{insertdoc 'make-codeset}}
+
 
 :sectnums:

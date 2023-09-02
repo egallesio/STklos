@@ -2,16 +2,15 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  6-Apr-2022 18:07 (eg)
 
 
 ADOC=@ASCIIDOCTOR@
 STKLOS_BINARY ?= ../../src/stklos
 
-SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc      \
-           intro.adoc libs.adoc licence.adoc match.adoc object.adoc  \
-           progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc         \
-           srfi.adoc stdproc.adoc stklos.adoc threads.adoc
+SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc          \
+           idiosync.adoc intro.adoc licence.adoc match.adoc object.adoc  \
+           progstruct.adoc regexp.adoc slib.adoc srfi.adoc stdproc.adoc  \
+           stklos.adoc threads.adoc
 DOCDB    = ../DOCDB
 SPP      = $(STKLOS_BINARY) -q -I ../../lib -f ../../utils/stklos-pp.stk --
 
@@ -31,7 +30,6 @@ MULTI_AUX = FDL.html                                        \
             _srfis.html                                     \
             _standard_procedures.html                       \
             _stklos_object_system.html                      \
-            _the_scmpkg_package_system.html                 \
             _threads_mutexes_and_condition_variables.html   \
             _using_the_slib_package.html
 
@@ -87,10 +85,10 @@ extradoc: multi pdf
 
 # ----------------------------------------------------------------------
 tmp-html.txt: $(SOURCES) $(DOCDB)
-	$(SPP) -D "doc-fmt: 'html" stklos.adoc > $@
+	$(SPP) -D "doc-fmt: html" stklos.adoc > $@
 
 tmp-pdf.txt: $(SOURCES) $(DOCDB)
-	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc > $@
+	$(SPP) -D "doc-fmt: pdf" stklos.adoc > $@
 # ----------------------------------------------------------------------
 $(DOCDB):
 	(cd ..; $(MAKE) docdb)

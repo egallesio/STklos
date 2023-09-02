@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,9 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 29-Jul-2022 14:51 (eg)
  */
 
+#include <limits.h>
 #include "stklos.h"
 #include "gnu-getopt.h"
 #include "git-info.h"
@@ -36,6 +36,7 @@
 int STk_interactive_debug = 0;
 #endif
 
+#define BSIZEOF(t) ((int) (sizeof(t) * CHAR_BIT))
 
 static void error_bad_string(SCM str)
 {
@@ -92,7 +93,7 @@ SCM STk_read_from_C_string(const char *str)
 
 /*===========================================================================*\
  *
- * Primitives that don't feet anywhere else
+ * Primitives that don't fit anywhere else
  *
 \*===========================================================================*/
 /*
@@ -101,24 +102,83 @@ SCM STk_read_from_C_string(const char *str)
  * (implementation-version)
  *
  * Returns a string identifying the current version of the system. A
- * version is constituted of two numbers separated by a point: the version
- * and the release numbers. Note that |implementation-version| corresponds
- * to the {{link-srfi 112}} name of this function.
+ * version is constituted of two (or three) numbers separated by a point:
+ * the version, the release numbers and, eventually, a patch number. The
+ * patch number is used for developments version only; it is absent for stable
+ * releases.
+ *
+ * Note that |implementation-version| corresponds to the {{link-srfi 112}} name of
+ * this function.
 doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))
 {
-  return STk_Cstring2string(VERSION);
+  return STk_Cstring2string(FULL_VERSION);
 }
 
-DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
+
+/*
+<doc EXT short-version
+ * (short-version)
+ *
+ * Returns a string identifying the current version of the system without
+ * its eventual patch number.
+doc>
+*/
+DEFINE_PRIMITIVE("short-version", short_version, subr0, (void))
 {
-  return STk_Cstring2string("abcdef");
+  return STk_Cstring2string(VERSION);  // version without patch number
+}
+
+
+DEFINE_PRIMITIVE("%stable-version?", stable_versionp, subr0, (void))
+{
+  return MAKE_BOOLEAN(strcmp(VERSION_STATUS, "stable") == 0);
 }
 
 DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
 {
-  return STk_read_from_C_string(CONF_SUMMARY);
+  char buffer[2000];
+  SCM z = STk_nil;
+
+  /* The SRFI-176 c.version property */
+  z = STk_append2(z, LIST2(STk_makekey("c-version"),
+                           STk_Cstring2string(C_VERSION)));
+
+  /* The SRFI-176 c.compile property */
+  z = STk_append2(z, LIST2(STk_makekey("c-compile"),
+                           STk_read_from_C_string(C_COMPILE)));
+
+  /* The SRFI-176 c.link property */
+  z = STk_append2(z, LIST2(STk_makekey("c-link"),
+                           STk_read_from_C_string(C_LINK)));
+
+  /* The SRFI-176 c.type-bits property */
+  snprintf(buffer,
+           sizeof(buffer),
+           "(:c-type-bits ((char %d) (short %d) (int %d) (long %d) "
+           "(float %d) (double %d) (pointer %d)))",
+           BSIZEOF(char), BSIZEOF(short), BSIZEOF(int), BSIZEOF(long),
+           BSIZEOF(float), BSIZEOF(double), BSIZEOF(SCM));
+  z = STk_append2(z, STk_read_from_C_string(buffer));
+
+  /* The SRFI-176 stklos.shlib.compile property */
+  z = STk_append2(z, LIST2(STk_makekey("shlib-compile"),
+                           STk_read_from_C_string(SHARED_LIB_COMPILE)));
+
+  /* The SRFI-176 stklos.shlib.link property */
+  z = STk_append2(z, LIST2(STk_makekey("shlib-link"),
+                           STk_read_from_C_string(SHARED_LIB_LINK)));
+
+  /* The SRFI-176 stklos.shlib.suffix property */
+  z = STk_append2(z, LIST2(STk_makekey("shlib-suffix"),
+                           STk_Cstring2string(SHARED_EXTENSION)));
+
+
+  /* Add information gathered during configuration */
+  z = STk_append2(z, STk_read_from_C_string(CONF_SUMMARY));
+
+  return z;
 }
 
 DEFINE_PRIMITIVE("%stklos-git", stklos_git, subr0, (void))
@@ -329,22 +389,22 @@ static char URI_regexp[] =
  *   empty string)
  *
  * @lisp
- * (uri-parse "http://google.com") 
-{*    => (:scheme "http" :user "" :host "google.com" :port 80 
+ * (uri-parse "https://stklos.net")
+{*    => (:scheme "https" :user "" :host "stklos.net" :port 443
  *         :path "/" :query "" :fragment "")
  *
- * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
+ * (uri-parse "https://stklos.net:8080/a/file?x=1;y=2#end")
  *     => (:scheme "http" :user "" :host "stklos.net" :port 8080
  *         :path "/a/file" :query "x=1;y=2" :fragment "end")
  *
  * (uri-parse "http://foo:secret@stklos.net:2000/a/file")
  *     => (:scheme "http" :user "foo:secret" :host "stklos.net"
  *         :port 2000  :path "/a/file" :query "" :fragment "")
- * 
+ *
  * (uri-parse "/a/file")
  *    => (:scheme "file" :user "" :host "" :port 0 :path "/a/file"
  *        :query "" :fragment "")
- * 
+ *
  * (uri-parse "")
  *    => (:scheme "file"  :user "" :host "" :port 0 :path ""
  *        :query "" :fragment "")
@@ -412,8 +472,9 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
     } else {
       char *scm = STRING_CHARS(scheme);
 
-      if (strcmp(scm, "http") == 0) port = MAKE_INT(80); else
-      if (strcmp(scm, "ftp") == 0) port = MAKE_INT(21);
+      if (strcmp(scm, "http") == 0)       port = MAKE_INT(80);
+      else if (strcmp(scm, "https") == 0) port = MAKE_INT(443);
+      else if (strcmp(scm, "ftp") == 0)   port = MAKE_INT(21);
       else port = MAKE_INT(0);
     }
     if (*url) url += 1;
@@ -599,7 +660,8 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 int STk_init_misc(void)
 {
   ADD_PRIMITIVE(version);
-  ADD_PRIMITIVE(push_id);
+  ADD_PRIMITIVE(short_version);
+  ADD_PRIMITIVE(stable_versionp);
   ADD_PRIMITIVE(stklos_configure);
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);

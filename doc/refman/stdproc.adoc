@@ -1,10 +1,9 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 23-Nov-2022 21:47 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -57,6 +56,8 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'round}}
 {{insertdoc 'rationalize}}
 {{insertdoc 'atan}}
+{{insertdoc 'atanh}}
+{{insertdoc 'degrees->radians}}
 {{insertdoc 'sqrt}}
 {{insertdoc 'square}}
 {{insertdoc 'exact-integer-sqrt}}
@@ -69,6 +70,8 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'random-integer}}
 {{insertdoc 'random-real}}
 {{insertdoc 'decode-float}}
+{{insertdoc 'encode-float}}
+{{insertdoc 'float-max-exponent}}
 {{insertdoc 'integer-length}}
 
 ==== Fixnums
@@ -510,6 +513,7 @@ primitives.
 {{insertdoc 'output-string-port?}}
 {{insertdoc 'output-bytevector-port?}}
 {{insertdoc 'output-file-port?}}
+{{insertdoc 'output-port-open?}}
 {{insertdoc 'output-virtual-port?}}
 {{insertdoc 'interactive-port?}}
 [#curroport]
@@ -698,6 +702,7 @@ primivitives to acess environment variables.
 {{insertdoc 'script-file}}
 {{insertdoc 'script-directory}}
 {{insertdoc 'version}}
+{{insertdoc 'short-version}}
 {{insertdoc 'machine-type}}
 {{insertdoc 'implementation-name}}
 {{insertdoc 'cpu-architecture}}
@@ -791,6 +796,8 @@ SRFI's documentation for more information.
 {{insertdoc 'hash-table-merge!}}
 {{insertdoc 'hash-table-equivalence-function}}
 {{insertdoc 'hash-table-hash-function}}
+{{insertdoc 'hash-mutable?}}
+{{insertdoc 'hash-immutable!}}
 {{insertdoc 'hash-table-size}}
 {{insertdoc 'hash-table-stats}}
 
@@ -804,12 +811,17 @@ also be represented with date structures.
 {{insertdoc 'current-second}}
 {{insertdoc 'current-seconds}}
 {{insertdoc 'current-time}}
+{{insertdoc 'make-time}}
+{{insertdoc 'set-time-nanosecond!}}
 {{insertdoc 'time?}}
 {{insertdoc 'time->seconds}}
 {{insertdoc 'seconds->time}}
+{{insertdoc 'time-utc->time-tai!}}
+{{insertdoc 'time-tai->time-utc!}}
 {{insertdoc 'current-date}}
 {{insertdoc 'make-date}}
 {{insertdoc 'date?}}
+{{insertdoc 'date-nanosecond}}
 {{insertdoc 'date-second}}
 {{insertdoc 'date-minute}}
 {{insertdoc 'date-hour}}
@@ -821,6 +833,7 @@ also be represented with date structures.
 [#datedst]
 {{insertdoc 'date-dst}}
 {{insertdoc 'date-tz}}
+{{insertdoc 'local-timezone-offset}}
 {{insertdoc 'date->seconds}}
 {{insertdoc 'date->string}}
 {{insertdoc 'seconds->date}}
@@ -856,9 +869,9 @@ Note that two boxes are `equal?` *_iff_* their content are `equal?`.
 ((("process")))
 ((("PID")))
 {{stklos}} provides access to Unix processes as first class objects.
-Basically, a process contains several informations such as the standard
+Basically, a process contains information such as the standard
 system process identification (aka PID on Unix Systems), the files where
-the standard files of the process are redirected.
+the standard files of the process are redirected, ...
 
 {{insertdoc 'run-process}}
 {{insertdoc 'process?}}
@@ -867,7 +880,7 @@ the standard files of the process are redirected.
 {{insertdoc 'process-error}}
 {{insertdoc 'process-wait}}
 {{insertdoc 'process-exit-status}}
-{{insertdoc 'process-signal}}
+{{insertdoc 'process-send-signal}}
 {{insertdoc 'process-kill}}
 {{insertdoc 'process-continue}}
 {{insertdoc 'process-list}}
@@ -895,7 +908,30 @@ applications.
 
 === Signals
 
-WARNING: This section needs to be written
+{{stklos}} permits to associate handlers to POSIX.1 signals. When a
+signal handler is called, the integer value of this signal is passed
+to it as (the only) parameter.
+
+The following POXIX.1 values for signal numbers are defined:
+`SIGABRT` `SIGALRM`, `SIGFPE`, `SIGHUP`,`SIGILL`, `SIGINT`, `SIGKILL`,
+`SIGPIPE`, `SIGQUIT`, `SIGSEGV`, `SIGTERM`, `SIGUSR1`, `SIGUSR2`,
+`SIGCHLD`, `SIGCONT`, `SIGSTOP`, `SIGTSTP`, `SIGTTIN`, `SIGTTOU`.
+Moreover, the following constants, which are often available on most
+systems are also defined (if supported by the running system):
+`SIGTRAP`, `SIGIOT`, `SIGEMT`, `SIGBUS`, `SIGSYS`, `SIGURG`, `SIGCLD`,
+`SIGIO`, `SIGPOLL`, `SIGXCPU`, `SIGXFSZ`, `SIGVTALRM`, `SIGPROF`,
+`SIGWINCH`, `SIGLOST`.
+
+See your Unix documentation for the exact meaning of each constant or
+<<POSIX>>. Use symbolic constants rather than their numeric value if
+you plan to port your program on another system.
+
+[#set-signal-handler!]
+{{insertdoc 'set-signal-handler!}}
+{{insertdoc 'get-signal-handler}}
+{{insertdoc 'send-signal}}
+{{insertdoc 'pause}}
+
 
 === Parameter Objects
 {{stklos}} parameters correspond to the ones defined in {{link-srfi 39}}.
@@ -910,9 +946,11 @@ See SRFI document for more information.
 {{insertdoc 'gc}}
 (((void)))
 {{insertdoc 'void}}
+{{insertdoc 'void?}}
 ((("SRFI-23")))
 {{insertdoc 'error}}
 {{insertdoc 'signal-error}}
+{{insertdoc 'syntax-error}}
 {{insertdoc 'file-error?}}
 {{insertdoc 'error-object?}}
 {{insertdoc 'error-object-message}}
@@ -932,6 +970,8 @@ See SRFI document for more information.
 {{insertdoc 'trace}}
 {{insertdoc 'untrace}}
 {{insertdoc 'pp}}
+{{insertdoc 'procedure-formals}}
+{{insertdoc 'procedure-source}}
 [#ansicolor]
 {{insertdoc 'ansi-color}}
 {{insertdoc 'disassemble}}
@@ -944,4 +984,3 @@ See SRFI document for more information.
 {{insertdoc 'base64-decode}}
 {{insertdoc 'base64-encode-string}}
 {{insertdoc 'base64-decode-string}}
-

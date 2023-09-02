@@ -21,7 +21,6 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 08-Aug-2021 13:40
- * Last file update: 11-Nov-2022 13:34 (eg)
  */
 
 #include <stklos.h>
@@ -62,7 +61,7 @@ EXTERN_PRIMITIVE("fx>?", fxgt, vsubr, (int argc, SCM *argv));
 #define FXGT  2
 #define OTHER 3
 
-static Inline int get_comparator(SCM obj)
+static inline int get_comparator(SCM obj)
 {
   if (STYPE(obj) == tc_vsubr) {
     if (PRIMITIVE_FUNC(obj) == STk_fxlt) return FXLT;

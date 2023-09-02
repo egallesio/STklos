@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  4-Sep-2022 19:16 (eg)
  */
 
 #include "stklos.h"
@@ -62,7 +61,9 @@ static char *program_file = "";
 static char *load_file    = "";
 static char *conf_dir     = "";
 static char *sexpr        = "";
+static char *cflags       = "";
 static int  vanilla       = 0;
+static int  startup_msg   = 1;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
 static int  line_editor   = 1;
@@ -72,17 +73,20 @@ static SCM  Idirs         = STk_nil;
 static SCM  Adirs         = STk_nil;
 
 
+
 static struct option long_options [] =
 {
   {"version",           no_argument,       NULL, 'v'},
   {"file",              required_argument, NULL, 'f'},
   {"prepend-load-path", required_argument, NULL, 'I'},
   {"append-load-path",  required_argument, NULL, 'A'},
+  {"compiler-flags",    required_argument, NULL, 'F'},
   {"load",              required_argument, NULL, 'l'},
   {"execute",           required_argument, NULL, 'e'},
   {"boot-file",         required_argument, NULL, 'b'},
   {"conf-dir",          required_argument, NULL, 'D'},
   {"no-init-file",      no_argument,       NULL, 'q'},
+  {"no-startup-message",no_argument,       NULL, 'Q'},
   {"interactive",       no_argument,       NULL, 'i'},
   {"no-line-editor",    no_argument,       NULL, 'n'},
   {"debug",             no_argument,       NULL, 'd'},
@@ -114,6 +118,7 @@ static void Usage(FILE *stream)
 "   -I dir, --prepend-load-path=dir prepend 'dir' to the load path list.\n"
 "   -A dir, --append-load-path=dir  append 'dir' to the load path list.\n"
 "   -q, --no-init-file              quiet: do not load the user init file\n"
+"   -Q, --no-startup-message        don't show the startup message\n"
 "   -i, --interactive               interactive mode\n"
 "   -n, --no-line-editor            don't use line editor\n"
 "   -d, --debug                     add information to ease debugging\n"
@@ -121,9 +126,22 @@ static void Usage(FILE *stream)
 "   -c, --case-sensitive            be case sensitive by default\n"
 "       --case-insensitive          be case insensitive by default\n"
 "   -u, --utf8-encoding=yes|no      use/don't use UTF-8 encoding\n"
+"   -F list, --compiler-flags=list  set/unset compiler flags (see below)\n"
 "   -v, --version                   show version and exit (simple)\n"
 "   -V                              show version and exit (detailed, SRFI-176)\n"
 "   -h, --help                      show this help and exit\n"
+"Compiler flags (option -F):\n"
+"  Flags are separated by commas, booleans flags must be prefixed by '+' or  '-'\n"
+"  Example:\n"
+"      --compiler-flags='+line-info,-time-display,unroll-iterations=3'\n"
+"  Possible flags:\n"
+"    line-info          Insert line numbers in generated file (as -l option)\n"
+"    show-instructions  Show instructions in generated file\n"
+"    time-display       Print file compilation time\n"
+"    keep-formals       Keep formal arguments in closures\n"
+"    keep-source        Keep source code in closures\n"
+"    inline-usuals      Inline usual functions\n"
+"    unroll-iterations  Set the number of iterations to be unrolled\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
@@ -136,7 +154,7 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "qidnvVhcf:l:e:b:s:D:I:A:u:", long_options, NULL);
+    c = getopt_long(argc, argv, "+qQidnvVhcF:f:l:e:b:s:D:I:A:u:", long_options, NULL);
     if (c == -1) break;
 
     switch (c) {
@@ -144,8 +162,8 @@ static int process_program_arguments(int argc, char *argv[])
       case 'V': srfi_176        = 1;                                    break;
       case 'I': Idirs = STk_cons(STk_Cstring2string(optarg), Idirs);    break;
       case 'A': Adirs = STk_cons(STk_Cstring2string(optarg), Adirs);    break;
-      case 'f': program_file    = optarg;
-                script_file     = STk_expand_file_name(optarg);         break;
+      case 'F': cflags          = optarg;                               break;
+      case 'f': program_file    = optarg;                               break;
       case 'l': load_file       = optarg;                               break;
       case 'e': sexpr           = optarg;                               break;
       case 'b': boot_file       = optarg;                               break;
@@ -154,6 +172,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'n': line_editor     = 0;                                    break;
       case 'd': debug_mode++;                                           break;
       case 'q': vanilla         = 1;                                    break;
+      case 'Q': startup_msg     = 0;                                    break;
       case 's': stack_size      = atoi(optarg);                         break;
       case 'c': STk_read_case_sensitive = 1;                            break;
       case 'z': STk_read_case_sensitive = 0;                            break;
@@ -173,9 +192,9 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   SCM options, l = STk_nil;
   int i;
 
-  for (i = argc-1; i >= 0; i--)
+  for (i = argc-1; i >= 0; i--) {
     l = STk_cons(STk_Cstring2string(argv[i]), l);
-
+  }
   options = LIST2(STk_makekey("argv"), l);
   ADD_OPTION("STklos",             "name");
   ADD_OPTION(argv0,                "program-name");
@@ -183,8 +202,10 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_OPTION(load_file,            "load");
   ADD_OPTION(sexpr,                "sexpr");
   ADD_OPTION(conf_dir,             "conf-dir");
+  ADD_OPTION(cflags,               "comp-flags");
   ADD_BOOL_OPTION(srfi_176,        "srfi-176");
   ADD_BOOL_OPTION(vanilla,         "no-init-file");
+  ADD_BOOL_OPTION(startup_msg,     "startup-message");
   ADD_BOOL_OPTION(STk_interactive, "interactive");
   ADD_BOOL_OPTION(line_editor,     "line-editor");
   ADD_INT_OPTION(debug_mode,       "debug");
@@ -212,6 +233,22 @@ int main(int argc, char *argv[])
   ret = process_program_arguments(argc, argv);
   argc -= ret;
   argv += ret;
+
+  if (!*program_file && argc) {
+    // We have at least one argument and we don't have set the -f option
+    program_file = *argv;
+    argv+=1;
+    argc-=1;
+  }
+
+  if (*program_file) {
+    if (strcmp(program_file, "-") == 0)
+      /* Use stdin as input => reset program_file to "" */
+      program_file = "";
+    else
+      /* Set script_file to for SRFI-196 */
+      script_file = STk_expand_file_name(program_file);
+  }
 
   /* See if we use UTF8 encoding */
   if (!setlocale(LC_ALL, "")) {

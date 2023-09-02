@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 03-Dec-2021 00:00 (jpellegrini)
-;;;; Last file update: 18-Nov-2022 17:16 (eg)
 ;;;;
 (select-module scheme/flonum)
 

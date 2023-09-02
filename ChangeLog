@@ -1,3 +1,2177 @@
+2023-07-05 Erick Gallesio <eg@stklos.net>
+	- Updated Docker file to use pcre2 instead of pcre
+	- Merge branch 'jpellegrini-bignums'
+	- Merge branch 'bignums' of https://github.com/jpellegrini/STklos into jpellegrini-bignums
+	- Added documentation from PR #558 in Appendix A
+	- Fix: port argument was not used when displaying prompt
+	- Merge branch 'banner'
+
+2023-07-04 Erick Gallesio <eg@stklos.net>
+	- Documentation: Added -Q option and show-startup-message parameter
+	- Added the stklos option -Q (or --no-startup-message)
+
+2023-07-03 Erick Gallesio <eg@stklos.net>
+	- Added the parameter `repl-sidplay-banner`
+
+2023-07-02 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-integer-division'
+
+2023-07-01 Erick Gallesio <eg@stklos.net>
+	- Add a fast path in integer_division when we have two fixnums
+	- Place the verification on parameters if STK_DEBUG is set
+
+2023-06-30 Erick Gallesio <eg@stklos.net>
+	- Correction for the use of the terms information and performance
+	- Merge branch 'integer-division' of https://github.com/jpellegrini/STklos into jpellegrini-integer-division
+
+2023-06-29 Erick Gallesio <eg@stklos.net>
+	- Correction for the use of the terms information and performance
+	- Added a provide for srfi-9
+	- Merge branch 'jpellegrini-srfi-222'
+	- Adapted code for new SRFI conventions
+	- Merge branch 'srfi-222' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-222
+	- Added some missing documentation
+	- Delete duplicated code
+	- Added references for include, include-ci and co in documentation
+	- Index in PDF documentation was not generated
+
+2023-06-27 Erick Gallesio <eg@stklos.net>
+	- Listify slots definition as a simple symbol in define-class
+
+2023-06-21 Erick Gallesio <eg@stklos.net>
+	- R7RS-large '.so' files  were not correctly installed
+
+2023-06-20 Erick Gallesio <eg@stklos.net>
+	- Fixed dependencies of (scheme stream) in Makefile.
+	- Typo
+
+2023-06-19 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'ryandesign-ryandesign-tmpcomp-prefix'
+	- Used @ryandesign proposition for simplifying tmpcomp
+
+2023-06-19 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into integer-division
+
+2023-06-19 Erick Gallesio <eg@stklos.net>
+	- Modified .gitignore for R7RS large vectors
+	- Some Makefiles cleaning
+	- Merge branch 'large-vectors'
+	- Implement (srfi 160) with (scheme vector @)
+	- Add R7RS-large (scheme vector @)
+	- Changed dependencies list.ostk -> list.$(SO)
+	- Don't call utf8 initialization function if not in debug mode
+
+2023-06-07 Erick Gallesio <eg@stklos.net>
+	- Typo fix.
+	- Add R7RS large (scheme fixnum)
+
+2023-06-06 Erick Gallesio <eg@stklos.net>
+	- Avoid the used of select-module
+	- Corrected some provide strings
+
+2023-06-05 Erick Gallesio <eg@stklos.net>
+	- lib/scheme/*.so were installed in share and lib !
+	- Replaced the remaining Inline in C sources
+	- Suppressed autoconf test for inline functions
+	- Fix Makefile
+	- Merge branch 'jpellegrini-small-fixes'
+	- Typo + minors fixes
+
+2023-06-03 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos into jpellegrini-small-fixes
+
+2023-06-02 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-srfi-46'
+	- Resolve conflicts during merge
+	- Merge branch 'jpellegrini-oo-help'
+	- Added <hash-table> class
+	- Added classes <port>, <input-port> and <output-port>
+
+2023-06-01 Erick Gallesio <eg@stklos.net>
+	- class-direct-supers has been renamed class-direct-superclasses
+	- Object and class documentation updated
+	- Merge branch 'oo-help' of https://github.com/jpellegrini/STklos into jpellegrini-oo-help
+
+2023-05-30 Erick Gallesio <eg@stklos.net>
+	- Added some documentation
+
+2023-05-28 Erick Gallesio <eg@stklos.net>
+	- Typo in error message
+
+2023-05-26 Erick Gallesio <eg@stklos.net>
+	- Suppressed importations of (srfi 9) in lib/srfi and lib/scheme
+	- Suppressed the elimination of %in-scheme in test for libraries
+	- Suppressed compilation warnings
+	- Suppressed primitive %in-scheme (use only special call %%in-scheme)
+	- New special call %%in-scheme which produces INSCHEME inst.
+	- Rewrote %in-scheme in C
+	- Deleted %module-restore and %make-syntax in library environment
+
+2023-05-25 Erick Gallesio <eg@stklos.net>
+	- Fixed usage of define-record-type in compiled libraries
+	- Displaced define-record-type from lib/srfi/9.stk to lib/r7rs.stk
+	- Merge branch 'jpellegrini-srfi-1'
+	- Added vertical bars around SCHEME module
+	- Merge branch 'srfi-1' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-1
+	- Merge branch 'jpellegrini-cxr'
+
+2023-05-24 Erick Gallesio <eg@stklos.net>
+	- Use keywords instead of strings in %cxr and reintroduced %cxr inline
+	- Rewrote the functions cxr in runtime, to use the nex primitive %cxr
+
+2023-05-19 Erick Gallesio <eg@stklos.net>
+	- Better error message for cxr
+	- Minor code rewriting
+	- Added special instruction IN-CXR instruction in the VM.
+	- Fix: verify number of parameters before inlining cxr or list-ref
+
+2023-05-17 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'cxr' of https://github.com/jpellegrini/STklos into jpellegrini-cxr
+
+2023-05-13 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #547 from jpellegrini/expt
+	- Merge pull request #537 from jpellegrini/mpz_pow
+	- Merge pull request #553 from bentaca/master
+
+2023-05-13 Erick Gallesio <eg@stklos.net>
+	- Changed the message displayed when asciidoctor is not installed.
+
+2023-05-13 bentaca <bentaca@txt.sent.com>
+	- some notes on the gtk requirement
+
+2023-05-12 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #551 from jpellegrini/gcd
+
+2023-05-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix typo in gcd2
+
+2023-05-10 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Also call mpz_clear for the bignum case
+	- Call mpz_clear on result from expt
+	- Better use of GMP in expt (fixes crash)
+
+2023-05-10 Erick Gallesio <eg@stklos.net>
+	- Forgot the modification of configure.ac to set HAVE_UTIMENSTAT
+
+2023-05-10 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #549 from jpellegrini/define-constant
+
+2023-05-10 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'utimensat'
+	- Merge branch 'clock_gettime'
+	- monotonic-time yields now an error for systems without clock_gettime.
+	- Permit the compilation of SRFI-170 whitout utimensat primitive
+	- Implement our clock_gettime for systems which don't provide it
+
+2023-05-08 Erick Gallesio <eg@stklos.net>
+	- Code factorization
+	- Added exemples in SRFI-227 as tests
+	- Added tests for SRFI-227
+	- Added support for SRFI-227
+
+2023-05-07 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-test-error'
+	- Changed a test which was erroneous
+
+2023-05-04 Erick Gallesio <eg@stklos.net>
+	- Changed a test in SRFI-2
+	- Rewrote the code of SRFI-2 with define-macro.
+	- Changed test/syntax-error by test/compile-error
+
+2023-05-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Redefining a symbol should clear its immutbale bit
+
+2023-05-02 Erick Gallesio <eg@stklos.net>
+	- Added test/syntax-error macro for testing expected compile error
+	- Simplified real? primitive for complexes
+
+2023-05-01 Erick Gallesio <eg@stklos.net>
+	- Rewrite test/error macro
+	- Merge branch 'test-error' of https://github.com/jpellegrini/STklos into jpellegrini-test-error
+	- Merge branch 'jpellegrini-bytevectors-bug'
+	- Small refactoring
+	- Merge branch 'bytevectors-bug' of https://github.com/jpellegrini/STklos into jpellegrini-bytevectors-bug
+
+2023-04-30 Jeronimo Pellegrini <j_p@aleph0.info>
+	- More tests for expt
+	- Make expt work again for inexact exponent + negative base
+	- Check index in IEEE float bytevectors
+	- Fix thinko in R7RS eval test
+	- Fix test for SRFI-94
+	- Acos is real for x in [-1,1], not ]-1,1[
+	- Print sign for a-0.0i
+	- null-ilist? should error for non-lists
+	- vector->list: don't allow end index < start index
+	- SRFI-2: Don't test syntax
+	- Handle exports and imports properly in SRFI-94
+	- Don't exepct json-read to fail on overflow
+
+2023-04-30 Erick Gallesio <eg@stklos.net>
+	- Added (scheme bytevector) in documentation
+	- Suppressed the documentation about ScmPkg
+
+2023-04-30 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix a macro test
+	- Remove some tests that fail, but don't seem to be correct
+	- Adjust vector tests that wrongly expected errors
+	- Adjusting complex number test
+	- SRFI 94: adjusting tests that wrongly expected errors
+	- Fix complex reader test
+	- 1+0.0i is not real (adjust tests)
+	- a+0i is real, a+0.0i is not...
+	- Use '0+0.0i' and not '0+0i' as 'not reals' in SRFI-94 tests
+	- Fix rational reader test
+	- Don't use test/error for compile errors
+	- New test/error macro
+	- Check arguments in bytevector-ieee-*-set!
+
+2023-04-30 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Merge branch 'jpellegrini-exact'
+	- Fix: sign was incorrect in double2rational when using GMP light
+	- Run a recent autmake in GMP dir
+	- Merge branch 'exact' of https://github.com/jpellegrini/STklos into jpellegrini-exact
+
+2023-04-30 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #524 from jpellegrini/bignum-log
+
+2023-04-30 Erick Gallesio <eg@stklos.net>
+	- Code formatting: break long lines
+
+2023-04-30 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #545 from jpellegrini/expt
+
+2023-04-29 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into bignum-log
+
+2023-04-29 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #540 from jpellegrini/log-zero
+
+2023-04-29 Erick Gallesio <eg@stklos.net>
+	- On SIGSEGV, ask for an issue report rather than an email
+	- Merge branch 'lassik-errno'
+	- Merge branch 'errno' of https://github.com/lassik/STklos into lassik-errno
+
+2023-04-24 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-radians-degrees'
+	- Tiny fix in documentation
+	- Merge branch 'radians-degrees' of https://github.com/jpellegrini/STklos into jpellegrini-radians-degrees
+	- Merge branch 'jpellegrini-optimize-dotimes'
+	- Tried (and failed) to implement "dotimes" with "repeat"
+
+2023-04-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Make expt more precise
+	- Enhance fold-right in SRFI-1
+	- Optimize list-ref for small constant indices
+	- Optimize the CXR aliases
+
+2023-04-22 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add type check to radians->degrees and its inverse
+	- Add documentation for radians->degrees
+	- Add radians->degrees and degrees->radians
+
+2023-04-22 Erick Gallesio <eg@stklos.net>
+	- Produce better code when count is constant in repeat
+	- Unroll loop in repeat even if the count is not a constant fixnum
+
+2023-04-21 Erick Gallesio <eg@stklos.net>
+	- Added the the flag "unroll-iterations" to the knwown flags
+
+2023-04-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Enhancements to SRFI 1
+	- Inline %car+cdrs and friends in SRFI-1
+
+2023-04-17 Erick Gallesio <eg@stklos.net>
+	- Avoid the exportation of %repeat from compiler and optimize repeat
+	- Compiler flags are exported in comflags.stk (was in compiler.stk)
+	- Test the validity of compiler:unroll-iterations in parameter lambda
+
+2023-04-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Simplify round for rationals (and make it faster)
+	- Use int_quotient instead of STk_quotient where possible
+	- Dont call GMP to divide SMALL / BIG or N / N
+
+2023-04-15 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'optimize-dotimes' of https://github.com/jpellegrini/STklos into jpellegrini-optimize-dotimes
+
+2023-04-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Simplify int_quotient and call mpz_clear on exit
+	- Speedup integer division
+
+2023-04-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add tests for log of imprecise zero
+	- Compute (log -0.0) as per R7RS
+
+2023-04-14 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-expt-zero'
+	- Merge branch 'expt-zero' of https://github.com/jpellegrini/STklos into jpellegrini-expt-zero
+	- Merge branch 'jpellegrini-decode-float'
+	- Fix some glitches in random numbers documentation
+	- Added documentation of encode-loat + some fixes
+	- Make te decode function static
+	- Merge branch 'decode-float' of https://github.com/jpellegrini/STklos into jpellegrini-decode-float
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Merge branch 'ryandesign-patch-2'
+	- Merge branch 'patch-2' of https://github.com/ryandesign/STklos into ryandesign-patch-2
+
+2023-04-14 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #538 from jpellegrini/help-path
+
+2023-04-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Make (expt inexact 0) = 1
+	- Make expt work with complex exponents
+
+2023-04-13 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-unboud-var-report-module-name'
+	- Rewrote %symbol->library-name in C
+	- Print pretty name for libraries when error occurs in a library
+
+2023-04-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Small cosmetic fix in compiler
+	- Use "inline" instead of "Inline"
+	- Fix typo in doc for eq?
+	- Document (pause)
+	- Use trunc for truncate
+	- hacking.adoc: pcre -> pcre2
+	- Fix typo and change skb -> adoc
+	- Remove square brackets from comment in peephole.stk
+	- hacking.adoc: more details on the peephole optimizer
+	- FIx alignment in code
+	- Expand explanation for continuations
+	- hacking.adoc: enhance explanation of continuations
+	- Fix typos in vm.adoc, hacking.adoc
+	- Add missing libraries in documentation
+	- Fix typos
+	- Fix typo in comment (SRFI number)
+	- Fix test for empty string in describe
+	- Silence compiler warning
+	- Fix typo in bytevector-u8-set! documentation
+	- Fix indentation in vm.c
+	- Fix typo in mutex-common.c
+	- Remove superfluous #ifdef STK_DEBUG in lib.c
+	- Fix help docs path
+	- Check if double is inf before calling mpz_init_d on it
+	- Call mpz_clear on zabove and zbelow in bignum2double
+	- Speed up bignum2double
+	- Use mpz_sgn instead of mpz_cmp_si when possible
+
+2023-04-12 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Report module name for unbounded variables
+
+2023-04-12 Erick Gallesio <eg@stklos.net>
+	- Fix the load path for unstable versions
+
+2023-04-12 Lassi Kortela <lassi@lassi.io>
+	- Fix typo SIGSGV -> SIGSEGV
+
+2023-04-12 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Fix %stable-version?
+
+2023-04-12 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #533 from jpellegrini/remove-unused-define
+
+2023-04-12 Erick Gallesio <eg@stklos.net>
+	- module-list filter was incorrect (libraries ARE modules).
+	- library-list was not exported
+	- Add an implementation file for SRFI-112
+	- Merge branch 'versionning'
+	- Added %short-version (version without patch number)
+	- Do not add a final dot on stable versions
+
+2023-04-12 Lassi Kortela <lassi@lassi.io>
+	- Clean up STk_errno_names
+
+2023-04-12 Erick Gallesio <eg@stklos.net>
+	- Changed banner to explicitly state if the version is stable or not
+	- Suppressed primitive %push-id in C
+	- STklos version number si now major.minor.patch
+	- Updated generated-git-info
+
+2023-04-11 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'lib200'
+
+2023-04-09 Erick Gallesio <eg@stklos.net>
+	- Added the primitives module-list and library-list
+	- Added doc in manual for module-immutable! and module-mutable?
+	- Suppressed some tests in test-r7rs-lib.stk
+	- Bug fix in module-imports + refactoring in env.c
+
+2023-04-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Call mpz_clear on mpz_t types
+	- Optimize double2rational
+
+2023-04-07 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Don't define __NO_MATH_INLINES
+
+2023-04-06 Erick Gallesio <eg@stklos.net>
+	- Small refactoring
+	- Module-exports returns a list of symbols now (instead of couples)
+	- Minor code refactoring of env.c
+	- Permit to use module name (instead of object in some primitives
+	- STklos-pp version hided the STklos version
+	- Modified documentation of modules
+
+2023-03-29 Erick Gallesio <eg@stklos.net>
+	- Rewrite %library-name->symbol in C and eenamed it
+
+2023-03-26 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'pcre2'
+	- Updated .gitignore for PCRE2
+	- PCRE -> PCRE2: Use the provided pcre2 source (used v10.42 here)
+	- PCRE -> PCRE2: First step (use system installed libs)
+
+2023-03-25 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Tests for while and until
+	- Rewrite while and until using tagbody
+
+2023-03-24 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #523 from jpellegrini/bytevector-portability
+
+2023-03-23 Erick Gallesio <eg@stklos.net>
+	- Script forgot to remove some "Last file update" tags.
+	- Merge branch 'nolastupdate'
+	- Suppressed the "Last file update" in all sources
+	- Merge branch 'jpellegrini-procedure-names'
+	- Bug fix: Use a long to store the result of STk_integer_value
+	- Don't use anymore %set-procedure-name
+	- Fix: adding a procedure name didn't work on extended lambdas
+	- Fix for procedure-name for base64-{en,de}code-string was incorrect
+
+2023-03-22 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'procedure-names' of https://github.com/jpellegrini/STklos into jpellegrini-procedure-names
+	- Add a new way to set procedure name.
+
+2023-03-22 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into decode-float
+
+2023-03-22 Erick Gallesio <eg@stklos.net>
+	- Claim to be R7RS in the man page, rather than R5RS.
+	- Some demos in extensions dir were not deleted by a `make distclean`
+	- Merge branch 'jpellegrini-real-precision'
+	- Merge branch 'real-precision' of https://github.com/jpellegrini/STklos into jpellegrini-real-precision
+
+2023-03-22 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #522 from ryandesign/patch-3
+	- Merge pull request #511 from ryandesign/patch-1
+
+2023-03-22 Erick Gallesio <eg@stklos.net>
+	- Warning suppression
+	- Use pkg-config for GMP
+
+2023-03-20 Erick Gallesio <eg@stklos.net>
+	- Updated .gitignore
+	- Merge branch 'noimg'
+	- Changed tmpcomp to use an absolute path instead of searching it
+	- Get rid of boot.img everywhere except for the building of boot.c
+
+2023-03-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Include tests for logs of bignums
+	- Make log work on bignums
+
+2023-03-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Set two more procedure names
+
+2023-03-19 Erick Gallesio <eg@stklos.net>
+	- Remove output file if compilation fails
+	- Don't compile file directly in given output file
+
+2023-03-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix bytevector portability
+
+2023-03-18 Ryan Schmidt <git@ryandesign.com>
+	- Remove sentence about STklos library from manpage
+
+2023-03-18 Erick Gallesio <eg@stklos.net>
+	- Supressed useless space when decribing non ASCII characters
+	- Merge branch 'jpellegrini-describe'
+	- Merge branch 'describe' of https://github.com/jpellegrini/STklos into jpellegrini-describe
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Suppressed the sentence telling that STklos can be a library
+
+2023-03-18 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #498 from ryandesign/ryandesign-darwin-versions
+
+2023-03-17 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'ryandesign-ryandesign-typos'
+	- Merge branch 'ryandesign-typos' of https://github.com/ryandesign/STklos into ryandesign-ryandesign-typos
+	- Declare therad stack size as a long
+
+2023-03-17 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Portable, simpler and faster decode-float + encode-float
+
+2023-03-17 Erick Gallesio <eg@stklos.net>
+	- Describe of uvector
+	- Renamed %uvector-type in uvector-tag
+
+2023-03-16 Ryan Schmidt <git@ryandesign.com>
+	- Use two-level namespace for bundles on macOS
+
+2023-03-16 Erick Gallesio <eg@stklos.net>
+	- Added some generic functions on uniform vectors.
+
+2023-03-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Optimize dotimes and repeat, and do loop unrolling
+
+2023-03-15 Ryan Schmidt <git@ryandesign.com>
+	- Fix formatting problems
+	- Fix typos
+
+2023-03-15 Erick Gallesio <eg@stklos.net>
+	- Make some internal functions accept an optional parameter
+
+2023-03-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Enhance documentation of real-precision
+	- Add some tests for real-precision
+
+2023-03-14 Erick Gallesio <eg@stklos.net>
+	- Displaced the homogeneous vector type as last parameter
+
+2023-03-13 Erick Gallesio <eg@stklos.net>
+	- Added the new type of subr: subr34
+
+2023-03-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Set some procedure names
+
+2023-03-11 Ryan Schmidt <git@ryandesign.com>
+	- Fix typos
+
+2023-03-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Describe void
+	- Describe keywords as 'keywords'
+	- describe: report ASCII/Unicode code point differently
+
+2023-03-10 Ryan Schmidt <git@ryandesign.com>
+	- Identify all Darwin OS versions
+
+2023-03-10 Erick Gallesio <eg@stklos.net>
+	- Display compilation messages warnings in ascending order
+
+2023-03-10 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #491 from ryandesign/ryandesign-fport-typos
+
+2023-03-10 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'ryandesign-ryandesign-configure-unreachable2'
+	- Merge branch 'ryandesign-configure-unreachable2' of https://github.com/ryandesign/STklos into ryandesign-ryandesign-configure-unreachable2
+
+2023-03-10 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #488 from jpellegrini/describe
+
+2023-03-10 Erick Gallesio <eg@stklos.net>
+	- Added %uvector-type primitive to know the uniform vector kind.
+	- Added class <uvector> and <bytevector>
+
+2023-03-10 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #487 from jpellegrini/error-functions
+
+2023-03-10 Ryan Schmidt <git@ryandesign.com>
+	- Fix typos and wording in fport.c and fport.h
+	- Recognize unknown OSes; add special Solaris flags
+	- Don't (attempt to) add include path on Darwin 10
+	- Don't define _XOPEN_SOURCE on Darwin 10
+
+2023-03-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Describe bytevectors
+	- Change %procedure-signature to procedure-formals
+
+2023-03-08 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #486 from jpellegrini/small-fixes
+
+2023-03-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use error specialized functions instead of STk_error()
+
+2023-03-08 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #485 from ryandesign/ryandesign-configure-typos
+
+2023-03-07 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove unused file
+	- Simple aesthetical changes
+	- Fix almost impossible to perceive typo
+
+2023-03-07 Ryan Schmidt <git@ryandesign.com>
+	- Fix typos in configure.ac
+
+2023-03-07 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'image2'
+	- Get rid of boot.img in the git
+
+2023-03-07 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #478 from jpellegrini/vm.adoc
+	- Merge pull request #484 from ryandesign/ryandesign-darwin-11
+
+2023-03-07 Ryan Schmidt <git@ryandesign.com>
+	- Fix build failure with bundled gc on Darwin 11
+
+2023-03-07 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #482 from ryandesign/ryandesign-stack-direction
+	- Merge pull request #483 from ryandesign/ryandesign-shlib-options
+	- Merge pull request #481 from ryandesign/patch-1
+
+2023-03-07 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-double2integer'
+	- Suppressed compiler warnings and small rewriting
+	- Merge branch 'double2integer' of https://github.com/jpellegrini/STklos into jpellegrini-double2integer
+
+2023-03-07 Ryan Schmidt <git@ryandesign.com>
+	- Fix indentation in shlib-options
+	- Don't implicitly declare exit in configure check
+
+2023-03-06 Ryan Schmidt <git@ryandesign.com>
+	- Fix typos in README
+
+2023-03-06 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-gcd'
+	- Replaced (recursive) gcd2_long by (iterative) gcd2_fixnum
+	- Symplification of gcd code
+
+2023-03-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Explain UGLOBAL_{REF,SET} and the checked global table in vm.adoc
+
+2023-03-05 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'gcd' of https://github.com/jpellegrini/STklos into jpellegrini-gcd
+
+2023-03-05 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #466 from jpellegrini/small-fixes
+
+2023-03-05 Erick Gallesio <eg@stklos.net>
+	- Supressed a gcc warning
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Merge branch 'jpellegrini-even-odd'
+	- Rewrote the testing function for number parity
+
+2023-03-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix imprecision in comment
+
+2023-03-04 Erick Gallesio <eg@stklos.net>
+	- Add a test for infinities for even?/odd?
+	- Merge branch 'even-odd' of https://github.com/jpellegrini/STklos into jpellegrini-even-odd
+
+2023-03-04 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #475 from jpellegrini/fix-compilation
+	- Merge pull request #471 from jpellegrini/abs
+
+2023-03-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Don't include declarations inside a switch label...
+	- Fix typo in parameter.c
+	- Fix typos in misc.c
+	- Small fixes to documentation formatting
+
+2023-03-04 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #467 from jpellegrini/srfi-235
+
+2023-03-04 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-keep-source'
+	- Documentation update
+	- Moved compiler parameters/flags in a new file: lib/compflags.stk
+	- procedure-source & procedure-formals are now public (and documented)
+
+2023-03-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- More tests for even? and odd?
+	- Fix even? and odd? for non-integers
+	- Make double2integer more efficient and precise
+
+2023-03-02 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix (abs fx-least) being negative
+
+2023-03-02 Erick Gallesio <eg@stklos.net>
+	- Display short options before long ones in generated help for getopt
+	- Deleted ducplicated line
+	- Added compiler flags documention for stklos(1) and stklos-compile(1)
+	- Renamed file libs.adoc in idiosync.adoc
+	- Added documentation on compiler flags in Reference Manual
+
+2023-03-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add rudimentary tests for GCD and LCM
+	- Use GMP for bignum GCD
+	- Add SRFI 235 - Combinators
+
+2023-02-28 Erick Gallesio <eg@stklos.net>
+	- Minor rewrite of %compiler-set-flags
+	- Added --compiler-flags to the stklos command.
+	- Suppress useless import of STKLOS-COMPILER in vm.adoc
+	- Renamed compiler:generate-signature in compiler:keep-formals
+	- Add compiler flags to access compiler parameters in STKLOS-COMPILE
+
+2023-02-27 Erick Gallesio <eg@stklos.net>
+	- Use another representation for keeping procedure source
+	- Use the procedure plist for keeping its documentation
+
+2023-02-26 Erick Gallesio <eg@stklos.net>
+	- Keep source in an extended lambda rather than its implementation
+	- Code cleaning
+	- Cached the value of keyword #:formals and #:source
+	- Use procedure plist to store formal parameters
+	- Use the procedure plist for keeping source code
+	- Merge branch 'keep-source' of https://github.com/jpellegrini/STklos into jpellegrini-keep-source
+	- Merge branch 'jpellegrini-math2'
+
+2023-02-25 Erick Gallesio <eg@stklos.net>
+	- Added documentation for hyperbolic functions
+
+2023-02-23 Erick Gallesio <eg@stklos.net>
+	- Suppressed some warnings in number.c
+	- Merge branch 'math2' of https://github.com/jpellegrini/STklos into jpellegrini-math2
+	- Deleted (now inexact) old comment
+	- Fix cond-expand after (scheme base) has been loaded
+	- Minor rewritings
+
+2023-02-22 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #464 from jpellegrini/small-fixes
+
+2023-02-22 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove unused file src/parameter-test.c
+
+2023-02-21 Jeronimo Pellegrini <j_p@aleph0.info>
+	- No need to import STKLOS-COMPILER in tests
+	- Add tests for %procedure-arity
+	- Add tests to %procedure-source
+
+2023-02-21 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-srfi-19'
+	- Add date comparison functions on SRFI-19 (extension)
+	- Added tests for (scheme charset) -- SRFI-14
+	- Fixed SRFI-14 aka (scheme charset)
+
+2023-02-21 Jeronimo Pellegrini <j_p@aleph0.info>
+	- More documentation for MOP
+
+2023-02-21 Erick Gallesio <eg@stklos.net>
+	- Added doc. of SRFI-238 functions make-codeset & codeset-list
+	- Delete useless signal number for SRFI-238 on MacOS
+	- Merge branch 'jpellegrini-vm.c'
+	- Merge branch 'vm.c' of https://github.com/jpellegrini/STklos into jpellegrini-vm.c
+	- Merge branch 'jpellegrini-read-number'
+	- Merge branch 'read-number' of https://github.com/jpellegrini/STklos into jpellegrini-read-number
+	- Merge branch 'jpellegrini-voidp'
+	- Added documentation void? in refman
+	- Merge branch 'voidp' of https://github.com/jpellegrini/STklos into jpellegrini-voidp
+
+2023-02-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add void?
+	- Add tests to number reader
+
+2023-02-20 Erick Gallesio <eg@stklos.net>
+	- Recurse on GTKlos demos when doing a `make clean`
+	- Added a .gitignore file in GTklos demos
+	- Avoid compilation warnings in GTKlos
+
+2023-02-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Don't trigger an error for "1+1"
+	- Fix misreading of numbers
+
+2023-02-19 Erick Gallesio <eg@stklos.net>
+	- Documentation fix
+	- Merge branch 'jpellegrini-vm-doc'
+	- Rebuild HTML and PDF for hacking.adoc and vm.adoc
+	- Merge branch 'vm-doc' of https://github.com/jpellegrini/STklos into jpellegrini-vm-doc
+	- Don't transform  (let () ...) in a begin too early
+	- Optimize direct calls to lambda without parameters
+
+2023-02-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add hyperbolic trigonometric functions
+
+2023-02-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Procedures optionally remember their sources
+
+2023-02-16 Erick Gallesio <eg@stklos.net>
+	- Small refactoring of cond-expand
+	- Added the 'library' clause to cond-expand.
+
+2023-02-15 Erick Gallesio <eg@stklos.net>
+	- Added cond-expand to define-library
+
+2023-02-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- vm.c: use listify_top in adjust_arity
+
+2023-02-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Aesthetic changes to hacking.adoc
+	- Document continuations
+	- More about the VM
+
+2023-02-13 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'Zambito1-445-r7rs-include-library-declarations'
+	- Rewrote code for include-library-declarations to use port->sexp-list
+
+2023-02-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- vm.adoc: Explaining procedure calls a bit more
+	- Expands and fixes VM documentation
+
+2023-02-12 Erick Gallesio <eg@stklos.net>
+	- Merge branch '445-r7rs-include-library-declarations' of https://github.com/Zambito1/STklos into Zambito1-445-r7rs-include-library-declarations
+	- Changed a bit pendian for FreeBSD
+	- Added comparisons functions in the SRFI-19 tests
+	- Commented tests using equal? on xxx->date functions
+	- Merge branch 'jpellegrini-srfi-19'
+
+2023-02-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use a portable way to get the timezone offset
+
+2023-02-11 Erick Gallesio <eg@stklos.net>
+	- Added lib/srfi/244.stk file for SRFI-244
+
+2023-02-11 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #444 from jpellegrini/srfi-244
+	- Merge pull request #449 from jpellegrini/srfi-19
+
+2023-02-11 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'no-scmpkg'
+
+2023-02-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Optimize copy-time in SRFI-19
+	- Fixes to SRFI-19
+
+2023-02-10 Robby Zambito <contact@robbyzambito.me>
+	- Update copyright and last updated
+	- Complete include-library-declarations implementation
+	- Initial attempt at adding include-library-declarations support
+
+2023-02-10 Erick Gallesio <eg@stklos.net>
+	- Produce a `letrec` instead of a `labels` in match-case expansion
+	- Replaced jim-gensym function by the STklos gensym primitive
+
+2023-02-09 Erick Gallesio <eg@stklos.net>
+	- Updated Match code
+	- Added dependencies for bigmatch.stk
+	- Refactored Match.d
+	- Prepare code to place all the Match code in a unique module
+
+2023-02-06 Erick Gallesio <eg@stklos.net>
+	- Start refactoring of Match.d
+
+2023-02-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Declare support for SRFI 244
+
+2023-02-05 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #442 from jpellegrini/small-fixes
+
+2023-02-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix typos
+	- Remove unused variable
+
+2023-02-03 Erick Gallesio <eg@stklos.net>
+	- boot image rebuild
+
+2023-02-03 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #441 from jpellegrini/small-fixes
+
+2023-02-02 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Inline fx=  fx< and similar
+
+2023-02-02 Erick Gallesio <eg@stklos.net>
+	- Suppressed http module
+	- Added default port 443 for https in uri-parse
+	- Suppressed the '.spi' extension in  load-suffixes
+	- Deleted recette.stk and tar.stk
+	- Suppressed ScmPkg
+
+2023-02-01 Erick Gallesio <eg@stklos.net>
+	- compfile.stk is no more compiled in a separate file
+	- Merge branch 'jpellegrini-small-fixes'
+	- Removed compile.stk from the boot list
+	- Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos into jpellegrini-small-fixes
+
+2023-01-31 Erick Gallesio <eg@stklos.net>
+	- Add a message when requiring SLIB whereas it is not installed
+	- Fix: %try-load lost the condition when an error occurs during load
+	- Fixed failing compilation of slib when slib cannot be found
+	- Minor modification in slib.stk
+
+2023-01-30 Erick Gallesio <eg@stklos.net>
+	- Changed the way SRFI-160 is built
+	- Minor rewriting to avoid warnings when compiling with clang
+	- Small fix on a test
+	- Avoid usage of K&R prototypes when calling Scheme primitives in vm.c
+	- Make all the function definitions C-ANSI in gnu-getopt
+	- Suppressed unused function trie_bitmap_delete
+	- Typo fixed
+	- Supressed some compilation warnings
+
+2023-01-27 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-srfi-215'
+	- Merge branch 'srfi-215' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-215
+	- Fix %current-time
+
+2023-01-26 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'srfi19-again'
+	- Renamed lib/date.stk in lib/time.stk
+	- Added invalided tests for srfi-19
+	- Added documentation for new time functions
+	- Replaced some occurences of %current-time by current-time
+	- Added tests to SRFI-19
+	- Added SRFI-19
+
+2023-01-25 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'codeset'
+	- Add message cache and sort the list of codes
+
+2023-01-24 Erick Gallesio <eg@stklos.net>
+	- Don't duplicate messages when code are duplicated
+	- Added a mutex in SRFI-238
+	- Add a cache for messages in a codeset
+	- Marker of the end of system codeset list was in bad order
+	- Fix bug in with-mutex primitive
+	- Added SRFI-238 tests
+
+2023-01-23 Erick Gallesio <eg@stklos.net>
+	- Added SRFI-238 (Codesets)
+
+2023-01-19 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'lassik-srfi-176'
+	- Merge branch 'srfi-176' of https://github.com/lassik/STklos into lassik-srfi-176
+	- Fixed a problem on line editor on MacOS
+
+2023-01-18 Lassi Kortela <lassi@lassi.io>
+	- Refactor SRFI-176 version-alist
+	- More simple SRFI-176 changes
+
+2023-01-17 Erick Gallesio <eg@stklos.net>
+	- Use %shared-suffix to initialize load-suffixes
+
+2023-01-16 Erick Gallesio <eg@stklos.net>
+	- Small modifications to SRFI-176 properties
+	- Moved the stklos.shlib.* properties to c.library.*
+
+2023-01-13 Erick Gallesio <eg@stklos.net>
+	- Suppressed the '-o' option form the stklos.shlib.lib key
+	- Some characters disappeared from the fuse.c source file !!!
+	- Added SRFI-176 properties for shared libs.
+	- Clean src/Makefile.am
+	- Added SH_MAIN_LOAD_FLAGS to c.compile property.
+	- Added SRFI-176 c.compile and c.link properties
+
+2023-01-12 Erick Gallesio <eg@stklos.net>
+	- Avoid to use basename in SRFI-160 Makefile.am
+	- Added the SRFI-176 c.type-bits and c.version properties
+	- Used backticks in Makefile.am instead of '$(...)'
+	- Merge branch 'jpellegrini-stklos-config'
+	- Changed the protection mode of stklos-config.in
+	- Add option --compiled-libraries to stklos-config command
+	- Merge branch 'stklos-config' of https://github.com/jpellegrini/STklos into jpellegrini-stklos-config
+
+2023-01-12 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #436 from zdimension/master
+
+2023-01-12 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-srfi-43'
+	- Merge branch 'srfi-43' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-43
+
+2023-01-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove duplicated export
+	- Add tests to SRFI-43
+	- Add SRFI 43: Vector Library
+
+2023-01-11 Tom Niget <tom.niget@etu.univ-cotedazur.fr>
+	- Create .gitattributes file
+
+2023-01-07 Erick Gallesio <eg@stklos.net>
+	- Indicate that stklos-script is obsolete in its man page.
+	- Display warnings instead of errors in stklos-pp
+	- Metadata keywords are folded to lower case before vatiable def.
+	- Permit empty strings in stklos-pp metadata
+
+2023-01-06 Erick Gallesio <eg@stklos.net>
+	- Don't use anymore stklos-script in the distribution
+
+2023-01-05 Erick Gallesio <eg@stklos.net>
+	- Updated copyright date of the interpreter banner
+	- Front matter can be defined without '---' fences
+	- Added an option to display the version of stklos-pp
+	- Forbid to place options after parameters (i.e. be POSIXLY_CORRECT)
+	- Fix: permit to use '-' with the '-f' option
+
+2023-01-04 Erick Gallesio <eg@stklos.net>
+	- Use '-' to specify to use stdin as input
+
+2023-01-03 Erick Gallesio <eg@stklos.net>
+	- Bug fix with implicit -f option (or was it a feature?)
+
+2023-01-02 Erick Gallesio <eg@stklos.net>
+	- Permit to launch a script without the -f option
+	- Added the --debug option to stklos-pp
+
+2023-01-01 Erick Gallesio <eg@stklos.net>
+	-  Fixed the read-header function
+	- Changed another time the syntax of the front matter
+
+2022-12-31 Erick Gallesio <eg@stklos.net>
+	- Added a portable version of endian.h to the src directory.
+
+2022-12-22 Erick Gallesio <eg@stklos.net>
+	- Added a test for endianness in inc configure.ac
+	- Suppressed the inclusion of <endian.h>
+
+2022-12-21 Erick Gallesio <eg@stklos.net>
+	- Fixed the -o option of stklos-pp
+	- Added a handler to ignore errors occur during pre-processing
+	- Changed the name 'md-command' in 'process-command' in pre-processor
+
+2022-12-19 Erick Gallesio <eg@stklos.net>
+	- Added a parameter to the function parse-metadata
+	- Add a parameter for process-metatda fucntion of (stklos preproc)
+	- Changed the syntax of front matter for stklos-pp
+
+2022-12-17 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'signal'
+	- Suppressed the function STk_get_signal_value which is no more used
+	- Renamed process-signal in process-send-signal
+	- Changed process-signal parameter to use an int instead of a symbol
+
+2022-12-16 Erick Gallesio <eg@stklos.net>
+	- Add documentation of the signal procedures.
+
+2022-12-11 Erick Gallesio <eg@stklos.net>
+	- Typo fix
+
+2022-12-11 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #430 from jpellegrini/srfi-228
+
+2022-12-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update status of SRFIs
+	- Add SRFI 228: Composing Comparators
+
+2022-12-09 Erick Gallesio <eg@stklos.net>
+	- Added function send-signal
+	- Added fucntions set-signal-handler! and get-signal-handler
+
+2022-12-04 Erick Gallesio <eg@stklos.net>
+	- Upcased the name of signals
+
+2022-12-04 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #428 from amirouche/priorize-stklos-extensions
+
+2022-12-03 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'amirouche-master'
+	- Moved amirouche's fix in configure.ac
+
+2022-11-30 jpellegrini <j_p@aleph0.info>
+	- Merge pull request #1 from amirouche/small-fixes
+
+2022-11-30 Amirouche <amirouche@hyper.dev>
+	- .github/workflows/ccpp: make -j$(nproc).
+	- `compfile.stk` must be compiled before boot.img0
+
+2022-11-30 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add missing Makefile dependency
+
+2022-11-30 Amirouche <amirouche@hyper.dev>
+	- Priorize stklos specific extensions
+	- configure: use [ ] to compare values
+
+2022-11-28 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix Makefile for SRFI 222
+
+2022-11-28 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-222
+
+2022-11-28 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-bytevectors'
+
+2022-11-28 Erick Gallesio <eg@unice.fr>
+	- Use == on symbols instead of STk_eq
+	- Use static symbols dor "little" and "big" to avoid STk_intern usage
+	- Suppress a warning about aliasing when compiling with -O2 on gcc
+
+2022-11-24 Erick Gallesio <eg@unice.fr>
+	- Warnings suppression and small fixes
+	- Typo fix
+	- Merge branch 'bytevectors' of https://github.com/jpellegrini/STklos into jpellegrini-bytevectors
+
+2022-11-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix LONG_FITS_INTEGER ni bytevector.c
+
+2022-11-24 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #425 from jpellegrini/srfi-236
+
+2022-11-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update HTML manual
+	- Use shuffling implementation
+	- Add SRFI 236 - Evaluating expressions in an unspecified order
+	- Fix errors from CLANG compiler
+	- Fix GCC warnings in bytevector.c
+	- Add R7RS-Large bytevectors
+
+2022-11-23 Erick Gallesio <eg@unice.fr>
+	- Added braces in a swicth statement internal declaration
+	- Inserted the documentation of integer-length in manual
+	- Merge branch 'jpellegrini-isqrt'
+	- Merge branch 'isqrt' of https://github.com/jpellegrini/STklos into jpellegrini-isqrt
+
+2022-11-21 Erick Gallesio <eg@unice.fr>
+	- Added file file lib/srfi/168.stk
+	- Merge branch 'jpellegrini-srfi-162'
+	- Merge branch 'srfi-162' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-162
+	- Fixed typos
+
+2022-11-20 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #424 from jpellegrini/hacking.adoc
+
+2022-11-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-162: Comparators sublibrary
+
+2022-11-20 Erick Gallesio <eg@unice.fr>
+	- Added R7RS large (scheme bitwise)
+
+2022-11-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Updates to hacking.adoc
+
+2022-11-18 Erick Gallesio <eg@unice.fr>
+	- Added copyright notice to flonum.c and flonum.stk
+	- Added R7RS large (scheme flonum) library
+	- Added the R7RS large (scheme division)
+
+2022-11-11 Erick Gallesio <eg@unice.fr>
+	- Added R7RS large (scheme text)
+	- Added Scheme large (scheme ideque)
+	- Added Scheme large (scheme generator)
+	- Added Scheme large (scheme vector)
+	- Added Scheme large (scheme sort)
+
+2022-11-10 Erick Gallesio <eg@unice.fr>
+	- R7RS large libraries in C were not properly installed
+
+2022-10-30 Erick Gallesio <eg@unice.fr>
+	- Upgraded libffi to version 3.4.4
+
+2022-10-19 Erick Gallesio <eg@unice.fr>
+	- Replaced (srfi 128) imports bt (scheme comparator)
+	- Added Scheme large (scheme comparator)
+	- Small typo fix
+	- Merge branch 'jpellegrini-srfi-233'
+
+2022-10-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-233
+
+2022-10-09 Erick Gallesio <eg@unice.fr>
+	- Added mmissing files
+
+2022-10-07 Erick Gallesio <eg@unice.fr>
+	- Added (scheme lseq) R7RS large library
+
+2022-10-03 Erick Gallesio <eg@unice.fr>
+	- Moved the test on hash table before SRFIs tests
+	- Merge branch 'jpellegrini-hash-tests'
+	- Merge branch 'hash-tests' of https://github.com/jpellegrini/STklos into jpellegrini-hash-tests
+	- Added missing files in gc directory
+	- Rewrote (scheme hash-table)
+
+2022-10-02 Erick Gallesio <eg@unice.fr>
+	- Rewrote (scheme list-queue)
+	- Rewrote (scheme ilist)
+	- Rewrote (scheme box) and (scheme set)
+	- Rewrote (scheme charset)
+
+2022-10-01 Erick Gallesio <eg@unice.fr>
+	- Rewrote (scheme list)
+	- Rewrote (scheme stream)
+
+2022-09-29 Erick Gallesio <eg@unice.fr>
+	- Corrected (again) Makefiles for R7RS large
+	- Fix Makefiles
+	- Added documentation on currently implemented R7RS large libraries
+	- Simplify Makefile.am for RSR7 large files
+	- Added R7RS-large (scheme ilist) and (scheme list-queue)
+	-  Added R7RS-large  (scheme box) and (scheme set)
+
+2022-09-28 Erick Gallesio <eg@unice.fr>
+	- Added R7RS-large  ((scheme charset) and (scheme streams)
+	- Added R7RS large (scheme list)
+	- Added the R7RS large (scheme hash-table) library
+
+2022-09-26 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'srfi-125' of https://github.com/jpellegrini/STklos
+
+2022-09-19 Erick Gallesio <eg@unice.fr>
+	- Fix: SRFI sources were installed with the exexute bit set
+
+2022-09-18 Erick Gallesio <eg@unice.fr>
+	- Bug fix on string ports
+	- Supress a gcc warning
+
+2022-09-11 Erick Gallesio <eg@unice.fr>
+	- Updated Boehm GC to version 8.2.2
+	- Give more information when fatal error occurs while executing a file
+	- Added dependencies to permit parallel makes of the lib directory
+
+2022-09-08 Erick Gallesio <eg@unice.fr>
+	- Bug Fix: select-module can create modules
+
+2022-09-04 Erick Gallesio <eg@unice.fr>
+	- Got rid of *%program-args* variable
+	- Bug fix: Banner indicators were uncorrect
+
+2022-08-18 Erick Gallesio <eg@unice.fr>
+	- Added the #c64 and #c128 in SRFi-4
+	- Bug fix in #c128 and #c64 vector creation
+	- Added generated srfi/160/*.stk to .gitignore
+	- Use C counterpart of list? and length Scheme primitives
+	- Small rewriting
+	- Supressed gcc compilation warnings
+	- Add "STk_" prefix to newly exported functions of uvector.c
+	- Merge branch 'jpellegrini-srfi-160'
+	- Staging the Makefile.in generated files
+	- Merge branch 'srfi-160' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-160
+
+2022-08-11 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #420 from jpellegrini/small-fixes
+
+2022-08-11 Erick Gallesio <eg@unice.fr>
+	- Added documentation and tests for environment primitive
+	- Use an import-only clause for R5RS module definition
+	- Environment functions small fixes
+
+2022-08-10 Erick Gallesio <eg@unice.fr>
+	- Added @jpellegrini tests from PR #389
+	- Added the R7RS environment primitive
+
+2022-08-10 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use indent_size instead of tab_width
+
+2022-08-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Mention editorconfig in hacking.adoc
+
+2022-08-08 Erick Gallesio <eg@unice.fr>
+	- Adding an .editorconfig file
+
+2022-08-06 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #419 from jpellegrini/small-fixes
+
+2022-08-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Small fixes to README
+
+2022-08-03 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #407 from jpellegrini/hacking.adoc
+	- Merge pull request #413 from jpellegrini/small-fixes
+
+2022-08-03 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'master' of github.com:egallesio/STklos
+
+2022-07-31 Erick Gallesio <eg@unice.fr>
+	- Optimize UTF-8 tests
+	- Merge branch 'jpellegrini-utf8'
+
+2022-07-30 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'utf8' of https://github.com/jpellegrini/STklos into jpellegrini-utf8
+
+2022-07-29 Erick Gallesio <eg@unice.fr>
+	- Permit readline completion on android
+	- Test is the backtrace libc function is available
+
+2022-07-20 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #398 from jpellegrini/int32
+
+2022-07-16 Erick Gallesio <eg@unice.fr>
+	- Avoid allocation in vector-reverse-copy! when there is overlapping
+	- Merge branch 'jpellegrini-srfi-133'
+	- Merge branch 'srfi-133' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-133
+	- Bug fix for string-replace!
+
+2022-07-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix small glitch in STk_utf8_grab_char
+
+2022-07-11 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #412 from jpellegrini/disassemble
+
+2022-07-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix error message in make-{polar,rectangular}
+
+2022-07-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix disassemble-expr
+
+2022-07-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI 60: use primitive integer-length
+	- Fix exact-integer-sqrt
+	- Add tests to integer-length
+	- Add integer-length
+
+2022-07-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fixes to SRFI-125
+	- Add hash-table-clear!
+	- SRFI 125: remove deprecation warnings
+	- Adds SRFI-125
+
+2022-06-28 Erick Gallesio <eg@unice.fr>
+	- Make some functions static in 116.c
+	- Fix STk_mutable_tree
+
+2022-06-27 Erick Gallesio <eg@unice.fr>
+	- Adaptation of tests of immutable bindings
+	- Finished merging branch 'hashtables-immutable' of https://github.com/jpellegrini/STklos
+	- Starting merge of 'hashtables-immutable' of https://github.com/jpellegrini/STklos
+
+2022-06-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add tests for hash tables
+
+2022-06-26 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Additions to hacking.adoc
+
+2022-06-25 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix variable name in stklos-config.in
+
+2022-06-24 Erick Gallesio <eg@unice.fr>
+	- Added tab completion for zsh
+	- Merge branch 'jpellegrini-bash-completion'
+	- Merge branch 'bash-completion' of https://github.com/jpellegrini/STklos into jpellegrini-bash-completion
+
+2022-06-24 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #402 from jpellegrini/srfi-25
+
+2022-06-24 Erick Gallesio <eg@unice.fr>
+	- Replaced ALL the calls to memcpy by memmove
+	- Replaced call to memcpy by a call to memmove in gallop function
+
+2022-06-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix a type problem
+	- Use general procedure functions instead of CLOSURE*
+
+2022-06-23 Erick Gallesio <eg@unice.fr>
+	- Correct a type problem
+	- Merge branch 'jpellegrini-srfi-25'
+	- Merge branch 'srfi-25' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-25
+
+2022-06-23 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #400 from jpellegrini/small-fixes
+	- Merge pull request #401 from jpellegrini/values2vector
+
+2022-06-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix the fix for values2vector message...
+	- Fixes for SRFI-160
+
+2022-06-23 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-160
+
+2022-06-23 Erick Gallesio <eg@unice.fr>
+	- Compute a better hash value for uniform vectors
+	- Code refactoring
+
+2022-06-22 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Extra tests for SRFI-160
+	- Remove extraneous parens
+	- Add SRFI-160: Homogeneous numeric vector libraries
+	- Fix allocation of uvectors
+
+2022-06-22 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #396 from jpellegrini/values2vector
+	- Merge pull request #395 from jpellegrini/uvector-fix
+
+2022-06-21 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix off-by-one issue in conversion to 32 bits
+	- SRFI-25: use STk_procedurep insted of CLOSUREP
+
+2022-06-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Enhance error message in STk_values2vector
+
+2022-06-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix allocation of uvectors
+
+2022-06-17 Erick Gallesio <eg@unice.fr>
+	- Code cleaning and added a note on let-syntax current problem
+
+2022-06-13 Erick Gallesio <eg@unice.fr>
+	- Code cleanup: Delete code about VM instuction MAKE_EXPANDER
+	- Added let-syntax
+
+2022-06-10 Erick Gallesio <eg@unice.fr>
+	- Addes describe and class <syntax> for macros.
+	- Small bug fix on the length of %let-syntax
+	- Added test on macros.
+	- Added local macros
+
+2022-06-08 Erick Gallesio <eg@unice.fr>
+	- Documentation update.
+	- Long standing bug correction
+	- Bug fix with partial importations
+	- Replaced a add1 in code by an addition
+	- Merge branch 'master' into defmacro
+
+2022-06-07 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Better error messages for SRFI-215
+
+2022-06-07 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #390 from jpellegrini/setters
+	- Merge pull request #391 from jpellegrini/gcc-warning-itrie
+	- Merge pull request #392 from jpellegrini/check-null-from-malloc
+
+2022-06-06 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Check for NULL from malloc
+	- Silence a GCC warning
+	- Add setters to SRFI 74
+	- Add setters to SRFI-4
+
+2022-06-06 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #385 from jpellegrini/optimize-void
+	- Merge pull request #388 from jpellegrini/srfi-214
+	- Merge pull request #387 from jpellegrini/srfi-25
+
+2022-06-06 Erick Gallesio <eg@unice.fr>
+	- Adding the missing readline-complete.c file in lib directory
+	- Added function module-symbols*
+	- The completion function on substring is now an example
+	- Added documentation for ansi-color
+	- Extended ansi-color to allow the use of 256 colors
+
+2022-06-04 Erick Gallesio <eg@unice.fr>
+	- Added documentation for repl-theme
+
+2022-06-02 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'jpellegrini-srfi-152'
+	- Merge branch 'srfi-152' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-152
+	- Integrate PR #373 in the default readline support.
+
+2022-05-31 Erick Gallesio <eg@unice.fr>
+	- Added a completer on substrings as an example
+
+2022-05-30 Erick Gallesio <eg@unice.fr>
+	- Modified the way to parameterize readline completion
+	- Added pragmas to silence soem warnings with GCC 12
+
+2022-05-29 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add setters for SRFI-25 arrays
+	- Add setters to SRFI-214 flexvectors
+	- Optimize (void ...)
+
+2022-05-26 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix vector-reverse-copy! in SRFI-133
+	- Add missing bindings in SRFI-133
+
+2022-05-23 Erick Gallesio <eg@unice.fr>
+	- Fix when using libedit
+	- Changed the behavoiur of completion function
+	- Don't use readline/readline.h since we don't know its location
+	- Merge branch 'jpellegrini-readline'
+	- Merge branch 'readline' of https://github.com/jpellegrini/STklos into jpellegrini-readline
+	- Correcte admonition in documentation
+
+2022-05-22 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #376 from jpellegrini/openbsd
+
+2022-05-21 Erick Gallesio <eg@unice.fr>
+	- Small fixes
+	- Typo fix
+
+2022-05-19 Erick Gallesio <eg@unice.fr>
+	- Minor fixes
+	- Merge branch 'zdimension-master'
+	- Merge branch 'master' of https://github.com/zdimension/STklos into zdimension-master
+	- Added @jpellegrini extra tests for SRFI-132
+	- Adapted PR #365 to use fact paths for fxlt and ftgt
+
+2022-05-18 Erick Gallesio <eg@unice.fr>
+	- Added missing functions documentation and typo fixes
+	- Fix typos
+	- Added documentation of SRFI-116 in manual
+	- Merge branch 'jpellegrini-srfi-116'
+	- Merge branch 'srfi-116' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-116
+
+2022-05-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI 116 -- Immutable List Library
+
+2022-05-18 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'master' of github.com:egallesio/STklos
+
+2022-05-18 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #371 from jpellegrini/srfi-1
+
+2022-05-18 Erick Gallesio <eg@unice.fr>
+	- Split long lines
+
+2022-05-18 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #369 from jpellegrini/small-fixes
+
+2022-05-17 Erick Gallesio <eg@unice.fr>
+	- Rewrite symbol-value, symbol-value* and symbol-bound? in C
+	- Suppressed bad closing parenthesis
+
+2022-05-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Better instructions for bash completion
+	- Refactor bash tab completion script
+	- Add bash completion for stklos-compile
+
+2022-05-16 Erick Gallesio <eg@unice.fr>
+	- Small rewrite of symbol-value* and symbol-bound?
+
+2022-05-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add bash tab completion to STklos
+
+2022-05-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI 152: String Library (reduced)
+
+2022-05-14 Tom Niget <tom.niget@etu.univ-cotedazur.fr>
+	- Remove orphaned method declaration, fix names in headers
+	- Add type hints; sanitize macro parameters
+	- Remove _ (reserved indicator) from macro name
+	- Fix multiline macros
+
+2022-05-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Make a comment clearer
+	- Calculate DBL_TRUE_MIN if it's not defined
+
+2022-05-13 Erick Gallesio <eg@unice.fr>
+	- Cleanup of boot.stk
+
+2022-05-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix indentation in utils/shlib-options
+
+2022-05-12 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Support OpenBSD in utils/shlib-options
+	- Use $(MAKE) instead of 'make'
+
+2022-05-12 Erick Gallesio <eg@unice.fr>
+	- Changed the way the SCHEME module was built
+
+2022-05-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add missing paren
+	- Revert libgc -> malloc
+	- Delete commented line
+	- Don't initialize tab completion without readline
+	- Use STk_must_malloc, not malloc
+
+2022-05-11 Erick Gallesio <eg@unice.fr>
+	- I finally got rid of syntax-autoload
+	- Don't syntax-autoload support for ScmPkg
+	- Don't use syntax-autoload for match-case & match-lambda
+	- Don't use syntax-autoload for getopt
+	- Don't use syntax-autoload for trace/untrace
+
+2022-05-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add tab completion to readline
+
+2022-05-11 Tom Niget <tom.niget@etu.univ-cotedazur.fr>
+	- Fix statement macro invocation
+	- Fix statement macros
+	- Correct typos and spelling
+
+2022-05-10 Erick Gallesio <eg@unice.fr>
+	- Autoload for syntax is no more an exported global variable
+
+2022-05-08 Erick Gallesio <eg@unice.fr>
+	- Added some new definitions in SCHEME module
+	- Don't use the obsolete function hash-table-get
+	- Clean code of SRFI-0
+	- First batch of modifications to put boot files in SCHEME module
+
+2022-05-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Optimize delete-duplicates in SRFI-1
+
+2022-05-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Enhance descriptions and fix a typo
+
+2022-05-01 Erick Gallesio <eg@unice.fr>
+	- Code cleaning in compiler
+	- Suppressed a call to export-syntax
+	- Rename primitive %debug -> %%debug
+
+2022-04-29 Erick Gallesio <eg@unice.fr>
+	- Fixed the autoloading of srfi-27 and srfi-48
+
+2022-04-28 Erick Gallesio <eg@unice.fr>
+	- Reintroduced macro-expand and documented macro-expand*
+
+2022-04-27 Erick Gallesio <eg@unice.fr>
+	- Restored the STklos.init (for SLIB)
+	- All def{syntax,macro} have been replaced by define-{syntax,macro}
+
+2022-04-26 Erick Gallesio <eg@unice.fr>
+	- Deleted all the code for old macros
+
+2022-04-25 Erick Gallesio <eg@unice.fr>
+	- Deleteed the unhigienic macro `define-syntax`
+	- Fixed SRFI-185 (the last one with a define-syntax)
+	- Fixed SRFI-41 and SRFI-100 to use new macros
+
+2022-04-24 Erick Gallesio <eg@unice.fr>
+	- Replaced the define-syntax by new macros in SRFI-64
+
+2022-04-22 Erick Gallesio <eg@unice.fr>
+	- Another bunch of defin-syntax rewrite.
+	- Changed the code of %macro-expand
+	- Added the pimitive %find-instanciated-module
+	- Move the %debug function in the runtime
+
+2022-04-21 Erick Gallesio <eg@unice.fr>
+	- Replace almost all define-syntax by the new defsyntax
+	- Code cleanup in env.c and module.stk
+	- Fixed test of R7RS libraries
+	- Changed the way library are implemented.
+	- Fix an expected test result on SRFI-9
+
+2022-04-19 Erick Gallesio <eg@unice.fr>
+	- Defined a tempoprary version of defsyntax for bootstraping
+	- Added tests for SRFI-9
+	- Added the (forgotten) new file runtime-macros in Makefile.am
+	- All define-macro (except define-syntax) => defmacro
+
+2022-04-16 Erick Gallesio <eg@unice.fr>
+	- Fix rewrite-body when a (new) macro produces a define
+	- Rewrote the define-values to produce better code
+
+2022-04-15 Erick Gallesio <eg@unice.fr>
+	- A bunch of new define-macro -> defmacro
+	- Going back on the format of boot.stk
+
+2022-04-14 Erick Gallesio <eg@unice.fr>
+	- Replaced most of define-macro by defmacro in all the code
+	- Added syntax-error + defined when and unless with new defmacro
+
+2022-04-12 Erick Gallesio <eg@unice.fr>
+	- Place several values by line in the boot.c file
+	- Displace the compiler at top of the boot.stk file
+	- Print the name of the module when we envcounter an unbound variable
+
+2022-04-11 Erick Gallesio <eg@unice.fr>
+	- Added dependencies for SRFI-37 in Makefile.am
+
+2022-04-10 Erick Gallesio <eg@unice.fr>
+	- Change the order if files included during boot
+	- Moved module runtime support in runtime.stk (inseat of module.stk)
+
+2022-04-08 Erick Gallesio <eg@unice.fr>
+	- Syntax type is now defined in C
+	- Added dependencies for srfi implementation
+	- defmacro macros are imported form .ostk file on "import"
+
+2022-04-06 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'master' into defmacro
+	- Use $(STKLOS_BINARY) instead of hardcoded stklos relative path
+	- Delete duplicate code
+	- Typo fix
+	- Fix: Module name was not a symbol.
+
+2022-04-05 Erick Gallesio <eg@unice.fr>
+	- Exported macro name was incorrect when rename was used in .ostk file
+	- Temporary re-implementation of define-macro (with defmacro)
+
+2022-04-03 Erick Gallesio <eg@unice.fr>
+	- Set the compiler default module at boot time
+	- Added the parameter compiler-current-module
+
+2022-04-02 Erick Gallesio <eg@unice.fr>
+	- Changed the representation of environments at compile time
+	- Typo fix in documentation
+
+2022-03-30 Erick Gallesio <eg@unice.fr>
+	- Typo fix
+
+2022-03-20 Erick Gallesio <eg@unice.fr>
+	- Add a note for SRFI-216 usage in the documentation
+	- Merge branch 'jpellegrini-srfi-221'
+	- Fixed tests for SRFI-221
+	- Merge branch 'srfi-221' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-221
+
+2022-03-19 Erick Gallesio <eg@unice.fr>
+	- Suppressed the definition of expt in SRFI-70 and use the STklos one
+
+2022-03-18 Erick Gallesio <eg@unice.fr>
+	- For srfis with a test suite, import them, instead of requiring them
+	- Added relay module files for SRFI-{143,169,176,193,219}
+	- Added relay module files for SRFI-{15,62,87}
+	- Merge branch 'jpellegrini-srfi-95'
+
+2022-03-15 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'srfi-95' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-95
+	- Use asciidoc for @jpellegrini vm.md
+
+2022-03-14 Erick Gallesio <eg@unice.fr>
+	- Used asciidoc for @jpellegrini HACKING.md
+	- Renamed documentation output directory html and pdf en HTML and PDF
+
+2022-03-13 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'jpellegrini-srfi-230'
+	- Merge branch 'srfi-230' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-230
+	- Fixed warnings when compiling with _FORTIFY_SOURCE=2
+
+2022-03-12 Erick Gallesio <eg@unice.fr>
+	- Fixed the code of the fold function redefined in SRFI-224
+	- Don't export syntaxes which are already defined in SCHEME module
+
+2022-03-11 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-95
+	- Merge branch 'master' into srfi-230
+
+2022-03-11 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'jpellegrini-vm-uint64_t'
+	- Merge branch 'vm-uint64_t' of https://github.com/jpellegrini/STklos into jpellegrini-vm-uint64_t
+	- Use a table of char, instead of int, for the bit count table
+	- Add a declaration of STk_bit_count in stklos.h
+	- Merge branch 'jpellegrini-bit-count'
+	- Merge branch 'bit-count' of https://github.com/jpellegrini/STklos into jpellegrini-bit-count
+
+2022-03-10 Erick Gallesio <eg@unice.fr>
+	- Fixed require function after loading SLIB
+	- Updated documentation about SLIB
+	- SRFI-100 is now a R7RS library
+	- Add tests for SRFI-100
+	- SRFI-96 is now a R7RS library
+	- Updated slib.stk and STklos.init to access SLIB
+	- Changed (once again) the implementation-vicinity fucntion
+	- Fix cond-expand to avoid file multiple loading
+
+2022-03-09 Erick Gallesio <eg@unice.fr>
+	- Changed the value of library-vicinity (calculated instead of fixed)
+
+2022-03-09 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Don't duplicate lookup table
+
+2022-03-06 Erick Gallesio <eg@unice.fr>
+	- SRFI-89 is now a R7RS library
+	- Added tests for SRFI-89
+	- Fix a bug SRFI-59 (which is a R7RS library now btw)
+
+2022-03-04 Erick Gallesio <eg@unice.fr>
+	- File "full-conditions.stk" has been renamed "conditions.stk"
+	- Adaptation and generalization of SRFI-55 + R7RS library
+	- Fix bug in cond-expand (since srfi-N can denote library srfi/N)
+
+2022-03-03 Erick Gallesio <eg@unice.fr>
+	- Transform SRFI-51 in a R7RS library
+	- Fixed export list of SRFI-48 (format)
+	- Added SRFI-45 R7RS library
+	- Added dependencies to permit parallel building
+	- Added SRFI-41 as a R7RS library
+	- Added SRFI-38 as a R7RS library
+	- Add SRFI-34 as a R7RS library
+
+2022-02-24 Erick Gallesio <eg@unice.fr>
+	- Updated the full-conditions file to use the libraries
+	- Transform SRFI-36 iin a R7RS library
+	- Added tests for SRFI-35
+	- SRFI-35 is now a R7RS library
+
+2022-02-22 Erick Gallesio <eg@unice.fr>
+	- Transform SRFI-94 in a R7RS library
+
+2022-02-21 Erick Gallesio <eg@unice.fr>
+	- Added SRFI-39 as a R7RS library
+	- Transform SRFI-156 as a R7RS library
+	- Transform SRFI-171 as a R7RS library
+	- Transform SRFI-190 in a R7RS library
+
+2022-02-19 Erick Gallesio <eg@unice.fr>
+	-  Merge the @jpellegrini PR #362 (Fix fxbit-count)
+	- Avoid a GCC warning
+	- Merge branch 'jpellegrini-fixnums'
+	- Merge branch 'fixnums' of https://github.com/jpellegrini/STklos into jpellegrini-fixnums
+	- Small fixes in Makefile and ignore LSP database for Emacs
+	- Fixed the path for fuse extension in configure.ac
+	- Renamed the stklos-fuse directory in fuse.
+	- Always use <stklos.h> in extenssions
+	- Transform SRFI-137 as a R7RS library
+	- Transform SRFI-61 as a R7RS library
+
+2022-02-10 Erick Gallesio <eg@unice.fr>
+	- distclean-am target must depend on clean-am in extensions
+	- Various small improvements in the code and the documenatation
+	- Definition of the hidh level function CURL
+	- Added some documentation for CURL extension
+	- Added error port management for cur-set-option
+
+2022-02-09 Erick Gallesio <eg@unice.fr>
+	- Permit to pass Scheme booleans to CURL options
+	- Add a call to curl_global_init when loading the extension
+
+2022-02-08 Erick Gallesio <eg@unice.fr>
+	- Simplified load-path in utils/tmpcomp
+	- Added a new demo in CURL extension
+	- Added a demo in CIRL extension (using IMAP)
+	- First usable version of (stklos curl)
+
+2022-02-07 Erick Gallesio <eg@unice.fr>
+	- First commit of the new CURL extension
+	- Added the primitive (cpointer-null? obj)
+
+2022-02-04 Erick Gallesio <eg@unice.fr>
+	- Forgot to add the new documentation file about libraries in git.
+	- Added documentation for STklos libraries
+	- Small changes for STklos documentation
+
+2022-02-03 Erick Gallesio <eg@unice.fr>
+	- Suppress remaining Skribe itemize in the documentation
+
+2022-02-02 Erick Gallesio <eg@unice.fr>
+	- Deleted the old trie file which is no more necessary + Cleanup
+	- Moved "itrie" module ad in R7RS (stklos itrie) library
+	- Supressed C warnings in itrie.c
+	- Merge (manually) PR#298 -- Integration of SRFI-217 and SRFI-224
+	- Makefile cleanup
+	- Avoid a warning when calling make in etensions directory
+	- Permit the user to run GTklos demo without prior installation
+
+2022-02-01 Erick Gallesio <eg@unice.fr>
+	- Reorganize directory structures of extension/fuse
+	- Small documentation update
+	- Updated main .gitignore file
+	- Reorganize directory structures of extension/gtklos
+	- Avoid <gtk-box> in user programs (use <vbox> and <hbox> instead)
+	- Renamed <box> class in <gtk-box>
+
+2022-01-31 Erick Gallesio <eg@unice.fr>
+	- internal-arrange-widget and realize-widgets were not exported
+	- Typo fixed
+	- Don't optimize calls to the void primitive.
+
+2022-01-29 Erick Gallesio <eg@unice.fr>
+	- Avoid pipes when building documentation
+	- Building the reference manual depends of DOCDB
+
+2022-01-28 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use fixed-size integers for opcodes
+
+2022-01-28 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-230
+
+2022-01-28 Erick Gallesio <eg@unice.fr>
+	- Restored the BASDIR varaible in lib/srfi/Makefile
+	- Rebased the new documentation on the main branch
+	- Added back a lost modification on lib/srfi/Makefile.am
+	- Build Documentation
+	- Changed the help function a bit
+	- Change some {{rseven}} tags by R7RS in source files.
+	- Some new documentation (mainly from PR #307)
+	- Added a fake asciidoctor command for command missing it.
+	- Added the -v option to all the asciidoctor calls
+	- Documentation of C FFI
+	- Added Licence information in the adoc files
+	- Simple HTMl page is now rebuilt when necesary + Documentation rebuilt
+	- Renamed the doc/adoc directory in doc/refman
+	- Samll fix.
+	- Adaptation of .gitignore for new documentation
+	- Added Licence (FDL 1.3 or later) to the manual
+	- Bug Fix and cleanup of the documentation build
+	- Added the primitive %read-list
+	- Bug fix in doc Makefiles
+	- Print the documented symbols not in manual when building doc
+	- Added some of the patches from @jpellegrini in PR#307
+	- Building new documentation
+	- Delete the old (Skribe) documentation
+	- Commit of the new documentation sources
+	- Code cleaning of stklos-pp
+	- Updated .gitignore
+	- Renamed (stklos markdown) library in (stklos preproc)
+	- Renamed stklos-pre  in stklos-pp
+	- Last (first round) modifications for new documentation
+	- Documentation (again)
+	- Adapatation of SRFIs for new documenatation
+	- More documentation fixes
+	- Still new documenation modifications
+	- Adapatation of the documentation for regexps..
+	- Modifications for the new documentation
+	- Another bunch of modification for the new documentation format
+	- First batch of documentation rewriting
+	- Renamed stklos-md in stklos-pre
+	- Fixed path of the DOCDB file in lib/srfi and lib/stklos
+	- Fix documentation od define-constant
+	- Added module (srklos markdown env)
+	- Add a new command stklos-md for Markdown documents
+
+2022-01-27 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #356 from jpellegrini/vm-doc
+	- Merge pull request #359 from jpellegrini/small-fixes
+
+2022-01-27 Erick Gallesio <eg@unice.fr>
+	- Document the function build-path-from-shell-variable
+
+2022-01-26 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Small cleanup to stklos.h
+	- Remove extra semicolon in SRFI 25
+
+2022-01-26 Erick Gallesio <eg@unice.fr>
+	- SRFI .so files must be installed in lib dir (rather than share)
+
+2022-01-25 Erick Gallesio <eg@unice.fr>
+	- Adaptation of extension stklos-fuse to new modules libraries
+	- Updated GTklos for new modules/libraries
+
+2022-01-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Explain small ints and fixnums
+
+2022-01-17 Erick Gallesio <eg@unice.fr>
+	- Fix in lib/srfi/Maefile.in
+
+2022-01-17 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #317 from jpellegrini/srfi-229
+	- Merge pull request #294 from jpellegrini/srfi-154
+
+2022-01-10 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI-95: avoid compile-time warnings
+	- More tests for SRFI-95
+	- Add SRFI-95: Sorting and Merging
+
+2022-01-04 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #349 from jpellegrini/complexes
+	- Merge pull request #352 from jpellegrini/small-fixes
+
+2022-01-01 Erick Gallesio <eg@unice.fr>
+	- Updated Copyright date for the REPL
+
+2021-12-31 Erick Gallesio <eg@unice.fr>
+	- Fix: keyword colon pos. was not initialized with --load
+
+2021-12-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix boolean operator precedence issue
+
+2021-12-17 Erick Gallesio <eg@unice.fr>
+	- Added define-constant syntax
+
+2021-12-17 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Differentiate "not a number" and "not a real number"
+
+2021-12-16 Erick Gallesio <eg@unice.fr>
+	- Added test about mutability from @jpellegrini
+	- Fixed library-name when parameter is an anonymous library.
+	- Updated describe to show the locked status of a module/library
+
+2021-12-15 Erick Gallesio <eg@unice.fr>
+	- Imported symbols are always unmutable (even if already in importer)
+	- Added documentation of symbol-bound? primitive
+	- Added module-lock!,  module-locked? and symbol-mutable? primitives
+	- Simplified the hash-table API when searching variables
+	- Print librarises using a R7RS name
+	- Deleted an unused file
+	- Make the SCHEME module immutable
+
+2021-12-14 Erick Gallesio <eg@unice.fr>
+	- Format message for 80 char width.
+	- Merge branch 'jpellegrini-small-fixes'
+	- Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos into jpellegrini-small-fixes
+	- Use VM instructions for incremetation/decrementation
+	- Use of library-name when describing libraries
+	- Moved library-name function from module.stk to library.stk
+	- Merge branch 'library' of https://github.com/jpellegrini/STklos
+
+2021-12-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI 154: First-class dynamic extents
+
+2021-12-13 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-229
+	- Merge branch 'master' into srfi-230
+
+2021-12-13 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #311 from jpellegrini/hacking.md
+	- Merge pull request #347 from jpellegrini/srfi-37
+	- Merge branch 'master' into srfi-37
+
+2021-12-13 Erick Gallesio <eg@unice.fr>
+	- Fixed a bug in the generation of Markdown link for SRFIs
+	- Small fixes in Makefiles
+	- Merge branch 'jpellegrini-srfi-151'
+	- Merge branch 'srfi-151' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-151
+
+2021-12-12 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'jpellegrini-srfi-48'
+	- Merge branch 'srfi-48' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-48
+	- Merge branch 'jpellegrini:srfi-37'
+	- Merge branch 'jpellegrini-srfi-54'
+	- Merge branch 'srfi-54' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-54
+	- Merge branch 'jpellegrini-srfi-70'
+	- Merge branch 'srfi-70' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-70
+	- Merge branch 'jpellegrini-srfi-69'
+	- Merge branch 'srfi-69' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-69
+
+2021-12-10 Erick Gallesio <eg@unice.fr>
+	- Suppressed code which is no more useful with R7RS libraries
+	- Merge branch 'jpellegrini-srfi-130'
+	- Merge branch 'srfi-130' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-130
+	- Merge branch 'jpellegrini-srfi-129'
+	- Merge branch 'srfi-129' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-129
+	- Merge branch 'jpellegrini-srfi-118'
+	- Merge branch 'srfi-118' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-118
+	- Fixed lib/Makefile.am
+	- Merge branch 'jpellegrini-srfi-117'
+	- Merge branch 'srfi-117' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-117
+	- Fixed lib/Makefile.am
+	- Merge branch 'jpellegrini-srfi-216'
+
+2021-12-09 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI 37 -> R7RS
+	- SRFI 48 -> R7RS
+	- SRFI 54 -> R7RS
+	- SRFI 70 -> R7RS library
+	- Small aestheteical changes
+
+2021-12-09 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-129
+	- Merge branch 'master' into srfi-130
+	- Merge branch 'master' into srfi-117
+	- Merge branch 'master' into srfi-118
+	- Merge branch 'master' into srfi-216
+
+2021-12-09 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix SRFI-113 module declaration
+	- SRFI 69 -> R7RS library
+
+2021-12-09 Erick Gallesio <eg@unice.fr>
+	- Fixed a problem in require-feature (which could reload files)
+	- Fixed Makefile.am in lib/srfi
+	- Added SRFI-111 R7RS library
+
+2021-12-08 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'jpellegrini-srfi-185'
+	- Merge branch 'srfi-185' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-185
+	- Merge branch 'jpellegrini-srfi-128'
+	- Merge branch 'srfi-128' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-128
+	- Merge branch 'jpellegrini-describe2'
+	- Merge branch 'describe2' of https://github.com/jpellegrini/STklos into jpellegrini-describe2
+	- Merge branch 'jpellegrini-srfi-144'
+	- Merge branch 'srfi-144' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-144
+	- Various fixes in Makefile.am (after conflicting merges)
+	- Merge branch 'jpellegrini-srfi-127'
+	- Merge branch 'srfi-127' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-127
+	- Merge branch 'jpellegrini-srfi-161'
+	- Merge branch 'srfi-161' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-161
+	- Small changes in SRFI-208
+	- Merge branch 'jpellegrini-srfi-208'
+	- Merge branch 'srfi-208' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-208
+	- Added @missing jpellegrini copyright to SRFI-195
+	- Small fixes in SRFI-88
+	- Merge branch 'jpellegrini-srfi-88'
+	- Merge branch 'srfi-88' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-88
+	- Small fixes on SRFI 195
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Merge branch 'jpellegrini-srfi-195'
+	- Merge branch 'srfi-195' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-195
+
+2021-12-08 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #338 from jpellegrini/small-fixes
+
+2021-12-07 Erick Gallesio <eg@unice.fr>
+	- Better printing of linebreak in help.
+
+2021-12-07 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add library-name
+	- Fix relative references in lib/srfi/Makefile.am
+	- Describe ports
+	- Enhanced describe for libraries and numbers
+
+2021-12-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI 195 -> R7RS
+	- SRFI 207: now an R7RS library
+	- iSRFIs 134 and 158: now R7RS libraries
+	- SRFI 151: now R7RS library
+
+2021-12-05 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-216
+	- Merge branch 'master' into srfi-229
+	- Merge branch 'master' into srfi-230
+	- Merge branch 'master' into srfi-144
+	- Merge branch 'master' into srfi-118
+	- Merge branch 'master' into srfi-88
+
+2021-12-05 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #316 from jpellegrini/srfi-133
+	- Merge pull request #315 from jpellegrini/srfi-180
+	- Merge pull request #313 from jpellegrini/srfi-223
+	- Merge pull request #312 from jpellegrini/srfi-141
+
+2021-12-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI 88 -> R7RS
+
+2021-12-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI 208 is now an R7RS library
+	- SRFI 161 now is an R7RS library
+	- SRFI 185 is now an R7RS library
+	- SRFI 130: R7RS library
+	- SRFIs 129 and 135: R7RS libraries
+	- SRFIs 113 and 128 not are R7RS libraries
+	- SRFI 127: now R7RS library
+	- SRFI 118: now an R7RS library
+	- SRFI 117: now an R7RS library
+
+2021-12-03 Erick Gallesio <eg@unice.fr>
+	- Changed the vesion of readline in Docker files
+
+2021-12-03 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #310 from jpellegrini/docker
+
+2021-12-03 Erick Gallesio <eg@unice.fr>
+	- A better describe for boxes
+	- Changed back the class ot boxes to <box> (instead of <ref>)
+
+2021-12-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI-144: now an R7RS library
+	- Add SRFI-230: Atomic Operations
+	- Add SRFI-229: Tagged Procedures
+	- SRFI-133: now an R7RS library
+	- SRFI 180: now an R7RS library
+	- SRFI 216: now an R7RS library
+	- SRFI 223: now an R7RS library
+	- SRFI 141: now R7RS module
+	- Update HACKING.md
+	- Update and fix Docker image building
+
+2021-12-02 Erick Gallesio <eg@unice.fr>
+	- Typo fix in describe
+	- Added an export-syntax call for syntaxes of srfi-189
+
+2021-12-02 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #301 from jpellegrini/srfi-189
+
+2021-12-02 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'jpellegrini-srfi-66'
+	- Merge branch 'srfi-66' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-66
+
+2021-12-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix comparison in fx=?
+	- More fixnum optimization
+	- More fixnum optimizations
+	- Fix fxbit-count
+	- Some fixnum optimizations
+
+2021-11-30 Erick Gallesio <eg@unice.fr>
+	- Supressed a warning when compiling srfi-29
+	- Add the symbols to the known symbol list when using select-module
+
+2021-11-30 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #302 from jpellegrini/srfi-215
+
+2021-11-29 jpellegrini <j_p@aleph0.info>
+	- Merge branch 'master' into srfi-189
+	- Merge branch 'master' into srfi-215
+
+2021-11-29 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-215: Central Log Exchange
+
+2021-11-29 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #300 from jpellegrini/srfi-196
+
+2021-11-29 Erick Gallesio <eg@unice.fr>
+	- Make help of stklos-compile fit on 80 characters
+	- Typo fix
+
+2021-11-29 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #295 from jpellegrini/srfi-138
+
+2021-11-28 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI 189: as R7RS library now
+	- SRFI 196: now as R7RS library
+	- Fix thinkos in stklos-compile manpage
+
+2021-11-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-138: Compiling Scheme programs to executables
+
+2021-11-27 Erick Gallesio <eg@unice.fr>
+	- AAdded the long options --{pre,ap}pend-load-path to stklos command
+	- 1dde -the -A option to stklos-compile (and -L is now -I)
+
+2021-11-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFIs 66 and 74: now R7RS libraries
+
+2021-11-27 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #292 from jpellegrini/stklos-compile
+	- Merge pull request #273 from egallesio/deflib
+
+2021-11-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use append on two lists, not cons
+
+2021-11-25 Erick Gallesio <eg@unice.fr>
+	- SRFI 175: now a R7RS library
+	- SRFI-173: now an R7RS library
+
+
+
+
+
+2021-11-25 Erick Gallesio <eg@unice.fr>
+	- STklos 1.70 release
+
 2021-11-24 Erick Gallesio <eg@unice.fr>
 	- Bumped the version of libffi to 3.4.2
 	- Bumped the PCRE version to 8.45
@@ -195,7 +2369,7 @@
 	- Changed the way width and height are get or set
 	- Added the <toolbar> widget
 	- Added <header-bar> class
-	
+
 2021-06-29 Erick Gallesio <eg@unice.fr>
 	- Added the <radiobutton> class
 	- Added containers classes which embed a box
@@ -297,7 +2471,7 @@
 
 2021-05-26 Lassi Kortela <lassi@lassi.io>
 	- Fix stdout/stderr and exit code 0/1 in usage
-	
+
 2021-05-26 Jeronimo Pellegrini <j_p@aleph0.info>
 	- Write help/usage to stdout when -h is used
 
@@ -512,7 +2686,7 @@
 
 2021-04-06 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
 	- Merge pull request #180 from jpellegrini/small-fixes
-	
+
 2021-04-05 Jeronimo Pellegrini <j_p@aleph0.info>
 	- Fixes to documentation and argument checking
 
@@ -1359,7 +3533,7 @@
 2019-07-07 Erick Gallesio <eg@unice.fr>
 	- Oops: pcre/missing was a link on the automake file instaead of a copy
 	- Fix in the generation of the .git_meta file
-	- Added meta informations of the source distrbution files in Git
+	- Added meta information of the source distrbution files in Git
 	- Fix: On OSX nl_langinfo returns a codeset in lower case
 
 2019-07-04 Erick Gallesio <eg@unice.fr>
@@ -3546,7 +5720,7 @@
 2007-02-09  Erick Gallesio  <eg@essi.fr>
 
 	* src/fport.c:
-	Added the nature of a file to %file-informations. It can be source,
+	Added the nature of a file to %file-information. It can be source,
 	byte-code or object
 	[39e06f30b4a4]
 
@@ -3597,7 +5771,7 @@
 	lib/snow-support.stk, src/boot.img, src/dynload.c, src/fport.c,
 	src/misc.c, src/sport.c, src/stklos.h, src/struct.c, src/vm.c, utils
 	/stklos-compile.stk:
-	Added file-informations to .so files
+	Added file-information to .so files
 	[ab43472293e7]
 
 2007-01-25  Erick Gallesio  <eg@essi.fr>
@@ -3769,7 +5943,7 @@
 
 	* lib/boot.stk, lib/repl.stk, src/boot.c, src/boot.img:
 	Better error messages when the debug mode is used (or when compiled
-	with line number informations)
+	with line number information)
 	[96301a2d147b]
 
 	* configure, configure.in, lib/Lalr.d/Makefile.in, lib/Makefile.am,
@@ -3948,7 +6122,7 @@
 	* lib/compfile.stk:
 	* lib/compiler.stk
 	* src/fport.c
-	* src/vm.c: Added informations on the global variables in
+	* src/vm.c: Added information on the global variables in
 	compiled bytecode files. This permits to avoid false messages on
 	references to undefined symbols.
 
@@ -4537,7 +6711,7 @@ n
 2005-04-24  Erick Gallesio  <eg@essi.fr>
 
 	* lib/compiler.stk: Line number generation is now embeded in the
-	stack (instead of in a global). This yields better informations
+	stack (instead of in a global). This yields better information
 	on errors and we have now a backtrace which is available when an
 	error occurs.
 
@@ -4940,7 +7114,7 @@ n
 
 2004-07-13  Erick Gallesio  <eg@essi.fr>
 
-	* PORTING-NOTES: Added informations about the port on SGI from
+	* PORTING-NOTES: Added information about the port on SGI from
 	Joshua Boyd
 
 	* lib/boot.stk:
@@ -5715,7 +7889,7 @@ n
 	* doc/Makefile.am: Added man pages for stklos, stklos-config and
 	stklos-compile.
 
-	* utils/stklos-config.in: Added informations when help is
+	* utils/stklos-config.in: Added information when help is
 	requested
 
 	* examples/menu.stk:

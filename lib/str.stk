@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jul-2011 16:42 (eg)
-;;;; Last file update: 12-May-2022 15:40 (eg)
 ;;;;
 
 ;;; The functions defined here replace C primitives which are not UTF-8 aware.

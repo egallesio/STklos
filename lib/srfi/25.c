@@ -21,7 +21,6 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 23-Jun-2022 18:29 (eg)
  */
 
 #include "stklos.h"

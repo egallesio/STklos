@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 18-Aug-2022 18:33 (eg)
  */
 
 #include <float.h>
@@ -61,19 +60,9 @@ static void error_change_const_vector(SCM v)
   STk_error("changing the constant vector ~s is not allowed", v);
 }
 
-static void error_bad_vector(SCM v)
-{
-  STk_error("bad vector ~s", v);
-}
-
-static void error_bad_uvector(SCM v, int tip)
+static void error_bad_typed_uvector(SCM v, int tip)
 {
   STk_error("bad #%s vector ~s", type_vector(tip), v);
-}
-
-static void error_bad_index(SCM index)
-{
-  STk_error("index ~S is invalid or out of bounds", index);
 }
 
 static void error_bad_length(SCM length)
@@ -81,15 +70,29 @@ static void error_bad_length(SCM length)
   STk_error("invalid vector length ~s", length);
 }
 
-static void error_bad_uniform_type(SCM type)
-{
-  STk_error("bad type for an uniform vector ~s", type);
-}
 
 static void error_bad_list(SCM l)
 {
   STk_error("bad list ~s", l);
 }
+
+static inline void check_uvector(SCM o)
+{
+  if (!UVECTORP(o)) STk_error("bad uniform vector ~s", o);
+}
+
+static inline void check_index(SCM uvect, SCM index, long i)
+{
+  if (i < 0 || i >= UVECTOR_SIZE(uvect))
+    STk_error("index ~S is invalid or out of bounds", index);
+}
+
+static inline void check_uniform_type(SCM type, long i)
+{
+  if (i < UVECT_S8 || i > UVECT_C128)
+    STk_error("bad type for an uniform vector ~s", type);
+}
+
 
 int STk_vector_element_size(int type)
 {
@@ -144,7 +147,7 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfi
   }
 
   /* Controlling s */
-  if (!UVECTORP(v)) error_bad_uvector(v, UVECT_U8);
+  if (!UVECTORP(v)) error_bad_typed_uvector(v, UVECT_U8);
   len = UVECTOR_SIZE(v);
 
   /* Controlling start index */
@@ -201,7 +204,7 @@ int STk_uvector_equal(SCM u1, SCM u2)
 
 
 /* Duplicated from number.c: */
-static Inline SCM Cmake_complex(SCM r, SCM i)
+static inline SCM Cmake_complex(SCM r, SCM i)
 {
   SCM z;
 
@@ -448,7 +451,7 @@ static SCM makeuvect(int type, int len, SCM init)
 
 
 // public version of makeuvect (used by srfi-160)
-SCM STk_makeuvect(int type, int len, SCM init) 
+SCM STk_makeuvect(int type, int len, SCM init)
 {
   return makeuvect(type, len, init);
 }
@@ -478,76 +481,95 @@ SCM STk_list2uvector(int type, SCM l)
  *
 \*===========================================================================*/
 
-DEFINE_PRIMITIVE("%make-uvector", make_uvector, subr3,(SCM type, SCM len, SCM init))
+DEFINE_PRIMITIVE("%make-uvector", make_uvector, subr3, (SCM len, SCM init, SCM type))
 {
   long l   = STk_integer_value(len);
   long tip = STk_integer_value(type);
 
-  if (l < 0)                              error_bad_length(len);
-  if (tip < UVECT_S8 || tip > UVECT_C128) error_bad_uniform_type(type);
+  if (l < 0) error_bad_length(len);
+  check_uniform_type(type, tip);
 
   return makeuvect(tip, l, init);
 }
 
-DEFINE_PRIMITIVE("%uvector?", uvectorp, subr2, (SCM type, SCM vect))
+DEFINE_PRIMITIVE("%uvector?", uvectorp, subr12, (SCM vect, SCM type))
 {
-  long tip = STk_integer_value(type);
-  return MAKE_BOOLEAN(UVECTORP(vect) && UVECTOR_TYPE(vect) == tip);
+  if (type) {
+    long tip = STk_integer_value(type);
+    return MAKE_BOOLEAN(UVECTORP(vect) && UVECTOR_TYPE(vect) == tip);
+  }
+  else
+    return MAKE_BOOLEAN(UVECTORP(vect));
 }
 
-DEFINE_PRIMITIVE("%uvector", uvector, subr2, (SCM type, SCM values))
+DEFINE_PRIMITIVE("%uvector", uvector, subr2, (SCM values, SCM type))
 {
   long tip = STk_integer_value(type);
 
-  if (tip < UVECT_S8 || tip > UVECT_C128) error_bad_uniform_type(type);
+  check_uniform_type(type, tip);
   return STk_list2uvector(tip, values);
 }
 
-DEFINE_PRIMITIVE("%uvector-length", uvector_length, subr2, (SCM type, SCM v))
+DEFINE_PRIMITIVE("%uvector-length", uvector_length, subr12, (SCM v, SCM type))
 {
-  long tip = STk_integer_value(type);
-
-  if (tip < UVECT_S8 || tip > UVECT_C128)        error_bad_uniform_type(type);
-  if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_uvector(v, tip);
-
+  check_uvector(v);
+  if (type) {
+    long tip = STk_integer_value(type);
+    check_uniform_type(type, tip);
+    if (UVECTOR_TYPE(v) != tip) error_bad_typed_uvector(v, tip);
+  }
   return MAKE_INT(UVECTOR_SIZE(v));
 }
 
-DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr3, (SCM type, SCM v, SCM index))
+DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr23, (SCM v, SCM index, SCM type))
 {
-  long i   = STk_integer_value(index);
-  long tip = STk_integer_value(type);
+  long i = STk_integer_value(index);
 
-  if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip))  error_bad_vector(v);
-  if (tip < UVECT_S8 || tip > UVECT_C128)        error_bad_uniform_type(type);
-  if (i < 0 || i >= UVECTOR_SIZE(v))             error_bad_index(index);
+  check_uvector(v);
+  check_index(v, index, i);
+
+  if (type) {
+    long tip = STk_integer_value(type);
+
+    check_uniform_type(type, tip);
+    if (UVECTOR_TYPE(v) != tip) error_bad_typed_uvector(v, tip);
+  }
 
   return uvector_ref(v, i);
 }
 
-DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr4,
-                 (SCM type, SCM v, SCM index, SCM value))
+DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr34,
+                 (SCM v, SCM index, SCM value, SCM type))
 {
-  long i   = STk_integer_value(index);
-  long tip = STk_integer_value(type);
+  long i = STk_integer_value(index);
 
-  if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_vector(v);
-  if (tip < UVECT_S8 || tip > UVECT_C128)       error_bad_uniform_type(type);
-  if (BOXED_INFO(v) & VECTOR_CONST)             error_change_const_vector(v);
-  if (i < 0 || i >= UVECTOR_SIZE(v))            error_bad_index(index);
+  check_uvector(v);
+  check_index(v, index, i);
+  if (BOXED_INFO(v) & VECTOR_CONST)  error_change_const_vector(v);
+
+  if (type) {
+    long tip = STk_integer_value(type);
+
+    check_uniform_type(type, tip);
+    if (UVECTOR_TYPE(v) != tip) error_bad_typed_uvector(v, tip);
+  }
 
   uvector_set(v, i, value);
   return STk_void;
 }
 
 
-DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr2, (SCM type, SCM v))
+DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr12, (SCM v, SCM type))
 {
-  long i, len, tip = STk_integer_value(type);
+  long i, len;
   SCM z, tmp;
 
-  if (tip < UVECT_S8 || tip > UVECT_C128)        error_bad_uniform_type(type);
-  if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_vector(v);
+  check_uvector(v);
+  if (type) {
+    long tip = STk_integer_value(type);
+    check_uniform_type(type, tip);
+    if (UVECTOR_TYPE(v) != tip)              error_bad_typed_uvector(v, tip);
+  }
 
   len = UVECTOR_SIZE(v);
   if (!len) return STk_nil;
@@ -560,12 +582,18 @@ DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr2, (SCM type, SCM v))
   return z;
 }
 
-DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM type, SCM l))
+DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM l, SCM type))
 {
   long tip = STk_integer_value(type);
 
-  if (tip < UVECT_S8 || tip > UVECT_C128) error_bad_uniform_type(type);
+  check_uniform_type(type, tip);
   return STk_list2uvector(tip, l);
+}
+
+DEFINE_PRIMITIVE("uvector-tag", uvector_tag, subr1, (SCM v))
+{
+  check_uvector(v);
+  return STk_intern(type_vector(UVECTOR_TYPE(v)));
 }
 
 
@@ -678,7 +706,7 @@ DEFINE_PRIMITIVE("bytevector-append", bytevector_append, vsubr,(int argc, SCM *a
   /* compute length of final result */
   for (i = 0; i < argc; i++) {
     if (!UVECTORP(argv[-i]) || UVECTOR_TYPE(argv[-i]) != UVECT_U8)
-      error_bad_uvector(argv[-i], UVECT_U8);
+      error_bad_typed_uvector(argv[-i], UVECT_U8);
     len += UVECTOR_SIZE(argv[-i]);
   }
 
@@ -759,6 +787,7 @@ int STk_init_uniform_vector(void)
   ADD_PRIMITIVE(uvector_length);
   ADD_PRIMITIVE(uvector_ref);
   ADD_PRIMITIVE(uvector_set);
+  ADD_PRIMITIVE(uvector_tag);
 
   /* R7RS specific bytevectors primitives */
   ADD_PRIMITIVE(bytevector_copy);

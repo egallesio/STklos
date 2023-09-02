@@ -1,0 +1,24 @@
+;;;;
+;;;; 244.stk         -- 
+;;;;
+
+(define-values (a) 1)
+(test "define-values.1" #t (equal? a 1))
+
+;(define-values b (values 2 3))
+;(assert (equal? b '(2 3)))
+
+(define-values (x y) (values 4 5))
+(test "define-values.2" #t (equal? 4 x))
+(test "define-values.3" #t (equal? 5 y))
+
+(define-values (u . v) (values 6 7))
+(test "define-values.4" #t (equal? 6 u))
+(test "define-values.5" #t (equal? '(7) v))
+
+(set! u 8)
+(set! v 9)
+(test "define-values.6" #t (equal? 8 u))
+(test "define-values.7" #t (equal? 9 v))
+
+(define-values () (values))

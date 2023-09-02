@@ -46,11 +46,9 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 30-Jun-2020 05:01 (jpellegrini)
-;;;; Last file update:  2-Oct-2022 21:10 (eg)
 ;;;;
 
 (define-module scheme/list-queue
-  (import (srfi 9))
   (export make-list-queue list-queue list-queue-copy list-queue-unfold list-queue-unfold-right
           list-queue? list-queue-empty?
           list-queue-front list-queue-back list-queue-list list-queue-first-last

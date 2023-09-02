@@ -2,7 +2,8 @@
 ;;;;
 ;;;; library.stk         -- R7RS define-library
 ;;;;
-;;;; Copyright © 2019-2022 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2019-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2023 Robby Zambito <contact@robbyzambito.me>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,45 +23,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 28-Sep-2022 11:39 (eg)
 ;;;;
 
 
-(export define-library library-name
+(export define-library library-name library-list
         ;; FIXME
-        %library-name->symbol
-        %symbol->library-name
         %module-define-and-export
         %make-copy-module)
-
-;;
-;; library name conversion functions
-;;
-(define (%library-name->string libname)
-  (define (->string libname)
-    (let* ((str (format #f "~A" libname))
-           (res (substring str 1 (- (string-length str) 1))))
-      (regexp-replace-all " " res "/")))
-
-  (cond
-   ((symbol? libname)                                   ;; STklos
-    (symbol->string libname))
-   ((and (pair? libname)
-         (list? libname)
-         (every (lambda (x)
-                  (or (symbol? x) (and (integer? x)
-                                       (positive? x))))
-                libname)
-         (->string libname)))
-   (else
-    (error "bad library name ~S" libname))))
-
-
-(define (%library-name->symbol libname)
-  (string->symbol (%library-name->string libname)))
-
-(define (%symbol->library-name name)
-  (map string->symbol (string-split (symbol->string name) "/")))
 
 ;;
 ;; A macro to redefine a symbol in a R7RS module
@@ -78,8 +47,7 @@
   (%%import (compiler-current-module) (list old))
   `(define-module ,new
      (import ,old)
-     (export ,@(map cdr
-                    (module-exports (find-module (%library-name->symbol old)))))))
+     (export ,@(module-exports (find-module old)))))
 
 
 ;; ======================================================================
@@ -87,8 +55,34 @@
 ;; DEFINE-LIBRARY
 ;;
 ;; ======================================================================
+#|
+<doc R7RS-SYNTAX define-library
+ * (define-library <library name> <library declaration> ...)
+ *
+ * The form |define-library| is defined in R7RS. The |<library name>| can be
+ * a symbol or a list (as modules).
+ *
+ * A |<library declaration>| is any of
+ *
+ * * |(export <export spec> ...)|
+ * * |(import <import set> ...)|
+ * * |(begin <command or definition> ...)|
+ * * |(include <filename1> <filename2> ...)|
+ * * |(include-ci <filename1> <filename2> ...)|
+ * * |(include-library-declarations <filename1> <filename2> ...)|
+ * * |(cond-expand <clause1> <clause2> ...)|
+ *
+ * See {{rseven}} for more information (or the specific entries in this document)
+ * about each |<library declaration>|.
+ *
+ * NOTE: {{rseven}} permits to use library declarations only in
+ * a library definition; {{stklos}} permits to use them (except
+ * |include-library-declarations|) anywhere at toplevel.
+doc>
+|#
 (define-macro (define-library name . decls)
-  (let* ((module-name    (%library-name->symbol name))
+  (let* ((module-name    (%normalize-library-name name))
+         (conds          '())
          (imports        '())
          (exports        '())
          (body           '())
@@ -97,45 +91,66 @@
                                        (find-module 'SCHEME))))
 
     ;; Parse declarations
-    (for-each (lambda (d)
-                (unless (pair? d)
-                  (error 'define-library "bad library declaration clause ~s" d))
-                (let ((key  (car d))
-                      (rest (cdr d)))
-                  (case key
-                    ((import)
-                     (set! imports (append imports rest)))
-                    ((export)
-                     (set! exports (append exports rest)))
-                    ((begin include include-ci)
-                     (set! body (append body (list d))))
-                    (else
-                     (error 'define-library "incorrect directive ~s" d)))))
-              decls)
+    (define (parse-declarations decls)
+      (for-each (lambda (d)
+                  (unless (pair? d)
+                    (error 'define-library "bad library declaration clause ~s" d))
+                  (let ((key  (car d))
+                        (rest (cdr d)))
+                    (case key
+                      ((import)
+                       (set! imports (append imports rest)))
+
+                      ((export)
+                       (set! exports (append exports rest)))
+
+                      ((begin include include-ci)
+                       (set! body (append body (list d))))
+
+                      ((include-library-declarations)
+                       (for-each (lambda (path)
+                                   (parse-declarations
+                                    (call-with-input-file (or (find-path path) path)
+                                      port->sexp-list)))
+                                 rest))
+
+                      ((cond-expand)
+                       (set! conds (cons d conds)))
+
+                      (else
+                       (error 'define-library "incorrect directive ~s" d)))))
+                decls))
+    (parse-declarations decls)
     ;;
     ;; Produce the expansion
     ;;
     ;; The difficulty here is that libraries have an empty environment. That
     ;; means that we cannot expand in a "define-module" and do the imports
-    ;; and the exports in it. Consequently, we work in four phases:
-    ;;  1. First, we create the library as a module and just do the imports and
-    ;;     exports in it. This allows us to use all the expansion code of
-    ;;     of import and exports since the STklos environment is visible.
-    ;;  2. We forge the symbols %module-restore and %make-syntax in the
-    ;;     environment of the module/library. The former is uses at the end of the
-    ;;     expansion of define-module. The latter is used by define-macro.
-    ;;  3. We transform the module in a library (that means more of less that
+    ;; and the exports in it. Consequently, we work in five phases:
+    ;;  1. First, we create the library as a module and  just expand all the
+    ;;     the cond-expand at the top of the module, as required by R7RS report.
+    ;;  2. After that, we just do the imports and exports in the module. Note
+    ;;     that this point and previous one can use the  expansion code of
+    ;;     of cond-expand ir import/export since the STklos environment is
+    ;;     visible.
+    ;;  3. We transform the module in a library (that means more or less that
     ;;     the STklos module is  deleted from the import list.
-    ;;  4. we evaluate the body in the module (which is now a library)
+    ;;  4. We evaluate the body in the module (which is now a library).
+    ;;
+    ;; NOTE: Since the environment of a library is empty, we cannot use the
+    ;; primitives defined in STklos or SCHEME modules. In this case, we can
+    ;; use the special call (%%in-scheme 'xx) to grab the value of xx in
+    ;; SCHEME module (used for instance with %module-restore which
+    ;; is needed at the end of the expansion of define-module
     ;;
     `(begin
        (define-module ,module-name
-         ;; ①: define the imports and the exports
+         ;; ①: start by expanding in place all the library cond-expand
+         (begin ,@(reverse! conds))
+
+         ;; ②: define the imports and the exports
          (import ,@imports)
          (export ,@exports)
-         ;; ②: define useful 'secret" symbols
-         (%symbol-define '%module-restore %module-restore (current-module))
-         (%symbol-define '%make-syntax    %make-syntax    (current-module))
 
          ;; ③: transform the module in a library
          (%module->library! ',module-name)
@@ -149,13 +164,16 @@
  * (library-name lib)
  *
  * Returns the name of |lib| if it was defined as an R7RS library,
- * and #f if the library is anonymous. If |lib| is not a library,
- * |library-name| raises an error.
+ * and `#f` if the library is anonymous. If |lib| is not a library,
+ * |library-name| raises an error. If a name is returned, it is
+ * as a list.
  *
  * @lisp
  * (define-library (example cool-library))
- * (library-name (find-module 'example/cool-library)) => (example cool-library)
- * (module-name  (find-module 'example/cool-library)) => example/cool-library
+ * (library-name (find-module 'example/cool-library))   => (example cool-library)
+ * (library-name (find-module '(example cool-library))) => (example cool-library)
+ * (module-name  (find-module 'example/cool-library))   => example/cool-library
+ * (module-name  (find-module '(example cool-library))) => example/cool-library
  *
  * (define-module example/a-module)
  * (library-name (find-module 'example/a-module))     => error
@@ -172,3 +190,15 @@ doc>
   (let ((name (module-name lib)))
     (and (not (eq? name #void))
          (%symbol->library-name (module-name lib)))))
+
+
+#|
+<doc EXT library-list
+ * (library-list)
+ *
+ *  Returns the list of all the living libraries.
+doc>
+|#
+(define (library-list)
+  (filter library? (all-modules)))
+

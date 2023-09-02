@@ -21,13 +21,12 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 07-Jul-2022 22:40
- * Last file update: 28-Nov-2022 16:57 (eg)
  */
 
 #include <gmp.h>
 #include <sys/param.h>
-#include <endian.h>
 #include <stklos.h>
+#include <pendian.h>
 #include "bytevector-incl.c"
 
 /* We define a type for endianness, just for convenience. */
@@ -48,6 +47,8 @@ struct bignum_obj {
    (_l) <= ((int64_t) INT_MAX_VAL))
 
 #define ULONG_FITS_INTEGER(_l)  ((_l) <= ((uint64_t) INT_MAX_VAL))
+
+#define TYPEOF(n)                (INTP(n)? tc_integer: STYPE(n))
 
 /* Reals... */
 static inline SCM double2real(double x)
@@ -105,6 +106,17 @@ get_endianness(SCM endianness) {
   return end_little; /* Never reached */
 }
 
+static inline double
+todouble(SCM val) {
+  switch (TYPEOF(val)) {
+    case tc_integer:
+    case tc_bignum:
+    case tc_rational:
+    case tc_real:     return STk_number2double(val);
+    default:          STk_error("bad real number ~S", val);
+                      return 0.0;   /* for the compiler */
+  }
+}
 
 
 /*
@@ -163,7 +175,7 @@ DEFINE_PRIMITIVE("bytevector-fill!", bytevector_fill, subr2,
 
   if (vali < 0)
       for (long i=0; i<UVECTOR_SIZE(b); i++)
-          ((char *) UVECTOR_DATA(b))[i] = (char) vali;
+          ((int8_t *) UVECTOR_DATA(b))[i] = (int8_t) vali;
   else
       for (long i=0; i<UVECTOR_SIZE(b); i++)
           ((uint8_t *) UVECTOR_DATA(b))[i] = (uint8_t) vali;;
@@ -172,12 +184,9 @@ DEFINE_PRIMITIVE("bytevector-fill!", bytevector_fill, subr2,
 }
 
 /*
-<doc EXT bytevector-u8-ref bytevector-s8-ref
- * (bytevector-u8-ref bytevector k)
+<doc EXT bytevector-s8-ref
  * (bytevector-s8-ref bytevector k)
  *
- * The |bytevector-u8-ref| procedure returns the byte at index |k| of
- * |bytevector|, as an octet.
  * The |bytevector-s8-ref| procedure returns the byte at index |k| of
  * |bytevector|, as a signed byte.
  *
@@ -199,20 +208,17 @@ DEFINE_PRIMITIVE("bytevector-s8-ref", bytevector_s8_ref, subr2,
   check_bytevector(b);
   check_integer(i);
 
-  return MAKE_INT(((char *) UVECTOR_DATA(b))[INT_VAL(i)]);
+  return MAKE_INT(((int8_t *) UVECTOR_DATA(b))[INT_VAL(i)]);
 }
 
 /*
-<doc EXT bytevector-u8-set! bytevector-s8-set!
- * (bytevector-u8-set! bytevector k octet)
+<doc EXT bytevector-s8-set!
  * (bytevector-s8-set! bytevector k byte)
  *
  * |K| must be a valid index of bytevector.
- * The |bytevector-u8-set!| procedure stores octet in element
- * |k| of |bytevector|.
  * The |bytevector-s8-set!| procedure stores the two’s-complement
  * representation of |byte| in element |k| of |bytevector|.
- * Both procedures return unspecified values.
+ * This procedure return an unspecified value.
  *
  * @lisp
  * (let ((b (make-bytevector 16 -127)))
@@ -233,7 +239,7 @@ DEFINE_PRIMITIVE("bytevector-s8-set!", bytevector_s8_set, subr3,
   check_integer(i);
   long  vali = STk_integer_value(byte);
   if (-128 <= vali && vali < +128)
-      ((char *) UVECTOR_DATA(b))[INT_VAL(i)] = (char) vali;
+      ((int8_t *) UVECTOR_DATA(b))[INT_VAL(i)] = (int8_t) vali;
   else STk_error("value ~S is out of bounds or incorrect for a bytevector", byte);
   return STk_void;
 }
@@ -246,7 +252,7 @@ SCM
 bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int sig) {
   if (size <= sizeof(long)) {
 
-    char *ptr; /* points into the bytevector */
+    uint8_t *ptr; /* points into the bytevector */
 
     /* Only one of these will be used, one for signed and one for unsigned result.
        We'll make an uint8_t point to the right one, and build the number. */
@@ -257,8 +263,8 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
     if (sig)  tmp = (uint8_t*) &res;
     else      tmp = (uint8_t*) &ures;
 
-    if (end == end_little) ptr = &(((char *) UVECTOR_DATA(b))[idx]);
-    else                   ptr = &(((char *) UVECTOR_DATA(b))[idx]) + size - 1;
+    if (end == end_little) ptr = &(((uint8_t *) UVECTOR_DATA(b))[idx]);
+    else                   ptr = &(((uint8_t *) UVECTOR_DATA(b))[idx]) + size - 1;
     for (size_t i=0; i < size; i++) {
       *tmp = *ptr;
       tmp++;
@@ -269,9 +275,8 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
     /* If the requested 'size' was less than sizeof(long), then
        we filled part of the number. If we also have a negative number,
        we need to finish filling the most significative part with ones. */
-    if (sig && (*(tmp-1) >= 128)) {
-    memset(tmp, 0xff, sizeof(long)-size);
-    }
+    if (sig && (*(tmp-1) >= 128))
+      memset(tmp, 0xff, sizeof(long)-size);
 
     /* We have built the long integer result as if the machine was little endian.
        If it is big endian, we swap everything: */
@@ -288,18 +293,18 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
     }
 
     return sig
-    ? STk_long2integer(res)
-    : STk_ulong2integer(ures);
+      ? STk_long2integer(res)
+      : STk_ulong2integer(ures);
 
   } else {
       /*** BIGNUMS ***/
 
-      if (sig &&
-      ( (  (end == end_big) &&
-           (((char *) UVECTOR_DATA(b))[idx]) < 0)
-        ||
-        (  (end == end_little) &&
-           (((char *) UVECTOR_DATA(b))[idx+size-1]) < 0))) {
+    if (sig &&
+        ( (  (end == end_big) &&
+             (((int8_t *) UVECTOR_DATA(b))[idx]) < 0)
+          ||
+          (  (end == end_little) &&
+             (((int8_t *) UVECTOR_DATA(b))[idx+size-1]) < 0))) {
       /***
           Negtive case: we do this:
           - copy the bits to tmp
@@ -312,11 +317,11 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
       ***/
 
       char *tmp = STk_must_malloc(size);
-      memcpy(tmp,&(((char *) UVECTOR_DATA(b))[idx]),size);
+      memcpy(tmp,&(((int8_t *) UVECTOR_DATA(b))[idx]),size);
 
       /* Negate the bits */
       for (size_t i=0; i<size; i++)
-          tmp[i] = ~tmp[i];
+        tmp[i] = ~tmp[i];
 
       /* import into a GMP number: */
       SCM z;
@@ -325,12 +330,12 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
       mpz_init(num2);
       int e = (end == end_little) ? -1 : +1;
       mpz_import (num,                                 /* destination             */
-              size,                                /* word count              */
-              e,                                   /* order (endianness)      */
-              1,                                   /* word size               */
-              e,                                   /* endianness within words */
-              0,                                   /* nails (skipped bits)    */
-              tmp);                                /* from                    */
+                  size,                                /* word count              */
+                  e,                                   /* order (endianness)      */
+                  1,                                   /* word size               */
+                  e,                                   /* endianness within words */
+                  0,                                   /* nails (skipped bits)    */
+                  tmp);                                /* from                    */
 
       /* Add one, to finish the conversion from 2's complement: */
       mpz_add_ui(num2,num,1);
@@ -340,7 +345,7 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
       mpz_set(BIGNUM_VAL(z), num);
       return z;
 
-      } else {
+    } else {
       /***
           Positive case: the GMP already has a function for that!
       ***/
@@ -349,17 +354,17 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
       mpz_init(num);
       int e = (end == end_little) ? -1 : +1;
       mpz_import (num,                                 /* destination             */
-              size,                                /* word count              */
-              e,                                   /* order (endianness)      */
-              1,                                   /* word size               */
-              e,                                   /* endianness within words */
-              0,                                   /* nails (skipped bits)    */
-              &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
+                  size,                                /* word count              */
+                  e,                                   /* order (endianness)      */
+                  1,                                   /* word size               */
+                  e,                                   /* endianness within words */
+                  0,                                   /* nails (skipped bits)    */
+                  &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
 
       NEWCELL(z, bignum);
       mpz_set(BIGNUM_VAL(z), num);
       return z;
-      }
+    }
   }
 }
 
@@ -1065,6 +1070,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-ref", bytevector_ieee_single_nat
   check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
+  if (idx%4) STk_error("index for IEEE single precision bytevector not multiple of 4: ~S", i);
 
   switch (sizeof(float)) {
   case 4: {
@@ -1117,6 +1123,7 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-ref", bytevector_ieee_double_nat
   check_bytevector(b);
   check_integer(i);
   unsigned long idx = INT_VAL(i);
+  if (idx%8) STk_error("index for IEEE double precision bytevector not multiple of 8: ~S", i);
 
   switch (sizeof(double)) {
   case 8: {
@@ -1131,7 +1138,6 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-ref", bytevector_ieee_double_nat
 }
 
 
-
 DEFINE_PRIMITIVE("bytevector-ieee-single-set!", bytevector_ieee_single_set, subr4,
                  (SCM b, SCM i, SCM val, SCM endianness))
 {
@@ -1144,8 +1150,8 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-set!", bytevector_ieee_single_set, subr
       end = end_big;
   else STk_error("bad endianness symbol ~S", endianness);
 
+  float valf = (float) todouble(val);
   unsigned long idx = INT_VAL(i);
-  float valf = REAL_VAL(val);
 
   switch (sizeof(float)) {
   case 4: {
@@ -1169,8 +1175,10 @@ DEFINE_PRIMITIVE("bytevector-ieee-single-native-set!", bytevector_ieee_single_na
 {
   check_integer(i);
 
+  float valf = (float) todouble(val);
   unsigned long idx = INT_VAL(i);
-  float valf = REAL_VAL(val);
+
+  if (idx%4) STk_error("index for IEEE single precision bytevector not multiple of 4: ~S", i);
 
   switch (sizeof(float)) {
   case 4: {
@@ -1194,7 +1202,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
 {
   check_integer(i);
 
+  double valf = todouble(val);
   endianness_t end = 0;
+
   if (endianness == symb_little)
       end = end_little;
   else if (endianness == symb_big)
@@ -1202,7 +1212,6 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-set!", bytevector_ieee_double_set, subr
   else STk_error("bad endianness symbol ~S", endianness);
 
   unsigned long   idx  = INT_VAL(i);
-  double valf = REAL_VAL(val);
 
   switch (sizeof(double)) {
   case 8: {
@@ -1222,7 +1231,9 @@ DEFINE_PRIMITIVE("bytevector-ieee-double-native-set!", bytevector_ieee_double_na
   check_integer(i);
 
   unsigned long   idx  = INT_VAL(i);
-  double valf = REAL_VAL(val);
+  if (idx%8) STk_error("index for IEEE double precision bytevector not multiple of 8: ~S", i);
+
+  double valf = todouble(val);
 
   switch (sizeof(double)) {
   case 8: {

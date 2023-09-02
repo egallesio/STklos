@@ -1,6 +1,6 @@
 # Makefile for the R7RS Scheme standard libraries
 #
-# Copyright © 2021-2022 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,18 +19,16 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 18-Nov-2022 17:39 (eg)
 
 #======================================================================
-
+SUBDIRS  = vector
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
-DOCDB  = ../DOCDB
-BASEDIR= ../..
-
+DOCDB   = ../DOCDB
+BASEDIR = ../..
 # ----------------------------------------------------------------------
 # R7RS Small Support
 # ----------------------------------------------------------------------
@@ -41,6 +39,7 @@ R7_STK=    base.stk            \
            cxr.stk             \
            eval.stk            \
            file.stk            \
+           fixnum.stk          \
            inexact.stk         \
            lazy.stk            \
            load.stk            \
@@ -58,6 +57,7 @@ R7_OBJS =  base.ostk            \
            cxr.ostk             \
            eval.ostk            \
            file.ostk            \
+           fixnum.ostk          \
            inexact.ostk         \
            lazy.ostk            \
            load.ostk            \
@@ -71,8 +71,7 @@ R7_OBJS =  base.ostk            \
 # ----------------------------------------------------------------------
 # R7RS Large Support
 # ----------------------------------------------------------------------
-LARGE_STK  = list.stk       \
-             charset.stk    \
+LARGE_STK  = charset.stk    \
              stream.stk     \
              box.stk        \
              set.stk        \
@@ -102,21 +101,21 @@ LARGE_OBJS = list.ostk       \
              division.ostk   \
              bitwise.ostk
 
-LARGE_C     = ilist.c     flonum.c     sort.c     vector.c     bytevector.c     rlist.c
-LARGE_C_STK = ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk   rlist.stk
-LARGE_SHOBJ = ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO) rlist.$(SO)
+LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c     rlist.c
+LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk   rlist.stk
+LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO) rlist.$(SO)
 
 
 #----------------------------------------------------------------------
 SRC_STK     = $(R7_STK) $(LARGE_STK)   $(LARGE_C_STK)
 SRC_C_STK   = $(LARGE_C_STK)
-scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS) $(LARGE_SHOBJ)
+scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
 
 SOURCES = $(SRC_STK) $(LARGE_C)
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
+schemedir       = @SCMDIR@/scheme
+schemelibdir    = @EXECDIR@/scheme
 scheme_sources  = $(SRC_STK)
 scheme_DATA     = $(scheme_OBJS)
 schemelib_DATA  = $(LARGE_SHOBJ)
@@ -130,8 +129,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 
@@ -147,13 +147,13 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # 	(cd ../srfi; $(MAKE)  `basename $@`)
 
 
-stream.ostk:     list.ostk ../streams/derived.ostk
-../streams/derived.ostk:
-	(cd ../streams; $(MAKE) derived.ostk)
+stream.ostk:     ../streams/primitive.ostk ../streams/derived.ostk
 
-set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
-../srfi/9.ostk:
-	(cd ../srfi; $(MAKE) 9.ostk)
+../streams/derived.ostk ../streams/primitive.ostk:
+	(cd ../streams; $(MAKE) $@)
+
+set.ostk: ../srfi/69.ostk comparator.ostk
+
 ../srfi/69.ostk:
 	(cd ../srfi; $(MAKE) 69.ostk)
 ../srfi/128.ostk:
@@ -164,6 +164,9 @@ set.ostk: ../srfi/9.ostk ../srfi/69.ostk comparator.ostk
 	(cd ../srfi; $(MAKE) 60.ostk)
 
 bytevector.$(SO): bytevector-incl.c bytevector.c
+
+list.$(SO): list-incl.c
+list-incl.c: list.stk
 
 ilist.$(SO): ilist-incl.c
 ilist-incl.c: comparator.ostk
@@ -180,25 +183,24 @@ vector-incl.c: vector.stk
 rlist.$(SO): rlist-incl.c
 rlist-incl.c: ../srfi/101.ostk
 
-
-#box.ostk:        ../srfi/111.ostk
-#set.ostk:        ../srfi/113.ostk
-#ilist.ostk:      ../srfi/116.$(SO)
-list-queue.ostk: ../srfi/9.ostk
 hash-table.ostk: comparator.ostk
-comparator.ostk: ../srfi/9.ostk
-ideque.ostk: ../srfi/9.ostk generator.ostk list.ostk
-text.ostk: ../srfi/9.ostk ../srfi/129.ostk
+ideque.ostk: generator.ostk list.$(SO)
+text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 
 # ======================================================================
 install-sources:
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) install-sources)\
+	done
 	cp $(scheme_sources) $(schemedir)
 
 clean:
+	(cd vector; $(MAKE) clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
+	(cd vector; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:
@@ -206,8 +208,8 @@ uninstall-hook:
 	rmdir $(schemedir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \
+			 $(SOURCES) >> $(DOCDB)
 
 # Local Variables:
 # tab-width: 8

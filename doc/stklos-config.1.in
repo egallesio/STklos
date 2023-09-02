@@ -21,7 +21,7 @@ stklos-config \- stklos libraries and component information retrieval.
 .SH DESCRIPTION
 The
 .B stklos-config
-permits to obtain informations about the
+permits to obtain information about the
 .B stklos
 version installed on a system. The values returned by this command
 are hard-coded when the system is configured.
@@ -39,21 +39,25 @@ The command that should be run to compile shared libraries.
 .IP "--link | -l"
 The command that should be used to link shared libraries.
 .IP "--cc"
-Value of CC used to compile STklos
+Value of CC used to compile STklos.
 .IP "--cflags"
-Value of CFLAGS used to compile STklos
+Value of CFLAGS used to compile STklos.
 .IP "--ldlags"
 Value of LDFLAGS used to compile STklos
+.IP "--cppflags"
+Value of CPPFLAGS used to compile STklos
 .IP "--shared-suffix | -s"
 The suffix for shared libraries.
 .IP "--threads | -t"
 The name thread system compiled in
 .B stklos.
 .IP "--libraries | -L"
-Display informations on the libraries which are compiled and the one
-which are used when the system was compiled
+Display information on the system dynamic libraries which are used by
+.B stklos.
+.IP "--compiled-libraries"
+Display information on the libraries which were compiled when the system was built.
 .IP "--help | -h | -?"
-Show a list of options
+Show a list of options.
 
 .SH "SEE ALSO"
 .BR stklos (1)

@@ -46,7 +46,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 13-Nov-2020 05:21 (jpellegrini)
-;;;; Last file update:  7-Oct-2022 18:38 (eg)
 ;;;;
 (define-module scheme/lseq
   

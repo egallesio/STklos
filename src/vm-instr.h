@@ -75,10 +75,10 @@
 #  define IN_EQV               70
 #  define IN_EQUAL             71
 #  define IN_APPLY             72
-#  define UNUSED_2             73
+#  define IN_CXR               73
 #  define SET_CUR_MOD          74
 #  define DOCSTRG              75
-#  define FORMALS              76
+#  define PROCNAME             76
 #  define FALSE_PUSH           77
 #  define TRUE_PUSH            78
 #  define NIL_PUSH             79
@@ -169,8 +169,11 @@
 #  define IN_FXLE              164
 #  define IN_FXGE              165
 #  define IN_FXDIFF            166
+#  define SOURCE               167
+#  define FORMALS              168
+#  define INSCHEME             169
 
-#  define NB_VM_INSTR (IN_FXDIFF           +1)
+#  define NB_VM_INSTR (INSCHEME            +1)
 #endif
 
 
@@ -250,10 +253,10 @@ static void *jump_table[] = {
   &&lab_IN_EQV              ,
   &&lab_IN_EQUAL            ,
   &&lab_IN_APPLY            ,
-  &&lab_UNUSED_2            ,
+  &&lab_IN_CXR              ,
   &&lab_SET_CUR_MOD         ,
   &&lab_DOCSTRG             ,
-  &&lab_FORMALS             ,
+  &&lab_PROCNAME            ,
   &&lab_FALSE_PUSH          ,
   &&lab_TRUE_PUSH           ,
   &&lab_NIL_PUSH            ,
@@ -344,6 +347,9 @@ static void *jump_table[] = {
   &&lab_IN_FXLE             ,
   &&lab_IN_FXGE             ,
   &&lab_IN_FXDIFF           ,
+  &&lab_SOURCE              ,
+  &&lab_FORMALS             ,
+  &&lab_INSCHEME            ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -425,10 +431,10 @@ static char *name_table[] = {
   "IN_EQV              ",
   "IN_EQUAL            ",
   "IN_APPLY            ",
-  "UNUSED_2            ",
+  "IN_CXR              ",
   "SET_CUR_MOD         ",
   "DOCSTRG             ",
-  "FORMALS             ",
+  "PROCNAME            ",
   "FALSE_PUSH          ",
   "TRUE_PUSH           ",
   "NIL_PUSH            ",
@@ -519,6 +525,9 @@ static char *name_table[] = {
   "IN_FXLE             ",
   "IN_FXGE             ",
   "IN_FXDIFF           ",
+  "SOURCE              ",
+  "FORMALS             ",
+  "INSCHEME            ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

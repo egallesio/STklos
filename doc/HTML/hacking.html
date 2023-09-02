@@ -771,14 +771,15 @@ pre.rouge {
 <li><a href="#_creating_new_types">6.9. Creating new types</a></li>
 </ul>
 </li>
-<li><a href="#_the_virtual_machine">7. The virtual machine</a></li>
-<li><a href="#_compiler_and_optimizations">8. Compiler and optimizations</a>
+<li><a href="#_continuations">7. Continuations</a></li>
+<li><a href="#_the_virtual_machine">8. The virtual machine</a></li>
+<li><a href="#_compiler_and_optimizations">9. Compiler and optimizations</a>
 <ul class="sectlevel2">
-<li><a href="#_the_compiler">8.1. The compiler</a></li>
-<li><a href="#_peephole_optimizer">8.2. Peephole optimizer</a></li>
+<li><a href="#_the_compiler">9.1. The compiler</a></li>
+<li><a href="#_peephole_optimizer">9.2. Peephole optimizer</a></li>
 </ul>
 </li>
-<li><a href="#_garbage_collection">9. Garbage collection</a></li>
+<li><a href="#_garbage_collection">10. Garbage collection</a></li>
 </ul>
 </div>
 </div>
@@ -1821,12 +1822,13 @@ pointers to functions to print and compare elements:</p>
    Code that retruns STk_true if x and y are to be considered `equal?`,
    and STk_false othereise.
 
-   NOTE: remember to NOT return 0 or 1. THe return value should be a Scheme
-         object, not a C with the intended boolean value. This is particularly
-         important because the compiler will NOT warn you if you return "0":
-         - SCM is defined as a pointer to void
+   NOTE: remember to *NOT* return 0 or 1. The return value should be a Scheme
+         object, not a C value with the intended boolean value. This is
+         particularly important because the compiler will *NOT* warn you if you
+         return "0":
+         - `SCM` is defined as a pointer to `void`
          - '0' can be interpreted as a pointer, so the compiler thinks it's OK
-         - '0' is *not* the same as STk_void
+         - '0' is *not* the same as `STk_void`
   */</span>
 <span class="p">}</span></code></pre>
 </div>
@@ -1924,7 +1926,82 @@ useful macros and function declarations for dealing with extended types.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_the_virtual_machine">7. The virtual machine</h2>
+<h2 id="_continuations">7. Continuations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One macro and two functions are declared in <code>vm.h</code> that can be used to
+capture, check and restore continuations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>CONTP(k)</code> verifies (as expected) wether <code>k</code> is a continuation object</p>
+</li>
+<li>
+<p><code>SCM STk_make_continuation(void)</code> returns the current continuation</p>
+</li>
+<li>
+<p><code>SCM STk_restore_cont(SCM cont, SCM val)</code> restores continuation <code>cont</code>, passing it
+the value <code>val</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There is also one function in <code>vm.c</code> which is not exported:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">DEFINE_PRIMITIVE</span><span class="p">(</span><span class="s">"%fresh-continuation?"</span><span class="o">,</span> <span class="nv">fresh_continuationp,</span> <span class="nv">subr1,</span> <span class="p">(</span><span class="nf">SCM</span> <span class="nv">obj</span><span class="p">))</span>
+<span class="err">{</span>
+  <span class="nv">return</span> <span class="nv">MAKE_BOOLEAN</span><span class="p">(</span><span class="nf">CONTP</span><span class="p">(</span><span class="nf">obj</span><span class="p">)</span> <span class="nv">&amp;&amp;</span> <span class="p">(((</span><span class="nf">struct</span> <span class="nv">continuation_obj</span> <span class="nv">*</span><span class="p">)</span> <span class="nv">obj</span><span class="p">)</span><span class="nv">-&gt;fresh</span><span class="p">))</span><span class="c1">;</span>
+<span class="err">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Their behavior is better illustrated by an example in Scheme:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">c</span> <span class="no">#f</span><span class="p">)</span>  <span class="c1">; to be set later</span>
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">a</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">b</span> <span class="mi">2</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"start~%"</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="nv">c</span> <span class="p">(</span><span class="nf">%make-continuation</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="nv">a</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"~a ~a~%"</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+
+<span class="nv">start</span>
+<span class="mi">2</span> <span class="mi">2</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%continuation?</span> <span class="nv">c</span><span class="p">)</span>
+<span class="no">#t</span>
+
+<span class="nv">stklos&gt;</span> <span class="nv">c</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%fresh-continuation?</span> <span class="nv">c</span><span class="p">)</span>
+<span class="no">#t</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
+<span class="mi">3</span> <span class="mi">2</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%fresh-continuation?</span> <span class="nv">c</span><span class="p">)</span>
+<span class="no">#f</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
+<span class="mi">4</span> <span class="mi">2</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
+<span class="mi">5</span> <span class="mi">2</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
+<span class="mi">6</span> <span class="mi">2</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_virtual_machine">8. The virtual machine</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>See the file <code>vm.adoc</code> for a description of the opcodes.</p>
@@ -1932,10 +2009,10 @@ useful macros and function declarations for dealing with extended types.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_compiler_and_optimizations">8. Compiler and optimizations</h2>
+<h2 id="_compiler_and_optimizations">9. Compiler and optimizations</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_the_compiler">8.1. The compiler</h3>
+<h3 id="_the_compiler">9.1. The compiler</h3>
 <div class="paragraph">
 <p>The compiler is in the file <code>lib/compiler.stk</code>.</p>
 </div>
@@ -1970,7 +2047,7 @@ instruction on the code (which will later be reversed, of course)</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_peephole_optimizer">8.2. Peephole optimizer</h3>
+<h3 id="_peephole_optimizer">9.2. Peephole optimizer</h3>
 <div class="paragraph">
 <p>STklos uses a peephole optimzier, located in the file
 <code>lib/peephole.stk</code>. This optimizer will transform several instruction
@@ -2038,7 +2115,7 @@ in the beginning of the file:</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_garbage_collection">9. Garbage collection</h2>
+<h2 id="_garbage_collection">10. Garbage collection</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>STklos uses the Boehm-Demers-Weiser garbage collector. The wrapper for
@@ -2081,7 +2158,7 @@ will be called when the object at <code>ptr</code> is collected.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-11-21 15:26:04 +0100
+Last updated 2023-02-19 16:12:02 +0100
 </div>
 </div>
 </body>

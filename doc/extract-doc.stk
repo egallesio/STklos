@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Nov-2000 11:08 (eg)
-;;;; Last file update:  6-May-2022 20:35 (eg)
 ;;;;
 
 (define start-doc-rgxp          (string->regexp "^<doc "))

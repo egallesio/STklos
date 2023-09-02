@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 14:29 (eg)
-;;;; Last file update: 18-May-2021 18:00 (eg)
 ;;;;
 
 ;;;; Most of theses tests were stolen in Gauche Scheme distribution
@@ -142,7 +141,7 @@
 
 (test "rational reader" '(1 #t) (rational-test (string->number "3/03")))
 (test/error "rational reader" (string->number "3/0"))
-(test/error "rational reader" '3/3/4)            
+(test/error "rational reader" 3/3/4)
 (test/error "rational reader" (rational-test (string->number "1/2.")))
 (test/error "rational reader" (rational-test (string->number "1.3/2")))
 
@@ -256,7 +255,6 @@
 (test "flonum from ratio reader" '(-1234.0 #t) (flonum-test '#i-1234/1))
 (test "flonum from ratio reader" '(-0.125 #t)  (flonum-test '#i-4/32))
 
-
 ;;------------------------------------------------------------------
 (test-subsection "complex reader")
 
@@ -285,11 +283,12 @@
 (test "complex reader" '(0 -1.0) (decompose-complex '-1.i))
 (test "complex reader" '(0 1.0) (decompose-complex '+1.0i))
 (test "complex reader" '(0 -1.0) (decompose-complex '-1.0i))
-(test "complex reader" 1 (decompose-complex '1+0.0i))
-(test "complex reader" 1 (decompose-complex '1+.0i))
-(test "complex reader" 1 (decompose-complex '1+0.i))
-(test "complex reader" 1 (decompose-complex '1+0.0e-43i))
-(test "complex reader" 100.0 (decompose-complex '1e2+0.0e-43i))
+(test "complex reader" 1 (decompose-complex '1+0i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+0.0i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+.0i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+0.i))
+(test "complex reader" '(1 0.0) (decompose-complex '1+0.0e-43i))
+(test "complex reader" '(100.0 0.0) (decompose-complex '1e2+0.0e-43i))
 
 (test "complex reader" 'i (decompose-complex 'i))
 (test "complex reader" #f (decompose-complex (string->number ".i")))
@@ -315,7 +314,7 @@
 (test "complex from ratio reader" '(1.0 0.4)    (decompose-complex '#i1+2/5i))
 (test "complex from ratio reader" '(0.6 2.0)    (decompose-complex '#i3/5+2i))
 (test "complex from ratio reader" '(2.0 -2.5)   (decompose-complex '#i2+5/-2i))
-(test "complex from ratio reader" 0.0           (decompose-complex '#i0/1+0/1i))
+(test "complex from ratio reader" '(0.0 0.0)    (decompose-complex '#i0/1+0/1i))
 (test "complex from ratio reader" '(-0.5 -0.5)  (decompose-complex '#i-1/2-1/2i))
 
 (test "complex from ratio reader (polar)" (make-polar #i2/5 1.0)       '#i2/5@1)
@@ -324,6 +323,71 @@
 (test "complex from ratio reader (polar)" (make-polar #i2 #i5/-2)      '#i2@5/-2)
 (test "complex from ratio reader (polar)" (make-polar #i0 #i0)         '#i0/1@0/1)
 (test "complex from ratio reader (polar)" (make-polar #i-1/2 #i1/2)    '#i-1/2@1/2)
+
+;; missing "i" at the end of a complex number:
+(test/error "complex missing i 1" 2+3)
+(test/error "complex missing i 2" 2-3)
+(test/error "complex missing i 3" 2_2+3_3)
+(test/error "complex missing i 4" 2/3+4/5)
+(test/error "complex missing i 5" 2/3-4/5)
+(test/error "complex missing i 6" 1+1.0)
+(test/error "complex missing i 7" 1-1.0)
+
+;; these do trigger errors, but they also break the tests...
+;; (test/error "complex missing i 8" '#x2+2)
+;; (test/error "complex missing i 9" '#x2-2)
+;; (test/error "complex missing i 10" '#b11+11)
+;; (test/error "complex missing i 11" '#b11-11)
+
+;; complexes can be written in hex or binary.
+(test "complex hex ++"    '(#xab #x+c2)    (decompose-complex '#xab+c2i))
+(test "complex hex +-"    '(#xab #x-c2)    (decompose-complex '#xab-c2i))
+(test "complex hex -+"    '(#x-ab #x+c2)   (decompose-complex '#x-ab+c2i))
+(test "complex hex --"    '(#x-ab #x-c2)   (decompose-complex '#x-ab-c2i))
+(test "complex binary ++" '(#b101 #b111)   (decompose-complex '#b101+111i))
+(test "complex binary +-" '(#b101 #b-111)  (decompose-complex '#b101-111i))
+(test "complex binary -+" '(#b-101 #b111)  (decompose-complex '#b-101+111i))
+(test "complex binary --" '(#b-101 #b-111) (decompose-complex '#b-101-111i))
+
+(test "complex hex polar ++"    (make-polar #xa #xb)       #xa@b)
+(test "complex hex polar +-"    (make-polar #x-a #xb)      #x-a@b)
+(test "complex hex polar -+"    (make-polar #xa #x-b)      #xa@-b)
+(test "complex hex polar --"    (make-polar #x-a #x-b)     #x-a@-b)
+(test "complex binary polar ++" (make-polar #b101 #b111)   #b101@111)
+(test "complex binary polar +-" (make-polar #b-101 #b111)  #b-101@111)
+(test "complex binary polar -+" (make-polar #b101 #b-111)  #b101@-111)
+(test "complex binary polar --" (make-polar #b-101 #b-111) #b-101@-111)
+
+(test "complex inf+n"
+      #t
+      (let ((c +inf.0+1/2i))
+        (and (infinite? (real-part c))
+             (positive? (real-part c))
+             (= 1/2 (imag-part c)))))
+
+(test "complex n-inf"
+      #t
+      (let ((c 3/4-inf.0i))
+        (and (infinite? (imag-part c))
+             (negative? (imag-part c))
+             (= 3/4 (real-part c)))))
+
+(test "complex +inf+inf"
+      #t
+      (let ((c +inf.0-inf.0i))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (positive? (real-part c))
+             (negative? (imag-part c)))))
+
+(test "complex +inf@n"
+      #t
+      (let ((c +inf.0@2))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (negative? (real-part c))
+             (positive? (imag-part c)))))
+
 
 ;;------------------------------------------------------------------
 (test-subsection "integer writer syntax")
@@ -363,6 +427,21 @@
         "-340282366920938463463374607431768211457")
       (i-tester2 (exp2 127)))
 
+;;------------------------------------------------------------------
+(test-subsection "complex writer syntax")
+
+(test "complex printing"
+      '("+inf.0+inf.0i" "-nan.0+inf.0i" "+inf.0+inf.0i" "-inf.0-inf.0i"
+        "-nan.0-nan.0i" "+nan.0+nan.0i"
+        "1+1i" "0+1i"
+        "1+0.0i" "1-0.0i"
+        "1+1/2i" "2-1/3i")
+      (map number->string
+           (list (* 1+1i +inf.0) (* 0+1i +inf.0) (* 2+1i +inf.0) (* -inf.0 1+1i)
+                 (* -nan.0 +1i) (* +nan.0 -1i)
+                 1+1i 0+1i
+                 1+0.0i 1-0.0i
+                 1+1/2i 2-1/3i)))
 
 ;;==================================================================
 ;; Predicates
@@ -377,6 +456,9 @@
 (test "integer?" #f (integer? 3+4i))
 (test "integer?" #t (integer? 3+0i))
 (test "integer?" #f (integer? #f))
+(test "integer?" #t (integer? (exact 1+0.0i)))
+(test "integer?" #t (integer? (exact 1.0+0.0i)))
+(test "integer?" #t (integer? (exact 0+0i)))
 
 (test "rational?" #t (rational? 0))
 (test "rational?" #t (rational? 85736847562938475634534245))
@@ -416,6 +498,10 @@
 (test "exact?" #f (exact? 4304953480349304983.049304953804))
 (test "exact?" #f (exact? 1.0+0i))
 (test "exact?" #f (exact? 1.0+5i))
+(test "exact?" #t (exact? 1+0i))
+(test "exact?" #t (exact? (exact 1+0.0i)))
+(test "exact?" #t (exact? (exact 1.0+0.0i)))
+(test "exact?" #t (exact? 0+0i))
 (test "inexact?" #f (inexact? 1))
 (test "inexact?" #f (inexact? 4304953480349304983049304953804))
 (test "inexact?" #t (inexact? 1.0))
@@ -423,18 +509,30 @@
 (test "inexact?" #t (inexact? 1.0+0i))
 (test "inexact?" #t (inexact? 1.0+5i))
 
-(test "odd?" #t (odd? 1))
-(test "odd?" #f (odd? 2))
+(test "odd?"  #t (odd? 1))
+(test "odd?"  #f (odd? 2))
 (test "even?" #f (even? 1))
 (test "even?" #t (even? 2))
-;;FIXME: (test "odd?" #t (odd? 1.0))
-;;FIXME: (test "odd?" #f (odd? 2.0))
-;;FIXME: (test "even?" #f (even? 1.0))
-;;FIXME: (test "even?" #t (even? 2.0))
+(test "odd?"  #t (odd? 1.0))
+(test "odd?"  #f (odd? 2.0))
+(test "even?" #f (even? 1.0))
+(test "even?" #t (even? 2.0))
 (test "odd?" #t (odd? 10000000000000000000000000000000000001))
 (test "odd?" #f (odd? 10000000000000000000000000000000000002))
 (test "even?" #f (even? 10000000000000000000000000000000000001))
 (test "even?" #t (even? 10000000000000000000000000000000000002))
+
+;; test if non-integer numbers classify as neither even nor odd:
+(test "odd?" #f (odd? 1/2))
+(test "odd?" #f (odd? 1.5))
+(test "odd?" #f (odd? 0+1i))
+(test "odd?" #f (odd? 0+1.0i))
+(test/error "odd?" (odd? "i am a number"))
+(test "even?" #f (even? 1/2))
+(test "even?" #f (even? 1.5))
+(test "even?" #f (even? 0+1i))
+(test "even?" #f (even? 0+1.0i))
+(test/error "even?" (even? "i am a number"))
 
 (test "zero?" #t (zero? 0))
 (test "zero?" #t (zero? 0.0))
@@ -937,7 +1035,105 @@
 (test "mersenne prime? 100" #f (mersenne-prime? 100))
 (test "mersenne prime? (* 61 19)" #f (mersenne-prime? (* 61 19)))
 
+;;------------------------------------------------------------------
+(test-subsection "gcd and lcm")
 
+(test "gcd" 0   (gcd))
+(test "gcd" 5   (gcd 0 5))
+(test "gcd" 5   (gcd 0 -5))
+(test "gcd" 5.0 (gcd 0.0 -5))
+(test "gcd" 1   (gcd 11 7))
+(test "gcd" 1   (gcd 1 10))
+(test "gcd" 1   (gcd -1 10))
+(test "gcd" 4   (gcd 20 8))
+(test "gcd" 4   (gcd -20 8))
+(test "gcd" 4.0 (gcd 20.0 8))
+(test "gcd" 4.0 (gcd 20 4.0))
+(test "gcd" 1   (gcd 1208925819614629174706189 929192))   ; first is prime
+(test "gcd" 1.0 (gcd 1208925819614629174706189 929192.0)) ; first is prime
+
+(test "gcd with real turned into bignum"
+      1.0
+      (gcd 20000000000000000000.0 3))
+
+(test "gcd 2 bignums -> fixnum"
+      4857223
+      ;; first: 2^65 * 7^5 * 17^2
+      ;; second: 7^5 * 17^50
+      (gcd 179199899179871458857844736
+           559675465285191576525278231414576190110023838138985405765037623943))
+
+(test "gcd 2 bignums -> bignum"
+      569468379011812486801
+      (gcd 21009674891402273592944939027143256440832
+           460916811707362526506357210533854319331779361732494458019956379934890049))
+
+(test "gcd"
+      4
+      (gcd 1099511627776 ;; 2^40
+           274877906944  ;; 2^38
+           10000         ;; 2^4 5^4
+           44444))       ;; 2^2 41 271
+
+
+(test/error "gcd" (gcd 1.2  1))
+(test/error "gcd" (gcd 1/2  1))
+(test/error "gcd" (gcd 1+2i 1))
+(test/error "gcd" (gcd 'a   1))
+(test/error "gcd" (gcd #\a  1))
+(test/error "gcd" (gcd "a"  1))
+(test/error "gcd" (gcd gcd  1))
+
+(test "gcd" fx-greatest (gcd 0 fx-greatest))
+
+(test "gcd" (+ fx-greatest 1) (gcd 0 (+ fx-greatest 1)))
+(test "gcd" (- fx-least)      (gcd 0 fx-least))
+(test "gcd"
+      (- (- fx-least 1))
+      (gcd 0 (- fx-least 1)))
+
+(test "gcd" 15.0 (gcd -15.0))
+
+
+(test "lcm" 1    (lcm))
+(test "lcm" 11   (lcm 11))
+(test "lcm" 11.0 (lcm 11.0))
+(test "lcm" 6    (lcm 2 3))
+(test "lcm" 60   (lcm 12 20))
+(test "lcm" 60   (lcm -12 20))
+(test "lcm" 60.0 (lcm 12.0 20))
+
+(test "lcm"
+      3298534883328        ;; 2^30 * 3
+      (lcm 824633720832    ;; 2^38 * 3
+           1099511627776)) ;; 2^40
+
+(test "lcm"
+      7635421060136960000 ;; 2^40  5^4 41 271
+      (lcm 1099511627776  ;; 2^40
+           274877906944   ;; 2^38
+           10000          ;; 2^4 5^4
+           44444))        ;; 2^2 41 271
+
+(test "lcm"
+      687194767360000.0   ;; 2^40 5^4
+      (lcm 1099511627776  ;; 2^40
+           274877906944   ;; 2^38
+           10000.0))      ;; 2^4 5^4
+
+(test "lcm"
+      189054653969025946927236298201845439024134660015551794280371585024       ;; 2^200 7^6
+      (lcm 120472576                                                           ;; 2^10  7^6
+           27007807709860849561033756885977919860590665716507399182910226432)) ;; 2^200 7^5
+
+
+(test/error "lcm" (lcm 1.2  1))
+(test/error "lcm" (lcm 1/2  1))
+(test/error "lcm" (lcm 1+2i 1))
+(test/error "lcm" (lcm 'a   1))
+(test/error "lcm" (lcm #\a  1))
+(test/error "lcm" (lcm "a"  1))
+(test/error "lcm" (lcm lcm  1))
 
 ;;------------------------------------------------------------------
 (test-subsection "expt")
@@ -953,7 +1149,38 @@
 (test "exact expt" 1 (expt 1 720000))
 (test "exact expt" 1 (expt -1 720000))
 (test "exact expt" -1 (expt -1 720001))
+(test "exact real" 8 (exact (expt 2 3.0))) ;; 3.0 is precisely representable in
+                                           ;; the IEEE standards
+(test "expt -2 0.5" #t
+      (complex? (expt -2.0 0.5)))
+(test "expt -2 1/2" #t
+      (complex? (expt -2.0 1/2)))
 
+(test "expt -2 0.5, expt -2 1/2 (imag part)" #t
+      (< (abs (- (imag-part (expt -2.0 0.5))
+                 (imag-part (expt -2.0 1/2))))
+         0.000001))
+(test "expt -2 0.5, expt -2 1/2 (real part)" #t
+      (< (abs (- (real-part (expt -2.0 0.5))
+                 (real-part (expt -2.0 1/2))))
+         0.000001))
+
+(test "0^0" 1 (expt 0 0))          ;; exact exponent, exact 1
+(test "0^0" 1 (expt 0.0 0))        ;; exact exponent, exact 1
+(test "0^0" 1.0 (expt 0 0.0))      ;; inexact exponent, inexact 1.0
+(test "0^0" 1.0 (expt 0.0 0.0))    ;; inexact exponent, inexact 1.0
+
+(test "complex expt"
+      #t
+      (let* ((z (expt 2 -3+4i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (< -0.116585885  r -0.116585884)
+             (<  0.045085823 i   0.045085824))))
+(test/error "0^-a+bi" (expt 0   -2+1i))
+(test/error "0^-a+bi" (expt 0.0 -2+1i))
+
+(test "exact expt" 1/1606938044258990275541962092341162602522202993782792835301376 (expt (expt 2 100) -2))
 
 ;;------------------------------------------------------------------
 (test-subsection "sqrt")
@@ -979,6 +1206,17 @@
 (test "sqrt bignum"  0+1452616561298192819i
       		     (sqrt -2110094874157786375590269875303166761))
 
+(test "sqrt complex with +0.0 imaginary part" 0.0+i
+      (sqrt -1+0.0i))
+(test "sqrt complex with +0.0 imaginary part" 0.0-i
+      (sqrt -1-0.0i))
+
+(test "sqrt -1" +1i (sqrt -1))
+(test "sqrt -1.0" #t
+      (let ((s (sqrt -1.0)))
+        (and (zero? (real-part s))
+             (< 0.999999 (imag-part s) 1.00001)
+             (inexact? s))))
 
 ;;------------------------------------------------------------------
 (test-subsection "logical operations")
@@ -1271,6 +1509,24 @@
       0.0
       (log 1.0))
 
+(test "log 0.0"
+      -inf.0
+      (log 0.0))
+
+(test "log -0.0" ;; R7RS says (log -0.0) should be "-inf + i*pi".
+      #t
+      (let ((z (log -0.0)))
+        (and (infinite? (real-part z))
+             (negative? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
+
+(test "log -inf.0" ;; The limit when x -> -inf is "+inf + i*pi".
+      #t
+      (let ((z (log -inf.0)))
+        (and (infinite? (real-part z))
+             (positive? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
+
 (test "log 2/3"
       #t
       (< -0.4055000
@@ -1321,7 +1577,61 @@
              (i (imag-part z)))
         (and (<  1.99999999 r  2.00000001)
              (< -3.00000001 i -2.99999999))))
-       
+
+
+;; log with bignums
+
+(test "log 2^200" ;; bignum that fits into a double
+      #t
+      (let ((z (log (expt 2 200))))
+        (<  138.6294360 z 138.629437)))
+
+(test "log 2^200 / 3" ;; numerator is a bignum that fits into a double,
+      ;; denominator is a fixnum
+      #t
+      (let ((z (log (/ (expt 2 200) 3))))
+        (<  137.530823 z 137.530824)))
+
+(test "log 2^60 / 3^70" ;; numerator is a fixnum,
+      ;; denominator is a bignum that fits into a double
+      #t
+      (let ((z (log (/ (expt 2 60) (expt 3 70)))))
+        (<  -35.314030 z -35.314029)))
+
+(test "log 2^70 / 3^70" ;; numerator and denominator are bignums that
+      ;; fit into a double
+      #t
+      (let ((z (log (/ (expt 2 70) (expt 3 70)))))
+        (<  -28.3825576 z -28.3825575)))
+
+;; Just being picky:
+(test "%stklos-has-gmp?" #t (boolean? (%stklos-has-gmp?)))
+
+(when (%stklos-has-gmp?)
+
+  (test "log 2^3000"
+        #t
+        (let ((z (log (expt 2 3000))))
+          (<  2079.44154160000 z 2079.44154170000)))
+
+  (test "log_2 2^4000"
+        #t
+        (let ((z (log (expt 2 4000) 2)))
+          (< 3999.9999999 z 4000.0000001)))
+
+  (test "log 10^3000 / 3"
+        #t
+        (let ((z (log (/ (expt 10 3000) 7))))
+          (<  6905.80936 z 6905.80937)))
+
+  (test "log 2^3000 / 3^2500" ;; numerator and denominator are bignums
+        #t
+        (let ((z (log (/ (expt 2 3000) (expt 3 2500)))))
+          (<  -667.089180 z -667.089179)))
+  )
+
+;; sin, cos
+
 (test "sin 1-1i"
       #t
       (let* ((z (sin 1-1i))
@@ -1437,6 +1747,122 @@
       1.0
       (atan (tan 1) 1))
 
+;; hyperbolic trigs
+
+(test "sinh 5"
+      #t
+      (< 74.20321057770000
+         (sinh 5)
+         74.20321057780000))
+
+(test "cosh 0.5"
+      #t
+      (< 1.1276259650000000
+         (cosh 0.5)
+         1.1276259660000000))
+
+(test "sinh 0.5"
+      #t
+      (< 0.521095305000000
+         (sinh 0.5)
+         0.521095306000000))
+
+(test "cosh 7"
+      #t
+      (< 548.31703515400000
+         (cosh 7)
+         548.31703515600000))
+
+(test "tanh 0.5"
+      #t
+      (< 0.4621171572000000
+         (tanh 0.5)
+         0.4621171573000000))
+
+(test "tanh 2"
+      #t
+      (< 0.9640275800000000
+         (tanh 2)
+         0.9640275801000000))
+
+
+(test "sinh asinh 2"
+      #t
+      (< 1.9999999999
+         (sinh (asinh 2))
+         2.0000000001))
+
+(test "cosh acosh 2"
+      #t
+      (< 1.9999999999
+         (cosh (acosh 2))
+         2.0000000001))
+
+
+(test "tanh atanh 1/2"
+      #t
+      (< 0.4999999999
+         (tanh (atanh 1/2))
+         0.5000000001))
+
+
+(test "asinh 2"
+      #t
+      (< 1.4436354751000000
+         (asinh 2)
+         1.4436354752000000))
+
+(test "asinh 2^75"
+      #t
+      (< 52.67918572000000
+         (asinh (expt 2 75))
+         52.67918573000000))
+
+(test "acosh 3"
+      #t
+      (< 1.7627471740000000
+         (acosh 3)
+         1.7627471750000000))
+
+(test "acosh 2^75"
+      #t
+      (< 52.67918572000000
+         (acosh (expt 2 75))
+         52.67918573000000))
+
+(test "asinh 1"
+      #t
+      (< 0.8813735870000000
+         (asinh 1)
+         0.8813735880000000))
+
+;; Domain error:
+(test/error "atanh 1"    (atanh +1))
+(test/error "atanh -1"   (atanh -1))
+(test/error "atanh 1.0"  (atanh +1.0))
+(test/error "atanh -1.0" (atanh -1.0))
+
+(test "atanh 1/2"
+      #t
+      (< 0.5493061440000000
+         (atanh 1/2)
+         0.5493061450000000))
+
+;; These should return exact results:
+(test "sinh 0.0"  0 (sinh  0.0))
+(test "cosh 0.0"  1 (cosh  0.0))
+(test "tanh 0.0"  0 (tanh  0.0))
+(test "asinh 0.0" 0 (asinh 0.0))
+(test "acosh 1.0" 0 (acosh 1.0))
+(test "atanh 0.0" 0 (atanh 0.0))
+(test "sinh 0"    0 (sinh  0))
+(test "cosh 0"    1 (cosh  0))
+(test "tanh 0"    0 (tanh  0))
+(test "asinh 0"   0 (asinh 0))
+(test "acosh 1"   0 (acosh 1))
+(test "atanh 0"   0 (atanh 0))
+
+
 ;;------------------------------------------------------------------
 (test-subsection "Misc")
 
@@ -1460,6 +1886,199 @@
 
 (test "numerator.7"  -3.0 (numerator (inexact (/ -6 4))))
 (test "denominator.7" 2.0 (denominator (inexact (/ -6 4))))
+
+
+;; decode-float
+
+
+(define (test-decode-float val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "decode-float"
+          val
+          (exact->inexact (* sign signif (expt 2 ex))))))
+
+(import (only (srfi 144)
+              flnormalized?
+              fl-least fl-greatest
+              fl-e fl-e-euler fl-phi
+              fl-sqrt-2 fl-sqrt-5
+              fl-sin-1 fl-pi))
+
+
+(test-decode-float 0.0)
+(test-decode-float 1.0)
+(test-decode-float -1.0)
+(test-decode-float fl-e)
+(test-decode-float (- fl-e))
+(test-decode-float fl-e-euler)
+(test-decode-float (- fl-e-euler))
+(test-decode-float fl-phi)
+(test-decode-float (- fl-phi))
+(test-decode-float fl-sqrt-2)
+(test-decode-float (- fl-sqrt-2))
+(test-decode-float fl-sqrt-5)
+(test-decode-float (- fl-sqrt-5))
+(test-decode-float fl-sin-1)
+(test-decode-float (- fl-sin-1))
+(test-decode-float fl-pi)
+(test-decode-float (- fl-pi))
+(test-decode-float fl-least)
+(test-decode-float (* fl-least 101))    ; subnormal
+(test-decode-float (* fl-least 2))      ; subnormal
+(test-decode-float (* fl-least 100000)) ; subnormal
+(test-decode-float (* fl-least -98))    ; subnormal
+(test-decode-float fl-greatest)
+
+
+(define (test-subnormal-decode val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "subnormal?" #f (flnormalized? val))
+    (test "subnormal-exponent"
+          (float-min-exponent)
+          ex)))
+
+(test-subnormal-decode (* fl-least))        ; subnormal
+(test-subnormal-decode (* fl-least 101))    ; subnormal
+(test-subnormal-decode (* fl-least 2))      ; subnormal
+(test-subnormal-decode (* fl-least 100000)) ; subnormal
+(test-subnormal-decode (* fl-least -98))    ; subnormal
+
+
+(define (test-re-encode-float val)
+  (let-values (( (signif ex sign) (decode-float val) ))
+    (test "re-encode-float"
+          val
+          (exact->inexact (encode-float signif ex sign)))))
+
+(test-re-encode-float 0.0)
+(test-re-encode-float 1.0)
+(test-re-encode-float -1.0)
+(test-re-encode-float fl-e)
+(test-re-encode-float (- fl-e))
+(test-re-encode-float fl-e-euler)
+(test-re-encode-float (- fl-e-euler))
+(test-re-encode-float fl-phi)
+(test-re-encode-float (- fl-phi))
+(test-re-encode-float fl-sqrt-2)
+(test-re-encode-float (- fl-sqrt-2))
+(test-re-encode-float fl-sqrt-5)
+(test-re-encode-float (- fl-sqrt-5))
+(test-re-encode-float fl-sin-1)
+(test-re-encode-float (- fl-sin-1))
+(test-re-encode-float fl-pi)
+(test-re-encode-float (- fl-pi))
+(test-re-encode-float fl-least)            ; subnormal
+(test-re-encode-float (* fl-least 101))    ; subnormal
+(test-re-encode-float (* fl-least 2))      ; subnormal
+(test-re-encode-float (* fl-least 100000)) ; subnormal
+(test-re-encode-float (* fl-least -98))    ; subnormal
+(test-re-encode-float fl-greatest)
+
+
+(test/error "encode > max exponent"
+            (encode-float 1 (+ (float-max-exponent) 1) 1))
+
+(test/error "encode < min exponent"
+            (encode-float 1 (- (float-min-exponent) 1) 1))
+
+(test/error "encode > max significand"
+            (encode-float (+ (float-max-significand) 1) 1 1))
+
+;; real-precision.
+;; This one is interesting. We're actually testing C's printf... :)
+
+(test/error "real-precision.0"
+      (parameterize ((real-precision 0)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test/error "real-precision.51"
+      (parameterize ((real-precision 51)) (with-output-to-string (lambda () (display 10.001)))))
+
+
+(test "real-precision.1"
+      "1e+01"
+      (parameterize ((real-precision 1)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.2"
+      "10.0"
+      (parameterize ((real-precision 2)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.3"
+      "10.0"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 10.001)))))
+(test "real-precision.4"
+      "10.0"
+      (parameterize ((real-precision 4)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test "real-precision.5"
+      "10.001"
+      (parameterize ((real-precision 5)) (with-output-to-string (lambda () (display 10.001)))))
+
+(test "real-precision..3"
+      "0.123"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 0.1234567890123456789)))))
+(test "real-precision..3"
+      "1.12"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 1.1234567890123456789)))))
+
+(test "real-precision..10"
+      "0.123456789"
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 0.1234567890123456789)))))
+
+(test "real-precision..10"
+      "1.123456789"
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 1.1234567890123456789)))))
+
+
+(test "real-precision..3"
+      "123.0"
+      (parameterize ((real-precision 3)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "real-precision..10"
+      "123.1234568" ;; last digit is 7, will be rounded to the closest one
+      (parameterize ((real-precision 10)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "real-precision..6"
+      "123.123"
+      (parameterize ((real-precision 6)) (with-output-to-string (lambda () (display 123.1234567890123456789)))))
+
+(test "degrees->radians 0"
+      0.0
+      (degrees->radians 0))
+
+(test "degrees->radians 180"
+      #t
+      (< 3.14159265
+         (degrees->radians 180)
+         3.14159266))
+
+(test "degrees->radians 10"
+      #t
+      (< 0.17453292
+         (degrees->radians 10)
+         0.17453293))
+
+(let ((pi 3.141592653589793115997963468544185161590576171875))
+
+  (test "radians->degrees 0"
+        0.0
+        (radians->degrees 0))
+
+  (test "radians->degrees pi"
+        #t
+        (< 179.99999
+           (radians->degrees pi)
+           180.00001))
+
+  (test "radians->degrees 10"
+        #t
+        (< 35.99999
+           (radians->degrees (/ pi 5))
+           36.00001)))
+
+
+(test "weird number or symbol.1" #t (number? '3s2))
+(test "weird number or symbol.2" #f (number? '3s2x))
+(test "weird number or symbol.3" #t (number? '3#d2+5i))
+(test "weird number or symbol.4" #f (number? '3#d2+5))
+
 
 
 (test-section-end)

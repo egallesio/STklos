@@ -2,7 +2,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update:  6-Jul-2021 12:31 (eg)
 
 SRC= demos.stk \
      button.stk canvas1.stk canvas2.stk canvas3.stk    \

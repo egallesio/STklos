@@ -45,7 +45,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 15-Feb-2021 09:16 (jpellegrini)
-;;;; Last file update: 22-Apr-2022 16:54 (eg)
 ;;;;
 
 (import (srfi 1))

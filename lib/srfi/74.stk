@@ -6,7 +6,6 @@
 ;;;;           Author: Michael Sperber
 ;;;;      Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2005
-;;;; Last file update: 22-Apr-2022 16:32 (eg)
 ;;;;
 ;;;; This code is an adaptation of the reference implementation provided
 ;;;; with the SRFI document by Michael Sperber.

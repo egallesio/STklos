@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update:  8-Jun-2022 13:23 (eg)
 ;;;;
 
 (require "test")
@@ -112,6 +111,16 @@ b|)
   (test "any.4" 6  (any fct '(2 4 6) '(1 2 5)))
   (test "any.5" 2  (any fct '(2 4 6 8 10) '(-1 -3 -4))))
 
+(test "void? #void" #t (void? #void))
+(test "void? (void)"     #t (void? (void)))
+(test "void? (if #f #t)" #t (void? (if #f #t)))
+(test "void? set!"       #t (let ((a 0)) (void? (set! a 1))))
+(test "void number"      #f (void? -2))
+(test "void string"      #f (void? "str"))
+(test "void nil"         #f (void? '()))
+(test "void closure"     #f (void? (lambda () -1)))
+(define-macro %%tmp (lambda lst 'ok))
+(test "void syntax"      #f (void? %%tmp))
 
 ;;----------------------------------------------------------------------
 (test-subsection "Escaped octals in strings")
@@ -122,10 +131,30 @@ b|)
 (test "read only 3 octal digits" "S45" (guard (e (else 'wrong)) (read-from-string "\"\\012345\"")))
 
 ;;----------------------------------------------------------------------
-(test-subsection "Docstrings and signatures")
+(test-subsection "Arity, docstrings, signatures and sources")
 
-(import STKLOS-COMPILER)
-(compiler:generate-signature #t)
+(let ((f (lambda () (void)))
+      (g (lambda (a) (void)))
+      (h (lambda (a b c d) (void)))
+      (i (lambda args (void)))
+      (j (lambda (a b c . rest) void))
+      (k (lambda (a b :optional c d) (void)))
+      (l (lambda (a b :key e f) (void)))
+      (m (lambda (a b :optional c d :rest r :key e f) (void))))
+  (test "arity zero"  0 (%procedure-arity f))
+  (test "arity one"   1 (%procedure-arity g))
+  (test "arity four"  4 (%procedure-arity h))
+  (test "arity args" -1 (%procedure-arity i))
+  (test "arity rest" -4 (%procedure-arity j))
+  (test "arity opke" -3 (%procedure-arity k))
+  (test "arity opke" -3 (%procedure-arity l))
+  (test "arity opke" -3 (%procedure-arity m)))
+
+(test "arity nil"  #f (%procedure-arity '()))
+(test "arity 5"    #f (%procedure-arity 5))
+(test "arity code" #f (%procedure-arity '(lambda () -1)))
+
+(compiler:keep-formals #t)
 
 (define (d) 1)
 (define (e x) 10)
@@ -137,13 +166,13 @@ b|)
 
 (test "empty signature"
       '()
-      (%procedure-signature d))
+      (procedure-formals d))
 (test "no-docstring"
       #f
       (%procedure-doc e))
 (test "no-docstring, but signature"
       '(x)
-      (%procedure-signature e))
+      (procedure-formals e))
 (test "docstring"
       "docstring abc"
       (%procedure-doc f))
@@ -152,30 +181,30 @@ b|)
       (%procedure-doc g))
 (test "signature"
       '(a b)
-      (%procedure-signature f))
+      (procedure-formals f))
 (test "signature g"
       '(a b)
-      (%procedure-signature g))
+      (procedure-formals g))
 (test "docstring h"
       "h doc"
       (%procedure-doc h))
 (test "signature h"
       '(x y)
-      (%procedure-signature h))
+      (procedure-formals h))
 (test "signature i"
       '(w z)
-      (%procedure-signature i))
+      (procedure-formals i))
 (test "really anonymous lambda - sig"
       '(l i s p)
-      (%procedure-signature (lambda (l i s p) (+ l i s p))))
+      (procedure-formals (lambda (l i s p) (+ l i s p))))
 (test "really anonymous lambda sig, with docstring"
       '(l i s p)
-      (%procedure-signature (lambda (l i s p) "Hello!" (+ l i s p))))
+      (procedure-formals (lambda (l i s p) "Hello!" (+ l i s p))))
 (test "really anonymous lambda - docstring"
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
 
-(compiler:generate-signature #f)
+(compiler:keep-formals #f)
 
 (define (dd) 1)
 (define (ee x) 10)
@@ -187,13 +216,13 @@ b|)
 
 (test "empty signature, not generated"
       #f
-      (%procedure-signature dd))
+      (procedure-formals dd))
 (test "no-docstring"
       #f
       (%procedure-doc ee))
 (test "no-docstring, but sig, not generated"
       #f
-      (%procedure-signature ee))
+      (procedure-formals ee))
 (test "docstring"
       "docstring abcd"
       (%procedure-doc ff))
@@ -202,29 +231,100 @@ b|)
       (%procedure-doc gg))
 (test "signature"
       #f
-      (%procedure-signature ff))
+      (procedure-formals ff))
 (test "signature gg"
       #f
-      (%procedure-signature gg))
+      (procedure-formals gg))
 (test "docstring hh"
       "hh doc"
       (%procedure-doc hh))
 (test "signature hh"
       #f
-      (%procedure-signature hh))
+      (procedure-formals hh))
 (test "signature ii"
       #f
-      (%procedure-signature ii))
+      (procedure-formals ii))
 (test "really anonymous lambda - sig (not generated)"
       #f
-      (%procedure-signature (lambda (l i s p) (+ l i s p))))
+      (procedure-formals (lambda (l i s p) (+ l i s p))))
 (test "really anonymous lambda sig - sig not generated, with docstring"
       #f
-      (%procedure-signature (lambda (l i s p) "Hello!" (+ l i s p))))
+      (procedure-formals (lambda (l i s p) "Hello!" (+ l i s p))))
 (test "really anonymous lambda doc - sig not generated, with docstring"
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
 
+;; source
+(compiler:keep-source #t)
+
+(define (cube x) (* x x x))
+(test "source cube"
+      '(lambda (x) (* x x x))
+      (procedure-source cube))
+
+(test "source cube different var"
+      #f ;; the *exact* source is returned.
+      (equal? (procedure-source cube)
+              '(lambda (y) (* y y y))))
+
+(let ((f (lambda (a b c) (list c b a))))
+  (test "source f"
+        '(lambda (a b c) (list c b a))
+        (procedure-source f)))
+
+(let ((f (lambda args (print args))))
+  (test "source lambda args"
+        '(lambda args (print args))
+        (procedure-source f)))
+
+;; not testing key and optionals, because the source of the
+;; optional/keyword processing is included.
+;; (let ((f (lambda (a b :optional c d :rest r :key e f)
+;;            (values r (list a b c d e f)))))
+;;   ...
+
+(let ((f #f)
+      (g #f))
+  (let loop ( (a 1)
+              (b 2) )
+    (set! g (list b a))
+    (set! f loop))
+  (test "source named let"
+        '(lambda (a b) (set! g (list b a)) (set! f loop))
+        (procedure-source f)))
+
+(letrec ((f (lambda (n) (if (positive? n)
+                       (* n (f (- n 1)))
+                       1))))
+  (test "source letrec"
+        '(lambda (n) (if (positive? n) (* n (f (- n 1))) 1))
+        (procedure-source f)))
+
+(test/error "source 1"    (procedure-source 1))
+(test/error "source void" (procedure-source #void))
+(test/error "source nil"  (procedure-source '()))
+(test/error "source code" (procedure-source '(lambda (a) (- a))))
+
+
+;; Disable and see if it's really off
+(compiler:keep-source #f)
+
+(define (cube x) (* x x x))
+(test "source cube"
+      #f
+      (procedure-source cube))
+
+(test "source cube different var"
+      #f
+      (equal? (procedure-source cube)
+              '(lambda (y) (* y y y))))
+
+(let ((f (lambda (a b c) (list c b a))))
+  (test "source f"
+        #f
+        (procedure-source f)))
+
+;;----------------------------------------------------------------------
 (test-subsection "tagbody and repeat")
 
 (test "tagbody without goto"
@@ -257,8 +357,9 @@ b|)
              #:outer
              (display "4" p)))))
 
-(test/error "tagbody absent label"
-            (tagbody (-> #:absent)))
+
+ (test/compile-error "tagbody absent label"
+                     (tagbody (-> #:absent)))
 
 (test "repeat.1"
       (make-string 100 #\.)
@@ -271,6 +372,49 @@ b|)
                                  (repeat -4 (display "." p)))))
 (test/error "repeat.3"
             (repeat 'not-a-number (display "." p)))
+
+;;----------------------------------------------------------------------
+(test-subsection "while and until")
+
+(test "while.1"
+      10
+      (let ((a 1)) (while (< a 10) (set! a (fx+ 1 a))) a))
+
+(test "while.2"
+      (void)
+      (while #f #f))
+
+(test "while.3"
+      '()
+      (let ((x '(1 2 3)))
+        (while (pair? x) (set! x (cdr x)))
+        x))
+
+(test "while.4"
+      '(3)
+      (let ((x '(1 2 3)))
+        (while (pair? (cdr x)) (set! x (cdr x)))
+        x))
+
+(test "until.1"
+      0
+      (let ((a 10)) (until (= a 0) (set! a (fx- a 1))) a))
+
+(test "until.2"
+      (void)
+      (until #t #f))
+
+(test "until.3"
+      '()
+      (let ((x '(1 2 3)))
+        (until (null? x) (set! x (cdr x)))
+        x))
+
+(test "until.4"
+      '(3)
+      (let ((x '(1 2 3)))
+        (until (null? (cdr x)) (set! x (cdr x)))
+        x))
 
 ;;----------------------------------------------------------------------
 (test-subsection "(void)")
@@ -291,6 +435,43 @@ b|)
 (test "syntax in env.1" '(1 2 3) (lambda (begin) (begin 1 2 3)) (lambda lambda lambda))
 (test "syntax in env.2" 3 (lambda (_) (begin 1 2 3)) (lambda lambda lambda))
 
+
+;;----------------------------------------------------------------------
+(test-subsection "match-case & match-lambda")
+
+
+(test "match-case.1"
+      'bar
+      (match-case '(a b a)
+                  ((?x ?x) 'foo)
+                  ((?x ?- ?x) 'bar)))
+
+(test "match-case.2"
+      '(length=3 d (b c) a)
+      (match-case '(a (b c) d)
+                  ((?x ?y) (list 'length=2 y x))
+                  ((?x ?y ?z) (list 'length=3 z y x))))
+
+(test "match-case.3"
+      'bar
+      (match-case '(a b c)
+                  ((a (not (kwote b)) c) 'foo)
+                  ((a (or (kwote a) (kwote b)) c) 'bar)))
+
+(test "match-lambda.1"
+      'bar
+      ((match-lambda
+         ((?x ?x) 'foo)
+         ((?x ?- ?x) 'bar))
+       '(a b a)))
+
+
+(test "match-lambda.2"
+      '(length=3 d (b c) a)
+      ((match-lambda
+         ((?x ?y) (list 'length=2 y x))
+         ((?x ?y ?z) (list 'length=3 z y x)))
+       '(a (b c) d)))
 
 ;;------------------------------------------------------------------
 (test-section-end)

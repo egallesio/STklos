@@ -23,7 +23,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Feb-2000 18:02 (eg)
-;;;; Last file update: 11-Apr-2000 12:32 (eg)
 ;;;;
 
 (require "regexp")

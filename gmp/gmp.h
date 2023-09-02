@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 20-May-2021 18:57
- * Last file update: 20-May-2021 18:58 (eg)
  */
 
 #ifndef _GMP_H_

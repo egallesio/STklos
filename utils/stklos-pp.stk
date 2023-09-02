@@ -2,7 +2,7 @@
 ;;;;
 ;;;; stklos-pp.stk         -- A simple STklos preprocessor
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,11 +22,18 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jan-2022 15:00
-;;;; Last file update: 17-Jan-2022 18:00 (eg)
 ;;;;
 
 
 (import (prefix (stklos preproc) pp-))
+
+
+(define (translate input output)
+  ;; avoid redirection if not necessary
+  (if (string=? output "-")
+      (pp-translate input)
+      (with-output-to-file output
+        (lambda () (pp-translate input)))))
 
 (define (main args)
   (let ((output "-"))
@@ -35,10 +42,17 @@
       "A simple preprocessor for text documents"
       ""
       (("define" :alternate "D" :arg str :help "Define new metadata")
-       (pp-parse-metadata str))
+       (pp-parse-metadata (open-input-string str) #f))
 
       (("output" :alternate "o" :arg file :help "Output in <file>")
        (set! output file))
+
+      (("debug" :alternate "d" :help "Be more verbose (can be used several times)")
+       (pp-verbosity (+ (pp-verbosity) 1)))
+
+      (("version" :alternate "v" :help "Show stklos-pp version and exit")
+       (printf "stklos-pp ~A\n" (stklos-pp-version))
+       (exit 0))
 
       (("help" :alternate "h" :help "This help")
        (arg-usage (current-output-port))
@@ -52,10 +66,10 @@
       (else
        (case (length other-arguments)
          ((0)                ;; No argument: use stdin
-          (pp-translate "-")
+          (translate "-" output)
           (exit 0))
          ((1)               ;; One argument: use it as input
-          (pp-translate (car other-arguments))
+          (translate (car other-arguments) output)
           (exit 0))
          (else              ;; Error
           (arg-usage (current-error-port))

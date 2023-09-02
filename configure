@@ -654,6 +654,13 @@ GOOCANV
 GTK_CFLAGS
 HAVE_CANVAS
 HAVE_GTK
+SH_LIB_LINK
+SH_LIB_COMPILE
+C_LINK
+C_COMPILE
+C_VERSION
+COMP_LIBS
+SYST_LIBS
 DLLIBS
 CONTROL_FX_PARAMETERS
 DEFAULT_CS
@@ -663,13 +670,14 @@ RDLINE
 FFIINC
 FFILIB
 FFI
-PCREPKG
-PCREINC
-PCRELIB
-PCRE
+PCRE2PKG
+PCRE2INC
+PCRE2LIB
+PCRE2
 GCINC
 GCLIB
 GC
+COMP_DIR
 STRIPCMD
 LDAP_LIB
 HAVE_GNOME
@@ -682,7 +690,6 @@ SH_SUFFIX
 SH_LOADER
 SH_LOAD_FLAGS
 SH_COMP_FLAGS
-EXTRA_COMP_FLAGS
 OS_NAME_VERSION
 OS_NAME
 BUILD_ARCH
@@ -696,6 +703,8 @@ GMP
 UNAME_O
 OS_FLAVOUR
 HAVE_DLOPEN
+VERSION_STATUS
+FULL_VERSION
 STKCFLAGS
 NO_THREAD_FALSE
 NO_THREAD_TRUE
@@ -1469,7 +1478,7 @@ Optional Packages:
   --with-provided-gc      use the provided Boehm GC library
   --with-provided-bignum  use the provided Bignum (GMPlite) library
   --with-gmp-light        a synonym for --with-provided-bignum
-  --with-provided-regexp  use the provided Regexp (PCRE) library
+  --with-provided-regexp  use the provided Regexp (PCRE2) library
   --with-provided-ffi     use the provided FFI library
   --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums
 
@@ -1731,6 +1740,49 @@ printf "%s\n" "$ac_res" >&6; }
 
 } # ac_fn_c_check_type
 
+# ac_fn_c_try_run LINENO
+# ----------------------
+# Try to run conftest.$ac_ext, and return whether this succeeded. Assumes that
+# executables *can* be run.
+ac_fn_c_try_run ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+printf "%s\n" "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
+  { { case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+printf "%s\n" "$ac_try_echo"; } >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; }
+then :
+  ac_retval=0
+else $as_nop
+  printf "%s\n" "$as_me: program exited with status $ac_status" >&5
+       printf "%s\n" "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+       ac_retval=$ac_status
+fi
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_c_try_run
+
 # ac_fn_c_try_link LINENO
 # -----------------------
 # Try to link conftest.$ac_ext, and return whether this succeeded.
@@ -1777,49 +1829,6 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_link
-
-# ac_fn_c_try_run LINENO
-# ----------------------
-# Try to run conftest.$ac_ext, and return whether this succeeded. Assumes that
-# executables *can* be run.
-ac_fn_c_try_run ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  if { { ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-printf "%s\n" "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
-  { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-printf "%s\n" "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }
-then :
-  ac_retval=0
-else $as_nop
-  printf "%s\n" "$as_me: program exited with status $ac_status" >&5
-       printf "%s\n" "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-       ac_retval=$ac_status
-fi
-  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_c_try_run
 
 # ac_fn_c_check_func LINENO FUNC VAR
 # ----------------------------------
@@ -2665,18 +2674,27 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
+   # Set also VERSION_STATUS to stable when changing version
+VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
 # Grab configure options before it is too late
 #
-CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""
+CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""; HAS_LDFLAGS=""; HAS_CPPFLAGS=""
+PDFDIR="";HTMLDIR=""; DOCDIR=""; LIBDIR=""; DATADIR="";
 
 for opt in "$@"
 do
   case $opt in
-     CC=*)     HAS_CC=1 ;;
-     CFLAGS=*) HAS_CFLAGS=1;;
+     CC=*)        HAS_CC=1 ;;
+     CFLAGS=*)    HAS_CFLAGS=1;;
+     LDLAGS=*)    HAS_LDLAGS=1;;
+     CPPFLAGS=*)  HAS_CPPFLAGS=1;;
+     --docdir=*)  DOCDIR=${docdir};;
+     --pdfdir=*)  PDFDIR=${pdfdir};;
+     --htmldir=*) HTMLDIR=${htmldir};;
+     --libdir=*)  LIBDIR=${libdir};;
+     --datadir=*) DATADIR=${datadir};;
   esac
 
   if test "X$opt" = "X--no-create" -o "X$opt" = "X--no-recursion"
@@ -2687,6 +2705,9 @@ do
      CONF_OPT="$CONF_OPT \\\"$opt\\\""
   fi
 done
+
+# export CC, CFLAGS and all for configure scripts launched by this configure script
+export CC CFLAGS LDFLAGS CPPFLAGS
 
 am__api_version='1.16'
 
@@ -5186,50 +5207,6 @@ fi
 
 
 ### Checks for typedefs, structures, and compiler characteristics.
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
-printf %s "checking for inline... " >&6; }
-if test ${ac_cv_c_inline+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  ac_cv_c_inline=no
-for ac_kw in inline __inline__ __inline; do
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#ifndef __cplusplus
-typedef int foo_t;
-static $ac_kw foo_t static_foo (void) {return 0; }
-$ac_kw foo_t foo (void) {return 0; }
-#endif
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ac_cv_c_inline=$ac_kw
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  test "$ac_cv_c_inline" != no && break
-done
-
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_inline" >&5
-printf "%s\n" "$ac_cv_c_inline" >&6; }
-
-case $ac_cv_c_inline in
-  inline | yes) ;;
-  *)
-    case $ac_cv_c_inline in
-      no) ac_val=;;
-      *) ac_val=$ac_cv_c_inline;;
-    esac
-    cat >>confdefs.h <<_ACEOF
-#ifndef __cplusplus
-#define inline $ac_val
-#endif
-_ACEOF
-    ;;
-esac
-
 ac_fn_c_check_type "$LINENO" "mode_t" "ac_cv_type_mode_t" "$ac_includes_default"
 if test "x$ac_cv_type_mode_t" = xyes
 then :
@@ -5296,6 +5273,239 @@ else $as_nop
 printf "%s\n" "#define size_t unsigned int" >>confdefs.h
 
 fi
+
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether byte ordering is bigendian" >&5
+printf %s "checking whether byte ordering is bigendian... " >&6; }
+if test ${ac_cv_c_bigendian+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_cv_c_bigendian=unknown
+    # See if we're dealing with a universal compiler.
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifndef __APPLE_CC__
+	       not a universal capable compiler
+	     #endif
+	     typedef int dummy;
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+
+	# Check for potential -arch flags.  It is not universal unless
+	# there are at least two -arch flags with different values.
+	ac_arch=
+	ac_prev=
+	for ac_word in $CC $CFLAGS $CPPFLAGS $LDFLAGS; do
+	 if test -n "$ac_prev"; then
+	   case $ac_word in
+	     i?86 | x86_64 | ppc | ppc64)
+	       if test -z "$ac_arch" || test "$ac_arch" = "$ac_word"; then
+		 ac_arch=$ac_word
+	       else
+		 ac_cv_c_bigendian=universal
+		 break
+	       fi
+	       ;;
+	   esac
+	   ac_prev=
+	 elif test "x$ac_word" = "x-arch"; then
+	   ac_prev=arch
+	 fi
+       done
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    if test $ac_cv_c_bigendian = unknown; then
+      # See if sys/param.h defines the BYTE_ORDER macro.
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+	     #include <sys/param.h>
+
+int
+main (void)
+{
+#if ! (defined BYTE_ORDER && defined BIG_ENDIAN \
+		     && defined LITTLE_ENDIAN && BYTE_ORDER && BIG_ENDIAN \
+		     && LITTLE_ENDIAN)
+	      bogus endian macros
+	     #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  # It does; now see whether it defined to BIG_ENDIAN or not.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+		#include <sys/param.h>
+
+int
+main (void)
+{
+#if BYTE_ORDER != BIG_ENDIAN
+		 not big endian
+		#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ac_cv_c_bigendian=yes
+else $as_nop
+  ac_cv_c_bigendian=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    fi
+    if test $ac_cv_c_bigendian = unknown; then
+      # See if <limits.h> defines _LITTLE_ENDIAN or _BIG_ENDIAN (e.g., Solaris).
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <limits.h>
+
+int
+main (void)
+{
+#if ! (defined _LITTLE_ENDIAN || defined _BIG_ENDIAN)
+	      bogus endian macros
+	     #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  # It does; now see whether it defined to _BIG_ENDIAN or not.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <limits.h>
+
+int
+main (void)
+{
+#ifndef _BIG_ENDIAN
+		 not big endian
+		#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ac_cv_c_bigendian=yes
+else $as_nop
+  ac_cv_c_bigendian=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+    fi
+    if test $ac_cv_c_bigendian = unknown; then
+      # Compile a test program.
+      if test "$cross_compiling" = yes
+then :
+  # Try to guess by grepping values from an object file.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+unsigned short int ascii_mm[] =
+		  { 0x4249, 0x4765, 0x6E44, 0x6961, 0x6E53, 0x7953, 0 };
+		unsigned short int ascii_ii[] =
+		  { 0x694C, 0x5454, 0x656C, 0x6E45, 0x6944, 0x6E61, 0 };
+		int use_ascii (int i) {
+		  return ascii_mm[i] + ascii_ii[i];
+		}
+		unsigned short int ebcdic_ii[] =
+		  { 0x89D3, 0xE3E3, 0x8593, 0x95C5, 0x89C4, 0x9581, 0 };
+		unsigned short int ebcdic_mm[] =
+		  { 0xC2C9, 0xC785, 0x95C4, 0x8981, 0x95E2, 0xA8E2, 0 };
+		int use_ebcdic (int i) {
+		  return ebcdic_mm[i] + ebcdic_ii[i];
+		}
+		extern int foo;
+
+int
+main (void)
+{
+return use_ascii (foo) == use_ebcdic (foo);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  if grep BIGenDianSyS conftest.$ac_objext >/dev/null; then
+	      ac_cv_c_bigendian=yes
+	    fi
+	    if grep LiTTleEnDian conftest.$ac_objext >/dev/null ; then
+	      if test "$ac_cv_c_bigendian" = unknown; then
+		ac_cv_c_bigendian=no
+	      else
+		# finding both strings is unlikely to happen, but who knows?
+		ac_cv_c_bigendian=unknown
+	      fi
+	    fi
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+else $as_nop
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main (void)
+{
+
+	     /* Are we little or big endian?  From Harbison&Steele.  */
+	     union
+	     {
+	       long int l;
+	       char c[sizeof (long int)];
+	     } u;
+	     u.l = 1;
+	     return u.c[sizeof (long int) - 1] == 1;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"
+then :
+  ac_cv_c_bigendian=no
+else $as_nop
+  ac_cv_c_bigendian=yes
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+    fi
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_bigendian" >&5
+printf "%s\n" "$ac_cv_c_bigendian" >&6; }
+ case $ac_cv_c_bigendian in #(
+   yes)
+     printf "%s\n" "#define WORDS_BIGENDIAN 1" >>confdefs.h
+;; #(
+   no)
+      ;; #(
+   universal)
+
+printf "%s\n" "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
+
+     ;; #(
+   *)
+     as_fn_error $? "unknown endianness
+ presetting ac_cv_c_bigendian=no (or yes) will help" "$LINENO" 5 ;;
+ esac
 
 
 ### Checks for library functions.
@@ -6353,10 +6563,10 @@ then :
   printf "%s\n" "#define HAVE_GETPASS 1" >>confdefs.h
 
 fi
-ac_fn_c_check_func "$LINENO" "gettimeofday" "ac_cv_func_gettimeofday"
-if test "x$ac_cv_func_gettimeofday" = xyes
+ac_fn_c_check_func "$LINENO" "clock_gettime" "ac_cv_func_clock_gettime"
+if test "x$ac_cv_func_clock_gettime" = xyes
 then :
-  printf "%s\n" "#define HAVE_GETTIMEOFDAY 1" >>confdefs.h
+  printf "%s\n" "#define HAVE_CLOCK_GETTIME 1" >>confdefs.h
 
 fi
 ac_fn_c_check_func "$LINENO" "glob" "ac_cv_func_glob"
@@ -6473,6 +6683,12 @@ then :
   printf "%s\n" "#define HAVE_STRTOUL 1" >>confdefs.h
 
 fi
+ac_fn_c_check_func "$LINENO" "utimensat" "ac_cv_func_utimensat"
+if test "x$ac_cv_func_utimensat" = xyes
+then :
+  printf "%s\n" "#define HAVE_UTIMENSAT 1" >>confdefs.h
+
+fi
 
 
 
@@ -6539,7 +6755,7 @@ done
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
-### Determine the options necessary for dynamic loading (even if disbaled later)
+### Determine the options necessary for dynamic loading (even if disabled later)
 if test X$LD = X
 then
    LD="ld"
@@ -6550,30 +6766,70 @@ DLLIBS=""
 
 eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
-case $OS_NAME_VERSION in
-  SUNOS*)
+case $OS in
+  SUNOS)
     CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
-  DARWIN_10)
-     GCINC="GCINC -D_XOPEN_SOURCE"
-     EXTRA_COMP_FLAGS="-I/opt/local/include"
-     ;;
-  UNKNOWN*)
+  UNKNOWN)
     echo ""
-    echo "**** STklos has no support for your system (`uname -s`)"
-    echo "**** Please modify the script \"utils/shlib-options\" to add"
-    echo "**** support for your system (it's easy) and restart installation process."
+    echo "**** STklos has no support for your system (`uname -s`)."
+    echo "**** Please modify the script \"utils/shlib-options\" to add support"
+    echo "**** for your system (it's easy) and rerun the configure script."
     echo "**** Thanks for sending your modifications to <bugs _at_ stklos.net>"
     exit 1
     ;;
 esac
 
+# Manage standard options --docdir, --pdfdir, --htmldir
+# By default, autoconf uses
+#   docdir = ${prefix}/share/doc/stklos
+#   pdfdir = ${docdir}
+#   htmldir = ${docdir}
+# To permit to have several versions of STklos installed, and to avoid
+# cluttering the doc directory, we use
+#   docdir = ${prefix}/share/doc/stklos/${VERSION}
+#   pdfdir = ${docdir}/pdf
+#   htmldir = ${docdir}/html
+# Of course, if the user specify any option, we use the value he/she gave
+if test "$DOCDIR" == "" ; then
+    # user has not given a "--docdir" option. Use our own convention
+    docdir="${prefix}/share/doc/${PACKAGE_TARNAME}/${VERSION}"
+fi
 
-### Initilize the extra conf file in src
-SCMDIR=$prefix/share/$PACKAGE/$VERSION
-EXECDIR=$prefix/lib/$PACKAGE/$VERSION
+if test "$PDFDIR" == ""  ; then
+   # user has not given a "--pdfdir" option. Use our own convention
+   pdfdir="${docdir}/pdf"
+fi
+
+if test "$HTMLDIR" == ""  ; then
+   # user has not given a "--htmldir" option. Use our own convention
+   htmldir="${docdir}/html"
+fi
+
+# Manage standard options --libdir and --datadir
+# If the user doesn't specify these option, we fix
+#   libdir to ${prefix}/lib/
+#   datadir to ${prefix}/share
+# Otherwise, we take the user provided values.
+#
+# In any case, we will place our files in the stklos/${VERSION} subdir
+
+if test "$LIBDIR" == ""  ; then
+   # user has not given a "--libdir" option. Use ${prefix}/lib/stklos/${VERSION}
+   libdir="${prefix}/lib/${PACKAGE_TARNAME}/${VERSION}"
+fi
+
+if test "$DATADIR" == ""  ; then
+   # user has not given a "--datadir" option. Use ${prefix}/share/stklos/${VERSION}
+   datadir="${prefix}/share/${PACKAGE_TARNAME}/${VERSION}"
+fi
+
+### Initialize the extra conf file in src
 PREFIX=$prefix
+SCMDIR=$datadir
+EXECDIR=$libdir
+
 
 ### Determine the kind of the machine which is running this script
 BUILD_OS=$os-$version
@@ -6581,21 +6837,15 @@ BUILD_ARCH=`uname -m`
 OS_NAME=$OS
 case $OS in
    LINUX)
-      v=`echo $version | sed -e 's/\([0-9]*\)\.\([0-9\]*\).*/\1_\2/'`
-      OS_NAME_VERSION=LINUX_$v
+      v=`echo $version | sed -e 's/^\([0-9]*\)\.\([0-9\]*\).*/\1_\2/'`
       ;;
    DARWIN)
-      case $version in
-         9*)  OS_NAME_VERSION=DARWIN_9;;
-         10*) OS_NAME_VERSION=DARWIN_10;;
-         11*) OS_NAME_VERSION=DARWIN_11;;
-         *)   OS_NAME_VERSION=DARWIN_OLD;;
-      esac
+      v=`echo $version | sed -e 's/^\([0-9]*\).*/\1/'`
       ;;
   *)
       v=`echo $version | sed -e 's/[^0-9]/_/g'`
-      OS_NAME_VERSION=$OS\_$v;
 esac
+OS_NAME_VERSION=${OS}_$v;
 
 
 ###
@@ -6686,7 +6936,7 @@ esac
 
 
 ###
-### To thread or not to thread ?
+### To thread or not to thread?
 ###
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthread" >&5
 printf %s "checking for pthread_create in -lpthread... " >&6; }
@@ -6854,19 +7104,6 @@ echo "*****"
 echo "***** GC support"
 echo "*****"
 
-# Patch code for OSX Lion
-case $OS_NAME_VERSION in
-     DARWIN_11)
-       if test ! -f gc/stklos-patch-applied
-       then
-              echo "**** Patching GC library";
-              patch -p1 < etc/lion.patch
-              touch  gc/stklos-patch-applied
-       fi
-       ;;
-esac
-
-
 # Try to determine if libgc is installed
 if ${PKGCONFIG} --exists bdw-gc ;then
    HAVE_GC="yes"
@@ -6915,7 +7152,7 @@ fi
 
 fi
 
-# Test if the user want to force with our GC lib
+# Test if the user wants to force the use of our GC lib
 
 # Check whether --with-provided-gc was given.
 if test ${with_provided_gc+y}
@@ -6929,14 +7166,7 @@ fi
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
 then
      echo "... Configuring libgc"
-
-     case $OS_NAME_VERSION in
-       DARWIN_10)
-          cflags="${CFLAGS} -D_XOPEN_SOURCE";;
-       *)
-          cflags="${CFLAGS}";;
-     esac
-     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix --enable-static \
+     (cd gc; ./configure --prefix=$prefix --enable-static \
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
@@ -6968,11 +7198,14 @@ echo "*****"
 echo "***** GMP support"
 echo "*****"
 
-# Try to determine if libgmp is installed
-# No pkg-config for gmp yet
 
-# check for GMP pre-version 3.0
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
+# Try to determine if libgmp is installed
+if ${PKGCONFIG} --exists gmp ;then
+   HAVE_GMP="yes"
+   GMPKG="present"
+else
+   # check for GMP pre-version 3.0
+   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
 printf %s "checking for mpz_init_set in -lgmp... " >&6; }
 if test ${ac_cv_lib_gmp_mpz_init_set+y}
 then :
@@ -7014,10 +7247,9 @@ else $as_nop
   HAVE_GMP="no"
 fi
 
-
-# check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
+   # check for GMP version post 3.0
+   if test "$HAVE_GMP" = "no" ;then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
 printf %s "checking for __gmpz_init_set in -lgmp... " >&6; }
 if test ${ac_cv_lib_gmp___gmpz_init_set+y}
 then :
@@ -7059,9 +7291,10 @@ else $as_nop
   HAVE_GMP="no"
 fi
 
+   fi
 fi
 
-# Test if the user want to force with our GMP lib
+# Test if the user wants to force the use of our GMP lib
 # (2 names available for that  --with-provided-bignum or (legacy) --with-gmp-light
 
 # Check whether --with-provided-bignum was given.
@@ -7088,7 +7321,7 @@ fi
 if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
 then
      echo "... Configuring libgmp"
-     (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
+     (cd gmp; CC=${CC} CFLAGS="${CFLAGS} -I../src -DFOR_STKLOS=1" ./configure \
               --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
      GMPINC='-I$(BASEDIR)/gmp'
@@ -7097,8 +7330,13 @@ then
 else
      echo "... Using system libgmp library"
      GMP=""
-     GMPINC=""
-     GMPLIB="-lgmp"
+     if $PKGCONFIG --exists gmp ;then
+        GMPINC="$($PKGCONFIG --cflags gmp)"
+        GMPLIB="$($PKGCONFIG --libs gmp)"
+     else
+        GMPINC=""
+        GMPLIB="-lgmp"
+     fi
      DLLIBS="$DLLIBS $GMPLIB"
 
 printf "%s\n" "#define HAVE_GMP 1" >>confdefs.h
@@ -7108,101 +7346,95 @@ fi
 
 
 # ----------------------------------------------------------------------
-# PCRE support
+# PCRE2 support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** Regexp support"
 echo "*****"
 
-# Try to determine if libpcre is installed
-if ${PKGCONFIG} --exists libpcre ;then
-   HAVE_PCRE="yes"
-   PCREPKG="present"
+# Try to determine if libpcre2 is installed
+if ${PKGCONFIG} --exists libpcre2-8 libpcre2-posix ;then
+   HAVE_PCRE2="yes"
+   PCRE2PKG="present"
 else
-   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pcre_fullinfo in -lpcre" >&5
-printf %s "checking for pcre_fullinfo in -lpcre... " >&6; }
-if test ${ac_cv_lib_pcre_pcre_fullinfo+y}
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for pcre2_config_8 in -lpcre2-8" >&5
+printf %s "checking for pcre2_config_8 in -lpcre2-8... " >&6; }
+if test ${ac_cv_lib_pcre2_8_pcre2_config_8+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpcre $LIBS $LIBS"
+LIBS="-lpcre2-8 $LIBS $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char pcre_fullinfo ();
+char pcre2_config_8 ();
 int
 main (void)
 {
-return pcre_fullinfo ();
+return pcre2_config_8 ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_lib_pcre_pcre_fullinfo=yes
+  ac_cv_lib_pcre2_8_pcre2_config_8=yes
 else $as_nop
-  ac_cv_lib_pcre_pcre_fullinfo=no
+  ac_cv_lib_pcre2_8_pcre2_config_8=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcre_pcre_fullinfo" >&5
-printf "%s\n" "$ac_cv_lib_pcre_pcre_fullinfo" >&6; }
-if test "x$ac_cv_lib_pcre_pcre_fullinfo" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcre2_8_pcre2_config_8" >&5
+printf "%s\n" "$ac_cv_lib_pcre2_8_pcre2_config_8" >&6; }
+if test "x$ac_cv_lib_pcre2_8_pcre2_config_8" = xyes
 then :
-  HAVE_PCRE="yes"
+  HAVE_PCRE2="yes"
 else $as_nop
-  HAVE_PCRE="no"
+  HAVE_PCRE2="no"
 fi
 
 fi
 
-# Test if the user want to force with our PCRE lib
+# Test if the user wants to force the use of our PCRE2 lib
 
 # Check whether --with-provided-regexp was given.
 if test ${with_provided_regexp+y}
 then :
-  withval=$with_provided_regexp; PROV_PCRE="$withval"
+  withval=$with_provided_regexp; PROV_PCRE2="$withval"
 else $as_nop
-  PROV_PCRE="no"
+  PROV_PCRE2="no"
 fi
 
 
-if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
+if test "$HAVE_PCRE2" = "no" -o "$PROV_PCRE2" = "yes"
 then
-     echo "... Configuring libpcre"
-     PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-                 -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-     (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
-           --enable-utf8 \
-           --prefix=$prefix --disable-shared --disable-cpp) || \
-           { echo "Cannot configure PCRE"; exit; }
-     PCRE=pcre
-     PCREINC="-I../pcre"
-     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-     DEF_PCRE=""
-     COMP_LIBS="libpcre $COMP_LIBS"
+     echo "... Configuring libpcre2"
+     (cd pcre2; ./configure --prefix=$prefix --disable-shared --disable-cpp) || \
+           { echo "Cannot configure PCRE2"; exit; }
+     PCRE2=pcre2
+     PCRE2INC="-I../pcre2"
+     PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
+     COMP_LIBS="libpcre2 $COMP_LIBS"
 else
-     echo "... Using system libpcre library"
-     PCRE=""
-     if $PKGCONFIG --exists libpcre ;then
-        PCREINC="$($PKGCONFIG --cflags libpcre)"
-        PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
+     echo "... Using system libpcre2 library"
+     if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
+        PCRE2INC="$($PKGCONFIG --cflags libpcre2-8 libpcre2-posix) "
+        PCRE2LIB="$($PKGCONFIG --libs   libpcre2-8 libpcre2-posix)"
      else
-        PCREINC=""
-        PCRELIB="-lpcre -lpcreposix"
+        PCRE2INC=""
+        PCRE2LIB="-lpcre-8 -lpcre2-posix"
      fi
-     DLLIBS="$DLLIBS $PCRELIB"
+     DLLIBS="$DLLIBS $PCRE2LIB"
 
-printf "%s\n" "#define HAVE_PCRE 1 " >>confdefs.h
+printf "%s\n" "#define HAVE_PCRE2 1 " >>confdefs.h
 
-     SYST_LIBS="libpcre $SYST_LIBS"
+     SYST_LIBS="libpcre2 $SYST_LIBS"
 fi
 
 
@@ -7261,7 +7493,7 @@ fi
 
 fi
 
-# Test if the user want to force with our FFI lib
+# Test if the user wants to force the use of our FFI lib
 
 # Check whether --with-provided-ffi was given.
 if test ${with_provided_ffi+y}
@@ -7275,8 +7507,7 @@ fi
 if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
 then
      echo "... Configuring libffi"
-     (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
-           --disable-structs --disable-raw-api --disable-shared \
+     (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
            --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
      FFI="ffi"
      FFIINC="-I../ffi/$(./config.guess)/include"
@@ -7331,8 +7562,8 @@ then :
 else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
- void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
-             void main () { char foo; inner (&foo); }
+ int inner (char *foo) { char bar; return !(foo >= &bar); }
+             int main (void) { char foo; return inner (&foo); }
 _ACEOF
 if ac_fn_c_try_run "$LINENO"
 then :
@@ -7386,10 +7617,46 @@ then
 fi
 
 ###
+### SFI-176 stuff
+###
+C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
+C_COMPILE=""
+C_LINK=""
+
+# c.compile property
+for arg in ${CC} ${CFLAGS} ${SH_MAIN_LOAD_FLAGS}
+do
+    C_COMPILE="${C_COMPILE}\\\"${arg}\\\" "
+done
+
+# c.link property
+for arg in ${CC} ${LDLAGS} ${GMPLIB} ${PCRE2LIB} ${FFILIB} ${GCLIB} -lm
+do
+    C_LINK="${C_LINK}\\\"${arg}\\\" "
+done
+
+SH_LIB_COMPILE=""
+SH_LIB_LINK=""
+
+# stklos.shlib.compile property
+inc=-I${prefix}/include/$PACKAGE
+for arg in ${CC} ${SH_COMP_FLAGS} ${inc} ${inc}/gc
+do
+    SH_LIB_COMPILE="${SH_LIB_COMPILE}\\\"${arg}\\\" "
+done
+
+# stklos.shlib.link property
+for arg in ${SH_LOADER} ${SH_LOAD_FLAGS}
+do
+    SH_LIB_LINK="${SH_LIB_LINK}\\\"${arg}\\\" "
+done
+
+
+###
 ### Finishing ...
 ###
 
-# See if we must add CC and CFLAGS to the arguments stored in $CONF_OPT
+# See if we must add CC, {C,LD,CPP}FLAGS to the arguments stored in $CONF_OPT
 if test "X$HAS_CC" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CC=$CC\\\""
 fi
@@ -7398,9 +7665,18 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
 
-CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
+if test "X$HAS_LDFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"LDFLAGS=$LDFLAGS\\\""
+fi
 
-# Determmine the STRIP command to use
+if test "X$HAS_CFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"CPPFLAGS=$CPPFLAGS\\\""
+fi
+
+
+CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
+
+# Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
    STRIPCMD=strip
 else
@@ -7509,14 +7785,45 @@ else $as_nop
   HAVE_LIBEDIT="no"
 fi
 
-                if "$HAVE_LIBEDIT" = "yes" ;then
+                if test "$HAVE_LIBEDIT" = "yes" ;then
                    RDLINE="-ledit";
                 fi
             fi;;
   *) DLLIBS="";;
 esac
 
+# Get configure/compilation directory
+COMP_DIR=`pwd`
+
+
+# Add information to VERSION
+FULL_VERSION=$VERSION
+
+if test $VERSION_STATUS = "unstable"
+then
+  # This code duplicates some code from "utils/generate-git-info"
+  # but it makes things simpler
+  git_version=`git --version 2>/dev/null || true`
+
+  if test "$git_version" != ""
+  then
+    # Git is installed
+    git_patch="`git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/'`"
+    if test "X$git_patch" != "X"
+    then
+      FULL_VERSION="$VERSION.$git_patch"
+    fi
+  else
+    FULL_VERSION=$VERSION-unstable
+  fi
+fi
+
+
+
+
 ### Output files
+
+
 
 
 
@@ -7549,7 +7856,7 @@ esac
 
 
 
-# PCRE
+# PCRE2
 
 
 
@@ -7559,6 +7866,15 @@ esac
 
 
 # readline completion support
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7577,7 +7893,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 pkgman/Makefile lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile doc/pp/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/scheme/Makefile lib/scheme/vector/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pp.1 doc/stklos-script.1 lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7712,6 +8028,7 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+
 if test -z "${PTHREADS_TRUE}" && test -z "${PTHREADS_FALSE}"; then
   as_fn_error $? "conditional \"PTHREADS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -8316,6 +8633,7 @@ do
     "doc/refman/Makefile") CONFIG_FILES="$CONFIG_FILES doc/refman/Makefile" ;;
     "doc/vm/Makefile") CONFIG_FILES="$CONFIG_FILES doc/vm/Makefile" ;;
     "doc/hacking/Makefile") CONFIG_FILES="$CONFIG_FILES doc/hacking/Makefile" ;;
+    "doc/pp/Makefile") CONFIG_FILES="$CONFIG_FILES doc/pp/Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "utils/Makefile") CONFIG_FILES="$CONFIG_FILES utils/Makefile" ;;
     "utils/stklos-config") CONFIG_FILES="$CONFIG_FILES utils/stklos-config" ;;
@@ -8324,8 +8642,8 @@ do
     "lib/Match.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Match.d/Makefile" ;;
     "lib/SILex.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/SILex.d/Makefile" ;;
     "lib/Lalr.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Lalr.d/Makefile" ;;
-    "lib/ScmPkg.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/ScmPkg.d/Makefile" ;;
     "lib/scheme/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/Makefile" ;;
+    "lib/scheme/vector/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/vector/Makefile" ;;
     "lib/srfi/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi/Makefile" ;;
     "lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES lib/stklos/Makefile" ;;
     "lib/streams/Makefile") CONFIG_FILES="$CONFIG_FILES lib/streams/Makefile" ;;
@@ -8334,9 +8652,8 @@ do
     "doc/stklos-config.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-config.1" ;;
     "doc/stklos-compile.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-compile.1" ;;
     "doc/stklos-genlex.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-genlex.1" ;;
-    "doc/stklos-pkg.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-pkg.1" ;;
+    "doc/stklos-pp.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-pp.1" ;;
     "doc/stklos-script.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-script.1" ;;
-    "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
     "lib/srfi/160/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi/160/Makefile" ;;
     "extensions/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/Makefile" ;;
     "extensions/gtklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/Makefile" ;;
@@ -9081,7 +9398,7 @@ printf "%s\n" "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2
 fi
 
 
-# Add a src/git-config.h if we dont have one
+# Add a src/git-config.h if we don't have one
 (cd src; ../utils/generate-git-info)
 
 chmod 0755 utils/stklos-config utils/stklos-script
@@ -9094,7 +9411,7 @@ echo "*******"
 echo "               System: " $BUILD_OS
 echo "              OS nick: " $OS_NAME_VERSION
 echo "              OS type: " $OS_FLAVOUR
-echo "      Install prefix : " $prefix
+echo "       Install prefix: " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD
@@ -9108,4 +9425,5 @@ echo " "
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "
+
 

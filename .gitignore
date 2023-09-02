@@ -53,7 +53,7 @@ doc/stklos-compile.1
 doc/stklos-config.1
 doc/stklos-genlex.1
 doc/stklos-install.1
-doc/stklos-pkg.1
+doc/stklos-pp.1
 doc/stklos-script.1
 doc/stklos.1
 doc/refman/html
@@ -118,39 +118,43 @@ gtklos/gtklosconf.h
 
 # Lib directory
 lib/Lalr.d/calc
-lib/boot-callcc.stk
 lib/srfis-data.scm
 
 #                  ... generated Scheme files
-lib/srfi/160/*.stk
+lib/scheme/vector/c128.stk
+lib/scheme/vector/c64.stk
+lib/scheme/vector/f32.stk
+lib/scheme/vector/f64.stk
+lib/scheme/vector/s16.stk
+lib/scheme/vector/s32.stk
+lib/scheme/vector/s64.stk
+lib/scheme/vector/s8.stk
+lib/scheme/vector/u16.stk
+lib/scheme/vector/u32.stk
+lib/scheme/vector/u64.stk
+lib/scheme/vector/u8.stk
 
 #                  ... generated C files
 *incl.c         
 
 
 
-# Pcre directory
-pcre/.libs
-pcre/RunTest
-pcre/chartables.c
-pcre/config.h
-pcre/configure.lineno
-pcre/dftables
-pcre/libpcre.pc
-pcre/libpcrecpp.pc
-pcre/pcre-config
-pcre/pcre.h
-pcre/pcre_chartables.c
-pcre/pcre_stringpiece.h
-pcre/pcrecpparg.h
-pcre/pcredemo
-pcre/pcregrep
-pcre/pcretest
-pcre/stamp-h1
-pcre/testNinput
-pcre/testsavedregex
-pcre/teststderr
-pcre/testtry
+# Pcre2 directory
+pcre2/.libs/
+pcre2/libpcre2-16.pc
+pcre2/libpcre2-32.pc
+pcre2/libpcre2-8.pc
+pcre2/libpcre2-posix.pc
+pcre2/pcre2-config
+pcre2/pcre2grep
+pcre2/pcre2posix_test
+pcre2/pcre2test
+pcre2/src/.dirstamp
+pcre2/src/config.h
+pcre2/src/pcre2.h
+pcre2/src/pcre2_chartables.c
+pcre2/src/stamp-h1
+
 
 # pkgman
 pkgman/stklos-pkg
@@ -160,7 +164,7 @@ src/.STklos.prcs_aux
 src/HOWTO-WIN32
 src/TAGS
 src/TODO
-src/boot.keep
+src/boot.img
 src/extraconf.h
 src/stamp-h1
 src/stklos
@@ -178,6 +182,7 @@ utils/stklos-config
 utils/stklos-genlex
 utils/stklos-script
 utils/stklos-pp
+
 
 
 # Extensions directory

@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  8-Oct-2021 11:15
-;;;; Last file update: 11-Aug-2022 11:41 (eg)
 ;;;;
 
 (define-module scheme/eval

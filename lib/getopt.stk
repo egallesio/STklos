@@ -1,7 +1,7 @@
 ;;;;
 ;;;; getopt.stk                         -- getopt
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Oct-2001 08:40 (eg)
-;;;; Last file update: 11-May-2022 15:19 (eg)
 ;;;;
 
 ;;;;
@@ -59,11 +58,11 @@ doc>
                                                         ">")
                                          ""))))))
       (if help
-          ; We have an help string, return something like ("--long, -l" . "help")
+          ; We have an help string, return something like ("-l ,--long" . "help")
           (cons
            (if alt
-               (format #f "~A, ~A" (pretty opt arg) (pretty alt arg))
-               (format #f "~A" (pretty opt arg)))
+               (format #f "~A, ~A" (pretty alt arg) (pretty opt arg))
+               (format #f "    ~A" (pretty opt arg)))
            help)
           ; No help string
           '())))
@@ -160,7 +159,7 @@ doc>
  * |parse-arguments| form
  *
  * @lisp
- * #!/usr/bin/env stklos-script
+ * #!/usr/bin/env stklos
  *
  * (define (main args)
  *   (parse-arguments args

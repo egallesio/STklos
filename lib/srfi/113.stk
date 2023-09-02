@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2-Oct-2022 00:44
-;;;; Last file update:  2-Oct-2022 00:45 (eg)
 ;;;;
 
 ;;;; The real implementation is in (scheme set).

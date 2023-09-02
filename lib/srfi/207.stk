@@ -1,7 +1,6 @@
 
 (define-module srfi/207
   (import (srfi 1)
-          (srfi 9)
           (srfi 13)
           (srfi 151)
           (srfi 158))

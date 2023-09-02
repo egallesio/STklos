@@ -21,7 +21,6 @@
  *
  *            Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *     Creation date: 03-Dec-2021 00:00 (jpellegrini)
- *  Last file update: 18-Nov-2022 17:17 (eg)
  *
  */
 
@@ -45,7 +44,7 @@ static SCM SCM_NaN;
  double lgamma_r(double x, int *signp);
 #endif
 
-static Inline SCM double2real(double x)
+static inline SCM double2real(double x)
 {
   SCM z;
 

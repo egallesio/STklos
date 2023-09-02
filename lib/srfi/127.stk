@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2-Oct-2022 21:16
-;;;; Last file update:  7-Oct-2022 18:45 (eg)
 ;;;;
 
 ;;;; The real implementation is in (scheme lseq).

@@ -1,7 +1,7 @@
 /*
  * utf8.c               -- UTF-8 support functions
  *
- * Copyright © 2011-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ * Copyright © 2011-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update: 10-Sep-2021 11:40 (eg)
  */
 
 #include "stklos.h"
@@ -217,10 +216,10 @@ int STk_utf8_char_from_byte(char *s, int i, int max) /*  byte index => char inde
   return (s == idx) ? pos : -1;
 }
 
-/* ======================================================================
- *      STklos Primitives
- * ====================================================================== */
 #ifdef STK_DEBUG
+/* ======================================================================
+ *      STklos Primitives (defined only if we are in debug mode)
+ * ====================================================================== */
 DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 {
   SCM lst = STk_nil;
@@ -237,7 +236,7 @@ DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 
 DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
 {
-  int i;
+  long i;
   uint32_t c = 0;
 
   STk_debug("String ~S. space=%d, size=%d, len =%d", str,
@@ -250,7 +249,7 @@ DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
 
   if (index) {
     i = STk_integer_value(index);
-    printf("------\nChar starting at index %d\n", i);
+    printf("------\nChar starting at index %ld\n", i);
     STk_debug("  length of char = %d",
               STk_utf8_sequence_length(&(STRING_CHARS(str)[i])));
     STk_utf8_grab_char(STRING_CHARS(str)+i, &c);
@@ -260,17 +259,14 @@ DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
   return STk_void;
 }
 
-#endif
-
-
 /* ======================================================================
  *      Initialization
  * ====================================================================== */
 int STk_init_utf8(void)
 {
-#ifdef STK_DEBUG
   ADD_PRIMITIVE(char_utf8_encoding);
   ADD_PRIMITIVE(dump_string);
-#endif
   return TRUE;
 }
+
+#endif

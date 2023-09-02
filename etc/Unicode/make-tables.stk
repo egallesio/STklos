@@ -21,7 +21,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 11-Aug-2011 00:16 (eg)
-;;;; Last file update:  9-Jul-2019 17:34 (eg)
 ;;;;
 
 (define digits   '())

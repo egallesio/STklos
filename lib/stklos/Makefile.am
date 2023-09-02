@@ -1,6 +1,6 @@
 # Makefile for the STklos specific  libraries
 #
-# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  2-Jun-2022 15:37 (eg)
 
 #======================================================================
 
@@ -31,8 +30,7 @@ SO = @SH_SUFFIX@
 #
 # Libraries written in Scheme only
 #
-SRC_STK = preproc.stk
-
+SRC_STK  = preproc.stk
 SRC_OSTK = preproc.ostk
 
 #
@@ -42,15 +40,16 @@ SRC_C     = itrie.c
 SRC_C_STK = itrie.stk
 SRC_SHOBJ = itrie.$(SO)
 
-scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+# scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+ALL_OBJS    = $(SRC_OSTK) $(SRC_SHOBJ)
 
 DOCDB  = ../DOCDB
 BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+schemedir       = @SCMDIR@/stklos
+schemelibdir    = @EXECDIR@/stklos
 scheme_DATA     = $(SRC_OSTK)
 schemelib_DATA  = $(SRC_SHOBJ)
 scheme_sources  = $(SRC_STK)
@@ -64,9 +63,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
-	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	/bin/rm -f $*.o
 #======================================================================
 # Dependencies
@@ -76,10 +75,10 @@ readline-complete.$(SO): readline-complete-incl.c readline-complete.c
 
 # ======================================================================
 install-sources:
-	install $(scheme_sources) $(schemedir)
+	cp $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS) *-incl.c  *~
+	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile
@@ -89,5 +88,5 @@ uninstall-hook:
 	rmdir $(schemedir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \
+					$(SOURCES) >> $(DOCDB)

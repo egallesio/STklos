@@ -1,0 +1,36 @@
+;;;;
+;;;;
+;;;; 112.stk         -- Export of SRFI-112 primitives (native)
+;;;;
+;;;; Copyright © 2023 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@stklos.net]
+;;;;    Creation date: 12-Apr-2023 14:07
+;;;; Last file update: 12-Apr-2023 14:11 (eg)
+;;;;
+
+;; SRFI-112 is native in STklos. This file is here to permit the import
+;; of (srfi 112) library
+(define-library (srfi 112)
+  (import (only SCHEME implementation-name implementation-version
+                cpu-architecture machine-name os-name os-version))
+  (export implementation-name implementation-version
+          cpu-architecture machine-name os-name os-version))
+
+(provide "srfi/112")

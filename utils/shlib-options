@@ -21,8 +21,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update:  8-Aug-2020 18:48 (eg)
-
 
 #
 # Utilities
@@ -68,7 +66,7 @@ case $os in
       esac
       OS=FREEBSD
       SH_COMP_FLAGS='-fpic'
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -80,7 +78,7 @@ case $os in
       esac
       OS=OPENBSD
       SH_COMP_FLAGS='-fpic'
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -89,7 +87,7 @@ case $os in
   HP*)
       OS=HPUX
       SH_COMP_FLAGS="+Z"
-      SH_LOAD_FLAGS="-b -o"
+      SH_LOAD_FLAGS="-b"
       SH_LOADER="$LD"
       SH_SUFFIX='sl'
       SH_LIB_SUFFIX='sl'
@@ -103,25 +101,25 @@ case $os in
       else
         SH_COMP_FLAGS="-KPIC"
       fi
-      SH_LOAD_FLAGS="-shared -o"
+      SH_LOAD_FLAGS="-shared"
       SH_LOADER="$CC"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
       ;;
   Linux*)
       case $version in
-            2.0.*) version=2.0.x;;
+        2.0.*) version=2.0.x;;
         2.1.*) version=2.1.x;;
         2.2.*) version=2.2.x;;
         2.3.*) version=2.3.x;;
         2.4.*) version=2.4.x;;
-          esac
-          case $machine in
+      esac
+      case $machine in
         i*86) machine=ix86;;
       esac
       OS=LINUX
       SH_COMP_FLAGS='-fpic -nostdlib'
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -130,7 +128,7 @@ case $os in
   NetBSD*)
       OS=NETBSD
       SH_COMP_FLAGS="-fpic"
-      SH_LOAD_FLAGS="-Bshareable -o"
+      SH_LOAD_FLAGS="-Bshareable"
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -139,7 +137,7 @@ case $os in
       OS=OSF
       if [ "$CC" = "gcc" ] ;then
          SH_COMP_FLAGS="-fpic"
-         SH_LOAD_FLAGS="-shared -o"
+         SH_LOAD_FLAGS="-shared"
          SH_LOADER="$LD"
          SH_SUFFIX='so'
          SH_LIB_SUFFIX='so'
@@ -152,10 +150,8 @@ case $os in
         sun4*) machine=sun4;;
       esac
       OS=SUNOS
-#         SH_COMP_FLAGS="-K pic"
-#     SH_LOAD_FLAGS='-G -z text -h'
       SH_COMP_FLAGS="-fpic"
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER="$LD"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'
@@ -163,7 +159,7 @@ case $os in
   Darwin*)
       OS=DARWIN;
       SH_COMP_FLAGS="-fPIC -fno-common"
-      SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress -o'
+      SH_LOAD_FLAGS='-bundle -undefined dynamic_lookup'
       SH_LOADER="$CC"
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='dylib'
@@ -174,7 +170,7 @@ case $os in
       OS=CYGWIN;
       OS_FLAVOUR=WIN32;
       SH_COMP_FLAGS=
-      SH_LOAD_FLAGS='-shared -o'
+      SH_LOAD_FLAGS='-shared'
       SH_LOADER='true'
       SH_SUFFIX='so'
       SH_LIB_SUFFIX='so'

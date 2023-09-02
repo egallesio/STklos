@@ -3,7 +3,6 @@
 ;;; 92/06/18
 
 ;;; Modified by Erick Gallesio for STklos
-;;; Last file update: 27-Jan-2001 12:55 (eg)
 
 
 ;;; Copyright (C) 1992 R. Kent Dybvig

@@ -2,7 +2,7 @@
 ;;;;
 ;;;; hashfs.stk -- Fuse Demo. A file system in a hash table
 ;;;;
-;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  8-Dec-2005 14:30 (eg)
-;;;; Last file update:  1-Feb-2022 17:34 (eg)
 ;;;;
 
 ;;;; Adapt the load-path.
@@ -44,7 +43,7 @@
 ;; ----------------------------------------------------------------------
 ;;      Structures ...
 ;; ----------------------------------------------------------------------
-;;       meta file informations are represented with a vector
+;;       meta file information is represented with a vector
 ;;              #(mode nlinks size pid gid atime mtime ctime)
 
 (define-struct hfile meta content)

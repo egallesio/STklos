@@ -21,7 +21,6 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 31-Jul-2020 15:35 (eg)
  */
 
 /**** Structure types ****/

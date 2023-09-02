@@ -45,7 +45,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Sep-2021 08:23
-;;;; Last file update: 10-Nov-2021 05:33 (jpellegrini)
 ;;;;
 
 (define-module srfi/214

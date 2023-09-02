@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+# Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,9 +20,8 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Sep-2022 09:25 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
+SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
 
 COMP ?= ../utils/tmpcomp
@@ -35,8 +34,9 @@ scheme_BOOT = assembler.stk \
           boot.stk          \
           callcc.stk        \
           compiler.stk      \
+          compfile.stk      \
+          compflags.stk     \
           computils.stk     \
-          date.stk          \
           equiv.stk         \
           expand.pp         \
           ffi.stk           \
@@ -61,13 +61,12 @@ scheme_BOOT = assembler.stk \
           srfi-0.stk        \
           str.stk           \
           struct.stk        \
+          time.stk          \
           thread.stk
 
 scheme_extra = STklos.init
 
-SRC_STK = bigloo-support.stk  \
-          bigmatch.stk        \
-          compfile.stk        \
+SRC_STK = bigmatch.stk        \
           conditions.stk      \
           describe.stk        \
           env.stk             \
@@ -75,30 +74,23 @@ SRC_STK = bigloo-support.stk  \
           full-syntax.stk     \
           getopt.stk          \
           help.stk            \
-          http.stk            \
           lex-rt.stk          \
           make-C-boot.stk     \
           pretty-print.stk    \
-          recette.stk         \
           slib.stk            \
-          tar.stk             \
           trace.stk
 
 
-scheme_OBJS = compfile.ostk     \
-          bigmatch.ostk         \
+scheme_OBJS = bigmatch.ostk     \
           conditions.ostk       \
           full-syntax.ostk      \
           describe.ostk         \
           env.ostk              \
           getopt.ostk           \
           help.ostk             \
-          http.ostk             \
           lex-rt.ostk           \
           pretty-print.ostk     \
-          recette.ostk          \
           slib.ostk             \
-          tar.ostk              \
           trace.ostk
 
 SRC_C         = readline-complete.c
@@ -111,10 +103,10 @@ BASEDIR     = ..
 
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
+schemedir       = @SCMDIR@
+schemelibdir    = @EXECDIR@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA  = $(scheme_SOLIBS) 
+schemelib_DATA  = $(scheme_SOLIBS)
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
@@ -129,14 +121,14 @@ SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
-	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../src @GCINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o
 
 #======================================================================
 
-all-recursive: boot generate-git-info compfile.ostk
+all-recursive: boot generate-git-info
 
 boot:	../src/boot.img
 
@@ -150,7 +142,7 @@ generate-git-info:
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
 	(export STKLOS_BUILDING=1; \
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img -f bb.stk boot.img0 instr0)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f bb.stk boot.img0 instr0)
 	@echo "*** Boot 1"; \
 	(export STKLOS_BUILDING=1; \
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ./boot.img0     -f bb.stk boot.img1 instr1)
@@ -160,22 +152,21 @@ generate-git-info:
 	@echo "*** Boot 3"; \
 	(export STKLOS_BUILDING=1; \
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ./boot.img2     -f bb.stk boot.img3 instr3)
-	@if cmp ./boot.img2 ./boot.img3 ;then 				\
-	   echo "*** New boot file created";  				\
-	   cp ../src/boot.img ../src/boot.keep;				\
-	   cp ./boot.img3 ../src/boot.img;    				\
-	   cp ./instr3    ../src/vm-instr.h;  				\
-	   echo "*** Create new boot.c";				\
-	   (export STKLOS_BUILDING=1;					\
-	    $(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img  	\
-		-f make-C-boot.stk -- boot.img3 ../src/boot.c);		\
-	   echo "*** Recompile STklos";					\
-	   (cd ../src; $(MAKE) stklos);					\
-	   echo "*** Cleaning useless images";				\
-	   /bin/rm boot.img[0-3] instr[0-3];  				\
-	else 								\
-	   echo "*** Boot file creation failed"; 			\
-	   exit 1; 							\
+	@if cmp ./boot.img2 ./boot.img3 ;then                      \
+	   echo "*** New boot file created";                       \
+	   cp ./boot.img3 ../src/boot.img;                         \
+	   cp ./instr3    ../src/vm-instr.h;                       \
+	   echo "*** Create new boot.c";                           \
+	   (export STKLOS_BUILDING=1;                              \
+		$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img    \
+		-f make-C-boot.stk -- boot.img3 ../src/boot.c);        \
+	   echo "*** Recompile STklos";                            \
+	   (cd ../src; $(MAKE) stklos);                            \
+	   echo "*** Cleaning useless images";                     \
+	   /bin/rm boot.img[0-3] instr[0-3];                       \
+	else                                                       \
+	   echo "*** Boot file creation failed";                   \
+	   exit 1;                                                 \
 	fi;
 
 # Installation of *.stk files
@@ -186,22 +177,28 @@ install-sources:
 	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
 
 
-# Explicit some dependencies here to avoid some warnings when compiling files
+# Explicit some dependencies here
 $(SCHEME_OBJS): ../src/boot.img
-compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
-recette.ostk: pretty-print.ostk
+bigmatch.ostk: Match.d/compiler.scm Match.d/descr.scm Match.d/mexpand.scm \
+               Match.d/normalize.scm Match.d/s2cfun.scm
+
+# SLIB
 slib.ostk: slib.stk STklos.init
+STklos.init: srfi/59.stk
+srfi/59.ostk:
+	(cd srfi; make 59.ostk)
+
 
 lib/scheme: lib
 lib/stklos: lib
 lib/streams: lib
 lib/srfi: lib/scheme lib/stklos lib/streams
 
-readline-complete.@SH_SUFFIX@: readline-complete.c 
+readline-complete.@SH_SUFFIX@: readline-complete.c
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
 	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@ @RDLINE@
+	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ @RDLINE@
 	/bin/rm -f $*.o
 
 #
@@ -209,7 +206,7 @@ readline-complete.@SH_SUFFIX@: readline-complete.c
 #
 # If ./srfis.stk we must rebuild
 #     - srfis-data.scm (used by SRFI0 and features)
-srfis-data.scm: srfis.stk
+srfis-data.scm: srfis.stk getopt.ostk
 	$(STKLOS_BINARY) -q -l srfis.stk \
 	                 -f ../utils/update-srfi-list.stk \
                      -- --internal > $@
@@ -222,8 +219,7 @@ doc: $(DOCDB)
 
 
 $(DOCDB): $(scheme_sources)
-	$(STKLOS_BINARY) -q -c -b ../src/boot.img -f ../doc/extract-doc \
-	$(scheme_sources) > $(DOCDB)
+	$(STKLOS_BINARY) -q -c -f ../doc/extract-doc $(scheme_sources) > $(DOCDB)
 
 clean:
 	/bin/rm -f $(scheme_OBJS) $(scheme_SOLIBS) ./srfis-data.scm

@@ -16,7 +16,7 @@
 
 # Makefile for STklos GTklos extension
 #
-# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update:  1-Feb-2022 17:29 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -173,6 +172,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+COMP_DIR = @COMP_DIR@
+COMP_LIBS = @COMP_LIBS@
 CONF_SUMMARY = @CONF_SUMMARY@
 CONTROL_FX_PARAMETERS = @CONTROL_FX_PARAMETERS@
 CPP = @CPP@
@@ -180,6 +181,9 @@ CPPFLAGS = @CPPFLAGS@
 CSCOPE = @CSCOPE@
 CTAGS = @CTAGS@
 CYGPATH_W = @CYGPATH_W@
+C_COMPILE = @C_COMPILE@
+C_LINK = @C_LINK@
+C_VERSION = @C_VERSION@
 DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -190,10 +194,10 @@ ECHO_T = @ECHO_T@
 ETAGS = @ETAGS@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
-EXTRA_COMP_FLAGS = @EXTRA_COMP_FLAGS@
 FFI = @FFI@
 FFIINC = @FFIINC@
 FFILIB = @FFILIB@
+FULL_VERSION = @FULL_VERSION@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -232,10 +236,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PCRE = @PCRE@
-PCREINC = @PCREINC@
-PCRELIB = @PCRELIB@
-PCREPKG = @PCREPKG@
+PCRE2 = @PCRE2@
+PCRE2INC = @PCRE2INC@
+PCRE2LIB = @PCRE2LIB@
+PCRE2PKG = @PCRE2PKG@
 PKGCONFIG = @PKGCONFIG@
 POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
@@ -245,6 +249,8 @@ SCMDIR = @SCMDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SH_COMP_FLAGS = @SH_COMP_FLAGS@
+SH_LIB_COMPILE = @SH_LIB_COMPILE@
+SH_LIB_LINK = @SH_LIB_LINK@
 SH_LIB_SUFFIX = @SH_LIB_SUFFIX@
 SH_LOADER = @SH_LOADER@
 SH_LOAD_FLAGS = @SH_LOAD_FLAGS@
@@ -254,9 +260,11 @@ STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
+SYST_LIBS = @SYST_LIBS@
 THREADS = @THREADS@
 UNAME_O = @UNAME_O@
 VERSION = @VERSION@
+VERSION_STATUS = @VERSION_STATUS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -313,8 +321,8 @@ SCM_SRCS = fuse.stk
 
 #======================================================================
 OUT = $(EXTENSION).@SH_SUFFIX@
-schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
-schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+schemedir = @SCMDIR@/stklos
+schemelibdir = @EXECDIR@/stklos
 
 #======================================================================
 BASEDIR = ../../../..
@@ -560,10 +568,10 @@ STKLOS_BINARY ?= $(BASEDIR)/src/stklos
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@  @STKCFLAGS@ @SH_COMP_FLAGS@ \
+	@CC@ @CFLAGS@  @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
          -I$(BASEDIR)/src @GCINC@ @GMPINC@ \
          -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
 	/bin/rm -f $*.o
 
 $(EXTENSION)-incl.c: $(EXTENSION).stk $(SCM_SRCS)

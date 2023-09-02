@@ -47,7 +47,6 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 15-Jun-2020 19:20 (jpellegrini)
-;;;; Last file update: 11-Nov-2022 16:19 (eg)
 ;;;;
 
 (define-module scheme/generator
