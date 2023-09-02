@@ -103,7 +103,6 @@ static SCM gcd2(SCM n1, SCM n2);
 
 EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i));
 EXTERN_PRIMITIVE("real-part", real_part, subr1, (SCM z));
-EXTERN_PRIMITIVE("magnitude", magnitude, subr1, (SCM z));
 EXTERN_PRIMITIVE("angle", angle, subr1, (SCM z));
 EXTERN_PRIMITIVE("sqrt", sqrt, subr1, (SCM z));
 EXTERN_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z));
@@ -3087,8 +3086,7 @@ static SCM my_log(SCM z)
                           return make_complex(double2real(plus_inf),  double2real(MY_PI));
                       else
                           return double2real(log(REAL_VAL(z)));
-    case tc_complex:  return make_complex(my_log(STk_magnitude(z)),
-                                          STk_angle(z));
+    case tc_complex:  return make_complex(my_log(absolute(z)), STk_angle(z));
     default:          error_bad_number(z);
   }
   return STk_void; /* never reached */
@@ -3675,7 +3673,7 @@ static inline SCM my_sqrt_complex(SCM z)
   if (negativep(a) ||
       (REALP(a) && signbit(REAL_VAL(a)))) { /* negativep(-0.0) won't work... */
     /* a < 0 */
-    bb = STk_sqrt(div2(sub2(STk_magnitude(z),a), MAKE_INT(2)));
+    bb = STk_sqrt(div2(sub2(absolute(z),a), MAKE_INT(2)));
 
     if (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
       bb = mul2(bb,MAKE_INT((unsigned long) -1));
@@ -3683,7 +3681,7 @@ static inline SCM my_sqrt_complex(SCM z)
     aa = div2(b,mul2(bb, MAKE_INT(2)));
   } else {
     /* a >= 0 */
-    aa = STk_sqrt(div2(add2(a, STk_magnitude(z)), MAKE_INT(2)));
+    aa = STk_sqrt(div2(add2(a, absolute(z)), MAKE_INT(2)));
     bb = zerop(aa) ? double2real(0.0): div2(b,mul2(aa,MAKE_INT(2)));
   }
   return make_complex(aa, bb);
