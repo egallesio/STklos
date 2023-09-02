@@ -3572,17 +3572,17 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
              else:
                  B = 0.0                        */
 
-      if (negativep(a) ||  /* a < 0 */
-          REALP(a) && signbit(REAL_VAL(a))) { /* negativep(-0.0) won't work... */
+      if (negativep(a) ||
+          (REALP(a) && signbit(REAL_VAL(a)))) { /* negativep(-0.0) won't work... */
+        /* a < 0 */
         bb = STk_sqrt(div2(sub2(STk_magnitude(z),a), MAKE_INT(2)));
 
-        if (negativep(b) ||
-            REALP(b) && signbit(REAL_VAL(b)))
-          bb = mul2(bb,MAKE_INT(-1));
+        if (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
+          bb = mul2(bb,MAKE_INT((unsigned long) -1));
 
         aa = div2(b,mul2(bb, MAKE_INT(2)));
-      }
-      else {  /* a >= 0 */
+      } else {
+        /* a >= 0 */
         aa = STk_sqrt(div2(add2(a, STk_magnitude(z)), MAKE_INT(2)));
         if (zerop(aa))
           bb = double2real(0.0);
