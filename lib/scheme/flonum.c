@@ -152,13 +152,8 @@ void STk_srfi_144_define_constants(SCM module) {
     DEFLOCONST("fl-gamma-2/3",tgamma(2.0/3.0), module);
 
     DEFLOCONST("fl-greatest", DBL_MAX, module);
-
-    /* dbl_truemin is defined in number.c, and declared
-       in stklos.h. It should be identical to DBL_TRUE_MIN on
-       systems that have it, and should br computed to be precisely
-       the least representable flonum on systems that do not have
-       the DBL_TRUE_MIN macro defined (such as OpenBSD). */
-    DEFLOCONST("fl-least", dbl_truemin, module);
+    DEFLOCONST("fl-least", STk_dbl_true_min(), // (eventually computed)  DBL_TRUE_MIN
+               module); 
 
     DEFLOCONST("fl-epsilon", DBL_EPSILON, module);
 #ifdef FP_FAST_FMA

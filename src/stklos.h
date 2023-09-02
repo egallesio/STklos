@@ -756,8 +756,10 @@ struct real_obj {
 #define REAL_VAL(p)     (((struct real_obj *) (p))->val)
 #define REALP(p)        (BOXED_TYPE_EQ((p), tc_real))
 
+double STk_dbl_true_min(void); /* return (or compute) DBL_TRUE_MIN */
+
 extern double STk_NaN;     /* IEEE NaN special value */
-extern double dbl_truemin; /* Least representable real - see comments in number.c  */
+
 
   /****
    **** Bignum
