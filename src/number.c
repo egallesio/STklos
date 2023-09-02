@@ -2394,7 +2394,7 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
 
 /*
 <doc  abs
- * (abs x)
+ * (abs z)
  *
  * |Abs| returns the absolute value of its argument.
  * @lisp
@@ -2403,6 +2403,10 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
  * (abs -3+4i)             => 5
  * (abs -3.0-4i)           => 5.0
  * @end lisp
+ *
+ * NOTE: {{stklos}} extends the {{rseven}} |abs| function, by allowing its
+ * argument to be a complex number. In this case, |abs| returns the
+ * _magnitude_ of its argument.
 doc>
  */
 DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
