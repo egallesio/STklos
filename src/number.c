@@ -103,7 +103,6 @@ static SCM gcd2(SCM n1, SCM n2);
 
 EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i));
 EXTERN_PRIMITIVE("real-part", real_part, subr1, (SCM z));
-EXTERN_PRIMITIVE("magnitude", magnitude, subr1, (SCM z));
 EXTERN_PRIMITIVE("angle", angle, subr1, (SCM z));
 EXTERN_PRIMITIVE("sqrt", sqrt, subr1, (SCM z));
 EXTERN_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z));
@@ -2394,13 +2393,19 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
 
 /*
 <doc  abs
- * (abs x)
+ * (abs z)
  *
  * |Abs| returns the absolute value of its argument.
  * @lisp
  * (abs -7)                =>  7
  * (abs -inf.0)            => +inf.0
+ * (abs -3+4i)             => 5
+ * (abs -3.0-4i)           => 5.0
  * @end lisp
+ *
+ * NOTE: {{stklos}} extends the {{rseven}} |abs| function, by allowing its
+ * argument to be a complex number. In this case, |abs| returns the
+ * _magnitude_ of its argument.
 doc>
  */
 DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
@@ -2421,6 +2426,11 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
     case tc_rational: return make_rational(absolute(RATIONAL_NUM(x)),
                                            RATIONAL_DEN(x));
+    case tc_complex:  {
+                        SCM r = COMPLEX_REAL(x);
+                        SCM i = COMPLEX_IMAG(x);
+                        return STk_sqrt(add2(mul2(r, r), mul2(i, i)));
+                      }
     default:          error_not_a_real_number(x);
   }
   return STk_void;      /* never reached */
@@ -3076,8 +3086,7 @@ static SCM my_log(SCM z)
                           return make_complex(double2real(plus_inf),  double2real(MY_PI));
                       else
                           return double2real(log(REAL_VAL(z)));
-    case tc_complex:  return make_complex(my_log(STk_magnitude(z)),
-                                          STk_angle(z));
+    case tc_complex:  return make_complex(my_log(absolute(z)), STk_angle(z));
     default:          error_bad_number(z);
   }
   return STk_void; /* never reached */
@@ -3664,7 +3673,7 @@ static inline SCM my_sqrt_complex(SCM z)
   if (negativep(a) ||
       (REALP(a) && signbit(REAL_VAL(a)))) { /* negativep(-0.0) won't work... */
     /* a < 0 */
-    bb = STk_sqrt(div2(sub2(STk_magnitude(z),a), MAKE_INT(2)));
+    bb = STk_sqrt(div2(sub2(absolute(z),a), MAKE_INT(2)));
 
     if (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
       bb = mul2(bb,MAKE_INT((unsigned long) -1));
@@ -3672,7 +3681,7 @@ static inline SCM my_sqrt_complex(SCM z)
     aa = div2(b,mul2(bb, MAKE_INT(2)));
   } else {
     /* a >= 0 */
-    aa = STk_sqrt(div2(add2(a, STk_magnitude(z)), MAKE_INT(2)));
+    aa = STk_sqrt(div2(add2(a, absolute(z)), MAKE_INT(2)));
     bb = zerop(aa) ? double2real(0.0): div2(b,mul2(aa,MAKE_INT(2)));
   }
   return make_complex(aa, bb);
@@ -3852,20 +3861,7 @@ doc>
 
 DEFINE_PRIMITIVE("magnitude", magnitude, subr1, (SCM z))
 {
-  switch (TYPEOF(z)) {
-    case tc_integer:
-    case tc_bignum:
-    case tc_rational:
-    case tc_real:     return absolute(z);
-    case tc_complex: {
-                        SCM r = COMPLEX_REAL(z);
-                        SCM i = COMPLEX_IMAG(z);
-
-                        return STk_sqrt(add2(mul2(r, r), mul2(i, i)));
-                      }
-    default:          error_bad_number(z);
-  }
-  return STk_void; /* never reached */
+  return absolute(z);
 }
 
 DEFINE_PRIMITIVE("angle", angle, subr1, (SCM z))

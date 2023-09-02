@@ -4893,7 +4893,7 @@ they return the additive or multiplicative inverse of their argument.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(abs x)</code></strong><br></p>
+<p><strong><code>(abs z)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -4903,8 +4903,24 @@ they return the additive or multiplicative inverse of their argument.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">abs</span> <span class="mi">-7</span><span class="p">)</span>                <span class="nv">=&gt;</span>  <span class="mi">7</span>
-<span class="p">(</span><span class="nb">abs</span> <span class="m">-inf.0</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="m">+inf.0</span></code></pre>
+<span class="p">(</span><span class="nb">abs</span> <span class="m">-inf.0</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="m">+inf.0</span>
+<span class="p">(</span><span class="nb">abs</span> <span class="mi">-3</span><span class="nv">+4i</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">5</span>
+<span class="p">(</span><span class="nb">abs</span> <span class="mf">-3.0</span><span class="mi">-4</span><span class="nv">i</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="mf">5.0</span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<strong><em>STklos</em></strong> extends the R<sup>7</sup>RS <code>abs</code> function, by allowing its
+argument to be a complex number. In this case, <code>abs</code> returns the
+<em>magnitude</em> of its argument.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>
@@ -14520,7 +14536,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1460</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1495</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -31426,7 +31442,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-31 22:50:18 +0200
+Last updated 2023-09-02 21:31:34 +0200
 </div>
 </div>
 </body>
