@@ -181,7 +181,7 @@ vector.$(SO): vector-incl.c
 vector-incl.c: vector.stk
 
 rlist.$(SO): rlist-incl.c
-rlist-incl.c: ../srfi/101.ostk
+rlist-incl.c: rlist.ostk
 
 hash-table.ostk: comparator.ostk
 ideque.ostk: generator.ostk list.$(SO)
