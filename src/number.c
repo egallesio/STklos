@@ -2423,8 +2423,11 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
     case tc_rational: return make_rational(absolute(RATIONAL_NUM(x)),
                                            RATIONAL_DEN(x));
-    case tc_complex:  return STk_sqrt(add2(mul2(COMPLEX_REAL(x),COMPLEX_REAL(x)),
-                                           mul2(COMPLEX_IMAG(x),COMPLEX_IMAG(x))));
+    case tc_complex:  {
+                        SCM r = COMPLEX_REAL(x);
+                        SCM i = COMPLEX_IMAG(x);
+                        return STk_sqrt(add2(mul2(r, r), mul2(i, i)));
+                      }
     default:          error_not_a_real_number(x);
   }
   return STk_void;      /* never reached */
@@ -3856,20 +3859,7 @@ doc>
 
 DEFINE_PRIMITIVE("magnitude", magnitude, subr1, (SCM z))
 {
-  switch (TYPEOF(z)) {
-    case tc_integer:
-    case tc_bignum:
-    case tc_rational:
-    case tc_real:     return absolute(z);
-    case tc_complex: {
-                        SCM r = COMPLEX_REAL(z);
-                        SCM i = COMPLEX_IMAG(z);
-
-                        return STk_sqrt(add2(mul2(r, r), mul2(i, i)));
-                      }
-    default:          error_bad_number(z);
-  }
-  return STk_void; /* never reached */
+  return absolute(z);
 }
 
 DEFINE_PRIMITIVE("angle", angle, subr1, (SCM z))
