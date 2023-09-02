@@ -3549,20 +3549,48 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
                         return Cmake_complex(MAKE_INT(0),
                                              double2real(sqrt(-REAL_VAL(z))));
                       return double2real(sqrt(REAL_VAL(z)));
-    case tc_complex:  if (zerop(COMPLEX_IMAG(z))) {
-                        // Special cases: (sqrt -1+0.0i) => +i
-                        //                (sqrt -1-0.0i) => -i
-                        SCM im = COMPLEX_IMAG(z);
-                        SCM tmp =  STk_ex2inex(STk_sqrt(COMPLEX_REAL(z)));
+    case tc_complex: {
+      SCM aa, bb;
+      SCM a = COMPLEX_REAL(z);
+      SCM b = COMPLEX_IMAG(z);
 
-                        if (REALP(im) && signbit(REAL_VAL(im))) {
-                          COMPLEX_IMAG(tmp) = double2real(-REAL_VAL(COMPLEX_IMAG(tmp)));
-                        }
-                        return tmp;
-                      } else
-                        return make_polar(STk_sqrt(STk_magnitude(z)),
-                                          div2(STk_angle(z), MAKE_INT(2)));
+      /* Given a, b we will compute A, B such that the square root of
+         the complex number a+bi is
 
+         sqrt(a+bi) = A+Bi
+
+         The algorithm:
+
+         if a < 0:
+             B := sqrt( (|z|-a) / 2) * sign(b)
+             A := b / (2*B).
+
+         if a >= 0:
+             A := sqrt( (|z|+a) / 2)
+             if A != 0:
+                 B := (b / (2*A))
+             else:
+                 B = 0.0                        */
+
+      if (negativep(a) ||  /* a < 0 */
+          REALP(a) && signbit(REAL_VAL(a))) { /* negativep(-0.0) won't work... */
+        bb = STk_sqrt(div2(sub2(STk_magnitude(z),a), MAKE_INT(2)));
+
+        if (negativep(b) ||
+            REALP(b) && signbit(REAL_VAL(b)))
+          bb = mul2(bb,MAKE_INT(-1));
+
+        aa = div2(b,mul2(bb, MAKE_INT(2)));
+      }
+      else {  /* a >= 0 */
+        aa = STk_sqrt(div2(add2(a, STk_magnitude(z)), MAKE_INT(2)));
+        if (zerop(aa))
+          bb = double2real(0.0);
+        else
+          bb = div2(b,mul2(aa,MAKE_INT(2)));
+      }
+      return make_complex(aa, bb);
+    }
     default:          error_bad_number(z);
   }
   return STk_void; /* never reached */
