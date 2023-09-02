@@ -3538,6 +3538,47 @@ static SCM my_sqrt_exact(SCM x)
   }
 }
 
+static inline SCM my_sqrt_complex(SCM z)
+{
+  SCM aa, bb;
+  SCM a = COMPLEX_REAL(z);
+  SCM b = COMPLEX_IMAG(z);
+
+  /* Given a, b we will compute A, B such that the square root of
+     the complex number a+bi is
+
+     sqrt(a+bi) = A+Bi
+
+     The algorithm:
+
+     if a < 0:
+     B := sqrt( (|z|-a) / 2) * sign(b)
+     A := b / (2*B).
+
+     if a >= 0:
+     A := sqrt( (|z|+a) / 2)
+     if A != 0:
+     B := (b / (2*A))
+     else:
+     B = 0.0                        */
+
+  if (negativep(a) ||
+      (REALP(a) && signbit(REAL_VAL(a)))) { /* negativep(-0.0) won't work... */
+    /* a < 0 */
+    bb = STk_sqrt(div2(sub2(STk_magnitude(z),a), MAKE_INT(2)));
+
+    if (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
+      bb = mul2(bb,MAKE_INT((unsigned long) -1));
+
+    aa = div2(b,mul2(bb, MAKE_INT(2)));
+  } else {
+    /* a >= 0 */
+    aa = STk_sqrt(div2(add2(a, STk_magnitude(z)), MAKE_INT(2)));
+    bb = zerop(aa) ? double2real(0.0): div2(b,mul2(aa,MAKE_INT(2)));
+  }
+  return make_complex(aa, bb);
+}
+
 DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 {
   switch (TYPEOF(z)) {
@@ -3549,48 +3590,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
                         return Cmake_complex(MAKE_INT(0),
                                              double2real(sqrt(-REAL_VAL(z))));
                       return double2real(sqrt(REAL_VAL(z)));
-    case tc_complex: {
-      SCM aa, bb;
-      SCM a = COMPLEX_REAL(z);
-      SCM b = COMPLEX_IMAG(z);
-
-      /* Given a, b we will compute A, B such that the square root of
-         the complex number a+bi is
-
-         sqrt(a+bi) = A+Bi
-
-         The algorithm:
-
-         if a < 0:
-             B := sqrt( (|z|-a) / 2) * sign(b)
-             A := b / (2*B).
-
-         if a >= 0:
-             A := sqrt( (|z|+a) / 2)
-             if A != 0:
-                 B := (b / (2*A))
-             else:
-                 B = 0.0                        */
-
-      if (negativep(a) ||
-          (REALP(a) && signbit(REAL_VAL(a)))) { /* negativep(-0.0) won't work... */
-        /* a < 0 */
-        bb = STk_sqrt(div2(sub2(STk_magnitude(z),a), MAKE_INT(2)));
-
-        if (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
-          bb = mul2(bb,MAKE_INT((unsigned long) -1));
-
-        aa = div2(b,mul2(bb, MAKE_INT(2)));
-      } else {
-        /* a >= 0 */
-        aa = STk_sqrt(div2(add2(a, STk_magnitude(z)), MAKE_INT(2)));
-        if (zerop(aa))
-          bb = double2real(0.0);
-        else
-          bb = div2(b,mul2(aa,MAKE_INT(2)));
-      }
-      return make_complex(aa, bb);
-    }
+    case tc_complex:  return my_sqrt_complex(z);
     default:          error_bad_number(z);
   }
   return STk_void; /* never reached */
