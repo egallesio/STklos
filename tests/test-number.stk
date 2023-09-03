@@ -2197,5 +2197,7 @@
       #t
       (nan? (abs 1-nan.0i)))
 
+(test "eqv? on 0.0 and -0.0" #f (eqv? +0.0 -0.0))
+(test "= on 0.0 and -0.0" #t (= +0.0 -0.0))
 
 (test-section-end)
