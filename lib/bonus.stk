@@ -1895,13 +1895,31 @@ doc>
   ;; We just put it all together.
   (let ((log2-n (- (integer-length n) 1))
         (log2-b (- (integer-length b) 1)))
-    (let ((L (quotient log2-n log2-b)))
+    (let ((L (quotient log2-n log2-b))
+          (step 1))
       ;; Ok, so FLOOR(a/b) can be smaller than FLOOR(a)/FLOOR(b).
       ;; That means we may have overestimated L -- but we should be
       ;; close. If we overestimated, then (expt b L) will be larger
       ;; than n, and we can subtract from it until we find the correct
       ;; number.
-      (while (> (expt b L) n) (set! L (- L 1)))
+      ;; We do increase the step at each iteration in order to speed
+      ;; up the process. If we go too far, we correct it later. This is
+      ;; fast.
+      (while (> (expt b L) n)
+        (set! L (- L step))
+        (set! step (+ step 2)))
+
+      ;; If we overestimated, then we had to walk down from L.
+      ;; In this case, since we added 2 to the step at each
+      ;; iteration, we may now have UNDERestimated. But then,
+      ;; we undo the last iteration (the "go back" line below),
+      ;; and start walking again, this time with a fixed step
+      ;; equal to 1.
+      (when (> step 1)            ; did we need to walk?
+        (set! L (+ L step -2))    ; go back...
+        (while (> (expt b L) n)
+          (set! L (- L 1))))      ; don't grow the step this time!
+
       (values L (- n (expt b L))))))
 
 #|
