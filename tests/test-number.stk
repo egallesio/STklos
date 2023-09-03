@@ -597,13 +597,19 @@
 (test "-bignum - -bignum" #x-fffffffd00000000fffffffd00000000
       (- xx yy))
 
-(test "minus-zero"
-      -0.0
-      (- 0.0))
+;; Following tests work if (eqv? 0.0 -0.0) is #f
+;; NOTE: (= 0.0 0.0) returns #t. Use strings to be sure
+(test "minus-zero.1"
+      "-0.0"
+      (format "~a" (- 0.0)))
 
-(test "minus zero"
-      0.0
-      (- 0.0 0.0))
+(test "minus-zero.2"
+      "0.0"
+      (format "~a" (- -0.0)))
+
+(test "minus zero.3"
+      "0.0"
+      (format "~a" (- 0.0 0.0)))
 
 ;;------------------------------------------------------------------
 (test-subsection "small immediate integer constants")
@@ -2190,8 +2196,6 @@
 (test "abs complex"
       #t
       (nan? (abs 1-nan.0i)))
-
-
 
 
 (test-section-end)

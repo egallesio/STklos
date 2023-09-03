@@ -2266,6 +2266,8 @@ DEFINE_PRIMITIVE("*", multiplication, vsubr, (int argc, SCM *argv))
  * (/ 3 4 5)               =>  3/20
  * (/ 3)                   =>  1/3
  * (/ 0.0)                 => +inf.0
+ * (/ -0.0)                => -inf.0
+ * (- 0.0)                 => -0.0
  * (/ 0)                   => error (division by 0)
  * @end lisp
 doc>
@@ -2273,11 +2275,11 @@ doc>
 SCM STk_sub2(SCM o1, SCM o2)
 {
   /* Special case:
-     (- 0.0) is calculated as (- 0 0.0)
-     which in turn should result in -0.0. */
+     (- 0.0) is calculated as (- 0 0.0) in turn should result in -0.0. */
   if (INTP(o1)  && INT_VAL(o1)==0 &&
-      REALP(o2) && FP_ZERO == fpclassify(REAL_VAL(o2)))
+      REALP(o2) && fpclassify(REAL_VAL(o2)) == FP_ZERO)
     return double2real(-REAL_VAL(o2));
+  
   switch (convert(&o1, &o2)) {
     case tc_bignum:
       {
