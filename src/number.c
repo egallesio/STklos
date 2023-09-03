@@ -2272,6 +2272,12 @@ doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
+  /* Special case:
+     (- 0.0) is calculated as (- 0 0.0)
+     which in turn should result in -0.0. */
+  if (INTP(o1)  && INT_VAL(o1)==0 &&
+      REALP(o2) && FP_ZERO == fpclassify(REAL_VAL(o2)))
+    return double2real(-REAL_VAL(o2));
   switch (convert(&o1, &o2)) {
     case tc_bignum:
       {
