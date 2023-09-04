@@ -197,21 +197,23 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
     case tc_rational:
       if (NUMBERP(y)) {
         /* special case on NaNs */
-        if (STk_isnan(x) && STk_isnan(y)) return STk_nan_equalp(x, y);
-
-        /* if exactness is different => #f */
-        if (EXACTP(x) != EXACTP(y))
-          return STk_false;
+        if (REALP(x) && REALP(y) && STk_isnan(x) && STk_isnan(y))
+          return STk_nan_equalp(x, y);
 
         /* special case (eqv? 0.0 -0.0) must return #f whereas = returns #t */
         if (REALP(x) && REALP(y) &&
             signbit(REAL_VAL(x)) != signbit(REAL_VAL(y))) /* test on 0 is useless */
           return STk_false;
 
+        /* if exactness is different => #f */
+        if (EXACTP(x) != EXACTP(y))
+          return STk_false;
+
         /* else test with '=' */
         return MAKE_BOOLEAN(STk_numeq2(x, y));
       }
       break;
+
     case tc_instance:
       if (STk_oo_initialized) {
         SCM fg, res;
