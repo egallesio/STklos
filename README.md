@@ -7,11 +7,11 @@ STklos (version 2.00)
 
 Purpose
 -------
-***STklos*** is a free [Scheme](http://www.schemers.org) system
-mostly compliant with the languages features defined in [R⁷RS
-small](http://www.scheme-reports.org/2015/working-group-1.html). The
-aim of this implementation is to be fast as well as light. The
-implementation is based on an ad-hoc *Virtual Machine*.
+*STklos*** (pronounced [/ˈɛs.'ti.kl'ɔss/](https://itinerarium.github.io/phoneme-synthesis/?w=ˈɛs.'ti.kl'ɔss)) is a free [Scheme](http://www.schemers.org) system mostly compliant
+with the language features defined in [R⁷RS small](http://www.scheme-reports.org/2015/working-group-1.html). The aim of this implementation
+is to be fast as well as light. The implementation is based on an ad-hoc
+*Virtual Machine*.
+
 
 <!-- ***STklos*** can also be compiled as a library and embedded
 in an application. -->
@@ -70,11 +70,11 @@ The 1.70 version supports 14 new [**SRFIs**](https://www.stklos.net/srfi.html).
 (We now have 98 SRFIs supported). The (new) `extensions` directory contains
 an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit.
 
-**August 2023** 
+**August 2023**
 The 2.00 version is available. This version is conforming to R^7^RS
 (previous versions of STklos used to implement the R^5^RS standard).
 It adds support for 24 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
-support for 122 SRFIs. You can now use the [cURL](https://curl.se/libcurl/) 
+support for 122 SRFIs. You can now use the [cURL](https://curl.se/libcurl/)
 library thanks to the new **curl** extension.
 
 SRFI Support
