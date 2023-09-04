@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.18">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Jeronimo Pellegrini">
 <title>The STklos Virtual Machine</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -744,7 +741,11 @@ pre.rouge {
 <li><a href="#_stack">3. Stack</a></li>
 <li><a href="#_local_variables">4. Local variables</a></li>
 <li><a href="#_deep_variables">5. Deep variables</a></li>
-<li><a href="#_global_variables">6. Global variables</a></li>
+<li><a href="#_global_variables">6. Global variables</a>
+<ul class="sectlevel2">
+<li><a href="#_uglobal_refset_and_the_checked_global_table">6.1. UGLOBAL_{REF,SET} and the checked global table</a></li>
+</ul>
+</li>
 <li><a href="#_operations">7. Operations</a>
 <ul class="sectlevel2">
 <li><a href="#_arithmetic">7.1. Arithmetic</a></li>
@@ -1217,6 +1218,30 @@ DEEP_LOC_REF_PUSH</pre>
 </div>
 </div>
 <div class="paragraph">
+<p>STklos organizes local environments as this: each level has a maximum
+of 256 variables. Both the level and the address of local variables
+are encoded in a single 16-bit integer, as "256v1+v2".  For example,
+2*256 + 03 = 0x0203. The first byte, 0x02, identifies the level, and
+the second byte, 0x03, identifies the variable.</p>
+</div>
+<div class="paragraph">
+<p>The VM will, then, do something like this to access a deep local variable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c">  <span class="cm">/* See this is src/vm.c, CASE(DEEP_LOCAL_REF):  */</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">level</span> <span class="o">=</span> <span class="n">FIRST_BYTE</span><span class="p">(</span><span class="n">info</span><span class="p">);</span> <span class="n">level</span><span class="p">;</span> <span class="n">level</span><span class="o">--</span><span class="p">)</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="p">(</span><span class="n">SCM</span><span class="p">)</span> <span class="n">FRAME_NEXT</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+
+  <span class="n">vm</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">=</span> <span class="n">FRAME_LOCAL</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">SECOND_BYTE</span><span class="p">(</span><span class="n">info</span><span class="p">));</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, <code>info</code> is the information to access the variable (a <code>uint16_t</code>
+number, as every opcode and operand used in the VM).
+<code>FIRST_BYTE</code> gets the level; <code>SECOND_BYTE</code> gets the var address.</p>
+</div>
+<div class="paragraph">
 <p>Examples:</p>
 </div>
 <div class="listingblock">
@@ -1268,6 +1293,62 @@ comparison opcode <code>IN-NUMEQ</code>:</p>
 005:  RETURN</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The following example shows a variable in a deeper level.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">c</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">b</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+      <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">a</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="nv">c</span><span class="p">))))</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>000:  PREPARE-CALL
+001:  INT-PUSH             2
+003:  ENTER-TAIL-LET       1
+005:  DEEP-LOCAL-REF       513
+007:  RETURN</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The number 513 is composed of the bytes 0x02 and 0x01:
+<code>#x0201 = 513</code>. This means "the variable of index 1 in
+level 2" (index 1 is for <code>c</code>, and index 0 is for <code>b</code>).</p>
+</div>
+<div class="paragraph">
+<p>The code for <code>(let ((c 4) (b 3)</code> is not shown, but it can bee seen
+with <code>disassemble-expr</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble-expr</span>
+  <span class="o">'</span><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">c</span> <span class="mi">4</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">b</span> <span class="mi">3</span><span class="p">))</span>
+     <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+       <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">a</span> <span class="mi">2</span><span class="p">))</span>
+         <span class="nv">c</span><span class="p">)))</span> <span class="no">#t</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>000:  PREPARE-CALL
+001:  INT-PUSH             4
+003:  INT-PUSH             3
+005:  ENTER-LET            2
+007:  CREATE-CLOSURE       9 0	;; ==&gt; 018
+010:  PREPARE-CALL
+011:  INT-PUSH             2
+013:  ENTER-TAIL-LET       1
+015:  DEEP-LOCAL-REF       513
+017:  RETURN
+018:  LEAVE-LET</pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1310,6 +1391,156 @@ Constants:
 
 Constants:
 0: my-cool-global-variable</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_uglobal_refset_and_the_checked_global_table">6.1. UGLOBAL_{REF,SET} and the checked global table</h3>
+<div class="paragraph">
+<p>The instructions <code>GLOBAL_REF</code> and <code>GLOBAL_SET</code> do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Acquire the mutex</p>
+</li>
+<li>
+<p>Fetch the index of the global variable</p>
+</li>
+<li>
+<p>Lookup the variable in the current environment (that is, consult a hash table
+in  amodule)</p>
+</li>
+<li>
+<p>Verify if the variable is mutable or not</p>
+</li>
+<li>
+<p>Finally, do the real get or set operation</p>
+</li>
+<li>
+<p>Release the lock</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Steps 1-4 are quite expensive, and shouldn&#8217;t need to be done every time the
+variable is accessed. Thus, the STklos VM keeps a table with <strong>checked globals</strong>.
+The first time a variable is referenced, the VM goes through all those steps,
+but before releasing the lock there is another step:</p>
+</div>
+<div class="paragraph">
+<p>5'. <strong>Patch the code</strong>, changing the <code>GLOBAL_REF</code> or <code>GLOBAL_SET</code> insrtuction
+     into a <code>UGLOBAL_REF</code> or <code>UGLOBAL_SET</code>.</p>
+</div>
+<div class="paragraph">
+<p>For example, in <code>GLOBAL_SET</code> this step is performed by the following two lines:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c">  <span class="cm">/* patch the code for optimize next accesses */</span>
+  <span class="n">vm</span><span class="o">-&gt;</span><span class="n">pc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_global</span><span class="p">(</span><span class="n">CDR</span><span class="p">(</span><span class="n">ref</span><span class="p">));</span>
+  <span class="n">vm</span><span class="o">-&gt;</span><span class="n">pc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">UGLOBAL_SET</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See that what is being changed are the two previous bytecode elements,
+<code>pc[-1]</code> and <code>pc[-2]</code>.</p>
+</div>
+<div class="paragraph">
+<p>So the code</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="mi">2</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>would perhaps be translated into</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>000:  SMALL-INT            2
+002:  GLOBAL-SET           5</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>5</code> is the index of the variable <code>a</code> (as a global).</p>
+</div>
+<div class="paragraph">
+<p>Then after the first time the <code>GLOBAL_SET</code> instruction is performed, the
+code will <strong>patch itself</strong> and change into</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>000:  SMALL-INT            2
+002:  UGLOBAL-SET          n</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>n</code> is the index of this global variable <strong>in a local table</strong>.</p>
+</div>
+<div class="paragraph">
+<p>The instruction <code>GLOBAL_SET</code> takes two integers to be represented, so
+when <code>pc[-1]</code> and <code>pc[-2]</code> are changed, what is being changed is the
+previous argument (<code>5</code> &#8594; <code>n</code>) and the previous instruction
+(<code>GLOBAL_SET</code> &#8594; <code>UGLOBAL_SET</code>).</p>
+</div>
+<div class="paragraph">
+<p><strong>And</strong>, of course, the <code>n</code>-th element of the table contains the address
+of the variable to be set. This is made clear in the code of <code>UGLOBAL_SET</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="n">CASE</span><span class="p">(</span><span class="n">UGLOBAL_SET</span><span class="p">)</span> <span class="p">{</span> <span class="cm">/* Never produced by compiler */</span>
+  <span class="cm">/* Because of optimization, we may get re-dispatched to here. */</span>
+  <span class="n">RELEASE_POSSIBLE_LOCK</span><span class="p">;</span>
+
+  <span class="n">fetch_global</span><span class="p">()</span> <span class="o">=</span> <span class="n">vm</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span> <span class="n">NEXT0</span><span class="p">;</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The checked globals table is defined earlier in <code>vm.c</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">static</span> <span class="n">SCM</span><span class="o">**</span> <span class="n">checked_globals</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="cp">#define fetch_global()  (*(checked_globals[(unsigned) fetch_next()]))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and the function <code>add_global(SCM ref)</code> will add a global to the table.</p>
+</div>
+<div class="paragraph">
+<p>Of course, this is also done in all other <code>UGREF_*</code> instructions in a
+similar way.</p>
+</div>
+<div class="paragraph">
+<p>That is why, even using a hash table, access to global variables happens
+with speed not too far from that of access to local variables in STklos.
+This can be seen in the following rudimentary benchmark:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;;;</span>
+<span class="c1">;;; Using locals: runs in about 3900ms</span>
+<span class="c1">;;;</span>
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">a</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">b</span> <span class="mi">2</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">time</span>
+    <span class="p">(</span><span class="nf">repeat</span> <span class="mi">100</span><span class="nv">_000_000</span>
+      <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))))</span>
+
+<span class="c1">;;;</span>
+<span class="c1">;;; Using globals: in the same system, runs in about 4000ms</span>
+<span class="c1">;;;</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">time</span>
+  <span class="p">(</span><span class="nf">repeat</span> <span class="mi">100</span><span class="nv">_000_000</span>
+     <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)))</span></code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -1706,7 +1937,7 @@ opcode is used:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble</span>
- <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">v</span> <span class="p">(</span><span class="nb">vector</span> <span class="sc">#\a</span> <span class="sc">#\b</span> <span class="sc">#\c</span><span class="p">)))</span>
+ <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">v</span> <span class="p">(</span><span class="nb">vector</span> <span class="o">#</span><span class="nv">a</span> <span class="o">#</span><span class="nv">b</span> <span class="o">#</span><span class="nv">c</span><span class="p">)))</span>
    <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">vector-set!</span> <span class="nv">v</span> <span class="mi">2</span> <span class="mi">10</span><span class="p">))))</span></code></pre>
 </div>
 </div>
@@ -2447,7 +2678,7 @@ in <code>vm.h</code>) contains pointers to the C stack, the Scheme stack and sev
 data.</p>
 </div>
 <div class="paragraph">
-<p>Capturing a continuation is carried ou tby the following step (these are
+<p>Capturing a continuation is carried out by the following steps (these are
 the actual comments in the function <code>STk_make_continuation</code>):</p>
 </div>
 <div class="olist arabic">
@@ -2483,7 +2714,7 @@ the actual comments in the function <code>STk_make_continuation</code>):</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>And, when the C stack is restored, the Vm is back to its original state, except
+<p>And, when the C stack is restored, the VM is back to its original state, except
 for the global variables.</p>
 </div>
 </div>
@@ -2491,7 +2722,7 @@ for the global variables.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-28 18:56:37 +0100
+Last updated 2023-09-01 14:44:07 +0200
 </div>
 </div>
 </body>
