@@ -626,7 +626,7 @@ DEFINE_PRIMITIVE("fl-",srfi_144_sub,vsubr,(int argc, SCM *argv))
 {
     if (argc==0) STk_error("expects at least one argument");
     ensure_fl(*argv);
-    if (argc==1) return double2real( 0.0 - REAL_VAL(*argv));
+    if (argc==1) return double2real(-REAL_VAL(*argv));
 
     register double res = REAL_VAL(*argv--);
     argc--;
