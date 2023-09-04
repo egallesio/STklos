@@ -220,6 +220,10 @@
 
 (test-subsection "hygienic macros")
 
+(test "very basic let-syntax"
+      10
+      (let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
+
 (define-syntax swap!
   (syntax-rules ()
     ((_ a b)
@@ -238,6 +242,36 @@
   (test "simple hygienic.2"   ;; using "temp" name
         '(3 1)
         (begin (swap! b temp) (list b temp))))
+
+
+(define-syntax g
+  (syntax-rules ()
+    ((g (a b ... c . d))
+     (begin (display (vector b ...))
+            (display a)
+            (display c)
+            (display d)))))
+
+(test "ellipsis in improper list.1"
+      "#(2 3 4 5)16()"
+      (with-output-to-string
+        (lambda ()
+          (g (1 2 3 4 5 6)))))
+
+(define-syntax g
+  (syntax-rules ^^^ ()
+    ((g (a b ^^^ c . d))
+     (begin (display (vector b ^^^))
+            (display a)
+            (display c)
+            (display d)))))
+
+(test "ellipsis in improper list.2"
+      "#(2 3 4 5)...6()"
+      (with-output-to-string
+        (lambda ()
+          (g ((quote ...) 2 3 4 5 6)))))
+
 
 ;;FIXME: Add more tests !!!!!!!!!
 

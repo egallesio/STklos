@@ -22,7 +22,7 @@
    vector?
    vector-empty?
    vector=
-   
+
    ;;; Selectors
    vector-ref
    vector-length
@@ -38,7 +38,7 @@
    vector-index-right              vector-skip-right
    vector-binary-search
    vector-any                      vector-every
-   
+
    ;;; Mutators
    vector-set!
    vector-swap!
@@ -120,7 +120,7 @@
                                   length)
                              callee)))))
     loop))
-    
+
 ;; Constructors
 
 (from-scheme make-vector)
@@ -129,9 +129,9 @@
 (from-133    vector-unfold-right)
 
 (define r7rs-vector-copy (symbol-value 'vector-copy scheme))
-(define (vector-copy v :optional (start 0) stop (fill #f fill?))
+(define (vector-copy v :optional (start 0) stop (fill #void fill?))
   (let ((stop (if stop stop (vector-length v))))
-    (if (not fill?)
+    (if (<= stop (vector-length v))
         (r7rs-vector-copy v start stop)
         (let ((w (make-vector (- stop start))))
           (dotimes (i (- (vector-length v) start))
@@ -140,7 +140,6 @@
             (vector-set! w (+ i (- (vector-length v) start))  fill))
           w))))
 
-      
 
 (from-133    vector-reverse-copy)
 (from-scheme vector-append)

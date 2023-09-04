@@ -61,11 +61,11 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@  @STKCFLAGS@ @SH_COMP_FLAGS@ \
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
          $(GTKFLAGS) \
          -I$(BASEDIR)/src @GCINC@ @GMPINC@ \
          -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  -o $*.@SH_SUFFIX@ $*.o @DLLIBS@
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@  -o $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o
 
 $(EXTENSION)-incl.c: $(EXTENSION).stk $(SCM_SRCS)

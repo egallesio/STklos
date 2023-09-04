@@ -395,8 +395,8 @@ BASEDIR = ../../..
 SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir = $(prefix)/share/@PACKAGE@/@VERSION@/scheme/vector
-srfilibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme/vector
+srfidir = @SCMDIR@/scheme/vector
+srfilibdir = @EXECDIR@/scheme/vector
 srfi_DATA = $(SRC_OSTK)
 srfilib_DATA = $(SRC_SHOBJ)
 srfi_sources = $(SRC_STK)
@@ -703,8 +703,9 @@ f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+			-I../../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 #======================================================================

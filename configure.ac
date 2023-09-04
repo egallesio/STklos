@@ -10,13 +10,21 @@ VERSION_STATUS=unstable    # and reset it to unstable after releasing
 #
 # Grab configure options before it is too late
 #
-CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""
+CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""; HAS_LDFLAGS=""; HAS_CPPFLAGS=""
+PDFDIR="";HTMLDIR=""; DOCDIR=""; LIBDIR=""; DATADIR="";
 
 for opt in "$@"
 do
   case $opt in
-     CC=*)     HAS_CC=1 ;;
-     CFLAGS=*) HAS_CFLAGS=1;;
+     CC=*)        HAS_CC=1 ;;
+     CFLAGS=*)    HAS_CFLAGS=1;;
+     LDLAGS=*)    HAS_LDLAGS=1;;
+     CPPFLAGS=*)  HAS_CPPFLAGS=1;;
+     --docdir=*)  DOCDIR=${docdir};;
+     --pdfdir=*)  PDFDIR=${pdfdir};;
+     --htmldir=*) HTMLDIR=${htmldir};;
+     --libdir=*)  LIBDIR=${libdir};;
+     --datadir=*) DATADIR=${datadir};;
   esac
 
   if test "X$opt" = "X--no-create" -o "X$opt" = "X--no-recursion"
@@ -27,6 +35,9 @@ do
      CONF_OPT="$CONF_OPT \\\"$opt\\\""
   fi
 done
+
+# export CC, CFLAGS and all for configure scripts launched by this configure script
+export CC CFLAGS LDFLAGS CPPFLAGS
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
@@ -106,11 +117,55 @@ case $OS in
     ;;
 esac
 
+# Manage standard options --docdir, --pdfdir, --htmldir
+# By default, autoconf uses
+#   docdir = ${prefix}/share/doc/stklos
+#   pdfdir = ${docdir}
+#   htmldir = ${docdir}
+# To permit to have several versions of STklos installed, and to avoid
+# cluttering the doc directory, we use
+#   docdir = ${prefix}/share/doc/stklos/${VERSION}
+#   pdfdir = ${docdir}/pdf
+#   htmldir = ${docdir}/html
+# Of course, if the user specify any option, we use the value he/she gave
+if test "$DOCDIR" == "" ; then
+    # user has not given a "--docdir" option. Use our own convention
+    docdir="${prefix}/share/doc/${PACKAGE_TARNAME}/${VERSION}"
+fi
+
+if test "$PDFDIR" == ""  ; then
+   # user has not given a "--pdfdir" option. Use our own convention
+   pdfdir="${docdir}/pdf"
+fi
+
+if test "$HTMLDIR" == ""  ; then
+   # user has not given a "--htmldir" option. Use our own convention
+   htmldir="${docdir}/html"
+fi
+
+# Manage standard options --libdir and --datadir
+# If the user doesn't specify these option, we fix
+#   libdir to ${prefix}/lib/
+#   datadir to ${prefix}/share
+# Otherwise, we take the user provided values.
+#
+# In any case, we will place our files in the stklos/${VERSION} subdir
+
+if test "$LIBDIR" == ""  ; then
+   # user has not given a "--libdir" option. Use ${prefix}/lib/stklos/${VERSION}
+   libdir="${prefix}/lib/${PACKAGE_TARNAME}/${VERSION}"
+fi
+
+if test "$DATADIR" == ""  ; then
+   # user has not given a "--datadir" option. Use ${prefix}/share/stklos/${VERSION}
+   datadir="${prefix}/share/${PACKAGE_TARNAME}/${VERSION}"
+fi
 
 ### Initialize the extra conf file in src
-SCMDIR=$prefix/share/$PACKAGE/$VERSION
-EXECDIR=$prefix/lib/$PACKAGE/$VERSION
 PREFIX=$prefix
+SCMDIR=$datadir
+EXECDIR=$libdir
+
 
 ### Determine the kind of the machine which is running this script
 BUILD_OS=$os-$version
@@ -234,7 +289,7 @@ AC_ARG_WITH(provided-gc,
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
 then
      echo "... Configuring libgc"
-     (cd gc; CC=${CC} CFLAGS=${CFLAGS} ./configure --prefix=$prefix --enable-static \
+     (cd gc; ./configure --prefix=$prefix --enable-static \
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
@@ -338,8 +393,7 @@ AC_ARG_WITH(provided-regexp,
 if test "$HAVE_PCRE2" = "no" -o "$PROV_PCRE2" = "yes"
 then
      echo "... Configuring libpcre2"
-     (cd pcre2; CC=${CC} CFLAGS="${CFLAGS}" ./configure \
-           --prefix=$prefix --disable-shared --disable-cpp) || \
+     (cd pcre2; ./configure --prefix=$prefix --disable-shared --disable-cpp) || \
            { echo "Cannot configure PCRE2"; exit; }
      PCRE2=pcre2
      PCRE2INC="-I../pcre2"
@@ -382,8 +436,7 @@ AC_ARG_WITH(provided-ffi,
 if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
 then
      echo "... Configuring libffi"
-     (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
-           --disable-structs --disable-raw-api --disable-shared \
+     (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
            --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
      FFI="ffi"
      FFIINC="-I../ffi/$(./config.guess)/include"
@@ -507,7 +560,7 @@ done
 ### Finishing ...
 ###
 
-# See if we must add CC and CFLAGS to the arguments stored in $CONF_OPT
+# See if we must add CC, {C,LD,CPP}FLAGS to the arguments stored in $CONF_OPT
 if test "X$HAS_CC" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CC=$CC\\\""
 fi
@@ -515,6 +568,15 @@ fi
 if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
 fi
+
+if test "X$HAS_LDFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"LDFLAGS=$LDFLAGS\\\""
+fi
+
+if test "X$HAS_CFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"CPPFLAGS=$CPPFLAGS\\\""
+fi
+
 
 CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
 
@@ -577,6 +639,8 @@ then
     FULL_VERSION=$VERSION-unstable
   fi
 fi
+
+
 
 
 ### Output files
@@ -711,3 +775,4 @@ echo " "
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "
+

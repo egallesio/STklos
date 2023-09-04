@@ -734,7 +734,7 @@ SCM STk_values2vector(SCM obj, SCM vect)
 	STk_error("bad vector ~S", vect);
     if (VECTOR_SIZE(vect) != len)
 	STk_error("expected %d values, but %d were given",
-		  VECTOR_SIZE(vect), len);
+            VECTOR_SIZE(vect), len);
     retval = vect;
   } else {
     /* Allocate a new vector for result */
@@ -1173,6 +1173,13 @@ CASE(DEEP_LOCAL_REF) {
   int level, info = fetch_next();
   SCM e = vm->env;
 
+  /* STklos organizes local environments as this: each level has a
+     maximum of 256 variables. Both the level and the address of local
+     variables are encoded in a single 16-bit integer, as "256v1+v2".
+     For example, 2*256 + 03 = 0x0203. The first byte, 0x02,
+     identifies the level, and the second byte, 0x03, identifies the
+     variable.  */
+
   /* Go down in the dynamic environment */
   for (level = FIRST_BYTE(info); level; level--)
     e = (SCM) FRAME_NEXT(e);
@@ -1445,14 +1452,14 @@ CASE(ENTER_TAIL_LET) {
       vm->fp = old_fp;
 
       /* Push a new environment on the stack */
-      vm->sp = ((SCM*)vm->env) - nargs-
-                     ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
+      vm->sp = ((SCM*)vm->env) - nargs -
+               ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
     }
     else {
       if (nargs) memmove(old_fp-nargs, vm->sp, nargs*sizeof(SCM));
       vm->fp = old_fp;
       vm->sp = vm->fp - nargs -
-                  ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
+               ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
     }
 
     PUSH_ENV(nargs, vm->val, vm->env);

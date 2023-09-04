@@ -11,7 +11,7 @@ directory is provided here, to avoid the copy of full GMP (which is
 quite large). Note however that mini-gmp is far less efficient than
 the full version counterpart.
 
-  - Version: 6.2.1 (the mini-gmp included in it)
+  - Version: 6.3.0 (the mini-gmp included in it)
   - License: LGPL
   - Home Page: https://gmplib.org/
 

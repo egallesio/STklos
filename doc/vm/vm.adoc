@@ -350,6 +350,27 @@ DEEP_LOCAL_SET
 DEEP_LOC_REF_PUSH
 ....
 
+STklos organizes local environments as this: each level has a maximum
+of 256 variables. Both the level and the address of local variables
+are encoded in a single 16-bit integer, as "256v1+v2".  For example,
+2*256 + 03 = 0x0203. The first byte, 0x02, identifies the level, and
+the second byte, 0x03, identifies the variable.
+
+The VM will, then, do something like this to access a deep local variable:
+
+[source,c]
+----
+  /* See this is src/vm.c, CASE(DEEP_LOCAL_REF):  */
+  for (level = FIRST_BYTE(info); level; level--)
+    e = (SCM) FRAME_NEXT(e);
+
+  vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
+----
+
+Here, `info` is the information to access the variable (a `uint16_t`
+number, as every opcode and operand used in the VM).
+`FIRST_BYTE` gets the level; `SECOND_BYTE` gets the var address.
+
 Examples:
 
 [source,scheme]
@@ -396,6 +417,58 @@ comparison opcode `IN-NUMEQ`:
 004:  IN-NUMEQ
 005:  RETURN
 ....
+
+The following example shows a variable in a deeper level.
+
+[source,scheme]
+----
+(disassemble
+  (let ((c 4)
+        (b 3))
+    (lambda ()
+      (let ((a 2))
+        c))))
+----
+
+....
+000:  PREPARE-CALL
+001:  INT-PUSH             2
+003:  ENTER-TAIL-LET       1
+005:  DEEP-LOCAL-REF       513
+007:  RETURN
+....
+
+The number 513 is composed of the bytes 0x02 and 0x01:
+`#x0201 = 513`. This means "the variable of index 1 in
+level 2" (index 1 is for `c`, and index 0 is for `b`).
+
+The code for `(let ((c 4) (b 3)` is not shown, but it can bee seen
+with `disassemble-expr`:
+
+[source,scheme]
+----
+(disassemble-expr
+  '(let ((c 4)
+         (b 3))
+     (lambda ()
+       (let ((a 2))
+         c))) #t)
+----
+
+....
+000:  PREPARE-CALL
+001:  INT-PUSH             4
+003:  INT-PUSH             3
+005:  ENTER-LET            2
+007:  CREATE-CLOSURE       9 0	;; ==> 018
+010:  PREPARE-CALL
+011:  INT-PUSH             2
+013:  ENTER-TAIL-LET       1
+015:  DEEP-LOCAL-REF       513
+017:  RETURN
+018:  LEAVE-LET
+....
+
 
 == Global variables
 

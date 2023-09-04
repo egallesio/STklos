@@ -1,6 +1,6 @@
 # Makefile for SILex/STklos
 #
-# Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2003-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 13-Dec-2003 10:54 (eg)
 
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir   = @SCMDIR@
 #scheme_DATA = silex.scm multilex.scm
 SRC= silex.scm multilex.scm
 

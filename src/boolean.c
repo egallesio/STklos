@@ -24,6 +24,7 @@
  *    Creation date: 23-Oct-1993 21:37
  */
 #include <sys/resource.h>
+#include <math.h>
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
@@ -191,15 +192,32 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
         break;
 
     case tc_real:
-    case tc_bignum:
-    case tc_complex:
-    case tc_rational:
-      if (NUMBERP(y)) {
-        if (EXACTP(x) != EXACTP(y))
+      if (REALP(y)) {
+        register double vx = REAL_VAL(x), vy= REAL_VAL(y);
+
+        /* special case on NaNs */
+        if (isnan(vx) && isnan(vy))
+          return STk_nan_equalp(x, y);
+
+        /* special case (eqv? 0.0 -0.0) must return #f whereas = returns #t */
+        if (signbit(vx) != signbit(vy)) /* test on 0.0 is useless indeed */
           return STk_false;
-        return MAKE_BOOLEAN(STk_numeq2(x, y));
       }
-      break;
+      /* Fallthrough */
+    case tc_bignum:
+    case tc_rational:
+      return (NUMBERP(y) && EXACTP(x) == EXACTP(y))?
+                 MAKE_BOOLEAN(STk_numeq2(x, y)):
+                 STk_false;
+
+    case tc_complex:
+      return (COMPLEXP(y) &&
+              EXACTP(x) == EXACTP(y) &&
+              STk_eqv(COMPLEX_REAL(x), COMPLEX_REAL(y)) == STk_true &&
+              STk_eqv(COMPLEX_IMAG(x), COMPLEX_IMAG(y)) == STk_true) ?
+                    STk_true:
+                    STk_false;
+
     case tc_instance:
       if (STk_oo_initialized) {
         SCM fg, res;

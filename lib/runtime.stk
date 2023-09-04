@@ -58,14 +58,14 @@
 (define cddddr (lambda (x) (%cxr x #:dddd)))
 
 (define (map* fn . l)           ; A map which accepts dotted lists (arg lists
-  (cond                         ; must be "isomorph"
+  (cond                         ; must be "isomorph")
    ((null? (car l)) '())
    ((pair? (car l)) (cons (apply fn      (map car l))
                           (apply map* fn (map cdr l))))
    (else            (apply fn l))))
 
 (define (for-each* fn . l)      ; A for-each which accepts dotted lists (arg lists
-  (cond                         ; must be "isomorph"
+  (cond                         ; must be "isomorph")
    ((null? (car l)) '())
    ((pair? (car l)) (apply fn (map car l)) (apply for-each* fn (map cdr l)))
    (else            (apply fn l))))
