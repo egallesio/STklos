@@ -220,6 +220,10 @@
 
 (test-subsection "hygienic macros")
 
+(test "very basic let-syntax"
+      10
+      (let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
+
 (define-syntax swap!
   (syntax-rules ()
     ((_ a b)
