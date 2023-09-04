@@ -204,13 +204,19 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
           return STk_false;
       }
       /* Fallthrough */
-
     case tc_bignum:
-    case tc_complex:
     case tc_rational:
       return (NUMBERP(y) && EXACTP(x) == EXACTP(y))?
                  MAKE_BOOLEAN(STk_numeq2(x, y)):
                  STk_false;
+
+    case tc_complex:
+      return (COMPLEXP(y) &&
+              EXACTP(x) == EXACTP(y) &&
+              STk_eqv(COMPLEX_REAL(x), COMPLEX_REAL(y)) == STk_true &&
+              STk_eqv(COMPLEX_IMAG(x), COMPLEX_IMAG(y)) == STk_true) ?
+                    STk_true:
+                    STk_false;
 
     case tc_instance:
       if (STk_oo_initialized) {

@@ -1225,9 +1225,9 @@
       (< 9.0e+210
          (sqrt (* (expt 2 700) (expt 2 700) 3))
          9.2e+210))
-(test "sqrt complex with +0.0 imaginary part" 0.0+i
+(test "sqrt complex with +0.0 imaginary part" 0.0+1.0i
       (sqrt -1+0.0i))
-(test "sqrt complex with +0.0 imaginary part" 0.0-i
+(test "sqrt complex with +0.0 imaginary part" 0.0-1.0i
       (sqrt -1-0.0i))
 
 (test "sqrt -1" +1i (sqrt -1))
@@ -2199,5 +2199,7 @@
 
 (test "eqv? on 0.0 and -0.0" #f (eqv? +0.0 -0.0))
 (test "= on 0.0 and -0.0" #t (= +0.0 -0.0))
+(test "eqv? on two inexact complexes.1" #f (eqv? 1.0+i 1.0+1.0i))
+(test "eqv? on two inexact complexes.2" #t (eqv? 1.0+1.0i 1.0+1.0i))
 
 (test-section-end)
