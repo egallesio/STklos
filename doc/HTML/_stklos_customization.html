@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -85,10 +85,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -733,12 +730,12 @@ pre.rouge {
              .nav-footer{text-align: center; margin-top: auto;}
              .nav-footer > p > a {white-space: nowrap;}</style>
 </head>
-<body id="_the_scmpkg_package_system" class="book toc2 toc-left">
+<body id="_stklos_customization" class="book toc2 toc-left">
 <div id="header">
 <h1>STklos Reference Manual : (version 1.70)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
-<span id="email" class="email"><a href="mailto:eg@unice.fr">eg@unice.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -763,25 +760,23 @@ pre.rouge {
 </li>
 <li><a href="_threads_mutexes_and_condition_variables.html">9. Threads, Mutexes and Condition Variables</a>
 </li>
-<li><a href="_customizations.html">10. Customizations</a>
-</li>
-<li><a href="_the_scmpkg_package_system.html"><span class="toc-current">11. The ScmPkg Package System</span></a>
+<li><a href="_stklos_customization.html"><span class="toc-current">10. STklos Customization</span></a>
 <ul class="sectlevel2">
-<li><a href="_the_scmpkg_package_system.html#_scmpkg_tutorial">11.1. <em>ScmPkg</em> "tutorial"</a>
+<li><a href="_stklos_customization.html#_parameter_objects_2">10.1. Parameter Objects</a>
 </li>
-<li><a href="_the_scmpkg_package_system.html#_stklos_pkg_options">11.2. stklos-pkg options</a>
+<li><a href="_stklos_customization.html#_environment_variables">10.2. Environment variables</a>
 </li>
 </ul>
 </li>
-<li><a href="_foreign_function_interface.html">12. Foreign Function Interface</a>
+<li><a href="_foreign_function_interface.html">11. Foreign Function Interface</a>
 </li>
-<li><a href="_using_the_slib_package.html">13. Using the SLIB package</a>
+<li><a href="_using_the_slib_package.html">12. Using the SLIB package</a>
 </li>
-<li><a href="_srfis.html">14. SRFIs</a>
+<li><a href="_srfis.html">13. SRFIs</a>
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
 </li>
-<li><a href="_libraries.html">Appendix C: STklos Libraries</a>
+<li><a href="_idiosync.html">Appendix C: STklos Idiosyncrasies</a>
 </li>
 <li><a href="FDL.html">Appendix D: GNU Free Documentation License</a>
 </li>
@@ -790,165 +785,469 @@ pre.rouge {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_the_scmpkg_package_system">11. The ScmPkg Package System</h2>
+<h2 id="_stklos_customization">10. STklos Customization</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_parameter_objects_2">10.1. Parameter Objects</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> environement can be customized using Parameter Objects. These
+parmaters are listed below.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(real-precision)</code></strong><br>
+<strong><code>(real-precision value)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter object allows changing the default precision used
+to print real numbers.</p>
+</div>
+<div class="paragraph">
+<p>By precision when printing a number we mean the number of significant
+digits&#8201;&#8212;&#8201;that is, excluding the leading and trailing zeros in
+decimal representation. (This is exactly the same as the number
+for the <code>g</code> specifier for <code>printf</code> in the C language).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="mi">15</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">f</span> <span class="mf">0.123456789</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mf">0.123456789</span>
+<span class="p">(</span><span class="nf">real-precision</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span> <span class="nv">f</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="mf">0.123</span>
+<span class="p">(</span><span class="nb">display</span>   <span class="mf">1.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">1.12</span>
+<span class="p">(</span><span class="nb">display</span>  <span class="mf">12.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">12.1</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">123.123456789</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mf">123.0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the last example, only three significant digits were printed (123),
+and the zero only marks this number as inexact.</p>
+</div>
+<div class="paragraph">
+<p>If the number won&#8217;t fit using the usual decimal format, it will be
+printed in scientific notation, but still using the specified number
+of significant digits:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">display</span>     <span class="mf">1234.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+03</span>
+<span class="p">(</span><span class="nb">display</span>    <span class="mf">12345.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+04</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12345678.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">1.23</span><span class="nv">e+07</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Repeating the three examples above with precision equal to one results
+in the following.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span>     <span class="mf">1234.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+03</span>
+<span class="p">(</span><span class="nb">display</span>    <span class="mf">12345.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+04</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12345678.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1</span><span class="nv">e+07</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the number is only printed up to its n-th digit, then the printed nth
+digit will be n rounded up or down, according to the digit that comes
+after it.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">real-precision</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12.123456789</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">12.12</span>  <span class="c1">;; "123..." rounded to "12"</span>
+<span class="p">(</span><span class="nb">display</span> <span class="mf">12.987654321</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mf">12.99</span>  <span class="c1">;; "987..." rounded to "99"</span></code></pre>
+</div>
+</div>
+<div id="srfi169" class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(accept-srfi-169-numbers)</code></strong><br>
+<strong><code>(accept-srfi-169-numbers value)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter object permits to change the behavior of the reader
+with underscores in numbers. Numbers with underscores are defined
+in ,(link-srfi 169). By default, this variable is true, meaning that
+underscores are accepted in numbers.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">accept-srfi-169-numbers</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nb">symbol?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nb">number?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">accept-srfi-169-numbers</span> <span class="no">#f</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">symbol?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nb">number?</span> <span class="ss">'1_000_000</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(read-case-sensitive)</code></strong><br>
+<strong><code>(read-case-sensitive value)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter object permits to change the default behaviour of
+the <code>read</code> primitive when reading a symbol. If this parameter has
+a true value a symbol is not converted to a default case when interned.
+Since R<sup>7</sup>RS requires that symbol are case insignificant, the default
+value  of this parameter is <code>#t</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">read-case-sensitive</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="o">`</span><span class="no">#t</span><span class="o">`</span>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">ABC</span>
+<span class="p">(</span><span class="nf">read-case-sensitive</span> <span class="no">#f</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">abc</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Default behaviour can be changed for a whole execution
+with the <code>--case-sensitive</code> or <code>case-insensitive</code> options.</p>
+</li>
+<li>
+<p>See also syntax for <em><a href="_standard_procedures.html#_symbols">special characters</a></em> in symbols.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(write-pretty-quotes)</code></strong><br>
+<strong><code>(write-pretty-quotes value)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter object permits to change the default behaviour of
+the <code>display</code> or <code>write</code> primitives when they write a list which starts with
+ the symbol quote,  quasiquote, unquote or unquote-splicing. If this parameter
+has a false value, the writer uses the list notation instead of a
+more human-readable value.
+By default, this parameter value is set to <code>#t</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">x</span> <span class="o">'</span><span class="ss">'a</span><span class="p">))</span>
+  <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">display</span> <span class="s">" "</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">write-pretty-quotes</span> <span class="no">#f</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">))</span>               <span class="nv">|-</span> <span class="ss">'a</span> <span class="p">(</span><span class="k">quote</span> <span class="nv">a</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div id="loadpath" class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(load-path)</code></strong><br>
+<strong><code>(load-path value)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>load-path</code> is a parameter object. It
+returns the current load path. The load path is a list of strings
+which correspond to the directories in which a file must be searched for
+loading. Directories of the load path are ,(emph "prepended") (in
+their apparition
+order) to the file name given to <code>load</code> or <code>try-load</code> until the file
+can be loaded.</p>
+</div>
+<div class="paragraph">
+<p>The initial value of the current load path can be set from the shell, by
+setting the <code>STKLOS_LOAD_PATH</code> shell variable.</p>
+</div>
+<div class="paragraph">
+<p>Giving a <code>value</code> to the parameter <code>load-path</code> permits to change the
+current list of paths.</p>
+</div>
 <div class="paragraph">
 <p>
-<em>ScmPkg</em> is a package distribution system for Scheme. It is
-currently supported by Bigloo and <strong><em>STklos</em></strong>. This package system
-provides new APIs to Scheme (e.g., network programming,
-cryptography, encoding, &#8230;&#8203;) and it manages automatic package
-installation, deinstallation and testing.</p>
+</p>
 </div>
-<div class="sect2">
-<h3 id="_scmpkg_tutorial">11.1. <em>ScmPkg</em> "tutorial"</h3>
-<div class="paragraph">
-<p><code>stklos-pkg</code> is the command which gives access to <em>ScmPkg</em> in <strong><em>STklos</em></strong>.
-This is the only command necessary to manage <em>ScmPkg</em> packages. For
-instance, this command manages a local cache of the <em>ScmPkg</em> server, permits
-(de)installation of <em>ScmPkg</em> packages, the test of packages, &#8230;&#8203;</p>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
-<div class="paragraph">
-<p>To start, we can synchronize our local repository with the <em>ScmPkg</em>
-servers. This can be done by the following command:</p>
-</div>
-<div class="listingblock">
+<div class="sidebarblock">
 <div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --sync</code></pre>
+<div class="paragraph small">
+<p><strong><code>(load-suffixes)</code></strong><br>
+<strong><code>(load-suffixes value)</code></strong><br></p>
+</div>
 </div>
 </div>
 <div class="paragraph">
-<p>This will download a description of the <em>ScmPkg</em> packages
-which are available. The list of these packages can be displayed with:</p>
+<p><code>load-suffixes</code> is a parameter object. It
+returns the list of possible suffixes for a Scheme file. Each suffix,
+must be a string. Suffixes are appended (in their apparition order)
+to a file name  is appended to a file name given to <code>load</code> or <code>try-load</code>
+until the file can be loaded.</p>
 </div>
-<div class="listingblock">
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
 <div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --list
-_bigloo-1.0.1 (tuning)
-_bigloo-regexp-0.0.1
-_bigloo-stdlib-0.0.1 (tuning)
-_chicken-0.0.1 (tuning)
-_chicken-net-0.0.1 (tuning)
-_chicken-os-0.0.1
-rfc3339-0.2.0
-srfi1-0.0.1 (tuning)
-$</code></pre>
+<div class="paragraph small">
+<p><strong><code>(load-verbose)</code></strong><br>
+<strong><code>(load-verbose value)</code></strong><br></p>
+</div>
 </div>
 </div>
 <div class="paragraph">
-<p>Packages whose name start by an underscore are packages needed for
-alien language support (e.g. the package "<em>bigloo" is necessary to
-run a package written in the Bigloo Scheme dialect, or the package
-"_chicken-net" is necessary for the packages using the network
-primitives of the Chicken Scheme dialect). Some packages may offer
-a tuning. A tuned package is a package which has been specially
-tuned for <strong>_STklos</em></strong> (e.g. the generic "srfi1" package which
-implement SRFI-1 has been tuned to be more efficient in STklos)</p>
+<p><code>load-verbose</code> is a parameter object. It permits to display the
+path name of the files which are loaded by <code>load</code> or <code>try-load</code> on
+the current error port, when set to a true value. If <code>load-verbose</code>
+is set to <code>#f</code>, no message is printed.</p>
 </div>
 <div class="paragraph">
-<p>To download a new package (and all its dependencies), one can simply
-issue the following command:</p>
+<p></p>
 </div>
-<div class="listingblock">
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
 <div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --extract PKG --directory /tmp/Test</code></pre>
+<div class="paragraph small">
+<p><strong><code>(thread-handler-error-show)</code></strong><br>
+<strong><code>(thread-handler-error-show value)</code></strong><br></p>
+</div>
 </div>
 </div>
 <div class="paragraph">
-<p>This command downloads the package <em>PKG</em>, its dependencies
-and (eventually) its tuning. It also creates a <code>Makefile</code>
-for compiling the package.  The <code>--directory</code> option
-specifies where the files must be extracted in the <code>/tmp/Test</code>
-directory (instaed of the current directory). The generated <code>Makefile</code>
-offers the following main targets</p>
+<p>When an untrapped error occurs in a thread, it produces an
+<a href="_threads_mutexes_and_condition_variables.html#make-thread"><em>uncaught exception</em></a> which can finally be
+trapped when the thread is <a href="_threads_mutexes_and_condition_variables.html#thread-join"><em>joined</em></a>.
+Setting the <code>thread-handler-error-show</code> parameter permits to see
+error message as soon as possible, even without joining the thread.
+This makes debugging easier. By default, this parameter is set to
+<code>#t</code>.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(stklos-debug-level)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>stklos-debug-level</code> is a parameter objet. It permits to know the current
+debugging level. The default value of this parameter is 0 (meaning "no debug").
+Note that the debugging level can also be set by the <code>--debug</code> option of the
+<code>stklos(1)</code> command.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(repl-theme)</code></strong><br>
+<strong><code>(repl-theme plist)</code></strong><br>
+<strong><code>(repl-theme name)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <strong><em>STklos</em></strong> REPL colors can be customized using a property list (or a theme
+name) using the <code>repl-theme</code> parameter. The properties that can be used in this
+property list are:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>all</strong> : the default target</p>
+<p><code>#:error</code> for the color of error messages</p>
 </li>
 <li>
-<p><strong>test:</strong> to launch the package tests</p>
+<p><code>#:prompt</code> for the color of the prompt</p>
 </li>
 <li>
-<p><strong>install:</strong> to install the package for the user</p>
+<p><code>#:help-prompt</code> for the color of the help prompt</p>
 </li>
 <li>
-<p><strong>system-install:</strong> to install the package system wide (privilegied access
-rights are probably needed)</p>
+<p><code>#:help</code> for the color of the help messages</p>
+</li>
+<li>
+<p><code>#:repl-depth</code> for the color of the depth indicator for recursive REPLs</p>
+</li>
+<li>
+<p><code>#:info</code> for the color of information messages.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>To test a package, one can also use the following command:</p>
+<p>There are three default themes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>classic</strong> which is the (colorful) default theme.</p>
+</li>
+<li>
+<p><strong>monochrome</strong> which doesn&#8217;t use colors</p>
+</li>
+<li>
+<p><strong>minimal</strong> where only the prompt and errors are colored.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Colors are expressed using the conventions of
+<a href="_standard_procedures.html#ansicolor">the <code>ansi-color</code> primitive</a>. For instance:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\type{$} stklos-pkg --test PKG</code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">key-set!</span> <span class="p">(</span><span class="nf">repl-theme</span><span class="p">)</span> <span class="nv">:prompt</span> <span class="o">'</span><span class="p">(</span><span class="nf">bold</span> <span class="nv">green</span><span class="p">))</span> <span class="c1">;; set the prompt to bold green</span>
+
+<span class="p">(</span><span class="nf">repl-theme</span> <span class="ss">'minimal</span><span class="p">)</span>                         <span class="c1">;; to use a sober prompt</span>
+
+<span class="p">(</span><span class="nf">repl-theme</span> <span class="o">'</span><span class="p">(</span><span class="o">#</span><span class="nv">:error</span> <span class="p">(</span><span class="nf">bold</span> <span class="nv">red</span><span class="p">)</span>              <span class="c1">;; explicitly defined theme</span>
+              <span class="o">#</span><span class="nv">:prompt</span> <span class="p">(</span><span class="nf">bold</span> <span class="nv">bg-red</span> <span class="nv">white</span><span class="p">)))</span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+A good place to change your theme is the <code>.stklosrc</code> file.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>This downloads the necessary files in a temporary directory,
-and launches the tests of the package <em>PKG</em></p>
+<p></p>
 </div>
-<div class="paragraph">
-<p>To install a package, one can also use the following command:</p>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
 </div>
-<div class="listingblock">
+<div class="sidebarblock">
 <div class="content">
-<pre class="rouge highlight"><code>$ stklos-pkg --install PKG</code></pre>
+<div class="paragraph small">
+<p><strong><code>(repl-show-startup-message)</code></strong><br>
+<strong><code>(repl-show-startup-message val)</code></strong><br></p>
+</div>
 </div>
 </div>
 <div class="paragraph">
-<p>This command downloads the necessary files in a temporary directory,
-and installs the package <em>PKG</em>.</p>
+<p>If this parameter is a true value, a banner is printed when <strong><em>STklos</em></strong> starts
+in interactive mode. Otherwise, no banner is printed. By default, this parameter
+is set to <code>#t</code>.</p>
 </div>
-<div class="paragraph">
-<p>This completes the basis <em>ScmPkg</em> tutorial. See below for
-the list of all stklos-pkg options</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This parameter can be set to <code>#f</code> with the <code>--no-startup-message</code> option of
+the <strong><em>STklos</em></strong> command. Otherwise, a good place to set this parameter is in the
+<code>.stklosrc</code> file.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_stklos_pkg_options">11.2. stklos-pkg options</h3>
+<h3 id="_environment_variables">10.2. Environment variables</h3>
 <div class="paragraph">
-<p>Here are the options supported by the stklos-pkg command</p>
+<p>The following variables can be used to customize <strong><em>STklos</em></strong>:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre>Usage: stklos-pkg [options] [parameter ...]
-Actions
-  --extract=&lt;pkg&gt;, -e &lt;pkg&gt;    Extract &lt;pkg&gt;. Don't install it
-  --test=&lt;pkg&gt;, -t &lt;pkg&gt;       Test &lt;pkg&gt;.
-  --install=&lt;pkg&gt;, -i &lt;pkg&gt;    Extract, compile, Install &lt;pkg&gt;.
-  --uninstall=&lt;pkg&gt;            un-install package &lt;pkg&gt;
-Repository administration
-  --sync, -s                   synchronize with remote server servers
-  --add=&lt;sb&gt;, -a &lt;sb&gt;          Add &lt;sb&gt; pkgball to the local repository
-  --download=&lt;pkg&gt;             download &lt;pkg&gt;
-  --fill-cache                 fill cache with available distant packages
-  --clear-cache                delete packages present in cache
-  --reset                      reset stklos-pkg repository. USE WITH CAUTION
-  --build-sync-file=&lt;dir&gt;      Build a synchronization file from &lt;dir&gt;
-Informations
-  --list, -l                   list available packages
-  --depends=&lt;pkg&gt;              Show all the dependencies of &lt;pkg&gt;
-  --installed                  Show installed packages
-Misc
-  --conf-dir=&lt;dir&gt;, -D &lt;dir&gt;   Use &lt;dir&gt; as stklos main configuration directory
-  --directory=&lt;dir&gt;, -C &lt;dir&gt;  Change to directory &lt;dir&gt; (extract/download)
-  --verbose, -v                be verbose (can be cumulated)
-  --system-wide, -S            do a system wide (de)installation
-  --version, -V                print the version and exit
-  --help, -h                   display this help
-  --options                    display program options
-  --cp                         INTERNAL USE ONLY. Do not use this option</pre>
-</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>STKLOS_LOAD_PATH</strong>: This is a colon-separated list
+of directories in which stklos looks for loading files. It is used by
+primitives such as <code><a href="_standard_procedures.html#load">load</a></code> or <code><a href="_standard_procedures.html#tryload">try-load</a></code>.  See also the
+<code><a href="_stklos_customization.html#loadpath">load-path</a></code> parameter.</p>
+</li>
+<li>
+<p><strong>STKLOS-FRAME</strong>: This variable must contains an integer
+which indicates the number of frames printed on an error. Use
+the value 0 for an unlimited backtrace.</p>
+</li>
+<li>
+<p><strong>STKLOS-CONFDIR</strong>: This variable can be used to
+designate the directory used by <strong><em>STklos</em></strong> to store its configuration or
+packages files. If not set, the default <strong><em>STklos</em></strong> configuration directory
+is by default <code>~/.stklos</code>.</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
 </div>
 <div class="paragraph nav-footer">
-<p>← Previous: <a href="_customizations.html">Customizations</a> | ↑ Up: <a href="stklos-ref-multi.html">STklos Reference Manual : (version 1.70)</a> | Next: <a href="_foreign_function_interface.html">Foreign Function Interface</a> →</p>
+<p>← Previous: <a href="_threads_mutexes_and_condition_variables.html">Threads, Mutexes and Condition Variables</a> | ↑ Up: <a href="stklos-ref-multi.html">STklos Reference Manual : (version 1.70)</a> | Next: <a href="_foreign_function_interface.html">Foreign Function Interface</a> →</p>
 </div>
 </div>
 <div id="footnotes">
@@ -966,7 +1265,10 @@ Misc
 <a href="#_footnoteref_1">1</a>. Under Unix, you can simply connect to a listening socket with the <code>telnet</code> of <code>netcat</code> command. For the given example, this can be achieved with <code>netcat localhost 12345</code>
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. Port 13, if open,  can  used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+<a href="#_footnoteref_2">2</a>. Port 13, if open, can be used for testing: making a connection to it permits to know the distant system&#8217;s idea of the time of day.
+</div>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. The "pattern matching compiler" has been written by Jean-Marie Geffroy and is part of the Manuel Serrano&#8217;s Bigloo compiler since several years <a href="_bibliography.html#Bigloo">[Bigloo]</a>
 </div>
 <div class="footnote" id="_footnotedef_1">
 <a href="#_footnoteref_1">1</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
@@ -974,7 +1276,7 @@ Misc
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-03-14 18:56:10 +0100
+Last updated 2023-07-22 20:08:25 +0200
 </div>
 </div>
 </body>

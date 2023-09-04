@@ -53,7 +53,7 @@
           atomic-fence)
   (import ;;(scheme base)
           ;;(scheme case-lambda)
-          (srfi 9)
+          ;;(srfi 9)
           (srfi 18)
           ;;(srfi 143) no need, it's STklos native!
           )

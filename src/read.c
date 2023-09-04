@@ -260,7 +260,7 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
         c = flush_spaces(port, eof_seen, port);
       }
       if (c != delim)
-        error_bad_dotted_list(port, line); // dot not befor last element
+        error_bad_dotted_list(port, line); // dot not before last element
       CDR(last) = cur;
       return start;
     }

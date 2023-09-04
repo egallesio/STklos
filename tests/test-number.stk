@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -358,6 +358,36 @@
 (test "complex binary polar -+" (make-polar #b101 #b-111)  #b101@-111)
 (test "complex binary polar --" (make-polar #b-101 #b-111) #b-101@-111)
 
+(test "complex inf+n"
+      #t
+      (let ((c +inf.0+1/2i))
+        (and (infinite? (real-part c))
+             (positive? (real-part c))
+             (= 1/2 (imag-part c)))))
+
+(test "complex n-inf"
+      #t
+      (let ((c 3/4-inf.0i))
+        (and (infinite? (imag-part c))
+             (negative? (imag-part c))
+             (= 3/4 (real-part c)))))
+
+(test "complex +inf+inf"
+      #t
+      (let ((c +inf.0-inf.0i))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (positive? (real-part c))
+             (negative? (imag-part c)))))
+
+(test "complex +inf@n"
+      #t
+      (let ((c +inf.0@2))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (negative? (real-part c))
+             (positive? (imag-part c)))))
+
 
 ;;------------------------------------------------------------------
 (test-subsection "integer writer syntax")
@@ -397,6 +427,19 @@
         "-340282366920938463463374607431768211457")
       (i-tester2 (exp2 127)))
 
+;;------------------------------------------------------------------
+(test-subsection "complex writer syntax")
+
+(test "complex printing"
+      '("+inf.0+inf.0i" "+nan.0+inf.0i" "+inf.0+inf.0i"
+       "-inf.0-inf.0i"  "+nan.0+nan.0i" "+nan.0+nan.0i"
+       "1+1i"           "0+1i"          "1+0.0i"
+       "1-0.0i"         "1+1/2i"        "2-1/3i")
+      (map number->string
+           (list (* 1+1i +inf.0) (* 0+1i +inf.0) (* 2+1i +inf.0)
+                 (* -inf.0 1+1i) (* -nan.0 +1i)  (* +nan.0 -1i)
+                 1+1i            0+1i            1+0.0i
+                 1-0.0i          1+1/2i          2-3/9i)))
 
 ;;==================================================================
 ;; Predicates
@@ -411,6 +454,9 @@
 (test "integer?" #f (integer? 3+4i))
 (test "integer?" #t (integer? 3+0i))
 (test "integer?" #f (integer? #f))
+(test "integer?" #t (integer? (exact 1+0.0i)))
+(test "integer?" #t (integer? (exact 1.0+0.0i)))
+(test "integer?" #t (integer? (exact 0+0i)))
 
 (test "rational?" #t (rational? 0))
 (test "rational?" #t (rational? 85736847562938475634534245))
@@ -450,6 +496,10 @@
 (test "exact?" #f (exact? 4304953480349304983.049304953804))
 (test "exact?" #f (exact? 1.0+0i))
 (test "exact?" #f (exact? 1.0+5i))
+(test "exact?" #t (exact? 1+0i))
+(test "exact?" #t (exact? (exact 1+0.0i)))
+(test "exact?" #t (exact? (exact 1.0+0.0i)))
+(test "exact?" #t (exact? 0+0i))
 (test "inexact?" #f (inexact? 1))
 (test "inexact?" #f (inexact? 4304953480349304983049304953804))
 (test "inexact?" #t (inexact? 1.0))
@@ -488,6 +538,7 @@
 (test "zero?" #t (zero? 0+0i))
 (test "zero?" #f (zero? 1.0))
 (test "zero?" #f (zero? +5i))
+(test "zero?" #t (zero? -0.0))
 (test "positive?" #t (positive? 1))
 (test "positive?" #f (positive? -1))
 (test "positive?" #t (positive? 3.1416))
@@ -545,6 +596,20 @@
       (- xx y))
 (test "-bignum - -bignum" #x-fffffffd00000000fffffffd00000000
       (- xx yy))
+
+;; Following tests work if (eqv? 0.0 -0.0) is #f
+;; NOTE: (= 0.0 0.0) returns #t. Use strings to be sure
+(test "minus-zero.1"
+      "-0.0"
+      (format "~a" (- 0.0)))
+
+(test "minus-zero.2"
+      "0.0"
+      (format "~a" (- -0.0)))
+
+(test "minus zero.3"
+      "0.0"
+      (format "~a" (- 0.0 0.0)))
 
 ;;------------------------------------------------------------------
 (test-subsection "small immediate integer constants")
@@ -1154,6 +1219,23 @@
 (test "sqrt bignum"  0+1452616561298192819i
       		     (sqrt -2110094874157786375590269875303166761))
 
+;; FIXME: the 700 exponent works for 64 bits, not for smaller floats.
+(test "sqrt bignum" #t ;; the argument is not representable as double, but the
+                       ;; result is!
+      (< 9.0e+210
+         (sqrt (* (expt 2 700) (expt 2 700) 3))
+         9.2e+210))
+(test "sqrt complex with +0.0 imaginary part" 0.0+1.0i
+      (sqrt -1+0.0i))
+(test "sqrt complex with +0.0 imaginary part" 0.0-1.0i
+      (sqrt -1-0.0i))
+
+(test "sqrt -1" +1i (sqrt -1))
+(test "sqrt -1.0" #t
+      (let ((s (sqrt -1.0)))
+        (and (zero? (real-part s))
+             (< 0.999999 (imag-part s) 1.00001)
+             (inexact? s))))
 
 ;;------------------------------------------------------------------
 (test-subsection "logical operations")
@@ -1453,9 +1535,16 @@
 (test "log -0.0" ;; R7RS says (log -0.0) should be "-inf + i*pi".
       #t
       (let ((z (log -0.0)))
-        (infinite? (real-part z))
-        (negative? (real-part z))
-        (< 3.14159265350 (imag-part z) 3.14159265360)))
+        (and (infinite? (real-part z))
+             (negative? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
+
+(test "log -inf.0" ;; The limit when x -> -inf is "+inf + i*pi".
+      #t
+      (let ((z (log -inf.0)))
+        (and (infinite? (real-part z))
+             (positive? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
 
 (test "log 2/3"
       #t
@@ -1793,6 +1882,67 @@
 (test "atanh 0"   0 (atanh 0))
 
 
+(test "cosh +inf"
+      #t
+      (and (infinite? (cosh +inf.0))
+           (positive? (cosh +inf.0))))
+
+(test "cosh -inf"
+      #t
+      (and (infinite? (cosh -inf.0))
+           (positive? (cosh -inf.0))))
+
+(test "sinh +inf"
+      #t
+      (and (infinite? (sinh +inf.0))
+           (positive? (sinh +inf.0))))
+
+(test "sinh -inf"
+      #t
+      (and (infinite? (sinh -inf.0))
+           (negative? (sinh -inf.0))))
+
+
+(test "acosh +inf"
+      #t
+      (and (infinite? (acosh +inf.0))
+           (positive? (acosh +inf.0))))
+
+(test "acosh -inf"
+      #t
+      (and (infinite? (acosh -inf.0))
+           (positive? (acosh -inf.0))))
+
+(test "asinh +inf"
+      #t
+      (and (infinite? (asinh +inf.0))
+           (positive? (asinh +inf.0))))
+
+(test "asinh -inf"
+      #t
+      (and (infinite? (asinh -inf.0))
+           (negative? (asinh -inf.0))))
+
+;; atanh(+inf) = -(i.pi)/2
+;; atanh(-inf) = +(i.pi)/2
+(test "atanh -inf"
+      #t
+      (let ((x (atanh -inf.0)))
+        (and (zero? (real-part x))
+             (inexact? (real-part x))
+             (< 1.5707963260     ;; pi/2
+                (imag-part x)
+                1.5707963270))))
+
+(test "atanh +inf"
+      #t
+      (let ((x (atanh +inf.0)))
+        (and (zero? (real-part x))
+             (inexact? (real-part x))
+             (< -1.5707963270     ;; pi/2
+                (imag-part x)
+                -1.5707963260))))
+
 ;;------------------------------------------------------------------
 (test-subsection "Misc")
 
@@ -2002,5 +2152,54 @@
         (< 35.99999
            (radians->degrees (/ pi 5))
            36.00001)))
+
+;;;
+;;; Misc
+;;;
+(test "weird number or symbol.1" #t (number? '3s2))
+(test "weird number or symbol.2" #f (number? '3s2x))
+(test "weird number or symbol.3" #t (number? '3#d2+5i))
+(test "weird number or symbol.4" #f (number? '3#d2+5))
+
+(test "equivalence +nan.0 -nan.0" +nan.0 -nan.0)
+(test "nan and comp.1" #t (eqv? +nan.0 +nan.0))
+(test "nan and comp.2" #t (eqv? +nan.0 -nan.0))
+(test "nan and com.3" #f (= +nan.0 +nan.0))
+(test "nan and comp.4" #f (= +nan.0 -nan.0))
+(test "nan and comp.5" #f (>= +nan.0 +nan.0))
+(test "nan and comp.6" #f (>= +nan.0 -nan.0))
+(test "nan and comp.7" #f (= (%make-nan #f #f 42) (%make-nan #f #f 42)))
+(test "nan and comp.8" #t (eqv? (%make-nan #f #f 42) (%make-nan #f #f 42)))
+(test "nan and comp.9" #f (= (%make-nan #f #f 42) (%make-nan #f #f 0)))
+(test "nan and comp.10" #f (eqv? (%make-nan #f #f 42) (%make-nan #f #f 0)))
+
+(test "abs complex"
+      5
+      (abs -3-4i))
+
+(test "abs complex"
+      5.0
+      (abs -3.0-4i))
+
+(test "abs complex"
+      #t
+      (infinite? (abs -inf.0+4i)))
+
+(test "abs complex"
+      #t
+      (infinite? (abs 2-inf.0i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs -nan.0+4i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs 1-nan.0i)))
+
+(test "eqv? on 0.0 and -0.0" #f (eqv? +0.0 -0.0))
+(test "= on 0.0 and -0.0" #t (= +0.0 -0.0))
+(test "eqv? on two inexact complexes.1" #f (eqv? 1.0+i 1.0+1.0i))
+(test "eqv? on two inexact complexes.2" #t (eqv? 1.0+1.0i 1.0+1.0i))
 
 (test-section-end)

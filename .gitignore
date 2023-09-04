@@ -53,7 +53,7 @@ doc/stklos-compile.1
 doc/stklos-config.1
 doc/stklos-genlex.1
 doc/stklos-install.1
-doc/stklos-pkg.1
+doc/stklos-pp.1
 doc/stklos-script.1
 doc/stklos.1
 doc/refman/html

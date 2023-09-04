@@ -113,8 +113,8 @@ scheme_OBJS = $(R7_OBJS) $(LARGE_OBJS)
 SOURCES = $(SRC_STK) $(LARGE_C)
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/scheme
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/scheme
+schemedir       = @SCMDIR@/scheme
+schemelibdir    = @EXECDIR@/scheme
 scheme_sources  = $(SRC_STK)
 scheme_DATA     = $(scheme_OBJS)
 schemelib_DATA  = $(LARGE_SHOBJ)
@@ -128,8 +128,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@ @LDFLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 

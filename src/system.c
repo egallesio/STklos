@@ -1871,9 +1871,22 @@ DEFINE_PRIMITIVE("pause", pause, subr0, (void))
  *
  */
 
-DEFINE_PRIMITIVE("%library-prefix", library_prefix, subr0, (void))
+DEFINE_PRIMITIVE("%library-prefix", library_prefix, subr01, (SCM arg))
 {
-  return STk_Cstring2string(PREFIXDIR);
+  char *res = "";
+
+  if (arg) {
+    if (SYMBOLP(arg)) {
+      if (strcmp(SYMBOL_PNAME(arg), "lib") == 0) res = EXECDIR;
+      else if (strcmp(SYMBOL_PNAME(arg), "data") == 0) res = SCMDIR;
+    }
+    if (!*res)
+      STk_error("bad argument (must be either the symbol lib or data)");
+  } else {
+    /* No argument => return the prefix only */
+    res = PREFIXDIR;
+  }
+  return STk_Cstring2string(res);
 }
 
 DEFINE_PRIMITIVE("%shared-suffix", shared_suffix, subr0, (void))

@@ -130,9 +130,10 @@ static void Usage(FILE *stream)
 "   -v, --version                   show version and exit (simple)\n"
 "   -V                              show version and exit (detailed, SRFI-176)\n"
 "   -h, --help                      show this help and exit\n"
-"Compiler flags:\n"
-"  They are of the form +xxx or -xxx separated by commas, such as\n"
-"      --compiler-flags='+line-info,+show-instructions,-time-display'\n"
+"Compiler flags (option -F):\n"
+"  Flags are separated by commas, booleans flags must be prefixed by '+' or  '-'\n"
+"  Example:\n"
+"      --compiler-flags='+line-info,-time-display,unroll-iterations=3'\n"
 "  Possible flags:\n"
 "    line-info          Insert line numbers in generated file (as -l option)\n"
 "    show-instructions  Show instructions in generated file\n"
@@ -140,6 +141,7 @@ static void Usage(FILE *stream)
 "    keep-formals       Keep formal arguments in closures\n"
 "    keep-source        Keep source code in closures\n"
 "    inline-usuals      Inline usual functions\n"
+"    unroll-iterations  Set the number of iterations to be unrolled\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }

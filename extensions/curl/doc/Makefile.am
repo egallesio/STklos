@@ -21,10 +21,6 @@ $(FILE).pdf: $(FILE).adoc
 	$(ADOC) -r asciidoctor-pdf -b pdf -v -o $@ $(FILE).tmp
 	rm -f $(FILE).tmp
 
-
-
-
-
 clean:
 	rm -f $(FILE).pdf $(FILE).html $(FILE).tmp *~
 

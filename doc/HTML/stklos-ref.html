@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.18">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -209,13 +209,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -394,7 +391,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -1131,7 +1128,7 @@ No escape sequences are recognized between the starting and terminating lines.</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"abc\ndef\n  ghi"</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"abcndefn  ghi"</span></code></pre>
 </div>
 </div>
 </div>
@@ -4294,7 +4291,7 @@ characters and <code>#f</code> otherwise.</p>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">:foo</span> <span class="nv">:bar</span><span class="p">)</span>                 <span class="nv">=&gt;</span>  <span class="no">#f</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="o">'</span><span class="p">()</span> <span class="o">'</span><span class="p">())</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="mi">2</span> <span class="mi">2</span><span class="p">)</span>                       <span class="nv">=&gt;</span>  <span class="nv">unspecified</span>
-<span class="p">(</span><span class="nb">eq?</span> <span class="sc">#\A</span> <span class="sc">#\A</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
 <span class="p">(</span><span class="nb">eq?</span> <span class="nv">car</span> <span class="nv">car</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
 <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">n</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)))</span>
   <span class="p">(</span><span class="nb">eq?</span> <span class="nv">n</span> <span class="nv">n</span><span class="p">))</span>                    <span class="nv">=&gt;</span>  <span class="no">#t</span> <span class="p">(</span><span class="nf">unspecified</span> <span class="nv">in</span> <span class="nv">r5rs</span><span class="p">)</span>
@@ -4535,7 +4532,9 @@ represented with a native integer.</p>
 <div class="paragraph">
 <p>These procedures return <code>#t</code> if their arguments are (respectively):
 equal, monotonically increasing, monotonically decreasing,
-monotonically nondecreasing, or monotonically nonincreasing.</p>
+monotonically nondecreasing, or monotonically nonincreasing, and
+<code>#f</code> otherwise. If any of the arguments are +nan.0, all the predicates
+return <code>#f</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -4894,7 +4893,7 @@ they return the additive or multiplicative inverse of their argument.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><strong><code>(abs x)</code></strong><br></p>
+<p><strong><code>(abs z)</code></strong><br></p>
 </div>
 </div>
 </div>
@@ -4904,8 +4903,24 @@ they return the additive or multiplicative inverse of their argument.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">abs</span> <span class="mi">-7</span><span class="p">)</span>                <span class="nv">=&gt;</span>  <span class="mi">7</span>
-<span class="p">(</span><span class="nb">abs</span> <span class="m">-inf.0</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="m">+inf.0</span></code></pre>
+<span class="p">(</span><span class="nb">abs</span> <span class="m">-inf.0</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="m">+inf.0</span>
+<span class="p">(</span><span class="nb">abs</span> <span class="mi">-3</span><span class="nv">+4i</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">5</span>
+<span class="p">(</span><span class="nb">abs</span> <span class="mf">-3.0</span><span class="mi">-4</span><span class="nv">i</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="mf">5.0</span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<strong><em>STklos</em></strong> extends the R<sup>7</sup>RS <code>abs</code> function, by allowing its
+argument to be a complex number. In this case, <code>abs</code> returns the
+<em>magnitude</em> of its argument.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>
@@ -5546,7 +5561,7 @@ NaNs, and non-flonum representations.
 <p>Returns a number of the maximally precise representation expressed by the
 given <code>string</code>. <code>Radix</code> must be an exact integer, either 2, 8, 10, or 16.
 If supplied, <code>radix</code> is a default radix that may be overridden by an explicit
-radix prefix in <code>string</code> (e.g. ,(code "\"#o177\"")). If <code>radix</code> is not
+radix prefix in <code>string</code> (e.g. ,(code ""#o177"")). If <code>radix</code> is not
  supplied, then
 the default radix is 10. If <code>string</code> is not a syntactically valid notation
 for a number, then <code>string&#8594;number</code> returns <code>#f</code>.</p>
@@ -5656,7 +5671,7 @@ function of  <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRF
 </div>
 <div class="paragraph">
 <p><code>decode-float</code> returns three exact integers: <code>significand</code>, <code>exponent</code>
-and <code>sign</code> (where <code>-1 &lt;= sign &lt;= 1</code>). The values returned by
+and <code>sign</code> (where <code>-1 &#8656; sign &#8656; 1</code>). The values returned by
 <code>decode-float</code> satisfy:</p>
 </div>
 <div class="listingblock">
@@ -5712,10 +5727,10 @@ depending on the value of <code>sign</code>.</p>
 <p>Both <code>significand</code> and <code>exponent</code> must be within their proper ranges:</p>
 </div>
 <div class="paragraph">
-<p>0 &lt; <code>significand</code> &lt;= <code>float-max-significand</code>, and</p>
+<p>0 &lt; <code>significand</code> &#8656; <code>float-max-significand</code>, and</p>
 </div>
 <div class="paragraph">
-<p><code>float-min-exponent</code> &lt;= <code>exponent</code> &lt;=  <code>float-max-exponent</code>.</p>
+<p><code>float-min-exponent</code> &#8656; <code>exponent</code> &#8656;  <code>float-max-exponent</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -6353,7 +6368,7 @@ field reversed.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns two values: <code>i</code>+<code>j</code>+<code>k</code>, and carry: it is the value of the computation</p>
+<p>Returns two values: <code>i</code>`j`<code>k</code>, and carry: it is the value of the computation</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -7318,8 +7333,8 @@ characters will be written between a pair of <code>|</code>.</p>
 <div class="paragraph">
 <p>In addition, any character can be used within an identifier when
 specified via an inline hex escape . For example, the identifier
-<code>H\x65;llo</code> is the same as the identifier Hello, and, if the
-UTF-8 encoding is used, the identifier <code>\x3BB;</code> is the same as
+<code>Hx65;llo</code> is the same as the identifier Hello, and, if the
+UTF-8 encoding is used, the identifier <code>x3BB;</code> is the same as
 the identifier <code>λ</code>.</p>
 </div>
 <div class="listingblock">
@@ -7430,8 +7445,7 @@ because in some implementations of Scheme they cannot be read as themselves.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nb">eq?</span> <span class="ss">'mISSISSIppi</span> <span class="ss">'mississippi</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="no">#t</span>
-   <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"mISSISSIppi"</span><span class="p">)</span>                    <span class="nv">=&gt;</span>  <span class="nv">|mISSISSIppi|</span>
+<pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"mISSISSIppi"</span><span class="p">)</span>                    <span class="nv">=&gt;</span>  <span class="nv">|mISSISSIppi|</span>
    <span class="p">(</span><span class="nb">eq?</span> <span class="ss">'bitBlt</span> <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"bitBlt"</span><span class="p">))</span>           <span class="nv">=&gt;</span>  <span class="no">#f</span>
    <span class="p">(</span><span class="nb">eq?</span> <span class="ss">'JollyWog</span>
         <span class="p">(</span><span class="nb">string-&gt;symbol</span>
@@ -7440,6 +7454,20 @@ because in some implementations of Scheme they cannot be read as themselves.</p>
              <span class="p">(</span><span class="nb">symbol-&gt;string</span>
                <span class="p">(</span><span class="nb">string-&gt;symbol</span> <span class="s">"K. Harper, M.D."</span><span class="p">)))</span>  <span class="nv">=&gt;</span>  <span class="no">#t</span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The expression <code>(eq? 'mISSISSIppi 'mississippi)</code> returns <code>#f</code> if
+<strong><em>STklos</em></strong> is running in case-sensitive mode (default), whereas it returns
+<code>#t</code> otherwise.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p></p>
@@ -7670,10 +7698,10 @@ used. Hereafter, are some examples of characters:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="sc">#\A</span>                <span class="nv">=&gt;</span> <span class="nv">uppercase</span> <span class="nv">A</span>
-<span class="sc">#\a</span>                <span class="nv">=&gt;</span> <span class="nv">lowercase</span> <span class="nv">a</span>
-<span class="sc">#\x41</span>              <span class="nv">=&gt;</span> <span class="nv">the</span> <span class="nv">U+0041</span> <span class="nv">character</span> <span class="p">(</span><span class="nf">uppercase</span> <span class="nv">A</span><span class="p">)</span>
-<span class="sc">#\x03bb</span>            <span class="nv">=&gt;</span> <span class="err">λ</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">A</span>                <span class="nv">=&gt;</span> <span class="nv">uppercase</span> <span class="nv">A</span>
+<span class="o">#</span><span class="nv">a</span>                <span class="nv">=&gt;</span> <span class="nv">lowercase</span> <span class="nv">a</span>
+<span class="mh">#x41</span>              <span class="nv">=&gt;</span> <span class="nv">the</span> <span class="nv">U+0041</span> <span class="nv">character</span> <span class="p">(</span><span class="nf">uppercase</span> <span class="nv">A</span><span class="p">)</span>
+<span class="mh">#x03bb</span>            <span class="nv">=&gt;</span> <span class="err">λ</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -7761,7 +7789,7 @@ It is guaranteed that under this ordering:</p>
 <div class="paragraph">
 <p>These procedures are similar to <code>char=?</code> et cetera, but they treat
 upper case and lower case letters as the same. For example,
-<code>(char-ci=? #\A #\a)</code> returns <code>#t</code>.</p>
+<code>(char-ci=? #A #a)</code> returns <code>#t</code>.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -7901,10 +7929,10 @@ returns #t), or #f on any other character.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">digit-value</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="o">#</span><span class="mi">3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="mh">#x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
 </div>
@@ -7914,7 +7942,7 @@ returns #t), or #f on any other character.</p>
 <p>
 STklos string constants allow the insertion of arbitrary characters
 by encoding them as escape sequences. An escape sequence is introduced
-by a backslash "$\backslash$".  The valid escape sequences are shown in
+by a backslash "$backslash$".  The valid escape sequences are shown in
 the following table.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch small">
@@ -7930,51 +7958,51 @@ the following table.</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">a</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Alarm</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\b</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">b</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Backspace</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\e</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">e</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Escape</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\n</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Newline</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">t</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Horizontal Tab</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\r</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">r</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Carriage Return</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\"</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">"</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">doublequote U+0022</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\\</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">backslash U+005C</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\0abc</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0abc</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">ASCII character with octal value abc</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\x&lt;hexa value&gt;;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">x&lt;hexa value&gt;;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">ASCII character with given hexadecimal value</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\&lt;intraline whitespace&gt;&lt;newline&gt;&lt;intraline whitespace&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;intraline whitespace&gt;&lt;newline&gt;&lt;intraline whitespace&gt;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">None (permits to enter a string on several lines)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\&lt;other&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;other&gt;</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;other&gt;</p></td>
 </tr>
 </tbody>
@@ -7984,14 +8012,14 @@ the following table.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"ab\040\x20;c\nd\
+<pre class="rouge highlight"><code data-lang="scheme"><span class="s">"ab040x20;cnd
          e"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>is the string consisting of the characters
-<code>&#35;\a</code>, <code>&#35;\b</code>, <code>&#35;\space</code>, <code>&#35;\space</code>,
-<code>&#35;\c</code>, <code>&#35;\newline</code>, <code>&#35;\d</code> and <code>&#35;\e</code>.</p>
+<code>&#35;a</code>, <code>&#35;b</code>, <code>&#35;space</code>, <code>&#35;space</code>,
+<code>&#35;c</code>, <code>&#35;newline</code>, <code>&#35;d</code> and <code>&#35;e</code>.</p>
 </div>
 <div class="paragraph">
 <p><strong>Notes:</strong></p>
@@ -8114,11 +8142,11 @@ the contents of the string are unspecified.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">3</span> <span class="o">#</span><span class="err">\</span><span class="nv">*</span><span class="p">))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">3</span> <span class="o">#</span><span class="nv">*</span><span class="p">))</span>
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="s">"***"</span><span class="p">)</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">void</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">error</span>
-<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nb">symbol-&gt;string</span> <span class="ss">'immutable</span><span class="p">)</span> <span class="mi">0</span> <span class="sc">#\?</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">f</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">void</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nf">g</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">error</span>
+<span class="p">(</span><span class="nb">string-set!</span> <span class="p">(</span><span class="nb">symbol-&gt;string</span> <span class="ss">'immutable</span><span class="p">)</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">?</span><span class="p">)</span>
                          <span class="nv">=&gt;</span>  <span class="nv">error</span></code></pre>
 </div>
 </div>
@@ -8474,12 +8502,12 @@ the end of <code>s1</code> (in which case a new string is allocated).</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">2</span><span class="p">)</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">2</span><span class="p">)</span>
               <span class="nv">=&gt;</span> <span class="s">"XXabcX"</span>
-<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">10</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">5</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">10</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"abc"</span> <span class="mi">5</span><span class="p">)</span>
               <span class="nv">=&gt;</span> <span class="s">"XXXXXabcXX"</span>
-<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="sc">#\X</span><span class="p">)</span> <span class="s">"a"</span> <span class="mi">10</span><span class="p">)</span>
-              <span class="nv">=&gt;</span> <span class="s">"XXXXXX\0\0\0\0a"</span></code></pre>
+<span class="p">(</span><span class="nf">string-blit!</span> <span class="p">(</span><span class="nb">make-string</span> <span class="mi">6</span> <span class="o">#</span><span class="nv">X</span><span class="p">)</span> <span class="s">"a"</span> <span class="mi">10</span><span class="p">)</span>
+              <span class="nv">=&gt;</span> <span class="s">"XXXXXX0000a"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -8502,7 +8530,7 @@ the end of <code>s1</code> (in which case a new string is allocated).</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-mutable?</span> <span class="s">"abc"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="no">#f</span>
 <span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string-copy</span> <span class="s">"abc"</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string</span> <span class="sc">#\a</span> <span class="sc">#\b</span> <span class="sc">#\c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">string-mutable?</span> <span class="p">(</span><span class="nb">string</span> <span class="o">#</span><span class="nv">a</span> <span class="o">#</span><span class="nv">b</span> <span class="o">#</span><span class="nv">c</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
 <span class="p">(</span><span class="nf">string-mutable?</span> <span class="mi">12</span><span class="p">)</span>                   <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
@@ -9075,8 +9103,8 @@ initialized to the elements of <code>string</code> between <code>start</code> an
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-&gt;vector</span> <span class="s">"ABC"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">(</span><span class="sc">#\A</span> <span class="sc">#\B</span> <span class="sc">#\C</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">vector-&gt;string</span> <span class="o">#</span><span class="p">(</span><span class="sc">#\1</span> <span class="sc">#\2</span> <span class="sc">#\3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="s">"123"</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">string-&gt;vector</span> <span class="s">"ABC"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">(</span><span class="o">#</span><span class="nv">A</span> <span class="o">#</span><span class="nv">B</span> <span class="o">#</span><span class="nv">C</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">vector-&gt;string</span> <span class="o">#</span><span class="p">(</span><span class="o">#</span><span class="mi">1</span> <span class="o">#</span><span class="mi">2</span> <span class="o">#</span><span class="mi">3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="s">"123"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -10034,7 +10062,7 @@ unspecified.</p>
          <span class="nv">=&gt;</span> <span class="s">"IBM"</span>
 
 <span class="p">(</span><span class="nf">string-map</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">c</span> <span class="nv">k</span><span class="p">)</span>
-           <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">eqv?</span> <span class="nv">k</span> <span class="sc">#\u</span><span class="p">)</span>
+           <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">eqv?</span> <span class="nv">k</span> <span class="o">#</span><span class="nv">u</span><span class="p">)</span>
                <span class="p">(</span><span class="nb">char-upcase</span> <span class="nv">c</span><span class="p">)</span>
                <span class="p">(</span><span class="nb">char-downcase</span> <span class="nv">c</span><span class="p">)))</span>
          <span class="s">"studlycaps"</span>
@@ -11283,7 +11311,7 @@ returns the string containing the text written on the string port.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-output-to-string</span>
-   <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">write</span> <span class="mi">123</span><span class="p">)</span> <span class="p">(</span><span class="nb">write</span> <span class="s">"Hello"</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="s">"123\\"</span><span class="nv">Hello</span><span class="err">\\</span><span class="s">""</span></code></pre>
+   <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">write</span> <span class="mi">123</span><span class="p">)</span> <span class="p">(</span><span class="nb">write</span> <span class="s">"Hello"</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="s">"123\"Hello\""</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -11863,7 +11891,7 @@ repeatedly until a <strong><em>sexpr</em></strong> is read on the current input 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">idle</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Nothing to read!\\n"</span><span class="p">))))</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">idle</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Nothing to read!\n"</span><span class="p">))))</span>
   <span class="p">(</span><span class="nf">port-idle-register!</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">)</span> <span class="nv">idle</span><span class="p">)</span>
   <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">result</span> <span class="p">(</span><span class="nb">read</span><span class="p">)))</span>
     <span class="p">(</span><span class="nf">port-idle-unregister!</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">)</span> <span class="nv">idle</span><span class="p">)</span>
@@ -12664,7 +12692,7 @@ file <code>"foo"</code> is formed of two lines which contains respectively the n
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">port-&gt;sexp-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">100</span> <span class="s">"bar"</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">port-&gt;string-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"100"</span> <span class="s">"\"bar\""</span><span class="p">)</span></code></pre>
+<span class="p">(</span><span class="nf">port-&gt;string-list</span> <span class="p">(</span><span class="nb">open-input-file</span> <span class="s">"foo"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"100"</span> <span class="s">""</span><span class="nv">bar</span><span class="s">""</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -12688,7 +12716,7 @@ file <code>"foo"</code> is formed of two lines which contains respectively the n
 <p>Writes a written representation of <code>obj</code> to the given <code>port</code>. Strings that
 appear in the written representation are enclosed in doublequotes, and
 within those strings backslash and doublequote characters are escaped
-by backslashes. Character objects are written using the ,(emph "#\\") notation.
+by backslashes. Character objects are written using the ,(emph "#\") notation.
 <code>Write</code> returns an unspecified value. The <code>port</code> argument may be omitted, in
 which case it defaults to the value returned by <code>current-output-port</code>.</p>
 </div>
@@ -13094,15 +13122,15 @@ string.  Otherwise, the output is printed on the specified port.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme">   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A test."</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="s">"A test."</span>
    <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~a."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A test."</span>
-   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~s."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A \"test\"."</span>
+   <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"A ~s."</span> <span class="s">"test"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"A "</span><span class="nv">test</span><span class="s">"."</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~8,2F"</span> <span class="mi">1</span><span class="nv">/3</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="s">"    0.33"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~6F"</span> <span class="mi">32</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="s">"    32"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~1,2F"</span> <span class="mi">4321</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="s">"4321.00"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~1,2F"</span> <span class="p">(</span><span class="nb">sqrt</span> <span class="mf">-3.9</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="s">"0.00+1.97i"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"#d~d #x~x #o~o #b~b~%"</span> <span class="mi">32</span> <span class="mi">32</span> <span class="mi">32</span> <span class="mi">32</span><span class="p">)</span>
-                                <span class="nv">=&gt;</span> <span class="s">"#d32 #x20 #o40 #b100000\n"</span>
+                                <span class="nv">=&gt;</span> <span class="s">"#d32 #x20 #o40 #b100000n"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="no">#f</span> <span class="s">"~&amp;1~&amp;~&amp;2~&amp;~&amp;~&amp;3~%"</span><span class="p">)</span>
-                                <span class="nv">=&gt;</span> <span class="s">"\n1\n2\n3\n"</span>
+                                <span class="nv">=&gt;</span> <span class="s">"n1n2n3n"</span>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~a ~? ~a"</span> <span class="ss">'a</span> <span class="s">"~s"</span> <span class="o">'</span><span class="p">(</span><span class="nf">new</span><span class="p">)</span> <span class="ss">'test</span><span class="p">)</span>
                                 <span class="nv">=&gt;</span> <span class="s">"a new test"</span></code></pre>
 </div>
@@ -13398,7 +13426,7 @@ by the GC.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">let-values</span> <span class="p">(((</span><span class="nf">name</span> <span class="nv">port</span><span class="p">)</span> <span class="p">(</span><span class="nf">create-temp-file</span><span class="p">)))</span>
-  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">msg</span> <span class="p">(</span><span class="nf">format</span> <span class="s">"Name: ~s\n"</span> <span class="nv">name</span><span class="p">)))</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">msg</span> <span class="p">(</span><span class="nf">format</span> <span class="s">"Name: ~sn"</span> <span class="nv">name</span><span class="p">)))</span>
     <span class="p">(</span><span class="nb">display</span> <span class="nv">msg</span><span class="p">)</span>
     <span class="p">(</span><span class="nb">display</span> <span class="nv">msg</span> <span class="nv">port</span><span class="p">)</span>
     <span class="p">(</span><span class="nf">close-port</span> <span class="nv">port</span><span class="p">)))</span>     <span class="nv">=&gt;</span> <span class="nv">prints</span> <span class="nv">the</span> <span class="nv">name</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">temp</span><span class="o">.</span> <span class="nv">file</span> <span class="nv">on</span> <span class="nv">the</span>
@@ -13878,10 +13906,10 @@ file name</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">winify-file-name</span> <span class="s">"/tmp"</span><span class="p">)</span>
-    <span class="nv">=&gt;</span> <span class="s">"C:\\cygwin\\tmp"</span>
+    <span class="nv">=&gt;</span> <span class="s">"C:\cygwin\tmp"</span>
 <span class="p">(</span><span class="nb">list</span> <span class="p">(</span><span class="nf">getcwd</span><span class="p">)</span> <span class="p">(</span><span class="nf">winify-file-name</span> <span class="p">(</span><span class="nf">getcwd</span><span class="p">)))</span>
     <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"//saxo/homes/eg/Projects/STklos"</span>
-        <span class="s">"\\\\saxo\\homes\\eg\\Projects\\STklos"</span><span class="p">)</span></code></pre>
+        <span class="s">"\\saxo\homes\eg\Projects\STklos"</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -13906,7 +13934,7 @@ file name</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">posixify-file-name</span> <span class="s">"C:\\cygwin\\tmp"</span><span class="p">)</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">posixify-file-name</span> <span class="s">"C:\cygwin\tmp"</span><span class="p">)</span>
        <span class="nv">=&gt;</span> <span class="s">"/tmp"</span></code></pre>
 </div>
 </div>
@@ -14016,7 +14044,7 @@ returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p>Retuns the operating system file separator as a character. This is typically
-<code>&#35;\/</code> on Unix (or Cygwin) systems and <code>&#35;\\</code> on Windows.</p>
+<code>&#35;/</code> on Unix (or Cygwin) systems and <code>&#35;\</code> on Windows.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14068,12 +14096,12 @@ the following special characters:</p>
 <p><code>*</code> Matches any sequence of zero or more characters.</p>
 </li>
 <li>
-<p><code>\[chars\]</code> Matches any single character in <code>chars</code>.
+<p><code>[chars]</code> Matches any single character in <code>chars</code>.
 If chars contains a sequence of the form <code>a-b</code> then any character
 between <code>a</code> and <code>b</code> (inclusive) will match.</p>
 </li>
 <li>
-<p><code>\x</code> Matches the character <code>x</code>.</p>
+<p><code>x</code> Matches the character <code>x</code>.</p>
 </li>
 <li>
 <p><code>{a,b,&#8230;&#8203;}</code> Matches any of the strings <code>a</code>, <code>b</code>, etc.
@@ -14508,7 +14536,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1347</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1495</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -15101,7 +15129,7 @@ the output of <code>str</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">exec</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="s">"A\nB\n"</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">exec</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="s">"AnBn"</span>
 <span class="p">(</span><span class="nf">exec-list</span> <span class="s">"echo A; echo B"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"A"</span> <span class="s">"B"</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -17528,7 +17556,7 @@ establishes a link between the running program and the application
 listening on port <code>port-number</code> of <code>hostname</code>.  If  the optional argument
 <code>line-buffered</code> has a true value, a line buffered policy is used when writing
 to the client socket (i.e. characters on the socket are tranmitted as soon
-as a <code>"#\newline</code> character is encountered). The default value of
+as a <code>"#newline</code> character is encountered). The default value of
 <code>line-buffered</code> is <code>#t</code>.</p>
 </div>
 <div class="paragraph">
@@ -17584,7 +17612,7 @@ go back waiting for further client connections.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">s</span> <span class="p">(</span><span class="nf">make-server-socket</span> <span class="mi">12345</span><span class="p">)))</span>
    <span class="p">(</span><span class="k">let</span> <span class="nv">loop</span> <span class="p">()</span>
       <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">ns</span> <span class="p">(</span><span class="nf">socket-accept</span> <span class="nv">s</span><span class="p">)))</span>
-        <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"I've read: ~A\\n"</span>
+        <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"I've read: ~A\n"</span>
                 <span class="p">(</span><span class="nf">read-line</span> <span class="p">(</span><span class="nf">socket-input</span> <span class="nv">ns</span><span class="p">)))</span>
         <span class="p">(</span><span class="nf">socket-shutdown</span> <span class="nv">ns</span> <span class="no">#f</span><span class="p">)</span>
         <span class="p">(</span><span class="nf">loop</span><span class="p">))))</span></code></pre>
@@ -17630,7 +17658,7 @@ length of this line on its output port.</p>
        <span class="p">(</span><span class="nf">client</span> <span class="p">(</span><span class="nf">socket-accept</span> <span class="nv">server</span><span class="p">))</span>
        <span class="p">(</span><span class="nf">l</span>      <span class="p">(</span><span class="nf">read-line</span> <span class="p">(</span><span class="nf">socket-input</span> <span class="nv">client</span><span class="p">))))</span>
   <span class="p">(</span><span class="nf">format</span> <span class="p">(</span><span class="nf">socket-output</span> <span class="nv">client</span><span class="p">)</span>
-          <span class="s">"Length is: ~a\n"</span> <span class="p">(</span><span class="nb">string-length</span> <span class="nv">l</span><span class="p">))</span>
+          <span class="s">"Length is: ~an"</span> <span class="p">(</span><span class="nb">string-length</span> <span class="nv">l</span><span class="p">))</span>
   <span class="p">(</span><span class="nf">socket-shutdown</span> <span class="nv">server</span><span class="p">))</span></code></pre>
 </div>
 </div>
@@ -18099,7 +18127,7 @@ they are evalued and simply ignored.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>#t</code> is <code>obj</code> is <code>#void</code>, and <code>#f</code> otherwise.
+<p>Returns <code>#t</code> if <code>obj</code> is <code>#void</code>, and <code>#f</code> otherwise.
 The usual "unspecified" result in Scheme standard and in SRFIs is <code>#void</code>
 in STklos, and it is also returned by the procedure <code>void</code>.</p>
 </div>
@@ -18118,7 +18146,7 @@ in STklos, and it is also returned by the procedure <code>void</code>.</p>
 </p>
 </div>
 <div class="paragraph text-right">
-<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+<p><span class="rmargin small">R<sup>7</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -18140,13 +18168,15 @@ name of the procedure which raises the error.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The specification string may follow the <em>tilde conventions</em> of
+R<sup>7</sup>RS permits only the fist form of call. Using a symbol as first
+parameter is <strong><em>STklos</em></strong> specific.
+Furthermore, the specification string may follow the <em>tilde conventions</em> of
 <code>format</code> (see <em><a href="#format">primitive <code>format</code></a></em>); in this case this
 procedure builds an error message according to the specification
 given in <code>str</code>. Otherwise,
 this procedure is in conformance with the <code>error</code> procedure defined in
 <strong><a href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong> (<em>Error reporting mechanism</em>) and <code>str</code> is printed with the <code>display</code> procedure,
-whereas the <code>obj`s are printed  with the `write</code> procedure.
+whereas the <code>obj</code> parameters are printed  with the <code>write</code> procedure.
 </td>
 </tr>
 </table>
@@ -18203,6 +18233,41 @@ condition which inherits from <code>&amp;error-message</code>.</p>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">signal-error</span> <span class="nv">&amp;error-message</span> <span class="nv">arg</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small">R<sup>7</sup>RS syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(syntax-error message arg1 &#8230;&#8203;)</code></strong><br>
+<strong><code>(syntax-error who message arg1 &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Syntax-error</code> behaves similarly to <code>error</code> except that it signals the
+error as soon as syntax-error is expanded. This can be use in macros to signal
+errors at compile time, without interrupting the compilation process. In
+interactive mode, under the REPL, <code>syntax-error</code> yields a true error.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS defines only the first form of call (with a string as first
+parameter).  <strong><em>STklos</em></strong> permits to use a symbol as first parameter to specify the
+location of the syntax error. It also permits the usage of  <em>tilde conventions</em>
+as the <code>error</code> primitive.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>
@@ -18562,8 +18627,8 @@ internal structure will be shown.</p>
 <span class="p">(</span><span class="nf">describe</span> <span class="mi">2</span><span class="nv">+3i</span><span class="p">)</span>
   <span class="mi">2</span><span class="nv">+3i</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">complex</span> <span class="nv">number</span><span class="o">.</span>
 
-<span class="p">(</span><span class="nf">describe</span> <span class="sc">#\A</span><span class="p">)</span>
-  <span class="sc">#\A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
+<span class="p">(</span><span class="nf">describe</span> <span class="o">#</span><span class="nv">A</span><span class="p">)</span>
+  <span class="o">#</span><span class="nv">A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -19124,7 +19189,7 @@ shorter, some of the original documentation as not been reported here. In
 particular some possibilities of PCRE have been completely occulted (those
 whose description was too long and which seems (at least to me), not too
 important). Read the documentation provided with PCRE for a complete
-description \footnote{The latest release of PCRE is available from
+description footnote{The latest release of PCRE is available from
 <a href="http://www.pcre.org/" class="bare">http://www.pcre.org/</a>.</p>
 </div>
 <div class="paragraph">
@@ -19158,7 +19223,7 @@ are as follows:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
+<td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">general escape character with several uses</p></td>
 </tr>
 <tr>
@@ -19178,34 +19243,34 @@ are as follows:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start character class definition</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">|</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start of alternative branch</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">(</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start subpattern</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">end subpattern</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">end subpattern</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">?</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">extends the meaning of '('<br>
 also 0 or 1 quantifier<br>
 also quantifier minimizer</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">*</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0 or more quantifier</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">+</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1 or more quantifier</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 or more quantifier</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">{</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">start min/max quantifier</p></td>
 </tr>
 </tbody>
 </table>
@@ -19220,7 +19285,7 @@ class". In a character class the only meta-characters are:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\</p></td>
+<td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">general escape character</p></td>
 </tr>
 <tr>
@@ -19254,16 +19319,16 @@ outside character classes.</p>
 </div>
 <div class="paragraph">
 <p>For example, if you want to match a <code><strong></code> character, you write
-<code>\</strong></code> in the pattern.  This escaping action applies whether or not
+<code></strong></code> in the pattern.  This escaping action applies whether or not
 the following character would otherwise be interpreted as a
 meta-character, so it is always safe to precede a non-alphameric
 with backslash to specify that it stands for itself. In
-particular, if you want to match a backslash, you write <code>\\</code>.</p>
+particular, if you want to match a backslash, you write <code>\</code>.</p>
 </div>
 <div class="paragraph">
 <p>If you want to remove the special meaning from a sequence of characters, you
-can do so by putting them between <code>\Q</code> and <code>\E</code>. This is different from Perl
-in that <code>$</code> and <code>@</code> are handled as literals in <code>\Q</code>&#8230;&#8203;<code>\E</code> sequences in PCRE,
+can do so by putting them between <code>Q</code> and <code>E</code>. This is different from Perl
+in that <code>$</code> and <code>@</code> are handled as literals in <code>Q</code>&#8230;&#8203;<code>E</code> sequences in PCRE,
 whereas in Perl, <code>`$</code> and <code>@</code> cause variable interpolation. Note the following
 examples:</p>
 </div>
@@ -19282,24 +19347,24 @@ examples:</p>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc$xyz\E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Qabc$xyzE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc followed by the contents of $xyz</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc\$xyz\E</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">abc\$xyz</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">abc\$xyz</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Qabc$xyzE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Qabc\E\$\Qxyz\E</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QabcE$QxyzE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">abc$xyz</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The <code>\Q&#8230;&#8203;\E</code> sequence is recognized both inside and outside character
+<p>The <code>Q&#8230;&#8203;E</code> sequence is recognized both inside and outside character
 classes.</p>
 </div>
 <div class="paragraph">
@@ -19317,48 +19382,48 @@ sequences than the binary character it represents:</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\a</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">a</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">alarm, that is, the BEL character (hex 07)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\cx</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">cx</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><em>control-x</em>, where x is any character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\e</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">e</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">escape (hex 1B)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\f</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">f</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">formfeed (hex 0C)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\n</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">n</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">newline (hex 0A)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\r</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">r</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">carriage return (hex 0D)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">t</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">tab (hex 09)</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\ddd</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ddd</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">character with octal code ddd, or backreference</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\xhh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">xhh</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">character with hex code hh</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
-<p>The precise effect of <code>\x</code> is as follows: if <code>x</code> is a lower case
+<p>The precise effect of <code>x</code> is as follows: if <code>x</code> is a lower case
 letter, it is converted to upper case. Then bit 6 of the character
-(hex 40) is inverted.  Thus <code>\cz</code> becomes hex 1A, but <code>\c{</code> becomes
-hex 3B, while <code>\c;</code> becomes hex 7B.</p>
+(hex 40) is inverted.  Thus <code>cz</code> becomes hex 1A, but <code>c{</code> becomes
+hex 3B, while <code>c;</code> becomes hex 7B.</p>
 </div>
 <div class="paragraph">
 <p>The handling of a backslash followed by a digit other than 0 is
@@ -19379,27 +19444,27 @@ the discussion of parenthesized subpatterns.</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\d</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">d</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any decimal digit</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\D</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">D</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any character that is not a decimal digit</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\s</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">s</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any whitespace character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\S</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any character that is not a whitespace character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\w</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">w</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any <em>word</em> character</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\W</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">W</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">any <em>non-word</em> character</p></td>
 </tr>
 </tbody>
@@ -19410,9 +19475,9 @@ characters into two disjoint sets. Any given character matches one,
 and only one, of each pair.</p>
 </div>
 <div class="paragraph">
-<p>For compatibility with Perl, <code>\s</code> does not match the VT character
+<p>For compatibility with Perl, <code>s</code> does not match the VT character
 (code 11).  This makes it different from the the POSIX "space"
-class. The <code>\s</code> characters are HT (9), LF (10), FF (12), CR (13), and
+class. The <code>s</code> characters are HT (9), LF (10), FF (12), CR (13), and
 space (32).</p>
 </div>
 <div class="paragraph">
@@ -19421,7 +19486,7 @@ that is, any character which can be part of a Perl <em>word</em>. The
 definition of letters and digits is controlled by PCRE&#8217;s character
 tables, and may vary if locale-specific matching is taking place.  For
 example, in the "fr" (French) locale, some character codes greater
-than 128 are used for accented letters, and these are matched by <code>\w</code>.</p>
+than 128 are used for accented letters, and these are matched by <code>w</code>.</p>
 </div>
 <div class="paragraph">
 <p>These character type sequences can appear both inside and outside
@@ -19443,45 +19508,45 @@ described below. The backslashed assertions are</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\b</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">b</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at a word boundary</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\B</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">B</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches when not at a word boundary</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at start of subject</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\Z</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Z</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at end of subject or before newline at end</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\z</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">z</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at end of subject</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">\G</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">G</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">matches at first matching position in subject</p></td>
 </tr>
 </tbody>
 </table>
 <div class="paragraph">
 <p>These assertions may not appear in character classes (but note that
-<code>\b</code> has a different meaning, namely the backspace character, inside a
+<code>b</code> has a different meaning, namely the backspace character, inside a
 character class).</p>
 </div>
 <div class="paragraph">
 <p>A word boundary is a position in the subject string where the current
-character and the previous character do not both match <code>\w</code>
-or <code>\W</code> (i.e. one matches <code>\w</code> and the other matches
-<code>\W</code>), or the start or end of the string if the first or last
-character matches <code>\w</code>, respectively.</p>
+character and the previous character do not both match <code>w</code>
+or <code>W</code> (i.e. one matches <code>w</code> and the other matches
+<code>W</code>), or the start or end of the string if the first or last
+character matches <code>w</code>, respectively.</p>
 </div>
 <div class="paragraph">
-<p>The <code>\A</code>, <code>\Z</code>, and <code>\z</code> assertions differ from the traditional
+<p>The <code>A</code>, <code>Z</code>, and <code>z</code> assertions differ from the traditional
 circumflex and dollar (described below) in that they only ever match
 at the very start and end of the subject string, whatever options
 are set. Thus, they are independent of multiline mode.</p>
@@ -19493,12 +19558,12 @@ character may have. This use of backslash as an escape character applies
 both inside and outside character classes.</p>
 </div>
 <div class="paragraph">
-<p>For example, if you want to match a "*" character, you write "\\*"
+<p>For example, if you want to match a "<strong>" character, you write "\</strong>"
 in the pattern. This applies whether or not the following character
 would otherwise be interpreted as a meta-character, so it is always
-safe to precede a non-alphameric with &#8220;\&#8221; to specify that it stands
+safe to precede a non-alphameric with &#8220;`" to specify that it stands
 for itself. In particular, if you want to match a backslash, you write
-&#8220;\\&#8221;.</p>
+"`\&#8221;.</p>
 </div>
 </div>
 <div class="sect2">
@@ -19534,12 +19599,12 @@ the <em>multiline</em> option is set. When this is the case, they match
 immediately after and immediately before an internal newline
 character, respectively, in addition to matching at the start and end
 of the subject string. For example, the pattern <code>^abc$</code> matches the
-subject string <code>"def\nabc"</code> in multiline mode, but not otherwise.</p>
+subject string <code>"defnabc"</code> in multiline mode, but not otherwise.</p>
 </div>
 <div class="paragraph">
-<p>Note that the sequences <code>\A</code>, <code>\Z</code>, and <code>\z</code> can be used to match the
+<p>Note that the sequences <code>A</code>, <code>Z</code>, and <code>z</code> can be used to match the
 start and end of the subject in both modes, and if all branches of a
-pattern start with <code>\A</code> it is always anchored, whether
+pattern start with <code>A</code> it is always anchored, whether
 <em>multiline</em> is set or not.</p>
 </div>
 </div>
@@ -19607,30 +19672,30 @@ character of a range. A pattern such as <code>[W-]46]</code> is interpreted as a
 class of two characters ("W" and "-") followed by a literal string
 "46]", so it would match "W46]" or "-46]". However, if the "]" is
 escaped with a backslash it is interpreted as the end of range, so
-<code>(W\]46)</code> is interpreted as a single class containing a range followed
+<code>(W]46)</code> is interpreted as a single class containing a range followed
 by two separate characters. The octal or hexadecimal representation of
 "]" can also be used to end a range.</p>
 </div>
 <div class="paragraph">
 <p>Ranges operate in the collating sequence of character values. They can also be
-used for characters specified numerically, for example <code>[\000-\037]</code>.</p>
+used for characters specified numerically, for example <code>[000-037]</code>.</p>
 </div>
 <div class="paragraph">
 <p>If a range that includes letters is used when caseless matching is set, it
 matches the letters in either case. For example, <code>[W-c]</code> is equivalent to
 <code>[][^_`wxyzabc]</code>, matched caselessly, and if character tables for the "fr"
-locale are in use, <code>[\xc8-\xcb]</code> matches accented E characters in both cases.</p>
+locale are in use, <code>[xc8-xcb]</code> matches accented E characters in both cases.</p>
 </div>
 <div class="paragraph">
-<p>The character types <code>\d</code>, <code>\D</code>, <code>\s</code>, <code>\S</code>, '\w`, and <code>\W</code> may also appear in a
+<p>The character types <code>d</code>, <code>D</code>, <code>s</code>, <code>S</code>, 'w`, and <code>W</code> may also appear in a
 character class, and add the characters that they match to the class. For
-example, <code>[\dABCDEF]</code> matches any hexadecimal digit. A circumflex can
+example, <code>[dABCDEF]</code> matches any hexadecimal digit. A circumflex can
 conveniently be used with the upper case character types to specify a more
 restricted set of characters than the matching lower case type. For example,
-the class <code>[^\W_]</code> matches any letter or digit, but not underscore.</p>
+the class <code>[^W_]</code> matches any letter or digit, but not underscore.</p>
 </div>
 <div class="paragraph">
-<p>All non-alphameric characters other than <code>\</code>, <code>-</code>, <code>^</code> (at the start) and the
+<p>All non-alphameric characters other than <code>`, `-</code>, <code>^</code> (at the start) and the
 terminating <code>]</code> are non-special in character classes, but it does no harm if they
 are escaped.</p>
 </div>
@@ -19680,7 +19745,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">digit</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">decimal digits (same as \d</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">decimal digits (same as d</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">graph</p></td>
@@ -19700,7 +19765,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">space</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">white space (not quite the same as \s)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">white space (not quite the same as s)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">upper</p></td>
@@ -19708,7 +19773,7 @@ class names are</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">word"</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><em>word</em> characters (same as \w)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>word</em> characters (same as w)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">xdigit</p></td>
@@ -19719,7 +19784,7 @@ class names are</p>
 <div class="paragraph">
 <p>The <em>space</em> characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
 space (32). Notice that this list includes the VT character (code 11). This
-makes "space" different to $\backslash$s, which does not include VT (for Perl
+makes "space" different to $backslash$s, which does not include VT (for Perl
 compatibility).</p>
 </div>
 <div class="paragraph">
@@ -19849,7 +19914,7 @@ Marking part of a pattern as a subpattern does two things:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>It localizes a set of alternatives. For example, the pattern\</p>
+<p>It localizes a set of alternatives. For example, the pattern</p>
 </li>
 </ul>
 </div>
@@ -19958,10 +20023,10 @@ items:</p>
 <p>the <code>.</code> metacharacter</p>
 </li>
 <li>
-<p>the <code>\C</code> escape sequence</p>
+<p>the <code>C</code> escape sequence</p>
 </li>
 <li>
-<p>escapes such as <code>\d</code> that match single characters</p>
+<p>escapes such as <code>d</code> that match single characters</p>
 </li>
 <li>
 <p>a character class</p>
@@ -20002,7 +20067,7 @@ quantifier specifies an exact number of required matches. Thus</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d{8}</code></pre>
+<pre class="rouge highlight"><code>d{8}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20052,12 +20117,12 @@ match no characters, the loop is forcibly broken.</p>
 possible (up to the maximum number of permitted times), without causing the
 rest of the pattern to fail. The classic example of where this gives problems
 is in trying to match comments in C programs. These appear between the
-sequences <code>/*</code> and <code>*/</code> and within the sequence, individual <code>*</code> and <code>/</code> characters may
+sequences <code>/<strong></code> and <code></strong>/</code> and within the sequence, individual <code>*</code> and <code>/</code> characters may
 appear. An attempt to match C comments by applying the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>/\*.*\*/</code></pre>
+<pre class="rouge highlight"><code>/*.**/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20079,7 +20144,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>/\*.*?*/</code></pre>
+<pre class="rouge highlight"><code>/*.*?*/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20090,7 +20155,7 @@ own right. Because it has two uses, it can sometimes appear doubled, as in</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d??\d</code></pre>
+<pre class="rouge highlight"><code>d??d</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20115,7 +20180,7 @@ to Perl&#8217;s <code>/s</code>) is set, thus allowing the <code>.</code> to mat
 implicitly anchored, because whatever follows will be tried against every
 character position in the subject string, so there is no point in retrying the
 overall match at any position after the first. PCRE normally treats such a
-pattern as though it were preceded by <code>\A</code>.</p>
+pattern as though it were preceded by <code>A</code>.</p>
 </div>
 <div class="paragraph">
 <p>In cases where it is known that the subject string contains no newlines, it is
@@ -20130,7 +20195,7 @@ succeed. Consider, for example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(.*)abc\1</code></pre>
+<pre class="rouge highlight"><code>(.*)abc1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20143,7 +20208,7 @@ that matched the final iteration. For example, after</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(tweedle[dume]{3}\s*)+</code></pre>
+<pre class="rouge highlight"><code>(tweedle[dume]{3}s*)+</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20169,7 +20234,7 @@ it fail earlier than it otherwise might, when the author of the pattern knows
 there is no point in carrying on.</p>
 </div>
 <div class="paragraph">
-<p>Consider, for example, the pattern <code>\d+foo</code> when applied to the subject line</p>
+<p>Consider, for example, the pattern <code>d+foo</code> when applied to the subject line</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -20178,7 +20243,7 @@ there is no point in carrying on.</p>
 </div>
 <div class="paragraph">
 <p>After matching all 6 digits and then failing to match "foo", the normal
-action of the matcher is to try again with only 5 digits matching the <code>\d+</code>
+action of the matcher is to try again with only 5 digits matching the <code>d+</code>
 item, and then with 4, and so on, before ultimately failing. "Atomic grouping"
 (a term taken from Jeffrey Friedl&#8217;s book) provides the means for specifying
 that once a subpattern has matched, it is not to be re-evaluated in this way.</p>
@@ -20190,7 +20255,7 @@ special parenthesis, starting with (<code>?&gt;</code> as in this example:)</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&gt;\d+)foo</code></pre>
+<pre class="rouge highlight"><code>(?&gt;d+)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20208,9 +20273,9 @@ the current point in the subject string.</p>
 <p>Atomic grouping subpatterns are not capturing subpatterns. Simple
 cases such as the above example can be thought of as a maximizing
 repeat that must swallow everything it can. So, while both
-<code>\d+</code> and <code>\d+?</code> are prepared to adjust the number
+<code>d+</code> and <code>d+?</code> are prepared to adjust the number
 of digits they match in order to make the rest of the pattern match,
-<code>(?&gt;\d+)</code> can only match an entire sequence of digits.</p>
+<code>(?&gt;d+)</code> can only match an entire sequence of digits.</p>
 </div>
 <div class="paragraph">
 <p>Atomic groups in general can of course contain arbitrarily complicated
@@ -20222,7 +20287,7 @@ previous example can be rewritten as</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\d++bar</code></pre>
+<pre class="rouge highlight"><code>d++bar</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20243,7 +20308,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(\D+|&lt;\d+&gt;)*[!?]</code></pre>
+<pre class="rouge highlight"><code>(D+|&lt;d+&gt;)*[!?]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20267,7 +20332,7 @@ If the pattern is changed to</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>((?&gt;\D+)|&lt;\d+&gt;)*[!?]</code></pre>
+<pre class="rouge highlight"><code>((?&gt;D+)|&lt;d+&gt;)*[!?]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20299,7 +20364,7 @@ the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(sens|respons)e and \1ibility</code></pre>
+<pre class="rouge highlight"><code>(sens|respons)e and 1ibility</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20309,7 +20374,7 @@ back reference, the case of letters is relevant. For example,</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>((?i)rah)\s+\1</code></pre>
+<pre class="rouge highlight"><code>((?i)rah)s+1</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20322,7 +20387,7 @@ rewrite the above example as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;p1&gt;(?i)rah)\s+(?P=p1)</code></pre>
+<pre class="rouge highlight"><code>(?&lt;p1&gt;(?i)rah)s+(?P=p1)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20332,7 +20397,7 @@ references to it always fail. For example, the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(a|(bc))\2</code></pre>
+<pre class="rouge highlight"><code>(a|(bc))2</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20345,13 +20410,13 @@ Otherwise an empty comment can be used.</p>
 </div>
 <div class="paragraph">
 <p>A back reference that occurs inside the parentheses to which it refers fails
-when the subpattern is first used, so, for example, (a\1) never matches.
+when the subpattern is first used, so, for example, (a1) never matches.
 However, such references can be useful inside repeated subpatterns. For
 example, the pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(a|b\1)+</code></pre>
+<pre class="rouge highlight"><code>(a|b1)+</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20368,7 +20433,7 @@ minimum of zero.</p>
 <div class="paragraph">
 <p>An assertion is a test on the characters following or preceding the current
 matching point that does not actually consume any characters. The simple
-assertions coded as <code>\b</code>, <code>\B</code>, <code>\A</code>, <code>\G</code>, <code>\Z</code>, <code>\z</code>, <code>^</code> and <code>$</code> are described above.
+assertions coded as <code>b</code>, <code>B</code>, <code>A</code>, <code>G</code>, <code>Z</code>, <code>z</code>, <code>^</code> and <code>$</code> are described above.
 More complicated assertions are coded as subpatterns. There are two kinds:
 those that look ahead of the current position in the subject string, and those
 that look behind it.</p>
@@ -20380,7 +20445,7 @@ with <code>(?=</code> for positive assertions and <code>(?!</code> for negative 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>\w+(?=;)</code></pre>
+<pre class="rouge highlight"><code>w+(?=;)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20517,7 +20582,7 @@ approach makes a significant difference to the processing time.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3})(?&lt;!999)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3})(?&lt;!999)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20531,7 +20596,7 @@ doesn&#8217;t match "123abcfoo". A pattern to do that is</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3}...)(?&lt;!999)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3}...)(?&lt;!999)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20553,7 +20618,7 @@ preceded by "foo", while</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(?&lt;=\d{3}(?!999)...)foo</code></pre>
+<pre class="rouge highlight"><code>(?&lt;=d{3}(?!999)...)foo</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20598,7 +20663,7 @@ it into three parts for ease of discussion:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>( \( )?    [^()]+    (?(1) \) )</code></pre>
+<pre class="rouge highlight"><code>( ( )?    [^()]+    (?(1) ) )</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20626,7 +20691,7 @@ alternatives on the second line:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code>(?(?=`(^a-z)*`(a-z))
-\d{2}-`(a-z){3}-\d{2}  |  \d{2}-\d{2}-\d{2} )</code></pre>
+d{2}-`(a-z){3}-d{2}  |  d{2}-d{2}-d{2} )</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20661,7 +20726,7 @@ pattern</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code>(sens|respons)e and \1ibility</code></pre>
+<pre class="rouge highlight"><code>(sens|respons)e and 1ibility</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -20767,7 +20832,7 @@ in the order of the opening parentheses in pattern.</p>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="mi">3</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(a*)(b*)(c*)"</span> <span class="s">"c"</span><span class="p">)</span>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">0</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">0</span> <span class="mi">1</span><span class="p">))</span>
-<span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(?&lt;=\\d{3})(?&lt;!999)foo"</span>
+<span class="p">(</span><span class="nf">regexp-match-positions</span> <span class="s">"(?&lt;=\d{3})(?&lt;!999)foo"</span>
                         <span class="s">"999foo and 123foo"</span><span class="p">)</span>
                  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">14</span> <span class="mi">17</span><span class="p">))</span></code></pre>
 </div>
@@ -20795,7 +20860,7 @@ match, <code>regexp-replace</code> returns <code>string</code> unmodified. Note 
 given <code>pattern</code> could be here either a string or a regular expression.</p>
 </div>
 <div class="paragraph">
-<p>If <code>pattern</code> contains <code>\n</code> where <strong>n</strong> is a digit between 1 and 9,
+<p>If <code>pattern</code> contains <code>n</code> where <strong>n</strong> is a digit between 1 and 9,
 then it is replaced in the substitution with the portion of string that
 matched the <strong>n</strong>-th parenthesized subexpression of <code>pattern</code>. If
 <strong>n</strong> is equal to 0, then it is replaced in <code>substitution</code>
@@ -20811,11 +20876,11 @@ To replace <em>all</em> the occurrences of <code>pattern</code>, use <code>regex
                    <span class="nv">=&gt;</span> <span class="s">"Xbcccc"</span>
 <span class="p">(</span><span class="nf">regexp-replace</span> <span class="p">(</span><span class="nf">string-&gt;regexp</span> <span class="s">"a*b"</span><span class="p">)</span> <span class="s">"aaabbcccc"</span> <span class="s">"X"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"Xbcccc"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"(a*)b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X\\1Y"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"(a*)b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X\1Y"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"XaaaYbcccc"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\\1 \\1"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\1 \1"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"ooba ooba"</span>
-<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\\0 \\0"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"f(.*)r"</span> <span class="s">"foobar"</span> <span class="s">"\0 \0"</span><span class="p">)</span>
                    <span class="nv">=&gt;</span> <span class="s">"foobar foobar"</span>
 
 <span class="p">(</span><span class="nf">regexp-replace</span> <span class="s">"a*b"</span> <span class="s">"aaabbcccc"</span> <span class="s">"X"</span><span class="p">)</span>
@@ -20845,7 +20910,7 @@ backslash, so that they safely match only themselves.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"cons"</span><span class="p">)</span>       <span class="nv">=&gt;</span> <span class="s">"cons"</span>
-<span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"list?"</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="s">"list\\?"</span></code></pre>
+<span class="p">(</span><span class="nf">regexp-quote</span> <span class="s">"list?"</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="s">"list\?"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -21176,7 +21241,7 @@ dynamic-wind) of the evaluations of the expressions</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-handler</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">c</span><span class="p">)</span>
-                <span class="p">(</span><span class="nb">display</span> <span class="s">"Catch an error\\n"</span><span class="p">))</span>
+                <span class="p">(</span><span class="nb">display</span> <span class="s">"Catch an error\n"</span><span class="p">))</span>
    <span class="p">(</span><span class="nb">display</span> <span class="s">"One ... "</span><span class="p">)</span>
    <span class="p">(</span><span class="nb">+</span> <span class="s">"will yield"</span> <span class="s">"an error"</span><span class="p">)</span>
    <span class="p">(</span><span class="nb">display</span> <span class="s">"... Two"</span><span class="p">))</span>
@@ -21239,7 +21304,7 @@ that installed the handler being called.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-handler</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">c</span><span class="p">)</span>
              <span class="p">(</span><span class="nf">format</span> <span class="s">"value ~A was raised"</span> <span class="nv">c</span><span class="p">))</span>
    <span class="p">(</span><span class="nf">raise</span> <span class="ss">'foo</span><span class="p">)</span>
-   <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"never printed\\n"</span><span class="p">))</span>
+   <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"never printed\n"</span><span class="p">))</span>
           <span class="nv">=&gt;</span> <span class="s">"value foo was raised"</span></code></pre>
 </div>
 </div>
@@ -22976,10 +23041,10 @@ for generic functions). A very simple example follows.</p>
 <span class="p">(</span><span class="k">define</span> <span class="nv">ci</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;circle&gt;</span> <span class="nv">:pos-x</span> <span class="mi">2</span> <span class="nv">:pos-y</span> <span class="mi">2</span> <span class="nv">:radius</span> <span class="mi">5</span><span class="p">))</span>
 
 <span class="p">(</span><span class="nf">describe-figure</span> <span class="nv">sq</span><span class="p">)</span>
-  <span class="nv">=&gt;</span> <span class="s">"A square centered at (1, 2), with side 10.\n"</span>
+  <span class="nv">=&gt;</span> <span class="s">"A square centered at (1, 2), with side 10.n"</span>
 
 <span class="p">(</span><span class="nf">describe-figure</span> <span class="nv">ci</span><span class="p">)</span>
-  <span class="nv">=&gt;</span> <span class="s">"A circle at (2, 2), with radius 5.\n"</span></code></pre>
+  <span class="nv">=&gt;</span> <span class="s">"A circle at (2, 2), with radius 5.n"</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -25749,7 +25814,7 @@ script via a /usr/bin/env trampoline, like this:</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="o">#</span><span class="nv">!/usr/bin/env</span> <span class="nv">stklos</span>
 
 <span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">main</span> <span class="nv">arguments</span><span class="p">)</span>
-  <span class="p">(</span><span class="nb">for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="sc">#\space</span><span class="p">))</span>
+  <span class="p">(</span><span class="nb">for-each</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="o">#</span><span class="nv">space</span><span class="p">))</span>
             <span class="p">(</span><span class="nb">cdr</span> <span class="nv">arguments</span><span class="p">))</span>
   <span class="p">(</span><span class="nb">newline</span><span class="p">)</span>
   <span class="mi">0</span><span class="p">)</span></code></pre>
@@ -31377,7 +31442,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-07-05 12:01:06 +0200
+Last updated 2023-09-02 21:31:34 +0200
 </div>
 </div>
 </body>

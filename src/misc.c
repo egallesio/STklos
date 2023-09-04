@@ -93,7 +93,7 @@ SCM STk_read_from_C_string(const char *str)
 
 /*===========================================================================*\
  *
- * Primitives that don't feet anywhere else
+ * Primitives that don't fit anywhere else
  *
 \*===========================================================================*/
 /*

@@ -26,8 +26,8 @@ SCM_SRCS = fuse.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@
-schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
-schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+schemedir      = @SCMDIR@/stklos
+schemelibdir   = @EXECDIR@/stklos
 
 #======================================================================
 BASEDIR= ../../../..
@@ -43,10 +43,10 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@  @STKCFLAGS@ @SH_COMP_FLAGS@ \
+	@CC@ @CFLAGS@  @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
          -I$(BASEDIR)/src @GCINC@ @GMPINC@ \
          -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
 	/bin/rm -f $*.o
 
 $(EXTENSION)-incl.c: $(EXTENSION).stk $(SCM_SRCS)

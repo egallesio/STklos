@@ -88,7 +88,7 @@ Now that the window is created, we need to start the GTK+ interaction loop to se
 
 As said by its name the fist form, is preferred when we create an interface interactively on the REPL. This form, call the GTK* event loop when your keyboard is idle. The second form is generally used when you create a script and dont use the REPL. 
 
-As we cans see, the *width* and the *height* of this window are reflected in the `xidth` and `height` of `w`. Hearafter are some manipulation with the width of `w`:
+As we can see, the *width* and the *height* of this window are reflected in the `width` and `height` of `w`. Hereafter, are some manipulation with the width of `w`:
 
 
 ```scheme
