@@ -39,6 +39,7 @@ Options:
         [--cc]                  CC used for building STklos
         [--cflags]              CFLAGS used for building STklos
         [--ldflags]             LDFLAGS used for building STklos
+        [--cppflags]            CPPFLAGS used for building STklos
         [--shared-suffix | -s]  Suffix for shared libraries on current
                                 platform
         [--threads | -t ]       Display the name of the available thread
@@ -77,6 +78,9 @@ while test $# -gt 0; do
             echo @CFLAGS@
             ;;
         --ldflags)
+            echo @LDFLAGS@
+            ;;
+        --cppflags)
             echo @LDFLAGS@
             ;;
         --shared-suffix|-s)

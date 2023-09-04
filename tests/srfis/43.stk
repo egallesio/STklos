@@ -696,6 +696,11 @@
                 (reverse-list->vector '(0 1 2 3) 2 1))
   ))
 
+(test "vector-copy, no fill"
+      #(-1 -1 -1 -1 -1 #void #void #void)
+      (let ((v (make-vector 5 -1)))
+        (vector-copy v 0 8)))
+
 ) ;; run-srfi-43-test
 
 ) ;; module

@@ -1807,13 +1807,13 @@ doc>
  * This form is similar to |define|, except the binding of |<variable>| which
  * is non mutable.
  *
- * @lisp 
+ * @lisp
  * (define-constant a 'hello)
  * (set! a 'goodbye)             => error
  * (define a 2)                  ; is  ok (it's a new binding)
  * (define-constant ((foo a) b)  ; foo is (lambda (a) (lambda (b) ...)))
  *     ...)
- * @end lisp 
+ * @end lisp
 doc>
 |#
 (define-macro (define-constant . args)
@@ -1836,7 +1836,7 @@ doc>
 <doc EXT void?
  * (void? obj)
  *
- * Returns `#t` is |obj| is `#void`, and `#f` otherwise.
+ * Returns `#t` if |obj| is `#void`, and `#f` otherwise.
  * The usual "unspecified" result in Scheme standard and in SRFIs is `#void`
  * in STklos, and it is also returned by the procedure |void|.
  *

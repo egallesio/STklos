@@ -44,6 +44,8 @@ Value of CC used to compile STklos.
 Value of CFLAGS used to compile STklos.
 .IP "--ldlags"
 Value of LDFLAGS used to compile STklos
+.IP "--cppflags"
+Value of CPPFLAGS used to compile STklos
 .IP "--shared-suffix | -s"
 The suffix for shared libraries.
 .IP "--threads | -t"

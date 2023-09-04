@@ -1,7 +1,7 @@
 ;;;;
 ;;;; help.stk           -- Interactive help
 ;;;;
-;;;; Copyright © 2009-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2009-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 ;;;; Michael Feyereisen [mfeyereisen@gmail.com]. Thanks to him for
 ;;;; having pushed me to finally implement the help function.
 ;;;;
-;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;           Author: Erick Gallesio [eg@1unice.fr]
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
 ;;;;
 
@@ -44,7 +44,7 @@
           '()))))
 
 (define *the-doc*
-  (read-database (make-path (%library-prefix) "share" "stklos" (short-version) "DOCDB")))
+  (read-database (make-path (%library-prefix 'data) "DOCDB")))
 
 
 ;; ----------------------------------------------------------------------

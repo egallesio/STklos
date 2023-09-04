@@ -273,8 +273,8 @@ BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
-srfilibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfidir       = @SCMDIR@/srfi
+srfilibdir    = @EXECDIR@/srfi
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)
@@ -288,8 +288,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 #======================================================================

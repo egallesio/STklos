@@ -742,7 +742,6 @@ int STk_init_misc(void);
 long STk_integer_value(SCM x); /* Returns LONG_MIN if not representable as long */
 unsigned long STk_uinteger_value(SCM x); /* Returns ULONG_MAX if not an ulong */
 
-
   /****
    **** Real
    ****/
@@ -757,7 +756,10 @@ struct real_obj {
 #define REAL_VAL(p)     (((struct real_obj *) (p))->val)
 #define REALP(p)        (BOXED_TYPE_EQ((p), tc_real))
 
-extern double STk_NaN;          /* IEEE NaN special value */
+double STk_dbl_true_min(void); /* return (or compute) DBL_TRUE_MIN */
+
+extern double STk_NaN;     /* IEEE NaN special value */
+
 
   /****
    **** Bignum
@@ -831,6 +833,8 @@ void STk_double2Cstr(char *buffer, size_t buuflen, double n);
    **** Predicate
    ****/
 int STk_real_isoddp(SCM n);   /* n MUST be a real */
+int STk_isnan(SCM z);
+EXTERN_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2));
 
 
 int    STk_init_number(void);
