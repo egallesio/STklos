@@ -396,13 +396,13 @@ static void patch_environment(vm_thread_t *vm)
 
 static void error_bad_arity(SCM func, int arity, int16_t given_args, vm_thread_t *vm)
 {
-   ACT_SAVE_PROC(vm->fp) = func;
+  ACT_SAVE_PROC(vm->fp) = func;
   if (arity >= 0)
     STk_error("%d argument%s required in call to ~S (%d provided)",
               arity, ((arity>1)? "s": ""), func, given_args);
   else
     STk_error("~S requires at least %d argument%s (%d provided)",
-              func, -arity-1, ((arity>1)? "s" : ""), given_args);
+              func, -arity-1, ((-arity-1) > 1 ? "s" : ""), given_args);
 }
 
 
