@@ -51,8 +51,13 @@
 ;; stklos-conf-file: returns an absolute name for the given configuration file
 ;;
 (define %stklos-conf-dir
-  (make-parameter (or (getenv "STKLOS_CONFDIR")
-                      (make-path (getenv "HOME") ".stklos"))
+  (make-parameter (let ((old-path (make-path (getenv "HOME") ".stklos"))
+                        (xdg-conf (getenv "XDG_CONFIG_HOME")))
+                    (or (getenv "STKLOS_CONFDIR")
+                        (if (file-exists? old-path)
+                            old-path
+                            (make-path (or xdg-conf "~/.config")
+                                       "stklos"))))
                   expand-file-name))
 
 (define (%stklos-conf-file name)
