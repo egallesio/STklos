@@ -35,6 +35,8 @@ The main changes in this version are:
 - Better `SLIB` support
 - Use PCRE2 library instead of legacy PCRE
 - New-command `stklos-pp(1)`
+- The preferred path for configuration files follows now [XDG Base
+  Directory Specification](https://specifications.freedesktop.org/basedir-spec).
 - Better error messages
 - New SRFIS supported
   - SRFI-19:  Time Data Types and Procedures
