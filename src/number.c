@@ -129,13 +129,13 @@ static SCM STk_complexp(SCM x);
  ******************************************************************************/
 static void error_bad_number(SCM n)
 {
-  STk_error("~S is a bad number", n);
+  STk_error("~W is a bad number", n);
 }
 
 static void error_not_a_real_number(SCM n)
 {
   if (COMPLEXP(n))
-    STk_error("~S is not a real number", n);
+    STk_error("~W is not a real number", n);
   else
     error_bad_number(n);
 }
@@ -152,27 +152,27 @@ static void error_at_least_1(void)
 
 static void error_cannot_operate(char *operation, SCM o1, SCM o2)
 {
-  STk_error("cannot perform %s on ~S and ~S", operation, o1, o2);
+  STk_error("cannot perform %s on ~W and ~W", operation, o1, o2);
 }
 
 static void error_divide_by_0(SCM n)
 {
-  STk_error("cannot divide ~S by 0", n);
+  STk_error("cannot divide ~W by 0", n);
 }
 
 static void error_incorrect_radix(SCM r)
 {
-  STk_error("base must be 2, 8, 10 or 16. It was ~S", r);
+  STk_error("base must be 2, 8, 10 or 16. It was ~W", r);
 }
 
 static void error_not_an_integer(SCM n)
 {
-  STk_error("exact or inexact integer required, got ~s", n);
+  STk_error("exact or inexact integer required, got ~W", n);
 }
 
 static void error_not_an_exact_integer(SCM n)
 {
-  STk_error("exact integer required, got ~s", n);
+  STk_error("exact integer required, got ~W", n);
 }
 
 union binary64 {
