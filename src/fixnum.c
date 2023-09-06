@@ -39,12 +39,12 @@ static void error_fx_at_least_1(void)
 
 static void error_negative_fixnum(SCM obj)
 {
-  STk_error("expected non-negative fixnum, found ~S", obj);
+  STk_error("expected non-negative fixnum, found ~W", obj);
 }
 
 static void error_bad_fxlength(SCM obj)
 {
-    STk_error("bad fixnum length ~S (should be < ~S)", obj, INT_LENGTH);
+    STk_error("bad fixnum length ~W (should be < ~S)", obj, INT_LENGTH);
 }
 
 /* used internally by the fx../carry primitives */
@@ -77,7 +77,7 @@ long exp_2_fxwidth() {
 
 static void error_bad_fixnum1(SCM o1)
 {
-  STk_error("bad fixnum ~S", o1);
+  STk_error("bad fixnum ~W", o1);
 }
 
 static void error_bad_fixnum2(SCM o1, SCM o2)
@@ -399,7 +399,7 @@ DEFINE_PRIMITIVE("fxsqrt", fxsqrt, subr1, (SCM o))
   ensure_fx(o);
   {
     long no = INT_VAL(o);
-    if (no < 0)   STk_error("non negative fixnum expected. It was: ~S", o);
+    if (no < 0)   STk_error("non negative fixnum expected. It was: ~W", o);
     long n1 = (long) sqrt((float)no);
     long n2 = no - (n1*n1);
     return STk_n_values(2,
