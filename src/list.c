@@ -49,7 +49,7 @@ static void error_bad_list(SCM x)
 
 static void error_bad_proc(SCM x)
 {
-  STk_error("bad procedure ~S", x);
+  STk_error("bad procedure ~W", x);
 }
 
 static void error_circular_list(SCM x)
@@ -68,7 +68,7 @@ static void error_not_exact_positive(SCM x)
 }
 static void error_bad_comparison_function(SCM x)
 {
-  STk_error("bad comparison function ~S", x);
+  STk_error("bad comparison function ~W", x);
 }
 
 int STk_int_length(SCM l)
@@ -232,7 +232,7 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
    * NOTE: using strings (instead of keywords) is less efficient because
    * the char * is at the end of the object. Using symbols is also fast
    * (even a bit faster, don't know why), but it is harder  to detect that
-   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
+   * that we can inline when we have (%cxr lst 'daa), because of the quote.
    */
   if (KEYWORDP(name)) {
     SCM lst   = l;
