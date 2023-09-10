@@ -99,17 +99,21 @@
   (let ((readline-flavor (key-get *%system-state-plist* #:readline #f)))
     (case readline-flavor
       ((readline libedit)
-       ;; We are using a line editor. Use a hook function to poll the
-       ;; editor input. NOTE: MacOS libedit doesn't provide rl-event-hook
-       ;; FIXME: Print a warning for MacOS?
-       (when rl-event-hook
-         (rl-input-timeout 0)
-         (%readline-idle-hook rl-event-hook)))
+         ;; We are using a line editor. Use a hook function to poll the
+         ;; editor input. NOTE: macOS libedit doesn't provide rl-event-hook
+         (if rl-event-hook
+             ;; We have a rl-event-hook
+             (begin
+               (rl-input-timeout 0)
+               (%readline-idle-hook rl-event-hook))
+             ;; No rl-event-hook (we're probably on macOS).
+             ;; Run gtk-main in a separate thread
+             (thread-start! (make-thread gtk-main 'gtk-thread))))
       (else
-       ;; no editor. Use a file-port hook
-       (port-idle-register! (current-input-port)
-                            (lambda ()
-                              (gtk-main-iteration-do #f)))))))
+         ;; no editor. Use a file-port hook
+         (port-idle-register! (current-input-port)
+                              (lambda ()
+                                (gtk-main-iteration-do #f)))))))
 
 
 ;;(define gtk-idle-proc (make-parameter #f))
