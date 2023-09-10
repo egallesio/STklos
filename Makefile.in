@@ -859,8 +859,13 @@ install-base:
 	  echo "***** Installing directory $$i"; \
 	  (cd $$i && $(MAKE) $(AM_MAKEFLAGS) install); \
 	done
-install-base-no-strip:
-	@env $(MAKE) install-base STRIP=no
+
+install-base-no-strip: install-base
+
+install-base-strip: install-base
+	echo $(bindir)
+	@STRIPCMD@ $(bindir)/stklos-@VERSION@
+	@echo "stklos executable stripped"
 
 install-sources: install-base
 	(cd lib && $(MAKE)  $(AM_MAKEFLAGS) install-sources)
