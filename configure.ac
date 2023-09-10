@@ -396,7 +396,7 @@ then
      (cd pcre2; ./configure --prefix=$prefix --disable-shared --disable-cpp) || \
            { echo "Cannot configure PCRE2"; exit; }
      PCRE2=pcre2
-     PCRE2INC="-I../pcre2"
+     PCRE2INC="-I../pcre2/src"
      PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
      COMP_LIBS="libpcre2 $COMP_LIBS"
 else
