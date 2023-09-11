@@ -31,7 +31,8 @@
 (define-gtk gtk-init (:pointer :pointer) :void        "gtk_init")
 (define-gtk gtk-main-iteration-do (:boolean) :boolean "gtk_main_iteration_do")
 (define-gtk gtk-main () :void                         "gtk_main")
-(define-gtk gtk-events-pending () :boolean            "gtk_events_pending")
+;;(define-gtk gtk-events-pending () :boolean          "gtk_events_pending")
+;;(define-gtk gtk-main-iteration () :void             "gtk_main_iteration")
 
 
 (define *table-id* '())
@@ -107,8 +108,12 @@
                (rl-input-timeout 0)
                (%readline-idle-hook rl-event-hook))
              ;; No rl-event-hook (we're probably on macOS).
-             ;; Run gtk-main in a separate thread
-             (thread-start! (make-thread gtk-main 'gtk-thread))))
+             ;; FIXME: Run gtk-main in a separate thread
+             ;; Something like (thread-start! (make-thread gtl-main))
+             ;; is OK on GNU/Linux but  doesn't work (in fact it seems
+             ;; that using external functions in
+             ;; a thread yield a SISEGV.
+             (error "no event hook available. Use gtk-main instead")))
       (else
          ;; no editor. Use a file-port hook
          (port-idle-register! (current-input-port)
