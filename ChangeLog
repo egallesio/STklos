@@ -1,3 +1,265 @@
+2023-09-11 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos into v200
+
+2023-09-10 Erick Gallesio <eg@stklos.net>
+	- Fixed a compilation warning
+	- Add a special case for start-interactive-gtk for libedit under macOS
+	- Corrected include path when --with-provided-regexp is used
+	- make install will install now a non stripped version of stklos
+	- Fix Makefile install dirs.
+
+2023-09-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix plural in error message
+
+2023-09-05 Erick Gallesio <eg@stklos.net>
+	- Updated NEWS.md
+	- Merge branch 'master' into v200
+	- Use XDG standard location for stklosrc file
+	- Added pronunciation od STklos (issue #576)
+
+2023-09-04 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #602 from jpellegrini/syntax-rules-improper-list
+
+2023-09-04 Erick Gallesio <eg@stklos.net>
+	- Merge new boot file
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Merge branch 'syntax-rules-improper-list' of https://github.com/jpellegrini/STklos
+	- Merge branch 'jpellegrini-let-syntax-small-fix'
+	- Merge branch 'let-syntax-small-fix' of https://github.com/jpellegrini/STklos into jpellegrini-let-syntax-small-fix
+	- Fix the code for eqv? on complex numbers + Modified 2 tests
+	- Optimized the number of tests on eqv? on numbers
+	- Fix a test for eqv? on NaNs (one more time)
+	- Fix: (fl- 0.0) returns -0.0 instead of +0.0
+
+2023-09-03 Erick Gallesio <eg@stklos.net>
+	- Fix (eqv? 0.0 -0.0)
+	- Merge branch 'jpellegrini-negative-zero'
+
+2023-09-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix a small glitch in `let-syntax`
+
+2023-09-03 Erick Gallesio <eg@stklos.net>
+	- Use strings for some tests since (falsely) (eqv? 0.0 -0.0) is #t
+	- Merge branch 'negative-zero' of https://github.com/jpellegrini/STklos into jpellegrini-negative-zero
+
+2023-09-02 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-complex-abs'
+	- Replaced calls to magnitude bay abs in number.c
+	- Adaped documentation of abs
+	- Simplified code of primitive magnitude (direct call to abs)
+	- Merge branch 'complex-abs' of https://github.com/jpellegrini/STklos into jpellegrini-complex-abs
+	- Merge branch 'jpellegrini-bignum-sqrt'
+	- Code refactoring
+	- Merge branch 'bignum-sqrt' of https://github.com/jpellegrini/STklos into jpellegrini-bignum-sqrt
+	- Merge branch 'jpellegrini-sqrt-precision'
+	- Code refactoring
+	- Suppressed gcc warnings
+	- Merge branch 'sqrt-precision' of https://github.com/jpellegrini/STklos into jpellegrini-sqrt-precision
+
+2023-09-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Aesthetical adjustments
+	- syntax-rules: accept ellipsis with improper lists
+
+2023-09-01 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-hacking-doc'
+	- Typo fixes
+	- Merge branch 'hacking-doc' of https://github.com/jpellegrini/STklos into jpellegrini-hacking-doc
+	- Deleted the (no more used) file .git_meta
+
+2023-08-31 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-atanh-inf'
+	- Merge branch 'atanh-inf' of https://github.com/jpellegrini/STklos into jpellegrini-atanh-inf
+	- Added tests and documentation about R7RS NaN rules
+	- Use nan=? when testing eqv? for NaN with payload
+	- Modified tests now that equal? on NaN always return #f
+	- Modified comparisons with NaNs
+	- Adapted test for the impression of complex with a -nan.0
+	- -nan.0 is now a synonym of +nan.0 as requested by R7RS
+
+2023-08-30 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #581 from jpellegrini/srfi-43
+
+2023-08-29 Erick Gallesio <eg@stklos.net>
+	- Suppressed the multi-file HTML reference manual from distribution
+	- Make generated PDF files smaller
+
+2023-08-28 Erick Gallesio <eg@stklos.net>
+	- Updated README.md for 2.00 release
+	- Merge branch 'jpellegrini-small-fixes'
+	- Modified documentation of string->symbol
+	- Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos into jpellegrini-small-fixes
+	- Merge branch 'gmp'
+	- Updated our internal gmp version (mini-gmp) to 6.3.0
+	- Merge branch 'jpellegrini-exact-complex'
+
+2023-08-27 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'exact-complex' of https://github.com/jpellegrini/STklos into jpellegrini-exact-complex
+	- Deleted useless files from git tree
+	- Added option --ldflags to stklos-config
+
+2023-08-26 Erick Gallesio <eg@stklos.net>
+	- Use CPPLAGS and LDFLAGS when building shared objects
+	- Start the integration of CPPGLAGS and LDFLAGS in config scripts
+
+2023-08-25 Erick Gallesio <eg@stklos.net>
+	- Fixed the install paths in `extensions` subdirs
+
+2023-08-24 Erick Gallesio <eg@stklos.net>
+	- Fix installed file mode of preproc.stk
+	- Adapted Makefiles to support --libdir and --datadir conf. options
+	- Changed the way we guess SLIB installation dir
+	- Fixed some remaining paths relative to $prefix rather than $docdir
+	- Simplified building of the load path
+	- Enhanced the %library-prefix primitive
+
+2023-08-22 Erick Gallesio <eg@stklos.net>
+	- Permit to customize pdfdir and htmldir
+
+2023-08-21 Erick Gallesio <eg@stklos.net>
+	- Take into account the --docdir and --mandir if provided
+
+2023-08-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- More fixes in C comments
+
+2023-08-20 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'fix_number'
+	- Typo fix
+
+2023-08-19 Erick Gallesio <eg@stklos.net>
+	- Add some tests on symbols which look like numbers
+	- Code cleaning of read_integer_or_real function
+
+2023-08-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fixing a typo
+	- Reindenting some lines in vm.c For clarity...
+
+2023-08-18 Erick Gallesio <eg@stklos.net>
+	- Fix another problem with real like symbols (e.g. 12s3x)
+
+2023-08-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Tests for exactness of complexes
+	- Complex -> integer when imag-part is exact 0
+
+2023-08-15 Erick Gallesio <eg@stklos.net>
+	- Alloc. a copy for symbols starting with a number and with a  '_'
+	- Symplify code: digitp takes already care of the R5RS '#' in numbers
+
+2023-08-12 Erick Gallesio <eg@stklos.net>
+	- Fix (partially) the issue #579 with numbers with '_'
+
+2023-08-10 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix typos in C comments
+
+2023-08-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Small documentation fixes
+
+2023-08-04 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #574 from jpellegrini/small-fixes
+
+2023-08-04 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-test-complex-sqrt'
+	- Fixed a test, and suppressed 2 added in a recent previous commit
+	- Merge branch 'test-complex-sqrt' of https://github.com/jpellegrini/STklos into jpellegrini-test-complex-sqrt
+	- Merge branch 'jpellegrini-log-minus-inf'
+	- Merge branch 'log-minus-inf' of https://github.com/jpellegrini/STklos into jpellegrini-log-minus-inf
+
+2023-08-02 Jeronimo Pellegrini <j_p@aleph0.info>
+	- More detailed description of NaNs
+
+2023-08-02 Erick Gallesio <eg@stklos.net>
+	- Added libdir when building some parts of stklos-pp manual
+
+2023-08-02 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Tests for sqrt of negative numbers
+
+2023-08-02 Erick Gallesio <eg@stklos.net>
+	- Add some tests on sqrt for complexes with zero imaginary part
+	- Fix the result of sqrt when imaginary part is +/-0.0
+	- Minor cleaning of build-pp-demo.sh
+
+2023-08-02 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #570 from jpellegrini/small-fixes
+
+2023-08-02 Erick Gallesio <eg@stklos.net>
+	- Prepend './' to the build-pp-demo.sh script
+	- Added a dependency on stklos-pp for documentation building
+	- Suppressed the (now useless) stklos-pkg(1) man page
+	- Merge branch 'pp'
+	- Added stklos-pp(1) man page
+	- Merge branch 'jpellegrini-read-complexes'
+	- STk_Cstr2simple_number -> Cstr2simple_number since it is static
+	- Place parameter **end at the end of STk_Cstr2simple_number
+	- Small refactoring (str2 is renamed in end, str3->end2)
+	- Fix: verify that there are no character afer a 'i' in a complex
+	- Small changes to STk_Cstr2number
+
+2023-08-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Cosmetic changes only
+
+2023-07-31 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'read-complexes' of https://github.com/jpellegrini/STklos into jpellegrini-read-complexes
+	- Merge branch 'jpellegrini-complex-print'
+	- Merge branch 'complex-print' of https://github.com/jpellegrini/STklos into jpellegrini-complex-print
+
+2023-07-29 Jeronimo Pellegrini <j_p@aleph0.info>
+	- (log -inf.0) = "+inf + i*pi"
+
+2023-07-28 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Make STk_Cstr2simple_number static inline
+	- Read complexes with infs and nans
+
+2023-07-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- number2Cstr: uniform use of variable names
+	- Explain if condition related to NaNs
+
+2023-07-25 Erick Gallesio <eg@stklos.net>
+	- Fix 2 compiler warnings
+
+2023-07-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- One more test for complex printing
+	- Add tests to complex number printing
+	- Don't include extra '+' when printing complexes
+
+2023-07-22 Erick Gallesio <eg@stklos.net>
+	- Rebuild all the documentation (PDF and multi-file)
+	- Merge branch 'pp'
+	- Fix: '-' is now considered as alphabetic in frontmatter
+	- Added documentation on stklos-pp
+
+2023-07-18 Erick Gallesio <eg@stklos.net>
+	- Fixed reading of frontmatter reading with '---' separator.
+	- Add protected character to stklos-pp
+
+2023-07-15 Erick Gallesio <eg@stklos.net>
+	- Enhanced the message printed by syntax-error
+	- Updated the documentation of `error`
+	- Add documentation for R7RS syntax-error
+	- Suppressed remaining import for SRFI-9
+
+2023-07-14 Erick Gallesio <eg@stklos.net>
+	- Updated --help options of stklos and stklos-compile
+	- Add new option to zsh completion function (+ bug fix)
+
+2023-07-12 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'logical'
+	- Suppressed useless code
+
+2023-07-11 Erick Gallesio <eg@stklos.net>
+	- Use C bit primitives instead of Scheme functions in (scheme bitwise)
+	- Optimize (a bit) operations in SRFI-60
+	- Implemented in C logical operations bit-and bit-or and bit-xor
+
+2023-07-10 Erick Gallesio <eg@stklos.net>
+	- Update AUHORS file
+	- Merge branch 'jpellegrini-fix-vm-with-goto'
+	- Go to the top of VM loop instead of the end
+	- Suppressed ';' in the NEXT macro
+	- Merge branch 'fix-vm-with-goto' of https://github.com/jpellegrini/STklos into jpellegrini-fix-vm-with-goto
+	- Updated ChangeLog
+
+2023-07-09 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix non-computed-goto build
+
 2023-07-05 Erick Gallesio <eg@stklos.net>
 	- Updated Docker file to use pcre2 instead of pcre
 	- Merge branch 'jpellegrini-bignums'

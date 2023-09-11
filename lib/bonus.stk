@@ -1738,8 +1738,8 @@ doc>
  * |chmod| returns `#t`; otherwise it returns `#f`.
  *
  * @lisp
- * (chmod "~/.stklos/stklosrc" 'read 'execute)
- * (chmod "~/.stklos/stklosrc" #o644)
+ * (chmod "~/.config/stklos/stklosrc" 'read 'execute)
+ * (chmod "~/.config/stklos/stklosrc" #o644)
  * @end lisp
 doc>
 |#

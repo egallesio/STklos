@@ -178,11 +178,11 @@ back-trace.
 .IP "STKLOS_CONFDIR"
 This variable can be used to designate the directory used by \fBstklos\fR
 to store its configuration or packages files. If not set, the default
-\fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
+\fBstklos\fR configuration directory is by default \fB${XDG_CONFIG_HOME}/stklos\fR (or \fB~/.config/stklos/\fR if  \fBXDG_CONFIG_HOME\fR is unset).
 
 .SH FILES
 
-.IP "~/<stklos-conf-dir>/stklosrc"
+.IP "<stklos-conf-dir>/stklosrc"
 This file is the user init file which is loaded when \fBstklos\fR
 starts. Use the \fB-q\fR to avoid the loading of this file.
 

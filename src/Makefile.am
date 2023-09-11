@@ -25,20 +25,12 @@
 CC	   	 = @CC@
 AM_CFLAGS	 = @STKCFLAGS@
 
-# In order to use strip when cross-compiling, we need it to be settable
-# as an env variable. Setting it in configure.ac doesn't seem to make the
-# desired effect, so we just do this simple conditional assignment here.
-# -- jpellegrini
-STRIP         = @STRIPCMD@
-
-
 STKLOS_BINARY ?= ./stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 
 
-bindir      = $(prefix)/bin
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
-extraincdir = $(prefix)/include/@PACKAGE@
+schemedir   = @SCMDIR@
+extraincdir = @EXECDIR@
 
 
 bin_PROGRAMS    = stklos
@@ -118,10 +110,8 @@ generate-git-info:
 
 
 install-exec-hook:
-	@echo "STRIP command: $$STRIP"
-	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi;
-	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
-	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
+	mv $(bindir)/stklos $(bindir)/stklos-@VERSION@
+	ln -s stklos-@VERSION@ $(bindir)/stklos
 
 
 doc:  $(DOCDB)

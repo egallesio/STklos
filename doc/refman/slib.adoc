@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -41,7 +41,8 @@ which is called.
 *_SLIB_* needs to create a catalog of the file that must be loaded to
 implement a given feature. This catalog is stored in a file named
 `slibcat` This file is, by default located in the
-`~/.stklos/slib` directory.  It is possible to change this
+`slib` directory into the {{stklos}} configuration directory
+(generally `~/.config/stklos`).  It is possible to change this
 directory with the `STKLOS_IMPLEMENTATION_PATH` shell variable.
 
 {{stklos}} searches the *_SLIB_* implementation directory in some standard
