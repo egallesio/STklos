@@ -1,3 +1,88 @@
+2023-09-11 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos into v200
+
+2023-09-10 Erick Gallesio <eg@stklos.net>
+	- Fixed a compilation warning
+	- Add a special case for start-interactive-gtk for libedit under macOS
+	- Corrected include path when --with-provided-regexp is used
+	- make install will install now a non stripped version of stklos
+	- Fix Makefile install dirs.
+
+2023-09-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix plural in error message
+
+2023-09-05 Erick Gallesio <eg@stklos.net>
+	- Updated NEWS.md
+	- Merge branch 'master' into v200
+	- Use XDG standard location for stklosrc file
+	- Added pronunciation od STklos (issue #576)
+
+2023-09-04 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #602 from jpellegrini/syntax-rules-improper-list
+
+2023-09-04 Erick Gallesio <eg@stklos.net>
+	- Merge new boot file
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Merge branch 'syntax-rules-improper-list' of https://github.com/jpellegrini/STklos
+	- Merge branch 'jpellegrini-let-syntax-small-fix'
+	- Merge branch 'let-syntax-small-fix' of https://github.com/jpellegrini/STklos into jpellegrini-let-syntax-small-fix
+	- Fix the code for eqv? on complex numbers + Modified 2 tests
+	- Optimized the number of tests on eqv? on numbers
+	- Fix a test for eqv? on NaNs (one more time)
+	- Fix: (fl- 0.0) returns -0.0 instead of +0.0
+
+2023-09-03 Erick Gallesio <eg@stklos.net>
+	- Fix (eqv? 0.0 -0.0)
+	- Merge branch 'jpellegrini-negative-zero'
+
+2023-09-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix a small glitch in `let-syntax`
+
+2023-09-03 Erick Gallesio <eg@stklos.net>
+	- Use strings for some tests since (falsely) (eqv? 0.0 -0.0) is #t
+	- Merge branch 'negative-zero' of https://github.com/jpellegrini/STklos into jpellegrini-negative-zero
+
+2023-09-02 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-complex-abs'
+	- Replaced calls to magnitude bay abs in number.c
+	- Adaped documentation of abs
+	- Simplified code of primitive magnitude (direct call to abs)
+	- Merge branch 'complex-abs' of https://github.com/jpellegrini/STklos into jpellegrini-complex-abs
+	- Merge branch 'jpellegrini-bignum-sqrt'
+	- Code refactoring
+	- Merge branch 'bignum-sqrt' of https://github.com/jpellegrini/STklos into jpellegrini-bignum-sqrt
+	- Merge branch 'jpellegrini-sqrt-precision'
+	- Code refactoring
+	- Suppressed gcc warnings
+	- Merge branch 'sqrt-precision' of https://github.com/jpellegrini/STklos into jpellegrini-sqrt-precision
+
+2023-09-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Aesthetical adjustments
+	- syntax-rules: accept ellipsis with improper lists
+
+2023-09-01 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-hacking-doc'
+	- Typo fixes
+	- Merge branch 'hacking-doc' of https://github.com/jpellegrini/STklos into jpellegrini-hacking-doc
+	- Deleted the (no more used) file .git_meta
+
+2023-08-31 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-atanh-inf'
+	- Merge branch 'atanh-inf' of https://github.com/jpellegrini/STklos into jpellegrini-atanh-inf
+	- Added tests and documentation about R7RS NaN rules
+	- Use nan=? when testing eqv? for NaN with payload
+	- Modified tests now that equal? on NaN always return #f
+	- Modified comparisons with NaNs
+	- Adapted test for the impression of complex with a -nan.0
+	- -nan.0 is now a synonym of +nan.0 as requested by R7RS
+
+2023-08-30 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #581 from jpellegrini/srfi-43
+
+2023-08-29 Erick Gallesio <eg@stklos.net>
+	- Suppressed the multi-file HTML reference manual from distribution
+	- Make generated PDF files smaller
+
 2023-08-28 Erick Gallesio <eg@stklos.net>
 	- Updated README.md for 2.00 release
 	- Merge branch 'jpellegrini-small-fixes'
