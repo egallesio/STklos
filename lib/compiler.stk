@@ -274,7 +274,7 @@
 ; ======================================================================
 
 ;; The global variable *code-constants* contains a list of constants for the
-;; code being compiled. 
+;; code being compiled.
 ;; Why is its index not also kept in the list? Because the index is the position
 ;; of the element in the list, and it's calculated when the compiler calls this
 ;; function (fetch-constant).
@@ -1785,12 +1785,22 @@ doc>
 
 
 ;; ======================================================================
+
+;; Compiles access to a symbol in the SCHEME module, using a special
+;; VM instruction INSCHEME:
+;;
+;; (%%in-scheme x) =>
+;;    GLOBAL-REF           0
+;;    INSCHEME
+;;
+;; Constants:
+;; 0: x
 (define (compile-in-scheme e env tail)
   (if (= (length e) 2)
       (begin
         (compile (cadr e) env (cadr e) tail)
         (emit 'INSCHEME))
-      (compiler-error '%%in-scheme "expected one argument")))
+      (compiler-error '%%in-scheme e "expected one argument")))
 
 ;;;;======================================================================
 ;;;;
