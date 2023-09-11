@@ -3492,7 +3492,22 @@ transcendental(atanh)
 
 DEFINE_PRIMITIVE("log", log, subr12, (SCM x, SCM b))
 {
-    return (b)? div2(my_log(x),my_log(b)) : my_log(x);
+    SCM res = (b)? div2(my_log(x),my_log(b)) : my_log(x);
+    /* If both arguments are exact, then check if
+       the result is exact. If not, return an inexact
+       real. */
+    if (REALP(res) && isexactp(x) && (!b || isexactp(b))) {
+        double fres = REAL_VAL(res);
+        double int_part;
+        double frac = modf(fres, &int_part);
+        if (fpclassify(frac) == FP_ZERO &&
+            !isinf(int_part) &&
+            !isnan(int_part))
+            return MAKE_INT((long) fres);
+        else
+            return double2real(fres);
+    }
+    return res;
 }
 
 
