@@ -1,4 +1,15 @@
+2023-09-12 Erick Gallesio <eg@unice.fr>
+	- STklos 2.00 release
+	
 2023-09-11 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'v200'
+        - Use the ".so" suffix for the readline completer on macOS
+        - Modified start-interactive-gtk for macOS
+        - Updated documentation
+        - Merge branch 'jpellegrini-compiler-error'
+        - Merge branch 'compiler-error' of https://github.com/jpellegrini/STklos into jpellegrini-compiler-error
+        - Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos
+
 	- Merge branch 'small-fixes' of https://github.com/jpellegrini/STklos into v200
 
 2023-09-10 Erick Gallesio <eg@stklos.net>
