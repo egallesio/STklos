@@ -20,7 +20,7 @@
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 26-Nov-2001 10:10 (eg)
 
-scheme_matchdir   = @SCMDIR@/Match.d
+scheme_matchdir   = $(DESTDIR)/@SCMDIR@/Match.d
 scheme_match_DATA = descr.scm compiler.scm  mexpand.scm normalize.scm s2cfun.scm
 
 # SRC = descr.scm compiler.scm  mexpand.scm normalize.scm s2cfun.scm
