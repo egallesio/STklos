@@ -29,13 +29,11 @@ STKLOS_BINARY ?= ./stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 
 
-schemedir   = @SCMDIR@
-extraincdir = @EXECDIR@
-
+extraincdir     = $(DESTDIR)@INCLUDEDIR@
+extrainc_DATA   = stklos.h extraconf.h stklosconf.h socket.h fport.h
 
 bin_PROGRAMS    = stklos
-#scheme_DATA     = boot.img
-extrainc_DATA   = stklos.h extraconf.h stklosconf.h socket.h fport.h
+
 
 DOCDB	        = DOCDB
 BASEDIR         = ..

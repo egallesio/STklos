@@ -162,9 +162,10 @@ if test "$DATADIR" == ""  ; then
 fi
 
 ### Initialize the extra conf file in src
-PREFIX=$prefix
-SCMDIR=$datadir
-EXECDIR=$libdir
+PREFIX=${prefix}
+SCMDIR=${datadir}
+EXECDIR=${libdir}
+INCLUDEDIR=${includedir}
 
 
 ### Determine the kind of the machine which is running this script
@@ -657,6 +658,7 @@ AC_SUBST(GMPINC)
 AC_SUBST(PREFIX)
 AC_SUBST(SCMDIR)
 AC_SUBST(EXECDIR)
+AC_SUBST(INCLUDEDIR)
 AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)

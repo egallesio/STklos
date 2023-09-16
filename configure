@@ -694,6 +694,7 @@ OS_NAME_VERSION
 OS_NAME
 BUILD_ARCH
 BUILD_OS
+INCLUDEDIR
 EXECDIR
 SCMDIR
 PREFIX
@@ -6826,9 +6827,10 @@ if test "$DATADIR" == ""  ; then
 fi
 
 ### Initialize the extra conf file in src
-PREFIX=$prefix
-SCMDIR=$datadir
-EXECDIR=$libdir
+PREFIX=${prefix}
+SCMDIR=${datadir}
+EXECDIR=${libdir}
+INCLUDEDIR=${includedir}
 
 
 ### Determine the kind of the machine which is running this script
@@ -7822,6 +7824,7 @@ fi
 
 
 ### Output files
+
 
 
 
