@@ -127,7 +127,7 @@ distclean: clean
 
 
 uninstall-hook:
-	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@
+	rm -f $(DESTDIR)$(bindir)/stklos-@VERSION@
 	rmdir $(extraincdir) || true
 
 

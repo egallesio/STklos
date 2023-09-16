@@ -103,8 +103,8 @@ BASEDIR     = ..
 
 
 #======================================================================
-schemedir       = $(DESTDIR)/@SCMDIR@
-schemelibdir    = $(DESTDIR)/@EXECDIR@
+schemedir       = $(DESTDIR)@SCMDIR@
+schemelibdir    = $(DESTDIR)@EXECDIR@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
 schemelib_DATA  = $(scheme_SOLIBS)
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
@@ -174,7 +174,7 @@ install-sources:
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) install-sources)\
 	done
-	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
+	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)$(schemedir)
 
 
 # Explicit some dependencies here

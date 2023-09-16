@@ -331,7 +331,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-scheme_matchdir = $(DESTDIR)/@SCMDIR@/Match.d
+scheme_matchdir = $(DESTDIR)@SCMDIR@/Match.d
 scheme_match_DATA = descr.scm compiler.scm  mexpand.scm normalize.scm s2cfun.scm
 all: all-am
 
@@ -549,8 +549,8 @@ uninstall-am: uninstall-scheme_matchDATA
 # SRC = descr.scm compiler.scm  mexpand.scm normalize.scm s2cfun.scm
 #
 # install-sources:
-# 	mkdir -p  $(DESTDIR)/$(scheme_matchdir)
-# 	cp $(SRC) $(DESTDIR)/$(scheme_matchdir)
+# 	mkdir -p  $(DESTDIR)$(scheme_matchdir)
+# 	cp $(SRC) $(DESTDIR)$(scheme_matchdir)
 #
 
 uninstall-hook:

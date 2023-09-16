@@ -979,7 +979,7 @@ distclean: clean
 	/bin/rm -f boot.img Makefile extraconf.h stklos stamp-h1 stklosconf.h
 
 uninstall-hook:
-	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@
+	rm -f $(DESTDIR)$(bindir)/stklos-@VERSION@
 	rmdir $(extraincdir) || true
 
 # Local Variables:
