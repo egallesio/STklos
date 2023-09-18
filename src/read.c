@@ -51,6 +51,8 @@ int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 #define SYMBOL_VALUE(x,ref)     STk_lookup((x), STk_current_module(), &(ref), FALSE)
 
 #define MAX_HEX_SEQ_LEN 20      /* Normally max value is 10FFFFF => 9 with '\0' */
+#define MAX_TOKEN_SIZE  1024    /* initial allocation size when reading a token */
+
 
 /* errors when reading strings */
 #define BAD_HEX_SEQUENCE     1

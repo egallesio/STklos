@@ -86,9 +86,6 @@ extern "C"
 #endif
 
 
-#define MAX_TOKEN_SIZE          1024            /* max size of a token */
-
-
 #define CPP_CONCAT(x, y)        x##y
 
 
