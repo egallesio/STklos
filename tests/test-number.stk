@@ -2202,4 +2202,13 @@
 (test "eqv? on two inexact complexes.1" #f (eqv? 1.0+i 1.0+1.0i))
 (test "eqv? on two inexact complexes.2" #t (eqv? 1.0+1.0i 1.0+1.0i))
 
+
+(test "read a 9000 digits bignum (see Issue #592)"
+      #t
+      (= (with-input-from-string
+             (with-output-to-string 
+               (lambda () (display (expt 2 30000))))
+           (lambda () (read)))
+         (expt 2 30000)))
+
 (test-section-end)

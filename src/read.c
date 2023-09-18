@@ -51,7 +51,13 @@ int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 #define SYMBOL_VALUE(x,ref)     STk_lookup((x), STk_current_module(), &(ref), FALSE)
 
 #define MAX_HEX_SEQ_LEN 20      /* Normally max value is 10FFFFF => 9 with '\0' */
-#define MAX_TOKEN_SIZE  1024    /* initial allocation size when reading a token */
+#define MAX_TOKEN_SIZE  1024    /* Initial allocation size when reading a token */
+
+
+typedef struct {                  /* structure used to read tokens */
+  char buffer[MAX_TOKEN_SIZE];    /* a statically allocated buffer */
+  char *word;                     /* the word itself (&buffer or allocated) */
+} s_word;
 
 
 /* errors when reading strings */
@@ -292,14 +298,38 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
   }
 }
 
-static int read_word(SCM port, int c, char *tok, int case_significant, int *last,
+
+static char *enlarge_word(s_word *pword, int n, int *sz)
+/* Enlarge word buffer which contains n characters in a buffer of size "sz" */
+{
+  int new_size = *sz * 3 / 2;
+
+  pword->word[n] = '\0';
+
+  if  (pword->word == pword->buffer) {
+    /* never dynamically allocated */
+    pword->word = STk_must_malloc_atomic(new_size);
+    memcpy(pword->word, pword->buffer, *sz);
+  } else {
+    /* word is already dynamically allocated, realloc it */
+    pword->word =STk_must_realloc(pword->word, new_size);
+  }
+  *sz =new_size;
+  return pword->word;
+}
+
+static int read_word(SCM port, int c, s_word *pword, int case_significant, int *last,
                      int *seen_pipe)
 // read an item whose 1st char is in c. Return its length
 // At exit "last", if not NULL,  contains the last character read for this item
 {
   register int j = 0;
   int allchars   = 0;
-  int next;
+  int next, sz;
+  char *tok;
+
+  tok = pword->word= pword->buffer;
+  sz = MAX_TOKEN_SIZE;                /* size allocated for reading a token */
 
   for( ; ; ) {
     allchars  ^= (c == '|');
@@ -332,13 +362,9 @@ static int read_word(SCM port, int c, char *tok, int case_significant, int *last
           if (len < 0)
             error_bad_inline_hexa_sequence(port, buffer, 1); /* 1 = symbol */
           else {
-            if (j + len >= MAX_TOKEN_SIZE-1) {
-              tok[j] = '\0';
-              error_token_too_large(port, tok);
-            } else {
-              memcpy(tok + j-1, buffer, len);
-              j += len-1;
-            }
+            if (j + len >= sz-1) tok = enlarge_word(pword, j, &sz);
+            memcpy(tok + j-1, buffer, len);
+            j += len-1;
           }
           break;
         }
@@ -357,7 +383,7 @@ static int read_word(SCM port, int c, char *tok, int case_significant, int *last
       }
     }
     c = next;
-    if (j >= MAX_TOKEN_SIZE-1) error_token_too_large(port, tok);
+    if (j >= sz-1) tok = enlarge_word(pword, j, &sz);
   }
 
   if (last) *last = c;
@@ -368,13 +394,16 @@ static int read_word(SCM port, int c, char *tok, int case_significant, int *last
 
 static SCM read_token(SCM port, int c, int case_significant)
 {
-  char tok[MAX_TOKEN_SIZE];
+  s_word w;
   int len, last, seen_pipe=0;
+  char *tok;
 
-  len = read_word(port, c, tok, case_significant, &last, &seen_pipe);
+  len = read_word(port, c, &w, case_significant, &last, &seen_pipe);
+  tok = w.word;
+
+
   if (!seen_pipe) {
     SCM z = STk_Cstr2number(tok, 10L);
-
     if (z != STk_false)
       return z;
   }
@@ -806,11 +835,13 @@ static SCM read_vector(SCM port, struct read_context *ctx)
 
 static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
 {
-  char tok[MAX_TOKEN_SIZE];
+  s_word w;
+  char *tok;
   int tag, len;
   SCM v;
 
-  len = read_word(port, c, tok, ctx->case_significant, NULL, NULL);
+  len = read_word(port, c, &w, ctx->case_significant, NULL, NULL);
+  tok = w.word;
 
   if (strcasecmp(tok, "f") ==0 || strcasecmp(tok, "false") ==0) {
     /* This is the #f constant */
@@ -819,20 +850,20 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
     if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
         (STk_uvectors_allowed && (len >= 2 && len <= 4))) {
       c = STk_getc(port);
-      if (c == '"')
-        return read_srfi207_bytevector(port, ctx->constant);
+      if (c == '"') return read_srfi207_bytevector(port, ctx->constant);
       if (c != '(') goto bad_spec;
-        tag = STk_uniform_vector_tag(tok);
-        if (tag >= 0) {
-          int konst = ctx->constant;
 
-          /* Ok that's seems correct read the list of values (this IS a constant) */
-          ctx->constant = TRUE;
-          v =  STk_list2uvector(tag, read_list(port, ')', ctx));
-          ctx->constant = konst;
-          BOXED_INFO(v) |= VECTOR_CONST;
-          return v;
-        }
+      tag = STk_uniform_vector_tag(tok);
+      if (tag >= 0) {
+        int konst = ctx->constant;
+
+        /* Ok that's seems correct read the list of values (this IS a constant) */
+        ctx->constant = TRUE;
+        v =  STk_list2uvector(tag, read_list(port, ')', ctx));
+        ctx->constant = konst;
+        BOXED_INFO(v) |= VECTOR_CONST;
+        return v;
+      }
     }
   }
  bad_spec:
