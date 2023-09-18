@@ -299,12 +299,10 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
 }
 
 
-static char *enlarge_word(s_word *pword, int n, int *sz)
+static char *enlarge_word(s_word *pword, int *sz)
 /* Enlarge word buffer which contains n characters in a buffer of size "sz" */
 {
   int new_size = *sz * 3 / 2;
-
-  pword->word[n] = '\0';
 
   if  (pword->word == pword->buffer) {
     /* never dynamically allocated */
@@ -362,7 +360,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
           if (len < 0)
             error_bad_inline_hexa_sequence(port, buffer, 1); /* 1 = symbol */
           else {
-            if (j + len >= sz-1) tok = enlarge_word(pword, j, &sz);
+            if (j + len >= sz-1) tok = enlarge_word(pword, &sz);
             memcpy(tok + j-1, buffer, len);
             j += len-1;
           }
@@ -383,7 +381,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
       }
     }
     c = next;
-    if (j >= sz-1) tok = enlarge_word(pword, j, &sz);
+    if (j >= sz-1) tok = enlarge_word(pword, &sz);
   }
 
   if (last) *last = c;
@@ -438,6 +436,8 @@ static SCM read_token(SCM port, int c, int case_significant)
       return STk_makekey(tok);
     }
     else {
+      // FIXME: we could have a `STk_intern_no_dup` to avoid the duplication of tok
+      // when tok != w.buffer. Is it really worthwhile?
       return STk_intern(tok);
     }
   }
