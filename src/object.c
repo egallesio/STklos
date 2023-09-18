@@ -59,9 +59,10 @@ EXTERN_PRIMITIVE("class-of", class_of, subr1, (SCM obj));
 static SCM Top, Object, Class, Generic, Method, Simple_method, Accessor,
            Procedure_class, Entity_class;
 static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number,
-           Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof,
-           Struct_type, Struct, Cond, Cond_type, Box, Syntax, Uvector,
-           Bytevector, Port, Input_port, Output_port, Hash_table, UnknownClass;
+           Liste, Null, Real, Complex, Rational, Integer, Fixnum, Bignum,
+           Eof, Keyword, Struct_type, Struct, Cond, Cond_type, Box, Syntax,
+           Uvector, Bytevector, Port, Input_port, Output_port, Hash_table,
+           UnknownClass;
 
 
 int STk_oo_initialized = FALSE;
@@ -908,6 +909,8 @@ static void make_standard_classes(void)
   mk_cls(&Real,         "<real>",       Class,           Complex,   STk_nil);
   mk_cls(&Rational,     "<rational>",   Class,           Real,      STk_nil);
   mk_cls(&Integer,      "<integer>",    Class,           Rational,  STk_nil);
+  mk_cls(&Bignum,       "<bignum>",     Class,           Integer,   STk_nil);
+  mk_cls(&Fixnum,       "<fixnum>",     Class,           Integer,   STk_nil);
   mk_cls(&Keyword,      "<keyword>",    Class,           Top,       STk_nil);
   mk_cls(&Eof,          "<eof>",        Class,           Top,       STk_nil);
   mk_cls(&Struct,       "<struct>",     Class,           Top,       STk_nil);
@@ -1024,7 +1027,7 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
   }
 
   if (INTP(obj))
-    return Integer;
+    return Fixnum;
 
   if (CHARACTERP(obj))
     return Char;
@@ -1037,7 +1040,7 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     case tc_real:       return Real;
     case tc_complex:    return Complex;
     case tc_rational:   return Rational;
-    case tc_bignum:     return Integer;
+    case tc_bignum:     return Bignum;
     case tc_keyword:    return Keyword;
     case tc_struct_type:return (COND_TYPEP(obj)) ? Cond_type: Struct_type;
     case tc_struct:     return (CONDP(obj)) ? Cond : Struct;
