@@ -51,11 +51,11 @@ int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 #define SYMBOL_VALUE(x,ref)     STk_lookup((x), STk_current_module(), &(ref), FALSE)
 
 #define MAX_HEX_SEQ_LEN 20      /* Normally max value is 10FFFFF => 9 with '\0' */
-#define MAX_TOKEN_SIZE  1024    /* Initial allocation size when reading a token */
+#define TOKEN_SIZE      200     /* Initial allocation size when reading a token */
 
 
 typedef struct {                  /* structure used to read tokens */
-  char buffer[MAX_TOKEN_SIZE];    /* a statically allocated buffer */
+  char buffer[TOKEN_SIZE];        /* a statically allocated buffer */
   char *word;                     /* the word itself (&buffer or allocated) */
 } s_word;
 
@@ -95,7 +95,7 @@ static void signal_error(SCM port, char *format, SCM param)
 
 static void error_token_too_large(SCM port, char *tok)
 {
-  tok[MAX_TOKEN_SIZE-1] = '\0'; /* truncate the name (should be sufficient !!) */
+  tok[TOKEN_SIZE-1] = '\0'; /* truncate the name (should be sufficient !!) */
   signal_error(port, "token too large ~S", STk_Cstring2string(tok));
 }
 
@@ -329,7 +329,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
   char *tok;
 
   tok = pword->word= pword->buffer;
-  sz = MAX_TOKEN_SIZE;                /* size allocated for reading a token */
+  sz = TOKEN_SIZE;             /* size statically allocated for reading a token */
 
   for( ; ; ) {
     allchars  ^= (c == '|');
@@ -447,7 +447,7 @@ static SCM read_token(SCM port, int c, int case_significant)
 static SCM read_char(SCM port, int c)
 /* read a char (or a char name) item whose 1st char is in c */
 {
-  char tok[MAX_TOKEN_SIZE];
+  char tok[TOKEN_SIZE];
   register int j = 0;
 
   for( ; ; ) {
@@ -460,7 +460,7 @@ static SCM read_char(SCM port, int c)
       STk_ungetc(c, port);
       break;
     }
-    if (j >= MAX_TOKEN_SIZE-1) error_token_too_large(port, tok);
+    if (j >= TOKEN_SIZE-1) error_token_too_large(port, tok);
   }
   tok[j] = '\0';
 
@@ -471,7 +471,7 @@ static SCM read_char(SCM port, int c)
 
 static SCM read_address(SCM port)
 {
-  char *end, tok[MAX_TOKEN_SIZE] = "0x";
+  char *end, tok[TOKEN_SIZE] = "0x";
   unsigned long address;
   register int j;
 
@@ -482,7 +482,7 @@ static SCM read_address(SCM port)
     if (c == EOF || ((c <=0x80) && isspace((unsigned char)c)))
       /* (c < 0x80) is for MacOs */
       break;
-    if (j >= MAX_TOKEN_SIZE-1) error_token_too_large(port, tok);
+    if (j >= TOKEN_SIZE-1) error_token_too_large(port, tok);
   }
   tok[j] = '\0';
 
@@ -570,7 +570,7 @@ static void patch_references(SCM port, SCM l, SCM cycles)
 static SCM read_cycle(SCM port, int c, struct read_context *ctx)
 /* read a #xx# or #xx= cycle item whose 1st char is in c. */
 {
-  char buffer[MAX_TOKEN_SIZE];
+  char buffer[TOKEN_SIZE];
   int  j = 0;
   SCM k, tmp, val;
 
@@ -578,7 +578,7 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
     buffer[j++] = c;
     c = STk_getc(port);
     if (c == EOF || !isdigit(c)) break;
-    if (j >= MAX_TOKEN_SIZE-1) error_token_too_large(port, buffer);
+    if (j >= TOKEN_SIZE-1) error_token_too_large(port, buffer);
   }
   buffer[j] = '\0';
   k = MAKE_INT(atoi(buffer));
