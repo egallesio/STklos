@@ -440,16 +440,29 @@ static SCM read_char(SCM port, int c)
 
 static SCM read_address(SCM port)
 {
-  char *end, tok[MAX_TOKEN_SIZE] = "0";
+  char *end, tok[MAX_TOKEN_SIZE] = "0x";
   unsigned long address;
+  register int j;
 
-  read_word(port, 'x', tok+1, FALSE, NULL, NULL);
+  for(j = 2; ; j++) {
+    int c;
+
+    tok[j] = c = STk_getc(port);
+    if (c == EOF || ((c <=0x80) && isspace((unsigned char)c)))
+      /* (c < 0x80) is for MacOs */
+      break;
+    if (j >= MAX_TOKEN_SIZE-1) error_token_too_large(port, tok);
+  }
+  tok[j] = '\0';
+
+  /* convert the hexa number contained in token to an address */
   address = strtoul(tok, &end, 16);
-  if (*end)
+  if (*end || errno)
     signal_error(port, "bad address specifier #p~a", STk_Cstring2string(tok+2));
 
   return (SCM) address;
 }
+
 
 static SCM read_here_string(SCM port)
 {
