@@ -249,7 +249,8 @@ DEFINE_PRIMITIVE("flnormalized-fraction-exponent", srfi_144_flnormalized_fractio
 DEFINE_PRIMITIVE("flsign-bit", srfi_144_flsign_bit, subr1, (SCM x))
 {
     ensure_fl(x);
-    return (MAKE_INT(signbit(REAL_VAL(x))));
+    /* use a comparison to be sure that result is 0 or 1 (tcc returns 0 or 128) */
+    return (MAKE_INT(signbit(REAL_VAL(x))!=0));
 }
 
 

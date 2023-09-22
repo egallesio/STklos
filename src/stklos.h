@@ -1473,6 +1473,8 @@ extern STk_instr STk_boot_code[];
 /* Misc */
 #if defined(__GNUC__) || defined(__clang__)
 #  define _UNUSED(x) __attribute__((__unused__)) x
+#else
+#  define _UNUSED(x) x
 #endif
 
 #ifdef __cplusplus
