@@ -31,13 +31,18 @@
 
 
 /* Define the maximum calls for equal-count (a version of equal bounded in
-  recursive calls). The value depends on the way the program is compiled:
-  if optimizations are used, the program grows stack faster
+  recursive calls). The value depends on the way the program is compiled: if
+  no optimization are used, the program grows stack faster. In any case, we
+  limit the number of calls to DEFAULT_MAX_EQUAL_CALLS. Note that the divisors
+  used below are very empirical
 */
 
-#define DEFAULT_MAX_EQUAL_CALLS  50000 /* max recursive calls  */
+#define DEFAULT_MAX_EQUAL_CALLS  30000 /* max recursive calls  */
 #define STK_DIVISOR_OPTIM          100 /* divisisor if compiled with -O option */
 #define STK_DIVISOR_NOT_OPTIM      200 /* divisisor if compiled without -O option */
+
+static int max_equal_calls = DEFAULT_MAX_EQUAL_CALLS;
+struct rlimit rl;
 
 #ifdef __OPTIMIZE__
    static int optimized = 1;
@@ -45,14 +50,14 @@
    static int optimized = 0;
 #endif
 
-static int max_equal_calls = DEFAULT_MAX_EQUAL_CALLS;
 
 static void limit_max_equal_calls(void) {
-  struct rlimit rl;
-
   if (getrlimit(RLIMIT_STACK, &rl) == 0) {
-    /* Determine a value for the maximum calls for equal-count depending on stack size*/
-    max_equal_calls = rl.rlim_cur / (optimized? STK_DIVISOR_OPTIM: STK_DIVISOR_NOT_OPTIM);
+    int n = rl.rlim_cur / (optimized? STK_DIVISOR_OPTIM: STK_DIVISOR_NOT_OPTIM);
+
+    /* Depending on stack size, eventually use a lower value for max_equal_calls */
+    if (n <= DEFAULT_MAX_EQUAL_CALLS)
+      max_equal_calls = n;
   }
 }
 
