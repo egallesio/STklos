@@ -59,7 +59,7 @@ AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 AC_CHECK_PROG(ASCIIDOCTOR, asciidoctor, "asciidoctor", "../adoc-fake.sh")
 if test "$ASCIIDOCTOR" = "asciidoctor"
 then
-    REPORT_ASCIIDOCTOR="asciidoctor"
+    REPORT_ASCIIDOCTOR="yes"
 else
     REPORT_ASCIIDOCTOR="no (documentation will NOT be rebuilt)"
 fi

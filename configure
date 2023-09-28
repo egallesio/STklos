@@ -5072,7 +5072,7 @@ fi
 
 if test "$ASCIIDOCTOR" = "asciidoctor"
 then
-    REPORT_ASCIIDOCTOR="asciidoctor"
+    REPORT_ASCIIDOCTOR="yes"
 else
     REPORT_ASCIIDOCTOR="no (documentation will NOT be rebuilt)"
 fi
