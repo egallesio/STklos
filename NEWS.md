@@ -19,7 +19,7 @@ persons (in alphabetical order):
 The main changes in this version are:
 
 - Support for R⁷RS libraries
-- Macro system hash been rewritten
+- Macro system has been rewritten
 - Support for ScmPkg packages has been suppressed
 - New options for the commands *stklos(1)* and  *stklos-compile(1)*
 - Optimizations on numerical operations
@@ -30,7 +30,7 @@ The main changes in this version are:
 - New extension: `curl` to access the *multiprotocol file transfer library*
 - Better support for macOS
 - `describe` has been enhanced for some type of objects
-- REPL has now tab completiongg
+- REPL has now tab completion
 - Bash and zsh completions for `stklos` and `stklos-compile` commands
 - Better `SLIB` support
 - Use PCRE2 library instead of legacy PCRE
@@ -51,7 +51,7 @@ The main changes in this version are:
   - SRFI-215: Central Log Exchange
   - SRFI 217: Integer Sets
   - SRFI 222: Compound objects
-  - SRFI 224: Integer Mappings - Scheme Requests for Implementation
+  - SRFI 224: Integer Mappings
   - SRFI-227: Optional Arguments
   - SRFI 228: Composing Comparators
   - SRFI-229: Tagged Procedures
