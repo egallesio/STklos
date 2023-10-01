@@ -675,7 +675,7 @@ doc>
 
 #|
 <doc EXT-SYNTAX  define-method
- obeject-eq* (define-method gf args body)
+ * (define-method gf args body)
  *
  * The primitive |define-method| creates a generic method that will be added to a
  * generic function |gf|, having arguments |args| and body |body|.
@@ -719,14 +719,17 @@ doc>
  * The classes matched in the example are |<string>| and |<number>|, but any
  * class can be used. All Scheme types are built-in classes in STklos:
  *
+ * ```
  * <boolean>  <null>
  * <char>     <object>
  * <class>    <pair>
  * <complex>  <procedure>
  * <eof>      <rational>
  * <integer>  <real>
+ * <fixnum>   <bignum>
  * <list>     <symbol>
  * <vector>  ...
+ * ```
  *
  * User-defined classes can also be used (and this is the main original use case
  * for generic functions). A very simple example follows.

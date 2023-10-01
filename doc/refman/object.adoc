@@ -442,7 +442,7 @@ element is the most specific class.  For instance,
 ```
 
 
-==== Generic function
+==== Generic functions
 ===== Generic functions and methods
 ((("generic function")))
 ((("method")))
