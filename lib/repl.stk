@@ -81,7 +81,7 @@
  *               #:prompt (bold bg-red white)))
  * @end lisp
  *
- * NOTE: A good place to change your theme is the `.stklosrc` file.
+ * NOTE: A good place to change your theme is the `stklosrc` file.
 doc>
 |#
 (define *repl-themes* `(
@@ -251,7 +251,7 @@ doc>
  *
  * NOTE: This parameter can be set to `#f` with the |--no-startup-message| option of
  * the {{stklos}} command. Otherwise, a good place to set this parameter is in the
- * `.stklosrc` file.
+ * `stklosrc` file.
 doc>
 |#
 (define repl-show-startup-message

@@ -4,7 +4,7 @@
 ###    Creation date: 28-Dec-1999 21:19 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.70])   # Set also VERSION_STATUS to stable when changing version
+AC_INIT([stklos],[2.00])   # Set also VERSION_STATUS to stable when changing version
 VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
@@ -162,9 +162,10 @@ if test "$DATADIR" == ""  ; then
 fi
 
 ### Initialize the extra conf file in src
-PREFIX=$prefix
-SCMDIR=$datadir
-EXECDIR=$libdir
+PREFIX=${prefix}
+SCMDIR=${datadir}
+EXECDIR=${libdir}
+INCLUDEDIR=${includedir}
 
 
 ### Determine the kind of the machine which is running this script
@@ -396,7 +397,7 @@ then
      (cd pcre2; ./configure --prefix=$prefix --disable-shared --disable-cpp) || \
            { echo "Cannot configure PCRE2"; exit; }
      PCRE2=pcre2
-     PCRE2INC="-I../pcre2"
+     PCRE2INC="-I../pcre2/src"
      PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
      COMP_LIBS="libpcre2 $COMP_LIBS"
 else
@@ -657,6 +658,7 @@ AC_SUBST(GMPINC)
 AC_SUBST(PREFIX)
 AC_SUBST(SCMDIR)
 AC_SUBST(EXECDIR)
+AC_SUBST(INCLUDEDIR)
 AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)

@@ -196,6 +196,7 @@ HAVE_CANVAS = @HAVE_CANVAS@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_GNOME = @HAVE_GNOME@
 HAVE_GTK = @HAVE_GTK@
+INCLUDEDIR = @INCLUDEDIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -493,11 +494,11 @@ uninstall-am:
 
 
 install-sources:
-	mkdir -p  $(DESTDIR)/$(schemedir)
-	cp $(SRC) $(DESTDIR)/$(schemedir)
+	mkdir -p  $(DESTDIR)$(schemedir)
+	cp $(SRC) $(DESTDIR)$(schemedir)
 
 uninstall-hook:
-	(cd $(DESTDIR)/$(schemedir) && rm -f $(SRC))
+	(cd $(DESTDIR)$(schemedir) && rm -f $(SRC))
 
 doc:
 

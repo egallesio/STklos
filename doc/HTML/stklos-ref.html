@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="Erick Gallesio">
-<title>STklos Reference Manual : (version 1.70)</title>
+<title>STklos Reference Manual : (version 2.00)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -728,7 +728,7 @@ pre.rouge {
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>STklos Reference Manual : (version 1.70)</h1>
+<h1>STklos Reference Manual : (version 2.00)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
 <span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
@@ -896,7 +896,7 @@ pre.rouge {
 <div class="sectionbody">
 <div class="paragraph">
 <p>This document provides a complete list of procedures and special forms
-implemented in version <strong>1.70</strong> of <strong><em>STklos</em></strong>. Originally, the
+implemented in version <strong>2.00</strong> of <strong><em>STklos</em></strong>. Originally, the
 language implemented by <strong><em>STklos</em></strong> was (nearly) compliant with the
 language described in the Revised<sup>5</sup> Report on the Algorithmic
 Language Scheme (aka R<sup>5</sup>RS) <a href="#R5RS">[R5RS]</a>. The fist public release of
@@ -4881,6 +4881,8 @@ they return the additive or multiplicative inverse of their argument.</p>
 <span class="p">(</span><span class="nb">/</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)</span>               <span class="nv">=&gt;</span>  <span class="mi">3</span><span class="nv">/20</span>
 <span class="p">(</span><span class="nb">/</span> <span class="mi">3</span><span class="p">)</span>                   <span class="nv">=&gt;</span>  <span class="mi">1</span><span class="nv">/3</span>
 <span class="p">(</span><span class="nb">/</span> <span class="mf">0.0</span><span class="p">)</span>                 <span class="nv">=&gt;</span> <span class="m">+inf.0</span>
+<span class="p">(</span><span class="nb">/</span> <span class="mf">-0.0</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="m">-inf.0</span>
+<span class="p">(</span><span class="nb">-</span> <span class="mf">0.0</span><span class="p">)</span>                 <span class="nv">=&gt;</span> <span class="mf">-0.0</span>
 <span class="p">(</span><span class="nb">/</span> <span class="mi">0</span><span class="p">)</span>                   <span class="nv">=&gt;</span> <span class="nv">error</span> <span class="p">(</span><span class="nf">division</span> <span class="nv">by</span> <span class="mi">0</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -13658,8 +13660,8 @@ is equivalent to pass it the integer <code>0</code>. If the operation succeeds,
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">chmod</span> <span class="s">"~/.stklos/stklosrc"</span> <span class="ss">'read</span> <span class="ss">'execute</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">chmod</span> <span class="s">"~/.stklos/stklosrc"</span> <span class="mo">#o644</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">chmod</span> <span class="s">"~/.config/stklos/stklosrc"</span> <span class="ss">'read</span> <span class="ss">'execute</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">chmod</span> <span class="s">"~/.config/stklos/stklosrc"</span> <span class="mo">#o644</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -14536,7 +14538,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-1</span><span class="o">.</span><span class="mf">70.1495</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mi">00</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -24495,7 +24497,7 @@ property list are:</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-A good place to change your theme is the <code>.stklosrc</code> file.
+A good place to change your theme is the <code>stklosrc</code> file.
 </td>
 </tr>
 </table>
@@ -24528,7 +24530,7 @@ is set to <code>#t</code>.</p>
 <td class="content">
 This parameter can be set to <code>#f</code> with the <code>--no-startup-message</code> option of
 the <strong><em>STklos</em></strong> command. Otherwise, a good place to set this parameter is in the
-<code>.stklosrc</code> file.
+<code>stklosrc</code> file.
 </td>
 </tr>
 </table>
@@ -24556,7 +24558,8 @@ the value 0 for an unlimited backtrace.</p>
 <p><strong>STKLOS-CONFDIR</strong>: This variable can be used to
 designate the directory used by <strong><em>STklos</em></strong> to store its configuration or
 packages files. If not set, the default <strong><em>STklos</em></strong> configuration directory
-is by default <code>~/.stklos</code>.</p>
+is by default <code>${XDG_CONFIG_HOME}/stklos</code> (or <code>~/.config/stklos</code> if the
+shell variable <code>XDG_CONFIG_HOME</code> is unset).</p>
 </li>
 </ul>
 </div>
@@ -25132,7 +25135,8 @@ which is called.</p>
 <p><strong><em>SLIB</em></strong> needs to create a catalog of the file that must be loaded to
 implement a given feature. This catalog is stored in a file named
 <code>slibcat</code> This file is, by default located in the
-<code>~/.stklos/slib</code> directory.  It is possible to change this
+<code>slib</code> directory into the <strong><em>STklos</em></strong> configuration directory
+(generally <code>~/.config/stklos</code>).  It is possible to change this
 directory with the <code>STKLOS_IMPLEMENTATION_PATH</code> shell variable.</p>
 </div>
 <div class="paragraph">
@@ -31442,7 +31446,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-02 21:31:34 +0200
+Last updated 2023-09-12 16:56:23 +0200
 </div>
 </div>
 </body>

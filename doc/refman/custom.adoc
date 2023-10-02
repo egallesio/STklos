@@ -49,4 +49,5 @@ The following variables can be used to customize {{stklos}}:
 - (((STKLOS_CONFDIR)))**STKLOS-CONFDIR**: This variable can be used to
   designate the directory used by {{stklos}} to store its configuration or
   packages files. If not set, the default {{stklos}} configuration directory
-  is by default `~/.stklos`.
+  is by default `${XDG_CONFIG_HOME}/stklos` (or `~/.config/stklos` if the
+  shell variable `XDG_CONFIG_HOME` is unset).

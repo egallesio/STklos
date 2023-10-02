@@ -38,10 +38,10 @@ then
         git_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
         git_commit="$(git rev-parse --short HEAD 2>/dev/null || true)"
         git_modified="$(git diff-index --name-only HEAD 2>/dev/null |  xargs -n 1 printf ' \\"%s\\"')"
-        git_patch="$(git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/')"
+        git_patch="$(git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/') || true"
 
         tmp1="#:branch \\\"$git_branch\\\" #:commit \\\"$git_commit\\\""
-        tmp2="#:tag \\\"$git_tag\\\" #:modified ($git_modified) #:patch $git_patch"
+        tmp2="#:tag \\\"$git_tag\\\" #:modified ($git_modified) #:patch \\\"$git_patch\\\""
         summary="#define GIT_SUMMARY \"($tmp1 $tmp2)\""
     fi
 fi

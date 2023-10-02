@@ -86,9 +86,6 @@ extern "C"
 #endif
 
 
-#define MAX_TOKEN_SIZE          1024            /* max size of a token */
-
-
 #define CPP_CONCAT(x, y)        x##y
 
 
@@ -1483,6 +1480,8 @@ extern STk_instr STk_boot_code[];
 /* Misc */
 #if defined(__GNUC__) || defined(__clang__)
 #  define _UNUSED(x) __attribute__((__unused__)) x
+#else
+#  define _UNUSED(x) x
 #endif
 
 #ifdef __cplusplus
