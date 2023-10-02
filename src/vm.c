@@ -937,15 +937,15 @@ static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
   int16_t tailp;
-  volatile int offset,
-               have_global_lock = 0;     /* if true, we're patching the code */
-  int nargs=0;
+  volatile STk_instr offset;         /* Anything returned by fetch_next() should be STk_instr */
+  volatile have_global_lock = 0;     /* if true, we're patching the code */
+  STk_instr nargs=0;
 
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
 #else
-   int16_t byteop;
+   STk_instr byteop;
 #endif
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
@@ -953,7 +953,7 @@ static void run_vm(vm_thread_t *vm)
   static STk_instr *code_base = NULL;
 #endif
 #if defined(STAT_VM)
-  static int16_t previous_op = NOP;
+  static STk_instr previous_op = NOP;
 #endif
 
 #if defined(USE_COMPUTED_GOTO)
@@ -1010,7 +1010,7 @@ CASE(CONSTANT_PUSH) { push(fetch_const());           NEXT; }
 CASE(PUSH_GLOBAL_REF)
 CASE(GLOBAL_REF) {
   SCM ref = NULL;
-  int16_t orig_opcode;
+  STk_instr orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1078,7 +1078,7 @@ CASE(UGLOBAL_REF_PUSH) { /* Never produced by compiler */
 CASE(PUSH_GREF_INVOKE)
 CASE(GREF_INVOKE) {
   SCM ref = NULL;
-  int16_t orig_opcode;
+  STk_instr orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1121,7 +1121,7 @@ CASE(UGREF_INVOKE) { /* Never produced by compiler */
 CASE(PUSH_GREF_TAIL_INV)
 CASE(GREF_TAIL_INVOKE) {
   SCM ref = NULL;
-  int16_t orig_opcode;
+  STk_instr orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1170,7 +1170,8 @@ CASE(LOCAL_REF3) { vm->val = FRAME_LOCAL(vm->env, 3);        NEXT1;}
 CASE(LOCAL_REF4) { vm->val = FRAME_LOCAL(vm->env, 4);        NEXT1;}
 CASE(LOCAL_REF)  { vm->val = FRAME_LOCAL(vm->env, fetch_next()); NEXT1;}
 CASE(DEEP_LOCAL_REF) {
-  int level, info = fetch_next();
+  int level;
+  STk_instr info = fetch_next();
   SCM e = vm->env;
 
   /* STklos organizes local environments as this: each level has a
@@ -1207,7 +1208,8 @@ CASE(DEEP_LOC_REF_FAR) {
 
 
 CASE(DEEP_LOC_REF_PUSH) {
-  int level, info = fetch_next();
+  int level;
+  STk_instr info = fetch_next();
   SCM e = vm->env;
 
   /* Go down in the dynamic environment */
@@ -1267,7 +1269,8 @@ CASE(LOCAL_SET)  { FRAME_LOCAL(vm->env,fetch_next()) = vm->val; NEXT0;}
 
 
 CASE(DEEP_LOCAL_SET) {
-  int level, info = fetch_next();
+  int level;
+  STk_instr info = fetch_next();
   SCM e = vm->env;
 
   /* Go down in the dynamic environment */
