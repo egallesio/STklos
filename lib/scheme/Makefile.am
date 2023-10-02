@@ -78,6 +78,7 @@ LARGE_STK  = charset.stk    \
              list-queue.stk \
              hash-table.stk \
              lseq.stk       \
+             rlist.stk      \
              comparator.stk \
              generator.stk  \
              ideque.stk     \
@@ -85,8 +86,8 @@ LARGE_STK  = charset.stk    \
              division.stk   \
              bitwise.stk
 
-
-LARGE_OBJS = charset.ostk    \
+LARGE_OBJS = list.ostk       \
+             charset.ostk    \
              stream.ostk     \
              box.ostk        \
              set.ostk        \
@@ -100,9 +101,9 @@ LARGE_OBJS = charset.ostk    \
              division.ostk   \
              bitwise.ostk
 
-LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c
-LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk
-LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO)
+LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c     rlist.c
+LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk   rlist.stk
+LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO) rlist.$(SO)
 
 
 #----------------------------------------------------------------------
@@ -178,6 +179,9 @@ sort-incl.c: sort.stk
 
 vector.$(SO): vector-incl.c
 vector-incl.c: vector.stk
+
+rlist.$(SO): rlist-incl.c
+rlist-incl.c: rlist.ostk
 
 hash-table.ostk: comparator.ostk
 ideque.ostk: generator.ostk list.$(SO)
