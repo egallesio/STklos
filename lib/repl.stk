@@ -123,6 +123,29 @@ doc>
     (set! *repl-commands* (cons (list names doc func)
                                 *repl-commands*))))
 
+(define (display-repl-command-help)
+  (let* ((lines (map (lambda (x)
+                       (let ((out (open-output-string)))
+                         (for-each (lambda (c) (fprintf out ",~a " c))
+                                   (car x))
+                         (cons (get-output-string out) (cadr x))))
+                     *repl-commands*))
+         (max-len (apply max (map string-length (map car lines)))))
+
+    ;; Print all the lines aligned on max-len characters
+    (display (do-color (get-repl-color :help)  "Available Commands:\n"))
+
+    (for-each (lambda (x)
+                (print "- "
+                       (car x)
+                       (make-string (- max-len (string-length (car x)))
+                                    #\space)
+                       " "
+                       (cdr x)))
+              (reverse lines))) ;; to keep the declaation order
+
+  (display (do-color 'normal)))
+
 (define (do-repl-command l)
   (define (search-repl-command name)
     (let Loop ((lst *repl-commands*))
@@ -169,27 +192,13 @@ doc>
 ;; ==== help
 (repl-add-command
    '(help ? h)
-   "This help"
+   "This help if no parameter, or help on its argument"
    (lambda ()
-     (let* ((lines (map (lambda (x)
-                          (let ((out (open-output-string)))
-                            (for-each (lambda (c) (fprintf out ",~a " c))
-                                      (car x))
-                            (cons (get-output-string out) (cadr x))))
-                        *repl-commands*))
-            (max-len (apply max (map string-length (map car lines)))))
+     (let ((arg (read-line)))
+       (if (equal? arg "")
+           (display-repl-command-help)
+           (help (read-from-string arg))))))
 
-       (display (do-color (get-repl-color :help)  "Available Commands:\n"))
-       ;; Print all the lines aligned on max-len characters
-       (for-each (lambda (x)
-                   (print "- "
-                          (car x)
-                          (make-string (- max-len (string-length (car x)))
-                                       #\space)
-                          " "
-                          (cdr x)))
-                 (reverse lines)))
-     (display (do-color 'normal))))
 
 ;; ----------------------------------------------------------------------
 ;;      repl-handler ...
