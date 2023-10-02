@@ -33,7 +33,8 @@
   (import SCHEME)
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
-          repl-theme get-repl-color repl-show-startup-message)
+          repl-theme get-repl-color repl-show-startup-message
+          repl-add-command)
 
 ;;; In module REPL
 
@@ -111,33 +112,84 @@ doc>
 
 
 ;;; ======================================================================
+;;;
+;;; REPL commands
+;;;
+;;; ======================================================================
+(define *repl-commands* '())
+
+(define (repl-add-command names doc func)
+  (let ((names (if (symbol? names) (list names) names)))
+    (set! *repl-commands* (cons (list names doc func)
+                                *repl-commands*))))
 
 (define (do-repl-command l)
-  (define (trim-left str)
-    (regexp-replace "^[ \t]*" str ""))
+  (define (search-repl-command name)
+    (let Loop ((lst *repl-commands*))
+      (if (pair? lst)
+          ;; See if (car lst) is a known repl command
+          (let ((cmd (car lst)))
+            (if (memq name (car cmd))
+                ((caddr cmd))
+                (Loop (cdr lst))))
+          ;; List of possibilities exhausted
+          (format (current-error-port)
+                  "bad command name: '~s'.\nType ,help for some help\n"
+                  name))))
 
-  (case (car l)
-    ((help h ?)         (display
-                         (do-color (get-repl-color :help)
-                                   (format "Available Commands:
-- ,backtrace ,bt   Show the stack when last error occurred
-- ,cd              Change current directory
-- ,pwd             Print working directory
-- ,quit ,q         Exit STklos
-- ,shell ,!        Run a shell command
-- ,help ,? ,h      This help\n")
-                                   'normal)
-                         (current-error-port))
-                        (flush-output-port (current-error-port)))
-    ((quit q)           (exit 0))
-    ((backtrace bt)     (%display-backtrace repl-backtrace 6))
-    ((shell !)          (system (read-line)))
-    ((cd)               (chdir (trim-left (read-line))))
-    ((pwd)              (printf "~S\n" (getcwd)))
-    (else               (format (current-error-port)
-                                "bad command name: ~S. Type ,help for some help\n"
-                                (car l)))))
+  ;; Skip the leading spaces
+  (let Loop ()
+    (when (eq? (peek-char) #\space)
+      (read-char)
+      (Loop)))
 
+    ;; And try to find a REPL command
+  (search-repl-command (car l)))
+
+;; ==== backtrace
+(repl-add-command '(backtrace bt)
+                  "Show the stack when last error occurred"
+                  (lambda () (%display-backtrace repl-backtrace 6)))
+;; ==== cd
+(repl-add-command 'cd
+                  "Change current directory"
+                  (lambda () (chdir (read-line))))
+;; ==== pwd
+(repl-add-command 'pwd
+                  "Print working directory"
+                  (lambda () (printf "~s~%" (getcwd))))
+;; ==== quit
+(repl-add-command '(quit q)
+                  "Exit STklos"
+                  (lambda () (exit 0)))
+;; ==== shell
+(repl-add-command '(shell !)
+                  "Run a shell command"
+                  (lambda () (system (read-line))))
+;; ==== help
+(repl-add-command
+   '(help ? h)
+   "This help"
+   (lambda ()
+     (let* ((lines (map (lambda (x)
+                          (let ((out (open-output-string)))
+                            (for-each (lambda (c) (fprintf out ",~a " c))
+                                      (car x))
+                            (cons (get-output-string out) (cadr x))))
+                        *repl-commands*))
+            (max-len (apply max (map string-length (map car lines)))))
+
+       (display (do-color (get-repl-color :help)  "Available Commands:\n"))
+       ;; Print all the lines aligned on max-len characters
+       (for-each (lambda (x)
+                   (print "- "
+                          (car x)
+                          (make-string (- max-len (string-length (car x)))
+                                       #\space)
+                          " "
+                          (cdr x)))
+                 (reverse lines)))
+     (display (do-color 'normal))))
 
 ;; ----------------------------------------------------------------------
 ;;      repl-handler ...
