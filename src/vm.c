@@ -1247,6 +1247,13 @@ CASE(GLOBAL_SET) {
   /* patch the code for optimize next accesses */
   vm->pc[-1] = add_global(CDR(ref));
   vm->pc[-2] = UGLOBAL_SET;
+
+  if (CLOSUREP(vm->val) && CLOSURE_NAME(vm->val) == STk_false) {
+    /* We do something like (set! foo (lambda () ....)) and the lambda doesn't have a procedure
+     * name in it. Just force the name of the closure to "foo". */
+    CLOSURE_NAME(vm->val) = orig_operand;
+ }
+
   RELEASE_LOCK;
   NEXT0;
 }
