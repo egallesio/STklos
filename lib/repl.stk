@@ -210,11 +210,16 @@ doc>
 (repl-add-command '(require-feature r)
                   "Require a feature"
                   (lambda () (require-feature (read))))
+;; ==== open
+(repl-add-command '(open o)
+                  "Open file or URL"
+                  (lambda ()
+                    (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
+                      (system (string-append cmd " " (read-line) " 2>/dev/null")))))
 ;; == version
 (repl-add-command '(version v)
                   "Show version"
                   (lambda () (printf "~a ~a~%" (version) (%push-id))))
-
 ;; ==== help
 (repl-add-command
    '(help ? h)
