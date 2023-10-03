@@ -202,7 +202,14 @@ doc>
 (repl-add-command '(expand e)
                   "Pretty print the macro expansion of a form"
                   (lambda () (pretty-print (macro-expand (read)))))
-
+;; ==== import
+(repl-add-command '(import i)
+                  "Import a library"
+                  (lambda () (eval-from-string (format "(import ~a)" (read)))))
+;; == require-feature
+(repl-add-command '(require-feature r)
+                  "Require a feature"
+                  (lambda () (require-feature (read))))
 ;; == version
 (repl-add-command '(version v)
                   "Show version"
