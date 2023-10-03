@@ -189,6 +189,25 @@ doc>
 (repl-add-command '(shell !)
                   "Run a shell command"
                   (lambda () (system (read-line))))
+;; ==== time
+(repl-add-command '(time t)
+                  "Print the time used to run the next expression"
+                  (lambda () (printf "~w~%" (eval-from-string
+                                          (format "(time (eval '~a))" (read))))))
+;; ==== describe
+(repl-add-command '(describe d)
+                  "Describe an object"
+                  (lambda () (describe (eval (read)))))
+;; ==== expand
+(repl-add-command '(expand e)
+                  "Pretty print the macro expansion of a form"
+                  (lambda () (pretty-print (macro-expand (read)))))
+
+;; == version
+(repl-add-command '(version v)
+                  "Show version"
+                  (lambda () (printf "~a ~a~%" (version) (%push-id))))
+
 ;; ==== help
 (repl-add-command
    '(help ? h)
