@@ -208,6 +208,12 @@ doc>
 (repl-add-command 'pwd
                   "Print working directory"
                   (lambda () (printf "~s~%" (getcwd))))
+
+;; ==== ls
+(repl-add-command 'ls
+                  "List directory content"
+                  (lambda () (system (string-append "ls " (read-line)))))
+
 ;; ==== quit
 (repl-add-command '(quit q)
                   "Exit STklos"

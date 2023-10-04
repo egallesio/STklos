@@ -67,6 +67,7 @@ of available commands is given below.
 - **,backtrace** (or **,bt**): Show the stack when last error occurred
 - **,cd**: Change current directory
 - **,pwd**: Print working directory
+- **,ls**: List directory content
 - **,quit** (or **,q**): Exit STklos
 - **,shell** (or **,!**): Run a shell command
 - **,time** (or **,t** ): Print the time used to run the next expression
