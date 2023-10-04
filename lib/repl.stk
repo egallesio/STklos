@@ -118,6 +118,30 @@ doc>
 ;;; ======================================================================
 (define *repl-commands* '())
 
+#|
+<doc EXT repl-add-command
+ * (repl-add-command names doc func)
+ *
+ * Add a new command to the REPL. The names of the command are given in the
+ * first parameter as a list (or a symbol if there is only one name).
+ * The documentation of the command is given as a string as the second parameter.
+ * Finally, the function given as the third parameter is called when the new command
+ * is executed by the user. The code hereafter, permits to add a command to call an
+ * editor, with the commands |,editor| or |,ed| followed (eventually) by a file name.
+ *
+ * @lisp
+ * (repl-add-command '(editor ed)
+ *                  "Edit a file with $EDITOR (or emacs if unset)"
+ *                  (lambda ()
+ *                    (let ((cmd (or (getenv "EDITOR") "emacs")))
+ *                      (system (string-append cmd " " (read-line) " 2>/dev/null")))))
+ * @end lisp
+ * 
+ * NOTE: {{stklos}} has already a number of commands defined, but |repl-add-command| can be
+ * useful to define you own command. A good place to add such a definition is in the
+ * |stklosrc| file.
+doc>
+|#
 (define (repl-add-command names doc func)
   (let ((names (if (symbol? names) (list names) names)))
     (set! *repl-commands* (cons (list names doc func)
