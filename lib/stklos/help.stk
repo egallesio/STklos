@@ -27,6 +27,11 @@
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
 ;;;;
 
+
+(define-module (stklos help)
+  (import SCHEME)
+  (export help)
+
 ;; ----------------------------------------------------------------------
 ;; Database reading
 ;; ----------------------------------------------------------------------
@@ -215,4 +220,10 @@ doc>
         (Loop prompt))))
   (display "done.\n"))
 
-(provide "help")
+) ;; End of module (stklos library)
+
+(select-module STklos)
+(import (stklos help))
+
+
+(provide "stklos/help")
