@@ -958,7 +958,7 @@ See SRFI document for more information.
 {{insertdoc 'error-object-location}}
 {{insertdoc 'require-extension}}
 {{insertdoc 'require-feature}}
-{{insertdoc 'repl}}
+
 [#assume]
 {{insertdoc 'assume}}
 ((("SRFI-176")))
