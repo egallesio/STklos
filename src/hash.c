@@ -385,8 +385,6 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
     BOXED_INFO(z) &= (~CONS_CONST);
     *BOX_VALUES(CDR(z)) = value;
   } else {
-    SCM z;
-
     /* Create a new box for this value */
     z = STk_make_box(value);
 

@@ -143,9 +143,12 @@ doc>
 doc>
 |#
 (define (repl-add-command names doc func)
-  (let ((names (if (symbol? names) (list names) names)))
-    (set! *repl-commands* (cons (list names doc func)
-                                *repl-commands*))))
+  (let* ((names (if (symbol? names) (list names) names))
+         (old   (assoc names *repl-commands*)))
+    (if old
+       (set-cdr! old (list doc func))   ;; already present. Replace.
+       (set! *repl-commands* (cons (list names doc func)
+                                   *repl-commands*)))))
 
 (define (display-repl-command-help)
   (let* ((lines (map (lambda (x)
@@ -170,7 +173,7 @@ doc>
 
   (display (do-color 'normal)))
 
-(define (do-repl-command l)
+(define (do-repl-command name)
   (define (search-repl-command name)
     (let Loop ((lst *repl-commands*))
       (if (pair? lst)
@@ -181,7 +184,7 @@ doc>
                 (Loop (cdr lst))))
           ;; List of possibilities exhausted
           (format (current-error-port)
-                  "bad command name: '~s'.\nType ,help for some help\n"
+                  "bad command name: '~s'.\nType ',help' for some help.\n"
                   name))))
 
   ;; Skip the leading spaces
@@ -190,8 +193,8 @@ doc>
       (read-char)
       (Loop)))
 
-    ;; And try to find a REPL command
-  (search-repl-command (car l)))
+  ;; And try to find a REPL command
+  (search-repl-command name))
 
 ;; ==== backtrace
 (repl-add-command '(backtrace bt)
@@ -426,7 +429,7 @@ doc>
                 (flush-output-port out))
 
              ((and (pair? e) (eq? (car e) 'unquote))
-                (do-repl-command (cdr e)))
+                (do-repl-command (cadr e)))
 
              (else
                 (call-with-values
