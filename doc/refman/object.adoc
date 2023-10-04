@@ -575,7 +575,7 @@ not needed.
 ((("next-method")))
 When a generic function is called, the list of applicable
 methods is built.  As mentioned before, the most specific method
-of this list is applied (see <<_generic_function>>).
+of this list is applied (see <<_generic_functions>>).
 
 This method may call, if needed, the next method in the list of
 applicable methods.  This is done by using the special form
