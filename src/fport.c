@@ -807,7 +807,7 @@ DEFINE_PRIMITIVE("%port-idle", port_idle, subr12, (SCM port, SCM val))
     /* Set the idle list to the given value. No control on the content of
      * the procedure list (must be done in Scheme)
      */
-    if (STk_int_length(val) < 0) STk_error_bad_io_param("bad list ~S", val);
+    if (STk_int_length(val) < 0) STk_error_bad_io_param("bad list ~W", val);
     PORT_IDLE(PORT_STREAM(port)) = val;
   }
   return  PORT_IDLE(PORT_STREAM(port));

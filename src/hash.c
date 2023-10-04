@@ -96,7 +96,7 @@ static unsigned long hash_scheme_string(SCM str)
   unsigned long result = 0;
   int i, l;
 
-  if (!STRINGP(str)) STk_error("bad string key ~S", str);
+  if (!STRINGP(str)) STk_error("bad string key ~W", str);
 
   string = STRING_CHARS(str);
   for (i=0, l=STRING_SIZE(str); i < l ; i++) {
@@ -377,7 +377,7 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
     /* Variable already exists. Change its value*/
     if (BOXED_INFO(z) & CONS_CONST)
       if (!define) {
-        STk_error("cannot set or redefine the symbol ~S in ~S",
+        STk_error("cannot set or redefine the symbol ~W in ~S",
                   v, STk_current_module());
       }
     /* It's a redefinition, not a new binding, so we not only allow
@@ -457,7 +457,7 @@ SCM STk_hash_keys(struct hash_table_obj *h)
 \*===========================================================================*/
 static void error_bad_hash_table(SCM obj)
 {
-  STk_error("bad hash table ~S", obj);
+  STk_error("bad hash table ~W", obj);
 }
 
 static void error_hash_immutable(SCM obj)
@@ -467,12 +467,12 @@ static void error_hash_immutable(SCM obj)
 
 static void error_bad_procedure(SCM obj)
 {
-  STk_error("bad procedure ~S", obj);
+  STk_error("bad procedure ~W", obj);
 }
 
 static void error_not_present(SCM key, SCM ht)
 {
-  STk_error("entry not defined for key ~S in table ~S", key, ht);
+  STk_error("entry not defined for key ~W in table ~S", key, ht);
 }
 
 
@@ -482,9 +482,9 @@ DEFINE_PRIMITIVE("%make-hash-table", make_hash, subr2, (SCM compar, SCM hashfct)
   hash_type type = hash_general;
 
   if (STk_procedurep(compar) == STk_false)
-    STk_error("bad comparison function ~S", compar);
+    STk_error("bad comparison function ~W", compar);
   if (STk_procedurep(hashfct) == STk_false)
-    STk_error("bad hash function ~S", hashfct);
+    STk_error("bad hash function ~W", hashfct);
 
   if (BOXED_TYPE(compar) == tc_subr2) {
     /* See if comparison function is 'eq?' or 'string?'.
@@ -969,7 +969,7 @@ DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))
 {
   if(!HASHP(ht)) error_bad_hash_table(ht);
   if (!port) port = STk_current_output_port();
-  else if (!OPORTP(port)) STk_error("bad port ~S", port);
+  else if (!OPORTP(port)) STk_error("bad port ~W", port);
 
   hash_stats((struct hash_table_obj *) ht, port);
   return STk_void;

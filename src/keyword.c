@@ -34,17 +34,17 @@ static struct hash_table_obj keyword_table;     /* The keyword "obarray" */
 
 static void error_bad_keyword(SCM obj)
 {
-  STk_error("bad keyword ~S", obj);
+  STk_error("bad keyword ~W", obj);
 }
 
 static void error_bad_list(SCM obj)
 {
-  STk_error("bad list of keywords ~S", obj);
+  STk_error("bad list of keywords ~W", obj);
 }
 
 static void error_const_cell(SCM x)
 {
-  STk_error("changing the constant ~s is not allowed", x);
+  STk_error("changing the constant ~W is not allowed", x);
 }
 
 static SCM make_uninterned_keyword(const char *name)
@@ -99,7 +99,7 @@ DEFINE_PRIMITIVE("make-keyword", make_keyword, subr1, (SCM str))
     s = STRING_CHARS(str);
   else if (SYMBOLP(str))
     s = SYMBOL_PNAME(str);
-  else STk_error("~S is not a string or a symbol", str);
+  else STk_error("~W is not a string or a symbol", str);
 
   return STk_makekey(s);
 }
@@ -117,7 +117,7 @@ DEFINE_PRIMITIVE("make-keyword", make_keyword, subr1, (SCM str))
  * (keyword? '#:foo)   => #t  ; always
  * (keyword? :foo)     => #t  ; depends of keyword-colon-position
  * (keyword? foo:)     => #t  ; depends of keyword-colon-position
- * (keyword? #:foo)    => #t  ; always 
+ * (keyword? #:foo)    => #t  ; always
  * @end lisp
 doc>
  */
@@ -237,7 +237,7 @@ DEFINE_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
  * |List| must be a list of keywords and their respective values.
  * |key-delete| remove the |key| and its associated value of the keyword
  * list. The key can be absent of the list.
- * 
+ *
  * |key-delete!| does the same job as |key-delete| by physically
  * modifying its |list| argument.
  * @lisp
