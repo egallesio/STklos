@@ -104,8 +104,9 @@
           "left undocumented. Furthermore, they can be changed without notice.\n"
           "Please don't use them.\n"))
       (else
-         ;; no documentation
-         #f))))
+         ;; We have a symbol which is not in the database. Evaluate it
+       (with-handler (lambda (c) #f)  ;; handler when unbound
+                     (find-documentation (eval self)))))))
 
 
 (define-method find-documentation ((self <procedure>))
@@ -116,11 +117,13 @@
                (find-documentation (string->symbol name)))))))
 
 (define-method find-documentation ((self <generic>))
-  (or (generic-function-documentation self)
-      (find-documentation (generic-function-name self))))
+  (generic-function-documentation self))  
 
 (define-method find-documentation ((self <method>))
   (find-documentation (method-procedure self)))
+
+(define-method find-documentation ((self <syntax>))
+  (find-documentation (%syntax-expander self)))
 
 (define-method find-documentation (obj)
   #f)
@@ -156,35 +159,56 @@
 doc>
 |#
 
-;; Returns the name of the object, if it is a procedure, or
-;; default if it has no name or if it is not a procedure.
-;; If default is ommited, it is taken to be obj itself.
-(define (%get-object-name obj . default)
-  (let ((def (if (null? default)
-                 obj
-                 (car default))))
-    (if (procedure? obj)
-        (let* ((name (%procedure-name obj)))
-          (if (string? name)
-              (string->symbol name)
-              def))
-        def)))
+;; Returns the name of the object, if it is known or #f
+(define-generic object-name)
+
+(define-method object-name ((obj <procedure>))
+  (let ((name (%procedure-name obj)))
+    (and (string? name)
+         (string->symbol name))))
+
+(define-method object-name ((obj <syntax>))
+  ;; syntax has always a name
+  (string->symbol (%syntax-name obj)))
+
+(define-method object-name ((obj <generic>))
+  (generic-function-name obj))
+
+(define-method object-name ((obj <method>))
+  (object-name (method-generic-function obj)))
+
+(define-method object-name (obj)
+  obj)
+
+
 
 ;; Returns the signature of an object in a human-friendly form.
 ;; (f x y), or
 ;; (_ x y)  if it is unnamed.
-(define (%help-signature obj)
-  (if (closure? obj) ;; procedures don't have formals available for now
-      (let* ((sig (procedure-formals obj)))
-        (if sig
-            (cons (%get-object-name obj '_) sig)
-            #f))
-      #f))
+(define-generic object-signature)
+
+(define-method object-signature ((obj <procedure>))
+  (let ((sig (procedure-formals obj)))
+    (and sig (cons (object-name obj) sig))))
+
+(define-method object-signature ((obj <syntax>))
+  (let ((sig (procedure-formals (%syntax-expander obj))))
+    (and sig (cons (object-name obj) sig))))
+
+(define-method object-signature ((obj <method>))
+  (let ((sig (procedure-formals (method-procedure obj))))
+    (and sig (cons (object-name obj) sig))))
+
+(define-method object-signature (obj)
+  #f)
+
+;; ======================================================================
+;; Help with a parameter
 
 (define-method help (obj)
   (let ((doc  (find-documentation obj))
-        (sig  (%help-signature obj))
-        (name (%get-object-name obj))
+        (sig  (object-signature obj))
+        (name (object-name obj))
         (pr   (lambda (str)
                 (printf "  ~a\n" (regexp-replace-all "\n" str "\n  ")))))
     (if (or sig doc)
@@ -195,9 +219,19 @@ doc>
           (when doc
             (display (ansi-color 'bold "Documentation:" 'normal "\n"))
             (pr doc)))
-          (display (ansi-color 'bold 'yellow (format #f "No help for ~a" name) 'normal "\n")))))
+        (display (ansi-color 'bold 'yellow (format #f "No help for ~a" name) 'normal "\n")))))
 
 
+(define-method help ((obj <symbol>))
+  (with-handler
+   (lambda (x) (display (ansi-color 'bold 'yellow
+                               (format "No help for ~a" obj) 'normal "\n")))
+   (help (eval obj))))
+
+
+
+;; ======================================================================  
+;; Help without parameter
 (define-method help ()
   ;; Interactive help
   (display (do-color (get-repl-color :help)
