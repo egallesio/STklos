@@ -1,7 +1,7 @@
 /*
  * syntax.c   -- Syntax objects
  *
- * Copyright © 2019-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+ * Copyright © 2019-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,7 +72,9 @@ DEFINE_PRIMITIVE("%syntax?", syntaxp, subr1, (SCM x))
 DEFINE_PRIMITIVE("%syntax-name", syntax_name, subr1, (SCM x))
 {
   if (!SYNTAXP(x)) error_bad_syntax(x);
-  return SYNTAX_NAME(x);
+  return (SYMBOLP(SYNTAX_NAME(x)))? 
+    STk_Cstring2string(SYMBOL_PNAME(SYNTAX_NAME(x))):
+    x;
 }
 
 DEFINE_PRIMITIVE("%syntax-source", syntax_source, subr1, (SCM x))
