@@ -104,9 +104,7 @@
           "left undocumented. Furthermore, they can be changed without notice.\n"
           "Please don't use them.\n"))
       (else
-         ;; We have a symbol which is not in the database. Evaluate it
-       (with-handler (lambda (c) #f)  ;; handler when unbound
-                     (find-documentation (eval self)))))))
+       #f))))
 
 
 (define-method find-documentation ((self <procedure>))
@@ -117,13 +115,18 @@
                (find-documentation (string->symbol name)))))))
 
 (define-method find-documentation ((self <generic>))
-  (generic-function-documentation self))  
+  (generic-function-documentation self))
 
 (define-method find-documentation ((self <method>))
   (find-documentation (method-procedure self)))
 
 (define-method find-documentation ((self <syntax>))
   (find-documentation (%syntax-expander self)))
+
+(define-method find-documentation ((self <parameter>))
+  (let ((name (%parameter-name self)))
+    (and (string? name)
+         (find-documentation (string->symbol name)))))
 
 (define-method find-documentation (obj)
   #f)
@@ -164,8 +167,9 @@ doc>
 
 (define-method object-name ((obj <procedure>))
   (let ((name (%procedure-name obj)))
-    (and (string? name)
-         (string->symbol name))))
+    (if (string? name)
+        (string->symbol name)
+        obj)))
 
 (define-method object-name ((obj <syntax>))
   ;; syntax has always a name
@@ -176,6 +180,12 @@ doc>
 
 (define-method object-name ((obj <method>))
   (object-name (method-generic-function obj)))
+
+(define-method object-name ((obj <parameter>))
+  (let ((name (%parameter-name obj)))
+    (if (string? name)
+        (string->symbol name)
+        obj)))
 
 (define-method object-name (obj)
   obj)
@@ -188,7 +198,7 @@ doc>
 (define-generic object-signature)
 
 (define-method object-signature ((obj <procedure>))
-  (let ((sig (procedure-formals obj)))
+  (let ((sig (and (closure? obj) (procedure-formals obj))))
     (and sig (cons (object-name obj) sig))))
 
 (define-method object-signature ((obj <syntax>))
@@ -198,6 +208,9 @@ doc>
 (define-method object-signature ((obj <method>))
   (let ((sig (procedure-formals (method-procedure obj))))
     (and sig (cons (object-name obj) sig))))
+
+(define-method object-signature ((obj <parameter>))
+  #f)
 
 (define-method object-signature (obj)
   #f)
@@ -211,26 +224,31 @@ doc>
         (name (object-name obj))
         (pr   (lambda (str)
                 (printf "  ~a\n" (regexp-replace-all "\n" str "\n  ")))))
-    (if (or sig doc)
-        (begin
-          (display (ansi-color 'bold 'yellow (format #f "Help for ~a:" name) 'normal "\n"))
-          (when sig
-            (display (ansi-color 'bold "Signature:" 'normal (format #f "\n  ~S\n" sig))))
-          (when doc
-            (display (ansi-color 'bold "Documentation:" 'normal "\n"))
-            (pr doc)))
-        (display (ansi-color 'bold 'yellow (format #f "No help for ~a" name) 'normal "\n")))))
+    (cond
+       ((or sig doc)
+         ;; Documentation or signature found
+         (display (ansi-color 'bold 'yellow (format #f "Help for ~a:" name) 'normal "\n"))
+         (when sig
+           (display (ansi-color 'bold "Signature:" 'normal (format #f "\n  ~S\n" sig))))
+         (when doc
+           (display (ansi-color 'bold "Documentation:" 'normal "\n"))
+           (pr doc)))
 
+      ((symbol? obj)
+         ;; We have a symbol and no documentation in the database. Perhaps, it's a closure
+         ;; with embedded documentation sting. Look at symbol value.
+       (let ((val (symbol-value* obj (current-module) #f)))
+         (if val
+             (help val)
+             (display (ansi-color 'bold 'yellow
+                                  (format "No help for ~a" obj) 'normal "\n")))))
 
-(define-method help ((obj <symbol>))
-  (with-handler
-   (lambda (x) (display (ansi-color 'bold 'yellow
-                               (format "No help for ~a" obj) 'normal "\n")))
-   (help (eval obj))))
+      (else
+         ;; We have lost
+         (display (ansi-color 'bold 'yellow (format #f "No help for ~a" name)
+                              'normal "\n"))))))
 
-
-
-;; ======================================================================  
+;; ======================================================================
 ;; Help without parameter
 (define-method help ()
   ;; Interactive help
@@ -244,12 +262,7 @@ doc>
           (color (get-repl-color :error)))
       (unless (eof-object? name)
         (if (symbol? name)
-            (let ((val (symbol-value* name (current-module) #f)))
-              (if val
-                  (let ((sig (%help-signature val)))
-                    (when sig (printf "Signature: ~a\n" sig))
-                    (display (find-documentation val)))
-                  (display (do-color color (format "Symbol ~S is unbound\n" name)))))
+            (help name)
             (display (do-color color "help only accepts symbols.\n")))
         (Loop prompt))))
   (display "done.\n"))
