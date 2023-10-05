@@ -864,9 +864,9 @@ int STk_init_parameter(void);
 
 SCM STk_get_parameter(SCM param);
 SCM STk_set_parameter(SCM param, SCM value);
-SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
+SCM STk_make_C_parameter(char *name, SCM value, SCM (*proc)(SCM new_value),
                          SCM module);
-SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_value),
+SCM STk_make_C_parameter2(char *name,SCM (*value)(void),SCM (*proc)(SCM new_value),
                           SCM module);
 
 

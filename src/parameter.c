@@ -1,7 +1,7 @@
 /*
  * parameter.c  -- Parameter Objects (SRFI-39)
  *
- * Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ struct parameter_obj {
   int C_type;           /* 0: parameter is expressed in Scheme                    */
                         /* 1: Converter is expressed in C rather than in Scheme   */
                         /* 2: idem and getter is a procedure to call to get value */
+  SCM name;
   SCM value;
   SCM converter;
   SCM (*getter)(void);  /* Used only for type 2 parameter objects */
@@ -41,6 +42,7 @@ struct parameter_obj {
 
 #define PARAMETERP(o)       (BOXED_TYPE_EQ((o), tc_parameter))
 #define PARAMETER_C_TYPE(p) (((struct parameter_obj *) (p))->C_type)
+#define PARAMETER_NAME(p)   (((struct parameter_obj *) (p))->name)
 #define PARAMETER_VALUE(p)  (((struct parameter_obj *) (p))->value)
 #define PARAMETER_CONV(p)   (((struct parameter_obj *) (p))->converter)
 #define PARAMETER_GETTER(p) (((struct parameter_obj *) (p))->getter)
@@ -94,49 +96,69 @@ SCM STk_set_parameter(SCM param, SCM value)
   return STk_void;
 }
 
-SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*conv)(SCM new_value),
-             SCM module)
+SCM STk_make_C_parameter(char *name, SCM value, SCM (*conv)(SCM new_value),
+                         SCM module)
 {
   SCM z;
 
   NEWCELL(z, parameter);
   PARAMETER_C_TYPE(z) = 1;
+  PARAMETER_NAME(z)   = STk_Cstring2string(name);
   PARAMETER_VALUE(z)  = conv(value);
   PARAMETER_CONV(z)   = (SCM) conv;
   PARAMETER_GETTER(z) = STk_void;
   MUT_INIT(PARAMETER_MUTEX(z));
 
   /* Bind it to the given symbol */
-  STk_define_variable(STk_intern(symbol), z, module);
+  STk_define_variable(STk_intern((char *)name), z, module);
 
   return z;
 }
 
-SCM STk_make_C_parameter2(SCM symbol, SCM (*getter)(void), SCM (*conv)(SCM new_value),
-              SCM module)
+SCM STk_make_C_parameter2(char *name, SCM (*getter)(void),
+                          SCM (*conv)(SCM new_value), SCM module)
 {
   SCM z;
 
   NEWCELL(z, parameter);
   PARAMETER_C_TYPE(z) = 2;
+  PARAMETER_NAME(z)   = STk_Cstring2string(name);
   PARAMETER_VALUE(z)  = getter();
   PARAMETER_CONV(z)   = (SCM) conv;
   PARAMETER_GETTER(z) = getter;
   MUT_INIT(PARAMETER_MUTEX(z));
 
   /* Bind it to the given symbol */
-  STk_define_variable(STk_intern(symbol), z, module);
+  STk_define_variable(STk_intern(name), z, module);
 
   return z;
 }
 
+static void print_parameter(SCM param, SCM port, int _UNUSED(mode))
+{
+  SCM name = PARAMETER_NAME(param);
 
+  STk_fprintf(port, "#[parameter ");
+  if (name != STk_false)
+    STk_fprintf(port, "%s]", STRING_CHARS(name));
+  else
+    STk_fprintf(port, "%lx]", param);
+}
 
 /*===========================================================================*\
  *
  *  Primitives
  *
 \*===========================================================================*/
+
+DEFINE_PRIMITIVE("%parameter-name", parameter_name, subr1, (SCM obj))
+{
+  if (!PARAMETERP(obj)) error_bad_parameter(obj);
+  {
+    SCM name = PARAMETER_NAME(obj);
+    return SYMBOLP(name) ? STk_Cstring2string(SYMBOL_PNAME(name)) : name;
+  }
+}
 
 /*
 <doc EXT make-parameter
@@ -200,6 +222,7 @@ DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv)
 
   NEWCELL(z, parameter);
   PARAMETER_C_TYPE(z) = 0;
+  PARAMETER_NAME(z)   = STk_false;
   PARAMETER_VALUE(z)  = v;
   PARAMETER_CONV(z)   = (conv) ? conv : STk_false;
   PARAMETER_GETTER(z) = STk_void;
@@ -228,7 +251,10 @@ DEFINE_PRIMITIVE("parameter?", parameterp, subr1, (SCM obj))
  *
 \*===========================================================================*/
 
-static struct extended_type_descr xtype_parameter = { .name = "parameter" };
+static struct extended_type_descr xtype_parameter = {
+  .name = "parameter",
+  .print = print_parameter
+};
 
 int STk_init_parameter(void)
 {
@@ -238,6 +264,7 @@ int STk_init_parameter(void)
   /* Define primitives */
   ADD_PRIMITIVE(make_parameter);
   ADD_PRIMITIVE(parameterp);
+  ADD_PRIMITIVE(parameter_name);
 
   return TRUE;
 }
