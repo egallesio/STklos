@@ -114,8 +114,8 @@ Boolean flags must begin by a '+' or a '-' character to indicate if the flag is 
 or unset. Valued flags, must be followed by a '=' and the value given to the flag.
 Flags are separated by the ',' character. For instance, the following
 list \fI-F=+line-info,-time-display,unroll-iterations=5\fR sets the
-\fIline-info\fR option, unsets the \fItime-display\fR option and initialzes the
-\fIunroll-iteration\R to 5. The following flags can be used with
+\fIline-info\fR option, unsets the \fItime-display\fR option and initializes the
+\fIunroll-iteration\fR to 5. The following flags can be used with
 this option:
 .IP "" 10
 - \fIline-info\fR insert line numbers in the generated file. Setting this flag
