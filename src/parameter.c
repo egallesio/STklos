@@ -33,7 +33,7 @@ struct parameter_obj {
   int C_type;           /* 0: parameter is expressed in Scheme                    */
                         /* 1: Converter is expressed in C rather than in Scheme   */
                         /* 2: idem and getter is a procedure to call to get value */
-  SCM name;
+  SCM name;             /* #f, a string or a symbol */
   SCM value;
   SCM converter;
   SCM (*getter)(void);  /* Used only for type 2 parameter objects */
@@ -58,16 +58,16 @@ struct parameter_obj {
  *
 \*===========================================================================*/
 
-static void error_bad_parameter(SCM obj)
+
+static inline void verify_parameter(SCM obj)
 {
-  STk_error("bad parameter ~S", obj);
+  if (!PARAMETERP(obj)) STk_error("bad parameter ~S", obj);
 }
 
 
 SCM STk_get_parameter(SCM param)
 {
-  if (!PARAMETERP(param)) error_bad_parameter(param);
-
+  verify_parameter(param);
   return (PARAMETER_C_TYPE(param) == 2) ?
     PARAMETER_GETTER(param)():
     PARAMETER_VALUE(param);
@@ -77,7 +77,7 @@ SCM STk_set_parameter(SCM param, SCM value)
 {
   SCM conv, new;
 
-  if (!PARAMETERP(param)) error_bad_parameter(param);
+  verify_parameter(param);
 
   conv = PARAMETER_CONV(param);
 
@@ -140,7 +140,7 @@ static void print_parameter(SCM param, SCM port, int _UNUSED(mode))
 
   STk_fprintf(port, "#[parameter ");
   if (name != STk_false)
-    STk_fprintf(port, "%s]", STRING_CHARS(name));
+    STk_fprintf(port, "%s]", STRINGP(name)? STRING_CHARS(name): SYMBOL_PNAME(name));
   else
     STk_fprintf(port, "%lx]", param);
 }
@@ -153,12 +153,22 @@ static void print_parameter(SCM param, SCM port, int _UNUSED(mode))
 
 DEFINE_PRIMITIVE("%parameter-name", parameter_name, subr1, (SCM obj))
 {
-  if (!PARAMETERP(obj)) error_bad_parameter(obj);
+  verify_parameter(obj);
   {
     SCM name = PARAMETER_NAME(obj);
     return SYMBOLP(name) ? STk_Cstring2string(SYMBOL_PNAME(name)) : name;
   }
 }
+
+DEFINE_PRIMITIVE("%set-parameter-name!", set_parameter_name, subr2, (SCM obj, SCM n))
+{
+  verify_parameter(obj);
+  if (!SYMBOLP(n) && !STRINGP(n)) STk_error("bad parameter name ~S", n);
+  PARAMETER_NAME(obj) = n;
+  return STk_void;
+}
+
+
 
 /*
 <doc EXT make-parameter
@@ -265,6 +275,7 @@ int STk_init_parameter(void)
   ADD_PRIMITIVE(make_parameter);
   ADD_PRIMITIVE(parameterp);
   ADD_PRIMITIVE(parameter_name);
+  ADD_PRIMITIVE(set_parameter_name);
 
   return TRUE;
 }

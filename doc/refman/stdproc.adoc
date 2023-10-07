@@ -938,6 +938,7 @@ you plan to port your program on another system.
 See SRFI document for more information.
 
 {{insertdoc 'make-parameter}}
+{{insertdoc 'define-parameter}}
 {{insertdoc 'parameterize}}
 {{insertdoc 'parameter?}}
 
