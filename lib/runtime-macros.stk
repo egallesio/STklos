@@ -106,24 +106,3 @@
                                  ',keywords
                                  ',clauses
                                  ',ellipsis))))))
-
-;; ----------------------------------------------------------------------
-;; define-parameter
-;; ----------------------------------------------------------------------
-#|
-<doc EXT-SYNTAX define-parameter
- * (define-parameter var val)
- * (define-parameter var val thunk)
- *
- * This form is a shortcut to define a new parameter named |var|. It also adds
- * a name to the created parameter object, which can be useful for debugging.
-doc>
-|#
-(define-macro (define-parameter name . args)
-  (if (<= 1 (length args) 2)
-      (let ((tmp (gensym 'param)))
-        `(define ,name (let ((,tmp (make-parameter ,@args)))
-                         (%set-parameter-name! ,tmp ',name)
-                         ,tmp)))
-      (syntax-error 'define-parameter
-               "bad number of arguments (must be 2 or 3)")))

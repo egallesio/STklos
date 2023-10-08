@@ -430,20 +430,18 @@ doc>
 doc>
 |#
 
-(define command-line
-  (let* ((script-file (key-get *%system-state-plist* :script-file ""))
-         (cmd-line    (cons (if (equal? script-file "")
-                                ""
-                                (key-get *%system-state-plist* :program-name ""))
-                            (key-get *%system-state-plist* :argv '()))))
-    (define (verify-setter val)
-      (if (and (list? val)
-               (not (null? val))
-               (every string? val))
-          val
-          (error "bad command line ~S" val)))
-
-    (make-parameter cmd-line verify-setter)))
+(define-parameter command-line
+  (let ((script-file (key-get *%system-state-plist* :script-file "")))
+    (cons (if (equal? script-file "")
+              ""
+              (key-get *%system-state-plist* :program-name ""))
+          (key-get *%system-state-plist* :argv '())))
+  (lambda (val)
+    (if (and (list? val)
+             (not (null? val))
+             (every string? val))
+        val
+        (error 'command-line "bad command line ~S" val))))
 
 
 #|

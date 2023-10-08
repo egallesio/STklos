@@ -230,19 +230,20 @@
 ;; ======================================================================
 
 (define compiler:inline-common-functions
-  (let ((inlined *inline-symbols*))
-    (make-parameter #t
-                    (lambda (v)
-                      (set! *inline-symbols* (if v inlined '()))
-                      (not (null? *inline-symbols*))))))
+  (let* ((inlined *inline-symbols*)
+         (res     (make-parameter #t
+                                  (lambda (v)
+                                    (set! *inline-symbols* (if v inlined '()))
+                                    (not (null? *inline-symbols*))))))
+    (%set-parameter-name! res 'compiler:inline-common-functions)
+    res))
 
-(define compiler-current-module
-  (make-parameter (current-module)
-                  (lambda (new)
-                    (unless (module? new)
-                      (error 'compiler-current-module "bad module parameter ~s" new))
-                    (add-file-module-list! new)
-                    new)))
+(define-parameter compiler-current-module (current-module)
+  (lambda (new)
+    (unless (module? new)
+      (error 'compiler-current-module "bad module parameter ~s" new))
+    (add-file-module-list! new)
+    new))
 
 
 ;; ----------------------------------------------------------------------
