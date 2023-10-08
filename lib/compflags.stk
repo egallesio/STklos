@@ -30,7 +30,8 @@
 ;;      Compiler parameters ...
 ;; ----------------------------------------------------------------------
 
-(export compiler:time-display
+(export define-parameter
+        compiler:time-display
         compiler:gen-line-number
         compiler:warn-use-undefined
         compiler:warn-use-undefined-postpone
@@ -167,20 +168,28 @@ doc>
  * |n| must be a positive integer.
 doc>
 |#
-(define compiler:time-display                   (make-parameter #t))
-(define compiler:gen-line-number                (make-parameter #f))
-(define compiler:warn-use-undefined             (make-parameter #f))
-(define compiler:warn-use-undefined-postpone    (make-parameter #t))
-(define compiler:show-assembly-code             (make-parameter #f))
-(define compiler:keep-formals                   (make-parameter #f))
-(define compiler:keep-source                    (make-parameter #f))
-(define compiler:unroll-iterations
-  (make-parameter 4
-                  (lambda (v)
-                    (unless (and (fixnum? v) (positive? v))
-                      (error 'compiler:unroll-iterations
-                             "must be a positive fixnum. It was ~s" v))
-                    v)))
+(define-parameter compiler:time-display                   #t)
+(define-parameter compiler:gen-line-number                #f)
+(define-parameter compiler:warn-use-undefined             #f)
+(define-parameter compiler:warn-use-undefined-postpone    #t)
+(define-parameter compiler:show-assembly-code             #f)
+(define-parameter compiler:keep-formals                   #f)
+(define-parameter compiler:keep-source                    #f)
+(define-parameter compiler:unroll-iterations 4
+  (lambda (v)
+    (unless (and (fixnum? v) (positive? v))
+      (error 'compiler:unroll-iterations
+             "must be a positive fixnum. It was ~s" v))
+    v))
+
+(define compiler:inline-common-functions
+  (let* ((inlined *inline-symbols*)
+         (res     (make-parameter #t
+                                  (lambda (v)
+                                    (set! *inline-symbols* (if v inlined '()))
+                                    (not (null? *inline-symbols*))))))
+    (%set-parameter-name! res 'compiler:inline-common-functions)
+    res))
 
 ;; ----------------------------------------------------------------------
 ;;      %compiler-set-flags ...

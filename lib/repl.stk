@@ -99,13 +99,12 @@ doc>
      (minimal     . (:error  (bold red)
                      :prompt  underline))))
 
-(define repl-theme
-  (make-parameter #f
-                  (lambda (theme)
-                    (if (symbol? theme)
-                        (let ((val (assoc theme *repl-themes*)))
-                          (if val (cdr val) '()))
-                        theme))))
+(define-parameter repl-theme #f
+  (lambda (theme)
+    (if (symbol? theme)
+        (let ((val (assoc theme *repl-themes*)))
+          (if val (cdr val) '()))
+        theme)))
 
 (define (get-repl-color key)
   (key-get (repl-theme) key ""))
@@ -326,12 +325,12 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;      repl-prompt ...
 ;; ----------------------------------------------------------------------
-(define repl-prompt (make-parameter ""))
+(define-parameter repl-prompt "")
 
 ;; ----------------------------------------------------------------------
 ;;      repl-prompt-use-color? ...
 ;; ----------------------------------------------------------------------
-(define repl-prompt-use-color? (make-parameter #t))
+(define-parameter repl-prompt-use-color? #t)
 
 ;; ----------------------------------------------------------------------
 ;;      make-prompt ...
@@ -350,7 +349,7 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;      repl-make-prompt ...
 ;; ----------------------------------------------------------------------
-(define repl-make-prompt (make-parameter make-prompt))
+(define-parameter repl-make-prompt make-prompt)
 
 ;; ----------------------------------------------------------------------
 ;;      display-prompt ...
@@ -362,7 +361,7 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;      repl-display-prompt ...
 ;; ----------------------------------------------------------------------
-(define repl-display-prompt (make-parameter display-prompt))
+(define-parameter repl-display-prompt display-prompt)
 
 
 #|
@@ -379,13 +378,13 @@ doc>
  * `stklosrc` file.
 doc>
 |#
-(define repl-show-startup-message
-  (make-parameter (key-get *%system-state-plist* #:startup-message #t)))
+(define-parameter repl-show-startup-message
+  (key-get *%system-state-plist* #:startup-message #t))
 
 ;; ----------------------------------------------------------------------
 ;;      main-repl-hook ...
 ;; ----------------------------------------------------------------------
-(define main-repl-hook (make-parameter void))
+(define-parameter main-repl-hook void)
 
 ;; ----------------------------------------------------------------------
 ;;      repl-change-default-ports ...

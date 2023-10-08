@@ -27,6 +27,11 @@
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
 ;;;;
 
+
+(define-module (stklos help)
+  (import SCHEME)
+  (export help)
+
 ;; ----------------------------------------------------------------------
 ;; Database reading
 ;; ----------------------------------------------------------------------
@@ -99,8 +104,7 @@
           "left undocumented. Furthermore, they can be changed without notice.\n"
           "Please don't use them.\n"))
       (else
-         ;; no documentation
-         #f))))
+       #f))))
 
 
 (define-method find-documentation ((self <procedure>))
@@ -111,11 +115,18 @@
                (find-documentation (string->symbol name)))))))
 
 (define-method find-documentation ((self <generic>))
-  (or (generic-function-documentation self)
-      (find-documentation (generic-function-name self))))
+  (generic-function-documentation self))
 
 (define-method find-documentation ((self <method>))
   (find-documentation (method-procedure self)))
+
+(define-method find-documentation ((self <syntax>))
+  (find-documentation (%syntax-expander self)))
+
+(define-method find-documentation ((self <parameter>))
+  (let ((name (%parameter-name self)))
+    (and (string? name)
+         (find-documentation (string->symbol name)))))
 
 (define-method find-documentation (obj)
   #f)
@@ -151,48 +162,94 @@
 doc>
 |#
 
-;; Returns the name of the object, if it is a procedure, or
-;; default if it has no name or if it is not a procedure.
-;; If default is ommited, it is taken to be obj itself.
-(define (%get-object-name obj . default)
-  (let ((def (if (null? default)
-                 obj
-                 (car default))))
-    (if (procedure? obj)
-        (let* ((name (%procedure-name obj)))
-          (if (string? name)
-              (string->symbol name)
-              def))
-        def)))
+;; Returns the name of the object, if it is known or #f
+(define-generic object-name)
+
+(define-method object-name ((obj <procedure>))
+  (let ((name (%procedure-name obj)))
+    (if (string? name)
+        (string->symbol name)
+        obj)))
+
+(define-method object-name ((obj <syntax>))
+  ;; syntax has always a name
+  (string->symbol (%syntax-name obj)))
+
+(define-method object-name ((obj <generic>))
+  (generic-function-name obj))
+
+(define-method object-name ((obj <method>))
+  (object-name (method-generic-function obj)))
+
+(define-method object-name ((obj <parameter>))
+  (let ((name (%parameter-name obj)))
+    (if (string? name)
+        (string->symbol name)
+        obj)))
+
+(define-method object-name (obj)
+  obj)
+
+
 
 ;; Returns the signature of an object in a human-friendly form.
 ;; (f x y), or
 ;; (_ x y)  if it is unnamed.
-(define (%help-signature obj)
-  (if (closure? obj) ;; procedures don't have formals available for now
-      (let* ((sig (procedure-formals obj)))
-        (if sig
-            (cons (%get-object-name obj '_) sig)
-            #f))
-      #f))
+(define-generic object-signature)
+
+(define-method object-signature ((obj <procedure>))
+  (let ((sig (and (closure? obj) (procedure-formals obj))))
+    (and sig (cons (object-name obj) sig))))
+
+(define-method object-signature ((obj <syntax>))
+  (let ((sig (procedure-formals (%syntax-expander obj))))
+    (and sig (cons (object-name obj) sig))))
+
+(define-method object-signature ((obj <method>))
+  (let ((sig (procedure-formals (method-procedure obj))))
+    (and sig (cons (object-name obj) sig))))
+
+(define-method object-signature ((obj <parameter>))
+  #f)
+
+(define-method object-signature (obj)
+  #f)
+
+;; ======================================================================
+;; Help with a parameter
 
 (define-method help (obj)
   (let ((doc  (find-documentation obj))
-        (sig  (%help-signature obj))
-        (name (%get-object-name obj))
+        (sig  (object-signature obj))
+        (name (object-name obj))
         (pr   (lambda (str)
                 (printf "  ~a\n" (regexp-replace-all "\n" str "\n  ")))))
-    (if (or sig doc)
-        (begin
-          (display (ansi-color 'bold 'yellow (format #f "Help for ~a:" name) 'normal "\n"))
-          (when sig
-            (display (ansi-color 'bold "Signature:" 'normal (format #f "\n  ~S\n" sig))))
-          (when doc
-            (display (ansi-color 'bold "Documentation:" 'normal "\n"))
-            (pr doc)))
-          (display (ansi-color 'bold 'yellow (format #f "No help for ~a" name) 'normal "\n")))))
+    (cond
+       ((or sig doc)
+         ;; Documentation or signature found
+         (display (ansi-color 'bold 'yellow (format #f "Help for ~a:" name) 'normal "\n"))
+         (when sig
+           (display (ansi-color 'bold "Signature:" 'normal (format #f "\n  ~S\n" sig))))
+         (when doc
+           (display (ansi-color 'bold "Documentation:" 'normal "\n"))
+           (pr doc)))
 
+      ((symbol? obj)
+         ;; We have a symbol and no documentation in the database. Perhaps, it's a closure
+         ;; with embedded documentation sting. Look at symbol value.
+       (let ((val (symbol-value* obj (current-module) #f)))
+         (if val
+             (help val)
+             (display (ansi-color 'bold 'yellow
+                                  (format "No help for ~a" obj) 'normal "\n")))))
 
+      (else
+         ;; We have lost
+         (display (ansi-color 'bold 'yellow (format #f "No help for ~a" name)
+                              'normal "\n"))))))
+
+;; ======================================================================
+;; Help without parameter
 (define-method help ()
   ;; Interactive help
   (display (do-color (get-repl-color :help)
@@ -205,14 +262,15 @@ doc>
           (color (get-repl-color :error)))
       (unless (eof-object? name)
         (if (symbol? name)
-            (let ((val (symbol-value* name (current-module) #f)))
-              (if val
-                  (let ((sig (%help-signature val)))
-                    (when sig (printf "Signature: ~a\n" sig))
-                    (display (find-documentation val)))
-                  (display (do-color color (format "Symbol ~S is unbound\n" name)))))
+            (help name)
             (display (do-color color "help only accepts symbols.\n")))
         (Loop prompt))))
   (display "done.\n"))
 
-(provide "help")
+) ;; End of module (stklos library)
+
+(select-module STklos)
+(import (stklos help))
+
+
+(provide "stklos/help")

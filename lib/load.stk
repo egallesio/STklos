@@ -50,15 +50,15 @@
 ;;
 ;; stklos-conf-file: returns an absolute name for the given configuration file
 ;;
-(define %stklos-conf-dir
-  (make-parameter (let ((old-path (make-path (getenv "HOME") ".stklos"))
-                        (xdg-conf (getenv "XDG_CONFIG_HOME")))
-                    (or (getenv "STKLOS_CONFDIR")
-                        (if (file-exists? old-path)
-                            old-path
-                            (make-path (or xdg-conf "~/.config")
-                                       "stklos"))))
-                  expand-file-name))
+(define-parameter %stklos-conf-dir
+  (let ((old-path (make-path (getenv "HOME") ".stklos"))
+        (xdg-conf (getenv "XDG_CONFIG_HOME")))
+    (or (getenv "STKLOS_CONFDIR")
+        (if (file-exists? old-path)
+            old-path
+            (make-path (or xdg-conf "~/.config")
+                       "stklos"))))
+  expand-file-name)
 
 (define (%stklos-conf-file name)
   (make-path (%stklos-conf-dir) name))
@@ -118,19 +118,18 @@ doc>
  * current list of paths.
 doc>
 |#
-(define load-path
-  (make-parameter *load-path*
-                  (lambda (new-path)
-                    ;; Sanity check
-                    (unless (list? new-path)
-                      (error 'load-path "bad list of path names ~S" new-path))
-                    (for-each (lambda (x)
-                                (unless (string? x)
-                                  (error 'load-path "bad path name ~S" x)))
-                              new-path)
-                    ;; Set the load path
-                    (set! *load-path* new-path)
-                    new-path)))
+(define-parameter load-path *load-path*
+  (lambda (new-path)
+    ;; Sanity check
+    (unless (list? new-path)
+      (error 'load-path "bad list of path names ~S" new-path))
+    (for-each (lambda (x)
+                (unless (string? x)
+                  (error 'load-path "bad path name ~S" x)))
+              new-path)
+    ;; Set the load path
+    (set! *load-path* new-path)
+    new-path))
 
 #|
 <doc EXT load-suffixes
@@ -144,19 +143,18 @@ doc>
  * until the file can be loaded.
 doc>
 |#
-(define load-suffixes
-  (make-parameter *load-suffixes*
-                  (lambda (new)
-                    ;; Sanity check
-                    (unless (list? new)
-                      (error 'load-path "bad list of suffixes ~S" new))
-                    (for-each (lambda (x)
-                                (unless (string? x)
-                                  (error 'load-path "bad path name ~S" x)))
-                              new)
-                    ;; Set the load suffixes
-                    (set! *load-suffixes* new)
-                    new)))
+(define-parameter load-suffixes *load-suffixes*
+  (lambda (new)
+    ;; Sanity check
+    (unless (list? new)
+      (error 'load-path "bad list of suffixes ~S" new))
+    (for-each (lambda (x)
+                (unless (string? x)
+                  (error 'load-path "bad path name ~S" x)))
+              new)
+    ;; Set the load suffixes
+    (set! *load-suffixes* new)
+    new))
 
 #|
 <doc EXT load-verbose
@@ -169,20 +167,19 @@ doc>
  * is set to `#f`, no message is printed.
 doc>
 |#
-(define load-verbose
-  (make-parameter *load-verbose*
-                  (lambda (x) (set! *load-verbose* (and x #t)) *load-verbose*)))
+(define-parameter load-verbose *load-verbose*
+  (lambda (x) (set! *load-verbose* (and x #t)) *load-verbose*))
 
 
 #|
 <doc EXT current-loading-file
  * (current-loading-file)
  *
- * Returns the path of the file that is currently being load.
+ * Returns the path of the file that is currently being loaded.
 doc>
 |#
-(define current-loading-file
-  (make-parameter #f))
+(define-parameter current-loading-file #f)
+
 
 
 ;=============================================================================
@@ -365,7 +362,7 @@ doc>
 (define provided?       #f)
 (define require/provide #f)
 
-(define warning-when-not-provided (make-parameter #t))
+(define-parameter warning-when-not-provided #t)  ;; FIXME: document it
 
 
 #| HACK: FIXME:
