@@ -229,15 +229,6 @@
 
 ;; ======================================================================
 
-(define compiler:inline-common-functions
-  (let* ((inlined *inline-symbols*)
-         (res     (make-parameter #t
-                                  (lambda (v)
-                                    (set! *inline-symbols* (if v inlined '()))
-                                    (not (null? *inline-symbols*))))))
-    (%set-parameter-name! res 'compiler:inline-common-functions)
-    res))
-
 (define-parameter compiler-current-module (current-module)
   (lambda (new)
     (unless (module? new)

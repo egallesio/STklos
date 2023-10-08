@@ -13347,7 +13347,7 @@ If no file is found, <code>find-path</code> returns <code>#f</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns the path of the file that is currently being load.</p>
+<p>Returns the path of the file that is currently being loaded.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -14540,7 +14540,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.38</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.41</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -18022,6 +18022,24 @@ parameter object, and an unspecified value is returned.</p>
  <span class="p">(</span><span class="nf">prompt</span> <span class="s">"&gt;"</span><span class="p">)</span>
  <span class="p">(</span><span class="nf">prompt</span><span class="p">)</span>       <span class="nv">=&gt;</span>  <span class="s">"&gt;"</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(define-parameter var val)</code></strong><br>
+<strong><code>(define-parameter var val thunk)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This form is a shortcut to define a new parameter named <code>var</code>. It also adds
+a name to the created parameter object, which can be useful for debugging.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -24480,6 +24498,9 @@ of available commands is given below.</p>
 </li>
 <li>
 <p><strong>,pwd</strong>: Print working directory</p>
+</li>
+<li>
+<p><strong>,ls</strong>: List directory content</p>
 </li>
 <li>
 <p><strong>,quit</strong> (or <strong>,q</strong>): Exit STklos</p>
@@ -31571,7 +31592,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-10-04 13:56:34 +0200
+Last updated 2023-10-08 21:02:12 +0200
 </div>
 </div>
 </body>
