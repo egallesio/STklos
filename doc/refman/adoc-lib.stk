@@ -2,7 +2,7 @@
 ;;;;
 ;;;; adoc-lib.stk         -- Library for Stklos documentation
 ;;;;
-;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -165,15 +165,16 @@
       ((extended)        "_STklos_ procedure")))
 
   (string-append
-   ;; Put marks for all the functions defined in this entry
+   ;; Put marks and custom ID for all the functions defined in this entry
    (apply string-append
-          (map (lambda (x) (format "(((~A)))\n" x)) (cons name similar)))
+          (map (lambda (x) (format "(((~A)))\n[#P_~A]\n" x x)) (cons name similar)))
+   ;; 
    ;; Display type
    "[.text-right]\n"
    (format "[.rmargin.small]#~a#\n" (show-type type))
    ;; Make a box
    "****\n"
-   ;; Display the synopsys
+   ;; Display the synopsis
    "[.small]\n"
    (apply string-append
           (map (lambda (x) (format "*`~a`* +\n" x)) synopsis))   ; "*+~a+* +\n"
