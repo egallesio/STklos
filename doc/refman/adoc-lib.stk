@@ -164,12 +164,20 @@
       ((extended-syntax) "_STklos_ syntax")
       ((extended)        "_STklos_ procedure")))
 
+  (define (produce-IDs)
+    (if (equal? (document-value 'doc-fmt #f) "html")
+        ;; We are producing HTM, let's go.
+        (string-append
+           "+++"
+           (apply string-append
+                  (map (lambda (x) (format "<a id='P_~a'></a>" x)) (cons name similar)))
+           "+++\n")
+        ;; We are not producing HTML, do not build custom IDs
+        ""))
+
   (string-append
    ;; Put custom ID for all the functions defined in this entry
-   "+++"
-   (apply string-append
-          (map (lambda (x) (format "<a id='P_~a'></a>" x)) (cons name similar)))
-   "+++\n"
+   (produce-IDs)
    ;; Put marks for all the functions defined in this entry
    (apply string-append
           (map (lambda (x) (format "(((~A)))\n" x)) (cons name similar)))
