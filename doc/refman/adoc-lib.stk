@@ -165,10 +165,14 @@
       ((extended)        "_STklos_ procedure")))
 
   (string-append
-   ;; Put marks and custom ID for all the functions defined in this entry
+   ;; Put custom ID for all the functions defined in this entry
+   "+++"
    (apply string-append
-          (map (lambda (x) (format "(((~A)))\n[#P_~A]\n" x x)) (cons name similar)))
-   ;; 
+          (map (lambda (x) (format "<a id='P_~a'></a>" x)) (cons name similar)))
+   "+++\n"
+   ;; Put marks for all the functions defined in this entry
+   (apply string-append
+          (map (lambda (x) (format "(((~A)))\n" x)) (cons name similar)))
    ;; Display type
    "[.text-right]\n"
    (format "[.rmargin.small]#~a#\n" (show-type type))
