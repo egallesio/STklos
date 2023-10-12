@@ -7675,8 +7675,18 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CPPFLAGS=$CPPFLAGS\\\""
 fi
 
+# Build the CONF_SUMMARY variable
+confdirs="("
+confdirs="${confdirs} #:libdir \\\"$libdir\\\" #:datadir \\\"$datadir\\\""
+confdirs="${confdirs} #:docdir \\\"$docdir\\\" #:htmldir \\\"$htmldir\\\" #:pdfdir \\\"$pdfdir\\\""
+confdirs="${confdirs})"
 
-CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
+confsum="("
+confsum="${confsum} #:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT)"
+confsum="${confsum} #:dirs ${confdirs}"
+confsum="${confsum})"
+
+CONF_SUMMARY="${confsum}"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
