@@ -42,7 +42,7 @@
 (define-module stklos/preproc
   (import (stklos preproc env))
   (export stklos-pp-version verbosity parse-metadata process-file process-string
-          translate)
+          translate document-value)
 
   (define *printing*      #t)
   (define *print-stack*   '())
@@ -122,6 +122,13 @@
          (die (format "bad command call ~s" expr))))))
 
   ;;;;
+  ;;;; document-value
+  ;;;;
+  (define (document-value symbol . default)
+    (apply symbol-value symbol (find-module 'stklos/preproc/env) default))
+  
+
+  ;;;; 
   ;;;; parse-metadata
   ;;;;
   (define (parse-metadata port :optional (test-end-markup? #t))
