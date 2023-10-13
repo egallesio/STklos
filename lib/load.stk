@@ -23,7 +23,7 @@
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
 ;;;;
 
-(export build-path-from-shell-variable
+(export build-path-from-shell-variable install-path
         load-path load-suffixes load-verbose current-loading-file
         try-load load
         find-path
@@ -180,6 +180,40 @@ doc>
 |#
 (define-parameter current-loading-file #f)
 
+
+
+#|
+<doc EXT install-path
+ * (install-path)
+ * (install-path key)
+ *
+ * Returns the list of the installation directories chosen when {{stklos}} was
+ * configured. Without parameter, |install-path| returns the path of all
+ * configured directories. When |key| is provided, only the corresponding path is
+ * returned. |Key| can be:
+ *
+ * - `#:libdir`  (directory for architecture specific installed files)
+ * - `#:datadir` (directory for portable installed files)
+ * - `#:docdir`  (directory for installed documentation)
+ * - `#:htmldir` (directory for installed HTML documentation)
+ * - `#:pdfdir`  (directory for installed PDF documentation)
+doc>
+|#
+;; NOTE: placed here because other returnning path functions are here, but this
+;; function is not really related to load.
+(define (install-path :optional key)
+  (let ((dirs (key-get (%stklos-configure) #:dirs #f)))
+    (unless dirs
+      (error 'install-path "cannot find configuration description"))
+    (if key
+        (begin
+          (unless (keyword? key)
+            (error 'install-path "bad keyword ~S" key))
+          (let ((val (key-get dirs key #f)))
+            (unless val
+              (error 'install-path "cannot find directory for key ~S" key))
+            val))
+        dirs)))
 
 
 ;=============================================================================
@@ -535,4 +569,3 @@ doc>
               symbols))))
 
 ; LocalWords:  repl autoload prepended
-

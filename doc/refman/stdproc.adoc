@@ -681,6 +681,7 @@ primivitives to acess environment variables.
 {{insertdoc 'get-environment-variables}}
 
 {{insertdoc 'build-path-from-shell-variable}}
+{{insertdoc 'install-path}}
 
 ==== Time
 {{insertdoc 'current-second}}
