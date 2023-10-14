@@ -57,6 +57,7 @@
         error-object-location %push-id %stable-version?
         define-constant
         void?
+        stklos-browser open-in-browser open-manual
         receive case-lambda
         radians->degrees degrees->radians
 
@@ -1869,6 +1870,39 @@ doc>
   (* (/ d 180)
      3.141592653589793115997963468544185161590576171875)) ; pi
 
+
+;;;;
+;;;; Browser & Manual
+;;;;
+
+(define-parameter stklos-browser
+  (cond
+   ((getenv "STKLOS_BROWSER"))
+   ((getenv "BROWSER"))
+   ((equal? (os-name) "Darwin") "open")
+   (else "xdg-open"))
+  (lambda (v)
+    (if (not (string? v))
+        (error 'stklos-browser "bad browser name ~s" v)
+        v)))
+
+(define (open-in-browser url)
+  (let ((cmd (format "~a '~a'" (stklos-browser) url)))
+    (when (positive? (stklos-debug-level))
+      (eprintf (format "Running command ~s\n" cmd)))
+    (system cmd)))
+
+(define (open-manual :optional complement)
+  (let* ((fn (make-path (install-path #:htmldir)
+                        "stklos-ref.html"))
+         (comp (format "~a" complement))  ;; -> string
+         (base (if (file-exists? fn)
+                   (string-append "file://" fn)
+                   "https://stklos.net/Doc/HTML/stklos-ref.html")))
+    (open-in-browser (if complement
+                         (string-append base "#P_" comp)
+                         base))))
+
 ;;;
 ;;; Misc
 ;;;
@@ -1879,6 +1913,8 @@ doc>
         (if commit
             (format "unstable -- ~a" commit)
             "unstable"))))
+
+
 
 ;;;; ======================================================================
 ;;;;
