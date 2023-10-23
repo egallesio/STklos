@@ -248,10 +248,15 @@ doc>
                   (lambda ()
                     (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
                       (system (string-append cmd " " (read-line) " 2>/dev/null")))))
-;; == version
-(repl-add-command '(version v)
-                  "Show version"
-                  (lambda () (printf "~a ~a~%" (version) (%push-id))))
+;; ==== describe
+(repl-add-command '(describe d)
+                  "Describe an object"
+                  (lambda () (describe (eval (read)))))
+;; ==== manual
+(repl-add-command '(manual m)
+                  "Search reference manual"
+                  (lambda () (manual (read-line))))
+
 ;; ==== help
 (repl-add-command
    '(help ? h)
@@ -262,7 +267,10 @@ doc>
            (display-repl-command-help)
            (help (read-from-string arg))))))
 
-
+;; == version
+(repl-add-command '(version v)
+                  "Show version"
+                  (lambda () (printf "~a ~a~%" (version) (%push-id))))
 ;; ----------------------------------------------------------------------
 ;;      repl-handler ...
 ;;         -- The error handler for the REPL
