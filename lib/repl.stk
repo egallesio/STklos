@@ -197,75 +197,78 @@ doc>
 
 
 ;; A simple trim for the commands below
-(define (simple-trim str)
-  (regexp-replace "\\s*$"
-                  (regexp-replace "^\\s*" str "")
-                  ""))
+(let ((simple-trim (lambda (str)
+                     (regexp-replace "\\s*$"
+                                     (regexp-replace "^\\s*" str "")
+                                     ""))))
+  
+  ;; ==== backtrace
+  (repl-add-command '(backtrace bt)
+                    "Show the stack when last error occurred"
+                    (lambda () (%display-backtrace repl-backtrace 6)))
+  ;; ==== cd
+  (repl-add-command 'cd
+                    "Change current directory"
+                    (lambda () (chdir (simple-trim (read-line)))))
+  ;; ==== pwd
+  (repl-add-command 'pwd
+                    "Print working directory"
+                    (lambda () (printf "~s~%" (getcwd))))
 
-;; ==== backtrace
-(repl-add-command '(backtrace bt)
-                  "Show the stack when last error occurred"
-                  (lambda () (%display-backtrace repl-backtrace 6)))
-;; ==== cd
-(repl-add-command 'cd
-                  "Change current directory"
-                  (lambda () (chdir (simple-trim (read-line)))))
-;; ==== pwd
-(repl-add-command 'pwd
-                  "Print working directory"
-                  (lambda () (printf "~s~%" (getcwd))))
+  ;; ==== ls
+  (repl-add-command 'ls
+                    "List directory content"
+                    (lambda () (system (string-append "ls " (read-line)))))
 
-;; ==== ls
-(repl-add-command 'ls
-                  "List directory content"
-                  (lambda () (system (string-append "ls " (read-line)))))
-
-;; ==== quit
-(repl-add-command '(quit q)
-                  "Exit STklos"
-                  (lambda () (exit 0)))
-;; ==== shell
-(repl-add-command '(shell !)
-                  "Run a shell command"
-                  (lambda () (system (read-line))))
-;; ==== time
-(repl-add-command '(time t)
-                  "Print the time used to run the next expression"
-                  (lambda () (printf "~w~%" (eval-from-string
+  ;; ==== quit
+  (repl-add-command '(quit q)
+                    "Exit STklos"
+                    (lambda () (exit 0)))
+  ;; ==== shell
+  (repl-add-command '(shell !)
+                    "Run a shell command"
+                    (lambda () (system (read-line))))
+  ;; ==== time
+  (repl-add-command '(time t)
+                    "Print the time used to run the next expression"
+                    (lambda () (printf "~w~%" (eval-from-string
                                           (format "(time (eval '~a))" (read))))))
-;; ==== describe
-(repl-add-command '(describe d)
-                  "Describe an object"
-                  (lambda () (describe (eval (read)))))
-;; ==== expand
-(repl-add-command '(expand e)
-                  "Pretty print the macro expansion of a form"
-                  (lambda () (pretty-print (macro-expand (read)))))
-;; ==== import
-(repl-add-command '(import i)
-                  "Import a library"
-                  (lambda () (eval-from-string (format "(import ~a)" (read)))))
-;; == require-feature
-(repl-add-command '(require-feature r)
-                  "Require a feature"
-                  (lambda () (require-feature (read))))
-;; ==== open
-(repl-add-command '(open o)
-                  "Open file or URL"
-                  (lambda ()
-                    (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
-                      (system (string-append cmd " " (read-line) " 2>/dev/null")))))
-;; ==== describe
-(repl-add-command '(describe d)
-                  "Describe an object"
-                  (lambda () (describe (eval (read)))))
-;; ==== manual
-(repl-add-command '(manual m)
-                  "Search reference manual"
-                  (lambda () (manual (simple-trim (read-line)))))
-
-;; ==== help
-(repl-add-command
+  ;; ==== describe
+  (repl-add-command '(describe d)
+                    "Describe an object"
+                    (lambda () (describe (eval (read)))))
+  ;; ==== expand
+  (repl-add-command '(expand e)
+                    "Pretty print the macro expansion of a form"
+                    (lambda () (pretty-print (macro-expand (read)))))
+  ;; ==== import
+  (repl-add-command '(import i)
+                    "Import a library"
+                    (lambda () (eval-from-string (format "(import ~a)" (read)))))
+  ;; == require-feature
+  (repl-add-command '(require-feature r)
+                    "Require a feature"
+                    (lambda () (require-feature (read))))
+  ;; ==== open
+  (repl-add-command '(open o)
+                    "Open file or URL"
+                    (lambda ()
+                      (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
+                        (system (string-append cmd " " (read-line) " 2>/dev/null")))))
+  ;; ==== describe
+  (repl-add-command '(describe d)
+                    "Describe an object"
+                    (lambda () (describe (eval (read)))))
+  ;; ==== manual
+  (repl-add-command '(manual m)
+                    "Search reference manual"
+                    (lambda () (manual (simple-trim (read-line)))))
+  ;; ==== apropos
+  (repl-add-command '(apropos a)
+                    "Search for symbol in documentation"
+                    (lambda () (print (apropos (simple-trim (read-line))))))
+  ;; ==== help
+  (repl-add-command
    '(help ? h)
    "This help if no parameter, or help on its argument"
    (lambda ()
@@ -274,10 +277,12 @@ doc>
            (display-repl-command-help)
            (help (read-from-string arg))))))
 
-;; == version
-(repl-add-command '(version v)
-                  "Show version"
-                  (lambda () (printf "~a ~a~%" (version) (%push-id))))
+  ;; == version
+  (repl-add-command '(version v)
+                    "Show version"
+                    (lambda () (printf "~a ~a~%" (version) (%push-id))))
+) ;; end of REPL commands
+
 ;; ----------------------------------------------------------------------
 ;;      repl-handler ...
 ;;         -- The error handler for the REPL
