@@ -195,6 +195,13 @@ doc>
   ;; And try to find a REPL command
   (search-repl-command name))
 
+
+;; A simple trim for the commands below
+(define (simple-trim str)
+  (regexp-replace "\\s*$"
+                  (regexp-replace "^\\s*" str "")
+                  ""))
+
 ;; ==== backtrace
 (repl-add-command '(backtrace bt)
                   "Show the stack when last error occurred"
@@ -202,7 +209,7 @@ doc>
 ;; ==== cd
 (repl-add-command 'cd
                   "Change current directory"
-                  (lambda () (chdir (read-line))))
+                  (lambda () (chdir (simple-trim (read-line)))))
 ;; ==== pwd
 (repl-add-command 'pwd
                   "Print working directory"
@@ -255,7 +262,7 @@ doc>
 ;; ==== manual
 (repl-add-command '(manual m)
                   "Search reference manual"
-                  (lambda () (manual (read-line))))
+                  (lambda () (manual (simple-trim (read-line)))))
 
 ;; ==== help
 (repl-add-command
