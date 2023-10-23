@@ -968,6 +968,10 @@ See SRFI document for more information.
 {{insertdoc 'apropos}}
 {{insertdoc 'help}}
 {{insertdoc 'describe}}
+{{insertdoc 'default-browser}}
+{{insertdoc 'open-in-browser}}
+{{insertdoc 'manual}}
+
 
 {{insertdoc 'trace}}
 {{insertdoc 'untrace}}
