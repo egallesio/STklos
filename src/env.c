@@ -806,25 +806,6 @@ DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr23,
   return value;
 }
 
-DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
-                 (SCM new, SCM old, SCM module))
-{
-  SCM res, mod = STk_current_module();
-
-  verify_symbol(new);
-  verify_symbol(old);
-  if (!module)
-    module = mod;
-  else
-    verify_module(module);
-
-  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
-  if (!res)
-    STk_error_unbound_variable(old, module);
-
-  STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
-  return STk_void;
-}
 
 DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
                  (SCM new, SCM old, SCM new_module, SCM old_module))
@@ -956,7 +937,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_mutablep);
   ADD_PRIMITIVE(symbol_immutable);
   ADD_PRIMITIVE(symbol_define);
-  ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);
 
   ADD_PRIMITIVE(normalize_name);
