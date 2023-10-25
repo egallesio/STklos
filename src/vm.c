@@ -1027,8 +1027,8 @@ CASE(GLOBAL_REF) {
   }
 
   /* patch the code for optimize next accesses */
-  vm->pc[-1]  = add_global(CDR(ref));
-  vm->pc[-2]  = (orig_opcode == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
+  //XXX vm->pc[-1]  = add_global(CDR(ref));
+  //XXX vm->pc[-2]  = (orig_opcode == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
   RELEASE_LOCK;
   NEXT1;
 }
@@ -1060,8 +1060,9 @@ CASE(GLOBAL_REF_PUSH) {
   push(res);
 
   /* patch the code for optimize next accesses */
-  vm->pc[-1]  = add_global(CDR(ref));
-  vm->pc[-2]  = UGLOBAL_REF_PUSH;
+  //FIXME:
+  //XXX vm->pc[-1]  = add_global(CDR(ref));
+  //XXX vm->pc[-2]  = UGLOBAL_REF_PUSH;
   RELEASE_LOCK;
   NEXT1;
 }
@@ -1096,8 +1097,8 @@ CASE(GREF_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-2]  = add_global(CDR(ref));
-  vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
+  //XXX vm->pc[-2]  = add_global(CDR(ref));
+  //XXX vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
   RELEASE_LOCK;
 
   /*and now invoke */
@@ -1139,9 +1140,9 @@ CASE(GREF_TAIL_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-2]  = add_global(CDR(ref));
-  vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ?
-                        UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
+  //XXX vm->pc[-2]  = add_global(CDR(ref));
+  //XXX vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ?
+  //XXX                 UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
   RELEASE_LOCK;
 
   /* and now invoke */
@@ -1241,29 +1242,43 @@ CASE(GLOBAL_SET) {
   if (BOXED_INFO(ref) & CONS_CONST) {
     RELEASE_LOCK;
     STk_error("cannot mute the value of ~S in ~S", orig_operand, vm->current_module);
-
   }
   *BOX_VALUES(CDR(ref)) = vm->val;    /* sure that this box arity is 1 */
   /* patch the code for optimize next accesses */
-  vm->pc[-1] = add_global(CDR(ref));
+  // vm->pc[-1] = add_global(CDR(ref));    FIXME: PB HERE!!!! XXXXXXXXXXXXXX
   vm->pc[-2] = UGLOBAL_SET;
 
   if (CLOSUREP(vm->val) && CLOSURE_NAME(vm->val) == STk_false) {
     /* We do something like (set! foo (lambda () ....)) and the lambda doesn't have a procedure
      * name in it. Just force the name of the closure to "foo". */
     CLOSURE_NAME(vm->val) = orig_operand;
- }
+  }
 
   RELEASE_LOCK;
   NEXT0;
-}
+ }
+
+
+//FIXME: CASE(UGLOBAL_SET) { /* Never produced by compiler */
+//FIXME:   /* Because of optimization, we may get re-dispatched to here. */
+//FIXME:   RELEASE_POSSIBLE_LOCK;
+//FIXME: 
+//FIXME:   fetch_global() = vm->val; NEXT0;
+//FIXME: }
+
 
 CASE(UGLOBAL_SET) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
+  SCM ref = NULL;
+  SCM orig_operand;
+
   RELEASE_POSSIBLE_LOCK;
 
-  fetch_global() = vm->val; NEXT0;
-}
+  orig_operand = fetch_const();
+  STk_lookup(orig_operand, vm->env, &ref, FALSE);
+  *BOX_VALUES(CDR(ref)) = vm->val;
+  NEXT0;
+ }
 
 CASE(LOCAL_SET0) { FRAME_LOCAL(vm->env, 0)           = vm->val; NEXT0;}
 CASE(LOCAL_SET1) { FRAME_LOCAL(vm->env, 1)           = vm->val; NEXT0;}
