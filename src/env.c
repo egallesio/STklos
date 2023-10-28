@@ -35,21 +35,24 @@
  *
 \*===========================================================================*/
 
-/* All the global variables values of a program (from all modules) are stored
- * in the global_storage array. The globals of a module are stored in a
- * module hashtable. Each entry of the module is a tc_global_obj which
- * contains the external name of the variable and its index in global_storage
+/*
+ * All the global variables values of a program (from all modules) are stored
+ * in the global_storage array. The global variable names of a module are
+ * stored in a module hashtable (see hash.c). All the names with same hash
+ * value are stored in a A-list of the form ((foo . i1) (bar . i2) ...) where
+ * the value associated to a key it an integer (the index where the variable
+ * is stored in STk_global_store).
  */
 #define GLOBAL_STORAGE_INIT_SIZE 3000 // ~3000 symbols used when we are in REPL
 
 SCM **STk_global_store; /* The store for all global variables */
 
-static int   global_store_len  = GLOBAL_STORAGE_INIT_SIZE;
-static int   global_store_used = 0;
-MUT_DECL(global_store_lock);
-
 int STk_reserve_store(void)
 {
+  static int   global_store_len  = GLOBAL_STORAGE_INIT_SIZE;
+  static int   global_store_used = 0;
+  MUT_DECL(global_store_lock);
+
   int res; // Build result in the mutex lock section
 
   MUT_LOCK(global_store_lock);
@@ -956,7 +959,7 @@ int STk_init_env(void)
   DEFINE_XTYPE(frame,  &xtype_frame);
 
   /* Initialize the global_store array */
-  STk_global_store = STk_must_malloc(global_store_len * sizeof(SCM));
+  STk_global_store = STk_must_malloc(GLOBAL_STORAGE_INIT_SIZE * sizeof(SCM));
 
   return TRUE;
 }
