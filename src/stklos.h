@@ -186,7 +186,7 @@ typedef enum {
   tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback, tc_syntax,                                               /* 45 */
+  tc_callback, tc_syntax, tc_global,                                    /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -477,14 +477,31 @@ void STk_signal(char *str);
   ----
   ------------------------------------------------------------------------------
 */
+
+/* ---------- Global variables ---------- */
+struct global_obj {
+  stk_header header;
+  SCM name;
+  int index;             /* index in storage */
+};
+
+#define GLOBALP(o)              (BOXED_TYPE_EQ((p), tc_frame))
+#define GLOBAL_NAME(p)          (((struct global_obj *) (p))->name)
+#define GLOBAL_INDEX(p)         (((struct global_obj *) (p))->index)
+
+
+extern SCM **STk_global_store;             // the store for all global variables
+int STk_new_global_store_entry(SCM value); // return the index where value is stored
+SCM STk_new_global(SCM name, SCM value, int is_alias);
+
+
+/* ---------- Locals ---------- */
 struct frame_obj {
   stk_header header;
   SCM next_frame;
   SCM owner;
   SCM locals[1];        /* the values associated to the names */
 };
-
-/* Note: boxes are used for global variables */
 
 #define FRAME_LENGTH(p)         (BOXED_INFO(p))
 #define FRAME_NEXT(p)           (((struct frame_obj *) (p))->next_frame)
@@ -644,6 +661,7 @@ struct cons_obj {
 #define CONS_CONST              (1 << 0)
 #define CONS_PLACEHOLDER        (1 << 1)        /* used for #n= and #n# notation */
 #define CONS_ECONS              (1 << 2)        /* used for extended conses      */
+#define CONS_ALIAS              (1 << 3)        /* used for implementing aliases */
 
 #define LIST1(a)                 STk_cons((a), STk_nil)
 #define LIST2(a,b)               STk_cons((a), LIST1(b))

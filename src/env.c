@@ -29,6 +29,63 @@
 #include "vm.h"
 #include "thread-common.h"
 
+/*===========================================================================*\
+ *
+ *                              G L O B A L S
+ *
+\*===========================================================================*/
+
+/* All the global variables of a program (form all modules) are stored in the
+ * global_storage array. All the globals of a module are stored in a module
+ * hashtable. Each entry of the module is a tc_global_obj which contains the
+ * external name of the variable and its index in global_storage
+ */
+#define GLOBAL_STORAGE_INIT_SIZE 4096
+
+SCM **STk_global_store; /* The store for all global variables */
+
+static int   global_store_len  = GLOBAL_STORAGE_INIT_SIZE;
+static int   global_store_used = 0;
+MUT_DECL(global_store_lock);
+
+static void print_global(SCM g, SCM port, int _UNUSED(mode))
+{
+  char buffer[100];
+  snprintf(buffer, sizeof(buffer), "[global %s @ %d]",
+           SYMBOL_PNAME(GLOBAL_NAME(g)), GLOBAL_INDEX(g));
+  STk_puts(buffer, port);
+}
+
+/* ---------------------------------------------------------------------- */
+int STk_new_global_store_entry(SCM value)
+{
+  MUT_LOCK(global_store_lock);
+  if (global_store_used >= global_store_len) { /* resize the checked  array */
+    // fprintf(stderr, "**** Resizing storage from %d to %d\n", global_store_len,
+    //                  global_store_len + global_store_len/2);
+
+    global_store_len += global_store_len / 2;
+    STk_global_store  = STk_must_realloc(STk_global_store,
+                                         global_store_len * sizeof(SCM*));
+  }
+  STk_global_store[global_store_used] = value;
+  MUT_UNLOCK(global_store_lock);
+
+  return global_store_used++;
+}
+
+SCM STk_new_global(SCM name, SCM value, int is_alias)
+{
+  SCM z;
+
+  /* Create the global object that will be stored in the module hash table */
+  NEWCELL(z, global);
+  GLOBAL_NAME(z) = name;
+  GLOBAL_INDEX(z) = is_alias ? GLOBAL_INDEX(value): STk_new_global_store_entry(value);
+  return z;
+}
+
+
 
 /*===========================================================================*\
  *
@@ -636,7 +693,7 @@ static inline SCM find_symbol_value(SCM symbol, SCM module)
 {
   SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
   if (res)
-    return *BOX_VALUES(CDR(res));    /* sure that this box arity is 1 */
+    return STk_global_store[GLOBAL_INDEX(CDR(res))];
   return NULL;
 }
 
@@ -737,7 +794,7 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
     SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), CAR(lst));
 
     /* Redefine symbol in (car lst) in SCHEME module */
-    STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
+    STk_define_variable(CAR(lst), STk_global_store[GLOBAL_INDEX(CDR(res))], Scheme_module);
   }
   return STk_void;
 }
@@ -839,7 +896,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
   if (res) {
     *ref = res;
-    return *BOX_VALUES(CDR(res));
+    return STk_global_store[GLOBAL_INDEX(CDR(res))];
   }
 
   // symbol was not found in the given env module. Try to find it in
@@ -849,7 +906,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
     if (res) {
       *ref = res;
-      return *BOX_VALUES(CDR(res));
+      return STk_global_store[GLOBAL_INDEX(CDR(res))];
     }
   }
 
@@ -859,6 +916,30 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   return STk_void;
 }
 
+#ifdef STK_DEBUG
+DEFINE_PRIMITIVE("%global-var-info", glob_var_info, subr12, (SCM name, SCM module))
+{
+  SCM res;
+
+  verify_symbol(name);
+  if (!module)
+    module = STk_current_module();
+  else
+    verify_module(module);
+
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), name);
+
+  if (res) {
+    int ro    = (BOXED_INFO(res) & CONS_CONST) != 0;
+    int alias = (BOXED_INFO(res) & CONS_ALIAS) != 0;
+    STk_debug("Symbol ~S is a global at index ~S (RO: %d, Alias: %d)",
+              name,  MAKE_INT(GLOBAL_INDEX(CDR(res))), ro, alias);
+  } else {
+    STk_debug("Symbol ~S is not set in module ~S", name, module);
+  }
+  return STk_void;
+}
+#endif
 
 
 /*===========================================================================*\
@@ -874,13 +955,20 @@ static struct extended_type_descr xtype_module = {
 };
 
 
-
-
 /* The stucture which describes the frame type */
 static struct extended_type_descr xtype_frame = {
   .name= "frame"                      /* name */
 };
 
+
+/* The stucture which describes the global variable type */
+static struct extended_type_descr xtype_global = {
+  .name  = "global",
+  .print = print_global
+};
+
+
+/* ---------------------------------------------------------------------- */
 
 int STk_init_env(void)
 {
@@ -889,9 +977,14 @@ int STk_init_env(void)
   /* Create the stklos module */
   STk_STklos_module  = make_module(STk_void); /* will be changed later */
 
-  /* Declare the extended types module_obj and frame_obj */
+  /* Declare the extended types module_obj , frame_obj and global_obj*/
   DEFINE_XTYPE(module, &xtype_module);
   DEFINE_XTYPE(frame,  &xtype_frame);
+  DEFINE_XTYPE(global, &xtype_global);
+
+  /* Initialize the global_store array */
+  STk_global_store = STk_must_malloc(global_store_len * sizeof(SCM));
+
   return TRUE;
 }
 
@@ -918,6 +1011,9 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
+#ifdef STK_DEBUG
+  ADD_PRIMITIVE(glob_var_info);
+#endif
 
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);

@@ -341,8 +341,9 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s, SCM (*create
  *
  *
  * Here variable are the variables defined in a module. Keys are symbols.
- * The value associated to a bucket is an A-list (symbol . value) of all the
- * symbols with the same hash value
+ * The value associated to a bucket is an list of symbols with the same hash
+ * value. Each component of this lis is a tc_global_obj (a couple symbol +
+ * index of this variable in the global store.
  *
 \*===========================================================================*/
 
@@ -375,29 +376,37 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
 
   if (z) {
     /* Variable already exists. Change its value*/
-    if (BOXED_INFO(z) & CONS_CONST)
+    if (BOXED_INFO(z) & CONS_CONST) {
       if (!define) {
         STk_error("cannot set or redefine the symbol ~S in ~S",
                   v, STk_current_module());
       }
-    /* It's a redefinition, not a new binding, so we not only allow
-       it, but also clear the CONST bit: */
+    }
+    /* It's a redefinition, not a new binding, clear the CONST bit: */
     BOXED_INFO(z) &= (~CONS_CONST);
-    *BOX_VALUES(CDR(z)) = value;
-  } else {
-    /* Create a new box for this value */
-    z = STk_make_box(value);
 
+    /* If variable was an alias, unalias it. */
+    if (BOXED_INFO(z) & CONS_ALIAS) {    //FIXME: unalias function in env.c?
+      /* We redefine an alias to a new value */
+      GLOBAL_INDEX(CDR(z)) = STk_new_global_store_entry(z);
+      BOXED_INFO(z)  &= ~CONS_ALIAS;
+    }
+
+    /* Finally set the variable to its new value */
+    STk_global_store[GLOBAL_INDEX(CDR(z))] = value;
+  } else {
     /* Enter the new variable in table */
-    HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z),
-                                      HASH_BUCKETS(h)[index]);
+    z = STk_new_global(v, value, 0); // 0 => it's a new variable
+    HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z), HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
+    STk_global_store[GLOBAL_INDEX(z)] = value;
   }
 }
 
-void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
+//FIXME: virer le rdonly?
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old, int ronly)
 {
   SCM z;
   int index;
@@ -405,20 +414,20 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
   z = hash_get_variable(h, v, &index);
 
   if (z) {
-    /* Variable already exists. Change its value*/
-    if (ronly) BOXED_INFO(z) |= CONS_CONST;  // make the association read only
-    CDR(z) = value;
+    /* Variable already exists. Change its index*/
+    GLOBAL_INDEX(CDR(z)) = GLOBAL_INDEX(old);
   } else {
     /* Enter the new variable in table */
-    SCM new = STk_cons(v, value);
+    z = STk_cons(v, STk_new_global(v, old, 1));  // 1 => it's an alias
+    BOXED_INFO(z) |= CONS_ALIAS;
 
-    if (ronly) BOXED_INFO(new) |= CONS_CONST; // ditto
-
-    HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
+    HASH_BUCKETS(h)[index] = STk_cons(z, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
   }
+  //BOXED_INFO(z) |= CONS_ALIAS;
+  if (ronly) BOXED_INFO(z) |= CONS_CONST;
 }
 
 
