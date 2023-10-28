@@ -1243,7 +1243,7 @@ CASE(GLOBAL_SET) {
     RELEASE_LOCK;
     STk_error("cannot mute the value of ~S in ~S", orig_operand, vm->current_module);
   }
-  STk_global_store[GLOBAL_INDEX(CDR(ref))] = vm->val;
+  STk_global_store[INT_VAL(CDR(ref))] = vm->val;
   /* patch the code for optimize next accesses */
   // vm->pc[-1] = add_global(CDR(ref));    FIXME: PB HERE!!!! XXXXXXXXXXXXXX
   vm->pc[-2] = UGLOBAL_SET;
@@ -1276,7 +1276,7 @@ CASE(UGLOBAL_SET) { /* Never produced by compiler */
 
   orig_operand = fetch_const();
   STk_lookup(orig_operand, vm->env, &ref, FALSE);
-  STk_global_store[GLOBAL_INDEX(CDR(ref))] = vm->val;
+  STk_global_store[INT_VAL(CDR(ref))] = vm->val;
   NEXT0;
  }
 

@@ -186,7 +186,7 @@ typedef enum {
   tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback, tc_syntax, tc_global,                                    /* 45 */
+  tc_callback, tc_syntax,                                               /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -478,21 +478,8 @@ void STk_signal(char *str);
   ------------------------------------------------------------------------------
 */
 
-/* ---------- Global variables ---------- */
-struct global_obj {
-  stk_header header;
-  SCM name;
-  int index;             /* index in storage */
-};
-
-#define GLOBALP(o)              (BOXED_TYPE_EQ((p), tc_frame))
-#define GLOBAL_NAME(p)          (((struct global_obj *) (p))->name)
-#define GLOBAL_INDEX(p)         (((struct global_obj *) (p))->index)
-
-
-extern SCM **STk_global_store;             // the store for all global variables
-int STk_new_global_store_entry(SCM value); // return the index where value is stored
-SCM STk_new_global(SCM name, SCM value, int is_alias);
+extern SCM **STk_global_store;    // the store for all global variables
+int STk_reserve_store(void);      // -> the index where value will be stored
 
 
 /* ---------- Locals ---------- */

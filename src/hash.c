@@ -388,20 +388,20 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
     /* If variable was an alias, unalias it. */
     if (BOXED_INFO(z) & CONS_ALIAS) {    //FIXME: unalias function in env.c?
       /* We redefine an alias to a new value */
-      GLOBAL_INDEX(CDR(z)) = STk_new_global_store_entry(z);
+      CDR(z) = MAKE_INT(STk_reserve_store());
       BOXED_INFO(z)  &= ~CONS_ALIAS;
     }
 
     /* Finally set the variable to its new value */
-    STk_global_store[GLOBAL_INDEX(CDR(z))] = value;
+    STk_global_store[INT_VAL(CDR(z))] = value;
   } else {
     /* Enter the new variable in table */
-    z = STk_new_global(v, value, 0); // 0 => it's a new variable
+    z = MAKE_INT(STk_reserve_store());
     HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z), HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
-    STk_global_store[GLOBAL_INDEX(z)] = value;
+    STk_global_store[INT_VAL(z)] = value;
   }
 }
 
@@ -415,10 +415,10 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old, int ronly)
 
   if (z) {
     /* Variable already exists. Change its index*/
-    GLOBAL_INDEX(CDR(z)) = GLOBAL_INDEX(old);
+    CDR(z) = old;
   } else {
     /* Enter the new variable in table */
-    z = STk_cons(v, STk_new_global(v, old, 1));  // 1 => it's an alias
+    z = STk_cons(v, old);
     BOXED_INFO(z) |= CONS_ALIAS;
 
     HASH_BUCKETS(h)[index] = STk_cons(z, HASH_BUCKETS(h)[index]);
