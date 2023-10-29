@@ -1455,6 +1455,7 @@ int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
 
 int STk_init_vm(void);
+int STk_late_init_vm(void);   // run when env.c is fully initialized
 
 /*****************************************************************************/
 
