@@ -367,7 +367,7 @@ SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v)
 }
 
 
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define)
+void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value)
 {
   SCM z;
   int index;
@@ -375,13 +375,6 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
   z = hash_get_variable(h, v, &index);
 
   if (z) {
-    /* Variable already exists. Change its value*/
-    if (BOXED_INFO(z) & CONS_CONST) {
-      if (!define) {
-        STk_error("cannot set or redefine the symbol ~S in ~S",
-                  v, STk_current_module());
-      }
-    }
     /* It's a redefinition, not a new binding, clear the CONST bit: */
     BOXED_INFO(z) &= (~CONS_CONST);
 

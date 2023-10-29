@@ -96,8 +96,8 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s,
  * Function for accessing module hash table. Don't use them but the
  * higher level interface instead.
  */
+void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value);
 SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v);
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define);
 void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value);
 
 /*

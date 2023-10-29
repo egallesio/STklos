@@ -789,7 +789,7 @@ void STk_define_variable(SCM symbol, SCM value, SCM module)
 {
   if (BOXED_INFO(module) & MODULE_CONST)
     STk_error("cannot define symbol ~S in ~a", symbol, module);
-  STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
+  STk_hash_define_variable(&MODULE_HASH_TABLE(module), symbol, value);
 }
 
 
