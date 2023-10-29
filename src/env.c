@@ -49,8 +49,8 @@ SCM **STk_global_store; /* The store for all global variables */
 
 int STk_reserve_store(void)
 {
-  static int   global_store_len  = GLOBAL_STORAGE_INIT_SIZE;
-  static int   global_store_used = 0;
+  static int global_store_len  = GLOBAL_STORAGE_INIT_SIZE;
+  static int global_store_used = 0;
   MUT_DECL(global_store_lock);
 
   int res; // Build result in the mutex lock section
@@ -863,7 +863,7 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
   if (!res)
     STk_error_unbound_variable(old, old_module);
 
-  STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
+  STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res));
   return STk_void;
 }
 

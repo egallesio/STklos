@@ -405,8 +405,8 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
   }
 }
 
-//FIXME: virer le rdonly?
-void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old, int ronly)
+
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old)
 {
   SCM z;
   int index;
@@ -426,8 +426,7 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old, int ronly)
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
   }
-  //BOXED_INFO(z) |= CONS_ALIAS;
-  if (ronly) BOXED_INFO(z) |= CONS_CONST;
+  BOXED_INFO(z) |= CONS_CONST;
 }
 
 
