@@ -111,11 +111,11 @@ int STk_reserve_store(void)
 {
   static int global_store_len  = GLOBAL_STORAGE_INIT_SIZE;
   static int global_store_used = 0;
-  MUT_DECL(global_store_lock);
+  //MUT_DECL(global_store_lock);
 
   int res; // Build result in the mutex lock section
 
-  MUT_LOCK(global_store_lock);
+  //MUT_LOCK(global_store_lock);
 
   if (global_store_used >= global_store_len) { /* resize the checked  array */
     // fprintf(stderr, "**** Resizing storage from %d to %d\n", global_store_len,
@@ -127,7 +127,7 @@ int STk_reserve_store(void)
   }
   res = global_store_used++;
 
-  MUT_UNLOCK(global_store_lock);
+  //MUT_UNLOCK(global_store_lock);
   return res;
 }
 

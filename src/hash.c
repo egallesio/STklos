@@ -381,6 +381,7 @@ void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value)
     /* If variable was an alias, unalias it. */
     if (BOXED_INFO(z) & CONS_ALIAS) {    //FIXME: unalias function in env.c?
       /* We redefine an alias to a new value */
+      // STk_debug("Redefinition de ~S", v);
       CDR(z) = MAKE_INT(STk_reserve_store());
       BOXED_INFO(z)  &= ~CONS_ALIAS;
     }
@@ -412,14 +413,14 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old)
   } else {
     /* Enter the new variable in table */
     z = STk_cons(v, old);
-    BOXED_INFO(z) |= CONS_ALIAS;
 
     HASH_BUCKETS(h)[index] = STk_cons(z, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
   }
-  BOXED_INFO(z) |= CONS_CONST;
+  /* Retain that we have an alias (and that this symbol is read-only) */
+  BOXED_INFO(z) |= (CONS_CONST | CONS_ALIAS);
 }
 
 
