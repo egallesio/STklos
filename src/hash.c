@@ -39,6 +39,7 @@
  */
 
 #include "stklos.h"
+#include "vm.h"
 #include "hash.h"
 
 
@@ -379,24 +380,23 @@ void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value)
     BOXED_INFO(z) &= (~CONS_CONST);
 
     /* If variable was an alias, unalias it. */
-    if (BOXED_INFO(z) & CONS_ALIAS) {    //FIXME: unalias function in env.c?
+    if (BOXED_INFO(z) & CONS_ALIAS) {
       /* We redefine an alias to a new value */
-      // STk_debug("Redefinition de ~S", v);
       CDR(z) = MAKE_INT(STk_reserve_store());
       BOXED_INFO(z)  &= ~CONS_ALIAS;
     }
 
     /* Finally set the variable to its new value */
-    STk_global_store[INT_VAL(CDR(z))] = value;
   } else {
     /* Enter the new variable in table */
-    z = MAKE_INT(STk_reserve_store());
-    HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z), HASH_BUCKETS(h)[index]);
+    z = STk_cons(v, MAKE_INT(STk_reserve_store()));
+    HASH_BUCKETS(h)[index] = STk_cons(z, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
-    STk_global_store[INT_VAL(z)] = value;
   }
+
+  vm_global_set(z, value);
 }
 
 

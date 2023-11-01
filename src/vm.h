@@ -1,7 +1,7 @@
 /*
  * v m . h                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,6 +72,24 @@ struct continuation_obj {
 SCM STk_make_continuation(void);
 SCM STk_restore_cont(SCM cont, SCM val);
 
+// Fast access to read/write a global variable.
+// hv is the (not null) result of STk_hash_get_variable
+#define vm_global_ref(hv)    (STk_global_store[INT_VAL(CDR(hv))])
+#define vm_global_set(hv, v) do {                    \
+        STk_global_store[INT_VAL(CDR(hv))] = v; \
+    } while(0)
+
+
+/*===========================================================================*\
+ *
+ *                              G L O B A L S
+ *
+\*===========================================================================*/
+
+extern SCM **STk_global_store;    // the store for all global variables
+int STk_reserve_store(void);      // -> the index where value will be stored
+
+
 
 /*===========================================================================*\
  *
@@ -109,4 +127,3 @@ typedef struct {
 
 vm_thread_t *STk_allocate_vm(int stack_size);
 vm_thread_t *STk_get_current_vm(void);
-

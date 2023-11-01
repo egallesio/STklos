@@ -636,7 +636,7 @@ static inline SCM find_symbol_value(SCM symbol, SCM module)
 {
   SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
   if (res)
-    return STk_global_store[INT_VAL(CDR(res))];
+    return vm_global_ref(res);
   return NULL;
 }
 
@@ -737,7 +737,7 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
     SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), CAR(lst));
 
     /* Redefine symbol in (car lst) in SCHEME module */
-    STk_define_variable(CAR(lst), STk_global_store[INT_VAL(CDR(res))], Scheme_module);
+    STk_define_variable(CAR(lst), vm_global_ref(res), Scheme_module);
   }
   return STk_void;
 }
@@ -839,7 +839,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
   if (res) {
     *ref = res;
-    return STk_global_store[INT_VAL(CDR(res))];
+    return vm_global_ref(res);
   }
 
   // symbol was not found in the given env module. Try to find it in
@@ -849,7 +849,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
     if (res) {
       *ref = res;
-      return STk_global_store[INT_VAL(CDR(res))];
+      return vm_global_ref(res);
     }
   }
 

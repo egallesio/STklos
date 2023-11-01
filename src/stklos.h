@@ -478,11 +478,6 @@ void STk_signal(char *str);
   ------------------------------------------------------------------------------
 */
 
-extern SCM **STk_global_store;    // the store for all global variables
-int STk_reserve_store(void);      // -> the index where value will be stored
-
-
-/* ---------- Locals ---------- */
 struct frame_obj {
   stk_header header;
   SCM next_frame;

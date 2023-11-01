@@ -97,19 +97,19 @@ static inline void set_signal_mask(sigset_t mask)
 
 /*
  * All the global variables values of a program (from all modules) are stored
- * in the global_storage array. The global variable names of a module are
+ * in the global_store array. The global variable names of a module are
  * stored in a module hashtable (see hash.c). All the names with same hash
  * value are stored in a A-list of the form ((foo . i1) (bar . i2) ...) where
  * the value associated to a key it an integer (the index where the variable
  * is stored in STk_global_store).
  */
-#define GLOBAL_STORAGE_INIT_SIZE 3000 // ~3000 symbols used when we are in REPL
+#define GLOBAL_STORE_INIT_SIZE 3000 // ~3000 symbols used when we are in REPL
 
 SCM **STk_global_store; /* The store for all global variables */
 
 int STk_reserve_store(void)
 {
-  static int global_store_len  = GLOBAL_STORAGE_INIT_SIZE;
+  static int global_store_len  = GLOBAL_STORE_INIT_SIZE;
   static int global_store_used = 0;
   //MUT_DECL(global_store_lock);
 
@@ -1286,7 +1286,7 @@ CASE(GLOBAL_SET) {
     RELEASE_LOCK;
     STk_error("cannot mute the value of ~S in ~S", orig_operand, vm->current_module);
   }
-  STk_global_store[INT_VAL(CDR(ref))] = vm->val;
+  vm_global_set(ref, vm->val);
   /* patch the code for optimize next accesses */
   // vm->pc[-1] = add_global(CDR(ref));    FIXME: PB HERE!!!! XXXXXXXXXXXXXX
   vm->pc[-2] = UGLOBAL_SET;
@@ -1319,7 +1319,7 @@ CASE(UGLOBAL_SET) { /* Never produced by compiler */
 
   orig_operand = fetch_const();
   STk_lookup(orig_operand, vm->env, &ref, FALSE);
-  STk_global_store[INT_VAL(CDR(ref))] = vm->val;
+  vm_global_set(ref, vm->val);
   NEXT0;
  }
 
@@ -2431,7 +2431,7 @@ int STk_init_vm()
   DEFINE_XTYPE(continuation, &xtype_continuation);
 
   /* Initialize the global_store array */
-  STk_global_store = STk_must_malloc(GLOBAL_STORAGE_INIT_SIZE * sizeof(SCM));
+  STk_global_store = STk_must_malloc(GLOBAL_STORE_INIT_SIZE * sizeof(SCM));
   return TRUE;
 }
 
