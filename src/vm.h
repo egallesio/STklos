@@ -72,13 +72,6 @@ struct continuation_obj {
 SCM STk_make_continuation(void);
 SCM STk_restore_cont(SCM cont, SCM val);
 
-// Fast access to read/write a global variable.
-// hv is the (not null) result of STk_hash_get_variable
-#define vm_global_ref(hv)    (STk_global_store[INT_VAL(CDR(hv))])
-#define vm_global_set(hv, v) do {                    \
-        STk_global_store[INT_VAL(CDR(hv))] = v; \
-    } while(0)
-
 
 /*===========================================================================*\
  *
@@ -86,9 +79,28 @@ SCM STk_restore_cont(SCM cont, SCM val);
  *
 \*===========================================================================*/
 
-extern SCM **STk_global_store;    // the store for all global variables
-int STk_reserve_store(void);      // -> the index where value will be stored
+// The use of two arrays, rather than a struct, permit to avoid alignement
+// problems (on a 64 bits machine, it would take 16 bytes by variable, instead
+// of 5 with two arrays.
 
+extern SCM **STk_global_store;    // the store for all global variables
+extern uint8_t *STk_global_flags;  // Information on the store cells
+
+#define GLOBAL_CONST     (1 << 0)    // Global is RO
+#define GLOBAL_ALIAS     (1 << 2)    // Global is an alias
+#define GLOBAL_RESERVED  (1 << 3)
+
+
+int STk_reserve_store(void);      // -> the index where value will be stored
+SCM STk_global_store_define(SCM descr, SCM v, SCM value); // Define a new variable
+SCM STk_global_store_alias(SCM descr, SCM v, SCM old);    // Link v -> old
+
+// Fast access to read/write a global variable.
+// hv is the (not null) result of STk_hash_get_variable
+#define vm_global_ref(hv)    (STk_global_store[INT_VAL(CDR(hv))])
+#define vm_global_set(hv, v) do {                    \
+        STk_global_store[INT_VAL(CDR(hv))] = v; \
+    } while(0)
 
 
 /*===========================================================================*\

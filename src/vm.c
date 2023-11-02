@@ -115,7 +115,7 @@ int STk_reserve_store(void)
 
   int res; // Build result in the mutex lock section
 
-  //MUT_LOCK(global_store_lock);
+  //MUT_LOCK(global_store_lock);     //FIXME
 
   if (global_store_used >= global_store_len) { /* resize the checked  array */
     // fprintf(stderr, "**** Resizing storage from %d to %d\n", global_store_len,
@@ -127,9 +127,53 @@ int STk_reserve_store(void)
   }
   res = global_store_used++;
 
-  //MUT_UNLOCK(global_store_lock);
+  //MUT_UNLOCK(global_store_lock);  // FIXME
   return res;
 }
+
+
+SCM STk_global_store_define(SCM descr, SCM var, SCM value)
+{
+  // descr is
+  //  - NULL if variable var was not already defined
+  //  - a list of the form (var index [allocated index]) otherwise
+  // return value is a filled descriptor
+
+  if (!descr) {
+    /* Define a new variable (not defined before) */
+    descr = STk_cons(var, MAKE_INT(STk_reserve_store()));
+  } else {
+    /* It's a redefinition, not a new binding, clear the CONST bit */
+    BOXED_INFO(descr) &= (~CONS_CONST);
+
+    /* If variable was an alias, unalias it. */
+    if (BOXED_INFO(descr) & CONS_ALIAS) {
+      /* We redefine an alias to a new value */
+      CDR(descr) = MAKE_INT(STk_reserve_store());
+      BOXED_INFO(descr)  &= ~CONS_ALIAS;
+    }
+  }
+
+  /* Finally, set the variable to the given value */
+  vm_global_set(descr, value);
+  return descr;
+}
+
+SCM STk_global_store_alias(SCM descr, SCM v, SCM old)
+{
+  if (descr) {
+    /* Variable already exists. Change its index*/
+    CDR(descr) = old;
+  } else {
+    /* Enter the new variable in table */
+    descr = STk_cons(v, old);
+  }
+  /* Retain that we have an alias (and that this symbol is read-only) */
+  BOXED_INFO(descr) |= (CONS_CONST | CONS_ALIAS);
+
+  return descr;
+}
+
 
 
 /*===========================================================================*\
@@ -1305,7 +1349,7 @@ CASE(GLOBAL_SET) {
 //FIXME: CASE(UGLOBAL_SET) { /* Never produced by compiler */
 //FIXME:   /* Because of optimization, we may get re-dispatched to here. */
 //FIXME:   RELEASE_POSSIBLE_LOCK;
-//FIXME: 
+//FIXME:
 //FIXME:   fetch_global() = vm->val; NEXT0;
 //FIXME: }
 

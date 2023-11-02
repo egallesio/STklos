@@ -367,64 +367,39 @@ SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v)
   return hash_get_variable(h, v, &idx);
 }
 
-
 void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value)
 {
-  SCM z;
+  SCM z, new;
   int index;
 
-  z = hash_get_variable(h, v, &index);
+  z   = hash_get_variable(h, v, &index);
+  new = STk_global_store_define(z, v, value);
 
-  if (z) {
-    /* It's a redefinition, not a new binding, clear the CONST bit: */
-    BOXED_INFO(z) &= (~CONS_CONST);
-
-    /* If variable was an alias, unalias it. */
-    if (BOXED_INFO(z) & CONS_ALIAS) {
-      /* We redefine an alias to a new value */
-      CDR(z) = MAKE_INT(STk_reserve_store());
-      BOXED_INFO(z)  &= ~CONS_ALIAS;
-    }
-
-    /* Finally set the variable to its new value */
-  } else {
-    /* Enter the new variable in table */
-    z = STk_cons(v, MAKE_INT(STk_reserve_store()));
-    HASH_BUCKETS(h)[index] = STk_cons(z, HASH_BUCKETS(h)[index]);
+  if (!z) {
+    /* v was not define before, enter it in the module hash table */
+    HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
   }
-
-  vm_global_set(z, value);
 }
 
 
 void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old)
 {
-  SCM z;
+  SCM z, new;
   int index;
 
-  z = hash_get_variable(h, v, &index);
+  z   = hash_get_variable(h, v, &index);
+  new = STk_global_store_alias(z, v, old);
 
-  if (z) {
-    /* Variable already exists. Change its index*/
-    CDR(z) = old;
-  } else {
-    /* Enter the new variable in table */
-    z = STk_cons(v, old);
-
-    HASH_BUCKETS(h)[index] = STk_cons(z, HASH_BUCKETS(h)[index]);
+  if (!z) {
+    HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
   }
-  /* Retain that we have an alias (and that this symbol is read-only) */
-  BOXED_INFO(z) |= (CONS_CONST | CONS_ALIAS);
 }
-
-
-
 
 /*===========================================================================*\
  *
