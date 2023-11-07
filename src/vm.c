@@ -23,10 +23,6 @@
  *    Creation date:  1-Mar-2000 19:51 (eg)
  */
 
-// INLINER values
-// Voir FIX:
-
-
 #include "stklos.h"
 #include "object.h"
 #include "vm.h"
@@ -136,7 +132,8 @@ SCM STk_global_store_define(SCM descr, SCM var, SCM value)
 {
   // descr is
   //  - NULL if variable var was not already defined
-  //  - a list of the form (var index [allocated index]) otherwise
+  //  - a list of the form (var . index) otherwise where index locates the
+  //   index of the value in STk_global_store array
   // return value is a filled descriptor
 
   if (!descr) {
@@ -175,7 +172,6 @@ SCM STk_global_store_alias(SCM descr, SCM v, SCM old)
 }
 
 
-
 /*===========================================================================*\
  *
  *                      V M   S T A C K   &   C O D E
@@ -190,11 +186,11 @@ SCM STk_global_store_alias(SCM descr, SCM v, SCM old)
                          ((SCM*)(a) < &vm->stack[vm->stack_len]))
 
 /* ==== Code access macros ==== */
-#define fetch_next()    (*(vm->pc)++)
-#define fetch_const()   (vm->constants[fetch_next()])
-#define look_const()    (vm->constants[*(vm->pc)])
-#define fetch_global()  (*(checked_globals[(unsigned) fetch_next()]))
-
+#define fetch_next()           (*(vm->pc)++)
+#define fetch_const()          (vm->constants[fetch_next()])
+#define look_const()           (vm->constants[*(vm->pc)])
+#define fetch_global()         (STk_global_store[(unsigned) fetch_next()])
+#define global_var_index(ref)  ((unsigned)INT_VAL(CDR(ref)))
 
 
 /*===========================================================================*\
@@ -1114,8 +1110,8 @@ CASE(GLOBAL_REF) {
   }
 
   /* patch the code for optimize next accesses */
-  //XXX vm->pc[-1]  = add_global(CDR(ref));
-  //XXX vm->pc[-2]  = (orig_opcode == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
+  vm->pc[-1]  = global_var_index(ref);
+  vm->pc[-2]  = (orig_opcode == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
   RELEASE_LOCK;
   NEXT1;
 }
@@ -1147,9 +1143,8 @@ CASE(GLOBAL_REF_PUSH) {
   push(res);
 
   /* patch the code for optimize next accesses */
-  //FIXME:
-  //XXX vm->pc[-1]  = add_global(CDR(ref));
-  //XXX vm->pc[-2]  = UGLOBAL_REF_PUSH;
+  vm->pc[-1]  = global_var_index(ref);
+  vm->pc[-2]  = UGLOBAL_REF_PUSH;
   RELEASE_LOCK;
   NEXT1;
 }
@@ -1184,8 +1179,8 @@ CASE(GREF_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  //XXX vm->pc[-2]  = add_global(CDR(ref));
-  //XXX vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
+  vm->pc[-2]  = global_var_index(ref);
+  vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
   RELEASE_LOCK;
 
   /*and now invoke */
@@ -1227,9 +1222,9 @@ CASE(GREF_TAIL_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  //XXX vm->pc[-2]  = add_global(CDR(ref));
-  //XXX vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ?
-  //XXX                 UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
+  vm->pc[-2]  = global_var_index(ref);
+  vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ?
+                     UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
   RELEASE_LOCK;
 
   /* and now invoke */
@@ -1332,7 +1327,7 @@ CASE(GLOBAL_SET) {
   }
   vm_global_set(ref, vm->val);
   /* patch the code for optimize next accesses */
-  // vm->pc[-1] = add_global(CDR(ref));    FIXME: PB HERE!!!! XXXXXXXXXXXXXX
+  vm->pc[-1] = global_var_index(ref);
   vm->pc[-2] = UGLOBAL_SET;
 
   if (CLOSUREP(vm->val) && CLOSURE_NAME(vm->val) == STk_false) {
@@ -1346,26 +1341,13 @@ CASE(GLOBAL_SET) {
  }
 
 
-//FIXME: CASE(UGLOBAL_SET) { /* Never produced by compiler */
-//FIXME:   /* Because of optimization, we may get re-dispatched to here. */
-//FIXME:   RELEASE_POSSIBLE_LOCK;
-//FIXME:
-//FIXME:   fetch_global() = vm->val; NEXT0;
-//FIXME: }
-
-
 CASE(UGLOBAL_SET) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
-  SCM ref = NULL;
-  SCM orig_operand;
-
   RELEASE_POSSIBLE_LOCK;
 
-  orig_operand = fetch_const();
-  STk_lookup(orig_operand, vm->env, &ref, FALSE);
-  vm_global_set(ref, vm->val);
-  NEXT0;
- }
+  fetch_global() = vm->val; NEXT0;
+}
+
 
 CASE(LOCAL_SET0) { FRAME_LOCAL(vm->env, 0)           = vm->val; NEXT0;}
 CASE(LOCAL_SET1) { FRAME_LOCAL(vm->env, 1)           = vm->val; NEXT0;}
