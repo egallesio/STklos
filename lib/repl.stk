@@ -34,7 +34,8 @@
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
           repl-theme get-repl-color repl-show-startup-message
-          repl-add-command)
+          repl-add-command
+          @ @1 @2 @3 @4 @5 @*)
 
 ;;; In module REPL
 
@@ -46,6 +47,14 @@
 (define default-in  (current-input-port))
 (define default-out (current-output-port))
 (define default-err (current-error-port))
+
+(define @  #void)
+(define @1 #void)
+(define @2 #void)
+(define @3 #void)
+(define @4 #void)
+(define @5 #void)
+(define @* (list @1 @2 @3 @4 @5))
 
 #|
 <doc EXT repl-theme
@@ -135,7 +144,7 @@ doc>
  *                    (let ((cmd (or (getenv "EDITOR") "emacs")))
  *                      (system (string-append cmd " " (read-line) " 2>/dev/null")))))
  * @end lisp
- * 
+ *
  * NOTE: {{stklos}} has already a number of commands defined, but |repl-add-command| can be
  * useful to define you own command. A good place to add such a definition is in the
  * |stklosrc| file.
@@ -159,18 +168,23 @@ doc>
          (max-len (apply max (map string-length (map car lines)))))
 
     ;; Print all the lines aligned on max-len characters
-    (display (do-color (get-repl-color :help)  "Available Commands:\n"))
-
+    (display (do-color (get-repl-color :help)  "Available commands:\n"))
+    (display (do-color 'normal))
     (for-each (lambda (x)
-                (print "- "
+                (print " - "
                        (car x)
                        (make-string (- max-len (string-length (car x)))
                                     #\space)
                        " "
                        (cdr x)))
-              (reverse lines))) ;; to keep the declaation order
+              (reverse lines))) ;; to keep the declaration order
 
-  (display (do-color 'normal)))
+  ;; Print somme helps on the @ variables
+  (display (do-color (get-repl-color :help)  "\nAvailable variables:\n"))
+  (display (do-color 'normal))
+  (display "If not redefined by your program, the following variables are available\n")
+  (display " - @1 (aka @), @2, @3, @4, @5 contain the last REPL's computed values\n")
+  (display " - @* contains a list of @1, @2, @3, @4 and @5 values\n"))
 
 (define (do-repl-command name)
   (define (search-repl-command name)
@@ -201,7 +215,7 @@ doc>
                      (regexp-replace "\\s*$"
                                      (regexp-replace "^\\s*" str "")
                                      ""))))
-  
+
   ;; ==== backtrace
   (repl-add-command '(backtrace bt)
                     "Show the stack when last error occurred"
@@ -473,7 +487,25 @@ doc>
                                                 'normal)
                                       out)))
                         (else
-                           (for-each (lambda (x) (write-shared x out) (newline out))
+                         ;; Build @* REPl variable
+                         (case (length v)
+                           ((1) (set! @* (list (car v) @1 @2 @3 @4)))
+                           ((2) (set! @* (list (car v) (cadr v) @1 @2 @3)))
+                           ((3) (set! @* (list (car v) (cadr v) (caddr v) @1 @2)))
+                           ((4) (set! @* (list (car v) (cadr v) (caddr v) (cadddr v)
+                                               @1)))
+                           (else (set! @* (list (car v) (cadr v) (caddr v) (cadddr v)
+                                                (car (cddddr v))))))
+                         ;; Build @i variables
+                         (set! @5 (car (cddddr @*)))
+                         (set! @4 (cadddr @*))
+                         (set! @3 (caddr @*))
+                         (set! @2 (cadr @*))
+                         (set! @1 (car @*))
+                         (set! @ @1)                      ; @ is an alias on @1
+
+                         ;; Print values
+                         (for-each (lambda (x) (write-shared x out) (newline out))
                                      v)))
                       (flush-output-port out))))))))
       ;; Loop if we have not meet an EOF
