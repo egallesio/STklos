@@ -107,11 +107,11 @@ int STk_reserve_store(void)
 {
   static int global_store_len  = GLOBAL_STORE_INIT_SIZE;
   static int global_store_used = 0;
-  //MUT_DECL(global_store_lock);
-
+  MUT_DECL(store_lock);
+  
   int res; // Build result in the mutex lock section
 
-  //MUT_LOCK(global_store_lock);     //FIXME
+  MUT_LOCK(store_lock);
 
   if (global_store_used >= global_store_len) { /* resize the checked  array */
     // fprintf(stderr, "**** Resizing storage from %d to %d\n", global_store_len,
@@ -123,7 +123,7 @@ int STk_reserve_store(void)
   }
   res = global_store_used++;
 
-  //MUT_UNLOCK(global_store_lock);  // FIXME
+  MUT_UNLOCK(store_lock);
   return res;
 }
 
@@ -336,12 +336,6 @@ vm_thread_t *STk_allocate_vm(int stack_size)
  *                       M i s c .
  */
 
-#define CHECK_GLOBAL_INIT_SIZE  50
-static SCM** checked_globals;
-static int   checked_globals_len  = CHECK_GLOBAL_INIT_SIZE;
-static int   checked_globals_used = 0;
-MUT_DECL(global_lock);          /* the lock to access checked_globals */
-
 
 
 #define FIRST_BYTE(n)  ((n) >> 8)
@@ -533,29 +527,6 @@ static inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
   }
   return arity;
 }
-
-
-/* Add a new global reference to the table of checked references */
-static int add_global(SCM ref)
-{
-  SCM addr = BOX_VALUES(ref);
-  int i;
-
-  /* Search this global in the already accessed globals */
-  for (i = 0; i <  checked_globals_used; i++) {
-    if (checked_globals[i] == addr) return i;
-  }
-
-  /* Not present yet */
-  if (checked_globals_used >= checked_globals_len) { /* resize the checked  array */
-    checked_globals_len += checked_globals_len / 2;
-    checked_globals      = STk_must_realloc(checked_globals,
-                                            checked_globals_len * sizeof(SCM*));
-  }
-  checked_globals[checked_globals_used] = addr;
-  return checked_globals_used++;
-}
-
 
 /*===========================================================================*\
  *
@@ -966,6 +937,7 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 \*===========================================================================*/
 
 /*
+ * VM LOCKING
  * For optimization, some opcode/operand pairs get patched on the fly,
  * and replaced by another operation.  It's important that the two
  * reads (opcode and operand) happen atomically. If not, we can get this
@@ -994,6 +966,9 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *      operand at [n+1]
  *   4) Thread A resumes, updates operand at [n+1], releases lock
  */
+
+MUT_DECL(global_lock);  /* Lock to permit code patching */
+
 #define LOCK_AND_RESTART                     do{\
   if (!have_global_lock) {                      \
     MUT_LOCK(global_lock);                      \
@@ -2463,9 +2438,6 @@ int STk_init_vm()
 
 int STk_late_init_vm()
 {
-  /* Initialize the table of checked references */
-  checked_globals = STk_must_malloc(checked_globals_len * sizeof(SCM));
-
   /* Add the apply primitive */
   ADD_PRIMITIVE(scheme_apply);
   ADD_PRIMITIVE(execute);
