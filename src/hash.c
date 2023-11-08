@@ -39,6 +39,7 @@
  */
 
 #include "stklos.h"
+#include "vm.h"
 #include "hash.h"
 
 
@@ -341,8 +342,9 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s, SCM (*create
  *
  *
  * Here variable are the variables defined in a module. Keys are symbols.
- * The value associated to a bucket is an A-list (symbol . value) of all the
- * symbols with the same hash value
+ * The value associated to a bucket is an list of symbols with the same hash
+ * value. Each component of this lis is a tc_global_obj (a couple symbol +
+ * index of this variable in the global store.
  *
 \*===========================================================================*/
 
@@ -365,55 +367,16 @@ SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v)
   return hash_get_variable(h, v, &idx);
 }
 
-
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define)
+void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value)
 {
-  SCM z;
+  SCM z, new;
   int index;
 
-  z = hash_get_variable(h, v, &index);
+  z   = hash_get_variable(h, v, &index);
+  new = STk_global_store_define(z, v, value);
 
-  if (z) {
-    /* Variable already exists. Change its value*/
-    if (BOXED_INFO(z) & CONS_CONST)
-      if (!define) {
-        STk_error("cannot set or redefine the symbol ~S in ~S",
-                  v, STk_current_module());
-      }
-    /* It's a redefinition, not a new binding, so we not only allow
-       it, but also clear the CONST bit: */
-    BOXED_INFO(z) &= (~CONS_CONST);
-    *BOX_VALUES(CDR(z)) = value;
-  } else {
-    /* Create a new box for this value */
-    z = STk_make_box(value);
-
-    /* Enter the new variable in table */
-    HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z),
-                                      HASH_BUCKETS(h)[index]);
-    HASH_NENTRIES(h) += 1;
-    /* If the table has exceeded a decent size, rebuild it */
-    if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
-  }
-}
-
-void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
-{
-  SCM z;
-  int index;
-
-  z = hash_get_variable(h, v, &index);
-
-  if (z) {
-    /* Variable already exists. Change its value*/
-    if (ronly) BOXED_INFO(z) |= CONS_CONST;  // make the association read only
-    CDR(z) = value;
-  } else {
-    /* Enter the new variable in table */
-    SCM new = STk_cons(v, value);
-
-    if (ronly) BOXED_INFO(new) |= CONS_CONST; // ditto
-
+  if (!z) {
+    /* v was not define before, enter it in the module hash table */
     HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
@@ -422,7 +385,21 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
 }
 
 
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM old)
+{
+  SCM z, new;
+  int index;
 
+  z   = hash_get_variable(h, v, &index);
+  new = STk_global_store_alias(z, v, old);
+
+  if (!z) {
+    HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
+    HASH_NENTRIES(h) += 1;
+    /* If the table has exceeded a decent size, rebuild it */
+    if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
+  }
+}
 
 /*===========================================================================*\
  *

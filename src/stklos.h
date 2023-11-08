@@ -477,14 +477,13 @@ void STk_signal(char *str);
   ----
   ------------------------------------------------------------------------------
 */
+
 struct frame_obj {
   stk_header header;
   SCM next_frame;
   SCM owner;
   SCM locals[1];        /* the values associated to the names */
 };
-
-/* Note: boxes are used for global variables */
 
 #define FRAME_LENGTH(p)         (BOXED_INFO(p))
 #define FRAME_NEXT(p)           (((struct frame_obj *) (p))->next_frame)
@@ -644,6 +643,7 @@ struct cons_obj {
 #define CONS_CONST              (1 << 0)
 #define CONS_PLACEHOLDER        (1 << 1)        /* used for #n= and #n# notation */
 #define CONS_ECONS              (1 << 2)        /* used for extended conses      */
+#define CONS_ALIAS              (1 << 3)        /* used for implementing aliases */
 
 #define LIST1(a)                 STk_cons((a), STk_nil)
 #define LIST2(a,b)               STk_cons((a), LIST1(b))
@@ -1450,6 +1450,7 @@ int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
 
 int STk_init_vm(void);
+int STk_late_init_vm(void);   // run when env.c is fully initialized
 
 /*****************************************************************************/
 

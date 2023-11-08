@@ -20,7 +20,11 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-(define-module srfi/230
+
+(define-module srfi/230)
+
+(unless (eq? (%thread-system) 'none)
+  (select-module srfi/230)
   (export memory-order
           memory-order?
           make-atomic-flag
@@ -52,196 +56,196 @@
           atomic-pair-compare-and-swap!
           atomic-fence)
   (import ;;(scheme base)
-          ;;(scheme case-lambda)
-          ;;(srfi 9)
-          (srfi 18)
-          ;;(srfi 143) no need, it's STklos native!
-          )
+   ;;(scheme case-lambda)
+   ;;(srfi 9)
+   (srfi 18)
+   ;;(srfi 143) no need, it's STklos native!
+   )
 
-    ;; Internals
+  ;; Internals
 
-    (define lock (make-mutex))
+  (define lock (make-mutex))
 
-    (define-syntax lock-guard
-      (syntax-rules ()
-        ((lock-guard . body)
-         (dynamic-wind
-           (lambda ()
-             (guard
-                 (c
-                  ((abandoned-mutex-exception? c)
-                   #f))
-               (mutex-lock! lock)))
-           (lambda () . body)
-           (lambda ()
-             (mutex-unlock! lock))))))
+  (define-syntax lock-guard
+    (syntax-rules ()
+      ((lock-guard . body)
+       (dynamic-wind
+         (lambda ()
+           (guard
+               (c
+                ((abandoned-mutex-exception? c)
+                 #f))
+             (mutex-lock! lock)))
+         (lambda () . body)
+         (lambda ()
+           (mutex-unlock! lock))))))
 
-    ;; Memory orders
+  ;; Memory orders
 
-    ;; Note: On an R6RS system, the following syntax and procedure would be
-    ;; implemented as an enumeration type.
+  ;; Note: On an R6RS system, the following syntax and procedure would be
+  ;; implemented as an enumeration type.
 
-    (define-syntax memory-order
-      (syntax-rules ()
-        ((memory-order symbol) 'symbol)))
+  (define-syntax memory-order
+    (syntax-rules ()
+      ((memory-order symbol) 'symbol)))
 
-    (define (memory-order? obj)
-      (and (memq
-            obj
-            '(relaxed acquire release acquire-release sequentially-consistent))
-           #t))
+  (define (memory-order? obj)
+    (and (memq
+          obj
+          '(relaxed acquire release acquire-release sequentially-consistent))
+         #t))
 
-    ;; Atomic flags
+  ;; Atomic flags
 
-    (define-record-type atomic-flag
-      (%make-atomic-flag content)
-      atomic-flag?
-      (content atomic-flag-content atomic-flag-set-content!))
+  (define-record-type atomic-flag
+    (%make-atomic-flag content)
+    atomic-flag?
+    (content atomic-flag-content atomic-flag-set-content!))
 
-    (define (make-atomic-flag)
-      (%make-atomic-flag #f))
+  (define (make-atomic-flag)
+    (%make-atomic-flag #f))
 
-    (define (atomic-flag-test-and-set! flag . o)
-      (lock-guard
-       (let ((prev (atomic-flag-content flag)))
-         (atomic-flag-set-content! flag #t)
-         prev)))
+  (define (atomic-flag-test-and-set! flag . o)
+    (lock-guard
+     (let ((prev (atomic-flag-content flag)))
+       (atomic-flag-set-content! flag #t)
+       prev)))
 
-    (define (atomic-flag-clear! flag . o)
-      (lock-guard
-       (atomic-flag-set-content! flag #f)))
+  (define (atomic-flag-clear! flag . o)
+    (lock-guard
+     (atomic-flag-set-content! flag #f)))
 
-    ;; Atomic boxes
+  ;; Atomic boxes
 
-    (define-record-type atomic-box
-      (make-atomic-box content)
-      atomic-box?
-      (content atomic-box-content atomic-box-set-content!))
+  (define-record-type atomic-box
+    (make-atomic-box content)
+    atomic-box?
+    (content atomic-box-content atomic-box-set-content!))
 
-    (define (atomic-box-ref box . o)
-      (lock-guard
-       (atomic-box-content box)))
+  (define (atomic-box-ref box . o)
+    (lock-guard
+     (atomic-box-content box)))
 
-    (define (atomic-box-set! box obj . o)
-      (lock-guard
-       (atomic-box-set-content! box obj)))
+  (define (atomic-box-set! box obj . o)
+    (lock-guard
+     (atomic-box-set-content! box obj)))
 
-    (define (atomic-box-swap! box obj . o)
-      (lock-guard
-       (let ((prev (atomic-box-content box)))
-         (atomic-box-set-content! box obj)
-         prev)))
+  (define (atomic-box-swap! box obj . o)
+    (lock-guard
+     (let ((prev (atomic-box-content box)))
+       (atomic-box-set-content! box obj)
+       prev)))
 
-    (define (atomic-box-compare-and-swap! box expected desired . o)
-      (lock-guard
-       (let ((actual (atomic-box-content box)))
-         (when (eq? expected actual)
-           (atomic-box-set-content! box desired))
-         actual)))
+  (define (atomic-box-compare-and-swap! box expected desired . o)
+    (lock-guard
+     (let ((actual (atomic-box-content box)))
+       (when (eq? expected actual)
+         (atomic-box-set-content! box desired))
+       actual)))
 
-    ;; Atomic fixnum boxes
+  ;; Atomic fixnum boxes
 
-    (define-record-type atomic-fxbox
-      (make-atomic-fxbox content)
-      atomic-fxbox?
-      (content atomic-fxbox-content atomic-fxbox-set-content!))
+  (define-record-type atomic-fxbox
+    (make-atomic-fxbox content)
+    atomic-fxbox?
+    (content atomic-fxbox-content atomic-fxbox-set-content!))
 
-    (define (atomic-fxbox-ref box . o)
-      (lock-guard
-       (atomic-fxbox-content box)))
+  (define (atomic-fxbox-ref box . o)
+    (lock-guard
+     (atomic-fxbox-content box)))
 
-    (define (atomic-fxbox-set! box obj . o)
-      (lock-guard
-       (atomic-fxbox-set-content! box obj)))
+  (define (atomic-fxbox-set! box obj . o)
+    (lock-guard
+     (atomic-fxbox-set-content! box obj)))
 
-    (define (atomic-fxbox-swap! box obj . o)
-      (lock-guard
-       (let ((prev (atomic-fxbox-content box)))
-         (atomic-fxbox-set-content! box obj)
-         prev)))
+  (define (atomic-fxbox-swap! box obj . o)
+    (lock-guard
+     (let ((prev (atomic-fxbox-content box)))
+       (atomic-fxbox-set-content! box obj)
+       prev)))
 
-    (define (atomic-fxbox-compare-and-swap! box expected desired . o)
-      (lock-guard
-       (let ((actual (atomic-fxbox-content box)))
-         (when (fx=? expected actual)
-           (atomic-fxbox-set-content! box desired))
-         actual)))
+  (define (atomic-fxbox-compare-and-swap! box expected desired . o)
+    (lock-guard
+     (let ((actual (atomic-fxbox-content box)))
+       (when (fx=? expected actual)
+         (atomic-fxbox-set-content! box desired))
+       actual)))
 
-    (define (atomic-fxbox+/fetch! box n . o)
-      (lock-guard
-       (let ((prev (atomic-fxbox-content box)))
-         (atomic-fxbox-set-content! box (fx+ n prev))
-         prev)))
+  (define (atomic-fxbox+/fetch! box n . o)
+    (lock-guard
+     (let ((prev (atomic-fxbox-content box)))
+       (atomic-fxbox-set-content! box (fx+ n prev))
+       prev)))
 
-    (define (atomic-fxbox-/fetch! box n . o)
-      (lock-guard
-       (let ((prev (atomic-fxbox-content box)))
-         (atomic-fxbox-set-content! box (fx- n prev))
-         prev)))
+  (define (atomic-fxbox-/fetch! box n . o)
+    (lock-guard
+     (let ((prev (atomic-fxbox-content box)))
+       (atomic-fxbox-set-content! box (fx- n prev))
+       prev)))
 
-    (define (atomic-fxbox-and/fetch! box n . o)
-      (lock-guard
-       (let ((prev (atomic-fxbox-content box)))
-         (atomic-fxbox-set-content! box (fxand n prev))
-         prev)))
+  (define (atomic-fxbox-and/fetch! box n . o)
+    (lock-guard
+     (let ((prev (atomic-fxbox-content box)))
+       (atomic-fxbox-set-content! box (fxand n prev))
+       prev)))
 
-    (define (atomic-fxbox-ior/fetch! box n . o)
-      (lock-guard
-       (let ((prev (atomic-fxbox-content box)))
-         (atomic-fxbox-set-content! box (fxior n prev))
-         prev)))
+  (define (atomic-fxbox-ior/fetch! box n . o)
+    (lock-guard
+     (let ((prev (atomic-fxbox-content box)))
+       (atomic-fxbox-set-content! box (fxior n prev))
+       prev)))
 
-    (define (atomic-fxbox-xor/fetch! box n . o)
-      (lock-guard
-       (let ((prev (atomic-fxbox-content box)))
-         (atomic-fxbox-set-content! box (fxxor n prev))
-         prev)))
+  (define (atomic-fxbox-xor/fetch! box n . o)
+    (lock-guard
+     (let ((prev (atomic-fxbox-content box)))
+       (atomic-fxbox-set-content! box (fxxor n prev))
+       prev)))
 
-    ;; Atomic pairs
+  ;; Atomic pairs
 
-    (define-record-type atomic-pair
-      (make-atomic-pair car cdr)
-      atomic-pair?
-      (car atomic-pair-car atomic-pair-set-car!)
-      (cdr atomic-pair-cdr atomic-pair-set-cdr!))
+  (define-record-type atomic-pair
+    (make-atomic-pair car cdr)
+    atomic-pair?
+    (car atomic-pair-car atomic-pair-set-car!)
+    (cdr atomic-pair-cdr atomic-pair-set-cdr!))
 
-    (define (atomic-pair-ref pair . o)
-      (lock-guard
-       (values
-        (atomic-pair-car pair)
-        (atomic-pair-cdr pair))))
+  (define (atomic-pair-ref pair . o)
+    (lock-guard
+     (values
+      (atomic-pair-car pair)
+      (atomic-pair-cdr pair))))
 
-    (define (atomic-pair-set! pair car cdr . o)
-      (lock-guard
+  (define (atomic-pair-set! pair car cdr . o)
+    (lock-guard
+     (atomic-pair-set-car! pair car)
+     (atomic-pair-set-cdr! pair cdr)))
+
+  (define (atomic-pair-swap! pair car cdr . o)
+    (lock-guard
+     (let ((prev-car (atomic-pair-car pair))
+           (prev-cdr (atomic-pair-cdr pair)))
        (atomic-pair-set-car! pair car)
-       (atomic-pair-set-cdr! pair cdr)))
+       (atomic-pair-set-cdr! pair cdr)
+       (values prev-car prev-cdr))))
 
-    (define (atomic-pair-swap! pair car cdr . o)
-      (lock-guard
-       (let ((prev-car (atomic-pair-car pair))
-             (prev-cdr (atomic-pair-cdr pair)))
-         (atomic-pair-set-car! pair car)
-         (atomic-pair-set-cdr! pair cdr)
-         (values prev-car prev-cdr))))
+  (define (atomic-pair-compare-and-swap! pair
+                                         expected-car expected-cdr
+                                         desired-car desired-cdr
+                                         . o)
+    (lock-guard
+     (let ((actual-car (atomic-pair-car pair))
+           (actual-cdr (atomic-pair-cdr pair)))
+       (when (and (eq? expected-car actual-car)
+                  (eq? expected-cdr actual-cdr))
+         (atomic-pair-set-car! pair desired-car)
+         (atomic-pair-set-cdr! pair desired-cdr))
+       (values actual-car actual-cdr))))
 
-    (define (atomic-pair-compare-and-swap! pair
-                                           expected-car expected-cdr
-                                           desired-car desired-cdr
-                                           . o)
-      (lock-guard
-       (let ((actual-car (atomic-pair-car pair))
-             (actual-cdr (atomic-pair-cdr pair)))
-         (when (and (eq? expected-car actual-car)
-                    (eq? expected-cdr actual-cdr))
-           (atomic-pair-set-car! pair desired-car)
-           (atomic-pair-set-cdr! pair desired-cdr))
-         (values actual-car actual-cdr))))
+  ;; Memory synchronization
 
-    ;; Memory synchronization
+  (define (atomic-fence . o)
+    (lock-guard (if #f #f)))
 
-    (define (atomic-fence . o)
-      (lock-guard (if #f #f)))
-
-) ;; END of define-module
+  ) 
 
 (provide "srfi/230")
