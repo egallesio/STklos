@@ -65,7 +65,9 @@
   (include "equiv.stk")           ; equivalence of circular structures
   (include "time.stk")            ; Dates & Time
   (include "logical.stk")         ; Logical operations
-  (include "thread.stk")          ; Thread support
+  (unless (eq? (%thread-system)
+               'none)
+    (include "thread.stk"))       ; Thread support
   (include "ffi.stk")             ; FFI support
   (include "r7rs.stk")            ; Support of R7RS
   (include "load.stk")            ; Extended load dealing with paths and suffixes

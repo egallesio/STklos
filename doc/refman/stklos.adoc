@@ -75,7 +75,9 @@ Free Documentation License">>.
 {{Include* "match.adoc"}}
 {{Include* "cond.adoc"}}
 {{Include* "object.adoc"}}
-{{Include* "threads.adoc"}}
+{{If (not (eq? (%thread-system) 'none))}}
+  {{Include* "threads.adoc"}}
+{{End}}
 {{Include* "custom.adoc"}}
 {{Include* "ffi.adoc"}}
 {{Include* "slib.adoc"}}
