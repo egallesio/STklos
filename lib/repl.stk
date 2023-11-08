@@ -265,7 +265,7 @@ doc>
                     (lambda () (manual (simple-trim (read-line)))))
   ;; ==== apropos
   (repl-add-command '(apropos a)
-                    "Search for symbol in documentation"
+                    "Search for symbols containing a given string"
                     (lambda () (print (apropos (simple-trim (read-line))))))
   ;; ==== help
   (repl-add-command

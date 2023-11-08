@@ -76,6 +76,8 @@ of available commands is given below.
 - **,import** (or  **,i**): Import a library
 - **,require-feature** (or **,r**):  Require a feature
 - **,open** (or **,o**): Open file or URL
+- **,manual** (or **,m**): Search reference manual
+- **,apropos** (or **,a**): Search symbols containing a given string
 - **,version** (or **,v**): Show version
 - **,help** (or **,?** or **,h*): Show help on REPL command with
     parameter. With a parameter, display the help of this parameter

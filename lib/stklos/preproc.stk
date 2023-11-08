@@ -252,8 +252,9 @@
         (set! ch (read-char port)))
 
       (if (eof-object? ch)
-          (unless (null? *print-stack*)
-            (error "unclosed if/else"))      ;; FIXME: add opening line
+          'nothing 
+          ;;(unless (null? *print-stack*)
+          ;;  (error "unclosed if/else"))      ;; FIXME: add opening line and FILE
           (let ((val (cond
                       ((eq? prev #\\)
                        ch)
