@@ -182,14 +182,16 @@
    (apply string-append
           (map (lambda (x) (format "(((~A)))\n" x)) (cons name similar)))
    ;; Display type
+   "[.rmargin]\n"
    "[.text-right]\n"
-   (format "[.rmargin.small]#~a#\n" (show-type type))
+   (format "[.rmargin.small.silver]#~a#\n" (show-type type))
    ;; Make a box
    "****\n"
    ;; Display the synopsis
    "[.small]\n"
    (apply string-append
-          (map (lambda (x) (format "*`~a`* +\n" x)) synopsis))   ; "*+~a+* +\n"
+          (map (lambda (x) (format "`**~a **` +\n" x)) ; Let a space before closing "**"
+               synopsis))
    "****\n"
    ;; Display the description text
    (process-string (rewrite-for-adoc txt))
