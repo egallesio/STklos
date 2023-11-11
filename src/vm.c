@@ -967,26 +967,26 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *   4) Thread A resumes, updates operand at [n+1], releases lock
  */
 
-MUT_DECL(global_lock);  /* Lock to permit code patching */
+MUT_DECL(global_code_lock);  /* Lock to permit code patching */
 
 #define LOCK_AND_RESTART                     do{\
-  if (!have_global_lock) {                      \
-    MUT_LOCK(global_lock);                      \
-    have_global_lock=1;                         \
+  if (!have_code_lock) {                        \
+    MUT_LOCK(global_code_lock);                 \
+    have_code_lock=1;                           \
     (vm->pc)--;                                 \
     NEXT;                                       \
   }                                             \
 }while(0)
 #define RELEASE_LOCK                         do{\
    {                                            \
-    MUT_UNLOCK(global_lock);                    \
-    have_global_lock=0;                         \
+    MUT_UNLOCK(global_code_lock);               \
+    have_code_lock=0;                           \
    }                                            \
 }while(0)
 #define RELEASE_POSSIBLE_LOCK                do{\
-  if (have_global_lock) {                       \
-    MUT_UNLOCK(global_lock);                    \
-    have_global_lock=0;                         \
+  if (have_code_lock) {                         \
+    MUT_UNLOCK(global_code_lock);               \
+    have_code_lock=0;                           \
   }                                             \
 }while(0)
 
@@ -996,7 +996,7 @@ static void run_vm(vm_thread_t *vm)
   jbuf jb;
   int16_t tailp;
   volatile int offset,
-               have_global_lock = 0;     /* if true, we're patching the code */
+               have_code_lock = 0;     /* if true, we're patching the code */
   int nargs=0;
 
 #if defined(USE_COMPUTED_GOTO)
