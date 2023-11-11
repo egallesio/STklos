@@ -21,7 +21,9 @@
 :docinfodir: ../lib/theme
 :docinfo: shared
 
-{{load "adoc-lib.stk"}}
+// Load the general adoc library and the refman specific one
+{{load "../lib/adoc-lib.stk"}}
+{{load "refman-lib.stk"}}
 
 [preface]
 == Preface
