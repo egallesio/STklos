@@ -21,8 +21,9 @@
 :docinfodir: ../lib/theme
 :docinfo: shared
 
-
-{{load "adoc-lib.stk"}}
+// Load the general adoc library and the refman specific one
+{{load "../lib/adoc-lib.stk"}}
+{{load "refman-lib.stk"}}
 
 [preface]
 == Preface
@@ -52,8 +53,8 @@ following URL: https://www.gnu.org/licenses/gpl-3.0.html
 * The manual you’re now reading is published under the terms of the
 _GNU Free Documentation License or later_ (see <<FDL>>).
 
-
-{{If (equal? doc-fmt "pdf")}}{{empty-line 14}} {{End}}
+{{empty-line 1}}
+{{If (equal? doc-fmt "pdf")}}{{empty-line 13}}{{End}}
 
 ****
 Copyright © 1999-{{date-year (current-date)}} Erick Gallesio
