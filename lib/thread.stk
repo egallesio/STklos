@@ -116,7 +116,7 @@ doc>
  * `#t`.
 doc>
 |#
-(define thread-handler-error-show (make-parameter #t))
+(define-parameter thread-handler-error-show #t)
 
 
 (define (thread-sleep! timeout)

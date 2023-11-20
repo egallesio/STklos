@@ -681,6 +681,7 @@ primivitives to acess environment variables.
 {{insertdoc 'get-environment-variables}}
 
 {{insertdoc 'build-path-from-shell-variable}}
+{{insertdoc 'install-path}}
 
 ==== Time
 {{insertdoc 'current-second}}
@@ -938,6 +939,7 @@ you plan to port your program on another system.
 See SRFI document for more information.
 
 {{insertdoc 'make-parameter}}
+{{insertdoc 'define-parameter}}
 {{insertdoc 'parameterize}}
 {{insertdoc 'parameter?}}
 
@@ -958,7 +960,7 @@ See SRFI document for more information.
 {{insertdoc 'error-object-location}}
 {{insertdoc 'require-extension}}
 {{insertdoc 'require-feature}}
-{{insertdoc 'repl}}
+
 [#assume]
 {{insertdoc 'assume}}
 ((("SRFI-176")))
@@ -966,6 +968,10 @@ See SRFI document for more information.
 {{insertdoc 'apropos}}
 {{insertdoc 'help}}
 {{insertdoc 'describe}}
+{{insertdoc 'default-browser}}
+{{insertdoc 'open-in-browser}}
+{{insertdoc 'manual}}
+
 
 {{insertdoc 'trace}}
 {{insertdoc 'untrace}}

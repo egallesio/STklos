@@ -2,7 +2,7 @@
  *
  * h a s h  . h                 -- Hash Tables
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2023 Erick Gallesio <eg@stklos.net>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -96,9 +96,9 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s,
  * Function for accessing module hash table. Don't use them but the
  * higher level interface instead.
  */
+void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value);
 SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v);
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define);
-void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly);
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value);
 
 /*
  * Utilities on hash tables

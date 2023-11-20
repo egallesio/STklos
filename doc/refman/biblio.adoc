@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -27,6 +27,8 @@
 
 * [[[GTK]]] http://gtk.org/[*The GTK+ Toolkit Home Page*]
 
+* [[[Libedit]]] https://www.thrysoee.dk/editline[Editline library (libedit)]
+
 * [[[PCRE]]] Philip Hazel -- http://pcre.org/[*PCRE (Perl Compatible Regular Expressions)*]
   Home page.
 
@@ -43,6 +45,8 @@ with Intelligent Backtrack* -- Workshop in Static Analysis, Bigre, (81--82), Bor
 * [[[R7RS]]] Alex S. Shinn, John Cowan and Arthur A. Gleckler --
   https://small.r7rs.org/attachment/r7rs.pdf[*The Revised7 Report on the Algorithmic Language Scheme -- R7RS small*]
   -- July, 2013.
+
+* [[[Readline]]] The GNU https://tiswww.case.edu/php/chet/readline/rltop.html[readline] library.
 
 * [[[SLIB]]] Aubrey Jaffer  -- https://people.csail.mit.edu/jaffer/SLIB[*The SLIB Portable Scheme Library Home Page*]
 

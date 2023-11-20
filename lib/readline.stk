@@ -129,7 +129,7 @@
 
 ;; The parameter rl-completer-function contains the function used
 ;; to complete strings It defaults to default-complete-function
-(define rl-completer-function (make-parameter default-complete-function))
+(define-parameter rl-completer-function default-complete-function)
 
 #|
   As an example, here is another completer function. This one tries to find

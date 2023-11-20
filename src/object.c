@@ -62,7 +62,7 @@ static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number,
            Liste, Null, Real, Complex, Rational, Integer, Fixnum, Bignum,
            Eof, Keyword, Struct_type, Struct, Cond, Cond_type, Box, Syntax,
            Uvector, Bytevector, Port, Input_port, Output_port, Hash_table,
-           UnknownClass;
+           Parameter, UnknownClass;
 
 
 int STk_oo_initialized = FALSE;
@@ -920,6 +920,7 @@ static void make_standard_classes(void)
   mk_cls(&Box,          "<box>",        Class,           Top,       STk_nil);
   mk_cls(&UnknownClass, "<unknown>",    Class,           Top,       STk_nil);
   mk_cls(&Procedure,    "<procedure>",  Procedure_class, Top,       STk_nil);
+  mk_cls(&Parameter,    "<parameter>",  Procedure_class, Procedure, STk_nil);
   mk_cls(&Syntax,       "<syntax>",     Class,           Top,       STk_nil);
   mk_cls(&Port,         "<port>",       Class,           Top,       STk_nil);
   mk_cls(&Input_port,   "<input-port>", Class,           Port,      STk_nil);
@@ -1050,6 +1051,7 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
                                Bytevector: Uvector;
     case tc_port:       return IPORTP(obj)? Input_port: Output_port;
     case tc_hash_table: return Hash_table;
+    case tc_parameter:  return Parameter;
     default: ;
   }
 
