@@ -1,7 +1,5 @@
 STklos (version 2.00)
 =====================
-
-
 **Erick Gallesio** <eg(at)stklos.net>
 
 
@@ -80,7 +78,7 @@ library thanks to the new **curl** extension.
 SRFI Support
 ------------
 
-The current version of STklos supports mre than 120 final SRFIs (a
+The current version of STklos supports more than 120 final SRFIs (a
 complete list of implemented SRFIs is available in the file
 SUPPORTED-SRFIS in the distribution). The goal is to support as many
 final SRFIs as possible.  Any help on implementing other SRFIs on
