@@ -145,9 +145,9 @@ doc>
  *                      (system (string-append cmd " " (read-line) " 2>/dev/null")))))
  * @end lisp
  *
- * NOTE: {{stklos}} has already a number of commands defined, but |repl-add-command| can be
- * useful to define you own command. A good place to add such a definition is in the
- * |stklosrc| file.
+ * NOTE: {{stklos}} has already a number of commands defined, but
+ * |repl-add-command| can be  useful to define your own commrand. A good place to add
+ * such a definition is in the |stklosrc| file.
 doc>
 |#
 (define (repl-add-command names doc func)
