@@ -231,7 +231,7 @@ doc>
 
   ;; ==== ls
   (repl-add-command 'ls
-                    "List directory content"
+                    "List directory content (accepts usual arguments to ls such as -l etc)"
                     (lambda () (system (string-append "ls " (read-line)))))
 
   ;; ==== quit
@@ -265,10 +265,9 @@ doc>
                     (lambda () (require-feature (read))))
   ;; ==== open
   (repl-add-command '(open o)
-                    "Open file or URL"
-                    (lambda ()
-                      (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
-                        (system (string-append cmd " " (read-line) " 2>/dev/null")))))
+                    "Open file or URL with the default browser"
+                    (lambda () (open-in-browser (read-line))))
+
   ;; ==== describe
   (repl-add-command '(describe d)
                     "Describe an object"
