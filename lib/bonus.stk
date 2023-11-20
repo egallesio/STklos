@@ -2352,7 +2352,7 @@ doc>
  * implementation is running.
 doc>
 |#
-(define (os-name)          (vector-ref (%uname) 0)) ; Posix sysname field
+;(define (os-name)          (vector-ref (%uname) 0)) ; Posix sysname field
 
 
 #|

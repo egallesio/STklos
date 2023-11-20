@@ -1945,6 +1945,16 @@ DEFINE_PRIMITIVE("%uname", uname, subr0, (void))
   return z;
 }
 
+DEFINE_PRIMITIVE("os-name", os_name, subr0, (void))
+{
+  struct utsname name;
+
+  if (uname(&name) != 0) {
+    error_posix(NULL, NULL);
+  }
+  return STk_Cstring2string(name.sysname);
+}
+
 
 int STk_init_system(void)
 {
@@ -2040,5 +2050,6 @@ int STk_init_system(void)
   ADD_PRIMITIVE(big_endianp);
   ADD_PRIMITIVE(get_locale);
   ADD_PRIMITIVE(uname);
+  ADD_PRIMITIVE(os_name);
   return TRUE;
 }
