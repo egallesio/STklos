@@ -265,7 +265,13 @@ doc>
                     (lambda () (require-feature (read))))
   ;; ==== open
   (repl-add-command '(open o)
-                    "Open file or URL with the default browser"
+                    "Open file or URL"
+                    (lambda ()
+                      (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
+                        (system (string-append cmd " " (read-line) " 2>/dev/null")))))
+  ;; ==== browse
+  (repl-add-command '(browse b)
+                    "Browse file or URL with the default browser"
                     (lambda () (open-in-browser (read-line))))
 
   ;; ==== describe
