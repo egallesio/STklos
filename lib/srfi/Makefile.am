@@ -53,7 +53,6 @@ SRC_STK   = 1.stk   \
             22.stk  \
             23.stk  \
             26.stk  \
-            27.stk  \
             28.stk  \
             29.stk  \
             31.stk  \
@@ -166,7 +165,6 @@ SRC_OSTK =  1.ostk   \
             22.ostk  \
             23.ostk  \
             26.ostk  \
-            27.ostk  \
             28.ostk  \
             29.ostk  \
             31.ostk  \
@@ -263,9 +261,9 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c        170.c      175.c      238.c
-SRC_C_STK = 25.stk      170.stk    175.stk    238.stk
-SRC_SHOBJ = 25.$(SO)    170.$(SO)  175.$(SO)  238.$(SO)
+SRC_C     = 25.c      27.c      170.c      175.c      238.c
+SRC_C_STK = 25.stk    27.stk    170.stk    175.stk    238.stk
+SRC_SHOBJ = 25.$(SO)  27.$(SO)  170.$(SO)  175.$(SO)  238.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 

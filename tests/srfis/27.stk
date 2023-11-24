@@ -1,0 +1,133 @@
+(test "srfi-27 random-source? 1"
+      #t
+      (random-source? default-random-source))
+
+(define s (make-random-source))
+
+(test "srfi-27 random-source? 2"
+      #t
+      (random-source? s))
+
+(test "srfi-27 random-state? 1"
+      #t
+      (random-state? (random-source-state-ref default-random-source)))
+
+(test "srfi-27 random-state? 2"
+      #t
+      (random-state? (random-source-state-ref s)))
+
+(let ((bound 1000))
+  (dotimes (i 100)
+    (let ((num ((random-source-make-integers s) bound)))
+      (test "srfi-27 random integer type - fixnum"
+            #t
+            (integer? num))
+      (test "srfi-27 random integer < bound - fixnum"
+            #t
+            (< num bound))
+      (test "srfi-27 random integer non-negative - fixnum"
+            #f
+            (negative? num)))))
+
+(let ((bound (expt 2 80))) ;; bignum
+  (dotimes (i 100)
+    (let ((num ((random-source-make-integers s) bound)))
+      (test "srfi-27 random integer type - bignum"
+            #t
+            (integer? num))
+      (test "srfi-27 random integer < bound - bignum"
+            #t
+            (< num bound))
+      (test "srfi-27 random integer non-negative - bignum"
+            #f
+            (negative? num)))))
+
+(dotimes (i 100)
+  (let ((num ((random-source-make-reals s))))
+    (test "srfi-27 random real type"
+          #t
+          (real? num))
+    (test "srfi-27 random real < 1.0"
+          #t
+          (< num 1.0))
+    (test "srfi-27 random real non-negative"
+          #f
+          (negative? num))))
+
+(let ((gen (random-source-make-reals s 0.2)))
+  (dotimes (j 100)
+    (let ((num (gen)))
+    (test "srfi-27 random real with prescribed precision type"
+          #t
+          (and (inexact? num) (real? num)))
+    (test "srfi-27 random real with prescribed precision< 1.0"
+          #t
+          (< num 1.0))
+    (test "srfi-27 random real with prescribed precision non-negative"
+          #f
+          (negative? num)))))
+
+(let ((gen (random-source-make-reals s 1/6)))
+  (dotimes (j 100)
+    (let ((num (gen)))
+    (test "srfi-27 random real with prescribed precision type"
+          #t
+          (and (exact? num) (rational? num)))
+    (test "srfi-27 random real with prescribed precision< 1.0"
+          #t
+          (< num 1))
+    (test "srfi-27 random real with prescribed precision non-negative"
+          #f
+          (negative? num)))))
+
+
+;; Check if restoring the state works.
+;; Also check if pseudo-randomize yields a different sequence (this one
+;; is silly, but let's leave it there)
+(let ((st (random-source-state-ref s)))
+  (let ((gen (random-source-make-integers s)))
+    (let ((a (let Loop ((lst '()) (i 0))
+               (if (< i 100)
+                   (Loop (cons (gen 1000) lst) (+ 1 i))
+                   lst))))
+      (random-source-pseudo-randomize! s 1 2)
+      (let ((gen-b (random-source-make-integers s)))
+       (let ((b (let Loop ((lst '()) (i 0))
+                 (if (< i 100)
+                     (Loop (cons (gen-b 1000) lst) (+ 1 i))
+                     lst))))
+        (random-source-state-set! s st)
+        (let ((gen-c (random-source-make-integers s)))
+        (let ((c (let Loop ((lst '()) (i 0))
+                   (if (< i 100)
+                       (Loop (cons (gen-c 1000) lst) (+ 1 i))
+                       lst))))
+          (test "srfi-27 restore random state 1" #f (equal? a b))
+          (test "srfi-27 restore rendom state 2" #t (equal? a c)))))))))
+
+
+;;;
+;;; Checking randomness
+;;;
+
+(let ((gen (random-source-make-reals s)))
+  (let ((tolerance 0.001)
+        (sum (let Loop ((s 0.0) (i 0))
+               (if (< i 10000)
+                   (Loop (+ s (gen)) (fx+ i 1))
+                   s))))
+    (let ((mean (/ sum 10000.0)))
+      (test "srfi-27 random reals mean"
+            #f
+            (> (abs (- mean 0.5)) tolerance)))))
+
+(let ((gen (random-source-make-integers s)))
+  (let ((tolerance 1)
+        (sum (let Loop ((s 0) (i 0))
+               (if (< i 10000)
+                   (Loop (fx+ s (gen 100)) (fx+ i 1))
+                   s))))
+    (let ((mean (/ sum 10000.0)))
+      (test "srfi-27 random integers mean"
+            #f
+            (> (abs (- mean 50)) tolerance)))))
