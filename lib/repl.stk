@@ -231,7 +231,7 @@ doc>
 
   ;; ==== ls
   (repl-add-command 'ls
-                    "List directory content (accepts usual arguments to ls such as -l etc)"
+                    "List directory content (usual 'ls' options accepted)"
                     (lambda () (system (string-append "ls " (read-line)))))
 
   ;; ==== quit
