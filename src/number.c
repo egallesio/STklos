@@ -3574,39 +3574,44 @@ transcendental(atanh)
 
 /*=============================================================================*/
 
+static inline int power_of_2_p(long x) {
+  /* Find if x is a small power of two.
+     By "small" power of two we mean k up to 5 */
+  for (int i=1; i <= 5; i++)
+    if (x == (1 << i)) {
+      return 1;
+    }
+  return 0;
+}
+
 SCM my_log2(SCM x, SCM b) {
   /* my_log2 has fast path for taking logs of fixnums, bignums and
      exact rationals in base two.  It uses a simple trick to extend
      this to "base which is power of two". */
-  
+
   if (b == MAKE_INT(1)) STk_error("cannot take log in base 1");
+  long base = INT_VAL(b);
 
   if (INTP(b)) {
     /* Fast path for base two. When the number is negative, we compute
        the exact log, and make a complex number with an exact real part,
        and an inexact imaginary part (equal to pi/log(b) ).    */
-    
-    /* Find if b is a small power of two.
-       By "small" power of two we mean k up to 5 */
-    int power_of_2 = 0;
-    long base = INT_VAL(b);
-    for (int i=1; i <= 5; i++)
-      if (base == (1 << i)) {
-        power_of_2 = 1;
-        break;
-      }
-    
-    if (power_of_2) {
+
+    if (power_of_2_p(base)) {
       switch (TYPEOF(x)) {
       case tc_integer: {
         unsigned long pwr = base;
+
         long xx = INT_VAL(x);
+        if (power_of_2_p(xx) && xx < base)
+          return div2(MAKE_INT(1), my_log2(b,x));
+
         int pos = (xx > 0);
 
         /* Explicitly check for +-1, so we give an exact result in these cases: */
         if (xx == 1)  return MAKE_INT(0);
         if (xx == -1) return Cmake_complex(MAKE_INT(0),double2real(MY_PI/log(base)));
-        
+
         xx = labs(xx);
         if (xx == 0) STk_error("cannot take log of zero");
         /* Linear search for the wanted power... */
