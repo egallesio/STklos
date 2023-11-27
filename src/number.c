@@ -3603,8 +3603,8 @@ SCM my_log2(SCM x, SCM b) {
         unsigned long pwr = base;
 
         long xx = INT_VAL(x);
-        if (power_of_2_p(xx) && xx < base)
-          return div2(MAKE_INT(1), my_log2(b,x));
+        if (power_of_2_p(xx) && base > 2)
+          return div2(my_log2(x,MAKE_INT(2)), my_log2(b,MAKE_INT(2)));
 
         int pos = (xx > 0);
 
