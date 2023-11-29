@@ -777,7 +777,6 @@ pre.rouge {
 <li><a href="#_parameter_objects_2">10.1. Parameter Objects</a></li>
 <li><a href="#_environment_variables">10.2. Environment variables</a></li>
 <li><a href="#_repl">10.3. REPL</a></li>
-<li><a href="#_repl_parameters">10.4. REPL parameters</a></li>
 </ul>
 </li>
 <li><a href="#_foreign_function_interface">11. Foreign Function Interface</a>
@@ -5678,7 +5677,7 @@ is shifted left by <code>m</code> bits; If <code>m</code> is negative, <code>n</
 this procedure appear to be independent uniformly distributed over
 the range [0, &#8230;&#8203;, <code>n</code>[. The argument <code>n</code> must be a positive integer,
 otherwise an error is signaled. This function is equivalent to the eponym
-function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
+function of <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a></strong> (<em>Source of random bits</em>).</p>
 </div>
 <div class="paragraph">
 <p><a id='P_random-real'></a>
@@ -5698,7 +5697,7 @@ function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
 <p>Return a real number <code>r</code> such that <code>0 &lt; r &lt; 1</code>.
 Subsequent results of this procedure appear to be independent uniformly
 distributed. This function is equivalent to the eponym
-function of SRFI-27 (see ,(link-srfi 27) definition for more details).</p>
+function of  <strong><a href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a></strong> (<em>Source of random bits</em>).</p>
 </div>
 <div class="paragraph">
 <p><a id='P_decode-float'></a>
@@ -14923,7 +14922,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.86</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.99</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -25240,6 +25239,9 @@ of available commands is given below.</p>
 <p><strong>,open</strong> (or <strong>,o</strong>): Open file or URL</p>
 </li>
 <li>
+<p><strong>,browse</strong> (or <strong>,b</strong>): Browse file or URL with the default browser</p>
+</li>
+<li>
 <p><strong>,manual</strong> (or <strong>,m</strong>): Search reference manual</p>
 </li>
 <li>
@@ -25300,9 +25302,44 @@ such a definition is in the <code>stklosrc</code> file.
 </table>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_repl_variables">10.3.2. REPL variables</h4>
+<div class="paragraph">
+<p>By default, <strong><em>STklos</em></strong> defines the following variables:</p>
 </div>
-<div class="sect2">
-<h3 id="_repl_parameters">10.4. REPL parameters</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>@1</code>, <code>@2</code>, <code>@3</code>, <code>@4</code> and <code>@5</code> contains five the last REPL&#8217;s
+computed values</p>
+</li>
+<li>
+<p><code>@</code> is an alias on <code>@1</code> (the last value computed by the REPL)</p>
+</li>
+<li>
+<p><code>@*</code> contains a list of <code>@1</code>, <code>@2</code>, <code>@3</code>, <code>@4</code> and <code>@5</code> values</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">values</span> <span class="ss">'a</span> <span class="ss">'b</span> <span class="ss">'c</span> <span class="ss">'d</span> <span class="ss">'e</span><span class="p">)</span>
+<span class="nv">a</span>
+<span class="nv">b</span>
+<span class="nv">c</span>
+<span class="nv">d</span>
+<span class="nv">e</span>
+<span class="nv">stklos&gt;</span> <span class="nv">@*</span>
+<span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="mi">5</span>
+<span class="nv">stklos&gt;</span> <span class="nv">@*</span>
+<span class="p">(</span><span class="nf">5</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_repl_parameters">10.3.3. REPL parameters</h4>
 <div class="paragraph">
 <p>The following parameter objects can be used to customize the REPL:</p>
 </div>
@@ -25424,6 +25461,7 @@ the <strong><em>STklos</em></strong> command. Otherwise, a good place to set thi
 </td>
 </tr>
 </table>
+</div>
 </div>
 </div>
 </div>
@@ -32489,7 +32527,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-11-20 14:34:30 +0100
+Last updated 2023-11-29 11:41:34 +0100
 </div>
 </div>
 </body>
