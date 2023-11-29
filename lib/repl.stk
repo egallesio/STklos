@@ -48,13 +48,16 @@
 (define default-out (current-output-port))
 (define default-err (current-error-port))
 
-(define @  #void)
 (define @1 #void)
 (define @2 #void)
 (define @3 #void)
 (define @4 #void)
 (define @5 #void)
 (define @* (list @1 @2 @3 @4 @5))
+
+;; define @ as an alias on @1
+(let ((M (find-module 'REPL))) (%symbol-link '@ '@1 M M))
+
 
 #|
 <doc EXT repl-theme
@@ -507,7 +510,6 @@ doc>
                          (set! @3 (caddr @*))
                          (set! @2 (cadr @*))
                          (set! @1 (car @*))
-                         (set! @ @1)                      ; @ is an alias on @1
 
                          ;; Print values
                          (for-each (lambda (x) (write-shared x out) (newline out))
