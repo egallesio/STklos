@@ -48,13 +48,16 @@
 (define default-out (current-output-port))
 (define default-err (current-error-port))
 
-(define @  #void)
 (define @1 #void)
 (define @2 #void)
 (define @3 #void)
 (define @4 #void)
 (define @5 #void)
 (define @* (list @1 @2 @3 @4 @5))
+
+;; define @ as an alias on @1
+(let ((M (find-module 'REPL))) (%symbol-link '@ '@1 M M))
+
 
 #|
 <doc EXT repl-theme
@@ -231,7 +234,7 @@ doc>
 
   ;; ==== ls
   (repl-add-command 'ls
-                    "List directory content"
+                    "List directory content (usual 'ls' options accepted)"
                     (lambda () (system (string-append "ls " (read-line)))))
 
   ;; ==== quit
@@ -269,6 +272,11 @@ doc>
                     (lambda ()
                       (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
                         (system (string-append cmd " " (read-line) " 2>/dev/null")))))
+  ;; ==== browse
+  (repl-add-command '(browse b)
+                    "Browse file or URL with the default browser"
+                    (lambda () (open-in-browser (read-line))))
+
   ;; ==== describe
   (repl-add-command '(describe d)
                     "Describe an object"
@@ -502,7 +510,6 @@ doc>
                          (set! @3 (caddr @*))
                          (set! @2 (cadr @*))
                          (set! @1 (car @*))
-                         (set! @ @1)                      ; @ is an alias on @1
 
                          ;; Print values
                          (for-each (lambda (x) (write-shared x out) (newline out))
