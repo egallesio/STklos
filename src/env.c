@@ -293,7 +293,7 @@ DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
   if (z == STk_void) error_bad_module_name(name);
 
   MODULE_IS_LIBRARY(z) = TRUE;
-  STk_dremq(STk_STklos_module, MODULE_IMPORTS(z));
+  MODULE_IMPORTS(z)    = STk_dremq(STk_STklos_module, MODULE_IMPORTS(z));
   return STk_void;
 }
 
