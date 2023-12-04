@@ -30,8 +30,8 @@ SO = @SH_SUFFIX@
 #
 # Libraries written in Scheme only
 #
-SRC_STK  = help.stk  preproc.stk
-SRC_OSTK = help.ostk preproc.ostk
+SRC_STK  = apropos.stk  help.stk  preproc.stk
+SRC_OSTK = apropos.ostk help.ostk preproc.ostk
 
 #
 # Libraries written in C and Scheme
