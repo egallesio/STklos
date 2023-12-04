@@ -1587,15 +1587,20 @@ doc>
      ((equal? module-list '(#t))  (all-modules))
      (else                        (map check-module module-list))))
 
-  ;; grab-symbols returns symbols (which contain "str") that are defined or
-  ;; imported in "module"
+  ;; grab-symbols returns symbols (containing "str") which can be used
+  ;; That is:
+  ;;   - the symbols defined or imported if module is current-module
+  ;;   - the exported symbols of given module otherwise
   (define (grab-symbols str module)
     (let ((s        (if (symbol? str) (symbol->string str) str))
-          (external (if (library? module)
-                        '()
-                        (module-symbols (find-module 'STklos))))
-          (internal (module-symbols module)))
-      (let Loop ((symbs (list->set (append internal external) '()))
+          (symbols  (if (eq? module (current-module))
+                        (let ((external (if (library? module)
+                                            '()
+                                            (module-symbols 'STklos)))
+                              (internal (module-symbols module)))
+                          (list->set (append internal external) '()))
+                        (module-exports module))))
+      (let Loop ((symbs symbols)
                  (res   '()))
         (cond
          ((null? symbs)
