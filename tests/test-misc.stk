@@ -507,35 +507,35 @@ b|)
 
 
 (test "apropos.3"
-      '(2 3)
+      '(1 1)
       (sort (map length
-                 (map cadr (apropos/alist 'ze :internal #t
-                                          (find-module 'A)
-                                          (find-module 'B))))
+                 (map cadr (apropos/alist 'ze  'A 'B)))
             <))
 
 (test "apropos.4"
-      '(A . 3)
-      (let ((x (apropos/alist "eta" :internal #t (find-module 'A))))
+      '(A . 1)
+      (let ((x (apropos/alist "eta" (find-module 'A))))
         (cons (caar x) (length (cadar x)))))
 
 (test "apropos.5"
       '()
       (apropos "x" (find-module 'A)
                    (find-module 'B)))
-
+;; Changed #t to 'STklos, since it is too slow (more than 8s on my (old) i5)
+;; This is normal: at the end of "make tests", the number of loaded modules
+;; is really big
 (test "apropos.6"
       #f
-      (null? (apropos "a" #t)))
+      (null? (apropos "a" 'STklos)))
 
 (test/error "apropos.7" (apropos 'a 'b)) ; bad module list
 (test/error "apropos.8" (apropos 5))     ; bad symbol / string
-
 ;; apropos/pp should return void:
+;; changed again #t by 'STklos
 (test "apropos.9" #void (let ((x #f))
                           (with-output-to-string ; suppress output, if any
                             (lambda ()
-                              (set! x (apropos/pp "___blah___" #t))))
+                              (set! x (apropos/pp "___blah___" 'STklos))))
                           x))
 
 ;;------------------------------------------------------------------
