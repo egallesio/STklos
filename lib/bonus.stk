@@ -1573,48 +1573,6 @@ doc>
   (define (symbol<? s1 s2)
     (string<? (symbol->string s1) (symbol->string s2)))
 
-  ;; return-symbols will look for the symbol str in module.
-  ;; The three other parameters tell if we are including
-  ;; symbols that are:
-  ;; - internal (defined in the module)
-  ;; - imported from other modules
-  ;; - exported
-  (define (return-symbols str module internal? imported? exported?)
-    ;; REMINDER:
-    ;; - module-exports is a list of SYMBOLS
-    ;; - module-imports is a list of MODULES
-    ;; - libraries DO have STklos in their import set, so we need to
-    ;;   filter them out.
-    (let* ((s        (if (symbol? str) (symbol->string str) str))
-
-           ;; exp & imp are the original eport and import sets. They
-           ;; may be modified later when building the 'exported',
-           ;; 'imported' and 'internal' sets.
-           (exp (module-exports module))
-           (imp (list->set
-                 (flatten
-                  (map module-exports
-                       (if (library? module)
-                           (set-diff (module-imports module) (module-exports 'stklos))
-                           (module-imports module)))) '()))
-
-           (exported (if exported? exp '()))
-           (imported (if imported? imp '()))
-           (internal (if internal? (set-diff
-                                    (set-diff
-                                     (set-diff (module-symbols module) exp) imp) (module-exports 'stklos))
-                         '())))
-
-      (let Loop ((symbs (list->set (append exported imported internal) '()))
-                 (res   '()))
-        (cond
-         ((null? symbs)
-          (and (not (null? res)) (sort res symbol<?)))
-         ((string-find? s (symbol->string (car symbs)))
-          (Loop (cdr symbs) (cons (car symbs) res)))
-         (else
-          (Loop (cdr symbs) res))))))
-
   (define (check-module m)
     (cond ((module? m) m)
           ((symbol? m) (find-module m))
@@ -1624,83 +1582,80 @@ doc>
 
   (define (apropos-get-modules module-list)
     ;; Just gets all modules from module-list:
-    (cond ((equal? '(#t) module-list)  (all-modules))
-          ((null? module-list)         (list (current-module)))
-          ((list? module-list)         (map check-module module-list))
-          (else (error 'apropos "bad module list definition ~s" module-list))))
+    (cond
+     ((null? module-list)         (list (current-module)))
+     ((equal? module-list '(#t))  (all-modules))
+     (else                        (map check-module module-list))))
 
-  (define (flatten lst)
-    (let loop ((L lst) (A '()))
-      (cond
-       ((null? L) A)
-       ((pair? L) (loop (car L)
-                        (loop (cdr L) A)))
-       (else (cons L A)))))
+  ;; grab-symbols returns symbols (which contain "str") that are defined or
+  ;; imported in "module"
+  (define (grab-symbols str module)
+    (let ((s        (if (symbol? str) (symbol->string str) str))
+          (external (if (library? module)
+                        '()
+                        (module-symbols (find-module 'STklos))))
+          (internal (module-symbols module)))
+      (let Loop ((symbs (list->set (append internal external) '()))
+                 (res   '()))
+        (cond
+         ((null? symbs)
+          (and (not (null? res)) (sort res symbol<?)))
+         ((string-find? s (symbol->string (car symbs)))
+          (Loop (cdr symbs) (cons (car symbs) res)))
+         (else
+          (Loop (cdr symbs) res))))))
 
+  ; ----------------------------------------------------------------------
   (set! apropos/alist
-    (lambda (str . args)
+    (lambda (str . modules)
       #:apropos/alist
-
-      (let ((int #f)
-            (imp #f)
-            (exp #t)
-            (module-list args))
-
-        ;; We'll walk through the keywords. Directly using :key along
-        ;; with :rest wouldn't work...
-        (while (and (pair? module-list)
-                    (keyword? (car module-list))
-                    (>= (length module-list) 2))
-
-          (case (car module-list)
-            ((#:internal) (begin (set! int (and (cadr module-list) #t))
-                                 (set! module-list (cddr module-list))))
-            ((#:imported) (begin (set! imp (and (cadr module-list) #t))
-                                 (set! module-list (cddr module-list))))
-            ((#:exported) (begin (set! exp (and (cadr module-list) #t))
-                                 (set! module-list (cddr module-list))))
-            (else (error "bad keyword option ~S" (car module-list)))))
-
-        (let ((x (apropos-get-modules module-list)))
-          (filter (lambda (x) (cadr x)) ;; don't include modules that don't have any
-                                   ;; matching symbols
-
-                  ;; the result will be an alist, ( (module1 [list-of-symbols])
-                  ;;                                (module2 [list-of-symbols])
-                  ;;                                ... )
-                  (map (lambda (m) (list (module-name m)
-                                    (return-symbols str m int imp exp)))
-                       x))))))
+      (let ((modules (apropos-get-modules modules)))
+        (filter (lambda (x) (cadr x)) ;; don't include modules that don't have any
+                                 ;; matching symbols
+                ;; the result will be an alist, ( (module1 [list-of-symbols])
+                ;;                                (module2 [list-of-symbols])
+                ;;                                ... )
+                (map (lambda (m) (list (module-name m)
+                                  (grab-symbols str m)))
+                     modules)))))
 
   ;; It's easy now to build apropos and apropos/pp on top of apropos/alist:
-
   (set! apropos
-    (lambda (str . module-list)
-      #:apropos
-      (sort
-       (list->set ; because the same symbol could be in more than one module
-        (flatten
-         (map cadr
-              (apply apropos/alist str module-list)))
-        '())
-       symbol<?)))
+        (lambda (str . module-list)
+          #:apropos
+
+          (define (flatten lst)
+            (let loop ((L lst) (A '()))
+              (cond
+               ((null? L) A)
+               ((pair? L) (loop (car L)
+                                (loop (cdr L) A)))
+               (else (cons L A)))))
+
+          (sort (list->set ; because the same symbol could be in more than one module
+                 (flatten
+                  (map cadr
+                       (apply apropos/alist (cons str module-list))))
+                 '())
+           symbol<?)))
 
   (set! apropos/pp
-    (lambda (str . module-list)
-      #:apropos/pp
-      (let ((a (apply apropos/alist (cons str module-list))))
-        (for-each (lambda (module+sylbols)
-                    (let ((m (car module+sylbols))
-                          (syms (cadr module+sylbols)))
-                      ;; m is certainly a symbol, so we can use
-                      ;; find-module on it!
-                      (format #t "~a ~a:~%" (if (library? (find-module m))
-                                                "Library"
-                                                "Module")
-                              m)
-                      (for-each (lambda (s) (format #t "   ~a~%" s)) syms)))
-                  a))))
+        (lambda (str . module-list)
+          #:apropos/pp
+          (let ((a (apply apropos/alist (cons str module-list))))
+            (for-each (lambda (module+sylbols)
+                        (let ((m    (car module+sylbols))
+                              (syms (cadr module+sylbols)))
+                          ;; m is certainly a symbol, so we can use
+                          ;; find-module on it!
+                          (printf "~a ~a:~%" (if (library? (find-module m))
+                                                 "Library"
+                                                 "Module")
+                                  m)
+                          (for-each (lambda (s) (format #t "   ~a~%" s)) syms)))
+                      a))))
   )
+
 
 #|
 <doc EXT die
