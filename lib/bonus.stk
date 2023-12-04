@@ -1681,7 +1681,7 @@ doc>
        (list->set ; because the same symbol could be in more than one module
         (flatten
          (map cadr
-              (apply apropos/alist (cons str module-list))))
+              (apply apropos/alist str module-list)))
         '())
        symbol<?)))
 
