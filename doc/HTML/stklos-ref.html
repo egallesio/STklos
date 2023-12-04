@@ -14922,7 +14922,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.99</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.104</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -19067,7 +19067,9 @@ value and it is an error if <code>obj</code> evaluates to a false value.</p>
 <strong><a href="http://srfi.schemers.org/srfi-176/srfi-176.html">SRFI-176</a></strong> (<em>Version flag</em>).</p>
 </div>
 <div class="paragraph">
-<p><a id='P_apropos'></a>
+<p><a id='P_apropos'></a><a id='P_apropos/pp'></a><a id='P_apropos/alist'></a>
+
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -19077,16 +19079,120 @@ value and it is an error if <code>obj</code> evaluates to a false value.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(apropos obj) </strong></code><br>
-<code><strong>(apropos obj module) </strong></code><br></p>
+<code><strong>(apropos/alist obj) </strong></code><br>
+<code><strong>(apropos/pp obj) </strong></code><br>
+<code><strong>(apropos obj module &#8230;&#8203;) </strong></code><br>
+<code><strong>(apropos/alist obj module &#8230;&#8203;) </strong></code><br>
+<code><strong>(apropos/pp obj module &#8230;&#8203;) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p><code>Apropos</code> returns a list of symbols whose print name contains the
-characters of <code>obj</code> as a substring . The given <code>obj</code> can be a string or
-symbol. This function returns the list of matched symbols which can
-be accessed from the given <code>module</code> (defaults to the current module if not
-provided).</p>
+<p>These procedures return the symbols whose print name contains the characters
+of <code>obj</code> as a substring, in the specified modules.  The given <code>obj</code> can be
+a string or symbol, and each module argument can be a symbol, a string, or
+the module itself.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If no <code>module</code> is provided, the current module is used.</p>
+</li>
+<li>
+<p>If modules are given, then these modules are searched.</p>
+</li>
+<li>
+<p>If only a single <code>#t</code> argument is given for a <code>module</code>, then all matching
+symbols from all loaded modules will be searched.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>apropos</code> command returns the symbols that can be used in a given module,
+that is:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>it returns the symbols defined or imported if the module is the current module.</p>
+</li>
+<li>
+<p>it returns the symbols exported by the module, if this module it is not the
+current one.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The three variants of <code>apropos</code> are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>apropos</code> returns a flat list of symbols, and no information about the
+modules where they are defined.</p>
+</li>
+<li>
+<p><code>apropos/alist</code> returns an association list where the key is a module name
+(as a symbol) and the data is a list of matched symbols which can be accessed
+from the given module.</p>
+</li>
+<li>
+<p><code>apropos/pp</code> does not have a return value, but prints the symbols on the
+screen, categorized by module.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that using <code>#t</code> will bring the same symbols in several different modules,
+since modules (as opposed to libraries) inherit all bindings in the <code>STklos</code>
+module.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-library</span> <span class="p">(</span><span class="nf">A</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">export</span> <span class="nv">zeta-one</span> <span class="nv">zeta-two</span> <span class="nv">zeta-three</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="k">define</span> <span class="nv">zeta-one</span> <span class="mi">1</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">define</span> <span class="nv">zeta-two</span> <span class="mi">2</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">define</span> <span class="nv">theta-three</span> <span class="mi">3</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-library</span> <span class="p">(</span><span class="nf">B</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">export</span> <span class="nv">zeta-two</span> <span class="nv">zeta-three</span> <span class="nv">theta-four</span><span class="p">)</span> <span class="c1">; but not zed</span>
+  <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="k">define</span> <span class="nv">zeta-two</span> <span class="mi">2</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">define</span> <span class="nv">zeta-three</span> <span class="mi">3</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">define</span> <span class="nv">theta-four</span> <span class="mi">4</span><span class="p">)</span>
+         <span class="p">(</span><span class="k">define</span> <span class="nv">zed</span> <span class="mi">5</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-library</span> <span class="p">(</span><span class="nf">C</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">export</span> <span class="nv">zee</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">B</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="k">define</span> <span class="nv">zee</span> <span class="mi">-1</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">apropos/alist</span> <span class="ss">'zeta</span>
+               <span class="ss">'A</span>                      <span class="c1">; a symbol (module name)</span>
+               <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'B</span><span class="p">))</span>       <span class="c1">; and a module</span>
+         <span class="nv">=&gt;</span> <span class="p">(</span> <span class="p">(</span><span class="nf">A</span> <span class="p">(</span><span class="nf">zeta-one</span> <span class="nv">zeta-three</span> <span class="nv">zeta-two</span><span class="p">))</span>
+              <span class="p">(</span><span class="nf">B</span> <span class="p">(</span><span class="nf">zeta-three</span> <span class="nv">zeta-two</span><span class="p">))</span> <span class="p">)</span>
+
+<span class="p">(</span><span class="nf">apropos/pp</span> <span class="ss">'zeta</span>
+               <span class="s">"A"</span>                     <span class="c1">; a string (module name)</span>
+               <span class="ss">'B</span><span class="p">)</span>                     <span class="c1">; a symbol (module name)</span>
+         <span class="nv">=&gt;</span> <span class="nv">void</span>
+<span class="nv">And</span> <span class="nv">outputs,</span> <span class="nv">to</span> <span class="nv">the</span> <span class="nv">current</span> <span class="nv">output</span> <span class="nv">port,</span> <span class="nv">the</span> <span class="nv">following:</span>
+<span class="nv">Module</span> <span class="nv">A:</span>
+   <span class="nv">zeta-one</span>
+   <span class="nv">zeta-three</span>
+   <span class="nv">zeta-two</span>
+<span class="nv">Module</span> <span class="nv">B:</span>
+   <span class="nv">zeta-three</span>
+   <span class="nv">zeta-two</span>
+
+<span class="p">(</span><span class="nf">apropos</span> <span class="s">"x"</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'A</span><span class="p">))</span>         <span class="c1">; obj is a string</span>
+         <span class="nv">=&gt;</span> <span class="p">()</span>                         <span class="c1">; no symbol found</span>
+
+<span class="p">(</span><span class="nf">apropos</span> <span class="ss">'o</span> <span class="o">'</span><span class="p">(</span><span class="nf">B</span><span class="p">))</span>                      <span class="c1">; module name can be a list</span>
+         <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">theta-four</span> <span class="nv">zeta-two</span><span class="p">)</span>      <span class="c1">; simple list returned by apropos</span>
+
+<span class="p">(</span><span class="nf">apropos/alist</span> <span class="ss">'a</span> <span class="no">#t</span><span class="p">)</span>
+         <span class="nv">=&gt;</span> <span class="nv">&lt;all</span> <span class="nv">symbols</span> <span class="nv">with</span> <span class="s">"a"</span> <span class="nv">in</span> <span class="nv">their</span> <span class="nv">names</span> <span class="nv">exported</span> <span class="nv">by</span> <span class="nv">all</span> <span class="nv">modules&gt;</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_help'></a>
@@ -32527,7 +32633,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-11-29 11:41:34 +0100
+Last updated 2023-12-04 15:36:07 +0100
 </div>
 </div>
 </body>

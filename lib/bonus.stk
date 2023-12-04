@@ -47,8 +47,7 @@
         port->string port->sexp-list port->string-list
         print printerr eprintf printf fprintf
         declare-new-error
-        exec exec-list
-        apropos die
+        exec exec-list die
         decompose-file-name dirname basename file-separator
         make-path file-suffix file-prefix
         port-idle-register! port-idle-unregister! port-idle-reset!
@@ -1456,51 +1455,6 @@ doc>
 (define (exec-list command)
   (call-with-input-file (string-append "| " command) port->string-list))
 
-
-
-#|
-<doc EXT apropos
- * (apropos obj)
- * (apropos obj module)
- *
- * |Apropos| returns a list of symbols whose print name contains the
- * characters of |obj| as a substring . The given |obj| can be a string or
- * symbol. This function returns the list of matched symbols which can
- * be accessed from the given |module| (defaults to the current module if not
- * provided).
- *
-doc>
-|#
-(define (apropos str :optional (module (current-module)))
-
-  (define (list->set lst res)
-    (cond
-      ((null? lst) res)
-      ((memq (car lst) res) (list->set (cdr lst) res))
-      (else (list->set (cdr lst) (cons (car lst) res)))))
-
-  (define (symbol<? s1 s2)
-    (string<? (symbol->string s1) (symbol->string s2)))
-
-  ;; Sanity check
-  (unless (module? module)
-    (error 'apropos "bad module ~S" module))
-
-  ;; Here we go
-  (let ((s        (if (symbol? str) (symbol->string str) str))
-        (external (if (library? module)
-                       '()
-                       (module-symbols (find-module 'STklos))))
-        (internal (module-symbols module)))
-    (let Loop ((symbs (list->set (append internal external) '()))
-               (res   '()))
-      (cond
-        ((null? symbs)
-           (and (not (null? res)) (sort res symbol<?)))
-        ((string-find? s (symbol->string (car symbs)))
-           (Loop (cdr symbs) (cons (car symbs) res)))
-        (else
-           (Loop (cdr symbs) res))))))
 
 #|
 <doc EXT die
