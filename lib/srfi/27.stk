@@ -249,7 +249,7 @@
 
 (define (random-real)
   ((in-module srfi/27 %random-real-from-source-mt)
-   ((in-module srfi/27 %random-source-state-ref) default-random-source))))
+   ((in-module srfi/27 %random-source-state-ref) default-random-source)))
 
 
 ;;;
