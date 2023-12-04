@@ -487,6 +487,7 @@ static SCM read_address(SCM port)
   tok[j] = '\0';
 
   /* convert the hexa number contained in token to an address */
+  errno = 0;            // Weird: strtoul doesn't set it anymore
   address = strtoul(tok, &end, 16);
   if (*end || errno)
     signal_error(port, "bad address specifier #p~a", STk_Cstring2string(tok+2));
