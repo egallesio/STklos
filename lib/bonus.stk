@@ -1457,13 +1457,13 @@ doc>
   (call-with-input-file (string-append "| " command) port->string-list))
 
 #|
-<doc EXT apropos apropos/alist apropos/pp
- * (apropos obj :key (internal #f) (imported #f) (exported #t))
- * (apropos/alist obj :key (internal #f) (imported #f) (exported #t))
- * (apropos/pp obj :key (internal #f) (imported #f) (exported #t))
- * (apropos obj :key (internal #f) (imported #f) (exported #t) [ module ...])
- * (apropos/alist obj :key (internal #f) (imported #f) (exported #t) [ module ...])
- * (apropos/pp obj :key (internal #f) (imported #f) (exported #t) [ module ...])
+<doc EXT apropos/alist apropos/pp apropos
+ * (apropos obj)
+ * (apropos/alist obj)
+ * (apropos/pp obj)
+ * (apropos obj module ...)
+ * (apropos/alist obj module ...)
+ * (apropos/pp obj module ...)
  *
  * These procedures return the symbols whose print name contains the characters
  * of |obj| as a substring, in the specified modules.  The given |obj| can be
@@ -1473,19 +1473,18 @@ doc>
  * - If no |module| is provided, the current module is used.
  * - If modules are given, then these modules are searched.
  * - If only a single `#t` argument is given for a |module|, then all matching
- *   symbols from all modules will be searched.
+ *   symbols from all loaded modules will be searched.
  *
- * The keyword arguments are boolean:
+ * The |apropos| command returns the symbols that can be used in a given module,
+ * that is:
  *
- * - If |:internal| is true, include the list of symbols defined inside the module
- * - If |:imported| is true, include the list of symbols imported by the module
- * - If |:exported| is true, include the symbols exported by the module
- *
- * The default is to list only the exported symbols.
+ * - it returns the symbols defined or imported if the module is the current module.
+ * - it returns the symbols exported by the module, if this module it is not the
+ *   current one.
  *
  * The three variants of |apropos| are:
  *
- * - |apropos| returns a flat list of symbols, and no information abotu the
+ * - |apropos| returns a flat list of symbols, and no information about the
  *   modules where they are defined.
  * - |apropos/alist| returns an association list where the key is a module name
  *   (as a symbol) and the data is a list of matched symbols which can be accessed
@@ -1494,7 +1493,7 @@ doc>
  *   screen, categorized by module.
  *
  * Note that using `#t` will bring the same symbols in several different modules,
- * since modules (as opposed to libraries) inherit all bindings in the |stklos|
+ * since modules (as opposed to libraries) inherit all bindings in the |STklos|
  * module.
  *
  * @lisp
@@ -1537,17 +1536,10 @@ doc>
  *          => ()                         ; no symbol found
  *
  * (apropos 'o '(B))                      ; module name can be a list
- *          => (theta-four zeta-two)      ; sinple list returned by apropos
- *
- * (apropos 'o :exported #f '(B))         ; oops, none of the options is active
- *          => ()                         ; so the result is empty
- *
- * (apropos 'o :exported #f               ; we suppressed the externals, so
- *             :internal #t '(B))         ; internals that are exported are out
- *          => ()                         ; and the result is empty!
+ *          => (theta-four zeta-two)      ; simple list returned by apropos
  *
  * (apropos/alist 'a #t)
- *          => <all symbols exported by all modules with "a" in their names>
+ *          => <all symbols with "a" in their names exported by all modules>
  * @end lisp
 doc>
 |#
