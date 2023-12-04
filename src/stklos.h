@@ -710,6 +710,7 @@ void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
 SCM STk_eval_C_string(const char *str, SCM module);
 SCM STk_read_from_C_string(const char *str);
+void STk_verify_address(unsigned long addr, SCM object);
 
 int STk_init_misc(void);
 

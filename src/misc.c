@@ -211,7 +211,7 @@ DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *
  * @lisp
  * (address-of "abc")              =>  140053283366272
- * (address-of "abc")              =>  140053289472288
+ * (address-of "abc")              =>  140053289472288 ;strings are not eq?
  *
  * (address-of 10)                 => 41
  * (address-of 10)                 => 41
@@ -222,6 +222,34 @@ DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  * @end lisp
 doc>
 */
+
+void STk_verify_address(unsigned long addr, SCM object)
+{
+  unsigned long tag = addr & 3;
+
+  switch(tag) {
+    case 0:        /* 00 It's a pointer! */
+      if (!GC_base((SCM)addr)) /* GC_base will return NULL if this address is not
+                                  within a region allocated by the GC. */
+        STk_error("bad object address ~s", object);
+      break;
+
+    case 1:
+      break; /* 01 Integers are always OK */
+
+    case 2:        /* 10 Small object (characters) */
+      /* We only allow characters as small objects */
+      if ((addr & 0x7) != 0x6) /* ...110 */
+        STk_error("bad small object address ~s", object);
+      break;
+
+    case 3:        /* 11 small constant */
+      if ((addr>>2) > LAST_SCONST)
+        STk_error("bad small constant address ~s", object);
+      break;
+  }
+}
+
 DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
 {
   char buffer[50];     /* should be sufficient for a while */
@@ -233,28 +261,12 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
 
 DEFINE_PRIMITIVE("address-ref", address_ref, subr1, (SCM object))
 {
+  unsigned long addr;
+
   if (!INTP(object)) STk_error("bad integer ~s", object);
-  unsigned long addr =  INT_VAL(object);
+  addr =  INT_VAL(object);
 
-  unsigned long tag = (unsigned long)addr & 3;
-
-  switch(tag) {
-  case 0:        /* 00 It's a pointer! */
-      if (!GC_base((SCM)addr)) /* GC_base will return NULL if this address is not
-                                  within a region allocated by the GC. */
-        STk_error("bad object address ~s", object);
-      break;
-  case 1: break; /* 01 Integers are always OK */
-  case 2:        /* 10 Small object (characters) */
-      /* We only allow characters as small objects */
-      if ((addr & 0x7) != 0x6) /* ...110 */
-        STk_error("bad small object address ~s", object);
-      break;
-  case 3:        /* 11 small constant */
-      if ((addr>>2) > LAST_SCONST)
-        STk_error("bad small constant address ~s", object);
-      break;
-  }
+  STk_verify_address(addr, object);
   return (SCM) addr;
 }
 

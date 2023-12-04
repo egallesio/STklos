@@ -487,30 +487,13 @@ static SCM read_address(SCM port)
   tok[j] = '\0';
 
   /* convert the hexa number contained in token to an address */
-  errno = 0;            // Weird: strtoul doesn't set it anymore
+  errno = 0;                 // Weird: strtoul doesn't set it anymore
   address = strtoul(tok, &end, 16);
   if (*end || errno)
     signal_error(port, "bad address specifier #p~a", STk_Cstring2string(tok+2));
 
-  unsigned long tag = address & 3;
-
-  switch(tag) {
-  case 0:        /* 00 It's a pointer! */
-      if (!GC_base((SCM)address)) /* GC_base will return NULL if this address is not
-                                     within a region allocated by the GC. */
-        signal_error(port, "bad object address #p~a", STk_Cstring2string(tok+2));
-      break;
-  case 1: break; /* 01 Integers are always OK */
-  case 2:        /* 10 Small object (characters) */
-      /* We only allow characters as small objects */
-      if ((address & 0x7) != 0x6) /* ...110 */
-        signal_error(port, "bad small object address #p~a", STk_Cstring2string(tok+2));
-      break;
-  case 3:        /* 11 small constant */
-      if ((address>>2) > LAST_SCONST)
-        signal_error(port, "bad small constant address #p~a", STk_Cstring2string(tok+2));
-      break;
-  }
+  /* Verify that the address isvalid */
+  STk_verify_address(address, STk_Cstring2string(tok+2));
 
   return (SCM) address;
 }
