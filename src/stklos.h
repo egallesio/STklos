@@ -1466,18 +1466,17 @@ extern STk_instr STk_boot_code[];
 #define STk_false       ((SCM) MAKE_SCONST(1))
 #define STk_true        ((SCM) MAKE_SCONST(2))
 #define STk_eof         ((SCM) MAKE_SCONST(3))
-#define STk_void        ((SCM) MAKE_SCONST(4))
+#define STk_void        ((SCM) MAKE_SCONST(4)) // must be the last constant
 
-#define LAST_SCONST     4
-/* LAST_SCONST above is used by 'read_address' in read.c, to validate small
-   constants. Please update it when a new small constant is added.
-
+/* STk_void must be the last small constant, since it is used by 'read_address'
+   in read.c, to validate small  constants. Insert new constants before STk_void,
+   if needed.
    NOTE: the two small constants below should NOT be read, so they stay
-         out. LAST_SCONST is the last *READABLE* and *REFERENTIABLE*
-         constant. */
+         out. STk_void is the last *READABLE* and *REFERENTIABLE constant.
+*/
 
-#define STk_dot         ((SCM) MAKE_SCONST(5)) /* special pupose value see read.c */
-#define STk_close_par   ((SCM) MAKE_SCONST(6)) /* special pupose value see read.c */
+#define STk_dot         (STk_void+(1<<3)) /* special purpose value see read.c */
+#define STk_close_par   (STk_void+(2<<3)) /* special purpose value see read.c */
 
 /* Misc */
 #if defined(__GNUC__) || defined(__clang__)

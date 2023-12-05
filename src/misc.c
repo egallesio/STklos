@@ -244,7 +244,7 @@ void STk_verify_address(unsigned long addr, SCM object)
       break;
 
     case 3:        /* 11 small constant */
-      if ((addr>>2) > LAST_SCONST)
+      if (addr > (unsigned long) STk_void)  /* #void is the last small constant */
         STk_error("bad small constant address ~s", object);
       break;
   }
