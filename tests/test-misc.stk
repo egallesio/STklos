@@ -538,5 +538,80 @@ b|)
                               (set! x (apropos/pp "___blah___" 'STklos))))
                           x))
 
+;------------------------------------------------------------------
+(test-subsection "address-of")
+
+(test "addresses-of symbol"
+      #t
+      (integer? (address-of 'a)))
+
+(test "address-of string"
+      #t
+      (integer? (address-of "ABC")))
+
+(test "address-of char"
+      #t
+      (integer? (address-of #\a)))
+
+(test "address-of closure"
+      #t
+      (integer? (address-of (lambda () 2))))
+
+(test "address-of void"
+      #t
+      (integer? (address-of #void)))
+
+
+(test "address-of and read back, symbol"
+      'a
+      (read-from-string (format "#p~x" (address-of 'a))))
+
+(test "address-of and read back, integer"
+      -99
+      (read-from-string (format "#p~x" (address-of -99))))
+
+(test "address-of and read back, real"
+      2.0
+      (read-from-string (format "#p~x" (address-of 2.0))))
+
+(test "address-of and read back, string"
+      "xyz"
+      (read-from-string (format "#p~x" (address-of "xyz"))))
+
+(test "address-of and read back, date"
+      #t
+      (date? (read-from-string (format "#p~x" (address-of (current-date))))))
+
+
+(test "read #pa 1010, ends in 10 but not char"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#pa")))
+
+(test "read #p1f tagged small constant, but too large"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p1f")))
+
+(test "read #p9 = 10 01 = integer '2'"
+      2
+      (with-handler (lambda (x) -1) (read-from-string "#p9")))
+
+(test "read #p0 = 00 = pointer to nowhere"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p0")))
+
+(test "read #p4 = 1 00 = pointer to nowhere"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p4")))
+
+
+(let ((mylist (list #void #f #t '() 0 1 (expt 2 500)
+                    "abc" '(1 2 3) (list 10 20 30) #(1 2 3)
+                    (current-time)
+                    (lambda (x) -x))))
+  (test "address-ref"
+        mylist
+        (map (lambda (thing) (address-ref (address-of thing)))
+             mylist)))
+
 ;;------------------------------------------------------------------
 (test-section-end)

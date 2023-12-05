@@ -147,6 +147,7 @@ extern "C"
 //
 // GC_API void GC_gcollect(void);
 // GC_API void GC_init(void);
+// GC_API void *GC_base(void * /* displaced_pointer */);
 
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
@@ -160,7 +161,8 @@ extern "C"
                                             (GC_finalization_proc)(f),  \
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
-
+#define STk_gc_base(ptr)                GC_base(ptr)
+  
 void STk_gc_init(void);
 
 
@@ -710,6 +712,7 @@ void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
 SCM STk_eval_C_string(const char *str, SCM module);
 SCM STk_read_from_C_string(const char *str);
+void STk_verify_address(unsigned long addr, SCM object);
 
 int STk_init_misc(void);
 
@@ -1465,10 +1468,13 @@ extern STk_instr STk_boot_code[];
 #define STk_false       ((SCM) MAKE_SCONST(1))
 #define STk_true        ((SCM) MAKE_SCONST(2))
 #define STk_eof         ((SCM) MAKE_SCONST(3))
-#define STk_void        ((SCM) MAKE_SCONST(4))
+#define STk_void        ((SCM) MAKE_SCONST(4)) // must be the last constant
 
-#define STk_dot         ((SCM) MAKE_SCONST(5)) /* special pupose value see read.c */
-#define STk_close_par   ((SCM) MAKE_SCONST(6)) /* special pupose value see read.c */
+/* STk_void must be the last small constant, since it is used by 'read_address'
+   in read.c, to validate small  constants. Insert new constants before STk_void,
+   if needed. It is also used in read.c to build special constant for the reader.
+   NOTE: STk_void is the last *READABLE* and *REFERENTIABLE constant.
+*/
 
 
 /* Misc */

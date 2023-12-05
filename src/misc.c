@@ -201,23 +201,6 @@ DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 }
 
 
-/*
-<doc EXT address-of
- * (address-of obj)
- *
- * Returns the address of the object |obj| as an integer.
-doc>
-*/
-DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
-{
-  char buffer[50];     /* should be sufficient for a while */
-
-  snprintf(buffer, sizeof(buffer),
-           "%lx", (unsigned long) object); /* not very efficient ... */
-  return STk_Cstr2number(buffer, 16L);
-}
-
-
 /*===========================================================================*\
  *
  * GC stuff
@@ -233,6 +216,11 @@ static void GC_warning_handler(char *msg, GC_word arg)
   if (strstr(msg, "Returning NULL")) STk_error("OUT of memory");
 }
 
+static inline int is_GC_allocated_adressp(void *addr)
+{
+  void *base = STk_gc_base(addr);
+  return base && (base == addr);
+}
 
 
 void STk_gc_init(void)
@@ -256,6 +244,74 @@ DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
   return STk_void;
 }
 
+
+/*
+<doc EXT address-of address-ref
+ * (address-of obj)
+ * (address-ref n)
+ *
+ * |Address-of| returns the address of the object |obj| as an integer.
+ * |Address-ref| returns the object of which |n| is the address.
+ *
+ * @lisp
+ * (address-of "abc")              =>  140053283366272
+ * (address-of "abc")              =>  140053289472288 ;strings are not eq?
+ *
+ * (address-of 10)                 => 41
+ * (address-of 10)                 => 41
+ *
+ * (address-ref (address-of "xyz") => "xyz"
+ *
+ * (address-ref 0)                 => error (points to nothing)
+ * @end lisp
+doc>
+*/
+
+void STk_verify_address(unsigned long addr, SCM object)
+{
+  unsigned long tag = addr & 3;
+
+  switch(tag) {
+    case 0:        /* 00 It's a pointer! */
+      if (!is_GC_allocated_adressp((void *) addr))
+        STk_error("bad object address ~s", object);
+      break;
+
+    case 1:
+      break; /* 01 Integers are always OK */
+
+    case 2:        /* 10 Small object (characters) */
+      /* We only allow characters as small objects */
+      if ((addr & 0x7) != 0x6) /* ...110 */
+        STk_error("bad small object address ~s", object);
+      break;
+
+    case 3:        /* 11 small constant */
+      if (addr > (unsigned long) STk_void)  /* #void is the last small constant */
+        STk_error("bad small constant address ~s", object);
+      break;
+  }
+}
+
+DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
+{
+  char buffer[50];     /* should be sufficient for a while */
+
+  snprintf(buffer, sizeof(buffer),
+           "%lx", (unsigned long) object); /* not very efficient ... */
+  return STk_Cstr2number(buffer, 16L);
+}
+
+DEFINE_PRIMITIVE("address-ref", address_ref, subr1, (SCM object))
+{
+  unsigned long addr;
+
+  if (!INTP(object)) STk_error("bad integer ~s", object);
+  addr =  INT_VAL(object);
+
+  STk_verify_address(addr, object);
+  return (SCM) addr;
+}
 
 /*===========================================================================*\
  *
@@ -666,6 +722,7 @@ int STk_init_misc(void)
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);
   ADD_PRIMITIVE(address_of);
+  ADD_PRIMITIVE(address_ref);
   ADD_PRIMITIVE(scheme_gc);
 
   ADD_PRIMITIVE(init_getopt);
