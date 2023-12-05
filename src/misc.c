@@ -201,6 +201,50 @@ DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 }
 
 
+/*===========================================================================*\
+ *
+ * GC stuff
+ *
+\*===========================================================================*/
+static void GC_warning_handler(char *msg, GC_word arg)
+{
+  char buffer[512];
+
+  if (strstr(msg, "cycle")) return;
+  snprintf(buffer, sizeof(buffer), msg, arg);
+  fprintf(stderr, "*** %s", buffer);
+  if (strstr(msg, "Returning NULL")) STk_error("OUT of memory");
+}
+
+static inline int is_GC_allocated_adressp(void *addr)
+{
+  void *base = STk_gc_base(addr);
+  return base && (base == addr);
+}
+
+
+void STk_gc_init(void)
+{
+  GC_init();
+  /* Consider a GC warning as errors. Abort as soon as we encounter one */
+  GC_set_warn_proc(GC_warning_handler);
+}
+
+
+/*
+<doc EXT gc
+ * (gc)
+ *
+ * Force a garbage collection step.
+doc>
+*/
+DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
+{
+  STk_gc();
+  return STk_void;
+}
+
+
 /*
 <doc EXT address-of address-ref
  * (address-of obj)
@@ -229,8 +273,7 @@ void STk_verify_address(unsigned long addr, SCM object)
 
   switch(tag) {
     case 0:        /* 00 It's a pointer! */
-      if (!GC_base((SCM)addr)) /* GC_base will return NULL if this address is not
-                                  within a region allocated by the GC. */
+      if (!is_GC_allocated_adressp((void *) addr))
         STk_error("bad object address ~s", object);
       break;
 
@@ -269,45 +312,6 @@ DEFINE_PRIMITIVE("address-ref", address_ref, subr1, (SCM object))
   STk_verify_address(addr, object);
   return (SCM) addr;
 }
-
-/*===========================================================================*\
- *
- * GC stuff
- *
-\*===========================================================================*/
-static void GC_warning_handler(char *msg, GC_word arg)
-{
-  char buffer[512];
-
-  if (strstr(msg, "cycle")) return;
-  snprintf(buffer, sizeof(buffer), msg, arg);
-  fprintf(stderr, "*** %s", buffer);
-  if (strstr(msg, "Returning NULL")) STk_error("OUT of memory");
-}
-
-
-
-void STk_gc_init(void)
-{
-  GC_init();
-  /* Consider a GC warning as errors. Abort as soon as we encounter one */
-  GC_set_warn_proc(GC_warning_handler);
-}
-
-
-/*
-<doc EXT gc
- * (gc)
- *
- * Force a garbage collection step.
-doc>
-*/
-DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
-{
-  STk_gc();
-  return STk_void;
-}
-
 
 /*===========================================================================*\
  *

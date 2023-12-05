@@ -147,6 +147,7 @@ extern "C"
 //
 // GC_API void GC_gcollect(void);
 // GC_API void GC_init(void);
+// GC_API void *GC_base(void * /* displaced_pointer */);
 
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
@@ -160,7 +161,8 @@ extern "C"
                                             (GC_finalization_proc)(f),  \
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
-
+#define STk_gc_base(ptr)                GC_base(ptr)
+  
 void STk_gc_init(void);
 
 
