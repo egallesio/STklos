@@ -1470,13 +1470,10 @@ extern STk_instr STk_boot_code[];
 
 /* STk_void must be the last small constant, since it is used by 'read_address'
    in read.c, to validate small  constants. Insert new constants before STk_void,
-   if needed.
-   NOTE: the two small constants below should NOT be read, so they stay
-         out. STk_void is the last *READABLE* and *REFERENTIABLE constant.
+   if needed. It is also used in read.c to build special constant for the reader.
+   NOTE: STk_void is the last *READABLE* and *REFERENTIABLE constant.
 */
 
-#define STk_dot         (STk_void+(1<<3)) /* special purpose value see read.c */
-#define STk_close_par   (STk_void+(2<<3)) /* special purpose value see read.c */
 
 /* Misc */
 #if defined(__GNUC__) || defined(__clang__)

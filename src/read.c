@@ -27,6 +27,16 @@
 #include "stklos.h"
 
 
+/* Define here special small constants for the reader. These constants are used
+ * by the reader logic. They cannot be used by a program.
+ *
+ * NOTE: We use here the fact that STk_void must be the last small constant
+ * defined in stklos.h
+*/
+
+#define dot_cst         (STk_void+(1<<2))
+#define close_par_cst   (STk_void+(2<<2))
+
 struct read_context {
   SCM cycles;
   SCM inner_refs;
@@ -243,18 +253,18 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
     line = PORT_LINE(port);
     cur  = read_rec(port, ctx, TRUE);
 
-    if (cur == STk_close_par) {
+    if (cur == close_par_cst) {
       c = STk_getc(port);
       if (c != delim) warning_parenthesis(port);
       return start;
     }
 
-    if (cur == STk_dot) {
+    if (cur == dot_cst) {
       if (last == STk_nil)
         error_bad_dotted_list(port, line);  // dot before an element
 
       cur = read_rec(port, ctx, TRUE);
-      if (cur == STk_close_par)
+      if (cur == close_par_cst)
         error_bad_dotted_list(port, line); // dot not followed by an element
 
       c = flush_spaces(port, eof_seen, port);
@@ -264,7 +274,7 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
         STk_ungetc(c, port);
         tmp = read_rec(port, ctx, TRUE);
 
-        if (tmp != STk_close_par) STk_error("closing parenthesis expected");
+        if (tmp != close_par_cst) STk_error("closing parenthesis expected");
         c = flush_spaces(port, eof_seen, port);
       }
       if (c != delim)
@@ -916,7 +926,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
       case '}':
         if (inlist) {
           STk_ungetc(c, port);
-          return STk_close_par;
+          return close_par_cst;
         }
         warning_parenthesis(port);
         break;
@@ -928,7 +938,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
     read_quoted:
         {
           SCM tmp = read_rec(port, ctx, inlist);
-          if (tmp == STk_dot || tmp == STk_close_par)
+          if (tmp == dot_cst || tmp == close_par_cst)
             signal_error(port, "bad quote/quasiquote syntax", STk_nil);
           return LIST2(quote_type, tmp);
         }
@@ -1054,7 +1064,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                    c = flush_spaces(port, NULL, NULL);
                    STk_ungetc(c, port);
                    if (inlist && (c == ')' || c == ']' || c == '}'))
-                     return STk_close_par;
+                     return close_par_cst;
                    continue;
           case ',': /* SRFI-10 */
                     return read_srfi10(port,
@@ -1086,7 +1096,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           STk_ungetc(c, port);
         }
         tmp = read_rec(port, ctx, inlist);
-        if (tmp == STk_dot || tmp == STk_close_par)
+        if (tmp == dot_cst || tmp == close_par_cst)
           signal_error(port, "bad unquote/unquote-splice syntax", STk_nil);
         return LIST2(symb, tmp);
       }
@@ -1102,7 +1112,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
             return STk_intern(".");
 
           if (inlist)
-            return STk_dot;
+            return dot_cst;
           signal_error(port, "dot outside of list", STk_nil);
         }
     }
