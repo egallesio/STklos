@@ -613,5 +613,11 @@ b|)
         (map (lambda (thing) (address-ref (address-of thing)))
              mylist)))
 
+(test "#p shouldn't crash"
+      #void ;; return value from dotimes
+      (dotimes (i  (expt 2 12)) ;; 12 so as to not slow down tests on older systems
+        (with-handler (lambda (a) -1)
+                      (eval-from-string (format "#p~a" i )))))
+
 ;;------------------------------------------------------------------
 (test-section-end)
