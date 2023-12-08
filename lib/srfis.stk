@@ -152,7 +152,7 @@
     (112 "Environment Inquiry")
     (113 "Sets and Bags" (sets-bags) "srfi-113")
     ;; 114  ....... withdrawn
-    ;; 115  Scheme Regular Expressions
+    (115  "Scheme Regular Expressions" () "srfi-115")
     (116 "Immutable List Library" (immutable-lists) "srfi-116")
     (117 "Queues based on lists" (queues-as-lists) "srfi-117")
     (118 "Simple adjustable-size strings" (adjustable-strings))
