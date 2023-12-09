@@ -5,6 +5,7 @@
   ;;; IMPORTS
   ;;;
 
+  (import (only SCHEME regexp-replace)) ;; In case SRFI-115 is loaded before
   (import scheme/vector/base)
 
   (import scheme/vector/s8)
