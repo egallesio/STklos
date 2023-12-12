@@ -519,6 +519,56 @@ DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
   return MAKE_CHARACTER(STk_to_fold((uint32_t) CHARACTER_VAL(c)));
 }
 
+/* ----------------------------------------------------------------------
+ * UTF8 support for char-sets 
+ * ---------------------------------------------------------------------- */
+static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
+{
+  SCM lst = STk_nil;
+
+  for (int i = len-1; i >=0; i--) {
+    lst = STk_cons(MAKE_CHARACTER(tab[i].key), lst);
+  }
+  return lst;
+}
+
+static inline SCM make_char_list2(utf8_char *tab, int len)
+{
+  SCM lst = STk_nil;
+
+  for (int i = len-1; i >=0; i--) {
+    lst = STk_cons(MAKE_CHARACTER(tab[i]), lst);
+  }
+  return lst;
+}
+
+
+DEFINE_PRIMITIVE("%uppers-list", uppers_list, subr0, (void))
+{
+  return make_char_list1(upper_table, upper_table_length);
+}
+
+DEFINE_PRIMITIVE("%lowers-list", lowers_list, subr0, (void))
+{
+  return make_char_list1(lower_table, lower_table_length);
+}
+
+DEFINE_PRIMITIVE("%digits-list", digits_list, subr0, (void))
+{
+  return make_char_list1(digits_table, digits_table_length);
+}
+
+DEFINE_PRIMITIVE("%letters-list", letters_list, subr0, (void))
+{
+  return make_char_list2(letters_table, letters_table_length);
+}
+
+DEFINE_PRIMITIVE("%spaces-list", spaces_list, subr0, (void))
+{
+  return make_char_list2(spaces_table, spaces_table_length);
+}
+
+
 
 int STk_init_char(void)
 {
@@ -552,5 +602,11 @@ int STk_init_char(void)
   ADD_PRIMITIVE(char_downcase);
   ADD_PRIMITIVE(char_foldcase);
 
+  /* Support for char-sets */
+  ADD_PRIMITIVE(uppers_list);
+  ADD_PRIMITIVE(lowers_list);
+  ADD_PRIMITIVE(digits_list);
+  ADD_PRIMITIVE(letters_list);
+  ADD_PRIMITIVE(digits_list);
   return TRUE;
 }
