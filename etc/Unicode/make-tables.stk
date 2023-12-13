@@ -1,7 +1,7 @@
 ;;;;
 ;;;; make-tables.stk    -- Make UTF-8 tables
 ;;;;
-;;;; Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 ;;;;    Creation date: 11-Aug-2011 00:16 (eg)
 ;;;;
 
+(define all      '())
 (define digits   '())
 (define lower    '())
 (define upper    '())
@@ -94,6 +95,7 @@
                  (up       (vector-ref res 12))
                  (low      (vector-ref res 13)))
             ;; (eprintf "res = ~S\n" res)
+            (set! all (cons char all))
             (cond
               ((equal? category "Lu")                 ;; Letter, Uppercase
                (let ((v (if (string=? low "") "0" low)))
@@ -124,11 +126,16 @@
             (Loop (read-line)))))
 
       ;; Print hash-tables
-      (print-assoc upper "upper_table")
-      (print-assoc lower "lower_table")
-      (print-assoc digits "digits_table")
-      (print-list letters "letters_table")
-      (print-list spaces  "spaces_table"))))
+      (printf "#ifdef BASE_CHAR_SET\n")
+          (print-list all     "all_table")
+      (printf "#else\n")
+          (print-assoc upper "upper_table")
+          (print-assoc lower "lower_table")
+          (print-assoc digits "digits_table")
+          (print-list letters "letters_table")
+          (print-list spaces  "spaces_table")
+      (printf "#endif // ifdef BAS_CHAR_SET\n"))))
+
 
 
 ;;; ======================================================================
@@ -156,7 +163,9 @@
                  (unless (and low (string=? (cdr low) to))
                    (set! folds (cons (cons from to) folds)))))
              (Loop (read-line))))))
-      (print-assoc folds "fold_table"))))
+      (printf "#ifndef BASE_CHAR_SET\n")
+      (print-assoc folds "fold_table")
+      (printf "#endif\n"))))
 
 
 (define (main argv)
