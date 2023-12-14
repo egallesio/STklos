@@ -162,7 +162,7 @@ extern "C"
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 #define STk_gc_base(ptr)                GC_base(ptr)
-  
+
 void STk_gc_init(void);
 
 
@@ -366,11 +366,12 @@ int STk_init_box(void);
 #define CHARACTER_VAL(n)  ((AS_LONG(n) >> 3))
 #define CHARACTERP(n)     ((AS_LONG(n) & 7) == 6)
 
+typedef uint32_t utf8_char;
 
 /* Simple  character conversion functions */
-uint32_t STk_to_upper(uint32_t c);
-uint32_t STk_to_lower(uint32_t c);
-uint32_t STk_to_fold(uint32_t c);
+utf8_char STk_to_upper(utf8_char c);
+utf8_char STk_to_lower(utf8_char c);
+utf8_char STk_to_fold(utf8_char c);
 
 
 char *STk_char2string(int c);
@@ -1329,7 +1330,7 @@ extern int STk_use_utf8;
   ((0 <= (c)  && (c) <=  0xd7ff) || (0xE000 <=(c) && (c) <= 0x10FFFF))
 
 
-char *STk_utf8_grab_char(char *str, uint32_t *c); /* result = pos. after current one */
+char *STk_utf8_grab_char(char *str, utf8_char *c); /* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(const char *s, int max);
 int STk_utf8_read_char(SCM port);
