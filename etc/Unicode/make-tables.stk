@@ -23,13 +23,14 @@
 ;;;;    Creation date: 11-Aug-2011 00:16 (eg)
 ;;;;
 
-(define all      '())
-(define digits   '())
-(define lower    '())
-(define upper    '())
-(define letters  '())
-(define spaces   '())
-(define folds    '())
+(define all          '())
+(define digits       '())
+(define lower        '())
+(define upper        '())
+(define letters      '())
+(define spaces       '())
+(define folds        '())
+(define puncts       '())  ;; Punctuations
 
 ;;; ======================================================================
 ;;;  print-assoc & print-list
@@ -95,7 +96,9 @@
                  (up       (vector-ref res 12))
                  (low      (vector-ref res 13)))
             ;; (eprintf "res = ~S\n" res)
-            (set! all (cons char all))
+            (unless (string=? category "Cs") ;; Not a character: (surrogate pair)
+              (set! all (cons char all)))
+
             (cond
               ((equal? category "Lu")                 ;; Letter, Uppercase
                (let ((v (if (string=? low "") "0" low)))
@@ -117,6 +120,9 @@
               ((member category '("Lt" "Lm"))        ;; Titlecase, Modifier
                (set! letters (cons char letters)))
 
+              ((member category '("Pc" "Pd" "Ps" "Pe" "Pi" "Pf" "Po"))  ;; Punctuation
+               (set! puncts (cons char puncts)))
+
               ((equal? category "Nd")
                (set! digits (cons (cons char (string->number dvalue)) digits)))
 
@@ -128,6 +134,7 @@
       ;; Print hash-tables
       (printf "#ifdef BASE_CHAR_SET\n")
           (print-list all     "all_table")
+          (print-list puncts  "puncts_table")
       (printf "#else\n")
           (print-assoc upper "upper_table")
           (print-assoc lower "lower_table")
