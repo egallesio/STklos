@@ -147,6 +147,11 @@ static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
   return -1;
 }
 
+// Public version of search_ordered_list
+int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len)
+{
+  return search_ordered_list(ch, table, len);
+}
 
 /*===========================================================================*\
  *
@@ -156,7 +161,7 @@ static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
 
 static void error_bad_char(SCM c)
 {
-  STk_error("bad char", c);
+  STk_error("bad char ~S", c);
 }
 
 static inline int charcomp(SCM c1, SCM c2)
@@ -520,6 +525,7 @@ DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
 /* ----------------------------------------------------------------------
  * UTF8 support for char-sets 
  * ---------------------------------------------------------------------- */
+
 static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
 {
   SCM lst = STk_nil;
@@ -565,7 +571,6 @@ DEFINE_PRIMITIVE("%spaces-list", spaces_list, subr0, (void))
 {
   return make_char_list2(spaces_table, spaces_table_length);
 }
-
 
 
 int STk_init_char(void)
