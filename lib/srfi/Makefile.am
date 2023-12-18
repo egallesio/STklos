@@ -376,7 +376,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) bitwise.ostk)
 ../scheme/vector/@.ostk:
 	(cd ../scheme/vector; $(MAKE) @.ostk)
-
+../stklos/itrie.$(SO):
+	(cd ../stklos; $(MAKE) itrie.$(SO))
 
 #======================================================================
 
