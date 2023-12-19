@@ -167,20 +167,6 @@
   (unless (and (integer? cursor) (>= cursor 0))
     (error proc "bad cursor ~S" cursor)))
 
-;;//(define (%char-set-unfold! proc p f g seed base-cs)
-;;//  (check-arg procedure? p proc)
-;;//  (check-arg procedure? f proc)
-;;//  (check-arg procedure? g proc)
-;;//  (let Loop ((seed seed))
-;;//    (if (p seed)
-;;//        base-cs
-;;//        (let ((c (f seed)))
-;;//          (%char-set-add base-cs c)
-;;//          (Loop (g seed))))))
-;;//
-;;;
-;;; Exported procedures
-;;;
 (define (char-set-cursor cs)
   (%verify-char-set cs 'char-set-cursor)
   (and (not (iset-empty? cs)) (iset-min cs)))
@@ -299,7 +285,6 @@
 
 (define (char-set-filter! predicate cs base-set)
   (%char-set-filter! predicate cs base-set 'char-set-filter!))
-  
 
 
 (define (%ucs-range->char-set! lower upper error? base-set proc)
@@ -481,8 +466,10 @@
         (ucs-range->char-set! #xd8 #xdf #t
                               (ucs-range->char-set! #xc0 #xd7 #t A-Z)))))
 
-;; FIXME
-(define char-set:title-case char-set:empty)
+(define char-set:title-case
+  (if (%use-utf8?)
+      (list->char-set (%title-case-list))
+      char-set:empty))
 
 (define char-set:letter
   (if (%use-utf8?)

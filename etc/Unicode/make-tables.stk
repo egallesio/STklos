@@ -30,8 +30,9 @@
 (define letters      '())
 (define spaces       '())
 (define folds        '())
-(define puncts       '())  ;; Punctuations
 (define symbols      '())
+(define titlecase    '())
+(define puncts       '())  ;; Punctuations
 
 ;;; ======================================================================
 ;;;  print-assoc & print-list
@@ -119,7 +120,8 @@
                (set! letters (cons char letters)))
 
               ((member category '("Lt" "Lm"))        ;; Titlecase, Modifier
-               (set! letters (cons char letters)))
+               (set! letters (cons char letters))
+               (set! titlecase (cons char titlecase)))
 
               ((member category                      ;; Punctuation
                        '("Pc" "Pd" "Ps" "Pe" "Pi" "Pf" "Po"))
@@ -141,15 +143,16 @@
 
       ;; Print hash-tables
       (printf "#ifndef BASE_CHAR_SET\n")
-          (print-assoc upper "upper_table")
-          (print-assoc lower "lower_table")
-          (print-assoc digits "digits_table")
-          (print-list letters "letters_table")
-          (print-list spaces  "spaces_table")
+          (print-assoc upper   "upper_table")
+          (print-assoc lower   "lower_table")
+          (print-assoc digits   "digits_table")
+          (print-list letters   "letters_table")
+          (print-list spaces    "spaces_table")
       (printf "#else\n")
-          (print-list all     "all_table")
-          (print-list puncts  "puncts_table")
-          (print-list symbols "symbols_table")
+          (print-list all       "all_table")
+          (print-list puncts    "puncts_table")
+          (print-list symbols   "symbols_table")
+          (print-list titlecase "titlecase_table")
       (printf "#endif // ifndef BAS_CHAR_SET\n"))))
 
 
