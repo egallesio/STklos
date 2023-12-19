@@ -12320,6 +12320,12 @@ static utf8_char titlecase_table[] = {
   0x1E13D,  0x1E94B,};
 static int titlecase_table_length = 290;
 
+static utf8_char blanks_table[] = {
+  0x0020,  0x00A0,  0x1680,  0x2000,  0x2001,  0x2002,  0x2003,  0x2004,
+  0x2005,  0x2006,  0x2007,  0x2008,  0x2009,  0x200A,  0x202F,  0x205F,
+  0x3000,};
+static int blanks_table_length = 17;
+
 #endif // ifndef BAS_CHAR_SET
 #ifndef BASE_CHAR_SET
 static struct utf8_conversion_char fold_table[] = {

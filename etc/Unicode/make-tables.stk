@@ -29,6 +29,7 @@
 (define upper        '())
 (define letters      '())
 (define spaces       '())
+(define blanks       '())
 (define folds        '())
 (define symbols      '())
 (define titlecase    '())
@@ -137,7 +138,10 @@
               ((or (member category                 ;; White Space
                             '("Zs" "Zl" "Zp"))
                    (member bidir '("B" "WS" "S")))
-               (set! spaces (cons char spaces))))
+               (set! spaces (cons char spaces))
+               (when (equal? category "Zs")
+                 ;; SRFI-14 differenciates blanks and white spaces
+                 (set! blanks (cons char blanks)))))
 
             (Loop (read-line)))))
 
@@ -153,6 +157,7 @@
           (print-list puncts    "puncts_table")
           (print-list symbols   "symbols_table")
           (print-list titlecase "titlecase_table")
+          (print-list blanks    "blanks_table")
       (printf "#endif // ifndef BAS_CHAR_SET\n"))))
 
 

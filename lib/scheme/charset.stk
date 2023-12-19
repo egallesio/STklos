@@ -81,7 +81,8 @@
 
 
 (%compile-time-define %valid-char-code?
-                      %all-list %punctuations-list %symbols-list)
+                      %all-list %punctuations-list %symbols-list
+                      %title-case-list %blanks-list)
 
 
 (define-macro (%verify-char-set obj proc)
@@ -538,11 +539,13 @@
 
 (define char-set:hex-digit (string->char-set "0123456789abcdefABCDEF"))
 
-;; FIXME
 (define char-set:blank
-  (list->char-set (map integer->char '(#x09     ; HORIZONTAL TABULATION
-                                       #x20     ; SPACE
-                                       #xA0)))) ; NO-BREAK SPACE
+  (if (%use-utf8?)
+      (char-set-adjoin (list->char-set (%blanks-list))
+                       #\tab)
+      (list->char-set (map integer->char '(#x09     ; HORIZONTAL TABULATION
+                                           #x20     ; SPACE
+                                           #xA0))))); NO-BREAK SPACE
 
 (define char-set:ascii (ucs-range->char-set 0 128))
 
