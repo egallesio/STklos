@@ -3406,7 +3406,7 @@ static void print_trie(SCM trie, SCM port, int mode) {
           clst = STk_cons(MAKE_CHARACTER(INT_VAL(CAR(lst))), clst);
           lst = CDR(lst);
         }
-        lst = STk_cons (STk_intern("<charset>"), STk_dreverse(clst));
+        lst = STk_cons (STk_intern("char-set"), STk_dreverse(clst));
       } else {
         lst = STk_cons (STk_intern("<iset>"), lst);
       }

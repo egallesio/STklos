@@ -519,6 +519,12 @@
 
 (define char-set:printing (char-set-union char-set:whitespace char-set:graphic))
 
+;;;
+;;; External reading of char-sets (SRFI 10)
+;;;
+(define-reader-ctor 'char-set char-set)
+
+
 
 (provide "scheme/charset")
 
