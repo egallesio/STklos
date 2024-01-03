@@ -88,9 +88,11 @@
 ;;;;;;;;;;;;;;;;;;;;
 
 (define (describe-iset x port)
-  (format port "a ~a iset, with ~a elements."
-          (if (iset-mutable? x) "mutable" "constant")
-          (iset-size x)))
+  (let ((sz (iset-size x)))
+    (format port "a ~a iset, with ~a element~a"
+            (if (iset-mutable? x) "mutable" "constant")
+            sz
+            (if (> sz 1) "s" ""))))
 
 (%user-type-proc-set! 'iset 'describe describe-iset)
 
