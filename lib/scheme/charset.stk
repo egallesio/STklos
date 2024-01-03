@@ -37,6 +37,8 @@
 (import (srfi 217))   ;; Integer sets
 
 (export
+   <char-set>
+ 
    ;; Predicates & comparison
    char-set? char-set= char-set<= char-set-hash
 
@@ -523,6 +525,37 @@
 ;;; External reading of char-sets (SRFI 10)
 ;;;
 (define-reader-ctor 'char-set char-set)
+
+
+;;;
+;;; OO support
+;;;
+(define-class <char-set> (<top>) ())
+
+;; NOTE: this is a bit "hacky": isets had already defined their class as the
+;; class <iset> with `%user-type-proc-set!`.
+;; We are sure that this class is loaded before us, since it is imported. So,
+;; now, we change the class-of to a function which can discriminate char-sets
+;; and isets
+(%user-type-proc-set! 'iset 'class-of (lambda (o)
+                                        (if (char-set? o)
+                                            <char-set>
+                                            <iset>)))
+
+;; Describe procedure.
+;; Same thing, we overwrite the procedure associated to iset
+(let ((iset-describe (%user-type-proc 'iset 'describe))) ;; get the old one
+  (%user-type-proc-set! 'iset 'describe
+                        (lambda (x port)
+                          (if (char-set? x)
+                              ;; char-set
+                              (let ((sz (iset-size x)))
+                                (format port "a char-set, with ~a element~a"
+                                        sz
+                                        (if (> sz 1) "s" "")))
+                              ;; iset
+                              (iset-describe x port))
+                          (void))))
 
 
 (provide "scheme/charset")
