@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-14.stk        -- Implementation of SRFI-14
 ;;;;
-;;;; Copyright © 2002-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@
 
 
 (define-macro (%verify-char-set obj proc)
-  `(unless (char-set? ,obj) (error ,proc "bad char-set ~S" ',obj)))
+  `(unless (char-set? ,obj) (error ,proc "bad char-set ~S" ,obj)))
 
 (define-macro (%verify-character obj proc)
   `(unless (char? ,obj) (error ,proc "bad character ~S" ',obj)))
@@ -104,43 +104,19 @@
 
 (define (%char-set-add1 cs c)
   (if (%valid-char-code? c)
-      (iset-adjoin! cs c)
+      (iset-adjoin cs c)
       cs))
 
 (define (%empty-char-set)
-  (iset))
-;;//
-;;//(define (%char-set-add1-int csv i)
-;;//  (bit-or csv (expt 2 i)))
-;;//
-;;//(define (%make-char-set-from-integer v)
-;;//  (make <char-set> :value v))
-;;//
-;;//(define (%char-set-value-set! cs v)
-;;//  (slot-set! cs 'value v))
-;;//
-;;//(define (%char-set-copy cs)
-;;//  (deep-clone cs))
+  (%iset->char-set (iset)))
 
-;;//(define (make-char-set . l)
-;;//  (let ((v 0))
-;;//    (for-each (lambda (x)
-;;//                (unless (char? x)
-;;//                  (error 'make-char-set "bad character ~S" x))
-;;//                (set! v (%char-set-add1-char v x)))
-;;//              l)
-;;//    (%make-char-set-from-integer v)))
-
-;;//
-;;//
 
 ;;;; ======================================================================
 ;;;;
 ;;;;                    G E N E R A L   P R O C E D U R E S
 ;;;;
 ;;;; ======================================================================
-(define (char-set? x)
-  (is-a? x <iset>))
+(define char-set? (in-module (stklos itrie) %char-set?) )
 
 (define (char-set= . rest)
   (%verify-char-sets rest 'char-set=)
@@ -210,7 +186,7 @@
     (if (p seed)
         cs
         (Loop (g seed)
-              (char-set-adjoin! cs (f seed))))))
+              (char-set-adjoin cs (f seed))))))
 
 
 (define (char-set-unfold p f g seed :optional (base-set (%empty-char-set)))
@@ -219,21 +195,13 @@
 (define (char-set-unfold! p f g seed base-set)
   (%char-set-unfold! 'char-set-unfold! p f g seed base-set))
 
-(define (char-set-unfold! p f g seed base-cs)
-  (let lp ((seed seed) (cs base-cs))
-        (if (p seed) cs                                 ; P says we are done.
-            (lp (g seed)                                ; Loop on (G SEED).
-                (char-set-adjoin! cs (f seed))))))      ; Add (F SEED) to set.
-
-
-
 (define (char-set-for-each proc cs)
    (%verify-char-set+proc cs proc 'char-set-for-each)
    (iset-for-each (lambda (x) (proc (integer->char x))) cs))
 
 (define (char-set-map proc cs)
   (%verify-char-set+proc cs proc 'char-set-for-map)
-  (iset-map (lambda (x) (char->integer (proc (integer->char x)))) cs))
+  (%iset->char-set (iset-map (lambda (x) (char->integer (proc (integer->char x)))) cs)))
 
 ;;;; ======================================================================
 ;;;;
@@ -242,34 +210,30 @@
 ;;;; ======================================================================
 
 (define (%char-set-filter! pred cs bs proc)
-  (%verify-proc pred proc)  ;; FIXME: cs et bs
+  (%verify-proc pred proc)  ;; FIXME: cs & bs
   (let ((max (iset-max cs)))
     (let Loop ((i (iset-min cs)))
       (if (> i max)
           bs
           (let ((char (integer->char i)))
             (when (and (iset-contains? cs i) (pred char))
-              (set! bs (iset-adjoin bs i)))
+              (set! bs (char-set-adjoin bs char)))
             (Loop (+ i 1)))))))
 
 
-(define (%char-set-copy cs)  ; non verifier char-set-copy
-  (iset-copy cs))
-
-;;;
 ;;; Exported procedures
 ;;;
 (define (char-set-copy cs)
   (%verify-char-set cs 'char-set-copy)
-  (iset-copy cs))
-
+  (%iset->char-set (iset-copy cs)))
+  
 (define (char-set  . lst)
   (for-each (lambda (x) (%verify-character x 'char-set)) lst)
-  (list->iset (map char->integer lst)))
+  (%iset->char-set (list->iset (map char->integer lst))))
 
 
 (define (list->char-set lst :optional (base-set (%empty-char-set)))
-  (apply iset-adjoin! base-set (map char->integer lst)))
+  (%iset->char-set (apply iset-adjoin base-set (map char->integer lst))))
 
 (define list->char-set! list->char-set)
 
@@ -302,14 +266,14 @@
           (when error?
             (error "character code ~s is invalid" i)))
       (Loop (+ i 1))))
-  base-set)
+  (%iset->char-set base-set))
 
 (define (ucs-range->char-set! lower upper error? base-set)
   (%ucs-range->char-set! lower upper error? base-set 'ucs-range->char-set!))
 
 (define (ucs-range->char-set lower upper
                              :optional (error? #f) (base-set #f base-set?))
-  (let ((base-set (if base-set? base-set (iset))))
+  (let ((base-set (if base-set? base-set (%empty-char-set))))
     (%ucs-range->char-set! lower upper error? base-set 'ucs-range->char-set)))
 
 
@@ -385,7 +349,7 @@
               (%verify-character x 'char-set-adjoin)
               (set! cs (%char-set-add1 cs (char->integer x))))
             chars)
-  cs)
+  (%iset->char-set cs))
 
 (define (char-set-delete cs . chars)
   (%verify-char-set cs 'char-set-delete)
@@ -393,7 +357,7 @@
               (%verify-character x 'char-set-delete)
               (set! cs (iset-delete cs (char->integer x))))
             chars)
-  cs)
+  (%iset->char-set cs))
 
 
 (define char-set-adjoin! char-set-adjoin)
@@ -401,26 +365,26 @@
 
 (define (char-set-complement cs)
   (%verify-char-set cs 'char-set-complement)
-  (apply iset-delete
-         char-set:full
-         (map char->integer (char-set->list cs))))
+  (%iset->char-set (apply iset-delete
+                          char-set:full
+                          (map char->integer (char-set->list cs)))))
 
 (define (char-set-union . lst)
   (for-each (lambda (x) (%verify-char-set x 'char-set-union)) lst)
-  (apply iset-union lst))
+  (%iset->char-set (apply iset-union lst)))
 
 
 (define (char-set-intersection . lst)
   (%verify-char-sets lst 'char-set-intersection)
-  (apply iset-intersection lst))
+  (%iset->char-set (apply iset-intersection lst)))
 
 (define (char-set-difference . lst)
   (%verify-char-sets lst 'char-set-difference)
-  (apply iset-difference lst))
+  (%iset->char-set (apply iset-difference lst)))
 
 (define (char-set-xor . lst)
   (%verify-char-sets lst 'char-set-xor)
-  (apply iset-xor lst))
+  (%iset->char-set (apply iset-xor lst)))
 
 (define (char-set-diff+intersection cs1 . cs)
   (values (apply char-set-difference cs1 cs)
@@ -457,7 +421,7 @@
       (let* ((a-z (ucs-range->char-set #x61 #x7B))
              (latin1 (ucs-range->char-set! #xdf #xf7  #t a-z))
              (latin2 (ucs-range->char-set! #xf8 #x100 #t latin1)))
-        (char-set-adjoin! latin2 (integer->char #xb5)))))
+        (char-set-adjoin latin2 (integer->char #xb5)))))
 
 (define char-set:upper-case
   (if (%use-utf8?)
@@ -476,9 +440,9 @@
   (if (%use-utf8?)
       (list->char-set (%letters-list))
       (let ((u/l (char-set-union char-set:upper-case char-set:lower-case)))
-        (char-set-adjoin! u/l
-                          (integer->char #xaa)      ; FEMININE ORDINAL INDICATOR
-                          (integer->char #xba)))))  ; MASCULINE ORDINAL INDICATOR
+        (char-set-adjoin u/l
+                         (integer->char #xaa)      ; FEMININE ORDINAL INDICATOR
+                         (integer->char #xba)))))  ; MASCULINE ORDINAL INDICATOR
 
 (define char-set:digit
   (if (%use-utf8?)
