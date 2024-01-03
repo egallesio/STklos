@@ -525,7 +525,6 @@
 (define-reader-ctor 'char-set char-set)
 
 
-
 (provide "scheme/charset")
 
 ;;; Copyright notice
