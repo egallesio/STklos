@@ -35,7 +35,7 @@
 /*
   New extended types for Patricia trees:
 
-   - iset represents sets of fixnums
+   - iset represents sets of fixnums (or charset)
    - fxmap represents mappings from fixnums to arbitrary types
 
    These will be filled later, at the end of this file.
@@ -43,6 +43,7 @@
 NOTE: char-sets are in fact isets with the bit TRIE_CHARSET set to 1
       Only a few functions takes care of this bit:
         - %iset->char-set force this bit to 1
+        - char-set? which test this bit
         - the iset printer which behaves differently for char-sets.
 
 */
@@ -211,8 +212,8 @@ struct trie_empty_obj {
 
 /* REMINDER: both iset and fxmap leaves need the 'long prefix'
              member, since TRIE_PREFIX uses it. Do not change
-	     the structure withtout reviewing the accessor
-	     macros. */
+             the structure withtout reviewing the accessor
+             macros. */
 
 struct trie_leaf_iset_obj {
     stk_header header;
@@ -2079,6 +2080,11 @@ DEFINE_PRIMITIVE("%iset->char-set", iset2charset, subr1, (SCM s))
   return s;
 }
 
+DEFINE_PRIMITIVE("%char-set?", charsetp, subr1, (SCM s))
+{
+  return MAKE_BOOLEAN(ISETP(s) && TRIE_CHARSETP(s));
+}
+
 
 DEFINE_PRIMITIVE("constant-iset", trie_constant_iset, vsubr, (int argc, SCM *argv))
 {
@@ -3444,7 +3450,10 @@ MODULE_ENTRY_START("stklos/itrie")
   ADD_PRIMITIVE_IN_MODULE(triep,                 module);
   ADD_PRIMITIVE_IN_MODULE(fxmapp,                module);
   ADD_PRIMITIVE_IN_MODULE(isetp,                 module);
+
+  /* charset primitives */
   ADD_PRIMITIVE_IN_MODULE(iset2charset,          module);
+  ADD_PRIMITIVE_IN_MODULE(charsetp,              module);
 
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_empty_p,    module);
   ADD_PRIMITIVE_IN_MODULE(trie_iset_empty_p,     module);
