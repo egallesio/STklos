@@ -1093,6 +1093,8 @@ STKLOS_BINARY ?= ../../src/stklos
 	(cd ../scheme; $(MAKE) bitwise.ostk)
 ../scheme/vector/@.ostk:
 	(cd ../scheme/vector; $(MAKE) @.ostk)
+../stklos/itrie.$(SO):
+	(cd ../stklos; $(MAKE) itrie.$(SO))
 
 #======================================================================
 
