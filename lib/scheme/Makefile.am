@@ -200,7 +200,7 @@ ideque.ostk: generator.ostk list.$(SO)
 text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 regex.ostk: regex/boundary.stk hash-table.ostk list.$(SO) \
-            charset.ostk bitwise.ostk
+            charset.$(SO) bitwise.ostk
 
 
 # ======================================================================
