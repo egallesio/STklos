@@ -105,4 +105,4 @@
        (curried formals exp ...)))))
 )
 
-(provide "srfi-232")
+(provide "srfi/232")
