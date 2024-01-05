@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -760,11 +760,8 @@ DEFINE_PRIMITIVE("utf8->string", utf82string, vsubr, (int argc, SCM *argv))
   len        = end_addr - start_addr;
 
   /* Verify that the sub-vector denotes a correct string */
-  if (STk_utf8_verify_sequence((char *) start_addr, len)) {
-    SCM z = STk_makestring(len, NULL);
-    memcpy(STRING_CHARS(z), start_addr, end_addr - start_addr);
-    return z;
-  }
+  if (STk_utf8_verify_sequence((char *) start_addr, len))
+    return STk_makestring(len, (char *) start_addr);
   else
     STk_error("bad UTF8 sequence between %d and %d in ~S", start, end, v);
 

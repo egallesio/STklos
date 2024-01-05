@@ -1,6 +1,6 @@
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #-======================================================================
 
-SUBDIRS=160
+SUBDIRS= 160
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -89,6 +89,7 @@ SRC_STK   = 1.stk   \
             111.stk \
             112.stk \
             113.stk \
+            115.stk \
             116.stk \
             117.stk \
             118.stk \
@@ -200,10 +201,11 @@ SRC_OSTK =  1.ostk   \
             100.ostk \
             111.ostk \
             112.ostk \
+            113.ostk \
+            115.ostk \
             116.ostk \
             117.ostk \
             118.ostk \
-            113.ostk \
             125.ostk \
             127.ostk \
             128.ostk \
@@ -306,6 +308,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 94.ostk: 60.ostk
 95.ostk:  ../scheme/sort.$(SO)
 113.ostk: ../scheme/set.ostk
+115.ostk: ../scheme/regex.ostk
 116.ostk: ../scheme/ilist.$(SO)
 117.ostk: 1.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
@@ -372,8 +375,11 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) bitwise.ostk)
 ../scheme/vector/@.ostk:
 	(cd ../scheme/vector; $(MAKE) @.ostk)
+../scheme/regex.ostk:
+	(cd ../scheme;  $(MAKE) regexp.ostk)
 
-
+../stklos/itrie.$(SO):
+	(cd ../stklos; $(MAKE) itrie.$(SO))
 #======================================================================
 
 install-data-hook:

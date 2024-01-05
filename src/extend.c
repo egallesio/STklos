@@ -3,7 +3,7 @@
  * e x t e n d . c          -- All the stuff dealing with
  *                             extended types
  *
- * Copyright © 1995-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1995-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,11 @@ SCM STk_extended_equal(SCM o1, SCM o2)
 
 SCM STk_extended_class_of(SCM o)
 {
-  return XTYPE_CLASS_OF(BOXED_XTYPE(o));
+  SCM type = XTYPE_CLASS_OF(BOXED_XTYPE(o));
+ 
+  /* type  may be a class or a function to call to obtain it */
+  return (STk_procedurep(type) == STk_true) ? STk_C_apply(type, 1, o): type;
+
 }
 
 // ----------------------------------------------------------------------

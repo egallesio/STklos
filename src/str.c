@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -82,7 +82,7 @@ static int stringcomp(SCM s1, SCM s2)
 
   if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
     /* At least one string is multi-bytes */
-    uint32_t ch1, ch2;
+    utf8_char ch1, ch2;
     char *end1, *end2;
 
     str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
@@ -124,7 +124,7 @@ static int stringcompi(SCM s1, SCM s2)
 
   if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
     /* At least one string is multi-bytes */
-    uint32_t ch1, ch2;
+    utf8_char ch1, ch2;
     char *end1, *end2;
 
     str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
@@ -202,9 +202,9 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
   return s;
 }
 
-static uint32_t *string2int(char *s, int len, int *utf8_len, uint32_t(*func)(uint32_t))
+static utf8_char *string2int(char *s, int len, int *utf8_len, utf8_char(*func)(utf8_char))
 {
-  uint32_t ch, *tmp, *buff = STk_must_malloc_atomic(len * sizeof(uint32_t));
+  utf8_char ch, *tmp, *buff = STk_must_malloc_atomic(len * sizeof(utf8_char));
   int space = 0;
 
   for (tmp = buff; len--; tmp++) {
@@ -218,7 +218,7 @@ static uint32_t *string2int(char *s, int len, int *utf8_len, uint32_t(*func)(uin
   return buff;
 }
 
-static SCM make_string_from_int_array(uint32_t *buff, int len, int utf8_len)
+static SCM make_string_from_int_array(utf8_char *buff, int len, int utf8_len)
 {
   SCM z;
   char *s, *end;
@@ -238,7 +238,7 @@ static SCM make_string_from_int_array(uint32_t *buff, int len, int utf8_len)
 }
 
 
-static void copy_array(uint32_t *buff, int len, char *from)
+static void copy_array(utf8_char *buff, int len, char *from)
 {
   while (len--)
     from += STk_char2utf8(*buff++, from);
@@ -251,7 +251,7 @@ static SCM make_substring(SCM string, long from, long to)
     return STk_makestring(to - from, STRING_CHARS(string)+from);
   else {
     /* multi-bytes string */
-    uint32_t c;
+    utf8_char c;
     char *pfrom, *pto;
     SCM z;
 
@@ -455,7 +455,7 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
     return MAKE_CHARACTER((unsigned char)STRING_CHARS(str)[k]);
   else {
     /* We have multibytes chars */
-    uint32_t c;
+    utf8_char c;
     char *s = STRING_CHARS(str);
 
     do
@@ -764,7 +764,7 @@ int get_substring_size(SCM string, long from, long to) {
     return (to - from);
   else {
     /* multi-bytes string */
-    uint32_t c;
+    utf8_char c;
     char *pfrom, *pto;
 
     pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
@@ -938,7 +938,7 @@ DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
 {
   register char *s;
   int len;
-  uint32_t c;
+  utf8_char c;
   SCM tmp, tmp1, z;
 
   if (!STRINGP(str)) error_bad_string(str);
@@ -1238,7 +1238,7 @@ doc>
  */
 static SCM string_xxcase(int argc, SCM *argv,
                          int (*toxx)(int),
-                         uint32_t (*towxx)(uint32_t))
+                         utf8_char (*towxx)(utf8_char))
 {
   SCM s;
   long start, end;
@@ -1246,7 +1246,7 @@ static SCM string_xxcase(int argc, SCM *argv,
   s = control_index(argc, argv, &start, &end);
 
   if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
-    uint32_t *wchars;
+    utf8_char *wchars;
     int len;
     char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
 
@@ -1287,7 +1287,7 @@ doc>
 */
 static SCM string_dxxcase(int argc, SCM *argv,
                           int (*toxx)(int),
-                          uint32_t (*towxx)(uint32_t))
+                          utf8_char (*towxx)(utf8_char))
 {
   SCM s;
   long i, start, end;
@@ -1296,7 +1296,7 @@ static SCM string_dxxcase(int argc, SCM *argv,
   if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
 
   if (STk_use_utf8 && !STRING_MONOBYTE(s)) {        /* multibyte string */
-    uint32_t *wchars;
+    utf8_char *wchars;
     int len;
     char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
     char *endp   = STk_utf8_index(STRING_CHARS(s), end, STRING_SIZE(s));
