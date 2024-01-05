@@ -270,7 +270,7 @@
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
     ;; 231 Intervals and Generalized Arrays (Updated^2)
-    ;; 232 Flexible Curried Procedures
+    (232 "Flexible Curried Procedures" () "srfi-232")
     (233 "INI files" (ini-files) "srfi-233")
     ;; 234 Topological sorting (draft)
     (235 "Combinators" (combinators) "srfi-235")
