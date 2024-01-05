@@ -17,7 +17,7 @@
 #
 #  Makefile for SRFI-115
 #
-# Copyright © 2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2023-2024 Erick Gallesio <eg@stklos.net>
 #
 #           Author: Erick Gallesio [eg@stklos.net]
 #    Creation date:  8-Dec-2023 12:19
@@ -96,7 +96,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = lib/srfi/115
+subdir = lib/scheme/regex
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -301,9 +301,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu lib/srfi/115/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu lib/scheme/regex/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu lib/srfi/115/Makefile
+	  $(AUTOMAKE) --gnu lib/scheme/regex/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -472,7 +472,7 @@ uninstall-am:
 
 
 all:
-	@echo "Nothing to do in srfi/115 directory"
+	@echo "Nothing to do in scheme/regexp directory"
 
 clean:
 

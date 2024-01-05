@@ -16,7 +16,7 @@
 
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -391,7 +391,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = 115 160
+SUBDIRS = 160
 STKLOS_FLAGS = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
@@ -1026,8 +1026,7 @@ STKLOS_BINARY ?= ../../src/stklos
 94.ostk: 60.ostk
 95.ostk:  ../scheme/sort.$(SO)
 113.ostk: ../scheme/set.ostk
-115.ostk: ../scheme/hash-table.ostk ../scheme/list.$(SO) ../scheme//charset.ostk \
-          ../scheme/bitwise.ostk
+115.ostk: ../scheme/regex.ostk
 116.ostk: ../scheme/ilist.$(SO)
 117.ostk: 1.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
@@ -1093,13 +1092,14 @@ STKLOS_BINARY ?= ../../src/stklos
 	(cd ../scheme; $(MAKE) bitwise.ostk)
 ../scheme/vector/@.ostk:
 	(cd ../scheme/vector; $(MAKE) @.ostk)
+../scheme/regex.ostk:
+	(cd ../scheme;  $(MAKE) regexp.ostk)
+
 ../stklos/itrie.$(SO):
 	(cd ../stklos; $(MAKE) itrie.$(SO))
-
 #======================================================================
 
 install-data-hook:
-	(cd 115; $(MAKE) install)
 	(cd 160; $(MAKE) install)
 
 install-sources:
@@ -1110,16 +1110,13 @@ install-sources:
 
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
-	(cd 115; $(MAKE) clean)
 	(cd 160; $(MAKE) clean)
 
 distclean: clean
 	/bin/rm -f Makefile
-	(cd 115; $(MAKE) distclean)
 	(cd 160; $(MAKE) distclean)
 
 uninstall-hook:
-	(cd 115; $(MAKE) uninstall)
 	(cd 160; $(MAKE) uninstall)
 	(cd $(srfidir); rm -f $(srfi_sources))
 	rmdir $(srfidir) || true

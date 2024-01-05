@@ -21,7 +21,7 @@
 #    Creation date:  8-Oct-2021 11:54 (eg)
 
 #======================================================================
-SUBDIRS  = vector
+SUBDIRS  = vector regex
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
@@ -80,6 +80,7 @@ LARGE_STK  = stream.stk     \
              comparator.stk \
              generator.stk  \
              ideque.stk     \
+             regex.stk      \
              text.stk       \
              division.stk   \
              bitwise.stk
@@ -94,6 +95,7 @@ LARGE_OBJS = stream.ostk     \
              comparator.ostk \
              generator.ostk  \
              ideque.ostk     \
+             regex.ostk     \
              text.ostk       \
              division.ostk   \
              bitwise.ostk
@@ -197,6 +199,9 @@ hash-table.ostk: comparator.ostk
 ideque.ostk: generator.ostk list.$(SO)
 text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
+regex.ostk: regex/boundary.stk hash-table.ostk list.$(SO) \
+            charset.ostk bitwise.ostk
+
 
 # ======================================================================
 install-sources:
@@ -205,15 +210,21 @@ install-sources:
 	done
 	cp $(scheme_sources) $(schemedir)
 
+install-data-hook:
+	(cd regex; $(MAKE) install)
 clean:
 	(cd vector; $(MAKE) clean)
+	(cd regex; $(MAKE) clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
 	(cd vector; $(MAKE) distclean)
+	(cd regex; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:
+	(cd vector; $(MAKE) uninstall)
+	(cd regex; $(MAKE) uninstall)
 	(cd $(schemedir); rm -f $(scheme_sources))
 	rmdir $(schemedir) || true
 

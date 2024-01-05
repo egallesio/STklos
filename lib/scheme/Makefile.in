@@ -392,7 +392,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #======================================================================
-SUBDIRS = vector
+SUBDIRS = vector regex
 STKLOS_FLAGS = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 DOCDB = ../DOCDB
@@ -449,6 +449,7 @@ LARGE_STK = stream.stk     \
              comparator.stk \
              generator.stk  \
              ideque.stk     \
+             regex.stk      \
              text.stk       \
              division.stk   \
              bitwise.stk
@@ -462,6 +463,7 @@ LARGE_OBJS = stream.ostk     \
              comparator.ostk \
              generator.ostk  \
              ideque.ostk     \
+             regex.ostk     \
              text.ostk       \
              division.ostk   \
              bitwise.ostk
@@ -778,7 +780,8 @@ info: info-recursive
 info-am:
 
 install-data-am: install-schemeDATA install-schemelibDATA
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-data-hook
 install-dvi: install-dvi-recursive
 
 install-dvi-am:
@@ -824,16 +827,17 @@ ps-am:
 uninstall-am: uninstall-schemeDATA uninstall-schemelibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
-.MAKE: $(am__recursive_targets) install-am install-strip uninstall-am
+.MAKE: $(am__recursive_targets) install-am install-data-am \
+	install-strip uninstall-am
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
 	check-am clean clean-generic cscopelist-am ctags ctags-am \
 	distclean distclean-generic distclean-tags distdir dvi dvi-am \
 	html html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-schemeDATA \
+	install-data-am install-data-hook install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-schemeDATA \
 	install-schemelibDATA install-strip installcheck \
 	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
@@ -915,6 +919,8 @@ hash-table.ostk: comparator.ostk
 ideque.ostk: generator.ostk list.$(SO)
 text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
+regex.ostk: regex/boundary.stk hash-table.ostk list.$(SO) \
+            charset.ostk bitwise.ostk
 
 # ======================================================================
 install-sources:
@@ -923,15 +929,21 @@ install-sources:
 	done
 	cp $(scheme_sources) $(schemedir)
 
+install-data-hook:
+	(cd regex; $(MAKE) install)
 clean:
 	(cd vector; $(MAKE) clean)
+	(cd regex; $(MAKE) clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
 	(cd vector; $(MAKE) distclean)
+	(cd regex; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:
+	(cd vector; $(MAKE) uninstall)
+	(cd regex; $(MAKE) uninstall)
 	(cd $(schemedir); rm -f $(scheme_sources))
 	rmdir $(schemedir) || true
 
