@@ -241,30 +241,31 @@
 (test-re "srfi-115 44" #f '(* lower) "abcD")
 (test-re "srfi-115 45" '("abcD") '(w/nocase (* lower)) "abcD")
 
-(test-re "srfi-115 46" '("σζ") '(* lower) "σζ")
-(test-re "srfi-115 47" '("Σ") '(* upper) "Σ")
-(test-re "srfi-115 48" '("\x01C5;") '(* title) "\x01C5;")
-(test-re "srfi-115 49" '("σζ\x01C5;") '(w/nocase (* lower)) "σζ\x01C5;")
+(when %use-utf8?
+  (test-re "srfi-115 46" '("σζ") '(* lower) "σζ")
+  (test-re "srfi-115 47" '("Σ") '(* upper) "Σ")
+  (test-re "srfi-115 48" '("\x01C5;") '(* title) "\x01C5;")
+  (test-re "srfi-115 49" '("σζ\x01C5;") '(w/nocase (* lower)) "σζ\x01C5;")
 
-(test-re "srfi-115 50" '("кириллица") '(* alpha) "кириллица")
-(test-re "srfi-115 51" #f '(w/ascii (* alpha)) "кириллица")
-(test-re "srfi-115 52" '("кириллица") '(w/nocase "КИРИЛЛИЦА") "кириллица")
+  (test-re "srfi-115 50" '("кириллица") '(* alpha) "кириллица")
+  (test-re "srfi-115 51" #f '(w/ascii (* alpha)) "кириллица")
+  (test-re "srfi-115 52" '("кириллица") '(w/nocase "КИРИЛЛИЦА") "кириллица")
 
-(test-re "srfi-115 53" '("１２３４５") '(* numeric) "１２３４５")
-(test-re "srfi-115 54" #f '(w/ascii (* numeric)) "１２３４５")
+  (test-re "srfi-115 53" '("１２３４５") '(* numeric) "１２３４５")
+  (test-re "srfi-115 54" #f '(w/ascii (* numeric)) "１２３４５")
 
-(test-re "srfi-115 55" '("한") 'grapheme "한")
-(test-re "srfi-115 56" '("글") 'grapheme "글")
+  (test-re "srfi-115 55" '("한") 'grapheme "한")
+  (test-re "srfi-115 56" '("글") 'grapheme "글")
 
-(test-re "srfi-115 57" '("한") '(: bog grapheme eog) "한")
-(test-re "srfi-115 58" #f '(: "ᄒ" bog grapheme eog "ᆫ") "한")
+  (test-re "srfi-115 57" '("한") '(: bog grapheme eog) "한")
+  (test-re "srfi-115 58" #f '(: "ᄒ" bog grapheme eog "ᆫ") "한")
 
-(test "srfi-115 59" '("a" "b" "c") (regexp-extract 'grapheme "abc"))
-(test "srfi-115 60" '("a" " " "b" " " "c") (regexp-extract 'grapheme "a b c"))
-(test "srfi-115 61" '("a" "\n" "b" "\r\n" "c") (regexp-extract 'grapheme "a\nb\r\nc"))
-(test "srfi-115 62" '("a\x0300;" "b\x0301;\x0302;" "c\x0303;\x0304;\x0305;")
-      (regexp-extract 'grapheme "a\x0300;b\x0301;\x0302;c\x0303;\x0304;\x0305;"))
-(test "srfi-115 63" '("한" "글") (regexp-extract 'grapheme "한글"))
+  (test "srfi-115 59" '("a" "b" "c") (regexp-extract 'grapheme "abc"))
+  (test "srfi-115 60" '("a" " " "b" " " "c") (regexp-extract 'grapheme "a b c"))
+  (test "srfi-115 61" '("a" "\n" "b" "\r\n" "c") (regexp-extract 'grapheme "a\nb\r\nc"))
+  (test "srfi-115 62" '("a\x0300;" "b\x0301;\x0302;" "c\x0303;\x0304;\x0305;")
+        (regexp-extract 'grapheme "a\x0300;b\x0301;\x0302;c\x0303;\x0304;\x0305;"))
+  (test "srfi-115 63" '("한" "글") (regexp-extract 'grapheme "한글")))
 
 
 (test "srfi-115 64" '("123" "456" "789")
@@ -297,11 +298,12 @@
 (test "srfi-115 73" '("abc" "123" "def" "456" "ghi" "789")
       (regexp-partition '(* numeric) "abc123def456ghi789"))
 
-(test "srfi-115 74" '("한" "글")
-      (regexp-extract
-       'grapheme
-       (utf8->string '#u8(#xe1 #x84 #x92 #xe1 #x85 #xa1 #xe1 #x86 #xab
-                          #xe1 #x84 #x80 #xe1 #x85 #xb3 #xe1 #x86 #xaf))))
+(when %use-utf8?
+  (test "srfi-115 74" '("한" "글")
+        (regexp-extract
+         'grapheme
+         (utf8->string '#u8(#xe1 #x84 #x92 #xe1 #x85 #xa1 #xe1 #x86 #xab
+                            #xe1 #x84 #x80 #xe1 #x85 #xb3 #xe1 #x86 #xaf)))))
 
 (test "srfi-115 75" "abc def"
       (regexp-replace '(+ space) "abc \t\n def" " "))
