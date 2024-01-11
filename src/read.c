@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 
 #include <ctype.h>
 #include "stklos.h"
+#include "hash.h"
 
 
 /* Define here special small constants for the reader. These constants are used
@@ -83,6 +84,9 @@ typedef struct {                  /* structure used to read tokens */
 #define COLON_BOTH   0x3
 
 static char colon_pos = COLON_BOTH;
+
+static SCM sharp_table;
+typedef SCM (*sharp_func) (SCM, struct read_context*, const char*);
 
 /*===========================================================================*\
  *
@@ -406,7 +410,8 @@ static SCM read_token(SCM port, int c, int case_significant)
   int len, last, seen_pipe=0;
   char *tok;
 
-  len = read_word(port, c, &w, case_significant, &last, &seen_pipe);
+  /* #xxx constants are not case significant */
+  len = read_word(port, c, &w, case_significant && (c!= '#'), &last, &seen_pipe);
   tok = w.word;
 
 
@@ -419,21 +424,17 @@ static SCM read_token(SCM port, int c, int case_significant)
   /* It is not a number */
   if (*tok == '#') {
     if (len > 1) {
-      if (len == 2) {
-        if (tok[1] == 't' || tok[1] == 'T') return STk_true;
-        if (tok[1] == 'f' || tok[1] == 'F') return STk_false;
-      }
       if (tok[1] == ':')
         return STk_makekey(tok+2);
-      else if (strcasecmp(tok+1, "true") == 0)
-        return STk_true;
-      else if (strcasecmp(tok+1, "false") == 0)
-        return STk_false;
-      else if (strcasecmp(tok+1, "eof") == 0)
-        return STk_eof;
-      else if (strcasecmp(tok+1, "void") == 0)
-        return STk_void;
+      else {
+        sharp_func fct = STk_C_hash_get(sharp_table, tok+1);
+        if (fct) // tok is a known keyword
+          return fct(port, NULL, tok+1);
+        if (tok[1] == '!')
+          // We had #!... where ... is not recognized => comment
+          return NULL;
       }
+    }
     error_bad_sharp_syntax(port, tok);
   } else {
     /* We have a symbol or a keyword */
@@ -955,51 +956,71 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                      goto default_sharp;
           case '\\': return read_char(port, STk_getc(port));
           case '(' : return read_vector(port, ctx);
-          case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
-                       c = STk_getc(port);
-                       if (c == 'o' || c == 'k' || c == 'r' || c == 'n' || c == 'f') {
-                         SCM word = read_token(port, c, FALSE);
+          case '!' : {
+                       SCM word;
 
-                         if (SYMBOLP(word)) {
-                           const char *s = SYMBOL_PNAME(word);
-
-                           /* Try to see if it is a DSSL keyword */
-                           if ((strcmp(s, "optional") == 0) ||
-                               (strcmp(s, "key")      == 0) ||
-                               (strcmp(s, "rest")     == 0))
-                             return STk_makekey(s);
-
-                           /* Treat fold-case and no-fold-case */
-                           if ((strcmp(s, "fold-case") == 0) ||
-                               (strcmp(s, "no-fold-case") == 0)) {
-                             if (c == 'n') {
-                               PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-                               ctx->case_significant = TRUE;
-                             }
-                             else {
-                               PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-                               ctx->case_significant = FALSE;
-                             }
-                             continue;
-                           }
-                           /* Treat keyword-colon-{none,before,after,both} */
-                           if ((strcmp(s, "keyword-colon-position-none")   == 0) ||
-                               (strcmp(s, "keyword-colon-position-before") == 0) ||
-                               (strcmp(s, "keyword-colon-position-after")  == 0) ||
-                               (strcmp(s, "keyword-colon-position-both")   == 0)) {
-                             PORT_KW_COL_POS(port) = colon_position_value(s+23); // none, before, ...
-                             continue;
-                           }
-                         }
-                       }
-                       /* if we are here, consider the rest of the line
-                        * as a comment*/
-                       do {
-                         if (c == EOF) return STk_eof;
-                       } while ((c=STk_getc(port)) != '\n');
                        STk_ungetc(c, port);
-                       continue;
+                       word = read_token(port, '#', FALSE);
+                       if (word)
+                         /* DSSSL keyword , #!fold-case or #!keyword-colon-position-... */
+                         return word;
+                       else {
+                         /* we have a comment (until the end of line) */
+                         do {
+                           if (c == EOF) return STk_eof;
+                         }
+                         while ((c=STk_getc(port)) != '\n');
+                         STk_ungetc(c, port);
+                         continue;
+                       }
                      }
+
+//EG          } if (SYMBOLP(word)) {
+//EG          case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
+//EG                       c = STk_getc(port);
+//EG                       if (c == 'o' || c == 'k' || c == 'r' || c == 'n' || c == 'f') {
+//EG                         SCM word = read_token(port, c, FALSE);
+//EG
+//EG                         if (SYMBOLP(word)) {
+//EG                           const char *s = SYMBOL_PNAME(word);
+//EG
+//EG                           /* Try to see if it is a DSSL keyword */
+//EG                           if ((strcmp(s, "optional") == 0) ||
+//EG                               (strcmp(s, "key")      == 0) ||
+//EG                               (strcmp(s, "rest")     == 0))
+//EG                             return STk_makekey(s);
+//EG
+//EG                           /* Treat fold-case and no-fold-case */
+//EG                           if ((strcmp(s, "fold-case") == 0) ||
+//EG                               (strcmp(s, "no-fold-case") == 0)) {
+//EG                             if (c == 'n') {
+//EG                               PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+//EG                               ctx->case_significant = TRUE;
+//EG                             }
+//EG                             else {
+//EG                               PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+//EG                               ctx->case_significant = FALSE;
+//EG                             }
+//EG                             continue;
+//EG                           }
+//EG                           /* Treat keyword-colon-{none,before,after,both} */
+//EG                           if ((strcmp(s, "keyword-colon-position-none")   == 0) ||
+//EG                               (strcmp(s, "keyword-colon-position-before") == 0) ||
+//EG                               (strcmp(s, "keyword-colon-position-after")  == 0) ||
+//EG                               (strcmp(s, "keyword-colon-position-both")   == 0)) {
+//EG                             PORT_KW_COL_POS(port) = colon_position_value(s+23); // none, before, ...
+//EG                             continue;
+//EG                           }
+//EG                         }
+//EG                       }
+//EG                       /* if we are here, consider the rest of the line
+//EG                        * as a comment*/
+//EG                       do {
+//EG                         if (c == EOF) return STk_eof;
+//EG                       } while ((c=STk_getc(port)) != '\n');
+//EG                       STk_ungetc(c, port);
+//EG                       continue;
+//EG                     }
           case '|':  {
                        char prev = ' ';
 
@@ -1330,6 +1351,50 @@ DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
   return read_list(port, CHARACTER_VAL(end_delim), &ctx);
 }
 
+/*=======================================================================*\
+ *
+ * Sharp reader helper functions
+ *
+\* ======================================================================*/
+
+static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
+                                const char *word)
+{
+  switch (*word) {
+    case 't': return STk_true;    // #t or #true
+    case 'f': return STk_false;   // #f or #false
+    case 'e': return STk_eof;     // #eof
+    case 'v': return STk_void;    // #void
+    default: // assert: word[0] == '!'
+      switch (word[1]) {
+        case 'o': return STk_makekey("optional"); // #!optional (DSSSL)
+        case 'k': return STk_makekey("key");      // #!key (DSSSL)
+        case 'r': return STk_makekey("rest");     // #!rest (DSSSL)
+      }
+  }
+  return NULL; // for the compiler
+}
+
+static SCM sharp_fold_keyword(SCM port, struct read_context *ctx, const char *word)
+{
+  if (*word == 'n') {  // word = "no-fold-case"
+    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+    ctx->case_significant = TRUE;
+  } else {
+    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+    ctx->case_significant = FALSE;
+  }
+  return NULL;  // NULL since the keyword is not returned
+}
+
+SCM sharp_keypos(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
+                 const char *word)
+{
+  const char *val=sizeof("keyword-colon-position-") + word; // none, before, ...
+  PORT_KW_COL_POS(port) = colon_position_value(val);
+  return NULL;  // NULL since the keword is not returned
+}
+
 /*===========================================================================*\
  *
  *                      I n i t i a l i z a t i o n
@@ -1369,6 +1434,27 @@ int STk_init_reader(void)
                         keyword_colon_position_get,
                         keyword_colon_position_set,
                         STk_STklos_module);
+
+  /* Initialize the table for objects wich start with a '#' */
+  sharp_table = STk_make_C_hash_table();
+
+  STk_C_hash_set(sharp_table, "t",             sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "true",          sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "false",         sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "f",             sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "eof",           sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "void",          sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "!optional",     sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "!key",          sharp_simple_keyword);
+  STk_C_hash_set(sharp_table, "!rest",         sharp_simple_keyword);
+
+  STk_C_hash_set(sharp_table, "!fold-case",    sharp_fold_keyword);
+  STk_C_hash_set(sharp_table, "!no-fold-case", sharp_fold_keyword);
+
+  STk_C_hash_set(sharp_table, "!keyword-colon-position-none",   sharp_keypos);
+  STk_C_hash_set(sharp_table, "!keyword-colon-position-before", sharp_keypos);
+  STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  sharp_keypos);
+  STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   sharp_keypos);
 
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */
