@@ -85,7 +85,19 @@ typedef struct {                  /* structure used to read tokens */
 
 static char colon_pos = COLON_BOTH;
 
-static SCM sharp_table;
+
+/* sharp_table is a table for reading #xxx constants (for instance #u8
+ * #!optional)
+ *
+ * sharp_char_table is an alist of character wich can follow a
+ * sharp character and which permit to enter a constant with its own syntax
+ * (for instance #*1101) to read a bitvector constant. The alist is of the form
+ * ( (ch1 . proc1) (ch2 .proc2) ... ) wher ch is a character and where proc is
+ * a procedure which take a parameter which is the port to read (the character
+ * ch being pushed back on this port)
+ */
+static SCM sharp_table, sharp_char_table = STk_nil;
+
 typedef SCM (*sharp_func) (SCM, struct read_context*, const char*);
 
 /*===========================================================================*\
@@ -930,7 +942,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         goto read_quoted;
       case '`':
         quote_type = sym_quasiquote;
-    read_quoted:
+      read_quoted:
         {
           SCM tmp = read_rec(port, ctx, inlist);
           if (tmp == dot_cst || tmp == close_par_cst)
@@ -1031,10 +1043,17 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           case '7':
           case '8':
           case '9': return read_cycle(port, c, ctx);
-          default:
+          default: {
             default_sharp:
-                    STk_ungetc(c, port);
-                    return read_token(port, '#', ctx);
+            SCM reader = STk_int_assq(MAKE_CHARACTER(c), sharp_char_table);
+
+            STk_ungetc(c, port);
+            if (reader != STk_false) {
+              return STk_C_apply(CDR(reader), 1, port);
+            } else {
+              return read_token(port, '#', ctx);
+            }
+          }
         }
         break; /* for the compiler */
       case ',': {
@@ -1330,13 +1349,29 @@ static SCM sharp_uvector(SCM port, struct read_context *ctx, const char *word)
   return read_uniform_vector(port, ctx, word);
 }
 
-
 void STk_add_uvector_reader_tag(const char *tag)
 {
   STk_C_hash_set(sharp_table, tag, sharp_uvector);
 }
 
-/*===========================================================================*\
+
+DEFINE_PRIMITIVE("%add-sharp-reader", add_sharp_reader, subr2, (SCM ch, SCM proc))
+{
+  SCM old;
+  if (!CHARACTERP(ch))                   STk_error("bad character ~S", ch);
+  if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
+
+  old = STk_int_assq(ch, sharp_char_table);
+  if (old != STk_false)
+    CDR(old) = proc;
+  else
+    sharp_char_table = STk_cons(STk_cons(ch, proc), sharp_char_table);
+
+  STk_debug("table ~S", sharp_char_table);
+  return STk_void;
+}
+
+/*===========================================================================* \
  *
  *                      I n i t i a l i z a t i o n
  *
@@ -1399,6 +1434,9 @@ int STk_init_reader(void)
 
   /* Add reader for #u8 constants */
   STk_add_uvector_reader_tag("u8");
+
+  /* Add a primitive to permit the definition new forms of sharp constants */
+  ADD_PRIMITIVE(add_sharp_reader);
 
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */
