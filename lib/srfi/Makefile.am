@@ -23,7 +23,7 @@
 
 #-======================================================================
 
-SUBDIRS= 160
+SUBDIRS=160
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -265,9 +265,9 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c      27.c      170.c      175.c      238.c
-SRC_C_STK = 25.stk    27.stk    170.stk    175.stk    238.stk
-SRC_SHOBJ = 25.$(SO)  27.$(SO)  170.$(SO)  175.$(SO)  238.$(SO)
+SRC_C     = 25.c     27.c     170.c      175.c      178.c     238.c
+SRC_C_STK = 25.stk   27.stk   170.stk    175.stk    178.stk   238.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)  178.$(SO) 238.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -345,6 +345,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 116.$(SO): 128.ostk 116-incl.c 116.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
+178.$(SO): 178-incl.c 178.c
 238.$(SO): 238-incl.c 238.c
 
 ../streams/derived.ostk:
