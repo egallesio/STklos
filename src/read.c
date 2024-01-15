@@ -404,14 +404,14 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
   return j;
 }
 
-static SCM read_token(SCM port, int c, int case_significant)
+static SCM read_token(SCM port, int c, struct read_context *ctx)
 {
   s_word w;
   int len, last, seen_pipe=0;
   char *tok;
+  int ci= ctx->case_significant && (c != '#'); // #xxx constants are case insensitive
 
-  /* #xxx constants are not case significant */
-  len = read_word(port, c, &w, case_significant && (c!= '#'), &last, &seen_pipe);
+  len = read_word(port, c, &w, ci, &last, &seen_pipe);
   tok = w.word;
 
 
@@ -428,11 +428,19 @@ static SCM read_token(SCM port, int c, int case_significant)
         return STk_makekey(tok+2);
       else {
         sharp_func fct = STk_C_hash_get(sharp_table, tok+1);
+
         if (fct) // tok is a known keyword
-          return fct(port, NULL, tok+1);
-        if (tok[1] == '!')
+          return fct(port, ctx, tok+1);
+
+        if (tok[1] == '!') {
           // We had #!... where ... is not recognized => comment
+          do {
+            if (c == EOF) return STk_eof;
+          }
+          while ((c=STk_getc(port)) != '\n');
+          STk_ungetc(c, port);
           return NULL;
+        }
       }
     }
     error_bad_sharp_syntax(port, tok);
@@ -512,8 +520,9 @@ static SCM read_address(SCM port)
 
 static SCM read_here_string(SCM port)
 {
-  SCM eof_token = read_token(port, STk_getc(port), TRUE);
   SCM res, line;
+  struct read_context ctx = {.case_significant =TRUE};
+  SCM eof_token           = read_token(port, STk_getc(port), &ctx);
   int first_line = TRUE;
 
   if (!SYMBOLP(eof_token)) STk_error("bad symbol for here string ~S", eof_token);
@@ -739,7 +748,7 @@ static SCM read_string(SCM port, int constant)
   }
   *p = '\0';
 
-  switch(error) {    /* No BAD_ASCII_CHAR here: '\!' is equivalent to '!' */
+  switch(error) {    /* No BAD_ASCII_CHAR here: '\Z' is equivalent to 'Z' */
     case BAD_HEX_SEQUENCE:
       error_bad_inline_hexa_sequence(port, hex_buffer, 0); break;
     case BAD_ESCAPED_SPACE:
@@ -887,6 +896,30 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
 }
 
 
+static SCM read_uniform_vector(SCM port, struct read_context *ctx, char *kind)
+{
+  int tag = STk_uniform_vector_tag(kind);
+  int c = STk_getc(port);
+
+  if (c == '"' && strcmp(kind, "u8") == 0)
+    return read_srfi207_bytevector(port, ctx->constant);
+
+  if (c == '(' && tag >= 0) {
+    SCM v;
+    int konst = ctx->constant;
+
+    /* Read the list of values (this IS a constant) */
+    ctx->constant = TRUE;
+    v =  STk_list2uvector(tag, read_list(port, ')', ctx));
+    ctx->constant = konst;
+    BOXED_INFO(v) |= VECTOR_CONST;
+    return v;
+  }
+  signal_error(port, "bad uniform vector specification ~A",STk_Cstring2string(kind));
+  return STk_void;
+}
+
+
 static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 {
   int c;
@@ -945,11 +978,8 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         }
       case '#':
         switch(c=STk_getc(port)) {
-          // FIXME:
           case 'F' :
-          case 'f' : if (STk_uvectors_allowed)
-                       return maybe_read_uniform_vector(port, c, ctx);
-                     goto default_sharp;
+          case 'f' : 
           case 'C' :
           case 'c' : if (STk_uvectors_allowed)
                        return maybe_read_uniform_vector(port, c, ctx);
@@ -959,68 +989,22 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           case '!' : {
                        SCM word;
 
+                       // Force case insensitive for reading #!xxx
+                       ctx->case_significant = FALSE;
+
                        STk_ungetc(c, port);
-                       word = read_token(port, '#', FALSE);
+                       word = read_token(port, '#', ctx);
+
+                       // set back value from the port (in case of #!{no,}fold-case)
+                       ctx->case_significant = (PORT_FLAGS(port)&PORT_CASE_SENSITIVE) != 0;
+
                        if (word)
                          /* DSSSL keyword , #!fold-case or #!keyword-colon-position-... */
                          return word;
-                       else {
-                         /* we have a comment (until the end of line) */
-                         do {
-                           if (c == EOF) return STk_eof;
-                         }
-                         while ((c=STk_getc(port)) != '\n');
-                         STk_ungetc(c, port);
+                       else
+                         /* Comment*/
                          continue;
-                       }
                      }
-
-//EG          } if (SYMBOLP(word)) {
-//EG          case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
-//EG                       c = STk_getc(port);
-//EG                       if (c == 'o' || c == 'k' || c == 'r' || c == 'n' || c == 'f') {
-//EG                         SCM word = read_token(port, c, FALSE);
-//EG
-//EG                         if (SYMBOLP(word)) {
-//EG                           const char *s = SYMBOL_PNAME(word);
-//EG
-//EG                           /* Try to see if it is a DSSL keyword */
-//EG                           if ((strcmp(s, "optional") == 0) ||
-//EG                               (strcmp(s, "key")      == 0) ||
-//EG                               (strcmp(s, "rest")     == 0))
-//EG                             return STk_makekey(s);
-//EG
-//EG                           /* Treat fold-case and no-fold-case */
-//EG                           if ((strcmp(s, "fold-case") == 0) ||
-//EG                               (strcmp(s, "no-fold-case") == 0)) {
-//EG                             if (c == 'n') {
-//EG                               PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-//EG                               ctx->case_significant = TRUE;
-//EG                             }
-//EG                             else {
-//EG                               PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-//EG                               ctx->case_significant = FALSE;
-//EG                             }
-//EG                             continue;
-//EG                           }
-//EG                           /* Treat keyword-colon-{none,before,after,both} */
-//EG                           if ((strcmp(s, "keyword-colon-position-none")   == 0) ||
-//EG                               (strcmp(s, "keyword-colon-position-before") == 0) ||
-//EG                               (strcmp(s, "keyword-colon-position-after")  == 0) ||
-//EG                               (strcmp(s, "keyword-colon-position-both")   == 0)) {
-//EG                             PORT_KW_COL_POS(port) = colon_position_value(s+23); // none, before, ...
-//EG                             continue;
-//EG                           }
-//EG                         }
-//EG                       }
-//EG                       /* if we are here, consider the rest of the line
-//EG                        * as a comment*/
-//EG                       do {
-//EG                         if (c == EOF) return STk_eof;
-//EG                       } while ((c=STk_getc(port)) != '\n');
-//EG                       STk_ungetc(c, port);
-//EG                       continue;
-//EG                     }
           case '|':  {
                        char prev = ' ';
 
@@ -1077,10 +1061,10 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           case 'U':
           case 'u': if (STk_uvectors_allowed || c == 'u')
                       /* For R7RS #u8 is always valid (bytevectors) */
-                      return maybe_read_uniform_vector(port, c, ctx);
+                       return maybe_read_uniform_vector(port, c, ctx);
                     else
                       goto default_sharp;
-         case ';': /* R6RS comments */
+          case ';': /* R6RS comments */
                    read_rec(port, ctx, FALSE);
                    c = flush_spaces(port, NULL, NULL);
                    STk_ungetc(c, port);
@@ -1103,7 +1087,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           default:
             default_sharp:
                     STk_ungetc(c, port);
-                    return read_token(port, '#', ctx->case_significant);
+                    return read_token(port, '#', ctx);
         }
         break; /* for the compiler */
       case ',': {
@@ -1125,7 +1109,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         return read_string(port, ctx->constant);
       default:
     default_case: {
-          SCM tmp = read_token(port, c, ctx->case_significant);
+          SCM tmp = read_token(port, c, ctx);
           if (tmp != sym_dot)
             return tmp;
 
@@ -1375,24 +1359,28 @@ static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*
   return NULL; // for the compiler
 }
 
-static SCM sharp_fold_keyword(SCM port, struct read_context *ctx, const char *word)
+static SCM sharp_fold_keyword(SCM port, struct read_context _UNUSED(*ctx),
+                              const char *word)
 {
-  if (*word == 'n') {  // word = "no-fold-case"
+  if (word[1] == 'n')   // word = "!no-fold-case"
     PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-    ctx->case_significant = TRUE;
-  } else {
+  else              // word = "fold-case"
     PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-    ctx->case_significant = FALSE;
-  }
+
   return NULL;  // NULL since the keyword is not returned
 }
 
-SCM sharp_keypos(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
-                 const char *word)
+static SCM sharp_keypos(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
+                        const char *word)
 {
   const char *val=sizeof("keyword-colon-position-") + word; // none, before, ...
   PORT_KW_COL_POS(port) = colon_position_value(val);
   return NULL;  // NULL since the keword is not returned
+}
+
+static SCM sharp_u8(SCM port, struct read_context *ctx, const char _UNUSED(*word))
+{
+  return read_uniform_vector(port, ctx, "u8");
 }
 
 /*===========================================================================*\
@@ -1455,6 +1443,8 @@ int STk_init_reader(void)
   STk_C_hash_set(sharp_table, "!keyword-colon-position-before", sharp_keypos);
   STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  sharp_keypos);
   STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   sharp_keypos);
+
+  STk_C_hash_set(sharp_table, "u8",   sharp_u8);
 
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */
