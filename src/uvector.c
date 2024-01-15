@@ -24,6 +24,7 @@
  */
 
 #include <float.h>
+#include <math.h>
 #include "stklos.h"
 
 static SCM u64_max, s64_min, s64_max;
@@ -290,18 +291,22 @@ static void uvector_set(SCM v, long i, SCM value)
         }
       break;
     case UVECT_F32:
-      if (REALP(value)) {
-        ((float *) UVECTOR_DATA(v))[i] = (float) REAL_VAL(value);
-        return;
-      }
-      break;
     case UVECT_F64:
-      if (REALP(value)) {
-        ((double *) UVECTOR_DATA(v))[i] = (double) REAL_VAL(value);
-        return;
+      {
+        double d = STk_number2double(value);
+
+        // if value is not a number, STk_number2double returns a NaN. However,
+        // a NaN is also a correct value for a #f32 or #f64 number. So, value
+        // is correct is it is a NaN or it's conversion is not a NaN.
+        if (STk_isnan(value) || !isnan(d)) {
+          if (UVECTOR_TYPE(v) == UVECT_F32)
+            ((float *) UVECTOR_DATA(v))[i] = (float) d;
+          else
+            ((double *) UVECTOR_DATA(v))[i] = d;
+          return;
+        }
       }
       break;
-
     /*
      Complexes are stored with the real part in the even-indexed cells, and
      imaginary parts in odd-indexed cells:
@@ -323,10 +328,14 @@ static void uvector_set(SCM v, long i, SCM value)
         ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(rea);
         ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) REAL_VAL(img);
         return;
-      } else if (REALP(value)){
-        ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(value);
-        ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) 0.0;
-        return;
+      } else {
+        float f = STk_number2double(value);
+
+        if (STk_isnan(value) || !isnan(f)) { // See comment for F64
+          ((float *) UVECTOR_DATA(v))[2*i]     = f;
+          ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) 0.0;
+          return;
+        }
       }
       break;
     case UVECT_C128:
@@ -339,10 +348,14 @@ static void uvector_set(SCM v, long i, SCM value)
         ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(rea);
         ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) REAL_VAL(img);
         return;
-      } else if (REALP(value)) {
-        ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(value);
-        ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) 0.0;
-        return;
+      } else {
+        double d = STk_number2double(value);
+
+        if (STk_isnan(value) || !isnan(d)) {  // See comment for F64
+          ((double *) UVECTOR_DATA(v))[2*i]     = d;
+          ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) 0.0;
+          return;
+        }
       }
       break;
   }
