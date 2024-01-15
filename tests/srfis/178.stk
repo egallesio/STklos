@@ -893,6 +893,22 @@
   (check (bitvector-ref/bool (bitvector 1 0 1 0) 0) => #t)
   (check (bitvector-ref/bool (bitvector 1 0 1 0) 3) => #f))
 
+;; SHARP CONSTANTS
+
+(define (check-sharp-reader)
+  (print-header "Checking #*xxx syntax...")
+
+  (check (read-from-string "#*101") => (bitvector 1 0 1))
+  (check (read-from-string "#*0000000000") => (make-bitvector 10 0))
+  (check (read-from-string "#*1111111111") => (make-bitvector 10 1))
+  (check (read-from-string "#*") => (bitvector))
+  (let* ((v (bitvector 1 1 0 1 0 0 0 1 1 1 0 1))
+         (s (with-output-to-string  (lambda () (display v)))))
+    (check (equal? v (read-from-string s)) => #t))
+
+)
+
+
 
 ;;;;;;;;;;;;
 ;;  TEST  ;;
@@ -909,7 +925,8 @@
   (check-mutators)
   (check-bitwise-operations)
   (check-quasi-integer-operations)
-  (check-bit-field-operations))
+  (check-bit-field-operations)
+  (check-sharp-reader))
 )
 
 (select-module test-srfi-178)
