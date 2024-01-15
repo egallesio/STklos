@@ -314,5 +314,12 @@
             '()
             bvecs))))
 
+;; Add #*... read syntax
+(%add-sharp-reader #\*
+                   (lambda (port)
+                     (let* ((v   (read port))
+                            (str (symbol->string v)))
+                       (or (string->bitvector (string-append "#" str))
+                           (error "bad bitvector #~a" v)))))
 
 (provide "srfi/178")
