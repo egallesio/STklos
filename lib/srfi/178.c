@@ -59,12 +59,13 @@ static inline void check_cons(SCM obj) {
   if (!CONSP(obj)) STk_error("bad list ~S", obj);
 }
 static inline void check_integer(SCM obj, char *msg) {
-  if (!INTP(obj)) STk_error("bad integer ~S for %d", obj);
+  if (!INTP(obj)) STk_error("bad integer ~S for %s", obj, msg);
 }
 static inline int get_bit(SCM bit) {
   if (bit == MAKE_INT(1) || bit == STk_true) return 1;
   if (bit == MAKE_INT(0) || bit == STk_false) return 0;
   STk_error("bad bit ~S", bit);
+  return 0; /* for the compiler */
 }
 
 /***
@@ -185,7 +186,6 @@ long count_run(int bit, SCM bvec, long start, int to_left) {
 }
 
 SCM STk_make_bvect(long len, SCM init) {
-  register long i;
   SCM  z;
   long size = len / BITS_PER_CELL;
 
@@ -354,7 +354,7 @@ DEFINE_PRIMITIVE("bitvector=?", bitvector_equal, vsubr, (int argc, SCM *argv)) {
 
 DEFINE_PRIMITIVE("bitvector-ref/int", bitvector_ref_int, subr2, (SCM bvec, SCM i)) {
   check_bitvector(bvec);
-  check_integer(i, " index");
+  check_integer(i, "index");
   return MAKE_INT(bvector_ref(bvec,get_index(bvec,i)));
 }
 
@@ -938,7 +938,7 @@ DEFINE_PRIMITIVE("string->bitvector", str2bv, subr1, (SCM str)) {
   long i = 0;
   if (STRING_LENGTH(str) < 2) return STk_false;
   char *s = STRING_CHARS(str);
-  if (s[0] != '#' | s[1] != '*') return STk_false;
+  if (s[0] != '#' || s[1] != '*') return STk_false;
   SCM bv = STk_make_bvect(STRING_LENGTH(str)-2, MAKE_INT(0));
   for (i=2; i<STRING_LENGTH(str); i++) {
     if (s[i] == '1') bvector_set(bv,i-2,1);
@@ -1382,7 +1382,7 @@ DEFINE_PRIMITIVE("bitvector-first-bit", bitvector_first_bit, subr2, (SCM bit, SC
   for (long i = 0; i < BVECTOR_LENGTH(bvec); i++)
       if (bvector_ref(bvec, i) == Cbit) return MAKE_INT(i);
 
-  return MAKE_INT(-1);
+  return MAKE_INT(-1UL);
 }
 
 
@@ -1549,7 +1549,7 @@ DEFINE_PRIMITIVE("bitvector-field-rotate", bitvector_field_rotate, subr4,
          0);
   long size = Cend - Cstart;
   long real_count = Ccount % size;
-  long ref = real_count < 0 ? Cend - 1 : Cstart;
+  //  long ref = real_count < 0 ? Cend - 1 : Cstart;
 
   if (real_count < 0) {
     real_count = - real_count;
@@ -1565,7 +1565,8 @@ DEFINE_PRIMITIVE("bitvector-field-rotate", bitvector_field_rotate, subr4,
   return bv;
 }
 
-DEFINE_PRIMITIVE("bitvector-field-flip", bitvector_field_flip, subr3, (SCM bvec, SCM start, SCM end)) {
+DEFINE_PRIMITIVE("bitvector-field-flip", bitvector_field_flip, subr3,
+                 (SCM bvec, SCM start, SCM end)) {
 /* (bitvector-field-flip bvec start end) */
   long Cstart, Cend;
   check_bitvector(bvec);
@@ -1573,7 +1574,8 @@ DEFINE_PRIMITIVE("bitvector-field-flip", bitvector_field_flip, subr3, (SCM bvec,
   return field_op(bvec, NULL, Cstart, Cend, FLIP, 0);
 }
 
-DEFINE_PRIMITIVE("bitvector-field-flip!", bitvector_field_dflip, subr3, (SCM bvec, SCM start, SCM end)) {
+DEFINE_PRIMITIVE("bitvector-field-flip!", bitvector_field_dflip, subr3,
+                 (SCM bvec, SCM start, SCM end)) {
 /* (bitvector-field-flip! bvec start end) */
   long Cstart, Cend;
   check_bitvector(bvec);
@@ -1581,7 +1583,7 @@ DEFINE_PRIMITIVE("bitvector-field-flip!", bitvector_field_dflip, subr3, (SCM bve
   return field_op(bvec, NULL, Cstart, Cend, FLIP, 1);
 }
 
-static void print_bitvector(SCM vect, SCM port, int mode)
+static void print_bitvector(SCM vect, SCM port, int _UNUSED(mode))
 {
   STk_puts(bv2string(vect), port);
 }
