@@ -857,46 +857,7 @@ static SCM read_vector(SCM port, struct read_context *ctx)
   return v;
 }
 
-static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
-{
-  s_word w;
-  char *tok;
-  int tag, len;
-  SCM v;
-
-  len = read_word(port, c, &w, ctx->case_significant, NULL, NULL);
-  tok = w.word;
-
-  if (strcasecmp(tok, "f") ==0 || strcasecmp(tok, "false") ==0) {
-    /* This is the #f constant */
-    return STk_false;
-  } else {
-    if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
-        (STk_uvectors_allowed && (len >= 2 && len <= 4))) {
-      c = STk_getc(port);
-      if (c == '"') return read_srfi207_bytevector(port, ctx->constant);
-      if (c != '(') goto bad_spec;
-
-      tag = STk_uniform_vector_tag(tok);
-      if (tag >= 0) {
-        int konst = ctx->constant;
-
-        /* Ok that's seems correct read the list of values (this IS a constant) */
-        ctx->constant = TRUE;
-        v =  STk_list2uvector(tag, read_list(port, ')', ctx));
-        ctx->constant = konst;
-        BOXED_INFO(v) |= VECTOR_CONST;
-        return v;
-      }
-    }
-  }
- bad_spec:
-  signal_error(port, "bad uniform vector specification ~A",STk_Cstring2string(tok));
-  return STk_void;
-}
-
-
-static SCM read_uniform_vector(SCM port, struct read_context *ctx, char *kind)
+static SCM read_uniform_vector(SCM port, struct read_context *ctx, const char *kind)
 {
   int tag = STk_uniform_vector_tag(kind);
   int c = STk_getc(port);
@@ -978,12 +939,6 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         }
       case '#':
         switch(c=STk_getc(port)) {
-          case 'F' :
-          case 'f' : 
-          case 'C' :
-          case 'c' : if (STk_uvectors_allowed)
-                       return maybe_read_uniform_vector(port, c, ctx);
-                     goto default_sharp;
           case '\\': return read_char(port, STk_getc(port));
           case '(' : return read_vector(port, ctx);
           case '!' : {
@@ -1056,14 +1011,6 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           case '&': return STk_make_box(read_rec(port, ctx, inlist));
           case 'p':
           case 'P': return read_address(port);
-          case 'S':
-          case 's':
-          case 'U':
-          case 'u': if (STk_uvectors_allowed || c == 'u')
-                      /* For R7RS #u8 is always valid (bytevectors) */
-                       return maybe_read_uniform_vector(port, c, ctx);
-                    else
-                      goto default_sharp;
           case ';': /* R6RS comments */
                    read_rec(port, ctx, FALSE);
                    c = flush_spaces(port, NULL, NULL);
@@ -1378,9 +1325,15 @@ static SCM sharp_keypos(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
   return NULL;  // NULL since the keword is not returned
 }
 
-static SCM sharp_u8(SCM port, struct read_context *ctx, const char _UNUSED(*word))
+static SCM sharp_uvector(SCM port, struct read_context *ctx, const char *word)
 {
-  return read_uniform_vector(port, ctx, "u8");
+  return read_uniform_vector(port, ctx, word);
+}
+
+
+void STk_add_uvector_reader_tag(const char *tag)
+{
+  STk_C_hash_set(sharp_table, tag, sharp_uvector);
 }
 
 /*===========================================================================*\
@@ -1444,7 +1397,8 @@ int STk_init_reader(void)
   STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  sharp_keypos);
   STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   sharp_keypos);
 
-  STk_C_hash_set(sharp_table, "u8",   sharp_u8);
+  /* Add reader for #u8 constants */
+  STk_add_uvector_reader_tag("u8");
 
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */

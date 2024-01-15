@@ -26,7 +26,6 @@
 #include <float.h>
 #include "stklos.h"
 
-int STk_uvectors_allowed = 0;
 static SCM u64_max, s64_min, s64_max;
 
 
@@ -174,7 +173,7 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfi
 
 
 /* Return the type of a uniform vector given its tag */
-int STk_uniform_vector_tag(char *s)
+int STk_uniform_vector_tag(const char *s)
 {
   static char *table[] =
     {"s8", "u8", "s16", "u16", "s32", "u32", "s64", "u64",
@@ -356,7 +355,7 @@ static void uvector_set(SCM v, long i, SCM value)
 
 void STk_uvector_put(SCM v, long i, SCM value) /* public version of uvector_set */
 {
-    uvector_set(v, i, value);
+  uvector_set(v, i, value);
 }
 
 static SCM uvector_ref(SCM v, long i)
@@ -607,9 +606,14 @@ DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
   s64_min = STk_Cstr2number(S64_MIN, 10);
   s64_max = STk_Cstr2number(S64_MAX, 10);
 
-  /* Retain that we can use uniform vectors from now on */
-  STk_uvectors_allowed = 1;
+  /* Add new readers #xxx syntax */
+  STk_add_uvector_reader_tag("s8");  /* "u8" is defined by default */
+  STk_add_uvector_reader_tag("s16"); STk_add_uvector_reader_tag("u16");
 
+  STk_add_uvector_reader_tag("s32"); STk_add_uvector_reader_tag("u32");
+  STk_add_uvector_reader_tag("s64"); STk_add_uvector_reader_tag("u64");
+  STk_add_uvector_reader_tag("f32"); STk_add_uvector_reader_tag("f64");
+  STk_add_uvector_reader_tag("c64"); STk_add_uvector_reader_tag("c128");
 
   return STk_void;
 }

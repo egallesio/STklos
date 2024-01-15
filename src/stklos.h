@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1161,6 +1161,7 @@ SCM   STk_read_constant(SCM port, int case_significant);
 char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
+void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
 extern int STk_read_case_sensitive;
 
 
@@ -1387,9 +1388,7 @@ struct uvector_obj {
 
 #define BYTEVECTORP(p)  (UVECTORP(p) && UVECTOR_TYPE(p) == UVECT_U8)
 
-extern int STk_uvectors_allowed;
-
-int STk_uniform_vector_tag(char *s);
+int STk_uniform_vector_tag(const char *s);
 int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 SCM STk_uvector_get(SCM v, long i);
