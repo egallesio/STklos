@@ -309,8 +309,7 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
          /* Constant read uses extended cons instead of cons */
          tmp = STk_econs(cur, STk_nil, PORT_FNAME(port), line, PORT_POS(port));
          BOXED_INFO(tmp) |= CONS_CONST;
-       }
-       else {
+       } else {
          tmp = STk_cons(cur, STk_nil);
        }
 
@@ -893,6 +892,130 @@ static SCM read_uniform_vector(SCM port, struct read_context *ctx, const char *k
 }
 
 
+/* read #.... syntax. If we read an object (a keyword such as #!rest or a
+ * constant such as #true), it is returned. Otherwise this is a comment and we
+ * return NULL.  */
+static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
+{
+  int c = STk_getc(port);
+
+  switch(c) {
+    case '\\': return read_char(port, STk_getc(port));
+
+    case '(' : return read_vector(port, ctx);
+
+   case '!' : {
+      SCM word;
+
+      // Force case insensitive for reading #!xxx
+      ctx->case_significant = FALSE;
+
+      STk_ungetc(c, port);
+      word = read_token(port, '#', ctx);
+
+      // set back value from the port (in case of #!{no,}fold-case)
+      ctx->case_significant = (PORT_FLAGS(port)&PORT_CASE_SENSITIVE) != 0;
+
+      if (word)
+        /* DSSSL keyword , #!fold-case or #!keyword-colon-position-... */
+        return word;
+      /* Comment*/
+      return NULL;
+    }
+
+    case '|':  {
+      char prev = ' ';
+
+      ctx->comment_level += 1;
+      for ( ; ; ) {
+        switch (c = STk_getc(port)) {
+        case EOF:
+          goto end_comment;
+        case '\n':
+          break;
+        case '#':
+          if (prev == '|') {
+            ctx->comment_level -= 1;
+            if (!ctx->comment_level) goto end_comment;
+          }
+          break;
+        case '|':
+          if (prev == '#')
+            ctx->comment_level += 1;
+          break;
+        default: ;
+        }
+        prev = c;
+      }
+      end_comment:
+      c = flush_spaces(port, (char *) NULL, (SCM) NULL);
+      if (c == EOF) {
+        if (ctx->comment_level)
+          signal_error(port, "eof encountered when reading a comment", STk_nil);
+        else
+          return STk_eof;
+      } else {
+        STk_ungetc(c,port);
+        return NULL;
+      }
+      break;   /* for the compiler */
+    }
+
+    case '<': {
+      char c2 = STk_getc(port);
+      if (c2 == '<' )
+        return read_here_string(port);
+      else  {
+        STk_ungetc(c2, port);
+        goto default_sharp;
+      }
+    }
+
+    case '&': return STk_make_box(read_rec(port, ctx, inlist));
+
+    case 'p':
+    case 'P': return read_address(port);
+
+    case ';': /* R6RS comments */
+      read_rec(port, ctx, FALSE);
+      c = flush_spaces(port, NULL, NULL);
+      STk_ungetc(c, port);
+      if (inlist && (c == ')' || c == ']' || c == '}'))
+        return close_par_cst;
+      return NULL;
+
+    case ',': /* SRFI-10 */
+      return read_srfi10(port, read_rec(port, ctx, inlist));
+
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9': return read_cycle(port, c, ctx);
+
+    default:
+    default_sharp:
+      {
+        SCM reader = STk_int_assq(MAKE_CHARACTER(c), sharp_char_table);
+
+        STk_ungetc(c, port);
+        if (reader != STk_false) {
+          return STk_C_apply(CDR(reader), 1, port);
+        } else {
+          return read_token(port, '#', ctx);
+        }
+      }
+  }
+  return NULL; // for the compiler
+}
+
+
+
 static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 {
   int c;
@@ -917,8 +1040,8 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         return(read_list(port, ']', ctx));
       }
 
-    case '{': {
-      SCM ref, read_brace_func = SYMBOL_VALUE(sym_read_brace, ref);
+      case '{': {
+        SCM ref, read_brace_func = SYMBOL_VALUE(sym_read_brace, ref);
 
         if (read_brace_func != STk_void) {
           STk_ungetc(c, port);
@@ -940,6 +1063,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
       case '\'':
         quote_type = sym_quote;
         goto read_quoted;
+
       case '`':
         quote_type = sym_quasiquote;
       read_quoted:
@@ -949,113 +1073,14 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
             signal_error(port, "bad quote/quasiquote syntax", STk_nil);
           return LIST2(quote_type, tmp);
         }
+
       case '#':
-        switch(c=STk_getc(port)) {
-          case '\\': return read_char(port, STk_getc(port));
-          case '(' : return read_vector(port, ctx);
-          case '!' : {
-                       SCM word;
-
-                       // Force case insensitive for reading #!xxx
-                       ctx->case_significant = FALSE;
-
-                       STk_ungetc(c, port);
-                       word = read_token(port, '#', ctx);
-
-                       // set back value from the port (in case of #!{no,}fold-case)
-                       ctx->case_significant = (PORT_FLAGS(port)&PORT_CASE_SENSITIVE) != 0;
-
-                       if (word)
-                         /* DSSSL keyword , #!fold-case or #!keyword-colon-position-... */
-                         return word;
-                       else
-                         /* Comment*/
-                         continue;
-                     }
-          case '|':  {
-                       char prev = ' ';
-
-                       ctx->comment_level += 1;
-                       for ( ; ; ) {
-                         switch (c = STk_getc(port)) {
-                           case EOF:
-                             goto end_comment;
-                           case '\n':
-                             break;
-                           case '#':
-                             if (prev == '|') {
-                               ctx->comment_level -= 1;
-                               if (!ctx->comment_level) goto end_comment;
-                             }
-                             break;
-                           case '|':
-                             if (prev == '#')
-                               ctx->comment_level += 1;
-                             break;
-                           default: ;
-                         }
-                         prev = c;
-                       }
-                       end_comment:
-                       c = flush_spaces(port, (char *) NULL, (SCM) NULL);
-                       if (c == EOF) {
-                         if (ctx->comment_level)
-                           signal_error(port,
-                                        "eof encountered when reading a comment",
-                                        STk_nil);
-                         else
-                           return STk_eof;
-                       } else {
-                         STk_ungetc(c,port);
-                         continue;
-                       }
-                       break;   /* for the compiler */
-                    }
-          case '<': {
-                       char c2 = STk_getc(port);
-                       if (c2 == '<' )
-                         return read_here_string(port);
-                       else  {
-                         STk_ungetc(c2, port);
-                         goto default_sharp;
-                       }
-                    }
-          case '&': return STk_make_box(read_rec(port, ctx, inlist));
-          case 'p':
-          case 'P': return read_address(port);
-          case ';': /* R6RS comments */
-                   read_rec(port, ctx, FALSE);
-                   c = flush_spaces(port, NULL, NULL);
-                   STk_ungetc(c, port);
-                   if (inlist && (c == ')' || c == ']' || c == '}'))
-                     return close_par_cst;
-                   continue;
-          case ',': /* SRFI-10 */
-                    return read_srfi10(port,
-                                       read_rec(port, ctx, inlist));
-          case '0':
-          case '1':
-          case '2':
-          case '3':
-          case '4':
-          case '5':
-          case '6':
-          case '7':
-          case '8':
-          case '9': return read_cycle(port, c, ctx);
-          default: {
-            default_sharp:
-            SCM reader = STk_int_assq(MAKE_CHARACTER(c), sharp_char_table);
-
-            STk_ungetc(c, port);
-            if (reader != STk_false) {
-              return STk_C_apply(CDR(reader), 1, port);
-            } else {
-              return read_token(port, '#', ctx);
-            }
-          }
+        {
+          SCM tmp = read_sharp(port, ctx, inlist);;
+          if (tmp) return tmp;
+          continue;
         }
-        break; /* for the compiler */
+
       case ',': {
         SCM symb, tmp;
 
@@ -1071,10 +1096,13 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           signal_error(port, "bad unquote/unquote-splice syntax", STk_nil);
         return LIST2(symb, tmp);
       }
+
       case '"':
         return read_string(port, ctx->constant);
+
       default:
-    default_case: {
+        default_case:
+        {
           SCM tmp = read_token(port, c, ctx);
           if (tmp != sym_dot)
             return tmp;
@@ -1088,6 +1116,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         }
     }
   }
+  return NULL; // for the compiler
 }
 
 /*===========================================================================*\
