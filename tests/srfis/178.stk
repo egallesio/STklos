@@ -908,7 +908,31 @@
 
 )
 
+;; EXTRA TESTS
+;; -- jpellegrini
 
+(define (extra-tests)
+  (print-header "Extra bitvector type tests...")
+  ;; class-of should not segfault, and the class of all bitvectors
+  ;; should be the same
+  (test "class-of.1"
+        #t
+        (eq?  (class-of (read-from-string "#*"))
+              (class-of (read-from-string "#*1"))))
+  (test "class-of.2"
+        #t
+        (eq?  (class-of (read-from-string "#*0"))
+              (class-of (bitvector #t #t))))
+  (test "class-of.3"
+        #t
+        (eq?  (class-of (read-from-string "#*"))
+              (class-of (read-from-string "#*1"))))
+
+  ;; describe should not segfault
+  (test "describe"
+        #t
+        (string? (with-output-to-string
+                   (lambda () (describe (read-from-string "#*")))))))
 
 ;;;;;;;;;;;;
 ;;  TEST  ;;
@@ -926,7 +950,8 @@
   (check-bitwise-operations)
   (check-quasi-integer-operations)
   (check-bit-field-operations)
-  (check-sharp-reader))
+  (check-sharp-reader)
+  (extra-tests))
 )
 
 (select-module test-srfi-178)
