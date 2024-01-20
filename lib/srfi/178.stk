@@ -77,6 +77,8 @@
 
 (select-module srfi/178)
 
+(%compile-time-define string->bitvector)
+
 (export bitvector
         bitvector-unfold
         bitvector-unfold-right
