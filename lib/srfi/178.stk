@@ -109,6 +109,18 @@
                       list->bitvector
                       reverse-list->bitvector)
 
+;; Customize "describe"
+(%user-type-proc-set! 'bitvector 'describe
+                      (lambda (x port)
+                        (format port "a bitvector of length ~A"
+                                (bitvector-length x))))
+;; Customize "class-of"
+(define-class <bitvector> (<top>) ())
+(export <bitvector>)
+
+
+(%user-type-proc-set! 'bitvector 'class-of <bitvector>)
+
 (define (bitvector . args)
   (list->bitvector args))
 
