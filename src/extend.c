@@ -72,9 +72,9 @@ SCM STk_extended_equal(SCM o1, SCM o2)
 SCM STk_extended_class_of(SCM o)
 {
   SCM type = XTYPE_CLASS_OF(BOXED_XTYPE(o));
- 
+
   /* type  may be a class or a function to call to obtain it */
-  return (STk_procedurep(type) == STk_true) ? STk_C_apply(type, 1, o): type;
+  return (type && STk_procedurep(type) == STk_true) ? STk_C_apply(type, 1, o): type;
 
 }
 
