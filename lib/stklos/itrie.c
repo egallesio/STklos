@@ -3386,8 +3386,8 @@ DEFINE_PRIMITIVE("%trie/list-flatten", trie_list_flatten, subr1, (SCM l))
 
 /*
   In order to print, we turn the iset or fxmap into a list
-  (or alist), then cons the appropriate symbol, `<iset>`
-  or `<fxmapping>`.
+  (or alist), then cons the appropriate symbol, `iset`
+  or `fxmapping`.
   But we need the `trie_flatten` function...
 
   FIXME: we should be able to do this with for-each. Can we
@@ -3397,7 +3397,7 @@ static void print_trie(SCM trie, SCM port, int mode) {
     SCM lst = trie_list_aux(trie, STk_nil);
     STk_puts("#,", port);
     if (FXMAPP(trie))
-        lst = trie_flatten(STk_cons (STk_intern("<fxmapping>"), lst));
+        lst = trie_flatten(STk_cons (STk_intern("fxmapping"), lst));
     else {
       if (TRIE_CHARSETP(trie)) {
         SCM clst = STk_nil;
@@ -3408,7 +3408,7 @@ static void print_trie(SCM trie, SCM port, int mode) {
         }
         lst = STk_cons (STk_intern("char-set"), STk_dreverse(clst));
       } else {
-        lst = STk_cons (STk_intern("<iset>"), lst);
+        lst = STk_cons (STk_intern("iset"), lst);
       }
     }
     STk_print(lst, port, mode);

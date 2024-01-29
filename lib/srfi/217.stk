@@ -99,7 +99,9 @@
 (define-class <iset>      (<top>) ())
 (%user-type-proc-set! 'iset 'class-of <iset>)
 
+;; Permit ,(<iset> ...) or ,(iset ...) to read an iset
 (define-reader-ctor '<iset> iset)
+(define-reader-ctor 'iset iset)
 
 (define (check-args pred? type . args)
   (for-each (lambda (x)
