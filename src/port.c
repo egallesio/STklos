@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ static void error_closed_port(SCM p)
 
 static void error_bad_utf8_character(int byte)
 {
-  general_io_error(io_read_error, "bad UTF-8 byte %S", MAKE_INT(byte));
+  general_io_error(io_read_error, "bad UTF-8 byte: %d", byte);
 }
 
 void STk_error_bad_io_param(char *fmt, SCM p)
