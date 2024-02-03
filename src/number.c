@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3844,7 +3844,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  *
  * If x1, x2, x3, and x4 are real numbers and z is a complex number such that
  * @l
- * |z = x1 + x2.i = x3 . e,(sup "i.x4")|
+ * |z = x1 + x2.i = x3 . e^i.x4^)|
  * @l
  * Then
  * @lisp
@@ -3856,7 +3856,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  * (angle z)                      => xa
  * @end lisp
  * where
- * |-,(symbol "pi") < xa <= ,(symbol "pi")| with |xa = x4 + 2,(symbol "pi")n|
+ * |-π < xa <= π| with |xa = x4 + 2πn|
  * for some integer n.
  * @lisp
  * (angle +inf.0)                 => 0.0
