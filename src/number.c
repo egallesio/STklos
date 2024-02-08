@@ -74,7 +74,8 @@ struct bignum_obj {
 
 /*==============================================================================*/
 
-#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
+//#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
+#define MY_PI      3.1415926535897932384626433832795028841971693993751058209749445923078164062862090L
 
 #define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 &&        \
                                   mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
@@ -222,7 +223,7 @@ int STk_isnan(SCM z) {
 
 double STk_dbl_true_min(void) /* return (or compute) DBL_TRUE_MIN */
 {
-  /* 
+  /*
    This function is used here in order to calculate a rational epsilon (for
    square roots) and also in the (scheme flonum) library.
 
@@ -2279,7 +2280,7 @@ SCM STk_sub2(SCM o1, SCM o2)
   if (INTP(o1)  && INT_VAL(o1)==0 &&
       REALP(o2) && fpclassify(REAL_VAL(o2)) == FP_ZERO)
     return double2real(-REAL_VAL(o2));
-  
+
   switch (convert(&o1, &o2)) {
     case tc_bignum:
       {
@@ -3573,9 +3574,100 @@ transcendental(atanh)
 
 /*=============================================================================*/
 
+static inline int power_of_2_p(long x) {
+  /* Find if x is a small power of two.
+     By "small" power of two we mean k up to 5 */
+  for (int i=1; i <= 5; i++)
+    if (x == (1 << i)) {
+      return 1;
+    }
+  return 0;
+}
+
+SCM my_log2(SCM x, SCM b) {
+  /* my_log2 has fast path for taking logs of fixnums, bignums and
+     exact rationals in base two.  It uses a simple trick to extend
+     this to "base which is power of two". */
+
+  if (b == MAKE_INT(1)) STk_error("cannot take log in base 1");
+  long base = INT_VAL(b);
+
+  if (INTP(b)) {
+    /* Fast path for base two. When the number is negative, we compute
+       the exact log, and make a complex number with an exact real part,
+       and an inexact imaginary part (equal to pi/log(b) ).    */
+
+    if (power_of_2_p(base)) {
+      switch (TYPEOF(x)) {
+      case tc_integer: {
+        unsigned long pwr = base;
+
+        long xx = INT_VAL(x);
+        if (power_of_2_p(xx) && base > 2)
+          return div2(my_log2(x,MAKE_INT(2)), my_log2(b,MAKE_INT(2)));
+
+        int pos = (xx > 0);
+
+        /* Explicitly check for +-1, so we give an exact result in these cases: */
+        if (xx == 1)  return MAKE_INT(0);
+        if (xx == -1) return Cmake_complex(MAKE_INT(0),double2real(MY_PI/log(base)));
+
+        xx = labs(xx);
+        if (xx == 0) STk_error("cannot take log of zero");
+        /* Linear search for the wanted power... */
+        for (int i=1; i < INT_LENGTH; i++, pwr *= base) {
+          if (xx == pwr)
+            /* If the number is negative, we return the same
+               result, but with an imaginary part equal to
+               PI/log(base). */
+            return pos
+              ? MAKE_INT(i)
+              : Cmake_complex(MAKE_INT(i),double2real(MY_PI/log(base)));
+        }
+        break;
+      }
+      case tc_bignum: {
+        if (base <= 62) { /* This is a GMP limitation */
+          mpz_t *xx = &BIGNUM_VAL(x);
+          mpz_t r;
+          mpz_init(r);
+          int sgn = mpz_sgn(*xx);
+          /* mpz_sizeinbase returns log(xx) in base two plus one, if it's
+             exact: */
+          unsigned long s = mpz_sizeinbase(*xx,base);
+          if (s != 1) {
+            mpz_ui_pow_ui(r, base, (s-1));
+            /* Now, is s-1 the exact log of xx in base 2 ? */
+            if (!mpz_cmpabs(r,*xx)) {
+              /* If the number is negative, we return the same
+               result, but with an imaginary part equal to
+               PI/log(base). */
+              mpz_clear(r);
+              return (sgn>0)
+                ? MAKE_INT(s-1)
+              : Cmake_complex(MAKE_INT(s-1),double2real(MY_PI/log(base)));
+            }
+          }
+          mpz_clear(r);
+          /* If not, do the floating-point work after the switch... */
+        }
+        break;
+      }
+      case tc_rational:
+        /* Do log(a/b) = log(a)/log(b).
+           This allows us to give exact answers to (log 1/32 2),
+           for example! */
+        return sub2(my_log2(RATIONAL_NUM(x),b),
+                    my_log2(RATIONAL_DEN(x),b));
+      }
+    }
+  }
+  return div2(my_log(x),my_log(b));
+}
+
 DEFINE_PRIMITIVE("log", log, subr12, (SCM x, SCM b))
 {
-    return (b)? div2(my_log(x),my_log(b)) : my_log(x);
+    return (b)? my_log2(x,b) : my_log(x);
 }
 
 

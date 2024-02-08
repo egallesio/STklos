@@ -1558,11 +1558,11 @@
          (/ (log 3) (log 4))))
 
 (test "log 16 2"
-      4.0
+      4
       (log 16 2))
 
 (test "log 1/4 2"
-      -2.0
+      -2
       (log 1/4 2))
 
 (test "log 2 10"
@@ -1570,6 +1570,15 @@
       (< 0.30102000
          (log 2 10)
          0.30103000))
+
+(test "log -64 4 re"
+      3
+      (real-part (log -64 4)))
+(test "log -64 4 im"
+      #t
+      (< 2.26618
+         (imag-part (log -64 4))
+         2.26619))
 
 (test "log 3-5i"
       #t
@@ -1634,9 +1643,12 @@
           (<  2079.44154160000 z 2079.44154170000)))
 
   (test "log_2 2^4000"
-        #t
-        (let ((z (log (expt 2 4000) 2)))
-          (< 3999.9999999 z 4000.0000001)))
+        4000
+        (log (expt 2 4000) 2))
+
+  (test "log_4 4^4000"
+        4000
+        (log (expt 4 4000) 4))
 
   (test "log 10^3000 / 3"
         #t
@@ -1648,6 +1660,12 @@
         (let ((z (log (/ (expt 2 3000) (expt 3 2500)))))
           (<  -667.089180 z -667.089179)))
   )
+
+(dotimes (base 3)
+  (dotimes (x 1000)
+    (test "logs"
+          x
+          (log (expt (expt 2 (+ base 1)) x) (expt 2 (+ base 1))))))
 
 ;; sin, cos
 
@@ -2206,7 +2224,7 @@
 (test "read a 9000 digits bignum (see Issue #592)"
       #t
       (= (with-input-from-string
-             (with-output-to-string 
+             (with-output-to-string
                (lambda () (display (expt 2 30000))))
            (lambda () (read)))
          (expt 2 30000)))
