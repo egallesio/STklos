@@ -3615,8 +3615,8 @@ SCM my_log2(SCM x, SCM b) {
         xx = labs(xx);
         if (xx == 0) STk_error("cannot take log of zero");
         /* Linear search for the wanted power... */
-        for (int i=1; i < INT_LENGTH; i++, pwr *= base) {
-          if (xx == pwr)
+        for (unsigned long i=1; i < INT_LENGTH; i++, pwr *= base) {
+          if (xx == (long) pwr)
             /* If the number is negative, we return the same
                result, but with an imaginary part equal to
                PI/log(base). */
