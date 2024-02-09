@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -1935,13 +1935,34 @@
       (and (infinite? (real-part (expt +inf.0+1i 2)))
            (infinite? (imag-part (expt +inf.0+1i 2)))))
 
-(test "complex division with infinity"
+(test "complex division with infinity.1"
       #t
-      ;; The real part is a NaN in STklos. Some Schemes do
+      ;; The real part is a 0+0i in STklos. Some Schemes do
       ;; return 0.0+0.0i, some return exact zero, some return
       ;; +nan+0.0i.
       ;; We do the same as Chez, Sagittarius and Chibi.
       (zero? (imag-part (/ 2 +inf.0+0.0i))))
+(test "complex division with infinity.2"
+      +inf.0+5/3i
+      (/ +inf.0+5i 3))
+(test "complex division with infinity.3"
+      5/3-inf.0i
+      (/ 5-inf.0i 3))
+
+
+(test "complex mult with infinity.1"
+      +inf.0+6i
+      (* 2 +inf.0+3i))
+(test "complex mult with infinity.2"
+      +inf.0+6.0i
+      (* 2 +inf.0+3.0i))
+(test "complex mult with infinity.3"
+      +inf.0+6.0i
+      (* 2.0 +inf.0+3i))
+(test "complex mult with infinity.4"
+      +inf.0+3/2i
+      (* 1/2 +inf.0+3i))
+
 
 (test "cosh +inf"
       #t
