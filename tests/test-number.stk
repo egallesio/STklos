@@ -1899,6 +1899,49 @@
 (test "acosh 1"   0 (acosh 1))
 (test "atanh 0"   0 (atanh 0))
 
+;;------------------------------------------------------------------
+(test-subsection "Complexes")
+
+(test "complex sum"
+      7+3i
+      (+ 2-3i 5+6i))
+
+(test "complex sub"
+      -3-9i
+      (- 2-3i 5+6i))
+
+(test "complex mul"
+      28-3i
+      (* 2-3i 5+6i))
+
+(test "complex div"
+      -8/61-27/61i
+      (/ 2-3i 5+6i))
+
+(test "complex multiply by integer"
+      2+inf.0i
+      (*  2+inf.0i  1))
+
+(test "complex multiply by real"
+      2.0+inf.0i
+      (*  2+inf.0i  1.0))
+
+(test "complex square"
+      #f
+      (nan? (expt +inf.0+1i 2)))
+
+(test "complex square"
+      #t
+      (and (infinite? (real-part (expt +inf.0+1i 2)))
+           (infinite? (imag-part (expt +inf.0+1i 2)))))
+
+(test "complex division with infinity"
+      #t
+      ;; The real part is a NaN in STklos. Some Schemes do
+      ;; return 0.0+0.0i, some return exact zero, some return
+      ;; +nan+0.0i.
+      ;; We do the same as Chez, Sagittarius and Chibi.
+      (zero? (imag-part (/ 2 +inf.0+0.0i))))
 
 (test "cosh +inf"
       #t
