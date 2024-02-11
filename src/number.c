@@ -2366,11 +2366,14 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
+  type_cell tc_o1 = TYPEOF(o1);
+
   switch (convert(&o1, &o2)) {
     case tc_bignum:
     case tc_integer:
       o1 = make_rational(o1, o2);
       break;
+
     case tc_real:
       {
         double r2 = REAL_VAL(o2);
@@ -2379,41 +2382,39 @@ SCM STk_div2(SCM o1, SCM o2)
           o1 = double2real(REAL_VAL(o1) / r2);
         break;
       }
+
     case tc_rational:
       o1 =  make_rational(mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2)),
                           mul2(RATIONAL_DEN(o1), RATIONAL_NUM(o2)));
       break;
-    case tc_complex:
-      {
-        /* See comment in STk_mul2 */
-        if (!zerop(o1)) {
-          if (IS_INFP(COMPLEX_REAL(o2)) || IS_INFP(COMPLEX_IMAG(o2))) {
-            // o2 contains an infinite => result is 0.0+0.0i
-            // FIXME: in fact, result can also be -0.0+0.0i, 0.0-0i
-            // or -0.0-0.0i, but I don't know the rule
-            o1 = make_complex(double2real(0.0), double2real(0.0));
-          } else if ((COMPLEX_IMAG(o2) == MAKE_INT(0)) &&
-                     (IS_INFP(COMPLEX_REAL(o1)) || IS_INFP(COMPLEX_IMAG(o1)))) {
-            // o1 is a complex and o2 is not
-            SCM r2 = COMPLEX_REAL(o2);
-            o1 = make_complex(div2(COMPLEX_REAL(o1), r2),
-                              div2(COMPLEX_IMAG(o1), r2));
-          } else {
-            SCM tmp, new_r, new_i;
 
-            tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
-                         mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
-            new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                              mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
-                         tmp);
-            new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
-                              mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
-                         tmp);
-            o1 = make_complex(new_r, new_i);
-          }
-        }
-        break;
+    case tc_complex:          /* See comment in STk_mul2 */
+      if (IS_INFP(COMPLEX_REAL(o2)) || IS_INFP(COMPLEX_IMAG(o2))) {
+        // o2 contains an infinite => result is 0.0+0.0i
+        // FIXME: in fact, result can also be -0.0+0.0i, 0.0-0i
+        // or -0.0-0.0i, but I don't know the rule
+        o1 = make_complex(double2real(0.0), double2real(0.0));
+      } else if ((COMPLEX_IMAG(o2) == MAKE_INT(0)) &&
+                 (IS_INFP(COMPLEX_REAL(o1)) || IS_INFP(COMPLEX_IMAG(o1)))) {
+        // o1 is a complex and o2 is not
+        SCM r2 = COMPLEX_REAL(o2);
+        o1 = make_complex(div2(COMPLEX_REAL(o1), r2),
+                          div2(COMPLEX_IMAG(o1), r2));
+      } else {
+        SCM tmp, new_r, new_i;
+
+        tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
+                     mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
+        new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
+                          mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
+                     tmp);
+        new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
+                          mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
+                     tmp);
+        o1 = make_complex(new_r, new_i);
       }
+      break;
+
     default: error_cannot_operate("division", o1, o2);
   }
   return o1;
