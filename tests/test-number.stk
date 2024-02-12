@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -1587,6 +1587,31 @@
              (i (imag-part z)))
         (and (<  1.7631802000 r  1.7631803000)
              (< -1.0303769000 i -1.0303768000))))
+
+;; exact-integer-log
+
+(dotimes (n 50)
+  (dotimes (b 50)
+    (when (and (positive? n) (> b 1))
+      (receive (l r)
+          (exact-integer-log n b)
+        (test "exact-integer-log.1"
+              #t
+              (and (= n (+ (expt b l) r))
+                   (> (expt b (+ 1 l)) n)))))))
+
+(dotimes (n 50)
+  (dotimes (b 50)
+    (when (and (positive? n) (> b 1))
+      (let ((N (+ 500 (expt 11 n)))
+            (B (* 3 (expt 7 b))))
+        (receive (l r)
+            (exact-integer-log N B)
+          (test "exact-integer-log.2"
+                #t
+                (and (= N (+ (expt B l) r))
+                     (> (expt B (+ 1 l)) N))))))))
+
 
 ;; exp, log
 
