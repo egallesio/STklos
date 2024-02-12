@@ -2366,8 +2366,6 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
-  type_cell tc_o1 = TYPEOF(o1);
-
   switch (convert(&o1, &o2)) {
     case tc_bignum:
     case tc_integer:
