@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -1808,7 +1808,7 @@ doc>
 
 #|
 
-<doc exact-integer-log
+<doc EXT exact-integer-log
  * (exact-integer-log n b)
  *
  * |Exact-integer-log| is to |log| what |exact-integer-sqrt| is to |sqrt|.

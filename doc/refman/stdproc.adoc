@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -61,6 +61,7 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'sqrt}}
 {{insertdoc 'square}}
 {{insertdoc 'exact-integer-sqrt}}
+{{insertdoc 'exact-integer-log}}
 {{insertdoc 'expt}}
 {{insertdoc 'angle}}
 {{insertdoc 'inexact->exact}}
@@ -725,7 +726,7 @@ use a `main` function in a Scheme program.
 ==== Misc. System Procedures
 {{insertdoc 'system}}
 {{insertdoc 'exec-list}}
-{{insertdoc 'address-of}}
+{{insertdoc 'address-ref}}
 {{insertdoc 'exit}}
 {{insertdoc 'emergency-exit}}
 {{insertdoc 'die}}

@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -254,15 +254,15 @@ DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
  * |Address-ref| returns the object of which |n| is the address.
  *
  * @lisp
- * (address-of "abc")              =>  140053283366272
- * (address-of "abc")              =>  140053289472288 ;strings are not eq?
+ * (address-of "abc")               =>  140053283366272
+ * (address-of "abc")               =>  140053289472288 ;strings are not eq?
  *
- * (address-of 10)                 => 41
- * (address-of 10)                 => 41
+ * (address-of 10)                  => 41
+ * (address-of 10)                  => 41
  *
- * (address-ref (address-of "xyz") => "xyz"
+ * (address-ref (address-of "xyz")) => "xyz"
  *
- * (address-ref 0)                 => error (points to nothing)
+ * (address-ref 0)                  => error (points to nothing)
  * @end lisp
 doc>
 */

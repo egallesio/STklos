@@ -864,7 +864,7 @@ following URL: <a href="https://www.gnu.org/licenses/gpl-3.0.html" class="bare">
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph">
-<p>Copyright © 1999-2023 Erick Gallesio</p>
+<p>Copyright © 1999-2024 Erick Gallesio</p>
 </div>
 <div class="paragraph">
 <p>Permission is granted to copy, distribute and/or modify this document
@@ -5393,6 +5393,50 @@ positive real part, or zero real part and non-negative imaginary part.</p>
 </div>
 </div>
 <div class="paragraph">
+<p><a id='P_exact-integer-log'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(exact-integer-log n b) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Exact-integer-log</code> is to <code>log</code> what <code>exact-integer-sqrt</code> is to <code>sqrt</code>.</p>
+</div>
+<div class="paragraph">
+<p>Returns two values: the first value is the largest integer number less
+than or equal to the logarithm of <code>n</code> in base <code>b</code>. The second value is
+the difference between <code>n</code> and <code>(expt b k)</code>, where <code>k</code> is the first value.</p>
+</div>
+<div class="paragraph">
+<p>Both arguments must be exact, and the resulting values are exact integers.
+Also, both arguments are mandatory, since it is no meaningful in this context
+to use base <strong>e</strong>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">exact-integer-log</span> <span class="mi">8</span> <span class="mi">2</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mi">3</span><span class="o">,</span><span class="mi">0</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span> <span class="mi">11</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">3</span><span class="o">,</span><span class="mi">3</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span>
+         <span class="p">(</span><span class="nb">expt</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">)</span>
+         <span class="p">(</span><span class="nb">expt</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))</span>     <span class="nv">=&gt;</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">162</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span> <span class="mi">16</span> <span class="mi">2</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span> <span class="mi">19</span> <span class="mi">1</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span>
+         <span class="p">(</span><span class="nb">expt</span> <span class="mi">6</span> <span class="mi">10000</span><span class="p">)</span>
+         <span class="p">(</span><span class="nb">expt</span> <span class="mi">6</span> <span class="mi">1000</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span> <span class="mi">2</span> <span class="mi">1</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span> <span class="mi">0</span> <span class="mi">5</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span>
+<span class="p">(</span><span class="nf">exact-integer-log</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><a id='P_expt'></a>
 </p>
 </div>
@@ -5449,7 +5493,7 @@ positive real part, or zero real part and non-negative imaginary part.</p>
 <p>If x1, x2, x3, and x4 are real numbers and z is a complex number such that</p>
 </div>
 <div class="paragraph">
-<p><code>z = x1 + x2.i = x3 . e,(sup "i.x4")</code></p>
+<p><code>z = x1 + x2.i = x3 . e<sup>i.x4</sup>)</code></p>
 </div>
 <div class="paragraph">
 <p>Then</p>
@@ -5466,7 +5510,7 @@ positive real part, or zero real part and non-negative imaginary part.</p>
 </div>
 <div class="paragraph">
 <p>where
-<code>-,(symbol "pi") &lt; xa &#8656; ,(symbol "pi")</code> with <code>xa = x4 + 2,(symbol "pi")n</code>
+<code>-π &lt; xa &#8656; π</code> with <code>xa = x4 + 2πn</code>
 for some integer n.</p>
 </div>
 <div class="listingblock">
@@ -14922,7 +14966,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.104</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.211</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -15542,7 +15586,8 @@ the output of <code>str</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_address-of'></a>
+<p><a id='P_address-ref'></a><a id='P_address-of'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -15551,12 +15596,27 @@ the output of <code>str</code>.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(address-of obj) </strong></code><br></p>
+<p><code><strong>(address-of obj) </strong></code><br>
+<code><strong>(address-ref n) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns the address of the object <code>obj</code> as an integer.</p>
+<p><code>Address-of</code> returns the address of the object <code>obj</code> as an integer.
+<code>Address-ref</code> returns the object of which <code>n</code> is the address.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">address-of</span> <span class="s">"abc"</span><span class="p">)</span>               <span class="nv">=&gt;</span>  <span class="mi">140053283366272</span>
+<span class="p">(</span><span class="nf">address-of</span> <span class="s">"abc"</span><span class="p">)</span>               <span class="nv">=&gt;</span>  <span class="mi">140053289472288</span> <span class="c1">;strings are not eq?</span>
+
+<span class="p">(</span><span class="nf">address-of</span> <span class="mi">10</span><span class="p">)</span>                  <span class="nv">=&gt;</span> <span class="mi">41</span>
+<span class="p">(</span><span class="nf">address-of</span> <span class="mi">10</span><span class="p">)</span>                  <span class="nv">=&gt;</span> <span class="mi">41</span>
+
+<span class="p">(</span><span class="nf">address-ref</span> <span class="p">(</span><span class="nf">address-of</span> <span class="s">"xyz"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="s">"xyz"</span>
+
+<span class="p">(</span><span class="nf">address-ref</span> <span class="mi">0</span><span class="p">)</span>                  <span class="nv">=&gt;</span> <span class="nv">error</span> <span class="p">(</span><span class="nf">points</span> <span class="nv">to</span> <span class="nv">nothing</span><span class="p">)</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_exit'></a>
@@ -19114,11 +19174,12 @@ that is:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>it returns the symbols defined or imported if the module is the current module.</p>
+<p>it returns the symbols defined or imported if the module is the current
+module.</p>
 </li>
 <li>
-<p>it returns the symbols exported by the module, if this module it is not the
-current one.</p>
+<p>it returns the symbols exported by the module, if this module it is not
+the current one.</p>
 </li>
 </ul>
 </div>
@@ -26187,7 +26248,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="_supported_srfis">13.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>122</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>125</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -26259,6 +26320,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-111/srfi-111.html">SRFI-111</a></strong>&#8201;&#8212;&#8201;<em>Boxes</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a></strong>&#8201;&#8212;&#8201;<em>Environment Inquiry</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-113/srfi-113.html">SRFI-113</a></strong>&#8201;&#8212;&#8201;<em>Sets and Bags</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-115/srfi-115.html">SRFI-115</a></strong>&#8201;&#8212;&#8201;<em>Scheme Regular Expressions</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-116/srfi-116.html">SRFI-116</a></strong>&#8201;&#8212;&#8201;<em>Immutable List Library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-117/srfi-117.html">SRFI-117</a></strong>&#8201;&#8212;&#8201;<em>Queues based on lists</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-118/srfi-118.html">SRFI-118</a></strong>&#8201;&#8212;&#8201;<em>Simple adjustable-size strings</em><br>
@@ -26292,6 +26354,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-174/srfi-174.html">SRFI-174</a></strong>&#8201;&#8212;&#8201;<em>POSIX Timespecs</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-175/srfi-175.html">SRFI-175</a></strong>&#8201;&#8212;&#8201;<em>ASCII character library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-176/srfi-176.html">SRFI-176</a></strong>&#8201;&#8212;&#8201;<em>Version flag</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-178/srfi-178.html">SRFI-178</a></strong>&#8201;&#8212;&#8201;<em>Bitvector library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-180/srfi-180.html">SRFI-180</a></strong>&#8201;&#8212;&#8201;<em>JSON</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-185/srfi-185.html">SRFI-185</a></strong>&#8201;&#8212;&#8201;<em>Linear adjustable-length strings</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-189/srfi-189.html">SRFI-189</a></strong>&#8201;&#8212;&#8201;<em>Maybe and Either: optional container types</em><br>
@@ -26315,6 +26378,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-228/srfi-228.html">SRFI-228</a></strong>&#8201;&#8212;&#8201;<em>A further comparator library</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-229/srfi-229.html">SRFI-229</a></strong>&#8201;&#8212;&#8201;<em>Tagged Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-232/srfi-232.html">SRFI-232</a></strong>&#8201;&#8212;&#8201;<em>Flexible Curried Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-233/srfi-233.html">SRFI-233</a></strong>&#8201;&#8212;&#8201;<em>INI files</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-235/srfi-235.html">SRFI-235</a></strong>&#8201;&#8212;&#8201;<em>Combinators</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br>
@@ -26385,7 +26449,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-233</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-115</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-178</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-232</code> <code>srfi-233</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -32633,7 +32697,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-04 15:36:07 +0100
+Last updated 2024-02-12 16:40:29 +0100
 </div>
 </div>
 </body>
