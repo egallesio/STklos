@@ -1924,6 +1924,69 @@
 (test "acosh 1"   0 (acosh 1))
 (test "atanh 0"   0 (atanh 0))
 
+;;------------------------------------------------------------------
+(test-subsection "Complexes")
+
+(test "complex sum"
+      7+3i
+      (+ 2-3i 5+6i))
+
+(test "complex sub"
+      -3-9i
+      (- 2-3i 5+6i))
+
+(test "complex mul"
+      28-3i
+      (* 2-3i 5+6i))
+
+(test "complex div"
+      -8/61-27/61i
+      (/ 2-3i 5+6i))
+
+(test "complex multiply by integer"
+      2+inf.0i
+      (*  2+inf.0i  1))
+
+(test "complex multiply by real"
+      2.0+inf.0i
+      (*  2+inf.0i  1.0))
+
+(test "complex square"
+      #f
+      (nan? (expt +inf.0+1i 2)))
+
+(test "complex square"
+      #t
+      (and (infinite? (real-part (expt +inf.0+1i 2)))
+           (infinite? (imag-part (expt +inf.0+1i 2)))))
+
+(test "complex division with infinity.1"
+      #t
+      ;; The real value is 0.0+0.0i in STklos. Some Schemes do
+      ;; return 0.0+0.0i, some return exact zero, some return
+      ;; +nan+0.0i.
+      (zero? (imag-part (/ 2 +inf.0+0.0i))))
+(test "complex division with infinity.2"
+      +inf.0+5/3i
+      (/ +inf.0+5i 3))
+(test "complex division with infinity.3"
+      5/3-inf.0i
+      (/ 5-inf.0i 3))
+
+
+(test "complex mult with infinity.1"
+      +inf.0+6i
+      (* 2 +inf.0+3i))
+(test "complex mult with infinity.2"
+      +inf.0+6.0i
+      (* 2 +inf.0+3.0i))
+(test "complex mult with infinity.3"
+      +inf.0+6.0i
+      (* 2.0 +inf.0+3i))
+(test "complex mult with infinity.4"
+      +inf.0+3/2i
+      (* 1/2 +inf.0+3i))
+
 
 (test "cosh +inf"
       #t
@@ -2195,6 +2258,38 @@
         (< 35.99999
            (radians->degrees (/ pi 5))
            36.00001)))
+;;;
+;;; Zeroes and infinities (some tests comes from Chez)
+;;;
+(test "zeros & infinities.0" +inf.0 (/ +0.0))
+(test "zeros & infinities.2" -inf.0 (/ -0.0))
+(test "zeros & infinities.3" +0.0 (/ +inf.0))
+(test "zeros & infinities.4" -0.0 (/ -inf.0))
+(test "zeros & infinities.5" +nan.0 (/ +nan.0))
+(test "zeros & infinities.6" +inf.0 (/ +1.0 +0.0))
+(test "zeros & infinities.7" -inf.0 (/ +1.0 -0.0))
+(test "zeros & infinities.8" -inf.0 (/ -1.0 +0.0))
+(test "zeros & infinities.9" +inf.0 (/ -1.0 -0.0))
+(test "zeros & infinities.10" +nan.0 (/ +0.0 +0.0))
+(test "zeros & infinities.11" +nan.0 (/ +0.0 -0.0))
+(test "zeros & infinities.12" +nan.0 (/ -0.0 +0.0))
+(test "zeros & infinities.13" +nan.0 (/ -0.0 -0.0))
+
+(test "zeros & infinities.14" 0 (/ 0 2))
+(test "zeros & infinities.15" 0.0 (/ 0.0 2))
+(test "zeros & infinities.16" 0.0+0.0i (/ 0+0.0i 2))   ;; As Petite
+
+(test "zeros & infinities.17" +nan.0 (/ +inf.0 -inf.0))
+(test "zeros & infinities.18" +nan.0 (/ -inf.0 -inf.0))
+(test "zeros & infinities.19" -inf.0 (/ -inf.0 0.0))
+
+(test "zeros & infinities.20" +inf.0 (/ 2 0.0))
+(test "zeros & infinities.21" -inf.0 (/ -2 0.0))
+(test "zeros & infinities.21" +inf.0 (/ -2 -0.0))
+(test "zeros & infinities.23" 0 (/ 0 2+3i))
+(test "zeros & infinities.24" 0.0+0.0i (/ -0.0 2+3i))
+(test "zeros & infinities.25" 0.0+0.0i (/ 0+0.0i 2+3i))
+
 
 ;;;
 ;;; Misc

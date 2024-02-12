@@ -82,6 +82,7 @@ struct bignum_obj {
 #define LONG_FITS_INTEGER(_l)    (INT_MIN_VAL <= (_l) && (_l) <= INT_MAX_VAL)
 #define TYPEOF(n)                (INTP(n)? tc_integer: STYPE(n))
 
+#define IS_INFP(x)              (REALP(x) && isinf(REAL_VAL(x)))
 
 #define MINUS_INF "-inf.0"
 #define PLUS_INF  "+inf.0"
@@ -2220,8 +2221,25 @@ SCM STk_mul2(SCM o1, SCM o2)
           SCM r2 = COMPLEX_REAL(o2);
           SCM i2 = COMPLEX_IMAG(o2);
 
-          o1 = make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
-                            add2(mul2(r1,i2), mul2(r2, i1)));
+          /* Take care to complex numbers with a real or imaginary part which
+           * is an infinite, when thy are multiplied by a non complex. In this
+           * case, normal computation of the result will multiply an infinity
+           * with zero, bringing a NaN in the result. In this case, we have
+           * made a useless conversion (but should be pretty rare).
+           */
+          if ((i1 == MAKE_INT(0)) && (IS_INFP(r2) || IS_INFP(i2))) {
+            // o1 was not a complex and o2 contains an infinite
+            o1 = make_complex(mul2(r1,COMPLEX_REAL(o2)),
+                              mul2(r1,COMPLEX_IMAG(o2)));
+          } else if ((i2 == MAKE_INT(0)) && (IS_INFP(r1) || IS_INFP(i1))) {
+            // o2 was not a complex and o1 contains an infinite
+            o1 = make_complex(mul2(r2, COMPLEX_REAL(o1)),
+                              mul2(r2,COMPLEX_IMAG(o1)));
+          } else {
+            // Normal case
+            o1 = make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
+                              add2(mul2(r1,i2), mul2(r2, i1)));
+          }
           break;
         }
       case tc_rational:
@@ -2348,11 +2366,14 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
+  type_cell tc_o1 = TYPEOF(o1);
+
   switch (convert(&o1, &o2)) {
     case tc_bignum:
     case tc_integer:
       o1 = make_rational(o1, o2);
       break;
+
     case tc_real:
       {
         double r2 = REAL_VAL(o2);
@@ -2361,27 +2382,39 @@ SCM STk_div2(SCM o1, SCM o2)
           o1 = double2real(REAL_VAL(o1) / r2);
         break;
       }
+
     case tc_rational:
       o1 =  make_rational(mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2)),
                           mul2(RATIONAL_DEN(o1), RATIONAL_NUM(o2)));
       break;
-    case tc_complex:
-      {
+
+    case tc_complex:          /* See comment in STk_mul2 */
+      if (IS_INFP(COMPLEX_REAL(o2)) || IS_INFP(COMPLEX_IMAG(o2))) {
+        // o2 contains an infinite => result is 0.0+0.0i
+        // FIXME: in fact, result can also be -0.0+0.0i, 0.0-0i
+        // or -0.0-0.0i, but I don't know the rule
+        o1 = make_complex(double2real(0.0), double2real(0.0));
+      } else if ((COMPLEX_IMAG(o2) == MAKE_INT(0)) &&
+                 (IS_INFP(COMPLEX_REAL(o1)) || IS_INFP(COMPLEX_IMAG(o1)))) {
+        // o1 is a complex and o2 is not
+        SCM r2 = COMPLEX_REAL(o2);
+        o1 = make_complex(div2(COMPLEX_REAL(o1), r2),
+                          div2(COMPLEX_IMAG(o1), r2));
+      } else {
         SCM tmp, new_r, new_i;
 
-        if (!zerop(o1)) {
-          tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
-                       mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
-          new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          o1 = make_complex(new_r, new_i);
-        }
-        break;
+        tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
+                     mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
+        new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
+                          mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
+                     tmp);
+        new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
+                          mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
+                     tmp);
+        o1 = make_complex(new_r, new_i);
       }
+      break;
+
     default: error_cannot_operate("division", o1, o2);
   }
   return o1;
