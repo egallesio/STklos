@@ -54,7 +54,7 @@ static void error_closed_port(SCM p)
 
 static void error_bad_utf8_character(int byte)
 {
-  general_io_error(io_read_error, "bad UTF-8 byte: %d", byte);
+  general_io_error(io_read_error, "bad UTF-8 byte: ~S", MAKE_INT(byte));
 }
 
 void STk_error_bad_io_param(char *fmt, SCM p)
