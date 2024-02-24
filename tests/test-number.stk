@@ -1088,7 +1088,11 @@
            10000         ;; 2^4 5^4
            44444))       ;; 2^2 41 271
 
-
+;; parameterize won't work for compiler:... parameters, since
+;; the form is compiled before the parameter is changed, so we
+;; need to manually set it, in isolated forms.
+(define %%%___inline-common-functions (compiler:inline-common-functions))
+(compiler:inline-common-functions #f)
 (test/error "gcd" (gcd 1.2  1))
 (test/error "gcd" (gcd 1/2  1))
 (test/error "gcd" (gcd 1+2i 1))
@@ -1096,6 +1100,36 @@
 (test/error "gcd" (gcd #\a  1))
 (test/error "gcd" (gcd "a"  1))
 (test/error "gcd" (gcd gcd  1))
+
+;; Different argument order, just to be sure:
+(test/error "gcd" (gcd 1 1.2))
+(test/error "gcd" (gcd 1 1/2))
+(test/error "gcd" (gcd 1 1+2i))
+(test/error "gcd" (gcd 1 'a))
+(test/error "gcd" (gcd 1 #\a))
+(test/error "gcd" (gcd 1 "a"))
+(test/error "gcd" (gcd 1 gcd))
+
+(compiler:inline-common-functions #t)
+(test/compile-error "gcd" (gcd 1.2  1))
+(test/compile-error "gcd" (gcd 1/2  1))
+(test/compile-error "gcd" (gcd 1+2i 1))
+(test/compile-error "gcd" (gcd 'a   1))
+(test/compile-error "gcd" (gcd #\a  1))
+(test/compile-error "gcd" (gcd "a"  1))
+(test/compile-error "gcd" (gcd gcd  1))
+
+;; Different argument order, just to be sure:
+(test/compile-error "gcd" (gcd 1 1.2))
+(test/compile-error "gcd" (gcd 1 1/2))
+(test/compile-error "gcd" (gcd 1 1+2i))
+(test/compile-error "gcd" (gcd 1 'a))
+(test/compile-error "gcd" (gcd 1 #\a))
+(test/compile-error "gcd" (gcd 1 "a"))
+(test/compile-error "gcd" (gcd 1 gcd))
+
+(compiler:inline-common-functions %%%___inline-common-functions)
+
 
 (test "gcd" fx-greatest (gcd 0 fx-greatest))
 
@@ -1139,7 +1173,11 @@
       (lcm 120472576                                                           ;; 2^10  7^6
            27007807709860849561033756885977919860590665716507399182910226432)) ;; 2^200 7^5
 
-
+;; parameterize won't work for compiler:... parameters, since
+;; the form is compiled before the parameter is changed, so we
+;; need to manually set it, in isolated forms.
+(define %%%___inline-common-functions (compiler:inline-common-functions))
+(compiler:inline-common-functions #f)
 (test/error "lcm" (lcm 1.2  1))
 (test/error "lcm" (lcm 1/2  1))
 (test/error "lcm" (lcm 1+2i 1))
@@ -1147,6 +1185,35 @@
 (test/error "lcm" (lcm #\a  1))
 (test/error "lcm" (lcm "a"  1))
 (test/error "lcm" (lcm lcm  1))
+
+;; Different argument order, just to be sure:
+(test/error "lcm" (lcm 1 1.2))
+(test/error "lcm" (lcm 1 1/2))
+(test/error "lcm" (lcm 1 1+2i))
+(test/error "lcm" (lcm 1 'a))
+(test/error "lcm" (lcm 1 #\a))
+(test/error "lcm" (lcm 1"a"))
+(test/error "lcm" (lcm 1 lcm))
+
+(compiler:inline-common-functions #t)
+(test/compile-error "lcm" (lcm 1.2  1))
+(test/compile-error "lcm" (lcm 1/2  1))
+(test/compile-error "lcm" (lcm 1+2i 1))
+(test/compile-error "lcm" (lcm 'a   1))
+(test/compile-error "lcm" (lcm #\a  1))
+(test/compile-error "lcm" (lcm "a"  1))
+(test/compile-error "lcm" (lcm lcm  1))
+
+;; Different argument order, just to be sure:
+(test/compile-error "lcm" (lcm 1 1.2))
+(test/compile-error "lcm" (lcm 1 1/2))
+(test/compile-error "lcm" (lcm 1 1+2i))
+(test/compile-error "lcm" (lcm 1 'a))
+(test/compile-error "lcm" (lcm 1 #\a))
+(test/compile-error "lcm" (lcm 1 "a"))
+(test/compile-error "lcm" (lcm 1 lcm))
+
+(compiler:inline-common-functions %%%___inline-common-functions)
 
 ;;------------------------------------------------------------------
 (test-subsection "expt")
