@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -115,6 +115,13 @@
 
 (define *inline-table* (append *inline-math*
                                *inline-general*))
+
+;;
+;; FIXME: to be modified. Necessary to compile the PR with current version of
+;; the code
+(define *inline-symbols* (map car *inline-table*))
+
+
 
 (define *always-inlined*        '(%set-current-module %%set-current-module
                                   %%execute %%execute-handler))
