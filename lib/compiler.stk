@@ -68,24 +68,31 @@
                                                  ;; square => square is not available when compiling...
                                                  ))
 
-(define *inline-math*         (append *inline-math-commutative* *inline-math-general*))
+(define *inline-math*       (append *inline-math-commutative* *inline-math-general*))
 
-(define *inline-general*      (make-inline-table fx=? fx<? fx<=? fx>? fx>=?
-                                                 ;; Following line associates
-                                                 ;; symbols with values different
-                                                 ;; from their own (they're aliases):
-                                                 (fx= fx=?) (fx< fx<?) (fx<= fx=?)
-                                                 (fx> fx>?) (fx>= fx>=?)
-                                                 cons car cdr null? list
-                                                 not
-                                                 vector-ref vector-set!
-                                                 string-ref string-set!
-                                                 eq? eqv? equal?
-                                                 void
-                                                 %cxr
-                                                 list-ref))
+(define *inline-general*    (make-inline-table fx=? fx<? fx<=? fx>? fx>=?
+                                               ;; Following line associates
+                                               ;; symbols with values different
+                                               ;; from their own (they're aliases):
+                                               (fx= fx=?) (fx< fx<?) (fx<= fx=?)
+                                               (fx> fx>?) (fx>= fx>=?)
+                                               cons car cdr null? list
+                                               not
+                                               vector-ref vector-set!
+                                               string-ref string-set!
+                                               eq? eqv? equal?
+                                               void
+                                               caar   cdar   cadr   cddr
+                                               caaar  cdaar  cadar  cddar
+                                               caadr  cdadr  caddr  cdddr
+                                               caaaar cdaaar cadaar cddaar
+                                               caadar cdadar caddar cdddar
+                                               caaadr cdaadr cadadr cddadr
+                                               caaddr cdaddr cadddr cddddr
+                                               %cxr
+                                               list-ref))
 
-(define *inline-table*        (append *inline-math* *inline-general*))
+(define *inline-table*      (append *inline-math* *inline-general*))
 
 ;;
 ;; FIXME: to be modified. Necessary to compile the PR with current version of
@@ -1329,10 +1336,12 @@ doc>
                          ((fx>=? fx>=) 'IN-FXGE))))
          (else  (compile-normal-call fct actuals len env epair #f))))
 
-      ;; This entry is here just because we declared these functions in the inline table.
-      ;; We don't need to inline them, because they were dealt with in a previous step
-      ;; by fold-commutative-args and maybe-fold-constant.
-      ((sin cos tan asin acos exp log sinh cosh tanh asinh acosh atanh sqrt square expt atan gcd lcm)
+      ;; This entry is here just because we declared these functions in the
+      ;; inline table.  We don't need to inline them, because they were dealt
+      ;; with in a previous step by fold-commutative-args and
+      ;; maybe-fold-constant.
+      ((sin cos tan asin acos exp log sinh cosh tanh asinh acosh atanh sqrt
+       square expt atan gcd lcm)
        (compile-normal-call fct actuals len env epair #f))
 
       ((cons)   (comp2 'IN-CONS))
