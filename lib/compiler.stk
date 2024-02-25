@@ -217,18 +217,7 @@
     (add-file-module-list! new)
     new))
 
-(define compiler:inline-common-functions
-  (let ((inlined-math-commutative *inline-math-commutative*)
-        (inlined-math-general     *inline-math-general*)
-        (inlined-math             *inline-math*)
-        (inlined-general          *inline-general*))
-    (make-parameter #t
-                    (lambda (v)
-                      (set! *inline-math-commutative* (if v inlined-math-commutative '()))
-                      (set! *inline-math-general*     (if v inlined-math-general     '()))
-                      (set! *inline-math*             (if v inlined-math             '()))
-                      (set! *inline-general*          (if v inlined-general          '()))
-                      (not (null? *inline-general*))))))
+
 
 
 ;; ----------------------------------------------------------------------

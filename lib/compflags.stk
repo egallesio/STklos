@@ -2,7 +2,7 @@
 ;;;;
 ;;;; compflags.stk         -- Compiler Flags
 ;;;;
-;;;; Copyright © 2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2023-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -182,14 +182,31 @@ doc>
              "must be a positive fixnum. It was ~s" v))
     v))
 
+;;.///(define compiler:inline-common-functions
+;;.///  (let* ((inlined *inline-symbols*)
+;;.///         (res     (make-parameter #t
+;;.///                                  (lambda (v)
+;;.///                                    (set! *inline-symbols* (if v inlined '()))
+;;.///                                    (not (null? *inline-symbols*))))))
+;;.///    (%set-parameter-name! res 'compiler:inline-common-functions)
+;;.///    res))
+
 (define compiler:inline-common-functions
-  (let* ((inlined *inline-symbols*)
-         (res     (make-parameter #t
-                                  (lambda (v)
-                                    (set! *inline-symbols* (if v inlined '()))
-                                    (not (null? *inline-symbols*))))))
-    (%set-parameter-name! res 'compiler:inline-common-functions)
-    res))
+  (let* ((inlined-math-commutative *inline-math-commutative*)
+         (inlined-math-general     *inline-math-general*)
+         (inlined-math             *inline-math*)
+         (inlined-general          *inline-general*)
+         (res (make-parameter #t
+                              (lambda (v)
+                                (set! *inline-math-commutative* (if v inlined-math-commutative '()))
+                                (set! *inline-math-general*     (if v inlined-math-general     '()))
+                                (set! *inline-math*             (if v inlined-math             '()))
+                                (set! *inline-general*          (if v inlined-general          '()))
+                                (set! *inline-table*            (append *inline-math*
+                                                                        *inline-general*))
+                                (not (null? *inline-table*))))))
+   (%set-parameter-name! res 'compiler:inline-common-functions)
+   res))
 
 ;; ----------------------------------------------------------------------
 ;;      %compiler-set-flags ...
