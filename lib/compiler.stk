@@ -64,9 +64,7 @@
                                                  sinh  cosh  tanh
                                                  asinh acosh atanh
                                                  exp log expt
-                                                 sqrt
-                                                 ;; square => square is not available when compiling...
-                                                 ))
+                                                 sqrt square))
 
 (define *inline-math*       (append *inline-math-commutative* *inline-math-general*))
 
@@ -1086,7 +1084,7 @@ doc>
             (and (null? alist) ; if alist was passed, it was a request for THAT alist only
                  (memq fct *always-inlined*)))))))
 
-;; maybe-fold-constant akes the current environment, a list of
+;; maybe-fold-constant takes the current environment, a list of
 ;; arguments and tries to math-fold them into constants.
 ;;
 ;; Example:
