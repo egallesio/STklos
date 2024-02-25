@@ -43,78 +43,49 @@
 
 (define *compiler-port* #f)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;; Use these two macros to create the inline table.
-;;;
-;; 1. Individual entries: add-entry-to-inline-table
-;;
-;; (add-entry-to-inline-table *table* op)
-;;    will add op to the inline table, associated to the value of the
-;;    symbol op
-;;
-;; (add-entry-to-inline-table *table* (op val))
-;;    will add op to the inline table, associated to val
-;;
-;; (add-entry-to-inline-table *table* cons) -> the symbol cons will be
-;;    associated to its own value
-;;
-;; (add-entry-to-inline-table *table* (fx= fx=?)) -> because we want the
-;;    symbol 'fx= to be associated to the procedure fx=?
-;;
-;; 2. A list of entries: add-list-to-inline-table
-;;
-;; Just use add-list-to-inline-table with a list of entries, with
-;; the same format used for add-entry-to-inline-table
-;;
-(define-macro (add-entry-to-inline-table *table* name)
-  (if (pair? name)
-      `(set! ,*table* (cons (cons (quote ,(car name)) ,(cadr name)) ,*table*))
-      `(set! ,*table* (cons (cons (quote ,name) ,name) ,*table*))))
+;; ----------------------------------------------------------------------
+;;  Define the inlining tables
+;; ----------------------------------------------------------------------
+(define-macro (make-inline-table . entries)
+  ;; Build an A-list of the given entries. The A-list keys correspond to the
+  ;; function name and the value its associated proceure in the SCHEME module.
+  `(list ,@(map (lambda (x)
+                  (if (pair? x)
+                      `(cons ',(car x) ,(cadr x))
+                      `(cons ',x ,x)))
+                  entries)))
 
-(define-macro (add-list-to-inline-table *table* . names)
-  (when (null? names) (error 'add-list-to-inline-table
-                             "need at least two arguments, onle one given."))
-  (cons 'begin
-        (map (lambda (n) `(add-entry-to-inline-table ,*table* ,n))
-             names)))
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define *inline-math-commutative* (make-inline-table + * gcd lcm))
 
-(define *inline-math-commutative* '())
-(add-list-to-inline-table *inline-math-commutative*
-                          + * gcd lcm)
+(define *inline-math-general* (make-inline-table - /
+                                                 fx+ fx- fx* fxquotient
+                                                 sin   cos   tan
+                                                 asin  acos  atan
+                                                 sinh  cosh  tanh
+                                                 asinh acosh atanh
+                                                 exp log expt
+                                                 sqrt
+                                                 ;; square => square is not available when compiling...
+                                                 ))
 
-(define *inline-math-general* '())
-(add-list-to-inline-table *inline-math-general*
-                          - /
-                          fx+ fx- fx* fxquotient
-                          sin  cos  tan  asin  acos  atan
-                          sinh cosh tanh asinh acosh atanh
-                          exp log expt
-                          sqrt
-                          ;; square => square is not available when compiling...
-                          )
+(define *inline-math*         (append *inline-math-commutative* *inline-math-general*))
 
-(define *inline-math* (append *inline-math-commutative*
-                              *inline-math-general*))
+(define *inline-general*      (make-inline-table fx=? fx<? fx<=? fx>? fx>=?
+                                                 ;; Following line associates
+                                                 ;; symbols with values different
+                                                 ;; from their own (they're aliases):
+                                                 (fx= fx=?) (fx< fx<?) (fx<= fx=?)
+                                                 (fx> fx>?) (fx>= fx>=?)
+                                                 cons car cdr null? list
+                                                 not
+                                                 vector-ref vector-set!
+                                                 string-ref string-set!
+                                                 eq? eqv? equal?
+                                                 void
+                                                 %cxr
+                                                 list-ref))
 
-(define *inline-general* '())
-(add-list-to-inline-table *inline-general*
-                          fx=? fx<? fx<=? fx>? fx>=?
-                          ;; The following line associates symbols with values
-                          ;; different from their own (they're aliases):
-                          (fx= fx=?) (fx< fx<?) (fx<= fx=?) (fx> fx>?) (fx>= fx>=?)
-                          cons car cdr null? list
-                          not
-                          vector-ref vector-set! string-ref string-set!
-                          eq? eqv? equal?
-                          void
-                          %cxr
-                          list-ref)
-
-(define *inline-table* (append *inline-math*
-                               *inline-general*))
+(define *inline-table*        (append *inline-math* *inline-general*))
 
 ;;
 ;; FIXME: to be modified. Necessary to compile the PR with current version of
