@@ -1080,9 +1080,9 @@ doc>
         (if (and found
                  (not (find-symbol-in-env fct env)))
             (let ((f (cdr found)))
-              (and f (eq? (symbol-value* fct STklos) f)))
-            (and (null? alist) ; if alist was passed, it was a request for THAT alist only
-                 (memq fct *always-inlined*)))))))
+              (and f (eq? f (symbol-value* fct STklos))))
+            (and (null? alist)                     ; if alist was passed, it was
+                 (memq fct *always-inlined*))))))) ; a request for THAT alist only
 
 ;; maybe-fold-constant takes the current environment, a list of
 ;; arguments and tries to math-fold them into constants.
@@ -1105,7 +1105,7 @@ doc>
       (let ((new-args (map (lambda (f) (maybe-fold-constant env f)) (cdr args))))
         (if (every number? new-args)
             (with-handler (lambda (_) args)
-               (apply (eval (car args))
+               (apply (cdr (assq (car args) *inline-math*))
                       (map (lambda (f) (maybe-fold-constant env f)) new-args)))
             (cons (car args) new-args)))
       args))
