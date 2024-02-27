@@ -1089,7 +1089,7 @@ doc>
 ;;
 ;; Example:
 ;;
-;; (maybe-fold-constant '( 2.0 (log (sin 2)) (f 5) ))
+;; (maybe-fold-constant #f '( 2.0 (log (sin 2)) (f 5) ))
 ;; => ( 2.0  -0.0950830360951606  (f 5) )
 ;;
 ;; * The number 2.0 remains unchanged;
@@ -1104,8 +1104,9 @@ doc>
            (can-be-inlined? (car args) env *inline-math*))
       (let ((new-args (map (lambda (f) (maybe-fold-constant env f)) (cdr args))))
         (if (every number? new-args)
-            (apply (eval (car args))
-                   (map (lambda (f) (maybe-fold-constant env f)) new-args))
+            (with-handler (lambda (_) args)
+               (apply (eval (car args))
+                      (map (lambda (f) (maybe-fold-constant env f)) new-args)))
             (cons (car args) new-args)))
       args))
 
@@ -1339,7 +1340,7 @@ doc>
       ;; with in a previous step by fold-commutative-args and
       ;; maybe-fold-constant.
       ((sin cos tan asin acos exp log sinh cosh tanh asinh acosh atanh sqrt
-       square expt atan gcd lcm)
+        square expt atan gcd lcm)
        (compile-normal-call fct actuals len env epair #f))
 
       ((cons)   (comp2 'IN-CONS))
