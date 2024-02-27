@@ -1445,9 +1445,13 @@ doc>
                     ((>= (length fct) 3) (cddr fct))
                     (else fct))))
           (compile-lambda-call fct actuals len env ep tail?))
-        (if (can-be-inlined? fct env)
-            (compile-primitive-call fct actuals len env args tail?)
-            (compile-normal-call    fct actuals len env args tail?)))))
+        (begin
+          (let ((expr (maybe-fold-constant env (cons fct actuals))))
+            (if (not (pair? expr))
+                (compile-constant expr env tail?)
+                (if (can-be-inlined? fct env)
+                    (compile-primitive-call fct actuals len env args tail?)
+                    (compile-normal-call    fct actuals len env args tail?))))))))
 
 ;;;;
 ;;;; LET / LET* / LETREC
