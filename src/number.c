@@ -3710,6 +3710,24 @@ DEFINE_PRIMITIVE("atan", atan, subr12, (SCM y, SCM x))
 /*=============================================================================*/
 
 /*
+<doc R7RS square
+ * (square z)
+ *
+ * Returns the square of |z|. This is equivalent to |(* z z)|.
+ *
+ * @lisp
+ * (square 42)     => 1764
+ * (square 2.0)    => 4.0
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("square", square, subr1, (SCM z))
+{
+  if (STk_numberp(z) == STk_false) error_bad_number(z);
+  return STk_mul2(z, z);
+}
+
+/*
 <doc sqrt
  * (sqrt z)
  *
@@ -4649,6 +4667,7 @@ int STk_init_number(void)
   ADD_PRIMITIVE(asinh);
   ADD_PRIMITIVE(atanh);
 
+  ADD_PRIMITIVE(square);
   ADD_PRIMITIVE(sqrt);
   ADD_PRIMITIVE(expt);
 

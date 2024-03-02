@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -538,7 +538,7 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
 
    default:
      // FIXME: The following code uses the above equal? . As a consequenece,
-     // we will not be able to detecte cycles in extended types.
+     // we will not be able to detect cycles in extended types.
      if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
           (BOXED_TYPE(x) == BOXED_TYPE(y)))
         return STk_extended_equal(x, y);
