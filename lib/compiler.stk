@@ -78,7 +78,9 @@
                                                not
                                                vector-ref vector-set!
                                                string-ref string-set!
-                                               eq? eqv? equal?
+                                               eq? eqv?
+                                               ;; FIXME: equal? is no more a subr
+                                               ;; and cannot be optimized
                                                void
                                                caar   cdar   cadr   cddr
                                                caaar  cdaar  cadar  cddar
@@ -91,12 +93,6 @@
                                                list-ref))
 
 (define *inline-table*      (append *inline-math* *inline-general*))
-
-;;
-;; FIXME: to be modified. Necessary to compile the PR with current version of
-;; the code
-(define *inline-symbols* (map car *inline-table*))
-
 
 
 (define *always-inlined*        '(%set-current-module %%set-current-module
