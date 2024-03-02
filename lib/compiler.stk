@@ -46,62 +46,54 @@
 ;; ----------------------------------------------------------------------
 ;;  Define the inlining tables
 ;; ----------------------------------------------------------------------
-(define-macro (make-inline-table . entries)
-  ;; Build an A-list of the given entries. The A-list keys correspond to the
-  ;; function name and the value its associated proceure in the SCHEME module.
-  `(list ,@(map (lambda (x)
-                  (if (pair? x)
-                      `(cons ',(car x) ,(cadr x))
-                      `(cons ',x ,x)))
-                  entries)))
+(define *inline-math-commutative* '(+ * gcd lcm))
+(define *inline-math-general*     '(- /
+                                    fx+ fx- fx* fxquotient
+                                    sin   cos   tan
+                                    asin  acos  atan
+                                    sinh  cosh  tanh
+                                    asinh acosh atanh
+                                    exp log expt
+                                    sqrt square))
+(define *inline-math*              (append *inline-math-commutative*
+                                           *inline-math-general*))
 
-(define *inline-math-commutative* (make-inline-table + * gcd lcm))
-
-(define *inline-math-general* (make-inline-table - /
-                                                 fx+ fx- fx* fxquotient
-                                                 sin   cos   tan
-                                                 asin  acos  atan
-                                                 sinh  cosh  tanh
-                                                 asinh acosh atanh
-                                                 exp log expt
-                                                 sqrt square))
-
-(define *inline-math*       (append *inline-math-commutative* *inline-math-general*))
-
-(define *inline-general*    (make-inline-table fx=? fx<? fx<=? fx>? fx>=?
-                                               ;; Following line associates
-                                               ;; symbols with values different
-                                               ;; from their own (they're aliases):
-                                               (fx= fx=?) (fx< fx<?) (fx<= fx=?)
-                                               (fx> fx>?) (fx>= fx>=?)
-                                               cons car cdr null? list
-                                               not
-                                               vector-ref vector-set!
-                                               string-ref string-set!
-                                               eq? eqv?
-                                               ;; FIXME: equal? is no more a subr
-                                               ;; and cannot be optimized
-                                               void
-                                               caar   cdar   cadr   cddr
-                                               caaar  cdaar  cadar  cddar
-                                               caadr  cdadr  caddr  cdddr
-                                               caaaar cdaaar cadaar cddaar
-                                               caadar cdadar caddar cdddar
-                                               caaadr cdaadr cadadr cddadr
-                                               caaddr cdaddr cadddr cddddr
-                                               %cxr
-                                               list-ref))
-
-(define *inline-table*      (append *inline-math* *inline-general*))
+(define *inline-general*          '(fx=? fx<? fx<=? fx>? fx>=?
+                                    fx=  fx<  fx<= fx> fx>= ;FIXME: should be deleted
+                                    cons car cdr null? list
+                                    not
+                                    vector-ref vector-set!
+                                    string-ref string-set!
+                                    eq? eqv?
+                                    ;; FIXME: equal? is no more a subr
+                                    ;; and cannot be optimized
+                                    void
+                                    caar   cdar   cadr   cddr
+                                    caaar  cdaar  cadar  cddar
+                                    caadr  cdadr  caddr  cdddr
+                                    caaaar cdaaar cadaar cddaar
+                                    caadar cdadar caddar cdddar
+                                    caaadr cdaadr cadadr cddadr
+                                    caaddr cdaddr cadddr cddddr
+                                    %cxr
+                                    list-ref))
+(define *inline-table*              (append *inline-math*
+                                            *inline-general*))
 
 
-(define *always-inlined*        '(%set-current-module %%set-current-module
-                                  %%execute %%execute-handler))
+(define *always-inlined*        '(%set-current-module
+                                  %%set-current-module
+                                  %%execute
+                                  %%execute-handler))
+;; ----------------------------------------------------------------------
 
 (define *code-instr*            #f)
 (define *code-constants*        '())
 (define *code-labels*           0)
 (define *compiling-file*        #f)  ;; is #t when we are compiling a file
+
+(define *scmmod*                (find-module 'SCHEME))
+
 
 (include "peephole.stk")
 (include "assembler.stk")
@@ -1072,10 +1064,10 @@ doc>
   (let ((STklos (find-module 'STklos)))
     (lambda (fct env . alist)
       (let* ((table (if (null? alist) *inline-table* (car alist)))
-             (found (assq fct table)))
+             (found (memq fct table)))
         (if (and found
                  (not (find-symbol-in-env fct env)))
-            (let ((f (cdr found)))
+            (let ((f (symbol-value fct *scmmod*)))
               (and f (eq? f (symbol-value* fct STklos))))
             (and (null? alist)                     ; if alist was passed, it was
                  (memq fct *always-inlined*))))))) ; a request for THAT alist only
@@ -1101,8 +1093,8 @@ doc>
       (let ((new-args (map (lambda (f) (maybe-fold-constant env f)) (cdr args))))
         (if (every number? new-args)
             (with-handler (lambda (_) args)
-               (apply (cdr (assq (car args) *inline-math*))
-                      (map (lambda (f) (maybe-fold-constant env f)) new-args)))
+             (apply (symbol-value (car args) *scmmod*)
+                    (map (lambda (f) (maybe-fold-constant env f)) new-args)))
             (cons (car args) new-args)))
       args))
 
@@ -1150,7 +1142,7 @@ doc>
     (if (can-be-inlined? fct env *inline-math-commutative*)
         ;; if the function is commutative:
         ;; fold-commutative and call %compile-primitive-call
-        (let* ((f-val (cdr (assq fct *inline-math-commutative*)))
+        (let* ((f-val   (symbol-value fct *scmmod*))
                (actuals (fold-commutative-args f-val actuals))
                (len (length actuals)))
           (%compile-primitive-call fct actuals len env epair tail?))
