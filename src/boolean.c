@@ -28,7 +28,7 @@
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
-
+#include "hash.h"
 
 /* Define the maximum calls for equal-count (a version of equal bounded in
   recursive calls). The value depends on the way the program is compiled: if
@@ -556,6 +556,133 @@ DEFINE_PRIMITIVE("%equal-try", equal_try, subr2, (SCM x, SCM y))
   return (cycle) ? STk_nil : res;
 }
 
+/* ---------------------------------------------------------------------- */
+SCM STk_hash_alist(SCM ht);    //FIXME
+
+
+static inline SCM donep(SCM x, SCM y, SCM table)
+{
+  return STk_memq(x, STk_hash_ref_default(table, y , STk_nil));
+}
+
+static void equate(SCM x, SCM y, SCM table)
+{
+  SCM xclass = STk_hash_ref_default(table, x, STk_nil);
+  SCM yclass = STk_hash_ref_default(table, y, STk_nil);
+
+  if (NULLP(xclass) && NULLP(yclass)) {
+    SCM class = LIST2(x, y);
+    STk_hash_set(table, x, class);
+    STk_hash_set(table, y, class);
+    return;
+  }
+
+  if (NULLP(xclass)) {
+    SCM class0 = STk_cons(x, CDR(yclass));
+    CDR(yclass) = class0;
+    STk_hash_set(table, x, yclass);
+    return;
+  }
+
+  if (NULLP(yclass)) {
+    SCM class0 = STk_cons(y, CDR(xclass));
+    CDR(xclass) = class0;
+    STk_hash_set(table, y, xclass);
+    return;
+  }
+
+  if ((xclass == yclass) || STk_memq(x, yclass) != STk_false) {
+    return;
+  } else {
+    SCM class0 = STk_append2(CDR(xclass), yclass);
+    CDR(xclass) = class0;
+    for (SCM lst = yclass; !NULLP(lst); lst = CDR(lst)) {
+      STk_hash_set(table, CAR(lst), xclass);
+    }
+    return;
+  }
+}
+
+static SCM easyp(SCM x, SCM y)
+{
+  if (STk_eqv(x, y) == STk_true)  return STk_true;
+  if (CONSP(x))                   return CONSP(y)? STk_false: STk_true;
+  if (CONSP(y))                   return STk_true;
+  if (VECTORP(x))                 return VECTORP(y)? STk_false: STk_true;
+  if (VECTORP(y))                 return STk_true;
+  if (!STRINGP(x) || !STRINGP(y)) return STk_true;
+  return STk_false;
+}
+
+static SCM vector_equiv(SCM x, SCM y, int n, SCM table);
+
+static SCM equivp(SCM x, SCM y, SCM done)
+{
+ Top:
+  if (STk_eqv(x, y) == STk_true)
+    return STk_true;
+
+  if (CONSP(x) && CONSP(y)) {
+    SCM x1 = CAR(x), x2 = CDR(x);
+    SCM y1 = CAR(y), y2 = CDR(y);
+
+    if (donep(x, y, done) != STk_false)
+      return STk_true;
+    if (STk_eqv(x1, y1) == STk_true) {
+      equate(x, y, done);
+      x = x2; y = y2;
+      goto Top;
+    }
+    if (STk_eqv(x2, y2) == STk_true) {
+      equate(x, y, done);
+      x = x1; y = y1;
+      goto Top;
+    }
+    if (easyp(x1, y1) == STk_true || easyp(x2, y2) == STk_true)
+      return STk_false;
+
+    equate(x, y, done);
+    if (equivp(x1, y1, done) == STk_false)
+      return STk_false;
+    x = x2; y = y2;
+    goto Top;
+  }
+
+  if (VECTORP(x) && VECTORP(y)) {
+    int nx = VECTOR_SIZE(x);
+    int ny = VECTOR_SIZE(y);
+
+    if (nx != ny)
+      return STk_false;
+    if (donep(x, y, done) != STk_false)
+      return STk_true;
+    equate(x, y, done);
+    return vector_equiv(x, y, nx, done);
+  }
+
+  return STk_equal(x, y);   // FIXME: SIMPLE_EQUAL
+}
+
+
+static SCM vector_equiv(SCM x, SCM y, int n, SCM table)
+{
+  for (int i = 0; i < n; i++) {
+    SCM xi  = VECTOR_DATA(x)[i];
+    SCM yi  = VECTOR_DATA(y)[i];
+    SCM res = (easyp(xi, yi)==STk_true) ? STk_eqv(xi, yi) : equivp(xi, yi, table);
+
+    if (res == STk_false) return STk_false;
+  }
+  return STk_true;
+}
+
+DEFINE_PRIMITIVE("equiv", equiv, subr2, (SCM x, SCM y))
+{
+  SCM res = STk_equal_try(x, y); //  res is #t, #f or '() if undecided
+
+  return (res == STk_nil) ? equivp(x, y, STk_make_basic_hash_table()): res;
+}
+
 
 int STk_init_boolean(void)
 {
@@ -566,5 +693,6 @@ int STk_init_boolean(void)
   ADD_PRIMITIVE(eqv);
   ADD_PRIMITIVE(equal);
   ADD_PRIMITIVE(equal_try);
+  ADD_PRIMITIVE(equiv);
   return TRUE;
 }
