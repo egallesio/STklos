@@ -34,7 +34,7 @@
         truncate-remainder floor-remainder
         square exact-integer-sqrt exact inexact
         boolean=?
-        make-list member-simple assoc-simple member assoc
+        make-list member assoc
         symbol=?
         string=?     %string2=?
         string<?     %string2<?
@@ -555,15 +555,6 @@ doc>
 |#
 (define (make-list k :optional (fill (void)))
   (vector->list (make-vector k fill)))
-
-;;
-;; Define versions of member and assoc which use equiv? instead of equal?
-;;
-(define member-simple member)
-(define assoc-simple  assoc)
-
-(define (member x y :optional (compar equal?)) (member-simple x y compar))
-(define (assoc  x y :optional (compar equal?)) (assoc-simple  x y compar))
 
 
 ;;;; ----------------------------------------------------------------------
