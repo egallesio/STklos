@@ -29,7 +29,6 @@
         delay delay-force lazy make-promise eager
         define-values
         define-record-type
-        equal-simple?
         exact-integer?
         floor-quotient floor/ truncate/ truncate-quotient
         truncate-remainder floor-remainder
@@ -399,13 +398,6 @@ doc>
 
 
 ;;;; ----------------------------------------------------------------------
-;;;; 6.1 Equivalence predicate
-;;;; ----------------------------------------------------------------------
-(define equal-simple? equal?)
-(set! equal? %equiv?)
-
-
-;;;; ----------------------------------------------------------------------
 ;;;; 6.2 Numbers
 ;;;; ----------------------------------------------------------------------
 
@@ -570,8 +562,8 @@ doc>
 (define member-simple member)
 (define assoc-simple  assoc)
 
-(define (member x y :optional (compar %equiv?)) (member-simple x y compar))
-(define (assoc  x y :optional (compar %equiv?)) (assoc-simple  x y compar))
+(define (member x y :optional (compar equal?)) (member-simple x y compar))
+(define (assoc  x y :optional (compar equal?)) (assoc-simple  x y compar))
 
 
 ;;;; ----------------------------------------------------------------------

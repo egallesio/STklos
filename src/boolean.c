@@ -349,7 +349,7 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  * |equal?| if they print the same.
 doc>
  */
-DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
+static SCM simple_equal(SCM x, SCM y)
 {
  Top:
   if (STk_eqv(x, y) == STk_true) return STk_true;
@@ -546,10 +546,10 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
   return STk_false;
 }
 
-/* %equal-try returns a boolean when it doesn't detect a cycle (in a
+/* equal_try returns a boolean when it doesn't detect a cycle (in a
  * given amount of calls). It returns '() when it suspects a cycle.
  */
-DEFINE_PRIMITIVE("%equal-try", equal_try, subr2, (SCM x, SCM y))
+static SCM equal_try(SCM x, SCM y)
 {
   int cycle = 0;
   SCM res = equal_count(x, y, max_equal_calls, &cycle);
@@ -557,9 +557,6 @@ DEFINE_PRIMITIVE("%equal-try", equal_try, subr2, (SCM x, SCM y))
 }
 
 /* ---------------------------------------------------------------------- */
-SCM STk_hash_alist(SCM ht);    //FIXME
-
-
 static inline SCM donep(SCM x, SCM y, SCM table)
 {
   return STk_memq(x, STk_hash_ref_default(table, y , STk_nil));
@@ -660,7 +657,7 @@ static SCM equivp(SCM x, SCM y, SCM done)
     return vector_equiv(x, y, nx, done);
   }
 
-  return STk_equal(x, y);   // FIXME: SIMPLE_EQUAL
+  return simple_equal(x, y);
 }
 
 
@@ -676,9 +673,9 @@ static SCM vector_equiv(SCM x, SCM y, int n, SCM table)
   return STk_true;
 }
 
-DEFINE_PRIMITIVE("%equiv?", equiv, subr2, (SCM x, SCM y))
+DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
 {
-  SCM res = STk_equal_try(x, y); //  res is #t, #f or '() if undecided
+  SCM res = equal_try(x, y); //  res is #t, #f or '() if undecided
 
   return (res == STk_nil) ? equivp(x, y, STk_make_basic_hash_table()): res;
 }
@@ -692,7 +689,6 @@ int STk_init_boolean(void)
   ADD_PRIMITIVE(eq);
   ADD_PRIMITIVE(eqv);
   ADD_PRIMITIVE(equal);
-  ADD_PRIMITIVE(equal_try);
-  ADD_PRIMITIVE(equiv);
+  
   return TRUE;
 }
