@@ -676,7 +676,7 @@ static SCM vector_equiv(SCM x, SCM y, int n, SCM table)
   return STk_true;
 }
 
-DEFINE_PRIMITIVE("equiv", equiv, subr2, (SCM x, SCM y))
+DEFINE_PRIMITIVE("%equiv?", equiv, subr2, (SCM x, SCM y))
 {
   SCM res = STk_equal_try(x, y); //  res is #t, #f or '() if undecided
 

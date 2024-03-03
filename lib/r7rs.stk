@@ -402,8 +402,8 @@ doc>
 ;;;; 6.1 Equivalence predicate
 ;;;; ----------------------------------------------------------------------
 (define equal-simple? equal?)
-;(set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
-(set! equal? equiv)
+(set! equal? %equiv?)
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.2 Numbers

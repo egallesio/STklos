@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,6 @@
   (include "bonus.stk")           ; Extended functions and syntaxes
   (include "regexp.stk")          ; Regular expressions
   (include "process.stk")         ; Processes from Scheme
-  (include "equiv.stk")           ; equivalence of circular structures
   (include "time.stk")            ; Dates & Time
   (include "logical.stk")         ; Logical operations
   (unless (eq? (%thread-system)
