@@ -188,8 +188,8 @@
            (PUSH-UGREF-TAIL-INV 2)      ;; Never produced by the compiler
 
            (DEEP-LOC-REF-PUSH   1)      ;; peephole: DEEP-LOCAL-SET + PUSH
-           (IN-ASSOC            1)      ;; Inlining of ASSQ ASSV and ASSOC
-           (UNUSED-4            0)
+           (IN-ASSOC            1)      ;; Inlining of assq, assv and assoc
+           (IN-MEMBER           1)      ;; Inlining of memq, memv and member
            (UNUSED-5            0)
            (UNUSED-6            0)
            (UNUSED-7            0)

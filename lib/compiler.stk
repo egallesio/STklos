@@ -66,6 +66,7 @@
                                     string-ref string-set!
                                     eq? eqv? equal?
                                     assq assv assoc
+                                    memq memv member
                                     void
                                     caar   cdar   cadr   cddr
                                     caaar  cdaar  cadar  cddar
@@ -1358,6 +1359,13 @@ doc>
       ((assoc)          (case len
                           ((2) (comp2 'IN-ASSOC 3))
                           ((3) (comp3 'IN-ASSOC 4))
+                          (else (compile-normal-call fct actuals len env epair #f))))
+
+      ((memq)           (comp2 'IN-MEMBER 1))
+      ((memv)           (comp2 'IN-MEMBER 2))
+      ((member)          (case len
+                          ((2) (comp2 'IN-MEMBER 3))
+                          ((3) (comp3 'IN-MEMBER 4))
                           (else (compile-normal-call fct actuals len env epair #f))))
 
 

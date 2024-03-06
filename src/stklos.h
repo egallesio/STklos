@@ -676,6 +676,8 @@ EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
 EXTERN_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name));
 EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
+EXTERN_PRIMITIVE("memv", memv, subr2, (SCM obj, SCM list));
+EXTERN_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp));
 EXTERN_PRIMITIVE("reverse", reverse, subr1, (SCM l));
 EXTERN_PRIMITIVE("reverse!", dreverse, subr1, (SCM l));
 EXTERN_PRIMITIVE("list-copy", list_copy, subr1, (SCM l));

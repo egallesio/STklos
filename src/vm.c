@@ -1632,7 +1632,6 @@ CASE(DBG_VM)  {
   ;
 }
 
-CASE(UNUSED_4)
 CASE(UNUSED_5)
 CASE(UNUSED_6)
 CASE(UNUSED_7)
@@ -1767,6 +1766,20 @@ CASE(IN_ASSOC)    {
     default: {
       SCM prev = pop ();
       vm->val= STk_assoc(prev, arg, vm->val); break;
+    }
+  }
+  NEXT1;
+}
+
+ CASE(IN_MEMBER)    {
+  SCM arg= pop();
+  switch (fetch_next()) {
+    case 1: vm->val= STk_memq(arg, vm->val); break;
+    case 2: vm->val= STk_memv(arg, vm->val); break;
+    case 3: vm->val= STk_member(arg, vm->val, NULL); break;
+    default: {
+      SCM prev = pop ();
+      vm->val= STk_member(prev, arg, vm->val); break;
     }
   }
   NEXT1;
