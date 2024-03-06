@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1631,7 +1631,7 @@ CASE(END_OF_CODE) {
 CASE(DBG_VM)  {
   ;
 }
-CASE(UNUSED_3)
+
 CASE(UNUSED_4)
 CASE(UNUSED_5)
 CASE(UNUSED_6)
@@ -1757,6 +1757,21 @@ CASE(IN_EQ)     { vm->val = MAKE_BOOLEAN(pop() == vm->val);                NEXT1
 CASE(IN_NOT_EQUAL) { vm->val = SCHEME_NOT(STk_equal(pop(), vm->val));      NEXT1; }
 CASE(IN_NOT_EQV)   { vm->val = SCHEME_NOT(STk_eqv(pop(), vm->val));        NEXT1; }
 CASE(IN_NOT_EQ)    { vm->val = MAKE_BOOLEAN(pop() != vm->val);             NEXT1; }
+
+CASE(IN_ASSOC)    {
+  SCM arg= pop();
+  switch (fetch_next()) {
+    case 1: vm->val= STk_assq(arg, vm->val); break;
+    case 2: vm->val= STk_assv(arg, vm->val); break;
+    case 3: vm->val= STk_assoc(arg, vm->val, NULL); break;
+    default: {
+      SCM prev = pop ();
+      vm->val= STk_assoc(prev, arg, vm->val); break;
+    }
+  }
+  NEXT1;
+}
+
 
 CASE(IN_VREF) {
   REG_CALL_PRIM(vector_ref);
