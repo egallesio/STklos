@@ -268,7 +268,6 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
 }
 
 
-
 /*
 <doc eq?
  * (eq? obj1 obj2)
@@ -465,16 +464,65 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
   return STk_false;
 }
 
-
 /* ---------------------------------------------------------------------- */
+/* The code below is a rewriting of the equiv? function given in the Reference
+ * implementation of the (withdrwn) SRFI 85 (Recursive Equivalence
+ * Predicates).
+ * 
+ * Original Scheme code is "Copyright 2006 William D Clinger"
+ *
+ * EQUIV? is a version of EQUAL? that terminates on all arguments.
+ *
+ * The basic idea of the algorithm is presented in
+ *
+ * J E Hopcroft and R M Karp.  A Linear Algorithm for
+ * Testing Equivalence of Finite Automata.
+ * Cornell University Technical Report 71-114,
+ * December 1971.
+ * http://techreports.library.cornell.edu:8081/Dienst/UI/1.0/Display/cul.cs/TR71-114
+ *
+ * The algorithm uses FIND and MERGE operations, which
+ * roughly correspond to done? and equate! in the code below.
+ * The algorithm maintains a stack of comparisons to do,
+ * and a set of equivalences that would be implied by the
+ * comparisons yet to be done.
+ *
+ * When comparing objects x and y whose equality cannot be
+ * determined without recursion, the algorithm pushes all
+ * the recursive subgoals onto the stack, and merges the
+ * equivalence classes for x and y.  If any of the subgoals
+ * involve comparing x and y, the algorithm will notice
+ * that they are in the same equivalence class and will
+ * avoid circularity by assuming x and y are equal.
+ * If all of the subgoals succeed, then x and y really are
+ * equal, so the algorithm is correct.
+ *
+ * If the hash tables give amortized constant-time lookup on
+ * object identity, then this algorithm could be made to run
+ * in O(n) time, where n is the number of nodes in the larger
+ * of the two structures being compared.
+ *
+ * If implemented in portable R5RS Scheme, the algorithm
+ * should still run in O(n^2) time, or close to it.
+ *
+ * This implementation uses two techniques to reduce the
+ * cost of the algorithm for common special cases:
+ *
+ * It starts out by trying the traditional recursive algorithm
+ * to bounded depth.
+ * It handles easy cases specially.
+ */
+
 static inline SCM donep(SCM x, SCM y, SCM table)
 {
+  // Are x and y equivalent according to the table?
   return STk_memq(x, STk_hash_ref_default(table, y , STk_nil));
 }
 
 static void equate(SCM x, SCM y, SCM table)
 {
-  SCM xclass = STk_hash_ref_default(table, x, STk_nil);
+  // Merge the equivalence classes of x and y in the table,
+    SCM xclass = STk_hash_ref_default(table, x, STk_nil);
   SCM yclass = STk_hash_ref_default(table, y, STk_nil);
 
   if (NULLP(xclass) && NULLP(yclass)) {
@@ -511,8 +559,8 @@ static void equate(SCM x, SCM y, SCM table)
 }
 
 static SCM easyp(SCM x, SCM y)
-{
-  if (STk_eqv(x, y) == STk_true)  return STk_true;
+{  // A comparison is easy if eqv? returns the right answer.
+   if (STk_eqv(x, y) == STk_true)  return STk_true;
   if (CONSP(x))                   return CONSP(y)? STk_false: STk_true;
   if (CONSP(y))                   return STk_true;
   if (VECTORP(x))                 return VECTORP(y)? STk_false: STk_true;
@@ -521,8 +569,29 @@ static SCM easyp(SCM x, SCM y)
   return STk_false;
 }
 
+
+
 static SCM equivp(SCM x, SCM y, SCM done)
 {
+  // done is a hash table that maps objects to their equivalence classes.
+  //
+  // Algorithmic invariant: If all of the comparisons that are in progress
+  // (pushed onto the control stack) come out equal, then all of the
+  // equivalences in done are correct.
+  //
+  // Invariant of this implementation: The equivalence classes omit easy
+  // cases, which are defined as cases in which eqv?  always returns the
+  // correct answer.  The equivalence classes also omit strings, because
+  // strings can be compared without risk of circularity.
+  //
+  // Invariant of this prototype: The equivalence classes include only pairs
+  // and vectors.  If records or other things are to be compared recursively,
+  // then they should be added to done.
+  //
+  // Without constant-time lookups, it is important to keep done as small as
+  // possible.  This implementation takes advantage of several common cases
+  // for which it is not necessary to keep track of a node's equivalence
+  // class.
  Top:
   if (STk_eqv(x, y) == STk_true)
     return STk_true;
@@ -576,7 +645,8 @@ static SCM equivp(SCM x, SCM y, SCM done)
     return STk_true;
   }
 
-  // Not a pair or a vector call equal?
+  // Not a pair or a vector call equal? (and equiv? will not be called back
+  // since recursive structures have been treated)
    return STk_equal(x, y);
 }
 
