@@ -64,9 +64,7 @@
                                     not
                                     vector-ref vector-set!
                                     string-ref string-set!
-                                    eq? eqv?
-                                    ;; FIXME: equal? is no more a subr
-                                    ;; and cannot be optimized
+                                    eq? eqv? equal?
                                     void
                                     caar   cdar   cadr   cddr
                                     caaar  cdaar  cadar  cddar
