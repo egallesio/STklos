@@ -349,11 +349,25 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  * |equal?| if they print the same.
 doc>
  */
+static SCM equal_count(SCM x, SCM y, int max, int *cycle);
+static SCM equivp(SCM x, SCM y, SCM done);
+
+
+DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
+{
+  int cycle = 0;
+  SCM res = equal_count(x, y, max_equal_calls, &cycle);
+
+  // if a cycle was detected, call the (costly) equivp function. Otherwise,
+  // just return res;
+  return (cycle) ? equivp(x, y, STk_make_basic_hash_table()): res;
+}
+
 
 /*
  * The equal-count function is a variant of equal which is bounded in
- * recursion calls. This function returns a boolean (AND a boolean
- * which tells the caller if a cycle was detected)
+ * recursion calls. This function returns a boolean (AND an int which tells
+ * the caller if a cycle was detected)
  */
 static SCM equal_count(SCM x, SCM y, int max, int *cycle)
 {
@@ -444,24 +458,13 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
       return STk_false;
 
    default:
-     // FIXME: The following code uses the above equal? . As a consequenece,
-     // we will not be able to detect cycles in extended types.
      if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
-          (BOXED_TYPE(x) == BOXED_TYPE(y)))
-        return STk_extended_equal(x, y);
+         (BOXED_TYPE(x) == BOXED_TYPE(y)))
+       return STk_extended_equal(x, y);
   }
   return STk_false;
 }
 
-/* equal_try returns a boolean when it doesn't detect a cycle (in a
- * given amount of calls). It returns '() when it suspects a cycle.
- */
-static SCM equal_try(SCM x, SCM y)
-{
-  int cycle = 0;
-  SCM res = equal_count(x, y, max_equal_calls, &cycle);
-  return (cycle) ? STk_nil : res;
-}
 
 /* ---------------------------------------------------------------------- */
 static inline SCM donep(SCM x, SCM y, SCM table)
@@ -518,14 +521,13 @@ static SCM easyp(SCM x, SCM y)
   return STk_false;
 }
 
-static SCM vector_equiv(SCM x, SCM y, int n, SCM table);
-
 static SCM equivp(SCM x, SCM y, SCM done)
 {
  Top:
   if (STk_eqv(x, y) == STk_true)
     return STk_true;
 
+  // Pairs
   if (CONSP(x) && CONSP(y)) {
     SCM x1 = CAR(x), x2 = CDR(x);
     SCM y1 = CAR(y), y2 = CDR(y);
@@ -552,6 +554,7 @@ static SCM equivp(SCM x, SCM y, SCM done)
     goto Top;
   }
 
+  // Vectors
   if (VECTORP(x) && VECTORP(y)) {
     int nx = VECTOR_SIZE(x);
     int ny = VECTOR_SIZE(y);
@@ -560,33 +563,25 @@ static SCM equivp(SCM x, SCM y, SCM done)
       return STk_false;
     if (donep(x, y, done) != STk_false)
       return STk_true;
+
     equate(x, y, done);
-    return vector_equiv(x, y, nx, done);
+    /* Comare each element of the vector */
+    for (int i = 0; i < nx; i++) {
+      SCM xi  = VECTOR_DATA(x)[i];
+      SCM yi  = VECTOR_DATA(y)[i];
+      SCM res = (easyp(xi, yi)==STk_true) ? STk_eqv(xi, yi) : equivp(xi, yi, done);
+
+      if (res == STk_false) return STk_false;
+    }
+    return STk_true;
   }
 
-  return STk_equal(x, y);
+  // Not a pair or a vector call equal?
+   return STk_equal(x, y);
 }
 
 
-static SCM vector_equiv(SCM x, SCM y, int n, SCM table)
-{
-  for (int i = 0; i < n; i++) {
-    SCM xi  = VECTOR_DATA(x)[i];
-    SCM yi  = VECTOR_DATA(y)[i];
-    SCM res = (easyp(xi, yi)==STk_true) ? STk_eqv(xi, yi) : equivp(xi, yi, table);
-
-    if (res == STk_false) return STk_false;
-  }
-  return STk_true;
-}
-
-DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
-{
-  SCM res = equal_try(x, y); //  res is #t, #f or '() if undecided
-
-  return (res == STk_nil) ? equivp(x, y, STk_make_basic_hash_table()): res;
-}
-
+/* ---------------------------------------------------------------------- */
 
 int STk_init_boolean(void)
 {
@@ -596,6 +591,6 @@ int STk_init_boolean(void)
   ADD_PRIMITIVE(eq);
   ADD_PRIMITIVE(eqv);
   ADD_PRIMITIVE(equal);
-  
+
   return TRUE;
 }
