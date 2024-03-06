@@ -64,9 +64,9 @@
                                     not
                                     vector-ref vector-set!
                                     string-ref string-set!
-                                    eq? eqv?
-                                    ;; FIXME: equal? is no more a subr
-                                    ;; and cannot be optimized
+                                    eq? eqv? equal?
+                                    assq assv assoc
+                                    memq memv member
                                     void
                                     caar   cdar   cadr   cddr
                                     caaar  cdaar  cadar  cddar
@@ -1155,20 +1155,20 @@ doc>
   (let ((comp  (lambda (mnemo expr)
                  (compile expr env epair #f)
                  (emit mnemo)))
-        (comp1 (lambda (mnemo)
+        (comp1 (lambda mnemo
                  (if (= len 1)
                      (begin
                        (compile (car actuals) env epair #f)
-                       (emit mnemo))
+                       (apply emit mnemo))
                      (compiler-error fct epair "1 argument required (~A provided)"
                                      len))))
-        (comp2 (lambda (mnemo)
+        (comp2 (lambda mnemo
                  (if (= len 2)
                      (begin
                        (compile (car actuals) env epair #f)
                        (emit 'PUSH)
                        (compile (cadr actuals) env epair #f)
-                       (emit mnemo))
+                       (apply emit mnemo))
                      (compiler-error fct epair "2 arguments required (~A provided)"
                                      len))))
         (oper1 (lambda (mnemo a)
@@ -1182,7 +1182,7 @@ doc>
                  (emit 'PUSH)
                  (compile b env epair #f)
                  (emit mnemo)))
-        (comp3 (lambda (mnemo)
+        (comp3 (lambda mnemo
                  (if (= len 3)
                      (begin
                        (compile (car actuals) env epair #f)
@@ -1190,7 +1190,7 @@ doc>
                        (compile (cadr actuals) env epair #f)
                        (emit 'PUSH)
                        (compile (caddr actuals) env epair #f)
-                       (emit mnemo))
+                       (apply emit mnemo))
                      (compiler-error fct epair "3 arguments required (~A provided)"
                                      len)))))
     (case fct
@@ -1353,6 +1353,22 @@ doc>
       ((eq?)            (comp2 'IN-EQ))
       ((eqv?)           (comp2 'IN-EQV))
       ((equal?)         (comp2 'IN-EQUAL))
+
+      ((assq)           (comp2 'IN-ASSOC 1))
+      ((assv)           (comp2 'IN-ASSOC 2))
+      ((assoc)          (case len
+                          ((2) (comp2 'IN-ASSOC 3))
+                          ((3) (comp3 'IN-ASSOC 4))
+                          (else (compile-normal-call fct actuals len env epair #f))))
+
+      ((memq)           (comp2 'IN-MEMBER 1))
+      ((memv)           (comp2 'IN-MEMBER 2))
+      ((member)          (case len
+                          ((2) (comp2 'IN-MEMBER 3))
+                          ((3) (comp3 'IN-MEMBER 4))
+                          (else (compile-normal-call fct actuals len env epair #f))))
+
+
       ((void)           (if (zero? len)
                             (emit 'IM-VOID)
                             (compile (append (cons 'begin actuals) (list (void)))

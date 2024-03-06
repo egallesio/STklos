@@ -1,7 +1,7 @@
 ;;;;
 ;;;; assembler.stk      -- Assember stuff
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -188,8 +188,8 @@
            (PUSH-UGREF-TAIL-INV 2)      ;; Never produced by the compiler
 
            (DEEP-LOC-REF-PUSH   1)      ;; peephole: DEEP-LOCAL-SET + PUSH
-           (UNUSED-3            0)
-           (UNUSED-4            0)
+           (IN-ASSOC            1)      ;; Inlining of assq, assv and assoc
+           (IN-MEMBER           1)      ;; Inlining of memq, memv and member
            (UNUSED-5            0)
            (UNUSED-6            0)
            (UNUSED-7            0)

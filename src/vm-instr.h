@@ -120,8 +120,8 @@
 #  define PUSH_GREF_TAIL_INV   115
 #  define PUSH_UGREF_TAIL_INV  116
 #  define DEEP_LOC_REF_PUSH    117
-#  define UNUSED_3             118
-#  define UNUSED_4             119
+#  define IN_ASSOC             118
+#  define IN_MEMBER            119
 #  define UNUSED_5             120
 #  define UNUSED_6             121
 #  define UNUSED_7             122
@@ -298,8 +298,8 @@ static void *jump_table[] = {
   &&lab_PUSH_GREF_TAIL_INV  ,
   &&lab_PUSH_UGREF_TAIL_INV ,
   &&lab_DEEP_LOC_REF_PUSH   ,
-  &&lab_UNUSED_3            ,
-  &&lab_UNUSED_4            ,
+  &&lab_IN_ASSOC            ,
+  &&lab_IN_MEMBER           ,
   &&lab_UNUSED_5            ,
   &&lab_UNUSED_6            ,
   &&lab_UNUSED_7            ,
@@ -476,8 +476,8 @@ static char *name_table[] = {
   "PUSH_GREF_TAIL_INV  ",
   "PUSH_UGREF_TAIL_INV ",
   "DEEP_LOC_REF_PUSH   ",
-  "UNUSED_3            ",
-  "UNUSED_4            ",
+  "IN_ASSOC            ",
+  "IN_MEMBER           ",
   "UNUSED_5            ",
   "UNUSED_6            ",
   "UNUSED_7            ",

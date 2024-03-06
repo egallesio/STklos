@@ -29,13 +29,12 @@
         delay delay-force lazy make-promise eager
         define-values
         define-record-type
-        equal-simple?
         exact-integer?
         floor-quotient floor/ truncate/ truncate-quotient
         truncate-remainder floor-remainder
         square exact-integer-sqrt exact inexact
         boolean=?
-        make-list member-simple assoc-simple member assoc
+        make-list member assoc
         symbol=?
         string=?     %string2=?
         string<?     %string2<?
@@ -399,13 +398,6 @@ doc>
 
 
 ;;;; ----------------------------------------------------------------------
-;;;; 6.1 Equivalence predicate
-;;;; ----------------------------------------------------------------------
-(define equal-simple? equal?)
-(set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
-
-
-;;;; ----------------------------------------------------------------------
 ;;;; 6.2 Numbers
 ;;;; ----------------------------------------------------------------------
 
@@ -563,15 +555,6 @@ doc>
 |#
 (define (make-list k :optional (fill (void)))
   (vector->list (make-vector k fill)))
-
-;;
-;; Define versions of member and assoc which use equiv? instead of equal?
-;;
-(define member-simple member)
-(define assoc-simple  assoc)
-
-(define (member x y :optional (compar %equiv?)) (member-simple x y compar))
-(define (assoc  x y :optional (compar %equiv?)) (assoc-simple  x y compar))
 
 
 ;;;; ----------------------------------------------------------------------
