@@ -349,99 +349,6 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  * |equal?| if they print the same.
 doc>
  */
-static SCM simple_equal(SCM x, SCM y)
-{
- Top:
-  if (STk_eqv(x, y) == STk_true) return STk_true;
-
-  switch (STYPE(x)) {
-    case tc_cons:
-      if (CONSP(y)) {
-        if (STk_equal(CAR(x), CAR(y)) == STk_false) return STk_false;
-        x = CDR(x); y = CDR(y);
-        goto Top;
-      }
-      break;
-    case tc_string:
-      if (STRINGP(y)) {
-        return STk_streq(x, y);
-      }
-      break;
-    case tc_vector:
-      if (VECTORP(y)) {
-        long lx, ly, i;
-        SCM *vx, *vy;
-
-        lx = VECTOR_SIZE(x); ly = VECTOR_SIZE(y);
-        if (lx == ly) {
-          vx = VECTOR_DATA(x);
-          vy = VECTOR_DATA(y);
-          for (i=0; i < lx;  i++) {
-            if (STk_equal(vx[i], vy[i]) == STk_false) return STk_false;
-          }
-          return STk_true;
-        }
-      }
-      break;
-    case tc_instance:
-      if (STk_oo_initialized) {
-        SCM fg, res;
-
-        fg = STk_lookup(STk_intern("object-equal?"),STk_current_module(),
-                        &res,FALSE);
-        res = STk_C_apply(fg, 2, x, y);
-        return res;
-      }
-      break;
-    case tc_struct:
-      if (STRUCTP(y) && (STRUCT_TYPE(x) == STRUCT_TYPE(y)))
-        return STk_equal(STk_struct2list(x), STk_struct2list(y));
-      break;
-    case tc_box:
-      if (BOXP(y)) {
-        long lx, ly, i;
-        lx = BOX_ARITY(x); ly = BOX_ARITY(y);
-        if (lx == ly) {
-          SCM *vx = BOX_VALUES(x);
-          SCM *vy = BOX_VALUES(y);
-          for (i=0; i < lx;  i++) {
-            if (STk_equal(vx[i], vy[i]) == STk_false) return STk_false;
-          }
-          return STk_true;
-        }
-      }
-      break;
-    case tc_uvector:
-      if (BOXED_TYPE_EQ(y, tc_uvector))
-        return MAKE_BOOLEAN(STk_uvector_equal(x, y));
-      break;
-
-    // The default case could handle those labels. They are just here to
-    // avoid the complex test in the default case when we are sure
-    // to return #f
-    case tc_not_boxed:
-    case tc_integer:      case tc_real:         case tc_bignum:
-    case tc_rational:     case tc_complex:      case tc_symbol:
-    case tc_keyword:      case tc_module:       case tc_closure:
-    case tc_subr0:        case tc_subr1:        case tc_subr2:
-    case tc_subr3:        case tc_subr4:        case tc_subr5:
-    case tc_subr01:       case tc_subr12:       case tc_subr23:
-    case tc_subr34:       case tc_vsubr:        case tc_apply:
-    case tc_hash_table:   case tc_frame:        case tc_next_method:
-    case tc_promise:      case tc_regexp:       case tc_process:
-    case tc_continuation: case tc_values:       case tc_parameter:
-    case tc_socket:       case tc_struct_type:  case tc_thread:
-    case tc_mutex:        case tc_condv:        case tc_ext_func:
-    case tc_pointer:      case tc_callback:     case tc_syntax:
-      return STk_false;
-
-  default:
-      if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
-         (BOXED_TYPE(x) == BOXED_TYPE(y)))
-       return STk_extended_equal(x, y);
-  }
-  return STk_false;
-}
 
 /*
  * The equal-count function is a variant of equal which is bounded in
@@ -657,7 +564,7 @@ static SCM equivp(SCM x, SCM y, SCM done)
     return vector_equiv(x, y, nx, done);
   }
 
-  return simple_equal(x, y);
+  return STk_equal(x, y);
 }
 
 
