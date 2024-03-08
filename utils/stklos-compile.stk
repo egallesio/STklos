@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -186,6 +186,7 @@
      "    keep-source        Keep source code in closures"
      "    inline-usuals      Inline usual functions"
      "    unroll-iterations  Set the number of iterations to be unrolled"
+     "    peephole-optimizer Use peephole optimizer"
 
      (else
       (cond
