@@ -76,7 +76,7 @@ directory is also used to store the packages installed with the
 .IP "-q, --no-init-file"
 quiet: do not load the user init file.
 .IP "-Q, --no-startup-message"
-quiet: do not show the startup message. 
+quiet: do not show the startup message.
 .IP "-i, --interactive"
 be interactive, even if the command finds it is not the case. This
 option is generally useful when used inside emacs since it permits to
@@ -120,7 +120,7 @@ this option:
 .IP "" 10
 - \fIline-info\fR insert line numbers in the generated file. Setting this flag
 is equivalent to the \fI-l\fR option. This flag uses the parameter
-\fIcompiler:gen-line-number\fR. 
+\fIcompiler:gen-line-number\fR.
 .IP "" 10
 - \fIshow-instructions\fR can be used to insert the textual instructions
 into compiled files. This flag uses the parameter
@@ -145,8 +145,12 @@ in produced code. This flag uses the parameter
 - \fIunroll-iterations\fR can be used to set the number of iterations to be unrolled
 in loops. This flag uses the parameter \fIcompiler:unroll-iterations\fR and its
 default value is 4.
-
-
+.IP "" 10
+- \fIpeephole-optimizer\fR can be used to activate or deactivate the peephole
+optimizer during compilation. The peephole optimizer is used to change a
+succession of instructions by another set of instructions that has better
+performance. This flag uses the parameter \fIcompiler:peehole-optimizer\fR.
+By default, the peephole optimizer is activated.
 .IP "-v, --version"
 print program version and exit.
 .IP "-V"
