@@ -778,7 +778,7 @@ echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
-echo "          asciidoctor: " $REPORT_ASCIIDOCTOR
+echo "          Asciidoctor: " $REPORT_ASCIIDOCTOR
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
