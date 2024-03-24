@@ -172,8 +172,9 @@
 #  define SOURCE               167
 #  define FORMALS              168
 #  define INSCHEME             169
+#  define CLOSURE_SET_OPT_KEY  170
 
-#  define NB_VM_INSTR (INSCHEME            +1)
+#  define NB_VM_INSTR (CLOSURE_SET_OPT_KEY +1)
 #endif
 
 
@@ -350,6 +351,7 @@ static void *jump_table[] = {
   &&lab_SOURCE              ,
   &&lab_FORMALS             ,
   &&lab_INSCHEME            ,
+  &&lab_CLOSURE_SET_OPT_KEY ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -528,6 +530,7 @@ static char *name_table[] = {
   "SOURCE              ",
   "FORMALS             ",
   "INSCHEME            ",
+  "CLOSURE_SET_OPT_KEY ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

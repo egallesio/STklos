@@ -28,7 +28,7 @@
 
 
 /* Keywords used in procedure plists */
-SCM STk_key_source, STk_key_formals, STk_key_doc;
+SCM STk_key_source, STk_key_formals, STk_key_doc, STk_key_opt, STk_key_key;
 
 
 /*===========================================================================*\
@@ -251,7 +251,15 @@ DEFINE_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc))
       /*  case tc_next_method: */
     case tc_continuation: res = 1;  break;
     case tc_parameter:    res = -1; break;
-    case tc_closure:      res = CLOSURE_ARITY(proc); break;
+    case tc_closure:      return STk_n_values(3,
+                                              MAKE_INT(CLOSURE_ARITY(proc)),
+                                              MAKE_INT(STk_int_length(STk_key_get(CLOSURE_PLIST(proc),
+                                                                                  STk_key_opt,
+                                                                                  STk_nil))),
+                                              MAKE_INT(STk_int_length(STk_key_get(CLOSURE_PLIST(proc),
+                                                                                  STk_key_key,
+                                                                                  STk_nil))));
+                          break;
       /* case tc_instance: */
     default : return STk_false;
   }
@@ -330,6 +338,60 @@ DEFINE_PRIMITIVE("procedure-source", proc_source, subr1, (SCM proc))
   }
   return STk_false;
 }
+
+DEFINE_PRIMITIVE("%procedure-optionals", proc_opts, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) error_bad_procedure(proc);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_key_opt, STk_nil);
+}
+
+DEFINE_PRIMITIVE("%procedure-keys", proc_keys, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) error_bad_procedure(proc);
+  return STk_key_get(CLOSURE_PLIST(proc), STk_key_key, STk_nil);
+}
+
+// for debugging only
+DEFINE_PRIMITIVE("%%set-procedure-optionals-and-keys!",
+                 proc_set_opt_key,
+                 subr3,
+                 (SCM proc, SCM o, SCM k)) {
+  if (!CLOSUREP(proc)) return STk_false;
+
+  if ( (!(CONSP(o) || NULLP(o))) ||
+       (!(CONSP(k) || NULLP(k))))
+    return STk_false;
+  SCM p = o;
+  while (p != STk_nil && CONSP(p)) {
+      if (STk_int_length(CAR(p)) != 3)
+          STk_error("bad optionals list ~s", o);
+      p = CDR(p);
+  }
+  p = k;
+  while (p != STk_nil && CONSP(p)) {
+      if (STk_int_length(CAR(p)) != 3)
+          STk_error("bad keywords list ~s", o);
+      p = CDR(p);
+  }
+  STk_key_get(CLOSURE_PLIST(proc),
+              STk_key_key,
+              k);
+  STk_key_get(CLOSURE_PLIST(proc),
+              STk_key_opt,
+              o);
+  return STk_true;
+}
+
+DEFINE_PRIMITIVE("%%set-procedure-arity!",
+                 proc_set_arity,
+                 subr2,
+                 (SCM proc, SCM a)) {
+  if (!CLOSUREP(proc)) return STk_false;
+  if (!INTP(a)) STk_error("bad integer ~s", a);
+  CLOSURE_ARITY(proc) = INT_VAL(a);
+  return STk_true;
+}
+
 
 /*===========================================================================*\
  *
@@ -443,6 +505,8 @@ int STk_init_proc(void)
   STk_key_source  = STk_makekey("source");
   STk_key_formals = STk_makekey("formals");
   STk_key_doc     = STk_makekey("documentation");
+  STk_key_opt     = STk_makekey("optional");
+  STk_key_key     = STk_makekey("keyword");
 
   DEFINE_XTYPE(closure, &xtype_closure);
   ADD_PRIMITIVE(procedurep);
@@ -457,6 +521,10 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(set_procedure_name);
   ADD_PRIMITIVE(proc_formals);
   ADD_PRIMITIVE(proc_env);
+  ADD_PRIMITIVE(proc_opts);
+  ADD_PRIMITIVE(proc_keys);
+  ADD_PRIMITIVE(proc_set_opt_key); // for debugging only
+  ADD_PRIMITIVE(proc_set_arity);   // for debugging only
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);
