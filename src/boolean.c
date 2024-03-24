@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
-
+#include "hash.h"
 
 /* Define the maximum calls for equal-count (a version of equal bounded in
   recursive calls). The value depends on the way the program is compiled: if
@@ -268,7 +268,6 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
 }
 
 
-
 /*
 <doc eq?
  * (eq? obj1 obj2)
@@ -349,104 +348,25 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  * |equal?| if they print the same.
 doc>
  */
+static SCM equal_count(SCM x, SCM y, int max, int *cycle);
+static SCM equivp(SCM x, SCM y, SCM done);
+
+
 DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
 {
- Top:
-  if (STk_eqv(x, y) == STk_true) return STk_true;
+  int cycle = 0;
+  SCM res = equal_count(x, y, max_equal_calls, &cycle);
 
-  switch (STYPE(x)) {
-    case tc_cons:
-      if (CONSP(y)) {
-        if (STk_equal(CAR(x), CAR(y)) == STk_false) return STk_false;
-        x = CDR(x); y = CDR(y);
-        goto Top;
-      }
-      break;
-    case tc_string:
-      if (STRINGP(y)) {
-        return STk_streq(x, y);
-      }
-      break;
-    case tc_vector:
-      if (VECTORP(y)) {
-        long lx, ly, i;
-        SCM *vx, *vy;
-
-        lx = VECTOR_SIZE(x); ly = VECTOR_SIZE(y);
-        if (lx == ly) {
-          vx = VECTOR_DATA(x);
-          vy = VECTOR_DATA(y);
-          for (i=0; i < lx;  i++) {
-            if (STk_equal(vx[i], vy[i]) == STk_false) return STk_false;
-          }
-          return STk_true;
-        }
-      }
-      break;
-    case tc_instance:
-      if (STk_oo_initialized) {
-        SCM fg, res;
-
-        fg = STk_lookup(STk_intern("object-equal?"),STk_current_module(),
-                        &res,FALSE);
-        res = STk_C_apply(fg, 2, x, y);
-        return res;
-      }
-      break;
-    case tc_struct:
-      if (STRUCTP(y) && (STRUCT_TYPE(x) == STRUCT_TYPE(y)))
-        return STk_equal(STk_struct2list(x), STk_struct2list(y));
-      break;
-    case tc_box:
-      if (BOXP(y)) {
-        long lx, ly, i;
-        lx = BOX_ARITY(x); ly = BOX_ARITY(y);
-        if (lx == ly) {
-          SCM *vx = BOX_VALUES(x);
-          SCM *vy = BOX_VALUES(y);
-          for (i=0; i < lx;  i++) {
-            if (STk_equal(vx[i], vy[i]) == STk_false) return STk_false;
-          }
-          return STk_true;
-        }
-      }
-      break;
-    case tc_uvector:
-      if (BOXED_TYPE_EQ(y, tc_uvector))
-        return MAKE_BOOLEAN(STk_uvector_equal(x, y));
-      break;
-
-    // The default case could handle those labels. They are just here to
-    // avoid the complex test in the default case when we are sure
-    // to return #f
-    case tc_not_boxed:
-    case tc_integer:      case tc_real:         case tc_bignum:
-    case tc_rational:     case tc_complex:      case tc_symbol:
-    case tc_keyword:      case tc_module:       case tc_closure:
-    case tc_subr0:        case tc_subr1:        case tc_subr2:
-    case tc_subr3:        case tc_subr4:        case tc_subr5:
-    case tc_subr01:       case tc_subr12:       case tc_subr23:
-    case tc_subr34:       case tc_vsubr:        case tc_apply:
-    case tc_hash_table:   case tc_frame:        case tc_next_method:
-    case tc_promise:      case tc_regexp:       case tc_process:
-    case tc_continuation: case tc_values:       case tc_parameter:
-    case tc_socket:       case tc_struct_type:  case tc_thread:
-    case tc_mutex:        case tc_condv:        case tc_ext_func:
-    case tc_pointer:      case tc_callback:     case tc_syntax:
-      return STk_false;
-
-  default:
-      if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
-         (BOXED_TYPE(x) == BOXED_TYPE(y)))
-       return STk_extended_equal(x, y);
-  }
-  return STk_false;
+  // if a cycle was detected, call the (costly) equivp function. Otherwise,
+  // just return res;
+  return (cycle) ? equivp(x, y, STk_make_basic_hash_table()): res;
 }
+
 
 /*
  * The equal-count function is a variant of equal which is bounded in
- * recursion calls. This function returns a boolean (AND a boolean
- * which tells the caller if a cycle was detected)
+ * recursion calls. This function returns a boolean (AND an int which tells
+ * the caller if a cycle was detected)
  */
 static SCM equal_count(SCM x, SCM y, int max, int *cycle)
 {
@@ -537,25 +457,201 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
       return STk_false;
 
    default:
-     // FIXME: The following code uses the above equal? . As a consequenece,
-     // we will not be able to detecte cycles in extended types.
      if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
-          (BOXED_TYPE(x) == BOXED_TYPE(y)))
-        return STk_extended_equal(x, y);
+         (BOXED_TYPE(x) == BOXED_TYPE(y)))
+       return STk_extended_equal(x, y);
   }
   return STk_false;
 }
 
-/* %equal-try returns a boolean when it doesn't detect a cycle (in a
- * given amount of calls). It returns '() when it suspects a cycle.
+/* ---------------------------------------------------------------------- */
+/* The code below is a rewriting of the equiv? function given in the Reference
+ * implementation of the (withdrwn) SRFI 85 (Recursive Equivalence
+ * Predicates).
+ * 
+ * Original Scheme code is "Copyright 2006 William D Clinger"
+ *
+ * EQUIV? is a version of EQUAL? that terminates on all arguments.
+ *
+ * The basic idea of the algorithm is presented in
+ *
+ * J E Hopcroft and R M Karp.  A Linear Algorithm for
+ * Testing Equivalence of Finite Automata.
+ * Cornell University Technical Report 71-114,
+ * December 1971.
+ * http://techreports.library.cornell.edu:8081/Dienst/UI/1.0/Display/cul.cs/TR71-114
+ *
+ * The algorithm uses FIND and MERGE operations, which
+ * roughly correspond to done? and equate! in the code below.
+ * The algorithm maintains a stack of comparisons to do,
+ * and a set of equivalences that would be implied by the
+ * comparisons yet to be done.
+ *
+ * When comparing objects x and y whose equality cannot be
+ * determined without recursion, the algorithm pushes all
+ * the recursive subgoals onto the stack, and merges the
+ * equivalence classes for x and y.  If any of the subgoals
+ * involve comparing x and y, the algorithm will notice
+ * that they are in the same equivalence class and will
+ * avoid circularity by assuming x and y are equal.
+ * If all of the subgoals succeed, then x and y really are
+ * equal, so the algorithm is correct.
+ *
+ * If the hash tables give amortized constant-time lookup on
+ * object identity, then this algorithm could be made to run
+ * in O(n) time, where n is the number of nodes in the larger
+ * of the two structures being compared.
+ *
+ * If implemented in portable R5RS Scheme, the algorithm
+ * should still run in O(n^2) time, or close to it.
+ *
+ * This implementation uses two techniques to reduce the
+ * cost of the algorithm for common special cases:
+ *
+ * It starts out by trying the traditional recursive algorithm
+ * to bounded depth.
+ * It handles easy cases specially.
  */
-DEFINE_PRIMITIVE("%equal-try", equal_try, subr2, (SCM x, SCM y))
+
+static inline SCM donep(SCM x, SCM y, SCM table)
 {
-  int cycle = 0;
-  SCM res = equal_count(x, y, max_equal_calls, &cycle);
-  return (cycle) ? STk_nil : res;
+  // Are x and y equivalent according to the table?
+  return STk_memq(x, STk_hash_ref_default(table, y , STk_nil));
 }
 
+static void equate(SCM x, SCM y, SCM table)
+{
+  // Merge the equivalence classes of x and y in the table,
+    SCM xclass = STk_hash_ref_default(table, x, STk_nil);
+  SCM yclass = STk_hash_ref_default(table, y, STk_nil);
+
+  if (NULLP(xclass) && NULLP(yclass)) {
+    SCM class = LIST2(x, y);
+    STk_hash_set(table, x, class);
+    STk_hash_set(table, y, class);
+    return;
+  }
+
+  if (NULLP(xclass)) {
+    SCM class0 = STk_cons(x, CDR(yclass));
+    CDR(yclass) = class0;
+    STk_hash_set(table, x, yclass);
+    return;
+  }
+
+  if (NULLP(yclass)) {
+    SCM class0 = STk_cons(y, CDR(xclass));
+    CDR(xclass) = class0;
+    STk_hash_set(table, y, xclass);
+    return;
+  }
+
+  if ((xclass == yclass) || STk_memq(x, yclass) != STk_false) {
+    return;
+  } else {
+    SCM class0 = STk_append2(CDR(xclass), yclass);
+    CDR(xclass) = class0;
+    for (SCM lst = yclass; !NULLP(lst); lst = CDR(lst)) {
+      STk_hash_set(table, CAR(lst), xclass);
+    }
+    return;
+  }
+}
+
+static SCM easyp(SCM x, SCM y)
+{  // A comparison is easy if eqv? returns the right answer.
+   if (STk_eqv(x, y) == STk_true)  return STk_true;
+  if (CONSP(x))                   return CONSP(y)? STk_false: STk_true;
+  if (CONSP(y))                   return STk_true;
+  if (VECTORP(x))                 return VECTORP(y)? STk_false: STk_true;
+  if (VECTORP(y))                 return STk_true;
+  if (!STRINGP(x) || !STRINGP(y)) return STk_true;
+  return STk_false;
+}
+
+
+
+static SCM equivp(SCM x, SCM y, SCM done)
+{
+  // done is a hash table that maps objects to their equivalence classes.
+  //
+  // Algorithmic invariant: If all of the comparisons that are in progress
+  // (pushed onto the control stack) come out equal, then all of the
+  // equivalences in done are correct.
+  //
+  // Invariant of this implementation: The equivalence classes omit easy
+  // cases, which are defined as cases in which eqv?  always returns the
+  // correct answer.  The equivalence classes also omit strings, because
+  // strings can be compared without risk of circularity.
+  //
+  // Invariant of this prototype: The equivalence classes include only pairs
+  // and vectors.  If records or other things are to be compared recursively,
+  // then they should be added to done.
+  //
+  // Without constant-time lookups, it is important to keep done as small as
+  // possible.  This implementation takes advantage of several common cases
+  // for which it is not necessary to keep track of a node's equivalence
+  // class.
+ Top:
+  if (STk_eqv(x, y) == STk_true)
+    return STk_true;
+
+  // Pairs
+  if (CONSP(x) && CONSP(y)) {
+    SCM x1 = CAR(x), x2 = CDR(x);
+    SCM y1 = CAR(y), y2 = CDR(y);
+
+    if (donep(x, y, done) != STk_false)
+      return STk_true;
+    if (STk_eqv(x1, y1) == STk_true) {
+      equate(x, y, done);
+      x = x2; y = y2;
+      goto Top;
+    }
+    if (STk_eqv(x2, y2) == STk_true) {
+      equate(x, y, done);
+      x = x1; y = y1;
+      goto Top;
+    }
+    if (easyp(x1, y1) == STk_true || easyp(x2, y2) == STk_true)
+      return STk_false;
+
+    equate(x, y, done);
+    if (equivp(x1, y1, done) == STk_false)
+      return STk_false;
+    x = x2; y = y2;
+    goto Top;
+  }
+
+  // Vectors
+  if (VECTORP(x) && VECTORP(y)) {
+    int nx = VECTOR_SIZE(x);
+    int ny = VECTOR_SIZE(y);
+
+    if (nx != ny)
+      return STk_false;
+    if (donep(x, y, done) != STk_false)
+      return STk_true;
+
+    equate(x, y, done);
+    /* Comare each element of the vector */
+    for (int i = 0; i < nx; i++) {
+      SCM xi  = VECTOR_DATA(x)[i];
+      SCM yi  = VECTOR_DATA(y)[i];
+      SCM res = (easyp(xi, yi)==STk_true) ? STk_eqv(xi, yi) : equivp(xi, yi, done);
+
+      if (res == STk_false) return STk_false;
+    }
+    return STk_true;
+  }
+
+  // Not a pair or a vector call equal? (and equiv? will not be called back
+  // since recursive structures have been treated)
+   return STk_equal(x, y);
+}
+
+
+/* ---------------------------------------------------------------------- */
 
 int STk_init_boolean(void)
 {
@@ -565,6 +661,6 @@ int STk_init_boolean(void)
   ADD_PRIMITIVE(eq);
   ADD_PRIMITIVE(eqv);
   ADD_PRIMITIVE(equal);
-  ADD_PRIMITIVE(equal_try);
+
   return TRUE;
 }

@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -257,6 +257,11 @@ static void enlarge_table(register struct hash_table_obj *h)
             default: ;
           }
         }
+        break;
+
+      /* C hash tables (as symbol hash) but with direct char* (not interning) */
+      case HASH_C_FLAG:
+        index = hash_string(CAR(CAR(tmp))) & HASH_MASK(h);
         break;
       }
       /* Place the old value at new index */
@@ -950,6 +955,54 @@ DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))
   return STk_void;
 }
 
+/*===========================================================================*\
+ *
+ *                      C hash tables
+ *
+ * For internal use: keys are C strings and values are in fact void*
+ *
+ * NOTE: Use only the functions defined below for these hash tables. Standard
+ * hash table functions cannot deal with this sort of hash tables (except the
+ * function enlarge_table).
+ *
+\*===========================================================================*/
+
+SCM STk_make_C_hash_table(void)
+{
+  SCM z;
+
+  NEWCELL(z, hash_table);
+  STk_hashtable_init((struct hash_table_obj *) z, HASH_C_FLAG);
+  return z;
+}
+
+void *STk_C_hash_get(struct hash_table_obj *ht, const char *key)
+{
+  int index = hash_string(key) & HASH_MASK(ht);
+  for(SCM l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
+    if (strcmp(CAR(CAR(l)), key) == 0) return (void*) CDR(CAR(l));
+  /* Not found */
+  return NULL;
+}
+
+void STk_C_hash_set(struct hash_table_obj *ht, const char *key, void *val)
+{
+  SCM l;
+  int index = hash_string(key) & HASH_MASK(ht);
+
+  for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
+    if (strcmp(CAR(CAR(l)), key) == 0) break;
+
+  if (NULLP(l)) {
+    HASH_BUCKETS(ht)[index] = STk_cons(STk_cons((SCM) key, val), HASH_BUCKETS(ht)[index]);
+    HASH_NENTRIES(ht) += 1;
+    /* If the table has exceeded a decent size, rebuild it */
+    if (HASH_NENTRIES(ht) >= HASH_NEWSIZE(ht))
+      enlarge_table((struct hash_table_obj *) ht);
+  }
+  else
+    CDR(CAR(l)) = val;
+}
 
 /*===========================================================================*\
  *

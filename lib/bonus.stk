@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -47,8 +47,7 @@
         port->string port->sexp-list port->string-list
         print printerr eprintf printf fprintf
         declare-new-error
-        exec exec-list
-        apropos die
+        exec exec-list die
         decompose-file-name dirname basename file-separator
         make-path file-suffix file-prefix
         port-idle-register! port-idle-unregister! port-idle-reset!
@@ -59,6 +58,7 @@
         void?
         default-browser open-in-browser manual man
         %with-profile-data
+        exact-integer-log
         receive case-lambda
         radians->degrees degrees->radians
 
@@ -1458,51 +1458,6 @@ doc>
   (call-with-input-file (string-append "| " command) port->string-list))
 
 
-
-#|
-<doc EXT apropos
- * (apropos obj)
- * (apropos obj module)
- *
- * |Apropos| returns a list of symbols whose print name contains the
- * characters of |obj| as a substring . The given |obj| can be a string or
- * symbol. This function returns the list of matched symbols which can
- * be accessed from the given |module| (defaults to the current module if not
- * provided).
- *
-doc>
-|#
-(define (apropos str :optional (module (current-module)))
-
-  (define (list->set lst res)
-    (cond
-      ((null? lst) res)
-      ((memq (car lst) res) (list->set (cdr lst) res))
-      (else (list->set (cdr lst) (cons (car lst) res)))))
-
-  (define (symbol<? s1 s2)
-    (string<? (symbol->string s1) (symbol->string s2)))
-
-  ;; Sanity check
-  (unless (module? module)
-    (error 'apropos "bad module ~S" module))
-
-  ;; Here we go
-  (let ((s        (if (symbol? str) (symbol->string str) str))
-        (external (if (library? module)
-                       '()
-                       (module-symbols (find-module 'STklos))))
-        (internal (module-symbols module)))
-    (let Loop ((symbs (list->set (append internal external) '()))
-               (res   '()))
-      (cond
-        ((null? symbs)
-           (and (not (null? res)) (sort res symbol<?)))
-        ((string-find? s (symbol->string (car symbs)))
-           (Loop (cdr symbs) (cons (car symbs) res)))
-        (else
-           (Loop (cdr symbs) res))))))
-
 #|
 <doc EXT die
  * (die message)
@@ -1851,6 +1806,76 @@ doc>
 doc>
 |#
 (define (void? obj) (eq? obj #void))
+
+#|
+
+<doc EXT exact-integer-log
+ * (exact-integer-log n b)
+ *
+ * |Exact-integer-log| is to |log| what |exact-integer-sqrt| is to |sqrt|.
+ *
+ * Returns two values: the first value is the largest integer number less
+ * than or equal to the logarithm of |n| in base |b|. The second value is
+ * the difference between |n| and |(expt b k)|, where |k| is the first value.
+ *
+ * Both arguments must be exact, and the resulting values are exact integers.
+ * Also, both arguments are mandatory, since it is no meaningful in this context
+ * to use base *e*.
+ *
+ * @lisp
+ * (exact-integer-log 8 2)  => 3,0
+ * (exact-integer-log 11 2) => 3,3
+ * (exact-integer-log
+ *          (expt 3 5)
+ *          (expt 3 4))     => 1, 162
+ * (exact-integer-log 16 2) => 4, 0
+ * (exact-integer-log 19 1) => 4, 3
+ * (exact-integer-log
+ *          (expt 6 10000)
+ *          (expt 6 1000)) => 10, 0
+ * (exact-integer-log 2 1) => error
+ * (exact-integer-log 0 5) => error
+ * (exact-integer-log 0 0) => error
+ * @end lisp
+doc>
+|#
+(define (exact-integer-log n b)
+  (unless (and (exact-integer? n) (positive? n))
+    (error "log exponent ~S is not a positive exact integer" n))
+  (unless (and (exact-integer? b) (> b 1))
+    (error "log base ~S is not exact integer greater than one" b))
+  ;; This is easier and faster than R7RS exact-integer-sqrt, since:
+  ;; * log(n b) = log_2(n) / log_2(b).
+  ;; * integer-length(n) = floor(log_2(n)) + 1
+  ;; We just put it all together.
+  (let ((log2-n (- (integer-length n) 1))
+        (log2-b (- (integer-length b) 1)))
+    (let ((L (quotient log2-n log2-b))
+          (step 1))
+      ;; Ok, so FLOOR(a/b) can be smaller than FLOOR(a)/FLOOR(b).
+      ;; That means we may have overestimated L -- but we should be
+      ;; close. If we overestimated, then (expt b L) will be larger
+      ;; than n, and we can subtract from it until we find the correct
+      ;; number.
+      ;; We do increase the step at each iteration in order to speed
+      ;; up the process. If we go too far, we correct it later. This is
+      ;; fast.
+      (while (> (expt b L) n)
+        (set! L (- L step))
+        (set! step (+ step 2)))
+
+      ;; If we overestimated, then we had to walk down from L.
+      ;; In this case, since we added 2 to the step at each
+      ;; iteration, we may now have UNDERestimated. But then,
+      ;; we undo the last iteration (the "go back" line below),
+      ;; and start walking again, this time with a fixed step
+      ;; equal to 1.
+      (when (> step 1)            ; did we need to walk?
+        (set! L (+ L step -2))    ; go back...
+        (while (> (expt b L) n)
+          (set! L (- L 1))))      ; don't grow the step this time!
+
+      (values L (- n (expt b L))))))
 
 #|
 <doc EXT radians->degrees degrees->radians

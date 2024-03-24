@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ scheme_BOOT = assembler.stk \
           compfile.stk      \
           compflags.stk     \
           computils.stk     \
-          equiv.stk         \
           expand.pp         \
           ffi.stk           \
           library.stk       \
@@ -192,12 +191,6 @@ lib/scheme: lib
 lib/stklos: lib
 lib/streams: lib
 lib/srfi: lib/scheme lib/stklos lib/streams
-
-readline-complete.@SH_SUFFIX@: readline-complete.c
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
-	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ @RDLINE@
-	/bin/rm -f $*.o
 
 #
 # SRFIs support

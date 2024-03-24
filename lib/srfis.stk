@@ -152,7 +152,7 @@
     (112 "Environment Inquiry")
     (113 "Sets and Bags" (sets-bags) "srfi-113")
     ;; 114  ....... withdrawn
-    ;; 115  Scheme Regular Expressions
+    (115  "Scheme Regular Expressions" () "srfi-115")
     (116 "Immutable List Library" (immutable-lists) "srfi-116")
     (117 "Queues based on lists" (queues-as-lists) "srfi-117")
     (118 "Simple adjustable-size strings" (adjustable-strings))
@@ -215,7 +215,7 @@
     (175 "ASCII character library" (ascii) "srfi-175")
     (176 "Version flag")
     ;; 177  ....... withdrawn
-    ;; 178  Bitvector library
+    (178 "Bitvector library" () "srfi-178")
     ;; 179  Nonempty Intervals and Generalized Arrays (Updated)
     (180 "JSON" (JSON json)  "srfi-180")
     ;; 181  Custom ports (including transcoded ports)
@@ -270,7 +270,7 @@
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
     ;; 231 Intervals and Generalized Arrays (Updated^2)
-    ;; 232 Flexible Curried Procedures
+    (232 "Flexible Curried Procedures" () "srfi-232")
     (233 "INI files" (ini-files) "srfi-233")
     ;; 234 Topological sorting (draft)
     (235 "Combinators" (combinators) "srfi-235")

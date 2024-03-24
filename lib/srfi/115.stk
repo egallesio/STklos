@@ -1,8 +1,8 @@
 ;;;;
 ;;;;
-;;;; 14.stk         -- Implementation of SRFI-14
+;;;; 115.stk         -- Implementation of SRFI-15 (scheme regex)
 ;;;;
-;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,10 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
-;;;;    Creation date:  1-Oct-2022 22:17
+;;;;    Creation date: 5-Jan-2024 13:46 (eg)
 ;;;;
 
-;;;; The real implementation is in (scheme charset).
-(%make-copy-module scheme/charset srfi/14)
+;;;; The real implementation is in (scheme regex).
+(%make-copy-module scheme/regex srfi/115)
 
-(provide "srfi/14")
+(provide "srfi/115")

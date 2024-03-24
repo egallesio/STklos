@@ -76,6 +76,7 @@ of available commands is given below.
 - **,import** (or  **,i**): Import a library
 - **,require-feature** (or **,r**):  Require a feature
 - **,open** (or **,o**): Open file or URL
+- **,browse** (or **,b**): Browse file or URL with the default browser
 - **,manual** (or **,m**): Search reference manual
 - **,apropos** (or **,a**): Search symbols containing a given string
 - **,version** (or **,v**): Show version
@@ -84,7 +85,31 @@ of available commands is given below.
 
 {{insertdoc 'repl-add-command}}
 
-=== REPL parameters
+==== REPL variables
+
+By default, {{stklos}} defines the following variables:
+
+- `@1`, `@2`, `@3`, `@4` and `@5` contains five the last REPL's
+  computed values
+- `@` is an alias on `@1` (the last value computed by the REPL)
+- `@*` contains a list of `@1`, `@2`, `@3`, `@4` and `@5` values
+
+```scheme
+stklos> (values 'a 'b 'c 'd 'e)
+a
+b
+c
+d
+e
+stklos> @*
+(a b c d e)
+stklos> (+ 2 3)
+5
+stklos> @*
+(5 (a b c d e) a b c)
+```
+
+==== REPL parameters
 
 The following parameter objects can be used to customize the REPL:
 

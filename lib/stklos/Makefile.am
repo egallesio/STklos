@@ -1,6 +1,6 @@
 # Makefile for the STklos specific  libraries
 #
-# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ SO = @SH_SUFFIX@
 #
 # Libraries written in Scheme only
 #
-SRC_STK  = help.stk  preproc.stk
-SRC_OSTK = help.ostk preproc.ostk
+SRC_STK  = apropos.stk  help.stk  preproc.stk
+SRC_OSTK = apropos.ostk help.ostk preproc.ostk
 
 #
 # Libraries written in C and Scheme
@@ -70,7 +70,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 #======================================================================
 # Dependencies
 
-itrie.$(SO): itrie-incl.c itrie.c
+itrie.$(SO): itrie-incl.c
+itrie-incl.c: itrie.stk
+
 readline-complete.$(SO): readline-complete-incl.c readline-complete.c
 
 # ======================================================================

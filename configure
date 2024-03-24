@@ -7906,7 +7906,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile doc/pp/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/scheme/Makefile lib/scheme/vector/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pp.1 doc/stklos-script.1 lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile doc/pp/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/scheme/Makefile lib/scheme/regex/Makefile lib/scheme/vector/Makefile lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pp.1 doc/stklos-script.1 lib/srfi/160/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/lib/stklos/Makefile extensions/gtklos/lib/stklos/gtklos-config.h extensions/gtklos/lib/stklos/gtklos.stk extensions/gtklos/demos/Makefile extensions/curl/Makefile extensions/curl/lib/stklos/Makefile extensions/curl/demos/Makefile extensions/curl/doc/Makefile extensions/fuse/Makefile extensions/fuse/lib/stklos/Makefile extensions/fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8656,6 +8656,7 @@ do
     "lib/SILex.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/SILex.d/Makefile" ;;
     "lib/Lalr.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Lalr.d/Makefile" ;;
     "lib/scheme/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/Makefile" ;;
+    "lib/scheme/regex/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/regex/Makefile" ;;
     "lib/scheme/vector/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/vector/Makefile" ;;
     "lib/srfi/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi/Makefile" ;;
     "lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES lib/stklos/Makefile" ;;

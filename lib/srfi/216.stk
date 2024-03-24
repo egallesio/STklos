@@ -33,6 +33,8 @@
           the-empty-stream stream-null?
           cons-stream)
 
+(%compile-time-define %thread-no-support)  ;; to avoid a warning
+  
 ;; ======================================================================
 ;; Constants
 ;; ======================================================================

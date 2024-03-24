@@ -473,5 +473,151 @@ b|)
          ((?x ?y ?z) (list 'length=3 z y x)))
        '(a (b c) d)))
 
+;;----------------------------------------------------------------------
+(test-subsection "apropos")
+
+(define (symbol<? s1 s2)
+  (string<? (symbol->string s1) (symbol->string s2)))
+
+(define-library (A)
+  (export zeta-one)
+  (begin (define zeta-one 1)
+         (define zeta-two 2)
+         (define theta-three 3)))
+(define-library (B)
+  (export zed)
+  (begin (define zeta-two 2)
+         (define zeta-three 3)
+         (define theta-four 4)
+         (define zed 5)))
+
+(test "apropos.1"
+      '(A B)
+      (sort (map car (apropos/alist 'ze
+                                    'A
+                                    (find-module 'B)))
+            symbol<?))
+
+(test "apropos.2"
+      '(A)
+      (sort (map car (apropos/alist 'zeta
+                                    (find-module 'A)
+                                    "B"))
+            symbol<?))
+
+
+(test "apropos.3"
+      '(1 1)
+      (sort (map length
+                 (map cadr (apropos/alist 'ze  'A 'B)))
+            <))
+
+(test "apropos.4"
+      '(A . 1)
+      (let ((x (apropos/alist "eta" (find-module 'A))))
+        (cons (caar x) (length (cadar x)))))
+
+(test "apropos.5"
+      '()
+      (apropos "x" (find-module 'A)
+                   (find-module 'B)))
+;; Changed #t to 'STklos, since it is too slow (more than 8s on my (old) i5)
+;; This is normal: at the end of "make tests", the number of loaded modules
+;; is really big
+(test "apropos.6"
+      #f
+      (null? (apropos "a" 'STklos)))
+
+(test/error "apropos.7" (apropos 'a 'b)) ; bad module list
+(test/error "apropos.8" (apropos 5))     ; bad symbol / string
+;; apropos/pp should return void:
+;; changed again #t by 'STklos
+(test "apropos.9" #void (let ((x #f))
+                          (with-output-to-string ; suppress output, if any
+                            (lambda ()
+                              (set! x (apropos/pp "___blah___" 'STklos))))
+                          x))
+
+;------------------------------------------------------------------
+(test-subsection "address-of")
+
+(test "addresses-of symbol"
+      #t
+      (integer? (address-of 'a)))
+
+(test "address-of string"
+      #t
+      (integer? (address-of "ABC")))
+
+(test "address-of char"
+      #t
+      (integer? (address-of #\a)))
+
+(test "address-of closure"
+      #t
+      (integer? (address-of (lambda () 2))))
+
+(test "address-of void"
+      #t
+      (integer? (address-of #void)))
+
+
+(test "address-of and read back, symbol"
+      'a
+      (read-from-string (format "#p~x" (address-of 'a))))
+
+(test "address-of and read back, integer"
+      -99
+      (read-from-string (format "#p~x" (address-of -99))))
+
+(test "address-of and read back, real"
+      2.0
+      (read-from-string (format "#p~x" (address-of 2.0))))
+
+(test "address-of and read back, string"
+      "xyz"
+      (read-from-string (format "#p~x" (address-of "xyz"))))
+
+(test "address-of and read back, date"
+      #t
+      (date? (read-from-string (format "#p~x" (address-of (current-date))))))
+
+
+(test "read #pa 1010, ends in 10 but not char"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#pa")))
+
+(test "read #p1f tagged small constant, but too large"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p1f")))
+
+(test "read #p9 = 10 01 = integer '2'"
+      2
+      (with-handler (lambda (x) -1) (read-from-string "#p9")))
+
+(test "read #p0 = 00 = pointer to nowhere"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p0")))
+
+(test "read #p4 = 1 00 = pointer to nowhere"
+      -1
+      (with-handler (lambda (x) -1) (read-from-string "#p4")))
+
+
+(let ((mylist (list #void #f #t '() 0 1 (expt 2 500)
+                    "abc" '(1 2 3) (list 10 20 30) #(1 2 3)
+                    (current-time)
+                    (lambda (x) -x))))
+  (test "address-ref"
+        mylist
+        (map (lambda (thing) (address-ref (address-of thing)))
+             mylist)))
+
+(test "#p shouldn't crash"
+      #void ;; return value from dotimes
+      (dotimes (i  (expt 2 12)) ;; 12 so as to not slow down tests on older systems
+        (with-handler (lambda (a) -1)
+                      (eval-from-string (format "#p~a" i )))))
+
 ;;------------------------------------------------------------------
 (test-section-end)
