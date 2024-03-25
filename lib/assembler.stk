@@ -125,7 +125,7 @@
            (IN-EQ               0)
            (IN-EQV              0)
            (IN-EQUAL            0)
-           (IN-APPLY            2)
+           (UNUSED-4            0)
            (IN-CXR              1)
 
            (SET-CUR-MOD         0)
