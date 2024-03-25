@@ -5070,6 +5070,12 @@ printf "%s\n" "no" >&6; }
 fi
 
 
+if test "$ASCIIDOCTOR" = "asciidoctor"
+then
+    REPORT_ASCIIDOCTOR="yes"
+else
+    REPORT_ASCIIDOCTOR="no (documentation will NOT be rebuilt)"
+fi
 ### Checks for header files.
 
 ac_header= ac_cache=
@@ -9434,10 +9440,10 @@ echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
+echo "          Asciidoctor: " $REPORT_ASCIIDOCTOR
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "
-
 
