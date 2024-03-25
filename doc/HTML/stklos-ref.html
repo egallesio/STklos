@@ -14966,7 +14966,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.211</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.248</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -31967,9 +31967,9 @@ when debugging a program. This parameter defaults to <code>#f</code> (but is set
 </div>
 </div>
 <div class="paragraph">
-<p>This parameter controls if the object files produced by the <strong><em>STklos</em></strong> compiler
-code must embed a readable version of the code. The code is placed at the beginning
-of the produced file. This parameter defaults to <code>#f</code>.</p>
+<p>This parameter controls if the object files produced by the <strong><em>STklos</em></strong>
+compiler code must embed a readable version of the code. The code is placed
+at the beginning of the produced file. This parameter defaults to <code>#f</code>.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_compiler:inline-common-functions'></a>
@@ -31987,11 +31987,12 @@ of the produced file. This parameter defaults to <code>#f</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This parameter controls if the compiler must try to inline the most common Scheme
-primitives (simple arithmetic, main list or vector functions, &#8230;&#8203;). Code produced
-when this parameter is set is more efficient. Note that the compiler can sometimes be
-misleaded if those functions are redefined, hence the existence of this parameter.
-<code>compiler:inline-common-functions</code> is set by default to <code>#t</code>.</p>
+<p>This parameter controls if the compiler must try to inline the most common
+Scheme primitives (simple arithmetic, main list or vector functions, &#8230;&#8203;).
+Code produced  when this parameter is set is more efficient. Note that the
+compiler can sometimes be misleaded if those functions are redefined, hence
+the existence of this parameter. <code>compiler:inline-common-functions</code> is set
+by default to <code>#t</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -32124,6 +32125,65 @@ Default value for <code>compiler:keep-source</code> is <code>#f</code>.</p>
 <p>This parameter controls the number of iterations to be unrolled in
 loops. Currently, only <code>repeat</code> loops are unrolled. The argument
 <code>n</code> must be a positive integer.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_compiler:peephole-optimizer'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(compiler:peephole-optimizer) </strong></code><br>
+<code><strong>(compiler:peephole-optimizer bool) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter determines if the peephole optimizer is used when compiling.
+The default value for this parameter is <code>#t</code>. The next example illustrates
+how it works.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:peephole-optimizer</span> <span class="no">#f</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="no">#f</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will print</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="mi">000</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF</span>           <span class="mi">0</span>
+<span class="mi">002</span><span class="nv">:</span>  <span class="nv">PUSH</span>
+<span class="mi">003</span><span class="nv">:</span>  <span class="nv">IM-FALSE</span>
+<span class="mi">004</span><span class="nv">:</span>  <span class="nv">IN-ADD2</span>
+<span class="mi">005</span><span class="nv">:</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, if we change the parameter,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:peephole-optimizer</span> <span class="no">#t</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="no">#f</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">then</span> <span class="nv">the</span> <span class="nv">result</span> <span class="nv">is</span>
+
+<span class="o">```</span><span class="nv">scheme</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF-PUSH</span>      <span class="mi">0</span>
+<span class="mi">002</span><span class="nv">:</span>  <span class="nv">IM-FALSE</span>
+<span class="mi">003</span><span class="nv">:</span>  <span class="nv">IN-ADD2</span>
+<span class="mi">004</span><span class="nv">:</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See that the <code>GLOBAL-REF</code> and <code>PUSH</code> were turned by the peephole optimizer
+into <code>GLOBAL-REF-PUSH</code>.</p>
 </div>
 </div>
 </div>
@@ -32697,7 +32757,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-02-12 16:40:29 +0100
+Last updated 2024-03-08 21:39:19 +0100
 </div>
 </div>
 </body>
