@@ -1632,6 +1632,7 @@ CASE(DBG_VM)  {
   ;
 }
 
+CASE(UNUSED_4)
 CASE(UNUSED_5)
 CASE(UNUSED_6)
 CASE(UNUSED_7)
@@ -1812,11 +1813,6 @@ CASE(IN_CXR) {
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
  }
-
-CASE(IN_APPLY)   {
-  STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
-  NEXT;
-}
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 FUNCALL:  /* (int nargs, int tailp) */
