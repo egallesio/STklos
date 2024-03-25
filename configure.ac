@@ -59,9 +59,9 @@ AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 AC_CHECK_PROG(ASCIIDOCTOR, asciidoctor, "asciidoctor", "../adoc-fake.sh")
 if test "$ASCIIDOCTOR" = "asciidoctor"
 then
-    REPORT_ASCIIDOCTOR="yes"
+    REPORT_ASCIIDOCTOR="yes (since Asciidoctor is installed)"
 else
-    REPORT_ASCIIDOCTOR="no (documentation will NOT be rebuilt)"
+    REPORT_ASCIIDOCTOR="no (install Asciidoctor to rebuild documentation)"
 fi
 ### Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h execinfo.h])
@@ -789,7 +789,7 @@ echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
-echo "          Asciidoctor: " $REPORT_ASCIIDOCTOR
+echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
