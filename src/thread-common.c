@@ -297,9 +297,34 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
   THREAD_VM(thr)      = new;
   THREAD_STATE(thr)   = th_runnable;
 
+  THREAD_ALLOCATIONS(thr)     = 0;
+  THREAD_BYTES_ALLOCATED(thr) = 0;
+
   STk_sys_thread_start(thr);
 
   return thr;
+}
+
+void thread_inc_allocs(SCM thr, int size) {
+  THREAD_ALLOCATIONS(thr) ++;
+  THREAD_BYTES_ALLOCATED(thr) += size;
+}
+
+DEFINE_PRIMITIVE("%thread-allocations-reset!", thread_allocs_reset, subr1, (SCM thr)) {
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
+  THREAD_BYTES_ALLOCATED(thr) = 0;
+  THREAD_ALLOCATIONS(thr) = 0;
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%thread-allocations", thread_allocs, subr1, (SCM thr)) {
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
+  unsigned long bytes = THREAD_BYTES_ALLOCATED(thr);
+  unsigned long cells = bytes / sizeof(SCM);
+  return STk_n_values(3,
+                      STk_ulong2integer(THREAD_BYTES_ALLOCATED(thr)),
+                      STk_ulong2integer(cells),
+                      STk_ulong2integer(THREAD_ALLOCATIONS(thr)));
 }
 
 /* ======================================================================
@@ -367,6 +392,8 @@ int STk_init_threads(int stack_size, void *start_stack)
                               stack_size);
   THREAD_STATE(primordial) = th_runnable;
   THREAD_VM(primordial)    = vm;
+  THREAD_ALLOCATIONS(primordial) = 0;
+  THREAD_BYTES_ALLOCATED(primordial) = 0;
   vm->scheme_thread        = primordial;
   vm->start_stack          = start_stack;
   STk_primordial_thread    = primordial;
@@ -391,6 +418,8 @@ int STk_init_threads(int stack_size, void *start_stack)
   ADD_PRIMITIVE(thread_join);
   ADD_PRIMITIVE(thread_sleep);
   ADD_PRIMITIVE(thread_system);
+  ADD_PRIMITIVE(thread_allocs);
+  ADD_PRIMITIVE(thread_allocs_reset);
 
   return TRUE;
 }

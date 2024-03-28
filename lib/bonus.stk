@@ -856,19 +856,78 @@ doc>
  * (time expr1 expr2 ...)
  *
  * Evaluates the expressions |expr1|, |expr2|, ... and returns the
- * result of the last expression. This form prints also the time spent
- * for this evaluation, in milliseconds, on the current error port.
+ * result of the last expression. This form also prints the time spent
+ * for this evaluation, in milliseconds, and the quantity of bytes
+ * alocated on the current error port.
  * This is CPU time, and not real ("wall") time.
+ *
+ * @lisp
+ * (time (begin (make-list 200) 'finish))
+ * Elapsed time: 0.0640000000000072 ms
+ * Allocated: 6704 bytes (~ 838 Scheme objects) in 209 allocation calls
+ *   => finish
+ * @end lisp
+ *
+ * In the example above, the result of the expression is only the symbol
+ * |finish|. The two other lines are written to the standard error port.
+ *
+ * The accounting is independent for each thread, and allocations in
+ * children threads do not increase the parent thread counters, as the
+ * example below illustrates.
+ *
+ * @lisp
+ * (let ((T (make-thread (lambda ()
+ *                         (let-values (( (b s k)
+ *                                        (%thread-allocations (current-thread))))
+ *                           (make-list 1_000_000)
+ *                           (let-values (( (B S K)
+ *                                          (%thread-allocations (current-thread))))
+ *                             (format #t "In child thread: ~a bytes, ~a objects in ~a calls~%"
+ *                                     (- B b) (- S s) (- K k))))))))
+ *   (let-values (( (b s k)
+ *                  (%thread-allocations (current-thread))))
+ *     ;; The million allocations in thread T won't affect
+ *     ;; the counting in parent thread:
+ *     (thread-start! T)
+ *     (thread-sleep! 2) ;; wait for the child thread to allocate a million cells
+ *     (let-values (( (B S K)
+ *                    (%thread-allocations (current-thread))))
+ *       (format #t "In parent thread: ~a bytes, ~a objects in ~a calls~%"
+ *               (- B b) (- S s) (- K k))))
+ *   (thread-join! T))
+ *
+ * In parent thread: 800672 bytes, 100084 objects in 17 calls
+ * In child thread: 32000272 bytes, 4000034 objects in 1000008 calls
+ * @end lisp
 doc>
 |#
 (define-macro time
   (lambda args
-    (let ((tmp1 (gensym))
-          (tmp2 (gensym)))
-      `(let* ((,tmp1 (clock))
-              (,tmp2 (begin ,@args)))
-         (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,tmp1))
-         ,tmp2))))
+    (let ((time-start        (gensym))
+          (res               (gensym))
+          (alloc-bytes-start (gensym))
+          (alloc-objs-start  (gensym))
+          (alloc-times-start (gensym))
+          (alloc-bytes-end   (gensym))
+          (alloc-objs-end    (gensym))
+          (alloc-times-end   (gensym)))
+      `(let* ((,time-start (clock)))
+         ;; %thread-allocations returns three values,
+         ;; bytes allocated, approximage number of SCM cells and
+         ;; number of calls to allocation
+         (let-values (( (,alloc-bytes-start ,alloc-objs-start ,alloc-times-start)
+                        (%thread-allocations (current-thread))))
+           (let ((,res (begin ,@args)))
+
+             (let-values (( (,alloc-bytes-end ,alloc-objs-end ,alloc-times-end)
+                            (%thread-allocations (current-thread))))
+
+               (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,time-start))
+               (format (current-error-port) "Allocated: ~S bytes (~~ ~S Scheme objects) in ~S allocation calls\n"
+                       (- ,alloc-bytes-end ,alloc-bytes-start)
+                       (- ,alloc-objs-end  ,alloc-objs-start)
+                       (- ,alloc-times-end ,alloc-times-start))
+               ,res)))))))
 
 
 #|
