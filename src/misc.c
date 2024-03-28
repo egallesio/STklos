@@ -36,6 +36,8 @@
 int STk_interactive_debug = 0;
 #endif
 
+int STk_count_allocations = 0;         /* Set it to 1 to have GC accouniting */
+
 #define BSIZEOF(t) ((int) (sizeof(t) * CHAR_BIT))
 
 static void error_bad_string(SCM str)
@@ -56,6 +58,33 @@ char *STk_strdup(const char *s)
 }
 
 
+void* STk_count_malloc(size_t size)
+{
+  STk_thread_inc_allocs(STk_current_thread(), size);
+  return GC_MALLOC(size);
+}
+
+
+void* STk_count_malloc_atomic(size_t size)
+{
+  STk_thread_inc_allocs(STk_current_thread(), size);
+  return GC_MALLOC_ATOMIC(size);
+}
+
+/* Getter and Setter for the count-allocation parameter */
+SCM get_count_allocs(void)
+{
+  return MAKE_BOOLEAN(STk_count_allocations);
+}
+
+SCM set_count_allocs(SCM value)
+{
+  STk_count_allocations = (value != STk_false);
+  return STk_void;
+}
+
+
+
 void STk_add_primitive(struct primitive_obj *o)
 {
   SCM symbol;
@@ -71,8 +100,6 @@ void STk_add_primitive_in_module(struct primitive_obj *o, SCM module)
   symbol = STk_intern(o->name);
   STk_define_variable(symbol, (SCM) o, module);
 }
-
-
 
 
 SCM STk_eval_C_string(const char *str, SCM module)
@@ -731,6 +758,9 @@ int STk_init_misc(void)
 
   ADD_PRIMITIVE(uri_parse);
   ADD_PRIMITIVE(str2html);
+
+  STk_make_C_parameter2("%count-allocations", get_count_allocs, set_count_allocs,
+                        STk_STklos_module);
 
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_debug);

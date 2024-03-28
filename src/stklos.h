@@ -151,9 +151,11 @@ extern "C"
 
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
-
-#define STk_must_malloc(size)           STk_must_malloc_real(size)
-#define STk_must_malloc_atomic(size)    STk_must_malloc_atomic_real(size)
+#define STk_must_malloc(size)                                           \
+  ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
+#define STk_must_malloc_atomic(size)                                    \
+  ((STk_count_allocations)? STk_count_malloc_atomic(size): GC_MALLOC_ATOMIC(size))
+  
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
 #define STk_free(ptr)                   GC_FREE(ptr)
 #define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
@@ -710,6 +712,10 @@ int STk_init_md5(void);
 extern int STk_interactive_debug;
 #endif
 
+extern int STk_count_allocations;
+
+void *STk_count_malloc(size_t size);
+void* STk_count_malloc_atomic(size_t size);
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
@@ -1313,6 +1319,9 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
   ------------------------------------------------------------------------------
 */
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
+
+void STk_thread_inc_allocs(SCM thr, size_t size);
+
 int STk_init_threads(int stack_size, void *start_stack);
 int STk_init_mutexes(void);
 
@@ -1458,18 +1467,6 @@ int STk_init_vm(void);
 int STk_late_init_vm(void);   // run when env.c is fully initialized
 
 /*****************************************************************************/
-
-void thread_inc_allocs(SCM thr, int size);
-extern SCM STk_primordial_thread;
-
-static inline void* STk_must_malloc_real(size_t size) {
-  if (STk_primordial_thread) thread_inc_allocs(STk_current_thread(), size);
-  return GC_MALLOC(size);
-}
-static inline void* STk_must_malloc_atomic_real(size_t size) {
-  if (STk_primordial_thread) thread_inc_allocs(STk_current_thread(), size);
-  return GC_MALLOC_ATOMIC(size);
-}
 
 extern char *STk_boot_consts;
 extern STk_instr STk_boot_code[];

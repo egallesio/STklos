@@ -1,7 +1,7 @@
 /*
  * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2006-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -305,8 +305,9 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
   return thr;
 }
 
-void thread_inc_allocs(SCM thr, int size) {
-  THREAD_ALLOCATIONS(thr) ++;
+void STk_thread_inc_allocs(SCM thr, size_t size)
+{
+  THREAD_ALLOCATIONS(thr)++;
   THREAD_BYTES_ALLOCATED(thr) += size;
 }
 
