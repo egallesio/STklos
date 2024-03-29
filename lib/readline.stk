@@ -129,7 +129,7 @@
 
 ;; The parameter rl-completer-function contains the function used
 ;; to complete strings It defaults to default-complete-function
-(define rl-completer-function (make-parameter default-complete-function))
+(define-parameter rl-completer-function default-complete-function)
 
 #|
   As an example, here is another completer function. This one tries to find
@@ -175,9 +175,10 @@
 
 (define (try-initialize-readline)
   ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
-  (let* ((suffix (%shared-library-suffix))
-         (res (or (try-initialize (string-append "libreadline." suffix))
-                  (try-initialize (string-append "libedit."  suffix)))))
+  (let* ((lsuffix (%shared-library-suffix))
+         (suffix  (%shared-suffix))
+         (res (or (try-initialize (string-append "libreadline." lsuffix))
+                  (try-initialize (string-append "libedit." lsuffix)))))
     (when (and res (try-load (string-append "readline-complete." suffix)))
       ;; We have found a readline library. Try to load completion support
       (%init-readline-completion-function readline-completion-generator))

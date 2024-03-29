@@ -243,6 +243,7 @@ HAVE_CANVAS = @HAVE_CANVAS@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_GNOME = @HAVE_GNOME@
 HAVE_GTK = @HAVE_GTK@
+INCLUDEDIR = @INCLUDEDIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -363,14 +364,14 @@ SRC_OSTK = primitive.ostk derived.ostk
 SRC_C = 
 SRC_C_STK = 
 SRC_SHOBJ = 
-scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+ALL_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 DOCDB = ../DOCDB
 BASEDIR = ../..
 SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-schemedir = $(prefix)/share/@PACKAGE@/@VERSION@/streams
-schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/streams
+schemedir = @SCMDIR@/streams
+schemelibdir = @EXECDIR@/streams
 scheme_DATA = $(SRC_OSTK)
 schemelib_DATA = $(SRC_SHOBJ)
 scheme_sources = $(SRC_STK)
@@ -664,9 +665,10 @@ STKLOS_BINARY ?= ../../src/stklos
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ \
 	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
 	/bin/rm -f $*.o
 #======================================================================
 # Dependencies
@@ -679,7 +681,7 @@ install-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS) *-incl.c  *~
+	rm -f $(ALL_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile

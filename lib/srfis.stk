@@ -152,7 +152,7 @@
     (112 "Environment Inquiry")
     (113 "Sets and Bags" (sets-bags) "srfi-113")
     ;; 114  ....... withdrawn
-    ;; 115  Scheme Regular Expressions
+    (115  "Scheme Regular Expressions" () "srfi-115")
     (116 "Immutable List Library" (immutable-lists) "srfi-116")
     (117 "Queues based on lists" (queues-as-lists) "srfi-117")
     (118 "Simple adjustable-size strings" (adjustable-strings))
@@ -215,7 +215,7 @@
     (175 "ASCII character library" (ascii) "srfi-175")
     (176 "Version flag")
     ;; 177  ....... withdrawn
-    ;; 178  Bitvector library
+    (178 "Bitvector library" () "srfi-178")
     ;; 179  Nonempty Intervals and Generalized Arrays (Updated)
     (180 "JSON" (JSON json)  "srfi-180")
     ;; 181  Custom ports (including transcoded ports)
@@ -238,18 +238,18 @@
     ;; 197  Pipeline Operators
     ;; 198  ...... withdrawn
     ;; 199  ....... withdrawn
-    ;; 200  Pattern Matching (draft)
+    ;; 200  ....... withdrawn
     ;; 201  Extensions to the Core Scheme Bindings
     ;; 202  Pattern-matching Variant of the and-let* Form that Supports Multiple Values
     ;; 203  A Simple Picture Language in the Style of SICP
-    ;; 204  Wright-Cartwright-Shinn Pattern Matcher (draft)
-    ;; 205  POSIX Terminal Fundamentals (draft)
+    ;; 204  ....... withdrawn
+    ;; 205  ....... withdrawn
     ;; 206  Auxiliary Syntax Keywords
     (207  "String-notated bytevectors" () "srfi-207")
     (208  "NaN procedures")
     ;; 209  Enumerations and Enum Sets
     ;; 210  Procedures and Syntax for Multiple Values
-    ;; 211  Namespaces for Scheme Macro Systems (draft)
+    ;; 211  Scheme Macro Libraries
     ;; 212  Aliases
     ;; 213  Identifier Properties
     (214  "Flexvectors" () "srfi-214")
@@ -264,21 +264,21 @@
     (223 "Generalized binary search procedures" () "srfi-223")
     (224 "Integer Mappings" () "srfi-224")
     ;; 225 Dictionaries
-    ;; 226 Control Features (draft)
+    ;; 226 Control Features
     (227 "Optional Arguments" () "srfi-227")
     (228 "A further comparator library" () "srfi-228")
     (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
     ;; 231 Intervals and Generalized Arrays (Updated^2)
-    ;; 232 Flexible Curried Procedures
+    (232 "Flexible Curried Procedures" () "srfi-232")
     (233 "INI files" (ini-files) "srfi-233")
     ;; 234 Topological sorting (draft)
     (235 "Combinators" (combinators) "srfi-235")
     (236 "Evaluating expressions in an unspecified order" () "srfi-236")
-    ;; 237 R6RS Records (refined) (draft)
+    ;; 237 R6RS Records (refined)
     (238 "Codesets" () "srfi-238")
     ;; 239 Destructuring lists
-    ;; 240 Reconciled records (draft)
+    ;; 240 Reconciled records
     ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data (drafr)
     ;; 242 The CFG Language (draft)
     ;; 243 Unreadable objects (draft)

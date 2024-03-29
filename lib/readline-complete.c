@@ -52,6 +52,8 @@ extern int rl_attempted_completion_over;        // 1 to suppress filename comple
 extern char *rl_completer_word_break_characters;// word separator. Normally "n\"\\'`@$>"
 extern rl_completion_func_t *rl_attempted_completion_function; // Pointer to our completion func
 
+extern char* rl_readline_name;                  // NOTE: both vars a are not
+extern char* rl_basic_quote_characters;         // completion related (see below)
 
 static SCM gen;                 // A pointer to the Scheme generator function
 
@@ -131,6 +133,15 @@ MODULE_ENTRY_START("readline-complete")
   SCM module =  STk_STklos_module;   // FIXME: should be READLINE
 
   ADD_PRIMITIVE_IN_MODULE(readline_init_completion, module);
+
+  // NOTE: the following assignments are not related to completion and should
+  // not be here.  However since our FFI doesn't permit to read/set variables
+  // and since this is the only file written in C interacting with readline,
+  // we do this assignment here.
+
+
+  rl_readline_name = "stklos";     // To permit STklos parts in the ~/ .inputrc file
+  rl_basic_quote_characters = "\"";// Suppress the simple quote for parent flashing
 }
 MODULE_ENTRY_END
 

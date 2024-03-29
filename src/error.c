@@ -2,7 +2,7 @@
  *
  * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -274,8 +274,20 @@ void STk_debug(char *format, ...)
   STk_flush(eport);
 }
 
-void STk_gdb(SCM obj)           /* associated to the  gdb write function */
+/*
+ * GDB helper
+ *
+ * Just define this code in your .gdbinit file to print Scheme objects
+ *
+ * define write
+ *    call STk_gdb($arg0)
+ * end
+ */
+void STk_gdb(SCM obj)
 {
-  STk_debug("Object 0x%lx value = ~s", (unsigned long) obj, obj);
+  char buffer[50];
+
+  snprintf(buffer, sizeof(buffer), "%p", obj);
+  STk_debug("Object %s value = ~s", buffer, obj);
 }
 #endif

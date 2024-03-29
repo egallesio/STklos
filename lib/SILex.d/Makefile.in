@@ -16,7 +16,7 @@
 
 # Makefile for SILex/STklos
 #
-# Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2003-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -196,6 +196,7 @@ HAVE_CANVAS = @HAVE_CANVAS@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_GNOME = @HAVE_GNOME@
 HAVE_GTK = @HAVE_GTK@
+INCLUDEDIR = @INCLUDEDIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -301,7 +302,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir = @SCMDIR@
 #scheme_DATA = silex.scm multilex.scm
 SRC = silex.scm multilex.scm
 all: all-am
@@ -493,11 +494,11 @@ uninstall-am:
 
 
 install-sources:
-	mkdir -p  $(DESTDIR)/$(schemedir)
-	cp $(SRC) $(DESTDIR)/$(schemedir)
+	mkdir -p  $(DESTDIR)$(schemedir)
+	cp $(SRC) $(DESTDIR)$(schemedir)
 
 uninstall-hook:
-	(cd $(DESTDIR)/$(schemedir) && rm -f $(SRC))
+	(cd $(DESTDIR)$(schemedir) && rm -f $(SRC))
 
 doc:
 

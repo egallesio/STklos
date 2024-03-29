@@ -20,7 +20,7 @@
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 25-Oct-2004 16:43 (eg)
 
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir   = @SCMDIR@
 scheme_DATA = lalr.ostk
 
 COMP ?= ../utils/tmpcomp
@@ -34,10 +34,10 @@ all: lalr.ostk calc
 
 install-sources: install
 	mkdir -p $(schemedir)
-	cp lalr.stk $(DESTDIR)/$(schemedir)
+	cp lalr.stk $(DESTDIR)$(schemedir)
 
 uninstall-hook:
-	rm  -f $(DESTDIR)/$(schemedir)/lalr.stk
+	rm  -f $(DESTDIR)$(schemedir)/lalr.stk
 
 calc: calc.stk
 	echo "#!/bin/sh" > calc

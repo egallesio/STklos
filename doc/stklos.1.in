@@ -74,7 +74,9 @@ directory is also used to store the packages installed with the
 \fIstklos-pkg(1)\fR command. Note that the shell variable
 \fISTKLOS_CONFDIR\fR can also be used to set this directory (see below).
 .IP "-q, --no-init-file"
-quiet: do not load the user init file
+quiet: do not load the user init file.
+.IP "-Q, --no-startup-message"
+quiet: do not show the startup message.
 .IP "-i, --interactive"
 be interactive, even if the command finds it is not the case. This
 option is generally useful when used inside emacs since it permits to
@@ -112,13 +114,13 @@ Boolean flags must begin by a '+' or a '-' character to indicate if the flag is 
 or unset. Valued flags, must be followed by a '=' and the value given to the flag.
 Flags are separated by the ',' character. For instance, the following
 list \fI-F=+line-info,-time-display,unroll-iterations=5\fR sets the
-\fIline-info\fR option, unsets the \fItime-display\fR option and initialzes the
-\fIunroll-iteration\R to 5. The following flags can be used with
+\fIline-info\fR option, unsets the \fItime-display\fR option and initializes the
+\fIunroll-iteration\fR to 5. The following flags can be used with
 this option:
 .IP "" 10
 - \fIline-info\fR insert line numbers in the generated file. Setting this flag
 is equivalent to the \fI-l\fR option. This flag uses the parameter
-\fIcompiler:gen-line-number\fR. 
+\fIcompiler:gen-line-number\fR.
 .IP "" 10
 - \fIshow-instructions\fR can be used to insert the textual instructions
 into compiled files. This flag uses the parameter
@@ -143,8 +145,12 @@ in produced code. This flag uses the parameter
 - \fIunroll-iterations\fR can be used to set the number of iterations to be unrolled
 in loops. This flag uses the parameter \fIcompiler:unroll-iterations\fR and its
 default value is 4.
-
-
+.IP "" 10
+- \fIpeephole-optimizer\fR can be used to activate or deactivate the peephole
+optimizer during compilation. The peephole optimizer is used to change a
+succession of instructions by another set of instructions that has better
+performance. This flag uses the parameter \fIcompiler:peehole-optimizer\fR.
+By default, the peephole optimizer is activated.
 .IP "-v, --version"
 print program version and exit.
 .IP "-V"
@@ -176,11 +182,11 @@ back-trace.
 .IP "STKLOS_CONFDIR"
 This variable can be used to designate the directory used by \fBstklos\fR
 to store its configuration or packages files. If not set, the default
-\fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
+\fBstklos\fR configuration directory is by default \fB${XDG_CONFIG_HOME}/stklos\fR (or \fB~/.config/stklos/\fR if  \fBXDG_CONFIG_HOME\fR is unset).
 
 .SH FILES
 
-.IP "~/<stklos-conf-dir>/stklosrc"
+.IP "<stklos-conf-dir>/stklosrc"
 This file is the user init file which is loaded when \fBstklos\fR
 starts. Use the \fB-q\fR to avoid the loading of this file.
 

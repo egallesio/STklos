@@ -1,7 +1,5 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
-//
 //           Author: Jeronimo Pellegrini <j_p@aleph0.info>
 //    Creation date:  4-Feb-2022 09:48
 
@@ -350,6 +348,27 @@ DEEP_LOCAL_SET
 DEEP_LOC_REF_PUSH
 ....
 
+STklos organizes local environments as this: each level has a maximum
+of 256 variables. Both the level and the address of local variables
+are encoded in a single 16-bit integer, as "256v1+v2".  For example,
+2*256 + 03 = 0x0203. The first byte, 0x02, identifies the level, and
+the second byte, 0x03, identifies the variable.
+
+The VM will, then, do something like this to access a deep local variable:
+
+[source,c]
+----
+  /* See this is src/vm.c, CASE(DEEP_LOCAL_REF):  */
+  for (level = FIRST_BYTE(info); level; level--)
+    e = (SCM) FRAME_NEXT(e);
+
+  vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
+----
+
+Here, `info` is the information to access the variable (a `uint16_t`
+number, as every opcode and operand used in the VM).
+`FIRST_BYTE` gets the level; `SECOND_BYTE` gets the var address.
+
 Examples:
 
 [source,scheme]
@@ -397,6 +416,58 @@ comparison opcode `IN-NUMEQ`:
 005:  RETURN
 ....
 
+The following example shows a variable in a deeper level.
+
+[source,scheme]
+----
+(disassemble
+  (let ((c 4)
+        (b 3))
+    (lambda ()
+      (let ((a 2))
+        c))))
+----
+
+....
+000:  PREPARE-CALL
+001:  INT-PUSH             2
+003:  ENTER-TAIL-LET       1
+005:  DEEP-LOCAL-REF       513
+007:  RETURN
+....
+
+The number 513 is composed of the bytes 0x02 and 0x01:
+`#x0201 = 513`. This means "the variable of index 1 in
+level 2" (index 1 is for `c`, and index 0 is for `b`).
+
+The code for `(let ((c 4) (b 3)` is not shown, but it can bee seen
+with `disassemble-expr`:
+
+[source,scheme]
+----
+(disassemble-expr
+  '(let ((c 4)
+         (b 3))
+     (lambda ()
+       (let ((a 2))
+         c))) #t)
+----
+
+....
+000:  PREPARE-CALL
+001:  INT-PUSH             4
+003:  INT-PUSH             3
+005:  ENTER-LET            2
+007:  CREATE-CLOSURE       9 0	;; ==> 018
+010:  PREPARE-CALL
+011:  INT-PUSH             2
+013:  ENTER-TAIL-LET       1
+015:  DEEP-LOCAL-REF       513
+017:  RETURN
+018:  LEAVE-LET
+....
+
+
 == Global variables
 
 Global variables can be read and set with the following opcodes:
@@ -433,71 +504,108 @@ Constants:
 0: my-cool-global-variable
 ....
 
-=== UGLOBAL_{REF,SET} and the checked global table
+=== UGLOBAL_{REF,SET} and the checked global variables
+
+Internally, the global variables values of a program are stored in a unique
+array called `STk_global_store`.
 
 The instructions `GLOBAL_REF` and `GLOBAL_SET` do the following:
 
-1. Acquire the mutex
-2. Fetch the index of the global variable
-3. Lookup the variable in the current environment (that is, consult a hash table
-   in  amodule)
-4. Verify if the variable is mutable or not
-5. Finally, do the real get or set operation
-6. Release the lock
+1. Fetch the name of the global variable
+2. Lookup the variable in the current environment (that is, consult a hash table
+   in a module)
+3. Verify if the variable is mutable or not
+4. Finally, do the real get or set operation in `STk_global_store`.
 
-Steps 1-4 are quite expensive, and shouldn't need to be done every time the
-variable is accessed. Thus, the STklos VM keeps a table with *checked globals*.
-The first time a variable is referenced, the VM goes through all those steps,
-but before releasing the lock there is another step:
+Steps 1-3 are quite expensive, and shouldn't need to be done every time the
+variable is accessed. Thus, the STklos VM patches the original code when
+we are sure that the variable used is properly defined. Hence, he first time a
+variable is referenced, the VM goes through all those steps, adds a final step:
 
-5'. **Patch the code**, changing the `GLOBAL_REF` or `GLOBAL_SET` insrtuction
-     into a `UGLOBAL_REF` or `UGLOBAL_SET`.
+[start=5]
+. **Patch the code**, that is, changing the `GLOBAL_REF` or `GLOBAL_SET` instruction
+  into a `UGLOBAL_REF` or `UGLOBAL_SET` ('U' prefix here is for already **U**sed vrariable)
 
-For example, in `GLOBAL_SET` this step is performed by the following two lines:
+For example, in `GLOBAL_SET`, this step is performed by the following two lines:
 
 [source,c]
 ----
   /* patch the code for optimize next accesses */
-  vm->pc[-1] = add_global(CDR(ref));
+  vm->pc[-1] = global_var_index(ref); // ref: result of the search in the hash table
   vm->pc[-2] = UGLOBAL_SET;
 ----
 
 See that what is being changed are the two previous bytecode elements,
-`pc[-1]` and `pc[-2]`.
+`pc[-1]` and `pc[-2]`. Note that the value returned by `global_var_index` is
+the index in `STk_global_store` where the used variable is stored.
 
-So the code
+So the code:
 
 [source,scheme]
 ----
-(set! a 2)
+(define (test) (set! a 2))
 ----
 
-would perhaps be translated into
+is translated in
 
 ----
-000:  SMALL-INT            2
-002:  GLOBAL-SET           5
+000:  CREATE-CLOSURE       6 0  ;; ==> 008
+003:  SMALL-INT            2
+005:  GLOBAL-SET           0
+007:  RETURN
+008:  DEFINE-SYMBOL        1
+010:
+
+Constants:
+0: a
+1: test
 ----
 
-where `5` is the index of the variable `a` (as a global).
+The second and third lines are used for doing this assignment. We can see that
+the parameter of the `GLOBAL_SET` instruction is the name of the variable to
+be set.
 
-Then after the first time the `GLOBAL_SET` instruction is performed, the
-code will **patch itself** and change into
+
+Then, after the first time the `GLOBAL_SET` instruction is performed, the
+code will **patch itself** and changed into
 
 ----
 000:  SMALL-INT            2
 002:  UGLOBAL-SET          n
 ----
 
-where `n` is the index of this global variable **in a local table**.
+where `n` is the index of this global variable in the `STk_global_store`
+array.
 
 The instruction `GLOBAL_SET` takes two integers to be represented, so
 when `pc[-1]` and `pc[-2]` are changed, what is being changed is the
-previous argument (`5` -> `n`) and the previous instruction
+previous argument (`0` -> `n`) and the previous instruction
 (`GLOBAL_SET` -> `UGLOBAL_SET`).
 
-*And*, of course, the `n`-th element of the table contains the address
-of the variable to be set. This is made clear in the code of `UGLOBAL_SET`:
+*And*, of course, the `n`-th element of the table contains the value of the
+variable to be set. We can see this by disassembling the `test` function defined
+before:
+
+----
+stklos> (disassemble test)
+000:  SMALL-INT            2
+002:  GLOBAL-SET           0
+004:  RETURN
+----
+
+Once `test` has been called at least one time, its code is:
+
+----
+stklos> (disassemble test)
+000:  SMALL-INT            2
+002:  UGLOBAL-SET          2971
+004:  RETURN
+----
+
+Here, `2971` is the index of the global variable `a` in the array of global
+variables.
+
+Let's see now the code of `UGLOBAL_SET`:
 
 [source,c]
 ----
@@ -509,19 +617,21 @@ CASE(UGLOBAL_SET) { /* Never produced by compiler */
 }
 ----
 
-The checked globals table is defined earlier in `vm.c`:
+The `fetch_global` macro is defined earlier in `vm.c`:
 
 [source,c]
 ----
-static SCM** checked_globals;
-...
-#define fetch_global()  (*(checked_globals[(unsigned) fetch_next()]))
+#define fetch_next()     (*(vm->pc)++)
+#define fetch_global()   (STk_global_store[(unsigned) fetch_next()])
 ----
 
-and the function `add_global(SCM ref)` will add a global to the table.
+The `RELEASE_POSSIBLE_LOCK` used here is a macro which deals with the lock
+needed to patch the code. This lock is necessary since STklos permits to
+have several threads to execute the same code. All the stuff about locking in
+the VM is explained in `vm.c` source file, and is covered (a bit) below.
 
-Of course, this is also done in all other `UGREF_*` instructions in a
-similar way.
+Of course, all the work detailed about how we optimize access to global
+variables is also done in all other `UGREF_*` instructions in a similar way.
 
 That is why, even using a hash table, access to global variables happens
 with speed not too far from that of access to local variables in STklos.
@@ -539,7 +649,7 @@ This can be seen in the following rudimentary benchmark:
       (set! a b))))
 
 ;;;
-;;; Using globals: in the same system, runs in about 4000ms
+;;; Using globals: runs in about the same time (probably a bit faster)
 ;;;
 (define a 0)
 (define b 2)
@@ -1397,21 +1507,24 @@ Already covered before:
 
 === The global lock
 
-There is one global mutex lock for STklos, called `global_lock`, declared in `vm.c`:
+There is one global mutex lock for STklos, called `global_code_lock`, declared in `vm.c`:
 
-`MUT_DECL(global_lock);          /* the lock to access checked_globals */`
+`MUT_DECL(global_code_lock);  /* Lock to permit code patching */`
 
-As per the comment, its purpose is to discipline access to global variables.
-
+As per the comment, its purpose is to discipline access to the instructions of
+the running program.  This lock is used when patching code for optimizing
+further global variables accesses (as explained before). This is necessary since
+STklos can use several threads. Note that each Scheme thread use its own
+VM, but the code and the global variables are shared among all the threads.
 
 Three macros are used to control the global lock (a mutex):
 
 * `LOCK_AND_RESTART` will acquire the lock, and decrease the program counter.
-It will also set a flag that signals that the lock has been acquired by this thread,
-and then call `NEXT`.
-The name "`AND_RESTART`" reflects the fact that it decreases the PC and calls `NEXT`
-(for the next instruction) -- so the effect is to start again operating on this
-instruction, but this time with the lock.
+It will also set a flag that signals to the running VM that the lock has been
+acquired by this thread, and then call `NEXT`.  The name "`AND_RESTART`"
+reflects the fact that it decreases the PC and calls `NEXT` (for the next
+instruction) -- so the effect is to start again operating on this instruction,
+but this time with the lock.
 
 * `RELEASE_LOCK` will release the lock, regardless of the thread having it or not. The flag indicating ownership by this thread is cleared.
 

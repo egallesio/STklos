@@ -1,7 +1,7 @@
 ;;;;
 ;;;; repl.stk   -- STklos REPL
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,9 @@
   (import SCHEME)
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
-          repl-theme get-repl-color)
+          repl-theme get-repl-color repl-show-startup-message
+          repl-add-command
+          @ @1 @2 @3 @4 @5 @*)
 
 ;;; In module REPL
 
@@ -45,6 +47,17 @@
 (define default-in  (current-input-port))
 (define default-out (current-output-port))
 (define default-err (current-error-port))
+
+(define @1 #void)
+(define @2 #void)
+(define @3 #void)
+(define @4 #void)
+(define @5 #void)
+(define @* (list @1 @2 @3 @4 @5))
+
+;; define @ as an alias on @1
+(let ((M (find-module 'REPL))) (%symbol-link '@ '@1 M M))
+
 
 #|
 <doc EXT repl-theme
@@ -81,7 +94,7 @@
  *               #:prompt (bold bg-red white)))
  * @end lisp
  *
- * A good place to change your theme is the `.stklosrc` file.
+ * NOTE: A good place to change your theme is the `stklosrc` file.
 doc>
 |#
 (define *repl-themes* `(
@@ -98,46 +111,199 @@ doc>
      (minimal     . (:error  (bold red)
                      :prompt  underline))))
 
-(define repl-theme
-  (make-parameter #f
-                  (lambda (theme)
-                    (if (symbol? theme)
-                        (let ((val (assoc theme *repl-themes*)))
-                          (if val (cdr val) '()))
-                        theme))))
+(define-parameter repl-theme #f
+  (lambda (theme)
+    (if (symbol? theme)
+        (let ((val (assoc theme *repl-themes*)))
+          (if val (cdr val) '()))
+        theme)))
 
 (define (get-repl-color key)
   (key-get (repl-theme) key ""))
 
 
 ;;; ======================================================================
+;;;
+;;; REPL commands
+;;;
+;;; ======================================================================
+(define *repl-commands* '())
 
-(define (do-repl-command l)
-  (define (trim-left str)
-    (regexp-replace "^[ \t]*" str ""))
+#|
+<doc EXT repl-add-command
+ * (repl-add-command names doc func)
+ *
+ * Add a new command to the REPL. The names of the command are given in the
+ * first parameter as a list (or a symbol if there is only one name).
+ * The documentation of the command is given as a string as the second parameter.
+ * Finally, the function given as the third parameter is called when the new command
+ * is executed by the user. The code hereafter, permits to add a command to call an
+ * editor, with the commands |,editor| or |,ed| followed (eventually) by a file name.
+ *
+ * @lisp
+ * (repl-add-command '(editor ed)
+ *                  "Edit a file with $EDITOR (or emacs if unset)"
+ *                  (lambda ()
+ *                    (let ((cmd (or (getenv "EDITOR") "emacs")))
+ *                      (system (string-append cmd " " (read-line) " 2>/dev/null")))))
+ * @end lisp
+ *
+ * NOTE: {{stklos}} has already a number of commands defined, but
+ * |repl-add-command| can be  useful to define your own commrand. A good place to add
+ * such a definition is in the |stklosrc| file.
+doc>
+|#
+(define (repl-add-command names doc func)
+  (let* ((names (if (symbol? names) (list names) names))
+         (old   (assoc names *repl-commands*)))
+    (if old
+       (set-cdr! old (list doc func))   ;; already present. Replace.
+       (set! *repl-commands* (cons (list names doc func)
+                                   *repl-commands*)))))
 
-  (case (car l)
-    ((help h ?)         (display
-                         (do-color (get-repl-color :help)
-                                   (format "Available Commands:
-- ,backtrace ,bt   Show the stack when last error occurred
-- ,cd              Change current directory
-- ,pwd             Print working directory
-- ,quit ,q         Exit STklos
-- ,shell ,!        Run a shell command
-- ,help ,? ,h      This help\n")
-                                   'normal)
-                         (current-error-port))
-                        (flush-output-port (current-error-port)))
-    ((quit q)           (exit 0))
-    ((backtrace bt)     (%display-backtrace repl-backtrace 6))
-    ((shell !)          (system (read-line)))
-    ((cd)               (chdir (trim-left (read-line))))
-    ((pwd)              (printf "~S\n" (getcwd)))
-    (else               (format (current-error-port)
-                                "bad command name: ~S. Type ,help for some help\n"
-                                (car l)))))
+(define (display-repl-command-help)
+  (let* ((lines (map (lambda (x)
+                       (let ((out (open-output-string)))
+                         (for-each (lambda (c) (fprintf out ",~a " c))
+                                   (car x))
+                         (cons (get-output-string out) (cadr x))))
+                     *repl-commands*))
+         (max-len (apply max (map string-length (map car lines)))))
 
+    ;; Print all the lines aligned on max-len characters
+    (display (do-color (get-repl-color :help)  "Available commands:\n"))
+    (display (do-color 'normal))
+    (for-each (lambda (x)
+                (print " - "
+                       (car x)
+                       (make-string (- max-len (string-length (car x)))
+                                    #\space)
+                       " "
+                       (cdr x)))
+              (reverse lines))) ;; to keep the declaration order
+
+  ;; Print somme helps on the @ variables
+  (display (do-color (get-repl-color :help)  "\nAvailable variables:\n"))
+  (display (do-color 'normal))
+  (display "If not redefined by your program, the following variables are available\n")
+  (display " - @1 (aka @), @2, @3, @4, @5 contain the last REPL's computed values\n")
+  (display " - @* contains a list of @1, @2, @3, @4 and @5 values\n"))
+
+(define (do-repl-command name)
+  (define (search-repl-command name)
+    (let Loop ((lst *repl-commands*))
+      (if (pair? lst)
+          ;; See if (car lst) is a known repl command
+          (let ((cmd (car lst)))
+            (if (memq name (car cmd))
+                ((caddr cmd))
+                (Loop (cdr lst))))
+          ;; List of possibilities exhausted
+          (format (current-error-port)
+                  "bad command name: '~s'.\nType ',help' for some help.\n"
+                  name))))
+
+  ;; Skip the leading spaces
+  (let Loop ()
+    (when (eq? (peek-char) #\space)
+      (read-char)
+      (Loop)))
+
+  ;; And try to find a REPL command
+  (search-repl-command name))
+
+
+;; A simple trim for the commands below
+(let ((simple-trim (lambda (str)
+                     (regexp-replace "\\s*$"
+                                     (regexp-replace "^\\s*" str "")
+                                     ""))))
+
+  ;; ==== backtrace
+  (repl-add-command '(backtrace bt)
+                    "Show the stack when last error occurred"
+                    (lambda () (%display-backtrace repl-backtrace 6)))
+  ;; ==== cd
+  (repl-add-command 'cd
+                    "Change current directory"
+                    (lambda () (chdir (simple-trim (read-line)))))
+  ;; ==== pwd
+  (repl-add-command 'pwd
+                    "Print working directory"
+                    (lambda () (printf "~s~%" (getcwd))))
+
+  ;; ==== ls
+  (repl-add-command 'ls
+                    "List directory content (usual 'ls' options accepted)"
+                    (lambda () (system (string-append "ls " (read-line)))))
+
+  ;; ==== quit
+  (repl-add-command '(quit q)
+                    "Exit STklos"
+                    (lambda () (exit 0)))
+  ;; ==== shell
+  (repl-add-command '(shell !)
+                    "Run a shell command"
+                    (lambda () (system (read-line))))
+  ;; ==== time
+  (repl-add-command '(time t)
+                    "Print the time used to run the next expression"
+                    (lambda () (printf "~w~%" (eval-from-string
+                                          (format "(time (eval '~a))" (read))))))
+  ;; ==== describe
+  (repl-add-command '(describe d)
+                    "Describe an object"
+                    (lambda () (describe (eval (read)))))
+  ;; ==== expand
+  (repl-add-command '(expand e)
+                    "Pretty print the macro expansion of a form"
+                    (lambda () (pretty-print (macro-expand (read)))))
+  ;; ==== import
+  (repl-add-command '(import i)
+                    "Import a library"
+                    (lambda () (eval-from-string (format "(import ~a)" (read)))))
+  ;; == require-feature
+  (repl-add-command '(require-feature r)
+                    "Require a feature"
+                    (lambda () (require-feature (read))))
+  ;; ==== open
+  (repl-add-command '(open o)
+                    "Open file or URL"
+                    (lambda ()
+                      (let ((cmd (if (equal? (os-name) "Darwin") "open" "xdg-open")))
+                        (system (string-append cmd " " (read-line) " 2>/dev/null")))))
+  ;; ==== browse
+  (repl-add-command '(browse b)
+                    "Browse file or URL with the default browser"
+                    (lambda () (open-in-browser (read-line))))
+
+  ;; ==== describe
+  (repl-add-command '(describe d)
+                    "Describe an object"
+                    (lambda () (describe (eval (read)))))
+  ;; ==== manual
+  (repl-add-command '(manual m)
+                    "Search reference manual"
+                    (lambda () (manual (simple-trim (read-line)))))
+  ;; ==== apropos
+  (repl-add-command '(apropos a)
+                    "Search for symbols containing a given string"
+                    (lambda () (print (apropos (simple-trim (read-line))))))
+  ;; ==== help
+  (repl-add-command
+   '(help ? h)
+   "This help if no parameter, or help on its argument"
+   (lambda ()
+     (let ((arg (read-line)))
+       (if (equal? arg "")
+           (display-repl-command-help)
+           (help (read-from-string arg))))))
+
+  ;; == version
+  (repl-add-command '(version v)
+                    "Show version"
+                    (lambda () (printf "~a ~a~%" (version) (%push-id))))
+) ;; end of REPL commands
 
 ;; ----------------------------------------------------------------------
 ;;      repl-handler ...
@@ -201,12 +367,12 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;      repl-prompt ...
 ;; ----------------------------------------------------------------------
-(define repl-prompt (make-parameter ""))
+(define-parameter repl-prompt "")
 
 ;; ----------------------------------------------------------------------
 ;;      repl-prompt-use-color? ...
 ;; ----------------------------------------------------------------------
-(define repl-prompt-use-color? (make-parameter #t))
+(define-parameter repl-prompt-use-color? #t)
 
 ;; ----------------------------------------------------------------------
 ;;      make-prompt ...
@@ -225,24 +391,42 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;      repl-make-prompt ...
 ;; ----------------------------------------------------------------------
-(define repl-make-prompt (make-parameter make-prompt))
+(define-parameter repl-make-prompt make-prompt)
 
 ;; ----------------------------------------------------------------------
 ;;      display-prompt ...
 ;; ----------------------------------------------------------------------
 (define (display-prompt port)
-  (display (repl-prompt))
+  (display (repl-prompt) port)
   (flush-output-port port))
 
 ;; ----------------------------------------------------------------------
 ;;      repl-display-prompt ...
 ;; ----------------------------------------------------------------------
-(define repl-display-prompt (make-parameter display-prompt))
+(define-parameter repl-display-prompt display-prompt)
+
+
+#|
+<doc EXT repl-show-startup-message
+ * (repl-show-startup-message)
+ * (repl-show-startup-message val)
+ *
+ * If this parameter is a true value, a banner is printed when {{stklos}} starts
+ * in interactive mode. Otherwise, no banner is printed. By default, this parameter
+ * is set to `#t`.
+ *
+ * NOTE: This parameter can be set to `#f` with the |--no-startup-message| option of
+ * the {{stklos}} command. Otherwise, a good place to set this parameter is in the
+ * `stklosrc` file.
+doc>
+|#
+(define-parameter repl-show-startup-message
+  (key-get *%system-state-plist* #:startup-message #t))
 
 ;; ----------------------------------------------------------------------
 ;;      main-repl-hook ...
 ;; ----------------------------------------------------------------------
-(define main-repl-hook (make-parameter void))
+(define-parameter main-repl-hook void)
 
 ;; ----------------------------------------------------------------------
 ;;      repl-change-default-ports ...
@@ -292,7 +476,7 @@ doc>
                 (flush-output-port out))
 
              ((and (pair? e) (eq? (car e) 'unquote))
-                (do-repl-command (cdr e)))
+                (do-repl-command (cadr e)))
 
              (else
                 (call-with-values
@@ -311,7 +495,24 @@ doc>
                                                 'normal)
                                       out)))
                         (else
-                           (for-each (lambda (x) (write-shared x out) (newline out))
+                         ;; Build @* REPl variable
+                         (case (length v)
+                           ((1) (set! @* (list (car v) @1 @2 @3 @4)))
+                           ((2) (set! @* (list (car v) (cadr v) @1 @2 @3)))
+                           ((3) (set! @* (list (car v) (cadr v) (caddr v) @1 @2)))
+                           ((4) (set! @* (list (car v) (cadr v) (caddr v) (cadddr v)
+                                               @1)))
+                           (else (set! @* (list (car v) (cadr v) (caddr v) (cadddr v)
+                                                (car (cddddr v))))))
+                         ;; Build @i variables
+                         (set! @5 (car (cddddr @*)))
+                         (set! @4 (cadddr @*))
+                         (set! @3 (caddr @*))
+                         (set! @2 (cadr @*))
+                         (set! @1 (car @*))
+
+                         ;; Print values
+                         (for-each (lambda (x) (write-shared x out) (newline out))
                                      v)))
                       (flush-output-port out))))))))
       ;; Loop if we have not meet an EOF
@@ -327,22 +528,22 @@ doc>
     ;; Use classic theme if the user has not set a theme in his/her init file
     (unless (repl-theme)
       (repl-theme 'classic))
-    ;; Show banner
-    (let* ((utf8?  (key-get *%system-state-plist* :use-utf8 #f))
-           (line1   (format "STklos version ~a (~a)\n" (version) (%push-id)))
-           (line2  "Copyright (C) 1999-2023 Erick Gallesio <eg@stklos.net>\n")
-           (line3 (format "[~a/~a/~a/~a]\n"
-                          (machine-type)
-                          (%thread-system)
-                          (key-get *%system-state-plist* :readline 'no-readline)
-                          (if utf8? 'utf8 'no-utf8)))
-           (line4  "Type ',h' for help\n")
-           (col1  (get-repl-color :input))
-           (col2  (get-repl-color :info)))
-      (display (do-color 'normal col1 "  \\    " col2 line1 'normal))
-      (display (do-color 'normal col1 "   \\   " col2 line2 'normal))
-      (display (do-color 'normal col1 "  / \\  " col2 line3 'normal))
-      (display (do-color 'normal col1 " /   \\ " col2 line4 'normal))))
+    (when (repl-show-startup-message)
+      (let* ((utf8?  (key-get *%system-state-plist* :use-utf8 #f))
+             (line1   (format "STklos version ~a (~a)\n" (version) (%push-id)))
+             (line2  "Copyright (C) 1999-2024 Erick Gallesio <eg@stklos.net>\n")
+             (line3 (format "[~a/~a/~a/~a]\n"
+                            (machine-type)
+                            (%thread-system)
+                            (key-get *%system-state-plist* :readline 'no-readline)
+                            (if utf8? 'utf8 'no-utf8)))
+             (line4  "Type ',h' for help\n")
+             (col1  (get-repl-color :input))
+             (col2  (get-repl-color :info)))
+        (display (do-color 'normal col1 "  \\    " col2 line1 'normal))
+        (display (do-color 'normal col1 "   \\   " col2 line2 'normal))
+        (display (do-color 'normal col1 "  / \\  " col2 line3 'normal))
+        (display (do-color 'normal col1 " /   \\ " col2 line4 'normal)))))
   ;; Lauch the REPL
   ((main-repl-hook))
   (repl)

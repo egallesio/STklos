@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -43,83 +43,57 @@
 
 (define *compiler-port* #f)
 
-(define *inline-table* `((+              . ,+)
-                         (-              . ,-)
-                         (*              . ,*)
-                         (/              . ,/)
-                         (fx+            . ,fx+)
-                         (fx-            . ,fx-)
-                         (fx*            . ,fx*)
-                         (fxquotient     . ,fxquotient)
-                         (=              . ,=)
-                         (<              . ,<)
-                         (<=             . ,<=)
-                         (>              . ,>)
-                         (>=             . ,>=)
-                         (fx=?           . ,fx=?)
-                         (fx<?           . ,fx<?)
-                         (fx<=?          . ,fx<=?)
-                         (fx>?           . ,fx>?)
-                         (fx>=?          . ,fx>=?)
-                         (fx=            . ,fx=?)
-                         (fx<            . ,fx<?)
-                         (fx<=           . ,fx<=?)
-                         (fx>            . ,fx>?)
-                         (fx>=           . ,fx>=?)
-                         (cons           . ,cons)
-                         (car            . ,car)
-                         (cdr            . ,cdr)
-                         (null?          . ,null?)
-                         (list           . ,list)
-                         (not            . ,not)
-                         (vector-ref     . ,vector-ref)
-                         (vector-set!    . ,vector-set!)
-                         (string-ref     . ,string-ref)
-                         (string-set!    . ,string-set!)
-                         (eq?            . ,eq?)
-                         (eqv?           . ,eqv?)
-                         (equal?         . ,equal?)
-                         (void           . ,void)
-                         (caar           . ,caar)
-                         (cdar           . ,cdar)
-                         (cadr           . ,cadr)
-                         (cddr           . ,cddr)
-                         (caaar          . ,caaar)
-                         (cdaar          . ,cdaar)
-                         (cadar          . ,cadar)
-                         (cddar          . ,cddar)
-                         (caadr          . ,caadr)
-                         (cdadr          . ,cdadr)
-                         (caddr          . ,caddr)
-                         (cdddr          . ,cdddr)
-                         (caaaar         . ,caaaar)
-                         (cdaaar         . ,cdaaar)
-                         (cadaar         . ,cadaar)
-                         (cddaar         . ,cddaar)
-                         (caadar         . ,caadar)
-                         (cdadar         . ,cdadar)
-                         (caddar         . ,caddar)
-                         (cdddar         . ,cdddar)
-                         (caaadr         . ,caaadr)
-                         (cdaadr         . ,cdaadr)
-                         (cadadr         . ,cadadr)
-                         (cddadr         . ,cddadr)
-                         (caaddr         . ,caaddr)
-                         (cdaddr         . ,cdaddr)
-                         (cadddr         . ,cadddr)
-                         (cddddr         . ,cddddr)
-                         (%cxr           . ,%cxr)
-                         (list-ref       . ,list-ref)))
+;; ----------------------------------------------------------------------
+;;  Define the inlining tables
+;; ----------------------------------------------------------------------
+(define *inline-math-commutative* '(+ * gcd lcm))
+(define *inline-math-general*     '(- /
+                                    fx+ fx- fx* fxquotient
+                                    sin   cos   tan
+                                    asin  acos  atan
+                                    sinh  cosh  tanh
+                                    asinh acosh atanh
+                                    exp log expt
+                                    sqrt square))
+(define *inline-math*              (append *inline-math-commutative*
+                                           *inline-math-general*))
 
-(define *inline-symbols* (map car *inline-table*))
+(define *inline-general*          '(fx=? fx<? fx<=? fx>? fx>=?
+                                    fx=  fx<  fx<= fx> fx>= ;FIXME: should be deleted
+                                    cons car cdr null? list
+                                    not
+                                    vector-ref vector-set!
+                                    string-ref string-set!
+                                    eq? eqv? equal?
+                                    assq assv assoc
+                                    memq memv member
+                                    void
+                                    caar   cdar   cadr   cddr
+                                    caaar  cdaar  cadar  cddar
+                                    caadr  cdadr  caddr  cdddr
+                                    caaaar cdaaar cadaar cddaar
+                                    caadar cdadar caddar cdddar
+                                    caaadr cdaadr cadadr cddadr
+                                    caaddr cdaddr cadddr cddddr
+                                    %cxr
+                                    list-ref))
+(define *inline-table*              (append *inline-math*
+                                            *inline-general*))
 
-(define *always-inlined*        '(%set-current-module %%set-current-module
-                                  %%execute %%execute-handler))
+
+(define *always-inlined*        '(%set-current-module
+                                  %%set-current-module
+                                  %%execute
+                                  %%execute-handler))
+;; ----------------------------------------------------------------------
 
 (define *code-instr*            #f)
 (define *code-constants*        '())
 (define *code-labels*           0)
 (define *compiling-file*        #f)  ;; is #t when we are compiling a file
+
+(define *scmmod*                (find-module 'SCHEME))
+
 
 (include "peephole.stk")
 (include "assembler.stk")
@@ -148,6 +122,10 @@
   mlocals                       ; #t if symbols are macros
   parent)                       ; parent scope
 
+;; find-symbol-in-env will return:
+;;    - a symbol, if it is a local variable
+;;    - a syntax object, if the symbol is bound to syntax
+;;    - #f otherwise
 (define (find-symbol-in-env symb env)
   (let Loop ((env env))
     (cond
@@ -187,6 +165,17 @@
 ;
 ; ======================================================================
 
+;; find-syntax-in-env returns the syntax object to which symb is bound,
+;; or #f
+;; This is *not* to be used when accessing symbol values; it is to be
+;; used when expanding macros -- to expand a form (S ...), we see if
+;; S is syntax; if it's not, we don't bother doing anything else and
+;; return the form as is.
+;;
+;; This is the usual way (almost all Schemes do this):
+;;    (define-syntax f (syntax-rules () ((f) -1)))
+;;    (let ((f (lambda () 10))) (macro-expand '(f))) => -1
+;;    (let ((f (lambda () 10))) (f))                 => 10
 (define (find-syntax-in-env symb env)
   (and (symbol? symb)
        (let ((val (find-symbol-in-env symb env)))         ; local macro?
@@ -214,24 +203,22 @@
 
 ;; ======================================================================
 
-(define compiler:inline-common-functions
-  (let ((inlined *inline-symbols*))
-    (make-parameter #t
-                    (lambda (v)
-                      (set! *inline-symbols* (if v inlined '()))
-                      (not (null? *inline-symbols*))))))
+(define-parameter compiler-current-module (current-module)
+  (lambda (new)
+    (unless (module? new)
+      (error 'compiler-current-module "bad module parameter ~s" new))
+    (add-file-module-list! new)
+    new))
 
-(define compiler-current-module
-  (make-parameter (current-module)
-                  (lambda (new)
-                    (unless (module? new)
-                      (error 'compiler-current-module "bad module parameter ~s" new))
-                    (add-file-module-list! new)
-                    new)))
+
 
 
 ;; ----------------------------------------------------------------------
 
+;; A label is just a number. Each instruction in the list *code-instr*
+;; is either:
+;;   - a list (instruction + arguments), or
+;;   - a label (an integer number)
 (define (new-label)
   (let ((lab *code-labels*))
     (set! *code-labels* (+ *code-labels* 1))
@@ -242,6 +229,8 @@
 (define (emit . args)
   (set! *code-instr* (cons args *code-instr*)))
 
+
+;; emit-label will emit the label 'lab' (an integer)
 (define (emit-label lab)
   (set! *code-instr* (cons lab *code-instr*)))
 
@@ -252,6 +241,17 @@
 ;
 ; ======================================================================
 
+;; The global variable *code-constants* contains a list of constants for the
+;; code being compiled.
+;; Why is its index not also kept in the list? Because the index is the position
+;; of the element in the list, and it's calculated when the compiler calls this
+;; function (fetch-constant).
+;;
+;; (define *code-constants* (list-copy '(a b c d e)))
+;; (fetch-constant 'c)  => 2
+;; (fetch-constant 'a)  => 0
+;; (fetch-constant 'x)  => 5   (and x is appended to the end of *code-constants*)
+;;
 (define (fetch-constant c)
   (let ((x (memq c *code-constants*)))
     (unless x
@@ -260,6 +260,10 @@
       (set! *code-constants* (append! *code-constants* x)))
     (- (length *code-constants*) (length x))))
 
+;; small-integer-constant? checks wether anobject is an exact integer in
+;; a specific range (hardcoded to [ -2^15, 2^15 - 1 ] here). This is because
+;; the STklos VM opcodes are 16-bit wide, so this is the range that fits an
+;; opcode argument.
 (define small-integer-constant?
   (let ((min-int (- (expt 2 15)))
         (max-int (- (expt 2 15) 1)))
@@ -268,6 +272,8 @@
            (exact? v)
            (<= min-int v max-int)))))
 
+;; Generates code for small constants.
+;; v is the constant to be produced; env and tail? are ignored.
 (define (compile-constant v env tail?)
   (cond
     ((eq? v #t)                        (emit 'IM-TRUE))
@@ -374,12 +380,41 @@ doc>
 ;;;; REFERENCES & ASSIGNMENT
 ;;;;
 
+;; compile-access will generate code for references and assignments.
+;; The argments:
+;;    - name: a symbol, the variable name.
+;;    - env: the environment to be used.
+;;    - epair: the extended pair (source s-expression) that originated a
+;;      call to compile-acces.
+;;    - ref: if #t, then it's a reference; if #f, it's an assignment.
 (define (compile-access name env epair ref)
 
+  ;; STklos organizes local environments as this: each level has a
+  ;; maximum of 256 variables. However, the "(+ (* v1 256) v2)"
+  ;; formula here does *not* mean that the variables are stored
+  ;; linearly in frames that are 256 bytes apart.
+  ;; The "256v1+v2" is actually an encoding in two bytes: 2*256 + 03 =
+  ;; 0x0203. The first byte, 0x02, identifies the level, and the second
+  ;; byte, 0x03, identifies the variable.
+  ;; Later, the VM will, for example, do the following to access
+  ;; a local variable in previous levels:
+  ;;
+  ;;    for (level = FIRST_BYTE(info); level; level--)
+  ;;      e = (SCM) FRAME_NEXT(e);
+  ;;    vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
+  ;;
+  ;; FIRST_BYTE gets the level; SECOND_BYTE gets the var address.
+  ;;
+  ;; make-word builds a 16-bit word that encodes level v1 and
+  ;; variable at offset v2.
   (define (make-word v1 v2)               ;; FIXME: Add control
     (+ (* v1 256) v2))
 
 
+  ;; The argument 'ref' determines if this is a set or a reference
+  ;; (#f = set, #t = ref). So 'em' is used to simplify emmitting the
+  ;; code: i1 is the instruction for ref, i2 is the instruction for
+  ;; set.
   (define (em i1 i2 . args)
     (apply emit (if ref i1 i2) args))
 
@@ -423,6 +458,18 @@ doc>
 (define (compile-reference name env epair tail?)
   (compile-access name env epair #t))
 
+;; compile-set! will just call compile-access, and when doing so, will
+;; set the 'ref' argument to #f. The 'ref' argument to compile-access
+;; means "this is just a reference, not an assignment".
+;; Before calling compile-access, compile-set! will check the syntax
+;; for set! and also extract the variable name.
+;;
+;;     (compile-set! '(set! a (+ 2 b)))
+;;      will make these two calls:
+;;        (compile '(+ 2 b) env '(set! a + 2 b) #f)
+;;        (compile-access 'a env '(set! a + 2 b) #f)
+;;
+;; The extended set! is treated separately.
 (define (compile-set! args env tail?)
   (let ((len (length (cdr args))))
     (if (= len 2)
@@ -442,6 +489,15 @@ doc>
 ;;;;
 ;;;; IF
 ;;;;
+;;
+;; (if cond expr1 expr2) =>
+;;    [ cond ]       * tail? = #f
+;;    JUMP-FALSE L1
+;;    [ expr1 ]
+;;    GOTO L2
+;;    L1:
+;;    [ expr2 ] -or- IM-VOID
+;;    L2:
 (define (compile-if args env tail?)
   (let ((len (length (cdr args)))
         (l1  (new-label))
@@ -594,14 +650,16 @@ doc>
        (else      (- (- n) 1)))))
 
 (define (extend-env env formals)
+  ;; (extend-env env '(a b . c))  =>  scope (c b a) '() env)
+  ;; (extend-env env 'x)          =>  scope (x)     '() env)
   (letrec ((aux (lambda (l res)
                   (cond
                      ((null? l) res)
                      ((pair? l) (aux (cdr l) (cons (car l) res)))
                      (else      (cons l res))))))
-    (make-scope (aux formals '())
-                '()
-                env)))
+    (make-scope (aux formals '()) ; locals
+                '()               ; mlocals
+                env)))            ; parent
 
 (define (extract-doc-and-name doc name body)
   ;; extract the doc string and and name of the prcedure if present in body
@@ -1004,33 +1062,113 @@ doc>
 
 (define can-be-inlined?
   (let ((STklos (find-module 'STklos)))
-    (lambda (fct env)
-      ;; Avoid to use *inline-table* on all symbols (assoc is too expensive here)
-      (if (and (memq fct *inline-symbols*)
-               (not (find-symbol-in-env fct env)))
-          (let ((f (assoc fct *inline-table*)))
-            (and f (eq? (symbol-value* fct STklos) (cdr f))))
-          (memq fct *always-inlined*)))))
+    (lambda (fct env . alist)
+      (let* ((table (if (null? alist) *inline-table* (car alist)))
+             (found (memq fct table)))
+        (if (and found
+                 (not (find-symbol-in-env fct env)))
+            (let ((f (symbol-value fct *scmmod*)))
+              (and f (eq? f (symbol-value* fct STklos))))
+            (and (null? alist)                     ; if alist was passed, it was
+                 (memq fct *always-inlined*))))))) ; a request for THAT alist only
+
+;; maybe-fold-constant takes the current environment, a list of
+;; arguments and tries to math-fold them into constants.
+;;
+;; Example:
+;;
+;; (maybe-fold-constant #f '( 2.0 (log (sin 2)) (f 5) ))
+;; => ( 2.0  -0.0950830360951606  (f 5) )
+;;
+;; * The number 2.0 remains unchanged;
+;; * The expression (log (sin 2)) is evaluated;
+;; * The expression (f 5) remains unchanged.
+;;
+;; (maybe-fold-constant #f '(expt 2 (expt 2 3))) => 256
+;; (maybe-fold-constant #f '(expt x (expt 2 3))) => (expt x 8)
+;; (maybe-fold-constant #f '(expt 2 (expt 2 x))) => (expt 2 (expt 2 x))
+(define (maybe-fold-constant env args)
+  (if (and (pair? args)
+           (can-be-inlined? (car args) env *inline-math*))
+      (let ((new-args (map (lambda (f) (maybe-fold-constant env f)) (cdr args))))
+        (if (every number? new-args)
+            (with-handler (lambda (_) args)
+             (apply (symbol-value (car args) *scmmod*)
+                    (map (lambda (f) (maybe-fold-constant env f)) new-args)))
+            (cons (car args) new-args)))
+      args))
+
+;; fold-commutative-args will do constant folding in the arguments
+;; as much as possible, and return a new argumetn list. This of
+;; course should be used only for commutative operations.
+;;
+;; (fold-commutative-args + '(a 2 3 b -1)) => (4 a b)
+;; (fold-commutative-args * '(a 2 3 b -1)) => (-6 a b)
+(define (fold-commutative-args fct args)
+  (let ((nums     (filter number? args))
+        (non-nums (filter (lambda (x) (not (number? x))) args)))
+    (if (null? nums)
+        args
+        (let ((num
+               (let loop ((n (car nums)) (nums (cdr nums)))
+                 (if (not (null? nums))
+                     (loop (fct n (car nums)) (cdr nums))
+                     n))))
+          (cons num non-nums)))))
 
 
+
+;; Before calling %compile-primitive-call, the function
+;; compile-primitive-call will first try to do as much constant folding
+;; as possible, for all math expressions.
+;;
+;; (exp (sqrt 5)) will end up generating:
+;;
+;; 000:  CONSTANT             0
+;;
+;; Constants:
+;; 0: 9.35646901660115
+;;
+;; Also:
+;; (disassemble-expr '(cos (+ 3 (tan 2))) #t)
+;; 000:  CONSTANT             0
+;;
+;; Constants:
+;; 0: 0.685897402427631
 (define (compile-primitive-call fct actuals len env epair tail?)
+  ;; First we call maybe-fold-constant, which will recursively do
+  ;; constant folding on all arguments:
+  (let ((actuals (map (lambda (arg) (maybe-fold-constant env arg)) actuals)))
+    (if (can-be-inlined? fct env *inline-math-commutative*)
+        ;; if the function is commutative:
+        ;; fold-commutative and call %compile-primitive-call
+        (let* ((f-val   (symbol-value fct *scmmod*))
+               (actuals (fold-commutative-args f-val actuals))
+               (len (length actuals)))
+          (%compile-primitive-call fct actuals len env epair tail?))
+        ;; otherwise (non-commutative), do not fold-commutative
+        (%compile-primitive-call fct actuals len env epair tail?))))
+
+
+;; %compile-primitive-call takes arguments already folded
+(define (%compile-primitive-call fct actuals len env epair tail?)
   (let ((comp  (lambda (mnemo expr)
                  (compile expr env epair #f)
                  (emit mnemo)))
-        (comp1 (lambda (mnemo)
+        (comp1 (lambda mnemo
                  (if (= len 1)
                      (begin
                        (compile (car actuals) env epair #f)
-                       (emit mnemo))
+                       (apply emit mnemo))
                      (compiler-error fct epair "1 argument required (~A provided)"
-                                    len))))
-        (comp2 (lambda (mnemo)
+                                     len))))
+        (comp2 (lambda mnemo
                  (if (= len 2)
                      (begin
                        (compile (car actuals) env epair #f)
                        (emit 'PUSH)
                        (compile (cadr actuals) env epair #f)
-                       (emit mnemo))
+                       (apply emit mnemo))
                      (compiler-error fct epair "2 arguments required (~A provided)"
                                      len))))
         (oper1 (lambda (mnemo a)
@@ -1044,7 +1182,7 @@ doc>
                  (emit 'PUSH)
                  (compile b env epair #f)
                  (emit mnemo)))
-        (comp3 (lambda (mnemo)
+        (comp3 (lambda mnemo
                  (if (= len 3)
                      (begin
                        (compile (car actuals) env epair #f)
@@ -1052,18 +1190,18 @@ doc>
                        (compile (cadr actuals) env epair #f)
                        (emit 'PUSH)
                        (compile (caddr actuals) env epair #f)
-                       (emit mnemo))
+                       (apply emit mnemo))
                      (compiler-error fct epair "3 arguments required (~A provided)"
                                      len)))))
     (case fct
       ;; Always inlined functions
       ((%%set-current-module)
-              (if (= len 1)
-                  (comp1 'SET-CUR-MOD)
-                  (compiler-error '%%set-current-module epair
-                                   "1 arg. only (~S)" len)))
+       (if (= len 1)
+           (comp1 'SET-CUR-MOD)
+           (compiler-error '%%set-current-module epair
+                           "1 arg. only (~S)" len)))
       ((%%execute-handler)
-              (comp3 'EXEC-HANDLER))
+       (comp3 'EXEC-HANDLER))
 
       ;; User functions
       ((+)  (case len
@@ -1073,131 +1211,125 @@ doc>
                         (compile-normal-call fct actuals len env epair #f)))
               ((2)  (let ((a (car actuals))
                           (b (cadr actuals)))
-                      (cond
-                        ((and (number? a) (number? b))
-                         (compile-constant (+ a b) env #f))
-                        ((small-integer-constant? a)
-                         (if (= a 1)
-                             (oper1 'IN-INCR b)
-                             (oper2 'IN-SINT-ADD2 b a)))
-                        ((small-integer-constant? b)
-                         (if (= b 1)
-                             (oper1 'IN-INCR a)
-                             (oper2 'IN-SINT-ADD2 a b)))
-                        (else
-                          (comp2 'IN-ADD2)))))
+                      (if (small-integer-constant? a)
+                          (if (= a 1)
+                              (oper1 'IN-INCR b)
+                              (oper2 'IN-SINT-ADD2 b a))
+                          (comp2 'IN-ADD2))))
               (else (compile-normal-call fct actuals len env epair #f))))
       ((-)  (case len
-                ((0)  (compiler-error '- epair "needs at least one argument"))
-                ((1)  (if (number? (car actuals))
-                          (compile-constant (- (car actuals)) env #f)
-                          (compile-normal-call fct actuals len env epair #f)))
-                ((2)  (let ((a (car actuals))
-                            (b (cadr actuals)))
-                        (cond
-                          ((and (number? a) (number? b))
-                           (compile-constant (- a b) env tail?))
-                          ((small-integer-constant? a)
-                           (oper2 'IN-SINT-SUB2 b a))
-                          ((eq? b 1)
-                           (oper1 'IN-DECR a))
-                          ((and (number? b)
-                                (small-integer-constant? (- b)))
-                           (oper2 'IN-SINT-ADD2 a (- b)))
-                          (else
-                           (comp2 'IN-SUB2)))))
-                (else (compile-normal-call fct actuals len env epair #f))))
-      ((*)    (case len
-                ((0)  (emit 'IM-ONE))
-                ((1)  (if (number? (car actuals))
+              ((0)  (compiler-error '- epair "needs at least one argument"))
+              ((1)  (if (number? (car actuals))
+                        (compile-constant (- (car actuals)) env #f)
+                        (compile-normal-call fct actuals len env epair #f)))
+              ((2)  (let ((a (car actuals))
+                          (b (cadr actuals)))
+                      (cond
+                       ((and (number? a) (number? b))
+                        (compile-constant (- a b) env tail?))
+                       ((small-integer-constant? a)
+                        (oper2 'IN-SINT-SUB2 b a))
+                       ((eq? b 1)
+                        (oper1 'IN-DECR a))
+                       ((and (number? b)
+                             (small-integer-constant? (- b)))
+                        (oper2 'IN-SINT-ADD2 a (- b)))
+                       (else
+                        (comp2 'IN-SUB2)))))
+              (else (compile-normal-call fct actuals len env epair #f))))
+      ((*)  (case len
+              ((0)  (emit 'IM-ONE))
+              ((1)  (if (number? (car actuals))
                         (compile (car actuals) env epair tail?)
                         (compile-normal-call fct actuals len env epair #f)))
-                ((2)  (let ((a (car actuals))
-                            (b (cadr actuals)))
-                        (cond
-                          ((and (number? a) (number? b))
-                           (compile-constant (* a b) env tail?))
-                          ((small-integer-constant? a)
-                           (oper2 'IN-SINT-MUL2 b a))
-                          ((small-integer-constant? b)
-                           (oper2 'IN-SINT-MUL2 a b))
-                          (else
-                           (comp2 'IN-MUL2)))))
-                (else (compile-normal-call fct actuals len env epair #f))))
+              ((2)  (let ((a (car actuals))
+                          (b (cadr actuals)))
+                      (if (small-integer-constant? a)
+                          (oper2 'IN-SINT-MUL2 b a))
+                      (comp2 'IN-MUL2)))
+              (else (compile-normal-call fct actuals len env epair #f))))
       ((/)    (case len
                 ((0)   (compiler-error '/ epair "needs at least one argument"))
                 ((1)   (if (number? (car actuals))
-                          (compile-constant (/ 1 (car actuals)) env #f)
-                          (compile-normal-call fct actuals len env epair #f)))
+                           (compile-constant (/ 1 (car actuals)) env #f)
+                           (compile-normal-call fct actuals len env epair #f)))
                 ((2)  (let ((a (car actuals))
                             (b (cadr actuals)))
                         (cond
-                          ((and (number? a) (number? b))
-                           (compile-constant (/ a b) env tail?))
-                          ((small-integer-constant? b)
-                           (oper2 'IN-SINT-DIV2 a b))
-                          (else
-                           (comp2 'IN-DIV2)))))
+                         ((and (number? a) (number? b))
+                          (compile-constant (/ a b) env tail?))
+                         ((small-integer-constant? b)
+                          (oper2 'IN-SINT-DIV2 a b))
+                         (else
+                          (comp2 'IN-DIV2)))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
       ((fx+ fx- fx* fxquotient)
-                (case len
-                  ((2) (let ((a (car actuals))
-                             (b (cadr actuals)))
-                         (cond
-                           ((and (fixnum? a) (fixnum? b))
-                            (compile-constant (case fct
-                                                ((fx+) (fx+ a b))
-                                                ((fx-) (fx- a b))
-                                                ((fx*) (fx* a b))
-                                                (else  (fxquotient a b)))
-                                              env
-                                              tail?))
-                           ((and (small-integer-constant? a)
-                                 (memq fct '(fx+ fx*))) ; commutative only
-                            (oper2 (if (eq? fct 'fx+)
-                                       'IN-SINT-FXADD2
-                                       'IN-SINT-FXMUL2)
-                                   b a))
-                           ((small-integer-constant? b)
-                            (oper2 (case fct
-                                     ((fx+) 'IN-SINT-FXADD2)
-                                     ((fx-) 'IN-SINT-FXSUB2)
-                                     ((fx*) 'IN-SINT-FXMUL2)
-                                     (else  'IN-SINT-FXDIV2))
-                                   a b))
-                           (else
-                            (comp2 (case fct
-                                     ((fx+) 'IN-FXADD2)
-                                     ((fx-) 'IN-FXSUB2)
-                                     ((fx*) 'IN-FXMUL2)
-                                     (else  'IN-FXDIV2)))))))
-                  (else
-                   (compile-normal-call fct actuals len env epair #f))))
+       (case len
+         ((2) (let ((a (car actuals))
+                    (b (cadr actuals)))
+                (cond
+                 ((and (fixnum? a) (fixnum? b))
+                  (compile-constant (case fct
+                                      ((fx+) (fx+ a b))
+                                      ((fx-) (fx- a b))
+                                      ((fx*) (fx* a b))
+                                      (else  (fxquotient a b)))
+                                    env
+                                    tail?))
+                 ((and (small-integer-constant? a)
+                       (memq fct '(fx+ fx*))) ; commutative only
+                  (oper2 (if (eq? fct 'fx+)
+                             'IN-SINT-FXADD2
+                             'IN-SINT-FXMUL2)
+                         b a))
+                 ((small-integer-constant? b)
+                  (oper2 (case fct
+                           ((fx+) 'IN-SINT-FXADD2)
+                           ((fx-) 'IN-SINT-FXSUB2)
+                           ((fx*) 'IN-SINT-FXMUL2)
+                           (else  'IN-SINT-FXDIV2))
+                         a b))
+                 (else
+                  (comp2 (case fct
+                           ((fx+) 'IN-FXADD2)
+                           ((fx-) 'IN-FXSUB2)
+                           ((fx*) 'IN-FXMUL2)
+                           (else  'IN-FXDIV2)))))))
+         (else
+          (compile-normal-call fct actuals len env epair #f))))
 
       ((= < > <= >=)
-                (case len
-                ((O)   (compiler-error fct epair
-                                        "needs at least one argument" fct))
-                ((2)   (comp2 (case fct
-                                ((=)  'IN-NUMEQ)
-                                ((<)  'IN-NUMLT)
-                                ((>)  'IN-NUMGT)
-                                ((<=) 'IN-NUMLE)
-                                ((>=) 'IN-NUMGE))))
-                (else  (compile-normal-call fct actuals len env epair #f))))
+       (case len
+         ((O)   (compiler-error fct epair
+                                "needs at least one argument" fct))
+         ((2)   (comp2 (case fct
+                         ((=)  'IN-NUMEQ)
+                         ((<)  'IN-NUMLT)
+                         ((>)  'IN-NUMGT)
+                         ((<=) 'IN-NUMLE)
+                         ((>=) 'IN-NUMGE))))
+         (else  (compile-normal-call fct actuals len env epair #f))))
 
       ((fx=? fx<? fx>? fx<=? fx>=?
         fx=  fx<  fx>  fx<=  fx>= )
-                (case len
-                ((O)   (compiler-error fct epair
-                                        "needs at least one argument" fct))
-                ((2)   (comp2 (case fct
-                                ((fx=?  fx=)  'IN-FXEQ)
-                                ((fx<?  fx<)  'IN-FXLT)
-                                ((fx>?  fx>)  'IN-FXGT)
-                                ((fx<=? fx<=) 'IN-FXLE)
-                                ((fx>=? fx>=) 'IN-FXGE))))
-                (else  (compile-normal-call fct actuals len env epair #f))))
+       (case len
+         ((O)   (compiler-error fct epair
+                                "needs at least one argument" fct))
+         ((2)   (comp2 (case fct
+                         ((fx=?  fx=)  'IN-FXEQ)
+                         ((fx<?  fx<)  'IN-FXLT)
+                         ((fx>?  fx>)  'IN-FXGT)
+                         ((fx<=? fx<=) 'IN-FXLE)
+                         ((fx>=? fx>=) 'IN-FXGE))))
+         (else  (compile-normal-call fct actuals len env epair #f))))
+
+      ;; This entry is here just because we declared these functions in the
+      ;; inline table.  We don't need to inline them, because they were dealt
+      ;; with in a previous step by fold-commutative-args and
+      ;; maybe-fold-constant.
+      ((sin cos tan asin acos exp log sinh cosh tanh asinh acosh atanh sqrt
+        square expt atan gcd lcm)
+       (compile-normal-call fct actuals len env epair #f))
 
       ((cons)   (comp2 'IN-CONS))
       ((car)    (comp1 'IN-CAR))
@@ -1205,15 +1337,7 @@ doc>
       ((null?)  (comp1 'IN-NULLP))
       ((not)    (comp1 'IN-NOT))
       ((list)   (compile-args actuals env)
-                (emit 'IN-LIST len))
-;;//      ((apply)  (case len
-;;//              ((0)  (compile-error "no argument given to apply"))
-;;//              ((1)  (compile-primitive-call fct (list (car actuals) '())
-;;//                                            (+ len 1) env tail?))
-;;//              (else (emit 'PREPARE-CALL)
-;;//                    (compile-args (cdr actuals) env)
-;;//                    (compile (car actuals) env #f)
-;;//                    (emit 'IN-APPLY (- len 1) (if tail? 1 0)))))
+       (emit 'IN-LIST len))
       ((vector-ref)     (comp2 'IN-VREF))
       ((vector-set!)    (comp3 'IN-VSET))
       ((string-ref)     (comp2 'IN-SREF))
@@ -1221,12 +1345,28 @@ doc>
       ((eq?)            (comp2 'IN-EQ))
       ((eqv?)           (comp2 'IN-EQV))
       ((equal?)         (comp2 'IN-EQUAL))
+
+      ((assq)           (comp2 'IN-ASSOC 1))
+      ((assv)           (comp2 'IN-ASSOC 2))
+      ((assoc)          (case len
+                          ((2) (comp2 'IN-ASSOC 3))
+                          ((3) (comp3 'IN-ASSOC 4))
+                          (else (compile-normal-call fct actuals len env epair #f))))
+
+      ((memq)           (comp2 'IN-MEMBER 1))
+      ((memv)           (comp2 'IN-MEMBER 2))
+      ((member)          (case len
+                          ((2) (comp2 'IN-MEMBER 3))
+                          ((3) (comp3 'IN-MEMBER 4))
+                          (else (compile-normal-call fct actuals len env epair #f))))
+
+
       ((void)           (if (zero? len)
                             (emit 'IM-VOID)
                             (compile (append (cons 'begin actuals) (list (void)))
                                      env epair #f)))
 
-      ;; The cxr closures are very commonly used, call the specialized IN-CDR instr.
+      ;; The cxr closures are very commonly used, call the specialized IN-CXR instr.
       ((caar cdar cadr cddr
         caaar cdaar cadar cddar caadr cdadr caddr cdddr
         caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar
@@ -1302,9 +1442,13 @@ doc>
                     ((>= (length fct) 3) (cddr fct))
                     (else fct))))
           (compile-lambda-call fct actuals len env ep tail?))
-        (if (can-be-inlined? fct env)
-            (compile-primitive-call fct actuals len env args tail?)
-            (compile-normal-call    fct actuals len env args tail?)))))
+        (begin
+          (let ((expr (maybe-fold-constant env (cons fct actuals))))
+            (if (not (pair? expr))
+                (compile-constant expr env tail?)
+                (if (can-be-inlined? fct env)
+                    (compile-primitive-call fct actuals len env args tail?)
+                    (compile-normal-call    fct actuals len env args tail?))))))))
 
 ;;;;
 ;;;; LET / LET* / LETREC
@@ -1562,6 +1706,18 @@ doc>
 ;;
 ;; DO
 ;;
+;; (do ((a a0 a+)
+;;      (b b0 b+)
+;;      ...)
+;;     (test fin)
+;;   <body>) =>
+;;
+;;      (letrec ((NAME (lambda (a b ...)
+;;                       (if test
+;;                         (begin fin)
+;;                         (begin <body>
+;;                               (name a+ b+ ...))))))
+;;         (NAME a0 b0 ...))
 (define (rewrite-do inits test body)
   (let ((loop-name (gensym)))
     `(letrec ((,loop-name
@@ -1683,12 +1839,22 @@ doc>
 
 
 ;; ======================================================================
+
+;; Compiles access to a symbol in the SCHEME module, using a special
+;; VM instruction INSCHEME:
+;;
+;; (%%in-scheme x) =>
+;;    GLOBAL-REF           0
+;;    INSCHEME
+;;
+;; Constants:
+;; 0: x
 (define (compile-in-scheme e env tail)
   (if (= (length e) 2)
       (begin
         (compile (cadr e) env (cadr e) tail)
         (emit 'INSCHEME))
-      (compiler-error '%%in-scheme "expected one argument")))
+      (compiler-error '%%in-scheme e "expected one argument")))
 
 ;;;;======================================================================
 ;;;;
@@ -1766,9 +1932,7 @@ both forms.
 
   (let ((path (find-path file
                          (if lib-only?
-                             (list (make-path (%library-prefix)
-                                              "share" "stklos"
-                                              (version)))
+                             (list (%library-prefix 'data))
                              (load-path)))))
     (if path
         (let ((infos (%file-information path)))
@@ -1856,11 +2020,15 @@ both forms.
      ,@body
      (void)))
 
+;; The expression, 'e', is of the form '(%%label nnnn)',
+;; where nnnn is an integer that describes this label.
 (define (compile-%%label e env tail)
   (if (= (length e) 2)
       (emit-label (cadr e))
       (compiler-error '%%label e "bad usage ~S" e)))
 
+;; The expression, 'e', is something like '(%%goto nnnn)',
+;; where nnnn is a label.
 (define (compile-%%goto e env tail)
   (if (= (length e) 2)
       (emit 'GOTO (cadr e))

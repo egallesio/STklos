@@ -235,6 +235,7 @@
 ;;         ((pair? (car args)) (apply fxmapping (flatten args)))
 ;;         (else (apply fxmaping args))))
 (define-reader-ctor '<fxmapping> fxmapping)
+(define-reader-ctor 'fxmapping fxmapping)
 
 ;;;;;;;;;;;;;;;;
 ;;;

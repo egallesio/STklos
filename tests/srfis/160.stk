@@ -429,7 +429,7 @@
 (test/error "wrong procedure.2" (c128vector-map (lambda (a b) (* a b)) v))
 (test/error "wrong procedure.3" (c128vector-unfold (lambda (a b) 1.0) 3 1.0))
 (test/error "wrong procedure.4" (c128vector-filter 1 v))
-(test/error "wrong seed"        (c128vector-unfold (lambda (a b) (values b 1.0)) 3 1))
+(test/error "wrong seed"        (c128vector-unfold (lambda (a b) (values b 1.0)) 3 'hi))
 
 (test/error "wrong index.1" (c128swap! v 1 5))
 (test/error "wrong index.2" (c128swap! v -1 2))

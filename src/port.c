@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ static void error_closed_port(SCM p)
 
 static void error_bad_utf8_character(int byte)
 {
-  general_io_error(io_read_error, "bad UTF-8 byte %S", MAKE_INT(byte));
+  general_io_error(io_read_error, "bad UTF-8 byte: ~S", MAKE_INT(byte));
 }
 
 void STk_error_bad_io_param(char *fmt, SCM p)
@@ -1181,7 +1181,7 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc EXT error
+<doc R7RS error
  * (error str obj ...)
  * (error name str obj ...)
  *
@@ -1189,13 +1189,15 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * of |error| takes  a symbol as first parameter; it is generally used for the
  * name of the procedure which raises the error.
  *
- * NOTE: The specification string may follow the _tilde conventions_ of
+ * NOTE: {{rseven}} permits only the fist form of call. Using a symbol as first
+ * parameter is {{stklos}} specific.
+ * Furthermore, the specification string may follow the _tilde conventions_ of
  * |format| (see _<<format, primitive `format`>>_); in this case this
  * procedure builds an error message according to the specification
  * given in |str|. Otherwise,
  * this procedure is in conformance with the |error| procedure defined in
  * {{link-srfi 23}} and |str| is printed with the |display| procedure,
- * whereas the |obj|s are printed  with the |write| procedure.
+ * whereas the |obj| parameters are printed  with the |write| procedure.
  *
  * Hereafter, are some calls of the |error| procedure using a formatted string
  * @lisp

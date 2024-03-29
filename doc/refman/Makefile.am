@@ -69,7 +69,7 @@ extradoc: multi pdf
 # https://github.com/owenh000/asciidoctor-multipage
 # The backreferences are alawas on the name of the source file.
 # So during the build of this version of the manual we create a link on
-# tmp-html.txt 
+# tmp-html.txt
 ../HTML/$(HTMLMULTI): tmp-html.txt
 	mkdir -p ../HTML/images
 	cp -a $(IMG) ../HTML/images
@@ -81,7 +81,12 @@ extradoc: multi pdf
 # ----------------------------------------------------------------------
 ../PDF/$(PDF): tmp-pdf.txt
 	mkdir -p ../PDF
-	$(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ tmp-pdf.txt
+	$(ADOC) -v -r asciidoctor-pdf -b pdf -o tmp.pdf tmp-pdf.txt
+	@echo "Reducing size of generated PDF file"
+	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress \
+		-dNOPAUSE -dQUIET -dBATCH -sOutputFile=$@ tmp.pdf
+	rm -f tmp.pdf
+
 
 # ----------------------------------------------------------------------
 tmp-html.txt: $(SOURCES) $(DOCDB)
@@ -94,7 +99,7 @@ $(DOCDB):
 	(cd ..; $(MAKE) docdb)
 
 clean:
-	rm -f  tmp-html.txt tmp-pdf.txt stklos-ref-multi.txt *~
+	rm -f  tmp-html.txt tmp-pdf.txt stklos-ref-multi.txt tmp.pdf *~
 
 distclean: clean
 	rm -f  ../HTML/$(HTMLMAIN) ../HTML/$(HTMLMULTI)

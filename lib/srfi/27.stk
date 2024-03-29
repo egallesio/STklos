@@ -243,10 +243,13 @@
 
 
 ;; assigning to default-random-source should not change these procedures
-(define (random-integer n) (%random-integer-from-source-mt
-                            (%random-source-state-ref default-random-source n)))
-(define (random-real)      (%random-real-from-source-mt
-                            (%random-source-state-ref default-random-source)))
+(define (random-integer n)
+  ((in-module srfi/27 %random-integer-from-source-mt)
+   ((in-module srfi/27 %random-source-state-ref) default-random-source) n))
+
+(define (random-real)
+  ((in-module srfi/27 %random-real-from-source-mt)
+   ((in-module srfi/27 %random-source-state-ref) default-random-source)))
 
 
 ;;;
@@ -278,14 +281,6 @@ doc>
 ;; These two procedures were broken due to autoloads, so we force their definition here
 
 (define-module STklos
-  (import (srfi 27))
-
-  (define (random-integer n)
-    ((in-module srfi/27 %random-integer-from-source-mt)
-     ((in-module srfi/27 %random-source-state-ref) default-random-source) n))
-
-  (define (random-real)
-    ((in-module srfi/27 %random-real-from-source-mt)
-     ((in-module srfi/27 %random-source-state-ref) default-random-source))))
-
-
+  (import (only (srfi 27)
+                random-integer
+                random-real)))

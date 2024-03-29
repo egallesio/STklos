@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,9 +24,9 @@
  */
 
 #include <float.h>
+#include <math.h>
 #include "stklos.h"
 
-int STk_uvectors_allowed = 0;
 static SCM u64_max, s64_min, s64_max;
 
 
@@ -174,7 +174,7 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfi
 
 
 /* Return the type of a uniform vector given its tag */
-int STk_uniform_vector_tag(char *s)
+int STk_uniform_vector_tag(const char *s)
 {
   static char *table[] =
     {"s8", "u8", "s16", "u16", "s32", "u32", "s64", "u64",
@@ -291,18 +291,22 @@ static void uvector_set(SCM v, long i, SCM value)
         }
       break;
     case UVECT_F32:
-      if (REALP(value)) {
-        ((float *) UVECTOR_DATA(v))[i] = (float) REAL_VAL(value);
-        return;
-      }
-      break;
     case UVECT_F64:
-      if (REALP(value)) {
-        ((double *) UVECTOR_DATA(v))[i] = (double) REAL_VAL(value);
-        return;
+      {
+        double d = STk_number2double(value);
+
+        // if value is not a number, STk_number2double returns a NaN. However,
+        // a NaN is also a correct value for a #f32 or #f64 number. So, value
+        // is correct is it is a NaN or it's conversion is not a NaN.
+        if (STk_isnan(value) || !isnan(d)) {
+          if (UVECTOR_TYPE(v) == UVECT_F32)
+            ((float *) UVECTOR_DATA(v))[i] = (float) d;
+          else
+            ((double *) UVECTOR_DATA(v))[i] = d;
+          return;
+        }
       }
       break;
-
     /*
      Complexes are stored with the real part in the even-indexed cells, and
      imaginary parts in odd-indexed cells:
@@ -324,10 +328,14 @@ static void uvector_set(SCM v, long i, SCM value)
         ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(rea);
         ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) REAL_VAL(img);
         return;
-      } else if (REALP(value)){
-        ((float *) UVECTOR_DATA(v))[2*i]     = (float) REAL_VAL(value);
-        ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) 0.0;
-        return;
+      } else {
+        float f = STk_number2double(value);
+
+        if (STk_isnan(value) || !isnan(f)) { // See comment for F64
+          ((float *) UVECTOR_DATA(v))[2*i]     = f;
+          ((float *) UVECTOR_DATA(v))[2*i + 1] = (float) 0.0;
+          return;
+        }
       }
       break;
     case UVECT_C128:
@@ -340,10 +348,14 @@ static void uvector_set(SCM v, long i, SCM value)
         ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(rea);
         ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) REAL_VAL(img);
         return;
-      } else if (REALP(value)) {
-        ((double *) UVECTOR_DATA(v))[2*i]     = (double) REAL_VAL(value);
-        ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) 0.0;
-        return;
+      } else {
+        double d = STk_number2double(value);
+
+        if (STk_isnan(value) || !isnan(d)) {  // See comment for F64
+          ((double *) UVECTOR_DATA(v))[2*i]     = d;
+          ((double *) UVECTOR_DATA(v))[2*i + 1] = (double) 0.0;
+          return;
+        }
       }
       break;
   }
@@ -356,7 +368,7 @@ static void uvector_set(SCM v, long i, SCM value)
 
 void STk_uvector_put(SCM v, long i, SCM value) /* public version of uvector_set */
 {
-    uvector_set(v, i, value);
+  uvector_set(v, i, value);
 }
 
 static SCM uvector_ref(SCM v, long i)
@@ -607,9 +619,14 @@ DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
   s64_min = STk_Cstr2number(S64_MIN, 10);
   s64_max = STk_Cstr2number(S64_MAX, 10);
 
-  /* Retain that we can use uniform vectors from now on */
-  STk_uvectors_allowed = 1;
+  /* Add new readers #xxx syntax */
+  STk_add_uvector_reader_tag("s8");  /* "u8" is defined by default */
+  STk_add_uvector_reader_tag("s16"); STk_add_uvector_reader_tag("u16");
 
+  STk_add_uvector_reader_tag("s32"); STk_add_uvector_reader_tag("u32");
+  STk_add_uvector_reader_tag("s64"); STk_add_uvector_reader_tag("u64");
+  STk_add_uvector_reader_tag("f32"); STk_add_uvector_reader_tag("f64");
+  STk_add_uvector_reader_tag("c64"); STk_add_uvector_reader_tag("c128");
 
   return STk_void;
 }
@@ -760,11 +777,8 @@ DEFINE_PRIMITIVE("utf8->string", utf82string, vsubr, (int argc, SCM *argv))
   len        = end_addr - start_addr;
 
   /* Verify that the sub-vector denotes a correct string */
-  if (STk_utf8_verify_sequence((char *) start_addr, len)) {
-    SCM z = STk_makestring(len, NULL);
-    memcpy(STRING_CHARS(z), start_addr, end_addr - start_addr);
-    return z;
-  }
+  if (STk_utf8_verify_sequence((char *) start_addr, len))
+    return STk_makestring(len, (char *) start_addr);
   else
     STk_error("bad UTF8 sequence between %d and %d in ~S", start, end, v);
 

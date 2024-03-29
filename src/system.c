@@ -1871,9 +1871,22 @@ DEFINE_PRIMITIVE("pause", pause, subr0, (void))
  *
  */
 
-DEFINE_PRIMITIVE("%library-prefix", library_prefix, subr0, (void))
+DEFINE_PRIMITIVE("%library-prefix", library_prefix, subr01, (SCM arg))
 {
-  return STk_Cstring2string(PREFIXDIR);
+  char *res = "";
+
+  if (arg) {
+    if (SYMBOLP(arg)) {
+      if (strcmp(SYMBOL_PNAME(arg), "lib") == 0) res = EXECDIR;
+      else if (strcmp(SYMBOL_PNAME(arg), "data") == 0) res = SCMDIR;
+    }
+    if (!*res)
+      STk_error("bad argument (must be either the symbol lib or data)");
+  } else {
+    /* No argument => return the prefix only */
+    res = PREFIXDIR;
+  }
+  return STk_Cstring2string(res);
 }
 
 DEFINE_PRIMITIVE("%shared-suffix", shared_suffix, subr0, (void))
@@ -1930,6 +1943,16 @@ DEFINE_PRIMITIVE("%uname", uname, subr0, (void))
   VECTOR_DATA(z)[4] = STk_Cstring2string(name.machine);
 
   return z;
+}
+
+DEFINE_PRIMITIVE("os-name", os_name, subr0, (void))
+{
+  struct utsname name;
+
+  if (uname(&name) != 0) {
+    error_posix(NULL, NULL);
+  }
+  return STk_Cstring2string(name.sysname);
 }
 
 
@@ -2027,5 +2050,6 @@ int STk_init_system(void)
   ADD_PRIMITIVE(big_endianp);
   ADD_PRIMITIVE(get_locale);
   ADD_PRIMITIVE(uname);
+  ADD_PRIMITIVE(os_name);
   return TRUE;
 }

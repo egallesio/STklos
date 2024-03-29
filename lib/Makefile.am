@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ scheme_BOOT = assembler.stk \
           compfile.stk      \
           compflags.stk     \
           computils.stk     \
-          equiv.stk         \
           expand.pp         \
           ffi.stk           \
           library.stk       \
@@ -73,7 +72,6 @@ SRC_STK = bigmatch.stk        \
           expand.ss           \
           full-syntax.stk     \
           getopt.stk          \
-          help.stk            \
           lex-rt.stk          \
           make-C-boot.stk     \
           pretty-print.stk    \
@@ -87,7 +85,6 @@ scheme_OBJS = bigmatch.ostk     \
           describe.ostk         \
           env.ostk              \
           getopt.ostk           \
-          help.ostk             \
           lex-rt.ostk           \
           pretty-print.ostk     \
           slib.ostk             \
@@ -103,8 +100,8 @@ BASEDIR     = ..
 
 
 #======================================================================
-schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
-schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
+schemedir       = $(DESTDIR)@SCMDIR@
+schemelibdir    = $(DESTDIR)@EXECDIR@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
 schemelib_DATA  = $(scheme_SOLIBS)
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
@@ -121,9 +118,9 @@ SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
-	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../src @GCINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o
 
 #======================================================================
@@ -174,7 +171,7 @@ install-sources:
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) install-sources)\
 	done
-	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
+	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)$(schemedir)
 
 
 # Explicit some dependencies here
@@ -194,12 +191,6 @@ lib/scheme: lib
 lib/stklos: lib
 lib/streams: lib
 lib/srfi: lib/scheme lib/stklos lib/streams
-
-readline-complete.@SH_SUFFIX@: readline-complete.c
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
-	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.@SH_SUFFIX@ $*.o @DLLIBS@ @RDLINE@
-	/bin/rm -f $*.o
 
 #
 # SRFIs support

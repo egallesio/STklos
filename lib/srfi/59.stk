@@ -11,14 +11,18 @@
           user-vicinity home-vicinity in-vicinity sub-vicinity
           make-vicinity pathname->vicinity vicinity:suffix?)
 
-  (define *slib-possible-paths* `(,(make-path (%stklos-conf-dir) "slib")
-                                  ,(make-path (%library-prefix)
-                                              "share"
-                                              "stklos"
-                                              "slib")
-                                  "/usr/local/share/slib"
-                                  "/usr/share/slib"))
-  
+  (define *slib-possible-paths*
+    (let* ((datadir (%library-prefix 'data))
+           (dir (if (equal? (basename datadir) (short-version))
+                    ;; datadir last part is the version number. Use dirname
+                    (dirname datadir)
+                    ;; datadir was probably given at config time. Use it
+                    datadir)))
+      `(,(make-path (%stklos-conf-dir) "slib")
+        ,(make-path dir "slib")
+        "/usr/local/share/slib"
+        "/usr/share/slib")))
+
   ;; Returns the vicinity of the currently loading Scheme code.
   (define (program-vicinity)
     (or (script-directory)
@@ -83,7 +87,7 @@
   ;; Returns the vicinity containing path.
   (define pathname->vicinity dirname)
 
-  ;; Returns the `#t' if chr is a vicinity suffix character; and #f otherwise. 
+  ;; Returns the `#t' if chr is a vicinity suffix character; and #f otherwise.
   (define (vicinity:suffix? chr)
     (eq? chr #\/))
 

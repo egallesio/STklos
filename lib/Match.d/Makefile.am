@@ -1,6 +1,6 @@
 # Makefile.am for STklos lib
 #
-# Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,14 +20,14 @@
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 26-Nov-2001 10:10 (eg)
 
-scheme_matchdir   = $(prefix)/share/@PACKAGE@/@VERSION@/Match.d
+scheme_matchdir   = $(DESTDIR)@SCMDIR@/Match.d
 scheme_match_DATA = descr.scm compiler.scm  mexpand.scm normalize.scm s2cfun.scm
 
 # SRC = descr.scm compiler.scm  mexpand.scm normalize.scm s2cfun.scm
 #
 # install-sources:
-# 	mkdir -p  $(DESTDIR)/$(scheme_matchdir)
-# 	cp $(SRC) $(DESTDIR)/$(scheme_matchdir)
+# 	mkdir -p  $(DESTDIR)$(scheme_matchdir)
+# 	cp $(SRC) $(DESTDIR)$(scheme_matchdir)
 #
 
 uninstall-hook:

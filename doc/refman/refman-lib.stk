@@ -1,0 +1,226 @@
+;;;;
+;;;;
+;;;; refman-lib.stk         -- Library for Reference Manual documentation
+;;;;
+;;;; Copyright © 2022-2023 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  7-Jan-2022 08:49
+;;;;
+
+(import (stklos preproc))
+
+;;;
+;;; SRFIs
+;;;
+(load "../../lib/srfis.stk")
+
+(define (make-srfi-url n)
+  (format "http://srfi.schemers.org/srfi-~A/srfi-~A.html" n n))
+
+
+(define (link-srfi n)
+  (let ((info (find-srfi n)))
+    (unless info
+      (error "link-srfi: SRFI ~S not in database!!" n))
+    (format "*link:~a[SRFI-~a]* (_~a_)(((SRFI-~a)))" (make-srfi-url n) n
+            (%srfi-title info) n)))
+
+(define (quick-link-srfi n)
+  (let ((info (find-srfi n)))
+    (unless info
+      (error "link-srfi: SRFI ~S not in database!!" n))
+    (format "*link:~a[SRFI-~a]*" (make-srfi-url n) n)))
+
+(define (srfi-title n)
+  (let ((info (find-srfi n)))
+    (unless info
+      (error "link-srfi: SRFI ~S not in database!!" n))
+    (%srfi-title info)))
+
+(define (srfi-file n)
+  (let ((info (find-srfi n)))
+    (unless info
+      (error "link-srfi: SRFI ~S not in database!!" n))
+    (%srfi-file info)))
+
+(define (srfi-subsection n)
+  (let ((infos (find-srfi n)))
+    (unless infos
+      (error "srfi-subsection: SRFI ~S not in database!!" n))
+    (let ((name (format "SRFI-~A" n)))
+      (printf "==== ~a -- ~a\n" (string-downcase name) (%srfi-title infos))
+      (printf "(((~a)))" name))))
+
+;======================================================================
+;
+;               rewrite-for-adoc
+;
+;======================================================================
+(define var-rgxp      (string->regexp "\\|([^|]+)\\|"))
+(define arrow-rgxp    (string->regexp "=>"))
+(define pipe-rgxp     (string->regexp "@pipe"))
+(define print-rgxp    (string->regexp "@print{?}?"))
+(define lisp-rgxp     (string->regexp "@lisp"))
+(define elisp-rgxp    (string->regexp "@end lisp"))
+(define R4RS-rgxp     (string->regexp "R4RS"))
+(define R5RS-rgxp     (string->regexp "R5RS"))
+(define R6RS-rgxp     (string->regexp "R6RS"))
+(define R7RS-rgxp     (string->regexp "R7RS"))
+(define STklos-rgxp   (string->regexp "STklos"))
+(define linebrk-rgxp  (string->regexp "@l"))
+
+
+(define (rewrite-for-adoc def)
+  ;; rewrite |%f| and |%t|
+  (set! def (regexp-replace-all "\\|%(f|t)\\|" def "`#\\1`"))
+
+  ;; rewrite |xxx| in @code{xxx}
+  (set! def (regexp-replace-all var-rgxp def "`\\1`"))
+  ;; rewrite => in an arrow
+  (set! def (regexp-replace-all arrow-rgxp def "=>"))
+  ;; rewrite @pipe to a bar
+  (set! def (regexp-replace-all pipe-rgxp def "|"))
+  ;; rewrite @print to |-
+  (set! def (regexp-replace-all print-rgxp def "|-"))
+  ;; rewrite @lisp ... @end lisp
+  (set! def (regexp-replace-all lisp-rgxp def "\n```scheme\n"))
+  (set! def (regexp-replace-all elisp-rgxp def "```\n"))
+
+  ;; rewrite R4RS
+  (set! def (regexp-replace-all R4RS-rgxp def (rfour)))
+  ;; rewrite R5RS
+  (set! def (regexp-replace-all R5RS-rgxp def (rfive)))
+  ;; rewrite R6RS
+  (set! def (regexp-replace-all R6RS-rgxp def (rsix)))
+  ;; rewrite R7RS
+  (set! def (regexp-replace-all R7RS-rgxp def (rseven)))
+  ;; rewrite STklos
+  ;;(set! def (regexp-replace-all STklos-rgxp def (stklos)))
+  ;; rewrite linebreak
+  (set! def (regexp-replace-all linebrk-rgxp def "\n\n"))
+
+  def)
+
+;;;
+;;; Insertdoc
+;;;
+
+(define *doc* '())          ;; The documentation database
+
+(define (read-database f)
+  (when *verbose* (format *stderr* "Reading database ..."))
+  (let ((in (open-input-file f)))
+    (do ((proc (read in) (read in)))
+    ((eof-object? proc))
+;      (format *stderr* "~A " (car proc))
+      (set! *doc* (cons (append proc (list :seen #f)) *doc*))))
+  (when *verbose* (format *stderr* " Done\n")))
+
+(define (doc name type synopsis similar txt)
+  (define (show-form x)
+    (format "*~a* +\n" x))
+
+  (define (show-type x)
+    (case x
+      ((syntax)          "R^5^RS syntax")
+      ((procedure)       "R^5^RS procedure")
+      ((r57rs-procedure) "R^5^RS / R^7^RS procedure")
+      ((r7rs-procedure)  "R^7^RS procedure")
+      ((r7rs-syntax)     "R^7^RS syntax")
+      ((extended-syntax) "_STklos_ syntax")
+      ((extended)        "_STklos_ procedure")))
+
+  (define (produce-IDs)
+    (if (equal? (document-value 'doc-fmt #f) "html")
+        ;; We are producing HTM, let's go.
+        (string-append
+           "+++"
+           (apply string-append
+                  (map (lambda (x) (format "<a id='P_~a'></a>" x)) (cons name similar)))
+           "+++\n")
+        ;; We are not producing HTML, do not build custom IDs
+        ""))
+
+  (string-append
+   ;; Put custom ID for all the functions defined in this entry
+   (produce-IDs)
+   ;; Put marks for all the functions defined in this entry
+   (apply string-append
+          (map (lambda (x) (format "(((~A)))\n" x)) (cons name similar)))
+   ;; Display type
+   "[.rmargin]\n"
+   "[.text-right]\n"
+   (format "[.rmargin.small.silver]#~a#\n" (show-type type))
+   ;; Make a box
+   "****\n"
+   ;; Display the synopsis
+   "[.small]\n"
+   (apply string-append
+          (map (lambda (x) (format "`**~a **` +\n" x)) ; Let a space before closing "**"
+               synopsis))
+   "****\n"
+   ;; Display the description text
+   (process-string (rewrite-for-adoc txt))
+   "\n\n"
+   ))
+
+
+(define (insertdoc item)
+  (let ((lst (assoc item *doc*)))
+    (unless lst
+      (format *stderr* "Error: no documentation for item ~S\n" item)
+      (exit 1))
+
+    (when *verbose*
+      (format *stderr* "Documentation of ~S\n" item))
+    (let ((infos (cdr lst)))
+      (if (key-get infos :see #f)
+          ;; Asked for an item which is not a main entry
+          (format *stderr* "doc for ~S requested whereas main entry is ~S\n"
+                  item (key-get infos :see))
+          ;; Generate a definition
+          (let ((type (key-get infos :type))
+                (syn  (string-split (key-get infos :synopsis) "\n"))
+                (desc (key-get infos :description))
+                (sim  (key-get infos :similar '())))
+            ;; Retain that we have document
+            (key-set! (cdr lst) :seen #t)
+            (doc item type syn sim desc))))))
+
+;;;
+;;;           show-undocumented
+;;;
+(define (show-undocumented)
+  (let ((cpt 0))
+    (for-each (lambda (x)
+                (unless (or (key-get (cdr x) :see #f) (key-get (cdr x) :seen))
+                  (when (zero? cpt)
+                    (eprintf "*** Undocumented procedures/syntaxes:\n"))
+                  (eprintf "\t~S\n" (car x))
+                  (set! cpt (+ cpt 1))))
+              *doc*)
+    (when (> cpt 0)
+      (eprintf "*** Uninserted symbols in documentation: ~a\n" cpt))))
+
+
+;;;
+;;; Initialize library
+;;;
+(read-database "../DOCDB")

@@ -63,6 +63,7 @@ static char *conf_dir     = "";
 static char *sexpr        = "";
 static char *cflags       = "";
 static int  vanilla       = 0;
+static int  startup_msg   = 1;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
 static int  line_editor   = 1;
@@ -85,6 +86,7 @@ static struct option long_options [] =
   {"boot-file",         required_argument, NULL, 'b'},
   {"conf-dir",          required_argument, NULL, 'D'},
   {"no-init-file",      no_argument,       NULL, 'q'},
+  {"no-startup-message",no_argument,       NULL, 'Q'},
   {"interactive",       no_argument,       NULL, 'i'},
   {"no-line-editor",    no_argument,       NULL, 'n'},
   {"debug",             no_argument,       NULL, 'd'},
@@ -112,10 +114,11 @@ static void Usage(FILE *stream)
 "   -f file, --file=file            use 'file' as program\n"
 "   -e sexpr, --execute=sexpr       evaluate the given sexpr and exit\n"
 "   -b file, --boot-file=file       use 'file' to boot the system\n"
-"   -D dir, --conf-dir=dir          change configuration dir (default: ~/.stklos)\n"
+"   -D dir, --conf-dir=dir          change conf. dir (default: ~/.config/stklos)\n"
 "   -I dir, --prepend-load-path=dir prepend 'dir' to the load path list.\n"
 "   -A dir, --append-load-path=dir  append 'dir' to the load path list.\n"
 "   -q, --no-init-file              quiet: do not load the user init file\n"
+"   -Q, --no-startup-message        don't show the startup message\n"
 "   -i, --interactive               interactive mode\n"
 "   -n, --no-line-editor            don't use line editor\n"
 "   -d, --debug                     add information to ease debugging\n"
@@ -127,9 +130,10 @@ static void Usage(FILE *stream)
 "   -v, --version                   show version and exit (simple)\n"
 "   -V                              show version and exit (detailed, SRFI-176)\n"
 "   -h, --help                      show this help and exit\n"
-"Compiler flags:\n"
-"  They are of the form +xxx or -xxx separated by commas, such as\n"
-"      --compiler-flags='+line-info,+show-instructions,-time-display'\n"
+"Compiler flags (option -F):\n"
+"  Flags are separated by commas, booleans flags must be prefixed by '+' or  '-'\n"
+"  Example:\n"
+"      --compiler-flags='+line-info,-time-display,unroll-iterations=3'\n"
 "  Possible flags:\n"
 "    line-info          Insert line numbers in generated file (as -l option)\n"
 "    show-instructions  Show instructions in generated file\n"
@@ -137,6 +141,8 @@ static void Usage(FILE *stream)
 "    keep-formals       Keep formal arguments in closures\n"
 "    keep-source        Keep source code in closures\n"
 "    inline-usuals      Inline usual functions\n"
+"    unroll-iterations  Set the number of iterations to be unrolled\n"
+"    peephole-optimizer Use the peephole optimizer\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
@@ -149,7 +155,7 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "+qidnvVhcF:f:l:e:b:s:D:I:A:u:", long_options, NULL);
+    c = getopt_long(argc, argv, "+qQidnvVhcF:f:l:e:b:s:D:I:A:u:", long_options, NULL);
     if (c == -1) break;
 
     switch (c) {
@@ -167,6 +173,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'n': line_editor     = 0;                                    break;
       case 'd': debug_mode++;                                           break;
       case 'q': vanilla         = 1;                                    break;
+      case 'Q': startup_msg     = 0;                                    break;
       case 's': stack_size      = atoi(optarg);                         break;
       case 'c': STk_read_case_sensitive = 1;                            break;
       case 'z': STk_read_case_sensitive = 0;                            break;
@@ -199,6 +206,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_OPTION(cflags,               "comp-flags");
   ADD_BOOL_OPTION(srfi_176,        "srfi-176");
   ADD_BOOL_OPTION(vanilla,         "no-init-file");
+  ADD_BOOL_OPTION(startup_msg,     "startup-message");
   ADD_BOOL_OPTION(STk_interactive, "interactive");
   ADD_BOOL_OPTION(line_editor,     "line-editor");
   ADD_INT_OPTION(debug_mode,       "debug");

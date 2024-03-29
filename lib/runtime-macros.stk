@@ -53,7 +53,7 @@
 ;;
 ;; %claim-error
 ;;
-;; Permit to claim that a function as detected an error
+;; Permit to claim that a function has detected an error
 ;; For instance
 ;;   (define (change-first-char! str char)
 ;;      (%claim-error 'change-first-char! (string-set! str 0 char)))

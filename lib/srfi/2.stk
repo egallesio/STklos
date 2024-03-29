@@ -213,7 +213,7 @@
                           `(let (,claw) ,(andin (car claw) res))
                           (syntax-error 'and-let* "symbol expected (was ~s)"
                                         claw)))))))
-           (else (syntax-error 'and-let* "bad form: ~s" claw))))
+           (else (syntax-error 'and-let* "bad form: ~s" claws))))
         (syntax-error 'and-let* "claws is not a list (was ~s)" claws))))
 
 
