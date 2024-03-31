@@ -911,12 +911,15 @@ doc>
       `(let ((,counting? (%count-allocations)))  ;; save if we are counting allocs
          (%thread-allocations-reset!)            ;; reset thread counters
          (%count-allocations #t)                 ;; count allocations now
-         (let* ((,time-start (clock))
+         (let* ((,time-start (exact-clock))
                 (,res        (begin ,@args))
                 (,allocs     (%thread-allocation-counter))
                 (,bytes      (%thread-allocation-bytes)))
-           (format #t "Elapsed time: ~S ms\n" (- (clock) ,time-start))
-           (format #t "Allocations: ~S bytes in ~S allocation calls\n" ,bytes ,allocs)
+           (eprintf "Elapsed time: ~S ms\n"
+                    (/ (- (exact-clock) ,time-start) 1000.0))
+           (eprintf "Allocations: ~S byte~A in ~S allocation call~A\n"
+                   ,bytes (if (> ,bytes 1) "s" "") ,allocs (if (> ,allocs 1) "s" ""))
+
            (%count-allocations ,counting?)       ;; restore save state
            ,res)))))                             ;; return computed result
 
