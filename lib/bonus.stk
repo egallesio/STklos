@@ -905,29 +905,20 @@ doc>
   (lambda args
     (let ((time-start        (gensym))
           (res               (gensym))
-          (alloc-bytes-start (gensym))
-          (alloc-objs-start  (gensym))
-          (alloc-times-start (gensym))
-          (alloc-bytes-end   (gensym))
-          (alloc-objs-end    (gensym))
-          (alloc-times-end   (gensym)))
-      `(let* ((,time-start (clock)))
-         ;; %thread-allocations returns three values,
-         ;; bytes allocated, approximage number of SCM cells and
-         ;; number of calls to allocation
-         (let-values (( (,alloc-bytes-start ,alloc-objs-start ,alloc-times-start)
-                        (%thread-allocations (current-thread))))
-           (let ((,res (begin ,@args)))
-
-             (let-values (( (,alloc-bytes-end ,alloc-objs-end ,alloc-times-end)
-                            (%thread-allocations (current-thread))))
-
-               (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,time-start))
-               (format (current-error-port) "Allocated: ~S bytes (~~ ~S Scheme objects) in ~S allocation calls\n"
-                       (- ,alloc-bytes-end ,alloc-bytes-start)
-                       (- ,alloc-objs-end  ,alloc-objs-start)
-                       (- ,alloc-times-end ,alloc-times-start))
-               ,res)))))))
+          (counting?         (gensym))
+          (allocs            (gensym))
+          (bytes             (gensym)))
+      `(let ((,counting? (%count-allocations)))  ;; save if we are counting allocs
+         (%thread-allocations-reset!)            ;; reset thread counters
+         (%count-allocations #t)                 ;; count allocations now
+         (let* ((,time-start (clock))
+                (,res        (begin ,@args))
+                (,allocs     (%thread-allocation-counter))
+                (,bytes      (%thread-allocation-bytes)))
+           (format #t "Elapsed time: ~S ms\n" (- (clock) ,time-start))
+           (format #t "Allocations: ~S bytes in ~S allocation calls\n" ,bytes ,allocs)
+           (%count-allocations ,counting?)       ;; restore save state
+           ,res)))))                             ;; return computed result
 
 
 #|
