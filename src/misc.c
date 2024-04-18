@@ -250,6 +250,16 @@ static inline int is_GC_allocated_adressp(void *addr)
 }
 
 
+DEFINE_PRIMITIVE("%gc-stats", gc_stats, subr0, (void))
+{
+  // NOTE: For now we just return gc_no
+  struct GC_prof_stats_s stat;
+
+  GC_get_prof_stats(&stat, sizeof(stat));
+  return LIST2(STk_makekey("gc-no"), STk_long2integer(stat.gc_no));
+}
+
+
 void STk_gc_init(void)
 {
   GC_init();
@@ -751,6 +761,7 @@ int STk_init_misc(void)
   ADD_PRIMITIVE(address_of);
   ADD_PRIMITIVE(address_ref);
   ADD_PRIMITIVE(scheme_gc);
+  ADD_PRIMITIVE(gc_stats);
 
   ADD_PRIMITIVE(init_getopt);
   ADD_PRIMITIVE(getopt);
