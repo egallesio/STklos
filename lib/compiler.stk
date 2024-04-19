@@ -58,7 +58,8 @@
 (define *inline-math*              (append *inline-math-commutative*
                                            *inline-math-general*))
 
-(define *inline-general*          '(fx=? fx<? fx<=? fx>? fx>=?
+(define *inline-general*          '(=    <    <=    >    >=
+                                    fx=? fx<? fx<=? fx>? fx>=?
                                     fx=  fx<  fx<= fx> fx>= ;FIXME: should be deleted
                                     cons car cdr null? list
                                     not
