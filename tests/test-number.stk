@@ -1680,6 +1680,26 @@
                      (> (expt B (+ 1 l)) N))))))))
 
 
+(test "log 1" 0 (log 1 2))
+(test "log 1" 0 (log 1 3))
+(test "log 1" 0 (log 1 -2))
+(test "log 1" 0 (log 1 -3))
+(test "log 1" 0 (log 1 (expt 2 300)))
+(test "log 1" 0 (log 1 (- (expt 2 300))))
+(test "log 1" 0 (log 1 (inexact (expt 2 300))))
+(test "log 1" 0 (log 1 (inexact (- (expt 2 300)))))
+(test "log 1" 0 (log 1 2.0))
+(test "log 1" 0 (log 1 3.0))
+(test "log 1" 0 (log 1 -2.0))
+(test "log 1" 0 (log 1 -3.0))
+(test "log 1" 0 (log 1 (/ 1 (expt 2 300))))
+(test "log 1" 0 (log 1 (/ 1 (- (expt 2 300)))))
+(test "log 1" 0 (log 1 (inexact (/ 1 (expt 2 300)))))
+(test "log 1" 0 (log 1 (inexact (/ 1 (- (expt 2 300))))))
+
+(test/error "log 1 0" (log 1 0))
+(test/error "log 1 1" (log 1 1))
+
 ;; exp, log
 
 (test "exp log 1.0"
