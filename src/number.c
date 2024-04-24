@@ -3619,8 +3619,8 @@ SCM my_log2(SCM x, SCM b) {
      exact rationals in base two.  It uses a simple trick to extend
      this to "base which is power of two". */
 
-  if (b == MAKE_INT(1)) STk_error("cannot take log in base 1");
-  if (b == MAKE_INT(0)) STk_error("cannot take log in base 0");
+  if (b==MAKE_INT(0) || b==MAKE_INT(1)) STk_error("cannot take log in base ~a", b);
+
   /* And now that we checked that the base is neither 0 nor 1: */
   if (x == MAKE_INT(1))  return MAKE_INT(0);
 
