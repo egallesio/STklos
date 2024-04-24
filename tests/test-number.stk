@@ -1878,6 +1878,22 @@
          (atan 1 1)
          0.7853982000))
 
+(test/error "angle zero, I"  (angle 0))
+
+;; The following tests are borrowed from Gauche:
+(let ((pi 3.141592653589793115997963468544185161590576171875))
+  (test "atan +0.0 +x"    +0.0     (atan 0.0 1))
+  (test "atan -0.0 +x" -0.0        (atan -0.0 1))
+  (test "atan +0.0 -x" pi          (atan +0.0 -1))
+  (test "atan -0.0 -x" (- pi)      (atan -0.0 -1))
+  (test "atan +0.0 +0.0" +0.0      (atan +0.0 +0.0))
+  (test "atan -0.0 +0.0" -0.0      (atan -0.0 +0.0))
+  (test "atan +0.0 -0.0" pi        (atan +0.0 -0.0))
+  (test "atan -0.0 -0.0" (- pi)    (atan -0.0 -0.0))
+  (test "atan +0.0 0" (/ pi 2)     (atan +0.0 0))
+  (test "atan -0.0 0" (- (/ pi 2)) (atan -0.0 0))
+  (test "atan 0 0" #t (nan? (atan 0 0))))
+
 ;; tan, atan
 
 (test "atan tan 2/3"
