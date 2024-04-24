@@ -316,7 +316,7 @@ void STk_thread_inc_allocs(SCM thr, size_t size)
   THREAD_BYTES_ALLOCATED(thr) += size;
 }
 
-DEFINE_PRIMITIVE("%thread-allocations-reset!",
+DEFINE_PRIMITIVE("%thread-allocation-reset!",
                  thread_allocs_reset, subr01, (SCM thr))
 {
   if (!thr) thr = STk_current_thread();

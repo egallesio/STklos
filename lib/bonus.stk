@@ -911,7 +911,7 @@ doc>
           (gc-no       (gensym)))
       `(let ((,counting? (%count-allocations))  ;; save if we are counting allocs
              (,gc-no     (begin (gc) (key-get (%gc-stats) #:gc-no 0)))) ;; and GC count
-         (%thread-allocations-reset!)            ;; reset thread counters
+         (%thread-allocation-reset!)            ;; reset thread counters
          (%count-allocations #t)                 ;; count allocations now
          (let* ((,time-start (exact-clock))
                 (,res        (begin ,@args))
