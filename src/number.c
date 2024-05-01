@@ -3313,7 +3313,7 @@ static SCM my_atan2(SCM y, SCM x)
   if (STk_realp(x) == STk_false) error_bad_number(x);
   if (x == MAKE_INT(0)) {
     /* Angle for 0+0i is not defined: */
-    if (y == MAKE_INT(0)) return double2real(STk_NaN);
+    if (y == MAKE_INT(0)) STk_error("result is undefined for values 0 and 0");
 
     /* For (atan y 0), if y is y is inexact zero, the result is either
        -pi/2 or +pi/2, according to R7RS (there is a table in the standard
