@@ -1176,8 +1176,8 @@ doc>
  * (1+ x)
  * (1- x)
  *
- * There procedures return |x| plus one and |x| minus one, repsectively.
- * Being procedures, they do not change the value of the variable |x|.
+ * These procedures return |x| plus one and |x| minus one, respectively. Note that
+ * the value of |x| is not changed.
  *
  * @lisp
  * (define x 10)
@@ -1202,14 +1202,14 @@ doc>
  *
  * @lisp
  * (define S (list 20 30 40))
- * (push! 10 S)
+ * (push! S 10)
  * S                         => (10 20 30 40)
  * (pop! S)                  => 10
  * S                         => (20 30 40)
  * @end lisp
 doc>
 |#
-(define-macro (push! e stack)
+(define-macro (push! stack e)
   `(set! ,stack (cons ,e ,stack)))
 
 (define-macro (pop! stack)
