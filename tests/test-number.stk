@@ -1891,8 +1891,8 @@
   (test "atan +0.0 -0.0" pi        (atan +0.0 -0.0))
   (test "atan -0.0 -0.0" (- pi)    (atan -0.0 -0.0))
   (test "atan +0.0 0" (/ pi 2)     (atan +0.0 0))
-  (test "atan -0.0 0" (- (/ pi 2)) (atan -0.0 0))
-  (test "atan 0 0" #t (nan? (atan 0 0))))
+  (test "atan -0.0 0" (- (/ pi 2)) (atan -0.0 0)))
+(test/error "atan 0 0"  (atan 0 0))
 
 ;; tan, atan
 
