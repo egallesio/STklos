@@ -1194,11 +1194,12 @@ doc>
 
 #|
 <doc EXT push! pop!
- * (push! x lst)
- * (pop! lst)
+ * (push! place val)
+ * (pop! place)
  *
  * These macros push and pop an element into/from a list, so as to use
- * it as a stack.
+ * it as a stack. The result of the |push!| form is undefined, whereas
+ * the result of |pop!| is the result of the evaluation of |place|.
  *
  * @lisp
  * (define S (list 20 30 40))
@@ -1207,27 +1208,53 @@ doc>
  * (pop! S)                  => 10
  * S                         => (20 30 40)
  * @end lisp
+ * Since {{stklos}} permits generalized |set!|, |place| may be a list
+ * of the form `(proc a1 a2 ...)`. In this case, |push!| calls the setter
+ * of |proc|.
+ * @lisp
+ * (define v (vector (list 1 2) (list 3 4)))
+ * (push! (vector-ref v 0) 17)
+ * (pop! (vector-ref v 1))                       => 3
+ * v                                             => #((17 1 2) (4))
+ * @end lisp
 doc>
 |#
-(define-macro (push! stack e)
-  `(set! ,stack (cons ,e ,stack)))
+(define-macro (push! place val)
+  (if (symbol? place)
+      ;; simple push! on a variable
+      `(set! ,place (cons ,val ,place))
+      ;; Generalized push!. Do not evaluate argument two times
+      (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+        `(let ,vars
+           ((setter ,(caar vars))
+            ,@(map car (cdr vars))
+            (cons ,val ,(map car vars)))))))
 
-(define-macro (pop! stack)
+
+(define-macro (pop! place)
   (let ((x (gensym 'res-)))
-    `(let ((,x (car ,stack)))
-       (set! ,stack (cdr ,stack))
-       ,x)))
-
+    (if (symbol? place)
+        ;; simple pop! on a variable
+        `(let ((,x (car ,place)))
+           (set! ,place (cdr ,place))
+           ,x)
+        ;; Generalized pop!. Do not evaluate argument two times
+        (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+          `(let ,vars
+               (let ((,x ,(map car vars)))
+                 ((setter ,(caar vars))
+                  ,@(map car (cdr vars))
+                  (cdr ,x))
+                 (car ,x)))))))
 
 #|
 <doc EXT dolist
  * (dolist (x lst) body)
+ * (dolist (x lst result) body)
  *
  * This macro will iterate over |lst|, executing |body| for each
  * element |x|. The symbol |x| will be captured and bound in |body|.
- * This is a convenience wrapper over |for-each|, to make typing the
- * lambda unnecessary; however, unlike |for-each|, it accepts a single variable
- * and a single list. It is inspired by the Common Lisp |dolist| macro.
+ * If |result| is provided, it will b
  *
  * @lisp
  * (dolist (x '(10 20 30))
@@ -1241,14 +1268,14 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (dolist var&list . body)
-  (unless (and (pair? var&list)
-               (= 2 (length var&list))
-               (symbol? (car var&list)))
-    (error 'dolist "variable and list expected instead of ~S" var&list))
+(define-macro (dolist binding . body)
+  (unless (and (pair? binding)
+               (<= 2 (length binding) 3)
+               (symbol? (car binding)))
+    (error 'dolist "bond must be symbol " binding))
   (when (null? body)
     (error 'dolist "empty body"))
-  `(for-each (lambda (,(car var&list)) ,@body) ,(cadr var&list)))
+  `(for-each (lambda (,(car binding)) ,@body) ,(cadr binding)))
 
 
 #|
