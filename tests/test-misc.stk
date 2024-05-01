@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2020-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -422,7 +422,7 @@ b|)
 (test "push!"
       '(10 20 30)
       (let ((S (list 20 30)))
-        (push! 10 S)
+        (push! S 10)
         S))
 
 (test "pop!"
@@ -435,7 +435,26 @@ b|)
       '(-10 20 30)
       (let ((S (list 10 20 30)))
         (pop! S)
-        (push! -10 S)
+        (push! S -10)
+        S))
+
+(test "generalized push!"
+      '((10 20 30) 0 (40 50))
+      (let ((S (list (list 20 30) (list 40 50))))
+        (push! (car S) 10)
+        (push! (cdr S) 0)
+        S))
+(test "generalized pop!"
+      '(10 #((20 30)))
+      (let* ((V (vector (list 10 20 30)))
+             (x (pop! (vector-ref V 0))))
+        (list x V)))
+
+(test "generalized push!-pop!"
+      '(() -10 20 30)
+      (let ((S (list (list 10) 20 30)))
+        (pop! (car S))
+        (push! (cdr S) -10)
         S))
 
 ;;----------------------------------------------------------------------
