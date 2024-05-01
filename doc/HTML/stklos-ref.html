@@ -14901,7 +14901,25 @@ per second.</p>
 </div>
 <div class="paragraph">
 <p>Returns an approximation of processor time, in milliseconds, used so far by the
-program.</p>
+program. The value returned is a real.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_exact-clock'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(exact-clock) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns an approximation of processor time, in microseconds, used so far by the
+program. The value returned is an integer.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_sleep'></a>
@@ -14938,9 +14956,53 @@ signal arrives during the pause, the execution may be resumed.</p>
 </div>
 <div class="paragraph">
 <p>Evaluates the expressions <code>expr1</code>, <code>expr2</code>, &#8230;&#8203; and returns the
-result of the last expression. This form prints also the time spent
-for this evaluation, in milliseconds, on the current error port.
+result of the last expression. This form also prints the time spent
+for this evaluation, in milliseconds, and the quantity of bytes
+alocated on the current error port.
 This is CPU time, and not real ("wall") time.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">time</span> <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nf">make-list</span> <span class="mi">200</span><span class="p">)</span> <span class="ss">'finish</span><span class="p">))</span>
+<span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">0.0640000000000072</span> <span class="nv">ms</span>
+<span class="nv">Allocated:</span> <span class="mi">6704</span> <span class="nv">bytes</span> <span class="p">(</span><span class="nf">~</span> <span class="mi">838</span> <span class="nv">Scheme</span> <span class="nv">objects</span><span class="p">)</span> <span class="nv">in</span> <span class="mi">209</span> <span class="nv">allocation</span> <span class="nv">calls</span>
+  <span class="nv">=&gt;</span> <span class="nv">finish</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the example above, the result of the expression is only the symbol
+<code>finish</code>. The two other lines are written to the standard error port.</p>
+</div>
+<div class="paragraph">
+<p>The accounting is independent for each thread, and allocations in
+children threads do not increase the parent thread counters, as the
+example below illustrates.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">T</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+                        <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">s</span> <span class="nv">k</span><span class="p">)</span>
+                                       <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
+                          <span class="p">(</span><span class="nf">make-list</span> <span class="mi">1</span><span class="nv">_000_000</span><span class="p">)</span>
+                          <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">B</span> <span class="nv">S</span> <span class="nv">K</span><span class="p">)</span>
+                                         <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
+                            <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"In child thread: ~a bytes, ~a objects in ~a calls~%"</span>
+                                    <span class="p">(</span><span class="nb">-</span> <span class="nv">B</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">S</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">K</span> <span class="nv">k</span><span class="p">))))))))</span>
+  <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">s</span> <span class="nv">k</span><span class="p">)</span>
+                 <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
+    <span class="c1">;; The million allocations in thread T won't affect</span>
+    <span class="c1">;; the counting in parent thread:</span>
+    <span class="p">(</span><span class="nf">thread-start!</span> <span class="nv">T</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">thread-sleep!</span> <span class="mi">2</span><span class="p">)</span> <span class="c1">;; wait for the child thread to allocate a million cells</span>
+    <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">B</span> <span class="nv">S</span> <span class="nv">K</span><span class="p">)</span>
+                   <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
+      <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"In parent thread: ~a bytes, ~a objects in ~a calls~%"</span>
+              <span class="p">(</span><span class="nb">-</span> <span class="nv">B</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">S</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">K</span> <span class="nv">k</span><span class="p">))))</span>
+  <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">T</span><span class="p">))</span>
+
+<span class="nv">In</span> <span class="nv">parent</span> <span class="nv">thread:</span> <span class="mi">800672</span> <span class="nv">bytes,</span> <span class="mi">100084</span> <span class="nv">objects</span> <span class="nv">in</span> <span class="mi">17</span> <span class="nv">calls</span>
+<span class="nv">In</span> <span class="nv">child</span> <span class="nv">thread:</span> <span class="mi">32000272</span> <span class="nv">bytes,</span> <span class="mi">4000034</span> <span class="nv">objects</span> <span class="nv">in</span> <span class="mi">1000008</span> <span class="nv">calls</span></code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -14966,7 +15028,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.248</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.267</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -32757,7 +32819,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-08 21:39:19 +0100
+Last updated 2024-03-31 19:56:10 +0200
 </div>
 </div>
 </body>

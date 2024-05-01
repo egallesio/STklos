@@ -148,12 +148,19 @@ extern "C"
 // GC_API void GC_gcollect(void);
 // GC_API void GC_init(void);
 // GC_API void *GC_base(void * /* displaced_pointer */);
+//
+// For statistics (only used in misc.c)
+// struct GC_prof_stats_s;
+// GC_API size_t GC_CALL GC_get_prof_stats(struct GC_prof_stats_s *,
+//                                         size_t /* stats_sz */);
 
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
+#define STk_must_malloc(size)                                           \
+  ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
+#define STk_must_malloc_atomic(size)                                    \
+  ((STk_count_allocations)? STk_count_malloc_atomic(size): GC_MALLOC_ATOMIC(size))
 
-#define STk_must_malloc(size)           GC_MALLOC(size)
-#define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
 #define STk_free(ptr)                   GC_FREE(ptr)
 #define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
@@ -710,6 +717,10 @@ int STk_init_md5(void);
 extern int STk_interactive_debug;
 #endif
 
+extern int STk_count_allocations;
+
+void *STk_count_malloc(size_t size);
+void* STk_count_malloc_atomic(size_t size);
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
@@ -1313,6 +1324,9 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
   ------------------------------------------------------------------------------
 */
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
+
+void STk_thread_inc_allocs(SCM thr, size_t size);
+
 int STk_init_threads(int stack_size, void *start_stack);
 int STk_init_mutexes(void);
 

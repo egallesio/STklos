@@ -856,20 +856,65 @@ doc>
  * (time expr1 expr2 ...)
  *
  * Evaluates the expressions |expr1|, |expr2|, ... and returns the
- * result of the last expression. This form prints also the time spent
- * for this evaluation, in milliseconds, on the current error port.
+ * result of the last expression. This form also prints the time spent
+ * for this evaluation, in milliseconds, and the quantity of bytes
+ * alocated on the current error port, as well as the number of garbage
+ * collection done.
  * This is CPU time, and not real ("wall") time.
+ *
+ * @lisp
+ * (time (begin (make-list 200) 'finish))
+ *     Elapsed time: 0.059 ms
+ *     Allocations: 6408 bytes in 201 allocation calls (GC: 0)
+ * => finish
+ * @end lisp
+ *
+ * In the example above, the result of the expression is only the symbol
+ * |finish|. The two other lines are written to the standard error port.
+ *
+ * The allocation accounting is independent for each thread, and allocations
+ * in children threads do not increase the parent thread counters, as the
+ * example below illustrates. Note that, on the other side, the number of GC
+ * calls is is a global counter.
+ *
+ * @lisp
+ * (let ((T (make-thread (lambda () (make-list 1_000_000) (eprintf "finish\n")))))
+ *   (time (thread-start! T) ;; Launch T wich allocate 1_000_1000 cells
+ *         (thread-sleep! 3) ;; wait for the child thread to allocate list
+ *         (thread-join! T)
+ *         100))
+ * finish
+ *     Elapsed time: 33.299 ms
+ *     Allocations: 800408 bytes in 10 allocation calls (GC: 0)
+ * 100
+ * @end lisp
+ * The ten allocations we can see here are for theads bookeeping and are
+ * far from the million cells allocated in thread |T|.
 doc>
 |#
 (define-macro time
   (lambda args
-    (let ((tmp1 (gensym))
-          (tmp2 (gensym)))
-      `(let* ((,tmp1 (clock))
-              (,tmp2 (begin ,@args)))
-         (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,tmp1))
-         ,tmp2))))
-
+    (let ((time-start  (gensym))
+          (res         (gensym))
+          (counting?   (gensym))
+          (allocs      (gensym))
+          (bytes       (gensym))
+          (gc-no       (gensym)))
+      `(let ((,counting? (%count-allocations))  ;; save if we are counting allocs
+             (,gc-no     (begin (gc) (key-get (%gc-stats) #:gc-no 0)))) ;; and GC count
+         (%thread-allocation-reset!)            ;; reset thread counters
+         (%count-allocations #t)                 ;; count allocations now
+         (let* ((,time-start (exact-clock))
+                (,res        (begin ,@args))
+                (,allocs     (%thread-allocation-counter))
+                (,bytes      (%thread-allocation-bytes)))
+           (eprintf "    Elapsed time: ~S ms\n"
+                    (/ (- (exact-clock) ,time-start) 1000.0))
+           (eprintf "    Allocations: ~S byte~A in ~S allocation call~A (GC: ~A)\n"
+                    ,bytes (if (> ,bytes 1) "s" "") ,allocs (if (> ,allocs 1) "s" "")
+                    (- (key-get (%gc-stats) #:gc-no 0) ,gc-no))
+           (%count-allocations ,counting?)       ;; restore save state
+           ,res)))))                             ;; return computed result
 
 #|
 <doc EXT-SYNTAX tagbody ->
