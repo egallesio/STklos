@@ -471,6 +471,31 @@ b|)
 (test "1-" 0+3i (1- 1+3i))
 (test/error "1-" (1- 'symbol))
 
+
+;;----------------------------------------------------------------------
+(test-subsection "inc! dec!")
+(let ((x 10)
+      (lst (list 1 2 3))
+      (vec (vector 1 2 (list 3 4))))
+  (test "inc!.1" 11 (begin (inc! x)    x))
+  (test "inc!.2" 21 (begin (inc! x 10) x))
+  (test "dec!.1" 11 (begin (dec! x 10) x))
+  (test "dec!.2" 10 (begin (dec! x)    x))
+
+  (test "generalized inc!.1" '(1 2 4)
+        (begin (inc! (list-ref lst 2)) lst))
+  (test "generalized inc!.2" '(11 2 4)
+        (begin (inc! (car lst) 10) lst))
+  (test "generalized dec!.1" '(11 2 3)
+        (begin (dec! (list-ref lst 2)) lst))
+  (test "generalized dec!.2" '(1 2 3)
+        (begin (dec! (car lst) 10) lst))
+  (let ((l (vector-ref vec 2)))
+    (test "generalized inc!.3" #(1 2 (45 4))
+          (begin (inc! (car l) 42) vec))
+    (test "generalized dec!.4" #(-1 2 (45 4))
+          (begin (dec! (vector-ref vec 0) 2) vec))))
+ 
 ;;----------------------------------------------------------------------
 (test-subsection "dolist")
 
