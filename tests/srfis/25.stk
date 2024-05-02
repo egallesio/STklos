@@ -639,10 +639,15 @@
         (array->list (array-shape orig))))
 
 
+(define-syntax push-it!
+  (syntax-rules ()
+    ((_ e lst)
+     (set! lst (cons e lst)))))
+
 (let ((shp (shape 1 3 10 12)))
   (let ((res '()))
     (shape-for-each shp
-                    (lambda (x y) (push! (list x y) res)))
+                    (lambda (x y) (push-it! (list x y) res)))
     (test "srfi-25 jp 20.shape-for-each.1"
           '( (1 10) (1 11) (2 10)  (2 11) )
           (reverse res)))
@@ -650,8 +655,8 @@
   (let ((res '())
         (vec (make-vector 2 'unused)))
     (shape-for-each shp
-                    (lambda (v) (push! (list (vector-ref v 0)
-                                        (vector-ref v 1)) res))
+                    (lambda (v) (push-it! (list (vector-ref v 0)
+                                           (vector-ref v 1)) res))
                     vec)
     (test "srfi-25 jp 20.shape-for-each.2"
           '( (1 10) (1 11) (2 10)  (2 11) )
@@ -660,8 +665,8 @@
   (let ((res '())
         (arr (make-array (shape 0 2) 'unused)))
     (shape-for-each shp
-                    (lambda (a) (push! (list (array-ref a 0)
-                                        (array-ref a 1)) res))
+                    (lambda (a) (push-it! (list (array-ref a 0)
+                                           (array-ref a 1)) res))
                     arr)
     (test "srfi-25 jp 20.shape-for-each.3"
           '( (1 10) (1 11) (2 10)  (2 11) )
@@ -672,7 +677,7 @@
   (let ((arr2 (make-array shp 'x)))
     (let ((res '()))
       (array-for-each-index arr2
-                            (lambda (x y) (push! (list x y) res)))
+                            (lambda (x y) (push-it! (list x y) res)))
       (test "srfi-25 jp 20.array-for-each-index.1"
             '( (1 10) (1 11) (2 10)  (2 11) )
             (reverse res)))
@@ -680,8 +685,8 @@
   (let ((res '())
         (vec (make-vector 2 'unused)))
     (array-for-each-index arr2
-                    (lambda (v) (push! (list (vector-ref v 0)
-                                        (vector-ref v 1)) res))
+                    (lambda (v) (push-it! (list (vector-ref v 0)
+                                           (vector-ref v 1)) res))
                     vec)
     (test "srfi-25 jp 20.array-for-each-index.2"
           '( (1 10) (1 11) (2 10)  (2 11) )
@@ -690,8 +695,8 @@
   (let ((res '())
         (arr (make-array (shape 0 2) 'unused)))
     (array-for-each-index arr2
-                    (lambda (a) (push! (list (array-ref a 0)
-                                        (array-ref a 1)) res))
+                    (lambda (a) (push-it! (list (array-ref a 0)
+                                           (array-ref a 1)) res))
                     arr)
     (test "srfi-25 jp 20.array-for-each-index.3"
           '( (1 10) (1 11) (2 10)  (2 11) )
@@ -808,7 +813,7 @@
          (orig (make-array (shape 0 2 0 3) 'unused))
          (a (make-array (shape 0 thread-num 0 arrays-per-thread) #f)))
     (dotimes (i thread-num)
-             (push! (make-thread (lambda ()
+             (push-it! (make-thread (lambda ()
                                    (dotimes (j arrays-per-thread)
                                             (array-set! a i j (share-array orig
                                                                            (shape 0 2 0 3)
