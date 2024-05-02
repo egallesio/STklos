@@ -1249,7 +1249,7 @@ doc>
                  (car ,x)))))))
 
 #|
-<doc EXT inc! dec!!
+<doc EXT inc! dec!
  * (inc! place)
  * (inc! place val)
  * (dec! place)
