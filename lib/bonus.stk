@@ -60,7 +60,9 @@
         exact-integer-log
         receive case-lambda
         radians->degrees degrees->radians
-
+        1+ 1- inc! dec!
+        pop! push!
+        dolist
         %define-condition-type-accessors
         message-condition? condition-message
         serious-condition?
@@ -1167,6 +1169,160 @@ doc>
     (unless ,test
       (begin ,@body
              (-> #:top)))))
+
+#|
+<doc EXT 1+ 1-
+ * (1+ x)
+ * (1- x)
+ *
+ * These procedures return |x| plus one and |x| minus one, respectively. Note that
+ * the value of |x| is not changed.
+ *
+ * @lisp
+ * (define x 10)
+ * (1+ x)          => 11
+ * x               => 10
+ * (1- x)          => 9
+ * x               => 10
+ * @end lisp
+doc>
+|#
+(define (1+ x) (+ x 1))
+(define (1- x) (- x 1))
+
+
+#|
+<doc EXT push! pop!
+ * (push! place val)
+ * (pop! place)
+ *
+ * These macros push and pop an element into/from a list, so as to use
+ * it as a stack. The result of the |push!| form is undefined, whereas
+ * the result of |pop!| is the result of the evaluation of |place|.
+ *
+ * @lisp
+ * (define S (list 20 30 40))
+ * (push! S 10)
+ * S                         => (10 20 30 40)
+ * (pop! S)                  => 10
+ * S                         => (20 30 40)
+ * @end lisp
+ * Since {{stklos}} permits generalized |set!|, |place| may be a list
+ * of the form `(proc a1 a2 ...)`. In this case, |push!| calls the setter
+ * of |proc|.
+ * @lisp
+ * (define v (vector (list 1 2) (list 3 4)))
+ * (push! (vector-ref v 0) 17)
+ * (pop! (vector-ref v 1))                       => 3
+ * v                                             => #((17 1 2) (4))
+ * @end lisp
+doc>
+|#
+(define (%make-inc-dec-push-body place func val)
+  (if (symbol? place)
+      ;; simple xxx! on a variable
+      `(set! ,place (,func ,val ,place))
+      ;; Generalized xxx!. Do not evaluate arguments two times
+      (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+        `(let ,vars
+           ((setter ,(caar vars))
+            ,@(map car (cdr vars))
+            (,func ,val ,(map car vars)))))))
+
+(define-macro (push! place val)
+  (%make-inc-dec-push-body place 'cons val))
+
+(define-macro (pop! place)
+  (let ((x (gensym 'res-)))
+    (if (symbol? place)
+        ;; simple pop! on a variable
+        `(let ((,x (car ,place)))
+           (set! ,place (cdr ,place))
+           ,x)
+        ;; Generalized pop!. Do not evaluate argument two times
+        (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+          `(let ,vars
+               (let ((,x ,(map car vars)))
+                 ((setter ,(caar vars))
+                  ,@(map car (cdr vars))
+                  (cdr ,x))
+                 (car ,x)))))))
+
+#|
+<doc EXT inc! dec!
+ * (inc! place)
+ * (inc! place val)
+ * (dec! place)
+ * (dec place val)
+ *
+ * These forms increment or decrement the value contained in |place| by |val|.
+ * If ommitted, |val| defaults to 1. The result of both forms is undefined.
+ *
+ * Since {{stklos}} permits generalized |set!|, |place| may be a list
+ * of the form `(proc a1 a2 ...)`. In this case, these forms call the setter
+ * of |proc|.
+ *
+ * @lisp
+ * (define x 10)
+ * (inc! x)
+ * x                        => 11
+ * (dec! x 10)
+ * x                        => 1
+ * (define l (list 1 2 3))
+ * (inc! (car l))
+ * (dec! (list-ref l 1) 20)
+ * l                        => (2 -18 3)
+ * @end lisp
+doc>
+|#
+(define-macro (inc! place :optional (value 1))
+  (%make-inc-dec-push-body place '+ value))
+
+(define-macro (dec! place :optional (value 1))
+  (%make-inc-dec-push-body place (lambda (a b) (- b a)) value))
+
+
+#|
+<doc EXT dolist
+ * (dolist (x lst) body)
+ * (dolist (x lst result) body)
+ *
+ * This macro will iterate over |lst|, executing |body| for each
+ * element |x|. The symbol |x| will be captured and bound in |body|.
+ * If |result| is provided, and is not |x|, this form returns |result|;
+ * otherwise, its result is undefined.
+ * @lisp
+ * (dolist (x '(10 20 30))
+ *   (display (- x)) (newline))
+ * -10
+ * -20
+ * -30
+ * (let ((sum 0))
+ *   (dolist (x '(1 2 3 4 5) sum)
+ *     (inc! sum (square x))))       => 55
+ * @end lisp
+ * The form |dolist| is borrowed from Common Lisp. However, using |dolist|
+ * is not the preferred way to process a list. For instance, the last example
+ * could be better rewritten in:
+ * @lisp
+ * (apply + (map square '(1 2 3 4 5))
+ * @end lisp
+doc>
+|#
+(define-macro (dolist binding . body)
+  (unless (and (pair? binding)
+               (<= 2 (length binding) 3)
+               (symbol? (car binding)))
+    (error 'dolist "bad dolist binding" binding))
+  (let ((x (gensym 'x)))
+    (apply (lambda (var lst . result)
+             `(begin
+                ;; iterate on all the list elements
+                (for-each (lambda (,x) (let ((,var ,x)) ,@body))
+                          ,lst)
+                ;; insert in the begin form the result if present or != of var
+                ,@(if (or (null? result) (eq? (car result) var)) '() result)))
+           binding)))
 
 #|
 <doc EXT call/ec

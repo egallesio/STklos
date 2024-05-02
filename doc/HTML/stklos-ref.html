@@ -1535,7 +1535,8 @@ assignment, as described in <code>set!</code>.</p>
 <span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nb">string-ref</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span>     <span class="nv">==</span> <span class="p">(</span><span class="nb">string-set!</span> <span class="nv">x</span> <span class="nv">i</span> <span class="nv">v</span><span class="p">)</span>
 <span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nb">vector-ref</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span>     <span class="nv">==</span> <span class="p">(</span><span class="nb">vector-set!</span> <span class="nv">x</span> <span class="nv">i</span> <span class="nv">v</span><span class="p">)</span><span class="nv">!</span>
 <span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nf">slot-ref</span> <span class="nv">x</span> <span class="ss">'name</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span>   <span class="nv">==</span> <span class="p">(</span><span class="nf">slot-set!</span> <span class="nv">x</span> <span class="ss">'name</span> <span class="nv">v</span><span class="p">)</span>
-<span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nf">struct-ref</span> <span class="nv">x</span> <span class="ss">'name</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span> <span class="nv">==</span> <span class="p">(</span><span class="nf">struct-set!</span> <span class="nv">x</span> <span class="ss">'name</span> <span class="nv">v</span><span class="p">)</span></code></pre>
+<span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nf">struct-ref</span> <span class="nv">x</span> <span class="ss">'name</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span> <span class="nv">==</span> <span class="p">(</span><span class="nf">struct-set!</span> <span class="nv">x</span> <span class="ss">'name</span> <span class="nv">v</span><span class="p">)</span>
+<span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nb">list-ref</span> <span class="nv">x</span> <span class="nv">i</span><span class="p">)</span> <span class="nv">v</span><span class="p">)</span>       <span class="nv">==</span> <span class="p">(</span><span class="nf">list-set!</span> <span class="nv">x</span> <span class="nv">i</span> <span class="nv">v</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2457,6 +2458,49 @@ value. The value returned by this form is <strong><em>void</em></strong>.</p>
 <div class="paragraph">
 <p><code>Until</code> evaluates the <code>&lt;expression&gt;</code>s until <code>&lt;while&gt;</code> returns a false
 value. The value returned by this form is <strong><em>void</em></strong>.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_dolist'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(dolist (x lst) body) </strong></code><br>
+<code><strong>(dolist (x lst result) body) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This macro will iterate over <code>lst</code>, executing <code>body</code> for each
+element <code>x</code>. The symbol <code>x</code> will be captured and bound in <code>body</code>.
+If <code>result</code> is provided, and is not <code>x</code>, this form returns <code>result</code>;
+otherwise, its result is undefined.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">dolist</span> <span class="p">(</span><span class="nf">x</span> <span class="o">'</span><span class="p">(</span><span class="nf">10</span> <span class="mi">20</span> <span class="mi">30</span><span class="p">))</span>
+  <span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span><span class="p">))</span> <span class="p">(</span><span class="nb">newline</span><span class="p">))</span>
+<span class="mi">-10</span>
+<span class="mi">-20</span>
+<span class="mi">-30</span>
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">sum</span> <span class="mi">0</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">dolist</span> <span class="p">(</span><span class="nf">x</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)</span> <span class="nv">sum</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">inc!</span> <span class="nv">sum</span> <span class="p">(</span><span class="nf">square</span> <span class="nv">x</span><span class="p">))))</span>       <span class="nv">=&gt;</span> <span class="mi">55</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The form <code>dolist</code> is borrowed from Common Lisp. However, using <code>dolist</code>
+is not the preferred way to process a list. For instance, the last example
+could be better rewritten in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">apply</span> <span class="nv">+</span> <span class="p">(</span><span class="nb">map</span> <span class="nv">square</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span></code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -5889,6 +5933,107 @@ This procedure works for any type of integer (fixnums and bignums).</p>
 <span class="p">(</span><span class="nf">integer-length</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">5000</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">5001</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p><a id='P_integer-length'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(integer-length n) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Integer-length</code> returns the necessary number of bits to represent <code>n</code>
+in 2&#8217;s complement, assuming a leading 1 bit when <code>n</code> is negative. When
+<code>n</code> is zero, the procedure returns zero.
+This procedure works for any type of integer (fixnums and bignums).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-3</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-2</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">-1</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">0</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">1</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">2</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="mi">3</span><span class="p">)</span>             <span class="nv">=&gt;</span> <span class="mi">2</span>
+<span class="p">(</span><span class="nf">integer-length</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">5000</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">5001</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_1-'></a><a id='P_1+'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(1+ x) </strong></code><br>
+<code><strong>(1- x) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These procedures return <code>x</code> plus one and <code>x</code> minus one, respectively. Note that
+the value of <code>x</code> is not changed.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">1+</span> <span class="nv">x</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">11</span>
+<span class="nv">x</span>               <span class="nv">=&gt;</span> <span class="mi">10</span>
+<span class="p">(</span><span class="nf">1-</span> <span class="nv">x</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">9</span>
+<span class="nv">x</span>               <span class="nv">=&gt;</span> <span class="mi">10</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_dec!'></a><a id='P_inc!'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(inc! place) </strong></code><br>
+<code><strong>(inc! place val) </strong></code><br>
+<code><strong>(dec! place) </strong></code><br>
+<code><strong>(dec place val) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These forms increment or decrement the value contained in <code>place</code> by <code>val</code>.
+If ommitted, <code>val</code> defaults to 1. The result of both forms is undefined.</p>
+</div>
+<div class="paragraph">
+<p>Since <strong><em>STklos</em></strong> permits generalized <code>set!</code>, <code>place</code> may be a list
+of the form <code>(proc a1 a2 &#8230;&#8203;)</code>. In this case, these forms call the setter
+of <code>proc</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">inc!</span> <span class="nv">x</span><span class="p">)</span>
+<span class="nv">x</span>                        <span class="nv">=&gt;</span> <span class="mi">11</span>
+<span class="p">(</span><span class="nf">dec!</span> <span class="nv">x</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nv">x</span>                        <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">l</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">inc!</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">l</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">dec!</span> <span class="p">(</span><span class="nb">list-ref</span> <span class="nv">l</span> <span class="mi">1</span><span class="p">)</span> <span class="mi">20</span><span class="p">)</span>
+<span class="nv">l</span>                        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">2</span> <span class="mi">-18</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
 <div class="sect3">
 <h4 id="_fixnums">4.2.1. Fixnums</h4>
 <div class="paragraph">
@@ -7462,6 +7607,49 @@ all the numbers greater than five from a list with</p>
 <p><code>delete!</code> is the linear-update variant of <code>delete</code>. It is allowed,
 but not required, to alter the cons cells in its argument <code>list</code> to
 construct the result.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_pop!'></a><a id='P_push!'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(push! place val) </strong></code><br>
+<code><strong>(pop! place) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These macros push and pop an element into/from a list, so as to use
+it as a stack. The result of the <code>push!</code> form is undefined, whereas
+the result of <code>pop!</code> is the result of the evaluation of <code>place</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">S</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">20</span> <span class="mi">30</span> <span class="mi">40</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">push!</span> <span class="nv">S</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nv">S</span>                         <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">10</span> <span class="mi">20</span> <span class="mi">30</span> <span class="mi">40</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">pop!</span> <span class="nv">S</span><span class="p">)</span>                  <span class="nv">=&gt;</span> <span class="mi">10</span>
+<span class="nv">S</span>                         <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">20</span> <span class="mi">30</span> <span class="mi">40</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since <strong><em>STklos</em></strong> permits generalized <code>set!</code>, <code>place</code> may be a list
+of the form <code>(proc a1 a2 &#8230;&#8203;)</code>. In this case, <code>push!</code> calls the setter
+of <code>proc</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">v</span> <span class="p">(</span><span class="nb">vector</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">push!</span> <span class="p">(</span><span class="nb">vector-ref</span> <span class="nv">v</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">17</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">pop!</span> <span class="p">(</span><span class="nb">vector-ref</span> <span class="nv">v</span> <span class="mi">1</span><span class="p">))</span>                       <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="nv">v</span>                                             <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">((</span><span class="nf">17</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">4</span><span class="p">))</span></code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -14958,15 +15146,16 @@ signal arrives during the pause, the execution may be resumed.</p>
 <p>Evaluates the expressions <code>expr1</code>, <code>expr2</code>, &#8230;&#8203; and returns the
 result of the last expression. This form also prints the time spent
 for this evaluation, in milliseconds, and the quantity of bytes
-alocated on the current error port.
+alocated on the current error port, as well as the number of garbage
+collection done.
 This is CPU time, and not real ("wall") time.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">time</span> <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nf">make-list</span> <span class="mi">200</span><span class="p">)</span> <span class="ss">'finish</span><span class="p">))</span>
-<span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">0.0640000000000072</span> <span class="nv">ms</span>
-<span class="nv">Allocated:</span> <span class="mi">6704</span> <span class="nv">bytes</span> <span class="p">(</span><span class="nf">~</span> <span class="mi">838</span> <span class="nv">Scheme</span> <span class="nv">objects</span><span class="p">)</span> <span class="nv">in</span> <span class="mi">209</span> <span class="nv">allocation</span> <span class="nv">calls</span>
-  <span class="nv">=&gt;</span> <span class="nv">finish</span></code></pre>
+    <span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">0.059</span> <span class="nv">ms</span>
+    <span class="nv">Allocations:</span> <span class="mi">6408</span> <span class="nv">bytes</span> <span class="nv">in</span> <span class="mi">201</span> <span class="nv">allocation</span> <span class="nv">calls</span> <span class="p">(</span><span class="nf">GC:</span> <span class="mi">0</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="nv">finish</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -14974,35 +15163,27 @@ This is CPU time, and not real ("wall") time.</p>
 <code>finish</code>. The two other lines are written to the standard error port.</p>
 </div>
 <div class="paragraph">
-<p>The accounting is independent for each thread, and allocations in
-children threads do not increase the parent thread counters, as the
-example below illustrates.</p>
+<p>The allocation accounting is independent for each thread, and allocations
+in children threads do not increase the parent thread counters, as the
+example below illustrates. Note that, on the other side, the number of GC
+calls is is a global counter.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">T</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
-                        <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">s</span> <span class="nv">k</span><span class="p">)</span>
-                                       <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
-                          <span class="p">(</span><span class="nf">make-list</span> <span class="mi">1</span><span class="nv">_000_000</span><span class="p">)</span>
-                          <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">B</span> <span class="nv">S</span> <span class="nv">K</span><span class="p">)</span>
-                                         <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
-                            <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"In child thread: ~a bytes, ~a objects in ~a calls~%"</span>
-                                    <span class="p">(</span><span class="nb">-</span> <span class="nv">B</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">S</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">K</span> <span class="nv">k</span><span class="p">))))))))</span>
-  <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">s</span> <span class="nv">k</span><span class="p">)</span>
-                 <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
-    <span class="c1">;; The million allocations in thread T won't affect</span>
-    <span class="c1">;; the counting in parent thread:</span>
-    <span class="p">(</span><span class="nf">thread-start!</span> <span class="nv">T</span><span class="p">)</span>
-    <span class="p">(</span><span class="nf">thread-sleep!</span> <span class="mi">2</span><span class="p">)</span> <span class="c1">;; wait for the child thread to allocate a million cells</span>
-    <span class="p">(</span><span class="nf">let-values</span> <span class="p">((</span> <span class="p">(</span><span class="nf">B</span> <span class="nv">S</span> <span class="nv">K</span><span class="p">)</span>
-                   <span class="p">(</span><span class="nf">%thread-allocations</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))))</span>
-      <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"In parent thread: ~a bytes, ~a objects in ~a calls~%"</span>
-              <span class="p">(</span><span class="nb">-</span> <span class="nv">B</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">S</span> <span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">K</span> <span class="nv">k</span><span class="p">))))</span>
-  <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">T</span><span class="p">))</span>
-
-<span class="nv">In</span> <span class="nv">parent</span> <span class="nv">thread:</span> <span class="mi">800672</span> <span class="nv">bytes,</span> <span class="mi">100084</span> <span class="nv">objects</span> <span class="nv">in</span> <span class="mi">17</span> <span class="nv">calls</span>
-<span class="nv">In</span> <span class="nv">child</span> <span class="nv">thread:</span> <span class="mi">32000272</span> <span class="nv">bytes,</span> <span class="mi">4000034</span> <span class="nv">objects</span> <span class="nv">in</span> <span class="mi">1000008</span> <span class="nv">calls</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">T</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nf">make-list</span> <span class="mi">1</span><span class="nv">_000_000</span><span class="p">)</span> <span class="p">(</span><span class="nf">eprintf</span> <span class="s">"finishn"</span><span class="p">)))))</span>
+  <span class="p">(</span><span class="nf">time</span> <span class="p">(</span><span class="nf">thread-start!</span> <span class="nv">T</span><span class="p">)</span> <span class="c1">;; Launch T wich allocate 1_000_1000 cells</span>
+        <span class="p">(</span><span class="nf">thread-sleep!</span> <span class="mi">3</span><span class="p">)</span> <span class="c1">;; wait for the child thread to allocate list</span>
+        <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">T</span><span class="p">)</span>
+        <span class="mi">100</span><span class="p">))</span>
+<span class="nv">finish</span>
+    <span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">33.299</span> <span class="nv">ms</span>
+    <span class="nv">Allocations:</span> <span class="mi">800408</span> <span class="nv">bytes</span> <span class="nv">in</span> <span class="mi">10</span> <span class="nv">allocation</span> <span class="nv">calls</span> <span class="p">(</span><span class="nf">GC:</span> <span class="mi">0</span><span class="p">)</span>
+<span class="mi">100</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The ten allocations we can see here are for theads bookeeping and are
+far from the million cells allocated in thread <code>T</code>.</p>
 </div>
 </div>
 <div class="sect3">
@@ -15028,7 +15209,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.267</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.293</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -32819,7 +33000,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-31 19:56:10 +0200
+Last updated 2024-05-02 16:56:52 +0200
 </div>
 </div>
 </body>

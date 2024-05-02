@@ -74,6 +74,9 @@ infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
 {{insertdoc 'encode-float}}
 {{insertdoc 'float-max-exponent}}
 {{insertdoc 'integer-length}}
+{{insertdoc 'integer-length}}
+{{insertdoc '1-}}
+{{insertdoc 'dec!}}
 
 ==== Fixnums
 ((("SRFI-143")))
@@ -158,6 +161,7 @@ quoted in programs.
 {{insertdoc 'filter!}}
 {{insertdoc 'remove!}}
 {{insertdoc 'delete!}}
+{{insertdoc 'pop!}}
 
 === Symbols
 The STklos reader can read symbols whose names contain special

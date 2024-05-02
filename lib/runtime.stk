@@ -116,6 +116,7 @@
  * (set! (vector-ref x i) v)     == (vector-set! x i v)!
  * (set! (slot-ref x 'name) v)   == (slot-set! x 'name v)
  * (set! (struct-ref x 'name) v) == (struct-set! x 'name v)
+ * (set! (list-ref x i) v)       == (list-set! x i v)
  * @end lisp
  * Furhermore, Parameter Objects (see _<<_parameter_objects>>_) are
  * their own setter:
@@ -150,6 +151,7 @@ doc>
 (set! (setter string-ref)       string-set!)
 (set! (setter slot-ref)         slot-set!)
 (set! (setter struct-ref)       struct-set!)
+(set! (setter list-ref)         list-set!)
 
 ;; ----------------------------------------------------------------------
 ;;      symbol-append

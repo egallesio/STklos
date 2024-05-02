@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2020-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -415,6 +415,106 @@ b|)
       (let ((x '(1 2 3)))
         (until (null? (cdr x)) (set! x (cdr x)))
         x))
+
+;;----------------------------------------------------------------------
+(test-subsection "push! and pop!")
+
+(test "push!"
+      '(10 20 30)
+      (let ((S (list 20 30)))
+        (push! S 10)
+        S))
+
+(test "pop!"
+      '(10 (20 30))
+      (let* ((S (list 10 20 30))
+             (x (pop! S)))
+        (list x S)))
+
+(test "push!-pop!"
+      '(-10 20 30)
+      (let ((S (list 10 20 30)))
+        (pop! S)
+        (push! S -10)
+        S))
+
+(test "generalized push!"
+      '((10 20 30) 0 (40 50))
+      (let ((S (list (list 20 30) (list 40 50))))
+        (push! (car S) 10)
+        (push! (cdr S) 0)
+        S))
+(test "generalized pop!"
+      '(10 #((20 30)))
+      (let* ((V (vector (list 10 20 30)))
+             (x (pop! (vector-ref V 0))))
+        (list x V)))
+
+(test "generalized push!-pop!"
+      '(() -10 20 30)
+      (let ((S (list (list 10) 20 30)))
+        (pop! (car S))
+        (push! (cdr S) -10)
+        S))
+
+;;----------------------------------------------------------------------
+(test-subsection "1+ 1-")
+
+(test "1+" 10 (1+ 9))
+(test "1+" 10.5 (1+ 9.5))
+(test "1+" 5/3 (1+ 2/3))
+(test "1+" 2+3i (1+ 1+3i))
+(test/error "1+" (1+ 'symbol))
+(test "1-" 8 (1- 9))
+(test "1-" 8.5 (1- 9.5))
+(test "1-" -1/3 (1- 2/3))
+(test "1-" 0+3i (1- 1+3i))
+(test/error "1-" (1- 'symbol))
+
+
+;;----------------------------------------------------------------------
+(test-subsection "inc! dec!")
+(let ((x 10)
+      (lst (list 1 2 3))
+      (vec (vector 1 2 (list 3 4))))
+  (test "inc!.1" 11 (begin (inc! x)    x))
+  (test "inc!.2" 21 (begin (inc! x 10) x))
+  (test "dec!.1" 11 (begin (dec! x 10) x))
+  (test "dec!.2" 10 (begin (dec! x)    x))
+
+  (test "generalized inc!.1" '(1 2 4)
+        (begin (inc! (list-ref lst 2)) lst))
+  (test "generalized inc!.2" '(11 2 4)
+        (begin (inc! (car lst) 10) lst))
+  (test "generalized dec!.1" '(11 2 3)
+        (begin (dec! (list-ref lst 2)) lst))
+  (test "generalized dec!.2" '(1 2 3)
+        (begin (dec! (car lst) 10) lst))
+  (let ((l (vector-ref vec 2)))
+    (test "generalized inc!.3" #(1 2 (45 4))
+          (begin (inc! (car l) 42) vec))
+    (test "generalized dec!.4" #(-1 2 (45 4))
+          (begin (dec! (vector-ref vec 0) 2) vec))))
+ 
+;;----------------------------------------------------------------------
+(test-subsection "dolist")
+
+(test "dolist"
+      ""
+      (with-output-to-string
+        (lambda ()
+          (dolist (x '()) (display x)))))
+
+(test "dolist"
+      #void
+      (dolist (x '()) (display x)))
+
+(test "dolist"
+      "102030"
+      (with-output-to-string
+        (lambda ()
+          (dolist (x '(10 20 30))
+                  (display x)))))
 
 ;;----------------------------------------------------------------------
 (test-subsection "(void)")
