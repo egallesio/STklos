@@ -5,6 +5,7 @@
   ;;; IMPORTS
   ;;;
 
+  (import (only SCHEME regexp-replace)) ;; In case SRFI-115 is loaded before
   (import scheme/vector/base)
 
   (import scheme/vector/s8)
@@ -21,7 +22,7 @@
   (import scheme/vector/c128)
 
   ;;;
-  <;;; EXPORTS
+  ;;; EXPORTS
   ;;;
 
   ;; We need to reexport everything we imported, but we don't do all that
@@ -164,27 +165,16 @@
   ;;
   (define (symbols-for-tag symbol-tag)
     (let ((tag (symbol->string symbol-tag)))
-      (let ((new-template (string-append "\\1" tag "\\2")))
-        (map string->symbol
-             (map (lambda (sym)
-                    (let ((template-name (symbol->string sym)))
-                      (regexp-replace "(.*)TAG(.*)" template-name new-template)))
-                  symbols)))))
+      (map string->symbol
+           (map (lambda (sym)
+                  (regexp-replace "TAG" (symbol->string sym) tag))
+                symbols))))
 
-  ;; Just the 1-ary case of fold, that we need here...
-  (define (fold1 kons knil lis1)
-    (let lp ((lis lis1) (ans knil))
-      (if (null? lis) ans
-          (lp (cdr lis) (kons (car lis) ans)))))
-
-  (define tags '(s8 u8 s16 u16 s32 u32 s64 u64 f32 f64 c64 c128))
-
-  ;; all-symbols:
-  ;; Some basic map-reduce trick with append and --
-  ;; the magic is done! We have all the 684 symbols!
+  ;; all-symbols: compute the 684 symbols!
   (define all-symbols
-    (fold1 append '() (map symbols-for-tag tags)))
-
+    (apply append
+           (map symbols-for-tag
+                '(s8 u8 s16 u16 s32 u32 s64 u64 f32 f64 c64 c128))))
 
   ;; HACK:
   ;; This is the macro-expansion of 'export', which happens to not

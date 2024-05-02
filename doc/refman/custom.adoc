@@ -11,7 +11,7 @@
 === Parameter Objects
 
 {{stklos}} environement can be customized using Parameter Objects. These
-parmaters are listed below.
+parameters are listed below.
 
 {{insertdoc 'real-precision}}
 [#srfi169]
@@ -26,11 +26,6 @@ parmaters are listed below.
 {{insertdoc 'load-verbose}}
 {{insertdoc 'thread-handler-error-show}}
 {{insertdoc 'stklos-debug-level}}
-{{insertdoc 'repl-theme}}
-{{insertdoc 'repl-show-startup-message}}
-
-
-
 
 === Environment variables
 
@@ -49,4 +44,75 @@ The following variables can be used to customize {{stklos}}:
 - (((STKLOS_CONFDIR)))**STKLOS-CONFDIR**: This variable can be used to
   designate the directory used by {{stklos}} to store its configuration or
   packages files. If not set, the default {{stklos}} configuration directory
-  is by default `~/.stklos`.
+  is by default `${XDG_CONFIG_HOME}/stklos` (or `~/.config/stklos` if the
+  shell variable `XDG_CONFIG_HOME` is unset).
+
+=== REPL
+
+By default, the (((REPL))){{stklos}} REPL try to find an installed
+_editing line library_ to read input expressions. It tries to link with GNU readline
+<<Readline>> or BSD libedit <<Libedit>> libraries. Line editing offers editing
+capabilities while the user is entering the line (navigation in the line, in
+the history and function or file completion).
+
+{{insertdoc 'repl}}
+
+
+==== REPL commands
+
+By default, {{stklos}} accepts some special commands. A command starts
+with a comma character, followed by the name of the command. The list
+of available commands is given below.
+
+- **,backtrace** (or **,bt**): Show the stack when last error occurred
+- **,cd**: Change current directory
+- **,pwd**: Print working directory
+- **,ls**: List directory content
+- **,quit** (or **,q**): Exit STklos
+- **,shell** (or **,!**): Run a shell command
+- **,time** (or **,t** ): Print the time used to run the next expression
+- **,describe** (or **,d**): Describe an object
+- **,expand** (or **,e**): Pretty print the macro expansion of a form
+- **,import** (or  **,i**): Import a library
+- **,require-feature** (or **,r**):  Require a feature
+- **,open** (or **,o**): Open file or URL
+- **,browse** (or **,b**): Browse file or URL with the default browser
+- **,manual** (or **,m**): Search reference manual
+- **,apropos** (or **,a**): Search symbols containing a given string
+- **,version** (or **,v**): Show version
+- **,help** (or **,?** or **,h*): Show help on REPL command with
+    parameter. With a parameter, display the help of this parameter
+
+{{insertdoc 'repl-add-command}}
+
+==== REPL variables
+
+By default, {{stklos}} defines the following variables:
+
+- `@1`, `@2`, `@3`, `@4` and `@5` contains five the last REPL's
+  computed values
+- `@` is an alias on `@1` (the last value computed by the REPL)
+- `@*` contains a list of `@1`, `@2`, `@3`, `@4` and `@5` values
+
+```scheme
+stklos> (values 'a 'b 'c 'd 'e)
+a
+b
+c
+d
+e
+stklos> @*
+(a b c d e)
+stklos> (+ 2 3)
+5
+stklos> @*
+(5 (a b c d e) a b c)
+```
+
+==== REPL parameters
+
+The following parameter objects can be used to customize the REPL:
+
+{{insertdoc 'repl-theme}}
+{{insertdoc 'repl-show-startup-message}}
+

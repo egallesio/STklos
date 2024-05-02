@@ -175,6 +175,32 @@
       (begin ((in-module test-mutation-2 set-var-ok!) 50)
              (in-module test-mutation-2 var)))
 
+(define-module (test-unaliasing)
+  (import test-mutation)
+  (test "unaliasing: before redefinition"
+        '(50 . 50)
+        (cons var (in-module test-mutation var)))
+
+  (define var 10000)
+  (test "unaliasing: after redefinition"
+        '(10000 . 50)
+        (cons var (in-module test-mutation var)))
+
+  (set! var 2)
+  (test "unaliasing: after set!"
+        '(2 . 50)
+        (cons var (in-module test-mutation var)))
+
+  (set-var! 42)
+  (test "unaliasing: after calling set-var!"
+        '(2 . 42)
+        (cons var (in-module test-mutation var))))
+  
+
+  
+  
+
+
 
 ;; ----------------------------------------------------------------------
 (test-subsection "Testing prefix/rename/only imports")

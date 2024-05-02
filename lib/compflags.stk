@@ -2,7 +2,7 @@
 ;;;;
 ;;;; compflags.stk         -- Compiler Flags
 ;;;;
-;;;; Copyright © 2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2023-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,8 @@
 ;;      Compiler parameters ...
 ;; ----------------------------------------------------------------------
 
-(export compiler:time-display
+(export define-parameter
+        compiler:time-display
         compiler:gen-line-number
         compiler:warn-use-undefined
         compiler:warn-use-undefined-postpone
@@ -38,7 +39,8 @@
         compiler:keep-formals
         compiler:keep-source
         compiler:inline-common-functions
-        compiler:unroll-iterations)
+        compiler:unroll-iterations
+        compiler:peephole-optimizer)
 
 #|
 <doc EXT compiler:time-display
@@ -64,19 +66,20 @@ doc>
  * (compiler:show-assembly-code)
  * (compiler:show-assembly-code bool)
  *
- * This parameter controls if the object files produced by the {{stklos}} compiler
- * code must embed a readable version of the code. The code is placed at the beginning
- * of the produced file. This parameter defaults to `#f`.
+ * This parameter controls if the object files produced by the {{stklos}}
+ * compiler code must embed a readable version of the code. The code is placed
+ * at the beginning of the produced file. This parameter defaults to `#f`.
 doc>
 <doc EXT compiler:inline-common-functions
  * (compiler:inline-common-functions)
  * (compiler:inline-common-functions bool)
  *
- * This parameter controls if the compiler must try to inline the most common Scheme
- * primitives (simple arithmetic, main list or vector functions, ...). Code produced
- * when this parameter is set is more efficient. Note that the compiler can sometimes be
- * misleaded if those functions are redefined, hence the existence of this parameter.
- * |compiler:inline-common-functions| is set by default to `#t`.
+ * This parameter controls if the compiler must try to inline the most common
+ * Scheme primitives (simple arithmetic, main list or vector functions, ...).
+ * Code produced  when this parameter is set is more efficient. Note that the
+ * compiler can sometimes be misleaded if those functions are redefined, hence
+ * the existence of this parameter. |compiler:inline-common-functions| is set
+ * by default to `#t`.
  * @lisp
  * > (compiler:inline-common-functions #t)
  * > (disassemble-expr '(begin (car '(1 2 3)) (+ a 1)) #t)
@@ -166,21 +169,74 @@ doc>
  * loops. Currently, only |repeat| loops are unrolled. The argument
  * |n| must be a positive integer.
 doc>
+<doc EXT compiler:peephole-optimizer
+ * (compiler:peephole-optimizer)
+ * (compiler:peephole-optimizer bool)
+ *
+ * This parameter determines if the peephole optimizer is used when compiling.
+ * The default value for this parameter is `#t`. The next example illustrates
+ * how it works.
+ *
+ * @lisp
+ * (compiler:peephole-optimizer #f)
+ * (disassemble-expr '(+ a #f) #t)
+ * @end lisp
+ * will print
+ * @lisp
+ * 000:  GLOBAL-REF           0
+ * 002:  PUSH
+ * 003:  IM-FALSE
+ * 004:  IN-ADD2
+ * 005:
+ * @end lisp
+ * Now, if we change the parameter,
+ * @lisp
+ * (compiler:peephole-optimizer #t)
+ * (disassemble-expr '(+ a #f) #t)
+ * then the result is
+ * @lisp
+ * 000:  GLOBAL-REF-PUSH      0
+ * 002:  IM-FALSE
+ * 003:  IN-ADD2
+ * 004:
+ * @end lisp
+ * See that the `GLOBAL-REF` and `PUSH` were turned by the peephole optimizer
+ * into `GLOBAL-REF-PUSH`.
+doc>
 |#
-(define compiler:time-display                   (make-parameter #t))
-(define compiler:gen-line-number                (make-parameter #f))
-(define compiler:warn-use-undefined             (make-parameter #f))
-(define compiler:warn-use-undefined-postpone    (make-parameter #t))
-(define compiler:show-assembly-code             (make-parameter #f))
-(define compiler:keep-formals                   (make-parameter #f))
-(define compiler:keep-source                    (make-parameter #f))
-(define compiler:unroll-iterations
-  (make-parameter 4
-                  (lambda (v)
-                    (unless (and (fixnum? v) (positive? v))
-                      (error 'compiler:unroll-iterations
-                             "must be a positive fixnum. It was ~s" v))
-                    v)))
+(define-parameter compiler:time-display                   #t)
+(define-parameter compiler:gen-line-number                #f)
+(define-parameter compiler:warn-use-undefined             #f)
+(define-parameter compiler:warn-use-undefined-postpone    #t)
+(define-parameter compiler:show-assembly-code             #f)
+(define-parameter compiler:keep-formals                   #f)
+(define-parameter compiler:keep-source                    #f)
+(define-parameter compiler:peephole-optimizer              #t)
+(define-parameter compiler:unroll-iterations 4
+  (lambda (v)
+    (unless (and (fixnum? v) (positive? v))
+      (error 'compiler:unroll-iterations
+             "must be a positive fixnum. It was ~s" v))
+    v))
+
+(define compiler:inline-common-functions
+  (let* ((inlined-math-commutative *inline-math-commutative*)
+         (inlined-math-general     *inline-math-general*)
+         (inlined-math             *inline-math*)
+         (inlined-general          *inline-general*)
+         (res     (make-parameter
+                   #t
+                   (lambda (v)
+                     (set! *inline-math-commutative* (if v inlined-math-commutative '()))
+                     (set! *inline-math-general*     (if v inlined-math-general     '()))
+                     (set! *inline-math*             (if v inlined-math             '()))
+                     (set! *inline-general*          (if v inlined-general          '()))
+                     (set! *inline-table*            (append *inline-math*
+                                                             *inline-general*))
+                     (not (null? *inline-table*))))))
+    (%set-parameter-name! res 'compiler:inline-common-functions)
+    res))
+
 
 ;; ----------------------------------------------------------------------
 ;;      %compiler-set-flags ...
@@ -204,6 +260,7 @@ doc>
                           ((keep-source)       (compiler:keep-source val))
                           ((inline-usuals)     (compiler:inline-common-functions val))
                           ((show-instructions) (compiler:show-assembly-code val))
+                          ((peephole-optimizer)(compiler:peephole-optimizer val))
                           (else (error "bad boolean flag ~s" flag))))
                       ;; valued flag
                       (let* ((lst  (string-split flag "=")))
@@ -214,7 +271,8 @@ doc>
                                 ((unroll-iterations)
                                  (if v
                                      (compiler:unroll-iterations v)
-                                     (error "bad value for unroll-iteration ~s" (cadr lst))))
+                                     (error "bad value for unroll-iteration ~s"
+                                            (cadr lst))))
                                 (else
                                  (error "bad flag name ~s" f))))
                             (error "bad valued flag ~s" flag))))))

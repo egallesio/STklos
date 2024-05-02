@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,10 +22,6 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
  */
-
-// INLINER values
-// Voir FIX:
-
 
 #include "stklos.h"
 #include "object.h"
@@ -91,6 +87,93 @@ static inline void set_signal_mask(sigset_t mask)
 
 /*===========================================================================*\
  *
+ *                              G L O B A L S
+ *
+\*===========================================================================*/
+
+/*
+ * All the global variables values of a program (from all modules) are stored
+ * in the global_store array. The global variable names of a module are
+ * stored in a module hashtable (see hash.c). All the names with same hash
+ * value are stored in a A-list of the form ((foo . i1) (bar . i2) ...) where
+ * the value associated to a key it an integer (the index where the variable
+ * is stored in STk_global_store).
+ */
+#define GLOBAL_STORE_INIT_SIZE 3000 // ~3000 symbols used when we are in REPL
+
+SCM **STk_global_store; /* The store for all global variables */
+
+int STk_reserve_store(void)
+{
+  static int global_store_len  = GLOBAL_STORE_INIT_SIZE;
+  static int global_store_used = 0;
+  MUT_DECL(store_lock);
+  
+  int res; // Build result in the mutex lock section
+
+  MUT_LOCK(store_lock);
+
+  if (global_store_used >= global_store_len) { /* resize the checked  array */
+    // fprintf(stderr, "**** Resizing storage from %d to %d\n", global_store_len,
+    //                  global_store_len + global_store_len/2);
+
+    global_store_len += global_store_len / 2;
+    STk_global_store  = STk_must_realloc(STk_global_store,
+                                         global_store_len * sizeof(SCM*));
+  }
+  res = global_store_used++;
+
+  MUT_UNLOCK(store_lock);
+  return res;
+}
+
+
+SCM STk_global_store_define(SCM descr, SCM var, SCM value)
+{
+  // descr is
+  //  - NULL if variable var was not already defined
+  //  - a list of the form (var . index) otherwise where index locates the
+  //   index of the value in STk_global_store array
+  // return value is a filled descriptor
+
+  if (!descr) {
+    /* Define a new variable (not defined before) */
+    descr = STk_cons(var, MAKE_INT(STk_reserve_store()));
+  } else {
+    /* It's a redefinition, not a new binding, clear the CONST bit */
+    BOXED_INFO(descr) &= (~CONS_CONST);
+
+    /* If variable was an alias, unalias it. */
+    if (BOXED_INFO(descr) & CONS_ALIAS) {
+      /* We redefine an alias to a new value */
+      CDR(descr) = MAKE_INT(STk_reserve_store());
+      BOXED_INFO(descr)  &= ~CONS_ALIAS;
+    }
+  }
+
+  /* Finally, set the variable to the given value */
+  vm_global_set(descr, value);
+  return descr;
+}
+
+SCM STk_global_store_alias(SCM descr, SCM v, SCM old)
+{
+  if (descr) {
+    /* Variable already exists. Change its index*/
+    CDR(descr) = old;
+  } else {
+    /* Enter the new variable in table */
+    descr = STk_cons(v, old);
+  }
+  /* Retain that we have an alias (and that this symbol is read-only) */
+  BOXED_INFO(descr) |= (CONS_CONST | CONS_ALIAS);
+
+  return descr;
+}
+
+
+/*===========================================================================*\
+ *
  *                      V M   S T A C K   &   C O D E
  *
 \*===========================================================================*/
@@ -103,11 +186,11 @@ static inline void set_signal_mask(sigset_t mask)
                          ((SCM*)(a) < &vm->stack[vm->stack_len]))
 
 /* ==== Code access macros ==== */
-#define fetch_next()    (*(vm->pc)++)
-#define fetch_const()   (vm->constants[fetch_next()])
-#define look_const()    (vm->constants[*(vm->pc)])
-#define fetch_global()  (*(checked_globals[(unsigned) fetch_next()]))
-
+#define fetch_next()           (*(vm->pc)++)
+#define fetch_const()          (vm->constants[fetch_next()])
+#define look_const()           (vm->constants[*(vm->pc)])
+#define fetch_global()         (STk_global_store[(unsigned) fetch_next()])
+#define global_var_index(ref)  ((unsigned)INT_VAL(CDR(ref)))
 
 
 /*===========================================================================*\
@@ -253,12 +336,6 @@ vm_thread_t *STk_allocate_vm(int stack_size)
  *                       M i s c .
  */
 
-#define CHECK_GLOBAL_INIT_SIZE  50
-static SCM** checked_globals;
-static int   checked_globals_len  = CHECK_GLOBAL_INIT_SIZE;
-static int   checked_globals_used = 0;
-MUT_DECL(global_lock);          /* the lock to access checked_globals */
-
 
 
 #define FIRST_BYTE(n)  ((n) >> 8)
@@ -396,13 +473,13 @@ static void patch_environment(vm_thread_t *vm)
 
 static void error_bad_arity(SCM func, int arity, int16_t given_args, vm_thread_t *vm)
 {
-   ACT_SAVE_PROC(vm->fp) = func;
+  ACT_SAVE_PROC(vm->fp) = func;
   if (arity >= 0)
     STk_error("%d argument%s required in call to ~S (%d provided)",
               arity, ((arity>1)? "s": ""), func, given_args);
   else
     STk_error("~S requires at least %d argument%s (%d provided)",
-              func, -arity-1, ((arity>1)? "s" : ""), given_args);
+              func, -arity-1, ((-arity-1) > 1 ? "s" : ""), given_args);
 }
 
 
@@ -450,29 +527,6 @@ static inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
   }
   return arity;
 }
-
-
-/* Add a new global reference to the table of checked references */
-static int add_global(SCM ref)
-{
-  SCM addr = BOX_VALUES(ref);
-  int i;
-
-  /* Search this global in the already accessed globals */
-  for (i = 0; i <  checked_globals_used; i++) {
-    if (checked_globals[i] == addr) return i;
-  }
-
-  /* Not present yet */
-  if (checked_globals_used >= checked_globals_len) { /* resize the checked  array */
-    checked_globals_len += checked_globals_len / 2;
-    checked_globals      = STk_must_realloc(checked_globals,
-                                            checked_globals_len * sizeof(SCM*));
-  }
-  checked_globals[checked_globals_used] = addr;
-  return checked_globals_used++;
-}
-
 
 /*===========================================================================*\
  *
@@ -883,6 +937,7 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 \*===========================================================================*/
 
 /*
+ * VM LOCKING
  * For optimization, some opcode/operand pairs get patched on the fly,
  * and replaced by another operation.  It's important that the two
  * reads (opcode and operand) happen atomically. If not, we can get this
@@ -911,24 +966,27 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *      operand at [n+1]
  *   4) Thread A resumes, updates operand at [n+1], releases lock
  */
+
+MUT_DECL(global_code_lock);  /* Lock to permit code patching */
+
 #define LOCK_AND_RESTART                     do{\
-  if (!have_global_lock) {                      \
-    MUT_LOCK(global_lock);                      \
-    have_global_lock=1;                         \
+  if (!have_code_lock) {                        \
+    MUT_LOCK(global_code_lock);                 \
+    have_code_lock=1;                           \
     (vm->pc)--;                                 \
     NEXT;                                       \
   }                                             \
 }while(0)
 #define RELEASE_LOCK                         do{\
    {                                            \
-    MUT_UNLOCK(global_lock);                    \
-    have_global_lock=0;                         \
+    MUT_UNLOCK(global_code_lock);               \
+    have_code_lock=0;                           \
    }                                            \
 }while(0)
 #define RELEASE_POSSIBLE_LOCK                do{\
-  if (have_global_lock) {                       \
-    MUT_UNLOCK(global_lock);                    \
-    have_global_lock=0;                         \
+  if (have_code_lock) {                         \
+    MUT_UNLOCK(global_code_lock);               \
+    have_code_lock=0;                           \
   }                                             \
 }while(0)
 
@@ -938,7 +996,7 @@ static void run_vm(vm_thread_t *vm)
   jbuf jb;
   int16_t tailp;
   volatile int offset,
-               have_global_lock = 0;     /* if true, we're patching the code */
+               have_code_lock = 0;     /* if true, we're patching the code */
   int nargs=0;
 
 #if defined(USE_COMPUTED_GOTO)
@@ -1027,7 +1085,7 @@ CASE(GLOBAL_REF) {
   }
 
   /* patch the code for optimize next accesses */
-  vm->pc[-1]  = add_global(CDR(ref));
+  vm->pc[-1]  = global_var_index(ref);
   vm->pc[-2]  = (orig_opcode == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
   RELEASE_LOCK;
   NEXT1;
@@ -1060,7 +1118,7 @@ CASE(GLOBAL_REF_PUSH) {
   push(res);
 
   /* patch the code for optimize next accesses */
-  vm->pc[-1]  = add_global(CDR(ref));
+  vm->pc[-1]  = global_var_index(ref);
   vm->pc[-2]  = UGLOBAL_REF_PUSH;
   RELEASE_LOCK;
   NEXT1;
@@ -1096,7 +1154,7 @@ CASE(GREF_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-2]  = add_global(CDR(ref));
+  vm->pc[-2]  = global_var_index(ref);
   vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
   RELEASE_LOCK;
 
@@ -1139,9 +1197,9 @@ CASE(GREF_TAIL_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-2]  = add_global(CDR(ref));
+  vm->pc[-2]  = global_var_index(ref);
   vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ?
-                        UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
+                     UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
   RELEASE_LOCK;
 
   /* and now invoke */
@@ -1241,15 +1299,22 @@ CASE(GLOBAL_SET) {
   if (BOXED_INFO(ref) & CONS_CONST) {
     RELEASE_LOCK;
     STk_error("cannot mute the value of ~S in ~S", orig_operand, vm->current_module);
-
   }
-  *BOX_VALUES(CDR(ref)) = vm->val;    /* sure that this box arity is 1 */
+  vm_global_set(ref, vm->val);
   /* patch the code for optimize next accesses */
-  vm->pc[-1] = add_global(CDR(ref));
+  vm->pc[-1] = global_var_index(ref);
   vm->pc[-2] = UGLOBAL_SET;
+
+  if (CLOSUREP(vm->val) && CLOSURE_NAME(vm->val) == STk_false) {
+    /* We do something like (set! foo (lambda () ....)) and the lambda doesn't have a procedure
+     * name in it. Just force the name of the closure to "foo". */
+    CLOSURE_NAME(vm->val) = orig_operand;
+  }
+
   RELEASE_LOCK;
   NEXT0;
-}
+ }
+
 
 CASE(UGLOBAL_SET) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
@@ -1257,6 +1322,7 @@ CASE(UGLOBAL_SET) { /* Never produced by compiler */
 
   fetch_global() = vm->val; NEXT0;
 }
+
 
 CASE(LOCAL_SET0) { FRAME_LOCAL(vm->env, 0)           = vm->val; NEXT0;}
 CASE(LOCAL_SET1) { FRAME_LOCAL(vm->env, 1)           = vm->val; NEXT0;}
@@ -1565,7 +1631,7 @@ CASE(END_OF_CODE) {
 CASE(DBG_VM)  {
   ;
 }
-CASE(UNUSED_3)
+
 CASE(UNUSED_4)
 CASE(UNUSED_5)
 CASE(UNUSED_6)
@@ -1692,6 +1758,35 @@ CASE(IN_NOT_EQUAL) { vm->val = SCHEME_NOT(STk_equal(pop(), vm->val));      NEXT1
 CASE(IN_NOT_EQV)   { vm->val = SCHEME_NOT(STk_eqv(pop(), vm->val));        NEXT1; }
 CASE(IN_NOT_EQ)    { vm->val = MAKE_BOOLEAN(pop() != vm->val);             NEXT1; }
 
+CASE(IN_ASSOC)    {
+  SCM arg= pop();
+  switch (fetch_next()) {
+    case 1: vm->val= STk_assq(arg, vm->val); break;
+    case 2: vm->val= STk_assv(arg, vm->val); break;
+    case 3: vm->val= STk_assoc(arg, vm->val, NULL); break;
+    default: {
+      SCM prev = pop ();
+      vm->val= STk_assoc(prev, arg, vm->val); break;
+    }
+  }
+  NEXT1;
+}
+
+ CASE(IN_MEMBER)    {
+  SCM arg= pop();
+  switch (fetch_next()) {
+    case 1: vm->val= STk_memq(arg, vm->val); break;
+    case 2: vm->val= STk_memv(arg, vm->val); break;
+    case 3: vm->val= STk_member(arg, vm->val, NULL); break;
+    default: {
+      SCM prev = pop ();
+      vm->val= STk_member(prev, arg, vm->val); break;
+    }
+  }
+  NEXT1;
+}
+
+
 CASE(IN_VREF) {
   REG_CALL_PRIM(vector_ref);
   vm->val = STk_vector_ref(pop(), vm->val);
@@ -1718,11 +1813,6 @@ CASE(IN_CXR) {
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
  }
-
-CASE(IN_APPLY)   {
-  STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
-  NEXT;
-}
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 FUNCALL:  /* (int nargs, int tailp) */
@@ -2365,9 +2455,13 @@ int STk_init_vm()
 {
   DEFINE_XTYPE(continuation, &xtype_continuation);
 
-  /* Initialize the table of checked references */
-  checked_globals = STk_must_malloc(checked_globals_len * sizeof(SCM));
+  /* Initialize the global_store array */
+  STk_global_store = STk_must_malloc(GLOBAL_STORE_INIT_SIZE * sizeof(SCM));
+  return TRUE;
+}
 
+int STk_late_init_vm()
+{
   /* Add the apply primitive */
   ADD_PRIMITIVE(scheme_apply);
   ADD_PRIMITIVE(execute);

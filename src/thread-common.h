@@ -48,19 +48,23 @@ struct thread_obj {
   enum thread_state state;
   int stack_stize;
   vm_thread_t *vm;
+  unsigned long allocations;
+  unsigned long bytes_allocated;
   struct sys_thread_obj sys_thread;
 };
 
 
-#define THREADP(p)              (BOXED_TYPE_EQ((p), tc_thread))
-#define THREAD_THUNK(p)         (((struct thread_obj *) (p))->thunk)
-#define THREAD_NAME(p)          (((struct thread_obj *) (p))->name)
-#define THREAD_SPECIFIC(p)      (((struct thread_obj *) (p))->specific)
-#define THREAD_RESULT(p)        (((struct thread_obj *) (p))->end_result)
-#define THREAD_EXCEPTION(p)     (((struct thread_obj *) (p))->end_exception)
-#define THREAD_STATE(p)         (((struct thread_obj *) (p))->state)
-#define THREAD_STACK_SIZE(p)    (((struct thread_obj *) (p))->stack_stize)
-#define THREAD_VM(p)            (((struct thread_obj *) (p))->vm)
+#define THREADP(p)                (BOXED_TYPE_EQ((p), tc_thread))
+#define THREAD_THUNK(p)           (((struct thread_obj *) (p))->thunk)
+#define THREAD_NAME(p)            (((struct thread_obj *) (p))->name)
+#define THREAD_SPECIFIC(p)        (((struct thread_obj *) (p))->specific)
+#define THREAD_RESULT(p)          (((struct thread_obj *) (p))->end_result)
+#define THREAD_EXCEPTION(p)       (((struct thread_obj *) (p))->end_exception)
+#define THREAD_STATE(p)           (((struct thread_obj *) (p))->state)
+#define THREAD_STACK_SIZE(p)      (((struct thread_obj *) (p))->stack_stize)
+#define THREAD_VM(p)              (((struct thread_obj *) (p))->vm)
+#define THREAD_ALLOCATIONS(p)     (((struct thread_obj *) (p))->allocations)
+#define THREAD_BYTES_ALLOCATED(p) (((struct thread_obj *) (p))->bytes_allocated)
 
 extern void STk_error_bad_thread(SCM obj);
 double STk_verify_timeout(SCM tm);

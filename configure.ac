@@ -4,7 +4,7 @@
 ###    Creation date: 28-Dec-1999 21:19 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.70])   # Set also VERSION_STATUS to stable when changing version
+AC_INIT([stklos],[2.00])   # Set also VERSION_STATUS to stable when changing version
 VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
@@ -57,6 +57,12 @@ AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 AC_CHECK_PROG(ASCIIDOCTOR, asciidoctor, "asciidoctor", "../adoc-fake.sh")
+if test "$ASCIIDOCTOR" = "asciidoctor"
+then
+    REPORT_ASCIIDOCTOR="yes (since Asciidoctor is installed)"
+else
+    REPORT_ASCIIDOCTOR="no (install Asciidoctor to rebuild documentation)"
+fi
 ### Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h execinfo.h])
 
@@ -162,9 +168,10 @@ if test "$DATADIR" == ""  ; then
 fi
 
 ### Initialize the extra conf file in src
-PREFIX=$prefix
-SCMDIR=$datadir
-EXECDIR=$libdir
+PREFIX=${prefix}
+SCMDIR=${datadir}
+EXECDIR=${libdir}
+INCLUDEDIR=${includedir}
 
 
 ### Determine the kind of the machine which is running this script
@@ -396,7 +403,7 @@ then
      (cd pcre2; ./configure --prefix=$prefix --disable-shared --disable-cpp) || \
            { echo "Cannot configure PCRE2"; exit; }
      PCRE2=pcre2
-     PCRE2INC="-I../pcre2"
+     PCRE2INC="-I../pcre2/src"
      PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
      COMP_LIBS="libpcre2 $COMP_LIBS"
 else
@@ -577,8 +584,18 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CPPFLAGS=$CPPFLAGS\\\""
 fi
 
+# Build the CONF_SUMMARY variable
+confdirs="("
+confdirs="${confdirs} #:libdir \\\"$libdir\\\" #:datadir \\\"$datadir\\\""
+confdirs="${confdirs} #:docdir \\\"$docdir\\\" #:htmldir \\\"$htmldir\\\" #:pdfdir \\\"$pdfdir\\\""
+confdirs="${confdirs})"
 
-CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
+confsum="("
+confsum="${confsum} #:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT)"
+confsum="${confsum} #:dirs ${confdirs}"
+confsum="${confsum})"
+
+CONF_SUMMARY="${confsum}"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
@@ -657,6 +674,7 @@ AC_SUBST(GMPINC)
 AC_SUBST(PREFIX)
 AC_SUBST(SCMDIR)
 AC_SUBST(EXECDIR)
+AC_SUBST(INCLUDEDIR)
 AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)
@@ -721,7 +739,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
           utils/stklos-script examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
-          lib/scheme/Makefile lib/scheme/vector/Makefile
+          lib/scheme/Makefile
+          lib/scheme/regex/Makefile lib/scheme/vector/Makefile
           lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile
           tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
@@ -770,9 +789,9 @@ echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
+echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "
-

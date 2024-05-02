@@ -227,6 +227,7 @@ HAVE_CANVAS = @HAVE_CANVAS@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_GNOME = @HAVE_GNOME@
 HAVE_GTK = @HAVE_GTK@
+INCLUDEDIR = @INCLUDEDIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -557,10 +558,10 @@ all: lalr.ostk calc
 
 install-sources: install
 	mkdir -p $(schemedir)
-	cp lalr.stk $(DESTDIR)/$(schemedir)
+	cp lalr.stk $(DESTDIR)$(schemedir)
 
 uninstall-hook:
-	rm  -f $(DESTDIR)/$(schemedir)/lalr.stk
+	rm  -f $(DESTDIR)$(schemedir)/lalr.stk
 
 calc: calc.stk
 	echo "#!/bin/sh" > calc

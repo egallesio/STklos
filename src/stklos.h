@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -86,9 +86,6 @@ extern "C"
 #endif
 
 
-#define MAX_TOKEN_SIZE          1024            /* max size of a token */
-
-
 #define CPP_CONCAT(x, y)        x##y
 
 
@@ -150,12 +147,20 @@ extern "C"
 //
 // GC_API void GC_gcollect(void);
 // GC_API void GC_init(void);
+// GC_API void *GC_base(void * /* displaced_pointer */);
+//
+// For statistics (only used in misc.c)
+// struct GC_prof_stats_s;
+// GC_API size_t GC_CALL GC_get_prof_stats(struct GC_prof_stats_s *,
+//                                         size_t /* stats_sz */);
 
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
+#define STk_must_malloc(size)                                           \
+  ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
+#define STk_must_malloc_atomic(size)                                    \
+  ((STk_count_allocations)? STk_count_malloc_atomic(size): GC_MALLOC_ATOMIC(size))
 
-#define STk_must_malloc(size)           GC_MALLOC(size)
-#define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
 #define STk_free(ptr)                   GC_FREE(ptr)
 #define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
@@ -163,6 +168,7 @@ extern "C"
                                             (GC_finalization_proc)(f),  \
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
+#define STk_gc_base(ptr)                GC_base(ptr)
 
 void STk_gc_init(void);
 
@@ -367,17 +373,18 @@ int STk_init_box(void);
 #define CHARACTER_VAL(n)  ((AS_LONG(n) >> 3))
 #define CHARACTERP(n)     ((AS_LONG(n) & 7) == 6)
 
+typedef uint32_t utf8_char;
 
 /* Simple  character conversion functions */
-uint32_t STk_to_upper(uint32_t c);
-uint32_t STk_to_lower(uint32_t c);
-uint32_t STk_to_fold(uint32_t c);
-
+utf8_char STk_to_upper(utf8_char c);
+utf8_char STk_to_lower(utf8_char c);
+utf8_char STk_to_fold(utf8_char c);
 
 char *STk_char2string(int c);
 int STk_string2char(char *s);
 int STk_init_char(void);
 
+int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len);
 
 /*
   ------------------------------------------------------------------------------
@@ -480,14 +487,13 @@ void STk_signal(char *str);
   ----
   ------------------------------------------------------------------------------
 */
+
 struct frame_obj {
   stk_header header;
   SCM next_frame;
   SCM owner;
   SCM locals[1];        /* the values associated to the names */
 };
-
-/* Note: boxes are used for global variables */
 
 #define FRAME_LENGTH(p)         (BOXED_INFO(p))
 #define FRAME_NEXT(p)           (((struct frame_obj *) (p))->next_frame)
@@ -647,6 +653,7 @@ struct cons_obj {
 #define CONS_CONST              (1 << 0)
 #define CONS_PLACEHOLDER        (1 << 1)        /* used for #n= and #n# notation */
 #define CONS_ECONS              (1 << 2)        /* used for extended conses      */
+#define CONS_ALIAS              (1 << 3)        /* used for implementing aliases */
 
 #define LIST1(a)                 STk_cons((a), STk_nil)
 #define LIST2(a,b)               STk_cons((a), LIST1(b))
@@ -676,6 +683,8 @@ EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
 EXTERN_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name));
 EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
+EXTERN_PRIMITIVE("memv", memv, subr2, (SCM obj, SCM list));
+EXTERN_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp));
 EXTERN_PRIMITIVE("reverse", reverse, subr1, (SCM l));
 EXTERN_PRIMITIVE("reverse!", dreverse, subr1, (SCM l));
 EXTERN_PRIMITIVE("list-copy", list_copy, subr1, (SCM l));
@@ -708,11 +717,16 @@ int STk_init_md5(void);
 extern int STk_interactive_debug;
 #endif
 
+extern int STk_count_allocations;
+
+void *STk_count_malloc(size_t size);
+void* STk_count_malloc_atomic(size_t size);
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
 void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
 SCM STk_eval_C_string(const char *str, SCM module);
 SCM STk_read_from_C_string(const char *str);
+void STk_verify_address(unsigned long addr, SCM object);
 
 int STk_init_misc(void);
 
@@ -867,9 +881,9 @@ int STk_init_parameter(void);
 
 SCM STk_get_parameter(SCM param);
 SCM STk_set_parameter(SCM param, SCM value);
-SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
+SCM STk_make_C_parameter(char *name, SCM value, SCM (*proc)(SCM new_value),
                          SCM module);
-SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_value),
+SCM STk_make_C_parameter2(char *name,SCM (*value)(void),SCM (*proc)(SCM new_value),
                           SCM module);
 
 
@@ -1160,6 +1174,7 @@ SCM   STk_read_constant(SCM port, int case_significant);
 char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
+void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
 extern int STk_read_case_sensitive;
 
 
@@ -1309,6 +1324,9 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
   ------------------------------------------------------------------------------
 */
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
+
+void STk_thread_inc_allocs(SCM thr, size_t size);
+
 int STk_init_threads(int stack_size, void *start_stack);
 int STk_init_mutexes(void);
 
@@ -1329,7 +1347,7 @@ extern int STk_use_utf8;
   ((0 <= (c)  && (c) <=  0xd7ff) || (0xE000 <=(c) && (c) <= 0x10FFFF))
 
 
-char *STk_utf8_grab_char(char *str, uint32_t *c); /* result = pos. after current one */
+char *STk_utf8_grab_char(char *str, utf8_char *c); /* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(const char *s, int max);
 int STk_utf8_read_char(SCM port);
@@ -1386,9 +1404,7 @@ struct uvector_obj {
 
 #define BYTEVECTORP(p)  (UVECTORP(p) && UVECTOR_TYPE(p) == UVECT_U8)
 
-extern int STk_uvectors_allowed;
-
-int STk_uniform_vector_tag(char *s);
+int STk_uniform_vector_tag(const char *s);
 int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 SCM STk_uvector_get(SCM v, long i);
@@ -1453,6 +1469,7 @@ int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
 
 int STk_init_vm(void);
+int STk_late_init_vm(void);   // run when env.c is fully initialized
 
 /*****************************************************************************/
 
@@ -1467,15 +1484,20 @@ extern STk_instr STk_boot_code[];
 #define STk_false       ((SCM) MAKE_SCONST(1))
 #define STk_true        ((SCM) MAKE_SCONST(2))
 #define STk_eof         ((SCM) MAKE_SCONST(3))
-#define STk_void        ((SCM) MAKE_SCONST(4))
+#define STk_void        ((SCM) MAKE_SCONST(4)) // must be the last constant
 
-#define STk_dot         ((SCM) MAKE_SCONST(5)) /* special pupose value see read.c */
-#define STk_close_par   ((SCM) MAKE_SCONST(6)) /* special pupose value see read.c */
+/* STk_void must be the last small constant, since it is used by 'read_address'
+   in read.c, to validate small  constants. Insert new constants before STk_void,
+   if needed. It is also used in read.c to build special constant for the reader.
+   NOTE: STk_void is the last *READABLE* and *REFERENTIABLE constant.
+*/
 
 
 /* Misc */
 #if defined(__GNUC__) || defined(__clang__)
 #  define _UNUSED(x) __attribute__((__unused__)) x
+#else
+#  define _UNUSED(x) x
 #endif
 
 #ifdef __cplusplus

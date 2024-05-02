@@ -90,11 +90,9 @@ static struct charelem chartable [] = {
 };
 
 struct utf8_conversion_char {
-  uint32_t key;
-  uint32_t val;
+  utf8_char key;
+  utf8_char val;
 };
-
-typedef uint32_t utf8_char;
 
 #include "utf8-tables.inc"
 
@@ -149,6 +147,11 @@ static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
   return -1;
 }
 
+// Public version of search_ordered_list
+int STk_valid_utf8_char_codep(utf8_char ch, utf8_char table[], int len)
+{
+  return search_ordered_list(ch, table, len);
+}
 
 /*===========================================================================*\
  *
@@ -158,7 +161,7 @@ static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
 
 static void error_bad_char(SCM c)
 {
-  STk_error("bad char", c);
+  STk_error("bad char ~S", c);
 }
 
 static inline int charcomp(SCM c1, SCM c2)
@@ -181,7 +184,7 @@ int STk_string2char(char *s)
 /* converts a char name to a char */
 {
   register struct charelem *p;
-  uint32_t val;
+  utf8_char val;
 
   /* Try to see if it is a multibyte character */
   if (* (STk_utf8_grab_char(s, &val)) == '\0') return val;
@@ -466,18 +469,18 @@ DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
  * lower case.
 doc>
  */
-uint32_t STk_to_upper(uint32_t c) {
+utf8_char STk_to_upper(utf8_char c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, lower_table, lower_table_length);
-    return (res <= 0) ? c : (uint32_t) res;   // -1: not a lowercase, 0 lower without upper
+    return (res <= 0) ? c : (utf8_char) res;   // -1: not a lowercase, 0 lower without upper
   } else
     return toupper(c);
 }
 
-uint32_t STk_to_lower(uint32_t c) {
+utf8_char STk_to_lower(utf8_char c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, upper_table, upper_table_length);
-    return (res <=0) ? c : (uint32_t) res;    // -1: not a lowercase, 0 lower without lower
+    return (res <=0) ? c : (utf8_char) res;    // -1: not a lowercase, 0 lower without lower
   } else
     return tolower(c);
 }
@@ -485,14 +488,14 @@ uint32_t STk_to_lower(uint32_t c) {
 DEFINE_PRIMITIVE("char-upcase", char_upcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
-  return MAKE_CHARACTER(STk_to_upper((uint32_t) CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_to_upper((utf8_char) CHARACTER_VAL(c)));
 }
 
 
 DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
-  return MAKE_CHARACTER(STk_to_lower((uint32_t) CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_to_lower((utf8_char) CHARACTER_VAL(c)));
 }
 /*
 <doc EXT char-foldcase
@@ -505,10 +508,10 @@ DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
  * does not exist.
 doc>
  */
-uint32_t STk_to_fold(uint32_t c) {
+utf8_char STk_to_fold(utf8_char c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, fold_table, fold_table_length);
-    return (res <=0) ? STk_to_lower(c) : (uint32_t) res;
+    return (res <=0) ? STk_to_lower(c) : (utf8_char) res;
   } else
     return tolower(c);
 }
@@ -516,7 +519,57 @@ uint32_t STk_to_fold(uint32_t c) {
 DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c))  error_bad_char(c);
-  return MAKE_CHARACTER(STk_to_fold((uint32_t) CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_to_fold((utf8_char) CHARACTER_VAL(c)));
+}
+
+/* ----------------------------------------------------------------------
+ * UTF8 support for char-sets 
+ * ---------------------------------------------------------------------- */
+
+static inline SCM make_char_list1(struct utf8_conversion_char *tab, int len)
+{
+  SCM lst = STk_nil;
+
+  for (int i = len-1; i >=0; i--) {
+    lst = STk_cons(MAKE_CHARACTER(tab[i].key), lst);
+  }
+  return lst;
+}
+
+static inline SCM make_char_list2(utf8_char *tab, int len)
+{
+  SCM lst = STk_nil;
+
+  for (int i = len-1; i >=0; i--) {
+    lst = STk_cons(MAKE_CHARACTER(tab[i]), lst);
+  }
+  return lst;
+}
+
+
+DEFINE_PRIMITIVE("%uppers-list", uppers_list, subr0, (void))
+{
+  return make_char_list1(upper_table, upper_table_length);
+}
+
+DEFINE_PRIMITIVE("%lowers-list", lowers_list, subr0, (void))
+{
+  return make_char_list1(lower_table, lower_table_length);
+}
+
+DEFINE_PRIMITIVE("%digits-list", digits_list, subr0, (void))
+{
+  return make_char_list1(digits_table, digits_table_length);
+}
+
+DEFINE_PRIMITIVE("%letters-list", letters_list, subr0, (void))
+{
+  return make_char_list2(letters_table, letters_table_length);
+}
+
+DEFINE_PRIMITIVE("%spaces-list", spaces_list, subr0, (void))
+{
+  return make_char_list2(spaces_table, spaces_table_length);
 }
 
 
@@ -552,5 +605,11 @@ int STk_init_char(void)
   ADD_PRIMITIVE(char_downcase);
   ADD_PRIMITIVE(char_foldcase);
 
+  /* Support for char-sets */
+  ADD_PRIMITIVE(uppers_list);
+  ADD_PRIMITIVE(lowers_list);
+  ADD_PRIMITIVE(digits_list);
+  ADD_PRIMITIVE(letters_list);
+  ADD_PRIMITIVE(digits_list);
   return TRUE;
 }

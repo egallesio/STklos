@@ -1,7 +1,7 @@
 ;;;;
 ;;;; image.stk                  -- GTK Image Widget
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,8 @@
 (define-gtk gtk-image-new-from-icon (#:string :long) #:pointer "gtk_image_new_from_icon_name")
 (define-gtk gtk-image-get-pixbuf (#:pointer) #:pointer         "gtk_image_get_pixbuf")
 
+
+(%compile-time-define %guess-pathname)  ; to avoid a warning
 
 
 ;; See https://developer.gnome.org/gtk3/stable/gtk3-Themeable-Stock-Images.html#GtkIconSize

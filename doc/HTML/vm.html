@@ -650,81 +650,10 @@ pre.rouge {
   background-color: #49483e;
 }
 </style>
-<!-- Generate a nice TOC -->
-<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
-<!-- We do not need the tocify CSS because the asciidoc CSS already provides most of what we neeed -->
-
 <style>
-.tocify-header {
-    font-style: italic;
-}
-
-.tocify-subheader {
-    font-style: normal;
-    font-size: 90%;
-}
-
-.tocify ul {
-    margin: 0;
- }
-
-.tocify-focus {
-    color: #7a2518;
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.tocify-focus > a {
-    color: #7a2518;
-}
+  /* Customize default CSS */
+  .sidebarblock { margin-top: -1em; }
 </style>
-
-<script type="text/javascript">
-    $(function () {
-        // Add a new container for the tocify toc into the existing toc so we can re-use its
-        // styling
-        $("#toc").append("<div id='generated-toc'></div>");
-        $("#generated-toc").tocify({
-            extendPage: true,
-            context: "#content",
-            highlightOnScroll: true,
-            hideEffect: "slideUp",
-            // Use the IDs that asciidoc already provides so that TOC links and intra-document
-            // links are the same. Anything else might confuse users when they create bookmarks.
-            hashGenerator: function(text, element) {
-                return $(element).attr("id");
-            },
-            // Smooth scrolling doesn't work properly if we use the asciidoc IDs
-            smoothScroll: false,
-            // Set to 'none' to use the tocify classes
-            theme: "none",
-            // Handle book (may contain h1) and article (only h2 deeper)
-            selectors: $( "#content" ).has( "h1" ).size() > 0 ? "h1,h2,h3,h4,h5" : "h2,h3,h4,h5",
-            ignoreSelector: ".discrete"
-        });
-
-        // Switch between static asciidoc toc and dynamic tocify toc based on browser size
-        // This is set to match the media selectors in the asciidoc CSS
-        // Without this, we keep the dynamic toc even if it is moved from the side to preamble
-        // position which will cause odd scrolling behavior
-        var handleTocOnResize = function() {
-            if ($(document).width() < 768) {
-                $("#generated-toc").hide();
-                $(".sectlevel0").show();
-                $(".sectlevel1").show();
-            }
-            else {
-                $("#generated-toc").show();
-                $(".sectlevel0").hide();
-                $(".sectlevel1").hide();
-            }
-        }
-
-        $(window).resize(handleTocOnResize);
-        handleTocOnResize();
-    });
-</script>
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
@@ -743,7 +672,7 @@ pre.rouge {
 <li><a href="#_deep_variables">5. Deep variables</a></li>
 <li><a href="#_global_variables">6. Global variables</a>
 <ul class="sectlevel2">
-<li><a href="#_uglobal_refset_and_the_checked_global_table">6.1. UGLOBAL_{REF,SET} and the checked global table</a></li>
+<li><a href="#_uglobal_refset_and_the_checked_global_variables">6.1. UGLOBAL_{REF,SET} and the checked global variables</a></li>
 </ul>
 </li>
 <li><a href="#_operations">7. Operations</a>
@@ -1394,80 +1323,93 @@ Constants:
 </div>
 </div>
 <div class="sect2">
-<h3 id="_uglobal_refset_and_the_checked_global_table">6.1. UGLOBAL_{REF,SET} and the checked global table</h3>
+<h3 id="_uglobal_refset_and_the_checked_global_variables">6.1. UGLOBAL_{REF,SET} and the checked global variables</h3>
+<div class="paragraph">
+<p>Internally, the global variables values of a program are stored in a unique
+array called <code>STk_global_store</code>.</p>
+</div>
 <div class="paragraph">
 <p>The instructions <code>GLOBAL_REF</code> and <code>GLOBAL_SET</code> do the following:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Acquire the mutex</p>
-</li>
-<li>
-<p>Fetch the index of the global variable</p>
+<p>Fetch the name of the global variable</p>
 </li>
 <li>
 <p>Lookup the variable in the current environment (that is, consult a hash table
-in  amodule)</p>
+in a module)</p>
 </li>
 <li>
 <p>Verify if the variable is mutable or not</p>
 </li>
 <li>
-<p>Finally, do the real get or set operation</p>
-</li>
-<li>
-<p>Release the lock</p>
+<p>Finally, do the real get or set operation in <code>STk_global_store</code>.</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>Steps 1-4 are quite expensive, and shouldn&#8217;t need to be done every time the
-variable is accessed. Thus, the STklos VM keeps a table with <strong>checked globals</strong>.
-The first time a variable is referenced, the VM goes through all those steps,
-but before releasing the lock there is another step:</p>
+<p>Steps 1-3 are quite expensive, and shouldn&#8217;t need to be done every time the
+variable is accessed. Thus, the STklos VM patches the original code when
+we are sure that the variable used is properly defined. Hence, he first time a
+variable is referenced, the VM goes through all those steps, adds a final step:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="5">
+<li>
+<p><strong>Patch the code</strong>, that is, changing the <code>GLOBAL_REF</code> or <code>GLOBAL_SET</code> instruction
+into a <code>UGLOBAL_REF</code> or <code>UGLOBAL_SET</code> ('U' prefix here is for already <strong>U</strong>sed vrariable)</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
-<p>5'. <strong>Patch the code</strong>, changing the <code>GLOBAL_REF</code> or <code>GLOBAL_SET</code> insrtuction
-     into a <code>UGLOBAL_REF</code> or <code>UGLOBAL_SET</code>.</p>
-</div>
-<div class="paragraph">
-<p>For example, in <code>GLOBAL_SET</code> this step is performed by the following two lines:</p>
+<p>For example, in <code>GLOBAL_SET</code>, this step is performed by the following two lines:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="c">  <span class="cm">/* patch the code for optimize next accesses */</span>
-  <span class="n">vm</span><span class="o">-&gt;</span><span class="n">pc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_global</span><span class="p">(</span><span class="n">CDR</span><span class="p">(</span><span class="n">ref</span><span class="p">));</span>
+  <span class="n">vm</span><span class="o">-&gt;</span><span class="n">pc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">global_var_index</span><span class="p">(</span><span class="n">ref</span><span class="p">);</span> <span class="c1">// ref: result of the search in the hash table</span>
   <span class="n">vm</span><span class="o">-&gt;</span><span class="n">pc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">UGLOBAL_SET</span><span class="p">;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>See that what is being changed are the two previous bytecode elements,
-<code>pc[-1]</code> and <code>pc[-2]</code>.</p>
+<code>pc[-1]</code> and <code>pc[-2]</code>. Note that the value returned by <code>global_var_index</code> is
+the index in <code>STk_global_store</code> where the used variable is stored.</p>
 </div>
 <div class="paragraph">
-<p>So the code</p>
+<p>So the code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="mi">2</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">test</span><span class="p">)</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="mi">2</span><span class="p">))</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>would perhaps be translated into</p>
+<p>is translated in</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>000:  SMALL-INT            2
-002:  GLOBAL-SET           5</pre>
+<pre>000:  CREATE-CLOSURE       6 0  ;; ==&gt; 008
+003:  SMALL-INT            2
+005:  GLOBAL-SET           0
+007:  RETURN
+008:  DEFINE-SYMBOL        1
+010:
+
+Constants:
+0: a
+1: test</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>where <code>5</code> is the index of the variable <code>a</code> (as a global).</p>
+<p>The second and third lines are used for doing this assignment. We can see that
+the parameter of the <code>GLOBAL_SET</code> instruction is the name of the variable to
+be set.</p>
 </div>
 <div class="paragraph">
-<p>Then after the first time the <code>GLOBAL_SET</code> instruction is performed, the
-code will <strong>patch itself</strong> and change into</p>
+<p>Then, after the first time the <code>GLOBAL_SET</code> instruction is performed, the
+code will <strong>patch itself</strong> and changed into</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1476,17 +1418,45 @@ code will <strong>patch itself</strong> and change into</p>
 </div>
 </div>
 <div class="paragraph">
-<p>where <code>n</code> is the index of this global variable <strong>in a local table</strong>.</p>
+<p>where <code>n</code> is the index of this global variable in the <code>STk_global_store</code>
+array.</p>
 </div>
 <div class="paragraph">
 <p>The instruction <code>GLOBAL_SET</code> takes two integers to be represented, so
 when <code>pc[-1]</code> and <code>pc[-2]</code> are changed, what is being changed is the
-previous argument (<code>5</code> &#8594; <code>n</code>) and the previous instruction
+previous argument (<code>0</code> &#8594; <code>n</code>) and the previous instruction
 (<code>GLOBAL_SET</code> &#8594; <code>UGLOBAL_SET</code>).</p>
 </div>
 <div class="paragraph">
-<p><strong>And</strong>, of course, the <code>n</code>-th element of the table contains the address
-of the variable to be set. This is made clear in the code of <code>UGLOBAL_SET</code>:</p>
+<p><strong>And</strong>, of course, the <code>n</code>-th element of the table contains the value of the
+variable to be set. We can see this by disassembling the <code>test</code> function defined
+before:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>stklos&gt; (disassemble test)
+000:  SMALL-INT            2
+002:  GLOBAL-SET           0
+004:  RETURN</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once <code>test</code> has been called at least one time, its code is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>stklos&gt; (disassemble test)
+000:  SMALL-INT            2
+002:  UGLOBAL-SET          2971
+004:  RETURN</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, <code>2971</code> is the index of the global variable <code>a</code> in the array of global
+variables.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see now the code of <code>UGLOBAL_SET</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1499,21 +1469,23 @@ of the variable to be set. This is made clear in the code of <code>UGLOBAL_SET</
 </div>
 </div>
 <div class="paragraph">
-<p>The checked globals table is defined earlier in <code>vm.c</code>:</p>
+<p>The <code>fetch_global</code> macro is defined earlier in <code>vm.c</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="c"><span class="k">static</span> <span class="n">SCM</span><span class="o">**</span> <span class="n">checked_globals</span><span class="p">;</span>
-<span class="p">...</span>
-<span class="cp">#define fetch_global()  (*(checked_globals[(unsigned) fetch_next()]))</span></code></pre>
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#define fetch_next()     (*(vm-&gt;pc)++)
+#define fetch_global()   (STk_global_store[(unsigned) fetch_next()])</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>and the function <code>add_global(SCM ref)</code> will add a global to the table.</p>
+<p>The <code>RELEASE_POSSIBLE_LOCK</code> used here is a macro which deals with the lock
+needed to patch the code. This lock is necessary since STklos permits to
+have several threads to execute the same code. All the stuff about locking in
+the VM is explained in <code>vm.c</code> source file, and is covered (a bit) below.</p>
 </div>
 <div class="paragraph">
-<p>Of course, this is also done in all other <code>UGREF_*</code> instructions in a
-similar way.</p>
+<p>Of course, all the work detailed about how we optimize access to global
+variables is also done in all other <code>UGREF_*</code> instructions in a similar way.</p>
 </div>
 <div class="paragraph">
 <p>That is why, even using a hash table, access to global variables happens
@@ -1532,7 +1504,7 @@ This can be seen in the following rudimentary benchmark:</p>
       <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))))</span>
 
 <span class="c1">;;;</span>
-<span class="c1">;;; Using globals: in the same system, runs in about 4000ms</span>
+<span class="c1">;;; Using globals: runs in about the same time (probably a bit faster)</span>
 <span class="c1">;;;</span>
 <span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="mi">0</span><span class="p">)</span>
 <span class="p">(</span><span class="k">define</span> <span class="nv">b</span> <span class="mi">2</span><span class="p">)</span>
@@ -2575,13 +2547,17 @@ returns a pointer to the <code>vm&#8594;val</code> register</p>
 <div class="sect2">
 <h3 id="_the_global_lock">12.1. The global lock</h3>
 <div class="paragraph">
-<p>There is one global mutex lock for STklos, called <code>global_lock</code>, declared in <code>vm.c</code>:</p>
+<p>There is one global mutex lock for STklos, called <code>global_code_lock</code>, declared in <code>vm.c</code>:</p>
 </div>
 <div class="paragraph">
-<p><code>MUT_DECL(global_lock);          /* the lock to access checked_globals */</code></p>
+<p><code>MUT_DECL(global_code_lock);  /* Lock to permit code patching */</code></p>
 </div>
 <div class="paragraph">
-<p>As per the comment, its purpose is to discipline access to global variables.</p>
+<p>As per the comment, its purpose is to discipline access to the instructions of
+the running program.  This lock is used when patching code for optimizing
+further global variables accesses (as explained before). This is necessary since
+STklos can use several threads. Note that each Scheme thread use its own
+VM, but the code and the global variables are shared among all the threads.</p>
 </div>
 <div class="paragraph">
 <p>Three macros are used to control the global lock (a mutex):</p>
@@ -2590,11 +2566,11 @@ returns a pointer to the <code>vm&#8594;val</code> register</p>
 <ul>
 <li>
 <p><code>LOCK_AND_RESTART</code> will acquire the lock, and decrease the program counter.
-It will also set a flag that signals that the lock has been acquired by this thread,
-and then call <code>NEXT</code>.
-The name &#8220;AND_RESTART&#8221; reflects the fact that it decreases the PC and calls <code>NEXT</code>
-(for the next instruction)&#8201;&#8212;&#8201;so the effect is to start again operating on this
-instruction, but this time with the lock.</p>
+It will also set a flag that signals to the running VM that the lock has been
+acquired by this thread, and then call <code>NEXT</code>.  The name &#8220;AND_RESTART&#8221;
+reflects the fact that it decreases the PC and calls <code>NEXT</code> (for the next
+instruction)&#8201;&#8212;&#8201;so the effect is to start again operating on this instruction,
+but this time with the lock.</p>
 </li>
 <li>
 <p><code>RELEASE_LOCK</code> will release the lock, regardless of the thread having it or not. The flag indicating ownership by this thread is cleared.</p>
@@ -2722,7 +2698,7 @@ for the global variables.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-01 14:44:07 +0200
+Last updated 2023-11-20 14:06:07 +0100
 </div>
 </div>
 </body>

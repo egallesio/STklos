@@ -67,8 +67,8 @@ SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 
 #======================================================================
-srfidir       = @SCMDIR@/srfi/160
-srfilibdir    = @EXECDIR@/srfi/160
+srfidir       = $(DESTDIR)@SCMDIR@/srfi/160
+srfilibdir    = $(DESTDIR)@EXECDIR@/srfi/160
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)

@@ -2,7 +2,7 @@
  *
  * h a s h  . h                 -- Hash Tables
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -41,11 +41,11 @@
 #define REBUILD_MULTIPLIER 3    /* When there are this many entries per bucket, */
                                 /* on average,  make the table larger           */
 
-#define HASH_OBARRAY_FLAG   1   /* Only for the symbol table      */
-#define HASH_VAR_FLAG       2   /* For modules (keys are symbols) */
-#define HASH_SCM_FLAG       3   /* For secheme hash tables        */
-/* 4, '100' means the table is constant. do NOT define macros for 5,6,7. */
-#define HASH_CONST          4
+#define HASH_OBARRAY_FLAG   (1<<0)   /* Only for the symbol table        */
+#define HASH_VAR_FLAG       (1<<1)   /* For modules (keys are symbols)   */
+#define HASH_SCM_FLAG       (1<<2)   /* For Scheme hash tables           */
+#define HASH_C_FLAG         (1<<3)   /* For C hash tables (used by read) */
+#define HASH_CONST          (1<<4)   /* Constant hash table              */
 
 typedef enum {hash_system, hash_eqp, hash_stringp, hash_general} hash_type;
 
@@ -96,9 +96,9 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s,
  * Function for accessing module hash table. Don't use them but the
  * higher level interface instead.
  */
+void STk_hash_define_variable(struct hash_table_obj *h, SCM v, SCM value);
 SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v);
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define);
-void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly);
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value);
 
 /*
  * Utilities on hash tables
@@ -112,5 +112,16 @@ SCM STk_make_basic_hash_table(void);
 EXTERN_PRIMITIVE("hash-table-ref/default", hash_ref_default, subr3,
                  (SCM ht, SCM key, SCM def));
 EXTERN_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val));
+
+
+/*
+ * C hash tables (for internal use: keys are C strings and values are void*
+ *
+ * NOTE: Use only the functions defined below for these hash tables. Standard
+ * hash table functions cannot deal with this sort of hash tables.
+ */
+SCM STk_make_C_hash_table(void);
+void* STk_C_hash_get(struct hash_table_obj *ht, const char *key);
+void STk_C_hash_set(struct hash_table_obj *ht, const char *key, void *val);
 
 int STk_init_hash(void);

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2011-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -29,13 +29,12 @@
         delay delay-force lazy make-promise eager
         define-values
         define-record-type
-        equal-simple?
         exact-integer?
         floor-quotient floor/ truncate/ truncate-quotient
         truncate-remainder floor-remainder
         square exact-integer-sqrt exact inexact
         boolean=?
-        make-list member-simple assoc-simple member assoc
+        make-list member assoc
         symbol=?
         string=?     %string2=?
         string<?     %string2<?
@@ -399,13 +398,6 @@ doc>
 
 
 ;;;; ----------------------------------------------------------------------
-;;;; 6.1 Equivalence predicate
-;;;; ----------------------------------------------------------------------
-(define equal-simple? equal?)
-(set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
-
-
-;;;; ----------------------------------------------------------------------
 ;;;; 6.2 Numbers
 ;;;; ----------------------------------------------------------------------
 
@@ -473,19 +465,6 @@ doc>
 (define truncate-remainder remainder)
 (define floor-remainder    modulo)
 
-#|
-<doc R7RS square
- * (square z)
- *
- * Returns the square of |z|. This is equivalent to |(* z z)|.
- *
- * @lisp
- * (square 42)     => 1764
- * (square 2.0)    => 4.0
- * @end lisp
-doc>
-|#
-(define (square z) (* z z))
 
 #|
 <doc R7RS exact-integer-sqrt
@@ -576,15 +555,6 @@ doc>
 |#
 (define (make-list k :optional (fill (void)))
   (vector->list (make-vector k fill)))
-
-;;
-;; Define versions of member and assoc which use equiv? instead of equal?
-;;
-(define member-simple member)
-(define assoc-simple  assoc)
-
-(define (member x y :optional (compar %equiv?)) (member-simple x y compar))
-(define (assoc  x y :optional (compar %equiv?)) (assoc-simple  x y compar))
 
 
 ;;;; ----------------------------------------------------------------------

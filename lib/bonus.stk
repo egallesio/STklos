@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -47,8 +47,7 @@
         port->string port->sexp-list port->string-list
         print printerr eprintf printf fprintf
         declare-new-error
-        exec exec-list
-        apropos die
+        exec exec-list die
         decompose-file-name dirname basename file-separator
         make-path file-suffix file-prefix
         port-idle-register! port-idle-unregister! port-idle-reset!
@@ -57,6 +56,8 @@
         error-object-location %push-id %stable-version?
         define-constant
         void?
+        default-browser open-in-browser manual man
+        exact-integer-log
         receive case-lambda
         radians->degrees degrees->radians
 
@@ -430,20 +431,18 @@ doc>
 doc>
 |#
 
-(define command-line
-  (let* ((script-file (key-get *%system-state-plist* :script-file ""))
-         (cmd-line    (cons (if (equal? script-file "")
-                                ""
-                                (key-get *%system-state-plist* :program-name ""))
-                            (key-get *%system-state-plist* :argv '()))))
-    (define (verify-setter val)
-      (if (and (list? val)
-               (not (null? val))
-               (every string? val))
-          val
-          (error "bad command line ~S" val)))
-
-    (make-parameter cmd-line verify-setter)))
+(define-parameter command-line
+  (let ((script-file (key-get *%system-state-plist* :script-file "")))
+    (cons (if (equal? script-file "")
+              ""
+              (key-get *%system-state-plist* :program-name ""))
+          (key-get *%system-state-plist* :argv '())))
+  (lambda (val)
+    (if (and (list? val)
+             (not (null? val))
+             (every string? val))
+        val
+        (error 'command-line "bad command line ~S" val))))
 
 
 #|
@@ -857,20 +856,65 @@ doc>
  * (time expr1 expr2 ...)
  *
  * Evaluates the expressions |expr1|, |expr2|, ... and returns the
- * result of the last expression. This form prints also the time spent
- * for this evaluation, in milliseconds, on the current error port.
+ * result of the last expression. This form also prints the time spent
+ * for this evaluation, in milliseconds, and the quantity of bytes
+ * alocated on the current error port, as well as the number of garbage
+ * collection done.
  * This is CPU time, and not real ("wall") time.
+ *
+ * @lisp
+ * (time (begin (make-list 200) 'finish))
+ *     Elapsed time: 0.059 ms
+ *     Allocations: 6408 bytes in 201 allocation calls (GC: 0)
+ * => finish
+ * @end lisp
+ *
+ * In the example above, the result of the expression is only the symbol
+ * |finish|. The two other lines are written to the standard error port.
+ *
+ * The allocation accounting is independent for each thread, and allocations
+ * in children threads do not increase the parent thread counters, as the
+ * example below illustrates. Note that, on the other side, the number of GC
+ * calls is is a global counter.
+ *
+ * @lisp
+ * (let ((T (make-thread (lambda () (make-list 1_000_000) (eprintf "finish\n")))))
+ *   (time (thread-start! T) ;; Launch T wich allocate 1_000_1000 cells
+ *         (thread-sleep! 3) ;; wait for the child thread to allocate list
+ *         (thread-join! T)
+ *         100))
+ * finish
+ *     Elapsed time: 33.299 ms
+ *     Allocations: 800408 bytes in 10 allocation calls (GC: 0)
+ * 100
+ * @end lisp
+ * The ten allocations we can see here are for theads bookeeping and are
+ * far from the million cells allocated in thread |T|.
 doc>
 |#
 (define-macro time
   (lambda args
-    (let ((tmp1 (gensym))
-          (tmp2 (gensym)))
-      `(let* ((,tmp1 (clock))
-              (,tmp2 (begin ,@args)))
-         (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,tmp1))
-         ,tmp2))))
-
+    (let ((time-start  (gensym))
+          (res         (gensym))
+          (counting?   (gensym))
+          (allocs      (gensym))
+          (bytes       (gensym))
+          (gc-no       (gensym)))
+      `(let ((,counting? (%count-allocations))  ;; save if we are counting allocs
+             (,gc-no     (begin (gc) (key-get (%gc-stats) #:gc-no 0)))) ;; and GC count
+         (%thread-allocation-reset!)            ;; reset thread counters
+         (%count-allocations #t)                 ;; count allocations now
+         (let* ((,time-start (exact-clock))
+                (,res        (begin ,@args))
+                (,allocs     (%thread-allocation-counter))
+                (,bytes      (%thread-allocation-bytes)))
+           (eprintf ";    Elapsed time: ~S ms\n"
+                    (/ (- (exact-clock) ,time-start) 1000.0))
+           (eprintf ";    Allocations: ~S byte~A in ~S allocation call~A (GC: ~A)\n"
+                    ,bytes (if (> ,bytes 1) "s" "") ,allocs (if (> ,allocs 1) "s" "")
+                    (- (key-get (%gc-stats) #:gc-no 0) ,gc-no))
+           (%count-allocations ,counting?)       ;; restore save state
+           ,res)))))                             ;; return computed result
 
 #|
 <doc EXT-SYNTAX tagbody ->
@@ -1458,51 +1502,6 @@ doc>
   (call-with-input-file (string-append "| " command) port->string-list))
 
 
-
-#|
-<doc EXT apropos
- * (apropos obj)
- * (apropos obj module)
- *
- * |Apropos| returns a list of symbols whose print name contains the
- * characters of |obj| as a substring . The given |obj| can be a string or
- * symbol. This function returns the list of matched symbols which can
- * be accessed from the given |module| (defaults to the current module if not
- * provided).
- *
-doc>
-|#
-(define (apropos str :optional (module (current-module)))
-
-  (define (list->set lst res)
-    (cond
-      ((null? lst) res)
-      ((memq (car lst) res) (list->set (cdr lst) res))
-      (else (list->set (cdr lst) (cons (car lst) res)))))
-
-  (define (symbol<? s1 s2)
-    (string<? (symbol->string s1) (symbol->string s2)))
-
-  ;; Sanity check
-  (unless (module? module)
-    (error 'apropos "bad module ~S" module))
-
-  ;; Here we go
-  (let ((s        (if (symbol? str) (symbol->string str) str))
-        (external (if (library? module)
-                       '()
-                       (module-symbols (find-module 'STklos))))
-        (internal (module-symbols module)))
-    (let Loop ((symbs (list->set (append internal external) '()))
-               (res   '()))
-      (cond
-        ((null? symbs)
-           (and (not (null? res)) (sort res symbol<?)))
-        ((string-find? s (symbol->string (car symbs)))
-           (Loop (cdr symbs) (cons (car symbs) res)))
-        (else
-           (Loop (cdr symbs) res))))))
-
 #|
 <doc EXT die
  * (die message)
@@ -1738,8 +1737,8 @@ doc>
  * |chmod| returns `#t`; otherwise it returns `#f`.
  *
  * @lisp
- * (chmod "~/.stklos/stklosrc" 'read 'execute)
- * (chmod "~/.stklos/stklosrc" #o644)
+ * (chmod "~/.config/stklos/stklosrc" 'read 'execute)
+ * (chmod "~/.config/stklos/stklosrc" #o644)
  * @end lisp
 doc>
 |#
@@ -1853,6 +1852,76 @@ doc>
 (define (void? obj) (eq? obj #void))
 
 #|
+
+<doc EXT exact-integer-log
+ * (exact-integer-log n b)
+ *
+ * |Exact-integer-log| is to |log| what |exact-integer-sqrt| is to |sqrt|.
+ *
+ * Returns two values: the first value is the largest integer number less
+ * than or equal to the logarithm of |n| in base |b|. The second value is
+ * the difference between |n| and |(expt b k)|, where |k| is the first value.
+ *
+ * Both arguments must be exact, and the resulting values are exact integers.
+ * Also, both arguments are mandatory, since it is no meaningful in this context
+ * to use base *e*.
+ *
+ * @lisp
+ * (exact-integer-log 8 2)  => 3,0
+ * (exact-integer-log 11 2) => 3,3
+ * (exact-integer-log
+ *          (expt 3 5)
+ *          (expt 3 4))     => 1, 162
+ * (exact-integer-log 16 2) => 4, 0
+ * (exact-integer-log 19 1) => 4, 3
+ * (exact-integer-log
+ *          (expt 6 10000)
+ *          (expt 6 1000)) => 10, 0
+ * (exact-integer-log 2 1) => error
+ * (exact-integer-log 0 5) => error
+ * (exact-integer-log 0 0) => error
+ * @end lisp
+doc>
+|#
+(define (exact-integer-log n b)
+  (unless (and (exact-integer? n) (positive? n))
+    (error "log exponent ~S is not a positive exact integer" n))
+  (unless (and (exact-integer? b) (> b 1))
+    (error "log base ~S is not exact integer greater than one" b))
+  ;; This is easier and faster than R7RS exact-integer-sqrt, since:
+  ;; * log(n b) = log_2(n) / log_2(b).
+  ;; * integer-length(n) = floor(log_2(n)) + 1
+  ;; We just put it all together.
+  (let ((log2-n (- (integer-length n) 1))
+        (log2-b (- (integer-length b) 1)))
+    (let ((L (quotient log2-n log2-b))
+          (step 1))
+      ;; Ok, so FLOOR(a/b) can be smaller than FLOOR(a)/FLOOR(b).
+      ;; That means we may have overestimated L -- but we should be
+      ;; close. If we overestimated, then (expt b L) will be larger
+      ;; than n, and we can subtract from it until we find the correct
+      ;; number.
+      ;; We do increase the step at each iteration in order to speed
+      ;; up the process. If we go too far, we correct it later. This is
+      ;; fast.
+      (while (> (expt b L) n)
+        (set! L (- L step))
+        (set! step (+ step 2)))
+
+      ;; If we overestimated, then we had to walk down from L.
+      ;; In this case, since we added 2 to the step at each
+      ;; iteration, we may now have UNDERestimated. But then,
+      ;; we undo the last iteration (the "go back" line below),
+      ;; and start walking again, this time with a fixed step
+      ;; equal to 1.
+      (when (> step 1)            ; did we need to walk?
+        (set! L (+ L step -2))    ; go back...
+        (while (> (expt b L) n)
+          (set! L (- L 1))))      ; don't grow the step this time!
+
+      (values L (- n (expt b L))))))
+
+#|
 <doc EXT radians->degrees degrees->radians
  * (radians->degrees r)
  * (degrees->radians d)
@@ -1871,6 +1940,80 @@ doc>
   (* (/ d 180)
      3.141592653589793115997963468544185161590576171875)) ; pi
 
+
+;;;;
+;;;; Browser & Manual
+;;;;
+
+
+#|
+<doc EXT default-browser
+ * (default-browser)
+ * (default-browser str)
+ *
+ * This parameter object denotes the name of the browser used by {{stklos}}
+ * to open URLs. The value of this parameter is set at initialization time
+ * to (in that order):
+ *
+ * - the value of the shell variable |STKLOS_BROWSER|, if it is set, or
+ * - the value of the shell variable |BROWSER|, if it is set, or
+ * - the string "open" on macOS, or "xdg-open" on other OS.
+doc>
+|#
+(define-parameter default-browser
+  (cond
+   ((getenv "STKLOS_BROWSER"))
+   ((getenv "BROWSER"))
+   ((equal? (os-name) "Darwin") "open")
+   (else "xdg-open"))
+  (lambda (v)
+    (if (not (string? v))
+        (error 'default-browser "bad browser name ~s" v)
+        v)))
+
+#|
+<doc EXT open-in-browser
+ * (open-in-browser url)
+ *
+ * Opens the URL given by the string |url| in the default browser, which is
+ * determined by the string contained in the parameter |default-browser|.
+doc>
+|#
+(define (open-in-browser url)
+  (let ((cmd (format "~a '~a'" (default-browser) url)))
+    (when (positive? (stklos-debug-level))
+      (eprintf (format "Running command ~s\n" cmd)))
+    (system cmd)))
+
+
+#|
+<doc EXT man manual
+ * (manual)
+ * (manual entry)
+ *
+ * Opens the {{stklos}} manual in a browser. If the symbol or the
+ * string |entry| is given, the manual is opened on the description
+ * of |entry|.
+ * NOTE: If the HTML manual file is not installed, the documentation is
+ * searched on the {{stklos}} web site, which can incur a non-negligible
+ * response time.
+ * NOTE: another name for this function is |man|.
+doc>
+|#
+(define (manual :optional complement)
+  (let* ((fn (make-path (install-path #:htmldir)
+                        "stklos-ref.html"))
+         (comp (format "~a" complement))  ;; -> string
+         (base (if (file-exists? fn)
+                   (string-append "file://" fn)
+                   "https://stklos.net/Doc/HTML/stklos-ref.html")))
+    (open-in-browser (if complement
+                         (string-append base "#P_" comp)
+                         base))))
+
+;; Use the usual abbreviation for manual
+(define man manual)
+
 ;;;
 ;;; Misc
 ;;;
@@ -1881,6 +2024,8 @@ doc>
         (if commit
             (format "unstable -- ~a" commit)
             "unstable"))))
+
+
 
 ;;;; ======================================================================
 ;;;;
@@ -2277,7 +2422,7 @@ doc>
  * implementation is running.
 doc>
 |#
-(define (os-name)          (vector-ref (%uname) 0)) ; Posix sysname field
+;(define (os-name)          (vector-ref (%uname) 0)) ; Posix sysname field
 
 
 #|

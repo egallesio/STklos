@@ -42,7 +42,7 @@ static void error_bad_sequence(const char *str)
 }
 
 
-char *STk_utf8_grab_char(char *str, uint32_t *c) /* result = pos. after current one */
+char *STk_utf8_grab_char(char *str, utf8_char *c) /* result = pos. after current one */
 {
   uint8_t *buff = (uint8_t *) str;
 
@@ -237,7 +237,7 @@ DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
 {
   long i;
-  uint32_t c = 0;
+  utf8_char c = 0;
 
   STk_debug("String ~S. space=%d, size=%d, len =%d", str,
             STRING_SPACE(str), STRING_SIZE(str), STRING_LENGTH(str));

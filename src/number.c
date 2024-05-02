@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,13 +74,15 @@ struct bignum_obj {
 
 /*==============================================================================*/
 
-#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
+//#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
+#define MY_PI      3.1415926535897932384626433832795028841971693993751058209749445923078164062862090L
 
 #define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 &&        \
                                   mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
 #define LONG_FITS_INTEGER(_l)    (INT_MIN_VAL <= (_l) && (_l) <= INT_MAX_VAL)
 #define TYPEOF(n)                (INTP(n)? tc_integer: STYPE(n))
 
+#define IS_INFP(x)              (REALP(x) && isinf(REAL_VAL(x)))
 
 #define MINUS_INF "-inf.0"
 #define PLUS_INF  "+inf.0"
@@ -222,7 +224,7 @@ int STk_isnan(SCM z) {
 
 double STk_dbl_true_min(void) /* return (or compute) DBL_TRUE_MIN */
 {
-  /* 
+  /*
    This function is used here in order to calculate a rational epsilon (for
    square roots) and also in the (scheme flonum) library.
 
@@ -2219,8 +2221,25 @@ SCM STk_mul2(SCM o1, SCM o2)
           SCM r2 = COMPLEX_REAL(o2);
           SCM i2 = COMPLEX_IMAG(o2);
 
-          o1 = make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
-                            add2(mul2(r1,i2), mul2(r2, i1)));
+          /* Take care to complex numbers with a real or imaginary part which
+           * is an infinite, when thy are multiplied by a non complex. In this
+           * case, normal computation of the result will multiply an infinity
+           * with zero, bringing a NaN in the result. In this case, we have
+           * made a useless conversion (but should be pretty rare).
+           */
+          if ((i1 == MAKE_INT(0)) && (IS_INFP(r2) || IS_INFP(i2))) {
+            // o1 was not a complex and o2 contains an infinite
+            o1 = make_complex(mul2(r1,COMPLEX_REAL(o2)),
+                              mul2(r1,COMPLEX_IMAG(o2)));
+          } else if ((i2 == MAKE_INT(0)) && (IS_INFP(r1) || IS_INFP(i1))) {
+            // o2 was not a complex and o1 contains an infinite
+            o1 = make_complex(mul2(r2, COMPLEX_REAL(o1)),
+                              mul2(r2,COMPLEX_IMAG(o1)));
+          } else {
+            // Normal case
+            o1 = make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
+                              add2(mul2(r1,i2), mul2(r2, i1)));
+          }
           break;
         }
       case tc_rational:
@@ -2279,7 +2298,7 @@ SCM STk_sub2(SCM o1, SCM o2)
   if (INTP(o1)  && INT_VAL(o1)==0 &&
       REALP(o2) && fpclassify(REAL_VAL(o2)) == FP_ZERO)
     return double2real(-REAL_VAL(o2));
-  
+
   switch (convert(&o1, &o2)) {
     case tc_bignum:
       {
@@ -2352,6 +2371,7 @@ SCM STk_div2(SCM o1, SCM o2)
     case tc_integer:
       o1 = make_rational(o1, o2);
       break;
+
     case tc_real:
       {
         double r2 = REAL_VAL(o2);
@@ -2360,27 +2380,39 @@ SCM STk_div2(SCM o1, SCM o2)
           o1 = double2real(REAL_VAL(o1) / r2);
         break;
       }
+
     case tc_rational:
       o1 =  make_rational(mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2)),
                           mul2(RATIONAL_DEN(o1), RATIONAL_NUM(o2)));
       break;
-    case tc_complex:
-      {
+
+    case tc_complex:          /* See comment in STk_mul2 */
+      if (IS_INFP(COMPLEX_REAL(o2)) || IS_INFP(COMPLEX_IMAG(o2))) {
+        // o2 contains an infinite => result is 0.0+0.0i
+        // FIXME: in fact, result can also be -0.0+0.0i, 0.0-0i
+        // or -0.0-0.0i, but I don't know the rule
+        o1 = make_complex(double2real(0.0), double2real(0.0));
+      } else if ((COMPLEX_IMAG(o2) == MAKE_INT(0)) &&
+                 (IS_INFP(COMPLEX_REAL(o1)) || IS_INFP(COMPLEX_IMAG(o1)))) {
+        // o1 is a complex and o2 is not
+        SCM r2 = COMPLEX_REAL(o2);
+        o1 = make_complex(div2(COMPLEX_REAL(o1), r2),
+                          div2(COMPLEX_IMAG(o1), r2));
+      } else {
         SCM tmp, new_r, new_i;
 
-        if (!zerop(o1)) {
-          tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
-                       mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
-          new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          o1 = make_complex(new_r, new_i);
-        }
-        break;
+        tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
+                     mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
+        new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
+                          mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
+                     tmp);
+        new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
+                          mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
+                     tmp);
+        o1 = make_complex(new_r, new_i);
       }
+      break;
+
     default: error_cannot_operate("division", o1, o2);
   }
   return o1;
@@ -3238,8 +3270,7 @@ static SCM acos_real(double d)
 static SCM my_acos(SCM z)
 {
   switch (TYPEOF(z)) {
-    case tc_integer:  if (z == MAKE_INT(0)) return div2(double2real(MY_PI),
-                                                        MAKE_INT(2));
+   case tc_integer:   if (z == MAKE_INT(1)) return MAKE_INT(0);
                       return acos_real(INT_VAL(z));
     case tc_bignum:   return acos_real(scheme_bignum2double(z));
     case tc_rational: return acos_real(rational2double(z));
@@ -3280,6 +3311,22 @@ static SCM my_atan2(SCM y, SCM x)
 {
   if (STk_realp(y) == STk_false) error_bad_number(y);
   if (STk_realp(x) == STk_false) error_bad_number(x);
+  if (x == MAKE_INT(0)) {
+    /* Angle for 0+0i is not defined: */
+    if (y == MAKE_INT(0)) STk_error("result is undefined for values 0 and 0");
+
+    /* For (atan y 0), if y is y is inexact zero, the result is either
+       -pi/2 or +pi/2, according to R7RS (there is a table in the standard
+       with several specific cases, including these). */
+    if (REALP(y)) {
+      double yval = REAL_VAL(y);
+      if (yval ==  0.0)
+        return signbit(yval)
+            ? double2real( - MY_PI / 2)
+            : double2real( + MY_PI / 2);
+      /* else use final return */
+    }
+  }
   return double2real(atan2(REAL_VAL(exact2inexact(STk_real_part(y))),
                            REAL_VAL(exact2inexact(STk_real_part(x)))));
 }
@@ -3573,9 +3620,104 @@ transcendental(atanh)
 
 /*=============================================================================*/
 
+static inline int power_of_2_p(long x) {
+  /* Find if x is a small power of two.
+     By "small" power of two we mean k up to 5 */
+  for (int i=1; i <= 5; i++)
+    if (x == (1 << i)) {
+      return 1;
+    }
+  return 0;
+}
+
+SCM my_log2(SCM x, SCM b) {
+  /* my_log2 has fast path for taking logs of fixnums, bignums and
+     exact rationals in base two.  It uses a simple trick to extend
+     this to "base which is power of two". */
+
+  if (b==MAKE_INT(0) || b==MAKE_INT(1)) STk_error("cannot take log in base ~a", b);
+
+  /* And now that we checked that the base is neither 0 nor 1: */
+  if (x == MAKE_INT(1))  return MAKE_INT(0);
+
+  long base = INT_VAL(b);
+
+  if (INTP(b)) {
+    /* Fast path for base two. When the number is negative, we compute
+       the exact log, and make a complex number with an exact real part,
+       and an inexact imaginary part (equal to pi/log(b) ).    */
+
+    if (power_of_2_p(base)) {
+      switch (TYPEOF(x)) {
+      case tc_integer: {
+        unsigned long pwr = base;
+
+        long xx = INT_VAL(x);
+        if (power_of_2_p(xx) && base > 2)
+          return div2(my_log2(x,MAKE_INT(2)), my_log2(b,MAKE_INT(2)));
+
+        int pos = (xx > 0);
+
+        /* Explicitly check for +-1, so we give an exact result in these cases: */
+        if (xx == 1)  return MAKE_INT(0);
+        if (xx == -1) return Cmake_complex(MAKE_INT(0),double2real(MY_PI/log(base)));
+
+        xx = labs(xx);
+        if (xx == 0) STk_error("cannot take log of zero");
+        /* Linear search for the wanted power... */
+        for (unsigned long i=1; i < INT_LENGTH; i++, pwr *= base) {
+          if (xx == (long) pwr)
+            /* If the number is negative, we return the same
+               result, but with an imaginary part equal to
+               PI/log(base). */
+            return pos
+              ? MAKE_INT(i)
+              : Cmake_complex(MAKE_INT(i),double2real(MY_PI/log(base)));
+        }
+        break;
+      }
+      case tc_bignum: {
+        if (base <= 62) { /* This is a GMP limitation */
+          mpz_t *xx = &BIGNUM_VAL(x);
+          mpz_t r;
+          mpz_init(r);
+          int sgn = mpz_sgn(*xx);
+          /* mpz_sizeinbase returns log(xx) in base two plus one, if it's
+             exact: */
+          unsigned long s = mpz_sizeinbase(*xx,base);
+          if (s != 1) {
+            mpz_ui_pow_ui(r, base, (s-1));
+            /* Now, is s-1 the exact log of xx in base 2 ? */
+            if (!mpz_cmpabs(r,*xx)) {
+              /* If the number is negative, we return the same
+               result, but with an imaginary part equal to
+               PI/log(base). */
+              mpz_clear(r);
+              return (sgn>0)
+                ? MAKE_INT(s-1)
+              : Cmake_complex(MAKE_INT(s-1),double2real(MY_PI/log(base)));
+            }
+          }
+          mpz_clear(r);
+          /* If not, do the floating-point work after the switch... */
+        }
+        break;
+      }
+      case tc_rational:
+        /* Do log(a/b) = log(a)/log(b).
+           This allows us to give exact answers to (log 1/32 2),
+           for example! */
+        return sub2(my_log2(RATIONAL_NUM(x),b),
+                    my_log2(RATIONAL_DEN(x),b));
+      }
+    }
+  }
+  return div2(my_log(x),my_log(b));
+}
+
 DEFINE_PRIMITIVE("log", log, subr12, (SCM x, SCM b))
 {
-    return (b)? div2(my_log(x),my_log(b)) : my_log(x);
+    return (b)? my_log2(x,b) : my_log(x);
 }
 
 
@@ -3585,6 +3727,24 @@ DEFINE_PRIMITIVE("atan", atan, subr12, (SCM y, SCM x))
 }
 
 /*=============================================================================*/
+
+/*
+<doc R7RS square
+ * (square z)
+ *
+ * Returns the square of |z|. This is equivalent to |(* z z)|.
+ *
+ * @lisp
+ * (square 42)     => 1764
+ * (square 2.0)    => 4.0
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("square", square, subr1, (SCM z))
+{
+  if (STk_numberp(z) == STk_false) error_bad_number(z);
+  return STk_mul2(z, z);
+}
 
 /*
 <doc sqrt
@@ -3844,7 +4004,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  *
  * If x1, x2, x3, and x4 are real numbers and z is a complex number such that
  * @l
- * |z = x1 + x2.i = x3 . e,(sup "i.x4")|
+ * |z = x1 + x2.i = x3 . e^i.x4^)|
  * @l
  * Then
  * @lisp
@@ -3856,7 +4016,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  * (angle z)                      => xa
  * @end lisp
  * where
- * |-,(symbol "pi") < xa <= ,(symbol "pi")| with |xa = x4 + 2,(symbol "pi")n|
+ * |-π < xa <= π| with |xa = x4 + 2πn|
  * for some integer n.
  * @lisp
  * (angle +inf.0)                 => 0.0
@@ -3877,7 +4037,13 @@ DEFINE_PRIMITIVE("angle", angle, subr1, (SCM z))
   switch (TYPEOF(z)) {
     case tc_integer:
     case tc_bignum:
-    case tc_rational: return positivep(z) ? MAKE_INT(0) : double2real(MY_PI);
+    case tc_rational: /* The angle for 0+0i is undefined. It would, strictly
+                         speaking, be atan(0/0), and we won't divide by zero.
+                         Of all other implementations, it seems that only Chez
+                         does trigger an error here, but it is the correct
+                         thing to do, at least for exact zero... */
+                      if (z == MAKE_INT(0)) STk_error("not defined for exact zero");
+                      return positivep(z) ? MAKE_INT(0) : double2real(MY_PI);
     case tc_real:     return double2real(positivep(z) ? 0.0 : MY_PI);
     case tc_complex:  return my_atan2(COMPLEX_IMAG(z), COMPLEX_REAL(z));
     default:          error_bad_number(z);
@@ -4526,6 +4692,7 @@ int STk_init_number(void)
   ADD_PRIMITIVE(asinh);
   ADD_PRIMITIVE(atanh);
 
+  ADD_PRIMITIVE(square);
   ADD_PRIMITIVE(sqrt);
   ADD_PRIMITIVE(expt);
 
