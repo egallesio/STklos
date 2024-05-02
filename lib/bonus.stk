@@ -913,7 +913,7 @@ doc>
            (eprintf ";    Elapsed time: ~S ms\n"
                     (/ (- (exact-clock) ,time-start) 1000.0))
            (eprintf ";    Allocations: ~S byte~A in ~S allocation call~A (GC: ~A)\n"
-                    ,bytes (if (> ,bytes 1) "s" "") ,allocs (if (> ,allocs 1) "s" "")
+                    ,bytes (if (= ,bytes 1) "" "s") ,allocs (if (= ,allocs 1) "" "s")
                     (- (key-get (%gc-stats) #:gc-no 0) ,gc-no))
            (%count-allocations ,counting?)       ;; restore save state
            ,res)))))                             ;; return computed result
