@@ -1307,11 +1307,16 @@ doc>
   (unless (and (pair? binding)
                (<= 2 (length binding) 3)
                (symbol? (car binding)))
-    (error 'dolist "bond must be symbol " binding))
-  (when (null? body)
-    (error 'dolist "empty body"))
-  `(for-each (lambda (,(car binding)) ,@body) ,(cadr binding)))
-
+    (error 'dolist "bad dolist binding" binding))
+  (let ((x (gensym 'x)))
+    (apply (lambda (var lst . result)
+             `(begin
+                ;; iterate on all the list elements
+                (for-each (lambda (,x) (let ((,var ,x)) ,@body))
+                          ,lst)
+                ;; insert in the begin form the result if present or != of var
+                ,@(if (or (null? result) (eq? (car result) var)) '() result)))
+           binding)))
 
 #|
 <doc EXT call/ec
