@@ -1289,17 +1289,23 @@ doc>
  *
  * This macro will iterate over |lst|, executing |body| for each
  * element |x|. The symbol |x| will be captured and bound in |body|.
- * If |result| is provided, it will b
- *
+ * If |result| is provided, and is not |x|, this form returns |result|;
+ * otherwise, its result is undefined.
  * @lisp
  * (dolist (x '(10 20 30))
  *   (display (- x)) (newline))
  * -10
  * -20
  * -30
- *
- * (macro-expand '(dolist (x lst) body))
- *   => (for-each (lambda (x) body) lst)
+ * (let ((sum 0))
+ *   (dolist (x '(1 2 3 4 5) sum)
+ *     (inc! sum (square x))))       => 55
+ * @end lisp
+ * The form |dolist| is borrowed from Common Lisp. However, using |dolist|
+ * is not the preferred way to process a list. For instance, the last example
+ * could be better rewritten in:
+ * @lisp
+ * (apply + (map square '(1 2 3 4 5))
  * @end lisp
 doc>
 |#
