@@ -60,10 +60,9 @@
         exact-integer-log
         receive case-lambda
         radians->degrees degrees->radians
-        1+ 1-
+        1+ 1- inc! dec!
         pop! push!
         dolist
-
         %define-condition-type-accessors
         message-condition? condition-message
         serious-condition?
@@ -1219,17 +1218,30 @@ doc>
  * @end lisp
 doc>
 |#
-(define-macro (push! place val)
+(define (%make-inc-dec-push-body place func val)
   (if (symbol? place)
-      ;; simple push! on a variable
-      `(set! ,place (cons ,val ,place))
-      ;; Generalized push!. Do not evaluate argument two times
+      ;; simple xxx! on a variable
+      `(set! ,place (,func ,val ,place))
+      ;; Generalized xxx!. Do not evaluate arguments two times
       (let ((vars (map (lambda (x) (list (gensym) x)) place)))
         `(let ,vars
            ((setter ,(caar vars))
             ,@(map car (cdr vars))
-            (cons ,val ,(map car vars)))))))
+            (,func ,val ,(map car vars)))))))
 
+(define (%make-inc-dec-push-body place func val)
+  (if (symbol? place)
+      ;; simple xxx! on a variable
+      `(set! ,place (,func ,val ,place))
+      ;; Generalized xxx!. Do not evaluate arguments two times
+      (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+        `(let ,vars
+           ((setter ,(caar vars))
+            ,@(map car (cdr vars))
+            (,func ,val ,(map car vars)))))))
+
+(define-macro (push! place val)
+  (%make-inc-dec-push-body place 'cons val))
 
 (define-macro (pop! place)
   (let ((x (gensym 'res-)))
@@ -1246,6 +1258,41 @@ doc>
                   ,@(map car (cdr vars))
                   (cdr ,x))
                  (car ,x)))))))
+
+#|
+<doc EXT inc! dec!!
+ * (inc! place)
+ * (inc! place val)
+ * (dec! place)
+ * (dec place val)
+ *
+ * These forms increment or decrement the value contained in |place| by |val|.
+ * If ommitted, |val| defaults to 1. The result of both forms is undefined.
+ *
+ * Since {{stklos}} permits generalized |set!|, |place| may be a list
+ * of the form `(proc a1 a2 ...)`. In this case, these forms call the setter
+ * of |proc|.
+ *
+ * @lisp
+ * (define x 10)
+ * (inc! x)
+ * x                        => 11
+ * (dec! x 10)
+ * x                        => 1
+ * (define l (list 1 2 3))
+ * (inc! (car l))
+ * (dec! (list-ref l 1) 20)
+ * l                        => (2 -18 3)
+ * @end lisp
+doc>
+|#
+(define-macro (inc! place :optional (value 1))
+  (%make-inc-dec-push-body place '+ value))
+
+(define-macro (dec! place :optional (value 1))
+  (%make-inc-dec-push-body place (lambda (a b) (- b a)) value))
+
+
 
 #|
 <doc EXT dolist
