@@ -1229,17 +1229,6 @@ doc>
             ,@(map car (cdr vars))
             (,func ,val ,(map car vars)))))))
 
-(define (%make-inc-dec-push-body place func val)
-  (if (symbol? place)
-      ;; simple xxx! on a variable
-      `(set! ,place (,func ,val ,place))
-      ;; Generalized xxx!. Do not evaluate arguments two times
-      (let ((vars (map (lambda (x) (list (gensym) x)) place)))
-        `(let ,vars
-           ((setter ,(caar vars))
-            ,@(map car (cdr vars))
-            (,func ,val ,(map car vars)))))))
-
 (define-macro (push! place val)
   (%make-inc-dec-push-body place 'cons val))
 
@@ -1291,7 +1280,6 @@ doc>
 
 (define-macro (dec! place :optional (value 1))
   (%make-inc-dec-push-body place (lambda (a b) (- b a)) value))
-
 
 
 #|
