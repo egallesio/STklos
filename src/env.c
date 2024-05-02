@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -437,7 +437,7 @@ doc>
  */
 DEFINE_PRIMITIVE("current-module", current_module, subr0, (void))
 {
-  if (STk_primordial_thread) {
+  if (STk_primordial_thread) {               /* != NULL => thread system is initialized */
     vm_thread_t *vm = STk_get_current_vm();
     return vm->current_module;
   } else {

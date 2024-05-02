@@ -125,7 +125,7 @@
            (IN-EQ               0)
            (IN-EQV              0)
            (IN-EQUAL            0)
-           (IN-APPLY            2)
+           (UNUSED-4            0)
            (IN-CXR              1)
 
            (SET-CUR-MOD         0)
@@ -308,7 +308,7 @@
 (define (assemble code)
   (let ((pc    0)
         (labs '())
-        (code  (peephole code)))
+        (code  (if (compiler:peephole-optimizer) (peephole code) code)))
     ;;
     ;; Pass 1
     ;;
@@ -473,7 +473,8 @@ doc>
   (let ((code (%procedure-code proc)))
     (if code
         (disassemble-code code port)
-        (error 'disassemble "cannot disassemble ~S (not a closure with bytecode)" proc))))
+        (error 'disassemble "cannot disassemble ~S (not a closure with bytecode)"
+               proc))))
 
 #|
 <doc EXT disassemble-expr

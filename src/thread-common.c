@@ -1,7 +1,7 @@
 /*
  * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2006-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -294,12 +294,56 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
   new->eport          = vm->eport;
   new->scheme_thread  = thr;
 
-  THREAD_VM(thr)      = new;
-  THREAD_STATE(thr)   = th_runnable;
+  THREAD_VM(thr)              = new;
+  THREAD_STATE(thr)           = th_runnable;
+  THREAD_ALLOCATIONS(thr)     = 0;
+  THREAD_BYTES_ALLOCATED(thr) = 0;
 
   STk_sys_thread_start(thr);
 
   return thr;
+}
+
+
+/*
+ *
+ * Thread memory allocation counter management
+ *
+ */
+void STk_thread_inc_allocs(SCM thr, size_t size)
+{
+  THREAD_ALLOCATIONS(thr)++;
+  THREAD_BYTES_ALLOCATED(thr) += size;
+}
+
+DEFINE_PRIMITIVE("%thread-allocation-reset!",
+                 thread_allocs_reset, subr01, (SCM thr))
+{
+  if (!thr) thr = STk_current_thread();
+  else
+    if (!THREADP(thr)) STk_error_bad_thread(thr);
+
+  THREAD_BYTES_ALLOCATED(thr) = 0;
+  THREAD_ALLOCATIONS(thr)     = 0;
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%thread-allocation-counter", thread_alloc_count, subr01, (SCM thr))
+{
+  if (!thr) thr = STk_current_thread();
+  else
+    if (!THREADP(thr)) STk_error_bad_thread(thr);
+
+  return STk_ulong2integer(THREAD_ALLOCATIONS(thr));
+}
+
+DEFINE_PRIMITIVE("%thread-allocation-bytes", thread_alloc_bytes, subr01, (SCM thr))
+{
+  if (!thr) thr = STk_current_thread();
+  else
+    if (!THREADP(thr)) STk_error_bad_thread(thr);
+
+  return STk_ulong2integer(THREAD_BYTES_ALLOCATED(thr));
 }
 
 /* ======================================================================
@@ -365,11 +409,13 @@ int STk_init_threads(int stack_size, void *start_stack)
   primordial = do_make_thread(STk_false,
                               STk_Cstring2string("primordial"),
                               stack_size);
-  THREAD_STATE(primordial) = th_runnable;
-  THREAD_VM(primordial)    = vm;
-  vm->scheme_thread        = primordial;
-  vm->start_stack          = start_stack;
-  STk_primordial_thread    = primordial;
+  THREAD_STATE(primordial)           = th_runnable;
+  THREAD_VM(primordial)              = vm;
+  THREAD_ALLOCATIONS(primordial)     = 0;
+  THREAD_BYTES_ALLOCATED(primordial) = 0;
+  vm->scheme_thread                  = primordial;
+  vm->start_stack                    = start_stack;
+  STk_primordial_thread              = primordial;
 
   /* Thread primitives */
   ADD_PRIMITIVE(current_thread);
@@ -391,6 +437,10 @@ int STk_init_threads(int stack_size, void *start_stack)
   ADD_PRIMITIVE(thread_join);
   ADD_PRIMITIVE(thread_sleep);
   ADD_PRIMITIVE(thread_system);
+  ADD_PRIMITIVE(thread_allocs_reset);
+  ADD_PRIMITIVE(thread_alloc_count);
+  ADD_PRIMITIVE(thread_alloc_bytes);
+  
 
   return TRUE;
 }

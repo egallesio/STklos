@@ -689,6 +689,7 @@ primivitives to acess environment variables.
 {{insertdoc 'current-jiffy}}
 {{insertdoc 'jiffies-per-second}}
 {{insertdoc 'clock}}
+{{insertdoc 'exact-clock}}
 {{insertdoc 'sleep}}
 {{insertdoc 'time}}
 

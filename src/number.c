@@ -3270,8 +3270,7 @@ static SCM acos_real(double d)
 static SCM my_acos(SCM z)
 {
   switch (TYPEOF(z)) {
-    case tc_integer:  if (z == MAKE_INT(0)) return div2(double2real(MY_PI),
-                                                        MAKE_INT(2));
+   case tc_integer:   if (z == MAKE_INT(1)) return MAKE_INT(0);
                       return acos_real(INT_VAL(z));
     case tc_bignum:   return acos_real(scheme_bignum2double(z));
     case tc_rational: return acos_real(rational2double(z));
@@ -3312,6 +3311,22 @@ static SCM my_atan2(SCM y, SCM x)
 {
   if (STk_realp(y) == STk_false) error_bad_number(y);
   if (STk_realp(x) == STk_false) error_bad_number(x);
+  if (x == MAKE_INT(0)) {
+    /* Angle for 0+0i is not defined: */
+    if (y == MAKE_INT(0)) STk_error("result is undefined for values 0 and 0");
+
+    /* For (atan y 0), if y is y is inexact zero, the result is either
+       -pi/2 or +pi/2, according to R7RS (there is a table in the standard
+       with several specific cases, including these). */
+    if (REALP(y)) {
+      double yval = REAL_VAL(y);
+      if (yval ==  0.0)
+        return signbit(yval)
+            ? double2real( - MY_PI / 2)
+            : double2real( + MY_PI / 2);
+      /* else use final return */
+    }
+  }
   return double2real(atan2(REAL_VAL(exact2inexact(STk_real_part(y))),
                            REAL_VAL(exact2inexact(STk_real_part(x)))));
 }
@@ -3620,7 +3635,11 @@ SCM my_log2(SCM x, SCM b) {
      exact rationals in base two.  It uses a simple trick to extend
      this to "base which is power of two". */
 
-  if (b == MAKE_INT(1)) STk_error("cannot take log in base 1");
+  if (b==MAKE_INT(0) || b==MAKE_INT(1)) STk_error("cannot take log in base ~a", b);
+
+  /* And now that we checked that the base is neither 0 nor 1: */
+  if (x == MAKE_INT(1))  return MAKE_INT(0);
+
   long base = INT_VAL(b);
 
   if (INTP(b)) {
@@ -4018,7 +4037,13 @@ DEFINE_PRIMITIVE("angle", angle, subr1, (SCM z))
   switch (TYPEOF(z)) {
     case tc_integer:
     case tc_bignum:
-    case tc_rational: return positivep(z) ? MAKE_INT(0) : double2real(MY_PI);
+    case tc_rational: /* The angle for 0+0i is undefined. It would, strictly
+                         speaking, be atan(0/0), and we won't divide by zero.
+                         Of all other implementations, it seems that only Chez
+                         does trigger an error here, but it is the correct
+                         thing to do, at least for exact zero... */
+                      if (z == MAKE_INT(0)) STk_error("not defined for exact zero");
+                      return positivep(z) ? MAKE_INT(0) : double2real(MY_PI);
     case tc_real:     return double2real(positivep(z) ? 0.0 : MY_PI);
     case tc_complex:  return my_atan2(COMPLEX_IMAG(z), COMPLEX_REAL(z));
     default:          error_bad_number(z);
