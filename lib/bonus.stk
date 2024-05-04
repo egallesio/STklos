@@ -1219,18 +1219,20 @@ doc>
 doc>
 |#
 (define (%make-inc-dec-push-body place func val)
-  (cond ((symbol? place)
-         ;; simple xxx! on a variable
-         `(set! ,place (,func ,val ,place)))
-         ;; Generalized xxx!. Do not evaluate arguments two times
-        ((list? place)
-         (let ((vars (map (lambda (x) (list (gensym) x)) place)))
-           `(let ,vars
-              ((setter ,(caar vars))
-               ,@(map car (cdr vars))
-               (,func ,val ,(map car vars))))))
-        (else (error "bad place ~w: it is neither a symbol (variable name) nor a list (generalized variable)"
-                     place))))
+  (cond
+   ((symbol? place)
+    ;; simple xxx! on a variable
+    `(set! ,place (,func ,val ,place)))
+   ((list? place)
+    ;; Generalized xxx!. Do not evaluate arguments two times
+    (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+      `(let ,vars
+         ((setter ,(caar vars))
+          ,@(map car (cdr vars))
+          (,func ,val ,(map car vars))))))
+   (else
+    (error "place ~W must be a symbol (variable) or a list (generalized variable)"
+           place))))
 
 (define-macro (push! place val)
   (%make-inc-dec-push-body place 'cons val))
