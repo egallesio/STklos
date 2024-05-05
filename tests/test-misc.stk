@@ -89,6 +89,10 @@ b|)
 ;;----------------------------------------------------------------------
 (test-subsection "bonus.stk")
 
+(test "improper-list?"
+      '(#f #f #f #t #t #f #f)
+      (map improper-list? (list 2 '() '(1 2 3) '(1 2 . 3) (cons 'a 'b) (list 1 2) #void)))
+
 (let ((fct  (lambda (x y) (and (even? x) (even? y) (+ x y)))))
   (test "every.1"
         1
@@ -495,7 +499,7 @@ b|)
           (begin (inc! (car l) 42) vec))
     (test "generalized dec!.4" #(-1 2 (45 4))
           (begin (dec! (vector-ref vec 0) 2) vec))))
- 
+
 ;;----------------------------------------------------------------------
 (test-subsection "dolist")
 

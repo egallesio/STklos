@@ -25,6 +25,7 @@
 
 (export read-chars read-chars! display-shared gensym
         macro-expand macro-expand*
+        improper-list?
         remove remove! delete delete!
         every any
         call-with-input-string call-with-output-string
@@ -156,6 +157,32 @@ doc>
     (if (equal? new exp)
         exp
         (macro-expand* new))))
+
+;;;
+;;; List functions
+;;;
+
+#|
+<doc EXT improper-list?
+ * (improper-list? obj)
+ *
+ * Returns false if and only if |obj| is an improper list.
+ * @lisp
+ * (improper-list? 2)            => #f
+ * (improper-list? '())          => #f
+ * (improper-list? '(1 2 3))     => #f
+ * (improper-list? '(1 2 . 3))   => #t
+ * (improper-list? (cons 'a 'b)) => #t
+ * (improper-list? (list 1 2))   => #f
+ * (improper-list? #void)        => #f
+ * @end lisp
+doc>
+|#
+
+(define (improper-list? lst)
+  (and (pair? lst)
+       (not (list? lst))))
+
 
 #|
 <doc EXT remove remove!
