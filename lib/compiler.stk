@@ -1454,6 +1454,19 @@ doc>
 ;;;;
 ;;;; LET / LET* / LETREC
 ;;;;
+
+;; valid-let-bindings? returns #t if:
+;;
+;; - its first argument must be a valid LET binding
+;; - when the second argument is #t, there may not be duplicate bindings
+;;
+;; When these conditions are not satisfied, the procedure will NOT return
+;; #f; it will signal an error instead.
+;;
+;; (valid-let-bindings? 1 #t) => error (syntax error)
+;; (valid-let-bindings? '() #t) => #t
+;; (valid-let-bindings? '((a 2) (a 3)) #t) => error (duplicate binding)
+;; (valid-let-bindings? '((a 2) (a 3)) #f) => #t
 (define (valid-let-bindings? bindings unique?)
   (letrec
       ((aux (lambda (l seen)
@@ -1469,7 +1482,7 @@ doc>
                                     (aux (cdr l) (cons (car b) seen)))
                                 (compiler-error 'let bindings
                                                  "malformed binding ~S" b))))
-               (else #f)))))
+               (else (compiler-error 'let bindings "malformed binding ~S" l))))))
     (aux bindings '())))
 
 ;;
