@@ -143,6 +143,7 @@ quoted in programs.
 {{insertdoc 'null?}}
 {{insertdoc 'pair-mutable?}}
 {{insertdoc 'list?}}
+{{insertdoc 'improper-list?}}
 {{insertdoc 'make-list}}
 {{insertdoc 'list}}
 {{insertdoc 'list*}}
