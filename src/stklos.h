@@ -46,14 +46,14 @@ extern "C"
 #include <memory.h>
 #include <locale.h>
 #include <stdint.h>
-#ifndef THEADS_NONE
+
+#include "stklosconf.h"
+#include "extraconf.h"
+#ifndef THREADS_NONE
 #  include <pthread.h>
 #  define GC_THREADS 1
 #  define _REENTRANT 1
 #endif
-
-#include "stklosconf.h"
-#include "extraconf.h"
 
 /* To debug the GC uncomment the following line */
 /* #define GC_DEBUG 1 */
