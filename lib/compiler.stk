@@ -1455,19 +1455,18 @@ doc>
 ;;;; LET / LET* / LETREC
 ;;;;
 
-;; valid-let-bindings? returns #t if:
+;; check-let-bindings returns #t if:
 ;;
 ;; - its first argument must be a valid LET binding
 ;; - when the second argument is #t, there may not be duplicate bindings
 ;;
-;; When these conditions are not satisfied, the procedure will NOT return
-;; #f; it will signal an error instead.
+;; When these conditions are not satisfied, the procedure signals an error.
 ;;
-;; (valid-let-bindings? 1 #t) => error (syntax error)
-;; (valid-let-bindings? '() #t) => #t
-;; (valid-let-bindings? '((a 2) (a 3)) #t) => error (duplicate binding)
-;; (valid-let-bindings? '((a 2) (a 3)) #f) => #t
-(define (valid-let-bindings? who bindings unique?)
+;; (check-let-bindings 1 #t) => error (syntax error)
+;; (check-let-bindings '() #t) => #t
+;; (check-let-bindings '((a 2) (a 3)) #t) => error (duplicate binding)
+;; (check-let-bindings '((a 2) (a 3)) #f) => #t
+(define (check-let-bindings who bindings unique?)
   (letrec
       ((err (lambda (b) (compiler-error who bindings "malformed binding ~S" b)))
        (aux (lambda (l seen)
@@ -1497,7 +1496,7 @@ doc>
               (body     (cddr args)))
           (if (null? bindings)
               (compile-body body env body tail?)
-              (when (valid-let-bindings? 'letrec bindings #t)
+              (when (check-let-bindings 'letrec bindings #t)
                 (let ((tmps (map (lambda (_) (gensym)) bindings)))
                   (compile `(let ,(map (lambda (x) (list (car x) #f)) bindings)
                               (let ,(map (lambda (x y) (list x (cadr y)))
@@ -1514,7 +1513,7 @@ doc>
 (define (compile-named-let name bindings body len args env tail?)
   (if (< len 4)
       (compiler-error 'let args "ill formed named let ~S" args)
-      (when (valid-let-bindings? 'let bindings #t)
+      (when (check-let-bindings 'let bindings #t)
         (compile `((letrec ((,name (lambda ,(map car bindings) ,@body)))
                        ,name)
                    ,@(map cadr bindings))
@@ -1532,7 +1531,7 @@ doc>
           (if (symbol? bindings)
               ;; Transform named let in letrec
               (compile-named-let bindings (car body) (cdr body) len args env tail?)
-              (when (valid-let-bindings? 'let bindings #t)
+              (when (check-let-bindings 'let bindings #t)
                 (compile `((lambda ,(map car bindings) ,@body)
                            ,@(map cadr bindings))
                          env args tail?)))))))
@@ -1549,7 +1548,7 @@ doc>
 ;;      (compiler-error 'let* args "ill formed let* ~S" args)
 ;;      (let ((bindings (cadr args))
 ;;            (body     (cddr args)))
-;;        (when (valid-let-bindings? 'let* bindings #f)
+;;        (when (check-let-bindings 'let* bindings #f)
 ;;          (compile (if (<= (length bindings) 1)
 ;;                       `(let ,bindings ,@body)
 ;;                       `(let (,(car bindings))
@@ -1579,7 +1578,7 @@ doc>
         (compiler-error 'let* args "ill formed let* ~S" args)
         (let ((bindings (cadr args))
               (body     (cddr args)))
-          (when (valid-let-bindings? 'let* bindings #f)
+          (when (check-let-bindings 'let* bindings #f)
             (if (<= (length bindings) 1)
                 (compile-let `(let ,bindings ,@body) env tail?)
                 (begin
