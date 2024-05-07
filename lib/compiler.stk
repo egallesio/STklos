@@ -1469,7 +1469,8 @@ doc>
 ;; (valid-let-bindings? '((a 2) (a 3)) #f) => #t
 (define (valid-let-bindings? bindings unique?)
   (letrec
-      ((aux (lambda (l seen)
+      ((err (lambda (b) (compiler-error 'let bindings "malformed binding ~S" b)))
+       (aux (lambda (l seen)
               (cond
                ((null? l) #t)
                ((pair? l) (let ((b (car l)))
@@ -1480,9 +1481,8 @@ doc>
                                     (compiler-error 'let bindings
                                                      "duplicate binding ~S" (car b))
                                     (aux (cdr l) (cons (car b) seen)))
-                                (compiler-error 'let bindings
-                                                 "malformed binding ~S" b))))
-               (else (compiler-error 'let bindings "malformed binding ~S" l))))))
+                                (err b))))
+               (else (err l))))))
     (aux bindings '())))
 
 ;;
