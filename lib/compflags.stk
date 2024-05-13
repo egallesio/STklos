@@ -41,7 +41,7 @@
         compiler:inline-common-functions
         compiler:unroll-iterations
         compiler:peephole-optimizer
-        compiler:allow-code-rewrite)
+        compiler:source-rewrite)
 
 #|
 <doc EXT compiler:time-display
@@ -204,9 +204,9 @@ doc>
  * See that the `GLOBAL-REF` and `PUSH` were turned by the peephole optimizer
  * into `GLOBAL-REF-PUSH`.
 doc>
-<doc EXT compiler:allow-code-rewrite
- * (compiler:allow-code-rewrite)
- * (compiler:allow-code-rewrite bool)
+<doc EXT compiler:source-rewrite
+ * (compiler:source-rewrite)
+ * (compiler:source-rewrite bool)
  *
  * This parameter determines if compiler tries to rewrite some expressions in
  * simpler ones. For instance, it permit to eliminate the unneeded expression
@@ -229,7 +229,7 @@ doc>
 (define-parameter compiler:keep-formals                   #f)
 (define-parameter compiler:keep-source                    #f)
 (define-parameter compiler:peephole-optimizer             #t)
-(define-parameter compiler:allow-code-rewrite             #t)
+(define-parameter compiler:source-rewrite                 #t)
 (define-parameter compiler:unroll-iterations 4
   (lambda (v)
     (unless (and (fixnum? v) (positive? v))
@@ -277,7 +277,7 @@ doc>
                           ((keep-formals)      (compiler:generate-signature val))
                           ((keep-source)       (compiler:keep-source val))
                           ((inline-usuals)     (compiler:inline-common-functions val))
-                          ((allow-code-rewrite)(compiler:allow-code-rewrite val))
+                          ((source-rewrite)    (compiler:source-rewrite val))
                           ((show-instructions) (compiler:show-assembly-code val))
                           ((peephole-optimizer)(compiler:peephole-optimizer val))
                           (else (error "bad boolean flag ~s" flag))))

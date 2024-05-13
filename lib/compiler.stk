@@ -2063,9 +2063,7 @@ both forms.
 ;;;;
 ;;;;======================================================================
 (define (compile expr env epair tail?)
-  (let ((e (if (compiler:allow-code-rewrite)
-               (rewrite-expression expr env)
-               expr)))
+  (let ((e (if (compiler:source-rewrite) (rewrite-expression expr env) expr)))
     (cond
      ;; ---- We have a pair
      ((pair? e)

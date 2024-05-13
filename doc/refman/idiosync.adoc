@@ -184,7 +184,7 @@ Compiling files from Scheme programs can be done with the
 {{insertdoc 'compiler:gen-line-number}}
 {{insertdoc 'compiler:show-assembly-code}}
 {{insertdoc 'compiler:inline-common-functions}}
-{{insertdoc 'compiler:allow-code-rewrite}}
+{{insertdoc 'compiler:source-rewrite}}
 {{insertdoc 'compiler:keep-formals}}
 {{insertdoc 'compiler:keep-source}}
 {{insertdoc 'compiler:unroll-iterations}}
