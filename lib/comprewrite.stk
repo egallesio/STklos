@@ -1,0 +1,161 @@
+;;;;
+;;;;
+;;;; comprewrite.stk         -- Rewrite expressions in simpler ones
+;;;;
+;;;; Copyright © 2024 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@stklos.net]
+;;;;    Creation date:  4-May-2024 18:09
+;;;;
+
+;;
+;; Rewrite table management
+;;
+(define *all-rewriters* (%make-hash-table eq? hash-table-hash))
+
+(define (find-rewriter symb)
+  (hash-table-get *all-rewriters* symb #f))
+
+(define (compiler:add-rewriter! symb proc)
+  ;; A rewriter must take 3 parameters
+  ;;    - expr  (the expression to simplify/rewrite)
+  ;;    - len   (the length of the expression)
+  ;;    - env   (the environment)
+  ;; It returns a (possibly) simplified expression
+  (hash-table-set! *all-rewriters* symb proc))
+
+;;
+;; rewrite an expression
+;;
+(define (const-expr? expr)    ;; is 'expr' a constant expression?
+  (and (not (symbol? expr))
+       (or (not (pair? expr))
+           (eq? (car expr) 'quote))))
+
+(define (const-value expr)    ;; return the value of a constant expression
+  (if (pair? expr)
+      (cadr expr)
+      expr))
+
+(define (rewrite-expression e env)
+  (let Loop ((save e))
+    (when (pair? e)
+      (let ((s     (car e))
+            (optim (find-rewriter (car e))))
+        (when (and optim (not (find-symbol-in-env s env)))
+          ;; We have a rewriter and symbol is not defined in current
+          ;; environment
+          (set! e (optim e (length e) env))
+          (unless (equal? e save)
+            ;; (%debug "Rewrite ~s => ~s" save e)
+            (Loop e))))))
+  ;; Return the (eventually modified) value of e
+  e)
+
+
+;;; ======================================================================
+;;;
+;;; Rewriting Rules
+;;;
+;;; ======================================================================
+(compiler:add-rewriter!            ;; 'IF' rewriter
+ 'if
+ (lambda (expr len env)
+   (if (<= 3 len 4)
+       (let ((Cond (rewrite-expression (cadr expr) env))
+             (Then (caddr expr))
+             (Else (if (null? (cdddr expr))
+                       #void
+                       (cadddr expr))))
+         (if (const-expr? Cond)
+             (if (const-value Cond)
+                 (rewrite-expression Then env)
+                 (rewrite-expression Else env))
+             expr))
+       expr)))
+
+
+(compiler:add-rewriter!            ;; 'NOT' rewriter
+ 'not
+ (lambda (expr len env)
+   (if (= len 2)
+       (let ((val (rewrite-expression (cadr expr) env)))
+         (if (const-expr? val)
+             (not (const-value val))
+             expr))
+       expr)))
+
+
+(compiler:add-rewriter!            ;; 'BEGIN' rewriter
+ 'begin
+ (lambda (expr _len env) ;; _len unused here
+   (let Loop ((e   (cdr expr))
+              (res (list 'begin)))
+     (cond
+      ((null? e)          ;; end of the list
+       (reverse! res))
+
+      ((null? (cdr e))    ;; last expression is always left as is
+       (Loop '() (cons (rewrite-expression (car e) env) res)))
+
+      (else               ;; if first expression is not a pair, skip it
+       (Loop (cdr e)
+             (if (or (pair? (car e))     ;; a call
+                     (eq? (car e) '=>))  ;; a => in a cond (SRF 61)
+                 (cons (rewrite-expression (car e) env) res)
+                 res)))))))
+
+(compiler:add-rewriter!            ;; 'EOF-OBJECT' rewriter
+ 'eof-object
+ (lambda (expr len env)
+   (if (= len 1)
+       #eof
+       expr)))
+
+
+;; FIXME: Verify that CAR and CDR rewriters preserve eq?-ness in code constants
+;; (or suppress them)
+(compiler:add-rewriter!            ;; 'CAR' rewriter
+ 'car
+ (lambda (expr len env)
+   (if (= len 2)
+       (let ((v (rewrite-expression (cadr expr) env)))
+         (if (const-expr? v)
+             (let ((val (const-value v)))
+               (if (pair? val)
+                   ;; quote added here to permit further rewrites (car (car ...))
+                   (list 'quote (car val))
+                   expr))
+             expr))
+       expr)))
+
+
+(compiler:add-rewriter!            ;; 'CDR' rewriter
+ 'cdr
+ (lambda (expr len env)
+   (if (= len 2)
+       (let ((v (rewrite-expression (cadr expr) env)))
+         (if (const-expr? v)
+             (let ((val (const-value v)))
+               (if (pair? val)
+                   ;; quote added here to permit further rewrites (cdr (car ...))
+                   (list 'quote (cdr val))
+                   expr))
+             expr))
+       expr)))

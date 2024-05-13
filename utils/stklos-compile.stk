@@ -185,6 +185,7 @@
      "    keep-formals       Keep formal arguments in closures"
      "    keep-source        Keep source code in closures"
      "    inline-usuals      Inline usual functions"
+     "    source-rewrite     Permit source rewrite/simplification"
      "    unroll-iterations  Set the number of iterations to be unrolled"
      "    peephole-optimizer Use peephole optimizer"
 

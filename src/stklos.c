@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -141,6 +141,7 @@ static void Usage(FILE *stream)
 "    keep-formals       Keep formal arguments in closures\n"
 "    keep-source        Keep source code in closures\n"
 "    inline-usuals      Inline usual functions\n"
+"    allow-code-rewrite Permit code rewriting/simplification\n"
 "    unroll-iterations  Set the number of iterations to be unrolled\n"
 "    peephole-optimizer Use the peephole optimizer\n"
 "All the arguments given after options are passed to the Scheme program.\n",

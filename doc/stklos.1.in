@@ -142,6 +142,10 @@ user procedures. This flag uses the parameter
 in produced code. This flag uses the parameter
 \fIcompiler:inline-common-functions\fR.
 .IP "" 10
+- \fIsource-rewrite\fR can be used to control if the compiler tries to
+rewrite/simplify source code before compiling it. This flag uses
+the parameter \fIcompiler:source-rewrite\fR.
+.IP "" 10
 - \fIunroll-iterations\fR can be used to set the number of iterations to be unrolled
 in loops. This flag uses the parameter \fIcompiler:unroll-iterations\fR and its
 default value is 4.

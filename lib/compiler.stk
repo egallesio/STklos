@@ -60,7 +60,7 @@
 
 (define *inline-general*          '(=    <    <=    >    >=
                                     fx=? fx<? fx<=? fx>? fx>=?
-                                    fx=  fx<  fx<= fx> fx>= ;FIXME: should be deleted
+                                    fx=  fx<  fx<= fx> fx>= ;FIXME should be deleted
                                     cons car cdr null? list
                                     not
                                     vector-ref vector-set!
@@ -100,6 +100,7 @@
 (include "assembler.stk")
 (include "computils.stk")
 (include "compfile.stk")
+(include "comprewrite.stk")
 (include "compflags.stk")
 
 ;; ----------------------------------------------------------------------
@@ -2061,64 +2062,65 @@ both forms.
 ;;;;            The bytecode compiler
 ;;;;
 ;;;;======================================================================
-(define (compile e env epair tail?)
-  (cond
-   ;; ---- We have a pair
-   ((pair? e)
-    (let ((first (car e)))
-      (cond
-       ((find-syntax-in-env first env)
+(define (compile expr env epair tail?)
+  (let ((e (if (compiler:source-rewrite) (rewrite-expression expr env) expr)))
+    (cond
+     ;; ---- We have a pair
+     ((pair? e)
+      (let ((first (car e)))
+         (cond
+         ((find-syntax-in-env first env)
           ;; ---- Macro call
           (compile (%macro-expand e env) env epair tail?))
 
-       ((find-symbol-in-env first env)
+         ((find-symbol-in-env first env)
           ;; --- Symbol is in environment => function call
           (compile-call e env tail?))
 
-       (else
-        ;; ---- special-form OR (not in env) function call?
-        (case first
-          ((if)                 (compile-if             e env tail?))
-          ((define)             (compile-define         e env tail?))
-          ((begin)              (compile-begin          e env tail?))
-          ((lambda λ)                (compile-lambda         e env tail?))
-          ((let %let)           (compile-let            e env tail?))
-          ((let*)               (compile-let*           e env tail?))
-          ((letrec)             (compile-letrec         e env tail?))
-          ((and)                (compile-and            e env tail?))
-          ((or)                 (compile-or             e env tail?))
-          ((cond)               (compile-cond           e env tail?))
-          ((case)               (compile-case           e env tail?))
-          ((do)                 (compile-do             e env tail?))
-          ((quote)              (compile-quote          e env tail?))
-          ((quasiquote)         (compile-quasiquote     e env tail?))
-          ((with-handler)       (compile-with-handler   e env tail?))
-          ((define-macro)       (compile-define-macro   e env tail?))
+         (else
+          ;; ---- special-form OR (not in env) function call?
+          (case first
+            ((if)                 (compile-if             e env tail?))
+            ((define)             (compile-define         e env tail?))
+            ((begin)              (compile-begin          e env tail?))
+            ((lambda λ)                (compile-lambda         e env tail?))
+            ((let %let)           (compile-let            e env tail?))
+            ((let*)               (compile-let*           e env tail?))
+            ((letrec)             (compile-letrec         e env tail?))
+            ((and)                (compile-and            e env tail?))
+            ((or)                 (compile-or             e env tail?))
+            ((cond)               (compile-cond           e env tail?))
+            ((case)               (compile-case           e env tail?))
+            ((do)                 (compile-do             e env tail?))
+            ((quote)              (compile-quote          e env tail?))
+            ((quasiquote)         (compile-quasiquote     e env tail?))
+            ((with-handler)       (compile-with-handler   e env tail?))
+            ((define-macro)       (compile-define-macro   e env tail?))
 
-          ((%%set!)             (compile-set!           e env tail?))
+            ((%%set!)             (compile-set!           e env tail?))
 
-          ((%let-syntax)        (compile-%let-syntax     e env tail?))
+            ((%let-syntax)        (compile-%let-syntax     e env tail?))
 
-          ;; Special calls
-          ((%%require)          (compile-require        e env tail?))
-          ((%%when-compile)     (compile-when-compile   e env tail?))
-          ((%%include)          (compile-include        e env tail?))
-          ((%%include-ci)       (compile-include-ci     e env tail?))
-          ((%%in-scheme)        (compile-in-scheme      e env tail?))
-          ((%%source-pos)       (compile-%%source-pos   e env tail?))
-          ((%%label)            (compile-%%label        e env tail?))
-          ((%%goto)             (compile-%%goto         e env tail?))
+            ;; Special calls
+            ((%%require)          (compile-require        e env tail?))
+            ((%%when-compile)     (compile-when-compile   e env tail?))
+            ((%%include)          (compile-include        e env tail?))
+            ((%%include-ci)       (compile-include-ci     e env tail?))
+            ((%%in-scheme)        (compile-in-scheme      e env tail?))
+            ((%%source-pos)       (compile-%%source-pos   e env tail?))
+            ((%%label)            (compile-%%label        e env tail?))
+            ((%%goto)             (compile-%%goto         e env tail?))
 
-          ;; Standard call (first is not in lexical env)
-          (else                 (compile-call           e env tail?)))))))
+            ;; Standard call (first is not in lexical env)
+            (else                 (compile-call           e env tail?)))))))
 
-   ;; ---- We have a symbol
-   ((symbol? e)
-    (compile-reference e env epair tail?))
+     ;; ---- We have a symbol
+     ((symbol? e)
+      (compile-reference e env epair tail?))
 
-   ;; Self evaluating object
-   (else
-    (compile-constant  e env tail?))))
+     ;; Self evaluating object
+     (else
+      (compile-constant  e env tail?)))))
 
 
 ;=============================================================================

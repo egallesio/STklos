@@ -40,7 +40,8 @@
         compiler:keep-source
         compiler:inline-common-functions
         compiler:unroll-iterations
-        compiler:peephole-optimizer)
+        compiler:peephole-optimizer
+        compiler:source-rewrite)
 
 #|
 <doc EXT compiler:time-display
@@ -203,6 +204,22 @@ doc>
  * See that the `GLOBAL-REF` and `PUSH` were turned by the peephole optimizer
  * into `GLOBAL-REF-PUSH`.
 doc>
+<doc EXT compiler:source-rewrite
+ * (compiler:source-rewrite)
+ * (compiler:source-rewrite bool)
+ *
+ * This parameter determines if compiler tries to rewrite some expressions in
+ * simpler ones. For instance, it permit to eliminate the unneeded expression
+ * in a |begin| form, or to evaluate some simple expression. For instance,
+ * @lisp
+ * (begin 100 foo (display "Hello") "Hi" (not #f))
+ * @end lisp
+ * is rewritten in
+ * @lisp
+ * (begin (display "Hello") #t)
+ * @end lisp
+ * This parameter defaults to `#t`. 
+doc>
 |#
 (define-parameter compiler:time-display                   #t)
 (define-parameter compiler:gen-line-number                #f)
@@ -211,7 +228,8 @@ doc>
 (define-parameter compiler:show-assembly-code             #f)
 (define-parameter compiler:keep-formals                   #f)
 (define-parameter compiler:keep-source                    #f)
-(define-parameter compiler:peephole-optimizer              #t)
+(define-parameter compiler:peephole-optimizer             #t)
+(define-parameter compiler:source-rewrite                 #t)
 (define-parameter compiler:unroll-iterations 4
   (lambda (v)
     (unless (and (fixnum? v) (positive? v))
@@ -224,16 +242,16 @@ doc>
          (inlined-math-general     *inline-math-general*)
          (inlined-math             *inline-math*)
          (inlined-general          *inline-general*)
-         (res     (make-parameter
-                   #t
-                   (lambda (v)
-                     (set! *inline-math-commutative* (if v inlined-math-commutative '()))
-                     (set! *inline-math-general*     (if v inlined-math-general     '()))
-                     (set! *inline-math*             (if v inlined-math             '()))
-                     (set! *inline-general*          (if v inlined-general          '()))
-                     (set! *inline-table*            (append *inline-math*
-                                                             *inline-general*))
-                     (not (null? *inline-table*))))))
+         (res (make-parameter
+               #t
+               (lambda (v)
+                 (set! *inline-math-commutative* (if v inlined-math-commutative '()))
+                 (set! *inline-math-general*     (if v inlined-math-general     '()))
+                 (set! *inline-math*             (if v inlined-math             '()))
+                 (set! *inline-general*          (if v inlined-general          '()))
+                 (set! *inline-table*            (append *inline-math*
+                                                         *inline-general*))
+                 (not (null? *inline-table*))))))
     (%set-parameter-name! res 'compiler:inline-common-functions)
     res))
 
@@ -259,6 +277,7 @@ doc>
                           ((keep-formals)      (compiler:generate-signature val))
                           ((keep-source)       (compiler:keep-source val))
                           ((inline-usuals)     (compiler:inline-common-functions val))
+                          ((source-rewrite)    (compiler:source-rewrite val))
                           ((show-instructions) (compiler:show-assembly-code val))
                           ((peephole-optimizer)(compiler:peephole-optimizer val))
                           (else (error "bad boolean flag ~s" flag))))
