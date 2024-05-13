@@ -242,16 +242,16 @@ doc>
          (inlined-math-general     *inline-math-general*)
          (inlined-math             *inline-math*)
          (inlined-general          *inline-general*)
-         (res     (make-parameter
-                   #t
-                   (lambda (v)
-                     (set! *inline-math-commutative* (if v inlined-math-commutative '()))
-                     (set! *inline-math-general*     (if v inlined-math-general     '()))
-                     (set! *inline-math*             (if v inlined-math             '()))
-                     (set! *inline-general*          (if v inlined-general          '()))
-                     (set! *inline-table*            (append *inline-math*
-                                                             *inline-general*))
-                     (not (null? *inline-table*))))))
+         (res (make-parameter
+               #t
+               (lambda (v)
+                 (set! *inline-math-commutative* (if v inlined-math-commutative '()))
+                 (set! *inline-math-general*     (if v inlined-math-general     '()))
+                 (set! *inline-math*             (if v inlined-math             '()))
+                 (set! *inline-general*          (if v inlined-general          '()))
+                 (set! *inline-table*            (append *inline-math*
+                                                         *inline-general*))
+                 (not (null? *inline-table*))))))
     (%set-parameter-name! res 'compiler:inline-common-functions)
     res))
 
@@ -277,6 +277,7 @@ doc>
                           ((keep-formals)      (compiler:generate-signature val))
                           ((keep-source)       (compiler:keep-source val))
                           ((inline-usuals)     (compiler:inline-common-functions val))
+                          ((allow-code-rewrite)(compiler:allow-code-rewrite val))
                           ((show-instructions) (compiler:show-assembly-code val))
                           ((peephole-optimizer)(compiler:peephole-optimizer val))
                           (else (error "bad boolean flag ~s" flag))))
