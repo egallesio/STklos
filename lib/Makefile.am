@@ -36,6 +36,7 @@ scheme_BOOT = assembler.stk \
           compiler.stk      \
           compfile.stk      \
           compflags.stk     \
+          comprewrite.stk   \
           computils.stk     \
           expand.pp         \
           ffi.stk           \
