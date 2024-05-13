@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date:  4-May-2024 18:09
-;;;; Last file update: 13-May-2024 15:45 (eg)
 ;;;;
 
 ;;
@@ -37,7 +36,7 @@
   ;; A rewriter must take 3 parameters
   ;;    - expr  (the expression to simplify/rewrite)
   ;;    - len   (the length of the expression)
-  ;;    - env   (the environment -- not used for now)
+  ;;    - env   (the environment)
   ;; It returns a (possibly) simplified expression
   (hash-table-set! *all-rewriters* symb proc))
 
@@ -57,8 +56,11 @@
 (define (rewrite-expression e env)
   (let Loop ((save e))
     (when (pair? e)
-      (let ((optim (find-rewriter (car e))))
-        (when optim
+      (let ((s     (car e))
+            (optim (find-rewriter (car e))))
+        (when (and optim (not (find-symbol-in-env s env)))
+          ;; We have a rewriter and symbol is not defined in current
+          ;; environment
           (set! e (optim e (length e) env))
           (unless (equal? e save)
             ;; (%debug "Rewrite ~s => ~s" save e)
@@ -72,7 +74,6 @@
 ;;; Rewriting Rules
 ;;;
 ;;; ======================================================================
-
 (compiler:add-rewriter!            ;; 'IF' rewriter
  'if
  (lambda (expr len env)
@@ -143,6 +144,7 @@
                    expr))
              expr))
        expr)))
+
 
 (compiler:add-rewriter!            ;; 'CDR' rewriter
  'cdr
