@@ -2062,8 +2062,10 @@ both forms.
 ;;;;            The bytecode compiler
 ;;;;
 ;;;;======================================================================
-(define (compile e env epair tail?)
-  (let ((e (rewrite-expression e env)))
+(define (compile expr env epair tail?)
+  (let ((e (if (compiler:allow-code-rewrite)
+               (rewrite-expression expr env)
+               expr)))
     (cond
      ;; ---- We have a pair
      ((pair? e)

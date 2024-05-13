@@ -40,7 +40,8 @@
         compiler:keep-source
         compiler:inline-common-functions
         compiler:unroll-iterations
-        compiler:peephole-optimizer)
+        compiler:peephole-optimizer
+        compiler:allow-code-rewrite)
 
 #|
 <doc EXT compiler:time-display
@@ -203,6 +204,22 @@ doc>
  * See that the `GLOBAL-REF` and `PUSH` were turned by the peephole optimizer
  * into `GLOBAL-REF-PUSH`.
 doc>
+<doc EXT compiler:allow-code-rewrite
+ * (compiler:allow-code-rewrite)
+ * (compiler:allow-code-rewrite bool)
+ *
+ * This parameter determines if compiler tries to rewrite some expressions in
+ * simpler ones. For instance, it permit to eliminate the unneeded expression
+ * in a |begin| form, or to evaluate some simple expression. For instance,
+ * @lisp
+ * (begin 100 foo (display "Hello") "Hi" (not #f))
+ * @end lisp
+ * is rewritten in
+ * @lisp
+ * (begin (display "Hello") #t)
+ * @end lisp
+ * This parameter defaults to `#t`. 
+doc>
 |#
 (define-parameter compiler:time-display                   #t)
 (define-parameter compiler:gen-line-number                #f)
@@ -211,7 +228,8 @@ doc>
 (define-parameter compiler:show-assembly-code             #f)
 (define-parameter compiler:keep-formals                   #f)
 (define-parameter compiler:keep-source                    #f)
-(define-parameter compiler:peephole-optimizer              #t)
+(define-parameter compiler:peephole-optimizer             #t)
+(define-parameter compiler:allow-code-rewrite             #t)
 (define-parameter compiler:unroll-iterations 4
   (lambda (v)
     (unless (and (fixnum? v) (positive? v))

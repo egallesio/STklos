@@ -7043,6 +7043,34 @@ all lists have finite length and are terminated by the empty list.</p>
 </div>
 </div>
 <div class="paragraph">
+<p><a id='P_improper-list?'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(improper-list? obj) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns false if and only if <code>obj</code> is an improper list.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">improper-list?</span> <span class="mi">2</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">improper-list?</span> <span class="o">'</span><span class="p">())</span>          <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">improper-list?</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>     <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">improper-list?</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="o">.</span> <span class="mi">3</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">improper-list?</span> <span class="p">(</span><span class="nb">cons</span> <span class="ss">'a</span> <span class="ss">'b</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">improper-list?</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">improper-list?</span> <span class="o">#</span><span class="nv">void</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><a id='P_make-list'></a>
 </p>
 </div>
@@ -15209,7 +15237,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.293</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.324</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -32275,6 +32303,42 @@ by default to <code>#t</code>.</p>
 </div>
 </div>
 <div class="paragraph">
+<p><a id='P_compiler:allow-code-rewrite'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(compiler:allow-code-rewrite) </strong></code><br>
+<code><strong>(compiler:allow-code-rewrite bool) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter determines if compiler tries to rewrite some expressions in
+simpler ones. For instance, it permit to eliminate the unneeded expression
+in a <code>begin</code> form, or to evaluate some simple expression. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">begin</span> <span class="mi">100</span> <span class="nv">foo</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Hello"</span><span class="p">)</span> <span class="s">"Hi"</span> <span class="p">(</span><span class="nb">not</span> <span class="no">#f</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is rewritten in</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"Hello"</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter defaults to <code>#t</code>.</p>
+</div>
+<div class="paragraph">
 <p><a id='P_compiler:keep-formals'></a>
 </p>
 </div>
@@ -33000,7 +33064,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-05-02 16:56:52 +0200
+Last updated 2024-05-13 18:38:07 +0200
 </div>
 </div>
 </body>
