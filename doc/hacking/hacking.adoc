@@ -1037,6 +1037,61 @@ reader can try the following:
 * Finally, write some benchmark to verify if the new optimization is worth
   the trouble (and the use of a new opcode).
 
+=== Source rewriter
+
+The file `lib/comprewrite.stk` contains rules for code rewriting.
+
+* The global variable `*all-rewriters*` holds a hash table with different
+  rewriting rules, indexed by symbol (one `if` rule, one `not` rule, one
+  `begin` rule and so on)
+* The object stored the entry for key `SYMBOL` is a procedure that transforms
+  the form `(SYMBOL ...)` into something else. For example, it will transform
+  `(IF 1 2 3)` into `2`.  The procedure takes as parameters:
+  - An expression (whose first element is te symbol that was used as key in
+    the hash table);
+  - The length of the expression;
+  - The environment.
+  The procedure should, of course, return the optimized expression.
+
+As an example,
+
+[source,scheme]
+----
+(define rewriters (in-module STKLOS-COMPILER *all-rewriters*))
+rewriters => #[hash-table 7fbb3a7359c0]
+
+(define rewrite-car (hash-table-get rewriters 'car))
+rewrite-car => #[closure 7fbb3a39bb80]
+
+(rewrite-car '(car '(1 2)) 2 (interaction-environment)) => '1
+----
+
+If the expression is wrong, nothing is done (since the rewriter is not
+where syntax or semantic errors are detected):
+
+[source,scheme]
+----
+(rewrite-car '(car '(1 2)) 2 (interaction-environment)) => '1
+(rewrite-car '(car 1 2 3) 4 (interaction-environment)) => '(car 1 2 3)
+----
+
+There is a parameter object to control the source rewriter.
+
+[source,scheme]
+----
+stklos> (compiler:source-rewrite #f)
+stklos> (disassemble-expr '(car '(1 2)))
+
+000:  CONSTANT             0
+002:  IN-CAR
+
+stklos> (compiler:source-rewrite #t)
+stklos> (disassemble-expr '(car '(1 2)))
+
+000:  IM-ONE
+----
+
+
 == Garbage collection
 
 STklos uses the Boehm-Demers-Weiser garbage collector. The wrapper for
