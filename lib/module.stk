@@ -634,7 +634,10 @@ doc>
 doc>
 |#
 (define-macro (in-module mod symb . default)
-  `(apply symbol-value* ',symb (find-module ',mod) ',default))
+  (if (and (eq? mod 'SCHEME)
+           (null? default))
+      `(%%in-scheme ',symb)
+      `(apply symbol-value* ',symb (find-module ',mod) ',default)))
 
 
 ;;=============================================================================
