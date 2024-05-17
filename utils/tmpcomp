@@ -28,6 +28,9 @@
 # system which need compilation. It will not be installed since the
 # user version is the stklos-compile script.
 
+# When the environment variable KEEP_FORMALS is "1", compilation will be done with
+# the flag "keep-formals" turned on.
+
 out="a.out"
 in=""
 Copt=""
@@ -67,8 +70,24 @@ STKLOS_LOAD_PATH=".:../lib:${prefix}/lib:"
 STKLOS_BUILDING=1
 export STKLOS_LOAD_PATH STKLOS_BUILDING
 
-${prefix}/src/stklos -c -q -f ${prefix}/utils/stklos-compile.stk -- \
-     --no-time $Copt --output=$out $in
+# I have tried to use "-F '+keep-formals'" and also "--compiler-flags='+keep-formals'"
+# in $COMP_FLAGS and pass it to stklos-compile here, but neither worked, as for some
+# reason the option ws not recognized. But directly evalauting an expression that sets
+# the keep-formals parameter works, so that's what we do!
+#
+# So -- The Makefiles that cll tmpcomp NEED to set the KEEP_FORMALS vraiable
+# when calling, as in
+#     KEEP_FORMALS=@KEEP_FORMALS@ tmpcomp ...
+#
+# -- jpellegrini
+if test "$KEEP_FORMALS" -eq 1
+then
+    ${prefix}/src/stklos -c -q -f ${prefix}/utils/stklos-compile.stk -- \
+             --no-time $Copt -e '(compiler:keep-formals #t)' --output=$out $in
+else
+    ${prefix}/src/stklos -c -q -f ${prefix}/utils/stklos-compile.stk -- \
+             --no-time $Copt --output=$out $in
+fi
 
 status=$?
 if test "$status" -gt 0
