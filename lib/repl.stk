@@ -35,7 +35,8 @@
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
           repl-theme get-repl-color repl-show-startup-message
           repl-add-command
-          @ @1 @2 @3 @4 @5 @*)
+          @ @1 @2 @3 @4 @5 @*
+          @@ @@1 @@2 @@3 @@4 @@5 @@*)
 
 ;;; In module REPL
 
@@ -55,8 +56,16 @@
 (define @5 #void)
 (define @* (list @1 @2 @3 @4 @5))
 
+(define @@1 #void)
+(define @@2 #void)
+(define @@3 #void)
+(define @@4 #void)
+(define @@5 #void)
+(define @@* (list @@1 @@2 @@3 @@4 @@5))
+
 ;; define @ as an alias on @1
 (let ((M (find-module 'REPL))) (%symbol-link '@ '@1 M M))
+(let ((M (find-module 'REPL))) (%symbol-link '@@ '@@1 M M))
 
 
 #|
@@ -187,7 +196,9 @@ doc>
   (display (do-color 'normal))
   (display "If not redefined by your program, the following variables are available\n")
   (display " - @1 (aka @), @2, @3, @4, @5 contain the last REPL's computed values\n")
-  (display " - @* contains a list of @1, @2, @3, @4 and @5 values\n"))
+  (display " - @* contains a list of @1, @2, @3, @4 and @5 values\n")
+  (display " - @@1 (aka @@), @@2, @@3, @@4, @@5 contain the last input to the REPL\n")
+  (display " - @@* contains a list of @@1, @@2, @@3, @@4 and @@5 values\n"))
 
 (define (do-repl-command name)
   (define (search-repl-command name)
@@ -510,6 +521,15 @@ doc>
                          (set! @3 (caddr @*))
                          (set! @2 (cadr @*))
                          (set! @1 (car @*))
+
+                         ;; Build @@* REPl variable:
+                         (set! @@* (list e @@1 @@2 @@3 @@4))
+                         ;; Build @@i variables:
+                         (set! @@5 (car (cddddr @@*)))
+                         (set! @@4 (cadddr @@*))
+                         (set! @@3 (caddr @@*))
+                         (set! @@2 (cadr @@*))
+                         (set! @@1 (car @@*))
 
                          ;; Print values
                          (for-each (lambda (x) (write-shared x out) (newline out))
