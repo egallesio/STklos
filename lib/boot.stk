@@ -190,8 +190,11 @@
            (list "???" #f))
           ((procedure? (caar bt))
            (let ((name (%procedure-name (caar bt))))
-             (if (or (string? name) (cdar bt))
+             (if (or (and (string? name) (not (string=? name "error")))
+                     (cdar bt))
                  ;; We have either a "pretty name" or a line information
+                 ;; Note: if name is "error", the real culprit is probably
+                 ;; below in the backtrace => skip this element
                  (list name
                        (or info (cdar bt)))
                  ;; Nothing interesting, continue to go down the stack
