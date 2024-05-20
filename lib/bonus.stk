@@ -1591,7 +1591,7 @@ doc>
         (loop (cons sexp res) (reader p)))))
 
 (define (port->string p)
-  (unless (input-port? p) (error "bad port ~S" p))
+  (unless (input-port? p) (error 'port->string "bad port ~S" p))
   (with-output-to-string
     (lambda () (copy-port p (current-output-port)))))
 
@@ -1983,7 +1983,7 @@ doc>
 (define (error-object-location obj)
   (if (error-object? obj)
       (condition-ref obj 'location)
-      (error "bad error object: ~S" obj)))
+      (error 'error-object-location "bad error object: ~S" obj)))
 
 #|
 <doc EXT define-constant
@@ -2073,9 +2073,9 @@ doc>
 |#
 (define (exact-integer-log n b)
   (unless (and (exact-integer? n) (positive? n))
-    (error "log exponent ~S is not a positive exact integer" n))
+    (error 'exact-integer-log "log exponent ~S is not a positive exact integer" n))
   (unless (and (exact-integer? b) (> b 1))
-    (error "log base ~S is not exact integer greater than one" b))
+    (error 'exact-integer-log "log base ~S is not exact integer greater than one" b))
   ;; This is easier and faster than R7RS exact-integer-sqrt, since:
   ;; * log(n b) = log_2(n) / log_2(b).
   ;; * integer-length(n) = floor(log_2(n)) + 1
@@ -2119,12 +2119,12 @@ doc>
 doc>
 |#
 (define (radians->degrees r)
-  (unless (real? r) (error "bad real number ~S" r))
+  (unless (real? r) (error 'radians->degrees "bad real number ~S" r))
   (/ (* r 180)
      3.141592653589793115997963468544185161590576171875)) ; pi
 
 (define (degrees->radians d)
-  (unless (real? d) (error "bad real number ~S" d))
+  (unless (real? d) (error 'degrees->radians "bad real number ~S" d))
   (* (/ d 180)
      3.141592653589793115997963468544185161590576171875)) ; pi
 
@@ -2532,7 +2532,7 @@ doc>
 |#
 (define (string->keyword str)
   (unless (string? str)
-    (error "bad string ~S" str))
+    (error 'string->keyword "bad string ~S" str))
   (make-keyword str))
 
 ;;

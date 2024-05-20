@@ -85,7 +85,7 @@ doc>
        ((null? l)
         (values (reverse! key) (reverse! other)))
        ((keyword? (car l))
-        (if (null? (cdr l)) (error "value expected after keyword ~S" (car l)))
+        (if (null? (cdr l)) (error 'run-process "value expected after keyword ~S" (car l)))
         (Loop (cddr l) (cons (cadr l) (cons (car l) key)) other))
        (else (Loop (cdr l) key (cons (car l) other))))))
 

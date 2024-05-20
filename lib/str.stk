@@ -82,9 +82,9 @@
               (unless (string? str2)
                 (error-bad-string str2))
               (unless (integer? offset)
-                (error "bad offset ~S" offset))
+                (error 'string-blit! "bad offset ~S" offset))
               (unless (string-mutable? str1)
-                (error "changing the constant string ~S is not allowed"))
+                (error 'str1ng-blit! "changing the constant string ~S is not allowed"))
 
               (let ((len1 (string-length str1))
                     (len2 (string-length str2)))
@@ -125,10 +125,10 @@
               (unless (string? str)
                 (error-bad-string  str))
               (unless (integer? start)
-                (error "bad starting index ~S" start))
+                (error 'string-titlecase "bad starting index ~S" start))
               (cond
                 ((not (integer? end))
-                 (error "bad ending index ~S" end))
+                 (error string-titlecase "bad ending index ~S" end))
                 ((= end -1)
                  (set! end (string-length str))))
 
@@ -159,10 +159,10 @@
               (unless (string? str)
                 (error-bad-string str))
               (unless (integer? start)
-                (error "bad starting index ~S" start))
+                (error 'string-titlecase! "bad starting index ~S" start))
               (cond
                 ((not (integer? end))
-                 (error "bad ending index ~S" end))
+                 (error 'string-titlecase! "bad ending index ~S" end))
                 ((= end -1)
                  (set! end (string-length str))))
 
@@ -178,4 +178,3 @@
                                            (else          (char-downcase curr))))
                       (Loop (+ i 1) curr-is-sep?))))))))
     ))
-

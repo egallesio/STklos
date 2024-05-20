@@ -68,19 +68,19 @@ doc>
          ;; b = nano
          ;; c = sec -> c necessary
          (unless c
-           (error "since first argument is symbol, 3 args (type, nanosecond and second) required, only 2 given"))
+           (error 'make-time "since first argument is symbol, 3 args (type, nanosecond and second) required, only 2 given"))
          (unless (memq a '(time-tai time-utc time-monotonic time-process time-duration))
-           (error "bad time type ~S" a))
-         (unless (integer? b) (error "bad integer ~S" b))
-         (unless (integer? c) (error "bad integer ~S" c))
+           (error 'make-time "bad time type ~S" a))
+         (unless (integer? b) (error 'make-time "bad integer ~S" b))
+         (unless (integer? c) (error 'make-time "bad integer ~S" c))
          (make-struct %time a b c))
         ((integer? a)
          ;; a = nano
          ;; b = sec -> c NOT allowed
-         (when c (error "since first argument is integer, 2 args (nanosecond and second) required, but 3 given"))
-         (unless (integer? b) (error "bad integer ~S" b))
+         (when c (error 'make-time "since first argument is integer, 2 args (nanosecond and second) required, but 3 given"))
+         (unless (integer? b) (error 'make-time "bad integer ~S" b))
          (make-struct %time 'time-utc a b))
-        (else (error "bad symbol or integer ~S" a))))
+        (else (error 'make-time "bad symbol or integer ~S" a))))
 
 #|
 <doc EXT time-type set-time-type! time-second set-time-second! time-nanosecond set-time-nanosecond!
@@ -386,11 +386,11 @@ doc>
   (cond ((or (null? type) (eq? (car type) 'time-utc))
          (%current-time))
         ((> (length type) 1)
-         (error "too many arguments (0 or 1 expected, ~S given)"
+         (error 'current-time "too many arguments (0 or 1 expected, ~S given)"
                 (length type)))
         ((eq? (car type) 'time-tai)
          (time-utc->time-tai (%current-time)))
-        (else (error "unsupported time type ~S" (car type)))))
+        (else (error 'current-time "unsupported time type ~S" (car type)))))
 
 ;;;; ======================================================================
 ;;;;

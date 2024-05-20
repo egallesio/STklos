@@ -498,7 +498,7 @@ doc>
             (loop xn1)))))
 
   (unless (and (exact-integer? k)(>= k 0))
-    (error "non negative integer expected. It was: ~S" k))
+    (error 'exact-integer-sqrt "non negative integer expected. It was: ~S" k))
   (let ((s (if (fixnum? k)
                (let ((v (sqrt k)))
                  (if (exact? v) v (inexact->exact (floor v))))
@@ -730,7 +730,7 @@ doc>
           #:vector->list  ; set procedure name
           (if start?
               (let ((end (if end? end (vector-length v))))
-                (when (< end start) (error "end index ~S < start index ~S" end start))
+                (when (< end start) (error 'vector->list "end index ~S < start index ~S" end start))
                 (%claim-error
                  'vector->list
                  (do ((i (- end 1) (- i 1))
@@ -814,7 +814,7 @@ doc>
 doc>
 |#
 (define (vector->string vect :optional (start 0) (end 0 end?))
-  (unless (vector? vect)    (error "bad vector ~S" vect))
+  (unless (vector? vect)    (error 'vector->string "bad vector ~S" vect))
   (unless end?              (set! end (vector-length vect)))
   (%claim-error
      'vector->string
@@ -824,13 +824,13 @@ doc>
        (if (< start end)
            (let ((c (vector-ref vect start)))
              (unless (char? c)
-               (error "element at index ~S of ~S must be a character" start vect))
+               (error 'vector->string "element at index ~S of ~S must be a character" start vect))
              (string-set! res i c)
              (loop res (+ i 1) (+ start 1)))
            res))))
 
 (define (string->vector str :optional (start 0) (end 0 end?))
-  (unless (string? str)    (error "bad string ~S" str))
+  (unless (string? str)    (error 'string->vector "bad string ~S" str))
   (unless end?             (set! end (string-length str)))
   (%claim-error
      'string->vector
@@ -1168,7 +1168,7 @@ doc>
 (define (error-object-message obj)
   (if (error-object? obj)
       (condition-ref obj 'r7rs-msg)
-      (error "bad error object: ~S" obj)))
+      (error 'error-object-message "bad error object: ~S" obj)))
 
 #|
 <doc R7RS error-object-irritants
@@ -1181,7 +1181,7 @@ doc>
 (define (error-object-irritants obj)
   (if (error-object? obj)
       (condition-ref obj 'r7rs-irritants)
-      (error "bad error object: ~S" obj)))
+      (error 'error-object-irritants "bad error object: ~S" obj)))
 
 #|
 <doc R7RS read-error? file-error?
@@ -1250,12 +1250,12 @@ doc>
 |#
 (define (input-port-open? port)
   (unless (input-port? port)
-    (error "bad input port ~S" port))
+    (error 'input-port-open? "bad input port ~S" port))
   (not (port-closed? port)))
 
 (define (output-port-open? port)
   (unless (output-port? port)
-    (error "bad output port ~S" port))
+    (error 'output-port-open? "bad output port ~S" port))
   (not (port-closed? port)))
 
 
@@ -1275,9 +1275,9 @@ doc>
   (%claim-error
     'read-string
     (unless (positive? k)
-      (error "parameter must be a positive integer. It was: ~S" k))
+      (error 'read-string "parameter must be a positive integer. It was: ~S" k))
     (unless (and (input-port? port) (textual-port? port))
-      (error "bad textual input port ~S" port))
+      (error 'read-string "bad textual input port ~S" port))
 
     (let ((buffer (make-string k)))
       (let Loop ((i 0)
@@ -1310,7 +1310,7 @@ doc>
   (%claim-error
     'read-u8
     (unless (binary-port? port)
-      (error "bad binary port ~S" port))
+      (error 'read-u8 "bad binary port ~S" port))
     (read-byte port)))
 
 #|
@@ -1332,7 +1332,7 @@ doc>
   (%claim-error
     'peek-u8
     (unless (binary-port? port)
-      (error "bad binary port ~S" port))
+      (error 'peek-u8 "bad binary port ~S" port))
     (peek-byte port)))
 
 
@@ -1358,7 +1358,7 @@ doc>
   (%claim-error
    'read-bytevector!
    (unless (bytevector? bv)
-     (error "bad bytevector ~S" bv))
+     (error 'read-bytevector! "bad bytevector ~S" bv))
    (unless end?
      (set! end (bytevector-length bv)))
    (%read-bytevector! bv port start end)))
@@ -1394,7 +1394,7 @@ doc>
   (%claim-error
    'write-u8
    (unless (binary-port? port)
-     (error "bad binary port ~S" port))
+     (error 'write-u8 "bad binary port ~S" port))
    (write-byte byte port)))
 
 #|
@@ -1413,8 +1413,8 @@ doc>
                                        (end -1 end?))
   (%claim-error
    'write-bytevector
-   (unless (bytevector? bv)     (error "bad bytevector ~S" bv))
-   (unless (binary-port? port)  (error "bad binary port ~S" port))
+   (unless (bytevector? bv)     (error 'write-bytevector "bad bytevector ~S" bv))
+   (unless (binary-port? port)  (error 'write-bytevector "bad binary port ~S" port))
    (unless end?                 (set! end (bytevector-length bv)))
 
    (let Loop ((i start))
@@ -1473,7 +1473,7 @@ doc>
                                    err)))
                             (thunk))))
     (if (eq? res err)
-        (error "exception handler returned on non-continuable exception")
+        (error 'with-exception-handler "exception handler returned on non-continuable exception")
         res)))
 
 #|

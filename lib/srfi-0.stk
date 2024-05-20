@@ -104,7 +104,7 @@ doc>
                 ((symbol? feat) feat)
                 ((string? feat) (string->symbol feat))
                 ((integer? feat) (symbol-append 'srfi- feat))
-                (else (error "bad feature" feat))))
+                (else (error 'require-feature "bad feature" feat))))
          (files (srfi-0-feature-implementation-file name)))
     (when files
       (for-each (lambda (x)
