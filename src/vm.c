@@ -108,7 +108,7 @@ int STk_reserve_store(void)
   static int global_store_len  = GLOBAL_STORE_INIT_SIZE;
   static int global_store_used = 0;
   MUT_DECL(store_lock);
-  
+
   int res; // Build result in the mutex lock section
 
   MUT_LOCK(store_lock);
@@ -391,10 +391,15 @@ typedef SCM (*primv)(int,SCM*);
 
 
 
-#define REG_CALL_PRIM(name) do{                           \
-  extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
-  ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);      \
-}while(0)
+#define REG_CALL_PRIM(name) do{                             \
+    extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
+    save_cur_proc         = ACT_SAVE_PROC(vm->fp);          \
+    ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);      \
+  }while(0)
+
+#define UNREG_CALL_PRIM() do{ ACT_SAVE_PROC(vm->fp) = save_cur_proc; }while(0)
+
+
 
 
 #define RETURN_FROM_PRIMITIVE() do{             \
@@ -785,10 +790,10 @@ SCM STk_values2vector(SCM obj, SCM vect)
        a clear message in this case (expected and given
        number of values). */
     if (!VECTORP(vect))
-	STk_error("bad vector ~S", vect);
+      STk_error("bad vector ~S", vect);
     if (VECTOR_SIZE(vect) != len)
-	STk_error("expected %d values, but %d were given",
-            VECTOR_SIZE(vect), len);
+      STk_error("expected %d values, but %d were given",
+                VECTOR_SIZE(vect), len);
     retval = vect;
   } else {
     /* Allocate a new vector for result */
@@ -995,9 +1000,19 @@ static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
   int16_t tailp;
+  int nargs=0;
   volatile int offset,
                have_code_lock = 0;     /* if true, we're patching the code */
-  int nargs=0;
+#ifndef __clang__
+  // With clang, we are faster without the "volatile" (which seems quite normal).
+  // But, on gcc, omitting the "volatile" (weirdly) produces less efficient code.
+  // NOTE:
+  //    ① the "volatile" is not really needed
+  //    ② declaring the save_cur_proc in each switch branch which need it is the
+  //       worst solution. 
+  volatile
+#endif
+  SCM save_cur_proc=STk_nil; /* cur. proc when calling inlined primitives */
 
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
@@ -1672,93 +1687,182 @@ CASE(UNUSED_28)
 #define SCHEME_NOT(x) (((x) == STk_false) ? STk_true: STk_false)
 
 
-CASE(IN_ADD2)   { REG_CALL_PRIM(plus);
-                  vm->val = STk_add2(pop(), vm->val); NEXT1;}
-CASE(IN_SUB2)   { REG_CALL_PRIM(difference);
-                  vm->val = STk_sub2(pop(), vm->val); NEXT1;}
-CASE(IN_MUL2)   { REG_CALL_PRIM(multiplication);
-                  vm->val = STk_mul2(pop(), vm->val); NEXT1;}
-CASE(IN_DIV2)   { REG_CALL_PRIM(division);
-                  vm->val = STk_div2(pop(), vm->val); NEXT1;}
-
-CASE(IN_FXADD2)   { REG_CALL_PRIM(fxplus);
-                  vm->val = STk_fxplus(pop(), vm->val); NEXT1;}
-CASE(IN_FXSUB2)   { REG_CALL_PRIM(fxminus);
-                  vm->val = STk_fxminus(pop(), vm->val); NEXT1;}
-CASE(IN_FXMUL2)   { REG_CALL_PRIM(fxtime);
-                  vm->val = STk_fxtime(pop(), vm->val); NEXT1;}
-CASE(IN_FXDIV2)   { REG_CALL_PRIM(fxdiv);
-                  vm->val = STk_fxdiv(pop(), vm->val); NEXT1;}
+CASE(IN_ADD2)   {
+  REG_CALL_PRIM(plus); vm->val = STk_add2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SUB2)   {
+  REG_CALL_PRIM(difference); vm->val = STk_sub2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_MUL2)   {
+  REG_CALL_PRIM(multiplication); vm->val=STk_mul2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_DIV2)   {
+  REG_CALL_PRIM(division); vm->val = STk_div2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;}
 
 
-CASE(IN_SINT_ADD2) { REG_CALL_PRIM(plus);
-                     vm->val = STk_add2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_SUB2) { REG_CALL_PRIM(difference);
-                     vm->val = STk_sub2(MAKE_INT(fetch_next()), vm->val); NEXT1;}
-CASE(IN_SINT_MUL2) { REG_CALL_PRIM(multiplication);
-                     vm->val = STk_mul2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_DIV2) { REG_CALL_PRIM(division);
-                     vm->val = STk_div2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_FXADD2)   {
+  REG_CALL_PRIM(fxplus); vm->val = STk_fxplus(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXSUB2)   {
+  REG_CALL_PRIM(fxminus); vm->val = STk_fxminus(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXMUL2)   {
+  REG_CALL_PRIM(fxtime); vm->val = STk_fxtime(pop(), vm->val);  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXDIV2)   {
+  REG_CALL_PRIM(fxdiv); vm->val = STk_fxdiv(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 
-CASE(IN_SINT_FXADD2) { REG_CALL_PRIM(fxplus);
-                     vm->val = STk_fxplus(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_FXSUB2) { REG_CALL_PRIM(fxminus);
-                     vm->val = STk_fxminus(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_FXMUL2) { REG_CALL_PRIM(fxtime);
-                     vm->val = STk_fxtime(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_FXDIV2) { REG_CALL_PRIM(fxdiv);
-                     vm->val = STk_fxdiv(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_SINT_ADD2) {
+  REG_CALL_PRIM(plus); vm->val = STk_add2(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_SUB2) {
+  REG_CALL_PRIM(difference); vm->val = STk_sub2(MAKE_INT(fetch_next()), vm->val);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_MUL2) {
+  REG_CALL_PRIM(multiplication); vm->val = STk_mul2(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_DIV2) {
+  REG_CALL_PRIM(division); vm->val = STk_div2(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 
-CASE(IN_NUMEQ)  { REG_CALL_PRIM(numeq);
-                  vm->val = MAKE_BOOLEAN(STk_numeq2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMDIFF){ REG_CALL_PRIM(numeq);
-                  vm->val = MAKE_BOOLEAN(!STk_numeq2(pop(), vm->val));     NEXT1;}
-CASE(IN_NUMLT)  { REG_CALL_PRIM(numlt);
-                  vm->val = MAKE_BOOLEAN(STk_numlt2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMGT)  { REG_CALL_PRIM(numgt);
-                  vm->val = MAKE_BOOLEAN(STk_numgt2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMLE)  { REG_CALL_PRIM(numle);
-                  vm->val = MAKE_BOOLEAN(STk_numle2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMGE)  { REG_CALL_PRIM(numge);
-                  vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));      NEXT1;}
-
-CASE(IN_FXEQ)  { REG_CALL_PRIM(fxeq);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)==0); NEXT1;}
-CASE(IN_FXDIFF){ REG_CALL_PRIM(fxeq);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)!=0); NEXT1;}
-CASE(IN_FXLT)  { REG_CALL_PRIM(fxlt);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<0);  NEXT1;}
-CASE(IN_FXGT)  { REG_CALL_PRIM(fxgt);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>0);  NEXT1;}
-CASE(IN_FXLE)  { REG_CALL_PRIM(fxle);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<=0); NEXT1;}
-CASE(IN_FXGE)  { REG_CALL_PRIM(fxge);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>=0); NEXT1;}
+CASE(IN_SINT_FXADD2) {
+  REG_CALL_PRIM(fxplus); vm->val = STk_fxplus(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_FXSUB2) {
+  REG_CALL_PRIM(fxminus); vm->val = STk_fxminus(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_FXMUL2) {
+  REG_CALL_PRIM(fxtime); vm->val = STk_fxtime(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_FXDIV2) {
+  REG_CALL_PRIM(fxdiv); vm->val = STk_fxdiv(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 
-CASE(IN_INCR)   { REG_CALL_PRIM(plus);
-                  vm->val = STk_add2(vm->val, MAKE_INT(1)); NEXT1;}
-CASE(IN_DECR)   { REG_CALL_PRIM(difference);
-                  vm->val = STk_sub2(vm->val, MAKE_INT(1)); NEXT1;}
+CASE(IN_NUMEQ)  {
+  REG_CALL_PRIM(numeq); vm->val = MAKE_BOOLEAN(STk_numeq2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMDIFF){
+  REG_CALL_PRIM(numeq); vm->val = MAKE_BOOLEAN(!STk_numeq2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMLT)  {
+  REG_CALL_PRIM(numlt); vm->val = MAKE_BOOLEAN(STk_numlt2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMGT)  {
+  REG_CALL_PRIM(numgt); vm->val = MAKE_BOOLEAN(STk_numgt2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMLE)  {
+  REG_CALL_PRIM(numle); vm->val = MAKE_BOOLEAN(STk_numle2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMGE)  {
+  REG_CALL_PRIM(numge); vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+
+CASE(IN_FXEQ)  {
+  REG_CALL_PRIM(fxeq); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)==0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXDIFF){
+  REG_CALL_PRIM(fxeq); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)!=0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXLT)  {
+  REG_CALL_PRIM(fxlt); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXGT)  {
+  REG_CALL_PRIM(fxgt); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXLE)  {
+  REG_CALL_PRIM(fxle); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<=0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXGE)  {
+  REG_CALL_PRIM(fxge); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>=0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+
+
+CASE(IN_INCR)   {
+  REG_CALL_PRIM(plus); vm->val = STk_add2(vm->val, MAKE_INT(1));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_DECR)   {
+  REG_CALL_PRIM(difference); vm->val = STk_sub2(vm->val, MAKE_INT(1));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 CASE(IN_CONS)   { vm->val = STk_cons(pop(), vm->val);                      NEXT1;}
-CASE(IN_CAR)    { REG_CALL_PRIM(car); vm->val = STk_car(vm->val);          NEXT1;}
-CASE(IN_CDR)    { REG_CALL_PRIM(cdr); vm->val = STk_cdr(vm->val);          NEXT1;}
+CASE(IN_CAR)    {
+  REG_CALL_PRIM(car); vm->val = STk_car(vm->val);UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_CDR)    {
+  REG_CALL_PRIM(cdr);  vm->val = STk_cdr(vm->val); UNREG_CALL_PRIM();
+  NEXT1;}
 CASE(IN_NULLP)  { vm->val = MAKE_BOOLEAN(vm->val == STk_nil);              NEXT1;}
 CASE(IN_LIST)   { vm->val = listify_top(fetch_next(), vm);                 NEXT1;}
 CASE(IN_NOT)    { vm->val = SCHEME_NOT(vm->val);                           NEXT1;}
+
 
 CASE(IN_EQUAL)  { vm->val = STk_equal(pop(), vm->val);                     NEXT1;}
 CASE(IN_EQV)    { vm->val = STk_eqv(pop(), vm->val);                       NEXT1;}
 CASE(IN_EQ)     { vm->val = MAKE_BOOLEAN(pop() == vm->val);                NEXT1;}
 
+
 CASE(IN_NOT_EQUAL) { vm->val = SCHEME_NOT(STk_equal(pop(), vm->val));      NEXT1; }
 CASE(IN_NOT_EQV)   { vm->val = SCHEME_NOT(STk_eqv(pop(), vm->val));        NEXT1; }
 CASE(IN_NOT_EQ)    { vm->val = MAKE_BOOLEAN(pop() != vm->val);             NEXT1; }
 
-CASE(IN_ASSOC)    {
+CASE(IN_ASSOC)    { //FIXME: register?
   SCM arg= pop();
   switch (fetch_next()) {
     case 1: vm->val= STk_assq(arg, vm->val); break;
@@ -1772,7 +1876,7 @@ CASE(IN_ASSOC)    {
   NEXT1;
 }
 
- CASE(IN_MEMBER)    {
+ CASE(IN_MEMBER)    { //FIXME: register?
   SCM arg= pop();
   switch (fetch_next()) {
     case 1: vm->val= STk_memq(arg, vm->val); break;
@@ -1790,26 +1894,30 @@ CASE(IN_ASSOC)    {
 CASE(IN_VREF) {
   REG_CALL_PRIM(vector_ref);
   vm->val = STk_vector_ref(pop(), vm->val);
+  UNREG_CALL_PRIM();
   NEXT1;
 }
 CASE(IN_SREF) {
   REG_CALL_PRIM(string_ref);
   vm->val = STk_string_ref(pop(), vm->val);
+  UNREG_CALL_PRIM();
   NEXT1;
 }
 CASE(IN_VSET)   {
   SCM index = pop();
   REG_CALL_PRIM(vector_set);
   STk_vector_set(pop(), index, vm->val);
+  UNREG_CALL_PRIM();
   NEXT0;
 }
 CASE(IN_SSET)   {
   SCM index = pop();
   REG_CALL_PRIM(string_set);
   STk_string_set(pop(), index, vm->val);
+  UNREG_CALL_PRIM();
   NEXT0;
 }
-CASE(IN_CXR) {
+ CASE(IN_CXR) {  //FIXME: register
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
  }
