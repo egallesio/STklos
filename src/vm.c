@@ -1000,11 +1000,19 @@ static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
   int16_t tailp;
+  int nargs=0;
   volatile int offset,
                have_code_lock = 0;     /* if true, we're patching the code */
-  int nargs=0;
+#ifndef __clang__
+  // With clang, we are faster without the "volatile" (which seems quite normal).
+  // But, on gcc, omitting the "volatile" (weirdly) produces less efficient code.
+  // NOTE:
+  //    ① the "volatile" is not really needed
+  //    ② declaring the save_cur_proc in each switch branch which need it is the
+  //       worst solution. 
   volatile
-  SCM save_cur_proc=STk_nil; /* name of cur. proc when calling inlined primitives */
+#endif
+  SCM save_cur_proc=STk_nil; /* cur. proc when calling inlined primitives */
 
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
