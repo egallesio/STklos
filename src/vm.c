@@ -1850,10 +1850,7 @@ CASE(IN_EQV)    { vm->val = STk_eqv(pop(), vm->val);                       NEXT1
 CASE(IN_EQ)     { vm->val = MAKE_BOOLEAN(pop() == vm->val);                NEXT1;}
 
 
- CASE(IN_NOT_EQUAL) { vm->val = SCHEME_NOT(STk_equal(pop(), vm->val));
-   UNREG_CALL_PRIM();
-   NEXT1;
- }
+CASE(IN_NOT_EQUAL) { vm->val = SCHEME_NOT(STk_equal(pop(), vm->val));      NEXT1; }
 CASE(IN_NOT_EQV)   { vm->val = SCHEME_NOT(STk_eqv(pop(), vm->val));        NEXT1; }
 CASE(IN_NOT_EQ)    { vm->val = MAKE_BOOLEAN(pop() != vm->val);             NEXT1; }
 
@@ -1902,6 +1899,7 @@ CASE(IN_VSET)   {
   SCM index = pop();
   REG_CALL_PRIM(vector_set);
   STk_vector_set(pop(), index, vm->val);
+  UNREG_CALL_PRIM();
   NEXT0;
 }
 CASE(IN_SSET)   {
