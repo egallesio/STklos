@@ -76,6 +76,9 @@
 ;;; ======================================================================
 (compiler:add-rewriter!            ;; 'IF' rewriter
  'if
+ ;; (if CONST then-expr else-expr)
+ ;; ===> then-expr  (if CONST is #f)
+ ;; ===> else-expr  (otherwise)
  (lambda (expr len env)
    (if (<= 3 len 4)
        (let ((Cond (rewrite-expression (cadr expr) env))
@@ -93,6 +96,11 @@
 
 (compiler:add-rewriter!            ;; 'NOT' rewriter
  'not
+ ;; (not CONST-A) ===> CONST-B
+ ;;
+ ;; where CONST-B is the boolean (not CONST-A)
+ ;;
+ ;; (inline not for constant)
  (lambda (expr len env)
    (if (= len 2)
        (let ((val (rewrite-expression (cadr expr) env)))
@@ -104,6 +112,11 @@
 
 (compiler:add-rewriter!            ;; 'BEGIN' rewriter
  'begin
+ ;; (begin CONST (a...) CONST (b...) => CONST (c...) XCONST)
+ ;; ===>
+ ;; (begin (a...) (b...) => (c...) XCONST
+ ;;
+ ;; (remove constants, except the last one and the => symbol)
  (lambda (expr _len env) ;; _len unused here
    (let Loop ((e   (cdr expr))
               (res (list 'begin)))
@@ -123,6 +136,7 @@
 
 (compiler:add-rewriter!            ;; 'EOF-OBJECT' rewriter
  'eof-object
+ ;; (eof-object) ===> #eof
  (lambda (expr len env)
    (if (= len 1)
        #eof
@@ -133,6 +147,7 @@
 ;; (or suppress them)
 (compiler:add-rewriter!            ;; 'CAR' rewriter
  'car
+ ;; (car (CONST-HEAD . COSNT-TAIL)) ===> CONST-HEAD
  (lambda (expr len env)
    (if (= len 2)
        (let ((v (rewrite-expression (cadr expr) env)))
@@ -148,6 +163,7 @@
 
 (compiler:add-rewriter!            ;; 'CDR' rewriter
  'cdr
+ ;; (cdr (CONST-HEAD . CONST-TAIL)) ===> CONST-TAIL
  (lambda (expr len env)
    (if (= len 2)
        (let ((v (rewrite-expression (cadr expr) env)))
