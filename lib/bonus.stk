@@ -58,6 +58,7 @@
         define-constant
         void?
         default-browser open-in-browser manual man
+        %with-profile-data
         exact-integer-log
         receive case-lambda
         radians->degrees degrees->radians
@@ -2213,6 +2214,19 @@ doc>
             (format "unstable -- ~a" commit)
             "unstable"))))
 
+(define-macro (%with-profile-data filename . args)
+  (let* ((format (if (memq (car args) '(:csv :scm))
+                     (car args)
+                     #f))
+         (body  (if format (cdr args) args))
+         (result (gensym 'result-)))
+    (if (%vm-has-stats?)
+        `(receive
+             ,result
+             (begin (%vm-reset-stats) ,@body)
+           (begin (%vm-dump-stats ,filename ,format)
+                  (apply values ,result)))
+        `(begin ,@body))))
 
 
 ;;;; ======================================================================
