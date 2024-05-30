@@ -159,3 +159,58 @@
                    expr))
              expr))
        expr)))
+
+(compiler:add-rewriter!            ;; 'EQUAL?' rewriter
+ 'equal?
+ ;; (equal? ATOM ATOM) ==> #t or #f
+ ;; (equal? ATOM x)    ==> (eq? ATOM x)
+ ;; (equal? x y)       ==> (equal? x y)
+ (lambda (expr len env)
+   (if (= len 3)
+       ;; The following are predicates to test wether an object can be compared
+       ;; with 'eq?'. If there are possible predicates missing, that's fine -
+       ;; some cases won't be optimized, but we'll be safe.
+       (let ((predicates-for-eq (list
+                                 fixnum?
+                                 char?
+                                 ;; do NOT include symbol?
+                                 eof-object?
+                                 void?
+                                 (lambda (x) (memq x '(#t #f)))
+                                 (lambda (x) (and (real? x)
+                                             (inexact? x)
+                                             (not (rational? x))))))
+             (x (rewrite-expression (cadr expr) env))
+             (y (rewrite-expression (caddr expr) env)))
+         ;; x-res and y-res are lists with the results of the predicates for the
+         ;; first and second arguments to 'equal?'
+         ;;
+         ;; For (equal? a 20), we'll have:
+         ;; x-res (#f #f #f #f #f #f)
+         ;; y-res (#t #f #f #f #f #f)
+         (let ((x-res (map (lambda (pred?) (and (const-expr? x)
+                                           (not (symbol? (cadr expr)))
+                                           (pred? (const-value x))))
+                           predicates-for-eq))
+               (y-res (map (lambda (pred?) (and (const-expr? y)
+                                           (not (symbol? (caddr expr)))
+                                           (pred? (const-value y))))
+                           predicates-for-eq)))
+           (cond ((and (const-expr? x)
+                       (const-expr? y))
+                  ;; two constants, just check if they're equal? and insert #t or #f:
+                  (equal? x y))
+
+                 ((or (any (lambda (z) z) x-res)
+                      (any (lambda (z) z) y-res))
+                  ;; At least one is constant, and is eq?-comparable, and that is
+                  ;; enough for us to use eq?:
+                  (list 'eq?
+                        ;; One is constant and the other isn't, so we use
+                        ;; const-value for the constant and (cxr expr) for
+                        ;; the other:
+                        (if (const-expr? x) (const-value x) (cadr expr))
+                        (if (const-expr? y) (const-value y) (caddr expr))))
+
+                 (else expr))))
+       expr)))
