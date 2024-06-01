@@ -285,3 +285,15 @@
        ;; here in the future without too much confusion.
        (join-lets expr)
        expr)))
+
+(compiler:add-rewriter!            ;; 'LET*' rewriter
+ 'let*
+ ;; (let BINDINGS1 (let BINDINGS2 ...)) => (let* BINDINGS ...)
+ (lambda (expr len env)
+   (if (and (> len 2)              ; at least '(let bindings expr)'
+            (list? (cadr expr)))   ; not named let
+       ;; Don't include the code here; keep it in a 'join-lets'
+       ;; separate procedure, so we can perhaps do other optimizations
+       ;; here in the future without too much confusion.
+       (join-lets expr)
+       expr)))
