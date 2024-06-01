@@ -159,3 +159,129 @@
                    expr))
              expr))
        expr)))
+
+
+;; deep-find checks if a symbol is refrenced anywhere inside a structure.
+;;
+;; (deep-find 'x '(a b c (d e (f x g) h) i)) => #t
+(define (deep-find elt lst)
+  (cond ((null? lst)                     #f)
+        ((eq? elt lst)                   #t)
+        ((pair? lst)
+         (or (deep-find elt (car lst))
+             (deep-find elt (cdr lst))))
+        (else #f)))
+
+
+;;; LET rewriter:
+;;
+;; The procedures internal-shadow?, external-shadow? and deep-find are
+;; used by the join-lets procedure which, in turn, is used by the let
+;; rewriter.
+
+;; (internal-shadow? bindings) will check if the bindings would
+;; LET their own variable definition if truned into a LET*.
+;; For example:
+;;
+;; (let ((a 10)
+;;       (b 20)
+;;       (c (+ 1 a))  ;; Oops, this is NOT the "a" begin defined in this LET...
+;;
+;; What we have above is internal shadowing, which this procedure detects.
+;;
+;; If we turned the above LET into LET*, it would be wrong:
+;; (let* ((a 10)
+;;        (b 20)
+;;        (c (+ 1 a))  ;; Now this "a" refers to the "a" being defined in these
+;;                     ;; bindings, and this is not correct!
+;;
+;; (internal-shadow? '( (a 1) (b 3) (c (+ a 2)) )) => #t
+;; (internal-shadow? '( (a 1) (b 3) (c (+ f 2)) )) => #f
+(define (internal-shadow? bindings)
+  (let ((vars  (map car bindings))
+        (exprs (map cdr bindings)))
+    (let Loop ((V vars)
+               (E exprs))
+      (cond ((null? V)             #f)
+            ((deep-find (car V) E) #t)
+            (else                  (Loop (cdr V) (cdr E)))))))
+
+;; (external-shadow? bindings2 bindings1) will check if bindings2
+;; will shadow any variable in bindings1.
+(define (external-shadow? bindings2 bindings1)
+  (let ((vars1 (map car bindings1))
+        (vars2 (map car bindings2)))
+    (let Loop ((vars1 vars1))
+      (cond ((null? vars1)            #f)
+            ((memq (car vars1) vars2) #t)
+            (else                     (Loop (cdr vars1)))))))
+
+;; (join-lets expr) will join nested LETs into a single
+;; LET-star (let*). this is faster since we avoid going
+;; into several "ENTER-LET" and "PREPARE-CALL" instructions.
+;;
+;; (join-lets '(let ((a 1))
+;;               (let ((b 2))
+;;                 (let ((c 3))
+;;                   x)
+;;                 y)))
+;; =>
+;; (let* ((a 1)
+;;        (b 2)
+;;        (c 3))
+;;   x y)
+;;
+;; See that the bodies of the LETs are appended, reflecting the order
+;; in which the expressions would be executed.
+;;
+;; Shadowing LETs are not optimized, as this can lead to wrong results.
+(define (join-lets expression)
+  ;; (let1 bindings1 (let2 bindings2 . body2) . body1)
+  ;;
+  ;; We know that (length expr) > 2, and:
+  ;;
+  ;; (list-ref expr 1)       = bindings1
+  ;; (list-ref expr 2)       = (let2 bindings2 ...)
+  ;; (cadr (list-ref expr 2) = bindings2
+  ;; (cdddr expr)            = body1
+  ;; (cddr (list-ref expr2)) = body2
+
+  (define (%join expr)
+    (if (and (pair? (list-ref expr 2))         ; body of LET1 is a list...
+             (memq (car (list-ref expr 2))
+                   '(let let*))                ; ...starting with LET or LET*
+             (list? (cadr (list-ref expr 2)))) ; and LET2 is not a named let
+
+        (let ((bindings1 (list-ref expr 1))
+              (bindings2 (cadr (list-ref expr 2))))
+
+          ;; No internal or external shadowing:
+          (if (and (not (external-shadow? bindings2 bindings1))
+                   (not (internal-shadow? bindings1))
+                   (not (internal-shadow? bindings2)))
+
+              (let* ((new-bindings (append bindings1 bindings2))
+                     (body1 (cdddr expr))
+                     (body2 (cddr (list-ref expr 2)))
+                     (body (cond ((null? body2) body1)
+                                 ((null? body1) body2)
+                                 (else (append body2 body1)))))
+                (%join (append (list 'let* new-bindings)
+                               body)))
+              expr))
+        expr))
+
+  (%join expression))
+
+
+(compiler:add-rewriter!            ;; 'LET' rewriter
+ 'let
+ ;; (let BINDINGS1 (let BINDINGS2 ...)) => (let* BINDINGS ...)
+ (lambda (expr len env)
+   (if (and (> len 2)              ; at least '(let bindings expr)'
+            (list? (cadr expr)))   ; not named let
+       ;; Don't include the code here; keep it in a 'join-lets'
+       ;; separate procedure, so we can perhaps do other optimizations
+       ;; here in the future without too much confusion.
+       (join-lets expr)
+       expr)))
