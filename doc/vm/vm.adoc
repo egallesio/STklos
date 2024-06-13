@@ -948,7 +948,7 @@ in the `cxr` library in the R7RS standard (`caar`, `cadr`, ..., up to
 
 [source,scheme]
 ----
-(disassemble-expr '(caadr a) #t)
+(disassemble-expr '(caadr x) #t)
 
 000:  GLOBAL-REF           1
 002:  IN-CXR               0
@@ -956,8 +956,13 @@ in the `cxr` library in the R7RS standard (`caar`, `cadr`, ..., up to
 
 Constants:
 0: #:daa
-1: a
+1: x
 ----
+
+The constant `daa` is the abbreviation of the operations --`(CAADR x)`
+ = `(CAR (CAR (CDR x)))`, *in reversed order* (because that is the order in which they
+will be applied, and it is mor enatural for the VM to go from the
+beginning of the string towards the end.
 
 See that if we turn off the inlining of functions in the compiler, we
 get a different output:
@@ -965,7 +970,7 @@ get a different output:
 [source,scheme]
 ----
 (compiler:inline-common-functions #f)
-(disassemble-expr '(caadr a) #t)
+(disassemble-expr '(caadr x) #t)
 
 000:  PREPARE-CALL
 001:  GLOBAL-REF           0
@@ -975,7 +980,7 @@ get a different output:
 008:
 
 Constants:
-0: a
+0: x
 1: caadr
 ----
 
