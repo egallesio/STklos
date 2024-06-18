@@ -880,6 +880,7 @@ structure (that is, the tagged word representing it) again on `val`.
 IN_CONS
 IN_CAR
 IN_CDR
+IN_CXR
 IN_LIST
 ....
 
@@ -940,6 +941,51 @@ is loaded on `val`, and then `IN-CONS` is called.
 Constants:
 0: a
 ....
+
+The special accessor `CXR` is used to access list parts, as described
+in the `cxr` library in the R7RS standard (`caar`, `cadr`, ..., up to
+`cddddr`). The following example illustrates this.
+
+[source,scheme]
+----
+(disassemble-expr '(caadr x) #t)
+
+000:  GLOBAL-REF           1
+002:  IN-CXR               0
+004:
+
+Constants:
+0: #:daa
+1: x
+----
+
+The constant `daa` is the abbreviation of the operations --`(CAADR x)`
+ = `(CAR (CAR (CDR x)))`, *in reversed order* (because that is the order in which they
+will be applied, and it is mor enatural for the VM to go from the
+beginning of the string towards the end.
+
+See that if we turn off the inlining of functions in the compiler, we
+get a different output:
+
+[source,scheme]
+----
+(compiler:inline-common-functions #f)
+(disassemble-expr '(caadr x) #t)
+
+000:  PREPARE-CALL
+001:  GLOBAL-REF           0
+003:  PUSH
+004:  GLOBAL-REF           1
+006:  INVOKE               1
+008:
+
+Constants:
+0: x
+1: caadr
+----
+
+Not only we have more instructions, but the `PREPARE-CALL` and
+`INVOKE` instructions above are rather expensive.
 
 === Structure references
 
@@ -1476,6 +1522,20 @@ Constants:
 0: a
 ....
 
+There is an instruction for returning the value of a symbol in the
+`SCHEME` module.
+
+[source,scheme]
+----
+(disassemble-expr '(%%in-scheme 'a) #t)
+
+000:  CONSTANT             0
+002:  INSCHEME
+003:
+
+Constants:
+0: a
+----
 
 == `vm.c`
 
