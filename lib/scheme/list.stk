@@ -1583,23 +1583,24 @@ FILTER an FILTER! are primitives in STklos
   (check-arg procedure? = lset<=)
   (or (not (pair? lists)) ; 0-ary case
       (let lp ((s1 (car lists)) (rest (cdr lists)))
-    (or (not (pair? rest))
-        (let ((s2 (car rest))  (rest (cdr rest)))
-          (and (or (eq? s2 s1)  ; Fast path
-               (%lset2<= = s1 s2)) ; Real test
-           (lp s2 rest)))))))
+	(or (not (pair? rest))
+	    (let ((s2 (car rest))  (rest (cdr rest)))
+	      (and (or (eq? s2 s1)	; Fast path
+		       (%lset2<= = s1 s2)) ; Real test
+		   (lp s2 rest)))))))
 
 (define (lset= = . lists)
+  (define (flip proc) (lambda (x y) (proc y x)))
   (check-arg procedure? = lset=)
   (or (not (pair? lists)) ; 0-ary case
       (let lp ((s1 (car lists)) (rest (cdr lists)))
-    (or (not (pair? rest))
-        (let ((s2   (car rest))
-          (rest (cdr rest)))
-          (and (or (eq? s1 s2)  ; Fast path
-               (and (%lset2<= = s1 s2) (%lset2<= = s2 s1))) ; Real test
-           (lp s2 rest)))))))
-
+        (or (not (pair? rest))
+            (let ((s2   (car rest))
+                  (rest (cdr rest)))
+              (and (or (eq? s1 s2)            ; Fast path
+                       (and (%lset2<= = s1 s2) ; Real test
+                            (%lset2<= (flip =) s2 s1)))
+                   (lp s2 rest)))))))
 
 (define (lset-adjoin = lis . elts)
   (check-arg procedure? = lset-adjoin)
