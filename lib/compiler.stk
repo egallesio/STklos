@@ -1499,12 +1499,17 @@ doc>
               (compile-body body env body tail?)
               (when (check-let-bindings 'letrec bindings #t)
                 (let ((tmps (map (lambda (_) (gensym)) bindings)))
-                  (compile `(let ,(map (lambda (x) (list (car x) #f)) bindings)
-                              (let ,(map (lambda (x y) (list x (cadr y)))
+                  ;; We have changed 'let' into '%let' in the expansion of
+                  ;; LETREC because when the optimizing rewriter (in comprwrite.stk)
+                  ;; joins nested LETs, it will also change the expansion of
+                  ;; LETRECs, breaking one of the tests (R5RS pitfalls, 1.2).
+                  ;; Using %let here completely avoids the problem.
+                  (compile `(%let ,(map (lambda (x) (list (car x) #f)) bindings)
+                              (%let ,(map (lambda (x y) (list x (cadr y)))
                                          tmps bindings)
                                 ,@(map (lambda (x y) `(set! ,(car y) ,x))
                                        tmps bindings))
-                              (let () ,@body))
+                              (%let () ,@body))
                            env args tail?))))))))
 
 ;;
