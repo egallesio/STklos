@@ -131,7 +131,7 @@
 (define (find-symbol-in-env symb env)
   (let Loop ((env env))
     (cond
-     ((not env)                       #f)
+     ((or (not env) (module? env))    #f)
      ((memq symb (scope-locals  env)) symb)
      ((assq symb (scope-mlocals env)) => cdr)
      (else                            (Loop (scope-parent env))))))
