@@ -30,9 +30,10 @@
 ;;; * Loading and using SRFIs; specifically, this shows the usefulness of SRFi-133
 ;;;   AKA (scheme (vector))
 ;;; * Using STklos extensions (1+ for example)
-;;; * A very simple programming style (librares, constatns, procedures, main entry point)
-;;; * A commenting style (write a main comment before each procedure, and show an example
-;;;   along with the comment
+;;; * A very simple programming style (libraries, constants, procedures,
+;;;   main entry point)
+;;; * A commenting style (write a main comment before each procedure, and show
+;;;   an example along with the comment
 
 ;;;
 ;;; LOADING LIBRARIES
@@ -70,12 +71,12 @@
 ;;
 ;; Example: (vector-iota 5) => #(0 1 2 3 4)
 ;;
-;; We will use this for the indices of the 12 possible dice aoutcomes:
+;; We will use this for the indices of the 12 possible dice outcomes:
 ;; (vector-iota 12) => #(0 1 2 3 4 5 6 7 8 9 10 11)
 (define (vector-iota n)
   (vector-unfold values n))
 
-;; vector-max computes themaximum value in a vector. It uses an internal
+;; vector-max computes the maximum value in a vector. It uses an internal
 ;; recursive and tail-calling procedure get-max.
 ;; See that we use the STklos extension procedure "1+" here.
 ;;
