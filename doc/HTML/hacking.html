@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.18">
+<meta name="generator" content="Asciidoctor 2.0.23">
 <meta name="author" content="Jeronimo Pellegrini">
 <title>Hacking STklos</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -141,7 +141,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -163,6 +163,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -209,13 +210,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -331,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -394,7 +392,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -653,81 +651,10 @@ pre.rouge {
   background-color: #49483e;
 }
 </style>
-<!-- Generate a nice TOC -->
-<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
-<!-- We do not need the tocify CSS because the asciidoc CSS already provides most of what we neeed -->
-
 <style>
-.tocify-header {
-    font-style: italic;
-}
-
-.tocify-subheader {
-    font-style: normal;
-    font-size: 90%;
-}
-
-.tocify ul {
-    margin: 0;
- }
-
-.tocify-focus {
-    color: #7a2518;
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.tocify-focus > a {
-    color: #7a2518;
-}
+  /* Customize default CSS */
+  .sidebarblock { margin-top: -1em; }
 </style>
-
-<script type="text/javascript">
-    $(function () {
-        // Add a new container for the tocify toc into the existing toc so we can re-use its
-        // styling
-        $("#toc").append("<div id='generated-toc'></div>");
-        $("#generated-toc").tocify({
-            extendPage: true,
-            context: "#content",
-            highlightOnScroll: true,
-            hideEffect: "slideUp",
-            // Use the IDs that asciidoc already provides so that TOC links and intra-document
-            // links are the same. Anything else might confuse users when they create bookmarks.
-            hashGenerator: function(text, element) {
-                return $(element).attr("id");
-            },
-            // Smooth scrolling doesn't work properly if we use the asciidoc IDs
-            smoothScroll: false,
-            // Set to 'none' to use the tocify classes
-            theme: "none",
-            // Handle book (may contain h1) and article (only h2 deeper)
-            selectors: $( "#content" ).has( "h1" ).size() > 0 ? "h1,h2,h3,h4,h5" : "h2,h3,h4,h5",
-            ignoreSelector: ".discrete"
-        });
-
-        // Switch between static asciidoc toc and dynamic tocify toc based on browser size
-        // This is set to match the media selectors in the asciidoc CSS
-        // Without this, we keep the dynamic toc even if it is moved from the side to preamble
-        // position which will cause odd scrolling behavior
-        var handleTocOnResize = function() {
-            if ($(document).width() < 768) {
-                $("#generated-toc").hide();
-                $(".sectlevel0").show();
-                $(".sectlevel1").show();
-            }
-            else {
-                $("#generated-toc").show();
-                $(".sectlevel0").hide();
-                $(".sectlevel1").hide();
-            }
-        }
-
-        $(window).resize(handleTocOnResize);
-        handleTocOnResize();
-    });
-</script>
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
@@ -777,6 +704,7 @@ pre.rouge {
 <ul class="sectlevel2">
 <li><a href="#_the_compiler">9.1. The compiler</a></li>
 <li><a href="#_peephole_optimizer">9.2. Peephole optimizer</a></li>
+<li><a href="#_source_rewriter">9.3. Source rewriter</a></li>
 </ul>
 </li>
 <li><a href="#_garbage_collection">10. Garbage collection</a></li>
@@ -814,7 +742,7 @@ on the same project across various editors and IDEs).</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>doc</code> – documentation, written mostly in Skribe</p>
+<p><code>doc</code> – documentation, written mostly in asciidoctor</p>
 </li>
 <li>
 <p><code>etc</code> – various sample files for specific needs</p>
@@ -837,7 +765,7 @@ program up to high-level things like modules implementing libraries and
 SRFIs</p>
 </li>
 <li>
-<p><code>pcre</code> – <code>libpcre</code> (a local copy)</p>
+<p><code>pcre2</code> – <code>libpcre</code> (a local copy)</p>
 </li>
 <li>
 <p><code>pkgman</code> – the package manager</p>
@@ -1195,11 +1123,11 @@ compiler warning about an unresolved reference.</p>
 <div class="sect2">
 <h3 id="_documentation">5.5. Documentation</h3>
 <div class="sect3">
-<h4 id="_documenting_srfis_in_srfi_skb">5.5.1. Documenting SRFIs in <code>srfi.skb</code></h4>
+<h4 id="_documenting_srfis_in_srfi_adoc">5.5.1. Documenting SRFIs in <code>srfi.adoc</code></h4>
 <div class="paragraph">
 <p>General documentation is automatically generated for SRFIs. If you need
 to give a precision specific to a given SRFI, add it to the end of the
-<code>doc/skb/srfi.skb</code> file using the <code>gen-srfi-documentation</code> function.</p>
+<code>doc/refman/srfi.adoc</code> file using the <code>gen-srfi-documentation</code> function.</p>
 </div>
 <div class="paragraph">
 <p>Note that the documentation is written in Skribe tool which is no more
@@ -1947,7 +1875,8 @@ the value <code>val</code></p>
 </ul>
 </div>
 <div class="paragraph">
-<p>There is also one function in <code>vm.c</code> which is not exported:</p>
+<p>There is also one function in <code>vm.c</code> which is not exported by <code>vm.h</code>, but is available
+as a Scheme primitive:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1958,7 +1887,71 @@ the value <code>val</code></p>
 </div>
 </div>
 <div class="paragraph">
-<p>Their behavior is better illustrated by an example in Scheme:</p>
+<p>Their Scheme counterparts, <code>%continuation?</code>, <code>%make-continuation</code>, and
+<code>%restore-continuation</code> are used to implement the Scheme procedure
+<code>call/cc</code> (in <code>lib/callcc.stk</code>). The implementation of <code>call/cc</code> is
+actually complex because it needs to be intertwined with the
+implementation of <code>dynamic-wind</code>, but in the same file there is
+another procedure, <code>%call/cc</code>, which does not do winding, and is
+therefore very simple (and it should be the starting point to
+understand the full-blown <code>call/cc</code>). We reproduce it here with some
+comments.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">%call/cc</span> <span class="nv">proc</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">k</span>  <span class="p">(</span><span class="nf">%make-continuation</span><span class="p">)))</span>
+    <span class="p">(</span><span class="k">if</span>  <span class="p">(</span><span class="nf">%fresh-continuation?</span> <span class="nv">k</span><span class="p">)</span>
+
+         <span class="c1">;; In the first time we get here, we create a closure (the lambda</span>
+         <span class="c1">;; below) that will take a value v and restore the continuation</span>
+         <span class="c1">;; k with it. So when we call</span>
+         <span class="c1">;; (%call/cc (lambda (kont) ... (kont x) ...)),</span>
+         <span class="c1">;; 'proc' below is the '(lambda (kont) ...)' in our code. And the</span>
+         <span class="c1">;; '(lambda v ...)' below is kont. 'v' is the argument that will be</span>
+         <span class="c1">;; given to kont.</span>
+
+         <span class="p">(</span><span class="nf">proc</span> <span class="p">(</span><span class="k">lambda</span> <span class="nv">v</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">k</span> <span class="nv">v</span><span class="p">)))</span>
+
+         <span class="c1">;; Next time and everytime again, we just return values applied to k,</span>
+         <span class="c1">;; because in this case, k will *not* be a continuation, but a list</span>
+         <span class="c1">;; with the values passed (this is because the lambda above accepts</span>
+         <span class="c1">;; 'v' as the arg list, and this list is passed to %restore-continuation</span>
+         <span class="c1">;; as the value to be returned).</span>
+         <span class="p">(</span><span class="nb">apply</span> <span class="nv">values</span> <span class="nv">k</span><span class="p">))))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>%call/cc</code> procedure is used in the same way the Scheme <code>call/cc</code>
+is used:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">c</span> <span class="no">#f</span><span class="p">)</span>
+<span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">a</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">b</span> <span class="mi">2</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"start~%"</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="nv">b</span> <span class="p">(</span><span class="nf">%call/cc</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">k</span><span class="p">)</span>
+                      <span class="p">(</span><span class="k">set!</span> <span class="nv">c</span> <span class="nv">k</span><span class="p">)</span>
+                      <span class="mi">-1</span><span class="p">)))</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="nv">a</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"~a ~a ~a~%"</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>
+
+<span class="nv">start</span>
+<span class="mi">2</span> <span class="mi">-1</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="mi">7</span><span class="nv">fbcd9a122c0</span><span class="p">]</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">c</span> <span class="mi">15</span><span class="p">)</span>
+<span class="mi">3</span> <span class="mi">15</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="mi">7</span><span class="nv">fbcd9a122c0</span><span class="p">]</span>
+
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">c</span> <span class="ss">'x</span><span class="p">)</span>
+<span class="mi">4</span> <span class="nv">x</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="mi">7</span><span class="nv">fbcd9a122c0</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The behavior of the fundamental continuation procedures is better
+illustrated by an example in Scheme, which mimics the example of
+<code>%call/cc</code> given above, <strong>ecxept</strong> that it does not have the return
+value of <code>%call/cc</code>, so it does not set the value of <code>b</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1968,7 +1961,7 @@ the value <code>val</code></p>
   <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"start~%"</span><span class="p">)</span>
   <span class="p">(</span><span class="k">set!</span> <span class="nv">c</span> <span class="p">(</span><span class="nf">%make-continuation</span><span class="p">))</span>
   <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="nv">a</span><span class="p">))</span>
-  <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"~a ~a~%"</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="no">#t</span> <span class="s">"~a ~a ~a~%"</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))</span>
 
 <span class="nv">start</span>
 <span class="mi">2</span> <span class="mi">2</span>
@@ -1977,25 +1970,28 @@ the value <code>val</code></p>
 <span class="no">#t</span>
 
 <span class="nv">stklos&gt;</span> <span class="nv">c</span>
-<span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span>     <span class="c1">;; addresses: C stack, Scheme stack,</span>
+                                             <span class="c1">;; continuation object</span>
 
 <span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%fresh-continuation?</span> <span class="nv">c</span><span class="p">)</span>
 <span class="no">#t</span>
 
-<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
-<span class="mi">3</span> <span class="mi">2</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>          <span class="c1">;; since this is the continuation of</span>
+                                             <span class="c1">;; "(set! c ...)", we put "c" as value,</span>
+                                             <span class="c1">;; so we can use the continuation again</span>
+<span class="mi">3</span> <span class="mi">2</span> <span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span>
 
 <span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%fresh-continuation?</span> <span class="nv">c</span><span class="p">)</span>
 <span class="no">#f</span>
 
 <span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
-<span class="mi">4</span> <span class="mi">2</span>
+<span class="mi">4</span> <span class="mi">2</span> <span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span>
 
 <span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
-<span class="mi">5</span> <span class="mi">2</span>
+<span class="mi">5</span> <span class="mi">2</span> <span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span>
 
 <span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">%restore-continuation</span> <span class="nv">c</span> <span class="nv">c</span><span class="p">)</span>
-<span class="mi">6</span> <span class="mi">2</span></code></pre>
+<span class="mi">6</span> <span class="mi">2</span> <span class="o">#</span><span class="p">[</span><span class="nf">continuation</span> <span class="p">(</span><span class="nf">C=3992</span> <span class="nv">S=1512</span><span class="p">)</span> <span class="nv">c069e000</span><span class="p">]</span></code></pre>
 </div>
 </div>
 </div>
@@ -2097,18 +2093,156 @@ the code would have a label between the two `RETURN`s.</p>
 will perform the transformations indicated in the comments.</p>
 </div>
 <div class="paragraph">
-<p>The input code is represented as a list. Some relevant definitions are
-in the beginning of the file:</p>
+<p>The input code is represented as a list of the form</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">label?</span> <span class="nv">code</span><span class="p">)</span>      <span class="c1">; is thecurrent instruction a label?</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span> <span class="p">(</span><span class="nf">instruction1</span> <span class="nv">op1</span> <span class="nv">op2</span><span class="p">)</span>    <span class="c1">;; one instruction with two operands</span>
+  <span class="p">(</span><span class="nf">instruction2</span> <span class="nv">op1</span><span class="p">)</span>        <span class="c1">;; one instruction with one operand</span>
+  <span class="p">(</span><span class="nf">instruction3</span><span class="p">)</span>            <span class="c1">;; one instruction with no operands</span>
+  <span class="o">...</span>
+  <span class="p">(</span><span class="nf">instruction10</span> <span class="nv">op1</span> <span class="nv">op2</span><span class="p">)</span>
+  <span class="mi">10</span>                        <span class="c1">;; this is a label!</span>
+  <span class="p">(</span><span class="nf">instruction11</span><span class="p">)</span>
+  <span class="o">...</span> <span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Some relevant definitions are in the beginning of the file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">label?</span> <span class="nv">code</span><span class="p">)</span>      <span class="c1">; is the current instruction a label?</span>
 <span class="p">(</span><span class="nf">this-instr</span> <span class="nv">code</span><span class="p">)</span>  <span class="c1">; the current instruction (reference to a position in the list)</span>
 <span class="p">(</span><span class="nf">next-instr</span> <span class="nv">code</span><span class="p">)</span>  <span class="c1">; the next instruction (cdr of the current one)</span>
 <span class="p">(</span><span class="nf">this-arg1</span> <span class="nv">code</span><span class="p">)</span>   <span class="c1">; argument 1 of current instruction</span>
 <span class="p">(</span><span class="nf">this-arg2</span> <span class="nv">code</span><span class="p">)</span>   <span class="c1">; argument 2 of current instruction</span>
 <span class="p">(</span><span class="nf">next-arg1</span> <span class="nv">code</span><span class="p">)</span>   <span class="c1">; argument 1 of next instruction</span>
 <span class="p">(</span><span class="nf">next-arg2</span> <span class="nv">code</span><span class="p">)</span>   <span class="c1">; argument 2 of next instruction</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There are only procedures for dealing with the current and the next
+instruction because the peephole optimizer currently only substitutes
+sequences of two instructions. It is an interesting exercise to try to
+implement three-instruction peephole operation. As a suggestion, the
+reader can try the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Implement <code>third-instr</code>. Be careful to not try to take the <code>cdr</code> of
+an empty list&#8230;&#8203;</p>
+</li>
+<li>
+<p>Include one more optimization clause in the optimizer that performs the
+substitution
+<code>[IN-CDR; IN-CDR; IN-CDR] &#8658; IN-CDDDR</code></p>
+</li>
+<li>
+<p>And of course, implement <code>IN-CDDDR</code>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Change <code>lib/assembler.stk</code></p>
+</li>
+<li>
+<p>Change <code>src/vm-instr.h</code></p>
+</li>
+<li>
+<p>Add one more case to the VM state machine (use the case for <code>IN_CDR</code>
+as a starting point).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Finally, write some benchmark to verify if the new optimization is worth
+the trouble (and the use of a new opcode).</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_source_rewriter">9.3. Source rewriter</h3>
+<div class="paragraph">
+<p>The file <code>lib/comprewrite.stk</code> contains rules for code rewriting.</p>
+</div>
+<div class="paragraph">
+<p>All the rewriting rules are stored in an compiler internal hash table, whose
+keys are symbols The value stored for key <code>SYMBOL</code> is a procedure that
+transforms the form <code>(SYMBOL &#8230;&#8203;)</code> into something else. For example, it will
+transform <code>(IF 1 2 3)</code> into <code>2</code>.  The procedure takes as parameters:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An expression (whose first element is the symbol that was used as key in
+the hash table);</p>
+</li>
+<li>
+<p>The length of the expression;</p>
+</li>
+<li>
+<p>The environment.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The procedure should, of course, return the optimized expression. This procedure
+can be obtained by the function <code>compiler:find-rewriter</code>, as seen below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">rewrite-car</span> <span class="p">(</span><span class="nf">compiler:find-rewriter</span> <span class="ss">'car</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="mi">2</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="ss">'1</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the expression doesn&#8217;t seems correct, nothing is done (since the rewriter
+is not where syntax or semantic errors are detected):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="mi">2</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="ss">'1</span>
+<span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>  <span class="mi">4</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The function <code>compiler:add-rewriter!</code> adds a new rewriting rule to the
+compiler. For instance, we can add a rule that transforms the calls to
+the <code>eof-object</code> standard primitive to the STklos constant <code>#eof</code> (this
+rewriter is already defined in the compiler)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:add-rewriter!</span>            <span class="c1">;; 'EOF-OBJECT' rewriter</span>
+ <span class="ss">'eof-object</span>
+ <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">expr</span> <span class="nv">len</span> <span class="nv">env</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">=</span> <span class="nv">len</span> <span class="mi">1</span><span class="p">)</span>
+       <span class="o">#</span><span class="nv">eof</span>
+       <span class="nv">expr</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">eof-rewriter</span> <span class="p">(</span><span class="nf">compiler:find-rewriter</span> <span class="ss">'eof-object</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">eof-rewriter</span> <span class="o">'</span><span class="p">(</span><span class="nf">eof-object</span><span class="p">)</span>   <span class="mi">1</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="o">#</span><span class="nv">efo</span>
+<span class="p">(</span><span class="nf">eof-rewriter</span> <span class="o">'</span><span class="p">(</span><span class="nf">eof-object</span> <span class="mi">1</span><span class="p">)</span> <span class="mi">2</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">eof-object</span> <span class="mi">1</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The parameter object <code>compiler:source-rewrite</code> can be used to control source
+rewriting.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">compiler:source-rewrite</span> <span class="no">#f</span><span class="p">)</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)))</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">CONSTANT</span>             <span class="mi">0</span>      <span class="c1">;; that is the list '(1 2)</span>
+<span class="mi">002</span><span class="nv">:</span>  <span class="nv">IN-CAR</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">compiler:source-rewrite</span> <span class="no">#t</span><span class="p">)</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)))</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">IM-ONE</span></code></pre>
 </div>
 </div>
 </div>
@@ -2127,11 +2261,11 @@ the GC is located in the header file <code>src/stklos.h</code>:</p>
 #define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
 #define STk_free(ptr)                   GC_FREE(ptr)
-#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
-                                            (void *) (ptr),             \
-                                            (GC_finalization_proc)(f),  \
-                                            0, 0, 0)
-#define STk_gc()                        GC_gcollect()
+#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER(
+</span>                                            <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="p">(</span><span class="n">ptr</span><span class="p">),</span>
+                                            <span class="p">(</span><span class="n">GC_finalization_proc</span><span class="p">)(</span><span class="n">f</span><span class="p">),</span>
+                                            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="cp">#define STk_gc()                        GC_gcollect()
 </span>
 <span class="kt">void</span> <span class="nf">STk_gc_init</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span></code></pre>
 </div>
@@ -2158,7 +2292,7 @@ will be called when the object at <code>ptr</code> is collected.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-02-19 16:12:02 +0100
+Last updated 2024-06-23 17:21:38 +0200
 </div>
 </div>
 </body>

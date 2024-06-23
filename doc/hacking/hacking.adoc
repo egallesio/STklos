@@ -1041,28 +1041,22 @@ reader can try the following:
 
 The file `lib/comprewrite.stk` contains rules for code rewriting.
 
-* The global variable `*all-rewriters*` holds a hash table with different
-  rewriting rules, indexed by symbol (one `if` rule, one `not` rule, one
-  `begin` rule and so on)
-* The object stored the entry for key `SYMBOL` is a procedure that transforms
-  the form `(SYMBOL ...)` into something else. For example, it will transform
-  `(IF 1 2 3)` into `2`.  The procedure takes as parameters:
+All the rewriting rules are stored in an compiler internal hash table, whose
+keys are symbols The value stored for key `SYMBOL` is a procedure that
+transforms the form `(SYMBOL ...)` into something else. For example, it will
+transform `(IF 1 2 3)` into `2`.  The procedure takes as parameters:
+
   - An expression (whose first element is the symbol that was used as key in
     the hash table);
   - The length of the expression;
   - The environment.
-  The procedure should, of course, return the optimized expression.
 
-As an example,
+The procedure should, of course, return the optimized expression. This procedure
+can be obtained by the function `compiler:find-rewriter`, as seen below:
 
 [source,scheme]
 ----
-(define rewriters (in-module STKLOS-COMPILER *all-rewriters*))
-rewriters => #[hash-table 7fbb3a7359c0]
-
-(define rewrite-car (hash-table-get rewriters 'car))
-rewrite-car => #[closure 7fbb3a39bb80]
-
+(define rewrite-car (compiler:find-rewriter 'car))
 (rewrite-car '(car '(1 2)) 2 (interaction-environment)) => '1
 ----
 
@@ -1072,19 +1066,39 @@ is not where syntax or semantic errors are detected):
 [source,scheme]
 ----
 (rewrite-car '(car '(1 2)) 2 (interaction-environment)) => '1
-(rewrite-car '(car 1 2 3) 4 (interaction-environment)) => '(car 1 2 3)
+(rewrite-car '(car 1 2 3)  4 (interaction-environment)) => '(car 1 2 3)
 ----
 
-There is a parameter object to control the source rewriter.
+The function `compiler:add-rewriter!` adds a new rewriting rule to the
+compiler. For instance, we can add a rule that transforms the calls to
+the `eof-object` standard primitive to the STklos constant `#eof` (this
+rewriter is already defined in the compiler)
+
+[source,scheme]
+----
+(compiler:add-rewriter!            ;; 'EOF-OBJECT' rewriter
+ 'eof-object
+ (lambda (expr len env)
+   (if (= len 1)
+       #eof
+       expr)))
+
+(define eof-rewriter (compiler:find-rewriter 'eof-object))
+(eof-rewriter '(eof-object)   1 (interaction-environment)) => #efo
+(eof-rewriter '(eof-object 1) 2 (interaction-environment)) => (eof-object 1)
+----
+
+
+The parameter object `compiler:source-rewrite` can be used to control source
+rewriting.
 
 [source,scheme]
 ----
 stklos> (compiler:source-rewrite #f)
 stklos> (disassemble-expr '(car '(1 2)))
 
-000:  CONSTANT             0
+000:  CONSTANT             0      ;; that is the list '(1 2)
 002:  IN-CAR
-
 stklos> (compiler:source-rewrite #t)
 stklos> (disassemble-expr '(car '(1 2)))
 
