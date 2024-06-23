@@ -24,12 +24,15 @@
 ;;;;    Creation date:  4-May-2024 18:09
 ;;;;
 
+(export compiler:find-rewriter
+        compiler:add-rewriter!)
+
 ;;
 ;; Rewrite table management
 ;;
 (define *all-rewriters* (%make-hash-table eq? hash-table-hash))
 
-(define (find-rewriter symb)
+(define (compiler:find-rewriter symb)
   (hash-table-get *all-rewriters* symb #f))
 
 (define (compiler:add-rewriter! symb proc)
@@ -57,7 +60,7 @@
   (let Loop ((save e))
     (when (pair? e)
       (let ((s     (car e))
-            (optim (find-rewriter (car e))))
+            (optim (compiler:find-rewriter (car e))))
         (when (and optim (not (find-symbol-in-env s env)))
           ;; We have a rewriter and symbol is not defined in current
           ;; environment
@@ -67,6 +70,7 @@
             (Loop e))))))
   ;; Return the (eventually modified) value of e
   e)
+
 
 
 ;;; ======================================================================
