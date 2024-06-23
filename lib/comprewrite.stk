@@ -24,12 +24,18 @@
 ;;;;    Creation date:  4-May-2024 18:09
 ;;;;
 
+(export compiler:find-rewriter
+        compiler:add-rewriter!
+        compiler:const-expr?
+        compiler:const-value
+        compiler:rewrite-expression)
+
 ;;
 ;; Rewrite table management
 ;;
 (define *all-rewriters* (%make-hash-table eq? hash-table-hash))
 
-(define (find-rewriter symb)
+(define (compiler:find-rewriter symb)
   (hash-table-get *all-rewriters* symb #f))
 
 (define (compiler:add-rewriter! symb proc)
@@ -53,11 +59,11 @@
       (cadr expr)
       expr))
 
-(define (rewrite-expression e env)
+(define (rewrite-expression e env)  ;; try to rewrite(simplify) expression e 
   (let Loop ((save e))
     (when (pair? e)
       (let ((s     (car e))
-            (optim (find-rewriter (car e))))
+            (optim (compiler:find-rewriter (car e))))
         (when (and optim (not (find-symbol-in-env s env)))
           ;; We have a rewriter and symbol is not defined in current
           ;; environment
@@ -67,6 +73,11 @@
             (Loop e))))))
   ;; Return the (eventually modified) value of e
   e)
+
+;; exported symbols of the previous functions
+(define compiler:const-expr? const-expr?)
+(define compiler:const-value const-value)
+(define compiler:rewrite-expression rewrite-expression)
 
 
 ;;; ======================================================================
