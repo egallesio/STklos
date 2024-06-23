@@ -25,7 +25,10 @@
 ;;;;
 
 (export compiler:find-rewriter
-        compiler:add-rewriter!)
+        compiler:add-rewriter!
+        compiler:const-expr?
+        compiler:const-value
+        compiler:rewrite-expression)
 
 ;;
 ;; Rewrite table management
@@ -56,7 +59,7 @@
       (cadr expr)
       expr))
 
-(define (rewrite-expression e env)
+(define (rewrite-expression e env)  ;; try to rewrite(simplify) expression e 
   (let Loop ((save e))
     (when (pair? e)
       (let ((s     (car e))
@@ -71,6 +74,10 @@
   ;; Return the (eventually modified) value of e
   e)
 
+;; exported symbols of the previous functions
+(define compiler:const-expr? const-expr?)
+(define compiler:const-value const-value)
+(define compiler:rewrite-expression rewrite-expression)
 
 
 ;;; ======================================================================
