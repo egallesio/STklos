@@ -2195,17 +2195,21 @@ can be obtained by the function <code>compiler:find-rewriter</code>, as seen bel
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">rewrite-car</span> <span class="p">(</span><span class="nf">compiler:find-rewriter</span> <span class="ss">'car</span><span class="p">))</span>
-<span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="mi">2</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="ss">'1</span></code></pre>
+<span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="mi">2</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="ss">'1</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">rewrite-not</span> <span class="p">(</span><span class="nf">compiler:find-rewriter</span> <span class="ss">'not</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">rewrite-not</span> <span class="o">'</span><span class="p">(</span><span class="nb">not</span> <span class="no">#t</span><span class="p">)</span> <span class="mi">1</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If the expression doesn&#8217;t seems correct, nothing is done (since the rewriter
-is not where syntax or semantic errors are detected):</p>
+<p>If the expression doesn&#8217;t seems correct, or cannot be simplified, nothing is
+done (since the rewriter is not where syntax or semantic errors are detected):</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span> <span class="mi">2</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="ss">'1</span>
-<span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>  <span class="mi">4</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+<span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>  <span class="mi">4</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">rewrite-car</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="nv">a-list</span><span class="p">)</span> <span class="mi">1</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="nv">a-list</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2243,6 +2247,46 @@ rewriting.</p>
 <span class="nv">stklos&gt;</span> <span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nb">car</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">)))</span>
 
 <span class="mi">000</span><span class="nv">:</span>  <span class="nv">IM-ONE</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Rewriting rules can be defined without modifying the compiler thanks to the following functions</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(compiler:const-expr? e)</code> which returns <code>#t</code> if the expression <code>e</code> is constant</p>
+</li>
+<li>
+<p><code>(compiler:const-value e)</code> which returns the value of the constant expression <code>e</code></p>
+</li>
+<li>
+<p><code>(compiler:rewrite-expression e env)</code> which returns a simplified version of
+expression <code>e</code> in the environment <code>e</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We are now able to write a rewriting rule for <code>not</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:add-rewriter!</span>            <span class="c1">;; 'NOT' rewriter</span>
+ <span class="ss">'not</span>
+ <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">expr</span> <span class="nv">len</span> <span class="nv">env</span><span class="p">)</span>
+   <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">=</span> <span class="nv">len</span> <span class="mi">2</span><span class="p">)</span>
+       <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">val</span> <span class="p">(</span><span class="nf">compiler:rewrite-expression</span> <span class="p">(</span><span class="nb">cadr</span> <span class="nv">expr</span><span class="p">)</span> <span class="nv">env</span><span class="p">)))</span>
+         <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">compiler:const-expr?</span> <span class="nv">val</span><span class="p">)</span>
+             <span class="p">(</span><span class="nb">not</span> <span class="p">(</span><span class="nf">compiler:const-value</span> <span class="nv">val</span><span class="p">))</span>
+             <span class="nv">expr</span><span class="p">))</span>
+       <span class="nv">expr</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">compiler:rewrite-expression</span> <span class="o">'</span><span class="p">(</span><span class="nb">not</span> <span class="mi">42</span><span class="p">)</span>            <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span>
+           <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">compiler:rewrite-expression</span> <span class="o">'</span><span class="p">(</span><span class="nb">not</span> <span class="p">(</span><span class="nb">not</span> <span class="mi">42</span><span class="p">))</span>      <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span>
+           <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">compiler:rewrite-expression</span> <span class="o">'</span><span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">not</span> <span class="mi">42</span><span class="p">)</span> <span class="mi">10</span> <span class="mi">12</span><span class="p">)</span> <span class="p">(</span><span class="nb">interaction-environment</span><span class="p">))</span>
+           <span class="nv">=&gt;</span> <span class="mi">12</span></code></pre>
 </div>
 </div>
 </div>
@@ -2292,7 +2336,7 @@ will be called when the object at <code>ptr</code> is collected.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-06-23 17:21:38 +0200
+Last updated 2024-06-23 18:06:04 +0200
 </div>
 </div>
 </body>

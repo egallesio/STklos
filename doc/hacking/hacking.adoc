@@ -1058,15 +1058,20 @@ can be obtained by the function `compiler:find-rewriter`, as seen below:
 ----
 (define rewrite-car (compiler:find-rewriter 'car))
 (rewrite-car '(car '(1 2)) 2 (interaction-environment)) => '1
+
+(define rewrite-not (compiler:find-rewriter 'not))
+(rewrite-not '(not #t) 1 (interaction-environment))
+
 ----
 
-If the expression doesn't seems correct, nothing is done (since the rewriter
-is not where syntax or semantic errors are detected):
+If the expression doesn't seems correct, or cannot be simplified, nothing is
+done (since the rewriter is not where syntax or semantic errors are detected):
 
 [source,scheme]
 ----
 (rewrite-car '(car '(1 2)) 2 (interaction-environment)) => '1
 (rewrite-car '(car 1 2 3)  4 (interaction-environment)) => '(car 1 2 3)
+(rewrite-car '(car a-list) 1 (interaction-environment)) => '(car a-list)
 ----
 
 The function `compiler:add-rewriter!` adds a new rewriting rule to the
@@ -1103,6 +1108,36 @@ stklos> (compiler:source-rewrite #t)
 stklos> (disassemble-expr '(car '(1 2)))
 
 000:  IM-ONE
+----
+
+Rewriting rules can be defined without modifying the compiler thanks to the following functions
+
+- `(compiler:const-expr? e)` which returns `#t` if the expression `e` is constant
+- `(compiler:const-value e)` which returns the value of the constant expression `e`
+- `(compiler:rewrite-expression e env)` which returns a simplified version of
+  expression `e` in the environment `e`.
+
+
+We are now able to write a rewriting rule for `not`:
+
+[source,scheme]
+----
+(compiler:add-rewriter!            ;; 'NOT' rewriter
+ 'not
+ (lambda (expr len env)
+   (if (= len 2)
+       (let ((val (compiler:rewrite-expression (cadr expr) env)))
+         (if (compiler:const-expr? val)
+             (not (compiler:const-value val))
+             expr))
+       expr)))
+
+(compiler:rewrite-expression '(not 42)            (interaction-environment))
+           => #f
+(compiler:rewrite-expression '(not (not 42))      (interaction-environment))
+           => #t
+(compiler:rewrite-expression '(if (not 42) 10 12) (interaction-environment))
+           => 12
 ----
 
 
