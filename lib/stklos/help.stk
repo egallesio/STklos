@@ -254,7 +254,10 @@ doc>
   ;; Interactive help
   (display (do-color (get-repl-color :help)
                      "You are in the interactive STklos help.\n"
-                     "Enter an *eof* to exit (either write #eof or type ^D)\n"))
+                     "Enter an *eof* to exit (either write #eof or type ^D).\n"
+                     "Note: This interactive help is for querying symbols. If you want\n"
+                     "a quick help with REPL commands instead, go back to the REPL and\n"
+                     "enter ,h (comma-h) there.\n"))
   (let Loop ((prompt (do-color (get-repl-color :help-prompt)
                                "help> " 'none)))
     (display prompt) (flush-output-port)
