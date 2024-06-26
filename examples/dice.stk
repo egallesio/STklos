@@ -146,18 +146,31 @@
     distr))
 
 
-;; This is the procedure that asks for the number of repetitions,
-;; then runs the experiment and plots the histogram.
-(define (run)
-  (display "How many times should I throw the two dices? ")
-  (let ((R (read)))
-    (newline)
-    (display "Ok, here is a histogram of the distribution:")
-    (newline)
-    (plot-distribution (make-histogram (run-experiment R)))))
+;; run will print message and run the experiment for n (it parameter)
+;; iterations and plot the histogram.
+(define (run n)
+  (newline)
+  (display "Ok, here is a histogram of the distribution:")
+  (newline)
+  (plot-distribution (make-histogram (run-experiment n))))
+
 
 ;;;
 ;;; MAIN ENTRY POINT
 ;;;
-
-(run)
+(define (main argv)
+  ;; This is the main procedure. If we have arguments on the command line, we
+  ;; use the first one as the number of iterations. Otherwise, we ask for this
+  ;; number. Once we have that number we run the experiment and plot the histogram
+  (let ((R (if (> (length argv) 1)
+               ;; We have at least an argument and argv contains all the words of
+               ;; the command line. If we entered at  the prompt:
+               ;;     $ dice 10_000
+               ;; argv will be ("dice" "10_000" ...).
+               ;; We use read-from-string her to convert the argument to a number
+               (read-from-string (list-ref argv 1))
+               ;; No argument => ask interactively to the user
+               (begin
+                 (display "How many times should I throw the two dices? ")
+                 (read)))))
+    (run R)))
