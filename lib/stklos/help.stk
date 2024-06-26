@@ -1,7 +1,7 @@
 ;;;;
 ;;;; help.stk           -- Interactive help
 ;;;;
-;;;; Copyright © 2009-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2009-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -252,12 +252,13 @@ doc>
 ;; Help without parameter
 (define-method help ()
   ;; Interactive help
-  (display (do-color (get-repl-color :help)
-                     "You are in the interactive STklos help.\n"
-                     "Enter an *eof* to exit (either write #eof or type ^D).\n"
-                     "Note: This interactive help is for querying symbols. If you want\n"
-                     "a quick help with REPL commands instead, go back to the REPL and\n"
-                     "enter ,h (comma-h) there.\n"))
+  (display
+   (do-color (get-repl-color :help)
+             "You are in the interactive STklos help.\n"
+             "Note: This interactive help is for querying symbols. If you want\n"
+             "a quick help with REPL commands instead, go back to the REPL and\n"
+             "enter ,h (comma-h) there.\n\n"
+             "Type ^D (or enter #eof) to exit and go back to the REPL.\n"))
   (let Loop ((prompt (do-color (get-repl-color :help-prompt)
                                "help> " 'none)))
     (display prompt) (flush-output-port)
