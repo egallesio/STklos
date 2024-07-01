@@ -140,16 +140,16 @@ generate-git-info:
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
 	(export STKLOS_BUILDING=1; \
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f bb.stk boot.img0 instr0)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS)  @SCM_BOOT_KEEP_FORMALS@ -f bb.stk boot.img0 instr0)
 	@echo "*** Boot 1"; \
 	(export STKLOS_BUILDING=1; \
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ./boot.img0     -f bb.stk boot.img1 instr1)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS)  @SCM_BOOT_KEEP_FORMALS@ -b ./boot.img0     -f bb.stk boot.img1 instr1)
 	@echo "*** Boot 2"; \
 	(export STKLOS_BUILDING=1; \
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ./boot.img1    -f bb.stk boot.img2 instr2)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS)  @SCM_BOOT_KEEP_FORMALS@ -b ./boot.img1    -f bb.stk boot.img2 instr2)
 	@echo "*** Boot 3"; \
 	(export STKLOS_BUILDING=1; \
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ./boot.img2     -f bb.stk boot.img3 instr3)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS)  @SCM_BOOT_KEEP_FORMALS@ -b ./boot.img2     -f bb.stk boot.img3 instr3)
 	@if cmp ./boot.img2 ./boot.img3 ;then                      \
 	   echo "*** New boot file created";                       \
 	   cp ./boot.img3 ../src/boot.img;                         \
