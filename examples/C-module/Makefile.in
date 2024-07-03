@@ -70,3 +70,6 @@ clean:
 	string-obfuscate-incl.o \
 	string-obfuscate.o \
 	string-obfuscate.so
+
+dist-clean: clean
+	rm -f Makefile
