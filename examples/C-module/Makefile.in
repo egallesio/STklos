@@ -41,7 +41,7 @@ all: $(SHARED_OBJ)
 # We first compile the Scheme file string-obfuscate.stk into a C file
 # string-obfuscate-incl.c, so it will be included in the library C file
 # later:
-string-obfuscate-incl.c: $(SCHEME_SOURCE) $(C_INCL)
+string-obfuscate-incl.c: $(SCHEME_SOURCE)
 	stklos-compile --no-time \
 	-C \
 	--output=$(C_INCL) \
