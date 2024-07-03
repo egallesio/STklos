@@ -1,6 +1,6 @@
 # Writing STklos modules in C and Scheme
 
-This  is an example of a STklos module written part in C and part in Scheme.
+This is an example of a STklos module written part in C and part in Scheme.
 
 What we illustrate with this example:
 

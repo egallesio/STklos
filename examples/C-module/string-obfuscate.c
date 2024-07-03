@@ -32,9 +32,9 @@
 
   Suppose a module named "module" is written, partly in C and partly
   in Scheme.
-  
+
   The two files written by the user are underlined with "~" signs:
-  
+
   - module.c   which actually creates the module, and contains its
                C-written part.
   - module.stk which executes Scheme code inside the module, after it
@@ -45,7 +45,7 @@
 
   The output file, containing the loadable module, is the shared
   object file, "module.so".
-               
+
                  +----------------+
   module.stk --> | stklos-compile | --> module-incl.c
   ~~~~~~~~~~     +----------------+         |
@@ -99,14 +99,14 @@ DEFINE_PRIMITIVE("string-add", obf_add, subr2, (SCM str, SCM n))
 {
     if (!STRINGP(str)) STk_error("bad string ~S", str);
     if (!INTP(n)) STk_error("bad integer ~S", n);
-    
+
     int len = STRING_SIZE(str); // size in bytes, not characters!
 
     SCM res = STk_makestring(len, NULL);
-    
+
     for (int i=0; i<len; i++)
 	STRING_CHARS(res)[i] = (INT_VAL(n) + STRING_CHARS(str)[i]);
-    
+
     return res;
 }
 
@@ -129,10 +129,10 @@ DEFINE_PRIMITIVE("string-xor", obf_xor, subr2, (SCM str, SCM n))
     int len = STRING_SIZE(str); // size in bytes, not characters!
 
     SCM res = STk_makestring(len, NULL);
-    
+
     for (int i=0; i<len; i++)
 	STRING_CHARS(res)[i] = (INT_VAL(n) ^ STRING_CHARS(str)[i]);
-    
+
     return res;
 }
 
@@ -152,7 +152,7 @@ DEFINE_PRIMITIVE("string-obfuscate-hidden", obf_hidden, subr0, ())
 /*
   The module configuration and initialization is done between the
   macros MODULE_ENTRY_START and MODULE_ENTRY_END.
-  
+
   The first (MODULE_ENTRY_START) will start the definion of an
   initialization function, which is called when the module is
   loaded, and *** the code included afterwards, up to
