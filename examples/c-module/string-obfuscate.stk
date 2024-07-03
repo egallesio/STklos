@@ -1,0 +1,86 @@
+;;;;
+;;;; string-obfuscate.stk  -- A simple module in C and Scheme
+;;;;
+;;;; Copyright © 2024 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 28-May-2024 20:35 (jpellegrini)
+;;;;
+
+;; We don't use (define-module ...) here, because the module
+;; has already been created in the C file.
+;; This file will be compiled as bytecode, named
+;; "string-obfuscate-incl.c", and included in the C file
+;; "string-obfuscate.c" (see the #include directive there!)
+;; So we just select the module and do exports, imports and
+;; definitions.
+
+(select-module string-obfuscate)
+
+(export string-obfuscate
+        string-obfuscate-set!)
+
+;; The following will tell STklos that the symbol `string-add`
+;; was defined in the C file. If we don't do this, we get a
+;; warning when compiling (remember that this file will be compiled
+;; into C code by stklo-compile *before* the C file is actually seen
+;; by the compiler, so it has no way to tell that this symbol was
+;; defined there!
+;; (And string-add is referenced in this module -- see below)
+(%compile-time-define string-add)
+
+
+;; Initially, string-obfuscate will be the STklos primitive
+;; string-rotate-n, which we defined in the C file.
+;; Below is also an example of documentation in Scheme
+#|
+<doc EXT string-obfuscate
+ * (string-obfuscate str n)
+ *
+ * Obfuscates the string |str| using the number n.
+ * There is not necessarily a way to deobfuscate it.
+ * @lisp
+ * (string-obfuscate "ABC"  3) => "DEF"
+ * (string-obfuscate "DEF" -3) => "ABC"
+ * @end lisp
+doc>
+|#
+(define string-obfuscate string-add)
+
+;; The user can change it by calling the following procedure
+#|
+<doc EXT string-obfuscate-set!
+ * (string-obfuscate-set! proc)
+ *
+ * Changes the procedure used to obfuscate strings.
+ * @lisp
+ * (string-obfuscate "ABC"  3)        => "DEF"
+ * (string-obfuscate-set! string-xor)
+ * string-obfuscate                   => [primitive string-xor]
+ * (string-obfuscate "ABC" 3)         => "BA@"
+ * (string-obfuscate "BA@" 3)         => "ABC"
+ * @end lisp
+doc>
+|#
+(define (string-obfuscate-set! proc)
+  (unless (procedure? proc) (error "bad procedure ~S" proc))
+  (set! string-obfuscate proc))
+
+;; We provide feature "string-obfuscate"
+(provide "string-obfuscate")
