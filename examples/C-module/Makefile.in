@@ -70,11 +70,7 @@ string-obfuscate.so: $(C_OBJ)
 	$(LD) $(LDFLAGS) $(SH_LOAD_FLAGS) -o $(SHARED_OBJ) $(C_OBJ)
 
 clean:
-	rm -f \
-	string-obfuscate-incl.c \
-	string-obfuscate-incl.o \
-	string-obfuscate.o \
-	string-obfuscate.so
+	rm -f $(C_INCL) $(C_SOURCE) $(C_OBJ) $(SHARED_OBJ)
 
-dist-clean: clean
+distclean: clean
 	rm -f Makefile
