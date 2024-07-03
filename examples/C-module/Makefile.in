@@ -1,5 +1,5 @@
 #  General variables which depends of the choices made when configure was run
-# (compiler used, compilation flags, ...) 
+# (compiler used, compilation flags, ...)
 CC=@CC@
 CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@
@@ -7,7 +7,7 @@ LD=@SH_LOADER@
 LDFLAGS=@LDFLAGS@
 SH_COMP_FLAGS=@SH_COMP_FLAGS@
 SH_LOADER=@SH_LOADER@
-SH_LOAD_FLAGS=@SH_LOAD_FLAGS@ 
+SH_LOAD_FLAGS=@SH_LOAD_FLAGS@
 SO=@SH_SUFFIX@
 STKCFLAGS=@STKCFLAGS@
 
@@ -21,6 +21,15 @@ STKLOS_SRC=../../src/
 # Same thing with the utils and lib directories
 STKLOS_UTILS=../../utils
 STKLOS_LIBS=../../lib
+
+# STKLOS_COMPILE is the command used to compile a Scheme file. The command is
+# a bit complex here because we want to be able to compile the files in this
+# directory without a prior installation of STklos. If you have already
+# installed STklos on your machine , you can use the second (commented)
+# definition of this variable
+STKLOS_COMPILE=$(STKLOS_SRC)/stklos -q -I $(STKLOS_LIBS) \
+		$(STKLOS_UTILS)/stklos-compile
+# STKLOS_COMPILE=stklos-compile
 
 # The following variables are:
 # SCHEME_SOURCE -- the Scheme part of the module
@@ -46,17 +55,12 @@ all: $(SHARED_OBJ)
 # string-obfuscate-incl.c, so it will be included in the library C file
 # later:
 string-obfuscate-incl.c: $(SCHEME_SOURCE)
-	$(STKLOS_UTILS)/stklos-compile --no-time  \
-		-I $(STKLOS_LIBS) \
+	$(STKLOS_COMPILE) --no-time \
 		-C \
 		--output=$(C_INCL) \
 		$(SCHEME_SOURCE)
 
 # Now we compile the C library, which will include string-obfuscate-incl.c.
-# The compiler flags are:
-# -fpic is of course necessary
-# -nostdlib, becaues STklos is already linked against libc
-# -c compile only, don't link
 string-obfuscate.o: $(C_SOURCE) $(C_INCL)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(STKCFLAGS) $(SH_COMP_FLAGS) \
 		-I$(STKLOS_SRC) \
@@ -70,7 +74,7 @@ string-obfuscate.so: $(C_OBJ)
 	$(LD) $(LDFLAGS) $(SH_LOAD_FLAGS) -o $(SHARED_OBJ) $(C_OBJ)
 
 clean:
-	rm -f $(C_INCL) $(C_SOURCE) $(C_OBJ) $(SHARED_OBJ)
+	rm -f $(C_INCL) $(C_OBJ) $(SHARED_OBJ)
 
 distclean: clean
 	rm -f Makefile
