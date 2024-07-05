@@ -1135,7 +1135,22 @@ general_diff:
   {
     SCM d = sub2(x, y);
 
-    if (zerop(d)) return 0;
+    if (zerop(d)) {
+      /* If we're comparing exacts and inexacts (specifically, ints
+         and reals), we should be careful not to consider them equal
+         when they are rounded during vonversion. For example,
+
+         (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
+
+         should be #f.  What we do is to see if the real number does
+         represent that integer exactly. If it doesn't, we return false. */
+      if ( REALP(x) && (INTP(y) || BIGNUMP(y)) )
+        return do_compare(double2integer(d1), y);
+      if ( REALP(y) && (INTP(x) || BIGNUMP(x)) )
+        return do_compare(x,double2integer(d2));
+      /* Ok, we're not comparing ints and reals, so just return zero: */
+      return 0;
+    }
     /* complex numbers cannot be compared => return always 1 */
     return COMPLEXP(d) ? 1 : (negativep(d) ? -1: 1);
   }
