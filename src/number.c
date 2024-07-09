@@ -1088,68 +1088,49 @@ static inline long double_diff(double d1, double d2)
 
 static long do_compare(SCM x, SCM y)
 {
+  SCM diff;
+
+  /* ASSERT: x and y are numbers and none is a NaN */
   switch (TYPEOF(x)) {
     case tc_real:
-            switch (TYPEOF(y)) {
-              case tc_real:     return double_diff(REAL_VAL(x), REAL_VAL(y));
-              case tc_integer:  return double_diff(REAL_VAL(x), INT_VAL(y));
-              case tc_complex:
-              case tc_rational:
-              case tc_bignum:   goto general_diff;
-              default:          break;
-            }
-            break;
+      switch (TYPEOF(y)) {
+        case tc_real:     return double_diff(REAL_VAL(x), REAL_VAL(y));
+        case tc_integer:  return double_diff(REAL_VAL(x), INT_VAL(y));
+        default:
+      }
+      break;
     case tc_integer:
-            switch (TYPEOF(y)) {
-              case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
-              case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
-              case tc_complex:
-              case tc_rational:
-              case tc_bignum:   goto general_diff;
-              default:          break;
-            }
-            break;
-    case tc_complex:
-    case tc_rational:
-    case tc_bignum:
-            switch (TYPEOF(y)) {
-              case tc_complex:
-              case tc_real:
-              case tc_rational:
-              case tc_bignum:
-              case tc_integer:  goto general_diff;
-              default:          break;
-            }
-            break;
+      switch (TYPEOF(y)) {
+        case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
+        case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
+        default:
+      }
+      break;
     default:
-            break;
   }
-  /* if we are here, it s that x and y cannot be compared */
-  STk_error("comparison between ~S and ~S impossible", x,  y);
-general_diff:
-  {
-    SCM d = sub2(x, y);
 
-    if (zerop(d)) {
-      /* If we're comparing exacts and inexacts (specifically, ints
-         and reals), we should be careful not to consider them equal
-         when they are rounded during vonversion. For example,
+  diff =  sub2(x, y);
 
-         (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
+  if (zerop(diff)) {
+    /* If we're comparing exacts and inexacts (specifically, ints
+       and reals), we should be careful not to consider them equal
+       when they are rounded during vonversion. For example,
 
-         should be #f.  What we do is to see if the real number does
-         represent that integer exactly. If it doesn't, we return false. */
-      if ( REALP(x) && (INTP(y) || BIGNUMP(y)) )
-        return do_compare(double2integer(REAL_VAL(x)), y);
-      if ( REALP(y) && (INTP(x) || BIGNUMP(x)) )
-        return do_compare(x,double2integer(REAL_VAL(y)));
-      /* Ok, we're not comparing ints and reals, so just return zero: */
-      return 0;
-    }
-    /* complex numbers cannot be compared => return always 1 */
-    return COMPLEXP(d) ? 1 : (negativep(d) ? -1: 1);
+       (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
+
+       should be #f.  What we do is to see if the real number does
+       represent that integer exactly. If it doesn't, we return false. */
+    if ( REALP(x) && (INTP(y) || BIGNUMP(y)) )
+      return do_compare(double2integer(REAL_VAL(x)), y);
+    if ( REALP(y) && (INTP(x) || BIGNUMP(x)) )
+      return do_compare(x,double2integer(REAL_VAL(y)));
+    /* Ok, we're not comparing ints and reals, so just return zero: */
+    return 0;
   }
+  /* complex numbers cannot be compared => return always 1 */
+  return COMPLEXP(diff) ? 1 : (negativep(diff) ? -1: 1);
 }
+
 
 
 static SCM int_quotient(SCM x, SCM y)
