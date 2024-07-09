@@ -1145,9 +1145,9 @@ general_diff:
          should be #f.  What we do is to see if the real number does
          represent that integer exactly. If it doesn't, we return false. */
       if ( REALP(x) && (INTP(y) || BIGNUMP(y)) )
-        return do_compare(double2integer(d1), y);
+        return do_compare(double2integer(REAL_VAL(x)), y);
       if ( REALP(y) && (INTP(x) || BIGNUMP(x)) )
-        return do_compare(x,double2integer(d2));
+        return do_compare(x,double2integer(REAL_VAL(y)));
       /* Ok, we're not comparing ints and reals, so just return zero: */
       return 0;
     }
