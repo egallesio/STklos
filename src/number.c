@@ -1089,7 +1089,7 @@ static long do_compare(SCM x, SCM y)
   switch (TYPEOF(x)) {
     case tc_real:
             switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
+              case tc_complex:  goto complex_diff;
               case tc_real:     d1 = REAL_VAL(x); d2 = REAL_VAL(y);
                                 goto double_diff;
               case tc_rational:
@@ -1101,7 +1101,7 @@ static long do_compare(SCM x, SCM y)
             break;
     case tc_integer:
             switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
+              case tc_complex:  goto complex_diff;
               case tc_real:     d1 = INT_VAL(x); d2 = REAL_VAL(y);
                                 goto double_diff;
               case tc_rational:
@@ -1110,11 +1110,11 @@ static long do_compare(SCM x, SCM y)
               default:          break;
             }
             break;
-    case tc_complex:
+    case tc_complex: goto complex_diff;
     case tc_rational:
     case tc_bignum:
             switch (TYPEOF(y)) {
-              case tc_complex:
+              case tc_complex: goto complex_diff;
               case tc_real:
               case tc_rational:
               case tc_bignum:
@@ -1131,6 +1131,17 @@ double_diff:
   if (isnan(d1) && isnan(d2))
     return 0;
   return (d1 == d2) ? 0 : ((d1 < d2)?  -1 : 1);
+complex_diff:
+  SCM r1 = COMPLEXP(x) ? COMPLEX_REAL(x) : x;
+  SCM i1 = COMPLEXP(x) ? COMPLEX_IMAG(x) : MAKE_INT(0);
+  SCM r2 = COMPLEXP(y) ? COMPLEX_REAL(y) : y;
+  SCM i2 = COMPLEXP(y) ? COMPLEX_IMAG(y) : MAKE_INT(0);
+  /* Compare both real parts and both imaginry parts using this same
+     function. We only return zero if both are zero, but we do
+     return +1 always (complexes are not comparable). */
+  return ( do_compare(r1, r2) ||  do_compare(i1, i2) )
+    ? 1
+    : 0;
 general_diff:
   {
     SCM d = sub2(x, y);
