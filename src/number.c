@@ -1081,32 +1081,31 @@ double STk_number2double(SCM n) /* returns NaN if not convertible */
  * Utilities
  *
  ******************************************************************************/
+static inline long double_diff(double d1, double d2)
+{
+  return (d1 == d2) ? 0 : ((d1 < d2)?  -1 : 1);
+}
 
 static long do_compare(SCM x, SCM y)
 {
-  double d1=0, d2=0;
-
   switch (TYPEOF(x)) {
     case tc_real:
             switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
-              case tc_real:     d1 = REAL_VAL(x); d2 = REAL_VAL(y);
-                                goto double_diff;
+              case tc_real:     return double_diff(REAL_VAL(x), REAL_VAL(y));
+              case tc_integer:  return double_diff(REAL_VAL(x), INT_VAL(y));
+              case tc_complex:
               case tc_rational:
               case tc_bignum:   goto general_diff;
-              case tc_integer:  d1 = REAL_VAL(x); d2 =  INT_VAL(y);
-                                goto double_diff;
               default:          break;
             }
             break;
     case tc_integer:
             switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
-              case tc_real:     d1 = INT_VAL(x); d2 = REAL_VAL(y);
-                                goto double_diff;
+              case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
+              case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
+              case tc_complex:
               case tc_rational:
               case tc_bignum:   goto general_diff;
-              case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
               default:          break;
             }
             break;
@@ -1127,10 +1126,6 @@ static long do_compare(SCM x, SCM y)
   }
   /* if we are here, it s that x and y cannot be compared */
   STk_error("comparison between ~S and ~S impossible", x,  y);
-double_diff:
-  if (isnan(d1) && isnan(d2))
-    return 0;
-  return (d1 == d2) ? 0 : ((d1 < d2)?  -1 : 1);
 general_diff:
   {
     SCM d = sub2(x, y);
