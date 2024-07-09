@@ -2059,10 +2059,14 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
   }
 
   exactp = isexactp(*argv);
+  if (STk_isnan(*argv)) return *argv;
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
+
+    /* if this argument is a NaN, result is a NaN */
+    if (STk_isnan(*argv)) return *argv;
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -2086,10 +2090,14 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
   }
 
   exactp = isexactp(*argv);
+  if (STk_isnan(*argv)) return *argv;
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
+
+    /* if this argument is a NaN, result is a NaN */
+    if (STk_isnan(*argv)) return *argv;
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;

@@ -2414,6 +2414,12 @@
 (test "nan and comp.9" #f (= (%make-nan #f #f 42) (%make-nan #f #f 0)))
 (test "nan and comp.10" #f (eqv? (%make-nan #f #f 42) (%make-nan #f #f 0)))
 
+(test "nan and max.1" +nan.0 (max 1 2 3.0 4/5 +nan.0))
+(test "nan and max.2" +nan.0 (max +nan.0 1 2 3.0 4/5))
+(test "nan and min.1" +nan.0 (min 1 2 3.0 4/5 +nan.0))
+(test "nan and min.2" +nan.0 (min +nan.0 1 2 3.0 4/5))
+
+
 (test "abs complex"
       5
       (abs -3-4i))
