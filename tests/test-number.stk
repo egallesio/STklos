@@ -2511,5 +2511,18 @@
        (= 5000000000000000000000000000000000+4999999999999999727876154935214080.0i
           5000000000000000000000000000000000+4999999999999999727876154935214080i))
 
+(test "Number equality test.13"
+      #f
+      (= 1/3 #i1/3))
+
+(test "Number equality test.14"
+      #f
+      (= #i1/3 1/3))
+
+(test "Number equality test.15"
+      #f
+      (= (exact->inexact (inexact->exact 1/3)) 1/3))
+
+
 
 (test-section-end)

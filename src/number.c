@@ -1095,8 +1095,6 @@ static inline long complex_diff(SCM r1, SCM i1, SCM r2, SCM i2)
 
 static long do_compare(SCM x, SCM y)
 {
-  SCM diff;
-
   /* ASSERT: x and y are numbers and none is a NaN */
   switch (TYPEOF(x)) {
     case tc_real:
@@ -1136,21 +1134,22 @@ static long do_compare(SCM x, SCM y)
 
   /* General case: compute x - y to decide the result.
    *
-   * NOTE: If we're comparing exacts and inexacts (specifically, ints and
-   * reals), we should be careful not to consider them equal when they are
-   * rounded during conversion. For example,
+   * NOTE: If we're comparing exacts and inexacts, we should be careful not to
+   * consider them equal when they are rounded during conversion. For example,
    *
    *   (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
+   *
    * should be #f.  What we do is to see if the real number does represent that
    * integer exactly. If it doesn't, we return false.
   */
-  diff = sub2(x, y);
+  SCM diff = sub2(x, y);
+  
   if (zerop(diff)) {
-    if ( REALP(x) && (INTP(y) || BIGNUMP(y)) )
+    if (REALP(x)) /* y can only be a bignum or a rational (others done before) */
       return do_compare(double2integer(REAL_VAL(x)), y);
-    if ( REALP(y) && (INTP(x) || BIGNUMP(x)) )
+    if (REALP(y)) /* x can only be a bignum or a rational (others done before) */
       return do_compare(x,double2integer(REAL_VAL(y)));
-    /* Ok, we're not comparing ints and reals, so just return zero: */
+    /* Ok, x an y are equal => return zero: */
     return 0;
   }
   else
