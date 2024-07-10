@@ -2322,12 +2322,6 @@ doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
-  /* Special case:
-     (- 0.0) is calculated as (- 0 0.0) in turn should result in -0.0. */
-  if (INTP(o1)  && INT_VAL(o1)==0 &&
-      REALP(o2) && fpclassify(REAL_VAL(o2)) == FP_ZERO)
-    return double2real(-REAL_VAL(o2));
-
   switch (convert(&o1, &o2)) {
     case tc_bignum:
       {
@@ -2377,15 +2371,25 @@ SCM STk_sub2(SCM o1, SCM o2)
 }
 
 
+/* A test to see if x is 0.0 or - 0.0 */
+#define IS_ZERO_ZEROP(x)  (REALP(x) && fpclassify(REAL_VAL(x)) == FP_ZERO)
+
 DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
 {
   SCM res;
 
   if (argc == 0) error_at_least_1();
-  if (argc == 1) return sub2(MAKE_INT(0), *argv);
+  if (argc == 1) {
+    /* Special case: (- 0.0) is -0.0 */
+    return IS_ZERO_ZEROP(*argv)? double2real(-REAL_VAL(*argv)):
+                                 sub2(MAKE_INT(0), *argv);
+  }
 
-  for (res = *argv-- ; --argc; argv--)
-    res = sub2(res, *argv);
+  for (res = *argv-- ; --argc; argv--) {
+    /* Special case again: if res is 0 and *argv is 0.0 -> res = -0.0 */
+    res = (res==MAKE_INT(0) && IS_ZERO_ZEROP(*argv)) ? double2real(-REAL_VAL(*argv)):
+                                                       sub2(res, *argv);
+  }
   return res;
 }
 

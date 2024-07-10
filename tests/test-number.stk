@@ -611,6 +611,31 @@
       "0.0"
       (format "~a" (- 0.0 0.0)))
 
+(test "minus zero.4"
+      "-0.0"
+      (format "~a" (- 0 0.0 0.0)))
+
+(test "minus zero.4"
+      "0.0"
+      (format "~a" (- 0 0.0 -0.0)))
+
+(test "minus zero.5"
+      #f
+      (equal? 0.0 -0.0))
+
+(test "minus zero.6"
+      #t
+      (equal? -0.0 -0.0))
+
+
+;; Note: We have a spcial case: (- 0+0.0i 0.0) is "0.0+0.0i" and not 
+;; "-0.0+0.0i"
+(test "minus zero in a complex"
+      "0.0+0.0i"
+      (format #f "~a" (- 0+0.0i 0.0)))
+
+
+
 ;;------------------------------------------------------------------
 (test-subsection "small immediate integer constants")
 
