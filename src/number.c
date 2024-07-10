@@ -1096,6 +1096,7 @@ static inline long complex_diff(SCM r1, SCM i1, SCM r2, SCM i2)
 static long do_compare(SCM x, SCM y)
 {
   /* ASSERT: x and y are numbers and none is a NaN */
+ Top:
   switch (TYPEOF(x)) {
     case tc_real:
       switch (TYPEOF(y)) {
@@ -1143,12 +1144,16 @@ static long do_compare(SCM x, SCM y)
    * integer exactly. If it doesn't, we return false.
   */
   SCM diff = sub2(x, y);
-  
+
   if (zerop(diff)) {
-    if (REALP(x)) /* y can only be a bignum or a rational (others done before) */
-      return do_compare(double2integer(REAL_VAL(x)), y);
-    if (REALP(y)) /* x can only be a bignum or a rational (others done before) */
-      return do_compare(x,double2integer(REAL_VAL(y)));
+    if (REALP(x)) { /* y can only be a bignum or a rational (others done before) */
+      x = double2integer(REAL_VAL(x));
+      goto Top;
+    }
+    if (REALP(y)) { /* x can only be a bignum or a rational (others done before) */
+      y = double2integer(REAL_VAL(y));
+      goto Top;
+    }
     /* Ok, x an y are equal => return zero: */
     return 0;
   }
