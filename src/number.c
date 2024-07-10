@@ -96,6 +96,7 @@ double STk_NaN;
 
 /**** forward declarations ****/
 static type_cell convert(SCM *px, SCM *py);
+static long do_compare(SCM x, SCM y);
 
 static int zerop(SCM n);
 static int negativep(SCM n);
@@ -1086,6 +1087,12 @@ static inline long double_diff(double d1, double d2)
   return (d1 == d2) ? 0 : ((d1 < d2)?  -1 : 1);
 }
 
+static inline long complex_diff(SCM r1, SCM i1, SCM r2, SCM i2)
+{
+  return do_compare(r1, r2) || do_compare(i1, i2);
+}
+
+
 static long do_compare(SCM x, SCM y)
 {
   SCM diff;
@@ -1096,30 +1103,49 @@ static long do_compare(SCM x, SCM y)
       switch (TYPEOF(y)) {
         case tc_real:     return double_diff(REAL_VAL(x), REAL_VAL(y));
         case tc_integer:  return double_diff(REAL_VAL(x), INT_VAL(y));
-        default:
+        case tc_complex:  return complex_diff(x, MAKE_INT(0),
+                                              COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
       }
       break;
-    case tc_integer:
+  case tc_integer:
       switch (TYPEOF(y)) {
         case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
         case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
-        default:
+        case tc_complex:  return complex_diff(x, MAKE_INT(0),
+                                              COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
+    case tc_complex:
+      switch (TYPEOF(y)) {
+        case tc_complex:   return complex_diff(COMPLEX_REAL(x),COMPLEX_IMAG(x),
+                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default:           return complex_diff(COMPLEX_REAL(x),COMPLEX_IMAG(x),
+                                               y, MAKE_INT(0));
       }
       break;
     default:
+      switch (TYPEOF(y)) {
+        case tc_complex:   return complex_diff(x, MAKE_INT(0),
+                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
   }
 
-  diff =  sub2(x, y);
-
+  /* General case: compute x - y to decide the result.
+   *
+   * NOTE: If we're comparing exacts and inexacts (specifically, ints and
+   * reals), we should be careful not to consider them equal when they are
+   * rounded during conversion. For example,
+   *
+   *   (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
+   * should be #f.  What we do is to see if the real number does represent that
+   * integer exactly. If it doesn't, we return false.
+  */
+  diff = sub2(x, y);
   if (zerop(diff)) {
-    /* If we're comparing exacts and inexacts (specifically, ints
-       and reals), we should be careful not to consider them equal
-       when they are rounded during vonversion. For example,
-
-       (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
-
-       should be #f.  What we do is to see if the real number does
-       represent that integer exactly. If it doesn't, we return false. */
     if ( REALP(x) && (INTP(y) || BIGNUMP(y)) )
       return do_compare(double2integer(REAL_VAL(x)), y);
     if ( REALP(y) && (INTP(x) || BIGNUMP(x)) )
@@ -1127,8 +1153,8 @@ static long do_compare(SCM x, SCM y)
     /* Ok, we're not comparing ints and reals, so just return zero: */
     return 0;
   }
-  /* complex numbers cannot be compared => return always 1 */
-  return COMPLEXP(diff) ? 1 : (negativep(diff) ? -1: 1);
+  else
+    return negativep(diff) ? -1: 1;
 }
 
 
