@@ -96,6 +96,7 @@ double STk_NaN;
 
 /**** forward declarations ****/
 static type_cell convert(SCM *px, SCM *py);
+static long do_compare(SCM x, SCM y);
 
 static int zerop(SCM n);
 static int negativep(SCM n);
@@ -1081,65 +1082,85 @@ double STk_number2double(SCM n) /* returns NaN if not convertible */
  * Utilities
  *
  ******************************************************************************/
+static inline long double_diff(double d1, double d2)
+{
+  return (d1 == d2) ? 0 : ((d1 < d2)?  -1 : 1);
+}
+
+static inline long complex_diff(SCM r1, SCM i1, SCM r2, SCM i2)
+{
+  return do_compare(r1, r2) || do_compare(i1, i2);
+}
+
 
 static long do_compare(SCM x, SCM y)
 {
-  double d1=0, d2=0;
-
+  /* ASSERT: x and y are numbers and none is a NaN */
+ Top:
   switch (TYPEOF(x)) {
     case tc_real:
-            switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
-              case tc_real:     d1 = REAL_VAL(x); d2 = REAL_VAL(y);
-                                goto double_diff;
-              case tc_rational:
-              case tc_bignum:   goto general_diff;
-              case tc_integer:  d1 = REAL_VAL(x); d2 =  INT_VAL(y);
-                                goto double_diff;
-              default:          break;
-            }
-            break;
-    case tc_integer:
-            switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
-              case tc_real:     d1 = INT_VAL(x); d2 = REAL_VAL(y);
-                                goto double_diff;
-              case tc_rational:
-              case tc_bignum:   goto general_diff;
-              case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
-              default:          break;
-            }
-            break;
+      switch (TYPEOF(y)) {
+        case tc_real:     return double_diff(REAL_VAL(x), REAL_VAL(y));
+        case tc_integer:  return double_diff(REAL_VAL(x), INT_VAL(y));
+        case tc_complex:  return complex_diff(x, MAKE_INT(0),
+                                              COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
+  case tc_integer:
+      switch (TYPEOF(y)) {
+        case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
+        case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
+        case tc_complex:  return complex_diff(x, MAKE_INT(0),
+                                              COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
     case tc_complex:
-    case tc_rational:
-    case tc_bignum:
-            switch (TYPEOF(y)) {
-              case tc_complex:
-              case tc_real:
-              case tc_rational:
-              case tc_bignum:
-              case tc_integer:  goto general_diff;
-              default:          break;
-            }
-            break;
+      switch (TYPEOF(y)) {
+        case tc_complex:   return complex_diff(COMPLEX_REAL(x),COMPLEX_IMAG(x),
+                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default:           return complex_diff(COMPLEX_REAL(x),COMPLEX_IMAG(x),
+                                               y, MAKE_INT(0));
+      }
+      break;
     default:
-            break;
+      switch (TYPEOF(y)) {
+        case tc_complex:   return complex_diff(x, MAKE_INT(0),
+                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
   }
-  /* if we are here, it s that x and y cannot be compared */
-  STk_error("comparison between ~S and ~S impossible", x,  y);
-double_diff:
-  if (isnan(d1) && isnan(d2))
-    return 0;
-  return (d1 == d2) ? 0 : ((d1 < d2)?  -1 : 1);
-general_diff:
-  {
-    SCM d = sub2(x, y);
 
-    if (zerop(d)) return 0;
-    /* complex numbers cannot be compared => return always 1 */
-    return COMPLEXP(d) ? 1 : (negativep(d) ? -1: 1);
+  /* General case: compute x - y to decide the result.
+   *
+   * NOTE: If we're comparing exacts and inexacts, we should be careful not to
+   * consider them equal when they are rounded during conversion. For example,
+   *
+   *   (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
+   *
+   * should be #f.  What we do is to see if the real number does represent that
+   * integer exactly. If it doesn't, we return false.
+  */
+  SCM diff = sub2(x, y);
+
+  if (zerop(diff)) {
+    if (REALP(x)) { /* y can only be a bignum or a rational (others done before) */
+      x = double2integer(REAL_VAL(x));
+      goto Top;
+    }
+    if (REALP(y)) { /* x can only be a bignum or a rational (others done before) */
+      y = double2integer(REAL_VAL(y));
+      goto Top;
+    }
+    /* Ok, x an y are equal => return zero: */
+    return 0;
   }
+  else
+    return negativep(diff) ? -1: 1;
 }
+
 
 
 static SCM int_quotient(SCM x, SCM y)
@@ -2044,10 +2065,14 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
   }
 
   exactp = isexactp(*argv);
+  if (STk_isnan(*argv)) return *argv;
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
+
+    /* if this argument is a NaN, result is a NaN */
+    if (STk_isnan(*argv)) return *argv;
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -2071,10 +2096,14 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
   }
 
   exactp = isexactp(*argv);
+  if (STk_isnan(*argv)) return *argv;
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
+
+    /* if this argument is a NaN, result is a NaN */
+    if (STk_isnan(*argv)) return *argv;
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
