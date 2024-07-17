@@ -611,6 +611,31 @@
       "0.0"
       (format "~a" (- 0.0 0.0)))
 
+(test "minus zero.4"
+      "-0.0"
+      (format "~a" (- 0 0.0 0.0)))
+
+(test "minus zero.4"
+      "0.0"
+      (format "~a" (- 0 0.0 -0.0)))
+
+(test "minus zero.5"
+      #f
+      (equal? 0.0 -0.0))
+
+(test "minus zero.6"
+      #t
+      (equal? -0.0 -0.0))
+
+
+;; Note: We have a special case: (- 0+0.0i 0.0) is "0.0+0.0i" and not 
+;; "-0.0+0.0i"
+(test "minus zero in a complex"
+      "0.0+0.0i"
+      (format #f "~a" (- 0+0.0i 0.0)))
+
+
+
 ;;------------------------------------------------------------------
 (test-subsection "small immediate integer constants")
 
@@ -2414,6 +2439,12 @@
 (test "nan and comp.9" #f (= (%make-nan #f #f 42) (%make-nan #f #f 0)))
 (test "nan and comp.10" #f (eqv? (%make-nan #f #f 42) (%make-nan #f #f 0)))
 
+(test "nan and max.1" +nan.0 (max 1 2 3.0 4/5 +nan.0))
+(test "nan and max.2" +nan.0 (max +nan.0 1 2 3.0 4/5))
+(test "nan and min.1" +nan.0 (min 1 2 3.0 4/5 +nan.0))
+(test "nan and min.2" +nan.0 (min +nan.0 1 2 3.0 4/5))
+
+
 (test "abs complex"
       5
       (abs -3-4i))
@@ -2451,5 +2482,72 @@
                (lambda () (display (expt 2 30000))))
            (lambda () (read)))
          (expt 2 30000)))
+
+(test "Number equality test.1"
+      #f
+      (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000))
+
+(test "Number equality test.2"
+      #t
+      (= 4999999999999999727876154935214080.0 4999999999999999727876154935214080))
+
+(test "Number equality test.3"
+      #t
+      (< 4999999999999999727876154935214080.0 5000000000000000000000000000000000))
+
+(test "Number equality test.4"
+      #f
+      (> 4999999999999999727876154935214080.0 5000000000000000000000000000000000))
+
+(test "Number equality test.5"
+      #t
+      (= 1.0 1))
+
+(test "Number equality test.6"
+      #t
+      (= 2.0 2))
+
+(test "Number equality test.7"
+      #t
+      (= 2+2i 2.0+2.0i))
+
+(test "Number equality test.8"
+      #f
+      (= 4999999999999999727876154935214080.0+4999999999999999727876154935214080.0i
+         5000000000000000000000000000000000+5000000000000000000000000000000000i ))
+
+(test "Number equality test.9"
+      #f
+      (= 5000000000000000000000000000000000+4999999999999999727876154935214080.0i
+         5000000000000000000000000000000000+5000000000000000000000000000000000i ))
+
+(test "Number equality test.10"
+      #f
+       (= 4999999999999999727876154935214080.0+5000000000000000000000000000000000i
+          5000000000000000000000000000000000+5000000000000000000000000000000000i ))
+
+(test "Number equality test.11"
+      #t
+       (= 4999999999999999727876154935214080.0+5000000000000000000000000000000000i
+          4999999999999999727876154935214080+5000000000000000000000000000000000i ))
+
+(test "Number equality test.12"
+      #t
+       (= 5000000000000000000000000000000000+4999999999999999727876154935214080.0i
+          5000000000000000000000000000000000+4999999999999999727876154935214080i))
+
+(test "Number equality test.13"
+      #f
+      (= 1/3 #i1/3))
+
+(test "Number equality test.14"
+      #f
+      (= #i1/3 1/3))
+
+(test "Number equality test.15"
+      #f
+      (= (exact->inexact (inexact->exact 1/3)) 1/3))
+
+
 
 (test-section-end)

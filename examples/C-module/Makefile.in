@@ -44,11 +44,6 @@ C_SOURCE=string-obfuscate.c
 C_OBJ=string-obfuscate.o
 SHARED_OBJ=string-obfuscate.$(SO)
 
-# Instead of making a compact Makefile that uses wildcards and variable names,
-# we opted for using the filenames in the Maefile rule heads, and the
-# variables above in the rule bodies. This could, perhaps, make it somewhat
-# easier for beginners to understand the file.
-
 all: $(SHARED_OBJ)
 
 # We first compile the Scheme file string-obfuscate.stk into a C file
@@ -68,10 +63,12 @@ string-obfuscate.o: $(C_SOURCE) $(C_INCL)
 		-o $(C_OBJ) \
 		$(C_SOURCE)
 
-# And finally, we make it a shared library so STklos will be
-# able to load it:
+# And finally, we make it a shared library so STklos will be able to load it:
 string-obfuscate.so: $(C_OBJ)
 	$(LD) $(LDFLAGS) $(SH_LOAD_FLAGS) -o $(SHARED_OBJ) $(C_OBJ)
+
+# Install is a noop for this directory
+install:
 
 clean:
 	rm -f $(C_INCL) $(C_OBJ) $(SHARED_OBJ)
