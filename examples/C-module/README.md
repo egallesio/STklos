@@ -10,9 +10,14 @@ What we illustrate with this example:
 * Writing help for procedures, not only in Scheme files, but also
   in C files.
 
+NOTE: It is probably simpler to understand the file `Makefile-sample` than the
+GNU autotools generated `Makefile`. The main difference is that the generated
+`Makefile` can be run without installing STklos, whereas `Makefile-sample` needs a
+prior installation of STklos. 
+
 ## Caveats
 
-* The example was built for Linux, but can be adapted for other systems.
+* The `Makefile-sample` was built for Linux, but can be adapted for other systems.
 * In order to write STklos modules in C, it is necessary to understand
   how typical STklos C code works. This can be found in the `hacking` file.
 
