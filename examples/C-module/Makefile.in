@@ -1,5 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+#          Author: Erick Gallesio [eg@stklos.net]
+#    Creation date: 17-Jul-2024 18:43
+
+
 #  General variables which depends of the choices made when configure was run
-# (compiler used, compilation flags, ...)
+# (compiler used, global compilation flags, ...)
 CC=@CC@
 CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@
