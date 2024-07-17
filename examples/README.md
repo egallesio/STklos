@@ -45,3 +45,6 @@ The files in this directory show some examples in STklos:
   thread this time).
 
 - `socket-client.stk` is a simple TCP client.
+
+- The directory `C-module` contains a complete example of a simple module
+  written in Scheme and in C.

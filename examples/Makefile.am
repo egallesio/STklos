@@ -41,9 +41,14 @@ COMP ?= ../utils/tmpcomp
 # Override the install target to avoid intallation in destination dir.
 install:
 
+all:
+	(cd C-module; make all)
+
 clean:
-	   /bin/rm -f $(schemedemo_SCRIPTS) *~
+	(cd C-module; make clean)
+	/bin/rm -f $(schemedemo_SCRIPTS) *~
 
 distclean: clean
+	(cd C-module; make distclean)
 	/bin/rm -f Makefile
 	/bin/rm -rf .deps

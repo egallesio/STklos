@@ -737,7 +737,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
           doc/pp/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script examples/Makefile
+          utils/stklos-script examples/Makefile examples/C-module/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/scheme/Makefile
           lib/scheme/regex/Makefile lib/scheme/vector/Makefile
