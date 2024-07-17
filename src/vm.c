@@ -1009,7 +1009,7 @@ static void run_vm(vm_thread_t *vm)
   // NOTE:
   //    ① the "volatile" is not really needed
   //    ② declaring the save_cur_proc in each switch branch which need it is the
-  //       worst solution. 
+  //       worst solution.
   volatile
 #endif
   SCM save_cur_proc=STk_nil; /* cur. proc when calling inlined primitives */
@@ -2565,22 +2565,33 @@ SCM STk_execute_C_bytecode(SCM all_consts, STk_instr *instr)
 \*===========================================================================*/
 
 DEFINE_PRIMITIVE("%vm-config",vm_config, subr0, ()) {
-  SCM res = STk_nil;
-
+  SCM debug_vm =
 #ifdef DEBUG_VM
-  res = STk_cons(STk_intern("debug-vm"), res);
-#endif
-
-#ifdef STAT_VM
-  res = STk_cons(STk_intern("stat-vm"), res);
-#endif
-
-#ifdef USE_COMPUTED_GOTO
-  res = STk_cons(STk_intern("computed-goto"), res);
+    STk_true
 #else
-  res = STk_cons(STk_intern("switch-case"), res);
+    STk_false
 #endif
-  return res;
+    ;
+
+  SCM stat_vm =
+#ifdef STAT_VM
+    STk_true
+#else
+    STk_false
+#endif
+    ;
+
+  SCM computed_goto =
+#ifdef USE_COMPUTED_GOTO
+    STk_true
+#else
+    STk_false
+#endif
+    ;
+
+  return STk_append2(LIST2(STk_makekey("computed-goto"), computed_goto),
+                     STk_append2(LIST2(STk_makekey("debug-vm"), debug_vm),
+                                 LIST2(STk_makekey("stat-vm"), stat_vm)));
 }
 
 
