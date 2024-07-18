@@ -32,22 +32,51 @@
 // #define DEBUG_VM
 /* #define STAT_VM  */
 
+/* STATISTICS GATHERING:
+   =====================
+
+   * couple_instr[a][b] will count the number of times instructions
+     [a,b] show up consecutively in bytecode.
+
+   * cpt_inst[a] will count the number of occurrences of instrution a
+     individually.
+
+   * time_inst[a] will count the time spent on instruction a.
+
+   The function tick() will be called after each VM iteration in order
+   to update the statistics (see the definitions for the NEXT macro
+   below, and also the end of the switch/case).  */
 #ifdef STAT_VM
-#  define DEBUG_VM
 static int couple_instr[NB_VM_INSTR][NB_VM_INSTR];
 static int cpt_inst[NB_VM_INSTR];
+static double time_inst[NB_VM_INSTR];
+static int collect_stats = 0;
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time);
 #endif
 
 #ifdef DEBUG_VM
 static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
+/*  We compile conditionally: if __GNUC__ is defined and we're not
+    debugging the VM, we use computed GOTOs, otherwise a standard
+    switch statement.
 
+    Also, for the computed GOTO code, we define "NEXT" (which will be
+    executed *after* each instruction) to also do some accounting if
+    STAT_VM is defined. */
 #if defined(__GNUC__) && !defined(DEBUG_VM)
    /* Use computed gotos to have better performance */
 #  define USE_COMPUTED_GOTO
 #  define CASE(x)       lab_##x:
-#  define NEXT          goto *jump_table[fetch_next()]
+#  if defined(STAT_VM)
+#    define NEXT          { if (collect_stats)                           \
+                              tick(byteop, &previous_op, &previous_time); \
+                            byteop = fetch_next();                       \
+                            goto *jump_table[byteop]; }
+#  else
+#    define NEXT          goto *jump_table[fetch_next()];
+#endif
 #else
    /* Standard C compiler. Use the classic switch statement */
 #  define CASE(x)       case x:
@@ -55,6 +84,8 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
                                             the do{...}while(0) guards. */
 #endif
 
+/* NEXT0: the instruction left zero results
+   NEXT1: the instruction left a result.     */
 #define NEXT0           do{vm->val = STk_void; vm->valc = 0; NEXT;}while(0)
 #define NEXT1           do{vm->valc = 1; NEXT;}while(0)
 
@@ -871,29 +902,125 @@ DEFINE_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void))
 
 
 
-#ifdef DEBUG_VM
-#  ifdef STAT_VM
-#    define DEFINE_NAME_TABLE
-#    include "vm-instr.h"
+/* When DEFINE_NAME_TABLE is defined, the code for defining a table
+   with the names of instructions in vm-instr.h is compiled, and then
+   name_table[i] will be a string with the name of instruction 'i'. */
+#ifdef STAT_VM
+#  define DEFINE_NAME_TABLE
+#  include "vm-instr.h"
 
-static void dump_couple_instr(void)
+static void dump_couple_instr_csv(const char *fname)
 {
   int i, j;
   FILE *dump;
 
-  dump = fopen("/tmp/dump.out", "w");
-  fprintf(dump, "[\n");
+  dump = fopen(fname, "w");
+
+  fprintf(dump, "instruction, count, time, time/count");
+  for (i = NOP; i < NB_VM_INSTR; i++)
+      fprintf(dump, ", %s", name_table[i]);
+  fprintf(dump, "\n");
 
   for (i = NOP; i < NB_VM_INSTR; i++) {
-    fprintf(dump, "((%s %d) ", name_table[i], cpt_inst[i]);
-    for (j = NOP; j < NB_VM_INSTR; j++)
-      fprintf(dump, "(%s %4d) ", name_table[j], couple_instr[i][j]);
-    fprintf(dump, ")\n");
+      if (cpt_inst[i]>0) {
+          fprintf(dump, "%s, %d, %20f, %.20f", name_table[i], cpt_inst[i], time_inst[i],
+                  cpt_inst[i]>0.0
+                  ? time_inst[i]/((double)cpt_inst[i])
+                  : 0.0);
+          for (j = NOP; j < NB_VM_INSTR; j++)
+              fprintf(dump, ", %4d", couple_instr[i][j]);
+          fprintf(dump, "\n");
+      }
   }
-  fprintf(dump, "\n]\n");
+  fclose(dump);
+}
+
+static void dump_couple_instr_scm(const char *fname)
+{
+  int i, j;
+  FILE *dump;
+
+  dump = fopen(fname, "w");
+
+  fprintf(dump,
+          ";; STklos VM statistics. It can be read in Scheme, and it represents one single\n"
+          ";; object: an alist with the names of instructions, and each CDR is a list containing:\n"
+          ";; \n"
+          ";; * count (the number of times this instruction was executed)\n"
+          ";; * time (the total time the program spent on this instruction)\n"
+          ";; * avg time (the average number of time spent on each execution of this instruction)\n"
+          ";; * an alist containing, for each OTHER instruction, the number of times they appeared\n"
+          ";;   together in the code."
+          ";; \n"
+          ";; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) \n"
+          ";;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) \n"
+          ";;   ...\n"
+          ";;   (INS2 countk timek avgtimek ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) ) \n"
+          ";; \n"
+          ";; BEGIN data\n");
+
+  for (i = NOP; i < NB_VM_INSTR; i++) {
+      if (cpt_inst[i]>0) {
+          fprintf(dump, "((%s %d %20f %.20f \n (", name_table[i], cpt_inst[i], time_inst[i],
+                  cpt_inst[i]>0.0
+                  ? time_inst[i]/((double)cpt_inst[i])
+                  : 0.0);
+          for (j = NOP; j < NB_VM_INSTR; j++)
+              fprintf(dump, "(%s . %4d) ", name_table[j], couple_instr[i][j]);
+          fprintf(dump, "))\n");
+      }
+  }
+  fprintf(dump, ")\n");
+  fprintf(dump, ";; END of data\n");
+  fclose(dump);
+}
+
+DEFINE_PRIMITIVE("%vm-collecting-stats?", vm_collecting_stats, subr0, ()) {
+    return collect_stats
+        ? STk_true
+        : STk_false;
+}
+
+DEFINE_PRIMITIVE("%vm-collect-stats-start", vm_stats_start, subr0, ()) {
+    collect_stats = 1;
+    return STk_void;
+}
+
+DEFINE_PRIMITIVE("%vm-collect-stats-stop", vm_stats_stop, subr0, ()) {
+    collect_stats = 0;
+    return STk_void;
+}
+
+DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ()) {
+    for (int i = NOP; i < NB_VM_INSTR; i++) {
+        cpt_inst[i] = 0;
+        time_inst[i] = 0.0;
+        for (int j = NOP; j < NB_VM_INSTR; j++)
+            couple_instr[i][j] = 0;
+    }
+    /* No need to zero previous_op and previous_time... */
+    return STk_void;
+}
+
+DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format)) {
+  if (!STRINGP(fname))               STk_error("bad string ~S", fname);
+  if (format && (!KEYWORDP(format))) STk_error("bad keyword ~S", format);
+
+  if (format && STk_eq(STk_makekey("csv"), format))
+    dump_couple_instr_csv(STRING_CHARS(fname));
+  else
+    dump_couple_instr_scm(STRING_CHARS(fname));
+  return STk_void;
 }
 # endif
+
+DEFINE_PRIMITIVE("%vm-has-stats?", vm_has_stats, subr0, ()) {
+#if defined(STAT_VM)
+  return STk_true;
+#else
+  return STk_false;
 #endif
+}
 
 
 #ifdef STK_DEBUG
@@ -995,6 +1122,20 @@ MUT_DECL(global_code_lock);  /* Lock to permit code patching */
   }                                             \
 }while(0)
 
+/* The function tick() will collect statistics when STAT_VM is defined. */
+#if defined(STAT_VM)
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time) {
+  static clock_t current_time;
+  current_time = clock();
+  couple_instr[*previous_op][b]++;
+  cpt_inst[b]++;
+  *previous_op = b;
+
+  if (*previous_time > 0)
+      time_inst[b] += ((double)(current_time - *previous_time)) / CLOCKS_PER_SEC;
+  *previous_time = clock();
+}
+#endif
 
 static void run_vm(vm_thread_t *vm)
 {
@@ -1014,27 +1155,41 @@ static void run_vm(vm_thread_t *vm)
 #endif
   SCM save_cur_proc=STk_nil; /* cur. proc when calling inlined primitives */
 
+/* If DEFINE_JUMP_TABLE is defined and we include vm-instr, then the static
+   array *jump_table[] will be defined with the labels for the goto
+   instructions. */
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
-#else
-   int16_t byteop;
 #endif
+
+  volatile STk_instr byteop = NOP;
+
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
 #    include "vm-instr.h"
   static STk_instr *code_base = NULL;
 #endif
+
 #if defined(STAT_VM)
-  static int16_t previous_op = NOP;
+STk_instr previous_op = NOP;
+time_t    previous_time = 0;
 #endif
+
 
 #if defined(USE_COMPUTED_GOTO)
   NEXT;
 #else
   for ( ; ; ) {
   VM_LOOP_TOP:     /* Execution loop */
-    byteop = fetch_next();
+
+    /* Update the statistics after each loop: */
+#   if defined(STAT_VM)
+      if (collect_stats) tick(byteop, &previous_op, &previous_time);
+#   endif
+
+   byteop = fetch_next();
+
 #  ifdef DEBUG_VM
     if (debug_level > 1)
       fprintf(stderr, "%08x [%03d]: %20s  sp=%-6d fp=%-6d env=%p\n",
@@ -1043,11 +1198,6 @@ static void run_vm(vm_thread_t *vm)
               name_table[(int)byteop],
               vm->sp - vm->stack,
               vm->fp - vm->stack, vm->env);
-#    ifdef STAT_VM
-    couple_instr[previous_op][byteop]++;
-    cpt_inst[byteop]++;
-    previous_op = byteop;
-#    endif
 #  endif
     switch (byteop) {
 #endif /*  USE_COMPUTED_GOTO */
@@ -1083,7 +1233,7 @@ CASE(CONSTANT_PUSH) { push(fetch_const());           NEXT; }
 CASE(PUSH_GLOBAL_REF)
 CASE(GLOBAL_REF) {
   SCM ref = NULL;
-  int16_t orig_opcode;
+  STk_instr orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1107,7 +1257,8 @@ CASE(GLOBAL_REF) {
 }
 
 CASE(PUSH_UGLOBAL_REF)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGLOBAL_REF) {     /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
@@ -1151,7 +1302,7 @@ CASE(UGLOBAL_REF_PUSH) { /* Never produced by compiler */
 CASE(PUSH_GREF_INVOKE)
 CASE(GREF_INVOKE) {
   SCM ref = NULL;
-  int16_t orig_opcode;
+  STk_instr orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1178,7 +1329,8 @@ CASE(GREF_INVOKE) {
 }
 
 CASE(PUSH_UGREF_INVOKE)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGREF_INVOKE) { /* Never produced by compiler */
 
   /* Because of optimization, we may get re-dispatched to here. */
@@ -1194,7 +1346,7 @@ CASE(UGREF_INVOKE) { /* Never produced by compiler */
 CASE(PUSH_GREF_TAIL_INV)
 CASE(GREF_TAIL_INVOKE) {
   SCM ref = NULL;
-  int16_t orig_opcode;
+  STk_instr orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
@@ -1222,7 +1374,8 @@ CASE(GREF_TAIL_INVOKE) {
 }
 
 CASE(PUSH_UGREF_TAIL_INV)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
@@ -1946,7 +2099,6 @@ FUNCALL:  /* (int nargs, int tailp) */
         nm       = STk_make_next_method(vm->val, nargs, argv, methods);
         vm->val  = INST_SLOT(CAR(methods), S_procedure);
         SET_NEXT_METHOD(vm->val, nm);
-        /* FALLTHROUGH */
       } else {
         SCM gf, args;
 
@@ -2138,16 +2290,16 @@ FUNCALL:  /* (int nargs, int tailp) */
   RETURN_FROM_PRIMITIVE();
 end_funcall:
   NEXT;
-}
+} /* FUNCALL: */
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 #ifndef USE_COMPUTED_GOTO
-      default:
-        STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop);
-    }
-  } /* for( ; ; ) */
+      default: { STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop); }
+    } /* switch (byteop) */
+  } /* for ( ; ; ) */
+
 #endif
   STk_panic("abnormal exit from the VM");
-}
+} /* run_vm */
 
 void STk_raise_exception(SCM cond)
 {
@@ -2628,5 +2780,13 @@ int STk_late_init_vm()
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_vm_debug);
 #endif
+#ifdef STAT_VM
+  ADD_PRIMITIVE(vm_dump_stat);
+  ADD_PRIMITIVE(vm_reset_stat);
+  ADD_PRIMITIVE(vm_collecting_stats);
+  ADD_PRIMITIVE(vm_stats_start);
+  ADD_PRIMITIVE(vm_stats_stop);
+#endif
+  ADD_PRIMITIVE(vm_has_stats);
   return TRUE;
 }
