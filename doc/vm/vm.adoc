@@ -1645,13 +1645,12 @@ void tick(STk_instr b) {
 
 Five Scheme primitives are then available:
 
-* `(%vm-dump-stats fname format)` will dump the statistics to a file
-  whose name is `fname`. This is *NOT* a Scheme port, but a Scheme
-  string. The file will be open using plain `fopen`. When the `format`
-  argument is the keyword `:csv`, then the output is in CSV format;
-  otherwise, there will be one single S-expression in the file,
-  readable from Scheme. This S-expression is an alist, documented in
-  the file itself (see below).
+* `(%vm-dump-stats fname format)` will dump the statistics to a file whose
+  name is `fname`.  The file will be opened using plain `fopen`.  When the
+  `format` argument is the keyword `:csv`, then the output is in CSV format;
+  otherwise, there will be one single S-expression in the file, readable from
+  Scheme. This S-expression is an alist, documented in the file itself (see
+  below).
 * `(%vm-reset-stats)` will reset all counters.
 * `(%vm-collecting-stats?)` returns true when the system is collecting
   statistics (that is, when the variable `collect_stats` is one -- see
@@ -1680,18 +1679,14 @@ shown below.
 ;; * an alist containing, for each OTHER instruction, the number of times they appeared\n"
 ;;   together in the code.
 ;;
-;; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn)))
-;;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn)))
+;; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))
+;;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))
 ;;   ...
-;;   (INS2 countk timek avgtimek ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) )
+;;   (INSn countn timen avgtimen ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn))) )
 ----
 
 The C code for printing the instructions is in the functions
 `dump_couple_instr_csv` and `dump_couple_instr_scm`.
-
-There is also one primitive that can be used to determine if the
-system has been compiled with the profiling code: `(%vm-has-stats)`
-will be either true or false.
 
 To profile some specific code there is the `%with-profile-data` macro:
 
@@ -1699,7 +1694,7 @@ To profile some specific code there is the `%with-profile-data` macro:
 [source,scheme]
 ----
 (%with-profile-data "file-name.csv" :csv
-  (display a)
+  (display 'a)
   (newline)
   (values 1 2 3))
 ----
@@ -1711,12 +1706,12 @@ This will expand to
 (receive
   result-4
   (begin (%vm-reset-stats)
-         (display a)
+         (display 'a)
          (newline)
          (values 1 2 3))
          (begin (%vm-dump-stats "file-name.csv" #:csv)
                 (apply values result-4)))
 ----
 
-So the macro will return the same values that the coude would, and will profile only
+So the macro will return the same values that the code would, and will profile only
 that part of the code.
