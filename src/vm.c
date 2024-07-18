@@ -1016,15 +1016,6 @@ DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format)
 }
 # endif
 
-DEFINE_PRIMITIVE("%vm-has-stats?", vm_has_stats, subr0, ()) {
-#if defined(STAT_VM)
-  return STk_true;
-#else
-  return STk_false;
-#endif
-}
-
-
 #ifdef STK_DEBUG
 static void patch_environment(vm_thread_t *vm);
 DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*argv)))
@@ -2789,6 +2780,5 @@ int STk_late_init_vm()
   ADD_PRIMITIVE(vm_stats_start);
   ADD_PRIMITIVE(vm_stats_stop);
 #endif
-  ADD_PRIMITIVE(vm_has_stats);
   return TRUE;
 }

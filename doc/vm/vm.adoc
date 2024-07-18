@@ -1688,6 +1688,18 @@ shown below.
 The C code for printing the instructions is in the functions
 `dump_couple_instr_csv` and `dump_couple_instr_scm`.
 
+Note that the `%vm-config` can be used to determine if the system has been
+compiled with the profiling code. This primitive returns a property list and
+the key `#:stat-vm` can be used here:
+
+[source,scheme]
+----
+stklos> (%vm-config)
+(#:computed-goto #t #:debug-vm #f #:stat-vm #t)
+stklos> (key-get (%vm-config) :stat-vm))
+#t
+----
+
 To profile some specific code there is the `%with-profile-data` macro:
 
 
@@ -1715,3 +1727,5 @@ This will expand to
 
 So the macro will return the same values that the code would, and will profile only
 that part of the code.
+
+
