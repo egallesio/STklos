@@ -944,25 +944,28 @@ static void dump_couple_instr_scm(const char *fname)
   dump = fopen(fname, "w");
 
   fprintf(dump,
-          ";; STklos VM statistics. It can be read in Scheme, and it represents one single\n"
-          ";; object: an alist with the names of instructions, and each CDR is a list containing:\n"
-          ";; \n"
+          ";; STklos VM statistics. It can be read in Scheme, and it represents\n"
+          ";; one single object: an alist with the names of instructions, and\n"
+          ";; each CDR is a list containing:\n"
+          ";;\n"
           ";; * count (the number of times this instruction was executed)\n"
           ";; * time (the total time the program spent on this instruction)\n"
-          ";; * avg time (the average number of time spent on each execution of this instruction)\n"
-          ";; * an alist containing, for each OTHER instruction, the number of times they appeared\n"
-          ";;   together in the code."
-          ";; \n"
+          ";; * avg time (the average number of time spent on each execution of\n"
+          ";;   this instruction)\n"
+          ";; * an alist containing, for each OTHER instruction, the number of\n"
+          ";;   times they appeared  together in the code.\n"
+          ";;\n"
           ";; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) \n"
           ";;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) \n"
           ";;   ...\n"
-          ";;   (INS2 countk timek avgtimek ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) ) \n"
+          ";;   (INSn countn timen avgtimen ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) ) \n"
           ";; \n"
           ";; BEGIN data\n");
 
+  fprintf(dump, "(");
   for (i = NOP; i < NB_VM_INSTR; i++) {
       if (cpt_inst[i]>0) {
-          fprintf(dump, "((%s %d %20f %.20f \n (", name_table[i], cpt_inst[i], time_inst[i],
+          fprintf(dump, "(%s %d %20f %.20f \n (", name_table[i], cpt_inst[i], time_inst[i],
                   cpt_inst[i]>0.0
                   ? time_inst[i]/((double)cpt_inst[i])
                   : 0.0);
