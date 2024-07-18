@@ -902,10 +902,11 @@ DEFINE_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void))
 
 
 
-/* When DEFINE_NAME_TABLE is defined, the code for defining a table
-   with the names of instructions in vm-instr.h is compiled, and then
-   name_table[i] will be a string with the name of instruction 'i'. */
 #ifdef STAT_VM
+/* When DEFINE_NAME_TABLE is defined, the code for defining a table
+ * with the names of instructions in vm-instr.h is compiled, and then
+ *  name_table[i] will be a string with the name of instruction 'i'.
+ */
 #  define DEFINE_NAME_TABLE
 #  include "vm-instr.h"
 
@@ -976,30 +977,28 @@ static void dump_couple_instr_scm(const char *fname)
 }
 
 DEFINE_PRIMITIVE("%vm-collecting-stats?", vm_collecting_stats, subr0, ()) {
-    return collect_stats
-        ? STk_true
-        : STk_false;
+  return MAKE_BOOLEAN(collect_stats);
 }
 
 DEFINE_PRIMITIVE("%vm-collect-stats-start", vm_stats_start, subr0, ()) {
-    collect_stats = 1;
-    return STk_void;
+  collect_stats = 1;
+  return STk_void;
 }
 
 DEFINE_PRIMITIVE("%vm-collect-stats-stop", vm_stats_stop, subr0, ()) {
-    collect_stats = 0;
-    return STk_void;
+  collect_stats = 0;
+  return STk_void;
 }
 
 DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ()) {
-    for (int i = NOP; i < NB_VM_INSTR; i++) {
-        cpt_inst[i] = 0;
-        time_inst[i] = 0.0;
-        for (int j = NOP; j < NB_VM_INSTR; j++)
-            couple_instr[i][j] = 0;
-    }
-    /* No need to zero previous_op and previous_time... */
-    return STk_void;
+  for (int i = NOP; i < NB_VM_INSTR; i++) {
+    cpt_inst[i] = 0;
+    time_inst[i] = 0.0;
+    for (int j = NOP; j < NB_VM_INSTR; j++)
+      couple_instr[i][j] = 0;
+  }
+  /* No need to zero previous_op and previous_time... */
+  return STk_void;
 }
 
 DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format)) {
@@ -1163,7 +1162,7 @@ static void run_vm(vm_thread_t *vm)
 #  include "vm-instr.h"
 #endif
 
-  volatile STk_instr byteop = NOP;
+  static volatile STk_instr byteop = NOP;
 
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
