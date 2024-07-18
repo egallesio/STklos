@@ -1008,7 +1008,7 @@ DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format)
   if (!STRINGP(fname))               STk_error("bad string ~S", fname);
   if (format && (!KEYWORDP(format))) STk_error("bad keyword ~S", format);
 
-  if (format && STk_eq(STk_makekey("csv"), format))
+  if (format && STk_eq(STk_makekey("csv"), format) == STk_true)
     dump_couple_instr_csv(STRING_CHARS(fname));
   else
     dump_couple_instr_scm(STRING_CHARS(fname));
