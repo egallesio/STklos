@@ -1671,13 +1671,15 @@ shown below.
 [source,scheme]
 ----
 ;; STklos VM statistics. It can be read in Scheme, and it represents one single
-;; object: an alist with the names of instructions, and each CDR is a list containing:
+;; object: an alist with the names of instructions, and each CDR is a list
+;; containing:
 ;;
 ;; * count (the number of times this instruction was executed)
 ;; * time (the total time the program spent on this instruction)
-;; * avg time (the average number of time spent on each execution of this instruction)
-;; * an alist containing, for each OTHER instruction, the number of times they appeared\n"
-;;   together in the code.
+;; * avg time (the average number of time spent on each execution of this
+;;   instruction)
+;; * an alist containing, for each OTHER instruction, the number of times they
+;;   appeared together in the code.
 ;;
 ;; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))
 ;;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))

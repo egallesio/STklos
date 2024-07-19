@@ -2220,12 +2220,15 @@ doc>
                      #f))
          (body  (if format (cdr args) args))
          (result (gensym 'result-)))
-    (if (%vm-has-stats?)
-        `(receive
-             ,result
-             (begin (%vm-reset-stats) ,@body)
-           (begin (%vm-dump-stats ,filename ,format)
-                  (apply values ,result)))
+    (if (key-get (%vm-config) :stat-vm)
+        `(receive ,result
+                  (begin
+                    (%vm-reset-stats)
+                    (%vm-collect-stats-start)
+                    ,@body)
+           (%vm-dump-stats ,filename ,format)
+           (%vm-collect-stats-stop)
+           (apply values ,result))
         `(begin ,@body))))
 
 
