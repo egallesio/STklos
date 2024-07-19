@@ -2224,10 +2224,10 @@ doc>
         `(receive ,result
                   (begin
                     (%vm-reset-stats)
-                    (%vm-collect-stats-start)
+                    (%vm-collect-stats #t)
                     ,@body)
            (%vm-dump-stats ,filename ,format)
-           (%vm-collect-stats-stop)
+           (%vm-collect-stats #f)
            (apply values ,result))
         `(begin ,@body))))
 

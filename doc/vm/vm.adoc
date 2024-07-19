@@ -1643,7 +1643,7 @@ void tick(STk_instr b) {
 }
 ----
 
-Five Scheme primitives are then available:
+Three Scheme primitives are then available:
 
 * `(%vm-dump-stats fname format)` will dump the statistics to a file whose
   name is `fname`.  The file will be opened using plain `fopen`.  When the
@@ -1652,13 +1652,11 @@ Five Scheme primitives are then available:
   Scheme. This S-expression is an alist, documented in the file itself (see
   below).
 * `(%vm-reset-stats)` will reset all counters.
-* `(%vm-collecting-stats?)` returns true when the system is collecting
-  statistics (that is, when the variable `collect_stats` is one -- see
-  `vm.c`), and false otherwise.
-* `(%vm-collect-stats-start)` and `(%vm-collect-stats-stop)` will turn
-  collecting on and off, respectively.
+* `(%vm-collect-stats . val)` is a parameter object. When called without
+   value, it returns if statistics are collected or not. With a value `val`,
+   one can determine if statistics must be collected.
 
-Collecting statistics is off by default, especially because compiling STklos
+ Collecting statistics is off by default, especially because compiling STklos
 is very slow with statistics gathering. It should be turned on before profiling.
 
 The status of "collecting" or "not collecting" reflects what happens internaly in the
@@ -1729,5 +1727,3 @@ This will expand to
 
 So the macro will return the same values that the code would, and will profile only
 that part of the code.
-
-

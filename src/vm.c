@@ -924,7 +924,8 @@ static void dump_couple_instr_csv(const char *fname)
 
   for (i = NOP; i < NB_VM_INSTR; i++) {
       if (cpt_inst[i]>0) {
-          fprintf(dump, "%s, %d, %20f, %.20f", name_table[i], cpt_inst[i], time_inst[i],
+          fprintf(dump, "%s, %d, %20f, %.20f", name_table[i], cpt_inst[i],
+                  time_inst[i],
                   cpt_inst[i]>0.0
                   ? time_inst[i]/((double)cpt_inst[i])
                   : 0.0);
@@ -979,18 +980,10 @@ static void dump_couple_instr_scm(const char *fname)
   fclose(dump);
 }
 
-DEFINE_PRIMITIVE("%vm-collecting-stats?", vm_collecting_stats, subr0, ()) {
+static SCM vm_collect_stats(SCM value) // for parameter %vm-collect-stats setter
+{
+  collect_stats = (value != STk_false);
   return MAKE_BOOLEAN(collect_stats);
-}
-
-DEFINE_PRIMITIVE("%vm-collect-stats-start", vm_stats_start, subr0, ()) {
-  collect_stats = 1;
-  return STk_void;
-}
-
-DEFINE_PRIMITIVE("%vm-collect-stats-stop", vm_stats_stop, subr0, ()) {
-  collect_stats = 0;
-  return STk_void;
 }
 
 DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ()) {
@@ -2749,6 +2742,7 @@ int STk_init_vm()
   return TRUE;
 }
 
+
 int STk_late_init_vm()
 {
   /* Add the apply primitive */
@@ -2776,9 +2770,10 @@ int STk_late_init_vm()
 #ifdef STAT_VM
   ADD_PRIMITIVE(vm_dump_stat);
   ADD_PRIMITIVE(vm_reset_stat);
-  ADD_PRIMITIVE(vm_collecting_stats);
-  ADD_PRIMITIVE(vm_stats_start);
-  ADD_PRIMITIVE(vm_stats_stop);
+  STk_make_C_parameter("%vm-collect-stats",
+                       STk_false,
+                       vm_collect_stats,
+                       STk_STklos_module);
 #endif
   return TRUE;
 }
