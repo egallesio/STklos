@@ -959,9 +959,9 @@ Constants:
 1: x
 ----
 
-The constant `daa` is the abbreviation of the operations --`(CAADR x)`
+The constant `#:daa` is the abbreviation of the operations --`(CAADR x)`
  = `(CAR (CAR (CDR x)))`, *in reversed order* (because that is the order in which they
-will be applied, and it is mor enatural for the VM to go from the
+will be applied, and it is more natural for the VM to go from the
 beginning of the string towards the end.
 
 See that if we turn off the inlining of functions in the compiler, we
