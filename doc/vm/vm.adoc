@@ -1665,6 +1665,20 @@ Restoring is easier:
 And, when the C stack is restored, the VM is back to its original state, except
 for the global variables.
 
+== Verifying the VM configuration
+
+The primitive `%vm-config` returns an association list describing the
+compile-time configuration of the VM. For example,
+
+```
+stklos> (%vm-config )
+(#:computed-goto #t #:debug-vm #f #:stat-vm #t)
+```
+
+* `#:computed-goto`: was `vm.c` compiled using computed `goto`?
+* `#:debug-vm`: does this STklos binary have debugging enabled?
+* `#:stat-vm`: was the VM compiled with code for statistics-collecting?
+
 == Collecting statistics
 
 The code in `vm.c` can optionally be compiled to collect statistics.
