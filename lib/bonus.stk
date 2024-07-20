@@ -2214,25 +2214,25 @@ doc>
             "unstable"))))
 
 (when-load-and-compile
- (when (key-get (%vm-config) :stat-vm)
+ (when (key-get (%vm-config) #:stat-vm)
    ;; We compile this file whereas STAT_VM is defined =>
    ;; 1. define the macro %with-profile-data
    ;; 2. export it
-   (define-macro (%with-profile-data filename . args)
-     (let* ((format (if (memq (car args) '(:csv :scm))
-                        (car args)
-                        #f))
-              (body  (if format (cdr args) args))
-              (result (gensym 'result-)))
-       `(receive ,result
-            (begin
-              (%vm-reset-stats)
-              (%vm-collect-stats #t)
-              ,@body)
-          (%vm-dump-stats ,filename ,format)
-          (%vm-collect-stats #f)
-          (apply values ,result))))
-   
+   (define-macro (%with-profile-data filename format . body)
+     (let ((expand (lambda (filename format body)
+                     (let ((result (gensym 'result-)))
+                       `(receive ,result
+                            (begin
+                              (%vm-reset-stats)
+                              (%vm-collect-stats #t)
+                              ,@body)
+                          (%vm-dump-stats ,filename ,format)
+                          (%vm-collect-stats #f)
+                          (apply values ,result))))))
+       (if (memq format '(#:csv #:scm))
+           (expand filename format body)
+           (expand filename #:scm (cons format body)))))
+
    (export %with-profile-data)))
 
 
