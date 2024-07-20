@@ -910,12 +910,9 @@ DEFINE_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void))
 #  define DEFINE_NAME_TABLE
 #  include "vm-instr.h"
 
-static void dump_couple_instr_csv(const char *fname)
+static void dump_couple_instr_csv(FILE *dump)
 {
   int i, j;
-  FILE *dump;
-
-  dump = fopen(fname, "w");
 
   fprintf(dump, "instruction, count, time, time/count");
   for (i = NOP; i < NB_VM_INSTR; i++)
@@ -934,15 +931,11 @@ static void dump_couple_instr_csv(const char *fname)
           fprintf(dump, "\n");
       }
   }
-  fclose(dump);
 }
 
-static void dump_couple_instr_scm(const char *fname)
+static void dump_couple_instr_scm(FILE *dump)
 {
   int i, j;
-  FILE *dump;
-
-  dump = fopen(fname, "w");
 
   fprintf(dump,
           ";; STklos VM statistics. It can be read in Scheme, and it represents\n"
@@ -977,7 +970,6 @@ static void dump_couple_instr_scm(const char *fname)
   }
   fprintf(dump, ")\n");
   fprintf(dump, ";; END of data\n");
-  fclose(dump);
 }
 
 static SCM vm_collect_stats(SCM value) // for parameter %vm-collect-stats setter
@@ -986,7 +978,8 @@ static SCM vm_collect_stats(SCM value) // for parameter %vm-collect-stats setter
   return MAKE_BOOLEAN(collect_stats);
 }
 
-DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ()) {
+DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ())
+{
   for (int i = NOP; i < NB_VM_INSTR; i++) {
     cpt_inst[i] = 0;
     time_inst[i] = 0.0;
@@ -997,14 +990,24 @@ DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ()) {
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format)) {
+DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format))
+{
   if (!STRINGP(fname))               STk_error("bad string ~S", fname);
   if (format && (!KEYWORDP(format))) STk_error("bad keyword ~S", format);
 
+  /* open dump file */
+  FILE *dump = fopen(STRING_CHARS(fname), "w");
+  if (!dump) STk_error("cannot open file ~S for writing", fname);
+
+  /* Produce the dump */
   if (format && STk_eq(STk_makekey("csv"), format) == STk_true)
-    dump_couple_instr_csv(STRING_CHARS(fname));
+    dump_couple_instr_csv(dump);
   else
-    dump_couple_instr_scm(STRING_CHARS(fname));
+    dump_couple_instr_scm(dump);
+
+  /* Close dump file */
+  fclose(dump);
+
   return STk_void;
 }
 # endif
