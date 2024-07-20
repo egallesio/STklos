@@ -6,6 +6,7 @@
 
 #  General variables which depends of the choices made when configure was run
 # (compiler used, global compilation flags, ...)
+BASEDIR=../..
 CC=@CC@
 CFLAGS=@CFLAGS@
 CPPFLAGS=@CPPFLAGS@
@@ -16,6 +17,7 @@ SH_LOADER=@SH_LOADER@
 SH_LOAD_FLAGS=@SH_LOAD_FLAGS@
 SO=@SH_SUFFIX@
 STKCFLAGS=@STKCFLAGS@
+GCINC=@GCINC@
 
 # ----------------------------------------------------------------------------
 
@@ -64,7 +66,7 @@ string-obfuscate-incl.c: $(SCHEME_SOURCE)
 # Now we compile the C library, which will include string-obfuscate-incl.c.
 string-obfuscate.o: $(C_SOURCE) $(C_INCL)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(STKCFLAGS) $(SH_COMP_FLAGS) \
-		-I$(STKLOS_SRC) \
+		$(GCINC) -I$(STKLOS_SRC) \
 		-c \
 		-o $(C_OBJ) \
 		$(C_SOURCE)
