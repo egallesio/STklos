@@ -1150,9 +1150,12 @@ static void run_vm(vm_thread_t *vm)
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
+#  ifdef STAT_VM
+      volatile STk_instr byteop = NOP;
+#  endif
+#else
+  STk_instr byteop = NOP;
 #endif
-
-  static volatile STk_instr byteop = NOP;
 
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
@@ -1161,8 +1164,8 @@ static void run_vm(vm_thread_t *vm)
 #endif
 
 #if defined(STAT_VM)
-STk_instr previous_op = NOP;
-time_t    previous_time = 0;
+  STk_instr previous_op = NOP;
+  time_t    previous_time = 0;
 #endif
 
 
