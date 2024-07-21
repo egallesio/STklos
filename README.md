@@ -103,7 +103,7 @@ Supported architectures
 
 The current version of STklos works on:
 
-- GNU/Linux 4.x and 5.0 (64 bits).
+- GNU/Linux 4.x, 5.x and 6.x (64 bits).
 - macOS 10.13 High Sierra
 - Win32 (using WSL - Windows Subsystem for Linux)
 
