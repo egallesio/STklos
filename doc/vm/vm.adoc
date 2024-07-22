@@ -1665,6 +1665,20 @@ Restoring is easier:
 And, when the C stack is restored, the VM is back to its original state, except
 for the global variables.
 
+== Verifying the VM configuration
+
+The primitive `%vm-config` returns an association list describing the
+compile-time configuration of the VM. For example,
+
+```
+stklos> (%vm-config )
+(#:computed-goto #t #:debug-vm #f #:stat-vm #t)
+```
+
+* `#:computed-goto`: was `vm.c` compiled using computed `goto`?
+* `#:debug-vm`: does this STklos binary have debugging enabled?
+* `#:stat-vm`: was the VM compiled with code for statistics-collecting?
+
 == Collecting statistics
 
 The code in `vm.c` can optionally be compiled to collect statistics.
@@ -1691,15 +1705,16 @@ conditionally on `STAT_VM`):
 
 [source,c]
 ----
-void tick(STk_instr b) {
-  couple_instr[previous_op][b]++;
-  cpt_inst[b]++;
-  previous_op = b;
-
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time) {
+  static clock_t current_time;
   current_time = clock();
-  if (previous_time > 0)
-      time_inst[b] += ((double)(current_time - previous_time)) / CLOCKS_PER_SEC;
-  previous_time = current_time;
+  couple_instr[*previous_op][b]++;
+  cpt_inst[b]++;
+  *previous_op = b;
+
+  if (*previous_time > 0)
+      time_inst[b] += ((double)(current_time - *previous_time)) / CLOCKS_PER_SEC;
+  *previous_time = clock();
 }
 ----
 
@@ -1713,8 +1728,10 @@ Three Scheme primitives are then available:
   below).
 * `(%vm-reset-stats)` will reset all counters.
 * `(%vm-collect-stats . val)` is a parameter object. When called without
-   value, it returns if statistics are collected or not. With a value `val`,
-   one can determine if statistics must be collected.
+   value, it returns if statistics are collected or not. If the value `val`
+   is determined, then statistics
+   - will start being collected, if `val` is `#t`;
+   - will not be collected anymore if `val` is `#f`.
 
  Collecting statistics is off by default, especially because compiling STklos
 is very slow with statistics gathering. It should be turned on before profiling.
