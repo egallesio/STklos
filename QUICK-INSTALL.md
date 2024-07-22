@@ -13,17 +13,25 @@ four) step process:
     - `--prefix=PATH`: place where the files will be installed (default to `/usr/local`)
     - `--with-provided-gc`: use the provided Boehm GC library
     - `--with-provided-bignum`: use the provided Bignum (GMPlite) library
+    - `--with-gmp-light`: a synonym for `--with-provided-bignum`
     - `--with-provided-regexp`: use the provided Regexp (PCRE) library
     - `--with-provided-ffi:` use the provided FFI library
     - `--without-control-fast-math`: do not verify that parameters of fx/fl functions are correct fixnums/flonums
     - `--enable-case-insensitive`: be case insensitive by default as in R5RS
     - `--enable-threads=TYPE`: choose threading package (value can be 'none' or 'pthreads', the default)
 
+    There are also environment variables that will have effect on how STklos is compiled. These should be passed to the configure script in the `CFLAGS` variable:
+
+    - `STK_DEBUG`: enable debugging code for STklos
+    - `VM_DEBUG`: enable debugging code for the VM
+    - `STAT_VM`: enable code for collecting timing statistics for the virtual machine (useful for profiling user programs and for working on optimizing the VM itself
+
     You can also choose the compiler and the compiler options to use for building **STklos** with the `CC` and `CFLAGS` parameters:
 
     ```bash
-    $ ./configure --prefix=/opt --with-provided-gc CC=clang CFLAGS="-O3 -Wall"
+    $ ./configure --prefix=/opt --with-provided-gc CC=clang CFLAGS="-O3 -Wall -DSTAT_VM"
     ```
+
     A summary will be printed at the end of the execution of the script as shown below:
 
     ```
@@ -40,6 +48,7 @@ four) step process:
          Case sensitivity:  true (by default)
     System libraries used:  libffi libpcre libgmp
        Compiled libraries:  libgc
+     Documentation update:  yes (since Asciidoctor is installed)
     ```
 
 
