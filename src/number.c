@@ -2144,6 +2144,8 @@ doc>
  */
 SCM STk_add2(SCM o1, SCM o2)
 {
+  SCM old1 = o1;
+  SCM old2 = o2;
   switch (convert(&o1, &o2)) {
     case tc_bignum:
         {
@@ -2168,7 +2170,24 @@ SCM STk_add2(SCM o1, SCM o2)
         }
       case tc_real:
         {
-          o1 = double2real(REAL_VAL(o1) + REAL_VAL(o2));
+          if (o1 != old1) {
+            /* We already allocated a new cell for o1, so we just
+             * modify it here! */
+            REAL_VAL(o1) = (REAL_VAL(o1) + REAL_VAL(o2));
+            if (isnan(REAL_VAL(o1)) && signbit(REAL_VAL(o1))) /* convert -nan.0 to +nan.0 */
+              REAL_VAL(o1) = STk_NaN;
+            return o1;
+          } else if (o2 != old2) {
+            /* We already allocated a new cell for o2, so we just
+             * modify it here! */
+            REAL_VAL(o2) = (REAL_VAL(o1) + REAL_VAL(o2));
+            if (isnan(REAL_VAL(o2)) && signbit(REAL_VAL(o2))) /* convert -nan.0 to +nan.0 */
+              REAL_VAL(o2) = STk_NaN;
+            return o2;
+          } else
+            /* We did NOT allocate a new cell for o1 or o2, so we just
+             * DO allocate it for o1 here! */
+            o1 = double2real(REAL_VAL(o1) + REAL_VAL(o2));
           break;
         }
       case tc_complex:
@@ -2212,6 +2231,8 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
+  SCM old1 = o1;
+  SCM old2 = o2;
   switch (convert(&o1, &o2)) {
     case tc_bignum:
       mult_bignum:
@@ -2239,8 +2260,25 @@ SCM STk_mul2(SCM o1, SCM o2)
         break;
       }
       case tc_real:
-        {
-          o1 = double2real(REAL_VAL(o1) * REAL_VAL(o2));
+      {
+        if (o1 != old1) {
+          /* We already allocated a new cell for o1, so we just
+           * modify it here! */
+          REAL_VAL(o1) = (REAL_VAL(o1) * REAL_VAL(o2));
+            if (isnan(REAL_VAL(o1)) && signbit(REAL_VAL(o1))) /* convert -nan.0 to +nan.0 */
+              REAL_VAL(o1) = STk_NaN;
+            return o1;
+          } else if (o2 != old2) {
+            /* We already allocated a new cell for o2, so we just
+             * modify it here! */
+            REAL_VAL(o2) = (REAL_VAL(o1) * REAL_VAL(o2));
+            if (isnan(REAL_VAL(o2)) && signbit(REAL_VAL(o2))) /* convert -nan.0 to +nan.0 */
+              REAL_VAL(o2) = STk_NaN;
+            return o2;
+          } else
+            /* We did NOT allocate a new cell for o1 or o2, so we just
+             * DO allocate it for o1 here! */
+            o1 = double2real(REAL_VAL(o1) * REAL_VAL(o2));
           break;
         }
       case tc_complex:
@@ -2322,6 +2360,8 @@ doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
+  SCM old1 = o1;
+  SCM old2 = o2;
   switch (convert(&o1, &o2)) {
     case tc_bignum:
       {
@@ -2345,6 +2385,23 @@ SCM STk_sub2(SCM o1, SCM o2)
       }
       case tc_real:
         {
+          if (o1 != old1) {
+            /* We already allocated a new cell for o1, so we just
+             * modify it here! */
+            REAL_VAL(o1) = (REAL_VAL(o1) - REAL_VAL(o2));
+            if (isnan(REAL_VAL(o1)) && signbit(REAL_VAL(o1))) /* convert -nan.0 to +nan.0 */
+              REAL_VAL(o1) = STk_NaN;
+            return o1;
+          } else if (o2 != old2) {
+            /* We already allocated a new cell for o2, so we just
+             * modify it here! */
+            REAL_VAL(o2) = (REAL_VAL(o1) - REAL_VAL(o2));
+            if (isnan(REAL_VAL(o2)) && signbit(REAL_VAL(o2))) /* convert -nan.0 to +nan.0 */
+              REAL_VAL(o2) = STk_NaN;
+            return o2;
+          } else
+            /* We did NOT allocate a new cell for o1 or o2, so we just
+             * DO allocate it for o1 here! */
           o1 = double2real(REAL_VAL(o1) - REAL_VAL(o2));
           break;
         }
@@ -2399,6 +2456,8 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
+  SCM old1 = o1;
+  SCM old2 = o2;
   switch (convert(&o1, &o2)) {
     case tc_bignum:
     case tc_integer:
@@ -2408,9 +2467,25 @@ SCM STk_div2(SCM o1, SCM o2)
     case tc_real:
       {
         double r2 = REAL_VAL(o2);
-
-        if (r2 != 1.0)
-          o1 = double2real(REAL_VAL(o1) / r2);
+        if (r2 == 1.0) return o1;
+        if (o1 != old1) {
+          /* We already allocated a new cell for o1, so we just
+           * modify it here! */
+          REAL_VAL(o1) = (REAL_VAL(o1) / REAL_VAL(o2));
+          if (isnan(REAL_VAL(o1)) && signbit(REAL_VAL(o1))) /* convert -nan.0 to +nan.0 */
+            REAL_VAL(o1) = STk_NaN;
+          return o1;
+        } else if (o2 != old2) {
+          /* We already allocated a new cell for o2, so we just
+           * modify it here! */
+          REAL_VAL(o2) = (REAL_VAL(o1) / REAL_VAL(o2));
+          if (isnan(REAL_VAL(o2)) && signbit(REAL_VAL(o2))) /* convert -nan.0 to +nan.0 */
+            REAL_VAL(o2) = STk_NaN;
+          return o2;
+        } else
+          /* We did NOT allocate a new cell for o1 or o2, so we just
+           * DO allocate it for o1 here! */
+        o1 = double2real(REAL_VAL(o1) / r2);
         break;
       }
 
