@@ -2158,11 +2158,8 @@ SCM STk_add2(SCM o1, SCM o2)
         case tc_integer:
           return make_complex(add2(COMPLEX_REAL(o1), o2),
                               COMPLEX_IMAG(o1));
-        default:
-          error_bad_number(o2);
-          break;
+        default: goto add_error;
       }
-      break;
     }
 
     // ========== o1 is a real
@@ -2170,143 +2167,108 @@ SCM STk_add2(SCM o1, SCM o2)
       double d2;
 
       switch (TYPEOF(o2)) {
-        case tc_complex: {
-          return make_complex(add2(o1, COMPLEX_REAL(o2)),
-                              COMPLEX_IMAG(o2));
-        }
-        case tc_real:     { d2 = REAL_VAL(o2);             break; }
-        case tc_rational: { d2 =  rational2double(o2);     break; }
-        case tc_bignum:   { d2 = scheme_bignum2double(o2); break; }
-        case tc_integer:  { d2 = (double) INT_VAL(o2);     break; }
-        default:
-          d2 = 0.0;              // for the compiler
-          error_bad_number(o2);
-          break;
+        case tc_complex:  return make_complex(add2(o1, COMPLEX_REAL(o2)),
+                                             COMPLEX_IMAG(o2));
+        case tc_real:     d2 = REAL_VAL(o2);             break;
+        case tc_rational: d2 =  rational2double(o2);     break;
+        case tc_bignum:   d2 = scheme_bignum2double(o2); break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
+        default:          goto add_error;
       }
       return double2real(REAL_VAL(o1) + d2);
     }
 
     // ========== o1 is a rational
     case tc_rational: {
+      SCM num1, num2, den;
+
       switch (TYPEOF(o2)) {
-        case tc_complex: {
-          return make_complex(add2(o1, COMPLEX_REAL(o2)),
-                              COMPLEX_IMAG(o2));
-        }
-        case tc_real: {
-          double d1 = rational2double(o1);
-          return double2real(d1 + REAL_VAL(o2));
-        }
-        case tc_rational: {
-          SCM num1, num2, den;
-
-          den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
-          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
-          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
-
-          return make_rational(add2(num1, num2), den);
-        }
+        case tc_complex:  return make_complex(add2(o1, COMPLEX_REAL(o2)),
+                                              COMPLEX_IMAG(o2));
+        case tc_real:     return double2real(rational2double(o1) + REAL_VAL(o2));
+        case tc_rational: den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
+                          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
+                          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
+                          return make_rational(add2(num1, num2), den);
         case tc_bignum:
-        case tc_integer:{
-          SCM num1, num2, den;
-
-          den  = RATIONAL_DEN(o1);
-          num1 = RATIONAL_NUM(o1);
-          num2 = mul2(o2, RATIONAL_DEN(o1));
-
-          return make_rational(add2(num1, num2), den);
-        }
-        default:
-          error_bad_number(o2);
-          break;
+        case tc_integer: den  = RATIONAL_DEN(o1);
+                         num1 = RATIONAL_NUM(o1);
+                         num2 = mul2(o2, RATIONAL_DEN(o1));
+                         return make_rational(add2(num1, num2), den);
+        default:         goto add_error;
       }
-      break;
     }
 
     // ========== o1 is a bignum
     case tc_bignum: {
+      mpz_t add, b2;
+      SCM tmp;
+
       switch (TYPEOF(o2)) {
-        case tc_complex: {
-          return make_complex(add2(o1, COMPLEX_REAL(o2)),
-                              COMPLEX_IMAG(o2));
-        }
-        case tc_real: {
-          return double2real(scheme_bignum2double(o1) + REAL_VAL(o2));
-        }
+        case tc_complex:  return make_complex(add2(o1, COMPLEX_REAL(o2)),
+                                              COMPLEX_IMAG(o2));
+        case tc_real:     return double2real(scheme_bignum2double(o1) +REAL_VAL(o2));
         case tc_rational: {
-          SCM num1, num2, den;
+                            SCM num1, num2, den;
 
-          den  = RATIONAL_DEN(o2);
-          num1 = mul2(o1, RATIONAL_DEN(o2));
-          num2 = RATIONAL_NUM(o2);
-
-          return make_rational(add2(num1, num2), den);
-        }
-        case tc_bignum: {
-          mpz_t add;
-          mpz_init(add);
-          mpz_add(add, BIGNUM_VAL(o1), BIGNUM_VAL(o2));
-          o1 = bignum2number(add);
-          mpz_clear(add);
-          return o1;
-        }
-        case tc_integer: {
-          mpz_t add, y;
-          mpz_init(add);
-          mpz_init_set_si(y, INT_VAL(o2));
-          mpz_add(add, BIGNUM_VAL(o1), y);
-          o1 = bignum2number(add);
-          mpz_clear(add);
-          return o1;
-        }
-        default:
-          error_bad_number(o2);
-          break;
+                            den  = RATIONAL_DEN(o2);
+                            num1 = mul2(o1, RATIONAL_DEN(o2));
+                            num2 = RATIONAL_NUM(o2);
+                            return make_rational(add2(num1, num2), den);
+                          }
+        case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
+        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
+        default:          goto add_error;
       }
-      break;
+
+      // if we are here: o1 is a Scheme bignumm and b2 is a GMP bignum
+      mpz_init(add);
+      mpz_add(add, BIGNUM_VAL(o1), b2);
+      tmp = bignum2number(add);
+      mpz_clear(add);
+      if (TYPEOF(o2) == tc_integer) // we initialze b2 here
+        mpz_clear(b2);
+      return tmp;
     }
 
     // ========== o1 is an a fixnum
     case tc_integer: {
+      SCM tmp;
+
       switch (TYPEOF(o2)) {
-        case tc_complex: {
-          return make_complex(add2(o1, COMPLEX_REAL(o2)),
-                              COMPLEX_IMAG(o2));
-        }
-        case tc_real: {
-          return double2real(INT_VAL(o1) + REAL_VAL(o2));
-        }
+        case tc_complex:  return make_complex(add2(o1, COMPLEX_REAL(o2)),
+                                              COMPLEX_IMAG(o2));
+        case tc_real:     return double2real(INT_VAL(o1) + REAL_VAL(o2));
         case tc_rational: {
-          SCM num1, num2, den;
+                            SCM num1, num2, den;
 
-          den  = RATIONAL_DEN(o2);
-          num1 = mul2(o1, RATIONAL_DEN(o2));
-          num2 = RATIONAL_NUM(o2);
-
-          return make_rational(add2(num1, num2), den);
-        }
-        case tc_bignum: {
-          mpz_t add, x;
-          mpz_init(add);
-          mpz_init_set_si(x, INT_VAL(o1));
-          mpz_add(add, x, BIGNUM_VAL(o2));
-          o1 = bignum2number(add);
-          mpz_clear(add);
-          return o1;
-        }
-        case tc_integer: {
-          long add =  (long) INT_VAL(o1) + INT_VAL(o2);
-          return (LONG_FITS_INTEGER(add)) ? MAKE_INT(add): long2scheme_bignum(add);
-        }
-        default:
-          error_bad_number(o2);
-          break;
+                            den  = RATIONAL_DEN(o2);
+                            num1 = mul2(o1, RATIONAL_DEN(o2));
+                            num2 = RATIONAL_NUM(o2);
+                            return make_rational(add2(num1, num2), den);
+                          }
+        case tc_bignum:   {
+                            mpz_t add, x;
+                            mpz_init(add);
+                            mpz_init_set_si(x, INT_VAL(o1));
+                            mpz_add(add, x, BIGNUM_VAL(o2));
+                            tmp = bignum2number(add);
+                            mpz_clear(add); mpz_clear(x);
+                            return tmp;
+                          }
+        case tc_integer:  {
+                             long add =  (long) INT_VAL(o1) + INT_VAL(o2);
+                             return (LONG_FITS_INTEGER(add)) ?
+                               MAKE_INT(add)                 :
+                               long2scheme_bignum(add);
+                           }
+        default:           goto add_error;
       }
-      break;
     }
-    default:
-      error_bad_number(o1);
   }
+
+ add_error:
+  error_cannot_operate("addition", o1, o2);
   return STk_void; // for the compiler
 }
 
