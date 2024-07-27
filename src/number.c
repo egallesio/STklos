@@ -2393,54 +2393,124 @@ doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
-    case tc_bignum:
-      {
-        mpz_t sub;
+  switch (TYPEOF(o1)) {
 
-        mpz_init(sub);
-        mpz_sub(sub, BIGNUM_VAL(o1), BIGNUM_VAL(o2));
-
-        o1 = bignum2number(sub),
-        mpz_clear(sub);
-        break;
+    // ========== o1 is a complex
+    case tc_complex: {
+      switch (TYPEOF(o2)) {
+        case tc_complex:
+          return make_complex(sub2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
+                              sub2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer: return make_complex(sub2(COMPLEX_REAL(o1), o2),
+                                             COMPLEX_IMAG(o1));
+        default: goto sub_error;
       }
-    case tc_integer:
-      {
-        long sub = (long) INT_VAL(o1) - INT_VAL(o2);
-        if (LONG_FITS_INTEGER(sub))
-          o1 = MAKE_INT(sub);
-        else
-          o1 = long2scheme_bignum(sub);
-        break;
+    }
+
+    // ========== o1 is a real
+    case tc_real: {
+      double d2;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  return make_complex(sub2(o1, COMPLEX_REAL(o2)),
+                                              COMPLEX_IMAG(o2));
+        case tc_real:     d2 = REAL_VAL(o2);             break;
+        case tc_rational: d2 = rational2double(o2);     break;
+        case tc_bignum:   d2 = scheme_bignum2double(o2); break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
+        default:          goto sub_error;
       }
-      case tc_real:
-        {
-          o1 = double2real(REAL_VAL(o1) - REAL_VAL(o2));
-          break;
-        }
-      case tc_complex:
-        {
-          o1 = make_complex(sub2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                            sub2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
-          break;
-        }
-      case tc_rational:
-        {
-          SCM num1, num2, den;
+      return double2real(REAL_VAL(o1) - d2);
+    }
 
-          den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
-          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
-          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
+    // ========== o1 is a rational
+    case tc_rational: {
+      SCM num1, num2, den;
 
-          o1 = make_rational(sub2(num1, num2), den);
-          break;
-        }
-      default: error_cannot_operate("subtraction", o1, o2);
+      switch (TYPEOF(o2)) {
+        case tc_complex:  return make_complex(sub2(o1, COMPLEX_REAL(o2)),
+                                              COMPLEX_IMAG(o2));
+        case tc_real:     return double2real(rational2double(o1) - REAL_VAL(o2));
+        case tc_rational: den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
+                          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
+                          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
+                          return make_rational(sub2(num1, num2), den);
+        case tc_bignum:
+        case tc_integer: den  = RATIONAL_DEN(o1);
+                         num1 = RATIONAL_NUM(o1);
+                         num2 = mul2(o2, den);
+                         return make_rational(sub2(num1, num2), den);
+        default:         goto sub_error;
+      }
+    }
+
+    // ========== o1 is a bignum
+    case tc_bignum: {
+      mpz_t sub, b2;
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  return make_complex(sub2(o1, COMPLEX_REAL(o2)),
+                                              COMPLEX_IMAG(o2));
+        case tc_real:     return double2real(scheme_bignum2double(o1) -REAL_VAL(o2));
+        case tc_rational: goto sub_int_and_rational;
+        case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
+        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
+        default:          goto sub_error;
+      }
+
+      // if we are here: o1 is a Scheme bignumm and b2 is a GMP bignum
+      mpz_init(sub);
+      mpz_sub(sub, BIGNUM_VAL(o1), b2);
+      tmp = bignum2number(sub);
+      mpz_clear(sub);
+      if (TYPEOF(o2) == tc_integer) // we initialze b2 here
+        mpz_clear(b2);
+      return tmp;
+    }
+
+    // ========== o1 is an a fixnum
+    case tc_integer: {
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  return make_complex(sub2(o1, COMPLEX_REAL(o2)),
+                                              sub2(MAKE_INT(0), COMPLEX_IMAG(o2)));
+        case tc_real:     return double2real(INT_VAL(o1) - REAL_VAL(o2));
+        case tc_rational: goto sub_int_and_rational;
+        case tc_bignum:   {
+                            mpz_t sub, x;
+                            mpz_init(sub);
+                            mpz_init_set_si(x, INT_VAL(o1));
+                            mpz_sub(sub, x, BIGNUM_VAL(o2));
+                            tmp = bignum2number(sub);
+                            mpz_clear(sub); mpz_clear(x);
+                            return tmp;
+                          }
+        case tc_integer:  {
+                             long sub =  (long) INT_VAL(o1) - INT_VAL(o2);
+                             return (LONG_FITS_INTEGER(sub)) ?
+                               MAKE_INT(sub)                 :
+                               long2scheme_bignum(sub);
+                           }
+        default:           goto sub_error;
+      }
+    }
   }
-  return o1;
-}
 
+ sub_error:
+  error_cannot_operate("difference", o1, o2);
+  return STk_void; // for the compiler
+
+ sub_int_and_rational:   // int can be a tc_bignum or an tc_integer
+  SCM den = RATIONAL_DEN(o2);
+
+  return make_rational(sub2(mul2(o1, den), RATIONAL_NUM(o2)),
+                       den);
+}
 
 /* A test to see if x is 0.0 or - 0.0 */
 #define IS_ZERO_ZEROP(x)  (REALP(x) && fpclassify(REAL_VAL(x)) == FP_ZERO)
