@@ -2283,74 +2283,130 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
-    case tc_bignum:
-      mult_bignum:
-      {
-        mpz_t prod;
+  switch (TYPEOF(o1)) {
 
-        mpz_init(prod);
-        mpz_mul(prod, BIGNUM_VAL(o1), BIGNUM_VAL(o2));
+    // ========== o1 is a complex
+    case tc_complex: {
+      SCM r1 = COMPLEX_REAL(o1);
+      SCM i1 = COMPLEX_IMAG(o1);
 
-        o1 = bignum2number(prod);
-        mpz_clear(prod);
-        break;
+      switch (TYPEOF(o2)) {
+      case tc_complex:  {
+                          SCM r2 = COMPLEX_REAL(o2);
+                          SCM i2 = COMPLEX_IMAG(o2);
+                          return make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
+                                              add2(mul2(r1,i2), mul2(r2, i1)));
+                        }
+      case tc_real:     // fallthrough
+      case tc_rational: // fallthrough
+      case tc_bignum:   // fallthrough
+      case tc_integer:  return make_complex(mul2(r1, o2), mul2(i1, o2));
+      default:          goto mult_error;
       }
-    case tc_integer:
-      {
-        long int i1 = INT_VAL(o1);
-        long int i2 = INT_VAL(o2);
+    }
 
-        o1 = MAKE_INT(i1*i2);
-        if (i1 != 0 && (INT_VAL(o1) / i1) != i2) {
-          o1 = long2scheme_bignum(i1);
-          o2 = long2scheme_bignum(i2);
-          goto mult_bignum;
-        }
-        break;
+    // ========== o1 is a real
+    case tc_real: {
+      double d2;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto mult_o1_complex;
+        case tc_real:     d2 = REAL_VAL(o2);             break;
+        case tc_rational: d2 = rational2double(o2);      break;
+        case tc_bignum:   d2 = scheme_bignum2double(o2); break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
+        default:          goto mult_error;
       }
-      case tc_real:
-        {
-          o1 = double2real(REAL_VAL(o1) * REAL_VAL(o2));
-          break;
-        }
-      case tc_complex:
-        {
-          SCM r1 = COMPLEX_REAL(o1);
-          SCM i1 = COMPLEX_IMAG(o1);
-          SCM r2 = COMPLEX_REAL(o2);
-          SCM i2 = COMPLEX_IMAG(o2);
+      return double2real(REAL_VAL(o1) * d2);
+    }
 
-          /* Take care to complex numbers with a real or imaginary part which
-           * is an infinite, when thy are multiplied by a non complex. In this
-           * case, normal computation of the result will multiply an infinity
-           * with zero, bringing a NaN in the result. In this case, we have
-           * made a useless conversion (but should be pretty rare).
-           */
-          if ((i1 == MAKE_INT(0)) && (IS_INFP(r2) || IS_INFP(i2))) {
-            // o1 was not a complex and o2 contains an infinite
-            o1 = make_complex(mul2(r1,COMPLEX_REAL(o2)),
-                              mul2(r1,COMPLEX_IMAG(o2)));
-          } else if ((i2 == MAKE_INT(0)) && (IS_INFP(r1) || IS_INFP(i1))) {
-            // o2 was not a complex and o1 contains an infinite
-            o1 = make_complex(mul2(r2, COMPLEX_REAL(o1)),
-                              mul2(r2,COMPLEX_IMAG(o1)));
-          } else {
-            // Normal case
-            o1 = make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
-                              add2(mul2(r1,i2), mul2(r2, i1)));
-          }
-          break;
-        }
-      case tc_rational:
-        {
-          o1 = make_rational(mul2(RATIONAL_NUM(o1), RATIONAL_NUM(o2)),
-                             mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2)));
-          break;
-        }
-      default: error_cannot_operate("multiplication", o1, o2);
+    // ========== o1 is a rational
+    case tc_rational: {
+      switch (TYPEOF(o2)) {
+        case tc_complex:  return make_complex(mul2(COMPLEX_REAL(o2), o1),
+                                              mul2(COMPLEX_IMAG(o2), o1));
+        case tc_real:     return double2real(rational2double(o1) * REAL_VAL(o2));
+        case tc_rational: return make_rational(mul2(RATIONAL_NUM(o1),
+                                                    RATIONAL_NUM(o2)),
+                                               mul2(RATIONAL_DEN(o1),
+                                                    RATIONAL_DEN(o2)));
+        case tc_bignum:
+        case tc_integer: return make_rational(mul2(RATIONAL_NUM(o1), o2),
+                                              RATIONAL_DEN(o1));
+        default:         goto mult_error;
+      }
+    }
+
+    // ========== o1 is a bignum
+    case tc_bignum: {
+      mpz_t mult, b2;
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto mult_o1_complex;
+        case tc_real:     return double2real(scheme_bignum2double(o1) *REAL_VAL(o2));
+        case tc_rational: return make_rational(mul2(o1, RATIONAL_NUM(o2)),
+                                               RATIONAL_DEN(o2));
+        case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
+        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
+        default:          goto mult_error;
+      }
+
+      // if we are here: o1 is a Scheme bignumm and b2 is a GMP bignum
+      mpz_init(mult);
+      mpz_mul(mult, BIGNUM_VAL(o1), b2);
+      tmp = bignum2number(mult);
+      mpz_clear(mult);
+      if (TYPEOF(o2) == tc_integer) // we initialze b2 here
+        mpz_clear(b2);
+      return tmp;
+    }
+
+    // ========== o1 is an a fixnum
+    case tc_integer: {
+      mpz_t mult, b1;
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto mult_o1_complex;
+        case tc_real:     return double2real(INT_VAL(o1) * REAL_VAL(o2));
+        case tc_rational: return make_rational(mul2(o1, RATIONAL_NUM(o2)),
+                                               RATIONAL_DEN(o2));
+        case tc_bignum:   mpz_init(mult);
+                          mpz_init_set_si(b1, INT_VAL(o1));
+                          mpz_mul(mult, b1, BIGNUM_VAL(o2));
+                          tmp = bignum2number(mult);
+                          mpz_clear(mult);
+                          mpz_clear(b1);
+                          return tmp;
+        case tc_integer:  {
+                            long int i1 = INT_VAL(o1);
+                            long int i2 = INT_VAL(o2);
+
+                            tmp = MAKE_INT(i1*i2);
+                            if (i1 != 0 && (INT_VAL(tmp) / i1) != i2) {
+                              mpz_init(mult);
+                              mpz_init_set_si(b1, i1);
+                              mpz_mul_si(mult, b1, i2);
+                              tmp = bignum2number(mult);
+                              mpz_clear(mult);
+                              mpz_clear(b1);
+                            }
+                            return tmp;
+                          }
+        default:          goto mult_error;
+      }
+    }
+
+    default: break;
   }
-  return o1;
+
+ mult_o1_complex:    // o1 here can be a real, a bignum or a fixnum
+   return make_complex(mul2(o1,COMPLEX_REAL(o2)),
+                       mul2(o1,COMPLEX_IMAG(o2)));
+  mult_error:
+  error_cannot_operate("multiplication", o1, o2);
+  return STk_void; // for the compiler
 }
 
 DEFINE_PRIMITIVE("*", multiplication, vsubr, (int argc, SCM *argv))
