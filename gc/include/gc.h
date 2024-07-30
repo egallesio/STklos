@@ -222,7 +222,7 @@ GC_API GC_ATTR_DEPRECATED int GC_java_finalization;
                         /* it a bit safer to use non-topologically-     */
                         /* ordered finalization.  Default value is      */
                         /* determined by JAVA_FINALIZATION macro.       */
-                        /* Enables register_finalizer_unreachable to    */
+                        /* Enables GC_register_finalizer_unreachable to */
                         /* work correctly.                              */
                         /* The setter and getter are unsynchronized.    */
 GC_API void GC_CALL GC_set_java_finalization(int);
@@ -916,17 +916,17 @@ GC_API void GC_CALL GC_start_incremental_collection(void);
 /* until it returns 0.                                          */
 GC_API int GC_CALL GC_collect_a_little(void);
 
-/* Allocate an object of size lb bytes.  The client guarantees that     */
-/* as long as the object is live, it will be referenced by a pointer    */
-/* that points to somewhere within the first 256 bytes of the object.   */
-/* (This should normally be declared volatile to prevent the compiler   */
-/* from invalidating this assertion.)  This routine is only useful      */
-/* if a large array is being allocated.  It reduces the chance of       */
-/* accidentally retaining such an array as a result of scanning an      */
+/* Allocate an object of size lb bytes.  The client guarantees that as  */
+/* long as the object is live, it will be referenced by a pointer that  */
+/* points to somewhere within the first GC heap block (hblk) of the     */
+/* object.  (This should normally be declared volatile to prevent the   */
+/* compiler from invalidating this assertion.)  This routine is only    */
+/* useful if a large array is being allocated.  It reduces the chance   */
+/* of accidentally retaining such an array as a result of scanning an   */
 /* integer that happens to be an address inside the array.  (Actually,  */
 /* it reduces the chance of the allocator not finding space for such    */
 /* an array, since it will try hard to avoid introducing such a false   */
-/* reference.)  On a SunOS 4.X or MS Windows system this is recommended */
+/* reference.)  On a SunOS 4.X or Windows system this is recommended    */
 /* for arrays likely to be larger than 100 KB or so.  For other systems,*/
 /* or if the collector is not configured to recognize all interior      */
 /* pointers, the threshold is normally much higher.                     */
@@ -1577,6 +1577,8 @@ GC_API void GC_CALL GC_start_mark_threads(void);
 
   /* Return non-zero (TRUE) if and only if the calling thread is        */
   /* registered with the garbage collector.                             */
+  /* If the thread is finished (e.g. running in a destructor and not    */
+  /* registered manually again), it is considered as not registered.    */
   GC_API int GC_CALL GC_thread_is_registered(void);
 
   /* Notify the collector about the stack and the alt-stack of the      */
@@ -1604,6 +1606,20 @@ GC_API void GC_CALL GC_start_mark_threads(void);
   /* Stop/start the world explicitly.  Not recommended for general use. */
   GC_API void GC_CALL GC_stop_world_external(void);
   GC_API void GC_CALL GC_start_world_external(void);
+
+  /* Provide a verifier/modifier of the stack pointer when pushing the  */
+  /* thread stacks.  This might be useful for a crude integration       */
+  /* with certain coroutine implementations.  (*sp_ptr) is the captured */
+  /* stack pointer of the suspended thread with pthread_id (the latter  */
+  /* is actually of pthread_t type).  The functionality is unsupported  */
+  /* on some targets (the getter always returns 0 in such a case).      */
+  /* Both the setter and the getter acquire the GC lock.  The client    */
+  /* function (if provided) is called with the GC lock acquired, and    */
+  /* might be with the world stopped.                                   */
+  typedef void (GC_CALLBACK * GC_sp_corrector_proc)(void ** /* sp_ptr */,
+                                                    void * /* pthread_id */);
+  GC_API void GC_CALL GC_set_sp_corrector(GC_sp_corrector_proc);
+  GC_API GC_sp_corrector_proc GC_CALL GC_get_sp_corrector(void);
 #endif /* GC_THREADS */
 
 /* Wrapper for functions that are likely to block (or, at least, do not */
@@ -2143,7 +2159,7 @@ GC_API int GC_CALL GC_get_force_unmap_on_gcollect(void);
                     GC_INIT_CONF_IGNORE_WARN; \
                     GC_INIT_CONF_INITIAL_HEAP_SIZE; }
 
-/* win32S may not free all resources on process exit.                   */
+/* win32s may not free all resources on process exit.                   */
 /* This explicitly deallocates the heap.  Defined only for Windows.     */
 GC_API void GC_CALL GC_win32_free_heap(void);
 

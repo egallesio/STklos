@@ -578,9 +578,7 @@ GC_INNER void GC_exclude_static_roots_inner(void *start, void *finish)
     } else {
         next = GC_next_exclusion((ptr_t)start);
     }
-    if (0 != next) {
-      size_t i;
-
+    if (next != NULL) {
       if ((word)(next -> e_start) < (word) finish) {
         /* incomplete error check. */
         ABORT("Exclusion ranges overlap");
@@ -590,14 +588,18 @@ GC_INNER void GC_exclude_static_roots_inner(void *start, void *finish)
           next -> e_start = (ptr_t)start;
           return;
       }
-      next_index = next - GC_excl_table;
+    }
+
+    next_index = GC_excl_table_entries;
+    if (next_index >= MAX_EXCLUSIONS) ABORT("Too many exclusions");
+    if (next != NULL) {
+      size_t i;
+
+      next_index = (size_t)(next - GC_excl_table);
       for (i = GC_excl_table_entries; i > next_index; --i) {
         GC_excl_table[i] = GC_excl_table[i-1];
       }
-    } else {
-      next_index = GC_excl_table_entries;
     }
-    if (GC_excl_table_entries == MAX_EXCLUSIONS) ABORT("Too many exclusions");
     GC_excl_table[next_index].e_start = (ptr_t)start;
     GC_excl_table[next_index].e_end = (ptr_t)finish;
     ++GC_excl_table_entries;
@@ -679,7 +681,8 @@ STATIC void GC_push_conditional_with_exclusions(ptr_t bottom, ptr_t top,
 
 #ifdef THREADS
 
-GC_INNER void GC_push_all_stack_sections(ptr_t lo, ptr_t hi,
+GC_INNER void GC_push_all_stack_sections(
+                        ptr_t lo /* top */, ptr_t hi /* bottom */,
                         struct GC_traced_stack_sect_s *traced_stack_sect)
 {
     while (traced_stack_sect != NULL) {
@@ -751,8 +754,9 @@ STATIC void GC_push_all_stack_partially_eager(ptr_t bottom, ptr_t top,
 }
 
 /* Similar to GC_push_all_stack_sections() but also uses cold_gc_frame. */
-STATIC void GC_push_all_stack_part_eager_sections(ptr_t lo, ptr_t hi,
-        ptr_t cold_gc_frame, struct GC_traced_stack_sect_s *traced_stack_sect)
+STATIC void GC_push_all_stack_part_eager_sections(
+        ptr_t lo /* top */, ptr_t hi /* bottom */, ptr_t cold_gc_frame,
+        struct GC_traced_stack_sect_s *traced_stack_sect)
 {
     GC_ASSERT(traced_stack_sect == NULL || cold_gc_frame == NULL ||
               (word)cold_gc_frame HOTTER_THAN (word)traced_stack_sect);
@@ -890,7 +894,7 @@ GC_INNER void GC_push_roots(GC_bool all, ptr_t cold_gc_frame GC_ATTR_UNUSED)
     /* not robust against mark stack overflow.                          */
     /* Re-register dynamic libraries, in case one got added.            */
     /* There is some argument for doing this as late as possible,       */
-    /* especially on win32, where it can change asynchronously.         */
+    /* especially on Win32, where it can change asynchronously.         */
     /* In those cases, we do it here.  But on other platforms, it's     */
     /* not safe with the world stopped, so we do it earlier.            */
 #   if !defined(REGISTER_LIBRARIES_EARLY)
