@@ -71,4 +71,46 @@
       (= (cos 1.5)
          ((in-module SCHEME cos) 1.5)))
 
+;;; ABS, LABS
+
+(define-external labs(:int)
+  :return-type :int)
+
+(define-external abs(:long)
+  :return-type :long)
+
+(test "abs.1"
+      #f
+      (eq? abs (in-module SCHEME abs)))
+
+(test "abs.2"
+      200
+      (abs -200))
+
+(test "abs.3"
+      200
+      (abs 200))
+
+(test "abs.4"
+            #t
+            (= (abs -65)
+               ((in-module SCHEME abs) -65)))
+
+;; if we don't restore abs, it will cause errors later. Our Scheme abs works for
+;; reals, but the C abs is for ints only...
+(define abs (in-module SCHEME abs))
+
+(test "labs.1"
+      200
+      (labs -200))
+
+(test "labs.2"
+      200
+      (labs 200))
+
+(test "labs.3"
+            #t
+            (= (labs -65)
+               ((in-module SCHEME abs) -65)))
+
 (test-section-end)
