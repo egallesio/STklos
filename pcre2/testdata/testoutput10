@@ -1,6 +1,8 @@
 # This set of tests is for UTF-8 support and Unicode property support, with
 # relevance only for the 8-bit library.
 
+#newline_default lf any anycrlf
+
 # The next 5 patterns have UTF-8 errors
 
 /[�]/utf
@@ -1613,12 +1615,12 @@ No match
     
 # Check name length with non-ASCII characters 
 
-/(?'ABáC678901234567890123456789012'...)/utf
+/(?'ABáC678901234567890123456789012012345678901234567890123456789AB012345678901234567890123456789AB012345678901234567890123456789AB'...)/utf
 
-/(?'ABáC6789012345678901234567890123'...)/utf
-Failed: error 148 at offset 36: subpattern name is too long (maximum 32 code units)
+/(?'ABáC6789012345678901234567890123012345678901234567890123456789AB012345678901234567890123456789AB012345678901234567890123456789AB'...)/utf
+Failed: error 148 at offset 132: subpattern name is too long (maximum 128 code units)
 
-/(?'ABZC6789012345678901234567890123'...)/utf
+/(?'ABZC6789012345678901234567890123012345678901234567890123456789AB012345678901234567890123456789AB012345678901234567890123456789AB'...)/utf
 
 /(?(n/utf
 Failed: error 142 at offset 4: syntax error in subpattern name (missing terminator?)
@@ -1644,6 +1646,38 @@ Failed: error 142 at offset 5: syntax error in subpattern name (missing terminat
 Partial match: ab
 \= Expect no match
     ab\x80cdef\=ph
+No match
+
+/.a/match_invalid_utf
+    ab\=ph
+Partial match: b
+    ab\=ps
+Partial match: b
+    b\xf0\x91\x88b\=ph
+Partial match: b
+    b\xf0\x91\x88b\=ps
+Partial match: b
+    b\xf0\x91\x88\xb4a
+ 0: \x{11234}a
+\= Expect no match
+    b\x80\=ph
+No match
+    b\x80\=ps
+No match
+    b\xf0\x91\x88\=ph
+No match
+    b\xf0\x91\x88\=ps
+No match
+
+/.a$/match_invalid_utf
+    ab\=ph
+Partial match: b
+    ab\=ps
+Partial match: b
+\= Expect no match
+    b\xf0\x91\x98\=ph
+No match
+    b\xf0\x91\x98\=ps
 No match
 
 /ab$/match_invalid_utf
@@ -1880,5 +1914,15 @@ Subject length lower bound = 1
 Partial match: 
     qchq\=ps
 Partial match: 
+
+/line1\nbreak/firstline,utf,match_invalid_utf
+    line1\nbreak
+ 0: line1\x{0a}break
+    line0\nline1\nbreak
+No match
+
+/A\z/utf,match_invalid_utf
+    A\x80\x42\n
+No match
 
 # End of testinput10
