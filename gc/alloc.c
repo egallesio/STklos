@@ -417,9 +417,11 @@ GC_API void GC_CALL GC_start_incremental_collection(void)
     if (!GC_incremental) return;
     LOCK();
     GC_should_start_incremental_collection = TRUE;
-    ENTER_GC();
-    GC_collect_a_little_inner(1);
-    EXIT_GC();
+    if (!GC_dont_gc) {
+      ENTER_GC();
+      GC_collect_a_little_inner(1);
+      EXIT_GC();
+    }
     UNLOCK();
 # endif
 }
@@ -715,8 +717,6 @@ GC_INNER void GC_collect_a_little_inner(int n)
     IF_CANCEL(int cancel_state;)
 
     GC_ASSERT(I_HOLD_LOCK());
-    if (GC_dont_gc) return;
-
     DISABLE_CANCEL(cancel_state);
     if (GC_incremental && GC_collection_in_progress()) {
         int i;
@@ -734,7 +734,7 @@ GC_INNER void GC_collect_a_little_inner(int n)
             GC_parallel_mark_disabled = FALSE;
 #       endif
 
-        if (i < max_deficit) {
+        if (i < max_deficit && !GC_dont_gc) {
             /* Need to finish a collection.     */
 #           ifdef SAVE_CALL_CHAIN
                 GC_save_callers(GC_last_stack);
@@ -765,7 +765,7 @@ GC_INNER void GC_collect_a_little_inner(int n)
             if (GC_deficit < 0)
                 GC_deficit = 0;
         }
-    } else {
+    } else if (!GC_dont_gc) {
         GC_maybe_gc();
     }
     RESTORE_CANCEL(cancel_state);
@@ -780,9 +780,11 @@ GC_API int GC_CALL GC_collect_a_little(void)
     DCL_LOCK_STATE;
 
     LOCK();
-    ENTER_GC();
-    GC_collect_a_little_inner(1);
-    EXIT_GC();
+    if (!GC_dont_gc) {
+      ENTER_GC();
+      GC_collect_a_little_inner(1);
+      EXIT_GC();
+    }
     result = (int)GC_collection_in_progress();
     UNLOCK();
     if (!result && GC_debugging_started) GC_print_all_smashed();
@@ -1271,9 +1273,12 @@ STATIC void GC_finish_collection(void)
 #   endif
 }
 
+STATIC word GC_heapsize_at_forced_unmap = 0;
+                                /* accessed with the allocation lock held */
+
 /* If stop_func == 0 then GC_default_stop_func is used instead.         */
 STATIC GC_bool GC_try_to_collect_general(GC_stop_func stop_func,
-                                         GC_bool force_unmap GC_ATTR_UNUSED)
+                                         GC_bool force_unmap)
 {
     GC_bool result;
     IF_USE_MUNMAP(int old_unmap_threshold;)
@@ -1284,6 +1289,11 @@ STATIC GC_bool GC_try_to_collect_general(GC_stop_func stop_func,
     if (GC_debugging_started) GC_print_all_smashed();
     GC_INVOKE_FINALIZERS();
     LOCK();
+    if (force_unmap) {
+      /* Record current heap size to make heap growth more conservative */
+      /* afterwards (as if the heap is growing from zero size again).   */
+      GC_heapsize_at_forced_unmap = GC_heapsize;
+    }
     DISABLE_CANCEL(cancel_state);
 #   ifdef USE_MUNMAP
       old_unmap_threshold = GC_unmap_threshold;
@@ -1324,13 +1334,8 @@ GC_API void GC_CALL GC_gcollect(void)
       GC_print_all_errors();
 }
 
-STATIC word GC_heapsize_at_forced_unmap = 0;
-
 GC_API void GC_CALL GC_gcollect_and_unmap(void)
 {
-    /* Record current heap size to make heap growth more conservative   */
-    /* afterwards (as if the heap is growing from zero size again).     */
-    GC_heapsize_at_forced_unmap = GC_heapsize;
     /* Collect and force memory unmapping to OS. */
     (void)GC_try_to_collect_general(GC_never_stop_func, TRUE);
 }
@@ -1457,7 +1462,18 @@ STATIC void GC_add_to_heap(struct hblk *p, size_t bytes)
     if ((word)p + bytes >= (word)GC_greatest_plausible_heap_addr) {
         GC_greatest_plausible_heap_addr = (void *)endp;
     }
-
+#   ifdef SET_REAL_HEAP_BOUNDS
+      if ((word)p < GC_least_real_heap_addr
+          || EXPECT(0 == GC_least_real_heap_addr, FALSE))
+        GC_least_real_heap_addr = (word)p - sizeof(word);
+      if (endp > GC_greatest_real_heap_addr) {
+#       ifdef INCLUDE_LINUX_THREAD_DESCR
+          /* Avoid heap intersection with the static data roots. */
+          GC_exclude_static_roots_inner((void *)p, (void *)endp);
+#       endif
+        GC_greatest_real_heap_addr = endp;
+      }
+#   endif
     if (old_capacity > 0) {
 #     ifndef GWW_VDB
         /* Recycling may call GC_add_to_heap() again but should not     */
@@ -1562,13 +1578,12 @@ GC_INNER GC_bool GC_expand_hp_inner(word n)
     }
     space = GET_MEM(bytes);
     if (EXPECT(NULL == space, FALSE)) {
-        WARN("Failed to expand heap by %" WARN_PRIdPTR " bytes\n",
-             (word)bytes);
+        WARN("Failed to expand heap by %" WARN_PRIuPTR " KiB\n", bytes >> 10);
         return(FALSE);
     }
     GC_add_to_our_memory((ptr_t)space, bytes);
     GC_INFOLOG_PRINTF("Grow heap to %lu KiB after %lu bytes allocated\n",
-                      TO_KiB_UL(GC_heapsize + (word)bytes),
+                      TO_KiB_UL(GC_heapsize + bytes),
                       (unsigned long)GC_bytes_allocd);
 
     /* Adjust heap limits generously for blacklisting to work better.   */
@@ -1724,7 +1739,10 @@ GC_INNER GC_bool GC_collect_or_expand(word needed_blocks,
         GC_gcollect_inner();
       } else {
 #       if !defined(AMIGA) || !defined(GC_AMIGA_FASTALLOC)
-          WARN("Out of Memory! Heap size: %" WARN_PRIdPTR " MiB."
+#         ifdef USE_MUNMAP
+            GC_ASSERT(GC_heapsize >= GC_unmapped_bytes);
+#         endif
+          WARN("Out of Memory! Heap size: %" WARN_PRIuPTR " MiB."
                " Returning NULL!\n", (GC_heapsize - GC_unmapped_bytes) >> 20);
 #       endif
         RESTORE_CANCEL(cancel_state);
@@ -1754,7 +1772,8 @@ GC_INNER ptr_t GC_allocobj(size_t gran, int kind)
     while (*flh == 0) {
       ENTER_GC();
 #     ifndef GC_DISABLE_INCREMENTAL
-        if (GC_incremental && GC_time_limit != GC_TIME_UNLIMITED) {
+        if (GC_incremental && GC_time_limit != GC_TIME_UNLIMITED
+            && !GC_dont_gc) {
           /* True incremental mode, not just generational.      */
           /* Do our share of marking work.                      */
           GC_collect_a_little_inner(1);
@@ -1777,7 +1796,7 @@ GC_INNER ptr_t GC_allocobj(size_t gran, int kind)
         if (NULL == *flh) {
           ENTER_GC();
           if (GC_incremental && GC_time_limit == GC_TIME_UNLIMITED
-              && !tried_minor) {
+              && !tried_minor && !GC_dont_gc) {
             GC_collect_a_little_inner(1);
             tried_minor = TRUE;
           } else {

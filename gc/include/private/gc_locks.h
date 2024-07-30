@@ -37,12 +37,6 @@
 
 #  ifdef PCR
      GC_EXTERN PCR_Th_ML GC_allocate_ml;
-#    if defined(CPPCHECK)
-#      define DCL_LOCK_STATE /* empty */
-#    else
-#      define DCL_LOCK_STATE \
-         PCR_ERes GC_fastLockRes; PCR_sigset_t GC_old_sig_mask
-#    endif
 #    define UNCOND_LOCK() PCR_Th_ML_Acquire(&GC_allocate_ml)
 #    define UNCOND_UNLOCK() PCR_Th_ML_Release(&GC_allocate_ml)
 #  elif defined(NN_PLATFORM_CTR) || defined(NINTENDO_SWITCH)
@@ -151,8 +145,6 @@
 #     define USE_SPIN_LOCK
       GC_EXTERN volatile AO_TS_t GC_allocate_lock;
       GC_INNER void GC_lock(void);
-        /* Allocation lock holder.  Only set if acquired by client through */
-        /* GC_call_with_alloc_lock.                                        */
 #     ifdef GC_ASSERTIONS
 #        define UNCOND_LOCK() \
               { GC_ASSERT(I_DONT_HOLD_LOCK()); \
@@ -199,6 +191,7 @@
 #    endif /* USE_PTHREAD_LOCKS */
 #    ifdef GC_ASSERTIONS
        GC_EXTERN unsigned long GC_lock_holder;
+       /* The allocator lock holder.    */
 #      define SET_LOCK_HOLDER() \
                 GC_lock_holder = NUMERIC_THREAD_ID(pthread_self())
 #      define UNSET_LOCK_HOLDER() GC_lock_holder = NO_THREAD

@@ -12,11 +12,9 @@
  */
 
 /*
- * The MS Windows specific part of de.
+ * The Windows specific part of de.
  * This started as the generic Windows application template
  * but significant parts didn't survive to the final version.
- *
- * This was written by a nonexpert windows programmer.
  */
 #if defined(__BORLANDC__) || defined(__CYGWIN__) || defined(__MINGW32__) \
     || defined(__NT__) || defined(_WIN32) || defined(WIN32)
@@ -26,6 +24,8 @@
 #endif
 #define NOSERVICE
 #include <windows.h>
+
+#include <ctype.h>
 
 #include "gc.h"
 #include "cord.h"

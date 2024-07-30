@@ -23,12 +23,11 @@
 #include "gc_disclaim.h"
 
 #define NOT_GCBUILD
-#include "private/gc_priv.h" /* for CLOCK_TYPE, COVERT_DATAFLOW, GC_random */
+#include "private/gc_priv.h"
 
-#ifdef LINT2
-# undef rand
-# define rand() (int)GC_random()
-#endif
+#undef rand
+static GC_RAND_STATE_T seed;
+#define rand() GC_RAND_NEXT(&seed)
 
 #define my_assert(e) \
     if (!(e)) { \
@@ -63,9 +62,9 @@ testobj_t testobj_new(int model)
     switch (model) {
 #     ifndef GC_NO_FINALIZATION
         case 0:
-            obj = GC_NEW(struct testobj_s);
+            obj = (struct testobj_s *)GC_malloc(sizeof(struct testobj_s));
             if (obj != NULL)
-              GC_REGISTER_FINALIZER_NO_ORDER(obj, testobj_finalize,
+              GC_register_finalizer_no_order(obj, testobj_finalize,
                                              &free_count, NULL, NULL);
             break;
 #     endif
@@ -74,7 +73,7 @@ testobj_t testobj_new(int model)
                                                  &fclos);
             break;
         case 2:
-            obj = GC_NEW(struct testobj_s);
+            obj = (struct testobj_s *)GC_malloc(sizeof(struct testobj_s));
             break;
         default:
             exit(-1);
@@ -128,7 +127,7 @@ int main(int argc, char **argv)
     if (GC_get_find_leak())
         printf("This test program is not designed for leak detection mode\n");
 
-    keep_arr = (testobj_t *)GC_MALLOC(sizeof(void *) * KEEP_CNT);
+    keep_arr = (testobj_t *)GC_malloc(sizeof(void *) * KEEP_CNT);
     if (NULL == keep_arr) {
         fprintf(stderr, "Out of memory!\n");
         exit(3);
