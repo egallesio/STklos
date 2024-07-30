@@ -56,4 +56,19 @@
       5
       (strlen "abcde"))
 
+;;; COS
+
+(define-external cos(:double)
+  :return-type :double)
+
+;; check that we actually shadowed the original 'cos' in Scheme:
+(test "cos.1"
+      #f
+      (eq? cos (in-module SCHEME cos)))
+
+(test "cos.2"
+      #t
+      (= (cos 1.5)
+         ((in-module SCHEME cos) 1.5)))
+
 (test-section-end)
