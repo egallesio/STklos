@@ -73,6 +73,7 @@ case "${host}" in
 	;;
   hppa*64-*-hpux*)
 	TARGET=PA64_HPUX; TARGETDIR=pa
+	SOURCES="ffi64.c hpux64.S"
 	;;
   hppa*-*-hpux*)
 	TARGET=PA_HPUX; TARGETDIR=pa
@@ -204,7 +205,7 @@ case "${host}" in
   powerpc-*-eabi*)
 	TARGET=POWERPC; TARGETDIR=powerpc
 	;;
-  powerpc-*-beos*)
+  powerpc-*-beos* | powerpc-*-haiku*)
 	TARGET=POWERPC; TARGETDIR=powerpc
 	;;
   powerpc-*-darwin* | powerpc64-*-darwin*)
@@ -262,6 +263,11 @@ case "${host}" in
   vax-*-*)
 	TARGET=VAX; TARGETDIR=vax
 	SOURCES="ffi.c elfbsd.S"
+	;;
+
+  wasm32-*-*)
+	TARGET=wasm32; TARGETDIR=wasm32
+	SOURCES="ffi.c"
 	;;
 
   xtensa*-*)

@@ -2,7 +2,7 @@ dnl Process this with autoconf to create configure
 
 AC_PREREQ([2.71])
 
-AC_INIT([libffi],[3.4.4],[http://github.com/libffi/libffi/issues])
+AC_INIT([libffi],[3.4.6],[http://github.com/libffi/libffi/issues])
 AC_CONFIG_HEADERS([fficonfig.h])
 
 AC_CANONICAL_TARGET
@@ -70,10 +70,6 @@ AM_MAINTAINER_MODE
 AC_CHECK_HEADERS(sys/memfd.h)
 AC_CHECK_FUNCS([memfd_create])
 
-AC_CHECK_HEADERS(sys/mman.h)
-AC_CHECK_FUNCS([mmap mkostemp mkstemp])
-AC_FUNC_MMAP_BLACKLIST
-
 dnl The -no-testsuite modules omit the test subdir.
 AM_CONDITIONAL(TESTSUBDIR, test -d $srcdir/testsuite)
 
@@ -99,7 +95,7 @@ AC_CHECK_INCLUDES_DEFAULT
 AC_PROG_EGREP
 
 AC_CHECK_FUNCS(memcpy)
-AC_FUNC_ALLOCA
+AC_CHECK_HEADERS(alloca.h)
 
 AC_CHECK_SIZEOF(double)
 AC_CHECK_SIZEOF(long double)
@@ -302,7 +298,7 @@ if test "x$GCC" = "xyes"; then
   	echo 'int __attribute__ ((visibility ("hidden"))) foo (void) { return 1  ; }' > conftest.c
   	libffi_cv_hidden_visibility_attribute=no
   	if AC_TRY_COMMAND(${CC-cc} -Werror -S conftest.c -o conftest.s 1>&AS_MESSAGE_LOG_FD); then
-  	    if $EGREP '(\.hidden|\.private_extern).*foo' conftest.s >/dev/null; then
+  	    if $EGREP '(\.hidden|\.private_extern).*foo|foo.*,hidden' conftest.s >/dev/null; then
   		libffi_cv_hidden_visibility_attribute=yes
   	    fi
   	fi
