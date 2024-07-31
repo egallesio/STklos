@@ -56,4 +56,90 @@
       5
       (strlen "abcde"))
 
+;;; COS
+
+(define-external cos(:double)
+  :return-type :double)
+
+;; check that we actually shadowed the original 'cos' in Scheme:
+(test "cos.1"
+      #f
+      (eq? cos (in-module SCHEME cos)))
+
+(test "cos.2"
+      #t
+      (= (cos 1.5)
+         ((in-module SCHEME cos) 1.5)))
+
+;;; ABS, LABS
+
+(define-external labs(:int)
+  :return-type :int)
+
+(define-external abs(:long)
+  :return-type :long)
+
+(test "abs.1"
+      #f
+      (eq? abs (in-module SCHEME abs)))
+
+(test "abs.2"
+      200
+      (abs -200))
+
+(test "abs.3"
+      200
+      (abs 200))
+
+(test "abs.4"
+            #t
+            (= (abs -65)
+               ((in-module SCHEME abs) -65)))
+
+;; if we don't restore abs, it will cause errors later. Our Scheme abs works for
+;; reals, but the C abs is for ints only...
+(define abs (in-module SCHEME abs))
+
+(test "labs.1"
+      200
+      (labs -200))
+
+(test "labs.2"
+      200
+      (labs 200))
+
+(test "labs.3"
+            #t
+            (= (labs -65)
+               ((in-module SCHEME abs) -65)))
+
+;;; NULL pointer and STRTOL
+
+(test "null cpointer" #t (cpointer-null? (%make-cpointer-null)))
+
+(define-external strtol(:string :pointer :int)
+  :return-type :long)
+
+;; base 8
+(test "strtol.1"
+      513
+      (strtol "1001" #void 8))
+
+;; base 10
+(test "strtol.2"
+      1001
+      (strtol "1001" #void 10))
+
+;; base 2
+(test "strtol.3"
+      9
+      (strtol "1001" #void 2))
+
+;; base 16
+(test "strtol.4"
+      6699
+      (strtol "1a2b" #void 16))
+
+
+
 (test-section-end)
