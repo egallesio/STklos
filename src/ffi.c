@@ -496,7 +496,7 @@ static int exec_callback(SCM callback, ...)
  * it is used in the gtk-gtklos-base ScmPkg (a callback can be called
  * with one or two pointers. Hopefully, callbacks were not documened
  * in previous versions of STklos ;-)
- * 
+ *
  * 2021/06/09: This code was used before for GTk support. It doesn't
  * seem useful anymore. It is kept here for reference
  */
@@ -690,7 +690,12 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
   return STk_void;
 }
 
-
+/* Being able to make a NULL pointer is dangerous, but some C
+   functions do require a NULL pointer as argument, so we have it
+   here, as an STklos hidden primitive. */
+DEFINE_PRIMITIVE("%make-cpointer-null", make_cpointer_null, subr0, ()) {
+  return STk_make_Cpointer(NULL, STk_void, STk_false);
+}
 
 #else /* HAVE_FFI */
 static void error_no_ffi(void)
@@ -722,6 +727,9 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
                  (SCM obj, SCM val, SCM type))
 { error_no_ffi(); return STk_void;}
 
+DEFINE_PRIMITIVE("%make-cpointer-null", make_cpointer_null, subr0, ()) {
+{ error_no_ffi(); return STk_void;}
+
 #endif
 
 /* ======================================================================
@@ -740,5 +748,7 @@ int STk_init_ffi(void)
   ADD_PRIMITIVE(get_symbol_address);
   ADD_PRIMITIVE(get_typed_ext_var);
   ADD_PRIMITIVE(set_typed_ext_var);
+
+  ADD_PRIMITIVE(make_cpointer_null);
   return TRUE;
 }
