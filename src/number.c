@@ -2600,62 +2600,47 @@ SCM STk_div2(SCM o1, SCM o2)
 
     // ========== o1 is a complex
     case tc_complex: {
-      switch (TYPEOF(o2)) {  //FIXME: too complex
-        case tc_complex:  {
-          SCM tmp, new_r, new_i;
+      SCM r1 = COMPLEX_REAL(o1);
+      SCM i1 = COMPLEX_IMAG(o1);
 
-          tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
-                       mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
-          new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          return make_complex(new_r, new_i);
+      switch (TYPEOF(o2)) {
+        case tc_complex: {
+          SCM r2  = COMPLEX_REAL(o2);
+          SCM i2  = COMPLEX_IMAG(o2);
+          SCM tmp = add2(mul2(r2, r2), mul2(i2, i2));
+          return make_complex(div2(add2(mul2(r1, r2), mul2(i1, i2)), tmp),
+                              div2(sub2(mul2(i1, r2), mul2(r1, i2)), tmp));
         }
         case tc_real:     // fallthrough
         case tc_rational: // fallthrough
         case tc_bignum:   // fallthrough
-        case tc_integer: return make_complex(div2(COMPLEX_REAL(o1), o2),
-                                             div2(COMPLEX_IMAG(o1), o2));
+        case tc_integer: return make_complex(div2(r1, o2),
+                                             div2(i1, o2));
         default: goto div_error;
       }
     }
-      // ========== o1 is a real
+
+    // ========== o1 is a real
     case tc_real: {
       double d2;
 
       switch (TYPEOF(o2)) {
-        case tc_complex: {
-          SCM a   = COMPLEX_REAL(o2);
-          SCM b   = COMPLEX_IMAG(o2);
-          SCM tmp = add2(mul2(a, a), mul2(b, b));
-
-          return make_complex(div2(mul2(a, o1), tmp),
-                              div2(mul2(b, o1), tmp));
-        }
+        case tc_complex:  goto div_x_by_a_complex;
         case tc_real:     d2 = REAL_VAL(o2);             break;
         case tc_rational: d2 = rational2double(o2);      break;
         case tc_bignum:   d2 = scheme_bignum2double(o2); break;
-        case tc_integer:  if (INT_VAL(o2) == 0) error_divide_by_0(o1);
-          d2 = (double) INT_VAL(o2);     break;
+        case tc_integer:  if (INT_VAL(o2) == 0)
+                            error_divide_by_0(o1);
+                          d2 = (double) INT_VAL(o2);     break;
         default:          goto div_error;
       }
       return double2real(REAL_VAL(o1) / d2);
     }
 
-      // ========== o1 is a rational
+    // ========== o1 is a rational
     case tc_rational: {
       switch (TYPEOF(o2)) {
-        case tc_complex: {
-          SCM a   = COMPLEX_REAL(o2);
-          SCM b   = COMPLEX_IMAG(o2);
-          SCM tmp = add2(mul2(a, a), mul2(b, b));
-
-          return make_complex(div2(mul2(a, o1), tmp),
-                              div2(mul2(b, o1), tmp));
-        }
+        case tc_complex:  goto div_x_by_a_complex;
         case tc_real:     return double2real(rational2double(o1) / REAL_VAL(o2));
         case tc_rational: return make_rational(mul2(RATIONAL_NUM(o1),
                                                     RATIONAL_DEN(o2)),
@@ -2664,49 +2649,37 @@ SCM STk_div2(SCM o1, SCM o2)
         case tc_bignum:
         case tc_integer: return make_rational(mul2(RATIONAL_DEN(o1), o2),
                                               RATIONAL_NUM(o1));
-        default: goto div_error;
+        default:         goto div_error;
       }
     }
 
-      // ========== o1 is a bignum
-    case tc_bignum: {
-      switch (TYPEOF(o2)) {
-        case tc_complex: {
-          SCM a   = COMPLEX_REAL(o2);
-          SCM b   = COMPLEX_IMAG(o2);
-          SCM tmp = add2(mul2(a, a), mul2(b, b));
-
-          return make_complex(div2(mul2(a, o1), tmp),
-                              div2(mul2(b, o1), tmp));
-        }
-        case tc_real:     return double2real(bignum2double(o1) / REAL_VAL(o2));
-        case tc_rational: return make_rational(mul2(o1, RATIONAL_DEN(o2)),
-                                               RATIONAL_NUM(o2));
-        case tc_bignum:
-        case tc_integer: return make_rational(o1, o2);
-        default: goto div_error;
-      }
-    }
-
-      // ========== o1 is a fixnum
+      // ========== o1 is a bignum or a fixnum
+    case tc_bignum:
     case tc_integer: {
       switch (TYPEOF(o2)) {
-        case tc_complex: {
-          SCM a   = COMPLEX_REAL(o2);
-          SCM b   = COMPLEX_IMAG(o2);
-          SCM tmp = add2(mul2(a, a), mul2(b, b));
-        
-          return make_complex(div2(mul2(a, o1), tmp),
-                              div2(mul2(b, o1), tmp));
-        }
-        case tc_real:     return double2real((double) INT_VAL(o1) / REAL_VAL(o2));
+        case tc_complex:  goto div_x_by_a_complex;
+        case tc_real:     if (TYPEOF(o1) == tc_bignum)
+                            return double2real(bignum2double(o1) /REAL_VAL(o2));
+                          else
+                            return double2real((double) INT_VAL(o1) /REAL_VAL(o2));
         case tc_rational: return make_rational(mul2(o1, RATIONAL_DEN(o2)),
                                                RATIONAL_NUM(o2));
         case tc_bignum:
-        case tc_integer: return make_rational(o1, o2);
-        default: goto div_error;
+        case tc_integer:  return make_rational(o1, o2);
+        default:          goto div_error;
       }
     }
+
+    default: goto div_error;
+  }
+
+ div_x_by_a_complex: {
+  SCM a   = COMPLEX_REAL(o2);
+  SCM b   = COMPLEX_IMAG(o2);
+  SCM tmp = add2(mul2(a, a), mul2(b, b));
+
+  return make_complex(div2(mul2(a, o1), tmp),
+                      div2(mul2(b, o1), tmp));
   }
 
  div_error:
