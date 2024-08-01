@@ -95,9 +95,7 @@ static double plus_inf, minus_inf;
 double STk_NaN;
 
 /**** forward declarations ****/
-static type_cell convert(SCM *px, SCM *py);
 static long do_compare(SCM x, SCM y);
-
 static int zerop(SCM n);
 static int negativep(SCM n);
 static int positivep(SCM n);
@@ -779,14 +777,25 @@ static double rational2double(SCM r)
 {
   SCM num = RATIONAL_NUM(r);
   SCM den = RATIONAL_DEN(r);
+  double d;
+  mpz_t x;
 
-  switch (convert(&num, &den)) {
-    case tc_integer: return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
-    case tc_bignum:  return bigrational2double(BIGNUM_VAL(num), BIGNUM_VAL(den));
-    default:         STk_panic("bad rational ~S", r);
+  if (TYPEOF(num) == tc_integer && TYPEOF(den) == tc_integer) // both are fixnums
+    return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
+
+  if (TYPEOF(num) == tc_bignum && TYPEOF(den) == tc_bignum)   // both are bignums
+    return bigrational2double(BIGNUM_VAL(num), BIGNUM_VAL(den));
+  if (TYPEOF(num) == tc_integer) {             // num is a fixnum, den is a bignum
+    mpz_init_set_si(x, INT_VAL(num));
+    d =  bigrational2double(x, BIGNUM_VAL(den));
+  } else {                                     // num is a bignum, den is a fixnum
+    mpz_init_set_si(x, INT_VAL(den));
+    d = bigrational2double(BIGNUM_VAL(num), x);
   }
-  return 0.0; /* never reached */
+  mpz_clear(x);
+  return d;
 }
+
 
 static inline SCM rational2real(SCM r)
 {
@@ -887,71 +896,6 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
 
     default: return STk_void; /* never reached (for the gcc static analyzer)  */
   }
-}
-
-
-/*===== The general conversion routine ==== */
-
-static type_cell convert(SCM *px, SCM *py)
-{
-  SCM x = *px;
-  SCM y = *py;
-
-  if (TYPEOF(x)==TYPEOF(y)) return(TYPEOF(x)); /* avoid testing on current cases */
-  switch (TYPEOF(x)) {
-    case tc_complex:
-            switch (TYPEOF(y)) {
-              case tc_complex: /*already done */
-              case tc_real:
-              case tc_rational:
-              case tc_bignum:
-              case tc_integer:  *py = Cmake_complex(y, MAKE_INT(0)); break;
-              default:          error_bad_number(y);                 break;
-            }
-            break;
-    case tc_real:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:     /* already done */                      break;
-              case tc_rational: *py = rational2real(y);                 break;
-              case tc_bignum:   *py = scheme_bignum2real(y);            break;
-              case tc_integer:  *py = double2real((double) INT_VAL(y)); break;
-              default:          error_bad_number(y);                    break;
-            }
-            break;
-    case tc_rational:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));   break;
-              case tc_real:     *px = rational2real(x);                break;
-              case tc_rational: /* already done */                     break;
-              case tc_bignum:   /* no break */
-              case tc_integer:  *py = Cmake_rational(y , MAKE_INT(1)); break;
-              default:          error_bad_number(y);                   break;
-            }
-            break;
-    case tc_bignum:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:     *px = scheme_bignum2real(x);            break;
-              case tc_rational: *px = Cmake_rational(x , MAKE_INT(1));  break;
-              case tc_bignum:   /* already done */                      break;
-              case tc_integer:  *py = long2scheme_bignum(INT_VAL(y));   break;
-              default:          error_bad_number(y);                    break;
-            }
-            break;
-    case tc_integer:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:     *px = double2real((double) INT_VAL(x)); break;
-              case tc_rational: *px = Cmake_rational(x,  MAKE_INT(1));  break;
-              case tc_bignum:   *px = long2scheme_bignum(INT_VAL(x));   break;
-              case tc_integer:  /* already done */                      break;
-              default:          error_bad_number(y);                    break;
-            }
-            break;
-    default: error_bad_number(x);
-  }
-  return TYPEOF(*px);
 }
 
 
