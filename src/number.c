@@ -2614,7 +2614,7 @@ SCM STk_div2(SCM o1, SCM o2)
   SCM tmp = add2(mul2(a, a), mul2(b, b));
 
   return make_complex(div2(mul2(a, o1), tmp),
-                      div2(mul2(b, o1), tmp));
+                      sub2(MAKE_INT(0), div2(mul2(b, o1), tmp)));
   }
 }
 
