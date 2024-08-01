@@ -2579,8 +2579,8 @@ SCM STk_div2(SCM o1, SCM o2)
                                                mul2(RATIONAL_DEN(o1),
                                                     RATIONAL_NUM(o2)));
         case tc_bignum:
-        case tc_integer: return make_rational(mul2(RATIONAL_DEN(o1), o2),
-                                              RATIONAL_NUM(o1));
+        case tc_integer: return make_rational(RATIONAL_NUM(o1),
+                                              mul2(RATIONAL_DEN(o1), o2));
         default:         goto div_error;
       }
     }
@@ -2591,9 +2591,11 @@ SCM STk_div2(SCM o1, SCM o2)
       switch (TYPEOF(o2)) {
         case tc_complex:  goto div_x_by_a_complex;
         case tc_real:     if (TYPEOF(o1) == tc_bignum)
-                            return double2real(bignum2double(o1) /REAL_VAL(o2));
+                            return double2real(bignum2double(BIGNUM_VAL(o1))
+                                                             / REAL_VAL(o2));
                           else
-                            return double2real((double) INT_VAL(o1) /REAL_VAL(o2));
+                            return double2real((double) INT_VAL(o1)
+                                               / REAL_VAL(o2));
         case tc_rational: return make_rational(mul2(o1, RATIONAL_DEN(o2)),
                                                RATIONAL_NUM(o2));
         case tc_bignum:
