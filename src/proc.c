@@ -180,8 +180,8 @@ DEFINE_PRIMITIVE("%set-procedure-name!", set_procedure_name, subr2, (SCM obj, SC
 <doc EXT closure?
  * (closure? obj)
  *
- * Returns {{true}} if |obj| is a procedure created with the |lambda|
- * syntax and {{false}} otherwise.
+ * Returns |#t| if |obj| is a procedure created with the |lambda|
+ * syntax and |#f| otherwise.
  *
  * Note that primitive procedures (those which are written in C) are
  * *not* closures:
