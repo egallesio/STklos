@@ -180,8 +180,25 @@ DEFINE_PRIMITIVE("%set-procedure-name!", set_procedure_name, subr2, (SCM obj, SC
 <doc EXT closure?
  * (closure? obj)
  *
- * Returns {{true}} if |obj| is a procedure created with the |lambda| syntax and
- * {{false}} otherwise.
+ * Returns |#t| if |obj| is a procedure created with the |lambda|
+ * syntax and |#f| otherwise.
+ *
+ * Note that primitive procedures (those which are written in C) are
+ * *not* closures:
+ *
+ * @lisp
+ * (define (cube x) (* x x x))
+ * (closure? cube)               => #t
+ *
+ * (define square-root sqrt)
+ * (eq? square-root sqrt)        => #t
+ * (closure? square-root)        => #f
+ *
+ * (closure? 10)                 => #f
+ * (closure? display)            => #f
+ * (closure? (lambda (x) (- x))) => #t
+ * (closure? any)                => #t
+ * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("closure?", closurep, subr1, (SCM obj))
@@ -298,6 +315,13 @@ DEFINE_PRIMITIVE("%procedure-environment", proc_env, subr1, (SCM proc))
  * the compiler flag <<"compiler:keep-formals">> is set at its creation.
  * If |proc| formal parameters are not available, |procedure-formals|
  * returns |#f|.
+ *
+ * @lisp
+ * (compiler:keep-formals #t)
+ *
+ * (define (f x y) (+ (* 3 x) y))
+ * (procedure-formals f)           => (x y)
+ * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("procedure-formals", proc_formals, subr1, (SCM proc))
@@ -314,6 +338,13 @@ DEFINE_PRIMITIVE("procedure-formals", proc_formals, subr1, (SCM proc))
  * Note that procedure source is kept in memory only if the compiler flag
  * <<"compiler:keep-source">> is set at its creation. If |proc| source is
  * not available, |procedure-source| returns |#f|.
+ *
+ * @lisp
+ * (compiler:keep-source #t)
+ *
+ * (define (f x y) (+ (* 3 x) y))
+ * (procedure-source f)           => (lambda (x y) (+ (* 3 x) y))
+ * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("procedure-source", proc_source, subr1, (SCM proc))
