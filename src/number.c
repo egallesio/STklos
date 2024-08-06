@@ -2497,7 +2497,8 @@ SCM STk_sub2(SCM o1, SCM o2)
                             mpz_clear(sub); mpz_clear(x);
                             return tmp;
                           }
-        case tc_integer:  if (INT_VAL(o1) == 0) return MAKE_INT(-INT_VAL(o2));
+        case tc_integer:  if (INT_VAL(o1) == 0 && INT_VAL(o2) != INT_MIN_VAL)
+                            return MAKE_INT(-INT_VAL(o2));
                           if (INT_VAL(o2) == 0) return o1;
                           else {
                              long sub =  (long) INT_VAL(o1) - INT_VAL(o2);
