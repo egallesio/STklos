@@ -27,7 +27,10 @@
 #endif
 
 #if (defined(__linux__) || defined(__GLIBC__) || defined(__GNU__) \
-     || defined(__CYGWIN__)) && !defined(_GNU_SOURCE)
+     || defined(__CYGWIN__) || defined(HAVE_DLADDR) \
+     || defined(HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID) \
+     || defined(HAVE_PTHREAD_SETNAME_NP_WITH_TID_AND_ARG) \
+     || defined(HAVE_PTHREAD_SETNAME_NP_WITH_TID)) && !defined(_GNU_SOURCE)
   /* Can't test LINUX, since this must be defined before other includes. */
 # define _GNU_SOURCE 1
 #endif
@@ -184,9 +187,7 @@ typedef int GC_bool;
 # define GC_ATTR_WORD_ALIGNED /* empty */
 #endif
 
-#ifndef HEADERS_H
-# include "gc_hdrs.h"
-#endif
+#include "gc_hdrs.h"
 
 #ifndef GC_ATTR_NO_SANITIZE_ADDR
 # ifndef ADDRESS_SANITIZER
@@ -222,7 +223,7 @@ typedef int GC_bool;
 #endif /* !GC_ATTR_NO_SANITIZE_THREAD */
 
 #ifndef GC_ATTR_UNUSED
-# if GC_GNUC_PREREQ(3, 4)
+# if GC_GNUC_PREREQ(3, 4) || defined(__clang__)
 #   define GC_ATTR_UNUSED __attribute__((__unused__))
 # else
 #   define GC_ATTR_UNUSED /* empty */
@@ -716,7 +717,7 @@ EXTERN_C_BEGIN
 
 /* Print warning message, e.g. almost out of memory.    */
 /* The argument (if any) format specifier should be:    */
-/* "%s", "%p" or "%"WARN_PRIdPTR.                       */
+/* "%s", "%p", "%"WARN_PRIdPTR or "%"WARN_PRIuPTR.      */
 #define WARN(msg, arg) \
     (*GC_current_warn_proc)((/* no const */ char *)("GC Warning: " msg), \
                             (word)(arg))
@@ -728,8 +729,9 @@ GC_EXTERN GC_warn_proc GC_current_warn_proc;
 /* client side, so non-standard print type modifiers (like MS "I64d")   */
 /* should be avoided here if possible.                                  */
 #ifndef WARN_PRIdPTR
-  /* Assume sizeof(void *) == sizeof(long) (or a little-endian machine) */
+  /* Assume sizeof(void *) == sizeof(long) or a little-endian machine.  */
 # define WARN_PRIdPTR "ld"
+# define WARN_PRIuPTR "lu"
 #endif
 
 /* A tagging macro (for a code static analyzer) to indicate that the    */
@@ -920,7 +922,7 @@ EXTERN_C_BEGIN
 /* Incremental GC with MPROTECT_VDB currently requires the      */
 /* page size to be a multiple of HBLKSIZE.  Since most modern   */
 /* architectures support variable page sizes down to 4 KB, and  */
-/* X86 is generally 4 KB, we now default to 4 KB, except for    */
+/* x86 is generally 4 KB, we now default to 4 KB, except for    */
 /*   Alpha: Seems to be used with 8 KB pages.                   */
 /*   SMALL_CONFIG: Want less block-level fragmentation.         */
 #ifndef HBLKSIZE
@@ -988,7 +990,7 @@ EXTERN_C_BEGIN
 
 /* Round up allocation size (in bytes) to a multiple of a granule.      */
 #define ROUNDUP_GRANULE_SIZE(lb) /* lb should have no side-effect */ \
-            (SIZET_SAT_ADD(lb, GRANULE_BYTES - 1) & ~(GRANULE_BYTES - 1))
+        (SIZET_SAT_ADD(lb, GRANULE_BYTES-1) & ~(size_t)(GRANULE_BYTES-1))
 
 /* Round up byte allocation requests to integral number of words, etc. */
 # define ROUNDED_UP_GRANULES(lb) /* lb should have no side-effect */ \
@@ -1110,7 +1112,7 @@ struct hblkhdr {
                          /* list headers.  Sometimes called regions.    */
     unsigned char hb_flags;
 #       define IGNORE_OFF_PAGE  1       /* Ignore pointers that do not  */
-                                        /* point to the first page of   */
+                                        /* point to the first hblk of   */
                                         /* this object.                 */
 #       define WAS_UNMAPPED 2   /* This is a free block, which has      */
                                 /* been unmapped from the address       */
@@ -1421,6 +1423,17 @@ struct _GC_arrays {
         /* obtained scratch area.                               */
         /* Used by GC_register_dynamic_libraries().             */
 # endif
+# if defined(GC_ASSERTIONS) || defined(INCLUDE_LINUX_THREAD_DESCR) \
+     || (defined(KEEP_BACK_PTRS) && ALIGNMENT == 1)
+#   define SET_REAL_HEAP_BOUNDS
+#   define GC_least_real_heap_addr GC_arrays._least_real_heap_addr
+#   define GC_greatest_real_heap_addr GC_arrays._greatest_real_heap_addr
+    word _least_real_heap_addr;
+    word _greatest_real_heap_addr;
+        /* Similar to GC_least/greatest_plausible_heap_addr but */
+        /* do not include future (potential) heap expansion.    */
+        /* Both variables are zero initially.                   */
+# endif
   mse *_mark_stack;
         /* Limits of stack for GC_mark routine.  All ranges     */
         /* between GC_mark_stack (incl.) and GC_mark_stack_top  */
@@ -1712,8 +1725,8 @@ GC_EXTERN struct obj_kind {
 #  endif /* !ENABLE_DISCLAIM */
 } GC_obj_kinds[MAXOBJKINDS];
 
-#define beginGC_obj_kinds ((ptr_t)(&GC_obj_kinds))
-#define endGC_obj_kinds (beginGC_obj_kinds + (sizeof GC_obj_kinds))
+#define beginGC_obj_kinds ((ptr_t)(&GC_obj_kinds[0]))
+#define endGC_obj_kinds (beginGC_obj_kinds + sizeof(GC_obj_kinds))
 
 /* Variables that used to be in GC_arrays, but need to be accessed by   */
 /* inline allocation code.  If they were in GC_arrays, the inlined      */
@@ -1725,12 +1738,12 @@ GC_EXTERN struct obj_kind {
         /* Number of bytes allocated during this collection cycle.      */
   extern ptr_t GC_objfreelist[MAXOBJGRANULES+1];
                           /* free list for NORMAL objects */
-# define beginGC_objfreelist ((ptr_t)(&GC_objfreelist))
+# define beginGC_objfreelist ((ptr_t)(&GC_objfreelist[0]))
 # define endGC_objfreelist (beginGC_objfreelist + sizeof(GC_objfreelist))
 
   extern ptr_t GC_aobjfreelist[MAXOBJGRANULES+1];
                           /* free list for atomic (PTRFREE) objects     */
-# define beginGC_aobjfreelist ((ptr_t)(&GC_aobjfreelist))
+# define beginGC_aobjfreelist ((ptr_t)(&GC_aobjfreelist[0]))
 # define endGC_aobjfreelist (beginGC_aobjfreelist + sizeof(GC_aobjfreelist))
 #endif /* SEPARATE_GLOBALS */
 
@@ -1807,6 +1820,9 @@ struct GC_traced_stack_sect_s {
   GC_INNER void GC_push_all_stack_sections(ptr_t lo, ptr_t hi,
                         struct GC_traced_stack_sect_s *traced_stack_sect);
   GC_EXTERN word GC_total_stacksize; /* updated on every push_all_stacks */
+# ifdef STACKPTR_CORRECTOR_AVAILABLE
+    GC_EXTERN GC_sp_corrector_proc GC_sp_corrector;
+# endif
 #else
   GC_EXTERN ptr_t GC_blocked_sp;
   GC_EXTERN struct GC_traced_stack_sect_s *GC_traced_stack_sect;
@@ -1919,9 +1935,11 @@ GC_INNER void GC_initiate_gc(void);
 GC_INNER GC_bool GC_collection_in_progress(void);
                         /* Collection is in progress, or was abandoned. */
 
-#define GC_PUSH_ALL_SYM(sym) \
-                GC_push_all((/* no volatile */ void *)&(sym), \
-                            (/* no volatile */ void *)(&(sym) + 1))
+/* Push contents of the symbol residing in the static roots area        */
+/* excluded from scanning by the the collector for a reason.            */
+/* Note: it should be used only for symbols of relatively small size    */
+/* (one or several words).                                              */
+#define GC_PUSH_ALL_SYM(sym) GC_push_all_eager(&(sym), &(sym) + 1)
 
 GC_INNER void GC_push_all_stack(ptr_t b, ptr_t t);
                                     /* As GC_push_all but consider      */
@@ -2135,6 +2153,9 @@ void GC_register_data_segments(void);
 #ifdef THREADS
   GC_INNER void GC_thr_init(void);
   GC_INNER void GC_init_parallel(void);
+# ifndef DONT_USE_ATEXIT
+    GC_INNER GC_bool GC_is_main_thread(void);
+# endif
 #else
   GC_INNER GC_bool GC_is_static_root(void *p);
                 /* Is the address p in one of the registered static     */
@@ -2233,7 +2254,7 @@ GC_INNER ptr_t GC_alloc_large(size_t lb, int k, unsigned flags);
                         /* Allocate a large block of size lb bytes.     */
                         /* The block is not cleared.  flags argument    */
                         /* should be 0 or IGNORE_OFF_PAGE.              */
-                        /* Calls GC_allchblk to do the actual           */
+                        /* Calls GC_allochblk to do the actual          */
                         /* allocation, but also triggers GC and/or      */
                         /* heap expansion as appropriate.               */
                         /* Does not update GC_bytes_allocd, but does    */
@@ -2302,11 +2323,11 @@ GC_INNER void * GC_generic_malloc_inner(size_t lb, int k);
 #if defined(DBG_HDRS_ALL) || defined(GC_GCJ_SUPPORT) \
     || !defined(GC_NO_FINALIZATION)
   GC_INNER void * GC_generic_malloc_inner_ignore_off_page(size_t lb, int k);
-                                /* Allocate an object, where            */
-                                /* the client guarantees that there     */
-                                /* will always be a pointer to the      */
-                                /* beginning of the object while the    */
-                                /* object is live.                      */
+                                /* Allocate an object, where the client */
+                                /* guarantees that there will always be */
+                                /* a pointer to the beginning (i.e.     */
+                                /* within the first hblk) of the object */
+                                /* while it is live.                    */
 #endif
 
 GC_INNER GC_bool GC_collect_or_expand(word needed_blocks,
@@ -2427,9 +2448,24 @@ GC_EXTERN void (*GC_print_heap_obj)(ptr_t p);
   GC_EXTERN long GC_backtraces;
 #endif
 
-#ifdef LINT2
-# define GC_RAND_MAX (~0U >> 1)
-  GC_API_PRIV long GC_random(void);
+/* A trivial (linear congruential) pseudo-random numbers generator, */
+/* safe for the concurrent usage.                                   */
+#define GC_RAND_MAX ((int)(~0U >> 1))
+#if defined(AO_HAVE_store) && defined(THREAD_SANITIZER)
+#   define GC_RAND_STATE_T volatile AO_t
+#   define GC_RAND_NEXT(pseed) GC_rand_next(pseed)
+    GC_INLINE int GC_rand_next(GC_RAND_STATE_T *pseed)
+    {
+      AO_t next = (AO_t)((AO_load(pseed) * 1103515245U + 12345)
+                         & (unsigned)GC_RAND_MAX);
+      AO_store(pseed, next);
+      return (int)next;
+    }
+#else
+#   define GC_RAND_STATE_T unsigned
+#   define GC_RAND_NEXT(pseed) /* overflow and race are OK */ \
+                (int)(*(pseed) = (*(pseed) * 1103515245U + 12345) \
+                                 & (unsigned)GC_RAND_MAX)
 #endif
 
 GC_EXTERN GC_bool GC_print_back_height;
@@ -2477,11 +2513,13 @@ GC_EXTERN GC_bool GC_print_back_height;
   GC_INNER void GC_unmap_gap(ptr_t start1, size_t bytes1, ptr_t start2,
                              size_t bytes2);
 
-  /* Compute end address for an unmap operation on the indicated block. */
-  GC_INLINE ptr_t GC_unmap_end(ptr_t start, size_t bytes)
-  {
-     return (ptr_t)((word)(start + bytes) & ~(GC_page_size - 1));
-  }
+# ifndef NOT_GCBUILD
+    /* Compute end address for an unmap operation on the indicated block. */
+    GC_INLINE ptr_t GC_unmap_end(ptr_t start, size_t bytes)
+    {
+      return (ptr_t)((word)(start + bytes) & ~(word)(GC_page_size-1));
+    }
+# endif
 #endif /* USE_MUNMAP */
 
 #ifdef CAN_HANDLE_FORK
@@ -2540,7 +2578,8 @@ GC_EXTERN GC_bool GC_print_back_height;
 # endif
 
 # ifdef CAN_HANDLE_FORK
-#   if defined(PROC_VDB) || defined(SOFT_VDB)
+#   if defined(PROC_VDB) || defined(SOFT_VDB) \
+       || (defined(MPROTECT_VDB) && defined(GC_DARWIN_THREADS))
       GC_INNER void GC_dirty_update_child(void);
                 /* Update pid-specific resources (like /proc file       */
                 /* descriptors) needed by the dirty bits implementation */
@@ -2549,6 +2588,19 @@ GC_EXTERN GC_bool GC_print_back_height;
 #     define GC_dirty_update_child() (void)0
 #   endif
 # endif /* CAN_HANDLE_FORK */
+
+# if defined(MPROTECT_VDB) && defined(DARWIN)
+    EXTERN_C_END
+#   include <pthread.h>
+    EXTERN_C_BEGIN
+#   ifdef THREADS
+      GC_INNER int GC_inner_pthread_create(pthread_t *t,
+                                GC_PTHREAD_CREATE_CONST pthread_attr_t *a,
+                                void *(*fn)(void *), void *arg);
+#   else
+#     define GC_inner_pthread_create pthread_create
+#   endif
+# endif /* MPROTECT_VDB && DARWIN */
 
   GC_INNER GC_bool GC_dirty_init(void);
                 /* Returns true if dirty bits are maintained (otherwise */
@@ -2724,7 +2776,7 @@ GC_EXTERN signed_word GC_bytes_found;
   GC_INNER void GC_mark_thread_local_free_lists(void);
 #endif
 
-#if defined(GLIBC_2_19_TSX_BUG) && defined(THREADS)
+#if defined(GLIBC_2_19_TSX_BUG) && defined(PARALLEL_MARK)
   /* Parse string like <major>[.<minor>[<tail>]] and return major value. */
   GC_INNER int GC_parse_version(int *pminor, const char *pverstr);
 #endif
@@ -2741,7 +2793,7 @@ GC_EXTERN signed_word GC_bytes_found;
 #endif
 
 #ifdef CHECKSUMS
-# if defined(MPROTECT_VDB) && !defined(DARWIN)
+# ifdef MPROTECT_VDB
     void GC_record_fault(struct hblk * h);
 # endif
   void GC_check_dirty(void);
@@ -2763,6 +2815,13 @@ GC_INNER void GC_start_debugging_inner(void);   /* defined in dbg_mlc.c. */
 /* Assumes we hold the allocation lock.                         */
 GC_INNER void *GC_store_debug_info_inner(void *p, word sz, const char *str,
                                          int linenum);
+
+#if defined(REDIRECT_MALLOC) && !defined(REDIRECT_MALLOC_IN_HEADER) \
+    && defined(GC_LINUX_THREADS)
+  GC_INNER void GC_init_lib_bounds(void);
+#else
+# define GC_init_lib_bounds() (void)0
+#endif
 
 #ifdef REDIRECT_MALLOC
 # ifdef GC_LINUX_THREADS
@@ -2833,7 +2892,7 @@ GC_INNER void *GC_store_debug_info_inner(void *p, word sz, const char *str,
   void * GC_find_limit(void *, int);
 #endif
 
-#ifdef UNIX_LIKE
+#if defined(UNIX_LIKE) && !defined(NO_DEBUGGING)
   GC_INNER void GC_set_and_save_fault_handler(void (*handler)(int));
 #endif
 
@@ -2971,7 +3030,7 @@ GC_INNER void *GC_store_debug_info_inner(void *p, word sz, const char *str,
 # elif (defined(GC_LINUX_THREADS) || defined(GC_DGUX386_THREADS)) \
        && !defined(GC_USESIGRT_SIGNALS)
 #   if defined(SPARC) && !defined(SIGPWR)
-      /* SPARC/Linux doesn't properly define SIGPWR in <signal.h>.      */
+      /* Linux/SPARC doesn't properly define SIGPWR in <signal.h>.      */
       /* It is aliased to SIGLOST in asm/signal.h, though.              */
 #     define SIG_SUSPEND SIGLOST
 #   else
@@ -3058,18 +3117,20 @@ GC_INNER void *GC_store_debug_info_inner(void *p, word sz, const char *str,
 #endif
 
 #if defined(NEED_FIND_LIMIT) \
+     || (defined(WRAP_MARK_SOME) && defined(__GNUC__)) \
      || (defined(USE_PROC_FOR_LIBRARIES) && defined(THREADS))
   GC_EXTERN JMP_BUF GC_jmp_buf;
 
   /* Set up a handler for address faults which will longjmp to  */
   /* GC_jmp_buf.                                                */
   GC_INNER void GC_setup_temporary_fault_handler(void);
+
   /* Undo the effect of GC_setup_temporary_fault_handler.       */
   GC_INNER void GC_reset_fault_handler(void);
 #endif /* NEED_FIND_LIMIT || USE_PROC_FOR_LIBRARIES */
 
 /* Some convenience macros for cancellation support. */
-#if defined(CANCEL_SAFE)
+#ifdef CANCEL_SAFE
 # if defined(GC_ASSERTIONS) \
      && (defined(USE_COMPILER_TLS) \
          || (defined(LINUX) && !defined(ARM32) && GC_GNUC_PREREQ(3, 3) \
@@ -3083,7 +3144,7 @@ GC_INNER void *GC_store_debug_info_inner(void *p, word sz, const char *str,
 #   define INCR_CANCEL_DISABLE()
 #   define DECR_CANCEL_DISABLE()
 #   define ASSERT_CANCEL_DISABLED() (void)0
-# endif /* GC_ASSERTIONS & ... */
+# endif /* !GC_ASSERTIONS */
 # define DISABLE_CANCEL(state) \
         do { pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &state); \
           INCR_CANCEL_DISABLE(); } while (0)
@@ -3091,7 +3152,7 @@ GC_INNER void *GC_store_debug_info_inner(void *p, word sz, const char *str,
         do { ASSERT_CANCEL_DISABLED(); \
           pthread_setcancelstate(state, NULL); \
           DECR_CANCEL_DISABLE(); } while (0)
-#else /* !CANCEL_SAFE */
+#else
 # define DISABLE_CANCEL(state) (void)0
 # define RESTORE_CANCEL(state) (void)0
 # define ASSERT_CANCEL_DISABLED() (void)0

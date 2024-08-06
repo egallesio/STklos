@@ -41,6 +41,7 @@ Alexandre Oliva <aoliva@redhat.com>
 Alexis Laferriere <alexis.laf@xymus.net>
 Alistair G. Crooks <agc@uts.amdahl.com>
 Allan Hsu <allan@counterpop.net>
+Amaury Sechet <deadalnix@gmail.com>
 Andre Leiradella <andre@leiradella.com>
 Andreas Jaeger <aj@suse.de>
 Andreas Tobler <andreastt@gmail.com>
@@ -122,6 +123,7 @@ Dave Barrett <barrett@asgard.cs.colorado.edu>
 Dave Detlefs <detlefs@src.dec.com>
 Dave Korn <dave.korn.cygwin@googlemail.com>
 Dave Love <d.love@dl.ac.uk>
+David A. Holland <dholland@netbsd.org>
 David Ayers <d.ayers@inode.at>
 David Brownlee <abs@absd.org>
 David Butenhof <david.butenhof@hp.com>
@@ -210,6 +212,7 @@ Jay Krell <jaykrell@microsoft.com>
 Jean-Baptiste Nivois
 Jean-Claude Beaudoin <jean.claude.beaudoin@gmail.com>
 Jean-Daniel Fekete <fekete@cs.umd.edu>
+Jeaye Wilkerson <contact@jeaye.com>
 Jeff Sturm <jsturm@one-point.com>
 Jeffrey Hsu <hsu@soda.berkeley.edu>
 Jeffrey Mark Siskind
@@ -260,6 +263,7 @@ Klemens Zwischenbrugger <ka7@la-evento.com>
 Knut Tvedten <knuttv@ifi.uio.no>
 Krister Walfridsson <cato@df.lth.se>
 Kristian Kristensen <kk@cs.aau.dk>
+Kristian Larsson <kristian@spritelink.net>
 Kumar Srikantan
 Kurt Miller <kurt@intricatesoftware.com>
 Lars Farm <lars.farm@ite.mh.se>
@@ -268,6 +272,7 @@ Leonardo Taccari <iamleot@gmail.com>
 Linas Vepstas <linasvepstas@gmail.com>
 Loren J. Rittle <rittle@latour.labs.mot.com>
 Louis Zhuang <louis.zhuang@acm.org>
+Lucas Holt <luke@foolishgames.com>
 Lucas Meijer <lucas@unity3d.com>
 Ludovic Courtes <ludo@gnu.org>
 Maarten Thibaut <mthibaut@cisco.com>
@@ -280,6 +285,7 @@ Marcos Dione <Marcos_David.Dione@sophia.inria.fr>
 Marcus Herbert
 Marek Vasut <marex@denx.de>
 Margaret Fleck <mfleck@illinois.edu>
+Marius Gerbershagen <marius.gerbershagen@gmail.com>
 Mark Boulter <mboulter@vnet.ibm.com>
 Mark Mitchell <mark@codesourcery.com>
 Mark Reichert <markr@sirs.com>
@@ -373,6 +379,7 @@ Richard Sandiford <rsandifo@nildram.co.uk>
 Richard Zidlicky <Richard.Zidlicky@stud.informatik.uni-erlangen.de>
 Rob Haack <rhaack@polaris.unm.edu>
 Robert Brazile <brazile@diamond.bbn.com>
+Robert Hensing <robert@roberthensing.nl>
 Rodrigo Kumpera <kumpera@gmail.com>
 Roger Sayle <roger@eyesopen.com>
 Roland McGrath <roland@redhat.com>
@@ -383,6 +390,7 @@ Rutger Ovidius <ovidr@users.sourceforge.net>
 Ryan Gonzalez <rymg19@gmail.com>
 Ryan Murray <rmurray@debian.org>
 Salvador Eduardo Tropea <salvador@inti.gov.ar>
+Sam James <sam@gentoo.org>
 Samuel Martin <s.martin49@gmail.com>
 Samuel Thibault <samuel.thibault@gnu.org>
 Scott Ananian <cananian@lesser-magoo.lcs.mit.edu>

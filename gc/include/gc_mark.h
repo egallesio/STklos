@@ -82,14 +82,14 @@ typedef struct GC_ms_entry * (*GC_mark_proc)(GC_word * /* addr */,
 
 /* Object descriptors on mark stack or in objects.  Low order two       */
 /* bits are tags distinguishing among the following 4 possibilities     */
-/* for the high order 30 bits.                                          */
+/* for the rest (high order) bits.                                      */
 #define GC_DS_TAG_BITS 2
 #define GC_DS_TAGS   ((1 << GC_DS_TAG_BITS) - 1)
 #define GC_DS_LENGTH 0  /* The entire word is a length in bytes that    */
                         /* must be a multiple of 4.                     */
-#define GC_DS_BITMAP 1  /* 30 (62) bits are a bitmap describing pointer */
-                        /* fields.  The msb is 1 if the first word      */
-                        /* is a pointer.                                */
+#define GC_DS_BITMAP 1  /* The high order bits are describing pointer   */
+                        /* fields.  The most significant bit is set if  */
+                        /* the first word is a pointer.                 */
                         /* (This unconventional ordering sometimes      */
                         /* makes the marker slightly faster.)           */
                         /* Zeroes indicate definite nonpointers.  Ones  */
@@ -101,7 +101,7 @@ typedef struct GC_ms_entry * (*GC_mark_proc)(GC_word * /* addr */,
                         /* PROC(descr).  ENV(descr) is passed as the    */
                         /* last argument.                               */
 #define GC_MAKE_PROC(proc_index, env) \
-            (((((env) << GC_LOG_MAX_MARK_PROCS) \
+            ((((((GC_word)(env)) << GC_LOG_MAX_MARK_PROCS) \
                | (proc_index)) << GC_DS_TAG_BITS) | GC_DS_PROC)
 #define GC_DS_PER_OBJECT 3  /* The real descriptor is at the            */
                         /* byte displacement from the beginning of the  */
@@ -125,7 +125,8 @@ GC_API void * GC_greatest_plausible_heap_addr;
                         /* Bounds on the heap.  Guaranteed valid        */
                         /* Likely to include future heap expansion.     */
                         /* Hence usually includes not-yet-mapped        */
-                        /* memory.                                      */
+                        /* memory, or might overlap with other data     */
+                        /* roots.                                       */
 
 /* Handle nested references in a custom mark procedure.                 */
 /* Check if obj is a valid object. If so, ensure that it is marked.     */
@@ -216,7 +217,7 @@ GC_API GC_ATTR_MALLOC GC_ATTR_ALLOC_SIZE(1) void * GC_CALL
                                         GC_generic_malloc_ignore_off_page(
                                             size_t /* lb */, int /* knd */);
                                 /* As above, but pointers to past the   */
-                                /* first page of the resulting object   */
+                                /* first hblk of the resulting object   */
                                 /* are ignored.                         */
 
 /* Generalized version of GC_malloc_[atomic_]uncollectable.     */
