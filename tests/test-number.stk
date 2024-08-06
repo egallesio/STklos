@@ -2405,7 +2405,7 @@
 
 (test "zeros & infinities.14" 0 (/ 0 2))
 (test "zeros & infinities.15" 0.0 (/ 0.0 2))
-(test "zeros & infinities.16" 0.0+0.0i (/ 0+0.0i 2))   ;; As Petite
+(test "zeros & infinities.16" 0+0.0i (/ 0+0.0i 2))
 
 (test "zeros & infinities.17" +nan.0 (/ +inf.0 -inf.0))
 (test "zeros & infinities.18" +nan.0 (/ -inf.0 -inf.0))
@@ -2415,8 +2415,8 @@
 (test "zeros & infinities.21" -inf.0 (/ -2 0.0))
 (test "zeros & infinities.21" +inf.0 (/ -2 -0.0))
 (test "zeros & infinities.23" 0 (/ 0 2+3i))
-(test "zeros & infinities.24" 0.0+0.0i (/ -0.0 2+3i))
-(test "zeros & infinities.25" 0.0+0.0i (/ 0+0.0i 2+3i))
+(test "zeros & infinities.24" -0.0+0.0i (/ -0.0 2+3i))
+(test "zeros & infinities.25" +0.0+0.0i (/ 0+0.0i 2+3i))
 
 
 ;;;
