@@ -1852,7 +1852,7 @@ static int zerop(SCM n)
 {
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) == 0);
-    case tc_real:     return (fpclassify(REAL_VAL(n)) == FP_ZERO);
+    case tc_real:     return REAL_ZEROP(n);
     case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(n)) == 0);
     case tc_complex:  return zerop(COMPLEX_REAL(n)) && zerop(COMPLEX_IMAG(n));
     case tc_rational: return zerop(RATIONAL_NUM(n));
@@ -2521,9 +2521,6 @@ SCM STk_sub2(SCM o1, SCM o2)
   return make_rational(sub2(mul2(o1, RATIONAL_DEN(o2)), RATIONAL_NUM(o2)),
                        RATIONAL_DEN(o2));
 }
-
-/* A test to see if x is 0.0 or - 0.0 */
-#define IS_ZERO_ZEROP(x)  (REALP(x) && fpclassify(REAL_VAL(x)) == FP_ZERO)
 
 DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
 {
@@ -3623,19 +3620,19 @@ static SCM my_cosh(SCM z)
 
      3. cosh(z) = cos(i z),
         but it's always slow. (not used) */
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(1);
-                    return double2real(cosh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(1);
-                    return double2real(cosh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: {
-      SCM ez = my_exp(z);
-      SCM inv_ez = div2 (MAKE_INT(1), ez);
-      return div2(add2(ez,inv_ez),
-                  double2real(2.0));
-  }
-  default:          error_bad_number(z);
+    case tc_real:    if (REAL_ZEROP(z)) return MAKE_INT(1);
+                     return double2real(cosh(REAL_VAL(z)));
+    case tc_integer: if (INT_VAL(z) == 0) return MAKE_INT(1);
+                     return double2real(cosh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: {
+                        SCM ez = my_exp(z);
+                        SCM inv_ez = div2 (MAKE_INT(1), ez);
+                        return div2(add2(ez,inv_ez),
+                                    double2real(2.0));
+                      }
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -3652,19 +3649,19 @@ static SCM my_sinh(SCM z)
         but it is almost always faster to use exponentials
         (not used) */
   switch (TYPEOF(z)) {
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
-                    return double2real(sinh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
-                    return double2real(sinh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: {
-      SCM ez = my_exp(z);
-      SCM inv_ez = div2 (MAKE_INT(1), ez);
-      return div2(sub2(ez,inv_ez),
-                  double2real(2.0));
-  }
-  default:          error_bad_number(z);
+    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
+                      return double2real(sinh(REAL_VAL(z)));
+    case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                      return double2real(sinh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: {
+                        SCM ez = my_exp(z);
+                        SCM inv_ez = div2 (MAKE_INT(1), ez);
+                        return div2(sub2(ez,inv_ez),
+                                    double2real(2.0));
+                      }
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -3681,19 +3678,19 @@ static SCM my_tanh(SCM z)
         but this is always slower than using exponentials...
         (not used) */
   switch (TYPEOF(z)) {
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
-                    return double2real(tanh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
-                    return double2real(tanh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: {
-      SCM ez = my_exp(z);
-      SCM inv_ez = div2 (MAKE_INT(1), ez);
-      return div2(sub2 (ez, inv_ez),
-                  add2 (ez, inv_ez));
-  }
-  default:          error_bad_number(z);
+    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
+                      return double2real(tanh(REAL_VAL(z)));
+    case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                      return double2real(tanh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: {
+                        SCM ez = my_exp(z);
+                        SCM inv_ez = div2 (MAKE_INT(1), ez);
+                        return div2(sub2 (ez, inv_ez),
+                                    add2 (ez, inv_ez));
+                      }
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -3704,14 +3701,14 @@ static SCM my_tanh(SCM z)
 static SCM my_asinh(SCM z) {
   /* asinh(z) = ln (z + SQRT(z^2 + 1)) */
   switch (TYPEOF(z)) {
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
-                    return double2real(asinh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
-                    return double2real(asinh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
-  default:          error_bad_number(z);
+    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
+                      return double2real(asinh(REAL_VAL(z)));
+    case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                      return double2real(asinh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -4128,9 +4125,11 @@ static inline SCM exact_exponent_expt(SCM x, SCM y)
          without it. */
       long sign = (INT_VAL(x) < 0) ? -1 : +1;
 
-      mpz_ui_pow_ui(res, (unsigned long) (sign*INT_VAL(x)), (unsigned long) INT_VAL(y));
+      mpz_ui_pow_ui(res, (unsigned long) (sign*INT_VAL(x)),
+                         (unsigned long) INT_VAL(y));
 
-      /* Put back the sign, if needed (that is, if sign (of x) < 0 and the exponent is odd): */
+      /* Put back the sign, if needed
+         (that is, if sign (of x) < 0 and the exponent is odd): */
       if (sign<0 && ((INT_VAL(y)) & 1UL)) mpz_neg(res,res);
       scm_res = bignum2number(res);
       mpz_clear(res);
