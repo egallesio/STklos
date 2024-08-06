@@ -2243,17 +2243,17 @@ SCM STk_mul2(SCM o1, SCM o2)
       SCM i1 = COMPLEX_IMAG(o1);
 
       switch (TYPEOF(o2)) {
-      case tc_complex:  {
-                          SCM r2 = COMPLEX_REAL(o2);
-                          SCM i2 = COMPLEX_IMAG(o2);
-                          return make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
+        case tc_complex:  {
+                            SCM r2 = COMPLEX_REAL(o2);
+                            SCM i2 = COMPLEX_IMAG(o2);
+                            return make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
                                               add2(mul2(r1,i2), mul2(r2, i1)));
-                        }
-      case tc_real:     // fallthrough
-      case tc_rational: // fallthrough
-      case tc_bignum:   // fallthrough
-      case tc_integer:  return make_complex(mul2(r1, o2), mul2(i1, o2));
-      default:          goto mult_error;
+                          }
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer:  return make_complex(mul2(r1, o2), mul2(i1, o2));
+      default:            goto mult_error;
       }
     }
 
@@ -2281,11 +2281,12 @@ SCM STk_mul2(SCM o1, SCM o2)
                                                     RATIONAL_NUM(o2)),
                                                mul2(RATIONAL_DEN(o1),
                                                     RATIONAL_DEN(o2)));
-        case tc_bignum:
-        case tc_integer: return make_rational(mul2(RATIONAL_NUM(o1), o2),
-                                              RATIONAL_DEN(o1));
+        case tc_bignum:  break;
+        case tc_integer: if (o2 == MAKE_INT(0)) return o2;
+                         break;
         default:         goto mult_error;
       }
+      return make_rational(mul2(RATIONAL_NUM(o1), o2), RATIONAL_DEN(o1));
     }
 
     // ========== o1 is a bignum
@@ -2299,7 +2300,8 @@ SCM STk_mul2(SCM o1, SCM o2)
         case tc_rational: return make_rational(mul2(o1, RATIONAL_NUM(o2)),
                                                RATIONAL_DEN(o2));
         case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
-        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
+        case tc_integer:  if (o2 == MAKE_INT(0)) return o2;
+                          mpz_init_set_si(b2, INT_VAL(o2)); break;
         default:          goto mult_error;
       }
 
@@ -2321,15 +2323,19 @@ SCM STk_mul2(SCM o1, SCM o2)
       switch (TYPEOF(o2)) {
         case tc_complex:  goto mult_x_and_complex;
         case tc_real:     return double2real(INT_VAL(o1) * REAL_VAL(o2));
-        case tc_rational: return make_rational(mul2(o1, RATIONAL_NUM(o2)),
+        case tc_rational: if (o1 == MAKE_INT(0)) return o1;
+                          return make_rational(mul2(o1, RATIONAL_NUM(o2)),
                                                RATIONAL_DEN(o2));
-        case tc_bignum:   mpz_init(mult);
-                          mpz_init_set_si(b1, INT_VAL(o1));
-                          mpz_mul(mult, b1, BIGNUM_VAL(o2));
-                          tmp = bignum2number(mult);
-                          mpz_clear(mult);
-                          mpz_clear(b1);
-                          return tmp;
+        case tc_bignum:   if (o1 == MAKE_INT(0)) return o1;
+                          else {
+                            mpz_init(mult);
+                            mpz_init_set_si(b1, INT_VAL(o1));
+                            mpz_mul(mult, b1, BIGNUM_VAL(o2));
+                            tmp = bignum2number(mult);
+                            mpz_clear(mult);
+                            mpz_clear(b1);
+                            return tmp;
+                          }
         case tc_integer:  {
                             long int i1 = INT_VAL(o1);
                             long int i2 = INT_VAL(o2);
@@ -2598,14 +2604,14 @@ SCM STk_div2(SCM o1, SCM o2)
                                                     RATIONAL_DEN(o2)),
                                                mul2(RATIONAL_DEN(o1),
                                                     RATIONAL_NUM(o2)));
-        case tc_bignum:
-        case tc_integer: return make_rational(RATIONAL_NUM(o1),
-                                              mul2(RATIONAL_DEN(o1), o2));
+        case tc_bignum:  break;
+        case tc_integer: break;
         default:         goto div_error;
       }
+      return make_rational(RATIONAL_NUM(o1), mul2(RATIONAL_DEN(o1), o2));
     }
 
-      // ========== o1 is a bignum or a fixnum
+    // ========== o1 is a bignum or a fixnum
     case tc_bignum:
     case tc_integer: {
       switch (TYPEOF(o2)) {
@@ -2618,10 +2624,12 @@ SCM STk_div2(SCM o1, SCM o2)
                                                / REAL_VAL(o2));
         case tc_rational: return make_rational(mul2(o1, RATIONAL_DEN(o2)),
                                                RATIONAL_NUM(o2));
-        case tc_bignum:
-        case tc_integer:  return make_rational(o1, o2);
+        case tc_bignum:   break;
+        case tc_integer:  if (o1 == MAKE_INT(0)) return o1;
+                          break;
         default:          goto div_error;
       }
+      return make_rational(o1, o2);
     }
 
     default: goto div_error;
