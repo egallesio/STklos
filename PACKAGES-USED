@@ -25,7 +25,7 @@ GC: The Boehm's conservative garbage collector for C and C++
 
 PCRE2: Perl-Compatible Regular Expression library
 ================================================
-    - Version: 10.42
+    - Version: 10.44
     - License: BSD
     - Home: http://www.pcre.org/
 
