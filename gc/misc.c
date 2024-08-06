@@ -248,7 +248,7 @@ STATIC void GC_init_size_map(void)
         GC_size_map[i] = ROUNDED_UP_GRANULES(i);
 #       ifndef _MSC_VER
           GC_ASSERT(GC_size_map[i] < TINY_FREELISTS);
-          /* Seems to tickle bug in VC++ 2008 for AMD64 */
+          /* Seems to tickle bug in VC++ 2008 for x64 */
 #       endif
     }
     /* We leave the rest of the array to be filled in on demand. */
@@ -281,7 +281,8 @@ STATIC void GC_init_size_map(void)
 # ifdef THREADS
 #   define BIG_CLEAR_SIZE 2048  /* Clear this much now and then.        */
 # else
-    STATIC word GC_stack_last_cleared = 0; /* GC_no when we last did this */
+    STATIC word GC_stack_last_cleared = 0;
+                        /* GC_gc_no value when we last did this.        */
     STATIC ptr_t GC_min_sp = NULL;
                         /* Coolest stack pointer value from which       */
                         /* we've already cleared the stack.             */
@@ -363,22 +364,22 @@ STATIC void GC_init_size_map(void)
         ptr_t limit = sp;
 
         MAKE_HOTTER(limit, BIG_CLEAR_SIZE*sizeof(word));
-        limit = (ptr_t)((word)limit & ~0xf);
+        limit = (ptr_t)((word)limit & ~(word)0xf);
                         /* Make it sufficiently aligned for assembly    */
                         /* implementations of GC_clear_stack_inner.     */
         return GC_clear_stack_inner(arg, limit);
       }
       BZERO((void *)dummy, SMALL_CLEAR_SIZE*sizeof(word));
 #   else
-      if (GC_gc_no > GC_stack_last_cleared) {
-        /* Start things over, so we clear the entire stack again */
-        if (GC_stack_last_cleared == 0)
+      if (GC_gc_no != GC_stack_last_cleared) {
+        /* Start things over, so we clear the entire stack again.   */
+        if (EXPECT(NULL == GC_high_water, FALSE))
           GC_high_water = (ptr_t)GC_stackbottom;
         GC_min_sp = GC_high_water;
         GC_stack_last_cleared = GC_gc_no;
         GC_bytes_allocd_at_reset = GC_bytes_allocd;
       }
-      /* Adjust GC_high_water */
+      /* Adjust GC_high_water.  */
       MAKE_COOLER(GC_high_water, WORDS_TO_BYTES(DEGRADE_RATE) + GC_SLOP);
       if ((word)sp HOTTER_THAN (word)GC_high_water) {
           GC_high_water = sp;
@@ -389,7 +390,7 @@ STATIC void GC_init_size_map(void)
 
         MAKE_HOTTER(limit, SLOP);
         if ((word)sp COOLER_THAN (word)limit) {
-          limit = (ptr_t)((word)limit & ~0xf);
+          limit = (ptr_t)((word)limit & ~(word)0xf);
                           /* Make it sufficiently aligned for assembly  */
                           /* implementations of GC_clear_stack_inner.   */
           GC_min_sp = sp;
@@ -434,7 +435,7 @@ GC_API void * GC_CALL GC_base(void * p)
         }
     if (HBLK_IS_FREE(candidate_hdr)) return(0);
     /* Make sure r points to the beginning of the object */
-        r = (ptr_t)((word)r & ~(WORDS_TO_BYTES(1) - 1));
+        r = (ptr_t)((word)r & ~(word)(WORDS_TO_BYTES(1)-1));
         {
             size_t offset = HBLKDISPL(r);
             word sz = candidate_hdr -> hb_sz;
@@ -782,12 +783,18 @@ GC_API int GC_CALL GC_is_init_called(void)
   {
     if (GC_find_leak && !skip_gc_atexit) {
 #     ifdef THREADS
-        GC_in_thread_creation = TRUE; /* OK to collect from unknown thread. */
-        GC_gcollect();
-        GC_in_thread_creation = FALSE;
-#     else
-        GC_gcollect();
+        /* Check that the thread executing at-exit functions is     */
+        /* the same as the one performed the GC initialization,     */
+        /* otherwise the latter thread might already be dead but    */
+        /* still registered and this, as a consequence, might       */
+        /* cause a signal delivery fail when suspending the threads */
+        /* on platforms that do not guarantee ESRCH returned if     */
+        /* the signal is not delivered.                             */
+        /* It should also prevent "Collecting from unknown thread"  */
+        /* abort in GC_push_all_stacks().                           */
+        if (!GC_is_main_thread() || !GC_thread_is_registered()) return;
 #     endif
+      GC_gcollect();
     }
   }
 #endif
@@ -1200,7 +1207,8 @@ GC_API void GC_CALL GC_init(void)
 #   if ALIGNMENT > GC_DS_TAGS
       /* Adjust normal object descriptor for extra allocation.  */
       if (EXTRA_BYTES != 0)
-        GC_obj_kinds[NORMAL].ok_descriptor = (word)(-ALIGNMENT) | GC_DS_LENGTH;
+        GC_obj_kinds[NORMAL].ok_descriptor =
+                        ((~(word)ALIGNMENT) + 1) | GC_DS_LENGTH;
 #   endif
     GC_exclude_static_roots_inner(beginGC_arrays, endGC_arrays);
     GC_exclude_static_roots_inner(beginGC_obj_kinds, endGC_obj_kinds);
@@ -1402,7 +1410,7 @@ GC_API void GC_CALL GC_enable_incremental(void)
       LOCK();
       if (!GC_incremental) {
         GC_setpagesize();
-        /* if (GC_no_win32_dlls) goto out; Should be win32S test? */
+        /* TODO: Should we skip enabling incremental if win32s? */
         maybe_install_looping_handler(); /* Before write fault handler! */
         if (!GC_is_initialized) {
           UNLOCK();
@@ -2147,13 +2155,9 @@ GC_API void * GC_CALL GC_call_with_alloc_lock(GC_fn_type fn, void *client_data)
     void * result;
     DCL_LOCK_STATE;
 
-#   ifdef THREADS
-      LOCK();
-#   endif
+    LOCK();
     result = (*fn)(client_data);
-#   ifdef THREADS
-      UNLOCK();
-#   endif
+    UNLOCK();
     return(result);
 }
 
@@ -2411,6 +2415,37 @@ GC_API GC_word GC_CALL GC_get_gc_no(void)
     UNLOCK();
     return fn;
   }
+
+# ifdef STACKPTR_CORRECTOR_AVAILABLE
+    GC_INNER GC_sp_corrector_proc GC_sp_corrector = 0;
+# endif
+
+  GC_API void GC_CALL GC_set_sp_corrector(
+                                GC_sp_corrector_proc fn GC_ATTR_UNUSED)
+  {
+#   ifdef STACKPTR_CORRECTOR_AVAILABLE
+      DCL_LOCK_STATE;
+
+      LOCK();
+      GC_sp_corrector = fn;
+      UNLOCK();
+#   endif
+  }
+
+  GC_API GC_sp_corrector_proc GC_CALL GC_get_sp_corrector(void)
+  {
+#   ifdef STACKPTR_CORRECTOR_AVAILABLE
+      GC_sp_corrector_proc fn;
+      DCL_LOCK_STATE;
+
+      LOCK();
+      fn = GC_sp_corrector;
+      UNLOCK();
+      return fn;
+#   else
+      return 0; /* unsupported */
+#   endif
+  }
 #endif /* THREADS */
 
 /* Setter and getter functions for the public R/W function variables.   */
@@ -2419,8 +2454,9 @@ GC_API GC_word GC_CALL GC_get_gc_no(void)
 
 GC_API void GC_CALL GC_set_oom_fn(GC_oom_func fn)
 {
-    GC_ASSERT(NONNULL_ARG_NOT_NULL(fn));
     DCL_LOCK_STATE;
+
+    GC_ASSERT(NONNULL_ARG_NOT_NULL(fn));
     LOCK();
     GC_oom_fn = fn;
     UNLOCK();

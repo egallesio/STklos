@@ -14,7 +14,7 @@
 dnl Process this file with autoconf to produce configure.
 
 dnl Initialization.
-AC_INIT(gc,8.2.2,https://github.com/ivmai/bdwgc/issues)
+AC_INIT(gc,8.2.6,https://github.com/ivmai/bdwgc/issues)
 dnl Version must conform to: [0-9]+[.][0-9]+[.][0-9]+
 
 AC_CONFIG_SRCDIR(gcj_mlc.c)
@@ -86,16 +86,22 @@ esac
 
 AC_MSG_CHECKING([for emscripten])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-#ifdef __EMSCRIPTEN__
-#error "this is emscripten"
-#endif
-]])], [emscripten=no], [emscripten=yes])
-# Note -s ASYNCIFY is required to scan the stack, ASYNCIFY_STACK_SIZE is
-# probably needed for gctest only.
-AS_IF([test "x$emscripten" = "xyes"],
-      [gc_cflags="${gc_cflags} -s ASYNCIFY -s ASYNCIFY_STACK_SIZE=128000"])
+#   ifndef __EMSCRIPTEN__
+#     error This is not Emscripten
+#   endif
+  ]])], [emscripten=yes], [emscripten=no])
 AM_CONDITIONAL(EMSCRIPTEN, test x$emscripten = xyes)
 AC_MSG_RESULT([$emscripten])
+
+AC_ARG_ENABLE(emscripten-asyncify,
+    [AS_HELP_STRING([--enable-emscripten-asyncify],
+                    [use Emscripten asyncify feature])])
+# Use this option if your program is targeting -sASYNCIFY.  The latter is
+# required to scan the stack, ASYNCIFY_STACK_SIZE is probably needed for
+# gctest only.
+AS_IF([test "${emscripten}" = yes -a "${enable_emscripten_asyncify}" = yes],
+      [gc_cflags="${gc_cflags} -DEMSCRIPTEN_ASYNCIFY"
+       gc_cflags="${gc_cflags} -sASYNCIFY -sASYNCIFY_STACK_SIZE=128000"])
 
 GC_CFLAGS=${gc_cflags}
 AC_SUBST(GC_CFLAGS)
@@ -130,8 +136,7 @@ AC_ARG_ENABLE(parallel-mark,
           AC_MSG_ERROR([Parallel mark requires --enable-threads=x spec])
         fi
         ;;
-     esac]
-)
+     esac])
 
 AC_ARG_ENABLE(thread-local-alloc,
     [AS_HELP_STRING([--disable-thread-local-alloc],
@@ -780,8 +785,8 @@ AC_ARG_ENABLE(gc-debug,
       i[3456]86-*-dgux*)
         AC_DEFINE(MAKE_BACK_GRAPH)
       ;;
-    esac ]
-  fi)
+    esac
+  fi ])
 AM_CONDITIONAL([MAKE_BACK_GRAPH], [test x"$enable_gc_debug" = xyes])
 AM_CONDITIONAL([KEEP_BACK_PTRS], [test x"$keep_back_ptrs" = xtrue])
 
@@ -834,25 +839,25 @@ AS_IF([test "$THREADS" = posix],
   [AC_MSG_CHECKING(for pthread_setname_np)
    old_CFLAGS="$CFLAGS"
    CFLAGS="$CFLAGS $CFLAGS_EXTRA -Werror"
-   AC_TRY_COMPILE([#include <pthread.h>],
-                  [pthread_setname_np("thread-name")],
+   AC_TRY_COMPILE([
+#         define _GNU_SOURCE 1
+#         include <pthread.h>
+        ], [pthread_setname_np("thread-name")],
      [AC_MSG_RESULT([yes (w/o tid)])
       AC_DEFINE([HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID], [1],
                 [Define to use 'pthread_setname_np(const char*)' function.])],
-     [AC_TRY_COMPILE([#include <pthread.h>],
-                     [pthread_setname_np(pthread_self(), "thread-name-%u", 0)],
+     [AC_TRY_COMPILE([
+#         define _GNU_SOURCE 1
+#         include <pthread.h>
+        ], [pthread_setname_np(pthread_self(), "thread-name-%u", 0)],
        [AC_MSG_RESULT([yes (with tid and arg)])
         AC_DEFINE([HAVE_PTHREAD_SETNAME_NP_WITH_TID_AND_ARG], [1],
          [Define to use 'pthread_setname_np(pthread_t, const char*, void *)'
           function.])],
        [AC_TRY_COMPILE([
-#ifdef __CYGWIN__
-#define _GNU_SOURCE 1
-#elif defined(__linux__) || defined(__GLIBC__) || defined(__GNU__)
-#define _GNU_SOURCE 1
-#endif
-#include <pthread.h>],
-         [pthread_setname_np(pthread_self(), "thread-name")],
+#             define _GNU_SOURCE 1
+#             include <pthread.h>
+            ], [pthread_setname_np(pthread_self(), "thread-name")],
          [AC_MSG_RESULT([yes (with tid)])
           AC_DEFINE([HAVE_PTHREAD_SETNAME_NP_WITH_TID], [1],
                     [Define to use 'pthread_setname_np(pthread_t, const char*)'
@@ -1047,7 +1052,7 @@ AC_ARG_ENABLE(gcov,
 if test "$enable_gcov" = "yes"; then
   CFLAGS="-D NTHREADS=20 $CFLAGS --coverage"
   if test "${enable_shared}" = no; then
-    # FIXME: As of g++-4.8.4/x86_64, in case of shared library build, test_cpp
+    # FIXME: As of g++-4.8.4/x64, in case of shared library build, test_cpp
     # linkage fails with "hidden symbol atexit is referenced by DSO" message.
     CXXFLAGS="$CXXFLAGS --coverage"
   fi
@@ -1203,11 +1208,8 @@ elif test "${enable_handle_fork}" != manual -a x$THREADS = xposix; then
     # If the option is omitted, pthread_atfork handlers are installed
     # by default for the targets where pthread_atfork is known to work.
     case "$host" in
-      *-*-darwin*)
-        # The incremental mode conflicts with fork handling on Darwin.
-        ;;
-      *-*-aix* | *-*-android* | *-*-cygwin* | *-*-freebsd* | *-*-haiku* | \
-      *-*-hpux11* | *-*-irix* | *-*-kfreebsd*-gnu | \
+      *-*-aix* | *-*-android* | *-*-cygwin* | *-*-darwin* | *-*-freebsd* | \
+      *-*-haiku* | *-*-hpux11* | *-*-irix* | *-*-kfreebsd*-gnu | \
       *-*-*linux* | *-*-netbsd* | *-*-openbsd* | *-*-osf* | *-*-solaris*)
         AC_DEFINE(HANDLE_FORK)
         ;;

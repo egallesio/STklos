@@ -602,7 +602,7 @@ GC_API GC_await_finalize_proc GC_CALL GC_get_await_finalize_proc(void)
 /* overflow is handled by the caller, and is not a disaster.            */
 #if defined(_MSC_VER) && defined(I386)
   GC_ATTR_NOINLINE
-  /* Otherwise some optimizer bug is tickled in VC for X86 (v19, at least). */
+  /* Otherwise some optimizer bug is tickled in VC for x86 (v19, at least). */
 #endif
 STATIC void GC_normal_finalize_mark_proc(ptr_t p)
 {
@@ -647,8 +647,17 @@ STATIC void GC_null_finalize_mark_proc(ptr_t p GC_ATTR_UNUSED) {}
 /* other objects specify no ordering.                                   */
 STATIC void GC_unreachable_finalize_mark_proc(ptr_t p)
 {
+    /* A dummy comparison to ensure the compiler not to optimize two    */
+    /* identical functions into a single one (thus, to ensure a unique  */
+    /* address of each).  Alternatively, GC_noop1(p) could be used.     */
+    if (EXPECT(NULL == p, FALSE)) return;
+
     GC_normal_finalize_mark_proc(p);
 }
+
+static GC_bool need_unreachable_finalization = FALSE;
+        /* Avoid the work if this is not used.  */
+        /* TODO: turn need_unreachable_finalization into a counter */
 
 /* Register a finalization function.  See gc.h for details.     */
 /* The last parameter is a procedure that determines            */
@@ -671,6 +680,8 @@ STATIC void GC_register_finalizer_inner(void * obj,
       return;
     }
     LOCK();
+    if (mp == GC_unreachable_finalize_mark_proc)
+        need_unreachable_finalization = TRUE;
     if (EXPECT(NULL == GC_fnlz_roots.fo_head, FALSE)
         || EXPECT(GC_fo_entries > ((word)1 << GC_log_fo_table_size), FALSE)) {
         GC_grow_table((struct hash_chain_entry ***)&GC_fnlz_roots.fo_head,
@@ -813,14 +824,10 @@ GC_API void GC_CALL GC_register_finalizer_no_order(void * obj,
                                 ocd, GC_null_finalize_mark_proc);
 }
 
-static GC_bool need_unreachable_finalization = FALSE;
-        /* Avoid the work if this isn't used.   */
-
 GC_API void GC_CALL GC_register_finalizer_unreachable(void * obj,
                                GC_finalization_proc fn, void * cd,
                                GC_finalization_proc *ofn, void ** ocd)
 {
-    need_unreachable_finalization = TRUE;
     GC_ASSERT(GC_java_finalization);
     GC_register_finalizer_inner(obj, fn, cd, ofn,
                                 ocd, GC_unreachable_finalize_mark_proc);
@@ -1291,12 +1298,15 @@ GC_INNER void GC_notify_or_invoke_finalizers(void)
     /* This is a convenient place to generate backtraces if appropriate, */
     /* since that code is not callable with the allocation lock.         */
 #   if defined(KEEP_BACK_PTRS) || defined(MAKE_BACK_GRAPH)
-      if (GC_gc_no > last_back_trace_gc_no) {
+      if (GC_gc_no != last_back_trace_gc_no) {
 #       ifdef KEEP_BACK_PTRS
-          long i;
-          /* Stops when GC_gc_no wraps; that's OK.      */
-          last_back_trace_gc_no = GC_WORD_MAX;  /* disable others. */
-          for (i = 0; i < GC_backtraces; ++i) {
+          static GC_bool bt_in_progress = FALSE;
+
+          if (!bt_in_progress) {
+            long i;
+
+            bt_in_progress = TRUE; /* prevent recursion or parallel usage */
+            for (i = 0; i < GC_backtraces; ++i) {
               /* FIXME: This tolerates concurrent heap mutation,        */
               /* which may cause occasional mysterious results.         */
               /* We need to release the GC lock, since GC_print_callers */
@@ -1307,9 +1317,11 @@ GC_INNER void GC_notify_or_invoke_finalizers(void)
               GC_printf("\n****Chosen address %p in object\n", current);
               GC_print_backtrace(current);
               LOCK();
+            }
+            bt_in_progress = FALSE;
           }
-          last_back_trace_gc_no = GC_gc_no;
 #       endif
+        last_back_trace_gc_no = GC_gc_no;
 #       ifdef MAKE_BACK_GRAPH
           if (GC_print_back_height) {
             GC_print_back_graph_stats();

@@ -326,7 +326,7 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
       ucontext_t ctxt;
 #     ifdef GETCONTEXT_FPU_EXCMASK_BUG
         /* Workaround a bug (clearing the FPU exception mask) in        */
-        /* getcontext on Linux/x86_64.                                  */
+        /* getcontext on Linux/x64.                                     */
 #       ifdef X86_64
           /* We manipulate FPU control word here just not to force the  */
           /* client application to use -lm linker option.               */
@@ -395,8 +395,8 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
         /* We're not sure whether he would like  */
         /* to be acknowledged for it or not.     */
         jmp_buf regs;
-        word * i = (word *)&regs;
-        ptr_t lim = (ptr_t)(&regs) + sizeof(regs);
+        word *i = (word *)&regs[0];
+        ptr_t lim = (ptr_t)(&regs[0]) + sizeof(regs);
 
         /* Setjmp doesn't always clear all of the buffer.               */
         /* That tends to preserve garbage.  Clear it.                   */
@@ -405,7 +405,8 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
         }
 #       if defined(MSWIN32) || defined(MSWINCE) || defined(UTS4) \
            || defined(OS2) || defined(CX_UX) || defined(__CC_ARM) \
-           || defined(LINUX) || defined(EWS4800) || defined(RTEMS)
+           || defined(LINUX) || defined(EWS4800) || defined(RTEMS) \
+           || defined(DJGPP)
           (void) setjmp(regs);
 #       else
           (void) _setjmp(regs);
