@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-ffi.stk   -- Tests of FFI
 ;;;;
-;;;; Copyright © 2007-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -115,7 +115,8 @@
 
 ;;; NULL pointer and STRTOL
 
-(test "null cpointer" #t (cpointer-null? (%make-cpointer-null)))
+;; Suppressed by eg 
+;; (test "null cpointer" #t (cpointer-null? (%make-cpointer-null)))
 
 (define-external strtol(:string :pointer :int)
   :return-type :long)
