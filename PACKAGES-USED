@@ -32,7 +32,7 @@ PCRE2: Perl-Compatible Regular Expression library
 
 libffi - a portable foreign function interface library
 ======================================================
-        - Version 3.4.4
+        - Version 3.4.6
         - License: Free (BSD like)
         - Home Page: https://sourceware.org/libffi/
 
