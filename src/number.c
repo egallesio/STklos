@@ -2117,9 +2117,7 @@ SCM STk_add2(SCM o1, SCM o2)
 
       switch (TYPEOF(o2)) {
         case tc_complex:  goto add_x_and_bignum;
-        case tc_real:     if (REAL_ZEROP(o1) && isnormal(REAL_VAL(o1))) return o2;
-                          if (REAL_ZEROP(o2) && isnormal(REAL_VAL(o2))) return o1;
-                          d2 = REAL_VAL(o2);             break;
+        case tc_real:     d2 = REAL_VAL(o2);             break;
         case tc_rational: d2 = rational2double(o2);      break;
         case tc_bignum:   d2 = scheme_bignum2double(o2); break;
         case tc_integer:  if (!INT_VAL(o2)) return o1;
