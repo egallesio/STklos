@@ -245,6 +245,11 @@ doc>
   (repl-add-command '(shell !)
                     "Run a shell command"
                     (lambda () (system (read-line))))
+
+  ;; ==== date
+  (repl-add-command '(date dt)
+                    "Print the current date and time"
+                    (lambda () (print (date))))
   ;; ==== time
   (repl-add-command '(time t)
                     "Print the time used to run the next expression"
