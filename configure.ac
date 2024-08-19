@@ -776,6 +776,9 @@ AC_OUTPUT
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
+# Shorten SYST_LIBS and COMP_LIBS to be less tan 80 chars
+SYST_LIBS=`echo $SYST_LIBS | sed -e "s/lib//g"`
+COMP_LIBS=`echo $COMP_LIBS | sed -e "s/lib//g"`
 
 echo " "
 echo " "
