@@ -309,13 +309,14 @@ else
      if $PKGCONFIG --exists bdw-gc ;then
         GCINC=$($PKGCONFIG  bdw-gc --cflags)
         GCLIB=$($PKGCONFIG  bdw-gc --libs)
+        GCVER=$(${PKGCONFIG} --modversion bdw-gc)
      else
         GCINC=""
         GCLIB="-lgc"
      fi
      DLLIBS="$DLLIBS -lgc"
      AC_DEFINE(HAVE_GC, 1, [Use system GC])
-     SYST_LIBS="libgc $SYST_LIBS"
+     SYST_LIBS="libgc ($GCVER) $SYST_LIBS"
 fi
 
 
@@ -367,13 +368,14 @@ else
      if $PKGCONFIG --exists gmp ;then
         GMPINC="$($PKGCONFIG --cflags gmp)"
         GMPLIB="$($PKGCONFIG --libs gmp)"
+        GMPVER=$(${PKGCONFIG} --modversion gmp)
      else
         GMPINC=""
         GMPLIB="-lgmp"
      fi
      DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
-     SYST_LIBS="libgmp $SYST_LIBS"
+     SYST_LIBS="libgmp ($GMPVER) $SYST_LIBS"
 fi
 
 
@@ -411,13 +413,14 @@ else
      if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
         PCRE2INC="$($PKGCONFIG --cflags libpcre2-8 libpcre2-posix) "
         PCRE2LIB="$($PKGCONFIG --libs   libpcre2-8 libpcre2-posix)"
+        PCRE2VER=$(${PKGCONFIG} --modversion libpcre2-posix)
      else
         PCRE2INC=""
         PCRE2LIB="-lpcre-8 -lpcre2-posix"
      fi
      DLLIBS="$DLLIBS $PCRE2LIB"
      AC_DEFINE(HAVE_PCRE2, 1 , [We use our version of pcre])
-     SYST_LIBS="libpcre2 $SYST_LIBS"
+     SYST_LIBS="libpcre2 ($PCRE2VER) $SYST_LIBS"
 fi
 
 
@@ -455,13 +458,14 @@ else
      if $PKGCONFIG --exists libffi ;then
        FFIINC=$($PKGCONFIG libffi --cflags)
        FFILIB=$($PKGCONFIG libffi --libs)
+       FFIVER=$($PKGCONFIG --modversion libffi)
      else
        FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
        DLLIBS="$DLLIBS $FFILIB"
      fi
      DLLIBS="$DLLIBS $FFILIB"
-     SYST_LIBS="libffi $SYST_LIBS"
+     SYST_LIBS="libffi ($FFIVER) $SYST_LIBS"
 fi
 # We always want FFI. Should be modifiable in the future
 AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
@@ -772,6 +776,9 @@ AC_OUTPUT
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
+# Shorten SYST_LIBS and COMP_LIBS to be less tan 80 chars
+SYST_LIBS=`echo $SYST_LIBS | sed -e "s/lib//g"`
+COMP_LIBS=`echo $COMP_LIBS | sed -e "s/lib//g"`
 
 echo " "
 echo " "
