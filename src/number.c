@@ -2592,9 +2592,7 @@ SCM STk_div2(SCM o1, SCM o2)
         case tc_real:     d2 = REAL_VAL(o2);             break;
         case tc_rational: d2 = rational2double(o2);      break;
         case tc_bignum:   d2 = scheme_bignum2double(o2); break;
-        case tc_integer:  if (INT_VAL(o2) == 0)
-                            error_divide_by_0(o1);
-                          d2 = (double) INT_VAL(o2);     break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
         default:          goto div_error;
       }
       return double2real(REAL_VAL(o1) / d2);
