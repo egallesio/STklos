@@ -9831,7 +9831,8 @@ echo "               System: " $BUILD_OS
 echo "              OS nick: " $OS_NAME_VERSION
 echo "              OS type: " $OS_FLAVOUR
 echo "       Install prefix: " $prefix
-echo "           C compiler: " $CC
+echo "    C compiler binary: " $CC
+echo "   C compiler version: " $C_VERSION
 echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
