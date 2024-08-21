@@ -2092,6 +2092,9 @@ doc>
  */
 SCM STk_add2(SCM o1, SCM o2)
 {
+  if (o1 == MAKE_INT(0)) return o2;
+  if (o2 == MAKE_INT(0)) return o1;
+
   switch (TYPEOF(o1)) {
 
     // ========== o1 is a complex
@@ -2100,15 +2103,13 @@ SCM STk_add2(SCM o1, SCM o2)
         case tc_complex:
           return make_complex(add2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
                               add2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
-        case tc_real:     break;
-        case tc_rational: break;
-        case tc_bignum:   break;
-        case tc_integer:  if (INT_VAL(o2) == 0) return o1;
-                          break;
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer:  return  make_complex(add2(COMPLEX_REAL(o1), o2),
+                                               COMPLEX_IMAG(o1));
         default:          goto add_error;
       }
-      return  make_complex(add2(COMPLEX_REAL(o1), o2),
-                           COMPLEX_IMAG(o1));
     }
 
     // ========== o1 is a real
@@ -2120,8 +2121,7 @@ SCM STk_add2(SCM o1, SCM o2)
         case tc_real:     d2 = REAL_VAL(o2);             break;
         case tc_rational: d2 = rational2double(o2);      break;
         case tc_bignum:   d2 = scheme_bignum2double(o2); break;
-        case tc_integer:  if (!INT_VAL(o2)) return o1;
-                          d2 = (double) INT_VAL(o2);     break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
         default:          goto add_error;
       }
       return double2real(REAL_VAL(o1) + d2);
@@ -2138,15 +2138,12 @@ SCM STk_add2(SCM o1, SCM o2)
                           num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
                           num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
                           return make_rational(add2(num1, num2), den);
-        case tc_bignum:
-        case tc_integer: if (INT_VAL(o2) == 0) return o1;
-                          else {
-                            den  = RATIONAL_DEN(o1);
-                            num1 = RATIONAL_NUM(o1);
-                            num2 = mul2(o2, den);
-                            return make_rational(add2(num1, num2), den);
-                          }
-        default:         goto add_error;
+        case tc_bignum:   // fallthrough
+        case tc_integer:  den  = RATIONAL_DEN(o1);
+                          num1 = RATIONAL_NUM(o1);
+                          num2 = mul2(o2, den);
+                          return make_rational(add2(num1, num2), den);
+        default:          goto add_error;
       }
     }
 
@@ -2160,8 +2157,7 @@ SCM STk_add2(SCM o1, SCM o2)
         case tc_real:     return double2real(scheme_bignum2double(o1) +REAL_VAL(o2));
         case tc_rational: goto add_x_and_rational;
         case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
-        case tc_integer:  if (INT_VAL(o2) == 0) return o1;
-                          mpz_init_set_si(b2, INT_VAL(o2)); break;
+        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
         default:          goto add_error;
       }
 
@@ -2192,9 +2188,7 @@ SCM STk_add2(SCM o1, SCM o2)
                             mpz_clear(add); mpz_clear(x);
                             return tmp;
                           }
-        case tc_integer:  if (INT_VAL(o1) == 0) return o2;
-                          if (INT_VAL(o2) == 0) return o1;
-                          else {
+        case tc_integer:  {
                             long add =  (long) INT_VAL(o1) + INT_VAL(o2);
                             return (LONG_FITS_INTEGER(add)) ? MAKE_INT(add):
                                         long2scheme_bignum(add);
@@ -2406,6 +2400,8 @@ doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
+  if (o2 == MAKE_INT(0)) return o1;
+
   switch (TYPEOF(o1)) {
 
     // ========== o1 is a complex
@@ -2414,15 +2410,14 @@ SCM STk_sub2(SCM o1, SCM o2)
         case tc_complex:
           return make_complex(sub2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
                               sub2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
-        case tc_real:     break;
-        case tc_rational: break;
-        case tc_bignum:   break;
-        case tc_integer:  if (INT_VAL(o2) == 0) return o1;
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer:  return make_complex(sub2(COMPLEX_REAL(o1), o2),
+                          COMPLEX_IMAG(o1));
                           break;
         default:          goto sub_error;
       }
-      return make_complex(sub2(COMPLEX_REAL(o1), o2),
-                          COMPLEX_IMAG(o1));
     }
 
     // ========== o1 is a real
@@ -2434,8 +2429,7 @@ SCM STk_sub2(SCM o1, SCM o2)
         case tc_real:     d2 = REAL_VAL(o2);             break;
         case tc_rational: d2 = rational2double(o2);      break;
         case tc_bignum:   d2 = scheme_bignum2double(o2); break;
-        case tc_integer:  if (!INT_VAL(o2)) return o1;
-                          d2 = (double) INT_VAL(o2);     break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
         default:          goto sub_error;
       }
       return double2real(REAL_VAL(o1) - d2);
@@ -2452,14 +2446,11 @@ SCM STk_sub2(SCM o1, SCM o2)
                           num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
                           num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
                           return make_rational(sub2(num1, num2), den);
-        case tc_bignum:
-        case tc_integer:  if (INT_VAL(o2) == 0) return o1;
-                          else {
-                            den  = RATIONAL_DEN(o1);
-                            num1 = RATIONAL_NUM(o1);
-                            num2 = mul2(o2, den);
-                            return make_rational(sub2(num1, num2), den);
-                          }
+        case tc_bignum:   // falsthrough
+        case tc_integer:  den  = RATIONAL_DEN(o1);
+                          num1 = RATIONAL_NUM(o1);
+                          num2 = mul2(o2, den);
+                          return make_rational(sub2(num1, num2), den);
         default:          goto sub_error;
       }
     }
@@ -2474,8 +2465,7 @@ SCM STk_sub2(SCM o1, SCM o2)
         case tc_real:     return double2real(scheme_bignum2double(o1) -REAL_VAL(o2));
         case tc_rational: goto sub_x_and_rational;
         case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
-        case tc_integer:  if (INT_VAL(o2) == 0) return o1;
-                          mpz_init_set_si(b2, INT_VAL(o2)); break;
+        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
         default:          goto sub_error;
       }
 
@@ -2508,7 +2498,6 @@ SCM STk_sub2(SCM o1, SCM o2)
                           }
         case tc_integer:  if (INT_VAL(o1) == 0 && INT_VAL(o2) != INT_MIN_VAL)
                             return MAKE_INT(-INT_VAL(o2));
-                          if (INT_VAL(o2) == 0) return o1;
                           else {
                              long sub =  (long) INT_VAL(o1) - INT_VAL(o2);
                              return (LONG_FITS_INTEGER(sub)) ?
@@ -2558,7 +2547,7 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
 SCM STk_div2(SCM o1, SCM o2)
 {
   if (o2 == MAKE_INT(1)) return o1;
-  
+
   switch (TYPEOF(o1)) {
 
     // ========== o1 is a complex
