@@ -2235,6 +2235,9 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
+  if (o1 == MAKE_INT(1)) return o2;
+  if (o2 == MAKE_INT(1)) return o1;
+
   switch (TYPEOF(o1)) {
 
     // ========== o1 is a complex
@@ -2554,6 +2557,8 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
+  if (o2 == MAKE_INT(1)) return o1;
+  
   switch (TYPEOF(o1)) {
 
     // ========== o1 is a complex
