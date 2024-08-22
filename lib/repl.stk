@@ -281,6 +281,10 @@ doc>
   (repl-add-command '(apropos a)
                     "Search for symbols containing a given string"
                     (lambda () (print (apropos (simple-trim (read-line))))))
+  ;; == version
+  (repl-add-command '(version v)
+                    "Show version"
+                    (lambda () (printf "~a ~a~%" (version) (%push-id))))
   ;; ==== help
   (repl-add-command
    '(help ? h)
@@ -291,10 +295,6 @@ doc>
            (display-repl-command-help)
            (help (read-from-string arg))))))
 
-  ;; == version
-  (repl-add-command '(version v)
-                    "Show version"
-                    (lambda () (printf "~a ~a~%" (version) (%push-id))))
 ) ;; end of REPL commands
 
 ;; ----------------------------------------------------------------------
