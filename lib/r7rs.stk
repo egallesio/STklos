@@ -1630,7 +1630,7 @@ doc>
  * example of what |features| might return:
  *
  * @lisp
- * (features) => (STklos STklos-{{version}} exact-complex
+ * (features) => (STklos STklos-{{short-version}}.xxx exact-complex
 *                 ieee-float full-unicode ratios little-endian ...)
  * @end lisp
 doc>
