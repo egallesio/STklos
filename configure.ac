@@ -196,7 +196,7 @@ OS_NAME_VERSION=${OS}_$v;
 ###
 SYST_LIBS=""
 COMP_LIBS=""
-
+SYST_LIBS_SHOW=""
 
 ### Check for dynamic loading
 AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
@@ -316,7 +316,8 @@ else
      fi
      DLLIBS="$DLLIBS -lgc"
      AC_DEFINE(HAVE_GC, 1, [Use system GC])
-     SYST_LIBS="libgc ($GCVER) $SYST_LIBS"
+     SYST_LIBS="libgc $SYST_LIBS"
+     SYST_LIBS_SHOW="gc ($GCVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -375,7 +376,8 @@ else
      fi
      DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
-     SYST_LIBS="libgmp ($GMPVER) $SYST_LIBS"
+     SYST_LIBS="libgmp $SYST_LIBS"
+     SYST_LIBS_SHOW="gmp ($GMPVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -420,7 +422,8 @@ else
      fi
      DLLIBS="$DLLIBS $PCRE2LIB"
      AC_DEFINE(HAVE_PCRE2, 1 , [We use our version of pcre])
-     SYST_LIBS="libpcre2 ($PCRE2VER) $SYST_LIBS"
+     SYST_LIBS="libpcre2 $SYST_LIBS"
+     SYST_LIBS_SHOW="pcre2 ($PCRE2VER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -465,7 +468,8 @@ else
        DLLIBS="$DLLIBS $FFILIB"
      fi
      DLLIBS="$DLLIBS $FFILIB"
-     SYST_LIBS="libffi ($FFIVER) $SYST_LIBS"
+     SYST_LIBS="libffi $SYST_LIBS"
+     SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
 fi
 # We always want FFI. Should be modifiable in the future
 AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
@@ -776,9 +780,8 @@ AC_OUTPUT
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
-# Shorten SYST_LIBS and COMP_LIBS to be less tan 80 chars
-SYST_LIBS=`echo $SYST_LIBS | sed -e "s/lib//g"`
-COMP_LIBS=`echo $COMP_LIBS | sed -e "s/lib//g"`
+# COMP_LIBS_SHOW is a "shorter" version of COMP_LIBS
+COMP_LIBS_SHOW=`echo $COMP_LIBS | sed -e "s/lib//g"`
 
 echo " "
 echo " "
@@ -795,8 +798,8 @@ echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
-echo "System libraries used: " $SYST_LIBS
-echo "   Compiled libraries: " $COMP_LIBS
+echo "System libraries used: " $SYST_LIBS_SHOW
+echo "   Compiled libraries: " $COMP_LIBS_SHOW
 echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 

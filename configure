@@ -7137,7 +7137,7 @@ OS_NAME_VERSION=${OS}_$v;
 ###
 SYST_LIBS=""
 COMP_LIBS=""
-
+SYST_LIBS_SHOW=""
 
 ### Check for dynamic loading
 ac_fn_c_check_func "$LINENO" "dlopen" "ac_cv_func_dlopen"
@@ -7511,7 +7511,8 @@ else
 
 printf "%s\n" "#define HAVE_GC 1" >>confdefs.h
 
-     SYST_LIBS="libgc ($GCVER) $SYST_LIBS"
+     SYST_LIBS="libgc $SYST_LIBS"
+     SYST_LIBS_SHOW="gc ($GCVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -7686,7 +7687,8 @@ else
 
 printf "%s\n" "#define HAVE_GMP 1" >>confdefs.h
 
-     SYST_LIBS="libgmp ($GMPVER) $SYST_LIBS"
+     SYST_LIBS="libgmp $SYST_LIBS"
+     SYST_LIBS_SHOW="gmp ($GMPVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -7790,7 +7792,8 @@ else
 
 printf "%s\n" "#define HAVE_PCRE2 1 " >>confdefs.h
 
-     SYST_LIBS="libpcre2 ($PCRE2VER) $SYST_LIBS"
+     SYST_LIBS="libpcre2 $SYST_LIBS"
+     SYST_LIBS_SHOW="pcre2 ($PCRE2VER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -7892,7 +7895,8 @@ else
        DLLIBS="$DLLIBS $FFILIB"
      fi
      DLLIBS="$DLLIBS $FFILIB"
-     SYST_LIBS="libffi ($FFIVER) $SYST_LIBS"
+     SYST_LIBS="libffi $SYST_LIBS"
+     SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
 fi
 # We always want FFI. Should be modifiable in the future
 
@@ -9819,9 +9823,8 @@ fi
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
-# Shorten SYST_LIBS and COMP_LIBS to be less tan 80 chars
-SYST_LIBS=`echo $SYST_LIBS | sed -e "s/lib//g"`
-COMP_LIBS=`echo $COMP_LIBS | sed -e "s/lib//g"`
+# COMP_LIBS_SHOW is a "shorter" version of COMP_LIBS
+COMP_LIBS_SHOW=`echo $COMP_LIBS | sed -e "s/lib//g"`
 
 echo " "
 echo " "
@@ -9838,8 +9841,8 @@ echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
-echo "System libraries used: " $SYST_LIBS
-echo "   Compiled libraries: " $COMP_LIBS
+echo "System libraries used: " $SYST_LIBS_SHOW
+echo "   Compiled libraries: " $COMP_LIBS_SHOW
 echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
