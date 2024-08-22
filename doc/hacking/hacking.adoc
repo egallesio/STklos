@@ -20,6 +20,7 @@
 :pdf-style: ../lib/theme/stklos.yml
 :docinfodir: ../lib/theme
 :docinfo: shared
+:nofooter:       // to have reproducible builds
 
 This is a quick guide to STklos hacking. It’s not detailed, so the
 document doesn’t become huge, and also because after understanding the

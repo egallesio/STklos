@@ -18,7 +18,7 @@
 :pdf-style: ../lib/theme/stklos.yml
 :docinfodir: ../lib/theme
 :docinfo: shared
-
+:nofooter:       // to have reproducible builds
 
 This is the documentation for the opcodes of the STklos virtual machine.
 The VM implementation is contained in the files `src/vm.h` and
