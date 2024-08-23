@@ -434,46 +434,64 @@ echo "*****"
 echo "***** FFI support"
 echo "*****"
 
-# Try to determine if libffi is installed
-if ${PKGCONFIG} --exists libffi ;then
-   HAVE_FFI="yes"
-else
-  AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
-fi
+# Check if the user wants FFI included or not.
+# The autoconf variable AVOID_FFI will be set here to either "yes"
+# or "no".
+# *** If it's set to "no", then the --with-provided-ffi won't even be
+#     verified.
+AC_ARG_WITH(ffi,
+       [  --without-ffi don't include FFI code ],
+       AVOID_FFI="yes", AVOID_FFI="no")
 
-# Test if the user wants to force the use of our FFI lib
-AC_ARG_WITH(provided-ffi,
-       [  --with-provided-ffi     use the provided FFI library],
-       PROV_FFI="$withval", PROV_FFI="no")
-
-if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
+if test "$AVOID_FFI" = "no"
 then
-     echo "... Configuring libffi"
-     (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
-           --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
-     FFI="ffi"
-     FFIINC="-I../ffi/$(./config.guess)/include"
-     FFILIB="../ffi/$(./config.guess)/.libs/libffi.a"
-     COMP_LIBS="libffi $COMP_LIBS"
-else
-     echo "... Using system libffi library"
-     FFI=""
-     if $PKGCONFIG --exists libffi ;then
-       FFIINC=$($PKGCONFIG libffi --cflags)
-       FFILIB=$($PKGCONFIG libffi --libs)
-       FFIVER=$($PKGCONFIG --modversion libffi)
-     else
-       FFIINC="-I/usr/include/ffi"
-       FFILIB="-lffi"
-       DLLIBS="$DLLIBS $FFILIB"
-     fi
-     DLLIBS="$DLLIBS $FFILIB"
-     SYST_LIBS="libffi $SYST_LIBS"
-     SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
-fi
-# We always want FFI. Should be modifiable in the future
-AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
+  # Try to determine if libffi is installed
+  if ${PKGCONFIG} --exists libffi ;then
+     HAVE_FFI="yes"
+  else
+    AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
+  fi
 
+  # Test if the user wants to force the use of our FFI lib
+  AC_ARG_WITH(provided-ffi,
+         [  --with-provided-ffi     use the provided FFI library],
+         PROV_FFI="$withval", PROV_FFI="no")
+
+  if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
+  then
+       echo "... Configuring libffi"
+       (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
+             --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
+       FFI="ffi"
+       FFIINC="-I../ffi/$(./config.guess)/include"
+       FFILIB="../ffi/$(./config.guess)/.libs/libffi.a"
+       COMP_LIBS="libffi $COMP_LIBS"
+       STR_FFI="provided"
+  else
+       echo "... Using system libffi library"
+       FFI=""
+       if $PKGCONFIG --exists libffi ;then
+         FFIINC=$($PKGCONFIG libffi --cflags)
+         FFILIB=$($PKGCONFIG libffi --libs)
+         FFIVER=$($PKGCONFIG --modversion libffi)
+       else
+         FFIINC="-I/usr/include/ffi"
+         FFILIB="-lffi"
+         DLLIBS="$DLLIBS $FFILIB"
+       fi
+       DLLIBS="$DLLIBS $FFILIB"
+       SYST_LIBS="libffi $SYST_LIBS"
+       SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
+       STR_FFI="system"
+  fi
+
+  # The following "HAVE_FFI" is defined so the compiler will actually
+  # compile the code for it.
+  AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
+else
+  echo "... NOT using FFI"
+  STR_FFI="none"
+fi
 
 # ----------------------------------------------------------------------
 # Control fixnum and flonum parameters
@@ -800,6 +818,7 @@ echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
 echo "System libraries used: " $SYST_LIBS_SHOW
 echo "   Compiled libraries: " $COMP_LIBS_SHOW
+echo "                  FFI: " $STR_FFI
 echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
