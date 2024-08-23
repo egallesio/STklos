@@ -1351,8 +1351,27 @@ keyword parameters:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>&#35;t</code> if <code>obj</code> is a procedure created with the <code>lambda</code> syntax and
-<code>&#35;f</code> otherwise.</p>
+<p>Returns <code>#t</code> if <code>obj</code> is a procedure created with the <code>lambda</code>
+syntax and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>Note that primitive procedures (those which are written in C) are
+<strong>not</strong> closures:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">cube</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">x</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">cube</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="no">#t</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">square-root</span> <span class="nv">sqrt</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="nv">square-root</span> <span class="nv">sqrt</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">square-root</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="no">#f</span>
+
+<span class="p">(</span><span class="nf">closure?</span> <span class="mi">10</span><span class="p">)</span>                 <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">display</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">any</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_case-lambda'></a>
@@ -19818,6 +19837,14 @@ the compiler flag &lt;&lt;"compiler:keep-formals"&gt;&gt; is set at its creation
 If <code>proc</code> formal parameters are not available, <code>procedure-formals</code>
 returns <code>#f</code>.</p>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:keep-formals</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">3</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">procedure-formals</span> <span class="nv">f</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span></code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p><a id='P_procedure-source'></a>
 </p>
@@ -19837,6 +19864,14 @@ returns <code>#f</code>.</p>
 Note that procedure source is kept in memory only if the compiler flag
 &lt;&lt;"compiler:keep-source"&gt;&gt; is set at its creation. If <code>proc</code> source is
 not available, <code>procedure-source</code> returns <code>#f</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:keep-source</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">3</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">procedure-source</span> <span class="nv">f</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">3</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">))</span></code></pre>
+</div>
 </div>
 <div id="ansicolor" class="paragraph">
 <p><a id='P_ansi-color'></a>
@@ -26230,6 +26265,26 @@ the FFI better!):</p>
                             <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">f17baf94d06</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">f17bafb4360</span><span class="p">]</span>
 <span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="p">(</span><span class="nf">c-strpbrk</span> <span class="s">"a string"</span> <span class="s">"rz"</span><span class="p">))</span>
                             <span class="nv">=&gt;</span> <span class="s">"ring"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to pass a <code>NULL</code> pointer to an external C function, the
+<code>#void</code> Scheme value can be used.</p>
+</div>
+<div class="paragraph">
+<p>As an example, the second argument to the <code>strtol</code> function can be
+<code>NULL</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-external</span> <span class="nv">strtol</span><span class="p">(</span><span class="nf">:string</span> <span class="nv">:pointer</span> <span class="nv">:int</span><span class="p">)</span>
+  <span class="nv">:return-type</span> <span class="nv">:long</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">strtol</span> <span class="s">"1001"</span> <span class="o">#</span><span class="nv">void</span> <span class="mi">10</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1001</span>
+<span class="p">(</span><span class="nf">strtol</span> <span class="s">"1001"</span> <span class="o">#</span><span class="nv">void</span> <span class="mi">2</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mi">9</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
