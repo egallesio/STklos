@@ -25649,16 +25649,7 @@ of available commands is given below.</p>
 <p><strong>,cd</strong>: Change current directory</p>
 </li>
 <li>
-<p><strong>,pwd</strong>: Print working directory</p>
-</li>
-<li>
-<p><strong>,ls</strong>: List directory content</p>
-</li>
-<li>
 <p><strong>,quit</strong> (or <strong>,q</strong>): Exit STklos</p>
-</li>
-<li>
-<p><strong>,shell</strong> (or <strong>,!</strong>): Run a shell command</p>
 </li>
 <li>
 <p><strong>,time</strong> (or <strong>,t</strong> ): Print the time used to run the next expression</p>
@@ -25695,6 +25686,22 @@ of available commands is given below.</p>
 parameter. With a parameter, display the help of this parameter</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>Furthermore, the <strong>'!'</strong> character can also be used to execute an
+external command using <strong>sh(1)</strong>. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="nv">!pwd</span>
+<span class="nv">/tmp/test</span>
+<span class="nv">stklos&gt;</span> <span class="nv">!emacs</span> <span class="nv">foo</span><span class="o">.</span><span class="nv">stk</span> <span class="nv">&amp;</span>   <span class="c1">;; to launch emacs on file foo.stk</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">!pwd</span> <span class="mi">100</span><span class="p">)</span>
+<span class="c1">;; !pwd</span>
+<span class="nv">stklos&gt;</span> <span class="nv">!pwd</span>               <span class="c1">;; now !pwd overrides pwd(1)</span>
+<span class="mi">100</span>
+<span class="nv">stklos&gt;</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_repl-add-command'></a>
