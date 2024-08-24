@@ -29,7 +29,7 @@ four) step process:
     You can also choose the compiler and the compiler options to use for building **STklos** with the `CC` and `CFLAGS` parameters:
 
     ```bash
-    $ ./configure --prefix=/opt --with-provided-gc CC=clang CFLAGS="-O3 -Wall -DSTAT_VM"
+    $ ./configure --prefix=/opt --with-provided-gc CC=clang-18 CFLAGS="-O3 -Wall -DSTAT_VM"
     ```
 
     A summary will be printed at the end of the execution of the script as shown below:
@@ -37,16 +37,18 @@ four) step process:
     ```
     SUMMARY
     *******
-                   System:  Linux-5.6.15-1-MANJARO
-                  OS nick:  LINUX_5_6
+                   System:  Linux-6.9.7-amd64
+                  OS nick:  LINUX_6_9
                   OS type:  unix
           Install prefix :  /opt
-               C compiler:  clang
+               C compiler:  clang-18
+       C compiler version:  Debian clang version 18.1.8 (9)
         Compilation flags:  -O3 -Wall
                    Loader:  ld
            Thread support:  pthreads
          Case sensitivity:  true (by default)
-    System libraries used:  libffi libpcre libgmp
+    Control fx parameters:  yes
+    System libraries used:  ffi (3.4.6) pcre2 (10.42) gmp (6.3.0)
        Compiled libraries:  libgc
      Documentation update:  yes (since Asciidoctor is installed)
     ```
