@@ -440,7 +440,7 @@ echo "*****"
 # *** If it's set to "no", then the --with-provided-ffi won't even be
 #     verified.
 AC_ARG_WITH(ffi,
-       [  --without-ffi don't include FFI code ],
+       [  --without-ffi           don't include FFI code ],
        AVOID_FFI="yes", AVOID_FFI="no")
 
 if test "$AVOID_FFI" = "no"
