@@ -196,7 +196,7 @@ OS_NAME_VERSION=${OS}_$v;
 ###
 SYST_LIBS=""
 COMP_LIBS=""
-
+SYST_LIBS_SHOW=""
 
 ### Check for dynamic loading
 AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
@@ -309,6 +309,7 @@ else
      if $PKGCONFIG --exists bdw-gc ;then
         GCINC=$($PKGCONFIG  bdw-gc --cflags)
         GCLIB=$($PKGCONFIG  bdw-gc --libs)
+        GCVER=$(${PKGCONFIG} --modversion bdw-gc)
      else
         GCINC=""
         GCLIB="-lgc"
@@ -316,6 +317,7 @@ else
      DLLIBS="$DLLIBS -lgc"
      AC_DEFINE(HAVE_GC, 1, [Use system GC])
      SYST_LIBS="libgc $SYST_LIBS"
+     SYST_LIBS_SHOW="gc ($GCVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -367,6 +369,7 @@ else
      if $PKGCONFIG --exists gmp ;then
         GMPINC="$($PKGCONFIG --cflags gmp)"
         GMPLIB="$($PKGCONFIG --libs gmp)"
+        GMPVER=$(${PKGCONFIG} --modversion gmp)
      else
         GMPINC=""
         GMPLIB="-lgmp"
@@ -374,6 +377,7 @@ else
      DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
      SYST_LIBS="libgmp $SYST_LIBS"
+     SYST_LIBS_SHOW="gmp ($GMPVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -411,6 +415,7 @@ else
      if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
         PCRE2INC="$($PKGCONFIG --cflags libpcre2-8 libpcre2-posix) "
         PCRE2LIB="$($PKGCONFIG --libs   libpcre2-8 libpcre2-posix)"
+        PCRE2VER=$(${PKGCONFIG} --modversion libpcre2-posix)
      else
         PCRE2INC=""
         PCRE2LIB="-lpcre-8 -lpcre2-posix"
@@ -418,6 +423,7 @@ else
      DLLIBS="$DLLIBS $PCRE2LIB"
      AC_DEFINE(HAVE_PCRE2, 1 , [We use our version of pcre])
      SYST_LIBS="libpcre2 $SYST_LIBS"
+     SYST_LIBS_SHOW="pcre2 ($PCRE2VER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -455,6 +461,7 @@ else
      if $PKGCONFIG --exists libffi ;then
        FFIINC=$($PKGCONFIG libffi --cflags)
        FFILIB=$($PKGCONFIG libffi --libs)
+       FFIVER=$($PKGCONFIG --modversion libffi)
      else
        FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
@@ -462,6 +469,7 @@ else
      fi
      DLLIBS="$DLLIBS $FFILIB"
      SYST_LIBS="libffi $SYST_LIBS"
+     SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
 fi
 # We always want FFI. Should be modifiable in the future
 AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
@@ -737,7 +745,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
           doc/pp/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script examples/Makefile
+          utils/stklos-script examples/Makefile examples/C-module/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/scheme/Makefile
           lib/scheme/regex/Makefile lib/scheme/vector/Makefile
@@ -772,6 +780,8 @@ AC_OUTPUT
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
+# COMP_LIBS_SHOW is a "shorter" version of COMP_LIBS
+COMP_LIBS_SHOW=`echo $COMP_LIBS | sed -e "s/lib//g"`
 
 echo " "
 echo " "
@@ -781,14 +791,15 @@ echo "               System: " $BUILD_OS
 echo "              OS nick: " $OS_NAME_VERSION
 echo "              OS type: " $OS_FLAVOUR
 echo "       Install prefix: " $prefix
-echo "           C compiler: " $CC
+echo "    C compiler binary: " $CC
+echo "   C compiler version: " $C_VERSION
 echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
-echo "System libraries used: " $SYST_LIBS
-echo "   Compiled libraries: " $COMP_LIBS
+echo "System libraries used: " $SYST_LIBS_SHOW
+echo "   Compiled libraries: " $COMP_LIBS_SHOW
 echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 

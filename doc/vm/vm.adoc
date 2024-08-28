@@ -18,7 +18,7 @@
 :pdf-style: ../lib/theme/stklos.yml
 :docinfodir: ../lib/theme
 :docinfo: shared
-
+:nofooter:       // to have reproducible builds
 
 This is the documentation for the opcodes of the STklos virtual machine.
 The VM implementation is contained in the files `src/vm.h` and
@@ -880,6 +880,7 @@ structure (that is, the tagged word representing it) again on `val`.
 IN_CONS
 IN_CAR
 IN_CDR
+IN_CXR
 IN_LIST
 ....
 
@@ -940,6 +941,51 @@ is loaded on `val`, and then `IN-CONS` is called.
 Constants:
 0: a
 ....
+
+The special accessor `CXR` is used to access list parts, as described
+in the `cxr` library in the R7RS standard (`caar`, `cadr`, ..., up to
+`cddddr`). The following example illustrates this.
+
+[source,scheme]
+----
+(disassemble-expr '(caadr x) #t)
+
+000:  GLOBAL-REF           1
+002:  IN-CXR               0
+004:
+
+Constants:
+0: #:daa
+1: x
+----
+
+The constant `#:daa` is the abbreviation of the operations --`(CAADR x)`
+ = `(CAR (CAR (CDR x)))`, *in reversed order* (because that is the order in which they
+will be applied, and it is more natural for the VM to go from the
+beginning of the string towards the end.
+
+See that if we turn off the inlining of functions in the compiler, we
+get a different output:
+
+[source,scheme]
+----
+(compiler:inline-common-functions #f)
+(disassemble-expr '(caadr x) #t)
+
+000:  PREPARE-CALL
+001:  GLOBAL-REF           0
+003:  PUSH
+004:  GLOBAL-REF           1
+006:  INVOKE               1
+008:
+
+Constants:
+0: x
+1: caadr
+----
+
+Not only we have more instructions, but the `PREPARE-CALL` and
+`INVOKE` instructions above are rather expensive.
 
 === Structure references
 
@@ -1476,6 +1522,20 @@ Constants:
 0: a
 ....
 
+There is an instruction for returning the value of a symbol in the
+`SCHEME` module.
+
+[source,scheme]
+----
+(disassemble-expr '(%%in-scheme 'a) #t)
+
+000:  CONSTANT             0
+002:  INSCHEME
+003:
+
+Constants:
+0: a
+----
 
 == `vm.c`
 
@@ -1604,3 +1664,135 @@ Restoring is easier:
 
 And, when the C stack is restored, the VM is back to its original state, except
 for the global variables.
+
+== Verifying the VM configuration
+
+The primitive `%vm-config` returns an association list describing the
+compile-time configuration of the VM. For example,
+
+```
+stklos> (%vm-config )
+(#:computed-goto #t #:debug-vm #f #:stat-vm #t)
+```
+
+* `#:computed-goto`: was `vm.c` compiled using computed `goto`?
+* `#:debug-vm`: does this STklos binary have debugging enabled?
+* `#:stat-vm`: was the VM compiled with code for statistics-collecting?
+
+== Collecting statistics
+
+The code in `vm.c` can optionally be compiled to collect statistics.
+If the symbol `STAT_VM` is defined during compilation, then the statistics-collecting
+code will be enabled. You can enable it, for example, by configuring STklos as
+
+[source]
+----
+./configure CFLAGS="-DSTAT_VM" ...
+----
+
+When the code has been compiled as this, the VM will, at the end of
+each iteration, check the instruction that was just executed and
+update:
+
+* The number of times that this instruction was executed
+* The number of times that this instruction was executed after the
+  previous one (so it's possible to tell what pairs of instructions
+  are more common)
+* The time taken to execute this instruction
+
+This is done in the `tick()` C function (which is compiled
+conditionally on `STAT_VM`):
+
+[source,c]
+----
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time) {
+  static clock_t current_time;
+  current_time = clock();
+  couple_instr[*previous_op][b]++;
+  cpt_inst[b]++;
+  *previous_op = b;
+
+  if (*previous_time > 0)
+      time_inst[b] += ((double)(current_time - *previous_time)) / CLOCKS_PER_SEC;
+  *previous_time = clock();
+}
+----
+
+Three Scheme primitives are then available:
+
+* `(%vm-dump-stats fname format)` will dump the statistics to a file whose
+  name is `fname`.  The file will be opened using plain `fopen`.  When the
+  `format` argument is the keyword `:csv`, then the output is in CSV format;
+  otherwise, there will be one single S-expression in the file, readable from
+  Scheme. This S-expression is an alist, documented in the file itself (see
+  below).
+* `(%vm-reset-stats)` will reset all counters.
+* `(%vm-collect-stats . val)` is a parameter object. When called without
+   value, it returns if statistics are collected or not. If the value `val`
+   is determined, then statistics
+   - will start being collected, if `val` is `#t`;
+   - will not be collected anymore if `val` is `#f`.
+
+ Collecting statistics is off by default, especially because compiling STklos
+is very slow with statistics gathering. It should be turned on before profiling.
+
+The status of "collecting" or "not collecting" reflects what happens internaly in the
+statistics gathering code, *when it is compiled in*. If STklos was compiled without
+`STAT_VM`, then those procedures are just not available at all.
+
+The documentation for the Scheme format for the dumped instructions is
+shown below.
+
+[source,scheme]
+----
+;; STklos VM statistics. It can be read in Scheme, and it represents one single
+;; object: an alist with the names of instructions, and each CDR is a list
+;; containing:
+;;
+;; * count (the number of times this instruction was executed)
+;; * time (the total time the program spent on this instruction)
+;; * avg time (the average number of time spent on each execution of this
+;;   instruction)
+;; * an alist containing, for each OTHER instruction, the number of times they
+;;   appeared together in the code.
+;;
+;; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))
+;;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))
+;;   ...
+;;   (INSn countn timen avgtimen ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn))) )
+----
+
+The C code for printing the instructions is in the functions
+`dump_couple_instr_csv` and `dump_couple_instr_scm`.
+
+Note that the `%vm-config` can be used to determine if the system has been
+compiled with the profiling code. As said before, this primitive returns a
+property list and `#:stat-vm` can be used here.
+
+To profile some specific code there is the `%with-profile-data` macro:
+
+
+[source,scheme]
+----
+(%with-profile-data "file-name.csv" :csv
+  (display 'a)
+  (newline)
+  (values 1 2 3))
+----
+
+This will expand to
+
+[source,scheme]
+----
+(receive
+  result-4
+  (begin (%vm-reset-stats)
+         (display 'a)
+         (newline)
+         (values 1 2 3))
+         (begin (%vm-dump-stats "file-name.csv" #:csv)
+                (apply values result-4)))
+----
+
+So the macro will return the same values that the code would, and will profile only
+that part of the code.

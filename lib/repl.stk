@@ -200,6 +200,12 @@ doc>
   (display " - @@1 (aka @@), @@2, @@3, @@4, @@5 contain the last input to the REPL\n")
   (display " - @@* contains a list of @@1, @@2, @@3, @@4 and @@5 values\n"))
 
+  ;; Print somme helps on the ! shell escape
+  (display (do-color (get-repl-color :help)  "\nShell commands:\n"))
+  (display (do-color 'normal))
+  (display "!cmd a1 a2 ...  executes the command \"cmd\" with the arguments a1 a2...\n"))
+
+
 (define (do-repl-command name)
   (define (search-repl-command name)
     (let Loop ((lst *repl-commands*))
@@ -238,24 +244,10 @@ doc>
   (repl-add-command 'cd
                     "Change current directory"
                     (lambda () (chdir (simple-trim (read-line)))))
-  ;; ==== pwd
-  (repl-add-command 'pwd
-                    "Print working directory"
-                    (lambda () (printf "~s~%" (getcwd))))
-
-  ;; ==== ls
-  (repl-add-command 'ls
-                    "List directory content (usual 'ls' options accepted)"
-                    (lambda () (system (string-append "ls " (read-line)))))
-
   ;; ==== quit
   (repl-add-command '(quit q)
                     "Exit STklos"
                     (lambda () (exit 0)))
-  ;; ==== shell
-  (repl-add-command '(shell !)
-                    "Run a shell command"
-                    (lambda () (system (read-line))))
   ;; ==== time
   (repl-add-command '(time t)
                     "Print the time used to run the next expression"
@@ -300,6 +292,10 @@ doc>
   (repl-add-command '(apropos a)
                     "Search for symbols containing a given string"
                     (lambda () (print (apropos (simple-trim (read-line))))))
+  ;; == version
+  (repl-add-command '(version v)
+                    "Show version"
+                    (lambda () (printf "~a ~a~%" (version) (%push-id))))
   ;; ==== help
   (repl-add-command
    '(help ? h)
@@ -310,10 +306,6 @@ doc>
            (display-repl-command-help)
            (help (read-from-string arg))))))
 
-  ;; == version
-  (repl-add-command '(version v)
-                    "Show version"
-                    (lambda () (printf "~a ~a~%" (version) (%push-id))))
 ) ;; end of REPL commands
 
 ;; ----------------------------------------------------------------------
@@ -487,7 +479,16 @@ doc>
                 (flush-output-port out))
 
              ((and (pair? e) (eq? (car e) 'unquote))
-                (do-repl-command (cadr e)))
+                 ;; Spcial ,xxx commands
+                 (do-repl-command (cadr e)))
+
+             ((and (symbol? e)
+                   (not (symbol-bound? e))
+                   (char=? (string-ref (symbol->string e) 0) #\!))
+                 ;; Shell command "!xxx arg1 arg2"
+                 (let* ((end (read-line (current-input-port)))
+                        (all (format "~a~a" e end)))
+                   (system (substring all 1 (string-length all)))))
 
              (else
                 (call-with-values

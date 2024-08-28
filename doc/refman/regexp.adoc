@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -48,12 +48,10 @@ are as follows:
 |  $  |assert end of subject (or line, in multiline mode)
 |  .  |match any character except newline (by default)
 |  [  |start character class definition
-|  \| |start of alternative branch
+|  \\| |start of alternative branch
 |  (  |start subpattern
 |  )  |end subpattern
-|  ?  |extends the meaning of '(' +
-also 0 or 1 quantifier +
-also quantifier minimizer
+|  ?  |0 or 1 quantifier +
 |  *  |0 or more quantifier
 |  +  |1 or more quantifier
 |  {  |start min/max quantifier
