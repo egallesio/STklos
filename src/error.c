@@ -64,7 +64,7 @@ static void print_format(SCM port,char *format, va_list ap)
       switch (*++s) {
         case '%': STk_putc('%', port); break;
 
-        case 'S': STk_putc('`', port); /* FALLTHROUGH */
+        case 'S': STk_putc('\'', port); /* FALLTHROUGH */
         case 's': for (str = va_arg(ap, char *); *str; str++)
                     STk_putc(*str, port);
                   if (*s == 'S') STk_putc('\'', port);
@@ -89,12 +89,12 @@ static void print_format(SCM port,char *format, va_list ap)
     } else if (*s == '~') {
       /* ~ format (CL like) */
       switch (*++s) {
-        case 'A': STk_putc('`', port); /* FALLTHROUGH */
+        case 'A': STk_putc('\'', port); /* FALLTHROUGH */
         case 'a': STk_print(va_arg(ap, SCM), port, DSP_MODE);
                   if (*s == 'A') STk_putc('\'', port);
                   break;
         case 'S': /* For errors ~S uses write* also to avoid loops */
-        case 'W': STk_putc('`', port);  /* FALLTHROUGH */
+        case 'W': STk_putc('\'', port);  /* FALLTHROUGH */
         case 's':
         case 'w': STk_print_star(va_arg(ap, SCM), port,WRT_MODE);
                   if (*s == 'W' || *s == 'S') STk_putc('\'', port);

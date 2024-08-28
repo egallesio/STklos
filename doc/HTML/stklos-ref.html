@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.23">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 2.00)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -141,7 +141,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -163,6 +163,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -328,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -471,7 +472,10 @@ pre.rouge .gd {
   background-color: #493131;
 }
 pre.rouge .ge {
-  color: #000000;
+  font-style: italic;
+}
+pre.rouge .ges {
+  font-weight: bold;
   font-style: italic;
 }
 pre.rouge .gr {
@@ -1347,8 +1351,27 @@ keyword parameters:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>&#35;t</code> if <code>obj</code> is a procedure created with the <code>lambda</code> syntax and
-<code>&#35;f</code> otherwise.</p>
+<p>Returns <code>#t</code> if <code>obj</code> is a procedure created with the <code>lambda</code>
+syntax and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>Note that primitive procedures (those which are written in C) are
+<strong>not</strong> closures:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">cube</span> <span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">x</span> <span class="nv">x</span> <span class="nv">x</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">cube</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="no">#t</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">square-root</span> <span class="nv">sqrt</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="nv">square-root</span> <span class="nv">sqrt</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">square-root</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="no">#f</span>
+
+<span class="p">(</span><span class="nf">closure?</span> <span class="mi">10</span><span class="p">)</span>                 <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">display</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">x</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">closure?</span> <span class="nv">any</span><span class="p">)</span>                <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_case-lambda'></a>
@@ -15237,7 +15260,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mf">00.329</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mi">00</span><span class="o">.</span><span class="nv">xxx</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -19814,6 +19837,14 @@ the compiler flag &lt;&lt;"compiler:keep-formals"&gt;&gt; is set at its creation
 If <code>proc</code> formal parameters are not available, <code>procedure-formals</code>
 returns <code>#f</code>.</p>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:keep-formals</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">3</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">procedure-formals</span> <span class="nv">f</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span></code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p><a id='P_procedure-source'></a>
 </p>
@@ -19833,6 +19864,14 @@ returns <code>#f</code>.</p>
 Note that procedure source is kept in memory only if the compiler flag
 &lt;&lt;"compiler:keep-source"&gt;&gt; is set at its creation. If <code>proc</code> source is
 not available, <code>procedure-source</code> returns <code>#f</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:keep-source</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">f</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">3</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">procedure-source</span> <span class="nv">f</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">3</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">))</span></code></pre>
+</div>
 </div>
 <div id="ansicolor" class="paragraph">
 <p><a id='P_ansi-color'></a>
@@ -20308,34 +20347,32 @@ are as follows:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start character class definition</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">|</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start of alternative branch</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">(</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">start subpattern</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">)</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">end subpattern</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">?</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0 or 1 quantifier<br></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">extends the meaning of '('<br>
-also 0 or 1 quantifier<br>
-also quantifier minimizer</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">*</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0 or more quantifier</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">+</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">+</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1 or more quantifier</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">{</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">start min/max quantifier</p></td>
 </tr>
 </tbody>
 </table>
@@ -25647,16 +25684,7 @@ of available commands is given below.</p>
 <p><strong>,cd</strong>: Change current directory</p>
 </li>
 <li>
-<p><strong>,pwd</strong>: Print working directory</p>
-</li>
-<li>
-<p><strong>,ls</strong>: List directory content</p>
-</li>
-<li>
 <p><strong>,quit</strong> (or <strong>,q</strong>): Exit STklos</p>
-</li>
-<li>
-<p><strong>,shell</strong> (or <strong>,!</strong>): Run a shell command</p>
 </li>
 <li>
 <p><strong>,time</strong> (or <strong>,t</strong> ): Print the time used to run the next expression</p>
@@ -25693,6 +25721,22 @@ of available commands is given below.</p>
 parameter. With a parameter, display the help of this parameter</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>Furthermore, the <strong>'!'</strong> character can also be used to execute an
+external command using <strong>sh(1)</strong>. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="nv">!pwd</span>
+<span class="nv">/tmp/test</span>
+<span class="nv">stklos&gt;</span> <span class="nv">!emacs</span> <span class="nv">foo</span><span class="o">.</span><span class="nv">stk</span> <span class="nv">&amp;</span>   <span class="c1">;; to launch emacs on file foo.stk</span>
+<span class="nv">stklos&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="nv">!pwd</span> <span class="mi">100</span><span class="p">)</span>
+<span class="c1">;; !pwd</span>
+<span class="nv">stklos&gt;</span> <span class="nv">!pwd</span>               <span class="c1">;; now !pwd overrides pwd(1)</span>
+<span class="mi">100</span>
+<span class="nv">stklos&gt;</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_repl-add-command'></a>
@@ -26221,6 +26265,26 @@ the FFI better!):</p>
                             <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">f17baf94d06</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">f17bafb4360</span><span class="p">]</span>
 <span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="p">(</span><span class="nf">c-strpbrk</span> <span class="s">"a string"</span> <span class="s">"rz"</span><span class="p">))</span>
                             <span class="nv">=&gt;</span> <span class="s">"ring"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to pass a <code>NULL</code> pointer to an external C function, the
+<code>#void</code> Scheme value can be used.</p>
+</div>
+<div class="paragraph">
+<p>As an example, the second argument to the <code>strtol</code> function can be
+<code>NULL</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-external</span> <span class="nv">strtol</span><span class="p">(</span><span class="nf">:string</span> <span class="nv">:pointer</span> <span class="nv">:int</span><span class="p">)</span>
+  <span class="nv">:return-type</span> <span class="nv">:long</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">strtol</span> <span class="s">"1001"</span> <span class="o">#</span><span class="nv">void</span> <span class="mi">10</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">1001</span>
+<span class="p">(</span><span class="nf">strtol</span> <span class="s">"1001"</span> <span class="o">#</span><span class="nv">void</span> <span class="mi">2</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="mi">9</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -33060,11 +33124,6 @@ their use in free software.</p>
 </div>
 <div class="footnote" id="_footnotedef_7">
 <a href="#_footnoteref_7">7</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
-</div>
-</div>
-<div id="footer">
-<div id="footer-text">
-Last updated 2024-05-13 19:18:31 +0200
 </div>
 </div>
 </body>

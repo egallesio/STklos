@@ -62,7 +62,7 @@ extradoc: multi pdf
 ../HTML/$(HTMLMAIN): tmp-html.txt
 	mkdir -p ../HTML/images
 	cp -a $(IMG) ../HTML/images
-	$(ADOC) -v -o $@ tmp-html.txt
+	$(ADOC) -v -o $@ tmp-html.txt && rm -f tmp-html.txt
 
 # ----------------------------------------------------------------------
 # For the Multiple file version of the manual, we need to install

@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -20,6 +20,7 @@
 :pdf-style: ../lib/theme/stklos.yml
 :docinfodir: ../lib/theme
 :docinfo: shared
+:nofooter:       // to have reproducible builds
 
 // Load the general adoc library and the refman specific one
 {{load "../lib/adoc-lib.stk"}}

@@ -24,12 +24,18 @@
 ;;;;    Creation date:  4-May-2024 18:09
 ;;;;
 
+(export compiler:find-rewriter
+        compiler:add-rewriter!
+        compiler:const-expr?
+        compiler:const-value
+        compiler:rewrite-expression)
+
 ;;
 ;; Rewrite table management
 ;;
 (define *all-rewriters* (%make-hash-table eq? hash-table-hash))
 
-(define (find-rewriter symb)
+(define (compiler:find-rewriter symb)
   (hash-table-get *all-rewriters* symb #f))
 
 (define (compiler:add-rewriter! symb proc)
@@ -53,11 +59,11 @@
       (cadr expr)
       expr))
 
-(define (rewrite-expression e env)
+(define (rewrite-expression e env)  ;; try to rewrite(simplify) expression e
   (let Loop ((save e))
     (when (pair? e)
       (let ((s     (car e))
-            (optim (find-rewriter (car e))))
+            (optim (compiler:find-rewriter (car e))))
         (when (and optim (not (find-symbol-in-env s env)))
           ;; We have a rewriter and symbol is not defined in current
           ;; environment
@@ -68,6 +74,11 @@
   ;; Return the (eventually modified) value of e
   e)
 
+;; exported symbols of the previous functions
+(define compiler:const-expr? const-expr?)
+(define compiler:const-value const-value)
+(define compiler:rewrite-expression rewrite-expression)
+
 
 ;;; ======================================================================
 ;;;
@@ -76,6 +87,9 @@
 ;;; ======================================================================
 (compiler:add-rewriter!            ;; 'IF' rewriter
  'if
+ ;; (if CONST then-expr else-expr)
+ ;; ===> then-expr  (if CONST is #f)
+ ;; ===> else-expr  (otherwise)
  (lambda (expr len env)
    (if (<= 3 len 4)
        (let ((Cond (rewrite-expression (cadr expr) env))
@@ -93,6 +107,11 @@
 
 (compiler:add-rewriter!            ;; 'NOT' rewriter
  'not
+ ;; (not CONST-A) ===> CONST-B
+ ;;
+ ;; where CONST-B is the boolean (not CONST-A)
+ ;;
+ ;; (inline not for constant)
  (lambda (expr len env)
    (if (= len 2)
        (let ((val (rewrite-expression (cadr expr) env)))
@@ -104,6 +123,11 @@
 
 (compiler:add-rewriter!            ;; 'BEGIN' rewriter
  'begin
+ ;; (begin CONST (a...) CONST (b...) => CONST (c...) XCONST)
+ ;; ===>
+ ;; (begin (a...) (b...) => (c...) XCONST
+ ;;
+ ;; (remove constants, except the last one and the => symbol)
  (lambda (expr _len env) ;; _len unused here
    (let Loop ((e   (cdr expr))
               (res (list 'begin)))
@@ -123,6 +147,7 @@
 
 (compiler:add-rewriter!            ;; 'EOF-OBJECT' rewriter
  'eof-object
+ ;; (eof-object) ===> #eof
  (lambda (expr len env)
    (if (= len 1)
        #eof
@@ -133,6 +158,7 @@
 ;; (or suppress them)
 (compiler:add-rewriter!            ;; 'CAR' rewriter
  'car
+ ;; (car (CONST-HEAD . CONST-TAIL)) ===> CONST-HEAD
  (lambda (expr len env)
    (if (= len 2)
        (let ((v (rewrite-expression (cadr expr) env)))
@@ -148,6 +174,7 @@
 
 (compiler:add-rewriter!            ;; 'CDR' rewriter
  'cdr
+ ;; (cdr (CONST-HEAD . CONST-TAIL)) ===> CONST-TAIL
  (lambda (expr len env)
    (if (= len 2)
        (let ((v (rewrite-expression (cadr expr) env)))

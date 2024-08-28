@@ -258,7 +258,7 @@ GC_INNER void GC_register_dynamic_libraries(void)
     }
 }
 
-# endif /* !USE_PROC ... */
+# endif /* !USE_PROC_FOR_LIBRARIES */
 # endif /* SOLARISDL */
 
 #if defined(SCO_ELF) || defined(DGUX) || defined(HURD) || defined(NACL) \
@@ -544,7 +544,7 @@ STATIC int GC_register_dynlib_callback(struct dl_phdr_info * info,
             } else {
               GC_ASSERT((word)end <=
                             (((word)load_segs[j].end + GC_page_size - 1) &
-                             ~(GC_page_size - 1)));
+                             ~(word)(GC_page_size - 1)));
               /* Remove from the existing load segment */
               load_segs[j].end2 = load_segs[j].end;
               load_segs[j].end = start;
@@ -920,7 +920,7 @@ GC_INNER void GC_register_dynamic_libraries(void)
         fd = -1;
 }
 
-# endif /* USE_PROC || IRIX5 */
+# endif /* USE_PROC_FOR_LIBRARIES || IRIX5 */
 
 # if defined(MSWIN32) || defined(MSWINCE) || defined(CYGWIN32)
 
@@ -1445,7 +1445,7 @@ GC_INNER void GC_register_dynamic_libraries(void)
 /* The _dyld_* functions have an internal lock so no _dyld functions
    can be called while the world is stopped without the risk of a deadlock.
    Because of this we MUST setup callbacks BEFORE we ever stop the world.
-   This should be called BEFORE any thread in created and WITHOUT the
+   This should be called BEFORE any thread is created and WITHOUT the
    allocation lock held. */
 
 GC_INNER void GC_init_dyld(void)
@@ -1472,7 +1472,7 @@ GC_INNER void GC_init_dyld(void)
         (void (*)(const struct mach_header*, intptr_t))GC_dyld_image_add);
   _dyld_register_func_for_remove_image(
         (void (*)(const struct mach_header*, intptr_t))GC_dyld_image_remove);
-                        /* Structure mach_header64 has the same fields  */
+                        /* Structure mach_header_64 has the same fields */
                         /* as mach_header except for the reserved one   */
                         /* at the end, so these casts are OK.           */
 

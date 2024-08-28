@@ -22,6 +22,10 @@ The files in this directory show some examples in STklos:
 - `secho.stk` is a simple echo program written is STklos. Use the
   `--help` option to see the available options.
 
+- `dice.stk` is a very simple example of scheme program that asks for
+   a number `N`, then runs two dice `N` times, and finally prints a
+   histogram of the distribution of outcomes.
+
 - `fork-test.stk` is a simple program using the Unix `fork(2)`
   primitive.
 
@@ -41,3 +45,6 @@ The files in this directory show some examples in STklos:
   thread this time).
 
 - `socket-client.stk` is a simple TCP client.
+
+- The directory `C-module` contains a complete example of a simple module
+  written in Scheme and in C.

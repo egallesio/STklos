@@ -81,7 +81,9 @@
 
 #ifdef DEBUG_THREADS
 # ifndef NSIG
-#   if defined(MAXSIG)
+#   ifdef CPPCHECK
+#     define NSIG 32
+#   elif defined(MAXSIG)
 #     define NSIG (MAXSIG+1)
 #   elif defined(_NSIG)
 #     define NSIG _NSIG
@@ -90,7 +92,7 @@
 #   else
 #     error define NSIG
 #   endif
-# endif /* NSIG */
+# endif /* !NSIG */
 
   void GC_print_sig_mask(void)
   {
@@ -356,6 +358,11 @@ STATIC void GC_suspend_handler_inner(ptr_t dummy GC_ATTR_UNUSED,
   me = GC_lookup_thread_async(self);
 
 # ifdef GC_ENABLE_SUSPEND_THREAD
+#   if defined(__GNUC__) && !defined(__clang__)
+      /* Workaround "writing 8 bytes into a region of size 0" bogus */
+      /* gcc warning (produced by gcc-12.2.0/aarch64, at least).    */
+      if (NULL == me) ABORT("Lookup self failed");
+#   endif
     suspend_cnt = (word)ao_load_async(&(me -> stop_info.ext_suspend_cnt));
 # endif
   if (((word)me->stop_info.last_stop_count & ~(word)THREAD_RESTARTED)
@@ -513,10 +520,11 @@ static void resend_lost_signals_retry(int n_live_threads,
 {
 # if defined(HAVE_CLOCK_GETTIME) && !defined(DONT_TIMEDWAIT_ACK_SEM)
 #   define TIMEOUT_BEFORE_RESEND 10000 /* us */
-    int i;
     struct timespec ts;
 
     if (n_live_threads > 0 && clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+      int i;
+
       TS_NSEC_ADD(ts, TIMEOUT_BEFORE_RESEND * 1000);
       /* First, try to wait for the semaphore with some timeout.            */
       /* On failure, fallback to WAIT_UNIT pause and resend of the signal.  */
@@ -772,7 +780,8 @@ GC_INNER void GC_push_all_stacks(void)
     size_t nthreads = 0;
     int i;
     GC_thread p;
-    ptr_t lo, hi;
+    ptr_t lo; /* stack top (sp) */
+    ptr_t hi; /* bottom */
 #   if defined(E2K) || defined(IA64)
       /* We also need to scan the register backing store.   */
       ptr_t bs_lo, bs_hi;
@@ -842,16 +851,28 @@ GC_INNER void GC_push_all_stacks(void)
 #           endif
         }
 #       ifdef DEBUG_THREADS
-          GC_log_printf("Stack for thread %p is [%p,%p)\n",
-                        (void *)p->id, (void *)lo, (void *)hi);
+#         ifdef STACK_GROWS_UP
+            GC_log_printf("Stack for thread %p is (%p,%p]\n",
+                          (void *)(p -> id), (void *)hi, (void *)lo);
+#         else
+            GC_log_printf("Stack for thread %p is [%p,%p)\n",
+                          (void *)(p -> id), (void *)lo, (void *)hi);
+#         endif
 #       endif
         if (0 == lo) ABORT("GC_push_all_stacks: sp not set!");
         if (p->altstack != NULL && (word)p->altstack <= (word)lo
             && (word)lo <= (word)p->altstack + p->altstack_size) {
-          hi = p->altstack + p->altstack_size;
+#         ifdef STACK_GROWS_UP
+            hi = p->altstack;
+#         else
+            hi = p->altstack + p->altstack_size;
+#         endif
           /* FIXME: Need to scan the normal stack too, but how ? */
-          /* FIXME: Assume stack grows down */
         }
+#       ifdef STACKPTR_CORRECTOR_AVAILABLE
+          if (GC_sp_corrector != 0)
+            GC_sp_corrector((void **)&lo, (void *)(p -> id));
+#       endif
         GC_push_all_stack_sections(lo, hi, traced_stack_sect);
 #       ifdef STACK_GROWS_UP
           total_size += lo - hi;
@@ -875,7 +896,7 @@ GC_INNER void GC_push_all_stacks(void)
 #       if defined(E2K) || defined(IA64)
 #         ifdef DEBUG_THREADS
             GC_log_printf("Reg stack for thread %p is [%p,%p)\n",
-                          (void *)p->id, (void *)bs_lo, (void *)bs_hi);
+                          (void *)(p -> id), (void *)bs_lo, (void *)bs_hi);
 #         endif
           GC_ASSERT(bs_lo != NULL && bs_hi != NULL);
           /* FIXME: This (if p->id==self) may add an unbounded number of */

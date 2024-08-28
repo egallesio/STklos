@@ -157,6 +157,22 @@ the FFI better!):
                             => "ring"
 ```
 
+In order to pass a `NULL` pointer to an external C function, the
+`#void` Scheme value can be used.
+
+As an example, the second argument to the `strtol` function can be
+`NULL`:
+
+```scheme
+(define-external strtol(:string :pointer :int)
+  :return-type :long)
+```
+
+```scheme
+(strtol "1001" #void 10) => 1001
+(strtol "1001" #void 2)  => 9
+```
+
 Functions on C pointers are described in the next section.
 
 ### C pointers
@@ -178,5 +194,3 @@ errors, crashes...
 {{insertdoc 'cpointer->string}}
 {{insertdoc 'allocate-bytes}}
 {{insertdoc 'free-bytes}}
-
-

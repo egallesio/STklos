@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.23">
 <meta name="author" content="Jeronimo Pellegrini">
 <title>The STklos Virtual Machine</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -141,7 +141,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -163,6 +163,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -328,7 +329,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -471,7 +472,10 @@ pre.rouge .gd {
   background-color: #493131;
 }
 pre.rouge .ge {
-  color: #000000;
+  font-style: italic;
+}
+pre.rouge .ges {
+  font-weight: bold;
   font-style: italic;
 }
 pre.rouge .gr {
@@ -704,6 +708,8 @@ pre.rouge {
 </ul>
 </li>
 <li><a href="#_continuations">13. Continuations</a></li>
+<li><a href="#_verifying_the_vm_configuration">14. Verifying the VM configuration</a></li>
+<li><a href="#_collecting_statistics">15. Collecting statistics</a></li>
 </ul>
 </div>
 </div>
@@ -1773,6 +1779,7 @@ structure (that is, the tagged word representing it) again on <code>val</code>.<
 <pre>IN_CONS
 IN_CAR
 IN_CDR
+IN_CXR
 IN_LIST</pre>
 </div>
 </div>
@@ -1839,6 +1846,55 @@ is loaded on <code>val</code>, and then <code>IN-CONS</code> is called.</p>
 Constants:
 0: a</pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The special accessor <code>CXR</code> is used to access list parts, as described
+in the <code>cxr</code> library in the R7RS standard (<code>caar</code>, <code>cadr</code>, &#8230;&#8203;, up to
+<code>cddddr</code>). The following example illustrates this.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nb">caadr</span> <span class="nv">x</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF</span>           <span class="mi">1</span>
+<span class="mi">002</span><span class="nv">:</span>  <span class="nv">IN-CXR</span>               <span class="mi">0</span>
+<span class="mi">004</span><span class="nv">:</span>
+
+<span class="nv">Constants:</span>
+<span class="mi">0</span><span class="nv">:</span> <span class="o">#</span><span class="nv">:daa</span>
+<span class="mi">1</span><span class="nv">:</span> <span class="nv">x</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The constant <code>#:daa</code> is the abbreviation of the operations --<code>(CAADR x)</code>
+ = <code>(CAR (CAR (CDR x)))</code>, <strong>in reversed order</strong> (because that is the order in which they
+will be applied, and it is more natural for the VM to go from the
+beginning of the string towards the end.</p>
+</div>
+<div class="paragraph">
+<p>See that if we turn off the inlining of functions in the compiler, we
+get a different output:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">compiler:inline-common-functions</span> <span class="no">#f</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nb">caadr</span> <span class="nv">x</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">PREPARE-CALL</span>
+<span class="mi">001</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF</span>           <span class="mi">0</span>
+<span class="mi">003</span><span class="nv">:</span>  <span class="nv">PUSH</span>
+<span class="mi">004</span><span class="nv">:</span>  <span class="nv">GLOBAL-REF</span>           <span class="mi">1</span>
+<span class="mi">006</span><span class="nv">:</span>  <span class="nv">INVOKE</span>               <span class="mi">1</span>
+<span class="mi">008</span><span class="nv">:</span>
+
+<span class="nv">Constants:</span>
+<span class="mi">0</span><span class="nv">:</span> <span class="nv">x</span>
+<span class="mi">1</span><span class="nv">:</span> <span class="nv">caadr</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Not only we have more instructions, but the <code>PREPARE-CALL</code> and
+<code>INVOKE</code> instructions above are rather expensive.</p>
 </div>
 </div>
 <div class="sect2">
@@ -2477,6 +2533,22 @@ Constants:
 0: a</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>There is an instruction for returning the value of a symbol in the
+<code>SCHEME</code> module.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">disassemble-expr</span> <span class="o">'</span><span class="p">(</span><span class="nf">%%in-scheme</span> <span class="ss">'a</span><span class="p">)</span> <span class="no">#t</span><span class="p">)</span>
+
+<span class="mi">000</span><span class="nv">:</span>  <span class="nv">CONSTANT</span>             <span class="mi">0</span>
+<span class="mi">002</span><span class="nv">:</span>  <span class="nv">INSCHEME</span>
+<span class="mi">003</span><span class="nv">:</span>
+
+<span class="nv">Constants:</span>
+<span class="mi">0</span><span class="nv">:</span> <span class="nv">a</span></code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -2695,10 +2767,193 @@ for the global variables.</p>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_verifying_the_vm_configuration">14. Verifying the VM configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The primitive <code>%vm-config</code> returns an association list describing the
+compile-time configuration of the VM. For example,</p>
 </div>
-<div id="footer">
-<div id="footer-text">
-Last updated 2023-11-20 14:06:07 +0100
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>stklos&gt; (%vm-config )
+(#:computed-goto #t #:debug-vm #f #:stat-vm #t)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#:computed-goto</code>: was <code>vm.c</code> compiled using computed <code>goto</code>?</p>
+</li>
+<li>
+<p><code>#:debug-vm</code>: does this STklos binary have debugging enabled?</p>
+</li>
+<li>
+<p><code>#:stat-vm</code>: was the VM compiled with code for statistics-collecting?</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_collecting_statistics">15. Collecting statistics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The code in <code>vm.c</code> can optionally be compiled to collect statistics.
+If the symbol <code>STAT_VM</code> is defined during compilation, then the statistics-collecting
+code will be enabled. You can enable it, for example, by configuring STklos as</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>./configure CFLAGS="-DSTAT_VM" ...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the code has been compiled as this, the VM will, at the end of
+each iteration, check the instruction that was just executed and
+update:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The number of times that this instruction was executed</p>
+</li>
+<li>
+<p>The number of times that this instruction was executed after the
+previous one (so it&#8217;s possible to tell what pairs of instructions
+are more common)</p>
+</li>
+<li>
+<p>The time taken to execute this instruction</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is done in the <code>tick()</code> C function (which is compiled
+conditionally on <code>STAT_VM</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">static</span> <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="n">STk_instr</span> <span class="n">b</span><span class="p">,</span> <span class="n">STk_instr</span> <span class="o">*</span><span class="n">previous_op</span><span class="p">,</span> <span class="kt">clock_t</span> <span class="o">*</span><span class="n">previous_time</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">static</span> <span class="kt">clock_t</span> <span class="n">current_time</span><span class="p">;</span>
+  <span class="n">current_time</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+  <span class="n">couple_instr</span><span class="p">[</span><span class="o">*</span><span class="n">previous_op</span><span class="p">][</span><span class="n">b</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+  <span class="n">cpt_inst</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+  <span class="o">*</span><span class="n">previous_op</span> <span class="o">=</span> <span class="n">b</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">previous_time</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">time_inst</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="p">((</span><span class="kt">double</span><span class="p">)(</span><span class="n">current_time</span> <span class="o">-</span> <span class="o">*</span><span class="n">previous_time</span><span class="p">))</span> <span class="o">/</span> <span class="n">CLOCKS_PER_SEC</span><span class="p">;</span>
+  <span class="o">*</span><span class="n">previous_time</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Three Scheme primitives are then available:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(%vm-dump-stats fname format)</code> will dump the statistics to a file whose
+name is <code>fname</code>.  The file will be opened using plain <code>fopen</code>.  When the
+<code>format</code> argument is the keyword <code>:csv</code>, then the output is in CSV format;
+otherwise, there will be one single S-expression in the file, readable from
+Scheme. This S-expression is an alist, documented in the file itself (see
+below).</p>
+</li>
+<li>
+<p><code>(%vm-reset-stats)</code> will reset all counters.</p>
+</li>
+<li>
+<p><code>(%vm-collect-stats . val)</code> is a parameter object. When called without
+value, it returns if statistics are collected or not. If the value <code>val</code>
+is determined, then statistics</p>
+<div class="ulist">
+<ul>
+<li>
+<p>will start being collected, if <code>val</code> is <code>#t</code>;</p>
+</li>
+<li>
+<p>will not be collected anymore if <code>val</code> is <code>#f</code>.</p>
+<div class="literalblock">
+<div class="content">
+<pre> Collecting statistics is off by default, especially because compiling STklos
+is very slow with statistics gathering. It should be turned on before profiling.</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The status of "collecting" or "not collecting" reflects what happens internaly in the
+statistics gathering code, <strong>when it is compiled in</strong>. If STklos was compiled without
+<code>STAT_VM</code>, then those procedures are just not available at all.</p>
+</div>
+<div class="paragraph">
+<p>The documentation for the Scheme format for the dumped instructions is
+shown below.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; STklos VM statistics. It can be read in Scheme, and it represents one single</span>
+<span class="c1">;; object: an alist with the names of instructions, and each CDR is a list</span>
+<span class="c1">;; containing:</span>
+<span class="c1">;;</span>
+<span class="c1">;; * count (the number of times this instruction was executed)</span>
+<span class="c1">;; * time (the total time the program spent on this instruction)</span>
+<span class="c1">;; * avg time (the average number of time spent on each execution of this</span>
+<span class="c1">;;   instruction)</span>
+<span class="c1">;; * an alist containing, for each OTHER instruction, the number of times they</span>
+<span class="c1">;;   appeared together in the code.</span>
+<span class="c1">;;</span>
+<span class="c1">;; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))</span>
+<span class="c1">;;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn)))</span>
+<span class="c1">;;   ...</span>
+<span class="c1">;;   (INSn countn timen avgtimen ( (INS1 . count1) (INS2 . count2) ... (INSn  . countn))) )</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The C code for printing the instructions is in the functions
+<code>dump_couple_instr_csv</code> and <code>dump_couple_instr_scm</code>.</p>
+</div>
+<div class="paragraph">
+<p>Note that the <code>%vm-config</code> can be used to determine if the system has been
+compiled with the profiling code. As said before, this primitive returns a
+property list and <code>#:stat-vm</code> can be used here.</p>
+</div>
+<div class="paragraph">
+<p>To profile some specific code there is the <code>%with-profile-data</code> macro:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">%with-profile-data</span> <span class="s">"file-name.csv"</span> <span class="nv">:csv</span>
+  <span class="p">(</span><span class="nb">display</span> <span class="ss">'a</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">newline</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">values</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will expand to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">receive</span>
+  <span class="nv">result-4</span>
+  <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nf">%vm-reset-stats</span><span class="p">)</span>
+         <span class="p">(</span><span class="nb">display</span> <span class="ss">'a</span><span class="p">)</span>
+         <span class="p">(</span><span class="nb">newline</span><span class="p">)</span>
+         <span class="p">(</span><span class="nb">values</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>
+         <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nf">%vm-dump-stats</span> <span class="s">"file-name.csv"</span> <span class="o">#</span><span class="nv">:csv</span><span class="p">)</span>
+                <span class="p">(</span><span class="nb">apply</span> <span class="nv">values</span> <span class="nv">result-4</span><span class="p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>So the macro will return the same values that the code would, and will profile only
+that part of the code.</p>
+</div>
+</div>
 </div>
 </div>
 </body>

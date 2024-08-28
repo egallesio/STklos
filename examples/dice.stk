@@ -1,0 +1,176 @@
+#!/usr/bin/env stklos
+;;;;
+;;;; dice.stk  -- A script to throw dice and show the resulting distribution
+;;;;
+;;;; Copyright © 2024 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 16-May-2024 19:41 (jpellegrini)
+;;;;
+
+
+;;; Concepts illustrated:
+;;;
+;;; * Loading and using SRFIs; specifically, this shows the usefulness of SRFi-133
+;;;   AKA (scheme (vector))
+;;; * Using STklos extensions (1+ for example)
+;;; * A very simple programming style (libraries, constants, procedures,
+;;;   main entry point)
+;;; * A commenting style (write a main comment before each procedure, and show
+;;;   an example along with the comment
+
+;;;
+;;; LOADING LIBRARIES
+;;;
+
+(import (srfi 27))       ;; for `random-integer`
+(import (scheme vector)) ;; for vector procedures
+
+
+;;;
+;;; CONSTANTS
+;;;
+
+(define char #\#)       ;; character used in the histogram
+(define line-length 40) ;; maximum line length in the histogram
+
+
+;;;
+;;; PROCEDURES
+;;;
+
+;; The procedure vector-sum will take a vector and return the sum of
+;; its elements. It does this calling vector-fold (see SRFI 133, also
+;; known as "(scheme (vector))").
+;;
+;; Example: (vector-sum #(10 20 30)) => 60
+(define (vector-sum vec)
+  (vector-fold + 0 vec))
+
+;; vector-iota will create a vector with values ranging from zero to
+;; n-1, representing the twelve POSITIONS in the histogram vector. We
+;; go from zero to n-1 and not from 1 to n, because indices start from zero
+;; in Scheme.
+;; This is done using vector-unfold from SRFI-133.
+;;
+;; Example: (vector-iota 5) => #(0 1 2 3 4)
+;;
+;; We will use this for the indices of the 12 possible dice outcomes:
+;; (vector-iota 12) => #(0 1 2 3 4 5 6 7 8 9 10 11)
+(define (vector-iota n)
+  (vector-unfold values n))
+
+;; vector-max computes the maximum value in a vector. It uses an internal
+;; recursive and tail-calling procedure get-max.
+;; See that we use the STklos extension procedure "1+" here.
+;;
+;; Example: (vector-max #(10 5 20 40 30)) => 40
+(define (vector-max vec)
+  (let ((len (vector-length vec)))
+    (let get-max ((M (vector-ref vec 0)) (pos 1))
+      (if (< pos len)
+          (if (> (vector-ref vec pos) M)
+              (get-max (vector-ref vec pos) (1+ pos))
+              (get-max M (1+ pos)))
+          M))))
+
+;; plot-distribution will take a vector with positive integer values,
+;; representing a histogram, and plot it.
+;;
+;; Example:  (plot-distribution #(1 2 5 1))
+;; Output:
+;;  ########
+;;  ################
+;;  ########################################
+;;  ########
+(define (plot-distribution vec)
+  (let* ((M (vector-max vec))
+         (outcomes (vector-iota (1+ M))))
+    (let ((factor (/ line-length M)))
+      (define (plot-line val)
+        (display (make-string (ceiling (* factor val)) char))
+        (newline))
+      (vector-for-each plot-line vec))))
+
+;; run-experiments will run REPS repetitions of the "throw two dice"
+;; experiment. It will create a vector of size REPS and set each position in
+;; it with the result of one isolated experiment.
+;; See that we sum one to each random integer, because (random-integer N) (from
+;; SRFI 27) will return a random integer between *zero* and *N-1*.
+;;
+;; Example: (run-experiment 10) => #(11 4 5 8 7 11 5 4 3 5)
+;;          (the values in the result vector will vary -- they are random numbers
+;;           between 2 and 12)
+(define (run-experiment reps)
+  (let ((vec (make-vector reps 0)))
+    ;; each time we call random-integer we get a different random number, so
+    ;; the two numbers generated here are not the same:
+    (vector-map! (lambda (x)  (+ 1 (random-integer 6)
+                            1 (random-integer 6)))
+                 vec)
+    vec))
+
+
+;; make-histogram will take a vector, holding a number each.
+;; This is supposed to be the histogram which run-experiment outputs.
+;; Then this procedure will output a *different* vector, with TWELVE
+;; positions, each containing the outcome count for each result (the first
+;; position contains how many times the result was "one", and so on).
+;; See that since we throw two dice, the first position is always zero
+;; (because we get at least one for each dice, so the total is at least
+;; 2.
+;; We use the STklos extension procedure "1-" here.
+;;
+;; Example: (make-histogram #(1 5 1 1 5 2)) => #(3 1 0 0 2)
+(define (make-histogram results)
+  (let ((distr (make-vector (vector-max results) 0)))
+    (vector-for-each (lambda (res)
+                       (inc! (vector-ref distr (1- res))))
+                     results)
+    distr))
+
+
+;; run will print message and run the experiment for n (it parameter)
+;; iterations and plot the histogram.
+(define (run n)
+  (newline)
+  (display "Ok, here is a histogram of the distribution:")
+  (newline)
+  (plot-distribution (make-histogram (run-experiment n))))
+
+
+;;;
+;;; MAIN ENTRY POINT
+;;;
+(define (main argv)
+  ;; This is the main procedure. If we have arguments on the command line, we
+  ;; use the first one as the number of iterations. Otherwise, we ask for this
+  ;; number. Once we have that number we run the experiment and plot the histogram
+  (let ((R (if (> (length argv) 1)
+               ;; We have at least an argument and argv contains all the words of
+               ;; the command line. If we entered at  the prompt:
+               ;;     $ dice 10_000
+               ;; argv will be ("dice" "10_000" ...).
+               ;; We use read-from-string her to convert the argument to a number
+               (read-from-string (list-ref argv 1))
+               ;; No argument => ask interactively to the user
+               (begin
+                 (display "How many times should I throw the two dices? ")
+                 (read)))))
+    (run R)))
