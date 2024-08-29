@@ -44,7 +44,8 @@
         call/ec
         base64-encode-string base64-decode-string
         md5sum-file
-        ansi-color ansi-color-protect do-color
+        ansi-color ansi-color-protect
+        ansi-color-specifier-list ansi-color-specifier? do-color
         port->string port->sexp-list port->string-list
         print printerr eprintf printf fprintf
         declare-new-error
@@ -1473,14 +1474,34 @@ doc>
  * @end lisp
  * will display the words BLUE and RED in color.
 doc>
+<doc EXT ansi-color-specifier-list ansi-color-specifier?
+ * (ansi-color-specifier-list)
+ * (ansi-color-specifier? obj)
+ *
+ * |Ansi-color-specifier-list| will return a list with all possible symbols
+ * that work as ANSI color specifier for strings.
+ * |Ansi-color-specifier?| will return `#t` if `obj` is an ANSI color
+ * specifier, and `#f` otherwise.
+ *
+ * @lisp
+ * (ansi-color-specifier? 'red)   => #t
+ * (ansi-color-specifier? 'bold)  => #t
+ * (ansi-color-specifier? 2+3i)   => #f
+ * (ansi-color-specifier? #t)     => #f
+ * (ansi-color-specifier? #void)  => #f
+ * (ansi-color-specifier?-list)
+ *   => (normal bold no-bold ... bg-cyan white bg-white)
+ * @end lisp
+doc>
 |#
-(define ansi-color         #f)
-(define ansi-color-protect #f)
+(define ansi-color                #f)
+(define ansi-color-protect        #f)
+(define ansi-color-specifier-list #f)
+(define ansi-color-specifier?     #f)
 
 (let ((ansi-color-start   "\e[")
       (ansi-color-stop    "m"))
 
-  (define (code c)
     (let ((alist '((normal      . "0")
                    (bold        . "1")  (no-bold        . "21")
                    (italic      . "2")  (no-italic      . "22")
@@ -1495,53 +1516,64 @@ doc>
                    (magenta     . "35") (bg-magenta     . "45")
                    (cyan        . "36") (bg-cyan        . "46")
                    (white       . "37") (bg-white       . "47"))))
-      (let ((v (assoc c alist)))
-        (if v (cdr v) ""))))
+      (define (code c)
+        (let ((v (assoc c alist)))
+          (if v (cdr v) "")))
 
-  ;; ansi-color-protect ...
-  (set! ansi-color-protect
-    (lambda (start stop)
-      #:ansi-color-protect
-      (set! ansi-color-start (string-append start "\e["))
-      (set! ansi-color-stop  (string-append "m" stop))))
+      (set! ansi-color-specifier-list
+        (lambda ()
+          #:ansi-color-specifier-list
+          (map car alist)))
 
-  ;; ansi-color ...
-  (set! ansi-color
-    (lambda  args
-      #:ansi-color
-      (let Loop ((args       args)
-                 (str-prev?  #t)
-                 (res        ""))
-        (cond
-          ((null? args)
-             (if str-prev?
-                 res
-                 (string-append res ansi-color-stop)))
-          ((string? (car args))
-             (Loop (cdr args)
-                   #t
-                   (string-append res
-                                  (if str-prev? "" ansi-color-stop)
-                                  (car args))))
-          ((integer? (car args))
-             (Loop (cdr args)
-                   #f
-                   (string-append res
-                                  (if str-prev? ansi-color-start ";")
-                                  (if (positive? (car args))
-                                      (format "38;5;~a" (car args))
-                                      (format "48;5;~a" (car args))))))
-          ((symbol? (car args))
-             (Loop (cdr args)
-                   #f
-                   (string-append res
-                                  (if  str-prev? ansi-color-start ";")
-                                  (code (car args)))))
-          ((pair? (car args))
-             (Loop (append (car args) (cdr args))
-                   str-prev?
-                   res))
-          (else (error 'ansi-color "bad command ~S" args)))))))
+      (set! ansi-color-specifier?
+        (lambda (obj)
+          #:ansi-color-specifier?
+          (if (assq obj alist) #t #f)))
+
+      ;; ansi-color-protect ...
+      (set! ansi-color-protect
+        (lambda (start stop)
+          #:ansi-color-protect
+          (set! ansi-color-start (string-append start "\e["))
+          (set! ansi-color-stop  (string-append "m" stop))))
+
+      ;; ansi-color ...
+      (set! ansi-color
+        (lambda  args
+          #:ansi-color
+          (let Loop ((args       args)
+                     (str-prev?  #t)
+                     (res        ""))
+            (cond
+             ((null? args)
+              (if str-prev?
+                  res
+                  (string-append res ansi-color-stop)))
+             ((string? (car args))
+              (Loop (cdr args)
+                    #t
+                    (string-append res
+                                   (if str-prev? "" ansi-color-stop)
+                                   (car args))))
+             ((integer? (car args))
+              (Loop (cdr args)
+                    #f
+                    (string-append res
+                                   (if str-prev? ansi-color-start ";")
+                                   (if (positive? (car args))
+                                       (format "38;5;~a" (car args))
+                                       (format "48;5;~a" (car args))))))
+             ((symbol? (car args))
+              (Loop (cdr args)
+                    #f
+                    (string-append res
+                                   (if  str-prev? ansi-color-start ";")
+                                   (code (car args)))))
+             ((pair? (car args))
+              (Loop (append (car args) (cdr args))
+                    str-prev?
+                    res))
+             (else (error 'ansi-color "bad command ~S" args))))))))
 
 
 (define do-color
