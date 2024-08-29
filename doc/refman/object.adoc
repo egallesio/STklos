@@ -682,6 +682,7 @@ we could define the following method to compare points:
 
 {{insertdoc 'define-class}}
 {{insertdoc 'make-instance}}
+{{insertdoc 'initialize}}
 {{insertdoc 'class-name}}
 {{insertdoc 'class-of}}
 {{insertdoc 'class-name}}
