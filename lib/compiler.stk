@@ -1258,12 +1258,10 @@ doc>
                 ((2)  (let ((a (car actuals))
                             (b (cadr actuals)))
                         (cond
-                         ;; it is only an error if b is *exact* zero (not 0.0),
-                         ;; and we can test that with eq? (not NOT with '='):
-                         ((eq? b 0)
-                          (compiler-error '/ epair "division by zero"))
                          ((and (number? a) (number? b))
-                          (compile-constant (/ a b) env tail?))
+                          (if (eq? b 0)
+                              (compiler-error '/ epair "division by zero")
+                              (compile-constant (/ a b) env tail?)))
                          ((small-integer-constant? b)
                           (oper2 'IN-SINT-DIV2 a b))
                          (else
