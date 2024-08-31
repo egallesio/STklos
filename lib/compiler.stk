@@ -1259,7 +1259,9 @@ doc>
                             (b (cadr actuals)))
                         (cond
                          ((and (number? a) (number? b))
-                          (compile-constant (/ a b) env tail?))
+                          (if (eq? b 0)
+                              (compiler-error '/ epair "division by zero")
+                              (compile-constant (/ a b) env tail?)))
                          ((small-integer-constant? b)
                           (oper2 'IN-SINT-DIV2 a b))
                          (else
@@ -1270,12 +1272,15 @@ doc>
          ((2) (let ((a (car actuals))
                     (b (cadr actuals)))
                 (cond
+                 ((and (eq? fct 'fxquotient) (eq? b 0))
+                  (compiler-error 'fxquotient epair "division by 0"))
                  ((and (fixnum? a) (fixnum? b))
                   (compile-constant (case fct
                                       ((fx+) (fx+ a b))
                                       ((fx-) (fx- a b))
                                       ((fx*) (fx* a b))
-                                      (else  (fxquotient a b)))
+                                      (else
+                                       (fxquotient a b)))
                                     env
                                     tail?))
                  ((and (small-integer-constant? a)
