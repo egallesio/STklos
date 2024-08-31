@@ -538,7 +538,7 @@ fi
 ###
 ### SFI-176 stuff
 ###
-C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
+C_VERSION=`((${CC} --version||${CC} -version) | head -n 1)2>/dev/null || echo "???"}`
 C_COMPILE=""
 C_LINK=""
 

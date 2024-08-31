@@ -69,6 +69,7 @@ examples/socket-client
 examples/socket-server
 examples/socket-server-fork
 examples/socket-server-thread
+examples/dice
 examples/fork-test
 examples/hello
 examples/secho
