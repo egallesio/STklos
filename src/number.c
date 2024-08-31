@@ -419,7 +419,7 @@ static SCM make_rational(SCM n, SCM d)
   SCM gcd;
 
   if (zerop(d))
-    STk_error("cannot make rational with null denominator");
+    STk_error("division by 0");
 
   /* Always keep sign in the numerator */
   if (negativep(d)) {
