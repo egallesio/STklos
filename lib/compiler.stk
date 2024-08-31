@@ -1260,7 +1260,8 @@ doc>
                         (cond
                          ;; it is only an error if b is *exact* zero (not 0.0),
                          ;; and we can test that with eq? (not NOT with '='):
-                         ((eq? b 0) (compiler-error "division by zero"))
+                         ((eq? b 0)
+                          (compiler-error '/ epair "division by zero"))
                          ((and (number? a) (number? b))
                           (compile-constant (/ a b) env tail?))
                          ((small-integer-constant? b)
@@ -1281,7 +1282,8 @@ doc>
                                       (else
                                        ;; it is only an error if b is *exact* zero (not 0.0),
                                        ;; and we can test that with eq? (not NOT with '='):
-                                       (when (eq? b 0) (compiler-error "division by zero"))
+                                       (when (eq? b 0)
+                                         (compiler-error 'fxquotient epair "division by zero"))
                                        (fxquotient a b)))
                                     env
                                     tail?))
