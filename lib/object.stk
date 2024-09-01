@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk -- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;;
-;;;; Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -1309,72 +1309,6 @@ doc>
 ;
 ;=============================================================================
 
-#|
-<doc EXT initialize
- * (initialize class initargs)
- *
- * |Initialize| is a generic method that is called by |make-instance|
- * (or |make|) in order to initialize instances of a class. It is similar
- * to the CLOS method |initialize-instance|.
- *
- * @lisp
- * (define-class <x> (<object>)
- *   ((a :init-keyword :a)
- *    (b :accessor x-b)
- *    c))
- *
- * (describe (make <x> :a 10))
- *
- * #[<x> 7f8a49e96bd0] is an instance of class <x>.
- * Slots are:
- *      a = 10
- *      b = #[unbound]
- *      c = #[unbound]
- * @end lisp
- * If an |initialize| method is implemented, it overrides the
- * default, and the initializing arguments are not automatically
- * processed:
- * @lisp
- * (define-method initialize ((x <x>) args)
- *   (print '== " " args)
- *   (set! (bb x) 1000))
- *
- * (describe (make <x> :a 10))
- *
- * == (a 10)
- * #[<x> 7f8a49e96bd0] is an instance of class <x>.
- * Slots are:
- *      a = #[unbound]
- *      b = 1000
- *      c = #[unbound]
- * @end lisp
- * Note that |a| was *not* initialized! This is because the new
- * |initialize| method does not set it, and the keyword initializer
- * was ignored (the method actually printed the arguments, but
- * ignored them).
- *
- * But if |next-method| is called at the end of our |initialize|
- * method, the result will be as expected:
- *
- * @lisp
- * (define-method initialize ((x <x>) args)
- *   (print '== " " args)
- *   (set! (bb x) 1000)
- *   (next-method))
- *
- * (describe (make <x> :a 10))
- *
- * == (a 10)
- * #[<x> 7f8a49e96bd0] is an instance of class <x>.
- * Slots are:
- *      a = 10
- *      b = 1000
- *      c = #[unbound]
- * @end lisp
- * Now |a| has also been initialized.
-doc>
-|#
-
 (define-method initialize ((object <object>) initargs)
   (%initialize-object object initargs))
 
@@ -1436,8 +1370,9 @@ doc>
 ;=============================================================================
 
 #|
-<doc EXT allocate-instance make-instance
+<doc EXT allocate-instance initialize make-instance
  * (allocate-instance c init-args)
+ * (initialize c init-args)
  * (make-instance c)
  * (make c)
  *
@@ -1460,6 +1395,66 @@ doc>
  *   xx = #[unbound]
  * @end lisp
  * NOTE: |make| is an alias for |make-instance|.
+ *
+ * |Initialize| is a generic function that is called by |make-instance|
+ * (or |make|) in order to initialize instances of a class. It is similar
+ * to the CLOS method |initialize-instance|.
+ *
+ * @lisp
+ * (define-class <x> (<object>)
+ *   ((a :init-keyword :a)
+ *    (b :accessor x-b)
+ *    c))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = 10
+ *      b = #[unbound]
+ *      c = #[unbound]
+ * @end lisp
+ * If an |initialize| method is implemented, it overrides the
+ * default, and the initializing arguments are not automatically
+ * processed:
+ * @lisp
+ * (define-method initialize ((x <x>) args)
+ *   (print '== " " args)
+ *   (set! (bb x) 1000))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * == (a 10)
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = #[unbound]
+ *      b = 1000
+ *      c = #[unbound]
+ * @end lisp
+ * Note that |a| was *not* initialized! This is because the new
+ * |initialize| method does not set it, and the keyword initializer
+ * was ignored (the method actually printed the arguments, but
+ * ignored them).
+ *
+ * But if |next-method| is called at the end of our |initialize|
+ * method, the result will be as expected:
+ *
+ * @lisp
+ * (define-method initialize ((x <x>) args)
+ *   (print '== " " args)
+ *   (set! (bb x) 1000)
+ *   (next-method))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * == (a 10)
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = 10
+ *      b = 1000
+ *      c = #[unbound]
+ * @end lisp
+ * Now |a| has also been initialized.
 doc>
 |#
 (define-method allocate-instance ((class <class>) initargs)

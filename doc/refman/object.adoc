@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -682,7 +682,6 @@ we could define the following method to compare points:
 
 {{insertdoc 'define-class}}
 {{insertdoc 'make-instance}}
-{{insertdoc 'initialize}}
 {{insertdoc 'class-name}}
 {{insertdoc 'class-of}}
 {{insertdoc 'class-name}}
