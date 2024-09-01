@@ -29,6 +29,9 @@ The files in this directory show some examples in STklos:
 - `fork-test.stk` is a simple program using the Unix `fork(2)`
   primitive.
 
+- `ascii-draw.stk` is an example of object-oriented program, using
+  a large part of the STklos CLOS-like system.
+
 - `threads.stk` is a program with 3 threads. It shows how to use
   threads and mutexes.
 
