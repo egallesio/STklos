@@ -48,7 +48,7 @@
     slot-definition-init-form slot-definition-init-keyword
     slot-init-function class-slot-definition
     compute-get-n-set
-    allocate-instance initialize make-instance make
+    allocate-instance initialize-instance initialize make-instance make
     no-next-method  no-applicable-method no-method ;; next-method-exists?
     change-class change-object-class
     shallow-clone deep-clone
@@ -1309,10 +1309,10 @@ doc>
 ;
 ;=============================================================================
 
-(define-method initialize ((object <object>) initargs)
+(define-method initialize-instance ((object <object>) initargs)
   (%initialize-object object initargs))
 
-(define-method initialize ((class <class>) initargs)
+(define-method initialize-instance ((class <class>) initargs)
   (next-method)
   (let ((dslots (key-get initargs :slots   '()))
         (supers (key-get initargs :dsupers '())))
@@ -1338,7 +1338,7 @@ doc>
     (compute-slot-accessors class dslots)))
 
 
-(define-method initialize ((generic <generic>) initargs)
+(define-method initialize-instance ((generic <generic>) initargs)
   (let ((previous-definition (key-get initargs :default #f))
         (doc                 (key-get initargs :documentation #f)))
     (next-method)
@@ -1354,12 +1354,14 @@ doc>
                    '()))
     (slot-set! generic 'documentation doc)))
 
-(define-method initialize ((method <method>) initargs)
+(define-method initialize-instance ((method <method>) initargs)
   (next-method)
   (slot-set! method 'generic-function (key-get initargs :generic-function #f))
   (slot-set! method 'specializers     (key-get initargs :specializers '()))
   (slot-set! method 'procedure        (key-get initargs :procedure (lambda l '()))))
 
+
+(define initialize initialize-instance)
 
 ;=============================================================================
 ;
@@ -1370,10 +1372,11 @@ doc>
 ;=============================================================================
 
 #|
-<doc EXT allocate-instance initialize make-instance
+<doc EXT allocate-instance initialize initialize-instance make make-instance
  * (allocate-instance c init-args)
- * (initialize c init-args)
+ * (initialize-instance c init-args)
  * (make-instance c)
+ * (initialize c init-args)
  * (make c)
  *
  * |Make-instance| creates and initializes an instance of class |c|.
@@ -1397,8 +1400,7 @@ doc>
  * NOTE: |make| is an alias for |make-instance|.
  *
  * |Initialize| is a generic function that is called by |make-instance|
- * (or |make|) in order to initialize instances of a class. It is similar
- * to the CLOS method |initialize-instance|.
+ * (or |make|) in order to initialize instances of a class.
  *
  * @lisp
  * (define-class <x> (<object>)
@@ -1418,7 +1420,7 @@ doc>
  * default, and the initializing arguments are not automatically
  * processed:
  * @lisp
- * (define-method initialize ((x <x>) args)
+ * (define-method initialize-instance ((x <x>) args)
  *   (print '== " " args)
  *   (set! (bb x) 1000))
  *
@@ -1440,7 +1442,7 @@ doc>
  * method, the result will be as expected:
  *
  * @lisp
- * (define-method initialize ((x <x>) args)
+ * (define-method initialize-instance ((x <x>) args)
  *   (print '== " " args)
  *   (set! (bb x) 1000)
  *   (next-method))
@@ -1455,6 +1457,17 @@ doc>
  *      c = #[unbound]
  * @end lisp
  * Now |a| has also been initialized.
+ *
+ * NOTE: |initialize| is an alias for |initialize-instance|.
+ *
+ * Finally, the standard |make-instance| is simple to write: it just
+ * calls |allocate-instance| and initializes it with |initialize-instance|:
+ * @lisp
+ * (define-method make-instance ((class <class>) . initargs)
+ *   (let ((instance (allocate-instance class initargs)))
+ *     (initialize-instance instance initargs)
+ *     instance))
+ * @end lisp
 doc>
 |#
 (define-method allocate-instance ((class <class>) initargs)
@@ -1462,7 +1475,7 @@ doc>
 
 (define-method make-instance ((class <class>) . initargs)
   (let ((instance (allocate-instance class initargs)))
-    (initialize instance initargs)
+    (initialize-instance instance initargs)
     instance))
 
 (define make make-instance)

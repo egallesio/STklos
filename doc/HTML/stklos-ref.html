@@ -23833,7 +23833,8 @@ will work with the definition of <code>&lt;point&gt;</code> given above:</p>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_make-instance'></a><a id='P_allocate-instance'></a>
+<p><a id='P_make-instance'></a><a id='P_initialize'></a><a id='P_allocate-instance'></a>
+
 
 </p>
 </div>
@@ -23844,6 +23845,7 @@ will work with the definition of <code>&lt;point&gt;</code> given above:</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(allocate-instance c init-args) </strong></code><br>
+<code><strong>(initialize c init-args) </strong></code><br>
 <code><strong>(make-instance c) </strong></code><br>
 <code><strong>(make c) </strong></code><br></p>
 </div>
@@ -23881,6 +23883,102 @@ without initializing it.</p>
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p><code>Initialize</code> is a generic function that is called by <code>make-instance</code>
+(or <code>make</code>) in order to initialize instances of a class. It is similar
+to the CLOS method <code>initialize-instance</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;x&gt;</span> <span class="p">(</span><span class="nf">&lt;object&gt;</span><span class="p">)</span>
+  <span class="p">((</span><span class="nf">a</span> <span class="nv">:init-keyword</span> <span class="nv">:a</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">b</span> <span class="nv">:accessor</span> <span class="nv">x-b</span><span class="p">)</span>
+   <span class="nv">c</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;x&gt;</span> <span class="nv">:a</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;x&gt;</span> <span class="mi">7</span><span class="nv">f8a49e96bd0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;x&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a</span> <span class="nv">=</span> <span class="mi">10</span>
+     <span class="nv">b</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span>
+     <span class="nv">c</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If an <code>initialize</code> method is implemented, it overrides the
+default, and the initializing arguments are not automatically
+processed:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">initialize-instance</span> <span class="p">((</span><span class="nf">x</span> <span class="nv">&lt;x&gt;</span><span class="p">)</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">print</span> <span class="ss">'==</span> <span class="s">" "</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nf">bb</span> <span class="nv">x</span><span class="p">)</span> <span class="mi">1000</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;x&gt;</span> <span class="nv">:a</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="nv">==</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">10</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;x&gt;</span> <span class="mi">7</span><span class="nv">f8a49e96bd0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;x&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span>
+     <span class="nv">b</span> <span class="nv">=</span> <span class="mi">1000</span>
+     <span class="nv">c</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that <code>a</code> was <strong>not</strong> initialized! This is because the new
+<code>initialize</code> method does not set it, and the keyword initializer
+was ignored (the method actually printed the arguments, but
+ignored them).</p>
+</div>
+<div class="paragraph">
+<p>But if <code>next-method</code> is called at the end of our <code>initialize</code>
+method, the result will be as expected:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">initialize-instance</span> <span class="p">((</span><span class="nf">x</span> <span class="nv">&lt;x&gt;</span><span class="p">)</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">print</span> <span class="ss">'==</span> <span class="s">" "</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nf">bb</span> <span class="nv">x</span><span class="p">)</span> <span class="mi">1000</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">next-method</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;x&gt;</span> <span class="nv">:a</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="nv">==</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">10</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;x&gt;</span> <span class="mi">7</span><span class="nv">f8a49e96bd0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;x&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a</span> <span class="nv">=</span> <span class="mi">10</span>
+     <span class="nv">b</span> <span class="nv">=</span> <span class="mi">1000</span>
+     <span class="nv">c</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now <code>a</code> has also been initialized.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>initialize</code> is an alias for <code>initialize-instance</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally, the standard <code>make-instance</code> is simple to write: it just
+calls <code>allocate-instance</code> and initializes it with <code>initialize-instance</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">make-instance</span> <span class="p">((</span><span class="nf">class</span> <span class="nv">&lt;class&gt;</span><span class="p">)</span> <span class="o">.</span> <span class="nv">initargs</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">instance</span> <span class="p">(</span><span class="nf">allocate-instance</span> <span class="nv">class</span> <span class="nv">initargs</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nf">initialize</span> <span class="nv">instance</span> <span class="nv">initargs</span><span class="p">)</span>
+    <span class="nv">instance</span><span class="p">))</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_class-name'></a>
