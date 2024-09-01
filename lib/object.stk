@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk -- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;;
-;;;; Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@
     slot-definition-init-form slot-definition-init-keyword
     slot-init-function class-slot-definition
     compute-get-n-set
-    allocate-instance initialize make-instance make
+    allocate-instance initialize-instance initialize make-instance make
     no-next-method  no-applicable-method no-method ;; next-method-exists?
     change-class change-object-class
     shallow-clone deep-clone
@@ -1309,10 +1309,10 @@ doc>
 ;
 ;=============================================================================
 
-(define-method initialize ((object <object>) initargs)
+(define-method initialize-instance ((object <object>) initargs)
   (%initialize-object object initargs))
 
-(define-method initialize ((class <class>) initargs)
+(define-method initialize-instance ((class <class>) initargs)
   (next-method)
   (let ((dslots (key-get initargs :slots   '()))
         (supers (key-get initargs :dsupers '())))
@@ -1338,7 +1338,7 @@ doc>
     (compute-slot-accessors class dslots)))
 
 
-(define-method initialize ((generic <generic>) initargs)
+(define-method initialize-instance ((generic <generic>) initargs)
   (let ((previous-definition (key-get initargs :default #f))
         (doc                 (key-get initargs :documentation #f)))
     (next-method)
@@ -1354,12 +1354,14 @@ doc>
                    '()))
     (slot-set! generic 'documentation doc)))
 
-(define-method initialize ((method <method>) initargs)
+(define-method initialize-instance ((method <method>) initargs)
   (next-method)
   (slot-set! method 'generic-function (key-get initargs :generic-function #f))
   (slot-set! method 'specializers     (key-get initargs :specializers '()))
   (slot-set! method 'procedure        (key-get initargs :procedure (lambda l '()))))
 
+
+(define initialize initialize-instance)
 
 ;=============================================================================
 ;
@@ -1370,9 +1372,11 @@ doc>
 ;=============================================================================
 
 #|
-<doc EXT allocate-instance make-instance
+<doc EXT allocate-instance initialize initialize-instance make make-instance
  * (allocate-instance c init-args)
+ * (initialize-instance c init-args)
  * (make-instance c)
+ * (initialize c init-args)
  * (make c)
  *
  * |Make-instance| creates and initializes an instance of class |c|.
@@ -1394,6 +1398,76 @@ doc>
  *   xx = #[unbound]
  * @end lisp
  * NOTE: |make| is an alias for |make-instance|.
+ *
+ * |Initialize| is a generic function that is called by |make-instance|
+ * (or |make|) in order to initialize instances of a class.
+ *
+ * @lisp
+ * (define-class <x> (<object>)
+ *   ((a :init-keyword :a)
+ *    (b :accessor x-b)
+ *    c))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = 10
+ *      b = #[unbound]
+ *      c = #[unbound]
+ * @end lisp
+ * If an |initialize| method is implemented, it overrides the
+ * default, and the initializing arguments are not automatically
+ * processed:
+ * @lisp
+ * (define-method initialize-instance ((x <x>) args)
+ *   (print '== " " args)
+ *   (set! (bb x) 1000))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * == (a 10)
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = #[unbound]
+ *      b = 1000
+ *      c = #[unbound]
+ * @end lisp
+ * Note that |a| was *not* initialized! This is because the new
+ * |initialize| method does not set it, and the keyword initializer
+ * was ignored (the method actually printed the arguments, but
+ * ignored them).
+ *
+ * But if |next-method| is called at the end of our |initialize|
+ * method, the result will be as expected:
+ *
+ * @lisp
+ * (define-method initialize-instance ((x <x>) args)
+ *   (print '== " " args)
+ *   (set! (bb x) 1000)
+ *   (next-method))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * == (a 10)
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = 10
+ *      b = 1000
+ *      c = #[unbound]
+ * @end lisp
+ * Now |a| has also been initialized.
+ *
+ * NOTE: |initialize| is an alias for |initialize-instance|.
+ *
+ * Finally, the standard |make-instance| is simple to write: it just
+ * calls |allocate-instance| and initializes it with |initialize-instance|:
+ * @lisp
+ * (define-method make-instance ((class <class>) . initargs)
+ *   (let ((instance (allocate-instance class initargs)))
+ *     (initialize-instance instance initargs)
+ *     instance))
+ * @end lisp
 doc>
 |#
 (define-method allocate-instance ((class <class>) initargs)
@@ -1401,7 +1475,7 @@ doc>
 
 (define-method make-instance ((class <class>) . initargs)
   (let ((instance (allocate-instance class initargs)))
-    (initialize instance initargs)
+    (initialize-instance instance initargs)
     instance))
 
 (define make make-instance)
