@@ -29,7 +29,7 @@
 
 (define-class <fake-class> () ())
 
-(define-method initialize ((self <fake-class>) initargs)
+(define-method initialize-instance ((self <fake-class>) initargs)
   (die (string-append "Canvases are not available on this machine.\n"
                         "Have you installed the \"goocanvas\" library?")))
 

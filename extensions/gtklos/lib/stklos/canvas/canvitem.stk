@@ -104,18 +104,18 @@
 
 
 ;;;
-;;; Initialize for <gtk-canvas-item>
+;;; Initialize-instance for <gtk-canvas-item>
 ;;;
 (define-generic make-canvas-item)
 
 (define-method make-canvas-item ((self <gtk-canvas-item>))
   (error 'make-canvas-item "no make-canvas-item method defined for ~S" self))
 
-(define-method initialize ((self <gtk-canvas-item>) initargs)
+(define-method initialize-instance ((self <gtk-canvas-item>) initargs)
   (let ((parent (key-get initargs #:parent #f)))
     ;; Verify that we have a parent for this object
     (unless parent
-      (error 'initialize "cannot create a ~S without parent"
+      (error 'initialize-instance "cannot create a ~S without parent"
              (class-name (class-of self))))
 
     ;; Create the canvas item
