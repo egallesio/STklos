@@ -1573,7 +1573,11 @@ doc>
  * #[<A> 7f91fe7a0510] is an instance of class <A>.
  * The only slot is:
  *      a-slot = a-value
+ *
+ * (slot-value c 'c-slot) => error
  * @end lisp
+ * The last line shows that |c| really changed into an object of
+ * class |<A>|: it does not have the slot |c-slot| anymore.
 doc>
 |#
 (define (change-object-class old-instance old-class new-class)
