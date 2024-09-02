@@ -1530,6 +1530,52 @@ doc>
 ;
 ;=============================================================================
 
+#|
+<doc EXT change-class
+ * (change-class object new-class)
+ *
+ * |Change-class| will change the class of |object| to |new-class|.
+ * The values of slots that do exist in both the old and new classes
+ * are carried out to the new object. The slots that do not exist in
+ * the old instance are initialized as if the object was new.
+ *
+ * @lisp
+ * (define-class <A> ()        ((a-slot #:init-form 'a-value)))
+ * (define-class <B> ()        ((b-slot #:init-form 'b-value)))
+ * (define-class <C> (<A> <B>) ((c-slot #:init-form 'c-value)))
+ *
+ * (define a (make <A>))
+ * (define c (make <C>))
+ *
+ * (describe a)
+ * #[<A> 7f91fe79c660] is an instance of class <A>.
+ * The only slot is:
+ *      a-slot = a-value
+ *
+ * (describe c)
+ * #[<C> 7f91fe7a0510] is an instance of class <C>.
+ * Slots are:
+ *      a-slot = a-value
+ *      b-slot = b-value
+ *      c-slot = c-value
+ *
+ * (change-class a <C>)
+ * (change-class c <A>)
+ *
+ * (describe a)
+ * #[<C> 7f91fe79c660] is an instance of class <C>.
+ * Slots are:
+ *      a-slot = a-value
+ *      b-slot = b-value
+ *      c-slot = c-value
+ *
+ * (describe c)
+ * #[<A> 7f91fe7a0510] is an instance of class <A>.
+ * The only slot is:
+ *      a-slot = a-value
+ * @end lisp
+doc>
+|#
 (define (change-object-class old-instance old-class new-class)
   (let ((new-instance (allocate-instance new-class ())))
     ;; Initalize the slot of the new instance
