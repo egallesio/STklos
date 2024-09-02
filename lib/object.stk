@@ -258,6 +258,31 @@ doc>
  * (class-direct-slots <B>) => ((a #:init-form 3))
  * @end lisp
 doc>
+<doc class-methods class-direct-methods
+ * (class-methods c)
+ * (class-direct-methods c)
+ *
+ * |Class-direct-methods| returns a list of all direct methods of
+ * a class.
+ *
+ * |Class-methods| returns a list of all methods of a class and also
+ * of its subclasses.
+ *
+ * @lisp
+ * (define-class <A> () ())
+ *
+ * (define-method method-A ((a <A>)) (print 'A))
+ * (define-class <C> (<A>) ())
+ * (define-method method-C ((c <C>)) (print 'C))
+ * (class-methods <C>)
+ *
+ * (map method-generic-function (class-methods <A>))
+ *     => (#[<generic> method-C (1)]
+ *         #[<generic> method-A (1)])
+ * (map method-generic-function (class-direct-methods <A>))
+ *     => (#[<generic> method-A (1)])
+ * @end lisp
+doc>
 |#
 (define (class-direct-superclasses C)
   (if (class? C)
@@ -378,6 +403,36 @@ doc>
 ;;;
 ;;; Generic functions
 ;;;
+#|
+<doc EXT generic-function-name generic-function-methods generic-function-documentation
+ * (generic-function-name gf)
+ * (generic-function-methods gf)
+ * (generic-function-documentation gf)
+ *
+ * Given a generic function object, these procedures return the name,
+ * the list of methods and the documentation of the generic function.
+ *
+ * For example,
+ *
+ * @lisp
+ * (define-generic compute :documentation "This function does computations")
+ *
+ * (define-method compute ( (a <real>) (b <real>) )
+ *   (* a b))
+ *
+ * (define-method compute ( (a <real>) (b <complex>) )
+ *   (* a (imag-part b)))
+ *
+ * (generic-function-name compute)          => compute
+ * (generic-function-methods compute)       => (#[<method> 7f9901743db0]
+ *                                              #[<method> 7f990155af60])
+ * (generic-function-documentation compute) => "This function does computations"
+ * @end lisp
+ *
+ * It is not necessary that the generic function be explicitly defined. If it is
+ * not explicitly created, however, the documentation will be set to `#f`.
+doc>
+|#
 (define (generic-function-name gf)
   (if (generic? gf)
       (slot-ref gf 'name)
@@ -396,6 +451,40 @@ doc>
 ;;;
 ;;; Methods
 ;;;
+#|
+<doc EXT method-generic-function method-specializers method-procedure
+ * (method-generic-function m)
+ * (method-specializers m)
+ * (method-procedure m)
+ *
+ * Given a method |m|,
+ * * |method-generic-function| returns the generic function that this
+ *   object is a specialization of;
+ * * |method-specializers| returns a list of specializers (this and other
+ *   methods) of its generic functions;
+ * * |method-procedure| returns the procedure that implements this method.
+ *
+ * @lisp
+ * (define-method compute ( (a <real>) (b <real>) )
+ *  (* a b))
+ *
+ * (define-method compute ( (a <real>) (b <complex>) )
+ *   (* a (imag-part b)))
+ *
+ * (define m (car (generic-function-methods compute)))
+ *
+ * (method-generic-function m)
+ *    => #[<generic> compute (2)]
+ *
+ * (method-specializers m)
+ *    => (#[<class> <real> 7f3e3a157ba0]
+ *        #[<class> <complex> 7f3e3a157bd0])
+ *
+ * (method-procedure m)
+ *    => #[closure 7f9901d6e680]
+ * @end lisp
+doc>
+|#
 (define (method-generic-function m)
   (if (method? m)
       (slot-ref m 'generic-function)
