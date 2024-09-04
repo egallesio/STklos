@@ -4110,15 +4110,6 @@ static inline SCM exact_exponent_expt(SCM x, SCM y)
   mpz_t res;
   SCM scm_res;
 
-  /* y is already known to be exact; so if it is zero,
-     return exact one. */
-  if (zerop(y)) return MAKE_INT(1);
-
-  if (zerop(x) || (x == MAKE_INT(1))) return x;
-
-  if (TYPEOF(y) == tc_bignum)
-    STk_error("exponent too big: ~S", y);
-
   switch (TYPEOF(x)) {
     case tc_integer:
       mpz_init(res);
@@ -4165,30 +4156,83 @@ static SCM my_expt(SCM x, SCM y)
   switch (TYPEOF(y)) {
     case tc_integer:
     case tc_bignum:
+
+      if (y == MAKE_INT(0))  /* Treat special case where y = 0 => 1 */
+        return MAKE_INT(1);
+
+      if (INTP(x)) { /* Treat special cases where x = 0, 1 or -1 */
+
+        if (INT_VAL(x) == 0 || INT_VAL(x) == 1)         // 0 and 1
+          return x;
+        if (x == MAKE_INT(-1UL))                        // -1
+          return MAKE_INT(number_parity(y));
+      }
+
+      if (REALP(x)) { /* Treat special cases where x = +0.0, -0,0, +1.0 or -1.0 */
+        double val = REAL_VAL(x);
+
+        if (val == 0.0) {
+          if (signbit(val))
+            // x = -0.0 result is -0.0 or + 0.0 depending of y's parity
+            return (number_parity(y)==-1) ? x : double2real(0.0);
+          else
+            // x = +0.0 retult is always +0.0
+            return x;
+        }
+        if (val == +1.0) return x;
+        if (val == -1.0) return double2real(number_parity(y));
+      }
+
+      if (TYPEOF(y) == tc_bignum)
+        /* x is not 0 or 1 (exact or inexact) => error */
+        STk_error("exponent too big: ~S", y);
+
+      // Ok all special cases treated => compute and exact x^y
       return exact_exponent_expt(x, y);
+
     case tc_rational:
     case tc_real:
-      {
-        if (zerop(y)) return double2real(1.0);
-        if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
-        if (REALP(y)) {
-          if (REALP(x) && !negativep(x)) {
-            /* real ^ real, see if we can use pow: */
-            double r = pow(REAL_VAL(x),REAL_VAL(y));
-            if (!isinf(r) || /* no overflow, return r */
-                (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not overflow, one arg. was inf! */
-              return double2real(r);
-          }
-          if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
-            /* It represents an integer precisely! Turn the exponent into
-               an exact number and call exact_exponent_expt: */
-            return exact2inexact(exact_exponent_expt(x, (inexact2exact(y))));
-          /* Either r overflowed, or y didn't represent an integer perfectly.
-             Fall through to use STklos' arithmetic version of
-             exp(log(x) * y)                                                  */
+      if (zerop(y)) /* Treat  special case where y = 0.0 (or -0.0) */
+        return double2real(1.0);
+
+      if (INTP(x)) { /* Treat special cases where x = 0, 1 or -1 */
+        if (INT_VAL(x) == 0) return double2real(0.0);        //  0
+        if (INT_VAL(x) == 1) return double2real(1.0);        // +1
+        if (x==MAKE_INT(-1UL) && STk_integerp(y)==STk_true)  // -1
+          return double2real(number_parity(y));
+      }
+
+      if (REALP(x)) { /* Treat special cases where x = +0.0, -0,0 */
+        double val = REAL_VAL(x);
+
+        if (val == 0.0) {
+          if (signbit(val))
+            // x = -0.0 result is -0.0 or + 0.0 depending of y's parity
+            return (number_parity(y)==-1) ? x : double2real(0.0);
+          else
+            // x = +0.0 retult is always +0.0
+            return x;
         }
       }
+
+      if (REALP(y)) {
+        if (REALP(x) && !negativep(x)) {
+          /* real ^ real, see if we can use pow: */
+          double r = pow(REAL_VAL(x),REAL_VAL(y));
+          if (!isinf(r) || /* no overflow, return r */
+              (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not overflow, one arg. was inf! */
+            return double2real(r);
+        }
+        if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
+          /* It represents an integer precisely! Turn the exponent into
+             an exact number and call exact_exponent_expt: */
+          return exact2inexact(exact_exponent_expt(x, (inexact2exact(y))));
+        /* Either r overflowed, or y didn't represent an integer perfectly.
+           Fall through to use STklos' arithmetic version of
+           exp(log(x) * y)                                                  */
+      }
       /* FALLTHROUGH */
+
     case tc_complex:
       if (zerop(x)) {
         /* R7RS: The value of 0^z is 1 if (zero? z), 0 if (real-part z) is positive,
@@ -4211,9 +4255,10 @@ static SCM my_expt(SCM x, SCM y)
 
 DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
 {
-  if (!COMPLEXP(y) && negativep(y))
+  if (!COMPLEXP(y) && negativep(y)) {
     return div2(MAKE_INT(1),
                 my_expt(x, sub2(MAKE_INT(0), y)));
+  }
   return my_expt(x, y);
 }
 
