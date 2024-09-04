@@ -1270,10 +1270,26 @@
                  (real-part (expt -2.0 1/2))))
          0.000001))
 
-(test "0^0" 1 (expt 0 0))          ;; exact exponent, exact 1
-(test "0^0" 1 (expt 0.0 0))        ;; exact exponent, exact 1
-(test "0^0" 1.0 (expt 0 0.0))      ;; inexact exponent, inexact 1.0
-(test "0^0" 1.0 (expt 0.0 0.0))    ;; inexact exponent, inexact 1.0
+(test "0^0.1" 1 (expt 0 0))          ;; exact exponent, exact 1
+(test "0^0.2" 1 (expt 0.0 0))        ;; exact exponent, exact 1
+(test "0^0/3" 1.0 (expt 0 0.0))      ;; inexact exponent, inexact 1.0
+(test "0^0.4" 1.0 (expt 0.0 0.0))    ;; inexact exponent, inexact 1.0
+
+(test "42^0.0" 1.0    (expt +42 +0.0))
+(test "-42x^0.0" 1.0  (expt -42 +0.0))
+(test "42x^-0.0" 1.0  (expt +42 -0.0))
+(test "-42x^-0.0" 1.0 (expt -42 -0.0))
+
+
+(test "0.0^4"   0.0 (expt  0.0 4))
+(test "-0.0^4"  0.0 (expt -0.0 4))
+(test "0.0^5"   0.0 (expt  0.0 5))
+(test "-0.0^5"   -0.0 (expt -0.0 5))
+
+(test "+0.0^3.2"  0.0    (expt +0.0 3.2))
+(test "-0.0^3.2"  0.0    (expt -0.0 3.2))
+(test "+0.0^-3.2" +inf.0 (expt +0.0 -3.2))
+(test "-0.0^-3.2" +inf.0 (expt -0.0 -3.2))
 
 (test "complex expt"
       #t
@@ -1285,7 +1301,8 @@
 (test/error "0^-a+bi" (expt 0   -2+1i))
 (test/error "0^-a+bi" (expt 0.0 -2+1i))
 
-(test "exact expt" 1/1606938044258990275541962092341162602522202993782792835301376 (expt (expt 2 100) -2))
+(test "exact expt" 1/1606938044258990275541962092341162602522202993782792835301376
+      (expt (expt 2 100) -2))
 
 (test "expt big exponent.1"
       1
@@ -1302,6 +1319,26 @@
 (test "expt big exponent.4"
       -1
       (expt -1 132897461238946918327469812213123215555532132133763))
+
+;; ----------
+
+(test "expt big exponent.5"
+      1.0
+      (expt 1.0 132897461238946918327469812213123215555532132133764))
+
+(test "expt big exponent.6"
+      1.0
+      (expt 1.0 132897461238946918327469812213123215555532132133763))
+
+(test "expt big exponent.7"
+      1.0
+      (expt -1.0 132897461238946918327469812213123215555532132133764))
+
+(test "expt big exponent.8"
+      -1.0
+      (expt -1.0 132897461238946918327469812213123215555532132133763))
+
+
 
 ;;------------------------------------------------------------------
 (test-subsection "sqrt")
