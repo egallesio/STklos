@@ -2,7 +2,7 @@
 ;;;;
 ;;;; canvline.stk         -- Canvas::Line
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -44,10 +44,11 @@
                                    ;; This slot is RO in GTK!!!
                                    (%widget-data-get o #:value ""))
                 #:slot-set!      (lambda (o v)
-                                   (%gtk-set-property! (slot-ref o 'wid) "data" v)
-                                   (%widget-data-set! o #:value v))
-                #:gtk-name       "data")))
+                                   (%widget-data-set! o #:value v)
+                                   (%gtk-set-property! (slot-ref o 'wid)
+                                                       "data" v)))))
 
+ 
 (define-method make-canvas-item ((self <canvas-path>) parent)
   (let ((x (goo-canvas-path-new  parent "")))
     (cpointer-type-set! x 'canvas-path)
