@@ -4211,9 +4211,20 @@ static SCM my_expt(SCM x, SCM y)
 
 DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
 {
-  if (!COMPLEXP(y) && negativep(y))
-    return div2(MAKE_INT(1),
-                my_expt(x, sub2(MAKE_INT(0), y)));
+    /* We specifically check for -1 here because if y is a bignum,
+       it will be rejected later -- but we know that if x is -1,
+       then the result only depends on the parity of y. */
+    if (x == MAKE_INT(-1) &&
+        ((TYPEOF(y) == tc_integer) ||
+         (TYPEOF(y) == tc_bignum)))
+        return (number_parity(y) < 0)
+            ? MAKE_INT(-1)
+            : MAKE_INT(+1);
+
+    if (!COMPLEXP(y) && negativep(y)) {
+        return div2(MAKE_INT(1),
+                    my_expt(x, sub2(MAKE_INT(0), y)));
+    }
   return my_expt(x, y);
 }
 
