@@ -4105,10 +4105,14 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 doc>
  */
 
-static inline SCM exact_exponent_expt(SCM x, SCM y)
+static inline SCM fixnum_exponent_expt(SCM x, SCM y)
 {
+  /* NOTE: 'y' MUST be a fixnum.  */
   mpz_t res;
   SCM scm_res;
+  /* Fast path for squaring. For larger exponents it isn't worth it, but for
+     '2' it's much faster to just call mul2(x,x).  */
+  if (y == MAKE_INT(2)) return mul2(x, x);
 
   switch (TYPEOF(x)) {
     case tc_integer:
@@ -4133,17 +4137,19 @@ static inline SCM exact_exponent_expt(SCM x, SCM y)
       mpz_clear(res);
       return scm_res;
     case tc_rational:
-      return make_rational(exact_exponent_expt(RATIONAL_NUM(x), y),
-                           exact_exponent_expt(RATIONAL_DEN(x), y));
+      return make_rational(fixnum_exponent_expt(RATIONAL_NUM(x), y),
+                           fixnum_exponent_expt(RATIONAL_DEN(x), y));
     default: {
-      SCM nx, ny, val = MAKE_INT(1);
+      SCM nx, val = MAKE_INT(1);
+      long ny = 1;
+      long yy = INT_VAL(y);
 
-      while (y != MAKE_INT(1)) {
+      while (yy > 1) {
         nx = mul2(x, x);
-        ny = int_quotient(y, MAKE_INT(2));
-        if (STk_evenp(y) == STk_false) val = mul2(x, val);
+        ny = yy / 2;
+        if (yy & 1) val = mul2(x, val);
         x = nx;
-        y = ny;
+        yy = ny;
       }
       return mul2(val, x);
     }
@@ -4188,7 +4194,7 @@ static SCM my_expt(SCM x, SCM y)
         STk_error("exponent too big: ~S", y);
 
       // Ok all special cases treated => compute and exact x^y
-      return exact_exponent_expt(x, y);
+      return fixnum_exponent_expt(x, y);
 
     case tc_rational:
     case tc_real:
@@ -4224,12 +4230,16 @@ static SCM my_expt(SCM x, SCM y)
             return double2real(r);
         }
         if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
-          /* It represents an integer precisely! Turn the exponent into
-             an exact number and call exact_exponent_expt: */
-          return exact2inexact(exact_exponent_expt(x, (inexact2exact(y))));
-        /* Either r overflowed, or y didn't represent an integer perfectly.
-           Fall through to use STklos' arithmetic version of
-           exp(log(x) * y)                                                  */
+          /* It represents an integer precisely! Turn the exponent into an
+             exact integer number and call us recursively. We don't go right
+             to fixnum_exponent_expt because y could be a bignum, and we check
+             for that in the recursive call. */
+          return exact2inexact(my_expt(x, (inexact2exact(y))));
+
+        /* If we are here, either 'r' overflowed, or 'y' didn't represent an
+           integer perfectly. Fall through to use STklos' arithmetic version
+           of exp(log(x) * y)
+        */
       }
       /* FALLTHROUGH */
 
