@@ -4105,14 +4105,14 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 doc>
  */
 
-static inline SCM fixnum_exponent_expt(SCM x, SCM y)
+static inline SCM fixnum_exponent_expt(SCM x, long y)
 {
-  /* NOTE: 'y' MUST be a fixnum.  */
   mpz_t res;
   SCM scm_res;
+
   /* Fast path for squaring. For larger exponents it isn't worth it, but for
      '2' it's much faster to just call mul2(x,x).  */
-  if (y == MAKE_INT(2)) return mul2(x, x);
+  if (y == 2) return mul2(x, x);
 
   switch (TYPEOF(x)) {
     case tc_integer:
@@ -4122,34 +4122,33 @@ static inline SCM fixnum_exponent_expt(SCM x, SCM y)
       long sign = (INT_VAL(x) < 0) ? -1 : +1;
 
       mpz_ui_pow_ui(res, (unsigned long) (sign*INT_VAL(x)),
-                         (unsigned long) INT_VAL(y));
+                         (unsigned long) y);
 
       /* Put back the sign, if needed
          (that is, if sign (of x) < 0 and the exponent is odd): */
-      if (sign<0 && ((INT_VAL(y)) & 1UL)) mpz_neg(res,res);
+      if (sign<0 && (y & 1UL)) mpz_neg(res,res);
       scm_res = bignum2number(res);
       mpz_clear(res);
       return scm_res;
     case tc_bignum:
       mpz_init(res);
-      mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
+      mpz_pow_ui(res, BIGNUM_VAL(x), y);
       scm_res = bignum2number(res);
       mpz_clear(res);
       return scm_res;
     case tc_rational:
       return make_rational(fixnum_exponent_expt(RATIONAL_NUM(x), y),
                            fixnum_exponent_expt(RATIONAL_DEN(x), y));
-    default: {
+    default: { // tc_complex and tc_real in fact
       SCM nx, val = MAKE_INT(1);
       long ny = 1;
-      long yy = INT_VAL(y);
 
-      while (yy > 1) {
+      while (y > 1) {
         nx = mul2(x, x);
-        ny = yy / 2;
-        if (yy & 1) val = mul2(x, val);
+        ny = y / 2;
+        if (y & 1) val = mul2(x, val);
         x = nx;
-        yy = ny;
+        y = ny;
       }
       return mul2(val, x);
     }
@@ -4194,7 +4193,7 @@ static SCM my_expt(SCM x, SCM y)
         STk_error("exponent too big: ~S", y);
 
       // Ok all special cases treated => compute and exact x^y
-      return fixnum_exponent_expt(x, y);
+      return fixnum_exponent_expt(x, INT_VAL(y));
 
     case tc_rational:
     case tc_real:
