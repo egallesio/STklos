@@ -36,7 +36,7 @@
 ;;; 1. Class definition, #:accessor, #:init-keyword, #:init-form
 ;;; 2. Class inheritance
 ;;; 3. Generic methods, including the use of next-method inside
-;;;    initialize
+;;;    initialize-instance
 ;;; 4. Using *only* the class of an object to get different behavior
 ;;;    (the initializers for <triangle> and <parallelogram> are mostly
 ;;;    the same, but the objects will be drawn differently *because
@@ -184,7 +184,7 @@
         (canvas-set! v r c #f #\space)))))
 
 ;; the initializer for <canvas>
-(define-method initialize ((v <canvas>) args)
+(define-method initialize-instance ((v <canvas>) args)
   ;; We call (next-method) first in order to initialize the slots with
   ;; their init-forms because we will use them:
   (next-method)
@@ -244,7 +244,7 @@
 
 (make-class-predicate <drawable>)
 
-(define-method initialize ((d <drawable>) args)
+(define-method initialize-instance ((d <drawable>) args)
   ;; <drawable> is not supposed to be initialized directly. Only its
   ;; subclasses should have instances, so we check here if class-of
   ;; d is <drawable>.
@@ -272,7 +272,7 @@
 
 (make-class-predicate <point>)
 
-(define-method initialize ((p <point>) args)
+(define-method initialize-instance ((p <point>) args)
   (let ((x (key-get args #:x))
         (y (key-get args #:y)))
     (unless (and (integer? x)
@@ -311,7 +311,7 @@
 
 (make-class-predicate <circle>)
 
-(define-method initialize ((c <circle>) args)
+(define-method initialize-instance ((c <circle>) args)
   (unless (point? (key-get args #:center))
     (error "circle center must be a point"))
   (when (not (integer? (key-get args #:radius)))
@@ -371,7 +371,7 @@
 (make-class-predicate <polygon>)
 
 
-(define-method initialize ((p <polygon>) args)
+(define-method initialize-instance ((p <polygon>) args)
   (unless (every point? (key-get args #:points))
     (print (key-get args #:points))
     (error "only points allowed as arguments when creating a polygon"))
@@ -388,7 +388,7 @@
 
 (make-class-predicate <segment>)
 
-(define-method initialize ((s <segment>) args)
+(define-method initialize-instance ((s <segment>) args)
   (next-method) ; first check if all points are really points :)
   (let ((points (key-get args #:points)))
     (unless (= (length (key-get args #:points)) 2)
@@ -461,7 +461,7 @@
     (not (zero? (- (* (- x2 x1) (- y3 y1))
                    (* (- y2 y1) (- x3 x1)))))))
 
-(define-method initialize ((t <triangle>) args)
+(define-method initialize-instance ((t <triangle>) args)
   (next-method) ; first check if all points are really points :)
   (let ((points (key-get args #:points)))
     (unless (= (length points) 3)
@@ -484,7 +484,7 @@
 
 (make-class-predicate <parallelogram>)
 
-(define-method initialize ((r <parallelogram>) args)
+(define-method initialize-instance ((r <parallelogram>) args)
   (next-method) ; first check if all points are really points :)
   (let ((pts (key-get args #:points)))
     (unless (= (length pts) 3)
@@ -537,7 +537,7 @@ Try this:
 (draw v g)
 (display v)
 
-(set! (canvas-background v) white)
+(set! (canvas-background v) 'white)
 (display v)
 |#
 
