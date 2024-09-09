@@ -466,7 +466,6 @@ then
        FFIINC="-I../ffi/$(./config.guess)/include"
        FFILIB="../ffi/$(./config.guess)/.libs/libffi.a"
        COMP_LIBS="libffi $COMP_LIBS"
-       STR_FFI="provided"
   else
        echo "... Using system libffi library"
        FFI=""
@@ -482,15 +481,14 @@ then
        DLLIBS="$DLLIBS $FFILIB"
        SYST_LIBS="libffi $SYST_LIBS"
        SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
-       STR_FFI="system"
   fi
-
+  STR_FFI="yes"
   # The following "HAVE_FFI" is defined so the compiler will actually
   # compile the code for it.
   AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
 else
   echo "... NOT using FFI"
-  STR_FFI="none"
+  STR_FFI="no"
 fi
 
 # ----------------------------------------------------------------------
@@ -814,11 +812,11 @@ echo "   C compiler version: " $C_VERSION
 echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
+echo "          FFI support: " $STR_FFI
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
 echo "System libraries used: " $SYST_LIBS_SHOW
 echo "   Compiled libraries: " $COMP_LIBS_SHOW
-echo "                  FFI: " $STR_FFI
 echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
