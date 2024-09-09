@@ -209,20 +209,13 @@ fi
 ###
 ### Be case sensitive or not
 ###
-CASE_SENSITIVE=true
-
 AC_ARG_ENABLE(case-insensitive,
-  [AS_HELP_STRING([--enable-case-insensitive],[Be case insensitive by default as in R5RS])],
-  CASE_SENSITIVE=false,
-  CASE_SENSITIVE=true)
+  [AS_HELP_STRING([--enable-case-insensitive],
+                  [Be case insensitive by default as in R5RS])])
 
-case "$CASE_SENSITIVE" in
-  false | 0 |off)
-     DEFAULT_CS=0
-     ;;
-  *)
-     DEFAULT_CS=1
-     ;;
+case "$enable_case_insensitive" in
+  yes|true|1) DEFAULT_CS=0; CASE_SENSITIVE=no;;
+  *)          DEFAULT_CS=1; CASE_SENSITIVE=yes;;
 esac
 
 
