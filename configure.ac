@@ -217,7 +217,7 @@ AC_ARG_ENABLE(case-insensitive,
   CASE_SENSITIVE=true)
 
 case "$CASE_SENSITIVE" in
-  false | 0 |off| yes)
+  false | 0 |off)
      DEFAULT_CS=0
      ;;
   *)
@@ -435,13 +435,17 @@ echo "***** FFI support"
 echo "*****"
 
 # Check if the user wants FFI included or not.
-# The autoconf variable AVOID_FFI will be set here to either "yes"
-# or "no".
+# The autoconf variable AVOID_FFI will be set here to either "yes" or "no".
 # *** If it's set to "no", then the --with-provided-ffi won't even be
 #     verified.
-AC_ARG_WITH(ffi,
-       [  --without-ffi           don't include FFI code ],
-       AVOID_FFI="yes", AVOID_FFI="no")
+AC_ARG_ENABLE(ffi,
+       [AS_HELP_STRING([--enable-ffi],[enable FFI support (yes by default)])])
+
+case "$enable_ffi" in
+  no|false|0) AVOID_FFI="yes";;
+  *)          AVOID_FFI="no" ;;
+esac
+
 
 if test "$AVOID_FFI" = "no"
 then
@@ -495,7 +499,7 @@ fi
 # Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
 AC_ARG_WITH(control-fast-math,
-       [  --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums],
+       [  --with-control-fast-math  verify  arguments to fx and fl functions are fixnums and flonums],
        CONTROL_FX="$withval", CONTROL_FX="yes")
 
 if test "$CONTROL_FX" = "yes"
