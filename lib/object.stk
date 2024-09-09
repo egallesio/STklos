@@ -172,13 +172,17 @@ doc>
   (if (class? C) (slot-ref C 'name) (%error-bad-class 'class-name C)))
 
 #|
-<doc EXT class-direct-superclasses class-direct-subclasses class-precedence-list
+<doc EXT class-direct-superclasses class-direct-subclasses class-subclasses class-precedence-list
  * (class-direct-superclasses c)
  * (class-direct-subclasses c)
+ * (class-subclasses c)
  * (class-precedence-list c)
  *
  * |class-direct-superclasses| and |class-direct-subclasses| return a list with
  * all direct superclasses or subclasses of class |c|.
+ *
+ * |class-subclasses| return a list with all subclasses of class |c|, even if
+ * not direct.
  *
  * |class-precedence-list| returns the precedence list for class |c|. If
  * |c| is a superclass of several classes, this list shows what precedence
@@ -203,6 +207,31 @@ doc>
  * |Slot-one| in class |<C>| refers to the slot defined in |<C>| (because
  * it is present in both |<A>| and |<C>|, but |<C>| has precedence over
  * |<A>|). |Slot-two| in |<C>| can only be the one defined in |<A>|.
+ *
+ * The native STklos types are also subclasses of one single class, |<top>|.
+ *
+ * @lisp
+ * (class-subclasses <top>)     => (#[<class> <entity-class> 7f34e3b59ed0]
+ *                                  #[<class> <procedure-class> 7f34e3b59f00]
+ *                                  #[<class> <class> 7f34e3b59f90]
+ *                                  #[<class> <accessor-method> 7f34e3b59e40]
+ *                                  ...
+ *                                  #[<class> <number> 7f34e3b59c00]
+ *                                  ...
+ *                                  #[<class> <port> 7f34e3b598a0]
+ *                                  #[<class> <hash-table> 7f34e3b59810])
+ * @end lisp
+ * One of the listed classes above is |<number>| (its subclasses are also
+ * listed in that output). Calling |class-subclasses| on |<number>| returns
+ * its six subclasses:
+ * @lisp
+ * (class-subclasses <number>)  => (#[<class> <bignum> 7f34e3b59b10]
+ *                                  #[<class> <fixnum> 7f34e3b59ae0]
+ *                                  #[<class> <integer> 7f34e3b59b40]
+ *                                  #[<class> <rational> 7f34e3b59b70]
+ *                                  #[<class> <real> 7f34e3b59ba0]
+ *                                  #[<class> <complex> 7f34e3b59bd0])
+ * @end lisp
 doc>
 |#
 
@@ -227,6 +256,31 @@ doc>
  *
  * @lisp
  * (class-direct-slots <B>) => ((a #:init-form 3))
+ * @end lisp
+doc>
+<doc class-methods class-direct-methods
+ * (class-methods c)
+ * (class-direct-methods c)
+ *
+ * |Class-direct-methods| returns a list of all direct methods of
+ * a class.
+ *
+ * |Class-methods| returns a list of all methods of a class and also
+ * of its subclasses.
+ *
+ * @lisp
+ * (define-class <A> () ())
+ *
+ * (define-method method-A ((a <A>)) (print 'A))
+ * (define-class <C> (<A>) ())
+ * (define-method method-C ((c <C>)) (print 'C))
+ * (class-methods <C>)
+ *
+ * (map method-generic-function (class-methods <A>))
+ *     => (#[<generic> method-C (1)]
+ *         #[<generic> method-A (1)])
+ * (map method-generic-function (class-direct-methods <A>))
+ *     => (#[<generic> method-A (1)])
  * @end lisp
 doc>
 |#
@@ -349,6 +403,36 @@ doc>
 ;;;
 ;;; Generic functions
 ;;;
+#|
+<doc EXT generic-function-name generic-function-methods generic-function-documentation
+ * (generic-function-name gf)
+ * (generic-function-methods gf)
+ * (generic-function-documentation gf)
+ *
+ * Given a generic function object, these procedures return the name,
+ * the list of methods and the documentation of the generic function.
+ *
+ * For example,
+ *
+ * @lisp
+ * (define-generic compute :documentation "This function does computations")
+ *
+ * (define-method compute ( (a <real>) (b <real>) )
+ *   (* a b))
+ *
+ * (define-method compute ( (a <real>) (b <complex>) )
+ *   (* a (imag-part b)))
+ *
+ * (generic-function-name compute)          => compute
+ * (generic-function-methods compute)       => (#[<method> 7f9901743db0]
+ *                                              #[<method> 7f990155af60])
+ * (generic-function-documentation compute) => "This function does computations"
+ * @end lisp
+ *
+ * It is not necessary that the generic function be explicitly defined. If it is
+ * not explicitly created, however, the documentation will be set to `#f`.
+doc>
+|#
 (define (generic-function-name gf)
   (if (generic? gf)
       (slot-ref gf 'name)
@@ -367,6 +451,40 @@ doc>
 ;;;
 ;;; Methods
 ;;;
+#|
+<doc EXT method-generic-function method-specializers method-procedure
+ * (method-generic-function m)
+ * (method-specializers m)
+ * (method-procedure m)
+ *
+ * Given a method |m|,
+ * * |method-generic-function| returns the generic function that this
+ *   object is a specialization of;
+ * * |method-specializers| returns a list of specializers (this and other
+ *   methods) of its generic functions;
+ * * |method-procedure| returns the procedure that implements this method.
+ *
+ * @lisp
+ * (define-method compute ( (a <real>) (b <real>) )
+ *  (* a b))
+ *
+ * (define-method compute ( (a <real>) (b <complex>) )
+ *   (* a (imag-part b)))
+ *
+ * (define m (car (generic-function-methods compute)))
+ *
+ * (method-generic-function m)
+ *    => #[<generic> compute (2)]
+ *
+ * (method-specializers m)
+ *    => (#[<class> <real> 7f3e3a157ba0]
+ *        #[<class> <complex> 7f3e3a157bd0])
+ *
+ * (method-procedure m)
+ *    => #[closure 7f9901d6e680]
+ * @end lisp
+doc>
+|#
 (define (method-generic-function m)
   (if (method? m)
       (slot-ref m 'generic-function)
@@ -1486,6 +1604,56 @@ doc>
 ;
 ;=============================================================================
 
+#|
+<doc EXT change-class
+ * (change-class object new-class)
+ *
+ * |Change-class| will change the class of |object| to |new-class|.
+ * The values of slots that do exist in both the old and new classes
+ * are carried out to the new object. The slots that do not exist in
+ * the old instance are initialized as if the object was new.
+ *
+ * @lisp
+ * (define-class <A> ()        ((a-slot #:init-form 'a-value)))
+ * (define-class <B> ()        ((b-slot #:init-form 'b-value)))
+ * (define-class <C> (<A> <B>) ((c-slot #:init-form 'c-value)))
+ *
+ * (define a (make <A>))
+ * (define c (make <C>))
+ *
+ * (describe a)
+ * #[<A> 7f91fe79c660] is an instance of class <A>.
+ * The only slot is:
+ *      a-slot = a-value
+ *
+ * (describe c)
+ * #[<C> 7f91fe7a0510] is an instance of class <C>.
+ * Slots are:
+ *      a-slot = a-value
+ *      b-slot = b-value
+ *      c-slot = c-value
+ *
+ * (change-class a <C>)
+ * (change-class c <A>)
+ *
+ * (describe a)
+ * #[<C> 7f91fe79c660] is an instance of class <C>.
+ * Slots are:
+ *      a-slot = a-value
+ *      b-slot = b-value
+ *      c-slot = c-value
+ *
+ * (describe c)
+ * #[<A> 7f91fe7a0510] is an instance of class <A>.
+ * The only slot is:
+ *      a-slot = a-value
+ *
+ * (slot-value c 'c-slot) => error
+ * @end lisp
+ * The last line shows that |c| really changed into an object of
+ * class |<A>|: it does not have the slot |c-slot| anymore.
+doc>
+|#
 (define (change-object-class old-instance old-class new-class)
   (let ((new-instance (allocate-instance new-class ())))
     ;; Initalize the slot of the new instance
