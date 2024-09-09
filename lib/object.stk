@@ -178,10 +178,10 @@ doc>
  * (class-subclasses c)
  * (class-precedence-list c)
  *
- * |class-direct-superclasses| and |class-direct-subclasses| return a list with
+ * |class-direct-superclasses| and |class-direct-subclasses| returns a list with
  * all direct superclasses or subclasses of class |c|.
  *
- * |class-subclasses| return a list with all subclasses of class |c|, even if
+ * |class-subclasses| returns a list with all subclasses of class |c|, even if
  * not direct.
  *
  * |class-precedence-list| returns the precedence list for class |c|. If
@@ -211,26 +211,21 @@ doc>
  * The native STklos types are also subclasses of one single class, |<top>|.
  *
  * @lisp
- * (class-subclasses <top>)     => (#[<class> <entity-class> 7f34e3b59ed0]
- *                                  #[<class> <procedure-class> 7f34e3b59f00]
- *                                  #[<class> <class> 7f34e3b59f90]
- *                                  #[<class> <accessor-method> 7f34e3b59e40]
- *                                  ...
- *                                  #[<class> <number> 7f34e3b59c00]
- *                                  ...
- *                                  #[<class> <port> 7f34e3b598a0]
- *                                  #[<class> <hash-table> 7f34e3b59810])
+ *
+ * (map class-name  (class-subclasses <top>))
+ *         => (<entity-class> <procedure-class> <class> <accessor-method>
+ *             <simple-method> <method> <generic> <object> <boolean> <char>
+ *             ...
+ *             <number>
+ *             ...
+ *             <output-port> <port> <hash-table>)
  * @end lisp
  * One of the listed classes above is |<number>| (its subclasses are also
  * listed in that output). Calling |class-subclasses| on |<number>| returns
  * its six subclasses:
  * @lisp
- * (class-subclasses <number>)  => (#[<class> <bignum> 7f34e3b59b10]
- *                                  #[<class> <fixnum> 7f34e3b59ae0]
- *                                  #[<class> <integer> 7f34e3b59b40]
- *                                  #[<class> <rational> 7f34e3b59b70]
- *                                  #[<class> <real> 7f34e3b59ba0]
- *                                  #[<class> <complex> 7f34e3b59bd0])
+ * (map class-name (class-subclasses <number>))
+ *         => (map class-name (class-subclasses <number>))
  * @end lisp
 doc>
 |#
