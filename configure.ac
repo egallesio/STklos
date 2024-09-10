@@ -211,7 +211,7 @@ fi
 ###
 AC_ARG_ENABLE(case-insensitive,
   [AS_HELP_STRING([--enable-case-insensitive],
-                  [Be case insensitive by default as in R5RS])])
+                  [case insensitive by default as in R5RS])])
 
 case "$enable_case_insensitive" in
   yes|true|1) DEFAULT_CS=0; CASE_SENSITIVE=no;;
@@ -225,7 +225,8 @@ esac
 AC_CHECK_LIB(pthread, pthread_create, deflt_threads=pthreads, deflt_threads=none)
 
 AC_ARG_ENABLE(threads,
-  [AS_HELP_STRING([--enable-threads=TYPE],[choose threading package (none,pthreads)])],
+  [AS_HELP_STRING([--enable-threads],
+                  [enable Posix threads support (enabled by default)])],
   THREADS=$enableval,
   THREADS=$deflt_threads)
 
@@ -237,7 +238,7 @@ case "$THREADS" in
    THREADS=none
    AC_DEFINE(THREADS_NONE, [], [No thread support])
    ;;
- posix | pthreads)
+ posix | pthreads | yes)
    ### Check for pthreads
    AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS",
                 [AC_MSG_ERROR([Missing PThread library])])
@@ -432,7 +433,8 @@ echo "*****"
 # *** If it's set to "no", then the --with-provided-ffi won't even be
 #     verified.
 AC_ARG_ENABLE(ffi,
-       [AS_HELP_STRING([--enable-ffi],[enable FFI support (yes by default)])])
+       [AS_HELP_STRING([--enable-ffi],
+                       [enable FFI support (enabled by default)])])
 
 case "$enable_ffi" in
   no|false|0) AVOID_FFI="yes";;
