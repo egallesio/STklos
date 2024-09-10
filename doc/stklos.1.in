@@ -95,7 +95,7 @@ use a stack of \fBn\fR cells.
 be case insensitive as in R5RS (see below).
 .IP "-c, --case-sensitive"
 be case sensitive as in R7RS. This is the default value (unless \fBstklos\fR
-has been built with the \fI--enable-case-insensitive\fR configure
+has been built with the \fI--disable-case-sensitive\fR configure
 option). This option (and the previous one) permits to change the default
 behavior.
 .IP "-u yes|no, --utf8-encoding=yes|no"
