@@ -7299,6 +7299,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 case "$THREADS" in
  no | none | single)
    THREADS=none
+   STR_THREADS="no"
 
 printf "%s\n" "#define THREADS_NONE /**/" >>confdefs.h
 
@@ -7357,6 +7358,7 @@ esac
 fi
 
    THREADS=pthreads
+   STR_THREADS="yes"
 
 printf "%s\n" "#define THREADS_PTHREADS /**/" >>confdefs.h
 
@@ -9851,7 +9853,7 @@ echo "     C compiler binary: " $CC
 echo "    C compiler version: " $C_VERSION
 echo "     Compilation flags: " $CFLAGS
 echo "                Loader: " $LD
-echo "        Thread support: " $THREADS
+echo "        Thread support: " $STR_THREADS
 echo "           FFI support: " $STR_FFI
 echo "Case sensitive symbols: " $CASE_SENSITIVE
 echo " Control fx parameters: " $CONTROL_FX

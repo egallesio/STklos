@@ -237,6 +237,7 @@ AC_LANG(C)
 case "$THREADS" in
  no | none | single)
    THREADS=none
+   STR_THREADS="no"
    AC_DEFINE(THREADS_NONE, [], [No thread support])
    ;;
  posix | pthreads | yes)
@@ -244,6 +245,7 @@ case "$THREADS" in
    AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS",
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
+   STR_THREADS="yes"
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
    AC_CHECK_FUNCS([pthread_cancel])
    ;;
@@ -810,7 +812,7 @@ echo "     C compiler binary: " $CC
 echo "    C compiler version: " $C_VERSION
 echo "     Compilation flags: " $CFLAGS
 echo "                Loader: " $LD
-echo "        Thread support: " $THREADS
+echo "        Thread support: " $STR_THREADS
 echo "           FFI support: " $STR_FFI
 echo "Case sensitive symbols: " $CASE_SENSITIVE
 echo " Control fx parameters: " $CONTROL_FX
