@@ -199,7 +199,8 @@ COMP_LIBS=""
 SYST_LIBS_SHOW=""
 
 ### Check for dynamic loading
-AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
+AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes",
+              AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
 
 if test "X$HAVE_DLOPEN" = "Xyes"
 then
@@ -209,12 +210,12 @@ fi
 ###
 ### Be case sensitive or not
 ###
-AC_ARG_ENABLE(case-insensitive,
-  [AS_HELP_STRING([--enable-case-insensitive],
-                  [case insensitive by default as in R5RS])])
+AC_ARG_ENABLE(case-sensitive,
+  [AS_HELP_STRING([--enable-case-sensitive],
+                  [symbols are case sensitive (enabled by default)])])
 
-case "$enable_case_insensitive" in
-  yes|true|1) DEFAULT_CS=0; CASE_SENSITIVE=no;;
+case "$enable_case_sensitive" in
+  no|false|0) DEFAULT_CS=0; CASE_SENSITIVE=no;;
   *)          DEFAULT_CS=1; CASE_SENSITIVE=yes;;
 esac
 
@@ -493,16 +494,15 @@ fi
 # ----------------------------------------------------------------------
 # Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
-AC_ARG_WITH(control-fast-math,
-       [  --with-control-fast-math  verify  arguments to fx and fl functions are fixnums and flonums],
-       CONTROL_FX="$withval", CONTROL_FX="yes")
+AC_ARG_ENABLE(fast_math_control,
+  [AS_HELP_STRING([--enable-fast-math-control],
+                  [verify arguments to fx and fl functions (enabled by  default)])])
 
-if test "$CONTROL_FX" = "yes"
-then
-    CONTROL_FX_PARAMETERS=1
-else
-    CONTROL_FX_PARAMETERS=0
-fi
+case "$enable_fast_math_control" in
+  no|false|0) CONTROL_FX_PARAMETERS=0; CONTROL_FX="no";;
+  *)          CONTROL_FX_PARAMETERS=1; CONTROL_FX="yes";;
+esac
+
 
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
@@ -802,21 +802,21 @@ echo " "
 echo " "
 echo "SUMMARY"
 echo "*******"
-echo "               System: " $BUILD_OS
-echo "              OS nick: " $OS_NAME_VERSION
-echo "              OS type: " $OS_FLAVOUR
-echo "       Install prefix: " $prefix
-echo "    C compiler binary: " $CC
-echo "   C compiler version: " $C_VERSION
-echo "    Compilation flags: " $CFLAGS
-echo "               Loader: " $LD
-echo "       Thread support: " $THREADS
-echo "          FFI support: " $STR_FFI
-echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
-echo "Control fx parameters: " $CONTROL_FX
-echo "System libraries used: " $SYST_LIBS_SHOW
-echo "   Compiled libraries: " $COMP_LIBS_SHOW
-echo " Documentation update: " $REPORT_ASCIIDOCTOR
+echo "                System: " $BUILD_OS
+echo "               OS nick: " $OS_NAME_VERSION
+echo "               OS type: " $OS_FLAVOUR
+echo "        Install prefix: " $prefix
+echo "     C compiler binary: " $CC
+echo "    C compiler version: " $C_VERSION
+echo "     Compilation flags: " $CFLAGS
+echo "                Loader: " $LD
+echo "        Thread support: " $THREADS
+echo "           FFI support: " $STR_FFI
+echo "Case sensitive symbols: " $CASE_SENSITIVE
+echo " Control fx parameters: " $CONTROL_FX
+echo " System libraries used: " $SYST_LIBS_SHOW
+echo "    Compiled libraries: " $COMP_LIBS_SHOW
+echo "  Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
