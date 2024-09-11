@@ -43,7 +43,7 @@
   (load "test-base64.stk")
   (load "test-box.stk")
   (load "test-regexp.stk")
-  (load "test-ffi.stk")
+  (when (%stklos-has-ffi?) (load "test-ffi.stk"))
   (load "test-r5.stk")
   (load "test-r7rs.stk")
   (load "test-r7rs-lib.stk")

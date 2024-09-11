@@ -13,12 +13,17 @@ four) step process:
     - `--prefix=PATH`: place where the files will be installed (default to `/usr/local`)
     - `--with-provided-gc`: use the provided Boehm GC library
     - `--with-provided-bignum`: use the provided Bignum (GMPlite) library
-    - `--with-gmp-light`: a synonym for `--with-provided-bignum`
     - `--with-provided-regexp`: use the provided Regexp (PCRE) library
     - `--with-provided-ffi:` use the provided FFI library
-    - `--without-control-fast-math`: do not verify that parameters of fx/fl functions are correct fixnums/flonums
-    - `--enable-case-insensitive`: be case insensitive by default as in R5RS
-    - `--enable-threads=TYPE`: choose threading package (value can be 'none' or 'pthreads', the default)
+    - `--with-gmp-light`: a synonym for `--with-provided-bignum`
+
+    By default the following options are enabled, but can be disabled with the following `configure` options
+
+    - `--disable-case-sensitive`: symbols are case insensitive by default (as in R5RS)
+    - `--disable-threads`: disable Posix threads support
+    - `--disable-control-fast-math`: do not verify that parameters of fx/fl functions are correct fixnums/flonums
+    - `--disable-ffi`: disable FFI (Foreign Function Interface) support
+
 
     There are also environment variables that will have effect on how STklos is compiled. These should be passed to the configure script in the `CFLAGS` variable:
 
@@ -37,20 +42,24 @@ four) step process:
     ```
     SUMMARY
     *******
-                   System:  Linux-6.9.7-amd64
-                  OS nick:  LINUX_6_9
-                  OS type:  unix
-          Install prefix :  /opt
-               C compiler:  clang-18
-       C compiler version:  Debian clang version 18.1.8 (9)
-        Compilation flags:  -O3 -Wall
-                   Loader:  ld
-           Thread support:  pthreads
-         Case sensitivity:  true (by default)
-    Control fx parameters:  yes
-    System libraries used:  ffi (3.4.6) pcre2 (10.42) gmp (6.3.0)
-       Compiled libraries:  libgc
-     Documentation update:  yes (since Asciidoctor is installed)
+                    System:  Linux-6.10.9-arch1-1
+                   OS nick:  LINUX_6_10
+                   OS type:  unix
+            Install prefix:  /opt
+         C compiler binary:  clang-18
+        C compiler version:  clang version 18.1.8
+         Compilation flags:  -O3 -Wall -DSTAT_VM
+                    Loader:  ld
+            Thread support:  yes
+               FFI support:  yes
+    Case sensitive symbols:  yes
+     Control fx parameters:  yes
+     System libraries used:  ffi (3.4.6) pcre2 (10.44) gmp (6.3.0)
+        Compiled libraries:  gc
+      Documentation update:  yes (since Asciidoctor is installed)
+
+    If this is correct, you can just type 'make' now at your shell prompt.
+    Otherwise, re-run 'configure' with correct options.
     ```
 
 

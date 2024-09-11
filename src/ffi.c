@@ -496,7 +496,7 @@ static int exec_callback(SCM callback, ...)
  * it is used in the gtk-gtklos-base ScmPkg (a callback can be called
  * with one or two pointers. Hopefully, callbacks were not documened
  * in previous versions of STklos ;-)
- * 
+ *
  * 2021/06/09: This code was used before for GTk support. It doesn't
  * seem useful anymore. It is kept here for reference
  */
@@ -698,12 +698,11 @@ static void error_no_ffi(void)
   STk_error("current system does not support FFI");
 }
 
-
 DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4,
                  (SCM p1, SCM p2, SCM p3, SCM p4))
 { error_no_ffi(); return STk_void;}
 
-DEFINE_PRIMITIVE("make-callback", make_callback, subr3, (SCM p1, SCM p2, SCM p3))
+DEFINE_PRIMITIVE("%make-callback", make_callback, subr3, (SCM p1, SCM p2, SCM p3))
 { error_no_ffi(); return STk_void;}
 
 DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
@@ -724,14 +723,26 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
 
 #endif
 
+DEFINE_PRIMITIVE("%stklos-has-ffi?", has_ffi, subr0, ())
+{
+#ifdef HAVE_FFI
+  return STk_true;
+#else
+  return STk_false;
+#endif
+}
+
+
 /* ======================================================================
  *      INIT  ...
  * ====================================================================== */
 int STk_init_ffi(void)
 {
+  #ifdef HAVE_FFI
   pointer_on_exec_callback = STk_make_Cpointer(exec_callback,
                                                STk_void,
                                                STk_false);
+  #endif
 
   ADD_PRIMITIVE(make_ext_func);
   ADD_PRIMITIVE(make_callback);
@@ -740,5 +751,7 @@ int STk_init_ffi(void)
   ADD_PRIMITIVE(get_symbol_address);
   ADD_PRIMITIVE(get_typed_ext_var);
   ADD_PRIMITIVE(set_typed_ext_var);
+
+  ADD_PRIMITIVE(has_ffi);
   return TRUE;
 }

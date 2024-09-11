@@ -199,7 +199,8 @@ COMP_LIBS=""
 SYST_LIBS_SHOW=""
 
 ### Check for dynamic loading
-AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
+AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes",
+              AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
 
 if test "X$HAVE_DLOPEN" = "Xyes"
 then
@@ -209,20 +210,13 @@ fi
 ###
 ### Be case sensitive or not
 ###
-CASE_SENSITIVE=true
+AC_ARG_ENABLE(case-sensitive,
+  [AS_HELP_STRING([--enable-case-sensitive],
+                  [symbols are case sensitive (enabled by default)])])
 
-AC_ARG_ENABLE(case-insensitive,
-  [AS_HELP_STRING([--enable-case-insensitive],[Be case insensitive by default as in R5RS])],
-  CASE_SENSITIVE=false,
-  CASE_SENSITIVE=true)
-
-case "$CASE_SENSITIVE" in
-  false | 0 |off| yes)
-     DEFAULT_CS=0
-     ;;
-  *)
-     DEFAULT_CS=1
-     ;;
+case "$enable_case_sensitive" in
+  no|false|0) DEFAULT_CS=0; CASE_SENSITIVE=no;;
+  *)          DEFAULT_CS=1; CASE_SENSITIVE=yes;;
 esac
 
 
@@ -232,7 +226,8 @@ esac
 AC_CHECK_LIB(pthread, pthread_create, deflt_threads=pthreads, deflt_threads=none)
 
 AC_ARG_ENABLE(threads,
-  [AS_HELP_STRING([--enable-threads=TYPE],[choose threading package (none,pthreads)])],
+  [AS_HELP_STRING([--enable-threads],
+                  [enable Posix threads support (enabled by default)])],
   THREADS=$enableval,
   THREADS=$deflt_threads)
 
@@ -242,13 +237,15 @@ AC_LANG(C)
 case "$THREADS" in
  no | none | single)
    THREADS=none
+   STR_THREADS="no"
    AC_DEFINE(THREADS_NONE, [], [No thread support])
    ;;
- posix | pthreads)
+ posix | pthreads | yes)
    ### Check for pthreads
    AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS",
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
+   STR_THREADS="yes"
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
    AC_CHECK_FUNCS([pthread_cancel])
    ;;
@@ -434,60 +431,80 @@ echo "*****"
 echo "***** FFI support"
 echo "*****"
 
-# Try to determine if libffi is installed
-if ${PKGCONFIG} --exists libffi ;then
-   HAVE_FFI="yes"
-else
-  AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
-fi
+# Check if the user wants FFI included or not.
+# The autoconf variable AVOID_FFI will be set here to either "yes" or "no".
+# *** If it's set to "no", then the --with-provided-ffi won't even be
+#     verified.
+AC_ARG_ENABLE(ffi,
+       [AS_HELP_STRING([--enable-ffi],
+                       [enable FFI support (enabled by default)])])
 
-# Test if the user wants to force the use of our FFI lib
-AC_ARG_WITH(provided-ffi,
-       [  --with-provided-ffi     use the provided FFI library],
-       PROV_FFI="$withval", PROV_FFI="no")
+case "$enable_ffi" in
+  no|false|0) AVOID_FFI="yes";;
+  *)          AVOID_FFI="no" ;;
+esac
 
-if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
+
+if test "$AVOID_FFI" = "no"
 then
-     echo "... Configuring libffi"
-     (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
-           --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
-     FFI="ffi"
-     FFIINC="-I../ffi/$(./config.guess)/include"
-     FFILIB="../ffi/$(./config.guess)/.libs/libffi.a"
-     COMP_LIBS="libffi $COMP_LIBS"
-else
-     echo "... Using system libffi library"
-     FFI=""
-     if $PKGCONFIG --exists libffi ;then
-       FFIINC=$($PKGCONFIG libffi --cflags)
-       FFILIB=$($PKGCONFIG libffi --libs)
-       FFIVER=$($PKGCONFIG --modversion libffi)
-     else
-       FFIINC="-I/usr/include/ffi"
-       FFILIB="-lffi"
-       DLLIBS="$DLLIBS $FFILIB"
-     fi
-     DLLIBS="$DLLIBS $FFILIB"
-     SYST_LIBS="libffi $SYST_LIBS"
-     SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
-fi
-# We always want FFI. Should be modifiable in the future
-AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
+  # Try to determine if libffi is installed
+  if ${PKGCONFIG} --exists libffi ;then
+     HAVE_FFI="yes"
+  else
+    AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
+  fi
 
+  # Test if the user wants to force the use of our FFI lib
+  AC_ARG_WITH(provided-ffi,
+         [  --with-provided-ffi     use the provided FFI library],
+         PROV_FFI="$withval", PROV_FFI="no")
+
+  if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
+  then
+       echo "... Configuring libffi"
+       (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
+             --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
+       FFI="ffi"
+       FFIINC="-I../ffi/$(./config.guess)/include"
+       FFILIB="../ffi/$(./config.guess)/.libs/libffi.a"
+       COMP_LIBS="libffi $COMP_LIBS"
+  else
+       echo "... Using system libffi library"
+       FFI=""
+       if $PKGCONFIG --exists libffi ;then
+         FFIINC=$($PKGCONFIG libffi --cflags)
+         FFILIB=$($PKGCONFIG libffi --libs)
+         FFIVER=$($PKGCONFIG --modversion libffi)
+       else
+         FFIINC="-I/usr/include/ffi"
+         FFILIB="-lffi"
+         DLLIBS="$DLLIBS $FFILIB"
+       fi
+       DLLIBS="$DLLIBS $FFILIB"
+       SYST_LIBS="libffi $SYST_LIBS"
+       SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
+  fi
+  STR_FFI="yes"
+  # The following "HAVE_FFI" is defined so the compiler will actually
+  # compile the code for it.
+  AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
+else
+  echo "... NOT using FFI"
+  STR_FFI="no"
+fi
 
 # ----------------------------------------------------------------------
 # Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
-AC_ARG_WITH(control-fast-math,
-       [  --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums],
-       CONTROL_FX="$withval", CONTROL_FX="yes")
+AC_ARG_ENABLE(fast_math_control,
+  [AS_HELP_STRING([--enable-fast-math-control],
+                  [verify arguments to fx and fl functions (enabled by  default)])])
 
-if test "$CONTROL_FX" = "yes"
-then
-    CONTROL_FX_PARAMETERS=1
-else
-    CONTROL_FX_PARAMETERS=0
-fi
+case "$enable_fast_math_control" in
+  no|false|0) CONTROL_FX_PARAMETERS=0; CONTROL_FX="no";;
+  *)          CONTROL_FX_PARAMETERS=1; CONTROL_FX="yes";;
+esac
+
 
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
@@ -787,20 +804,21 @@ echo " "
 echo " "
 echo "SUMMARY"
 echo "*******"
-echo "               System: " $BUILD_OS
-echo "              OS nick: " $OS_NAME_VERSION
-echo "              OS type: " $OS_FLAVOUR
-echo "       Install prefix: " $prefix
-echo "    C compiler binary: " $CC
-echo "   C compiler version: " $C_VERSION
-echo "    Compilation flags: " $CFLAGS
-echo "               Loader: " $LD
-echo "       Thread support: " $THREADS
-echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
-echo "Control fx parameters: " $CONTROL_FX
-echo "System libraries used: " $SYST_LIBS_SHOW
-echo "   Compiled libraries: " $COMP_LIBS_SHOW
-echo " Documentation update: " $REPORT_ASCIIDOCTOR
+echo "                System: " $BUILD_OS
+echo "               OS nick: " $OS_NAME_VERSION
+echo "               OS type: " $OS_FLAVOUR
+echo "        Install prefix: " $prefix
+echo "     C compiler binary: " $CC
+echo "    C compiler version: " $C_VERSION
+echo "     Compilation flags: " $CFLAGS
+echo "                Loader: " $LD
+echo "        Thread support: " $STR_THREADS
+echo "           FFI support: " $STR_FFI
+echo "Case sensitive symbols: " $CASE_SENSITIVE
+echo " Control fx parameters: " $CONTROL_FX
+echo " System libraries used: " $SYST_LIBS_SHOW
+echo "    Compiled libraries: " $COMP_LIBS_SHOW
+echo "  Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
