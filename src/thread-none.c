@@ -90,9 +90,8 @@ static unsigned long _bytes_allocated = 0UL;
 #define THREAD_ALLOCATIONS(thr)      _allocations
 #define THREAD_BYTES_ALLOCATED(thr)  _bytes_allocated
 
-void STk_thread_inc_allocs(SCM thr, size_t size)
+void STk_thread_inc_allocs(SCM _UNUSED(thr), size_t size)
 {
-  verify_thread(thr);
   THREAD_ALLOCATIONS(thr)++;
   THREAD_BYTES_ALLOCATED(thr) += size;
 }
