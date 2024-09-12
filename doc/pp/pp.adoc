@@ -1,0 +1,255 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2023-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.fr]
+//    Creation date: 18-Aug-2023 12:22 (eg)
+
+= stklos-pp: a STklos Preprocessor
+:authors: Erick Gallesio
+:email: eg@stklos.net
+:logo: images/dice.png
+:doctype: book
+:source-highlighter: rouge
+:rouge-style: monokai
+:icons: font
+:toc: left
+:toclevels: 2
+:sectnum:
+:xrefstyle: short
+:pdf-style: ../lib/theme/stklos.yml
+:docinfodir: ../lib/theme
+:docinfo: shared
+:nofooter:       // to have reproducible builds
+
+{{load "../lib/adoc-lib.stk"}}
+
+== Introduction
+
+
+The command `stklos-pp` is a simple text preprocessor. It takes a text as
+input and produces a text as output. By itself, `stklos-pp` is language
+agnostic; that means that its input can be in any language (LaTeX, Markdown,
+Asciidoctor, …). Embedded templates in the input file are expressed in
+{{stklos}}, using double curly braces.
+
+Here is as simple example, using the `stklos-pp` command:
+
+```sh
+$ echo "A simple computation: 2 + 3 = \{{+ 2 3}}." | stklos-pp
+A simple computation: 2 + 3 = 5.
+```
+
+As another example, consider the following text file named `fib.txt`
+
+```txt
+{{Include "Resources/fib.txt"}}
+```
+
+Running the command `stklos-pp fib.txt` will produce the following input:
+
+```txt
+{{System "../../src/stklos -I ../../lib ../../utils/stklos-pp Resources/fib.txt"}}
+```
+
+== Variables
+
+=== Variable Definition
+
+`stklos-pp` permits to define variables in several ways. Variables are defined
+in the module `(stklos preproc env)`.
+
+**Definition in Scheme**
+
+A variable can be defined in a document using the standard Scheme `define` special form:
+
+```txt
+\{{define foo 5}}
+The square of foo is \{{* foo foo}}.
+```
+
+
+**Definition from the Command Line**
+
+A variable can also be defined from the command line using the `-D` option of
+the `stklos-pp` command. Note that, in this case, variables are defined as
+strings. You have to convert them if this type is not convenient:
+
+```sh
+$ stklos-pp -D"install-dir: /opt/foo" -D"mode: 0755" <<EOF
+The install directory is \{{install-dir}} and mode is \{{mode}}.
+The mode in decimal is \{{string->number (string-append "#o" mode)}}
+EOF
+The install directory is /opt/foo and mode is 0755
+The mode in decimal is 493
+```
+
+**Frontmatter**
+
+Variables can also be defined in the header of a file. As command line variables,
+variables defined in the header are defined as strings.
+
+Consider the file `fronmatter.txt`:
+
+```markdown
+{{Include "Resources/frontmatter.txt"}}
+```
+
+Running the command ``stklos-pp frontmatter.txt` will produce the following output.
+
+```txt
+{{System "../../src/stklos -I ../../lib ../../utils/stklos-pp Resources/frontmatter.txt"}}
+```
+
+NOTE: As said in the above example, the '---' separators can be
+omitted (in this case, let an empty line after the last variable definition).
+
+
+=== Special Variables
+
+**stklos-pp-version**
+
+When `stkos-pp` starts, there is only one variable defined:
+`stklos-pp-version`. This variable contains a function which returns the
+version of `stklos-pp` as a string.
+
+```txt
+STklos version: \{{short-version}}
+stklos-pp version: \{{stklos-pp-version}}
+```
+
+produces
+
+```txt
+STklos version: {{short-version}}
+stklos-pp version: {{stklos-pp-version}}
+```
+
+
+**process-command**
+
+The `process-command` can be used to specify the program to apply to the whole
+text when `stklos-pp` has built it. If you have set this variable to `pandoc`
+in the file `F.md`, running the command
+
+```sh
+$ stklos-pp F.md
+```
+
+will print the HTML output built by `pandoc` on the prepossessing of file
+`F.md`. Without this variable, you'll have to run something like
+
+
+```sh
+$ stklos-pp F.md | pandoc
+```
+
+**process-args**
+
+This variable permits to collect the (eventual) arguments that must be passed
+to the command defined to `process-command`. For instance, if you use
+`pandoc`, you can define `process-args` to `"--from=markdown --to=latex"`, if
+your text is written in Markdown format and you want a result expressed in LaTeX.
+
+
+
+**template**
+
+The `template` variable permits to specify the two template files that will be
+combined to build the output. If the value of `template` is `T`, the output
+of `stklos-pp` on file `F` will contain:
+
+- the result of processing the file `T-prelude.templ`, followed by
+- the result of processing the file `F`, followed by
+- the result of processing the file `T-postlude.templ`, followed by
+
+For instance, using the file `my-prelude.templ`
+
+
+=== Variables: Full Example
+
+Here, we want to produce an HTML file from a Markdown named `pp-demo.md`
+expressed in Markdown (using GitHub extensions).
+
+**File `pp-demo.md`**
+```markdown
+{{Include "Resources/pp-demo.md"}}
+```
+
+This file states that the template is called `"mymd"`. Hence, we have to define
+the files `mymd-prelude.templ` and `my-postlude.templ`.
+
+**File `mymd-prelude.templ`**
+```html
+{{Include "Resources/mymd-prelude.templ"}}
+```
+
+**File `mymd-postlude.templ`**
+```html
+{{Include "Resources/mymd-postlude.templ"}}
+```
+
+Running the command `stklos-pp pp-demo.md` will produce an HTML file.
+A version of the file is available link:../HTML/pp-demo.html[here].
+
+
+
+== Directives
+
+`stklos-pp` directives are also delimited a double pair of braces. The list of available
+ directives is given below:
+
+=== Directives `Include` and `Include*`
+
+The `\{{Include pathname}}` is replaced by the characters of the file named `pathname`.
+The `\{{Include* pathname}}` is replaced by the result of pre-processing the characters
+of the file named `pathname`.
+
+Suppose, we  have a file named `"included.txt"` which contains
+
+```txt
+{{Include "Resources/included.txt"}}
+```
+
+Using `\{{Include "included.txt"}}` will be replaced by the characters
+
+```txt
+{{Include "Resources/included.txt"}}
+```
+
+whereas `\{{Include* "included.txt"}}` will be replaced by
+
+```txt
+{{Include* "Resources/included.txt"}}
+```
+
+=== Directive `System`
+
+The directive `\{{System shell-command}}` is replaced by the characters of the
+standard output of `shell-command`. For instance, 
+
+```txt
+BEGIN \{{System "cd /tmp; echo -n ${PWD}"}} END
+```
+will produces the following output:
+
+```txt
+BEGIN {{System "cd /tmp; echo -n ${PWD}"}} END
+```
+
+=== Directives `If`, `Else` and `End`
+
+These directives permits to choose the piece of text that must be in the
+output given a (Scheme) boolean value:
+
+```txt
+\{{If (odd? n)}}
+This text is printed since \{{n}} is odd.
+\{{Else}}
+another message
+\{{End}}
+```
+
+Here, the first message is output when `n` is odd; otherwise, the second
+message is printed. Of course, the `\{{Else}`} directive can be omitted when
+no output is not needed when the condition is false.

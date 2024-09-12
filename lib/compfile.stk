@@ -78,7 +78,7 @@ doc>
 
 (define (compile-file input output :key (prepend '() has-prepend?))
 
-  (define (compute-file-informations initial-globals)
+  (define (compute-file-information initial-globals)
     (let ((globs (let loop ((lst (compiler-known-globals))
                             (res '()))
                    (cond
@@ -89,7 +89,7 @@ doc>
                      (else
                       (loop (cdr lst) (cons (car lst)
                                             res)))))))
-      ;; Return informations
+      ;; Return information
       (list :version   (version)
             :globals   globs
             :macros    (file-module-list-expanders))))
@@ -125,7 +125,7 @@ doc>
         ;; Write the header
         (format out "#!/usr/bin/env stklos\n")
         (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
-        (format out "STklos ~S\n" (compute-file-informations globs))
+        (format out "STklos ~S\n" (compute-file-information globs))
 
         (let ((code (assemble (reverse! *code-instr*))))
           (when (compiler:show-assembly-code)

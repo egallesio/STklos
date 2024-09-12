@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,8 @@
 int STk_interactive_debug = 0;
 #endif
 
+int STk_count_allocations = 0;         /* Set it to 1 to have GC accouniting */
+
 #define BSIZEOF(t) ((int) (sizeof(t) * CHAR_BIT))
 
 static void error_bad_string(SCM str)
@@ -56,6 +58,33 @@ char *STk_strdup(const char *s)
 }
 
 
+void* STk_count_malloc(size_t size)
+{
+  STk_thread_inc_allocs(STk_current_thread(), size);
+  return GC_MALLOC(size);
+}
+
+
+void* STk_count_malloc_atomic(size_t size)
+{
+  STk_thread_inc_allocs(STk_current_thread(), size);
+  return GC_MALLOC_ATOMIC(size);
+}
+
+/* Getter and Setter for the count-allocation parameter */
+SCM get_count_allocs(void)
+{
+  return MAKE_BOOLEAN(STk_count_allocations);
+}
+
+SCM set_count_allocs(SCM value)
+{
+  STk_count_allocations = (value != STk_false);
+  return STk_void;
+}
+
+
+
 void STk_add_primitive(struct primitive_obj *o)
 {
   SCM symbol;
@@ -71,8 +100,6 @@ void STk_add_primitive_in_module(struct primitive_obj *o, SCM module)
   symbol = STk_intern(o->name);
   STk_define_variable(symbol, (SCM) o, module);
 }
-
-
 
 
 SCM STk_eval_C_string(const char *str, SCM module)
@@ -93,7 +120,7 @@ SCM STk_read_from_C_string(const char *str)
 
 /*===========================================================================*\
  *
- * Primitives that don't feet anywhere else
+ * Primitives that don't fit anywhere else
  *
 \*===========================================================================*/
 /*
@@ -122,7 +149,7 @@ DEFINE_PRIMITIVE("version", version, subr0, (void))
  * (short-version)
  *
  * Returns a string identifying the current version of the system without
- * its eventual patch number. 
+ * its eventual patch number.
 doc>
 */
 DEFINE_PRIMITIVE("short-version", short_version, subr0, (void))
@@ -201,23 +228,6 @@ DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 }
 
 
-/*
-<doc EXT address-of
- * (address-of obj)
- *
- * Returns the address of the object |obj| as an integer.
-doc>
-*/
-DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
-{
-  char buffer[50];     /* should be sufficient for a while */
-
-  snprintf(buffer, sizeof(buffer),
-           "%lx", (unsigned long) object); /* not very efficient ... */
-  return STk_Cstr2number(buffer, 16L);
-}
-
-
 /*===========================================================================*\
  *
  * GC stuff
@@ -233,6 +243,21 @@ static void GC_warning_handler(char *msg, GC_word arg)
   if (strstr(msg, "Returning NULL")) STk_error("OUT of memory");
 }
 
+static inline int is_GC_allocated_adressp(void *addr)
+{
+  void *base = STk_gc_base(addr);
+  return base && (base == addr);
+}
+
+
+DEFINE_PRIMITIVE("%gc-stats", gc_stats, subr0, (void))
+{
+  // NOTE: For now we just return gc_no
+  struct GC_prof_stats_s stat;
+
+  GC_get_prof_stats(&stat, sizeof(stat));
+  return LIST2(STk_makekey("gc-no"), STk_long2integer(stat.gc_no));
+}
 
 
 void STk_gc_init(void)
@@ -256,6 +281,74 @@ DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
   return STk_void;
 }
 
+
+/*
+<doc EXT address-of address-ref
+ * (address-of obj)
+ * (address-ref n)
+ *
+ * |Address-of| returns the address of the object |obj| as an integer.
+ * |Address-ref| returns the object of which |n| is the address.
+ *
+ * @lisp
+ * (address-of "abc")               =>  140053283366272
+ * (address-of "abc")               =>  140053289472288 ;strings are not eq?
+ *
+ * (address-of 10)                  => 41
+ * (address-of 10)                  => 41
+ *
+ * (address-ref (address-of "xyz")) => "xyz"
+ *
+ * (address-ref 0)                  => error (points to nothing)
+ * @end lisp
+doc>
+*/
+
+void STk_verify_address(unsigned long addr, SCM object)
+{
+  unsigned long tag = addr & 3;
+
+  switch(tag) {
+    case 0:        /* 00 It's a pointer! */
+      if (!is_GC_allocated_adressp((void *) addr))
+        STk_error("bad object address ~s", object);
+      break;
+
+    case 1:
+      break; /* 01 Integers are always OK */
+
+    case 2:        /* 10 Small object (characters) */
+      /* We only allow characters as small objects */
+      if ((addr & 0x7) != 0x6) /* ...110 */
+        STk_error("bad small object address ~s", object);
+      break;
+
+    case 3:        /* 11 small constant */
+      if (addr > (unsigned long) STk_void)  /* #void is the last small constant */
+        STk_error("bad small constant address ~s", object);
+      break;
+  }
+}
+
+DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
+{
+  char buffer[50];     /* should be sufficient for a while */
+
+  snprintf(buffer, sizeof(buffer),
+           "%lx", (unsigned long) object); /* not very efficient ... */
+  return STk_Cstr2number(buffer, 16L);
+}
+
+DEFINE_PRIMITIVE("address-ref", address_ref, subr1, (SCM object))
+{
+  unsigned long addr;
+
+  if (!INTP(object)) STk_error("bad integer ~s", object);
+  addr =  INT_VAL(object);
+
+  STk_verify_address(addr, object);
+  return (SCM) addr;
+}
 
 /*===========================================================================*\
  *
@@ -666,7 +759,9 @@ int STk_init_misc(void)
   ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);
   ADD_PRIMITIVE(address_of);
+  ADD_PRIMITIVE(address_ref);
   ADD_PRIMITIVE(scheme_gc);
+  ADD_PRIMITIVE(gc_stats);
 
   ADD_PRIMITIVE(init_getopt);
   ADD_PRIMITIVE(getopt);
@@ -674,6 +769,9 @@ int STk_init_misc(void)
 
   ADD_PRIMITIVE(uri_parse);
   ADD_PRIMITIVE(str2html);
+
+  STk_make_C_parameter2("%count-allocations", get_count_allocs, set_count_allocs,
+                        STk_STklos_module);
 
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_debug);

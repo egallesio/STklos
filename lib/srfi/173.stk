@@ -50,7 +50,6 @@
 ;;;;
 
 (define-module srfi/173
-  (import (srfi 9))
   (export make-hook
           hook?
           list->hook

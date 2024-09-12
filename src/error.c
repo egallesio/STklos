@@ -2,7 +2,7 @@
  *
  * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -64,7 +64,7 @@ static void print_format(SCM port,char *format, va_list ap)
       switch (*++s) {
         case '%': STk_putc('%', port); break;
 
-        case 'S': STk_putc('`', port); /* FALLTHROUGH */
+        case 'S': STk_putc('\'', port); /* FALLTHROUGH */
         case 's': for (str = va_arg(ap, char *); *str; str++)
                     STk_putc(*str, port);
                   if (*s == 'S') STk_putc('\'', port);
@@ -89,17 +89,15 @@ static void print_format(SCM port,char *format, va_list ap)
     } else if (*s == '~') {
       /* ~ format (CL like) */
       switch (*++s) {
-        case 'A': STk_putc('`', port); /* FALLTHROUGH */
+        case 'A': STk_putc('\'', port); /* FALLTHROUGH */
         case 'a': STk_print(va_arg(ap, SCM), port, DSP_MODE);
                   if (*s == 'A') STk_putc('\'', port);
                   break;
-        case 'W': STk_putc('`', port);  /* FALLTHROUGH */
+        case 'S': /* For errors ~S uses write* also to avoid loops */
+        case 'W': STk_putc('\'', port);  /* FALLTHROUGH */
+        case 's':
         case 'w': STk_print_star(va_arg(ap, SCM), port,WRT_MODE);
-                  if (*s == 'W') STk_putc('\'', port);
-                  break;
-        case 'S': STk_putc('`', port);  /* FALLTHROUGH */
-        case 's': STk_print(va_arg(ap, SCM), port, WRT_MODE);
-                  if (*s == 'S') STk_putc('\'', port);
+                  if (*s == 'W' || *s == 'S') STk_putc('\'', port);
                   break;
         case '~': STk_putc('~', port);  break;
         case '%': STk_putc('\n', port); break;
@@ -274,8 +272,20 @@ void STk_debug(char *format, ...)
   STk_flush(eport);
 }
 
-void STk_gdb(SCM obj)           /* associated to the  gdb write function */
+/*
+ * GDB helper
+ *
+ * Just define this code in your .gdbinit file to print Scheme objects
+ *
+ * define write
+ *    call STk_gdb($arg0)
+ * end
+ */
+void STk_gdb(SCM obj)
 {
-  STk_debug("Object 0x%lx value = ~s", (unsigned long) obj, obj);
+  char buffer[50];
+
+  snprintf(buffer, sizeof(buffer), "%p", obj);
+  STk_debug("Object %s value = ~s", buffer, obj);
 }
 #endif

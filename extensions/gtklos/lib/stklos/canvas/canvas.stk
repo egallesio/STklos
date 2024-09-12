@@ -116,9 +116,9 @@
 
 
 ;;;
-;;; initialize
+;;; initialize-instance
 ;;;
-(define-method initialize ((self <canvas>) initargs)
+(define-method initialize-instance ((self <canvas>) initargs)
   (next-method)
   (let ((root (goo-canvas-get-root-item (slot-ref self 'wid))))
     (cpointer-type-set! root 'goo-canvas-root)

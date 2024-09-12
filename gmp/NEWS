@@ -1,3 +1,4 @@
 07/04/2003: Initial version
 10/28/2009: Replaced GMP subset by MPI
 05/20/2021: Replaced version with wrappers around MPI with mini-gmp
+08/28/2023: Updated mini-gmp version (6.2.0 -> 6.3.0)

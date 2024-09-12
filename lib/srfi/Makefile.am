@@ -1,6 +1,6 @@
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -89,6 +89,7 @@ SRC_STK   = 1.stk   \
             111.stk \
             112.stk \
             113.stk \
+            115.stk \
             116.stk \
             117.stk \
             118.stk \
@@ -133,12 +134,14 @@ SRC_STK   = 1.stk   \
             217.stk \
             219.stk \
             221.stk \
+            222.stk \
             223.stk \
             224.stk \
             227.stk \
             228.stk \
             229.stk \
             230.stk \
+            232.stk \
             233.stk \
             235.stk \
             236.stk \
@@ -199,10 +202,11 @@ SRC_OSTK =  1.ostk   \
             100.ostk \
             111.ostk \
             112.ostk \
+            113.ostk \
+            115.ostk \
             116.ostk \
             117.ostk \
             118.ostk \
-            113.ostk \
             125.ostk \
             127.ostk \
             128.ostk \
@@ -244,12 +248,14 @@ SRC_OSTK =  1.ostk   \
             217.ostk \
             219.ostk \
             221.ostk \
+            222.ostk \
             223.ostk \
             224.ostk \
             227.ostk \
             228.ostk \
             229.ostk \
             230.ostk \
+            232.ostk \
             233.ostk \
             235.ostk \
             236.ostk \
@@ -259,9 +265,9 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c     170.c      175.c      238.c
-SRC_C_STK = 25.stk   27.stk   170.stk    175.stk    238.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)  238.$(SO)
+SRC_C     = 25.c     27.c     170.c      175.c      178.c     238.c
+SRC_C_STK = 25.stk   27.stk   170.stk    175.stk    178.stk   238.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 170.$(SO)  175.$(SO)  178.$(SO) 238.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -271,8 +277,8 @@ BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
-srfilibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfidir       = $(DESTDIR)@SCMDIR@/srfi
+srfilibdir    = $(DESTDIR)@EXECDIR@/srfi
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)
@@ -286,8 +292,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
+	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
+		-I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
+	@SH_LOADER@ @LDFLAGS@ @SH_LOAD_FLAGS@ -o $*.$(SO) $*.o @DLLIBS@
 	@/bin/rm -f $*.o
 
 #======================================================================
@@ -303,6 +310,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 94.ostk: 60.ostk
 95.ostk:  ../scheme/sort.$(SO)
 113.ostk: ../scheme/set.ostk
+115.ostk: ../scheme/regex.ostk
 116.ostk: ../scheme/ilist.$(SO)
 117.ostk: 1.ostk ../scheme/list-queue.ostk
 125.ostk: 128.ostk ../scheme/hash-table.ostk
@@ -337,6 +345,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 116.$(SO): 128.ostk 116-incl.c 116.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
+178.$(SO): 178-incl.c 178.c
 238.$(SO): 238-incl.c 238.c
 
 ../streams/derived.ostk:
@@ -369,8 +378,11 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	(cd ../scheme; $(MAKE) bitwise.ostk)
 ../scheme/vector/@.ostk:
 	(cd ../scheme/vector; $(MAKE) @.ostk)
+../scheme/regex.ostk:
+	(cd ../scheme;  $(MAKE) regexp.ostk)
 
-
+../stklos/itrie.$(SO):
+	(cd ../stklos; $(MAKE) itrie.$(SO))
 #======================================================================
 
 install-data-hook:

@@ -105,10 +105,42 @@
                    (let ((x 7)
                          (z (+ x y)))
                      (* z x))))
+(test "let.3" 10 (let () 10))
+(test "let.4" 20 (let ((x (let ((y 20))
+                            y)))
+                   x))
+
+(test/compile-error "ill-formed let.1"
+                    (let 1 2))
+(test/compile-error "ill-formed let.2"
+                    (let "abc" 2))
+(test/compile-error "ill-formed let.3"
+                    (let #void 1))
+(test/compile-error "ill-formed let.4"
+                    (let))
+(test/compile-error "ill-formed let.5"
+                    (let ((a) 1)))
+(test/compile-error "ill-formed let.6"
+                    (let (() 1)))
+
+
 (test "let*" 70 (let ((x 2) (y 3))
                   (let* ((x 7)
                          (z (+ x y)))
                     (* z x)))  )
+(test/compile-error "ill-formed let*.1"
+                    (let* 1 2))
+(test/compile-error "ill-formed let*.2"
+                    (let* "abc" 2))
+(test/compile-error "ill-formed let*.3"
+                    (let* #void 1))
+(test/compile-error "ill-formed let*.4"
+                    (let*))
+(test/compile-error "ill-formed let*.5"
+                    (let* ((a) 1)))
+(test/compile-error "ill-formed let*.6"
+                    (let* (() 1)))
+
 (test "letrec" '(#t #f) (letrec ((even?
                                   (lambda (n)
                                     (if (zero? n)
@@ -120,6 +152,18 @@
                                         #f
                                         (even? (- n 1))))))
                           (list (even? 88) (odd? 88))))
+(test/compile-error "ill-formed letrec.1"
+                    (letrec 1 2))
+(test/compile-error "ill-formed letrec.2"
+                    (letrec "abc" 2))
+(test/compile-error "ill-formed letrec.3"
+                    (letrec #void 1))
+(test/compile-error "ill-formed letrec.4"
+                    (letrec))
+(test/compile-error "ill-formed letrec.5"
+                    (letrec ((a) 1)))
+(test/compile-error "ill-formed letrec.6"
+                    (letrec (() 1)))
 
 (test "letrec*" 5 (letrec* ((p
                              (lambda (x)
@@ -132,6 +176,19 @@
                             (x (p 5))
                             (y x))
                     y))
+(test/compile-error "ill-formed letrec*.1"
+                    (letrec* 1 2))
+(test/compile-error "ill-formed letrec*.2"
+                    (letrec* "abc" 2))
+(test/compile-error "ill-formed letrec*.3"
+                    (letrec* #void 1))
+(test/compile-error "ill-formed letrec*.4"
+                    (letrec*))
+(test/compile-error "ill-formed letrec*.5"
+                    (letrec* ((a) 1)))
+(test/compile-error "ill-formed letrec*.6"
+                    (letrec* (() 1)))
+
 ;;;
 ;;; let-values
 ;;;

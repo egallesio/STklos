@@ -152,60 +152,8 @@ void STk_srfi_144_define_constants(SCM module) {
     DEFLOCONST("fl-gamma-2/3",tgamma(2.0/3.0), module);
 
     DEFLOCONST("fl-greatest", DBL_MAX, module);
-
-/* DBL_MIN is the least NORMAL positive number represented in IEEE format.
-   DBL_TRUE_MIN is the least SUBNORMAL positive number: the one that, when
-   divided by 2, is equal to zero.
-   Some platforms may not have DBL_TRUE_MIN defined (at this time, OpenBSD
-   doesn't), so we calculate DBL_TRUE_MIN.
-
-   Remark I: Using IEEE 754, the representations of DBL_MIN and DBL_TRUE_MIN
-   are as follows.
-
-   DBL_MIN:
-   [ 0 | 00000000001 | 0000000000000000000000000000000000000000000000000000 ]
-   Signal = 0, Exponent = 1, Mantissa = 0.
-
-   DBL_MIN / 2.0:
-   [ 0 | 00000000000 | 1000000000000000000000000000000000000000000000000000 ]
-   Signal = 0, Exponent = 0, Mantissa = 2^52.
-
-   DBL_MIN / 4.0:
-   [ 0 | 00000000000 | 0100000000000000000000000000000000000000000000000000 ]
-   Signal = 0, Exponent = 0, Mantissa = 2^51.
-
-   DBL_TRUE_MIN:
-   [ 0 | 00000000000 | 0000000000000000000000000000000000000000000000000001 ]
-   Signal = 0, Exponent = 0, Mantissa = 1.
-
-   Each time we divide DBL_MIN by 2.0, we do a right shift on the number.
-   Eventually, it will become zero.
-
-   Note that the first time that DBL_MIN is divided by zero already results in
-   a subnormal number (the exponent becomes zero) -- because DBL_MIN is
-   indeed the least *normal* number.
-
-   Remark II: if we were to assume that numbers are always represented using
-   IEEE format, we could just take positive zero, set its first bit, and
-   that would be the same as DBL_TRUE_MIN. But we'll be more careful and
-   calculate it, dividing DBL_MIN by 2 successfully until it is zero.
-
-   -- jpellegrini          */
-#ifdef DBL_TRUE_MIN
-    DEFLOCONST("fl-least", DBL_TRUE_MIN, module);
-#else
-    {
-	double x = DBL_MIN;
-	double res = x;
-	while (1) {
-	    if (x == 0.0) break;
-	    res = x;
-	    x = x / 2.0;
-	}
-        DEFLOCONST("fl-least", res, module);
-    }
-#endif
-
+    DEFLOCONST("fl-least", STk_dbl_true_min(), // (eventually computed)  DBL_TRUE_MIN
+               module); 
 
     DEFLOCONST("fl-epsilon", DBL_EPSILON, module);
 #ifdef FP_FAST_FMA
@@ -301,7 +249,8 @@ DEFINE_PRIMITIVE("flnormalized-fraction-exponent", srfi_144_flnormalized_fractio
 DEFINE_PRIMITIVE("flsign-bit", srfi_144_flsign_bit, subr1, (SCM x))
 {
     ensure_fl(x);
-    return (MAKE_INT(signbit(REAL_VAL(x))));
+    /* use a comparison to be sure that result is 0 or 1 (tcc returns 0 or 128) */
+    return (MAKE_INT(signbit(REAL_VAL(x))!=0));
 }
 
 
@@ -678,7 +627,7 @@ DEFINE_PRIMITIVE("fl-",srfi_144_sub,vsubr,(int argc, SCM *argv))
 {
     if (argc==0) STk_error("expects at least one argument");
     ensure_fl(*argv);
-    if (argc==1) return double2real( 0.0 - REAL_VAL(*argv));
+    if (argc==1) return double2real(-REAL_VAL(*argv));
 
     register double res = REAL_VAL(*argv--);
     argc--;

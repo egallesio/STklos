@@ -54,32 +54,19 @@
   }
 #endif /* !SHORT_DBG_HDRS */
 
-#ifdef LINT2
-  long GC_random(void)
-  {
-    static unsigned seed = 1; /* not thread-safe */
-
-    /* Linear congruential pseudo-random numbers generator.     */
-    seed = (seed * 1103515245U + 12345) & GC_RAND_MAX; /* overflow is ok */
-    return (long)seed;
-  }
-#endif
-
 #ifdef KEEP_BACK_PTRS
 
-#ifdef LINT2
-# define RANDOM() GC_random()
-#else
-# include <stdlib.h>
-# define GC_RAND_MAX RAND_MAX
+  /* Use a custom trivial random() implementation as the standard   */
+  /* one might lead to crashes (if used from a multi-threaded code) */
+  /* or to a compiler warning about the deterministic result.       */
+  static int GC_rand(void)
+  {
+    static GC_RAND_STATE_T seed;
 
-# if defined(__GLIBC__) || defined(SOLARIS) \
-     || defined(HPUX) || defined(IRIX5) || defined(OSF1)
-#   define RANDOM() random()
-# else
-#   define RANDOM() (long)rand()
-# endif
-#endif /* !LINT2 */
+    return GC_RAND_NEXT(&seed);
+  }
+
+# define RANDOM() (long)GC_rand()
 
   /* Store back pointer to source in dest, if that appears to be possible. */
   /* This is not completely safe, since we may mistakenly conclude that    */
@@ -108,7 +95,6 @@
   /* and *offset_p.                                                     */
   /*   source is root ==> *base_p = address, *offset_p = 0              */
   /*   source is heap object ==> *base_p != 0, *offset_p = offset       */
-  /*   Returns 1 on success, 0 if source couldn't be determined.        */
   /* Dest can be any address within a heap object.                      */
   GC_API GC_ref_kind GC_CALL GC_get_back_ptr_info(void *dest, void **base_p,
                                                   size_t *offset_p)
@@ -136,10 +122,10 @@
         ptr_t target = *(ptr_t *)bp;
         ptr_t alternate_target = *(ptr_t *)alternate_ptr;
 
-        if ((word)alternate_target >= (word)GC_least_plausible_heap_addr
-            && (word)alternate_target <= (word)GC_greatest_plausible_heap_addr
-            && ((word)target < (word)GC_least_plausible_heap_addr
-                || (word)target > (word)GC_greatest_plausible_heap_addr)) {
+        if ((word)alternate_target > GC_least_real_heap_addr
+            && (word)alternate_target < GC_greatest_real_heap_addr
+            && ((word)target <= GC_least_real_heap_addr
+                || (word)target >= GC_greatest_real_heap_addr)) {
             bp = alternate_ptr;
         }
       }
@@ -163,16 +149,17 @@
   GC_API void * GC_CALL GC_generate_random_heap_address(void)
   {
     size_t i;
-    word heap_offset = RANDOM();
+    word heap_offset = (word)RANDOM();
 
-    if (GC_heapsize > GC_RAND_MAX) {
+    if (GC_heapsize > (word)GC_RAND_MAX) {
         heap_offset *= GC_RAND_MAX;
-        heap_offset += RANDOM();
+        heap_offset += (word)RANDOM();
     }
     heap_offset %= GC_heapsize;
         /* This doesn't yield a uniform distribution, especially if     */
-        /* e.g. RAND_MAX = 1.5* GC_heapsize.  But for typical cases,    */
+        /* e.g. RAND_MAX is 1.5*GC_heapsize.  But for typical cases,    */
         /* it's not too bad.                                            */
+
     for (i = 0;; ++i) {
         size_t size;
 
@@ -1075,7 +1062,7 @@ static void store_old(void *obj, GC_finalization_proc my_old_fn,
 {
     if (0 != my_old_fn) {
       if (my_old_fn == OFN_UNSET) {
-        /* register_finalizer() failed; (*ofn) and (*ocd) are unchanged. */
+        /* GC_register_finalizer() failed; (*ofn) and (*ocd) are unchanged. */
         return;
       }
       if (my_old_fn != GC_debug_invoke_finalizer) {

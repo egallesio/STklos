@@ -1,7 +1,7 @@
 ;;;;
 ;;;; runtime.stk        -- Stuff necessary for bootstaping the system
 ;;;;
-;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -58,14 +58,14 @@
 (define cddddr (lambda (x) (%cxr x #:dddd)))
 
 (define (map* fn . l)           ; A map which accepts dotted lists (arg lists
-  (cond                         ; must be "isomorph"
+  (cond                         ; must be "isomorph")
    ((null? (car l)) '())
    ((pair? (car l)) (cons (apply fn      (map car l))
                           (apply map* fn (map cdr l))))
    (else            (apply fn l))))
 
 (define (for-each* fn . l)      ; A for-each which accepts dotted lists (arg lists
-  (cond                         ; must be "isomorph"
+  (cond                         ; must be "isomorph")
    ((null? (car l)) '())
    ((pair? (car l)) (apply fn (map car l)) (apply for-each* fn (map cdr l)))
    (else            (apply fn l))))
@@ -116,6 +116,7 @@
  * (set! (vector-ref x i) v)     == (vector-set! x i v)!
  * (set! (slot-ref x 'name) v)   == (slot-set! x 'name v)
  * (set! (struct-ref x 'name) v) == (struct-set! x 'name v)
+ * (set! (list-ref x i) v)       == (list-set! x i v)
  * @end lisp
  * Furhermore, Parameter Objects (see _<<_parameter_objects>>_) are
  * their own setter:
@@ -150,6 +151,7 @@ doc>
 (set! (setter string-ref)       string-set!)
 (set! (setter slot-ref)         slot-set!)
 (set! (setter struct-ref)       struct-set!)
+(set! (setter list-ref)         list-set!)
 
 ;; ----------------------------------------------------------------------
 ;;      symbol-append
@@ -166,6 +168,29 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;      parameters
 ;; ----------------------------------------------------------------------
+;; ----------------------------------------------------------------------
+;; define-parameter
+;; ----------------------------------------------------------------------
+#|
+<doc EXT-SYNTAX define-parameter
+ * (define-parameter var val)
+ * (define-parameter var val thunk)
+ *
+ * This form is a shortcut to define a new parameter named |var|. It also adds
+ * a name to the created parameter object, which can be useful for debugging.
+doc>
+|#
+(define-macro (define-parameter name . args)
+  (if (<= 1 (length args) 2)
+      (let ((tmp (gensym 'param)))
+        `(define ,name (let ((,tmp (make-parameter ,@args)))
+                         (%set-parameter-name! ,tmp ',name)
+                         ,tmp)))
+      (syntax-error 'define-parameter
+               "bad number of arguments (must be 2 or 3)")))
+
+
+
 #|
 <doc EXT stklos-debug-level
  * (stklos-debug-level)
@@ -176,15 +201,15 @@ doc>
  * |stklos(1)| command.
 doc>
 |#
-(define stklos-debug-level
-  (make-parameter 0))
+(define-parameter stklos-debug-level 0
+  (lambda (x)
+    (if (integer? x) x (error 'stklos-debug-level "bad integer" x))))
 
 ;; ----------------------------------------------------------------------
 ;;      management of globals ...
 ;; ----------------------------------------------------------------------
 ;; This should be in compiler module but it a nightmare with bootstrap.
-(define compiler-known-globals
-  (make-parameter '()))
+(define-parameter compiler-known-globals '())
 
 (define (register-new-global! symbol)
   (let ((lst (compiler-known-globals)))
@@ -232,3 +257,7 @@ doc>
     (display (apply format fmt args) out)
     (display  "\x1b;[0m" out)
     (newline out)))
+
+(define (%trace . l)
+  (when (> (stklos-debug-level) 0)
+    (apply %debug l)))

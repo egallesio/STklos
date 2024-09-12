@@ -27,3 +27,6 @@
 (define-module srfi/9
   (import (only |SCHEME| define-record-type))
   (export define-record-type))
+
+(provide "srfi/9")
+

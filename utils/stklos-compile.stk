@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@
     ;; Skip the symbol STklos
     (read in)
 
-    ;; Write file informations (information is not used for now)
+    ;; Write file information (information is not used for now)
     (let ((info (read in))
           (str  (open-output-string)))
       (write info str)
@@ -175,15 +175,19 @@
         (exit 0))
 
      "\nCompiler flags (option -F)"
-     "  They are of the form +xxx or -xxx separated by commas, such as"
-     "      -compiler-flags '+line-info,+show-instructions,-time-display'"
+     "   Flags are separated by commas, booleans flags must be prefixed by '+' or  '-'"
+     "   Example:"
+     "      -compiler-flags='+line-info,-time-display,unroll-iterations=3'"
      "  Possible flags:"
      "    line-info          Insert line numbers in generated file (as -l option)"
+     "    show-instructions  Show instructions in generated file (as -S option)"
      "    time-display       Print file compilation time"
      "    keep-formals       Keep formal arguments in closures"
      "    keep-source        Keep source code in closures"
      "    inline-usuals      Inline usual functions"
-     "    show-instructions  Show instructions in generated file (as -S option)"
+     "    source-rewrite     Permit source rewrite/simplification"
+     "    unroll-iterations  Set the number of iterations to be unrolled"
+     "    peephole-optimizer Use peephole optimizer"
 
      (else
       (cond

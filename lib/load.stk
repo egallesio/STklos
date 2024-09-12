@@ -1,7 +1,7 @@
 ;;;;
 ;;;; load.stk   -- Extended load function
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
 ;;;;
 
-(export build-path-from-shell-variable
+(export build-path-from-shell-variable install-path
         load-path load-suffixes load-verbose current-loading-file
         try-load load
         find-path
@@ -34,6 +34,7 @@
         autoload
 
         ;; FIXME
+        %guess-pathname
         %stklos-conf-dir
         %stklos-conf-file
         %try-load-conditions
@@ -50,10 +51,15 @@
 ;;
 ;; stklos-conf-file: returns an absolute name for the given configuration file
 ;;
-(define %stklos-conf-dir
-  (make-parameter (or (getenv "STKLOS_CONFDIR")
-                      (make-path (getenv "HOME") ".stklos"))
-                  expand-file-name))
+(define-parameter %stklos-conf-dir
+  (let ((old-path (make-path (getenv "HOME") ".stklos"))
+        (xdg-conf (getenv "XDG_CONFIG_HOME")))
+    (or (getenv "STKLOS_CONFDIR")
+        (if (file-exists? old-path)
+            old-path
+            (make-path (or xdg-conf "~/.config")
+                       "stklos"))))
+  expand-file-name)
 
 (define (%stklos-conf-file name)
   (make-path (%stklos-conf-dir) name))
@@ -90,13 +96,7 @@ doc>
 (set! *load-path*
       (let ((user-path (build-path-from-shell-variable "STKLOS_LOAD_PATH")))
         (if (null? user-path)
-            (let ((prefix  (%library-prefix))
-                  (release (short-version)))
-              (list "."
-                    (%stklos-conf-file (make-path "pkg" "lib"))
-                    (%stklos-conf-file "ext")
-                    (make-path prefix "lib"   "stklos" release)
-                    (make-path prefix "share" "stklos" release)))
+            (list "." (%library-prefix 'lib) (%library-prefix 'data))
             user-path)))
 
 #|
@@ -119,19 +119,18 @@ doc>
  * current list of paths.
 doc>
 |#
-(define load-path
-  (make-parameter *load-path*
-                  (lambda (new-path)
-                    ;; Sanity check
-                    (unless (list? new-path)
-                      (error 'load-path "bad list of path names ~S" new-path))
-                    (for-each (lambda (x)
-                                (unless (string? x)
-                                  (error 'load-path "bad path name ~S" x)))
-                              new-path)
-                    ;; Set the load path
-                    (set! *load-path* new-path)
-                    new-path)))
+(define-parameter load-path *load-path*
+  (lambda (new-path)
+    ;; Sanity check
+    (unless (list? new-path)
+      (error 'load-path "bad list of path names ~S" new-path))
+    (for-each (lambda (x)
+                (unless (string? x)
+                  (error 'load-path "bad path name ~S" x)))
+              new-path)
+    ;; Set the load path
+    (set! *load-path* new-path)
+    new-path))
 
 #|
 <doc EXT load-suffixes
@@ -145,19 +144,18 @@ doc>
  * until the file can be loaded.
 doc>
 |#
-(define load-suffixes
-  (make-parameter *load-suffixes*
-                  (lambda (new)
-                    ;; Sanity check
-                    (unless (list? new)
-                      (error 'load-path "bad list of suffixes ~S" new))
-                    (for-each (lambda (x)
-                                (unless (string? x)
-                                  (error 'load-path "bad path name ~S" x)))
-                              new)
-                    ;; Set the load suffixes
-                    (set! *load-suffixes* new)
-                    new)))
+(define-parameter load-suffixes *load-suffixes*
+  (lambda (new)
+    ;; Sanity check
+    (unless (list? new)
+      (error 'load-path "bad list of suffixes ~S" new))
+    (for-each (lambda (x)
+                (unless (string? x)
+                  (error 'load-path "bad path name ~S" x)))
+              new)
+    ;; Set the load suffixes
+    (set! *load-suffixes* new)
+    new))
 
 #|
 <doc EXT load-verbose
@@ -170,20 +168,53 @@ doc>
  * is set to `#f`, no message is printed.
 doc>
 |#
-(define load-verbose
-  (make-parameter *load-verbose*
-                  (lambda (x) (set! *load-verbose* (and x #t)) *load-verbose*)))
+(define-parameter load-verbose *load-verbose*
+  (lambda (x) (set! *load-verbose* (and x #t)) *load-verbose*))
 
 
 #|
 <doc EXT current-loading-file
  * (current-loading-file)
  *
- * Returns the path of the file that is currently being load.
+ * Returns the path of the file that is currently being loaded.
 doc>
 |#
-(define current-loading-file
-  (make-parameter #f))
+(define-parameter current-loading-file #f)
+
+
+
+#|
+<doc EXT install-path
+ * (install-path)
+ * (install-path key)
+ *
+ * Returns the list of the installation directories chosen when {{stklos}} was
+ * configured. Without parameter, |install-path| returns the path of all
+ * configured directories. When |key| is provided, only the corresponding path is
+ * returned. |Key| can be:
+ *
+ * - `#:libdir`  (directory for architecture specific installed files)
+ * - `#:datadir` (directory for portable installed files)
+ * - `#:docdir`  (directory for installed documentation)
+ * - `#:htmldir` (directory for installed HTML documentation)
+ * - `#:pdfdir`  (directory for installed PDF documentation)
+doc>
+|#
+;; NOTE: placed here because other returnning path functions are here, but this
+;; function is not really related to load.
+(define (install-path :optional key)
+  (let ((dirs (key-get (%stklos-configure) #:dirs #f)))
+    (unless dirs
+      (error 'install-path "cannot find configuration description"))
+    (if key
+        (begin
+          (unless (keyword? key)
+            (error 'install-path "bad keyword ~S" key))
+          (let ((val (key-get dirs key #f)))
+            (unless val
+              (error 'install-path "cannot find directory for key ~S" key))
+            val))
+        dirs)))
 
 
 ;=============================================================================
@@ -366,7 +397,7 @@ doc>
 (define provided?       #f)
 (define require/provide #f)
 
-(define warning-when-not-provided (make-parameter #t))
+(define-parameter warning-when-not-provided #t)  ;; FIXME: document it
 
 
 #| HACK: FIXME:
@@ -411,8 +442,7 @@ doc>
 
       (unless (member what provided)
         (let* ((path (if lib-only?
-                         (list (make-path (%library-prefix) "share" "stklos"
-                                          (short-version)))
+                         (list (%library-prefix 'data))
                          (load-path)))
                (suff (load-suffixes))
                (file (%rewrite-require-spec what path suff)))
@@ -540,4 +570,3 @@ doc>
               symbols))))
 
 ; LocalWords:  repl autoload prepended
-

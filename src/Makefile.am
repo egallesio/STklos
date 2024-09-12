@@ -25,25 +25,15 @@
 CC	   	 = @CC@
 AM_CFLAGS	 = @STKCFLAGS@
 
-# In order to use strip when cross-compiling, we need it to be settable
-# as an env variable. Setting it in configure.ac doesn't seem to make the
-# desired effect, so we just do this simple conditional assignment here.
-# -- jpellegrini
-STRIP         = @STRIPCMD@
-
-
 STKLOS_BINARY ?= ./stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 
 
-bindir      = $(prefix)/bin
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
-extraincdir = $(prefix)/include/@PACKAGE@
-
+extraincdir     = $(DESTDIR)@INCLUDEDIR@
+extrainc_DATA   = stklos.h extraconf.h stklosconf.h socket.h fport.h
 
 bin_PROGRAMS    = stklos
-#scheme_DATA     = boot.img
-extrainc_DATA   = stklos.h extraconf.h stklosconf.h socket.h fport.h
+
 
 DOCDB	        = DOCDB
 BASEDIR         = ..
@@ -118,10 +108,8 @@ generate-git-info:
 
 
 install-exec-hook:
-	@echo "STRIP command: $$STRIP"
-	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi;
-	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
-	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
+	mv $(bindir)/stklos $(bindir)/stklos-@VERSION@
+	ln -s stklos-@VERSION@ $(bindir)/stklos
 
 
 doc:  $(DOCDB)
@@ -137,7 +125,7 @@ distclean: clean
 
 
 uninstall-hook:
-	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@
+	rm -f $(DESTDIR)$(bindir)/stklos-@VERSION@
 	rmdir $(extraincdir) || true
 
 

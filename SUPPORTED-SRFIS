@@ -77,6 +77,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
     - SRFI-113: Sets and Bags
+    - SRFI-115: Scheme Regular Expressions
     - SRFI-116: Immutable List Library
     - SRFI-117: Queues based on lists
     - SRFI-118: Simple adjustable-size strings
@@ -110,6 +111,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-174: POSIX Timespecs
     - SRFI-175: ASCII character library
     - SRFI-176: Version flag
+    - SRFI-178: Bitvector library
     - SRFI-180: JSON
     - SRFI-185: Linear adjustable-length strings
     - SRFI-189: Maybe and Either: optional container types
@@ -126,12 +128,14 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda
     - SRFI-221: Generator/accumulator sub-library
+    - SRFI-222: Compound objects
     - SRFI-223: Generalized binary search procedures
     - SRFI-224: Integer Mappings
     - SRFI-227: Optional Arguments
     - SRFI-228: A further comparator library
     - SRFI-229: Tagged Procedures
     - SRFI-230: Atomic Operations
+    - SRFI-232: Flexible Curried Procedures
     - SRFI-233: INI files
     - SRFI-235: Combinators
     - SRFI-236: Evaluating expressions in an unspecified order

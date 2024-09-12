@@ -11,28 +11,28 @@ directory is provided here, to avoid the copy of full GMP (which is
 quite large). Note however that mini-gmp is far less efficient than
 the full version counterpart.
 
-  - Version: 6.2.1 (the mini-gmp included in it)
+  - Version: 6.3.0 (the mini-gmp included in it)
   - License: LGPL
   - Home Page: https://gmplib.org/
 
 
 GC: The Boehm's conservative garbage collector for C and C++
 ============================================================
-    - Version: 8.2.2
+    - Version: 8.2.6
     - License: Free (BSD-like)
     - Home Page: https://www.hboehm.info/gc/
 
 
 PCRE2: Perl-Compatible Regular Expression library
 ================================================
-    - Version: 10.42
+    - Version: 10.44
     - License: BSD
     - Home: http://www.pcre.org/
 
 
 libffi - a portable foreign function interface library
 ======================================================
-        - Version 3.4.4
+        - Version 3.4.6
         - License: Free (BSD like)
         - Home Page: https://sourceware.org/libffi/
 

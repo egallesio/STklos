@@ -210,7 +210,7 @@
   #f)
 
 
-(define-method initialize ((self <gtk-widget>) initargs)
+(define-method initialize-instance ((self <gtk-widget>) initargs)
   ;; Initialize %data slot as soon as possible
   (slot-set! self '%data '())
   (realize-widget self initargs)

@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,10 +23,6 @@
  *    Creation date:  1-Mar-2000 19:51 (eg)
  */
 
-// INLINER values
-// Voir FIX:
-
-
 #include "stklos.h"
 #include "object.h"
 #include "vm.h"
@@ -36,28 +32,60 @@
 // #define DEBUG_VM
 /* #define STAT_VM  */
 
+/* STATISTICS GATHERING:
+   =====================
+
+   * couple_instr[a][b] will count the number of times instructions
+     [a,b] show up consecutively in bytecode.
+
+   * cpt_inst[a] will count the number of occurrences of instrution a
+     individually.
+
+   * time_inst[a] will count the time spent on instruction a.
+
+   The function tick() will be called after each VM iteration in order
+   to update the statistics (see the definitions for the NEXT macro
+   below, and also the end of the switch/case).  */
 #ifdef STAT_VM
-#  define DEBUG_VM
 static int couple_instr[NB_VM_INSTR][NB_VM_INSTR];
 static int cpt_inst[NB_VM_INSTR];
+static double time_inst[NB_VM_INSTR];
+static int collect_stats = 0;
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time);
 #endif
 
 #ifdef DEBUG_VM
 static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
+/*  We compile conditionally: if __GNUC__ is defined and we're not
+    debugging the VM, we use computed GOTOs, otherwise a standard
+    switch statement.
 
+    Also, for the computed GOTO code, we define "NEXT" (which will be
+    executed *after* each instruction) to also do some accounting if
+    STAT_VM is defined. */
 #if defined(__GNUC__) && !defined(DEBUG_VM)
    /* Use computed gotos to have better performance */
 #  define USE_COMPUTED_GOTO
 #  define CASE(x)       lab_##x:
-#  define NEXT          goto *jump_table[fetch_next()]
+#  if defined(STAT_VM)
+#    define NEXT          { if (collect_stats)                           \
+                              tick(byteop, &previous_op, &previous_time); \
+                            byteop = fetch_next();                       \
+                            goto *jump_table[byteop]; }
+#  else
+#    define NEXT          goto *jump_table[fetch_next()];
+#endif
 #else
    /* Standard C compiler. Use the classic switch statement */
 #  define CASE(x)       case x:
-#  define NEXT          continue;/* Be sure to not use continue elsewhere */
+#  define NEXT          goto VM_LOOP_TOP /* NOT continue, as it interacts badly with
+                                            the do{...}while(0) guards. */
 #endif
 
+/* NEXT0: the instruction left zero results
+   NEXT1: the instruction left a result.     */
 #define NEXT0           do{vm->val = STk_void; vm->valc = 0; NEXT;}while(0)
 #define NEXT1           do{vm->valc = 1; NEXT;}while(0)
 
@@ -90,6 +118,93 @@ static inline void set_signal_mask(sigset_t mask)
 
 /*===========================================================================*\
  *
+ *                              G L O B A L S
+ *
+\*===========================================================================*/
+
+/*
+ * All the global variables values of a program (from all modules) are stored
+ * in the global_store array. The global variable names of a module are
+ * stored in a module hashtable (see hash.c). All the names with same hash
+ * value are stored in a A-list of the form ((foo . i1) (bar . i2) ...) where
+ * the value associated to a key it an integer (the index where the variable
+ * is stored in STk_global_store).
+ */
+#define GLOBAL_STORE_INIT_SIZE 3000 // ~3000 symbols used when we are in REPL
+
+SCM **STk_global_store; /* The store for all global variables */
+
+int STk_reserve_store(void)
+{
+  static int global_store_len  = GLOBAL_STORE_INIT_SIZE;
+  static int global_store_used = 0;
+  MUT_DECL(store_lock);
+
+  int res; // Build result in the mutex lock section
+
+  MUT_LOCK(store_lock);
+
+  if (global_store_used >= global_store_len) { /* resize the checked  array */
+    // fprintf(stderr, "**** Resizing storage from %d to %d\n", global_store_len,
+    //                  global_store_len + global_store_len/2);
+
+    global_store_len += global_store_len / 2;
+    STk_global_store  = STk_must_realloc(STk_global_store,
+                                         global_store_len * sizeof(SCM*));
+  }
+  res = global_store_used++;
+
+  MUT_UNLOCK(store_lock);
+  return res;
+}
+
+
+SCM STk_global_store_define(SCM descr, SCM var, SCM value)
+{
+  // descr is
+  //  - NULL if variable var was not already defined
+  //  - a list of the form (var . index) otherwise where index locates the
+  //   index of the value in STk_global_store array
+  // return value is a filled descriptor
+
+  if (!descr) {
+    /* Define a new variable (not defined before) */
+    descr = STk_cons(var, MAKE_INT(STk_reserve_store()));
+  } else {
+    /* It's a redefinition, not a new binding, clear the CONST bit */
+    BOXED_INFO(descr) &= (~CONS_CONST);
+
+    /* If variable was an alias, unalias it. */
+    if (BOXED_INFO(descr) & CONS_ALIAS) {
+      /* We redefine an alias to a new value */
+      CDR(descr) = MAKE_INT(STk_reserve_store());
+      BOXED_INFO(descr)  &= ~CONS_ALIAS;
+    }
+  }
+
+  /* Finally, set the variable to the given value */
+  vm_global_set(descr, value);
+  return descr;
+}
+
+SCM STk_global_store_alias(SCM descr, SCM v, SCM old)
+{
+  if (descr) {
+    /* Variable already exists. Change its index*/
+    CDR(descr) = old;
+  } else {
+    /* Enter the new variable in table */
+    descr = STk_cons(v, old);
+  }
+  /* Retain that we have an alias (and that this symbol is read-only) */
+  BOXED_INFO(descr) |= (CONS_CONST | CONS_ALIAS);
+
+  return descr;
+}
+
+
+/*===========================================================================*\
+ *
  *                      V M   S T A C K   &   C O D E
  *
 \*===========================================================================*/
@@ -102,11 +217,11 @@ static inline void set_signal_mask(sigset_t mask)
                          ((SCM*)(a) < &vm->stack[vm->stack_len]))
 
 /* ==== Code access macros ==== */
-#define fetch_next()    (*(vm->pc)++)
-#define fetch_const()   (vm->constants[fetch_next()])
-#define look_const()    (vm->constants[*(vm->pc)])
-#define fetch_global()  (*(checked_globals[(unsigned) fetch_next()]))
-
+#define fetch_next()           (*(vm->pc)++)
+#define fetch_const()          (vm->constants[fetch_next()])
+#define look_const()           (vm->constants[*(vm->pc)])
+#define fetch_global()         (STk_global_store[(unsigned) fetch_next()])
+#define global_var_index(ref)  ((unsigned)INT_VAL(CDR(ref)))
 
 
 /*===========================================================================*\
@@ -252,12 +367,6 @@ vm_thread_t *STk_allocate_vm(int stack_size)
  *                       M i s c .
  */
 
-#define CHECK_GLOBAL_INIT_SIZE  50
-static SCM** checked_globals;
-static int   checked_globals_len  = CHECK_GLOBAL_INIT_SIZE;
-static int   checked_globals_used = 0;
-MUT_DECL(global_lock);          /* the lock to access checked_globals */
-
 
 
 #define FIRST_BYTE(n)  ((n) >> 8)
@@ -313,10 +422,15 @@ typedef SCM (*primv)(int,SCM*);
 
 
 
-#define REG_CALL_PRIM(name) do{                           \
-  extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
-  ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);      \
-}while(0)
+#define REG_CALL_PRIM(name) do{                             \
+    extern struct primitive_obj CPP_CONCAT(STk_o_, name);   \
+    save_cur_proc         = ACT_SAVE_PROC(vm->fp);          \
+    ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);      \
+  }while(0)
+
+#define UNREG_CALL_PRIM() do{ ACT_SAVE_PROC(vm->fp) = save_cur_proc; }while(0)
+
+
 
 
 #define RETURN_FROM_PRIMITIVE() do{             \
@@ -395,13 +509,13 @@ static void patch_environment(vm_thread_t *vm)
 
 static void error_bad_arity(SCM func, int arity, int16_t given_args, vm_thread_t *vm)
 {
-   ACT_SAVE_PROC(vm->fp) = func;
+  ACT_SAVE_PROC(vm->fp) = func;
   if (arity >= 0)
     STk_error("%d argument%s required in call to ~S (%d provided)",
               arity, ((arity>1)? "s": ""), func, given_args);
   else
     STk_error("~S requires at least %d argument%s (%d provided)",
-              func, -arity-1, ((arity>1)? "s" : ""), given_args);
+              func, -arity-1, ((-arity-1) > 1 ? "s" : ""), given_args);
 }
 
 
@@ -449,29 +563,6 @@ static inline int16_t adjust_arity(SCM func, int16_t nargs, vm_thread_t *vm)
   }
   return arity;
 }
-
-
-/* Add a new global reference to the table of checked references */
-static int add_global(SCM ref)
-{
-  SCM addr = BOX_VALUES(ref);
-  int i;
-
-  /* Search this global in the already accessed globals */
-  for (i = 0; i <  checked_globals_used; i++) {
-    if (checked_globals[i] == addr) return i;
-  }
-
-  /* Not present yet */
-  if (checked_globals_used >= checked_globals_len) { /* resize the checked  array */
-    checked_globals_len += checked_globals_len / 2;
-    checked_globals      = STk_must_realloc(checked_globals,
-                                            checked_globals_len * sizeof(SCM*));
-  }
-  checked_globals[checked_globals_used] = addr;
-  return checked_globals_used++;
-}
-
 
 /*===========================================================================*\
  *
@@ -730,10 +821,10 @@ SCM STk_values2vector(SCM obj, SCM vect)
        a clear message in this case (expected and given
        number of values). */
     if (!VECTORP(vect))
-	STk_error("bad vector ~S", vect);
+      STk_error("bad vector ~S", vect);
     if (VECTOR_SIZE(vect) != len)
-	STk_error("expected %d values, but %d were given",
-		  VECTOR_SIZE(vect), len);
+      STk_error("expected %d values, but %d were given",
+                VECTOR_SIZE(vect), len);
     retval = vect;
   } else {
     /* Allocate a new vector for result */
@@ -811,30 +902,115 @@ DEFINE_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void))
 
 
 
-#ifdef DEBUG_VM
-#  ifdef STAT_VM
-#    define DEFINE_NAME_TABLE
-#    include "vm-instr.h"
+#ifdef STAT_VM
+/* When DEFINE_NAME_TABLE is defined, the code for defining a table
+ * with the names of instructions in vm-instr.h is compiled, and then
+ *  name_table[i] will be a string with the name of instruction 'i'.
+ */
+#  define DEFINE_NAME_TABLE
+#  include "vm-instr.h"
 
-static void dump_couple_instr(void)
+static void dump_couple_instr_csv(FILE *dump)
 {
   int i, j;
-  FILE *dump;
 
-  dump = fopen("/tmp/dump.out", "w");
-  fprintf(dump, "[\n");
+  fprintf(dump, "instruction, count, time, time/count");
+  for (i = NOP; i < NB_VM_INSTR; i++)
+      fprintf(dump, ", %s", name_table[i]);
+  fprintf(dump, "\n");
 
   for (i = NOP; i < NB_VM_INSTR; i++) {
-    fprintf(dump, "((%s %d) ", name_table[i], cpt_inst[i]);
-    for (j = NOP; j < NB_VM_INSTR; j++)
-      fprintf(dump, "(%s %4d) ", name_table[j], couple_instr[i][j]);
-    fprintf(dump, ")\n");
+      if (cpt_inst[i]>0) {
+          fprintf(dump, "%s, %d, %20f, %.20f", name_table[i], cpt_inst[i],
+                  time_inst[i],
+                  cpt_inst[i]>0.0
+                  ? time_inst[i]/((double)cpt_inst[i])
+                  : 0.0);
+          for (j = NOP; j < NB_VM_INSTR; j++)
+              fprintf(dump, ", %4d", couple_instr[i][j]);
+          fprintf(dump, "\n");
+      }
   }
-  fprintf(dump, "\n]\n");
+}
+
+static void dump_couple_instr_scm(FILE *dump)
+{
+  int i, j;
+
+  fprintf(dump,
+          ";; STklos VM statistics. It can be read in Scheme, and it represents\n"
+          ";; one single object: an alist with the names of instructions, and\n"
+          ";; each CDR is a list containing:\n"
+          ";;\n"
+          ";; * count (the number of times this instruction was executed)\n"
+          ";; * time (the total time the program spent on this instruction)\n"
+          ";; * avg time (the average number of time spent on each execution of\n"
+          ";;   this instruction)\n"
+          ";; * an alist containing, for each OTHER instruction, the number of\n"
+          ";;   times they appeared  together in the code.\n"
+          ";;\n"
+          ";; ( (INS1 count1 time1 avgtime1 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) \n"
+          ";;   (INS2 count2 time2 avgtime2 ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) \n"
+          ";;   ...\n"
+          ";;   (INSn countn timen avgtimen ( (INS1 . count1) (INS2 . count2) ... (INSn  .countn))) ) \n"
+          ";; \n"
+          ";; BEGIN data\n");
+
+  fprintf(dump, "(");
+  for (i = NOP; i < NB_VM_INSTR; i++) {
+      if (cpt_inst[i]>0) {
+          fprintf(dump, "(%s %d %20f %.20f \n (", name_table[i], cpt_inst[i], time_inst[i],
+                  cpt_inst[i]>0.0
+                  ? time_inst[i]/((double)cpt_inst[i])
+                  : 0.0);
+          for (j = NOP; j < NB_VM_INSTR; j++)
+              fprintf(dump, "(%s . %4d) ", name_table[j], couple_instr[i][j]);
+          fprintf(dump, "))\n");
+      }
+  }
+  fprintf(dump, ")\n");
+  fprintf(dump, ";; END of data\n");
+}
+
+static SCM vm_collect_stats(SCM value) // for parameter %vm-collect-stats setter
+{
+  collect_stats = (value != STk_false);
+  return MAKE_BOOLEAN(collect_stats);
+}
+
+DEFINE_PRIMITIVE("%vm-reset-stats", vm_reset_stat, subr0, ())
+{
+  for (int i = NOP; i < NB_VM_INSTR; i++) {
+    cpt_inst[i] = 0;
+    time_inst[i] = 0.0;
+    for (int j = NOP; j < NB_VM_INSTR; j++)
+      couple_instr[i][j] = 0;
+  }
+  /* No need to zero previous_op and previous_time... */
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%vm-dump-stats", vm_dump_stat, subr12, (SCM fname, SCM format))
+{
+  if (!STRINGP(fname))               STk_error("bad string ~S", fname);
+  if (format && (!KEYWORDP(format))) STk_error("bad keyword ~S", format);
+
+  /* open dump file */
+  FILE *dump = fopen(STRING_CHARS(fname), "w");
+  if (!dump) STk_error("cannot open file ~S for writing", fname);
+
+  /* Produce the dump */
+  if (format && STk_eq(STk_makekey("csv"), format) == STk_true)
+    dump_couple_instr_csv(dump);
+  else
+    dump_couple_instr_scm(dump);
+
+  /* Close dump file */
+  fclose(dump);
+
+  return STk_void;
 }
 # endif
-#endif
-
 
 #ifdef STK_DEBUG
 static void patch_environment(vm_thread_t *vm);
@@ -882,6 +1058,7 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 \*===========================================================================*/
 
 /*
+ * VM LOCKING
  * For optimization, some opcode/operand pairs get patched on the fly,
  * and replaced by another operation.  It's important that the two
  * reads (opcode and operand) happen atomically. If not, we can get this
@@ -910,56 +1087,101 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
  *      operand at [n+1]
  *   4) Thread A resumes, updates operand at [n+1], releases lock
  */
+
+MUT_DECL(global_code_lock);  /* Lock to permit code patching */
+
 #define LOCK_AND_RESTART                     do{\
-  if (!have_global_lock) {                      \
-    MUT_LOCK(global_lock);                      \
-    have_global_lock=1;                         \
+  if (!have_code_lock) {                        \
+    MUT_LOCK(global_code_lock);                 \
+    have_code_lock=1;                           \
     (vm->pc)--;                                 \
     NEXT;                                       \
   }                                             \
 }while(0)
 #define RELEASE_LOCK                         do{\
    {                                            \
-    MUT_UNLOCK(global_lock);                    \
-    have_global_lock=0;                         \
+    MUT_UNLOCK(global_code_lock);               \
+    have_code_lock=0;                           \
    }                                            \
 }while(0)
 #define RELEASE_POSSIBLE_LOCK                do{\
-  if (have_global_lock) {                       \
-    MUT_UNLOCK(global_lock);                    \
-    have_global_lock=0;                         \
+  if (have_code_lock) {                         \
+    MUT_UNLOCK(global_code_lock);               \
+    have_code_lock=0;                           \
   }                                             \
 }while(0)
+
+/* The function tick() will collect statistics when STAT_VM is defined. */
+#if defined(STAT_VM)
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time) {
+  static clock_t current_time;
+  current_time = clock();
+  couple_instr[*previous_op][b]++;
+  cpt_inst[b]++;
+  *previous_op = b;
+
+  if (*previous_time > 0)
+      time_inst[b] += ((double)(current_time - *previous_time)) / CLOCKS_PER_SEC;
+  *previous_time = clock();
+}
+#endif
 
 static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
   int16_t tailp;
-  volatile STk_instr offset;         /* Anything returned by fetch_next() should be STk_instr */
-  volatile have_global_lock = 0;     /* if true, we're patching the code */
   STk_instr nargs=0;
+  volatile STk_instr offset;           /* Anything returned by fetch_next() should be STk_instr */    
+  volatile int have_code_lock = 0;     /* if true, we're patching the code */
+#ifndef __clang__
+  // With clang, we are faster without the "volatile" (which seems quite normal).
+  // But, on gcc, omitting the "volatile" (weirdly) produces less efficient code.
+  // NOTE:
+  //    ① the "volatile" is not really needed
+  //    ② declaring the save_cur_proc in each switch branch which need it is the
+  //       worst solution.
+  volatile
+#endif
+  SCM save_cur_proc=STk_nil; /* cur. proc when calling inlined primitives */
 
+/* If DEFINE_JUMP_TABLE is defined and we include vm-instr, then the static
+   array *jump_table[] will be defined with the labels for the goto
+   instructions. */
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
+#  ifdef STAT_VM
+      volatile STk_instr byteop = NOP;
+#  endif
 #else
-   STk_instr byteop;
+  STk_instr byteop = NOP;
 #endif
+
 #if defined(DEBUG_VM)
 #    define DEFINE_NAME_TABLE
 #    include "vm-instr.h"
   static STk_instr *code_base = NULL;
 #endif
+
 #if defined(STAT_VM)
-  static STk_instr previous_op = NOP;
+  STk_instr previous_op = NOP;
+  time_t    previous_time = 0;
 #endif
+
 
 #if defined(USE_COMPUTED_GOTO)
   NEXT;
 #else
   for ( ; ; ) {
-    /* Execution loop */
-    byteop = fetch_next();
+  VM_LOOP_TOP:     /* Execution loop */
+
+    /* Update the statistics after each loop: */
+#   if defined(STAT_VM)
+      if (collect_stats) tick(byteop, &previous_op, &previous_time);
+#   endif
+
+   byteop = fetch_next();
+
 #  ifdef DEBUG_VM
     if (debug_level > 1)
       fprintf(stderr, "%08x [%03d]: %20s  sp=%-6d fp=%-6d env=%p\n",
@@ -968,11 +1190,6 @@ static void run_vm(vm_thread_t *vm)
               name_table[(int)byteop],
               vm->sp - vm->stack,
               vm->fp - vm->stack, vm->env);
-#    ifdef STAT_VM
-    couple_instr[previous_op][byteop]++;
-    cpt_inst[byteop]++;
-    previous_op = byteop;
-#    endif
 #  endif
     switch (byteop) {
 #endif /*  USE_COMPUTED_GOTO */
@@ -1025,14 +1242,15 @@ CASE(GLOBAL_REF) {
   }
 
   /* patch the code for optimize next accesses */
-  vm->pc[-1]  = add_global(CDR(ref));
+  vm->pc[-1]  = global_var_index(ref);
   vm->pc[-2]  = (orig_opcode == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
   RELEASE_LOCK;
   NEXT1;
 }
 
 CASE(PUSH_UGLOBAL_REF)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGLOBAL_REF) {     /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
@@ -1058,7 +1276,7 @@ CASE(GLOBAL_REF_PUSH) {
   push(res);
 
   /* patch the code for optimize next accesses */
-  vm->pc[-1]  = add_global(CDR(ref));
+  vm->pc[-1]  = global_var_index(ref);
   vm->pc[-2]  = UGLOBAL_REF_PUSH;
   RELEASE_LOCK;
   NEXT1;
@@ -1094,7 +1312,7 @@ CASE(GREF_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-2]  = add_global(CDR(ref));
+  vm->pc[-2]  = global_var_index(ref);
   vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
   RELEASE_LOCK;
 
@@ -1103,7 +1321,8 @@ CASE(GREF_INVOKE) {
 }
 
 CASE(PUSH_UGREF_INVOKE)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGREF_INVOKE) { /* Never produced by compiler */
 
   /* Because of optimization, we may get re-dispatched to here. */
@@ -1137,9 +1356,9 @@ CASE(GREF_TAIL_INVOKE) {
 
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-2]  = add_global(CDR(ref));
+  vm->pc[-2]  = global_var_index(ref);
   vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ?
-                        UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
+                     UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
   RELEASE_LOCK;
 
   /* and now invoke */
@@ -1147,7 +1366,8 @@ CASE(GREF_TAIL_INVOKE) {
 }
 
 CASE(PUSH_UGREF_TAIL_INV)
-  push(vm->val);        /* Fall through */
+  push(vm->val);
+  /* Fall through */
 CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
@@ -1171,6 +1391,13 @@ CASE(DEEP_LOCAL_REF) {
   int level;
   STk_instr info = fetch_next();
   SCM e = vm->env;
+
+  /* STklos organizes local environments as this: each level has a
+     maximum of 256 variables. Both the level and the address of local
+     variables are encoded in a single 16-bit integer, as "256v1+v2".
+     For example, 2*256 + 03 = 0x0203. The first byte, 0x02,
+     identifies the level, and the second byte, 0x03, identifies the
+     variable.  */
 
   /* Go down in the dynamic environment */
   for (level = FIRST_BYTE(info); level; level--)
@@ -1234,15 +1461,22 @@ CASE(GLOBAL_SET) {
   if (BOXED_INFO(ref) & CONS_CONST) {
     RELEASE_LOCK;
     STk_error("cannot mute the value of ~S in ~S", orig_operand, vm->current_module);
-
   }
-  *BOX_VALUES(CDR(ref)) = vm->val;    /* sure that this box arity is 1 */
+  vm_global_set(ref, vm->val);
   /* patch the code for optimize next accesses */
-  vm->pc[-1] = add_global(CDR(ref));
+  vm->pc[-1] = global_var_index(ref);
   vm->pc[-2] = UGLOBAL_SET;
+
+  if (CLOSUREP(vm->val) && CLOSURE_NAME(vm->val) == STk_false) {
+    /* We do something like (set! foo (lambda () ....)) and the lambda doesn't have a procedure
+     * name in it. Just force the name of the closure to "foo". */
+    CLOSURE_NAME(vm->val) = orig_operand;
+  }
+
   RELEASE_LOCK;
   NEXT0;
-}
+ }
+
 
 CASE(UGLOBAL_SET) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
@@ -1250,6 +1484,7 @@ CASE(UGLOBAL_SET) { /* Never produced by compiler */
 
   fetch_global() = vm->val; NEXT0;
 }
+
 
 CASE(LOCAL_SET0) { FRAME_LOCAL(vm->env, 0)           = vm->val; NEXT0;}
 CASE(LOCAL_SET1) { FRAME_LOCAL(vm->env, 1)           = vm->val; NEXT0;}
@@ -1446,14 +1681,14 @@ CASE(ENTER_TAIL_LET) {
       vm->fp = old_fp;
 
       /* Push a new environment on the stack */
-      vm->sp = ((SCM*)vm->env) - nargs-
-                     ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
+      vm->sp = ((SCM*)vm->env) - nargs -
+               ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
     }
     else {
       if (nargs) memmove(old_fp-nargs, vm->sp, nargs*sizeof(SCM));
       vm->fp = old_fp;
       vm->sp = vm->fp - nargs -
-                  ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
+               ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
     }
 
     PUSH_ENV(nargs, vm->val, vm->env);
@@ -1559,7 +1794,7 @@ CASE(END_OF_CODE) {
 CASE(DBG_VM)  {
   ;
 }
-CASE(UNUSED_3)
+
 CASE(UNUSED_4)
 CASE(UNUSED_5)
 CASE(UNUSED_6)
@@ -1600,123 +1835,240 @@ CASE(UNUSED_28)
 #define SCHEME_NOT(x) (((x) == STk_false) ? STk_true: STk_false)
 
 
-CASE(IN_ADD2)   { REG_CALL_PRIM(plus);
-                  vm->val = STk_add2(pop(), vm->val); NEXT1;}
-CASE(IN_SUB2)   { REG_CALL_PRIM(difference);
-                  vm->val = STk_sub2(pop(), vm->val); NEXT1;}
-CASE(IN_MUL2)   { REG_CALL_PRIM(multiplication);
-                  vm->val = STk_mul2(pop(), vm->val); NEXT1;}
-CASE(IN_DIV2)   { REG_CALL_PRIM(division);
-                  vm->val = STk_div2(pop(), vm->val); NEXT1;}
-
-CASE(IN_FXADD2)   { REG_CALL_PRIM(fxplus);
-                  vm->val = STk_fxplus(pop(), vm->val); NEXT1;}
-CASE(IN_FXSUB2)   { REG_CALL_PRIM(fxminus);
-                  vm->val = STk_fxminus(pop(), vm->val); NEXT1;}
-CASE(IN_FXMUL2)   { REG_CALL_PRIM(fxtime);
-                  vm->val = STk_fxtime(pop(), vm->val); NEXT1;}
-CASE(IN_FXDIV2)   { REG_CALL_PRIM(fxdiv);
-                  vm->val = STk_fxdiv(pop(), vm->val); NEXT1;}
+CASE(IN_ADD2)   {
+  REG_CALL_PRIM(plus); vm->val = STk_add2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SUB2)   {
+  REG_CALL_PRIM(difference); vm->val = STk_sub2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_MUL2)   {
+  REG_CALL_PRIM(multiplication); vm->val=STk_mul2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_DIV2)   {
+  REG_CALL_PRIM(division); vm->val = STk_div2(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;}
 
 
-CASE(IN_SINT_ADD2) { REG_CALL_PRIM(plus);
-                     vm->val = STk_add2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_SUB2) { REG_CALL_PRIM(difference);
-                     vm->val = STk_sub2(MAKE_INT(fetch_next()), vm->val); NEXT1;}
-CASE(IN_SINT_MUL2) { REG_CALL_PRIM(multiplication);
-                     vm->val = STk_mul2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_DIV2) { REG_CALL_PRIM(division);
-                     vm->val = STk_div2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_FXADD2)   {
+  REG_CALL_PRIM(fxplus); vm->val = STk_fxplus(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXSUB2)   {
+  REG_CALL_PRIM(fxminus); vm->val = STk_fxminus(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXMUL2)   {
+  REG_CALL_PRIM(fxtime); vm->val = STk_fxtime(pop(), vm->val);  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXDIV2)   {
+  REG_CALL_PRIM(fxdiv); vm->val = STk_fxdiv(pop(), vm->val); UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 
-CASE(IN_SINT_FXADD2) { REG_CALL_PRIM(fxplus);
-                     vm->val = STk_fxplus(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_FXSUB2) { REG_CALL_PRIM(fxminus);
-                     vm->val = STk_fxminus(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_FXMUL2) { REG_CALL_PRIM(fxtime);
-                     vm->val = STk_fxtime(vm->val, MAKE_INT(fetch_next())); NEXT1;}
-CASE(IN_SINT_FXDIV2) { REG_CALL_PRIM(fxdiv);
-                     vm->val = STk_fxdiv(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_SINT_ADD2) {
+  REG_CALL_PRIM(plus); vm->val = STk_add2(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_SUB2) {
+  REG_CALL_PRIM(difference); vm->val = STk_sub2(MAKE_INT(fetch_next()), vm->val);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_MUL2) {
+  REG_CALL_PRIM(multiplication); vm->val = STk_mul2(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_DIV2) {
+  REG_CALL_PRIM(division); vm->val = STk_div2(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 
-CASE(IN_NUMEQ)  { REG_CALL_PRIM(numeq);
-                  vm->val = MAKE_BOOLEAN(STk_numeq2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMDIFF){ REG_CALL_PRIM(numeq);
-                  vm->val = MAKE_BOOLEAN(!STk_numeq2(pop(), vm->val));     NEXT1;}
-CASE(IN_NUMLT)  { REG_CALL_PRIM(numlt);
-                  vm->val = MAKE_BOOLEAN(STk_numlt2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMGT)  { REG_CALL_PRIM(numgt);
-                  vm->val = MAKE_BOOLEAN(STk_numgt2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMLE)  { REG_CALL_PRIM(numle);
-                  vm->val = MAKE_BOOLEAN(STk_numle2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMGE)  { REG_CALL_PRIM(numge);
-                  vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));      NEXT1;}
-
-CASE(IN_FXEQ)  { REG_CALL_PRIM(fxeq);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)==0); NEXT1;}
-CASE(IN_FXDIFF){ REG_CALL_PRIM(fxeq);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)!=0); NEXT1;}
-CASE(IN_FXLT)  { REG_CALL_PRIM(fxlt);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<0);  NEXT1;}
-CASE(IN_FXGT)  { REG_CALL_PRIM(fxgt);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>0);  NEXT1;}
-CASE(IN_FXLE)  { REG_CALL_PRIM(fxle);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<=0); NEXT1;}
-CASE(IN_FXGE)  { REG_CALL_PRIM(fxge);
-                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>=0); NEXT1;}
+CASE(IN_SINT_FXADD2) {
+  REG_CALL_PRIM(fxplus); vm->val = STk_fxplus(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_FXSUB2) {
+  REG_CALL_PRIM(fxminus); vm->val = STk_fxminus(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_FXMUL2) {
+  REG_CALL_PRIM(fxtime); vm->val = STk_fxtime(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_SINT_FXDIV2) {
+  REG_CALL_PRIM(fxdiv); vm->val = STk_fxdiv(vm->val, MAKE_INT(fetch_next()));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 
-CASE(IN_INCR)   { REG_CALL_PRIM(plus);
-                  vm->val = STk_add2(vm->val, MAKE_INT(1)); NEXT1;}
-CASE(IN_DECR)   { REG_CALL_PRIM(difference);
-                  vm->val = STk_sub2(vm->val, MAKE_INT(1)); NEXT1;}
+CASE(IN_NUMEQ)  {
+  REG_CALL_PRIM(numeq); vm->val = MAKE_BOOLEAN(STk_numeq2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMDIFF){
+  REG_CALL_PRIM(numeq); vm->val = MAKE_BOOLEAN(!STk_numeq2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMLT)  {
+  REG_CALL_PRIM(numlt); vm->val = MAKE_BOOLEAN(STk_numlt2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMGT)  {
+  REG_CALL_PRIM(numgt); vm->val = MAKE_BOOLEAN(STk_numgt2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMLE)  {
+  REG_CALL_PRIM(numle); vm->val = MAKE_BOOLEAN(STk_numle2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_NUMGE)  {
+  REG_CALL_PRIM(numge); vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+
+CASE(IN_FXEQ)  {
+  REG_CALL_PRIM(fxeq); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)==0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXDIFF){
+  REG_CALL_PRIM(fxeq); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)!=0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXLT)  {
+  REG_CALL_PRIM(fxlt); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXGT)  {
+  REG_CALL_PRIM(fxgt); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXLE)  {
+  REG_CALL_PRIM(fxle); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<=0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_FXGE)  {
+  REG_CALL_PRIM(fxge); vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>=0);
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+
+
+CASE(IN_INCR)   {
+  REG_CALL_PRIM(plus); vm->val = STk_add2(vm->val, MAKE_INT(1));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_DECR)   {
+  REG_CALL_PRIM(difference); vm->val = STk_sub2(vm->val, MAKE_INT(1));
+  UNREG_CALL_PRIM();
+  NEXT1;
+ }
 
 CASE(IN_CONS)   { vm->val = STk_cons(pop(), vm->val);                      NEXT1;}
-CASE(IN_CAR)    { REG_CALL_PRIM(car); vm->val = STk_car(vm->val);          NEXT1;}
-CASE(IN_CDR)    { REG_CALL_PRIM(cdr); vm->val = STk_cdr(vm->val);          NEXT1;}
+CASE(IN_CAR)    {
+  REG_CALL_PRIM(car); vm->val = STk_car(vm->val);UNREG_CALL_PRIM();
+  NEXT1;
+ }
+CASE(IN_CDR)    {
+  REG_CALL_PRIM(cdr);  vm->val = STk_cdr(vm->val); UNREG_CALL_PRIM();
+  NEXT1;}
 CASE(IN_NULLP)  { vm->val = MAKE_BOOLEAN(vm->val == STk_nil);              NEXT1;}
 CASE(IN_LIST)   { vm->val = listify_top(fetch_next(), vm);                 NEXT1;}
 CASE(IN_NOT)    { vm->val = SCHEME_NOT(vm->val);                           NEXT1;}
+
 
 CASE(IN_EQUAL)  { vm->val = STk_equal(pop(), vm->val);                     NEXT1;}
 CASE(IN_EQV)    { vm->val = STk_eqv(pop(), vm->val);                       NEXT1;}
 CASE(IN_EQ)     { vm->val = MAKE_BOOLEAN(pop() == vm->val);                NEXT1;}
 
+
 CASE(IN_NOT_EQUAL) { vm->val = SCHEME_NOT(STk_equal(pop(), vm->val));      NEXT1; }
 CASE(IN_NOT_EQV)   { vm->val = SCHEME_NOT(STk_eqv(pop(), vm->val));        NEXT1; }
 CASE(IN_NOT_EQ)    { vm->val = MAKE_BOOLEAN(pop() != vm->val);             NEXT1; }
 
+CASE(IN_ASSOC)    { //FIXME: register?
+  SCM arg= pop();
+  switch (fetch_next()) {
+    case 1: vm->val= STk_assq(arg, vm->val); break;
+    case 2: vm->val= STk_assv(arg, vm->val); break;
+    case 3: vm->val= STk_assoc(arg, vm->val, NULL); break;
+    default: {
+      SCM prev = pop ();
+      vm->val= STk_assoc(prev, arg, vm->val); break;
+    }
+  }
+  NEXT1;
+}
+
+ CASE(IN_MEMBER)    { //FIXME: register?
+  SCM arg= pop();
+  switch (fetch_next()) {
+    case 1: vm->val= STk_memq(arg, vm->val); break;
+    case 2: vm->val= STk_memv(arg, vm->val); break;
+    case 3: vm->val= STk_member(arg, vm->val, NULL); break;
+    default: {
+      SCM prev = pop ();
+      vm->val= STk_member(prev, arg, vm->val); break;
+    }
+  }
+  NEXT1;
+}
+
+
 CASE(IN_VREF) {
   REG_CALL_PRIM(vector_ref);
   vm->val = STk_vector_ref(pop(), vm->val);
+  UNREG_CALL_PRIM();
   NEXT1;
 }
 CASE(IN_SREF) {
   REG_CALL_PRIM(string_ref);
   vm->val = STk_string_ref(pop(), vm->val);
+  UNREG_CALL_PRIM();
   NEXT1;
 }
 CASE(IN_VSET)   {
   SCM index = pop();
   REG_CALL_PRIM(vector_set);
   STk_vector_set(pop(), index, vm->val);
+  UNREG_CALL_PRIM();
   NEXT0;
 }
 CASE(IN_SSET)   {
   SCM index = pop();
   REG_CALL_PRIM(string_set);
   STk_string_set(pop(), index, vm->val);
+  UNREG_CALL_PRIM();
   NEXT0;
 }
-CASE(IN_CXR) {
+ CASE(IN_CXR) {  //FIXME: register
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
  }
-
-CASE(IN_APPLY)   {
-  STk_panic("INSTRUCTION IN-APPLY!!!!!!!!!!!!!!!!!!!!!!!");
-  NEXT;
-}
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 FUNCALL:  /* (int nargs, int tailp) */
@@ -1742,7 +2094,6 @@ FUNCALL:  /* (int nargs, int tailp) */
         nm       = STk_make_next_method(vm->val, nargs, argv, methods);
         vm->val  = INST_SLOT(CAR(methods), S_procedure);
         SET_NEXT_METHOD(vm->val, nm);
-        /* FALLTHROUGH */
       } else {
         SCM gf, args;
 
@@ -1934,16 +2285,16 @@ FUNCALL:  /* (int nargs, int tailp) */
   RETURN_FROM_PRIMITIVE();
 end_funcall:
   NEXT;
-}
+} /* FUNCALL: */
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 #ifndef USE_COMPUTED_GOTO
-      default:
-        STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop);
-    }
-  }
+      default: { STk_panic("INSTRUCTION %d NOT IMPLEMENTED\n", byteop); }
+    } /* switch (byteop) */
+  } /* for ( ; ; ) */
+
 #endif
   STk_panic("abnormal exit from the VM");
-}
+} /* run_vm */
 
 void STk_raise_exception(SCM cond)
 {
@@ -2354,14 +2705,55 @@ SCM STk_execute_C_bytecode(SCM all_consts, STk_instr *instr)
   return STk_void;
 }
 
+/*===========================================================================*\
+ *
+ *                       V M   I N T R O S P E C T I O N
+ *
+\*===========================================================================*/
+
+DEFINE_PRIMITIVE("%vm-config",vm_config, subr0, ()) {
+  SCM debug_vm =
+#ifdef DEBUG_VM
+    STk_true
+#else
+    STk_false
+#endif
+    ;
+
+  SCM stat_vm =
+#ifdef STAT_VM
+    STk_true
+#else
+    STk_false
+#endif
+    ;
+
+  SCM computed_goto =
+#ifdef USE_COMPUTED_GOTO
+    STk_true
+#else
+    STk_false
+#endif
+    ;
+
+  return STk_append2(LIST2(STk_makekey("computed-goto"), computed_goto),
+                     STk_append2(LIST2(STk_makekey("debug-vm"), debug_vm),
+                                 LIST2(STk_makekey("stat-vm"), stat_vm)));
+}
+
 
 int STk_init_vm()
 {
   DEFINE_XTYPE(continuation, &xtype_continuation);
 
-  /* Initialize the table of checked references */
-  checked_globals = STk_must_malloc(checked_globals_len * sizeof(SCM));
+  /* Initialize the global_store array */
+  STk_global_store = STk_must_malloc(GLOBAL_STORE_INIT_SIZE * sizeof(SCM));
+  return TRUE;
+}
 
+
+int STk_late_init_vm()
+{
   /* Add the apply primitive */
   ADD_PRIMITIVE(scheme_apply);
   ADD_PRIMITIVE(execute);
@@ -2379,8 +2771,18 @@ int STk_init_vm()
   ADD_PRIMITIVE(continuationp);
   ADD_PRIMITIVE(fresh_continuationp);
 
+  ADD_PRIMITIVE(vm_config);
+
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_vm_debug);
+#endif
+#ifdef STAT_VM
+  ADD_PRIMITIVE(vm_dump_stat);
+  ADD_PRIMITIVE(vm_reset_stat);
+  STk_make_C_parameter("%vm-collect-stats",
+                       STk_false,
+                       vm_collect_stats,
+                       STk_STklos_module);
 #endif
   return TRUE;
 }

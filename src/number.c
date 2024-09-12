@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,9 +45,12 @@ static unsigned int log10_maxint;
 
 #define FINITE_REALP(n) isfinite(REAL_VAL(n))
 
-/* Complex i:
-   will be used as a constant when computing some functions. */
+/* Complex i: will be used as a constant when computing some functions. */
 static SCM complex_i;
+
+/* rational_epsilon: an exact (rational) epsilon which should
+ * be small enough to work as an epsilon for doubles. */
+static SCM rational_epsilon;
 
 /* Forward declarations */
 static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder);
@@ -71,18 +74,24 @@ struct bignum_obj {
 
 /*==============================================================================*/
 
-#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
+//#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
+#define MY_PI      3.1415926535897932384626433832795028841971693993751058209749445923078164062862090L
 
 #define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 &&        \
                                   mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
 #define LONG_FITS_INTEGER(_l)    (INT_MIN_VAL <= (_l) && (_l) <= INT_MAX_VAL)
 #define TYPEOF(n)                (INTP(n)? tc_integer: STYPE(n))
 
+#define IS_INFP(x)              (REALP(x) && isinf(REAL_VAL(x)))
 
 #define MINUS_INF "-inf.0"
 #define PLUS_INF  "+inf.0"
 #define MINUS_NaN "-nan.0"
 #define PLUS_NaN  "+nan.0"
+
+/* Tests to see if x is 0.0 or -0.0 */
+#define REAL_ZEROP(x)     (fpclassify(REAL_VAL(x)) == FP_ZERO)
+#define IS_ZERO_ZEROP(x)  (REALP(x) && REAL_ZEROP(x))
 
 
 /* Special IEEE values */
@@ -90,8 +99,7 @@ static double plus_inf, minus_inf;
 double STk_NaN;
 
 /**** forward declarations ****/
-static type_cell convert(SCM *px, SCM *py);
-
+static long do_compare(SCM x, SCM y);
 static int zerop(SCM n);
 static int negativep(SCM n);
 static int positivep(SCM n);
@@ -100,11 +108,11 @@ static SCM gcd2(SCM n1, SCM n2);
 
 EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i));
 EXTERN_PRIMITIVE("real-part", real_part, subr1, (SCM z));
-EXTERN_PRIMITIVE("magnitude", magnitude, subr1, (SCM z));
 EXTERN_PRIMITIVE("angle", angle, subr1, (SCM z));
 EXTERN_PRIMITIVE("sqrt", sqrt, subr1, (SCM z));
 EXTERN_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z));
 EXTERN_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z));
+
 
 #define add2 STk_add2
 #define mul2 STk_mul2
@@ -169,6 +177,11 @@ static void error_not_an_integer(SCM n)
   STk_error("exact or inexact integer required, got ~s", n);
 }
 
+static void error_not_an_exact_integer(SCM n)
+{
+  STk_error("exact integer required, got ~s", n);
+}
+
 union binary64 {
   uint64_t u;
   double   d;
@@ -199,6 +212,80 @@ static double make_nan(int neg, int quiet, unsigned long pay)
   return t.d;
 }
 
+int STk_isnan(SCM z) {
+  switch (TYPEOF(z)) {
+  case tc_complex:  return (REALP(COMPLEX_REAL(z)) && isnan(REAL_VAL(COMPLEX_REAL(z)))) ||
+                           (REALP(COMPLEX_IMAG(z)) && isnan(REAL_VAL(COMPLEX_IMAG(z))));
+  case tc_real:     return isnan(REAL_VAL(z));
+  case tc_rational:
+  case tc_bignum:
+  case tc_integer:  return 0;
+  default:          error_bad_number(z); return 0;
+  }
+}
+
+
+double STk_dbl_true_min(void) /* return (or compute) DBL_TRUE_MIN */
+{
+  /*
+   This function is used here in order to calculate a rational epsilon (for
+   square roots) and also in the (scheme flonum) library.
+
+   Some platforms may not have DBL_TRUE_MIN defined (at this time, OpenBSD
+   doesn't), so we calculate DBL_TRUE_MIN. dbl_truemin is also used in
+   lib/scheme/flonum.c
+
+   DBL_MIN is the least NORMAL positive number represented in IEEE format.
+   DBL_TRUE_MIN is the least SUBNORMAL positive number: the one that, when
+   divided by 2, is equal to zero.
+   Some platforms may not have DBL_TRUE_MIN defined (at this time, OpenBSD
+   doesn't), so we calculate DBL_TRUE_MIN.
+
+   Remark I: Using IEEE 754, the representations of DBL_MIN and DBL_TRUE_MIN
+   are as follows.
+
+   DBL_MIN:
+   [ 0 | 00000000001 | 0000000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 1, Mantissa = 0.
+
+   DBL_MIN / 2.0:
+   [ 0 | 00000000000 | 1000000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 0, Mantissa = 2^52.
+
+   DBL_MIN / 4.0:
+   [ 0 | 00000000000 | 0100000000000000000000000000000000000000000000000000 ]
+   Signal = 0, Exponent = 0, Mantissa = 2^51.
+
+   DBL_TRUE_MIN:
+   [ 0 | 00000000000 | 0000000000000000000000000000000000000000000000000001 ]
+   Signal = 0, Exponent = 0, Mantissa = 1.
+
+   Each time we divide DBL_MIN by 2.0, we do a right shift on the number.
+   Eventually, it will become zero.
+
+   Note that the first time that DBL_MIN is divided by zero already results in
+   a subnormal number (the exponent becomes zero) -- because DBL_MIN is
+   indeed the least *normal* number.
+
+   Remark II: if we were to assume that numbers are always represented using
+   IEEE format, we could just take positive zero, set its first bit, and
+   that would be the same as DBL_TRUE_MIN. But we'll be more careful and
+   calculate it, dividing DBL_MIN by 2 successfully until it is zero.
+
+   -- jpellegrini
+  */
+#ifdef DBL_TRUE_MIN
+  return DBL_TRUE_MIN;
+#else
+  double x = DBL_MIN;
+  double res = x;
+  while (1) {
+    if (x == 0.0) return res;
+    res = x;
+    x = x / 2.0;
+  }
+#endif
+}
 
 /*
 <doc EXT real-precision
@@ -332,7 +419,7 @@ static SCM make_rational(SCM n, SCM d)
   SCM gcd;
 
   if (zerop(d))
-    STk_error("cannot make rational with null denominator");
+    STk_error("division by 0");
 
   /* Always keep sign in the numerator */
   if (negativep(d)) {
@@ -384,7 +471,24 @@ static void print_complex(SCM n, SCM port, int mode)
   SCM imag = COMPLEX_IMAG(n);
 
   STk_print(COMPLEX_REAL(n), port, mode);
-  if (positivep(imag) || (REALP(imag) && !signbit(REAL_VAL(imag))))
+  /* About the next IF condition:
+     NaNs and infinities do have a signbit and they satisfy REALP, so,
+     specifically for NaNs:
+
+     1) +nan.0 passes the first line in the condition (sign bit is zero).
+        But for the extra plus to be printed, the other two lines
+        require:
+          i) Either zero (it's not), OR:
+         ii) Positive AND not infinity -- but NaNs so not satisfy the
+             STklos C predicate positivep. :)
+        Then the extra + is not printed, and the +nan.0 is printed.
+
+     2) -nan.0 fails the first line, because its sign bit is 1 (negated = 0).
+        Then the + is not printed, and the -nan.0 is printed.                 */
+  if ((!((REALP(imag) && signbit(REAL_VAL(imag))))) &&
+      (zerop(imag) ||
+       (positivep(imag) && (!(REALP(imag) && isinf(REAL_VAL(imag)))))))
+
     STk_putc('+', port);
   STk_print(imag, port, mode);
   STk_putc('i', port);
@@ -434,6 +538,7 @@ static inline SCM double2real(double x)
 {
   SCM z;
 
+  if (isnan(x) && signbit(x)) /* convert -nan.0 to +nan.0 */ x = STk_NaN;
   NEWCELL(z, real);
   REAL_VAL(z) = x;
   return z;
@@ -447,11 +552,95 @@ static inline SCM bignum2integer(mpz_t n)
 
 static inline double bignum2double(mpz_t n)
 {
-  /* I do not use the function mpz_get_d since it gives an unspecified value
-   * when converting a number which is +inf or -inf
-   */
- char *s = STk_must_malloc_atomic(mpz_sizeinbase(n, 10) + 2);
- return atof(mpz_get_str(s, 10, n));
+    /* If the result does not fit a double, we return (+/-)inf.0
+       We don't use the result of mpz_get_d because it does not
+       guarantee that an inf will be returned in this case.
+
+       The most positive and most negative flonums are (+/-) DBL_MAX,
+       so we only call the GMP function mpz_cmpabs_d once (no need to
+       test for both > +DBL_MAX and < -DBL_MAX).                 */
+    if (mpz_cmpabs_d((n), +DBL_MAX) > 0)
+        return (mpz_sgn(n)>0)
+            ? plus_inf
+            : minus_inf;
+
+    /* A very large integer may not be representable as a float.
+
+       mpz_get_d always "rounds towards zero" -- that is, it returns
+       the closest float to n ***that is between 0 and n***, but
+       R7RS requires 'inexact' to return the *closest* number.
+       So we need to adapt.
+
+       Suppose there are two representable integers around n, but n
+       itself is not representable. Call those integers 'below' and
+       'above':
+
+           0                        below       n  above
+        ---|--------------------------|---------|----|-----
+                                      v
+                                   returned
+                                    by GMP
+
+        As the figure shows, even if there is an integer 'above'
+        that is closer to n, the number 'below' (closer to 0) will be
+        returned.  Note that the whole picture could be reflected
+        around zero if n is negative, so "above" actually means
+        "farthest from zero" but not "largest":
+
+           above  n       below                        0
+        -----|----|---------|--------------------------|---
+                                                       |
+                                                neg <--+--> pos
+
+        We of course can be sure that there is no integer between
+        'below' and 'above'.
+
+        So we do the following:
+
+        1. Get the next integer representable as double with nextafter (the
+           one starting from below, but *away from zero*). We call this
+           one 'above'
+        2. Convert both below and above back into bignums (!), as 'zbelow'
+           and 'zabove'
+        3. Measure (using the GMP) the distances ABS(zabove-n) and ABS(n-zbelow)
+           and if n is closer to zabove, we return ceil(above) or floor(above),
+           depending on the sign. If it's closer to below, we return below.     */
+    double below = mpz_get_d(n);
+
+    /* Use ceil or floor, since we want the next *integer* representable as
+       double -- and that's exactly what ceil and floor do! */
+    double above = (below > 0)
+        ? ceil(nextafter(below, plus_inf))
+        : floor(nextafter(below, minus_inf));
+
+    /* So, if going further we get to infinity, we return 'below'. This
+       is our interpretation: "infinity" is always farther to 'n' than
+       'below'. (And the GMP may crash without this, if we try to
+       initialize a number with an infinite double!)
+       'Below' is guaranteed to NOT be infinite (it was the first
+       thing we did in this function!)                              */
+    if (isinf(above)) return below;
+
+    /* the *_set_d functions in GMP are *exact*, so no precision is lost here: */
+    mpz_t zbelow, zabove;
+    mpz_init_set_d(zabove, above);
+    mpz_init_set_d(zbelow, below);
+
+    /* zabove <- distance(zabove, n)
+       zbelow <- distance(n, zbelow)   */
+    mpz_sub(zabove, zabove, n);
+    mpz_sub(zbelow, n, zbelow);
+
+    /* First store res, then clear zbelow amd zabove, and THEN
+       return! */
+    double res = (mpz_cmpabs(zabove, zbelow) >= 0)
+        ? below
+        : above;
+
+    mpz_clear(zbelow);
+    mpz_clear(zabove);
+
+    return res;
 }
 
 
@@ -592,14 +781,25 @@ static double rational2double(SCM r)
 {
   SCM num = RATIONAL_NUM(r);
   SCM den = RATIONAL_DEN(r);
+  double d;
+  mpz_t x;
 
-  switch (convert(&num, &den)) {
-    case tc_integer: return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
-    case tc_bignum:  return bigrational2double(BIGNUM_VAL(num), BIGNUM_VAL(den));
-    default:         STk_panic("bad rational ~S", r);
+  if (TYPEOF(num) == tc_integer && TYPEOF(den) == tc_integer) // both are fixnums
+    return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
+
+  if (TYPEOF(num) == tc_bignum && TYPEOF(den) == tc_bignum)   // both are bignums
+    return bigrational2double(BIGNUM_VAL(num), BIGNUM_VAL(den));
+  if (TYPEOF(num) == tc_integer) {             // num is a fixnum, den is a bignum
+    mpz_init_set_si(x, INT_VAL(num));
+    d =  bigrational2double(x, BIGNUM_VAL(den));
+  } else {                                     // num is a bignum, den is a fixnum
+    mpz_init_set_si(x, INT_VAL(den));
+    d = bigrational2double(BIGNUM_VAL(num), x);
   }
-  return 0.0; /* never reached */
+  mpz_clear(x);
+  return d;
 }
+
 
 static inline SCM rational2real(SCM r)
 {
@@ -628,6 +828,7 @@ void STk_double2Cstr(char *buffer, size_t bufflen, double n)
     if (strcmp(buffer, "nan.0") == 0) snprintf(buffer, bufflen,  "+nan.0");
   }
 }
+
 
 /* Convert a number to a C-string. Result must be freed if != from buffer */
 static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
@@ -662,29 +863,35 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
       return s;
     case tc_rational:
       {
-        char *s1, *s2, *s3, tmp[100];
+        char *left, *right, *res, tmp[100];
         size_t len;
 
-        s1  = number2Cstr(RATIONAL_NUM(n), base, buffer, bufflen);
-        s2  = number2Cstr(RATIONAL_DEN(n), base, tmp, sizeof(tmp));
-        len = strlen(s1) + strlen(s2) + 2;
-        s3  = STk_must_malloc_atomic(len);
-        snprintf(s3, len, "%s/%s", s1, s2);
-        if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
-        return s3;
+        left  = number2Cstr(RATIONAL_NUM(n), base, buffer, bufflen);
+        right = number2Cstr(RATIONAL_DEN(n), base, tmp, sizeof(tmp));
+        len   = strlen(left) + strlen(right) + 2;
+        res   = STk_must_malloc_atomic(len);
+        snprintf(res, len, "%s/%s", left, right);
+        if (right!=tmp) STk_free(right); /*buffer will event. be deallocated by caller*/
+        return res;
       }
     case tc_complex:
       {
-        char *s1, *s2, *s3, tmp[100];
+        /* We print the real and imaginary parts in left (real) and
+           right (imaginary), and then glue them together in res. tmp
+           is just a temporary buffer for the imaginary part. */
+        char *left, *right, *res, tmp[100];
         size_t len;
 
-        s1  = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
-        s2  = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
-        len  = strlen(s1) + strlen(s2) + 3;
-        s3 = STk_must_malloc_atomic(len);
-        snprintf(s3, len, "%s%s%si", s1, ((*s2 == '-') ? "": "+"), s2);
-        if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
-        return s3;
+        left  = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
+        right = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
+        len   = strlen(left) + strlen(right) + 3;
+        res   = STk_must_malloc_atomic(len);
+        /* If the imaginary part is negative, infinite, or nan, then its representation
+           will already have the sign (-2.5, +nan.0, -inf.0 etc), so we don't add the
+           sign before the imaginary part. */
+        snprintf(res, len, "%s%s%si", left, (isdigit(*right) ? "+" : ""), right);
+        if (right!=tmp) STk_free(right); /* buffer will event. be deallocated by caller */
+        return res;
       }
     case tc_real:
       if (base != 10) STk_error("base must be 10 for this number", n);
@@ -693,71 +900,6 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
 
     default: return STk_void; /* never reached (for the gcc static analyzer)  */
   }
-}
-
-
-/*===== The general conversion routine ==== */
-
-static type_cell convert(SCM *px, SCM *py)
-{
-  SCM x = *px;
-  SCM y = *py;
-
-  if (TYPEOF(x)==TYPEOF(y)) return(TYPEOF(x)); /* avoid testing on current cases */
-  switch (TYPEOF(x)) {
-    case tc_complex:
-            switch (TYPEOF(y)) {
-              case tc_complex: /*already done */
-              case tc_real:
-              case tc_rational:
-              case tc_bignum:
-              case tc_integer:  *py = Cmake_complex(y, MAKE_INT(0)); break;
-              default:          error_bad_number(y);                 break;
-            }
-            break;
-    case tc_real:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:     /* already done */                      break;
-              case tc_rational: *py = rational2real(y);                 break;
-              case tc_bignum:   *py = scheme_bignum2real(y);            break;
-              case tc_integer:  *py = double2real((double) INT_VAL(y)); break;
-              default:          error_bad_number(y);                    break;
-            }
-            break;
-    case tc_rational:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));   break;
-              case tc_real:     *px = rational2real(x);                break;
-              case tc_rational: /* already done */                     break;
-              case tc_bignum:   /* no break */
-              case tc_integer:  *py = Cmake_rational(y , MAKE_INT(1)); break;
-              default:          error_bad_number(y);                   break;
-            }
-            break;
-    case tc_bignum:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:     *px = scheme_bignum2real(x);            break;
-              case tc_rational: *px = Cmake_rational(x , MAKE_INT(1));  break;
-              case tc_bignum:   /* already done */                      break;
-              case tc_integer:  *py = long2scheme_bignum(INT_VAL(y));   break;
-              default:          error_bad_number(y);                    break;
-            }
-            break;
-    case tc_integer:
-            switch (TYPEOF(y)) {
-              case tc_complex:  *px = Cmake_complex(x, MAKE_INT(0));    break;
-              case tc_real:     *px = double2real((double) INT_VAL(x)); break;
-              case tc_rational: *px = Cmake_rational(x,  MAKE_INT(1));  break;
-              case tc_bignum:   *px = long2scheme_bignum(INT_VAL(x));   break;
-              case tc_integer:  /* already done */                      break;
-              default:          error_bad_number(y);                    break;
-            }
-            break;
-    default: error_bad_number(x);
-  }
-  return TYPEOF(*px);
 }
 
 
@@ -888,85 +1030,116 @@ double STk_number2double(SCM n) /* returns NaN if not convertible */
  * Utilities
  *
  ******************************************************************************/
-
-static long do_compare(SCM x, SCM y)
+static inline long double_diff(double d1, double d2)
 {
-  double d1=0, d2=0;
-
-  switch (TYPEOF(x)) {
-    case tc_real:
-            switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
-              case tc_real:     d1 = REAL_VAL(x); d2 = REAL_VAL(y);
-                                goto double_diff;
-              case tc_rational:
-              case tc_bignum:   goto general_diff;
-              case tc_integer:  d1 = REAL_VAL(x); d2 =  INT_VAL(y);
-                                goto double_diff;
-              default:          break;
-            }
-            break;
-    case tc_integer:
-            switch (TYPEOF(y)) {
-              case tc_complex:  goto general_diff;
-              case tc_real:     d1 = INT_VAL(x); d2 = REAL_VAL(y);
-                                goto double_diff;
-              case tc_rational:
-              case tc_bignum:   goto general_diff;
-              case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
-              default:          break;
-            }
-            break;
-    case tc_complex:
-    case tc_rational:
-    case tc_bignum:
-            switch (TYPEOF(y)) {
-              case tc_complex:
-              case tc_real:
-              case tc_rational:
-              case tc_bignum:
-              case tc_integer:  goto general_diff;
-              default:          break;
-            }
-            break;
-    default:
-            break;
-  }
-  /* if we are here, it s that x and y cannot be compared */
-  STk_error("comparison between ~S and ~S impossible", x,  y);
-double_diff:
-  if (isnan(d1) && isnan(d2))
-    return 0;
   return (d1 == d2) ? 0 : ((d1 < d2)?  -1 : 1);
-general_diff:
-  {
-    SCM d = sub2(x, y);
+}
 
-    if (zerop(d)) return 0;
-    /* complex numbers cannot be compared => return always 1 */
-    return COMPLEXP(d) ? 1 : (negativep(d) ? -1: 1);
-  }
+static inline long complex_diff(SCM r1, SCM i1, SCM r2, SCM i2)
+{
+  return do_compare(r1, r2) || do_compare(i1, i2);
 }
 
 
-static SCM int_quotient(SCM x, SCM y)
-/* Specialized version for rationals. Accepts only integer or bignums as params */
+static long do_compare(SCM x, SCM y)
 {
-  mpz_t q, r;
-
-  if (INTP(x)) {
-    if (INTP(y))
-      return MAKE_INT(INT_VAL(x)/INT_VAL(y));
-    else
-      x = long2scheme_bignum(INT_VAL(x));
-  } else {
-    if (INTP(y))
-      y = long2scheme_bignum(INT_VAL(y));
+  /* ASSERT: x and y are numbers and none is a NaN */
+ Top:
+  switch (TYPEOF(x)) {
+    case tc_real:
+      switch (TYPEOF(y)) {
+        case tc_real:     return double_diff(REAL_VAL(x), REAL_VAL(y));
+        case tc_integer:  return double_diff(REAL_VAL(x), INT_VAL(y));
+        case tc_complex:  return complex_diff(x, MAKE_INT(0),
+                                              COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
+  case tc_integer:
+      switch (TYPEOF(y)) {
+        case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
+        case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
+        case tc_complex:  return complex_diff(x, MAKE_INT(0),
+                                              COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
+    case tc_complex:
+      switch (TYPEOF(y)) {
+        case tc_complex:   return complex_diff(COMPLEX_REAL(x),COMPLEX_IMAG(x),
+                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default:           return complex_diff(COMPLEX_REAL(x),COMPLEX_IMAG(x),
+                                               y, MAKE_INT(0));
+      }
+      break;
+    default:
+      switch (TYPEOF(y)) {
+        case tc_complex:   return complex_diff(x, MAKE_INT(0),
+                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
   }
-  /* Here x and y are both bignum */
-  mpz_init(q); mpz_init(r);
-  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y));
-  return bignum2number(q);
+
+  /* General case: compute x - y to decide the result.
+   *
+   * NOTE: If we're comparing exacts and inexacts, we should be careful not to
+   * consider them equal when they are rounded during conversion. For example,
+   *
+   *   (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000)
+   *
+   * should be #f.  What we do is to see if the real number does represent that
+   * integer exactly. If it doesn't, we return false.
+  */
+  SCM diff = sub2(x, y);
+
+  if (zerop(diff)) {
+    if (REALP(x)) { /* y can only be a bignum or a rational (others done before) */
+      x = double2integer(REAL_VAL(x));
+      goto Top;
+    }
+    if (REALP(y)) { /* x can only be a bignum or a rational (others done before) */
+      y = double2integer(REAL_VAL(y));
+      goto Top;
+    }
+    /* Ok, x an y are equal => return zero: */
+    return 0;
+  }
+  else
+    return negativep(diff) ? -1: 1;
+}
+
+
+
+static SCM int_quotient(SCM x, SCM y)
+/* Specialized version for rationals.
+   Accepts only integer or bignums as params, and not inexacts as
+   int_divide. Also, *only* computes and returns the quotient,
+   not the remainder. */
+{
+  mpz_t q;
+  SCM res;
+
+  if (INTP(x) && INTP(y))
+    return MAKE_INT(INT_VAL(x)/INT_VAL(y));
+
+  mpz_init(q);
+
+  if (INTP(x)) /* && BIGNUMP(y), of course! */
+    return MAKE_INT(0); /* int / BIGNUM = 0... */
+
+  if (INTP(y)) /* && BIGNUMP(x), of course! */
+    /* The sign is in the numerator, so it's OK to use the '_ui' variant
+       from the GMP.  */
+    mpz_tdiv_q_ui(q, BIGNUM_VAL(x), INT_VAL(y));
+  else /* Here x and y are both bignums */
+    mpz_tdiv_q(q, BIGNUM_VAL(x), BIGNUM_VAL(y));
+
+  res = bignum2number(q);
+
+  mpz_clear(q);
+
+  return res;
 }
 
 static int digitp(char c, long base)
@@ -1046,61 +1219,107 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
 }
 
 
-/*
- * SRFI-169.
- * remove_underscores will remove all underscores from a number represented
- * as string, while also checking wether the string conforms to SRFI-169
- * (no double underscores, no leading or trailing underscores, and no
- * underscore close to anything that is not a digit).
- */
-static int remove_underscores(char *str, const char *end, long base) {
-  char *q;
-  int just_saw_one = 0;
-  for (char *p=str; p<end-1; p++)
-    if (*p=='_') {
+static int could_be_a_srfi_169_number(char *str, long base) // SRFI-169 syntax OK?
+{
+  char prev = *str;
 
-      /* SRFI-169: no double underscores */
-      if (just_saw_one) return 0;
-      just_saw_one = 1;
+  if (prev == '_')
+    // a number cannot start with a '_'
+    return 0;
 
-      if ((p>str) && (! digitp(*(p-1),base))) return 0; /* SRFI-169: no '_' adjacent to dot. */
-      if (!digitp(*(p+1),base))               return 0; /* SRFI-169: no '_' adjacent to dot. */
-
-      for (q=p; q<end; q++) {
-        *q=*(q+1);
-      }
-      p--;
-      end = q;
-    } else
-      just_saw_one = 0;
-
-  if (*(end-1)=='_') return 0;  /* SRFI-169 forbids trailing '_' */
+  for (char *p=str+1; *p; p++) {
+    char next= *(p+1); /* could be the final '\0' */
+    if (*p == '_') {
+      // a '_' must be surrounded by digit (or the '#' for R5RS)
+      // note: we use base 16 here just for verification, control will be done later
+      if (!digitp(prev, base) || !digitp(next, base))
+        return 0;
+    }
+    prev = *p;
+  }
   return 1;
 }
 
+static void clean_srfi_169_number(char *str)  // Suppress '_' of a correct SRFI-169
+{
+  char *q = str;
+
+  for (char *p = str; *p; p++) {
+    if (*p != '_') {
+      if (p != q) *q = *p;
+      q++;
+    }
+  }
+  *q = '\0';
+}
+
+static int contain_weird_chars(char *str) // has characters that'll be patched later?
+{
+  for (char *p=str; *p; p++) {
+    switch (*p) {
+    case '#':
+    case 's': case 'S': case 'f': case 'F':
+    case 'd': case 'D': case 'l': case 'L': return 1;
+    }
+  }
+  return 0;
+}
 
 static SCM read_integer_or_real(char *str, long base, char exact_flag, char **end)
 {
   int adigit=0, isint=1;
-  char saved_char = '\0', *p = str, *p1, *p2, *p3, *p4;
+  char saved_char = '\0', *original_str = str;
+  char *p, *p1, *p2, *p3, *p4;
   SCM res;
 
-  /* see function compute_exact_real for the meaning of these pointers */
+  /* if first char cannot start a number, return #f (not a number => symbol) */
+  if (!digitp(*str, base) && *str != '-' && *str != '+' && *str != '.')
+    return STk_false;
+
+  /* If str contains certain characters, they will be patched later, to passed a correct
+   * string to  standard conversion functions. For instance, "1_2#s3" will be modified
+   * in place to "120e3" before to be sent to the standard strtod function. The problem
+   * is that we can think that we are on a number an see later that it's a symbol (all non
+   * numbers are symbols in STklos). For instance "1_2#s3XY" is a symbol and,
+   * if we don't care, it will be read as symbol "120e3XY".
+   * Consequently, we need to work on a copy of str, when analyzing numbers. Since
+   * allocations for each number slow down significantly the reader, we'll work on
+   * minimizing the number of string duplications.
+   */
+
+  /* suppress eventually '_' of SRFI_169 numbers */
+  if (use_srfi_169 && strchr(str, '_')) {
+    if (could_be_a_srfi_169_number(str, base)) {
+      str = STk_strdup(str);
+      clean_srfi_169_number(str);
+    } else
+      /* we have '_' and it it's not a valid srfi-169 number => it's a symbol */
+      return STk_false;
+  }
+
+  /* if number contains weird exponent notation or '#' characters, duplicate */
+  if (contain_weird_chars(str) && str == original_str) {
+     /* Note: if str != original_str, we have already duplicated the string since it
+      * contains at least an underscore */
+    str = STk_strdup(str);
+  }
+
+  p = str; // str can be the original string or a copy of it, if we'll patch it
+
+  /* See function compute_exact_real for the meaning of p1..p4 pointers */
   p1 = p2 = p3 = p4 = NULL;
 
   if (*p == '-' || *p == '+') p+=1;
   if (*p == '#') return STk_false;
-  if (*p == '_') return STk_false; /* SRFI-169 forbids _ in leading position. */
 
-  /* the  ( || *p=='_' ) in the rest of this function implements SRFI-169. */
-  while(digitp(*p, base) || *p=='_') { p+=1; adigit=1; if (*p == '#') isint = 0; }
+  while(digitp(*p, base)) { p+=1; adigit=1; if (*p == '#') isint = 0; }
 
   if (adigit) p1 = p;           /* p1 = end of integral part */
 
   if (*p=='.') {
     isint = 0; p += 1;
     p2 = p;
-    while(digitp(*p, base) || *p=='_') { p+=1; adigit=1; }
+    while(digitp(*p, base)) { p+=1; adigit=1; }
     p3 = p;
   }
 
@@ -1111,9 +1330,9 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
     p += 1;
     p4 = p;
     if (*p == '-' || *p == '+') p+=1;
-    if (!(digitp(*p, base)|| *p=='_')) return STk_false;
+    if (!digitp(*p, base)) return STk_false;
     p+=1;
-    while (digitp(*p, base)|| *p=='_') p+=1;
+    while (digitp(*p, base)) p+=1;
   }
   if (*p) {
     /* Patch the end of the number with a '\0' (will be restored on exit) */
@@ -1121,14 +1340,6 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
     *p = '\0';
   }
 
-  /* SRFI-169: we have already accepted the number with underscores, now
-   *  remove_underscores will validate their positions and remove them
-   */
-  if (strchr(str, '_')) {
-    if (!use_srfi_169) return STk_false;
-    if (!remove_underscores(str,p,base))
-      return STk_false;
-  }
 
   if (isint) {
     /* We are sure to have an integer. Read it as a bignum and see if we can
@@ -1188,7 +1399,7 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
 }
 
 
-static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **end)
+static SCM read_rational_den(SCM num, char *str, long base, char exact_flag, char **end)
 {
   SCM den;
 
@@ -1201,100 +1412,115 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
   else if (exact_flag=='i')
     /* We're sure we got here with either fixnums, bignums or reals, so
        div2 will always work. */
-    return  (div2(num,den));
+    return div2(num,den);
 
   STk_error("cannot make rational with ~S and ~S", num, den);
 
   return STk_false;             /* never reached */
 }
 
-SCM STk_Cstr2number(char *str, long base)
+/* ----------------------------------------------------------------------
+ * STk_Cstr2number: Read a number from a C string
+ * ---------------------------------------------------------------------- */
+
+/* STk_Cstr2simple_number will read from str a non-complex number.
+   The function STk_Cstr2number, which reads complexes, uses
+   this one to read the two parts of the number, */
+static SCM Cstr2simple_number(char *str, char *exact, long *base, char **end)
 {
-  int i, exact, radix, polar, is_signed;
+  int i, radix;
   char *p = str;
-  SCM num1, num2;
+  SCM num = STk_false;
 
-  is_signed = 0;
+  if ((*str == '-' || *str == '+') && isalpha(str[1])) {
+    /* Treat special inf "+values.0" -inf.0 , "+nan.0", "-nan.0"
+     * NOTE: R7RS says that -nan.0 is synonym to +nan.0 */
+    if      (strncmp(str, MINUS_INF,6)==0) num = double2real(minus_inf);
+    else if (strncmp(str, PLUS_INF,6)==0)  num = double2real(plus_inf);
+    else if (strncmp(str, MINUS_NaN,6)==0) num = double2real(STk_NaN);
+    else if (strncmp(str, PLUS_NaN,6)==0)  num = double2real(STk_NaN);
 
-  if ((*str == '-' || *str == '+')) {
-    is_signed = 1;
-
-    if (isalpha(str[1])) {
-      /* Treat special values "+inf.0" -inf.0 and "NaN" as well as +i and -i */
-      if (strcmp(str, MINUS_INF)==0) return double2real(minus_inf);
-      if (strcmp(str, PLUS_INF)==0)  return double2real(plus_inf);
-      if (strcmp(str, MINUS_NaN)==0) return double2real(make_nan(1,0,0));
-      if (strcmp(str, PLUS_NaN)==0)  return double2real(make_nan(0,0,0));
-      if (strcmp(str, "+i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
-      if (strcmp(str, "-i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
+    if (num != STk_false) { /* Did we actually read an inf or nan? */
+      *end = str + 6;
+      return num;
     }
   }
 
-  exact = ' ', radix = 0;
-  for (i = 0; i < 2; i++) {
-    if (*p == '#') {
-      p += 1;
-      switch (*p++) {
-        case 'e': if (exact == ' ') { exact = 'e'; break; }  else return STk_false;
-        case 'i': if (exact == ' ') { exact = 'i'; break; }  else return STk_false;
-        case 'b': if (!radix) {base = 2;  radix = 1; break;} else return STk_false;
-        case 'o': if (!radix) {base = 8;  radix = 1; break;} else return STk_false;
-        case 'd': if (!radix) {base = 10; radix = 1; break;} else return STk_false;
-        case 'x': if (!radix) {base = 16; radix = 1; break;} else return STk_false;
-        default:  return STk_false;
-      }
-      str += 2;
+  /* Should we read in a different basis or exactness? */
+  radix = 0;
+  for (i = 0; i < 2 && *p == '#'; i++) { /* two loops laps to permit #i#xff -> 255.0 */
+    p += 1;
+    switch (*p++) {
+      case 'e': if (*exact == ' ')  { *exact = 'e'; break;} else return STk_false;
+      case 'i': if (*exact == ' ')  { *exact = 'i'; break;} else return STk_false;
+      case 'b': if (!radix) {*base = 2;  radix = 1; break;} else return STk_false;
+      case 'o': if (!radix) {*base = 8;  radix = 1; break;} else return STk_false;
+      case 'd': if (!radix) {*base = 10; radix = 1; break;} else return STk_false;
+      case 'x': if (!radix) {*base = 16; radix = 1; break;} else return STk_false;
+      default:  return STk_false;
     }
-    if (*p != '#') break;
+    str += 2;
   }
 
-  num1 = read_integer_or_real(p, base, exact, &p);
-  if (num1 == STk_false) return STk_false;
+  /* If the user tries to make us read a complex with two different
+     bases, #xa+#o10i it will fail (as it should), because trying to
+     read +#o10 below fails. */
+  num = read_integer_or_real(p, *base, *exact, &p);
+  if (num == STk_false) return STk_false;
 
   if (*p == '/')
-    num1 = read_rational(num1, p+1, base, exact, &p);
+    num = read_rational_den(num, p+1, *base, *exact, &p);
 
-  if ((*p == '+') || (*p == '-') || (*p == '@')) {
-    /* Start to read a complex number */
-    if (*p == '+' && p[1] == 'i') {
-      p   += 2;
-      num1 = make_complex(num1, MAKE_INT(1UL));   /* special case ...+i */
-    }
-    else if (*p == '-' && p[1] == 'i') {
-      p    += 2;
-      num1  = make_complex(num1, MAKE_INT(-1UL)); /* special case ...-i */
-    }
-    else {                                      /* general case ....[+-@]... */
-      polar = (*p == '@') ? (p++,1) : 0;
-
-      num2 = read_integer_or_real(p, base, exact, &p);
-      if (num2 == STk_false) return STk_false;
-
-      if (*p == '/') {
-        /* Second member of complex number is a rational */
-        num2 = read_rational(num2, p+1, base, exact, &p);
-        if (num2 == STk_false) return STk_false;
-      }
-
-      if (polar) {
-        num1 = make_polar(num1, num2);
-      } else {
-        if (*p == 'i') {
-          num1 = make_complex(num1, num2);
-          p += 1;
-        } else return STk_false;
-      }
-    }
-  } else if (*p == 'i' && is_signed) {
-    /* We had a number of the form '{+|-}...i' */
-    p   += 1;
-    num1 = make_complex(MAKE_INT(0), num1);
-  }
-
-  return (*p) ? STk_false : num1;
+  /* Store in end where the number ends. */
+  *end = p;
+  return num;
 }
 
 
+
+/* Reads a number from str in the specified base. */
+SCM STk_Cstr2number(char *str, long base)
+{
+  if (strcmp(str, "+i")==0) return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
+  if (strcmp(str, "-i")==0) return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
+  else {
+    char *end, *end2 = "";
+    char exact = ' ';
+    SCM a, b;
+
+    /* First part of the number */
+    a = Cstr2simple_number(str, &exact, &base, &end);
+    if (a == STk_false) return STk_false; /* Not even the first part was good */
+
+    /* Second part of the number; the possibilities now are:
+       i)   Non-complex;
+       ii)  +bi, -bi;
+       iii) a+bi, a-bi;
+       iv)  a@b;
+       v)   not a number */
+    switch (*end) {
+      case '\0':
+        return a;
+      case 'i':
+        if (*str == '+' || *str == '-')
+          if (*(end+1) == '\0') return make_complex(MAKE_INT(0),a);
+        break;
+      case '+':
+      case '-':
+        if (strcmp(end, "+i")==0) return make_complex(a,MAKE_INT(+1UL));
+        if (strcmp(end, "-i")==0) return make_complex(a,MAKE_INT(-1UL));
+        b = Cstr2simple_number(end, &exact, &base, &end2);
+        if (*end2 == 'i' && *(end2+1) == '\0') return make_complex(a,b);
+        break;
+      case '@':
+        /* end+1, because we want to skip the '@' sign: */
+        b = Cstr2simple_number(end+1, &exact, &base, &end2);
+        if (*end2 == '\0') return make_polar(a,b);
+        break;
+    }
+    return STk_false;
+  }
+}
 
 /******************************************************************************
  *
@@ -1512,7 +1738,9 @@ DEFINE_PRIMITIVE("integer-length", integer_length, subr1, (SCM z))
  *
  * These procedures return |#t| if their arguments are (respectively):
  * equal, monotonically increasing, monotonically decreasing,
- * monotonically nondecreasing, or monotonically nonincreasing.
+ * monotonically nondecreasing, or monotonically nonincreasing, and
+ * |#f| otherwise. If any of the arguments are +nan.0, all the predicates
+ * return |#f|.
  * @lisp
  * (= +inf.0 +inf.0)           =>  #t
  * (= -inf.0 +inf.0)           =>  #f
@@ -1533,10 +1761,11 @@ doc>
       SCM previous;                                                         \
                                                                             \
       if (argc == 0) error_at_least_1();                                    \
-      if (_max_type_(*argv) == STk_false) error_not_a_real_number(*argv);  \
+      if (_max_type_(*argv) == STk_false) error_not_a_real_number(*argv);   \
                                                                             \
       for (previous = *argv--; --argc; previous = *argv--) {                \
         if (_max_type_(*argv) == STk_false) error_bad_number(*argv);        \
+        if (STk_isnan(*argv)) return STk_false;                             \
         if (do_compare(previous, *argv) _operator_ 0) return STk_false;     \
       }                                                                     \
       return STk_true;                                                      \
@@ -1546,8 +1775,9 @@ doc>
 #define COMPARE_NUM2(_prim_, _max_type_, _operator_)                        \
     long STk_##_prim_##2(SCM o1, SCM o2)                                    \
     {                                                                       \
-      if (_max_type_(o1) == STk_false) error_not_a_real_number(o1);        \
-      if (_max_type_(o2) == STk_false) error_not_a_real_number(o2);        \
+      if (_max_type_(o1) == STk_false) error_not_a_real_number(o1);         \
+      if (_max_type_(o2) == STk_false) error_not_a_real_number(o2);         \
+      if (STk_isnan(o1) || STk_isnan(o2)) return 0;                         \
       return do_compare(o1, o2) _operator_ 0;                               \
     }
 
@@ -1590,9 +1820,9 @@ doc>
 
 int STk_real_isoddp(SCM n)   /* n MUST be a real */
 {
-  SCM q, r;
+  SCM r = 0;
 
-  integer_division(n, MAKE_INT(2), &q, &r);
+  integer_division(n, MAKE_INT(2), NULL, &r);
   /* We are sure here that r is a real */
   return (fpclassify(REAL_VAL(r)) != FP_ZERO);
 }
@@ -1622,8 +1852,8 @@ static int zerop(SCM n)
 {
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) == 0);
-    case tc_real:     return (fpclassify(REAL_VAL(n)) == FP_ZERO);
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) == 0);
+    case tc_real:     return REAL_ZEROP(n);
+    case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(n)) == 0);
     case tc_complex:  return zerop(COMPLEX_REAL(n)) && zerop(COMPLEX_IMAG(n));
     case tc_rational: return zerop(RATIONAL_NUM(n));
     default:          error_bad_number(n);
@@ -1636,7 +1866,7 @@ static int positivep(SCM n)
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) > 0);
     case tc_real:     return (REAL_VAL(n) > 0.0);
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) > 0);
+    case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(n)) > 0);
     case tc_rational: return positivep(RATIONAL_NUM(n));
     default:          error_not_a_real_number(n);
   }
@@ -1649,7 +1879,7 @@ static int negativep(SCM n)
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) < 0);
     case tc_real:     return (REAL_VAL(n) < 0.0);
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) < 0);
+    case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(n)) < 0);
     case tc_rational: return negativep(RATIONAL_NUM(n));
     default:          error_not_a_real_number(n);
   }
@@ -1745,15 +1975,7 @@ doc>
 */
 DEFINE_PRIMITIVE("nan?", nanp, subr1, (SCM z))
 {
-  switch (TYPEOF(z)) {
-    case tc_complex: return MAKE_BOOLEAN(STk_nanp(COMPLEX_REAL(z)) == STk_true ||
-                                         STk_nanp(COMPLEX_IMAG(z)) == STk_true);
-    case tc_real:     return MAKE_BOOLEAN(isnan(REAL_VAL(z)));
-    case tc_rational:
-    case tc_bignum:
-    case tc_integer:  return STk_false;
-    default:          error_bad_number(z); return STk_void;
-  }
+  return MAKE_BOOLEAN(STk_isnan(z));
 }
 
 
@@ -1791,10 +2013,14 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
   }
 
   exactp = isexactp(*argv);
+  if (STk_isnan(*argv)) return *argv;
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
+
+    /* if this argument is a NaN, result is a NaN */
+    if (STk_isnan(*argv)) return *argv;
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -1818,10 +2044,14 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
   }
 
   exactp = isexactp(*argv);
+  if (STk_isnan(*argv)) return *argv;
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
+
+    /* if this argument is a NaN, result is a NaN */
+    if (STk_isnan(*argv)) return *argv;
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -1862,54 +2092,123 @@ doc>
  */
 SCM STk_add2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
-    case tc_bignum:
-        {
-          mpz_t add;
+  if (o1 == MAKE_INT(0)) return o2;
+  if (o2 == MAKE_INT(0)) return o1;
 
-          mpz_init(add);
-          mpz_add(add, BIGNUM_VAL(o1), BIGNUM_VAL(o2));
+  switch (TYPEOF(o1)) {
 
-          o1 = bignum2number(add);
-          mpz_clear(add);
-          break;
-        }
-      case tc_integer:
-        {
-          long add =  (long) INT_VAL(o1) + INT_VAL(o2);
+    // ========== o1 is a complex
+    case tc_complex: {
+      switch (TYPEOF(o2)) {
+        case tc_complex:
+          return make_complex(add2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
+                              add2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer:  return  make_complex(add2(COMPLEX_REAL(o1), o2),
+                                               COMPLEX_IMAG(o1));
+        default:          goto add_error;
+      }
+    }
 
-          if (LONG_FITS_INTEGER(add))
-            o1 = MAKE_INT(add);
-          else
-            o1 = long2scheme_bignum(add);
-          break;
-        }
-      case tc_real:
-        {
-          o1 = double2real(REAL_VAL(o1) + REAL_VAL(o2));
-          break;
-        }
-      case tc_complex:
-        {
-          o1 = make_complex(add2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                            add2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
-          break;
-        }
-      case tc_rational:
-        {
-          SCM num1, num2, den;
+    // ========== o1 is a real
+    case tc_real: {
+      double d2;
 
-          den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
-          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
-          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto add_x_and_bignum;
+        case tc_real:     d2 = REAL_VAL(o2);             break;
+        case tc_rational: d2 = rational2double(o2);      break;
+        case tc_bignum:   d2 = scheme_bignum2double(o2); break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
+        default:          goto add_error;
+      }
+      return double2real(REAL_VAL(o1) + d2);
+    }
 
-          o1 = make_rational(add2(num1, num2), den);
-          break;
-        }
-      default: error_cannot_operate("addition", o1, o2);
+    // ========== o1 is a rational
+    case tc_rational: {
+      SCM num1, num2, den;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto add_x_and_bignum;
+        case tc_real:     return double2real(rational2double(o1) + REAL_VAL(o2));
+        case tc_rational: den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
+                          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
+                          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
+                          return make_rational(add2(num1, num2), den);
+        case tc_bignum:   // fallthrough
+        case tc_integer:  den  = RATIONAL_DEN(o1);
+                          num1 = RATIONAL_NUM(o1);
+                          num2 = mul2(o2, den);
+                          return make_rational(add2(num1, num2), den);
+        default:          goto add_error;
+      }
+    }
+
+    // ========== o1 is a bignum
+    case tc_bignum: {
+      mpz_t add, b2;
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto add_x_and_bignum;
+        case tc_real:     return double2real(scheme_bignum2double(o1) +REAL_VAL(o2));
+        case tc_rational: goto add_x_and_rational;
+        case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
+        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
+        default:          goto add_error;
+      }
+
+      // if we are here: o1 is a Scheme bignumm and b2 is a GMP bignum
+      mpz_init(add);
+      mpz_add(add, BIGNUM_VAL(o1), b2);
+      tmp = bignum2number(add);
+      mpz_clear(add);
+      if (TYPEOF(o2) == tc_integer) // we initialze b2 here
+        mpz_clear(b2);
+      return tmp;
+    }
+
+    // ========== o1 is an a fixnum
+    case tc_integer: {
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto add_x_and_bignum;
+        case tc_real:     return double2real(INT_VAL(o1) + REAL_VAL(o2));
+        case tc_rational: goto add_x_and_rational;
+        case tc_bignum:   {
+                            mpz_t add, x;
+                            mpz_init(add);
+                            mpz_init_set_si(x, INT_VAL(o1));
+                            mpz_add(add, x, BIGNUM_VAL(o2));
+                            tmp = bignum2number(add);
+                            mpz_clear(add); mpz_clear(x);
+                            return tmp;
+                          }
+        case tc_integer:  {
+                            long add =  (long) INT_VAL(o1) + INT_VAL(o2);
+                            return (LONG_FITS_INTEGER(add)) ? MAKE_INT(add):
+                                        long2scheme_bignum(add);
+                           }
+        default:           goto add_error;
+      }
+    }
   }
-  return o1;
+
+ add_error:
+  error_cannot_operate("addition", o1, o2);
+
+ add_x_and_bignum:         // x can be a real, a rational, a bignum or a fixnum
+  return make_complex(add2(o1, COMPLEX_REAL(o2)), COMPLEX_IMAG(o2));
+
+ add_x_and_rational:    // x can be a tc_bignum or an tc_integer
+  return make_rational(add2(mul2(o1, RATIONAL_DEN(o2)), RATIONAL_NUM(o2)),
+                       RATIONAL_DEN(o2));
 }
+
 
 DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
 {
@@ -1930,57 +2229,135 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
-    case tc_bignum:
-      mult_bignum:
-      {
-        mpz_t prod;
+  if (o1 == MAKE_INT(1)) return o2;
+  if (o2 == MAKE_INT(1)) return o1;
 
-        mpz_init(prod);
-        mpz_mul(prod, BIGNUM_VAL(o1), BIGNUM_VAL(o2));
+  switch (TYPEOF(o1)) {
 
-        o1 = bignum2number(prod);
-        mpz_clear(prod);
-        break;
+    // ========== o1 is a complex
+    case tc_complex: {
+      SCM r1 = COMPLEX_REAL(o1);
+      SCM i1 = COMPLEX_IMAG(o1);
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  {
+                            SCM r2 = COMPLEX_REAL(o2);
+                            SCM i2 = COMPLEX_IMAG(o2);
+                            return make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
+                                              add2(mul2(r1,i2), mul2(r2, i1)));
+                          }
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer:  return make_complex(mul2(r1, o2), mul2(i1, o2));
+      default:            goto mult_error;
       }
-    case tc_integer:
-      {
-        long int i1 = INT_VAL(o1);
-        long int i2 = INT_VAL(o2);
+    }
 
-        o1 = MAKE_INT(i1*i2);
-        if (i1 != 0 && (INT_VAL(o1) / i1) != i2) {
-          o1 = long2scheme_bignum(i1);
-          o2 = long2scheme_bignum(i2);
-          goto mult_bignum;
-        }
-        break;
+    // ========== o1 is a real
+    case tc_real: {
+      double d2;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto mult_x_and_complex;
+        case tc_real:     d2 = REAL_VAL(o2);             break;
+        case tc_rational: d2 = rational2double(o2);      break;
+        case tc_bignum:   d2 = scheme_bignum2double(o2); break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
+        default:          goto mult_error;
       }
-      case tc_real:
-        {
-          o1 = double2real(REAL_VAL(o1) * REAL_VAL(o2));
-          break;
-        }
-      case tc_complex:
-        {
-          SCM r1 = COMPLEX_REAL(o1);
-          SCM i1 = COMPLEX_IMAG(o1);
-          SCM r2 = COMPLEX_REAL(o2);
-          SCM i2 = COMPLEX_IMAG(o2);
+      return double2real(REAL_VAL(o1) * d2);
+    }
 
-          o1 = make_complex(sub2(mul2(r1,r2), mul2(i1, i2)),
-                            add2(mul2(r1,i2), mul2(r2, i1)));
-          break;
-        }
-      case tc_rational:
-        {
-          o1 = make_rational(mul2(RATIONAL_NUM(o1), RATIONAL_NUM(o2)),
-                             mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2)));
-          break;
-        }
-      default: error_cannot_operate("multiplication", o1, o2);
+    // ========== o1 is a rational
+    case tc_rational: {
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto mult_x_and_complex;
+        case tc_real:     return double2real(rational2double(o1) * REAL_VAL(o2));
+        case tc_rational: return make_rational(mul2(RATIONAL_NUM(o1),
+                                                    RATIONAL_NUM(o2)),
+                                               mul2(RATIONAL_DEN(o1),
+                                                    RATIONAL_DEN(o2)));
+        case tc_bignum:  break;
+        case tc_integer: if (o2 == MAKE_INT(0)) return o2;
+                         break;
+        default:         goto mult_error;
+      }
+      return make_rational(mul2(RATIONAL_NUM(o1), o2), RATIONAL_DEN(o1));
+    }
+
+    // ========== o1 is a bignum
+    case tc_bignum: {
+      mpz_t mult, b2;
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto mult_x_and_complex;
+        case tc_real:     return double2real(scheme_bignum2double(o1) *REAL_VAL(o2));
+        case tc_rational: return make_rational(mul2(o1, RATIONAL_NUM(o2)),
+                                               RATIONAL_DEN(o2));
+        case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
+        case tc_integer:  if (o2 == MAKE_INT(0)) return o2;
+                          mpz_init_set_si(b2, INT_VAL(o2)); break;
+        default:          goto mult_error;
+      }
+
+      // if we are here: o1 is a Scheme bignumm and b2 is a GMP bignum
+      mpz_init(mult);
+      mpz_mul(mult, BIGNUM_VAL(o1), b2);
+      tmp = bignum2number(mult);
+      mpz_clear(mult);
+      if (TYPEOF(o2) == tc_integer) // we initialze b2 here
+        mpz_clear(b2);
+      return tmp;
+    }
+
+    // ========== o1 is an a fixnum
+    case tc_integer: {
+      mpz_t mult, b1;
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto mult_x_and_complex;
+        case tc_real:     return double2real(INT_VAL(o1) * REAL_VAL(o2));
+        case tc_rational: if (o1 == MAKE_INT(0)) return o1;
+                          return make_rational(mul2(o1, RATIONAL_NUM(o2)),
+                                               RATIONAL_DEN(o2));
+        case tc_bignum:   if (o1 == MAKE_INT(0)) return o1;
+                          else {
+                            mpz_init(mult);
+                            mpz_init_set_si(b1, INT_VAL(o1));
+                            mpz_mul(mult, b1, BIGNUM_VAL(o2));
+                            tmp = bignum2number(mult);
+                            mpz_clear(mult);
+                            mpz_clear(b1);
+                            return tmp;
+                          }
+        case tc_integer:  {
+                            long int i1 = INT_VAL(o1);
+                            long int i2 = INT_VAL(o2);
+
+                            tmp = MAKE_INT(i1*i2);
+                            if (i1 != 0 && (INT_VAL(tmp) / i1) != i2) {
+                              mpz_init(mult);
+                              mpz_init_set_si(b1, i1);
+                              mpz_mul_si(mult, b1, i2);
+                              tmp = bignum2number(mult);
+                              mpz_clear(mult);
+                              mpz_clear(b1);
+                            }
+                            return tmp;
+                          }
+        default:          goto mult_error;
+      }
+    }
   }
-  return o1;
+ mult_error:
+  error_cannot_operate("multiplication", o1, o2);
+
+ mult_x_and_complex:    // x here can be a real, a rational, a bignum or a fixnum
+  return make_complex(mul2(o1,COMPLEX_REAL(o2)),
+                       mul2(o1,COMPLEX_IMAG(o2)));
 }
 
 DEFINE_PRIMITIVE("*", multiplication, vsubr, (int argc, SCM *argv))
@@ -2015,70 +2392,151 @@ DEFINE_PRIMITIVE("*", multiplication, vsubr, (int argc, SCM *argv))
  * (/ 3 4 5)               =>  3/20
  * (/ 3)                   =>  1/3
  * (/ 0.0)                 => +inf.0
+ * (/ -0.0)                => -inf.0
+ * (- 0.0)                 => -0.0
  * (/ 0)                   => error (division by 0)
  * @end lisp
 doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
-    case tc_bignum:
-      {
-        mpz_t sub;
+  if (o2 == MAKE_INT(0)) return o1;
 
-        mpz_init(sub);
-        mpz_sub(sub, BIGNUM_VAL(o1), BIGNUM_VAL(o2));
+  switch (TYPEOF(o1)) {
 
-        o1 = bignum2number(sub),
-        mpz_clear(sub);
-        break;
+    // ========== o1 is a complex
+    case tc_complex: {
+      switch (TYPEOF(o2)) {
+        case tc_complex:
+          return make_complex(sub2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
+                              sub2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer:  return make_complex(sub2(COMPLEX_REAL(o1), o2),
+                          COMPLEX_IMAG(o1));
+                          break;
+        default:          goto sub_error;
       }
-    case tc_integer:
-      {
-        long sub = (long) INT_VAL(o1) - INT_VAL(o2);
-        if (LONG_FITS_INTEGER(sub))
-          o1 = MAKE_INT(sub);
-        else
-          o1 = long2scheme_bignum(sub);
-        break;
+    }
+
+    // ========== o1 is a real
+    case tc_real: {
+      double d2;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto sub_x_and_complex;
+        case tc_real:     d2 = REAL_VAL(o2);             break;
+        case tc_rational: d2 = rational2double(o2);      break;
+        case tc_bignum:   d2 = scheme_bignum2double(o2); break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
+        default:          goto sub_error;
       }
-      case tc_real:
-        {
-          o1 = double2real(REAL_VAL(o1) - REAL_VAL(o2));
-          break;
-        }
-      case tc_complex:
-        {
-          o1 = make_complex(sub2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                            sub2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2)));
-          break;
-        }
-      case tc_rational:
-        {
-          SCM num1, num2, den;
+      return double2real(REAL_VAL(o1) - d2);
+    }
 
-          den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
-          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
-          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
+    // ========== o1 is a rational
+    case tc_rational: {
+      SCM num1, num2, den;
 
-          o1 = make_rational(sub2(num1, num2), den);
-          break;
-        }
-      default: error_cannot_operate("subtraction", o1, o2);
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto sub_x_and_complex;
+        case tc_real:     return double2real(rational2double(o1) - REAL_VAL(o2));
+        case tc_rational: den  = mul2(RATIONAL_DEN(o1), RATIONAL_DEN(o2));
+                          num1 = mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2));
+                          num2 = mul2(RATIONAL_NUM(o2), RATIONAL_DEN(o1));
+                          return make_rational(sub2(num1, num2), den);
+        case tc_bignum:   // falsthrough
+        case tc_integer:  den  = RATIONAL_DEN(o1);
+                          num1 = RATIONAL_NUM(o1);
+                          num2 = mul2(o2, den);
+                          return make_rational(sub2(num1, num2), den);
+        default:          goto sub_error;
+      }
+    }
+
+    // ========== o1 is a bignum
+    case tc_bignum: {
+      mpz_t sub, b2;
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto sub_x_and_complex;
+        case tc_real:     return double2real(scheme_bignum2double(o1) -REAL_VAL(o2));
+        case tc_rational: goto sub_x_and_rational;
+        case tc_bignum:   memcpy(&b2, BIGNUM_VAL(o2), sizeof(mpz_t)); break;
+        case tc_integer:  mpz_init_set_si(b2, INT_VAL(o2)); break;
+        default:          goto sub_error;
+      }
+
+      // if we are here: o1 is a Scheme bignumm and b2 is a GMP bignum
+      mpz_init(sub);
+      mpz_sub(sub, BIGNUM_VAL(o1), b2);
+      tmp = bignum2number(sub);
+      mpz_clear(sub);
+      if (TYPEOF(o2) == tc_integer) // we initialze b2 here
+        mpz_clear(b2);
+      return tmp;
+    }
+
+    // ========== o1 is an a fixnum
+    case tc_integer: {
+      SCM tmp;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto sub_x_and_complex;
+        case tc_real:     return double2real(INT_VAL(o1) - REAL_VAL(o2));
+        case tc_rational: goto sub_x_and_rational;
+        case tc_bignum:   {
+                            mpz_t sub, x;
+                            mpz_init(sub);
+                            mpz_init_set_si(x, INT_VAL(o1));
+                            mpz_sub(sub, x, BIGNUM_VAL(o2));
+                            tmp = bignum2number(sub);
+                            mpz_clear(sub); mpz_clear(x);
+                            return tmp;
+                          }
+        case tc_integer:  if (INT_VAL(o1) == 0 && INT_VAL(o2) != INT_MIN_VAL)
+                            return MAKE_INT(-INT_VAL(o2));
+                          else {
+                             long sub =  (long) INT_VAL(o1) - INT_VAL(o2);
+                             return (LONG_FITS_INTEGER(sub)) ?
+                               MAKE_INT(sub)                 :
+                               long2scheme_bignum(sub);
+                           }
+        default:           goto sub_error;
+      }
+    }
   }
-  return o1;
-}
 
+ sub_error:
+  error_cannot_operate("difference", o1, o2);
+
+ sub_x_and_complex: // x can be a real, a rational, a bignum or a fixnum
+  return make_complex(sub2(o1, COMPLEX_REAL(o2)),
+                      sub2(MAKE_INT(0), COMPLEX_IMAG(o2)));
+
+ sub_x_and_rational:   // int can be a tc_bignum or an tc_integer
+  return make_rational(sub2(mul2(o1, RATIONAL_DEN(o2)), RATIONAL_NUM(o2)),
+                       RATIONAL_DEN(o2));
+}
 
 DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
 {
   SCM res;
 
   if (argc == 0) error_at_least_1();
-  if (argc == 1) return sub2(MAKE_INT(0), *argv);
+  if (argc == 1) {
+    /* Special case: (- 0.0) is -0.0 */
+    return IS_ZERO_ZEROP(*argv)? double2real(-REAL_VAL(*argv)):
+                                 sub2(MAKE_INT(0), *argv);
+  }
 
-  for (res = *argv-- ; --argc; argv--)
-    res = sub2(res, *argv);
+  for (res = *argv-- ; --argc; argv--) {
+    /* Special case again: if res is 0 and *argv is 0.0 -> res = -0.0 */
+    res = (res==MAKE_INT(0) && IS_ZERO_ZEROP(*argv)) ? double2real(-REAL_VAL(*argv)):
+                                                       sub2(res, *argv);
+  }
   return res;
 }
 
@@ -2088,43 +2546,98 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
-  switch (convert(&o1, &o2)) {
-    case tc_bignum:
-    case tc_integer:
-      o1 = make_rational(o1, o2);
-      break;
-    case tc_real:
-      {
-        double r2 = REAL_VAL(o2);
+  if (o2 == MAKE_INT(1)) return o1;
 
-        if (r2 != 1.0)
-          o1 = double2real(REAL_VAL(o1) / r2);
-        break;
-      }
-    case tc_rational:
-      o1 =  make_rational(mul2(RATIONAL_NUM(o1), RATIONAL_DEN(o2)),
-                          mul2(RATIONAL_DEN(o1), RATIONAL_NUM(o2)));
-      break;
-    case tc_complex:
-      {
-        SCM tmp, new_r, new_i;
+  switch (TYPEOF(o1)) {
 
-        if (!zerop(o1)) {
-          tmp   = add2(mul2(COMPLEX_REAL(o2), COMPLEX_REAL(o2)),
-                       mul2(COMPLEX_IMAG(o2), COMPLEX_IMAG(o2)));
-          new_r = div2(add2(mul2(COMPLEX_REAL(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_IMAG(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          new_i = div2(sub2(mul2(COMPLEX_IMAG(o1), COMPLEX_REAL(o2)),
-                            mul2(COMPLEX_REAL(o1), COMPLEX_IMAG(o2))),
-                       tmp);
-          o1 = make_complex(new_r, new_i);
+    // ========== o1 is a complex
+    case tc_complex: {
+      SCM r1 = COMPLEX_REAL(o1);
+      SCM i1 = COMPLEX_IMAG(o1);
+
+      switch (TYPEOF(o2)) {
+        case tc_complex: {
+          SCM r2  = COMPLEX_REAL(o2);
+          SCM i2  = COMPLEX_IMAG(o2);
+          SCM tmp = add2(mul2(r2, r2), mul2(i2, i2));
+          return make_complex(div2(add2(mul2(r1, r2), mul2(i1, i2)), tmp),
+                              div2(sub2(mul2(i1, r2), mul2(r1, i2)), tmp));
         }
-        break;
+        case tc_real:     // fallthrough
+        case tc_rational: // fallthrough
+        case tc_bignum:   // fallthrough
+        case tc_integer: return make_complex(div2(r1, o2),
+                                             div2(i1, o2));
+        default: goto div_error;
       }
-    default: error_cannot_operate("division", o1, o2);
+    }
+
+    // ========== o1 is a real
+    case tc_real: {
+      double d2;
+
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto div_x_by_a_complex;
+        case tc_real:     d2 = REAL_VAL(o2);             break;
+        case tc_rational: d2 = rational2double(o2);      break;
+        case tc_bignum:   d2 = scheme_bignum2double(o2); break;
+        case tc_integer:  d2 = (double) INT_VAL(o2);     break;
+        default:          goto div_error;
+      }
+      return double2real(REAL_VAL(o1) / d2);
+    }
+
+    // ========== o1 is a rational
+    case tc_rational: {
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto div_x_by_a_complex;
+        case tc_real:     return double2real(rational2double(o1) / REAL_VAL(o2));
+        case tc_rational: return make_rational(mul2(RATIONAL_NUM(o1),
+                                                    RATIONAL_DEN(o2)),
+                                               mul2(RATIONAL_DEN(o1),
+                                                    RATIONAL_NUM(o2)));
+        case tc_bignum:  break;
+        case tc_integer: break;
+        default:         goto div_error;
+      }
+      return make_rational(RATIONAL_NUM(o1), mul2(RATIONAL_DEN(o1), o2));
+    }
+
+    // ========== o1 is a bignum or a fixnum
+    case tc_bignum:
+    case tc_integer: {
+      switch (TYPEOF(o2)) {
+        case tc_complex:  goto div_x_by_a_complex;
+        case tc_real:     if (TYPEOF(o1) == tc_bignum)
+                            return double2real(bignum2double(BIGNUM_VAL(o1))
+                                                             / REAL_VAL(o2));
+                          else
+                            return double2real((double) INT_VAL(o1)
+                                               / REAL_VAL(o2));
+        case tc_rational: return make_rational(mul2(o1, RATIONAL_DEN(o2)),
+                                               RATIONAL_NUM(o2));
+        case tc_bignum:   break;
+        case tc_integer:  if (o1 == MAKE_INT(0)) return o1;
+                          break;
+        default:          goto div_error;
+      }
+      return make_rational(o1, o2);
+    }
+
+    default: goto div_error;
   }
-  return o1;
+
+ div_error:
+  error_cannot_operate("division", o1, o2);
+
+ div_x_by_a_complex: {
+  SCM a   = COMPLEX_REAL(o2);
+  SCM b   = COMPLEX_IMAG(o2);
+  SCM tmp = add2(mul2(a, a), mul2(b, b));
+
+  return make_complex(div2(mul2(a, o1), tmp),
+                      sub2(MAKE_INT(0), div2(mul2(b, o1), tmp)));
+  }
 }
 
 DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
@@ -2142,13 +2655,19 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
 
 /*
 <doc  abs
- * (abs x)
+ * (abs z)
  *
  * |Abs| returns the absolute value of its argument.
  * @lisp
  * (abs -7)                =>  7
  * (abs -inf.0)            => +inf.0
+ * (abs -3+4i)             => 5
+ * (abs -3.0-4i)           => 5.0
  * @end lisp
+ *
+ * NOTE: {{stklos}} extends the {{rseven}} |abs| function, by allowing its
+ * argument to be a complex number. In this case, |abs| returns the
+ * _magnitude_ of its argument.
 doc>
  */
 DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
@@ -2157,7 +2676,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_integer:  if (INT_VAL(x) == INT_MIN_VAL)
                         return long2scheme_bignum(-INT_VAL(x));
                       return (INT_VAL(x) < 0) ? MAKE_INT(-INT_VAL(x)) : x;
-    case tc_bignum:   if (mpz_cmp_ui(BIGNUM_VAL(x), 0L) < 0) {
+    case tc_bignum:   if (mpz_sgn(BIGNUM_VAL(x)) < 0) {
                         mpz_t tmp;
 
                         mpz_init(tmp);
@@ -2169,6 +2688,11 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
     case tc_rational: return make_rational(absolute(RATIONAL_NUM(x)),
                                            RATIONAL_DEN(x));
+    case tc_complex:  {
+                        SCM r = COMPLEX_REAL(x);
+                        SCM i = COMPLEX_IMAG(x);
+                        return STk_sqrt(add2(mul2(r, r), mul2(i, i)));
+                      }
     default:          error_not_a_real_number(x);
   }
   return STk_void;      /* never reached */
@@ -2229,80 +2753,149 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
  * @end lisp
 doc>
  */
+static void int_divide(SCM x, SCM y, SCM *quotient, SCM* remainder, int exact)
+{
+#ifdef STK_DEBUG
+  if (!quotient && !remainder)
+    STk_panic("integer_division called with no quotient nor reminder pointers");
+#endif
+  /* Here, x and y can only be integer or bignum (not real) */
+
+  /* NOTE about the remainder: the GMP accepts 'unsigned integers' and
+     also returns 'unsigned integers' for remainders. We can safely use
+     'long' for these remainders, AND these will always fit a fixnum,
+     because we'll only receive them when we passed fixnums as arguments,
+     and the remainder won't be larger. */
+
+  long quo;              /* temp var for long quotient */
+  long rem = 0;          /* temp var for long remainder */
+  mpz_t q;
+  mpz_t r;
+  int big_q = 0;         /* Is the result quotient a bignum? */
+  int big_r = 0;         /* Is the result remainder a bignum? */
+
+  /* The following sequence of "if"s is written for clarity. Even though
+     it may look like we call INTP more times than necessary, the compiler
+     will later optimize the logic here. */
+
+  /* FIXNUM - FIXNUM */
+  if (INTP(x) && INTP(y)) { // NOTE: at least one of x or y was originally inexact
+    long int i1 = INT_VAL(x);
+    long int i2 = INT_VAL(y);
+
+    if (quotient)  quo = i1 / i2;
+    if (remainder) rem = i1 % i2;
+
+  /* FIXNUM - BIGNUM */
+  } else if (INTP(x)) {
+      /* STklos never stores fixnums as if they were bignums, so
+         we're sure that the quotient for INT/BIG = zero. */
+      if (quotient)  quo = 0;
+      if (remainder) rem = INT_VAL(x);
+
+  /* BIGNUM - FIXNUM */
+  } else  if (INTP(y)) {
+      if (quotient) mpz_init(q);
+      /* The GMP only returns unsigned remainders, so we need to keep track of the
+         sign of x. The easiest way to put back the sign is to initialize rem with
+         it, and multiply by whatever the GMP returns.
+         Also, we need 'labs' so the GMP will get the expected ulong. */
+      long xsign = mpz_sgn(BIGNUM_VAL(x));
+      if (!quotient) rem = xsign * (long) mpz_tdiv_ui(BIGNUM_VAL(x), labs(INT_VAL(y)));
+      else rem = xsign * (long) mpz_tdiv_q_ui(q, BIGNUM_VAL(x),
+                                              labs(INT_VAL(y))); /* rem may or may not be used */
+      if (quotient && (INT_VAL(y) < 0)) mpz_neg(q,q); /* Put back the sign of y */
+      big_q = 1;
+
+  /* BIGNUM - BIGNUM */
+  } else {
+    if (quotient)  mpz_init(q);
+    if (remainder) mpz_init(r);
+    /* mpz_cmpabs seems fast enough to not make much of a difference,
+       so we can call it here -- and it makes the dividing SMALL / BIG
+       and N / N cases much faster (I wonder why the GMP doesn't do
+       this internally): */
+    int cmp = mpz_cmpabs(BIGNUM_VAL(x), BIGNUM_VAL(y));
+    if (cmp < 0) {
+      /* SMALL / BIG -> quotient 0, remainder x */
+      if (quotient)  quo = 0;
+      if (remainder) mpz_set(r, BIGNUM_VAL(x));
+      big_r = 1;
+    } else if (cmp == 0) {
+      /* (+-)N / (+-)N -> quotient (signX * signY), remainder 0 */
+      long xsign = mpz_sgn(BIGNUM_VAL(x));
+      long ysign = mpz_sgn(BIGNUM_VAL(x));
+      if (quotient)  quo = xsign * ysign;
+      if (remainder) rem = 0;
+    } else {
+      /* BIG / SMALL -> call a division GMP function */
+      if (!quotient)        mpz_tdiv_r(r, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      else if (!remainder)  mpz_tdiv_q(q, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      else                  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y));
+      big_q = big_r = 1;
+    }
+  }
+  /*** END OF CASES ***/
+
+  /* Check exactness and set the result values */
+  if (exact) {
+      if (quotient)  *quotient  = big_q ? bignum2number(q) : long2integer(quo);
+      if (remainder) *remainder = big_r ? bignum2number(r) : long2integer(rem);
+  } else {
+      if (quotient)  *quotient  = big_q ? double2real(bignum2double(q)) :
+                                          double2real((double) quo);
+      if (remainder) *remainder = big_r ? double2real(bignum2double(r)) :
+                                          double2real((double) rem);
+  }
+  if (quotient  && big_q) mpz_clear(q);
+  if (remainder && big_r) mpz_clear(r);
+}
+
 static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder)
 {
-  mpz_t q, r;
   int exact = 1;
 
   if (!INTP(x) && !BIGNUMP(x) && !REALP(x)) error_bad_number(x);
   if (!INTP(y) && !BIGNUMP(y) && !REALP(y)) error_bad_number(y);
   if (zerop(y))                             error_divide_by_0(x);
 
-  if (REALP(x)) { x = real2integer(x); exact = 0; }
-  if (REALP(y)) { y = real2integer(y); exact = 0; }
-
-  /* Here, x and y can only be integer or bignum (not real) */
-  if (INTP(x)) {
-    if (INTP(y)) {
-      long int i1 = INT_VAL(x);
-      long int i2 = INT_VAL(y);
-
-      if (exact) {
-        *quotient  = MAKE_INT(i1 / i2);
-        *remainder = MAKE_INT(i1 % i2);
-      } else {
-        /* Useless casts to long are here for clang-tidy */
-        *quotient  = double2real((double) ((long) (i1 / i2)));
-        *remainder = double2real((double) ((long) (i1 % i2)));
-      }
-      return;
-    }
-    else
-      x = long2scheme_bignum(INT_VAL(x));
+  if (INTP(x) && INTP(y)) {
+    /* Fast path for the division of two fixnums */
+    long int i1 = INT_VAL(x);
+    long int i2 = INT_VAL(y);
+    if (quotient)  *quotient  = long2integer(i1 / i2);
+    if (remainder) *remainder = long2integer(i1 % i2);
   } else {
-    /* x is a bignum */
-    if (INTP(y))
-      y = long2scheme_bignum(INT_VAL(y));
+    /* General case */
+    if (REALP(x)) { x = real2integer(x); exact = 0; }
+    if (REALP(y)) { y = real2integer(y); exact = 0; }
+    int_divide(x, y, quotient, remainder, exact);
   }
-
-  /* Here x and y are both bignum */
-  mpz_init(q); mpz_init(r);
-  mpz_tdiv_qr(q,r,BIGNUM_VAL(x),BIGNUM_VAL(y));
-  if (exact) {
-    *quotient  = bignum2number(q);
-    *remainder = bignum2number(r);
-  } else {
-    /*     *quotient  = double2real(mpz_get_d(q)); */
-    /*     *remainder = double2real(mpz_get_d(r)); */
-    *quotient  = double2real(bignum2double(q));
-    *remainder = double2real(bignum2double(r));
-  }
-  mpz_clear(q); mpz_clear(r);                          /* //FIXME: TESTER */
 }
 
 DEFINE_PRIMITIVE("quotient", quotient, subr2, (SCM n1, SCM n2))
 {
-  SCM q, r;
+  SCM q = 0;
 
-  integer_division(n1, n2, &q, &r);
+  integer_division(n1, n2, &q, NULL);
   return q;
 }
 
 
 DEFINE_PRIMITIVE("remainder", remainder, subr2, (SCM n1, SCM n2))
 {
-  SCM q, r;
+  SCM r = 0;
 
-  integer_division(n1, n2, &q, &r);
+  integer_division(n1, n2, NULL, &r);
   return r;
 }
 
 
 DEFINE_PRIMITIVE("modulo", modulo, subr2, (SCM n1, SCM n2))
 {
-  SCM q, r;
+  SCM r = 0;
 
-  integer_division(n1, n2, &q, &r);
+  integer_division(n1, n2, NULL, &r);
   if (negativep(n1) != negativep(n2) && !zerop(r))
      /*kerch@parc.xerox.com*/
     r = add2(r, n2);
@@ -2390,7 +2983,7 @@ static SCM gcd2(SCM n1, SCM n2)
     else if (BIGNUMP(n1) && BIGNUMP(n2)) /*  n1:BIG n2:BIG */
       mpz_gcd(r, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
 
-    /* NOTE: we are sure to not here a NaN or an infinity since
+    /* NOTE: we are sure to not have here a NaN or an infinity since
      * at most r is equal to n1 or n2, which has been accepted by
      * predicate integer? when entering this function
      */
@@ -2518,7 +3111,7 @@ DEFINE_PRIMITIVE("floor", floor, subr1, (SCM x))
                                  sub2(RATIONAL_NUM(x),
                                       sub2(RATIONAL_DEN(x), MAKE_INT(1))):
                                  RATIONAL_NUM(x);
-                        return STk_quotient(tmp, RATIONAL_DEN(x));
+                        return int_quotient(tmp, RATIONAL_DEN(x));
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -2538,7 +3131,7 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
                                 RATIONAL_NUM(x) :
                                 add2(RATIONAL_NUM(x),
                                      sub2(RATIONAL_DEN(x), MAKE_INT(1)));
-                        return STk_quotient(tmp, RATIONAL_DEN(x));
+                        return int_quotient(tmp, RATIONAL_DEN(x));
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -2551,8 +3144,11 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
 DEFINE_PRIMITIVE("truncate", truncate, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
-    case tc_real:     return double2real(trunc(REAL_VAL(x)));
-    case tc_rational: return STk_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
+    case tc_real:     {
+                        double d = REAL_VAL(x);
+                        return double2real(d < 0.0 ? ceil(d): floor(d));
+                      }
+    case tc_rational: return int_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
     case tc_bignum:
     case tc_integer:  return x;
     default:          error_not_a_real_number(x);
@@ -2572,18 +3168,18 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
                         return double2real(res);
                       }
     case tc_rational: {
-                        SCM tmp;
-
-                        if (RATIONAL_DEN(x) == MAKE_INT(2)) {
-                          tmp = (negativep(RATIONAL_NUM(x))) ?
-                                   sub2(RATIONAL_NUM(x), MAKE_INT(1)):
-                                   add2(RATIONAL_NUM(x), MAKE_INT(1));
-                          return mul2(STk_quotient(tmp, MAKE_INT(4)), MAKE_INT(2));
-                        }
-                        tmp = make_rational(add2(mul2(RATIONAL_NUM(x), MAKE_INT(2)),
-                                                 RATIONAL_DEN(x)),
-                                            mul2(RATIONAL_DEN(x), MAKE_INT(2)));
-                        return STk_floor(tmp);
+                        SCM q, r;
+                        integer_division(RATIONAL_NUM(x), RATIONAL_DEN(x), &q, &r);
+                        /* abs(r) is between 0 and denom-1,
+                           so we can compare if r/2 <= denom. Or
+                           if 2 <= 2denom. */
+                        if (STk_numge2(mul2(absolute(r),MAKE_INT(2)),
+                                       RATIONAL_DEN(x)))
+                            return negativep(RATIONAL_NUM(x))
+                                ? sub2(q, MAKE_INT(1))
+                                : add2(q, MAKE_INT(1));
+                        else
+                            return q;
                       }
     case tc_bignum:
     case tc_integer:  return x;
@@ -2700,7 +3296,7 @@ static double my_bignum_rational_log(SCM z) {
   /* For both the numerator and denominator:
 
      - If it is a bignum AND fits a double, then just
-       converto to double and take the log.
+       convert to double and take the log.
      - If it is a bignum and does NOT fit a double,
        use my_bignum_log.
      - It may be that only one of numerator or denominator
@@ -2748,10 +3344,11 @@ static SCM my_log(SCM z)
                         return double2real(my_bignum_rational_log(z));
     case tc_real:     if ( (REAL_VAL(z) == 0.0) && signbit(REAL_VAL(z)) )
                           return make_complex(double2real(minus_inf), double2real(MY_PI));
+                      else if ( isinf(REAL_VAL(z)) && signbit(REAL_VAL(z)) )
+                          return make_complex(double2real(plus_inf),  double2real(MY_PI));
                       else
                           return double2real(log(REAL_VAL(z)));
-    case tc_complex:  return make_complex(my_log(STk_magnitude(z)),
-                                          STk_angle(z));
+    case tc_complex:  return make_complex(my_log(absolute(z)), STk_angle(z));
     default:          error_bad_number(z);
   }
   return STk_void; /* never reached */
@@ -2895,8 +3492,7 @@ static SCM acos_real(double d)
 static SCM my_acos(SCM z)
 {
   switch (TYPEOF(z)) {
-    case tc_integer:  if (z == MAKE_INT(0)) return div2(double2real(MY_PI),
-                                                        MAKE_INT(2));
+   case tc_integer:   if (z == MAKE_INT(1)) return MAKE_INT(0);
                       return acos_real(INT_VAL(z));
     case tc_bignum:   return acos_real(scheme_bignum2double(z));
     case tc_rational: return acos_real(rational2double(z));
@@ -2937,6 +3533,22 @@ static SCM my_atan2(SCM y, SCM x)
 {
   if (STk_realp(y) == STk_false) error_bad_number(y);
   if (STk_realp(x) == STk_false) error_bad_number(x);
+  if (x == MAKE_INT(0)) {
+    /* Angle for 0+0i is not defined: */
+    if (y == MAKE_INT(0)) STk_error("result is undefined for values 0 and 0");
+
+    /* For (atan y 0), if y is y is inexact zero, the result is either
+       -pi/2 or +pi/2, according to R7RS (there is a table in the standard
+       with several specific cases, including these). */
+    if (REALP(y)) {
+      double yval = REAL_VAL(y);
+      if (yval ==  0.0)
+        return signbit(yval)
+            ? double2real( - MY_PI / 2)
+            : double2real( + MY_PI / 2);
+      /* else use final return */
+    }
+  }
   return double2real(atan2(REAL_VAL(exact2inexact(STk_real_part(y))),
                            REAL_VAL(exact2inexact(STk_real_part(x)))));
 }
@@ -3009,19 +3621,19 @@ static SCM my_cosh(SCM z)
 
      3. cosh(z) = cos(i z),
         but it's always slow. (not used) */
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(1);
-                    return double2real(cosh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(1);
-                    return double2real(cosh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: {
-      SCM ez = my_exp(z);
-      SCM inv_ez = div2 (MAKE_INT(1), ez);
-      return div2(add2(ez,inv_ez),
-                  double2real(2.0));
-  }
-  default:          error_bad_number(z);
+    case tc_real:    if (REAL_ZEROP(z)) return MAKE_INT(1);
+                     return double2real(cosh(REAL_VAL(z)));
+    case tc_integer: if (INT_VAL(z) == 0) return MAKE_INT(1);
+                     return double2real(cosh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: {
+                        SCM ez = my_exp(z);
+                        SCM inv_ez = div2 (MAKE_INT(1), ez);
+                        return div2(add2(ez,inv_ez),
+                                    double2real(2.0));
+                      }
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -3038,19 +3650,19 @@ static SCM my_sinh(SCM z)
         but it is almost always faster to use exponentials
         (not used) */
   switch (TYPEOF(z)) {
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
-                    return double2real(sinh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
-                    return double2real(sinh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: {
-      SCM ez = my_exp(z);
-      SCM inv_ez = div2 (MAKE_INT(1), ez);
-      return div2(sub2(ez,inv_ez),
-                  double2real(2.0));
-  }
-  default:          error_bad_number(z);
+    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
+                      return double2real(sinh(REAL_VAL(z)));
+    case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                      return double2real(sinh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: {
+                        SCM ez = my_exp(z);
+                        SCM inv_ez = div2 (MAKE_INT(1), ez);
+                        return div2(sub2(ez,inv_ez),
+                                    double2real(2.0));
+                      }
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -3067,19 +3679,19 @@ static SCM my_tanh(SCM z)
         but this is always slower than using exponentials...
         (not used) */
   switch (TYPEOF(z)) {
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
-                    return double2real(tanh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
-                    return double2real(tanh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: {
-      SCM ez = my_exp(z);
-      SCM inv_ez = div2 (MAKE_INT(1), ez);
-      return div2(sub2 (ez, inv_ez),
-                  add2 (ez, inv_ez));
-  }
-  default:          error_bad_number(z);
+    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
+                      return double2real(tanh(REAL_VAL(z)));
+    case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                      return double2real(tanh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: {
+                        SCM ez = my_exp(z);
+                        SCM inv_ez = div2 (MAKE_INT(1), ez);
+                        return div2(sub2 (ez, inv_ez),
+                                    add2 (ez, inv_ez));
+                      }
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -3090,14 +3702,14 @@ static SCM my_tanh(SCM z)
 static SCM my_asinh(SCM z) {
   /* asinh(z) = ln (z + SQRT(z^2 + 1)) */
   switch (TYPEOF(z)) {
-  case tc_real:     if (fpclassify(REAL_VAL(z)) == FP_ZERO) return MAKE_INT(0);
-                    return double2real(asinh(REAL_VAL(z)));
-  case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
-                    return double2real(asinh(INT_VAL(z)));
-  case tc_complex:
-  case tc_bignum:
-  case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
-  default:          error_bad_number(z);
+    case tc_real:     if (REAL_ZEROP(z)) return MAKE_INT(0);
+                      return double2real(asinh(REAL_VAL(z)));
+    case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
+                      return double2real(asinh(INT_VAL(z)));
+    case tc_complex:
+    case tc_bignum:
+    case tc_rational: return my_log(add2(z, STk_sqrt(add2(mul2(z,z), MAKE_INT(1)))));
+    default:          error_bad_number(z);
   }
   return STk_void; // for the compiler
 }
@@ -3108,10 +3720,12 @@ static SCM my_asinh(SCM z) {
    than +1, which will produce a NaN from the C library. */
 static inline SCM
 acosh_aux(SCM z, double zz) {
+    /* acosh(+inf) = acosh(-inf) = +inf */
+    if (isinf(zz)) return double2real(plus_inf);
     double r = zz*zz - 1;
     if (!isinf(r) && r >= 0) { /* can be too large for a double if
-                                zz is too large; can be negative if
-                                zz is in (0,+1). */
+                                  zz is too large; can be negative if
+                                  zz is in (0,+1). */
         double zzz = sqrt(r) + zz;
         if (!isinf(zzz)) /* did it overflow when we summed zz? */
             return double2real(log(zzz));
@@ -3179,6 +3793,11 @@ static SCM my_atanh(SCM z) {
       if (zz == -1.0 || zz == +1.0)
         error_out_of_range(z);
       if (fpclassify(zz) == FP_ZERO) return MAKE_INT(0);
+      /* atanh(inf) is -(i.pi)/2 */
+      if (isinf(zz)) return Cmake_complex(double2real(0.0),
+                                          double2real(MY_PI/(signbit(zz)
+                                                             ? 2.0L
+                                                             : -2.0L)));
       return atanh_aux(1.0 + zz, 1.0 - zz);
   }
   case tc_integer:  {
@@ -3223,9 +3842,104 @@ transcendental(atanh)
 
 /*=============================================================================*/
 
+static inline int power_of_2_p(long x) {
+  /* Find if x is a small power of two.
+     By "small" power of two we mean k up to 5 */
+  for (int i=1; i <= 5; i++)
+    if (x == (1 << i)) {
+      return 1;
+    }
+  return 0;
+}
+
+SCM my_log2(SCM x, SCM b) {
+  /* my_log2 has fast path for taking logs of fixnums, bignums and
+     exact rationals in base two.  It uses a simple trick to extend
+     this to "base which is power of two". */
+
+  if (b==MAKE_INT(0) || b==MAKE_INT(1)) STk_error("cannot take log in base ~a", b);
+
+  /* And now that we checked that the base is neither 0 nor 1: */
+  if (x == MAKE_INT(1))  return MAKE_INT(0);
+
+  long base = INT_VAL(b);
+
+  if (INTP(b)) {
+    /* Fast path for base two. When the number is negative, we compute
+       the exact log, and make a complex number with an exact real part,
+       and an inexact imaginary part (equal to pi/log(b) ).    */
+
+    if (power_of_2_p(base)) {
+      switch (TYPEOF(x)) {
+      case tc_integer: {
+        unsigned long pwr = base;
+
+        long xx = INT_VAL(x);
+        if (power_of_2_p(xx) && base > 2)
+          return div2(my_log2(x,MAKE_INT(2)), my_log2(b,MAKE_INT(2)));
+
+        int pos = (xx > 0);
+
+        /* Explicitly check for +-1, so we give an exact result in these cases: */
+        if (xx == 1)  return MAKE_INT(0);
+        if (xx == -1) return Cmake_complex(MAKE_INT(0),double2real(MY_PI/log(base)));
+
+        xx = labs(xx);
+        if (xx == 0) STk_error("cannot take log of zero");
+        /* Linear search for the wanted power... */
+        for (unsigned long i=1; i < INT_LENGTH; i++, pwr *= base) {
+          if (xx == (long) pwr)
+            /* If the number is negative, we return the same
+               result, but with an imaginary part equal to
+               PI/log(base). */
+            return pos
+              ? MAKE_INT(i)
+              : Cmake_complex(MAKE_INT(i),double2real(MY_PI/log(base)));
+        }
+        break;
+      }
+      case tc_bignum: {
+        if (base <= 62) { /* This is a GMP limitation */
+          mpz_t *xx = &BIGNUM_VAL(x);
+          mpz_t r;
+          mpz_init(r);
+          int sgn = mpz_sgn(*xx);
+          /* mpz_sizeinbase returns log(xx) in base two plus one, if it's
+             exact: */
+          unsigned long s = mpz_sizeinbase(*xx,base);
+          if (s != 1) {
+            mpz_ui_pow_ui(r, base, (s-1));
+            /* Now, is s-1 the exact log of xx in base 2 ? */
+            if (!mpz_cmpabs(r,*xx)) {
+              /* If the number is negative, we return the same
+               result, but with an imaginary part equal to
+               PI/log(base). */
+              mpz_clear(r);
+              return (sgn>0)
+                ? MAKE_INT(s-1)
+              : Cmake_complex(MAKE_INT(s-1),double2real(MY_PI/log(base)));
+            }
+          }
+          mpz_clear(r);
+          /* If not, do the floating-point work after the switch... */
+        }
+        break;
+      }
+      case tc_rational:
+        /* Do log(a/b) = log(a)/log(b).
+           This allows us to give exact answers to (log 1/32 2),
+           for example! */
+        return sub2(my_log2(RATIONAL_NUM(x),b),
+                    my_log2(RATIONAL_DEN(x),b));
+      }
+    }
+  }
+  return div2(my_log(x),my_log(b));
+}
+
 DEFINE_PRIMITIVE("log", log, subr12, (SCM x, SCM b))
 {
-    return (b)? div2(my_log(x),my_log(b)) : my_log(x);
+    return (b)? my_log2(x,b) : my_log(x);
 }
 
 
@@ -3237,6 +3951,24 @@ DEFINE_PRIMITIVE("atan", atan, subr12, (SCM y, SCM x))
 /*=============================================================================*/
 
 /*
+<doc R7RS square
+ * (square z)
+ *
+ * Returns the square of |z|. This is equivalent to |(* z z)|.
+ *
+ * @lisp
+ * (square 42)     => 1764
+ * (square 2.0)    => 4.0
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("square", square, subr1, (SCM z))
+{
+  if (STk_numberp(z) == STk_false) error_bad_number(z);
+  return STk_mul2(z, z);
+}
+
+/*
 <doc sqrt
  * (sqrt z)
  *
@@ -3244,31 +3976,105 @@ DEFINE_PRIMITIVE("atan", atan, subr12, (SCM y, SCM x))
  * positive real part, or zero real part and non-negative imaginary part.
 doc>
  */
+static SCM my_sqrt_exact(SCM z) {
+  if (zerop(z))     return MAKE_INT(0);
+  if (negativep(z)) return Cmake_complex(MAKE_INT(0),
+                                         my_sqrt_exact(mul2(MAKE_INT(-1UL), z)));
 
-static SCM my_sqrt_exact(SCM x)
-{
-  if (zerop(x))     return MAKE_INT(0);
-  if (negativep(x)) return Cmake_complex(MAKE_INT(0),
-                                         my_sqrt_exact(mul2(MAKE_INT(-1UL), x)));
-  if (INTP(x)) {
-    long   i = INT_VAL(x);
+  if (INTP(z)) {
+    long   i = INT_VAL(z);
     double d = (double) sqrt((double) i);
 
     return ((int) d * (int) d == i)? MAKE_INT((int) d) : double2real(d);
+
   } else { /* This is a bignum */
-    mpz_t root, tmp;
-    SCM res;
 
-    mpz_init(root);
-    mpz_sqrt(root, BIGNUM_VAL(x));
+    mpz_t z0;
+    mpz_init(z0);
 
-    mpz_init(tmp);
-    mpz_mul(tmp, root, root);
-    res = (mpz_cmp(tmp, BIGNUM_VAL(x))==0) ? bignum2number(root) :
-                                             STk_sqrt(scheme_bignum2real(x));
-    mpz_clear(root); mpz_clear(tmp);
-    return res;
+    if (mpz_perfect_square_p(BIGNUM_VAL(z))) {
+      /* We're lucky! It's a perfect square, and the GMP
+         will compute the exact result. */
+      mpz_sqrt(z0,BIGNUM_VAL(z));
+      return bignum2number(z0);
+    }
+
+    /* Does it fit a double? If so, use plain C sqrt. It's not exact
+       anyway, since we checked above with the result from
+       mpz_sqrtrem... */
+    double r = bignum2double(BIGNUM_VAL(z));
+    if (isfinite(r)) return double2real(sqrt(r));
+
+    mpz_sqrt(z0,BIGNUM_VAL(z));
+    SCM x0 = bignum2number(z0);
+    /* If x0 does not fit a double, we don't need to waste time with
+       an approximation. Return infinity. */
+    r = bignum2double(BIGNUM_VAL(x0));
+    if (!isfinite(r)) return double2real(plus_inf);
+
+    /* Ok, we tried everything. There's only the slow path now! */
+    SCM x = x0;
+    SCM x_new = x0;
+    SCM err = x0;
+
+    /* Approximate the square root... Essentially, Newton's method,
+       but coded using STklos' internal sub2, div2, mul2, abs
+       functions.  */
+    while(STk_numgt2(err, rational_epsilon) > 0 &&
+          isfinite(REAL_VAL(exact2inexact(x_new)))) {
+        x_new = sub2(x, div2(sub2(mul2(x, x), z),
+                             mul2(x, MAKE_INT(2))));
+        err = STk_abs(sub2(x_new, x));
+        x = x_new;
+    }
+    /* Return inexact, because if we got here, the square of this
+       result will not equal to z (it's an approximation, so it would
+       be strange to give an "exact" result that is not "exactly" the
+       result of the operation). But for floating-point, it is
+       acceptable to offer an approximation.  */
+    return exact2inexact(x_new);
   }
+}
+
+static inline SCM my_sqrt_complex(SCM z)
+{
+  SCM aa, bb;
+  SCM a = COMPLEX_REAL(z);
+  SCM b = COMPLEX_IMAG(z);
+
+  /* Given a, b we will compute A, B such that the square root of
+     the complex number a+bi is
+
+     sqrt(a+bi) = A+Bi
+
+     The algorithm:
+
+     if a < 0:
+     B := sqrt( (|z|-a) / 2) * sign(b)
+     A := b / (2*B).
+
+     if a >= 0:
+     A := sqrt( (|z|+a) / 2)
+     if A != 0:
+     B := (b / (2*A))
+     else:
+     B = 0.0                        */
+
+  if (negativep(a) ||
+      (REALP(a) && signbit(REAL_VAL(a)))) { /* negativep(-0.0) won't work... */
+    /* a < 0 */
+    bb = STk_sqrt(div2(sub2(absolute(z),a), MAKE_INT(2)));
+
+    if (negativep(b) || (REALP(b) && signbit(REAL_VAL(b))))
+      bb = mul2(bb,MAKE_INT((unsigned long) -1));
+
+    aa = div2(b,mul2(bb, MAKE_INT(2)));
+  } else {
+    /* a >= 0 */
+    aa = STk_sqrt(div2(add2(a, absolute(z)), MAKE_INT(2)));
+    bb = zerop(aa) ? double2real(0.0): div2(b,mul2(aa,MAKE_INT(2)));
+  }
+  return make_complex(aa, bb);
 }
 
 DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
@@ -3282,8 +4088,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
                         return Cmake_complex(MAKE_INT(0),
                                              double2real(sqrt(-REAL_VAL(z))));
                       return double2real(sqrt(REAL_VAL(z)));
-    case tc_complex:  return make_polar(STk_sqrt(STk_magnitude(z)),
-                                        div2(STk_angle(z), MAKE_INT(2)));
+    case tc_complex:  return my_sqrt_complex(z);
     default:          error_bad_number(z);
   }
   return STk_void; /* never reached */
@@ -3300,19 +4105,14 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 doc>
  */
 
-static inline SCM exact_exponent_expt(SCM x, SCM y)
+static inline SCM fixnum_exponent_expt(SCM x, long y)
 {
   mpz_t res;
   SCM scm_res;
 
-  /* y is already known to be exact; so if it is zero,
-     return exact one. */
-  if (zerop(y)) return MAKE_INT(1);
-
-  if (zerop(x) || (x == MAKE_INT(1))) return x;
-
-  if (TYPEOF(y) == tc_bignum)
-    STk_error("exponent too big: ~S", y);
+  /* Fast path for squaring. For larger exponents it isn't worth it, but for
+     '2' it's much faster to just call mul2(x,x).  */
+  if (y == 2) return mul2(x, x);
 
   switch (TYPEOF(x)) {
     case tc_integer:
@@ -3321,29 +4121,32 @@ static inline SCM exact_exponent_expt(SCM x, SCM y)
          without it. */
       long sign = (INT_VAL(x) < 0) ? -1 : +1;
 
-      mpz_ui_pow_ui(res, (unsigned long) (sign*INT_VAL(x)), (unsigned long) INT_VAL(y));
+      mpz_ui_pow_ui(res, (unsigned long) (sign*INT_VAL(x)),
+                         (unsigned long) y);
 
-      /* Put back the sign, if needed (that is, if sign (of x) < 0 and the exponent is odd): */
-      if (sign<0 && ((INT_VAL(y)) & 1UL)) mpz_neg(res,res);
+      /* Put back the sign, if needed
+         (that is, if sign (of x) < 0 and the exponent is odd): */
+      if (sign<0 && (y & 1UL)) mpz_neg(res,res);
       scm_res = bignum2number(res);
       mpz_clear(res);
       return scm_res;
     case tc_bignum:
       mpz_init(res);
-      mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
+      mpz_pow_ui(res, BIGNUM_VAL(x), y);
       scm_res = bignum2number(res);
       mpz_clear(res);
       return scm_res;
     case tc_rational:
-      return make_rational(exact_exponent_expt(RATIONAL_NUM(x), y),
-                           exact_exponent_expt(RATIONAL_DEN(x), y));
-    default: {
-      SCM nx, ny, val = MAKE_INT(1);
+      return make_rational(fixnum_exponent_expt(RATIONAL_NUM(x), y),
+                           fixnum_exponent_expt(RATIONAL_DEN(x), y));
+    default: { // tc_complex and tc_real in fact
+      SCM nx, val = MAKE_INT(1);
+      long ny = 1;
 
-      while (y != MAKE_INT(1)) {
+      while (y > 1) {
         nx = mul2(x, x);
-        ny = STk_quotient(y, MAKE_INT(2));
-        if (STk_evenp(y) == STk_false) val = mul2(x, val);
+        ny = y / 2;
+        if (y & 1) val = mul2(x, val);
         x = nx;
         y = ny;
       }
@@ -3358,30 +4161,87 @@ static SCM my_expt(SCM x, SCM y)
   switch (TYPEOF(y)) {
     case tc_integer:
     case tc_bignum:
-      return exact_exponent_expt(x, y);
+
+      if (y == MAKE_INT(0))  /* Treat special case where y = 0 => 1 */
+        return MAKE_INT(1);
+
+      if (INTP(x)) { /* Treat special cases where x = 0, 1 or -1 */
+
+        if (INT_VAL(x) == 0 || INT_VAL(x) == 1)         // 0 and 1
+          return x;
+        if (x == MAKE_INT(-1UL))                        // -1
+          return MAKE_INT(number_parity(y));
+      }
+
+      if (REALP(x)) { /* Treat special cases where x = +0.0, -0,0, +1.0 or -1.0 */
+        double val = REAL_VAL(x);
+
+        if (val == 0.0) {
+          if (signbit(val))
+            // x = -0.0 result is -0.0 or + 0.0 depending of y's parity
+            return (number_parity(y)==-1) ? x : double2real(0.0);
+          else
+            // x = +0.0 retult is always +0.0
+            return x;
+        }
+        if (val == +1.0) return x;
+        if (val == -1.0) return double2real(number_parity(y));
+      }
+
+      if (TYPEOF(y) == tc_bignum)
+        /* x is not 0 or 1 (exact or inexact) => error */
+        STk_error("exponent too big: ~S", y);
+
+      // Ok all special cases treated => compute and exact x^y
+      return fixnum_exponent_expt(x, INT_VAL(y));
+
     case tc_rational:
     case tc_real:
-      {
-        if (zerop(y)) return double2real(1.0);
-        if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
-        if (REALP(y)) {
-          if (REALP(x) && !negativep(x)) {
-            /* real ^ real, see if we can use pow: */
-            double r = pow(REAL_VAL(x),REAL_VAL(y));
-            if (!isinf(r) || /* no overflow, return r */
-                (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not overflow, one arg. was inf! */
-              return double2real(r);
-          }
-          if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
-            /* It represents an integer precisely! Turn the exponent into
-               an exact number and call exact_exponent_expt: */
-            return exact2inexact(exact_exponent_expt(x, (inexact2exact(y))));
-          /* Either r overflowed, or y didn't represent an integer perfectly.
-             Fall through to use STklos' arithmetic version of
-             exp(log(x) * y)                                                  */
+      if (zerop(y)) /* Treat  special case where y = 0.0 (or -0.0) */
+        return double2real(1.0);
+
+      if (INTP(x)) { /* Treat special cases where x = 0, 1 or -1 */
+        if (INT_VAL(x) == 0) return double2real(0.0);        //  0
+        if (INT_VAL(x) == 1) return double2real(1.0);        // +1
+        if (x==MAKE_INT(-1UL) && STk_integerp(y)==STk_true)  // -1
+          return double2real(number_parity(y));
+      }
+
+      if (REALP(x)) { /* Treat special cases where x = +0.0, -0,0 */
+        double val = REAL_VAL(x);
+
+        if (val == 0.0) {
+          if (signbit(val))
+            // x = -0.0 result is -0.0 or + 0.0 depending of y's parity
+            return (number_parity(y)==-1) ? x : double2real(0.0);
+          else
+            // x = +0.0 retult is always +0.0
+            return x;
         }
       }
+
+      if (REALP(y)) {
+        if (REALP(x) && !negativep(x)) {
+          /* real ^ real, see if we can use pow: */
+          double r = pow(REAL_VAL(x),REAL_VAL(y));
+          if (!isinf(r) || /* no overflow, return r */
+              (!FINITE_REALP(x)) || !FINITE_REALP(y)) /* not overflow, one arg. was inf! */
+            return double2real(r);
+        }
+        if (! (REAL_VAL(y) - floor(REAL_VAL(y))))
+          /* It represents an integer precisely! Turn the exponent into an
+             exact integer number and call us recursively. We don't go right
+             to fixnum_exponent_expt because y could be a bignum, and we check
+             for that in the recursive call. */
+          return exact2inexact(my_expt(x, (inexact2exact(y))));
+
+        /* If we are here, either 'r' overflowed, or 'y' didn't represent an
+           integer perfectly. Fall through to use STklos' arithmetic version
+           of exp(log(x) * y)
+        */
+      }
       /* FALLTHROUGH */
+
     case tc_complex:
       if (zerop(x)) {
         /* R7RS: The value of 0^z is 1 if (zero? z), 0 if (real-part z) is positive,
@@ -3404,9 +4264,10 @@ static SCM my_expt(SCM x, SCM y)
 
 DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
 {
-  if (!COMPLEXP(y) && negativep(y))
+  if (!COMPLEXP(y) && negativep(y)) {
     return div2(MAKE_INT(1),
                 my_expt(x, sub2(MAKE_INT(0), y)));
+  }
   return my_expt(x, y);
 }
 
@@ -3421,7 +4282,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  *
  * If x1, x2, x3, and x4 are real numbers and z is a complex number such that
  * @l
- * |z = x1 + x2.i = x3 . e,(sup "i.x4")|
+ * |z = x1 + x2.i = x3 . e^i.x4^)|
  * @l
  * Then
  * @lisp
@@ -3433,7 +4294,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  * (angle z)                      => xa
  * @end lisp
  * where
- * |-,(symbol "pi") < xa <= ,(symbol "pi")| with |xa = x4 + 2,(symbol "pi")n|
+ * |-π < xa <= π| with |xa = x4 + 2πn|
  * for some integer n.
  * @lisp
  * (angle +inf.0)                 => 0.0
@@ -3446,20 +4307,7 @@ doc>
 
 DEFINE_PRIMITIVE("magnitude", magnitude, subr1, (SCM z))
 {
-  switch (TYPEOF(z)) {
-    case tc_integer:
-    case tc_bignum:
-    case tc_rational:
-    case tc_real:     return absolute(z);
-    case tc_complex: {
-                        SCM r = COMPLEX_REAL(z);
-                        SCM i = COMPLEX_IMAG(z);
-
-                        return STk_sqrt(add2(mul2(r, r), mul2(i, i)));
-                      }
-    default:          error_bad_number(z);
-  }
-  return STk_void; /* never reached */
+  return absolute(z);
 }
 
 DEFINE_PRIMITIVE("angle", angle, subr1, (SCM z))
@@ -3467,7 +4315,13 @@ DEFINE_PRIMITIVE("angle", angle, subr1, (SCM z))
   switch (TYPEOF(z)) {
     case tc_integer:
     case tc_bignum:
-    case tc_rational: return positivep(z) ? MAKE_INT(0) : double2real(MY_PI);
+    case tc_rational: /* The angle for 0+0i is undefined. It would, strictly
+                         speaking, be atan(0/0), and we won't divide by zero.
+                         Of all other implementations, it seems that only Chez
+                         does trigger an error here, but it is the correct
+                         thing to do, at least for exact zero... */
+                      if (z == MAKE_INT(0)) STk_error("not defined for exact zero");
+                      return positivep(z) ? MAKE_INT(0) : double2real(MY_PI);
     case tc_real:     return double2real(positivep(z) ? 0.0 : MY_PI);
     case tc_complex:  return my_atan2(COMPLEX_IMAG(z), COMPLEX_REAL(z));
     default:          error_bad_number(z);
@@ -3553,8 +4407,8 @@ DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
 {
   switch (TYPEOF(z)) {
     case tc_complex:  if (REALP(COMPLEX_REAL(z)) || REALP(COMPLEX_IMAG(z)))
-                        return Cmake_complex(inexact2exact(COMPLEX_REAL(z)),
-                                             inexact2exact(COMPLEX_IMAG(z)));
+                        return make_complex(inexact2exact(COMPLEX_REAL(z)),
+                                            inexact2exact(COMPLEX_IMAG(z)));
                       else return z;
     case tc_real:     {
                         register double x = REAL_VAL(z);
@@ -3810,7 +4664,7 @@ DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM expo
   int g = INT_VAL(inexact2exact(sign));
 
   /* #f => NaN,
-     #t =? inf  */
+     #t => inf  */
   if (significand == STk_false) return double2real(make_nan(0,0,0));
   if (significand == STk_true)  return (g >= 0)
                                   ? double2real(plus_inf)
@@ -3838,6 +4692,43 @@ DEFINE_PRIMITIVE("encode-float", encode_float, subr3, (SCM significand, SCM expo
   SCM res = STk_mul2(sign, significand);
   return STk_mul2(res, STk_expt (MAKE_INT(2), exponent));
 }
+
+/*
+ *
+ * Logical operations
+ *
+ */
+
+static inline SCM bignum_logop(SCM n1, SCM n2,
+                               void (*op)(mpz_t, const mpz_t, const mpz_t))
+{
+  mpz_t r;
+  SCM res;
+
+  mpz_init(r);
+  op(r, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
+  res = bignum2number(r);
+  mpz_clear(r);
+  return res;
+}
+
+#define LOGICAL_OP(sname, name, op, opfct)                         \
+DEFINE_PRIMITIVE(sname, name, subr2, (SCM n1, SCM n2))             \
+{                                                                  \
+  if (!INTP(n1) && !BIGNUMP(n1))  error_not_an_exact_integer(n1);  \
+  if (!INTP(n2) && !BIGNUMP(n2))  error_not_an_exact_integer(n2);  \
+                                                                   \
+  if (INTP(n1) && INTP(n2))                                        \
+    return MAKE_INT(INT_VAL(n1) op INT_VAL(n2));                   \
+                                                                   \
+  if (INTP(n1)) n1 = long2scheme_bignum(INT_VAL(n1));              \
+  if (INTP(n2)) n2 = long2scheme_bignum(INT_VAL(n2));              \
+  return bignum_logop(n1, n2, opfct);                              \
+}
+
+LOGICAL_OP("%bit-and", bit_and, &, mpz_and)
+LOGICAL_OP("%bit-or",  bit_or,  |, mpz_ior)
+LOGICAL_OP("%bit-xor", bit_xor, ^, mpz_xor)
 
 
 /*
@@ -3877,12 +4768,17 @@ static void verify_NaN(SCM n) {
 
 DEFINE_PRIMITIVE("%make-nan", make_nan, subr3, (SCM neg, SCM quiet, SCM payload))
 {
+  SCM z;
+
   if (!INTP(payload) || ((uint64_t) INT_VAL(payload) > payload_mask))
     STk_error("bad payload ~S", payload);
-  return double2real(make_nan(neg != STk_false,
-                              quiet != STk_false,
-                              INT_VAL(payload)));
+
+  /* Do not call STk_double2real since it converts -nan.0 to +nan.0 */
+  NEWCELL(z, real);
+  REAL_VAL(z) = make_nan(neg != STk_false, quiet != STk_false, INT_VAL(payload));
+  return z;
 }
+
 
 
 /*
@@ -3951,6 +4847,7 @@ DEFINE_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2)) {
   return MAKE_BOOLEAN(tmp1.u ==tmp2.u);
 }
 
+
 DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
 {
 #ifdef  __MINI_GMP_H__
@@ -3960,6 +4857,7 @@ DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
 #endif
 }
 
+
 /*
  *
  * Initialization
@@ -3968,17 +4866,20 @@ DEFINE_PRIMITIVE("%stklos-has-gmp?", has_gmp, subr0, ())
 int STk_init_number(void)
 {
   /* For systems without these constants, we can do:
-  plus_inf  = 1.0 / 0.0;
-  minus_inf = -plus_inf;
-  STk_NaN   = strtod("NAN", NULL);
+     plus_inf  = 1.0 / 0.0;
+     minus_inf = -plus_inf;
+     STk_NaN   = strtod("NAN", NULL);
   */
 
   /* initialize  special IEEE 754 values */
   plus_inf  = HUGE_VAL;
   minus_inf = -HUGE_VAL;
-  STk_NaN   =  strtod("NAN", NULL);
+  STk_NaN   = strtod("NAN", NULL); // FIXME: use make_nan(0, 1, 0)?
 
-  complex_i = make_complex(MAKE_INT(0),MAKE_INT(1));
+  /* Other useful "constants" */
+  complex_i        = make_complex(MAKE_INT(0),MAKE_INT(1));
+  rational_epsilon = div2(inexact2exact(double2real(STk_dbl_true_min())),
+                          MAKE_INT(2));
 
   /* Force the LC_NUMERIC locale to "C", since Scheme definition
      imposes that decimal numbers use a '.'
@@ -4069,6 +4970,7 @@ int STk_init_number(void)
   ADD_PRIMITIVE(asinh);
   ADD_PRIMITIVE(atanh);
 
+  ADD_PRIMITIVE(square);
   ADD_PRIMITIVE(sqrt);
   ADD_PRIMITIVE(expt);
 
@@ -4091,6 +4993,11 @@ int STk_init_number(void)
   ADD_PRIMITIVE(float_max_signif);
   ADD_PRIMITIVE(float_min_exp);
   ADD_PRIMITIVE(float_max_exp);
+
+  ADD_PRIMITIVE(bit_and);
+  ADD_PRIMITIVE(bit_or);
+  ADD_PRIMITIVE(bit_xor);
+
 
   /* SRFI 208: NaN procedures */
   ADD_PRIMITIVE(make_nan);

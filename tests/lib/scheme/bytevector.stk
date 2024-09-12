@@ -1,7 +1,8 @@
-
 ;;; TESTS for (scheme bytevector).
 ;;; The tests are performed inside a module, because the library
 ;;; overrides a standard R7RS procedure, changing its signature.
+
+(test-subsection "(scheme bytevector)")
 
 (define-module test-scheme/bytevector
   (import (scheme bytevector))
@@ -16,7 +17,7 @@
             (e2 ex2)
             (dif (if (finite? e1)
                      (abs (- e1 e2))
-                     (if (= e1 e2) 0 +nan.0))))
+                     (if (eqv? e1 e2) 0 +nan.0))))
        (test name #t (< dif epsilon))))))
 
 
@@ -81,7 +82,7 @@
               (bytevector-u8-ref b 3))))
 
 (test "bytevector-s8-set!"
-      #u8(10 20 246 236) 
+      #u8(10 20 246 236)
       (let ((b (bytevector 1 1 1 1)))
         (bytevector-s8-set! b 0  10)
         (bytevector-s8-set! b 1  20)
@@ -131,7 +132,7 @@
         (bytevector-uint-ref b 1 'little 10)))
 
 (test "bytevector-uint-ref.bignum.10-bytes.BE"
-      4741030526724903796992      
+      4741030526724903796992
       (let ((b #u8(1 1 3 4 1 0 1 0 1 0 2 3)))
         (bytevector-uint-ref b 0 'big 10)))
 
@@ -162,7 +163,7 @@
   (test "string->utf16.large.little"
         #u8(97 0 98 0 0 216 63 220 100 0)
         (string->utf16 s 'little))
-  
+
   (test "string->utf16.large.big"
         #u8(0 97 0 98 216 0 220 63 0 100)
         (string->utf16 s 'big)))
@@ -241,7 +242,7 @@
     (test "24" (let ((b (make-bytevector 16 -127)))
                  (bytevector-s8-set! b 0 -126)
                  (bytevector-u8-set! b 1 246)
-                 
+
             (list
              (bytevector-s8-ref b 0)
              (bytevector-u8-ref b 0)
@@ -268,16 +269,16 @@
       (test "32" (bytevector->u8-list b)
             '(253 255 255 255 255 255 255 255
                   255 255 255 255 255 255 255 255))
-      
+
       (test "33"
             (void)
             (bytevector-uint-set! b 0 (- (expt 2 128) 3)
                                   (endianness big) 16))
       (test "34" (bytevector-uint-ref b 0 (endianness big) 16)
             #xfffffffffffffffffffffffffffffffd)
-      
+
       (test "35" (bytevector-sint-ref b 0 (endianness big) 16) -3)
-      
+
       (test "36" (bytevector->u8-list b)
             '(255 255 255 255 255 255 255 255
                   255 255 255 255 255 255 255 253))
@@ -291,19 +292,19 @@
             '(513 65283 513 513)))
 
 
-      
+
 (let ((b (u8-list->bytevector
           '(255 255 255 255 255 255 255 255
                 255 255 255 255 255 255 255 253))))
-  
+
   (test "39"   65023 (bytevector-u16-ref b 14 'little))
   (test "40"    -513 (bytevector-s16-ref b 14 'little))
   (test "41"   65533 (bytevector-u16-ref b 14 'big))
   (test "42"      -3 (bytevector-s16-ref b 14 'big))
-  
+
   (test "43" (void) (bytevector-u16-set! b 0 12345 'little))
   (test "44" 12345 (bytevector-u16-ref b 0 'little))
-  
+
   (test "45.16" (void) (bytevector-u16-native-set! b 0 12005))
   (test "46.16" 12005  (bytevector-u16-native-ref b 0))
   (test "47.16" #t (not (not (memq 12005
@@ -361,7 +362,7 @@
 (let ((b (u8-list->bytevector
           '(255 255 255 255 255 255 255 255
                 255 255 255 255 255 255 255 253))))
-  
+
   (test "48" (bytevector-u32-ref b 12 (endianness little)) 4261412863)
   (test "49" (bytevector-s32-ref b 12 (endianness little)) -33554433)
   (test "50" (bytevector-u32-ref b 12 (endianness big)) 4294967293)
@@ -418,7 +419,7 @@
     (test "77" (string->utf32 "app\x3BB;e" 'little) #u8(97 0 0 0 112 0 0 0 112 0 0 0 #xBB #x3 0 0 101 0 0 0))
     (test "78" (string->utf32 "app\x3BB;e" 'big) #u8(0 0 0 97 0 0 0 112 0 0 0 112 0 0 #x3 #xBB 0 0 0 101))
     (test "79" (string->utf32 "app\x3BB;e") #u8(0 0 0 97 0 0 0 112 0 0 0 112 0 0 #x3 #xBB 0 0 0 101))
-    
+
     (let ([bv-append
            (lambda (bv1 bv2)
              (let ([bv (make-bytevector (+ (bytevector-length bv1)
@@ -433,7 +434,7 @@
          (test "82" (utf16->string (string->utf16 str 'little) 'little) str)
          (test "83" (utf16->string (bv-append #u8(#xFF #xFE) (string->utf16 str 'little)) 'big) str)
          (test "84" (utf16->string (bv-append #u8(#xFE #xFF) (string->utf16 str 'big)) 'little) str)
-         
+
          (test "85"
                (utf16->string (bv-append #u8(#xFF #xFE) (string->utf16 str 'little)) 'little #t)
                (string-append "\xFEFF;" str))
@@ -446,7 +447,7 @@
          (test "88"
                (utf16->string (bv-append #u8(#xFF #xFE) (string->utf16 str 'big)) 'big #t)
                (string-append "\xFFFE;" str))
-         
+
          (test "89" (utf32->string (string->utf32 str 'big) 'big) str)
          (test "90" (utf32->string (string->utf32 str 'little) 'little) str)
          (test "91" (utf32->string (bv-append #u8(#xFF #xFE 0 0) (string->utf32 str 'little)) 'big) str)
@@ -472,4 +473,3 @@
 (select-module test-scheme/bytevector)
 (run)
 (select-module STklos)
-

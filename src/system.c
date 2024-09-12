@@ -2,7 +2,7 @@
  *
  * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1414,7 +1414,7 @@ DEFINE_PRIMITIVE("date", date, subr0, (void))
  * (clock)
  *
  * Returns an approximation of processor time, in milliseconds, used so far by the
- * program.
+ * program. The value returned is a real.
 doc>
  */
 DEFINE_PRIMITIVE("clock", clock, subr0, (void))
@@ -1422,6 +1422,20 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
   return STk_double2real((double) clock() /
                          CLOCKS_PER_SEC * (double) TIME_DIV_CONST);
 }
+
+/*
+<doc EXT exact-clock
+ * (exact-clock)
+ *
+ * Returns an approximation of processor time, in microseconds, used so far by the
+ * program. The value returned is an integer.
+doc>
+ */
+DEFINE_PRIMITIVE("exact-clock", exact_clock, subr0, (void)) // Result is in microseconds
+{
+  return MAKE_INT(clock() * CLOCKS_PER_SEC / (TIME_DIV_CONST * 1000));
+}
+
 
 
 /*
@@ -1871,9 +1885,22 @@ DEFINE_PRIMITIVE("pause", pause, subr0, (void))
  *
  */
 
-DEFINE_PRIMITIVE("%library-prefix", library_prefix, subr0, (void))
+DEFINE_PRIMITIVE("%library-prefix", library_prefix, subr01, (SCM arg))
 {
-  return STk_Cstring2string(PREFIXDIR);
+  char *res = "";
+
+  if (arg) {
+    if (SYMBOLP(arg)) {
+      if (strcmp(SYMBOL_PNAME(arg), "lib") == 0) res = EXECDIR;
+      else if (strcmp(SYMBOL_PNAME(arg), "data") == 0) res = SCMDIR;
+    }
+    if (!*res)
+      STk_error("bad argument (must be either the symbol lib or data)");
+  } else {
+    /* No argument => return the prefix only */
+    res = PREFIXDIR;
+  }
+  return STk_Cstring2string(res);
 }
 
 DEFINE_PRIMITIVE("%shared-suffix", shared_suffix, subr0, (void))
@@ -1932,6 +1959,16 @@ DEFINE_PRIMITIVE("%uname", uname, subr0, (void))
   return z;
 }
 
+DEFINE_PRIMITIVE("os-name", os_name, subr0, (void))
+{
+  struct utsname name;
+
+  if (uname(&name) != 0) {
+    error_posix(NULL, NULL);
+  }
+  return STk_Cstring2string(name.sysname);
+}
+
 
 int STk_init_system(void)
 {
@@ -1970,6 +2007,7 @@ int STk_init_system(void)
 
   /* Declare primitives */
   ADD_PRIMITIVE(clock);
+  ADD_PRIMITIVE(exact_clock);
   ADD_PRIMITIVE(date);
   ADD_PRIMITIVE(current_seconds);
   ADD_PRIMITIVE(current_second);
@@ -2027,5 +2065,6 @@ int STk_init_system(void)
   ADD_PRIMITIVE(big_endianp);
   ADD_PRIMITIVE(get_locale);
   ADD_PRIMITIVE(uname);
+  ADD_PRIMITIVE(os_name);
   return TRUE;
 }

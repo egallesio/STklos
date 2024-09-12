@@ -62,6 +62,13 @@ As said before, libraries are implemented with modules. Briefly
 stated, the library |(lib a b)| will be implemented with a module whose name
 is |lib/a/b| and the |STklos| module has been deleted from the import list.
 
+(((export)))
+(((import)))
+(((begin)))
+(((include)))
+(((include-ci)))
+(((include-library-declarations)))
+(((cond-expand)))
 {{insertdoc 'define-library}}
 {{insertdoc 'library?}}
 {{insertdoc 'library-name}}

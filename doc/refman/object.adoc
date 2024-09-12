@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -442,7 +442,7 @@ element is the most specific class.  For instance,
 ```
 
 
-==== Generic function
+==== Generic functions
 ===== Generic functions and methods
 ((("generic function")))
 ((("method")))
@@ -575,7 +575,7 @@ not needed.
 ((("next-method")))
 When a generic function is called, the list of applicable
 methods is built.  As mentioned before, the most specific method
-of this list is applied (see <<_generic_function>>).
+of this list is applied (see <<_generic_functions>>).
 
 This method may call, if needed, the next method in the list of
 applicable methods.  This is done by using the special form
@@ -687,6 +687,7 @@ we could define the following method to compare points:
 {{insertdoc 'class-name}}
 {{insertdoc 'find-class}}
 {{insertdoc 'is-a?}}
+{{insertdoc 'ensure-metaclass}}
 
 ==== Generic Functions and Methods
 
@@ -703,3 +704,4 @@ behavior which depends of the type or the number of its parameters.
 {{insertdoc  'class-precedence-list}}
 {{insertdoc  'class-direct-slots}}
 {{insertdoc  'class-slot-definition}}
+{{insertdoc  'slot-definition-init-keyword}}

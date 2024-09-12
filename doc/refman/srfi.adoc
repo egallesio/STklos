@@ -194,6 +194,11 @@ will compare dates by first normalizing them to make the time zone offset
 irrelevant, so "2000 Nov 12 03:30:10 GMT-2" will be taken as equal to
 "2000 Nov 12 02:30:10 GMT-1".
 
+{{insertdoc 'time-difference}}
+{{insertdoc 'time>?}}
+{{insertdoc 'time-resolution}}
+
+
 
 
 // **** SRFI-22
@@ -451,11 +456,19 @@ underscores in numbers.
 {{quick-link-srfi 41}} or {{quick-link-srfi 221}}. Prefix the imported symbols of this SRFI, if you plan to
 use it with one of the previous libraries.
 
+// **** SRFI-230
+{{srfi-subsection 230}}
+
+{{quick-link-srfi 238}} is fully supported if {{stklos}} was compiled
+with Posix threads. If {{stklos}} was compiled without thread support,
+the module `(srfi 230)` is defined, but it exports nothing.
+
+
 // **** SRFI-238
 {{srfi-subsection 238}}
 
 {{quick-link-srfi 238}} is fully supported. Furthermore, {{stklos}}
-adds the functions `codeset-list` and `make-codeset`. 
+adds the functions `codeset-list` and `make-codeset`.
 
 {{insertdoc 'codeset-list}}
 {{insertdoc 'make-codeset}}

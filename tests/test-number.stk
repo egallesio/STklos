@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -358,6 +358,36 @@
 (test "complex binary polar -+" (make-polar #b101 #b-111)  #b101@-111)
 (test "complex binary polar --" (make-polar #b-101 #b-111) #b-101@-111)
 
+(test "complex inf+n"
+      #t
+      (let ((c +inf.0+1/2i))
+        (and (infinite? (real-part c))
+             (positive? (real-part c))
+             (= 1/2 (imag-part c)))))
+
+(test "complex n-inf"
+      #t
+      (let ((c 3/4-inf.0i))
+        (and (infinite? (imag-part c))
+             (negative? (imag-part c))
+             (= 3/4 (real-part c)))))
+
+(test "complex +inf+inf"
+      #t
+      (let ((c +inf.0-inf.0i))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (positive? (real-part c))
+             (negative? (imag-part c)))))
+
+(test "complex +inf@n"
+      #t
+      (let ((c +inf.0@2))
+        (and (infinite? (imag-part c))
+             (infinite? (real-part c))
+             (negative? (real-part c))
+             (positive? (imag-part c)))))
+
 
 ;;------------------------------------------------------------------
 (test-subsection "integer writer syntax")
@@ -397,6 +427,19 @@
         "-340282366920938463463374607431768211457")
       (i-tester2 (exp2 127)))
 
+;;------------------------------------------------------------------
+(test-subsection "complex writer syntax")
+
+(test "complex printing"
+      '("+inf.0+inf.0i" "+nan.0+inf.0i" "+inf.0+inf.0i"
+       "-inf.0-inf.0i"  "+nan.0+nan.0i" "+nan.0+nan.0i"
+       "1+1i"           "0+1i"          "1+0.0i"
+       "1-0.0i"         "1+1/2i"        "2-1/3i")
+      (map number->string
+           (list (* 1+1i +inf.0) (* 0+1i +inf.0) (* 2+1i +inf.0)
+                 (* -inf.0 1+1i) (* -nan.0 +1i)  (* +nan.0 -1i)
+                 1+1i            0+1i            1+0.0i
+                 1-0.0i          1+1/2i          2-3/9i)))
 
 ;;==================================================================
 ;; Predicates
@@ -411,6 +454,9 @@
 (test "integer?" #f (integer? 3+4i))
 (test "integer?" #t (integer? 3+0i))
 (test "integer?" #f (integer? #f))
+(test "integer?" #t (integer? (exact 1+0.0i)))
+(test "integer?" #t (integer? (exact 1.0+0.0i)))
+(test "integer?" #t (integer? (exact 0+0i)))
 
 (test "rational?" #t (rational? 0))
 (test "rational?" #t (rational? 85736847562938475634534245))
@@ -450,6 +496,10 @@
 (test "exact?" #f (exact? 4304953480349304983.049304953804))
 (test "exact?" #f (exact? 1.0+0i))
 (test "exact?" #f (exact? 1.0+5i))
+(test "exact?" #t (exact? 1+0i))
+(test "exact?" #t (exact? (exact 1+0.0i)))
+(test "exact?" #t (exact? (exact 1.0+0.0i)))
+(test "exact?" #t (exact? 0+0i))
 (test "inexact?" #f (inexact? 1))
 (test "inexact?" #f (inexact? 4304953480349304983049304953804))
 (test "inexact?" #t (inexact? 1.0))
@@ -488,6 +538,7 @@
 (test "zero?" #t (zero? 0+0i))
 (test "zero?" #f (zero? 1.0))
 (test "zero?" #f (zero? +5i))
+(test "zero?" #t (zero? -0.0))
 (test "positive?" #t (positive? 1))
 (test "positive?" #f (positive? -1))
 (test "positive?" #t (positive? 3.1416))
@@ -545,6 +596,45 @@
       (- xx y))
 (test "-bignum - -bignum" #x-fffffffd00000000fffffffd00000000
       (- xx yy))
+
+;; Following tests work if (eqv? 0.0 -0.0) is #f
+;; NOTE: (= 0.0 0.0) returns #t. Use strings to be sure
+(test "minus-zero.1"
+      "-0.0"
+      (format "~a" (- 0.0)))
+
+(test "minus-zero.2"
+      "0.0"
+      (format "~a" (- -0.0)))
+
+(test "minus zero.3"
+      "0.0"
+      (format "~a" (- 0.0 0.0)))
+
+(test "minus zero.4"
+      "-0.0"
+      (format "~a" (- 0 0.0 0.0)))
+
+(test "minus zero.4"
+      "0.0"
+      (format "~a" (- 0 0.0 -0.0)))
+
+(test "minus zero.5"
+      #f
+      (equal? 0.0 -0.0))
+
+(test "minus zero.6"
+      #t
+      (equal? -0.0 -0.0))
+
+
+;; Note: We have a special case: (- 0+0.0i 0.0) is "0.0+0.0i" and not
+;; "-0.0+0.0i"
+(test "minus zero in a complex"
+      "0.0+0.0i"
+      (format #f "~a" (- 0+0.0i 0.0)))
+
+
 
 ;;------------------------------------------------------------------
 (test-subsection "small immediate integer constants")
@@ -1023,7 +1113,11 @@
            10000         ;; 2^4 5^4
            44444))       ;; 2^2 41 271
 
-
+;; parameterize won't work for compiler:... parameters, since
+;; the form is compiled before the parameter is changed, so we
+;; need to manually set it, in isolated forms.
+(define %%%___inline-common-functions (compiler:inline-common-functions))
+(compiler:inline-common-functions #f)
 (test/error "gcd" (gcd 1.2  1))
 (test/error "gcd" (gcd 1/2  1))
 (test/error "gcd" (gcd 1+2i 1))
@@ -1031,6 +1125,36 @@
 (test/error "gcd" (gcd #\a  1))
 (test/error "gcd" (gcd "a"  1))
 (test/error "gcd" (gcd gcd  1))
+
+;; Different argument order, just to be sure:
+(test/error "gcd" (gcd 1 1.2))
+(test/error "gcd" (gcd 1 1/2))
+(test/error "gcd" (gcd 1 1+2i))
+(test/error "gcd" (gcd 1 'a))
+(test/error "gcd" (gcd 1 #\a))
+(test/error "gcd" (gcd 1 "a"))
+(test/error "gcd" (gcd 1 gcd))
+
+(compiler:inline-common-functions #t)
+(test/compile-error "gcd" (gcd 1.2  1))
+(test/compile-error "gcd" (gcd 1/2  1))
+(test/compile-error "gcd" (gcd 1+2i 1))
+(test/compile-error "gcd" (gcd 'a   1))
+(test/compile-error "gcd" (gcd #\a  1))
+(test/compile-error "gcd" (gcd "a"  1))
+(test/compile-error "gcd" (gcd gcd  1))
+
+;; Different argument order, just to be sure:
+(test/compile-error "gcd" (gcd 1 1.2))
+(test/compile-error "gcd" (gcd 1 1/2))
+(test/compile-error "gcd" (gcd 1 1+2i))
+(test/compile-error "gcd" (gcd 1 'a))
+(test/compile-error "gcd" (gcd 1 #\a))
+(test/compile-error "gcd" (gcd 1 "a"))
+(test/compile-error "gcd" (gcd 1 gcd))
+
+(compiler:inline-common-functions %%%___inline-common-functions)
+
 
 (test "gcd" fx-greatest (gcd 0 fx-greatest))
 
@@ -1074,7 +1198,11 @@
       (lcm 120472576                                                           ;; 2^10  7^6
            27007807709860849561033756885977919860590665716507399182910226432)) ;; 2^200 7^5
 
-
+;; parameterize won't work for compiler:... parameters, since
+;; the form is compiled before the parameter is changed, so we
+;; need to manually set it, in isolated forms.
+(define %%%___inline-common-functions (compiler:inline-common-functions))
+(compiler:inline-common-functions #f)
 (test/error "lcm" (lcm 1.2  1))
 (test/error "lcm" (lcm 1/2  1))
 (test/error "lcm" (lcm 1+2i 1))
@@ -1082,6 +1210,35 @@
 (test/error "lcm" (lcm #\a  1))
 (test/error "lcm" (lcm "a"  1))
 (test/error "lcm" (lcm lcm  1))
+
+;; Different argument order, just to be sure:
+(test/error "lcm" (lcm 1 1.2))
+(test/error "lcm" (lcm 1 1/2))
+(test/error "lcm" (lcm 1 1+2i))
+(test/error "lcm" (lcm 1 'a))
+(test/error "lcm" (lcm 1 #\a))
+(test/error "lcm" (lcm 1"a"))
+(test/error "lcm" (lcm 1 lcm))
+
+(compiler:inline-common-functions #t)
+(test/compile-error "lcm" (lcm 1.2  1))
+(test/compile-error "lcm" (lcm 1/2  1))
+(test/compile-error "lcm" (lcm 1+2i 1))
+(test/compile-error "lcm" (lcm 'a   1))
+(test/compile-error "lcm" (lcm #\a  1))
+(test/compile-error "lcm" (lcm "a"  1))
+(test/compile-error "lcm" (lcm lcm  1))
+
+;; Different argument order, just to be sure:
+(test/compile-error "lcm" (lcm 1 1.2))
+(test/compile-error "lcm" (lcm 1 1/2))
+(test/compile-error "lcm" (lcm 1 1+2i))
+(test/compile-error "lcm" (lcm 1 'a))
+(test/compile-error "lcm" (lcm 1 #\a))
+(test/compile-error "lcm" (lcm 1 "a"))
+(test/compile-error "lcm" (lcm 1 lcm))
+
+(compiler:inline-common-functions %%%___inline-common-functions)
 
 ;;------------------------------------------------------------------
 (test-subsection "expt")
@@ -1113,10 +1270,26 @@
                  (real-part (expt -2.0 1/2))))
          0.000001))
 
-(test "0^0" 1 (expt 0 0))          ;; exact exponent, exact 1
-(test "0^0" 1 (expt 0.0 0))        ;; exact exponent, exact 1
-(test "0^0" 1.0 (expt 0 0.0))      ;; inexact exponent, inexact 1.0
-(test "0^0" 1.0 (expt 0.0 0.0))    ;; inexact exponent, inexact 1.0
+(test "0^0.1" 1 (expt 0 0))          ;; exact exponent, exact 1
+(test "0^0.2" 1 (expt 0.0 0))        ;; exact exponent, exact 1
+(test "0^0/3" 1.0 (expt 0 0.0))      ;; inexact exponent, inexact 1.0
+(test "0^0.4" 1.0 (expt 0.0 0.0))    ;; inexact exponent, inexact 1.0
+
+(test "42^0.0" 1.0    (expt +42 +0.0))
+(test "-42x^0.0" 1.0  (expt -42 +0.0))
+(test "42x^-0.0" 1.0  (expt +42 -0.0))
+(test "-42x^-0.0" 1.0 (expt -42 -0.0))
+
+
+(test "0.0^4"   0.0 (expt  0.0 4))
+(test "-0.0^4"  0.0 (expt -0.0 4))
+(test "0.0^5"   0.0 (expt  0.0 5))
+(test "-0.0^5"   -0.0 (expt -0.0 5))
+
+(test "+0.0^3.2"  0.0    (expt +0.0 3.2))
+(test "-0.0^3.2"  0.0    (expt -0.0 3.2))
+(test "+0.0^-3.2" +inf.0 (expt +0.0 -3.2))
+(test "-0.0^-3.2" +inf.0 (expt -0.0 -3.2))
 
 (test "complex expt"
       #t
@@ -1128,7 +1301,44 @@
 (test/error "0^-a+bi" (expt 0   -2+1i))
 (test/error "0^-a+bi" (expt 0.0 -2+1i))
 
-(test "exact expt" 1/1606938044258990275541962092341162602522202993782792835301376 (expt (expt 2 100) -2))
+(test "exact expt" 1/1606938044258990275541962092341162602522202993782792835301376
+      (expt (expt 2 100) -2))
+
+(test "expt big exponent.1"
+      1
+      (expt 1 132897461238946918327469812213123215555532132133764))
+
+(test "expt big exponent.2"
+      1
+      (expt 1 132897461238946918327469812213123215555532132133763))
+
+(test "expt big exponent.3"
+      1
+      (expt -1 132897461238946918327469812213123215555532132133764))
+
+(test "expt big exponent.4"
+      -1
+      (expt -1 132897461238946918327469812213123215555532132133763))
+
+;; ----------
+
+(test "expt big exponent.5"
+      1.0
+      (expt 1.0 132897461238946918327469812213123215555532132133764))
+
+(test "expt big exponent.6"
+      1.0
+      (expt 1.0 132897461238946918327469812213123215555532132133763))
+
+(test "expt big exponent.7"
+      1.0
+      (expt -1.0 132897461238946918327469812213123215555532132133764))
+
+(test "expt big exponent.8"
+      -1.0
+      (expt -1.0 132897461238946918327469812213123215555532132133763))
+
+
 
 ;;------------------------------------------------------------------
 (test-subsection "sqrt")
@@ -1154,6 +1364,23 @@
 (test "sqrt bignum"  0+1452616561298192819i
       		     (sqrt -2110094874157786375590269875303166761))
 
+;; FIXME: the 700 exponent works for 64 bits, not for smaller floats.
+(test "sqrt bignum" #t ;; the argument is not representable as double, but the
+                       ;; result is!
+      (< 9.0e+210
+         (sqrt (* (expt 2 700) (expt 2 700) 3))
+         9.2e+210))
+(test "sqrt complex with +0.0 imaginary part" 0.0+1.0i
+      (sqrt -1+0.0i))
+(test "sqrt complex with +0.0 imaginary part" 0.0-1.0i
+      (sqrt -1-0.0i))
+
+(test "sqrt -1" +1i (sqrt -1))
+(test "sqrt -1.0" #t
+      (let ((s (sqrt -1.0)))
+        (and (zero? (real-part s))
+             (< 0.999999 (imag-part s) 1.00001)
+             (inexact? s))))
 
 ;;------------------------------------------------------------------
 (test-subsection "logical operations")
@@ -1453,9 +1680,16 @@
 (test "log -0.0" ;; R7RS says (log -0.0) should be "-inf + i*pi".
       #t
       (let ((z (log -0.0)))
-        (infinite? (real-part z))
-        (negative? (real-part z))
-        (< 3.14159265350 (imag-part z) 3.14159265360)))
+        (and (infinite? (real-part z))
+             (negative? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
+
+(test "log -inf.0" ;; The limit when x -> -inf is "+inf + i*pi".
+      #t
+      (let ((z (log -inf.0)))
+        (and (infinite? (real-part z))
+             (positive? (real-part z))
+             (< 3.14159265350 (imag-part z) 3.14159265360))))
 
 (test "log 2/3"
       #t
@@ -1469,11 +1703,11 @@
          (/ (log 3) (log 4))))
 
 (test "log 16 2"
-      4.0
+      4
       (log 16 2))
 
 (test "log 1/4 2"
-      -2.0
+      -2
       (log 1/4 2))
 
 (test "log 2 10"
@@ -1482,6 +1716,15 @@
          (log 2 10)
          0.30103000))
 
+(test "log -64 4 re"
+      3
+      (real-part (log -64 4)))
+(test "log -64 4 im"
+      #t
+      (< 2.26618
+         (imag-part (log -64 4))
+         2.26619))
+
 (test "log 3-5i"
       #t
       (let* ((z (log  3-5i))
@@ -1489,6 +1732,51 @@
              (i (imag-part z)))
         (and (<  1.7631802000 r  1.7631803000)
              (< -1.0303769000 i -1.0303768000))))
+
+;; exact-integer-log
+
+(dotimes (n 50)
+  (dotimes (b 50)
+    (when (and (positive? n) (> b 1))
+      (receive (l r)
+          (exact-integer-log n b)
+        (test "exact-integer-log.1"
+              #t
+              (and (= n (+ (expt b l) r))
+                   (> (expt b (+ 1 l)) n)))))))
+
+(dotimes (n 50)
+  (dotimes (b 50)
+    (when (and (positive? n) (> b 1))
+      (let ((N (+ 500 (expt 11 n)))
+            (B (* 3 (expt 7 b))))
+        (receive (l r)
+            (exact-integer-log N B)
+          (test "exact-integer-log.2"
+                #t
+                (and (= N (+ (expt B l) r))
+                     (> (expt B (+ 1 l)) N))))))))
+
+
+(test "log 1" 0 (log 1 2))
+(test "log 1" 0 (log 1 3))
+(test "log 1" 0 (log 1 -2))
+(test "log 1" 0 (log 1 -3))
+(test "log 1" 0 (log 1 (expt 2 300)))
+(test "log 1" 0 (log 1 (- (expt 2 300))))
+(test "log 1" 0 (log 1 (inexact (expt 2 300))))
+(test "log 1" 0 (log 1 (inexact (- (expt 2 300)))))
+(test "log 1" 0 (log 1 2.0))
+(test "log 1" 0 (log 1 3.0))
+(test "log 1" 0 (log 1 -2.0))
+(test "log 1" 0 (log 1 -3.0))
+(test "log 1" 0 (log 1 (/ 1 (expt 2 300))))
+(test "log 1" 0 (log 1 (/ 1 (- (expt 2 300)))))
+(test "log 1" 0 (log 1 (inexact (/ 1 (expt 2 300)))))
+(test "log 1" 0 (log 1 (inexact (/ 1 (- (expt 2 300))))))
+
+(test/error "log 1 0" (log 1 0))
+(test/error "log 1 1" (log 1 1))
 
 ;; exp, log
 
@@ -1545,9 +1833,12 @@
           (<  2079.44154160000 z 2079.44154170000)))
 
   (test "log_2 2^4000"
-        #t
-        (let ((z (log (expt 2 4000) 2)))
-          (< 3999.9999999 z 4000.0000001)))
+        4000
+        (log (expt 2 4000) 2))
+
+  (test "log_4 4^4000"
+        4000
+        (log (expt 4 4000) 4))
 
   (test "log 10^3000 / 3"
         #t
@@ -1559,6 +1850,12 @@
         (let ((z (log (/ (expt 2 3000) (expt 3 2500)))))
           (<  -667.089180 z -667.089179)))
   )
+
+(dotimes (base 3)
+  (dotimes (x 1000)
+    (test "logs"
+          x
+          (log (expt (expt 2 (+ base 1)) x) (expt 2 (+ base 1))))))
 
 ;; sin, cos
 
@@ -1607,7 +1904,7 @@
          (sin (asin 2/3))))
 
 (test "cos-acos 1"
-      1.0
+      1
       (cos (acos 1)))
 
 (test "cos-acos 2/3"
@@ -1658,6 +1955,22 @@
       (< 0.7853981000
          (atan 1 1)
          0.7853982000))
+
+(test/error "angle zero, I"  (angle 0))
+
+;; The following tests are borrowed from Gauche:
+(let ((pi 3.141592653589793115997963468544185161590576171875))
+  (test "atan +0.0 +x"    +0.0     (atan 0.0 1))
+  (test "atan -0.0 +x" -0.0        (atan -0.0 1))
+  (test "atan +0.0 -x" pi          (atan +0.0 -1))
+  (test "atan -0.0 -x" (- pi)      (atan -0.0 -1))
+  (test "atan +0.0 +0.0" +0.0      (atan +0.0 +0.0))
+  (test "atan -0.0 +0.0" -0.0      (atan -0.0 +0.0))
+  (test "atan +0.0 -0.0" pi        (atan +0.0 -0.0))
+  (test "atan -0.0 -0.0" (- pi)    (atan -0.0 -0.0))
+  (test "atan +0.0 0" (/ pi 2)     (atan +0.0 0))
+  (test "atan -0.0 0" (- (/ pi 2)) (atan -0.0 0))
+  (test/error "atan 0 0" (nan? (atan 0 0))))
 
 ;; tan, atan
 
@@ -1792,6 +2105,130 @@
 (test "acosh 1"   0 (acosh 1))
 (test "atanh 0"   0 (atanh 0))
 
+;;------------------------------------------------------------------
+(test-subsection "Complexes")
+
+(test "complex sum"
+      7+3i
+      (+ 2-3i 5+6i))
+
+(test "complex sub"
+      -3-9i
+      (- 2-3i 5+6i))
+
+(test "complex mul"
+      28-3i
+      (* 2-3i 5+6i))
+
+(test "complex div"
+      -8/61-27/61i
+      (/ 2-3i 5+6i))
+
+(test "complex multiply by integer"
+      2+inf.0i
+      (*  2+inf.0i  1))
+
+(test "complex multiply by real"
+      2.0+inf.0i
+      (*  2+inf.0i  1.0))
+
+(test "complex square"
+      #f
+      (nan? (expt +inf.0+1i 2)))
+
+(test "complex square"
+      #t
+      (and (infinite? (real-part (expt +inf.0+1i 2)))
+           (infinite? (imag-part (expt +inf.0+1i 2)))))
+
+(test "complex division with infinity.1"
+      #t
+      ;; The real value is 0.0+0.0i in STklos. Some Schemes do
+      ;; return 0.0+0.0i, some return exact zero, some return
+      ;; +nan+0.0i.
+      (zero? (imag-part (/ 2 +inf.0+0.0i))))
+(test "complex division with infinity.2"
+      +inf.0+5/3i
+      (/ +inf.0+5i 3))
+(test "complex division with infinity.3"
+      5/3-inf.0i
+      (/ 5-inf.0i 3))
+
+
+(test "complex mult with infinity.1"
+      +inf.0+6i
+      (* 2 +inf.0+3i))
+(test "complex mult with infinity.2"
+      +inf.0+6.0i
+      (* 2 +inf.0+3.0i))
+(test "complex mult with infinity.3"
+      +inf.0+6.0i
+      (* 2.0 +inf.0+3i))
+(test "complex mult with infinity.4"
+      +inf.0+3/2i
+      (* 1/2 +inf.0+3i))
+
+
+(test "cosh +inf"
+      #t
+      (and (infinite? (cosh +inf.0))
+           (positive? (cosh +inf.0))))
+
+(test "cosh -inf"
+      #t
+      (and (infinite? (cosh -inf.0))
+           (positive? (cosh -inf.0))))
+
+(test "sinh +inf"
+      #t
+      (and (infinite? (sinh +inf.0))
+           (positive? (sinh +inf.0))))
+
+(test "sinh -inf"
+      #t
+      (and (infinite? (sinh -inf.0))
+           (negative? (sinh -inf.0))))
+
+
+(test "acosh +inf"
+      #t
+      (and (infinite? (acosh +inf.0))
+           (positive? (acosh +inf.0))))
+
+(test "acosh -inf"
+      #t
+      (and (infinite? (acosh -inf.0))
+           (positive? (acosh -inf.0))))
+
+(test "asinh +inf"
+      #t
+      (and (infinite? (asinh +inf.0))
+           (positive? (asinh +inf.0))))
+
+(test "asinh -inf"
+      #t
+      (and (infinite? (asinh -inf.0))
+           (negative? (asinh -inf.0))))
+
+;; atanh(+inf) = -(i.pi)/2
+;; atanh(-inf) = +(i.pi)/2
+(test "atanh -inf"
+      #t
+      (let ((x (atanh -inf.0)))
+        (and (zero? (real-part x))
+             (inexact? (real-part x))
+             (< 1.5707963260     ;; pi/2
+                (imag-part x)
+                1.5707963270))))
+
+(test "atanh +inf"
+      #t
+      (let ((x (atanh +inf.0)))
+        (and (zero? (real-part x))
+             (inexact? (real-part x))
+             (< -1.5707963270     ;; pi/2
+                (imag-part x)
+                -1.5707963260))))
 
 ;;------------------------------------------------------------------
 (test-subsection "Misc")
@@ -2002,5 +2439,384 @@
         (< 35.99999
            (radians->degrees (/ pi 5))
            36.00001)))
+;;;
+;;; Zeroes and infinities (some tests comes from Chez)
+;;;
+(test "zeros & infinities.0" +inf.0 (/ +0.0))
+(test "zeros & infinities.2" -inf.0 (/ -0.0))
+(test "zeros & infinities.3" +0.0 (/ +inf.0))
+(test "zeros & infinities.4" -0.0 (/ -inf.0))
+(test "zeros & infinities.5" +nan.0 (/ +nan.0))
+(test "zeros & infinities.6" +inf.0 (/ +1.0 +0.0))
+(test "zeros & infinities.7" -inf.0 (/ +1.0 -0.0))
+(test "zeros & infinities.8" -inf.0 (/ -1.0 +0.0))
+(test "zeros & infinities.9" +inf.0 (/ -1.0 -0.0))
+(test "zeros & infinities.10" +nan.0 (/ +0.0 +0.0))
+(test "zeros & infinities.11" +nan.0 (/ +0.0 -0.0))
+(test "zeros & infinities.12" +nan.0 (/ -0.0 +0.0))
+(test "zeros & infinities.13" +nan.0 (/ -0.0 -0.0))
+
+(test "zeros & infinities.14" 0 (/ 0 2))
+(test "zeros & infinities.15" 0.0 (/ 0.0 2))
+(test "zeros & infinities.16" 0+0.0i (/ 0+0.0i 2))
+
+(test "zeros & infinities.17" +nan.0 (/ +inf.0 -inf.0))
+(test "zeros & infinities.18" +nan.0 (/ -inf.0 -inf.0))
+(test "zeros & infinities.19" -inf.0 (/ -inf.0 0.0))
+
+(test "zeros & infinities.20" +inf.0 (/ 2 0.0))
+(test "zeros & infinities.21" -inf.0 (/ -2 0.0))
+(test "zeros & infinities.21" +inf.0 (/ -2 -0.0))
+(test "zeros & infinities.23" 0 (/ 0 2+3i))
+(test "zeros & infinities.24" -0.0+0.0i (/ -0.0 2+3i))
+(test "zeros & infinities.25" +0.0+0.0i (/ 0+0.0i 2+3i))
+
+
+;;;
+;;; Misc
+;;;
+(test "weird number or symbol.1" #t (number? '3s2))
+(test "weird number or symbol.2" #f (number? '3s2x))
+(test "weird number or symbol.3" #t (number? '3#d2+5i))
+(test "weird number or symbol.4" #f (number? '3#d2+5))
+
+(test "equivalence +nan.0 -nan.0" +nan.0 -nan.0)
+(test "nan and comp.1" #t (eqv? +nan.0 +nan.0))
+(test "nan and comp.2" #t (eqv? +nan.0 -nan.0))
+(test "nan and com.3" #f (= +nan.0 +nan.0))
+(test "nan and comp.4" #f (= +nan.0 -nan.0))
+(test "nan and comp.5" #f (>= +nan.0 +nan.0))
+(test "nan and comp.6" #f (>= +nan.0 -nan.0))
+(test "nan and comp.7" #f (= (%make-nan #f #f 42) (%make-nan #f #f 42)))
+(test "nan and comp.8" #t (eqv? (%make-nan #f #f 42) (%make-nan #f #f 42)))
+(test "nan and comp.9" #f (= (%make-nan #f #f 42) (%make-nan #f #f 0)))
+(test "nan and comp.10" #f (eqv? (%make-nan #f #f 42) (%make-nan #f #f 0)))
+
+(test "nan and max.1" +nan.0 (max 1 2 3.0 4/5 +nan.0))
+(test "nan and max.2" +nan.0 (max +nan.0 1 2 3.0 4/5))
+(test "nan and min.1" +nan.0 (min 1 2 3.0 4/5 +nan.0))
+(test "nan and min.2" +nan.0 (min +nan.0 1 2 3.0 4/5))
+
+
+(test "abs complex"
+      5
+      (abs -3-4i))
+
+(test "abs complex"
+      5.0
+      (abs -3.0-4i))
+
+(test "abs complex"
+      #t
+      (infinite? (abs -inf.0+4i)))
+
+(test "abs complex"
+      #t
+      (infinite? (abs 2-inf.0i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs -nan.0+4i)))
+
+(test "abs complex"
+      #t
+      (nan? (abs 1-nan.0i)))
+
+(test "eqv? on 0.0 and -0.0" #f (eqv? +0.0 -0.0))
+(test "= on 0.0 and -0.0" #t (= +0.0 -0.0))
+(test "eqv? on two inexact complexes.1" #f (eqv? 1.0+i 1.0+1.0i))
+(test "eqv? on two inexact complexes.2" #t (eqv? 1.0+1.0i 1.0+1.0i))
+
+
+(test "read a 9000 digits bignum (see Issue #592)"
+      #t
+      (= (with-input-from-string
+             (with-output-to-string
+               (lambda () (display (expt 2 30000))))
+           (lambda () (read)))
+         (expt 2 30000)))
+
+(test "Number equality test.1"
+      #f
+      (= 4999999999999999727876154935214080.0 5000000000000000000000000000000000))
+
+(test "Number equality test.2"
+      #t
+      (= 4999999999999999727876154935214080.0 4999999999999999727876154935214080))
+
+(test "Number equality test.3"
+      #t
+      (< 4999999999999999727876154935214080.0 5000000000000000000000000000000000))
+
+(test "Number equality test.4"
+      #f
+      (> 4999999999999999727876154935214080.0 5000000000000000000000000000000000))
+
+(test "Number equality test.5"
+      #t
+      (= 1.0 1))
+
+(test "Number equality test.6"
+      #t
+      (= 2.0 2))
+
+(test "Number equality test.7"
+      #t
+      (= 2+2i 2.0+2.0i))
+
+(test "Number equality test.8"
+      #f
+      (= 4999999999999999727876154935214080.0+4999999999999999727876154935214080.0i
+         5000000000000000000000000000000000+5000000000000000000000000000000000i ))
+
+(test "Number equality test.9"
+      #f
+      (= 5000000000000000000000000000000000+4999999999999999727876154935214080.0i
+         5000000000000000000000000000000000+5000000000000000000000000000000000i ))
+
+(test "Number equality test.10"
+      #f
+       (= 4999999999999999727876154935214080.0+5000000000000000000000000000000000i
+          5000000000000000000000000000000000+5000000000000000000000000000000000i ))
+
+(test "Number equality test.11"
+      #t
+       (= 4999999999999999727876154935214080.0+5000000000000000000000000000000000i
+          4999999999999999727876154935214080+5000000000000000000000000000000000i ))
+
+(test "Number equality test.12"
+      #t
+       (= 5000000000000000000000000000000000+4999999999999999727876154935214080.0i
+          5000000000000000000000000000000000+4999999999999999727876154935214080i))
+
+(test "Number equality test.13"
+      #f
+      (= 1/3 #i1/3))
+
+(test "Number equality test.14"
+      #f
+      (= #i1/3 1/3))
+
+(test "Number equality test.15"
+      #f
+      (= (exact->inexact (inexact->exact 1/3)) 1/3))
+
+;; Tests added on 2024-08-02 for STk_add2, STk_mul2, STk_mul2, STk_div2 dont
+;; try to convert numbers before doing the operation (this permit to limit
+;; some number allocation
+;; NOTE: this is very basic and not sufficient
+
+(define (approx?  n1 n2)
+  (cond
+   ((and (real? n1) (real? n2))
+    (if (zero? n1)
+        (= n1 n2)
+        (< (abs (/ (- n1 n2) n1)) 1e-10)))
+    ((and (complex? n1) (complex? n2))
+     (and (approx? (real-part n1) (real-part n2))
+          (approx? (imag-part n1) (imag-part n2))))
+    (else (= n1 n2))))
+
+(test "Simple testing STk_add2.1" '6+4i
+      (+ 3+2i 3+2i) approx?)
+(test "Simple testing STk_add2.2" '4.23+2i
+      (+ 3+2i 1.23) approx?)
+(test "Simple testing STk_add2.3" '70/23+2i
+      (+ 3+2i 1/23) approx?)
+(test "Simple testing STk_add2.4" '1222222222222222222222222222222222222226+2i
+      (+ 3+2i 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_add2.5" '126+2i
+      (+ 3+2i 123) approx?)
+(test "Simple testing STk_add2.6" '4.23+2i
+      (+ 1.23 3+2i) approx?)
+(test "Simple testing STk_add2.7" '2.46
+      (+ 1.23 1.23) approx?)
+(test "Simple testing STk_add2.8" '1.27347826086957
+      (+ 1.23 1/23) approx?)
+(test "Simple testing STk_add2.9" '1.22222222222222e+39
+      (+ 1.23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_add2.10" '124.23
+      (+ 1.23 123) approx?)
+(test "Simple testing STk_add2.11" '70/23+2i
+      (+ 1/23 3+2i) approx?)
+(test "Simple testing STk_add2.12" '1.27347826086957
+      (+ 1/23 1.23) approx?)
+(test "Simple testing STk_add2.13" '2/23
+      (+ 1/23 1/23) approx?)
+(test "Simple testing STk_add2.14" '28111111111111111111111111111111111111130/23
+      (+ 1/23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_add2.15" '2830/23
+      (+ 1/23 123) approx?)
+(test "Simple testing STk_add2.16" '122222222222222222222222226+2i
+      (+ 122222222222222222222222223 3+2i) approx?)
+(test "Simple testing STk_add2.17" '1.22222222222222e+26
+      (+ 122222222222222222222222223 1.23) approx?)
+(test "Simple testing STk_add2.18" '2811111111111111111111111130/23
+      (+ 122222222222222222222222223 1/23) approx?)
+(test "Simple testing STk_add2.19" '1222222222222344444444444444444444444446
+      (+ 122222222222222222222222223 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_add2.20" '122222222222222222222222346
+      (+ 122222222222222222222222223 123) approx?)
+(test "Simple testing STk_add2.21" '126+2i
+      (+ 123 3+2i) approx?)
+(test "Simple testing STk_add2.22" '124.23
+      (+ 123 1.23) approx?)
+(test "Simple testing STk_add2.23" '2830/23
+      (+ 123 1/23) approx?)
+(test "Simple testing STk_add2.24" '1222222222222222222222222222222222222346
+      (+ 123 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_add2.25" '246
+      (+ 123 123) approx?)
+(test "Simple testing STk_sub2.1" '0
+      (- 3+2i 3+2i) approx?)
+(test "Simple testing STk_sub2.2" '1.77+2i
+      (- 3+2i 1.23) approx?)
+(test "Simple testing STk_sub2.3" '68/23+2i
+      (- 3+2i 1/23) approx?)
+(test "Simple testing STk_sub2.4" '-1222222222222222222222222222222222222220+2i
+      (- 3+2i 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_sub2.5" '-120+2i
+      (- 3+2i 123) approx?)
+(test "Simple testing STk_sub2.6" '-1.77-2i
+      (- 1.23 3+2i) approx?)
+(test "Simple testing STk_sub2.7" '0.0
+      (- 1.23 1.23) approx?)
+(test "Simple testing STk_sub2.8" '1.18652173913043
+      (- 1.23 1/23) approx?)
+(test "Simple testing STk_sub2.9" '-1.22222222222222e+39
+      (- 1.23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_sub2.10" '-121.77
+      (- 1.23 123) approx?)
+(test "Simple testing STk_sub2.11" '-68/23-2i
+      (- 1/23 3+2i) approx?)
+(test "Simple testing STk_sub2.12" '-1.18652173913043
+      (- 1/23 1.23) approx?)
+(test "Simple testing STk_sub2.13" '0
+      (- 1/23 1/23) approx?)
+(test "Simple testing STk_sub2.14" '-28111111111111111111111111111111111111128/23
+      (- 1/23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_sub2.15" '-2828/23
+      (- 1/23 123) approx?)
+(test "Simple testing STk_sub2.16" '122222222222222222222222220-2i
+      (- 122222222222222222222222223 3+2i) approx?)
+(test "Simple testing STk_sub2.17" '1.22222222222222e+26
+      (- 122222222222222222222222223 1.23) approx?)
+(test "Simple testing STk_sub2.18" '2811111111111111111111111128/23
+      (- 122222222222222222222222223 1/23) approx?)
+(test "Simple testing STk_sub2.19" '-1222222222222100000000000000000000000000
+      (- 122222222222222222222222223 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_sub2.20" '122222222222222222222222100
+      (- 122222222222222222222222223 123) approx?)
+(test "Simple testing STk_sub2.21" '120-2i
+      (- 123 3+2i) approx?)
+(test "Simple testing STk_sub2.22" '121.77
+      (- 123 1.23) approx?)
+(test "Simple testing STk_sub2.23" '2828/23
+      (- 123 1/23) approx?)
+(test "Simple testing STk_sub2.24" '-1222222222222222222222222222222222222100
+      (- 123 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_sub2.25" '0
+      (- 123 123) approx?)
+(test "Simple testing STk_div2.1" '1
+      (/ 3+2i 3+2i) approx?)
+(test "Simple testing STk_div2.2" '2.4390243902439+1.6260162601626i
+      (/ 3+2i 1.23) approx?)
+(test "Simple testing STk_div2.3" '69+46i
+      (/ 3+2i 1/23) approx?)
+(test "Simple testing STk_div2.4" '3/1222222222222222222222222222222222222223+2/1222222222222222222222222222222222222223i
+      (/ 3+2i 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_div2.5" '1/41+2/123i
+      (/ 3+2i 123) approx?)
+(test "Simple testing STk_div2.6" '0.283846153846154-0.189230769230769i
+      (/ 1.23 3+2i) approx?)
+(test "Simple testing STk_div2.7" '1.0
+      (/ 1.23 1.23) approx?)
+(test "Simple testing STk_div2.8" '28.29
+      (/ 1.23 1/23) approx?)
+(test "Simple testing STk_div2.9" '1.00636363636364e-39
+      (/ 1.23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_div2.10" '0.01
+      (/ 1.23 123) approx?)
+(test "Simple testing STk_div2.11" '3/299-2/299i
+      (/ 1/23 3+2i) approx?)
+(test "Simple testing STk_div2.12" '0.0353481795687522
+      (/ 1/23 1.23) approx?)
+(test "Simple testing STk_div2.13" '1
+      (/ 1/23 1/23) approx?)
+(test "Simple testing STk_div2.14" '1/28111111111111111111111111111111111111129
+      (/ 1/23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_div2.15" '1/2829
+      (/ 1/23 123) approx?)
+(test "Simple testing STk_div2.16" '366666666666666666666666669/13-244444444444444444444444446/13i
+      (/ 122222222222222222222222223 3+2i) approx?)
+(test "Simple testing STk_div2.17" '9.93676603432701e+25
+      (/ 122222222222222222222222223 1.23) approx?)
+(test "Simple testing STk_div2.18" '2811111111111111111111111129
+      (/ 122222222222222222222222223 1/23) approx?)
+(test "Simple testing STk_div2.19" '122222222222222222222222223/1222222222222222222222222222222222222223
+      (/ 122222222222222222222222223 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_div2.20" '40740740740740740740740741/41
+      (/ 122222222222222222222222223 123) approx?)
+(test "Simple testing STk_div2.21" '369/13-246/13i
+      (/ 123 3+2i) approx?)
+(test "Simple testing STk_div2.22" '100.0
+      (/ 123 1.23) approx?)
+(test "Simple testing STk_div2.23" '2829
+      (/ 123 1/23) approx?)
+(test "Simple testing STk_div2.24" '123/1222222222222222222222222222222222222223
+      (/ 123 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_div2.25" '1
+      (/ 123 123) approx?)
+(test "Simple testing STk_mul2.1" '5+12i
+      (* 3+2i 3+2i) approx?)
+(test "Simple testing STk_mul2.2" '3.69+2.46i
+      (* 3+2i 1.23) approx?)
+(test "Simple testing STk_mul2.3" '3/23+2/23i
+      (* 3+2i 1/23) approx?)
+(test "Simple testing STk_mul2.4" '3666666666666666666666666666666666666669+2444444444444444444444444444444444444446i
+      (* 3+2i 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_mul2.5" '369+246i
+      (* 3+2i 123) approx?)
+(test "Simple testing STk_mul2.6" '3.69+2.46i
+      (* 1.23 3+2i) approx?)
+(test "Simple testing STk_mul2.7" '1.5129
+      (* 1.23 1.23) approx?)
+(test "Simple testing STk_mul2.8" '0.0534782608695652
+      (* 1.23 1/23) approx?)
+(test "Simple testing STk_mul2.9" '1.50333333333333e+39
+      (* 1.23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_mul2.10" '151.29
+      (* 1.23 123) approx?)
+(test "Simple testing STk_mul2.11" '3/23+2/23i
+      (* 1/23 3+2i) approx?)
+(test "Simple testing STk_mul2.12" '0.0534782608695652
+      (* 1/23 1.23) approx?)
+(test "Simple testing STk_mul2.13" '1/529
+      (* 1/23 1/23) approx?)
+(test "Simple testing STk_mul2.14" '1222222222222222222222222222222222222223/23
+      (* 1/23 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_mul2.15" '123/23
+      (* 1/23 123) approx?)
+(test "Simple testing STk_mul2.16" '366666666666666666666666669+244444444444444444444444446i
+      (* 122222222222222222222222223 3+2i) approx?)
+(test "Simple testing STk_mul2.17" '1.50333333333333e+26
+      (* 122222222222222222222222223 1.23) approx?)
+(test "Simple testing STk_mul2.18" '122222222222222222222222223/23
+      (* 122222222222222222222222223 1/23) approx?)
+(test "Simple testing STk_mul2.19" '149382716049382716049382717000000000000095061728395061728395061729
+      (* 122222222222222222222222223 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_mul2.20" '15033333333333333333333333429
+      (* 122222222222222222222222223 123) approx?)
+(test "Simple testing STk_mul2.21" '369+246i
+      (* 123 3+2i) approx?)
+(test "Simple testing STk_mul2.22" '151.29
+      (* 123 1.23) approx?)
+(test "Simple testing STk_mul2.23" '123/23
+      (* 123 1/23) approx?)
+(test "Simple testing STk_mul2.24" '150333333333333333333333333333333333333429
+      (* 123 1222222222222222222222222222222222222223) approx?)
+(test "Simple testing STk_mul2.25" '15129
+      (* 123 123) approx?)
+
 
 (test-section-end)

@@ -72,8 +72,12 @@
  * * |(include-library-declarations <filename1> <filename2> ...)|
  * * |(cond-expand <clause1> <clause2> ...)|
  *
- * See {{rseven}} for more information (or the sepcific entries in this document)
+ * See {{rseven}} for more information (or the specific entries in this document)
  * about each |<library declaration>|.
+ *
+ * NOTE: {{rseven}} permits to use library declarations only in
+ * a library definition; {{stklos}} permits to use them (except
+ * |include-library-declarations|) anywhere at toplevel.
 doc>
 |#
 (define-macro (define-library name . decls)
@@ -197,3 +201,4 @@ doc>
 |#
 (define (library-list)
   (filter library? (all-modules)))
+

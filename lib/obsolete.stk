@@ -127,3 +127,6 @@
 
 ;; 28-Feb-2023
 (define compiler:generate-signature compiler:keep-formals)
+
+;; 29-Jun-2023
+(define %file-informations %file-information)

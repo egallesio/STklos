@@ -185,7 +185,7 @@
     (slot-set! self 'wid id)))
 
 
-(define-method initialize ((self <menu-radio-item>) initargs)
+(define-method initialize-instance ((self <menu-radio-item>) initargs)
   (next-method)
   (let ((sibling (key-get initargs #:sibling #f)))
     (when sibling

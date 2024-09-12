@@ -20,7 +20,7 @@
 # ---------- Build stage
 FROM alpine:3.15 AS build
 RUN apk update && \
-    apk add build-base gc-dev gmp-dev libffi-dev pcre-dev git
+    apk add build-base gc-dev gmp-dev libffi-dev pcre2-dev git
 
 ARG version
 WORKDIR /build
@@ -38,7 +38,7 @@ RUN env TERM="dumb" make all tests install
 # ---------- Running stage
 FROM alpine:3.15
 RUN apk update && \
-    apk add gc gmp libffi pcre readline
+    apk add gc gmp libffi pcre2 readline
 COPY --from=build /usr/local/ /usr/local/
 RUN ln -s /usr/lib/libreadline.so.8.1 /usr/lib/libreadline.so
 WORKDIR /home
