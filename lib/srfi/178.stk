@@ -1,0 +1,339 @@
+;;;;
+;;;; 178.stk         -- SRFI-178: Bitvector library
+;;;;
+;;;; Copyright © 2023 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 20-Aug-2023 20:05
+;;;;
+;;;; Uses code from the reference implementation and grom Gauche
+;;;;
+;;;; Copyright from the reference implementation:
+;;;;;;;; Copyright (c) 2018 John Cowan, 2020 Wolfgang Corcoran-Mathe
+
+;;;;;;;; Permission is hereby granted, free of charge, to any person obtaining a copy
+;;;;;;;; of this software and associated documentation files (the "Software"), to deal
+;;;;;;;; in the Software without restriction, including without limitation the rights
+;;;;;;;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+;;;;;;;; of the Software, and to permit persons to whom the Software is furnished to do
+;;;;;;;; so, subject to the following conditions:
+
+;;;;;;;; The above copyright notice and this permission notice (including the next
+;;;;;;;; paragraph) shall be included in all copies or substantial portions of the Software.
+
+;;;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+;;;;;;;; INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+;;;;;;;; PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+;;;;;;;; CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+;;;;;;;; OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+;;;; Copyright from Gauche:
+;;;;;;;; Copyright (c) 2000-2022  Shiro Kawai  <shiro@acm.org>
+;;;;;;;;
+;;;;;;;; Redistribution and use in source and binary forms, with or without
+;;;;;;;; modification, are permitted provided that the following conditions
+;;;;;;;; are met:
+;;;;;;;;
+;;;;;;;; 1. Redistributions of source code must retain the above copyright
+;;;;;;;;    notice, this list of conditions and the following disclaimer.
+;;;;;;;;
+;;;;;;;; 2. Redistributions in binary form must reproduce the above copyright
+;;;;;;;;    notice, this list of conditions and the following disclaimer in the
+;;;;;;;;    documentation and/or other materials provided with the distribution.
+;;;;;;;;
+;;;;;;;; 3. Neither the name of the authors nor the names of its contributors
+;;;;;;;;    may be used to endorse or promote products derived from this
+;;;;;;;;    software without specific prior written permission.
+;;;;;;;;
+;;;;;;;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+;;;;;;;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+;;;;;;;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+;;;;;;;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+;;;;;;;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+;;;;;;;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+;;;;;;;; TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+;;;;;;;; PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+;;;;;;;; LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+;;;;;;;; NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+;;;;;;;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+(select-module srfi/178)
+
+(%compile-time-define string->bitvector)
+
+(export bitvector
+        bitvector-unfold
+        bitvector-unfold-right
+        bitvector-concatenate
+        make-bitvector/int-generator
+        make-bitvector/bool-generator
+        make-bitvector-accumulator
+
+        bitvector-fold/int
+        bitvector-fold/bool
+        bitvector-fold-right/int
+        bitvector-fold-right/bool
+
+        bitvector-map/int        ; Gauche
+        bitvector-map/bool       ; Gauche
+        bitvector-map!/int       ; Gauche
+        bitvector-map!/bool      ; Gauche
+        bitvector-map->list/int
+        bitvector-map->list/bool
+        bitvector-for-each/int   ; Gauche
+        bitvector-for-each/bool) ; Gauche
+
+(%compile-time-define make-bitvector
+                      bitvector-set!
+                      list->bitvector
+                      bitvector-append
+                      bitvector-length
+                      bitvector-ref/int
+                      bitvector-ref/bool
+                      list->bitvector
+                      reverse-list->bitvector)
+
+;; Customize "describe"
+(%user-type-proc-set! 'bitvector 'describe
+                      (lambda (x port)
+                        (format port "a bitvector of length ~A"
+                                (bitvector-length x))))
+;; Customize "class-of"
+(define-class <bitvector> (<top>) ())
+(export <bitvector>)
+
+
+(%user-type-proc-set! 'bitvector 'class-of <bitvector>)
+
+(define (bitvector . args)
+  (list->bitvector args))
+
+
+;; The unfold and unfold-right procedures were taken from the refrence
+;; implementation. Maybe it iwould be interesting to rewrite them in C
+;; in the future.
+
+;; Comment from the reference implementation:
+;;; These procedures work by building temporary lists, then converting
+;;; them to vectors. This uses more space than pre-allocating a bitvector
+;;; and filling it, but it's referentially transparent: there's no way
+;;; to capture a partially-filled bitvector through continuation tricks.
+
+
+(define (%unfold/index f len seeds)
+  (letrec
+   ((build
+     (lambda (i seeds)
+       (if (= i len)
+           '()
+           (let-values (((b . seeds*) (apply f i seeds)))
+             (cons b (build (+ i 1) seeds*)))))))
+
+    (build 0 seeds)))
+
+(define (bitvector-unfold f len . seeds)
+  (list->bitvector (%unfold/index f len seeds)))
+
+(define (%unfold-right/index f len seeds)
+  (letrec
+   ((build
+     (lambda (i seeds res)
+       (if (< i 0)
+           res
+           (let-values (((b . seeds*) (apply f i seeds)))
+             (build (- i 1) seeds* (cons b res)))))))
+
+    (build (- len 1) seeds '())))
+
+(define (bitvector-unfold-right f len . seeds)
+  (list->bitvector (%unfold-right/index f len seeds)))
+
+(define (bitvector-concatenate lst)
+  (apply bitvector-append lst))
+
+;; The two following definitions were commented out because
+;; they depend on SRFI-158, and maybe it's better to not depend on that --
+;; so I used the reference implementation instead.
+
+;; (define (make-bitvector/int-generator bitvector)
+;;   (list->generator (bitvector->list/int bitvector->list)))
+
+;; (define (make-bitvector/bool-generator bitvector)
+;;   (list->generator (bitvector->list/bool bitvector->list)))
+
+(define (%make-bitvector-generator bvec ref-proc)
+  (let ((len (bitvector-length bvec))
+        (i 0))
+    (lambda ()
+      (if (= i len)
+          (eof-object)
+          (let ((r (ref-proc bvec i)))
+            (set! i (+ i 1))
+            r)))))
+
+(define (make-bitvector/int-generator bvec)
+  (%make-bitvector-generator bvec bitvector-ref/int))
+
+(define (make-bitvector/bool-generator bvec)
+  (%make-bitvector-generator bvec bitvector-ref/bool))
+
+(define (make-bitvector-accumulator)
+  (let ((r '()))
+    (lambda (x)
+      (if (eof-object? x)
+        (reverse-list->bitvector r)
+        (set! r (cons x r))))))
+
+
+;;;
+;;; From Gauche (thanks Shiro Kawai for the fine code):
+;;;
+
+
+;; Translated Gauche-specific "^", "let1" and "rlet1" into standard Scheme.
+
+(define-syntax bv-iterator
+  (syntax-rules ()
+    [(_ ref (arg ... bv bvs) len body1 bodyn)
+     (case-lambda
+       [(arg ... bv)                    ;short path
+        (let ((len (bitvector-length bv)))
+          body1)]
+       [(arg ...) (error "At least one bitvector is required")]
+       [(arg ... . bvs)
+        (let ([len (bitvector-length (car bvs))])
+          (unless (every (lambda (v) (= len (bitvector-length v))) (cdr bvs))
+            (error "bitvectors must be of the same length" bvs))
+          bodyn)])]))
+
+(define (*ref bvs ref k) (map (lambda (v) (ref v k)) bvs))
+
+(define (%gen-fold ref)
+  (bv-iterator ref (kons knil bv bvs) len
+               (let loop ([k 0] [knil knil])
+                 (if (= k len) knil (loop (+ k 1) (kons knil (ref bv k)))))
+               (let loop ([k 0] [knil knil])
+                 (if (= k len)
+                   knil
+                   (loop (+ k 1)
+                         (apply kons knil (*ref bvs ref k)))))))
+
+(define bitvector-fold/int  (%gen-fold bitvector-ref/int))
+(define bitvector-fold/bool (%gen-fold bitvector-ref/bool))
+
+(define (%gen-fold-right ref)
+  (bv-iterator ref (kons knil bv bvs) len
+               (let loop ([k (- len 1)] [knil knil])
+                 (if (< k 0) knil (loop (- k 1) (kons knil (ref bv k)))))
+               (let loop ([k (- len 1)] [knil knil])
+                 (if (< k 0)
+                   knil
+                   (loop (- k 1)
+                         (apply kons knil (*ref bvs ref k)))))))
+
+(define bitvector-fold-right/int (%gen-fold-right bitvector-ref/int))
+(define bitvector-fold-right/bool (%gen-fold-right bitvector-ref/bool))
+
+(define (%gen-map ref)
+  (bv-iterator ref (f bv bvs) len
+               ;; we don't need to worry about restart-safety
+               (let ((r (make-bitvector len)))
+                 (let loop ([k 0])
+                   (unless (= k len)
+                     (bitvector-set! r k (f (ref bv k)))
+                     (loop (+ k 1))))
+                 r)
+               (let ((r (make-bitvector len)))
+                 (let loop ([k 0])
+                   (unless (= k len)
+                     (bitvector-set! r k (apply f (*ref bvs ref k)))
+                     (loop (+ k 1))))
+                 r)))
+
+(define bitvector-map/int (%gen-map bitvector-ref/int))
+(define bitvector-map/bool (%gen-map bitvector-ref/bool))
+
+(define (%gen-map! ref)
+  (bv-iterator ref (f bv bvs) len
+               (let loop ([k 0])
+                 (unless (= k len)
+                   (bitvector-set! bv k (f (ref bv k)))
+                   (loop (+ k 1))))
+               (let loop ([k 0])
+                 (unless (= k len)
+                   (bitvector-set! (car bvs) k
+                                   (apply f (*ref bvs ref k)))
+                   (loop (+ k 1))))))
+
+(define bitvector-map!/int (%gen-map! bitvector-ref/int))
+(define bitvector-map!/bool (%gen-map! bitvector-ref/bool))
+
+(define (%gen-for-each ref)
+  (bv-iterator ref (f bv bvs) len
+               (let loop ([k 0])
+                 (unless (= k len)
+                   (f (ref bv k))
+                   (loop (+ k 1))))
+               (let loop ([k 0])
+                 (unless (= k len)
+                   (apply f (*ref bvs ref k))
+                   (loop (+ k 1))))))
+
+(define bitvector-for-each/int (%gen-for-each bitvector-ref/int))
+(define bitvector-for-each/bool (%gen-for-each bitvector-ref/bool))
+
+;;;
+;;; END of Gauche code
+;;;
+
+(define bitvector-map->list/int
+  (case-lambda
+    ((f bvec)                    ; fast path
+     (bitvector-fold-right/int (lambda (xs b) (cons (f b) xs))
+                               '()
+                               bvec))
+    ((f . bvecs)
+     (apply bitvector-fold-right/int
+            (lambda (xs . bs) (cons (apply f bs) xs))
+            '()
+            bvecs))))
+
+(define bitvector-map->list/bool
+  (case-lambda
+    ((f bvec)                    ; fast path
+     (bitvector-fold-right/bool (lambda (xs b) (cons (f b) xs))
+                                '()
+                                bvec))
+    ((f . bvecs)
+     (apply bitvector-fold-right/bool
+            (lambda (xs . bs) (cons (apply f bs) xs))
+            '()
+            bvecs))))
+
+;; Add #*... read syntax
+(%add-sharp-reader #\*
+                   (lambda (port)
+                     (let* ((v   (read port))
+                            (str (symbol->string v)))
+                       (or (string->bitvector (string-append "#" str))
+                           (error "bad bitvector #~a" v)))))
+
+(provide "srfi/178")

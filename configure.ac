@@ -4,7 +4,7 @@
 ###    Creation date: 28-Dec-1999 21:19 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.70])   # Set also VERSION_STATUS to stable when changing version
+AC_INIT([stklos],[2.00])   # Set also VERSION_STATUS to stable when changing version
 VERSION_STATUS=unstable    # and reset it to unstable after releasing
 
 #
@@ -57,6 +57,12 @@ AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 AC_CHECK_PROG(ASCIIDOCTOR, asciidoctor, "asciidoctor", "../adoc-fake.sh")
+if test "$ASCIIDOCTOR" = "asciidoctor"
+then
+    REPORT_ASCIIDOCTOR="yes (since Asciidoctor is installed)"
+else
+    REPORT_ASCIIDOCTOR="no (install Asciidoctor to rebuild documentation)"
+fi
 ### Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h execinfo.h])
 
@@ -162,9 +168,10 @@ if test "$DATADIR" == ""  ; then
 fi
 
 ### Initialize the extra conf file in src
-PREFIX=$prefix
-SCMDIR=$datadir
-EXECDIR=$libdir
+PREFIX=${prefix}
+SCMDIR=${datadir}
+EXECDIR=${libdir}
+INCLUDEDIR=${includedir}
 
 
 ### Determine the kind of the machine which is running this script
@@ -189,7 +196,7 @@ OS_NAME_VERSION=${OS}_$v;
 ###
 SYST_LIBS=""
 COMP_LIBS=""
-
+SYST_LIBS_SHOW=""
 
 ### Check for dynamic loading
 AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
@@ -302,6 +309,7 @@ else
      if $PKGCONFIG --exists bdw-gc ;then
         GCINC=$($PKGCONFIG  bdw-gc --cflags)
         GCLIB=$($PKGCONFIG  bdw-gc --libs)
+        GCVER=$(${PKGCONFIG} --modversion bdw-gc)
      else
         GCINC=""
         GCLIB="-lgc"
@@ -309,6 +317,7 @@ else
      DLLIBS="$DLLIBS -lgc"
      AC_DEFINE(HAVE_GC, 1, [Use system GC])
      SYST_LIBS="libgc $SYST_LIBS"
+     SYST_LIBS_SHOW="gc ($GCVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -360,6 +369,7 @@ else
      if $PKGCONFIG --exists gmp ;then
         GMPINC="$($PKGCONFIG --cflags gmp)"
         GMPLIB="$($PKGCONFIG --libs gmp)"
+        GMPVER=$(${PKGCONFIG} --modversion gmp)
      else
         GMPINC=""
         GMPLIB="-lgmp"
@@ -367,6 +377,7 @@ else
      DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
      SYST_LIBS="libgmp $SYST_LIBS"
+     SYST_LIBS_SHOW="gmp ($GMPVER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -396,7 +407,7 @@ then
      (cd pcre2; ./configure --prefix=$prefix --disable-shared --disable-cpp) || \
            { echo "Cannot configure PCRE2"; exit; }
      PCRE2=pcre2
-     PCRE2INC="-I../pcre2"
+     PCRE2INC="-I../pcre2/src"
      PCRE2LIB="../pcre2/.libs/libpcre2-posix.a ../pcre2/.libs/libpcre2-8.a"
      COMP_LIBS="libpcre2 $COMP_LIBS"
 else
@@ -404,6 +415,7 @@ else
      if $PKGCONFIG --exists libpcre2-8 libpcre2-posix ;then
         PCRE2INC="$($PKGCONFIG --cflags libpcre2-8 libpcre2-posix) "
         PCRE2LIB="$($PKGCONFIG --libs   libpcre2-8 libpcre2-posix)"
+        PCRE2VER=$(${PKGCONFIG} --modversion libpcre2-posix)
      else
         PCRE2INC=""
         PCRE2LIB="-lpcre-8 -lpcre2-posix"
@@ -411,6 +423,7 @@ else
      DLLIBS="$DLLIBS $PCRE2LIB"
      AC_DEFINE(HAVE_PCRE2, 1 , [We use our version of pcre])
      SYST_LIBS="libpcre2 $SYST_LIBS"
+     SYST_LIBS_SHOW="pcre2 ($PCRE2VER) $SYST_LIBS_SHOW"
 fi
 
 
@@ -448,6 +461,7 @@ else
      if $PKGCONFIG --exists libffi ;then
        FFIINC=$($PKGCONFIG libffi --cflags)
        FFILIB=$($PKGCONFIG libffi --libs)
+       FFIVER=$($PKGCONFIG --modversion libffi)
      else
        FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
@@ -455,6 +469,7 @@ else
      fi
      DLLIBS="$DLLIBS $FFILIB"
      SYST_LIBS="libffi $SYST_LIBS"
+     SYST_LIBS_SHOW="ffi ($FFIVER) $SYST_LIBS_SHOW"
 fi
 # We always want FFI. Should be modifiable in the future
 AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
@@ -523,7 +538,7 @@ fi
 ###
 ### SFI-176 stuff
 ###
-C_VERSION=`(${CC} --version | head -n 1) 2>/dev/null || ${CC}`
+C_VERSION=`((${CC} --version||${CC} -version) | head -n 1)2>/dev/null || echo "???"}`
 C_COMPILE=""
 C_LINK=""
 
@@ -577,8 +592,18 @@ if test "X$HAS_CFLAGS" = "X" ;then
    CONF_OPT="$CONF_OPT \\\"CPPFLAGS=$CPPFLAGS\\\""
 fi
 
+# Build the CONF_SUMMARY variable
+confdirs="("
+confdirs="${confdirs} #:libdir \\\"$libdir\\\" #:datadir \\\"$datadir\\\""
+confdirs="${confdirs} #:docdir \\\"$docdir\\\" #:htmldir \\\"$htmldir\\\" #:pdfdir \\\"$pdfdir\\\""
+confdirs="${confdirs})"
 
-CONF_SUMMARY="(#:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT))"
+confsum="("
+confsum="${confsum} #:system ($SYST_LIBS) #:compiled ($COMP_LIBS) #:configure ($CONF_OPT)"
+confsum="${confsum} #:dirs ${confdirs}"
+confsum="${confsum})"
+
+CONF_SUMMARY="${confsum}"
 
 # Determine the STRIP command to use
 if test "X$STRIP" = "X" ;then
@@ -657,6 +682,7 @@ AC_SUBST(GMPINC)
 AC_SUBST(PREFIX)
 AC_SUBST(SCMDIR)
 AC_SUBST(EXECDIR)
+AC_SUBST(INCLUDEDIR)
 AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)
@@ -719,9 +745,10 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/refman/Makefile doc/vm/Makefile doc/hacking/Makefile
           doc/pp/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-          utils/stklos-script examples/Makefile
+          utils/stklos-script examples/Makefile examples/C-module/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
-          lib/scheme/Makefile lib/scheme/vector/Makefile
+          lib/scheme/Makefile
+          lib/scheme/regex/Makefile lib/scheme/vector/Makefile
           lib/srfi/Makefile lib/stklos/Makefile lib/streams/Makefile
           tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
@@ -753,6 +780,8 @@ AC_OUTPUT
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
+# COMP_LIBS_SHOW is a "shorter" version of COMP_LIBS
+COMP_LIBS_SHOW=`echo $COMP_LIBS | sed -e "s/lib//g"`
 
 echo " "
 echo " "
@@ -762,17 +791,18 @@ echo "               System: " $BUILD_OS
 echo "              OS nick: " $OS_NAME_VERSION
 echo "              OS type: " $OS_FLAVOUR
 echo "       Install prefix: " $prefix
-echo "           C compiler: " $CC
+echo "    C compiler binary: " $CC
+echo "   C compiler version: " $C_VERSION
 echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "Control fx parameters: " $CONTROL_FX
-echo "System libraries used: " $SYST_LIBS
-echo "   Compiled libraries: " $COMP_LIBS
+echo "System libraries used: " $SYST_LIBS_SHOW
+echo "   Compiled libraries: " $COMP_LIBS_SHOW
+echo " Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "
-

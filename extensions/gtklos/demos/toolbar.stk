@@ -1,7 +1,7 @@
 ;;;;
 ;;;; toolbar.stk    -- GTklos Toolbars Implementation
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -51,8 +51,10 @@ its appearance.
                      #:file "toolbar" #:border-width 10 #:padding 10
                      #:expand #t #:fill #t
                      #:message *toolbar-msg*))
-         (frm  (make <frame> #:title  "Toolbar Example" #:parent win #:expand #t #:fill #t))
-         (tb   (make <toolbar> #:parent frm #:toolbar-style "both" #:expand #t #:fill #t ))
+         (frm  (make <frame> #:title  "Toolbar Example"
+                     #:parent win #:expand #t #:fill #t))
+         (tb   (make <toolbar> #:parent frm #:toolbar-style "both"
+                     #:expand #t #:fill #t ))
          (box  (make <hbox>   #:parent win #:padding 10 #:expand #t #:fill #t)))
 
     ;; First radio-buttons group
@@ -64,7 +66,9 @@ its appearance.
 
     ;; Second radio-buttons group
     (let* ((frm  (make <vframe> #:parent box  #:title "  Style  "))
-           (cmd (lambda (w e) (write (text w)) (set! (toolbar-style tb) (string->symbol (text w)))))
+           (cmd (lambda (w e)
+                  (write (text w))
+                  (set! (toolbar-style tb) (string->symbol (text w)))))
            (r1   (make-radio "icons"           #f frm cmd))
            (r2   (make-radio "text"            r1 frm cmd))
            (r3   (make-radio "both"            r1 frm cmd))
@@ -73,10 +77,10 @@ its appearance.
 
     ;; Populate the toolbar
     (add-items-to-toolbar tb
-          `( (#:text "Up"    #:icon-name "go-up"   #:command ,(tb-callback))
-             (#:text "Down"  #:icon-name "go-down" #:command ,(tb-callback))
+          `( (#:text "Up"    #:icon-name "go-up"       #:command ,(tb-callback))
+             (#:text "Down"  #:icon-name "go-down"     #:command ,(tb-callback))
              () ; A separator
-             (#:text "Left"  #:icon-name "go-left"  #:command ,(tb-callback))
-             (#:text "Right" #:icon-name "go-right" #:command ,(tb-callback))))
+             (#:text "Left"  #:icon-name "go-previous" #:command ,(tb-callback))
+             (#:text "Right" #:icon-name "go-next"     #:command ,(tb-callback))))
 
     (gtk-main)))

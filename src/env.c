@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 #include "thread-common.h"
 
 
-/*===========================================================================*\
+/*===========================================================================* \
  *
  *                              M O D U L E S
  *
@@ -293,7 +293,7 @@ DEFINE_PRIMITIVE("%module->library!", module2library, subr1, (SCM name))
   if (z == STk_void) error_bad_module_name(name);
 
   MODULE_IS_LIBRARY(z) = TRUE;
-  STk_dremq(STk_STklos_module, MODULE_IMPORTS(z));
+  MODULE_IMPORTS(z)    = STk_dremq(STk_STklos_module, MODULE_IMPORTS(z));
   return STk_void;
 }
 
@@ -437,7 +437,7 @@ doc>
  */
 DEFINE_PRIMITIVE("current-module", current_module, subr0, (void))
 {
-  if (STk_primordial_thread) {
+  if (STk_primordial_thread) {               /* != NULL => thread system is initialized */
     vm_thread_t *vm = STk_get_current_vm();
     return vm->current_module;
   } else {
@@ -636,7 +636,7 @@ static inline SCM find_symbol_value(SCM symbol, SCM module)
 {
   SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
   if (res)
-    return *BOX_VALUES(CDR(res));    /* sure that this box arity is 1 */
+    return vm_global_ref(res);
   return NULL;
 }
 
@@ -737,7 +737,7 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
     SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), CAR(lst));
 
     /* Redefine symbol in (car lst) in SCHEME module */
-    STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
+    STk_define_variable(CAR(lst), vm_global_ref(res), Scheme_module);
   }
   return STk_void;
 }
@@ -789,7 +789,7 @@ void STk_define_variable(SCM symbol, SCM value, SCM module)
 {
   if (BOXED_INFO(module) & MODULE_CONST)
     STk_error("cannot define symbol ~S in ~a", symbol, module);
-  STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
+  STk_hash_define_variable(&MODULE_HASH_TABLE(module), symbol, value);
 }
 
 
@@ -806,25 +806,6 @@ DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr23,
   return value;
 }
 
-DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
-                 (SCM new, SCM old, SCM module))
-{
-  SCM res, mod = STk_current_module();
-
-  verify_symbol(new);
-  verify_symbol(old);
-  if (!module)
-    module = mod;
-  else
-    verify_module(module);
-
-  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
-  if (!res)
-    STk_error_unbound_variable(old, module);
-
-  STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
-  return STk_void;
-}
 
 DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
                  (SCM new, SCM old, SCM new_module, SCM old_module))
@@ -840,7 +821,7 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
   if (!res)
     STk_error_unbound_variable(old, old_module);
 
-  STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
+  STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res));
   return STk_void;
 }
 
@@ -858,7 +839,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
   if (res) {
     *ref = res;
-    return *BOX_VALUES(CDR(res));
+    return vm_global_ref(res);
   }
 
   // symbol was not found in the given env module. Try to find it in
@@ -868,7 +849,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
     if (res) {
       *ref = res;
-      return *BOX_VALUES(CDR(res));
+      return vm_global_ref(res);
     }
   }
 
@@ -878,6 +859,30 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   return STk_void;
 }
 
+#ifdef STK_DEBUG
+DEFINE_PRIMITIVE("%global-var-info", glob_var_info, subr12, (SCM name, SCM module))
+{
+  SCM res;
+
+  verify_symbol(name);
+  if (!module)
+    module = STk_current_module();
+  else
+    verify_module(module);
+
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), name);
+
+  if (res) {
+    int ro    = (BOXED_INFO(res) & CONS_CONST) != 0;
+    int alias = (BOXED_INFO(res) & CONS_ALIAS) != 0;
+    STk_debug("Symbol ~S is a global at index ~S (RO: %d, Alias: %d)",
+              name,  CDR(res), ro, alias);
+  } else {
+    STk_debug("Symbol ~S is not set in module ~S", name, module);
+  }
+  return STk_void;
+}
+#endif
 
 
 /*===========================================================================*\
@@ -893,13 +898,12 @@ static struct extended_type_descr xtype_module = {
 };
 
 
-
-
 /* The stucture which describes the frame type */
 static struct extended_type_descr xtype_frame = {
   .name= "frame"                      /* name */
 };
 
+/* ---------------------------------------------------------------------- */
 
 int STk_init_env(void)
 {
@@ -911,6 +915,7 @@ int STk_init_env(void)
   /* Declare the extended types module_obj and frame_obj */
   DEFINE_XTYPE(module, &xtype_module);
   DEFINE_XTYPE(frame,  &xtype_frame);
+
   return TRUE;
 }
 
@@ -937,6 +942,9 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
+#ifdef STK_DEBUG
+  ADD_PRIMITIVE(glob_var_info);
+#endif
 
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);
@@ -956,7 +964,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_mutablep);
   ADD_PRIMITIVE(symbol_immutable);
   ADD_PRIMITIVE(symbol_define);
-  ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);
 
   ADD_PRIMITIVE(normalize_name);

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -62,10 +62,11 @@
   (include "bonus.stk")           ; Extended functions and syntaxes
   (include "regexp.stk")          ; Regular expressions
   (include "process.stk")         ; Processes from Scheme
-  (include "equiv.stk")           ; equivalence of circular structures
   (include "time.stk")            ; Dates & Time
   (include "logical.stk")         ; Logical operations
-  (include "thread.stk")          ; Thread support
+  (unless (eq? (%thread-system)
+               'none)
+    (include "thread.stk"))       ; Thread support
   (include "ffi.stk")             ; FFI support
   (include "r7rs.stk")            ; Support of R7RS
   (include "load.stk")            ; Extended load dealing with paths and suffixes
@@ -189,8 +190,11 @@
            (list "???" #f))
           ((procedure? (caar bt))
            (let ((name (%procedure-name (caar bt))))
-             (if (or (string? name) (cdar bt))
+             (if (or (and (string? name) (not (string=? name "error")))
+                     (cdar bt))
                  ;; We have either a "pretty name" or a line information
+                 ;; Note: if name is "error", the real culprit is probably
+                 ;; below in the backtrace => skip this element
                  (list name
                        (or info (cdar bt)))
                  ;; Nothing interesting, continue to go down the stack

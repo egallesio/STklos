@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -114,7 +114,7 @@ static void Usage(FILE *stream)
 "   -f file, --file=file            use 'file' as program\n"
 "   -e sexpr, --execute=sexpr       evaluate the given sexpr and exit\n"
 "   -b file, --boot-file=file       use 'file' to boot the system\n"
-"   -D dir, --conf-dir=dir          change configuration dir (default: ~/.stklos)\n"
+"   -D dir, --conf-dir=dir          change conf. dir (default: ~/.config/stklos)\n"
 "   -I dir, --prepend-load-path=dir prepend 'dir' to the load path list.\n"
 "   -A dir, --append-load-path=dir  append 'dir' to the load path list.\n"
 "   -q, --no-init-file              quiet: do not load the user init file\n"
@@ -141,7 +141,9 @@ static void Usage(FILE *stream)
 "    keep-formals       Keep formal arguments in closures\n"
 "    keep-source        Keep source code in closures\n"
 "    inline-usuals      Inline usual functions\n"
+"    allow-code-rewrite Permit code rewriting/simplification\n"
 "    unroll-iterations  Set the number of iterations to be unrolled\n"
+"    peephole-optimizer Use the peephole optimizer\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }

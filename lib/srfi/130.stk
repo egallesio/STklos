@@ -55,7 +55,7 @@
   (import (except (srfi 13)
                   string-index string-index-right
                   string-skip string-skip-right))
-   
+
   (export string-cursor? string-ref/cursor)
   (export string-cursor-start string-cursor-end
           string-cursor-prev string-cursor-next

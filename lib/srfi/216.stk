@@ -2,7 +2,7 @@
 ;;;;
 ;;;; srfi-216.stk         -- SRFI-116: SICP Prerequisites
 ;;;;
-;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,8 @@
           the-empty-stream stream-null?
           cons-stream)
 
+(%compile-time-define %thread-no-support)  ;; to avoid a warning
+  
 ;; ======================================================================
 ;; Constants
 ;; ======================================================================
@@ -57,26 +59,36 @@
 ;; ======================================================================
 ;; Multi-threading
 ;; ======================================================================
-(unless (eq? (%thread-system) 'none)
-  (define (parallel-execute . procs)
-    (let ((threads (map (lambda (p) (thread-start! (make-thread p)))
-                        procs)))
-      (for-each thread-join! threads)))
 
-  ;; tests-and-set!
-  (define test-and-set! #f)
+;; define parallel-execute and test-and-set! to #f. They will be changed if
+;; STklos is compiled with thread support
+(define parallel-execute #f)
+(define test-and-set!    #f)
 
-  (let ((mutex(make-mutex)))
-    (set! test-and-set!
-          (lambda (cell)
-            (mutex-lock! mutex)
-            (let ((result (if (car cell)
-                              #t
-                              (begin (set-car! cell #t)
-                                     #f))))
-              (mutex-unlock! mutex)
-              result)))))
+(case (%thread-system)
+  ((none)
+   ;; No thread support
+   (set! parallel-execute %thread-no-support)
+   (set! test-and-set!    %thread-no-support))
 
+  (else
+   ;; We have thread support
+   (set! parallel-execute
+        (lambda procs
+          (let ((threads (map (lambda (p) (thread-start! (make-thread p)))
+                              procs)))
+            (for-each thread-join! threads))))
+
+   (let ((mutex(make-mutex)))
+     (set! test-and-set!
+           (lambda (cell)
+             (mutex-lock! mutex)
+             (let ((result (if (car cell)
+                               #t
+                               (begin (set-car! cell #t)
+                                      #f))))
+               (mutex-unlock! mutex)
+               result))))))
 
 ;; ======================================================================
 ;; Streams.
@@ -91,4 +103,3 @@
 ;;;; ======================================================================
 
 (provide "srfi/216")
-

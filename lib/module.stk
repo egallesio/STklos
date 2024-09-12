@@ -634,7 +634,22 @@ doc>
 doc>
 |#
 (define-macro (in-module mod symb . default)
-  `(apply symbol-value* ',symb (find-module ',mod) ',default))
+  ;; If mod is the symbol SCHEME we know the user wants the SCHEME module.
+  ;; This is because:
+  ;;
+  ;; 1. That module cannot be renamed.
+  ;; 2. This is a macro, and we don't need to (and cannot!) evaluate its
+  ;;    arguments.
+  ;;
+  ;; So, in that case we can call the `%%in-scheme` primitive, which is
+  ;; much faster than using apply and symbol-value*.
+  ;; however, if the user wanted a default value, we revert to applying
+  ;; symbol-value*, because we'd need a handler around %%in-scheme, which
+  ;; becomes terribly slow.
+  (if (and (eq? mod 'SCHEME)
+           (null? default))
+      `(%%in-scheme ',symb)
+      `(apply symbol-value* ',symb (find-module ',mod) ',default)))
 
 
 ;;=============================================================================

@@ -1,7 +1,7 @@
 ;;;;
-;;;; make-C-boot.stk		-- Create a C image to boot on
+;;;; make-C-boot.stk            -- Create a C image to boot on
 ;;;;
-;;;; Copyright © 2005-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 ;;;;
 
 ;; ----------------------------------------------------------------------
-;;	header ...
+;;      header ...
 ;; ----------------------------------------------------------------------
 (define (header in out)
   (format out "/*
@@ -36,35 +36,48 @@ This is a dump of the image in file ~A
 #include \"stklos.h\"\n\n" (port-file-name in)))
 
 ;; ----------------------------------------------------------------------
-;;	write-boot-file ...
+;;      write-boot-file ...
 ;; ----------------------------------------------------------------------
 (define (write-boot-file src dst)
   (let ((in  (open-input-file src))
-	(out (open-output-file dst)))
-    (read in)
-    (read in)
-    (let ((v (read in))
-	  (str (open-output-string)))
-      (write v str)
-      (header in out)
-      (format out "char* STk_boot_consts = ~S;\n\n" (get-output-string str)))
+        (out (open-output-file dst)))
+    ;; Print the header of the C file
+    (header in out)
+
+    ;; Skip the two sexpr of the input file
+    (read in)  ;; STklos string
+    (read in)  ;; Information of the .ostk file
+
+    ;; Print the constants vector one item per line (since git or emacs are
+    ;; bad with long lines).
+    ;; NOTE: There is a double write because we need to read back the values
+    ;; and another one since the vector is stored in a C string.
+    (let ((v   (read in)))
+      (format out "char* STk_boot_consts = \"#(\"\n")
+      (vector-for-each (lambda (x)
+                         (write (with-output-to-string (lambda () (write x))) out)
+                         (display " \" \"\n" out))
+                       v)
+      (format out "\")\";\n\n"))
+
+    ;; Print the code vector
     (let ((sz (read in)))
       (format out "STk_instr STk_boot_code [] = { \n")
       (read-byte in)  ; To skip the newline after size
       (dotimes (i sz)
-	(let* ((c1 (read-byte in))
-	       (c2 (read-byte in)))
-	  (format out
-		  "0x~A"
-		  (number->string (bit-or (bit-shift c1 8) c2) 16))
-	  (when (< i (- sz 1))
-	    (display ",\n" out))))
+        (let* ((c1 (read-byte in))
+               (c2 (read-byte in)))
+          (format out
+                  "0x~A"
+                  (number->string (bit-or (bit-shift c1 8) c2) 16))
+          (when (< i (- sz 1))
+            (display ",\n" out))))
       (display "};\n" out))
     (flush-output-port out)
     (close-port out)))
 
 ;; ----------------------------------------------------------------------
-;;	main ...
+;;      main ...
 ;; ----------------------------------------------------------------------
 (define (main args)
   (if (= (length args) 3)

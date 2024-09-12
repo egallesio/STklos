@@ -132,7 +132,7 @@
 (define-class <hbox> (<gtk-box>)
   ())
 
-(define-method initialize ((self <hbox>) initargs)
+(define-method initialize-instance ((self <hbox>) initargs)
   (next-method self (append initargs '(#:orientation horizontal))))
 
 
@@ -144,7 +144,7 @@
 (define-class <vbox> (<gtk-box>)
   ())
 
-(define-method initialize ((self <vbox>) initargs)
+(define-method initialize-instance ((self <vbox>) initargs)
   (next-method self (append initargs '(#:orientation vertical))))
 
 

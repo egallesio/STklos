@@ -50,7 +50,7 @@
   (test "SRFI-14.13" #t
         (char-set= (string->char-set "eiaou2468013579999")
                    (char-set-unfold null? car cdr '(#\a #\e #\i #\o #\u #\u #\u)
-                                    char-set:digit)))
+                                    (string->char-set "0123456789"))))
 
   (test "SRFI-14.14" #t
         (char-set= (string->char-set "eiaou246801357999")

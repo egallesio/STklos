@@ -39,12 +39,13 @@ STk_init_library(int _UNUSED(*argc), char _UNUSED(***argv), int stack_size)
 
 
   return
+    STk_init_vm()                               &&
     STk_init_env()                              &&
     STk_init_symbol()                           &&
     STk_late_init_env()                         &&
     STk_init_struct()                           &&
     STk_init_cond()                             &&
-    STk_init_vm()                               &&
+    STk_late_init_vm()                         &&
     STk_init_threads(stack_size, start_stack)   &&
     STk_init_port()                             &&
     STk_init_extend()                           &&

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-regexp.stk	-- Testing Regexps
 ;;;;
-;;;; Copyright © 2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2009-2023 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,9 @@
 
 (test-section "Regexps")
 
+;; Be sure to use STklos regexp primitives
+(import (only SCHEME regexp-match-positions regexp-replace regexp?
+              regexp-replace-all string->regexp regexp-quote))
 
 ;;------------------------------------------------------------------
 (test-subsection "Searches")

@@ -25,11 +25,11 @@ schemedir   = @SCMDIR@
 SRC= silex.scm multilex.scm
 
 install-sources:
-	mkdir -p  $(DESTDIR)/$(schemedir)
-	cp $(SRC) $(DESTDIR)/$(schemedir)
+	mkdir -p  $(DESTDIR)$(schemedir)
+	cp $(SRC) $(DESTDIR)$(schemedir)
 
 
 uninstall-hook:
-	(cd $(DESTDIR)/$(schemedir) && rm -f $(SRC))
+	(cd $(DESTDIR)$(schemedir) && rm -f $(SRC))
 
 doc:

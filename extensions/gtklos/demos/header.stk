@@ -2,7 +2,7 @@
 ;;;;
 ;;;; header.stk         -- A simple Heraderbar demo
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -44,13 +44,13 @@ This demo illustrates the use of the GTK Header Bars in windows.
            (hdr (make <header-bar> #:title "I'm the title"
                       #:subtitle "I'm the subtitle" #:parent win
                       #:decoration-layout ":minimize,maximize,close"
+                      #:show-close-button ctrl
                       #:show-close-button #t)))
       (make <label> :text "I'm the content of the window"
             :parent (list win #:expand #t ))
       (when ctrl
         ;; Add the control buttons: Here we spevify that we have, on the right,
         ;; minimize, maximize and close buttons.
-        (set! (show-close-button hdr) #t)
         (set! (decoration-layout hdr) ":minimize,maximize,close")))))
 
 

@@ -1,0 +1,344 @@
+;;;;
+;;;; 115.stk         -- Tests for srfi-115
+;;;;
+(define (maybe-match->list rx str . o)
+  (let ((res (apply regexp-matches rx str o)))
+    (and res (regexp-match->list res))))
+
+(define-syntax test-re
+  (syntax-rules ()
+    ((test-re id res rx str start end)
+     (test id res (maybe-match->list rx str start end)))
+    ((test-re id res rx str start)
+     (test-re id res rx str start (string-length str)))
+    ((test-re id res rx str)
+     (test-re id res rx str 0))))
+
+(define (maybe-search->list rx str . o)
+  (let ((res (apply regexp-search rx str o)))
+    (and res (regexp-match->list res))))
+
+(define-syntax test-re-search
+  (syntax-rules ()
+    ((test-re-search id res rx str start end)
+     (test id res (maybe-search->list rx str start end)))
+    ((test-re-search id res rx str start)
+     (test-re-search id res rx str start (string-length str)))
+    ((test-re-search id res rx str)
+     (test-re-search id res rx str 0))))
+
+(test-re "srfi-115 1"
+         '("ababc" "abab")
+         '(: ($ (* "ab")) "c")
+         "ababc")
+
+(test-re "srfi-115 2"
+         '("ababc" "abab")
+         '(: ($ (* "ab")) "c")
+         "xababc"
+         1)
+
+(test-re-search "srfi-115 3" '("y") '(seq "y") "xy")
+
+(test-re-search "srfi-115 4"
+                '("ababc" "abab")
+                '(: ($ (* "ab")) "c")
+                "xababc")
+
+(test-re "srfi-115 5"
+         #f
+         '(: (* any) ($ "foo" (* any)) ($ "bar" (* any)))
+         "fooxbafba")
+
+(test-re "srfi-115 6"
+         '("fooxbarfbar" "fooxbarf" "bar")
+         '(: (* any) ($ "foo" (* any)) ($ "bar" (* any)))
+         "fooxbarfbar")
+
+(test-re "srfi-115 7"
+         '("abcd" "abcd")
+         '($ (* (or "ab" "cd")))
+         "abcd")
+
+(test "srfi-115 8"
+      "ab"
+      (regexp-match-submatch
+       (regexp-matches '(or (-> foo "ab") (-> foo "cd")) "ab")
+       'foo))
+
+(test "srfi-115 9"
+      "cd"
+      (regexp-match-submatch
+       (regexp-matches '(or (-> foo "ab") (-> foo "cd")) "cd")
+       'foo))
+
+;; non-deterministic case from issue #229
+(let* ((elapsed '(: (** 1 2 num) ":" num num (? ":" num num)))
+       (span (rx ,elapsed "-" ,elapsed)))
+  (test-re-search "srfi-115 10"
+                  '("1:45:02-2:06:13")
+                  span
+                  " 1:45:02-2:06:13 "))
+
+(test-re "srfi-115 11"
+         '("ababc" "abab")
+         '(: bos ($ (* "ab")) "c")
+         "ababc")
+
+(test-re "srfi-115 12"
+         '("ababc" "abab")
+         '(: ($ (* "ab")) "c" eos)
+         "ababc")
+
+(test-re "srfi-115 13"
+         '("ababc" "abab")
+         '(: bos ($ (* "ab")) "c" eos)
+         "ababc")
+
+(test-re "srfi-115 14"
+         #f
+         '(: bos ($ (* "ab")) eos "c")
+         "ababc")
+
+(test-re "srfi-115 15"
+         #f
+         '(: ($ (* "ab")) bos "c" eos)
+         "ababc")
+
+(test-re "srfi-115 16"
+         '("ababc" "abab")
+         '(: bol ($ (* "ab")) "c")
+         "ababc")
+
+(test-re "srfi-115 17"
+         '("ababc" "abab")
+         '(: ($ (* "ab")) "c" eol)
+         "ababc")
+
+(test-re "srfi-115 18"
+         '("ababc" "abab")
+         '(: bol ($ (* "ab")) "c" eol)
+         "ababc")
+
+(test-re "srfi-115 19"
+         #f
+         '(: bol ($ (* "ab")) eol "c")
+         "ababc")
+
+(test-re "srfi-115 20"
+         #f
+         '(: ($ (* "ab")) bol "c" eol)
+         "ababc")
+
+(test-re "srfi-115 21"
+         '("\nabc\n" "abc")
+         '(: (* #\newline) bol ($ (* alpha)) eol (* #\newline))
+         "\nabc\n")
+
+(test-re "srfi-115 22"
+         #f
+         '(: (* #\newline) bol ($ (* alpha)) eol (* #\newline))
+         "\n'abc\n")
+
+(test-re "srfi-115 23"
+         #f
+         '(: (* #\newline) bol ($ (* alpha)) eol (* #\newline))
+         "\nabc.\n")
+
+(test-re "srfi-115 24"
+         '("ababc" "abab")
+         '(: bow ($ (* "ab")) "c")
+         "ababc")
+
+(test-re "srfi-115 25"
+         '("ababc" "abab")
+         '(: ($ (* "ab")) "c" eow)
+         "ababc")
+
+(test-re "srfi-115 26"
+         '("ababc" "abab")
+         '(: bow ($ (* "ab")) "c" eow)
+         "ababc")
+
+(test-re "srfi-115 27"
+         #f
+         '(: bow ($ (* "ab")) eow "c")
+         "ababc")
+
+(test-re "srfi-115 28"
+         #f
+         '(: ($ (* "ab")) bow "c" eow)
+         "ababc")
+
+(test-re "srfi-115 29"
+         '("  abc  " "abc")
+         '(: (* space) bow ($ (* alpha)) eow (* space))
+         "  abc  ")
+
+(test-re "srfi-115 30"
+         #f
+         '(: (* space) bow ($ (* alpha)) eow (* space))
+         " 'abc  ")
+
+(test-re "srfi-115 31"
+         #f
+         '(: (* space) bow ($ (* alpha)) eow (* space))
+         " abc.  ")
+
+(test-re "srfi-115 32"
+         '("abc  " "abc")
+         '(: ($ (* alpha)) (* any))
+         "abc  ")
+
+(test-re "srfi-115 33"
+         '("abc  " "")
+         '(: ($ (*? alpha)) (* any))
+         "abc  ")
+
+(test-re "srfi-115 34"
+         '("<em>Hello World</em>" "em>Hello World</em")
+         '(: "<" ($ (* any)) ">" (* any))
+         "<em>Hello World</em>")
+
+(test-re "srfi-115 35"
+         '("<em>Hello World</em>" "em")
+         '(: "<" ($ (*? any)) ">" (* any))
+         "<em>Hello World</em>")
+
+(test-re-search "srfi-115 36" '("foo") '(: "foo") " foo ")
+
+(test-re-search "srfi-115 37" #f '(: nwb "foo" nwb) " foo ")
+
+(test-re-search "srfi-115 38" '("foo") '(: nwb "foo" nwb) "xfoox")
+
+(test-re "srfi-115 39"
+         '("beef")
+         '(* (/"af"))
+         "beef")
+
+(test-re "srfi-115 40"
+         '("12345beef" "beef")
+         '(: (* numeric) ($ (* (/"af"))))
+         "12345beef")
+
+(let ((number '($ (+ numeric))))
+  (test "srfi-115 41"
+        '("555" "867" "5309")
+        (cdr (regexp-match->list
+              (regexp-search `(: ,number "-" ,number "-" ,number)
+                             "555-867-5309"))))
+  (test "srfi-115 42"
+        '("555" "5309")
+        (cdr (regexp-match->list
+              (regexp-search `(: ,number "-" (w/nocapture ,number) "-" ,number)
+                             "555-867-5309")))))
+
+(test-re "srfi-115 43"
+         '("12345BeeF" "BeeF")
+         '(: (* numeric) (w/nocase ($ (* (/"af")))))
+         "12345BeeF")
+
+(test-re "srfi-115 44" #f '(* lower) "abcD")
+(test-re "srfi-115 45" '("abcD") '(w/nocase (* lower)) "abcD")
+
+(when %use-utf8?
+  (test-re "srfi-115 46" '("σζ") '(* lower) "σζ")
+  (test-re "srfi-115 47" '("Σ") '(* upper) "Σ")
+  (test-re "srfi-115 48" '("\x01C5;") '(* title) "\x01C5;")
+  (test-re "srfi-115 49" '("σζ\x01C5;") '(w/nocase (* lower)) "σζ\x01C5;")
+
+  (test-re "srfi-115 50" '("кириллица") '(* alpha) "кириллица")
+  (test-re "srfi-115 51" #f '(w/ascii (* alpha)) "кириллица")
+  (test-re "srfi-115 52" '("кириллица") '(w/nocase "КИРИЛЛИЦА") "кириллица")
+
+  (test-re "srfi-115 53" '("１２３４５") '(* numeric) "１２３４５")
+  (test-re "srfi-115 54" #f '(w/ascii (* numeric)) "１２３４５")
+
+  (test-re "srfi-115 55" '("한") 'grapheme "한")
+  (test-re "srfi-115 56" '("글") 'grapheme "글")
+
+  (test-re "srfi-115 57" '("한") '(: bog grapheme eog) "한")
+  (test-re "srfi-115 58" #f '(: "ᄒ" bog grapheme eog "ᆫ") "한")
+
+  (test "srfi-115 59" '("a" "b" "c") (regexp-extract 'grapheme "abc"))
+  (test "srfi-115 60" '("a" " " "b" " " "c") (regexp-extract 'grapheme "a b c"))
+  (test "srfi-115 61" '("a" "\n" "b" "\r\n" "c") (regexp-extract 'grapheme "a\nb\r\nc"))
+  (test "srfi-115 62" '("a\x0300;" "b\x0301;\x0302;" "c\x0303;\x0304;\x0305;")
+        (regexp-extract 'grapheme "a\x0300;b\x0301;\x0302;c\x0303;\x0304;\x0305;"))
+  (test "srfi-115 63" '("한" "글") (regexp-extract 'grapheme "한글")))
+
+
+(test "srfi-115 64" '("123" "456" "789")
+      (regexp-extract '(+ numeric) "abc123def456ghi789"))
+
+(test "srfi-115 65" '("123" "456" "789")
+      (regexp-extract '(* numeric) "abc123def456ghi789"))
+
+(test "srfi-115 66" '("abc" "def" "ghi" "")
+      (regexp-split '(+ numeric) "abc123def456ghi789"))
+
+(test "srfi-115 67" '("abc" "def" "ghi" "")
+      (regexp-split '(* numeric) "abc123def456ghi789"))
+
+(test "srfi-115 68" '("a" "b")
+      (regexp-split '(+ whitespace) "a b"))
+
+(test "srfi-115 69" '("a" "" "b")
+      (regexp-split '(",;") "a,,b"))
+
+(test "srfi-115 70" '("a" "" "b" "")
+      (regexp-split '(",;") "a,,b,"))
+
+(test "srfi-115 71" '("")
+      (regexp-partition '(* numeric) ""))
+
+(test "srfi-115 72" '("abc" "123" "def" "456" "ghi")
+      (regexp-partition '(* numeric) "abc123def456ghi"))
+
+(test "srfi-115 73" '("abc" "123" "def" "456" "ghi" "789")
+      (regexp-partition '(* numeric) "abc123def456ghi789"))
+
+(when %use-utf8?
+  (test "srfi-115 74" '("한" "글")
+        (regexp-extract
+         'grapheme
+         (utf8->string '#u8(#xe1 #x84 #x92 #xe1 #x85 #xa1 #xe1 #x86 #xab
+                            #xe1 #x84 #x80 #xe1 #x85 #xb3 #xe1 #x86 #xaf)))))
+
+(test "srfi-115 75" "abc def"
+      (regexp-replace '(+ space) "abc \t\n def" " "))
+
+(test "srfi-115 76" "  abc-abc"
+      (regexp-replace '(: ($ (+ alpha)) ":" (* space)) "  abc: " '(1 "-" 1)))
+
+(test "srfi-115 77" "  abc-  abc"
+      (regexp-replace '(: ($ (+ alpha)) ":" (* space)) "  abc: " '(1 "-" pre 1)))
+
+(test "srfi-115 78" "-abc \t\n d ef  "
+      (regexp-replace '(+ space) "  abc \t\n d ef  " "-" 0))
+
+(test "srfi-115 79" "-abc \t\n d ef  "
+      (regexp-replace '(+ space) "  abc \t\n d ef  " "-" 0 #f 0))
+
+(test "srfi-115 80" "  abc-d ef  "
+      (regexp-replace '(+ space) "  abc \t\n d ef  " "-" 0 #f 1))
+
+(test "srfi-115 81" "  abc \t\n d-ef  "
+      (regexp-replace '(+ space) "  abc \t\n d ef  " "-" 0 #f 2))
+
+(test "srfi-115 82" "  abc \t\n d ef-"
+      (regexp-replace '(+ space) "  abc \t\n d ef  " "-" 0 #f 3))
+
+(test "srfi-115 83" "  abc \t\n d ef  "
+      (regexp-replace '(+ space) "  abc \t\n d ef  " "-" 0 #f 4))
+
+(test "srfi-115 84" " abc d ef " (regexp-replace-all '(+ space) "  abc \t\n d ef  " " "))
+
+(test "srfi-115 85"
+      "bc pre: <<<bc >>> match1: <<<def>>> post: <<<gh>>>gh"
+      (regexp-replace
+       '(: ($ (+ alpha)) ":" (* space))
+       "abc def: ghi"
+       '("pre: <<<" pre ">>> match1: <<<" 1 ">>> post: <<<" post ">>>")
+       1 11))
+

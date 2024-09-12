@@ -1,0 +1,959 @@
+;; Tests for SRFI-178
+;;
+;; These are performed inside a module.
+;; The original test is copied verbatim, and some definitions were
+;; added in a preamble in order to make it work.
+
+(define-module test-srfi-178
+  (import SCHEME)
+  (import (only (srfi 158) generator-for-each generator->list))
+
+(define print-header test-subsection)
+
+(define-syntax check
+  (syntax-rules (=>)
+    ((_ exp => res)
+     (test "srfi 178" res exp))))
+
+(define (proc-or a b) (or a b))
+(define bitvector= bitvector=?)
+(define (constantly x) (lambda (_) x))
+
+;; BIT CONVERSIONS
+
+(define (check-bit-conversions)
+  (print-header "Checking bit conversions...")
+
+  (check (bit->integer 0)  => 0)
+  (check (bit->integer 1)  => 1)
+  (check (bit->integer #f) => 0)
+  (check (bit->integer #t) => 1)
+  (check (bit->boolean 0)  => #f)
+  (check (bit->boolean 1)  => #t)
+  (check (bit->boolean #f) => #f)
+  (check (bit->boolean #t) => #t))
+
+;; PREDICATES
+
+(define (check-predicates)
+  (print-header "Checking predicates...")
+
+  (check (bitvector? (bitvector))        => #t)
+  (check (bitvector? (make-bitvector 1)) => #t)
+
+  (check (bitvector-empty? (bitvector))   => #t)
+  (check (bitvector-empty? (bitvector 1)) => #f)
+
+  (check (bitvector= (bitvector) (bitvector)) => #t)
+  (check (bitvector= (bitvector 1 0 0) (bitvector 1 0 0)) => #t)
+  (check (bitvector= (bitvector 1 0 0) (bitvector 1 0 1)) => #f)
+  (check (bitvector= (bitvector 1 0 0) (bitvector 1 0))   => #f)
+  (check (bitvector= (bitvector 1 0 0)
+                     (bitvector 1 0 0)
+                     (bitvector 1 0 0))
+   => #t)
+  (check (bitvector= (bitvector 1 0 0)
+                     (bitvector 1 0 1)
+                     (bitvector 1 0 0))
+   => #f))
+
+;; CONSTRUCTORS
+
+(define (check-constructors)
+  (print-header "Checking constructors...")
+
+  (check (bitvector-length (make-bitvector 8))                  => 8)
+  (check (bitvector= (make-bitvector 4 0) (bitvector 0 0 0 0))  => #t)
+  (check (bitvector= (make-bitvector 4 #t) (bitvector 1 1 1 1)) => #t)
+
+  ;;; unfolds
+
+  (check (bitvector=
+          (bitvector-unfold (lambda (_) 0) 4)
+          (bitvector 0 0 0 0))
+   => #t)
+  (check (bitvector=
+          (bitvector-unfold (lambda (_ b) (values b (not b))) 4 #f)
+          (bitvector 0 1 0 1))
+   => #t)
+  (check (bitvector=
+          (bitvector-unfold (lambda (_ b c)
+                              (values (and b c) (not b) c))
+                            4
+                            #t
+                            #t)
+          (bitvector 1 0 1 0))
+   => #t)
+  (check (bitvector=
+          (bitvector-unfold-right (lambda (_) 0) 4)
+          (bitvector 0 0 0 0))
+   => #t)
+  (check (bitvector=
+          (bitvector-unfold-right (lambda (_ b) (values b (not b))) 4 #f)
+          (bitvector 1 0 1 0))
+   => #t)
+  (check (bitvector=
+          (bitvector-unfold-right (lambda (_ b c)
+                                    (values (and b c) (not b) c))
+                                  4
+                                  #t
+                                  #t)
+          (bitvector 0 1 0 1))
+   => #t)
+
+  ;;; copy
+
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (bitvector= bvec (bitvector-copy bvec)) => #t)
+    (check (eqv? bvec (bitvector-copy bvec)) => #f))  ; fresh copy?
+  (check (bitvector= (bitvector-copy (bitvector 1 0 1 0) 1) (bitvector 0 1 0))
+   => #t)
+  (check (bitvector= (bitvector-copy (bitvector 1 0 1 0) 2 4) (bitvector 1 0))
+   => #t)
+
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (equal? (bitvector->list/int (bitvector-reverse-copy bvec))
+                   (reverse (bitvector->list/int bvec)))
+     => #t)
+    (check (eqv? bvec (bitvector-reverse-copy bvec)) => #f))  ; fresh copy?
+  (check (bitvector= (bitvector-reverse-copy (bitvector 1 0 1 0) 1)
+                     (bitvector 0 1 0))
+   => #t)
+  (check (bitvector= (bitvector-reverse-copy (bitvector 1 0 1 0) 2 4)
+                     (bitvector 0 1))
+   => #t)
+
+  ;;; append & concatenate
+
+  (check (bitvector=
+          (bitvector-append (bitvector 1 0) (bitvector 0 1))
+          (bitvector 1 0 0 1))
+   => #t)
+  (check (bitvector=
+          (bitvector-append (bitvector 1 0) (bitvector 0 1) (bitvector))
+          (bitvector 1 0 0 1))
+   => #t)
+  (check (bitvector=
+          (bitvector-concatenate
+           (list (bitvector 1 0) (bitvector 0 1) (bitvector)))
+          (bitvector 1 0 0 1))
+   => #t)
+  (check (bitvector=
+          (bitvector-append-subbitvectors (bitvector 1 0 0 1) 0 2
+                                          (bitvector 1 1 1 1) 2 4)
+          (bitvector 1 0 1 1))
+   => #t)
+)
+
+;; CONVERSIONS
+
+(define (check-bitvector-conversions)
+  (print-header "Checking bitvector conversions...")
+
+  ;;; lists
+
+  (check (bitvector->list/int (bitvector))             => '())
+  (check (bitvector->list/int (bitvector 1 0 1 0))     => '(1 0 1 0))
+  (check (bitvector->list/int (bitvector 1 0 1 0) 2)   => '(1 0))
+  (check (bitvector->list/int (bitvector 1 0 1 0) 1 3) => '(0 1))
+  (check (bitvector->list/bool (bitvector)) => '())
+  (check (bitvector->list/bool (bitvector 1 0 1 0)) => '(#t #f #t #f))
+  (check (bitvector->list/bool (bitvector 1 0 1 0) 2) => '(#t #f))
+  (check (bitvector->list/bool (bitvector 1 0 1 0) 1 3) => '(#f #t))
+
+  (check (reverse-bitvector->list/int (bitvector)) => '())
+  (check (reverse-bitvector->list/int (bitvector 1 0 1 0) 2) => '(0 1))
+  (check (reverse-bitvector->list/int (bitvector 1 0 1 0) 1 3) => '(1 0))
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (equal? (reverse-bitvector->list/int bvec)
+                   (reverse (bitvector->list/int bvec)))
+     => #t)
+    (check (equal? (reverse-bitvector->list/bool bvec)
+                   (reverse (bitvector->list/bool bvec)))
+     => #t))
+  (check (reverse-bitvector->list/bool (bitvector)) => '())
+  (check (reverse-bitvector->list/bool (bitvector 1 0 1 0) 2) => '(#f #t))
+  (check (reverse-bitvector->list/bool (bitvector 1 0 1 0) 1 3) => '(#t #f))
+
+  (check (bitvector= (list->bitvector '(1 0 #t #f)) (bitvector 1 0 1 0)) => #t)
+  (let ((bs '(1 0 1 0)))
+    (check (equal? bs (bitvector->list/int (list->bitvector bs))) => #t)
+    (check (equal? bs
+                   (reverse-bitvector->list/int
+                    (reverse-list->bitvector bs)))
+     => #t))
+  (check (bitvector= (reverse-list->bitvector '(1 0 #t #f)) (bitvector 0 1 0 1))
+   => #t)
+
+  ;;; vectors
+
+  (check (bitvector->vector/int (bitvector))              => #())
+  (check (bitvector->vector/int (bitvector 1 0 1 0))      => #(1 0 1 0))
+  (check (bitvector->vector/int (bitvector 1 0 1 0) 1)    => #(0 1 0))
+  (check (bitvector->vector/int (bitvector 1 0 1 0) 1 3)  => #(0 1))
+  (check (bitvector->vector/bool (bitvector))             => #())
+  (check (bitvector->vector/bool (bitvector 1 0 1 0))     => #(#t #f #t #f))
+  (check (bitvector->vector/bool (bitvector 1 0 1 0) 1)   => #(#f #t #f))
+  (check (bitvector->vector/bool (bitvector 1 0 1 0) 1 3) => #(#f #t))
+
+  (check (reverse-bitvector->vector/int (bitvector))              => #())
+  (check (reverse-bitvector->vector/int (bitvector 1 0 1 0))      => #(0 1 0 1))
+  (check (reverse-bitvector->vector/int (bitvector 1 0 1 0) 2)    => #(0 1))
+  (check (reverse-bitvector->vector/int (bitvector 1 0 1 0) 1 3)  => #(1 0))
+  (check (reverse-bitvector->vector/bool (bitvector))             => #())
+  (check (reverse-bitvector->vector/bool (bitvector 1 0 1 0))
+   => #(#f #t #f #t))
+  (check (reverse-bitvector->vector/bool (bitvector 1 0 1 0) 2)   => #(#f #t))
+  (check (reverse-bitvector->vector/bool (bitvector 1 0 1 0) 1 3) => #(#t #f))
+
+  (check (bitvector-empty? (vector->bitvector #())) => #t)
+  (check (bitvector= (vector->bitvector #(1 0 #t #f))
+                     (bitvector 1 0 1 0))
+   => #t)
+  (check (bitvector= (vector->bitvector #(1 0 1 0) 1)
+                     (bitvector 0 1 0))
+   => #t)
+  (check (bitvector= (vector->bitvector #(1 0 1 0) 1 3)
+                     (bitvector 0 1))
+   => #t)
+  (check (bitvector-empty? (reverse-vector->bitvector #())) => #t)
+  (check (bitvector= (reverse-vector->bitvector #(1 0 #t #f))
+                     (bitvector 0 1 0 1))
+   => #t)
+  (check (bitvector= (reverse-vector->bitvector #(1 0 1 0) 2)
+                     (bitvector 0 1))
+   => #t)
+  (check (bitvector= (reverse-vector->bitvector #(1 0 1 0) 1 3)
+                     (bitvector 1 0))
+   => #t)
+
+  ;;; strings
+
+  (check (bitvector->string (bitvector 1 0 1 0))     => "#*1010")
+  (check (bitvector->string (bitvector))             => "#*")
+  (check (bitvector= (string->bitvector "#*1010") (bitvector 1 0 1 0))
+   => #t)
+  (check (bitvector-empty? (string->bitvector "#*")) => #t)
+  (check (string->bitvector "")                      => #f)
+  (check (string->bitvector "1010")                  => #f)
+  (check (string->bitvector "#")                     => #f)
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (bitvector= (string->bitvector (bitvector->string bvec))
+                       bvec)
+     => #t))
+
+  ;;; integers
+
+  ;; Remember, these are little-endian!
+  (check (bitvector->integer (bitvector 0 1 0 1)) => #xa)
+  (check (bitvector->integer (bitvector 1 0 1 0 1 1 0 1)) => #xb5)
+  (check (bitvector= (integer->bitvector #xa) (bitvector 0 1 0 1)) => #t)
+  (check (bitvector= (integer->bitvector #xb5) (bitvector 1 0 1 0 1 1 0 1))
+    => #t)
+  (check (bitvector= (integer->bitvector #xb5 4) (bitvector 1 0 1 0)) => #t)
+)
+
+;; BIT FIELDS
+
+(define (check-bit-field-operations)
+  (print-header "Checking bit field operations...")
+
+  (check (bitvector-field-any? (bitvector 0 1 0 0) 0 4) => #t)
+  (check (bitvector-field-any? (bitvector 0 0 0 0) 0 4) => #f)
+  (check (bitvector-field-any? (bitvector 0 1 0 0) 1 3) => #t)
+  (check (bitvector-field-any? (bitvector 0 1 0 0) 2 4) => #f)
+
+  (check (bitvector-field-every? (make-bitvector 4 1) 0 4) => #t)
+  (check (bitvector-field-every? (bitvector 1 1 1 0) 0 4) => #f)
+  (check (bitvector-field-every? (bitvector 1 1 0 0) 0 2) => #t)
+  (check (bitvector-field-every? (bitvector 1 1 0 0) 2 4) => #f)
+
+  (check (bitvector= (bitvector-field-clear (make-bitvector 4 1) 0 2)
+                     (bitvector 0 0 1 1))
+   => #t)
+  (let ((bvec (make-bitvector 4 1)))
+    (check (bitvector= (begin (bitvector-field-clear! bvec 0 2) bvec)
+                       (bitvector 0 0 1 1))
+     => #t))
+  (check (bitvector= (bitvector-field-set (make-bitvector 4 0) 0 2)
+                     (bitvector 1 1 0 0))
+   => #t)
+  (let ((bvec (make-bitvector 4 0)))
+    (check (bitvector= (begin (bitvector-field-set! bvec 0 2) bvec)
+                       (bitvector 1 1 0 0))
+     => #t))
+
+  ;;; replace-same and replace
+
+  (check
+   (bitvector=
+    (bitvector-field-replace-same (make-bitvector 4 0)
+                                  (make-bitvector 4 1)
+                                  1
+                                  3)
+    (bitvector 0 1 1 0))
+   => #t)
+  (let ((bvec (make-bitvector 4 0)))
+    (check
+     (bitvector= (begin
+                  (bitvector-field-replace-same! bvec
+                                                 (make-bitvector 4 1)
+                                                 1
+                                                 3)
+                  bvec)
+                 (bitvector 0 1 1 0))
+     => #t))
+  (check
+   (bitvector=
+    (bitvector-field-replace (make-bitvector 4 0) (bitvector 1 0 0 0) 1 3)
+    (bitvector 0 1 0 0))
+   => #t)
+  (let ((bvec (make-bitvector 4 0)))
+    (check
+     (bitvector= (begin
+                  (bitvector-field-replace! bvec (make-bitvector 4 1) 1 3)
+                  bvec)
+                 (bitvector 0 1 1 0))
+     => #t))
+
+  ;;; rotate
+
+  (check (bitvector= (bitvector-field-rotate (bitvector 1 0 0 1) 1 0 4)
+                     (bitvector 0 0 1 1))
+   => #t)
+  (check (bitvector= (bitvector-field-rotate (bitvector 1 0 0 1) -1 0 4)
+                     (bitvector 1 1 0 0))
+   => #t)
+  (check (bitvector=
+          (bitvector-field-rotate (bitvector 1 0 0 1 1 0 1 0) 2 2 6)
+          (bitvector 1 0 1 0 0 1 1 0))
+   => #t)
+  (check (bitvector=
+          (bitvector-field-rotate (bitvector 1 0 0 1 1 0 1 0) -3 2 6)
+          (bitvector 1 0 1 1 0 0 1 0))
+   => #t)
+
+  ;;; flip
+
+  (check (bitvector= (bitvector-field-flip (bitvector 0 1 0 1) 0 4)
+                     (bitvector 1 0 1 0))
+   => #t)
+  (check (bitvector= (bitvector-field-flip (bitvector 0 1 0 1) 2 4)
+                     (bitvector 0 1 1 0))
+   => #t)
+  (let ((bvec (bitvector 0 1 0 1)))
+    (check (bitvector= (begin (bitvector-field-flip! bvec 0 4) bvec)
+                       (bitvector 1 0 1 0))
+     => #t))
+  (let ((bvec (bitvector 0 1 0 1)))
+    (check (bitvector= (begin (bitvector-field-flip! bvec 2 4) bvec)
+                       (bitvector 0 1 1 0))
+     => #t))
+)
+
+;; GENERATORS ADN ACCUMULATORS
+
+(define (check-generators-and-accumulators)
+  (define test-bvec (bitvector 1 0 1 1 0 1 0 1))
+  (print-header "Checking generators and accumulators...")
+
+  ;;; Generators
+
+  (check (eof-object? ((make-bitvector/int-generator (bitvector)))) => #t)
+  (check (eof-object? ((make-bitvector/bool-generator (bitvector)))) => #t)
+  (check (bitvector=
+          (bitvector-unfold (lambda (_ g) (values (g) g))
+                            (bitvector-length test-bvec)
+                            (make-bitvector/int-generator test-bvec))
+          test-bvec)
+   => #t)
+  (check (bitvector=
+          (bitvector-unfold (lambda (_ g) (values (g) g))
+                            (bitvector-length test-bvec)
+                            (make-bitvector/bool-generator test-bvec))
+          test-bvec)
+   => #t)
+
+  ;;; Accumulator
+
+  (check (bitvector-empty? ((make-bitvector-accumulator) (eof-object)))
+   => #t)
+  ;; Accumulate integers.
+  (check (bitvector= test-bvec
+                     (let ((acc (make-bitvector-accumulator)))
+                       (bitvector-for-each/int acc test-bvec)
+                       (acc (eof-object))))
+   => #t)
+  ;; Accumulate booleans.
+  (check (bitvector= test-bvec
+                     (let ((acc (make-bitvector-accumulator)))
+                       (bitvector-for-each/bool acc test-bvec)
+                       (acc (eof-object))))
+   => #t)
+
+  ;;; Generator/accumulator identities
+
+  ;; Accumulating generated values yields the original structure.
+  (check (bitvector=
+          (let ((gen (make-bitvector/int-generator test-bvec))
+                (acc (make-bitvector-accumulator)))
+            (generator-for-each acc gen)
+            (acc (eof-object)))
+          test-bvec)
+   => #t)
+
+  ;; Generating accumulated values yields the original values.
+  ;; Integer generator.
+  (let ((lis (bitvector->list/int test-bvec)))
+    (check (equal?
+            (let ((acc (make-bitvector-accumulator)))
+              (for-each acc lis)
+              (generator->list
+               (make-bitvector/int-generator (acc (eof-object)))))
+            lis)
+     => #t))
+  ;; Boolean generator.
+  (let ((lis (bitvector->list/bool test-bvec)))
+    (check (equal?
+            (let ((acc (make-bitvector-accumulator)))
+              (for-each acc lis)
+              (generator->list
+               (make-bitvector/bool-generator (acc (eof-object)))))
+            lis)
+     => #t))
+)
+
+;;; ITERATORS
+
+(define (check-iterators)
+  (print-header "Checking iteration...")
+
+  ;;; take & take-right
+
+  (check (bitvector= (bitvector-take (bitvector 1 0 1 0) 2)
+                     (bitvector 1 0))
+   => #t)
+  (check (bitvector-empty? (bitvector-take (bitvector 1 0) 0)) => #t)
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (bitvector= (bitvector-take bvec (bitvector-length bvec))
+                       bvec)
+     => #t)
+    (check (bitvector= (bitvector-take-right bvec (bitvector-length bvec))
+                       bvec)
+     => #t))
+  (check (bitvector= (bitvector-take-right (bitvector 1 0 1 0) 3)
+                     (bitvector 0 1 0))
+   => #t)
+  (check (bitvector-empty? (bitvector-take-right (bitvector 1 0) 0)) => #t)
+
+  ;;; drop & drop-right
+
+  (check (bitvector= (bitvector-drop (bitvector 1 0 1 0) 1)
+                     (bitvector 0 1 0))
+   => #t)
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (bitvector-empty? (bitvector-drop bvec (bitvector-length bvec)))
+     => #t)
+    (check (bitvector= (bitvector-drop bvec 0) bvec) => #t)
+    (check (bitvector= (bitvector-drop-right bvec 0) bvec) => #t)
+    (check (bitvector-empty?
+            (bitvector-drop-right bvec (bitvector-length bvec)))
+     => #t))
+  (check (bitvector= (bitvector-drop-right (bitvector 1 0 1 0) 1)
+                     (bitvector 1 0 1))
+   => #t)
+
+  ;;; segment
+
+  (check (bitvector= (car (bitvector-segment (bitvector 1 0 1 0) 2))
+                     (bitvector 1 0))
+   => #t)
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (bitvector= (bitvector-concatenate (bitvector-segment bvec 1))
+                       bvec)
+     => #t))
+
+  ;;; fold
+
+  (check (bitvector-fold/int + 0 (bitvector)) => 0)
+  (check (bitvector-fold/int + 0 (bitvector 1)) => 1)
+  (check (bitvector-fold/bool proc-or #f (bitvector)) => #f)
+  (check (bitvector-fold/bool proc-or #f (bitvector #t)) => #t)
+  (check (bitvector-fold-right/int + 0 (bitvector)) => 0)
+  (check (bitvector-fold-right/int + 0 (bitvector 1)) => 1)
+  (check (bitvector-fold-right/bool proc-or #f (bitvector)) => #f)
+  (check (bitvector-fold-right/bool proc-or #f (bitvector #t)) => #t)
+
+  ;;; map
+
+  (check (bitvector-empty? (bitvector-map/int values (bitvector))) => #t)
+  (check (bitvector= (bitvector-map/int (constantly 1) (bitvector 0 0 1))
+                     (bitvector 1 1 1))
+   => #t)
+  (check (bitvector= (bitvector-map/int (lambda (a b c) b)
+                                        (bitvector 1 0 0)
+                                        (bitvector 0 1 0)
+                                        (bitvector 0 0 1))
+                     (bitvector 0 1 0))
+   => #t)
+  (check (bitvector-empty? (bitvector-map/bool values (bitvector))) => #t)
+  (check (bitvector= (bitvector-map/bool (constantly #t)
+                                         (bitvector #f #f #t))
+                     (bitvector #t #t #t))
+   => #t)
+  (check (bitvector= (bitvector-map/bool (lambda (a b c) b)
+                                         (bitvector #t #f #f)
+                                         (bitvector #f #t #f)
+                                         (bitvector #f #f #t))
+                     (bitvector #f #t #f))
+   => #t)
+
+  ;;; map!
+
+  (check (let ((bvec (bitvector)))
+           (bitvector-map!/int values bvec)
+           (bitvector-empty? bvec))
+   => #t)
+  (check (let ((bvec (bitvector 1 0 1 0)))
+           (bitvector-map!/int (constantly 1) bvec)
+           (bitvector= bvec (bitvector 1 1 1 1)))
+   => #t)
+  (check (let ((bvec1 (bitvector 1 0 0))
+               (bvec2 (bitvector 0 1 0))
+               (bvec3 (bitvector 0 0 1)))
+           (bitvector-map!/int (lambda (a b c) b) bvec1 bvec2 bvec3)
+           (bitvector= bvec1 bvec2))
+   => #t)
+  (check (let ((bvec (bitvector)))
+           (bitvector-map!/bool values bvec)
+           (bitvector-empty? bvec))
+   => #t)
+  (check (let ((bvec (bitvector #t #f #t #f)))
+           (bitvector-map!/bool (constantly #t) bvec)
+           (bitvector= bvec (bitvector #t #t #t #t)))
+   => #t)
+  (check (let ((bvec1 (bitvector #t #f #f))
+               (bvec2 (bitvector #f #t #f))
+               (bvec3 (bitvector #f #f #t)))
+           (bitvector-map!/bool (lambda (a b c) b) bvec1 bvec2 bvec3)
+           (bitvector= bvec1 bvec2))
+   => #t)
+
+
+  ;;; map->list
+
+  (check (bitvector-map->list/bool values (bitvector)) => '())
+  (check (bitvector-map->list/int (constantly 1) (bitvector 1 0 0)) => '(1 1 1))
+  (check (bitvector-map->list/int list (bitvector 1 0) (bitvector 0 1))
+   => '((1 0) (0 1)))
+  (check (bitvector-map->list/bool values (bitvector)) => '())
+  (check (bitvector-map->list/bool (constantly #t) (bitvector 1 0 0))
+   => '(#t #t #t))
+  (check (bitvector-map->list/bool list (bitvector 1 0) (bitvector 0 1))
+   => '((#t #f) (#f #t)))
+
+  ;;; for-each
+
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (let ((c 0))
+             (bitvector-for-each/int (lambda (_) (set! c (+ c 1))) bvec)
+             c)
+     => (bitvector-length bvec))
+    (check (let ((lis '()))
+             (bitvector-for-each/int (lambda (b) (set! lis (cons b lis))) bvec)
+             lis)
+     => (reverse-bitvector->list/int bvec))
+    (check (let ((c 0))
+             (bitvector-for-each/bool (lambda (_) (set! c (+ c 1))) bvec)
+             c)
+     => (bitvector-length bvec))
+    (check (let ((lis '()))
+             (bitvector-for-each/bool (lambda (b) (set! lis (cons b lis))) bvec)
+             lis)
+     => (reverse-bitvector->list/bool bvec)))
+)
+
+;;; LOGIC OPS
+
+(define (check-bitwise-operations)
+  (define test-bvec1 (bitvector 1 0 1 0))
+  (define test-bvec2 (bitvector 1 1 0 0))
+  (define test-bvec3 (bitvector 0 0 1 1))
+  (print-header "Checking bitwise operations...")
+
+  ;;; not
+
+  (check (bitvector= (bitvector-not test-bvec1) (bitvector 0 1 0 1))
+   => #t)
+  (check (bitvector= (bitvector-not (bitvector-not test-bvec1))
+                     test-bvec1)
+   => #t)
+
+  ;;; Associative operations
+
+  (check (bitvector= (bitvector-and test-bvec1 test-bvec2 test-bvec3)
+                     (bitvector 0 0 0 0))
+   => #t)
+  (check (bitvector= (bitvector-ior test-bvec1 test-bvec2 test-bvec3)
+                     (bitvector 1 1 1 1))
+   => #t)
+  (check (bitvector= (bitvector-xor test-bvec1 test-bvec2 test-bvec3)
+                     (bitvector 0 1 0 1))
+   => #t)
+  (check (bitvector= (bitvector-eqv test-bvec1 test-bvec2 test-bvec3)
+                     (bitvector 0 1 0 1))
+   => #t)
+
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-and! test-bvec1* test-bvec2 test-bvec3)
+                  test-bvec1*)
+                 (bitvector 0 0 0 0))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-ior! test-bvec1* test-bvec2 test-bvec3)
+                  test-bvec1*)
+                 (bitvector 1 1 1 1))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-xor! test-bvec1* test-bvec2 test-bvec3)
+                  test-bvec1*)
+                 (bitvector 0 1 0 1))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-eqv! test-bvec1* test-bvec2 test-bvec3)
+                  test-bvec1*)
+                 (bitvector 0 1 0 1))
+     => #t))
+
+  ;;; Non-associative binary operations
+
+  (check (bitvector= (bitvector-nand test-bvec1 test-bvec2)
+                     (bitvector 0 1 1 1))
+   => #t)
+  (check (bitvector= (bitvector-nor test-bvec1 test-bvec2)
+                     (bitvector 0 0 0 1))
+   => #t)
+  (check (bitvector= (bitvector-andc1 test-bvec1 test-bvec2)
+                     (bitvector 0 1 0 0))
+   => #t)
+  (check (bitvector= (bitvector-andc2 test-bvec1 test-bvec2)
+                     (bitvector 0 0 1 0))
+   => #t)
+  (check (bitvector= (bitvector-orc1 test-bvec1 test-bvec2)
+                     (bitvector 1 1 0 1))
+   => #t)
+  (check (bitvector= (bitvector-orc2 test-bvec1 test-bvec2)
+                     (bitvector 1 0 1 1))
+   => #t)
+
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-nand! test-bvec1* test-bvec2)
+                  test-bvec1*)
+                 (bitvector 0 1 1 1))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-nor! test-bvec1* test-bvec2)
+                  test-bvec1*)
+                 (bitvector 0 0 0 1))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-andc1! test-bvec1* test-bvec2)
+                  test-bvec1*)
+                 (bitvector 0 1 0 0))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-andc2! test-bvec1* test-bvec2)
+                  test-bvec1*)
+                 (bitvector 0 0 1 0))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-orc1! test-bvec1* test-bvec2)
+                  test-bvec1*)
+                 (bitvector 1 1 0 1))
+     => #t))
+  (let ((test-bvec1* (bitvector-copy test-bvec1)))
+    (check
+     (bitvector= (begin
+                  (bitvector-orc2! test-bvec1* test-bvec2)
+                  test-bvec1*)
+                 (bitvector 1 0 1 1))
+     => #t))
+)
+
+;; MUTATORS
+
+(define (check-mutators)
+  (print-header "Checking mutators...")
+
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check
+     (bitvector= (begin (bitvector-set! bvec 1 1) bvec)
+                 (bitvector 1 1 1 0))
+     => #t))
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check
+     (bitvector= (begin (bitvector-set! bvec 0 #f) bvec)
+                 (bitvector 0 0 1 0))
+     => #t))
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check
+     (bitvector= (begin (bitvector-swap! bvec 0 1) bvec)
+                 (bitvector 0 1 1 0))
+     => #t))
+
+  ;;; reverse!
+
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check
+     (bitvector= (begin (bitvector-reverse! bvec) bvec)
+                 (bitvector 0 1 0 1))
+     => #t))
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check
+     (bitvector= (begin (bitvector-reverse! bvec 2) bvec)
+                 (bitvector 1 0 0 1))
+     => #t))
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check
+     (bitvector= (begin (bitvector-reverse! bvec 1 3) bvec)
+                 (bitvector 1 1 0 0))
+     => #t))
+
+  ;;; copy!
+
+  (let ((bvec (bitvector 0 0 0 0)))
+    (check
+     (bitvector= (begin (bitvector-copy! bvec 0 (bitvector 1 0)) bvec)
+                 (bitvector 1 0 0 0))
+     => #t))
+  (let ((bvec (bitvector 0 0 0 0)))
+    (check
+     (bitvector= (begin (bitvector-copy! bvec 1 (bitvector 1 1 0) 1) bvec)
+                 (bitvector 0 1 0 0))
+     => #t))
+  (let ((bvec (bitvector 0 0 0 0)))
+    (check
+     (bitvector= (begin (bitvector-copy! bvec 1 (bitvector 1 0 1) 0 2) bvec)
+                 (bitvector 0 1 0 0))
+     => #t))
+
+  ;;; reverse-copy!
+
+  (let ((bvec (bitvector 0 0 0 0)))
+    (check
+     (bitvector= (begin (bitvector-reverse-copy! bvec 0 (bitvector 1 0))
+                        bvec)
+                 (bitvector 0 1 0 0))
+     => #t))
+  (let ((bvec (bitvector 0 0 0 0)))
+    (check
+     (bitvector= (begin (bitvector-reverse-copy! bvec 1 (bitvector 0 0 1) 1)
+                        bvec)
+                 (bitvector 0 1 0 0))
+     => #t))
+  (let ((bvec (bitvector 0 0 0 0)))
+    (check
+     (bitvector= (begin (bitvector-reverse-copy! bvec 1 (bitvector 0 1 1) 0 2)
+                        bvec)
+                 (bitvector 0 1 0 0))
+     => #t))
+)
+
+;; QUASI-INTEGER OPRATIONS
+
+(define (check-quasi-integer-operations)
+  (print-header "Checking quasi-integer operations...")
+
+  (check (bitvector= (bitvector-logical-shift (bitvector 1 0 1 1) 2 0)
+                     (bitvector 1 1 0 0))
+   => #t)
+  (check (bitvector= (bitvector-logical-shift (bitvector 1 0 1 1) -2 #t)
+                     (bitvector 1 1 1 0))
+   => #t)
+
+  (check (bitvector-count 1 (make-bitvector 8 1))        => 8)
+  (check (bitvector-count #t (make-bitvector 8 0))       => 0)
+  (check (bitvector-count 1 (bitvector 1 1 0 1 1 0 0 0)) => 4)
+
+  (check (bitvector-count-run 1 (make-bitvector 8 1) 0)  => 8)
+  (check (bitvector-count-run #t (make-bitvector 8 0) 4) => 0)
+  (check (bitvector-count-run 1 (bitvector 0 1 1 1) 1)   => 3)
+
+  (let ((then-bvec (bitvector 1 0 1 0))
+        (else-bvec (bitvector 0 0 0 1)))
+    (check
+     (bitvector= (bitvector-if (make-bitvector 4 1) then-bvec else-bvec)
+                 then-bvec)
+     => #t)
+    (check
+     (bitvector= (bitvector-if (make-bitvector 4 0) then-bvec else-bvec)
+                 else-bvec)
+     => #t))
+  (check (bitvector= (bitvector-if (bitvector 1 1 0 0)
+                                   (bitvector 0 1 1 1)
+                                   (bitvector 0 0 1 0))
+                     (bitvector 0 1 1 0))
+   => #t)
+
+  (check (bitvector-first-bit 0 (make-bitvector 4 0))  => 0)
+  (check (bitvector-first-bit #t (bitvector 0 0 1 0))  => 2)
+  (check (bitvector-first-bit #f (make-bitvector 4 1)) => -1)
+)
+
+
+;; QUASI-STRING OPERATIONS
+
+(define (check-quasi-string-ops)
+  (print-header "Checking quasi-string operations...")
+
+  ;;; prefix & suffix
+
+  (check (bitvector-prefix-length (bitvector 1 0 0) (bitvector 1 0 1)) => 2)
+  (check (bitvector-prefix-length (bitvector) (bitvector 1 0 1))       => 0)
+  (let ((bvec (bitvector 1 0 1)))
+    (check (= (bitvector-prefix-length bvec bvec) (bitvector-length bvec))
+     => #t)
+    (check (= (bitvector-suffix-length bvec bvec) (bitvector-length bvec))
+     => #t))
+  (check (bitvector-suffix-length (bitvector 1 0 0) (bitvector 0 0 0)) => 2)
+  (check (bitvector-suffix-length (bitvector) (bitvector 1 0 1))       => 0)
+
+  (check (bitvector-prefix? (bitvector 1) (bitvector 1 0)) => #t)
+  (check (bitvector-prefix? (bitvector 0) (bitvector 1 0)) => #f)
+  (check (bitvector-suffix? (bitvector 0) (bitvector 1 0)) => #t)
+  (check (bitvector-suffix? (bitvector 1) (bitvector 1 0)) => #f)
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (bitvector-prefix? bvec bvec) => #t)
+    (check (bitvector-suffix? bvec bvec) => #t))
+
+  ;;; pad & trim
+
+  (check (bitvector=
+          (bitvector-pad 0 (bitvector 1) 4)
+          (bitvector 0 0 0 1))
+   => #t)
+  (let ((bvec (bitvector 1 0 1 0)))
+    (check (bitvector= (bitvector-pad 0 bvec (bitvector-length bvec))
+                       bvec)
+     => #t)
+    (check (bitvector= (bitvector-pad-right 0 bvec (bitvector-length bvec))
+                       bvec)
+     => #t))
+  (check (bitvector=
+          (bitvector-pad-right 0 (bitvector 1) 4)
+          (bitvector 1 0 0 0))
+   => #t)
+  (check (bitvector= (bitvector-trim 0 (bitvector 0 0 0 1))
+                     (bitvector 1))
+   => #t)
+  (check (bitvector= (bitvector-trim 0 (bitvector 1 0 1))
+                     (bitvector 1 0 1))
+   => #t)
+  (check (bitvector= (bitvector-trim-right 0 (bitvector 1 0 1))
+                     (bitvector 1 0 1))
+   => #t)
+  (check (bitvector= (bitvector-trim-right 0 (bitvector 1 0 0 0))
+                     (bitvector 1))
+   => #t)
+  (check (bitvector= (bitvector-trim-both 1 (bitvector 1 0 1))
+                     (bitvector 0))
+   => #t)
+  (check (bitvector= (bitvector-trim-both 0 (bitvector 1 0 1))
+                     (bitvector 1 0 1))
+   => #t)
+)
+
+;; SELECTORS
+
+(define (check-selectors)
+  (print-header "Checking selectors...")
+
+  (check (bitvector-length (bitvector))             => 0)
+  (check (bitvector-length (bitvector 1 0 1 0))     => 4)
+  (check (bitvector-ref/int (bitvector 1 0 1 0) 0)  => 1)
+  (check (bitvector-ref/int (bitvector 1 0 1 0) 3)  => 0)
+  (check (bitvector-ref/bool (bitvector 1 0 1 0) 0) => #t)
+  (check (bitvector-ref/bool (bitvector 1 0 1 0) 3) => #f))
+
+;; SHARP CONSTANTS
+
+(define (check-sharp-reader)
+  (print-header "Checking #*xxx syntax...")
+
+  (check (read-from-string "#*101") => (bitvector 1 0 1))
+  (check (read-from-string "#*0000000000") => (make-bitvector 10 0))
+  (check (read-from-string "#*1111111111") => (make-bitvector 10 1))
+  (check (read-from-string "#*") => (bitvector))
+  (let* ((v (bitvector 1 1 0 1 0 0 0 1 1 1 0 1))
+         (s (with-output-to-string  (lambda () (display v)))))
+    (check (equal? v (read-from-string s)) => #t))
+
+)
+
+;; EXTRA TESTS
+;; -- jpellegrini
+
+(define (extra-tests)
+  (print-header "Extra bitvector type tests...")
+  ;; class-of should not segfault, and the class of all bitvectors
+  ;; should be the same
+  (test "class-of.1"
+        #t
+        (eq?  (class-of (read-from-string "#*"))
+              (class-of (read-from-string "#*1"))))
+  (test "class-of.2"
+        #t
+        (eq?  (class-of (read-from-string "#*0"))
+              (class-of (bitvector #t #t))))
+  (test "class-of.3"
+        #t
+        (eq?  (class-of (read-from-string "#*"))
+              (class-of (read-from-string "#*1"))))
+
+  ;; describe should not segfault
+  (test "describe"
+        #t
+        (string? (with-output-to-string
+                   (lambda () (describe (read-from-string "#*")))))))
+
+;;;;;;;;;;;;
+;;  TEST  ;;
+;;;;;;;;;;;;
+
+(define (run)
+  (check-predicates)
+  (check-bitvector-conversions)
+  (check-selectors)
+  (check-bit-conversions)
+  (check-constructors)
+  (check-iterators)
+  (check-quasi-string-ops)
+  (check-mutators)
+  (check-bitwise-operations)
+  (check-quasi-integer-operations)
+  (check-bit-field-operations)
+  (check-sharp-reader)
+  (extra-tests))
+)
+
+(select-module test-srfi-178)
+(run)
+(select-module stklos)

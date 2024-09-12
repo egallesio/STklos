@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -79,6 +79,7 @@ values are being computed, thus allowing mutually recursive definitions.
 {{insertdoc 'repeat}}
 {{insertdoc 'while}}
 {{insertdoc 'until}}
+{{insertdoc 'dolist}}
 
 === Delayed Evaluation
 ((("call by need")))

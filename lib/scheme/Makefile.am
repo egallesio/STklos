@@ -1,6 +1,6 @@
 # Makefile for the R7RS Scheme standard libraries
 #
-# Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #    Creation date:  8-Oct-2021 11:54 (eg)
 
 #======================================================================
-SUBDIRS  = vector
+SUBDIRS  = vector regex
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
@@ -71,8 +71,7 @@ R7_OBJS =  base.ostk            \
 # ----------------------------------------------------------------------
 # R7RS Large Support
 # ----------------------------------------------------------------------
-LARGE_STK  = charset.stk    \
-             stream.stk     \
+LARGE_STK  = stream.stk     \
              box.stk        \
              set.stk        \
              list-queue.stk \
@@ -82,13 +81,14 @@ LARGE_STK  = charset.stk    \
              comparator.stk \
              generator.stk  \
              ideque.stk     \
+             regex.stk      \
              text.stk       \
              division.stk   \
              bitwise.stk
 
-LARGE_OBJS = list.ostk       \
-             charset.ostk    \
-             stream.ostk     \
+
+LARGE_OBJS = stream.ostk     \
+             rlist.ostk      \
              box.ostk        \
              set.ostk        \
              list-queue.ostk \
@@ -97,13 +97,17 @@ LARGE_OBJS = list.ostk       \
              comparator.ostk \
              generator.ostk  \
              ideque.ostk     \
+             regex.ostk     \
              text.ostk       \
              division.ostk   \
              bitwise.ostk
 
-LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c     rlist.c
-LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk   rlist.stk
-LARGE_SHOBJ = list.$(SO)  ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO) rlist.$(SO)
+LARGE_C     = list.c      ilist.c     flonum.c     sort.c     vector.c     bytevector.c \
+              charset.c   rlist.c
+LARGE_C_STK = list.stk    ilist.stk   flonum.stk   sort.stk   vector.stk   bytevector.stk \
+              charset.stk rlist.stk
+LARGE_SHOBJ = list.$(SO)     ilist.$(SO) flonum.$(SO) sort.$(SO) vector.$(SO) bytevector.$(SO) \
+              charset.$(SO) rlist.$(SO)
 
 
 #----------------------------------------------------------------------
@@ -154,6 +158,11 @@ stream.ostk:     ../streams/primitive.ostk ../streams/derived.ostk
 
 set.ostk: ../srfi/69.ostk comparator.ostk
 
+charset.stk: ../srfi/217.ostk
+charset.$(SO): charset-incl.c
+charset-incl.c: charset.stk
+
+
 ../srfi/69.ostk:
 	(cd ../srfi; $(MAKE) 69.ostk)
 ../srfi/128.ostk:
@@ -162,6 +171,11 @@ set.ostk: ../srfi/69.ostk comparator.ostk
 	(cd ../srfi; $(MAKE) 129.ostk)
 ../srfi/60.ostk:
 	(cd ../srfi; $(MAKE) 60.ostk)
+../srfi/217.ostk:
+	(cd ../srfi; $(MAKE) 217.ostk)
+../stklos/itrie.$(SO):
+	(cd ../stklos; $(MAKE) itrie.$(SO))
+
 
 bytevector.$(SO): bytevector-incl.c bytevector.c
 
@@ -183,10 +197,16 @@ vector-incl.c: vector.stk
 rlist.$(SO): rlist-incl.c
 rlist-incl.c: rlist.ostk
 
+charset.$(SO): charset-incl.c
+charset-incl.c: charset.stk
+
 hash-table.ostk: comparator.ostk
 ideque.ostk: generator.ostk list.$(SO)
 text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
+regex.ostk: regex/boundary.stk hash-table.ostk list.$(SO) \
+            charset.$(SO) bitwise.ostk
+
 
 # ======================================================================
 install-sources:
@@ -195,15 +215,21 @@ install-sources:
 	done
 	cp $(scheme_sources) $(schemedir)
 
+install-data-hook:
+	(cd regex; $(MAKE) install)
 clean:
 	(cd vector; $(MAKE) clean)
+	(cd regex; $(MAKE) clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
 	(cd vector; $(MAKE) distclean)
+	(cd regex; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:
+	(cd vector; $(MAKE) uninstall)
+	(cd regex; $(MAKE) uninstall)
 	(cd $(schemedir); rm -f $(scheme_sources))
 	rmdir $(schemedir) || true
 

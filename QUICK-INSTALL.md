@@ -13,33 +13,44 @@ four) step process:
     - `--prefix=PATH`: place where the files will be installed (default to `/usr/local`)
     - `--with-provided-gc`: use the provided Boehm GC library
     - `--with-provided-bignum`: use the provided Bignum (GMPlite) library
+    - `--with-gmp-light`: a synonym for `--with-provided-bignum`
     - `--with-provided-regexp`: use the provided Regexp (PCRE) library
     - `--with-provided-ffi:` use the provided FFI library
     - `--without-control-fast-math`: do not verify that parameters of fx/fl functions are correct fixnums/flonums
     - `--enable-case-insensitive`: be case insensitive by default as in R5RS
     - `--enable-threads=TYPE`: choose threading package (value can be 'none' or 'pthreads', the default)
 
+    There are also environment variables that will have effect on how STklos is compiled. These should be passed to the configure script in the `CFLAGS` variable:
+
+    - `STK_DEBUG`: enable debugging code for STklos
+    - `VM_DEBUG`: enable debugging code for the VM
+    - `STAT_VM`: enable code for collecting timing statistics for the virtual machine (useful for profiling user programs and for working on optimizing the VM itself
+
     You can also choose the compiler and the compiler options to use for building **STklos** with the `CC` and `CFLAGS` parameters:
 
     ```bash
-    $ ./configure --prefix=/opt --with-provided-gc CC=clang CFLAGS="-O3 -Wall"
+    $ ./configure --prefix=/opt --with-provided-gc CC=clang-18 CFLAGS="-O3 -Wall -DSTAT_VM"
     ```
+
     A summary will be printed at the end of the execution of the script as shown below:
 
     ```
     SUMMARY
     *******
-                   System:  Linux-5.6.15-1-MANJARO
-                  OS nick:  LINUX_5_6
+                   System:  Linux-6.9.7-amd64
+                  OS nick:  LINUX_6_9
                   OS type:  unix
           Install prefix :  /opt
-               C compiler:  clang
+               C compiler:  clang-18
+       C compiler version:  Debian clang version 18.1.8 (9)
         Compilation flags:  -O3 -Wall
                    Loader:  ld
            Thread support:  pthreads
          Case sensitivity:  true (by default)
-    System libraries used:  libffi libpcre libgmp
+    Control fx parameters:  yes
+    System libraries used:  ffi (3.4.6) pcre2 (10.42) gmp (6.3.0)
        Compiled libraries:  libgc
+     Documentation update:  yes (since Asciidoctor is installed)
     ```
 
 
@@ -49,14 +60,14 @@ four) step process:
 
 3. **Optionally**, you can type `make tests` to run some internal tests
 
-4. To install the version just compiled in the configured place, type `make install` for a full install. The size of a full installation is approximately 6.5Mb (on a x86 64 bits architecture).  
+4. To install the version just compiled in the configured place, type `make install` for a full install. The size of a full installation is approximately 18Mb (on a x86 64 bits architecture).
 On machines with a more limited space, you can use the following Makefile installation targets:
-    - `install-base` to install only the VM and all the compiled Scheme files (size is ~2.0Mb). The installation is fully functional (except the `help` function which will yield an error).
-    - `install-base-no-strip` is identical to `install-base`, except that the `stklos` binary is not stripped (this could be useful when cross compiling **STklos** or when generating packages with debug symbols).
-    - `install-sources` to install the Scheme source files used whence building the system (adds ~1.5Mb to the installation)
-    - `install-doc` to install the documentation (for the help command, manual pages, and reference manual in HTML and PDF formats). This adds ~3.0Mb) to the installation).
+    - `install-base` (or `install-base-no-strip`) to install only the VM and all the compiled Scheme files (size is ~5Mb). The installation is fully functional (except the `help` function which will yield an error).
+    - `install-base-strip` is identical to `install-base`, except that the `stklos` binary is stripped to save some disk space. This permits to save ~1Mb of disk space.
+    - `install-sources` to install the Scheme source files used whence building the system (adds ~3Mb to the installation)
+    - `install-doc` to install the documentation (for the help command, manual pages, and reference manual in HTML and PDF formats). This adds ~11Mb) to the installation).
 
-**Note**: `make install` is equivalent to `make install-base install-sources install-docs`
+**Note**: `make install` is equivalent to `make install-base install-sources install-docs`.
 
 
 

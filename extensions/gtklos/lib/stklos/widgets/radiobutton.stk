@@ -61,7 +61,7 @@
                      #:slot-set!    group-selected-setter)))
 
 
-(define-method initialize ((self <radio-button>) initargs)
+(define-method initialize-instance ((self <radio-button>) initargs)
   ;; initialize the widget and it %data field that we will change
   (next-method self initargs)
 

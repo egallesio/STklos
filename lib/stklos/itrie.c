@@ -1,6 +1,10 @@
 /*
- * itrie.c   -- Tries with fixnum keys --- Implementation of
- * SRFI-217: Integer Sets and SRFI-224: Integer Mappings
+ * itrie.c   -- Tries with fixnum keys
+ *
+ * Implementation of
+ *   - SRFI-14: Character Sets,
+ *   - SRFI-217: Integer Sets,
+ *   - SRFI-224: Integer Mappings
  *
  * Copyright © 2021 Jerônimo Pellegrini <j_p@aleph0.info>
  *
@@ -31,10 +35,17 @@
 /*
   New extended types for Patricia trees:
 
-   - iset represents sets of fixnums
+   - iset represents sets of fixnums (or charset)
    - fxmap represents mappings from fixnums to arbitrary types
 
    These will be filled later, at the end of this file.
+
+NOTE: char-sets are in fact isets with the bit TRIE_CHARSET set to 1
+      Only a few functions takes care of this bit:
+        - %iset->char-set force this bit to 1
+        - char-set? which test this bit
+        - the iset printer which behaves differently for char-sets.
+
 */
 static int tc_iset;
 static int tc_fxmap;
@@ -185,7 +196,7 @@ static int tc_fxmap;
 #define TRIE_CONST     (1 << 0)
 #define TRIE_LEAF      (1 << 1)
 #define TRIE_EMPTY     (1 << 2)
-
+#define TRIE_CHARSET   (1 << 3)
 
 struct trie_branch_obj {
     stk_header header;
@@ -201,8 +212,8 @@ struct trie_empty_obj {
 
 /* REMINDER: both iset and fxmap leaves need the 'long prefix'
              member, since TRIE_PREFIX uses it. Do not change
-	     the structure withtout reviewing the accessor
-	     macros. */
+             the structure withtout reviewing the accessor
+             macros. */
 
 struct trie_leaf_iset_obj {
     stk_header header;
@@ -228,6 +239,8 @@ struct trie_leaf_fxmap_obj {
 #define TRIE_LEAFP(p)        (BOXED_INFO(p) & TRIE_LEAF)
 #define TRIE_BRANCHP(p)      (!(TRIE_LEAFP(p)))
 #define TRIE_EMPTYP(p)       (BOXED_INFO(p) & TRIE_EMPTY)
+#define TRIE_CHARSETP(p)     (BOXED_INFO(p) & TRIE_CHARSET)
+
 
 /* BRANCHES _AND_ LEAVES! */
 #define TRIE_PREFIX(p)       (((struct trie_leaf_iset_obj  *)   (p))->prefix)
@@ -2060,6 +2073,19 @@ DEFINE_PRIMITIVE("iset", trie_iset, vsubr, (int argc, SCM *argv))
     return trie_aux(0, 0,  argc, argv);
 }
 
+DEFINE_PRIMITIVE("%iset->char-set", iset2charset, subr1, (SCM s))
+{
+  if (!ISETP(s)) STk_error("bad iset ~S", s);
+  BOXED_INFO(s) |= TRIE_CHARSET;
+  return s;
+}
+
+DEFINE_PRIMITIVE("%char-set?", charsetp, subr1, (SCM s))
+{
+  return MAKE_BOOLEAN(ISETP(s) && TRIE_CHARSETP(s));
+}
+
+
 DEFINE_PRIMITIVE("constant-iset", trie_constant_iset, vsubr, (int argc, SCM *argv))
 {
     /* 1=constant, 1=NO_values */
@@ -3360,8 +3386,8 @@ DEFINE_PRIMITIVE("%trie/list-flatten", trie_list_flatten, subr1, (SCM l))
 
 /*
   In order to print, we turn the iset or fxmap into a list
-  (or alist), then cons the appropriate symbol, `<iset>`
-  or `<fxmapping>`.
+  (or alist), then cons the appropriate symbol, `iset`
+  or `fxmapping`.
   But we need the `trie_flatten` function...
 
   FIXME: we should be able to do this with for-each. Can we
@@ -3371,9 +3397,20 @@ static void print_trie(SCM trie, SCM port, int mode) {
     SCM lst = trie_list_aux(trie, STk_nil);
     STk_puts("#,", port);
     if (FXMAPP(trie))
-        lst = trie_flatten(STk_cons (STk_intern("<fxmapping>"), lst));
-    else
-        lst = STk_cons (STk_intern("<iset>"), lst);
+        lst = trie_flatten(STk_cons (STk_intern("fxmapping"), lst));
+    else {
+      if (TRIE_CHARSETP(trie)) {
+        SCM clst = STk_nil;
+        // (map integer->char lst)
+        while (!NULLP(lst)) { 
+          clst = STk_cons(MAKE_CHARACTER(INT_VAL(CAR(lst))), clst);
+          lst = CDR(lst);
+        }
+        lst = STk_cons (STk_intern("char-set"), STk_dreverse(clst));
+      } else {
+        lst = STk_cons (STk_intern("iset"), lst);
+      }
+    }
     STk_print(lst, port, mode);
 }
 
@@ -3413,6 +3450,10 @@ MODULE_ENTRY_START("stklos/itrie")
   ADD_PRIMITIVE_IN_MODULE(triep,                 module);
   ADD_PRIMITIVE_IN_MODULE(fxmapp,                module);
   ADD_PRIMITIVE_IN_MODULE(isetp,                 module);
+
+  /* charset primitives */
+  ADD_PRIMITIVE_IN_MODULE(iset2charset,          module);
+  ADD_PRIMITIVE_IN_MODULE(charsetp,              module);
 
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_empty_p,    module);
   ADD_PRIMITIVE_IN_MODULE(trie_iset_empty_p,     module);

@@ -79,7 +79,7 @@
           iset-open-closed-interval iset-closed-open-interval
           isubset= isubset< isubset<= isubset> isubset>=)
 
-(export %trie-compare)
+(export %trie-compare %iset->char-set)
 
 ;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -88,16 +88,20 @@
 ;;;;;;;;;;;;;;;;;;;;
 
 (define (describe-iset x port)
-  (format port "a ~a iset, with ~a elements."
-          (if (iset-mutable? x) "mutable" "constant")
-          (iset-size x)))
+  (let ((sz (iset-size x)))
+    (format port "a ~a iset, with ~a element~a"
+            (if (iset-mutable? x) "mutable" "constant")
+            sz
+            (if (> sz 1) "s" ""))))
 
 (%user-type-proc-set! 'iset 'describe describe-iset)
 
 (define-class <iset>      (<top>) ())
 (%user-type-proc-set! 'iset 'class-of <iset>)
 
+;; Permit ,(<iset> ...) or ,(iset ...) to read an iset
 (define-reader-ctor '<iset> iset)
+(define-reader-ctor 'iset iset)
 
 (define (check-args pred? type . args)
   (for-each (lambda (x)

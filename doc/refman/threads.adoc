@@ -12,10 +12,8 @@
 ((("condition variable")))
 The thread system provides the following data types:
 
-*  Thread (a virtual processor which shares object
-			space with all other threads)
-* Mutex (a mutual exclusion device,
-		      also known as a lock and binary semaphore)
+* Thread (a virtual processor which shares object space with all other threads)
+* Mutex (a mutual exclusion device, also known as a lock and binary semaphore)
 * Condition variable (a set of blocked threads)
 
 

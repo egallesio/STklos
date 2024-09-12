@@ -169,7 +169,7 @@ STATIC GC_descr GC_double_descr(GC_descr descriptor, word nwords)
     if ((descriptor & GC_DS_TAGS) == GC_DS_LENGTH) {
         descriptor = GC_bm_table[BYTES_TO_WORDS((word)descriptor)];
     }
-    descriptor |= (descriptor & ~GC_DS_TAGS) >> nwords;
+    descriptor |= (descriptor & ~(GC_descr)GC_DS_TAGS) >> nwords;
     return(descriptor);
 }
 
@@ -577,7 +577,7 @@ GC_API GC_descr GC_CALL GC_make_descriptor(const GC_word * bm, size_t len)
         if (index == -1) return(WORDS_TO_BYTES(last_set_bit+1) | GC_DS_LENGTH);
                                 /* Out of memory: use conservative      */
                                 /* approximation.                       */
-        result = GC_MAKE_PROC(GC_typed_mark_proc_index, (word)index);
+        result = GC_MAKE_PROC(GC_typed_mark_proc_index, index);
     }
     return result;
 }
@@ -670,7 +670,8 @@ GC_API GC_ATTR_MALLOC void * GC_CALL GC_calloc_explicitly_typed(size_t n,
                                           &complex_descr, &leaf);
     lb *= n;
     switch(descr_type) {
-        case NO_MEM: return(0);
+        case NO_MEM:
+            return (*GC_get_oom_fn())(lb);
         case SIMPLE:
             return GC_malloc_explicitly_typed(lb, simple_descr);
         case LEAF:

@@ -208,9 +208,10 @@ GC_API void * GC_CALL GC_is_visible(void *p)
             /* Else do it again correctly:      */
 #           if defined(DYNAMIC_LOADING) || defined(MSWIN32) \
                 || defined(MSWINCE) || defined(CYGWIN32) || defined(PCR)
-              GC_register_dynamic_libraries();
-              if (GC_is_static_root(p))
-                return(p);
+              if (!GC_no_dls) {
+                GC_register_dynamic_libraries();
+                if (GC_is_static_root(p)) return p;
+              }
 #           endif
             goto fail;
         } else {
@@ -240,7 +241,8 @@ GC_API void * GC_CALL GC_is_visible(void *p)
                     break;
                 case GC_DS_PER_OBJECT:
                     if ((signed_word)descr >= 0) {
-                      descr = *(word *)((ptr_t)base + (descr & ~GC_DS_TAGS));
+                      descr = *(word *)((ptr_t)base
+                                        + (descr & ~(word)GC_DS_TAGS));
                     } else {
                       ptr_t type_descr = *(ptr_t *)base;
                       descr = *(word *)(type_descr

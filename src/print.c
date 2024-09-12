@@ -26,6 +26,9 @@
 #include <ctype.h>
 #include "stklos.h"
 
+#define MAX_BUF_SIZE 1024    /* Buffer size for printing strings */
+
+
 static int pretty_quotes = 1;
 
 
@@ -121,11 +124,11 @@ static void printstring(SCM s, SCM port, int mode)
   } else {
     register char *p    = STRING_CHARS(s);
     register size_t len = STRING_SIZE(s);
-    char buffer[MAX_TOKEN_SIZE], *buff = buffer;
+    char buffer[MAX_BUF_SIZE], *buff = buffer;
 
     *buff++ = '"';
     for (   ; len; len--, p++) {
-      if (buff >= buffer + MAX_TOKEN_SIZE - 7) { /* 7 because we can add \X" and */
+      if (buff >= buffer + MAX_BUF_SIZE - 7) {   /* 7 because we can add \X" and */
         /* buffer is full. Flush it */           /* a null char at this positon  */
         *buff = '\0';
         STk_puts(buffer, port);

@@ -1,0 +1,41 @@
+;; "Simple currying"
+  (test "srfi-232.1" 5 ((curried (x y) (+ x y)) 2 3))
+  (test "srfi-232.2" 5 (((curried (x y) (+ x y)) 2) 3))
+  (test "srfi-232.3" 5 ((curried (w x y z) (+ w x y z)) 1 1 1 2))
+  (test "srfi-232.4" 5 ((((curried (w x y z) (+ w x y z)) 1) 1) 1 2))
+  (test "srfi-232.5" 5 (((curried (w x y z) (+ w x y z)) 1) 1 1 2))
+  (test "srfi-232.6" 5 (((curried (w x y z) (+ w x y z)) 1 1) 1 2))
+  (test "srfi-232.7" 5 (((curried (w x y z) (+ w x y z)) 1 1 1) 2))
+  (test "srfi-232.8" 5 (((((curried (w x y z) (+ w x y z)) 1) 1) 1) 2))
+
+
+;; "Variadic"
+  (test "srfi-232.9"
+        '(3 (3 4))
+        ((curried (a b . rest) (list (+ a b) rest)) 1 2 3 4))
+  (test "srfi-232.10"
+        '(3 (3 4))
+        (((curried (a b . rest) (list (+ a b) rest)) 1) 2 3 4))
+  (test  "srfi-232.11"
+        '(3 ())
+        ((curried (a b . rest) (list (+ a b) rest)) 1 2))
+
+
+;; "Nullary"
+  (test "srfi-232.12" 3 ((curried () (curried (x y) (+ x y))) 1 2))
+  (test "srfi-232.13" 3 (((curried () (curried (x y) (+ x y))) 1) 2))
+
+  ;; "... while these behaviors are decidedly not wrong, they are
+  ;;  perhaps mildly unsettling."
+  (test "srfi-232.14"
+        2
+        ((curried (a)
+           (curried ()
+             (curried ()
+               (curried (b) b)))) 1 2))
+  (test "srfi-232.15" 4 (((((((((curried (a b c) 4)))))))) 1 2 3))
+
+
+;; "Extra arguments"
+  (test "srfi-232.16" 20 ((curried (x y) (curried (z) (* z (+ x y)))) 2 3 4))
+  (test "srfi-232.16" 20 (((curried (x y) (curried (z) (* z (+ x y)))) 2) 3 4))

@@ -1,5 +1,5 @@
 ;;;;
-;;;; division.stk         -- Implementation of (schee division) aka SRFI-141
+;;;; division.stk         -- Implementation of (scheme division) aka SRFI-141
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;

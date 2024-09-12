@@ -1,7 +1,7 @@
 ;;;;
-;;;; date.stk                   -- Date and Time Operations
+;;;; time.stk                   -- Date and Time Operations
 ;;;;
-;;;; Copyright © 2002-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify

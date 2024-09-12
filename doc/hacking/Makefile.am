@@ -27,7 +27,11 @@ extradoc: pdf
 # ----------------------------------------------------------------------
 ../PDF/$(PDF): tmp-pdf.txt
 	mkdir -p ../PDF
-	$(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ tmp-pdf.txt
+	$(ADOC) -v -r asciidoctor-pdf -b pdf -o tmp.pdf tmp-pdf.txt
+	@echo "Reducing size of generated PDF file"
+	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress \
+		-dNOPAUSE -dQUIET -dBATCH -sOutputFile=$@ tmp.pdf
+	rm -f tmp.pdf
 
 # ----------------------------------------------------------------------
 tmp-html.txt: $(SOURCE) $(DOCDB)
@@ -38,8 +42,8 @@ tmp-pdf.txt: $(SOURCE) $(DOCDB)
 
 # ----------------------------------------------------------------------
 clean:
-	rm -f  tmp-html.txt tmp-pdf.txt  *~
+	rm -f  tmp-html.txt tmp-pdf.txt tmp.pdf  *~
 
 distclean: clean
-	rm -f ../HTML/$(HTMLMAIN) 
+	rm -f ../HTML/$(HTMLMAIN)
 	rm -f ../PDF/$(PDF)

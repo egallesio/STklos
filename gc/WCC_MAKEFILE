@@ -87,8 +87,8 @@ check: gctest.exe test_cpp.exe cordtest.exe .SYMBOLIC
 
 !ifdef ENABLE_STATIC
 
-OBJS= alloc.obj reclaim.obj allchblk.obj misc.obj &
-      mach_dep.obj os_dep.obj mark_rts.obj headers.obj mark.obj &
+OBJS= alloc.obj reclaim.obj allchblk.obj backgraph.obj checksums.obj &
+      misc.obj mach_dep.obj os_dep.obj mark_rts.obj headers.obj mark.obj &
       obj_map.obj blacklst.obj finalize.obj new_hblk.obj &
       dbg_mlc.obj malloc.obj dyn_load.obj &
       typd_mlc.obj ptr_chck.obj mallocx.obj fnlz_mlc.obj gcj_mlc.obj
@@ -259,7 +259,7 @@ gc_cpp.obj: gc_cpp.cc .AUTODEPEND
         $(CXX) $(TEST_CXXFLAGS) $*.cc
 
 test.obj: tests\test.c .AUTODEPEND
-        $(CC) $(TEST_CFLAGS) /wcd=13 /wcd=201 /wcd=367 /wcd=368 tests\test.c
+        $(CC) $(TEST_CFLAGS) /wcd=201 tests\test.c
 cordtest.obj: cord\tests\cordtest.c .AUTODEPEND
         $(CC) $(TEST_CFLAGS) $(CORDFLAG) cord\tests\cordtest.c
 test_cpp.obj: tests\test_cpp.cc .AUTODEPEND

@@ -1,7 +1,7 @@
 /*
- * thread-none.c			-- Threads support in STklos
+ * thread-none.c            -- Threads support in STklos
  *
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,7 +50,8 @@ DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
 }
 
 
-DEFINE_PRIMITIVE("%thread-no-support", threadno, vsubr, (int argc, SCM *argv))
+DEFINE_PRIMITIVE("%thread-no-support", threadno, vsubr, (int _UNUSED(argc),
+                                                         SCM _UNUSED(*argv)))
 {
   STk_error("your version of stklos does not provide thread support");
   return STk_void;
@@ -63,7 +64,7 @@ DEFINE_PRIMITIVE("%thread-dynwind-stack", thread_dynwind_stack, subr0, (void))
 }
 
 DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1,
-		 (SCM value))
+                 (SCM _UNUSED(value)))
 {
   vm_thread_t *vm = STk_get_current_vm();
   vm->dynwind_stack = value;

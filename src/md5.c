@@ -1,7 +1,7 @@
 /*
  * md5.c            -- MD5 algorithm
  *
- * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,7 +70,13 @@ static void md5_starts( struct md5_context *ctx )
     ctx->state[3] = 0x10325476;
 }
 
-static void md5_process( struct md5_context *ctx, const uint8 data[static 64] )
+#if defined(__GNUC__) || defined(__CLANG__)
+#  define STAT64 static 64
+#else
+#  define STAT64 64
+#endif
+
+static void md5_process( struct md5_context *ctx, const uint8 data[STAT64] )
 {
     uint32 A, B, C, D, X[16];
 

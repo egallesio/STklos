@@ -1,7 +1,7 @@
 /*
  * s p o r t . c                        -- String ports management
  *
- * Copyright © 1993-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -369,7 +369,7 @@ DEFINE_PRIMITIVE("open-input-string", open_input_string, subr1, (SCM s))
 
 /*
 <doc R7RS open-input-bytevector
- * (open-input-string bytevector)
+ * (open-input-bytevector bytevector)
  *
  * Takes a bytevector and returns a binary input port that
  * delivers bytes from the |bytevector|.

@@ -1,7 +1,7 @@
 /*
  * syntax.c   -- Syntax objects
  *
- * Copyright © 2019-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+ * Copyright © 2019-2023 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,19 +41,24 @@ struct syntax_obj {
 #define SYNTAX_MODULE(p)   (((struct syntax_obj *) (p))->module)
 
 
-static void error_bad_syntax(SCM obj)
+static inline void verify_syntax(SCM obj)
 {
-  STk_error("bad syntax object ~S", obj);
+  if (!SYNTAXP(obj)) STk_error("bad syntax object ~S", obj);
 }
+
 
 DEFINE_PRIMITIVE("%make-syntax", make_syntax, subr4,
                  (SCM name, SCM src, SCM expander, SCM mod))
 {
   SCM z;
 
-  // STk_debug("DEFINING syntax ~S in ~S", name, mod);
+  /* Control some parameters */
+  if (!SYMBOLP(name))
+    STk_error("bad syntax name ~S", name);
+  if (mod != STk_false && !SYMBOLP(mod))
+    STk_error("bad module name ~S", mod);
 
-  //FIXME: Add controls on parameter types
+  /* Build the result */
   NEWCELL(z, syntax);
   SYNTAX_NAME(z)     = name;
   SYNTAX_SOURCE(z)   = src;
@@ -71,25 +76,28 @@ DEFINE_PRIMITIVE("%syntax?", syntaxp, subr1, (SCM x))
 
 DEFINE_PRIMITIVE("%syntax-name", syntax_name, subr1, (SCM x))
 {
-  if (!SYNTAXP(x)) error_bad_syntax(x);
-  return SYNTAX_NAME(x);
+  verify_syntax(x);
+  {
+    SCM name = SYNTAX_NAME(x);
+    return SYMBOLP(name) ? STk_Cstring2string(SYMBOL_PNAME(name)) : name;
+  }
 }
 
 DEFINE_PRIMITIVE("%syntax-source", syntax_source, subr1, (SCM x))
 {
-  if (!SYNTAXP(x)) error_bad_syntax(x);
+  verify_syntax(x);
   return SYNTAX_SOURCE(x);
 }
 
 DEFINE_PRIMITIVE("%syntax-expander", syntax_expander, subr1, (SCM x))
 {
-  if (!SYNTAXP(x)) error_bad_syntax(x);
+  verify_syntax(x);
   return SYNTAX_EXPANDER(x);
 }
 
 DEFINE_PRIMITIVE("%syntax-module", syntax_module, subr1, (SCM x))
 {
-  if (!SYNTAXP(x)) error_bad_syntax(x);
+  verify_syntax(x);
   return SYNTAX_MODULE(x);
 }
 
@@ -116,6 +124,6 @@ int STk_init_syntax(void)
   ADD_PRIMITIVE(syntax_source);
   ADD_PRIMITIVE(syntax_expander);
   ADD_PRIMITIVE(syntax_module);
-  
+
   return TRUE;
 }
