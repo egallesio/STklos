@@ -464,8 +464,7 @@ LARGE_OBJS = stream.ostk     \
              list-queue.ostk \
              hash-table.ostk \
              lseq.ostk       \
-             rlist.ostk
-
+             rlist.ostk      \
              comparator.ostk \
              generator.ostk  \
              ideque.ostk     \
