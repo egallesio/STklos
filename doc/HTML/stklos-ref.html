@@ -23833,7 +23833,9 @@ will work with the definition of <code>&lt;point&gt;</code> given above:</p>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_make-instance'></a><a id='P_initialize'></a><a id='P_allocate-instance'></a>
+<p><a id='P_make-instance'></a><a id='P_make'></a><a id='P_initialize-instance'></a><a id='P_initialize'></a><a id='P_allocate-instance'></a>
+
+
 
 
 </p>
@@ -23845,8 +23847,9 @@ will work with the definition of <code>&lt;point&gt;</code> given above:</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(allocate-instance c init-args) </strong></code><br>
-<code><strong>(initialize c init-args) </strong></code><br>
+<code><strong>(initialize-instance c init-args) </strong></code><br>
 <code><strong>(make-instance c) </strong></code><br>
+<code><strong>(initialize c init-args) </strong></code><br>
 <code><strong>(make c) </strong></code><br></p>
 </div>
 </div>
@@ -23886,8 +23889,7 @@ without initializing it.</p>
 </div>
 <div class="paragraph">
 <p><code>Initialize</code> is a generic function that is called by <code>make-instance</code>
-(or <code>make</code>) in order to initialize instances of a class. It is similar
-to the CLOS method <code>initialize-instance</code>.</p>
+(or <code>make</code>) in order to initialize instances of a class.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -23976,7 +23978,7 @@ calls <code>allocate-instance</code> and initializes it with <code>initialize-in
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">make-instance</span> <span class="p">((</span><span class="nf">class</span> <span class="nv">&lt;class&gt;</span><span class="p">)</span> <span class="o">.</span> <span class="nv">initargs</span><span class="p">)</span>
   <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">instance</span> <span class="p">(</span><span class="nf">allocate-instance</span> <span class="nv">class</span> <span class="nv">initargs</span><span class="p">)))</span>
-    <span class="p">(</span><span class="nf">initialize</span> <span class="nv">instance</span> <span class="nv">initargs</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">initialize-instance</span> <span class="nv">instance</span> <span class="nv">initargs</span><span class="p">)</span>
     <span class="nv">instance</span><span class="p">))</span></code></pre>
 </div>
 </div>
@@ -24118,6 +24120,69 @@ of the most specific classes posible.</p>
 <span class="p">(</span><span class="nf">class-direct-superclasses</span> <span class="nv">m</span><span class="p">)</span>
   <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;B&gt;</span> <span class="mi">7</span><span class="nv">fea2b8a3c30</span><span class="p">]</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">fea2b8afb40</span><span class="p">])</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p><a id='P_change-class'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(change-class object new-class) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Change-class</code> will change the class of <code>object</code> to <code>new-class</code>.
+The values of slots that do exist in both the old and new classes
+are carried out to the new object. The slots that do not exist in
+the old instance are initialized as if the object was new.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span>        <span class="p">((</span><span class="nf">a-slot</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'a-value</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;B&gt;</span> <span class="p">()</span>        <span class="p">((</span><span class="nf">b-slot</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'b-value</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;C&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span> <span class="nv">&lt;B&gt;</span><span class="p">)</span> <span class="p">((</span><span class="nf">c-slot</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'c-value</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">c</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;C&gt;</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">a</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;A&gt;</span> <span class="mi">7</span><span class="nv">f91fe79c660</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;A&gt;</span><span class="o">.</span>
+<span class="nv">The</span> <span class="nv">only</span> <span class="nv">slot</span> <span class="nv">is:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">c</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">f91fe7a0510</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;C&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+     <span class="nv">b-slot</span> <span class="nv">=</span> <span class="nv">b-value</span>
+     <span class="nv">c-slot</span> <span class="nv">=</span> <span class="nv">c-value</span>
+
+<span class="p">(</span><span class="nf">change-class</span> <span class="nv">a</span> <span class="nv">&lt;C&gt;</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">change-class</span> <span class="nv">c</span> <span class="nv">&lt;A&gt;</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">a</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">f91fe79c660</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;C&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+     <span class="nv">b-slot</span> <span class="nv">=</span> <span class="nv">b-value</span>
+     <span class="nv">c-slot</span> <span class="nv">=</span> <span class="nv">c-value</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">c</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;A&gt;</span> <span class="mi">7</span><span class="nv">f91fe7a0510</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;A&gt;</span><span class="o">.</span>
+<span class="nv">The</span> <span class="nv">only</span> <span class="nv">slot</span> <span class="nv">is:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+
+<span class="p">(</span><span class="nf">slot-value</span> <span class="nv">c</span> <span class="ss">'c-slot</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The last line shows that <code>c</code> really changed into an object of
+class <code>&lt;A&gt;</code>: it does not have the slot <code>c-slot</code> anymore.</p>
 </div>
 </div>
 <div class="sect3">
@@ -24328,11 +24393,59 @@ applicable method.</p>
 <span class="p">(</span><span class="nf">class-list</span> <span class="mi">1-2</span><span class="nv">i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">complex</span> <span class="nv">number</span> <span class="nv">top</span><span class="p">)</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p><a id='P_method-procedure'></a><a id='P_method-specializers'></a><a id='P_method-generic-function'></a>
+
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(method-generic-function m) </strong></code><br>
+<code><strong>(method-specializers m) </strong></code><br>
+<code><strong>(method-procedure m) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Given a method <code>m</code>,
+* <code>method-generic-function</code> returns the generic function that this
+  object is a specialization of;
+* <code>method-specializers</code> returns a list of specializers (this and other
+  methods) of its generic functions;
+* <code>method-procedure</code> returns the procedure that implements this method.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">)</span>
+ <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;complex&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">imag-part</span> <span class="nv">b</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">m</span> <span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nf">generic-function-methods</span> <span class="nv">compute</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">method-generic-function</span> <span class="nv">m</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">compute</span> <span class="p">(</span><span class="nf">2</span><span class="p">)]</span>
+
+<span class="p">(</span><span class="nf">method-specializers</span> <span class="nv">m</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;real&gt;</span> <span class="mi">7</span><span class="nv">f3e3a157ba0</span><span class="p">]</span>
+       <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;complex&gt;</span> <span class="mi">7</span><span class="nv">f3e3a157bd0</span><span class="p">])</span>
+
+<span class="p">(</span><span class="nf">method-procedure</span> <span class="nv">m</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="mi">7</span><span class="nv">f9901d6e680</span><span class="p">]</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_misc_2">8.3.3. Misc.</h4>
 <div class="paragraph">
-<p><a id='P_class-precedence-list'></a><a id='P_class-direct-subclasses'></a><a id='P_class-direct-superclasses'></a>
+<p><a id='P_class-precedence-list'></a><a id='P_class-subclasses'></a><a id='P_class-direct-subclasses'></a><a id='P_class-direct-superclasses'></a>
+
 
 
 </p>
@@ -24345,13 +24458,18 @@ applicable method.</p>
 <div class="paragraph small">
 <p><code><strong>(class-direct-superclasses c) </strong></code><br>
 <code><strong>(class-direct-subclasses c) </strong></code><br>
+<code><strong>(class-subclasses c) </strong></code><br>
 <code><strong>(class-precedence-list c) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p><code>class-direct-superclasses</code> and <code>class-direct-subclasses</code> return a list with
+<p><code>class-direct-superclasses</code> and <code>class-direct-subclasses</code> returns a list with
 all direct superclasses or subclasses of class <code>c</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>class-subclasses</code> returns a list with all subclasses of class <code>c</code>, even if
+not direct.</p>
 </div>
 <div class="paragraph">
 <p><code>class-precedence-list</code> returns the precedence list for class <code>c</code>. If
@@ -24380,6 +24498,31 @@ their names.</p>
 <p><code>Slot-one</code> in class <code>&lt;C&gt;</code> refers to the slot defined in <code>&lt;C&gt;</code> (because
 it is present in both <code>&lt;A&gt;</code> and <code>&lt;C&gt;</code>, but <code>&lt;C&gt;</code> has precedence over
 <code>&lt;A&gt;</code>). <code>Slot-two</code> in <code>&lt;C&gt;</code> can only be the one defined in <code>&lt;A&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>The native STklos types are also subclasses of one single class, <code>&lt;top&gt;</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span>  <span class="p">(</span><span class="nf">class-subclasses</span> <span class="nv">&lt;top&gt;</span><span class="p">))</span>
+        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&lt;entity-class&gt;</span> <span class="nv">&lt;procedure-class&gt;</span> <span class="nv">&lt;class&gt;</span> <span class="nv">&lt;accessor-method&gt;</span>
+            <span class="nv">&lt;simple-method&gt;</span> <span class="nv">&lt;method&gt;</span> <span class="nv">&lt;generic&gt;</span> <span class="nv">&lt;object&gt;</span> <span class="nv">&lt;boolean&gt;</span> <span class="nv">&lt;char&gt;</span>
+            <span class="o">...</span>
+            <span class="nv">&lt;number&gt;</span>
+            <span class="o">...</span>
+            <span class="nv">&lt;output-port&gt;</span> <span class="nv">&lt;port&gt;</span> <span class="nv">&lt;hash-table&gt;</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>One of the listed classes above is <code>&lt;number&gt;</code> (its subclasses are also
+listed in that output). Calling <code>class-subclasses</code> on <code>&lt;number&gt;</code> returns
+its six subclasses:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-subclasses</span> <span class="nv">&lt;number&gt;</span><span class="p">))</span>
+        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-subclasses</span> <span class="nv">&lt;number&gt;</span><span class="p">))</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_class-direct-slots'></a><a id='P_class-slots'></a>
@@ -24414,6 +24557,46 @@ were defined directly in the class (excluding the inherited slots).</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">class-direct-slots</span> <span class="nv">&lt;B&gt;</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">a</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">3</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_class-direct-methods'></a><a id='P_class-methods'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(class-methods c) </strong></code><br>
+<code><strong>(class-direct-methods c) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Class-direct-methods</code> returns a list of all direct methods of
+a class.</p>
+</div>
+<div class="paragraph">
+<p><code>Class-methods</code> returns a list of all methods of a class and also
+of its subclasses.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">())</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">method-A</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nf">print</span> <span class="ss">'A</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;C&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span><span class="p">)</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">method-C</span> <span class="p">((</span><span class="nf">c</span> <span class="nv">&lt;C&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nf">print</span> <span class="ss">'C</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">class-methods</span> <span class="nv">&lt;C&gt;</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nb">map</span> <span class="nv">method-generic-function</span> <span class="p">(</span><span class="nf">class-methods</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+    <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">method-C</span> <span class="p">(</span><span class="nf">1</span><span class="p">)]</span>
+        <span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">method-A</span> <span class="p">(</span><span class="nf">1</span><span class="p">)])</span>
+<span class="p">(</span><span class="nb">map</span> <span class="nv">method-generic-function</span> <span class="p">(</span><span class="nf">class-direct-methods</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+    <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">method-A</span> <span class="p">(</span><span class="nf">1</span><span class="p">)])</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -24490,6 +24673,51 @@ of a slot, as returned by <code>class-slots</code> or by <code>class-slot-defini
 <span class="p">(</span><span class="nf">slot-definition-options</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">))</span>
  <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">)</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p><a id='P_generic-function-documentation'></a><a id='P_generic-function-methods'></a><a id='P_generic-function-name'></a>
+
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(generic-function-name gf) </strong></code><br>
+<code><strong>(generic-function-methods gf) </strong></code><br>
+<code><strong>(generic-function-documentation gf) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Given a generic function object, these procedures return the name,
+the list of methods and the documentation of the generic function.</p>
+</div>
+<div class="paragraph">
+<p>For example,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-generic</span> <span class="nv">compute</span> <span class="nv">:documentation</span> <span class="s">"This function does computations"</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;complex&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">imag-part</span> <span class="nv">b</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">generic-function-name</span> <span class="nv">compute</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="nv">compute</span>
+<span class="p">(</span><span class="nf">generic-function-methods</span> <span class="nv">compute</span><span class="p">)</span>       <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">7</span><span class="nv">f9901743db0</span><span class="p">]</span>
+                                             <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">7</span><span class="nv">f990155af60</span><span class="p">])</span>
+<span class="p">(</span><span class="nf">generic-function-documentation</span> <span class="nv">compute</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"This function does computations"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is not necessary that the generic function be explicitly defined. If it is
+not explicitly created, however, the documentation will be set to <code>#f</code>.</p>
 </div>
 <div class="literalblock">
 <div class="content">

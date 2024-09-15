@@ -23,8 +23,6 @@
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
 ;;;;
 
-(define original-input-port (current-input-port))
-
 ;;
 ;; Following code is in the STklos module and is needed to ensure STklos
 ;; bootstrap
