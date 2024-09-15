@@ -53,7 +53,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
 static SCM sym_read_brace, sym_read_bracket, read_error;
 
-int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
+int STk_read_case_sensitive = 1; /* Be case sensitive by default */
 
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
@@ -1246,15 +1246,39 @@ static SCM read_srfi10(SCM port, SCM l)
  * [NOTE]
  * ====
  * *  Default behaviour can be changed for a whole execution
- *    with the |--case-sensitive| or |case-insensitive| options.
+ *    with the |--case-sensitive| or |--case-insensitive| options.
  * *  See also syntax for _<<_symbols, special characters>>_ in symbols.
  * ====
 doc>
 */
-static SCM read_case_sensitive_conv(SCM value)
+static SCM read_case_sensitive_get(void)
 {
-  STk_read_case_sensitive = (value != STk_false);
   return MAKE_BOOLEAN(STk_read_case_sensitive);
+}
+
+static SCM read_case_sensitive_set(SCM value)
+{
+  SCM port = STk_current_input_port();
+
+  STk_read_case_sensitive = (value != STk_false);
+  if (value == STk_true)
+    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+  else
+    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+
+  return MAKE_BOOLEAN(STk_read_case_sensitive);
+}
+
+DEFINE_PRIMITIVE("%set-default-case-sensitive", set_default_cs, subr0, (void))
+{
+  /* This function is used atboot time to set the case sensitivity used at
+   * configuration time. It is called just before being interactive.
+   *
+   * NOTE: STklos always boots in case senvitive mode and images are alwways
+   * built in this mode, even if configured as case insensitive mode
+   */
+  read_case_sensitive_set(MAKE_BOOLEAN(DEFAULT_CASE_SENSITIVE));
+  return STk_void;
 }
 
 
@@ -1427,10 +1451,10 @@ int STk_init_reader(void)
   ADD_PRIMITIVE(reader_ctor);
 
   /* Declare parameter read-case-sensitve */
-  STk_make_C_parameter("read-case-sensitive",
-                       MAKE_BOOLEAN(STk_read_case_sensitive),
-                       read_case_sensitive_conv,
-                       STk_STklos_module);
+  STk_make_C_parameter2("read-case-sensitive",
+                        read_case_sensitive_get,
+                        read_case_sensitive_set,
+                        STk_STklos_module);
 
   /* Declare parameter keyword-colon-position */
   colon_pos = COLON_BOTH;
@@ -1469,6 +1493,9 @@ int STk_init_reader(void)
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */
   ADD_PRIMITIVE(user_read_list);
+
+  /* Add primive to set the default case sensitive defined at configuration time */
+  ADD_PRIMITIVE(set_default_cs);
 
   return TRUE;
 }

@@ -63,6 +63,7 @@ static char *conf_dir     = "";
 static char *sexpr        = "";
 static char *cflags       = "";
 static int  vanilla       = 0;
+static int  forced_case   = 0;
 static int  startup_msg   = 1;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
@@ -176,8 +177,8 @@ static int process_program_arguments(int argc, char *argv[])
       case 'q': vanilla         = 1;                                    break;
       case 'Q': startup_msg     = 0;                                    break;
       case 's': stack_size      = atoi(optarg);                         break;
-      case 'c': STk_read_case_sensitive = 1;                            break;
-      case 'z': STk_read_case_sensitive = 0;                            break;
+      case 'c': STk_read_case_sensitive = 1; forced_case = 1;           break;
+      case 'z': STk_read_case_sensitive = 0; forced_case = 1;           break;
       case 'u': STk_use_utf8    = strspn(optarg, "yY1");                break;
       case 'h': Usage(stdout); exit(0);
       case '?': /* message error is printed by getopt */
@@ -210,6 +211,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_BOOL_OPTION(startup_msg,     "startup-message");
   ADD_BOOL_OPTION(STk_interactive, "interactive");
   ADD_BOOL_OPTION(line_editor,     "line-editor");
+  ADD_BOOL_OPTION(forced_case,     "user-case-sensitivity");
   ADD_INT_OPTION(debug_mode,       "debug");
   ADD_BOOL_OPTION(STk_use_utf8,    "use-utf8");
   ADD_OPTION(script_file,          "script-file");

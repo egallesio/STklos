@@ -260,6 +260,7 @@
       (confdir (key-get *%system-state-plist* :conf-dir #f))
       (debug   (key-get *%system-state-plist* :debug 0))
       (cflags  (key-get *%system-state-plist* :comp-flags #f))
+      (user-cs (key-get *%system-state-plist* :user-case-sensitivity #f))
       (Idirs   (key-get *%system-state-plist* :prepend-dirs '()))
       (Adirs   (key-get *%system-state-plist* :append-dirs '())))
 
@@ -312,6 +313,11 @@
     (with-handler
       (lambda (c) (%simple-fatal-exception-handler "loading file" ld c 7))
       (load ld)))
+
+  (unless user-cs
+    ;; User didn't express it's preferred case sensitivity. Use the configured one
+    (%set-default-case-sensitive))
+
 
   (cond
     ;; "--file" option

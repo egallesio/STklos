@@ -42,7 +42,7 @@ all: $(SHARED_OBJ)
 # string-obfuscate-incl.c, so it will be included in the library C file
 # later:
 string-obfuscate-incl.c: $(SCHEME_SOURCE) $(C_INCL)
-	stklos-compile --no-time \
+	stklos-compile -c --no-time \
 	-C \
 	--output=$(C_INCL) \
 	$(SCHEME_SOURCE)
