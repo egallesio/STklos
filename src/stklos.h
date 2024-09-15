@@ -756,6 +756,7 @@ int STk_init_misc(void);
 long STk_integer_value(SCM x); /* Returns LONG_MIN if not representable as long */
 unsigned long STk_uinteger_value(SCM x); /* Returns ULONG_MAX if not an ulong */
 
+
   /****
    **** Real
    ****/
@@ -793,9 +794,6 @@ struct rational_obj {
 #define RATIONAL_NUM(p)         (((struct rational_obj *) (p))->num)
 #define RATIONAL_DEN(p)         (((struct rational_obj *) (p))->den)
 #define RATIONALP(p)            (BOXED_TYPE_EQ((p), tc_rational))
-#define EXACT_RATIONALP(p)      (RATIONALP(p)             && \
-                                 !REALP(RATIONAL_NUM(p))  && \
-                                 !REALP(RATIONAL_DEN(p)))
 
   /****
    **** Complex
@@ -855,7 +853,7 @@ int    STk_init_number(void);
 
 #define NUMBERP(x)      (INTP(x) || BIGNUMP(x) || REALP(x) || RATIONALP(x) || \
                          COMPLEXP(x))
-#define EXACTP(x)       (INTP(x) || BIGNUMP(x) || EXACT_RATIONALP(x) || \
+#define EXACTP(x)       (INTP(x) || BIGNUMP(x) || RATIONALP(x) || \
                          EXACT_COMPLEXP(x))
 
 /*
