@@ -119,6 +119,16 @@ static void signal_error(SCM port, char *format, SCM param)
 }
 
 
+
+static inline void set_port_read_case_sensibility(SCM port, int sensitive)
+{
+  if (sensitive)
+    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+  else
+    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+}
+
+
 static void error_token_too_large(SCM port, char *tok)
 {
   tok[TOKEN_SIZE-1] = '\0'; /* truncate the name (should be sufficient !!) */
@@ -1261,11 +1271,7 @@ static SCM read_case_sensitive_set(SCM value)
   SCM port = STk_current_input_port();
 
   STk_read_case_sensitive = (value != STk_false);
-  if (value == STk_true)
-    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-  else
-    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-
+  set_port_read_case_sensibility(port, STk_read_case_sensitive);
   return MAKE_BOOLEAN(STk_read_case_sensitive);
 }
 
@@ -1381,11 +1387,7 @@ static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*
 static SCM sharp_fold_keyword(SCM port, struct read_context _UNUSED(*ctx),
                               const char *word)
 {
-  if (word[1] == 'n')   // word = "!no-fold-case"
-    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-  else              // word = "fold-case"
-    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-
+  set_port_read_case_sensibility(port, (word[1] == 'n')); // word = "!no-fold-case"
   return NULL;  // NULL since the keyword is not returned
 }
 
