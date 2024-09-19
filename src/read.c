@@ -1227,57 +1227,6 @@ static SCM read_srfi10(SCM port, SCM l)
 
 
 /*
-<doc EXT read-case-sensitive
- * (read-case-sensitive)
- * (read-case-sensitive value)
- *
- * This parameter object permits to change the default behaviour of
- * the |read| primitive when reading a symbol. If this parameter has
- * a true value a symbol is not converted to a default case when interned.
- * Since R7RS requires that symbol are case insignificant, the default
- * value  of this parameter is |#t|.
- * @lisp
- * (read-case-sensitive)        => |#t|
- * (read-from-string "ABC")     => ABC
- * (read-case-sensitive #f)
- * (read-from-string "ABC")     => abc
- * @end lisp
- * [NOTE]
- * ====
- * *  Default behaviour can be changed for a whole execution
- *    with the |--case-sensitive| or |--case-insensitive| options.
- * *  See also syntax for _<<_symbols, special characters>>_ in symbols.
- * ====
-doc>
-*/
-static SCM read_case_sensitive_get(void)
-{
-  return MAKE_BOOLEAN(STk_read_case_sensitive);
-}
-
-static SCM read_case_sensitive_set(SCM value)
-{
-  SCM port = STk_current_input_port();
-
-  STk_read_case_sensitive = (value != STk_false);
-  set_port_read_case_sensibility(port, STk_read_case_sensitive);
-  return MAKE_BOOLEAN(STk_read_case_sensitive);
-}
-
-DEFINE_PRIMITIVE("%set-default-case-sensitive", set_default_cs, subr0, (void))
-{
-  /* This function is used atboot time to set the case sensitivity used at
-   * configuration time. It is called just before being interactive.
-   *
-   * NOTE: STklos always boots in case senvitive mode and images are alwways
-   * built in this mode, even if configured as case insensitive mode
-   */
-  read_case_sensitive_set(MAKE_BOOLEAN(DEFAULT_CASE_SENSITIVE));
-  return STk_void;
-}
-
-
-/*
 <doc EXT keyword-colon-position
  * (keyword-colon-position)
  * (keyword-colon-position value)
@@ -1414,6 +1363,7 @@ DEFINE_PRIMITIVE("%add-sharp-reader", add_sharp_reader, subr2, (SCM ch, SCM proc
   return STk_void;
 }
 
+
 /*===========================================================================* \
  *
  *                      I n i t i a l i z a t i o n
@@ -1440,12 +1390,6 @@ int STk_init_reader(void)
 
   /* Declare SRFI-10 support function */
   ADD_PRIMITIVE(reader_ctor);
-
-  /* Declare parameter read-case-sensitve */
-  STk_make_C_parameter2("read-case-sensitive",
-                        read_case_sensitive_get,
-                        read_case_sensitive_set,
-                        STk_STklos_module);
 
   /* Declare parameter keyword-colon-position */
   colon_pos = COLON_BOTH;

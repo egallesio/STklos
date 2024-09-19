@@ -1679,7 +1679,6 @@ DEFINE_PRIMITIVE("%port-case-sensitive-set!", port_cs_set, subr2, (SCM port,SCM 
 {
   if (!PORTP(port)) STk_error_bad_port(port);
 
-  STk_debug(" On demande ~S ~S", port, val);
   if (val != STk_false)
     PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
   else
