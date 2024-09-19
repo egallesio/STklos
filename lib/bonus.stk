@@ -31,7 +31,8 @@
         call-with-input-string call-with-output-string
         read-case-sensitive
         open-input-virtual open-output-virtual
-        read-from-string eval-from-string
+        read-from-string read-from-string-ci
+        eval-from-string
         command-line program-name
         create-directories ensure-directories-exist
         posix-error? posix-error-name posix-error-message
@@ -438,15 +439,18 @@ doc>
 ;;;;
 
 #|
-<doc EXT read-from-string
+<doc EXT read-from-string-ci read-from-string
  * (read-from-string str)
  *
  * Performs a read from the given |str|. If |str| is the empty string,
- * an end of file object is returned.
+ * an end of file object is returned. |Read-from-string-ci| uses |read-ci|
+ * to read.
  *
  * @lisp
  * (read-from-string "123 456") => 123
  * (read-from-string "")        => an eof object
+ * (read-from-string "ABC")     => ABC
+ * (read-from-string-ci "ABC")  => abc
  * @end lisp
 doc>
 |#
@@ -455,6 +459,13 @@ doc>
          (expr (read p)))
     (close-port p)
     expr))
+
+(define (read-from-string-ci s)
+  (let* ((p    (open-input-string s))
+         (expr (read-ci p)))
+    (close-port p)
+    expr))
+ 
 
 #|
 <doc EXT eval-from-string
