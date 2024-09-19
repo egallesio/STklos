@@ -114,7 +114,7 @@ SCM STk_eval_C_string(const char *str, SCM module)
 
 SCM STk_read_from_C_string(const char *str)
 {
-  return STk_read(STk_open_C_string(str), STk_read_case_sensitive);
+  return STk_read(STk_open_C_string(str), 1);
 }
 
 

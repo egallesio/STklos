@@ -53,8 +53,6 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
 static SCM sym_read_brace, sym_read_bracket, read_error;
 
-int STk_read_case_sensitive = 1; /* Be case sensitive by default */
-
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
 #define PLACEHOLDER_VAL(x)      (CDR(x))
@@ -119,16 +117,6 @@ static void signal_error(SCM port, char *format, SCM param)
 }
 
 
-
-static inline void set_port_read_case_sensibility(SCM port, int sensitive)
-{
-  if (sensitive)
-    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-  else
-    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-}
-
-
 static void error_token_too_large(SCM port, char *tok)
 {
   tok[TOKEN_SIZE-1] = '\0'; /* truncate the name (should be sufficient !!) */
@@ -187,7 +175,8 @@ static void warning_parenthesis(SCM port)
 
 static void warning_bad_escaped_sequence(SCM port, int c)
 {
-  STk_warning("character %c must not be escaped on line %d of ~S", c, PORT_LINE(port), port);
+  STk_warning("character %c must not be escaped on line %d of ~S", c,
+              PORT_LINE(port), port);
 }
 
 
@@ -1387,7 +1376,7 @@ static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*
 static SCM sharp_fold_keyword(SCM port, struct read_context _UNUSED(*ctx),
                               const char *word)
 {
-  set_port_read_case_sensibility(port, (word[1] == 'n')); // word = "!no-fold-case"
+  STk_port_cs_set(port, MAKE_BOOLEAN((word[1] == 'n'))); // word = "!no-fold-case"
   return NULL;  // NULL since the keyword is not returned
 }
 
@@ -1495,9 +1484,6 @@ int STk_init_reader(void)
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */
   ADD_PRIMITIVE(user_read_list);
-
-  /* Add primive to set the default case sensitive defined at configuration time */
-  ADD_PRIMITIVE(set_default_cs);
 
   return TRUE;
 }

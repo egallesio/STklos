@@ -1665,6 +1665,29 @@ DEFINE_PRIMITIVE("port-close-hook", port_close_hook, subr1, (SCM port))
 }
 
 
+/*
+ * Port case sensitivity accesoors
+ */
+DEFINE_PRIMITIVE("%port-case-sensitive", port_cs, subr1, (SCM port))
+{
+  if (!PORTP(port)) STk_error_bad_port(port);
+  return MAKE_BOOLEAN(PORT_CASE_SENSITIVEP(port));
+}
+
+
+DEFINE_PRIMITIVE("%port-case-sensitive-set!", port_cs_set, subr2, (SCM port,SCM val))
+{
+  if (!PORTP(port)) STk_error_bad_port(port);
+
+  STk_debug(" On demande ~S ~S", port, val);
+  if (val != STk_false)
+    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+  else
+    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+  return STk_void;
+}
+
+
 /*===========================================================================*\
  *
  * Initializations
@@ -1786,6 +1809,9 @@ int STk_init_port(void)
   ADD_PRIMITIVE(port_close_hook);
   ADD_PRIMITIVE(port_close_hook_set);
 
+  ADD_PRIMITIVE(port_cs);
+  ADD_PRIMITIVE(port_cs_set);
+  
   return STk_init_fport() &&
          STk_init_sport() &&
          STk_init_vport();

@@ -29,6 +29,7 @@
         remove remove! delete delete!
         every any
         call-with-input-string call-with-output-string
+        read-case-sensitive
         open-input-virtual open-output-virtual
         read-from-string eval-from-string
         command-line program-name
@@ -354,7 +355,7 @@ doc>
 <doc EXT call-with-input-string
  * (call-with-input-string string proc)
  *
- * behaves as |call-with-input-file| except that the port passed to |proc|
+ * behaves as |call-with1-input-file| except that the port passed to |proc|
  * is the sting port obtained from |port|.
  * @lisp
  * (call-with-input-string "123 456"
@@ -387,6 +388,22 @@ doc>
     (proc port)
     (close-port port)
     (get-output-string port)))
+
+;;;
+;;; Port functions
+;;;
+;;FIXME: Documentation
+(%debug "On definit read-cas-sensitive")
+
+(define-parameter read-case-sensitive
+  #t
+  (lambda (v)
+    (%port-case-sensitive-set! (current-input-port) v)
+    (%port-case-sensitive (current-input-port))))
+
+
+
+
 
 ;;;
 ;;; Virtual Port functions
