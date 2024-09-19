@@ -260,6 +260,15 @@ static SCM STk_set_current_error_port(SCM port)
 doc>
  */
 /*
+<doc read-ci
+ * (read-ci)
+ * (read-ci port)
+ *
+ * |Read-ci| result is identical to |read| except that symbols are always
+ * read as case insensitive.
+doc>
+*/
+/*
 <doc EXT read-with-shared-structure
  * (read-with-shared-structure)
  * (read-with-shared-structure  port)
@@ -289,6 +298,12 @@ DEFINE_PRIMITIVE("read", scheme_read, subr01, (SCM port))
 {
   port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   return STk_read(port, PORT_CASE_SENSITIVEP(port));
+}
+
+DEFINE_PRIMITIVE("read-ci", scheme_read_ci, subr01, (SCM port))
+{
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
+  return STk_read(port, 0);
 }
 
 
@@ -1762,6 +1777,7 @@ int STk_init_port(void)
                         STk_set_current_error_port, STk_STklos_module);
 
   ADD_PRIMITIVE(scheme_read);
+  ADD_PRIMITIVE(scheme_read_ci);
   ADD_PRIMITIVE(scheme_read_cst);
   ADD_PRIMITIVE(read_char);
   ADD_PRIMITIVE(read_bytes);
