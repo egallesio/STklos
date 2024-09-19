@@ -32,7 +32,7 @@
         read-case-sensitive
         open-input-virtual open-output-virtual
         read-from-string read-from-string-ci
-        eval-from-string
+        eval-from-string eval-from-string-ci
         command-line program-name
         create-directories ensure-directories-exist
         posix-error? posix-error-name posix-error-message
@@ -468,25 +468,34 @@ doc>
  
 
 #|
-<doc EXT eval-from-string
+<doc EXT eval-from-string-ci eval-from-string
  * (eval-from-string str)
  * (eval-from-string str module)
+ * (eval-from-string-ci str)
+ * (eval-from-string-ci str module)
  *
  * Read an expression from |str| and evaluates it with |eval|. If a |module|
  * is passed, the evaluation takes place in the environment of this module.
  * Otherwise, the evaluation takes place in the environment returned by
- * |current-module|.
+ * |current-module|. The primitive |eval-from-string-ci| uses the |read-ci|
+ * to read the form to evaluate.
  * @lisp
  * (define x 10)
  * (define-module M
  *   (define x 100))
  * (eval-from-string "(+ x x)")                   => 20
  * (eval-from-string "(+ x x)" (find-module 'M))  => 200
+ * (eval-from-string "(cons 'A 'B)")              => (A . B)
+ * (eval-from-string-ci "(cons 'A 'B)")           => (a . b)
  * @end lisp
 doc>
 |#
 (define (eval-from-string str :optional env)
   (eval (read-from-string str)
+        env))
+
+(define (eval-from-string-ci str :optional env)
+  (eval (read-from-string-ci str)
         env))
 
 

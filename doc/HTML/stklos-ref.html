@@ -12696,6 +12696,25 @@ to denote values that do not have a convenient printed representation. See
 the SRFI document for more information.</p>
 </div>
 <div class="paragraph">
+<p><a id='P_read-ci'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(read-ci) </strong></code><br>
+<code><strong>(read-ci port) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Read-ci</code> result is identical to <code>read</code> except that symbols are always
+read as case insensitive.</p>
+</div>
+<div class="paragraph">
 <p>
 <a id='P_read-with-shared-structure'></a>
 </p>
@@ -13197,7 +13216,8 @@ this procedure is ignored.
 </table>
 </div>
 <div class="paragraph">
-<p><a id='P_read-from-string'></a>
+<p><a id='P_read-from-string'></a><a id='P_read-from-string-ci'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -13212,12 +13232,15 @@ this procedure is ignored.
 </div>
 <div class="paragraph">
 <p>Performs a read from the given <code>str</code>. If <code>str</code> is the empty string,
-an end of file object is returned.</p>
+an end of file object is returned. <code>Read-from-string-ci</code> uses <code>read-ci</code>
+to read.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"123 456"</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">123</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">""</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">an</span> <span class="nv">eof</span> <span class="nv">object</span></code></pre>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">""</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">an</span> <span class="nv">eof</span> <span class="nv">object</span>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">ABC</span>
+<span class="p">(</span><span class="nf">read-from-string-ci</span> <span class="s">"ABC"</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="nv">abc</span></code></pre>
 </div>
 </div>
 <div class="paragraph">

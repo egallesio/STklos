@@ -260,7 +260,7 @@ static SCM STk_set_current_error_port(SCM port)
 doc>
  */
 /*
-<doc read-ci
+<doc EXT read-ci
  * (read-ci)
  * (read-ci port)
  *
