@@ -92,12 +92,10 @@ increase the debugging level;
 .IP "-s, --stack-size=n"
 use a stack of \fBn\fR cells.
 .IP "--case-insensitive"
-be case insensitive as in R5RS (see below).
+be case insensitive as in R5RS.
 .IP "-c, --case-sensitive"
-be case sensitive as in R7RS. This is the default value (unless \fBstklos\fR
-has been built with the \fI--disable-case-sensitive\fR configure
-option). This option (and the previous one) permits to change the default
-behavior.
+be case sensitive as in R7RS. This is the default value. This option
+(and the previous one) permits to change the default behavior.
 .IP "-u yes|no, --utf8-encoding=yes|no"
 At initialisation time, \fBSTklos\fR infers the current locale from the
 \fILC_ALL\fR variable. From the character encoding used in the selected

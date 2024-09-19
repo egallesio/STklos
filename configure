@@ -656,7 +656,6 @@ COMP_LIBS
 SYST_LIBS
 DLLIBS
 CONTROL_FX_PARAMETERS
-DEFAULT_CS
 CONF_SUMMARY
 THREADS
 RDLINE
@@ -813,7 +812,6 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 enable_dependency_tracking
-enable_case_sensitive
 enable_threads
 with_provided_gc
 with_provided_bignum
@@ -1465,7 +1463,6 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
-  --enable-case-sensitive symbols are case sensitive (enabled by default)
   --enable-threads        enable Posix threads support (enabled by default)
   --enable-ffi            enable FFI support (enabled by default)
   --enable-fast-math-control
@@ -7207,21 +7204,6 @@ printf "%s\n" "#define HAVE_DLOPEN 1" >>confdefs.h
 
 fi
 
-###
-### Be case sensitive or not
-###
-# Check whether --enable-case-sensitive was given.
-if test ${enable_case_sensitive+y}
-then :
-  enableval=$enable_case_sensitive;
-fi
-
-
-case "$enable_case_sensitive" in
-  no|false|0) DEFAULT_CS=0; CASE_SENSITIVE=no;;
-  *)          DEFAULT_CS=1; CASE_SENSITIVE=yes;;
-esac
-
 
 ###
 ### To thread or not to thread?
@@ -8284,7 +8266,6 @@ fi
 
 
 # readline completion support
-
 
 
 
@@ -9855,7 +9836,6 @@ echo "     Compilation flags: " $CFLAGS
 echo "                Loader: " $LD
 echo "        Thread support: " $STR_THREADS
 echo "           FFI support: " $STR_FFI
-echo "Case sensitive symbols: " $CASE_SENSITIVE
 echo " Control fx parameters: " $CONTROL_FX
 echo " System libraries used: " $SYST_LIBS_SHOW
 echo "    Compiled libraries: " $COMP_LIBS_SHOW
