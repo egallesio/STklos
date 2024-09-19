@@ -1831,12 +1831,13 @@ doc>
 ;;
 ;; INCLUDE
 ;;
-(define (%include-file name)
+(define (%include-file name  case-sensitive?)
   (let ((port (open-input-file name))
         (old  *compiler-port*))
     (with-handler (lambda (c) (set! *compiler-port* old) (raise c))
                   (set! *compiler-port* port)
-
+                  (unless case-sensitive?
+                    (%port-case-sensitive-set! port #f))
                   (do ((expr (%read port) (%read port)))
                       ((eof-object? expr))
                     (compile expr #f expr #f))
@@ -1848,13 +1849,14 @@ doc>
 (define (compile-include e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include e "bad include directive ~S" e))
-  (for-each %include-file (cdr e)))
+  (for-each (lambda (f) (%include-file f #t))
+            (cdr e)))
 
 (define (compile-include-ci e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include-ci e "bad include directive ~S" e))
-  (parameterize ((read-case-sensitive #f))
-    (for-each %include-file (cdr e))))
+  (for-each (lambda (f) (%include-file f #f))
+            (cdr e)))
 
 
 ;; ======================================================================

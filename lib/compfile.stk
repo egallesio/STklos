@@ -1,7 +1,7 @@
 ;;;;
 ;;;; compfile.stk       -- STklos File Compiler
 ;;;;
-;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -119,7 +119,7 @@ doc>
             (compile exprs #f exprs #f)))
 
         ;; Read the source file
-        (%include-file input)
+        (%include-file input #t)
         (emit 'END-OF-CODE)
 
         ;; Write the header
