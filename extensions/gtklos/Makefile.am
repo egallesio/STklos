@@ -10,7 +10,7 @@
 SUBDIRS=lib/stklos demos
 
 clean-am:
-	(cd demos; make clean)
+	(cd demos && make clean)
 	rm -f *~
 
 distclean-am:

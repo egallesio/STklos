@@ -71,7 +71,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # Dependencies
 derived.ostk: primitive.ostk ../scheme/list.$(SO)
 ../scheme/list.$(SO):
-	(cd ../scheme; $(MAKE) list.$(SO))
+	(cd ../scheme && $(MAKE) list.$(SO))
 
 # ======================================================================
 install-sources:
@@ -84,7 +84,7 @@ distclean: clean
 	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd $(schemedir); rm -f $(scheme_sources))
+	(cd $(schemedir) && rm -f $(scheme_sources)) || true
 	rmdir $(schemedir) || true
 
 doc:

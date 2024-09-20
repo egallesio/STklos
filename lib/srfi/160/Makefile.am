@@ -98,43 +98,43 @@ c64.ostk:  ../../scheme/vector/c64.ostk
 c128.ostk: ../../scheme/vector/c128.ostk
 
 ../../scheme/vector/base.$(SO):
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s8.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u8.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s16.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u16.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/f32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/f64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/c64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/c128.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 
 #======================================================================
@@ -150,7 +150,7 @@ distclean: clean
 	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd $(srfidir); rm -f $(srfi_sources) )
+	(cd $(srfidir) && rm -f $(srfi_sources) ) || true
 	rmdir $(srfidir) || true
 ##
 ## # no docs...

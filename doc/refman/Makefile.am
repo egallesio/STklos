@@ -96,7 +96,7 @@ tmp-pdf.txt: $(SOURCES) $(DOCDB)
 	$(SPP) -D "doc-fmt: pdf" stklos.adoc > $@
 # ----------------------------------------------------------------------
 $(DOCDB):
-	(cd ..; $(MAKE) docdb)
+	(cd .. && $(MAKE) docdb)
 
 clean:
 	rm -f  tmp-html.txt tmp-pdf.txt stklos-ref-multi.txt tmp.pdf *~
