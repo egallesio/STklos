@@ -845,13 +845,10 @@ static int find_file_nature(SCM f)
 }
 
 
-SCM STk_load_source_file(SCM f)
+SCM STk_load_source_file(SCM f, SCM env)
 {
   SCM sexpr;
-  SCM eval_symb, eval, ref;
-
-  /* //FIXME: eval devrait être connu sans faire de lookup(i.e. exporté par la VM)*/
-  eval_symb = STk_intern("eval");
+  SCM eval, ref, eval_symb = STk_intern("eval");
 
   for ( ; ; ) {
     /* We need to lookup for eval symbol for each expr, since it can
@@ -861,27 +858,36 @@ SCM STk_load_source_file(SCM f)
     sexpr = STk_read_constant(f, PORT_CASE_SENSITIVEP(f));
     if (sexpr == STk_eof) break;
     eval  = STk_lookup(eval_symb, STk_current_module(), &ref, TRUE);
-    STk_C_apply(eval, 1, sexpr);
+
+    /* NOTE: we cannot call *always* eval with 2 parameters since, at boot
+     * time, things about modules are not completely initialized.
+     */
+     if (env) STk_C_apply(eval, 2, sexpr, env);
+     else     STk_C_apply(eval, 1, sexpr);
   }
   STk_close_port(f);
   return STk_true;
 }
 
 
-static SCM load_file(SCM filename)
+static SCM load_file(SCM filename, SCM env)
 {
   SCM f;
-  char *fname = STRING_CHARS(filename);
+  char *fname;
+
+  if (!STRINGP(filename))   STk_error_bad_file_name(filename);
+  if (env && !MODULEP(env)) STk_error("bad environment", env);
 
   /* Verify that file is not a directory */
+  fname = STRING_CHARS(filename);
   if (STk_dirp(fname)) return STk_false;
 
   /* It's Ok, try now to load file */
   f = STk_open_file(fname, "r");
   if (f != STk_false) {
     switch (find_file_nature(f)) {
-      case FILE_IS_SOURCE: return STk_load_source_file(f);
-      case FILE_IS_BCODE:  return STk_load_bcode_file(f);
+      case FILE_IS_SOURCE: return STk_load_source_file(f, env);
+      case FILE_IS_BCODE:  return STk_load_bcode_file(f);           // TODO
       case FILE_IS_OBJECT: return STk_load_object_file(f, fname);
     }
   }
@@ -906,10 +912,13 @@ static SCM load_file(SCM filename)
  * with the suffixes given by `"load-suffixes"`.
 doc>
  */
-DEFINE_PRIMITIVE("load", scheme_load, subr1, (SCM filename))
+
+DEFINE_PRIMITIVE("load", scheme_load, subr12, (SCM filename, SCM env))
 {
-  if (!STRINGP(filename)) STk_error_bad_file_name(filename);
-  if (load_file(filename) == STk_false)
+  // NOTE: This function is overloaded by the load function in
+  // "lib/load.stk". We keep it here to have a fallback function, for a
+  // possible alternative boot image.
+  if (load_file(filename, env) == STk_false)
     STk_error_file_name("cannot load ~S", filename);
   return STk_void;
 }
@@ -926,10 +935,9 @@ DEFINE_PRIMITIVE("load", scheme_load, subr1, (SCM filename))
  * |#t|. Otherwise, |try-load| retuns |#f|.
 doc>
  */
-DEFINE_PRIMITIVE("try-load", scheme_try_load, subr1, (SCM filename))
+DEFINE_PRIMITIVE("try-load", scheme_try_load, subr12, (SCM filename, SCM env))
 {
-  if (!STRINGP(filename)) STk_error_bad_file_name(filename);
-  return load_file(filename);
+  return load_file(filename, env);
 }
 
 
