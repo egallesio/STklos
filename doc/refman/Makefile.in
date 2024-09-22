@@ -169,7 +169,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -311,7 +310,7 @@ SOURCES = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc          \
            stklos.adoc threads.adoc
 
 DOCDB = ../DOCDB
-SPP = $(STKLOS_BINARY) -q -I ../../lib -f ../../utils/stklos-pp.stk --
+SPP = $(STKLOS_BINARY) -c -q -I ../../lib -f ../../utils/stklos-pp.stk --
 HTMLMAIN = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html
 MULTI_AUX = FDL.html                                        \

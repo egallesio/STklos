@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -460,7 +460,7 @@ make_fport(const char *fname, int fd, int flags)
   if (flags & (PORT_READ | PORT_RW)) mode |= STK_IOREAD;
 
   /* Set the case-sensitive bit */
-  if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
+  flags |= PORT_CASE_SENSITIVE;
 
   /* Initialize the stream part */
   PORT_BASE(fs)          = STk_must_malloc_atomic(n);

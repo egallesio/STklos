@@ -259,7 +259,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -915,7 +914,7 @@ lib/srfi: lib/scheme lib/stklos lib/streams
 # If ./srfis.stk we must rebuild
 #     - srfis-data.scm (used by SRFI0 and features)
 srfis-data.scm: srfis.stk getopt.ostk
-	$(STKLOS_BINARY) -q -l srfis.stk \
+	$(STKLOS_BINARY) -c -q -l srfis.stk \
 	                 -f ../utils/update-srfi-list.stk \
                      -- --internal > $@
 	(cd ..; $(MAKE) SUPPORTED-SRFIS)

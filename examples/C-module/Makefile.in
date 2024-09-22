@@ -35,7 +35,7 @@ STKLOS_LIBS=../../lib
 # directory without a prior installation of STklos. If you have already
 # installed STklos on your machine , you can use the second (commented)
 # definition of this variable
-STKLOS_COMPILE=$(STKLOS_SRC)/stklos -q -I $(STKLOS_LIBS) \
+STKLOS_COMPILE=$(STKLOS_SRC)/stklos -c -q -I $(STKLOS_LIBS) \
 		$(STKLOS_UTILS)/stklos-compile
 # STKLOS_COMPILE=stklos-compile
 

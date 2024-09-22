@@ -1,7 +1,7 @@
 /*
  * vport.c                                      -- Virtual Ports
  *
- * Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -261,7 +261,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
 {
   SCM z;
   struct vstream  *vs;
-  int flag = (STk_read_case_sensitive) ? PORT_CASE_SENSITIVE : 0;
+  int flag = PORT_CASE_SENSITIVE;
 
   if (!VECTORP(v) || VECTOR_SIZE(v) != 4) error_bad_vector(v, 4);
 
@@ -357,7 +357,7 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
 {
   SCM z;
   struct vstream  *vs;
-  int flag = (STk_read_case_sensitive) ? PORT_CASE_SENSITIVE : 0;
+  int flag = PORT_CASE_SENSITIVE;
 
   if (!VECTORP(v) || VECTOR_SIZE(v) != 4) error_bad_vector(v, 4);
 

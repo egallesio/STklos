@@ -1068,6 +1068,8 @@ int STk_init_vport(void);
  ****/
 EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
 EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
+EXTERN_PRIMITIVE("%port-case-sensitive-set!", port_cs_set, subr2,(SCM port,SCM val));
+
 
 void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);
@@ -1173,7 +1175,8 @@ char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
-extern int STk_read_case_sensitive;
+void STk_set_port_case_sensitivity(SCM port, int sensitive);
+  
 
 
 /*

@@ -19,7 +19,6 @@ four) step process:
 
     By default the following options are enabled, but can be disabled with the following `configure` options
 
-    - `--disable-case-sensitive`: symbols are case insensitive by default (as in R5RS)
     - `--disable-threads`: disable Posix threads support
     - `--disable-control-fast-math`: do not verify that parameters of fx/fl functions are correct fixnums/flonums
     - `--disable-ffi`: disable FFI (Foreign Function Interface) support
@@ -52,7 +51,6 @@ four) step process:
                     Loader:  ld
             Thread support:  yes
                FFI support:  yes
-    Case sensitive symbols:  yes
      Control fx parameters:  yes
      System libraries used:  ffi (3.4.6) pcre2 (10.44) gmp (6.3.0)
         Compiled libraries:  gc

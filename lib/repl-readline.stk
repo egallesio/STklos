@@ -1,7 +1,7 @@
 ;;;;
 ;;;; repl-readline.stk  -- REPL with GNU-Readline support
 ;;;;
-;;;; Copyright © 2010-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2010-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -100,6 +100,9 @@
                           (if (eof-object? buff)
                               (begin (fill-buff) #eof)
                               #f)))))
+      (unless (%port-case-sensitive (current-input-port))
+        ;; current-input-port in insensitive. Make the virtual port too.
+        (%port-case-sensitive-set! port #f))
 
       (current-input-port port)
       (repl-change-default-ports :in port))))
@@ -111,5 +114,3 @@
 
 ;; End of module REPL-READLINE
 )
-
-

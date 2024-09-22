@@ -1,7 +1,7 @@
 /*
  * s p o r t . c                        -- String ports management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -246,7 +246,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_BUFSIZE(ss) = init_len;
 
   /* Set the case-sensitive bit */
-  if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
+  flags |= PORT_CASE_SENSITIVE;
 
   /* Initialize now the port itself */
   NEWCELL(res, port);

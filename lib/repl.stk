@@ -430,6 +430,14 @@ doc>
   (set! default-out out)
   (set! default-err err))
 
+
+;; ----------------------------------------------------------------------
+;;      repl-fold-case? ...
+;; ----------------------------------------------------------------------
+(define (repl-fold-case?)
+  ;; See if user used stklos(1) "--case-insensitive" option
+  (key-get *%system-state-plist* #:fold-case #f))
+
 ;; ----------------------------------------------------------------------
 ;;      repl ...
 ;; ----------------------------------------------------------------------
@@ -525,6 +533,11 @@ doc>
 (define (main-repl)
   ;; Initialize signals suitable for a REPL session (e.g. be immune to ^C)
   (%initialize-signals)
+
+  (when (repl-fold-case?)
+    ;; Be case insensitive if user asked for it
+    (read-case-sensitive #f))
+
   (when interactive?
     ;; Use classic theme if the user has not set a theme in his/her init file
     (unless (repl-theme)

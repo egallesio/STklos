@@ -207,18 +207,6 @@ then
   AC_DEFINE(HAVE_DLOPEN, 1, [System provides dlopen])
 fi
 
-###
-### Be case sensitive or not
-###
-AC_ARG_ENABLE(case-sensitive,
-  [AS_HELP_STRING([--enable-case-sensitive],
-                  [symbols are case sensitive (enabled by default)])])
-
-case "$enable_case_sensitive" in
-  no|false|0) DEFAULT_CS=0; CASE_SENSITIVE=no;;
-  *)          DEFAULT_CS=1; CASE_SENSITIVE=yes;;
-esac
-
 
 ###
 ### To thread or not to thread?
@@ -735,7 +723,6 @@ AC_SUBST(RDLINE)
 
 AC_SUBST(THREADS)
 AC_SUBST(CONF_SUMMARY)
-AC_SUBST(DEFAULT_CS)
 AC_SUBST(CONTROL_FX_PARAMETERS)
 AC_SUBST(DLLIBS)
 AC_SUBST(SYST_LIBS)
@@ -814,7 +801,6 @@ echo "     Compilation flags: " $CFLAGS
 echo "                Loader: " $LD
 echo "        Thread support: " $STR_THREADS
 echo "           FFI support: " $STR_FFI
-echo "Case sensitive symbols: " $CASE_SENSITIVE
 echo " Control fx parameters: " $CONTROL_FX
 echo " System libraries used: " $SYST_LIBS_SHOW
 echo "    Compiled libraries: " $COMP_LIBS_SHOW

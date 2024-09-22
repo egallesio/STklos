@@ -11448,7 +11448,7 @@ or <code>call-with-output-file</code>.
 </div>
 </div>
 <div class="paragraph">
-<p>behaves as <code>call-with-input-file</code> except that the port passed to <code>proc</code>
+<p>behaves as <code>call-with1-input-file</code> except that the port passed to <code>proc</code>
 is the sting port obtained from <code>port</code>.</p>
 </div>
 <div class="listingblock">
@@ -12696,6 +12696,25 @@ to denote values that do not have a convenient printed representation. See
 the SRFI document for more information.</p>
 </div>
 <div class="paragraph">
+<p><a id='P_read-ci'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(read-ci) </strong></code><br>
+<code><strong>(read-ci port) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Read-ci</code> result is identical to <code>read</code> except that symbols are always
+read as case insensitive.</p>
+</div>
+<div class="paragraph">
 <p>
 <a id='P_read-with-shared-structure'></a>
 </p>
@@ -13197,7 +13216,8 @@ this procedure is ignored.
 </table>
 </div>
 <div class="paragraph">
-<p><a id='P_read-from-string'></a>
+<p><a id='P_read-from-string'></a><a id='P_read-from-string-ci'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -13212,12 +13232,15 @@ this procedure is ignored.
 </div>
 <div class="paragraph">
 <p>Performs a read from the given <code>str</code>. If <code>str</code> is the empty string,
-an end of file object is returned.</p>
+an end of file object is returned. <code>Read-from-string-ci</code> uses <code>read-ci</code>
+to read.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"123 456"</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">123</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">""</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">an</span> <span class="nv">eof</span> <span class="nv">object</span></code></pre>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">""</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">an</span> <span class="nv">eof</span> <span class="nv">object</span>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">ABC</span>
+<span class="p">(</span><span class="nf">read-from-string-ci</span> <span class="s">"ABC"</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="nv">abc</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -25745,18 +25768,10 @@ underscores are accepted in numbers.</p>
 </div>
 <div class="paragraph">
 <p>This parameter object permits to change the default behaviour of
-the <code>read</code> primitive when reading a symbol. If this parameter has
-a true value a symbol is not converted to a default case when interned.
-Since R<sup>7</sup>RS requires that symbol are case insignificant, the default
-value  of this parameter is <code>#t</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">read-case-sensitive</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="o">`</span><span class="no">#t</span><span class="o">`</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">ABC</span>
-<span class="p">(</span><span class="nf">read-case-sensitive</span> <span class="no">#f</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">abc</span></code></pre>
-</div>
+the <code>read</code> primitive used on the current input port , when reading a symbol.
+If this parameter has a true value a symbol is not converted to a default
+case when interned. Since R<sup>7</sup>RS requires that symbol are case insignificant,
+the default value  of this parameter is <code>#t</code>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -25768,8 +25783,8 @@ value  of this parameter is <code>#t</code>.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Default behaviour can be changed for a whole execution
-with the <code>--case-sensitive</code> or <code>case-insensitive</code> options.</p>
+<p>This parameter works on the current input port only and cannot change
+read beahviour&#8217;s globally.</p>
 </li>
 <li>
 <p>See also syntax for <em><a href="#_symbols">special characters</a></em> in symbols.</p>
@@ -32548,7 +32563,7 @@ Please refer to its manpage for more information.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(compile-file input output) </strong></code><br>
-<code><strong>(compile-file input output :prepend cmds) </strong></code><br></p>
+<code><strong>(compile-file input output #:prepend cmds #:case-sensitive cs) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -32558,10 +32573,22 @@ whose name is <code>output</code> (if <code>compile-file</code> fails, <code>out
 deleted).</p>
 </div>
 <div class="paragraph">
-<p>If the <code>:prepend</code> keyword argument is given, it must be a list of
-expressions, which will be compiled before the rest of the input
-file. This can be used to define variables that the compiled program
-will use (but it does not affect the compiler itself).</p>
+<p>This command accepts two optional keywords:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#:prepend</code> :  it must be a list of  expressions, which will be
+compiled before the rest of the input  file. This can be used
+to define variables that the compiled program  will use (but it
+does not affect the compiler itself).</p>
+</li>
+<li>
+<p><code>#:case-sensitive</code> : it tells if the compiler reads symbols in
+case sensitive mode (as R<sup>7</sup>RS) or not not (as R<sup>5</sup>RS).
+By default the compiler is in case sensitive mode.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>This procedure will not set the executable bit on the generated file.</p>

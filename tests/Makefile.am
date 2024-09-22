@@ -1,6 +1,6 @@
 # Makefile.am for testing STklos
 #
-# Copyright © 2005-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ all:
 check: test
 
 test tests:
-	@../src/stklos --no-init-file --utf8-encoding=yes -f do-test.stk
+	@../src/stklos -c --no-init-file --utf8-encoding=yes -f do-test.stk
 
 clean-am:
 	rm -f TEST.LOG SRFI-64_Meta-Test_Suite.log data *~

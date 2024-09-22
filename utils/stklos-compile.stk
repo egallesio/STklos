@@ -29,6 +29,7 @@
 (define *prepend-code* '())
 (define *c-code* #f)
 (define *expr* #f)
+(define *case-sensitive* #t)
 
 ;; ----------------------------------------------------------------------
 ;;      convert-to-C ...
@@ -98,17 +99,19 @@
 ;; ----------------------------------------------------------------------
 ;;      compile-to-bytecode ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-bytecode file out prepend)
-  (compile-file file out :prepend prepend)
+(define (compile-to-bytecode file out)
+  (compile-file file out
+                :prepend *prepend-code*
+                :case-sensitive *case-sensitive*)
   (chmod out #o755))
 
 ;; ----------------------------------------------------------------------
 ;;      compile-to-C-code ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-C-code file out prepend)
+(define (compile-to-C-code file out)
   (let ((tmp  (create-temp-file))
         (name (file-prefix (basename file))))
-    (compile-to-bytecode file tmp prepend)
+    (compile-to-bytecode file tmp)
     (convert-to-C tmp out name)
     (remove-file tmp)))
 
@@ -122,9 +125,9 @@
      ""
      "Input options"
      (("case-sensitive" :alternate "c"  :help "Be case sensitive on symbols")
-        (read-case-sensitive #t))
+      (set! *case-sensitive* #t))
      (("case-insensitive" :alternate "i"  :help "Be case insensitive on symbols")
-      (read-case-sensitive #f))
+      (set! *case-sensitive* #f))
      (("colon-position" :alternate "p" :arg pos
        :help "Allowed position of ':' for keywords")
       (cond
@@ -208,8 +211,8 @@
                            (eprintf "~a:0: Error: ~a\n" in (condition-message c))
                            (emergency-exit 1))
               (if *c-code*
-                  (compile-to-C-code   in *output* *prepend-code*)
-                  (compile-to-bytecode in *output* *prepend-code*))))
+                  (compile-to-C-code   in *output*)
+                  (compile-to-bytecode in *output*))))
          (exit 0))
         (else
           (arg-usage (current-error-port))

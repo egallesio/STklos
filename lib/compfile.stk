@@ -1,7 +1,7 @@
 ;;;;
 ;;;; compfile.stk       -- STklos File Compiler
 ;;;;
-;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -60,23 +60,29 @@
 #|
 <doc EXT compile-file
  * (compile-file input output)
- * (compile-file input output :prepend cmds)
+ * (compile-file input output #:prepend cmds #:case-sensitive cs)
  *
  * Compiles the file whose name is |input| into a bytecode executable
  * whose name is |output| (if |compile-file| fails, |output| file is
  * deleted).
  *
- * If the |:prepend| keyword argument is given, it must be a list of
- * expressions, which will be compiled before the rest of the input
- * file. This can be used to define variables that the compiled program
- * will use (but it does not affect the compiler itself).
+ * This command accepts two optional keywords:
  *
+ *  * |\#:prepend| :  it must be a list of  expressions, which will be
+ *    compiled before the rest of the input  file. This can be used
+ *    to define variables that the compiled program  will use (but it
+ *    does not affect the compiler itself).
+ *
+ *  * |\#:case-sensitive| : it tells if the compiler reads symbols in
+ *    case sensitive mode (as {{rseven}}) or not not (as {{rfive}}).
+ *    By default the compiler is in case sensitive mode.
  *
  * This procedure will not set the executable bit on the generated file.
 doc>
 |#
 
-(define (compile-file input output :key (prepend '() has-prepend?))
+(define (compile-file input output :key (prepend '() has-prepend?)
+                                        (case-sensitive #t))
 
   (define (compute-file-information initial-globals)
     (let ((globs (let loop ((lst (compiler-known-globals))
@@ -119,7 +125,7 @@ doc>
             (compile exprs #f exprs #f)))
 
         ;; Read the source file
-        (%include-file input)
+        (%include-file input case-sensitive)
         (emit 'END-OF-CODE)
 
         ;; Write the header
