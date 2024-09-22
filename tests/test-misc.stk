@@ -758,6 +758,18 @@ b|)
       '|AbC|
       (with-input-from-string "AbC" (lambda () (read))))
 
+(test "eval-from-string-ci.1"
+      8
+      (eval-from-string-ci "(SqRt 64)"))
+
+(test "eval-from-string-ci.2"
+      "3.14"
+      (with-output-to-string (lambda () (eval-from-string-ci "(DisPlaY 3.14)"))))
+
+
+(test/error "eval-from-string (no ci)"
+            (eval-from-string "(DisPlaY 3.14)"))
+
 
 ;;------------------------------------------------------------------
 (test-section-end)
