@@ -1097,9 +1097,6 @@ union word_ptr_ao_u {
 # endif
 };
 
-/* We maintain layout maps for heap blocks containing objects of a given */
-/* size.  Each entry in this map describes a byte offset and has the     */
-/* following type.                                                       */
 struct hblkhdr {
     struct hblk * hb_next;      /* Link field for hblk free list         */
                                 /* and for lists of chunks waiting to be */
@@ -1453,12 +1450,14 @@ struct _GC_arrays {
 # ifdef USE_MUNMAP
 #   define GC_unmapped_bytes GC_arrays._unmapped_bytes
     word _unmapped_bytes;
-#   ifdef COUNT_UNMAPPED_REGIONS
-#     define GC_num_unmapped_regions GC_arrays._num_unmapped_regions
-      signed_word _num_unmapped_regions;
-#   endif
 # else
 #   define GC_unmapped_bytes 0
+# endif
+# if defined(COUNT_UNMAPPED_REGIONS) && defined(USE_MUNMAP)
+#   define GC_num_unmapped_regions GC_arrays._num_unmapped_regions
+    signed_word _num_unmapped_regions;
+# else
+#   define GC_num_unmapped_regions 0
 # endif
   bottom_index * _all_nils;
 # define GC_scan_ptr GC_arrays._scan_ptr
@@ -1486,6 +1485,8 @@ struct _GC_arrays {
 #   define GC_trace_addr GC_arrays._trace_addr
     ptr_t _trace_addr;
 # endif
+# define GC_noop_sink GC_arrays._noop_sink
+  volatile word _noop_sink;
 # define GC_capacity_heap_sects GC_arrays._capacity_heap_sects
   size_t _capacity_heap_sects;
 # define GC_n_heap_sects GC_arrays._n_heap_sects
@@ -1565,13 +1566,17 @@ struct _GC_arrays {
 #   define GC_root_index GC_arrays._root_index
     struct roots * _root_index[RT_SIZE];
 # endif
-# ifdef SAVE_CALL_CHAIN
-#   define GC_last_stack GC_arrays._last_stack
+# if defined(SAVE_CALL_CHAIN) && !defined(DONT_SAVE_TO_LAST_STACK) \
+     && (!defined(REDIRECT_MALLOC) || !defined(GC_HAVE_BUILTIN_BACKTRACE))
     struct callinfo _last_stack[NFRAMES];
                 /* Stack at last garbage collection.  Useful for        */
                 /* debugging mysterious object disappearances.  In the  */
                 /* multi-threaded case, we currently only save the      */
-                /* calling stack.                                       */
+                /* calling stack.  Not supported in case of malloc      */
+                /* redirection because backtrace() may call malloc().   */
+#   define SAVE_CALLERS_TO_LAST_STACK() GC_save_callers(GC_arrays._last_stack)
+# else
+#   define SAVE_CALLERS_TO_LAST_STACK() (void)0
 # endif
 # ifndef SEPARATE_GLOBALS
 #   define GC_objfreelist GC_arrays._objfreelist
@@ -1922,12 +1927,12 @@ GC_INNER void GC_invalidate_mark_state(void);
                                 /* ones, and roots may point to         */
                                 /* unmarked objects.  Reset mark stack. */
 GC_INNER GC_bool GC_mark_some(ptr_t cold_gc_frame);
-                        /* Perform about one pages worth of marking     */
+                        /* Perform about one page of marking            */
                         /* work of whatever kind is needed.  Returns    */
                         /* quickly if no collection is in progress.     */
-                        /* Return TRUE if mark phase finished.          */
+                        /* Return TRUE if mark phase is finished.       */
 GC_INNER void GC_initiate_gc(void);
-                                /* initiate collection.                 */
+                                /* Initiate collection.                 */
                                 /* If the mark state is invalid, this   */
                                 /* becomes full collection.  Otherwise  */
                                 /* it's partial.                        */
@@ -2618,6 +2623,14 @@ GC_EXTERN GC_bool GC_print_back_height;
 # define GC_dirty(p) (GC_manual_vdb ? GC_dirty_inner(p) : (void)0)
 # define REACHABLE_AFTER_DIRTY(p) GC_reachable_here(p)
 #endif /* !GC_DISABLE_INCREMENTAL */
+
+#if defined(COUNT_PROTECTED_REGIONS) && defined(MPROTECT_VDB)
+  /* Do actions on heap growth, if needed, to prevent hitting the       */
+  /* kernel limit on the VM map regions.                                */
+  GC_INNER void GC_handle_protected_regions_limit(void);
+#else
+# define GC_handle_protected_regions_limit() (void)0
+#endif
 
 /* Same as GC_base but excepts and returns a pointer to const object.   */
 #define GC_base_C(p) ((const void *)GC_base((/* no const */ void *)(p)))
