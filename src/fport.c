@@ -876,7 +876,7 @@ static SCM load_file(SCM filename, SCM env)
   char *fname;
 
   if (!STRINGP(filename))   STk_error_bad_file_name(filename);
-  if (env && !MODULEP(env)) STk_error("bad environment", env);
+  if (env && !MODULEP(env)) STk_error("bad environment ~S", env);
 
   /* Verify that file is not a directory */
   fname = STRING_CHARS(filename);
@@ -887,8 +887,8 @@ static SCM load_file(SCM filename, SCM env)
   if (f != STk_false) {
     switch (find_file_nature(f)) {
       case FILE_IS_SOURCE: return STk_load_source_file(f, env);
-      case FILE_IS_BCODE:  return STk_load_bcode_file(f);           // TODO
-      case FILE_IS_OBJECT: return STk_load_object_file(f, fname);
+      case FILE_IS_BCODE:  return STk_load_bcode_file(f, env);
+      case FILE_IS_OBJECT: return STk_load_object_file(f, fname); //TODO
     }
   }
   return STk_false;
