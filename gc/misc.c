@@ -462,20 +462,21 @@ GC_API int GC_CALL GC_is_heap_ptr(const void *p)
     return HDR_FROM_BI(bi, p) != 0;
 }
 
-/* Return the size of an object, given a pointer to its base.           */
-/* (For small objects this also happens to work from interior pointers, */
-/* but that shouldn't be relied upon.)                                  */
 GC_API size_t GC_CALL GC_size(const void * p)
 {
-    hdr * hhdr = HDR(p);
+    hdr *hhdr;
 
+    /* Accept NULL for compatibility with malloc_usable_size(). */
+    if (EXPECT(NULL == p, FALSE)) return 0;
+
+    hhdr = HDR(p);
     return (size_t)hhdr->hb_sz;
 }
-
 
 /* These getters remain unsynchronized for compatibility (since some    */
 /* clients could call some of them from a GC callback holding the       */
 /* allocator lock).                                                     */
+
 GC_API size_t GC_CALL GC_get_heap_size(void)
 {
     /* ignore the memory space returned to OS (i.e. count only the      */
@@ -2352,8 +2353,7 @@ GC_API void * GC_CALL GC_do_blocking(GC_fn_type fn, void * client_data)
 static void block_add_size(struct hblk *h, word pbytes)
 {
   hdr *hhdr = HDR(h);
-  *(word *)pbytes += (WORDS_TO_BYTES(hhdr->hb_sz) + (HBLKSIZE - 1))
-                        & ~(word)(HBLKSIZE - 1);
+  *(word *)pbytes += (hhdr -> hb_sz + (HBLKSIZE - 1)) & ~(word)(HBLKSIZE - 1);
 }
 
 GC_API size_t GC_CALL GC_get_memory_use(void)

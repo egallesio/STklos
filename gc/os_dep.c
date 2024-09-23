@@ -386,7 +386,7 @@ GC_INNER const char * GC_get_maps(void)
 
           /* Set p to point just past last slash, if any. */
             while (*p != '\0' && *p != '\n' && *p != ' ' && *p != '\t') ++p;
-            while (*p != '/' && (word)p >= (word)map_path) --p;
+            while ((word)p >= (word)map_path && *p != '/') --p;
             ++p;
           if (strncmp(nm, p, nm_len) == 0) {
             *startp = my_start;
@@ -619,7 +619,7 @@ GC_INNER const char * GC_get_maps(void)
         result = bound;
       } else {
         result += pgsz; /* no overflow expected */
-        GC_noop1((word)(*result));
+        GC_noop1((word)(unsigned char)(*result));
       }
     }
 
@@ -1026,7 +1026,7 @@ GC_INNER size_t GC_page_size = 0;
                     }
                     result -= MIN_PAGE_SIZE; /* no underflow expected */
                 }
-                GC_noop1((word)(*result));
+                GC_noop1((word)(unsigned char)(*result));
             }
         }
         GC_reset_fault_handler();
@@ -1966,25 +1966,21 @@ void GC_register_data_segments(void)
       p = base = limit = GC_least_described_address(static_root);
       while ((word)p < (word)GC_sysinfo.lpMaximumApplicationAddress) {
         size_t result = VirtualQuery(p, &buf, sizeof(buf));
-        char * new_limit;
         DWORD protect;
 
         if (result != sizeof(buf) || buf.AllocationBase == 0
             || GC_is_heap_base(buf.AllocationBase)) break;
-        new_limit = (char *)p + buf.RegionSize;
+        if ((word)p > GC_WORD_MAX - buf.RegionSize) break; /* overflow */
         protect = buf.Protect;
         if (buf.State == MEM_COMMIT
             && is_writable(protect)) {
-            if ((char *)p == limit) {
-                limit = new_limit;
-            } else {
+            if ((char *)p != limit) {
                 if (base != limit) GC_add_roots_inner(base, limit, FALSE);
                 base = (char *)p;
-                limit = new_limit;
             }
+            limit = (char *)p + buf.RegionSize;
         }
-        if ((word)p > (word)new_limit /* overflow */) break;
-        p = (LPVOID)new_limit;
+        p = (char *)p + buf.RegionSize;
       }
       if (base != limit) GC_add_roots_inner(base, limit, FALSE);
   }
@@ -2032,10 +2028,11 @@ void GC_register_data_segments(void)
     } else {
         GC_reset_fault_handler();
         /* We got here via a longjmp.  The address is not readable.     */
-        /* This is known to happen under Solaris 2.4 + gcc, which place */
-        /* string constants in the text segment, but after etext.       */
-        /* Use plan B.  Note that we now know there is a gap between    */
-        /* text and data segments, so plan A brought us something.      */
+        /* This is known to happen under Solaris 2.4 + gcc, which       */
+        /* places string constants in the text segment, but after       */
+        /* etext.  Use plan B.  Note that we now know there is a gap    */
+        /* between text and data segments, so plan A brought us         */
+        /* something.                                                   */
         result = (char *)GC_find_limit(DATAEND, FALSE);
     }
     return (/* no volatile */ ptr_t)result;
@@ -3142,9 +3139,7 @@ GC_API GC_push_other_roots_proc GC_CALL GC_get_push_other_roots(void)
    * to the write-protected heap.  Probably the best way to do this is to
    * ensure that system calls write at most to pointer-free objects in the
    * heap, and do even that only if we are on a platform on which those
-   * are not protected.  Another alternative is to wrap system calls
-   * (see example for read below), but the current implementation holds
-   * applications.
+   * are not protected.
    * We assume the page size is a multiple of HBLKSIZE.
    * We prefer them to be the same.  We avoid protecting pointer-free
    * objects only if they are the same.
@@ -3436,6 +3431,19 @@ GC_API GC_push_other_roots_proc GC_CALL GC_get_push_other_roots(void)
   {
 #   if !defined(MSWIN32) && !defined(MSWINCE)
       struct sigaction act, oldact;
+#   endif
+
+#   ifdef COUNT_PROTECTED_REGIONS
+      GC_ASSERT(GC_page_size != 0);
+      if ((signed_word)(GC_heapsize / (word)GC_page_size)
+                >= ((signed_word)GC_UNMAPPED_REGIONS_SOFT_LIMIT
+                    - GC_num_unmapped_regions) * 2) {
+        GC_COND_LOG_PRINTF("Cannot turn on GC incremental mode"
+                           " as heap contains too many pages\n");
+        return FALSE;
+      }
+#   endif
+#   if !defined(MSWIN32) && !defined(MSWINCE)
       act.sa_flags = SA_RESTART | SA_SIGINFO;
       act.sa_sigaction = GC_write_fault_handler;
       (void)sigemptyset(&act.sa_mask);
@@ -3610,16 +3618,44 @@ STATIC void GC_protect_heap(void)
     }
 }
 
-/*
- * Acquiring the allocation lock here is dangerous, since this
- * can be called from within GC_call_with_alloc_lock, and the cord
- * package does so.  On systems that allow nested lock acquisition, this
- * happens to work.
- */
+# if defined(CAN_HANDLE_FORK) && defined(DARWIN) && defined(THREADS) \
+     || defined(COUNT_PROTECTED_REGIONS)
+    /* Remove protection for the entire heap not updating GC_dirty_pages. */
+    STATIC void GC_unprotect_all_heap(void)
+    {
+      unsigned i;
 
-/* We no longer wrap read by default, since that was causing too many   */
-/* problems.  It is preferred that the client instead avoids writing    */
-/* to the write-protected heap with a system call.                      */
+      GC_ASSERT(I_HOLD_LOCK());
+      GC_ASSERT(GC_auto_incremental);
+      for (i = 0; i < GC_n_heap_sects; i++) {
+        UNPROTECT(GC_heap_sects[i].hs_start, GC_heap_sects[i].hs_bytes);
+      }
+    }
+# endif /* CAN_HANDLE_FORK && DARWIN && THREADS || COUNT_PROTECTED_REGIONS */
+
+# ifdef COUNT_PROTECTED_REGIONS
+    GC_INNER void GC_handle_protected_regions_limit(void)
+    {
+      GC_ASSERT(GC_page_size != 0);
+      /* To prevent exceeding the limit of vm.max_map_count, the most */
+      /* trivial (though highly restrictive) way is to turn off the   */
+      /* incremental collection mode (based on mprotect) once the     */
+      /* number of pages in the heap reaches that limit.              */
+      if (GC_auto_incremental && !GC_GWW_AVAILABLE()
+          && (signed_word)(GC_heapsize / (word)GC_page_size)
+                >= ((signed_word)GC_UNMAPPED_REGIONS_SOFT_LIMIT
+                    - GC_num_unmapped_regions) * 2) {
+        GC_unprotect_all_heap();
+#       ifdef DARWIN
+          GC_task_self = 0;
+#       endif
+        GC_incremental = FALSE;
+        WARN("GC incremental mode is turned off"
+             " to prevent hitting VM maps limit\n", 0);
+      }
+    }
+# endif /* COUNT_PROTECTED_REGIONS */
+
 #endif /* MPROTECT_VDB */
 
 #if !defined(THREADS) && (defined(PROC_VDB) || defined(SOFT_VDB))
@@ -4055,19 +4091,24 @@ GC_INLINE void GC_proc_read_dirty(GC_bool output_unneeded)
     return &soft_vdb_buf[ofs / sizeof(pagemap_elem_t)];
   }
 
-  static void soft_set_grungy_pages(ptr_t vaddr /* start */, ptr_t limit,
+  static void soft_set_grungy_pages(ptr_t start, ptr_t limit,
                                     ptr_t next_start_hint)
   {
+    word vaddr = (word)start & ~(word)(GC_page_size-1);
+    off_t next_fpos_hint;
+
+    GC_ASSERT(modHBLKSZ((word)start) == 0);
     GC_ASSERT(GC_page_size != 0);
-    while ((word)vaddr < (word)limit) {
+    next_fpos_hint = (off_t)((word)next_start_hint / GC_page_size
+                                * sizeof(pagemap_elem_t));
+    while (vaddr < (word)limit) {
       size_t res;
       word limit_buf;
       const pagemap_elem_t *bufp = pagemap_buffered_read(&res,
-                (off_t)((word)vaddr / GC_page_size * sizeof(pagemap_elem_t)),
-                (size_t)((((word)limit - (word)vaddr + GC_page_size-1)
-                         / GC_page_size) * sizeof(pagemap_elem_t)),
-                (off_t)((word)next_start_hint / GC_page_size
-                        * sizeof(pagemap_elem_t)));
+                (off_t)(vaddr / GC_page_size * sizeof(pagemap_elem_t)),
+                (size_t)(((word)limit - vaddr + GC_page_size-1) / GC_page_size
+                         * sizeof(pagemap_elem_t)),
+                next_fpos_hint);
 
       if (res % sizeof(pagemap_elem_t) != 0) {
         /* Punt: */
@@ -4076,19 +4117,23 @@ GC_INLINE void GC_proc_read_dirty(GC_bool output_unneeded)
         break;
       }
 
-      limit_buf = ((word)vaddr & ~(word)(GC_page_size-1))
-                  + (res / sizeof(pagemap_elem_t)) * GC_page_size;
-      for (; (word)vaddr < limit_buf; vaddr += GC_page_size, bufp++)
+      limit_buf = vaddr + (res / sizeof(pagemap_elem_t)) * GC_page_size;
+      for (; vaddr < limit_buf; vaddr += GC_page_size, bufp++)
         if ((*bufp & PM_SOFTDIRTY_MASK) != 0) {
           struct hblk * h;
-          ptr_t next_vaddr = vaddr + GC_page_size;
+          word next_vaddr = vaddr + GC_page_size;
 
+          if (EXPECT(next_vaddr > (word)limit, FALSE))
+            next_vaddr = (word)limit;
           /* If the bit is set, the respective PTE was written to       */
           /* since clearing the soft-dirty bits.                        */
 #         ifdef DEBUG_DIRTY_BITS
             GC_log_printf("dirty page at: %p\n", (void *)vaddr);
 #         endif
-          for (h = (struct hblk *)vaddr; (word)h < (word)next_vaddr; h++) {
+          h = (struct hblk *)vaddr;
+          if (EXPECT(vaddr < (word)start, FALSE))
+            h = (struct hblk *)start;
+          for (; (word)h < next_vaddr; h++) {
             word index = PHT_HASH(h);
             set_pht_entry_from_index(GC_grungy_pages, index);
           }
@@ -4124,9 +4169,9 @@ GC_INLINE void GC_proc_read_dirty(GC_bool output_unneeded)
       pagemap_buf_len = 0; /* invalidate soft_vdb_buf */
 
       for (i = 0; i != GC_n_heap_sects; ++i) {
-        ptr_t vaddr = GC_heap_sects[i].hs_start;
+        ptr_t start = GC_heap_sects[i].hs_start;
 
-        soft_set_grungy_pages(vaddr, vaddr + GC_heap_sects[i].hs_bytes,
+        soft_set_grungy_pages(start, start + GC_heap_sects[i].hs_bytes,
                               i < GC_n_heap_sects-1 ?
                                     GC_heap_sects[i+1].hs_start : NULL);
       }
@@ -4136,7 +4181,7 @@ GC_INLINE void GC_proc_read_dirty(GC_bool output_unneeded)
 
 #     ifndef NO_VDB_FOR_STATIC_ROOTS
         for (i = 0; (int)i < n_root_sets; ++i) {
-          soft_set_grungy_pages(GC_static_roots[i].r_start,
+          soft_set_grungy_pages((ptr_t)HBLKPTR(GC_static_roots[i].r_start),
                                 GC_static_roots[i].r_end,
                                 (int)i < n_root_sets-1 ?
                                     GC_static_roots[i+1].r_start : NULL);
@@ -4555,19 +4600,12 @@ typedef enum {
 # ifdef CAN_HANDLE_FORK
     GC_INNER void GC_dirty_update_child(void)
     {
-      unsigned i;
-
       GC_ASSERT(I_HOLD_LOCK());
       if (0 == GC_task_self) return; /* GC incremental mode is off */
 
-      GC_ASSERT(GC_auto_incremental);
       GC_ASSERT(GC_mprotect_state == GC_MP_NORMAL);
-
-      /* Unprotect the entire heap not updating GC_dirty_pages. */
       GC_task_self = mach_task_self(); /* needed by UNPROTECT() */
-      for (i = 0; i < GC_n_heap_sects; i++) {
-        UNPROTECT(GC_heap_sects[i].hs_start, GC_heap_sects[i].hs_bytes);
-      }
+      GC_unprotect_all_heap();
 
       /* Restore the old task exception ports.  */
       /* TODO: Should we do it in fork_prepare/parent_proc? */
@@ -5142,13 +5180,32 @@ GC_API int GC_CALL GC_get_pages_executable(void)
                 /* you could use something like pthread_getspecific.    */
 # endif
     GC_bool GC_in_save_callers = FALSE;
-#endif
+
+# if defined(THREADS) && defined(DBG_HDRS_ALL)
+#   include "private/dbg_mlc.h"
+
+    /* A dummy version of GC_save_callers() which does not call */
+    /* backtrace().                                             */
+    GC_INNER void GC_save_callers_no_unlock(struct callinfo info[NFRAMES])
+    {
+      GC_ASSERT(I_HOLD_LOCK());
+      info[0].ci_pc = (word)(&GC_save_callers_no_unlock);
+      BZERO(&info[1], sizeof(void *) * (NFRAMES - 1));
+    }
+# endif
+#endif /* REDIRECT_MALLOC */
 
 GC_INNER void GC_save_callers(struct callinfo info[NFRAMES])
 {
   void * tmp_info[NFRAMES + 1];
   int npcs, i;
 
+  GC_ASSERT(I_HOLD_LOCK());
+                /* backtrace may call dl_iterate_phdr which is also     */
+                /* used by GC_register_dynamic_libraries, and           */
+                /* dl_iterate_phdr is not guaranteed to be reentrant.   */
+
+  GC_STATIC_ASSERT(sizeof(struct callinfo) == sizeof(void *));
 # ifdef REDIRECT_MALLOC
     if (GC_in_save_callers) {
       info[0].ci_pc = (word)(&GC_save_callers);
@@ -5156,17 +5213,15 @@ GC_INNER void GC_save_callers(struct callinfo info[NFRAMES])
       return;
     }
     GC_in_save_callers = TRUE;
+    /* backtrace() might call a redirected malloc. */
+    UNLOCK();
+    npcs = backtrace((void **)tmp_info, NFRAMES + 1);
+    LOCK();
+# else
+    npcs = backtrace((void **)tmp_info, NFRAMES + 1);
 # endif
-
-  GC_ASSERT(I_HOLD_LOCK());
-                /* backtrace may call dl_iterate_phdr which is also     */
-                /* used by GC_register_dynamic_libraries, and           */
-                /* dl_iterate_phdr is not guaranteed to be reentrant.   */
-
   /* We retrieve NFRAMES+1 pc values, but discard the first one, since  */
   /* it points to our own frame.                                        */
-  GC_STATIC_ASSERT(sizeof(struct callinfo) == sizeof(void *));
-  npcs = backtrace((void **)tmp_info, NFRAMES + 1);
   i = 0;
   if (npcs > 1) {
     i = npcs - 1;

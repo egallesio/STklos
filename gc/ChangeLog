@@ -1,4 +1,39 @@
 
+== [8.2.8] 2024-09-08 ==
+
+* Allow GC_size() argument to be null
+* Disable backtrace saving at garbage collections if DONT_SAVE_TO_LAST_STACK
+* Eliminate 'cast signed to bigger unsigned' CSA warnings in GC_find_limit
+* Eliminate 'x might be clobbered by longjmp' gcc warning in setjmp_t.c
+* Fix 'un-mprotect vdb failed' abort with out-of-memory reason on Linux
+* Fix ADD_CALL_CHAIN() placement to follow GC_store_debug_info_inner call
+* Fix GC_debug_realloc to support custom kind
+* Fix GC_is_visible for case of arg pointing exactly to object upper bound
+* Fix GC_print_trace_inner to print the last element of the circular buffer
+* Fix cordtst2.tmp file deletion in cordtest on Windows
+* Fix double lock in GC_malloc called from backtrace()
+* Fix handling of page-unaligned boundaries in soft_set_grungy_pages
+* Fix heap blocks size computation by GC_get_memory_use
+* Fix indent of a closing curly braces in GC_apply_to_all_blocks
+* Fix infinite resend lost signals if a thread is restarted by SIGQUIT
+* Fix null pointer dereference in GC_is_visible if type_descr is null
+* Fix per_object_helper() after changing hb_sz units
+* Fix pointer relational comparison in GC_do_enumerate_reachable_objects
+* Fix poor thread-local allocation performance because of double EXTRA_BYTES
+* Fix potential GC_add_roots_inner call with an overflowed pointer (Win32)
+* Fix potential address overflow in GC_add_to_heap
+* Fix potential buffer overrun during read in GC_text_mapping
+* Fix various typos in comments
+* Prevent GC_noop_sink from scanning by the collector
+* Prevent redirected malloc call from a garbage collection routine
+* Redirect malloc_usable_size() in leak_detector.h
+* Remove redundant dirty/reachable_here calls in GC_malloc_explicitly_typed
+* Update and fix diagrams describing the tree structure for pointer lookups
+* Use atomic store to set GC_first_nonempty in GC_do_parallel_mark
+* Use atomic store to set entry id and update cache_ptr in slow_getspecific
+* Workaround '.obj file not found' error reported by watcom wlib
+
+
 == [8.2.6] 2024-02-04 ==
 
 * Avoid unexpected heap growth in gctest for the case of VERY_SMALL_CONFIG
@@ -83,7 +118,7 @@
 * Adjust WoW64 workaround to work on UWP/WinRT
 * Adjust naming of Win32/64 and x86/64 words in comments and documentation
 * Avoid potential race between realloc and GC_block_was_dirty
-* Do not double-clear first two words of object in GC_generic_malloc_aligned
+* Do not double-clear first two words of object in GC_generic_malloc
 * Do not mention FASTLOCK in comment
 * Do not mix debug and non-debug allocations in disclaim tests
 * Do not prohibit threaded builds with malloc redirection on non-Linux
@@ -521,6 +556,14 @@
 * Workaround 'push_regs configured incorrectly' error (GCC-11)
 * Workaround 'same value in both branches of ternary operator' cppcheck FP
 * Workaround various cppcheck false positives
+
+
+== [8.0.14] 2024-09-07 ==
+
+* Disable backtrace saving at garbage collections if DONT_SAVE_TO_LAST_STACK
+* Fix infinite resend lost signals if a thread is restarted by SIGQUIT
+
+Also, includes 7.6.22 changes
 
 
 == [8.0.12] 2024-02-04 ==
@@ -1050,6 +1093,17 @@ Also, includes 7.6.18 changes
 * Workaround 'bad pointer arithmetic' false waring in check_annotated_obj
 * Workaround Clang optimizer bug crashing clear_stack_inner on OS X 10.8
 * Workaround Thread Sanitizer (TSan) false positive warnings
+
+
+== [7.6.22] 2024-09-07 ==
+
+* Eliminate 'cast signed to bigger unsigned' CSA warnings in GC_find_limit
+* Fix GC_debug_realloc to support custom kind
+* Fix heap blocks size computation by GC_get_memory_use
+* Fix pointer relational comparison in GC_do_enumerate_reachable_objects
+* Prevent GC_noop_sink from scanning by the collector
+
+Also, includes 7.4.28 changes
 
 
 == [7.6.20] 2024-02-03 ==
@@ -1632,6 +1686,27 @@ Also, includes 7.4.6 changes
 Also, includes 7.4.4 changes
 
 
+== [7.4.28] 2024-09-07 ==
+
+* Avoid gcc stringop-overflow warning for intended overflow in smashtest
+* Fix ADD_CALL_CHAIN() placement to follow GC_store_debug_info_inner call
+* Fix GC_is_visible for case of arg pointing exactly to object upper bound
+* Fix GC_print_trace_inner to print the last element of the circular buffer
+* Fix cordtst2.tmp file deletion in cordtest on Windows
+* Fix double lock in GC_malloc called from backtrace()
+* Fix indent of a closing curly braces in GC_apply_to_all_blocks
+* Fix null pointer dereference in GC_is_visible if type_descr is null
+* Fix per_object_helper() after changing hb_sz units
+* Fix poor thread-local allocation performance because of double EXTRA_BYTES
+* Fix potential GC_add_roots_inner call with an overflowed pointer (Win32)
+* Fix potential address overflow in GC_add_to_heap
+* Fix potential buffer overrun during read in GC_text_mapping
+* Fix typos in comments
+* Prevent redirected malloc call from a garbage collection routine
+* Remove redundant dirty/reachable_here calls in GC_malloc_explicitly_typed
+* Update and fix diagrams describing the tree structure for pointer lookups
+
+
 == [7.4.26] 2024-02-03 ==
 
 * Eliminate 'unused parameter' gcc warning in free() if IGNORE_FREE
@@ -2204,6 +2279,35 @@ Also, includes 7.2e, 7.2d, 7.2c, 7.2b changes
 * Use pthread_key for thread-local storage on FreeBSD
 * Use union of AO_t and word to favor strict-aliasing compiler optimization
 Also, includes 7.2 changes
+
+
+== [7.2s] 2024-09-06 ==
+
+* Avoid gcc stringop-overflow warning for intended overflow in smashtest
+* Eliminate 'type defaults to int in declaration' warning (REDIRECT_MALLOC)
+* Eliminate 'value exceeds maximum object size' GCC warning in huge_test
+* Eliminate warning and simplify expression in GC_init_explicit_typing
+* Fix 'GetVersion deprecated' compiler warning in os_dep (MS VC)
+* Fix 'value truncated' compiler warning in CORD_cat (MS VC)
+* Fix ADD_CALL_CHAIN() placement to follow GC_store_debug_info_inner call
+* Fix GC_is_visible for case of arg pointing exactly to object upper bound
+* Fix GC_jmp_buf multiple definition
+* Fix GC_print_trace_inner to print the last element of the circular buffer
+* Fix double lock in GC_malloc called from backtrace()
+* Fix indent of a closing curly braces in GC_apply_to_all_blocks
+* Fix null pointer dereference in GC_is_visible if type_descr is null
+* Fix per_object_helper() after changing hb_sz units
+* Fix poor thread-local allocation performance because of double EXTRA_BYTES
+* Fix potential GC_add_roots_inner call with an overflowed pointer (Win32)
+* Fix potential address overflow in GC_add_to_heap
+* Fix potential buffer overrun during read in GC_text_mapping
+* Fix typos in comments
+* Prevent compiler warnings regarding unused argument and printf in extra
+* Prevent redirected malloc call from a garbage collection routine
+* Remove barrett_diagram file duplicated by tree.html
+* Remove non-existing DISCARD_WORDS from GC data structure ASCII diagram
+* Resolve GCC warning in setjmp_t.c
+* Update and fix diagrams describing the tree structure for pointer lookups
 
 
 == [7.2r] 2024-02-03 ==
