@@ -1,7 +1,7 @@
 /*
  * simple-module.c  -- A simple C module for STklos
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,10 @@
  *    Creation date: 22-Jul-2000 12:10 (eg)
  */
 
-/* This module defines two simple primitives called "test" and "add".
- *    - "test" takes one parameter, displays it and returns it.
+/* This module defines three simple primitives called "hello", "test" and "add".
+ *    - "hello" takes no parameter and displays a simple message
+ *    - "test" takes one parameter, displays it and returns it (reversed if it
+ *      is a pair, unmodified otherwise.
  *    - "add" returns the sum of its two (small) integer parameters
  *
  * New primitives are defined with the DEFINE_PRIMITIVE macro
@@ -54,13 +56,22 @@
 #include <stklos.h>
 
 
+DEFINE_PRIMITIVE("hello", hello, subr0, (void))
+{
+  SCM msg = STk_Cstring2string("Hello from STklos.\n"); // convert C str -> SCM str
+  STk_display(msg, STk_current_output_port());          // call SCM display
+  return STk_void;                                      // return #void
+}
+
+
 DEFINE_PRIMITIVE("test", tst, subr1, (SCM l))
 {
   SCM oport =  STk_current_output_port();
   STk_fprintf(oport, "Parameter is ");
   STk_display(l, oport);
-  STk_newline(oport);
-  return l;
+  STk_putc('\n', oport);
+
+  return CONSP(l) ? STk_cons(CDR(l), CAR(l)): l;       // Reverse CONSes. Keep others
 }
 
 DEFINE_PRIMITIVE("add", add, subr2, (SCM a, SCM b))
@@ -69,8 +80,8 @@ DEFINE_PRIMITIVE("add", add, subr2, (SCM a, SCM b))
   if (!INTP(a)) STk_error("First parameter ~S is not an integer", a);
   if (!INTP(b)) STk_error("Second parameter ~S is not an integer", b);
 
-  sum = INT_VAL(a) + INT_VAL(b);
-  return MAKE_INT(sum);
+  sum = INT_VAL(a) + INT_VAL(b);                      // INT_VAL returns a C int
+  return MAKE_INT(sum);                               // MAKE_INT returns a SCM int
 }
 
 
@@ -78,11 +89,16 @@ DEFINE_PRIMITIVE("add", add, subr2, (SCM a, SCM b))
  * The name of the module is just used to display error message. Put
  * something meaningful in it. The statements beween MODULE_ENTRY_START
  * and MODULE_ENTRY_END are executed when the module is loaded.
+ *
+ * ADD_PRIMITIVE_IN_MODULE adds a primitive in the given module.
  */
 MODULE_ENTRY_START("simple-module")
 {
+  SCM mod = STk_current_module();
   STk_puts("Loading extension simple-module\n", STk_current_output_port());
-  ADD_PRIMITIVE(tst);
-  ADD_PRIMITIVE(add);
+
+  ADD_PRIMITIVE_IN_MODULE(hello, mod);
+  ADD_PRIMITIVE_IN_MODULE(tst, mod);
+  ADD_PRIMITIVE_IN_MODULE(add, mod);
 }
 MODULE_ENTRY_END
