@@ -13,5 +13,5 @@ clean-am:
 	rm -f *~
 
 distclean-am: clean-am
-	(cd demos; make distclean)
+	(cd demos && make distclean)
 	rm -f Makefile

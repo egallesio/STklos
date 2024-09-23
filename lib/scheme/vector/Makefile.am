@@ -117,10 +117,10 @@ f32.stk f64.stk c64.stk c128.stk: tagvector-template.stk base.$(SO)
 # Dependencies
 
 ../../scheme/comparator.ostk:
-	(cd ../../scheme; $(MAKE) comparator.ostk)
+	(cd ../../scheme && $(MAKE) comparator.ostk)
 
 ../../srfi/4.ostk:
-	(cd ../../srfi; $(MAKE) 4.ostk)
+	(cd ../../srfi && $(MAKE) 4.ostk)
 
 base.$(SO): ../../srfi/4.ostk ../../scheme/comparator.ostk base-incl.c base.c
 
@@ -142,7 +142,7 @@ distclean: clean
 	/bin/rm -f Makefile $(srfi_interm)
 
 uninstall-hook:
-	(cd $(srfidir); rm -f $(srfi_sources) $(srfi_interm))
+	(cd $(srfidir) && rm -f $(srfi_sources) $(srfi_interm)) || true
 	rmdir $(srfidir) || true
 ##
 ## # no docs...

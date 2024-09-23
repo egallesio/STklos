@@ -86,7 +86,7 @@ distclean: clean
 	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd $(schemedir); rm -f $(scheme_sources))
+	(cd $(schemedir) && rm -f $(scheme_sources)) || true
 	rmdir $(schemedir) || true
 
 doc:

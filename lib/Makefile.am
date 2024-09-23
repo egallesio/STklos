@@ -159,7 +159,7 @@ generate-git-info:
 		$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img    \
 		-f make-C-boot.stk -- boot.img3 ../src/boot.c);        \
 	   echo "*** Recompile STklos";                            \
-	   (cd ../src; $(MAKE) stklos);                            \
+	   (cd ../src && $(MAKE) stklos);                            \
 	   echo "*** Cleaning useless images";                     \
 	   /bin/rm boot.img[0-3] instr[0-3];                       \
 	else                                                       \
@@ -170,7 +170,7 @@ generate-git-info:
 # Installation of *.stk files
 install-sources:
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; $(MAKE) install-sources)\
+	   (cd $$i && $(MAKE) install-sources)\
 	done
 	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)$(schemedir)
 
@@ -202,11 +202,11 @@ srfis-data.scm: srfis.stk getopt.ostk
 	$(STKLOS_BINARY) -c -q -l srfis.stk \
 	                 -f ../utils/update-srfi-list.stk \
                      -- --internal > $@
-	(cd ..; $(MAKE) SUPPORTED-SRFIS)
+	(cd .. && $(MAKE) SUPPORTED-SRFIS)
 
 doc: $(DOCDB)
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; $(MAKE) doc)\
+	   (cd $$i && $(MAKE) doc)\
 	done
 
 
@@ -216,18 +216,18 @@ $(DOCDB): $(scheme_sources)
 clean:
 	/bin/rm -f $(scheme_OBJS) $(scheme_SOLIBS) ./srfis-data.scm
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; $(MAKE) clean)\
+	   (cd $$i && $(MAKE) clean)\
 	done
 
 distclean: clean
 	/bin/rm -f Makefile
 	touch boot.stk
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; $(MAKE) distclean)\
+	   (cd $$i && $(MAKE) distclean)\
 	done
 
 uninstall-hook:
-	(cd $(schemedir) && rm -f $(DOCDB) $(scheme_sources))
+	(cd $(schemedir) && rm -f $(DOCDB) $(scheme_sources)) || true
 	rmdir $(schemedir) $(schemelibdir) || true
 
 

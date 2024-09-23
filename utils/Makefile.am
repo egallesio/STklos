@@ -38,7 +38,7 @@ stklos-pp: stklos-pp.stk ../lib/stklos/preproc.ostk
 	$(COMP) -o stklos-pp stklos-pp.stk
 
 ../lib/stklos/preproc.ostk:
-	(cd ../lib/stklos; $(MAKE)  preproc.ostk)
+	(cd ../lib/stklos && $(MAKE)  preproc.ostk)
 
 clean-am:
 	rm -f $(scmbin) $(localscript) *~
