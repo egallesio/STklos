@@ -896,8 +896,9 @@ static SCM load_file(SCM filename, SCM env)
 
 
 /*
-<doc load
+<doc R57RS load
  * (load filename)
+ * (load filename env)
  *
  * (((load-path)))
  * (((load-suffixes)))
@@ -907,9 +908,17 @@ static SCM load_file(SCM filename, SCM env)
  * shared objects). The loading of object files is not available on
  * all architectures. The value returned by |load| is *_void_*.
  *
+ * The optional parameter |env| may be an environment specifier (as defined by
+ * {{rseven}}) or a module. When |env| is specified, the loaded code is evaluated
+ * (or run) in the environment given by |env|. If omitted,
+ * |(interaction-environment)| is assumed. When |env| is specified as a module,
+ * it is mutable.
+ *
  * If the file whose name is |filename| cannot be located, |load| will try
  * to find it in one of the directories given by `"load-path"`
  * with the suffixes given by `"load-suffixes"`.
+ *
+ * NOTE: {{rfive}} defines only the one parameter version of |load|.
 doc>
  */
 
@@ -927,16 +936,21 @@ DEFINE_PRIMITIVE("load", scheme_load, subr12, (SCM filename, SCM env))
 /*
 <doc EXT try-load
  * (try-load filename)
+ * (try-load filename env)
  *
  * |try-load| tries to load the file named |filename|. As with |load|,
  * |try-load| tries to find the file given the current load path
  * and a set of suffixes if |filename| cannot be loaded. If |try-load|
  * is able to find a readable file, it is loaded, and |try-load| returns
  * |#t|. Otherwise, |try-load| retuns |#f|.
+ *
+ * See the description of |env| environment in the <<load>> primitive.
 doc>
  */
 DEFINE_PRIMITIVE("try-load", scheme_try_load, subr12, (SCM filename, SCM env))
 {
+  // NOTE: This primitive will be overloaded (but sill used bay the
+  // overloading function) in the file "lib/load.stk"
   return load_file(filename, env);
 }
 

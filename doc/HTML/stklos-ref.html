@@ -11298,7 +11298,8 @@ evaluated by default (the <strong><em>STklos</em></strong> module). The returned
 is mutable.</p>
 </div>
 <div class="paragraph">
-<p><a id='P_eval-from-string'></a>
+<p><a id='P_eval-from-string'></a><a id='P_eval-from-string-ci'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -11308,7 +11309,9 @@ is mutable.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(eval-from-string str) </strong></code><br>
-<code><strong>(eval-from-string str module) </strong></code><br></p>
+<code><strong>(eval-from-string str module) </strong></code><br>
+<code><strong>(eval-from-string-ci str) </strong></code><br>
+<code><strong>(eval-from-string-ci str module) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -11316,7 +11319,8 @@ is mutable.</p>
 <p>Read an expression from <code>str</code> and evaluates it with <code>eval</code>. If a <code>module</code>
 is passed, the evaluation takes place in the environment of this module.
 Otherwise, the evaluation takes place in the environment returned by
-<code>current-module</code>.</p>
+<code>current-module</code>. The primitive <code>eval-from-string-ci</code> uses the <code>read-ci</code>
+to read the form to evaluate.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -11324,7 +11328,9 @@ Otherwise, the evaluation takes place in the environment returned by
 <span class="p">(</span><span class="nf">define-module</span> <span class="nv">M</span>
   <span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="mi">100</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(+ x x)"</span><span class="p">)</span>                   <span class="nv">=&gt;</span> <span class="mi">20</span>
-<span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(+ x x)"</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'M</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="mi">200</span></code></pre>
+<span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(+ x x)"</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'M</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="mi">200</span>
+<span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(cons 'A 'B)"</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">A</span> <span class="o">.</span> <span class="nv">B</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">eval-from-string-ci</span> <span class="s">"(cons 'A 'B)"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="o">.</span> <span class="nv">b</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -12700,7 +12706,7 @@ the SRFI document for more information.</p>
 </p>
 </div>
 <div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -13847,12 +13853,13 @@ that STklos supports.</p>
 </p>
 </div>
 <div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+<p><span class="rmargin small silver">R<sup>5</sup>RS / R<sup>7</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(load filename) </strong></code><br></p>
+<p><code><strong>(load filename) </strong></code><br>
+<code><strong>(load filename env) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -13866,9 +13873,28 @@ shared objects). The loading of object files is not available on
 all architectures. The value returned by <code>load</code> is <strong><em>void</em></strong>.</p>
 </div>
 <div class="paragraph">
+<p>The optional parameter <code>env</code> may be an environment specifier (as defined by
+R<sup>7</sup>RS) or a module. When <code>env</code> is specified, the loaded code is evaluated
+(or run) in the environment given by <code>env</code>. If omitted,
+<code>(interaction-environment)</code> is assumed. When <code>env</code> is specified as a module,
+it is mutable.</p>
+</div>
+<div class="paragraph">
 <p>If the file whose name is <code>filename</code> cannot be located, <code>load</code> will try
 to find it in one of the directories given by <code>"load-path"</code>
 with the suffixes given by <code>"load-suffixes"</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>5</sup>RS defines only the one parameter version of <code>load</code>.
+</td>
+</tr>
+</table>
 </div>
 <div id="tryload" class="paragraph">
 <p><a id='P_try-load'></a>
@@ -13880,7 +13906,8 @@ with the suffixes given by <code>"load-suffixes"</code>.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(try-load filename) </strong></code><br></p>
+<p><code><strong>(try-load filename) </strong></code><br>
+<code><strong>(try-load filename env) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -13890,6 +13917,9 @@ with the suffixes given by <code>"load-suffixes"</code>.</p>
 and a set of suffixes if <code>filename</code> cannot be loaded. If <code>try-load</code>
 is able to find a readable file, it is loaded, and <code>try-load</code> returns
 <code>#t</code>. Otherwise, <code>try-load</code> retuns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p>See the description of <code>env</code> environment in the <a href="#load">[load]</a> primitive.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_find-path'></a>
