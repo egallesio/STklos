@@ -293,7 +293,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-subdirs = curl fuse gtklos 
+subdirs = curl fuse gtklos
 all: all-am
 
 .SUFFIXES:
@@ -483,11 +483,11 @@ all:
 	@echo "***"
 
 clean-am:
-	for d in $(subdirs) ;do (cd $$d; $(MAKE) $@) ;done
+	for d in $(subdirs) ;do (cd $$d && $(MAKE) $@) ;done
 	rm -f *~
 
 distclean-am:
-	for d in $(subdirs) ;do (cd $$d; $(MAKE) $@) ;done
+	for d in $(subdirs) ;do (cd $$d && $(MAKE) $@) ;done
 	rm -f Makefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

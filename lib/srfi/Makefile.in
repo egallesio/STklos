@@ -1068,62 +1068,62 @@ STKLOS_BINARY ?= ../../src/stklos
 238.$(SO): 238-incl.c 238.c
 
 ../streams/derived.ostk:
-	(cd ../streams; $(MAKE) derived.ostk)
+	(cd ../streams && $(MAKE) derived.ostk)
 ../scheme/list.$(SO):
-	(cd ../scheme; $(MAKE) list.$(SO))
+	(cd ../scheme && $(MAKE) list.$(SO))
 ../scheme/charset.ostk:
-	(cd ../scheme; $(MAKE) charset.ostk)
+	(cd ../scheme && $(MAKE) charset.ostk)
 ../scheme/set.ostk:
-	(cd ../scheme; $(MAKE) set.ostk)
+	(cd ../scheme && $(MAKE) set.ostk)
 ../scheme/ilist.$(SO):
-	(cd ../scheme; $(MAKE) ilist.$(SO))
+	(cd ../scheme && $(MAKE) ilist.$(SO))
 ../scheme/list-queue.ostk:
-	(cd ../scheme; $(MAKE) list-queue.ostk)
+	(cd ../scheme && $(MAKE) list-queue.ostk)
 ../scheme/hash-table.ostk:
-	(cd ../scheme; $(MAKE) hash-table.ostk)
+	(cd ../scheme && $(MAKE) hash-table.ostk)
 ../scheme/lseq.ostk:
-	(cd ../scheme; $(MAKE) lseq.ostk)
+	(cd ../scheme && $(MAKE) lseq.ostk)
 ../scheme/sort.$(SO):
-	(cd ../scheme; $(MAKE) sort.$(SO))
+	(cd ../scheme && $(MAKE) sort.$(SO))
 ../scheme/generator.ostk:
-	(cd ../scheme; $(MAKE) generator.ostk)
+	(cd ../scheme && $(MAKE) generator.ostk)
 ../scheme/ideque.ostk:
-	(cd ../scheme; $(MAKE) ideque.ostk)
+	(cd ../scheme && $(MAKE) ideque.ostk)
 ../scheme/division.ostk:
-	(cd ../scheme; $(MAKE) division.ostk)
+	(cd ../scheme && $(MAKE) division.ostk)
 ../scheme/flonum.$(SO):
-	(cd ../scheme; $(MAKE) division.$(SO))
+	(cd ../scheme && $(MAKE) division.$(SO))
 ../scheme/bitwise.$(SO):
-	(cd ../scheme; $(MAKE) bitwise.ostk)
+	(cd ../scheme && $(MAKE) bitwise.ostk)
 ../scheme/vector/@.ostk:
-	(cd ../scheme/vector; $(MAKE) @.ostk)
+	(cd ../scheme/vector && $(MAKE) @.ostk)
 ../scheme/regex.ostk:
-	(cd ../scheme;  $(MAKE) regexp.ostk)
+	(cd ../scheme && $(MAKE) regexp.ostk)
 
 ../stklos/itrie.$(SO):
-	(cd ../stklos; $(MAKE) itrie.$(SO))
+	(cd ../stklos && $(MAKE) itrie.$(SO))
 #======================================================================
 
 install-data-hook:
-	(cd 160; $(MAKE) install)
+	(cd 160 && $(MAKE) install)
 
 install-sources:
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; $(MAKE) install-sources)\
+	   (cd $$i && $(MAKE) install-sources)\
 	done
 	cp $(srfi_sources) $(srfidir)
 
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
-	(cd 160; $(MAKE) clean)
+	(cd 160 && $(MAKE) clean)
 
 distclean: clean
 	/bin/rm -f Makefile
-	(cd 160; $(MAKE) distclean)
+	(cd 160 && $(MAKE) distclean)
 
 uninstall-hook:
-	(cd 160; $(MAKE) uninstall)
-	(cd $(srfidir); rm -f $(srfi_sources))
+	(cd 160 && $(MAKE) uninstall)
+	(cd $(srfidir) && rm -f $(srfi_sources))
 	rmdir $(srfidir) || true
 
 doc:
