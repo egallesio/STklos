@@ -2604,7 +2604,7 @@ static inline STk_instr* read_code(SCM f, unsigned int len) /* read a code phras
   return res;
 }
 
-SCM STk_load_bcode_file(SCM f)
+SCM STk_load_bcode_file(SCM f, SCM env)
 {
   SCM consts, code_size, *save_constants, save_env;
   STk_instr *save_pc;
@@ -2632,7 +2632,7 @@ SCM STk_load_bcode_file(SCM f)
 
     vm->pc        = read_code(f, size);                      /* Read the code */
     vm->constants = VECTOR_DATA(consts);
-    vm->env       = vm->current_module;
+    vm->env       = env ? env : vm->current_module;
     run_vm(vm);
   }
 
@@ -2653,7 +2653,7 @@ int STk_load_boot(char *filename)
   tmp = STk_read(f, TRUE);
   if (tmp != STk_intern("STklos")) return -2;
 
-  tmp = STk_load_bcode_file(f);
+  tmp = STk_load_bcode_file(f, NULL);
   if (tmp == STk_false) return -3;
 
   /* The system has booted on the given file */

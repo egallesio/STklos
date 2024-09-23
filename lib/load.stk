@@ -284,7 +284,7 @@ doc>
 (define %try-load-conditions
   (make-parameter '() (lambda (v) v)))      ;; will be used as a stack
 
-(define (%try-load fn load-path load-suffixes)
+(define (%try-load fn load-path load-suffixes env)
   (let ((path (%guess-pathname fn load-path load-suffixes))
         (oldp (current-loading-file))
         (res  #f)
@@ -302,7 +302,10 @@ doc>
                         (raise c)))
 
           (when *load-verbose* (format out ";; Loading file ~S.\n" path))
-          (set! res             (%primitive-try-load path))
+          ;; Do not *always* call %primitive-try-load with 2 parameters here.
+          (set! res (if env
+                        (%primitive-try-load path env)
+                        (%primitive-try-load path)))
           (when *load-verbose* (format out ";; File ~S loaded.\n" path))
           ;; Restore current-load-path
           (current-loading-file oldp)
@@ -311,12 +314,12 @@ doc>
     res))
 
 ;;
-;; Overload the function try-load primitive with a version which uses load-path annd
-;; load-suffixes
+;; Overload the function try-load primitive with a version which uses
+;; load-path and load-suffixes
 ;;
-(set! try-load (lambda (fn)
+(set! try-load (lambda (fn :optional env)
                  #:try-load
-                 (%try-load fn (load-path) (load-suffixes))))
+                 (%try-load fn (load-path) (load-suffixes) env)))
 
 ;=============================================================================
 ;
@@ -332,13 +335,13 @@ doc>
                            'r7rs-msg "cannot load file"
                            'r7rs-irritants (list fn))))
 
-(define (%load fn load-path load-suffixes)
-  (if (%try-load fn load-path load-suffixes)
+(define (%load fn load-path load-suffixes env)
+  (if (%try-load fn load-path load-suffixes env)
     (values (void)) ;; To be sure to have only 1 value (for repl printing defines)
     (%cannot-load fn)))
 
-(define (load fn)
-  (%load fn (load-path) (load-suffixes)))
+(define (load fn :optional env)
+  (%load fn (load-path) (load-suffixes) env))
 
 
 #|
@@ -449,7 +452,7 @@ doc>
           (if file
               (let ((file     (car file))
                     (lib-name (cdr file)))
-                (%load file '() '())  ;; '() => no path & no suffixes
+                (%load file '() '() #f)  ;; '() => no path & no suffixes
                 (when lib-name
                   (%do-imports (find-module 'STklos)
                                (list (list lib-name))
@@ -473,7 +476,7 @@ doc>
     (lambda (what)
       #:require/provide
       (unless (member what provided)
-        (%load what (load-path) (load-suffixes)))
+        (%load what (load-path) (load-suffixes) #f))
       (provide what)))
 
 

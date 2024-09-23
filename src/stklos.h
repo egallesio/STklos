@@ -454,7 +454,7 @@ int STk_init_cpointer(void);
 
 
 void *STk_find_external_function(char *path, char *fname, int error_if_absent);
-SCM STk_load_object_file(SCM f, char *fname);
+SCM STk_load_object_file(SCM f, char *fname, SCM env);
 SCM STk_info_object_file(char *fname);
 
 /*
@@ -1009,6 +1009,9 @@ struct port_obj {
 #define PORT_BINARYP(x)         (PORT_FLAGS(x) & PORT_BINARY)
 #define PORT_TEXTUALP(x)        (PORT_FLAGS(x) & PORT_TEXTUAL)
 
+EXTERN_PRIMITIVE("read", scheme_read, subr01, (SCM port));
+EXTERN_PRIMITIVE("display", display, subr12, (SCM expr, SCM port));
+
 
 /****
  ****           sio.h primitives
@@ -1464,7 +1467,7 @@ SCM STk_values2vector(SCM obj, SCM vect);
 EXTERN_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv));
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 
-SCM STk_load_bcode_file(SCM f);
+  SCM STk_load_bcode_file(SCM f, SCM env);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);

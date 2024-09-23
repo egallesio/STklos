@@ -1,7 +1,7 @@
 /*
- * dynload.c	-- Dynamic loading stuff
+ * dynload.c                    -- Dynamic loading stuff
  *
- * Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
  */
 
 #include "stklos.h"
+#include "vm.h"
 
 #define INIT_FUNC_NAME "STk_module_main"
 #define INFO_FUNC_NAME "STk_module_info"
@@ -97,7 +98,7 @@ void *STk_find_external_function(char *path, char *fname, int error_if_absent)
     }
     MUT_LOCK(dynload_mutex);
     files_already_loaded = STk_cons(STk_cons(STk_Cstring2string(path), (SCM) handle),
-				    files_already_loaded);
+                                    files_already_loaded);
     MUT_UNLOCK(dynload_mutex);
   }
 
@@ -107,15 +108,20 @@ void *STk_find_external_function(char *path, char *fname, int error_if_absent)
   return fct;
 }
 
-SCM STk_load_object_file(SCM f, char *path)
+SCM STk_load_object_file(SCM f, char *path, SCM env)
 {
+  vm_thread_t *vm = STk_get_current_vm();
+  SCM curmod      = vm->current_module;
   InitFunc init_fct;
-
+  
   /* Close the port since we don't need it */
   STk_close_port(f);
 
+  if (env) vm->current_module = env;
   init_fct = STk_find_external_function(path, INIT_FUNC_NAME, TRUE);
   init_fct();
+  if (env) vm->current_module = curmod;
+  
   return STk_true;
 }
 
