@@ -454,7 +454,7 @@ int STk_init_cpointer(void);
 
 
 void *STk_find_external_function(char *path, char *fname, int error_if_absent);
-SCM STk_load_object_file(SCM f, char *fname);
+SCM STk_load_object_file(SCM f, char *fname, SCM env);
 SCM STk_info_object_file(char *fname);
 
 /*
@@ -1008,6 +1008,9 @@ struct port_obj {
 #define PORT_CASE_SENSITIVEP(x) (PORT_FLAGS(x) & PORT_CASE_SENSITIVE)
 #define PORT_BINARYP(x)         (PORT_FLAGS(x) & PORT_BINARY)
 #define PORT_TEXTUALP(x)        (PORT_FLAGS(x) & PORT_TEXTUAL)
+
+EXTERN_PRIMITIVE("read", scheme_read, subr01, (SCM port));
+EXTERN_PRIMITIVE("display", display, subr12, (SCM expr, SCM port));
 
 
 /****

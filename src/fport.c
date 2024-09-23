@@ -888,7 +888,7 @@ static SCM load_file(SCM filename, SCM env)
     switch (find_file_nature(f)) {
       case FILE_IS_SOURCE: return STk_load_source_file(f, env);
       case FILE_IS_BCODE:  return STk_load_bcode_file(f, env);
-      case FILE_IS_OBJECT: return STk_load_object_file(f, fname); //TODO
+      case FILE_IS_OBJECT: return STk_load_object_file(f, fname, env);
     }
   }
   return STk_false;
