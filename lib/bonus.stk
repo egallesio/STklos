@@ -2785,6 +2785,8 @@ doc>
       (install-dir ,(%library-prefix))
       (website "https://stklos.net")
       (scheme.features ,@(features))
+      (stklos.binary-load-path ,(%library-prefix 'lib))
+      (stklos.scheme-load-path ,(%library-prefix 'data))
       (scheme.path ,@(load-path))
       (scheme.srfi ,@srfis)
       (scheme.srfi.count ,(length srfis))
