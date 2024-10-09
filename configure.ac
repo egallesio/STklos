@@ -4,8 +4,8 @@
 ###    Creation date: 28-Dec-1999 21:19 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[2.00])   # Set also VERSION_STATUS to stable when changing version
-VERSION_STATUS=unstable    # and reset it to unstable after releasing
+AC_INIT([stklos],[2.10])   # Set also VERSION_STATUS to stable when changing version
+VERSION_STATUS=stable      # and reset it to unstable after releasing
 
 #
 # Grab configure options before it is too late
