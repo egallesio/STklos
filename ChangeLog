@@ -1,3 +1,13 @@
+2024-10-09 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-inform-lib-and-scheme-paths'
+	- Add documentation path to the configure summary
+	- Merge branch 'jpellegrini-inform-lib-and-scheme-paths'
+	- Merge branch 'inform-lib-and-scheme-paths' of https://github.com/jpellegrini/STklos into jpellegrini-inform-lib-and-scheme-paths
+	- Merge branch 'jpellegrini-hacking+'
+	- Merge branch 'hacking+' of https://github.com/jpellegrini/STklos into jpellegrini-hacking+
+	- Merge branch 'next-unicode'
+	- Updated Unicode to version 16.0.0
+
 2024-09-23 Erick Gallesio <eg@stklos.net>
 	- Merge pull request #690 from jpellegrini/makefiles
 

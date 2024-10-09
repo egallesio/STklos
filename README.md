@@ -75,6 +75,12 @@ It adds support for 24 new [**SRFIs**](https://www.stklos.net/srfi.html) giving 
 support for 122 SRFIs. You can now use the [cURL](https://curl.se/libcurl/)
 library thanks to the new **curl** extension.
 
+**October 2024**
+The 2.10 versions enhances the REPL, the documentation and numerical
+functions. It adss support for 3 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
+support for 125 SRFIs.
+
+
 SRFI Support
 ------------
 

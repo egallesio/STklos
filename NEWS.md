@@ -4,9 +4,8 @@ NEWS
 
 This version of ***STklos*** mostly enhances the 2.00 version released a year ago. As usual, this version could not have be finalized without the help of Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini)).
 
-
-
 **Contributors for this version**:
+
 - Akinori Hattori ([@hattya](https://github.com/hattya))
 - Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
 
@@ -35,14 +34,13 @@ This version of ***STklos*** mostly enhances the 2.00 version released a year ag
 - Added special instructions in the VM for `member`, `memq` and `memv`
 - Added special instructions in the VM for `assoc`, `assq` and `assv`
 - Do constant folding before in-lining usual functions
-- Better UTF-8 support and updated Unicode tables
+- Better UTF-8 support and updated Unicode tables to version 16.0.0
 - Enhance the `apropos` primitive
 - New REPL variables: `@*`, `@1`, `@2`, `@3`, `@4` and `@5`
 - New REPL commands: `time`, `describe`, `expand`, `import`, `require-feature`, 
   `open`, `browse`, `manual`, `apropos`
 - Documentation of a function can be accessed directly into the HTML Reeference Manual
 - Length of symbols is no more limited.
-
 
 **New primitives / parameters**:
 
