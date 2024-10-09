@@ -137,6 +137,7 @@ esac
 if test "$DOCDIR" == "" ; then
     # user has not given a "--docdir" option. Use our own convention
     docdir="${prefix}/share/doc/${PACKAGE_TARNAME}/${VERSION}"
+    DOCDIR=${docdir}
 fi
 
 if test "$PDFDIR" == ""  ; then
@@ -807,6 +808,7 @@ echo "    Compiled libraries: " $COMP_LIBS_SHOW
 echo "    STklos load prefix: " $PREFIX
 echo "      Binary load path: " $EXECDIR
 echo "      Scheme load path: " $SCMDIR
+echo "     Documentation dir: " $DOCDIR
 echo "  Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
