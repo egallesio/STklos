@@ -804,6 +804,9 @@ echo "           FFI support: " $STR_FFI
 echo " Control fx parameters: " $CONTROL_FX
 echo " System libraries used: " $SYST_LIBS_SHOW
 echo "    Compiled libraries: " $COMP_LIBS_SHOW
+echo "    STklos load prefix: " $PREFIX
+echo "      Binary load path: " $EXECDIR
+echo "      Scheme load path: " $SCMDIR
 echo "  Documentation update: " $REPORT_ASCIIDOCTOR
 echo " "
 
