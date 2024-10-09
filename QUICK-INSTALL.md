@@ -54,6 +54,9 @@ four) step process:
      Control fx parameters:  yes
      System libraries used:  ffi (3.4.6) pcre2 (10.44) gmp (6.3.0)
         Compiled libraries:  gc
+          Binary load path:  /usr/local/lib/stklos/2.00
+          Scheme load path:  /usr/local/share/stklos/2.00
+         Documentation dir:  /usr/local/share/doc/stklos/2.00
       Documentation update:  yes (since Asciidoctor is installed)
 
     If this is correct, you can just type 'make' now at your shell prompt.
