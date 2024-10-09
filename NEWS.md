@@ -1,5 +1,88 @@
 NEWS
 ====
+## Version 2.10
+
+This version of ***STklos*** mostly enhances the 2.00 version released a year ago. As usual, this version could not have be finalized without the help of Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini)).
+
+
+
+**Contributors for this version**:
+- Akinori Hattori ([@hattya](https://github.com/hattya))
+- Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini))
+
+
+**Enhancements:**
+
+- Corrected the result of `stklos-config --compile`
+- Added the second (optional) parameter to R7RS `load` (and `try-load`)
+- Enhanced various things about ***STklos*** compilation/installation
+- Added information in the summary of configuration script
+- Builds are now reproducible
+- FFI support can be completely disabled, if needed.
+- Updated GTklos, the  GTK+ extension
+- Optimize `expt` primitive.
+- Avoid unneeded boxing of numbers in the `+`, `-`, `*` and `/` operations
+- Added `!` as a shell escape under the REPL
+- Added statistics to the VM
+- Permit to build ***STklos*** with the `tcc` C compiler.
+- Added an simple hybrid (C and Scheme) module in the examples directory
+- Correct/enhance  implementation of numerical functions in some corner cases (in particular with NaNs and infinities).
+- Added an API to add expressions rewriting rules before their compilation.
+- Location given in error message is more precise
+- Error messages don't loop anymore when displaying circular structures
+- Added `list-set!` as the setter function of `list-ref`
+- Added the number of allocations and collections to the output of the `time` form
+- Added special instructions in the VM for `member`, `memq` and `memv`
+- Added special instructions in the VM for `assoc`, `assq` and `assv`
+- Do constant folding before in-lining usual functions
+- Better UTF-8 support and updated Unicode tables
+- Enhance the `apropos` primitive
+- New REPL variables: `@*`, `@1`, `@2`, `@3`, `@4` and `@5`
+- New REPL commands: `time`, `describe`, `expand`, `import`, `require-feature`, 
+  `open`, `browse`, `manual`, `apropos`
+- Documentation of a function can be accessed directly into the HTML Reeference Manual
+- Length of symbols is no more limited.
+
+
+**New primitives / parameters**:
+
+- `read-ci`
+- `eval-form-string-ci`
+- `read-from-sring-ci`
+- `compiler:source-rewrite`
+- `compiler:peephole-optimizer`
+- `1+` and `1-`
+- `push!` and `pop`
+- `inc!` and `dec!`
+- `dolist`
+- `apropos/alist`
+- `apropos/pp`
+- `default-browser`
+- `open-in-browser`
+- `manual`
+- `install-path`
+- `define-parameter`
+
+**Updated embedded libraries**
+
+- `libgc` updated to version 8.2.8
+- `libffi` updated to version 3.4.6
+- `libpcre2` updated to version 10.44
+
+**New supported SRFI**
+
+- SRFI-115: Scheme Regular Expressions
+- SRFI-178: Bitvector library
+- SRFI-232: Flexible curried procedures
+
+**Misc:**
+
+- Updated documentation
+- Added tests
+- Code cleaning an optimizations
+- Bug fixes
+
+
 
 Version 2.00
 ------------
@@ -42,24 +125,24 @@ The main changes in this version are:
   - SRFI-19:  Time Data Types and Procedures
   - SRFI 43: Vector Library
   - SRFI-95: Sorting and Merging
-  - SRFI 116: Immutable List Library
-  - SRFI 125: Intermediate hash tables
+  - SRFI-116: Immutable List Library
+  - SRFI-125: Intermediate hash tables
   - SRFI-138: Compiling Scheme programs to executables
-  - SRFI 152: String Library (reduced)
+  - SRFI-152: String Library (reduced)
   - SRFI-162: Comparators sublibrary
-  - SRFI 154: First-class dynamic extents
+  - SRFI-154: First-class dynamic extents
   - SRFI-215: Central Log Exchange
-  - SRFI 217: Integer Sets
-  - SRFI 222: Compound objects
-  - SRFI 224: Integer Mappings
+  - SRFI-217: Integer Sets
+  - SRFI-222: Compound objects
+  - SRFI-224: Integer Mappings
   - SRFI-227: Optional Arguments
-  - SRFI 228: Composing Comparators
+  - SRFI-228: Composing Comparators
   - SRFI-229: Tagged Procedures
   - SRFI-230: Atomic Operations
-  - SRFI 235: Combinators
-  - SRFI 236: Evaluating expressions in an unspecified order
+  - SRFI-235: Combinators
+  - SRFI-236: Evaluating expressions in an unspecified order
   - SRFI-238: Codesets
-  - SRFI 244: Multiple-value Definitions
+  - SRFI-244: Multiple-value Definitions
 - Added support for some R7RS-large libraries
    - supported libraries of the *Red edition* are
        - `(scheme bytevector)`
