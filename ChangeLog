@@ -1,3 +1,7 @@
+2024-10-10 Erick Gallesio <eg@stklos.net>
+	- STklos 2.10 release
+	- Fix some problems when compiling in a chrooted environment
+
 2024-10-09 Erick Gallesio <eg@stklos.net>
 	- Merge branch 'jpellegrini-inform-lib-and-scheme-paths'
 	- Add documentation path to the configure summary
