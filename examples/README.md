@@ -32,6 +32,10 @@ The files in this directory show some examples in STklos:
 - `threads.stk` is a program with 3 threads. It shows how to use
   threads and mutexes.
 
+- `regular-expression.stk` is a script that removes all references to
+  IP numbers form a file, replacing them with "<IP REMOVED>". This example
+  shows a practical use of regular expressions.
+
 - `socket-server.stk` is a simple TCP server. Running it displays the
   port to use for communicating with it. This server accepts only one
   connection and it answers its client by returning the entered lines
