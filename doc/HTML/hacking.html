@@ -711,6 +711,12 @@ pre.rouge {
 </ul>
 </li>
 <li><a href="#_garbage_collection">10. Garbage collection</a></li>
+<li><a href="#_c_variables_for_conditional_compilation">11. C variables for conditional compilation</a>
+<ul class="sectlevel2">
+<li><a href="#_detecting_libffi_libgmp_dynamic_loading">11.1. Detecting libffi, libgmp, dynamic loading</a></li>
+<li><a href="#_statistics_gathering">11.2. Statistics gathering</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -2333,6 +2339,87 @@ for strings, numbers etc.</p>
 will be called when the object at <code>ptr</code> is collected.</p>
 </li>
 </ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_c_variables_for_conditional_compilation">11. C variables for conditional compilation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These are simple to understand, but we ist them here anyway.</p>
+</div>
+<div class="sect2">
+<h3 id="_detecting_libffi_libgmp_dynamic_loading">11.1. Detecting libffi, libgmp, dynamic loading</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>libffi</code>: the <code>configure</code> script will set the <code>HAS_FFI</code> variable when libffi is available. In
+<code>ffi.c</code>, for example, the code that actually uses <code>libffi</code> is guarded by an <code>ifdef</code></p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#ifdef HAVE_FFI
+</span>    <span class="cm">/* use libffi here */</span>
+<span class="cp">#else </span><span class="cm">/* HAVE_FFI */</span><span class="cp">
+</span><span class="k">static</span> <span class="kt">void</span> <span class="nf">error_no_ffi</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">STk_error</span><span class="p">(</span><span class="s">"current system does not support FFI"</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="p">...</span>
+<span class="n">DEFINE_PRIMITIVE</span><span class="p">(</span><span class="s">"make-callback"</span><span class="p">,</span> <span class="n">make_callback</span><span class="p">,</span> <span class="n">subr3</span><span class="p">,</span> <span class="p">(</span><span class="n">SCM</span> <span class="n">p1</span><span class="p">,</span> <span class="n">SCM</span> <span class="n">p2</span><span class="p">,</span> <span class="n">SCM</span> <span class="n">p3</span><span class="p">))</span>
+<span class="p">{</span> <span class="n">error_no_ffi</span><span class="p">();</span> <span class="k">return</span> <span class="n">STk_void</span><span class="p">;}</span>
+<span class="p">...</span>
+<span class="cp">#endif</span></code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>libgmp</code>: In <code>number.c</code>, STklos includes &#8220;gmp.h&#8221;. This header file
+may be provided either by <code>mini-gmp</code> or by the full GMP. WHen the
+<code>mini-gmp</code> is used, the variable <code><em>MINI_GMP_H</em></code> is defined, so
+for example this is tone in <code>number.c</code>:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#ifdef __MINI_GMP_H__
+</span>    <span class="cm">/* BEGIN code for compiling WITH MINI GMP (*no* rationals!) */</span>
+    <span class="p">...</span>
+<span class="cp">#else
+</span>    <span class="cm">/* BEGIN code for compiling WITH FULL GMP (*with* rationals!) */</span>
+    <span class="p">...</span>
+<span class="cp">#endif </span><span class="cm">/* __MINI_GMP_H__ */</span><span class="cp">
+</span></code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In <code>dynload.c</code>, the variable <code>HAVE_DLOPEN</code> is used to guard the full contents of the file.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_statistics_gathering">11.2. Statistics gathering</h3>
+<div class="paragraph">
+<p>In <code>vm.c</code>, code that does statistics gathering is guarded by <code>STAT_VM</code>. For example,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#ifdef STAT_VM
+</span><span class="k">static</span> <span class="kt">int</span> <span class="n">couple_instr</span><span class="p">[</span><span class="n">NB_VM_INSTR</span><span class="p">][</span><span class="n">NB_VM_INSTR</span><span class="p">];</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="n">cpt_inst</span><span class="p">[</span><span class="n">NB_VM_INSTR</span><span class="p">];</span>
+<span class="k">static</span> <span class="kt">double</span> <span class="n">time_inst</span><span class="p">[</span><span class="n">NB_VM_INSTR</span><span class="p">];</span>
+<span class="k">static</span> <span class="kt">int</span> <span class="n">collect_stats</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">tick</span><span class="p">(</span><span class="n">STk_instr</span> <span class="n">b</span><span class="p">,</span> <span class="n">STk_instr</span> <span class="o">*</span><span class="n">previous_op</span><span class="p">,</span> <span class="kt">clock_t</span> <span class="o">*</span><span class="n">previous_time</span><span class="p">);</span>
+<span class="cp">#endif</span></code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
