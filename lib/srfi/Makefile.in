@@ -641,8 +641,8 @@ BASEDIR = ../..
 SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir = $(DESTDIR)@SCMDIR@/srfi
-srfilibdir = $(DESTDIR)@EXECDIR@/srfi
+srfidir = @SCMDIR@/srfi
+srfilibdir = @EXECDIR@/srfi
 srfi_DATA = $(SRC_OSTK)
 srfilib_DATA = $(SRC_SHOBJ)
 srfi_sources = $(SRC_STK)
@@ -1111,7 +1111,7 @@ install-sources:
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i && $(MAKE) install-sources)\
 	done
-	cp $(srfi_sources) $(srfidir)
+	install $(srfi_sources) $(DESTDIR)$(srfidir)
 
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
@@ -1123,8 +1123,8 @@ distclean: clean
 
 uninstall-hook:
 	(cd 160 && $(MAKE) uninstall)
-	(cd $(srfidir) && rm -f $(srfi_sources))
-	rmdir $(srfidir) || true
+	(cd $(DESTDIR)$(srfidir) && rm -f $(srfi_sources))
+	rmdir $(DESTDIR)$(srfidir) || true
 
 doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \

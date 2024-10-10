@@ -67,8 +67,8 @@ SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 
 #======================================================================
-srfidir       = $(DESTDIR)@SCMDIR@/srfi/160
-srfilibdir    = $(DESTDIR)@EXECDIR@/srfi/160
+srfidir       = @SCMDIR@/srfi/160
+srfilibdir    = @EXECDIR@/srfi/160
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)
@@ -140,8 +140,8 @@ c128.ostk: ../../scheme/vector/c128.ostk
 #======================================================================
 
 install-sources:
-	mkdir -p $(srfidir)
-	cp $(srfi_sources) $(srfidir)
+	mkdir -p $(DESTDIR)$(srfidir)
+	cp $(srfi_sources) $(DESTDIR)$(srfidir)
 
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
@@ -150,7 +150,7 @@ distclean: clean
 	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd $(srfidir) && rm -f $(srfi_sources) ) || true
+	(cd $(PREFIX)$(srfidir) && rm -f $(srfi_sources) ) || true
 	rmdir $(srfidir) || true
 ##
 ## # no docs...

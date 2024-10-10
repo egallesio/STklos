@@ -1,6 +1,6 @@
 # Makefile.am for STklos source file
 #
-# Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+# Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ STKLOS_BINARY ?= ./stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 
 
-extraincdir     = $(DESTDIR)@INCLUDEDIR@
+extraincdir     = @INCLUDEDIR@/stklos
 extrainc_DATA   = stklos.h extraconf.h stklosconf.h socket.h fport.h
 
 bin_PROGRAMS    = stklos
