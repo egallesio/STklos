@@ -1,4 +1,4 @@
-STklos (version 2.00)
+STklos (version 2.10)
 =====================
 **Erick Gallesio** <eg(at)stklos.net>
 
