@@ -143,6 +143,7 @@ SRC_STK   = 1.stk   \
             230.stk \
             232.stk \
             233.stk \
+            234.stk \
             235.stk \
             236.stk \
             244.stk
@@ -257,6 +258,7 @@ SRC_OSTK =  1.ostk   \
             230.ostk \
             232.ostk \
             233.ostk \
+            234.ostk \
             235.ostk \
             236.ostk \
             244.ostk
@@ -337,6 +339,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
 224.ostk: ../scheme/comparator.ostk
+234.ostk: 1.ostk 11.ostk 26.ostk
 235.ostk: 1.ostk
 
 
