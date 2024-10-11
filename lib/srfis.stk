@@ -272,7 +272,7 @@
     ;; 231 Intervals and Generalized Arrays (Updated^2)
     (232 "Flexible Curried Procedures" () "srfi-232")
     (233 "INI files" (ini-files) "srfi-233")
-    ;; 234 Topological sorting (draft)
+    (234 "Topological sorting" (topological-sort) "srfi-234")
     (235 "Combinators" (combinators) "srfi-235")
     (236 "Evaluating expressions in an unspecified order" () "srfi-236")
     ;; 237 R6RS Records (refined)
