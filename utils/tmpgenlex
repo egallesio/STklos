@@ -24,10 +24,11 @@
 #    Creation date:  1-Jan-2002 18:57 (eg)
 #
 
+prefix="$(cd -- "$(dirname "$0")/.." >/dev/null 2>&1 && pwd)"
+[ "x$STKLOS_BINARY" != "x" ] || STKLOS_BINARY=${prefix}/src/stklos
 
-STKLOS_LOAD_PATH="../lib"
-export STKLOS_LOAD_PATH 
-
-../src/stklos -c -q -b ../src/boot.img -f ../utils/stklos-genlex -- $*
+STKLOS_LOAD_PATH=".:../lib:${prefix}/lib:"
+export STKLOS_LOAD_PATH
 
 
+${STKLOS_BINARY} -c -q -b ../src/boot.img -f ../utils/stklos-genlex -- $*

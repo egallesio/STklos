@@ -62,12 +62,14 @@ case $# in
 esac
 
 prefix="$(cd -- "$(dirname "$0")/.." >/dev/null 2>&1 && pwd)"
+[ "x$STKLOS_BINARY" != "x" ] || STKLOS_BINARY=${prefix}/src/stklos
 
 STKLOS_LOAD_PATH=".:../lib:${prefix}/lib:"
 STKLOS_BUILDING=1
 export STKLOS_LOAD_PATH STKLOS_BUILDING
 
-${prefix}/src/stklos -c -q -f ${prefix}/utils/stklos-compile.stk -- \
+
+${STKLOS_BINARY} -c -q -f ${prefix}/utils/stklos-compile.stk -- \
      --no-time $Copt --output=$out $in
 
 status=$?
