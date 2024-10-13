@@ -535,10 +535,13 @@ doc>
   (let ((inc (string->symbol (format "%%~a" kind))))
     (if (null? files)
         (error kind "at least one parameter must be provided")
-        `(,inc ,@(map (lambda (x)
-                        ;; return x if find-path is null to improve messages
-                        (or (find-path x) x))
-                      files)))))
+        (let* ((src-file (current-loading-file))
+               (dir      (and src-file (dirname src-file)))
+               (paths    (if dir (cons dir *load-path*) *load-path*)))
+          `(,inc ,@(map (lambda (x)
+                          ;; return x if find-path is null to improve messages
+                          (or (find-path x paths) x))
+                      files))))))
 
 (define-macro (include . files)
   `(%do-include include ,files))
