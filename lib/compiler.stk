@@ -460,19 +460,19 @@ doc>
 (define (compile-reference name env epair tail?)
   (compile-access name env epair #t))
 
-;; compile-set! will just call compile-access, and when doing so, will
+;; compile-%%set! will just call compile-access, and when doing so, will
 ;; set the 'ref' argument to #f. The 'ref' argument to compile-access
 ;; means "this is just a reference, not an assignment".
-;; Before calling compile-access, compile-set! will check the syntax
+;; Before calling compile-access, compile-%%set! will check the syntax
 ;; for set! and also extract the variable name.
 ;;
-;;     (compile-set! '(set! a (+ 2 b)))
+;;     (compile-%%set! '(set! a (+ 2 b)))
 ;;      will make these two calls:
 ;;        (compile '(+ 2 b) env '(set! a + 2 b) #f)
 ;;        (compile-access 'a env '(set! a + 2 b) #f)
 ;;
 ;; The extended set! is treated separately.
-(define (compile-set! args env tail?)
+(define (compile-%%set! args env tail?)
   (let ((len (length (cdr args))))
     (if (= len 2)
         (let ((var (cadr args))
@@ -1846,13 +1846,13 @@ doc>
     (close-port port)))
 
 
-(define (compile-include e env tail)
+(define (compile-%%include e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include e "bad include directive ~S" e))
   (for-each (lambda (f) (%include-file f #t))
             (cdr e)))
 
-(define (compile-include-ci e env tail)
+(define (compile-%%include-ci e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include-ci e "bad include directive ~S" e))
   (for-each (lambda (f) (%include-file f #f))
@@ -1870,7 +1870,7 @@ doc>
 ;;
 ;; Constants:
 ;; 0: x
-(define (compile-in-scheme e env tail)
+(define (compile-%%in-scheme e env tail)
   (if (= (length e) 2)
       (begin
         (compile (cadr e) env (cadr e) tail)
@@ -2007,7 +2007,7 @@ both forms.
 ;;;;
 ;;;; REQUIRE
 ;;;;
-(define (compile-require e env tail)
+(define (compile-%%require e env tail)
   ;; Require is not really special (it is in fact compiled as a normal call)
   ;; We just try to add the globals of the file to the list of known
   ;; globals. This is very empiric, but it avoids to add too much false
@@ -2024,7 +2024,7 @@ both forms.
 ;;;;
 ;;;; WHEN-COMPILE
 ;;;;
-(define (compile-when-compile e env tail)
+(define (compile-%%when-compile e env tail)
   (with-handler (lambda (c)
                   (eprintf "*** Exception on when-compile form of ~S\n" e)
                   (raise c))
@@ -2104,16 +2104,16 @@ both forms.
             ((with-handler)       (compile-with-handler   e env tail?))
             ((define-macro)       (compile-define-macro   e env tail?))
 
-            ((%%set!)             (compile-set!           e env tail?))
+            ((%%set!)             (compile-%%set!         e env tail?))
 
             ((%let-syntax)        (compile-%let-syntax     e env tail?))
 
             ;; Special calls
-            ((%%require)          (compile-require        e env tail?))
-            ((%%when-compile)     (compile-when-compile   e env tail?))
-            ((%%include)          (compile-include        e env tail?))
-            ((%%include-ci)       (compile-include-ci     e env tail?))
-            ((%%in-scheme)        (compile-in-scheme      e env tail?))
+            ((%%require)          (compile-%%require      e env tail?))
+            ((%%when-compile)     (compile-%%when-compile e env tail?))
+            ((%%include)          (compile-%%include      e env tail?))
+            ((%%include-ci)       (compile-%%include-ci   e env tail?))
+            ((%%in-scheme)        (compile-%%in-scheme    e env tail?))
             ((%%source-pos)       (compile-%%source-pos   e env tail?))
             ((%%label)            (compile-%%label        e env tail?))
             ((%%goto)             (compile-%%goto         e env tail?))
