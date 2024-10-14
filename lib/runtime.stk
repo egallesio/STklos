@@ -118,7 +118,7 @@
  * (set! (struct-ref x 'name) v) == (struct-set! x 'name v)
  * (set! (list-ref x i) v)       == (list-set! x i v)
  * @end lisp
- * Furhermore, Parameter Objects (see _<<_parameter_objects>>_) are
+ * Furhermore, Parameter Objects (see _<<doc_parameter_objects>>_) are
  * their own setter:
  * @lisp
  * (real-precision)              => 15

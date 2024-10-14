@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -54,7 +54,7 @@ In {{stklos}}, by default, identifiers which start (or end) with a colon
 `bar:` are {{stklos}} keywords, but `not:key` is not a
 keyword. Alternatively, to be compatible with other Scheme implementations,
 the notation `#:foo` is also available to denote the keyword of name
-`foo`. See _<<_keywords>>_ for more information.
+`foo`. See _<<doc_keywords>>_ for more information.
 
 The reader behavior, concerning keywords, can also be changed by the
 following directives:
@@ -164,11 +164,11 @@ the constants `#t` and `#f` as proposed by {{rseven}}.
 * `[]` Brackets are equivalent to
 parentheses. They are used for grouping and to build lists. A
 list opened with a left square bracket must be closed with a
-right square bracket (see _<<_pairs_and_lists>>_).
+right square bracket (see _<<doc_pairs_and_lists>>_).
 
 * `:` a colon at the beginning or the end of
 a symbol introduces a keyword.  Keywords are described in section
-Keywords (see _<<_keywords>>).
+Keywords (see _<<doc_keywords>>_).
 
 * `{{sharp}}n=` ((("Circular structure"))) 
  is used to represent circular structures.  The value given of `n`

@@ -20,6 +20,7 @@
 :pdf-style: ../lib/theme/stklos.yml
 :docinfodir: ../lib/theme
 :docinfo: shared
+:idprefix: doc_
 :nofooter:       // to have reproducible builds
 
 // Load the general adoc library and the refman specific one

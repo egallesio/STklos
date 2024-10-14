@@ -89,7 +89,7 @@ the `srfi` meta library and their name is SRFI number. Hence, to use
 the exported symbols of {{quick-link-srfi 1}}, you'll have to import the
 `(srfi 1)` library.
 
-See  _<<_srfis>>_ for more information
+See  _<<doc_srfis>>_ for more information
 
 ==== The (stklos ...) Libraries
 

@@ -654,7 +654,7 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
  * main difference with the |write| procedure is that |write*|
  * handles data structures with cycles. Circular structure written by
  * this procedure use the `"{{sharp}}n="`)) and  `"{{sharp}}n{{sharp}}"`))
- * notations (see <<_other_notations>>).
+ * notations (see _<<doc_other_notations>>_).
  *
  * NOTE: This function is also called |write*|.
  * The name |write*| was the name used by {{stklos}} for

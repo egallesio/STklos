@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2022 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -723,7 +723,7 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
  *
  * Sends the integer signal |sig| to |proc|. Since value of |sig| is system
  * dependant, use the symbolic defined signal constants to make your program
- * independant of the running system (see <<_signals>>).
+ * independant of the running system (see _<<doc_signals>>_).
  * The result of |process-send-signal| is *_void_*.
 doc>
 */

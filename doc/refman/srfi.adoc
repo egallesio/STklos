@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -291,14 +291,14 @@ is more general than the one defined this SRFI.
 {{srfi-subsection 35}}
 (((conditions)))
 {{quick-link-srfi 35}} is fully supported.
-See _<<_predefined_conditions>>_ for the predefined conditions
+See _<<doc_predefined_conditions>>_ for the predefined conditions
 and when it is required to load this file.
 
 
 // **** SRFI-36
 {{srfi-subsection 36}}
 (((conditions, IO)))
-{{quick-link-srfi 36}} is fully supported.  See _<<_predefined_conditions>>_
+{{quick-link-srfi 36}} is fully supported.  See _<<doc_predefined_conditions>>_
 Conditions) for the predefined conditions and when it is required to
 load this file.
 

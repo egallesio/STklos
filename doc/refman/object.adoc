@@ -75,7 +75,7 @@ The syntax of `define-class` is close to CLOS `defclass`:
 
 The *_metaclass option_* will not be discussed here.
 The **_superclass_**es list specifies the super classes of
-*_class_* (see <<_inheritance>> for details).
+*_class_* (see _<<doc_inheritance>>_ for details).
 
 ((("class")))
 A *_slot description_* gives the name of a slot and,
@@ -575,7 +575,7 @@ not needed.
 ((("next-method")))
 When a generic function is called, the list of applicable
 methods is built.  As mentioned before, the most specific method
-of this list is applied (see <<_generic_functions>>).
+of this list is applied (see <<doc_generic_functions>>).
 
 This method may call, if needed, the next method in the list of
 applicable methods.  This is done by using the special form

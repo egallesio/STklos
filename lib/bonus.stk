@@ -410,7 +410,7 @@ doc>
  * * This parameter works on the current input port only and cannot change
  *   read beahviour's globally.
  *
- * * See also syntax for _<<_symbols, special characters>>_ in symbols.
+ * * See also syntax for _<<doc_symbols, special characters>>_ in symbols.
  * ====
 doc>
 |#
@@ -2573,7 +2573,7 @@ doc>
  * @end lisp
  * is equivalent to the requiring |srfi-1| and |srfi-2|.
 
- * A list of available symbolic names for features is given in <<_srfis>>.
+ * A list of available symbolic names for features is given in <<doc_srfis>>.
 doc>
 |#
 

@@ -61,7 +61,7 @@ doc/*/tmp-html.txt
 doc/*/tmp-pdf.txt
 doc/HTML/stklos-ref-multi.html
 doc/HTML/FDL.html
-doc/HTML/_*.html
+doc/HTML/doc_*.html
 
 
 # Examples directory 
