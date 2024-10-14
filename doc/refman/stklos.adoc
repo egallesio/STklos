@@ -88,7 +88,7 @@ Free Documentation License">>.
 {{Include* "biblio.adoc"}}
 
 [appendix]
-[#_idiosync]
+[#doc_idiosync]
 {{Include* "idiosync.adoc"}}
 
 [appendix]

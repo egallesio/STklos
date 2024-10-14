@@ -22,6 +22,7 @@ MULTI_AUX = FDL.html                                           \
             doc_exceptions_and_conditions.html                 \
             doc_expressions.html                               \
             doc_foreign_function_interface.html                \
+            doc_idiosync.html                                  \
             doc_introduction.html                              \
             doc_pattern_matching.html                          \
             doc_preface.html                                   \
