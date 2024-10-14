@@ -16,7 +16,7 @@ of `configure --help`.
 ***However:***
 
 * You *need* a STklos binary in order to compile STklos. When not
-  cross-copiling,
+  cross-compiling,
   - the binary is generated as `src/stklos`
   - the build proceeds using `src/stklos` as the STklos binary that
     can be used to compile `.stk` files
