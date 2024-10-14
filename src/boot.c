@@ -598,7 +598,7 @@ char* STk_boot_consts = "#("
 "compile-reference" " "
 "\"~S is a bad symbol\"" " "
 "\"bad assignment syntax in ~S\"" " "
-"compile-set!" " "
+"compile-%%set!" " "
 "\"bad syntax in ~S\"" " "
 "compile-if" " "
 "extended-lambda->lambda" " "
@@ -807,13 +807,13 @@ char* STk_boot_consts = "#("
 "close-port" " "
 "include" " "
 "\"bad include directive ~S\"" " "
-"compile-include" " "
+"compile-%%include" " "
 "include-ci" " "
 "\"bad include directive ~S\"" " "
-"compile-include-ci" " "
+"compile-%%include-ci" " "
 "INSCHEME" " "
 "\"expected one argument\"" " "
-"compile-in-scheme" " "
+"compile-%%in-scheme" " "
 "%let-syntax" " "
 "\"ill formed %let-syntax ~S\"" " "
 "\"ill formed binding ~S\"" " "
@@ -830,9 +830,9 @@ char* STk_boot_consts = "#("
 "find-file-information" " "
 "import-file-information" " "
 "boolean?" " "
-"compile-require" " "
+"compile-%%require" " "
 "\"*** Exception on when-compile form of ~S\\n\"" " "
-"compile-when-compile" " "
+"compile-%%when-compile" " "
 "(lambda body `(begin (%%when-compile ,@body) (void)))" " "
 "when-load-and-compile" " "
 "(lambda body `(begin (%%when-compile ,@body) ,@body (void)))" " "
@@ -1837,7 +1837,7 @@ char* STk_boot_consts = "#("
 "(lambda (file) `(%%require4syntax ,file))" " "
 "%%require4syntax" " "
 "%do-include" " "
-"(lambda (kind files) (let ((inc (string->symbol (format \"%%~a\" kind)))) (if (null? files) (error kind \"at least one parameter must be provided\") `(,inc ,@(map (lambda (x) (or (find-path x) x)) files)))))" " "
+"(lambda (kind files) (let ((inc (string->symbol (format \"%%~a\" kind)))) (if (null? files) (error kind \"at least one parameter must be provided\") (let* ((src-file (current-loading-file)) (dir (and src-file (dirname src-file))) (paths (if dir (cons dir *load-path*) *load-path*))) `(,inc ,@(map (lambda (x) (or (find-path x paths) x)) files))))))" " "
 "\"%%~a\"" " "
 "\"at least one parameter must be provided\"" " "
 "(lambda files `(%do-include include ,files))" " "
@@ -23041,7 +23041,7 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x7d,
 0x2d,
-0x6771,
+0x6794,
 0x25,
 0x55,
 0xf6,
@@ -48411,7 +48411,7 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x726,
 0x23,
-0x37,
+0x5a,
 0x2,
 0x25,
 0x25,
@@ -48442,16 +48442,50 @@ STk_instr STk_boot_code [] = {
 0x4c,
 0x2,
 0x24,
-0x65,
+0x2a,
+0x3,
 0x25,
-0x23,
-0xd,
-0x1,
+0x56,
+0x6fe,
+0x0,
+0x15,
+0xc,
+0x1d,
+0x7,
 0x25,
 0x65,
 0x56,
-0x332,
+0x1d6,
 0x1,
+0x1c,
+0x1,
+0x1,
+0x16,
+0xd,
+0x1d,
+0x6,
+0x66,
+0xa,
+0x6ec,
+0x3b,
+0x1c,
+0x2,
+0xa,
+0x6ec,
+0x17,
+0x75,
+0x100,
+0x25,
+0x23,
+0xf,
+0x1,
+0x25,
+0x65,
+0x75,
+0x102,
+0x56,
+0x332,
+0x2,
 0x1e,
 0x4,
 0xc,
@@ -48461,11 +48495,12 @@ STk_instr STk_boot_code [] = {
 0x24,
 0x21,
 0x75,
-0x100,
+0x200,
 0x56,
 0x3a,
 0x2,
 0x3b,
+0x24,
 0x24,
 0x21,
 0x55,
