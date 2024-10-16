@@ -481,6 +481,7 @@ doc>
 
              ((and (symbol? e)
                    (not (symbol-bound? e))
+                   (not (eq? e '||))
                    (char=? (string-ref (symbol->string e) 0) #\!))
                  ;; Shell command "!xxx arg1 arg2"
                  (let* ((end (read-line (current-input-port)))
