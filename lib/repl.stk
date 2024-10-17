@@ -480,6 +480,7 @@ doc>
                  (do-repl-command (cadr e)))
 
              ((and (symbol? e)
+                   (not (eq? e '||))
                    (not (symbol-bound? e))
                    (char=? (string-ref (symbol->string e) 0) #\!))
                  ;; Shell command "!xxx arg1 arg2"
