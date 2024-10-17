@@ -134,18 +134,18 @@ esac
 #   pdfdir = ${docdir}/pdf
 #   htmldir = ${docdir}/html
 # Of course, if the user specify any option, we use the value he/she gave
-if test "$DOCDIR" == "" ; then
+if test "X$DOCDIR" = "X" ; then
     # user has not given a "--docdir" option. Use our own convention
     docdir="${prefix}/share/doc/${PACKAGE_TARNAME}/${VERSION}"
     DOCDIR=${docdir}
 fi
 
-if test "$PDFDIR" == ""  ; then
+if test "X$PDFDIR" = "X"  ; then
    # user has not given a "--pdfdir" option. Use our own convention
    pdfdir="${docdir}/pdf"
 fi
 
-if test "$HTMLDIR" == ""  ; then
+if test "X$HTMLDIR" = "X"  ; then
    # user has not given a "--htmldir" option. Use our own convention
    htmldir="${docdir}/html"
 fi
@@ -158,12 +158,12 @@ fi
 #
 # In any case, we will place our files in the stklos/${VERSION} subdir
 
-if test "$LIBDIR" == ""  ; then
+if test "X$LIBDIR" = "X"  ; then
    # user has not given a "--libdir" option. Use ${prefix}/lib/stklos/${VERSION}
    libdir="${prefix}/lib/${PACKAGE_TARNAME}/${VERSION}"
 fi
 
-if test "$DATADIR" == ""  ; then
+if test "X$DATADIR" = "X"  ; then
    # user has not given a "--datadir" option. Use ${prefix}/share/stklos/${VERSION}
    datadir="${prefix}/share/${PACKAGE_TARNAME}/${VERSION}"
 fi
@@ -658,7 +658,7 @@ then
   # but it makes things simpler
   git_version=`git --version 2>/dev/null || true`
 
-  if test "$git_version" != ""
+  if test "X$git_version" != "X"
   then
     # Git is installed
     git_patch="`git describe --tags | sed -Ee 's/.*-(.*)-.*/\1/'`"
