@@ -64,6 +64,8 @@ times.
 .IP "-A dir"
 append 'dir' to the directory path. This option can be used several
 times.
+.IP "--includes-use-load-path"
+\fIInclude\fR and \fIinclude-ci\fR use the \fIload-path\fR parameter object.
 .IP "-e sexpr, --execute=sexpr"
 evaluate the given sexpr and exit
 .IP "-b file, --boot-file=file"

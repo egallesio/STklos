@@ -159,7 +159,8 @@
         (compiler:gen-line-number #t))
      (("show-instructions" :alternate "S" :help "Show instructions in generated file")
          (compiler:show-assembly-code #t))
-     (("compiler-flags" :alternate "F" :arg flags :help "Add (+) or suppress (-) compiler flags")
+     (("compiler-flags" :alternate "F" :arg flags
+       :help "Add (+) or suppress (-) compiler flags")
       (%compiler-set-flags flags))
 
      "Path options"
