@@ -548,11 +548,13 @@ doc>
 ; INCLUDE
 ;
 ;=============================================================================
+
 (define-macro (%do-include kind files)
   (let ((inc (string->symbol (format "%%~a" kind))))
     (if (null? files)
         (error kind "at least one parameter must be provided")
-        (let* ((src-file (current-loading-file))
+        (let* ((port     (compiler-current-port))
+               (src-file (if port (port-file-name port) (current-loading-file)))
                (dir      (and src-file (dirname src-file)))
                (others   (if (includes-use-load-path) *load-path* '()))
                (paths    (if dir (cons dir others) others)))
