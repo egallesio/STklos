@@ -1,7 +1,7 @@
 ;;;;
 ;;;; utils.stk  -- Compiler Utilities
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -40,24 +40,25 @@
 ;;;     compiler-error ...
 ;;; ----------------------------------------------------------------------
 (define (compiler-error where who fmt . l)
-  (let* ((where (if (eq? where (void)) "" (format "~A: " where)))
+  (let* ((port  (compiler-current-port))
+         (where (if (eq? where (void)) "" (format "~A: " where)))
          (loc   (cond
                  ((%epair? who)
                   ;; location should be more accurate especially on generated code
                   (format "~A:~A: "
                           (%path-without-cwd (%epair-file who))
                           (%epair-line who)))
-                 ((and *compiler-port* (%port-file-fd *compiler-port*))
-                  ;; *compiler-port* denotes a file port (probably less precise location
+                 ((and port (%port-file-fd port))
+                  ;; port denotes a file port (probably less precise location
                   ;; than with an epair)
                   (format "~A:~A: "
-                          (%path-without-cwd (port-file-name *compiler-port*))
-                          (port-current-line *compiler-port*)))
+                          (%path-without-cwd (port-file-name port))
+                          (port-current-line port)))
                  (else
                   ;; no information on the location. Be silent
                   ""))))
 
-    (if *compiler-port*
+    (if port
         ;; Compiling a file
         (apply format
                (current-error-port)
@@ -78,7 +79,7 @@
                             (%path-without-cwd (%epair-file who))
                             (%epair-line who))
                     "")))
-    (if *compiler-port*
+    (if (compiler-current-port)
         ;; Compiling a file
         (apply format
                (current-error-port)

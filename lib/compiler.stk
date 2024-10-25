@@ -33,15 +33,12 @@
           %compiler-new-label
           %macro-expand
 
-          ;; FIXME
           compiler-current-module
+          compiler-current-port
           when-compile
           when-load-and-compile
           %syntax-error
           %compile-time-define)
-
-
-(define *compiler-port* #f)
 
 ;; ----------------------------------------------------------------------
 ;;  Define the inlining tables
@@ -212,6 +209,7 @@
     (add-file-module-list! new)
     new))
 
+(define-parameter compiler-current-port #f)
 
 
 
@@ -1833,16 +1831,16 @@ doc>
 ;;
 (define (%include-file name  case-sensitive?)
   (let ((port (open-input-file name))
-        (old  *compiler-port*))
-    (with-handler (lambda (c) (set! *compiler-port* old) (raise c))
-                  (set! *compiler-port* port)
+        (old  (compiler-current-port)))
+    (with-handler (lambda (c) (set! (compiler-current-port) old) (raise c))
+                  (set! (compiler-current-port) port)
                   (unless case-sensitive?
                     (%port-case-sensitive-set! port #f))
                   (do ((expr (%read port) (%read port)))
                       ((eof-object? expr))
                     (compile expr #f expr #f))
 
-                  (set! *compiler-port* old))
+                  (set! (compiler-current-port) old))
     (close-port port)))
 
 
