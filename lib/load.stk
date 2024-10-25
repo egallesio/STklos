@@ -30,8 +30,7 @@
         find-path
         require provide provided? require/provide
         warning-when-not-provided
-        require-library require-for-syntax
-        include include-ci include-file
+        require-library include include-ci include-file
         autoload
 
         ;; FIXME
@@ -526,22 +525,6 @@ doc>
 
 (define-macro (require-library what)
   `(%%require ,what #t))
-
-#|
-<doc EXT require-for-syntax
- * (require-for-syntax string)
- *
-doc>
-|#
-#;(define-macro (require-for-syntax name)
-  `(when-compile
-      (require ,name)))
-
-
-(define-macro (require-for-syntax file)
-  `(%%require4syntax ,file))
-
-
 
 ;=============================================================================
 ;
