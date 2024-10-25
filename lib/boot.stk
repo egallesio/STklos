@@ -259,7 +259,8 @@
       (debug   (key-get *%system-state-plist* :debug 0))
       (cflags  (key-get *%system-state-plist* :comp-flags #f))
       (Idirs   (key-get *%system-state-plist* :prepend-dirs '()))
-      (Adirs   (key-get *%system-state-plist* :append-dirs '())))
+      (Adirs   (key-get *%system-state-plist* :append-dirs '()))
+      (usepath (key-get *%system-state-plist* :use-load-path #f)))
 
   ;; Test if we have the -V flag (SRFI-176 version flag)
   (when s176
@@ -283,6 +284,8 @@
     (load-path (append Idirs
                        (load-path)
                        (reverse Adirs))))
+  (when usepath
+    (includes-use-load-path #t))
 
   ;; Look at the debug flag
   (when (> debug 0)
