@@ -24,7 +24,8 @@
 ;;;;
 
 (export build-path-from-shell-variable install-path
-        load-path load-suffixes load-verbose current-loading-file
+        load-path load-suffixes includes-use-load-path
+        load-verbose current-loading-file
         try-load load
         find-path
         require provide provided? require/provide
@@ -156,6 +157,22 @@ doc>
     ;; Set the load suffixes
     (set! *load-suffixes* new)
     new))
+
+#|
+<doc EXT includes-use-load-path
+ * (includes-use-load-path)
+ * (includes-use-load-path bool)
+ *
+ * This parameter controls if the |include| and |include-ci| forms use
+ * the |load-path| parameter. By default, the loading path is not used;
+ * that means that an included file is searched only in the directory
+ * of the file which include it. If |load-path| is used, then
+ * an included file is searched first in the directory which contains
+ * the including file, and then, in the directories given by |load-path|.
+doc>
+|#
+(define-parameter includes-use-load-path #f)
+
 
 #|
 <doc EXT load-verbose
@@ -537,7 +554,8 @@ doc>
         (error kind "at least one parameter must be provided")
         (let* ((src-file (current-loading-file))
                (dir      (and src-file (dirname src-file)))
-               (paths    (if dir (cons dir *load-path*) *load-path*)))
+               (others   (if (includes-use-load-path) *load-path* '()))
+               (paths    (if dir (cons dir others) others)))
           `(,inc ,@(map (lambda (x)
                           ;; return x if find-path is null to improve messages
                           (or (find-path x paths) x))

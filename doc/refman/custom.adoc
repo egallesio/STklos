@@ -24,6 +24,7 @@ parameters are listed below.
 (((STKLOS_LOAD_SUFFIXES)))
 {{insertdoc 'load-suffixes}}
 {{insertdoc 'load-verbose}}
+{{insertdoc 'includes-use-load-path}}
 {{insertdoc 'thread-handler-error-show}}
 {{insertdoc 'stklos-debug-level}}
 
