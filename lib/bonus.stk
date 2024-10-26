@@ -465,7 +465,7 @@ doc>
          (expr (read-ci p)))
     (close-port p)
     expr))
- 
+
 
 #|
 <doc EXT eval-from-string-ci eval-from-string
@@ -1703,8 +1703,50 @@ doc>
 <doc EXT-SYNTAX declare-new-error
  * (declare-new-error name)
  *
- * TODO
+ * Declares a new error with name |&name|. This will expand to
+ * |define-condition-type| (described in SRFI-35), and the effect will
+ * be that:
+ * - a new condition of type |&error-message| is created, with a |&|
+ *   sign prepended to |name|
+ * - a new predicate is created, with a |&| sign prepended and a
+ *   question mark (|?|) appended to |name|
+ * - a new procedure called |name| is created. This procedure will
+ *   signal errors of this new type.
  *
+ * SRFI 35 must have been loaded for |declare-new-error| to work.
+ *
+ * @lisp
+ * (import (srfi 35))
+ *
+ * (declare-new-error big-error)
+ * (apropos 'big-error) => (&big-error &big-error? big-error)
+ *
+ * (describe &big-error)
+ * #[condition-type &big-error 139844680604416] is a condition type
+ *                                              whose name is &big-error.
+ * Parent of condition type: &error-message
+ * Fields of condition type:
+ * 	location
+ * 	backtrace
+ * 	message
+ * 	r7rs-msg
+ * 	r7rs-irritants
+ *
+ * &big-error? => #[closure &big-error?]
+ * big-error   => #[closure big-error]
+ *
+ * (big-error)
+ * **** Error:
+ * big-error:
+ *
+ * (big-error "Huge mistake: ~S" 14)
+ * **** Error:
+ * big-error: Huge mistake: 14
+ *
+ * (big-error 'callee "Huge mistake: ~S" 14)
+ * **** Error:
+ * callee: Huge mistake: 14
+ * @end lisp
 doc>
 |#
 (define-macro (declare-new-error name)
