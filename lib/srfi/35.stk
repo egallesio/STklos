@@ -90,12 +90,15 @@
  * (define-new-error name)
  *
  * Declares a new error with name |&name|. This will expand to
- * |define-condition-type| (described in SRFI-35), and the effect will
- * be that:
+ * |define-condition-type| (described in SRFI-35),
+ * and the effect will be that:
+ *
  * - a new condition of type |&error-message| is created, with a |&|
  *   sign prepended to |name|
+ *
  * - a new predicate is created, with a |&| sign prepended and a
  *   question mark (|?|) appended to |name|
+ *
  * - a new procedure called |name| is created. This procedure will
  *   signal errors of this new type.
  *
@@ -110,18 +113,14 @@
  *                                              whose name is &big-error.
  * Parent of condition type: &error-message
  * Fields of condition type:
- * 	location
- * 	backtrace
- * 	message
- * 	r7rs-msg
- * 	r7rs-irritants
+ *     location
+ *     backtrace
+ *     message
+ *     r7rs-msg
+ *     r7rs-irritants
  *
  * &big-error? => #[closure &big-error?]
  * big-error   => #[closure big-error]
- *
- * (big-error)
- * **** Error:
- * big-error:
  *
  * (big-error "Huge mistake: ~S" 14)
  * **** Error:

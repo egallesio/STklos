@@ -28291,6 +28291,72 @@ is more general than the one defined this SRFI.</p>
 See <em><a href="#doc_predefined_conditions">Section 7.3</a></em> for the predefined conditions
 and when it is required to load this file.</p>
 </div>
+<div class="paragraph">
+<p>Furthermore, this SRFI exports also the helper syntax <code>define-new-error</code>:
+<a id='P_define-new-error'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(define-new-error name) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Declares a new error with name <code>&amp;name</code>. This will expand to
+<code>define-condition-type</code> (described in SRFI-35),
+and the effect will be that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a new condition of type <code>&amp;error-message</code> is created, with a <code>&amp;</code>
+sign prepended to <code>name</code></p>
+</li>
+<li>
+<p>a new predicate is created, with a <code>&amp;</code> sign prepended and a
+question mark (<code>?</code>) appended to <code>name</code></p>
+</li>
+<li>
+<p>a new procedure called <code>name</code> is created. This procedure will
+signal errors of this new type.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">35</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-new-error</span> <span class="nv">big-error</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">apropos</span> <span class="ss">'big-error</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&amp;big-error</span> <span class="nv">&amp;big-error?</span> <span class="nv">big-error</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">&amp;big-error</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">condition-type</span> <span class="nv">&amp;big-error</span> <span class="mi">139844680604416</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">condition</span> <span class="nv">type</span>
+                                             <span class="nv">whose</span> <span class="nv">name</span> <span class="nv">is</span> <span class="nv">&amp;big-error</span><span class="o">.</span>
+<span class="nv">Parent</span> <span class="nv">of</span> <span class="nv">condition</span> <span class="nv">type:</span> <span class="nv">&amp;error-message</span>
+<span class="nv">Fields</span> <span class="nv">of</span> <span class="nv">condition</span> <span class="nv">type:</span>
+    <span class="nv">location</span>
+    <span class="nv">backtrace</span>
+    <span class="nv">message</span>
+    <span class="nv">r7rs-msg</span>
+    <span class="nv">r7rs-irritants</span>
+
+<span class="nv">&amp;big-error?</span> <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">&amp;big-error?</span><span class="p">]</span>
+<span class="nv">big-error</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">big-error</span><span class="p">]</span>
+
+<span class="p">(</span><span class="nf">big-error</span> <span class="s">"Huge mistake: ~S"</span> <span class="mi">14</span><span class="p">)</span>
+<span class="nv">****</span> <span class="nv">Error:</span>
+<span class="nv">big-error:</span> <span class="nv">Huge</span> <span class="nv">mistake:</span> <span class="mi">14</span>
+
+<span class="p">(</span><span class="nf">big-error</span> <span class="ss">'callee</span> <span class="s">"Huge mistake: ~S"</span> <span class="mi">14</span><span class="p">)</span>
+<span class="nv">****</span> <span class="nv">Error:</span>
+<span class="nv">callee:</span> <span class="nv">Huge</span> <span class="nv">mistake:</span> <span class="mi">14</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="doc_srfi_36io_conditions">srfi-36&#8201;&#8212;&#8201;I/O Conditions</h4>
