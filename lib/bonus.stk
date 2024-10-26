@@ -49,7 +49,6 @@
         ansi-color ansi-color-protect do-color
         port->string port->sexp-list port->string-list
         print printerr eprintf printf fprintf
-        declare-new-error
         exec exec-list die
         decompose-file-name dirname basename file-separator
         make-path file-suffix file-prefix
@@ -465,7 +464,7 @@ doc>
          (expr (read-ci p)))
     (close-port p)
     expr))
- 
+
 
 #|
 <doc EXT eval-from-string-ci eval-from-string
@@ -1697,27 +1696,6 @@ doc>
 
 (define (fprintf port fmt . args)
   (display (apply format fmt args) port))
-
-
-#|
-<doc EXT-SYNTAX declare-new-error
- * (declare-new-error name)
- *
- * TODO
- *
-doc>
-|#
-(define-macro (declare-new-error name)
-  (let ((cond-name (string->symbol (format "&~a" name)))
-        (predicate (string->symbol (format "&~a?" name)))
-        (args      (gensym)))
-    `(begin
-       (define-condition-type ,cond-name &error-message ,predicate)
-       (define (,name . ,args)
-         (if (and (not (null? ,args))
-                  (symbol? (car ,args)))
-             (apply signal-error ,cond-name ,args)
-             (apply signal-error ,cond-name ',name ,args))))))
 
 #|
 <doc EXT  exec exec-list

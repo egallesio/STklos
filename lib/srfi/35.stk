@@ -1,7 +1,7 @@
 ;;;;
 ;;;; 35.stk     -- Implementation of SRFI-35 (Conditions)
 ;;;;
-;;;; Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -40,6 +40,9 @@
 
      ;; Standard conditions
      &condition &message &serious &error
+
+     ;; STklos bonus
+     define-new-error
    )
 
 (define-macro (%define-condition-type-accessors name supertype predicate . slots)
@@ -82,6 +85,64 @@
               slots)
        ,new)))
 
+#|
+<doc EXT-SYNTAX define-new-error
+ * (define-new-error name)
+ *
+ * Declares a new error with name |&name|. This will expand to
+ * |define-condition-type| (described in SRFI-35),
+ * and the effect will be that:
+ *
+ * - a new condition of type |&error-message| is created, with a |&|
+ *   sign prepended to |name|
+ *
+ * - a new predicate is created, with a |&| sign prepended and a
+ *   question mark (|?|) appended to |name|
+ *
+ * - a new procedure called |name| is created. This procedure will
+ *   signal errors of this new type.
+ *
+ * @lisp
+ * (import (srfi 35))
+ *
+ * (define-new-error big-error)
+ * (apropos 'big-error) => (&big-error &big-error? big-error)
+ *
+ * (describe &big-error)
+ * #[condition-type &big-error 139844680604416] is a condition type
+ *                                              whose name is &big-error.
+ * Parent of condition type: &error-message
+ * Fields of condition type:
+ *     location
+ *     backtrace
+ *     message
+ *     r7rs-msg
+ *     r7rs-irritants
+ *
+ * &big-error? => #[closure &big-error?]
+ * big-error   => #[closure big-error]
+ *
+ * (big-error "Huge mistake: ~S" 14)
+ * **** Error:
+ * big-error: Huge mistake: 14
+ *
+ * (big-error 'callee "Huge mistake: ~S" 14)
+ * **** Error:
+ * callee: Huge mistake: 14
+ * @end lisp
+doc>
+|#
+(define-macro (define-new-error name)
+  (let ((cond-name (string->symbol (format "&~a" name)))
+        (predicate (string->symbol (format "&~a?" name)))
+        (args      (gensym)))
+    `(begin
+       (define-condition-type ,cond-name &error-message ,predicate)
+       (define (,name . ,args)
+         (if (and (not (null? ,args))
+                  (symbol? (car ,args)))
+             (apply signal-error ,cond-name ,args)
+             (apply signal-error ,cond-name ',name ,args))))))
 )  ;; End of module
 
 (provide "srfi/35")

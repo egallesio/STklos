@@ -294,6 +294,10 @@ is more general than the one defined this SRFI.
 See _<<doc_predefined_conditions>>_ for the predefined conditions
 and when it is required to load this file.
 
+Furthermore, this SRFI exports also the helper syntax `define-new-error`:
+{{insertdoc 'define-new-error}}
+
+
 
 // **** SRFI-36
 {{srfi-subsection 36}}
