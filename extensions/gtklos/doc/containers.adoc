@@ -1,0 +1,10 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.net]
+//    Creation date:  31-Oct-2024 09:48
+
+== Containers
+
+EOF

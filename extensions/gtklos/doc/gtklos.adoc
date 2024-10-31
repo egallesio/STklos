@@ -1,0 +1,26 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.net]
+//    Creation date:  31-Oct-2024 09:48
+
+= GTKlos extension
+:authors: Erick Gallesio
+:email: eg@stklos.net
+:doctype: book
+:source-highlighter: rouge
+:rouge-style: pango
+:icons: font
+:toc: left
+:toclevels: 2
+:sectnums:
+:xrefstyle: short
+:pdf-styless: ../../../doc/refman/theme/stklos.yml
+
+
+{{load "../../../doc/lib/adoc-lib.stk"}}
+{{load "./doc.stk"}}
+
+{{Include* "intro.adoc"}}
+{{Include* "containers.adoc"}}
