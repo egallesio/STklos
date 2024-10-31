@@ -1,7 +1,7 @@
 /*
  * gtklos.c              -- Various GTk+ wrappers for GTklos
  *
- * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -754,9 +754,16 @@ DEFINE_PRIMITIVE("%file-chooser-files", file_chooser_files, subr1, (SCM obj))
 
 static void stklos_interactive_gtk_loop(void) {
   if (gtk_events_pending())
-    gtk_main_iteration_do(0);
+    gtk_main_iteration_do(1);
 }
 
+
+DEFINE_PRIMITIVE("%flush-gtk-events", flush_gtk_event, subr0, (void))
+{
+  while (gtk_events_pending())
+    gtk_main_iteration_do(0);
+  return STk_void;
+}
 
 DEFINE_PRIMITIVE("%readline-idle-hook", rl_hook, subr1, (SCM ptr))
 {
@@ -925,7 +932,8 @@ MODULE_ENTRY_START("stklos/gtklos") {
   ADD_PRIMITIVE_IN_MODULE(timeout, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(when_idle, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(kill_idle, gtklos_module);
-
+  ADD_PRIMITIVE_IN_MODULE(flush_gtk_event, gtklos_module);
+  
 #if HAVE_CANVAS == 1
   /* Canvas support */
   canvas_line = STk_intern("canvas-line");

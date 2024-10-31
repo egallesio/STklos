@@ -764,6 +764,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           extensions/Makefile
 
           extensions/gtklos/Makefile
+          extensions/gtklos/doc/Makefile
           extensions/gtklos/lib/stklos/Makefile
           extensions/gtklos/lib/stklos/gtklos-config.h
           extensions/gtklos/lib/stklos/gtklos.stk
