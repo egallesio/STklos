@@ -22,19 +22,18 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 31-Oct-2024 18:32
-;;;; Last file update: 31-Oct-2024 19:54 (eg)
+;;;; Last file update:  3-Nov-2024 18:44 (eg)
 ;;;;
 
 (import (stklos gtklos))
 
 (define-macro (do* sexpr)
   `(begin
-     (sleep 10)
      (write ',sexpr)
      (newline)
      ,sexpr))
 
-
+#|
 (define (event-loop)
   (thread-start!
    (make-thread (lambda ()
@@ -44,3 +43,82 @@
                     (Loop))))))
 
 (event-loop)
+|#
+
+;; ----------------------------------------------------------------------
+
+(define-method widget-precedence-list (class)
+  (filter (lambda(x) (not (member x (list <object> <top>))))
+          (class-precedence-list class)))
+
+
+(define (class-adoc-id k)
+  (let ((name (regexp-replace "<(.*)>"
+                              (symbol->string (class-name k))
+                              "\\1")))
+     (format #f "class-~a" name)))
+
+#|
+(define (show-class-text k)
+  ;; print the class-precedence list
+  (let ((l (widget-precedence-list k)))
+    (printf "Class ~a inherits from:\n\n" (class-name k))
+    (for-each (lambda (x)
+                (printf "- <<~a,`~a`>>\n" (class-adoc-id x) (class-name x)))
+              (cdr l))
+    (printf "\n\n"))
+
+  ;; print the direct subclasses
+  (let ((l (class-direct-subclasses k)))
+    (unless (null? l)
+      (printf "Class ~a is directly inherited by:\n\n" (class-name k))
+      (for-each (lambda (x)
+                  (printf "- <<~a,`~a`>>\n" (class-adoc-id x) (class-name x)))
+                l)
+      (printf "\n\n")))
+
+  ;; print the slots
+  (let ((l (class-direct-slots k)))
+    (if (null? l)
+        (printf "Class ~a has no direct slots\n\n" (class-name k))
+        (begin 
+          (printf "The directs slots of the ~a class are:\n\n" (class-name k))
+          (for-each (lambda (x) (printf "- ~a\n" (slot-definition-name x))) l)
+          (printf "\n\n")))))
+|#
+
+(define (show-class-table k)
+  (printf "[%unbreakable]\n")
+  (printf "[cols=\"2\"]\n")
+  (printf "|===\n\n")
+  
+  ;; print the class-precedence list
+  (let ((l (widget-precedence-list k)))
+    (printf "| *Inherited classes*\n")
+    (printf "| ")
+    (for-each (lambda (x)
+                (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x)))
+              (cdr l))
+    (printf "\n"))
+
+  ;; print the direct subclasses
+  (let ((l (class-direct-subclasses k)))
+    (printf "| *Directly inheriting classes*\n")
+    (printf "| ")
+    (for-each (lambda (x)
+                (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x)))
+              l)
+    (printf "\n"))
+  
+  ;; print the slots
+  (let ((l (map slot-definition-name (class-direct-slots k))))
+    (printf "| *Direct slots*\n")
+    (printf "| ")
+    (for-each (lambda (x) (printf "~a +\n" x))
+              (sort l
+                    (lambda (x y)
+                      (string<? (symbol->string x) (symbol->string y)))))
+
+    (printf "\n"))
+
+  (printf "|===\n\n"))

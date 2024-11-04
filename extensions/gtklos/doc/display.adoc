@@ -1,0 +1,21 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.net]
+//    Creation date:  31-Oct-2024 09:48
+
+== Display widgets
+
+A display widget is a GUI component which shosw some information (a text, an image, or a progress bar for instance)
+
+
+[#class-label]
+=== Class <label>
+
+{{show-class-table <label>}}
+
+Notes::
+- The `text` slot contains the text of the label.
+- The `justify` slot may contain one of the following symbols: `left`, `right`, `center` or `fill`
+- When setting the `justify` slot, the value given can be a symbol or a string.

@@ -8,16 +8,18 @@ ADOC=@ASCIIDOCTOR@
 TOP   =../../..
 SPP   = $(TOP)/src/stklos -q -I $(TOP)/lib -I ../lib -f $(TOP)/utils/stklos-pp.stk --
 FILE  = gtklos
-DOCS  = intro.adoc containers.adoc
+DOCS  = containers.adoc dialogs.adoc display.adoc gtklos.adoc intro.adoc misc.adoc
+LIB   = doc.stk
+
 
 all: $(FILE).html  $(FILE).pdf
 
-$(FILE).html: $(FILE).adoc $(DOCS)
+$(FILE).html: $(DOCS) $(LIB)
 	$(SPP) $(FILE).adoc > $(FILE).tmp
 	$(ADOC) -v -o $@ $(FILE).tmp
 	rm -f $(FILE).tmp
 
-$(FILE).pdf: $(FILE).adoc $(DOCS)
+$(FILE).pdf: $(DOCS) $(LIB)
 	$(SPP) $(FILE).adoc > $(FILE).tmp
 	$(ADOC) -r asciidoctor-pdf -b pdf -v -o $@ $(FILE).tmp
 	rm -f $(FILE).tmp

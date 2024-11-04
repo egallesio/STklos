@@ -1,0 +1,36 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.net]
+//    Creation date:  31-Oct-2024 09:48
+
+== Basic Classes
+
+This section describes the basic classes which are inherited by the high level
+GTKlos widgets.
+
+
+
+[#class-gtk-object]
+=== Class <gtk-object>
+
+{{show-class-table (in-module (stklos gtklos) <gtk-object>)}}
+
+TODO
+
+[#class-gtk-widget]
+=== Class <gtk-widget>
+
+{{show-class-table (in-module (stklos gtklos) <gtk-widget>)}}
+
+TODO
+
+
+
+[#class-gtk-container]
+=== Class <gtk-container>
+
+{{show-class-table (in-module (stklos gtklos) <gtk-container>)}}
+
+TODO

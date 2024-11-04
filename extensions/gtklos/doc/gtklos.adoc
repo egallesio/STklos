@@ -24,3 +24,7 @@
 
 {{Include* "intro.adoc"}}
 {{Include* "containers.adoc"}}
+{{Include* "display.adoc"}}
+
+{{Include* "dialogs.adoc"}}
+{{Include* "misc.adoc"}}

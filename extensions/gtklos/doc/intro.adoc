@@ -97,17 +97,17 @@ the width of `+w+`:
 ----
 ;; Use start-interactive-gtk to develop in the REPL
 stklos> (start-interactive-gtk)
-
 ;; Setting the width to 400
-stklos> {{do* (slot-set! w 'width 400)}}
+stklos> (slot-set! w 'width 400)
 ;; Reading back the value
-stklos> {{do* (slot-ref w 'width)}}
-
+stklos> (slot-ref w 'width)
+400
 ;; Since accessors are defined on all slots we can also do
-stklos> {{do* (width w)}}
-stklos> {{do* (set! (width w) 300)}}
-stklos> {{do*(width w)}}
-
+stklos> (width w)
+400
+stklos> (set! (width w) 300)
+stklos> (width w)
+300
 ----
 
 Of course, we can also define the widget size at creation time with a

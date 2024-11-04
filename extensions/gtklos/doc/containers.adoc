@@ -5,6 +5,166 @@
 //           Author: Erick Gallesio [eg@stklos.net]
 //    Creation date:  31-Oct-2024 09:48
 
-== Containers
+== Container widgets
 
-EOF
+A container is a widget that can contain other widgets. It permits to
+create new windows or organize le layout of a multi widget GUI
+component.
+
+
+[#class-window]
+=== Class <window>
+
+The `<window>` class defines a new window. By default, a new window is
+mapped on the screen it is created and it's size is 200x200.
+
+{{show-class-table <window>}}
+
+All these slots have an associated accessor that can be used to read or
+write the value of the slot. For instance
+
+[source,scheme]
+----
+stklos> (define w (make <window> :title "A window"))
+;; w
+stklos> (title w)
+"A window"
+stklos> (set! (title w) "Title changed")
+stklos> (title w)
+"Title changed"
+stklos>
+----
+
+[#class-vwindow]
+=== Class <vwindow>
+
+A `<vwindow>` is a utility class. It is a window which contains a vertical box,
+to arrange vertically some widgets in it. See example below.
+
+{{show-class-table <vwindow>}}
+
+Note:: The classes `<%vbox>` and `<%box>` are special classes used to
+initialize a new `<vwindow>` object. They are not exported by the GTKlos
+library and are not meant to be used in a user program.
+
+
+Example::
+
+[source,scheme]
+----
+stklos> (define w (make <vwindow> :title "Vertical window" :width 400))
+;; w
+stklos> (dolist (b '("One" "Two" "Three")) (make <button> :text b :parent w))
+stklos>
+----
+
+This will display the following window:
+
+image::images/vwindow-figure.png[images/window-figure,align="center"]
+
+Note:: Specifying that a button has `w` as parent permits to embed it in the `w` container.
+
+
+[#class-hwindow]
+=== Class <hwindow>
+
+A `<hwindow>` is a utility class. It is a window which contains an horizontal box,
+to arrange horizontally some widgets in it.
+
+{{show-class-table <hwindow>}}
+
+Note:: The classes `<%hbox>` and `<%box>` are special classes used to
+initialize a new `<vwindow>` object. They are not exported by the GTKlos
+library and are not meant to be used in a user program.
+
+
+[#class-gtk-box]
+=== Class <gtk-box>
+
+A `<gtk-box>` is a simple container which arranges child widgets into a single row or column, depending upon the value of `orientation` property.
+
+
+WARNING: Normally, a class name prefixed by `<gtk-` is an internal class which is not exported bt the GTKlos library. This class name has been choose, because the name `<box>` is already used for the normal {{stklos}} boxes (see SRFI-111).
+
+{{show-class-table <gtk-box>}}
+
+Note:: One of the most important slot o this class is the slot `orientation`
+(not shown here, since it is inherited from the class `<gtk-orientable>`). Its
+value is a symbol which can be one of the symbols `horizontal` or `vertical`.
+
+[#class-hbox]
+=== Class <hbox>
+
+This utility class can be used to define a `<gtk-box>` whose orientation is
+initialized to `horizontal`.
+
+{{show-class-table <hbox>}}
+
+
+[#class-vbox]
+=== Class <vbox>
+
+This utility class can be used to define a `<gtk-box>` whose orientation is
+initialized to `vertical`.
+
+{{show-class-table <vbox>}}
+
+[#class-frame]
+=== Class <frame>
+
+A <frame> widget surrounds its child with a decorative frame and an optional label.
+
+{{show-class-table <frame>}}
+
+Note::
+
+- The `title` slot contains the label of the frame
+- The `shadow` slot value can be one of the following symbols `none`, `in`, `out`, `etched-in` or `etched-out`.
+- The `xalign` and `yalign` flots can be used to adjust the position of the label.
+
+
+[#class-hframe]
+=== Class <hframe>
+
+This utility class permits to define a frame which contain an horizontal box that can be filled with components that are arranged vertically.
+
+{{show-class-table <hframe>}}
+
+[#class-vframe]
+=== Class <vframe>
+
+{{show-class-table <vframe>}}
+
+[#class-grid]
+=== Class <grid>
+
+A `<grid>` widget is a container which arranges its child widgets in rows and columns, with arbitrary positions and horizontal/vertical spans.
+
+{{show-class-table <grid>}}
+
+TODO: describe `container-add!`
+
+Example::
+
+[source,scheme]
+----
+stklos> (define w (make <window> :title "Grid demo"))
+;; w
+stklos> (define g (make <grid> :parent w))
+;; g
+;; Create 5 buttons
+stklos> (define b (map (lambda (x) (make <button> :text x :width 200))
+               '("Button #1" "Button #2" "Button #3" "Button #4" "Button #5")))
+;; b
+;; Add them to the grid
+stklos> (container-add! g (list-ref b 0) #:left 0 #:top 0 :width 2)
+stklos> (container-add! g (list-ref b 1) #:left 0 #:top 1)
+stklos> (container-add! g (list-ref b 2) #:left 1 #:top 1 :height 2)
+stklos> (container-add! g (list-ref b 3) #:left 0 #:top 2)
+stklos> (container-add! g (list-ref b 4) #:left 0 #:top 3)
+stklos>
+----
+
+This will display the following window:
+
+image::images/grid-figure.png[images/grid-figure,align="center"]
