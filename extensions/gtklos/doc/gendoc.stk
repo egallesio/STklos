@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 31-Oct-2024 18:32
-;;;; Last file update:  5-Nov-2024 17:11 (eg)
+;;;; Last file update:  5-Nov-2024 18:17 (eg)
 ;;;;
 
 (import (stklos gtklos))
@@ -58,7 +58,7 @@
                          (let* ((gf   (method-generic-function x))
                                 (name (generic-function-name gf)))
                            (if (is-a? x <accessor-method>)
-                               name 
+                               name
                                (list name
                                      (map* class-name (method-specializers x))))))
                        methods)))
@@ -111,50 +111,71 @@
 |#
 
 (define (show-class-table k)
-  (printf "[%unbreakable]\n")
-  (printf "[cols=\"38,~\"]\n")
-  (printf "|===\n\n")
 
-  ;; print the class-precedence list
-  (let ((l (widget-precedence-list k)))
-    (printf ">| *Inherited classes*: \n")
-    (printf "| ")
-    (for-each (lambda (x)
-                (unless (undocumented-symbol? (class-name x))
-                  (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x))))
-              (cdr l))
-    (printf "\n"))
+  (define (documented-slots k)
+    (let ((slots (map slot-definition-name (class-direct-slots k))))
+      (remove undocumented-symbol? (sort slots symbol<?))))
 
-  ;; print the direct subclasses
-  (let ((l (class-direct-subclasses k)))
-    (printf ">| *Directly inheriting classes*: \n")
-    (printf "| ")
-    (for-each (lambda (x)
-                (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x)))
-              l)
-    (printf "\n"))
+  (define (documented-methods k)
+    (let-values (((methods accessors) (widget-methods k)))
+      ;; We DO NOT document accessors
+      (let ((documented (remove (lambda (x) (undocumented-symbol? (car x))) methods)))
+        (sort documented
+              (lambda (x y) (symbol<? (car x) (car y)))))))
 
-  ;; print the slots
-  (let ((l (map slot-definition-name (class-direct-slots k))))
+  (define (generate-index-enties slots methods)
+    ;; slots
+    (for-each (lambda (x) (printf "((~a _slot_))\n" x)) slots)
+    ;; methods
+    (for-each (lambda (x) (printf "((~a _method_))\n" (car x))) methods))
+
+  (define (generate-table slots methods)
+    (printf "[%unbreakable]\n")
+    (printf "[cols=\"38,~\"]\n")
+    (printf "|===\n\n")
+
+    ;; print the class-precedence list
+    (let ((l (widget-precedence-list k)))
+      (printf ">| *Inherited classes*: \n")
+      (printf "| ")
+      (for-each (lambda (x)
+                  (unless (undocumented-symbol? (class-name x))
+                    (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x))))
+                (cdr l))
+      (printf "\n"))
+
+    ;; print the direct subclasses
+    (let ((l (class-direct-subclasses k)))
+      (printf ">| *Directly inheriting classes*: \n")
+      (printf "| ")
+      (for-each (lambda (x)
+                  (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x)))
+                l)
+      (printf "\n"))
+
+    ;; print the slots
     (printf ">| *Direct slots*: \n")
     (printf "| ")
-    (for-each (lambda (x) (printf "((~a _slot_))~a +\n" x x))
-              (remove undocumented-symbol? (sort l symbol<?)))
-    (printf "\n"))
+    (for-each (lambda (x) (printf "~a +\n" x)) slots)
+    (printf "\n")
 
-  ;; print methods (and omit accessors)
-  (let-values (((methods accessors) (widget-methods k)))
+    ;; print the methods (and omit accessors)
     (printf ">| *Direct (non accessor) methods*: \n")
     (printf "| ")
-    (for-each (lambda (x)
-                (unless (undocumented-symbol? (car x))
-                  (printf "((~a _method_)) ~A ~A +\n" (car x) (car x) (cadr x))))
-              (sort methods (lambda (x y) 
-                              (symbol<? (car x) (car y)))))
-       (printf "\n"))
+    (for-each (lambda (x) (printf "~A ~A +\n" (car x) (cadr x)))
+              methods)
+    (printf "\n")
 
-  (printf "|===\n\n"))
+    (printf "|===\n\n"))
+
+  (let ((slots  (documented-slots k))
+        (methods (documented-methods k)))
+
+    (generate-index-enties slots methods)
+    (generate-table slots methods)))
+
 
 
 (define (class-doc who)
-  (printf "[#class-~a]((~a, _<~a>_ class))\n"))
+  (printf "[#class-~a]\nindexterm:[~a, _<~a> class_]\n" who who who))
+
