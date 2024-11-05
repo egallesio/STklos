@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 31-Oct-2024 18:32
-;;;; Last file update:  4-Nov-2024 16:30 (eg)
+;;;; Last file update:  5-Nov-2024 17:11 (eg)
 ;;;;
 
 (import (stklos gtklos))
@@ -138,7 +138,7 @@
   (let ((l (map slot-definition-name (class-direct-slots k))))
     (printf ">| *Direct slots*: \n")
     (printf "| ")
-    (for-each (lambda (x) (printf "~a +\n" x))
+    (for-each (lambda (x) (printf "((~a _slot_))~a +\n" x x))
               (remove undocumented-symbol? (sort l symbol<?)))
     (printf "\n"))
 
@@ -148,9 +148,13 @@
     (printf "| ")
     (for-each (lambda (x)
                 (unless (undocumented-symbol? (car x))
-                  (printf "~A ~A +\n" (car x) (cadr x))))
+                  (printf "((~a _method_)) ~A ~A +\n" (car x) (car x) (cadr x))))
               (sort methods (lambda (x y) 
                               (symbol<? (car x) (car y)))))
        (printf "\n"))
 
   (printf "|===\n\n"))
+
+
+(define (class-doc who)
+  (printf "[#class-~a]((~a, _<~a>_ class))\n"))
