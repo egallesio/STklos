@@ -7,24 +7,26 @@ ADOC=@ASCIIDOCTOR@
 
 TOP   =../../..
 SPP   = $(TOP)/src/stklos -q -I $(TOP)/lib -I ../lib -f $(TOP)/utils/stklos-pp.stk --
-FILE  = gtklos
-DOCS  = containers.adoc dialogs.adoc display.adoc gtklos.adoc intro.adoc misc.adoc
-LIB   = doc.stk
+MAIN  = gtklos
+DOCS  = buttons.adoc canvases.adoc containers.adoc dialogs.adoc \
+        displays.adoc events.adoc gtklos.adoc intro.adoc misc.adoc texts.adoc
+SCM   = gendoc.stk
+SRC   = $(DOCS) $(SCM)
 
 
-all: $(FILE).html  $(FILE).pdf
+all: $(MAIN).html  $(MAIN).pdf
 
-$(FILE).html: $(DOCS) $(LIB)
-	$(SPP) $(FILE).adoc > $(FILE).tmp
-	$(ADOC) -v -o $@ $(FILE).tmp
-	rm -f $(FILE).tmp
+$(MAIN).html: $(SRC)
+	$(SPP) $(MAIN).adoc > $(MAIN).tmp
+	$(ADOC) -v -o $@ $(MAIN).tmp
+	rm -f $(MAIN).tmp
 
-$(FILE).pdf: $(DOCS) $(LIB)
-	$(SPP) $(FILE).adoc > $(FILE).tmp
-	$(ADOC) -r asciidoctor-pdf -b pdf -v -o $@ $(FILE).tmp
-	rm -f $(FILE).tmp
+$(MAIN).pdf: $(SRC)
+	$(SPP) $(MAIN).adoc > $(MAIN).tmp
+	$(ADOC) -r asciidoctor-pdf -b pdf -v -o $@ $(MAIN).tmp
+	rm -f $(MAIN).tmp
 
 clean:
-	rm -f $(FILE).pdf $(FILE).html $(FILE).tmp *~
+	rm -f $(MAIN).pdf $(MAIN).html $(MAIN).tmp *~
 
 distclean: clean

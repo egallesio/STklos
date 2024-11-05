@@ -16,15 +16,21 @@
 :toclevels: 2
 :sectnums:
 :xrefstyle: short
-:pdf-styless: ../../../doc/refman/theme/stklos.yml
-
+:pdf-styles: ../../../doc/refman/theme/stklos.yml
+:nofooter:       // to have reproducible builds
 
 {{load "../../../doc/lib/adoc-lib.stk"}}
-{{load "./doc.stk"}}
+{{load "./gendoc.stk"}}
 
 {{Include* "intro.adoc"}}
 {{Include* "containers.adoc"}}
-{{Include* "display.adoc"}}
-
+{{Include* "displays.adoc"}}
+{{Include* "events.adoc"}}
+{{Include* "texts.adoc"}}
+{{Include* "buttons.adoc"}}
 {{Include* "dialogs.adoc"}}
 {{Include* "misc.adoc"}}
+{{Include* "canvases.adoc"}}
+
+[index]
+== Index

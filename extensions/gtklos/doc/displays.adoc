@@ -19,3 +19,23 @@ Notes::
 - The `text` slot contains the text of the label.
 - The `justify` slot may contain one of the following symbols: `left`, `right`, `center` or `fill`
 - When setting the `justify` slot, the value given can be a symbol or a string.
+
+
+
+=== Class <image>
+
+TODO
+
+=== Class <progress>
+
+TODO
+
+=== Class <scale>
+
+TODO
+
+=== Class <separator>
+
+TODO
+
+

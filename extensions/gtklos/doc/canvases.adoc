@@ -6,18 +6,6 @@
 //    Creation date:  31-Oct-2024 09:48
 
 
-== Dialog widgets
+== Canvases
 
-
-[#class-dialog]
-=== Class <dialog
->
-{{show-class-table <dialog>}}
-
-
-=== Class <color-dialog>
-
-=== Class <file-dialog>
-
-=== Class <font-dialog>
-
+TODO

@@ -5,19 +5,10 @@
 //           Author: Erick Gallesio [eg@stklos.net]
 //    Creation date:  31-Oct-2024 09:48
 
+== Entries and Text widgets
 
-== Dialog widgets
+=== Class <entry>
 
+=== Class <text>
 
-[#class-dialog]
-=== Class <dialog
->
-{{show-class-table <dialog>}}
-
-
-=== Class <color-dialog>
-
-=== Class <file-dialog>
-
-=== Class <font-dialog>
 

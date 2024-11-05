@@ -5,19 +5,28 @@
 //           Author: Erick Gallesio [eg@stklos.net]
 //    Creation date:  31-Oct-2024 09:48
 
+== Buttons
 
-== Dialog widgets
-
-
-[#class-dialog]
-=== Class <dialog
->
-{{show-class-table <dialog>}}
+TODO
 
 
-=== Class <color-dialog>
+=== Class <button>
 
-=== Class <file-dialog>
+TODO
 
-=== Class <font-dialog>
 
+=== Class <checkbutton>
+
+TODO
+
+=== Class <radiobutton>
+
+TODO
+
+=== Class <combobox>
+
+TODO
+
+=== Class <menu>
+
+TODO

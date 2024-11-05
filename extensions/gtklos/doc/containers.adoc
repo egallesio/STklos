@@ -43,9 +43,9 @@ to arrange vertically some widgets in it. See example below.
 
 {{show-class-table <vwindow>}}
 
-Note:: The classes `<%vbox>` and `<%box>` are special classes used to
-initialize a new `<vwindow>` object. They are not exported by the GTKlos
-library and are not meant to be used in a user program.
+// Note:: The classes `<%vbox>` and `<%box>` are special classes used to
+// initialize a new `<vwindow>` object. They are not exported by the GTKlos
+// library and are not meant to be used in a user program.
 
 
 Example::
@@ -73,9 +73,9 @@ to arrange horizontally some widgets in it.
 
 {{show-class-table <hwindow>}}
 
-Note:: The classes `<%hbox>` and `<%box>` are special classes used to
-initialize a new `<vwindow>` object. They are not exported by the GTKlos
-library and are not meant to be used in a user program.
+// Note:: The classes `<%hbox>` and `<%box>` are special classes used to
+// initialize a new `<vwindow>` object. They are not exported by the GTKlos
+// library and are not meant to be used in a user program.
 
 
 [#class-gtk-box]
@@ -88,9 +88,22 @@ WARNING: Normally, a class name prefixed by `<gtk-` is an internal class which i
 
 {{show-class-table <gtk-box>}}
 
-Note:: One of the most important slot o this class is the slot `orientation`
+
+Notes::
+
+1. One of the most important slot o this class is the slot `orientation`
 (not shown here, since it is inherited from the class `<gtk-orientable>`). Its
 value is a symbol which can be one of the symbols `horizontal` or `vertical`.
+
+2. Method `container-add!` accepts a list of keyword parameters after the
+widget to add to the container. The possible values for these keyword parameters are:
+    - `expand` (defaults to the value of slot `expand` slot of the box)
+    - `fill` (defaults to the value of slot `fill` slot of the box)
+    - `padding` (defaults to the value of slot `padding` slot of the box)
+    - `end` (default to `#f`)
+
+
+
 
 [#class-hbox]
 === Class <hbox>
@@ -116,7 +129,7 @@ A <frame> widget surrounds its child with a decorative frame and an optional lab
 
 {{show-class-table <frame>}}
 
-Note::
+Notes::
 
 - The `title` slot contains the label of the frame
 - The `shadow` slot value can be one of the following symbols `none`, `in`, `out`, `etched-in` or `etched-out`.
@@ -126,12 +139,16 @@ Note::
 [#class-hframe]
 === Class <hframe>
 
-This utility class permits to define a frame which contain an horizontal box that can be filled with components that are arranged vertically.
+This utility class permits to define a frame which contain an horizontal box
+that can be filled with components that are arranged horizontally.
 
 {{show-class-table <hframe>}}
 
 [#class-vframe]
 === Class <vframe>
+This utility class permits to define a frame which contain an vframe box
+that can be filled with components that are arranged vertically.
+
 
 {{show-class-table <vframe>}}
 
@@ -142,7 +159,13 @@ A `<grid>` widget is a container which arranges its child widgets in rows and co
 
 {{show-class-table <grid>}}
 
-TODO: describe `container-add!`
+Note:: Method `container-add!` accepts a list of keyword parameters after the
+widget to add to the container. The possible value for these keyword parameters are:
+     - `left` is the column position of the added widget (starting from 1)
+     - `top` is the line position of the added widget (starting from 1)
+     - `width` is the width position of the added widget
+     - `height` is the height position of the added widget
+
 
 Example::
 
@@ -168,3 +191,12 @@ stklos>
 This will display the following window:
 
 image::images/grid-figure.png[images/grid-figure,align="center"]
+
+
+=== Class <header>
+
+TODO
+
+=== Class <toolbar>
+
+TODO
