@@ -1,7 +1,7 @@
 ;;;;
 ;;;; widget.stk                                 -- GTK widget
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,7 @@
 ;;;;    <destroyed-object> class ...
 ;;;;
 ;;;; ======================================================================
-(define-class <destroyed-object> () ())
+(define-class <gtk-destroyed-object> () ())
 
 
 ;;;; ======================================================================
@@ -234,7 +234,7 @@
 ;;//    (when event
 ;;//      (disconnect-event-handler! event w)))
   (gtk-widget-destroy (wid w))                  ; destroy the GTK widget
-  (change-class w <destroyed-object>))          ; Change class to <destroyed-object>
+  (change-class w <gtk-destroyed-object>))      ; Change class to <gtk-destroyed-object>
 
 
 (define-method destroy (w)
