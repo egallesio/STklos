@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 31-Oct-2024 18:32
-;;;; Last file update:  5-Nov-2024 18:17 (eg)
+;;;; Last file update:  5-Nov-2024 18:30 (eg)
 ;;;;
 
 (import (stklos gtklos))
@@ -125,9 +125,9 @@
 
   (define (generate-index-enties slots methods)
     ;; slots
-    (for-each (lambda (x) (printf "((~a _slot_))\n" x)) slots)
+    (for-each (lambda (x) (printf "indexterm:[~a _slot_]\n" x)) slots)
     ;; methods
-    (for-each (lambda (x) (printf "((~a _method_))\n" (car x))) methods))
+    (for-each (lambda (x) (printf "indexterm:[~a _method_]\n" (car x))) methods))
 
   (define (generate-table slots methods)
     (printf "[%unbreakable]\n")
@@ -177,5 +177,5 @@
 
 
 (define (class-doc who)
-  (printf "[#class-~a]\nindexterm:[~a, _<~a> class_]\n" who who who))
+  (printf "[#class-~a]\nindexterm:[~a, `<~a>` _class_]\n" who who who))
 

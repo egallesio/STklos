@@ -230,11 +230,11 @@
 ;;; Destroy
 ;;;
 (define-method destroy ((w <gtk-widget>))
-;;//  (let ((event (slot-ref w '%event)))               ; Disconnect w from its  handler
+;;//  (let ((event (slot-ref w '%event)))       ; Disconnect w from its  handler
 ;;//    (when event
 ;;//      (disconnect-event-handler! event w)))
   (gtk-widget-destroy (wid w))                  ; destroy the GTK widget
-  (change-class w <gtk-destroyed-object>))      ; Change class to <gtk-destroyed-object>
+  (change-class w <gtk-destroyed-object>))      ; -> class <gtk-destroyed-object>
 
 
 (define-method destroy (w)
