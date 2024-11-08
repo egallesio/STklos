@@ -108,8 +108,15 @@
 (define-class <toolbar-item> (<gtk-widget>)
   ())
 
+
+(define-method container-add!((toolbar <toolbar>) (item <toolbar-item>)
+                              (pos <integer>))
+  ;; Add to a given position (0 at start, -1 at end)
+  (gtk-toolbar-insert (slot-ref toolbar 'wid) (slot-ref item 'wid) pos))
+
 (define-method container-add!((toolbar <toolbar>) (item <toolbar-item>))
-  (gtk-toolbar-insert (slot-ref toolbar 'wid) (slot-ref item 'wid) -1))
+  ;; Append item to to existings items
+  (container-add! tb item -1))
 
 
 ;;;;
