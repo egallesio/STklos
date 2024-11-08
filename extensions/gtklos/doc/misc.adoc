@@ -65,7 +65,8 @@ created widget.
    <<realize-widget, *realize-widget* method>>.  Normal user program shouldn't
    change the value of this slot.
 
-[#destroy][#realize-widget]
+[#destroy]
+[#realize-widget]
 Methods::
 - *container-add!* is the method used to add a widget to a container. Its
    first argument is the container widget and its second argument is the
@@ -117,6 +118,7 @@ The class `<gtk-orientable>`is inherited by classes which can be horizontally or
 
 {{show-class-table (in-module (stklos gtklos) <gtk-orientable>)}}
 
-Note:: the only slot of this class indicates the orientation of the
-widget. It's value is a symbol whose value can be `horitontal` or `vertical`.
+Note:: The only slot of this class (*orientation*) indicates the orientation
+of the widget. It's value is a symbol whose value can be `horitontal` or
+`vertical`.
 

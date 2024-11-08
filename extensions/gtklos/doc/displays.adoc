@@ -7,10 +7,11 @@
 
 == Display widgets
 
-A display widget is a GUI component which shosw some information (a text, an image, or a progress bar for instance)
+A display widget is a GUI component which shosw some information (a text, an
+image, or a progress bar for instance)
 
 
-[#class-label]
+{{class-doc "label"}}
 === Class <label>
 
 {{show-class-table <label>}}

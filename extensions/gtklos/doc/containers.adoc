@@ -12,7 +12,7 @@ create new windows or organize le layout of a multi widget GUI
 component.
 
 
-[#class-window]
+{{class-doc "window"}}
 === Class <window>
 
 The `<window>` class defines a new window. By default, a new window is
@@ -35,7 +35,7 @@ stklos> (title w)
 stklos>
 ----
 
-[#class-vwindow]
+{{class-doc "vwindow"}}
 === Class <vwindow>
 
 A `<vwindow>` is a utility class. It is a window which contains a vertical box,
@@ -65,7 +65,7 @@ image::images/vwindow-figure.png[images/window-figure,align="center"]
 Note:: Specifying that a button has `w` as parent permits to embed it in the `w` container.
 
 
-[#class-hwindow]
+{{class-doc "hwindow"}}
 === Class <hwindow>
 
 A `<hwindow>` is a utility class. It is a window which contains an horizontal box,
@@ -78,7 +78,7 @@ to arrange horizontally some widgets in it.
 // library and are not meant to be used in a user program.
 
 
-[#class-gtk-box]
+{{class-doc "gtk-box"}}
 === Class <gtk-box>
 
 A `<gtk-box>` is a simple container which arranges child widgets into a single row or column, depending upon the value of `orientation` property.
@@ -103,9 +103,7 @@ widget to add to the container. The possible values for these keyword parameters
     - `end` (default to `#f`)
 
 
-
-
-[#class-hbox]
+{{class-doc "hbox"}}
 === Class <hbox>
 
 This utility class can be used to define a `<gtk-box>` whose orientation is
@@ -114,7 +112,7 @@ initialized to `horizontal`.
 {{show-class-table <hbox>}}
 
 
-[#class-vbox]
+{{class-doc "vbox"}}
 === Class <vbox>
 
 This utility class can be used to define a `<gtk-box>` whose orientation is
@@ -122,7 +120,7 @@ initialized to `vertical`.
 
 {{show-class-table <vbox>}}
 
-[#class-frame]
+{{class-doc "frame"}}
 === Class <frame>
 
 A <frame> widget surrounds its child with a decorative frame and an optional label.
@@ -136,7 +134,7 @@ Notes::
 - The `xalign` and `yalign` flots can be used to adjust the position of the label.
 
 
-[#class-hframe]
+{{class-doc "hframe"}}
 === Class <hframe>
 
 This utility class permits to define a frame which contain an horizontal box
@@ -144,7 +142,7 @@ that can be filled with components that are arranged horizontally.
 
 {{show-class-table <hframe>}}
 
-[#class-vframe]
+{{class-doc "vframe"}}
 === Class <vframe>
 This utility class permits to define a frame which contain an vframe box
 that can be filled with components that are arranged vertically.
@@ -152,7 +150,7 @@ that can be filled with components that are arranged vertically.
 
 {{show-class-table <vframe>}}
 
-[#class-grid]
+{{class-doc "grid"}}
 === Class <grid>
 
 A `<grid>` widget is a container which arranges its child widgets in rows and columns, with arbitrary positions and horizontal/vertical spans.
@@ -193,10 +191,167 @@ This will display the following window:
 image::images/grid-figure.png[images/grid-figure,align="center"]
 
 
-=== Class <header>
+{{class-doc "header-bar"}}
+=== Class <header-bar>
 
-TODO
+A `<header-bar>` is similar to a horizontal `<gtk-box>`. Furthermore, this widget
+can add typical window frame controls, such as minimize, maximize and close
+buttons, or the window icon. It is often used at the top of a `<vwindow>`
 
+{{show-class-table <header-bar>}}
+
+Notable slots::
+- *decoration-layout* is a string used to indicate the layout of the buttons
+   (see example below)
+- *decoration-layout-set* is a boolean used to know if the decoration layout
+   has been set
+- *show-close-button* indicates if the decoration buttons (not only the close
+   button!!) are shown or not. Its default value is `#f`
+
+Exemple::
+The following example illustrates the use of a header bar.
+
+[source,scheme]
+----
+(define w (make <vwindow> :width 400))
+
+(define h (make <header-bar> :title "I'm the title"
+                             :subtitle "I'm the subtitle"
+                             :parent w
+                             :decoration-layout "minimize,maximize:close"
+                             :show-close-button #t))
+
+(define l (make <label> :text "I'm the content of the window"
+                        :parent (list w :expand #t)))
+----
+
+Execution of this code will display the following window
+
+
+image::images/header-figure.png[images/header-figure,align="center"]
+
+Notes::
+
+1. The `decoration-layout` slot is set here to `"minimize, maximize:close"` to place
+
+   - the _minimize_ and _maximize_ buttons on the left (since they are before
+     the `':'` character)
+    - the _close_ button on the right (since it is after the `':'` character)
+2. The `show-close-button` is set to `#t` so display the control buttons
+3. The `parent` is set here to `w` with an indication that it must be expanded
+into it container (`w` here). See the documentation of `parent` of the
+<<class-gtk-widget, `<gtk-widget>` class>>.
+
+
+<<<
+{{class-doc "toolbar"}}
 === Class <toolbar>
 
-TODO
+A `<toolbar>` is container whose constituents are instance of the
+`<toolbar-item>` class.
+
+{{show-class-table <toolbar>}}
+
+Slots::
+
+- *expand* is a boolean. It indicates if toolbar items are expanded or not
+   (default to `#f`)
+- *icon-size* can be one of the following symbols `small`, `medium`, `large`
+   or `huge`
+- *show-arrow* is the boolean. It indicates if the toolbar as an overflow menu.
+- *toolbar-style*: can be one of the following symbols `icons`, `text`,
+   `both` or `both-horizontal`.
+
+Notable method::
+
+The method *add-items-to-toolbar* is a utility method to easily populate the
+components of a toolbar. It takes a toolbar and a list describing its
+components with the following convention, for each item of the list:
+
+1. an empty list specify to add a new separator, that is an instance of
+`<toolbar-separator-item>`, to the toolbar
+2. a list specifies that a new `<toolbar-icon-item>` must be created and added
+to the toolbar. The content of the list are the parameters that must be passed
+during the creation of the icon.
+
+[source,scheme]
+----
+(define w (make <vwindow> :title "Test header" :width 300))
+(define tb (make <toolbar> :parent w))
+
+(add-items-to-toolbar tb                            ;; populate the toolbar
+ '((:text "Play"  :icon-name "media-playback-start")
+   (:text "Pause" :icon-name "media-playback-pause")
+   ()  ;; <== A separator
+   (:text "Stop" :icon-name "media-playback-stop")))
+----
+
+Execution of this code will display the following window
+
+image::images/toolbar-figure.png[images/toolbar-figure,align="center"]
+
+Notes::
+
+1. For the sake of simplicity, the buttons are inactive here (use the
+`command` slot to add an action when the toolbar button is clicked).
+
+2. Icons her are stock buttons they are searched by the GTK library in the
+standard directory (generally `/usr/share/icons` on GNU/Linux).
+
+3. Since `<gtk-toolbar>` inherits from `<gtk-orientable>`, a toobar can be
+horizontal or vertical.
+
+
+{{class-doc "toolbar-item"}}
+==== Class <toolbar-item>
+
+The `<toolbar-item>` class is the parent class of the toolbar items classes
+that can be added to a to a GTK toolbar. It offers only one method
+(*container-add*) to add an item to a toolbar.
+
+
+{{show-class-table <toolbar-item>}}
+
+There are two methods of the generic function *container-add!* to add an item
+to a container:
+
+ - with 2 parameters, the methods permit to append the new item at the end of
+    already added items.
+ - with 3 parameters, the method adds the given item at the position given as
+   third parameter (an integer). If the position is 0 the item is prepended to
+   the start of the toolbar. If it is negative, the item is appended to the
+   end of the toolbar.
+
+
+
+
+{{class-doc "toolbar-separator-item"}}
+==== Class <toolbar-separator-item>
+
+The class `<toolbar-separator-item>`  permits to define a separator to a toolbar.
+
+{{show-class-table <toolbar-separator-item>}}
+
+
+
+
+{{class-doc "toolbar-button-item"}}
+==== Class <toolbar-button-item>
+
+The class `<toolbar-separator-item>` permits to define a button to a
+toolbar. The button can have an image and a text.
+
+{{show-class-table <toolbar-button-item>}}
+
+Methods::
+
+- *command* is identical to the command associated to a button. See the
+   documentation of <<button, buttons>>.
+
+- *icon-name* is a string which contains is the name of the themed icon
+   displayed on the item.  Icons are searched by the GTK library in the
+   standard directory (generally `/usr/share/icons` on GNU/Linux).
+
+- *text* is the text of the button item.
+
+

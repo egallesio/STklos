@@ -9,10 +9,10 @@
 == Dialog widgets
 
 
-[#class-dialog]
-=== Class <dialog
->
-{{show-class-table <dialog>}}
+
+=== Class <dialog>
+
+//show-class-table <dialog>}}
 
 
 === Class <color-dialog>
