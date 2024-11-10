@@ -116,7 +116,7 @@
 
 (define-method container-add!((toolbar <toolbar>) (item <toolbar-item>))
   ;; Append item to to existings items
-  (container-add! tb item -1))
+  (container-add! toolbar item -1))
 
 
 ;;;;
