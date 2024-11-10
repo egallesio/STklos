@@ -1,7 +1,7 @@
 ;;;;
 ;;;; button.stk -- GTK demo using buttons
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -36,19 +36,20 @@ various relief can be hardly visible.
 ")
 
 (define (click w e)
-  (printf "You have clicked on '~s' button\n" (text w)))
+  (printf "You have clicked on ~s button\n" (text w)))
 
 
 (define (main args)
-  (let* ((win (make <demo-window> #:title "Buttons Demo" #:width 600
-                    #:file "button" #:border-width 5
-                    #:message demo-message))
-         (b1  (make <button> #:parent win #:text "Normal"  #:border-width 5))
-         (b2  (make <button> #:parent win #:text "None"    #:border-width 5
-                    #:relief 'none))
-         (b3  (make <button> #:parent win #:text "Tooltip" #:border-width 5
-                    #:tooltip (string-append "A long tool-tip using\n"
-                                             "several lines\n"
-                                             "..."))))
+  (let ((win (make <demo-window> #:title "Buttons Demo" #:width 600
+                                 #:file "button" #:border-width 5
+                                 #:message demo-message)))
+
+    (make <button> #:parent win #:text "Normal"  #:border-width 5 #:command click)
+    (make <button> #:parent win #:text "None"    #:border-width 5 #:command click
+                   #:relief 'none)
+    (make <button> #:parent win #:text "Tooltip" #:border-width 5 #:command click
+                   #:tooltip (string-append "A long tool-tip using\n"
+                                            "several lines\n"
+                                            "..."))
     (gtk-main)
     0))
