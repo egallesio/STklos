@@ -7,8 +7,73 @@
 
 == Entries and Text widgets
 
+
+// ----------------------------------------------------------------------
+{{class-doc "entry"}}
 === Class <entry>
 
+An `<entry>` widget is a single line text entry widget.
+
+
+{{show-class-table <entry>}}
+
+Slots::
+
+- *activates-default* is a boolean which tells if the entry will activate the
+   default widget.
+- *caps-lock-warning* is a boolean which tells if a password entry will show a
+   warning when Caps Lock is on.
+- *cursor-position* indicates the position of the cursor in the entry.
+- *has-frame* is a boolean which tells if the entry has a frame.
+- *max-length* is the maximum length of the entry.
+- *placeholder-text* is the string which is displayed in the entry when it is
+   empty and unfocused.
+- *primary-icon-name* is the name of the icon to use for the primary icon for
+   the entry. Icons are searched by the GTK library in the standard directory
+   (generally `/usr/share/icons` on GNU/Linux).
+- *secondary-icon-name* is the name of the icon to use for the secondary icon
+   for the entry.
+- *text-editable* is a boolean which indicates if the text entry is modifiable.
+- *text-overwrite* is a boolean which tells if the text is overwritten when
+   typing in the entry.
+- *text-visibility* is a boolean which tells if the text in the entry is
+   visible. Setting the visibility to false is useful to read secrets.
+- *value* is a string which contains the text in the entry.
+
+
+// ----------------------------------------------------------------------
+{{class-doc "text"}}
 === Class <text>
 
+The `<text>` widget permits to create an editable text widget.
 
+{{show-class-table <text>}}
+
+Slots::
+
+- *accepts-tab* indicates if the text widget insert a tab character
+   when the `Tab` key is pressed.
+- *cursor-visible* indicates if the cursor is displayed.
+- *justify* is one of the following symbols: `left`, `right`, `center`
+   or `fill`.
+- *text-buffer* contains a C pointer to the representation of the
+   internal GTK buffer (handle with care).
+- *text-editable* is a boolean which indicates if the text widget is
+   modifiable.
+- *text-indent* contains the value of the default indentation for
+   paragraphs.
+- *text-monospace* is a boolean which indicates that the text content
+   should use monospace fonts.
+- *text-overwrite* is a boolean which tells if the text is overwritten
+   when typing in the text widget.
+- *text-wrap* is a boolean. It indicates if text must be wrapped in
+   the widget
+- *value* contains the characters of the text widget
+
+Methods::
+
+- *event-connect* permits to connect a signal to the text widget (see
+   the <<Events>>)
+- *text-copy-clipboard* copies  the content of text clipboard
+- *text-cut-clipboard* cuts the selected clipboard
+- *text-paste-clipboard* pastes the clipboard in the text widget

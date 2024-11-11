@@ -30,8 +30,8 @@
 {{Include* "containers.adoc"}}
 {{Include* "displays.adoc"}}
 {{Include* "events.adoc"}}
-{{Include* "texts.adoc"}}
 {{Include* "buttons.adoc"}}
+{{Include* "texts.adoc"}}
 {{Include* "dialogs.adoc"}}
 {{Include* "misc.adoc"}}
 {{Include* "canvases.adoc"}}
