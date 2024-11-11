@@ -21,7 +21,10 @@
 :docinfodir: ../lib/theme
 :docinfo: shared
 :idprefix: doc_
-:nofooter:       // to have reproducible builds
+{{If (equal? doc-fmt "html")}}
+:nofooter:     // to have reproducible builds
+{{End}}
+
 
 // Load the general adoc library and the refman specific one
 {{load "../lib/adoc-lib.stk"}}
