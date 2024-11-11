@@ -23,8 +23,10 @@ $(MAIN).html: $(SRC)
 
 $(MAIN).pdf: $(SRC)
 	$(SPP) -D "doc-fmt: pdf" $(MAIN).adoc > $(MAIN).tmp
-	$(ADOC) -r asciidoctor-pdf -b pdf -v -o $@ $(MAIN).tmp
-	rm -f $(MAIN).tmp
+	$(ADOC) -r asciidoctor-pdf -b pdf -v -o tmp.pdf $(MAIN).tmp
+	gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress \
+		-dNOPAUSE -dQUIET -dBATCH -sOutputFile=$@ tmp.pdf
+	rm -f $(MAIN).tmp tmp.pdf
 
 clean:
 	rm -f $(MAIN).pdf $(MAIN).html $(MAIN).tmp *~
