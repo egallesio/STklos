@@ -17,7 +17,11 @@
 :sectnums:
 :xrefstyle: short
 :pdf-styles: ../../../doc/refman/theme/stklos.yml
-:nofooter:       // to have reproducible builds
+{{If (equal? doc-fmt "html")}}
+:nofooter:
+{{End}}
+
+
 
 {{load "../../../doc/lib/adoc-lib.stk"}}
 {{load "./gendoc.stk"}}
@@ -32,5 +36,8 @@
 {{Include* "misc.adoc"}}
 {{Include* "canvases.adoc"}}
 
+
+{{If (equal? doc-fmt "pdf")}}
 [index]
 == Index
+{{End}}

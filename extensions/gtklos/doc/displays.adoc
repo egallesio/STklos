@@ -7,36 +7,128 @@
 
 == Display widgets
 
-A display widget is a GUI component which shosw some information (a text, an
+A display widget is a GUI component which shows some information (a text, an
 image, or a progress bar for instance)
 
 
 {{class-doc "label"}}
 === Class <label>
 
+A `<label>` permits to define a text widget which displays a small text.
+
 {{show-class-table <label>}}
 
 Notes::
 - The `text` slot contains the text of the label.
 - The `justify` slot may contain one of the following symbols: `left`, `right`, `center` or `fill`
-- When setting the `justify` slot, the value given can be a symbol or a string.
 
 
 
+// ----------------------------------------------------------------------
+{{class-doc "image"}}
 === Class <image>
 
-TODO
+The class `<image>` permits to display an image.
 
-=== Class <progress>
+{{show-class-table <image>}}
 
-TODO
 
+Slots::
+
+- *file-name* designates a file containing the image to display. If the file
+   cannot be found. a "broken image" icon will be displayed. If the file
+   contains an animation, the image will be animated. The `image-path`
+   parameter object is used to find the image file (see below).
+- *icon-name*: is a string which contains is the name of the themed icon
+   displayed on the item.  Icons are searched by the GTK library in the
+   standard directory (generally `/usr/share/icons` on GNU/Linux).
+- *icon-size* can be one of the following symbols `small`, `medium`, `large`
+   or `huge`.
+
+Parameter object::
+- indexterm:[image-path _parameter object_]
+  indexterm:[STKLOS_IMAGE_PATH,`STKLOS_IMAGE_PATH` shellvariable]
+  *image-path* is a parameter object which denotes the paths to be searched
+  when specifying a file name with the `file-name` slot. The default path
+  contains the current directory and a directory depending of {{stklos}}
+  installation directory. Alternatively, the default path can also be specified
+  with the shell variable `STKLOS_INDEX_TERM`.
+
+
+Notable Method::
+
+- *get-image-pixbuf* return a C pointer on the pixbuf used to represent the image.
+This can be useful to insert an image in a canvas.
+
+
+// ----------------------------------------------------------------------
+{{class-doc "progress-bar"}}
+=== Class <progress-bar>
+
+A `<progress-bar>` ca be used to display the progress of a long running
+operation; it can be used in two different modes: _percentage_ mode and _activity
+mode_.
+
+{{show-class-table <progress-bar>}}
+
+Slots::
+
+- *inverted* is a boolean. It permits to invert the growing direction of a
+   progress bar (form top to bottom for vertical progress bars and from left
+   to right for horitontal ones).
+- *pulse-step* indicates the fraction of the progress bar used to advance to
+   the next step.
+- *show-text* is a boolean used to indicate if a text is shown in the
+   progress bar. The shown text is either the value of the `text` slot or,
+   if not set, the value of the `value` slot, as a percentage.
+- *text* is a string. It is the legend of the progress bar.
+- *value* denotes the fraction of the task which is already done. Setting this
+   slot permit to use the progress bar in _percentage_ mode.
+
+Notable method::
+
+- *progress-bar-pulse* can be used to indicate that some progress has been
+   made. The progress bar enters “activity mode,” where a block bounces back
+   and forth.
+
+
+// ----------------------------------------------------------------------
+{{class-doc "scale"}}
 === Class <scale>
 
-TODO
+The class `<scale>` defines a slider control used to select a numeric value.
 
+{{show-class-table <scale>}}
+
+
+Slots::
+
+- *command* contains a function that will be called when the value of the
+   scale is changed. See general description on the the _command_ slot in
+   <<Events>>.
+- *digits* specifies the number of decimal places that are displayed in the
+   value.
+- *draw-value* is a boolean. It indicates whether the current value is
+   displayed.
+- *has-origin* is a boolean. It indicates if the scale has an origin.
+- *increment*
+- *lower* is the minimum possible value of the scale.
+- *orientation* indicates the orientation of the scale. Warning: it is a
+  *read-only* slot.
+- *upper* is the maximum possible value of the scale.
+- *value* is the value of the scale. Setting it  will move the scale.
+- *value-pos* indicates the position where the value is displayed. Its value
+   can be the symbol `top`, `bottom`, `left` or `right`.
+
+
+
+
+// ----------------------------------------------------------------------
+{{class-doc "separator"}}
 === Class <separator>
 
-TODO
+A `<separator>` is a horizontal or vertical separator widget, used to group
+the widgets within a window. It displays a line with a shadow to make it
+appear sunken into the interface.
 
-
+{{show-class-table <separator>}}

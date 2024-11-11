@@ -257,7 +257,7 @@ Slots::
 - *expand* is a boolean. It indicates if toolbar items are expanded or not
    (default to `#f`)
 - *icon-size* can be one of the following symbols `small`, `medium`, `large`
-   or `huge`
+   or `huge`.
 - *show-arrow* is the boolean. It indicates if the toolbar as an overflow menu.
 - *toolbar-style*: can be one of the following symbols `icons`, `text`,
    `both` or `both-horizontal`.

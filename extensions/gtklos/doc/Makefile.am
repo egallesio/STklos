@@ -17,12 +17,12 @@ SRC   = $(DOCS) $(SCM)
 all: $(MAIN).html  $(MAIN).pdf
 
 $(MAIN).html: $(SRC)
-	$(SPP) $(MAIN).adoc > $(MAIN).tmp
+	$(SPP) -D "doc-fmt: html" $(MAIN).adoc > $(MAIN).tmp
 	$(ADOC) -v -o $@ $(MAIN).tmp
 	rm -f $(MAIN).tmp
 
 $(MAIN).pdf: $(SRC)
-	$(SPP) $(MAIN).adoc > $(MAIN).tmp
+	$(SPP) -D "doc-fmt: pdf" $(MAIN).adoc > $(MAIN).tmp
 	$(ADOC) -r asciidoctor-pdf -b pdf -v -o $@ $(MAIN).tmp
 	rm -f $(MAIN).tmp
 
