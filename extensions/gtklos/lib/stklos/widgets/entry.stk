@@ -1,7 +1,7 @@
 ;;;;
 ;;;; entry.stk  -- GTK Entry Widget
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -39,33 +39,61 @@
 ;
 ;======================================================================
 (define-class <entry> (<gtk-widget>)
-  ((cursor-position #:accessor       cursor-position
-                    #:init-keyword   #:cursor-position
-                    #:allocation     #:virtual
-                    #:slot-ref       (lambda (o)
-                                       (gtk-editable-get-position
-                                        (slot-ref o 'wid)))
-                    #:slot-set!      (lambda (o v)
-                                       (gtk-editable-set-position
-                                        (slot-ref o 'wid) v)))
-   (max-length      #:accessor       max-length
-                    #:init-keyword   #:max-length
-                    #:allocation     #:gtk-property)
-   (text-visibility #:accessor       text-visibility
-                    #:init-keyword   #:text-visibility
-                    #:allocation     #:gtk-property
-                    #:gtk-name       "visibility")
-   (text-editable   #:accessor       text-editable
-                    #:init-keyword   #:text-editable
-                    #:allocation     #:virtual ;; since the GTK property doesn't seems to work
-                    #:slot-ref       (lambda (o)
-                                       (gtk-editable-get-editable (slot-ref o 'wid)))
-                    #:slot-set!      (lambda (o v)
-                                       (gtk-editable-set-editable (slot-ref o 'wid) v)))
-   (value           #:accessor       value
-                    #:init-keyword   #:value
-                    #:allocation     #:gtk-property
-                    #:gtk-name       "text")))
+  ((activates-default #:accessor       activates-default
+                      #:init-keyword   #:activates-default
+                      #:allocation     #:gtk-property)
+   (caps-lock-warning #:accessor       caps-lock-warning
+                      #:init-keyword   #:caps-lock-warning
+                      #:allocation     #:gtk-property)
+   (cursor-position   #:accessor       cursor-position
+                      #:init-keyword   #:cursor-position
+                      #:allocation     #:virtual
+                      #:slot-ref       (lambda (o)
+                                         (gtk-editable-get-position
+                                          (slot-ref o 'wid)))
+                      #:slot-set!      (lambda (o v)
+                                         (gtk-editable-set-position
+                                          (slot-ref o 'wid) v)))
+   (has-frame        #:accessor        has-frame
+                     #:init-keyword    #:has-frame
+                     #:allocation      #:gtk-property)
+;; TODO; convert int->char
+;;   (invisible-char #:accessor invisible-char
+;;                   #:init-keyword #:invisible-char
+;;                   #:allocation #:gtk-property)
+
+   (max-length              #:accessor       max-length
+                            #:init-keyword   #:max-length
+                            #:allocation     #:gtk-property)
+   (overwrite-mode          #:accessor       overwrite-mode
+                            #:init-keyword   #:overwrite-mode
+                            #:allocation     #:gtk-property)
+   (placeholder-text        #:accessor       placeholder-text
+                            #:init-keyword   #:placeholder-text
+                            #:allocation     #:gtk-property)
+   (primary-icon-name       #:accessor       primary-icon-name
+                            #:init-keyword   #:primary-icon-name
+                            #:allocation     #:gtk-property)
+   (secondary-icon-name     #:accessor       secondary-icon-name
+                            #:init-keyword   #:secondary-icon-name
+                            #:allocation     #:gtk-property)
+   (text-editable           #:accessor       text-editable
+                            #:init-keyword   #:text-editable
+                            #:allocation     #:virtual ;; since GTK property NOK
+                            #:slot-ref       (lambda (o)
+                                               (gtk-editable-get-editable
+                                                (slot-ref o 'wid)))
+                            #:slot-set!      (lambda (o v)
+                                               (gtk-editable-set-editable
+                                                (slot-ref o 'wid) v)))
+   (text-visibility         #:accessor        text-visibility
+                            #:init-keyword    #:text-visibility
+                            #:allocation      #:gtk-property
+                            #:gtk-name        "visibility")
+   (value                   #:accessor       value
+                            #:init-keyword   #:value
+                            #:allocation     #:gtk-property
+                            #:gtk-name       "text")))
 
 (define-method realize-widget ((self <entry>) initargs)
   (let ((e (gtk-entry-new)))
@@ -76,4 +104,7 @@
 ;;;
 ;;; Module exports
 ;;;
-(export <entry> cursor-position max-length text-visibility text-editable value)
+(export <entry> activates-default caps-lock-warning cursor-position
+        has-frame max-length overwrite-mode placeholder-text
+        primary-icon-name secondary-icon-name text-editable
+        text-visibility value)
