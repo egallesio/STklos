@@ -1,7 +1,7 @@
 ;;;;
 ;;;; scale.stk              -- GTklos Scale Widget
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -124,5 +124,5 @@
 ;;;
 ;;; Exports
 ;;;
-(export <scale> digits draw-value has-origin value-pos value lower upper
-        increment command)
+(export <scale> orientation digits draw-value has-origin value-pos value lower
+        upper increment command)

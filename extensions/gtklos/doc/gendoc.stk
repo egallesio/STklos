@@ -1,0 +1,181 @@
+;;;;
+;;;;
+;;;; doc.stk         -- Small library for GTklos documentation building
+;;;;
+;;;; Copyright © 2024 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@stklos.net]
+;;;;    Creation date: 31-Oct-2024 18:32
+;;;; Last file update:  5-Nov-2024 18:30 (eg)
+;;;;
+
+(import (stklos gtklos))
+
+(define-macro (do* sexpr)
+  `(begin
+     (write ',sexpr)
+     (newline)
+     ,sexpr))
+
+#|
+(define (event-loop)
+  (thread-start!
+   (make-thread (lambda ()
+                  (let Loop ()
+                    (%flush-gtk-events)
+                    (sleep 20)
+                    (Loop))))))
+
+(event-loop)
+|#
+
+;; ----------------------------------------------------------------------
+
+(define-method widget-precedence-list (class)
+  (filter (lambda(x) (not (member x (list <object> <top>))))
+          (class-precedence-list class)))
+
+
+(define (widget-methods k)
+  (let* ((methods (class-direct-methods k))
+         (all     (map (lambda (x)
+                         (let* ((gf   (method-generic-function x))
+                                (name (generic-function-name gf)))
+                           (if (is-a? x <accessor-method>)
+                               name
+                               (list name
+                                     (map* class-name (method-specializers x))))))
+                       methods)))
+    (values (filter list?   all)
+            (filter symbol? all))))
+
+(define (class-adoc-id k)
+  (let ((name (regexp-replace "<(.*)>"
+                              (symbol->string (class-name k))
+                              "\\1")))
+     (format #f "class-~a" name)))
+
+;;
+;; Utilities
+;;
+(define (symbol<? x y)
+  (string<? (symbol->string x) (symbol->string y)))
+
+(define (undocumented-symbol? symb)  ;; We do not document things with a % in it
+  (string-find? "%" (symbol->string symb)))
+
+
+#|
+(define (show-class-text k)
+  ;; print the class-precedence list
+  (let ((l (widget-precedence-list k)))
+    (printf "Class ~a inherits from:\n\n" (class-name k))
+    (for-each (lambda (x)
+                (printf "- <<~a,`~a`>>\n" (class-adoc-id x) (class-name x)))
+              (cdr l))
+    (printf "\n\n"))
+
+  ;; print the direct subclasses
+  (let ((l (class-direct-subclasses k)))
+    (unless (null? l)
+      (printf "Class ~a is directly inherited by:\n\n" (class-name k))
+      (for-each (lambda (x)
+                  (printf "- <<~a,`~a`>>\n" (class-adoc-id x) (class-name x)))
+                l)
+      (printf "\n\n")))
+
+  ;; print the slots
+  (let ((l (class-direct-slots k)))
+    (if (null? l)
+        (printf "Class ~a has no direct slots\n\n" (class-name k))
+        (begin
+          (printf "The directs slots of the ~a class are:\n\n" (class-name k))
+          (for-each (lambda (x) (printf "- ~a\n" (slot-definition-name x))) l)
+          (printf "\n\n")))))
+|#
+
+(define (show-class-table k)
+
+  (define (documented-slots k)
+    (let ((slots (map slot-definition-name (class-direct-slots k))))
+      (remove undocumented-symbol? (sort slots symbol<?))))
+
+  (define (documented-methods k)
+    (let-values (((methods accessors) (widget-methods k)))
+      ;; We DO NOT document accessors
+      (let ((documented (remove (lambda (x) (undocumented-symbol? (car x))) methods)))
+        (sort documented
+              (lambda (x y) (symbol<? (car x) (car y)))))))
+
+  (define (generate-index-enties slots methods)
+    ;; slots
+    (for-each (lambda (x) (printf "indexterm:[~a _slot_]\n" x)) slots)
+    ;; methods
+    (for-each (lambda (x) (printf "indexterm:[~a _method_]\n" (car x))) methods))
+
+  (define (generate-table slots methods)
+    (printf "[%unbreakable]\n")
+    (printf "[cols=\"38,~\"]\n")
+    (printf "|===\n\n")
+
+    ;; print the class-precedence list
+    (let ((l (widget-precedence-list k)))
+      (printf ">| *Inherited classes*: \n")
+      (printf "| ")
+      (for-each (lambda (x)
+                  (unless (undocumented-symbol? (class-name x))
+                    (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x))))
+                (cdr l))
+      (printf "\n"))
+
+    ;; print the direct subclasses
+    (let ((l (class-direct-subclasses k)))
+      (printf ">| *Directly inheriting classes*: \n")
+      (printf "| ")
+      (for-each (lambda (x)
+                  (printf "<<~a,`~a`>> +\n" (class-adoc-id x) (class-name x)))
+                l)
+      (printf "\n"))
+
+    ;; print the slots
+    (printf ">| *Direct slots*: \n")
+    (printf "| ")
+    (for-each (lambda (x) (printf "~a +\n" x)) slots)
+    (printf "\n")
+
+    ;; print the methods (and omit accessors)
+    (printf ">| *Direct (non accessor) methods*: \n")
+    (printf "| ")
+    (for-each (lambda (x) (printf "~A ~A +\n" (car x) (cadr x)))
+              methods)
+    (printf "\n")
+
+    (printf "|===\n\n"))
+
+  (let ((slots  (documented-slots k))
+        (methods (documented-methods k)))
+
+    (generate-index-enties slots methods)
+    (generate-table slots methods)))
+
+
+
+(define (class-doc who)
+  (printf "[#class-~a]\nindexterm:[~a, `<~a>` _class_]\n" who who who))
+

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; toolbar.stk    -- GTklos Toolbars Implementation
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -88,9 +88,6 @@
    (expand        #:accessor     expand
                   #:init-keyword #:expand
                   #:init-form    #f)
-   (homogeneous   #:accessor     homogeneous
-                  #:init-keyword #:homogeneous
-                  #:initform     #f)
 ))
 
 
@@ -111,8 +108,15 @@
 (define-class <toolbar-item> (<gtk-widget>)
   ())
 
+
+(define-method container-add!((toolbar <toolbar>) (item <toolbar-item>)
+                              (pos <integer>))
+  ;; Add to a given position (0 at start, -1 at end)
+  (gtk-toolbar-insert (slot-ref toolbar 'wid) (slot-ref item 'wid) pos))
+
 (define-method container-add!((toolbar <toolbar>) (item <toolbar-item>))
-  (gtk-toolbar-insert (slot-ref toolbar 'wid) (slot-ref item 'wid) -1))
+  ;; Append item to to existings items
+  (container-add! toolbar item -1))
 
 
 ;;;;
@@ -170,6 +174,7 @@
 ;;;
 (export <toolbar>
         icon-size show-arrow toolbar-style expand
+        <toolbar-item>
         <toolbar-separator-item>
         <toolbar-button-item> text icon-name command
         add-items-to-toolbar)
