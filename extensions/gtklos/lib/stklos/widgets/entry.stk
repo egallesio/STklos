@@ -65,9 +65,6 @@
    (max-length              #:accessor       max-length
                             #:init-keyword   #:max-length
                             #:allocation     #:gtk-property)
-   (overwrite-mode          #:accessor       overwrite-mode
-                            #:init-keyword   #:overwrite-mode
-                            #:allocation     #:gtk-property)
    (placeholder-text        #:accessor       placeholder-text
                             #:init-keyword   #:placeholder-text
                             #:allocation     #:gtk-property)
@@ -86,6 +83,10 @@
                             #:slot-set!      (lambda (o v)
                                                (gtk-editable-set-editable
                                                 (slot-ref o 'wid) v)))
+   (text-overwrite          #:accessor       text-overwrite
+                            #:init-keyword   #:text-overwrite
+                            #:allocation     #:gtk-property
+                            #:gtk-name       "overwrite_mode")
    (text-visibility         #:accessor        text-visibility
                             #:init-keyword    #:text-visibility
                             #:allocation      #:gtk-property
@@ -105,6 +106,6 @@
 ;;; Module exports
 ;;;
 (export <entry> activates-default caps-lock-warning cursor-position
-        has-frame max-length overwrite-mode placeholder-text
+        has-frame max-length  placeholder-text
         primary-icon-name secondary-icon-name text-editable
-        text-visibility value)
+        text-overwrite text-visibility value)
