@@ -577,7 +577,8 @@ DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
   ev = GTK_EVENT_VALUE(event);
 
   switch (((GdkEventAny *) ev)->type) {
-  case GDK_KEY_PRESS:
+    case GDK_KEY_PRESS:
+    case GDK_KEY_RELEASE:
     keyval = ((GdkEventKey *)ev)->keyval;
     switch (keyval) {                  // Names are in <gdk/gdkkeysyms.h>
       case GDK_KEY_Return: return MAKE_CHARACTER('\n');
@@ -586,7 +587,7 @@ DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
                            return MAKE_CHARACTER(keyval);
     }
   default:
-    return MAKE_CHARACTER(0);
+    return STk_false;
   }
 }
 
