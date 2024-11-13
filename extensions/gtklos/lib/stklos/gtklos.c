@@ -524,7 +524,7 @@ DEFINE_PRIMITIVE("event-type", event_type, subr1, (SCM event))
     case GDK_PROPERTY_NOTIFY   : return STk_intern("PROPERTY");
     case GDK_SELECTION_CLEAR   : return STk_intern("SELECTION-CLEAR");
     case GDK_SELECTION_REQUEST : return STk_intern("SELECTION-REQUEST");
-    case GDK_SELECTION_NOTIFY  : return STk_intern("SELECTION");
+    case GDK_SELECTION_NOTIFY  : return STk_intern("SELECTION-NOTIFY");
     case GDK_PROXIMITY_IN      : return STk_intern("PROXIMITY-IN");
     case GDK_PROXIMITY_OUT     : return STk_intern("PROXIMITY-OUT");
     case GDK_DRAG_ENTER        : return STk_intern("DRAG-ENTER");
@@ -571,7 +571,7 @@ DEFINE_PRIMITIVE("event-y", event_y, subr1, (SCM event))
 DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
 {
   GdkEvent *ev;
-  int keyval;
+  guint keyval;
 
   if (!GTK_EVENTP(event)) error_bad_event(event);
   ev = GTK_EVENT_VALUE(event);
@@ -582,7 +582,7 @@ DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
     switch (keyval) {                  // Names are in <gdk/gdkkeysyms.h>
       case GDK_KEY_Return: return MAKE_CHARACTER('\n');
       case GDK_KEY_Tab:    return MAKE_CHARACTER('\t');
-      default:             keyval = (keyval < 0xff) ? keyval: 0;;
+      default:             // keyval = (keyval < 0xff) ? keyval: 0;
                            return MAKE_CHARACTER(keyval);
     }
   default:
