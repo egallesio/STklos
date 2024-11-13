@@ -509,8 +509,8 @@ DEFINE_PRIMITIVE("event-type", event_type, subr1, (SCM event))
     case GDK_MOTION_NOTIFY     : return STk_intern("MOTION");
     case GDK_BUTTON_PRESS      :
     case GDK_2BUTTON_PRESS     :
-    case GDK_3BUTTON_PRESS     : return STk_intern("PRESS");
-    case GDK_BUTTON_RELEASE    : return STk_intern("RELEASE");
+    case GDK_3BUTTON_PRESS     : return STk_intern("BUTTON-PRESS");
+    case GDK_BUTTON_RELEASE    : return STk_intern("BUTTON-RELEASE");
     case GDK_KEY_PRESS         : return STk_intern("KEY-PRESS");
     case GDK_KEY_RELEASE       : return STk_intern("KEY-RELEASE");
     case GDK_ENTER_NOTIFY      : return STk_intern("ENTER");
