@@ -1,7 +1,7 @@
 ;;;;
 ;;;; event.stk  -- Demo showing event management in GTklos
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -82,7 +82,8 @@ output.
                      #f))
     (event-connect txt "key-press-event"
                    (lambda (w e)
-                     (printf "Keypress: [~A] (keysym: [~A] modifiers [~A]\n"
-                             (event-char e) (event-keyval e) (event-modifiers e))
+                     (printf "Keypress: [~A] (keyval: [~A] keycode: [~A] mod. [~A]\n"
+                             (event-char e) (event-keyval e) (event-keycode e)
+                             (event-modifiers e))
                      #f))
     (gtk-main)))

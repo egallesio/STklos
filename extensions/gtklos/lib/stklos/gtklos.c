@@ -594,16 +594,28 @@ DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
 DEFINE_PRIMITIVE("event-keyval", event_keyval, subr1, (SCM event))
 {
   GdkEvent *ev;
-  guint16 keyval;
+  guint keyval;
   gboolean res;
 
   if (!GTK_EVENTP(event)) error_bad_event(event);
   ev = GTK_EVENT_VALUE(event);
 
-  res = gdk_event_get_keycode(ev, &keyval);
+  res = gdk_event_get_keyval(ev, &keyval);
   return res ? MAKE_INT(keyval): STk_false;
 }
 
+DEFINE_PRIMITIVE("event-keycode", event_keycode, subr1, (SCM event))
+{
+  GdkEvent *ev;
+  guint16 keycode;
+  gboolean res;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  res = gdk_event_get_keycode(ev, &keycode);
+  return res ? MAKE_INT(keycode): STk_false;
+}
 
 DEFINE_PRIMITIVE("event-modifiers", event_modifiers,  subr1, (SCM event))
 {
@@ -918,6 +930,7 @@ MODULE_ENTRY_START("stklos/gtklos") {
   ADD_PRIMITIVE_IN_MODULE(event_y, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_char, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_keyval, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_keycode, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_modifiers, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_button, gtklos_module);
 
