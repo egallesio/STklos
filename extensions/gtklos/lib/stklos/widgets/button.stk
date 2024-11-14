@@ -1,7 +1,7 @@
 ;;;;
 ;;;; button.stk -- GTK Button Widget
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -70,15 +70,12 @@
                     #:init-keyword   #:image
                     #:allocation     #:virtual
                     #:slot-ref      (lambda (o)
-                                      (let ((v (gtk-button-get-image (slot-ref o
-                                                                               'wid))))
+                                      (let ((v (gtk-button-get-image
+                                                   (slot-ref o 'wid))))
                                         (if (eq? v (void)) #f v)))
                     #:slot-set!     (lambda (o v)
                                       (gtk-button-set-image (slot-ref o 'wid)
                                                             (slot-ref v 'wid))))
-   (focus-on-click  #:accessor      focus-on-click
-                    #:init-keyword  #:focus-on-click
-                    #:allocation    #:gtk-property)
    (relief          #:accessor      relief
                     #:init-keyword  #:relief
                     #:allocation    #:virtual
@@ -88,9 +85,6 @@
                     #:slot-set!     (lambda (o v)
                                       (gtk-button-set-relief (slot-ref o 'wid)
                                                              (relief->int v))))
-   (use-stock      #:accessor       use-stock
-                   #:init-keyword   #:use-stock
-                   #:allocation     #:gtk-property)
    (use-underline  #:accessor       use-underline
                    #:init-keyword   #:use-underline
                    #:allocation     #:gtk-property)
@@ -111,5 +105,4 @@
 ;;; Exports
 ;;;
 (export <button>
-        command text image focus-on-click relief use-stock use-underline
-        xalign yalign)
+        command text image relief  use-underline xalign yalign)
