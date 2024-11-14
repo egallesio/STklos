@@ -47,7 +47,6 @@
   ;; half is equivalent to normal now
   (if (= v 2) 'none 'normal))
 
-
 ;======================================================================
 ;
 ;           < B u t t o n >
@@ -76,6 +75,17 @@
                     #:slot-set!     (lambda (o v)
                                       (gtk-button-set-image (slot-ref o 'wid)
                                                             (slot-ref v 'wid))))
+   (image-position  #:accessor     image-position
+                    #:init-keyword #:image-poition
+                    #:allocation   #:virtual
+                    #:slot-ref     (lambda (o)
+                                    (int->pos
+                                     (%gtk-get-property (slot-ref o 'wid)
+                                                        "image-position")))
+                    #:slot-set!    (lambda (o v)
+                                     (%gtk-set-property! (slot-ref o 'wid)
+                                                        "image-position"
+                                                        (pos->int v))))
    (relief          #:accessor      relief
                     #:init-keyword  #:relief
                     #:allocation    #:virtual
