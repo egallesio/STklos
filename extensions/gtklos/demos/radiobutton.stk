@@ -1,7 +1,7 @@
 ;;;;
 ;;;; radiobutton.stk            -- GTK Radio Button Demo
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@ Some GTklos radio buttons and two buttons to give them life.
           #:border-width 10
           #:sibling leader
           #:command (lambda (w e)
-                      (let ((sel (group-selected w)))
+                      (let ((sel (radio-selected w)))
                         (when (eq? w sel)
                           ;; Show only a message when selected (not on de-selection)
                           (printf "Radio group #~s: ~s\n" group (text sel)))))))
@@ -74,7 +74,7 @@ Some GTklos radio buttons and two buttons to give them life.
         (make <button> #:text "Radio #2 selected"
                        #:parent buttons
                        #:command (lambda (w e)
-                                   (let ((sel (group-selected r1)))
+                                   (let ((sel (radio-selected r1)))
                                      (printf "Radio group #2: ~s\n" (text sel)))))
         (make <button> #:text "Change Radio 2"
                        #:parent buttons
@@ -82,7 +82,7 @@ Some GTklos radio buttons and two buttons to give them life.
                                    (set-cdr! (last-pair l) l)   ; make the list circular
                                    (lambda (w e)
                                      (set! l (cdr l))
-                                     (set! (group-selected r1) (car l)))))))
+                                     (set! (radio-selected r1) (car l)))))))
     (gtk-main)
     0))
 
