@@ -1,7 +1,7 @@
 ;;;;
 ;;;; events.stk                                  -- GTK Events Management
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -134,11 +134,13 @@
                  (key-set! (slot-ref o '%event) key v)))))
 
 (define (event-describe e)
-  (eprintf "event description ~S\n" e)
+  (eprintf "Event description ~S\n" e)
   (eprintf "\t     type: ~S\n" (event-type e))
   (eprintf "\t   button: ~S\n" (event-button e))
   (eprintf "\tmodifiers: ~S\n" (event-modifiers e))
   (eprintf "\t     char: ~S\n" (event-char e))
+  (eprintf "\t   keyval: ~S\n" (event-keyval e))
+  (eprintf "\t  keycode: ~S\n" (event-keycode e))
   (eprintf "\t        x: ~S\n" (event-x e))
   (eprintf "\t        y: ~S\n" (event-y e)))
 

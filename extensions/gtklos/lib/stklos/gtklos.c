@@ -695,9 +695,9 @@ DEFINE_PRIMITIVE("event-button", event_button, subr1, (SCM event))
             return MAKE_INT(2);
          if( state & GDK_BUTTON3_MASK )
             return MAKE_INT(3);
-         return MAKE_INT(0);
+         return STk_false;
       }
-    default: return MAKE_INT(0);
+    default: return STk_false;
   }
 }
 
