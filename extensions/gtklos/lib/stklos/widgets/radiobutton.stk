@@ -94,6 +94,8 @@
     (slot-set! self 'wid id)))
 
 
+(define-method radio-group ((self <radio-button>))
+  (find-radio-group self))
 
 
 ;; ======================================================================
@@ -263,4 +265,4 @@
 ;;;
 ;;; Exports
 ;;;
-(export <radio-button> radio-selected sibling)
+(export <radio-button> radio-selected sibling radio-group)
