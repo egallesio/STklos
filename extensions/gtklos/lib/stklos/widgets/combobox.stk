@@ -121,8 +121,9 @@
 (define-method container-add! ((self <combobox>) (str <string>))
   (gtk-combo-box-text-append (wid self) str))
 
-(define-method container-add! ((self <combobox>) obj . args)
-  (error "Only strings can be added to  <combobox> fo now. It was ~S" obj))
+(define-method container-add! ((self <combobox>) (obj <top>))
+  (gtk-combo-box-text-append (wid self)
+                             (format #f "~a" obj)))
 
 
 ;======================================================================
