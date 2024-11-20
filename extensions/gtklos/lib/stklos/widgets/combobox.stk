@@ -1,7 +1,7 @@
 ;;;;
 ;;;; combobox.stk   -- GTklos Combobox class
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -28,8 +28,8 @@
 ;;;
 
 (define-gtk gtk-combo-box-text-new () #:pointer
-  "gtk_combo_box_text_new") 
- 
+  "gtk_combo_box_text_new")
+
 (define-gtk gtk-combo-box-text-new-with-entry  () #:pointer
   "gtk_combo_box_text_new_with_entry")
 
@@ -65,48 +65,50 @@
 ;
 ;======================================================================
 (define-class <combobox> (<gtk-container>)
-  ((items     #:accessor      items
-              #:init-keyword  #:items
-              #:allocation    #:virtual
-              #:slot-ref      (lambda (o)
-                                (%widget-data-get o #:items #f))
-              #:slot-set!     (lambda (o v)
-                                ;; Delete old items
-                                (let ((old (%widget-data-get o #:items '()))
-                                      (w   (wid o)))
-                                  ;; Remove all entries
-                                  (gtk-combo-box-text-remove-all w)
-                                  ;; Add new ones
-                                  (for-each (lambda (x) (container-add! o x)) v)
-                                  (%widget-data-set! o #:items v))))
-   (value     #:accessor        value
-              #:init-keyword    #:value
-              #:allocation      #:virtual
-              #:slot-ref        (lambda (o)
-                                  (let ((v (gtk-combo-box-get-active (wid o))))
-                                    (if (= v -1)
-                                        #f
-                                        (list-ref (%widget-data-get o #:items #f) v))))
-              #:slot-set!       (lambda (o v)
-                                  (if v
-                                      (let Loop ((lst (%widget-data-get o #:items '()))
-                                                 (i 0))
-                                        (cond
-                                         ((null? lst)
+  ((items     #:accessor       items
+              #:init-keyword   #:items
+              #:allocation     #:virtual
+              #:slot-ref       (lambda (o)
+                                 (%widget-data-get o #:items #f))
+              #:slot-set!      (lambda (o v)
+                                 ;; Delete old items
+                                 (let ((old (%widget-data-get o #:items '()))
+                                       (w   (wid o)))
+                                   ;; Remove all entries
+                                   (gtk-combo-box-text-remove-all w)
+                                   ;; Add new ones
+                                   (for-each (lambda (x) (container-add! o x)) v)
+                                   (%widget-data-set! o #:items v))))
+   (value     #:accessor       value
+              #:init-keyword   #:value
+              #:allocation     #:virtual
+              #:slot-ref       (lambda (o)
+                                 (let ((v (%gtk-get-property (slot-ref o 'wid)
+                                                             "active")))
+                                   (if (negative? v)
+                                       #f
+                                       (list-ref (%widget-data-get o #:items #f)
+                                                 v))))
+              #:slot-set!      (lambda (o v)
+                                 (if v
+                                     (let Loop ((lst (%widget-data-get o #:items '()))
+                                                (i 0))
+                                       (cond
+                                        ((null? lst)
                                           (error "cannot find item ~S in combobox ~S"
                                                  v o))
-                                         ((equal? (car lst) v)
-                                          (gtk-combo-box-set-active (wid o) i))
-                                         (else
-                                          (Loop (cdr lst) (+ i 1)))))
-                                      ;; v = #f => unset value
-                                      (gtk-combo-box-set-active (wid o) -1))))
-   (command   #:accessor        command
-              #:init-keyword    #:command
-              #:allocation      #:virtual
-              #:slot-ref        (%make-event-getter-func "changed")
-              #:slot-set!       (%make-event-setter-func "changed"))
-   ))
+                                        ((equal? (car lst) v)
+                                         (gtk-combo-box-set-active (wid o) i))
+                                        (else
+                                         (Loop (cdr lst) (+ i 1)))))
+                                     ;; v = #f => unset value
+                                     (gtk-combo-box-set-active (wid o) -1))))
+   (command   #:accessor       command
+              #:init-keyword   #:command
+              #:allocation     #:virtual
+              #:slot-ref       (%make-event-getter-func "changed")
+              #:slot-set!      (%make-event-setter-func "changed"))))
+
 
 (define-method realize-widget ((self <combobox>) initargs)
   (let ((c (gtk-combo-box-text-new)))
