@@ -36,7 +36,7 @@
 (define-gtk gtk-combo-box-text-remove-all (#:pointer)  #:void
   "gtk_combo_box_text_remove_all")
 
-(define-gtk gtk-combo-box-text-get-active (#:pointer) #:long
+(define-gtk gtk-combo-box-text-get-active (#:pointer) #:pointer
   "gtk_combo_box_text_get_active_text")
 
 (define-gtk gtk-combo-box-text-append (#:pointer #:string) #:void
@@ -135,18 +135,20 @@
   ((has-frame #:accessor      has-frame
               #:init-keyword  #:has-frame
               #:allocation    #:gtk-property)
-   (value  #:accessor       value
-           #:init-keyword   #:value
-           #:allocation     #:virtual
-           #:slot-ref       (lambda (o)
-                              ;; FIXME: this string must be free with g_free!!!!
-                              (gtk-combo-box-text-get-active (wid o)))
-           #:slot-set!      (lambda (o v)
-                              (let ((w (wid o)))
-                                (gtk-combo-box-text-prepend-text w v)
-                                (gtk-combo-box-set-active w 0)
-                                (gtk-combo-box-text-remove w 0))))))
-
+   (value     #:accessor      value
+              #:init-keyword  #:value
+              #:allocation    #:virtual
+              #:slot-ref      (lambda (o)
+                                (let* ((v   (gtk-combo-box-text-get-active (wid o)))
+                                       (res (string-copy (cpointer->string v))))
+                                  ;; NOTE: In GTK, v must be free with g_free!!!!
+                                  (g-free v)
+                                  res))
+              #:slot-set!      (lambda (o v)
+                                 (let ((w (wid o)))
+                                   (gtk-combo-box-text-prepend-text w v)
+                                   (gtk-combo-box-set-active w 0)
+                                   (gtk-combo-box-text-remove w 0))))))
 
 (define-method realize-widget ((self <entry-combobox>) initargs)
   (let ((c (gtk-combo-box-text-new-with-entry)))

@@ -44,6 +44,10 @@
 (define-gtk gtk-widget-set-size-request (#:pointer #:int #:int) #:void
   "gtk_widget_set_size_request")
 
+(define-external g-free ((ptr #:pointer))
+  :entry-name "g_free"
+  :library-name (find-gtk-library 'gobject))
+
 (define-generic realize-widget)
 (define-generic internal-arrange-widget)
 
