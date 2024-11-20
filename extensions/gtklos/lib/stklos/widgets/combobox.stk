@@ -91,8 +91,8 @@
                                                  v))))
               #:slot-set!      (lambda (o v)
                                  (if v
-                                     (let Loop ((lst (%widget-data-get o #:items '()))
-                                                (i 0))
+                                     (let Loop((lst (%widget-data-get o #:items '()))
+                                               (i   0))
                                        (cond
                                         ((null? lst)
                                           (error "cannot find item ~S in combobox ~S"
@@ -132,7 +132,10 @@
 ;
 ;======================================================================
 (define-class <entry-combobox> (<combobox>)
-  ((value  #:accessor       value
+  ((has-frame #:accessor      has-frame
+              #:init-keyword  #:has-frame
+              #:allocation    #:gtk-property)
+   (value  #:accessor       value
            #:init-keyword   #:value
            #:allocation     #:virtual
            #:slot-ref       (lambda (o)
@@ -142,12 +145,8 @@
                               (let ((w (wid o)))
                                 (gtk-combo-box-text-prepend-text w v)
                                 (gtk-combo-box-set-active w 0)
-                                (gtk-combo-box-text-remove w 0))))
+                                (gtk-combo-box-text-remove w 0))))))
 
-    ;;(gtk-combo-box-prepend-text w v)
-	;;			    (gtk-combo-box-set-active w 0)
-	;;			    (gtk-combo-box-remove-text w 0))))))
-   ))
 
 (define-method realize-widget ((self <entry-combobox>) initargs)
   (let ((c (gtk-combo-box-text-new-with-entry)))
@@ -159,5 +158,5 @@
 ;;;
 ;;; Exports
 ;;;
-(export <combobox> <entry-combobox> items value command)
+(export <combobox> <entry-combobox> items value has-frame command)
 
