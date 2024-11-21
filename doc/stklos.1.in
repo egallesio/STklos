@@ -155,6 +155,10 @@ optimizer during compilation. The peephole optimizer is used to change a
 succession of instructions by another set of instructions that has better
 performance. This flag uses the parameter \fIcompiler:peehole-optimizer\fR.
 By default, the peephole optimizer is activated.
+.IP "" 10
+-\fIverify-assume\fR can be use to indicate if the compiler must include the
+code necessary to verify the SRFI-145 assume forms, or not. This flag is false
+by default, but it is forced to true if the debug mode is set.
 .IP "-v, --version"
 print program version and exit.
 .IP "-V"

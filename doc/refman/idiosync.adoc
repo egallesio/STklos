@@ -175,10 +175,13 @@ Compiling files from Scheme programs can be done with the
 
 {{insertdoc 'compile-file}}
 
-==== Compiler flags 
+[#compflags]
+
+==== Compiler flags
 
 
-{{stklos}} compiler behaviour can be customized by several parameters. Those parameters are described below.
+{{stklos}} compiler behaviour can be customized by several parameters.
+Those parameters are described below.
 
 {{insertdoc 'compiler:time-display}}
 {{insertdoc 'compiler:gen-line-number}}
@@ -189,4 +192,4 @@ Compiling files from Scheme programs can be done with the
 {{insertdoc 'compiler:keep-source}}
 {{insertdoc 'compiler:unroll-iterations}}
 {{insertdoc 'compiler:peephole-optimizer}}
-
+{{insertdoc 'compiler:verify-assume}}
