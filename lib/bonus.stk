@@ -2718,7 +2718,7 @@ doc>
                                        "")
                                    "invalid assumption:")))
         `(or ,expr
-             (error ,fmt ',expr ,@args)))
+             (error 'assume ,fmt ',expr ,@args)))
       ;; ... and ignored otherwise
       #void))
 
