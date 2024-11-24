@@ -137,8 +137,9 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-230: Atomic Operations
     - SRFI-232: Flexible Curried Procedures
     - SRFI-233: INI files
-    - SRFI-234: Topological Sorting
+    - SRFI-234: Topological sorting
     - SRFI-235: Combinators
     - SRFI-236: Evaluating expressions in an unspecified order
     - SRFI-238: Codesets
     - SRFI-244: Multiple-value definitions
+    - SRFI-253: Data (Type-)Checking

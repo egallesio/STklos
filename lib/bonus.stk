@@ -2699,15 +2699,17 @@ doc>
  * (assume obj ...)
  *
  * The special form |assume| is defined in {{link-srfi 145}}.
- * When {{stklos}} is in debug mode, this special form is an expression
- * that evaluates to the value of |obj| if |obj| evaluates to a true
- * value and it is an error if |obj| evaluates to a false value.
+ * When parameter object |compiler:verify-assume| is true, this special
+ * form is an expression  that evaluates to the value of |obj| if |obj|
+ * evaluates to a true value and it is an error if |obj| evaluates to a
+ * false value. When the parameter object |compiler:verify-assume| is
+ * false the call  to |assume| is elided (see <<compflags>>).
  *
- * When {{stklos}} is not in debug mode, the call to |assume| is elided.
+ * NOTE: When {{stklos}} is run in debug mode, assumptions are evaluated. 
 doc>
 |#
 (define-macro (assume expr . args)
-  (if (positive? (stklos-debug-level))
+  (if (compiler:verify-assume)
       ;; Assumptions are evaluated in debug mode ...
       (let* ((efile (and (%epair? expr) (%epair-file expr)))
              (eline (and (%epair? expr) (%epair-line expr)))
@@ -2716,7 +2718,7 @@ doc>
                                        "")
                                    "invalid assumption:")))
         `(or ,expr
-             (error ,fmt ',expr ,@args)))
+             (error 'assume ,fmt ',expr ,@args)))
       ;; ... and ignored otherwise
       #void))
 

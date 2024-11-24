@@ -41,7 +41,8 @@
         compiler:inline-common-functions
         compiler:unroll-iterations
         compiler:peephole-optimizer
-        compiler:source-rewrite)
+        compiler:source-rewrite
+        compiler:verify-assume)
 
 #|
 <doc EXT compiler:time-display
@@ -218,7 +219,18 @@ doc>
  * @lisp
  * (begin (display "Hello") #t)
  * @end lisp
- * This parameter defaults to `#t`. 
+ * This parameter defaults to `#t`.
+doc>
+<doc EXT compiler:verify-assume
+ * (compiler:verify-assume)
+ * (compiler:verify-assume bool)
+ *
+ * This parameter is used by the |assume| form ({{quick-link-srfi 145}}).
+ * If its value is `#t`, assumptions are not verified at all (their code is
+ * not compiled). Otherwise, assumptions are verified.
+ *
+ * NOTE: When {{stklos}} is in debug modethe debug mode, this parameter is
+ * forced to `#t`.
 doc>
 |#
 (define-parameter compiler:time-display                   #t)
@@ -230,6 +242,8 @@ doc>
 (define-parameter compiler:keep-source                    #f)
 (define-parameter compiler:peephole-optimizer             #t)
 (define-parameter compiler:source-rewrite                 #t)
+(define-parameter compiler:verify-assume                  #f)
+
 (define-parameter compiler:unroll-iterations 4
   (lambda (v)
     (unless (and (fixnum? v) (positive? v))
@@ -280,6 +294,7 @@ doc>
                           ((source-rewrite)    (compiler:source-rewrite val))
                           ((show-instructions) (compiler:show-assembly-code val))
                           ((peephole-optimizer)(compiler:peephole-optimizer val))
+                          ((verify-assume)     (compiler:verify-assume val))
                           (else (error "bad boolean flag ~s" flag))))
                       ;; valued flag
                       (let* ((lst  (string-split flag "=")))

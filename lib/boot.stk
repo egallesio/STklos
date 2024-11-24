@@ -22,7 +22,7 @@
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
 ;;;;
- 
+
 ;;
 ;; Following code is in the STklos module and is needed to ensure STklos
 ;; bootstrap
@@ -293,6 +293,7 @@
     (compiler:warn-use-undefined #t)    ; Signal usage of still undefined symbols
     (compiler:gen-line-number #t)       ; Generate line numbers
     (compiler:keep-source #t)           ; Keep function source
+    (compiler:verify-assume #t)         ; Do verify the SRFI-145 assume calls
     (when (> debug 1)                   ; Load-verbose when debug >= 2
       (load-verbose debug)))
 
