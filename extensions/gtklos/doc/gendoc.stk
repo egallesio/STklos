@@ -22,7 +22,6 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@stklos.net]
 ;;;;    Creation date: 31-Oct-2024 18:32
-;;;; Last file update:  5-Nov-2024 18:30 (eg)
 ;;;;
 
 (import (stklos gtklos))
@@ -174,8 +173,32 @@
     (generate-index-enties slots methods)
     (generate-table slots methods)))
 
-
-
 (define (class-doc who)
   (printf "[#class-~a]\nindexterm:[~a, `<~a>` _class_]\n" who who who))
 
+
+;; Primitive header in a box as STklos refman
+(define (primitive-doc  synopsis kind)
+  (printf "(((~a)))\n"  (car synopsis))
+  (printf "[.rmargin]\n")
+  (printf "[.text-right]\n")
+  (printf "[.rmargin.small.silver]#~a#\n" kind)
+  ;; Make a box
+  (printf "****\n")
+  (printf "**`~a`**\n" synopsis)
+  (printf "****\n"))
+
+
+
+;; ----------------------------------------------------------------------
+(define (see-realize)
+  (printf "see general documentation on <<realize-widget, _realize-widget_>>"))
+
+(define (see-initialize)
+  (printf "see general documentation on <<initialize-instance, _initialize-instance_>>"))
+
+(define (see-container-add)
+  (printf "see general documentation on <<container-add!, _container-add!_>>"))
+
+(define (see-command)
+  (printf "see general documentation on <<command-callback, _command_ callback>>"))

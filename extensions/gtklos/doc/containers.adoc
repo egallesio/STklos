@@ -16,13 +16,28 @@ component.
 === Class <window>
 
 The `<window>` class defines a new window. By default, a new window is
-mapped on the screen it is created and it's size is 200x200.
+mapped on the screen when it is created and it's size is 200x200.
 
 {{show-class-table <window>}}
+
+Slots::
+
+- *height* is the height of the window. The default is 200 pixels.
+- *modal* is a boolean. It indicates if the window is in modal mode. A modal
+   window prevents interaction with other windows in the same application.
+- *resizable* indicates if the window size can be changed.
+- *title* indicates the string to display in the window title bar.
+- *transient* is a boolean. It indicates if the window is transient.
+- *width* is the width of the window. The default is 200 pixels.
+
+Method::
+
+- *realize-widget* {{see-realize}}.
 
 All these slots have an associated accessor that can be used to read or
 write the value of the slot. For instance
 
+<<<
 [source,scheme]
 ----
 stklos> (define w (make <window> :title "A window"))
@@ -89,20 +104,32 @@ WARNING: Normally, a class name prefixed by `<gtk-` is an internal class which i
 {{show-class-table <gtk-box>}}
 
 
+Slots::
+- *baseline-position* indicates the baseline position (see GTK documentation for more information)
+- *expand* is a boolean which indicates if children must be expanded by default
+- *fill* is a boolean which indicates if children fill the empty space by default.
+- *homogeneous* is a boolean. It indicates if all children of the box are
+   given equal space in the box.
+- *padding* is teh default value of the padding
+- *spacing*  is the number of pixels between children of the box (default is 0).
+
+Methods::
+
+- *container-add!* accepts a list of keyword parameters after the widget to
+  add to the container. The possible values for these keyword parameters are:
+** `expand` (defaults to the value of slot `expand` slot of the box)
+** `fill` (defaults to the value of slot `fill` slot of the box)
+** `padding` (defaults to the value of slot `padding` slot of the box)
+** `end` add element to the end (default to `#f`)
+- *realize-widget* {{see-realize}}
+
 Notes::
 
-1. One of the most important slot o this class is the slot `orientation`
+One of the most important slot of this class is the slot `orientation`
 (not shown here, since it is inherited from the class `<gtk-orientable>`). Its
 value is a symbol which can be one of the symbols `horizontal` or `vertical`.
 
-2. Method `container-add!` accepts a list of keyword parameters after the
-widget to add to the container. The possible values for these keyword parameters are:
-    - `expand` (defaults to the value of slot `expand` slot of the box)
-    - `fill` (defaults to the value of slot `fill` slot of the box)
-    - `padding` (defaults to the value of slot `padding` slot of the box)
-    - `end` (default to `#f`)
-
-
+// ----------------------------------------------------------------------
 {{class-doc "hbox"}}
 === Class <hbox>
 
@@ -111,7 +138,11 @@ initialized to `horizontal`.
 
 {{show-class-table <hbox>}}
 
+Method::
+* *initialize-instance* {{see-initialize}}
 
+
+// ----------------------------------------------------------------------
 {{class-doc "vbox"}}
 === Class <vbox>
 
@@ -120,20 +151,27 @@ initialized to `vertical`.
 
 {{show-class-table <vbox>}}
 
+Method::
+* *initialize-instance* {{see-initialize}}
+
+
+// ----------------------------------------------------------------------
 {{class-doc "frame"}}
 === Class <frame>
 
-A <frame> widget surrounds its child with a decorative frame and an optional label.
+A `<frame>` widget surrounds its child with a decorative frame and an optional label.
 
 {{show-class-table <frame>}}
 
-Notes::
+Slots::
 
-- The `title` slot contains the label of the frame
-- The `shadow` slot value can be one of the following symbols `none`, `in`, `out`, `etched-in` or `etched-out`.
-- The `xalign` and `yalign` flots can be used to adjust the position of the label.
+- *shadow*  can be one of the following symbols `none`, `in`, `out`, `etched-in` or `etched-out`.
+- *title* contains the label of the frame
+- *xalign* is a float to adjust the position of the title (0: left, 1: right, 0.5:default)
+- *yalign* is a float to adjust the position of the title (0: top, 1: bottom, 0.5:default)
 
 
+// ----------------------------------------------------------------------
 {{class-doc "hframe"}}
 === Class <hframe>
 
@@ -150,6 +188,8 @@ that can be filled with components that are arranged vertically.
 
 {{show-class-table <vframe>}}
 
+
+// ----------------------------------------------------------------------
 {{class-doc "grid"}}
 === Class <grid>
 
@@ -157,12 +197,25 @@ A `<grid>` widget is a container which arranges its child widgets in rows and co
 
 {{show-class-table <grid>}}
 
-Note:: Method `container-add!` accepts a list of keyword parameters after the
-widget to add to the container. The possible value for these keyword parameters are:
-     - `left` is the column position of the added widget (starting from 1)
-     - `top` is the line position of the added widget (starting from 1)
-     - `width` is the width position of the added widget
-     - `height` is the height position of the added widget
+
+Slots::
+
+- *column-homogeneous* is a boolean which indicates whether all columns of the
+   grid will have the same width.
+- *column-spacing* is the amount of space between columns of the grid.
+- *row-homogeneous* is a boolean which indicates whether all rows of the grid
+   will have the same width.
+- *row-spacing* is the amount of space between rows of the grid.
+
+Methods::
+
+* *container-add!* accepts a list of keyword parameters after the widget to
+add to the container. The possible value for these keyword parameters are:
+** `left` is the column position of the added widget (starting from 1)
+** `top` is the line position of the added widget (starting from 1)
+** `width` is the width position of the added widget
+** `height` is the height position of the added widget
+* *realize-widget* {{see-realize}}
 
 
 Example::
@@ -183,7 +236,6 @@ stklos> (container-add! g (list-ref b 1) #:left 0 #:top 1)
 stklos> (container-add! g (list-ref b 2) #:left 1 #:top 1 :height 2)
 stklos> (container-add! g (list-ref b 3) #:left 0 #:top 2)
 stklos> (container-add! g (list-ref b 4) #:left 0 #:top 3)
-stklos>
 ----
 
 This will display the following window:
@@ -200,13 +252,20 @@ buttons, or the window icon. It is often used at the top of a `<vwindow>`
 
 {{show-class-table <header-bar>}}
 
-Notable slots::
+Slots::
 - *decoration-layout* is a string used to indicate the layout of the buttons
    (see example below)
 - *decoration-layout-set* is a boolean used to know if the decoration layout
    has been set
+-  *has-subtitle* reserves space for a subtitle (even if not currently set).
 - *show-close-button* indicates if the decoration buttons (not only the close
    button!!) are shown or not. Its default value is `#f`
+- *subtitle* indicates the subtitle of the header bar (note that place is
+   always reserved for a subtitle, except is `has-subtitle` is set to `#f`.
+- *title* indicates the title of the header bar.
+
+Method::
+* *realize-widget* {{see-realize}}
 
 Exemple::
 The following example illustrates the use of a header bar.
@@ -242,8 +301,8 @@ Notes::
 into it container (`w` here). See the documentation of `parent` of the
 <<class-gtk-widget, `<gtk-widget>` class>>.
 
-
 <<<
+// ----------------------------------------------------------------------
 {{class-doc "toolbar"}}
 === Class <toolbar>
 
@@ -262,9 +321,9 @@ Slots::
 - *toolbar-style*: can be one of the following symbols `icons`, `text`,
    `both` or `both-horizontal`.
 
-Notable method::
+Methods::
 
-The method *add-items-to-toolbar* is a utility method to easily populate the
+- *add-items-to-toolbar* is a utility method to easily populate the
 components of a toolbar. It takes a toolbar and a list describing its
 components with the following convention, for each item of the list:
 
@@ -274,6 +333,10 @@ components with the following convention, for each item of the list:
 to the toolbar. The content of the list are the parameters that must be passed
 during the creation of the icon.
 
+- *container-add!*: {{see-container-add}}.
+
+<<<
+Exemple:: 
 [source,scheme]
 ----
 (define w (make <vwindow> :title "Test header" :width 300))
@@ -302,15 +365,19 @@ standard directory (generally `/usr/share/icons` on GNU/Linux).
 horizontal or vertical.
 
 
+// ----------------------------------------------------------------------
 {{class-doc "toolbar-item"}}
 ==== Class <toolbar-item>
 
 The `<toolbar-item>` class is the parent class of the toolbar items classes
-that can be added to a to a GTK toolbar. It offers only one method
+that can be added to a to a GTK toolbar. It offers only two methods
 (*container-add*) to add an item to a toolbar.
 
 
 {{show-class-table <toolbar-item>}}
+
+
+Methods:: 
 
 There are two methods of the generic function *container-add!* to add an item
 to a container:
@@ -323,8 +390,7 @@ to a container:
    end of the toolbar.
 
 
-
-
+// ----------------------------------------------------------------------
 {{class-doc "toolbar-separator-item"}}
 ==== Class <toolbar-separator-item>
 
@@ -332,9 +398,12 @@ The class `<toolbar-separator-item>`  permits to define a separator to a toolbar
 
 {{show-class-table <toolbar-separator-item>}}
 
+Methods::
+
+- *realize-widget* {{see-realize}}.
 
 
-
+// ----------------------------------------------------------------------
 {{class-doc "toolbar-button-item"}}
 ==== Class <toolbar-button-item>
 
@@ -343,10 +412,9 @@ toolbar. The button can have an image and a text.
 
 {{show-class-table <toolbar-button-item>}}
 
-Methods::
+Slots::
 
-- *command* is identical to the command associated to a button. See the
-   documentation of <<button, buttons>>.
+- *command* is identical to the command associated to a button ({{see-command}})
 
 - *icon-name* is a string which contains is the name of the themed icon
    displayed on the item.  Icons are searched by the GTK library in the
@@ -354,4 +422,6 @@ Methods::
 
 - *text* is the text of the button item.
 
+Method::
 
+- *realize-widget: {{see-realize}}

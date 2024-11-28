@@ -5,28 +5,198 @@
 //           Author: Erick Gallesio [eg@stklos.net]
 //    Creation date:  31-Oct-2024 09:48
 
-== Buttons
-
-TODO
+== Button widgets
 
 
+{{class-doc "button"}}
 === Class <button>
 
-TODO
+A `<button>` widget is generally used to trigger a callback function
+that is called when the button is pressed.
+
+{{show-class-table <button>}}
 
 
-=== Class <checkbutton>
+Slots::
+- *command* denotes the callback called when the button is clicked
+   (see <<command-property, _command property_>>).
+- *image* contains the child widget to appear next to the button text.
+- *image-position* is a symbol used to define the position of the
+   image relative to the text inside the button. It's value can be one
+   of the symbols `left`, `right`, `top`, `bottom`.
+- *relief* is a symbol describing the relief style of the button. Its
+   value can be the `normal` or `none`.
+- *text* is a string which contains the button label.
+- *use-underline* if true, an underline in the text of the button
+  label indicates the next character should be used for the mnemonic
+  accelerator key.
+- *xalign* is a float that can be used to control the horizontal
+   position of button content (0.0 is left and 1.0 is right). The
+   default value is 0.5.
+- *yalign* is a float that can be used to control the vertical
+   position of button content (0.0 is top and 1.0 is bottom). The
+   default value is 0.5.
 
-TODO
+Methods::
 
-=== Class <radiobutton>
+- *realize-widget* {{see-realize}}.
 
-TODO
+Here is a simple button with a text and an image. Clicking on the button, will
+launch the _emacs_ editor:
 
+<<<
+[source, scheme]
+----
+(let ((w (make <vwindow> :title "Button test" :width 300 :height 40)))
+  ;; create a button with a text and an image
+  (make <button> :text " Emacs "
+        :image (make <image> :icon-name "emacs")
+        :parent w
+        :command (lambda (e w) (system "emacs &"))))
+----
+
+This code displays a window with a the _emacs_ button:
+
+image::images/button-figure.png[images/button-figure,align="center"]
+
+// ----------------------------------------------------------------------
+{{class-doc "check-button"}}
+=== Class <check-button>
+
+A `<check-button>` is a button with a toggle button displayed next to the
+button label.
+
+{{show-class-table <check-button>}}
+
+Slots::
+
+- *value* is a boolean. It indicates if the check button is on or off.
+
+Methods::
+
+- *realize-widget** {{see-realize}}.
+
+
+
+[source,scheme]
+----
+(let ((w (make <vwindow> :title "Check button test" :width 300 :height 40)))
+  (make <check-button> :text "Bold"   :parent w)
+  (make <check-button> :text "Italic" :parent w :value #t))
+----
+
+This code displays the following window:
+
+image::images/checkbutton-figure.png[images/checkbutton-figure,align="center"]
+
+
+// ----------------------------------------------------------------------
+{{class-doc "radio-button"}}
+=== Class <radio-button>
+
+A `<radiobutton>` is similar to a check button. Radio buttons are generally
+pcas in a group of radio buttons.  When one is selected, all other radio
+buttons in the same group are deselected. It is one way of giving the user a
+choice from many options.
+
+{{show-class-table <radio-button>}}
+
+Slots::
+
+- *radio-selected* contains the radio button which is selected in the
+   radio-button's group. For-instance the expression `(text (radio-selected
+   b))` can be used to find the label string of the radio group to which the
+   button `b` belongs. Note any button of the group can be used here to find
+   the selected radio button.
+- *sibling* is a read-only slot. It contains the value of the `#:sibling`
+   option passed when the widget was initialized. See `initialize-instance`
+   below.
+
+Methods::
+
+- *initialize-instance* for radio buttons takes care of the `#:sibling` option
+   which can be passed during their creation. If no sibling is passed (or is
+   `#f`), the radio button creates a new group and register it in this
+   group. If a sibling is passed, it must be a radio button and the new
+   created button will be registered in the same group of this sibling radio
+   button.
+- *radio-group* returns a list of all the buttons of the group to which
+   belongs the radio button passed as parameter.
+- *realize-widget* {{see-realize}}.
+
+
+[source,scheme]
+----
+(let* ((w  (make <vwindow> :title "Radio button test" :width 300 :height 40))
+       (b1 (make <radio-button> :text "Small"  :parent w))
+       (b2 (make <radio-button> :text "Normal" :parent w :sibling b1))
+       (b3 (make <radio-button> :text "Big"    :parent w :sibling b1)))
+    (set! (radio-selected b1) b2)) ;; Select button b2 instead of the group leader b1
+----
+
+The evaluation of this code will display the following window.
+
+image::images/radio-figure.png[images/radio-figure,align="center"]
+
+
+// ______________________________________________________________________
+
+{{class-doc "combobox"}}
 === Class <combobox>
 
-TODO
+A `<combobox>` permits the user to choose from a list of valid choices. It
+displays the selected choice. When activated, the combo box displays a popup
+with a list of valid choices.
 
-=== Class <menu>
+{{show-class-table <combobox>}}
 
-TODO
+Slots::
+
+- *command* contains the callback function that will be used when  an entry is selected.
+- *items* is a list of strings. It represents the correct values for the combo box.
+- *value* is the current selected value of in the combo box. If no value is
+  selected, this slot is `#f`.
+
+Methods::
+
+- *container-add!* permits to append a value to the end of the list of items.
+  If the value given is not a string, it is converted before to a string.
+- *realize-widget* {{see-realize}}.
+
+Example::
+
+[source,scheme]
+----
+(let ((w  (make <vwindow> :title "Combo box test" :width 300 :height 40)))
+  (make <combobox> :parent w  :items '("XS" "S" "M" "L" "XL")
+        :value "M"
+        :command (lambda (w e)
+                   (printf "You have selected ~S\n" (value w)))))
+----
+
+// ----------------------------------------------------------------------
+{{class-doc "entry-combobox"}}
+=== Class <entry-combobox>
+
+An `<entry-combobox>` is similar to a `<combo-box>`, excepts that its value
+can be edited.
+
+{{show-class-table <entry-combobox>}}
+
+
+Slots::
+
+- *has-frame* is a boolean. It indicates whether a frame is drawn around the entry.
+- *value* is the current selected value of in the combo box. If no value is
+  selected, this slot is `#f`.
+
+Methods::
+
+- *realize-widget* {{see-realize}}.
+
+=== Menus
+
+{{class-doc "menu"}}
+==== Class <menu>
+
+{{show-class-table <menu>}}
