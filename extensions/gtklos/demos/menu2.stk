@@ -1,7 +1,7 @@
 ;;;;
 ;;;; menu1.stk          -- GTK+ Menu Demo
 ;;;;
-;;;; Copyright © 2009-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2009-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -29,9 +29,9 @@
 Menu Bar Demo (version 2)
 
 This demo just shows a simple menu bar with simple menus.
-This time we use the <b>add-menubar-items!</b> function which
-allow a simpler code (comare the source code of this version
-and the same demo wher everything is done bt hand).
+This time, we use the <b>add-menubar-items!</b> function which
+allow a simpler code (compare the source code of this version
+and the same demo where everything is done bt hand).
 ")
 
 
