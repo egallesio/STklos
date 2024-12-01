@@ -118,14 +118,7 @@
                         #:allocation     #:gtk-property)
    (reserve-toggle-size #:accessor       reserve-toggle-size
                         #:init-keyword   #:reserve-toggle-size
-                        #:allocation     #:gtk-property)
-   (tearoff-state       #:accessor       tearoff-state
-                        #:init-keyword   #:tearoff-state
-                        #:allocation     #:gtk-property)
-   (tearoff-title       #:accessor       tearoff-title
-                        #:init-keyword   #:tearoff-title
                         #:allocation     #:gtk-property)))
-
 
 (define-method realize-widget ((self <menu>) initargs)
   (let ((m (gtk-menu-new)))
@@ -305,9 +298,8 @@
 ;;; Exports
 ;;;
 (export <menu-bar> pack-direction child-pack-direction
-        <menu> active reserve-toggle-size tearoff-state tearoff-title
+        <menu> active reserve-toggle-size
         <menu-item> right-justified accel-path use-underline
         <menu-check-item> value draw-as-radio inconsistent
         <menu-separator-item>
         add-items-to-menubar)
-
