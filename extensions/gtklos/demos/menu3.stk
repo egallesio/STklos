@@ -1,7 +1,7 @@
 ;;;;
 ;;;; menu3.stk          -- GTK+ Menu Demo
 ;;;;
-;;;; Copyright © 2009-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2009-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -44,37 +44,37 @@ menus.
      (mb   (make <menu-bar> :parent win)))
     (add-items-to-menubar mb
                            `(("File"
-                                 ("Load"   :action ,action)
-                                 ("Save"   :action ,action)
+                                 ("Load"   :command ,action)
+                                 ("Save"   :command ,action)
                                  (""       :type   :separator)
-                                 ("Quit"   :action ,(lambda _ (exit 0))))
+                                 ("Quit"   :command ,(lambda _ (exit 0))))
                              ("Edit"
-                                 ("Copy"   :action ,action)
-                                 ("Cut"    :action ,action)
-                                 ("Paste"  :action ,action))
+                                 ("Copy"   :command ,action)
+                                 ("Cut"    :command ,action)
+                                 ("Paste"  :command ,action))
                              ("Cascade"
                                  ("  1  " :type :cascade
-                                  :menu (("One"  :action ,action)
-                                         ("Un"   :action ,action)
-                                         ("Eins" :action ,action)))
+                                  :menu (("One"  :command ,action)
+                                         ("Un"   :command ,action)
+                                         ("Eins" :command ,action)))
                                  ("  2  " :type :cascade
-                                  :menu (("Two"  :action ,action)
-                                         ("Deux" :action ,action)
-                                         ("Zwei" :action ,action)))
-                                 ("  3  " :action ,action)
-                                 ("  4  " :action ,action))
+                                  :menu (("Two"  :command ,action)
+                                         ("Deux" :command ,action)
+                                         ("Zwei" :command ,action)))
+                                 ("  3  " :command ,action)
+                                 ("  4  " :command ,action))
                              ("Check"
-                                 ("option1" :type :check :action ,action)
-                                 ("option2" :type :check :action ,action :value #t))
+                                 ("option1" :type :check :command ,action)
+                                 ("option2" :type :check :command ,action :value #t))
                              ("Radio"
-                                 ("radio1 group1" :type :radio :action ,action)
-                                 ("radio2 group1" :type :radio :action ,action :value #t)
+                                 ("radio1 group1" :type :radio :command ,action)
+                                 ("radio2 group1" :type :radio :command ,action :value #t)
                                  (""       :type :separator)
-                                 ("radio1 group2" :type :radio :action ,action :first #t)
-                                 ("radio2 group2" :type :radio :action ,action))
+                                 ("radio1 group2" :type :radio :command ,action :first #t)
+                                 ("radio2 group2" :type :radio :command ,action))
                              ()  ;; Add an empty list to make space
                              ;; Now "Help" will be on the right part of the tool-bar
                              ("Help"
-                                 ("About"     :action ,action)
-                                 ("More Info" :action ,action))))
+                                 ("About"     :command ,action)
+                                 ("More Info" :command ,action))))
     (gtk-main)))

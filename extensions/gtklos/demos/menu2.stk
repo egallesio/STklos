@@ -47,13 +47,13 @@ and the same demo where everything is done bt hand).
 
     (add-items-to-menubar mb
         `(("Item 1"
-             ("Item 1 / 1"   :action ,action)
-             ("Item 1 / 2"   :action ,action))
+             ("Item 1 / 1"   :command ,action)
+             ("Item 1 / 2"   :command ,action))
           ("Item 2"
-             ("Item 2 / 1"   :action ,action)
-             ("Item 2 / 2"   :action ,action))
+             ("Item 2 / 1"   :command ,action)
+             ("Item 2 / 2"   :command ,action))
           ()                    ;; Use an empty list to make space
           ("Item 3"
-             ("Item 3 / 1"   :action ,action)
-             ("Item 3 / 2"   :action ,action))))
+             ("Item 3 / 1"   :command ,action)
+             ("Item 3 / 2"   :command ,action))))
     (gtk-main)))

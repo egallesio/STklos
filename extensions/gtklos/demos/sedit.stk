@@ -1,7 +1,7 @@
 ;;;;
 ;;;; sedit.stk  -- A small editor written in STklos
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -116,18 +116,18 @@
     ;; Fill the menu
     (add-items-to-menubar menus
         `(("File"
-             ("Open"          #:action ,open-a-file)
-             ("Save"          #:action ,save-file)
-             ("Save As ..."   #:action ,save-as)
+             ("Open"          #:command ,open-a-file)
+             ("Save"          #:command ,save-file)
+             ("Save As ..."   #:command ,save-as)
              (""              #:type   #:separator)
-             ("Quit"          #:action ,quit-editor))
+             ("Quit"          #:command ,quit-editor))
           ("Edit"
-             ("Cut"           #:action ,cut-sel)
-             ("Copy"          #:action ,copy-sel)
-             ("Paste"         #:action ,paste-sel))
+             ("Cut"           #:command ,cut-sel)
+             ("Copy"          #:command ,copy-sel)
+             ("Paste"         #:command ,paste-sel))
           ()
           ("Help"
-             ("About"       #:action ,about-editor))))
+             ("About"         #:command ,about-editor))))
     ;; Fill the toolbar
     (add-items-to-toolbar tb
         `((:icon-name "document-open"    #:command ,open-a-file #:tooltip "Open file")
