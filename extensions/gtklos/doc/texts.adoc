@@ -40,6 +40,10 @@ Slots::
    visible. Setting the visibility to false is useful to read secrets.
 - *value* is a string which contains the text in the entry.
 
+Method::
+
+- *realize-widget* {{see-realize}}
+
 
 // ----------------------------------------------------------------------
 {{class-doc "text"}}
@@ -74,6 +78,7 @@ Methods::
 
 - *event-connect* permits to connect a signal to the text widget (see
    the <<Events>>)
+- *realize-widget* {{see-realize}}
 - *text-copy-clipboard* copies  the content of text clipboard
 - *text-cut-clipboard* cuts the selected clipboard
 - *text-paste-clipboard* pastes the clipboard in the text widget

@@ -5,7 +5,7 @@
 //           Author: Erick Gallesio [eg@stklos.net]
 //    Creation date:  31-Oct-2024 09:48
 
-= GTKlos extension
+= GTKlos extension: Building GUI with STklos
 :authors: Erick Gallesio
 :email: eg@stklos.net
 :doctype: book
@@ -33,8 +33,9 @@
 {{Include* "buttons.adoc"}}
 {{Include* "texts.adoc"}}
 {{Include* "dialogs.adoc"}}
-{{Include* "misc.adoc"}}
+{{Include* "gtk-misc.adoc"}}
 {{Include* "canvases.adoc"}}
+{{Include* "misc.adoc"}}
 
 
 {{If (equal? doc-fmt "pdf")}}

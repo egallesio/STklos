@@ -14,3 +14,6 @@ event functions
 remove
 idle....
 
+
+
+Un moyent pour enlever un callback

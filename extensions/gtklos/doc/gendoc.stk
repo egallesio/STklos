@@ -201,4 +201,4 @@
   (printf "see general documentation on <<container-add!, _container-add!_>>"))
 
 (define (see-command)
-  (printf "see general documentation on <<command-callback, _command_ callback>>"))
+  (printf "see general documentation on <<command_slot, command _slot_>>"))

@@ -148,7 +148,7 @@ The slot `+command+` is particularly important on buttons. It contains the
 callback function that will be called when we click (with left mouse button)
 on `+b+`. The function will be called with two parameters the widget which
 has been clicked and an event object which contains all the information on
-the event itself (more on that below).
+the event itself (more on that in <<command_slot>>).
 
 We can add a _command_ to the previous button with:
 
@@ -159,7 +159,6 @@ stklos> (set! (command b)
                 (printf "Button ~s was clicked\n" w)))
 ----
 
-Now, when clicking the button `+b+` a message will be printed.  
+Now, when clicking the button `+b+` a message will be printed.
 
 This ends this small introduction on GTKlos.
-
