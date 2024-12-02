@@ -161,9 +161,6 @@
    (right-justified #:accessor      right-justified
                     #:init-keyword  #:right-justified
                     #:allocation    #:gtk-property)
-   (accel-path      #:accessor      accel-path
-                    #:init-keyword  #:accel-path
-                    #:allocation    #:gtk-property)
    (use-underline   #:accessor      use-underline
                     #:init-keyword  #:use-underline
                     #:allocation    #:gtk-property)))
@@ -244,10 +241,11 @@
 (define-method add-items-to-menubar ((mb <menu-bar>) items)
 
   (define (fill-menu m items)
-    (let ((sibling #f))
+    (let ((sibling #f)
+          (no-action (lambda (w e) (eprintf "*** No command set for ~S\n" (text w)))))
       (for-each (lambda (x)
                   (let ((title  (car x))
-                        (action (key-get (cdr x) #:action #f))
+                        (action (key-get (cdr x) #:action no-action))
                         (type   (key-get (cdr x) #:type   #:item)))
                     (case type
                       ((#:separator)
@@ -299,7 +297,8 @@
 ;;;
 (export <menu-bar> pack-direction child-pack-direction
         <menu> active reserve-toggle-size
-        <menu-item> right-justified accel-path use-underline
+        <menu-item> right-justified use-underline
         <menu-check-item> value draw-as-radio inconsistent
+        <menu-radio-item> sibling
         <menu-separator-item>
         add-items-to-menubar)
