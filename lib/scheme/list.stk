@@ -302,6 +302,20 @@
 ;;; Constructors
 ;;;;;;;;;;;;;;;;
 
+#|
+<doc EXT xcons
+ * (xcons d a)
+ *
+ * The same as |(lambda (d a) (cons a d))|
+ * Of utility only as a value to be conveniently passed to higher-order procedures.
+ *
+ * @lisp
+ * (xcons '(b c) 'a) => (a b c)
+ * @end lisp
+ *  The name stands for "eXchanged CONS."
+doc>
+|#
+
 ;;; Occasionally useful as a value to be passed to a fold or other
 ;;; higher-order procedure.
 (define (xcons d a) (cons a d))
@@ -331,8 +345,20 @@
 ;(define (list . ans) ans)  ; R4RS
 
 
+#|
+<doc EXT list-tabulate
+ * (list-tabulate len proc)
+ *
+ * Returns an n-element list. Element i of the list, where 0 <= i < n, is
+ * produced by |(init-proc i)|. No guarantee is made about the dynamic order
+ * in which init-proc is applied to these indices.
+ *
+ * @lisp
+ * (list-tabulate 4 values) => (0 1 2 3)
+ * @end lisp
+doc>
+|#
 ;;; Make a list of length LEN. Elt i is (PROC i) for 0 <= i < LEN.
-
 (define (list-tabulate len proc)
   (check-arg (lambda (n) (and (integer? n) (>= n 0))) len list-tabulate)
   (check-arg procedure? proc list-tabulate)
@@ -351,6 +377,21 @@
     (cons x (recur (car rest) (cdr rest)))
     x)))
 |#
+#|
+<doc EXT cons*
+ * (cons* elt1 elt2 ...)
+ *
+ * Like list, but the last argument provides the tail of the constructed list, returning
+ * |(cons elt1 (cons elt2 (cons ... eltn)))|
+ *
+ * This function is called |list*| in Common Lisp and about half of the Schemes that provide
+ * it, and |cons*| in the other half.
+ * @lisp
+ * (cons* 1 2 3 4) => (1 2 3 . 4)
+ * (cons* 1)       => 1
+ * @end lisp
+doc>
+|#
 (define cons* list*)    ;; list* is a primitive in STklos
 
 ;;; (unfold not-pair? car cdr lis values)
@@ -364,6 +405,21 @@
 ;;;     (cons (car lis) (recur (cdr lis)))
 ;;;     lis)))
 
+#|
+<doc EXT iota
+ * (iota count [start step])
+ *
+ * Returns a list containing the elements
+ * |(start start+step ... start+(count-1)*step)|
+ *
+ * The start and step parameters default to 0 and 1, respectively.
+ * This procedure takes its name from the APL primitive.
+ * @lisp
+ * (iota 5)        => (0 1 2 3 4)
+ * (iota 5 0 -0.1) => (0 -0.1 -0.2 -0.3 -0.4)
+ * @end lisp
+doc>
+|#
 ;;; IOTA count [start step] (start start+step ... start+(count-1)*step)
 
 (define (iota count :optional (start 0) (step 1))
@@ -423,11 +479,46 @@
 ;     ((<= steps-left 0) ans)))))
 
 
-
+#|
+<doc EXT circular-list
+ * (circular-list elt1 elt2 ...)
+ *
+ * Constructs a circular list of the elements.
+ * @lisp
+ * (circular-list 'z 'q) => (z q z q z q ...)
+ * @end lisp
+doc>
+|#
 (define (circular-list val1 . vals)
   (let ((ans (cons val1 vals)))
     (set-cdr! (last-pair ans) ans)
     ans))
+
+
+#|
+<doc EXT proper-list?
+ * (proper-list? x0
+ *
+ * Returns true iff |x| is a proper list -- a finite, nil-terminated list.
+ *
+ * More carefully: The empty list is a proper list. A pair whose cdr is a
+ * proper list is also a proper list:
+ * @lisp
+ *  <proper-list> ::= ()                            (Empty proper list)
+ *                 |   (cons <x> <proper-list>)      (Proper-list pair)
+ * @end lisp
+ * Note that this definition rules out circular lists. This function is required
+ * to detect this case and return false.
+ *
+ * Nil-terminated lists are called "proper" lists by R5RS and Common Lisp. The
+ * opposite of proper is improper.
+ *
+ * R5RS binds this function to the variable |list?|.
+ * @lisp
+ * (not (proper-list? x)) = (or (dotted-list? x) (circular-list? x))
+ * @end lisp
+doc>
+|#
 
 ;;; <proper-list> ::= ()            ; Empty proper list
 ;;;       |   (cons <x> <proper-list>)  ; Proper-list pair
@@ -456,6 +547,41 @@
 ;;; <dotted-list> ::= <non-nil,non-pair>    ; Empty dotted list
 ;;;               |   (cons <x> <dotted-list>)  ; Proper-list pair
 
+#|
+<doc EXT circular-list?
+ * (circular-list? x)
+ *
+ * True if |x| is a circular list. A circular list is a value such that for
+ * every n >= 0, cdrn(x) is a pair.
+ *
+ * Terminology: The opposite of circular is finite.
+ * @lisp
+ * (not (circular-list? x)) = (or (proper-list? x) (dotted-list? x))
+ * @end lisp
+doc>
+|#
+(define (circular-list? x)
+  (let lp ((x x) (lag x))
+    (and (pair? x)
+     (let ((x (cdr x)))
+       (and (pair? x)
+        (let ((x   (cdr x))
+              (lag (cdr lag)))
+          (or (eq? x lag) (lp x lag))))))))
+
+#|
+<doc EXT dotted-list?
+ * (dotted-list? x)
+ *
+ * True if |x| is a finite, non-nil-terminated list. That is, there exists an
+ * n >= 0 such that cdrn(x) is neither a pair nor (). This includes non-pair,
+ * non-() values (e.g. symbols, numbers), which are considered to be dotted
+ * lists of length 0.
+ * @lisp
+ * (not (dotted-list? x)) = (or (proper-list? x) (circular-list? x))
+ * @end lisp
+doc>
+|#
 (define (dotted-list? x)
   (let lp ((x x) (lag x))
     (if (pair? x)
@@ -467,26 +593,81 @@
           (not (null? x))))
     (not (null? x)))))
 
-(define (circular-list? x)
-  (let lp ((x x) (lag x))
-    (and (pair? x)
-     (let ((x (cdr x)))
-       (and (pair? x)
-        (let ((x   (cdr x))
-              (lag (cdr lag)))
-          (or (eq? x lag) (lp x lag))))))))
-
+#|
+<doc EXT not-pair?
+ * (not-pair? x)
+ *
+ * The asme as |(lambda (x) (not (pair? x)))|
+ *
+ * Provided as a procedure as it can be useful as the termination condition for
+ * list-processing procedures that wish to handle all finite lists, both proper
+ * and dotted.
+doc>
+|#
 (define (not-pair? x) (not (pair? x)))  ; Inline me.
 
 ;;; This is a legal definition which is fast and sloppy:
 ;;;     (define null-list? not-pair?)
 ;;; but we'll provide a more careful one:
+#|
+<doc EXT null-list?
+ * (null-list? list)
+ *
+ * |List| is a proper or circular list. This procedure returns true if the argument
+ * is the empty list (), and false otherwise. It is an error to pass this procedure
+ * a value which is not a proper or circular list.
+ *
+ * This procedure is recommended as the termination condition for list-processing
+ * procedures that are not defined on dotted lists.
+doc>
+|#
 (define (null-list? l)
   (cond ((pair? l) #f)
     ((null? l) #t)
     (else (error 'null-list? "argument out of domain ~S" l))))
 
+#|
+<doc EXT list=
+ (list= elt= list1 ...)
 
+ * Determines list equality, given an element-equality
+ * procedure. Proper list A equals proper list B if they are of the same
+ * length, and their corresponding elements are equal, as determined by
+ * elt=. If the element-comparison procedure's first argument is from
+ * listi, then its second argument is from listi+1, i.e. it is always
+ * called as |(elt= a b)| for a an element of list A, and b an element of
+ * list B.
+ *
+ * In the n-ary case, every listi is compared to listi+1 (as opposed,
+ * for example, to comparing list1 to every listi, for i>1). If there are
+ * no list arguments at all, list= simply returns true.
+ *
+ * It is an error to apply list= to anything except proper lists. While
+ * implementations may choose to extend it to circular lists, note that
+ * it cannot reasonably be extended to dotted lists, as it provides no
+ * way to specify an equality procedure for comparing the list
+ * terminators.
+ *
+ * Note that the dynamic order in which the elt= procedure is applied
+ * to pairs of elements is not specified. For example, if list= is
+ * applied to three lists, A, B, and C, it may first completely compare A
+ * to B, then compare B to C, or it may compare the first elements of A
+ * and B, then the first elements of B and C, then the second elements of
+ * A and B, and so forth.
+ *
+ * The equality procedure must be consistent with eq?. That is, it must be
+ * the case that
+ * |(eq? x y) => (elt= x y)|.
+ *
+ * Note that this implies that two lists which are eq? are always
+ * |list=|, as well; implementations may exploit this fact to "short-cut"
+ * the element-by-element comparisons.
+ * @lisp
+ * (list= eq?)      => #t       ; Trivial cases
+ * (list= eq? '(a)) => #t
+ * @end lisp
+doc>
+|#
 (define (list= = . lists)
   (or (null? lists) ; special case
 
@@ -512,7 +693,21 @@
 ;    (if (pair? x)          ; a circular list. This version
 ;        (lp (cdr x) (+ len 1))     ; diverges.
 ;        len)))
-
+#|
+<doc EXT length+
+ * (length+ clist)
+ *
+ * Both |length| and |length+| return the length of the argument. It is an error
+ * to pass a value to length which is not a proper list (finite and nil-terminated).
+ * In particular, this means an implementation may diverge or signal an error when
+ * |length| is applied to a circular list.
+ *
+ * | length+|, on the other hand, returns #F when applied to a circular list.
+ *
+ *  The length of a proper list is a non-negative integer n such that |cdr| applied
+ * n times to the list produces the empty list.
+doc>
+|#
 (define (length+ x)         ; Returns #f if X is circular.
   (let lp ((x x) (lag x) (len 0))
     (if (pair? x)
@@ -564,6 +759,25 @@
 ;(define (cdddar x) (cdddr (car x)))
 ;(define (cddddr x) (cdddr (cdr x)))
 
+#|
+<doc EXT firs second third fourth fifth sixth seventh eigth ninth tenth
+ * (first   pair)
+ * (second  pair)
+ * (third   pair)
+ * (fourth  pair)
+ * (fifth   pair)
+ * (sixth   pair)
+ * (seventh pair)
+ * (eighth  pair)
+ * (ninth   pair)
+ * (tenth   pair)
+ *
+ * Synonyms for |car|, |cadr|, |caddr|, ...
+ * @lisp
+ * (third '(a b c d e)) => c
+ * @end lisp
+doc>
+|#
 
 (define first  car)
 (define second cadr)
@@ -576,10 +790,51 @@
 (define (ninth   x) (car  (cddddr (cddddr x))))
 (define (tenth   x) (cadr (cddddr (cddddr x))))
 
+#|
+<doc EXT car+cdr
+ * (car+cdr pair)
+ *
+ * The fundamental pair deconstructor:
+ * @lisp
+ * (lambda (p) (values (car p) (cdr p)))
+ * @end lisp
+ * This can, of course, be implemented more efficiently by a compiler.
+doc>
+|#
 (define (car+cdr pair) (values (car pair) (cdr pair)))
 
 ;;; take & drop
 
+#|
+<doc EXT take drop
+ * (take x i)
+ * (drop x i)
+ *
+ * |take| returns the first |i| elements of list |x|.
+ * |drop| returns all but the first |i| elements of list |x|.
+ * @lisp
+ * (take '(a b c d e)  2) => (a b)
+ * (drop '(a b c d e)  2) => (c d e)
+ * @end lisp
+ * |x| may be any value -- a proper, circular, or dotted list:
+ * @lisp
+ * (take '(1 2 3 . d) 2) => (1 2)
+ * (drop '(1 2 3 . d) 2) => (3 . d)
+ * (take '(1 2 3 . d) 3) => (1 2 3)
+ * (drop '(1 2 3 . d) 3) => d
+ * @end lisp
+ * For a legal |i|, take and drop partition the list in a manner which
+ * can be inverted with append:
+ * @lisp
+ * (append (take x i) (drop x i)) = x
+ * @end lisp
+ * |drop| is exactly equivalent to performing |i| |cdr| operations on |x|;
+ * the returned value shares a common tail with |x|. If the argument is
+ * a list of non-zero length, |take| is guaranteed to return a
+ * freshly-allocated list, even in the case where the entire list is taken,
+ * e.g. |(take lis (length lis))|.
+doc>
+|#
 (define (take lis k)
   (check-arg integer? k take)
   (let recur ((lis lis) (k k))
@@ -592,15 +847,41 @@
   (let iter ((lis lis) (k k))
     (if (zero? k) lis (iter (cdr lis) (- k 1)))))
 
-(define (take! lis k)
-  (check-arg integer? k take!)
-  (if (zero? k) '()
-      (begin (set-cdr! (drop lis (- k 1)) '())
-         lis)))
 
 ;;; TAKE-RIGHT and DROP-RIGHT work by getting two pointers into the list,
 ;;; off by K, then chasing down the list until the lead pointer falls off
 ;;; the end.
+#|
+<doc EXT take-right drop-right
+ * (take-right flist i)
+ * (drop-right flist i)
+ *
+ * |take-right| returns the last |i| elements of flist.
+ * |drop-right| returns all but the last |i| elements of flist.
+ * @lisp
+ * (take-right '(a b c d e) 2) => (d e)
+ * (drop-right '(a b c d e) 2) => (a b c)
+ * @end lisp
+ * The returned list may share a common tail with the argument list.
+ *
+ * |flist| may be any finite list, either proper or dotted:
+ * @lisp
+ * (take-right '(1 2 3 . d) 2) => (2 3 . d)
+ * (drop-right '(1 2 3 . d) 2) => (1)
+ * (take-right '(1 2 3 . d) 0) => d
+ * (drop-right '(1 2 3 . d) 0) => (1 2 3)
+ * @end lisp
+ * For a legal |i|, |take-right| and |drop-right| partition the list in a
+ * manner which can be inverted with |append|:
+ * @lisp
+ * (append (take flist i) (drop flist i)) = flist
+ * @end lisp
+ * |take-right|'s return value is guaranteed to share a common tail with flist.
+ * If the argument is a list of non-zero length, |drop-right| is guaranteed to
+ * return a freshly-allocated list, even in the case where nothing is dropped,
+ * e.g. |(drop-right lis 0)|.
+doc>
+|#
 
 (define (take-right lis k)
   (check-arg integer? k take-right)
@@ -615,6 +896,31 @@
     (if (pair? lead)
     (cons (car lag) (recur (cdr lag) (cdr lead)))
     '())))
+
+
+#|
+<doc EXT take! drop-right!
+ * (take! x i)
+ * (drop-right! flist i)
+ *
+ * |take!| and |drop-right!| are "linear-update" variants of |take|
+ * and |drop-right|: the procedure is allowed, but not required, to
+ * alter the argument list to produce the result.
+ *
+ * If |x| is circular, |take!| may return a shorter-than-expected list:
+ * @lisp
+ * (take! (circular-list 1 3 5) 8) => (1 3)
+ * (take! (circular-list 1 3 5) 8) => (1 3 5 1 3 5 1 3)
+ * @end lisp
+doc>
+|#
+
+(define (take! lis k)
+  (check-arg integer? k take!)
+  (if (zero? k) '()
+      (begin (set-cdr! (drop lis (- k 1)) '())
+         lis)))
+
 
 ;;; In this function, LEAD is actually K+1 ahead of LAG. This lets
 ;;; us stop LAG one step early, in time to smash its cdr to ().
@@ -675,6 +981,26 @@
 ;          lis)))
 ;      (list-tail lis k)))
 
+#|
+<doc EXT split-at split-at!
+ * (split-at  x i)
+ * (split-at! x i)
+ *
+ * |split-at| splits the list |x| at index |i|, returning a list of the first
+ * |i| elements,
+ * and the remaining tail. It is equivalent to
+ * @lisp
+ * (values (take x i) (drop x i))
+ * @end lisp
+ * |split-at!| is the linear-update variant. It is allowed, but not required,
+ * to alter the argument list to produce the result.
+ * @lisp
+ * (split-at '(a b c d e f g h) 3) =>
+ *     (a b c)
+ *     (d e f g h)
+ * @end lisp
+doc>
+|#
 (define (split-at x k)
   (check-arg integer? k split-at)
   (let recur ((lis x) (k k))
@@ -691,18 +1017,50 @@
     (values x suffix))))
 
 
+#|
+<doc EXT last
+ * (last pair)
+ *
+ * |last| returns the last element of the non-empty, finite list pair.
+ * @lisp
+ * (last '(a b c)) => c
+ * (last-pair '(a b c)) => (c)
+ * @end lisp
+|#
 (define (last lis) (car (last-pair lis)))
 
-(define (last-pair lis)
-  (check-arg pair? lis last-pair)
-  (let lp ((lis lis))
-    (let ((tail (cdr lis)))
-      (if (pair? tail) (lp tail) lis))))
+;; last-pair is a primitive in STklos core:
+;; (define (last-pair lis)
+;;   (check-arg pair? lis last-pair)
+;;   (let lp ((lis lis))
+;;     (let ((tail (cdr lis)))
+;;       (if (pair? tail) (lp tail) lis))))
 
 
 ;;; Unzippers -- 1 through 5
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+#|
+<doc EXT unzip1 unzip2 unzip3 unzip4 unzip5
+ * (unzip1 list)
+ * (unzip2 list)
+ * (unzip3 list)
+ * (unzip4 list)
+ * (unzip5 list)
+ *
+ * |unzip1| takes a list of lists, where every list must contain at
+ * least one element, and returns a list containing the initial element
+ * of each such list. That is, it returns (map car lists). |unzip2| takes a
+ * list of lists, where every list must contain at least two elements,
+ * and returns two values: a list of the first elements, and a list of
+ * the second elements. unzip3 does the same for the first three elements
+ * of the lists, and so forth.
+ * @lisp
+ * (unzip2 '((1 one) (2 two) (3 three))) =>
+ *     (1 2 3)
+ *     (one two three)
+ * @end lisp
+doc>
+|#
 (define (unzip1 lis) (map car lis))
 
 (define (unzip2 lis)
@@ -769,11 +1127,65 @@
 ;;; REDUCE and REDUCE-RIGHT only use RIDENTITY in the empty-list case.
 ;;; These cannot meaningfully be n-ary.
 
+#|
+<doc EXT reduce
+ * (reduce f ridentity list)
+ *
+ * |reduce| is a variant of |fold|.
+ *
+ * |ridentity| should be a "right identity" of the procedure |f| -- that
+ * is, for any value x acceptable to f,
+ * @lisp
+ * (f x ridentity) = x
+ * @end lisp
+ *
+ * |reduce| has the following definition:
+ * @l
+ * If |list| = |()|, return |ridentity|;
+ * Otherwise, return |(fold f (car list) (cdr list))|.
+ * @l
+ * In other words, we compute (fold f ridentity list).
+ *
+ * Note that |ridentity| is used only in the empty-list case. You
+ * typically use reduce when applying |f| is expensive and you'd like to
+ * avoid the extra application incurred when |f|old applies |f| to the head
+ * of list and the identity value, redundantly producing the same value
+ * passed in to |f|. For example, if |f| involves searching a file directory
+ * or performing a database query, this can be significant. In general,
+ * however, |fold| is useful in many contexts where |reduce| is not (consider
+ * the examples given in the |fold| definition -- only one of the five
+ * folds uses a function with a right identity. The other four may not be
+ * performed with reduce).
+ * @lisp
+ * ;; Take the max of a list of non-negative integers.
+ * (reduce max 0 nums) ; i.e., (apply max 0 nums)
+ * @end lisp
+doc>
+|#
 (define (reduce f ridentity lis)
   (check-arg procedure? f reduce)
   (if (null-list? lis) ridentity
       (fold f (car lis) (cdr lis))))
 
+#|
+<doc EXT reduce-right
+ * (reduce-right f ridentity list)
+ *
+ *  reduce-right is the fold-right variant of reduce. It obeys the following definition:
+ * @lisp
+ * (reduce-right f ridentity '())   => ridentity
+ * (reduce-right f ridentity '(e1)) => (f e1 ridentity) = e1
+ * (reduce-right f ridentity '(e1 e2 ...)) =>
+ *     (fold-right f e1 '(e2 ...))
+ * @end lisp
+ * In other words, we compute (fold-right f ridentity list), but as with reduce, only use ridentity in the empty-list case."
+ * @lisp
+ * ;; Append a bunch of lists together.
+ * ;; I.e., (apply append list-of-lists)
+ * (reduce-right append '() list-of-lists)
+ * @end lisp
+doc>
+|#
 (define (reduce-right f ridentity lis)
   (check-arg procedure? f reduce-right)
   (if (null-list? lis) ridentity
@@ -802,6 +1214,28 @@
 
 ;;; Hand-inline the FOLD and PAIR-FOLD ops for speed.
 
+#|
+<doc EXT append-reverse append-reverse!
+ * (append-reverse  rev-head tail)
+ * (append-reverse! rev-head tail)
+ *
+ * |append-reverse| returns |(append (reverse rev-head) tail)|. It is
+ * provided because it is a common operation -- a common list-processing
+ * style calls for this exact operation to transfer values accumulated in
+ * reverse order onto the front of another list, and because the
+ * implementation is significantly more efficient than the simple
+ * composition it replaces. (But note that this pattern of iterative
+ * computation followed by a reverse can frequently be rewritten as a
+ * recursion, dispensing with the reverse and append-reverse steps, and
+ * shifting temporary, intermediate storage from the heap to the stack,
+ * which is typically a win for reasons of cache locality and eager
+ * storage reclamation.)
+ *
+ * |append-reverse!| is just the linear-update variant -- it is
+ * allowed, but not required, to alter rev-head's cons cells to construct
+ * the result.
+doc>
+|#
 (define (append-reverse rev-head tail)
   (let lp ((rev-head rev-head) (tail tail))
     (if (null-list? rev-head) tail
@@ -814,7 +1248,32 @@
       (set-cdr! rev-head tail)
       (lp next-rev rev-head)))))
 
-
+#|
+<doc EXT concatenate concatenate!
+ * (concatenate  list-of-lists)
+ * (concatenate! list-of-lists)
+ *
+ * These functions append the elements of their argument together.
+ * That is, concatenate returns
+ * @lisp
+ * (apply append list-of-lists)
+ * @end lisp
+ *  or, equivalently,
+ * @lisp
+ * (reduce-right append '() list-of-lists)
+ * @end lisp
+ * |concatenate!| is the linear-update variant, defined in terms of |append!|
+ * instead of |append|.
+ *
+ * Note that some Scheme implementations do not support passing more than a certain
+ * number (e.g., 64) of arguments to an n-ary procedure. In these implementations,
+ * the |(apply append ...)| idiom would fail when applied to long lists, but
+ * |concatenate| would continue to function properly.
+ *
+ * As with |append| and |append!|, the last element of the input list may be any
+ * value at all.
+doc>
+|#
 (define (concatenate  lists) (reduce-right append  '() lists))
 (define (concatenate! lists) (reduce-right append! '() lists))
 
@@ -900,6 +1359,28 @@ written in C, in STklos core!
 
 ;;; count
 ;;;;;;;;;
+
+#|
+<doc EXT count
+ * (count pred clist1 clist2 ...)
+ *
+ * |pred| is a procedure taking as many arguments as there are lists
+ * and returning a single value. It is applied element-wise to the
+ * elements of the lists, and a count is tallied of the number of
+ * elements that produce a true value. This count is returned. |count|
+ * is "iterative" in that it is guaranteed to apply pred to the list
+ * elements in a left-to-right order. The counting stops when the
+ * shortest list expires.
+ * @lisp
+ * (count even? '(3 1 4 1 5 9 2 5 6)) => 3
+ * (count < '(1 2 4 8) '(2 4 6 8 10 12 14 16)) => 3
+ * @end lisp
+ * At least one of the argument lists must be finite:
+ * @lisp
+ * (count < '(3 1 4 1) (circular-list 1 10)) => 2
+ * @end lisp
+doc>
+|#
 (define (count pred list1 . lists)
   (check-arg procedure? pred count)
   (if (pair? lists)
@@ -921,16 +1402,74 @@ written in C, in STklos core!
 ;;; fold/unfold
 ;;;;;;;;;;;;;;;
 
-(define (unfold-right p f g seed :optional (tail '()))
-  (check-arg procedure? p unfold-right)
-  (check-arg procedure? f unfold-right)
-  (check-arg procedure? g unfold-right)
-  (let lp ((seed seed) (ans tail))
-    (if (p seed) ans
-    (lp (g seed)
-        (cons (f seed) ans)))))
-
-
+#|
+<doc EXT unfold
+ * (unfold p f g seed [tail-gen])
+ *
+ * |unfold| is best described by its basic recursion:
+ * @lisp
+ * (unfold p f g seed) =
+ *     (if (p seed) (tail-gen seed)
+ *         (cons (f seed)
+ *               (unfold p f g (g seed))))
+ * @end lisp
+ *
+ *  p        Determines when to stop unfolding.
+ *  f        Maps each seed value to the corresponding list element.
+ *  g        Maps each seed value to next seed value.
+ *  seed     The "state" value for the unfold.
+ *  tail-gen Creates the tail of the list; defaults to (lambda (x) '())
+ *
+ *  In other words, we use g to generate a sequence of seed values
+ *  |seed|, |g(seed)|, |g2(seed)|, |g3(seed)|, ...
+ *
+ * These seed values are mapped to list elements by |f|, producing the
+ * elements of the result list in a left-to-right order. |P| says when to
+ * stop.
+ *
+ * |unfold| is the fundamental recursive list constructor, just as
+ * |fold-right| is the fundamental recursive list consumer. While |unfold|
+ * may seem a bit abstract to novice functional programmers, it can be
+ * used in a number of ways:
+ * @lisp
+ *  ;; List of squares: 1^2 ... 10^2
+ *  (unfold (lambda (x) (> x 10))
+ *          (lambda (x) (* x x))
+ *  	(lambda (x) (+ x 1))
+ *  	1)
+ *
+ *  (unfold null-list? car cdr lis) ; Copy a proper list.
+ *
+ *  ;; Read current input port into a list of values.
+ *  (unfold eof-object? values (lambda (x) (read)) (read))
+ *
+ *  ;; Copy a possibly non-proper list:
+ *  (unfold not-pair? car cdr lis
+ *                values)
+ *
+ *  ;; Append HEAD onto TAIL:
+ *  (unfold null-list? car cdr head
+ *                 (lambda (x) tail))
+ * @end lisp
+ * Interested functional programmers may enjoy noting that |fold-right|
+ * and unfold are in some sense inverses. That is, given operations
+ * |knull?|, |kar|, |kdr|, |kons|, and |knil| satisfying
+ * @lisp
+ * (kons (kar x) (kdr x)) = x and (knull? knil) = #t
+ * @end lisp
+ * then
+ * @lisp
+ * (fold-right kons knil (unfold knull? kar kdr x)) = x
+ * @end lisp
+ * and
+ * @lisp
+ *  (unfold knull? kar kdr (fold-right kons knil x)) = x.
+ * @end lisp
+ *  This combinator sometimes is called an "anamorphism;" when an
+ * explicit tail-gen procedure is supplied, it is called
+ * an "apomorphism."
+doc>
+|#
 (define (unfold p f g seed . maybe-tail-gen)
   (check-arg procedure? p unfold)
   (check-arg procedure? f unfold)
@@ -950,7 +1489,121 @@ written in C, in STklos core!
     (if (p seed) '()
         (cons (f seed) (recur (g seed)))))))
 
+#|
+<doc EXT unfold-right
+ * (unfold-right p f g seed [tail])
+ *
+ * |unfold-right| constructs a list with the following loop:
+ * @lisp
+ * (let lp ((seed seed) (lis tail))
+ *   (if (p seed) lis
+ *       (lp (g seed)
+ *           (cons (f seed) lis))))
+ * @end lisp
+ *  p        Determines when to stop unfolding.
+ *  f        Maps each seed value to the corresponding list element.
+ *  g        Maps each seed value to next seed value.
+ *  seed     The "state" value for the unfold.
+ *  tail     list terminator; defaults to |'()|.
+ *
+ * In other words, we use g to generate a sequence of seed values
+ * |seed|, |g(seed)|, |g2(seed)|, |g3(seed)|, ...
+ *
+ * These seed values are mapped to list elements by f, producing the
+ * elements of the result list in a right-to-left order. P says when to
+ * stop.
+ *
+ * |unfold-right| is the fundamental iterative list constructor, just
+ * as |fold| is the fundamental iterative list consumer. While |unfold-right|
+ * may seem a bit abstract to novice functional programmers, it can be
+ * used in a number of ways:
+ * @lisp
+ * ;; List of squares: 1^2 ... 10^2
+ * (unfold-right zero?
+ *               (lambda (x) (* x x))
+ *               (lambda (x) (- x 1))
+ *               10)
+ *
+ *  ;; Reverse a proper list.
+ *  (unfold-right null-list? car cdr lis)
+ *
+ *  ;; Read current input port into a list of values.
+ *  (unfold-right eof-object? values (lambda (x) (read)) (read))
+ *
+ *  ;; (append-reverse rev-head tail)
+ *  (unfold-right null-list? car cdr rev-head tail)
+ * @end lisp
+ * Interested functional programmers may enjoy noting that |fold| and
+ * |unfold-right| are in some sense inverses. That is, given operations
+ * |knull?|, |kar|, |kdr|, |kons|, and |knil| satisfying
+ * @lisp
+ *   (kons (kar x) (kdr x)) = x and (knull? knil) = #t
+ * @end lisp
+ * then
+ * @lisp
+ * (fold kons knil (unfold-right knull? kar kdr x)) = x
+ * @end lisp
+ * and
+ * @lisp
+ *   (unfold-right knull? kar kdr (fold kons knil x)) = x.
+ * @end lisp
+ * This combinator presumably has some pretentious mathematical name;
+ * interested readers are invited to communicate it to the author.
+doc>
+|#
+(define (unfold-right p f g seed :optional (tail '()))
+  (check-arg procedure? p unfold-right)
+  (check-arg procedure? f unfold-right)
+  (check-arg procedure? g unfold-right)
+  (let lp ((seed seed) (ans tail))
+    (if (p seed) ans
+    (lp (g seed)
+        (cons (f seed) ans)))))
 
+#|
+<doc EXT fold
+ * (fold kons knil clist1 clist2 ...)
+ *
+ * The fundamental list iterator.
+
+ * First, consider the single list-parameter case. If clist1 = (e1 e2 ... en),
+ * then this procedure returns
+ * @lisp
+ * (kons en ... (kons e2 (kons e1 knil)) ... )
+ * @end lisp
+ * That is, it obeys the (tail) recursion
+ * @lisp
+ * (fold kons knil lis) = (fold kons (kons (car lis) knil) (cdr lis))
+ * (fold kons knil '()) = knil
+ * @end lisp
+ * Examples:
+ * @ lisp
+ * (fold + 0 lis)			; Add up the elements of LIS.
+ *
+ * (fold cons '() lis)		; Reverse LIS.
+ *
+ * (fold cons tail rev-head)	; See APPEND-REVERSE.
+ *
+ * ;; How many symbols in LIS?
+ * (fold (lambda (x count) (if (symbol? x) (+ count 1) count))
+ *       0
+ *       lis)
+ *
+ * ;; Length of the longest string in LIS:
+ * (fold (lambda (s max-len) (max max-len (string-length s)))
+ *       0
+ *       lis)
+ * @end lisp
+ * If n list arguments are provided, then the |kons| function must take
+ * n+1 parameters: one element from each list, and the "seed" or fold
+ * state, which is initially |knil|. The fold operation terminates when the
+ * shortest list runs out of values:
+ * @lisp
+ *(fold cons* '() '(a b c) '(1 2 3 4 5)) => (c 3 b 2 a 1)
+ * @end lisp
+ * At least one of the list arguments must be finite.
+doc>
+|#
 (define (fold kons knil lis1 . lists)
   (check-arg procedure? kons fold)
   (if (pair? lists)
@@ -999,18 +1652,29 @@ written in C, in STklos core!
                     (set! i (- i 1)))
             x))))
 
-
-(define (pair-fold-right f zero lis1 . lists)
-  (check-arg procedure? f pair-fold-right)
-  (if (pair? lists)
-      (let recur ((lists (cons lis1 lists)))        ; N-ary case
-    (let ((cdrs (%cdrs lists)))
-      (if (null? cdrs) zero
-          (apply f (append! lists (list (recur cdrs)))))))
-
-      (let recur ((lis lis1))               ; Fast path
-    (if (null-list? lis) zero (f lis (recur (cdr lis)))))))
-
+#|
+<doc EXT pair-fold
+ * (pair-fold kons knil clist1 clist2 ...)
+ *
+ * Analogous to |fold|, but |kons| is applied to successive sublists of
+ * the lists, rather than successive elements -- that is, |kons| is applied
+ * to the pairs making up the lists, giving this (tail) recursion:
+ * @lisp
+ * (pair-fold kons knil lis) = (let ((tail (cdr lis)))
+ *                               (pair-fold kons (kons lis knil) tail))
+ * (pair-fold kons knil '()) = knil
+ * @end lisp
+ * For finite lists, the kons function may reliably apply set-cdr! to
+ * the pairs it is given without altering the sequence of execution.
+ * @l
+ *    Example:
+ * @lisp
+ * ;;; Destructively reverse a list.
+ * (pair-fold (lambda (pair tail) (set-cdr! pair tail) pair) '() lis)
+ * @end lisp
+ * At least one of the list arguments must be finite.
+doc>
+|#
 (define (pair-fold f zero lis1 . lists)
   (check-arg procedure? f pair-fold)
   (if (pair? lists)
@@ -1023,6 +1687,34 @@ written in C, in STklos core!
     (if (null-list? lis) ans
         (let ((tail (cdr lis)))     ; Grab the cdr now,
           (lp tail (f lis ans)))))))    ; in case F SET-CDR!s LIS.
+
+#|
+<doc EXT pair-fold-right
+ * (pair-fold-right kons knil clist1 clist2 ...)
+ *
+ * Holds the same relationship with fold-right that pair-fold holds with fold. Obeys the recursion
+ * @lisp
+ * (pair-fold-right kons knil lis) =
+ *     (kons lis (pair-fold-right kons knil (cdr lis)))
+ * (pair-fold-right kons knil '()) = knil
+ * @end lisp
+ * Example:
+ * @lisp
+ * (pair-fold-right cons '() '(a b c)) => ((a b c) (b c) (c))
+ * @end lisp
+ * At least one of the list arguments must be finite.
+doc>
+|#
+(define (pair-fold-right f zero lis1 . lists)
+  (check-arg procedure? f pair-fold-right)
+  (if (pair? lists)
+      (let recur ((lists (cons lis1 lists)))        ; N-ary case
+    (let ((cdrs (%cdrs lists)))
+      (if (null? cdrs) zero
+          (apply f (append! lists (list (recur cdrs)))))))
+
+      (let recur ((lis lis1))               ; Fast path
+    (if (null-list? lis) zero (f lis (recur (cdr lis)))))))
 
 
 
@@ -1047,11 +1739,103 @@ written in C, in STklos core!
           (if (null-list? rest) vals
           (appender vals (recur (car rest) (cdr rest)))))))))
 
+#|
+<doc EXT append-map append-map!
+ * (append-map  f clist1 clist2 ...)
+ * (append-map! f clist1 clist2 ...)
+ *
+ * Equivalent to
+ * @lisp
+ * (apply append (map f clist1 clist2 ...))
+ * @end lisp
+ * and
+ * @lisp
+ * (apply append! (map f clist1 clist2 ...))
+ * @end lisp
+ *
+ * Map |f| over the elements of the lists, just as in the |map|
+ * function. However, the results of the applications are appended
+ * together to make the final result. |append-map| uses |append| to
+ * append the results together; |append-map!| uses |append!|.
+ *
+ * The dynamic order in which the various applications of |f| are
+ * made is not specified.
+ *
+ * Example:
+ * @lisp
+ * (append-map! (lambda (x) (list x (- x))) '(1 3 8))
+ *     => (1 -1 3 -3 8 -8)
+ * @end lisp
+ *  At least one of the list arguments must be finite.
+doc>
+|#
 (define (append-map f lis1 . lists)
   (really-append-map append-map  append  f lis1 lists))
 (define (append-map! f lis1 . lists)
   (really-append-map append-map! append! f lis1 lists))
 
+#|
+<doc EXT map!
+ * (map! f list1 clist2 ...)
+ *
+ * Linear-update variant of |map| -- |map!| is allowed, but not required,
+ * to alter the cons cells of |list1| to construct the result list.
+ *
+ * The dynamic order in which the various applications of f are made is
+ * not specified.
+ *
+ * In the n-ary case, |clist2|, |clist3|, ... must have at least as many
+ * elements as |list1|.
+doc>
+|#
+;;; We stop when LIS1 runs out, not when any list runs out.
+(define (map! f lis1 . lists)
+  (check-arg procedure? f map!)
+  (if (pair? lists)
+      (let lp ((lis1 lis1) (lists lists))
+        (if (not (null-list? lis1))
+            (receive (heads tails) (%cars+cdrs/no-test lists)
+              (set-car! lis1 (apply f (car lis1) heads))
+              (lp (cdr lis1) tails))))
+
+      ;; Fast path.
+      (pair-for-each (lambda (pair) (set-car! pair (f (car pair)))) lis1))
+  lis1)
+
+#|
+<doc EXT map-in-order
+ * (map-in-order f clist1 clist2 ...)
+ *
+ * A variant of the |map| procedure that guarantees to apply |f| across the
+ * elements of the |listi| arguments in a left-to-right order. This is
+ * useful for mapping procedures that both have side effects and return
+ * useful values.
+ *
+ *  At least one of the list arguments must be finite.
+doc>
+|#
+(define map-in-order map)   ;; for STklos
+
+#|
+<doc EXT pair-for-each
+ * (pair-for-each f clist1 clist2 ...)
+ *
+ * Like |for-each|, but |f| is applied to successive sublists of the argument
+ * lists. That is, |f| is applied to the cons cells of the lists, rather
+ * than the lists' elements. These applications occur in left-to-right
+ * order.
+ *
+ * The |f| procedure may reliably apply |set-cdr!| to the pairs it is
+ * given without altering the sequence of execution.
+ * @lisp
+ * (pair-for-each (lambda (pair) (display pair) (newline)) '(a b c)) ==>
+ *     (a b c)
+ *     (b c)
+ *     (c)
+ * @end lisp
+ * At least one of the list arguments must be finite.
+doc>
+|#
 (define (pair-for-each proc lis1 . lists)
   (check-arg procedure? proc pair-for-each)
   (if (pair? lists)
@@ -1069,21 +1853,21 @@ written in C, in STklos core!
               (proc lis)        ; in case PROC SET-CDR!s LIS.
               (lp tail))))))
 
-;;; We stop when LIS1 runs out, not when any list runs out.
-(define (map! f lis1 . lists)
-  (check-arg procedure? f map!)
-  (if (pair? lists)
-      (let lp ((lis1 lis1) (lists lists))
-        (if (not (null-list? lis1))
-            (receive (heads tails) (%cars+cdrs/no-test lists)
-              (set-car! lis1 (apply f (car lis1) heads))
-              (lp (cdr lis1) tails))))
-
-      ;; Fast path.
-      (pair-for-each (lambda (pair) (set-car! pair (f (car pair)))) lis1))
-  lis1)
-
-
+#|
+<doc EXT filter-map
+ * (filter-map f clist1 clist2 ...)
+ *
+ * Like |map|, but only true values are saved.
+ * @lisp
+ * (filter-map (lambda (x) (and (number? x) (* x x))) '(a 1 b 3 c 7))
+ *    => (1 9 49)
+ * @end lisp
+ * The dynamic order in which the various applications of |f| are made
+ * is not specified.
+ *
+ * At least one of the list arguments must be finite.
+doc>
+|#
 ;;; Map F across L, and save up all the non-false results.
 (define (filter-map f lis1 . lists)
   (check-arg procedure? f filter-map)
@@ -1127,7 +1911,6 @@ written in C, in STklos core!
 ;;// ;;; We extend MAP to handle arguments of unequal length.
 ;;// (define map map-in-order)
 
-(define map-in-order map)   ;; for STklos
 
 
 ;;; filter, remove, partition
@@ -1234,6 +2017,23 @@ FILTER an FILTER! are primitives in STklos
 ;;; Answers share common tail with LIS where possible;
 ;;; the technique is slightly subtle.
 
+#|
+<doc EXT partition
+ * (partition pred list)
+ *
+ * Partitions the elements of |list| with predicate |pred|, and returns
+ * two values: the list of in-elements and the list of out-elements. The
+ * list is not disordered -- elements occur in the result lists in the
+ * same order as they occur in the argument |list|. The dynamic order in
+ * which the various applications of |pred| are made is not specified. One
+ * of the returned lists may share a common tail with the argument |list|.
+ * @lisp
+ * (partition symbol? '(one 2 3 four five 6)) =>
+ *     (one four five)
+ *     (2 3 6)
+ @end lisp
+doc>
+|#
 (define (partition pred lis)
   (check-arg procedure? pred partition)
   (let recur ((lis lis))
@@ -1258,6 +2058,14 @@ FILTER an FILTER! are primitives in STklos
 ;                        (values in lis))))))))
 
 
+#|
+<doc EXT partition!
+ * (partition! pred list)
+ *
+ * Linear-update variant of |partition|. This procedure is allowed, but not required,
+ * to alter the cons cells in the argument list to construct the result lists.
+doc>
+|#
 ;;; This implementation of PARTITION!
 ;;; - doesn't cons, and uses no stack;
 ;;; - is careful not to do redundant SET-CDR! writes, as writes to memory are
@@ -1266,7 +2074,6 @@ FILTER an FILTER! are primitives in STklos
 ;;; It just zips down contiguous runs of in and out elts in LIS doing the
 ;;; minimal number of SET-CDR!s to splice these runs together into the result
 ;;; lists.
-
 (define (partition! pred lis)
   (check-arg procedure? pred partition!)
   (if (null-list? lis) (values lis lis)
@@ -1319,6 +2126,58 @@ FILTER an FILTER! are primitives in STklos
 ;;; find find-tail take-while drop-while span break any every list-index
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+#|
+<doc EXT find
+ * (find pred clist)
+ *
+ *  Returns the first element of |clist| that satisfies predicate |pred|;
+ * false if no element does.
+ * @lisp
+ * (find even? '(3 1 4 1 5 9)) => 4
+ * @end lisp
+ * Note that |find| has an ambiguity in its lookup semantics -- if find
+ * returns `#f`, you cannot tell (in general) if it found a `#f` element that
+ * satisfied |pred|, or if it did not find any element at all. In many
+ * situations, this ambiguity cannot arise -- either the list being
+ * searched is known not to contain any `#f` elements, or the list is
+ * guaranteed to have an element satisfying |pred|. However, in cases where
+ * this ambiguity can arise, you should use |find-tail| instead of |find| --
+ * |find-tail| has no such ambiguity:
+ * @lisp
+ * (cond ((find-tail pred lis) => (lambda (pair) ...)) ; Handle (CAR PAIR)
+ *       (else ...)) ; Search failed.
+ * @end lisp
+doc>
+|#
+(define (find pred list)
+  (cond ((find-tail pred list) => car)
+    (else #f)))
+
+#|
+<doc EXT find-tail
+ * (find-tail pred clist)
+ *
+ * Return the first pair of |clist| whose |car| satisfies |pred|. If no pair does,
+ * return false.
+ *
+ * |find-tail| can be viewed as a general-predicate variant of the |member| function.
+ *
+ * Examples:
+ * @lisp
+ * (find-tail even? '(3 1 37 -8 -5 0 0)) => (-8 -5 0 0)
+ * (find-tail even? '(3 1 37 -5)) => #f
+ *
+ * ;; MEMBER X LIS:
+ * (find-tail (lambda (elt) (equal? x elt)) lis)
+ * @end lisp
+ * In the circular-list case, this procedure "rotates" the list.
+ *
+ * Find-tail is essentially drop-while, where the sense of the
+ * predicate is inverted: Find-tail searches until it finds an element
+ * satisfying the predicate; drop-while searches until it finds an
+ * element that doesn't satisfy the predicate.
+doc>
+|#
 (define (find-tail pred list)
   (check-arg procedure? pred find-tail)
   (let lp ((list list))
@@ -1326,10 +2185,21 @@ FILTER an FILTER! are primitives in STklos
      (if (pred (car list)) list
          (lp (cdr list))))))
 
-(define (find pred list)
-  (cond ((find-tail pred list) => car)
-    (else #f)))
-
+#|
+<doc EXT take-while take-while!
+ * (take-while  pred clist)
+ * (take-while! pred clist)
+ *
+ * Returns the longest initial prefix of |clist| whose elements all satisfy the
+ * predicate |pred|.
+ *
+ * |Take-while!| is the linear-update variant. It is allowed, but not required,
+ * to alter the argument list to produce the result.
+ * @lisp
+ * (take-while even? '(2 18 3 10 22 9)) => (2 18)
+ * @end lisp
+doc>
+|#
 (define (take-while pred lis)
   (check-arg procedure? pred take-while)
   (let recur ((lis lis))
@@ -1338,14 +2208,6 @@ FILTER an FILTER! are primitives in STklos
       (if (pred x)
           (cons x (recur (cdr lis)))
           '())))))
-
-(define (drop-while pred lis)
-  (check-arg procedure? pred drop-while)
-  (let lp ((lis lis))
-    (if (null-list? lis) '()
-    (if (pred (car lis))
-        (lp (cdr lis))
-        lis))))
 
 (define (take-while! pred lis)
   (check-arg procedure? pred take-while!)
@@ -1357,6 +2219,59 @@ FILTER an FILTER! are primitives in STklos
              (set-cdr! prev '())))))
          lis)))
 
+#|
+<doc EXT drop-while
+ * (drop-while pred clist)
+ *
+ * Drops the longest initial prefix of |clist| whose elements all satisfy the
+ * predicate |pred|, and returns the rest of the list.
+ * @lisp
+ * (drop-while even? '(2 18 3 10 22 9)) => (3 10 22 9)
+ * @end lisp
+ *  The circular-list case may be viewed as "rotating" the list.
+doc>
+|#
+(define (drop-while pred lis)
+  (check-arg procedure? pred drop-while)
+  (let lp ((lis lis))
+    (if (null-list? lis) '()
+    (if (pred (car lis))
+        (lp (cdr lis))
+        lis))))
+
+#|
+<doc EXT span span! break break!
+ * (span   pred clist)
+ * (span!  pred list)
+ * (break  pred clist)
+ * (break! pred list)
+ *
+ * |Span| splits the list into the longest initial prefix whose
+ * elements all satisfy |pred|, and the remaining tail. |Break| inverts the
+ * sense of the predicate: the tail commences with the first element of
+ * the input list that satisfies the predicate.
+ *
+ * In other words: |span| finds the intial span of elements satisfying
+ * |pred|, and |break| breaks the list at the first element satisfying |pred|.
+ *
+ * |Span| is equivalent to
+ * @lisp
+ * (values (take-while pred clist)
+ *         (drop-while pred clist))
+ * @end lisp
+ * |Span!| and |break!| are the linear-update variants. They are allowed,
+ * but not required, to alter the argument |list| to produce the result.
+ * @lisp
+ * (span even? '(2 18 3 10 22 9)) =>
+ *   (2 18)
+ *   (3 10 22 9)
+ *
+ * (break even? '(3 1 4 1 5 9)) =>
+ *   (3 1)
+ *   (4 1 5 9)
+ * @end lisp
+doc>
+|#
 (define (span pred lis)
   (check-arg procedure? pred span)
   (let recur ((lis lis))
@@ -1431,6 +2346,33 @@ FILTER an FILTER! are primitives in STklos
         (and (pred head) (lp (car tail) (cdr tail))))))))
 |#
 
+#|
+<doc EXT list-index
+ * (list-index pred clist1 clist2 ...)
+ *
+ * Return the index of the leftmost element that satisfies |pred|.
+ *
+ * If there are n list arguments |clist1| ... |clistn|, then |pred| must be
+ * a function taking n arguments and returning a single value,
+ * interpreted as a boolean (that is, `#f` means false, and any other value
+ * means true).
+ *
+ * |List-index| applies pred to the first elements of the |clisti|
+ * parameters. If this application returns true, |list-index| immediately
+ * returns zero. Otherwise, it iterates, applying |pred| to the second
+ * elements of the |clisti| parameters, then the third, and so forth. When
+ * it finds a tuple of list elements that cause pred to return true, it
+ * stops and returns the zero-based index of that position in the lists.
+ *
+ * The iteration stops when one of the lists runs out of values; in
+ * this case, list-index returns `#f`.
+ * @lisp
+ * (list-index even? '(3 1 4 1 5 9))                => 2
+ * (list-index < '(3 1 4 1 5 9 2 5 6) '(2 7 1 8 2)) => 1
+ * (list-index = '(3 1 4 1 5 9 2 5 6) '(2 7 1 8 2)) => #f
+ * @end lisp
+doc>
+|#
 (define (list-index pred lis1 . lists)
   (check-arg procedure? pred list-index)
   (if (pair? lists)
@@ -1487,7 +2429,46 @@ FILTER an FILTER! are primitives in STklos
 ;;; right-duplicate deletion
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; delete-duplicates delete-duplicates!
-;;;
+
+#|
+<doc EXT delete-duplicates delete-duplicates!
+ * (delete-duplicates  list [=])
+ * (delete-duplicates! list [=])
+ *
+ * |Delete-duplicates| removes duplicate elements from the |list|
+ * argument. If there are multiple equal elements in the argument |list|,
+ * the result list only contains the first or leftmost of these elements
+ * in the result. The order of these surviving elements is the same as in
+ * the original list -- delete-duplicates does not disorder the
+ * list (hence it is useful for "cleaning up" association lists).
+ *
+ * The |=| parameter is used to compare the elements of the list; it
+ * defaults to |equal?|. If |x| comes before |y| in list, then the comparison
+ * is performed |(= x y)|. The comparison procedure will be used to compare
+ * each pair of elements in list no more than once; the order in which it
+ * is applied to the various pairs is not specified.
+ *
+ * Implementations of |delete-duplicates| are allowed to share common
+ * tails between argument and result lists -- for example, if the list
+ * argument contains only unique elements, it may simply return exactly
+ * this list.
+ *
+ * The STklos implementation of |delete-duplicates| uses an element-marking
+ * strategy and hence runs in linear time.
+ *
+ * |delete-duplicates!| is the linear-update variant of
+ * |delete-duplicates|; it is allowed, but not required, to alter the cons
+ * cells in its argument list to construct the result.
+ * @lisp
+ * (delete-duplicates '(a b a c a b c z)) => (a b c z)
+ *
+ * ;; Clean up an alist:
+ * (delete-duplicates '((a . 3) (b . 7) (a . 9) (c . 1))
+ *                    (lambda (x y) (eq? (car x) (car y))))
+ *     => ((a . 3) (b . 7) (c . 1))
+ * @end lisp
+doc>
+|#
 ;;; The reference implementaiton of SRFI-1 has the following caveat:
 ;;;
 ;;;;; Beware -- these are N^2 algorithms. To efficiently remove duplicates
@@ -1534,12 +2515,57 @@ FILTER an FILTER! are primitives in STklos
 ;;;(define (assoc x lis :optional (elt= equal?))
 ;;;  (find (lambda (entry) (elt= x (car entry))) lis))
 
+#|
+<doc EXT alist-cons
+ * (alist-cons key datum alist)
+ *
+ * @lisp
+ * (lambda (key datum alist) (cons (cons key datum) alist))
+ * @end lisp
+ * Cons a new alist entry mapping |key| -> |datum| onto |alist|.
+doc>
+|#
 (define (alist-cons key datum alist) (cons (cons key datum) alist))
 
+#|
+<doc EXT alist-copy
+ * (alist-copy alist)
+ *
+ * Make a fresh copy of |alist|. This means copying each pair that forms an association
+ * as well as the spine of the list, i.e.
+ * @lisp
+ * (lambda (a) (map (lambda (elt) (cons (car elt) (cdr elt))) a))
+ * @end lisp
+doc>
+|#
 (define (alist-copy alist)
   (map (lambda (elt) (cons (car elt) (cdr elt)))
        alist))
 
+#|
+<doc EXT alist-delete alist-delete!
+ * (alist-delete  key alist [=])
+ * (alist-delete! key alist [=])
+ *
+ * |Alist-delete| deletes all associations from |alist| with the given
+ * |key|, using key-comparison procedure |=|, which defaults to |equal?|.
+ * The dynamic order in which the various applications of |=| are made is
+ * not specified.
+ *
+ * Return values may share common tails with the alist argument. The
+ * alist is not disordered -- elements that appear in the result alist
+ * occur in the same order as they occur in the argument alist.
+ *
+ * The comparison procedure is used to compare the element keys |ki| of
+ * |alist|'s entries to the key parameter in this way: |(= key ki)|. Thus,
+ * one can reliably remove all entries of alist whose key is greater than
+ * five with |(alist-delete 5 alist <)|.
+ *
+ * |Alist-delete!| is the linear-update variant of |alist-delete|. It is
+ * allowed, but not required, to alter cons cells from the alist
+ * parameter to construct the result.
+doc>
+|#
 (define (alist-delete key alist :optional (elt= equal?))
   (filter (lambda (elt) (not (elt= key (car elt)))) alist))
 
@@ -1577,6 +2603,23 @@ FILTER an FILTER! are primitives in STklos
 ;;;   FILTER in this source code share longest common tails between args
 ;;;   and results to get structure sharing in the lset procedures.
 
+#|
+<doc EXT lset<=
+ * (lset<= = list1 ...)
+ *
+ * Returns true iff every listi is a subset of |listi|+1, using |=| for
+ * the element-equality procedure. List |A| is a subset of list |B| if every
+ * element in |A| is equal to some element of |B|. When performing an element
+ * comparison, the = procedure's first argument is an element of |A|; its
+ * second, an element of |B|.
+ * @lisp
+ * (lset<= eq? '(a) '(a b a) '(a b c c)) => #t
+ * (lset<= eq?)                          => #t ; Trivial cases
+ * (lset<= eq? '(a))                     => #t
+ * @end lisp
+doc>
+|#
+
 (define (%lset2<= = lis1 lis2) (every (lambda (x) (member x lis2 =)) lis1))
 
 (define (lset<= = . lists)
@@ -1588,6 +2631,23 @@ FILTER an FILTER! are primitives in STklos
 	      (and (or (eq? s2 s1)	; Fast path
 		       (%lset2<= = s1 s2)) ; Real test
 		   (lp s2 rest)))))))
+
+#|
+<doc EXT lset=
+ * (lset= = list1 list2 ...)
+ *
+ * Returns true iff every |listi| is set-equal to |listi+1|, using |=| for the
+ * element-equality procedure. "Set-equal" simply means that |listi| is a
+ * subset of |listi+1|, and |listi+1| is a subset of listi. The |=| procedure's
+ * first argument is an element of |listi|; its second is an element of
+ * |listi+1|.
+ * @lisp
+ * (lset= eq? '(b e a) '(a e b) '(e e b a)) => #t
+ * (lset= eq?)                              => #t   ; Trivial cases
+ * (lset= eq? '(a))                         => #t
+ * @end lisp
+doc>
+|#
 
 (define (lset= = . lists)
   (define (flip proc) (lambda (x y) (proc y x)))
@@ -1602,12 +2662,70 @@ FILTER an FILTER! are primitives in STklos
                             (%lset2<= (flip =) s2 s1)))
                    (lp s2 rest)))))))
 
+#|
+<doc EXT lset-adjoin
+ * (lset-adjoin = list elt1 ...)
+ *
+ * Adds the |elti| elements not already in the list parameter to the
+ * result list. The result shares a common tail with the list
+ * parameter. The new elements are added to the front of the list, but no
+ * guarantees are made about their order. The |=| parameter is an equality
+ * procedure used to determine if an |elti| is already a member of
+ * |list|. Its first argument is an element of |list|; its second is one of
+ * the |elti|.
+ *
+ * The |list| parameter is always a suffix of the result -- even if the
+ * |list| parameter contains repeated elements, these are not reduced.
+ * @lisp
+ * (lset-adjoin eq? '(a b c d c e) 'a 'e 'i 'o 'u) => (u o i a b c d c e)
+ * @end lisp
+doc>
+|#
 (define (lset-adjoin = lis . elts)
   (check-arg procedure? = lset-adjoin)
   (fold (lambda (elt ans) (if (member elt ans =) ans (cons elt ans)))
     lis elts))
 
-
+#|
+<doc EXT lset-union lset-union!
+ * (lset-union = list1 ...)
+ * (lset-union! = list1 ...)
+ *
+ * Returns the union of the lists, using |=| for the element-equality procedure.
+ *
+ * The union of lists |A| and |B| is constructed as follows:
+ *
+ * If |A| is the empty list, the answer is |B| (or a copy of |B|).
+ * Otherwise, the result is initialised to be list |A| (or a copy of |A|).
+ * Proceed through the elements of list |B| in a left-to-right order. If |b|
+ * is such an element of |B|, compare every element |r| of the current result
+ * list to |b|: |(= r b)|. If all comparisons fail, |b| is consed onto the
+ * front of the result.
+ *
+ * However, there is no guarantee that |=| will be applied to every
+ * pair of arguments from |A| and |B|. In particular, if |A| is |eq?| to |B|, the
+ * operation may immediately terminate.
+ *
+ * In the n-ary case, the two-argument |list-union| operation is simply
+ * folded across the argument lists.
+ *
+ * @lisp
+ * (lset-union eq? '(a b c d e) '(a e i o u)) =>
+ *     (u o i a b c d e)
+ *
+ * ;; Repeated elements in LIST1 are preserved.
+ * (lset-union eq? '(a a c) '(x a x)) => (x a a c)
+ *
+ * ;; Trivial cases
+ * (lset-union eq?) => ()
+ * (lset-union eq? '(a b c)) => (a b c)
+ * @end lisp
+ *
+ * |list-union!| is a linear-update variant. It is allowed, but not required,
+ * to use the cons cells in their first list parameter to construct its answer.
+ * |lset-union!| is permitted to recycle cons cells from any of its list arguments.
+doc>
+|#
 (define (lset-union = . lists)
   (check-arg procedure? = lset-union)
   (reduce (lambda (lis ans)     ; Compute ANS + LIS.
@@ -1637,6 +2755,44 @@ FILTER an FILTER! are primitives in STklos
       '() lists))
 
 
+#|
+<doc EXT lset-intersection lset-intersection!
+ * (lset-intersection = list1 list2 ...)
+ * (lset-intersection! = list1 list2 ...)
+ *
+ * Returns the intersection of the lists, using |=| for the
+ * element-equality procedure.
+ *
+ * The intersection of lists |A| and |B| is comprised of every element of
+ * |A| that is |=| to some element of |B|: |(= a b)|, for |a| in |A|, and |b| in
+ * |B|. Note this implies that an element which appears in B and multiple
+ * times in list |A| will also appear multiple times in the result.
+ *
+ * The order in which elements appear in the result is the same as
+ * they appear in |list1| -- that is, lset-intersection essentially filters
+ * list1, without disarranging element order. The result may share a
+ * common tail with |list1|.
+ *
+ * In the n-ary case, the two-argument list-intersection operation is
+ * simply folded across the argument lists. However, the dynamic order in
+ * which the applications of |=| are made is not specified. The procedure
+ * may check an element of list1 for membership in every other list
+ * before proceeding to consider the next element of |list1|, or it may
+ * completely intersect |list1| and |list2| before proceeding to |list3|, or it
+ * may go about its work in some third order.
+ * @lisp
+ * (lset-intersection eq? '(a b c d e) '(a e i o u)) => (a e)
+ *
+ * ;; Repeated elements in LIST1 are preserved.
+ * (lset-intersection eq? '(a x y a) '(x a x z)) => '(a x a)
+ *
+ * (lset-intersection eq? '(a b c)) => (a b c)     ; Trivial case
+ * @end lisp
+ * |lset-intersection| is the linear-update variant. It is allowed, but
+ * not required, to use the cons cells in its first list parameter to construct
+ * its answer.
+doc>
+|#
 (define (lset-intersection = lis1 . lists)
   (check-arg procedure? = lset-intersection)
   (let ((lists (delete lis1 lists eq?))) ; Throw out any LIS1 vals.
@@ -1655,7 +2811,36 @@ FILTER an FILTER! are primitives in STklos
                (every (lambda (lis) (member x lis =)) lists))
              lis1)))))
 
-
+#|
+<doc EXT lset-difference lset-difference!
+ * (lset-difference = list1 list2 ...)
+ * (lset-difference! = list1 list2 ...)
+ *
+ * Returns the difference of the lists, using |=| for the element-equality
+ * procedure -- all the elements of list1 that are not = to any element
+ * from one of the other listi parameters.
+ *
+ * The = procedure's first argument is always an element of |list1|; its
+ * second is an element of one of the other |listi|. Elements that are
+ * repeated multiple times in the |list1| parameter will occur multiple
+ * times in the result. The order in which elements appear in the result
+ * is the same as they appear in |list1| -- that is, lset-difference
+ * essentially filters |list1|, without disarranging element order. The
+ * result may share a common tail with |list1|. The dynamic order in which
+ * the applications of |=| are made is not specified. The procedure may
+ * check an element of |list1| for membership in every other list before
+ * proceeding to consider the next element of |list1|, or it may completely
+ * compute the difference of |list1| and |list2| before proceeding to |list3|,
+ * or it may go about its work in some third order.
+ * @lisp
+ * (lset-difference eq? '(a b c d e) '(a e i o u)) => (b c d)
+ * (lset-difference eq? '(a b c))                  => (a b c) ; Trivial case
+ * @end lisp
+ * |lset-difference!| is the linear-update variant. It is allowed, but
+ * not required, to use the cons cells in its first list parameter to construct
+ * its answer.
+doc>
+|#
 (define (lset-difference = lis1 . lists)
   (check-arg procedure? = lset-difference)
   (let ((lists (filter pair? lists)))   ; Throw out empty lists.
@@ -1676,6 +2861,31 @@ FILTER an FILTER! are primitives in STklos
                   lists))
              lis1)))))
 
+#|
+<doc EXT lset-diff+intersection lset-diff+intersection!
+ * (lset-diff+intersection = list1 list2 ...)
+ * (lset-diff+intersection! = list1 list2 ...)
+ *
+ * Returns two values -- the difference and the intersection of the
+ * lists. Is equivalent to
+ * @ lisp
+ * (values (lset-difference = list1 list2 ...)
+ *         (lset-intersection = list1
+ *                              (lset-union = list2 ...)))
+ * @end lisp
+ * but can be implemented more efficiently.
+ *
+ * The |=| procedure's first argument is an element of |list1|; its second is
+ * an element of one of the other |listi|.
+ *
+ * Either of the answer lists may share a common tail with |list1|. This
+ * operation essentially partitions |list1|.
+ *
+ * |lset-diff+intersection!| is the linear-update variant. It is allowed, but
+ * not required, to use the cons cells in its first list parameter to construct
+ * its answer.
+doc>
+|#
 (define (lset-diff+intersection = lis1 . lists)
   (check-arg procedure? = lset-diff+intersection)
   (cond ((every null-list? lists) (values lis1 '()))    ; Short cut
@@ -1686,6 +2896,46 @@ FILTER an FILTER! are primitives in STklos
              lis1))))
 
 
+#|
+<doc EXT lset-xor lset-xor!
+ * (lset-xor = list1 ...)
+ * (lset-xor! = list1 ...)
+ *
+ * Returns the exclusive-or of the sets, using |=| for the element-equality
+ * procedure. If there are exactly two lists, this is all the elements
+ * that appear in exactly one of the two lists. The operation is
+ * associative, and thus extends to the n-ary case -- the elements that
+ * appear in an odd number of the lists. The result may share a common
+ * tail with any of the |listi| parameters.
+ *
+ * More precisely, for two lists |A| and |B|, |A xor B| is a list of:
+ *
+ * every element |a| of |A| such that there is no element |b| of |B| such that |(= a b)|, and
+ * every element |b| of |B| such that there is no element |a| of |A| such that |(= b a)|.
+ *
+ * However, an implementation is allowed to assume that |=| is symmetric --
+ * that is, that
+ * @lisp
+ * (= a b) => (= b a).
+ * @end lisp
+ * This means, for example, that if a comparison |(= a b)| produces true
+ * for some |a| in |A| and |b| in |B|, both |a| and |b| may be removed from inclusion
+ * in the result.
+ *
+ * In the n-ary case, the binary-xor operation is simply folded across
+ * the lists.
+ *
+ * @lisp
+ * (lset-xor eq? '(a b c d e) '(a e i o u)) => (d c b i o u)
+ * ;; Trivial cases:
+ * (lset-xor eq?)                           => ()
+ * (lset-xor eq? '(a b c d e))              => (a b c d e)
+ * @end lisp
+ * |lset-xor!| is the linear-update variant. It is allowed, but
+ * not required, to use the cons cells in its first list parameter to construct
+ * its answer.
+doc>
+|#
 (define (lset-xor = . lists)
   (check-arg procedure? = lset-xor)
   (reduce (lambda (b a)          ; Compute A xor B:
@@ -1769,6 +3019,7 @@ FILTER an FILTER! are primitives in STklos
 (redefine make-list)
 (redefine assoc)
 (redefine member)
+(redefine last-pair)
 
 )  ; END OF MODULE
 
