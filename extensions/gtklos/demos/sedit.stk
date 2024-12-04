@@ -33,13 +33,19 @@
 ;;;; message on the standard error port.
 ;;;;
 (define (graphical-handler c)
-  (describe c)
   (make-simple-message-dialog "Error ..."
                   'error
                   (format "\n\n~A: ~A\n\n"
                       (condition-ref c 'location)
                       (condition-ref c 'message))
-                  '(ok)))
+                  :buttons '("gtk-ok")))
+
+(define (make-file-selector-dialog . args)
+  (let* ((dlg (apply make <file-dialog> args))
+         (res (dialog-run dlg)))
+    (destroy dlg)
+    res))
+
 
 ;;;;
 ;;;; I/O Operations
@@ -48,6 +54,8 @@
   (with-handler graphical-handler
     (set! *current-file* f)
     (text-read-file *text* f)))
+
+
 
 
 (define (open-a-file . _)
@@ -61,10 +69,10 @@
 (define (save-as . _)
   (with-handler graphical-handler
      (let ((f (make-file-selector-dialog #:title "Save as ..."
-                                         #:type 'save
+                                         #:dialog-type 'save
                                          #:value (and  *current-file* ""))))
        (when f
-         (if (and (file-exists? f) (not (file-is-regular? f)))
+         (if (or (file-exists? f) (not (file-is-regular? f)))
              (error "buffer cannot be saved in ~S" f)
              (begin
                (set! *current-file* f)
@@ -96,7 +104,7 @@
                    "\n"
                    "This is a simple demo of an editor written\n"
                    "using STklos (version " (version) ")\n")
-                  '(ok)))
+                  :buttons '("gtk-ok")))
 
 
 ;;;;
