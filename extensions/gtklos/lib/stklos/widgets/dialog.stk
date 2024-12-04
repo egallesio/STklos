@@ -78,7 +78,7 @@
   (let Loop ((value 0) (buttons buttons))
     (unless (null? buttons)
       (unless (string? (car buttons))
-        (error "button name must be a string (it was ~S" (car buttons)))
+        (error "button name must be a string (it was ~S)" (car buttons)))
       (gtk-dialog-add-button dialog (car buttons) value)
       (Loop (+ value 1)
               (cdr buttons)))))
@@ -148,7 +148,8 @@
 ;; A list of possible icon names:
 ;;        https://developer.gnome.org/icon-naming-spec/
 (define (make-simple-message-dialog title type message
-                                    :optional (buttons '("gtk-ok" "gtk-cancel")))
+                                    :key (buttons '("gtk-ok" "gtk-cancel"))
+                                    (width 300) (height 100))
   (let* ((type  (case type
                   ((error)    "dialog-error")
                   ((info)     "dialog-information")
@@ -156,7 +157,8 @@
                   ((question) "dialog-question")
                   ((warning)  "dialog-warning")
                   (else       (format "~a" type))))  ;;<- convert to string
-         (dialog (make <dialog> #:title title #:buttons buttons))
+         (dialog (make <dialog> #:title title #:buttons buttons #:width width
+                                #:height height))
          (box    (make <hbox>   #:border-width 10 #:padding 20 #:parent dialog))
          (img    (make <image>  #:icon-name type :icon-size 'huge
                                 #:parent box))
