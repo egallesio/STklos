@@ -71,29 +71,19 @@
 ;;
 ;; ======================================================================
 (define-class <dialog> (<window>)
-  ((%run)           ;; contains a closure to run the dialog
-   (use-header-bar  #:accessor      use-header-bar
-                    #:init-keyword  #:use-header-bar
-                    #:allocation    #:virtual
-                    #:slot-ref      (lambda (o)
-                                      (= (%gtk-get-property (slot-ref o 'wid)
-                                                            "use-header-bar")
-                                         1))
-                    #:slot-set!     (lambda (o v)
-                                      (%gtk-set-property (slot-ref o 'wid)
-                                                         "use-header-bar"
-                                                         (if v 1 0))))
-   ))
+  ((%run)))           ;; contains a closure to run the dialog
 
 
 (define (%create-dialog-buttons dialog buttons)
   (let Loop ((value 0) (buttons buttons))
-      (unless (null? buttons)
-        (let* ((first (car buttons))
-               (txt   (if (symbol? first) (format "gtk-~a" first) first)))
-          (gtk-dialog-add-button dialog txt value)
-          (Loop (+ value 1)
-                (cdr buttons))))))
+    (unless (null? buttons)
+      (unless (string? (car buttons))
+        (error "button name must be a string (it was ~S" (car buttons)))
+      (gtk-dialog-add-button dialog (car buttons) value)
+      (Loop (+ value 1)
+              (cdr buttons)))))
+
+
 
 (define (%create-dialog-closure dialog buttons)
   (lambda ()
@@ -103,24 +93,34 @@
                     #f)))
       res)))
 
-  
-;; Spécify at creation time the buttons used by the dialog
-;; The default is "Ok" and "Cancel"
-;; If a button is a symbol, it will be used as a GTk stock item
-;; and an icon will be associated to the text.
-;; For instance 'ok will add a button with text "Ok" and a check
-;; A complet list of stock items is available at
-;; https://developer.gnome.org/gtk3/stable/gtk3-Stock-Items.html
-(define-method realize-widget ((self <dialog>) initargs)
-  (let ((dialog  (gtk-dialog-new))
-        (buttons (key-get initargs #:buttons '(ok cancel))))
-    (cpointer-type-set! dialog 'dialog)
-    (slot-set! self 'wid dialog)
 
-    ;; Create the buttons & the closure for running the dialog
-    (%create-dialog-buttons dialog buttons)
-    (slot-set! self '%run (%create-dialog-closure dialog buttons))
-    dialog))
+;;Specify at creation time the buttons used by the dialog with the `:buttons`
+;;valued parameter. the default buttons are a "OK and " and "Cancel" buttons.
+;;The specified value can be the name of a GTK stock item and an icon will be
+;;associated to the text.  For instance "gtk-ok" will add a button with text
+;;"Ok" and a check. So the default value for the `:buttons` parameter is the list
+;; ("gtk-ok" "gtk-cancel"). See official GTK documentation for the
+;; possible names  for GTK stock items.
+;; NOTE:  usage of GTK stock items is now deprecated
+
+(define-method realize-widget ((self <dialog>) initargs)
+  (let ((w         (key-get initargs #:width  200))
+        (h         (key-get initargs #:height 50)))
+    ;; HACK: As with <window>, set the preferred size by hand, otherwise value
+    ;; is not respected. Changing it after that seems to be OK
+    (set! initargs (key-delete! initargs #:width))
+    (set! initargs (key-delete! initargs #:height))
+
+    (let ((dialog  (gtk-dialog-new))
+          (buttons (key-get initargs #:buttons '("gtk-ok" "gtk-cancel"))))
+      (cpointer-type-set! dialog 'dialog)
+      (slot-set! self 'wid dialog)
+      ;; Create the buttons & the closure for running the dialog
+      (%create-dialog-buttons dialog buttons)
+      (slot-set! self '%run (%create-dialog-closure dialog buttons))
+      ;; Set (eventually) the user size
+      (gtk-window-set-default-size dialog w h)
+      dialog)))
 
 
 (define-method container-add! ((cont <dialog>) (widget <gtk-widget>) . options)
@@ -148,7 +148,7 @@
 ;; A list of possible icon names:
 ;;        https://developer.gnome.org/icon-naming-spec/
 (define (make-simple-message-dialog title type message
-                                    :optional (buttons '(ok cancel)))
+                                    :optional (buttons '("gtk-ok" "gtk-cancel")))
   (let* ((type  (case type
                   ((error)    "dialog-error")
                   ((info)     "dialog-information")
@@ -171,6 +171,6 @@
 ;;;
 ;;; Exports
 ;;;
-(export <dialog> use-header-bar
+(export <dialog>
         dialog-run
         make-simple-message-dialog)

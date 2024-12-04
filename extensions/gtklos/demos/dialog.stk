@@ -1,7 +1,7 @@
 ;;;;
 ;;;; dialog.stk -- Dialog box
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -51,8 +51,8 @@ to create the dialog.
   (let* ((win (make <demo-window> :title "Dialog Demo" :x 100 :y 100
                     :file "dialog" :border-width 15
                     :message *dialog-msg*)))
-    (make-dialog win "Error"    'error '(ok))
-    (make-dialog win "Info"     'info '(ok))
-    (make-dialog win "Question" 'question '(yes no))
-    (make-dialog win "Warning"  'warning '("More information" cancel))
+    (make-dialog win "Error"    'error '("gtk-ok"))
+    (make-dialog win "Info"     'info '("gtk-ok"))
+    (make-dialog win "Question" 'question '("gtk-yes" "gtk-no"))
+    (make-dialog win "Warning"  'warning '("More information" "gtk-cancel"))
     (gtk-main)))
