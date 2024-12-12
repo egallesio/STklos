@@ -35,6 +35,7 @@
 {{Include* "dialogs.adoc"}}
 {{Include* "gtk-misc.adoc"}}
 {{Include* "canvases.adoc"}}
+{{Include* "canvases-misc.adoc"}}
 {{Include* "misc.adoc"}}
 
 
