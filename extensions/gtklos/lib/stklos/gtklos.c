@@ -812,6 +812,16 @@ DEFINE_PRIMITIVE("timeout", timeout, subr2, (SCM delay, SCM proc))
   return STk_long2integer((long) g_timeout_add(val, do_timeout_call, proc));
 }
 
+DEFINE_PRIMITIVE("timeout-seconds", timeout_seconds, subr2, (SCM delay, SCM proc))
+{
+  long val = STk_integer_value(delay);
+
+  if (val == LONG_MIN) error_bad_integer(delay);
+  if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
+
+  return STk_long2integer((long) g_timeout_add_seconds(val, do_timeout_call, proc));
+}
+
 DEFINE_PRIMITIVE("when-idle", when_idle, subr1, (SCM proc))
 {
   if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
@@ -819,7 +829,7 @@ DEFINE_PRIMITIVE("when-idle", when_idle, subr1, (SCM proc))
   return STk_long2integer((long) g_idle_add(do_timeout_call, proc));
 }
 
-DEFINE_PRIMITIVE("kill-idle", kill_idle, subr1, (SCM id))
+DEFINE_PRIMITIVE("kill-idle-callback", kill_idle_callback, subr1, (SCM id))
 {
   long val = STk_integer_value(id);
 
@@ -944,10 +954,11 @@ MODULE_ENTRY_START("stklos/gtklos") {
   ADD_PRIMITIVE_IN_MODULE(rl_hook, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(timeout, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(timeout_seconds, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(when_idle, gtklos_module);
-  ADD_PRIMITIVE_IN_MODULE(kill_idle, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(kill_idle_callback, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(flush_gtk_event, gtklos_module);
-  
+
 #if HAVE_CANVAS == 1
   /* Canvas support */
   canvas_line = STk_intern("canvas-line");
