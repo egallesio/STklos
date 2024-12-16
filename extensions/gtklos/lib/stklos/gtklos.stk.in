@@ -35,7 +35,7 @@
                       rl-input-timeout rl-event-hook
                       event-x event-y)
 
-(export timeout timeout-seconds when-idle kill-idle)
+(export timeout timeout-seconds when-idle kill-idle-callback)
 
 ;;;; ---- Library
 (include "lib/libs.stk")

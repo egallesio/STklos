@@ -123,6 +123,13 @@
    (can-focus   #:accessor       can-focus
                 #:init-keyword   #:can-focus
                 #:allocation     #:gtk-property)
+   (expand      #:accessor       expand
+                #:init-keyword   #:expand
+                #:allocation     #:gtk-property)
+   (focus-on-click
+                #:accessor       focus-on-click
+                #:init-keyword   #:focus-on-click
+                #:allocation     #:gtk-property)
    (has-default #:accessor       has-default
                 #:init-keyword   #:has-default
                 #:allocation     #:gtk-property)
@@ -322,7 +329,8 @@
 ;;;
 (export  realize-widget internal-arrange-widget
          ;; accessors
-         parent can-default has-default has-focus height-request name visible
+         parent expand can-default has-default has-focus focus-on-click
+         height-request name visible
          sensitive width-request tooltip xalign yalign xpad ypad
          ;; methods
          destroy event-connect event-connect-after
