@@ -148,6 +148,6 @@
 ;;;
 ;;; Exports
 ;;;
-(export g-signal-connect g-signal-connect-after
+(export ;; g-signal-connect g-signal-connect-after
         event-char event-modifiers event-button event-x event-y event-type
         event-keyval event-keycode event-describe)
