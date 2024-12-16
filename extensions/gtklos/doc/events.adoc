@@ -177,7 +177,9 @@ A signal name is a string (such as "clicked" "enter", "leave",
 
 ==== Event connection
 
-(((event-connect, event-connect _primitive_)))
+indexterm:[event-connect _method_]
+indexterm:[event-connect-after _method_]
+[#event-connect]
 To handle a signal, we can add an event handler for this signal. The
 connection between the signal and the event is done by the `event-connect`
 primitive. This function takes three parameters
@@ -225,6 +227,13 @@ We see here that we have:
 
  1. the mouse enters in the button (event "enter")
  2. the button 1 has been pressed (event "clicked")
+
+
+NOTE: `event-connect` connects a callback function to a signal for a
+particular object. The handler will be called *before* the default handler for
+the signal. To connect a callback that will be called *after* the default
+handler, you can use `event-connect-after`.
+
 
 [#command_slot]
 ==== The command slot

@@ -425,3 +425,63 @@ Slots::
 Method::
 
 - *realize-widget: {{see-realize}}
+
+
+// ----------------------------------------------------------------------
+{{class-doc "scroll"}}
+=== Class <scroll>
+
+The `<scroll>` class represents  a container that accepts a single child widget and makes that child scrollable using scollbars. 
+
+{{show-class-table <scroll>}}
+
+Slots::
+
+- *hpolicy* determines how the size should be computed to achieve the one of
+   the visibility mode for the horizontal scrollbar. It's value can be one of
+   the symbols `always`, `automatic`, `never` or `external` (default is
+   `automatic`).
+- *max-content-height* is the maximum content height of the scrolled window, or -1
+   if not set.
+- *max-content-width* is the maximum content width of the scrolled window, or -1
+- *min-content-height* is the minimum content height of scrolled_window, or -1
+   if not set.
+- *min-content-width* is the minimum content width of scrolled_window, or -1
+   if not set.
+- *overlay-scrolling* indicates whether overlay scrolling is enabled
+   or not. If it is, the scrollbars are only added as traditional widgets when
+   a mouse is present. Otherwise, they are overlayed on top of the content, as
+   narrow indicators.
+- *vpolicy* determines how the size should be computed to achieve the one of
+   the visibility mode for the vertical scrollbar. It's value can be one of
+   the symbols `always`, `automatic`, `never` or `external` (default is
+   `automatic`).
+- *window-placement* indicates where the scollbars are placed. It's value can e
+   one of the symbols  `top-left`, `bottom-left`, `top-right` or `bottom-right`.
+
+Method::
+
+- *realize-widget* {{see-realize}}.
+
+Example::
+
+[source,scheme]
+----
+(let* ((win    (make <vwindow> #:title "Scroll Demo"
+                       #:width 300 #:height 200
+                       #:expand #t #:fill #t))
+         (scroll (make <scroll> #:parent win :overlay-scrolling #f))
+         (grid   (make <grid> #:parent scroll #:row-spacing 10 #:column-spacing 10)))
+
+    ;; Build a set of  buttons in the grid contained in <scroll>
+    (dotimes (i 100)
+      (make <button>
+            #:text (format "Button #~A" i)
+            #:parent (list grid #:top (quotient i 5) #:left (modulo i 5)))))
+----
+
+It will display the following window:
+
+image::images/scroll-figure.png[images/scroll-figure,align="center"]
+
+            

@@ -112,6 +112,7 @@ Slots::
    option passed when the widget was initialized. See `initialize-instance`
    below.
 
+[#initialize-instance]
 Methods::
 
 - *initialize-instance* for radio buttons takes care of the `#:sibling` option

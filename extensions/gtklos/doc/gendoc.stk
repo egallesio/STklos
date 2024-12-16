@@ -200,5 +200,19 @@
 (define (see-container-add)
   (printf "see general documentation on <<container-add!, _container-add!_>>"))
 
+(define (see-container-remove)
+  (printf "see general documentation on <<container-remove!, _container-add!_>>"))
+
 (define (see-command)
   (printf "see general documentation on <<command_slot, command _slot_>>"))
+
+(define (see-dialog-realize)
+  (printf "see documentation on <<dialog-realize, _realize-widget_ for dialogs>>"))
+
+(define (see-dialog-run)
+  (printf "see documentation on <<dialog-run, _dialog-run_ for dialogs>>"))
+
+(define (see-make-canvas-item)
+  (printf "see documentation on <<make-canvas-item, _make-canvas-item_ method>>"))
+
+

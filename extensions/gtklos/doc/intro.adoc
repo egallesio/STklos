@@ -78,6 +78,8 @@ stklos> {{do* (describe w)}}
 stklos>
 ----
 
+indexterm:[start-interactive-gtk _function_]
+indexterm:[gtk-main _function_]
 Now that the window is created, we need to start the GTK+ interaction
 loop to see it effectively on our screen. This can be done by calling
 
@@ -87,7 +89,7 @@ loop to see it effectively on our screen. This can be done by calling
 As said by its name, the fist form is preferred when we create an interface
 interactively in the REPL. This form, call the GTK+ event loop when your
 keyboard is idle. The second form is generally used when you create a script
-and dont use the REPL.
+and don't use the REPL.
 
 As we can see, the _width_ and the _height_ of this window are reflected in
 the `+width+` and `+height+` of `+w+`. Hereafter, are some manipulation with
