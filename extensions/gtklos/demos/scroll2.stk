@@ -1,7 +1,7 @@
 ;;;;
-;;;; scroll2.stk	-- GTklos Scroll Widget Demo
+;;;; scroll2.stk        -- GTklos Scroll Widget Demo
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ radio buttons located at the top of this window.
         #:border-width 10
         #:sibling leader
         #:command (lambda (w e)
-                    (let ((sel (group-selected w)))
+                    (let ((sel (radio-selected w)))
                       (when (eq? w sel)
                         (set! (window-placement scroll) (text sel)))))))
 
@@ -78,20 +78,22 @@ radio buttons located at the top of this window.
     (make <check-button> #:text "Vertical Scroll"
                          #:value #t
                          #:command (lambda (chk e)
-                                     (set! (vpolicy scroll) (if (value chk) 'automatic 'never)))
+                                     (set! (vpolicy scroll)
+                                           (if (value chk) 'automatic 'never)))
                          #:parent frm2)
     (make <check-button> #:text "Horizontal Scroll"
                          #:value #t
                          #:command (lambda (chk e)
-                                     (set! (hpolicy scroll) (if (value chk) 'automatic 'never)))
+                                     (set! (hpolicy scroll)
+                                           (if (value chk) 'automatic 'never)))
                          #:parent frm2)
 
 
 
     ;; Build a set of  buttons in the scroll
-    (dotimes (i 60)
+    (dotimes (i 100)
       (make <button>
             #:text (format "Button #~A" i)
-            #:parent (list grid #:top (quotient i 5) #:left (modulo i 5))
+            #:parent (list grid #:top (quotient i 10) #:left (modulo i 10))
             #:command (lambda _ (eprintf "You have clicked on button #~A\n" i))))
     (gtk-main)))

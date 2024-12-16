@@ -2,7 +2,7 @@
 ;;;;
 ;;;; file-dialog.stk         -- GTK+ File Dialog
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -62,9 +62,9 @@
    (show-hidden       #:accessor      show-hidden
                       #:init-keyword  #:show-hidden
                       #:allocation    #:gtk-property)
-   (use-preview-label #:accessor      use-preview-label
-                      #:init-keyword  #:use-preview-label
-                      #:allocation    #:gtk-property)
+   (dialog-type       #:accessor      dialog-type
+                      #:init-form     'open
+                      #:init-keyword  #:dialog-type)
    (value             #:accessor      value
                       #:init-keyword  #:value
                       #:allocation    #:virtual
@@ -75,8 +75,8 @@
 
 
 (define-method realize-widget ((self <file-dialog>) initargs)
-  (let* ((title (key-get initargs #:title "Select File"))
-         (type  (find-file-dialog-type (key-get initargs #:type 'open)))
+  (let* ((title   (key-get initargs #:title "Select File"))
+         (type    (find-file-dialog-type (key-get initargs #:dialog-type 'open)))
          (dialog  (gtk-file-chooser-dialog-new title (void) type (void))))
 
     ;; Normal stuff
@@ -86,11 +86,11 @@
     ;; Add buttons to the widget
     (let ((buttons
              (cond
-              ((= type |GTK_FILE_CHOOSER_ACTION_OPEN|)          '(cancel open))
-              ((= type |GTK_FILE_CHOOSER_ACTION_SAVE|)          '(cancel save))
-              ((= type |GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER|) '(cancel "Select"))
-              ((= type |GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER|) '(cancel "Create"))
-              (else                                             '(cancel ok)))))
+              ((= type |GTK_FILE_CHOOSER_ACTION_OPEN|)          '("gtk-cancel" "gtk-open"))
+              ((= type |GTK_FILE_CHOOSER_ACTION_SAVE|)          '("gtk-cancel" "gtk-save"))
+              ((= type |GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER|) '("gtk-cancel" "Select"))
+              ((= type |GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER|) '("gtk-cancel" "Create"))
+              (else                                             '("gtk-cancel" "gtk-ok")))))
       (%create-dialog-buttons dialog buttons))))
 
 
@@ -114,12 +114,4 @@
     res))
 
 
-(define (make-file-selector-dialog . args)
-  (let* ((dlg (apply make <file-dialog> args))
-         (res (dialog-run dlg)))
-    (destroy dlg)
-    res))
-
-
-(export <file-dialog> select-multiple show-hidden use-preview-label value
-        dialog-run  make-file-selector-dialog)
+(export <file-dialog> select-multiple show-hidden value dialog-run)

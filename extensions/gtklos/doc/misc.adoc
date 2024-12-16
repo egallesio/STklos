@@ -5,120 +5,93 @@
 //           Author: Erick Gallesio [eg@stklos.net]
 //    Creation date:  31-Oct-2024 09:48
 
-== Basic Classes
-
-This section describes the basic classes which are inherited by the high level
-GTKlos widgets. These classes are not exported by the GTKlos library. However,
-since the slots (an their accessor function) are available in the library
-widgets, they are exposed here. Furthermore, all the methods described here
-are also available in user programs, once the library has been imported.
+== Misc. functions
 
 
-{{class-doc "gtk-object"}}
-=== Class <gtk-object>
-
-The `<gtk-object>` class is the root of the hierarchy of all the GTK object.
-
-{{show-class-table (in-module (stklos gtklos) <gtk-object>)}}
-
-Note:: The `event-connect` and `event-connect-after` methods are described in the
-<<Events, Events section>>.
-
-{{class-doc "gtk-destroyed-object"}}
-=== Class <gtk-destroyed-object>
-
-The `<gtk-destroyed-object>` class is the class given to a `<gtk-object>` which
-has been destroyed with the <<destroy, *destroy* method>>.
-
-{{show-class-table (in-module (stklos gtklos) <gtk-destroyed-object>)}}
+This part of the document describes the public functions which have not
+detailed before and are exported by the `(stklos gtklos)` library.
 
 
-<<<
-{{class-doc  "gtk-widget"}}
-[%gtk_widget]
-=== Class <gtk-widget>
+//----------------------------------------------------------------------
+indexterm:[timeout _function_]
+==== timeout
 
-The `<gtk-widget>` is the base class all widgets in GTK derive from.
+The function `timeout` permits to add a callback which is called
+periodically. The callback is integrated in the GTK event loop. It takes
+two parameters:
 
+1. a delay (in millisecond) which is the period of the repetition
+2. a thumb procedure which is the callback. If this procedure returns `#f`
+the callback is destroyed. Otherwise, it will be called after the given delay.
 
-{{show-class-table (in-module (stklos gtklos) <gtk-widget>)}}
-
-Notable slots::
-
-- *name* denotes the name of the widget. The name of the widget allows you to
-   refer to it from a CSS file. See GTK documentation for more information.
-- *parent* denotes the parent of the container widget which contain this
-   window.  A list can be used when setting the parent of a widget. In this
-   case, the first element of the list must be the container in which the
-   widget must be added, the rest are the parameters that would be used when
-   using the *container-add!* method (see below).
-- *sensitive* indicates the if the user can interact with it. If the widget is
-   non sensitive, it is grayed out.
-- *show* is a read only slots. It indicates if the widget is shown when realized.
-  The default value of this slot is `#t`.
-- *tooltip* is a string that can the text to be used as a tooltip for the
-
-created widget.
-- *visible* is a boolean to set/unset the visibility of the widget.
-- *wid* is a {{stklos}} slot. It contains the low level GTK widget which
-   implements the high level GTKlos object. Its value is generally set in the
-   <<realize-widget, *realize-widget* method>>.  Normal user program shouldn't
-   change the value of this slot.
-
-[#destroy]
-[#realize-widget]
-Methods::
-- *container-add!* is the method used to add a widget to a container. Its
-   first argument is the container widget and its second argument is the
-   widget to add to the container. Subsequent parameters depend of the
-   container (each container has its own conventions to add a component to
-   it).
-- *container-info* returns some information on the way the widget has been
-   added to its container as a list. If the widget has no parent, it returns
-   `#f`.
-- *container-remove!* permit to remove the widget form it container. The
-   widget is not destroyed.
-- *destroy* permits to destroy the widget (and all its children if it is a
-   container). When a widget is destroyed, its class is changed to
-   `<destroyed-gtk-object>`.
-- *internal-arrange-widget* is a hook called when the widget is
-   initialized. Most of the time it does nothing.
-- *realize-widget* is the method called to create a low level GTK widget, and
-   initialize it properly. Each widget has it own `realize-widget`. For
-   `<gtk-widget>`, it does nothing.
-
-<<<
-{{class-doc  "gtk-container"}}
-=== Class <gtk-container>
-
-The `<gtk-container>` class is inherited by all the container widgets.
+This function returns an integer which is the event-loop ID of the callback.
+It can be used to destroy a callback with the function `kill-idle-callback`
+(see below).
 
 
-{{show-class-table (in-module (stklos gtklos) <gtk-container>)}}
+// ----------------------------------------------------------------------
+indexterm:[timeout-seconds _function_]
+==== timeout-seconds
 
-The direct methods of this class are described in the section about
-<<class-gtk-widget, *<gtk-widget>* class>>.
+The function `timeout` permits to add a callback which is called
+periodically. The callback is integrated in the GTK event loop.  This function
+is preferred if you want to have a timer in the “seconds” range and do not
+care about the exact time of the first call of the timer. It allows for more
+optimizations and more efficient system power usage.  It takes two parameters:
+
+1. a delay (in second) which is the period of the repetition
+2. a thumb procedure which is the callback. If this procedure returns `#f`
+the callback is destroyed. Otherwise, it will be called after the given delay.
+
+This function returns an integer which is the event-loop ID of the callback.
+It can be used to destroy a callback with the function `kill-idle-callback`
+(see below).
+
+
+// ----------------------------------------------------------------------
+indexterm:[when-idle _function_]
+==== when-idle
+
+The function `when-idle` takes one parameter (a function without parameter) to
+be called whenever there are no higher priority events pending to the default
+main loop. If this function returns `#t` it is automatically removed from the
+list of event sources and will not be called again.
+
+This function returns an integer which is the event-loop ID of the callback.
+It can be used to destroy a callback with the function `kill-idle-callback`
+(see below).
+
+// ----------------------------------------------------------------------
+indexterm:[kill-idle-callback _function_]
+==== kill-idle-callback
+
+The `kill-idle-callback` takes one parameter: the callback ID to remove form
+the event loop (a callback ID, is the value returned by a function such as
+`timeout` or `when-idle`).
 
 
 
-{{class-doc  "gtk-misc"}}
-=== Class <gtk-misc>
+// ----------------------------------------------------------------------
+indexterm:[gtk-main _function_]
+==== gtk-main
 
-This class factorizes properties which are common between the label and image
-widgets.
+The function `gtk-main` run the main event loop of GTK. This function should
+be called at the end of a GUI program to take into account the signals and
+event of this program and, consequently, interact with the user.
 
-{{show-class-table (in-module (stklos gtklos) <gtk-misc>)}}
+// ----------------------------------------------------------------------
+indexterm:[start-interactive-gtk _function_]
+==== start-interactive-gtk
+
+This function is useful when developing an application in the {{stklos}} REPL.
+This function tries to connect the REPL to the GTK main event loop. Hence,
+when your keyboard is idle, GTK event are processed.
 
 
 
-{{class-doc  "gtk-orientable"}}
-=== Class <gtk-orientable>
 
-The class `<gtk-orientable>`is inherited by classes which can be horizontally or vertically oriented.
 
-{{show-class-table (in-module (stklos gtklos) <gtk-orientable>)}}
 
-Note:: The only slot of this class (*orientation*) indicates the orientation
-of the widget. It's value is a symbol whose value can be `horitontal` or
-`vertical`.
+
+
 

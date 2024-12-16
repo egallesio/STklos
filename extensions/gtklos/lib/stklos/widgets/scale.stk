@@ -33,7 +33,7 @@
 
 (define-gtk gtk-scale-new (#:long #:pointer) #:pointer "gtk_scale_new")
 
-(define (value-pos->int val)
+(define (pos->int val)
   (let ((val (if (string? val) (string->symbol val) val)))
     (case val
       ((left)    0)
@@ -42,7 +42,7 @@
       ((bottom)  3)
       (else      (error "bad position value: ~s" val)))))
 
-(define (int->value-pos val)
+(define (int->pos val)
   (case val
     ((0)  'left)
     ((1)  'right)
@@ -70,13 +70,13 @@
                    #:init-keyword #:value-pos
                    #:allocation   #:virtual
                    #:slot-ref     (lambda (o)
-                                    (int->value-pos
+                                    (int->pos
                                      (%gtk-get-property (slot-ref o 'wid)
                                                         "value-pos")))
                    #:slot-set!    (lambda (o v)
                                    (%gtk-set-property! (slot-ref o 'wid)
                                                        "value-pos"
-                                                       (value-pos->int v))))
+                                                       (pos->int v))))
    (value          #:accessor     value
                    #:init-keyword #:value
                    #:allocation   #:gtk-property

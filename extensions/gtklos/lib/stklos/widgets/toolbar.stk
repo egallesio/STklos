@@ -85,9 +85,6 @@
                                    (%gtk-set-property! (slot-ref o 'wid)
                                                        "toolbar-style"
                                                        (tbstyle->int v))))
-   (expand        #:accessor     expand
-                  #:init-keyword #:expand
-                  #:init-form    #f)
 ))
 
 
@@ -173,7 +170,7 @@
 ;;; Exports
 ;;;
 (export <toolbar>
-        icon-size show-arrow toolbar-style expand
+        icon-size show-arrow toolbar-style 
         <toolbar-item>
         <toolbar-separator-item>
         <toolbar-button-item> text icon-name command

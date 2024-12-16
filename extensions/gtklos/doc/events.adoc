@@ -8,6 +8,246 @@
 [#Events]
 == Signal and Events
 
-TODO
+When a user interacts with a GTklos with an input device (e.g. moves a
+mouse or presses a key on the keyboard), GTK receives events from the
+windowing system.  Those events are generally directed to a widget
+(the area under the pointer mouse for mouse events or the focused
+widget for a keyboard event). For more information on GTK events you
+can see https://docs.gtk.org/gtk3/input-handling.html[_The GTK Input
+and Event Handling Model_] chapter in GTK documentation.
 
 
+=== Event primitives
+
+The GTklos {{stklos}} extension defines a new object type called
+_GTK-event_ to handle events. Some primitives are also defined.
+
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(get-gtk-event) "_STklos_ procedure"}}
+
+This function returns a new _GTK-event_ object representing the event
+currently processed by GTK. If no event is processed this function returns
+`#f`
+
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-type ev) "_STklos_ procedure"}}
+
+GTK events can have different types, depending of the event occuring
+on a GTklos widget. The function `event-type` returns an information
+on the type of the event as a symbol. The possible values returned by
+this function can be one of the following symbols:
+
+|====================
+| NOTHING       | DELETE                | DESTROY               | EXPOSE
+| MOTION        | BUTTON-PRESS          | BUTTON-RELEASE        | KEY-PRESS
+| KEY-RELEASE   | ENTER                 | LEAVE                 | FOCUS-IN
+| FOCUS-OUT     | CONFIGURE             | MAP                   | UNMAP
+| PROPERTY      | SELECTION-CLEAR       | SELECTION-REQUEST     | SELECTION-NOTIFY
+| PROXIMITY-IN  | PROXIMITY-OUT         | DRAG-ENTER            | DRAG-LEAVE
+| DRAG-MOTION   | DRAG-STATUS           | DROP-START            | DROP-FINISHED
+| CLIENT-EVENT  | VISIBILITY            |                       |
+|====================
+
+See GTK documentation for more information.
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-x ev) "_STklos_ procedure"}}
+
+The primitive `event-x` returns the event window relative x
+coordinates from the `ev` event. It returns `#f` if the the given
+event does not contain such a coordinate.
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-y ev) "_STklos_ procedure"}}
+
+The primitive `event-y` returns the event window relative y
+coordinates from the `ev` event.It returns `#f` if the the given
+event does not contain such a coordinate.
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-char ev) "_STklos_ procedure"}}
+
+The primitive `event-char` returns the character associated to the event `ev`
+if it is a key press or key release event (the result is a Scheme
+character). If a key is not pressed or released, the function returns `#f`.
+
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-keyval ev) "_STklos_ procedure"}}
+
+Returns the _keyval_ associated to event `ev` as an integer, or `#f` if it does
+not exists.
+
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-keycode ev) "_STklos_ procedure"}}
+
+Returns the _keycode_ associated to event `ev` as an integer, or `#f` if it does
+not exists.
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-modifiers ev) "_STklos_ procedure"}}
+
+Returns a list of the modifiers associated to the `ev` event. The
+components of the list can be the following symbols
+
+- _shift_
+- _lock_
+- _control_
+- _mod1_, _mod2_, _mod3_, _mod4_ or _mod5_
+
+If no modifier is pressed. The function returns the empty list.
+
+Example::
+
+[source,scheme]
+----
+(define w (make <vwindow> :title "Testing events" :width 300 :height 40))
+
+;; define an entry for the test
+(define e (make <entry>
+            :placeholder-text "Press any mouse button on this entry"
+            :parent (list w :expand #t :fill #t)))
+
+;; Connect an event handler to the e entry
+(event-connect e "button-press-event"
+               (lambda (wid ev)
+                 (eprintf "Button pressed. Modifiers: ~S\n"
+                          (event-modifiers ev))))
+----
+*=>*
+----
+Button pressed. Modifiers: ()
+Button pressed. Modifiers: (control)
+Button pressed. Modifiers: (control shift)
+Button pressed. Modifiers: (mod1 control shift)
+----
+
+See also the <<event-connect, *event-connect* primitive>> for details.
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-button ev) "_STklos_ procedure"}}
+
+Returns the number of the button involved in the event `ev`. If `ev` doesn't
+contain a button, `event-button` returns `#f`.
+
+
+// ----------------------------------------------------------------------
+{{primitive-doc '(event-describe ev) "_STklos_ procedure"}}
+
+This primitive prints on the current error port some information on the `ev`
+event.
+
+Result looks like this
+
+----
+vent description #[GTK-event 707c2c5a9ea0]
+             type: KEY-PRESS
+           button: #f
+        modifiers: (shift)
+             char: #\H
+           keyval: 72
+          keycode: 43
+                x: #f
+                y: #f
+----
+
+=== Signal primitives
+
+
+==== Notion of signal
+
+A GTKlos application is, in fact, an event driven application. When an event
+occurs (a mouse click, a mouse motion, ...), the application may react to this
+event. If there no event, the application is generally idle. When an event
+reaches a widget, it may react to this event by emitting a signal. A GTKlos
+program can connect a specific _callback_ to a signal. So, a callback is a
+kind of handler functions in charge of the signal.
+
+
+==== Event callback
+
+A signal name is a string (such as "clicked" "enter", "leave",
+"destroy", ...). All GTKlos callbacks are Scheme functions with two parameters:
+
+1. the widget receiving the event
+2. the event itself
+
+==== Event connection
+
+indexterm:[event-connect _method_]
+indexterm:[event-connect-after _method_]
+[#event-connect]
+To handle a signal, we can add an event handler for this signal. The
+connection between the signal and the event is done by the `event-connect`
+primitive. This function takes three parameters
+
+1. the widget ti which we want to connect an handler
+2. the name of the signal sent when this event occurs
+3. the callback function
+
+
+NOTE: Each widget has a given set of possible signal names that it sends to the application (see the GTK+ documentation for more information).
+
+Hereafter is an example which uses two calls to  `event-connect`
+[source,scheme]
+----
+(define win (make <vwindow> :title "Demo window" :width 300 :height 40))
+
+(define but (make <button> :text "Test button" :parent win))
+
+(event-connect but "clicked"
+               (lambda (wid ev)
+                 (eprintf "Widget ~S was clicked\n" wid)
+                 (event-describe ev)))
+
+(event-connect but "enter"
+               (lambda (wid _) (eprintf "We enter the button ~S\n" wid)))
+----
+
+An example of output:
+
+[source,text]
+----
+Widget #[<button> 7b70477ab0c0] was clicked     <= ①
+Event description #[GTK-event 7b70477bd720]     <= ②
+             type: BUTTON-RELEASE
+           button: 1
+        modifiers: ()
+             char: #f
+           keyval: #f
+          keycode: #f
+                x: 50.0625
+                y: 23.7734375
+----
+
+We see here that we have:
+
+ 1. the mouse enters in the button (event "enter")
+ 2. the button 1 has been pressed (event "clicked")
+
+
+NOTE: `event-connect` connects a callback function to a signal for a
+particular object. The handler will be called *before* the default handler for
+the signal. To connect a callback that will be called *after* the default
+handler, you can use `event-connect-after`.
+
+
+[#command_slot]
+==== The command slot
+
+Numerous GTKlos widgets have a slot named `command` which permits to
+fast-connect a "clicked" signal to a widget. This signal is generally sent by
+reactive widgets when the button 1 or the mouse is clicked over the widget.
+Hence, the connection of the "clicked" signal of the previous example
+can be done at the button definition:
+
+[source,scheme]
+----
+(define but (make <button> :text "Test button" :parent win
+                  :command (lambda (wid ev)
+                             (eprintf "Widget ~S was clicked\n" wid)
+                             (event-describe ev))))
+----

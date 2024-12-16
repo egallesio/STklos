@@ -1,7 +1,7 @@
 ;;;;
 ;;;; demos.stk  -- Run all the STklos demos
 ;;;;
-;;;; Copyright © 2009-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2009-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -29,13 +29,17 @@
               (lambda ()
                 (read-from-string (format "(~A)" (read-line))))))
 
+(define (exit-demo . ignore)
+  (eprintf "Terminating the GTKlos demo.\nBye.\n")
+  (exit 0))
+
 
 (define (main args)
   (let* ((win   (make <vwindow> #:title "Run a GTklos demo" :width 400))
          (label (make <label>  #:text "\n<b>Choose a demo below</b>\n" #:parent win))
          (grid  (make <grid>   #:parent win :column-homogeneous #t))
          (bye   (make <button> :text "\nExit\n" :parent win
-                               :command (lambda _ (exit 0)))))
+                               :command exit-demo)))
 
     ;; Fill the grid with demos
     (let Loop ((top 0)
@@ -59,5 +63,9 @@
               (if (zero? (modulo (+ left 1) 4))
                   (Loop (+ top 1) 0    (cdr lst))
                   (Loop top (+ left 1) (cdr lst)))))))
+
+    ;; Terminate the demo if window is closed
+    (event-connect win "delete-event" exit-demo)
+
     ;; GTk starts
     (gtk-main)))

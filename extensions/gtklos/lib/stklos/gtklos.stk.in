@@ -2,7 +2,7 @@
 ;;;;
 ;;;; gtklos.stk         -- GTklos extension
 ;;;;
-;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@
                       rl-input-timeout rl-event-hook
                       event-x event-y)
 
-(export timeout when-idle kill-idle)
+(export timeout timeout-seconds when-idle kill-idle-callback)
 
 ;;;; ---- Library
 (include "lib/libs.stk")

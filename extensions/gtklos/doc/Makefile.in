@@ -294,7 +294,8 @@ TOP = ../../..
 SPP = $(TOP)/src/stklos -q -I $(TOP)/lib -I ../lib -f $(TOP)/utils/stklos-pp.stk --
 MAIN = gtklos
 DOCS = buttons.adoc canvases.adoc containers.adoc dialogs.adoc \
-        displays.adoc events.adoc gtklos.adoc intro.adoc misc.adoc texts.adoc
+        displays.adoc events.adoc gtklos.adoc gtk-misc.adoc intro.adoc \
+        misc.adoc texts.adoc
 
 SCM = gendoc.stk
 SRC = $(DOCS) $(SCM)

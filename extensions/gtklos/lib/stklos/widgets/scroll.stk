@@ -1,7 +1,7 @@
 ;;;;
 ;;;; scroll.stk             -- GTklos Scrolled Windows
 ;;;;
-;;;; Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -40,41 +40,41 @@
 ;;;;    <gtk-adjustement> class ...
 ;;;;
 ;;;; ======================================================================
-(define-class <gtk-adjustement> (<gtk-widget>)
-  ((value               #:accessor      value
-                        #:init-keyword  #:value
-                        #:allocation    #:gtk-property)
-   (adjustement-lower   #:accessor      adjustement-lower
-                        #:init-keyword  #:adjustement-lower
-                        #:allocation    #:gtk-property
-                        #:gtk-name      lower)
-   (adjustement-upper   #:accessor      adjustement-upper
-                        #:init-keyword  #:adjustement-upper
-                        #:allocation    #:gtk-property
-                        #:gtk-name      upper)
-   (step-increment      #:accessor      step-increment
-                        #:init-keyword  #:step-increment
-                        #:allocation    #:gtk-property)
-   (page-increment      #:accessor      page-increment
-                        #:init-keyword  #:page-increment
-                        #:allocation    #:gtk-property)
-   (page-size           #:accessor      page-size
-                        #:init-keyword  #:page-size
-                        #:allocation    #:gtk-property)))
-
-
-
-(define-method realize-widget ((self <gtk-adjustement>) initargs)
-  (let* ((value (key-get #:value             initargs 0))
-         (lower (key-get #:adjustement-lower initargs 0))
-         (upper (key-get #:adjustement-upper initargs 100))
-         (si    (key-get #:step-increment    initargs 1))
-         (pi    (key-get #:page-increment    initargs 1))
-         (ps    (key-get #:page-size         initargs 100))
-         (adj   (gtk-adjustment-new value lower upper si pi ps)))
-    (cpointer-type-set! adj 'gtk-adjustement)
-    (slot-set! self 'wid adj)))
-
+;;// Keep?(define-class <gtk-adjustement> (<gtk-widget>)
+;;// Keep?  ((value               #:accessor      value
+;;// Keep?                        #:init-keyword  #:value
+;;// Keep?                        #:allocation    #:gtk-property)
+;;// Keep?   (adjustement-lower   #:accessor      adjustement-lower
+;;// Keep?                        #:init-keyword  #:adjustement-lower
+;;// Keep?                        #:allocation    #:gtk-property
+;;// Keep?                        #:gtk-name      lower)
+;;// Keep?   (adjustement-upper   #:accessor      adjustement-upper
+;;// Keep?                        #:init-keyword  #:adjustement-upper
+;;// Keep?                        #:allocation    #:gtk-property
+;;// Keep?                        #:gtk-name      upper)
+;;// Keep?   (step-increment      #:accessor      step-increment
+;;// Keep?                        #:init-keyword  #:step-increment
+;;// Keep?                        #:allocation    #:gtk-property)
+;;// Keep?   (page-increment      #:accessor      page-increment
+;;// Keep?                        #:init-keyword  #:page-increment
+;;// Keep?                        #:allocation    #:gtk-property)
+;;// Keep?   (page-size           #:accessor      page-size
+;;// Keep?                        #:init-keyword  #:page-size
+;;// Keep?                        #:allocation    #:gtk-property)))
+;;// Keep?
+;;// Keep?
+;;// Keep?
+;;// Keep?(define-method realize-widget ((self <gtk-adjustement>) initargs)
+;;// Keep?  (let* ((value (key-get #:value             initargs 0))
+;;// Keep?         (lower (key-get #:adjustement-lower initargs 0))
+;;// Keep?         (upper (key-get #:adjustement-upper initargs 100))
+;;// Keep?         (si    (key-get #:step-increment    initargs 1))
+;;// Keep?         (pi    (key-get #:page-increment    initargs 1))
+;;// Keep?         (ps    (key-get #:page-size         initargs 100))
+;;// Keep?         (adj   (gtk-adjustment-new value lower upper si pi ps)))
+;;// Keep?    (cpointer-type-set! adj 'gtk-adjustement)
+;;// Keep?    (slot-set! self 'wid adj)))
+;;// Keep?
 
 ;;======================================================================
 ;;
@@ -174,9 +174,9 @@
 ;;;
 ;;; Exports
 ;;
-(export <gtk-adjustement>
-        value adjustement-lower adjustement-upper
-        step-increment page-increment page-size
+(export ;;// Keep? <gtk-adjustement>
+        ;;// Keep? value adjustement-lower adjustement-upper
+        ;;// Keep? step-increment page-increment page-size
         <scroll>
         min-content-width max-content-width min-content-height
         max-content-height overlay-scrolling hpolicy vpolicy

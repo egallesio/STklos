@@ -11,19 +11,6 @@ A display widget is a GUI component which shows some information (a text, an
 image, or a progress bar for instance)
 
 
-{{class-doc "label"}}
-=== Class <label>
-
-A `<label>` permits to define a text widget which displays a small text.
-
-{{show-class-table <label>}}
-
-Notes::
-- The `text` slot contains the text of the label.
-- The `justify` slot may contain one of the following symbols: `left`, `right`, `center` or `fill`
-
-
-
 // ----------------------------------------------------------------------
 {{class-doc "image"}}
 === Class <image>
@@ -45,6 +32,11 @@ Slots::
 - *icon-size* can be one of the following symbols `small`, `medium`, `large`
    or `huge`.
 
+Methods::
+- *get-image-pixbuf* return a C pointer on the pixbuf used to represent the image.
+This can be useful to insert an image in a canvas.
+- *realize-widget* {{see-realize}}.
+
 Parameter object::
 - indexterm:[image-path _parameter object_]
   indexterm:[STKLOS_IMAGE_PATH,`STKLOS_IMAGE_PATH` shellvariable]
@@ -55,19 +47,36 @@ Parameter object::
   with the shell variable `STKLOS_INDEX_TERM`.
 
 
-Notable Method::
+// ----------------------------------------------------------------------
+{{class-doc "label"}}
+=== Class <label>
 
-- *get-image-pixbuf* return a C pointer on the pixbuf used to represent the image.
-This can be useful to insert an image in a canvas.
+A `<label>` permits to define a text widget which displays a small text.
+
+{{show-class-table <label>}}
+
+Slots::
+- *justify* slot may contain one of the following symbols: `left`, `right`,
+   `center` or `fill`.
+- *selectable* isa boolean. If `#t`, the user can select text from the label,
+   for copy-and-paste.
+- *text* slot contains the text of the label.
+
+
+Method::
+
+-*realize-widget* {{see-realize}}.
+
+
 
 
 // ----------------------------------------------------------------------
 {{class-doc "progress-bar"}}
 === Class <progress-bar>
 
-A `<progress-bar>` ca be used to display the progress of a long running
-operation; it can be used in two different modes: _percentage_ mode and _activity
-mode_.
+A `<progress-bar>` can be used to display the progress of a long running
+operation; it can be used in two different modes: _percentage_ mode and
+_activity mode_.
 
 {{show-class-table <progress-bar>}}
 
@@ -85,11 +94,12 @@ Slots::
 - *value* denotes the fraction of the task which is already done. Setting this
    slot permit to use the progress bar in _percentage_ mode.
 
-Notable method::
+Methods::
 
 - *progress-bar-pulse* can be used to indicate that some progress has been
    made. The progress bar enters “activity mode,” where a block bounces back
    and forth.
+- *realize-widget* {{see-realize}}.
 
 
 // ----------------------------------------------------------------------
@@ -121,7 +131,9 @@ Slots::
    can be the symbol `top`, `bottom`, `left` or `right`.
 
 
+Method::
 
+- *realize-widget {{see-realize}}.
 
 // ----------------------------------------------------------------------
 {{class-doc "separator"}}
@@ -132,3 +144,8 @@ the widgets within a window. It displays a line with a shadow to make it
 appear sunken into the interface.
 
 {{show-class-table <separator>}}
+
+Method::
+
+- *realize-widget* {{see-realize}}.
+
