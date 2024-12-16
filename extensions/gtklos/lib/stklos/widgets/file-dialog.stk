@@ -114,12 +114,4 @@
     res))
 
 
-(define (make-file-selector-dialog . args)
-  (let* ((dlg (apply make <file-dialog> args))
-         (res (dialog-run dlg)))
-    (destroy dlg)
-    res))
-
-
-(export <file-dialog> select-multiple show-hidden use-preview-label value
-        dialog-run  make-file-selector-dialog)
+(export <file-dialog> select-multiple show-hidden value dialog-run)
