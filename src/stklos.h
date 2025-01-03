@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -523,6 +523,8 @@ extern SCM STk_STklos_module;
 EXTERN_PRIMITIVE("%create-module", create_module, subr1, (SCM name));
 EXTERN_PRIMITIVE("current-module", current_module, subr0, (void));
 EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module));
+EXTERN_PRIMITIVE("symbol-value", symbol_value, subr23,
+                 (SCM symbol, SCM module, SCM default_value));
 
 void STk_export_all_symbols(SCM module);
 

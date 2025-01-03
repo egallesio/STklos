@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -1341,8 +1341,8 @@ doc>
       ((cdr)    (comp1 'IN-CDR))
       ((null?)  (comp1 'IN-NULLP))
       ((not)    (comp1 'IN-NOT))
-      ((list)   (compile-args actuals env)
-       (emit 'IN-LIST len))
+      ((list)           (compile-args actuals env)
+                        (emit 'IN-LIST len))
       ((vector-ref)     (comp2 'IN-VREF))
       ((vector-set!)    (comp3 'IN-VSET))
       ((string-ref)     (comp2 'IN-SREF))
@@ -2062,6 +2062,18 @@ both forms.
            e
            #f))
 
+;; A fast acess to symbol-value (useful when the function symbol-value is
+;; not in the environment).
+(define (compile-%%symbol-value e env tail)
+  (if (= (length e)  3)
+     (begin
+       (compile (cadr e) env (cadr e) tail)
+       (emit 'PUSH)
+       (compile (caddr e) env (caddr e) tail)
+       (emit 'SYMBOL-VALUE))
+     (compiler-error '%%symbol-value e "bas usage ~S" e)))
+
+
 ;;;;======================================================================
 ;;;;
 ;;;;            The bytecode compiler
@@ -2115,6 +2127,7 @@ both forms.
             ((%%source-pos)       (compile-%%source-pos   e env tail?))
             ((%%label)            (compile-%%label        e env tail?))
             ((%%goto)             (compile-%%goto         e env tail?))
+            ((%%symbol-value)     (compile-%%symbol-value e env tail?))
 
             ;; Standard call (first is not in lexical env)
             (else                 (compile-call           e env tail?)))))))
