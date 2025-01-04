@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1588,6 +1588,12 @@ CASE(SET_CUR_MOD) {
   NEXT0;
 }
 
+CASE(SYMBOL_VALUE) { // NOTE: No default value possible. Useful to have one?
+  SCM var = pop();
+  vm->val = STk_symbol_value(var, vm->val, NULL);
+  NEXT1;
+}
+
 
 CASE(POP)     { vm->val = pop(); NEXT1; }
 CASE(PUSH)    { push(vm->val);   NEXT; }
@@ -1792,7 +1798,6 @@ CASE(DBG_VM)  {
   ;
 }
 
-CASE(UNUSED_4)
 CASE(UNUSED_5)
 CASE(UNUSED_6)
 CASE(UNUSED_7)
@@ -2062,10 +2067,11 @@ CASE(IN_SSET)   {
   UNREG_CALL_PRIM();
   NEXT0;
 }
- CASE(IN_CXR) {  //FIXME: register
+
+CASE(IN_CXR) {  //FIXME: register
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
- }
+}
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 FUNCALL:  /* (int nargs, int tailp) */
