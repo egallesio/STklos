@@ -1551,7 +1551,14 @@ doc>
          (ex       (gensym))
          (old-hdlr (gensym))
          (reraised (gensym))
-         (res      (gensym)))
+         (res      (gensym))
+         (clauses  (if (and (pair? last)         ;; Add an else clause if not present
+                            (pair? (car last))
+                            (eq? (caar last) 'else))
+                       (cdr clauses)
+                       (append (cdr clauses)
+                               `((else (set! ,reraised #t)
+                                       (,old-hdlr ,ex)))))))
     `(let ((,old-hdlr ( [%%symbol-value 'current-exception-handler 'SCHEME] )))
        (with-handler
         (lambda (,ex)
@@ -1559,15 +1566,7 @@ doc>
                            ([%%symbol-value '%continuable-exception-value 'SCHEME] ,ex)
                            ,ex))
                  (,reraised #f)
-                 (,res (cond
-                        ,@(cdr clauses)
-                           ;; Add an else clause if not present
-                        ,@(if (and (pair? last)
-                                   (pair? (car last))
-                                   (eq? (caar last) 'else))
-                              '()
-                              `((else (set! ,reraised #t)
-                                      (,old-hdlr ,ex)))))))
+                 (,res (cond ,@clauses)))
             (if ,reraised
                 ,res
                 (if ([%%symbol-value '%continuable-exception? 'SCHEME] ,ex)
