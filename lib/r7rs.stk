@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2011-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -1552,23 +1552,25 @@ doc>
          (old-hdlr (gensym))
          (reraised (gensym))
          (res      (gensym)))
-    `(let ((,old-hdlr (current-exception-handler)))
+    `(let ((,old-hdlr ( [%%symbol-value 'current-exception-handler 'SCHEME] )))
        (with-handler
         (lambda (,ex)
-          (let* ((,var (if (%continuable-exception? ,ex)
-                           (%continuable-exception-value ,ex)
+          (let* ((,var (if ([%%symbol-value '%continuable-exception? 'SCHEME] ,ex)
+                           ([%%symbol-value '%continuable-exception-value 'SCHEME] ,ex)
                            ,ex))
                  (,reraised #f)
                  (,res (cond
                         ,@(cdr clauses)
                            ;; Add an else clause if not present
-                        ,@(if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else))
+                        ,@(if (and (pair? last)
+                                   (pair? (car last))
+                                   (eq? (caar last) 'else))
                               '()
                               `((else (set! ,reraised #t)
                                       (,old-hdlr ,ex)))))))
             (if ,reraised
                 ,res
-                (if (%continuable-exception? ,ex)
+                (if ([%%symbol-value '%continuable-exception? 'SCHEME] ,ex)
                     (raise ,res)
                     ,res))))
         ,@body))))
