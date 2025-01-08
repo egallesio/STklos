@@ -710,11 +710,17 @@ pre.rouge {
 <li><a href="#_source_rewriter">9.3. Source rewriter</a></li>
 </ul>
 </li>
-<li><a href="#_garbage_collection">10. Garbage collection</a></li>
-<li><a href="#_c_variables_for_conditional_compilation">11. C variables for conditional compilation</a>
+<li><a href="#_syntax">10. Syntax</a>
 <ul class="sectlevel2">
-<li><a href="#_detecting_libffi_libgmp_dynamic_loading">11.1. Detecting libffi, libgmp, dynamic loading</a></li>
-<li><a href="#_statistics_gathering">11.2. Statistics gathering</a></li>
+<li><a href="#_fundamental_non_hygienic_macros">10.1. Fundamental, non-hygienic macros</a></li>
+<li><a href="#_hygienic_macros_syntax_rules">10.2. Hygienic macros (<code>syntax-rules</code>)</a></li>
+</ul>
+</li>
+<li><a href="#_garbage_collection">11. Garbage collection</a></li>
+<li><a href="#_c_variables_for_conditional_compilation">12. C variables for conditional compilation</a>
+<ul class="sectlevel2">
+<li><a href="#_detecting_libffi_libgmp_dynamic_loading">12.1. Detecting libffi, libgmp, dynamic loading</a></li>
+<li><a href="#_statistics_gathering">12.2. Statistics gathering</a></li>
 </ul>
 </li>
 </ul>
@@ -2302,7 +2308,228 @@ expression <code>e</code> in the environment <code>e</code>.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_garbage_collection">10. Garbage collection</h2>
+<h2 id="_syntax">10. Syntax</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_fundamental_non_hygienic_macros">10.1. Fundamental, non-hygienic macros</h3>
+<div class="paragraph">
+<p>STklos has, fundamentally, a single type of macro, which can be created with
+<code>define-macro</code>, and has lexical scope.</p>
+</div>
+<div class="paragraph">
+<p><code>src/syntax.c</code> is where the structure <code>syntax_obj</code> is defined, having the fields:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>name</code> &#8201;&#8212;&#8201;the name given to the macro when it was created)</p>
+</li>
+<li>
+<p><code>expander_src</code>&#8201;&#8212;&#8201;the source code of the expander</p>
+</li>
+<li>
+<p><code>expander</code>&#8201;&#8212;&#8201;the compiled expander</p>
+</li>
+<li>
+<p><code>module</code>&#8201;&#8212;&#8201;the module in which the macro was created</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><code>lib/compiler.stk</code> is where the <code>define-macro</code> syntax is compiled.
+The argument list obeys the same rules as arguments for procedures,
+because the procedures <code>define&#8594;lambda</code> and <code>extended-lambda&#8594;lambda</code>
+are actually used. Basically, the compiler will just check the
+argument list and call <code>%make-syntax</code>, which is defined in
+<code>src/syntax.c</code>.</p>
+</div>
+<div class="paragraph">
+<p>But the compiler also deals with the lexical scope discipline of macros:
+there is a section <code>SYNTAX</code> in the compiler where two procedures are
+defined:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>(find-syntax-in-env symb env)</code> will look into the environment
+<code>env</code>, trying to find the symbol <code>symb</code>.</p>
+</li>
+<li>
+<p><code>(%macro-expand form env)</code> will expand the macros in <code>form</code>, using
+the given environment.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Reading the procedure <code>compile</code> certainly helps understand how STklos macros are expanded.
+The first part of it is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">compile</span> <span class="nv">expr</span> <span class="nv">env</span> <span class="nv">epair</span> <span class="nv">tail?</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">e</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nf">compiler:source-rewrite</span><span class="p">)</span> <span class="p">(</span><span class="nf">rewrite-expression</span> <span class="nv">expr</span> <span class="nv">env</span><span class="p">)</span> <span class="nv">expr</span><span class="p">)))</span>
+    <span class="p">(</span><span class="k">cond</span>
+     <span class="c1">;; ---- We have a pair</span>
+     <span class="p">((</span><span class="nb">pair?</span> <span class="nv">e</span><span class="p">)</span>
+      <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">first</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">e</span><span class="p">)))</span>
+         <span class="p">(</span><span class="k">cond</span>
+         <span class="p">((</span><span class="nf">find-syntax-in-env</span> <span class="nv">first</span> <span class="nv">env</span><span class="p">)</span>
+          <span class="c1">;; ---- Macro call</span>
+          <span class="p">(</span><span class="nf">compile</span> <span class="p">(</span><span class="nf">%macro-expand</span> <span class="nv">e</span> <span class="nv">env</span><span class="p">)</span> <span class="nv">env</span> <span class="nv">epair</span> <span class="nv">tail?</span><span class="p">))</span>
+
+         <span class="p">((</span><span class="nf">find-symbol-in-env</span> <span class="nv">first</span> <span class="nv">env</span><span class="p">)</span>
+          <span class="c1">;; --- Symbol is in environment =&gt; function call</span>
+          <span class="p">(</span><span class="nf">compile-call</span> <span class="nv">e</span> <span class="nv">env</span> <span class="nv">tail?</span><span class="p">))</span>
+
+         <span class="p">(</span><span class="k">else</span>
+           <span class="c1">;; ... (rest of the compile procedure)</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_hygienic_macros_syntax_rules">10.2. Hygienic macros (<code>syntax-rules</code>)</h3>
+<div class="paragraph">
+<p>STklos supports <code>syntax-rules</code> as per R7RS. A <code>syntax-rules</code> definition will be
+translated into a <code>define-macro</code>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>define-syntax</code> with <code>syntax-rules</code> is in <code>runtime-macros.stk</code>, and
+will just expand the syntax definitin into a <code>define-macro</code> whcih
+uses <code>find-clause</code></p>
+</li>
+<li>
+<p>The code for matching is in the file <code>lib/mbe.stk</code> (the name is a
+reference to the first work on hygienic macros by Eugene Kohlbecker
+in 1986&#8201;&#8212;&#8201;the title of the work was "Macros by Example", a
+reference to the template-based idea). The original code by E.
+Kohlbecker was the starting point for the STklos implementation.
+The <code>find-clause</code> procedure is here:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define-syntax</span> <span class="nv">f</span>
+  <span class="p">(</span><span class="k">syntax-rules</span> <span class="p">()</span>
+    <span class="p">((</span><span class="nf">f</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>   <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+    <span class="p">((</span><span class="nf">f</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="nf">find-clause</span> <span class="ss">'f</span> <span class="o">'</span><span class="p">(</span><span class="nf">2</span> <span class="mi">3</span><span class="p">)</span> <span class="o">'</span><span class="p">()</span> <span class="o">'</span><span class="p">(</span> <span class="p">((</span><span class="nf">f</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>   <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span> <span class="p">((</span><span class="nf">f</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))))</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">find-clause</span> <span class="ss">'f</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span> <span class="o">'</span><span class="p">()</span> <span class="o">'</span><span class="p">(</span> <span class="p">((</span><span class="nf">f</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>   <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span> <span class="p">((</span><span class="nf">f</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">)</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">b</span> <span class="nv">c</span><span class="p">))))</span>
+  <span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The changes are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>all the functions reside in the module <code>MBE</code>, the only binding which is
+visible from outside is <code>define-styntax</code> (and the fake <code>let-syntax</code> and
+<code>letrec-syntax</code>).</p>
+</li>
+<li>
+<p>some functions were added to the <code>MBE</code> module, and some functions were split</p>
+</li>
+<li>
+<p>The macro <code>define-syntax</code> itself is expanded to a function call which
+parses all the clauses rather than to a cond which tests all the
+clauses. This conducts to code which is smaller than the original
+solution (particularly for syntaxes with a lot of clauses).</p>
+</li>
+<li>
+<p>Symbols which starts with <code>%%</code> never appear in the macro expansion
+(i.e. they are replaced by a gensymed symbol). The example below
+illustrates the problem. Suppose we have defined</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">        <span class="p">(</span><span class="k">define-syntax</span> <span class="nv">swap!</span>
+           <span class="p">(</span><span class="k">syntax-rules</span> <span class="p">()</span>
+             <span class="p">((</span><span class="nf">swap!</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span>
+              <span class="p">(</span><span class="nf">my-let</span> <span class="p">((</span><span class="nf">tmp</span> <span class="nv">x</span><span class="p">))</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">y</span> <span class="nv">tmp</span><span class="p">)))))</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>the expansion of `(swap! a b)` would be:</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">        <span class="o">`</span><span class="p">(</span><span class="nf">my-let</span> <span class="p">((</span><span class="nf">tmp</span> <span class="nv">a</span><span class="p">))</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">b</span> <span class="nv">tmp</span><span class="p">))</span><span class="o">`</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>which is not hygienic. In this case, two symbols were introduced MY-LET
+and TMP (with a "let" expansion would be correct, since LET is treated
+specially by MBE. Here MY-LET must be kept as is whereas TMP must be
+replaced by a gensymed symbol. Changing TMP by %%TMP in the previous
+definition yields the following expansion:</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">        <span class="p">(</span><span class="nf">my-let</span> <span class="p">((</span><span class="nf">|G156|</span> <span class="nv">a</span><span class="p">))</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="k">set!</span> <span class="nv">b</span> <span class="nv">|G156|</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>which is correct.</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Tail patterns are handled as in SRFI-46 (and R7RS). For example:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">        <span class="p">(</span><span class="k">define-syntax</span> <span class="nv">last-two</span>
+           <span class="p">(</span><span class="k">syntax-rules</span> <span class="p">()</span>
+             <span class="p">((</span><span class="nf">last-two</span> <span class="nv">skip</span> <span class="o">...</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span> <span class="o">'</span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">))))</span>
+
+        <span class="p">(</span><span class="nf">last-two</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span>  <span class="nv">===&gt;</span>  <span class="p">(</span><span class="nf">3</span> <span class="mi">4</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Tail patterns support was done by Vitaly Magerya</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An optional alternative symbol for ellipsis can be specified as per R7RS. For example:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme">        <span class="p">(</span><span class="k">define-syntax</span> <span class="nv">last-two</span>
+           <span class="p">(</span><span class="k">syntax-rules</span> <span class="nv">***</span> <span class="p">()</span>
+             <span class="c1">;; we can swap ... and x here, because ... now is just</span>
+             <span class="c1">;; an identifier:</span>
+             <span class="p">((</span><span class="nf">last-two</span> <span class="nv">skip</span> <span class="nv">***</span> <span class="nv">x</span> <span class="o">...</span><span class="p">)</span> <span class="o">'</span><span class="p">(</span><span class="o">...</span> <span class="nv">x</span><span class="p">))))</span>
+
+        <span class="p">(</span><span class="nf">last-two</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span>  <span class="nv">===&gt;</span>  <span class="p">(</span><span class="nf">4</span> <span class="mi">3</span><span class="p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_garbage_collection">11. Garbage collection</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>STklos uses the Boehm-Demers-Weiser garbage collector. The wrapper for
@@ -2343,13 +2570,13 @@ will be called when the object at <code>ptr</code> is collected.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_c_variables_for_conditional_compilation">11. C variables for conditional compilation</h2>
+<h2 id="_c_variables_for_conditional_compilation">12. C variables for conditional compilation</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>These are simple to understand, but we ist them here anyway.</p>
 </div>
 <div class="sect2">
-<h3 id="_detecting_libffi_libgmp_dynamic_loading">11.1. Detecting libffi, libgmp, dynamic loading</h3>
+<h3 id="_detecting_libffi_libgmp_dynamic_loading">12.1. Detecting libffi, libgmp, dynamic loading</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -2405,7 +2632,7 @@ for example this is tone in <code>number.c</code>:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_statistics_gathering">11.2. Statistics gathering</h3>
+<h3 id="_statistics_gathering">12.2. Statistics gathering</h3>
 <div class="paragraph">
 <p>In <code>vm.c</code>, code that does statistics gathering is guarded by <code>STAT_VM</code>. For example,</p>
 </div>
