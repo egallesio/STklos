@@ -141,7 +141,7 @@ you are in a directory specifically created for Termux in your extenal SD card).
 After ssh-ing into the device, install the build tools. Termux does not have gcc, only clang.
 
 ```
-apt install libgc libpcreposix make clang git autoconf automake
+apt install libgc libpcreposix make clang git autoconf automake binutils-is-llvm
 ```
 
 Of course, clone the repository (or you can download a release tarball and extract it):
@@ -153,7 +153,7 @@ git clone https://github.com/egallesio/STklos
 Configure: in order to install STklos for usage within Termux, we use the prefix as below.
 
 ```
-./configure --prefix=/data/data/com.termux/files/usr/
+./configure LDFLAGS=-L/system/lib64/ --prefix=/data/data/com.termux/files/usr/
 make
 make test
 ```
@@ -170,10 +170,10 @@ Now run STklos!
 
 ```
 stklos -i
-  \    STklos version 1.40  (Id: 58dfbe0)
-   \   Copyright (C) 1999-2020 Erick Gallesio <eg@unice.fr>
-  / \  Université Côte d'Azur
- /   \ [Linux-3.18.140-perf-g1b0d9102ccae-aarch64/none/readline/utf8]
+  \    STklos version 2.00.565 (unstable -- 6338e863)
+   \   Copyright (C) 1999-2024 Erick Gallesio <eg@stklos.net>
+  / \  [Linux-4.14.113-g1c8cbedf56fe-aarch64/pthreads/readline/utf8]
+ /   \ Type ',h' for help
 stklos>
 ```
 
@@ -257,7 +257,7 @@ git clone https://github.com/egallesio/STklos
 Configure, `make`, `make test` and `make install`:
 
 ```
-./configure --prefix=/data/data/com.termux/files/usr/
+./configure LDFLAGS=-L/system/lib64 --prefix=/data/data/com.termux/files/usr/
 make
 make test
 make install
@@ -270,6 +270,6 @@ make install
 ### Running an x86 Android OS on a VM
 
 Download an ISO file of an x86 Android OS and install it on your preferred VM system.
-Once you have it running, you should have access to the Google Play Store. Then, you can install a version of `termux` on your running OS. Compiling and running STklos, can be done as explained before with the anbox tool or a native  installation. 
+Once you have it running, you should have access to the Google Play Store. Then, you can install a version of `termux` on your running OS. Compiling and running STklos, can be done as explained before with the anbox tool or a native  installation.
 
 Have fun
