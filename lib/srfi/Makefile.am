@@ -147,7 +147,8 @@ SRC_STK   = 1.stk   \
             235.stk \
             236.stk \
             244.stk \
-            253.stk
+            253.stk \
+            260.stk
 
 SRC_OSTK =  1.ostk   \
             2.ostk   \
@@ -263,8 +264,8 @@ SRC_OSTK =  1.ostk   \
             235.ostk \
             236.ostk \
             244.ostk \
-            253.ostk
-
+            253.ostk \
+            260.ostk
 
 #
 # SRFIs written in C and Scheme
@@ -343,6 +344,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 224.ostk: ../scheme/comparator.ostk
 234.ostk: 1.ostk 11.ostk 26.ostk
 235.ostk: 1.ostk
+260.ostk: 27.ostk
 
 
 25.$(SO):  25-incl.c  25.c

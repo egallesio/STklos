@@ -298,7 +298,7 @@
     ;; 257 Simple extendable pattern matcher with backtracking (draft)
     ;; 258 Uninterned symbols (draft)
     ;; 259 Tagged procedures with type safety (draft)
-    ;; 260 Generated Symbols (draft)
+    (260 "Generated symbols" () "srfi-260")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
