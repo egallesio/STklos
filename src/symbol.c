@@ -88,6 +88,35 @@ SCM STk_intern(char *name)
   return res;
 }
 
+/*
+<doc EXT symbol-interned?
+ * (symbol-interned? sym)
+ *
+ * Returns |#t| if |sym| is an interned symbol, amd |#f| if |sym| is an
+ * uninterned symbol. When |sym| is not a symbol, an error is signalled.
+ * @lisp
+ * (symbol-interned? (gensym))      => #f
+ * (symbol-interned? (gensym "x-")) => #f
+ * (symbol-interned? 'a)            => #t
+ * (symbol-interned? "x")           => error
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("symbol-interned?", symbol_interned_p, subr1, (SCM x))
+{
+  int unused;
+  if (!SYMBOLP(x)) STk_error("bad symbol ~s", x);
+  SCM s = STk_hash_get_symbol(&obarray, SYMBOL_PNAME(x), &unused);
+
+  /* If it's not in the table, it's not interned: */
+  if (!s) return STk_false;
+
+  /* Howeer, it's not enough to check its presence in the table. We
+     need to see wether the symbol found there is eq? to the one we
+     have: */
+  return STk_eq(s,x);
+}
+
 DEFINE_PRIMITIVE("symbol?", symbolp, subr1, (SCM x))
 /*
 <doc  symbol?
@@ -206,5 +235,6 @@ int STk_init_symbol(void)
   ADD_PRIMITIVE(symbol2string);
   ADD_PRIMITIVE(string2symbol);
   ADD_PRIMITIVE(string2usymbol);                /* + */
+  ADD_PRIMITIVE(symbol_interned_p);
   return TRUE;
 }
