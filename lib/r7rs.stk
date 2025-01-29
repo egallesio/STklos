@@ -569,12 +569,13 @@ doc>
 doc>
 |#
 (define (symbol=? e1 . rest)
-  (letrec ((verify (lambda (val lst)
-                  (or (null? lst)
-                     (and (symbol? (car lst))
-                        (eq? (car lst) val)
-                        (verify val (cdr lst)))))))
-    (verify e1 rest)))
+  (unless (symbol? e1) (error "bad symbol ~s" e1))
+  (letrec ((verify (lambda (lst)
+                     (cond ((null? lst)               #t)
+                           ((not (symbol? (car lst))) (error "bad symbol ~s" (car lst)))
+                           ((eq? (car lst) e1)        (verify (cdr lst)))
+                           (else                      #f)))))
+    (verify rest)))
 
 
 ;;;; ----------------------------------------------------------------------
