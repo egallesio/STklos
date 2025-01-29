@@ -878,24 +878,34 @@ doc>
     ,(map (lambda (x)
             (let ((macro-name (car x))
                   (syn-rules  (cadr x)))
-              (let ((alt-ellipsis? (not (list? (cadr syn-rules)))))
-                (let ((ellipsis (if alt-ellipsis?
-                                    (cadr syn-rules)
-                                    '...))
-                      (keywords (if alt-ellipsis?
-                                    (cons macro-name (caddr syn-rules))
-                                    (cons macro-name (cadr syn-rules))))
-                      (clauses  (if alt-ellipsis?
-                                    (cdddr syn-rules)
-                                    (cddr syn-rules))))
-                  (check-wrong-ellipsis-escape clauses ellipsis)
-                  `(,macro-name (lambda args
-                                  ((%%symbol-value 'find-clause 'MBE)
-                                           ',macro-name
-                                           args
-                                           ',keywords
-                                           ',clauses
-                                           ',ellipsis)))))))
+      ;; SRFI-46:
+      ;; Let the user pick the ellipsis symbol. Since STklos does not recognize
+      ;; symbols starting with ":", we test for symbol and keyword here.
+      ;; If we find that the user included a symbol or keyword instead of a list
+      ;; after "SYNTAX-RULES", then it's the ellipsis marker to be used,
+      ;; (SYNTAX-RULES ::: () ((_ (f x :::)) (do-something x :::)))
+      (let ((ellipsis '...))
+        (when (or (symbol?  (cadr syn-rules))
+                  (keyword? (cadr syn-rules)))
+          (set! ellipsis (cadr syn-rules))
+          (set! syn-rules (cdr syn-rules)))
+
+
+        (let ((keywords    (cons macro-name (cadr syn-rules)))
+              (clauses     (cddr syn-rules)))
+
+          ;; Check if ellipsis patterns are proper (if any). If they are not,
+          ;; an error will be signaled by check-wrong-ellipsis-escape
+          ;; * Should we export this symbol from MBE? It will only be used here.
+          ((in-module MBE check-wrong-ellipsis-escape) clauses ellipsis)
+
+          `(,macro-name (lambda args
+                          ((%%symbol-value 'find-clause 'MBE)
+                           ',macro-name
+                           args
+                           ',keywords
+                           ',clauses
+                           ',ellipsis)))))))
           bindings)
     ,@body))
 
