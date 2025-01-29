@@ -449,6 +449,80 @@
 (let-syntax ((f (syntax-rules () ((_ #()) 20))))
   (test "vector-pattern.6" 20 (f #())))
 
+
+;;; ellipsis escaping (example in R7RS)
+(define-syntax be-like-begin
+  (syntax-rules ()
+    ((be-like-begin name)
+      (define-syntax name
+        (syntax-rules ()
+          ((name expr (... ...))
+            (begin expr (... ...))))))))
+
+(be-like-begin sequence)
+
+(test "ellipsis escaping (example in R7RS)"
+      4
+      (sequence 1 2 3 4))
+
+(let-syntax ((with-alternate-begin
+              (syntax-rules ()
+                ((_ name body ...)
+                 (let-syntax ((name
+                               (syntax-rules ()
+                                 ((name expr (... ...))
+                                  (begin expr (... ...))))))
+                   body ...)))))
+  (with-alternate-begin sequence
+                        (test "ellipsis escaping (example in R7RS), adapted"
+                              30
+                              (sequence 10 20 30))))
+
+
+
+(define-syntax test-macro:nested-ellipsis-escape
+  (syntax-rules ()
+    ((_ a b c d e)
+     (a (b (... (c d e ...)) c)))))
+
+(test "ellipsis escaping (nested)"
+      '(1 (2 (3 4 5 ...) 3))
+      (macro-expand '(test-macro:nested-ellipsis-escape 1 2 3 4 5)))
+
+(let-syntax ((test-macro:nested-ellipsis-escape
+              (syntax-rules ()
+                ((_ a b c d e)
+                 (a (b (... (c d e ...)) c))))))
+  (test "ellipsis escaping (nested) - let-syntax"
+        '(1 (2 (3 4 5 ...) 3))
+        (macro-expand '(test-macro:nested-ellipsis-escape 1 2 3 4 5))))
+
+(test/compile-error "ellipsis escape with too many elements in template.1"
+                    (define-syntax %f
+                      (syntax-rules ()
+                        ((%f) (... 1 2))))) ;; wrong, will signal an error!
+
+(test/compile-error "ellipsis escape with too many elements in template.2"
+                    (let-syntax ((%f (syntax-rules ()
+                                       ((%f) (... 1 2)))))
+                      (macro-expand '(%f)))) ; should never get here
+
+(test/compile-error "ellipsis escape with too many elements in template.3"
+                    (let-syntax ((%f (syntax-rules ()
+                                       ((%f) (begin (... 1 2))))))
+                      (macro-expand '(%f)))) ; should never get here
+
+(test/compile-error "ellipsis escape with not enough elements in template.4"
+                    (let-syntax ((%f (syntax-rules ()
+                                       ((%f) (a (...))))))
+                      (macro-expand* '(%f)))) ; should never get here
+
+(let-syntax ((%f (syntax-rules ()
+                    ((%f) (format (... "2"))))))
+  (test "ellipsis escaping"
+        '"2"
+        (%f)))
+
 ;;FIXME: Add more tests !!!!!!!!!
 
 
