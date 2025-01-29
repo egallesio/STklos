@@ -344,10 +344,10 @@
                       (macro-expand* '(%f)))) ; should never get here
 
 (let-syntax ((%f (syntax-rules ()
-                    ((%f) (a (... 2))))))
+                    ((%f) (format (... "2"))))))
   (test "ellipsis escaping"
-        '(a 2)
-        (macro-expand* '(%f))))
+        '"2"
+        (%f)))
 
 ;;FIXME: Add more tests !!!!!!!!!
 
