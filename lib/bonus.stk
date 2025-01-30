@@ -138,7 +138,7 @@ doc>
  * (macro-expand '(car bar))  => (car bar)
  * @end lisp
  *
- * |macro-expand| returns the *full* macro expansion of |form|, that is it repeats
+ * |macro-expand*| returns the *full* macro expansion of |form|, that is it repeats
  * the macro-expansion, while the expanded form contains macro calls.
  *
  * @lisp
@@ -2705,7 +2705,7 @@ doc>
  * false value. When the parameter object |compiler:verify-assume| is
  * false the call  to |assume| is elided (see <<compflags>>).
  *
- * NOTE: When {{stklos}} is run in debug mode, assumptions are evaluated. 
+ * NOTE: When {{stklos}} is run in debug mode, assumptions are evaluated.
 doc>
 |#
 (define-macro (assume expr . args)
