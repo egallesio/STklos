@@ -51,6 +51,7 @@
 (define-macro (set! . args)          `(#%set! ,@args))
 (define-macro (|λ| . args)           `(#%lambda ,@args))
 (define-macro (lambda . args)             `(#%lambda ,@args))
+(define-macro (quote-expanded . args) `(#%quote-expanded ,@args))
 
 ;;;;
 ;;;; WHEN/UNLESS
