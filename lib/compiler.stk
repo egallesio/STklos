@@ -38,7 +38,9 @@
           when-compile
           when-load-and-compile
           %syntax-error
-          %compile-time-define)
+          %compile-time-define
+
+          %special-forms-list)
 
 ;; ----------------------------------------------------------------------
 ;;  Define the inlining tables
@@ -92,6 +94,7 @@
 
 (define *scmmod*                (find-module 'SCHEME))
 
+(define *special-forms* '()) ;; we push elements here when they are defined
 
 (include "peephole.stk")
 (include "assembler.stk")
@@ -110,6 +113,20 @@
 ;;= (define (dprintf . args)
 ;;=   (when  (%compiler-debug) (apply eprintf args)))
 ;;=
+
+; ======================================================================
+;
+;                          SPECIAL DORMS DB
+;
+; ======================================================================
+
+(define (register-special-form form)
+  ;; push! is not available here
+  (set! *special-forms* (cons form *special-forms*)))
+
+;; It feels wrong to export the variable, so we export a procedure that
+;; returns it... But it has a small cost to call it.
+(define (%special-forms-list) *special-forms*)
 
 ; ======================================================================
 ;
@@ -313,6 +330,7 @@ doc>
   (if (= (length expr) 2)
       (compile-constant (cadr expr) env tail?)
       (compiler-error 'quote expr "bad usage in ~S" expr)))
+(register-special-form 'quote)
 
 ; ======================================================================
 ;
@@ -374,6 +392,7 @@ doc>
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
                 (compiler-error 'define args "bad variable name ~S" who))
             (compiler-error 'define args "internal define forbidden here ~S" args)))))
+(register-special-form 'define)
 
 
 ;;;;
@@ -514,6 +533,7 @@ doc>
               (emit 'IM-VOID))
           (emit-label l2))
         (compiler-error 'if args "bad syntax in ~S" args))))
+(register-special-form 'if)
 
 ;;
 ;; DEFINE-MACRO
@@ -540,7 +560,7 @@ doc>
                   (%symbol-define name (eval obj mod) mod))
                 (compiler-error 'define-macro e "bad variable name ~S" name)))))
       (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
-
+(register-special-form 'define-macro)
 
 #|
 
@@ -582,6 +602,7 @@ doc>
         (emit-label lab1)
         (emit 'IM-FALSE)
         (emit-label lab2))))
+(register-special-form 'and)
 
 #|
 
@@ -617,7 +638,7 @@ doc>
         (Loop (cdr l))))
     (emit 'IM-FALSE)
     (emit-label lab)))
-
+(register-special-form 'or)
 
 ;;;;
 ;;;; BEGIN
@@ -638,6 +659,7 @@ doc>
                  (begin
                    (compile (car body) env args #f)
                    (Loop (cdr body)))))))))
+(register-special-form 'begin)
 
 ;;;;
 ;;;; LAMBDA
@@ -1010,6 +1032,7 @@ doc>
          (body        (cddr r5rs-lambda))
          (arity       (compute-arity formals)))
     (compile-user-lambda formals body arity env args)))
+(register-special-form 'lambda)
 
 ;;;;
 ;;;; APPLICATION
@@ -1509,6 +1532,7 @@ doc>
                                        tmps bindings))
                               (let () ,@body))
                            env args tail?))))))))
+(register-special-form 'letrec)
 
 ;;
 ;; LET (& named let)
@@ -1539,6 +1563,7 @@ doc>
                 (compile `((lambda ,(map car bindings) ,@body)
                            ,@(map cadr bindings))
                          env args tail?)))))))
+(register-special-form 'let)
 
 ;;
 ;; LET*
@@ -1603,6 +1628,7 @@ doc>
                           (compile-access var (extend-env env loc) args #f)
                           (Loop (cdr l)
                                 loc)))))))))))
+(register-special-form 'let*)
 
 ;;
 ;; COND
@@ -1639,6 +1665,7 @@ doc>
 (define (compile-cond e env tail?)
   (let ((new-form (rewrite-cond-clauses (cdr e))))
     (compile new-form env e tail?)))
+(register-special-form 'cond)
 
 ;;
 ;; CASE
@@ -1719,6 +1746,7 @@ doc>
                            (rewrite-case-clauses key clauses))))
         (compile new-form env e tail?))
       (compiler-error 'case e "no key given")))
+(register-special-form 'case)
 
 ;;
 ;; DO
@@ -1764,6 +1792,7 @@ doc>
                e
                #f)
       (compiler-error 'do e "bad syntax")))
+(register-special-form 'do)
 
 ;;
 ;; QUASIQUOTE
@@ -1808,6 +1837,7 @@ doc>
   (if (= (length e) 2)
       (compile (backquotify (cadr e) 0) env e tail?)
       (compiler-error 'quasiquote e "bad syntax")))
+(register-special-form 'quasiquote)
 
 
 ;;
@@ -1824,7 +1854,7 @@ doc>
         (emit 'POP-HANDLER)
         (emit-label lab))
       (compiler-error 'with-handler e "bad syntax")))
-
+(register-special-form 'with-handler)
 
 ;;
 ;; INCLUDE
