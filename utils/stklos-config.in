@@ -65,8 +65,8 @@ while test $# -gt 0; do
             echo @VERSION@
             ;;
         --compile|-c)
-            inc=-I${prefix}/include/@PACKAGE@
-            echo @CC@ @SH_COMP_FLAGS@ $inc $inc/gc
+            inc=-I${prefix}/include/
+            echo @CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ @GCINC@ $inc
             ;;
         --link|-l)
             echo @SH_LOADER@ @SH_LOAD_FLAGS@

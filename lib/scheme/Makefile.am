@@ -146,13 +146,16 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 #
 #
 # $(DEPS):
-# 	(cd ../srfi; $(MAKE)  `basename $@`)
+# 	(cd ../srfi && $(MAKE)  `basename $@`)
 
 
 stream.ostk:     ../streams/primitive.ostk ../streams/derived.ostk
 
-../streams/derived.ostk ../streams/primitive.ostk:
-	(cd ../streams; $(MAKE) $@)
+../streams/derived.ostk:
+	(cd ../streams && $(MAKE) derived.ostk)
+
+../streams/primitive.ostk:
+	(cd ../streams && $(MAKE) primitive.ostk)
 
 set.ostk: ../srfi/69.ostk comparator.ostk
 
@@ -162,17 +165,17 @@ charset-incl.c: charset.stk
 
 
 ../srfi/69.ostk:
-	(cd ../srfi; $(MAKE) 69.ostk)
+	(cd ../srfi && $(MAKE) 69.ostk)
 ../srfi/128.ostk:
-	(cd ../srfi; $(MAKE) 128.ostk)
+	(cd ../srfi && $(MAKE) 128.ostk)
 ../srfi/129.ostk:
-	(cd ../srfi; $(MAKE) 129.ostk)
+	(cd ../srfi && $(MAKE) 129.ostk)
 ../srfi/60.ostk:
-	(cd ../srfi; $(MAKE) 60.ostk)
+	(cd ../srfi && $(MAKE) 60.ostk)
 ../srfi/217.ostk:
-	(cd ../srfi; $(MAKE) 217.ostk)
+	(cd ../srfi && $(MAKE) 217.ostk)
 ../stklos/itrie.$(SO):
-	(cd ../stklos; $(MAKE) itrie.$(SO))
+	(cd ../stklos && $(MAKE) itrie.$(SO))
 
 
 bytevector.$(SO): bytevector-incl.c bytevector.c
@@ -206,26 +209,26 @@ regex.ostk: regex/boundary.stk hash-table.ostk list.$(SO) \
 # ======================================================================
 install-sources:
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; $(MAKE) install-sources)\
+	   (cd $$i && $(MAKE) install-sources)\
 	done
 	cp $(scheme_sources) $(schemedir)
 
 install-data-hook:
-	(cd regex; $(MAKE) install)
+	(cd regex && $(MAKE) install)
 clean:
-	(cd vector; $(MAKE) clean)
-	(cd regex; $(MAKE) clean)
+	(cd vector && $(MAKE) clean)
+	(cd regex && $(MAKE) clean)
 	rm -f $(scheme_OBJS) *-incl.c *~
 
 distclean: clean
-	(cd vector; $(MAKE) distclean)
-	(cd regex; $(MAKE) distclean)
+	(cd vector && $(MAKE) distclean)
+	(cd regex && $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd vector; $(MAKE) uninstall)
-	(cd regex; $(MAKE) uninstall)
-	(cd $(schemedir); rm -f $(scheme_sources))
+	(cd vector && $(MAKE) uninstall)
+	(cd regex && $(MAKE) uninstall)
+	(cd $(schemedir) && rm -f $(scheme_sources)) || true
 	rmdir $(schemedir) || true
 
 doc:

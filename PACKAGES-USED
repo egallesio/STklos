@@ -18,7 +18,7 @@ the full version counterpart.
 
 GC: The Boehm's conservative garbage collector for C and C++
 ============================================================
-    - Version: 8.2.6
+    - Version: 8.2.8
     - License: Free (BSD-like)
     - Home Page: https://www.hboehm.info/gc/
 
@@ -40,13 +40,15 @@ SILex: The Dany Dubé Scheme Implementation of Lex
 =================================================
     - Version 1.0
     - Licence: GPL
-    - Home Page: http://www.iro.umontreal.ca/~dube/
+    - Home Page: <no more available>.
+                 Last copy can be found on Internet Archive at
+		 https://web.archive.org/web/20130225211040/http://www.iro.umontreal.ca/~dube/
 
 LALR: The Dominique Boucher LALR Package
 ========================================
     - Version 2.1.4
     - Licence: GPL2
-    - Home Page: http://www.iro.umontreal.ca/~boucherd/Lalr/documentation/lalr.html
+    - Home Page: https://github.com/schemeway/lalr-scm
 
                  +++++++++++++++++++++++++++++++++++
 

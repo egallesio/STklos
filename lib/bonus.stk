@@ -29,8 +29,10 @@
         remove remove! delete delete!
         every any
         call-with-input-string call-with-output-string
+        read-case-sensitive
         open-input-virtual open-output-virtual
-        read-from-string eval-from-string
+        read-from-string read-from-string-ci
+        eval-from-string eval-from-string-ci
         command-line program-name
         create-directories ensure-directories-exist
         posix-error? posix-error-name posix-error-message
@@ -47,7 +49,6 @@
         ansi-color ansi-color-protect do-color
         port->string port->sexp-list port->string-list
         print printerr eprintf printf fprintf
-        declare-new-error
         exec exec-list die
         decompose-file-name dirname basename file-separator
         make-path file-suffix file-prefix
@@ -354,7 +355,7 @@ doc>
 <doc EXT call-with-input-string
  * (call-with-input-string string proc)
  *
- * behaves as |call-with-input-file| except that the port passed to |proc|
+ * behaves as |call-with1-input-file| except that the port passed to |proc|
  * is the sting port obtained from |port|.
  * @lisp
  * (call-with-input-string "123 456"
@@ -389,6 +390,37 @@ doc>
     (get-output-string port)))
 
 ;;;
+;;; Port functions
+;;;
+
+#|
+<doc EXT read-case-sensitive
+ * (read-case-sensitive)
+ * (read-case-sensitive value)
+ *
+ * This parameter object permits to change the default behaviour of
+ * the |read| primitive used on the current input port , when reading a symbol.
+ * If this parameter has a true value a symbol is not converted to a default
+ * case when interned. Since R7RS requires that symbol are case insignificant,
+ * the default value  of this parameter is `#t`.
+ *
+ * [NOTE]
+ * ====
+ * * This parameter works on the current input port only and cannot change
+ *   read beahviour's globally.
+ *
+ * * See also syntax for _<<doc_symbols, special characters>>_ in symbols.
+ * ====
+doc>
+|#
+(define-parameter read-case-sensitive
+  #t
+  (lambda (v)
+    (%port-case-sensitive-set! (current-input-port) v)
+    (%port-case-sensitive (current-input-port))))
+
+
+;;;
 ;;; Virtual Port functions
 ;;;
 (define (open-input-virtual :key (read-char #f) (ready? #f) (eof? #f) (close #f))
@@ -406,15 +438,18 @@ doc>
 ;;;;
 
 #|
-<doc EXT read-from-string
+<doc EXT read-from-string-ci read-from-string
  * (read-from-string str)
  *
  * Performs a read from the given |str|. If |str| is the empty string,
- * an end of file object is returned.
+ * an end of file object is returned. |Read-from-string-ci| uses |read-ci|
+ * to read.
  *
  * @lisp
  * (read-from-string "123 456") => 123
  * (read-from-string "")        => an eof object
+ * (read-from-string "ABC")     => ABC
+ * (read-from-string-ci "ABC")  => abc
  * @end lisp
 doc>
 |#
@@ -424,26 +459,42 @@ doc>
     (close-port p)
     expr))
 
+(define (read-from-string-ci s)
+  (let* ((p    (open-input-string s))
+         (expr (read-ci p)))
+    (close-port p)
+    expr))
+
+
 #|
-<doc EXT eval-from-string
+<doc EXT eval-from-string-ci eval-from-string
  * (eval-from-string str)
  * (eval-from-string str module)
+ * (eval-from-string-ci str)
+ * (eval-from-string-ci str module)
  *
  * Read an expression from |str| and evaluates it with |eval|. If a |module|
  * is passed, the evaluation takes place in the environment of this module.
  * Otherwise, the evaluation takes place in the environment returned by
- * |current-module|.
+ * |current-module|. The primitive |eval-from-string-ci| uses the |read-ci|
+ * to read the form to evaluate.
  * @lisp
  * (define x 10)
  * (define-module M
  *   (define x 100))
  * (eval-from-string "(+ x x)")                   => 20
  * (eval-from-string "(+ x x)" (find-module 'M))  => 200
+ * (eval-from-string "(cons 'A 'B)")              => (A . B)
+ * (eval-from-string-ci "(cons 'A 'B)")           => (a . b)
  * @end lisp
 doc>
 |#
 (define (eval-from-string str :optional env)
   (eval (read-from-string str)
+        env))
+
+(define (eval-from-string-ci str :optional env)
+  (eval (read-from-string-ci str)
         env))
 
 
@@ -1646,27 +1697,6 @@ doc>
 (define (fprintf port fmt . args)
   (display (apply format fmt args) port))
 
-
-#|
-<doc EXT-SYNTAX declare-new-error
- * (declare-new-error name)
- *
- * TODO
- *
-doc>
-|#
-(define-macro (declare-new-error name)
-  (let ((cond-name (string->symbol (format "&~a" name)))
-        (predicate (string->symbol (format "&~a?" name)))
-        (args      (gensym)))
-    `(begin
-       (define-condition-type ,cond-name &error-message ,predicate)
-       (define (,name . ,args)
-         (if (and (not (null? ,args))
-                  (symbol? (car ,args)))
-             (apply signal-error ,cond-name ,args)
-             (apply signal-error ,cond-name ',name ,args))))))
-
 #|
 <doc EXT  exec exec-list
  * (exec str)
@@ -2521,7 +2551,7 @@ doc>
  * @end lisp
  * is equivalent to the requiring |srfi-1| and |srfi-2|.
 
- * A list of available symbolic names for features is given in <<_srfis>>.
+ * A list of available symbolic names for features is given in <<doc_srfis>>.
 doc>
 |#
 
@@ -2669,15 +2699,17 @@ doc>
  * (assume obj ...)
  *
  * The special form |assume| is defined in {{link-srfi 145}}.
- * When {{stklos}} is in debug mode, this special form is an expression
- * that evaluates to the value of |obj| if |obj| evaluates to a true
- * value and it is an error if |obj| evaluates to a false value.
+ * When parameter object |compiler:verify-assume| is true, this special
+ * form is an expression  that evaluates to the value of |obj| if |obj|
+ * evaluates to a true value and it is an error if |obj| evaluates to a
+ * false value. When the parameter object |compiler:verify-assume| is
+ * false the call  to |assume| is elided (see <<compflags>>).
  *
- * When {{stklos}} is not in debug mode, the call to |assume| is elided.
+ * NOTE: When {{stklos}} is run in debug mode, assumptions are evaluated. 
 doc>
 |#
 (define-macro (assume expr . args)
-  (if (positive? (stklos-debug-level))
+  (if (compiler:verify-assume)
       ;; Assumptions are evaluated in debug mode ...
       (let* ((efile (and (%epair? expr) (%epair-file expr)))
              (eline (and (%epair? expr) (%epair-line expr)))
@@ -2686,7 +2718,7 @@ doc>
                                        "")
                                    "invalid assumption:")))
         `(or ,expr
-             (error ,fmt ',expr ,@args)))
+             (error 'assume ,fmt ',expr ,@args)))
       ;; ... and ignored otherwise
       #void))
 
@@ -2733,6 +2765,8 @@ doc>
       (install-dir ,(%library-prefix))
       (website "https://stklos.net")
       (scheme.features ,@(features))
+      (stklos.binary-load-path ,(%library-prefix 'lib))
+      (stklos.scheme-load-path ,(%library-prefix 'data))
       (scheme.path ,@(load-path))
       (scheme.srfi ,@srfis)
       (scheme.srfi.count ,(length srfis))

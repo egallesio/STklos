@@ -217,7 +217,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -657,7 +656,7 @@ uninstall-am:
 
 
 clean-am:
-	(cd demos; make clean)
+	(cd demos && make clean)
 	rm -f *~
 
 distclean-am:

@@ -217,7 +217,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -677,7 +676,7 @@ STKLOS_BINARY ?= ../../src/stklos
 # Dependencies
 derived.ostk: primitive.ostk ../scheme/list.$(SO)
 ../scheme/list.$(SO):
-	(cd ../scheme; $(MAKE) list.$(SO))
+	(cd ../scheme && $(MAKE) list.$(SO))
 
 # ======================================================================
 install-sources:
@@ -690,7 +689,7 @@ distclean: clean
 	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd $(schemedir); rm -f $(scheme_sources))
+	(cd $(schemedir) && rm -f $(scheme_sources)) || true
 	rmdir $(schemedir) || true
 
 doc:

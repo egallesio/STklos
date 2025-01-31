@@ -64,6 +64,8 @@ times.
 .IP "-A dir"
 append 'dir' to the directory path. This option can be used several
 times.
+.IP "--includes-use-load-path"
+\fIInclude\fR and \fIinclude-ci\fR use the \fIload-path\fR parameter object.
 .IP "-e sexpr, --execute=sexpr"
 evaluate the given sexpr and exit
 .IP "-b file, --boot-file=file"
@@ -92,12 +94,10 @@ increase the debugging level;
 .IP "-s, --stack-size=n"
 use a stack of \fBn\fR cells.
 .IP "--case-insensitive"
-be case insensitive as in R5RS (see below).
+be case insensitive as in R5RS.
 .IP "-c, --case-sensitive"
-be case sensitive as in R7RS. This is the default value (unless \fBstklos\fR
-has been built with the \fI--enable-case-insensitive\fR configure
-option). This option (and the previous one) permits to change the default
-behavior.
+be case sensitive as in R7RS. This is the default value. This option
+(and the previous one) permits to change the default behavior.
 .IP "-u yes|no, --utf8-encoding=yes|no"
 At initialisation time, \fBSTklos\fR infers the current locale from the
 \fILC_ALL\fR variable. From the character encoding used in the selected
@@ -155,6 +155,10 @@ optimizer during compilation. The peephole optimizer is used to change a
 succession of instructions by another set of instructions that has better
 performance. This flag uses the parameter \fIcompiler:peehole-optimizer\fR.
 By default, the peephole optimizer is activated.
+.IP "" 10
+-\fIverify-assume\fR can be use to indicate if the compiler must include the
+code necessary to verify the SRFI-145 assume forms, or not. This flag is false
+by default, but it is forced to true if the debug mode is set.
 .IP "-v, --version"
 print program version and exit.
 .IP "-V"

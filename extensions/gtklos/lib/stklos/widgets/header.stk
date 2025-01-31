@@ -2,7 +2,7 @@
 ;;;;
 ;;;; header.stk         -- Header bar GTK widget
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -65,7 +65,8 @@
 ;;; Exports
 ;;;
 (export <header-bar>
-        title subtitle decoration-layout decoration-layout has-subtitle show-close-button)
+        title subtitle decoration-layout decoration-layout-set has-subtitle
+        show-close-button)
 
 ;; Local Variables:
 ;; compile-command: "make -C .."

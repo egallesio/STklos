@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1588,6 +1588,12 @@ CASE(SET_CUR_MOD) {
   NEXT0;
 }
 
+CASE(SYMBOL_VALUE) { // NOTE: No default value possible. Useful to have one?
+  SCM var = pop();
+  vm->val = STk_symbol_value(var, vm->val, NULL);
+  NEXT1;
+}
+
 
 CASE(POP)     { vm->val = pop(); NEXT1; }
 CASE(PUSH)    { push(vm->val);   NEXT; }
@@ -1792,7 +1798,6 @@ CASE(DBG_VM)  {
   ;
 }
 
-CASE(UNUSED_4)
 CASE(UNUSED_5)
 CASE(UNUSED_6)
 CASE(UNUSED_7)
@@ -2062,10 +2067,11 @@ CASE(IN_SSET)   {
   UNREG_CALL_PRIM();
   NEXT0;
 }
- CASE(IN_CXR) {  //FIXME: register
+
+CASE(IN_CXR) {  //FIXME: register
   vm->val= STk_cxr(vm->val, fetch_const());
   NEXT1;
- }
+}
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 FUNCALL:  /* (int nargs, int tailp) */
@@ -2604,7 +2610,7 @@ static inline STk_instr* read_code(SCM f, unsigned int len) /* read a code phras
   return res;
 }
 
-SCM STk_load_bcode_file(SCM f)
+SCM STk_load_bcode_file(SCM f, SCM env)
 {
   SCM consts, code_size, *save_constants, save_env;
   STk_instr *save_pc;
@@ -2632,7 +2638,7 @@ SCM STk_load_bcode_file(SCM f)
 
     vm->pc        = read_code(f, size);                      /* Read the code */
     vm->constants = VECTOR_DATA(consts);
-    vm->env       = vm->current_module;
+    vm->env       = env ? env : vm->current_module;
     run_vm(vm);
   }
 
@@ -2653,7 +2659,7 @@ int STk_load_boot(char *filename)
   tmp = STk_read(f, TRUE);
   if (tmp != STk_intern("STklos")) return -2;
 
-  tmp = STk_load_bcode_file(f);
+  tmp = STk_load_bcode_file(f, NULL);
   if (tmp == STk_false) return -3;
 
   /* The system has booted on the given file */

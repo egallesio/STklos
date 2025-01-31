@@ -2,7 +2,7 @@
 ;;;;
 ;;;; image.stk  -- GTK Image Demo
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -200,9 +200,9 @@ The second line of images uses stock icons
 
     ;; Separator
     ;; Create the media demo
-    (make <image> #:parent media #:icon-name "gtk-media-previous" #:icon-size 'huge)
-    (make <image> #:parent media #:icon-name "gtk-media-play" #:icon-size 'huge)
-    (make <image> #:parent media #:icon-name "gtk-media-stop" #:icon-size 'huge)
-    (make <image> #:parent media #:icon-name "gtk-media-next" #:icon-size 'huge)
+    (for-each (lambda (icon)
+                (make <image> #:parent media #:icon-name icon #:icon-size 'huge))
+              '( "media-skip-backward" "media-playback-start" "media-playback-stop"
+                 "media-skip-forward"))
     (gtk-main)
     0))

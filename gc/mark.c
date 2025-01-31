@@ -34,8 +34,6 @@ void GC_noop6(word arg1 GC_ATTR_UNUSED, word arg2 GC_ATTR_UNUSED,
 # endif
 }
 
-volatile word GC_noop_sink;
-
 /* Single argument version, robust against whole program analysis. */
 GC_ATTR_NO_SANITIZE_THREAD
 GC_API void GC_CALL GC_noop1(word x)
@@ -1087,7 +1085,7 @@ STATIC void GC_do_parallel_mark(void)
         ABORT("Tried to start parallel mark in bad state");
     GC_VERBOSE_LOG_PRINTF("Starting marking for mark phase number %lu\n",
                           (unsigned long)GC_mark_no);
-    GC_first_nonempty = (AO_t)GC_mark_stack;
+    AO_store(&GC_first_nonempty, (AO_t)GC_mark_stack);
     GC_active_count = 0;
     GC_helper_count = 1;
     GC_help_wanted = TRUE;
@@ -1435,7 +1433,7 @@ GC_API void GC_CALL GC_print_trace_inner(GC_word gc_no)
 {
     int i;
 
-    for (i = GC_trace_buf_ptr-1; i != GC_trace_buf_ptr; i--) {
+    for (i = GC_trace_buf_ptr-1;; i--) {
         struct trace_entry *p;
 
         if (i < 0) i = TRACE_ENTRIES-1;
@@ -1449,6 +1447,7 @@ GC_API void GC_CALL GC_print_trace_inner(GC_word gc_no)
                   p -> kind, (unsigned)(p -> gc_no),
                   (unsigned long)(p -> bytes_allocd),
                   (long)p->arg1 ^ 0x80000000L, (long)p->arg2 ^ 0x80000000L);
+        if (i == GC_trace_buf_ptr) break;
     }
     GC_printf("Trace incomplete\n");
 }
@@ -1800,7 +1799,7 @@ STATIC void GC_push_marked(struct hblk *h, hdr *hhdr)
 /* the disclaim notifiers.                                              */
 /* To determine whether an object has been reclaimed, we require that   */
 /* any live object has a non-zero as one of the two lowest bits of the  */
-/* first word.  On the other hand, a reclaimed object is a members of   */
+/* first word.  On the other hand, a reclaimed object is a member of    */
 /* free-lists, and thus contains a word-aligned next-pointer as the     */
 /* first word.                                                          */
  GC_ATTR_NO_SANITIZE_THREAD

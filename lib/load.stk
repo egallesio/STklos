@@ -1,7 +1,7 @@
 ;;;;
 ;;;; load.stk   -- Extended load function
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -24,16 +24,17 @@
 ;;;;
 
 (export build-path-from-shell-variable install-path
-        load-path load-suffixes load-verbose current-loading-file
+        load-path load-suffixes includes-use-load-path
+        load-verbose current-loading-file
         try-load load
         find-path
         require provide provided? require/provide
         warning-when-not-provided
-        require-library require-for-syntax
-        include include-ci include-file
+        require-library include include-ci include-file
         autoload
 
         ;; FIXME
+        %guess-pathname
         %stklos-conf-dir
         %stklos-conf-file
         %try-load-conditions
@@ -155,6 +156,22 @@ doc>
     ;; Set the load suffixes
     (set! *load-suffixes* new)
     new))
+
+#|
+<doc EXT includes-use-load-path
+ * (includes-use-load-path)
+ * (includes-use-load-path bool)
+ *
+ * This parameter controls if the |include| and |include-ci| forms use
+ * the |load-path| parameter. By default, the loading path is not used;
+ * that means that an included file is searched only in the directory
+ * of the file which include it. If |load-path| is used, then
+ * an included file is searched first in the directory which contains
+ * the including file, and then, in the directories given by |load-path|.
+doc>
+|#
+(define-parameter includes-use-load-path #f)
+
 
 #|
 <doc EXT load-verbose
@@ -283,7 +300,7 @@ doc>
 (define %try-load-conditions
   (make-parameter '() (lambda (v) v)))      ;; will be used as a stack
 
-(define (%try-load fn load-path load-suffixes)
+(define (%try-load fn load-path load-suffixes env)
   (let ((path (%guess-pathname fn load-path load-suffixes))
         (oldp (current-loading-file))
         (res  #f)
@@ -301,7 +318,10 @@ doc>
                         (raise c)))
 
           (when *load-verbose* (format out ";; Loading file ~S.\n" path))
-          (set! res             (%primitive-try-load path))
+          ;; Do not *always* call %primitive-try-load with 2 parameters here.
+          (set! res (if env
+                        (%primitive-try-load path env)
+                        (%primitive-try-load path)))
           (when *load-verbose* (format out ";; File ~S loaded.\n" path))
           ;; Restore current-load-path
           (current-loading-file oldp)
@@ -310,12 +330,12 @@ doc>
     res))
 
 ;;
-;; Overload the function try-load primitive with a version which uses load-path annd
-;; load-suffixes
+;; Overload the function try-load primitive with a version which uses
+;; load-path and load-suffixes
 ;;
-(set! try-load (lambda (fn)
+(set! try-load (lambda (fn :optional env)
                  #:try-load
-                 (%try-load fn (load-path) (load-suffixes))))
+                 (%try-load fn (load-path) (load-suffixes) env)))
 
 ;=============================================================================
 ;
@@ -331,13 +351,13 @@ doc>
                            'r7rs-msg "cannot load file"
                            'r7rs-irritants (list fn))))
 
-(define (%load fn load-path load-suffixes)
-  (if (%try-load fn load-path load-suffixes)
+(define (%load fn load-path load-suffixes env)
+  (if (%try-load fn load-path load-suffixes env)
     (values (void)) ;; To be sure to have only 1 value (for repl printing defines)
     (%cannot-load fn)))
 
-(define (load fn)
-  (%load fn (load-path) (load-suffixes)))
+(define (load fn :optional env)
+  (%load fn (load-path) (load-suffixes) env))
 
 
 #|
@@ -448,7 +468,7 @@ doc>
           (if file
               (let ((file     (car file))
                     (lib-name (cdr file)))
-                (%load file '() '())  ;; '() => no path & no suffixes
+                (%load file '() '() #f)  ;; '() => no path & no suffixes
                 (when lib-name
                   (%do-imports (find-module 'STklos)
                                (list (list lib-name))
@@ -472,7 +492,7 @@ doc>
     (lambda (what)
       #:require/provide
       (unless (member what provided)
-        (%load what (load-path) (load-suffixes)))
+        (%load what (load-path) (load-suffixes) #f))
       (provide what)))
 
 
@@ -506,35 +526,25 @@ doc>
 (define-macro (require-library what)
   `(%%require ,what #t))
 
-#|
-<doc EXT require-for-syntax
- * (require-for-syntax string)
- *
-doc>
-|#
-#;(define-macro (require-for-syntax name)
-  `(when-compile
-      (require ,name)))
-
-
-(define-macro (require-for-syntax file)
-  `(%%require4syntax ,file))
-
-
-
 ;=============================================================================
 ;
 ; INCLUDE
 ;
 ;=============================================================================
+
 (define-macro (%do-include kind files)
   (let ((inc (string->symbol (format "%%~a" kind))))
     (if (null? files)
         (error kind "at least one parameter must be provided")
-        `(,inc ,@(map (lambda (x)
-                        ;; return x if find-path is null to improve messages
-                        (or (find-path x) x))
-                      files)))))
+        (let* ((port     (compiler-current-port))
+               (src-file (if port (port-file-name port) (current-loading-file)))
+               (dir      (and src-file (dirname src-file)))
+               (others   (if (includes-use-load-path) *load-path* '()))
+               (paths    (if dir (cons dir others) others)))
+          `(,inc ,@(map (lambda (x)
+                          ;; return x if find-path is null to improve messages
+                          (or (find-path x paths) x))
+                      files))))))
 
 (define-macro (include . files)
   `(%do-include include ,files))

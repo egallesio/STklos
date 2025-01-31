@@ -1,0 +1,438 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.net]
+//    Creation date:  31-Oct-2024 09:48
+
+
+== Canvases
+
+
+GTKlos permits to access to the GTK canvas widget if the library
+`GooCanvas` is installed {{stklos}} is configured.  `GooCanvas` is a
+canvas widget for GTK+ that uses the Cairo 2D library for drawing. It
+has a model/view split, and uses interfaces for canvas items and
+views.
+
+NOTE: This documentation is built from the original `GooCanvas` documentation
+available at the following URL: https://lazka.github.io/pgi-docs/GooCanvas-2.0
+
+// ----------------------------------------------------------------------
+
+{{class-doc "canvas"}}
+=== Class <canvas>
+
+{{show-class-table <canvas>}}
+
+Slots::
+
+- *automatic-bounds* indicates if the bounds are automatically calculated
+   based on the bounds of all the items in the canvas.
+- *background-color* is a strings that contains the color to use for the
+   canvas background.
+- *bounds-from-origin* indicates if the automatic bounds are calculated from
+   the origin.
+- *bounds-padding* is a float. It indicates the padding added to the automatic
+   bounds.
+- *canvas-x1* is the x coordinate of the left edge of the canvas bounds, in
+   canvas units.
+- *canvas-x2* is the x coordinate of the right edge of the canvas bounds, in
+   canvas units.
+- *canvas-y1* is the y coordinate of the top edge of the canvas bounds, in
+   canvas units.
+- *canvas-y2* is the y coordinate of the bottom edge of the canvas bounds, in
+   canvas units.
+- *clear-background* indicates if the background is cleared before the canvas
+   is painted.
+- *integer-layout* indicates if all item layout is done to the nearest integer.
+- *resolution-x* is the horizontal resolution of the display, in dots per inch
+- *resolution-y* is the vertical resolution of the display, in dots per inch
+- *scale* is the magnification factor of the canvas.
+- *scale-x* is the horizontal magnification factor of the canvas.
+- *scale-y* is the vertical magnification factor of the canvas.
+
+
+Methods::
+- *initialize-instance* initializes the given canvas.
+- *realize-widget* {{see-realize}}.
+
+
+=== Canvas Items
+
+Canvas items (rectangles, ellipses, ...)  are the components that are
+displayed in a canvas widget. To add a canvas item in a given canvas, you just
+need to set the parent of the canvas item to this canvas.
+
+// ______________________________________________________________________
+{{class-doc "canvas-rectangle"}}
+==== Class <canvas-rectangle>
+
+A `<canvas-rectangle>` represents a rectangle item. Since it is a subclass
+_<gtk-canvas-item>_, it inherits all of the style properties such as `x`, `y`,
+`fill-color` or `line-width`.
+
+{{show-class-table <canvas-rectangle>}}
+
+Slots::
+
+- *radius-x* is the horizontal radius to use for rounded corners.
+- *radius-y* is the vertical radius to use for rounded corners
+
+Method::
+
+- make-canvas-item {{see-make-canvas-item}}
+
+Example::
+
+[source,scheme]
+----
+(define w (make <vwindow> :title "Rectangle demo"))
+(define c (make <canvas> :parent w :width 400 :height 300))
+
+(define r1 (make <canvas-rectangle> :parent c
+                 :x 50 :y 50 :width 100 :height 80 :fill-color "red"))
+
+(define r2 (make <canvas-rectangle> :parent c
+                 :x 120 :y 70 :width 140 :height 150
+                 :stroke-color "orange" :radius-x 20 :radius-y 20
+                 :line-width 5
+                 :fill-color "rgba(0,0,255,0.7)"))
+----
+
+Here, we define two rectangles, a red one `r1` and a (partially transparent)
+blue one `r2`. We obtain:
+
+image::images/rectangle-figure.png[images/rectangle-figure,align="center"]
+
+
+NOTE: Canvas items receive event signals as standard GTK widgets. For instance
+we can define a behavior when entering in `r1` or when cliking `r2`
+
+
+[source,scheme]
+----
+(event-connect r1 "enter-notify-event"   (lambda ignore (eprintf "Entering r1\n")))
+(event-connect r2 "button-release-event" (lambda ignore (eprintf "Clicked r2\n")))
+----
+
+<<<
+// ______________________________________________________________________
+{{class-doc "canvas-ellipse"}}
+==== Class <canvas-ellipse>
+
+A `<canvas-ellipse>` represents an ellipse item.
+
+
+{{show-class-table <canvas-ellipse>}}
+
+
+Slots::
+
+- *center-x* is the x coordinate of the center of the ellipse
+- *center-y* is the y coordinate of the center of the ellipse
+- *radius-x* is the horizontal radius of the ellipse
+- *radius-y* is the vertical radius of the ellipse
+
+Method::
+
+- *make-canvas-item* {{see-make-canvas-item}}.
+
+[source,scheme]
+----
+(define w (make <vwindow> :title "Ellipse demo"))
+(define c (make <canvas> :parent w :width 400 :height 300))
+(define e1 (make <canvas-ellipse> :parent c
+                 :center-x 100 :center-y 80 :radius-x 80 :radius-y 30
+                 :fill-color "red"))
+(define e2 (make <canvas-ellipse> :parent c
+                 :center-x 180 :center-y 150 :radius-x 100 :radius-y 100
+                 :line-width 5 :stroke-color "orange"
+                 :fill-color "rgba(0,0,255,0.7)"))
+----
+
+image::images/ellipse-figure.png[images/ellipse-figure,align="center"]
+
+
+
+// ______________________________________________________________________
+{{class-doc "canvas-line"}}
+==== Class <canvas-line>
+
+A `<canvas-line>` represents a line item. More exactly,it is a poly-line item
+which is a series of one or more lines, with optional arrows at either end.
+
+{{show-class-table <canvas-line>}}
+
+
+Slots::
+
+- *arrow-length* is a float which represents the length of the arrows, as a
+   multiple of the line width.
+- *arrow-tip-length* is a float which represents the length of the arrow tip,
+   as a multiple of the line width.
+- *arrow-width* is a float which represents the width of the arrows, as a
+   multiple of the line width.
+- *close-path* indicates if the last point should be connected to the first.
+- *end-arrow* indicates if an arrow should be displayed at the end of the poly-line
+- *points* is the list of points of the poly-line.
+- *start-arrow* indicates if an arrow should be displayed at the start of the
+   poly-line.
+
+Method::
+
+- *make-canvas-item* {{see-make-canvas-item}}.
+
+Example::
+
+[source,scheme]
+----
+(define w (make <vwindow> :title "Line demo"))
+(define c (make <canvas> :parent w :width 100 :height 200))
+
+(define l1 (make <canvas-line> :parent c :points '(180 50 10 20 60 150)
+                 :stroke-color "red" :end-arrow #t
+                 :arrow-length 10 :arrow-tip-length 5 :arrow-width 15))
+----
+
+image::images/line-figure.png[images/line-figure,align="center"]
+
+<<<
+// ______________________________________________________________________
+{{class-doc "canvas-text"}}
+==== Class <canvas-text>
+
+A `<canvas-text>` represents a text canvas item.
+
+{{show-class-table <canvas-text>}}
+
+Slots::
+
+- *alignment* indicates how to align the text. Its value can be one of the
+   symbols `left`, `center` or `right`.
+- *anchor* indicates how to position the text relative to the given `x` and
+   `y` coordinates . Its value can be one of the symbols `center`, `north`,
+   `north-west`, `north-east`, `south`, `south-west`, `south-east`, `west` or
+   `east`.
+- *ellipsize* indicates the preferred place to ellipsize the string, if the
+   label does not have enough room to display the entire string. It's value
+   can be one of the symbols `none`, `start`, `middle` or `end`.
+- *use-markup* indicates whether we use _PangoMarkup_ in the text, to support
+   different styles.
+- *value* contains the text to display.
+- *wrap* indicates the preferred method of wrapping the string if a width has
+   been set. Its value can be one of the symbols `word`, `char` or `word-char`.
+`
+Method`::
+
+- *make-canvas-item* {{see-make-canvas-item}}.
+
+// ______________________________________________________________________
+{{class-doc "canvas-image"}}
+==== Class <canvas-image>
+
+A `<canvas-image>` permits to add an image as a canvas item in a canvas.
+
+{{show-class-table <canvas-image>}}
+
+Slots::
+
+- *alpha* is the opacity of the image (0.0 is fully transparent, and 1.0 is
+   opaque).
+- *image* contains the GTKlos image to display (see <<class-image>>)
+- *pixbuf* contains the pixbuf to display (see <<class-image>>)
+- *scale-to-fit* indicate if the image is scaled to fit the width and height
+   settings.
+
+Method::
+
+- *make-canvas-item* {{see-make-canvas-item}}.
+
+// ______________________________________________________________________
+{{class-doc "canvas-path"}}
+==== Class <canvas-path>
+
+A `<canvas-path>` represents a path item, which is a series of one or more
+lines, bezier curves, or elliptical arcs, using SVG canvas path notation.
+
+{{show-class-table <canvas-path>}}
+
+Slot::
+
+- *value* is the sequence of path commands as a string.
+
+Method::
+
+- *make-canvas-item* {{see-make-canvas-item}}.
+
+<<<
+Example::
+
+[source,scheme]
+----
+(define w (make <vwindow> :title "Path demo"))
+(define c (make <canvas> :parent w :width 400 :height 200))
+
+(define p1 (make <canvas-path> :parent c :stroke-color "blue"
+                 :value "M20,100 C20,50 100,50 100,100"))
+
+(define p2 (make <canvas-path> :parent c :fill-color "yellow"
+                 :stroke-color "red" :line-width 5
+                 :value "M150 5 L75 200 L225 200 Z"))
+----
+
+image::images/path-figure.png[images/path-figure,align="center"]
+
+
+<<<
+// ======================================================================
+=== Canvas Base Classes
+
+There are two canvas base classes: `<gtk-canvas-item>` and
+`<gtk-canvas-item-simple>`. They are not exported by the GTKlos library.
+However, since the slots (an their accessor function) are available in the
+library widgets, they are exposed here. Furthermore, all the methods described
+here are also available in user programs, once the library has been imported.
+
+
+{{class-doc "gtk-canvas-item"}}
+==== Class <gtk-canvas-item>
+
+The `<gtk-canvas-item>` is the base class of all the items that can be added
+in a canvas object.
+
+{{show-class-table (in-module (stklos gtklos) <gtk-canvas-item>)}}
+
+Slots::
+
+- *can-focus* indicates if the item can take the keyboard focus.
+- *description* contains a description of the item for use by assistive
+   technologies.
+- *parent* contains the parent of the canvas item
+- *pointer-events* specifies when the item receives pointer events. This is a
+   mask value which can be built with the constants
+** *CANVAS_EVENTS_NONE* the item doesn’t receive events at all.
+** *CANVAS_EVENTS_VISIBLE_MASK* a mask indicating that the item only receives
+    *events when it is visible.
+** *CANVAS_EVENTS_PAINTED_MASK* the item receives events in its painted areas,
+    whether it is visible or not.
+** *CANVAS_EVENTS_FILL_MASK* a mask indicating that the filled part of the
+     item receives events.
+** *CANVAS_EVENTS_STROKE_MASK* a mask indicating that the stroked part of the
+    item receives events.
+- *title* contains a short context-rich description of the item for use by
+   assistive technologies.
+- *tooltip* contains the tooltip to display for the item.
+- *visibility* indicates when the canvas item is visible. Its value can be one
+   of the symbols
+** *hidden* the item is invisible, and is not allocated any space
+** *invisible* the item is invisible, but it is still allocated space
+** *visible* the item is visible.
+** *visible-above-threshold* the item is visible when the canvas scale setting
+    is greater than or equal to the item’s visibility threshold setting.
+- *visibility-threshold* contains the scale threshold at which the item
+   becomes visible
+- *wid* is a {{stklos}} slot. It contains ta pointer to the GTK object used to
+   implement the canvas item . Its value is generally set in the
+   <<make-canvas-item, _make-canvas-item_ method>>.  Normal user program
+   shouldn't change the value of this slot.
+
+Methods::
+
+[#make-canvas-item]
+- *canvas-item-animate* animates an item from its current position to the
+  given offsets, scale and rotation. This method takes several keyword
+  arguments:
+** *x*  (default 0.0): the final x coordinate.
+** *y*: (default 0.0): the final y coordinate.
+** *scale* (default 1.0): the final scale.
+** *degrees* (default: 360.0) the final rotation. This can be negative to
+    rotate anticlockwise, and can also be greater than 360 to rotate a number
+    of times.
+** *absolute* (default `#t`) indicates if the x, y, scale and degrees values are
+   absolute, or relative to the current transform.
+** *duration* (default 1000): the duration of the animation, in milliseconds.
+** *step-time* (default 1): the time between each animation step, in milliseconds.
+** *animation-type* (default `freeze`) specifies what happens when the
+    animation finishes. This value may be one of the symbols
+*** `freeze`: the item remains in the final position,
+*** `reset`: the item is moved back to the initial position,
+*** `restart`: the animation is restarted from the initial position.
+*** `bounce`: the animation bounces back and forth between the start and end
+    positions.
+- *canvas-item-lower* lowers the given item in the stacking order.
+- *canvas-item-raise* raises the given item in the stacking order.
+- *canvas-item-remove* removes the item from its parent.
+- *canvas-item-rotate* rotates the item’s coordinate system by the given
+   amount, about the given origin. This method takes four for parameters:
+** the item to rotate
+** *degrees* (a float) which is the clockwise angle rotation
+** *cx* (a float) which is the `x` coordinate of the origin of the rotation.
+** *cy* (a float) which is the `y` coordinate of the origin of the rotation.
+- *canvas-item-scale* scales the item’s coordinate system by the given amounts.
+This method takes three for parameters:
+** the item to rotate
+** `sx` (a float) is the amount to scale the horizontal axis.
+** `sy` (a float) is the amount to scale the vertical axis.
+- *canvas-item-stop-animation* stops any current animation for the given item,
+   leaving it at its current position.
+- *canvas-item-translate* translates the origin of the item’s coordinate
+   system by the given amounts. This method takes three for parameters:
+** the item to translate
+** `tx` (a float) is the amount to move the origin in the horizontal direction
+** `ty` (a float) is the amount to move the origin in the vertical direction
+- *initialize-instance* verifies that a parent is given, and calls the
+   _make-canvas-item_ method.à
+-  *make-canvas-item* creates the GTK canvas item
+   object. This method is redefined for each GTKlos descendant of the class
+   `<gtk-canvas-item>`.
+
+<<<
+
+// ======================================================================
+{{class-doc "gtk-canvas-item-simple"}}
+==== Class <gtk-canvas-item-simple>
+
+{{show-class-table (in-module (stklos gtklos) <gtk-canvas-item-simple>)}}
+
+Slots::
+
+- *antialias* indicates the anti-aliasing mode to use. The value is one of the
+   symbols `default`, `none`, `gray` or `subpixel`.
+- *clip-fill-rule* is the fill rule used to determine which parts of
+   the item are clipped. It's value is either the symbol `winding` or
+   `even-odd` (see the
+   https://pycairo.readthedocs.io/en/latest/reference/enums.html#cairo.FillRule[cairo.FillRule]
+   for more information).
+- *clip-path* is a string representing the sequence of path commands
+   specifying the clip path.
+- *fill-color* is he color to use to paint the interior of the item
+- *fill-rule* is the fill rule used to determine which parts of the item are
+   filled (see the
+   https://pycairo.readthedocs.io/en/latest/reference/enums.html#cairo.FillRule[cairo.FillRule]
+   for more information)
+- *font* is the base font to use for the text
+- *height* is the height of the object in pixels.
+- *hint-metrics* is the hinting to be used for font metrics.its value is one
+   of the symbols `default`, `on` or `off` (see the
+   https://pycairo.readthedocs.io/en/latest/reference/enums.html#cairo.HintMetrics[cairo.HintMetrics]
+   for more information).
+- *line-cap* is the the line cap style to use. Its value is one of the symbols
+  `butt`, `round` or `square`(see https://lazka.github.io/pgi-docs/GooCanvas-2.0/enums.html#GooCanvas.CairoLineCap[cairo.LineCap] for more information.
+- *line-join* is the line join style to use. Its value is one of the symbols
+   `mitter`, `round` or `bevel` (see
+   https://pycairo.readthedocs.io/en/latest/reference/enums.html#cairo.LineJoin[cairo.LineJoin]
+   for more information.
+- *line-join-miter-limit* is a float representing the smallest angle to use
+   with miter joins, in degrees. Bevel joins will be used below this limit
+- *line-width* is a float representing the line width to use for the item’s
+   perimeter.
+- *operator* is the compositing operator to use. Its value is one of the
+ symbols `clear`, `source`, `dest-atop`, `xor`, `add`, `saturate`, `over`,
+ `in`, `out`, `atop`, `dest`, `dest-over`, `dest-in` or `dest-out`` (see
+ https://pycairo.readthedocs.io/en/latest/reference/enums.html#cairo.Operator[caito.Operator]
+ for more information).
+- *stroke-color* is the color to use for the item’s perimeter
+- *width* is the width of the object in pixels.
+- *x* is the x coordinate of the canvas item
+- *y* is the y coordinate of the canvas item

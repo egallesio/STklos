@@ -30,6 +30,6 @@ install-sources:
 
 
 uninstall-hook:
-	(cd $(DESTDIR)$(schemedir) && rm -f $(SRC))
+	(cd $(DESTDIR)$(schemedir) && rm -f $(SRC)) || true
 
 doc:

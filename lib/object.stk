@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk -- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;;
-;;;; Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@
     slot-definition-init-form slot-definition-init-keyword
     slot-init-function class-slot-definition
     compute-get-n-set
-    allocate-instance initialize make-instance make
+    allocate-instance initialize-instance initialize make-instance make
     no-next-method  no-applicable-method no-method ;; next-method-exists?
     change-class change-object-class
     shallow-clone deep-clone
@@ -172,13 +172,17 @@ doc>
   (if (class? C) (slot-ref C 'name) (%error-bad-class 'class-name C)))
 
 #|
-<doc EXT class-direct-superclasses class-direct-subclasses class-precedence-list
+<doc EXT class-direct-superclasses class-direct-subclasses class-subclasses class-precedence-list
  * (class-direct-superclasses c)
  * (class-direct-subclasses c)
+ * (class-subclasses c)
  * (class-precedence-list c)
  *
- * |class-direct-superclasses| and |class-direct-subclasses| return a list with
+ * |class-direct-superclasses| and |class-direct-subclasses| returns a list with
  * all direct superclasses or subclasses of class |c|.
+ *
+ * |class-subclasses| returns a list with all subclasses of class |c|, even if
+ * not direct.
  *
  * |class-precedence-list| returns the precedence list for class |c|. If
  * |c| is a superclass of several classes, this list shows what precedence
@@ -203,6 +207,26 @@ doc>
  * |Slot-one| in class |<C>| refers to the slot defined in |<C>| (because
  * it is present in both |<A>| and |<C>|, but |<C>| has precedence over
  * |<A>|). |Slot-two| in |<C>| can only be the one defined in |<A>|.
+ *
+ * The native STklos types are also subclasses of one single class, |<top>|.
+ *
+ * @lisp
+ *
+ * (map class-name  (class-subclasses <top>))
+ *         => (<entity-class> <procedure-class> <class> <accessor-method>
+ *             <simple-method> <method> <generic> <object> <boolean> <char>
+ *             ...
+ *             <number>
+ *             ...
+ *             <output-port> <port> <hash-table>)
+ * @end lisp
+ * One of the listed classes above is |<number>| (its subclasses are also
+ * listed in that output). Calling |class-subclasses| on |<number>| returns
+ * its six subclasses:
+ * @lisp
+ * (map class-name (class-subclasses <number>))
+ *         => (map class-name (class-subclasses <number>))
+ * @end lisp
 doc>
 |#
 
@@ -227,6 +251,31 @@ doc>
  *
  * @lisp
  * (class-direct-slots <B>) => ((a #:init-form 3))
+ * @end lisp
+doc>
+<doc class-methods class-direct-methods
+ * (class-methods c)
+ * (class-direct-methods c)
+ *
+ * |Class-direct-methods| returns a list of all direct methods of
+ * a class.
+ *
+ * |Class-methods| returns a list of all methods of a class and also
+ * of its subclasses.
+ *
+ * @lisp
+ * (define-class <A> () ())
+ *
+ * (define-method method-A ((a <A>)) (print 'A))
+ * (define-class <C> (<A>) ())
+ * (define-method method-C ((c <C>)) (print 'C))
+ * (class-methods <C>)
+ *
+ * (map method-generic-function (class-methods <A>))
+ *     => (#[<generic> method-C (1)]
+ *         #[<generic> method-A (1)])
+ * (map method-generic-function (class-direct-methods <A>))
+ *     => (#[<generic> method-A (1)])
  * @end lisp
 doc>
 |#
@@ -349,6 +398,36 @@ doc>
 ;;;
 ;;; Generic functions
 ;;;
+#|
+<doc EXT generic-function-name generic-function-methods generic-function-documentation
+ * (generic-function-name gf)
+ * (generic-function-methods gf)
+ * (generic-function-documentation gf)
+ *
+ * Given a generic function object, these procedures return the name,
+ * the list of methods and the documentation of the generic function.
+ *
+ * For example,
+ *
+ * @lisp
+ * (define-generic compute :documentation "This function does computations")
+ *
+ * (define-method compute ( (a <real>) (b <real>) )
+ *   (* a b))
+ *
+ * (define-method compute ( (a <real>) (b <complex>) )
+ *   (* a (imag-part b)))
+ *
+ * (generic-function-name compute)          => compute
+ * (generic-function-methods compute)       => (#[<method> 7f9901743db0]
+ *                                              #[<method> 7f990155af60])
+ * (generic-function-documentation compute) => "This function does computations"
+ * @end lisp
+ *
+ * It is not necessary that the generic function be explicitly defined. If it is
+ * not explicitly created, however, the documentation will be set to `#f`.
+doc>
+|#
 (define (generic-function-name gf)
   (if (generic? gf)
       (slot-ref gf 'name)
@@ -367,6 +446,40 @@ doc>
 ;;;
 ;;; Methods
 ;;;
+#|
+<doc EXT method-generic-function method-specializers method-procedure
+ * (method-generic-function m)
+ * (method-specializers m)
+ * (method-procedure m)
+ *
+ * Given a method |m|,
+ * * |method-generic-function| returns the generic function that this
+ *   object is a specialization of;
+ * * |method-specializers| returns a list of specializers (this and other
+ *   methods) of its generic functions;
+ * * |method-procedure| returns the procedure that implements this method.
+ *
+ * @lisp
+ * (define-method compute ( (a <real>) (b <real>) )
+ *  (* a b))
+ *
+ * (define-method compute ( (a <real>) (b <complex>) )
+ *   (* a (imag-part b)))
+ *
+ * (define m (car (generic-function-methods compute)))
+ *
+ * (method-generic-function m)
+ *    => #[<generic> compute (2)]
+ *
+ * (method-specializers m)
+ *    => (#[<class> <real> 7f3e3a157ba0]
+ *        #[<class> <complex> 7f3e3a157bd0])
+ *
+ * (method-procedure m)
+ *    => #[closure 7f9901d6e680]
+ * @end lisp
+doc>
+|#
 (define (method-generic-function m)
   (if (method? m)
       (slot-ref m 'generic-function)
@@ -1309,10 +1422,10 @@ doc>
 ;
 ;=============================================================================
 
-(define-method initialize ((object <object>) initargs)
+(define-method initialize-instance ((object <object>) initargs)
   (%initialize-object object initargs))
 
-(define-method initialize ((class <class>) initargs)
+(define-method initialize-instance ((class <class>) initargs)
   (next-method)
   (let ((dslots (key-get initargs :slots   '()))
         (supers (key-get initargs :dsupers '())))
@@ -1338,7 +1451,7 @@ doc>
     (compute-slot-accessors class dslots)))
 
 
-(define-method initialize ((generic <generic>) initargs)
+(define-method initialize-instance ((generic <generic>) initargs)
   (let ((previous-definition (key-get initargs :default #f))
         (doc                 (key-get initargs :documentation #f)))
     (next-method)
@@ -1354,12 +1467,14 @@ doc>
                    '()))
     (slot-set! generic 'documentation doc)))
 
-(define-method initialize ((method <method>) initargs)
+(define-method initialize-instance ((method <method>) initargs)
   (next-method)
   (slot-set! method 'generic-function (key-get initargs :generic-function #f))
   (slot-set! method 'specializers     (key-get initargs :specializers '()))
   (slot-set! method 'procedure        (key-get initargs :procedure (lambda l '()))))
 
+
+(define initialize initialize-instance)
 
 ;=============================================================================
 ;
@@ -1370,9 +1485,11 @@ doc>
 ;=============================================================================
 
 #|
-<doc EXT allocate-instance make-instance
+<doc EXT allocate-instance initialize initialize-instance make make-instance
  * (allocate-instance c init-args)
+ * (initialize-instance c init-args)
  * (make-instance c)
+ * (initialize c init-args)
  * (make c)
  *
  * |Make-instance| creates and initializes an instance of class |c|.
@@ -1394,6 +1511,76 @@ doc>
  *   xx = #[unbound]
  * @end lisp
  * NOTE: |make| is an alias for |make-instance|.
+ *
+ * |Initialize| is a generic function that is called by |make-instance|
+ * (or |make|) in order to initialize instances of a class.
+ *
+ * @lisp
+ * (define-class <x> (<object>)
+ *   ((a :init-keyword :a)
+ *    (b :accessor x-b)
+ *    c))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = 10
+ *      b = #[unbound]
+ *      c = #[unbound]
+ * @end lisp
+ * If an |initialize| method is implemented, it overrides the
+ * default, and the initializing arguments are not automatically
+ * processed:
+ * @lisp
+ * (define-method initialize-instance ((x <x>) args)
+ *   (print '== " " args)
+ *   (set! (bb x) 1000))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * == (a 10)
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = #[unbound]
+ *      b = 1000
+ *      c = #[unbound]
+ * @end lisp
+ * Note that |a| was *not* initialized! This is because the new
+ * |initialize| method does not set it, and the keyword initializer
+ * was ignored (the method actually printed the arguments, but
+ * ignored them).
+ *
+ * But if |next-method| is called at the end of our |initialize|
+ * method, the result will be as expected:
+ *
+ * @lisp
+ * (define-method initialize-instance ((x <x>) args)
+ *   (print '== " " args)
+ *   (set! (bb x) 1000)
+ *   (next-method))
+ *
+ * (describe (make <x> :a 10))
+ *
+ * == (a 10)
+ * #[<x> 7f8a49e96bd0] is an instance of class <x>.
+ * Slots are:
+ *      a = 10
+ *      b = 1000
+ *      c = #[unbound]
+ * @end lisp
+ * Now |a| has also been initialized.
+ *
+ * NOTE: |initialize| is an alias for |initialize-instance|.
+ *
+ * Finally, the standard |make-instance| is simple to write: it just
+ * calls |allocate-instance| and initializes it with |initialize-instance|:
+ * @lisp
+ * (define-method make-instance ((class <class>) . initargs)
+ *   (let ((instance (allocate-instance class initargs)))
+ *     (initialize-instance instance initargs)
+ *     instance))
+ * @end lisp
 doc>
 |#
 (define-method allocate-instance ((class <class>) initargs)
@@ -1401,7 +1588,7 @@ doc>
 
 (define-method make-instance ((class <class>) . initargs)
   (let ((instance (allocate-instance class initargs)))
-    (initialize instance initargs)
+    (initialize-instance instance initargs)
     instance))
 
 (define make make-instance)
@@ -1412,6 +1599,56 @@ doc>
 ;
 ;=============================================================================
 
+#|
+<doc EXT change-class
+ * (change-class object new-class)
+ *
+ * |Change-class| will change the class of |object| to |new-class|.
+ * The values of slots that do exist in both the old and new classes
+ * are carried out to the new object. The slots that do not exist in
+ * the old instance are initialized as if the object was new.
+ *
+ * @lisp
+ * (define-class <A> ()        ((a-slot #:init-form 'a-value)))
+ * (define-class <B> ()        ((b-slot #:init-form 'b-value)))
+ * (define-class <C> (<A> <B>) ((c-slot #:init-form 'c-value)))
+ *
+ * (define a (make <A>))
+ * (define c (make <C>))
+ *
+ * (describe a)
+ * #[<A> 7f91fe79c660] is an instance of class <A>.
+ * The only slot is:
+ *      a-slot = a-value
+ *
+ * (describe c)
+ * #[<C> 7f91fe7a0510] is an instance of class <C>.
+ * Slots are:
+ *      a-slot = a-value
+ *      b-slot = b-value
+ *      c-slot = c-value
+ *
+ * (change-class a <C>)
+ * (change-class c <A>)
+ *
+ * (describe a)
+ * #[<C> 7f91fe79c660] is an instance of class <C>.
+ * Slots are:
+ *      a-slot = a-value
+ *      b-slot = b-value
+ *      c-slot = c-value
+ *
+ * (describe c)
+ * #[<A> 7f91fe7a0510] is an instance of class <A>.
+ * The only slot is:
+ *      a-slot = a-value
+ *
+ * (slot-value c 'c-slot) => error
+ * @end lisp
+ * The last line shows that |c| really changed into an object of
+ * class |<A>|: it does not have the slot |c-slot| anymore.
+doc>
+|#
 (define (change-object-class old-instance old-class new-class)
   (let ((new-instance (allocate-instance new-class ())))
     ;; Initalize the slot of the new instance

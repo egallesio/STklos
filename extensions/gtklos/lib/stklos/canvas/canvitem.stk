@@ -1,7 +1,7 @@
 1;;;;
 ;;;; canvas-vitem.stk   -- GTklos Canvas Items
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -104,18 +104,18 @@
 
 
 ;;;
-;;; Initialize for <gtk-canvas-item>
+;;; Initialize-instance for <gtk-canvas-item>
 ;;;
 (define-generic make-canvas-item)
 
 (define-method make-canvas-item ((self <gtk-canvas-item>))
   (error 'make-canvas-item "no make-canvas-item method defined for ~S" self))
 
-(define-method initialize ((self <gtk-canvas-item>) initargs)
+(define-method initialize-instance ((self <gtk-canvas-item>) initargs)
   (let ((parent (key-get initargs #:parent #f)))
     ;; Verify that we have a parent for this object
     (unless parent
-      (error 'initialize "cannot create a ~S without parent"
+      (error 'initialize-instance "cannot create a ~S without parent"
              (class-name (class-of self))))
 
     ;; Create the canvas item
@@ -236,7 +236,7 @@
    (line-cap              #:accessor       line-cap
                           #:init-keyword   #:line-cap
                           #:allocation     #:gtk-property-enum
-                          #:gtk-enum       (butt round sqaure))
+                          #:gtk-enum       (butt round square))
 ;; (line-dash             #:accessor       line-dash
 ;;                        #:init-keyword   #:line-dash
 ;;                        #:allocation     #:gtk-property)
@@ -253,13 +253,10 @@
    (operator              #:accessor       operator
                           #:init-keyword   #:operator
                           #:allocation     #:gtk-property-enum
-                          #:gtk-enum       (clear source over in out atop
-                                            dest dest-over dest-in dest-out dest-atop
-                                            xor add saturate
-                                            multiply  screen overlay darken lighten color-dodge
-                                            color-burn hard-light soft-light differennce exclusion
-                                            hsl-hue hsl-saturation hsl-color hsl-luminosity))
-  (stroke-color           #:accessor       stroke-color
+                          #:gtk-enum       (clear source over dest-atop xor add
+                                            saturate over in out atop
+                                            dest dest-over dest-in dest-out))
+   (stroke-color          #:accessor       stroke-color
                           #:init-keyword   #:stroke-color
                           #:allocation     #:virtual
                           #:slot-ref       (lambda (o)
@@ -297,7 +294,7 @@
         canvas-item-animate canvas-item-stop-animation canvas-item-raise
         canvas-item-lower canvas-item-remove
 
-        parent can-focus description title tooltip visibility visibility-threshold
-        antialias clip-fill-rule clip-path fill-color fill-rule font hint-metrics
-        line-cap line-join line-join-miter-limit line-width operator stroke-color
-        width height canvas-item-x canvas-item-y)
+        parent can-focus description pointer-events title tooltip visibility
+        visibility-threshold antialias clip-fill-rule clip-path fill-color
+        fill-rule font hint-metrics line-cap line-join line-join-miter-limit
+        line-width operator stroke-color width height canvas-item-x canvas-item-y)

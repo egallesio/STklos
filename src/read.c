@@ -53,8 +53,6 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
 static SCM sym_read_brace, sym_read_bracket, read_error;
 
-int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
-
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
 #define PLACEHOLDER_VAL(x)      (CDR(x))
@@ -177,7 +175,8 @@ static void warning_parenthesis(SCM port)
 
 static void warning_bad_escaped_sequence(SCM port, int c)
 {
-  STk_warning("character %c must not be escaped on line %d of ~S", c, PORT_LINE(port), port);
+  STk_warning("character %c must not be escaped on line %d of ~S", c,
+              PORT_LINE(port), port);
 }
 
 
@@ -1228,37 +1227,6 @@ static SCM read_srfi10(SCM port, SCM l)
 
 
 /*
-<doc EXT read-case-sensitive
- * (read-case-sensitive)
- * (read-case-sensitive value)
- *
- * This parameter object permits to change the default behaviour of
- * the |read| primitive when reading a symbol. If this parameter has
- * a true value a symbol is not converted to a default case when interned.
- * Since R7RS requires that symbol are case insignificant, the default
- * value  of this parameter is |#t|.
- * @lisp
- * (read-case-sensitive)        => |#t|
- * (read-from-string "ABC")     => ABC
- * (read-case-sensitive #f)
- * (read-from-string "ABC")     => abc
- * @end lisp
- * [NOTE]
- * ====
- * *  Default behaviour can be changed for a whole execution
- *    with the |--case-sensitive| or |case-insensitive| options.
- * *  See also syntax for _<<_symbols, special characters>>_ in symbols.
- * ====
-doc>
-*/
-static SCM read_case_sensitive_conv(SCM value)
-{
-  STk_read_case_sensitive = (value != STk_false);
-  return MAKE_BOOLEAN(STk_read_case_sensitive);
-}
-
-
-/*
 <doc EXT keyword-colon-position
  * (keyword-colon-position)
  * (keyword-colon-position value)
@@ -1357,11 +1325,7 @@ static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*
 static SCM sharp_fold_keyword(SCM port, struct read_context _UNUSED(*ctx),
                               const char *word)
 {
-  if (word[1] == 'n')   // word = "!no-fold-case"
-    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-  else              // word = "fold-case"
-    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-
+  STk_port_cs_set(port, MAKE_BOOLEAN((word[1] == 'n'))); // word = "!no-fold-case"
   return NULL;  // NULL since the keyword is not returned
 }
 
@@ -1399,6 +1363,7 @@ DEFINE_PRIMITIVE("%add-sharp-reader", add_sharp_reader, subr2, (SCM ch, SCM proc
   return STk_void;
 }
 
+
 /*===========================================================================* \
  *
  *                      I n i t i a l i z a t i o n
@@ -1425,12 +1390,6 @@ int STk_init_reader(void)
 
   /* Declare SRFI-10 support function */
   ADD_PRIMITIVE(reader_ctor);
-
-  /* Declare parameter read-case-sensitve */
-  STk_make_C_parameter("read-case-sensitive",
-                       MAKE_BOOLEAN(STk_read_case_sensitive),
-                       read_case_sensitive_conv,
-                       STk_STklos_module);
 
   /* Declare parameter keyword-colon-position */
   colon_pos = COLON_BOTH;

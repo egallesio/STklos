@@ -1,4 +1,4 @@
-STklos (version 2.00)
+STklos (version 2.10)
 =====================
 **Erick Gallesio** <eg(at)stklos.net>
 
@@ -74,6 +74,12 @@ The 2.00 version is available. This version is conforming to R^7^RS
 It adds support for 24 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
 support for 122 SRFIs. You can now use the [cURL](https://curl.se/libcurl/)
 library thanks to the new **curl** extension.
+
+**October 2024**
+The 2.10 versions enhances the REPL, the documentation and numerical
+functions. It adds support for 3 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
+support for 125 SRFIs.
+
 
 SRFI Support
 ------------

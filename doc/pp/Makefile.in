@@ -154,7 +154,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -491,7 +490,7 @@ extradoc: pdf
 ../HTML/$(SAMPLE): Resources/mymd-prelude.templ  Resources/mymd-postlude.templ \
                    Resources/pp-demo.md
 	mkdir -p ../HTML
-	(cd Resources; ./build-pp-demo.sh)
+	(cd Resources && ./build-pp-demo.sh)
 
 # ----------------------------------------------------------------------
 ../PDF/$(PDF): tmp-pdf.txt

@@ -20,7 +20,11 @@
 :pdf-style: ../lib/theme/stklos.yml
 :docinfodir: ../lib/theme
 :docinfo: shared
-:nofooter:       // to have reproducible builds
+:idprefix: doc_
+{{If (equal? doc-fmt "html")}}
+:nofooter:     // to have reproducible builds
+{{End}}
+
 
 // Load the general adoc library and the refman specific one
 {{load "../lib/adoc-lib.stk"}}
@@ -87,7 +91,7 @@ Free Documentation License">>.
 {{Include* "biblio.adoc"}}
 
 [appendix]
-[#_idiosync]
+[#doc_idiosync]
 {{Include* "idiosync.adoc"}}
 
 [appendix]

@@ -723,5 +723,53 @@ b|)
         (with-handler (lambda (a) -1)
                       (eval-from-string (format "#p~a" i )))))
 
+;------------------------------------------------------------------
+(test-subsection "case insensitive read")
+
+(test "read-from-string-ci.1"
+      'abc
+      (read-from-string-ci  "AbC"))
+
+(test "read-from-string-ci.2"
+      123
+      (read-from-string-ci "123"))
+
+(test "read-from-string (not ci).1"
+      #f
+      (eq?
+       (string->symbol "AbC")
+       (read-from-string-ci "AbC")))
+
+(test "read-from-string (not ci).2"
+      '|AbC|
+      (read-from-string "AbC"))
+
+(test "read-from-string (not ci).3"
+      #t
+      (eq?
+       (string->symbol "AbC")
+       (read-from-string "AbC")))
+
+(test "read-ci"
+      'abc
+      (with-input-from-string "AbC" (lambda () (read-ci))))
+
+(test "read (not ci)"
+      '|AbC|
+      (with-input-from-string "AbC" (lambda () (read))))
+
+(test "eval-from-string-ci.1"
+      8
+      (eval-from-string-ci "(SqRt 64)"))
+
+(test "eval-from-string-ci.2"
+      "3.14"
+      (with-output-to-string (lambda () (eval-from-string-ci "(DisPlaY 3.14)"))))
+
+
+(test/error "eval-from-string (no ci)"
+            (eval-from-string "(DisPlaY 3.14)"))
+
+
 ;;------------------------------------------------------------------
 (test-section-end)

@@ -299,8 +299,8 @@ static void *store_debug_info(void *p, size_t lb,
     LOCK();
     if (!GC_debugging_started)
         GC_start_debugging_inner();
-    ADD_CALL_CHAIN(p, ra);
     result = GC_store_debug_info_inner(p, (word)lb, s, i);
+    ADD_CALL_CHAIN(p, ra);
     UNLOCK();
     return result;
 }
@@ -574,11 +574,11 @@ STATIC void * GC_debug_generic_malloc(size_t lb, int knd, GC_EXTRA_PARAMS)
   /* case, we need to make sure that all objects have debug headers.    */
   GC_INNER void * GC_debug_generic_malloc_inner(size_t lb, int k)
   {
-    void * result;
+    void *base, *result;
 
     GC_ASSERT(I_HOLD_LOCK());
-    result = GC_generic_malloc_inner(SIZET_SAT_ADD(lb, DEBUG_BYTES), k);
-    if (NULL == result) {
+    base = GC_generic_malloc_inner(SIZET_SAT_ADD(lb, DEBUG_BYTES), k);
+    if (NULL == base) {
         GC_err_printf("GC internal allocation (%lu bytes) returning NULL\n",
                        (unsigned long) lb);
         return(0);
@@ -586,19 +586,20 @@ STATIC void * GC_debug_generic_malloc(size_t lb, int knd, GC_EXTRA_PARAMS)
     if (!GC_debugging_started) {
         GC_start_debugging_inner();
     }
-    ADD_CALL_CHAIN(result, GC_RETURN_ADDR);
-    return (GC_store_debug_info_inner(result, (word)lb, "INTERNAL", 0));
+    result = GC_store_debug_info_inner(base, (word)lb, "INTERNAL", 0);
+    ADD_CALL_CHAIN(base, GC_RETURN_ADDR);
+    return result;
   }
 
   GC_INNER void * GC_debug_generic_malloc_inner_ignore_off_page(size_t lb,
                                                                 int k)
   {
-    void * result;
+    void *base, *result;
 
     GC_ASSERT(I_HOLD_LOCK());
-    result = GC_generic_malloc_inner_ignore_off_page(
+    base = GC_generic_malloc_inner_ignore_off_page(
                                 SIZET_SAT_ADD(lb, DEBUG_BYTES), k);
-    if (NULL == result) {
+    if (NULL == base) {
         GC_err_printf("GC internal allocation (%lu bytes) returning NULL\n",
                        (unsigned long) lb);
         return(0);
@@ -606,8 +607,9 @@ STATIC void * GC_debug_generic_malloc(size_t lb, int knd, GC_EXTRA_PARAMS)
     if (!GC_debugging_started) {
         GC_start_debugging_inner();
     }
-    ADD_CALL_CHAIN(result, GC_RETURN_ADDR);
-    return (GC_store_debug_info_inner(result, (word)lb, "INTERNAL", 0));
+    result = GC_store_debug_info_inner(base, (word)lb, "INTERNAL", 0);
+    ADD_CALL_CHAIN_INNER(base);
+    return result;
   }
 #endif /* DBG_HDRS_ALL */
 
@@ -877,8 +879,8 @@ GC_API void * GC_CALL GC_debug_realloc(void * p, size_t lb, GC_EXTRA_PARAMS)
         break;
 #    endif
       default:
-        result = NULL; /* initialized to prevent warning. */
-        ABORT_RET("GC_debug_realloc: encountered bad kind");
+        result = GC_debug_generic_malloc(lb, hhdr -> hb_obj_kind, OPT_RA s, i);
+        break;
     }
 
     if (result != NULL) {
@@ -973,7 +975,7 @@ STATIC void GC_check_heap_block(struct hblk *hbp, word dummy GC_ATTR_UNUSED)
     } else {
       plim = hbp->hb_body + HBLKSIZE - sz;
     }
-    /* go through all words in block */
+    /* go through all objects in block */
     for (bit_no = 0; (word)p <= (word)plim;
          bit_no += MARK_BIT_OFFSET(sz), p += sz) {
       if (mark_bit_from_hdr(hhdr, bit_no) && GC_HAS_DEBUG_INFO((ptr_t)p)) {

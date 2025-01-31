@@ -1,7 +1,7 @@
 ;;;;
 ;;;; box.stk    -- Vertical and Horizontal GTk Boxes
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@
 ;;;;
 ;;;; Methods for Boxes
 ;;;;
-(define-method container-add! ((cont <gtk-box>) widget
+(define-method container-add! ((cont <gtk-box>) (widget <gtk-widget>)
                                #:key (expand  (slot-ref cont 'expand))
                                      (fill    (slot-ref cont 'fill))
                                      (padding (slot-ref cont 'padding))
@@ -132,7 +132,7 @@
 (define-class <hbox> (<gtk-box>)
   ())
 
-(define-method initialize ((self <hbox>) initargs)
+(define-method initialize-instance ((self <hbox>) initargs)
   (next-method self (append initargs '(#:orientation horizontal))))
 
 
@@ -144,7 +144,7 @@
 (define-class <vbox> (<gtk-box>)
   ())
 
-(define-method initialize ((self <vbox>) initargs)
+(define-method initialize-instance ((self <vbox>) initargs)
   (next-method self (append initargs '(#:orientation vertical))))
 
 

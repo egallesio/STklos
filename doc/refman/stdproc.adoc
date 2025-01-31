@@ -566,6 +566,7 @@ primitives.
 
 ==== Input
 {{insertdoc 'read}}
+{{insertdoc 'read-ci}}
 ((("SRFI-38")))
 {{insertdoc 'read-with-shared-structure}}
 [#readerctor]

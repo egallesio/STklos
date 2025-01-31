@@ -1141,6 +1141,152 @@ We are now able to write a rewriting rule for `not`:
            => 12
 ----
 
+== Syntax
+
+=== Fundamental, non-hygienic macros
+
+STklos has, fundamentally, a single type of macro, which can be created with
+`define-macro`, and has lexical scope.
+
+`src/syntax.c` is where the structure `syntax_obj` is defined, having the fields:
+
+* `name`  -- the name given to the macro when it was created)
+* `expander_src` -- the source code of the expander
+* `expander` -- the compiled expander
+* `module` -- the module in which the macro was created
+
+`lib/compiler.stk` is where the `define-macro` syntax is compiled.
+The argument list obeys the same rules as arguments for procedures,
+because the procedures `define->lambda` and `extended-lambda->lambda`
+are actually used. Basically, the compiler will just check the
+argument list and call `%make-syntax`, which is defined in
+`src/syntax.c`.
+
+But the compiler also deals with the lexical scope discipline of macros:
+there is a section `SYNTAX` in the compiler where two procedures are
+defined:
+
+* `(find-syntax-in-env symb env)` will look into the environment
+     `env`, trying to find the symbol `symb`.
+* `(%macro-expand form env)` will expand the macros in `form`, using
+    the given environment.
+
+Reading the procedure `compile` certainly helps understand how STklos macros are expanded.
+The first part of it is:
+[source,scheme]
+----
+(define (compile expr env epair tail?)
+  (let ((e (if (compiler:source-rewrite) (rewrite-expression expr env) expr)))
+    (cond
+     ;; ---- We have a pair
+     ((pair? e)
+      (let ((first (car e)))
+         (cond
+         ((find-syntax-in-env first env)
+          ;; ---- Macro call
+          (compile (%macro-expand e env) env epair tail?))
+
+         ((find-symbol-in-env first env)
+          ;; --- Symbol is in environment => function call
+          (compile-call e env tail?))
+
+         (else
+           ;; ... (rest of the compile procedure)
+----
+
+=== Hygienic macros (`syntax-rules`)
+
+STklos supports `syntax-rules` as per R7RS. A `syntax-rules` definition will be
+translated into a `define-macro`.
+
+* `define-syntax` with `syntax-rules` is in `runtime-macros.stk`, and
+  will just expand the syntax definitin into a `define-macro` whcih
+  uses `find-clause`
+* The code for matching is in the file `lib/mbe.stk` (the name is a
+  reference to the first work on hygienic macros by Eugene Kohlbecker
+  in 1986 -- the title of the work was "Macros by Example", a
+  reference to the template-based idea). The original code by E.
+  Kohlbecker was the starting point for the STklos implementation.
+  The `find-clause` procedure is here:
+
+[source,scheme]
+----
+(define-syntax f
+  (syntax-rules ()
+    ((f a b)   (+ a b))
+    ((f a b c) (* b c))))
+
+(find-clause 'f '(2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))))
+  => (+ 2 3)
+
+(find-clause 'f '(1 2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))))
+  => (* 2 3)
+----
+
+The changes are:
+
+* all the functions reside in the module `MBE`, the only binding which is
+    visible from outside is `define-styntax` (and the fake `let-syntax` and
+    `letrec-syntax`).
+* some functions were added to the `MBE` module, and some functions were split
+* The macro `define-syntax` itself is expanded to a function call which
+    parses all the clauses rather than to a cond which tests all the
+    clauses. This conducts to code which is smaller than the original
+    solution (particularly for syntaxes with a lot of clauses).
+* Symbols which starts with `%%` never appear in the macro expansion
+    (i.e. they are replaced by a gensymed symbol). The example below
+    illustrates the problem. Suppose we have defined
+
+[source,scheme]
+----
+        (define-syntax swap!
+           (syntax-rules ()
+             ((swap! x y)
+              (my-let ((tmp x)) (set! x y) (set! y tmp)))))
+----
+
+    the expansion of `(swap! a b)` would be:
+
+[source,scheme]
+----
+        `(my-let ((tmp a)) (set! a b) (set! b tmp))`
+----
+    which is not hygienic. In this case, two symbols were introduced MY-LET
+    and TMP (with a "let" expansion would be correct, since LET is treated
+    specially by MBE. Here MY-LET must be kept as is whereas TMP must be
+    replaced by a gensymed symbol. Changing TMP by %%TMP in the previous
+    definition yields the following expansion:
+
+[source,scheme]
+----
+        (my-let ((|G156| a)) (set! a b) (set! b |G156|))
+----
+    which is correct.
+
+* Tail patterns are handled as in SRFI-46 (and R7RS). For example:
+
+[source,scheme]
+----
+        (define-syntax last-two
+           (syntax-rules ()
+             ((last-two skip ... x y) '(x y))))
+
+        (last-two 1 2 3 4)  ===>  (3 4)
+----
+    Tail patterns support was done by Vitaly Magerya
+
+* An optional alternative symbol for ellipsis can be specified as per R7RS. For example:
+
+[source,scheme]
+----
+        (define-syntax last-two
+           (syntax-rules *** ()
+             ;; we can swap ... and x here, because ... now is just
+             ;; an identifier:
+             ((last-two skip *** x ...) '(... x))))
+
+        (last-two 1 2 3 4)  ===>  (4 3)
+----
 
 == Garbage collection
 
@@ -1169,3 +1315,65 @@ that are supposed to be just a bignum, but ``look like apointer''. Used
 for strings, numbers etc.
 * `STk_register_finalizer` will register a finalizer function `f`, which
 will be called when the object at `ptr` is collected.
+
+== C variables for conditional compilation
+
+
+These are simple to understand, but we ist them here anyway.
+
+=== Detecting libffi, libgmp, dynamic loading
+
+
+* `libffi`: the `configure` script will set the `HAS_FFI` variable when libffi is available. In
+   `ffi.c`, for example, the code that actually uses `libffi` is guarded by an `ifdef`
+
+[source,c]
+----
+#ifdef HAVE_FFI
+    /* use libffi here */
+#else /* HAVE_FFI */
+static void error_no_ffi(void)
+{
+  STk_error("current system does not support FFI");
+}
+...
+DEFINE_PRIMITIVE("make-callback", make_callback, subr3, (SCM p1, SCM p2, SCM p3))
+{ error_no_ffi(); return STk_void;}
+...
+#endif
+----
+
+
+* `libgmp`: In `number.c`, STklos includes "`gmp.h`". This header file
+   may be provided either by `mini-gmp` or by the full GMP. WHen the
+   `mini-gmp` is used, the variable `__MINI_GMP_H__` is defined, so
+   for example this is tone in `number.c`:
+
+[source,c]
+----
+#ifdef __MINI_GMP_H__
+    /* BEGIN code for compiling WITH MINI GMP (*no* rationals!) */
+    ...
+#else
+    /* BEGIN code for compiling WITH FULL GMP (*with* rationals!) */
+    ...
+#endif /* __MINI_GMP_H__ */
+
+----
+
+* In `dynload.c`, the variable `HAVE_DLOPEN` is used to guard the full contents of the file.
+
+### Statistics gathering
+
+In `vm.c`, code that does statistics gathering is guarded by `STAT_VM`. For example,
+
+[source,c]
+----
+#ifdef STAT_VM
+static int couple_instr[NB_VM_INSTR][NB_VM_INSTR];
+static int cpt_inst[NB_VM_INSTR];
+static double time_inst[NB_VM_INSTR];
+static int collect_stats = 0;
+static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time);
+#endif
+----

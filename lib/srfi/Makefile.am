@@ -143,9 +143,11 @@ SRC_STK   = 1.stk   \
             230.stk \
             232.stk \
             233.stk \
+            234.stk \
             235.stk \
             236.stk \
-            244.stk
+            244.stk \
+            253.stk
 
 SRC_OSTK =  1.ostk   \
             2.ostk   \
@@ -257,9 +259,11 @@ SRC_OSTK =  1.ostk   \
             230.ostk \
             232.ostk \
             233.ostk \
+            234.ostk \
             235.ostk \
             236.ostk \
-            244.ostk
+            244.ostk \
+            253.ostk
 
 
 #
@@ -277,8 +281,8 @@ BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir       = $(DESTDIR)@SCMDIR@/srfi
-srfilibdir    = $(DESTDIR)@EXECDIR@/srfi
+srfidir       = @SCMDIR@/srfi
+srfilibdir    = @EXECDIR@/srfi
 srfi_DATA     = $(SRC_OSTK)
 srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)
@@ -337,6 +341,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
 224.ostk: ../scheme/comparator.ostk
+234.ostk: 1.ostk 11.ostk 26.ostk
 235.ostk: 1.ostk
 
 
@@ -349,63 +354,63 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 238.$(SO): 238-incl.c 238.c
 
 ../streams/derived.ostk:
-	(cd ../streams; $(MAKE) derived.ostk)
+	(cd ../streams && $(MAKE) derived.ostk)
 ../scheme/list.$(SO):
-	(cd ../scheme; $(MAKE) list.$(SO))
+	(cd ../scheme && $(MAKE) list.$(SO))
 ../scheme/charset.ostk:
-	(cd ../scheme; $(MAKE) charset.ostk)
+	(cd ../scheme && $(MAKE) charset.ostk)
 ../scheme/set.ostk:
-	(cd ../scheme; $(MAKE) set.ostk)
+	(cd ../scheme && $(MAKE) set.ostk)
 ../scheme/ilist.$(SO):
-	(cd ../scheme; $(MAKE) ilist.$(SO))
+	(cd ../scheme && $(MAKE) ilist.$(SO))
 ../scheme/list-queue.ostk:
-	(cd ../scheme; $(MAKE) list-queue.ostk)
+	(cd ../scheme && $(MAKE) list-queue.ostk)
 ../scheme/hash-table.ostk:
-	(cd ../scheme; $(MAKE) hash-table.ostk)
+	(cd ../scheme && $(MAKE) hash-table.ostk)
 ../scheme/lseq.ostk:
-	(cd ../scheme; $(MAKE) lseq.ostk)
+	(cd ../scheme && $(MAKE) lseq.ostk)
 ../scheme/sort.$(SO):
-	(cd ../scheme; $(MAKE) sort.$(SO))
+	(cd ../scheme && $(MAKE) sort.$(SO))
 ../scheme/generator.ostk:
-	(cd ../scheme; $(MAKE) generator.ostk)
+	(cd ../scheme && $(MAKE) generator.ostk)
 ../scheme/ideque.ostk:
-	(cd ../scheme; $(MAKE) ideque.ostk)
+	(cd ../scheme && $(MAKE) ideque.ostk)
 ../scheme/division.ostk:
-	(cd ../scheme; $(MAKE) division.ostk)
+	(cd ../scheme && $(MAKE) division.ostk)
 ../scheme/flonum.$(SO):
-	(cd ../scheme; $(MAKE) division.$(SO))
+	(cd ../scheme && $(MAKE) division.$(SO))
 ../scheme/bitwise.$(SO):
-	(cd ../scheme; $(MAKE) bitwise.ostk)
+	(cd ../scheme && $(MAKE) bitwise.ostk)
 ../scheme/vector/@.ostk:
-	(cd ../scheme/vector; $(MAKE) @.ostk)
+	(cd ../scheme/vector && $(MAKE) @.ostk)
 ../scheme/regex.ostk:
-	(cd ../scheme;  $(MAKE) regexp.ostk)
+	(cd ../scheme && $(MAKE) regexp.ostk)
 
 ../stklos/itrie.$(SO):
-	(cd ../stklos; $(MAKE) itrie.$(SO))
+	(cd ../stklos && $(MAKE) itrie.$(SO))
 #======================================================================
 
 install-data-hook:
-	(cd 160; $(MAKE) install)
+	(cd 160 && $(MAKE) install)
 
 install-sources:
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; $(MAKE) install-sources)\
+	   (cd $$i && $(MAKE) install-sources)\
 	done
-	cp $(srfi_sources) $(srfidir)
+	install $(srfi_sources) $(DESTDIR)$(srfidir)
 
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
-	(cd 160; $(MAKE) clean)
+	(cd 160 && $(MAKE) clean)
 
 distclean: clean
 	/bin/rm -f Makefile
-	(cd 160; $(MAKE) distclean)
+	(cd 160 && $(MAKE) distclean)
 
 uninstall-hook:
-	(cd 160; $(MAKE) uninstall)
-	(cd $(srfidir); rm -f $(srfi_sources))
-	rmdir $(srfidir) || true
+	(cd 160 && $(MAKE) uninstall)
+	(cd $(DESTDIR)$(srfidir) && rm -f $(srfi_sources))
+	rmdir $(DESTDIR)$(srfidir) || true
 
 doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -f ../../doc/extract-doc \

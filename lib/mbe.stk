@@ -731,12 +731,16 @@ doc>
 ;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
 ;;
 ;; =>
-;; (%let-syntax ((f (lambda args
-;;                    (%find-macro-clause 'f
-;;                                        args
-;;                                        '(f)
-;;                                        '(((f) 10)) '===))))
-;;              (f))
+;;     (%let-syntax
+;;       ((f (lambda args
+;;             ((%%symbol-value 'find-clause 'MBE)
+;;              'f
+;;              args
+;;              '(f)
+;;              '(((f) 10))
+;;              '===))))
+;;       (f))
+;;
 (define-macro (let-syntax bindings . body)
   `(%let-syntax
     ,(map (lambda (x)
@@ -753,34 +757,20 @@ doc>
                                     (cdddr syn-rules)
                                     (cddr syn-rules))))
                   `(,macro-name (lambda args
-                                  (%find-macro-clause ',macro-name
-                                                      args
-                                                      ',keywords
-                                                      ',clauses
-                                                      ',ellipsis)))))))
+                                  ((%%symbol-value 'find-clause 'MBE)
+                                           ',macro-name
+                                           args
+                                           ',keywords
+                                           ',clauses
+                                           ',ellipsis)))))))
           bindings)
     ,@body))
 
+;; NOTE:
+;;    define-syntax is defined in the file lib/runtime-macros.stk
+;;
+
 )       ;;; end of module definition of MBE
-
-
-(define %find-macro-clause (symbol-value 'find-clause (find-module 'MBE)))
-
-
-
-
-
-
-;;MAC (define-macro (define-syntax macro-name syn-rules)
-;;MAC   (if (or (not (pair? syn-rules))
-;;MAC           (not (eq? (car syn-rules) 'syntax-rules)))
-;;MAC     (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
-;;MAC
-;;MAC     (let ((keywords    (cons macro-name (cadr syn-rules)))
-;;MAC           (clauses     (cddr syn-rules))
-;;MAC           (find-clause (symbol-value 'find-clause (find-module 'MBE))))
-;;MAC       `(define-macro (,macro-name . args)
-;;MAC          (%find-macro-clause ',macro-name args ',keywords ',clauses)))))
 
 
 #|

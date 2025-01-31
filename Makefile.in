@@ -255,7 +255,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -894,15 +893,15 @@ SUPPORTED-SRFIS: lib/srfis.stk
 	mv -f  $@.tmp $@
 
 clean-am:
-	for i in doc tests utils extensions;do (cd $$i; $(MAKE) clean) ;done
+	for i in doc tests utils extensions;do (cd $$i && $(MAKE) clean) ;done
 	rm -f SUPPORTED-SRFIS.tmp
 
 distclean: clean
-	for i in $(SUBDIRS) extensions ;do (cd $$i; $(MAKE) distclean); done
+	for i in $(SUBDIRS) extensions ;do (cd $$i && $(MAKE) distclean); done
 	rm -rf Makefile config.log config.status autom4te.cache
 
 test tests: all
-	(cd tests; $(MAKE) test)
+	(cd tests && $(MAKE) test)
 
 uninstall-hook:
 	rmdir $(schemeprefix) $(schemelibprefix) || true

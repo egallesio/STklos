@@ -218,7 +218,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -389,8 +388,8 @@ BASEDIR = ../../..
 SOURCES = $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
-srfidir = $(DESTDIR)@SCMDIR@/srfi/160
-srfilibdir = $(DESTDIR)@EXECDIR@/srfi/160
+srfidir = @SCMDIR@/srfi/160
+srfilibdir = @EXECDIR@/srfi/160
 srfi_DATA = $(SRC_OSTK)
 srfilib_DATA = $(SRC_SHOBJ)
 srfi_sources = $(SRC_STK)
@@ -700,49 +699,49 @@ c64.ostk:  ../../scheme/vector/c64.ostk
 c128.ostk: ../../scheme/vector/c128.ostk
 
 ../../scheme/vector/base.$(SO):
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s8.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u8.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s16.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u16.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/s64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/u64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/f32.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/f64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/c64.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 ../../scheme/vector/c128.ostk:
-	(cd ../../scheme/vector; $(MAKE) $@)
+	(cd ../../scheme/vector && $(MAKE) $@)
 
 #======================================================================
 
 install-sources:
-	mkdir -p $(srfidir)
-	cp $(srfi_sources) $(srfidir)
+	mkdir -p $(DESTDIR)$(srfidir)
+	cp $(srfi_sources) $(DESTDIR)$(srfidir)
 
 clean:
 	rm -f $(srfi_OBJS) *-incl.c *~
@@ -751,7 +750,7 @@ distclean: clean
 	/bin/rm -f Makefile
 
 uninstall-hook:
-	(cd $(srfidir); rm -f $(srfi_sources) )
+	(cd $(PREFIX)$(srfidir) && rm -f $(srfi_sources) ) || true
 	rmdir $(srfidir) || true
 
 # Local Variables:

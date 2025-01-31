@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
 <meta name="author" content="Erick Gallesio">
-<title>STklos Reference Manual : (version 2.00)</title>
+<title>STklos Reference Manual : (version 2.10)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -661,7 +661,7 @@ pre.rouge {
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>STklos Reference Manual : (version 2.00)</h1>
+<h1>STklos Reference Manual : (version 2.10)</h1>
 <div class="details">
 <span id="author" class="author">Erick Gallesio</span><br>
 <span id="email" class="email"><a href="mailto:eg@stklos.net">eg@stklos.net</a></span><br>
@@ -669,156 +669,156 @@ pre.rouge {
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_preface">Preface</a>
+<li><a href="#doc_preface">Preface</a>
 <ul class="sectlevel2">
-<li><a href="#_licences">Licences</a></li>
+<li><a href="#doc_licences">Licences</a></li>
 </ul>
 </li>
-<li><a href="#_introduction">1. Introduction</a>
+<li><a href="#doc_introduction">1. Introduction</a>
 <ul class="sectlevel2">
-<li><a href="#_overview_of_stklos">1.1. Overview of <strong><em>STklos</em></strong></a></li>
-<li><a href="#_lexical_conventions">1.2. Lexical Conventions</a></li>
+<li><a href="#doc_overview_of_stklos">1.1. Overview of <strong><em>STklos</em></strong></a></li>
+<li><a href="#doc_lexical_conventions">1.2. Lexical Conventions</a></li>
 </ul>
 </li>
-<li><a href="#_expressions">2. Expressions</a>
+<li><a href="#doc_expressions">2. Expressions</a>
 <ul class="sectlevel2">
-<li><a href="#_literal_expressions">2.1. Literal expressions</a></li>
-<li><a href="#_procedures">2.2. Procedures</a></li>
-<li><a href="#_assignments">2.3. Assignments</a></li>
-<li><a href="#_conditionals">2.4. Conditionals</a></li>
-<li><a href="#_binding_constructs">2.5. Binding Constructs</a></li>
-<li><a href="#_sequencing">2.6. Sequencing</a></li>
-<li><a href="#_iterations">2.7. Iterations</a></li>
-<li><a href="#_delayed_evaluation">2.8. Delayed Evaluation</a></li>
-<li><a href="#_quasiquotation">2.9. Quasiquotation</a></li>
-<li><a href="#_macros">2.10. Macros</a></li>
+<li><a href="#doc_literal_expressions">2.1. Literal expressions</a></li>
+<li><a href="#doc_procedures">2.2. Procedures</a></li>
+<li><a href="#doc_assignments">2.3. Assignments</a></li>
+<li><a href="#doc_conditionals">2.4. Conditionals</a></li>
+<li><a href="#doc_binding_constructs">2.5. Binding Constructs</a></li>
+<li><a href="#doc_sequencing">2.6. Sequencing</a></li>
+<li><a href="#doc_iterations">2.7. Iterations</a></li>
+<li><a href="#doc_delayed_evaluation">2.8. Delayed Evaluation</a></li>
+<li><a href="#doc_quasiquotation">2.9. Quasiquotation</a></li>
+<li><a href="#doc_macros">2.10. Macros</a></li>
 </ul>
 </li>
-<li><a href="#_program_structure">3. Program structure</a>
+<li><a href="#doc_program_structure">3. Program structure</a>
 <ul class="sectlevel2">
-<li><a href="#_modules">3.1. Modules</a></li>
-<li><a href="#_libraries">3.2. Libraries</a></li>
-<li><a href="#_variables_and_constants">3.3. Variables and Constants</a></li>
+<li><a href="#doc_modules">3.1. Modules</a></li>
+<li><a href="#doc_libraries">3.2. Libraries</a></li>
+<li><a href="#doc_variables_and_constants">3.3. Variables and Constants</a></li>
 </ul>
 </li>
-<li><a href="#_standard_procedures">4. Standard Procedures</a>
+<li><a href="#doc_standard_procedures">4. Standard Procedures</a>
 <ul class="sectlevel2">
-<li><a href="#_equivalence_predicates">4.1. Equivalence predicates</a></li>
-<li><a href="#_numbers">4.2. Numbers</a></li>
-<li><a href="#_booleans">4.3. Booleans</a></li>
-<li><a href="#_pairs_and_lists">4.4. Pairs and lists</a></li>
-<li><a href="#_symbols">4.5. Symbols</a></li>
-<li><a href="#_characters">4.6. Characters</a></li>
-<li><a href="#_strings">4.7. Strings</a></li>
-<li><a href="#_vectors">4.8. Vectors</a></li>
-<li><a href="#_structures">4.9. Structures</a></li>
-<li><a href="#_bytevectors">4.10. Bytevectors</a></li>
-<li><a href="#_control_features">4.11. Control features</a></li>
-<li><a href="#_input_and_output">4.12. Input and Output</a></li>
-<li><a href="#_system_interface">4.13. System interface</a></li>
-<li><a href="#_keywords">4.14. Keywords</a></li>
-<li><a href="#_hash_tables">4.15. Hash Tables</a></li>
-<li><a href="#_dates_and_times">4.16. Dates and Times</a></li>
-<li><a href="#_boxes">4.17. Boxes</a></li>
-<li><a href="#_processes">4.18. Processes</a></li>
-<li><a href="#_sockets">4.19. Sockets</a></li>
-<li><a href="#_signals">4.20. Signals</a></li>
-<li><a href="#_parameter_objects">4.21. Parameter Objects</a></li>
-<li><a href="#_misc">4.22. Misc</a></li>
+<li><a href="#doc_equivalence_predicates">4.1. Equivalence predicates</a></li>
+<li><a href="#doc_numbers">4.2. Numbers</a></li>
+<li><a href="#doc_booleans">4.3. Booleans</a></li>
+<li><a href="#doc_pairs_and_lists">4.4. Pairs and lists</a></li>
+<li><a href="#doc_symbols">4.5. Symbols</a></li>
+<li><a href="#doc_characters">4.6. Characters</a></li>
+<li><a href="#doc_strings">4.7. Strings</a></li>
+<li><a href="#doc_vectors">4.8. Vectors</a></li>
+<li><a href="#doc_structures">4.9. Structures</a></li>
+<li><a href="#doc_bytevectors">4.10. Bytevectors</a></li>
+<li><a href="#doc_control_features">4.11. Control features</a></li>
+<li><a href="#doc_input_and_output">4.12. Input and Output</a></li>
+<li><a href="#doc_system_interface">4.13. System interface</a></li>
+<li><a href="#doc_keywords">4.14. Keywords</a></li>
+<li><a href="#doc_hash_tables">4.15. Hash Tables</a></li>
+<li><a href="#doc_dates_and_times">4.16. Dates and Times</a></li>
+<li><a href="#doc_boxes">4.17. Boxes</a></li>
+<li><a href="#doc_processes">4.18. Processes</a></li>
+<li><a href="#doc_sockets">4.19. Sockets</a></li>
+<li><a href="#doc_signals">4.20. Signals</a></li>
+<li><a href="#doc_parameter_objects">4.21. Parameter Objects</a></li>
+<li><a href="#doc_misc">4.22. Misc</a></li>
 </ul>
 </li>
-<li><a href="#_regular_expressions">5. Regular Expressions</a>
+<li><a href="#doc_regular_expressions">5. Regular Expressions</a>
 <ul class="sectlevel2">
-<li><a href="#_backslash">5.1. Backslash</a></li>
-<li><a href="#_circumflex_and_dollar">5.2. Circumflex and Dollar</a></li>
-<li><a href="#_full_stop_period_dot">5.3. Full Stop (period, dot)</a></li>
-<li><a href="#_square_brackets">5.4. Square Brackets</a></li>
-<li><a href="#_posix_character_classes">5.5. POSIX character classes</a></li>
-<li><a href="#_vertical_bar">5.6. Vertical Bar</a></li>
-<li><a href="#_internal_option_setting">5.7. Internal Option Setting</a></li>
-<li><a href="#_subpatterns">5.8. Subpatterns</a></li>
-<li><a href="#_named_subpatterns">5.9. Named Subpatterns</a></li>
-<li><a href="#_repetition">5.10. Repetition</a></li>
-<li><a href="#_atomic_grouping_and_possessive_quantifiers">5.11. Atomic Grouping And Possessive Quantifiers</a></li>
-<li><a href="#_back_references">5.12. Back References</a></li>
-<li><a href="#_assertions">5.13. Assertions</a></li>
-<li><a href="#_conditional_subpatterns">5.14. Conditional Subpatterns</a></li>
-<li><a href="#_comments_2">5.15. Comments</a></li>
-<li><a href="#_subpatterns_as_subroutines">5.16. Subpatterns As Subroutines</a></li>
-<li><a href="#_regexp_procedures">5.17. Regexp Procedures</a></li>
+<li><a href="#doc_backslash">5.1. Backslash</a></li>
+<li><a href="#doc_circumflex_and_dollar">5.2. Circumflex and Dollar</a></li>
+<li><a href="#doc_full_stop_period_dot">5.3. Full Stop (period, dot)</a></li>
+<li><a href="#doc_square_brackets">5.4. Square Brackets</a></li>
+<li><a href="#doc_posix_character_classes">5.5. POSIX character classes</a></li>
+<li><a href="#doc_vertical_bar">5.6. Vertical Bar</a></li>
+<li><a href="#doc_internal_option_setting">5.7. Internal Option Setting</a></li>
+<li><a href="#doc_subpatterns">5.8. Subpatterns</a></li>
+<li><a href="#doc_named_subpatterns">5.9. Named Subpatterns</a></li>
+<li><a href="#doc_repetition">5.10. Repetition</a></li>
+<li><a href="#doc_atomic_grouping_and_possessive_quantifiers">5.11. Atomic Grouping And Possessive Quantifiers</a></li>
+<li><a href="#doc_back_references">5.12. Back References</a></li>
+<li><a href="#doc_assertions">5.13. Assertions</a></li>
+<li><a href="#doc_conditional_subpatterns">5.14. Conditional Subpatterns</a></li>
+<li><a href="#doc_comments_2">5.15. Comments</a></li>
+<li><a href="#doc_subpatterns_as_subroutines">5.16. Subpatterns As Subroutines</a></li>
+<li><a href="#doc_regexp_procedures">5.17. Regexp Procedures</a></li>
 </ul>
 </li>
-<li><a href="#_pattern_matching">6. Pattern Matching</a>
+<li><a href="#doc_pattern_matching">6. Pattern Matching</a>
 <ul class="sectlevel2">
-<li><a href="#_the_pattern_language">6.1. The Pattern Language</a></li>
-<li><a href="#_stklos_pattern_matching_facilities">6.2. <strong><em>STklos</em></strong> Pattern Matching Facilities</a></li>
+<li><a href="#doc_the_pattern_language">6.1. The Pattern Language</a></li>
+<li><a href="#doc_stklos_pattern_matching_facilities">6.2. <strong><em>STklos</em></strong> Pattern Matching Facilities</a></li>
 </ul>
 </li>
-<li><a href="#_exceptions_and_conditions">7. Exceptions and Conditions</a>
+<li><a href="#doc_exceptions_and_conditions">7. Exceptions and Conditions</a>
 <ul class="sectlevel2">
-<li><a href="#_exceptions">7.1. Exceptions</a></li>
-<li><a href="#_conditions">7.2. Conditions</a></li>
-<li><a href="#_predefined_conditions">7.3. Predefined Conditions</a></li>
+<li><a href="#doc_exceptions">7.1. Exceptions</a></li>
+<li><a href="#doc_conditions">7.2. Conditions</a></li>
+<li><a href="#doc_predefined_conditions">7.3. Predefined Conditions</a></li>
 </ul>
 </li>
-<li><a href="#_stklos_object_system">8. STklos Object System</a>
+<li><a href="#doc_stklos_object_system">8. STklos Object System</a>
 <ul class="sectlevel2">
-<li><a href="#_introduction_2">8.1. Introduction</a></li>
-<li><a href="#_object_system_tutorial">8.2. Object System Tutorial</a></li>
-<li><a href="#_object_system_main_functions_and_syntaxes">8.3. Object System Main Functions and Syntaxes</a></li>
+<li><a href="#doc_introduction_2">8.1. Introduction</a></li>
+<li><a href="#doc_object_system_tutorial">8.2. Object System Tutorial</a></li>
+<li><a href="#doc_object_system_main_functions_and_syntaxes">8.3. Object System Main Functions and Syntaxes</a></li>
 </ul>
 </li>
-<li><a href="#_threads_mutexes_and_condition_variables">9. Threads, Mutexes and Condition Variables</a>
+<li><a href="#doc_threads_mutexes_and_condition_variables">9. Threads, Mutexes and Condition Variables</a>
 <ul class="sectlevel2">
-<li><a href="#_threads">9.1. Threads</a></li>
-<li><a href="#_mutexes">9.2. Mutexes</a></li>
-<li><a href="#_condition_variables">9.3. Condition Variables</a></li>
-<li><a href="#_conditions_2">9.4. Conditions</a></li>
+<li><a href="#doc_threads">9.1. Threads</a></li>
+<li><a href="#doc_mutexes">9.2. Mutexes</a></li>
+<li><a href="#doc_condition_variables">9.3. Condition Variables</a></li>
+<li><a href="#doc_conditions_2">9.4. Conditions</a></li>
 </ul>
 </li>
-<li><a href="#_stklos_customization">10. STklos Customization</a>
+<li><a href="#doc_stklos_customization">10. STklos Customization</a>
 <ul class="sectlevel2">
-<li><a href="#_parameter_objects_2">10.1. Parameter Objects</a></li>
-<li><a href="#_environment_variables">10.2. Environment variables</a></li>
-<li><a href="#_repl">10.3. REPL</a></li>
+<li><a href="#doc_parameter_objects_2">10.1. Parameter Objects</a></li>
+<li><a href="#doc_environment_variables">10.2. Environment variables</a></li>
+<li><a href="#doc_repl">10.3. REPL</a></li>
 </ul>
 </li>
-<li><a href="#_foreign_function_interface">11. Foreign Function Interface</a>
+<li><a href="#doc_foreign_function_interface">11. Foreign Function Interface</a>
 <ul class="sectlevel2">
-<li><a href="#_external_functions">11.1. External functions</a></li>
-<li><a href="#_c_pointers">11.2. C pointers</a></li>
+<li><a href="#doc_external_functions">11.1. External functions</a></li>
+<li><a href="#doc_c_pointers">11.2. C pointers</a></li>
 </ul>
 </li>
-<li><a href="#_using_the_slib_package">12. Using the SLIB package</a></li>
-<li><a href="#_srfis">13. SRFIs</a>
+<li><a href="#doc_using_the_slib_package">12. Using the SLIB package</a></li>
+<li><a href="#doc_srfis">13. SRFIs</a>
 <ul class="sectlevel2">
-<li><a href="#_supported_srfis">13.1. Supported SRFIs</a></li>
-<li><a href="#_using_a_srfi">13.2. Using a SRFI</a></li>
-<li><a href="#_misc_information">13.3. Misc. Information</a></li>
+<li><a href="#doc_supported_srfis">13.1. Supported SRFIs</a></li>
+<li><a href="#doc_using_a_srfi">13.2. Using a SRFI</a></li>
+<li><a href="#doc_misc_information">13.3. Misc. Information</a></li>
 </ul>
 </li>
-<li><a href="#_bibliography">Bibliography</a></li>
-<li><a href="#_idiosync">Appendix A: STklos Idiosyncrasies</a>
+<li><a href="#doc_bibliography">Bibliography</a></li>
+<li><a href="#doc_idiosync">Appendix A: STklos Idiosyncrasies</a>
 <ul class="sectlevel2">
-<li><a href="#_stklos_libraries">A.1. STklos libraries</a></li>
-<li><a href="#_stklos_compiler">A.2. STklos compiler</a></li>
+<li><a href="#doc_stklos_libraries">A.1. STklos libraries</a></li>
+<li><a href="#doc_stklos_compiler">A.2. STklos compiler</a></li>
 </ul>
 </li>
 <li><a href="#FDL">Appendix B: GNU Free Documentation License</a>
 <ul class="sectlevel2">
-<li><a href="#_preamble">B.1. PREAMBLE</a></li>
-<li><a href="#_applicability_and_definitions">B.2. APPLICABILITY AND DEFINITIONS</a></li>
-<li><a href="#_verbatim_copying">B.3. VERBATIM COPYING</a></li>
-<li><a href="#_copying_in_quantity">B.4. COPYING IN QUANTITY</a></li>
-<li><a href="#_modifications">B.5. MODIFICATIONS</a></li>
-<li><a href="#_combining_documents">B.6. COMBINING DOCUMENTS</a></li>
-<li><a href="#_collections_of_documents">B.7. COLLECTIONS OF DOCUMENTS</a></li>
-<li><a href="#_aggregation_with_independent_works">B.8. AGGREGATION WITH INDEPENDENT WORKS</a></li>
-<li><a href="#_translation">B.9. TRANSLATION</a></li>
-<li><a href="#_termination">B.10. TERMINATION</a></li>
-<li><a href="#_future_revisions_of_this_license">B.11. FUTURE REVISIONS OF THIS LICENSE</a></li>
-<li><a href="#_relicensing">B.12. RELICENSING</a></li>
-<li><a href="#_addendum_how_to_use_this_license_for_your_documents">B.13. ADDENDUM: How to use this License for your documents</a></li>
+<li><a href="#doc_preamble">B.1. PREAMBLE</a></li>
+<li><a href="#doc_applicability_and_definitions">B.2. APPLICABILITY AND DEFINITIONS</a></li>
+<li><a href="#doc_verbatim_copying">B.3. VERBATIM COPYING</a></li>
+<li><a href="#doc_copying_in_quantity">B.4. COPYING IN QUANTITY</a></li>
+<li><a href="#doc_modifications">B.5. MODIFICATIONS</a></li>
+<li><a href="#doc_combining_documents">B.6. COMBINING DOCUMENTS</a></li>
+<li><a href="#doc_collections_of_documents">B.7. COLLECTIONS OF DOCUMENTS</a></li>
+<li><a href="#doc_aggregation_with_independent_works">B.8. AGGREGATION WITH INDEPENDENT WORKS</a></li>
+<li><a href="#doc_translation">B.9. TRANSLATION</a></li>
+<li><a href="#doc_termination">B.10. TERMINATION</a></li>
+<li><a href="#doc_future_revisions_of_this_license">B.11. FUTURE REVISIONS OF THIS LICENSE</a></li>
+<li><a href="#doc_relicensing">B.12. RELICENSING</a></li>
+<li><a href="#doc_addendum_how_to_use_this_license_for_your_documents">B.13. ADDENDUM: How to use this License for your documents</a></li>
 </ul>
 </li>
 </ul>
@@ -826,11 +826,11 @@ pre.rouge {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_preface">Preface</h2>
+<h2 id="doc_preface">Preface</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This document provides a complete list of procedures and special forms
-implemented in version <strong>2.00</strong> of <strong><em>STklos</em></strong>. Originally, the
+implemented in version <strong>2.10</strong> of <strong><em>STklos</em></strong>. Originally, the
 language implemented by <strong><em>STklos</em></strong> was (nearly) compliant with the
 language described in the Revised<sup>5</sup> Report on the Algorithmic
 Language Scheme (aka R<sup>5</sup>RS) <a href="#R5RS">[R5RS]</a>. The fist public release of
@@ -848,7 +848,7 @@ a set of <em>standard</em> libraries.</p>
 these reports, or if it is a <strong><em>STklos</em></strong> extension.</p>
 </div>
 <div class="sect2">
-<h3 id="_licences">Licences</h3>
+<h3 id="doc_licences">Licences</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -884,10 +884,10 @@ Free Documentation License"</a>.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_introduction">1. Introduction</h2>
+<h2 id="doc_introduction">1. Introduction</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_overview_of_stklos">1.1. Overview of <strong><em>STklos</em></strong></h3>
+<h3 id="doc_overview_of_stklos">1.1. Overview of <strong><em>STklos</em></strong></h3>
 <div class="paragraph">
 <p>
 
@@ -923,9 +923,9 @@ identical in every points, share the same philosophy.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_lexical_conventions">1.2. Lexical Conventions</h3>
+<h3 id="doc_lexical_conventions">1.2. Lexical Conventions</h3>
 <div class="sect3">
-<h4 id="_identifiers">1.2.1. Identifiers</h4>
+<h4 id="doc_identifiers">1.2.1. Identifiers</h4>
 <div class="paragraph">
 <p>
 
@@ -939,7 +939,7 @@ In <strong><em>STklos</em></strong>, by default, identifiers which start (or end
 <code>bar:</code> are <strong><em>STklos</em></strong> keywords, but <code>not:key</code> is not a
 keyword. Alternatively, to be compatible with other Scheme implementations,
 the notation <code>#:foo</code> is also available to denote the keyword of name
-<code>foo</code>. See <em><a href="#_keywords">Section 4.14</a></em> for more information.</p>
+<code>foo</code>. See <em><a href="#doc_keywords">Section 4.14</a></em> for more information.</p>
 </div>
 <div class="paragraph">
 <p>The reader behavior, concerning keywords, can also be changed by the
@@ -987,7 +987,7 @@ behavior can be changed by</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_comments">1.2.2. Comments</h4>
+<h4 id="doc_comments">1.2.2. Comments</h4>
 <div class="paragraph">
 <p>
 
@@ -1037,7 +1037,7 @@ keywords and optional arguments, to be compatible with DSSSL lambdas
 </div>
 </div>
 <div class="sect3">
-<h4 id="_here_strings">1.2.3. Here Strings</h4>
+<h4 id="doc_here_strings">1.2.3. Here Strings</h4>
 <div class="paragraph">
 <p>
 
@@ -1070,7 +1070,7 @@ No escape sequences are recognized between the starting and terminating lines.</
 </div>
 </div>
 <div class="sect3">
-<h4 id="_other_notations">1.2.4. Other Notations</h4>
+<h4 id="doc_other_notations">1.2.4. Other Notations</h4>
 <div class="paragraph">
 <p>
 
@@ -1088,12 +1088,12 @@ the constants <code>#t</code> and <code>#f</code> as proposed by R<sup>7</sup>RS
 <p><code>[]</code> Brackets are equivalent to
 parentheses. They are used for grouping and to build lists. A
 list opened with a left square bracket must be closed with a
-right square bracket (see <em><a href="#_pairs_and_lists">Section 4.4</a></em>).</p>
+right square bracket (see <em><a href="#doc_pairs_and_lists">Section 4.4</a></em>).</p>
 </li>
 <li>
 <p><code>:</code> a colon at the beginning or the end of
 a symbol introduces a keyword.  Keywords are described in section
-Keywords (see _<a href="#_keywords">Section 4.14</a>).</p>
+Keywords (see <em><a href="#doc_keywords">Section 4.14</a></em>).</p>
 </li>
 <li>
 <p><code>&#35;n=</code> 
@@ -1132,7 +1132,7 @@ expression</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_expressions">2. Expressions</h2>
+<h2 id="doc_expressions">2. Expressions</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>This chapter describes the main forms available in <strong><em>STklos</em></strong>. R<sup>5</sup>RS
@@ -1141,7 +1141,7 @@ very succinctly here for reference. See <a href="#R5RS">[R5RS]</a> for a complet
 description.</p>
 </div>
 <div class="sect2">
-<h3 id="_literal_expressions">2.1. Literal expressions</h3>
+<h3 id="doc_literal_expressions">2.1. Literal expressions</h3>
 <div class="paragraph">
 <p><a id='P_quote'></a>
 </p>
@@ -1189,7 +1189,7 @@ constant vectors. This is not necessary with STklos.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_procedures">2.2. Procedures</h3>
+<h3 id="doc_procedures">2.2. Procedures</h3>
 <div class="paragraph">
 <p>
 
@@ -1434,7 +1434,7 @@ of any <code>&lt;clause&gt;</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_assignments">2.3. Assignments</h3>
+<h3 id="doc_assignments">2.3. Assignments</h3>
 <div class="paragraph">
 <p>
 <a id='P_set!'></a>
@@ -1563,7 +1563,7 @@ assignment, as described in <code>set!</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Furhermore, Parameter Objects (see <em><a href="#_parameter_objects">Section 4.21</a></em>) are
+<p>Furhermore, Parameter Objects (see <em><a href="#doc_parameter_objects">Section 4.21</a></em>) are
 their own setter:</p>
 </div>
 <div class="listingblock">
@@ -1575,7 +1575,7 @@ their own setter:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_conditionals">2.4. Conditionals</h3>
+<h3 id="doc_conditionals">2.4. Conditionals</h3>
 <div class="paragraph">
 <p>
 <a id='P_if'></a>
@@ -1852,7 +1852,7 @@ returned. Otherwise, <code>unless</code> returns <strong><em>void</em></strong>.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_binding_constructs">2.5. Binding Constructs</h3>
+<h3 id="doc_binding_constructs">2.5. Binding Constructs</h3>
 <div class="paragraph">
 <p>
 The three binding constructs <code>let</code>, <code>let*</code>, and
@@ -2229,7 +2229,7 @@ this behavior</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_sequencing">2.6. Sequencing</h3>
+<h3 id="doc_sequencing">2.6. Sequencing</h3>
 <div class="paragraph">
 <p><a id='P_begin'></a>
 </p>
@@ -2313,7 +2313,7 @@ for defining new syntaxes, and should probably not be used as is.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_iterations">2.7. Iterations</h3>
+<h3 id="doc_iterations">2.7. Iterations</h3>
 <div class="paragraph">
 <p><a id='P_do'></a>
 </p>
@@ -2527,7 +2527,7 @@ could be better rewritten in:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_delayed_evaluation">2.8. Delayed Evaluation</h3>
+<h3 id="doc_delayed_evaluation">2.8. Delayed Evaluation</h3>
 <div class="paragraph">
 <p>
 
@@ -2704,7 +2704,7 @@ SRFI-45.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_quasiquotation">2.9. Quasiquotation</h3>
+<h3 id="doc_quasiquotation">2.9. Quasiquotation</h3>
 <div class="paragraph">
 <p>
 
@@ -2777,7 +2777,7 @@ in all respects.  <code>,&lt;expression&gt;</code> is identical to <code>(unquot
 </div>
 </div>
 <div class="sect2">
-<h3 id="_macros">2.10. Macros</h3>
+<h3 id="doc_macros">2.10. Macros</h3>
 <div class="paragraph">
 <p>
 
@@ -3129,7 +3129,7 @@ the macro-expansion, while the expanded form contains macro calls.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_program_structure">3. Program structure</h2>
+<h2 id="doc_program_structure">3. Program structure</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -3157,7 +3157,7 @@ Consequently, <strong><em>STklos</em></strong> offers both systems: modules and 
 (the latter being implemented on top of the former).</p>
 </div>
 <div class="sect2">
-<h3 id="_modules">3.1. Modules</h3>
+<h3 id="doc_modules">3.1. Modules</h3>
 <div class="paragraph">
 <p><a id='P_define-module'></a>
 </p>
@@ -3853,7 +3853,7 @@ is searched in <code>mod</code> and all the modules it imports.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_libraries">3.2. Libraries</h3>
+<h3 id="doc_libraries">3.2. Libraries</h3>
 <div class="paragraph">
 <p>The library concept is defined in R<sup>7</sup>RS ans is supported in <strong><em>STklos</em></strong>.
 As said before, libraries are implemented with modules. Briefly
@@ -4016,7 +4016,7 @@ as a list.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_variables_and_constants">3.3. Variables and Constants</h3>
+<h3 id="doc_variables_and_constants">3.3. Variables and Constants</h3>
 <div class="paragraph">
 <p><a id='P_define'></a>
 </p>
@@ -4164,10 +4164,10 @@ always not mutable.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_standard_procedures">4. Standard Procedures</h2>
+<h2 id="doc_standard_procedures">4. Standard Procedures</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_equivalence_predicates">4.1. Equivalence predicates</h3>
+<h3 id="doc_equivalence_predicates">4.1. Equivalence predicates</h3>
 <div class="paragraph">
 <p>A predicate is a procedure that always returns a boolean value
 (<code>#t</code> or <code>#f</code>). An equivalence predicate is the
@@ -4426,7 +4426,7 @@ A rule of thumb is that objects are generally
 </div>
 </div>
 <div class="sect2">
-<h3 id="_numbers">4.2. Numbers</h3>
+<h3 id="doc_numbers">4.2. Numbers</h3>
 <div class="paragraph">
 <p>R<sup>5</sup>RS description of numbers is quite long and will not be given here.
 STklos support the full number tower as described in R<sup>5</sup>RS; see this
@@ -6058,7 +6058,7 @@ of <code>proc</code>.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_fixnums">4.2.1. Fixnums</h4>
+<h4 id="doc_fixnums">4.2.1. Fixnums</h4>
 <div class="paragraph">
 <p>
 <strong><em>STklos</em></strong> defines small integers as fixnums. Operations on fixnums
@@ -6709,7 +6709,7 @@ field reversed.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_booleans">4.3. Booleans</h3>
+<h3 id="doc_booleans">4.3. Booleans</h3>
 <div class="paragraph">
 <p>
 
@@ -6795,7 +6795,7 @@ quoted in programs.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_pairs_and_lists">4.4. Pairs and lists</h3>
+<h3 id="doc_pairs_and_lists">4.4. Pairs and lists</h3>
 <div class="paragraph">
 <p>
 
@@ -7704,7 +7704,7 @@ of <code>proc</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_symbols">4.5. Symbols</h3>
+<h3 id="doc_symbols">4.5. Symbols</h3>
 <div class="paragraph">
 <p>The STklos reader can read symbols whose names contain special
 characters or letters in the non standard case.  When a symbol is
@@ -7917,7 +7917,7 @@ either a string or a symbol.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_characters">4.6. Characters</h3>
+<h3 id="doc_characters">4.6. Characters</h3>
 <div class="paragraph">
 <p>
 
@@ -8336,7 +8336,7 @@ returns #t), or #f on any other character.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_strings">4.7. Strings</h3>
+<h3 id="doc_strings">4.7. Strings</h3>
 <div class="paragraph">
 <p>
 STklos string constants allow the insertion of arbitrary characters
@@ -9283,7 +9283,7 @@ In R<sup>7</sup>RS, <code>string-foldcase</code> accepts only one argument.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_vectors">4.8. Vectors</h3>
+<h3 id="doc_vectors">4.8. Vectors</h3>
 <div class="paragraph">
 <p>
 Vectors are heterogenous structures whose elements are
@@ -9726,7 +9726,7 @@ two arguments and returns a true value if the first argument is strictly
 </div>
 </div>
 <div class="sect2">
-<h3 id="_structures">4.9. Structures</h3>
+<h3 id="doc_structures">4.9. Structures</h3>
 <div class="paragraph">
 <p>
 A structure type is a record data type composing a number of slots. A
@@ -10109,7 +10109,7 @@ slots of the structure type of <code>s</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_bytevectors">4.10. Bytevectors</h3>
+<h3 id="doc_bytevectors">4.10. Bytevectors</h3>
 <div class="paragraph">
 <p>
 <em>Bytevectors</em> represent blocks of binary data.  They
@@ -10394,7 +10394,7 @@ sequences.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_control_features">4.11. Control features</h3>
+<h3 id="doc_control_features">4.11. Control features</h3>
 <div class="paragraph">
 <p><a id='P_procedure?'></a>
 </p>
@@ -11298,7 +11298,8 @@ evaluated by default (the <strong><em>STklos</em></strong> module). The returned
 is mutable.</p>
 </div>
 <div class="paragraph">
-<p><a id='P_eval-from-string'></a>
+<p><a id='P_eval-from-string'></a><a id='P_eval-from-string-ci'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -11308,7 +11309,9 @@ is mutable.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(eval-from-string str) </strong></code><br>
-<code><strong>(eval-from-string str module) </strong></code><br></p>
+<code><strong>(eval-from-string str module) </strong></code><br>
+<code><strong>(eval-from-string-ci str) </strong></code><br>
+<code><strong>(eval-from-string-ci str module) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -11316,7 +11319,8 @@ is mutable.</p>
 <p>Read an expression from <code>str</code> and evaluates it with <code>eval</code>. If a <code>module</code>
 is passed, the evaluation takes place in the environment of this module.
 Otherwise, the evaluation takes place in the environment returned by
-<code>current-module</code>.</p>
+<code>current-module</code>. The primitive <code>eval-from-string-ci</code> uses the <code>read-ci</code>
+to read the form to evaluate.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -11324,12 +11328,14 @@ Otherwise, the evaluation takes place in the environment returned by
 <span class="p">(</span><span class="nf">define-module</span> <span class="nv">M</span>
   <span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="mi">100</span><span class="p">))</span>
 <span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(+ x x)"</span><span class="p">)</span>                   <span class="nv">=&gt;</span> <span class="mi">20</span>
-<span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(+ x x)"</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'M</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="mi">200</span></code></pre>
+<span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(+ x x)"</span> <span class="p">(</span><span class="nf">find-module</span> <span class="ss">'M</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="mi">200</span>
+<span class="p">(</span><span class="nf">eval-from-string</span> <span class="s">"(cons 'A 'B)"</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">A</span> <span class="o">.</span> <span class="nv">B</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">eval-from-string-ci</span> <span class="s">"(cons 'A 'B)"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">a</span> <span class="o">.</span> <span class="nv">b</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_input_and_output">4.12. Input and Output</h3>
+<h3 id="doc_input_and_output">4.12. Input and Output</h3>
 <div class="paragraph">
 <p>
 
@@ -11365,7 +11371,7 @@ primitives.</p>
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_ports">4.12.1. Ports</h4>
+<h4 id="doc_ports">4.12.1. Ports</h4>
 <div class="paragraph">
 <p><a id='P_call-with-port'></a>
 </p>
@@ -11448,7 +11454,7 @@ or <code>call-with-output-file</code>.
 </div>
 </div>
 <div class="paragraph">
-<p>behaves as <code>call-with-input-file</code> except that the port passed to <code>proc</code>
+<p>behaves as <code>call-with1-input-file</code> except that the port passed to <code>proc</code>
 is the sting port obtained from <code>port</code>.</p>
 </div>
 <div class="listingblock">
@@ -12656,7 +12662,7 @@ stream), or <code>#f</code> if it is not.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_input">4.12.2. Input</h4>
+<h4 id="doc_input">4.12.2. Input</h4>
 <div class="paragraph">
 <p><a id='P_read'></a>
 </p>
@@ -12694,6 +12700,25 @@ returned by <code>current-input-port</code>. It is an error to read from a close
 <p><strong><em>STklos</em></strong> <code>read</code> supports the <strong><a href="http://srfi.schemers.org/srfi-10/srfi-10.html">SRFI-10</a></strong> <code>#,()</code> form that can be used
 to denote values that do not have a convenient printed representation. See
 the SRFI document for more information.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_read-ci'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(read-ci) </strong></code><br>
+<code><strong>(read-ci port) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Read-ci</code> result is identical to <code>read</code> except that symbols are always
+read as case insensitive.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -13197,7 +13222,8 @@ this procedure is ignored.
 </table>
 </div>
 <div class="paragraph">
-<p><a id='P_read-from-string'></a>
+<p><a id='P_read-from-string'></a><a id='P_read-from-string-ci'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -13212,12 +13238,15 @@ this procedure is ignored.
 </div>
 <div class="paragraph">
 <p>Performs a read from the given <code>str</code>. If <code>str</code> is the empty string,
-an end of file object is returned.</p>
+an end of file object is returned. <code>Read-from-string-ci</code> uses <code>read-ci</code>
+to read.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"123 456"</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="mi">123</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">""</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">an</span> <span class="nv">eof</span> <span class="nv">object</span></code></pre>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">""</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">an</span> <span class="nv">eof</span> <span class="nv">object</span>
+<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">ABC</span>
+<span class="p">(</span><span class="nf">read-from-string-ci</span> <span class="s">"ABC"</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="nv">abc</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -13255,7 +13284,7 @@ file <code>"foo"</code> is formed of two lines which contains respectively the n
 </div>
 </div>
 <div class="sect3">
-<h4 id="_output">4.12.3. Output</h4>
+<h4 id="doc_output">4.12.3. Output</h4>
 <div class="paragraph">
 <p><a id='P_write'></a>
 </p>
@@ -13300,7 +13329,7 @@ which case it defaults to the value returned by <code>current-output-port</code>
 main difference with the <code>write</code> procedure is that <code>write*</code>
 handles data structures with cycles. Circular structure written by
 this procedure use the <code>"&#35;n="</code>)) and  <code>"&#35;n&#35;"</code>))
-notations (see <a href="#_other_notations">Section 1.2.4</a>).</p>
+notations (see <em><a href="#doc_other_notations">Section 1.2.4</a></em>).</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -13803,7 +13832,7 @@ flushes the characters printed).</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_system_interface">4.13. System interface</h3>
+<h3 id="doc_system_interface">4.13. System interface</h3>
 <div class="paragraph">
 <p>The <strong><em>STklos</em></strong> system interface offers all the functions defined in
 R<sup>7</sup>RS. Note, that the base implementation provides also a subset of the
@@ -13815,7 +13844,7 @@ other functions it defines can be done by requiring it, as the other SRFIs
 that STklos supports.</p>
 </div>
 <div class="sect3">
-<h4 id="_loading_code">4.13.1. Loading code</h4>
+<h4 id="doc_loading_code">4.13.1. Loading code</h4>
 <div class="paragraph">
 <p></p>
 </div>
@@ -13824,12 +13853,13 @@ that STklos supports.</p>
 </p>
 </div>
 <div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+<p><span class="rmargin small silver">R<sup>5</sup>RS / R<sup>7</sup>RS procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(load filename) </strong></code><br></p>
+<p><code><strong>(load filename) </strong></code><br>
+<code><strong>(load filename env) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -13843,9 +13873,28 @@ shared objects). The loading of object files is not available on
 all architectures. The value returned by <code>load</code> is <strong><em>void</em></strong>.</p>
 </div>
 <div class="paragraph">
+<p>The optional parameter <code>env</code> may be an environment specifier (as defined by
+R<sup>7</sup>RS) or a module. When <code>env</code> is specified, the loaded code is evaluated
+(or run) in the environment given by <code>env</code>. If omitted,
+<code>(interaction-environment)</code> is assumed. When <code>env</code> is specified as a module,
+it is mutable.</p>
+</div>
+<div class="paragraph">
 <p>If the file whose name is <code>filename</code> cannot be located, <code>load</code> will try
 to find it in one of the directories given by <code>"load-path"</code>
 with the suffixes given by <code>"load-suffixes"</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>5</sup>RS defines only the one parameter version of <code>load</code>.
+</td>
+</tr>
+</table>
 </div>
 <div id="tryload" class="paragraph">
 <p><a id='P_try-load'></a>
@@ -13857,7 +13906,8 @@ with the suffixes given by <code>"load-suffixes"</code>.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(try-load filename) </strong></code><br></p>
+<p><code><strong>(try-load filename) </strong></code><br>
+<code><strong>(try-load filename env) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -13867,6 +13917,9 @@ with the suffixes given by <code>"load-suffixes"</code>.</p>
 and a set of suffixes if <code>filename</code> cannot be loaded. If <code>try-load</code>
 is able to find a readable file, it is loaded, and <code>try-load</code> returns
 <code>#t</code>. Otherwise, <code>try-load</code> retuns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p>See the description of <code>env</code> environment in the <a href="#load">[load]</a> primitive.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_find-path'></a>
@@ -13954,7 +14007,7 @@ a <code>require</code> followed by a <code>provide</code>. <code>Provided?</code
 </div>
 </div>
 <div class="sect3">
-<h4 id="_file_primitives">4.13.2. File Primitives</h4>
+<h4 id="doc_file_primitives">4.13.2. File Primitives</h4>
 <div class="paragraph">
 <p><a id='P_temp-file-prefix'></a>
 </p>
@@ -14868,7 +14921,7 @@ that raised the error.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_environment">4.13.3. Environment</h4>
+<h4 id="doc_environment">4.13.3. Environment</h4>
 <div class="paragraph">
 <p><a id='P_getenv'></a>
 </p>
@@ -15051,7 +15104,7 @@ returned. <code>Key</code> can be:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_time">4.13.4. Time</h4>
+<h4 id="doc_time">4.13.4. Time</h4>
 <div class="paragraph">
 <p><a id='P_current-second'></a>
 </p>
@@ -15238,7 +15291,7 @@ far from the million cells allocated in thread <code>T</code>.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_system_information">4.13.5. System Information</h4>
+<h4 id="doc_system_information">4.13.5. System Information</h4>
 <div class="paragraph">
 <p><a id='P_features'></a>
 </p>
@@ -15260,7 +15313,7 @@ example of what <code>features</code> might return:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mi">00</span><span class="o">.</span><span class="nv">xxx</span> <span class="nv">exact-complex</span>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">features</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">STklos</span> <span class="nv">STklos-2</span><span class="o">.</span><span class="mi">10</span><span class="o">.</span><span class="nv">xxx</span> <span class="nv">exact-complex</span>
                <span class="nv">ieee-float</span> <span class="nv">full-unicode</span> <span class="nv">ratios</span> <span class="nv">little-endian</span> <span class="o">...</span><span class="p">)</span></code></pre>
 </div>
 </div>
@@ -15611,7 +15664,7 @@ Unix <em>PID</em> as an integer).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_program_arguments_parsing">4.13.6. Program Arguments Parsing</h4>
+<h4 id="doc_program_arguments_parsing">4.13.6. Program Arguments Parsing</h4>
 <div class="paragraph">
 <p>
 <strong><em>STklos</em></strong> provides a simple way to parse program arguments with the
@@ -15831,7 +15884,7 @@ strings need to be manipulated by a program.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_misc_system_procedures">4.13.7. Misc. System Procedures</h4>
+<h4 id="doc_misc_system_procedures">4.13.7. Misc. System Procedures</h4>
 <div class="paragraph">
 <p><a id='P_system'></a>
 </p>
@@ -16052,7 +16105,7 @@ is undefined.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_keywords">4.14. Keywords</h3>
+<h3 id="doc_keywords">4.14. Keywords</h3>
 <div class="paragraph">
 <p>
 
@@ -16304,7 +16357,7 @@ of the value of <code>keyword-colon-position</code>. Hence, we have</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_hash_tables">4.15. Hash Tables</h3>
+<h3 id="doc_hash_tables">4.15. Hash Tables</h3>
 <div class="paragraph">
 <p>
 A hash table consists of zero or more entries, each consisting of a key
@@ -17008,7 +17061,7 @@ to <code>hash-table-stats</code>, information are printed on the current output 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_dates_and_times">4.16. Dates and Times</h3>
+<h3 id="doc_dates_and_times">4.16. Dates and Times</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> stores dates and times with a compact
 representation which consists is an integer which represents the
@@ -17850,7 +17903,7 @@ Epoch). The keyed values returned are</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_boxes">4.17. Boxes</h3>
+<h3 id="doc_boxes">4.17. Boxes</h3>
 <div class="paragraph">
 <p>Boxes are objects which contain one or several states.  A box may
 be constructed with the box, constant-box. <strong><em>STklos</em></strong> boxes are
@@ -18066,7 +18119,7 @@ exact integer between 0 and <code>n</code>-1, when <code>n</code> is the number 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_processes">4.18. Processes</h3>
+<h3 id="doc_processes">4.18. Processes</h3>
 <div class="paragraph">
 <p>
 
@@ -18280,7 +18333,7 @@ returns <code>#f</code> otherwise.</p>
 <div class="paragraph">
 <p>Sends the integer signal <code>sig</code> to <code>proc</code>. Since value of <code>sig</code> is system
 dependant, use the symbolic defined signal constants to make your program
-independant of the running system (see <a href="#_signals">Section 4.20</a>).
+independant of the running system (see <em><a href="#doc_signals">Section 4.20</a></em>).
 The result of <code>process-send-signal</code> is <strong><em>void</em></strong>.</p>
 </div>
 <div class="paragraph">
@@ -18379,7 +18432,7 @@ the child process.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_sockets">4.19. Sockets</h3>
+<h3 id="doc_sockets">4.19. Sockets</h3>
 <div class="paragraph">
 <p>
 <strong><em>STklos</em></strong> defines <strong>sockets</strong>, on systems which support them,
@@ -18689,7 +18742,7 @@ create a socket on port 13 of the machine
 </div>
 </div>
 <div class="sect2">
-<h3 id="_signals">4.20. Signals</h3>
+<h3 id="doc_signals">4.20. Signals</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> permits to associate handlers to POSIX.1 signals. When a
 signal handler is called, the integer value of this signal is passed
@@ -18820,7 +18873,7 @@ will terminate after the signal-catching function returns.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_parameter_objects">4.21. Parameter Objects</h3>
+<h3 id="doc_parameter_objects">4.21. Parameter Objects</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> parameters correspond to the ones defined in <strong><a href="http://srfi.schemers.org/srfi-39/srfi-39.html">SRFI-39</a></strong> (<em>Parameters objects</em>).
 See SRFI document for more information.</p>
@@ -18965,7 +19018,7 @@ the <code>&lt;body&gt;</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_misc">4.22. Misc</h3>
+<h3 id="doc_misc">4.22. Misc</h3>
 <div class="paragraph">
 <p>
 <a id='P_gc'></a>
@@ -19344,7 +19397,7 @@ For instance,</p>
 <p>is equivalent to the requiring <code>srfi-1</code> and <code>srfi-2</code>.</p>
 </div>
 <div class="paragraph">
-<p>A list of available symbolic names for features is given in <a href="#_srfis">Chapter 13</a>.</p>
+<p>A list of available symbolic names for features is given in <a href="#doc_srfis">Chapter 13</a>.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_require-feature'></a>
@@ -19376,7 +19429,7 @@ Consequently, to use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.htm
 </div>
 </div>
 <div class="paragraph">
-<p>See also <a href="#_srfis">Chapter 13</a> for more information.</p>
+<p>See also <a href="#doc_srfis">Chapter 13</a> for more information.</p>
 </div>
 <div id="assume" class="paragraph">
 <p><a id='P_assume'></a>
@@ -19394,12 +19447,23 @@ Consequently, to use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.htm
 </div>
 <div class="paragraph">
 <p>The special form <code>assume</code> is defined in <strong><a href="http://srfi.schemers.org/srfi-145/srfi-145.html">SRFI-145</a></strong> (<em>Assumptions</em>).
-When <strong><em>STklos</em></strong> is in debug mode, this special form is an expression
-that evaluates to the value of <code>obj</code> if <code>obj</code> evaluates to a true
-value and it is an error if <code>obj</code> evaluates to a false value.</p>
+When parameter object <code>compiler:verify-assume</code> is true, this special
+form is an expression  that evaluates to the value of <code>obj</code> if <code>obj</code>
+evaluates to a true value and it is an error if <code>obj</code> evaluates to a
+false value. When the parameter object <code>compiler:verify-assume</code> is
+false the call  to <code>assume</code> is elided (see <a href="#compflags">Section A.2.1</a>).</p>
 </div>
-<div class="paragraph">
-<p>When <strong><em>STklos</em></strong> is not in debug mode, the call to <code>assume</code> is elided.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When <strong><em>STklos</em></strong> is run in debug mode, assumptions are evaluated.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>
@@ -20278,7 +20342,7 @@ encoded format.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_regular_expressions">5. Regular Expressions</h2>
+<h2 id="doc_regular_expressions">5. Regular Expressions</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -20412,7 +20476,7 @@ class". In a character class the only meta-characters are:</p>
 <p>The following sections describe the use of each of the meta-characters.</p>
 </div>
 <div class="sect2">
-<h3 id="_backslash">5.1. Backslash</h3>
+<h3 id="doc_backslash">5.1. Backslash</h3>
 <div class="paragraph">
 <p>The backslash character has several uses. Firstly, if it is followed by a
 non-alphameric character, it takes away any special meaning that character may
@@ -20669,7 +20733,7 @@ for itself. In particular, if you want to match a backslash, you write
 </div>
 </div>
 <div class="sect2">
-<h3 id="_circumflex_and_dollar">5.2. Circumflex and Dollar</h3>
+<h3 id="doc_circumflex_and_dollar">5.2. Circumflex and Dollar</h3>
 <div class="paragraph">
 <p>Outside a character class, in the default matching mode, the
 circumflex character is an assertion which is true only if the current
@@ -20711,7 +20775,7 @@ pattern start with <code>A</code> it is always anchored, whether
 </div>
 </div>
 <div class="sect2">
-<h3 id="_full_stop_period_dot">5.3. Full Stop (period, dot)</h3>
+<h3 id="doc_full_stop_period_dot">5.3. Full Stop (period, dot)</h3>
 <div class="paragraph">
 <p>Outside a character class, a dot in the pattern matches any
 one character in the subject, including a non-printing character,
@@ -20723,7 +20787,7 @@ has no special meaning in a character class.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_square_brackets">5.4. Square Brackets</h3>
+<h3 id="doc_square_brackets">5.4. Square Brackets</h3>
 <div class="paragraph">
 <p>An opening square bracket introduces a character class,
 terminated by a closing square bracket. A closing square bracket
@@ -20803,7 +20867,7 @@ are escaped.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_posix_character_classes">5.5. POSIX character classes</h3>
+<h3 id="doc_posix_character_classes">5.5. POSIX character classes</h3>
 <div class="paragraph">
 <p>Perl supports the POSIX notation for character classes, which
 uses names enclosed by [: and :] within the enclosing square
@@ -20907,7 +20971,7 @@ given if they are encountered.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_vertical_bar">5.6. Vertical Bar</h3>
+<h3 id="doc_vertical_bar">5.6. Vertical Bar</h3>
 <div class="paragraph">
 <p>Vertical bar characters are used to separate alternative patterns. For example,
 the pattern</p>
@@ -20927,7 +20991,7 @@ pattern as well as the alternative in the subpattern.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_internal_option_setting">5.7. Internal Option Setting</h3>
+<h3 id="doc_internal_option_setting">5.7. Internal Option Setting</h3>
 <div class="paragraph">
 <p>The settings of the <em>caseless</em>, <em>multiline</em>, <em>dotall</em>, and
 <em>EXTENDED</em> options can be changed from within the pattern by a sequence of
@@ -21008,7 +21072,7 @@ the start.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_subpatterns">5.8. Subpatterns</h3>
+<h3 id="doc_subpatterns">5.8. Subpatterns</h3>
 <div class="paragraph">
 <p>Subpatterns are delimited by parentheses (round brackets), which can be nested.
 Marking part of a pattern as a subpattern does two things:</p>
@@ -21100,7 +21164,7 @@ the above patterns match "SUNDAY" as well as "Saturday".</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_named_subpatterns">5.9. Named Subpatterns</h3>
+<h3 id="doc_named_subpatterns">5.9. Named Subpatterns</h3>
 <div class="paragraph">
 <p>Identifying capturing parentheses by number is simple, but it can be very hard
 to keep track of the numbers in complicated regular expressions. Furthermore,
@@ -21111,7 +21175,7 @@ alphanumeric characters and underscores, and must be unique within a pattern.</p
 </div>
 </div>
 <div class="sect2">
-<h3 id="_repetition">5.10. Repetition</h3>
+<h3 id="doc_repetition">5.10. Repetition</h3>
 <div class="paragraph">
 <p>Repetition is specified by quantifiers, which can follow any of the following
 items:</p>
@@ -21326,7 +21390,7 @@ example, after</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_atomic_grouping_and_possessive_quantifiers">5.11. Atomic Grouping And Possessive Quantifiers</h3>
+<h3 id="doc_atomic_grouping_and_possessive_quantifiers">5.11. Atomic Grouping And Possessive Quantifiers</h3>
 <div class="paragraph">
 <p>With both maximizing and minimizing repetition, failure of what follows
 normally causes the repeated item to be re-evaluated to see if a different
@@ -21442,7 +21506,7 @@ If the pattern is changed to</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_back_references">5.12. Back References</h3>
+<h3 id="doc_back_references">5.12. Back References</h3>
 <div class="paragraph">
 <p>Outside a character class, a backslash followed by a digit greater than 0 (and
 possibly further digits) is a back reference to a capturing subpattern earlier
@@ -21531,7 +21595,7 @@ minimum of zero.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_assertions">5.13. Assertions</h3>
+<h3 id="doc_assertions">5.13. Assertions</h3>
 <div class="paragraph">
 <p>An assertion is a test on the characters following or preceding the current
 matching point that does not actually consume any characters. The simple
@@ -21737,7 +21801,7 @@ because it does not make sense for negative assertions.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_conditional_subpatterns">5.14. Conditional Subpatterns</h3>
+<h3 id="doc_conditional_subpatterns">5.14. Conditional Subpatterns</h3>
 <div class="paragraph">
 <p>It is possible to cause the matching process to obey a subpattern
 conditionally or to choose between two alternative subpatterns, depending on
@@ -21806,7 +21870,7 @@ dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_comments_2">5.15. Comments</h3>
+<h3 id="doc_comments_2">5.15. Comments</h3>
 <div class="paragraph">
 <p>The sequence <code>(?#</code> marks the start of a comment which continues up to the next
 closing parenthesis. Nested parentheses are not permitted. The characters
@@ -21819,7 +21883,7 @@ character in the pattern.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_subpatterns_as_subroutines">5.16. Subpatterns As Subroutines</h3>
+<h3 id="doc_subpatterns_as_subroutines">5.16. Subpatterns As Subroutines</h3>
 <div class="paragraph">
 <p>If the syntax for a recursive subpattern reference (either by number or by
 name) is used outside the parentheses to which it refers, it operates like a
@@ -21847,7 +21911,7 @@ refer.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_regexp_procedures">5.17. Regexp Procedures</h3>
+<h3 id="doc_regexp_procedures">5.17. Regexp Procedures</h3>
 <div class="paragraph">
 <p>This section lists the <strong><em>STklos</em></strong> functions that can use PCRE regexpr described
 before</p>
@@ -22028,7 +22092,7 @@ a mix of regexp strings and verbatim strings.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_pattern_matching">6. Pattern Matching</h2>
+<h2 id="doc_pattern_matching">6. Pattern Matching</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p></p>
@@ -22069,7 +22133,7 @@ datum is a list of zero or more <code>a</code>s followed by zero or more <code>`
 </ul>
 </div>
 <div class="sect2">
-<h3 id="_the_pattern_language">6.1. The Pattern Language</h3>
+<h3 id="doc_the_pattern_language">6.1. The Pattern Language</h3>
 <div class="paragraph">
 <p>
 The syntax for <code>&lt;pattern&gt;</code> is:</p>
@@ -22214,7 +22278,7 @@ element is the atom <code>a</code>.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_stklos_pattern_matching_facilities">6.2. <strong><em>STklos</em></strong> Pattern Matching Facilities</h3>
+<h3 id="doc_stklos_pattern_matching_facilities">6.2. <strong><em>STklos</em></strong> Pattern Matching Facilities</h3>
 <div class="paragraph">
 <p>Only two special forms are provided for this in <strong><em>STklos</em></strong>: <code>match-case</code> and
 <code>match-lambda</code>.</p>
@@ -22300,10 +22364,10 @@ which, once applied to an expression, behaves exactly like a
 </div>
 </div>
 <div class="sect1">
-<h2 id="_exceptions_and_conditions">7. Exceptions and Conditions</h2>
+<h2 id="doc_exceptions_and_conditions">7. Exceptions and Conditions</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_exceptions">7.1. Exceptions</h3>
+<h3 id="doc_exceptions">7.1. Exceptions</h3>
 <div class="paragraph">
 <p>
 The following text is extracted from <strong><a href="http://srfi.schemers.org/srfi-34/srfi-34.html">SRFI-34</a></strong> (<em>Exception Handling for Programs</em>), from which
@@ -22527,7 +22591,7 @@ current exception handler is that of the <code>guard</code> expression.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_conditions">7.2. Conditions</h3>
+<h3 id="doc_conditions">7.2. Conditions</h3>
 <div class="paragraph">
 <p>
 The following text is extracted from <strong><a href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong> (<em>Conditions</em>), from which
@@ -22854,7 +22918,7 @@ is always allocated.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_predefined_conditions">7.3. Predefined Conditions</h3>
+<h3 id="doc_predefined_conditions">7.3. Predefined Conditions</h3>
 <div class="paragraph">
 <p>
 
@@ -22906,10 +22970,10 @@ and <strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a><
 </div>
 </div>
 <div class="sect1">
-<h2 id="_stklos_object_system">8. STklos Object System</h2>
+<h2 id="doc_stklos_object_system">8. STklos Object System</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_introduction_2">8.1. Introduction</h3>
+<h3 id="doc_introduction_2">8.1. Introduction</h3>
 <div class="paragraph">
 <p>The aim of this chapter is to present <strong><em>STklos</em></strong> object
 system.  Briefly stated, <strong><em>STklos</em></strong> gives the  programmer
@@ -22955,7 +23019,7 @@ meta programming.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_object_system_tutorial">8.2. Object System Tutorial</h3>
+<h3 id="doc_object_system_tutorial">8.2. Object System Tutorial</h3>
 <div class="paragraph">
 <p>The <strong><em>STklos</em></strong> object system relies on classes like most of the current OO
 languages.  Furthermore, <strong><em>STklos</em></strong> provides meta-classes, multiple
@@ -22967,9 +23031,9 @@ the reader has some basic notions of OO programming, and is familiar with
 terms such as <strong><em>classes, instances</em></strong> or <strong><em>methods.</em></strong></p>
 </div>
 <div class="sect3">
-<h4 id="_class_definition_and_instantiation">8.2.1. Class definition and instantiation</h4>
+<h4 id="doc_class_definition_and_instantiation">8.2.1. Class definition and instantiation</h4>
 <div class="sect4">
-<h5 id="_class_definition">Class definition</h5>
+<h5 id="doc_class_definition">Class definition</h5>
 <div class="paragraph">
 <p>
 
@@ -22989,7 +23053,7 @@ The syntax of <code>define-class</code> is close to CLOS <code>defclass</code>:<
 <div class="paragraph">
 <p>The <strong><em>metaclass option</em></strong> will not be discussed here.
 The <strong><em>superclass</em></strong>es list specifies the super classes of
-<strong><em>class</em></strong> (see <a href="#_inheritance">Section 8.2.2</a> for details).</p>
+<strong><em>class</em></strong> (see <em><a href="#doc_inheritance">Section 8.2.2</a></em> for details).</p>
 </div>
 <div class="paragraph">
 <p>
@@ -23029,7 +23093,7 @@ class <code>&lt;point&gt;</code> and adding a new slot (the <code>radius</code> 
 </div>
 </div>
 <div class="sect4">
-<h5 id="_instance_creation_and_slot_access">Instance creation and slot access</h5>
+<h5 id="doc_instance_creation_and_slot_access">Instance creation and slot access</h5>
 <div class="paragraph">
 <p>
 
@@ -23089,7 +23153,7 @@ Slots are:
 </div>
 </div>
 <div class="sect4">
-<h5 id="_slot_definition">Slot Definition</h5>
+<h5 id="doc_slot_definition">Slot Definition</h5>
 <div class="paragraph">
 <p>When specifying a slot, a set of options can be given to
 the system.  Each option is specified with a keyword. For
@@ -23213,7 +23277,7 @@ As a consequence, we have</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_virtual_slots">Virtual Slots</h5>
+<h5 id="doc_virtual_slots">Virtual Slots</h5>
 <div class="paragraph">
 <p>
 
@@ -23274,9 +23338,9 @@ Slots are:
 </div>
 </div>
 <div class="sect3">
-<h4 id="_inheritance">8.2.2. Inheritance</h4>
+<h4 id="doc_inheritance">8.2.2. Inheritance</h4>
 <div class="sect4">
-<h5 id="_class_hierarchy_and_inheritance_of_slots">Class hierarchy and inheritance of slots</h5>
+<h5 id="doc_class_hierarchy_and_inheritance_of_slots">Class hierarchy and inheritance of slots</h5>
 <div class="paragraph">
 <p>inheritance
 Inheritance is specified upon class definition. As said in the introduction,
@@ -23348,7 +23412,7 @@ The order of slots is not significant.
 </div>
 </div>
 <div class="sect4">
-<h5 id="_class_precedence_list">Class precedence list</h5>
+<h5 id="doc_class_precedence_list">Class precedence list</h5>
 <div class="paragraph">
 <p></p>
 </div>
@@ -23452,9 +23516,9 @@ element is the most specific class.  For instance,</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_generic_functions">8.2.3. Generic functions</h4>
+<h4 id="doc_generic_functions">8.2.3. Generic functions</h4>
 <div class="sect4">
-<h5 id="_generic_functions_and_methods">Generic functions and methods</h5>
+<h5 id="doc_generic_functions_and_methods">Generic functions and methods</h5>
 <div class="paragraph">
 <p>
 
@@ -23611,13 +23675,13 @@ not needed.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_next_method">Next-method</h5>
+<h5 id="doc_next_method">Next-method</h5>
 <div class="paragraph">
 <p>
 
 When a generic function is called, the list of applicable
 methods is built.  As mentioned before, the most specific method
-of this list is applied (see <a href="#_generic_functions">Section 8.2.3</a>).</p>
+of this list is applied (see <a href="#doc_generic_functions">Section 8.2.3</a>).</p>
 </div>
 <div class="paragraph">
 <p>This method may call, if needed, the next method in the list of
@@ -23648,7 +23712,7 @@ applicable methods.  This is done by using the special form
 </div>
 </div>
 <div class="sect4">
-<h5 id="_standard_generic_functions">Standard  generic functions</h5>
+<h5 id="doc_standard_generic_functions">Standard  generic functions</h5>
 <div class="paragraph">
 <p>
 
@@ -23738,9 +23802,9 @@ we could define the following method to compare points:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_object_system_main_functions_and_syntaxes">8.3. Object System Main Functions and Syntaxes</h3>
+<h3 id="doc_object_system_main_functions_and_syntaxes">8.3. Object System Main Functions and Syntaxes</h3>
 <div class="sect3">
-<h4 id="_classes_and_instances">8.3.1. Classes and Instances</h4>
+<h4 id="doc_classes_and_instances">8.3.1. Classes and Instances</h4>
 <div class="paragraph">
 <p><a id='P_define-class'></a>
 </p>
@@ -23833,7 +23897,10 @@ will work with the definition of <code>&lt;point&gt;</code> given above:</p>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_make-instance'></a><a id='P_allocate-instance'></a>
+<p><a id='P_make-instance'></a><a id='P_make'></a><a id='P_initialize-instance'></a><a id='P_initialize'></a><a id='P_allocate-instance'></a>
+
+
+
 
 </p>
 </div>
@@ -23844,7 +23911,9 @@ will work with the definition of <code>&lt;point&gt;</code> given above:</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(allocate-instance c init-args) </strong></code><br>
+<code><strong>(initialize-instance c init-args) </strong></code><br>
 <code><strong>(make-instance c) </strong></code><br>
+<code><strong>(initialize c init-args) </strong></code><br>
 <code><strong>(make c) </strong></code><br></p>
 </div>
 </div>
@@ -23881,6 +23950,101 @@ without initializing it.</p>
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p><code>Initialize</code> is a generic function that is called by <code>make-instance</code>
+(or <code>make</code>) in order to initialize instances of a class.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;x&gt;</span> <span class="p">(</span><span class="nf">&lt;object&gt;</span><span class="p">)</span>
+  <span class="p">((</span><span class="nf">a</span> <span class="nv">:init-keyword</span> <span class="nv">:a</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">b</span> <span class="nv">:accessor</span> <span class="nv">x-b</span><span class="p">)</span>
+   <span class="nv">c</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;x&gt;</span> <span class="nv">:a</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;x&gt;</span> <span class="mi">7</span><span class="nv">f8a49e96bd0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;x&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a</span> <span class="nv">=</span> <span class="mi">10</span>
+     <span class="nv">b</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span>
+     <span class="nv">c</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If an <code>initialize</code> method is implemented, it overrides the
+default, and the initializing arguments are not automatically
+processed:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">initialize-instance</span> <span class="p">((</span><span class="nf">x</span> <span class="nv">&lt;x&gt;</span><span class="p">)</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">print</span> <span class="ss">'==</span> <span class="s">" "</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nf">bb</span> <span class="nv">x</span><span class="p">)</span> <span class="mi">1000</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;x&gt;</span> <span class="nv">:a</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="nv">==</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">10</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;x&gt;</span> <span class="mi">7</span><span class="nv">f8a49e96bd0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;x&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span>
+     <span class="nv">b</span> <span class="nv">=</span> <span class="mi">1000</span>
+     <span class="nv">c</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that <code>a</code> was <strong>not</strong> initialized! This is because the new
+<code>initialize</code> method does not set it, and the keyword initializer
+was ignored (the method actually printed the arguments, but
+ignored them).</p>
+</div>
+<div class="paragraph">
+<p>But if <code>next-method</code> is called at the end of our <code>initialize</code>
+method, the result will be as expected:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">initialize-instance</span> <span class="p">((</span><span class="nf">x</span> <span class="nv">&lt;x&gt;</span><span class="p">)</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">print</span> <span class="ss">'==</span> <span class="s">" "</span> <span class="nv">args</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">set!</span> <span class="p">(</span><span class="nf">bb</span> <span class="nv">x</span><span class="p">)</span> <span class="mi">1000</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">next-method</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;x&gt;</span> <span class="nv">:a</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="nv">==</span> <span class="p">(</span><span class="nf">a</span> <span class="mi">10</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;x&gt;</span> <span class="mi">7</span><span class="nv">f8a49e96bd0</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;x&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a</span> <span class="nv">=</span> <span class="mi">10</span>
+     <span class="nv">b</span> <span class="nv">=</span> <span class="mi">1000</span>
+     <span class="nv">c</span> <span class="nv">=</span> <span class="o">#</span><span class="p">[</span><span class="nf">unbound</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now <code>a</code> has also been initialized.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>initialize</code> is an alias for <code>initialize-instance</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally, the standard <code>make-instance</code> is simple to write: it just
+calls <code>allocate-instance</code> and initializes it with <code>initialize-instance</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">make-instance</span> <span class="p">((</span><span class="nf">class</span> <span class="nv">&lt;class&gt;</span><span class="p">)</span> <span class="o">.</span> <span class="nv">initargs</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">instance</span> <span class="p">(</span><span class="nf">allocate-instance</span> <span class="nv">class</span> <span class="nv">initargs</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nf">initialize-instance</span> <span class="nv">instance</span> <span class="nv">initargs</span><span class="p">)</span>
+    <span class="nv">instance</span><span class="p">))</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_class-name'></a>
@@ -24021,9 +24185,72 @@ of the most specific classes posible.</p>
   <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;B&gt;</span> <span class="mi">7</span><span class="nv">fea2b8a3c30</span><span class="p">]</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">fea2b8afb40</span><span class="p">])</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p><a id='P_change-class'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(change-class object new-class) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Change-class</code> will change the class of <code>object</code> to <code>new-class</code>.
+The values of slots that do exist in both the old and new classes
+are carried out to the new object. The slots that do not exist in
+the old instance are initialized as if the object was new.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span>        <span class="p">((</span><span class="nf">a-slot</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'a-value</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;B&gt;</span> <span class="p">()</span>        <span class="p">((</span><span class="nf">b-slot</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'b-value</span><span class="p">)))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;C&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span> <span class="nv">&lt;B&gt;</span><span class="p">)</span> <span class="p">((</span><span class="nf">c-slot</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="ss">'c-value</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">c</span> <span class="p">(</span><span class="nf">make</span> <span class="nv">&lt;C&gt;</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">a</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;A&gt;</span> <span class="mi">7</span><span class="nv">f91fe79c660</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;A&gt;</span><span class="o">.</span>
+<span class="nv">The</span> <span class="nv">only</span> <span class="nv">slot</span> <span class="nv">is:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">c</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">f91fe7a0510</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;C&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+     <span class="nv">b-slot</span> <span class="nv">=</span> <span class="nv">b-value</span>
+     <span class="nv">c-slot</span> <span class="nv">=</span> <span class="nv">c-value</span>
+
+<span class="p">(</span><span class="nf">change-class</span> <span class="nv">a</span> <span class="nv">&lt;C&gt;</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">change-class</span> <span class="nv">c</span> <span class="nv">&lt;A&gt;</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">a</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;C&gt;</span> <span class="mi">7</span><span class="nv">f91fe79c660</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;C&gt;</span><span class="o">.</span>
+<span class="nv">Slots</span> <span class="nv">are:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+     <span class="nv">b-slot</span> <span class="nv">=</span> <span class="nv">b-value</span>
+     <span class="nv">c-slot</span> <span class="nv">=</span> <span class="nv">c-value</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">c</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">&lt;A&gt;</span> <span class="mi">7</span><span class="nv">f91fe7a0510</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">class</span> <span class="nv">&lt;A&gt;</span><span class="o">.</span>
+<span class="nv">The</span> <span class="nv">only</span> <span class="nv">slot</span> <span class="nv">is:</span>
+     <span class="nv">a-slot</span> <span class="nv">=</span> <span class="nv">a-value</span>
+
+<span class="p">(</span><span class="nf">slot-value</span> <span class="nv">c</span> <span class="ss">'c-slot</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The last line shows that <code>c</code> really changed into an object of
+class <code>&lt;A&gt;</code>: it does not have the slot <code>c-slot</code> anymore.</p>
+</div>
 </div>
 <div class="sect3">
-<h4 id="_generic_functions_and_methods_2">8.3.2. Generic Functions and Methods</h4>
+<h4 id="doc_generic_functions_and_methods_2">8.3.2. Generic Functions and Methods</h4>
 <div class="paragraph">
 <p>Generic functions and methods are an important part of <strong><em>STklos</em></strong> object
 system. A generic function is a function which can have several methods with a
@@ -24230,11 +24457,59 @@ applicable method.</p>
 <span class="p">(</span><span class="nf">class-list</span> <span class="mi">1-2</span><span class="nv">i</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">complex</span> <span class="nv">number</span> <span class="nv">top</span><span class="p">)</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p><a id='P_method-procedure'></a><a id='P_method-specializers'></a><a id='P_method-generic-function'></a>
+
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(method-generic-function m) </strong></code><br>
+<code><strong>(method-specializers m) </strong></code><br>
+<code><strong>(method-procedure m) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Given a method <code>m</code>,
+* <code>method-generic-function</code> returns the generic function that this
+  object is a specialization of;
+* <code>method-specializers</code> returns a list of specializers (this and other
+  methods) of its generic functions;
+* <code>method-procedure</code> returns the procedure that implements this method.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">)</span>
+ <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;complex&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">imag-part</span> <span class="nv">b</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">m</span> <span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nf">generic-function-methods</span> <span class="nv">compute</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">method-generic-function</span> <span class="nv">m</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">compute</span> <span class="p">(</span><span class="nf">2</span><span class="p">)]</span>
+
+<span class="p">(</span><span class="nf">method-specializers</span> <span class="nv">m</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;real&gt;</span> <span class="mi">7</span><span class="nv">f3e3a157ba0</span><span class="p">]</span>
+       <span class="o">#</span><span class="p">[</span><span class="nf">&lt;class&gt;</span> <span class="nv">&lt;complex&gt;</span> <span class="mi">7</span><span class="nv">f3e3a157bd0</span><span class="p">])</span>
+
+<span class="p">(</span><span class="nf">method-procedure</span> <span class="nv">m</span><span class="p">)</span>
+   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="mi">7</span><span class="nv">f9901d6e680</span><span class="p">]</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
-<h4 id="_misc_2">8.3.3. Misc.</h4>
+<h4 id="doc_misc_2">8.3.3. Misc.</h4>
 <div class="paragraph">
-<p><a id='P_class-precedence-list'></a><a id='P_class-direct-subclasses'></a><a id='P_class-direct-superclasses'></a>
+<p><a id='P_class-precedence-list'></a><a id='P_class-subclasses'></a><a id='P_class-direct-subclasses'></a><a id='P_class-direct-superclasses'></a>
+
 
 
 </p>
@@ -24247,13 +24522,18 @@ applicable method.</p>
 <div class="paragraph small">
 <p><code><strong>(class-direct-superclasses c) </strong></code><br>
 <code><strong>(class-direct-subclasses c) </strong></code><br>
+<code><strong>(class-subclasses c) </strong></code><br>
 <code><strong>(class-precedence-list c) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p><code>class-direct-superclasses</code> and <code>class-direct-subclasses</code> return a list with
+<p><code>class-direct-superclasses</code> and <code>class-direct-subclasses</code> returns a list with
 all direct superclasses or subclasses of class <code>c</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>class-subclasses</code> returns a list with all subclasses of class <code>c</code>, even if
+not direct.</p>
 </div>
 <div class="paragraph">
 <p><code>class-precedence-list</code> returns the precedence list for class <code>c</code>. If
@@ -24282,6 +24562,31 @@ their names.</p>
 <p><code>Slot-one</code> in class <code>&lt;C&gt;</code> refers to the slot defined in <code>&lt;C&gt;</code> (because
 it is present in both <code>&lt;A&gt;</code> and <code>&lt;C&gt;</code>, but <code>&lt;C&gt;</code> has precedence over
 <code>&lt;A&gt;</code>). <code>Slot-two</code> in <code>&lt;C&gt;</code> can only be the one defined in <code>&lt;A&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>The native STklos types are also subclasses of one single class, <code>&lt;top&gt;</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span>  <span class="p">(</span><span class="nf">class-subclasses</span> <span class="nv">&lt;top&gt;</span><span class="p">))</span>
+        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&lt;entity-class&gt;</span> <span class="nv">&lt;procedure-class&gt;</span> <span class="nv">&lt;class&gt;</span> <span class="nv">&lt;accessor-method&gt;</span>
+            <span class="nv">&lt;simple-method&gt;</span> <span class="nv">&lt;method&gt;</span> <span class="nv">&lt;generic&gt;</span> <span class="nv">&lt;object&gt;</span> <span class="nv">&lt;boolean&gt;</span> <span class="nv">&lt;char&gt;</span>
+            <span class="o">...</span>
+            <span class="nv">&lt;number&gt;</span>
+            <span class="o">...</span>
+            <span class="nv">&lt;output-port&gt;</span> <span class="nv">&lt;port&gt;</span> <span class="nv">&lt;hash-table&gt;</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>One of the listed classes above is <code>&lt;number&gt;</code> (its subclasses are also
+listed in that output). Calling <code>class-subclasses</code> on <code>&lt;number&gt;</code> returns
+its six subclasses:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-subclasses</span> <span class="nv">&lt;number&gt;</span><span class="p">))</span>
+        <span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">map</span> <span class="nv">class-name</span> <span class="p">(</span><span class="nf">class-subclasses</span> <span class="nv">&lt;number&gt;</span><span class="p">))</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_class-direct-slots'></a><a id='P_class-slots'></a>
@@ -24316,6 +24621,46 @@ were defined directly in the class (excluding the inherited slots).</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">class-direct-slots</span> <span class="nv">&lt;B&gt;</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">a</span> <span class="o">#</span><span class="nv">:init-form</span> <span class="mi">3</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_class-direct-methods'></a><a id='P_class-methods'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(class-methods c) </strong></code><br>
+<code><strong>(class-direct-methods c) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Class-direct-methods</code> returns a list of all direct methods of
+a class.</p>
+</div>
+<div class="paragraph">
+<p><code>Class-methods</code> returns a list of all methods of a class and also
+of its subclasses.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;A&gt;</span> <span class="p">()</span> <span class="p">())</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">method-A</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nf">print</span> <span class="ss">'A</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">define-class</span> <span class="nv">&lt;C&gt;</span> <span class="p">(</span><span class="nf">&lt;A&gt;</span><span class="p">)</span> <span class="p">())</span>
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">method-C</span> <span class="p">((</span><span class="nf">c</span> <span class="nv">&lt;C&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nf">print</span> <span class="ss">'C</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">class-methods</span> <span class="nv">&lt;C&gt;</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nb">map</span> <span class="nv">method-generic-function</span> <span class="p">(</span><span class="nf">class-methods</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+    <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">method-C</span> <span class="p">(</span><span class="nf">1</span><span class="p">)]</span>
+        <span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">method-A</span> <span class="p">(</span><span class="nf">1</span><span class="p">)])</span>
+<span class="p">(</span><span class="nb">map</span> <span class="nv">method-generic-function</span> <span class="p">(</span><span class="nf">class-direct-methods</span> <span class="nv">&lt;A&gt;</span><span class="p">))</span>
+    <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;generic&gt;</span> <span class="nv">method-A</span> <span class="p">(</span><span class="nf">1</span><span class="p">)])</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -24393,6 +24738,51 @@ of a slot, as returned by <code>class-slots</code> or by <code>class-slot-defini
  <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">:init-form</span> <span class="mi">0</span> <span class="o">#</span><span class="nv">:accessor</span> <span class="nv">x</span><span class="p">)</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p><a id='P_generic-function-documentation'></a><a id='P_generic-function-methods'></a><a id='P_generic-function-name'></a>
+
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(generic-function-name gf) </strong></code><br>
+<code><strong>(generic-function-methods gf) </strong></code><br>
+<code><strong>(generic-function-documentation gf) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Given a generic function object, these procedures return the name,
+the list of methods and the documentation of the generic function.</p>
+</div>
+<div class="paragraph">
+<p>For example,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-generic</span> <span class="nv">compute</span> <span class="nv">:documentation</span> <span class="s">"This function does computations"</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-method</span> <span class="nv">compute</span> <span class="p">(</span> <span class="p">(</span><span class="nf">a</span> <span class="nv">&lt;real&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;complex&gt;</span><span class="p">)</span> <span class="p">)</span>
+  <span class="p">(</span><span class="nb">*</span> <span class="nv">a</span> <span class="p">(</span><span class="nb">imag-part</span> <span class="nv">b</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nf">generic-function-name</span> <span class="nv">compute</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="nv">compute</span>
+<span class="p">(</span><span class="nf">generic-function-methods</span> <span class="nv">compute</span><span class="p">)</span>       <span class="nv">=&gt;</span> <span class="p">(</span><span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">7</span><span class="nv">f9901743db0</span><span class="p">]</span>
+                                             <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">7</span><span class="nv">f990155af60</span><span class="p">])</span>
+<span class="p">(</span><span class="nf">generic-function-documentation</span> <span class="nv">compute</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"This function does computations"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is not necessary that the generic function be explicitly defined. If it is
+not explicitly created, however, the documentation will be set to <code>#f</code>.</p>
+</div>
 <div class="literalblock">
 <div class="content">
 <pre>  //  SPDX-License-Identifier: GFDL-1.3-or-later
@@ -24408,7 +24798,7 @@ of a slot, as returned by <code>class-slots</code> or by <code>class-slot-defini
 </div>
 </div>
 <div class="sect1">
-<h2 id="_threads_mutexes_and_condition_variables">9. Threads, Mutexes and Condition Variables</h2>
+<h2 id="doc_threads_mutexes_and_condition_variables">9. Threads, Mutexes and Condition Variables</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -24436,7 +24826,7 @@ all the SRFI mechanisms. See this SRFI documentation for a more complete
 description</p>
 </div>
 <div class="sect2">
-<h3 id="_threads">9.1. Threads</h3>
+<h3 id="doc_threads">9.1. Threads</h3>
 <div id="make-thread" class="paragraph">
 <p><a id='P_make-thread'></a>
 </p>
@@ -24770,7 +25160,7 @@ returns an unspecified value.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_mutexes">9.2. Mutexes</h3>
+<h3 id="doc_mutexes">9.2. Mutexes</h3>
 <div class="paragraph">
 <p><a id='P_make-mutex'></a>
 </p>
@@ -25044,7 +25434,7 @@ also on entrance or departure of its dynamic context
 </div>
 </div>
 <div class="sect2">
-<h3 id="_condition_variables">9.3. Condition Variables</h3>
+<h3 id="doc_condition_variables">9.3. Condition Variables</h3>
 <div class="paragraph">
 <p><a id='P_make-condition-variable'></a>
 </p>
@@ -25173,7 +25563,7 @@ an unspecified value.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_conditions_2">9.4. Conditions</h3>
+<h3 id="doc_conditions_2">9.4. Conditions</h3>
 <div class="paragraph">
 <p><a id='P_join-timeout-exception?'></a>
 </p>
@@ -25286,10 +25676,10 @@ of that thread (<code>exc</code> must be an <em>uncaught exception</em> object).
 </div>
 </div>
 <div class="sect1">
-<h2 id="_stklos_customization">10. STklos Customization</h2>
+<h2 id="doc_stklos_customization">10. STklos Customization</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_parameter_objects_2">10.1. Parameter Objects</h3>
+<h3 id="doc_parameter_objects_2">10.1. Parameter Objects</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> environement can be customized using Parameter Objects. These
 parameters are listed below.</p>
@@ -25419,18 +25809,10 @@ underscores are accepted in numbers.</p>
 </div>
 <div class="paragraph">
 <p>This parameter object permits to change the default behaviour of
-the <code>read</code> primitive when reading a symbol. If this parameter has
-a true value a symbol is not converted to a default case when interned.
-Since R<sup>7</sup>RS requires that symbol are case insignificant, the default
-value  of this parameter is <code>#t</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">read-case-sensitive</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="o">`</span><span class="no">#t</span><span class="o">`</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">ABC</span>
-<span class="p">(</span><span class="nf">read-case-sensitive</span> <span class="no">#f</span><span class="p">)</span>
-<span class="p">(</span><span class="nf">read-from-string</span> <span class="s">"ABC"</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">abc</span></code></pre>
-</div>
+the <code>read</code> primitive used on the current input port , when reading a symbol.
+If this parameter has a true value a symbol is not converted to a default
+case when interned. Since R<sup>7</sup>RS requires that symbol are case insignificant,
+the default value  of this parameter is <code>#t</code>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -25442,11 +25824,11 @@ value  of this parameter is <code>#t</code>.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Default behaviour can be changed for a whole execution
-with the <code>--case-sensitive</code> or <code>case-insensitive</code> options.</p>
+<p>This parameter works on the current input port only and cannot change
+read beahviour&#8217;s globally.</p>
 </li>
 <li>
-<p>See also syntax for <em><a href="#_symbols">special characters</a></em> in symbols.</p>
+<p>See also syntax for <em><a href="#doc_symbols">special characters</a></em> in symbols.</p>
 </li>
 </ul>
 </div>
@@ -25566,6 +25948,29 @@ the current error port, when set to a true value. If <code>load-verbose</code>
 is set to <code>#f</code>, no message is printed.</p>
 </div>
 <div class="paragraph">
+<p><a id='P_includes-use-load-path'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(includes-use-load-path) </strong></code><br>
+<code><strong>(includes-use-load-path bool) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter controls if the <code>include</code> and <code>include-ci</code> forms use
+the <code>load-path</code> parameter. By default, the loading path is not used;
+that means that an included file is searched only in the directory
+of the file which include it. If <code>load-path</code> is used, then
+an included file is searched first in the directory which contains
+the including file, and then, in the directories given by <code>load-path</code>.</p>
+</div>
+<div class="paragraph">
 <p><a id='P_thread-handler-error-show'></a>
 </p>
 </div>
@@ -25611,7 +26016,7 @@ Note that the debugging level can also be set by the <code>--debug</code> option
 </div>
 </div>
 <div class="sect2">
-<h3 id="_environment_variables">10.2. Environment variables</h3>
+<h3 id="doc_environment_variables">10.2. Environment variables</h3>
 <div class="paragraph">
 <p>The following variables can be used to customize <strong><em>STklos</em></strong>:</p>
 </div>
@@ -25639,7 +26044,7 @@ shell variable <code>XDG_CONFIG_HOME</code> is unset).</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_repl">10.3. REPL</h3>
+<h3 id="doc_repl">10.3. REPL</h3>
 <div class="paragraph">
 <p>By default, the <strong><em>STklos</em></strong> REPL try to find an installed
 <em>editing line library</em> to read input expressions. It tries to link with GNU readline
@@ -25669,7 +26074,7 @@ be passed when <code>repl</code> is called. If not passed, they default to
 <code>current-input-port</code>, <code>current-output-port</code> and <code>current-error-port</code>.</p>
 </div>
 <div class="sect3">
-<h4 id="_repl_commands">10.3.1. REPL commands</h4>
+<h4 id="doc_repl_commands">10.3.1. REPL commands</h4>
 <div class="paragraph">
 <p>By default, <strong><em>STklos</em></strong> accepts some special commands. A command starts
 with a comma character, followed by the name of the command. The list
@@ -25785,7 +26190,7 @@ such a definition is in the <code>stklosrc</code> file.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_repl_variables">10.3.2. REPL variables</h4>
+<h4 id="doc_repl_variables">10.3.2. REPL variables</h4>
 <div class="paragraph">
 <p>By default, <strong><em>STklos</em></strong> defines the following variables:</p>
 </div>
@@ -25821,7 +26226,7 @@ computed values</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_repl_parameters">10.3.3. REPL parameters</h4>
+<h4 id="doc_repl_parameters">10.3.3. REPL parameters</h4>
 <div class="paragraph">
 <p>The following parameter objects can be used to customize the REPL:</p>
 </div>
@@ -25949,7 +26354,7 @@ the <strong><em>STklos</em></strong> command. Otherwise, a good place to set thi
 </div>
 </div>
 <div class="sect1">
-<h2 id="_foreign_function_interface">11. Foreign Function Interface</h2>
+<h2 id="doc_foreign_function_interface">11. Foreign Function Interface</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p></p>
@@ -25973,7 +26378,7 @@ the <strong><em>STklos</em></strong> VM when using an external C function.</p>
 evolve in future versions.</strong></p>
 </div>
 <div class="sect2">
-<h3 id="_external_functions">11.1. External functions</h3>
+<h3 id="doc_external_functions">11.1. External functions</h3>
 <div class="paragraph">
 <p>The definition of an external function is done with the
 <code>define-external</code> special form.  This form takes as arguments
@@ -26292,7 +26697,7 @@ the FFI better!):</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_c_pointers">11.2. C pointers</h3>
+<h3 id="doc_c_pointers">11.2. C pointers</h3>
 <div class="paragraph">
 <p>It is very common that external functions return pointers, serving as
 handles on internal structures. This pointers, called hereafter
@@ -26496,7 +26901,7 @@ allocated memory (a NULL value for C).</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_using_the_slib_package">12. Using the SLIB package</h2>
+<h2 id="doc_using_the_slib_package">12. Using the SLIB package</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -26561,7 +26966,7 @@ variable.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_srfis">13. SRFIs</h2>
+<h2 id="doc_srfis">13. SRFIs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -26581,9 +26986,9 @@ information on each SRFI, please look at the official
 SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="_supported_srfis">13.1. Supported SRFIs</h3>
+<h3 id="doc_supported_srfis">13.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>125</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>127</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -26715,14 +27120,16 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-230/srfi-230.html">SRFI-230</a></strong>&#8201;&#8212;&#8201;<em>Atomic Operations</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-232/srfi-232.html">SRFI-232</a></strong>&#8201;&#8212;&#8201;<em>Flexible Curried Procedures</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-233/srfi-233.html">SRFI-233</a></strong>&#8201;&#8212;&#8201;<em>INI files</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-234/srfi-234.html">SRFI-234</a></strong>&#8201;&#8212;&#8201;<em>Topological sorting</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-235/srfi-235.html">SRFI-235</a></strong>&#8201;&#8212;&#8201;<em>Combinators</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong>&#8201;&#8212;&#8201;<em>Codesets</em><br>
--  <strong><a href="http://srfi.schemers.org/srfi-244/srfi-244.html">SRFI-244</a></strong>&#8201;&#8212;&#8201;<em>Multiple-value definitions</em><br></p>
+-  <strong><a href="http://srfi.schemers.org/srfi-244/srfi-244.html">SRFI-244</a></strong>&#8201;&#8212;&#8201;<em>Multiple-value definitions</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-253/srfi-253.html">SRFI-253</a></strong>&#8201;&#8212;&#8201;<em>Data (Type-)Checking</em><br></p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_a_srfi">13.2. Using a SRFI</h3>
+<h3 id="doc_using_a_srfi">13.2. Using a SRFI</h3>
 <div class="paragraph">
 <p>Using a particular SRFI can be done with the special form
 <code>cond-expand</code> defined in <strong><a href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a></strong> which is fully supported
@@ -26764,7 +27171,7 @@ use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a></st
 <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 <div class="sect3">
-<h4 id="_embedded_srfis">13.2.1. Embedded SRFIs</h4>
+<h4 id="doc_embedded_srfis">13.2.1. Embedded SRFIs</h4>
 <div class="paragraph">
 <p>As said before, an <em>embedded</em> SRFI can be used directly without loading a
 support file. (Note that using <strong>require-feature</strong> works too
@@ -26776,7 +27183,7 @@ and permits to ignore if the SRFI is embedded).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_external_srfis">13.2.2. External SRFIs</h4>
+<h4 id="doc_external_srfis">13.2.2. External SRFIs</h4>
 <div class="paragraph">
 <p>An external SRFI needs to load at least one external file. This can be done
 with <strong>require</strong> or <strong>require-feature</strong>. As with embedded SRFIS, using
@@ -26784,11 +27191,11 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-115</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-178</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-232</code> <code>srfi-233</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-115</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-178</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-232</code> <code>srfi-233</code> <code>srfi-234</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code> <code>srfi-253</code></p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_features">13.2.3. SRFI features</h4>
+<h4 id="doc_srfi_features">13.2.3. SRFI features</h4>
 <div class="paragraph">
 <p>For some SRFIs, <strong><em>STklos</em></strong> accepts that uses them with a name. This names
 are given <a href="#feature_identifiers">Table 2</a>.</p>
@@ -26959,6 +27366,10 @@ are given <a href="#feature_identifiers">Table 2</a>.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-233</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">topological-sort</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">srfi-234</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">combinators</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">srfi-235</p></td>
 </tr>
@@ -26975,13 +27386,13 @@ are given <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_misc_information">13.3. Misc. Information</h3>
+<h3 id="doc_misc_information">13.3. Misc. Information</h3>
 <div class="paragraph">
 <p>Previous section described the general way to use the SRFIS implemented in
 <strong><em>STklos</em></strong>.  This section concentrates on information not given above.</p>
 </div>
 <div class="sect3">
-<h4 id="_srfi_0feature_based_conditional_expansion_construct">srfi-0&#8201;&#8212;&#8201;Feature-based conditional expansion construct</h4>
+<h4 id="doc_srfi_0feature_based_conditional_expansion_construct">srfi-0&#8201;&#8212;&#8201;Feature-based conditional expansion construct</h4>
 <div class="paragraph">
 <p>
 <strong><a href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a></strong> defines the <code>cond-expand</code> special form. It is fully
@@ -27001,7 +27412,7 @@ running on.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_4homogeneous_numeric_vector_datatypes">srfi-4&#8201;&#8212;&#8201;Homogeneous numeric vector datatypes</h4>
+<h4 id="doc_srfi_4homogeneous_numeric_vector_datatypes">srfi-4&#8201;&#8212;&#8201;Homogeneous numeric vector datatypes</h4>
 <div class="paragraph">
 <p>
 
@@ -27046,7 +27457,7 @@ of the uniform vector, as a symbol</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_10sharp_comma_external_form">srfi-10&#8201;&#8212;&#8201;Sharp Comma External Form</h4>
+<h4 id="doc_srfi_10sharp_comma_external_form">srfi-10&#8201;&#8212;&#8201;Sharp Comma External Form</h4>
 <div class="paragraph">
 <p>
 
@@ -27056,7 +27467,7 @@ this document (see <em><a href="#readerctor">primitive <code>define-reader-ctor<
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_16syntax_for_procedures_of_variable_arity">srfi-16&#8201;&#8212;&#8201;Syntax for procedures of variable arity</h4>
+<h4 id="doc_srfi_16syntax_for_procedures_of_variable_arity">srfi-16&#8201;&#8212;&#8201;Syntax for procedures of variable arity</h4>
 <div class="paragraph">
 <p>
 
@@ -27065,7 +27476,7 @@ this document (see <em><a href="#readerctor">primitive <code>define-reader-ctor<
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_17generalized_set">srfi-17&#8201;&#8212;&#8201;Generalized set!</h4>
+<h4 id="doc_srfi_17generalized_set">srfi-17&#8201;&#8212;&#8201;Generalized set!</h4>
 <div class="paragraph">
 <p></p>
 </div>
@@ -27079,7 +27490,7 @@ to define the setters for the (numerous) <code>cXXXXr</code> list procedures.</p
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_19time_data_types_and_procedures">srfi-19&#8201;&#8212;&#8201;Time Data Types and Procedures</h4>
+<h4 id="doc_srfi_19time_data_types_and_procedures">srfi-19&#8201;&#8212;&#8201;Time Data Types and Procedures</h4>
 <div class="paragraph">
 <p>
 
@@ -27197,7 +27608,7 @@ create the resulting object.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_22running_scheme_scripts_on_unix">srfi-22&#8201;&#8212;&#8201;Running Scheme Scripts on Unix</h4>
+<h4 id="doc_srfi_22running_scheme_scripts_on_unix">srfi-22&#8201;&#8212;&#8201;Running Scheme Scripts on Unix</h4>
 <div class="paragraph">
 <p>
 
@@ -27243,7 +27654,7 @@ script via a /usr/bin/env trampoline, like this:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_23error_reporting_mechanism">srfi-23&#8201;&#8212;&#8201;Error reporting mechanism</h4>
+<h4 id="doc_srfi_23error_reporting_mechanism">srfi-23&#8201;&#8212;&#8201;Error reporting mechanism</h4>
 <div class="paragraph">
 <p>
 
@@ -27252,7 +27663,7 @@ is more general than the one defined in SRFI-23.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_25multi_dimensional_arrays">srfi-25&#8201;&#8212;&#8201;Multi-dimensional Arrays</h4>
+<h4 id="doc_srfi_25multi_dimensional_arrays">srfi-25&#8201;&#8212;&#8201;Multi-dimensional Arrays</h4>
 <div class="paragraph">
 <p>
 
@@ -27865,7 +28276,7 @@ inverse, from left, to permute the rows appropriately.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_27source_of_random_bits">srfi-27&#8201;&#8212;&#8201;Source of random bits</h4>
+<h4 id="doc_srfi_27source_of_random_bits">srfi-27&#8201;&#8212;&#8201;Source of random bits</h4>
 <div class="paragraph">
 <p>
 
@@ -27875,7 +28286,7 @@ inverse, from left, to permute the rows appropriately.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_28basic_format_strings">srfi-28&#8201;&#8212;&#8201;Basic Format Strings</h4>
+<h4 id="doc_srfi_28basic_format_strings">srfi-28&#8201;&#8212;&#8201;Basic Format Strings</h4>
 <div class="paragraph">
 <p>
 
@@ -27884,27 +28295,93 @@ is more general than the one defined this SRFI.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_35conditions">srfi-35&#8201;&#8212;&#8201;Conditions</h4>
+<h4 id="doc_srfi_35conditions">srfi-35&#8201;&#8212;&#8201;Conditions</h4>
 <div class="paragraph">
 <p>
 
 <strong><a href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong> is fully supported.
-See <em><a href="#_predefined_conditions">Section 7.3</a></em> for the predefined conditions
+See <em><a href="#doc_predefined_conditions">Section 7.3</a></em> for the predefined conditions
 and when it is required to load this file.</p>
+</div>
+<div class="paragraph">
+<p>Furthermore, this SRFI exports also the helper syntax <code>define-new-error</code>:
+<a id='P_define-new-error'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(define-new-error name) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Declares a new error with name <code>&amp;name</code>. This will expand to
+<code>define-condition-type</code> (described in SRFI-35),
+and the effect will be that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a new condition of type <code>&amp;error-message</code> is created, with a <code>&amp;</code>
+sign prepended to <code>name</code></p>
+</li>
+<li>
+<p>a new predicate is created, with a <code>&amp;</code> sign prepended and a
+question mark (<code>?</code>) appended to <code>name</code></p>
+</li>
+<li>
+<p>a new procedure called <code>name</code> is created. This procedure will
+signal errors of this new type.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">35</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">define-new-error</span> <span class="nv">big-error</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">apropos</span> <span class="ss">'big-error</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">&amp;big-error</span> <span class="nv">&amp;big-error?</span> <span class="nv">big-error</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">&amp;big-error</span><span class="p">)</span>
+<span class="o">#</span><span class="p">[</span><span class="nf">condition-type</span> <span class="nv">&amp;big-error</span> <span class="mi">139844680604416</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">condition</span> <span class="nv">type</span>
+                                             <span class="nv">whose</span> <span class="nv">name</span> <span class="nv">is</span> <span class="nv">&amp;big-error</span><span class="o">.</span>
+<span class="nv">Parent</span> <span class="nv">of</span> <span class="nv">condition</span> <span class="nv">type:</span> <span class="nv">&amp;error-message</span>
+<span class="nv">Fields</span> <span class="nv">of</span> <span class="nv">condition</span> <span class="nv">type:</span>
+    <span class="nv">location</span>
+    <span class="nv">backtrace</span>
+    <span class="nv">message</span>
+    <span class="nv">r7rs-msg</span>
+    <span class="nv">r7rs-irritants</span>
+
+<span class="nv">&amp;big-error?</span> <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">&amp;big-error?</span><span class="p">]</span>
+<span class="nv">big-error</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">big-error</span><span class="p">]</span>
+
+<span class="p">(</span><span class="nf">big-error</span> <span class="s">"Huge mistake: ~S"</span> <span class="mi">14</span><span class="p">)</span>
+<span class="nv">****</span> <span class="nv">Error:</span>
+<span class="nv">big-error:</span> <span class="nv">Huge</span> <span class="nv">mistake:</span> <span class="mi">14</span>
+
+<span class="p">(</span><span class="nf">big-error</span> <span class="ss">'callee</span> <span class="s">"Huge mistake: ~S"</span> <span class="mi">14</span><span class="p">)</span>
+<span class="nv">****</span> <span class="nv">Error:</span>
+<span class="nv">callee:</span> <span class="nv">Huge</span> <span class="nv">mistake:</span> <span class="mi">14</span></code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_36io_conditions">srfi-36&#8201;&#8212;&#8201;I/O Conditions</h4>
+<h4 id="doc_srfi_36io_conditions">srfi-36&#8201;&#8212;&#8201;I/O Conditions</h4>
 <div class="paragraph">
 <p>
 
-<strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong> is fully supported.  See <em><a href="#_predefined_conditions">Section 7.3</a></em>
+<strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong> is fully supported.  See <em><a href="#doc_predefined_conditions">Section 7.3</a></em>
 Conditions) for the predefined conditions and when it is required to
 load this file.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_55require_extension">srfi-55&#8201;&#8212;&#8201;Require-extension</h4>
+<h4 id="doc_srfi_55require_extension">srfi-55&#8201;&#8212;&#8201;Require-extension</h4>
 <div class="paragraph">
 <p>
 
@@ -27914,7 +28391,7 @@ in a <em>require-extension</em> clause.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_69basic_hash_tables">srfi-69&#8201;&#8212;&#8201;Basic Hash Tables</h4>
+<h4 id="doc_srfi_69basic_hash_tables">srfi-69&#8201;&#8212;&#8201;Basic Hash Tables</h4>
 <div class="paragraph">
 <p>
 
@@ -27926,7 +28403,7 @@ behaviour, you need use a <code>require-feature</code> in your code.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_88keyword_objects">srfi-88&#8201;&#8212;&#8201;Keyword Objects</h4>
+<h4 id="doc_srfi_88keyword_objects">srfi-88&#8201;&#8212;&#8201;Keyword Objects</h4>
 <div class="paragraph">
 <p>
 <strong><a href="http://srfi.schemers.org/srfi-88/srfi-88.html">SRFI-88</a></strong> is fully
@@ -27949,7 +28426,7 @@ To obtain the symbol <code>:</code> in <strong><em>STklos</em></strong>, you mus
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_116immutable_list_library">srfi-116&#8201;&#8212;&#8201;Immutable List Library</h4>
+<h4 id="doc_srfi_116immutable_list_library">srfi-116&#8201;&#8212;&#8201;Immutable List Library</h4>
 <div class="paragraph">
 <p>
 
@@ -30309,7 +30786,7 @@ is an ilist rather than a list. It is equivalent to</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_138compiling_scheme_programs_to_executables">srfi-138&#8201;&#8212;&#8201;Compiling Scheme programs to executables</h4>
+<h4 id="doc_srfi_138compiling_scheme_programs_to_executables">srfi-138&#8201;&#8212;&#8201;Compiling Scheme programs to executables</h4>
 <div class="paragraph">
 <p>
 
@@ -30324,7 +30801,7 @@ use with <code>cond-expand</code> in the compiled code only. It will not include
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_145assumptions">srfi-145&#8201;&#8212;&#8201;Assumptions</h4>
+<h4 id="doc_srfi_145assumptions">srfi-145&#8201;&#8212;&#8201;Assumptions</h4>
 <div class="paragraph">
 <p>
 
@@ -30333,7 +30810,7 @@ use with <code>cond-expand</code> in the compiled code only. It will not include
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_169underscores_in_numbers">srfi-169&#8201;&#8212;&#8201;Underscores in numbers</h4>
+<h4 id="doc_srfi_169underscores_in_numbers">srfi-169&#8201;&#8212;&#8201;Underscores in numbers</h4>
 <div class="paragraph">
 <p>
 
@@ -30344,7 +30821,7 @@ underscores in numbers.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_216sicp_prerequisites_portable">srfi-216&#8201;&#8212;&#8201;SICP Prerequisites (Portable)</h4>
+<h4 id="doc_srfi_216sicp_prerequisites_portable">srfi-216&#8201;&#8212;&#8201;SICP Prerequisites (Portable)</h4>
 <div class="paragraph">
 <p>
 
@@ -30355,7 +30832,7 @@ use it with one of the previous libraries.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_230atomic_operations">srfi-230&#8201;&#8212;&#8201;Atomic Operations</h4>
+<h4 id="doc_srfi_230atomic_operations">srfi-230&#8201;&#8212;&#8201;Atomic Operations</h4>
 <div class="paragraph">
 <p></p>
 </div>
@@ -30366,7 +30843,7 @@ the module <code>(srfi 230)</code> is defined, but it exports nothing.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srfi_238codesets">srfi-238&#8201;&#8212;&#8201;Codesets</h4>
+<h4 id="doc_srfi_238codesets">srfi-238&#8201;&#8212;&#8201;Codesets</h4>
 <div class="paragraph">
 <p></p>
 </div>
@@ -30432,7 +30909,7 @@ is a list of triplets (code-number symbol message) where <code>symbol</code> and
 </div>
 </div>
 <div class="sect1">
-<h2 id="_bibliography">Bibliography</h2>
+<h2 id="doc_bibliography">Bibliography</h2>
 <div class="sectionbody">
 <div class="ulist bibliography">
 <ul class="bibliography">
@@ -30506,17 +30983,17 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_idiosync">Appendix A: STklos Idiosyncrasies</h2>
+<h2 id="doc_idiosync">Appendix A: STklos Idiosyncrasies</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_stklos_libraries">A.1. STklos libraries</h3>
+<h3 id="doc_stklos_libraries">A.1. STklos libraries</h3>
 <div class="paragraph">
 <p>This section describes the standard libraries provided by <strong><em>STklos</em></strong>.</p>
 </div>
 <div class="sect3">
-<h4 id="_the_scheme_libraries">A.1.1. The (scheme &#8230;&#8203;) Libraries</h4>
+<h4 id="doc_the_scheme_libraries">A.1.1. The (scheme &#8230;&#8203;) Libraries</h4>
 <div class="sect4">
-<h5 id="_r7rs_small_libraries">R<sup>7</sup>RS Small Libraries</h5>
+<h5 id="doc_r7rs_small_libraries">R<sup>7</sup>RS Small Libraries</h5>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> offers all the libraries defined by R<sup>7</sup>RS:</p>
 </div>
@@ -30577,7 +31054,7 @@ with Modules</strong>&#8201;&#8212;&#8201;LISP and Symbolic Computation, 91996, 
 </div>
 </div>
 <div class="sect4">
-<h5 id="_r7rs_large_libraries">R<sup>7</sup>RS Large Libraries</h5>
+<h5 id="doc_r7rs_large_libraries">R<sup>7</sup>RS Large Libraries</h5>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> supports some libraries of the (under development) R<sup>7</sup>RS Large editions.</p>
 </div>
@@ -30897,7 +31374,7 @@ to be anything other than <code>little</code> or <code>big</code>.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_the_srfi_libraries">A.1.2. The (srfi &#8230;&#8203;) Libraries</h4>
+<h4 id="doc_the_srfi_libraries">A.1.2. The (srfi &#8230;&#8203;) Libraries</h4>
 <div class="paragraph">
 <p>All the SRFI supported by <strong><em>STklos</em></strong> are placed under
 the <code>srfi</code> meta library and their name is SRFI number. Hence, to use
@@ -30905,11 +31382,11 @@ the exported symbols of <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.
 <code>(srfi 1)</code> library.</p>
 </div>
 <div class="paragraph">
-<p>See  <em><a href="#_srfis">Chapter 13</a></em> for more information</p>
+<p>See  <em><a href="#doc_srfis">Chapter 13</a></em> for more information</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_the_stklos_libraries">A.1.3. The (stklos &#8230;&#8203;) Libraries</h4>
+<h4 id="doc_the_stklos_libraries">A.1.3. The (stklos &#8230;&#8203;) Libraries</h4>
 <div class="paragraph">
 <p>This section describes the standard libraries which are placed under
 the <code>stklos</code> meta library. Note that <strong><em>STklos</em></strong> extensions can add
@@ -30917,7 +31394,7 @@ some libraries in the <code>stklos</code> meta library; they will be described i
 the extension documentation.</p>
 </div>
 <div class="sect4">
-<h5 id="_stklos_itrie_library">(stklos itrie) Library</h5>
+<h5 id="doc_stklos_itrie_library">(stklos itrie) Library</h5>
 <div class="paragraph">
 <p>This library was designed by Jerônimo Pellegrini
 (<a href="https://github.com/jpellegrini">@jpellegrini</a>).</p>
@@ -32179,7 +32656,7 @@ is negative. It is an error if <code>step</code> is zero.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_stklos_preproc_library">(stklos preproc) Library</h5>
+<h5 id="doc_stklos_preproc_library">(stklos preproc) Library</h5>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -32196,7 +32673,7 @@ This library  must be described
 </div>
 </div>
 <div class="sect2">
-<h3 id="_stklos_compiler">A.2. STklos compiler</h3>
+<h3 id="doc_stklos_compiler">A.2. STklos compiler</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> always compiles code into bytecode before executing&#8201;&#8212;&#8201;it
 is not an interpreter, but a bytecode compiler with an ad-hoc virtual
@@ -32222,7 +32699,7 @@ Please refer to its manpage for more information.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(compile-file input output) </strong></code><br>
-<code><strong>(compile-file input output :prepend cmds) </strong></code><br></p>
+<code><strong>(compile-file input output #:prepend cmds #:case-sensitive cs) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -32232,18 +32709,31 @@ whose name is <code>output</code> (if <code>compile-file</code> fails, <code>out
 deleted).</p>
 </div>
 <div class="paragraph">
-<p>If the <code>:prepend</code> keyword argument is given, it must be a list of
-expressions, which will be compiled before the rest of the input
-file. This can be used to define variables that the compiled program
-will use (but it does not affect the compiler itself).</p>
+<p>This command accepts two optional keywords:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#:prepend</code> :  it must be a list of  expressions, which will be
+compiled before the rest of the input  file. This can be used
+to define variables that the compiled program  will use (but it
+does not affect the compiler itself).</p>
+</li>
+<li>
+<p><code>#:case-sensitive</code> : it tells if the compiler reads symbols in
+case sensitive mode (as R<sup>7</sup>RS) or not not (as R<sup>5</sup>RS).
+By default the compiler is in case sensitive mode.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>This procedure will not set the executable bit on the generated file.</p>
 </div>
 <div class="sect3">
-<h4 id="_compiler_flags">A.2.1. Compiler flags</h4>
+<h4 id="compflags">A.2.1. Compiler flags</h4>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> compiler behaviour can be customized by several parameters. Those parameters are described below.</p>
+<p><strong><em>STklos</em></strong> compiler behaviour can be customized by several parameters.
+Those parameters are described below.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_compiler:time-display'></a>
@@ -32556,6 +33046,39 @@ how it works.</p>
 <p>See that the <code>GLOBAL-REF</code> and <code>PUSH</code> were turned by the peephole optimizer
 into <code>GLOBAL-REF-PUSH</code>.</p>
 </div>
+<div class="paragraph">
+<p><a id='P_compiler:verify-assume'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(compiler:verify-assume) </strong></code><br>
+<code><strong>(compiler:verify-assume bool) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter is used by the <code>assume</code> form (<strong><a href="http://srfi.schemers.org/srfi-145/srfi-145.html">SRFI-145</a></strong>).
+If its value is <code>#t</code>, assumptions are not verified at all (their code is
+not compiled). Otherwise, assumptions are verified.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When <strong><em>STklos</em></strong> is in debug modethe debug mode, this parameter is
+forced to <code>#t</code>.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -32575,7 +33098,7 @@ Inc. <a href="https://fsf.org/" class="bare">https://fsf.org/</a></p>
 license document, but changing it is not allowed.</p>
 </div>
 <div class="sect2">
-<h3 id="_preamble">B.1. PREAMBLE</h3>
+<h3 id="doc_preamble">B.1. PREAMBLE</h3>
 <div class="paragraph">
 <p>The purpose of this License is to make a manual, textbook, or other
 functional and useful document ``free" in the sense of freedom: to
@@ -32602,7 +33125,7 @@ works whose purpose is instruction or reference.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_applicability_and_definitions">B.2. APPLICABILITY AND DEFINITIONS</h3>
+<h3 id="doc_applicability_and_definitions">B.2. APPLICABILITY AND DEFINITIONS</h3>
 <div class="paragraph">
 <p>This License applies to any manual or other work, in any medium, that
 contains a notice placed by the copyright holder saying it can be
@@ -32701,7 +33224,7 @@ meaning of this License.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_verbatim_copying">B.3. VERBATIM COPYING</h3>
+<h3 id="doc_verbatim_copying">B.3. VERBATIM COPYING</h3>
 <div class="paragraph">
 <p>You may copy and distribute the Document in any medium, either
 commercially or noncommercially, provided that this License, the
@@ -32719,7 +33242,7 @@ you may publicly display copies.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_copying_in_quantity">B.4. COPYING IN QUANTITY</h3>
+<h3 id="doc_copying_in_quantity">B.4. COPYING IN QUANTITY</h3>
 <div class="paragraph">
 <p>If you publish printed copies (or copies in media that commonly have
 printed covers) of the Document, numbering more than 100, and the
@@ -32761,7 +33284,7 @@ them a chance to provide you with an updated version of the Document.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_modifications">B.5. MODIFICATIONS</h3>
+<h3 id="doc_modifications">B.5. MODIFICATIONS</h3>
 <div class="paragraph">
 <p>You may copy and distribute a Modified Version of the Document under the
 conditions of sections 2 and 3 above, provided that you release the
@@ -32884,7 +33407,7 @@ imply endorsement of any Modified Version.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_combining_documents">B.6. COMBINING DOCUMENTS</h3>
+<h3 id="doc_combining_documents">B.6. COMBINING DOCUMENTS</h3>
 <div class="paragraph">
 <p>You may combine the Document with other documents released under this
 License, under the terms defined in section 4 above for modified
@@ -32912,7 +33435,7 @@ must delete all sections Entitled "Endorsements".</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_collections_of_documents">B.7. COLLECTIONS OF DOCUMENTS</h3>
+<h3 id="doc_collections_of_documents">B.7. COLLECTIONS OF DOCUMENTS</h3>
 <div class="paragraph">
 <p>You may make a collection consisting of the Document and other documents
 released under this License, and replace the individual copies of this
@@ -32928,7 +33451,7 @@ other respects regarding verbatim copying of that document.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_aggregation_with_independent_works">B.8. AGGREGATION WITH INDEPENDENT WORKS</h3>
+<h3 id="doc_aggregation_with_independent_works">B.8. AGGREGATION WITH INDEPENDENT WORKS</h3>
 <div class="paragraph">
 <p>A compilation of the Document or its derivatives with other separate and
 independent documents or works, in or on a volume of a storage or
@@ -32949,7 +33472,7 @@ they must appear on printed covers that bracket the whole aggregate.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_translation">B.9. TRANSLATION</h3>
+<h3 id="doc_translation">B.9. TRANSLATION</h3>
 <div class="paragraph">
 <p>Translation is considered a kind of modification, so you may distribute
 translations of the Document under the terms of section 4. Replacing
@@ -32971,7 +33494,7 @@ its Title (section 1) will typically require changing the actual title.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_termination">B.10. TERMINATION</h3>
+<h3 id="doc_termination">B.10. TERMINATION</h3>
 <div class="paragraph">
 <p>You may not copy, modify, sublicense, or distribute the Document except
 as expressly provided under this License. Any attempt otherwise to copy,
@@ -33003,7 +33526,7 @@ not give you any rights to use it.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_future_revisions_of_this_license">B.11. FUTURE REVISIONS OF THIS LICENSE</h3>
+<h3 id="doc_future_revisions_of_this_license">B.11. FUTURE REVISIONS OF THIS LICENSE</h3>
 <div class="paragraph">
 <p>The Free Software Foundation may publish new, revised versions of the
 GNU Free Documentation License from time to time. Such new versions will
@@ -33025,7 +33548,7 @@ permanently authorizes you to choose that version for the Document.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_relicensing">B.12. RELICENSING</h3>
+<h3 id="doc_relicensing">B.12. RELICENSING</h3>
 <div class="paragraph">
 <p>"Massive Multiauthor Collaboration Site" (or "MMC Site") means any
 World Wide Web server that publishes copyrightable works and also
@@ -33060,7 +33583,7 @@ provided the MMC is eligible for relicensing.</p>
 <div style="page-break-after: always;"></div>
 </div>
 <div class="sect2">
-<h3 id="_addendum_how_to_use_this_license_for_your_documents">B.13. ADDENDUM: How to use this License for your documents</h3>
+<h3 id="doc_addendum_how_to_use_this_license_for_your_documents">B.13. ADDENDUM: How to use this License for your documents</h3>
 <div class="paragraph">
 <p>To use this License in a document you have written, include a copy of
 the License in the document and put the following copyright and license

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-0.stk                                 -- SRFI-0 aka cond-expand
 ;;;;
-;;;; Copyright © 1999-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -96,7 +96,7 @@
  * (require-feature 'lists)      ;; Since this feature name is an alias for SRFI-1
  * @end lisp
  *
- * See also <<_srfis>> for more information.
+ * See also <<doc_srfis>> for more information.
 doc>
 |#
 (define (require-feature feat)

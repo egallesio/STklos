@@ -216,7 +216,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -659,7 +658,7 @@ clean-am:
 	rm -f *~
 
 distclean-am: clean-am
-	(cd demos; make distclean)
+	(cd demos && make distclean)
 	rm -f Makefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

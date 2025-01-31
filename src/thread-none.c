@@ -1,7 +1,7 @@
 /*
  * thread-none.c            -- Threads support in STklos
  *
- * Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2006-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,21 +27,28 @@
 #include "stklos.h"
 #include "vm.h"
 
-SCM STk_primordial_thread = NULL;
+SCM STk_primordial_thread;
 SCM STk_cond_thread_terminated;
 static SCM cond_thread_abandonned_mutex, cond_join_timeout;
 
 static vm_thread_t *current_vm;
 
 
+static void verify_thread(SCM thr)
+{
+  if (thr && thr != STk_primordial_thread) STk_error("bad thread ~s", thr);
+}
+
+
 vm_thread_t *STk_get_current_vm(void){
   return current_vm;
 }
 
+
+
 DEFINE_PRIMITIVE("current-thread", current_thread, subr0, (void))
 {
-  vm_thread_t *vm = STk_get_current_vm();
-  return vm->scheme_thread;
+  return STk_primordial_thread;
 }
 
 DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
@@ -72,6 +79,46 @@ DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1,
 
 }
 
+/*
+ *
+ * Thread memory allocation counter management
+ *
+ */
+static unsigned long _allocations     = 0UL;
+static unsigned long _bytes_allocated = 0UL;
+
+#define THREAD_ALLOCATIONS(thr)      _allocations
+#define THREAD_BYTES_ALLOCATED(thr)  _bytes_allocated
+
+void STk_thread_inc_allocs(SCM _UNUSED(thr), size_t size)
+{
+  THREAD_ALLOCATIONS(thr)++;
+  THREAD_BYTES_ALLOCATED(thr) += size;
+}
+
+DEFINE_PRIMITIVE("%thread-allocation-reset!", thread_allocs_reset, subr01, (SCM thr))
+{
+  verify_thread(thr);
+  THREAD_BYTES_ALLOCATED(thr) = 0;
+  THREAD_ALLOCATIONS(thr)     = 0;
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%thread-allocation-counter", thread_alloc_count, subr01, (SCM thr))
+{
+  verify_thread(thr);
+
+  return STk_ulong2integer(THREAD_ALLOCATIONS(thr));
+}
+
+DEFINE_PRIMITIVE("%thread-allocation-bytes", thread_alloc_bytes, subr01, (SCM thr))
+{
+  verify_thread(thr);
+  return STk_ulong2integer(THREAD_BYTES_ALLOCATED(thr));
+}
+
+
+
 int STk_init_threads(int stack_size, void *start_stack)
 {
   /* Define the threads exceptions */
@@ -90,13 +137,18 @@ int STk_init_threads(int stack_size, void *start_stack)
   current_vm = STk_allocate_vm(stack_size);
   current_vm->scheme_thread = STk_false;
   current_vm->start_stack   = start_stack;
-  STk_primordial_thread = STk_false;
+  STk_primordial_thread     = STk_make_uninterned_symbol("primordial");
 
   /* Thread primitives */
   ADD_PRIMITIVE(current_thread);
   ADD_PRIMITIVE(thread_system);
   ADD_PRIMITIVE(thread_dynwind_stack);
   ADD_PRIMITIVE(thread_dynwind_stack_set);
+
+  /* GC counting primitives (acting on globals since we have no thread) */
+  ADD_PRIMITIVE(thread_allocs_reset);
+  ADD_PRIMITIVE(thread_alloc_count);
+  ADD_PRIMITIVE(thread_alloc_bytes);
 
   /* Fake primitives */
   ADD_PRIMITIVE(threadno);

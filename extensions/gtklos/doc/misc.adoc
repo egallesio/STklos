@@ -1,0 +1,97 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.net]
+//    Creation date:  31-Oct-2024 09:48
+
+== Misc. functions
+
+
+This part of the document describes the public functions which have not
+detailed before and are exported by the `(stklos gtklos)` library.
+
+
+//----------------------------------------------------------------------
+indexterm:[timeout _function_]
+==== timeout
+
+The function `timeout` permits to add a callback which is called
+periodically. The callback is integrated in the GTK event loop. It takes
+two parameters:
+
+1. a delay (in millisecond) which is the period of the repetition
+2. a thumb procedure which is the callback. If this procedure returns `#f`
+the callback is destroyed. Otherwise, it will be called after the given delay.
+
+This function returns an integer which is the event-loop ID of the callback.
+It can be used to destroy a callback with the function `kill-idle-callback`
+(see below).
+
+
+// ----------------------------------------------------------------------
+indexterm:[timeout-seconds _function_]
+==== timeout-seconds
+
+The function `timeout` permits to add a callback which is called
+periodically. The callback is integrated in the GTK event loop.  This function
+is preferred if you want to have a timer in the “seconds” range and do not
+care about the exact time of the first call of the timer. It allows for more
+optimizations and more efficient system power usage.  It takes two parameters:
+
+1. a delay (in second) which is the period of the repetition
+2. a thumb procedure which is the callback. If this procedure returns `#f`
+the callback is destroyed. Otherwise, it will be called after the given delay.
+
+This function returns an integer which is the event-loop ID of the callback.
+It can be used to destroy a callback with the function `kill-idle-callback`
+(see below).
+
+
+// ----------------------------------------------------------------------
+indexterm:[when-idle _function_]
+==== when-idle
+
+The function `when-idle` takes one parameter (a function without parameter) to
+be called whenever there are no higher priority events pending to the default
+main loop. If this function returns `#t` it is automatically removed from the
+list of event sources and will not be called again.
+
+This function returns an integer which is the event-loop ID of the callback.
+It can be used to destroy a callback with the function `kill-idle-callback`
+(see below).
+
+// ----------------------------------------------------------------------
+indexterm:[kill-idle-callback _function_]
+==== kill-idle-callback
+
+The `kill-idle-callback` takes one parameter: the callback ID to remove form
+the event loop (a callback ID, is the value returned by a function such as
+`timeout` or `when-idle`).
+
+
+
+// ----------------------------------------------------------------------
+indexterm:[gtk-main _function_]
+==== gtk-main
+
+The function `gtk-main` run the main event loop of GTK. This function should
+be called at the end of a GUI program to take into account the signals and
+event of this program and, consequently, interact with the user.
+
+// ----------------------------------------------------------------------
+indexterm:[start-interactive-gtk _function_]
+==== start-interactive-gtk
+
+This function is useful when developing an application in the {{stklos}} REPL.
+This function tries to connect the REPL to the GTK main event loop. Hence,
+when your keyboard is idle, GTK event are processed.
+
+
+
+
+
+
+
+
+

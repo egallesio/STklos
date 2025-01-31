@@ -61,6 +61,8 @@ it is probably only useful if you want to hack the VM.
 Prepend the directory <dir> to the compiler loading path.
 .IP "--append-load-path=<dir>, -A <dir>"
 Append the directory <dir> to the compiler loading path.
+.IP "--includes-use-load-path"
+\fIInclude\fR and \fIinclude-ci\fR use the \fIload-path\fR parameter object.
 .IP "--no-time"
 Do not display the compilation time
 .IP "-F, --compiler-flags=list"

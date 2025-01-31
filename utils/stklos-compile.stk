@@ -29,6 +29,7 @@
 (define *prepend-code* '())
 (define *c-code* #f)
 (define *expr* #f)
+(define *case-sensitive* #t)
 
 ;; ----------------------------------------------------------------------
 ;;      convert-to-C ...
@@ -98,17 +99,19 @@
 ;; ----------------------------------------------------------------------
 ;;      compile-to-bytecode ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-bytecode file out prepend)
-  (compile-file file out :prepend prepend)
+(define (compile-to-bytecode file out)
+  (compile-file file out
+                :prepend *prepend-code*
+                :case-sensitive *case-sensitive*)
   (chmod out #o755))
 
 ;; ----------------------------------------------------------------------
 ;;      compile-to-C-code ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-C-code file out prepend)
+(define (compile-to-C-code file out)
   (let ((tmp  (create-temp-file))
         (name (file-prefix (basename file))))
-    (compile-to-bytecode file tmp prepend)
+    (compile-to-bytecode file tmp)
     (convert-to-C tmp out name)
     (remove-file tmp)))
 
@@ -122,9 +125,9 @@
      ""
      "Input options"
      (("case-sensitive" :alternate "c"  :help "Be case sensitive on symbols")
-        (read-case-sensitive #t))
+      (set! *case-sensitive* #t))
      (("case-insensitive" :alternate "i"  :help "Be case insensitive on symbols")
-      (read-case-sensitive #f))
+      (set! *case-sensitive* #f))
      (("colon-position" :alternate "p" :arg pos
        :help "Allowed position of ':' for keywords")
       (cond
@@ -156,7 +159,8 @@
         (compiler:gen-line-number #t))
      (("show-instructions" :alternate "S" :help "Show instructions in generated file")
          (compiler:show-assembly-code #t))
-     (("compiler-flags" :alternate "F" :arg flags :help "Add (+) or suppress (-) compiler flags")
+     (("compiler-flags" :alternate "F" :arg flags
+       :help "Add (+) or suppress (-) compiler flags")
       (%compiler-set-flags flags))
 
      "Path options"
@@ -166,6 +170,9 @@
      (("append-load-path"  :alternate "A" :arg dir
        :help "Append <dir> to the loading path")
       (set! (load-path) (append (load-path) (list dir))))
+     (("includes-use-load-path"
+       :help "include and include-ci use the load-path parameter")
+      (includes-use-load-path #t))
 
      "Misc. options"
      (("no-time" :help "Don't display file compilation time")
@@ -188,6 +195,7 @@
      "    source-rewrite     Permit source rewrite/simplification"
      "    unroll-iterations  Set the number of iterations to be unrolled"
      "    peephole-optimizer Use peephole optimizer"
+     "    verify-assume      Produce code to verify SRFI-145 assume forms"
 
      (else
       (cond
@@ -208,8 +216,8 @@
                            (eprintf "~a:0: Error: ~a\n" in (condition-message c))
                            (emergency-exit 1))
               (if *c-code*
-                  (compile-to-C-code   in *output* *prepend-code*)
-                  (compile-to-bytecode in *output* *prepend-code*))))
+                  (compile-to-C-code   in *output*)
+                  (compile-to-bytecode in *output*))))
          (exit 0))
         (else
           (arg-usage (current-error-port))

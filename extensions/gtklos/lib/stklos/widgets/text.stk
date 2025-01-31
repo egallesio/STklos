@@ -1,7 +1,7 @@
 ;;;;
 ;;;; text.stk   -- GTklos Text Widget
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -216,7 +216,7 @@
 ;;
 (define-method text-cut-clipboard ((t <text>))
   (gtk-text-buffer-cut-clipboard (text-buffer t)
-                                 (gtk-clipboard-get 1)    ; 0 = GDK_NONE
+                                 (gtk-clipboard-get 0)    ; 0 = GDK_NONE
                                  #t))
 
 (define-method text-copy-clipboard ((t <text>))

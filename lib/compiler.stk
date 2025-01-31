@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -33,15 +33,12 @@
           %compiler-new-label
           %macro-expand
 
-          ;; FIXME
           compiler-current-module
+          compiler-current-port
           when-compile
           when-load-and-compile
           %syntax-error
           %compile-time-define)
-
-
-(define *compiler-port* #f)
 
 ;; ----------------------------------------------------------------------
 ;;  Define the inlining tables
@@ -212,6 +209,7 @@
     (add-file-module-list! new)
     new))
 
+(define-parameter compiler-current-port #f)
 
 
 
@@ -460,19 +458,19 @@ doc>
 (define (compile-reference name env epair tail?)
   (compile-access name env epair #t))
 
-;; compile-set! will just call compile-access, and when doing so, will
+;; compile-%%set! will just call compile-access, and when doing so, will
 ;; set the 'ref' argument to #f. The 'ref' argument to compile-access
 ;; means "this is just a reference, not an assignment".
-;; Before calling compile-access, compile-set! will check the syntax
+;; Before calling compile-access, compile-%%set! will check the syntax
 ;; for set! and also extract the variable name.
 ;;
-;;     (compile-set! '(set! a (+ 2 b)))
+;;     (compile-%%set! '(set! a (+ 2 b)))
 ;;      will make these two calls:
 ;;        (compile '(+ 2 b) env '(set! a + 2 b) #f)
 ;;        (compile-access 'a env '(set! a + 2 b) #f)
 ;;
 ;; The extended set! is treated separately.
-(define (compile-set! args env tail?)
+(define (compile-%%set! args env tail?)
   (let ((len (length (cdr args))))
     (if (= len 2)
         (let ((var (cadr args))
@@ -1259,7 +1257,9 @@ doc>
                             (b (cadr actuals)))
                         (cond
                          ((and (number? a) (number? b))
-                          (compile-constant (/ a b) env tail?))
+                          (if (eq? b 0)
+                              (compiler-error '/ epair "division by zero")
+                              (compile-constant (/ a b) env tail?)))
                          ((small-integer-constant? b)
                           (oper2 'IN-SINT-DIV2 a b))
                          (else
@@ -1270,12 +1270,15 @@ doc>
          ((2) (let ((a (car actuals))
                     (b (cadr actuals)))
                 (cond
+                 ((and (eq? fct 'fxquotient) (eq? b 0))
+                  (compiler-error 'fxquotient epair "division by 0"))
                  ((and (fixnum? a) (fixnum? b))
                   (compile-constant (case fct
                                       ((fx+) (fx+ a b))
                                       ((fx-) (fx- a b))
                                       ((fx*) (fx* a b))
-                                      (else  (fxquotient a b)))
+                                      (else
+                                       (fxquotient a b)))
                                     env
                                     tail?))
                  ((and (small-integer-constant? a)
@@ -1338,8 +1341,8 @@ doc>
       ((cdr)    (comp1 'IN-CDR))
       ((null?)  (comp1 'IN-NULLP))
       ((not)    (comp1 'IN-NOT))
-      ((list)   (compile-args actuals env)
-       (emit 'IN-LIST len))
+      ((list)           (compile-args actuals env)
+                        (emit 'IN-LIST len))
       ((vector-ref)     (comp2 'IN-VREF))
       ((vector-set!)    (comp3 'IN-VSET))
       ((string-ref)     (comp2 'IN-SREF))
@@ -1826,30 +1829,32 @@ doc>
 ;;
 ;; INCLUDE
 ;;
-(define (%include-file name)
+(define (%include-file name  case-sensitive?)
   (let ((port (open-input-file name))
-        (old  *compiler-port*))
-    (with-handler (lambda (c) (set! *compiler-port* old) (raise c))
-                  (set! *compiler-port* port)
-
+        (old  (compiler-current-port)))
+    (with-handler (lambda (c) (set! (compiler-current-port) old) (raise c))
+                  (set! (compiler-current-port) port)
+                  (unless case-sensitive?
+                    (%port-case-sensitive-set! port #f))
                   (do ((expr (%read port) (%read port)))
                       ((eof-object? expr))
                     (compile expr #f expr #f))
 
-                  (set! *compiler-port* old))
+                  (set! (compiler-current-port) old))
     (close-port port)))
 
 
-(define (compile-include e env tail)
+(define (compile-%%include e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include e "bad include directive ~S" e))
-  (for-each %include-file (cdr e)))
+  (for-each (lambda (f) (%include-file f #t))
+            (cdr e)))
 
-(define (compile-include-ci e env tail)
+(define (compile-%%include-ci e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include-ci e "bad include directive ~S" e))
-  (parameterize ((read-case-sensitive #f))
-    (for-each %include-file (cdr e))))
+  (for-each (lambda (f) (%include-file f #f))
+            (cdr e)))
 
 
 ;; ======================================================================
@@ -1863,7 +1868,7 @@ doc>
 ;;
 ;; Constants:
 ;; 0: x
-(define (compile-in-scheme e env tail)
+(define (compile-%%in-scheme e env tail)
   (if (= (length e) 2)
       (begin
         (compile (cadr e) env (cadr e) tail)
@@ -2000,7 +2005,7 @@ both forms.
 ;;;;
 ;;;; REQUIRE
 ;;;;
-(define (compile-require e env tail)
+(define (compile-%%require e env tail)
   ;; Require is not really special (it is in fact compiled as a normal call)
   ;; We just try to add the globals of the file to the list of known
   ;; globals. This is very empiric, but it avoids to add too much false
@@ -2017,7 +2022,7 @@ both forms.
 ;;;;
 ;;;; WHEN-COMPILE
 ;;;;
-(define (compile-when-compile e env tail)
+(define (compile-%%when-compile e env tail)
   (with-handler (lambda (c)
                   (eprintf "*** Exception on when-compile form of ~S\n" e)
                   (raise c))
@@ -2056,6 +2061,18 @@ both forms.
            '()
            e
            #f))
+
+;; A fast acess to symbol-value (useful when the function symbol-value is
+;; not in the environment).
+(define (compile-%%symbol-value e env tail)
+  (if (= (length e)  3)
+     (begin
+       (compile (cadr e) env (cadr e) tail)
+       (emit 'PUSH)
+       (compile (caddr e) env (caddr e) tail)
+       (emit 'SYMBOL-VALUE))
+     (compiler-error '%%symbol-value e "bas usage ~S" e)))
+
 
 ;;;;======================================================================
 ;;;;
@@ -2097,19 +2114,20 @@ both forms.
             ((with-handler)       (compile-with-handler   e env tail?))
             ((define-macro)       (compile-define-macro   e env tail?))
 
-            ((%%set!)             (compile-set!           e env tail?))
+            ((%%set!)             (compile-%%set!         e env tail?))
 
             ((%let-syntax)        (compile-%let-syntax     e env tail?))
 
             ;; Special calls
-            ((%%require)          (compile-require        e env tail?))
-            ((%%when-compile)     (compile-when-compile   e env tail?))
-            ((%%include)          (compile-include        e env tail?))
-            ((%%include-ci)       (compile-include-ci     e env tail?))
-            ((%%in-scheme)        (compile-in-scheme      e env tail?))
+            ((%%require)          (compile-%%require      e env tail?))
+            ((%%when-compile)     (compile-%%when-compile e env tail?))
+            ((%%include)          (compile-%%include      e env tail?))
+            ((%%include-ci)       (compile-%%include-ci   e env tail?))
+            ((%%in-scheme)        (compile-%%in-scheme    e env tail?))
             ((%%source-pos)       (compile-%%source-pos   e env tail?))
             ((%%label)            (compile-%%label        e env tail?))
             ((%%goto)             (compile-%%goto         e env tail?))
+            ((%%symbol-value)     (compile-%%symbol-value e env tail?))
 
             ;; Standard call (first is not in lexical env)
             (else                 (compile-call           e env tail?)))))))

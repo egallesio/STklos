@@ -260,6 +260,15 @@ static SCM STk_set_current_error_port(SCM port)
 doc>
  */
 /*
+<doc EXT read-ci
+ * (read-ci)
+ * (read-ci port)
+ *
+ * |Read-ci| result is identical to |read| except that symbols are always
+ * read as case insensitive.
+doc>
+*/
+/*
 <doc EXT read-with-shared-structure
  * (read-with-shared-structure)
  * (read-with-shared-structure  port)
@@ -289,6 +298,12 @@ DEFINE_PRIMITIVE("read", scheme_read, subr01, (SCM port))
 {
   port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   return STk_read(port, PORT_CASE_SENSITIVEP(port));
+}
+
+DEFINE_PRIMITIVE("read-ci", scheme_read_ci, subr01, (SCM port))
+{
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
+  return STk_read(port, 0);
 }
 
 
@@ -639,7 +654,7 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
  * main difference with the |write| procedure is that |write*|
  * handles data structures with cycles. Circular structure written by
  * this procedure use the `"{{sharp}}n="`)) and  `"{{sharp}}n{{sharp}}"`))
- * notations (see <<_other_notations>>).
+ * notations (see _<<doc_other_notations>>_).
  *
  * NOTE: This function is also called |write*|.
  * The name |write*| was the name used by {{stklos}} for
@@ -1665,6 +1680,28 @@ DEFINE_PRIMITIVE("port-close-hook", port_close_hook, subr1, (SCM port))
 }
 
 
+/*
+ * Port case sensitivity accesoors
+ */
+DEFINE_PRIMITIVE("%port-case-sensitive", port_cs, subr1, (SCM port))
+{
+  if (!PORTP(port)) STk_error_bad_port(port);
+  return MAKE_BOOLEAN(PORT_CASE_SENSITIVEP(port));
+}
+
+
+DEFINE_PRIMITIVE("%port-case-sensitive-set!", port_cs_set, subr2, (SCM port,SCM val))
+{
+  if (!PORTP(port)) STk_error_bad_port(port);
+
+  if (val != STk_false)
+    PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+  else
+    PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+  return STk_void;
+}
+
+
 /*===========================================================================*\
  *
  * Initializations
@@ -1740,6 +1777,7 @@ int STk_init_port(void)
                         STk_set_current_error_port, STk_STklos_module);
 
   ADD_PRIMITIVE(scheme_read);
+  ADD_PRIMITIVE(scheme_read_ci);
   ADD_PRIMITIVE(scheme_read_cst);
   ADD_PRIMITIVE(read_char);
   ADD_PRIMITIVE(read_bytes);
@@ -1786,6 +1824,9 @@ int STk_init_port(void)
   ADD_PRIMITIVE(port_close_hook);
   ADD_PRIMITIVE(port_close_hook_set);
 
+  ADD_PRIMITIVE(port_cs);
+  ADD_PRIMITIVE(port_cs_set);
+  
   return STk_init_fport() &&
          STk_init_sport() &&
          STk_init_vport();

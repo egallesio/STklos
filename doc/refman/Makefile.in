@@ -169,7 +169,6 @@ CYGPATH_W = @CYGPATH_W@
 C_COMPILE = @C_COMPILE@
 C_LINK = @C_LINK@
 C_VERSION = @C_VERSION@
-DEFAULT_CS = @DEFAULT_CS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLIBS = @DLLIBS@
@@ -311,25 +310,26 @@ SOURCES = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc          \
            stklos.adoc threads.adoc
 
 DOCDB = ../DOCDB
-SPP = $(STKLOS_BINARY) -q -I ../../lib -f ../../utils/stklos-pp.stk --
+SPP = $(STKLOS_BINARY) -c -q -I ../../lib -f ../../utils/stklos-pp.stk --
 HTMLMAIN = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html
-MULTI_AUX = FDL.html                                        \
-            _bibliography.html                              \
-            _customizations.html                            \
-            _exceptions_and_conditions.html                 \
-            _expressions.html                               \
-            _foreign_function_interface.html                \
-            _introduction.html                              \
-            _pattern_matching.html                          \
-            _preface.html                                   \
-            _program_structure.html                         \
-            _regular_expressions.html                       \
-            _srfis.html                                     \
-            _standard_procedures.html                       \
-            _stklos_object_system.html                      \
-            _threads_mutexes_and_condition_variables.html   \
-            _using_the_slib_package.html
+MULTI_AUX = FDL.html                                           \
+            doc_bibliography.html                              \
+            doc_customizations.html                            \
+            doc_exceptions_and_conditions.html                 \
+            doc_expressions.html                               \
+            doc_foreign_function_interface.html                \
+            doc_idiosync.html                                  \
+            doc_introduction.html                              \
+            doc_pattern_matching.html                          \
+            doc_preface.html                                   \
+            doc_program_structure.html                         \
+            doc_regular_expressions.html                       \
+            doc_srfis.html                                     \
+            doc_standard_procedures.html                       \
+            doc_stklos_object_system.html                      \
+            doc_threads_mutexes_and_condition_variables.html   \
+            doc_using_the_slib_package.html
 
 PDF = stklos-ref.pdf
 IMG = images/hierarchy.png
@@ -592,7 +592,7 @@ extradoc: multi pdf
 # ----------------------------------------------------------------------
 # For the Multiple file version of the manual, we need to install
 # https://github.com/owenh000/asciidoctor-multipage
-# The backreferences are alawas on the name of the source file.
+# The backreferences are always on the name of the source file.
 # So during the build of this version of the manual we create a link on
 # tmp-html.txt
 ../HTML/$(HTMLMULTI): tmp-html.txt
@@ -620,7 +620,7 @@ tmp-pdf.txt: $(SOURCES) $(DOCDB)
 	$(SPP) -D "doc-fmt: pdf" stklos.adoc > $@
 # ----------------------------------------------------------------------
 $(DOCDB):
-	(cd ..; $(MAKE) docdb)
+	(cd .. && $(MAKE) docdb)
 
 clean:
 	rm -f  tmp-html.txt tmp-pdf.txt stklos-ref-multi.txt tmp.pdf *~

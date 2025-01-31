@@ -1,7 +1,7 @@
 ;;;;
 ;;;; menu.stk           -- GTK+ Menu Management
 ;;;;
-;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -60,8 +60,46 @@
 ;;           < m e n u - b a r >
 ;;
 ;;======================================================================
+(define (pd->int dir)
+  (case dir
+    ((left->right) 0)
+    ((right->left) 1)
+    ((top->bottom) 2)
+    ((bottom->top) 3)
+    (else (error "bad direction ~S" dir))))
+
+(define (int->pd val)
+  (case val
+    ((0) 'left->right)
+    ((1) 'right->left)
+    ((2) 'top->bottom)
+    ((3) 'bottom->top)))
+
+
 (define-class <menu-bar> (<gtk-menu-shell>)
-  ())
+  ((chiild-pack-direction   #:accessor       child-pack-direction
+                            #:init-keyword   #:child-pack-direction
+                            #:allocation     #:virtual
+                            #:slot-ref       (lambda (o)
+                                               (int->pd (%gtk-get-property
+                                                         (wid o)
+                                                         "child-pack-direction")))
+                            #:slot-set!     (lambda (o v)
+                                              (%gtk-set-property!
+                                                   (wid o)
+                                                   "child-pack-direction"
+                                                   (pd->int v))))
+   (pack-direction          #:accessor       pack-direction
+                            #:init-keyword   #:pack-direction
+                            #:allocation     #:virtual
+                            #:slot-ref       (lambda (o)
+                                               (int->pd (%gtk-get-property
+                                                         (wid o)
+                                                         "pack-direction")))
+                            #:slot-set!     (lambda (o v)
+                                              (%gtk-set-property! (wid o)
+                                                                  "pack-direction"
+                                                                  (pd->int v))))))
 
 (define-method realize-widget ((self <menu-bar>) initargs)
   (let ((mb (gtk-menu-bar-new)))
@@ -80,14 +118,7 @@
                         #:allocation     #:gtk-property)
    (reserve-toggle-size #:accessor       reserve-toggle-size
                         #:init-keyword   #:reserve-toggle-size
-                        #:allocation     #:gtk-property)
-   (tearoff-state       #:accessor       tearoff-state
-                        #:init-keyword   #:tearoff-state
-                        #:allocation     #:gtk-property)
-   (tearoff-title       #:accessor       tearoff-title
-                        #:init-keyword   #:tearoff-title
                         #:allocation     #:gtk-property)))
-
 
 (define-method realize-widget ((self <menu>) initargs)
   (let ((m (gtk-menu-new)))
@@ -129,9 +160,6 @@
                     #:gtk-name      "label")
    (right-justified #:accessor      right-justified
                     #:init-keyword  #:right-justified
-                    #:allocation    #:gtk-property)
-   (accel-path      #:accessor      accel-path
-                    #:init-keyword  #:accel-path
                     #:allocation    #:gtk-property)
    (use-underline   #:accessor      use-underline
                     #:init-keyword  #:use-underline
@@ -185,7 +213,7 @@
     (slot-set! self 'wid id)))
 
 
-(define-method initialize ((self <menu-radio-item>) initargs)
+(define-method initialize-instance ((self <menu-radio-item>) initargs)
   (next-method)
   (let ((sibling (key-get initargs #:sibling #f)))
     (when sibling
@@ -213,27 +241,28 @@
 (define-method add-items-to-menubar ((mb <menu-bar>) items)
 
   (define (fill-menu m items)
-    (let ((sibling #f))
+    (let ((sibling #f)
+          (no-command (lambda (w e) (eprintf "*** No command set for ~S\n" (text w)))))
       (for-each (lambda (x)
-                  (let ((title  (car x))
-                        (action (key-get (cdr x) #:action #f))
-                        (type   (key-get (cdr x) #:type   #:item)))
+                  (let ((title (car x))
+                        (cmd   (key-get (cdr x) #:command no-command))
+                        (type  (key-get (cdr x) #:type   #:item)))
                     (case type
                       ((#:separator)
                        (make <menu-separator-item> #:parent m))
                       ((#:item)
-                       (make <menu-item> #:text title #:parent m #:command action))
+                       (make <menu-item> #:text title #:parent m #:command cmd))
                       ((#:check)
                        (let ((val (key-get (cdr x) #:value #f)))
                          (make <menu-check-item> #:text title #:parent m #:value val
-                               #:command action)))
+                               #:command cmd)))
                       ((#:radio)
                        (let* ((first (key-get (cdr x) #:first #f))
                               (group (if first #f sibling))
                               (val   (key-get (cdr x) #:value #f)))
                          (set! sibling
                                (make <menu-radio-item> #:text title #:parent m
-                                     #:sibling group #:value val #:command action))))
+                                     #:sibling group #:value val #:command cmd))))
                       ((#:cascade)
                        (let* ((new (make <menu-item> #:text title #:parent m))
                               (sub (make <menu> #:parent new)))
@@ -266,10 +295,10 @@
 ;;;
 ;;; Exports
 ;;;
-(export <menu-bar>
-        <menu> active reserve-toggle-size tearoff-state tearoff-title
-        <menu-item> right-justified accel-path use-underline
+(export <menu-bar> pack-direction child-pack-direction
+        <menu> active reserve-toggle-size
+        <menu-item> right-justified use-underline
         <menu-check-item> value draw-as-radio inconsistent
+        <menu-radio-item> sibling
         <menu-separator-item>
         add-items-to-menubar)
-

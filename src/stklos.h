@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -454,7 +454,7 @@ int STk_init_cpointer(void);
 
 
 void *STk_find_external_function(char *path, char *fname, int error_if_absent);
-SCM STk_load_object_file(SCM f, char *fname);
+SCM STk_load_object_file(SCM f, char *fname, SCM env);
 SCM STk_info_object_file(char *fname);
 
 /*
@@ -523,6 +523,8 @@ extern SCM STk_STklos_module;
 EXTERN_PRIMITIVE("%create-module", create_module, subr1, (SCM name));
 EXTERN_PRIMITIVE("current-module", current_module, subr0, (void));
 EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module));
+EXTERN_PRIMITIVE("symbol-value", symbol_value, subr23,
+                 (SCM symbol, SCM module, SCM default_value));
 
 void STk_export_all_symbols(SCM module);
 
@@ -756,6 +758,7 @@ int STk_init_misc(void);
 long STk_integer_value(SCM x); /* Returns LONG_MIN if not representable as long */
 unsigned long STk_uinteger_value(SCM x); /* Returns ULONG_MAX if not an ulong */
 
+
   /****
    **** Real
    ****/
@@ -793,9 +796,6 @@ struct rational_obj {
 #define RATIONAL_NUM(p)         (((struct rational_obj *) (p))->num)
 #define RATIONAL_DEN(p)         (((struct rational_obj *) (p))->den)
 #define RATIONALP(p)            (BOXED_TYPE_EQ((p), tc_rational))
-#define EXACT_RATIONALP(p)      (RATIONALP(p)             && \
-                                 !REALP(RATIONAL_NUM(p))  && \
-                                 !REALP(RATIONAL_DEN(p)))
 
   /****
    **** Complex
@@ -855,7 +855,7 @@ int    STk_init_number(void);
 
 #define NUMBERP(x)      (INTP(x) || BIGNUMP(x) || REALP(x) || RATIONALP(x) || \
                          COMPLEXP(x))
-#define EXACTP(x)       (INTP(x) || BIGNUMP(x) || EXACT_RATIONALP(x) || \
+#define EXACTP(x)       (INTP(x) || BIGNUMP(x) || RATIONALP(x) || \
                          EXACT_COMPLEXP(x))
 
 /*
@@ -1011,6 +1011,9 @@ struct port_obj {
 #define PORT_BINARYP(x)         (PORT_FLAGS(x) & PORT_BINARY)
 #define PORT_TEXTUALP(x)        (PORT_FLAGS(x) & PORT_TEXTUAL)
 
+EXTERN_PRIMITIVE("read", scheme_read, subr01, (SCM port));
+EXTERN_PRIMITIVE("display", display, subr12, (SCM expr, SCM port));
+
 
 /****
  ****           sio.h primitives
@@ -1070,6 +1073,8 @@ int STk_init_vport(void);
  ****/
 EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
 EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
+EXTERN_PRIMITIVE("%port-case-sensitive-set!", port_cs_set, subr2,(SCM port,SCM val));
+
 
 void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);
@@ -1175,7 +1180,8 @@ char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
-extern int STk_read_case_sensitive;
+void STk_set_port_case_sensitivity(SCM port, int sensitive);
+  
 
 
 /*
@@ -1463,7 +1469,7 @@ SCM STk_values2vector(SCM obj, SCM vect);
 EXTERN_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv));
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 
-SCM STk_load_bcode_file(SCM f);
+  SCM STk_load_bcode_file(SCM f, SCM env);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);

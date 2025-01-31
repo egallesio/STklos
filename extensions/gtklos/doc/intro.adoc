@@ -1,0 +1,166 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//
+//           Author: Erick Gallesio [eg@stklos.net]
+//    Creation date:  31-Oct-2024 09:48
+
+== Introduction
+
+This extension permits to easily program GUI (Graphical User Interfaces) using
+the OO model of _STklos_. The model used here, is very similar to the one
+originally defined in https://conservatory.scheme.org/stk/[STk Scheme] and is
+discussed in the papers
+image:
+- https://www.gallesio.org/Publis/jfp03.pdf[Programming
+Graphical User Interfaces with Scheme], and in
+- https://www.gallesio.org/Publis/Isotas96.pdf[Designing a Meta Object Protocol
+to wrap a Standard Graphical Toolkit].
+
+Furthermore, this OO model allows you to define your own widgets thanks to the
+MOP (Meta Object Protocol) of _STklos_.
+
+=== Installation
+
+The extension is in the `+extensions/gtklos+` directory of _STklos_. It
+is configured when you run `+configure+` in the main directory of
+_STklos_. So, to compile it you just need to run
+
+[source,bash]
+----
+$ make
+----
+
+The `+demos+` directory contains several demos that can be run separately or
+with the `+run-demos+` script in this directory. Running this script, with
+
+[source,bash]
+----
+$ cd demos
+$ ./run-demos
+----
+
+you should obtain something like:
+
+image::images/demos-main.png[images/demos-main,align="center"]
+
+If everything is correct, you can install the _GTklos_ extension with a
+`+make install+` in the `+gtklos+` directory. Everything will be
+installed in a sub-directory of the main _STklos_ installation
+
+=== Getting started
+
+To use the _GTklos_ extension you need to import the `+(stklos gtklos)+`
+library. This can be done with:
+
+[source,scheme]
+----
+;; Import GTKlos to access its exported symbols
+(import (stklos gtklos))
+----
+
+==== A first window
+
+The first thing you must do to make an interface consists to create an
+instance of the class `+<window>+`. For instance,
+
+[source,scheme]
+----
+stklos> {{do* (define w (make <window> #:title "A first window"))}}
+----
+
+will create a window with a title set to `+"A first window"+`. You can
+see all the slots that can be set in `+w+` by using describe:
+
+[source,scheme]
+----
+stklos> {{do* (describe w)}}
+stklos>
+----
+
+indexterm:[start-interactive-gtk _function_]
+indexterm:[gtk-main _function_]
+Now that the window is created, we need to start the GTK+ interaction
+loop to see it effectively on our screen. This can be done by calling
+
+- `+(start-interactive-gtk)+`, or
+- `+(gtk-main)+`
+
+As said by its name, the fist form is preferred when we create an interface
+interactively in the REPL. This form, call the GTK+ event loop when your
+keyboard is idle. The second form is generally used when you create a script
+and don't use the REPL.
+
+As we can see, the _width_ and the _height_ of this window are reflected in
+the `+width+` and `+height+` of `+w+`. Hereafter, are some manipulation with
+the width of `+w+`:
+
+[source,scheme]
+----
+;; Use start-interactive-gtk to develop in the REPL
+stklos> (start-interactive-gtk)
+;; Setting the width to 400
+stklos> (slot-set! w 'width 400)
+;; Reading back the value
+stklos> (slot-ref w 'width)
+400
+;; Since accessors are defined on all slots we can also do
+stklos> (width w)
+400
+stklos> (set! (width w) 300)
+stklos> (width w)
+300
+----
+
+Of course, we can also define the widget size at creation time with a
+class such as
+
+[source,scheme]
+----
+stklos> (define w (make <window> #:title "STklos window"
+                                 #:width 400
+                                 #:height 100))
+----
+
+==== Adding a button
+
+We can add a button to a the previous window bay making an instance of a
+`+<button>+`:
+
+[source,scheme]
+----
+{{do* (define b (make <button> #:parent w #:text "A button"))}}
+----
+
+By saying that the parent of `+b+` is `+w+`, the window we have just
+created just before, this button will be _inside_ the `+w+` window. So,
+we will obtain:
+
+image::images/simple-button.png[images/simple-button,align="center"]
+
+Using describe, on `+b+` we have:
+
+[source,scheme]
+----
+stklos> {{do* (describe b)}}
+stklos>
+----
+
+The slot `+command+` is particularly important on buttons. It contains the
+callback function that will be called when we click (with left mouse button)
+on `+b+`. The function will be called with two parameters the widget which
+has been clicked and an event object which contains all the information on
+the event itself (more on that in <<command_slot>>).
+
+We can add a _command_ to the previous button with:
+
+[source,scheme]
+----
+stklos> (set! (command b)
+              (lambda (w e)
+                (printf "Button ~s was clicked\n" w)))
+----
+
+Now, when clicking the button `+b+` a message will be printed.
+
+This ends this small introduction on GTKlos.

@@ -1,7 +1,7 @@
 /*
  * gtklos.c              -- Various GTk+ wrappers for GTklos
  *
- * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2024 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -509,8 +509,8 @@ DEFINE_PRIMITIVE("event-type", event_type, subr1, (SCM event))
     case GDK_MOTION_NOTIFY     : return STk_intern("MOTION");
     case GDK_BUTTON_PRESS      :
     case GDK_2BUTTON_PRESS     :
-    case GDK_3BUTTON_PRESS     : return STk_intern("PRESS");
-    case GDK_BUTTON_RELEASE    : return STk_intern("RELEASE");
+    case GDK_3BUTTON_PRESS     : return STk_intern("BUTTON-PRESS");
+    case GDK_BUTTON_RELEASE    : return STk_intern("BUTTON-RELEASE");
     case GDK_KEY_PRESS         : return STk_intern("KEY-PRESS");
     case GDK_KEY_RELEASE       : return STk_intern("KEY-RELEASE");
     case GDK_ENTER_NOTIFY      : return STk_intern("ENTER");
@@ -524,7 +524,7 @@ DEFINE_PRIMITIVE("event-type", event_type, subr1, (SCM event))
     case GDK_PROPERTY_NOTIFY   : return STk_intern("PROPERTY");
     case GDK_SELECTION_CLEAR   : return STk_intern("SELECTION-CLEAR");
     case GDK_SELECTION_REQUEST : return STk_intern("SELECTION-REQUEST");
-    case GDK_SELECTION_NOTIFY  : return STk_intern("SELECTION");
+    case GDK_SELECTION_NOTIFY  : return STk_intern("SELECTION-NOTIFY");
     case GDK_PROXIMITY_IN      : return STk_intern("PROXIMITY-IN");
     case GDK_PROXIMITY_OUT     : return STk_intern("PROXIMITY-OUT");
     case GDK_DRAG_ENTER        : return STk_intern("DRAG-ENTER");
@@ -571,22 +571,23 @@ DEFINE_PRIMITIVE("event-y", event_y, subr1, (SCM event))
 DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
 {
   GdkEvent *ev;
-  int keyval;
+  guint keyval;
 
   if (!GTK_EVENTP(event)) error_bad_event(event);
   ev = GTK_EVENT_VALUE(event);
 
   switch (((GdkEventAny *) ev)->type) {
-  case GDK_KEY_PRESS:
+    case GDK_KEY_PRESS:
+    case GDK_KEY_RELEASE:
     keyval = ((GdkEventKey *)ev)->keyval;
     switch (keyval) {                  // Names are in <gdk/gdkkeysyms.h>
       case GDK_KEY_Return: return MAKE_CHARACTER('\n');
       case GDK_KEY_Tab:    return MAKE_CHARACTER('\t');
-      default:             keyval = (keyval < 0xff) ? keyval: 0;;
+      default:             // keyval = (keyval < 0xff) ? keyval: 0;
                            return MAKE_CHARACTER(keyval);
     }
   default:
-    return MAKE_CHARACTER(0);
+    return STk_false;
   }
 }
 
@@ -594,16 +595,28 @@ DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
 DEFINE_PRIMITIVE("event-keyval", event_keyval, subr1, (SCM event))
 {
   GdkEvent *ev;
-  guint16 keyval;
+  guint keyval;
   gboolean res;
 
   if (!GTK_EVENTP(event)) error_bad_event(event);
   ev = GTK_EVENT_VALUE(event);
 
-  res = gdk_event_get_keycode(ev, &keyval);
+  res = gdk_event_get_keyval(ev, &keyval);
   return res ? MAKE_INT(keyval): STk_false;
 }
 
+DEFINE_PRIMITIVE("event-keycode", event_keycode, subr1, (SCM event))
+{
+  GdkEvent *ev;
+  guint16 keycode;
+  gboolean res;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  res = gdk_event_get_keycode(ev, &keycode);
+  return res ? MAKE_INT(keycode): STk_false;
+}
 
 DEFINE_PRIMITIVE("event-modifiers", event_modifiers,  subr1, (SCM event))
 {
@@ -682,9 +695,9 @@ DEFINE_PRIMITIVE("event-button", event_button, subr1, (SCM event))
             return MAKE_INT(2);
          if( state & GDK_BUTTON3_MASK )
             return MAKE_INT(3);
-         return MAKE_INT(0);
+         return STk_false;
       }
-    default: return MAKE_INT(0);
+    default: return STk_false;
   }
 }
 
@@ -754,9 +767,16 @@ DEFINE_PRIMITIVE("%file-chooser-files", file_chooser_files, subr1, (SCM obj))
 
 static void stklos_interactive_gtk_loop(void) {
   if (gtk_events_pending())
-    gtk_main_iteration_do(0);
+    gtk_main_iteration_do(1);
 }
 
+
+DEFINE_PRIMITIVE("%flush-gtk-events", flush_gtk_event, subr0, (void))
+{
+  while (gtk_events_pending())
+    gtk_main_iteration_do(0);
+  return STk_void;
+}
 
 DEFINE_PRIMITIVE("%readline-idle-hook", rl_hook, subr1, (SCM ptr))
 {
@@ -792,6 +812,16 @@ DEFINE_PRIMITIVE("timeout", timeout, subr2, (SCM delay, SCM proc))
   return STk_long2integer((long) g_timeout_add(val, do_timeout_call, proc));
 }
 
+DEFINE_PRIMITIVE("timeout-seconds", timeout_seconds, subr2, (SCM delay, SCM proc))
+{
+  long val = STk_integer_value(delay);
+
+  if (val == LONG_MIN) error_bad_integer(delay);
+  if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
+
+  return STk_long2integer((long) g_timeout_add_seconds(val, do_timeout_call, proc));
+}
+
 DEFINE_PRIMITIVE("when-idle", when_idle, subr1, (SCM proc))
 {
   if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
@@ -799,7 +829,7 @@ DEFINE_PRIMITIVE("when-idle", when_idle, subr1, (SCM proc))
   return STk_long2integer((long) g_idle_add(do_timeout_call, proc));
 }
 
-DEFINE_PRIMITIVE("kill-idle", kill_idle, subr1, (SCM id))
+DEFINE_PRIMITIVE("kill-idle-callback", kill_idle_callback, subr1, (SCM id))
 {
   long val = STk_integer_value(id);
 
@@ -911,6 +941,7 @@ MODULE_ENTRY_START("stklos/gtklos") {
   ADD_PRIMITIVE_IN_MODULE(event_y, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_char, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_keyval, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_keycode, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_modifiers, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_button, gtklos_module);
 
@@ -923,8 +954,10 @@ MODULE_ENTRY_START("stklos/gtklos") {
   ADD_PRIMITIVE_IN_MODULE(rl_hook, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(timeout, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(timeout_seconds, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(when_idle, gtklos_module);
-  ADD_PRIMITIVE_IN_MODULE(kill_idle, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(kill_idle_callback, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(flush_gtk_event, gtklos_module);
 
 #if HAVE_CANVAS == 1
   /* Canvas support */

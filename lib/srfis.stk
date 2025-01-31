@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfis.stk  - The list of STklos implemented SRFIs and some utilities
 ;;;;
-;;;; Copyright © 2020-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2020-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -272,7 +272,7 @@
     ;; 231 Intervals and Generalized Arrays (Updated^2)
     (232 "Flexible Curried Procedures" () "srfi-232")
     (233 "INI files" (ini-files) "srfi-233")
-    ;; 234 Topological sorting (draft)
+    (234 "Topological sorting" (topological-sort) "srfi-234")
     (235 "Combinators" (combinators) "srfi-235")
     (236 "Evaluating expressions in an unspecified order" () "srfi-236")
     ;; 237 R6RS Records (refined)
@@ -283,6 +283,17 @@
     ;; 242 The CFG Language (draft)
     ;; 243 Unreadable objects (draft)
     (244 "Multiple-value definitions")
+    ;; 245 ...... withdrawn (Mixing definitions and expressions within bodies)
+    ;; 246 ...... withdrawn (Guardians)
+    ;; 247 Syntactic Monads
+    ;; 248 Minimal delimited continuations (draft)
+    ;; 249 ...... withdrawn (Restarting conditions)
+    ;; 250 ...... withdrawn (Insertion-ordered hash tables)
+    ;; 251 Mixing groups of definitions with expressions within bodies
+    ;; 252 Property Testing
+    (253 "Data (Type-)Checking" () "srfi-253")
+    ;; 254 Ephemerons and Guardians (draft)
+    ;; 255 Restarting conditions (draft)
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file

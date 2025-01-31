@@ -1,7 +1,7 @@
 ;;;;
 ;;;; widget.stk                                 -- GTK widget
 ;;;;
-;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -44,6 +44,10 @@
 (define-gtk gtk-widget-set-size-request (#:pointer #:int #:int) #:void
   "gtk_widget_set_size_request")
 
+(define-external g-free ((ptr #:pointer))
+  :entry-name "g_free"
+  :library-name (find-gtk-library 'gobject))
+
 (define-generic realize-widget)
 (define-generic internal-arrange-widget)
 
@@ -62,7 +66,7 @@
 ;;;;    <destroyed-object> class ...
 ;;;;
 ;;;; ======================================================================
-(define-class <destroyed-object> () ())
+(define-class <gtk-destroyed-object> () ())
 
 
 ;;;; ======================================================================
@@ -118,6 +122,13 @@
                 #:allocation     #:gtk-property)
    (can-focus   #:accessor       can-focus
                 #:init-keyword   #:can-focus
+                #:allocation     #:gtk-property)
+   (expand      #:accessor       expand
+                #:init-keyword   #:expand
+                #:allocation     #:gtk-property)
+   (focus-on-click
+                #:accessor       focus-on-click
+                #:init-keyword   #:focus-on-click
                 #:allocation     #:gtk-property)
    (has-default #:accessor       has-default
                 #:init-keyword   #:has-default
@@ -210,7 +221,7 @@
   #f)
 
 
-(define-method initialize ((self <gtk-widget>) initargs)
+(define-method initialize-instance ((self <gtk-widget>) initargs)
   ;; Initialize %data slot as soon as possible
   (slot-set! self '%data '())
   (realize-widget self initargs)
@@ -230,11 +241,11 @@
 ;;; Destroy
 ;;;
 (define-method destroy ((w <gtk-widget>))
-;;//  (let ((event (slot-ref w '%event)))               ; Disconnect w from its  handler
+;;//  (let ((event (slot-ref w '%event)))       ; Disconnect w from its  handler
 ;;//    (when event
 ;;//      (disconnect-event-handler! event w)))
   (gtk-widget-destroy (wid w))                  ; destroy the GTK widget
-  (change-class w <destroyed-object>))          ; Change class to <destroyed-object>
+  (change-class w <gtk-destroyed-object>))      ; -> class <gtk-destroyed-object>
 
 
 (define-method destroy (w)
@@ -318,7 +329,8 @@
 ;;;
 (export  realize-widget internal-arrange-widget
          ;; accessors
-         parent can-default has-default has-focus height-request name visible
+         parent expand can-default has-default has-focus focus-on-click
+         height-request name visible
          sensitive width-request tooltip xalign yalign xpad ypad
          ;; methods
          destroy event-connect event-connect-after

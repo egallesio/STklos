@@ -63,6 +63,7 @@ static char *conf_dir     = "";
 static char *sexpr        = "";
 static char *cflags       = "";
 static int  vanilla       = 0;
+static int  fold_case     = 0;
 static int  startup_msg   = 1;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
@@ -71,31 +72,32 @@ static int  srfi_176      = 0;
 static char *script_file  = "";
 static SCM  Idirs         = STk_nil;
 static SCM  Adirs         = STk_nil;
-
+static int  use_load_path = 0;
 
 
 static struct option long_options [] =
 {
-  {"version",           no_argument,       NULL, 'v'},
-  {"file",              required_argument, NULL, 'f'},
-  {"prepend-load-path", required_argument, NULL, 'I'},
-  {"append-load-path",  required_argument, NULL, 'A'},
-  {"compiler-flags",    required_argument, NULL, 'F'},
-  {"load",              required_argument, NULL, 'l'},
-  {"execute",           required_argument, NULL, 'e'},
-  {"boot-file",         required_argument, NULL, 'b'},
-  {"conf-dir",          required_argument, NULL, 'D'},
-  {"no-init-file",      no_argument,       NULL, 'q'},
-  {"no-startup-message",no_argument,       NULL, 'Q'},
-  {"interactive",       no_argument,       NULL, 'i'},
-  {"no-line-editor",    no_argument,       NULL, 'n'},
-  {"debug",             no_argument,       NULL, 'd'},
-  {"stack-size",        required_argument, NULL, 's'},
-  {"case-sensitive",    no_argument,       NULL, 'c'},
-  {"case-insensitive",  no_argument,       NULL, 'z'},
-  {"utf8-encoding",     required_argument, NULL, 'u'},
-  {"help",              no_argument,       NULL, 'h'},
-  {NULL,                0,                 NULL, 0  }     /* for Clang */
+  {"version",                no_argument,       NULL, 'v'},
+  {"file",                   required_argument, NULL, 'f'},
+  {"prepend-load-path",      required_argument, NULL, 'I'},
+  {"append-load-path",       required_argument, NULL, 'A'},
+  {"includes-use-load-path", no_argument,  NULL, 'y'},
+  {"compiler-flags",         required_argument, NULL, 'F'},
+  {"load",                   required_argument, NULL, 'l'},
+  {"execute",                required_argument, NULL, 'e'},
+  {"boot-file",              required_argument, NULL, 'b'},
+  {"conf-dir",               required_argument, NULL, 'D'},
+  {"no-init-file",           no_argument,       NULL, 'q'},
+  {"no-startup-message",     no_argument,       NULL, 'Q'},
+  {"interactive",            no_argument,       NULL, 'i'},
+  {"no-line-editor",         no_argument,       NULL, 'n'},
+  {"debug",                  no_argument,       NULL, 'd'},
+  {"stack-size",             required_argument, NULL, 's'},
+  {"case-sensitive",         no_argument,       NULL, 'c'},
+  {"case-insensitive",       no_argument,       NULL, 'z'},
+  {"utf8-encoding",          required_argument, NULL, 'u'},
+  {"help",                   no_argument,       NULL, 'h'},
+  {NULL,                     0,                 NULL, 0  }     /* for Clang */
 };
 
 static void SimpleVersion(void)
@@ -115,8 +117,9 @@ static void Usage(FILE *stream)
 "   -e sexpr, --execute=sexpr       evaluate the given sexpr and exit\n"
 "   -b file, --boot-file=file       use 'file' to boot the system\n"
 "   -D dir, --conf-dir=dir          change conf. dir (default: ~/.config/stklos)\n"
-"   -I dir, --prepend-load-path=dir prepend 'dir' to the load path list.\n"
-"   -A dir, --append-load-path=dir  append 'dir' to the load path list.\n"
+"   -I dir, --prepend-load-path=dir prepend 'dir' to the load path list\n"
+"   -A dir, --append-load-path=dir  append 'dir' to the load path list\n"
+"       --includes-use-load-path    include and include-ci use load-path\n"
 "   -q, --no-init-file              quiet: do not load the user init file\n"
 "   -Q, --no-startup-message        don't show the startup message\n"
 "   -i, --interactive               interactive mode\n"
@@ -176,8 +179,9 @@ static int process_program_arguments(int argc, char *argv[])
       case 'q': vanilla         = 1;                                    break;
       case 'Q': startup_msg     = 0;                                    break;
       case 's': stack_size      = atoi(optarg);                         break;
-      case 'c': STk_read_case_sensitive = 1;                            break;
-      case 'z': STk_read_case_sensitive = 0;                            break;
+      case 'c': /* do nothing since it is the default now */            break;
+      case 'y': use_load_path   = 1;                                    break;
+      case 'z': fold_case       = 1;                                    break;
       case 'u': STk_use_utf8    = strspn(optarg, "yY1");                break;
       case 'h': Usage(stdout); exit(0);
       case '?': /* message error is printed by getopt */
@@ -210,12 +214,13 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_BOOL_OPTION(startup_msg,     "startup-message");
   ADD_BOOL_OPTION(STk_interactive, "interactive");
   ADD_BOOL_OPTION(line_editor,     "line-editor");
+  ADD_BOOL_OPTION(fold_case,       "fold-case");
   ADD_INT_OPTION(debug_mode,       "debug");
   ADD_BOOL_OPTION(STk_use_utf8,    "use-utf8");
   ADD_OPTION(script_file,          "script-file");
   ADD_SCM_OPTION(Idirs,            "prepend-dirs");
   ADD_SCM_OPTION(Adirs,            "append-dirs");
-
+  ADD_BOOL_OPTION(use_load_path,   "use-load-path");
   STk_define_variable(STk_intern("*%system-state-plist*"), options,
                       STk_STklos_module);
 }
