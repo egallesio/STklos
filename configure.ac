@@ -495,6 +495,29 @@ case "$enable_fast_math_control" in
 esac
 
 
+# -----------------------------------------------------------------------
+# Should the compiler keep the formal parameters of procedures in core
+# and libraries?
+# -----------------------------------------------------------------------
+AC_ARG_WITH(keep-formals,
+       [  --without-keep-formals  don't keep formal parameters of closures when compiling
+                          procedures in core and libraries (this does not affect compilation of closures
+                          done by the user later, the effect is to have them for out-of-the-box STklos
+                          closures. Formal parameters of primitive procedures are never kept, regardless
+                          of this option)],
+       DONT_KEEP_FORMALS="$withval", DONT_KEEP_FORMALS="no")
+
+if test "$DONT_KEEP_FORMALS" = "yes"
+then
+    STR_KEEP_FORMALS="no"    # for output at the end of this script
+    KEEP_FORMALS=0           # for tmpcomp (and in the future, C files)
+    SCM_BOOT_KEEP_FORMALS="" # for the Makefile compiling the boot image
+else
+    STR_KEEP_FORMALS="yes"
+    KEEP_FORMALS=1
+    SCM_BOOT_KEEP_FORMALS="--compiler-flags='+keep-formals'"
+fi
+
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
 ###
@@ -725,6 +748,8 @@ AC_SUBST(RDLINE)
 AC_SUBST(THREADS)
 AC_SUBST(CONF_SUMMARY)
 AC_SUBST(CONTROL_FX_PARAMETERS)
+AC_SUBST(KEEP_FORMALS)
+AC_SUBST(SCM_BOOT_KEEP_FORMALS)
 AC_SUBST(DLLIBS)
 AC_SUBST(SYST_LIBS)
 AC_SUBST(COMP_LIBS)
@@ -804,6 +829,7 @@ echo "                Loader: " $LD
 echo "        Thread support: " $STR_THREADS
 echo "           FFI support: " $STR_FFI
 echo " Control fx parameters: " $CONTROL_FX
+echo "         Keep formals: " $STR_KEEP_FORMALS
 echo " System libraries used: " $SYST_LIBS_SHOW
 echo "    Compiled libraries: " $COMP_LIBS_SHOW
 echo "    STklos load prefix: " $PREFIX
