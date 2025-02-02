@@ -771,5 +771,37 @@ b|)
             (eval-from-string "(DisPlaY 3.14)"))
 
 
+(test-subsection "copy lists with cycles")
+
+;; We do NOT put cyclic lists in the expected value of tests, because the
+;; test suite would try to print them in a way that loops forever.
+;; Instead, we test for #t outcome from EQUAL?
+
+(test "list-copy with cycles 1"
+      #t
+      (equal? '#0=(1 2 3 . #0#)
+              (list-copy '#0=(1 2 3 . #0#))))
+
+(test "list-copy with cycles 2"
+      #t
+      (equal? '(1 2 . #0=(3 4 5 . #0#))
+              (list-copy '(1 2 . #0=(3 4 5 . #0#)))))
+
+(test "list-copy with cycles 3"
+      #t
+      (equal? '#0=(1 . #0#)
+              (list-copy '#0=(1 . #0#))))
+
+
+(let ((results (make-list 50 #f)))
+  (dotimes (i 50)
+    (let ((L (make-list 1000 #void)))
+      (set-cdr! (last-pair L) (list-tail L (+ 500 i)))
+      (list-set! results i (equal? L (list-copy L)))))
+  (test ""
+        #t
+        (every (lambda (x) x)  results)))
+
+
 ;;------------------------------------------------------------------
 (test-section-end)

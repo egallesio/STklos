@@ -232,7 +232,7 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
    * NOTE: using strings (instead of keywords) is less efficient because
    * the char * is at the end of the object. Using symbols is also fast
    * (even a bit faster, don't know why), but it is harder  to detect that
-   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
+   * that we can inline when we have (%cxr lst 'daa), because of the quote.
    */
   if (KEYWORDP(name)) {
     SCM lst   = l;
@@ -708,11 +708,122 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
  * not a pair, it is returned; otherwise the result is a new pair whose
  * |car| and |cdr| are obtained by calling |list-copy| on
  * the |car| and |cdr| of |obj|, respectively.
+ *
+ * The implementation in STklos works fine with improper lists and with
+ * lists that contain a cycle.
 doc>
  */
-DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l))
+static SCM simple_list_copy(SCM l)
 {
-  return CONSP(l) ? STk_cons(STk_list_copy(CAR(l)), STk_list_copy(CDR(l))): l;
+  return CONSP(l) ? STk_cons(simple_list_copy(CAR(l)), simple_list_copy(CDR(l))): l;
+}
+
+EXTERN_PRIMITIVE("last-pair", last_pair, subr1, (SCM l));
+DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l)) {
+  /*
+    About the cycle detecting and copying algorithm:
+
+    1. Detect cycles using Floyd's algorithm.  The algorithm runs two
+       pointers, "fast" and "slow" through the list. Both are placed
+       at the CAR, then at each step, slow goes forward one link, and
+       fast goes forward two links.
+
+    2. If there is a cycle:
+
+       2.i) we position fast back at the CAR and now move the two
+            pointers *one* link at each time. The pointers will
+            *necessarily meet* exactly *at the beginning of the cycle.
+
+       2.ii) If there is a cycle, we break the list in two parts. For
+             example, the cycle below starts at C:
+
+                        +--------------+
+                        |              |
+                        v              |
+              A -> B -> C -> D -> E -> F
+
+              We break the links from B to C and from T fo C:
+
+              A -> B    C -> D -> E -> F
+
+              Then we just copy the two lists and put back the links.
+
+    3. If there is no cycle, use a simple copying subroutine to copy
+       the list.
+
+    Remarks:
+
+    1. See that when there are cycles, we change the links *in the
+       original list* also (but we fix it before returning).
+
+    2. We use STk_last_pair, which is not optimal. But we also expect
+       lists with cycles tno not be frequent, and also to not be huge.
+       And STk_last_pair is linear anyway.
+   */
+    if (!CONSP(l)) return l;
+
+    /* 1. Detect possible cycles using Floyd's algorithm */
+    SCM slow  = l;
+    SCM fast  = l;
+    int cycle = 0;
+    SCM prev = l;
+    while(CONSP(fast) && CONSP(CDR(fast))) {
+        prev = slow;
+        slow = CDR(slow);
+        fast = CDR(CDR(fast));
+        if(slow == fast) {
+            cycle = 1;
+            break;
+        }
+    }
+
+    if (cycle) {
+      /* 2.i Put fast back in the beginning, and now move slow and fast
+             one link at a time. When they meet, we found the cycle start. */
+        fast = l;
+        while(CDR(slow)!=CDR(fast)){
+          prev = slow;
+          slow = CDR(slow);
+          fast = CDR(fast);
+        }
+
+        /* 2.ii break the list in two parts and copy */
+        if (slow == fast) {
+
+          /* Special case: single cycle. slow and fast meet at the beginning, and
+             we cut the list at "prev" before continuing. There will be only
+             one list to copy. */
+          CDR(prev)=STk_nil;
+          SCM list_part_i  = simple_list_copy(l);
+          CDR(prev)=l;
+          CDR(STk_last_pair(list_part_i)) = list_part_i;
+          return list_part_i;
+
+        } else {
+
+          SCM cycle_start = CDR(slow);
+
+          /* Break cycle into two lists */
+          CDR(fast) = STk_nil;
+          CDR(slow) = STk_nil;
+
+          SCM list_part_i  = simple_list_copy(l);
+          SCM list_part_ii = simple_list_copy(cycle_start);
+
+          /* Restore cycle in original list */
+          CDR(fast) = cycle_start;
+          CDR(slow) = cycle_start;
+
+          /* Insert cycle in new list */
+          CDR(STk_last_pair(list_part_i)) = list_part_ii;
+          CDR(STk_last_pair(list_part_ii)) = list_part_ii;
+
+          return list_part_i;
+        }
+    } else {
+      /* 3. No cycle, just copy */
+      return simple_list_copy(l);
+    }
 }
 
 
