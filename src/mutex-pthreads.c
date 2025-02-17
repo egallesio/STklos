@@ -57,7 +57,7 @@ void STk_make_sys_mutex(SCM z)
  *
  * Returns information about the state of the |mutex|. The possible results
  * are:
- * 
+ *
  *  * a thread *T*: the mutex is in the locked/owned state and
  *    thread *T* is the owner of the mutex
  *  * the symbol *not-owned*: the mutex is in the locked/not-owned
@@ -66,7 +66,7 @@ void STk_make_sys_mutex(SCM z)
  *    state
  *  * the symbol *not-abandoned*: the mutex is in the
  *     unlocked/not-abandoned state
- * 
+ *
  * @lisp
  * (mutex-state (make-mutex))  =>  not-abandoned
  *
@@ -121,7 +121,7 @@ DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
  *    is not supplied),
  *  ** if T is terminated the mutex becomes _unlocked/abandoned_,
  *  ** otherwise mutex becomes _locked/owned_ with T as the owner.
- * 
+ *
  * After changing the state of the mutex, an "abandoned mutex exception" is
  * raised if the mutex was unlocked/abandoned before the state change,
  * otherwise |mutex-lock!| returns |#t|.
@@ -146,7 +146,7 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
     ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
   }
 
-  pthread_cleanup_push((void (*)()) mutex_finalizer, mtx);
+  pthread_cleanup_push((void (*)(SCM)) mutex_finalizer, mtx);
 
   if (pthread_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
     STk_error_deadlock();
@@ -216,7 +216,7 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
     ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000000);
   }
 
-  pthread_cleanup_push((void (*)()) mutex_finalizer, mtx);
+  pthread_cleanup_push((void (*)(SCM)) mutex_finalizer, mtx);
 
   if (pthread_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
     STk_error_deadlock();
