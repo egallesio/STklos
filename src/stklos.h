@@ -272,7 +272,11 @@ typedef struct {
 struct primitive_obj {
   stk_header header;
   char *name;
-  SCM (*code)();
+  /* The following line was
+       SCM (*code)();
+     but GCC 15 does not allow us to initialize it with primitives of type
+     (SCM (*code)(void*, void*, ...)), so we use "void*" which works.       */
+  void *code;
   SCM plist;
 };
 
@@ -1181,7 +1185,7 @@ int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
 void STk_set_port_case_sensitivity(SCM port, int sensitive);
-  
+
 
 
 /*

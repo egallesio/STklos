@@ -91,7 +91,7 @@ static void *start_scheme_thread(void *arg)
   THREAD_VM(thr)->start_stack = start_stack;
 
   pthread_setspecific(vm_key, THREAD_VM(thr));
-  pthread_cleanup_push(terminate_scheme_thread, thr);
+  pthread_cleanup_push((void (*)(SCM))terminate_scheme_thread, thr);
 
   res = STk_C_apply(THREAD_THUNK(thr), 0);
   if (THREAD_EXCEPTION(thr) == STk_false) {
@@ -154,7 +154,7 @@ DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
  * |thread-terminate!| does not return. Otherwise, |thread-terminate!|
  * returns an unspecified value; the termination of the thread will occur
  * before |thread-terminate!| returns.
- * 
+ *
  * [NOTE]
  * ====
  * -  This operation must be used carefully because it terminates a thread
