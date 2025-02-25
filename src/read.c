@@ -1214,6 +1214,9 @@ static SCM read_srfi10(SCM port, SCM l)
   if (len < 0)
     signal_error(port, "bad list in a #,(...) form ~S", l);
 
+  if (len == 0)
+    signal_error(port, "empty tag in a #,(...) form", STk_nil);
+
   tmp = STk_int_assq(CAR(l), ctor_table);
   if (tmp == STk_false)
     signal_error(port, "bad tag in a #,(...) form ~S", CAR(l));
