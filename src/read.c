@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1211,8 +1211,12 @@ static SCM read_srfi10(SCM port, SCM l)
   int len = STk_int_length(l);
   SCM tmp;
 
-  if (len < 0)
-    signal_error(port, "bad list in a #,(...) form ~S", l);
+  if (len <= 0) {
+    if (len)
+      signal_error(port, "bad list in a #,(...) form ~S", l);
+    else
+      signal_error(port, "empty tag in a #,(...) form", STk_nil);
+  }
 
   tmp = STk_int_assq(CAR(l), ctor_table);
   if (tmp == STk_false)
