@@ -272,11 +272,7 @@ typedef struct {
 struct primitive_obj {
   stk_header header;
   char *name;
-  /* The following line was
-       SCM (*code)();
-     but GCC 15 does not allow us to initialize it with primitives of type
-     (SCM (*code)(void*, void*, ...)), so we use "void*" which works.       */
-  void *code;
+  SCM (*code)();
   SCM plist;
 };
 
@@ -288,7 +284,7 @@ struct primitive_obj {
   SCM CPP_CONCAT(STk_, _cname) _params;                         \
   struct primitive_obj CPP_CONCAT(STk_o_, _cname) = {           \
         {CPP_CONCAT(tc_, _type), 0},                            \
-        _sname, CPP_CONCAT(STk_, _cname), STk_nil};             \
+        _sname, (SCM (*)())CPP_CONCAT(STk_, _cname), STk_nil};  \
   SCM CPP_CONCAT(STk_, _cname) _params
 
 #define EXTERN_PRIMITIVE(_sname, _cname, _type, _params)        \
