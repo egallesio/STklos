@@ -170,6 +170,7 @@ extern "C"
 #define STk_gc()                        GC_gcollect()
 #define STk_gc_base(ptr)                GC_base(ptr)
 
+
 void STk_gc_init(void);
 
 
@@ -183,6 +184,10 @@ void STk_gc_init(void);
 #define MAX_CELL_TYPES          256
 
 typedef void* SCM;
+/* Function added to allocate a list of size n. This is faster than
+   repeatedly calling STk_must_malloc. It is defined here, and not with
+   the allocation API, because it needs the SCM type. */
+SCM STk_must_malloc_list(int n, SCM init);
 
 typedef enum {
   tc_not_boxed=-1,
@@ -711,6 +716,7 @@ EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
 EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
 EXTERN_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name));
+EXTERN_PRIMITIVE("make-list", make_list, subr12, (SCM n, SCM init));
 EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
 EXTERN_PRIMITIVE("memv", memv, subr2, (SCM obj, SCM list));

@@ -232,7 +232,7 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
    * NOTE: using strings (instead of keywords) is less efficient because
    * the char * is at the end of the object. Using symbols is also fast
    * (even a bit faster, don't know why), but it is harder  to detect that
-   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
+   * that we can inline when we have (%cxr lst 'daa), because of the quote.
    */
   if (KEYWORDP(name)) {
     SCM lst   = l;
@@ -298,6 +298,23 @@ doc>
 {
   return MAKE_BOOLEAN(STk_int_length(x) >= 0);
 }
+
+/*
+<doc R7RS make-list
+ * (make-list k)
+ * (make-list k fill)
+ *
+ * Returns a newly allocated list of k elements. If a second
+ * argument is given, then each element is initialized to fill .
+ * Otherwise the initial contents of each element is unspecified.
+doc>
+*/
+DEFINE_PRIMITIVE("make-list", make_list, subr12, (SCM n, SCM init)) {
+  if (!INTP(n)) STk_error("bad integer ~s", n);
+  if (!init) init = STk_void;
+  return STk_must_malloc_list(INT_VAL(n), init);
+}
+
 
 DEFINE_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv))
 /*
@@ -1061,6 +1078,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(cxr);
   ADD_PRIMITIVE(nullp);
   ADD_PRIMITIVE(listp);
+  ADD_PRIMITIVE(make_list);
   ADD_PRIMITIVE(list);
   ADD_PRIMITIVE(list_length);
   ADD_PRIMITIVE(append);
