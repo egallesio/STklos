@@ -61,6 +61,7 @@
         with-exception-handler raise-continuable guard
         current-jiffy jiffies-per-second features
         %continuable-exception?  %continuable-exception-value;; FIXME
+        and or
         )
 
 
@@ -285,6 +286,16 @@ doc>
       (delay expr)))
 
 (define eager make-promise)
+
+;;;
+;;; AND, OR
+;;;
+;; These are implemented directly in the compiler, but they should also be
+;; part of the SCHEME module (because R7RS requires them to be syntax in the
+;; (scheme base) library).
+;; The compiler understands %and, %or, so we expand and/or using those.
+(define-macro (and . rest) `(%and ,@rest))
+(define-macro (or . rest)  `(%or ,@rest))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 5.3 Variable definitions
