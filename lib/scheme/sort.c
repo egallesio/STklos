@@ -64,8 +64,8 @@ EXTERN_PRIMITIVE("fx>?", fxgt, vsubr, (int argc, SCM *argv));
 static inline int get_comparator(SCM obj)
 {
   if (STYPE(obj) == tc_vsubr) {
-    if (PRIMITIVE_FUNC(obj) == STk_fxlt) return FXLT;
-    if (PRIMITIVE_FUNC(obj) == STk_fxgt) return FXGT;
+    if (PRIMITIVE_FUNC(obj) == (t_subrptr) STk_fxlt) return FXLT;
+    if (PRIMITIVE_FUNC(obj) == (t_subrptr) STk_fxgt) return FXGT;
   }
   return OTHER;
 }

@@ -269,10 +269,12 @@ typedef struct {
    *    }
    */
 
+  typedef SCM (*t_subrptr)();
+  
 struct primitive_obj {
   stk_header header;
   char *name;
-  SCM (*code)();
+  t_subrptr code;
   SCM plist;
 };
 
@@ -284,7 +286,7 @@ struct primitive_obj {
   SCM CPP_CONCAT(STk_, _cname) _params;                         \
   struct primitive_obj CPP_CONCAT(STk_o_, _cname) = {           \
         {CPP_CONCAT(tc_, _type), 0},                            \
-        _sname, CPP_CONCAT(STk_, _cname), STk_nil};             \
+        _sname, (t_subrptr)CPP_CONCAT(STk_, _cname), STk_nil};  \
   SCM CPP_CONCAT(STk_, _cname) _params
 
 #define EXTERN_PRIMITIVE(_sname, _cname, _type, _params)        \
@@ -1181,7 +1183,7 @@ int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
 void STk_set_port_case_sensitivity(SCM port, int sensitive);
-  
+
 
 
 /*
