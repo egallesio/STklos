@@ -470,8 +470,8 @@ DEFINE_PRIMITIVE("%make-hash-table", make_hash, subr2, (SCM compar, SCM hashfct)
     /* See if comparison function is 'eq?' or 'string?'.
      * If so, we implement the hash table in the most efficient way.
      */
-    if (PRIMITIVE_FUNC(compar) == (SCM(*)()) STk_eq)    type = hash_eqp;
-    if (PRIMITIVE_FUNC(compar) == (SCM(*)()) STk_streq) type = hash_stringp;
+    if (PRIMITIVE_FUNC(compar) == (t_subrptr) STk_eq)    type = hash_eqp;
+    if (PRIMITIVE_FUNC(compar) == (t_subrptr) STk_streq) type = hash_stringp;
   }
 
   NEWCELL(z, hash_table);
