@@ -937,27 +937,47 @@ doc>
 DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
 {
   register char *s;
-  int len;
+  int len, ctr;
   utf8_char c;
-  SCM tmp, tmp1, z;
+  SCM z;
 
   if (!STRINGP(str)) error_bad_string(str);
 
-  len = STRING_LENGTH(str);
+  ctr = len = STRING_LENGTH(str);
+  if (!len) return STk_nil;
   s   = STRING_CHARS(str);
 
-  tmp = z = STk_nil;
+  /* Allocate all of the list at once. This avoids (i) fragmentation of memory;
+     and (ii) calling the allocator repeated times.  */
+  z = (SCM) STk_must_malloc(len * sizeof(struct cons_obj));
 
-  while (len--) {
+  struct cons_obj* ptr = (struct cons_obj *) z;
+
+  /* ptr points to the first cell... We iterate over the: */
+  while(ctr--) {
     s = STk_utf8_grab_char(s, &c);
-    tmp1 = STk_cons(MAKE_CHARACTER(c), STk_nil);
-    if (z == STk_nil)
-      tmp = z = tmp1;
-    else
-      tmp = CDR(tmp) = tmp1;
+    CAR(ptr) = MAKE_CHARACTER(c);
+    BOXED_TYPE(ptr) = tc_cons;
+    BOXED_INFO(ptr) = 0;
+    ptr++;
   }
+
+  /* Rewind, in order to adjust the CDRs: */
+  ptr = (struct cons_obj *) z;
+  ctr = len - 1; /* Wi'll reference prt+1, so we only do it len-1 times */
+
+  while(ctr--) {
+      CDR(ptr) = (SCM) (ptr+1);
+      ptr++;
+   }
+
+  /* We only adjusted the internal CDRs, not the last one. WE do
+     this now: */
+  CDR(ptr) = STk_nil;
+
   return z;
 }
+
 
 DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
 {
