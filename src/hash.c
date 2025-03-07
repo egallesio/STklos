@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2025 Erick Gallesio <eg@stklos.net>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -470,8 +470,8 @@ DEFINE_PRIMITIVE("%make-hash-table", make_hash, subr2, (SCM compar, SCM hashfct)
     /* See if comparison function is 'eq?' or 'string?'.
      * If so, we implement the hash table in the most efficient way.
      */
-    if (PRIMITIVE_FUNC(compar) == STk_eq)    type = hash_eqp;
-    if (PRIMITIVE_FUNC(compar) == STk_streq) type = hash_stringp;
+    if (PRIMITIVE_FUNC(compar) == (SCM(*)()) STk_eq)    type = hash_eqp;
+    if (PRIMITIVE_FUNC(compar) == (SCM(*)()) STk_streq) type = hash_stringp;
   }
 
   NEWCELL(z, hash_table);
