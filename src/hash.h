@@ -91,6 +91,7 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag);
  */
 SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s,
                            SCM (*create)(const char *s));
+SCM STk_hash_get_symbol(struct hash_table_obj *h, const char *s, int *index);
 
 /*
  * Function for accessing module hash table. Don't use them but the
