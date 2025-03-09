@@ -2,7 +2,7 @@
  *
  * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -67,7 +67,8 @@ int STk_symbol_flags(register const char *s)
   }
 }
 
-SCM STk_make_uninterned_symbol(const char *name)
+
+static inline SCM make_uninterned_symbol(const char *name)
 {
   SCM z;
 
@@ -77,13 +78,22 @@ SCM STk_make_uninterned_symbol(const char *name)
   return z;
 }
 
+
+SCM STk_make_uninterned_symbol(const char *name)
+{
+  SCM z = make_uninterned_symbol(name);
+  BOXED_INFO(z) |= SYMBOL_UNINTERNED;
+  return z;
+}
+
+
 SCM STk_intern(char *name)
 {
   SCM res;
   MUT_DECL(obarray_mutex);
 
   MUT_LOCK(obarray_mutex);
-  res =  STk_hash_intern_symbol(&obarray, name, STk_make_uninterned_symbol);
+  res =  STk_hash_intern_symbol(&obarray, name, make_uninterned_symbol);
   MUT_UNLOCK(obarray_mutex);
   return res;
 }
@@ -104,17 +114,8 @@ doc>
 */
 DEFINE_PRIMITIVE("symbol-interned?", symbol_interned_p, subr1, (SCM x))
 {
-  int unused;
   if (!SYMBOLP(x)) STk_error("bad symbol ~s", x);
-  SCM s = STk_hash_get_symbol(&obarray, SYMBOL_PNAME(x), &unused);
-
-  /* If it's not in the table, it's not interned: */
-  if (!s) return STk_false;
-
-  /* Howeer, it's not enough to check its presence in the table. We
-     need to see wether the symbol found there is eq? to the one we
-     have: */
-  return STk_eq(s,x);
+  return MAKE_BOOLEAN(!(BOXED_INFO(x) & SYMBOL_UNINTERNED));
 }
 
 DEFINE_PRIMITIVE("symbol?", symbolp, subr1, (SCM x))
