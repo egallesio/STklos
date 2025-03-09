@@ -321,8 +321,6 @@ static inline SCM hash_get_symbol(struct hash_table_obj *h, const char *s, int *
   return (SCM) NULL;
 }
 
-SCM STk_hash_get_symbol(struct hash_table_obj *h, const char *s, int *index)
-{ return hash_get_symbol(h, s, index); }
 
 SCM STk_hash_intern_symbol(struct hash_table_obj *h, const char *s, SCM (*create) (const char *s))
 {
