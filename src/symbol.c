@@ -102,8 +102,8 @@ SCM STk_intern(char *name)
 <doc EXT symbol-interned?
  * (symbol-interned? sym)
  *
- * Returns |#t| if |sym| is an interned symbol, amd |#f| if |sym| is an
- * uninterned symbol. When |sym| is not a symbol, an error is signalled.
+ * Returns |#t| if |sym| is an interned symbol, and |#f| if |sym| is an
+ * uninterned symbol. When |sym| is not a symbol, an error is signaled.
  * @lisp
  * (symbol-interned? (gensym))      => #f
  * (symbol-interned? (gensym "x-")) => #f
