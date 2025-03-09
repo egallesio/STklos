@@ -835,10 +835,11 @@
 ;;------------------------------------------------------------------
 (test-subsection "6.5 Symbols")
 
-(test "symbol=?.1" #t (symbol=? 'a 'a (string->symbol "a")))
-(test "symbol=?.2" #t (symbol=? '|A| (string->symbol "A")))
-(test "symbol=?.3" #f (symbol=? '|A| (string->symbol "a")))
-(test "symbol=?.4" #f (symbol=? 'a 'a "a"))
+(test "symbol=?.1" #t    (symbol=? 'a 'a (string->symbol "a")))
+(test "symbol=?.2" #t    (symbol=? '|A| (string->symbol "A")))
+(test "symbol=?.3" #f    (symbol=? '|A| (string->symbol "a")))
+(test/error "symbol=?.4" (symbol=? 'a 'a "a"))
+(test "symbol=?.5" #f    (eqv? (string->uninterned-symbol "x") (string->uninterned-symbol "x")))
 
 
 ;;-------------------------------------------------------------------

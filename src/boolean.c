@@ -192,6 +192,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
 
   switch (STYPE(x)) {
     case tc_symbol:
+        if (x != y) return STk_false; /* one of the is uninterned! */
         if (SYMBOLP(y) && strcmp(SYMBOL_PNAME(x), SYMBOL_PNAME(y)) == 0)
           return STk_true;
         break;
@@ -468,7 +469,7 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
 /* The code below is a rewriting of the equiv? function given in the Reference
  * implementation of the (withdrwn) SRFI 85 (Recursive Equivalence
  * Predicates).
- * 
+ *
  * Original Scheme code is "Copyright 2006 William D Clinger"
  *
  * EQUIV? is a version of EQUAL? that terminates on all arguments.
