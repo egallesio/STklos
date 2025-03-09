@@ -51,6 +51,16 @@ b|)
 (test/error "non finished hex sequence.2" (read-from-string "a\\x123"))
 (test/error "too long hex sequence" (read-form-string "\\x111111111111111111111111"))
 
+(test "gensym.1" #t (symbol? (gensym)))
+(test "gensym.2" #t (symbol? (gensym 'a)))
+(test "gensym.3" #t (symbol? (gensym "a")))
+(test "symbol-interned?.1" #f (symbol-interned? (gensym)))
+(test "symbol-interned?.2" #f (symbol-interned? (gensym 'a)))
+(test "symbol-interned?.3" #f (symbol-interned? (gensym "a-")))
+(test "symbol-interned?.4" #t (symbol-interned? 'a))
+(test/error "symbol-interned?.4" (symbol-interned? "a"))
+(test "string->unsymbol-interned?.1" #t (symbol? (string->uninterned-symbol  "aaa")))
+(test "string->unsymbol-interned?.2" #f (symbol-interned? (string->uninterned-symbol  "aaa")))
 
 ;;----------------------------------------------------------------------
 (test-subsection "Paths")

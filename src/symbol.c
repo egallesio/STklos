@@ -2,7 +2,7 @@
  *
  * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -67,7 +67,8 @@ int STk_symbol_flags(register const char *s)
   }
 }
 
-SCM STk_make_uninterned_symbol(const char *name)
+
+static inline SCM make_uninterned_symbol(const char *name)
 {
   SCM z;
 
@@ -77,15 +78,44 @@ SCM STk_make_uninterned_symbol(const char *name)
   return z;
 }
 
+
+SCM STk_make_uninterned_symbol(const char *name)
+{
+  SCM z = make_uninterned_symbol(name);
+  BOXED_INFO(z) |= SYMBOL_UNINTERNED;
+  return z;
+}
+
+
 SCM STk_intern(char *name)
 {
   SCM res;
   MUT_DECL(obarray_mutex);
 
   MUT_LOCK(obarray_mutex);
-  res =  STk_hash_intern_symbol(&obarray, name, STk_make_uninterned_symbol);
+  res =  STk_hash_intern_symbol(&obarray, name, make_uninterned_symbol);
   MUT_UNLOCK(obarray_mutex);
   return res;
+}
+
+/*
+<doc EXT symbol-interned?
+ * (symbol-interned? sym)
+ *
+ * Returns |#t| if |sym| is an interned symbol, and |#f| if |sym| is an
+ * uninterned symbol. When |sym| is not a symbol, an error is signaled.
+ * @lisp
+ * (symbol-interned? (gensym))      => #f
+ * (symbol-interned? (gensym "x-")) => #f
+ * (symbol-interned? 'a)            => #t
+ * (symbol-interned? "x")           => error
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("symbol-interned?", symbol_interned_p, subr1, (SCM x))
+{
+  if (!SYMBOLP(x)) STk_error("bad symbol ~s", x);
+  return MAKE_BOOLEAN(!(BOXED_INFO(x) & SYMBOL_UNINTERNED));
 }
 
 DEFINE_PRIMITIVE("symbol?", symbolp, subr1, (SCM x))
@@ -206,5 +236,6 @@ int STk_init_symbol(void)
   ADD_PRIMITIVE(symbol2string);
   ADD_PRIMITIVE(string2symbol);
   ADD_PRIMITIVE(string2usymbol);                /* + */
+  ADD_PRIMITIVE(symbol_interned_p);
   return TRUE;
 }

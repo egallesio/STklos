@@ -1287,6 +1287,7 @@ struct symbol_obj {
 
 #define SYMBOL_NEEDS_BARS       (1 << 0)        /* Info flag */
 #define SYMBOL_HAS_UPPER        (1 << 1)
+#define SYMBOL_UNINTERNED       (1 << 2)
 
 EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
