@@ -303,21 +303,41 @@ doc>
 DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
 {
   int j, len;
-  SCM z, tmp;
+  SCM z;
 
   if (!VECTORP(v)) error_bad_vector(v);
 
   len = VECTOR_SIZE(v);
   if (!len) return STk_nil;
 
-  /* len > 0. Build the fist cell and iterate */
-  tmp = z = STk_cons(*VECTOR_DATA(v), STk_nil);
-  for (j=1; j<len; j++) {
-    tmp = CDR(tmp) = STk_cons(VECTOR_DATA(v)[j], STk_nil);
+  /* Allocate all of the list at once. This avoids (i) fragmentation of memory;
+     and (ii) calling the allocator repeated times.  */
+  z = (SCM) STk_must_malloc(len * sizeof(struct cons_obj));
+
+  struct cons_obj* ptr = (struct cons_obj *) z;
+
+  /* ptr points to the first cell... We iterate over the: */
+  for (j=0; j < len; j++) {
+    CAR(ptr) = VECTOR_DATA(v)[j];
+    BOXED_TYPE(ptr) = tc_cons;
+    BOXED_INFO(ptr) = 0;
+    ptr++;
   }
+
+  /* Rewind, in order to adjust the CDRs: */
+  ptr = (struct cons_obj *) z;
+
+  for (j=0; j < len-1; j++) {
+      CDR(ptr) = (SCM) (ptr+1);
+      ptr++;
+  }
+
+  /* We only adjusted the internal CDRs, not the last one. WE do
+     this now: */
+  CDR(ptr) = STk_nil;
+
   return z;
 }
-
 
 DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))
 {
@@ -414,7 +434,7 @@ DEFINE_PRIMITIVE("vector-append", vector_append, vsubr, (int argc, SCM *argv))
  * (vector-fill! vector fill start end)
  *
  * Stores |fill| in every element of |vector| between |start| and |end|.
- * 
+ *
  * NOTE: The R5RS version of |vector-fill!| accepts only one
  * parameter.
 doc>
