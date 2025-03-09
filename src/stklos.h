@@ -253,22 +253,6 @@ typedef struct {
         BOXED_INFO(_var) = 0;                           \
         }while(0)
 
-  /*
-   * PRIMITIVES
-   *
-   * Primitives are defined with the macro DEFINE_PRIMITIVE. An example of
-   * usage of this  macro is given below:
-   *    DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM obj)) {
-   *       <body>
-   *    }
-   * It will be expansed in
-   *    SCM STk_pairp(SCM obj);
-   *    static struct obj_primitive obj_pairp = { "pair?", tc_subr1, STk_pairp};
-   *    SCM STk_pairp(SCM obj){
-   *      <body>
-   *    }
-   */
-
 typedef SCM (*t_subrptr)();
 
 struct primitive_obj {
