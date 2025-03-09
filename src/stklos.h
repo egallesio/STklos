@@ -269,7 +269,7 @@ typedef struct {
    *    }
    */
 
-  typedef SCM (*t_subrptr)();
+typedef SCM (*t_subrptr)();
 
 struct primitive_obj {
   stk_header header;
@@ -293,7 +293,7 @@ struct primitive_obj {
  *
  * This will create a Scheme primitive.
  * - in Scheme, the name will be "scheme-name".
- * - in C, the name will be "STk_cname" (yes, the name given is prepended with "STk_"
+ * - in C, the name will be "STk_cname" (yes the name given is prepended with "STk_")
  * - the subroutine _type determines the number of arguments:
  *   + subr0, subr1, ... subr5 are subroutines with 0, .., 5 arguments
  *   + subr01, subr12, subr23, subr34 are subroutines with 0, 1, 2, 3, 4 arguments,
@@ -312,18 +312,17 @@ struct primitive_obj {
  * Will be translated into:
  *
  *   SCM STk_nom (SCM x, SCM y);
- *
- *   struct primitive_obj STk_o_nom = { {tc_subr2, 0}, "nome", (t_subrptr) STk_nom, STk_nil};
- *
+ *   struct primitive_obj STk_o_nom = {
+ *        {tc_subr2, 0}, "nome", (t_subrptr) STk_nom, STk_nil
+ *   };
  *   SCM STk_nom (SCM x, SCM y) { return NULL; }
  *
  * The above three lines are:
  * 1. The prototype of STk_nom
- * 2. A static structure that holds information on the procedure (its arity, its Scheme name, and
- *    a pointer to the code)
+ * 2. A static structure that holds information on the procedure (its arity,
+ *     its Scheme name, and a pointer to the code)
  * 3. The C function itself, implementing the procedure.
  *
- * (2) is necessary because the procedure will be referenced to in other parts of the code.
  */
 #define DEFINE_PRIMITIVE(_sname, _cname, _type, _params)        \
   SCM CPP_CONCAT(STk_, _cname) _params;                         \
