@@ -253,24 +253,8 @@ typedef struct {
         BOXED_INFO(_var) = 0;                           \
         }while(0)
 
-  /*
-   * PRIMITIVES
-   *
-   * Primitives are defined with the macro DEFINE_PRIMITIVE. An example of
-   * usage of this  macro is given below:
-   *    DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM obj)) {
-   *       <body>
-   *    }
-   * It will be expansed in
-   *    SCM STk_pairp(SCM obj);
-   *    static struct obj_primitive obj_pairp = { "pair?", tc_subr1, STk_pairp};
-   *    SCM STk_pairp(SCM obj){
-   *      <body>
-   *    }
-   */
+typedef SCM (*t_subrptr)();
 
-  typedef SCM (*t_subrptr)();
-  
 struct primitive_obj {
   stk_header header;
   char *name;
@@ -282,6 +266,48 @@ struct primitive_obj {
 #define PRIMITIVE_FUNC(p)       (((struct primitive_obj *) (p))->code)
 #define PRIMITIVE_PLIST(p)      (((struct primitive_obj *) (p))->plist)
 
+/*
+ * DEFINE_PRIMITIVE:
+ *
+ * # USAGE:
+ *
+ * DEFINE_PRIMITIVE("scheme-name", _cname, _type, parameters) {
+ *  ... code ...
+ * }
+ *
+ * This will create a Scheme primitive.
+ * - in Scheme, the name will be "scheme-name".
+ * - in C, the name will be "STk_cname" (yes the name given is prepended with "STk_")
+ * - the subroutine _type determines the number of arguments:
+ *   + subr0, subr1, ... subr5 are subroutines with 0, .., 5 arguments
+ *   + subr01, subr12, subr23, subr34 are subroutines with 0, 1, 2, 3, 4 arguments,
+ *     and one optional extra argument.
+ *   + vsubr is a procedure with variable number of arguments.
+ * - the argument list has the obvious meaning
+ *
+ * # IMPLEMENTATION: HOW THE PRE-PROCESSOR TRANSLATES THIS
+ *
+ * Best explained with an example:
+ *
+ *   DEFINE_PRIMITIVE("name", nom, subr2, (SCM x, SCM y)) {
+ *     return NULL;
+ *   }
+ *
+ * Will be translated into:
+ *
+ *   SCM STk_nom (SCM x, SCM y);
+ *   struct primitive_obj STk_o_nom = {
+ *        {tc_subr2, 0}, "nome", (t_subrptr) STk_nom, STk_nil
+ *   };
+ *   SCM STk_nom (SCM x, SCM y) { return NULL; }
+ *
+ * The above three lines are:
+ * 1. The prototype of STk_nom
+ * 2. A static structure that holds information on the procedure (its arity,
+ *     its Scheme name, and a pointer to the code)
+ * 3. The C function itself, implementing the procedure.
+ *
+ */
 #define DEFINE_PRIMITIVE(_sname, _cname, _type, _params)        \
   SCM CPP_CONCAT(STk_, _cname) _params;                         \
   struct primitive_obj CPP_CONCAT(STk_o_, _cname) = {           \
