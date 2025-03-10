@@ -167,10 +167,16 @@ static void error_eof_in_string(SCM port)
   signal_error(port, "end of file while reading a string on ~S", port);
 }
 
-
-static void warning_parenthesis(SCM port)
+/* If expected is zero, then it's a stray closing delimitar. If it's different
+   from zero, it is the closing delimiter that was expected. */
+static void warning_parenthesis(SCM port, char bad_closepar, char expected)
 {
-  STk_warning("bad closing parenthesis on line %d of ~S", PORT_LINE(port), port);
+  char buffer[40] = "";
+  if (expected)
+    snprintf(buffer, sizeof(buffer), " (char. `%c` expected)", expected);
+  
+  STk_warning("bad closing parenthesis `%c`%s on line %d of ~S",
+              bad_closepar, buffer, PORT_LINE(port), port);
 }
 
 static void warning_bad_escaped_sequence(SCM port, int c)
@@ -270,7 +276,7 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
 
     if (cur == close_par_cst) {
       c = STk_getc(port);
-      if (c != delim) warning_parenthesis(port);
+      if (c != delim) warning_parenthesis(port, c, delim);
       return start;
     }
 
@@ -1057,7 +1063,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           STk_ungetc(c, port);
           return close_par_cst;
         }
-        warning_parenthesis(port);
+        warning_parenthesis(port,c,0);
         break;
       case '\'':
         quote_type = sym_quote;
