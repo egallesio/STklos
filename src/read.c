@@ -536,26 +536,20 @@ static SCM read_address(SCM port)
 
 static SCM read_here_string(SCM port)
 {
-  SCM res, line;
-  struct read_context ctx = {.case_significant =TRUE};
-  SCM eof_token           = read_token(port, STk_getc(port), &ctx);
+  SCM res, line, eof_token;
   int first_line = TRUE;
 
-  if (!SYMBOLP(eof_token)) STk_error("bad symbol for here string ~S", eof_token);
+  // read the EOF token
+  eof_token = STk_read_line(port);
 
-  /* skip the end of line */
-  line = STk_read_line(port);
-  if (!STRINGP(line) || (STRING_SIZE(line) != 0))
-    STk_error("end of line expected after the ~S delimiter", eof_token);
-
-
+  // read the string itself
   res = STk_open_output_string();
   while (1) {
     line = STk_read_line(port);
     if (line == STk_eof)
       STk_error("eof seen while reading an here-string");
     else
-      if (strcmp(STRING_CHARS(line), SYMBOL_PNAME(eof_token)) == 0)
+      if (strcmp(STRING_CHARS(line), STRING_CHARS(eof_token)) == 0)
         break;
     /* Append the read string to the result */
     if (first_line)
