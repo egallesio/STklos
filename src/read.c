@@ -171,12 +171,12 @@ static void error_eof_in_string(SCM port)
    from zero, it is the closing delimiter that was expected. */
 static void warning_parenthesis(SCM port, char bad_closepar, char expected)
 {
+  char buffer[40] = "";
   if (expected)
-    STk_warning("bad closing parenthesis `%c` (expected `%c`) on line %d of ~S",
-                bad_closepar, expected, PORT_LINE(port), port);
-  else
-    STk_warning("bad closing parenthesis `%c` on line %d of ~S",
-                bad_closepar, PORT_LINE(port), port);
+    snprintf(buffer, sizeof(buffer), " (char. `%c` expected)", expected);
+  
+  STk_warning("bad closing parenthesis `%c`%s on line %d of ~S",
+              bad_closepar, buffer, PORT_LINE(port), port);
 }
 
 static void warning_bad_escaped_sequence(SCM port, int c)
