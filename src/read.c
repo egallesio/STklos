@@ -174,7 +174,7 @@ static void warning_parenthesis(SCM port, char bad_closepar, char expected)
   char buffer[40] = "";
   if (expected)
     snprintf(buffer, sizeof(buffer), " (char. `%c` expected)", expected);
-  
+
   STk_warning("bad closing parenthesis `%c`%s on line %d of ~S",
               bad_closepar, buffer, PORT_LINE(port), port);
 }
@@ -1056,9 +1056,17 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         //return read_list(port, '}', ctx);
       }
 
+      case '}':
+        SCM ref, read_brace_func = SYMBOL_VALUE(sym_read_brace, ref);
+
+        if (c == '}' && read_brace_func == STk_void) {
+          // '}' is not a closing delimiter
+          goto default_case;
+        }
+        /* fallthrough */
       case ')':
       case ']':
-      case '}':
+
         if (inlist) {
           STk_ungetc(c, port);
           return close_par_cst;
