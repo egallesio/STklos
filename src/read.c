@@ -52,6 +52,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
 static SCM sym_read_brace, sym_read_bracket, read_error;
+static SCM read_brace_proc = STk_false; // Value of parameter read-brace-procedure
 
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
@@ -405,10 +406,15 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
     next = STk_getc(port);
     if (next == EOF) break;
     if (!allchars) {
-      if (strchr("()[]{}'`,;\"\n\r \t\f", next)) {
+      if (strchr("()[]'`,;\"\n\r \t\f", next)) {
         STk_ungetc(next, port);
         break;
       }
+      if (strchr("{}", next) && read_brace_proc != STk_false) {
+        STk_ungetc(next, port);
+        break;
+      }
+
     }
     c = next;
     if (j >= sz-1) tok = enlarge_word(pword, &sz);
@@ -1040,33 +1046,29 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
       }
 
       case '{': {
-        SCM ref, read_brace_func = SYMBOL_VALUE(sym_read_brace, ref);
-
-        if (read_brace_func != STk_void) {
+        if (read_brace_proc != STk_false) {
           STk_ungetc(c, port);
-          return STk_C_apply(read_brace_func, 1, port);
+          return STk_C_apply(read_brace_proc, 1, port);
         }
         goto default_case;                   //FIXME
-        //return read_list(port, '}', ctx);
+        // return read_list(port, '}', ctx);
       }
 
       case '}':
-        SCM ref, read_brace_func = SYMBOL_VALUE(sym_read_brace, ref);
-
-        if (c == '}' && read_brace_func == STk_void) {
+        if (read_brace_proc == STk_false) {
           // '}' is not a closing delimiter
           goto default_case;
         }
         /* fallthrough */
       case ')':
       case ']':
-
         if (inlist) {
           STk_ungetc(c, port);
           return close_par_cst;
         }
         warning_parenthesis(port,c,0);
         break;
+
       case '\'':
         quote_type = sym_quote;
         goto read_quoted;
@@ -1293,6 +1295,22 @@ int STk_keyword_colon_convention(void)
   return colon_pos;
 }
 
+/*
+<doc EXT read-brace-procedure
+ * (read-brace-procedure)
+ * (read-brace-procedure value)
+ *
+doc>
+*/
+static SCM read_brace_procedure_conv(SCM proc) 
+{
+  if (proc != STk_false && STk_procedurep(proc) == STk_false)
+    STk_error_with_location(STk_intern("read-brace-procedure"),
+                            "bad procedure ~S", proc);
+  read_brace_proc = proc;
+  return proc;
+}
+
 
 DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
 {
@@ -1410,6 +1428,12 @@ int STk_init_reader(void)
                         keyword_colon_position_set,
                         STk_STklos_module);
 
+  /* Declare parameter read-brace-procedure */
+  STk_make_C_parameter("read-brace-procedure",
+                       read_brace_proc,
+                       read_brace_procedure_conv,
+                       STk_STklos_module);
+  
   /* Initialize the table for objects wich start with a '#' */
   sharp_table = STk_make_C_hash_table();
 

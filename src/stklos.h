@@ -1278,7 +1278,7 @@ struct string_obj {
 #define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
 SCM STk_makestring(int len, const char *init);
-SCM STk_Cstring2string(const char *str);           /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(const char *str);      /* Embed a C string in Scheme world  */
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
