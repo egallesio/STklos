@@ -309,6 +309,7 @@ doc>
 doc>
 */
 DEFINE_PRIMITIVE("make-list", make_list, subr12, (SCM n, SCM init)) {
+  if (!INTP(n)) STk_error("bad integer ~s", n);
   if (!init) init = STk_void;
   return STk_must_malloc_list(INT_VAL(n), init);
 }
