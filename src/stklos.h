@@ -716,6 +716,7 @@ EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
 EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
 EXTERN_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name));
+EXTERN_PRIMITIVE("make-list", make_list, subr12, (SCM n, SCM init));
 EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
 EXTERN_PRIMITIVE("memv", memv, subr2, (SCM obj, SCM list));
