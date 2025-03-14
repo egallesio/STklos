@@ -2040,7 +2040,6 @@ SCM STk_must_malloc_list_upton(int *n, SCM init, SCM *last) {
 SCM STk_must_malloc_list(int n, SCM init) {
   SCM z2;
   SCM last, new_last;
-  int original_n = n;
   SCM z = STk_must_malloc_list_upton(&n, init, &last);
   while (n) {
     /* n is the remaining cells to allocate. Try again:*/
