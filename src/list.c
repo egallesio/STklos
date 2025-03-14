@@ -47,6 +47,11 @@ static void error_bad_list(SCM x)
   STk_error("bad list ~W", x);
 }
 
+static void error_improper_list(SCM x)
+{
+  STk_error("improper list ~W", x);
+}
+
 static void error_bad_proc(SCM x)
 {
   STk_error("bad procedure ~S", x);
@@ -576,15 +581,17 @@ DEFINE_PRIMITIVE("append", append, vsubr, (int argc, SCM* argv))
  * @end lisp
 doc>
  */
+SCM STk_simple_list_copy(SCM l, int len);
 DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
 {
-  SCM p, n = STk_nil;
-
-  for(p=l; !NULLP(p); p=CDR(p)) {
-    if (!CONSP(p)) error_bad_list(l);
-    n = STk_cons(CAR(p), n);
-  }
-  return n;
+  int len;
+  SCM x = STk_list_type_and_length(l, &len);
+  if (!x) error_bad_list(l);
+  if (CONSP(x)) error_circular_list(l);
+  if (!NULLP(x)) error_improper_list(l);
+  /* WARNING: do not use STk_list_copy here. It will make STklos enter a loop
+     in sme situations, running out of stack space. */
+  return STk_dreverse(STk_simple_list_copy(l,len));
 }
 
 /*
@@ -874,6 +881,25 @@ DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l)) {
   int len;
   SCM x = STk_list_type_and_length(l, &len);
   return MAKE_BOOLEAN (x && CONSP(x));
+}
+
+SCM STk_simple_list_copy(SCM l, int len) {
+  if (NULLP(l)) return STk_nil;
+
+  SCM res = STk_must_malloc_list(len, STk_false);
+  SCM ptr_to = res;
+  SCM ptr_from = l;
+
+  while (CONSP(ptr_to) && CONSP(CDR(ptr_to))) {
+    CAR(ptr_to) = CAR(ptr_from);
+    ptr_from = CDR(ptr_from);
+    ptr_to   = CDR(ptr_to);
+  }
+
+  CAR(ptr_to) = CAR(ptr_from);
+  CDR(ptr_to) = CDR(ptr_from);
+
+  return res;
 }
 
 /*
