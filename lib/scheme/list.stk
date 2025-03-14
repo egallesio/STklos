@@ -467,14 +467,15 @@
           (not (null? x))))
     (not (null? x)))))
 
-(define (circular-list? x)
-  (let lp ((x x) (lag x))
-    (and (pair? x)
-     (let ((x (cdr x)))
-       (and (pair? x)
-        (let ((x   (cdr x))
-              (lag (cdr lag)))
-          (or (eq? x lag) (lp x lag))))))))
+;; In STklos core
+;; (define (circular-list? x)
+;;   (let lp ((x x) (lag x))
+;;     (and (pair? x)
+;;      (let ((x (cdr x)))
+;;        (and (pair? x)
+;;         (let ((x   (cdr x))
+;;               (lag (cdr lag)))
+;;           (or (eq? x lag) (lp x lag))))))))
 
 (define (not-pair? x) (not (pair? x)))  ; Inline me.
 
@@ -1769,6 +1770,9 @@ FILTER an FILTER! are primitives in STklos
 (redefine make-list)
 (redefine assoc)
 (redefine member)
+
+;; Not R7RS, but also moved to STklos core:
+(redefine circular-list?)
 
 )  ; END OF MODULE
 
