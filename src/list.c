@@ -726,9 +726,138 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
  * the |car| and |cdr| of |obj|, respectively.
 doc>
  */
-DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l))
-{
-  return CONSP(l) ? STk_cons(STk_list_copy(CAR(l)), STk_list_copy(CDR(l))): l;
+DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l)) {
+  /*
+    About the cycle detecting and copying algorithm:
+
+    1. Detect cycles using Floyd's algorithm.  The algorithm runs two
+       pointers, "fast" and "slow" through the list. Both are placed
+       at the CAR, then at each step, slow goes forward one link, and
+       fast goes forward two links.
+
+    2. If there is a cycle:
+
+       2.i) we position fast back at the CAR and now move the two
+            pointers *one* link at each time. The pointers will
+            *necessarily meet* exactly *at the beginning of the cycle.
+
+       2.ii) If there is a cycle, we mark the cell in which it starts
+             example, the cycle below starts at C:
+
+                        +--------------+
+                        |              |
+                        v              |
+              A -> B -> C -> D -> E -> F
+
+              We keep an extra pointer to C.
+
+       2.iii) Now we count the number of cells from the beginning (A)
+              to the SECOND time we see C (minus one). This is the
+              "length" of the list (the size to be allocated to the
+              copy).
+
+    3. If there is no cycle, count the number of elements as usual (but
+       allowing for improper lists)
+
+    4. Copy the elements from the old to the new list.
+
+    5. Adjust the last CDR:
+
+       5.i) If the last CDR of the old list is NIL (proper list), or if
+            it is NOT a CONS pair (list ending with non-nil, but still
+            finite), make the last CDR the same.
+
+       5.ii) If there was a cycle, then make the last CDR of the new
+             list point to the marked cell.
+
+   */
+    if (!CONSP(l)) return l;
+
+    /* 1. Detect possible cycles using Floyd's algorithm */
+    SCM slow  = l;
+    SCM fast  = l;
+    int cycle = 0;
+    SCM cycle_start;
+    SCM prev = l;
+    int len = 0;
+    while(CONSP(fast) && CONSP(CDR(fast))) {
+        prev = slow;
+        slow = CDR(slow);
+        fast = CDR(CDR(fast));
+        if(slow == fast) {
+            cycle = 1;
+            break;
+        }
+    }
+
+    if (cycle) {
+      /* 2.i Put fast back in the beginning, and now move slow and fast
+             one link at a time. When they meet, we found the cycle start. */
+        fast = l;
+        while(CDR(slow)!=CDR(fast)){
+          prev = slow;
+          slow = CDR(slow);
+          fast = CDR(fast);
+        }
+
+        /* 2.ii Keep a link to the cell where the cycle starts */
+        cycle_start = CDR(slow);
+
+        /* 2.iii Count the cyclic list size. */
+        len = 0;
+        slow = l;
+        int passed_cycle = 0;
+        while (1) {
+          len++;
+          if (CDR(slow) == cycle_start) {
+            if (passed_cycle) break;
+            else              passed_cycle = 1;
+          }
+          slow = CDR(slow);
+        }
+    } else {
+      /* 3 Count the uncyclic list size. */
+      slow = l;
+      for ( ; ; ) {
+        if (NULLP(slow) || !CONSP(slow)) break;
+        slow = CDR(slow);
+        len += 1;
+      }
+    }
+
+    /* LEN now has the length of the list to be copied. */
+
+    /* 4. Allocate the list and copy the CARs */
+    SCM ptr, ptr_res, res = STk_must_malloc_list(len, STk_false);
+    SCM cycle_start_in_new_list;
+
+    ptr = l;
+    ptr_res = res;
+    for (; len>1; len--) {
+      CAR(ptr_res) = CAR(ptr);
+      /* Mark where the cycle start is in the copy: */
+      if (cycle && ptr == cycle_start)
+        cycle_start_in_new_list = ptr_res;
+
+      ptr_res = CDR(ptr_res);
+      ptr = CDR(ptr);
+    }
+
+    /* Last cell: */
+    CAR(ptr_res) = CAR(ptr);
+
+    if (!cycle && (CDR(ptr) == STk_nil || /* No cycle */
+                   !CONSP(CDR(ptr))))     /* Improper list */
+      CDR(ptr_res) = CDR(ptr);
+
+    else if (cycle && CDR(ptr) == cycle_start) /* Cycle */
+      CDR(ptr_res) = cycle_start_in_new_list;
+
+    else {
+      STk_error("impossible error in list-copy"); /* ??? */
+    }
+    return res;
+
 }
 
 
