@@ -1111,11 +1111,15 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
   register SCM ptr, l;
   SCM result;
 
+  int len;
+  SCM x = STk_list_type_and_length(list, &len);
+  if (!x) error_bad_list(list);
+  if (CONSP(x)) error_circular_list(list);
+  if (!NULLP(x)) error_improper_list(list);
+
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
-  if (!CONSP(list) && !NULLP(list)) error_bad_list(list);
 
   for (ptr=l=list, result=STk_nil; !NULLP(l); ) {
-    if (!CONSP(l)) error_bad_list(list);
 
     if (STk_C_apply(pred, 1, CAR(l)) != STk_false) {
       if (NULLP(result)) {
@@ -1129,21 +1133,24 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
       CAR(ptr) = CAR(l);
       CDR(ptr) = STk_nil;
     }
-    if ((l=CDR(l)) == list) error_circular_list(list);
-  }
+    l=CDR(l);
+ }
   return result;
 }
 
 
 DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
 {
-  SCM previous, l, start=list;
+  SCM previous, l;
+  int len;
+  SCM x = STk_list_type_and_length(list, &len);
+  if (!x) error_bad_list(list);
+  if (CONSP(x)) error_circular_list(list);
+  if (!NULLP(x)) error_improper_list(list);
 
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
-  if (!CONSP(list) && !NULLP(list)) error_bad_list(list);
 
   for (previous=STk_nil, l=list; !NULLP(l); ) {
-    if (!CONSP(l)) error_bad_list(list);
     if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
 
     if (STk_C_apply(pred, 1, CAR(l)) == STk_false) {
@@ -1154,7 +1161,7 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
     } else {
       previous = l;
     }
-    if ((l=CDR(l)) == start) error_circular_list(list);
+    l = CDR(l);
   }
   return list;
 }
