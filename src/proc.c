@@ -542,8 +542,16 @@ DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
   SCM *lists = argv;
   SCM *ptr = lists;
   for (int i=0; i<argc; i++)
-    if (!NULLP(*ptr) && !CONSP(*ptr)) STk_error("bad list !s", *ptr);
+    if (!NULLP(*ptr) && !CONSP(*ptr)) STk_error("bad list ~s", *ptr);
   return fold(kons, knil, argc, lists);
+}
+
+DEFINE_PRIMITIVE("reduce", reduce, subr3, (SCM f, SCM id, SCM list))
+{
+  if (STk_procedurep(f) == STk_false) STk_error("bad procedure ~s", f);
+  if (NULLP(list)) return id;
+  if (!CONSP(list)) STk_error("bad list ~s", list);
+  return fold(f,CAR(list), 1, &(CDR(list)));
 }
 
 int STk_init_proc(void)
@@ -571,5 +579,6 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(for_each);
 
   ADD_PRIMITIVE(fold);
+  ADD_PRIMITIVE(reduce);
 return TRUE;
 }

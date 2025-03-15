@@ -769,10 +769,10 @@
 ;;; REDUCE and REDUCE-RIGHT only use RIDENTITY in the empty-list case.
 ;;; These cannot meaningfully be n-ary.
 
-(define (reduce f ridentity lis)
-  (check-arg procedure? f reduce)
-  (if (null-list? lis) ridentity
-      (fold f (car lis) (cdr lis))))
+;; (define (reduce f ridentity lis)
+;;   (check-arg procedure? f reduce)
+;;   (if (null-list? lis) ridentity
+;;       (fold f (car lis) (cdr lis))))
 
 (define (reduce-right f ridentity lis)
   (check-arg procedure? f reduce-right)
@@ -1771,6 +1771,7 @@ FILTER an FILTER! are primitives in STklos
 (redefine member)
 
 (redefine fold)
+(redefine reduce)
 
 )  ; END OF MODULE
 
