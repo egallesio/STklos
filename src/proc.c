@@ -546,6 +546,28 @@ DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
   return fold(kons, knil, argc, lists);
 }
 
+/*
+<doc reduce
+ * (reduce f init lst)
+ *
+ * If |lst| is null, the returned value is |init|. Otherwise,
+ * it is equivalent to |(fold f (car lst) (cdr lst))|.
+ * That is, |reduce| will operate on each par of consecutive
+ * elements of lst beginning at the leftmost position, accumulating
+ * the result value.
+ *
+ * @lisp
+ * (reduce - 'a '())        => 'a
+ * (reduce - 'a '(10 40 90) => 60
+ * @end lisp
+ *
+ * In the second example, the computations are:
+ * @lisp
+ * (- 40 10)   => 30 ; will be used as second argument
+ * (- 90 30)   => 60 ; final value
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("reduce", reduce, subr3, (SCM f, SCM id, SCM list))
 {
   if (STk_procedurep(f) == STk_false) STk_error("bad procedure ~s", f);
