@@ -468,6 +468,84 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
 }
 
 
+SCM fold(SCM kons, SCM knil, int n, SCM* lists) {
+  if (n == 1) { /* Fast path for common case */
+    SCM tmp = knil;
+    for (SCM v = *lists; !NULLP(v); v = CDR(v)) {
+      if (!CONSP(v)) error_malformed_list(v);
+      tmp = STk_C_apply(kons, 2, CAR(v), tmp);
+    }
+    return tmp;
+  } else {
+    SCM v     = STk_makevect(n + 1, (SCM) NULL);
+    SCM *args = VECTOR_DATA(v);
+    int i, j;
+    SCM tmp = knil;
+
+    for ( ; ; ) {
+      /* Build the parameter list */
+      for (i=0, j=0; i < n; i++,j--) {
+        if (NULLP(lists[j]))
+          return tmp;
+        if (!CONSP(lists[j])) error_malformed_list(lists[j]);
+
+        args[i]  = CAR(lists[j]);
+        lists[j] = CDR(lists[j]);
+      }
+      args[n] = tmp;
+
+      tmp = STk_C_apply(kons, -(n+1), args);
+    }
+  }
+}
+
+/*
+<doc fold
+ * (fold kons knil list1 list2 ...)
+ *
+ * The procedure |kons| will first be applied to |(arg1 arg2 ... argn
+ * X)|, where |argj| is the CAR of the j-th list and |X| is |knil|.
+ * Then, this will be repeated, but each |argj| is updated to the next
+ * element in the j-th list, and |X| is updated to the result of the
+ * previous pass.
+ *
+ * @lisp
+ * (fold - 100 '())            => 100
+ * (fold - 100 '(1 2 3))       => -98
+ * (fold - 100 '(1 4) '(5 10)) => 98
+ * @end lisp
+ *
+ * In the first example, there is only an empty list, so |kons| is not
+ * even called, and |knil| is returned.
+ *
+ * In the second case, the oerations performed were
+ * @lisp
+ * (- 1 100)  => -99       ; X is -99
+ * (- 2 -99)  => 101       ; X is 101
+ * (- 3 101)  => -98       ; final result
+ * @end lisp
+ *
+ * In the the third example,
+ * @lisp
+ * (- 1 5 100)   => -104   ; X is -104
+ * (- 4 10 -104) =>  98    ; final result
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
+{
+  if (argc < 3) STk_error("expected at least 3 arguments (given %d)", argc);
+  SCM kons = *argv--;
+  SCM knil = *argv--;
+  argc = argc - 2;
+  if (STk_procedurep(kons) == STk_false) STk_error("bad procedure ~s", kons);
+  SCM *lists = argv;
+  SCM *ptr = lists;
+  for (int i=0; i<argc; i++)
+    if (!NULLP(*ptr) && !CONSP(*ptr)) STk_error("bad list !s", *ptr);
+  return fold(kons, knil, argc, lists);
+}
+
 int STk_init_proc(void)
 {
   // Define some keywords to avoid calls to STk_makekey (which uses a mutex!)
@@ -491,5 +569,7 @@ int STk_init_proc(void)
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);
-  return TRUE;
+
+  ADD_PRIMITIVE(fold);
+return TRUE;
 }
