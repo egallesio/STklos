@@ -1076,7 +1076,10 @@ doc>
  */
 DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 {
-  if (!CONSP(l)) error_wrong_type(l);
+  int len;
+  SCM x = STk_list_type_and_length(l, &len);
+  if (!x) error_bad_list(l);
+  if (CONSP(x)) error_circular_list(l);
 
   while (CONSP(CDR(l)))
     l = CDR(l);
