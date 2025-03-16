@@ -1305,7 +1305,7 @@ int STk_keyword_colon_convention(void)
  * (read-brace-handler v)
  *
  * These parameter objects permit to change the way an open curly brace ('{')
- * or an open bracket ('[') is read depending of the value of |v|:
+ * or an open square bracket ('[') is read depending of the value of |v|:
  *
  *  - if |v| is `#f`, the character is a normal character without special
  *    behaviour
