@@ -23,6 +23,17 @@
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
 ;;;;
 
+;;; NOTE:
+;;;
+;;;
+;;; This code makes use of `list-deep-copy` because import sets, which are
+;;; alists, are copied. If one uses `list-copy`, then the assoc pairs are
+;;; not newly allocated, and are shared with the old import set. This will
+;;; cause problems, since this code uses set-cdr! to change the name of
+;;; a binding.
+;;;
+;;; So: *** use list-deep-copy, not list-copy! ***
+
 ;;=============================================================================
 ;;
 ;;                              MODULE-SYMBOLS*
