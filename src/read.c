@@ -407,19 +407,12 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
     next = STk_getc(port);
     if (next == EOF) break;
     if (!allchars) {
-      if (strchr("()'`,;\"\n\r \t\f", next)) {
+      if (strchr("()'`,;\"\n\r \t\f", next)                                    ||
+          (read_brace_handler   != STk_false && (next == '{' || next == '}'))  ||
+          (read_bracket_handler != STk_false && (next == '[' || next == ']')))    {
         STk_ungetc(next, port);
         break;
       }
-      if (strchr("{}", next) && read_brace_handler != STk_false) {
-        STk_ungetc(next, port);
-        break;
-      }
-      if (strchr("[]", next) && read_bracket_handler != STk_false) {
-        STk_ungetc(next, port);
-        break;
-      }
-
     }
     c = next;
     if (j >= sz-1) tok = enlarge_word(pword, &sz);
@@ -1063,19 +1056,14 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
       }
 
       case '}':
-        if (read_brace_handler == STk_false) { // '}' isn't a closing delimiter
-          goto default_case;
-        }
-        goto end_of_list;
-
       case ']':
-        if (read_bracket_handler == STk_false) { // ']' isn't a closing delimiter
+        if ((c == '}' && read_brace_handler   == STk_false)  ||
+            (c == ']' && read_bracket_handler == STk_false))
+          // '}' (or ']') isn't a closing delimiter
           goto default_case;
-        }
         /* fallthrough */
 
       case ')':
-      end_of_list:
         if (inlist) {
           STk_ungetc(c, port);
           return close_par_cst;
