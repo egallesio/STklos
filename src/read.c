@@ -51,8 +51,8 @@ static SCM read_srfi10(SCM port, SCM l);
 static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
-static SCM sym_read_brace, sym_read_bracket, read_error;
-static SCM read_brace_proc = STk_false; // Value of parameter read-brace-procedure
+static SCM sym_read_bracket, read_error;
+static SCM read_brace_handler = STk_false; // Value of parameter read-brace-handler
 
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
@@ -410,7 +410,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
         STk_ungetc(next, port);
         break;
       }
-      if (strchr("{}", next) && read_brace_proc != STk_false) {
+      if (strchr("{}", next) && read_brace_handler != STk_false) {
         STk_ungetc(next, port);
         break;
       }
@@ -1046,17 +1046,18 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
       }
 
       case '{': {
-        if (read_brace_proc != STk_false) {
-          STk_ungetc(c, port);
-          return STk_C_apply(read_brace_proc, 1, port);
+        if (read_brace_handler == STk_true) {   // '{' starts a list
+          return read_list(port, '}', ctx);
         }
-        goto default_case;                   //FIXME
-        // return read_list(port, '}', ctx);
+        if (read_brace_handler == STk_false) {  // '{' is a normal character
+          goto default_case;
+        }
+        STk_ungetc(c, port);                  // '{' needs to call the user handler
+        return STk_C_apply(read_brace_handler, 1, port);
       }
 
       case '}':
-        if (read_brace_proc == STk_false) {
-          // '}' is not a closing delimiter
+        if (read_brace_handler == STk_false) { // '}' isn't a closing delimiter
           goto default_case;
         }
         /* fallthrough */
@@ -1296,18 +1297,61 @@ int STk_keyword_colon_convention(void)
 }
 
 /*
-<doc EXT read-brace-procedure
- * (read-brace-procedure)
- * (read-brace-procedure value)
+<doc EXT read-brace-handler
+ * (read-brace-handler)
+ * (read-brace-handler v)
  *
+ * This parameter object permits to change the way an open curly brace (`{`)
+ * is read depending of the value of |v|:
+ *
+ *  - if |v| is `#f`, the character is a normal character without special
+ *    behavior
+ *  - if |v| is `#t`, the character delimits the beginning of a list ended by a
+ *    closing curly brace ('}`).
+ *  - if |v| is not a boolean, it must be a procedure which takes a parameter
+ *    (a port). This procedure will be called by |read| and the value it returns
+ *    will be the value returned by |read|. Note that the `{` characer is still
+ *    present in the port when the procedure starts.
+ *
+ * By default, |read-brace-handler| is '#f`.
+ *
+ * @lisp
+ * ;; Read a string delimited by curly braces (use '\\' to quote a character
+ * (define (read-upstring port)
+ *   (read-char port)                  ;; skip open brace
+ *   (let Loop ((c    (peek-char port))
+ *              (res '()))
+ *     (cond
+ *      ((eof-object? c)               ;; EOF
+ *       (error 'read-upstring "EOF encountered"))
+ *
+ *      ((char=? c #\\})                ;; End of list
+ *       (read-char port)
+ *       (list->string (reverse! res)))
+ *
+ *      (else                         ;; Other char
+ *       (let ((ch (if (char=? c #\\\\) ;; See if char is quoted
+ *                     (begin (read-char port) (peek-char port)) ;; as is
+ *                     (char-upcase c))))                        ;; upper-case
+ *         (read-char port)
+ *         (Loop (peek-char port)  (cons ch res)))))))
+ *
+ * (read-brace-handler read-upstring)
+ * {abcde}              => "ABCDE"
+ * {ab\\cde}             => "ABcDE"
+ * {ab\\{xyz\\}cd}        => "AB{XYZ}CD"
+ *
+ * (read-brace-handler #t)
+ * '{1 2 {3 4} 5 6}     =>  (1 2 (3 4) 5 6)
+ * @end lisp
 doc>
 */
-static SCM read_brace_procedure_conv(SCM proc) 
+static SCM read_brace_handler_conv(SCM proc)
 {
-  if (proc != STk_false && STk_procedurep(proc) == STk_false)
-    STk_error_with_location(STk_intern("read-brace-procedure"),
+  if (!BOOLEANP(proc) && STk_procedurep(proc) == STk_false)
+    STk_error_with_location(STk_intern("read-brace-handler"),
                             "bad procedure ~S", proc);
-  read_brace_proc = proc;
+  read_brace_handler = proc;
   return proc;
 }
 
@@ -1407,7 +1451,6 @@ int STk_init_reader(void)
   sym_unquote_splicing = STk_intern("unquote-splicing");
   sym_dot              = STk_intern(".");
   sym_read_bracket     = STk_intern("%read-bracket");
-  sym_read_brace       = STk_intern("%read-brace");
 
   /* read-error condition */
   read_error = STk_defcond_type("&read-error", STk_err_mess_condition,
@@ -1429,11 +1472,11 @@ int STk_init_reader(void)
                         STk_STklos_module);
 
   /* Declare parameter read-brace-procedure */
-  STk_make_C_parameter("read-brace-procedure",
-                       read_brace_proc,
-                       read_brace_procedure_conv,
+  STk_make_C_parameter("read-brace-handler",
+                       read_brace_handler,
+                       read_brace_handler_conv,
                        STk_STklos_module);
-  
+
   /* Initialize the table for objects wich start with a '#' */
   sharp_table = STk_make_C_hash_table();
 

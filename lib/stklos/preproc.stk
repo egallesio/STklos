@@ -326,7 +326,9 @@
             (set! pre  (process-file prelude-file))
             (set! post (process-file postlude-file))))
 
-        ;; Display pre + body (eventually sent to an external document processor) + post
+        ;; Display pre +
+        ;;         body (eventually sent to an external document processor) +
+        ;;         post
         ;; External document processor can be pandoc, markdown, asciidoc ...
         (display pre)
         (if cmd
@@ -334,17 +336,8 @@
             (display body))
         (display post))))
 
-
-  ;;
-  ;; Define the reader for braces
-  ;;
-  (read-brace-procedure
-      (lambda (port)
-        ;; skip opening brace which has been pushed back by the reader
-        (read-char port)
-        ;; read a list finished by a closing brace
-        (%read-list port #\})))
-
+  ;; Define the reader for braces (braces are list delimiters)
+  (read-brace-handler #t)
   
 ) ;; End of module preproc
 
