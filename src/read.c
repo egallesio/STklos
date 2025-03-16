@@ -1298,24 +1298,30 @@ int STk_keyword_colon_convention(void)
 }
 
 /*
-<doc EXT read-brace-handler
+<doc EXT read-bracket-handler read-brace-handler
+ * (read-bracket-handler)
+ * (read-bracket-handler v)
  * (read-brace-handler)
  * (read-brace-handler v)
  *
- * This parameter object permits to change the way an open curly brace (`{`)
- * is read depending of the value of |v|:
+ * These parameter objects permit to change the way an open curly brace ('{')
+ * or an open bracket ('[') is read depending of the value of |v|:
  *
  *  - if |v| is `#f`, the character is a normal character without special
- *    behavior
- *  - if |v| is `#t`, the character delimits the beginning of a list ended by a
- *    closing curly brace ('}`).
+ *    behaviour
+ *  - if |v| is `#t`, the character delimits the beginning of a list ended by
+ *    the corresponding closing bracket (or brace).
  *  - if |v| is not a boolean, it must be a procedure which takes a parameter
- *    (a port). This procedure will be called by |read| and the value it returns
- *    will be the value returned by |read|. Note that the `{` characer is still
- *    present in the port when the procedure starts.
+ *    (a port). This procedure will be called by |read|, and the value it returns
+ *    will be the value returned by |read|. Note that the opening characer is
+ *    still present in the port when the procedure starts.
  *
- * By default, |read-brace-handler| is '#f`.
+ * By default,
  *
+ *    - |read-bracket-handler| is `#t`, and
+ *    - |read-brace-handler| is `#f`.
+ *
+ * *Example:*
  * @lisp
  * ;; Read a string delimited by curly braces (use '\\' to quote a character
  * (define (read-upstring port)
