@@ -802,6 +802,7 @@ pre.rouge {
 <ul class="sectlevel2">
 <li><a href="#doc_stklos_libraries">A.1. STklos libraries</a></li>
 <li><a href="#doc_stklos_compiler">A.2. STklos compiler</a></li>
+<li><a href="#doc_customizing_the_reader">A.3. Customizing the reader</a></li>
 </ul>
 </li>
 <li><a href="#FDL">Appendix B: GNU Free Documentation License</a>
@@ -868,7 +869,7 @@ following URL: <a href="https://www.gnu.org/licenses/gpl-3.0.html" class="bare">
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph">
-<p>Copyright © 1999-2024 Erick Gallesio</p>
+<p>Copyright © 1999-2025 Erick Gallesio</p>
 </div>
 <div class="paragraph">
 <p>Permission is granted to copy, distribute and/or modify this document
@@ -3103,7 +3104,7 @@ otherwise <code>form</code> is returned unchanged.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>macro-expand</code> returns the <strong>full</strong> macro expansion of <code>form</code>, that is it repeats
+<p><code>macro-expand*</code> returns the <strong>full</strong> macro expansion of <code>form</code>, that is it repeats
 the macro-expansion, while the expanded form contains macro calls.</p>
 </div>
 <div class="listingblock">
@@ -7859,6 +7860,60 @@ The expression <code>(eq? 'mISSISSIppi 'mississippi)</code> returns <code>#f</co
 </table>
 </div>
 <div class="paragraph">
+<p><a id='P_gensym'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(gensym) </strong></code><br>
+<code><strong>(gensym prefix) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Creates a new symbol. The print name of the generated symbol
+consists of a prefix (which defaults to "G") followed by the decimal
+representation of a number. If <code>prefix</code> is specified, it must be
+either a string or a symbol.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">gensym</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">|G100|</span>
+<span class="p">(</span><span class="nf">gensym</span> <span class="s">"foo-"</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">foo-101</span>
+<span class="p">(</span><span class="nf">gensym</span> <span class="ss">'foo-</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="nv">foo-102</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_symbol-interned?'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(symbol-interned? sym) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>sym</code> is an interned symbol, and <code>#f</code> if <code>sym</code> is an
+uninterned symbol. When <code>sym</code> is not a symbol, an error is signaled.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">symbol-interned?</span> <span class="p">(</span><span class="nf">gensym</span><span class="p">))</span>      <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">symbol-interned?</span> <span class="p">(</span><span class="nf">gensym</span> <span class="s">"x-"</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">symbol-interned?</span> <span class="ss">'a</span><span class="p">)</span>            <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">symbol-interned?</span> <span class="s">"x"</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><a id='P_string->uninterned-symbol'></a>
 </p>
 </div>
@@ -7885,34 +7940,6 @@ The expression <code>(eq? 'mISSISSIppi 'mississippi)</code> returns <code>#f</co
         <span class="p">(</span><span class="nb">eq?</span> <span class="nv">ua</span> <span class="p">(</span><span class="nf">string-&gt;uninterned-symbol</span> <span class="s">"a"</span><span class="p">))</span>
         <span class="p">(</span><span class="nb">eqv?</span> <span class="nv">ua</span> <span class="p">(</span><span class="nf">string-&gt;uninterned-symbol</span> <span class="s">"a"</span><span class="p">))))</span>
           <span class="nv">=&gt;</span> <span class="p">(</span><span class="no">#f</span> <span class="no">#t</span> <span class="no">#f</span> <span class="no">#t</span><span class="p">)</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_gensym'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(gensym) </strong></code><br>
-<code><strong>(gensym prefix) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Creates a new symbol. The print name of the generated symbol
-consists of a prefix (which defaults to "G") followed by the decimal
-representation of a number. If <code>prefix</code> is specified, it must be
-either a string or a symbol.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">gensym</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="nv">|G100|</span>
-<span class="p">(</span><span class="nf">gensym</span> <span class="s">"foo-"</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">foo-101</span>
-<span class="p">(</span><span class="nf">gensym</span> <span class="ss">'foo-</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="nv">foo-102</span></code></pre>
 </div>
 </div>
 </div>
@@ -33078,6 +33105,100 @@ forced to <code>#t</code>.
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="doc_customizing_the_reader">A.3. Customizing the reader</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> reader compiler behaviour can be customized by several parameters.
+Those parameters are described below.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_read-brace-handler'></a><a id='P_read-bracket-handler'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(read-bracket-handler) </strong></code><br>
+<code><strong>(read-bracket-handler v) </strong></code><br>
+<code><strong>(read-brace-handler) </strong></code><br>
+<code><strong>(read-brace-handler v) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These parameter objects permit to change the way an open curly brace ('{')
+or an open bracket ('[') is read depending of the value of <code>v</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>if <code>v</code> is <code>#f</code>, the character is a normal character without special
+behaviour</p>
+</li>
+<li>
+<p>if <code>v</code> is <code>#t</code>, the character delimits the beginning of a list ended by
+the corresponding closing bracket (or brace).</p>
+</li>
+<li>
+<p>if <code>v</code> is not a boolean, it must be a procedure which takes a parameter
+(a port). This procedure will be called by <code>read</code>, and the value it returns
+will be the value returned by <code>read</code>. Note that the opening characer is
+still present in the port when the procedure starts.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>By default,</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>read-bracket-handler</code> is <code>#t</code>, and</p>
+</li>
+<li>
+<p><code>read-brace-handler</code> is <code>#f</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Example:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="c1">;; Read a string delimited by curly braces (use '\' to quote a character</span>
+<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">read-upstring</span> <span class="nv">port</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">read-char</span> <span class="nv">port</span><span class="p">)</span>                  <span class="c1">;; skip open brace</span>
+  <span class="p">(</span><span class="k">let</span> <span class="nv">Loop</span> <span class="p">((</span><span class="nf">c</span>    <span class="p">(</span><span class="nb">peek-char</span> <span class="nv">port</span><span class="p">))</span>
+             <span class="p">(</span><span class="nf">res</span> <span class="o">'</span><span class="p">()))</span>
+    <span class="p">(</span><span class="k">cond</span>
+     <span class="p">((</span><span class="nb">eof-object?</span> <span class="nv">c</span><span class="p">)</span>               <span class="c1">;; EOF</span>
+      <span class="p">(</span><span class="nf">error</span> <span class="ss">'read-upstring</span> <span class="s">"EOF encountered"</span><span class="p">))</span>
+
+     <span class="p">((</span><span class="nb">char=?</span> <span class="nv">c</span> <span class="o">#</span><span class="err">\}</span><span class="p">)</span>                <span class="c1">;; End of list</span>
+      <span class="p">(</span><span class="nb">read-char</span> <span class="nv">port</span><span class="p">)</span>
+      <span class="p">(</span><span class="nb">list-&gt;string</span> <span class="p">(</span><span class="nf">reverse!</span> <span class="nv">res</span><span class="p">)))</span>
+
+     <span class="p">(</span><span class="k">else</span>                         <span class="c1">;; Other char</span>
+      <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">ch</span> <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">char=?</span> <span class="nv">c</span> <span class="o">#</span><span class="err">\\</span><span class="p">)</span> <span class="c1">;; See if char is quoted</span>
+                    <span class="p">(</span><span class="k">begin</span> <span class="p">(</span><span class="nb">read-char</span> <span class="nv">port</span><span class="p">)</span> <span class="p">(</span><span class="nb">peek-char</span> <span class="nv">port</span><span class="p">))</span> <span class="c1">;; as is</span>
+                    <span class="p">(</span><span class="nb">char-upcase</span> <span class="nv">c</span><span class="p">))))</span>                        <span class="c1">;; upper-case</span>
+        <span class="p">(</span><span class="nb">read-char</span> <span class="nv">port</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Loop</span> <span class="p">(</span><span class="nb">peek-char</span> <span class="nv">port</span><span class="p">)</span>  <span class="p">(</span><span class="nb">cons</span> <span class="nv">ch</span> <span class="nv">res</span><span class="p">)))))))</span>
+
+<span class="p">(</span><span class="nf">read-brace-handler</span> <span class="nv">read-upstring</span><span class="p">)</span>
+<span class="err">{</span><span class="nv">abcde</span><span class="err">}</span>              <span class="nv">=&gt;</span> <span class="s">"ABCDE"</span>
+<span class="err">{</span><span class="nv">ab</span><span class="err">\</span><span class="nv">cde</span><span class="err">}</span>             <span class="nv">=&gt;</span> <span class="s">"ABcDE"</span>
+<span class="err">{</span><span class="nv">ab</span><span class="err">\{</span><span class="nv">xyz</span><span class="err">\}</span><span class="nv">cd</span><span class="err">}</span>        <span class="nv">=&gt;</span> <span class="s">"AB{XYZ}CD"</span>
+
+<span class="p">(</span><span class="nf">read-brace-handler</span> <span class="no">#t</span><span class="p">)</span>
+<span class="o">'</span><span class="err">{</span><span class="mi">1</span> <span class="mi">2</span> <span class="err">{</span><span class="mi">3</span> <span class="mi">4</span><span class="err">}</span> <span class="mi">5</span> <span class="mi">6</span><span class="err">}</span>     <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">4</span><span class="p">)</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
