@@ -51,8 +51,9 @@ static SCM read_srfi10(SCM port, SCM l);
 static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
-static SCM sym_read_bracket, read_error;
-static SCM read_brace_handler = STk_false; // Value of parameter read-brace-handler
+static SCM read_error;
+static SCM read_brace_handler   = STk_false; // Value of param. read-brace-handler
+static SCM read_bracket_handler = STk_true;  // Value of param. read-bracket-handler
 
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
@@ -406,11 +407,15 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
     next = STk_getc(port);
     if (next == EOF) break;
     if (!allchars) {
-      if (strchr("()[]'`,;\"\n\r \t\f", next)) {
+      if (strchr("()'`,;\"\n\r \t\f", next)) {
         STk_ungetc(next, port);
         break;
       }
       if (strchr("{}", next) && read_brace_handler != STk_false) {
+        STk_ungetc(next, port);
+        break;
+      }
+      if (strchr("[]", next) && read_bracket_handler != STk_false) {
         STk_ungetc(next, port);
         break;
       }
@@ -1036,13 +1041,14 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         return(read_list(port, ')', ctx));
 
       case '[': {
-        SCM ref, read_bracket_func = SYMBOL_VALUE(sym_read_bracket, ref);
-
-        if (read_bracket_func != STk_void) {
-          STk_ungetc(c, port);
-          return STk_C_apply(read_bracket_func, 1, port);
+        if (read_bracket_handler == STk_true) {   // '[' starts a list
+          return read_list(port, ']', ctx);
         }
-        return(read_list(port, ']', ctx));
+        if (read_bracket_handler == STk_false) {   // '[' is a normal character
+          goto default_case;
+        }
+        STk_ungetc(c, port);                     // '[' needs to call the user handler
+        return STk_C_apply(read_bracket_handler, 1, port);
       }
 
       case '{': {
@@ -1060,9 +1066,16 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         if (read_brace_handler == STk_false) { // '}' isn't a closing delimiter
           goto default_case;
         }
-        /* fallthrough */
-      case ')':
+        goto end_of_list;
+
       case ']':
+        if (read_bracket_handler == STk_false) { // ']' isn't a closing delimiter
+          goto default_case;
+        }
+        /* fallthrough */
+
+      case ')':
+      end_of_list:
         if (inlist) {
           STk_ungetc(c, port);
           return close_par_cst;
@@ -1355,6 +1368,15 @@ static SCM read_brace_handler_conv(SCM proc)
   return proc;
 }
 
+static SCM read_bracket_handler_conv(SCM proc)
+{
+  if (!BOOLEANP(proc) && STk_procedurep(proc) == STk_false)
+    STk_error_with_location(STk_intern("read-bracket-handler"),
+                            "bad procedure ~S", proc);
+  read_bracket_handler = proc;
+  return proc;
+}
+
 
 DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
 {
@@ -1450,7 +1472,6 @@ int STk_init_reader(void)
   sym_unquote          = STk_intern("unquote");
   sym_unquote_splicing = STk_intern("unquote-splicing");
   sym_dot              = STk_intern(".");
-  sym_read_bracket     = STk_intern("%read-bracket");
 
   /* read-error condition */
   read_error = STk_defcond_type("&read-error", STk_err_mess_condition,
@@ -1471,10 +1492,16 @@ int STk_init_reader(void)
                         keyword_colon_position_set,
                         STk_STklos_module);
 
-  /* Declare parameter read-brace-procedure */
+  /* Declare parameter read-brace-handler */
   STk_make_C_parameter("read-brace-handler",
                        read_brace_handler,
                        read_brace_handler_conv,
+                       STk_STklos_module);
+
+  /* Declare parameter read-bracket-handler */
+  STk_make_C_parameter("read-bracket-handler",
+                       read_bracket_handler,
+                       read_bracket_handler_conv,
                        STk_STklos_module);
 
   /* Initialize the table for objects wich start with a '#' */
