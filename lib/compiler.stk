@@ -1995,7 +1995,15 @@ both forms.
                   (let ((exports (%module-exports module)))
                     (unless (member names exports)
                       (%module-exports-set! module (cons names exports))))))
-              (key-get infos :macros '()))))
+              (key-get infos :macros '()))
+
+    ;; Rebuild the read directive defined in the imported file
+    (for-each (lambda (x)
+                (let ((name (car x))
+                      (code (cdr x)))
+                  (%add-read-directive name
+                                       (eval code (compiler-current-module)))))
+              (key-get infos :read-dir '()))))
 
 
 (define (%grab-file-information str)
