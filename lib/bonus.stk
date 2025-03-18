@@ -398,7 +398,23 @@ doc>
 <doc EXT define-read-directive
  * (define-read-directive name expr1 expr2 ...)
  *
- * 
+ * The form |define-read-directive| adds a reading directive that will be recognized
+ * by the reader. The new reading directive will start with a sharp character
+ * ('#') followed by the characters of |name|. When the reader recognizes the read
+ * directive, it executes the sequence of expressions |expr1| |expr2| ...
+ *
+ * NOTE: When the expressions |expr1| |expr2| ..., the thunk functions |current-port|
+ * and  |current-directive| are defined in their dynamic environment. They can
+ * respectively be used to access the port where the directive was read and
+ * it's name as a string.
+ *
+ * @lisp
+ * (define-read-directive !srfi-169    (accept-srfi-169-numbers #t))
+ * (define-read-directive !no-srfi-169 (accept-srfi-169-numbers #f))
+ *
+ * (list #!srfi-169    (symbol? '1_000) (integer? '1_000)
+ *       #!no-srfi-169 (symbol? '1_000) (integer? '1_000)) => (#f #t #t #f)
+ * @end lisp
 doc>
 |#
 (define-macro (define-read-directive name . body)

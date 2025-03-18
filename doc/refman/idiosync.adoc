@@ -201,4 +201,5 @@ Those parameters are described below.
 Those parameters are described below.
 
 {{insertdoc 'read-brace-handler}}
+{{insertdoc 'define-read-directive}}
 
