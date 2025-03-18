@@ -403,10 +403,10 @@ doc>
  * ('#') followed by the characters of |name|. When the reader recognizes the read
  * directive, it executes the sequence of expressions |expr1| |expr2| ...
  *
- * NOTE: When the expressions |expr1| |expr2| ..., the thunk functions |current-port|
- * and  |current-directive| are defined in their dynamic environment. They can
- * respectively be used to access the port where the directive was read and
- * it's name as a string.
+ * NOTE: When the expressions |expr1| |expr2| ..., the thunk functions
+ * |current-port| and  |current-directive| are defined in their
+ * dynamic environment. They can  respectively be used to access the port
+ * where the directive was read and it's name as a string.
  *
  * @lisp
  * (define-read-directive !srfi-169    (accept-srfi-169-numbers #t))
@@ -418,29 +418,20 @@ doc>
 doc>
 |#
 (define-macro (define-read-directive name . body)
-  (let ((port (gensym))
-        (str  (gensym)))
+  (let* ((port (gensym '_rd))
+         (str  (gensym '_rd))
+         (code `(lambda (,port ,str)
+                  (let ((current-port (lambda() ,port))
+                        (current-directive (lambda() (format "#~a" ,str))))
+                    ,@body))))
     `(begin
        ;; Define the code associated to directive both in produced code
        ;; and in the compiler
-       (when-load-and-compile
-          (%add-read-directive
-           ',name
-           (lambda (,port ,str)
-             (let ((current-port (lambda() ,port))
-                   (current-directive (lambda() (format "#~a" ,str))))
-               ,@body))))
+       (when-load-and-compile (%add-read-directive ',name ,code))
+
        ;; Add the directive code to the .ostk meta-data
        (when-compile
-        (register-read-directive!
-         ',name
-         '(lambda (,port ,str)
-            (let ((current-port (lambda() ,port))
-                  (current-directive (lambda() (format "#~a" ,str))))
-              ,@body)))))))
-
-
-
+        (register-read-directive! ',name ,code)))))
 
 ;;;
 ;;; Port functions
