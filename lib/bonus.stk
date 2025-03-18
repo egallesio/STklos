@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@
         call-with-input-string call-with-output-string
         read-case-sensitive
         open-input-virtual open-output-virtual
+        define-read-directive
         read-from-string read-from-string-ci
         eval-from-string eval-from-string-ci
         command-line program-name
@@ -388,6 +389,36 @@ doc>
     (proc port)
     (close-port port)
     (get-output-string port)))
+
+
+;;;;
+;;;; Read directives
+;;;;
+#|
+<doc EXT define-read-directive
+ * (define-read-directive name expr1 expr2 ...)
+ *
+ * 
+doc>
+|#
+(define-macro (define-read-directive name . body)
+  (let ((port (gensym))
+        (str  (gensym)))
+    `(begin
+       ;; Define the code associated to directive both in produced code
+       ;; and in the compiler
+       (when-load-and-compile
+          (%add-read-directive
+           ',name
+           (lambda (,port ,str)
+             (let ((current-port (lambda() ,port))
+                   (current-directive (lambda() (format "#~a" ,str))))
+               ,@body))))
+       ;; Add the directive code to the .ostk meta-data
+       ;; TODO: ....
+       )))
+
+
 
 ;;;
 ;;; Port functions
@@ -983,7 +1014,7 @@ doc>
       `(let ((,counting? (%count-allocations))  ;; save if we are counting allocs
              (,gc-no     (begin (gc) (key-get (%gc-stats) #:gc-no 0)))) ;; and GC count
          (%thread-allocation-reset!)            ;; reset thread counters
-         (%count-allocations #t)                 ;; count allocations now
+         (%count-allocations #t)                ;; count allocations now
          (let* ((,time-start (exact-clock))
                 (,res        (begin ,@args))
                 (,allocs     (%thread-allocation-counter))

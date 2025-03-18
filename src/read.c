@@ -98,7 +98,7 @@ static char colon_pos = COLON_BOTH;
  */
 static SCM sharp_table, sharp_char_table = STk_nil;
 
-typedef SCM (*sharp_func) (SCM, struct read_context*, const char*);
+typedef SCM (*sharp_func) (SCM, struct read_context*, const char*, SCM data);
 
 /*===========================================================================*\
  *
@@ -447,11 +447,15 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
       if (tok[1] == ':')
         return STk_makekey(tok+2);
       else {
-        sharp_func fct = STk_C_hash_get(sharp_table, tok+1);
+        SCM tmp = STk_C_hash_get(sharp_table, tok+1);
 
-        if (fct) // tok is a known keyword
-          return fct(port, ctx, tok+1);
+        if (tmp) {
+          // tok is a known keyword
+          // tmp is a cons:  (<a C function> . <data argument of this function>)
+          sharp_func fct = (sharp_func) CAR(tmp);
 
+          return fct(port, ctx, tok+1, CDR(tmp));
+        }
         if (tok[1] == '!') {
           // We had #!... where ... is not recognized => comment
           do {
@@ -477,7 +481,10 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
     else {
       // FIXME: we could have a `STk_intern_no_dup` to avoid the duplication of tok
       // when tok != w.buffer. Is it really worthwhile?
-      return STk_intern(tok);
+      SCM tmp =  STk_intern(tok);
+
+      if (seen_pipe) BOXED_INFO(tmp) |= SYMBOL_NEEDS_BARS;
+      return tmp;
     }
   }
   return STk_void;   // for the compiler
@@ -1395,7 +1402,7 @@ DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
 \* ======================================================================*/
 
 static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
-                                const char *word)
+                                const char *word, SCM _UNUSED(data))
 {
   switch (*word) {
     case 't': return STk_true;    // #t or #true
@@ -1413,28 +1420,49 @@ static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*
 }
 
 static SCM sharp_fold_keyword(SCM port, struct read_context _UNUSED(*ctx),
-                              const char *word)
+                              const char *word, SCM _UNUSED(data))
 {
   STk_port_cs_set(port, MAKE_BOOLEAN((word[1] == 'n'))); // word = "!no-fold-case"
   return NULL;  // NULL since the keyword is not returned
 }
 
 static SCM sharp_keypos(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
-                        const char *word)
+                        const char *word, SCM _UNUSED(data))
 {
   const char *val=sizeof("keyword-colon-position-") + word; // none, before, ...
   PORT_KW_COL_POS(port) = colon_position_value(val);
   return NULL;  // NULL since the keword is not returned
 }
 
-static SCM sharp_uvector(SCM port, struct read_context *ctx, const char *word)
+static SCM sharp_user_directive(SCM port, struct read_context _UNUSED(*ctx),
+                              const char *word, SCM data)
+{
+  STk_C_apply(data, 2, port, STk_Cstring2string(word));
+  /* Result of function call is lost since all read directive are in fact comments */
+  return NULL; /* NULl <=> comment */
+}
+
+static SCM sharp_uvector(SCM port, struct read_context *ctx, const char *word,
+                         SCM _UNUSED(data))
 {
   return read_uniform_vector(port, ctx, word);
 }
 
 void STk_add_uvector_reader_tag(const char *tag)
 {
-  STk_C_hash_set(sharp_table, tag, sharp_uvector);
+  STk_C_hash_set(sharp_table, tag, STk_cons((SCM) sharp_uvector, STk_void));
+}
+
+
+DEFINE_PRIMITIVE("%add-read-directive", add_read_directive,
+                 subr2, (SCM str, SCM proc))
+{
+  if (!SYMBOLP(str))                     STk_error("bad symbol ~S", str);
+  if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
+
+  STk_C_hash_set(sharp_table, SYMBOL_PNAME(str), STk_cons((SCM) sharp_user_directive,
+                                                          proc));
+  return STk_void;
 }
 
 
@@ -1459,8 +1487,7 @@ DEFINE_PRIMITIVE("%add-sharp-reader", add_sharp_reader, subr2, (SCM ch, SCM proc
  *                      I n i t i a l i z a t i o n
  *
 \*===========================================================================*/
-int STk_init_reader(void)
-{
+int STk_init_reader(void) {
   sym_quote            = STk_intern("quote");
   sym_quasiquote       = STk_intern("quasiquote");
   sym_unquote          = STk_intern("unquote");
@@ -1501,29 +1528,38 @@ int STk_init_reader(void)
   /* Initialize the table for objects wich start with a '#' */
   sharp_table = STk_make_C_hash_table();
 
-  STk_C_hash_set(sharp_table, "t",             sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "true",          sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "false",         sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "f",             sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "eof",           sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "void",          sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "!optional",     sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "!key",          sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "!rest",         sharp_simple_keyword);
+  {
+    SCM tmp         = STk_cons((SCM)sharp_simple_keyword, STk_void);
 
-  STk_C_hash_set(sharp_table, "!fold-case",    sharp_fold_keyword);
-  STk_C_hash_set(sharp_table, "!no-fold-case", sharp_fold_keyword);
-
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-none",   sharp_keypos);
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-before", sharp_keypos);
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  sharp_keypos);
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   sharp_keypos);
-
+    STk_C_hash_set(sharp_table, "t",             tmp);
+    STk_C_hash_set(sharp_table, "true",          tmp);
+    STk_C_hash_set(sharp_table, "false",         tmp);
+    STk_C_hash_set(sharp_table, "f",             tmp);
+    STk_C_hash_set(sharp_table, "eof",           tmp);
+    STk_C_hash_set(sharp_table, "void",          tmp);
+    STk_C_hash_set(sharp_table, "!optional",     tmp);
+    STk_C_hash_set(sharp_table, "!key",          tmp);
+    STk_C_hash_set(sharp_table, "!rest",         tmp);
+  }
+  {
+    SCM tmp = STk_cons((SCM) sharp_fold_keyword, STk_void);
+    STk_C_hash_set(sharp_table, "!fold-case",    tmp);
+    STk_C_hash_set(sharp_table, "!no-fold-case", tmp);
+  }
+  {
+    SCM tmp = STk_cons((SCM) sharp_keypos, STk_void);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-none",   tmp);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-before", tmp);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  tmp);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   tmp);
+  }
+  
   /* Add reader for #u8 constants */
   STk_add_uvector_reader_tag("u8");
 
-  /* Add a primitive to permit the definition new forms of sharp constants */
+   /* Add primitives to define new forms of sharp directives/constants */
   ADD_PRIMITIVE(add_sharp_reader);
+  ADD_PRIMITIVE(add_read_directive);
 
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */
