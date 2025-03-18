@@ -431,8 +431,14 @@ doc>
                    (current-directive (lambda() (format "#~a" ,str))))
                ,@body))))
        ;; Add the directive code to the .ostk meta-data
-       ;; TODO: ....
-       )))
+       (when-compile
+        (register-read-directive!
+         ',name
+         '(lambda (,port ,str)
+            (let ((current-port (lambda() ,port))
+                  (current-directive (lambda() (format "#~a" ,str))))
+              ,@body)))))))
+
 
 
 
