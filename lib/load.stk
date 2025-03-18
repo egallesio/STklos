@@ -560,8 +560,59 @@ doc>
 <doc EXT autoload
  * (autoload file symbol ...)
  *
- * TODO
+ * This macro will arrange so that when |symbol| is referenced, |file| is
+ * loaded so the procedures defined in |file| with the names |symbol ...|
+ * can be used.
  *
+ * Note that |the-file| must be a string with the file name, with or without
+ * the extension; each |symbol| must be the name of a procedure defined in
+ * the file; and the file should have the line |(provide NAME)|, where |NAME|
+ * is the same string as |file|.
+ *
+ * Suppose this is the content of |the-file.stk|:
+ * @lisp
+ * (define (f x) (* x 10))
+ * (define (g x) (/ x 10))
+ * (provide "the-file")
+ * @end lisp
+ * And suppose also that one starts STklos (using the REPL or otherwise as a
+ * program), *without* loading |the-file|. If this line is evaluated:
+ * @lisp
+ * (autoload "the-file" f g)
+ * @end lisp
+ * For now, |the file| has *not* been loaded. But dummy closures were created for
+ * |f| and |g|, and when they are called, they will load |the file|.
+ *
+ * To fully explain this, we do the autoload line again, but first we tell STklos
+ * to keep the source code of procedures:
+ * @lisp
+ * (compiler:keep-source #t)
+ * (autoload "the-file" f g)
+ * f => #[closure f G1]
+ * g => #[closure g G1]
+ * @end lisp
+ * And see the source of |g| for example:
+ * @lisp
+ * (procedure-source g)
+ *   => (lambda G1 (let ((G2 g))
+ *              (require "the-file")
+ *              (if (eq? G2 g)
+ *                  (error 'autoload "~S has not been defined in ~S" 'g "the-file")
+ *                  (apply g G1))))
+ * @end lisp
+ *
+ * So, when either |f| or |g| are used as procedures, |the-file| will be loaded so
+ * they can be used, even if it was not explicitly loaded:
+ * @lisp
+ * (f 2)  => 20
+ * (g 30) => 3
+ *
+ * f => #[closure f (x)]     ; changed to the implementation in the-file!
+ * g => #[closure g (x)]     ; changed to the implementation in the-file!
+ *
+ * (procedure-source g)
+ * => (lambda (x) (/ x 10))
+ * @end lisp
 doc>
 |#
 (define-macro (autoload file . symbols)
