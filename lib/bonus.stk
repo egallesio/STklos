@@ -1336,7 +1336,7 @@ doc>
  * (inc! place)
  * (inc! place val)
  * (dec! place)
- * (dec place val)
+ * (dec! place val)
  *
  * These forms increment or decrement the value contained in |place| by |val|.
  * If ommitted, |val| defaults to 1. The result of both forms is undefined.
