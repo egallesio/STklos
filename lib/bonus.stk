@@ -1296,18 +1296,35 @@ doc>
  * @end lisp
 doc>
 |#
-(define (%make-inc-dec-push-body place func val)
+(define (%make-inc-dec-push-body place func val :optional (op-val-place #t))
+  ;; inc! dec! pop! and push! are build by the same procedure,
+  ;; %make-inc-dec-push-body.
+  ;;
+  ;; But dec! and push! operate in different ways:
+  ;;
+  ;; (dec!  a 2)  =>  (set! a (-    a 2)) ;; "a" and "2" in the order they appeared...
+  ;; (push! a 2)  =>  (set! a (cons 2 a)) ;; "a" and "2" in reverse order!
+  ;;
+  ;; So the argument "op-val-place" is used to determine what the order will be.
   (cond
    ((symbol? place)
     ;; simple xxx! on a variable
-    `(set! ,place (,func ,val ,place)))
+    ;; The order of the operation can be
+    ;; "op val place"
+    ;; "op place val"
+    ;; depending on the argument "op-val-place"
+    (if op-val-place
+        `(set! ,place (,func ,val ,place))
+        `(set! ,place (,func ,place ,val))))
    ((list? place)
     ;; Generalized xxx!. Do not evaluate arguments two times
     (let ((vars (map (lambda (x) (list (gensym) x)) place)))
       `(let ,vars
          ((setter ,(caar vars))
           ,@(map car (cdr vars))
-          (,func ,val ,(map car vars))))))
+          ,(if op-val-place
+            `(,func ,val ,(map car vars))
+            `(,func ,(map car vars) ,val))))))
    (else
     (error "place ~W must be a symbol (variable) or a list (generalized variable)"
            place))))
@@ -1362,7 +1379,7 @@ doc>
   (%make-inc-dec-push-body place '+ value))
 
 (define-macro (dec! place :optional (value 1))
-  (%make-inc-dec-push-body place (lambda (a b) (- b a)) value))
+  (%make-inc-dec-push-body place '- value #f))
 
 
 #|
