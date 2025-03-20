@@ -2770,9 +2770,15 @@ doc>
 ;; ----------------------------------------------------------------------
 ;; SRFI 169: Underscores in numbers
 ;; ----------------------------------------------------------------------
-(define-read-directive !srfi-169    (accept-srfi-169-numbers #t))
-(define-read-directive !no-srfi-169 (accept-srfi-169-numbers #f))
-
+;; The following code is more or less
+;;     (define-read-directive !srfi-169    (accept-srfi-169-numbers #t))
+;;     (define-read-directive !no-srfi-169 (accept-srfi-169-numbers #f))
+;; but for some reason the full expansion of define-read-directive
+;; doesn't work at boot time.
+(%add-read-directive '!srfi-169
+                     (lambda (port directive) (accept-srfi-169-numbers #t)))
+(%add-read-directive '!no-srfi-169
+                     (lambda (port directive) (accept-srfi-169-numbers #f)))
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI-176: "Version flag"
