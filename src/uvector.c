@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 #include "stklos.h"
 
 static SCM u64_max, s64_min, s64_max;
-
+static int accept_uvector_syntax = 0; // #uxx and #sxx allowed?
 
 /*
  * Utilities
@@ -609,6 +609,34 @@ DEFINE_PRIMITIVE("uvector-tag", uvector_tag, subr1, (SCM v))
 }
 
 
+static void add_uvector_syntax(void) {
+  if (!accept_uvector_syntax) {
+    // Add uvector syntax if not already in the table
+    STk_add_uvector_reader_tag("s8");  /* "u8" is defined by default */
+    STk_add_uvector_reader_tag("s16"); STk_add_uvector_reader_tag("u16");
+    STk_add_uvector_reader_tag("s32"); STk_add_uvector_reader_tag("u32");
+    STk_add_uvector_reader_tag("s64"); STk_add_uvector_reader_tag("u64");
+    STk_add_uvector_reader_tag("f32"); STk_add_uvector_reader_tag("f64");
+    STk_add_uvector_reader_tag("c64");
+    STk_add_uvector_reader_tag("c128");
+    accept_uvector_syntax = 1;
+  }
+}
+
+
+static void delete_uvector_syntax(void) {
+  if (accept_uvector_syntax) {
+    // Delete uvector syntax if necessary 
+    STk_del_uvector_reader_tag("s8");  /* "u8" is defined by default */
+    STk_del_uvector_reader_tag("s16"); STk_del_uvector_reader_tag("u16");
+    STk_del_uvector_reader_tag("s32"); STk_del_uvector_reader_tag("u32");
+    STk_del_uvector_reader_tag("s64"); STk_del_uvector_reader_tag("u64");
+    STk_del_uvector_reader_tag("f32"); STk_del_uvector_reader_tag("f64");
+    STk_del_uvector_reader_tag("c64"); STk_del_uvector_reader_tag("c128");
+    accept_uvector_syntax = 0;
+  }
+}
+
 DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
 {
   ADD_PRIMITIVE(uvector_list);
@@ -620,15 +648,23 @@ DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
   s64_max = STk_Cstr2number(S64_MAX, 10);
 
   /* Add new readers #xxx syntax */
-  STk_add_uvector_reader_tag("s8");  /* "u8" is defined by default */
-  STk_add_uvector_reader_tag("s16"); STk_add_uvector_reader_tag("u16");
-
-  STk_add_uvector_reader_tag("s32"); STk_add_uvector_reader_tag("u32");
-  STk_add_uvector_reader_tag("s64"); STk_add_uvector_reader_tag("u64");
-  STk_add_uvector_reader_tag("f32"); STk_add_uvector_reader_tag("f64");
-  STk_add_uvector_reader_tag("c64"); STk_add_uvector_reader_tag("c128");
+  add_uvector_syntax();
 
   return STk_void;
+}
+
+/****
+ **** Parameter object accept-uvector-syntax
+ ****
+ */
+static SCM accept_uvector_syntax_conv(SCM value)
+{
+  if (value == STk_false) {
+    delete_uvector_syntax();
+  } else {
+    add_uvector_syntax();
+  }
+  return MAKE_BOOLEAN(accept_uvector_syntax);
 }
 
 
@@ -810,6 +846,9 @@ int STk_init_uniform_vector(void)
 
   /* A pseudo primitive to launch the definition of  all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);
-
+  STk_make_C_parameter("accept-uvector-syntax",
+                       MAKE_BOOLEAN(accept_uvector_syntax),
+                       accept_uvector_syntax_conv,
+                       STk_STklos_module);
   return TRUE;
 }

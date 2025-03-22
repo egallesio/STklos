@@ -1208,6 +1208,7 @@ char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
+void STk_del_uvector_reader_tag(const char *tag); // to invalidate them
 void STk_set_port_case_sensitivity(SCM port, int sensitive);
 
 

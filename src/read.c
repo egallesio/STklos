@@ -1453,6 +1453,11 @@ void STk_add_uvector_reader_tag(const char *tag)
   STk_C_hash_set(sharp_table, tag, STk_cons((SCM) sharp_uvector, STk_void));
 }
 
+void STk_del_uvector_reader_tag(const char *tag)
+{
+  STk_C_hash_delete(sharp_table, tag);
+}
+
 
 DEFINE_PRIMITIVE("%add-read-directive", add_read_directive,
                  subr2, (SCM str, SCM proc))
