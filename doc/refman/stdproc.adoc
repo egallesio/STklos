@@ -452,12 +452,12 @@ need to be quoted in programs.
 {{insertdoc 'bytevector-append}}
 {{insertdoc 'string->utf8}}
 
-NOTE: Syntax for reading bytevectors (`#u8`), which are {{rseven}}, is always
-available. However, various SRFIs or the permit to manipulate several types of
-uniform vectors or the {{rseven}}-large `(scheme vector)` library propose a
-lexical syntax for those vectors. See the documentation of the
-_<<accept_uvector_syntax, `accept-uvector-syntax` parameter object>>_.
-
+NOTE: {{rseven}} syntax for reading bytevectors is always available.  However,
+various SRFIs or the {{rseven}}-large `(scheme vector)` library propose an 
+extended lexical syntax for uniform/homogeneos  vectors. See the
+documentation of the _<<accept_uvector_syntax, `accept-uvector-syntax`
+parameter object>>_, and the _<<uvector_syntax_directive, `#!uvector-syntax`
+read directive>>_.
 
 
 === Control features
@@ -751,10 +751,10 @@ use a `main` function in a Scheme program.
 
 === Keywords
 ((("keyword")))
-((("#!keyword-colon-position-none")))
-((("#!keyword-colon-position-before")))
-((("#!keyword-colon-position-after")))
-((("#!keyword-colon-position-both")))
+((("# !keyword-colon-position-none")))
+((("# !keyword-colon-position-before")))
+((("# !keyword-colon-position-after")))
+((("# !keyword-colon-position-both")))
 Keywords are symbolic constants which evaluate to themselves.
    By default, a keyword is a symbol whose first (or last) character is a colon
    (*_":"_*). Alternatively, to be compatible with other Scheme

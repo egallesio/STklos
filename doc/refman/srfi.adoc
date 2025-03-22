@@ -152,12 +152,26 @@ running on.
 
 // **** SRFI-4
 {{srfi-subsection 4}}
-(((SRFI-160")))
+((("SRFI-160")))
 {{quick-link-srfi 4}} is fully supported and is extended to provide the
 additional *c64vector* and *c128vector* types of {{link-srfi 160}}.
-[#allow_uvector_syntax]
+
 {{insertdoc 'uvector-tag}}
+
+[#accept_uvector_syntax]
 {{insertdoc 'accept-uvector-syntax}}
+
+[#uvector_syntax_directive]
+((("# !uvector-syntax")))
+((("# !no-uvector-syntax")))
+Furthermore, {{stklos}} defines two read directives:
+
+- `#!uvector-syntax` to allow the reading of the extended lexical syntax for
+  uniform vectors (such as `#s8` or `#f32`, ...)
+- `#!no-uvector-syntax` to forbid the reading of uniform vector lexical syntax.
+
+When this SRFI is imported/loaded, {{stklos}} reader accepts numbers with
+underscores.
 
 
 // **** SRFI-10
@@ -449,7 +463,9 @@ _<<assume,`assume` special form>>_.
 {{srfi-subsection 160}}
 (((accept-uvector-syntax)))
 {{quick-link-srfi 160}} is fully supported. See also the
-_<<accept_uvector_syntax, `accept-uvector-syntax` parameter object>>_.
+_<<accept_uvector_syntax, `accept-uvector-syntax` parameter object>>_ and the
+ _<<uvector_syntax_directive, `#!uvector-syntax` read directive>>_.
+
 
 
 // **** SRFI-169

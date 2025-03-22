@@ -644,18 +644,18 @@ static void delete_uvector_syntax(void) {
  * (accept-uvector-syntax)
  * (accept-uvector-syntax v)
  *
- * SRFIS which defines homogeneous or uniform vectors permits to have
+ * SRFIS which define homogeneous or uniform vectors permit to have
  * an extended lexical syntax for such objects (`#s8`, `#u64` ...).
- * This parameter permits to accept or not the reading of this extended
- * syntax depending of the value of |v|.
+ * The parameter |accept-uvector-syntax| permits to accept or not the
+ * reading of this extended syntax depending of the value of |v|.
  *
  * By default, {{stklos}} does not allow the reading of this extended syntax
  * for uniform. Use this parameter object to permit the use of this extended
  * syntax.
  *
- * NOTE: Extended syntax for bytevectors is always accepted, since it
- * is {{rseven}}.
- *
+ * NOTE: Extended syntax for bytevectors is always accepted, since it is
+ * {{rseven}}. Loading or importing {{quick-link-srfi 4}} or {{quick-link-srfi
+ * 160}} will allow the reading of this extended lexical syntax.
 doc>
 */
 static SCM accept_uvector_syntax_conv(SCM val)
@@ -678,6 +678,7 @@ DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
   s64_min = STk_Cstr2number(S64_MIN, 10);
   s64_max = STk_Cstr2number(S64_MAX, 10);
 
+  add_uvector_syntax();    // allow to read #s64(...), #f32(...)
   return STk_void;
 }
 
@@ -860,7 +861,6 @@ int STk_init_uniform_vector(void)
   /* A pseudo primitive to launch the definition of all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);
 
-  STk_allow_uvectors();
   /* Declare parameter accept-uvector-syntax */
   STk_make_C_parameter("accept-uvector-syntax",
                        MAKE_BOOLEAN(accept_uvector_syntax),

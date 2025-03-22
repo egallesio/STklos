@@ -2317,6 +2317,22 @@ doc>
 ;;;;
 ;;;; ======================================================================
 
+;;;; 
+;;;; SRFI 4: Uniform vectors
+;;;; ----------------------------------------------------------------------
+;; The following code is more or less
+;;     (define-read-directive !uvector-syntax    (accept-uvector-syntax #t))
+;;     (define-read-directive !no-uvector-syntax (accept-uvector-syntax #f))
+;; but for some reason the full expansion of define-read-directive
+;; doesn't work at boot time.
+(%add-read-directive '!uvector-syntax
+                     (lambda (port directive) (accept-uvector-syntax #t)))
+(%add-read-directive '!no-uvector-syntax
+                     (lambda (port directive) (accept-uvector-syntax #f)))
+
+
+
+
 ;;;
 ;;; SRFI-8
 ;;;
@@ -2771,11 +2787,7 @@ doc>
 ;; ----------------------------------------------------------------------
 ;; SRFI 169: Underscores in numbers
 ;; ----------------------------------------------------------------------
-;; The following code is more or less
-;;     (define-read-directive !underscore-numbers    (accept-srfi-169-numbers #t))
-;;     (define-read-directive !no-underscore-numbers (accept-srfi-169-numbers #f))
-;; but for some reason the full expansion of define-read-directive
-;; doesn't work at boot time.
+;; See comment for SRFI-4
 (%add-read-directive '!underscore-numbers
                      (lambda (port directive) (accept-srfi-169-numbers #t)))
 (%add-read-directive '!no-underscore-numbers
