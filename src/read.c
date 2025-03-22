@@ -127,7 +127,7 @@ static void error_token_too_large(SCM port, char *tok)
 
 static void error_bad_sharp_syntax(SCM port, char *tok)
 {
-  signal_error(port, "bad sharp syntax in ~S", STk_Cstring2string(tok));
+  signal_error(port, "bad sharp syntax in ~s", STk_Cstring2string(tok));
 }
 
 static void error_key_not_defined(SCM port, SCM key)
@@ -975,9 +975,10 @@ static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
       char c2 = STk_getc(port);
       if (c2 == '<' )
         return read_here_string(port);
-      else  {
+      else {
         STk_ungetc(c2, port);
-        goto default_sharp;
+        error_bad_sharp_syntax(port, "#<");
+        return STk_void;                    // for the compiler
       }
     }
 
@@ -1009,7 +1010,6 @@ static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
     case '9': return read_cycle(port, c, ctx);
 
     default:
-    default_sharp:
       {
         SCM reader = STk_int_assq(MAKE_CHARACTER(c), sharp_char_table);
 
