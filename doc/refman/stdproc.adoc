@@ -452,6 +452,13 @@ need to be quoted in programs.
 {{insertdoc 'bytevector-append}}
 {{insertdoc 'string->utf8}}
 
+NOTE: Syntax for reading bytevectors (`#u8`), which are {{rseven}}, is always
+available. However, various SRFIs or the permit to manipulate several types of
+uniform vectors or the {{rseven}}-large `(scheme vector)` library propose a
+lexical syntax for those vectors. See the documentation of the
+_<<accept_uvector_syntax, `accept-uvector-syntax` parameter object>>_.
+
+
 
 === Control features
 {{insertdoc 'procedure?}}

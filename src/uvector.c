@@ -120,7 +120,8 @@ int STk_vector_element_size(int type)
 
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfill)
 {
-  SCM v = STk_void; /* value chosen to avoid a warning from the gcc static analyzer */
+  SCM v = STk_void; /* value chosen to avoid a warning from the gcc
+                       static analyzer */
   long len, start=0, end=-1;
 
   /* Controling number of arguments */
@@ -314,8 +315,9 @@ static void uvector_set(SCM v, long i, SCM value)
       -----+-----+-----+-----+-------
      | r_1 | i_1 | r_2 | i_2 |  ...  |
       -----+-----+-----+-----+-------
-     Every complex real-part and imag-part is transformed into inexact, so it would into
-     a double. Forthermore, for c64 vectors, they're downcasted to floats.
+     Every complex real-part and imag-part is transformed into inexact, so it
+     would into a double. Forthermore, for c64 vectors, they're downcasted
+     to floats.
     */
     case UVECT_C64:
       if (COMPLEXP(value)) {
@@ -489,7 +491,7 @@ SCM STk_list2uvector(int type, SCM l)
 /*===========================================================================*\
  *
  * User primitives on uniform vectors.
- * All thes functions are used by the file  which implements SRFI-4
+ * All thes functions are used by the file which implements SRFI-4
  *
 \*===========================================================================*/
 
@@ -626,7 +628,7 @@ static void add_uvector_syntax(void) {
 
 static void delete_uvector_syntax(void) {
   if (accept_uvector_syntax) {
-    // Delete uvector syntax if necessary 
+    // Delete uvector syntax if necessary
     STk_del_uvector_reader_tag("s8");  /* "u8" is defined by default */
     STk_del_uvector_reader_tag("s16"); STk_del_uvector_reader_tag("u16");
     STk_del_uvector_reader_tag("s32"); STk_del_uvector_reader_tag("u32");
@@ -636,6 +638,35 @@ static void delete_uvector_syntax(void) {
     accept_uvector_syntax = 0;
   }
 }
+
+/*
+<doc EXT accept-uvector-syntax
+ * (accept-uvector-syntax)
+ * (accept-uvector-syntax v)
+ *
+ * SRFIS which defines homogeneous or uniform vectors permits to have
+ * an extended lexical syntax for such objects (`#s8`, `#u64` ...).
+ * This parameter permits to accept or not the reading of this extended
+ * syntax depending of the value of |v|.
+ *
+ * By default, {{stklos}} does not allow the reading of this extended syntax
+ * for uniform. Use this parameter object to permit the use of this extended
+ * syntax.
+ *
+ * NOTE: Extended syntax for bytevectors is always accepted, since it
+ * is {{rseven}}.
+ *
+doc>
+*/
+static SCM accept_uvector_syntax_conv(SCM val)
+{
+  if (val == STk_false)
+    delete_uvector_syntax();
+  else
+    add_uvector_syntax();
+  return MAKE_BOOLEAN(accept_uvector_syntax);
+}
+
 
 DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
 {
@@ -647,26 +678,8 @@ DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
   s64_min = STk_Cstr2number(S64_MIN, 10);
   s64_max = STk_Cstr2number(S64_MAX, 10);
 
-  /* Add new readers #xxx syntax */
-  add_uvector_syntax();
-
   return STk_void;
 }
-
-/****
- **** Parameter object accept-uvector-syntax
- ****
- */
-static SCM accept_uvector_syntax_conv(SCM value)
-{
-  if (value == STk_false) {
-    delete_uvector_syntax();
-  } else {
-    add_uvector_syntax();
-  }
-  return MAKE_BOOLEAN(accept_uvector_syntax);
-}
-
 
 /*===========================================================================*\
  *
@@ -844,11 +857,15 @@ int STk_init_uniform_vector(void)
   ADD_PRIMITIVE(bytevector_append);
   ADD_PRIMITIVE(utf82string);
 
-  /* A pseudo primitive to launch the definition of  all the function of SRFI-4 */
+  /* A pseudo primitive to launch the definition of all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);
+
+  STk_allow_uvectors();
+  /* Declare parameter accept-uvector-syntax */
   STk_make_C_parameter("accept-uvector-syntax",
                        MAKE_BOOLEAN(accept_uvector_syntax),
                        accept_uvector_syntax_conv,
                        STk_STklos_module);
+
   return TRUE;
 }

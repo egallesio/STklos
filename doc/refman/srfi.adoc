@@ -155,7 +155,9 @@ running on.
 (((SRFI-160")))
 {{quick-link-srfi 4}} is fully supported and is extended to provide the
 additional *c64vector* and *c128vector* types of {{link-srfi 160}}.
+[#allow_uvector_syntax]
 {{insertdoc 'uvector-tag}}
+{{insertdoc 'accept-uvector-syntax}}
 
 
 // **** SRFI-10
@@ -441,6 +443,13 @@ use with `cond-expand` in the compiled code only. It will not include
 (((assume)))
 {{quick-link-srfi 145}} is fully supported. See the
 _<<assume,`assume` special form>>_.
+
+
+// **** SRFI-160
+{{srfi-subsection 160}}
+(((accept-uvector-syntax)))
+{{quick-link-srfi 160}} is fully supported. See also the
+_<<accept_uvector_syntax, `accept-uvector-syntax` parameter object>>_.
 
 
 // **** SRFI-169
