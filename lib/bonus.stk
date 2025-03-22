@@ -409,11 +409,12 @@ doc>
  * where the directive was read and it's name as a string.
  *
  * @lisp
- * (define-read-directive !srfi-169    (accept-srfi-169-numbers #t))
- * (define-read-directive !no-srfi-169 (accept-srfi-169-numbers #f))
+ * (define-read-directive !underscore-numbers    (accept-srfi-169-numbers #t))
+ * (define-read-directive !no-underscore-numbers (accept-srfi-169-numbers #f))
  *
- * (list #!srfi-169    (symbol? '1_000) (integer? '1_000)
- *       #!no-srfi-169 (symbol? '1_000) (integer? '1_000)) => (#f #t #t #f)
+ * (list #!underscore-numbers    (symbol? '1_000) (integer? '1_000)
+ *       #!no-underscore-numbers (symbol? '1_000) (integer? '1_000))
+ *                         => (#f #t #t #f)
  * @end lisp
 doc>
 |#
@@ -2771,13 +2772,13 @@ doc>
 ;; SRFI 169: Underscores in numbers
 ;; ----------------------------------------------------------------------
 ;; The following code is more or less
-;;     (define-read-directive !srfi-169    (accept-srfi-169-numbers #t))
-;;     (define-read-directive !no-srfi-169 (accept-srfi-169-numbers #f))
+;;     (define-read-directive !underscore-numbers    (accept-srfi-169-numbers #t))
+;;     (define-read-directive !no-underscore-numbers (accept-srfi-169-numbers #f))
 ;; but for some reason the full expansion of define-read-directive
 ;; doesn't work at boot time.
-(%add-read-directive '!srfi-169
+(%add-read-directive '!underscore-numbers
                      (lambda (port directive) (accept-srfi-169-numbers #t)))
-(%add-read-directive '!no-srfi-169
+(%add-read-directive '!no-underscore-numbers
                      (lambda (port directive) (accept-srfi-169-numbers #f)))
 
 ;; ----------------------------------------------------------------------

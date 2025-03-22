@@ -452,8 +452,8 @@ _<<assume,`assume` special form>>_.
 
 Furthermore, {{stklos}} defines two read directives:
 
-- `#!srfi-169` to allow the reading of  number with underscores, and
-- `#!no-srfi-169` to forbid the reading of  number with underscores.
+- `#!underscore-numbers` to allow the reading of  number with underscores, and
+- `#!no-underscore-numbers` to forbid the reading of  number with underscores.
 
 By default, the {{stklos}} reader accepts numbers with underscores.
 

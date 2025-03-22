@@ -80,9 +80,9 @@
 (test "hex, negative" -32 (read-from-string "#x-2_0"))
 (test "octal, signed, two _" 10030 (read-from-string "#o+2_345_6"))
 
-(test "#!srfi-169 and #!no-srfi-169 read-directive" '(#f #t #t #f)
-      (list #!srfi-169    (symbol? '1_000) (integer? '1_000)
-            #!no-srfi-169 (symbol? '1_000) (integer? '1_000)))
+(test "#!underscore-numbers and #!no-underscore-numbers" '(#f #t #t #f)
+      (list #!underscore-numbers    (symbol? '1_000) (integer? '1_000)
+            #!no-underscore-numbers (symbol? '1_000) (integer? '1_000)))
 
 
 (test/error "hex, #x-_"  (read-from-string "#x-_2"))
