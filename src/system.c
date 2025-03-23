@@ -1274,21 +1274,24 @@ DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
  * If  program has registered exit functions with |register-exit-function!|,
  * they are called (in an order which is the reverse of their call order).
  * @l
- * NOTE: The {{stklos}} |exit| primitive accepts also an
- * integer value as parameter (R7RS accepts only a boolean).
+ * This primitive accepts an integer value as parameter. If the value is not
+ * a small integer, then the integer 1 will be returned to the operating
+ * system. Other arguments are ignored.
 doc>
 */
-DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
+DEFINE_PRIMITIVE("exit", exit, vsubr, (int argc, SCM *argv))
 {
   long ret = 0;
   SCM cond;
 
-  if (retcode) {
+  if (argc > 0) {
+    SCM retcode = *argv;
     if (BOOLEANP(retcode)) {
       ret = (retcode != STk_true);
     } else {
       ret = STk_integer_value(retcode);
-      if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
+      if (ret == LONG_MIN)
+        ret = 1;
     }
   }
 
@@ -1308,20 +1311,23 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
  * dynamic-wind _after_ procedures and communicates an exit
  * value to the operating system in the same manner as |exit|.
  * @l
- * NOTE: The {{stklos}} |emergency-exit| primitive accepts also an
- * integer value as parameter (R7RS accepts only a boolean).
+ * This primitive accepts an integer value as parameter. If the value is not
+ * a small integer, then the integer 1 will be returned to the operating
+ * system. Other arguments are ignored.
 doc>
 */
-DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
+DEFINE_PRIMITIVE("emergency-exit", emergency_exit, vsubr, (SCM argc, SCM *argv))
 {
   long ret = 0;
 
-  if (retcode) {
+  if (argc > 0) {
+    SCM retcode = *argv;
     if (BOOLEANP(retcode)) {
       ret = (retcode != STk_true);
     } else {
       ret = STk_integer_value(retcode);
-      if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
+      if (ret == LONG_MIN)
+        ret = 1;
     }
   }
   _exit(ret);
