@@ -2,7 +2,7 @@
  *
  * s i g n a l . c          -- Signal handling
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -156,7 +156,7 @@ static void sighup(int _UNUSED(i))
 {
   /* FIXME: perhaps we should be more verbose */
   fprintf(stderr, "Received a SIGHUP signal.\n");
-  STk_exit(0);
+  STk_exit(MAKE_INT(EXIT_SUCCESS));
 }
 
 static void sigabort(int _UNUSED(i))

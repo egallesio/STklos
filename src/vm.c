@@ -29,6 +29,7 @@
 #include "vm-instr.h"
 #include "struct.h"
 
+
 // #define DEBUG_VM
 /* #define STAT_VM  */
 
@@ -239,7 +240,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   if (!vm->stack) {
     fprintf(stderr, "cannot allocate a stack with a size of %d cells\n", stack_size);
     fflush(stderr);
-    STk_exit(MAKE_INT(1));
+    STk_exit(MAKE_INT(EXIT_FAILURE));
   }
 
   /* Initialize the VM registers */
