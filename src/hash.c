@@ -994,7 +994,9 @@ void STk_C_hash_set(struct hash_table_obj *ht, const char *key, void *val)
     if (strcmp(CAR(CAR(l)), key) == 0) break;
 
   if (NULLP(l)) {
-    HASH_BUCKETS(ht)[index] = STk_cons(STk_cons((SCM) key, val), HASH_BUCKETS(ht)[index]);
+    HASH_BUCKETS(ht)
+    [index] = STk_cons(STk_cons((SCM)key, val),
+                       HASH_BUCKETS(ht)[index]);
     HASH_NENTRIES(ht) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(ht) >= HASH_NEWSIZE(ht))
@@ -1002,6 +1004,24 @@ void STk_C_hash_set(struct hash_table_obj *ht, const char *key, void *val)
   }
   else
     CDR(CAR(l)) = val;
+}
+
+void STk_C_hash_delete(struct hash_table_obj *ht, const char *key)
+{
+  SCM prev, l;
+  int index = hash_string(key) & HASH_MASK(ht);
+
+  for(prev=NULL,l = HASH_BUCKETS(ht)[index]; !NULLP(l); prev=l, l = CDR(l))
+    if (strcmp(CAR(CAR(l)), key) == 0) break;
+
+  if (l) {
+    // key was present
+    if (prev)
+      CDR(prev) = CDR(l);
+    else
+      HASH_BUCKETS(ht)[index] = CDR(l);
+    HASH_NENTRIES(ht) -= 1;
+  }
 }
 
 /*===========================================================================*\
