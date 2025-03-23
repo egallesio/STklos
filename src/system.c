@@ -1294,12 +1294,12 @@ doc>
 */
 DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
 {
-  long ret = 0;
+  long ret = EXIT_SUCCESS;
   SCM cond;
 
   if (retcode) {
     if (BOOLEANP(retcode)) {
-      ret = (retcode != STk_true);
+      ret = (retcode == STk_true) ? EXIT_SUCCESS: EXIT_FAILURE;
     } else {
       ret = STk_integer_value(retcode);
       if (ret == LONG_MIN)
@@ -1339,11 +1339,11 @@ doc>
 */
 DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
 {
-  long ret = 0;
+  long ret = EXIT_SUCCESS;
 
   if (retcode) {
     if (BOOLEANP(retcode)) {
-      ret = (retcode != STk_true);
+      ret = (retcode == STk_true)? EXIT_SUCCESS: EXIT_FAILURE;
     } else {
       ret = STk_integer_value(retcode);
       if (ret == LONG_MIN)
