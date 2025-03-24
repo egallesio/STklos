@@ -1245,9 +1245,9 @@ doc>
               ((2)  (let ((a (car actuals))
                           (b (cadr actuals)))
                       (if (small-integer-constant? a)
-                          (oper2 'IN-SINT-MUL2 b a))
-                      (comp2 'IN-MUL2)))
-              (else (compile-normal-call fct actuals len env epair #f))))
+                          (oper2 'IN-SINT-MUL2 b a)
+                          (comp2 'IN-MUL2))))
+               (else (compile-normal-call fct actuals len env epair #f))))
       ((/)    (case len
                 ((0)   (compiler-error '/ epair "needs at least one argument"))
                 ((1)   (if (number? (car actuals))
