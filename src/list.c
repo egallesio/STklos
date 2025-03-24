@@ -2,7 +2,7 @@
  *
  * l i s t . c                  -- Lists procedures
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -232,7 +232,7 @@ DEFINE_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name))
    * NOTE: using strings (instead of keywords) is less efficient because
    * the char * is at the end of the object. Using symbols is also fast
    * (even a bit faster, don't know why), but it is harder  to detect that
-   * that we can inline when we have (%cxr lst 'daa), because of the quote. 
+   * that we can inline when we have (%cxr lst 'daa), because of the quote.
    */
   if (KEYWORDP(name)) {
     SCM lst   = l;
@@ -335,10 +335,16 @@ DEFINE_PRIMITIVE("length", list_length, subr1, (SCM l))
 doc>
  */
 {
-  int len = STk_int_length(l);
+  if (NULLP(l)) return MAKE_INT(0);
 
-  if (len >= 0) return MAKE_INT(len);
-  STk_error("length of ~W is not calculable", l);
+  if (!CONSP(l))
+    STk_error("bad list ~s", l);
+  else {
+    int len = STk_int_length(l);
+
+    if (len >= 0) return MAKE_INT(len);
+    STk_error("length of improper list ~W is not calculable", l);
+  }
   return STk_void; /* never reached */
 }
 
