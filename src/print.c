@@ -281,6 +281,11 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_puts(PRIMITIVE_NAME(exp), port);
       STk_putc(']', port);
       return;
+    case tc_param_vsubr:
+      STk_puts("#[parameterizable primitive ", port);
+      STk_puts(PRIMITIVE_NAME(exp), port);
+      STk_putc(']', port);
+      return;
 #ifdef HAVE_FFI
     case tc_ext_func:
       STk_puts("#[external-func ", port);

@@ -2266,6 +2266,12 @@ FUNCALL:  /* (int nargs, int tailp) */
       goto error_invoke;
     case tc_vsubr: CALL_PRIMV(vm->val, (nargs, vm->sp+nargs-1));          break;
 
+    case tc_param_vsubr:
+      /* Similar to vsubr, but we add 1 to nargs, and push the parameterizable
+         argument on the stack: */
+      push(PRIMITIVE_PARAM(vm->val));
+      CALL_PRIMV(vm->val, (nargs+1, vm->sp+nargs));                       break;
+
     case tc_parameter:
       if (nargs == 0) {vm->val = STk_get_parameter(vm->val);            break;}
       if (nargs == 1) {vm->val = STk_set_parameter(vm->val, vm->sp[0]); break;}
