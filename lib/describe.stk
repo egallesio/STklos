@@ -91,6 +91,19 @@ doc>
 (define-module DESCRIBE
   (export describe)
 
+
+(define (describe-simple x port)
+  (if (or (number? x)
+          (char? x)
+          (boolean? x)
+          (eof-object? x)
+          (null? x)
+          (void? x)
+          (keyword? x))
+      (format port "~W" x)
+      (let ((s (symbol->string (class-name (class-of x)))))
+        (format port "of type ~A" (substring s 1 (1- (string-length s)))))))
+
 ;;;
 ;;; describe for simple objects
 ;;;
@@ -163,7 +176,10 @@ doc>
                         (when (procedure-source x)
                           (format port
                               ".~%The source code is available -- call `procedure-source` on it")))
-     ((procedure? x)    (format port "a primitive procedure"))
+     ((procedure? x)    (format port "a primitive procedure")
+                        (when (%procedure-parameterizable? x)
+                          (format port " whose parameter is ")
+                          (describe-simple (%procedure-parameter x) port)))
      ((eof-object? x)   (format port "the end-of-file object"))
      ((struct-type? x)  (format port "the type structure named ~A"
                                 (struct-type-name x)))

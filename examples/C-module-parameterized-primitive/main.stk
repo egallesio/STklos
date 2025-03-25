@@ -1,0 +1,43 @@
+;;;;
+;;;; descriptive-statistics.stk  -- A simple module in C and Scheme
+;;;;
+;;;; Copyright © 2024 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 28-May-2024 20:35 (jpellegrini)
+;;;;
+
+;; We don't use (define-module ...) here, because the module
+;; has already been created in the C file.
+;; This file will be compiled as bytecode, named
+;; "descriptive-statistics-incl.c", and included in the C file
+;; "descriptive-statistics.c" (see the #include directive there!)
+;; So we just select the module and do exports, imports and
+;; definitions.
+
+(import descriptive-statistics)
+
+(let ((x 15)
+      (y 20)
+      (arith-mean (make-mean :arithmetic))
+      (geom-mean  (make-mean :geometric))
+      (harm-mean (make-mean :harmonic)))
+  (format #t "Arithmetic mean = ~a\n" (arith-mean x y))
+  (format #t "Geometric mean = ~a\n"  (geom-mean x y))
+  (format #t "Harmonic mean = ~a\n"   (harm-mean x y)))

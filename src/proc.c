@@ -63,7 +63,6 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
   return z;
 }
 
-
 static void print_lambda(SCM closure, SCM port, int mode)
 {
   if (CLOSURE_NAME(closure) != STk_false)
@@ -120,6 +119,7 @@ DEFINE_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
     case tc_subr23:
     case tc_subr34:
     case tc_vsubr:
+    case tc_param_vsubr:
     case tc_apply:
     case tc_next_method:
     case tc_continuation:
@@ -141,6 +141,18 @@ DEFINE_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
   }
 }
 
+DEFINE_PRIMITIVE("%procedure-parameterizable?", procedure_param_p, subr1, (SCM obj))
+{
+  if (STk_procedurep(obj) == STk_false) STk_error("bad procedure ~s", obj);
+  return (STYPE(obj) == tc_param_vsubr) ? STk_true : STk_false;
+}
+
+DEFINE_PRIMITIVE("%procedure-parameter", procedure_param, subr1, (SCM obj))
+{
+  if (STYPE(obj) != tc_param_vsubr) STk_error("bad parameterizable procedure ~s", obj);
+  return PRIMITIVE_PARAM(obj);
+}
+
 DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
 {
   switch (STYPE(obj)) {
@@ -155,6 +167,7 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
     case tc_subr23:
     case tc_subr34:
     case tc_vsubr:
+    case tc_param_vsubr:
     case tc_apply:    return STk_Cstring2string(PRIMITIVE_NAME(obj));
 #ifdef HAVE_FFI
     case tc_ext_func: return STk_ext_func_name(obj);
@@ -220,9 +233,10 @@ DEFINE_PRIMITIVE("%procedure-plist", proc_plist, subr1, (SCM obj))
     case tc_subr12:
     case tc_subr23:
     case tc_subr34:
-    case tc_vsubr:   return PRIMITIVE_PLIST(obj);
-    case tc_closure: return CLOSURE_PLIST(obj);
-    default:         error_bad_procedure(obj);
+    case tc_vsubr:
+    case tc_param_vsubr: return PRIMITIVE_PLIST(obj);
+    case tc_closure:     return CLOSURE_PLIST(obj);
+    default:             error_bad_procedure(obj);
   }
   return STk_void;
 }
@@ -240,9 +254,10 @@ DEFINE_PRIMITIVE("%set-procedure-plist!", set_proc_plist, subr2, (SCM obj, SCM v
     case tc_subr12:
     case tc_subr23:
     case tc_subr34:
-    case tc_vsubr:   PRIMITIVE_PLIST(obj) = v; break;
-    case tc_closure: CLOSURE_PLIST(obj)   = v; break;
-    default:         error_bad_procedure(obj);
+    case tc_vsubr:       PRIMITIVE_PLIST(obj) = v; break;
+    case tc_param_vsubr: PRIMITIVE_PLIST(obj) = v; break;
+    case tc_closure:     CLOSURE_PLIST(obj)   = v; break;
+    default:             error_bad_procedure(obj);
   }
   return STk_void;
 }
@@ -264,6 +279,7 @@ DEFINE_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc))
     case tc_subr23:       res = -3; break;
     case tc_subr34:       res = -4; break;
     case tc_vsubr:        res = -1; break;
+    case tc_param_vsubr:  res = -1; break;
     case tc_apply:        res = -1; break;
       /*  case tc_next_method: */
     case tc_continuation: res = 1;  break;
@@ -484,6 +500,8 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(proc_doc);
   ADD_PRIMITIVE(proc_source);
   ADD_PRIMITIVE(proc_arity);
+  ADD_PRIMITIVE(procedure_param_p);
+  ADD_PRIMITIVE(procedure_param);
   ADD_PRIMITIVE(procedure_name);
   ADD_PRIMITIVE(set_procedure_name);
   ADD_PRIMITIVE(proc_formals);

@@ -195,7 +195,7 @@ typedef enum {
   tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback, tc_syntax,                                               /* 45 */
+  tc_callback, tc_syntax, tc_param_vsubr,                               /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -262,9 +262,22 @@ struct primitive_obj {
   SCM plist;
 };
 
+struct pprimitive_obj {
+  stk_header header;
+  char *name;
+  t_subrptr code;
+  SCM plist;
+  SCM param;
+};
+
 #define PRIMITIVE_NAME(p)       (((struct primitive_obj *) (p))->name)
 #define PRIMITIVE_FUNC(p)       (((struct primitive_obj *) (p))->code)
 #define PRIMITIVE_PLIST(p)      (((struct primitive_obj *) (p))->plist)
+#define PRIMITIVE_PARAM(p)      (((struct pprimitive_obj *) (p))->param)
+
+/* VSUBR_PARAM is the key that will be used in the plist to get the parameter
+   for parameterizable primitives. It is initialized in the VM. */
+extern SCM VSUBR_PARAM;
 
 /*
  * DEFINE_PRIMITIVE:
