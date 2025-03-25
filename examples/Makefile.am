@@ -43,6 +43,7 @@ install:
 
 all:
 	(cd C-module; make all)
+	(cd C-module-parameterized-primitive; make all)
 
 clean:
 	(cd C-module; make clean)
