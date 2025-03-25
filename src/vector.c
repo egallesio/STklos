@@ -303,21 +303,27 @@ doc>
 DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
 {
   int j, len;
-  SCM z, tmp;
+  SCM z;
 
   if (!VECTORP(v)) error_bad_vector(v);
 
   len = VECTOR_SIZE(v);
   if (!len) return STk_nil;
 
-  /* len > 0. Build the fist cell and iterate */
-  tmp = z = STk_cons(*VECTOR_DATA(v), STk_nil);
-  for (j=1; j<len; j++) {
-    tmp = CDR(tmp) = STk_cons(VECTOR_DATA(v)[j], STk_nil);
+  /* Allocate all of the list at once. This avoids calling the
+     allocator repeated times.  */
+  z = STk_must_malloc_list(len, STk_false);
+  SCM ptr  = z;
+
+  j = 0;
+  while (CONSP(ptr)) {
+    CAR(ptr) = VECTOR_DATA(v)[j];
+    ptr = CDR(ptr);
+    j++;
   }
+
   return z;
 }
-
 
 DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))
 {
@@ -414,7 +420,7 @@ DEFINE_PRIMITIVE("vector-append", vector_append, vsubr, (int argc, SCM *argv))
  * (vector-fill! vector fill start end)
  *
  * Stores |fill| in every element of |vector| between |start| and |end|.
- * 
+ *
  * NOTE: The R5RS version of |vector-fill!| accepts only one
  * parameter.
 doc>

@@ -34,7 +34,7 @@
         truncate-remainder floor-remainder
         square exact-integer-sqrt exact inexact
         boolean=?
-        make-list member assoc
+        member assoc
         symbol=?
         string=?     %string2=?
         string<?     %string2<?
@@ -538,23 +538,6 @@ doc>
                         (eq? (car lst) val)
                         (verify val (cdr lst)))))))
     (verify e1 rest)))
-
-;;;; ----------------------------------------------------------------------
-;;;; 6.4 Pairs and lists
-;;;; ----------------------------------------------------------------------
-
-#|
-<doc R7RS make-list
- * (make-list k)
- * (make-list k fill)
- *
- * Returns a newly allocated list of k elements. If a second
- * argument is given, then each element is initialized to fill .
- * Otherwise the initial contents of each element is unspecified.
-doc>
-|#
-(define (make-list k :optional (fill (void)))
-  (vector->list (make-vector k fill)))
 
 
 ;;;; ----------------------------------------------------------------------
