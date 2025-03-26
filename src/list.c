@@ -47,6 +47,11 @@ static void error_bad_list(SCM x)
   STk_error("bad list ~W", x);
 }
 
+static void error_improper_list(SCM x)
+{
+  STk_error("improper list ~W", x);
+}
+
 static void error_bad_proc(SCM x)
 {
   STk_error("bad procedure ~S", x);
@@ -83,6 +88,143 @@ int STk_int_length(SCM l)
     len += 1;
   }
 }
+
+/* STk_list_type_and_length():
+
+   List checking (proper improper, cyclic) AND length computing.
+
+   If l is:
+
+   1. PROPER LIST: return STk_nil.
+   2. CYCLIC LIST: A CONS cell (this is where the cycle starts).
+   3. FINITE PROPER LIST: The last CDR.
+   4. NOT A LIST: NULL.
+
+   - In cases (1), (2), and (3) the length of the list is returned
+     in the len argument.
+
+   - If the list consists of a single cycle, then we guarantee that
+     the poitner returned is to the FIRST cell of the list.
+ */
+SCM STk_list_type_and_length(SCM l, int *len) {
+  /*
+    About the cycle detecting and copying algorithm:
+
+    1. Detect cycles using Floyd's algorithm.  The algorithm runs two
+       pointers, "fast" and "slow" through the list. Both are placed
+       at the CAR, then at each step, slow goes forward one link, and
+       fast goes forward two links.
+
+    2. If there is a cycle:
+
+       2.i) we position fast back at the CAR and now move the two
+            pointers *one* link at each time. The pointers will
+            *necessarily meet* exactly *at the beginning of the cycle.
+
+       2.ii) If there is a cycle, we mark the cell in which it starts
+             example, the cycle below starts at C:
+
+                        +--------------+
+                        |              |
+                        v              |
+              A -> B -> C -> D -> E -> F
+
+              We keep an extra pointer to C.
+
+       2.iii) Now we count the number of cells from the beginning (A)
+              to the SECOND time we see C (minus one). This is the
+              "length" of the list (the size to be allocated to the
+              copy).
+
+    3. If there is no cycle, count the number of elements as usual (but
+       allowing for improper lists)
+
+   */
+
+    if (!CONSP(l) && !NULLP(l)) return NULL;      /* Case (4) in function description */
+    if (NULLP(l))  { (*len)=0;  return STk_nil; } /* Case (1) in function description,
+                                                  specifically for the proper list '().*/
+
+    /* 1. Detect possible cycles using Floyd's algorithm */
+    SCM slow  = l;
+    SCM fast  = l;
+    int cycle = 0;
+    SCM cycle_start;
+    int single_cycle = 0;
+
+    while(CONSP(fast) && CONSP(CDR(fast))) {
+        slow = CDR(slow);
+        fast = CDR(CDR(fast));
+        if(slow == fast) {
+            cycle = 1;
+            break;
+        }
+    }
+
+    if (cycle) {
+      /* 2.i Put fast back in the beginning, and now move slow and
+             fast one link at a time. When they meet, we found the
+             cycle start. */
+        fast = l;
+        while(CDR(slow)!=CDR(fast)){
+          slow = CDR(slow);
+          fast = CDR(fast);
+        }
+
+        /* 2.ii Keep a link to the cell where the cycle starts */
+
+        /* Special case: if slow == fast, then the list is a single cycle,
+           and we'd be cunting one more cons cell than necesary. */
+        if (slow == fast)
+          single_cycle = 1;
+
+        cycle_start = CDR(slow);
+
+        /* 2.iii Count the cyclic list size. */
+
+        (*len) = 0;
+
+        slow = l;
+        int passed_cycle = 0;
+        while (1) {
+          (*len)++;
+          if (CDR(slow) == cycle_start) {
+            if (passed_cycle) break;
+            else              passed_cycle = 1;
+          }
+          slow = CDR(slow);
+        }
+
+    } else {
+      /* 3 Count the uncyclic list size. */
+      (*len)=0;
+      slow = l;
+      for ( ; ; ) {
+        /* See the beginning of the function -- l is guaranteed to be
+           non-nil (actual pair), so we can take the CDR of slow
+           (which was initialzed to l).
+           This way we'll have CDR(slow) point to the proper place
+           (the list's last CDR, since this is a non-circular list) */
+        if (!CONSP(CDR(slow)) || NULLP(CDR(slow))) {
+          (*len)++;
+          break;
+        }
+        slow = CDR(slow);
+        (*len)++;
+      }
+    }
+
+    /* LEN now has the length of the list to be copied, and we only
+       need to return CDR(slow), which will be what we promised (NIL
+       for proper lists, cycle_start for cyclic lists, or the last-cdr
+       for improper lists.  Except that -- if it's a single cycle, we
+       don't want to return the (random) place where slow and fast
+       met. We'll return the start ot the list! */
+
+    if (single_cycle) return l;
+    return CDR(slow);
+}
+
 
 SCM STk_argv2list(int argc, SCM *argv)
 {
@@ -296,8 +438,26 @@ DEFINE_PRIMITIVE("list?", listp, subr1, (SCM x))
 doc>
  */
 {
-  return MAKE_BOOLEAN(STk_int_length(x) >= 0);
+  int len;
+  return MAKE_BOOLEAN(NULLP(STk_list_type_and_length(x, &len)));
 }
+
+/*
+<doc R7RS make-list
+ * (make-list k)
+ * (make-list k fill)
+ *
+ * Returns a newly allocated list of k elements. If a second
+ * argument is given, then each element is initialized to fill .
+ * Otherwise the initial contents of each element is unspecified.
+doc>
+*/
+DEFINE_PRIMITIVE("make-list", make_list, subr12, (SCM n, SCM init)) {
+  if (!INTP(n)) STk_error("bad integer ~s", n);
+  if (!init) init = STk_void;
+  return STk_must_malloc_list(INT_VAL(n), init);
+}
+
 
 DEFINE_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv))
 /*
@@ -427,15 +587,17 @@ DEFINE_PRIMITIVE("append", append, vsubr, (int argc, SCM* argv))
  * @end lisp
 doc>
  */
+SCM STk_simple_list_copy(SCM l, int len);
 DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
 {
-  SCM p, n = STk_nil;
-
-  for(p=l; !NULLP(p); p=CDR(p)) {
-    if (!CONSP(p)) error_bad_list(l);
-    n = STk_cons(CAR(p), n);
-  }
-  return n;
+  int len;
+  SCM x = STk_list_type_and_length(l, &len);
+  if (!x) error_bad_list(l);
+  if (CONSP(x)) error_circular_list(l);
+  if (!NULLP(x)) error_improper_list(l);
+  /* WARNING: do not use STk_list_copy here. It will make STklos enter a loop
+     in sme situations, running out of stack space. */
+  return STk_dreverse(STk_simple_list_copy(l,len));
 }
 
 /*
@@ -707,18 +869,148 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
 
 
 /*
-<doc R7RS list-copy
- * (list-copy obj)
+<doc circular-list?
+ * (circular-list? obj)
  *
- * |list-copy| recursively copies trees of pairs. If |obj| is
- * not a pair, it is returned; otherwise the result is a new pair whose
- * |car| and |cdr| are obtained by calling |list-copy| on
- * the |car| and |cdr| of |obj|, respectively.
+ * Returns |#t#| if |obj| is a circular list, and |#f| otherwise.
+ *
+ * @lisp
+ * (define L (list 1 2 3 4))
+ * (set-cdr! (cdddr L) (cdr L))
+ * (circular-list? L)               => #t
+ * (circular-list? 10)              => #f
+ * (circular-list? '#0=(a b . #0#) )=> #t
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l)) {
+  int len;
+  SCM x = STk_list_type_and_length(l, &len);
+  return MAKE_BOOLEAN (x && CONSP(x));
+}
+
+SCM STk_simple_list_copy(SCM l, int len) {
+  if (NULLP(l)) return STk_nil;
+
+  SCM res = STk_must_malloc_list(len, STk_false);
+  SCM ptr_to = res;
+  SCM ptr_from = l;
+
+  while (CONSP(ptr_to) && CONSP(CDR(ptr_to))) {
+    CAR(ptr_to) = CAR(ptr_from);
+    ptr_from = CDR(ptr_from);
+    ptr_to   = CDR(ptr_to);
+  }
+
+  CAR(ptr_to) = CAR(ptr_from);
+  CDR(ptr_to) = CDR(ptr_from);
+
+  return res;
+}
+
+/*
+<doc list-copy list-deep-copy
+ * (list-copy obj)
+ * (list-deep-copy obj)
+ *
+ * These procedures copy trees of pairs. |list-copy| will copy the
+ * pairs, but wil not recurse into them for copying; but |list-deep-copy|
+ * will recurse into the structure, so a new tree or association list will
+ * be returned.
+ *
+ * |List-deep-copy| is particularly useful to copy association lists when
+ * one needs the new list items to *not* be |eq?| to the old ones.
+ *
+ * Note that |list-deep-copy| will only recurse into lists, not vectors,
+ * structs and other data structures.
+ *
+ * @lisp
+ * (define X (cons 1 2))
+ * (define y (list X 10))
+ * (eq? y (list-copy y))                  => #f
+ * (eq? (car y) (car (list-copy y)))      => #t
+ * (eq? (car y) (car (list-deep-copy y))) => #f
+ *
+ * (define X '#(1 2))
+ * (define y (list X 10))
+ * (eq? y (list-copy y))                  => #f
+ * (eq? (car y) (car (list-copy y)))      => #t
+ * (eq? (car y) (car (list-deep-copy y))) => #t ; <= didn't recurse into vector
+ * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l))
-{
-  return CONSP(l) ? STk_cons(STk_list_copy(CAR(l)), STk_list_copy(CDR(l))): l;
+SCM list_copy(SCM l, int deep) {
+  if (!CONSP(l)) return l;
+  if (NULLP(l))  return STk_nil;
+
+  int len;
+  SCM last = STk_list_type_and_length(l, &len);
+  SCM cycle_start = last;
+  int cycle = CONSP(last);
+
+  /*
+    1. Allocate the new list.
+
+    2. Copy the elements from the old to the new list.
+
+    3. Adjust the last CDR:
+
+       3.i) If the last CDR of the old list is NIL (proper list), or if
+            it is NOT a CONS pair (list ending with non-nil, but still
+            finite), make the last CDR the same.
+
+       3.ii) If there was a cycle, then make the last CDR of the new
+             list point to the marked cell.
+  */
+
+    /* 1. Allocate the list and copy the CARs */
+    SCM ptr, ptr_res, res = STk_must_malloc_list(len, STk_false);
+    SCM cycle_start_in_new_list = STk_nil;
+    ptr = l;
+    ptr_res = res;
+
+    if (cycle && l == cycle_start) len--;
+
+    /* 2. Copy. */
+
+    for (int ctr = 0; ctr < len-1; ctr++) {
+        if (deep)  CAR(ptr_res) = list_copy(CAR(ptr),1);
+        else       CAR(ptr_res) = CAR(ptr);
+      /* Mark where the cycle start is in the copy: */
+      if (cycle && ptr == cycle_start)
+        cycle_start_in_new_list = ptr_res;
+
+      ptr_res = CDR(ptr_res);
+      ptr = CDR(ptr);
+    }
+
+    /* 3. Adjust last CDR: */
+
+    if (deep)  CAR(ptr_res) = list_copy(CAR(ptr),1);
+    else       CAR(ptr_res) = CAR(ptr);
+
+    if (!cycle && (CDR(ptr) == STk_nil || /* No cycle */
+                   !CONSP(CDR(ptr))))     /* Improper list */
+      CDR(ptr_res) = CDR(ptr);
+
+    else if (cycle && l == cycle_start) /* Cycle */
+      CDR(ptr_res) = res;
+
+    else if (cycle && CDR(ptr) == cycle_start) /* Cycle */
+      CDR(ptr_res) = cycle_start_in_new_list;
+
+    else {
+      STk_error("impossible error"); /* ??? */
+    }
+    return res;
+}
+
+DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l)) {
+  return list_copy(l,0);
+}
+
+DEFINE_PRIMITIVE("list-deep-copy", list_deep_copy, subr1, (SCM l)) {
+  return list_copy(l,1);
 }
 
 
@@ -790,7 +1082,10 @@ doc>
  */
 DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 {
-  if (!CONSP(l)) error_wrong_type(l);
+  int len;
+  SCM x = STk_list_type_and_length(l, &len);
+  if (!x) error_bad_list(l);
+  if (CONSP(x)) error_circular_list(l);
 
   while (CONSP(CDR(l)))
     l = CDR(l);
@@ -822,11 +1117,15 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
   register SCM ptr, l;
   SCM result;
 
+  int len;
+  SCM x = STk_list_type_and_length(list, &len);
+  if (!x) error_bad_list(list);
+  if (CONSP(x)) error_circular_list(list);
+  if (!NULLP(x)) error_improper_list(list);
+
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
-  if (!CONSP(list) && !NULLP(list)) error_bad_list(list);
 
   for (ptr=l=list, result=STk_nil; !NULLP(l); ) {
-    if (!CONSP(l)) error_bad_list(list);
 
     if (STk_C_apply(pred, 1, CAR(l)) != STk_false) {
       if (NULLP(result)) {
@@ -840,21 +1139,24 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
       CAR(ptr) = CAR(l);
       CDR(ptr) = STk_nil;
     }
-    if ((l=CDR(l)) == list) error_circular_list(list);
-  }
+    l=CDR(l);
+ }
   return result;
 }
 
 
 DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
 {
-  SCM previous, l, start=list;
+  SCM previous, l;
+  int len;
+  SCM x = STk_list_type_and_length(list, &len);
+  if (!x) error_bad_list(list);
+  if (CONSP(x)) error_circular_list(list);
+  if (!NULLP(x)) error_improper_list(list);
 
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
-  if (!CONSP(list) && !NULLP(list)) error_bad_list(list);
 
   for (previous=STk_nil, l=list; !NULLP(l); ) {
-    if (!CONSP(l)) error_bad_list(list);
     if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
 
     if (STk_C_apply(pred, 1, CAR(l)) == STk_false) {
@@ -865,7 +1167,7 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
     } else {
       previous = l;
     }
-    if ((l=CDR(l)) == start) error_circular_list(list);
+    l = CDR(l);
   }
   return list;
 }
@@ -1067,6 +1369,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(cxr);
   ADD_PRIMITIVE(nullp);
   ADD_PRIMITIVE(listp);
+  ADD_PRIMITIVE(make_list);
   ADD_PRIMITIVE(list);
   ADD_PRIMITIVE(list_length);
   ADD_PRIMITIVE(append);
@@ -1080,7 +1383,9 @@ int STk_init_list(void)
   ADD_PRIMITIVE(assq);
   ADD_PRIMITIVE(assv);
   ADD_PRIMITIVE(assoc);
+  ADD_PRIMITIVE(circ);
   ADD_PRIMITIVE(list_copy);
+  ADD_PRIMITIVE(list_deep_copy);
 
   ADD_PRIMITIVE(pair_mutable);
   ADD_PRIMITIVE(list_star);

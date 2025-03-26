@@ -23,6 +23,17 @@
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
 ;;;;
 
+;;; NOTE:
+;;;
+;;;
+;;; This code makes use of `list-deep-copy` because import sets, which are
+;;; alists, are copied. If one uses `list-copy`, then the assoc pairs are
+;;; not newly allocated, and are shared with the old import set. This will
+;;; cause problems, since this code uses set-cdr! to change the name of
+;;; a binding.
+;;;
+;;; So: *** use list-deep-copy, not list-copy! ***
+
 ;;=============================================================================
 ;;
 ;;                              MODULE-SYMBOLS*
@@ -431,7 +442,7 @@ doc>
     (let* ((mod       (eventually-load-library name))
            (imported  (build-import-list mod
                                          keylist
-                                         (list-copy (%module-exports mod)))))
+                                         (list-deep-copy (%module-exports mod)))))
       ;; Make aliases for all symbols in imported list
       (if only-syntax
           (for-each (lambda (pair)
@@ -476,10 +487,10 @@ doc>
                 (%grab-file-information (symbol->string (car x))))
               imp)
     ;; Do importation at compile time AND at execution time
-    (%do-imports (compiler-current-module) (list-copy imp) #t)
+    (%do-imports (compiler-current-module) (list-deep-copy imp) #t)
 
     ;; Run time expansion
-    `(%do-imports (current-module) (list-copy ',imp) #f)))
+    `(%do-imports (current-module) (list-deep-copy ',imp) #f)))
 
 (define (%%import lib modules)
   (let ((imp (%parse-imports modules)))
@@ -490,7 +501,7 @@ doc>
               imp)
     ;; Do importation at compile time AND at execution time
     ;(%do-imports  (compiler-current-module) (list-copy imp) #t)
-    (%do-imports lib (list-copy imp) #f)))
+    (%do-imports lib (list-deep-copy imp) #f)))
 
 
 ;;=============================================================================
