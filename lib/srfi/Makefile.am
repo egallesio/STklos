@@ -347,6 +347,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
+101.$(SO): 101-incl.c 101.c
 116.$(SO): 128.ostk 116-incl.c 116.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
