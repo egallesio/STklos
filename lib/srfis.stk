@@ -277,7 +277,7 @@
     (236 "Evaluating expressions in an unspecified order" () "srfi-236")
     ;; 237 R6RS Records (refined)
     (238 "Codesets" () "srfi-238")
-    ;; 239 Destructuring lists
+    (239 "Destructuring lists" () "srfi-239")
     ;; 240 Reconciled records
     ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data
     ;; 242 The CFG Language
