@@ -296,7 +296,7 @@
     ;; 255 Restarting conditions
     ;; 256 ...... withdrawn (Minimal extension to SRFI 9/R7RS small record type definitions for inheritance)
     ;; 257 Simple extendable pattern matcher with backtracking (draft)
-    ;; 258 Uninterned symbols (draft)
+    (258 "Uninterned symbols" () "srfi-258")
     ;; 259 Tagged procedures with type safety (draft)
     ;; 260 Generated Symbols (draft)
     ))
