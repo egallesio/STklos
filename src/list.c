@@ -110,16 +110,12 @@ SCM STk_must_malloc_list(int n, SCM init)
     SCM ptr, start;
 
     ptr = start = STk_must_malloc_many(sizeof(struct cons_obj));
-    if (!start) STk_error("Cannot allocate list of size %d", n);
 
     for (int i=0; i < n; i++) {
       if (!GC_NEXT(ptr)) {
         // Current list chunk exhausted and list not completly allocated.
         // Allocate another list chunk.
-        SCM tmp = STk_must_malloc_many(sizeof(struct cons_obj));
-
-        if (!tmp) STk_error("Cannot allocate list of size %d", n);
-        GC_NEXT(ptr) = tmp;
+        GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
       }
 
       SCM next = GC_NEXT(ptr);
