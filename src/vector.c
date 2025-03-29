@@ -2,7 +2,7 @@
  *
  * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -302,27 +302,23 @@ doc>
 /* Following version implements only the R5RS version of vector->list (1 arg only) */
 DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
 {
-  int j, len;
-  SCM z;
+  int len;
 
   if (!VECTORP(v)) error_bad_vector(v);
 
   len = VECTOR_SIZE(v);
-  if (!len) return STk_nil;
+  if (!len)
+    return STk_nil;
+  else {
+    // Allocate the list all at once to avoid calling the allocator repeated times.
+    SCM z = STk_must_malloc_list(len, STk_false);
+    int i = 0;
 
-  /* Allocate all of the list at once. This avoids calling the
-     allocator repeated times.  */
-  z = STk_must_malloc_list(len, STk_false);
-  SCM ptr  = z;
-
-  j = 0;
-  while (CONSP(ptr)) {
-    CAR(ptr) = VECTOR_DATA(v)[j];
-    ptr = CDR(ptr);
-    j++;
+    for (SCM ptr = z; CONSP(ptr); ptr = CDR(ptr)) {
+      CAR(ptr) = VECTOR_DATA(v)[i++];
+    }
+    return z;
   }
-
-  return z;
 }
 
 DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))

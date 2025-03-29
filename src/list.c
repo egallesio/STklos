@@ -89,7 +89,7 @@ int STk_int_length(SCM l)
   }
 }
 
-/* STk_list_type_and_length():
+/* list_type_and_length():
 
    List checking (proper improper, cyclic) AND length computing.
 
@@ -106,7 +106,7 @@ int STk_int_length(SCM l)
    - If the list consists of a single cycle, then we guarantee that
      the poitner returned is to the FIRST cell of the list.
  */
-SCM STk_list_type_and_length(SCM l, int *len) {
+static SCM list_type_and_length(SCM l, int *len) {
   /*
     About the cycle detecting and copying algorithm:
 
@@ -439,7 +439,7 @@ doc>
  */
 {
   int len;
-  return MAKE_BOOLEAN(NULLP(STk_list_type_and_length(x, &len)));
+  return MAKE_BOOLEAN(NULLP(list_type_and_length(x, &len)));
 }
 
 /*
@@ -591,7 +591,7 @@ SCM STk_simple_list_copy(SCM l, int len);
 DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
 {
   int len;
-  SCM x = STk_list_type_and_length(l, &len);
+  SCM x = list_type_and_length(l, &len);
   if (!x) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
   if (!NULLP(x)) error_improper_list(l);
@@ -885,7 +885,8 @@ doc>
 */
 DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l)) {
   int len;
-  SCM x = STk_list_type_and_length(l, &len);
+  SCM x = list_type_and_length(l, &len);
+  
   return MAKE_BOOLEAN (x && CONSP(x));
 }
 
@@ -909,7 +910,7 @@ SCM STk_simple_list_copy(SCM l, int len) {
 }
 
 /*
-<doc list-copy list-deep-copy
+<doc list-deep-copy list-copy
  * (list-copy obj)
  * (list-deep-copy obj)
  *
@@ -939,12 +940,12 @@ SCM STk_simple_list_copy(SCM l, int len) {
  * @end lisp
 doc>
  */
-SCM list_copy(SCM l, int deep) {
+static SCM list_copy(SCM l, int deep) {
   if (!CONSP(l)) return l;
   if (NULLP(l))  return STk_nil;
 
   int len;
-  SCM last = STk_list_type_and_length(l, &len);
+  SCM last = list_type_and_length(l, &len);
   SCM cycle_start = last;
   int cycle = CONSP(last);
 
@@ -1083,7 +1084,7 @@ doc>
 DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 {
   int len;
-  SCM x = STk_list_type_and_length(l, &len);
+  SCM x = list_type_and_length(l, &len);
   if (!x) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
 
@@ -1118,7 +1119,7 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
   SCM result;
 
   int len;
-  SCM x = STk_list_type_and_length(list, &len);
+  SCM x = list_type_and_length(list, &len);
   if (!x) error_bad_list(list);
   if (CONSP(x)) error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);
@@ -1149,7 +1150,7 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
 {
   SCM previous, l;
   int len;
-  SCM x = STk_list_type_and_length(list, &len);
+  SCM x = list_type_and_length(list, &len);
   if (!x) error_bad_list(list);
   if (CONSP(x)) error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);

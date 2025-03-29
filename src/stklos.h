@@ -153,8 +153,11 @@ extern "C"
 // struct GC_prof_stats_s;
 // GC_API size_t GC_CALL GC_get_prof_stats(struct GC_prof_stats_s *,
 //                                         size_t /* stats_sz */);
+// For allocating list (fast)
+// GC_API GC_ATTR_MALLOC void * GC_CALL GC_malloc_many(size_t lb);
 
-  /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
+
+/* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
 #define STk_must_malloc(size)                                           \
   ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
@@ -716,7 +719,6 @@ EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
 EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
 EXTERN_PRIMITIVE("%cxr", cxr, subr2, (SCM l, SCM name));
-EXTERN_PRIMITIVE("make-list", make_list, subr12, (SCM n, SCM init));
 EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
 EXTERN_PRIMITIVE("memv", memv, subr2, (SCM obj, SCM list));
