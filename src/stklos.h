@@ -172,7 +172,7 @@ extern "C"
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 #define STk_gc_base(ptr)                GC_base(ptr)
-
+#define STk_must_malloc_many(size)      GC_malloc_many(size)
 
 void STk_gc_init(void);
 

@@ -90,92 +90,51 @@ int STk_int_length(SCM l)
 }
 
 
-/* Allocates up to *n CONS cells. That is, the result is a list with
-   AT MOST *n cells, but maybe less.
+/* STk_must_malloc_list
+ *
+ * Allocate a list of n cons cells, all of them initialized with the value of init.
+ *
+ * We use here the (weird) function STk_must_malloc_many. This function
+ * returns a list of objects, linked through their first word. It is faster
+ * than n successive calls to STk_must_malloc, since the allocation lock can
+ * be acquired and released many fewer times.  Note that STk_must_malloc_many
+ * returns an unknown (small) number of objects If this number is less than n,
+ * we call another time STk_must_malloc_many. If it is bigger, the unused
+ * objects will be collected back later by the GC.
+ */
+SCM STk_must_malloc_list(int n, SCM init)
+{
+  if (n == 0)
+    return STk_nil;
+  else {
+    SCM ptr, start;
 
-   1. The parameter (*n) will be changed to the number of cells still
-      missing, or zero if the list is complete.
-   2. The parameter (*last) will be set to the last CONS cell of the
-      list. This is to optimize the situation in which this function
-      did not yet return enough cells, and will be called again. Later,
-      this link will be used to glue the lists together without the
-      need to use APPEND.  */
-static SCM must_malloc_list_upton(int *n, SCM init, SCM *last) {
-  if (*n == 0) return STk_nil;
-  if (*n < 0)  STk_error("Negative list size ~s", MAKE_INT(*n));
+    ptr = start = STk_must_malloc_many(sizeof(struct cons_obj));
+    if (!start) STk_error("Cannot allocate list of size %d", n);
 
-  /* libgc does not allow us to choose how many objects we'd like to
-     allocate.  We ask for many objects and get a linked list where
-     each object has the size given as argument.
-     The first word of the object is a link to the next.   */
-  void **ptr = GC_malloc_many(sizeof(struct cons_obj));
-  if (!ptr) STk_error("Cannot allocate list of size ~s", MAKE_INT(*n));
+    for (int i=0; i < n; i++) {
+      if (!GC_NEXT(ptr)) {
+        // Current list chunk exhausted and list not completly allocated.
+        // Allocate another list chunk.
+        SCM tmp = STk_must_malloc_many(sizeof(struct cons_obj));
 
-  /* GC_NEXT gets the next in the list. */
-  void **next =  GC_NEXT(ptr);
+        if (!tmp) STk_error("Cannot allocate list of size %d", n);
+        GC_NEXT(ptr) = tmp;
+      }
 
-  /* Adjust the first CONS cell (there is at least one, since we
-     already returned STk_nil for zero) */
-  BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
-  BOXED_INFO((struct cons_obj* ) ptr) = 0;
-  CAR((struct cons_obj* ) ptr) = init;
-  CDR((struct cons_obj* ) ptr) = STk_nil;
-
-  /* ptr will be the last cons on the list, so we update the
-     last parameter: */
-  *last = (SCM) ptr;
-
-  /* count is the number of actually allocated cells. */
-  int count = 1;
-  void **tmp;
-
-  while ((void **) next) {
-    tmp = GC_NEXT(next);
-    /* We only run up to n cells. After that, we just follow the
-       links, clearing up the first word in order to give them back to
-       the GC. */
-    if (count >= *n) {
-      next = NULL;
-    } else {
-      count++;
-      BOXED_TYPE((struct cons_obj* ) next) = tc_cons;
-      BOXED_INFO((struct cons_obj* ) next) = 0;
-      CAR((struct cons_obj* ) next) = init;
-      CDR((struct cons_obj* ) next) = ptr;
+      SCM next = GC_NEXT(ptr);
+      BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
+      BOXED_INFO((struct cons_obj* ) ptr) = 0;
+      CAR((struct cons_obj* ) ptr) = init;
+      CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
       ptr = next;
     }
-    next = tmp;
+
+    if (STk_count_allocations)
+      STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
+    return start;
   }
-  /* Let's count the bytes effectively given to the user, not those
-   * that we threw away. */
-  if (STk_count_allocations)
-    STk_thread_inc_allocs(STk_current_thread(),
-                          count * sizeof(struct cons_obj));
-  /* *n will hold the cells still missing. */
-  *n -= count;
-  return (SCM) ptr;
 }
-
-/* Allocates, at once, a list of n cons cells, all of them initialzied
-   with the value of init. */
-SCM STk_must_malloc_list(int n, SCM init) {
-  SCM z2;
-  SCM last, new_last;
-  SCM z = must_malloc_list_upton(&n, init, &last);
-  while (n) {
-    /* n is the remaining cells to allocate. Try again:*/
-    z2 = must_malloc_list_upton(&n, init, &new_last);
-
-    /* last was the last cell in the old list. We point its CDR to
-       the new list, and set last to the new_last (of the new list).
-       This effectively appends z2 to the end of the old list. */
-    CDR((SCM)last) = z2;
-    last = new_last;
-  }
-  return z;
-}
-
-
 
 /* list_type_and_length():
 
@@ -974,7 +933,7 @@ doc>
 DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l)) {
   int len;
   SCM x = list_type_and_length(l, &len);
-  
+
   return MAKE_BOOLEAN (x && CONSP(x));
 }
 
