@@ -690,7 +690,350 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
   return STk_void;
 }
 
+/* ======================================================================
+ *      STk_pointer-set-c-int8_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-int8_t!", pointer_set_c_int8_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(int8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int8_t)STk_integer_value(value);
+  return STk_void;
+}
 
+/* ======================================================================
+ *      STk_pointer-set-c-uint8_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-uint8_t!", pointer_set_c_uint8_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(uint8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint8_t)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-int16_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-int16_t!", pointer_set_c_int16_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(int16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int16_t)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-uint16_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-uint16_t!", pointer_set_c_uint16_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(uint16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint16_t)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-int32_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-int32_t!", pointer_set_c_int32_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(int32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int32_t)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-uint32_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-uint32_t!", pointer_set_c_uint32_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(uint32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint32_t)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-int64_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-int64_t!", pointer_set_c_int64_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(int64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int64_t)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-uint64_t_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-uint64_t!", pointer_set_c_uint64_t, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(uint64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint64_t)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-char_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-char!", pointer_set_c_char, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (char)CHARACTER_VAL(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-short_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-short!", pointer_set_c_short, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (short)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-unsigned-short_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-unsigned-short!", pointer_set_c_unsigned_short, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(unsigned short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (unsigned short)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-int_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-int!", pointer_set_c_int, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-unsigned-int_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-unsigned-int!", pointer_set_c_unsigned_int, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-long_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-long!", pointer_set_c_long, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (long)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-unsigned-long_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-unsigned-long!", pointer_set_c_unsigned_long, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(unsigned long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (unsigned long)STk_integer_value(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-float_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-float!", pointer_set_c_float, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(float*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (float)STk_number2double(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-double_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-double!", pointer_set_c_double, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  *(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (double)STk_number2double(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-set-c-pointer_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-set-c-pointer!", pointer_set_c_pointer, subr3,
+                 (SCM pointer, SCM offset, SCM value))
+{
+  char* p = (char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset);
+  *(char**)p = CPOINTER_VALUE(value);
+  //*(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (double)DOUBLE_DATA(value);
+  return STk_void;
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-int8_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-int8_t", pointer_ref_c_int8_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(int8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-uint8_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-uint8_t", pointer_ref_c_uint8_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(uint8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-int16_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-int16_t", pointer_ref_c_int16_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(int16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-uint16_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-uint16_t", pointer_ref_c_uint16_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(uint16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-int32_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-int32_t", pointer_ref_c_int32_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(int32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-uint32_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-uint32_t", pointer_ref_c_uint32_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(uint32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-int64_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-int64_t", pointer_ref_c_int64_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(int64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-uint64_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-uint64_t", pointer_ref_c_uint64_t, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(uint64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-char_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-char", pointer_ref_c_char, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_CHARACTER(*((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-short_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-short", pointer_ref_c_short, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-unsigned-short_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-unsigned-short", pointer_ref_c_unsigned_short, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-int_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-int", pointer_ref_c_int, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-unsigned-int_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-unsigned-int", pointer_ref_c_unsigned_int, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-long_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-long", pointer_ref_c_long, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-unsigned-long_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-unsigned-long", pointer_ref_c_unsigned_long, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return MAKE_INT(*(long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-float_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-float", pointer_ref_c_float, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return STk_double2real(*(float*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-double_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-double", pointer_ref_c_double, subr2,
+                 (SCM pointer, SCM offset))
+{
+  return STk_double2real(*(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+}
+
+/* ======================================================================
+ *      STk_pointer-ref-c-pointer_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("pointer-ref-c-pointer", pointer_ref_c_pointer, subr2,
+                 (SCM pointer, SCM offset))
+{
+  //return STk_make_Cpointer( *(void*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+  return STk_void;
+}
 
 #else /* HAVE_FFI */
 static void error_no_ffi(void)
@@ -751,6 +1094,44 @@ int STk_init_ffi(void)
   ADD_PRIMITIVE(get_symbol_address);
   ADD_PRIMITIVE(get_typed_ext_var);
   ADD_PRIMITIVE(set_typed_ext_var);
+
+  ADD_PRIMITIVE(pointer_set_c_int8_t);
+  ADD_PRIMITIVE(pointer_set_c_uint8_t);
+  ADD_PRIMITIVE(pointer_set_c_int16_t);
+  ADD_PRIMITIVE(pointer_set_c_uint16_t);
+  ADD_PRIMITIVE(pointer_set_c_int32_t);
+  ADD_PRIMITIVE(pointer_set_c_uint32_t);
+  ADD_PRIMITIVE(pointer_set_c_int64_t);
+  ADD_PRIMITIVE(pointer_set_c_uint64_t);
+  ADD_PRIMITIVE(pointer_set_c_char);
+  ADD_PRIMITIVE(pointer_set_c_short);
+  ADD_PRIMITIVE(pointer_set_c_unsigned_short);
+  ADD_PRIMITIVE(pointer_set_c_int);
+  ADD_PRIMITIVE(pointer_set_c_unsigned_int);
+  ADD_PRIMITIVE(pointer_set_c_long);
+  ADD_PRIMITIVE(pointer_set_c_unsigned_long);
+  ADD_PRIMITIVE(pointer_set_c_float);
+  ADD_PRIMITIVE(pointer_set_c_double);
+  ADD_PRIMITIVE(pointer_set_c_pointer);
+
+  ADD_PRIMITIVE(pointer_ref_c_int8_t);
+  ADD_PRIMITIVE(pointer_ref_c_uint8_t);
+  ADD_PRIMITIVE(pointer_ref_c_int16_t);
+  ADD_PRIMITIVE(pointer_ref_c_uint16_t);
+  ADD_PRIMITIVE(pointer_ref_c_int32_t);
+  ADD_PRIMITIVE(pointer_ref_c_uint32_t);
+  ADD_PRIMITIVE(pointer_ref_c_int64_t);
+  ADD_PRIMITIVE(pointer_ref_c_uint64_t);
+  ADD_PRIMITIVE(pointer_ref_c_char);
+  ADD_PRIMITIVE(pointer_ref_c_short);
+  ADD_PRIMITIVE(pointer_ref_c_unsigned_short);
+  ADD_PRIMITIVE(pointer_ref_c_int);
+  ADD_PRIMITIVE(pointer_ref_c_unsigned_int);
+  ADD_PRIMITIVE(pointer_ref_c_long);
+  ADD_PRIMITIVE(pointer_ref_c_unsigned_long);
+  ADD_PRIMITIVE(pointer_ref_c_float);
+  ADD_PRIMITIVE(pointer_ref_c_double);
+  ADD_PRIMITIVE(pointer_ref_c_pointer);
 
   ADD_PRIMITIVE(has_ffi);
   return TRUE;
