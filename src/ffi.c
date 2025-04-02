@@ -868,7 +868,6 @@ DEFINE_PRIMITIVE("pointer-set-c-pointer!", pointer_set_c_pointer, subr3,
 {
   char* p = (char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset);
   *(char**)p = CPOINTER_VALUE(value);
-  //*(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (double)DOUBLE_DATA(value);
   return STk_void;
 }
 
@@ -1031,8 +1030,8 @@ DEFINE_PRIMITIVE("pointer-ref-c-double", pointer_ref_c_double, subr2,
 DEFINE_PRIMITIVE("pointer-ref-c-pointer", pointer_ref_c_pointer, subr2,
                  (SCM pointer, SCM offset))
 {
-  //return STk_make_Cpointer( *(void*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
-  return STk_void;
+  char* p = ((char*)CPOINTER_VALUE(pointer)) + STk_integer_value(offset);
+  return STk_make_Cpointer(*(char**)p, STk_void, &(*(char**)p));
 }
 
 #else /* HAVE_FFI */
