@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -391,11 +391,11 @@ static SCM map(int argc, SCM *argv, int in_map)
     v = *argv;
 
     if (in_map) {
-        /* Calculate the length so we can use STk_must_malloc_list(): */
+        /* Calculate the length so we can use STk_C_make_list(): */
         len = STk_int_length(v);
         if (len < 0) STk_error("bad list ~W", v);
         /* Allocate the result list: */
-        res = STk_must_malloc_list(len, STk_false);
+        res = STk_C_make_list(len, STk_false);
     }
 
     /* Just fill in the list and return it: */
@@ -429,7 +429,7 @@ static SCM map(int argc, SCM *argv, int in_map)
         }
         if (len == INT_MAX) STk_error("at least one proper list required");
 
-        res = STk_must_malloc_list(len, STk_false);
+        res = STk_C_make_list(len, STk_false);
         ptr = res;
     }
 

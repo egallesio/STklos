@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -720,11 +720,159 @@ DEFINE_PRIMITIVE("%%debug", set_debug, subr0, (void))
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("%test", test, subr1, (SCM s))
+DEFINE_PRIMITIVE("%make-list-cons", test, subr12, (SCM len, SCM init))
 {
-  /* A special place for doing tests */
-  return STk_C_apply(s, 0);
+  SCM last = STk_nil;
+  int n = INT_VAL(len);
+
+  if (!init) init = STk_void;
+
+  for (int i = 0; i < n; i++)
+    last = STk_cons(init, last);
+  return last;
 }
+
+DEFINE_PRIMITIVE("%make-list-many", test2, subr12, (SCM len, SCM init))
+{
+  int n = INT_VAL(len);
+  SCM ptr, start;
+
+  if (!init) init = STk_void;
+
+  if (!n) return STk_nil;
+
+  ptr = start = STk_must_malloc_many(sizeof(struct cons_obj));
+
+  for (int i=0; i < n; i++) {
+    if (!GC_NEXT(ptr)) {
+      // Enlarge current list chunk by allocatting some new pairs
+      GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
+    }
+
+    SCM next = GC_NEXT(ptr);
+    BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
+    BOXED_INFO((struct cons_obj* ) ptr) = 0;
+    CAR((struct cons_obj* ) ptr) = init;
+    CDR((struct cons_obj* ) ptr) = (i == n-1) ? STk_nil: next ;
+    ptr = next;
+  }
+
+  if (STk_count_allocations)
+    STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
+  return start;
+}
+
+DEFINE_PRIMITIVE("%make-list-cons+many", test3, subr12, (SCM len, SCM init))
+{
+  int n = INT_VAL(len);
+  SCM ptr, start;
+
+  if (!init) init = STk_void;
+
+  if (n < 100) {
+    SCM last = STk_nil;
+    for (int i = 0; i < n; i++)
+      last = STk_cons(init, last);
+    return last;
+  }
+
+  ptr = start = STk_must_malloc_many(sizeof(struct cons_obj));
+
+  for (int i=0; i < n; i++) {
+    if (!GC_NEXT(ptr)) {
+      // Enlarge current list chunk by allocatting some new pairs
+      GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
+    }
+
+    SCM next = GC_NEXT(ptr);
+    BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
+    BOXED_INFO((struct cons_obj* ) ptr) = 0;
+    CAR((struct cons_obj* ) ptr) = init;
+    CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
+    ptr = next;
+  }
+
+  if (STk_count_allocations)
+    STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
+  return start;
+}
+
+DEFINE_PRIMITIVE("%make-list-pool", test4, subr12, (SCM len, SCM init))
+{
+  int n = INT_VAL(len);
+  SCM ptr, start, next = NULL;
+  static void* pool = NULL;
+
+
+  if (!n) return STk_nil;
+
+  if (!init) init = STk_void;
+
+  ptr = start = pool? pool: STk_must_malloc_many(sizeof(struct cons_obj));
+  pool = NULL;
+
+  for (int i=0; i < n; i++) {
+    if (!GC_NEXT(ptr)) {
+      //STk_debug("Enlarge %d", i);
+      // Enlarge current list chunk by allocatting some new pairs
+      GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
+    }
+
+    //if (i == 800) return STk_nil;
+    next = GC_NEXT(ptr);
+    BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
+    BOXED_INFO((struct cons_obj* ) ptr) = 0;
+    CAR((struct cons_obj* ) ptr) = init;
+    CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
+    ptr = next;
+  }
+
+  pool = next;
+
+  if (STk_count_allocations)
+    STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
+  return start;
+}
+
+DEFINE_PRIMITIVE("%make-list-pool-ts", test5, subr12, (SCM len, SCM init))
+{
+  int n = INT_VAL(len);
+  SCM ptr, start, next = NULL;
+  static void* pool = NULL;
+  MUT_DECL(cons_pool);
+
+  if (!n) return STk_nil;
+
+  if (!init) init = STk_void;
+
+  MUT_LOCK(cons_pool);
+  ptr = start = pool? pool: STk_must_malloc_many(sizeof(struct cons_obj));
+  pool = NULL;
+  MUT_UNLOCK(cons_pool);
+
+  for (int i=0; i < n; i++) {
+    if (!GC_NEXT(ptr)) {
+      //STk_debug("Enlarge %d", i);
+      // Enlarge current list chunk by allocatting some new pairs
+      GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
+    }
+
+    //if (i == 800) return STk_nil;
+    next = GC_NEXT(ptr);
+    BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
+    BOXED_INFO((struct cons_obj* ) ptr) = 0;
+    CAR((struct cons_obj* ) ptr) = init;
+    CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
+    ptr = next;
+  }
+
+  MUT_LOCK(cons_pool);  pool = next;   MUT_UNLOCK(cons_pool);
+
+  if (STk_count_allocations)
+    STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
+  return start;
+}
+
 
 DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 {
@@ -776,6 +924,10 @@ int STk_init_misc(void)
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_debug);
   ADD_PRIMITIVE(test);
+  ADD_PRIMITIVE(test2);
+  ADD_PRIMITIVE(test3);
+  ADD_PRIMITIVE(test4);
+  ADD_PRIMITIVE(test5);
   ADD_PRIMITIVE(c_backtrace);
 #endif
   return TRUE;

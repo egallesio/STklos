@@ -90,7 +90,7 @@ int STk_int_length(SCM l)
 }
 
 
-/* STk_must_malloc_list
+/* STk_C_make_list
  *
  * Allocate a list of n cons cells, all of them initialized with the value of init.
  *
@@ -107,7 +107,7 @@ int STk_int_length(SCM l)
  * `STk_must_malloc_many`. Hence, this reduces tremendously the work of the GC.
  */
 
-SCM STk_must_malloc_list(int n, SCM init)
+SCM STk_C_make_list(int n, SCM init)
 {
   SCM ptr, start, next = STk_nil;
   static void* pool    = NULL;        // protected by the cons_pool mutex
@@ -115,7 +115,7 @@ SCM STk_must_malloc_list(int n, SCM init)
 
   if (!n) return STk_nil;
 
-  // Initialize start from a previous call to STk_must_malloc_list, if possible.
+  // Initialize start from a previous call to STk_C_make_list, if possible.
   // Otherwise call the special GC function
   MUT_LOCK(cons_pool);
   ptr = start = pool? pool: STk_must_malloc_many(sizeof(struct cons_obj));
@@ -509,7 +509,7 @@ doc>
 DEFINE_PRIMITIVE("make-list", make_list, subr12, (SCM n, SCM init)) {
   if (!INTP(n)) STk_error("bad integer ~s", n);
   if (!init) init = STk_void;
-  return STk_must_malloc_list(INT_VAL(n), init);
+  return STk_C_make_list(INT_VAL(n), init);
 }
 
 
@@ -947,7 +947,7 @@ DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l)) {
 SCM STk_simple_list_copy(SCM l, int len) {
   if (NULLP(l)) return STk_nil;
 
-  SCM res = STk_must_malloc_list(len, STk_false);
+  SCM res = STk_C_make_list(len, STk_false);
   SCM ptr_to = res;
   SCM ptr_from = l;
 
@@ -1019,7 +1019,7 @@ static SCM list_copy(SCM l, int deep) {
   */
 
     /* 1. Allocate the list and copy the CARs */
-    SCM ptr, ptr_res, res = STk_must_malloc_list(len, STk_false);
+    SCM ptr, ptr_res, res = STk_C_make_list(len, STk_false);
     SCM cycle_start_in_new_list = STk_nil;
     ptr = l;
     ptr_res = res;

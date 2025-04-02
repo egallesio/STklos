@@ -946,7 +946,7 @@ DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
   len = STRING_LENGTH(str);
   s   = STRING_CHARS(str);
 
-  tmp = z = STk_must_malloc_list(len,STk_false);
+  tmp = z = STk_C_make_list(len,STk_false);
 
   for (int i=0; i<len; i++) {
     s = STk_utf8_grab_char(s, &c);

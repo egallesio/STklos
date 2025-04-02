@@ -189,11 +189,6 @@ void STk_gc_init(void);
 
 typedef void* SCM;
 
-/* Function added to allocate a list of size n. This is faster than
-   repeatedly calling STk_must_malloc. It is defined here, and not with
-   the allocation API, because it needs the SCM type. */
-SCM STk_must_malloc_list(int n, SCM init);
-
 typedef enum {
   tc_not_boxed=-1,
   tc_cons, tc_integer, tc_real, tc_bignum,  tc_rational,                /* 0 */
@@ -716,6 +711,7 @@ SCM STk_append2(SCM l1, SCM l2);
 SCM STk_dappend2(SCM l1, SCM l2);       /* destructive append */
 SCM STk_dremq(SCM obj, SCM list);       /* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
+SCM STk_C_make_list(int n, SCM init);  /* GC friendly list allocation */
 
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));

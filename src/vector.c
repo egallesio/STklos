@@ -311,7 +311,7 @@ DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
     return STk_nil;
   else {
     // Allocate the list all at once to avoid calling the allocator repeated times.
-    SCM z = STk_must_malloc_list(len, STk_false);
+    SCM z = STk_C_make_list(len, STk_false);
     int i = 0;
 
     for (SCM ptr = z; CONSP(ptr); ptr = CDR(ptr)) {
