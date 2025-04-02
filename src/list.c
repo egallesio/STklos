@@ -105,18 +105,22 @@ int STk_int_length(SCM l)
  * allocated, but unused, cells, in the `pool` variable. When the function
  * is entered again, it will be used, in place of a call to the function
  * `STk_must_malloc_many`. Hence, this reduces tremendously the work of the GC.
- *
  */
 
 SCM STk_must_malloc_list(int n, SCM init)
 {
-  SCM ptr, start, next = NULL;
-  static void* pool    = NULL;
+  SCM ptr, start, next = STk_nil;
+  static void* pool    = NULL;        // protected by the cons_pool mutex
+  MUT_DECL(cons_pool);
 
   if (!n) return STk_nil;
 
+  // Initialize start from a previous call to STk_must_malloc_list, if possible.
+  // Otherwise call the special GC function
+  MUT_LOCK(cons_pool);
   ptr = start = pool? pool: STk_must_malloc_many(sizeof(struct cons_obj));
-  pool = NULL;
+  pool = NULL; // in case we are interrupted before setting it before return
+  MUT_UNLOCK(cons_pool);
 
   for (int i=0; i < n; i++) {
     if (!GC_NEXT(ptr)) {
@@ -131,7 +135,7 @@ SCM STk_must_malloc_list(int n, SCM init)
     ptr = next;
   }
 
-  pool = next;
+  MUT_LOCK(cons_pool); pool = next; MUT_UNLOCK(cons_pool);
 
   if (STk_count_allocations)
     STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
