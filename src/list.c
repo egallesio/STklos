@@ -100,41 +100,44 @@ int STk_int_length(SCM l)
  * be acquired and released many fewer times.  Note that STk_must_malloc_many
  * returns an unknown (small) number of objects If this number is less than n,
  * we call another time STk_must_malloc_many. If it is bigger, the unused
- * objects will be collected back later by the GC.
+ * objects will be collected back later by the GC (if we do nothing). To avoid
+ * to "abandon" unused objects when the function returns, we keep the (already
+ * allocated, but unused, cells, in the `pool` variable. When the function
+ * is entered again, it will be used, in place of a call to the function
+ * `STk_must_malloc_many`. Hence, this reduces tremendously the work of the GC.
+ *
  */
+
 SCM STk_must_malloc_list(int n, SCM init)
 {
-  if (n < 100) {    // Don't use STk_must_malloc_many
-    SCM last = STk_nil;
+  SCM ptr, start, next = NULL;
+  static void* pool    = NULL;
 
-    for (int i = 0; i < n; i++)
-      last = STk_cons(init, last);
-    return last;
-  }
-  else {           //  Use STk_must_malloc_many
-    SCM ptr, start;
+  if (!n) return STk_nil;
 
-    ptr = start = STk_must_malloc_many(sizeof(struct cons_obj));
+  ptr = start = pool? pool: STk_must_malloc_many(sizeof(struct cons_obj));
+  pool = NULL;
 
-    for (int i=0; i < n; i++) {
-      if (!GC_NEXT(ptr)) {
-        // Enlarge current list chunk by allocatting some new pairs
-        GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
-      }
-
-      SCM next = GC_NEXT(ptr);
-      BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
-      BOXED_INFO((struct cons_obj* ) ptr) = 0;
-      CAR((struct cons_obj* ) ptr) = init;
-      CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
-      ptr = next;
+  for (int i=0; i < n; i++) {
+    if (!GC_NEXT(ptr)) {
+      // Enlarge current list chunk by allocatting some new pairs
+      GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
     }
-
-    if (STk_count_allocations)
-      STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
-    return start;
+    next = GC_NEXT(ptr);
+    BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
+    BOXED_INFO((struct cons_obj* ) ptr) = 0;
+    CAR((struct cons_obj* ) ptr) = init;
+    CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
+    ptr = next;
   }
+
+  pool = next;
+
+  if (STk_count_allocations)
+    STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
+  return start;
 }
+
 
 /* list_type_and_length():
 
@@ -643,7 +646,7 @@ DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
   if (CONSP(x)) error_circular_list(l);
   if (!NULLP(x)) error_improper_list(l);
   /* WARNING: do not use STk_list_copy here. It will make STklos enter a loop
-     in sme situations, running out of stack space. */
+     in some situations, running out of stack space. */
   return STk_dreverse(STk_simple_list_copy(l,len));
 }
 

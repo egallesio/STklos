@@ -174,6 +174,7 @@ extern "C"
 #define STk_gc_base(ptr)                GC_base(ptr)
 #define STk_must_malloc_many(size)      GC_malloc_many(size)
 
+
 void STk_gc_init(void);
 
 
@@ -187,6 +188,7 @@ void STk_gc_init(void);
 #define MAX_CELL_TYPES          256
 
 typedef void* SCM;
+
 /* Function added to allocate a list of size n. This is faster than
    repeatedly calling STk_must_malloc. It is defined here, and not with
    the allocation API, because it needs the SCM type. */
