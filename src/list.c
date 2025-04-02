@@ -104,17 +104,21 @@ int STk_int_length(SCM l)
  */
 SCM STk_must_malloc_list(int n, SCM init)
 {
-  if (n == 0)
-    return STk_nil;
-  else {
+  if (n < 100) {    // Don't use STk_must_malloc_many
+    SCM last = STk_nil;
+
+    for (int i = 0; i < n; i++)
+      last = STk_cons(init, last);
+    return last;
+  }
+  else {           //  Use STk_must_malloc_many
     SCM ptr, start;
 
     ptr = start = STk_must_malloc_many(sizeof(struct cons_obj));
 
     for (int i=0; i < n; i++) {
       if (!GC_NEXT(ptr)) {
-        // Current list chunk exhausted and list not completly allocated.
-        // Allocate another list chunk.
+        // Enlarge current list chunk by allocatting some new pairs
         GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
       }
 
