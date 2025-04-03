@@ -995,8 +995,7 @@ SCM STk_simple_list_copy(SCM l, int len) {
 doc>
  */
 static SCM list_copy(SCM l, int deep) {
-  if (!CONSP(l)) return l;
-  if (NULLP(l))  return STk_nil;
+  if (!CONSP(l)) return l;     // non list values and '() too
 
   int len;
   SCM last = list_type_and_length(l, &len);
