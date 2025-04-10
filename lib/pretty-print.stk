@@ -38,6 +38,30 @@
  * is returned as a string by |pretty-print|.
  * Note that |pp| is another name for |pretty-print|.
  *
+ * @lisp
+ * (pp '(display (+ a b c (expt d e) (abs (* f g h (- i j))) )) :width 25)
+ * => (display
+ *      (+ a
+ *         b
+ *         c
+ *         (expt d e)
+ *          (abs (* f
+ *                 g
+ *                 h
+ *                 (- i j)))))
+ *
+ * (pp '(display (+ a b c (expt d e) (abs (* f g h (- i j))) )) :width 35)
+ * => (display
+ *      (+ a
+ *         b
+ *         c
+ *         (expt d e)
+ *         (abs (* f g h (- i j)))))
+ *
+ * (pp '(display (+ a b c (expt d e) (abs (* f g h (- i j))) )) :width 47)
+ * => (display
+ *      (+ a b c (expt d e) (abs (* f g h (- i j)))))
+ * @end lisp
 doc>
 |#
 
