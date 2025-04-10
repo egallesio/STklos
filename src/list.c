@@ -90,23 +90,26 @@ int STk_int_length(SCM l)
 }
 
 
-static SCM simple_list_copy(SCM l, int len) {
+static SCM simple_list_copy(SCM l, int len)
+{
   if (NULLP(l)) return STk_nil;
+  else {
+    SCM res = STk_C_make_list(len, STk_void);
+    SCM ptr_to = res;
+    SCM ptr_from = l;
 
-  SCM res = STk_C_make_list(len, STk_false);
-  SCM ptr_to = res;
-  SCM ptr_from = l;
+    while (--len) {
+      CAR(ptr_to) = CAR(ptr_from);
+      ptr_from = CDR(ptr_from);
+      ptr_to   = CDR(ptr_to);
+    }
 
-  while (CONSP(ptr_to) && CONSP(CDR(ptr_to))) {
+    /* last pair of the result */
     CAR(ptr_to) = CAR(ptr_from);
-    ptr_from = CDR(ptr_from);
-    ptr_to   = CDR(ptr_to);
+    CDR(ptr_to) = STk_nil;
+
+    return res;
   }
-
-  CAR(ptr_to) = CAR(ptr_from);
-  CDR(ptr_to) = CDR(ptr_from);
-
-  return res;
 }
 
 /* STk_C_make_list
