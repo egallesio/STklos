@@ -166,139 +166,129 @@ SCM STk_C_make_list(int n, SCM init)
 
 
 /* list_type_and_length():
-
-   List checking (proper improper, cyclic) AND length computing.
-
-   If l is:
-
-   1. PROPER LIST: return STk_nil.
-   2. CYCLIC LIST: A CONS cell (this is where the cycle starts).
-   3. FINITE PROPER LIST: The last CDR.
-   4. NOT A LIST: NULL.
-
-   - In cases (1), (2), and (3) the length of the list is returned
-     in the len argument.
-
-   - If the list consists of a single cycle, then we guarantee that
-     the pointer returned is to the FIRST cell of the list.
+ *
+ * List checking (proper improper, cyclic) AND length computing.
+ *
+ * If l is:
+ *    1. PROPER LIST: return STk_nil.
+ *    2. CYCLIC LIST: A CONS cell (this is where the cycle starts).
+ *    3. FINITE IMPROPER LIST: The last CDR.
+ *    4. NOT A LIST: NULL.
+ *
+ *   - In cases (1), (2), and (3) the length of the list is returned
+ *     in the len argument.
+ *   - If the list consists of a single cycle, then we guarantee that
+ *    the pointer returned is to the FIRST cell of the list.
  */
-static SCM list_type_and_length(SCM l, int *len) {
-  /*
-    About the cycle detecting and copying algorithm:
+static SCM list_type_and_length(SCM l, int *len) 
+{
+  //     About the cycle detecting and copying algorithm:
+  //
+  //     1. Detect cycles using Floyd's algorithm.  The algorithm runs two
+  //        pointers, "fast" and "slow" through the list. Both are placed
+  //        at the CAR, then at each step, slow goes forward one link, and
+  //        fast goes forward two links.
+  //
+  //     2. If there is a cycle:
+  //
+  //        2.i) we position fast back at the CAR and now move the two
+  //             pointers *one* link at each time. The pointers will
+  //             *necessarily meet* exactly *at the beginning of the cycle.
+  //
+  //        2.ii) If there is a cycle, we mark the cell in which it starts
+  //              example, the cycle below starts at C:
+  //
+  //                         +--------------+
+  //                         |              |
+  //                         v              |
+  //               A -> B -> C -> D -> E -> F
+  //
+  //               We keep an extra pointer to C.
+  //
+  //        2.iii) Now we count the number of cells from the beginning (A)
+  //               to the SECOND time we see C (minus one). This is the
+  //               "length" of the list (the size to be allocated to the
+  //               copy).
+  //
+  //     3. If there is no cycle, count the number of elements as usual (but
+  //        allowing for improper lists)
 
-    1. Detect cycles using Floyd's algorithm.  The algorithm runs two
-       pointers, "fast" and "slow" through the list. Both are placed
-       at the CAR, then at each step, slow goes forward one link, and
-       fast goes forward two links.
+  *len = 0;
+  if (NULLP(l)) return STk_nil; /* Case (1) in function description, specifically
+                                   for the proper list '().*/
+  if (!CONSP(l)) return NULL;  /* Case (4) in function description */
 
-    2. If there is a cycle:
+  /* 1. Detect possible cycles using Floyd's algorithm */
+  SCM slow  = l;
+  SCM fast  = l;
+  int cycle = 0;
+  SCM cycle_start;
+  int single_cycle = 0;
 
-       2.i) we position fast back at the CAR and now move the two
-            pointers *one* link at each time. The pointers will
-            *necessarily meet* exactly *at the beginning of the cycle.
+  while(CONSP(fast) && CONSP(CDR(fast))) {
+    slow = CDR(slow);
+    fast = CDR(CDR(fast));
+    if(slow == fast) {
+      cycle = 1;
+      break;
+    }
+  }
 
-       2.ii) If there is a cycle, we mark the cell in which it starts
-             example, the cycle below starts at C:
-
-                        +--------------+
-                        |              |
-                        v              |
-              A -> B -> C -> D -> E -> F
-
-              We keep an extra pointer to C.
-
-       2.iii) Now we count the number of cells from the beginning (A)
-              to the SECOND time we see C (minus one). This is the
-              "length" of the list (the size to be allocated to the
-              copy).
-
-    3. If there is no cycle, count the number of elements as usual (but
-       allowing for improper lists)
-
-   */
-
-    if (!CONSP(l) && !NULLP(l)) return NULL;      /* Case (4) in function description */
-    if (NULLP(l))  { (*len)=0;  return STk_nil; } /* Case (1) in function description,
-                                                  specifically for the proper list '().*/
-
-    /* 1. Detect possible cycles using Floyd's algorithm */
-    SCM slow  = l;
-    SCM fast  = l;
-    int cycle = 0;
-    SCM cycle_start;
-    int single_cycle = 0;
-
-    while(CONSP(fast) && CONSP(CDR(fast))) {
-        slow = CDR(slow);
-        fast = CDR(CDR(fast));
-        if(slow == fast) {
-            cycle = 1;
-            break;
-        }
+  if (cycle) {
+    /* 2.i Put fast back in the beginning, and now move slow and
+       fast one link at a time. When they meet, we found the
+       cycle start. */
+    fast = l;
+    while(CDR(slow)!=CDR(fast)){
+      slow = CDR(slow);
+      fast = CDR(fast);
     }
 
-    if (cycle) {
-      /* 2.i Put fast back in the beginning, and now move slow and
-             fast one link at a time. When they meet, we found the
-             cycle start. */
-        fast = l;
-        while(CDR(slow)!=CDR(fast)){
-          slow = CDR(slow);
-          fast = CDR(fast);
-        }
+    /* 2.ii Keep a link to the cell where the cycle starts */
 
-        /* 2.ii Keep a link to the cell where the cycle starts */
+    /* Special case: if slow == fast, then the list is a single cycle,
+       and we'd be counting one more cons cell than necesary. */
+    if (slow == fast)
+      single_cycle = 1;
 
-        /* Special case: if slow == fast, then the list is a single cycle,
-           and we'd be cunting one more cons cell than necesary. */
-        if (slow == fast)
-          single_cycle = 1;
+    cycle_start = CDR(slow);
 
-        cycle_start = CDR(slow);
-
-        /* 2.iii Count the cyclic list size. */
-
-        (*len) = 0;
-
-        slow = l;
-        int passed_cycle = 0;
-        while (1) {
-          (*len)++;
-          if (CDR(slow) == cycle_start) {
-            if (passed_cycle) break;
-            else              passed_cycle = 1;
-          }
-          slow = CDR(slow);
-        }
-
-    } else {
-      /* 3 Count the uncyclic list size. */
-      (*len)=0;
-      slow = l;
-      for ( ; ; ) {
-        /* See the beginning of the function -- l is guaranteed to be
-           non-nil (actual pair), so we can take the CDR of slow
-           (which was initialzed to l).
-           This way we'll have CDR(slow) point to the proper place
-           (the list's last CDR, since this is a non-circular list) */
-        if (!CONSP(CDR(slow)) || NULLP(CDR(slow))) {
-          (*len)++;
-          break;
-        }
-        slow = CDR(slow);
-        (*len)++;
+    /* 2.iii Count the cyclic list size. */
+    slow = l;
+    int passed_cycle = 0;
+    while (1) {
+      (*len)++;
+      if (CDR(slow) == cycle_start) {
+        if (passed_cycle) break;
+        else              passed_cycle = 1;
       }
+      slow = CDR(slow);
     }
+  } else {
+    /* 3 Count the uncyclic list size. */
+    slow = l;
+    for ( ; ; ) {
+      /* See the beginning of the function -- l is guaranteed to be
+         non-nil (actual pair), so we can take the CDR of slow
+         (which was initialzed to l).
+         This way we'll have CDR(slow) point to the proper place
+         (the list's last CDR, since this is a non-circular list) */
+      if (!CONSP(CDR(slow)) || NULLP(CDR(slow))) {
+        (*len)++;
+        break;
+      }
+      slow = CDR(slow);
+      (*len)++;
+    }
+  }
 
-    /* LEN now has the length of the list to be copied, and we only
-       need to return CDR(slow), which will be what we promised (NIL
-       for proper lists, cycle_start for cyclic lists, or the last-cdr
-       for improper lists.  Except that -- if it's a single cycle, we
-       don't want to return the (random) place where slow and fast
-       met. We'll return the start ot the list! */
-
-    if (single_cycle) return l;
-    return CDR(slow);
+  /* LEN now has the length of the list to be copied, and we only
+     need to return CDR(slow), which will be what we promised (NIL
+     for proper lists, cycle_start for cyclic lists, or the last-cdr
+     for improper lists.  Except that -- if it's a single cycle, we
+     don't want to return the (random) place where slow and fast
+     met. We'll return the start ot the list! */
+  return (single_cycle) ?  l : CDR(slow);
 }
 
 
@@ -667,6 +657,7 @@ DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
 {
   int len;
   SCM x = list_type_and_length(l, &len);
+
   if (!x) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
   if (!NULLP(x)) error_improper_list(l);
@@ -1141,6 +1132,7 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 {
   int len;
   SCM x = list_type_and_length(l, &len);
+
   if (!x) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
 
@@ -1176,6 +1168,7 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
 
   int len;
   SCM x = list_type_and_length(list, &len);
+
   if (!x) error_bad_list(list);
   if (CONSP(x)) error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);
