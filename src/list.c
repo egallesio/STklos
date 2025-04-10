@@ -90,6 +90,25 @@ int STk_int_length(SCM l)
 }
 
 
+static SCM simple_list_copy(SCM l, int len) {
+  if (NULLP(l)) return STk_nil;
+
+  SCM res = STk_C_make_list(len, STk_false);
+  SCM ptr_to = res;
+  SCM ptr_from = l;
+
+  while (CONSP(ptr_to) && CONSP(CDR(ptr_to))) {
+    CAR(ptr_to) = CAR(ptr_from);
+    ptr_from = CDR(ptr_from);
+    ptr_to   = CDR(ptr_to);
+  }
+
+  CAR(ptr_to) = CAR(ptr_from);
+  CDR(ptr_to) = CDR(ptr_from);
+
+  return res;
+}
+
 /* STk_C_make_list
  *
  * Allocate a list of n cons cells, all of them initialized with the value of init.
@@ -158,7 +177,7 @@ SCM STk_C_make_list(int n, SCM init)
      in the len argument.
 
    - If the list consists of a single cycle, then we guarantee that
-     the poitner returned is to the FIRST cell of the list.
+     the pointer returned is to the FIRST cell of the list.
  */
 static SCM list_type_and_length(SCM l, int *len) {
   /*
@@ -641,7 +660,6 @@ DEFINE_PRIMITIVE("append", append, vsubr, (int argc, SCM* argv))
  * @end lisp
 doc>
  */
-SCM STk_simple_list_copy(SCM l, int len);
 DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
 {
   int len;
@@ -651,7 +669,7 @@ DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
   if (!NULLP(x)) error_improper_list(l);
   /* WARNING: do not use STk_list_copy here. It will make STklos enter a loop
      in some situations, running out of stack space. */
-  return STk_dreverse(STk_simple_list_copy(l,len));
+  return STk_dreverse(simple_list_copy(l,len));
 }
 
 /*
@@ -937,30 +955,12 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l)) {
+DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l))
+{
   int len;
   SCM x = list_type_and_length(l, &len);
 
   return MAKE_BOOLEAN (x && CONSP(x));
-}
-
-SCM STk_simple_list_copy(SCM l, int len) {
-  if (NULLP(l)) return STk_nil;
-
-  SCM res = STk_C_make_list(len, STk_false);
-  SCM ptr_to = res;
-  SCM ptr_from = l;
-
-  while (CONSP(ptr_to) && CONSP(CDR(ptr_to))) {
-    CAR(ptr_to) = CAR(ptr_from);
-    ptr_from = CDR(ptr_from);
-    ptr_to   = CDR(ptr_to);
-  }
-
-  CAR(ptr_to) = CAR(ptr_from);
-  CDR(ptr_to) = CDR(ptr_from);
-
-  return res;
 }
 
 /*
