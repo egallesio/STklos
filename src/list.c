@@ -180,7 +180,7 @@ SCM STk_C_make_list(int n, SCM init)
  *   - If the list consists of a single cycle, then we guarantee that
  *    the pointer returned is to the FIRST cell of the list.
  */
-static SCM list_type_and_length(SCM l, int *len) 
+static SCM list_type_and_length(SCM l, int *len)
 {
   //     About the cycle detecting and copying algorithm:
   //
@@ -224,8 +224,10 @@ static SCM list_type_and_length(SCM l, int *len)
   int cycle = 0;
   SCM cycle_start;
   int single_cycle = 0;
+  int allocs = 0;     // # of needed of cells (not significant if we have a cycle)
 
   while(CONSP(fast) && CONSP(CDR(fast))) {
+    allocs += 2;
     slow = CDR(slow);
     fast = CDR(CDR(fast));
     if(slow == fast) {
@@ -264,31 +266,25 @@ static SCM list_type_and_length(SCM l, int *len)
       }
       slow = CDR(slow);
     }
-  } else {
-    /* 3 Count the uncyclic list size. */
-    slow = l;
-    for ( ; ; ) {
-      /* See the beginning of the function -- l is guaranteed to be
-         non-nil (actual pair), so we can take the CDR of slow
-         (which was initialzed to l).
-         This way we'll have CDR(slow) point to the proper place
-         (the list's last CDR, since this is a non-circular list) */
-      if (!CONSP(CDR(slow)) || NULLP(CDR(slow))) {
-        (*len)++;
-        break;
-      }
-      slow = CDR(slow);
-      (*len)++;
-    }
-  }
 
-  /* LEN now has the length of the list to be copied, and we only
-     need to return CDR(slow), which will be what we promised (NIL
-     for proper lists, cycle_start for cyclic lists, or the last-cdr
-     for improper lists.  Except that -- if it's a single cycle, we
-     don't want to return the (random) place where slow and fast
-     met. We'll return the start ot the list! */
-  return (single_cycle) ?  l : CDR(slow);
+    /* LEN now has the length of the list to be copied, and we only need to
+       return CDR(slow), which will be what we promised (NIL for proper lists,
+       cycle_start for cyclic lists, or the last-cdr for improper lists.
+       Except that -- if it's a single cycle, we don't want to return the
+       (random) place where slow and fast met. We'll return the start ot the
+       list! */
+    return (single_cycle) ?  l : CDR(slow);
+  } else {
+    /* Not a cycle.
+       If L is a proper list, FAST is the last pair of L or '() depending
+       of the parity of list's length.
+       If L is an improper list, FAST is a dotted pair of an atom depending
+       of the parity of list's length.
+    */
+    if (CONSP(fast)) allocs++;
+    (*len) = allocs;
+    return (CONSP(fast) ? CDR(fast): fast);
+  }
 }
 
 
@@ -1136,7 +1132,7 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
   if (!x) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
 
-  while (CONSP(CDR(l)))
+  while(--len)
     l = CDR(l);
 
   return l;
