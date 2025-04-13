@@ -145,13 +145,15 @@ doc>
      ((char?    x)      (format port "a character whose Unicode code point~a is ~s"
                                 (if (<= (char->integer x) 127) " (and ASCII value)" "")
                                 (char->integer x)))
-     ((symbol?  x)      (format port "a symbol")
-                        (call/cc
-                         (lambda (out)
-                           (with-handler
-                            (lambda (e) (out))
-                            (format port ", with ~amutable binding"
-                                    (if (symbol-mutable? x) "" "im"))))))
+     ((symbol?  x)      (let ((int (if (symbol-interned? x)
+                                       "a"
+                                       "an uninterned"))
+
+                              (bound (if (symbol-bound? x)
+                                         (format #f ", with ~amutable binding"
+                                                 (if (symbol-mutable? x) "" "im"))
+                                         "")))
+                          (format port "~a symbol~a" int bound)))
      ((keyword? x)      (format port "a keyword"))
      ((pair?    x)      (format port "a non-empty list"))
      ((string?  x)      (if (zero? (string-length x))
