@@ -1,0 +1,19 @@
+
+
+(test "srfi-258.1" #t (eq? generate-uninterned-symbol (in-module SCHEME gensym)))
+
+(let ((a (string->uninterned-symbol "abc"))
+      (b (string->uninterned-symbol "abc"))
+      (c (string->symbol "abc")))
+  (test "srfi-258.2"  #f    (eq? a b))
+  (test "srfi-258.3"  #f    (eq? a c))
+  (test "srfi-258.4"  #f    (eq? b c))
+  (test "srfi-258.5"  #f    (symbol-interned? a))
+  (test "srfi-258.6"  #f    (symbol-interned? b))
+  (test "srfi-258.7"  #t    (symbol-interned? c))
+  (test "srfi-258.8"  "abc" (symbol->string a))
+  (test "srfi-258.9"  "abc" (symbol->string b))
+  (test "srfi-258.10" "abc" (symbol->string c))
+  (test "srfi-258.11" #t    (string=? (symbol->string a)
+                                      (symbol->string b)
+                                      (symbol->string c))))
