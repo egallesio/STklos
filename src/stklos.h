@@ -153,8 +153,11 @@ extern "C"
 // struct GC_prof_stats_s;
 // GC_API size_t GC_CALL GC_get_prof_stats(struct GC_prof_stats_s *,
 //                                         size_t /* stats_sz */);
+// For allocating list (fast)
+// GC_API GC_ATTR_MALLOC void * GC_CALL GC_malloc_many(size_t lb);
 
-  /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
+
+/* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
 #define STk_must_malloc(size)                                           \
   ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
@@ -169,6 +172,8 @@ extern "C"
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 #define STk_gc_base(ptr)                GC_base(ptr)
+#define STk_must_malloc_many(size)      GC_malloc_many(size)
+
 
 void STk_gc_init(void);
 
@@ -706,6 +711,7 @@ SCM STk_append2(SCM l1, SCM l2);
 SCM STk_dappend2(SCM l1, SCM l2);       /* destructive append */
 SCM STk_dremq(SCM obj, SCM list);       /* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
+SCM STk_C_make_list(int n, SCM init);  /* GC friendly list allocation */
 
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
