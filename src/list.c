@@ -657,9 +657,10 @@ DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
   if (!x) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
   if (!NULLP(x)) error_improper_list(l);
+
   /* WARNING: do not use STk_list_copy here. It will make STklos enter a loop
      in some situations, running out of stack space. */
-  return STk_dreverse(simple_list_copy(l,len));
+  return STk_dreverse(simple_list_copy(l, len));
 }
 
 /*
@@ -934,7 +935,7 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
 <doc circular-list?
  * (circular-list? obj)
  *
- * Returns |#t#| if |obj| is a circular list, and |#f| otherwise.
+ * Returns |#t| if |obj| is a circular list, and |#f| otherwise.
  *
  * @lisp
  * (define L (list 1 2 3 4))
@@ -945,7 +946,7 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l))
+DEFINE_PRIMITIVE("circular-list?", circular_listp, subr1, (SCM l))
 {
   int len;
   SCM x = list_type_and_length(l, &len);
@@ -954,7 +955,7 @@ DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l))
 }
 
 /*
-<doc list-deep-copy list-copy
+<doc EXT list-deep-copy list-copy
  * (list-copy obj)
  * (list-deep-copy obj)
  *
@@ -982,9 +983,13 @@ DEFINE_PRIMITIVE("circular-list?", circ, subr1, (SCM l))
  * (eq? (car y) (car (list-copy y)))      => #t
  * (eq? (car y) (car (list-deep-copy y))) => #t ; <= didn't recurse into vector
  * @end lisp
+ *
+ * NOTE: {{rseven}} defines the |list-copy| primitive, but it states that calling
+ * it on a circular list is an error. This is not the case in {{stklos}}.
 doc>
  */
-static SCM list_copy(SCM l, int deep) {
+static SCM list_copy(SCM l, int deep)
+{
   if (!CONSP(l)) return l;     // non list values and '() too
 
   int len;
@@ -1008,7 +1013,7 @@ static SCM list_copy(SCM l, int deep) {
   */
 
     /* 1. Allocate the list and copy the CARs */
-    SCM ptr, ptr_res, res = STk_C_make_list(len, STk_false);
+    SCM ptr, ptr_res, res = STk_C_make_list(len, STk_void);
     SCM cycle_start_in_new_list = STk_nil;
     ptr = l;
     ptr_res = res;
@@ -1016,10 +1021,8 @@ static SCM list_copy(SCM l, int deep) {
     if (cycle && l == cycle_start) len--;
 
     /* 2. Copy. */
-
     for (int ctr = 0; ctr < len-1; ctr++) {
-        if (deep)  CAR(ptr_res) = list_copy(CAR(ptr),1);
-        else       CAR(ptr_res) = CAR(ptr);
+      CAR(ptr_res) = (deep) ? list_copy(CAR(ptr), 1) : CAR(ptr);
       /* Mark where the cycle start is in the copy: */
       if (cycle && ptr == cycle_start)
         cycle_start_in_new_list = ptr_res;
@@ -1029,9 +1032,7 @@ static SCM list_copy(SCM l, int deep) {
     }
 
     /* 3. Adjust last CDR: */
-
-    if (deep)  CAR(ptr_res) = list_copy(CAR(ptr),1);
-    else       CAR(ptr_res) = CAR(ptr);
+    CAR(ptr_res) = (deep) ? list_copy(CAR(ptr), 1) : CAR(ptr);
 
     if (!cycle && (CDR(ptr) == STk_nil || /* No cycle */
                    !CONSP(CDR(ptr))))     /* Improper list */
@@ -1049,11 +1050,15 @@ static SCM list_copy(SCM l, int deep) {
     return res;
 }
 
-DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l)) {
+
+DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l))
+{
   return list_copy(l,0);
 }
 
-DEFINE_PRIMITIVE("list-deep-copy", list_deep_copy, subr1, (SCM l)) {
+
+DEFINE_PRIMITIVE("list-deep-copy", list_deep_copy, subr1, (SCM l))
+{
   return list_copy(l,1);
 }
 
@@ -1161,7 +1166,6 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
 {
   register SCM ptr, l;
   SCM result;
-
   int len;
   SCM x = list_type_and_length(list, &len);
 
@@ -1196,6 +1200,7 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
   SCM previous, l;
   int len;
   SCM x = list_type_and_length(list, &len);
+
   if (!x) error_bad_list(list);
   if (CONSP(x)) error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);
@@ -1402,8 +1407,6 @@ DEFINE_PRIMITIVE("%epair-position", epair_position, subr1, (SCM obj))
   return STk_void; /* never reached */
 }
 
-
-
 int STk_init_list(void)
 {
   ADD_PRIMITIVE(pairp);
@@ -1429,7 +1432,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(assq);
   ADD_PRIMITIVE(assv);
   ADD_PRIMITIVE(assoc);
-  ADD_PRIMITIVE(circ);
+  ADD_PRIMITIVE(circular_listp);
   ADD_PRIMITIVE(list_copy);
   ADD_PRIMITIVE(list_deep_copy);
 

@@ -303,22 +303,20 @@ doc>
 DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
 {
   int len;
+  SCM z = STk_nil;
 
   if (!VECTORP(v)) error_bad_vector(v);
-
   len = VECTOR_SIZE(v);
-  if (!len)
-    return STk_nil;
-  else {
-    // Allocate the list all at once to avoid calling the allocator repeated times.
-    SCM z = STk_C_make_list(len, STk_false);
+  if (len) {
     int i = 0;
 
+    // Allocate the list all at once to avoid calling the allocator repeated times.
+    z = STk_C_make_list(len, STk_void);
     for (SCM ptr = z; CONSP(ptr); ptr = CDR(ptr)) {
       CAR(ptr) = VECTOR_DATA(v)[i++];
     }
-    return z;
   }
+  return z;
 }
 
 DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))

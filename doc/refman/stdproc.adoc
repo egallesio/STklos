@@ -144,6 +144,7 @@ quoted in programs.
 {{insertdoc 'pair-mutable?}}
 {{insertdoc 'list?}}
 {{insertdoc 'improper-list?}}
+{{insertdoc 'circular-list?}}
 {{insertdoc 'make-list}}
 {{insertdoc 'list}}
 {{insertdoc 'list*}}
