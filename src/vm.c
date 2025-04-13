@@ -474,10 +474,21 @@ void STk_print_vm_registers(char *msg, STk_instr *code)
  */
 static inline SCM listify_top(int n, vm_thread_t *vm)
 {
-  SCM *p, res = STk_nil;
+  /* Using STk_C_make_list here makes this faster when the list of
+     variable arguments is long, and has no impact when it's
+     short. */
+  SCM *p, res = STk_C_make_list(n, STk_nil);
+  SCM ptr = res;
 
-  for (p = vm->sp, vm->sp+=n; p < vm->sp; p++)
-    res = STk_cons(*p, res);
+  /* Popping means we *increase* vm->sp by n.
+     We start with the pointer p on vm->sp+n-1, and go down until
+     it reaches vm->sp.
+   */
+  for (p = vm->sp+n-1 ;  p >= vm->sp ;  p--, ptr = CDR(ptr) )
+    CAR(ptr) = *p;
+
+  vm->sp+=n;
+
   return res;
 }
 
