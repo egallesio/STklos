@@ -588,10 +588,12 @@ DEFINE_PRIMITIVE("%uvector->list", uvector_list, subr12, (SCM v, SCM type))
   len = UVECTOR_SIZE(v);
   if (!len) return STk_nil;
 
-  /* len > 0. Build the fist cell and iterate */
-  tmp = z = STk_cons(uvector_ref(v, 0), STk_nil);
-  for (i=1; i<len; i++) {
-    tmp = CDR(tmp) = STk_cons(uvector_ref(v, i), STk_nil);
+  z = STk_C_make_list(len, STk_false);
+  tmp = z;
+
+  for (i=0; i<len; i++) {
+    CAR(tmp) = uvector_ref(v, i);
+    tmp = CDR(tmp);
   }
   return z;
 }
