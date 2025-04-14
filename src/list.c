@@ -1104,20 +1104,27 @@ DEFINE_PRIMITIVE("pair-mutable?", pair_mutable, subr1, (SCM obj))
  *    (list* 1 2 3)        => (1 2 . 3)
  *    (list* 1 2 3 '(4 5)) => (1 2 3 4 5)
  *    (list*)              => ()
+ *    (list* 1)            => 1
  * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("list*", list_star, vsubr, (int argc, SCM *argv))
 {
-  register SCM *tmp, l;
-
   if (argc == 0) return STk_nil;
+  if (argc == 1) return *argv;
 
-  tmp = argv-argc+1;
-  l   = *tmp;
+  SCM l = STk_C_make_list(argc-1, STk_false);
+  register SCM ptr = l;
+  register int i;
 
-  for (++tmp; tmp <= argv; tmp++)
-    l = STk_cons(*tmp, l);
+  for(i = 0; i < argc-2; i++) {
+    CAR(ptr) = *argv;
+    ptr = CDR(ptr);
+    argv--;
+  }
+  CAR(ptr) = *argv;
+  argv--;
+  CDR(ptr) = *argv;
 
   return l;
 }
