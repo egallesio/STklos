@@ -535,10 +535,14 @@ DEFINE_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv))
 doc>
  */
 {
-  register SCM *tmp, l = STk_nil;
+  register SCM *tmp;
+  SCM l = STk_C_make_list(argc, STk_false);
+  register SCM p = l;
 
-  for (tmp = argv-argc+1; tmp <= argv; tmp++)
-    l = STk_cons(*tmp, l);
+  for (tmp = argv; tmp > (argv-argc) ; tmp--) {
+    CAR(p) = *tmp;
+    p = CDR(p);
+  }
 
   return l;
 }
