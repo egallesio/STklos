@@ -602,29 +602,30 @@ doc>
  */
 SCM STk_append2(SCM l1, SCM l2)
 {
-  register SCM prev, tmp, l;
-  SCM res;
+  int n;
+  SCM type = list_type_and_length(l1, &n);
+  if (type == STk_nil) { /* proper list */
 
-  if (NULLP(l1)) return l2;
-  if (!CONSP(l1)) goto Error;
+    if (NULLP(l1)) return l2;
 
-  prev = res = STk_nil;
-  for (l = l1; ; l = CDR(l)) {
-    if (NULLP(l)) break;
-    if (!CONSP(l)) goto Error;
-    tmp = STk_cons(CAR(l), STk_nil);
-
-    if (res == STk_nil) {
-      prev = res = tmp;
-    } else {
-      CDR(prev) = tmp;
-      prev = tmp;
+    SCM res = STk_C_make_list(n, STk_false);
+    register SCM ptr = res;
+    register int i;
+    while(CONSP(CDR(ptr))) {
+      CAR(ptr) = CAR(l1);
+      ptr = CDR(ptr);
+      l1  = CDR(l1);
     }
+
+    CAR(ptr) = CAR(l1);
+    CDR(ptr) = l2;
+
+    return res;
   }
-  CDR(prev) = l2;
-  return res;
-Error:
-  error_bad_list(l1);
+  if (type == NULL) error_bad_list(l1);
+  if (CONSP(type))  error_circular_list(l1);
+  error_improper_list(l1);
+
   return STk_void; /* never reached */
 }
 
