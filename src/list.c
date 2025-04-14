@@ -290,10 +290,11 @@ static SCM list_type_and_length(SCM l, int *len)
 
 SCM STk_argv2list(int argc, SCM *argv)
 {
-  SCM res = STk_nil;
-
-  while (argc--) {
-    res = STk_cons(argv[-argc], res);
+  SCM res = STk_C_make_list(argc,STk_false);
+  SCM ptr = res;
+  for(int i=0; i<argc; i++) {
+    CAR(ptr) = argv[i];
+    ptr = CDR(ptr);
   }
   return res;
 }
