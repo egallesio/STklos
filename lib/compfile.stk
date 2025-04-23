@@ -1,7 +1,7 @@
 ;;;;
 ;;;; compfile.stk       -- STklos File Compiler
 ;;;;
-;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,11 @@
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
 ;;;;
 
+(export register-read-directive!)
 
-; modules seen in a file (used by compile-file)
+;;
+;;; modules seen in a file (used by compile-file)
+;;;
 (define *file-module-list* '())
 
 (define (file-module-list-reset!)
@@ -56,6 +59,21 @@
                                         res)
                                   res))))))
               *file-module-list*)))
+
+;;
+;;; add-read-directive definitions seen in a file (used by compile-file)
+;;;
+(define *read-directive-list* '())
+
+(define (read-directive-list-reset!)
+  (set! *read-directive-list* '()))
+
+(define (register-read-directive! dir code)
+  (set! *read-directive-list* (cons (cons dir code)
+                                    *read-directive-list*)))
+
+(define (read-directive-list) *read-directive-list*)
+
 
 #|
 <doc EXT compile-file
@@ -98,18 +116,20 @@ doc>
       ;; Return information
       (list :version   (version)
             :globals   globs
-            :macros    (file-module-list-expanders))))
+            :macros    (file-module-list-expanders)
+            :read-dir  (read-directive-list))))
 
   (define (do-compile out)
     (let ((globs    (compiler-known-globals))
           (tm       (clock))
           (copts    (compiler:warn-use-undefined-postpone)))
 
-      ;; Clear the list containing  macros sources
+      ;; Clear the list containing  macros sources and read directives sources
       (file-module-list-reset!)
+      (read-directive-list-reset!)
 
       ;; Defer warning til the end of the compilation of file
-                                        ;(compiler:warn-use-undefined-postpone #t)
+      ;;(compiler:warn-use-undefined-postpone #t)
 
       (fluid-let ((*code-instr* '())
                   (*code-constants* '())

@@ -153,8 +153,11 @@ extern "C"
 // struct GC_prof_stats_s;
 // GC_API size_t GC_CALL GC_get_prof_stats(struct GC_prof_stats_s *,
 //                                         size_t /* stats_sz */);
+// For allocating list (fast)
+// GC_API GC_ATTR_MALLOC void * GC_CALL GC_malloc_many(size_t lb);
 
-  /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
+
+/* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
 #define STk_must_malloc(size)                                           \
   ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
@@ -169,6 +172,8 @@ extern "C"
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 #define STk_gc_base(ptr)                GC_base(ptr)
+#define STk_must_malloc_many(size)      GC_malloc_many(size)
+
 
 void STk_gc_init(void);
 
@@ -706,6 +711,7 @@ SCM STk_append2(SCM l1, SCM l2);
 SCM STk_dappend2(SCM l1, SCM l2);       /* destructive append */
 SCM STk_dremq(SCM obj, SCM list);       /* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
+SCM STk_C_make_list(int n, SCM init);  /* GC friendly list allocation */
 
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
@@ -1208,6 +1214,7 @@ char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
+void STk_del_uvector_reader_tag(const char *tag); // to invalidate them
 void STk_set_port_case_sensitivity(SCM port, int sensitive);
 
 
@@ -1278,7 +1285,7 @@ struct string_obj {
 #define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
 SCM STk_makestring(int len, const char *init);
-SCM STk_Cstring2string(const char *str);           /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(const char *str);      /* Embed a C string in Scheme world  */
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));

@@ -467,14 +467,15 @@
           (not (null? x))))
     (not (null? x)))))
 
-(define (circular-list? x)
-  (let lp ((x x) (lag x))
-    (and (pair? x)
-     (let ((x (cdr x)))
-       (and (pair? x)
-        (let ((x   (cdr x))
-              (lag (cdr lag)))
-          (or (eq? x lag) (lp x lag))))))))
+;; In STklos core
+;; (define (circular-list? x)
+;;   (let lp ((x x) (lag x))
+;;     (and (pair? x)
+;;      (let ((x (cdr x)))
+;;        (and (pair? x)
+;;         (let ((x   (cdr x))
+;;               (lag (cdr lag)))
+;;           (or (eq? x lag) (lp x lag))))))))
 
 (define (not-pair? x) (not (pair? x)))  ; Inline me.
 
@@ -693,11 +694,12 @@
 
 (define (last lis) (car (last-pair lis)))
 
-(define (last-pair lis)
-  (check-arg pair? lis last-pair)
-  (let lp ((lis lis))
-    (let ((tail (cdr lis)))
-      (if (pair? tail) (lp tail) lis))))
+;; Already in STklos core
+;; (define (last-pair lis)
+;;   (check-arg pair? lis last-pair)
+;;   (let lp ((lis lis))
+;;     (let ((tail (cdr lis)))
+;;       (if (pair? tail) (lp tail) lis))))
 
 
 ;;; Unzippers -- 1 through 5
@@ -1772,6 +1774,10 @@ FILTER an FILTER! are primitives in STklos
 
 (redefine fold)
 (redefine reduce)
+
+;; Not R7RS, but also moved to STklos core:
+(redefine last-pair)
+(redefine circular-list?)
 
 )  ; END OF MODULE
 

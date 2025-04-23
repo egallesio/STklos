@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -423,7 +423,7 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
     case 0:                                                   /* CHILD */
       if (thunk) {
         STk_C_apply(thunk, 0);
-        STk_exit(0);
+        STk_exit(MAKE_INT(EXIT_SUCCESS));
       }
       return STk_false;
     default:                                                  /* PARENT */

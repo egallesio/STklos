@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-misc.stk         -- Some tests which don't feat anywhere else
 ;;;;
-;;;; Copyright © 2020-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2020-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -779,6 +779,74 @@ b|)
 
 (test/error "eval-from-string (no ci)"
             (eval-from-string "(DisPlaY 3.14)"))
+
+;;------------------------------------------------------------------
+(test-subsection "read brace and brackets")
+
+(let ((brace    (read-brace-handler))
+      (bracket  (read-bracket-handler)))
+
+  (define (read-upstring closing port)
+    (read-char port)                  ;; skip open brace
+    (let Loop ((c    (peek-char port))
+               (res '()))
+      (cond
+       ((eof-object? c)               ;; EOF
+        (error 'read-upstring "EOF encountered"))
+
+       ((char=? c closing)                ;; End of list
+        (read-char port)
+        (list->string (reverse! res)))
+
+       (else                         ;; Other char
+        (let ((ch (if (char=? c #\\) ;; See if char is quoted
+                      (begin (read-char port) (peek-char port)) ;; as is
+                      (char-upcase c))))                        ;; in upper-case
+          (read-char port)
+          (Loop (peek-char port)  (cons ch res)))))))
+
+  ;; brackets
+  (read-bracket-handler #f)
+  (test "bracket-1" '|[]| (read-from-string "[]"))
+  (test "bracket-2" '|[a| (read-from-string "[a b c]"))
+
+  (read-bracket-handler #t)
+  (test "bracket-3" '() (read-from-string "[]"))
+  (test "bracket-4" '(a b c) (read-from-string "[a b c]"))
+  (test "bracket-5" '(a (b c) d) (read-from-string "[a (b #;no c) d #;e]"))
+
+  (read-bracket-handler (lambda(p) (read-upstring #\] p)))
+  (test "bracket-6" "" (read-from-string "[]"))
+  (test "bracket-7" "ABCDE" (read-from-string "[abcde]"))
+  (test "bracket-8" "ABcDE" (read-from-string "[ab\\cde]"))
+  (test "bracket-9" "AB{XYZ}CD" (read-from-string "[ab\\{xyz\\}cd]"))
+  (read-bracket-handler bracket)
+
+  ;; braces
+  (read-brace-handler #f)
+  (test "brace-1" '|{}| (read-from-string "{}"))
+  (test "brace-2" '|{a| (read-from-string "{a b c}"))
+
+  (read-brace-handler #t)
+  (test "brace-3" '() (read-from-string "{}"))
+  (test "brace-4" '(a b c) (read-from-string "{a b c}"))
+  (test "brace-5" '(a (b c) d) (read-from-string "{a (b #;no c) d #;e}"))
+
+  (read-brace-handler (lambda(p) (read-upstring #\} p)))
+  (test "brace-6" "" (read-from-string "{}"))
+  (test "brace-7" "ABCDE" (read-from-string "{abcde}"))
+  (test "brace-8" "ABcDE" (read-from-string "{ab\\cde}"))
+  (test "brace-9" "AB{XYZ}CD" (read-from-string "{ab\\{xyz\\}cd}"))
+  (read-brace-handler brace))
+
+
+
+
+
+
+
+
+
 
 
 ;;------------------------------------------------------------------
