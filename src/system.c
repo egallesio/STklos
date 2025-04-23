@@ -2,7 +2,7 @@
  *
  * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1267,62 +1267,88 @@ DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
 /*
 <doc EXT exit
  * (exit)
- * (exit ret-code)
+ * (exit obj)
  *
- * Exits the program with the specified integer return code. If |ret-code|
- * is omitted, the program terminates with a return code of 0.
- * If  program has registered exit functions with |register-exit-function!|,
- * they are called (in an order which is the reverse of their call order).
- * @l
- * NOTE: The {{stklos}} |exit| primitive accepts also an
- * integer value as parameter (R7RS accepts only a boolean).
+ * Runs all outstanding dynamic-wind after procedures, terminates
+ * the running program, and communicates an exit value to the
+ * operating system. If no argument is supplied,
+ * or if |obj| is |#t|, the exit procedure communicates
+ * to the operating system that the program exited normally.
+ * If obj is |#f|, the |exit| procedure communicates to
+ * the operating system that the program exited abnormally.
+ *
+ * If |obj| is an integer, it will be returned to the operating system.
+ * Otherwise the value returned by |exit| indicates that the program
+ * exited abnormally.
+ *
+ * NOTE: The parameters which eventualy follow
+ * @lisp
+ * (register-exit-function! (lambda(x) (display "FINAL")))
+ *
+ * (dynamic-wind
+ *   (lambda () (display 1))
+ *   (lambda () (display 2) (exit) (display 3))
+ *   (lambda () (display 4)))                   |- 124FINAL (and exit)
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
 {
-  long ret = 0;
+  long ret = EXIT_SUCCESS;
   SCM cond;
 
   if (retcode) {
     if (BOOLEANP(retcode)) {
-      ret = (retcode != STk_true);
+      ret = (retcode == STk_true) ? EXIT_SUCCESS: EXIT_FAILURE;
     } else {
       ret = STk_integer_value(retcode);
-      if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
+      if (ret == LONG_MIN)
+        ret = 1;
     }
   }
 
-  /* Raise an &exit-r7rs condition  with the numeric value of the exit code*/
+  /* Raise an &exit-r7rs condition with the numeric value of the exit code*/
   cond = STk_make_C_cond(STk_exit_condition, 1, MAKE_INT(ret));
   STk_raise(cond);
 
   return STk_void; /* never reached */
 }
 
+
 /*
 <doc EXT emergency-exit
  * (emergency-exit)
- * (emergency-exit ret-code)
+ * (emergency-exit obj)
  *
  * Terminates the program without running any outstanding
  * dynamic-wind _after_ procedures and communicates an exit
  * value to the operating system in the same manner as |exit|.
- * @l
- * NOTE: The {{stklos}} |emergency-exit| primitive accepts also an
- * integer value as parameter (R7RS accepts only a boolean).
+ *
+ * The registered procedures with |register-exit-function!|, if any,
+ * are not executed.
+ *
+ * @lisp
+ * (register-exit-function! (lambda(x) (display "FINAL")))
+ *
+ * (dynamic-wind
+ *   (lambda () (display 1))
+ *   (lambda () (display 2) (exit) (display 3))
+ *   (lambda () (display 4)))                   |- 12 (and exit)
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
 {
-  long ret = 0;
+  long ret = EXIT_SUCCESS;
 
   if (retcode) {
     if (BOOLEANP(retcode)) {
-      ret = (retcode != STk_true);
+      ret = (retcode == STk_true)? EXIT_SUCCESS: EXIT_FAILURE;
     } else {
       ret = STk_integer_value(retcode);
-      if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
-    }
+      if (ret == LONG_MIN)
+        ret = 1;
+}
   }
   _exit(ret);
 

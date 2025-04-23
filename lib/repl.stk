@@ -332,7 +332,7 @@ doc>
 (define (repl-handler c port)
   (if (condition? c)
       (cond
-        ((condition-has-type? c &error-message)         ;; &error-message
+       ((condition-has-type? c &error-message)         ;; &error-message
            (let ((who (condition-ref c 'location))
                  (msg (condition-ref c 'message))
                  (bt  (condition-ref c 'backtrace)))
@@ -439,6 +439,21 @@ doc>
   (key-get *%system-state-plist* #:fold-case #f))
 
 ;; ----------------------------------------------------------------------
+;;      skip-until-end-of-line ...
+;; ----------------------------------------------------------------------
+(define (skip-until-end-of-line port)
+  ;; Advance on input to avoid cascading errors
+  ;; Example: #x8(1 2 3)
+  ;;    - without skipping characters would signal to errors (bad tag and
+  ;;      a bad function call
+  ;;    - with skip, only the bad tag will be signaled, and (1 2 3) will be skipped
+  ;; Of course, this is only done  for the REPL.
+  (let Loop ((ch (peek-char port)))
+    (unless (or (eof-object? ch) (char=? ch #\newline))
+      (read-char port)
+      (Loop (peek-char port)))))
+
+;; ----------------------------------------------------------------------
 ;;      repl ...
 ;; ----------------------------------------------------------------------
 
@@ -459,7 +474,9 @@ doc>
   (let ((eof #f))
     (set! repl-level (+ repl-level 1))
     (let Loop ()
-      (with-handler (lambda (c) (repl-handler c err))
+      (with-handler (lambda (c)
+                      (skip-until-end-of-line in)  ;; to avoid cascade errors
+                      (repl-handler c err))        ;; ro signal the error
          ;; display prompt
          (when interactive?
            ( (repl-make-prompt) (current-module) )

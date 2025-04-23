@@ -403,12 +403,14 @@
 
 
 (define (TAGvector->list v :optional (start 0) (end (TAGvector-length v)))
-  (let ((v (TAGvector-copy v start end)))
-    (let loop ((i (fx- (TAGvector-length v) 1))
-               (lst '()))
-      (if (fx< i 0)
-          lst
-          (loop (fx- i 1) (cons (TAGvector-ref v i) lst))))))
+  (let* ((len (fx- end start))
+         (L (make-list len))
+         (ptr L))
+    (repeat len
+      (set-car! ptr (TAGvector-ref v start))
+      (set! ptr (cdr ptr))
+      (set! start (fx+ 1 start)))
+    L))
 
 
 (define (reverse-list->TAGvector lst)

@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@
         call-with-input-string call-with-output-string
         read-case-sensitive
         open-input-virtual open-output-virtual
+        define-read-directive
         read-from-string read-from-string-ci
         eval-from-string eval-from-string-ci
         command-line program-name
@@ -388,6 +389,50 @@ doc>
     (proc port)
     (close-port port)
     (get-output-string port)))
+
+
+;;;;
+;;;; Read directives
+;;;;
+#|
+<doc EXT define-read-directive
+ * (define-read-directive name expr1 expr2 ...)
+ *
+ * The form |define-read-directive| adds a reading directive that will be recognized
+ * by the reader. The new reading directive will start with a sharp character
+ * ('#') followed by the characters of |name|. When the reader recognizes the read
+ * directive, it executes the sequence of expressions |expr1| |expr2| ...
+ *
+ * NOTE: When the expressions |expr1| |expr2| ..., the thunk functions
+ * |current-port| and  |current-directive| are defined in their
+ * dynamic environment. They can  respectively be used to access the port
+ * where the directive was read and it's name as a string.
+ *
+ * @lisp
+ * (define-read-directive !underscore-numbers    (accept-srfi-169-numbers #t))
+ * (define-read-directive !no-underscore-numbers (accept-srfi-169-numbers #f))
+ *
+ * (list #!underscore-numbers    (symbol? '1_000) (integer? '1_000)
+ *       #!no-underscore-numbers (symbol? '1_000) (integer? '1_000))
+ *                         => (#f #t #t #f)
+ * @end lisp
+doc>
+|#
+(define-macro (define-read-directive name . body)
+  (let* ((port (gensym '_rd))
+         (str  (gensym '_rd))
+         (code `(lambda (,port ,str)
+                  (let ((current-port (lambda() ,port))
+                        (current-directive (lambda() (format "#~a" ,str))))
+                    ,@body))))
+    `(begin
+       ;; Define the code associated to directive both in produced code
+       ;; and in the compiler
+       (when-load-and-compile (%add-read-directive ',name ,code))
+
+       ;; Add the directive code to the .ostk meta-data
+       (when-compile
+        (register-read-directive! ',name ,code)))))
 
 ;;;
 ;;; Port functions
@@ -983,7 +1028,7 @@ doc>
       `(let ((,counting? (%count-allocations))  ;; save if we are counting allocs
              (,gc-no     (begin (gc) (key-get (%gc-stats) #:gc-no 0)))) ;; and GC count
          (%thread-allocation-reset!)            ;; reset thread counters
-         (%count-allocations #t)                 ;; count allocations now
+         (%count-allocations #t)                ;; count allocations now
          (let* ((,time-start (exact-clock))
                 (,res        (begin ,@args))
                 (,allocs     (%thread-allocation-counter))
@@ -1336,7 +1381,7 @@ doc>
  * (inc! place)
  * (inc! place val)
  * (dec! place)
- * (dec place val)
+ * (dec! place val)
  *
  * These forms increment or decrement the value contained in |place| by |val|.
  * If ommitted, |val| defaults to 1. The result of both forms is undefined.
@@ -2272,6 +2317,22 @@ doc>
 ;;;;
 ;;;; ======================================================================
 
+;;;; 
+;;;; SRFI 4: Uniform vectors
+;;;; ----------------------------------------------------------------------
+;; The following code is more or less
+;;     (define-read-directive !uvector-syntax    (accept-uvector-syntax #t))
+;;     (define-read-directive !no-uvector-syntax (accept-uvector-syntax #f))
+;; but for some reason the full expansion of define-read-directive
+;; doesn't work at boot time.
+(%add-read-directive '!uvector-syntax
+                     (lambda (port directive) (accept-uvector-syntax #t)))
+(%add-read-directive '!no-uvector-syntax
+                     (lambda (port directive) (accept-uvector-syntax #f)))
+
+
+
+
 ;;;
 ;;; SRFI-8
 ;;;
@@ -2722,6 +2783,15 @@ doc>
       ;; ... and ignored otherwise
       #void))
 
+
+;; ----------------------------------------------------------------------
+;; SRFI 169: Underscores in numbers
+;; ----------------------------------------------------------------------
+;; See comment for SRFI-4
+(%add-read-directive '!underscore-numbers
+                     (lambda (port directive) (accept-srfi-169-numbers #t)))
+(%add-read-directive '!no-underscore-numbers
+                     (lambda (port directive) (accept-srfi-169-numbers #f)))
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI-176: "Version flag"

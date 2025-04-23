@@ -123,5 +123,6 @@ EXTERN_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
 SCM STk_make_C_hash_table(void);
 void* STk_C_hash_get(struct hash_table_obj *ht, const char *key);
 void STk_C_hash_set(struct hash_table_obj *ht, const char *key, void *val);
+void STk_C_hash_delete(struct hash_table_obj *ht, const char *key);
 
 int STk_init_hash(void);

@@ -51,7 +51,9 @@ static SCM read_srfi10(SCM port, SCM l);
 static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
-static SCM sym_read_brace, sym_read_bracket, read_error;
+static SCM read_error;
+static SCM read_brace_handler   = STk_false; // Value of param. read-brace-handler
+static SCM read_bracket_handler = STk_true;  // Value of param. read-bracket-handler
 
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
@@ -96,7 +98,7 @@ static char colon_pos = COLON_BOTH;
  */
 static SCM sharp_table, sharp_char_table = STk_nil;
 
-typedef SCM (*sharp_func) (SCM, struct read_context*, const char*);
+typedef SCM (*sharp_func) (SCM, struct read_context*, const char*, SCM data);
 
 /*===========================================================================*\
  *
@@ -125,7 +127,7 @@ static void error_token_too_large(SCM port, char *tok)
 
 static void error_bad_sharp_syntax(SCM port, char *tok)
 {
-  signal_error(port, "bad sharp syntax in ~S", STk_Cstring2string(tok));
+  signal_error(port, "bad sharp syntax in ~s", STk_Cstring2string(tok));
 }
 
 static void error_key_not_defined(SCM port, SCM key)
@@ -167,10 +169,16 @@ static void error_eof_in_string(SCM port)
   signal_error(port, "end of file while reading a string on ~S", port);
 }
 
-
-static void warning_parenthesis(SCM port)
+/* If expected is zero, then it's a stray closing delimitar. If it's different
+   from zero, it is the closing delimiter that was expected. */
+static void warning_parenthesis(SCM port, char bad_closepar, char expected)
 {
-  STk_warning("bad closing parenthesis on line %d of ~S", PORT_LINE(port), port);
+  char buffer[40] = "";
+  if (expected)
+    snprintf(buffer, sizeof(buffer), " (char. `%c` expected)", expected);
+
+  STk_warning("bad closing parenthesis `%c`%s on line %d of ~S",
+              bad_closepar, buffer, PORT_LINE(port), port);
 }
 
 static void warning_bad_escaped_sequence(SCM port, int c)
@@ -270,7 +278,7 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
 
     if (cur == close_par_cst) {
       c = STk_getc(port);
-      if (c != delim) warning_parenthesis(port);
+      if (c != delim) warning_parenthesis(port, c, delim);
       return start;
     }
 
@@ -399,7 +407,9 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
     next = STk_getc(port);
     if (next == EOF) break;
     if (!allchars) {
-      if (strchr("()[]{}'`,;\"\n\r \t\f", next)) {
+      if (strchr("()'`,;\"\n\r \t\f", next)                                    ||
+          (read_brace_handler   != STk_false && (next == '{' || next == '}'))  ||
+          (read_bracket_handler != STk_false && (next == '[' || next == ']')))    {
         STk_ungetc(next, port);
         break;
       }
@@ -437,11 +447,15 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
       if (tok[1] == ':')
         return STk_makekey(tok+2);
       else {
-        sharp_func fct = STk_C_hash_get(sharp_table, tok+1);
+        SCM tmp = STk_C_hash_get(sharp_table, tok+1);
 
-        if (fct) // tok is a known keyword
-          return fct(port, ctx, tok+1);
+        if (tmp) {
+          // tok is a known keyword
+          // tmp is a cons:  (<a C function> . <data argument of this function>)
+          sharp_func fct = (sharp_func) CAR(tmp);
 
+          return fct(port, ctx, tok+1, CDR(tmp));
+        }
         if (tok[1] == '!') {
           // We had #!... where ... is not recognized => comment
           do {
@@ -467,7 +481,10 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
     else {
       // FIXME: we could have a `STk_intern_no_dup` to avoid the duplication of tok
       // when tok != w.buffer. Is it really worthwhile?
-      return STk_intern(tok);
+      SCM tmp =  STk_intern(tok);
+
+      if (seen_pipe) BOXED_INFO(tmp) |= SYMBOL_NEEDS_BARS;
+      return tmp;
     }
   }
   return STk_void;   // for the compiler
@@ -530,26 +547,20 @@ static SCM read_address(SCM port)
 
 static SCM read_here_string(SCM port)
 {
-  SCM res, line;
-  struct read_context ctx = {.case_significant =TRUE};
-  SCM eof_token           = read_token(port, STk_getc(port), &ctx);
+  SCM res, line, eof_token;
   int first_line = TRUE;
 
-  if (!SYMBOLP(eof_token)) STk_error("bad symbol for here string ~S", eof_token);
+  // read the EOF token
+  eof_token = STk_read_line(port);
 
-  /* skip the end of line */
-  line = STk_read_line(port);
-  if (!STRINGP(line) || (STRING_SIZE(line) != 0))
-    STk_error("end of line expected after the ~S delimiter", eof_token);
-
-
+  // read the string itself
   res = STk_open_output_string();
   while (1) {
     line = STk_read_line(port);
     if (line == STk_eof)
       STk_error("eof seen while reading an here-string");
     else
-      if (strcmp(STRING_CHARS(line), SYMBOL_PNAME(eof_token)) == 0)
+      if (strcmp(STRING_CHARS(line), STRING_CHARS(eof_token)) == 0)
         break;
     /* Append the read string to the result */
     if (first_line)
@@ -964,9 +975,10 @@ static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
       char c2 = STk_getc(port);
       if (c2 == '<' )
         return read_here_string(port);
-      else  {
+      else {
         STk_ungetc(c2, port);
-        goto default_sharp;
+        error_bad_sharp_syntax(port, "#<");
+        return STk_void;                    // for the compiler
       }
     }
 
@@ -998,7 +1010,6 @@ static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
     case '9': return read_cycle(port, c, ctx);
 
     default:
-    default_sharp:
       {
         SCM reader = STk_int_assq(MAKE_CHARACTER(c), sharp_char_table);
 
@@ -1030,35 +1041,43 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         return(read_list(port, ')', ctx));
 
       case '[': {
-        SCM ref, read_bracket_func = SYMBOL_VALUE(sym_read_bracket, ref);
-
-        if (read_bracket_func != STk_void) {
-          STk_ungetc(c, port);
-          return STk_C_apply(read_bracket_func, 1, port);
+        if (read_bracket_handler == STk_true) {   // '[' starts a list
+          return read_list(port, ']', ctx);
         }
-        return(read_list(port, ']', ctx));
+        if (read_bracket_handler == STk_false) {   // '[' is a normal character
+          goto default_case;
+        }
+        STk_ungetc(c, port);                     // '[' needs to call the user handler
+        return STk_C_apply(read_bracket_handler, 1, port);
       }
 
       case '{': {
-        SCM ref, read_brace_func = SYMBOL_VALUE(sym_read_brace, ref);
-
-        if (read_brace_func != STk_void) {
-          STk_ungetc(c, port);
-          return STk_C_apply(read_brace_func, 1, port);
+        if (read_brace_handler == STk_true) {   // '{' starts a list
+          return read_list(port, '}', ctx);
         }
-        goto default_case;                   //FIXME
-        //return read_list(port, '}', ctx);
+        if (read_brace_handler == STk_false) {  // '{' is a normal character
+          goto default_case;
+        }
+        STk_ungetc(c, port);                  // '{' needs to call the user handler
+        return STk_C_apply(read_brace_handler, 1, port);
       }
 
-      case ')':
-      case ']':
       case '}':
+      case ']':
+        if ((c == '}' && read_brace_handler   == STk_false)  ||
+            (c == ']' && read_bracket_handler == STk_false))
+          // '}' (or ']') isn't a closing delimiter
+          goto default_case;
+        /* fallthrough */
+
+      case ')':
         if (inlist) {
           STk_ungetc(c, port);
           return close_par_cst;
         }
-        warning_parenthesis(port);
+        warning_parenthesis(port,c,0);
         break;
+
       case '\'':
         quote_type = sym_quote;
         goto read_quoted;
@@ -1285,6 +1304,80 @@ int STk_keyword_colon_convention(void)
   return colon_pos;
 }
 
+/*
+<doc EXT read-bracket-handler read-brace-handler
+ * (read-bracket-handler)
+ * (read-bracket-handler v)
+ * (read-brace-handler)
+ * (read-brace-handler v)
+ *
+ * These parameter objects permit to change the way an open curly brace ('{')
+ * or an open square bracket ('[') is read depending of the value of |v|:
+ *
+ *  - if |v| is `#f`, the character is a normal character without special
+ *    behaviour
+ *  - if |v| is `#t`, the character delimits the beginning of a list ended by
+ *    the corresponding closing bracket (or brace).
+ *  - if |v| is not a boolean, it must be a procedure which takes a parameter
+ *    (a port). This procedure will be called by |read|, and the value it returns
+ *    will be the value returned by |read|. Note that the opening characer is
+ *    still present in the port when the procedure starts.
+ *
+ * By default,
+ *
+ *    - |read-bracket-handler| is `#t`, and
+ *    - |read-brace-handler| is `#f`.
+ *
+ * *Example:*
+ * @lisp
+ * ;; Read a string delimited by curly braces (use '\\' to quote a character
+ * (define (read-upstring port)
+ *   (read-char port)                  ;; skip open brace
+ *   (let Loop ((c    (peek-char port))
+ *              (res '()))
+ *     (cond
+ *      ((eof-object? c)               ;; EOF
+ *       (error 'read-upstring "EOF encountered"))
+ *
+ *      ((char=? c #\\})                ;; End of list
+ *       (read-char port)
+ *       (list->string (reverse! res)))
+ *
+ *      (else                         ;; Other char
+ *       (let ((ch (if (char=? c #\\\\) ;; See if char is quoted
+ *                     (begin (read-char port) (peek-char port)) ;; as is
+ *                     (char-upcase c))))                        ;; upper-case
+ *         (read-char port)
+ *         (Loop (peek-char port)  (cons ch res)))))))
+ *
+ * (read-brace-handler read-upstring)
+ * {abcde}              => "ABCDE"
+ * {ab\\cde}             => "ABcDE"
+ * {ab\\{xyz\\}cd}        => "AB{XYZ}CD"
+ *
+ * (read-brace-handler #t)
+ * '{1 2 {3 4} 5 6}     =>  (1 2 (3 4) 5 6)
+ * @end lisp
+doc>
+*/
+static SCM read_brace_handler_conv(SCM proc)
+{
+  if (!BOOLEANP(proc) && STk_procedurep(proc) == STk_false)
+    STk_error_with_location(STk_intern("read-brace-handler"),
+                            "bad procedure ~S", proc);
+  read_brace_handler = proc;
+  return proc;
+}
+
+static SCM read_bracket_handler_conv(SCM proc)
+{
+  if (!BOOLEANP(proc) && STk_procedurep(proc) == STk_false)
+    STk_error_with_location(STk_intern("read-bracket-handler"),
+                            "bad procedure ~S", proc);
+  read_bracket_handler = proc;
+  return proc;
+}
+
 
 DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
 {
@@ -1309,7 +1402,7 @@ DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
 \* ======================================================================*/
 
 static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
-                                const char *word)
+                                const char *word, SCM _UNUSED(data))
 {
   switch (*word) {
     case 't': return STk_true;    // #t or #true
@@ -1327,28 +1420,54 @@ static SCM sharp_simple_keyword(SCM _UNUSED(port), struct read_context _UNUSED(*
 }
 
 static SCM sharp_fold_keyword(SCM port, struct read_context _UNUSED(*ctx),
-                              const char *word)
+                              const char *word, SCM _UNUSED(data))
 {
   STk_port_cs_set(port, MAKE_BOOLEAN((word[1] == 'n'))); // word = "!no-fold-case"
   return NULL;  // NULL since the keyword is not returned
 }
 
 static SCM sharp_keypos(SCM _UNUSED(port), struct read_context _UNUSED(*ctx),
-                        const char *word)
+                        const char *word, SCM _UNUSED(data))
 {
   const char *val=sizeof("keyword-colon-position-") + word; // none, before, ...
   PORT_KW_COL_POS(port) = colon_position_value(val);
   return NULL;  // NULL since the keword is not returned
 }
 
-static SCM sharp_uvector(SCM port, struct read_context *ctx, const char *word)
+static SCM sharp_user_directive(SCM port, struct read_context _UNUSED(*ctx),
+                              const char *word, SCM data)
+{
+  STk_C_apply(data, 2, port, STk_Cstring2string(word));
+  /* Result of function call is lost since all read directive are in fact comments */
+  return NULL; /* NULl <=> comment */
+}
+
+static SCM sharp_uvector(SCM port, struct read_context *ctx, const char *word,
+                         SCM _UNUSED(data))
 {
   return read_uniform_vector(port, ctx, word);
 }
 
 void STk_add_uvector_reader_tag(const char *tag)
 {
-  STk_C_hash_set(sharp_table, tag, sharp_uvector);
+  STk_C_hash_set(sharp_table, tag, STk_cons((SCM) sharp_uvector, STk_void));
+}
+
+void STk_del_uvector_reader_tag(const char *tag)
+{
+  STk_C_hash_delete(sharp_table, tag);
+}
+
+
+DEFINE_PRIMITIVE("%add-read-directive", add_read_directive,
+                 subr2, (SCM str, SCM proc))
+{
+  if (!SYMBOLP(str))                     STk_error("bad symbol ~S", str);
+  if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
+
+  STk_C_hash_set(sharp_table, SYMBOL_PNAME(str), STk_cons((SCM) sharp_user_directive,
+                                                          proc));
+  return STk_void;
 }
 
 
@@ -1373,15 +1492,12 @@ DEFINE_PRIMITIVE("%add-sharp-reader", add_sharp_reader, subr2, (SCM ch, SCM proc
  *                      I n i t i a l i z a t i o n
  *
 \*===========================================================================*/
-int STk_init_reader(void)
-{
+int STk_init_reader(void) {
   sym_quote            = STk_intern("quote");
   sym_quasiquote       = STk_intern("quasiquote");
   sym_unquote          = STk_intern("unquote");
   sym_unquote_splicing = STk_intern("unquote-splicing");
   sym_dot              = STk_intern(".");
-  sym_read_bracket     = STk_intern("%read-bracket");
-  sym_read_brace       = STk_intern("%read-brace");
 
   /* read-error condition */
   read_error = STk_defcond_type("&read-error", STk_err_mess_condition,
@@ -1402,32 +1518,53 @@ int STk_init_reader(void)
                         keyword_colon_position_set,
                         STk_STklos_module);
 
+  /* Declare parameter read-brace-handler */
+  STk_make_C_parameter("read-brace-handler",
+                       read_brace_handler,
+                       read_brace_handler_conv,
+                       STk_STklos_module);
+
+  /* Declare parameter read-bracket-handler */
+  STk_make_C_parameter("read-bracket-handler",
+                       read_bracket_handler,
+                       read_bracket_handler_conv,
+                       STk_STklos_module);
+
   /* Initialize the table for objects wich start with a '#' */
   sharp_table = STk_make_C_hash_table();
 
-  STk_C_hash_set(sharp_table, "t",             sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "true",          sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "false",         sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "f",             sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "eof",           sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "void",          sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "!optional",     sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "!key",          sharp_simple_keyword);
-  STk_C_hash_set(sharp_table, "!rest",         sharp_simple_keyword);
+  {
+    SCM tmp         = STk_cons((SCM)sharp_simple_keyword, STk_void);
 
-  STk_C_hash_set(sharp_table, "!fold-case",    sharp_fold_keyword);
-  STk_C_hash_set(sharp_table, "!no-fold-case", sharp_fold_keyword);
-
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-none",   sharp_keypos);
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-before", sharp_keypos);
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  sharp_keypos);
-  STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   sharp_keypos);
-
+    STk_C_hash_set(sharp_table, "t",             tmp);
+    STk_C_hash_set(sharp_table, "true",          tmp);
+    STk_C_hash_set(sharp_table, "false",         tmp);
+    STk_C_hash_set(sharp_table, "f",             tmp);
+    STk_C_hash_set(sharp_table, "eof",           tmp);
+    STk_C_hash_set(sharp_table, "void",          tmp);
+    STk_C_hash_set(sharp_table, "!optional",     tmp);
+    STk_C_hash_set(sharp_table, "!key",          tmp);
+    STk_C_hash_set(sharp_table, "!rest",         tmp);
+  }
+  {
+    SCM tmp = STk_cons((SCM) sharp_fold_keyword, STk_void);
+    STk_C_hash_set(sharp_table, "!fold-case",    tmp);
+    STk_C_hash_set(sharp_table, "!no-fold-case", tmp);
+  }
+  {
+    SCM tmp = STk_cons((SCM) sharp_keypos, STk_void);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-none",   tmp);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-before", tmp);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  tmp);
+    STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   tmp);
+  }
+  
   /* Add reader for #u8 constants */
   STk_add_uvector_reader_tag("u8");
 
-  /* Add a primitive to permit the definition new forms of sharp constants */
+   /* Add primitives to define new forms of sharp directives/constants */
   ADD_PRIMITIVE(add_sharp_reader);
+  ADD_PRIMITIVE(add_read_directive);
 
   /* Add primitive for reading a list whose first character is already read */
   /* This is useful to add specialized reader on [] and {} */

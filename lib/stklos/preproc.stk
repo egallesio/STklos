@@ -1,7 +1,7 @@
 ;;;;
 ;;;; preproc.stk     -- various stuff for pre-processing Text file with STlklos
 ;;;;
-;;;; Copyright © 2021-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -326,7 +326,9 @@
             (set! pre  (process-file prelude-file))
             (set! post (process-file postlude-file))))
 
-        ;; Display pre + body (eventually sent to an external document processor) + post
+        ;; Display pre +
+        ;;         body (eventually sent to an external document processor) +
+        ;;         post
         ;; External document processor can be pandoc, markdown, asciidoc ...
         (display pre)
         (if cmd
@@ -334,20 +336,9 @@
             (display body))
         (display post))))
 
-
-  ;;
-  ;; Define the reader for braces
-  ;;
-  (define (read-brace port)
-    ;; skip opening brace which has been pushed back by the reader
-    (read-char port)
-    ;; read a list finished by a closing brace
-    (%read-list port #\}))
-
-  ;; Change the STklos reader for braces
-  (eval `(define %read-brace ,read-brace)
-        (find-module 'STklos))
-
+  ;; Define the reader for braces (braces are list delimiters)
+  (read-brace-handler #t)
+  
 ) ;; End of module preproc
 
 (provide "stklos/preproc")
