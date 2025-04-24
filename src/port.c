@@ -1181,6 +1181,16 @@ Incorrect_format_width:
  *    (format "~a ~? ~a" 'a "~s" '(new) 'test)
  *                                 => "a new test"
  * @end lisp
+ * The following code illustrates the case in which |port| is an output
+ * port:
+ * @lisp
+ * (let ((out (open-output-file "output.txt")))
+ *   (format out "This goes to the file: ~x~%" 251))
+ * @end lisp
+ * After the code is executed, the file |output.txt| will contain the line
+ * "|This goes to the file: fb|".
+ *
+ * Finally, |(pp (format #f "~h"))| will print some quick help for |format|.
  *
  * NOTE: The second form of |format| is compliant with {{link-srfi 28}}.
  * That is, when |port| is omitted, the output is returned as a string as if
@@ -1826,7 +1836,7 @@ int STk_init_port(void)
 
   ADD_PRIMITIVE(port_cs);
   ADD_PRIMITIVE(port_cs_set);
-  
+
   return STk_init_fport() &&
          STk_init_sport() &&
          STk_init_vport();
