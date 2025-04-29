@@ -98,24 +98,9 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
 
-#define MY_SETJMP(jb)           (jb.blocked = get_signal_mask(), setjmp(jb.j))
-#define MY_LONGJMP(jb, val)     (longjmp((jb).j, val))
 
 #define FX(v)                   (STk_fixval(v))
 
-static inline sigset_t get_signal_mask(void)
-{
-  sigset_t new, old;
-
-  sigemptyset(&new);
-  sigprocmask(SIG_BLOCK, &new, &old);
-  return old;
-}
-
-static inline void set_signal_mask(sigset_t mask)
-{
-  sigprocmask(SIG_SETMASK, &mask, NULL);
-}
 
 /*===========================================================================*\
  *
@@ -304,7 +289,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   vm->constants          = (SCM *)  VM_STATE_CST(p);            \
   vm->env                = (SCM)    VM_STATE_ENV(p);            \
   vm->fp                 = (SCM *)  VM_STATE_FP(p);             \
-  vm->top_jmp_buf        = (jbuf *) VM_STATE_JUMP_BUF(p);       \
+  vm->top_jmp_buf        = (JBUF *) VM_STATE_JUMP_BUF(p);       \
   vm->sp                += VM_STATE_SIZE;                       \
 }while(0)
 
@@ -1129,7 +1114,7 @@ static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time) {
 
 static void run_vm(vm_thread_t *vm)
 {
-  jbuf jb;
+  JBUF jb;
   int16_t tailp;
   int nargs=0;
   volatile int offset,
@@ -1713,11 +1698,8 @@ do_push_handler:
 
   vm->top_jmp_buf = &jb;
 
-  if (MY_SETJMP(jb)) {
-    /* We come back from an error. */
-    set_signal_mask(jb.blocked);
-  }
-  else {
+  if (MY_SETJMP(jb) == 0) {
+    /* We do not come back from an error. */
     SAVE_VM_STATE();
     SAVE_HANDLER_STATE(vm->val, vm->pc+offset);
   }
