@@ -1584,7 +1584,7 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
    Code posted on StackOverflow is licensed CC-BY-SA, so the attribution:
    By: StackOverflow user Serge Ballesta (https://stackoverflow.com/users/3545273/serge-ballesta)
 */
-long tz_offset(time_t t) {
+static long tz_offset(time_t t) {
   struct tm local = *localtime(&t);
   struct tm utc = *gmtime(&t);
 

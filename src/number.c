@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3852,7 +3852,7 @@ static inline int power_of_2_p(long x) {
   return 0;
 }
 
-SCM my_log2(SCM x, SCM b) {
+static SCM my_log2(SCM x, SCM b) {
   /* my_log2 has fast path for taking logs of fixnums, bignums and
      exact rationals in base two.  It uses a simple trick to extend
      this to "base which is power of two". */

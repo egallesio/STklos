@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,12 +72,12 @@ void* STk_count_malloc_atomic(size_t size)
 }
 
 /* Getter and Setter for the count-allocation parameter */
-SCM get_count_allocs(void)
+static SCM get_count_allocs(void)
 {
   return MAKE_BOOLEAN(STk_count_allocations);
 }
 
-SCM set_count_allocs(SCM value)
+static SCM set_count_allocs(SCM value)
 {
   STk_count_allocations = (value != STk_false);
   return STk_void;
