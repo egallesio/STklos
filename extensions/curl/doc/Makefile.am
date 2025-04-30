@@ -25,3 +25,4 @@ clean:
 	rm -f $(FILE).pdf $(FILE).html $(FILE).tmp *~
 
 distclean: clean
+	rm -f ./Makefile

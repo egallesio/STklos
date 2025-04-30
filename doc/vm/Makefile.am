@@ -47,3 +47,4 @@ clean:
 distclean: clean
 	rm -f ../HTML/$(HTMLMAIN)
 	rm -f ../PDF/$(PDF)
+	rm -f ./Makefile

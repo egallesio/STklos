@@ -30,6 +30,8 @@ $(MAIN).pdf: $(SRC)
 	rm -f $(MAIN).tmp tmp.pdf
 
 clean:
-	rm -f $(MAIN).pdf $(MAIN).html $(MAIN).tmp *~
+	rm -f $(MAIN).tmp *~
 
 distclean: clean
+	rm -f ./Makefile
+

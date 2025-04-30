@@ -630,6 +630,7 @@ distclean: clean
 	for i in $(MULTI_AUX); do rm -f ../HTML/$$i ; done
 	rm -f ../HTML/$(IMG)
 	rm -f ../PDF/$(PDF)
+	rm -f ./Makefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
