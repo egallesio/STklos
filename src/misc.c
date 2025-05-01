@@ -743,6 +743,27 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 #endif
   return STk_void;
 }
+
+
+/****
+ **** Tracing GC calls
+ ****
+*/
+
+static void simple_trace_object(SCM ptr, void _UNUSED(*client_data))
+{
+  STk_debug("GC  is called on object (%%x%x): ~S",  ptr, ptr);
+}
+
+
+DEFINE_PRIMITIVE("%gc-trace-object", gc_trace_object, subr1, (SCM ptr))
+{
+  if (!BOXED_OBJP(ptr)) {
+    STk_error("cannot trace non-boxed object ~S", ptr);
+  }
+  STk_register_finalizer(ptr, simple_trace_object);
+  return STk_void;
+}
 #endif
 
 /*===========================================================================*\
@@ -777,6 +798,7 @@ int STk_init_misc(void)
   ADD_PRIMITIVE(set_debug);
   ADD_PRIMITIVE(test);
   ADD_PRIMITIVE(c_backtrace);
+  ADD_PRIMITIVE(gc_trace_object);
 #endif
   return TRUE;
 }
