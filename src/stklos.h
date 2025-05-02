@@ -258,7 +258,12 @@ typedef struct {
         BOXED_INFO(_var) = 0;                           \
         }while(0)
 
-typedef SCM (*t_subrptr)();
+#if __STDC_VERSION__ >= 202311L
+  typedef SCM (*t_subrptr)(...);
+#else
+  typedef SCM (*t_subrptr)();
+#endif
+
 
 struct primitive_obj {
   stk_header header;
