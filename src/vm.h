@@ -1,7 +1,7 @@
 /*
  * v m . h                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,9 +38,9 @@
 // Could be defined with sigsetjmp or siglongjmp, if saving/restroring signal masks
 // is needed. sigsetjmp and siglongjmp are REALLY slower. For now, we can only use
 // the basic setjmp/longjmp primitives.
-#define JBUF                    sigjmp_buf             
-#define MY_SETJMP(jb)           sigsetjmp(jb,1)
-#define MY_LONGJMP(jb, val)     siglongjmp(jb, val)
+#define JBUF                    jmp_buf
+#define MY_SETJMP(jb)           setjmp(jb)
+#define MY_LONGJMP(jb, val)     longjmp(jb, val)
 
 
 /*===========================================================================*\
