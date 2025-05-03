@@ -32,6 +32,11 @@ extern "C"
 {
 #endif
 
+#define _DEFAULT_SOURCE
+#define _XOPEN_SOURCE 500
+#define _SVID_SOURCE
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -258,7 +263,12 @@ typedef struct {
         BOXED_INFO(_var) = 0;                           \
         }while(0)
 
+
 #if __STDC_VERSION__ >= 202311L
+  /* Gcc 15+ uses by default -stdc=gnu23 (that is an adapration of C23), where
+   * we cannot declare t_subrptr as a "SCM (*)()" which is equivalent to a
+   * SCM (*)(void).
+   */
   typedef SCM (*t_subrptr)(...);
 #else
   typedef SCM (*t_subrptr)();

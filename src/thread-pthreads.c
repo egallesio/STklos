@@ -1,7 +1,7 @@
 /*
  * thread-pthreads.c                    -- Threads support in STklos
  *
- * Copyright © 2006-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2006-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,11 +24,13 @@
  */
 
 
-#include <unistd.h>
-#include <sched.h>
 #include "stklos.h"
 #include "vm.h"
 #include "thread-common.h"
+
+#include <unistd.h>
+#include <sched.h>
+
 
 /*
  * Thread specific value (the VM)

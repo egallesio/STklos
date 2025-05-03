@@ -23,10 +23,9 @@
  *
  */
 
-#include <ctype.h>
 #include "stklos.h"
 #include "hash.h"
-
+#include <ctype.h>
 
 /* Define here special small constants for the reader. These constants are used
  * by the reader logic. They cannot be used by a program.

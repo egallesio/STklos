@@ -28,14 +28,16 @@
  * implementation using the C buffered IO (at least on glibc).
  *
  */
+
+#include "stklos.h"
+#include "fport.h"
+#include "vm.h"
+
 #include <ctype.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/wait.h>
 
-#include "stklos.h"
-#include "fport.h"
-#include "vm.h"
 
 int STk_interactive = 0;                  /* We are in interactive mode */
 SCM STk_stdin, STk_stdout, STk_stderr;    /* The unredirected ports */

@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,10 @@
  *    Creation date: 17-Feb-1993 12:27
  *
  */
-
-#include <ctype.h>
 #include "stklos.h"
 #include "vm.h"
 
+#include <ctype.h>
 
 #define INITIAL_LINE_SIZE 256           /* Initial size for readline */
 

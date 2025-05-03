@@ -23,11 +23,12 @@
  *    Creation date:  2-Feb-2006 21:58 (eg)
  */
 
-#include <unistd.h>
 #include "stklos.h"
 #include "vm.h"
 #include "thread-common.h"
 #include "mutex-common.h"
+
+#include <unistd.h>
 
 /* ====================================================================== *\
  *

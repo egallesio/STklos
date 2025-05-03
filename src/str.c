@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,8 @@
  *    Creation date: ??????
  */
 
-#include <ctype.h>
 #include "stklos.h"
+#include <ctype.h>
 
 
 /* min size added to a string when reallocated in a string-set! */

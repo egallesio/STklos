@@ -23,13 +23,13 @@
  *    Creation date: 03-May-2021 15:22
  */
 
+#include "stklos.h"
+#include "struct.h"
+
 #include <gmp.h>
 #include <math.h>
 #include <fcntl.h>
 #include <string.h>
-
-#include "stklos.h"
-#include "struct.h"
 
 #include "27-incl.c"
 

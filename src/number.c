@@ -24,12 +24,13 @@
  *    Creation date: 12-May-1993 10:34
  */
 
+#include "stklos.h"
 
 #include <math.h>
 #include <float.h>
 #include <ctype.h>
 #include <locale.h>
-#include "stklos.h"
+
 
 #undef sinc
 #if defined(__linux__) && defined(__alpha__)

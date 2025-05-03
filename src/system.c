@@ -24,6 +24,9 @@
  *    Creation date: 29-Mar-1994 10:57
  */
 
+#include "stklos.h"
+#include "struct.h"
+
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
@@ -34,8 +37,6 @@
 #include <time.h>
 #include <locale.h>
 #include <math.h>
-#include "stklos.h"
-#include "struct.h"
 
 #ifndef MAXBUFF
 #  define MAXBUFF 1024

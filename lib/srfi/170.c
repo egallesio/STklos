@@ -23,6 +23,10 @@
  *    Creation date: 09-Jan-2021 11:54
  */
 
+#include "stklos.h"
+#include "struct.h"
+#include "fport.h"
+
 #include <limits.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,9 +40,6 @@
 #include <grp.h>
 #include <pwd.h>
 
-#include "stklos.h"
-#include "struct.h"
-#include "fport.h"
 
 #include "170-incl.c"
 

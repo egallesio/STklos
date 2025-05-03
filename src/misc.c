@@ -23,10 +23,11 @@
  *    Creation date:  9-Jan-2000 12:50 (eg)
  */
 
-#include <limits.h>
 #include "stklos.h"
 #include "gnu-getopt.h"
 #include "git-info.h"
+#include <limits.h>
+
 
 #ifdef STK_DEBUG
   #ifdef HAVE_BACKTRACE
@@ -35,6 +36,7 @@
 
 int STk_interactive_debug = 0;
 #endif
+
 
 int STk_count_allocations = 0;         /* Set it to 1 to have GC accouniting */
 
