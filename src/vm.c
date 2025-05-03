@@ -2367,6 +2367,15 @@ void STk_get_stack_pointer(void **addr)
   *addr = (void *) &c;
 }
 
+
+// Adding a compiler pragma to ignore warnings about clobbered
+// variable. Generally declaring the variable as volatile is OK, but if we do
+// that, it complains that the actual parameter is a volatile whereas formal
+// parameter is not declared as such (passing by an auxiliary variable doesn't
+// help.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclobbered"
+
 DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
   SCM z;
@@ -2426,7 +2435,6 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   memcpy(k->cstack, cstart, csize);
 
   k->fresh = 1;
-
   if (MY_SETJMP(k->state) == 0) {
     /* This is the initial call to %make_continuation */
     return z;
@@ -2438,6 +2446,9 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
     return STk_get_current_vm()->val;
   }
 }
+#pragma GCC diagnostic pop
+
+
 
 #define CALL_CC_SPACE   1024    /* Add some space for restoration bookkeeping */
 
