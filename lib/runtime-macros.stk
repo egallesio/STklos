@@ -100,6 +100,10 @@
 
         (let ((keywords    (cons macro-name (cadr syn-rules)))
               (clauses     (cddr syn-rules)))
+
+          ;; Should we export this symbol from MBE? It will only be used here.
+          ((in-module MBE check-wrong-ellipsis-escape) clauses ellipsis)
+
           `(define-macro (,macro-name . args)
              ((%%symbol-value 'find-clause 'MBE) ',macro-name
                                                  args
