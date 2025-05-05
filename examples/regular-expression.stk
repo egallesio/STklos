@@ -1,0 +1,109 @@
+;;;;
+;;;; regular-expression.stk  -- A script to remove IP addresses from a
+;;;;                            text file
+;;;;
+;;;; Copyright © 2024 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 26-Aug-2024 21:43 (jpellegrini)
+;;;;
+
+;;; Concepts illustrated:
+;;;
+;;; * Looping through a file (or any inpur port), reading lines and
+;;;   processing them one at a time
+;;; * Creating a regular expression and using it to replace a string
+;;;   in another string
+
+
+;; We first define a regexp for IPv4 addresses.
+;; Here,
+;;
+;;   \\d    will match a single digit
+;;   [.]    will match a single dot
+;;
+;; See that:
+;;
+;;    \d would match a single "d" character
+;;    .  (outside square brackets) would match ANY character
+;;
+;; An IPv4 address is composed of four words separated by dots,
+;; each one being the decimal representation of a number in the range
+;; [0,255].
+;; Each word has the format:
+;;   - "25" followed by a digit in [0,5], OR
+;;   - "2" followed by a digit in [0,4], followed by a digit, OR
+;;   - Maybe "0" or "1", folowed by a digit, maybe followed by
+;;     another digit
+;;
+;; We will create a string for a single word with the three allowed
+;; digits, "NNN", and another with a dot prefix, ".NNN", then
+;; concatenate them (on of the first, three of the second type).
+(define ipv4-word "((25[0-5])|(2[0-4])\\d|[0-1]?\\d\\d?)") ; "NNN"
+(define ipv4-word/dot (string-append "[.]" ipv4-word))   ; ".NNN"
+(define ipv4-regexp-string
+  (string-append ipv4-word                     ; first word
+                 "(" ipv4-word/dot ")" "{3}")) ; followed by the 3 others
+
+;; Build a regexp object using the IP matching string.  The result,
+;; ipv4-regexp, is an object of type "regexp", and that can be checked
+;; by calling "regexp-object?"
+(define ipv4-regexp (string->regexp ipv4-regexp-string))
+
+;; remove-ips will remove the IPs from a single line, actually
+;; changing them to "<IP REMOVED>"
+(define (remove-ips line)
+  (regexp-replace ipv4-regexp line "<IP REMOVED>"))
+
+;; This procedure will loop through the input file, reading lines,
+;; calling remove-ips, and writing the result to the output file.
+(define (remove-ips-from-file input-port output-port)
+    (let loop ((line (read-line input-port)))
+      (unless (eof-object? line)
+        (display (remove-ips line) output-port)
+        (newline output-port)
+        (loop (read-line input-port)))))
+
+;; get-string is just a procedure to read a string from the user,
+;; given a string question.
+(define (get-string question)
+  (display question)
+  (read-line))
+
+(define banner
+  (string-append "Welcome. This script removes ipv4 addresses from text files.\n"
+                 "Please enter the name of an input file and an output file.\n"))
+
+;; Program entry point.
+;;
+;; Instead of a traditional Unix program, where we'd use standard
+;; input and standard output (or accept file names as arguments), we
+;; do things in a DOS-like style, asking interactively for the file
+;; names. This is not the was a STklos program (or a Unix script, for
+;; the matter) would usually work, but it may be interesting as an
+;; example of a different way of building programs.
+;; And it also naturally suggests an nice exercise, which is to turn
+;; the script into a more natural, Unixe-like one.
+(begin
+  (display banner)
+  (let ((in (get-string "Name of input file? "))
+        (out (get-string "Name of output file? ")))
+    (let ((in-port  (open-input-file  in))
+          (out-port (open-output-file out)))
+      (remove-ips-from-file in-port out-port))))
