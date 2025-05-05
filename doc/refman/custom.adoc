@@ -130,3 +130,4 @@ The following parameter objects can be used to customize the REPL:
 
 {{insertdoc 'repl-theme}}
 {{insertdoc 'repl-show-startup-message}}
+{{insertdoc 'repl-flushed-characters}}

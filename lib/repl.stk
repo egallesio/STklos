@@ -34,6 +34,7 @@
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
           repl-prompt-use-color? repl-change-default-ports main-repl-hook
           repl-theme get-repl-color repl-show-startup-message
+          repl-flushed-characters
           repl-add-command
           @ @1 @2 @3 @4 @5 @*)
 
@@ -47,6 +48,50 @@
 (define default-in  (current-input-port))
 (define default-out (current-output-port))
 (define default-err (current-error-port))
+
+#|
+<doc EXT repl-flushed-characters
+ * (repl-flushed-characters)
+ * (repl-flushed-characters lst)
+ *
+ * When a line is intered int the REPL, STklos will flush the characters
+ * in the list contained in the parameter obejct |repl-flushed-characters|.
+ * The default value is |(#\space #\tab)|. Newlines and end-of-file are
+ * always flushed.
+ *
+ * @lisp
+ * stklos> (read-char)      <= no character after the closing parenthesis
+ * 4                        <= user input
+ * #\4                      <= return value
+ * stklos> (read-char)      <= a space after the closing parenthesis
+ * 4                        <= user input
+ * #\4                      <= return value
+ * stklos> (read-char)3     <= '3' after closing parenthesis
+ * #\3                      <= return value
+ * stklos> (read-char) 3    <= space and '3' after closing parenthesis
+ * #\3                      <= return value
+ * stklos> (read-char)35    <= '35' after closing parenthesis
+ * #\3                      <= return value
+ * 5                        <= next return value
+ *
+ * (repl-flushed-characters '())
+ * stklos> (read-char)      <= no character after the closing parenthesis
+ * 4                        <= user input
+ * #\4                      <= return value
+ * stklos> (read-char)      <= a space after the closing parenthesis
+ * #\space                  <= return value (the space was not skipped)
+ * stklos> (read-char)3     <= '3' after closing parenthesis
+ * #\3                      <= return value
+ * stklos> (read-char) 3    <= space and '3' after closing parenthesis
+ * #\space                  <= return value (the space was not skipped)
+ * #\3                      <= next return value
+ * stklos> (read-char)35    <= '35' after closing parenthesis
+ * #\3                      <= return value
+ * 5                        <= next return value
+ * @end lisp
+doc>
+|#
+(define repl-flushed-characters (make-parameter '(#\space #\tab)))
 
 (define @1 #void)
 (define @2 #void)
@@ -512,6 +557,20 @@ doc>
                    (system (substring all 1 (string-length all)))))
 
              (else
+                ;; Flush spaces, tabs and newlines (by default), or
+                ;; whatever is contained in the list stored in the
+                ;; parameter repl-flushed-characters. If we type
+                ;; (read-char) in the REPL, we'll be able to enter a
+                ;; character. If we enter (read-char)3456, the
+                ;; character #\3 will be read, and '456' will be
+                ;; considered the next token.
+                (let loop ((c (peek-char in)))
+                  (if (memq c '(#\newline #eof))
+                      (read-char in)
+                      (when (memq c (repl-flushed-characters))
+                        (read-char in)
+                        (loop (peek-char in)))))
+
                 (call-with-values
                   (lambda () (eval e))
                   (lambda v
