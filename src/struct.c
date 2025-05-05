@@ -1,7 +1,7 @@
 /*
  * struct.c         -- Low level support for structures
  *
- * Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -250,7 +250,7 @@ static void print_struct_type(SCM expr, SCM port, int _UNUSED(mode))
 {
   char buffer[1000];
 
-  snprintf(buffer, sizeof(buffer), "#[%s-type %s %ld]",
+  snprintf(buffer, sizeof(buffer), "#[%s-type %s %lx]",
       COND_TYPEP(expr) ? "condition": "struct",
       get_struct_type_name(expr),
       (unsigned long) expr);
@@ -484,7 +484,7 @@ static void print_struct(SCM expr, SCM port, int _UNUSED(mode))
     STk_C_apply(STRUCT_TYPE_PRINTER(type), 2, expr, port);
   } else {
     /* Use the default writer */
-    snprintf(buffer, sizeof(buffer), "#[%s %s %ld]",
+    snprintf(buffer, sizeof(buffer), "#[%s %s %lx]",
         (CONDP(expr) ? "condition" : "struct"),
         get_struct_type_name(STRUCT_TYPE(expr)),
         (unsigned long) expr);
