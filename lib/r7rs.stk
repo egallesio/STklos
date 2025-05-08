@@ -70,7 +70,7 @@
 
 ;;;; With-error-loc
 (define-macro (with-error-loc name . body)
-  ;; It permits to claim to location of the function which has
+  ;; It permits to claim the location of the function which has
   ;; detected an error.
   ;;
   ;; For instance
@@ -1420,9 +1420,10 @@ doc>
  * (with-handler <handler> <expr~1~> ... <expr~n~>)
  *
  * Evaluates the sequences of expressions |<expr~1~>| to |<expr~n~>|.
- * |<handler>| must be a procedure that accepts one argument. It is installed
- * as the current exception handler for the dynamic extent (as determined by
- * dynamic-wind) of the evaluations of the expressions
+ * |<handler>| may be a symbol or a a procedure that accepts one argument.
+ * If it is a procedure, it is installed as the current exception handler
+ * for the dynamic extent (as determined by dynamic-wind) of the evaluations
+ * of the expressions
  * @lisp
  * (with-handler (lambda (c)
  *                 (display "Catch an error\\n"))
@@ -1431,6 +1432,21 @@ doc>
  *    (display "... Two"))
  *        @print{} "One ... Catch an error"
  * @end lisp
+ *
+ * The handler may also be a symbol. This can be used to claim the location of
+ * the function which has detected an error.
+ *
+ * @lisp
+ * (define (change-first-char! str char)
+ *     (with-handler 'change-first-char! (string-set! str 0 char)))
+ *
+ * > (change-first-char! (string-copy "abc") 10)
+ * **** Error:
+ * change-first-char!: bad character `10'
+ * @end lisp
+ *
+ * Here, the error is claimed by |change-first-char!| instead of the
+ * |string-set!| procedure.
 doc>
 
 <doc R7RS with-exception-handler
