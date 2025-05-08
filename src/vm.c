@@ -2339,14 +2339,28 @@ void STk_raise_exception(SCM cond)
  * ,(link-srfi 18).
 doc>
 */
+
+static SCM search_exception_handler(SCM *hdlrs)
+{
+  if (hdlrs  == NULL)
+    return STk_false;
+  else {
+    SCM proc = (SCM) HANDLER_PROC(hdlrs);
+
+    if (SYMBOLP(proc))
+      // We are in the context of a claim-error. This is not the searched
+      // function. Find the parent handler
+      return search_exception_handler((SCM *) HANDLER_PREV(hdlrs));
+    return proc;
+  }
+}
+
+
 DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))
 {
   vm_thread_t *vm = STk_get_current_vm();
 
-  if (vm->handlers == NULL)
-    return STk_false;
-  else
-    return (SCM) HANDLER_PROC(vm->handlers);
+  return search_exception_handler(vm->handlers);
 }
 
 /*
