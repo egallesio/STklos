@@ -449,6 +449,7 @@ SCM STk_make_C_cond(SCM type, int nargs, ...);
 EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3,
                  (SCM name, SCM parent, SCM slots));
 EXTERN_PRIMITIVE("raise", raise, subr1, (SCM obj));
+EXTERN_PRIMITIVE("condition-has-type?", cond_has_typep, subr2, (SCM c, SCM t));
 
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
 SCM STk_condition_type_is_a(SCM type, SCM t);
