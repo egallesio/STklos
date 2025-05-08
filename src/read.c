@@ -524,9 +524,10 @@ static SCM read_address(SCM port)
     int c;
 
     tok[j] = c = STk_getc(port);
-    if (c == EOF || ((c <=0x80) && isspace((unsigned char)c)))
-      /* (c < 0x80) is for MacOs */
+    if (c == EOF || !isxdigit(c)) {
+      STk_ungetc(c, port);
       break;
+    }
     if (j >= TOKEN_SIZE-1) error_token_too_large(port, tok);
   }
   tok[j] = '\0';

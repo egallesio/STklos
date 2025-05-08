@@ -1693,7 +1693,7 @@ CASE(PUSH_HANDLER) {
 do_push_handler:
 
   /* place the value in val on the stack as well as the value of handlers */
-  if (STk_procedurep(vm->val) == STk_false)
+  if (STk_procedurep(vm->val) == STk_false && !SYMBOLP(vm->val))
     STk_error("bad exception handler ~S", vm->val);
 
   vm->top_jmp_buf = &jb;
@@ -2312,8 +2312,19 @@ void STk_raise_exception(SCM cond)
   /* Execute the procedure handler on behalf of the old handler (since the
    * procedure can be itself erroneous).
    */
-  vm->val = STk_C_apply(proc, 1, cond);
-
+  if (SYMBOLP(proc)) {
+    // Special case: the handler is a symbol and not a function. We just
+    // patch, if possible, the location of the condition to this symbol. This
+    // permits to force the culprit of the error to another location than the
+    // original one. After that, we just raise the (eventually patched)
+    // condition.
+    if (STRUCTP(cond) && STk_struct_isa(cond, STk_err_mess_condition) == STk_true) {
+      STk_int_struct_set(cond, STk_intern("location"), proc); // patch location
+    }
+    vm->val = STk_raise(cond);
+  } else {
+    vm->val = STk_C_apply(proc, 1, cond);
+  }
   /*
    * Return to the good "run_vm" incarnation
    */
@@ -2328,14 +2339,28 @@ void STk_raise_exception(SCM cond)
  * ,(link-srfi 18).
 doc>
 */
+
+static SCM search_exception_handler(SCM *hdlrs)
+{
+  if (hdlrs  == NULL)
+    return STk_false;
+  else {
+    SCM proc = (SCM) HANDLER_PROC(hdlrs);
+
+    if (SYMBOLP(proc))
+      // We are in the context of a claim-error. This is not the searched
+      // function. Find the parent handler
+      return search_exception_handler((SCM *) HANDLER_PREV(hdlrs));
+    return proc;
+  }
+}
+
+
 DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))
 {
   vm_thread_t *vm = STk_get_current_vm();
 
-  if (vm->handlers == NULL)
-    return STk_false;
-  else
-    return (SCM) HANDLER_PROC(vm->handlers);
+  return search_exception_handler(vm->handlers);
 }
 
 /*

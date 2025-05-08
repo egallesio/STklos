@@ -22534,9 +22534,10 @@ context, and this SRFI&#8217;s current exception handler.</p>
 </div>
 <div class="paragraph">
 <p>Evaluates the sequences of expressions <code>&lt;expr<sub>1</sub>&gt;</code> to <code>&lt;expr<sub>n</sub>&gt;</code>.
-<code>&lt;handler&gt;</code> must be a procedure that accepts one argument. It is installed
-as the current exception handler for the dynamic extent (as determined by
-dynamic-wind) of the evaluations of the expressions</p>
+<code>&lt;handler&gt;</code> may be a symbol or a a procedure that accepts one argument.
+If it is a procedure, it is installed as the current exception handler
+for the dynamic extent (as determined by dynamic-wind) of the evaluations
+of the expressions</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -22547,6 +22548,24 @@ dynamic-wind) of the evaluations of the expressions</p>
    <span class="p">(</span><span class="nb">display</span> <span class="s">"... Two"</span><span class="p">))</span>
        <span class="nv">|-</span> <span class="s">"One ... Catch an error"</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The handler may also be a symbol. This can be used to claim the location of
+the function which has detected an error.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">change-first-char!</span> <span class="nv">str</span> <span class="nv">char</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">with-handler</span> <span class="ss">'change-first-char!</span> <span class="p">(</span><span class="nb">string-set!</span> <span class="nv">str</span> <span class="mi">0</span> <span class="nv">char</span><span class="p">)))</span>
+
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">change-first-char!</span> <span class="p">(</span><span class="nb">string-copy</span> <span class="s">"abc"</span><span class="p">)</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nv">****</span> <span class="nv">Error:</span>
+<span class="nv">change-first-char!:</span> <span class="nv">bad</span> <span class="nv">character</span> <span class="o">`</span><span class="mi">10</span><span class="o">'</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, the error is claimed by <code>change-first-char!</code> instead of the
+<code>string-set!</code> procedure.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_with-exception-handler'></a>
