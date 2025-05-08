@@ -98,24 +98,9 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
 
-#define MY_SETJMP(jb)           (jb.blocked = get_signal_mask(), setjmp(jb.j))
-#define MY_LONGJMP(jb, val)     (longjmp((jb).j, val))
 
 #define FX(v)                   (STk_fixval(v))
 
-static inline sigset_t get_signal_mask(void)
-{
-  sigset_t new, old;
-
-  sigemptyset(&new);
-  sigprocmask(SIG_BLOCK, &new, &old);
-  return old;
-}
-
-static inline void set_signal_mask(sigset_t mask)
-{
-  sigprocmask(SIG_SETMASK, &mask, NULL);
-}
 
 /*===========================================================================*\
  *
@@ -304,7 +289,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   vm->constants          = (SCM *)  VM_STATE_CST(p);            \
   vm->env                = (SCM)    VM_STATE_ENV(p);            \
   vm->fp                 = (SCM *)  VM_STATE_FP(p);             \
-  vm->top_jmp_buf        = (jbuf *) VM_STATE_JUMP_BUF(p);       \
+  vm->top_jmp_buf        = (JBUF *) VM_STATE_JUMP_BUF(p);       \
   vm->sp                += VM_STATE_SIZE;                       \
 }while(0)
 
@@ -1129,7 +1114,7 @@ static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time) {
 
 static void run_vm(vm_thread_t *vm)
 {
-  jbuf jb;
+  JBUF jb;
   int16_t tailp;
   int nargs=0;
   volatile int offset,
@@ -1708,16 +1693,13 @@ CASE(PUSH_HANDLER) {
 do_push_handler:
 
   /* place the value in val on the stack as well as the value of handlers */
-  if (STk_procedurep(vm->val) == STk_false)
+  if (STk_procedurep(vm->val) == STk_false && !SYMBOLP(vm->val))
     STk_error("bad exception handler ~S", vm->val);
 
   vm->top_jmp_buf = &jb;
 
-  if (MY_SETJMP(jb)) {
-    /* We come back from an error. */
-    set_signal_mask(jb.blocked);
-  }
-  else {
+  if (MY_SETJMP(jb) == 0) {
+    /* We do not come back from an error. */
     SAVE_VM_STATE();
     SAVE_HANDLER_STATE(vm->val, vm->pc+offset);
   }
@@ -2330,8 +2312,19 @@ void STk_raise_exception(SCM cond)
   /* Execute the procedure handler on behalf of the old handler (since the
    * procedure can be itself erroneous).
    */
-  vm->val = STk_C_apply(proc, 1, cond);
-
+  if (SYMBOLP(proc)) {
+    // Special case: the handler is a symbol and not a function. We just
+    // patch, if possible, the location of the condition to this symbol. This
+    // permits to force the culprit of the error to another location than the
+    // original one. After that, we just raise the (eventually patched)
+    // condition.
+    if (STRUCTP(cond) && STk_struct_isa(cond, STk_err_mess_condition) == STk_true) {
+      STk_int_struct_set(cond, STk_intern("location"), proc); // patch location
+    }
+    vm->val = STk_raise(cond);
+  } else {
+    vm->val = STk_C_apply(proc, 1, cond);
+  }
   /*
    * Return to the good "run_vm" incarnation
    */
@@ -2346,14 +2339,28 @@ void STk_raise_exception(SCM cond)
  * ,(link-srfi 18).
 doc>
 */
+
+static SCM search_exception_handler(SCM *hdlrs)
+{
+  if (hdlrs  == NULL)
+    return STk_false;
+  else {
+    SCM proc = (SCM) HANDLER_PROC(hdlrs);
+
+    if (SYMBOLP(proc))
+      // We are in the context of a claim-error. This is not the searched
+      // function. Find the parent handler
+      return search_exception_handler((SCM *) HANDLER_PREV(hdlrs));
+    return proc;
+  }
+}
+
+
 DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))
 {
   vm_thread_t *vm = STk_get_current_vm();
 
-  if (vm->handlers == NULL)
-    return STk_false;
-  else
-    return (SCM) HANDLER_PROC(vm->handlers);
+  return search_exception_handler(vm->handlers);
 }
 
 /*
@@ -2384,6 +2391,15 @@ void STk_get_stack_pointer(void **addr)
   char c;
   *addr = (void *) &c;
 }
+
+
+// Adding a compiler pragma to ignore warnings about clobbered
+// variable. Generally declaring the variable as volatile is OK, but if we do
+// that, it complains that the actual parameter is a volatile whereas formal
+// parameter is not declared as such (passing by an auxiliary variable doesn't
+// help.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclobbered"
 
 DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
@@ -2444,7 +2460,6 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   memcpy(k->cstack, cstart, csize);
 
   k->fresh = 1;
-
   if (MY_SETJMP(k->state) == 0) {
     /* This is the initial call to %make_continuation */
     return z;
@@ -2456,6 +2471,9 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
     return STk_get_current_vm()->val;
   }
 }
+#pragma GCC diagnostic pop
+
+
 
 #define CALL_CC_SPACE   1024    /* Add some space for restoration bookkeeping */
 

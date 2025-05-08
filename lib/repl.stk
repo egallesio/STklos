@@ -475,8 +475,14 @@ doc>
     (set! repl-level (+ repl-level 1))
     (let Loop ()
       (with-handler (lambda (c)
-                      (skip-until-end-of-line in)  ;; to avoid cascade errors
-                      (repl-handler c err))        ;; ro signal the error
+                      (when (and (condition? c)
+                                 (condition-has-type? c &error-message))
+                        ;; This is an error message (and not a SIGINT or
+                        ;; another condition or even non-condition). Skip
+                        ;; characters until the end of line to avoid cascading
+                        ;; errors.
+                        (skip-until-end-of-line in))
+                      (repl-handler c err))           ;; Signal the error
          ;; display prompt
          (when interactive?
            ( (repl-make-prompt) (current-module) )

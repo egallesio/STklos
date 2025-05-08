@@ -1,7 +1,7 @@
 /*
  * socket.c                             -- Socket acess for STklos
  *
- * Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,9 @@
  *    Creation date:  3-Jan-2003 18:45 (eg)
  */
 
+#include "stklos.h"
+#include "socket.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -30,9 +33,6 @@
 #include <netdb.h>
 #include <memory.h>
 #include <errno.h>
-
-#include "stklos.h"
-#include "socket.h"
 
 
 /*===========================================================================*\
@@ -249,7 +249,7 @@ static SCM internal_init_client_socket(SCM hostname, SCM port)
 
   /* Setup a connect address */
   memset(&server, 0, sizeof(server));
-  memcpy((char*)&server.sin_addr, hp->h_addr, hp->h_length);
+  memcpy((char*)&server.sin_addr, hp->h_addr_list[0], hp->h_length);
   server.sin_family = AF_INET;
   server.sin_port   = htons(val);
 

@@ -1,7 +1,7 @@
 /*
  * mutex-pthreads.c     -- Pthread Mutexes in Scheme
  *
- * Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,12 +23,12 @@
  *    Creation date:  2-Feb-2006 21:58 (eg)
  */
 
-#include <unistd.h>
 #include "stklos.h"
 #include "vm.h"
 #include "mutex-common.h"
 #include "thread-common.h"
 
+#include <unistd.h>
 
 /* ====================================================================== *\
  *

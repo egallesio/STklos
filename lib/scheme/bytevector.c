@@ -23,9 +23,9 @@
  *    Creation date: 07-Jul-2022 22:40
  */
 
+#include <stklos.h>
 #include <gmp.h>
 #include <sys/param.h>
-#include <stklos.h>
 #include <pendian.h>
 #include "bytevector-incl.c"
 

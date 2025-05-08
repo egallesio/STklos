@@ -24,8 +24,9 @@
  *    Creation date: ??? 1993
  */
 
-#include <string.h>
 #include "stklos.h"
+#include <string.h>
+
 
 /*
  * Utilities
