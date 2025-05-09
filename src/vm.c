@@ -2318,7 +2318,7 @@ void STk_raise_exception(SCM cond)
     // permits to force the culprit of the error to another location than the
     // original one. After that, we just raise the (eventually patched)
     // condition.
-    if (STRUCTP(cond) && STk_struct_isa(cond, STk_err_mess_condition) == STk_true) {
+    if (CONDP(cond) && STk_cond_has_typep(cond, STk_err_mess_condition)==STk_true) {
       STk_int_struct_set(cond, STk_intern("location"), proc); // patch location
     }
     vm->val = STk_raise(cond);
