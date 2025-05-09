@@ -1,6 +1,6 @@
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -148,7 +148,8 @@ SRC_STK   = 1.stk   \
             236.stk \
             244.stk \
             253.stk \
-            258.stk
+            258.stk \
+            260.stk
 
 SRC_OSTK =  1.ostk   \
             2.ostk   \
@@ -265,7 +266,8 @@ SRC_OSTK =  1.ostk   \
             236.ostk \
             244.ostk \
             253.ostk \
-            258.ostk
+            258.ostk \
+            260.ostk
 
 #
 # SRFIs written in C and Scheme
@@ -344,6 +346,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 224.ostk: ../scheme/comparator.ostk
 234.ostk: 1.ostk 11.ostk 26.ostk
 235.ostk: 1.ostk
+260.ostk: 27.$(SO)
 
 
 25.$(SO):  25-incl.c  25.c
