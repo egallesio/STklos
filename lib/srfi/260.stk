@@ -38,9 +38,14 @@
       (string->symbol
        (format "~x:~a"
                (random-integer max-random)
-               (cond ((null? opt)    "")
-                     ((string? (car opt)) (car opt))
-                     (else (error "bad string ~s" (car opt)))))))
+               (cond ((null? opt) "")
+                     ((null? (cdr opt))
+                      (let ((first (car opt)))
+                        (if (string? first)
+                            first
+                            (error "bad string ~s" first))))
+                     (else (error "too many parameters ~s" opt))))))
+
 ))
 
 (provide "srfi/260")

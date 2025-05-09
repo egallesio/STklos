@@ -42,3 +42,10 @@
       #t
       (let ([s (generate-symbol)])
         (symbol=? (string->symbol (symbol->string s)) s))) ;=> #t
+
+(test/error "srfi-260.9"
+            (generate-symbol 100))
+
+(test/error "srfi-260.10"
+            (generate-symbol 100 200 300))
+
