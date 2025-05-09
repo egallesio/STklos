@@ -144,3 +144,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-244: Multiple-value definitions
     - SRFI-253: Data (Type-)Checking
     - SRFI-258: Uninterned symbols
+    - SRFI-260: Generated symbols
