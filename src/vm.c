@@ -459,10 +459,21 @@ void STk_print_vm_registers(char *msg, STk_instr *code)
  */
 static inline SCM listify_top(int n, vm_thread_t *vm)
 {
-  SCM *p, res = STk_nil;
+  /* Using STk_C_make_list here makes this faster when the list of
+     variable arguments is long, and has no impact when it's
+     short. */
+  SCM *p, res = STk_C_make_list(n, STk_nil);
+  SCM ptr = res;
 
-  for (p = vm->sp, vm->sp+=n; p < vm->sp; p++)
-    res = STk_cons(*p, res);
+  /* Popping means we *increase* vm->sp by n.
+     We start with the pointer p on vm->sp+n-1, and go down until
+     it reaches vm->sp.
+   */
+  for (p = vm->sp+n-1 ;  p >= vm->sp ;  p--, ptr = CDR(ptr) )
+    CAR(ptr) = *p;
+
+  vm->sp+=n;
+
   return res;
 }
 
@@ -747,11 +758,17 @@ DEFINE_PRIMITIVE("%call-for-values", call_for_values, subr1, (SCM prod))
     case 0: return STk_nil;
     case 1: return LIST1(vm->val);
     default:  {
-                SCM  res = STk_nil;
                 if (len <= MAX_VALS) {
-                  for (int i = len-1; i >= 1; i--)
-                    res = STk_cons(vm->vals[i], res);
-                  return STk_cons(vm->val, res);
+                  /* vm->val goes into CAR(res), and
+                     vm->vals go into the other list positions: */
+                  SCM res = STk_C_make_list(len, STk_nil);
+                  SCM ptr = CDR(res);
+                  CAR(res) = vm->val;
+                  for (int i = 1; i <= len-1; i++) {
+                    CAR(ptr) = vm->vals[i];
+                    ptr = CDR(ptr);
+                  }
+                  return res;
                 } else {
                   return STk_vector2list(vm->vals[0]);
                 }
