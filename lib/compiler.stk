@@ -518,7 +518,7 @@ doc>
 ;;
 ;; DEFINE-MACRO
 ;;
-(define (compile-define-macro e env tail?)
+(define (compile-%%define-macro e env tail?)
   (if (not env)
       ;; We have a global macro
       (let ((l (define->lambda e)))
@@ -2120,8 +2120,7 @@ both forms.
             ((quote)              (compile-quote          e env tail?))  ;; FIXME
             ((quasiquote)         (compile-quasiquote     e env tail?))  ;; FIXME
             ((%%with-handler)     (compile-%%with-handler e env tail?))
-            ((define-macro)       (compile-define-macro   e env tail?))
-
+            ((%%define-macro)     (compile-%%define-macro e env tail?))
             ((%%set!)             (compile-%%set!         e env tail?))
 
             ((%let-syntax)        (compile-%let-syntax     e env tail?))
