@@ -64,9 +64,28 @@
                  [_ 1 2 3]))
 
 (test/compile-error "list-case.10"
-            (list-case 10
-                       [#(1 2) 1 2 3]))
+                    (list-case 10
+                               [#(1 2) 1 2 3]))
 
 (test/compile-error "list-case.11"
-            (list-case 10
+                    (list-case 10
+                               [#(void) 1 2 3]))
+
+(test/compile-error "list-case.12"
+                     (list-case 10
+                                [ (a . a) 'will-fail ]))
+
+(test "list-case.13"
+      'ok-it-is-a-pair
+      (list-case '(1 . 2)
+                 [ () 'null ]
+                 [ a  'neither-null-nor-pair ]
+                 [ (_ . _) 'ok-it-is-a-pair ]))
+
+(test "list-case.14"
+            (list-case 14
+                       [#(1 2) 1 2 3]))
+
+(test/compile-error "list-case.15"
+            (list-case 15
                        [#(void) 1 2 3]))

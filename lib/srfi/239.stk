@@ -39,9 +39,22 @@
             (body (cdr clause)))
         (unless (symbol? head) (error 'list-case "bad variable name ~s" head))
         (unless (symbol? tail) (error 'list-case "bad variable name ~s" tail))
-        `(let ((,head (car ,expr))
-               (,tail (cdr ,expr)))
-           ,@body)))
+        (when (and (not (eq? head '_))
+                   (eq? head tail))
+          (error 'list-case "double variable in clause: ~s" head))
+        (let ((bindings (let  loop ((vars (list head tail))
+                                    (exprs (list `(car ,expr) `(cdr ,expr)))
+                                    (bin '()))
+                          (if (null? vars)
+                              bin
+                              (loop (cdr vars)
+                                    (cdr exprs)
+                                    (if (eq? (car vars) '_)
+                                        bin
+                                        (cons (list (car vars) (car exprs)) bin)))))))
+
+          `(let ,bindings
+             ,@body))))
 
     ;;(null-clause->code '(() (blah)) '(x y z))
     ;; => ((null? (x y z)) (begin (blah)))
