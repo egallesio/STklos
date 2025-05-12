@@ -1004,7 +1004,7 @@ doc>
       (compiler-error 'lambda el "bad definition ~S" el)))
 
 
-(define (compile-lambda args env tail?)
+(define (compile-%%lambda args env tail?)
   (let* ((r5rs-lambda (extended-lambda->lambda args))
          (formals     (cadr r5rs-lambda))
          (body        (cddr r5rs-lambda))
@@ -1492,7 +1492,7 @@ doc>
 ;; LETREC
 ;;
 
-(define (compile-letrec args env tail?)
+(define (compile-%%letrec args env tail?)
   (let ((len (length args)))
     (if (< len 3)
         (compiler-error 'letrec args "ill formed letrec ~S" args)
@@ -1526,7 +1526,7 @@ doc>
                  tail?))))
 
 
-(define (compile-let args env tail?)
+(define (compile-%%let args env tail?)
   (let ((len (length args)))
     (if (< len 3)
         (compiler-error 'let args "ill formed let ~S" args)
@@ -1544,9 +1544,9 @@ doc>
 ;; LET*
 ;;
 
-;; Here is a simple version (inefficient) of compile-let*
+;; Here is a simple version (inefficient) of compile-%%let*
 ;;
-;;    (define (compile-let* args env tail?)
+;;    (define (compile-%%let* args env tail?)
 ;;      (let ((len (length args)))
 ;;        (if (< len 3)
 ;;      (compiler-error 'let* args "ill formed let* ~S" args)
@@ -1561,7 +1561,7 @@ doc>
 ;;                   env args tail?))))))
 ;;
 
-(define (compile-let* args env tail?)
+(define (compile-%%let* args env tail?)
   ;; This is a little bit tricky
   ;; We have something like
   ;; (let ((a E1) (b E2)) ...) =>
@@ -1584,7 +1584,7 @@ doc>
               (body     (cddr args)))
           (when (check-let-bindings 'let* bindings #f)
             (if (<= (length bindings) 1)
-                (compile-let `(let ,bindings ,@body) env tail?)
+                (compile-%%let `(let ,bindings ,@body) env tail?)
                 (begin
                   (emit (if tail? 'ENTER-TAIL-LET-STAR 'ENTER-LET-STAR)
                         (length bindings))
@@ -1813,7 +1813,7 @@ doc>
 ;;
 ;; WITH-HANDLER
 ;;
-(define (compile-with-handler e env tail?)
+(define (compile-%%with-handler e env tail?)
   (if (> (length e) 2)
       (let ((handler (cadr e))
             (body    (cddr e))
@@ -2106,20 +2106,20 @@ both forms.
           ;; ---- special-form OR (not in env) function call?
           (case first
             ((%%if)               (compile-%%if           e env tail?))
-            ((define)             (compile-define         e env tail?))
-            ((%%begin begin)      (compile-%%begin        e env tail?))
-            ((lambda λ)                (compile-lambda         e env tail?))
-            ((let %let)           (compile-let            e env tail?))
-            ((let*)               (compile-let*           e env tail?))
-            ((letrec)             (compile-letrec         e env tail?))
+            ((define)             (compile-define         e env tail?)) ;; FIXME
+            ((begin %%begin)      (compile-%%begin        e env tail?)) ;; FIXME
+            ((%%lambda)           (compile-%%lambda       e env tail?))
+            ((%%let)              (compile-%%let          e env tail?))
+            ((%%let*)             (compile-%%let*         e env tail?))
+            ((%%letrec)           (compile-%%letrec       e env tail?))
             ((%%and)              (compile-%%and          e env tail?))
             ((%%or)               (compile-%%or           e env tail?))
             ((%%cond)             (compile-%%cond         e env tail?))
             ((%%case)             (compile-%%case         e env tail?))
             ((%%do)               (compile-%%do           e env tail?))
-            ((quote)              (compile-quote          e env tail?))
-            ((quasiquote)         (compile-quasiquote     e env tail?))
-            ((with-handler)       (compile-with-handler   e env tail?))
+            ((quote)              (compile-quote          e env tail?))  ;; FIXME
+            ((quasiquote)         (compile-quasiquote     e env tail?))  ;; FIXME
+            ((%%with-handler)     (compile-%%with-handler e env tail?))
             ((define-macro)       (compile-define-macro   e env tail?))
 
             ((%%set!)             (compile-%%set!         e env tail?))
