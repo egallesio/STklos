@@ -111,30 +111,32 @@ SCM STk_global_store_alias(SCM descr, SCM v, SCM old);    // Link v -> old
  *
 \*===========================================================================*/
 
-#define MAX_VALS 8      /* static number of values      */
+#define MAX_VALS 8      /* static number of values        */
 
 typedef struct {
-  STk_instr *pc;        /* Program Counter              */
-  SCM *fp;              /* Frame pointer                */
-  SCM *sp;              /* Stack pointer                */
-  SCM val;              /* Current value register       */
-  SCM env;              /* Current environment register */
-  SCM *constants;       /* Constants of current code    */
-  SCM *handlers;        /* Exceptions handlers          */
+  STk_instr *pc;        /* Program Counter                */
+  SCM *fp;              /* Frame pointer                  */
+  SCM *sp;              /* Stack pointer                  */
+  SCM val;              /* Current value register         */
+  SCM env;              /* Current environment register   */
+  SCM *constants;       /* Constants of current code      */
+  SCM *handlers;        /* Exceptions handlers            */
 
-  SCM r1, r2;           /* general registers             */
+  SCM r1, r2;           /* general registers              */
 
-  SCM vals[MAX_VALS];   /* registers for multiple values */
-  int valc;             /* # of multiple values          */
+  SCM vals[MAX_VALS];   /* registers for multiple values  */
+  int valc;             /* # of multiple values           */
 
   JBUF *top_jmp_buf;
-  void *start_stack;
+  void *start_stack;    /* start address for the C stack.
+                           initialized in the file
+                           thread-{common,none,pthreads}.c */
 
   SCM *stack;
   int stack_len;
   SCM current_module;
-  SCM iport, oport,eport; /* Standard ports */
-  SCM scheme_thread;      /* Scheme associated thread   */
+  SCM iport, oport,eport; /* Standard ports                */
+  SCM scheme_thread;      /* Scheme associated thread      */
   SCM dynwind_stack;
 } vm_thread_t;
 
