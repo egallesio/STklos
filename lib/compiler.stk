@@ -498,7 +498,7 @@ doc>
 ;;    L1:
 ;;    [ expr2 ] -or- IM-VOID
 ;;    L2:
-(define (compile-if args env tail?)
+(define (compile-%%if args env tail?)
   (let ((len (length (cdr args)))
         (l1  (new-label))
         (l2  (new-label)))
@@ -563,7 +563,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define (compile-and args env tail?)
+(define (compile-%%and args env tail?)
   (if (null? (cdr args))
       ;; Case (and) ==> #t
       (emit 'IM-TRUE)
@@ -605,7 +605,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define (compile-or args env tail?)
+(define (compile-%%or args env tail?)
   ;; General case
   ;; code for (or x1 x2 .. xn) is
   ;;      x1; jump-true l1; x2; jump-true l1; ... ; im-false; L1:
@@ -622,7 +622,7 @@ doc>
 ;;;;
 ;;;; BEGIN
 ;;;;
-(define (compile-begin args env tail?)
+(define (compile-%%begin args env tail?)
   (let ((len (length (cdr args))))
     (case len
       ((0) ;; Body without form
@@ -1636,7 +1636,7 @@ doc>
                                    (begin ,@(cdar c))
                                    ,(rewrite-cond-clauses (cdr c))))))
 
-(define (compile-cond e env tail?)
+(define (compile-%%cond e env tail?)
   (let ((new-form (rewrite-cond-clauses (cdr e))))
     (compile new-form env e tail?)))
 
@@ -1708,7 +1708,7 @@ doc>
                                    `((memv ,key ',case) ,@exprs))))))))
                 clauses)))
 
-(define (compile-case e env tail?)
+(define (compile-%%case e env tail?)
   (if (> (length e) 2)
       (let* ((key     (cadr e))
              (clauses (cddr e))
@@ -1757,7 +1757,7 @@ doc>
        (,loop-name ,@(map cadr inits)))))
 
 
-(define (compile-do e env tail?)
+(define (compile-%%do e env tail?)
   (if (>= (length e) 3)
       (compile (rewrite-do (cadr e) (caddr e) (cdddr e))
                env
@@ -2105,18 +2105,18 @@ both forms.
          (else
           ;; ---- special-form OR (not in env) function call?
           (case first
-            ((if)                 (compile-if             e env tail?))
+            ((%%if)               (compile-%%if           e env tail?))
             ((define)             (compile-define         e env tail?))
-            ((begin)              (compile-begin          e env tail?))
+            ((%%begin begin)      (compile-%%begin        e env tail?))
             ((lambda λ)                (compile-lambda         e env tail?))
             ((let %let)           (compile-let            e env tail?))
             ((let*)               (compile-let*           e env tail?))
             ((letrec)             (compile-letrec         e env tail?))
-            ((and)                (compile-and            e env tail?))
-            ((or)                 (compile-or             e env tail?))
-            ((cond)               (compile-cond           e env tail?))
-            ((case)               (compile-case           e env tail?))
-            ((do)                 (compile-do             e env tail?))
+            ((%%and)              (compile-%%and          e env tail?))
+            ((%%or)               (compile-%%or           e env tail?))
+            ((%%cond)             (compile-%%cond         e env tail?))
+            ((%%case)             (compile-%%case         e env tail?))
+            ((%%do)               (compile-%%do           e env tail?))
             ((quote)              (compile-quote          e env tail?))
             ((quasiquote)         (compile-quasiquote     e env tail?))
             ((with-handler)       (compile-with-handler   e env tail?))

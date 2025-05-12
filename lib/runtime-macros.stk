@@ -28,6 +28,14 @@
 ;; it is STKLOS-COMPILER when we are bootstrapping.
 (select-module STklos)
 
+(define-macro (if . args)         `(%%if ,@args))
+;;(define-macro (define . args)   `(%%define ,@args))
+;;(define-macro (begin . args)      `(%%begin ,@args))
+(define-macro (and . args)        `(%%and ,@args))
+(define-macro (or . args)         `(%%or ,@args))
+(define-macro (cond . args)       `(%%cond ,@args))
+(define-macro (case . args)       `(%%case ,@args))
+(define-macro (do . args)         `(%%do ,@args))
 
 ;;;;
 ;;;; WHEN/UNLESS
