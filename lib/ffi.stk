@@ -23,8 +23,46 @@
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
 ;;;;
 
-(export make-external-function make-callback define-external)
+(export make-external-function
+        make-callback
+        define-external
+        cpointer-set-int8_t!
+        cpointer-set-uint8_t!
+        cpointer-set-int16_t!
+        cpointer-set-uint16_t!
+        cpointer-set-int32_t!
+        cpointer-set-uint32_t!
+        cpointer-set-int64_t!
+        cpointer-set-uint64_t!
+        cpointer-set-char!
+        cpointer-set-short!
+        cpointer-set-unsigned-short!
+        cpointer-set-int!
+        cpointer-set-unsigned-int!
+        cpointer-set-long!
+        cpointer-set-unsigned-long!
+        cpointer-set-float!
+        cpointer-set-double!
+        cpointer-set-pointer!
 
+        cpointer-ref-int8_t
+        cpointer-ref-uint8_t
+        cpointer-ref-int16_t
+        cpointer-ref-uint16_t
+        cpointer-ref-int32_t
+        cpointer-ref-uint32_t
+        cpointer-ref-int64_t
+        cpointer-ref-uint64_t
+        cpointer-ref-char
+        cpointer-ref-short
+        cpointer-ref-unsigned-short
+        cpointer-ref-int
+        cpointer-ref-unsigned-int
+        cpointer-ref-long
+        cpointer-ref-unsigned-long
+        cpointer-ref-float
+        cpointer-ref-double
+        cpointer-ref-pointer)
 
 (define make-external-function #f)
 (define make-callback          #f)
@@ -86,7 +124,6 @@
   (set! make-callback
     (lambda (proc types data)
       (%make-callback proc (parse-parameters types) data))))
-
 
 
 #|
