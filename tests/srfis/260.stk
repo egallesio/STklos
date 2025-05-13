@@ -1,0 +1,51 @@
+
+(test "srfi-260.1"
+      #t
+      (let ([s (generate-symbol)])
+        (symbol? s))) ; => #t
+
+(test "srfi-260.2"
+      #t
+      (let ([s (generate-symbol "S:::")])
+        (symbol=? s))) ; => #t
+
+
+(test "srfi-260.3"
+      #t
+      (let ([s (generate-symbol)])
+        (symbol=? s s))) ; => #t
+
+(test "srfi-260.4"
+      #f
+      (let ([s1 (generate-symbol)]
+            [s2 (generate-symbol)])
+        (symbol=? s1 s2))) ;=> #f
+
+(test "srfi-260.5"
+      #f
+      (let ([s1 (generate-symbol "g1")]
+            [s2 (generate-symbol "g1")])
+        (symbol=? s1 s2))) ;=> #f
+
+(test "srfi-260.6"
+      #f
+      (let ([s1 (generate-symbol "g1")]
+            [s2 'g1])
+        (symbol=? s1 s2))) ;=> #f
+
+(test "srfi-260.7"
+      #f
+      (let ([s (generate-symbol "g1")])
+        (string=? (symbol->string s) "g1"))) ;=> #f
+
+(test "srfi-260.8"
+      #t
+      (let ([s (generate-symbol)])
+        (symbol=? (string->symbol (symbol->string s)) s))) ;=> #t
+
+(test/error "srfi-260.9"
+            (generate-symbol 100))
+
+(test/error "srfi-260.10"
+            (generate-symbol 100 200 300))
+

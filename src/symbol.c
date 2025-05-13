@@ -24,9 +24,10 @@
  *    Creation date: 20-Nov-1993 12:12
  */
 
-#include <ctype.h>
 #include "stklos.h"
 #include "hash.h"
+
+#include <ctype.h>
 
 /**** Static globals ****/
 static struct hash_table_obj obarray;

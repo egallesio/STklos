@@ -34,7 +34,7 @@
         truncate-remainder floor-remainder
         square exact-integer-sqrt exact inexact
         boolean=?
-        make-list member assoc
+        member assoc
         symbol=?
         string=?     %string2=?
         string<?     %string2<?
@@ -67,6 +67,22 @@
 ;;;; Aliases
 (define write-shared write*)
 (define write-simple write)
+
+;;;; With-error-loc
+(define-macro (with-error-loc name . body)
+  ;; It permits to claim the location of the function which has
+  ;; detected an error.
+  ;;
+  ;; For instance
+  ;;   (define (change-first-char! str char)
+  ;;      (with-error-loc 'change-first-char! (string-set! str 0 char)))
+  ;;   > (change-first-char! (string-copy "abc") 10)
+  ;;   **** Error:
+  ;;  change-first-char!: bad character `10'
+  ;;
+  ;; Here the error is claimed by change-first-char! instead of string-set!
+
+  `(with-handler ,name ,@body))    ;; Simple isn't it?
 
 
 ;;;; ----------------------------------------------------------------------
@@ -539,23 +555,6 @@ doc>
                         (verify val (cdr lst)))))))
     (verify e1 rest)))
 
-;;;; ----------------------------------------------------------------------
-;;;; 6.4 Pairs and lists
-;;;; ----------------------------------------------------------------------
-
-#|
-<doc R7RS make-list
- * (make-list k)
- * (make-list k fill)
- *
- * Returns a newly allocated list of k elements. If a second
- * argument is given, then each element is initialized to fill .
- * Otherwise the initial contents of each element is unspecified.
-doc>
-|#
-(define (make-list k :optional (fill (void)))
-  (vector->list (make-vector k fill)))
-
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.5 Symbols
@@ -630,8 +629,8 @@ doc>
           #:string->list  ;; set procedure name
           (if start?
               (let ((end (if end? end (string-length str))))
-                (%claim-error 'string->list
-                              (s->l (substring str start end))))
+                (with-error-loc 'string->list
+                                (s->l (substring str start end))))
               (s->l str)))))
 
 
@@ -689,8 +688,8 @@ doc>
       (err "not enough room in destination string ~S" to))
 
     ;; do the copy
-    (%claim-error 'string-copy!
-                  (%string-copy! to at from start end))))
+    (with-error-loc 'string-copy!
+                    (%string-copy! to at from start end))))
 
 ;;
 ;; R7RS string-fill!
@@ -701,8 +700,7 @@ doc>
 ;; Implement the one with 2 to 4 parameters
 (let ((fill (lambda (str char :optional (start 0 start?) (end 0 end?))
               #:string-fill!
-              (%claim-error
-                 'string-fill!
+              (with-error-loc 'string-fill!
                  (if start?
                      ;; R7RS string-fill!
                      (begin
@@ -732,8 +730,7 @@ doc>
           (if start?
               (let ((end (if end? end (vector-length v))))
                 (when (< end start) (error "end index ~S < start index ~S" end start))
-                (%claim-error
-                 'vector->list
+                (with-error-loc 'vector->list
                  (do ((i (- end 1) (- i 1))
                       (result '() (cons (vector-ref v i) result)))
                      ((< i start) result))))
@@ -784,8 +781,8 @@ doc>
       (err "not enough room in destination vector ~S" to))
 
     ;; do the copy
-    (%claim-error 'vector-copy!
-                  (%vector-copy! to at from start end))))
+    (with-error-loc 'vector-copy!
+                    (%vector-copy! to at from start end))))
 
 
 
@@ -817,8 +814,7 @@ doc>
 (define (vector->string vect :optional (start 0) (end 0 end?))
   (unless (vector? vect)    (error "bad vector ~S" vect))
   (unless end?              (set! end (vector-length vect)))
-  (%claim-error
-     'vector->string
+  (with-error-loc 'vector->string
      (let loop ((res   (make-string (- end start)))
                 (i     0)
                 (start start))
@@ -833,8 +829,7 @@ doc>
 (define (string->vector str :optional (start 0) (end 0 end?))
   (unless (string? str)    (error "bad string ~S" str))
   (unless end?             (set! end (string-length str)))
-  (%claim-error
-     'string->vector
+  (with-error-loc 'string->vector
      (let loop ((res   (make-vector (- end start)))
                 (i     0)
                 (start start))
@@ -862,8 +857,8 @@ doc>
 doc>
 |#
 (define (make-bytevector size :optional (default 0))
-  (%claim-error 'make-bytevector
-                (%make-uvector size default 1)))
+  (with-error-loc 'make-bytevector
+                  (%make-uvector size default 1)))
 
 #|
 <doc R7RS bytevector?
@@ -887,7 +882,7 @@ doc>
 doc>
 |#
 (define (bytevector . lst)
-  (%claim-error 'bytevector (%uvector lst 1)))
+  (with-error-loc 'bytevector (%uvector lst 1)))
 
 
 #|
@@ -898,7 +893,7 @@ doc>
 doc>
 |#
 (define (bytevector-length bv)
-  (%claim-error 'bytevector-length (%uvector-length bv 1)))
+  (with-error-loc 'bytevector-length (%uvector-length bv 1)))
 
 
 #|
@@ -914,7 +909,7 @@ doc>
 doc>
 |#
 (define (bytevector-u8-ref bv idx)
-  (%claim-error 'bytevector-u8-ref (%uvector-ref bv idx 1)))
+  (with-error-loc 'bytevector-u8-ref (%uvector-ref bv idx 1)))
 
 
 #|
@@ -932,7 +927,7 @@ doc>
 doc>
 |#
 (define (bytevector-u8-set! bv idx val)
-  (%claim-error 'bytevector-u8-set! (%uvector-set! bv idx val 1)))
+  (with-error-loc 'bytevector-u8-set! (%uvector-set! bv idx val 1)))
 
 
 #|
@@ -995,8 +990,8 @@ doc>
       (err "not enough room in destination bytevector ~S" to))
 
     ;; do the copy
-    (%claim-error 'bytevector-copy!
-                  (%bytevector-copy! to at from start end))))
+    (with-error-loc 'bytevector-copy!
+                    (%bytevector-copy! to at from start end))))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.10 Control features
@@ -1232,12 +1227,12 @@ doc>
     (error 'call-with-port  "bad port ~S" port))
   #;(unless (and (procedure? proc) (memq (%procedure-arity proc) '(-2 -1 1)))
     (error 'call-with-port "bad procedure ~S" proc))
-  (%claim-error 'call-with-port
-                (let ((res (call-with-values
-                               (lambda () (proc port))
-                             list)))
-                  (close-port port)
-                  (apply values res))))
+  (with-error-loc 'call-with-port
+                  (let ((res (call-with-values
+                                 (lambda () (proc port))
+                               list)))
+                    (close-port port)
+                    (apply values res))))
 
 
 #|
@@ -1273,8 +1268,7 @@ doc>
 doc>
 |#
 (define (read-string k :optional (port (current-input-port)))
-  (%claim-error
-    'read-string
+  (with-error-loc 'read-string
     (unless (positive? k)
       (error "parameter must be a positive integer. It was: ~S" k))
     (unless (and (input-port? port) (textual-port? port))
@@ -1308,8 +1302,7 @@ doc>
 |#
 
 (define (read-u8 :optional (port (current-input-port)))
-  (%claim-error
-    'read-u8
+  (with-error-loc 'read-u8
     (unless (binary-port? port)
       (error "bad binary port ~S" port))
     (read-byte port)))
@@ -1330,8 +1323,7 @@ doc>
 doc>
 |#
 (define (peek-u8 :optional (port (current-input-port)))
-  (%claim-error
-    'peek-u8
+  (with-error-loc 'peek-u8
     (unless (binary-port? port)
       (error "bad binary port ~S" port))
     (peek-byte port)))
@@ -1356,8 +1348,7 @@ doc>
 (define (read-bytevector! bv :optional (port (current-input-port))
                                        (start 0)
                                        (end -1 end?))
-  (%claim-error
-   'read-bytevector!
+  (with-error-loc 'read-bytevector!
    (unless (bytevector? bv)
      (error "bad bytevector ~S" bv))
    (unless end?
@@ -1378,9 +1369,8 @@ doc>
 (define (write-string str :optional (port (current-output-port))
                                     (start 0)
                                     (end -1 end?))
-  (%claim-error
-   'write-string
-   (%write-string str port start (if end? end (string-length str)))))
+  (with-error-loc 'write-string
+                  (%write-string str port start (if end? end (string-length str)))))
 
 
 #|
@@ -1392,8 +1382,7 @@ doc>
 doc>
 |#
 (define (write-u8 byte :optional (port (current-output-port)))
-  (%claim-error
-   'write-u8
+  (with-error-loc 'write-u8
    (unless (binary-port? port)
      (error "bad binary port ~S" port))
    (write-byte byte port)))
@@ -1412,8 +1401,7 @@ doc>
 (define (write-bytevector bv :optional (port (current-output-port))
                                        (start 0)
                                        (end -1 end?))
-  (%claim-error
-   'write-bytevector
+  (with-error-loc 'write-bytevector
    (unless (bytevector? bv)     (error "bad bytevector ~S" bv))
    (unless (binary-port? port)  (error "bad binary port ~S" port))
    (unless end?                 (set! end (bytevector-length bv)))
@@ -1432,9 +1420,10 @@ doc>
  * (with-handler <handler> <expr~1~> ... <expr~n~>)
  *
  * Evaluates the sequences of expressions |<expr~1~>| to |<expr~n~>|.
- * |<handler>| must be a procedure that accepts one argument. It is installed
- * as the current exception handler for the dynamic extent (as determined by
- * dynamic-wind) of the evaluations of the expressions
+ * |<handler>| may be a symbol or a a procedure that accepts one argument.
+ * If it is a procedure, it is installed as the current exception handler
+ * for the dynamic extent (as determined by dynamic-wind) of the evaluations
+ * of the expressions
  * @lisp
  * (with-handler (lambda (c)
  *                 (display "Catch an error\\n"))
@@ -1443,6 +1432,21 @@ doc>
  *    (display "... Two"))
  *        @print{} "One ... Catch an error"
  * @end lisp
+ *
+ * The handler may also be a symbol. This can be used to claim the location of
+ * the function which has detected an error.
+ *
+ * @lisp
+ * (define (change-first-char! str char)
+ *     (with-handler 'change-first-char! (string-set! str 0 char)))
+ *
+ * > (change-first-char! (string-copy "abc") 10)
+ * **** Error:
+ * change-first-char!: bad character `10'
+ * @end lisp
+ *
+ * Here, the error is claimed by |change-first-char!| instead of the
+ * |string-set!| procedure.
 doc>
 
 <doc R7RS with-exception-handler

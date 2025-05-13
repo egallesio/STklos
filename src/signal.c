@@ -201,7 +201,7 @@ DEFINE_PRIMITIVE("%default-signal-handler", dflt_sighdlr, subr1, (SCM sig))
     case SIGSEGV: sigsegv(SIGSEGV);  break;
     case SIGABRT: sigabort(SIGABRT); break;
     case SIGHUP:  sighup(SIGHUP);    break;
-  default: STk_error("signal ~S si not managed by this handler", sig);
+  default: STk_error("signal ~S is not managed by this handler", sig);
   }
   return STk_void;
 }

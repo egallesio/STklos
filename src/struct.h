@@ -1,7 +1,7 @@
 /*
  * struct.h         -- Low level support for structures
  *
- * Copyright © 2004-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify

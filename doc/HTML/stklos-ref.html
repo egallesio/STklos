@@ -6032,7 +6032,7 @@ the value of <code>x</code> is not changed.</p>
 <p><code><strong>(inc! place) </strong></code><br>
 <code><strong>(inc! place val) </strong></code><br>
 <code><strong>(dec! place) </strong></code><br>
-<code><strong>(dec place val) </strong></code><br></p>
+<code><strong>(dec! place val) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -7095,6 +7095,32 @@ all lists have finite length and are terminated by the empty list.</p>
 </div>
 </div>
 <div class="paragraph">
+<p><a id='P_circular-list?'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver">R<sup>5</sup>RS procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(circular-list? obj) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> if <code>obj</code> is a circular list, and <code>#f</code> otherwise.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">L</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))</span>
+<span class="p">(</span><span class="nb">set-cdr!</span> <span class="p">(</span><span class="nb">cdddr</span> <span class="nv">L</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr</span> <span class="nv">L</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">circular-list?</span> <span class="nv">L</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">circular-list?</span> <span class="mi">10</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">circular-list?</span> <span class="o">'#</span><span class="mi">0</span><span class="nv">=</span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span> <span class="o">.</span> <span class="o">#</span><span class="mi">0</span><span class="o">#</span><span class="p">)</span> <span class="p">)</span><span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><a id='P_make-list'></a>
 </p>
 </div>
@@ -7535,24 +7561,62 @@ comparison function.
 </table>
 </div>
 <div class="paragraph">
-<p><a id='P_list-copy'></a>
+<p><a id='P_list-copy'></a><a id='P_list-deep-copy'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver">R<sup>7</sup>RS procedure</span></p>
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(list-copy obj) </strong></code><br></p>
+<p><code><strong>(list-copy obj) </strong></code><br>
+<code><strong>(list-deep-copy obj) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p><code>list-copy</code> recursively copies trees of pairs. If <code>obj</code> is
-not a pair, it is returned; otherwise the result is a new pair whose
-<code>car</code> and <code>cdr</code> are obtained by calling <code>list-copy</code> on
-the <code>car</code> and <code>cdr</code> of <code>obj</code>, respectively.</p>
+<p>These procedures copy trees of pairs. <code>list-copy</code> will copy the
+pairs, but wil not recurse into them for copying; but <code>list-deep-copy</code>
+will recurse into the structure, so a new tree or association list will
+be returned.</p>
+</div>
+<div class="paragraph">
+<p><code>List-deep-copy</code> is particularly useful to copy association lists when
+one needs the new list items to <strong>not</strong> be <code>eq?</code> to the old ones.</p>
+</div>
+<div class="paragraph">
+<p>Note that <code>list-deep-copy</code> will only recurse into lists, not vectors,
+structs and other data structures.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">X</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">y</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">X</span> <span class="mi">10</span><span class="p">))</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="nv">y</span> <span class="p">(</span><span class="nf">list-copy</span> <span class="nv">y</span><span class="p">))</span>                  <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nf">list-copy</span> <span class="nv">y</span><span class="p">)))</span>      <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nf">list-deep-copy</span> <span class="nv">y</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">X</span> <span class="o">'#</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">y</span> <span class="p">(</span><span class="nb">list</span> <span class="nv">X</span> <span class="mi">10</span><span class="p">))</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="nv">y</span> <span class="p">(</span><span class="nf">list-copy</span> <span class="nv">y</span><span class="p">))</span>                  <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nf">list-copy</span> <span class="nv">y</span><span class="p">)))</span>      <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nb">car</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nf">list-deep-copy</span> <span class="nv">y</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#t</span> <span class="c1">; &lt;= didn't recurse into vector</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS defines the <code>list-copy</code> primitive, but it states that calling
+it on a circular list is an error. This is not the case in <strong><em>STklos</em></strong>.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><a id='P_filter!'></a><a id='P_filter'></a>
@@ -10418,6 +10482,23 @@ sequences.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">utf8-&gt;string</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="mh">#x41</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="s">"A"</span>
 <span class="p">(</span><span class="nf">string-&gt;utf8</span> <span class="s">"λ"</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="o">#</span><span class="nv">u8</span><span class="p">((</span><span class="mh">#xce</span> <span class="mh">#xbb</span><span class="p">)</span></code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+R<sup>7</sup>RS syntax for reading bytevectors is always available.  However,
+various SRFIs or the R<sup>7</sup>RS-large <code>(scheme vector)</code> library propose an
+extended lexical syntax for uniform/homogeneos  vectors. See the
+documentation of the <em><a href="#accept_uvector_syntax"><code>accept-uvector-syntax</code>
+parameter object</a></em>, and the <em><a href="#uvector_syntax_directive"><code>#!uvector-syntax</code>
+read directive</a></em>.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -16003,15 +16084,23 @@ the output of <code>str</code>.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(exit) </strong></code><br>
-<code><strong>(exit ret-code) </strong></code><br></p>
+<code><strong>(exit obj) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Exits the program with the specified integer return code. If <code>ret-code</code>
-is omitted, the program terminates with a return code of 0.
-If  program has registered exit functions with <code>register-exit-function!</code>,
-they are called (in an order which is the reverse of their call order).</p>
+<p>Runs all outstanding dynamic-wind after procedures, terminates
+the running program, and communicates an exit value to the
+operating system. If no argument is supplied,
+or if <code>obj</code> is <code>#t</code>, the exit procedure communicates
+to the operating system that the program exited normally.
+If obj is <code>#f</code>, the <code>exit</code> procedure communicates to
+the operating system that the program exited abnormally.</p>
+</div>
+<div class="paragraph">
+<p>If <code>obj</code> is an integer, it will be returned to the operating system.
+Otherwise the value returned by <code>exit</code> indicates that the program
+exited abnormally.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -16020,11 +16109,20 @@ they are called (in an order which is the reverse of their call order).</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The <strong><em>STklos</em></strong> <code>exit</code> primitive accepts also an
-integer value as parameter (R<sup>7</sup>RS accepts only a boolean).
+The parameters which eventualy follow
 </td>
 </tr>
 </table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">register-exit-function!</span> <span class="p">(</span><span class="k">lambda</span><span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"FINAL"</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nb">dynamic-wind</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">1</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">exit</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">3</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">4</span><span class="p">)))</span>                   <span class="nv">|-</span> <span class="mi">124</span><span class="nv">FINAL</span> <span class="p">(</span><span class="k">and</span> <span class="nv">exit</span><span class="p">)</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_emergency-exit'></a>
@@ -16037,7 +16135,7 @@ integer value as parameter (R<sup>7</sup>RS accepts only a boolean).
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(emergency-exit) </strong></code><br>
-<code><strong>(emergency-exit ret-code) </strong></code><br></p>
+<code><strong>(emergency-exit obj) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -16046,18 +16144,19 @@ integer value as parameter (R<sup>7</sup>RS accepts only a boolean).
 dynamic-wind <em>after</em> procedures and communicates an exit
 value to the operating system in the same manner as <code>exit</code>.</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The <strong><em>STklos</em></strong> <code>emergency-exit</code> primitive accepts also an
-integer value as parameter (R<sup>7</sup>RS accepts only a boolean).
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>The registered procedures with <code>register-exit-function!</code>, if any,
+are not executed.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">register-exit-function!</span> <span class="p">(</span><span class="k">lambda</span><span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="s">"FINAL"</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nb">dynamic-wind</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">1</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="nf">exit</span><span class="p">)</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">3</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">display</span> <span class="mi">4</span><span class="p">)))</span>                   <span class="nv">|-</span> <span class="mi">12</span> <span class="p">(</span><span class="k">and</span> <span class="nv">exit</span><span class="p">)</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_die'></a>
@@ -22435,9 +22534,10 @@ context, and this SRFI&#8217;s current exception handler.</p>
 </div>
 <div class="paragraph">
 <p>Evaluates the sequences of expressions <code>&lt;expr<sub>1</sub>&gt;</code> to <code>&lt;expr<sub>n</sub>&gt;</code>.
-<code>&lt;handler&gt;</code> must be a procedure that accepts one argument. It is installed
-as the current exception handler for the dynamic extent (as determined by
-dynamic-wind) of the evaluations of the expressions</p>
+<code>&lt;handler&gt;</code> may be a symbol or a a procedure that accepts one argument.
+If it is a procedure, it is installed as the current exception handler
+for the dynamic extent (as determined by dynamic-wind) of the evaluations
+of the expressions</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -22448,6 +22548,24 @@ dynamic-wind) of the evaluations of the expressions</p>
    <span class="p">(</span><span class="nb">display</span> <span class="s">"... Two"</span><span class="p">))</span>
        <span class="nv">|-</span> <span class="s">"One ... Catch an error"</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The handler may also be a symbol. This can be used to claim the location of
+the function which has detected an error.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">change-first-char!</span> <span class="nv">str</span> <span class="nv">char</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">with-handler</span> <span class="ss">'change-first-char!</span> <span class="p">(</span><span class="nb">string-set!</span> <span class="nv">str</span> <span class="mi">0</span> <span class="nv">char</span><span class="p">)))</span>
+
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">change-first-char!</span> <span class="p">(</span><span class="nb">string-copy</span> <span class="s">"abc"</span><span class="p">)</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nv">****</span> <span class="nv">Error:</span>
+<span class="nv">change-first-char!:</span> <span class="nv">bad</span> <span class="nv">character</span> <span class="o">`</span><span class="mi">10</span><span class="o">'</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, the error is claimed by <code>change-first-char!</code> instead of the
+<code>string-set!</code> procedure.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_with-exception-handler'></a>
@@ -27015,7 +27133,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="doc_supported_srfis">13.1. Supported SRFIs</h3>
 <div class="paragraph">
-<p><strong><em>STklos</em></strong> supports <strong>127</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>129</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -27152,7 +27270,9 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 -  <strong><a href="http://srfi.schemers.org/srfi-236/srfi-236.html">SRFI-236</a></strong>&#8201;&#8212;&#8201;<em>Evaluating expressions in an unspecified order</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-238/srfi-238.html">SRFI-238</a></strong>&#8201;&#8212;&#8201;<em>Codesets</em><br>
 -  <strong><a href="http://srfi.schemers.org/srfi-244/srfi-244.html">SRFI-244</a></strong>&#8201;&#8212;&#8201;<em>Multiple-value definitions</em><br>
--  <strong><a href="http://srfi.schemers.org/srfi-253/srfi-253.html">SRFI-253</a></strong>&#8201;&#8212;&#8201;<em>Data (Type-)Checking</em><br></p>
+-  <strong><a href="http://srfi.schemers.org/srfi-253/srfi-253.html">SRFI-253</a></strong>&#8201;&#8212;&#8201;<em>Data (Type-)Checking</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-258/srfi-258.html">SRFI-258</a></strong>&#8201;&#8212;&#8201;<em>Uninterned symbols</em><br>
+-  <strong><a href="http://srfi.schemers.org/srfi-260/srfi-260.html">SRFI-260</a></strong>&#8201;&#8212;&#8201;<em>Generated symbols</em><br></p>
 </div>
 </div>
 <div class="sect2">
@@ -27218,7 +27338,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 <div class="paragraph">
 <p><strong>List of external SRFIs:</strong>
-<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-115</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-178</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-232</code> <code>srfi-233</code> <code>srfi-234</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code> <code>srfi-253</code></p>
+<code>srfi-1</code> <code>srfi-2</code> <code>srfi-4</code> <code>srfi-5</code> <code>srfi-7</code> <code>srfi-9</code> <code>srfi-13</code> <code>srfi-14</code> <code>srfi-17</code> <code>srfi-19</code> <code>srfi-25</code> <code>srfi-26</code> <code>srfi-27</code> <code>srfi-29</code> <code>srfi-35</code> <code>srfi-36</code> <code>srfi-37</code> <code>srfi-41</code> <code>srfi-43</code> <code>srfi-48</code> <code>srfi-51</code> <code>srfi-54</code> <code>srfi-59</code> <code>srfi-60</code> <code>srfi-61</code> <code>srfi-64</code> <code>srfi-66</code> <code>srfi-69</code> <code>srfi-74</code> <code>srfi-89</code> <code>srfi-94</code> <code>srfi-95</code> <code>srfi-96</code> <code>srfi-100</code> <code>srfi-113</code> <code>srfi-115</code> <code>srfi-116</code> <code>srfi-117</code> <code>srfi-125</code> <code>srfi-127</code> <code>srfi-128</code> <code>srfi-129</code> <code>srfi-130</code> <code>srfi-132</code> <code>srfi-133</code> <code>srfi-134</code> <code>srfi-135</code> <code>srfi-137</code> <code>srfi-141</code> <code>srfi-144</code> <code>srfi-151</code> <code>srfi-152</code> <code>srfi-154</code> <code>srfi-156</code> <code>srfi-158</code> <code>srfi-160</code> <code>srfi-161</code> <code>srfi-162</code> <code>srfi-170</code> <code>srfi-171</code> <code>srfi-173</code> <code>srfi-174</code> <code>srfi-175</code> <code>srfi-178</code> <code>srfi-180</code> <code>srfi-185</code> <code>srfi-189</code> <code>srfi-190</code> <code>srfi-196</code> <code>srfi-207</code> <code>srfi-214</code> <code>srfi-215</code> <code>srfi-216</code> <code>srfi-217</code> <code>srfi-221</code> <code>srfi-222</code> <code>srfi-223</code> <code>srfi-224</code> <code>srfi-227</code> <code>srfi-228</code> <code>srfi-229</code> <code>srfi-230</code> <code>srfi-232</code> <code>srfi-233</code> <code>srfi-234</code> <code>srfi-235</code> <code>srfi-236</code> <code>srfi-238</code> <code>srfi-253</code> <code>srfi-258</code> <code>srfi-260</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -27444,8 +27564,10 @@ running on.</p>
 <p>
 
 <strong><a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong> is fully supported and is extended to provide the
-additional <strong>c64vector</strong> and <strong>c128vector</strong> types of <strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong> (<em>Homogeneous numeric vector libraries</em>).
-<a id='P_uvector-tag'></a><a id='P_uvector->list'></a><a id='P_uvector-set!'></a><a id='P_uvector-ref'></a><a id='P_uvector-length'></a><a id='P_uvector?'></a>
+additional <strong>c64vector</strong> and <strong>c128vector</strong> types of <strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong> (<em>Homogeneous numeric vector libraries</em>).</p>
+</div>
+<div class="paragraph">
+<p><a id='P_uvector-tag'></a><a id='P_uvector->list'></a><a id='P_uvector-set!'></a><a id='P_uvector-ref'></a><a id='P_uvector-length'></a><a id='P_uvector?'></a>
 
 
 
@@ -27481,6 +27603,65 @@ of the uniform vector, as a symbol</p>
 <span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">u8</span><span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="nv">u8</span>
 <span class="p">(</span><span class="nf">uvector-tag</span> <span class="o">#</span><span class="nv">c32</span><span class="p">())</span>       <span class="nv">=&gt;</span> <span class="nv">c32</span></code></pre>
 </div>
+</div>
+<div id="accept_uvector_syntax" class="paragraph">
+<p><a id='P_accept-uvector-syntax'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(accept-uvector-syntax) </strong></code><br>
+<code><strong>(accept-uvector-syntax v) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>SRFIS which define homogeneous or uniform vectors permit to have
+an extended lexical syntax for such objects (<code>#s8</code>, <code>#u64</code> &#8230;&#8203;).
+The parameter <code>accept-uvector-syntax</code> permits to accept or not the
+reading of this extended syntax depending of the value of <code>v</code>.</p>
+</div>
+<div class="paragraph">
+<p>By default, <strong><em>STklos</em></strong> does not allow the reading of this extended syntax
+for uniform. Use this parameter object to permit the use of this extended
+syntax.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Extended syntax for bytevectors is always accepted, since it is
+R<sup>7</sup>RS. Loading or importing <strong><a href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong> or <strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong> will allow the reading of this extended lexical syntax.
+</td>
+</tr>
+</table>
+</div>
+<div id="uvector_syntax_directive" class="paragraph">
+<p>
+
+Furthermore, <strong><em>STklos</em></strong> defines two read directives:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#!uvector-syntax</code> to allow the reading of the extended lexical syntax for
+uniform vectors (such as <code>#s8</code> or <code>#f32</code>, &#8230;&#8203;)</p>
+</li>
+<li>
+<p><code>#!no-uvector-syntax</code> to forbid the reading of uniform vector lexical syntax.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When this SRFI is imported/loaded, <strong><em>STklos</em></strong> reader accepts numbers with
+underscores.</p>
 </div>
 </div>
 <div class="sect3">
@@ -30837,14 +31018,39 @@ use with <code>cond-expand</code> in the compiled code only. It will not include
 </div>
 </div>
 <div class="sect3">
+<h4 id="doc_srfi_160homogeneous_numeric_vector_libraries">srfi-160&#8201;&#8212;&#8201;Homogeneous numeric vector libraries</h4>
+<div class="paragraph">
+<p>
+
+<strong><a href="http://srfi.schemers.org/srfi-160/srfi-160.html">SRFI-160</a></strong> is fully supported. See also the
+<em><a href="#accept_uvector_syntax"><code>accept-uvector-syntax</code> parameter object</a></em> and the
+ <em><a href="#uvector_syntax_directive"><code>#!uvector-syntax</code> read directive</a></em>.</p>
+</div>
+</div>
+<div class="sect3">
 <h4 id="doc_srfi_169underscores_in_numbers">srfi-169&#8201;&#8212;&#8201;Underscores in numbers</h4>
 <div class="paragraph">
 <p>
 
 
 
-<strong><a href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a></strong> is fully supported. See <em><a href="#srfi169">parameter <code>accept-srfi-169-numbers</code></a></em> to eventually forbid the usage of
-underscores in numbers.</p>
+<strong><a href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a></strong> is fully supported. See <em><a href="#srfi169">parameter <code>accept-srfi-169-numbers</code></a></em> to  eventually accept/forbid the usage of underscores in numbers.</p>
+</div>
+<div class="paragraph">
+<p>Furthermore, <strong><em>STklos</em></strong> defines two read directives:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#!underscore-numbers</code> to allow the reading of  number with underscores, and</p>
+</li>
+<li>
+<p><code>#!no-underscore-numbers</code> to forbid the reading of  number with underscores.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>By default, the <strong><em>STklos</em></strong> reader accepts numbers with underscores.</p>
 </div>
 </div>
 <div class="sect3">
@@ -33134,7 +33340,7 @@ Those parameters are described below.</p>
 </div>
 <div class="paragraph">
 <p>These parameter objects permit to change the way an open curly brace ('{')
-or an open bracket ('[') is read depending of the value of <code>v</code>:</p>
+or an open square bracket ('[') is read depending of the value of <code>v</code>:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -33199,6 +33405,51 @@ still present in the port when the procedure starts.</p>
 
 <span class="p">(</span><span class="nf">read-brace-handler</span> <span class="no">#t</span><span class="p">)</span>
 <span class="o">'</span><span class="err">{</span><span class="mi">1</span> <span class="mi">2</span> <span class="err">{</span><span class="mi">3</span> <span class="mi">4</span><span class="err">}</span> <span class="mi">5</span> <span class="mi">6</span><span class="err">}</span>     <span class="nv">=&gt;</span>  <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">4</span><span class="p">)</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_define-read-directive'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(define-read-directive name expr1 expr2 &#8230;&#8203;) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The form <code>define-read-directive</code> adds a reading directive that will be recognized
+by the reader. The new reading directive will start with a sharp character
+('#') followed by the characters of <code>name</code>. When the reader recognizes the read
+directive, it executes the sequence of expressions <code>expr1</code> <code>expr2</code> &#8230;&#8203;</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When the expressions <code>expr1</code> <code>expr2</code> &#8230;&#8203;, the thunk functions
+<code>current-port</code> and  <code>current-directive</code> are defined in their
+dynamic environment. They can  respectively be used to access the port
+where the directive was read and it&#8217;s name as a string.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-read-directive</span> <span class="nv">!underscore-numbers</span>    <span class="p">(</span><span class="nf">accept-srfi-169-numbers</span> <span class="no">#t</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">define-read-directive</span> <span class="nv">!no-underscore-numbers</span> <span class="p">(</span><span class="nf">accept-srfi-169-numbers</span> <span class="no">#f</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nb">list</span> <span class="o">#</span><span class="nv">!underscore-numbers</span>    <span class="p">(</span><span class="nb">symbol?</span> <span class="ss">'1_000</span><span class="p">)</span> <span class="p">(</span><span class="nb">integer?</span> <span class="ss">'1_000</span><span class="p">)</span>
+      <span class="o">#</span><span class="nv">!no-underscore-numbers</span> <span class="p">(</span><span class="nb">symbol?</span> <span class="ss">'1_000</span><span class="p">)</span> <span class="p">(</span><span class="nb">integer?</span> <span class="ss">'1_000</span><span class="p">))</span>
+                        <span class="nv">=&gt;</span> <span class="p">(</span><span class="no">#f</span> <span class="no">#t</span> <span class="no">#t</span> <span class="no">#f</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>

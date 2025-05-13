@@ -694,12 +694,7 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
 
 
   if (PROCESS_EXITED(proc)) {
-#ifndef WIN32
-    if (WIFSIGNALED(PROCESS_STATUS(proc)))
-      n = WCOREDUMP(PROCESS_STATUS(proc));
-    else
-#endif
-      n = WEXITSTATUS(PROCESS_STATUS(proc));
+    n = WEXITSTATUS(PROCESS_STATUS(proc));
   } else {
     res = waitpid(PROCESS_PID(proc), &info, WNOHANG);
     if (res == 0) {

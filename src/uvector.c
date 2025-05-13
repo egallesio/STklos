@@ -23,9 +23,10 @@
  *    Creation date: 15-Apr-2001 10:13 (eg)
  */
 
+#include "stklos.h"
+
 #include <float.h>
 #include <math.h>
-#include "stklos.h"
 
 static SCM u64_max, s64_min, s64_max;
 static int accept_uvector_syntax = 0; // #uxx and #sxx allowed?

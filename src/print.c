@@ -1,7 +1,7 @@
 /*
  * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,9 @@
  *    Creation date: ??-Oct-1993 ??:??
  *
  */
-#include <ctype.h>
 #include "stklos.h"
+#include <ctype.h>
+
 
 #define MAX_BUF_SIZE 1024    /* Buffer size for printing strings */
 

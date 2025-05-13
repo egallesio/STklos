@@ -24,6 +24,9 @@
  *    Creation date: 29-Mar-1994 10:57
  */
 
+#include "stklos.h"
+#include "struct.h"
+
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
@@ -34,8 +37,6 @@
 #include <time.h>
 #include <locale.h>
 #include <math.h>
-#include "stklos.h"
-#include "struct.h"
 
 #ifndef MAXBUFF
 #  define MAXBUFF 1024
@@ -1584,7 +1585,7 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
    Code posted on StackOverflow is licensed CC-BY-SA, so the attribution:
    By: StackOverflow user Serge Ballesta (https://stackoverflow.com/users/3545273/serge-ballesta)
 */
-long tz_offset(time_t t) {
+static long tz_offset(time_t t) {
   struct tm local = *localtime(&t);
   struct tm utc = *gmtime(&t);
 

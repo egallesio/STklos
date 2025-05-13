@@ -1,7 +1,7 @@
 /*
  * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2006-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,10 +22,12 @@
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
  */
-#include <unistd.h>
+
 #include "stklos.h"
 #include "vm.h"
 #include "thread-common.h"
+
+#include <unistd.h>
 
 SCM STk_primordial_thread = NULL;
 

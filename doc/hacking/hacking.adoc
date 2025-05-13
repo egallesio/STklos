@@ -1306,6 +1306,9 @@ the GC is located in the header file `src/stklos.h`:
 #define STk_gc()                        GC_gcollect()
 
 void STk_gc_init(void);
+
+SCM STk_C_make_list(int n, SCM init);
+
 ----
 
 * `STk_must_malloc` - used to allocate structured objects.
@@ -1315,6 +1318,13 @@ that are supposed to be just a bignum, but ``look like apointer''. Used
 for strings, numbers etc.
 * `STk_register_finalizer` will register a finalizer function `f`, which
 will be called when the object at `ptr` is collected.
+* `STk_C_alloc_list` will allocate a list of length `len`, initialized
+with `val`. This is done in a single call to the garbage collector, so
+it's much faster than consing each cell individually. It should be
+used when creating or copying lists. See for example the function
+`simple_list_copy`, `list_copy` and `STk_append2`, and also the
+primitive `list` in `list.c and the function `map`, used by the
+primitive `map` in `proc.c`.
 
 == C variables for conditional compilation
 

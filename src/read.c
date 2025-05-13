@@ -23,10 +23,9 @@
  *
  */
 
-#include <ctype.h>
 #include "stklos.h"
 #include "hash.h"
-
+#include <ctype.h>
 
 /* Define here special small constants for the reader. These constants are used
  * by the reader logic. They cannot be used by a program.
@@ -525,9 +524,10 @@ static SCM read_address(SCM port)
     int c;
 
     tok[j] = c = STk_getc(port);
-    if (c == EOF || ((c <=0x80) && isspace((unsigned char)c)))
-      /* (c < 0x80) is for MacOs */
+    if (c == EOF || !isxdigit(c)) {
+      STk_ungetc(c, port);
       break;
+    }
     if (j >= TOKEN_SIZE-1) error_token_too_large(port, tok);
   }
   tok[j] = '\0';

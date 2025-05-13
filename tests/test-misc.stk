@@ -841,6 +841,67 @@ b|)
 
 
 
+;;;
+;;; With-handler (FIXME: needs more tests)
+;;;
+
+(test "with-handler func.1"
+      3
+      (with-handler (lambda (x) "Problem") 1 2 3))
+
+(test "with-handler func .2"
+      "Problem"
+      (with-handler (lambda (x) "Problem") 1 (car 2) 3))
+
+(test "with-handler func.3"
+      '("Problem" .  "seen")
+      (with-handler (lambda (x) (cons x "seen"))
+                    (with-handler (lambda (x) (raise "Problem"))
+                                  1 (car 2) 3)))
+
+(test "with-handler symbol.1"
+      3
+      (with-handler 'foo (+ 1 2)))
+
+(test "with-handler symbol.2"
+      '(foo . "ERROR!!")
+      (with-handler (lambda (x)
+                      (cons (condition-ref x 'location)
+                            (condition-ref x 'message)))
+                    (error 'foo "ERROR!!")))
+
+(test "with-handler symbol.3"
+      '(bar . "ERROR!!")
+      (with-handler (lambda (x)
+                      (cons (condition-ref x 'location)
+                            (condition-ref x 'message)))
+                    (with-handler 'bar
+                                  (error 'foo "ERROR!!"))))
+
+(test "with-handler symbol.4"
+      '(raboof . "ERROR!!")
+      (with-handler (lambda (x)
+                      (cons (condition-ref x 'location)
+                            (condition-ref x 'message)))
+                    (with-handler 'raboof
+                                  (with-handler 'bar
+                                                (error 'foo "ERROR!!")))))
+
+(test "with-handler current-exception-handler.1"
+      print
+      (with-handler print
+                    (current-exception-handler)))
+
+(test "with-handler current-exception-handler.2"
+      print
+      (with-handler print
+                    (with-handler 'I_must_be_skiped
+                                  (current-exception-handler))))
+
+(test/error "with-handler bad parameter" (with-handler 1 2))
+
+
+
 
 
 

@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,12 +23,13 @@
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
  */
-#include <sys/resource.h>
-#include <math.h>
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
 #include "hash.h"
+
+#include <sys/resource.h>
+#include <math.h>
 
 /* Define the maximum calls for equal-count (a version of equal bounded in
   recursive calls). The value depends on the way the program is compiled: if

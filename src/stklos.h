@@ -32,6 +32,11 @@ extern "C"
 {
 #endif
 
+#define _DEFAULT_SOURCE
+#define _XOPEN_SOURCE 500
+#define _SVID_SOURCE
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -153,8 +158,11 @@ extern "C"
 // struct GC_prof_stats_s;
 // GC_API size_t GC_CALL GC_get_prof_stats(struct GC_prof_stats_s *,
 //                                         size_t /* stats_sz */);
+// For allocating list (fast)
+// GC_API GC_ATTR_MALLOC void * GC_CALL GC_malloc_many(size_t lb);
 
-  /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
+
+/* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
 #define STk_must_malloc(size)                                           \
   ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
@@ -169,6 +177,8 @@ extern "C"
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 #define STk_gc_base(ptr)                GC_base(ptr)
+#define STk_must_malloc_many(size)      GC_malloc_many(size)
+
 
 void STk_gc_init(void);
 
@@ -253,7 +263,17 @@ typedef struct {
         BOXED_INFO(_var) = 0;                           \
         }while(0)
 
-typedef SCM (*t_subrptr)();
+
+#if __STDC_VERSION__ >= 202311L
+  /* Gcc 15+ uses by default -stdc=gnu23 (that is an adapration of C23), where
+   * we cannot declare t_subrptr as a "SCM (*)()" which is equivalent to a
+   * SCM (*)(void).
+   */
+  typedef SCM (*t_subrptr)(...);
+#else
+  typedef SCM (*t_subrptr)();
+#endif
+
 
 struct primitive_obj {
   stk_header header;
@@ -429,6 +449,7 @@ SCM STk_make_C_cond(SCM type, int nargs, ...);
 EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3,
                  (SCM name, SCM parent, SCM slots));
 EXTERN_PRIMITIVE("raise", raise, subr1, (SCM obj));
+EXTERN_PRIMITIVE("condition-has-type?", cond_has_typep, subr2, (SCM c, SCM t));
 
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
 SCM STk_condition_type_is_a(SCM type, SCM t);
@@ -706,6 +727,7 @@ SCM STk_append2(SCM l1, SCM l2);
 SCM STk_dappend2(SCM l1, SCM l2);       /* destructive append */
 SCM STk_dremq(SCM obj, SCM list);       /* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
+SCM STk_C_make_list(int n, SCM init);  /* GC friendly list allocation */
 
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));

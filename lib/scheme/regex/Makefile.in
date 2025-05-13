@@ -17,7 +17,7 @@
 #
 #  Makefile for SRFI-115
 #
-# Copyright © 2023-2024 Erick Gallesio <eg@stklos.net>
+# Copyright © 2023-2025 Erick Gallesio <eg@stklos.net>
 #
 #           Author: Erick Gallesio [eg@stklos.net]
 #    Creation date:  8-Dec-2023 12:19
@@ -482,6 +482,7 @@ clean:
 install:
 
 distclean: clean
+	rm -f ./Makefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

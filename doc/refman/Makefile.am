@@ -107,3 +107,4 @@ distclean: clean
 	for i in $(MULTI_AUX); do rm -f ../HTML/$$i ; done
 	rm -f ../HTML/$(IMG)
 	rm -f ../PDF/$(PDF)
+	rm -f ./Makefile

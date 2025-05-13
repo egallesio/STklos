@@ -1,7 +1,7 @@
 #
 #  Makefile 	-- Makefile for the STklos extensions
 #
-# Copyright © 2021-2022 Erick Gallesio - Polytech Nice-Sophia <eg@unice.fr>
+# Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  6-Jul-2021 11:53
@@ -19,6 +19,6 @@ clean-am:
 	for d in $(subdirs) ;do (cd $$d && $(MAKE) $@) ;done
 	rm -f *~
 
-distclean-am:
-	for d in $(subdirs) ;do (cd $$d && $(MAKE) $@) ;done
+distclean-am: clean-am
+	for d in $(subdirs) ;do (cd $$d && $(MAKE) distclean) ;done
 	rm -f Makefile

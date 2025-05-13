@@ -95,6 +95,14 @@ doc>
 ;;; describe for simple objects
 ;;;
 (define-method describe ((x <top>) port)
+  (define (spell-number-type x)
+    (cond ((fixnum? x)   "fixnum")
+          ((bignum? x)   "bignum")
+          ((nan? x)      "NaN")
+          ((inexact? x)  "inexact")
+          ((rational? x) "rational")))
+
+
   (format port "~W is " x)
   (cond
      ((number? x)       (if (exact? x)
@@ -104,35 +112,48 @@ doc>
                                              (format port "#o~a "  (number->string x 8))
                                              (format port "#b~a)"  (number->string x 2)))
                               ((bignum? x)   (format port "a bignum integer number"))
-                              ((rational? x) (format port "a rational number"))
+                              ((rational? x) (format port
+                                                     "a rational number, with a ~a numerator and a ~a denominator"
+                                                     (spell-number-type (numerator x))
+                                                     (spell-number-type (denominator x))))
                               ((complex? x)  (format port
-                                                     "an exact complex number")))
+                                                     "an exact complex number, with ~a real part and ~a imaginary part"
+                                                     (spell-number-type (real-part x))
+                                                     (spell-number-type (imag-part x)))))
+                            ;; now inexact:
                             (cond
                               ((infinite? x) (format port "~a infinity"
                                                      (if (negative? x)
                                                          "negative"
                                                          "positive")))
-                              ((nan? x)      (format port
+                              ((and (nan? x)
+                                    (not (complex? x))) ; don't call nan-quiet? nan-payload etc on complexes
+                                             (format port
                                                      "a ~aquiet, ~anegative non-number (NaN), "
                                                      (if (nan-quiet? x) "" "non-")
                                                      (if (nan-negative? x) "" "non-"))
                                              (format port "with payload ~a" (nan-payload x)))
                               ((real? x)     (format port "a real number"))
                               ((complex? x)  (format port
-                                                     "an inexact complex number")))))
+                                                     "an inexact complex number, with ~a real part and ~a imaginary part"
+                                                     (spell-number-type (real-part x))
+                                                     (spell-number-type (imag-part x)))))))
+
      ((null?    x)      (format port "the empty list"))
      ((void?    x)      (format port "the unspecified (void) object"))
      ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
      ((char?    x)      (format port "a character whose Unicode code point~a is ~s"
                                 (if (<= (char->integer x) 127) " (and ASCII value)" "")
                                 (char->integer x)))
-     ((symbol?  x)      (format port "a symbol")
-                        (call/cc
-                         (lambda (out)
-                           (with-handler
-                            (lambda (e) (out))
-                            (format port ", with ~amutable binding"
-                                    (if (symbol-mutable? x) "" "im"))))))
+     ((symbol?  x)      (let ((int (if (symbol-interned? x)
+                                       "a"
+                                       "an uninterned"))
+
+                              (bound (if (symbol-bound? x)
+                                         (format #f ", with ~amutable binding"
+                                                 (if (symbol-mutable? x) "" "im"))
+                                         "")))
+                          (format port "~a symbol~a" int bound)))
      ((keyword? x)      (format port "a keyword"))
      ((pair?    x)      (format port "a non-empty list"))
      ((string?  x)      (if (zero? (string-length x))

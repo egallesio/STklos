@@ -53,3 +53,4 @@ clean:
 distclean: clean
 	rm -f ../HTML/$(HTMLMAIN) ../HTML/$(SAMPLE)
 	rm -f ../PDF/$(PDF) ../PDF/$(SAMPLE)
+	rm -f ./Makefile
