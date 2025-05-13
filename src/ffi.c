@@ -1009,7 +1009,7 @@ DEFINE_PRIMITIVE("cpointer-ref-unsigned-long", cpointer_ref_unsigned_long, subr2
 /* ======================================================================
  *      STk_cpointer-ref-float_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-float", pointer_ref_float, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-float", cpointer_ref_float, subr2,
                  (SCM pointer, SCM offset))
 {
   return STk_double2real(*(float*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
