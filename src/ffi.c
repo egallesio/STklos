@@ -691,9 +691,9 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-int8_t_func primitive ...
+ *      STk_cpointer-set-int8_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-int8_t!", cpointer_set_int8_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-int8!", cpointer_set_int8, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(int8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int8_t)STk_integer_value(value);
@@ -701,9 +701,9 @@ DEFINE_PRIMITIVE("cpointer-set-int8_t!", cpointer_set_int8_t, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-uint8_t_func primitive ...
+ *      STk_cpointer-set-uint8_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-uint8_t!", cpointer_set_uint8_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-uint8!", cpointer_set_uint8, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(uint8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint8_t)STk_integer_value(value);
@@ -711,9 +711,9 @@ DEFINE_PRIMITIVE("cpointer-set-uint8_t!", cpointer_set_uint8_t, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-int16_t_func primitive ...
+ *      STk_cpointer-set-int16_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-int16_t!", cpointer_set_int16_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-int16!", cpointer_set_int16, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(int16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int16_t)STk_integer_value(value);
@@ -721,9 +721,9 @@ DEFINE_PRIMITIVE("cpointer-set-int16_t!", cpointer_set_int16_t, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-uint16_t_func primitive ...
+ *      STk_cpointer-set-uint16_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-uint16_t!", cpointer_set_uint16_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-uint16!", cpointer_set_uint16, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(uint16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint16_t)STk_integer_value(value);
@@ -731,9 +731,9 @@ DEFINE_PRIMITIVE("cpointer-set-uint16_t!", cpointer_set_uint16_t, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-int32_t_func primitive ...
+ *      STk_cpointer-set-int32_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-int32_t!", cpointer_set_int32_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-int32!", cpointer_set_int32, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(int32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int32_t)STk_integer_value(value);
@@ -741,9 +741,9 @@ DEFINE_PRIMITIVE("cpointer-set-int32_t!", cpointer_set_int32_t, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-uint32_t_func primitive ...
+ *      STk_cpointer-set-uint32_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-uint32_t!", cpointer_set_uint32_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-uint32!", cpointer_set_uint32, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(uint32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint32_t)STk_integer_value(value);
@@ -751,9 +751,9 @@ DEFINE_PRIMITIVE("cpointer-set-uint32_t!", cpointer_set_uint32_t, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-int64_t_func primitive ...
+ *      STk_cpointer-set-int64_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-int64_t!", cpointer_set_int64_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-int64!", cpointer_set_int64, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(int64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int64_t)STk_integer_value(value);
@@ -761,9 +761,9 @@ DEFINE_PRIMITIVE("cpointer-set-int64_t!", cpointer_set_int64_t, subr3,
 }
 
 /* ======================================================================
- *      STk_cpointer-set-uint64_t_func primitive ...
+ *      STk_cpointer-set-uint64_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set-uint64_t!", cpointer_set_uint64_t, subr3,
+DEFINE_PRIMITIVE("cpointer-set-uint64!", cpointer_set_uint64, subr3,
                  (SCM pointer, SCM offset, SCM value))
 {
   *(uint64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint64_t)STk_integer_value(value);
@@ -874,7 +874,7 @@ DEFINE_PRIMITIVE("cpointer-set-pointer!", cpointer_set_pointer, subr3,
 /* ======================================================================
  *      STk_cpointer-ref-int8_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-int8_t", cpointer_ref_int8_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-int8", cpointer_ref_int8, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(int8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -883,7 +883,7 @@ DEFINE_PRIMITIVE("cpointer-ref-int8_t", cpointer_ref_int8_t, subr2,
 /* ======================================================================
  *      STk_cpointer-ref-uint8_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-uint8_t", cpointer_ref_uint8_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-uint8", cpointer_ref_uint8, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(uint8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -892,7 +892,7 @@ DEFINE_PRIMITIVE("cpointer-ref-uint8_t", cpointer_ref_uint8_t, subr2,
 /* ======================================================================
  *      STk_cpointer-ref-int16_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-int16_t", cpointer_ref_int16_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-int16", cpointer_ref_int16, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(int16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -901,7 +901,7 @@ DEFINE_PRIMITIVE("cpointer-ref-int16_t", cpointer_ref_int16_t, subr2,
 /* ======================================================================
  *      STk_cpointer-ref-uint16_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-uint16_t", cpointer_ref_uint16_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-uint16", cpointer_ref_uint16, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(uint16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -910,7 +910,7 @@ DEFINE_PRIMITIVE("cpointer-ref-uint16_t", cpointer_ref_uint16_t, subr2,
 /* ======================================================================
  *      STk_cpointer-ref-int32_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-int32_t", cpointer_ref_int32_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-int32", cpointer_ref_int32, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(int32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -919,7 +919,7 @@ DEFINE_PRIMITIVE("cpointer-ref-int32_t", cpointer_ref_int32_t, subr2,
 /* ======================================================================
  *      STk_cpointer-ref-uint32_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-uint32_t", cpointer_ref_uint32_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-uint32", cpointer_ref_uint32, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(uint32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -928,7 +928,7 @@ DEFINE_PRIMITIVE("cpointer-ref-uint32_t", cpointer_ref_uint32_t, subr2,
 /* ======================================================================
  *      STk_cpointer-ref-int64_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-int64_t", cpointer_ref_int64_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-int64", cpointer_ref_int64, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(int64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -937,7 +937,7 @@ DEFINE_PRIMITIVE("cpointer-ref-int64_t", cpointer_ref_int64_t, subr2,
 /* ======================================================================
  *      STk_cpointer-ref-uint64_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-ref-uint64_t", cpointer_ref_uint64_t, subr2,
+DEFINE_PRIMITIVE("cpointer-ref-uint64", cpointer_ref_uint64, subr2,
                  (SCM pointer, SCM offset))
 {
   return MAKE_INT(*(uint64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
@@ -1094,14 +1094,14 @@ int STk_init_ffi(void)
   ADD_PRIMITIVE(get_typed_ext_var);
   ADD_PRIMITIVE(set_typed_ext_var);
 
-  ADD_PRIMITIVE(cpointer_set_int8_t);
-  ADD_PRIMITIVE(cpointer_set_uint8_t);
-  ADD_PRIMITIVE(cpointer_set_int16_t);
-  ADD_PRIMITIVE(cpointer_set_uint16_t);
-  ADD_PRIMITIVE(cpointer_set_int32_t);
-  ADD_PRIMITIVE(cpointer_set_uint32_t);
-  ADD_PRIMITIVE(cpointer_set_int64_t);
-  ADD_PRIMITIVE(cpointer_set_uint64_t);
+  ADD_PRIMITIVE(cpointer_set_int8);
+  ADD_PRIMITIVE(cpointer_set_uint8);
+  ADD_PRIMITIVE(cpointer_set_int16);
+  ADD_PRIMITIVE(cpointer_set_uint16);
+  ADD_PRIMITIVE(cpointer_set_int32);
+  ADD_PRIMITIVE(cpointer_set_uint32);
+  ADD_PRIMITIVE(cpointer_set_int64);
+  ADD_PRIMITIVE(cpointer_set_uint64);
   ADD_PRIMITIVE(cpointer_set_char);
   ADD_PRIMITIVE(cpointer_set_short);
   ADD_PRIMITIVE(cpointer_set_unsigned_short);
@@ -1113,14 +1113,14 @@ int STk_init_ffi(void)
   ADD_PRIMITIVE(cpointer_set_double);
   ADD_PRIMITIVE(cpointer_set_pointer);
 
-  ADD_PRIMITIVE(cpointer_ref_int8_t);
-  ADD_PRIMITIVE(cpointer_ref_uint8_t);
-  ADD_PRIMITIVE(cpointer_ref_int16_t);
-  ADD_PRIMITIVE(cpointer_ref_uint16_t);
-  ADD_PRIMITIVE(cpointer_ref_int32_t);
-  ADD_PRIMITIVE(cpointer_ref_uint32_t);
-  ADD_PRIMITIVE(cpointer_ref_int64_t);
-  ADD_PRIMITIVE(cpointer_ref_uint64_t);
+  ADD_PRIMITIVE(cpointer_ref_int8);
+  ADD_PRIMITIVE(cpointer_ref_uint8);
+  ADD_PRIMITIVE(cpointer_ref_int16);
+  ADD_PRIMITIVE(cpointer_ref_uint16);
+  ADD_PRIMITIVE(cpointer_ref_int32);
+  ADD_PRIMITIVE(cpointer_ref_uint32);
+  ADD_PRIMITIVE(cpointer_ref_int64);
+  ADD_PRIMITIVE(cpointer_ref_uint64);
   ADD_PRIMITIVE(cpointer_ref_char);
   ADD_PRIMITIVE(cpointer_ref_short);
   ADD_PRIMITIVE(cpointer_ref_unsigned_short);

@@ -26,14 +26,14 @@
 (export make-external-function
         make-callback
         define-external
-        cpointer-set-int8_t!
-        cpointer-set-uint8_t!
-        cpointer-set-int16_t!
-        cpointer-set-uint16_t!
-        cpointer-set-int32_t!
-        cpointer-set-uint32_t!
-        cpointer-set-int64_t!
-        cpointer-set-uint64_t!
+        cpointer-set-int8!
+        cpointer-set-uint8!
+        cpointer-set-int16!
+        cpointer-set-uint16!
+        cpointer-set-int32!
+        cpointer-set-uint32!
+        cpointer-set-int64!
+        cpointer-set-uint64!
         cpointer-set-char!
         cpointer-set-short!
         cpointer-set-unsigned-short!
@@ -45,14 +45,14 @@
         cpointer-set-double!
         cpointer-set-pointer!
 
-        cpointer-ref-int8_t
-        cpointer-ref-uint8_t
-        cpointer-ref-int16_t
-        cpointer-ref-uint16_t
-        cpointer-ref-int32_t
-        cpointer-ref-uint32_t
-        cpointer-ref-int64_t
-        cpointer-ref-uint64_t
+        cpointer-ref-int8
+        cpointer-ref-uint8
+        cpointer-ref-int16
+        cpointer-ref-uint16
+        cpointer-ref-int32
+        cpointer-ref-uint32
+        cpointer-ref-int64
+        cpointer-ref-uint64
         cpointer-ref-char
         cpointer-ref-short
         cpointer-ref-unsigned-short
