@@ -58,15 +58,9 @@ doc>
 (define bit-xor #f)
 
 (let ()
-  (define (reduce fct lst base)
-    (if (null? lst)
-        base
-        (fct (car lst)
-             (reduce fct (cdr lst) base))))
-
-  (set! bit-and (lambda lst (reduce %bit-and lst -1)))
-  (set! bit-or  (lambda lst (reduce %bit-or  lst  0)))
-  (set! bit-xor (lambda lst (reduce %bit-xor lst  0))))
+  (set! bit-and (lambda lst (reduce %bit-and -1 lst)))
+  (set! bit-or  (lambda lst (reduce %bit-or  0 lst)))
+  (set! bit-xor (lambda lst (reduce %bit-xor 0 lst))))
 
 
 (define (bit-not n)
