@@ -25,10 +25,6 @@
 ;;;;
 
 (define-module scheme/case-lambda
-  ;; HACK
-  ;; FIXME: must be changed when we have clean macros
-  (define case-lambda #void)
-  (export case-lambda))
+  (%module-define-and-export case-lambda))
 
 (provide "scheme/case-lambda")
-
