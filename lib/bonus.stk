@@ -24,7 +24,7 @@
 
 
 (export read-chars read-chars! display-shared gensym
-        macro-expand macro-expand*
+        macro-expand macro-expand* unquote unquote-splicing
         improper-list?
         remove remove! delete delete!
         every any
@@ -159,6 +159,19 @@ doc>
     (if (equal? new exp)
         exp
         (macro-expand* new))))
+
+
+;;
+;; Quasiquote friends
+;;
+(define-macro (unquote . e)
+  (syntax-error "unquote cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote e)))
+
+(define-macro (unquote-splicing . e)
+  (syntax-error "unquote-splicing cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote-splicing e)))
+
 
 ;;;
 ;;; List functions

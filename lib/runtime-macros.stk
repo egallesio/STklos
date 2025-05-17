@@ -50,6 +50,7 @@
 (define-macro (|lambda| . args)      `(%%lambda ,@args))
 (define-macro (|λ| . args)           `(%%lambda ,@args))
 (define-macro (quote . args)         `(%%quote ,@args))
+(define-macro (set! . args)          `(%%set! ,@args))
 
 ;;;;
 ;;;; WHEN/UNLESS
@@ -63,13 +64,6 @@
   (if (<= (length args) 1)
       (syntax-error 'unless "bad syntax in ~S" `(unless ,@args))
       `(if (not ,(car args)) (begin ,@(cdr args)))))
-
-;;;;
-;;;; SET!
-;;;;
-(define-macro (set! . args)
-  `(%%set! ,@args))
-
 
 ;;;;
 ;;;; QUASIQUOTE
@@ -112,17 +106,6 @@
 
   ;; Body of quasiquote starts here
   (backquotify expr 0))
-
-;;
-;; Quasiquote friends
-;;
-(define-macro (unquote . e)
-  (syntax-error "unquote cannot be used outside of quasiquote in form ~S"
-                (cons 'unquote e)))
-
-(define-macro (unquote-splicing . e)
-  (syntax-error "unquote-splicing cannot be used outside of quasiquote in form ~S"
-                (cons 'unquote-splicing e)))
 
 
 ;; ----------------------------------------------------------------------
