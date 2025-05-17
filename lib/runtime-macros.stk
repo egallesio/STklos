@@ -70,6 +70,50 @@
 (define-macro (set! . args)
   `(%%set! ,@args))
 
+
+;;;;
+;;;; QUASIQUOTE
+;;;;
+(define-macro (quasiquote expr)
+  (define (backquotify e level)
+    (cond
+      ((pair? e)
+         (cond
+           ((eq? (car e) 'quasiquote)
+                 (list 'list ''quasiquote
+                       (backquotify (cadr e) (+ level 1))))
+           ((eq? (car e) 'unquote)
+                 (if (<= level 0)
+                     (cadr e)
+                     (list 'list ''unquote
+                           (backquotify (cadr e) (- level 1)))))
+           ((eq? (car e) 'unquote-splicing)
+                (if (<= level 0)
+                    (list 'cons
+                          (backquotify (car e) level)
+                          (backquotify (cdr e) level))
+                    (list 'list ''unquote-splicing
+                          (backquotify (cadr e) (- level 1)))))
+           ((and (<= level 0) (pair? (car e)) (eq? (caar e) 'unquote-splicing))
+                (if (null? (cdr e))
+                    (cadar e)
+                    (list 'append (cadar e)
+                          (backquotify (cdr e) level))))
+           (else
+                (list 'cons
+                      (backquotify (car e) level)
+                      (backquotify (cdr e) level)))))
+      ((vector? e)
+         (list 'list->vector (backquotify (vector->list e) level)))
+      ((symbol? e)
+         (list 'quote e))
+      (else
+       e)))
+
+  ;; Body of quasiquote starts here
+  (backquotify expr 0))
+
+
 ;; ----------------------------------------------------------------------
 ;; syntax-error
 ;; ----------------------------------------------------------------------
