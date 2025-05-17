@@ -113,6 +113,17 @@
   ;; Body of quasiquote starts here
   (backquotify expr 0))
 
+;;
+;; Quasiquote friends
+;;
+(define-macro (unquote . e)
+  (syntax-error "unquote cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote e)))
+
+(define-macro (unquote-splicing . e)
+  (syntax-error "unquote-splicing cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote-splicing e)))
+
 
 ;; ----------------------------------------------------------------------
 ;; syntax-error
