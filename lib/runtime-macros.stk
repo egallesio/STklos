@@ -49,7 +49,7 @@
 (define-macro (with-handler . args)  `(%%with-handler ,@args))
 (define-macro (|lambda| . args)      `(%%lambda ,@args))
 (define-macro (|λ| . args)           `(%%lambda ,@args))
-
+(define-macro (quote . args)         `(%%quote ,@args))
 
 ;;;;
 ;;;; WHEN/UNLESS

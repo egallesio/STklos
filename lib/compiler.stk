@@ -194,11 +194,9 @@
      ((not (symbol? (car form)))  (map-expander form))
      (else  (let* ((name (car form))
                    (val  (find-syntax-in-env name env)))
-              (if (eq? name 'quote)
-                  form
-                  (if (and (symbol? name) (%syntax? val))
-                      (apply (%syntax-expander val) (cdr form))
-                      (map-expander form))))))))
+              (if (and (symbol? name) (%syntax? val))
+                  (apply (%syntax-expander val) (cdr form))
+                  (map-expander form)))))))
 
 ;; ======================================================================
 
@@ -309,7 +307,7 @@
  * constant vectors. This is not necessary with STklos.
 doc>
 |#
-(define (compile-quote expr env tail?)
+(define (compile-%%quote expr env tail?)
   (if (= (length expr) 2)
       (compile-constant (cadr expr) env tail?)
       (compiler-error 'quote expr "bad usage in ~S" expr)))
@@ -2072,7 +2070,7 @@ both forms.
             ((%%cond)             (compile-%%cond         e env tail?))
             ((%%case)             (compile-%%case         e env tail?))
             ((%%do)               (compile-%%do           e env tail?))
-            ((quote)              (compile-quote          e env tail?))  ;; FIXME
+            ((%%quote)            (compile-%%quote        e env tail?))
             ((%%with-handler)     (compile-%%with-handler e env tail?))
             ((%%define-macro)     (compile-%%define-macro e env tail?))
             ((%%set!)             (compile-%%set!         e env tail?))
