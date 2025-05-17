@@ -85,61 +85,61 @@
       test-syntax-3)
 
 ;;;
-;;; local %let-syntax
+;;; local %%let-syntax
 ;;;
 
-;;  %let-syntax should not mess with lexical levels
+;;  %%let-syntax should not mess with lexical levels
 (test "lex-scope macros 7"
       -1
       (let ((a -1))
-        (%let-syntax ((f (lambda (x) 1))
-                      (g -2))       ; %let-syntax doesn't care if "-2"
+        (%%let-syntax ((f (lambda (x) 1))
+                      (g -2))       ; %%let-syntax doesn't care if "-2"
                                     ; is used as transformer
            a)))
 
-;; %let-syntax with empty environment should not mess with lexical levels
+;; %%let-syntax with empty environment should not mess with lexical levels
 (test "lex-scope macros 8"
       -1
       (let ((a -1))
-        (%let-syntax ()
+        (%%let-syntax ()
            a)))
 
-;; basic %let-syntax
+;; basic %%let-syntax
 (test "lex-scope macros 9"
       -2
       (let ((a -1))
-        (%let-syntax ((f (lambda form -2)))
+        (%%let-syntax ((f (lambda form -2)))
           (f))))
 
-;; %let-syntax
+;; %%let-syntax
 (test "lex-scope macros 10"
       -2
-      (%let-syntax ((g (lambda form -2)))
+      (%%let-syntax ((g (lambda form -2)))
         (let ((a -1))
-          (%let-syntax ((f (lambda form '(g))))
+          (%%let-syntax ((f (lambda form '(g))))
             (f)))))
 
 (test "lex-scope macros 11"
       -2
       (let ((g (lambda () -1)))
-        (%let-syntax ((g (lambda form -2)))
+        (%%let-syntax ((g (lambda form -2)))
           (g))))
 
 (test "lex-scope macros 12"
       -1
-      (%let-syntax ((g (lambda form -2)))
+      (%%let-syntax ((g (lambda form -2)))
         (let ((g (lambda () -1)))
           (g))))
 
 (test "lex-scope macros 13"
       42
-      (%let-syntax ((f (lambda form 42)))
+      (%%let-syntax ((f (lambda form 42)))
         (let ((g (lambda () -1)))
           (let ((h -2))
             (let ((i -3))
               (f))))))
 
-(%let-syntax ((f (lambda form 42)))
+(%%let-syntax ((f (lambda form 42)))
   (test "lex-scope macros 14"
         42
         (let ((g (lambda () -1)))
@@ -154,48 +154,48 @@
 (define-macro (%lex-scope-example)
   (let ((g    (gensym 'g-))
         (form (gensym 'form-)))
-    `(%let-syntax ((,g (lambda ,form -2)))
+    `(%%let-syntax ((,g (lambda ,form -2)))
                   ,g)))
 
 (test/error "lex-scope macros 15" (%lex-scope-example))
 
 ; version that didn't work:
 ;; (test/error "lex-scope macros 15"
-;;             (%let-syntax ((g (lambda form -2)))
+;;             (%%let-syntax ((g (lambda form -2)))
 ;;               g))
 
 (test "lex-scope macros 16"
       -1
-      (%let-syntax ((g (lambda form -2)))
-        (%let-syntax ((g (lambda form -1)))
+      (%%let-syntax ((g (lambda form -2)))
+        (%%let-syntax ((g (lambda form -1)))
           (g))))
 
 (test "lex-scope macros 17"
       -2
-      (%let-syntax ((g (lambda form -2)))
+      (%%let-syntax ((g (lambda form -2)))
         (let ((f (lambda () (g))))
-          (%let-syntax ((g (lambda form -1)))
+          (%%let-syntax ((g (lambda form -1)))
             (f)))))
 
 (test "lex-scope macros 18"
       -1
-      (%let-syntax ((g (lambda form -2)))
-        (%let-syntax ((g (lambda form -1)))
+      (%%let-syntax ((g (lambda form -2)))
+        (%%let-syntax ((g (lambda form -1)))
           (let ((f (lambda () (g))))
             (f)))))
 
 (test "lex-scope macros 19"
       -1
-      (%let-syntax ((g (lambda form -1)))
+      (%%let-syntax ((g (lambda form -1)))
         (begin
           (g))))
 
 
-;; %let-syntax is NOT hygienic; we capture a variable in
+;; %%let-syntax is NOT hygienic; we capture a variable in
 ;; this example.
 (define (test-syntax-function x)
   (let ((one 1))
-    (%let-syntax ((plus-one (lambda (k) `(+ one ,k))))
+    (%%let-syntax ((plus-one (lambda (k) `(+ one ,k))))
       (plus-one x))))
 
 (test "lex-scope macros 20"
@@ -209,7 +209,7 @@
 (test "lex-scope macros 21"
       -1
       (let ((a -3))
-        (%let-syntax ((g (lambda form -2)))
+        (%%let-syntax ((g (lambda form -2)))
           (let ((f (lambda () (test-syntax-4))))
             (f)))))
 

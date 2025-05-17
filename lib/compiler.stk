@@ -418,7 +418,7 @@ doc>
 
   (let loop ((lev 0) (env env))
     ;; lev denotes the number of frames between the searched variable location
-    ;; and the current frame. Note that the extra levels introduced by %let-syntax
+    ;; and the current frame. Note that the extra levels introduced by %%let-syntax
     ;; don't result in a frame in the stack.
     (if (not env)
         ;; name is a global variable
@@ -1851,10 +1851,10 @@ the R7RS form
 NOTE: Hopefully our implementation produce the SAME (incorrect) result for
 both forms.
 |#
-(define (compile-%let-syntax e env tail?)
+(define (compile-%%let-syntax e env tail?)
   (let ((len (length e)))
     (if (< len  3)
-        (compiler-error '%let-syntax e "ill formed %let-syntax ~S" e)
+        (compiler-error '%%let-syntax e "ill formed syntax ~S" e)
         (let ((bindings (cadr e))
               (body     (cddr e)))
           (if (null? bindings)
@@ -1870,7 +1870,7 @@ both forms.
                     ;; build a new macro environment for evaluating body
                     (let ((new (car bindings)))
                       (unless (and (list? new) (= (length new) 2))
-                        (compiler-error '%let-syntax new
+                        (compiler-error '%%let-syntax new
                                         "ill formed binding ~S" new))
                       (let* ((name      (car new))
                              (expander  (cadr new))
@@ -2074,8 +2074,7 @@ both forms.
             ((%%with-handler)     (compile-%%with-handler e env tail?))
             ((%%define-macro)     (compile-%%define-macro e env tail?))
             ((%%set!)             (compile-%%set!         e env tail?))
-
-            ((%let-syntax)        (compile-%let-syntax     e env tail?))
+            ((%%let-syntax)       (compile-%%let-syntax   e env tail?))
 
             ;; Special calls
             ((%%require)          (compile-%%require      e env tail?))

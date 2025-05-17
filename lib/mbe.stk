@@ -731,7 +731,7 @@ doc>
 ;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
 ;;
 ;; =>
-;;     (%let-syntax
+;;     (%%let-syntax
 ;;       ((f (lambda args
 ;;             ((%%symbol-value 'find-clause 'MBE)
 ;;              'f
@@ -742,7 +742,7 @@ doc>
 ;;       (f))
 ;;
 (define-macro (let-syntax bindings . body)
-  `(%let-syntax
+  `(%%let-syntax
     ,(map (lambda (x)
             (let ((macro-name (car x))
                   (syn-rules  (cadr x)))
