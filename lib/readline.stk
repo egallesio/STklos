@@ -120,7 +120,8 @@
   (if (zero? (string-length str))
       '()
       ;; We just compare the prefix.
-      (let* ((symbols (module-symbols* (current-module)))
+      (let* ((symbols (append (%special-forms-list)
+                              (module-symbols* (current-module))))
              (size (string-length str))
              (match (lambda (s)
                       (and (>= (string-length s) size)
