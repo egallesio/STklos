@@ -36,7 +36,7 @@
    `(begin ,@(map (lambda (symb) `(define ,symb #void))
                   lst)))
 
-  (%define-here ... => _  else syntax-rules)
+  (%define-here syntax-rules)
   ;; HACK END
   ;; ----------------------------------------------------------------------
   (%module-define-and-export
