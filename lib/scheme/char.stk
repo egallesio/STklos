@@ -25,7 +25,7 @@
 ;;;;
 
 (define-module scheme/char
-  (%module-import-and-export
+  (%scheme-import-and-export
      char-alphabetic?              char-ci=?
      char-ci<?                     char-ci>?
      char-ci<=?                    char-ci>=?

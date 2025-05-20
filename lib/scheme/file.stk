@@ -25,7 +25,7 @@
 ;;;;
 
 (define-module scheme/file
-  (%module-import-and-export
+  (%scheme-import-and-export
       call-with-input-file    call-with-output-file
       delete-file             file-exists?
       open-input-file         open-output-file

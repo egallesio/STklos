@@ -25,7 +25,7 @@
 ;;;;
 
 (define-module scheme/inexact
-  (%module-import-and-export
+  (%scheme-import-and-export
    acos        asin
    atan       cos
    exp        finite?

@@ -25,7 +25,7 @@
 ;;;;
 
 (define-module scheme/complex
-  (%module-import-and-export
+  (%scheme-import-and-export
          angle       magnitude
          imag-part   real-part
          make-polar  make-rectangular))

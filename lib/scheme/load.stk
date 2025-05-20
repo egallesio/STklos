@@ -25,7 +25,7 @@
 ;;;;
 
 (define-module scheme/load
-  (%module-import-and-export load))
+  (%scheme-import-and-export load))
 
 (provide "scheme/load")
 

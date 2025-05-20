@@ -26,6 +26,6 @@
 
 
 (define-module scheme/repl
-  (%module-import-and-export interaction-environment))
+  (%scheme-import-and-export interaction-environment))
 
 (provide "scheme/repl")

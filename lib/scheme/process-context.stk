@@ -25,7 +25,7 @@
 ;;;;
 
 (define-module scheme/process-context
-  (%module-import-and-export
+  (%scheme-import-and-export
        get-environment-variable get-environment-variables
        command-line             emergency-exit
        exit))

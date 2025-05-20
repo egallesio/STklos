@@ -26,7 +26,7 @@
 
 
 (define-module scheme/read
-  (%module-import-and-export read))
+  (%scheme-import-and-export read))
 
 (provide "scheme/read")
 

@@ -26,7 +26,7 @@
 
 
 (define-module scheme/r5rs
-  (%module-import-and-export
+  (%scheme-import-and-export
    - * / + < <= = > >= abs acos and angle append apply asin assoc assq
    assv atan begin boolean?
    caaaar caaadr caadar caaddr

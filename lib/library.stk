@@ -27,23 +27,12 @@
 
 
 (export define-library library-name library-list
-        ;; FIXME
-        %module-define-and-export
-        %module-import-and-export
-        %make-copy-module)
-
-;;
-;; A macro to redefine a symbol in a R7RS module
-;;
-(define-macro (%module-define-and-export . lst)
-  `(begin
-     ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)
-     (export ,@lst)))
+               %scheme-import-and-export %make-copy-module)
 
 ;;
 ;; A macro to import a list of symbols from SCHEME and re-export it
 ;;
-(define-macro (%module-import-and-export . lst)
+(define-macro (%scheme-import-and-export . lst)
   `(begin
      (import (only SCHEME ,@lst))
      (export ,@lst)))
