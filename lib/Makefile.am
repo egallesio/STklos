@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+# Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,7 +69,6 @@ scheme_extra = STklos.init
 SRC_STK = bigmatch.stk        \
           conditions.stk      \
           describe.stk        \
-          env.stk             \
           expand.ss           \
           full-syntax.stk     \
           getopt.stk          \
@@ -84,7 +83,6 @@ scheme_OBJS = bigmatch.ostk     \
           conditions.ostk       \
           full-syntax.ostk      \
           describe.ostk         \
-          env.ostk              \
           getopt.ostk           \
           lex-rt.ostk           \
           pretty-print.ostk     \
