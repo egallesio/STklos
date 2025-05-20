@@ -67,7 +67,6 @@
     (include "thread.stk"))       ; Thread support
   (include "ffi.stk")             ; FFI support
   (include "r7rs.stk")            ; Support of R7RS
-  (include "env.stk")             ; Environment functions
   (include "load.stk")            ; Extended load dealing with paths and suffixes
   (include "library.stk")         ; R7RS define-library
   (include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
