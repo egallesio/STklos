@@ -26,20 +26,7 @@
 
 
 (define-module scheme/base
-  (import SCHEME)
-
-  ;; ----------------------------------------------------------------------
-  ;; HACK START
-  ;; THIS IS A UGLY HACK. THIS MACRO MUST BE DELETED AS SOON AS WE KNOW
-  ;; HOW TO CLEANLY EXPORT SYNTAXES?
-  (define-macro (%define-here . lst)
-   `(begin ,@(map (lambda (symb) `(define ,symb #void))
-                  lst)))
-
-  (%define-here syntax-rules)
-  ;; HACK END
-  ;; ----------------------------------------------------------------------
-  (%module-define-and-export
+   (%module-import-and-export
       *                                 +
       -                                 ...
       /                                 <
@@ -97,7 +84,7 @@
       let                               let*
       let*-values                       let-syntax
       let-values                        letrec
-      letrec*                            letrec-syntax
+      letrec*                           letrec-syntax
       list                              list->string
       list->vector                      list-copy
       list-ref                          list-set!
@@ -143,7 +130,7 @@
       string?                           substring
       symbol->string                    symbol=?
       symbol?                           syntax-error
-      syntax-rules                      textual-port?
+      #;syntax-rules                      textual-port?
       truncate                          truncate-quotient
       truncate-remainder                truncate/
       u8-ready?                         unless

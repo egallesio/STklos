@@ -2,7 +2,7 @@
 ;;;;
 ;;;; repl.stk         -- The (scheme repl) library
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,6 @@
 
 
 (define-module scheme/repl
-  (%module-define-and-export interaction-environment))
+  (%module-import-and-export interaction-environment))
 
 (provide "scheme/repl")
