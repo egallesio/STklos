@@ -178,13 +178,14 @@
 (define (find-syntax-in-env symb env)
   (and (symbol? symb)
        (let ((val (find-symbol-in-env symb env)))         ; local macro?
-         (if (%syntax? val)
-             val
+         (if val
+             ;; Symbol was found (but it can also be a non syntax -- a simple local)
+             (and (%syntax? val) val)
+             ;; symbol was not found try to see if it is a global macroo
              (let ((val (symbol-value* symb               ; global macro?
                                        (compiler-current-module)
                                        #f)))
-               (and (%syntax? val)
-                    val))))))
+               (and (%syntax? val) val))))))
 
 (define (%macro-expand form env)
   (let ((map-expander (lambda (form)
