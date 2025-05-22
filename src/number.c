@@ -1045,6 +1045,15 @@ static inline long complex_diff(SCM r1, SCM i1, SCM r2, SCM i2)
 static long do_compare(SCM x, SCM y)
 {
   /* ASSERT: x and y are numbers and none is a NaN */
+
+  /* RATIONALS: when comparing a rational to integers, or to another rational,
+                instead of computing the difference, we compare
+                a/b compared to c/d  <-->  ad compared to bc
+                a   compared to c/d  <-->  ad compared to c
+                and so on. This is faster and conses less.
+                But we do NOT do this for reals and complexes, because it's a
+                more complicated situation.       */
+
  Top:
   switch (TYPEOF(x)) {
     case tc_real:
@@ -1056,12 +1065,21 @@ static long do_compare(SCM x, SCM y)
         default: break;
       }
       break;
-  case tc_integer:
+    case tc_integer:
       switch (TYPEOF(y)) {
         case tc_real:     return double_diff(INT_VAL(x), REAL_VAL(y));
         case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
+        case tc_rational: return do_compare(STk_mul2(x, RATIONAL_DEN(y)),
+                                             RATIONAL_NUM(y));
         case tc_complex:  return complex_diff(x, MAKE_INT(0),
                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
+        default: break;
+      }
+      break;
+    case tc_bignum:
+      switch (TYPEOF(y)) {
+        case tc_rational: return do_compare(STk_mul2(x, RATIONAL_DEN(y)),
+                                            RATIONAL_NUM(y));
         default: break;
       }
       break;
@@ -1071,6 +1089,16 @@ static long do_compare(SCM x, SCM y)
                                                COMPLEX_REAL(y),COMPLEX_IMAG(y));
         default:           return complex_diff(COMPLEX_REAL(x),COMPLEX_IMAG(x),
                                                y, MAKE_INT(0));
+      }
+      break;
+    case tc_rational:
+      switch (TYPEOF(y)) {
+        case tc_integer:
+        case tc_bignum:   return do_compare(RATIONAL_NUM(x),
+                                            STk_mul2(y, RATIONAL_DEN(x)));
+        case tc_rational: return do_compare(STk_mul2(RATIONAL_NUM(x), RATIONAL_DEN(y)),
+                                            STk_mul2(RATIONAL_NUM(y), RATIONAL_DEN(x)));
+        default: break;
       }
       break;
     default:
