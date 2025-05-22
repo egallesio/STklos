@@ -130,7 +130,7 @@
       string?                           substring
       symbol->string                    symbol=?
       symbol?                           syntax-error
-      #;syntax-rules                      textual-port?
+      syntax-rules                      textual-port?
       truncate                          truncate-quotient
       truncate-remainder                truncate/
       u8-ready?                         unless
