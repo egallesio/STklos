@@ -2093,6 +2093,9 @@ both forms.
 
      ;; ---- We have a symbol
      ((symbol? e)
+      (when (find-syntax-in-env e env)
+        ;; Accessing the value of a syntax (not calling it) is forbidden
+        (error "invalid use of syntax ~S" e))
       (compile-reference e env epair tail?))
 
      ;; Self evaluating object
