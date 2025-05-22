@@ -46,7 +46,9 @@
 
 (test "lex-scope macros 1"
       #t
-      (%syntax? test-syntax-1))
+      ;; we canot access directly the value of test-syntax-1 value. Search it.
+      (%syntax? (symbol-value 'test-syntax-1 (current-module))))
+
 
 (test "lex-scope macros 2"
       -1
@@ -157,7 +159,7 @@
     `(%%let-syntax ((,g (lambda ,form -2)))
                   ,g)))
 
-(test/error "lex-scope macros 15" (%lex-scope-example))
+(test/compile-error "lex-scope macros 15" (%lex-scope-example))
 
 ; version that didn't work:
 ;; (test/error "lex-scope macros 15"
