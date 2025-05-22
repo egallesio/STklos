@@ -118,31 +118,42 @@
 
 
 ;; ----------------------------------------------------------------------
-;; define-syntax
+;; define-syntax & syntax-rules
 ;; ----------------------------------------------------------------------
+(define-macro (syntax-rules . syn-rules)
+  (let ((ellipsis '...))
+    (when (or (symbol?  (car syn-rules))
+              (keyword? (car syn-rules)))
+      (set! ellipsis  (car syn-rules))
+      (set! syn-rules (cdr syn-rules)))
+
+    (let ((keywords    (car syn-rules))
+          (clauses     (cdr syn-rules))
+          (args        (gensym 'args)))
+      `(lambda ,args
+         ((%%symbol-value 'find-clause 'MBE) ',(car keywords)
+                                             ,args
+                                             ',keywords
+                                             ',clauses
+                                             ',ellipsis)))))
+
 (define-macro (define-syntax macro-name syn-rules)
-  (if (or (not (pair? syn-rules))
-          (not (eq? (car syn-rules) 'syntax-rules)))
-      (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
 
-      ;; SRFI-46:
-      ;; Let the user pick the ellipsis symbol. Since STklos does not recognize
-      ;; symbols starting with ":", we test for symbol and keyword here.
-      ;; If we find that the user included a symbol or keyword instead of a list
-      ;; after "SYNTAX-RULES", then it's the ellipsis marker to be used,
-      ;; (SYNTAX-RULES ::: () ((_ (f x :::)) (do-something x :::)))
-      (let ((ellipsis '...))
-        (when (or (symbol?  (cadr syn-rules))
-                  (keyword? (cadr syn-rules)))
-          (set! ellipsis (cadr syn-rules))
-          (set! syn-rules (cdr syn-rules)))
+  (define (gen-macro ellipsis keywords clauses)
+    `(define-macro ,macro-name
+       (syntax-rules ,ellipsis ,(cons macro-name keywords) ,@clauses)))
 
+  (define (signal-error _)
+    (syntax-error 'define-syntax "in '~S', bad syntax-rules ~S"
+                                 macro-name syn-rules))
 
-        (let ((keywords    (cons macro-name (cadr syn-rules)))
-              (clauses     (cddr syn-rules)))
-          `(define-macro (,macro-name . args)
-             ((%%symbol-value 'find-clause 'MBE) ',macro-name
-                                                 args
-                                                 ',keywords
-                                                 ',clauses
-                                                 ',ellipsis))))))
+    (if (or (not (pair? syn-rules))
+            (not (eq? (car syn-rules) 'syntax-rules)))
+      (signal-error #f)
+      (with-handler signal-error
+                    (let ((first (cadr syn-rules)))
+                      (if (or (symbol? first) (keyword? first))
+                          ;; User gave the ellipsis symbol
+                          (gen-macro first (caddr syn-rules) (cdddr syn-rules))
+                          (gen-macro '...  first             (cddr syn-rules)))))))
+
