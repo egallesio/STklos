@@ -1,7 +1,7 @@
 ;;;;
 ;;;; module.stk -- Module stuff
 ;;;;
-;;;; Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -390,12 +390,12 @@ doc>
 
   (define (not-in-import-set clause symbol)
     ;; Signal an error only if we are not just importing for syntax.
-    ;; Teh problem comes from the fact that we must do compute the import
+    ;; The problem comes from the fact that we must do compute the import
     ;; clause two times (with only-syntax set to #t and #f).
     ;; In any case, the real import will always signal error, if some symbol
     ;; is not properly defined.
     (unless only-syntax
-      (error clause "symbol ~s is not in the import set" symbol)))
+      (error clause "symbol ~s is not in the import set of ~S" symbol lib)))
 
   (define (build-import-list lib lst imported)
     (if (null? lst)
