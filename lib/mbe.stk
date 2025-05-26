@@ -702,7 +702,7 @@ doc>
   (let ((macro-form (cons macro-name macro-args)))
     (let Loop ((l clauses))
       (if (null? l)
-          (error macro-name "no matching clause for ~S" macro-form)
+          (syntax-error macro-name "no matching clause for ~S" macro-form)
           (let ((in-pattern  (caar  l))
                 (out-pattern (cadar l)))
             (if (mbe:matches-pattern? in-pattern macro-form keywords ellipsis)
@@ -731,7 +731,7 @@ doc>
 ;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
 ;;
 ;; =>
-;;     (%let-syntax
+;;     (%%let-syntax
 ;;       ((f (lambda args
 ;;             ((%%symbol-value 'find-clause 'MBE)
 ;;              'f
@@ -742,7 +742,7 @@ doc>
 ;;       (f))
 ;;
 (define-macro (let-syntax bindings . body)
-  `(%let-syntax
+  `(%%let-syntax
     ,(map (lambda (x)
             (let ((macro-name (car x))
                   (syn-rules  (cadr x)))
