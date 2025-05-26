@@ -125,7 +125,7 @@ doc>
 
 (define-module MBE
   (import SCHEME)
-  (export let-syntax letrec-syntax)
+  (export let-syntax letrec-syntax define-syntax syntax-rules)
 
   (define-macro (letrec-syntax . args)
     (error 'letrec-syntax
@@ -766,9 +766,52 @@ doc>
           bindings)
     ,@body))
 
-;; NOTE:
-;;    define-syntax is defined in the file lib/runtime-macros.stk
-;;
+;;;;
+;;;; STklos code for define-syntax and syntax-rules 
+;;;;
+
+(define-macro (syntax-rules . syn-rules)
+  (let ((ellipsis '...))
+    (when (or (symbol?  (car syn-rules))
+              (keyword? (car syn-rules)))
+      (set! ellipsis  (car syn-rules))
+      (set! syn-rules (cdr syn-rules)))
+
+    (let ((keywords    (car syn-rules))
+          (clauses     (cdr syn-rules))
+          (args        (gensym 'args)))
+      `(lambda ,args
+         ((%%symbol-value 'find-clause 'MBE) ',(car keywords)
+                                             ,args
+                                             ',keywords
+                                             ',clauses
+                                             ',ellipsis)))))
+
+(define-macro (define-syntax macro-name syn-rules)
+
+  (define (gen-macro ellipsis keywords clauses)
+    `(define-macro ,macro-name
+       (syntax-rules ,ellipsis ,(cons macro-name keywords) ,@clauses)))
+
+  (define (signal-error _)
+    (syntax-error 'define-syntax "in '~S', bad syntax-rules ~S"
+                                 macro-name syn-rules))
+
+    (if (or (not (pair? syn-rules))
+            (not (eq? (car syn-rules) 'syntax-rules)))
+      (signal-error #f)
+      (with-handler signal-error
+                    (let ((first (cadr syn-rules)))
+                      (if (or (symbol? first) (keyword? first))
+                          ;; User gave the ellipsis symbol
+                          (gen-macro first (caddr syn-rules) (cdddr syn-rules))
+                          (gen-macro '...  first             (cddr syn-rules)))))))
+
+
+
+
+
+
 
 )       ;;; end of module definition of MBE
 

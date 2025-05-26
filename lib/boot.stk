@@ -106,9 +106,9 @@
 ;; and forbid further definitions.
 (define-module SCHEME
   (import STKLOS-COMPILER STKLOS-OBJECT MBE SRFI-0 REPL REPL-READLINE)
-  (export eval                           ;; from STKLOS-COMPILER
-          let-syntax letrec-syntax       ;; from MBE
-          cond-expand)                   ;; from SRFI-0
+  (export eval                                                ;; from STKLOS-COMPILER
+          let-syntax letrec-syntax syntax-rules define-syntax ;; from MBE
+          cond-expand)                                        ;; from SRFI-0
 
   ;; During he bootstap, the module SCHEME is present and all the definitions
   ;; made above (yes above!!), need an unlocked SCHEME module. So, the module
