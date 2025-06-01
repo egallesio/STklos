@@ -732,11 +732,12 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
  *      STk_cpointer-set_func primitive ...
  * ====================================================================== */
 DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
-                 (SCM pointer, SCM type, SCM value, SCM offset))
+                 (SCM pointer_obj, SCM type, SCM value, SCM offset))
 {
   long kind = STk_integer_value(type);
+  char* pointer = CPOINTER_VALUE(pointer_obj) + STk_integer_value(offset);
 
-  if (!CPOINTERP(pointer))  error_bad_cpointer(pointer);
+  if (!CPOINTERP(pointer_obj))  error_bad_cpointer(pointer_obj);
   if (kind == LONG_MIN) error_bad_type_number(type);
 
   switch (kind) {
@@ -744,25 +745,25 @@ DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
       STk_error("Can not set type :void");
       break;
     case 1:                                             /* char */
-        *((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (char)CHARACTER_VAL(value);
+        *pointer = (char)CHARACTER_VAL(value);
         break;
     case 2:                                             /* short */
-        *(short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (short)STk_integer_value(value);
+        *(short*)pointer = (short)STk_integer_value(value);
         break;
     case 3:                                             /* ushort */
-        *(unsigned short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (unsigned short)STk_integer_value(value);
+        *(unsigned short*)pointer = (unsigned short)STk_integer_value(value);
         break;
     case 4:                                             /* int */
-        *(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int)STk_integer_value(value);
+        *(int*)pointer = (int)STk_integer_value(value);
         break;
     case 5:                                             /* uint */
-        *(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int)STk_integer_value(value);
+        *(int*)pointer = (int)STk_integer_value(value);
         break;
     case 6:                                             /* long */
-        *(long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (long)STk_integer_value(value);
+        *(long*)pointer = (long)STk_integer_value(value);
         break;
     case 7:                                             /* ulong */
-        *(unsigned long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (unsigned long)STk_integer_value(value);
+        *(unsigned long*)pointer = (unsigned long)STk_integer_value(value);
         break;
     case 8:                                             /* lonlong */
         STk_error("passing argument of type ~S is not implemented yet", type);
@@ -771,53 +772,52 @@ DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
         STk_error("passing argument of type ~S is not implemented yet", type);
         break;
     case 10:                                            /* float */
-        *(float*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (float)STk_number2double(value);
+        *(float*)pointer = (float)STk_number2double(value);
         break;
     case 11:                                            /* double */
-        *(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (double)STk_number2double(value);
+        *(double*)pointer = (double)STk_number2double(value);
         break;
     case 12:                                            /* boolean */
-        *(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (value != STk_false);
+        *(int*)pointer = (value != STk_false);
         break;
     case 13:                                            /* pointer */
-        char* p = (char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset);
-        *(char**)p = CPOINTER_VALUE(value);
+        *(char**)pointer = CPOINTER_VALUE(value);
         break;
     case 14:                                            /* string */
         STk_error("passing argument of type ~S is not implemented yet", type);
         break;
     case 15:                                            /* int8 */
-        *(int8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int8_t)STk_integer_value(value);
+        *(int8_t*)pointer = (int8_t)STk_integer_value(value);
         break;
     case 16:                                            /* int16 */
-        *(int16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int16_t)STk_integer_value(value);
+        *(int16_t*)pointer = (int16_t)STk_integer_value(value);
         break;
     case 17:                                            /* int32 */
-        *(int32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int32_t)STk_integer_value(value);
+        *(int32_t*)pointer = (int32_t)STk_integer_value(value);
         break;
     case 18:                                            /* int64 */
-        *(int64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int64_t)STk_integer_value(value);
+        *(int64_t*)pointer = (int64_t)STk_integer_value(value);
         break;
     case 19:                                            /* obj */
         STk_error("Can not set type :obj");
         break;
     case 20:                                            /* uint8 */
-        *(uint8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint8_t)STk_integer_value(value);
+        *(uint8_t*)pointer = (uint8_t)STk_integer_value(value);
         break;
     case 21:                                            /* uint16 */
-        *(uint16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint16_t)STk_integer_value(value);
+        *(uint16_t*)pointer = (uint16_t)STk_integer_value(value);
         break;
     case 22:                                            /* uint32 */
-        *(uint32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint32_t)STk_integer_value(value);
+        *(uint32_t*)pointer = (uint32_t)STk_integer_value(value);
         break;
     case 23:                                            /* uint64 */
-        *(uint64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (uint64_t)STk_integer_value(value);
+        *(uint64_t*)pointer = (uint64_t)STk_integer_value(value);
         break;
     case 24:                                            /* schar */
-        *((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (char)CHARACTER_VAL(value);
+        *pointer = (char)CHARACTER_VAL(value);
         break;
     case 25:                                            /* uchar */
-        *((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (unsigned char)CHARACTER_VAL(value);
+        *pointer = (unsigned char)CHARACTER_VAL(value);
         break;
   }
   return STk_void;
@@ -827,12 +827,13 @@ DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
  *      STk_cpointer-ref_func primitive ...
  * ====================================================================== */
 DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
-                 (SCM pointer, SCM type, SCM offset))
+                 (SCM pointer_obj, SCM type, SCM offset))
 {
 
   long kind = STk_integer_value(type);
+  char* pointer = CPOINTER_VALUE(pointer_obj) + STk_integer_value(offset);
 
-  if (!CPOINTERP(pointer))  error_bad_cpointer(pointer);
+  if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
   if (kind == LONG_MIN) error_bad_type_number(pointer);
 
   switch (kind) {
@@ -840,19 +841,19 @@ DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
       STk_error("Can not set type :void");
       break;
     case 1:                                             /* char */
-        return MAKE_CHARACTER(*(unsigned char*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_CHARACTER(*(unsigned char*)pointer);
     case 2:                                             /* short */
-        return MAKE_INT(*(short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(short*)pointer);
     case 3:                                             /* ushort */
-        return MAKE_INT(*(short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(short*)pointer);
     case 4:                                             /* int */
-        return MAKE_INT(*(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(int*)pointer);
     case 5:                                             /* uint */
-        return MAKE_INT(*(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(int*)pointer);
     case 6:                                             /* long */
-        return MAKE_INT(*(long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(long*)pointer);
     case 7:                                             /* ulong */
-        return MAKE_INT(*(long*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(long*)pointer);
     case 8:                                             /* lonlong */
         STk_error("passing argument of type ~S is not implemented yet", type);
         return STk_void;
@@ -860,40 +861,40 @@ DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
         STk_error("passing argument of type ~S is not implemented yet", type);
         return STk_void;
     case 10:                                            /* float */
-        return STk_double2real(*(float*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return STk_double2real(*(float*)pointer);
     case 11:                                            /* double */
-        return STk_double2real(*(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return STk_double2real(*(double*)pointer);
     case 12:                                            /* boolean */
-        return MAKE_BOOLEAN(*(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_BOOLEAN(*(int*)pointer);
     case 13:                                            /* pointer */
-        char* p = ((char*)CPOINTER_VALUE(pointer)) + STk_integer_value(offset);
-        return STk_make_Cpointer(*(char**)p, STk_void, STk_false);
+        //char* p = ((char*)CPOINTER_VALUE(pointer)) + offset;
+        return STk_make_Cpointer(*(char**)pointer, STk_void, STk_false);
     case 14:                                            /* string */
         STk_error("passing argument of type ~S is not implemented yet", type);
         return STk_void;
     case 15:                                            /* int8 */
-        return MAKE_INT(*(int8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(int8_t*)pointer);
     case 16:                                            /* int16 */
-        return MAKE_INT(*(int16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(int16_t*)pointer);
     case 17:                                            /* int32 */
-        return MAKE_INT(*(int32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(int32_t*)pointer);
     case 18:                                            /* int64 */
-        return MAKE_INT(*(int64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(int64_t*)pointer);
     case 19:                                            /* obj */
         STk_error("Can not ref type :obj");
         return STk_void;
     case 20:                                            /* uint8 */
-        return MAKE_INT(*(uint8_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(uint8_t*)pointer);
     case 21:                                            /* uint16 */
-        return MAKE_INT(*(uint16_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(uint16_t*)pointer);
     case 22:                                            /* uint32 */
-        return MAKE_INT(*(uint32_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(uint32_t*)pointer);
     case 23:                                            /* uint64 */
-        return MAKE_INT(*(uint64_t*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_INT(*(uint64_t*)pointer);
     case 24:                                            /* schar */
-        return MAKE_CHARACTER(*((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_CHARACTER(*pointer);
     case 25:                                            /* uchar */
-        return MAKE_CHARACTER(*(unsigned char*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_CHARACTER(*(unsigned char*)pointer);
     default:
       STk_panic("Incorrect type number for external variable ~S", type);
   }
