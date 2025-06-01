@@ -96,13 +96,13 @@
   ;; make-callback
   (set! make-callback
     (lambda (proc types data)
-      (%make-callback proc (parse-parameters types) data))))
+      (%make-callback proc (parse-parameters types) data)))
 
   ;; cpointer-set!
   (set! cpointer-set!
     (lambda (pointer type value . offset)
       (%cpointer-set! pointer
-                      (arg-type->number type)
+                      (arg-type->number type #f)
                       value
                       (if (null? offset) 0 (car offset)))))
 
@@ -110,8 +110,8 @@
   (set! cpointer-ref
     (lambda (pointer type . offset)
       (%cpointer-ref pointer
-                     (arg-type->number type)
-                     (if (null? offset) 0 (car offset)))))
+                     (arg-type->number type #f)
+                     (if (null? offset) 0 (car offset))))))
 
 
 #|
