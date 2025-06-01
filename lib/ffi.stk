@@ -26,46 +26,13 @@
 (export make-external-function
         make-callback
         define-external
-        cpointer-set-int8!
-        cpointer-set-uint8!
-        cpointer-set-int16!
-        cpointer-set-uint16!
-        cpointer-set-int32!
-        cpointer-set-uint32!
-        cpointer-set-int64!
-        cpointer-set-uint64!
-        cpointer-set-char!
-        cpointer-set-short!
-        cpointer-set-unsigned-short!
-        cpointer-set-int!
-        cpointer-set-unsigned-int!
-        cpointer-set-long!
-        cpointer-set-unsigned-long!
-        cpointer-set-float!
-        cpointer-set-double!
-        cpointer-set-pointer!
-
-        cpointer-ref-int8
-        cpointer-ref-uint8
-        cpointer-ref-int16
-        cpointer-ref-uint16
-        cpointer-ref-int32
-        cpointer-ref-uint32
-        cpointer-ref-int64
-        cpointer-ref-uint64
-        cpointer-ref-char
-        cpointer-ref-short
-        cpointer-ref-unsigned-short
-        cpointer-ref-int
-        cpointer-ref-unsigned-int
-        cpointer-ref-long
-        cpointer-ref-unsigned-long
-        cpointer-ref-float
-        cpointer-ref-double
-        cpointer-ref-pointer)
+        cpointer-set!
+        cpointer-ref)
 
 (define make-external-function #f)
 (define make-callback          #f)
+(define cpointer-set!          #f)
+(define cpointer-ref           #f)
 
 (let ((table '((:void       0)
                (:char       1)
@@ -86,7 +53,13 @@
                (:int16      16)
                (:int32      17)
                (:int64      18)
-               (:obj        19))))
+               (:obj        19)
+               (:uint8      20)
+               (:uint16     21)
+               (:uint32     22)
+               (:uint64     23)
+               (:schar      24)
+               (:uchar      25))))
 
   (define (arg-type->number k argument?)
     (let ((info (assoc k table)))
@@ -124,6 +97,21 @@
   (set! make-callback
     (lambda (proc types data)
       (%make-callback proc (parse-parameters types) data))))
+
+  ;; cpointer-set!
+  (set! cpointer-set!
+    (lambda (pointer type value . offset)
+      (%cpointer-set! pointer
+                      (arg-type->number type)
+                      value
+                      (if (null? offset) 0 (car offset)))))
+
+  ;; cpointer-ref
+  (set! cpointer-ref
+    (lambda (pointer type . offset)
+      (%cpointer-ref pointer
+                     (arg-type->number type)
+                     (if (null? offset) 0 (car offset)))))
 
 
 #|

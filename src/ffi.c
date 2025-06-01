@@ -731,13 +731,13 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
 /* ======================================================================
  *      STk_cpointer-set_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr4,
+DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
                  (SCM pointer, SCM type, SCM value, SCM offset))
 {
   long kind = STk_integer_value(type);
 
   if (!CPOINTERP(pointer))  error_bad_cpointer(pointer);
-  if (kind == LONG_MIN) error_bad_type_number(pointer);
+  if (kind == LONG_MIN) error_bad_type_number(type);
 
   switch (kind) {
     case 0:                                             /* void */
@@ -823,7 +823,10 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr4,
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr3,
+/* ======================================================================
+ *      STk_cpointer-ref_func primitive ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
                  (SCM pointer, SCM type, SCM offset))
 {
 
