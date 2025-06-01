@@ -777,7 +777,7 @@ DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
         *(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (double)STk_number2double(value);
         break;
     case 12:                                            /* boolean */
-        *(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (int)STk_integer_value(value);
+        *(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)) = (value != STk_false);
         break;
     case 13:                                            /* pointer */
         char* p = (char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset);
@@ -864,7 +864,7 @@ DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
     case 11:                                            /* double */
         return STk_double2real(*(double*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
     case 12:                                            /* boolean */
-        return MAKE_INT(*(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_BOOLEAN(*(int*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
     case 13:                                            /* pointer */
         char* p = ((char*)CPOINTER_VALUE(pointer)) + STk_integer_value(offset);
         return STk_make_Cpointer(*(char**)p, STk_void, STk_false);
