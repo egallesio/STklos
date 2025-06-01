@@ -840,7 +840,7 @@ DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
       STk_error("Can not set type :void");
       break;
     case 1:                                             /* char */
-        return MAKE_INT(*(unsigned char*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_CHARACTER(*(unsigned char*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
     case 2:                                             /* short */
         return MAKE_INT(*(short*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
     case 3:                                             /* ushort */
@@ -893,7 +893,7 @@ DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
     case 24:                                            /* schar */
         return MAKE_CHARACTER(*((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
     case 25:                                            /* uchar */
-        return MAKE_INT(*(unsigned char*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
+        return MAKE_CHARACTER(*(unsigned char*)((char*)CPOINTER_VALUE(pointer) + STk_integer_value(offset)));
     default:
       STk_panic("Incorrect type number for external variable ~S", type);
   }
