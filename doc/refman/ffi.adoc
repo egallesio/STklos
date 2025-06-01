@@ -60,7 +60,6 @@ between the C and the Scheme worlds.
 |*:uint32*  | uint32_t          | Scheme integer
 |*:uint64*  | uint64_t          | Scheme integer
 |*:schar*   | char              | Scheme character
-|*:uchar*   | unsigned char     | Scheme character
 |====
 
 

@@ -116,13 +116,13 @@ static void error_bad_string(SCM obj)
  (:boolean      12) (:pointer   13) (:string    14)  (:int8     15)
  (:int16        16) (:int32     17) (:int64     18)  (:obj      19)
  (:uint8        20) (:uint16    21) (:uint32    22)  (:uint64   23)
- (:schar        24) (:uchar     25)
+ (:schar        24)
  )
 */
 
 
 
-#define EXT_FUNC_MAX_TYPE 25            /* maximal value for types */
+#define EXT_FUNC_MAX_TYPE 24            /* maximal value for types */
 #define EXT_FUNC_MAX_PARAMS 30          /* max # of parameters to an external func */
 
 static ffi_type* conversion[] = {
@@ -151,7 +151,6 @@ static ffi_type* conversion[] = {
   &ffi_type_uint32,             /* :uint32 */
   &ffi_type_uint64,             /* :uint64 */
   &ffi_type_schar,              /* :schar*/
-  &ffi_type_uchar,              /* :uchar*/
 };
 
 
@@ -183,7 +182,6 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
     case 6:                                             /* long */
     case 7:                                             /* ulong */
     case 24:                                            /* schar */
-    case 25:                                            /* uchar */
       {
         long val = STk_integer_value(obj);
         if (val != LONG_MIN) {
@@ -196,7 +194,6 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
             case 6: res->uivalue = (long) val; break;
             case 7: res->uivalue = (unsigned long) val; break;
             case 24: res->cvalue  = (char) val; break;
-            case 25: res->cvalue  = (unsigned char) val; break;
           }
           return;
         }
@@ -663,7 +660,6 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
     case 6:                                             /* long */
     case 7:                                             /* ulong */
     case 24:                                            /* schar */
-    case 25:                                            /* uchar */
       {
         long value = CHARACTERP(val) ?
                          (long) CHARACTER_VAL(val) :
@@ -681,7 +677,6 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
             case 7: (* ((unsigned long *)CPOINTER_VALUE(obj)))
                              = (unsigned long) value; break;
             case 24: (* ((unsigned char *)CPOINTER_VALUE(obj))) = (unsigned char) value; break;
-            case 25: (* ((unsigned char *)CPOINTER_VALUE(obj))) = (unsigned char) value; break;
           }
           return STk_void;
         }
@@ -816,9 +811,6 @@ DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
     case 24:                                            /* schar */
         *pointer = (char)CHARACTER_VAL(value);
         break;
-    case 25:                                            /* uchar */
-        *pointer = (unsigned char)CHARACTER_VAL(value);
-        break;
   }
   return STk_void;
 }
@@ -893,8 +885,6 @@ DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
         return MAKE_INT(*(uint64_t*)pointer);
     case 24:                                            /* schar */
         return MAKE_CHARACTER(*pointer);
-    case 25:                                            /* uchar */
-        return MAKE_CHARACTER(*(unsigned char*)pointer);
     default:
       STk_panic("Incorrect type number for external variable ~S", type);
   }
