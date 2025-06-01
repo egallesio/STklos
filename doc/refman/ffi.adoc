@@ -55,6 +55,12 @@ between the C and the Scheme worlds.
 |*:pointer* | void *            | Scheme pointer object or Scheme string
 |*:string*  | char *            | Scheme string
 |*:obj*     | void *            | Any Scheme object passed as is
+|*:uint8*   | uint8_t           | Scheme integer
+|*:uint16*  | uint16_t          | Scheme integer
+|*:uint32*  | uint32_t          | Scheme integer
+|*:uint64*  | uint64_t          | Scheme integer
+|*:schar*   | char              | Scheme character
+|*:uchar*   | unsigned char     | Scheme character
 |====
 
 
@@ -194,3 +200,5 @@ errors, crashes...
 {{insertdoc 'cpointer->string}}
 {{insertdoc 'allocate-bytes}}
 {{insertdoc 'free-bytes}}
+{{insertdoc 'cpointer-set!}}
+{{insertdoc 'cpointer-ref}}
