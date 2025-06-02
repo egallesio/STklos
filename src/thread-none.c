@@ -23,8 +23,8 @@
  *    Creation date: 23-Jan-2006 12:14 (se)
  */
 
-#include "thread-common.h"
 #include "stklos.h"
+#include "thread-common.h"
 #include "vm.h"
 
 SCM STk_primordial_thread;
@@ -32,12 +32,6 @@ SCM STk_cond_thread_terminated;
 static SCM cond_thread_abandonned_mutex, cond_join_timeout;
 
 static vm_thread_t *current_vm;
-
-
-static void verify_thread(SCM thr)
-{
-  if (thr && thr != STk_primordial_thread) STk_error("bad thread ~s", thr);
-}
 
 
 vm_thread_t *STk_get_current_vm(void){
