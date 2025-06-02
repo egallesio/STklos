@@ -127,6 +127,9 @@ typedef struct {
   SCM vals[MAX_VALS];   /* registers for multiple values */
   int valc;             /* # of multiple values          */
 
+  size_t allocations;     /* # of allocations in the VM */
+  size_t bytes_allocated; /* bytes allocated            */
+
   JBUF *top_jmp_buf;
   void *start_stack;
 

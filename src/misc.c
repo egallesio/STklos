@@ -26,6 +26,7 @@
 #include "stklos.h"
 #include "gnu-getopt.h"
 #include "git-info.h"
+#include "vm.h"
 #include <limits.h>
 
 
@@ -59,17 +60,22 @@ char *STk_strdup(const char *s)
   return res;
 }
 
+/*
+ *
+ *  Memory allocation counter management
+ *
+ */
 
 void* STk_count_malloc(size_t size)
 {
-  STk_thread_inc_allocs(STk_current_thread(), size);
+  STk_vm_inc_allocs(size);
   return GC_MALLOC(size);
 }
 
 
 void* STk_count_malloc_atomic(size_t size)
 {
-  STk_thread_inc_allocs(STk_current_thread(), size);
+  STk_vm_inc_allocs(size);
   return GC_MALLOC_ATOMIC(size);
 }
 
@@ -83,6 +89,24 @@ static SCM set_count_allocs(SCM value)
 {
   STk_count_allocations = (value != STk_false);
   return STk_void;
+}
+
+DEFINE_PRIMITIVE("%vm-allocation-reset!", vm_alloc_reset, subr0, (void))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+
+  vm->allocations = vm->bytes_allocated = 0;
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%vm-allocation-counter", vm_alloc_count, subr0, (void))
+{
+  return STk_ulong2integer(STk_get_current_vm()->allocations);
+}
+
+DEFINE_PRIMITIVE("%vm-allocation-bytes", vm_alloc_bytes, subr0, (void))
+{
+  return STk_ulong2integer(STk_get_current_vm()->bytes_allocated);
 }
 
 
@@ -775,6 +799,10 @@ DEFINE_PRIMITIVE("%gc-trace-object", gc_trace_object, subr1, (SCM ptr))
 \*===========================================================================*/
 int STk_init_misc(void)
 {
+  ADD_PRIMITIVE(vm_alloc_reset);
+  ADD_PRIMITIVE(vm_alloc_count);
+  ADD_PRIMITIVE(vm_alloc_bytes);
+  
   ADD_PRIMITIVE(version);
   ADD_PRIMITIVE(short_version);
   ADD_PRIMITIVE(stable_versionp);

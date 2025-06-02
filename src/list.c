@@ -160,7 +160,7 @@ SCM STk_C_make_list(int n, SCM init)
   MUT_LOCK(cons_pool); pool = next; MUT_UNLOCK(cons_pool);
 
   if (STk_count_allocations)
-    STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
+    STk_vm_inc_allocs(n * sizeof(struct cons_obj));
   return start;
 }
 

@@ -1521,7 +1521,10 @@ SCM STk_values2vector(SCM obj, SCM vect);
 EXTERN_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv));
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 
-  SCM STk_load_bcode_file(SCM f, SCM env);
+void STk_vm_inc_allocs(size_t sz);
+
+
+SCM STk_load_bcode_file(SCM f, SCM env);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
