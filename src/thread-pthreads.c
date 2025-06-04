@@ -31,16 +31,43 @@
 #include <unistd.h>
 #include <sched.h>
 
-
 /*
- * Thread specific value (the VM)
+ * Thread specific value (acess to the running VM only)
+ *
+ * We have two implementation
+ *   - Using the Posix pthread_key_create, pthread_{set,get}specific primitives
+ *   - Using TLS (Thread Local Storage) wit the keyword __thread.
+ *
+ * TLS is really faster on gcc (with -O2). This is less impressive with clang or
+ * ith "-O3".
  */
+#if __STDC_VERSION__ >= 201112L
+#    define HAS_TLS  1 // We can use TLS
+#endif
+
+
+#ifdef HAS_TLS
+/****
+ **** Using TLS
+ ****/
+static __thread vm_thread_t *current_vm;
+
+static void set_current_vm(vm_thread_t *vm)
+{
+  current_vm = vm;
+}
+
+vm_thread_t *STk_get_current_vm(void)
+{
+  return current_vm; // ? current_vm : THREAD_VM(STk_primordial_thread);
+}
+#else
+/****
+ **** Using Pthread keys
+ ****/
 static pthread_key_t vm_key;
 
-static void cleanup_vm_specific(void _UNUSED(*p))    /* Nothing to do for now */
-{
-  /* Do nothing */
-}
+static void cleanup_vm_specific(void _UNUSED(*p)) { }   /* Nothing to do for now */
 
 static void initialize_vm_key(void)
 {
@@ -53,13 +80,18 @@ static void initialize_vm_key(void)
   }
 }
 
+static void set_current_vm(vm_thread_t *vm)
+{
+  pthread_setspecific(vm_key, vm);
+}
+
+
 vm_thread_t *STk_get_current_vm(void)
 {
   vm_thread_t *vm = pthread_getspecific(vm_key);
-
-  return vm? vm : THREAD_VM(STk_primordial_thread);
+  return vm;
 }
-
+#endif     /* HAS_TLS */
 
 /* ====================================================================== */
 
@@ -92,7 +124,9 @@ static void *start_scheme_thread(void *arg)
   STk_get_stack_pointer(&start_stack);
   THREAD_VM(thr)->start_stack = start_stack;
 
-  pthread_setspecific(vm_key, THREAD_VM(thr));
+  /* Set the current VM (in TLS of with a key specific, depending of cc version) */
+  set_current_vm(THREAD_VM(thr));
+
   pthread_cleanup_push((void (*)(SCM))terminate_scheme_thread, thr);
 
   res = STk_C_apply(THREAD_THUNK(thr), 0);
@@ -299,8 +333,10 @@ DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
 
 int STk_init_sys_threads(vm_thread_t *vm)
 {
+#ifndef HAS_TLS
   /* Define the key to access the thead specific VM */
   initialize_vm_key();
-  pthread_setspecific(vm_key, vm);
+#endif
+  set_current_vm(vm);
   return TRUE;
 }
