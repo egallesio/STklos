@@ -25,7 +25,7 @@
  */
 
 #include "stklos.h"
-
+#include "vm.h"      // FIXME:
 /*===========================================================================*\
  *
  *                              Utilities
@@ -160,7 +160,7 @@ SCM STk_C_make_list(int n, SCM init)
   MUT_LOCK(cons_pool); pool = next; MUT_UNLOCK(cons_pool);
 
   if (STk_count_allocations)
-    STk_vm_inc_allocs(n * sizeof(struct cons_obj));
+    STk_vm_inc_allocs(STk_get_current_vm(), n * sizeof(struct cons_obj));
   return start;
 }
 

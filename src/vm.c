@@ -242,6 +242,8 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   vm->scheme_thread   = STk_false;
   vm->dynwind_stack   = LIST1(STk_false);
 
+  for (int i = 0; i < CELL_POOL_SZ; i++)
+    vm->cell_pool[i] = NULL;
   return vm;
 }
 
@@ -2399,10 +2401,8 @@ DEFINE_PRIMITIVE("%pop-exception-handler", pop_handler, subr0, (void))
  *                         A L L O C A T I O N S
  *
 \*===========================================================================*/
-void STk_vm_inc_allocs(size_t sz)
+void STk_vm_inc_allocs(vm_thread_t *vm, size_t sz)
 {
-  vm_thread_t *vm = STk_get_current_vm();
-
   vm->allocations     += 1;
   vm->bytes_allocated += sz;
 }

@@ -330,7 +330,6 @@ DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
  *      Initialization ...
  * ======================================================================
  */
-
 int STk_init_sys_threads(vm_thread_t *vm)
 {
 #ifndef HAS_TLS

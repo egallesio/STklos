@@ -112,6 +112,7 @@ SCM STk_global_store_alias(SCM descr, SCM v, SCM old);    // Link v -> old
 \*===========================================================================*/
 
 #define MAX_VALS 8      /* static number of values      */
+#define CELL_POOL_SZ 10 /* size of the pool cells       */
 
 typedef struct {
   STk_instr *pc;        /* Program Counter              */
@@ -129,7 +130,7 @@ typedef struct {
 
   size_t allocations;     /* # of allocations in the VM */
   size_t bytes_allocated; /* bytes allocated            */
-
+  SCM cell_pool[CELL_POOL_SZ]; /* pool of (eventually) pre-allocated cells */
   JBUF *top_jmp_buf;
   void *start_stack;
 
@@ -144,3 +145,4 @@ typedef struct {
 
 vm_thread_t *STk_allocate_vm(int stack_size);
 vm_thread_t *STk_get_current_vm(void);
+void STk_vm_inc_allocs(vm_thread_t *vm, size_t n);
