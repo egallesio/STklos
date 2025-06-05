@@ -11347,8 +11347,9 @@ in the R<sup>5</sup>RS report.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-In STklos, <code>scheme-report-environment</code> function can be called
-without the version number (defaults to 5).
+<code>scheme-report-environment</code> function can be called
+without the version number (defaults to 5). Other version values return
+an error.
 </td>
 </tr>
 </table>
@@ -13843,6 +13844,23 @@ string.  Otherwise, the output is printed on the specified port.</p>
    <span class="p">(</span><span class="nf">format</span> <span class="s">"~a ~? ~a"</span> <span class="ss">'a</span> <span class="s">"~s"</span> <span class="o">'</span><span class="p">(</span><span class="nf">new</span><span class="p">)</span> <span class="ss">'test</span><span class="p">)</span>
                                 <span class="nv">=&gt;</span> <span class="s">"a new test"</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The following code illustrates the case in which <code>port</code> is an output
+port:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">out</span> <span class="p">(</span><span class="nb">open-output-file</span> <span class="s">"output.txt"</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="nv">out</span> <span class="s">"This goes to the file: ~x~%"</span> <span class="mi">251</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After the code is executed, the file <code>output.txt</code> will contain the line
+&#8220;This goes to the file: fb&#8221;.</p>
+</div>
+<div class="paragraph">
+<p>Finally, <code>(pp (format #f "~h"))</code> will print some quick help for <code>format</code>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -20000,11 +20018,39 @@ currently traced.</p>
 <div class="paragraph">
 <p>This function tries to obtain a pretty-printed representation of <code>sexpr</code>.
 The pretty-printed form is written on <code>port</code> with lines which are no
-more long than <code>width</code> characters. If <code>port</code> is omitted if defaults to
+more long than <code>width</code> characters. If <code>port</code> is omitted it defaults to
 the current error port. As a special convention, if <code>port</code> is <code>#t</code>,
 output goes to the current output port and if <code>port</code> is <code>#f</code>, the output
-is returned as a string by <code>pretty-print</code>.
-Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
+is returned as a string by <code>pretty-print</code>.</p>
+</div>
+<div class="paragraph">
+<p>Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">pp</span> <span class="o">'</span><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))</span> <span class="p">))</span> <span class="nv">:width</span> <span class="mi">25</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">display</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span>
+        <span class="nv">b</span>
+        <span class="nv">c</span>
+        <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>
+        <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span>
+                <span class="nv">g</span>
+                <span class="nv">h</span>
+                <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nf">pp</span> <span class="o">'</span><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))</span> <span class="p">))</span> <span class="nv">:width</span> <span class="mi">35</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">display</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span>
+        <span class="nv">b</span>
+        <span class="nv">c</span>
+        <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>
+        <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nf">pp</span> <span class="o">'</span><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))</span> <span class="p">))</span> <span class="nv">:width</span> <span class="mi">47</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">display</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))))</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_procedure-formals'></a>
