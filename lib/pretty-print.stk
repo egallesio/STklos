@@ -1,7 +1,7 @@
 ;;;;
 ;;;; pretty-print.stk   -- Pretty Printer
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -32,10 +32,11 @@
  *
  * This function tries to obtain a pretty-printed representation of |sexpr|.
  * The pretty-printed form is written on |port| with lines which are no
- * more long than |width| characters. If |port| is omitted if defaults to
+ * more long than |width| characters. If |port| is omitted it defaults to
  * the current error port. As a special convention, if |port| is `#t`,
  * output goes to the current output port and if |port| is `#f`, the output
  * is returned as a string by |pretty-print|.
+ * 
  * Note that |pp| is another name for |pretty-print|.
  *
  * @lisp
@@ -45,7 +46,7 @@
  *         b
  *         c
  *         (expt d e)
- *          (abs (* f
+ *         (abs (* f
  *                 g
  *                 h
  *                 (- i j)))))
