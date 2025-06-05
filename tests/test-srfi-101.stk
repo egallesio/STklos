@@ -35,6 +35,8 @@
   ;;                 list-ref map for-each)
   ;;         )
 
+(test-section "SRFI-101")
+
 
 (define-syntax check-expect
   (syntax-rules ()
@@ -45,6 +47,7 @@
 (define scheme:list  (symbol-value 'list  scheme))
 
 (import (prefix srfi/101 s_))
+
 
 
 ; quote
@@ -188,3 +191,6 @@
 
 (check-expect "srfi-101.50" (s_linear-access-list->random-access-list (scheme:list 1 2 3))
               (s_list 1 2 3))
+
+;;------------------------------------------------------------------
+(test-section-end)
