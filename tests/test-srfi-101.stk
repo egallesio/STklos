@@ -35,6 +35,8 @@
   ;;                 list-ref map for-each)
   ;;         )
 
+(require "test")
+
 (test-section "SRFI-101")
 
 
