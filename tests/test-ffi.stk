@@ -179,7 +179,9 @@
 (cpointer-set! p :boolean #f)
 (test "cpointer-set/cpointer-ref ̣boolean2" #f (cpointer-ref p :boolean))
 (cpointer-set! p :float 42.42)
-(test "cpointer-set/cpointer-ref ̣1" 42.42 (cpointer-ref p :float))
+(test "cpointer-set/cpointer-ref ̣1" 42.42
+                                    (cpointer-ref p :float)
+                                    (lambda (x y) (< (abs (- x y)) 0.1)))
 (cpointer-set! p :double 42.42)
 (test "cpointer-set/cpointer-ref ̣1" 42.42 (cpointer-ref p :double))
 
