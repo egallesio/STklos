@@ -828,6 +828,9 @@ DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
   return STk_void;
 }
 
+
+
+
 /* ======================================================================
  *      STk_cpointer-ref_func primitive ...
  * ====================================================================== */
@@ -941,7 +944,7 @@ DEFINE_PRIMITIVE("%stklos-has-ffi?", has_ffi, subr0, ())
 #endif
 }
 
-DEFINE_PRIMITIVE("%ffi-table", ffi_table, subr0, (void))
+DEFINE_PRIMITIVE("%ffi-assoc-table", ffi_assoc_table, subr0, (void))
 {
   return ffi_table;
 }
@@ -969,7 +972,7 @@ int STk_init_ffi(void)
   ADD_PRIMITIVE(cpointer_set);
   ADD_PRIMITIVE(cpointer_ref);
 
-  ADD_PRIMITIVE(ffi_table);
+  ADD_PRIMITIVE(ffi_assoc_table);
   ADD_PRIMITIVE(has_ffi);
   return TRUE;
 }
