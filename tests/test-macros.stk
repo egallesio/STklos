@@ -275,6 +275,109 @@
           (g ((quote ...) 2 3 4 5 6)))))
 
 
+
+(test "macro shadows variable.1"
+      -1
+      (let ((f 1))
+        (let-syntax ((f (syntax-rules () ((_) -1))))
+          (f))))
+
+(test/compile-error "macro shadows variable.2"
+      (let ((f 1))
+        (let-syntax ((f (syntax-rules () ((_) -1))))
+          f)))
+
+(test "variable shadows macro.1"
+      +1
+      (let-syntax ((f (syntax-rules () ((_) -1))))
+        (let ((f +1))
+          f)))
+
+(test "variable shadows macro.2"
+      +1
+      (let-syntax ((f (syntax-rules () ((_) -1))))
+        (let ((f (lambda () +1)))
+          (f))))
+
+(define-syntax %%%%some-esoteric-identifier
+  (syntax-rules () ((_) -1)))
+
+(test "variable shadows global macro.1"
+      +1
+      (let ((%%%%some-esoteric-identifier +1))
+        %%%%some-esoteric-identifier))
+
+(test "variable shadows global macro.2"
+      +1
+      (let ((%%%%some-esoteric-identifier (lambda () +1)))
+        (%%%%some-esoteric-identifier)))
+
+(define-syntax %%%f
+  (syntax-rules ()
+    ((%%%f a b) (- a b))))
+
+(test "variable shadows global macro.3"
+      5
+      (let ((%%%f +)) (%%%f 2 3)))
+
+;; ;;;
+;; ;;; Macros don't remember environment:
+;; ;;;
+;; (let ((x 'outer))
+;;   (let-syntax ((m (syntax-rules ()
+;;                     ((m a) (list x a)))))
+;;     (let ((x 'inner))
+;;       (cons x (m 17)))))
+
+;; (let ((a 1))
+;;   (let-syntax ((f (syntax-rules () ((_) -1))))
+;;     (let ((x 'outer))
+;;       (let-syntax ((m (syntax-rules ()
+;;                         ((m a) (list x a)))))
+;;         (let ((x 'inner))
+;;           (cons x (m 17)))))))
+
+;; ;; Should be (inner outer 17)
+;; ;; STklos result is (inner inner 17)
+
+
+
+;;;
+;;; Macros don't remember environment:
+;;;
+
+;; ;; GLOBAL
+;; (define-syntax f
+;;   (syntax-rules ()
+;;     ((f) %a)))
+
+;; (let ((%a -1)) (f))
+;; ;; should be error (a unbound), but works
+
+;; ;; LOCAL
+;; (let-syntax ((%f (syntax-rules ()
+;;                    ((%f) %x))))
+;;   (let ((%x -1))
+;;     (%f)))
+;; ;; should be error (%x unbound), but works
+
+
+
+;; (define-module A
+;;   (export f)
+;;   (define a 10)
+;;   (define-syntax f
+;;     (syntax-rules ()
+;;       ((f) a))))
+
+;; (define-module B
+;;   (import A)
+;;   (define a 20))
+
+;; (select-module B)
+;; (f) ;; should be 10 (a in module A, not in module B)
+
+
 ;;FIXME: Add more tests !!!!!!!!!
 
 
