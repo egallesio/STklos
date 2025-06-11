@@ -32,6 +32,11 @@ static SCM ffi_table = STk_nil; // Alist such as ( (:void 0) (:int 1) ....)
 #ifdef HAVE_FFI
 #  include <ffi.h>
 
+/* not portable but this is was stolen in FFI test */
+#define ffi_type_ulonglong ffi_type_ulong
+#define ffi_type_slonglong ffi_type_slong
+
+
 /* ------------------------------ *\
  * STklos C external functions
  * ------------------------------ */
@@ -47,17 +52,28 @@ struct ext_func_obj {
 };
 
 union any {
-  unsigned char  cvalue;
-  short          svalue;
-  unsigned short usvalue;
-  int            ivalue;
-  unsigned int   uivalue;
-  long           lvalue;
-  unsigned long  ulvalue;
-  long long      evalue;
-  float          fvalue;
-  double         dvalue;
-  void *         pvalue;
+  char                  cvalue;
+  signed char           scvalue;
+  unsigned char         ucvalue;
+  short                 svalue;
+  unsigned short        usvalue;
+  int                   ivalue;
+  unsigned int          uivalue;
+  long                  lvalue;
+  unsigned long         ulvalue;
+  long long             llvalue;
+  unsigned long long    ullvalue;
+  int8_t                i8value;
+  uint8_t               ui8value;
+  int16_t               i16value;
+  uint16_t              ui16value;
+  int32_t               i32value;
+  uint32_t              ui32value;
+  int64_t               i64value;
+  uint64_t              ui64value;
+  float                 fvalue;
+  double                dvalue;
+  void *                pvalue;
 };
 
 #define EXTFUNC_NAME(f)         (((struct ext_func_obj *) (f))->name)
@@ -114,13 +130,13 @@ static void error_bad_string(SCM obj)
 #define EXT_FUNC_MAX_PARAMS 30          /* max # of parameters to an external func */
 
 enum f_codes {
-  f_void,      f_char,       f_short,      f_ushort,
-  f_int,       f_uint,       f_long,       f_ulong,
-  f_longlong,  f_ulonglong,  f_float,      f_double,
-  f_boolean,   f_pointer,    f_string,     f_int8,
-  f_int16,     f_int32,      f_int64,      f_obj,
-  f_uint8,     f_uint16,     f_uint32,     f_uint64,
-  f_schar,     f_uchar,
+  f_void,      f_char,      f_schar,     f_uchar,
+  f_short,     f_ushort,    f_int,       f_uint,
+  f_long,      f_ulong,     f_longlong,  f_ulonglong,
+  f_int8,      f_uint8,     f_int16,     f_uint16,
+  f_int32,     f_uint32,    f_int64,     f_uint64,
+  f_float,     f_double,    f_boolean,     f_obj,
+  f_pointer,   f_string,
   f_last    /* MUST be the last item of the enum */
 };
 
@@ -148,8 +164,8 @@ static void build_ffi_tables(void)
   REG_TYPE(uint,        &ffi_type_uint);
   REG_TYPE(long,        &ffi_type_slong);
   REG_TYPE(ulong,       &ffi_type_ulong);
-  REG_TYPE(longlong,    &ffi_type_slong);     // portable ???
-  REG_TYPE(ulonglong,   &ffi_type_ulong);     // portable ???
+  REG_TYPE(longlong,    &ffi_type_slong);
+  REG_TYPE(ulonglong,   &ffi_type_ulong);
   REG_TYPE(float,       &ffi_type_float);
   REG_TYPE(double,      &ffi_type_double);
   REG_TYPE(boolean,     &ffi_type_uint);
@@ -190,34 +206,57 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
     case f_char:
     case f_uchar:
     case f_schar:
+      if (CHARACTERP(obj)) {
+        int val = CHARACTER_VAL(obj);
+        switch (type_needed) {
+          case f_char:      res->cvalue    = (char) val; break;
+          case f_uchar:     res->ucvalue   = (unsigned char) val; break;
+          case f_schar:     res->scvalue   = (signed char) val; break;
+        }
+      }
+      /* fallthrough */ /* to see if it's an int */
     case f_short:
     case f_ushort:
     case f_int:
     case f_uint:
     case f_long:
     case f_ulong:
-      {
-        long val = STk_integer_value(obj);
-        if (val != LONG_MIN) {
-          switch (type_needed) {
-            case f_char:   res->cvalue  = (char) val; break;
-            case f_uchar:  res->cvalue  = (unsigned char) val; break;
-            case f_schar:  res->cvalue  = (signed char) val; break;
-            case f_short:  res->svalue  = (short) val; break;
-            case f_ushort: res->usvalue = (unsigned short) val; break;
-            case f_int:    res->ivalue  = (int) val; break;
-            case f_uint:   res->uivalue = (unsigned int) val; break;
-            case f_long:   res->lvalue  = (long) val; break;
-            case f_ulong:  res->ulvalue = (unsigned long) val; break;
-          }
-          return;
-        }
-        break;
-      }
     case f_longlong:
     case f_ulonglong:
-      STk_error("passing long long is not implemented yet");
-      break;
+    case f_int8:
+    case f_uint8:
+    case f_int16:
+    case f_uint16:
+    case f_int32:
+    case f_uint32:
+    case f_int64:
+    case f_uint64: {
+      long val = STk_integer_value(obj);
+      if (val != LONG_MIN) {
+        switch (type_needed) {
+          case f_char:      res->cvalue    = (char) val; break;
+          case f_uchar:     res->ucvalue   = (unsigned char) val; break;
+          case f_schar:     res->scvalue   = (signed char) val; break;
+          case f_short:     res->svalue    = (short) val; break;
+          case f_ushort:    res->usvalue   = (unsigned short) val; break;
+          case f_int:       res->ivalue    = (int) val; break;
+          case f_uint:      res->uivalue   = (unsigned int) val; break;
+          case f_long:      res->lvalue    = (long) val; break;
+          case f_ulong:     res->ulvalue   = (unsigned long) val; break;
+          case f_longlong:  res->llvalue   = (long long) val; break;
+          case f_ulonglong: res->ullvalue  = (unsigned long long) val; break;
+          case f_int8:      res->i8value   = (int8_t) val; break;
+          case f_uint8:     res->ui8value  = (uint8_t) val; break;
+          case f_int16:     res->i16value  = (int16_t) val; break;
+          case f_uint16:    res->ui16value = (uint16_t) val; break;
+          case f_int32:     res->i32value  = (int32_t) val; break;
+          case f_uint32:    res->ui32value = (uint32_t) val; break;
+          case f_int64:     res->i64value  = (int64_t) val; break;
+          case f_uint64:    res->ui64value = (uint64_t) val; break;
+        }
+      }
+      return;
+    }
     case f_float:
     case f_double:
       {
@@ -259,16 +298,6 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
         return;
       }
       break;
-    case f_int8:
-    case f_int16:
-    case f_int32:
-    case f_int64:
-    case f_uint8:
-    case f_uint16:
-    case f_uint32:
-    case f_uint64:
-      STk_error("passing intXX is not implemented yet");
-      break;
     case f_obj:
       res->pvalue = obj;
       return;
@@ -285,8 +314,14 @@ static SCM c2scheme(union any obj, SCM rettype)
   switch (INT_VAL(rettype)) {
     case f_void:
       return STk_void;
+
     case f_char:
       return MAKE_CHARACTER(obj.cvalue);
+    case f_uchar:
+      return MAKE_CHARACTER(obj.ucvalue);
+    case f_schar:
+      return STk_long2integer(obj.scvalue); /* signed chars are (small) ints */
+
     case f_short:
       return STk_long2integer(obj.svalue);
     case f_ushort:
@@ -300,32 +335,43 @@ static SCM c2scheme(union any obj, SCM rettype)
     case f_ulong:
       return STk_ulong2integer(obj.ulvalue);
     case f_longlong:
+      return STk_ulong2integer(obj.llvalue);
     case f_ulonglong:
-      STk_error("returning long long is not implemented yet");
-      break;
+      return STk_ulong2integer(obj.ullvalue);
+    case f_int8:
+      return STk_ulong2integer(obj.i8value);
+    case f_uint8:
+      return STk_ulong2integer(obj.ui8value);
+    case f_int16:
+      return STk_ulong2integer(obj.i16value);
+    case f_uint16:
+      return STk_ulong2integer(obj.ui16value);
+    case f_int32:
+      return STk_ulong2integer(obj.i32value);
+    case f_uint32:
+      return STk_ulong2integer(obj.ui32value);
+    case f_int64:
+      return STk_ulong2integer(obj.i64value);
+    case f_uint64:
+      return STk_ulong2integer(obj.ui64value);
+
     case f_float:
       return STk_double2real((double) obj.fvalue);
     case f_double:
       return STk_double2real(obj.dvalue);
+
     case f_boolean:
       return MAKE_BOOLEAN(obj.ivalue);
+
     case f_pointer:
       return (obj.pvalue) ?
         STk_make_Cpointer(obj.pvalue, STk_void, STk_false) :
         STk_void;
-    case f_string:                                            /* string */
+
+    case f_string:
       if (! obj.pvalue) return STk_void;
       return STk_Cstring2string(obj.pvalue);
-    case f_int8:
-    case f_int16:
-    case f_int32:
-    case f_int64:
-    case f_uint8:
-    case f_uint16:
-    case f_uint32:
-    case f_uint64:
-      STk_error("returning intXX is not implemented yet");
-      break;
+
     case f_obj:
       return (obj.pvalue ? obj.pvalue : STk_void);
     default:
@@ -468,8 +514,13 @@ static int exec_callback(SCM callback, ...)
     switch(INT_VAL(CAR(Cargs))) {
       case f_void:
         break;
+
       case f_char:
         param.cvalue = va_arg(ap, int); break;
+      case f_schar:
+        param.scvalue = va_arg(ap, signed int); break;
+      case f_uchar:
+        param.ucvalue = va_arg(ap, unsigned int); break;
       case f_short:
         param.svalue = va_arg(ap, int); break;
       case f_ushort:
@@ -483,30 +534,52 @@ static int exec_callback(SCM callback, ...)
       case f_ulong:
         param.ulvalue = va_arg(ap, unsigned long); break;
       case f_longlong:
+        param.llvalue = va_arg(ap, long long); break;
       case f_ulonglong:
-        STk_error("long long in a callback are not implemented yet"); break;
+        param.ullvalue = va_arg(ap, unsigned long long); break;
+      case f_int8:
+        param.i8value = va_arg(ap, int); break;
+      case f_uint8:
+        param.ui8value = va_arg(ap, unsigned int); break;
+      case f_int16:
+        param.i16value = va_arg(ap, int); break;
+      case f_uint16:
+        param.ui16value = va_arg(ap, unsigned int); break;
+      case f_int32:      /* Be careful with  integer promotion ? */
+        param.i32value = (sizeof(int32_t) >= sizeof(int)) ?
+                            va_arg(ap, int32_t): va_arg(ap, int);
+        break;
+      case f_uint32:     /* Be careful with  integer promotion ? */
+        param.ui32value = (sizeof(int32_t) >= sizeof(int)) ?
+                            va_arg(ap, uint32_t): va_arg(ap, unsigned int);
+        break;
+      case f_int64:      /* Be careful with  integer promotion ? */
+        param.i32value = (sizeof(int64_t) >= sizeof(int)) ?
+                            va_arg(ap, int64_t): va_arg(ap, int);
+        break;
+      case f_uint64:      /* Be careful with  integer promotion ? */
+        param.i32value = (sizeof(int64_t) >= sizeof(int)) ?
+                            va_arg(ap, uint64_t): va_arg(ap, unsigned int);
+        break;
+
       case f_float:
         param.fvalue = (float) va_arg(ap, double); break;
       case f_double:
         param.dvalue = va_arg(ap, double); break;
+
       case f_boolean:
         param.ivalue = va_arg(ap, int); break;
+
       case f_pointer:
         param.pvalue = va_arg(ap, void *); break;
+
       case f_string:
         param.pvalue = va_arg(ap, char *); break;
-      case f_int8:
-      case f_int16:
-      case f_int32:
-      case f_int64:
-      case f_uint8:
-      case f_uint16:
-      case f_uint32:
-      case f_uint64:                                          /* uint64 */
         STk_error("argument of type ~S in callback are not implemented yet",
                   CAR(Cargs)); break;
       case f_obj:
         param.pvalue = va_arg(ap, void *); break;
+
       default:
         STk_panic("incorrect type number for FFI ~s", (CAR(Cargs)));
     }
