@@ -45,6 +45,7 @@ typedef char **rl_completion_func_t(const char *, int, int);
 
 /* Readline function used */
 extern char **rl_completion_matches(const char *, rl_compentry_func_t *);
+extern int rl_parse_and_bind (char *);
 
 /* Readline variables used */
 extern char *rl_line_buffer;                    // The line buffer
@@ -128,11 +129,19 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,s
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("readline-set-option",readline_set_option,subr2, (SCM option, SCM value)) {
+  char s[201];
+  snprintf(s,200,"set %s %s",STRING_CHARS(option), STRING_CHARS(value));
+  int res = rl_parse_and_bind(s);
+  return MAKE_BOOLEAN(res == 0);
+}
+
 MODULE_ENTRY_START("readline-complete")
 {
   SCM module =  STk_STklos_module;   // FIXME: should be READLINE
 
   ADD_PRIMITIVE_IN_MODULE(readline_init_completion, module);
+  ADD_PRIMITIVE_IN_MODULE(readline_set_option, module);
 
   // NOTE: the following assignments are not related to completion and should
   // not be here.  However since our FFI doesn't permit to read/set variables
