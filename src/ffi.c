@@ -234,28 +234,28 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
       long val = STk_integer_value(obj);
       if (val != LONG_MIN) {
         switch (type_needed) {
-          case f_char:      res->cvalue    = (char) val; break;
-          case f_uchar:     res->ucvalue   = (unsigned char) val; break;
-          case f_schar:     res->scvalue   = (signed char) val; break;
-          case f_short:     res->svalue    = (short) val; break;
-          case f_ushort:    res->usvalue   = (unsigned short) val; break;
-          case f_int:       res->ivalue    = (int) val; break;
-          case f_uint:      res->uivalue   = (unsigned int) val; break;
-          case f_long:      res->lvalue    = (long) val; break;
-          case f_ulong:     res->ulvalue   = (unsigned long) val; break;
-          case f_longlong:  res->llvalue   = (long long) val; break;
-          case f_ulonglong: res->ullvalue  = (unsigned long long) val; break;
-          case f_int8:      res->i8value   = (int8_t) val; break;
-          case f_uint8:     res->ui8value  = (uint8_t) val; break;
-          case f_int16:     res->i16value  = (int16_t) val; break;
-          case f_uint16:    res->ui16value = (uint16_t) val; break;
-          case f_int32:     res->i32value  = (int32_t) val; break;
-          case f_uint32:    res->ui32value = (uint32_t) val; break;
-          case f_int64:     res->i64value  = (int64_t) val; break;
-          case f_uint64:    res->ui64value = (uint64_t) val; break;
+          case f_char:      res->cvalue    = (char) val; return;
+          case f_uchar:     res->ucvalue   = (unsigned char) val; return;
+          case f_schar:     res->scvalue   = (signed char) val; return;
+          case f_short:     res->svalue    = (short) val; return;
+          case f_ushort:    res->usvalue   = (unsigned short) val; return;
+          case f_int:       res->ivalue    = (int) val; return;
+          case f_uint:      res->uivalue   = (unsigned int) val; return;
+          case f_long:      res->lvalue    = (long) val; return;
+          case f_ulong:     res->ulvalue   = (unsigned long) val; return;
+          case f_longlong:  res->llvalue   = (long long) val; return;
+          case f_ulonglong: res->ullvalue  = (unsigned long long) val; return;
+          case f_int8:      res->i8value   = (int8_t) val; return;
+          case f_uint8:     res->ui8value  = (uint8_t) val; return;
+          case f_int16:     res->i16value  = (int16_t) val; return;
+          case f_uint16:    res->ui16value = (uint16_t) val; return;
+          case f_int32:     res->i32value  = (int32_t) val; return;
+          case f_uint32:    res->ui32value = (uint32_t) val; return;
+          case f_int64:     res->i64value  = (int64_t) val; return;
+          case f_uint64:    res->ui64value = (uint64_t) val; return;
         }
       }
-      return;
+      break;
     }
     case f_float:
     case f_double:
