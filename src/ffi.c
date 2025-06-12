@@ -973,7 +973,7 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
  *      STk_cpointer-ref_func primitive ...
  * ====================================================================== */
 /*
-<doc EXT-SYNTAX cpointer-ref
+<doc EXT cpointer-ref
  * (cpointer-ref pointer type)
  * (cpointer-ref pointer type offset)
  *
@@ -1013,11 +1013,11 @@ DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
     case f_ushort:    return MAKE_INT(*(unsigned short*)ptr + off);
     case f_int:       return MAKE_INT(*(int*)ptr + off);
     case f_uint:      return MAKE_INT(*(unsigned int*)ptr + off);
-    case f_int8:      return MAKE_INT(*(int8_t*)ptr + off);
     case f_long:      return MAKE_INT(*(long*)ptr + off);
     case f_ulong:     return MAKE_INT(*(unsigned long*)ptr + off);
     case f_longlong:  return MAKE_INT(*(unsigned long long*)ptr + off);
     case f_ulonglong: return MAKE_INT(*(unsigned long long*)ptr + off);
+    case f_int8:      return MAKE_INT(*(int8_t*)ptr + off);
     case f_uint8:    return MAKE_INT(*(uint8_t*)ptr + off);
     case f_int16:    return MAKE_INT(*(int16_t*)ptr + off);
     case f_uint16:   return MAKE_INT(*(uint16_t*)ptr + off);
@@ -1042,7 +1042,6 @@ DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
   }
   return STk_void; /* for the compiler */
 }
-
 #else /* HAVE_FFI */
 static void error_no_ffi(void)
 {
@@ -1088,6 +1087,67 @@ DEFINE_PRIMITIVE("%ffi-assoc-table", ffi_assoc_table, subr0, (void))
   return ffi_table;
 }
 
+/*
+<doc EXT c-size-of
+ * (c-size-of type)
+ *
+ * |c-size-of| returns the size of a C |type|, measured in units sized as char.
+ * The type is given as a keyword following the conventions described in the
+ * previous table.
+ *
+ * @lisp
+ * (c-size-of :char)               => 1
+ * (= (* 2 (c-size-of :int8))
+ *    (c-size-of :int16))          => #t
+ * @end lisp
+doc>
+*/
+
+DEFINE_PRIMITIVE("c-size-of", csizeof, subr1, (SCM type)) // available even if no FFI
+{
+  long kind =  arg_type_to_number(type);
+  int res = 0;
+
+  switch (kind) {
+    case f_char:
+    case f_schar:
+    case f_uchar:     res = sizeof(char); break;
+
+    case f_short:
+    case f_ushort:    res = sizeof(short); break;
+    case f_int:
+    case f_uint:      res = sizeof(int); break;
+    case f_long:
+    case f_ulong:     res = sizeof(long); break;
+    case f_longlong:
+    case f_ulonglong: res = sizeof(long long); break;
+    case f_int8:
+    case f_uint8:     res = sizeof(int8_t); break;
+    case f_int16:
+    case f_uint16:    res = sizeof(int16_t); break;
+    case f_int32:
+    case f_uint32:    res = sizeof(int32_t); break;
+    case f_int64:
+    case f_uint64:    res = sizeof(int64_t); break;
+
+    case f_float:     res = sizeof(float);; break;
+    case f_double:    res = sizeof(double); break;
+
+    case f_boolean:   res = sizeof(int); break;
+
+    case f_pointer:
+    case f_string:   res = sizeof(void *); break;
+
+    case f_void:
+    case f_obj:     /* fallthrough */
+
+    default: STk_error("cannot determine the size of ~S", type);
+  }
+  return MAKE_INT(res);
+}
+
+
+
 /* ======================================================================
  *      INIT  ...
  * ====================================================================== */
@@ -1113,5 +1173,6 @@ int STk_init_ffi(void)
 
   ADD_PRIMITIVE(ffi_assoc_table);
   ADD_PRIMITIVE(has_ffi);
+  ADD_PRIMITIVE(csizeof);
   return TRUE;
 }
