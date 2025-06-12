@@ -840,7 +840,7 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
  *
  * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
  * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
- * |type|. It permits to access the C object as an array. 
+ * |type|. It permits to access the C object as an array.
  *
  * @lisp
  * (define p (allocate-bytes 1))
@@ -990,7 +990,8 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
  * (cpointer-ref pointer type offset)
  *
  * Returns value of |type| from |pointer|. If |offset| is not given
- * it defaults to 0.
+ * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+ * |type|. It permits to access the C object as an array.
  *
  * @lisp
  * (define p (allocate-bytes 1))
@@ -999,8 +1000,13 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
  *       => 42
  * (cpointer-ref p :uint8 0)
  *       => 42
- * @end lisp
  *
+ * (define q (allocate-bytes (* 2 (c-size-of :long))))
+ * (cpointer-set! q :long 1234 0)
+ * (cpointer-set! q :long 6789 1) ; address is one C "long" after 
+ * (cons (cpointer-ref q :long 1)
+ *       (cpointer-ref q :long 0))   => (6789 . 1234)
+ * @end lisp
 doc>
 */
 #define CPTR_REF(type) (*( (type*)ptr + off))

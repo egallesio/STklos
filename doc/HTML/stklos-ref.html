@@ -27238,7 +27238,8 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 </div>
 <div class="paragraph">
 <p>Returns value of <code>type</code> from <code>pointer</code>. If <code>offset</code> is not given
-it defaults to 0.</p>
+it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+<code>type</code>. It permits to access the C object as an array.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27247,7 +27248,13 @@ it defaults to 0.</p>
 <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">p</span> <span class="nv">:uint8</span><span class="p">)</span>
       <span class="nv">=&gt;</span> <span class="mi">42</span>
 <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">0</span><span class="p">)</span>
-      <span class="nv">=&gt;</span> <span class="mi">42</span></code></pre>
+      <span class="nv">=&gt;</span> <span class="mi">42</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">q</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:long</span><span class="p">))))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">1234</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">6789</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">; address is one C "long" after</span>
+<span class="p">(</span><span class="nb">cons</span> <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">0</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">6789</span> <span class="o">.</span> <span class="mi">1234</span><span class="p">)</span></code></pre>
 </div>
 </div>
 </div>
