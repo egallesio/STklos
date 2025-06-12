@@ -835,23 +835,35 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
  * ====================================================================== */
 /*
 <doc EXT cpointer-set!
-  * (cpointer-set! pointer type value)
-  * (cpointer-set! pointer type value offset)
-  *
-  * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
-  * it defaults to 0.
-  *
-  * @lisp
-  * (define p (allocate-bytes 1))
-  * (cpointer-set! p :uint8 42)
-  * @end lisp
-  *
-  * @lisp
-  * (define p (allocate-bytes 2))
-  * (cpointer-set! p :uint8 42 0)
-  * (cpointer-set! p :uint8 43 1)
-  * @end lisp
- doc>
+ * (cpointer-set! pointer type value)
+ * (cpointer-set! pointer type value offset)
+ *
+ * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
+ * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+ * |type|. It permits to access the C object as an array. 
+ *
+ * @lisp
+ * (define p (allocate-bytes 1))
+ * (cpointer-set! p :uint8 42)
+ * @end lisp
+ *
+ * @lisp
+ * (define p (allocate-bytes 2))
+ * (cpointer-set! p :uint8 42 0)
+ * (cpointer-set! p :uint8 43 1)
+ * @end lisp
+ *
+ * The following examples shows how we cans forge a C string in Scheme
+ * @lisp
+ * (let (( buff (allocate-bytes 5)))
+ *   (cpointer-set! buff :uchar #\a 0)
+ *   (cpointer-set! buff :uchar #\b 1)
+ *   (cpointer-set! buff :uchar #\c 2)
+ *   (cpointer-set! buff :uchar #\d 3)
+ *   (cpointer-set! buff :uchar #\null 4) ;; convention for end of string in C
+ *   (cpointer->string buff))      => "abcd"
+ * @end lisp
+doc>
 */
 #define SET_CPTR(type, v) (*((type *) ptr+ off) = (type) v)
 
@@ -984,9 +996,9 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
  * (define p (allocate-bytes 1))
  * (cpointer-set! p :uint8 42)
  * (cpointer-ref p :uint8)
- * > 42
+ *       => 42
  * (cpointer-ref p :uint8 0)
- * > 42
+ *       => 42
  * @end lisp
  *
 doc>

@@ -187,7 +187,7 @@ As an example, the second argument to the `strtol` function can be
 
 Functions on C pointers are described in the next section.
 
-{{insertdoc 'c-size_of}}
+{{insertdoc 'c-size-of}}
 
 
 ### C pointers
