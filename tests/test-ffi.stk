@@ -170,10 +170,18 @@
         :uint16
         :uint32
         :uint64))
+
 (cpointer-set! p :char #\a)
 (test "cpointer-set/cpointer-ref ̣char" #\a (cpointer-ref p :char))
 (cpointer-set! p :schar #\b)
-(test "cpointer-set/cpointer-ref ̣schar" #\b (cpointer-ref p :schar))
+(test "cpointer-set/cpointer-ref ̣schar.1" #\b
+      (integer->char (cpointer-ref p :schar)))
+(cpointer-set! p :schar (char->integer #\c))
+(test "cpointer-set/cpointer-ref ̣schar.2" #\c
+      (integer->char (cpointer-ref p :schar)))
+(cpointer-set! p :uchar #\a)
+(test "cpointer-set/cpointer-ref ụchar" #\a (cpointer-ref p :uchar))
+
 (cpointer-set! p :boolean #t)
 (test "cpointer-set/cpointer-ref ̣boolean1" #t (cpointer-ref p :boolean))
 (cpointer-set! p :boolean #f)
