@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//  Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
@@ -41,25 +41,32 @@ between the C and the Scheme worlds.
 |====
 | Name | Corresponding C type | Corresponding Scheme type
 
-|*:void*    | void              | _none_
-|*:char*    | char              | Scheme character
-|*:short*   | short             | Scheme integer
-|*:ushort*  | unsigned short    | Scheme integer
-|*:int*     | int               | Scheme integer
-|*:uint*    | unsigned int      | Scheme integer
-|*:long*    | long int          | Scheme integer
-|*:ulong*   | unsigned long int | Scheme integer
-|*:float*   | float             | Scheme real number
-|*:double*  | double            | Scheme real number
-|*:boolean* | int               | boolean
-|*:pointer* | void *            | Scheme pointer object or Scheme string
-|*:string*  | char *            | Scheme string
-|*:obj*     | void *            | Any Scheme object passed as is
-|*:uint8*   | uint8_t           | Scheme integer
-|*:uint16*  | uint16_t          | Scheme integer
-|*:uint32*  | uint32_t          | Scheme integer
-|*:uint64*  | uint64_t          | Scheme integer
-|*:schar*   | char              | Scheme character
+|*:void*    | void                     | _none_
+|*:char*    | char                     | Scheme character
+|*:uchar*   | unsigned char            | Scheme character
+|*:schar*   | signed char              | Scheme integer
+|*:short*   | short                    | Scheme integer
+|*:ushort*  | unsigned short           | Scheme integer
+|*:int*     | int                      | Scheme integer
+|*:uint*    | unsigned int             | Scheme integer
+|*:long*    | long int                 | Scheme integer
+|*:ulong*   | unsigned long int        | Scheme integer
+|*:longlong*| long long int            | Scheme integer
+|*:ulonglong*| unsigned long long int  | Scheme integer
+|*:int8*    | int8_t                   | Scheme integer
+|*:int16*   | int16_t                  | Scheme integer
+|*:int32*   | int32_t                  | Scheme integer
+|*:int64*   | int64_t                  | Scheme integer
+|*:uint8*   | uint8_t                  | Scheme integer
+|*:uint16*  | uint16_t                 | Scheme integer
+|*:uint32*  | uint32_t                 | Scheme integer
+|*:uint64*  | uint64_t                 | Scheme integer
+|*:float*   | float                    | Scheme real number
+|*:double*  | double                   | Scheme real number
+|*:boolean* | int                      | boolean
+|*:pointer* | void *                   | Scheme pointer object or Scheme string
+|*:string*  | char *                   | Scheme string
+|*:obj*     | void *                   | Any Scheme object passed as is
 |====
 
 
@@ -179,6 +186,9 @@ As an example, the second argument to the `strtol` function can be
 ```
 
 Functions on C pointers are described in the next section.
+
+{{insertdoc 'c-size_of}}
+
 
 ### C pointers
 
