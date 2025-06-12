@@ -26,12 +26,10 @@
 (export make-external-function
         make-callback
         define-external
-        cpointer-set!
         cpointer-ref)
 
 (define make-external-function #f)
 (define make-callback          #f)
-(define cpointer-set!          #f)
 (define cpointer-ref           #f)
 
 (let ((table (%ffi-assoc-table)))  ;; table is an A-list which asssociate
@@ -74,34 +72,6 @@
     (lambda (proc types data)
       (%make-callback proc (parse-parameters types) data)))
 
-#|
-<doc EXT-SYNTAX cpointer-set!
- * (cpointer-set! pointer type value)
- * (cpointer-set! pointer type value offset)
- *
- * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
- * it defaults to 0.
- *
- * @lisp
- * (define p (allocate-bytes 1))
- * (cpointer-set! p :uint8 42)
- * @end lisp
- *
- * @lisp
- * (define p (allocate-bytes 2))
- * (cpointer-set! p :uint8 42 0)
- * (cpointer-set! p :uint8 43 1)
- * @end lisp
- *
-doc>
-|#
-  ;; cpointer-set!
-  (set! cpointer-set!
-    (lambda (pointer type value . offset)
-      (%cpointer-set! pointer
-                      (arg-type->number type #f)
-                      value
-                      (if (null? offset) 0 (car offset)))))
 
 #|
 <doc EXT-SYNTAX cpointer-ref

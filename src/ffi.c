@@ -124,6 +124,11 @@ static void error_bad_string(SCM obj)
   STk_error("bad string ~S", obj);
 }
 
+static void error_bad_offset(SCM obj)
+{
+  STk_error("bad offset ~S", obj);
+}
+
 
 
 /* ====================================================================== */
@@ -135,7 +140,7 @@ enum f_codes {
   f_long,      f_ulong,     f_longlong,  f_ulonglong,
   f_int8,      f_uint8,     f_int16,     f_uint16,
   f_int32,     f_uint32,    f_int64,     f_uint64,
-  f_float,     f_double,    f_boolean,     f_obj,
+  f_float,     f_double,    f_boolean,   f_obj,
   f_pointer,   f_string,
   f_last    /* MUST be the last item of the enum */
 };
@@ -194,6 +199,16 @@ static ffi_type* convert(SCM obj)
   return conversion[n];
 }
 
+
+static int arg_type_to_number(SCM obj)
+{
+  SCM l= STk_assq(obj, ffi_table);
+
+  if (l == STk_false) 
+    STk_error("bad type specification ~S", obj);
+  return INT_VAL(CAR(CDR(l)));
+}
+
 /* ======================================================================
  *      scheme2c ...
  * ====================================================================== */
@@ -203,6 +218,7 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
     case f_void:
       STk_error("conversion of a parameter to void forbidden");
       break;
+
     case f_char:
     case f_uchar:
     case f_schar:
@@ -257,6 +273,7 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
       }
       break;
     }
+
     case f_float:
     case f_double:
       {
@@ -271,9 +288,11 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
         }
         break;
       }
+
     case f_boolean:
       res->ivalue = (obj != STk_false);
       return;
+
     case f_pointer:                                            /* pointer */
       if (CPOINTERP(obj)) {
         res->pvalue = CPOINTER_VALUE(obj);
@@ -814,94 +833,140 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
 /* ======================================================================
  *      STk_cpointer-set_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("%cpointer-set!", cpointer_set, subr4,
-                 (SCM pointer_obj, SCM type, SCM value, SCM offset))
-{
-  long kind = STk_integer_value(type);
-  char* pointer = CPOINTER_VALUE(pointer_obj) + STk_integer_value(offset);
+/*
+<doc EXT cpointer-set!
+  * (cpointer-set! pointer type value)
+  * (cpointer-set! pointer type value offset)
+  *
+  * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
+  * it defaults to 0.
+  *
+  * @lisp
+  * (define p (allocate-bytes 1))
+  * (cpointer-set! p :uint8 42)
+  * @end lisp
+  *
+  * @lisp
+  * (define p (allocate-bytes 2))
+  * (cpointer-set! p :uint8 42 0)
+  * (cpointer-set! p :uint8 43 1)
+  * @end lisp
+ doc>
+*/
+#define SET_CPTR(type, v) (*((type *) ptr+ off) = (type) v)
 
-  if (!CPOINTERP(pointer_obj))  error_bad_cpointer(pointer_obj);
+DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
+                 (SCM pointer_obj, SCM type, SCM obj, SCM offset))
+{
+  long kind = arg_type_to_number(type);
+  long off  = offset? STk_integer_value(offset): 0;
+  void *ptr = CPOINTER_VALUE(pointer_obj);
+
   if (kind == LONG_MIN) error_bad_type_number(type);
+  if (off  == LONG_MIN) error_bad_offset(offset);
+  if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
 
   switch (kind) {
     case f_void:
       STk_error("Can not set type :void");
       break;
+
     case f_char:
-        *pointer = (char)CHARACTER_VAL(value);
+    case f_uchar:
+    case f_schar:
+      if (CHARACTERP(obj)) {
+        int val = CHARACTER_VAL(obj);
+        switch (kind) {
+          case f_char:      SET_CPTR(char, val); break;
+          case f_uchar:     SET_CPTR(unsigned char, val); break;
+          case f_schar:     SET_CPTR(signed char, val); break;
+        }
         break;
+      }
+      /* fallthrough */ /* to see if it's an int */
     case f_short:
-        *(short*)pointer = (short)STk_integer_value(value);
-        break;
     case f_ushort:
-        *(unsigned short*)pointer = (unsigned short)STk_integer_value(value);
-        break;
     case f_int:
-        *(int*)pointer = (int)STk_integer_value(value);
-        break;
     case f_uint:
-        *(int*)pointer = (int)STk_integer_value(value);
-        break;
     case f_long:
-        *(long*)pointer = (long)STk_integer_value(value);
-        break;
     case f_ulong:
-        *(unsigned long*)pointer = (unsigned long)STk_integer_value(value);
-        break;
     case f_longlong:
     case f_ulonglong:
-        STk_error("passing argument of type ~S is not implemented yet", type);
-        break;
-    case f_float:
-        *(float*)pointer = (float)STk_number2double(value);
-        break;
-    case f_double:
-        *(double*)pointer = (double)STk_number2double(value);
-        break;
-    case f_boolean:
-        *(int*)pointer = (value != STk_false);
-        break;
-    case f_pointer:
-        *(char**)pointer = CPOINTER_VALUE(value);
-        break;
-    case f_string:
-        STk_error("passing argument of type ~S is not implemented yet", type);
-        break;
     case f_int8:
-        *(int8_t*)pointer = (int8_t)STk_integer_value(value);
-        break;
-    case f_int16:
-        *(int16_t*)pointer = (int16_t)STk_integer_value(value);
-        break;
-    case f_int32:
-        *(int32_t*)pointer = (int32_t)STk_integer_value(value);
-        break;
-    case f_int64:
-        *(int64_t*)pointer = (int64_t)STk_integer_value(value);
-        break;
-    case f_obj:
-        STk_error("can not set type :obj");
-        break;
     case f_uint8:
-        *(uint8_t*)pointer = (uint8_t)STk_integer_value(value);
-        break;
+    case f_int16:
     case f_uint16:
-        *(uint16_t*)pointer = (uint16_t)STk_integer_value(value);
-        break;
+    case f_int32:
     case f_uint32:
-        *(uint32_t*)pointer = (uint32_t)STk_integer_value(value);
-        break;
-    case f_uint64:
-        *(uint64_t*)pointer = (uint64_t)STk_integer_value(value);
-        break;
-    case f_schar:
-        *pointer = (signed char)CHARACTER_VAL(value);
-        break;
+    case f_int64:
+    case f_uint64: {
+      long val = STk_integer_value(obj);
+      if (val != LONG_MIN) {
+        switch (kind) {
+          case f_char:      SET_CPTR(char, val); break;;
+          case f_schar:     SET_CPTR(signed char, val); break;
+          case f_uchar:     SET_CPTR(unsigned char, val); break;
+          case f_short:     SET_CPTR(short, val); break;
+          case f_ushort:    SET_CPTR(unsigned short, val); break;
+          case f_int:       SET_CPTR(int, val); break;
+          case f_uint:      SET_CPTR(unsigned int, val); break;
+          case f_long:      SET_CPTR(long, val); break;
+          case f_ulong:     SET_CPTR(unsigned long, val); break;
+          case f_longlong:  SET_CPTR(long long, val); break;
+          case f_ulonglong: SET_CPTR(unsigned long long, val); break;
+          case f_int8:      SET_CPTR(int8_t, val); break;
+          case f_uint8:     SET_CPTR(uint8_t, val); break;
+          case f_int16:     SET_CPTR(int16_t, val); break;
+          case f_uint16:    SET_CPTR(uint16_t, val); break;
+          case f_int32:     SET_CPTR(int32_t, val); break;
+          case f_uint32:    SET_CPTR(uint32_t, val); break;
+          case f_int64:     SET_CPTR(int64_t, val); break;
+          case f_uint64:    SET_CPTR(uint64_t, val); break;
+        }
+      } else
+        STk_error("bad integer value ~S", obj);
+      break;
+    }
+
+    case f_float:
+    case f_double: {
+      double d = STk_number2double(obj);
+
+      if (isnan(d))
+        STk_error("number ~S cannot be converted to ~S", obj, type);
+      if (kind == f_float)
+        SET_CPTR(float, d);
+      else
+        SET_CPTR(double, d);
+    }
+      break;
+
+    case f_boolean: SET_CPTR(int, (obj != STk_false)); break;
+
+    case f_pointer:
+      if (CPOINTERP(obj))
+        SET_CPTR(void*, CPOINTER_VALUE(obj));
+      else if (obj ==STk_void)
+        SET_CPTR(void*, NULL);
+      else
+        STk_error("cpointer or #void expected. It was ~S", obj);
+      break;
+
+    case f_string:
+      if (STRINGP(obj))
+        SET_CPTR(char*, STRING_CHARS(obj));
+      else if (obj ==STk_void)
+        SET_CPTR(char*, NULL);
+      else
+        STk_error("string or #void expected. It was ~S", obj);
+      break;
+
+    case f_obj:
+      STk_error("cannot set a :obj pointer. Value was ~S", obj);
+      break;
   }
   return STk_void;
 }
-
-
 
 
 /* ======================================================================
