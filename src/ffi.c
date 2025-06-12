@@ -204,7 +204,7 @@ static int arg_type_to_number(SCM obj)
 {
   SCM l= STk_assq(obj, ffi_table);
 
-  if (l == STk_false) 
+  if (l == STk_false)
     STk_error("bad type specification ~S", obj);
   return INT_VAL(CAR(CDR(l)));
 }
@@ -862,7 +862,7 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
   long off  = offset? STk_integer_value(offset): 0;
   void *ptr = CPOINTER_VALUE(pointer_obj);
 
-  if (kind == LONG_MIN) error_bad_type_number(type);
+  // kind is verified by arg_type_to_number
   if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
 
@@ -972,72 +972,73 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
 /* ======================================================================
  *      STk_cpointer-ref_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("%cpointer-ref", cpointer_ref, subr3,
+/*
+<doc EXT-SYNTAX cpointer-ref
+ * (cpointer-ref pointer type)
+ * (cpointer-ref pointer type offset)
+ *
+ * Returns value of |type| from |pointer|. If |offset| is not given
+ * it defaults to 0.
+ *
+ * @lisp
+ * (define p (allocate-bytes 1))
+ * (cpointer-set! p :uint8 42)
+ * (cpointer-ref p :uint8)
+ * > 42
+ * (cpointer-ref p :uint8 0)
+ * > 42
+ * @end lisp
+ *
+doc>
+*/
+DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
                  (SCM pointer_obj, SCM type, SCM offset))
 {
-  long kind = STk_integer_value(type);
-  char* pointer = CPOINTER_VALUE(pointer_obj) + STk_integer_value(offset);
+  long kind =  arg_type_to_number(type);
+  long off  = offset? STk_integer_value(offset): 0;
+  void *ptr = CPOINTER_VALUE(pointer_obj);
 
+  // kind is verified by arg_type_to_number
+  if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
-  if (kind == LONG_MIN) error_bad_type_number(pointer);
 
   switch (kind) {
-    case f_void:
-      STk_error("Can not set type :void");
-      break;
-    case f_char:
-        return MAKE_CHARACTER(*(unsigned char*)pointer);
-    case f_short:
-        return MAKE_INT(*(short*)pointer);
-    case f_ushort:
-        return MAKE_INT(*(short*)pointer);
-    case f_int:
-        return MAKE_INT(*(int*)pointer);
-    case f_uint:
-        return MAKE_INT(*(int*)pointer);
-    case f_long:
-        return MAKE_INT(*(long*)pointer);
-    case f_ulong:
-        return MAKE_INT(*(long*)pointer);
-    case f_longlong:
-    case f_ulonglong:
-        STk_error("passing argument of type ~S is not implemented yet", type);
-        return STk_void;
-    case f_float:
-        return STk_double2real(*(float*)pointer);
-    case f_double:
-        return STk_double2real(*(double*)pointer);
-    case f_boolean:
-        return MAKE_BOOLEAN(*(int*)pointer);
+    case f_void:      STk_error("can not ref type :void"); return STk_void;
+
+    case f_char:      return MAKE_CHARACTER(*(char*)ptr + off);
+    case f_schar:     return MAKE_INT(*(signed char*)ptr + off);
+    case f_uchar:     return MAKE_CHARACTER(*(unsigned char*)ptr + off);
+
+    case f_short:     return MAKE_INT(*(short*)ptr + off);
+    case f_ushort:    return MAKE_INT(*(unsigned short*)ptr + off);
+    case f_int:       return MAKE_INT(*(int*)ptr + off);
+    case f_uint:      return MAKE_INT(*(unsigned int*)ptr + off);
+    case f_int8:      return MAKE_INT(*(int8_t*)ptr + off);
+    case f_long:      return MAKE_INT(*(long*)ptr + off);
+    case f_ulong:     return MAKE_INT(*(unsigned long*)ptr + off);
+    case f_longlong:  return MAKE_INT(*(unsigned long long*)ptr + off);
+    case f_ulonglong: return MAKE_INT(*(unsigned long long*)ptr + off);
+    case f_uint8:    return MAKE_INT(*(uint8_t*)ptr + off);
+    case f_int16:    return MAKE_INT(*(int16_t*)ptr + off);
+    case f_uint16:   return MAKE_INT(*(uint16_t*)ptr + off);
+    case f_int32:    return MAKE_INT(*(int32_t*)ptr + off);
+    case f_uint32:   return MAKE_INT(*(uint32_t*)ptr + off);
+    case f_int64:    return MAKE_INT(*(int64_t*)ptr + off);
+    case f_uint64:   return MAKE_INT(*(uint64_t*)ptr + off);
+
+    case f_float:    return STk_double2real(*(float*)ptr + off);
+    case f_double:   return STk_double2real(*(double*)ptr + off);
+
+    case f_boolean:  return MAKE_BOOLEAN(*(int*)ptr + off);
+
     case f_pointer:
-        //char* p = ((char*)CPOINTER_VALUE(pointer)) + offset;
-        return STk_make_Cpointer(*(char**)pointer, STk_void, STk_false);
+      return STk_make_Cpointer(*(void**)ptr+off, STk_void, STk_false);
     case f_string:
-        STk_error("passing argument of type ~S is not implemented yet", type);
-        return STk_void;
-    case f_int8:
-        return MAKE_INT(*(int8_t*)pointer);
-    case f_int16:
-        return MAKE_INT(*(int16_t*)pointer);
-    case f_int32:
-        return MAKE_INT(*(int32_t*)pointer);
-    case f_int64:
-        return MAKE_INT(*(int64_t*)pointer);
-    case f_obj:
-        STk_error("can not ref type :obj");
-        return STk_void;
-    case f_uint8:
-        return MAKE_INT(*(uint8_t*)pointer);
-    case f_uint16:
-        return MAKE_INT(*(uint16_t*)pointer);
-    case f_uint32:
-        return MAKE_INT(*(uint32_t*)pointer);
-    case f_uint64:
-        return MAKE_INT(*(uint64_t*)pointer);
-    case f_schar:
-        return MAKE_CHARACTER(*pointer);
-    default:
-      STk_panic("Incorrect type number for external variable ~S", type);
+      return STk_Cstring2string((*(char**)ptr+off));
+
+    case f_obj:     STk_error("can not ref type :obj"); return STk_void;
+
+    default: STk_error("incorrect type: ~S", type);
   }
   return STk_void; /* for the compiler */
 }
