@@ -193,4 +193,45 @@
 (cpointer-set! p :double 42.42)
 (test "cpointer-set/cpointer-ref ̣1" 42.42 (cpointer-ref p :double))
 
+
+;;; C-size-of
+(test "sizeof char" 1 (c-size-of :char))
+(test "sizeof schar" 1 (c-size-of :schar))
+(test "sizeof uchar" 1 (c-size-of :uchar))
+(test "sizeof int16 = 2* sizeof int8" #t (= (* 2 (c-size-of :int8))
+                                            (c-size-of :int16)))
+(test "sizeof pointer = sizeof string" #t (= (c-size-of :pointer)
+                                             (c-size-of :string)))
+
+;; Testing offset in ref/set
+(define buff (allocate-bytes 5))
+(cpointer-set! buff :uchar #\a 0)
+(cpointer-set! buff :uchar #\B 1)
+(cpointer-set! buff :uchar #\c 2)
+(cpointer-set! buff :uchar #\D 3)
+(cpointer-set! buff :uchar #\null 4)
+
+(test "ref with offsets" '(#\a #\B #\c #\D #\null)
+      (list (cpointer-ref buff :uchar 0)
+            (cpointer-ref buff :uchar 1)
+            (cpointer-ref buff :uchar 2)
+            (cpointer-ref buff :uchar 3)
+            (cpointer-ref buff :uchar 4)))
+(test "read back the (forged) C string"
+      "aBcD"
+      (cpointer->string buff))
+
+
+(let ((array (allocate-bytes (* 10 (c-size-of :long)))))
+  (dotimes (i 10)
+           (cpointer-set! array :long (square i) i))
+  (test "offset with long"
+        '(0 1 4 9 16 25 36 49 64 81)
+        (map (lambda (i)
+               (cpointer-ref array :long i))
+             '(0 1 2 3 4 5 6 7 8 9))))
+
+      
+             
+
 (test-section-end)
