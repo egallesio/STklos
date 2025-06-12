@@ -130,6 +130,11 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,s
 }
 
 DEFINE_PRIMITIVE("readline-set-option",readline_set_option,subr2, (SCM option, SCM value)) {
+  if (!STRINGP(option)) STk_error("bad string ~s", option);
+  if (!STRINGP(value)) STk_error("bad string ~s", value);
+  if (STRING_SIZE(option) + STRING_SIZE(value) > 195)
+    STk_error("option and value strings too long (max 195 bytes)");
+
   char s[201];
   snprintf(s,200,"set %s %s",STRING_CHARS(option), STRING_CHARS(value));
   int res = rl_parse_and_bind(s);
