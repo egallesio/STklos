@@ -114,11 +114,6 @@ static void error_bad_cpointer(SCM obj)
   STk_error("bad C pointer object ~S", obj);
 }
 
-static void error_bad_type_number(SCM obj)
-{
-  STk_error("bad type number ~S", obj);
-}
-
 static void error_bad_string(SCM obj)
 {
   STk_error("bad string ~S", obj);
@@ -657,161 +652,6 @@ DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2,
   return var? STk_make_Cpointer(var, STk_intern("extern-var"), STk_false): STk_false;
 }
 
-
-DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM type))
-{
-  long kind = STk_integer_value(type);
-
-  if (!CPOINTERP(obj))  error_bad_cpointer(obj);
-  if (kind == LONG_MIN) error_bad_type_number(obj);
-
-  switch (kind) {
-    case 0:                                             /* void */
-      STk_error("cannot access a void variable");
-      break;
-    case 1:                                             /* char */
-    case 24:                                            /* schar */
-      return MAKE_CHARACTER(* ((char *)CPOINTER_VALUE(obj)));
-    case 2:                                             /* short */
-      return STk_long2integer(* ((short *)CPOINTER_VALUE(obj)));
-    case 3:                                             /* ushort */
-      return STk_long2integer(* ((unsigned short *)CPOINTER_VALUE(obj)));
-    case 4:                                             /* int */
-      return STk_long2integer(* ((int *)CPOINTER_VALUE(obj)));
-    case 5:                                             /* uint */
-      return STk_long2integer(* ((unsigned int *)CPOINTER_VALUE(obj)));
-    case 6:                                             /* long */
-      return STk_long2integer(* ((long *)CPOINTER_VALUE(obj)));
-    case 7:                                             /* ulong */
-      return STk_long2integer(* ((unsigned long *)CPOINTER_VALUE(obj)));
-    case 8:                                             /* lonlong */
-    case 9:                                             /* ulonlong */
-      STk_error("access to long long is not implemented yet");
-      break;
-    case 10:                                            /* float */
-      return STk_double2real(* ((float *)CPOINTER_VALUE(obj)));
-    case 11:                                            /* double */
-      return STk_double2real(* ((double *)CPOINTER_VALUE(obj)));
-    case 12:                                            /* boolean */
-      return MAKE_BOOLEAN(* ((int *)CPOINTER_VALUE(obj)));
-    case 13:                                            /* pointer */
-      {
-        void *ptr = (* ((void**) CPOINTER_VALUE(obj)));
-
-        return (ptr) ?
-          STk_make_Cpointer(ptr, STk_void, STk_false) :
-          STk_void;
-      }
-    case 14:                                            /* string */
-      {
-        char *str = (* ((char **) CPOINTER_VALUE(obj)));
-
-        return (str) ? STk_Cstring2string(str): STk_void;
-      }
-    case 15:                                            /* int8 */
-    case 16:                                            /* int16 */
-    case 17:                                            /* int32 */
-    case 18:                                            /* int64 */
-    case 20:                                            /* uint8 */
-    case 21:                                            /* uint16 */
-    case 22:                                            /* uint32 */
-    case 23:                                            /* uint64 */
-      STk_error("returning intXX is not implemented yet");
-      break;
-    case 19:                                            /* obj */
-      {
-        void *ptr = (* (void**) CPOINTER_VALUE(obj));
-
-        return (ptr) ? ptr : STk_void;
-      }
-    default:
-      STk_panic("incorrect type number for external variable ~S", type);
-  }
-  return STk_void;
-}
-
-DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
-                 (SCM obj, SCM val, SCM type))
-{
-  long kind = STk_integer_value(type);
-
-  if (!CPOINTERP(obj))  error_bad_cpointer(obj);
-  if (kind == LONG_MIN) error_bad_type_number(obj);
-
-  switch (kind) {
-    case 0:                                             /* void */
-      STk_error("conversion to void forbidden");
-      break;
-    case 1:                                             /* char */
-    case 2:                                             /* short */
-    case 3:                                             /* ushort */
-    case 4:                                             /* int */
-    case 5:                                             /* uint */
-    case 6:                                             /* long */
-    case 7:                                             /* ulong */
-    case 24:                                            /* schar */
-      {
-        long value = CHARACTERP(val) ?
-                         (long) CHARACTER_VAL(val) :
-                         STk_integer_value(val);
-        if (value != LONG_MIN) {
-          switch (kind) {
-            case 1: (* ((char *)CPOINTER_VALUE(obj))) = (char) value; break;
-            case 2: (* ((short *)CPOINTER_VALUE(obj))) = (short) value; break;
-            case 3: (* ((unsigned short *)CPOINTER_VALUE(obj)))
-                             = (unsigned short) value; break;
-            case 4: (* ((int *)CPOINTER_VALUE(obj))) = (int) value; break;
-            case 5: (* ((unsigned int *)CPOINTER_VALUE(obj)))
-                             = (unsigned int) value; break;
-            case 6: (* ((long *)CPOINTER_VALUE(obj))) = (long) value; break;
-            case 7: (* ((unsigned long *)CPOINTER_VALUE(obj)))
-                             = (unsigned long) value; break;
-            case 24: (* ((unsigned char *)CPOINTER_VALUE(obj))) = (unsigned char) value; break;
-          }
-          return STk_void;
-        }
-        break;
-      }
-    case 8:                                             /* lonlong */
-    case 9:                                             /* ulonlong */
-      STk_error("setting long long is not implemented yet");
-      break;
-    case 10:                                            /* float */
-    case 11:                                            /* double */
-      {
-        double d =  STk_number2double(val);
-
-        if (!isnan(d)) {
-          if (kind == 10)
-            (* ((float *)CPOINTER_VALUE(obj))) = (float) d;
-          else
-            (* ((double *)CPOINTER_VALUE(obj))) = d;
-          return STk_void;
-        }
-        break;
-      }
-    case 12:                                            /* boolean */
-      (* ((int *)CPOINTER_VALUE(obj))) = (val != STk_false);
-      return STk_void;
-    case 13:                                            /* pointer */
-    case 14:                                            /* string */
-    case 15:                                            /* int8 */
-    case 16:                                            /* int16 */
-    case 17:                                            /* int32 */
-    case 18:                                            /* int64 */
-    case 20:                                            /* uint8 */
-    case 21:                                            /* uint16 */
-    case 22:                                            /* uint32 */
-    case 23:                                            /* uint64 */
-      STk_error("passing argument of type ~S is not implemented yet", type);
-      break;
-    case 19:                                            /* obj */
-      (* ((void **)CPOINTER_VALUE(obj))) = CPOINTER_VALUE(val);
-      return STk_void;
-  }
-  STk_error("cannot convert ~S in requested type (~S)", obj, type);
-  return STk_void;
-}
 #else /* HAVE_FFI */
 static void error_no_ffi(void)
 {
@@ -875,9 +715,7 @@ int STk_init_ffi(void)
   ADD_PRIMITIVE(make_ext_func);
   ADD_PRIMITIVE(make_callback);
   ADD_PRIMITIVE(exec_cb_addr);
-
   ADD_PRIMITIVE(get_symbol_address);
-
   ADD_PRIMITIVE(ffi_assoc_table);
   ADD_PRIMITIVE(has_ffi);
   return TRUE;
