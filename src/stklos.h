@@ -623,8 +623,21 @@ int STk_init_extend(void);
   ----
   ------------------------------------------------------------------------------
 */
+enum f_codes {
+  f_void,      f_char,      f_schar,     f_uchar,
+  f_short,     f_ushort,    f_int,       f_uint,
+  f_long,      f_ulong,     f_longlong,  f_ulonglong,
+  f_int8,      f_uint8,     f_int16,     f_uint16,
+  f_int32,     f_uint32,    f_int64,     f_uint64,
+  f_float,     f_double,    f_boolean,   f_obj,
+  f_pointer,   f_string,
+  f_last    /* MUST be the last item of the enum */
+};
+
+int STk_ffi_type_to_number(SCM key);
 SCM STk_call_ext_function(SCM fct, int argc, SCM *argv);
 SCM STk_ext_func_name(SCM fct);
+  
 int STk_init_ffi(void);
 
 

@@ -187,9 +187,6 @@ As an example, the second argument to the `strtol` function can be
 
 Functions on C pointers are described in the next section.
 
-{{insertdoc 'c-size-of}}
-
-
 ### C pointers
 
 It is very common that external functions return pointers, serving as
@@ -207,7 +204,8 @@ errors, crashes...
 {{insertdoc 'cpointer-data-set!}}
 {{insertdoc 'cpointer-type-set!}}
 {{insertdoc 'cpointer->string}}
-{{insertdoc 'allocate-bytes}}
-{{insertdoc 'free-bytes}}
 {{insertdoc 'cpointer-set!}}
 {{insertdoc 'cpointer-ref}}
+{{insertdoc 'allocate-bytes}}
+{{insertdoc 'free-bytes}}
+{{insertdoc 'c-size-of}}

@@ -26946,32 +26946,6 @@ the FFI better!):</p>
 <div class="paragraph">
 <p>Functions on C pointers are described in the next section.</p>
 </div>
-<div class="paragraph">
-<p><a id='P_c-size-of'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(c-size-of type) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p><code>c-size-of</code> returns the size of a C <code>type</code>, measured in units sized as char.
-The type is given as a keyword following the conventions described in the
-previous table.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:char</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="mi">1</span>
-<span class="p">(</span><span class="nb">=</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:int8</span><span class="p">))</span>
-   <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:int16</span><span class="p">))</span>          <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
-</div>
-</div>
 </div>
 <div class="sect2">
 <h3 id="doc_c_pointers">11.2. C pointers</h3>
@@ -27116,65 +27090,6 @@ in a fatal error.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_allocate-bytes'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(allocate-bytes n) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p><code>Allocate-bytes</code> will allocate <code>n</code> consecutive bytes using
-the standard STklos allocation function (which uses the
-Boehm–Demers–Weiser garbage collector <a href="#BoehmGC">[BoehmGC]</a>).
-It returns a <code>cpointer</code> Scheme object that points to the first byte
-allocated. This pointer is managed by the  standard GC and doesn&#8217;t need
-to be freed.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_free-bytes'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(free-bytes obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p><code>Obj</code> must be a <code>cpointer</code> to allocated data. When <code>Free-bytes</code> is called
-on <code>obj</code>, it will deallocate its data calling
-- the C function <code>free</code> (if it  was allocated by the standard C <code>malloc</code>
-  function), or
-- the Boehm GC free  function (if the pointer was allocated using
-  <code>allocate-bytes</code> primitive).</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">10</span><span class="p">))</span>
-<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">fd91e8e0f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span>
-<span class="p">(</span><span class="nf">cpointer-type-set!</span> <span class="nv">a</span> <span class="ss">'myadress</span><span class="p">)</span>
-<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">myadress-pointer</span> <span class="mi">7</span><span class="nv">fd91e8e0f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span>
-<span class="p">(</span><span class="nf">free-bytes</span> <span class="nv">a</span><span class="p">)</span>
-<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">myadress-pointer</span> <span class="mi">0</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>After the call to <code>free-bytes</code>, when <code>a</code> is printed, the first number
-shown is zero, indicating that its data pointer does not point to
-allocated memory (a NULL value for C).</p>
-</div>
-<div class="paragraph">
 <p><a id='P_cpointer-set!'></a>
 </p>
 </div>
@@ -27255,6 +27170,91 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">6789</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">; address is one C "long" after</span>
 <span class="p">(</span><span class="nb">cons</span> <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">1</span><span class="p">)</span>
       <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">0</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">6789</span> <span class="o">.</span> <span class="mi">1234</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_allocate-bytes'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(allocate-bytes n) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Allocate-bytes</code> will allocate <code>n</code> consecutive bytes using
+the standard STklos allocation function (which uses the
+Boehm–Demers–Weiser garbage collector <a href="#BoehmGC">[BoehmGC]</a>).
+It returns a <code>cpointer</code> Scheme object that points to the first byte
+allocated. This pointer is managed by the  standard GC and doesn&#8217;t need
+to be freed.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_free-bytes'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(free-bytes obj) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Obj</code> must be a <code>cpointer</code> to allocated data. When <code>Free-bytes</code> is called
+on <code>obj</code>, it will deallocate its data calling
+- the C function <code>free</code> (if it  was allocated by the standard C <code>malloc</code>
+  function), or
+- the Boehm GC free  function (if the pointer was allocated using
+  <code>allocate-bytes</code> primitive).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">10</span><span class="p">))</span>
+<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">fd91e8e0f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span>
+<span class="p">(</span><span class="nf">cpointer-type-set!</span> <span class="nv">a</span> <span class="ss">'myadress</span><span class="p">)</span>
+<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">myadress-pointer</span> <span class="mi">7</span><span class="nv">fd91e8e0f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span>
+<span class="p">(</span><span class="nf">free-bytes</span> <span class="nv">a</span><span class="p">)</span>
+<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">myadress-pointer</span> <span class="mi">0</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After the call to <code>free-bytes</code>, when <code>a</code> is printed, the first number
+shown is zero, indicating that its data pointer does not point to
+allocated memory (a NULL value for C).</p>
+</div>
+<div class="paragraph">
+<p><a id='P_c-size-of'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(c-size-of type) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>c-size-of</code> returns the size of a C <code>type</code>, measured in units sized as char.
+The type is given as a keyword following the conventions described in the
+previous table.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:char</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nb">=</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:int8</span><span class="p">))</span>
+   <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:int16</span><span class="p">))</span>          <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
 </div>
 </div>
 </div>

@@ -2,7 +2,7 @@
  *
  * c p o i n t e r . c          -- Pointers on C objects
  *
- * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,12 +25,18 @@
  */
 
 #include "stklos.h"
+#include <math.h> // for isnan()
+
 
 static void error_bad_cpointer(SCM obj)
 {
   STk_error("bad C pointer object ~S", obj);
 }
 
+static void error_bad_offset(SCM obj)
+{
+  STk_error("bad offset ~S", obj);
+}
 
 SCM STk_make_Cpointer(void *ptr, SCM type, SCM data)
 {
@@ -158,6 +164,233 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr1, (SCM p))
   return STk_Cstring2string(CPOINTER_VALUE(p));
 }
 
+/*
+<doc EXT cpointer-set!
+ * (cpointer-set! pointer type value)
+ * (cpointer-set! pointer type value offset)
+ *
+ * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
+ * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+ * |type|. It permits to access the C object as an array.
+ *
+ * @lisp
+ * (define p (allocate-bytes 1))
+ * (cpointer-set! p :uint8 42)
+ * @end lisp
+ *
+ * @lisp
+ * (define p (allocate-bytes 2))
+ * (cpointer-set! p :uint8 42 0)
+ * (cpointer-set! p :uint8 43 1)
+ * @end lisp
+ *
+ * The following examples shows how we cans forge a C string in Scheme
+ * @lisp
+ * (let (( buff (allocate-bytes 5)))
+ *   (cpointer-set! buff :uchar #\a 0)
+ *   (cpointer-set! buff :uchar #\b 1)
+ *   (cpointer-set! buff :uchar #\c 2)
+ *   (cpointer-set! buff :uchar #\d 3)
+ *   (cpointer-set! buff :uchar #\null 4) ;; convention for end of string in C
+ *   (cpointer->string buff))      => "abcd"
+ * @end lisp
+doc>
+*/
+#define SET_CPTR(type, v) (*((type *) ptr+ off) = (type) v)
+
+DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
+                 (SCM pointer_obj, SCM type, SCM obj, SCM offset))
+{
+  long kind = STk_ffi_type_to_number(type);
+  long off  = offset? STk_integer_value(offset): 0;
+  void *ptr = CPOINTER_VALUE(pointer_obj);
+
+  // kind is verified by STk_ffi_type_to_number
+  if (off  == LONG_MIN) error_bad_offset(offset);
+  if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
+
+  switch (kind) {
+    case f_void:
+      STk_error("Can not set type :void");
+      break;
+
+    case f_char:
+    case f_uchar:
+    case f_schar:
+      if (CHARACTERP(obj)) {
+        int val = CHARACTER_VAL(obj);
+        switch (kind) {
+          case f_char:      SET_CPTR(char, val); break;
+          case f_uchar:     SET_CPTR(unsigned char, val); break;
+          case f_schar:     SET_CPTR(signed char, val); break;
+        }
+        break;
+      }
+      /* fallthrough */ /* to see if it's an int */
+    case f_short:
+    case f_ushort:
+    case f_int:
+    case f_uint:
+    case f_long:
+    case f_ulong:
+    case f_longlong:
+    case f_ulonglong:
+    case f_int8:
+    case f_uint8:
+    case f_int16:
+    case f_uint16:
+    case f_int32:
+    case f_uint32:
+    case f_int64:
+    case f_uint64: {
+      long val = STk_integer_value(obj);
+      if (val != LONG_MIN) {
+        switch (kind) {
+          case f_char:      SET_CPTR(char, val); break;;
+          case f_schar:     SET_CPTR(signed char, val); break;
+          case f_uchar:     SET_CPTR(unsigned char, val); break;
+          case f_short:     SET_CPTR(short, val); break;
+          case f_ushort:    SET_CPTR(unsigned short, val); break;
+          case f_int:       SET_CPTR(int, val); break;
+          case f_uint:      SET_CPTR(unsigned int, val); break;
+          case f_long:      SET_CPTR(long, val); break;
+          case f_ulong:     SET_CPTR(unsigned long, val); break;
+          case f_longlong:  SET_CPTR(long long, val); break;
+          case f_ulonglong: SET_CPTR(unsigned long long, val); break;
+          case f_int8:      SET_CPTR(int8_t, val); break;
+          case f_uint8:     SET_CPTR(uint8_t, val); break;
+          case f_int16:     SET_CPTR(int16_t, val); break;
+          case f_uint16:    SET_CPTR(uint16_t, val); break;
+          case f_int32:     SET_CPTR(int32_t, val); break;
+          case f_uint32:    SET_CPTR(uint32_t, val); break;
+          case f_int64:     SET_CPTR(int64_t, val); break;
+          case f_uint64:    SET_CPTR(uint64_t, val); break;
+        }
+      } else
+        STk_error("bad integer value ~S", obj);
+      break;
+    }
+
+    case f_float:
+    case f_double: {
+      double d = STk_number2double(obj);
+
+      if (isnan(d))
+        STk_error("number ~S cannot be converted to ~S", obj, type);
+      if (kind == f_float)
+        SET_CPTR(float, d);
+      else
+        SET_CPTR(double, d);
+    }
+      break;
+
+    case f_boolean: SET_CPTR(int, (obj != STk_false)); break;
+
+    case f_pointer:
+      if (CPOINTERP(obj))
+        SET_CPTR(void*, CPOINTER_VALUE(obj));
+      else if (obj ==STk_void)
+        SET_CPTR(void*, NULL);
+      else
+        STk_error("cpointer or #void expected. It was ~S", obj);
+      break;
+
+    case f_string:
+      if (STRINGP(obj))
+        SET_CPTR(char*, STRING_CHARS(obj));
+      else if (obj ==STk_void)
+        SET_CPTR(char*, NULL);
+      else
+        STk_error("string or #void expected. It was ~S", obj);
+      break;
+
+    case f_obj:
+      STk_error("cannot set a :obj pointer. Value was ~S", obj);
+      break;
+  }
+  return STk_void;
+}
+
+
+/*
+<doc EXT cpointer-ref
+ * (cpointer-ref pointer type)
+ * (cpointer-ref pointer type offset)
+ *
+ * Returns value of |type| from |pointer|. If |offset| is not given
+ * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+ * |type|. It permits to access the C object as an array.
+ *
+ * @lisp
+ * (define p (allocate-bytes 1))
+ * (cpointer-set! p :uint8 42)
+ * (cpointer-ref p :uint8)
+ *       => 42
+ * (cpointer-ref p :uint8 0)
+ *       => 42
+ *
+ * (define q (allocate-bytes (* 2 (c-size-of :long))))
+ * (cpointer-set! q :long 1234 0)
+ * (cpointer-set! q :long 6789 1) ; address is one C "long" after 
+ * (cons (cpointer-ref q :long 1)
+ *       (cpointer-ref q :long 0))   => (6789 . 1234)
+ * @end lisp
+doc>
+*/
+#define CPTR_REF(type) (*( (type*)ptr + off))
+
+DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
+                 (SCM pointer_obj, SCM type, SCM offset))
+{
+  long kind =  STk_ffi_type_to_number(type);
+  long off  = offset? STk_integer_value(offset): 0;
+  void *ptr = CPOINTER_VALUE(pointer_obj);
+
+  // kind is verified by STk_ffi_type_to_number
+  if (off  == LONG_MIN) error_bad_offset(offset);
+  if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
+
+  switch (kind) {
+    case f_void:      STk_error("can not ref type :void"); return STk_void;
+
+    case f_char:      return MAKE_CHARACTER(CPTR_REF(char));
+    case f_schar:     return MAKE_INT(CPTR_REF(signed char));
+    case f_uchar:     return MAKE_CHARACTER(CPTR_REF(unsigned char));
+
+    case f_short:     return MAKE_INT(CPTR_REF(short));
+    case f_ushort:    return MAKE_INT(CPTR_REF(unsigned short));
+    case f_int:       return MAKE_INT(CPTR_REF(int));
+    case f_uint:      return MAKE_INT(CPTR_REF(unsigned int));
+    case f_long:      return MAKE_INT(CPTR_REF(long));
+    case f_ulong:     return MAKE_INT(CPTR_REF(unsigned long));
+    case f_longlong:  return MAKE_INT(CPTR_REF(long long));
+    case f_ulonglong: return MAKE_INT(CPTR_REF(unsigned long long));
+    case f_int8:      return MAKE_INT(CPTR_REF(int8_t));
+    case f_uint8:    return MAKE_INT(CPTR_REF(uint8_t));
+    case f_int16:    return MAKE_INT(CPTR_REF(int16_t));
+    case f_uint16:   return MAKE_INT(CPTR_REF(uint16_t));
+    case f_int32:    return MAKE_INT(CPTR_REF(int32_t));
+    case f_uint32:   return MAKE_INT(CPTR_REF(uint32_t));
+    case f_int64:    return MAKE_INT(CPTR_REF(int64_t));
+    case f_uint64:   return MAKE_INT(CPTR_REF(uint64_t));
+
+    case f_float:    return STk_double2real(CPTR_REF(float));
+    case f_double:   return STk_double2real(CPTR_REF(double));
+
+    case f_boolean:  return MAKE_BOOLEAN(CPTR_REF(int));
+
+    case f_pointer:
+      return STk_make_Cpointer(CPTR_REF(void*), STk_void, STk_false);
+    case f_string:
+      return STk_Cstring2string(CPTR_REF(char *));
+
+    case f_obj:     STk_error("can not ref type :obj"); return STk_void;
+
+    default: STk_error("incorrect type: ~S", type);
+  }
+  return STk_void; /* for the compiler */
+}
+
 /* ----------------------------------------------------------------------
  *      User interface allocation functions ...
  *
@@ -240,6 +473,63 @@ DEFINE_PRIMITIVE("free-bytes", free_bytes, subr1, (SCM p))
   return STk_void;
 }
 
+/*
+<doc EXT c-size-of
+ * (c-size-of type)
+ *
+ * |c-size-of| returns the size of a C |type|, measured in units sized as char.
+ * The type is given as a keyword following the conventions described in the
+ * previous table.
+ *
+ * @lisp
+ * (c-size-of :char)               => 1
+ * (= (* 2 (c-size-of :int8))
+ *    (c-size-of :int16))          => #t
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("c-size-of", csizeof, subr1, (SCM type))
+{
+  long kind =  STk_ffi_type_to_number(type);
+  int res = 0;
+
+  switch (kind) {
+    case f_char:
+    case f_schar:
+    case f_uchar:     res = sizeof(char); break;
+
+    case f_short:
+    case f_ushort:    res = sizeof(short); break;
+    case f_int:
+    case f_uint:      res = sizeof(int); break;
+    case f_long:
+    case f_ulong:     res = sizeof(long); break;
+    case f_longlong:
+    case f_ulonglong: res = sizeof(long long); break;
+    case f_int8:
+    case f_uint8:     res = sizeof(int8_t); break;
+    case f_int16:
+    case f_uint16:    res = sizeof(int16_t); break;
+    case f_int32:
+    case f_uint32:    res = sizeof(int32_t); break;
+    case f_int64:
+    case f_uint64:    res = sizeof(int64_t); break;
+
+    case f_float:     res = sizeof(float);; break;
+    case f_double:    res = sizeof(double); break;
+
+    case f_boolean:   res = sizeof(int); break;
+
+    case f_pointer:
+    case f_string:   res = sizeof(void *); break;
+
+    case f_void:
+    case f_obj:     /* fallthrough */
+
+    default: STk_error("cannot determine the size of ~S", type);
+  }
+  return MAKE_INT(res);
+}
 
 int STk_init_cpointer(void)
 {
@@ -250,8 +540,12 @@ int STk_init_cpointer(void)
   ADD_PRIMITIVE(cpointer_data_set);
   ADD_PRIMITIVE(cpointer_type_set);
   ADD_PRIMITIVE(cpointer2string);
+  ADD_PRIMITIVE(cpointer_set);
+  ADD_PRIMITIVE(cpointer_ref);
 
   ADD_PRIMITIVE(allocate_bytes);
   ADD_PRIMITIVE(free_bytes);
+  ADD_PRIMITIVE(csizeof);
+
   return TRUE;
 }
