@@ -2,7 +2,7 @@
  *
  * fuse.c                       -- Interface wrapper for FUSE
  *
- * Copyright © 2005-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2005-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,10 +30,9 @@
 //
 #define FUSE_USE_VERSION   26     /* version of the API we want to use */
 #define _FILE_OFFSET_BITS  64
-#include <fuse.h>
 
-/* ---------------------------------------------------------------------- */
 #include <stklos.h>
+#include <fuse.h>
 #include "fuse-incl.c"
 
 static struct user_operations {

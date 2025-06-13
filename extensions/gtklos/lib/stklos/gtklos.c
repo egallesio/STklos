@@ -1,7 +1,7 @@
 /*
  * gtklos.c              -- Various GTk+ wrappers for GTklos
  *
- * Copyright © 2007-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,11 +23,10 @@
  *    Creation date: 11-Aug-2007 11:38 (eg)
  */
 
-
+#include <stklos.h>
 #include <math.h>               /* for isnan */
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>     /* For the keysyms macros */
-#include <stklos.h>
 #include "gtklos-config.h"
 
 #include "gtklos-incl.c"
