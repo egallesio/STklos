@@ -1,7 +1,7 @@
 /*
  * ffi.c        -- FFI support dor STklos
  *
- * Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,8 +26,16 @@
 #include "stklos.h"
 #include <math.h>
 
+
+static SCM ffi_table = STk_nil; // Alist such as ( (:void 0) (:int 1) ....)
+
 #ifdef HAVE_FFI
 #  include <ffi.h>
+
+/* not portable but this is was stolen in FFI test */
+#define ffi_type_ulonglong ffi_type_ulong
+#define ffi_type_slonglong ffi_type_slong
+
 
 /* ------------------------------ *\
  * STklos C external functions
@@ -44,17 +52,28 @@ struct ext_func_obj {
 };
 
 union any {
-  unsigned char  cvalue;
-  short          svalue;
-  unsigned short usvalue;
-  int            ivalue;
-  unsigned int   uivalue;
-  long           lvalue;
-  unsigned long  ulvalue;
-  long long      evalue;
-  float          fvalue;
-  double         dvalue;
-  void *         pvalue;
+  char                  cvalue;
+  signed char           scvalue;
+  unsigned char         ucvalue;
+  short                 svalue;
+  unsigned short        usvalue;
+  int                   ivalue;
+  unsigned int          uivalue;
+  long                  lvalue;
+  unsigned long         ulvalue;
+  long long             llvalue;
+  unsigned long long    ullvalue;
+  int8_t                i8value;
+  uint8_t               ui8value;
+  int16_t               i16value;
+  uint16_t              ui16value;
+  int32_t               i32value;
+  uint32_t              ui32value;
+  int64_t               i64value;
+  uint64_t              ui64value;
+  float                 fvalue;
+  double                dvalue;
+  void *                pvalue;
 };
 
 #define EXTFUNC_NAME(f)         (((struct ext_func_obj *) (f))->name)
@@ -106,56 +125,72 @@ static void error_bad_string(SCM obj)
 }
 
 
-
 /* ====================================================================== */
-
-/*
-((:void         0)  (:char      1)  (:short     2)   (:ushort   3)
- (:int          4)  (:uint      5)  (:long      6)   (:ulong    7)
- (:lonlong      8)  (:ulonlong  9)  (:float     10)  (:double   11)
- (:boolean      12) (:pointer   13) (:string    14)  (:int8     15)
- (:int16        16) (:int32     17) (:int64     18)  (:obj      19))
-*/
-
-
-
-#define EXT_FUNC_MAX_TYPE 19            /* maximal value for types */
 #define EXT_FUNC_MAX_PARAMS 30          /* max # of parameters to an external func */
 
-static ffi_type* conversion[] = {
-  &ffi_type_void,               /* :void */
-  &ffi_type_uchar,              /* :char */
-  &ffi_type_sshort,             /* :short */
-  &ffi_type_ushort,             /* :ushort */
-  &ffi_type_sint,               /* :int */
-  &ffi_type_uint,               /* :uint */
-  &ffi_type_slong,              /* :long */
-  &ffi_type_ulong,              /* :ulong */
-  &ffi_type_sint64,             /* :lonlong   !!!!!!!!!!!!! */
-  &ffi_type_uint64,             /* :lonlong   !!!!!!!!!!!!! */
-  &ffi_type_float,              /* :float */
-  &ffi_type_double,             /* :double */
-  &ffi_type_uint,               /* :boolean */
-  &ffi_type_pointer,            /* :pointer */
-  &ffi_type_pointer,            /* :string */
-  &ffi_type_sint8,              /* :int8 */
-  &ffi_type_sint16,             /* :int16 */
-  &ffi_type_sint32,             /* :int32 */
-  &ffi_type_sint64,             /* :int64 */
-  &ffi_type_pointer,            /* :obj */
-};
+static ffi_type* conversion[f_last];
+
+void register_ffi_type(char *str, enum f_codes val, ffi_type *tip)
+{
+  /* Add the item to the A-list table associating Scheme name and internal value */
+  ffi_table = STk_cons(LIST2(STk_makekey(str), MAKE_INT(val)), ffi_table);
+
+  /* Add the item to the conversion table */
+  conversion[val] = tip;
+}
+
+
+#define REG_TYPE(symb, tip) register_ffi_type(#symb, f_##symb, tip)
+
+static void build_ffi_tables(void)
+{
+  REG_TYPE(void,        &ffi_type_void);
+  REG_TYPE(char,        &ffi_type_uchar);
+  REG_TYPE(short,       &ffi_type_sshort);
+  REG_TYPE(ushort,      &ffi_type_ushort);
+  REG_TYPE(int,         &ffi_type_sint);
+  REG_TYPE(uint,        &ffi_type_uint);
+  REG_TYPE(long,        &ffi_type_slong);
+  REG_TYPE(ulong,       &ffi_type_ulong);
+  REG_TYPE(longlong,    &ffi_type_slong);
+  REG_TYPE(ulonglong,   &ffi_type_ulong);
+  REG_TYPE(float,       &ffi_type_float);
+  REG_TYPE(double,      &ffi_type_double);
+  REG_TYPE(boolean,     &ffi_type_uint);
+  REG_TYPE(pointer,     &ffi_type_pointer);
+  REG_TYPE(string,      &ffi_type_pointer);
+  REG_TYPE(int8,        &ffi_type_sint8);
+  REG_TYPE(int16,       &ffi_type_sint16);
+  REG_TYPE(int32,       &ffi_type_sint32);
+  REG_TYPE(int64,       &ffi_type_sint64);
+  REG_TYPE(obj,         &ffi_type_pointer);
+  REG_TYPE(uint8,       &ffi_type_uint8);
+  REG_TYPE(uint16,      &ffi_type_uint16);
+  REG_TYPE(uint32,      &ffi_type_uint32);
+  REG_TYPE(uint64,      &ffi_type_uint64);
+  REG_TYPE(schar,       &ffi_type_schar);
+  REG_TYPE(uchar,       &ffi_type_uchar);
+}
 
 
 static ffi_type* convert(SCM obj)
 {
   int n = STk_integer_value(obj);
 
-  if (n < 0 || n > EXT_FUNC_MAX_TYPE) STk_error("bad integer ~S", obj);
+  if (n < 0 || n >=f_last) STk_error("bad integer ~S", obj);
 
   return conversion[n];
 }
 
 
+int STk_ffi_type_to_number(SCM obj)
+{
+  SCM l= STk_assq(obj, ffi_table);
+
+  if (l == STk_false)
+    STk_error("bad type specification ~S", obj);
+  return INT_VAL(CAR(CDR(l)));
+}
 
 /* ======================================================================
  *      scheme2c ...
@@ -163,43 +198,72 @@ static ffi_type* convert(SCM obj)
 static void scheme2c(SCM obj, int type_needed, union any *res, int index)
 {
   switch (type_needed) {
-    case 0:                                             /* void */
+    case f_void:
       STk_error("conversion of a parameter to void forbidden");
       break;
-    case 1:                                             /* char */
-    case 2:                                             /* short */
-    case 3:                                             /* ushort */
-    case 4:                                             /* int */
-    case 5:                                             /* uint */
-    case 6:                                             /* long */
-    case 7:                                             /* ulong */
-      {
-        long val = STk_integer_value(obj);
-        if (val != LONG_MIN) {
-          switch (type_needed) {
-            case 1: res->cvalue  = (unsigned char) val; break;
-            case 2: res->svalue  = (short) val; break;
-            case 3: res->usvalue = (unsigned short) val; break;
-            case 4: res->ivalue  = (int) val; break;
-            case 5: res->uivalue = (unsigned int) val; break;
-            case 6: res->uivalue = (long) val; break;
-            case 7: res->uivalue = (unsigned long) val; break;
-          }
-          return;
+
+    case f_char:
+    case f_uchar:
+    case f_schar:
+      if (CHARACTERP(obj)) {
+        int val = CHARACTER_VAL(obj);
+        switch (type_needed) {
+          case f_char:      res->cvalue    = (char) val; break;
+          case f_uchar:     res->ucvalue   = (unsigned char) val; break;
+          case f_schar:     res->scvalue   = (signed char) val; break;
         }
-        break;
       }
-    case 8:                                             /* lonlong */
-    case 9:                                             /* ulonlong */
-      STk_error("passing long long is not implemented yet");
+      /* fallthrough */ /* to see if it's an int */
+    case f_short:
+    case f_ushort:
+    case f_int:
+    case f_uint:
+    case f_long:
+    case f_ulong:
+    case f_longlong:
+    case f_ulonglong:
+    case f_int8:
+    case f_uint8:
+    case f_int16:
+    case f_uint16:
+    case f_int32:
+    case f_uint32:
+    case f_int64:
+    case f_uint64: {
+      long val = STk_integer_value(obj);
+      if (val != LONG_MIN) {
+        switch (type_needed) {
+          case f_char:      res->cvalue    = (char) val; return;
+          case f_uchar:     res->ucvalue   = (unsigned char) val; return;
+          case f_schar:     res->scvalue   = (signed char) val; return;
+          case f_short:     res->svalue    = (short) val; return;
+          case f_ushort:    res->usvalue   = (unsigned short) val; return;
+          case f_int:       res->ivalue    = (int) val; return;
+          case f_uint:      res->uivalue   = (unsigned int) val; return;
+          case f_long:      res->lvalue    = (long) val; return;
+          case f_ulong:     res->ulvalue   = (unsigned long) val; return;
+          case f_longlong:  res->llvalue   = (long long) val; return;
+          case f_ulonglong: res->ullvalue  = (unsigned long long) val; return;
+          case f_int8:      res->i8value   = (int8_t) val; return;
+          case f_uint8:     res->ui8value  = (uint8_t) val; return;
+          case f_int16:     res->i16value  = (int16_t) val; return;
+          case f_uint16:    res->ui16value = (uint16_t) val; return;
+          case f_int32:     res->i32value  = (int32_t) val; return;
+          case f_uint32:    res->ui32value = (uint32_t) val; return;
+          case f_int64:     res->i64value  = (int64_t) val; return;
+          case f_uint64:    res->ui64value = (uint64_t) val; return;
+        }
+      }
       break;
-    case 10:                                            /* float */
-    case 11:                                            /* double */
+    }
+
+    case f_float:
+    case f_double:
       {
         double d =  STk_number2double(obj);
 
         if (!isnan(d)) {
-          if (type_needed == 10)
+          if (type_needed == f_float)
             res->fvalue = (float) d;
           else
             res->dvalue = d;
@@ -207,10 +271,12 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
         }
         break;
       }
-    case 12:                                            /* boolean */
+
+    case f_boolean:
       res->ivalue = (obj != STk_false);
       return;
-    case 13:                                            /* pointer */
+
+    case f_pointer:                                            /* pointer */
       if (CPOINTERP(obj)) {
         res->pvalue = CPOINTER_VALUE(obj);
         return;
@@ -224,7 +290,7 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
         return;
       }
       break;
-    case 14:                                            /* string */
+    case f_string:                                            /* string */
       if (STRINGP(obj)) {
         res->pvalue = STRING_CHARS(obj);
         return;
@@ -234,13 +300,7 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
         return;
       }
       break;
-    case 15:                                            /* int8 */
-    case 16:                                            /* int16 */
-    case 17:                                            /* int32 */
-    case 18:                                            /* int64 */
-      STk_error("passing intXX is not implemented yet");
-      break;
-    case 19:                                            /* obj */
+    case f_obj:
       res->pvalue = obj;
       return;
   }
@@ -254,46 +314,67 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
 static SCM c2scheme(union any obj, SCM rettype)
 {
   switch (INT_VAL(rettype)) {
-    case 0:                                             /* void */
+    case f_void:
       return STk_void;
-    case 1:                                             /* char */
+
+    case f_char:
       return MAKE_CHARACTER(obj.cvalue);
-    case 2:                                             /* short */
+    case f_uchar:
+      return MAKE_CHARACTER(obj.ucvalue);
+    case f_schar:
+      return STk_long2integer(obj.scvalue); /* signed chars are (small) ints */
+
+    case f_short:
       return STk_long2integer(obj.svalue);
-    case 3:                                             /* ushort */
+    case f_ushort:
       return STk_long2integer(obj.usvalue);
-    case 4:                                             /* int */
+    case f_int:
       return STk_long2integer(obj.ivalue);
-    case 5:                                             /* uint */
+    case f_uint:
       return STk_long2integer(obj.uivalue);
-    case 6:                                             /* long */
+    case f_long:
       return STk_long2integer(obj.lvalue);
-    case 7:                                             /* ulong */
+    case f_ulong:
       return STk_ulong2integer(obj.ulvalue);
-    case 8:                                             /* lonlong */
-    case 9:                                             /* ulonlong */
-      STk_error("returning long long is not implemented yet");
-      break;
-    case 10:                                            /* float */
+    case f_longlong:
+      return STk_ulong2integer(obj.llvalue);
+    case f_ulonglong:
+      return STk_ulong2integer(obj.ullvalue);
+    case f_int8:
+      return STk_ulong2integer(obj.i8value);
+    case f_uint8:
+      return STk_ulong2integer(obj.ui8value);
+    case f_int16:
+      return STk_ulong2integer(obj.i16value);
+    case f_uint16:
+      return STk_ulong2integer(obj.ui16value);
+    case f_int32:
+      return STk_ulong2integer(obj.i32value);
+    case f_uint32:
+      return STk_ulong2integer(obj.ui32value);
+    case f_int64:
+      return STk_ulong2integer(obj.i64value);
+    case f_uint64:
+      return STk_ulong2integer(obj.ui64value);
+
+    case f_float:
       return STk_double2real((double) obj.fvalue);
-    case 11:                                            /* double */
+    case f_double:
       return STk_double2real(obj.dvalue);
-    case 12:                                            /* boolean */
+
+    case f_boolean:
       return MAKE_BOOLEAN(obj.ivalue);
-    case 13:                                            /* pointer */
+
+    case f_pointer:
       return (obj.pvalue) ?
         STk_make_Cpointer(obj.pvalue, STk_void, STk_false) :
         STk_void;
-    case 14:                                            /* string */
+
+    case f_string:
       if (! obj.pvalue) return STk_void;
       return STk_Cstring2string(obj.pvalue);
-    case 15:                                            /* int8 */
-    case 16:                                            /* int16 */
-    case 17:                                            /* int32 */
-    case 18:                                            /* int64 */
-      STk_error("returning intXX is not implemented yet");
-      break;
-    case 19:                                            /* obj */
+
+    case f_obj:
       return (obj.pvalue ? obj.pvalue : STk_void);
     default:
       STk_panic("incorrect type number for FFI ~S", rettype);
@@ -433,43 +514,74 @@ static int exec_callback(SCM callback, ...)
   for (Cargs = CALLBACK_TYPES(callback); !NULLP(Cargs); Cargs = CDR(Cargs)) {
     /* grab the argument on the stack */
     switch(INT_VAL(CAR(Cargs))) {
-      case 0:                                           /* void */
+      case f_void:
         break;
-      case 1:                                           /* char */
+
+      case f_char:
         param.cvalue = va_arg(ap, int); break;
-      case 2:                                           /* short */
+      case f_schar:
+        param.scvalue = va_arg(ap, signed int); break;
+      case f_uchar:
+        param.ucvalue = va_arg(ap, unsigned int); break;
+      case f_short:
         param.svalue = va_arg(ap, int); break;
-      case 3:                                           /* ushort */
+      case f_ushort:
         param.usvalue = va_arg(ap, unsigned int); break;
-      case 4:                                           /* int */
+      case f_int:
         param.ivalue = va_arg(ap, int); break;
-      case 5:                                           /* uint */
+      case f_uint:
         param.uivalue = va_arg(ap, unsigned int); break;
-      case 6:                                           /* long */
+      case f_long:
         param.lvalue = va_arg(ap, long); break;
-      case 7:                                           /* ulong */
+      case f_ulong:
         param.ulvalue = va_arg(ap, unsigned long); break;
-      case 8:                                           /* lonlong */
-      case 9:                                           /* ulonlong */
-        STk_error("long long in a callback are not implemented yet"); break;
-      case 10:                                          /* float */
+      case f_longlong:
+        param.llvalue = va_arg(ap, long long); break;
+      case f_ulonglong:
+        param.ullvalue = va_arg(ap, unsigned long long); break;
+      case f_int8:
+        param.i8value = va_arg(ap, int); break;
+      case f_uint8:
+        param.ui8value = va_arg(ap, unsigned int); break;
+      case f_int16:
+        param.i16value = va_arg(ap, int); break;
+      case f_uint16:
+        param.ui16value = va_arg(ap, unsigned int); break;
+      case f_int32:      /* Be careful with  integer promotion ? */
+        param.i32value = (sizeof(int32_t) >= sizeof(int)) ?
+                            va_arg(ap, int32_t): va_arg(ap, int);
+        break;
+      case f_uint32:     /* Be careful with  integer promotion ? */
+        param.ui32value = (sizeof(int32_t) >= sizeof(int)) ?
+                            va_arg(ap, uint32_t): va_arg(ap, unsigned int);
+        break;
+      case f_int64:      /* Be careful with  integer promotion ? */
+        param.i32value = (sizeof(int64_t) >= sizeof(int)) ?
+                            va_arg(ap, int64_t): va_arg(ap, int);
+        break;
+      case f_uint64:      /* Be careful with  integer promotion ? */
+        param.i32value = (sizeof(int64_t) >= sizeof(int)) ?
+                            va_arg(ap, uint64_t): va_arg(ap, unsigned int);
+        break;
+
+      case f_float:
         param.fvalue = (float) va_arg(ap, double); break;
-      case 11:                                          /* double */
+      case f_double:
         param.dvalue = va_arg(ap, double); break;
-      case 12:                                          /* boolean */
+
+      case f_boolean:
         param.ivalue = va_arg(ap, int); break;
-      case 13:                                          /* pointer */
+
+      case f_pointer:
         param.pvalue = va_arg(ap, void *); break;
-      case 14:                                          /* string */
+
+      case f_string:
         param.pvalue = va_arg(ap, char *); break;
-      case 15:                                          /* int8 */
-      case 16:                                          /* int16 */
-      case 17:                                          /* int32 */
-      case 18:                                          /* int64 */
         STk_error("argument of type ~S in callback are not implemented yet",
                   CAR(Cargs)); break;
-      case 19:                                          /* obj */
+      case f_obj:
         param.pvalue = va_arg(ap, void *); break;
+
       default:
         STk_panic("incorrect type number for FFI ~s", (CAR(Cargs)));
     }
@@ -558,6 +670,7 @@ DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM t
       STk_error("cannot access a void variable");
       break;
     case 1:                                             /* char */
+    case 24:                                            /* schar */
       return MAKE_CHARACTER(* ((char *)CPOINTER_VALUE(obj)));
     case 2:                                             /* short */
       return STk_long2integer(* ((short *)CPOINTER_VALUE(obj)));
@@ -599,6 +712,10 @@ DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM t
     case 16:                                            /* int16 */
     case 17:                                            /* int32 */
     case 18:                                            /* int64 */
+    case 20:                                            /* uint8 */
+    case 21:                                            /* uint16 */
+    case 22:                                            /* uint32 */
+    case 23:                                            /* uint64 */
       STk_error("returning intXX is not implemented yet");
       break;
     case 19:                                            /* obj */
@@ -632,6 +749,7 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
     case 5:                                             /* uint */
     case 6:                                             /* long */
     case 7:                                             /* ulong */
+    case 24:                                            /* schar */
       {
         long value = CHARACTERP(val) ?
                          (long) CHARACTER_VAL(val) :
@@ -648,6 +766,7 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
             case 6: (* ((long *)CPOINTER_VALUE(obj))) = (long) value; break;
             case 7: (* ((unsigned long *)CPOINTER_VALUE(obj)))
                              = (unsigned long) value; break;
+            case 24: (* ((unsigned char *)CPOINTER_VALUE(obj))) = (unsigned char) value; break;
           }
           return STk_void;
         }
@@ -680,6 +799,10 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
     case 16:                                            /* int16 */
     case 17:                                            /* int32 */
     case 18:                                            /* int64 */
+    case 20:                                            /* uint8 */
+    case 21:                                            /* uint16 */
+    case 22:                                            /* uint32 */
+    case 23:                                            /* uint64 */
       STk_error("passing argument of type ~S is not implemented yet", type);
       break;
     case 19:                                            /* obj */
@@ -689,9 +812,6 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
   STk_error("cannot convert ~S in requested type (~S)", obj, type);
   return STk_void;
 }
-
-
-
 #else /* HAVE_FFI */
 static void error_no_ffi(void)
 {
@@ -732,6 +852,11 @@ DEFINE_PRIMITIVE("%stklos-has-ffi?", has_ffi, subr0, ())
 #endif
 }
 
+DEFINE_PRIMITIVE("%ffi-assoc-table", ffi_assoc_table, subr0, (void))
+{
+  return ffi_table;
+}
+
 
 /* ======================================================================
  *      INIT  ...
@@ -744,14 +869,16 @@ int STk_init_ffi(void)
                                                STk_false);
   #endif
 
+  // Construct the type->number (even if no FFI to access c-pointer-{ref,set!} )
+  build_ffi_tables();
+
   ADD_PRIMITIVE(make_ext_func);
   ADD_PRIMITIVE(make_callback);
   ADD_PRIMITIVE(exec_cb_addr);
 
   ADD_PRIMITIVE(get_symbol_address);
-  ADD_PRIMITIVE(get_typed_ext_var);
-  ADD_PRIMITIVE(set_typed_ext_var);
 
+  ADD_PRIMITIVE(ffi_assoc_table);
   ADD_PRIMITIVE(has_ffi);
   return TRUE;
 }

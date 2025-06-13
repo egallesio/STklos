@@ -1640,7 +1640,7 @@ char* STk_boot_consts = "#("
 "((make-external-function . make-external-function) (make-callback . make-callback) (define-external . define-external))" " "
 "make-external-function" " "
 "make-callback" " "
-"((#:void 0) (#:char 1) (#:short 2) (#:ushort 3) (#:int 4) (#:uint 5) (#:long 6) (#:ulong 7) (#:lonlong 8) (#:ulonlong 9) (#:float 10) (#:double 11) (#:boolean 12) (#:pointer 13) (#:string 14) (#:int8 15) (#:int16 16) (#:int32 17) (#:int64 18) (#:obj 19))" " "
+"%ffi-assoc-table" " "
 "define-external" " "
 "\"parameter of type :void are forbidden\"" " "
 "\"bad type name ~S\"" " "
@@ -23436,7 +23436,7 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x7d,
 0x2d,
-0x6864,
+0x6867,
 0x25,
 0x55,
 0x11a,
@@ -39248,8 +39248,11 @@ STk_instr STk_boot_code [] = {
 0x1f,
 0x660,
 0x25,
-0x55,
+0x25,
+0x56,
 0x661,
+0x0,
+0x21,
 0x29,
 0x1,
 0x25,

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; ffi.stk            -- FFI support
 ;;;;
-;;;; Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,32 +23,15 @@
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
 ;;;;
 
-(export make-external-function make-callback define-external)
-
+(export make-external-function
+        make-callback
+        define-external)
 
 (define make-external-function #f)
 (define make-callback          #f)
 
-(let ((table '((:void       0)
-               (:char       1)
-               (:short      2)
-               (:ushort     3)
-               (:int        4)
-               (:uint       5)
-               (:long       6)
-               (:ulong      7)
-               (:lonlong    8)
-               (:ulonlong   9)
-               (:float      10)
-               (:double     11)
-               (:boolean    12)
-               (:pointer    13)
-               (:string     14)
-               (:int8       15)
-               (:int16      16)
-               (:int32      17)
-               (:int64      18)
-               (:obj        19))))
+(let ((table (%ffi-assoc-table)))  ;; table is an A-list which asssociate
+                                   ;; a type name to its encoding in ffi.c
 
   (define (arg-type->number k argument?)
     (let ((info (assoc k table)))
