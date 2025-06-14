@@ -33,23 +33,22 @@
 (let ((table (%ffi-assoc-table)))  ;; table is an A-list which asssociate
                                    ;; a type name to its encoding in ffi.c
 
-  (define (arg-type->number k argument?)
+  (define (C-type->number k argument?)
+    (when (and argument?  (eq? k :void))
+      (error 'define-external "parameter of type :void are forbidden"))
     (let ((info (assoc k table)))
       (if info
-          (let ((r (cdr info)))
-            (if (and (zero? r) argument?)
-                (error 'define-external "parameter of type :void are forbidden")
-                r))
+          (cdr info)
           (error 'define-external "bad type name ~S" k))))
 
   (define (parse-parameters lst)
     (map (lambda (x)
        (cond
          ((keyword? x)
-          (arg-type->number x #t))
+          (C-type->number x #t))
          ((pair? x)
           (if (and (symbol? (car x)) (keyword? (cadr x)) (null? (cddr x)))
-          (arg-type->number (cadr x) #t)
+          (C-type->number (cadr x) #t)
           (error 'make-external-function
              "bad parameter description: ~S" x)))
          (else
@@ -62,7 +61,7 @@
     (lambda (entry-name parameters return-type lib-name)
       (%make-ext-func entry-name
               (parse-parameters parameters)
-              (arg-type->number return-type #f)
+              (C-type->number return-type #f)
               lib-name)))
 
   ;; make-callback
