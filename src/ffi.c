@@ -674,7 +674,7 @@ static void build_ffi_tables(void)
 }
 
 
-int STk_ffi_type_to_number(SCM obj)
+int STk_C_type2number(SCM obj)
 {
   SCM l= STk_assq(obj, ffi_table);
 

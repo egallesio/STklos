@@ -634,7 +634,7 @@ enum f_codes {
   f_last    /* MUST be the last item of the enum */
 };
 
-int STk_ffi_type_to_number(SCM key);
+int STk_C_type2number(SCM key);
 SCM STk_call_ext_function(SCM fct, int argc, SCM *argv);
 SCM STk_ext_func_name(SCM fct);
   

@@ -201,11 +201,11 @@ doc>
 DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
                  (SCM pointer_obj, SCM type, SCM obj, SCM offset))
 {
-  long kind = STk_ffi_type_to_number(type);
+  long kind = STk_C_type2number(type);
   long off  = offset? STk_integer_value(offset): 0;
   void *ptr = CPOINTER_VALUE(pointer_obj);
 
-  // kind is verified by STk_ffi_type_to_number
+  // kind is verified by STk_C_type2number
   if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
 
@@ -342,11 +342,11 @@ doc>
 DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
                  (SCM pointer_obj, SCM type, SCM offset))
 {
-  long kind =  STk_ffi_type_to_number(type);
+  long kind =  STk_C_type2number(type);
   long off  = offset? STk_integer_value(offset): 0;
   void *ptr = CPOINTER_VALUE(pointer_obj);
 
-  // kind is verified by STk_ffi_type_to_number
+  // kind is verified by STk_C_type2number
   if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
 
@@ -490,7 +490,7 @@ doc>
 */
 DEFINE_PRIMITIVE("c-size-of", csizeof, subr1, (SCM type))
 {
-  long kind =  STk_ffi_type_to_number(type);
+  long kind =  STk_C_type2number(type);
   int res = 0;
 
   switch (kind) {
