@@ -36,11 +36,11 @@
   (define (arg-type->number k argument?)
     (let ((info (assoc k table)))
       (if info
-      (let ((r (cadr info)))
-        (if (and (zero? r) argument?)
-        (error 'define-external "parameter of type :void are forbidden")
-        (cadr info)))
-      (error 'define-external "bad type name ~S" k))))
+          (let ((r (cdr info)))
+            (if (and (zero? r) argument?)
+                (error 'define-external "parameter of type :void are forbidden")
+                r))
+          (error 'define-external "bad type name ~S" k))))
 
   (define (parse-parameters lst)
     (map (lambda (x)

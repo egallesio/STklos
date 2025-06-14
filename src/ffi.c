@@ -27,7 +27,7 @@
 #include <math.h>
 
 
-static SCM ffi_table = STk_nil; // Alist such as ( (:void 0) (:int 1) ....)
+static SCM ffi_table = STk_nil; // Alist such as ( (:void . 0) (:int . 1) ....)
 
 #ifdef HAVE_FFI
 #  include <ffi.h>
@@ -627,7 +627,7 @@ DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2,
 void register_ffi_type(char *str, enum f_codes val, ffi_type *tip)
 {
   /* Add the item to the A-list table associating Scheme name and internal value */
-  ffi_table = STk_cons(LIST2(STk_makekey(str), MAKE_INT(val)), ffi_table);
+  ffi_table = STk_cons(STk_cons(STk_makekey(str), MAKE_INT(val)), ffi_table);
 
   /* Add the item to the conversion table */
   conversion[val] = tip;
@@ -680,7 +680,7 @@ int STk_C_type2number(SCM obj)
 
   if (l == STk_false)
     STk_error("bad type specification ~S", obj);
-  return INT_VAL(CAR(CDR(l)));
+  return INT_VAL(CDR(l));
 }
 
 
