@@ -653,8 +653,8 @@ static void build_ffi_tables(void)
   REG_TYPE(uint,        &ffi_type_uint);
   REG_TYPE(long,        &ffi_type_slong);
   REG_TYPE(ulong,       &ffi_type_ulong);
-  REG_TYPE(longlong,    &ffi_type_slong);
-  REG_TYPE(ulonglong,   &ffi_type_ulong);
+  REG_TYPE(longlong,    &ffi_type_slonglong);
+  REG_TYPE(ulonglong,   &ffi_type_ulonglong);
   REG_TYPE(float,       &ffi_type_float);
   REG_TYPE(double,      &ffi_type_double);
   REG_TYPE(boolean,     &ffi_type_uint);
