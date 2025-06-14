@@ -107,66 +107,15 @@ struct callback_obj {
 
 static SCM pointer_on_exec_callback;
 
-/* ====================================================================== */
-
-static void error_bad_cpointer(SCM obj)
-{
-  STk_error("bad C pointer object ~S", obj);
-}
-
 static void error_bad_string(SCM obj)
 {
   STk_error("bad string ~S", obj);
 }
 
-
 /* ====================================================================== */
 #define EXT_FUNC_MAX_PARAMS 30          /* max # of parameters to an external func */
 
-static ffi_type* conversion[f_last];
-
-void register_ffi_type(char *str, enum f_codes val, ffi_type *tip)
-{
-  /* Add the item to the A-list table associating Scheme name and internal value */
-  ffi_table = STk_cons(LIST2(STk_makekey(str), MAKE_INT(val)), ffi_table);
-
-  /* Add the item to the conversion table */
-  conversion[val] = tip;
-}
-
-
-#define REG_TYPE(symb, tip) register_ffi_type(#symb, f_##symb, tip)
-
-static void build_ffi_tables(void)
-{
-  REG_TYPE(void,        &ffi_type_void);
-  REG_TYPE(char,        &ffi_type_uchar);
-  REG_TYPE(short,       &ffi_type_sshort);
-  REG_TYPE(ushort,      &ffi_type_ushort);
-  REG_TYPE(int,         &ffi_type_sint);
-  REG_TYPE(uint,        &ffi_type_uint);
-  REG_TYPE(long,        &ffi_type_slong);
-  REG_TYPE(ulong,       &ffi_type_ulong);
-  REG_TYPE(longlong,    &ffi_type_slong);
-  REG_TYPE(ulonglong,   &ffi_type_ulong);
-  REG_TYPE(float,       &ffi_type_float);
-  REG_TYPE(double,      &ffi_type_double);
-  REG_TYPE(boolean,     &ffi_type_uint);
-  REG_TYPE(pointer,     &ffi_type_pointer);
-  REG_TYPE(string,      &ffi_type_pointer);
-  REG_TYPE(int8,        &ffi_type_sint8);
-  REG_TYPE(int16,       &ffi_type_sint16);
-  REG_TYPE(int32,       &ffi_type_sint32);
-  REG_TYPE(int64,       &ffi_type_sint64);
-  REG_TYPE(obj,         &ffi_type_pointer);
-  REG_TYPE(uint8,       &ffi_type_uint8);
-  REG_TYPE(uint16,      &ffi_type_uint16);
-  REG_TYPE(uint32,      &ffi_type_uint32);
-  REG_TYPE(uint64,      &ffi_type_uint64);
-  REG_TYPE(schar,       &ffi_type_schar);
-  REG_TYPE(uchar,       &ffi_type_uchar);
-}
-
+static ffi_type* conversion[f_last];    /* initialized by build_ffi_tables */
 
 static ffi_type* convert(SCM obj)
 {
@@ -175,16 +124,6 @@ static ffi_type* convert(SCM obj)
   if (n < 0 || n >=f_last) STk_error("bad integer ~S", obj);
 
   return conversion[n];
-}
-
-
-int STk_ffi_type_to_number(SCM obj)
-{
-  SCM l= STk_assq(obj, ffi_table);
-
-  if (l == STk_false)
-    STk_error("bad type specification ~S", obj);
-  return INT_VAL(CAR(CDR(l)));
 }
 
 /* ======================================================================
@@ -659,29 +598,91 @@ static void error_no_ffi(void)
 }
 
 DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4,
-                 (SCM p1, SCM p2, SCM p3, SCM p4))
+                 (SCM _UNUSED(p1), SCM _UNUSED(p2),
+                  SCM _UNUSED(p3), SCM _UNUSED(p4)))
 { error_no_ffi(); return STk_void;}
 
-DEFINE_PRIMITIVE("%make-callback", make_callback, subr3, (SCM p1, SCM p2, SCM p3))
+DEFINE_PRIMITIVE("%make-callback", make_callback, subr3,
+                 (SCM _UNUSED(p1), SCM _UNUSED(p2), SCM _UNUSED(p3)))
 { error_no_ffi(); return STk_void;}
 
 DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
 { error_no_ffi(); return STk_void;}
 
-
 DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2,
-                 (SCM name, SCM libname))
-{ error_no_ffi(); return STk_void;}
-
-DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM type))
-{error_no_ffi(); return STk_void;}
-
-
-DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
-                 (SCM obj, SCM val, SCM type))
+                 (SCM _UNUSED(name), SCM _UNUSED(libname)))
 { error_no_ffi(); return STk_void;}
 
 #endif
+
+
+/* ======================================================================
+ *
+ * Construction of the ffi_table (and conversion table if we have FFI)
+ *
+ * ====================================================================== */
+#ifdef HAVE_FFI
+#define REG_TYPE(symb, tip) register_ffi_type(#symb, f_##symb, tip)
+
+void register_ffi_type(char *str, enum f_codes val, ffi_type *tip)
+{
+  /* Add the item to the A-list table associating Scheme name and internal value */
+  ffi_table = STk_cons(LIST2(STk_makekey(str), MAKE_INT(val)), ffi_table);
+
+  /* Add the item to the conversion table */
+  conversion[val] = tip;
+}
+#else
+#define REG_TYPE(symb, tip) register_ffi_type(#symb, f_##symb) // tip is unused here
+
+void register_ffi_type(char *str, enum f_codes val)
+{
+  /* Add the item to the A-list table associating Scheme name and internal value */
+  ffi_table = STk_cons(LIST2(STk_makekey(str), MAKE_INT(val)), ffi_table);
+}
+#endif
+
+
+static void build_ffi_tables(void)
+{
+  REG_TYPE(void,        &ffi_type_void);
+  REG_TYPE(char,        &ffi_type_uchar);
+  REG_TYPE(short,       &ffi_type_sshort);
+  REG_TYPE(ushort,      &ffi_type_ushort);
+  REG_TYPE(int,         &ffi_type_sint);
+  REG_TYPE(uint,        &ffi_type_uint);
+  REG_TYPE(long,        &ffi_type_slong);
+  REG_TYPE(ulong,       &ffi_type_ulong);
+  REG_TYPE(longlong,    &ffi_type_slong);
+  REG_TYPE(ulonglong,   &ffi_type_ulong);
+  REG_TYPE(float,       &ffi_type_float);
+  REG_TYPE(double,      &ffi_type_double);
+  REG_TYPE(boolean,     &ffi_type_uint);
+  REG_TYPE(pointer,     &ffi_type_pointer);
+  REG_TYPE(string,      &ffi_type_pointer);
+  REG_TYPE(int8,        &ffi_type_sint8);
+  REG_TYPE(int16,       &ffi_type_sint16);
+  REG_TYPE(int32,       &ffi_type_sint32);
+  REG_TYPE(int64,       &ffi_type_sint64);
+  REG_TYPE(obj,         &ffi_type_pointer);
+  REG_TYPE(uint8,       &ffi_type_uint8);
+  REG_TYPE(uint16,      &ffi_type_uint16);
+  REG_TYPE(uint32,      &ffi_type_uint32);
+  REG_TYPE(uint64,      &ffi_type_uint64);
+  REG_TYPE(schar,       &ffi_type_schar);
+  REG_TYPE(uchar,       &ffi_type_uchar);
+}
+
+
+int STk_ffi_type_to_number(SCM obj)
+{
+  SCM l= STk_assq(obj, ffi_table);
+
+  if (l == STk_false)
+    STk_error("bad type specification ~S", obj);
+  return INT_VAL(CAR(CDR(l)));
+}
+
 
 DEFINE_PRIMITIVE("%stklos-has-ffi?", has_ffi, subr0, ())
 {
