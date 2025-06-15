@@ -253,11 +253,10 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
     case tc_vector:       case tc_uvector:     case tc_hash_table:
     case tc_port:         case tc_frame:       case tc_next_method:
     case tc_promise:      case tc_regexp:      case tc_process:
-    case tc_continuation: case tc_values:      case tc_parameter:
+    case tc_continuation: case tc_syntax:      case tc_parameter:
     case tc_socket:       case tc_struct_type: case tc_struct:
     case tc_thread:       case tc_mutex:       case tc_condv:
     case tc_box:          case tc_ext_func:    case tc_callback:
-    case tc_syntax:
       return STk_false;
 
     default:
@@ -452,10 +451,10 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
     case tc_subr34:       case tc_vsubr:        case tc_apply:
     case tc_hash_table:   case tc_frame:        case tc_next_method:
     case tc_promise:      case tc_regexp:       case tc_process:
-    case tc_continuation: case tc_values:       case tc_parameter:
+    case tc_continuation: case tc_syntax:       case tc_parameter:
     case tc_socket:       case tc_struct_type:  case tc_thread:
     case tc_mutex:        case tc_condv:        case tc_ext_func:
-    case tc_pointer:      case tc_callback:     case tc_syntax:
+    case tc_pointer:      case tc_callback:
       return STk_false;
 
    default:

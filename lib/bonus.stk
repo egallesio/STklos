@@ -24,7 +24,8 @@
 
 
 (export read-chars read-chars! display-shared gensym
-        macro-expand macro-expand*
+        macro-expand macro-expand* unquote unquote-splicing
+        ... => _ else
         improper-list?
         remove remove! delete delete!
         every any
@@ -159,6 +160,33 @@ doc>
     (if (equal? new exp)
         exp
         (macro-expand* new))))
+
+
+;;
+;; Quasiquote friends
+;;
+(define-macro (unquote . e)
+  (syntax-error "unquote cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote e)))
+
+(define-macro (unquote-splicing . e)
+  (syntax-error "unquote-splicing cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote-splicing e)))
+
+;;
+;; auxiliary syntax
+;;
+(define-macro (...  . args)
+  (syntax-error "auxiliary syntax '...' cannot be used here ~s" (cons '... args)))
+
+(define-macro (=>  . args)   ;;  FIXME: it breaks SRFI 61
+  (syntax-error "auxiliary syntax '=>' cannot be used here ~s" (cons '=> args)))
+
+(define-macro (_  . args)
+  (syntax-error "auxiliary syntax '_' cannot be used here ~s" (cons '_ args)))
+
+(define-macro (else  . args)
+  (syntax-error "auxiliary syntax 'else' cannot be used here ~s" (cons 'else args)))
 
 ;;;
 ;;; List functions

@@ -202,10 +202,10 @@ typedef enum {
   tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,                   /* 15 */
   tc_subr23, tc_subr34, tc_vsubr, tc_apply, tc_vector,                  /* 20 */
   tc_uvector, tc_hash_table, tc_port, tc_frame, tc_next_method,         /* 25 */
-  tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
+  tc_promise, tc_regexp, tc_process, tc_continuation, tc_syntax,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback, tc_syntax,                                               /* 45 */
+  tc_callback,                                               /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 

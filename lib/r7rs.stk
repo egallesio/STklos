@@ -55,6 +55,8 @@
         string-for-each vector-for-each
         error-object? error-object-message error-object-irritants
         read-error? file-error?
+        environment scheme-report-environment null-environment
+        interaction-environment
         call-with-port input-port-open? output-port-open?
         read-string read-u8 peek-u8 read-bytevector!
         write-string write-u8 write-bytevector
@@ -1199,6 +1201,110 @@ doc>
   (and (condition? obj)
        (condition-has-type? obj &i/o-filename-error)))
 
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.13 Environments and evaluation
+;;;; ----------------------------------------------------------------------
+
+#|
+<doc R7RS environment
+ * (environment set1 ...)
+ *
+ * This procedure returns a specifier for the environment that
+ * results by starting with an empty environment and then
+ * importing each *set*, considered as an import
+ * set, into it. The bindings of the environment represented by
+ * the specifier, as is the environment itself.
+ *
+ * In STklos,
+ * - each |set| argument can be a list (specifying an R7RS
+ *   library) or a symbol (specifying a module).
+ * - the return environment is an R7RS library (which can be
+ *   passed to |eval|).
+ *
+ * @lisp
+ * (eval '(* 7 3) (environment '(scheme base)))    => 21
+ *
+ * (let ((f (eval '(lambda (f x) (f x x))
+ *                (null-environment 5))))
+ *   (f + 10))                                     => 20
+ *
+ * (eval '(define foo 32)
+ *       (environment '(scheme base)))             => errror
+ *
+ * (let ((e (environment '(only (scheme base) + -)
+ *                       '(only (scheme write) display))))
+ *   (length (module-symbols e)))                  => 3
+ *
+ * (let ((e (environment '(prefix (only (scheme base) car)
+ *                                foo-))))
+ *    (module-symbols e))                            => (foo-car)
+ *
+ * @end lisp
+doc>
+|#
+(define (environment . args)
+  (if (null? args)
+      (null-environment)
+      (let ((e (%make-empty-environment)))
+        ;; import the specified import sets in args
+        (%%import e args)
+        ;; make the module immutable
+        (module-immutable! e)
+        e)))
+
+#|
+<doc scheme-report-environment
+ * (scheme-report-environment)
+ * (scheme-report-environment version)
+ *
+ * Returns a specifier for an environment that contains the bindings defined
+ * in the R5RS report.
+ *
+ * NOTE: |scheme-report-environment| function can be called
+ * without the version number (defaults to 5). Other version values return
+ * an error.
+doc>
+|#
+(define (scheme-report-environment :optional (version 5))
+  (unless (eq? version 5)
+    (error "this version is not supported ~S" version))
+  (environment '(scheme r5rs)))
+
+#|
+<doc null-environment
+ * (null-environment)
+ * (null-environment version)
+ *
+ * Returns a specifier for an environment that is empty except for
+ * the (syntactic) bindings for all syntactic keywords defined in
+ * the R5RS report.
+ *
+ * NOTE: In STklos, |null-environment| function can be called
+ * without the version number (defaults to 5).
+doc>
+|#
+(define null-environment
+  (let ((null-env #f))
+    (lambda (:optional (version 5))
+      (unless (eq? version 5)
+        (error "this version is not supported ~S" version))
+      (unless null-env
+        (set! null-env (%make-empty-environment))
+        (module-immutable! null-env))
+      null-env)))
+
+#|
+<doc interaction-environment
+ * (interaction-environment)
+ *
+ * This procedure returns the environment in the expression are
+ * evaluated by default (the {{stklos}} module). The returned environment
+ * is mutable.
+doc>
+|#
+(define (interaction-environment)
+  (find-module 'STklos))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.13 Input and Output
