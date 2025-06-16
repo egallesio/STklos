@@ -29,6 +29,7 @@ description.
 ((("closure")))
 {{insertdoc 'lambda}}
 {{insertdoc 'closure?}}
+{{insertdoc 'primitive?}}
 {{insertdoc 'case-lambda}}
 
 === Assignments
@@ -126,7 +127,7 @@ referential transparency gains poignancy only when `let-syntax` and
 disaster unless you're using system-function names as local variables
 with unintuitive bindings that the macro can't use. However, if you
 must have the full {{rfive}} macro functionality, you can do
- 
+
 ```scheme
 (require "full-syntax")
 ```
