@@ -1749,10 +1749,17 @@ doc>
 |#
 (define (features)
   (let ((all (in-module |SRFI-0| *all-features*)))
-    (apply append
-           (map (lambda (x)
-                  (cond
-                    ((symbol? x)     (list x))
-                    ((pair? (car x)) (car x))
-                    (else            (list (car x)))))
-                all))))
+    ;; R7RS says it is an error to try to modify this list, so we make
+    ;; it immutable:
+    (let ((L (apply append
+                    (map (lambda (x)
+                       (cond
+                        ((symbol? x)     (list x))
+                        ((pair? (car x)) (car x))
+                        (else            (list (car x)))))
+                         all))))
+      (let loop ((ptr L))
+        (if (null? ptr)
+            L
+            (begin (pair-immutable! ptr)
+                   (loop (cdr ptr))))))))
