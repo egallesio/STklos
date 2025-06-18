@@ -203,6 +203,19 @@ doc>
                                 (if (positive? (hash-table-size x))
                                     (format #f " with ~a entries" (hash-table-size x))
                                     "")))
+     ((mutex? x)        (let ((name     (mutex-name     x))
+                              (state    (if (thread? (mutex-state    x))
+                                            (format #f "locked by thread ~a" (mutex-state x))
+                                            (mutex-state x)))
+                              (specific (if (void? (mutex-specific x))
+                                            "void"
+                                            "non-void")))
+                          (if name
+                              (format port "a mutex with name ~a, state ~a and ~a specific field"
+                                      name state specific)
+                              (format port "an unnamed mutex with state ~a and ~a specific field"
+                                      state specific))))
+
      (else              (let ((user-type-name (%user-type-name x)))
                           (if user-type-name
                               ;; Object type is user defined.
