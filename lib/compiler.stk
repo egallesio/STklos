@@ -313,6 +313,31 @@ doc>
       (compile-constant (cadr expr) env tail?)
       (compiler-error 'quote expr "bad usage in ~S" expr)))
 
+#|
+<doc syntax quote-expanded
+ * (quote-expanded form)
+ *
+ * |Quote-expanded| will first expand then quote (without evaluating)
+ * |form|, and it can be used not only on the REPL or on top-level
+ * contexts, but also inside |let-syntax|.
+ *
+ * @lisp
+ * (let-syntax ((%f (syntax-rules ()
+ *                    ((%f) (format  "2")))))
+ *   (quote-expanded (%f)))                    => (format "2")
+ *
+ * (let-syntax ((%f (syntax-rules ()
+ *                    ((%f x) (display x)))))
+ *   (quote-expanded (%f '(a b c))))           => (display '(a b c))
+ * @end lisp
+doc>
+|#
+(define (compile-%%quote-expanded expr env tail?)
+  (if (= (length expr) 2)
+      (compile-constant (%macro-expand (cadr expr) env) env tail?)
+      (compiler-error 'quote-expanded expr "bad usage in ~S" expr)))
+
+
 ; ======================================================================
 ;
 ;                               DEFINE
@@ -2059,23 +2084,24 @@ both forms.
          (else
           ;; ---- special-form OR (not in env) function call?
           (case first
-            ((%%if)               (compile-%%if           e env tail?))
-            ((%%define)           (compile-%%define       e env tail?))
-            ((%%begin)            (compile-%%begin        e env tail?))
-            ((%%lambda)           (compile-%%lambda       e env tail?))
-            ((%%let)              (compile-%%let          e env tail?))
-            ((%%let*)             (compile-%%let*         e env tail?))
-            ((%%letrec)           (compile-%%letrec       e env tail?))
-            ((%%and)              (compile-%%and          e env tail?))
-            ((%%or)               (compile-%%or           e env tail?))
-            ((%%cond)             (compile-%%cond         e env tail?))
-            ((%%case)             (compile-%%case         e env tail?))
-            ((%%do)               (compile-%%do           e env tail?))
-            ((%%quote)            (compile-%%quote        e env tail?))
-            ((%%with-handler)     (compile-%%with-handler e env tail?))
-            ((%%define-macro)     (compile-%%define-macro e env tail?))
-            ((%%set!)             (compile-%%set!         e env tail?))
-            ((%%let-syntax)       (compile-%%let-syntax   e env tail?))
+            ((%%if)               (compile-%%if             e env tail?))
+            ((%%define)           (compile-%%define         e env tail?))
+            ((%%begin)            (compile-%%begin          e env tail?))
+            ((%%lambda)           (compile-%%lambda         e env tail?))
+            ((%%let)              (compile-%%let            e env tail?))
+            ((%%let*)             (compile-%%let*           e env tail?))
+            ((%%letrec)           (compile-%%letrec         e env tail?))
+            ((%%and)              (compile-%%and            e env tail?))
+            ((%%or)               (compile-%%or             e env tail?))
+            ((%%cond)             (compile-%%cond           e env tail?))
+            ((%%case)             (compile-%%case           e env tail?))
+            ((%%do)               (compile-%%do             e env tail?))
+            ((%%quote)            (compile-%%quote          e env tail?))
+            ((%%with-handler)     (compile-%%with-handler   e env tail?))
+            ((%%define-macro)     (compile-%%define-macro   e env tail?))
+            ((%%quote-expanded)   (compile-%%quote-expanded e env tail?))
+            ((%%set!)             (compile-%%set!           e env tail?))
+            ((%%let-syntax)       (compile-%%let-syntax     e env tail?))
 
             ;; Special calls
             ((%%require)          (compile-%%require      e env tail?))
