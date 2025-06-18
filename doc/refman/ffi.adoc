@@ -42,8 +42,8 @@ between the C and the Scheme worlds.
 | Name | Corresponding C type | Corresponding Scheme type
 
 |*:void*    | void                     | _none_
-|*:char*    | char                     | Scheme character
-|*:uchar*   | unsigned char            | Scheme character
+|*:char*    | char                     | Scheme integer
+|*:uchar*   | unsigned char            | Scheme integer
 |*:schar*   | signed char              | Scheme integer
 |*:short*   | short                    | Scheme integer
 |*:ushort*  | unsigned short           | Scheme integer
@@ -63,11 +63,18 @@ between the C and the Scheme worlds.
 |*:uint64*  | uint64_t                 | Scheme integer
 |*:float*   | float                    | Scheme real number
 |*:double*  | double                   | Scheme real number
-|*:boolean* | int                      | boolean
+|*:boolean* | int                      | Scheme boolean
 |*:pointer* | void *                   | Scheme pointer object or Scheme string
 |*:string*  | char *                   | Scheme string
 |*:obj*     | void *                   | Any Scheme object passed as is
 |====
+
+NOTE: **About `:char`, `:schar` and `:uchar`**: +
+When the value comes from Scheme,
+it can be either an integer or a character. When the value is read back from
+C, the value is always returned as an integer. This is because a character can
+be used as a small integer in C (possibly signed) and that its value may be an
+incorrect Scheme character.
 
 
 {{insertdoc 'define-external}}
