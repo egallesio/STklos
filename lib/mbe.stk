@@ -209,20 +209,20 @@ doc>
             (let* ((a-te-al (hyg:tag (car e) kk al ellipsis))
                     (d-te-al (hyg:tag (cdr e) kk (cdr a-te-al) ellipsis)))
               (cons (cons (car a-te-al) (car d-te-al))
-                (cdr d-te-al))))
-      ((vector? e)
-        (list->vector
-          (hyg:tag (vector->list e) kk al ellipsis)))
-      ((symbol? e)
-        (cond ((eq? e ellipsis) (cons ellipsis al))
-          ((memq e kk) (cons e al))
-          ((hyg:rassq e al) =>
-            (lambda (c)
-              (cons (car c) al)))
-          (else
-            (let ((te (gensym e)))
-              (cons te (cons (cons te e) al))))))
-      (else (cons e al)))))
+                    (cdr d-te-al))))
+          ((vector? e)
+           (list->vector
+            (hyg:tag (vector->list e) kk al ellipsis)))
+          ((symbol? e)
+           (cond ((eq? e ellipsis) (cons ellipsis al))
+                 ((memq e kk) (cons e al))
+                 ((hyg:rassq e al) =>
+                  (lambda (c)
+                    (cons (car c) al)))
+                 (else
+                  (let ((te (gensym e)))
+                    (cons te (cons (cons te e) al))))))
+          (else (cons e al)))))
 
 ;;untagging
 ;;
@@ -288,14 +288,14 @@ doc>
 (define hyg:untag-no-tags
   (lambda (e al)
     (cond ((pair? e)
-            (cons (hyg:untag-no-tags (car e) al)
-              (hyg:untag-no-tags (cdr e) al)))
-      ((vector? e)
-        (list->vector
-          (hyg:untag-no-tags (vector->list e) al)))
-      ((not (symbol? e)) e)
-      ((assq e al) => cdr)
-      (else e))))
+           (cons (hyg:untag-no-tags (car e) al)
+                 (hyg:untag-no-tags (cdr e) al)))
+          ((vector? e)
+           (list->vector
+            (hyg:untag-no-tags (vector->list e) al)))
+          ((not (symbol? e)) e)
+          ((assq e al) => cdr)
+          (else e))))
 
 (define hyg:untag-quasiquote
   (lambda (form al tmps)
@@ -412,24 +412,24 @@ doc>
     (cond ((pair? e)
             (cons (hyg:untag-vanilla (car e) al tmps)
               (hyg:untag-vanilla (cdr e) al tmps)))
-      ((vector? e)
-        (list->vector
-          (hyg:untag-vanilla (vector->list e) al tmps)))
-      ((not (symbol? e)) e)
-      ((memq e tmps) e)
-      ((assq e al) => (lambda (v)
-                        ;; This is a kludge which basically permits to
-                        ;; say that a symbol which starts with "%%" must
-                        ;; always be gensymed. This is used when the
-                        ;; output pattern introduces a new symbol since
-                        ;; original MBE code does not deal well with
-                        ;; this case [eg]
-                        (let ((str (symbol->string (cdr v))))
-                          (if (and (> (string-length str) 2)
-                                   (string=? (substring str 0 2) "%%"))
-                              (car v)
-                              (cdr v)))))
-      (else e))))
+          ((vector? e)
+           (list->vector
+            (hyg:untag-vanilla (vector->list e) al tmps)))
+          ((not (symbol? e)) e)
+          ((memq e tmps) e)
+          ((assq e al) => (lambda (v)
+                            ;; This is a kludge which basically permits to
+                            ;; say that a symbol which starts with "%%" must
+                            ;; always be gensymed. This is used when the
+                            ;; output pattern introduces a new symbol since
+                            ;; original MBE code does not deal well with
+                            ;; this case [eg]
+                            (let ((str (symbol->string (cdr v))))
+                              (if (and (> (string-length str) 2)
+                                       (string=? (substring str 0 2) "%%"))
+                                  (car v)
+                                  (cdr v)))))
+          (else e))))
 
 ;; a flatten procedure.
 (define hyg:flatten
@@ -514,7 +514,11 @@ doc>
             ((and (pair? p) (pair? e))
 		     (and (mbe:matches-pattern? (car p) (car e) k ellipsis)
 		          (mbe:matches-pattern? (cdr p) (cdr e) k ellipsis)))
-            ((and (vector? p) (vector? e))
+            ((and (vector? p)
+                  (vector? e)
+                  (> (vector-length p) 0)
+                  (= (vector-length p)
+                     (vector-length e)))
              (let ((list-p (vector->list p))
                    (list-e (vector->list e)))
                (and (mbe:matches-pattern? (car list-p) (car list-e) k ellipsis)

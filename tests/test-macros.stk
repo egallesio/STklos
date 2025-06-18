@@ -292,6 +292,8 @@
 (let-syntax ((f (syntax-rules () ((f a #(b c) d) (list d c b a)))))
   (test "vector-pattern.5" '(4 3 2 1)  (f 1 #(2 3) 4)))
 
+(let-syntax ((f (syntax-rules () ((_ #()) 20))))
+  (test "vector-pattern.6" 20 (f #())))
 
 ;;FIXME: Add more tests !!!!!!!!!
 
