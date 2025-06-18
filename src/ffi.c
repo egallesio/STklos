@@ -251,12 +251,12 @@ static SCM c2scheme(union any obj, SCM rettype)
     case f_void:
       return STk_void;
 
-    case f_char:
-      return MAKE_CHARACTER(obj.cvalue);
-    case f_uchar:
-      return MAKE_CHARACTER(obj.ucvalue);
+    case f_char:                                // all char types return an int since
+      return STk_long2integer(obj.cvalue);      // the C value may be an incorrect
+    case f_uchar:                               // Scheme character (if they are used
+      return STk_long2integer(obj.ucvalue);     // as small integers in C).
     case f_schar:
-      return STk_long2integer(obj.scvalue); /* signed chars are (small) ints */
+      return STk_long2integer(obj.scvalue);
 
     case f_short:
       return STk_long2integer(obj.svalue);

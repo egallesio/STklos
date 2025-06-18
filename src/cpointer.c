@@ -353,9 +353,9 @@ DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
   switch (kind) {
     case f_void:      STk_error("can not ref type :void"); return STk_void;
 
-    case f_char:      return MAKE_CHARACTER(CPTR_REF(char));
+    case f_char:      return MAKE_INT(CPTR_REF(char));
     case f_schar:     return MAKE_INT(CPTR_REF(signed char));
-    case f_uchar:     return MAKE_CHARACTER(CPTR_REF(unsigned char));
+    case f_uchar:     return MAKE_INT(CPTR_REF(unsigned char));
 
     case f_short:     return MAKE_INT(CPTR_REF(short));
     case f_ushort:    return MAKE_INT(CPTR_REF(unsigned short));
@@ -366,23 +366,21 @@ DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
     case f_longlong:  return MAKE_INT(CPTR_REF(long long));
     case f_ulonglong: return MAKE_INT(CPTR_REF(unsigned long long));
     case f_int8:      return MAKE_INT(CPTR_REF(int8_t));
-    case f_uint8:    return MAKE_INT(CPTR_REF(uint8_t));
-    case f_int16:    return MAKE_INT(CPTR_REF(int16_t));
-    case f_uint16:   return MAKE_INT(CPTR_REF(uint16_t));
-    case f_int32:    return MAKE_INT(CPTR_REF(int32_t));
-    case f_uint32:   return MAKE_INT(CPTR_REF(uint32_t));
-    case f_int64:    return MAKE_INT(CPTR_REF(int64_t));
-    case f_uint64:   return MAKE_INT(CPTR_REF(uint64_t));
+    case f_uint8:     return MAKE_INT(CPTR_REF(uint8_t));
+    case f_int16:     return MAKE_INT(CPTR_REF(int16_t));
+    case f_uint16:    return MAKE_INT(CPTR_REF(uint16_t));
+    case f_int32:     return MAKE_INT(CPTR_REF(int32_t));
+    case f_uint32:    return MAKE_INT(CPTR_REF(uint32_t));
+    case f_int64:     return MAKE_INT(CPTR_REF(int64_t));
+    case f_uint64:    return MAKE_INT(CPTR_REF(uint64_t));
 
-    case f_float:    return STk_double2real(CPTR_REF(float));
-    case f_double:   return STk_double2real(CPTR_REF(double));
+    case f_float:     return STk_double2real(CPTR_REF(float));
+    case f_double:    return STk_double2real(CPTR_REF(double));
 
-    case f_boolean:  return MAKE_BOOLEAN(CPTR_REF(int));
+    case f_boolean:   return MAKE_BOOLEAN(CPTR_REF(int));
 
-    case f_pointer:
-      return STk_make_Cpointer(CPTR_REF(void*), STk_void, STk_false);
-    case f_string:
-      return STk_Cstring2string(CPTR_REF(char *));
+    case f_pointer:   return STk_make_Cpointer(CPTR_REF(void*), STk_void, STk_false);
+    case f_string:    return STk_Cstring2string(CPTR_REF(char *));
 
     case f_obj:     STk_error("can not ref type :obj"); return STk_void;
 

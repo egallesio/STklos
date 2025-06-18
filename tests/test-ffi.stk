@@ -172,7 +172,9 @@
         :uint64))
 
 (cpointer-set! p :char #\a)
-(test "cpointer-set/cpointer-ref ̣char" #\a (cpointer-ref p :char))
+(test "cpointer-set/cpointer-ref ̣char"
+      (char->integer #\a)
+      (cpointer-ref p :char))
 (cpointer-set! p :schar #\b)
 (test "cpointer-set/cpointer-ref ̣schar.1" #\b
       (integer->char (cpointer-ref p :schar)))
@@ -180,7 +182,9 @@
 (test "cpointer-set/cpointer-ref ̣schar.2" #\c
       (integer->char (cpointer-ref p :schar)))
 (cpointer-set! p :uchar #\a)
-(test "cpointer-set/cpointer-ref ụchar" #\a (cpointer-ref p :uchar))
+(test "cpointer-set/cpointer-ref ụchar"
+      (char->integer #\a)
+      (cpointer-ref p :uchar))
 
 (cpointer-set! p :boolean #t)
 (test "cpointer-set/cpointer-ref ̣boolean1" #t (cpointer-ref p :boolean))
@@ -220,7 +224,8 @@
 (cpointer-set! buff :uchar #\D 3)
 (cpointer-set! buff :uchar #\null 4)
 
-(test "ref with offsets" '(#\a #\B #\c #\D #\null)
+(test "ref with offsets"
+      (map char->integer '(#\a #\B #\c #\D #\null))
       (list (cpointer-ref buff :uchar 0)
             (cpointer-ref buff :uchar 1)
             (cpointer-ref buff :uchar 2)
