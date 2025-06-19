@@ -226,6 +226,15 @@
       10
       (let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
 
+
+
+(test/compile-error "wrong syntax-rules.1"
+                    (let-syntax ((f (syntax-rules))) (f)))
+(test/compile-error "wrong syntax-rules.2"
+                    (let-syntax ((f (syntax-rules ()))) (f)))
+(test/compile-error "wrong syntax-rules.3"
+                    (let-syntax ((f (syntax-rules () ((f) 1) 2))) (f 1)))
+
 (define-syntax swap!
   (syntax-rules ()
     ((_ a b)
@@ -376,6 +385,51 @@
 
 ;; (select-module B)
 ;; (f) ;; should be 10 (a in module A, not in module B)
+
+;;; syntax-rules mixed with define-macro in let-syntax
+
+(let-syntax ((f (lambda args 10))
+             (g (syntax-rules () ((GG) 20))))
+  (test "let-syntax both macro styles.1"
+        '(10 20)
+        (list (f) (g))))
+
+(let-syntax ((g (syntax-rules () ((GG) 20)))
+             (f (lambda args 10)))
+  (test "let-syntax both macro styles.2"
+        '(10 20)
+        (list (f) (g))))
+
+(test/compile-error "let-syntax both macro styles.3"
+                    (let-syntax ((f (lambda args))) (f)))
+
+(let-syntax ((f (lambda (x) (* x 3))))
+  (test "let-syntax both macro styles.3"
+        '15
+        (f 5)))
+
+
+;;; general let-syntax
+
+(test/compile-error "wrong syntax-rules.0"
+                    ;; LET-SYNTAX will only accept (syntax-rules ...) and
+                    ;; (lambda ...). Anything else is a syntax error.
+                    (let-syntax ((f (syntax-thing () ((f) -1))))))
+
+(test/compile-error "wrong syntax-rules.1"
+                    (let-syntax ((f (syntax-thing () ((f) -1)))) (f)))
+
+(test/compile-error "wrong syntax-rules.2"
+                    (let-syntax ((f (syntax-rules () ((f 4) 40) ((1) 2) ))) (f 4)))
+
+(test/compile-error "wrong syntax-rules.3"
+                    (let-syntax ((f (syntax-rules () ((f 4) 40) (1 2) ))) (f 4)))
+
+(test/compile-error "wrong syntax-rules.4"
+                    (let-syntax ((f (syntax-rules () ((f 4) 40) ((f)) ))) (f 4)))
+
+(test/compile-error "wrong syntax-rules.5"
+                    (let-syntax ((f (syntax-rules () ((f 4) 40) 6 ))) (f 4)))
 
 
 ;;FIXME: Add more tests !!!!!!!!!
