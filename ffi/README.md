@@ -1,5 +1,3 @@
-Status
-======
 
 libffi-3.5.1 was released on June 10, 2025.  Check the libffi web
 page for updates: <URL:http://sourceware.org/libffi/>.

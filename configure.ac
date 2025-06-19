@@ -451,7 +451,7 @@ then
   if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
   then
        echo "... Configuring libffi"
-       (cd ffi; ./autogen.sh && ./configure --disable-structs --disable-raw-api --disable-shared \
+       (cd ffi; ./configure --disable-structs --disable-raw-api --disable-shared \
              --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
        FFI="ffi"
        FFIINC="-I../ffi/$(./config.guess)/include"
