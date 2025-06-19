@@ -171,36 +171,6 @@
                   (set! resume (lambda (v) (return (eof-object))))
                   (return (eof-object))))))))
 
-(define (fold kons knil lis1 . lists)
-  (define (null-list? l)
-    (cond ((pair? l) #f)
-          ((null? l) #t)
-          (else (error 'null-list? "argument out of domain ~S" l))))
-
-  (define (car+cdr pair) (values (car pair) (cdr pair)))
-
-  (define (%cars+cdrs+ lists cars-final)
-    (call/ec
-     (lambda (abort)
-       (let recur ((lists lists))
-         (if (pair? lists)
-             (receive (list other-lists) (car+cdr lists)
-               (if (null-list? list) (abort '() '()) ; LIST is empty -- bail out
-                   (receive (a d) (car+cdr list)
-                     (receive (cars cdrs) (recur other-lists)
-                       (values (cons a cars) (cons d cdrs))))))
-             (values (list cars-final) '()))))))
-
-  (if (pair? lists)
-      (let lp ((lists (cons lis1 lists)) (ans knil))    ; N-ary case
-    (receive (cars+ans cdrs) (%cars+cdrs+ lists ans)
-      (if (null? cars+ans) ans ; Done.
-          (lp cdrs (apply kons cars+ans)))))
-
-      (let lp ((lis lis1) (ans knil))           ; Fast path
-    (if (null? lis) ans
-        (lp (cdr lis) (kons (car lis) ans))))))
-
 (define (check-args pred? type . args)
   (for-each (lambda (x)
               (when (not (pred? x))
