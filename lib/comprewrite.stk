@@ -186,3 +186,199 @@
                    expr))
              expr))
        expr)))
+
+
+;;;
+;;; LET rewriter:
+;;;
+;;
+;; The procedures no-named-let?, no-srfi-5-let?, deep-find, internal-shadow?, and
+;; external-shadow? are used by the join-lets procedure which, in turn, is used by
+;; the let rewriter.
+
+
+;; We repeatedely check if a form is a named LET, so here's the procedure to do so.
+(define (no-named-let? form)
+  ;; form = (LET A B ...)
+  ;; (CADR form) = A
+  (list? (cadr form)))
+
+;; We do not optimize SRFI-5 LETs.
+(define (no-srfi-5-let? form)
+  ;; form = (LET A B ...)
+  ;; (CADR form) = A
+  ;; (CAADR form) = (CAR A)
+  (or (not (pair? (cadr form))) ; named LET, not SRFI-5 LET
+      (list? (caadr form))))    ; CAR of bindings is list, not SRFI-5 LET
+
+;; deep-find checks if a symbol is refrenced anywhere inside a structure.
+;;
+;; (deep-find 'x '(a b c (d e (f x g) h) i)) => #t
+(define (deep-find elt lst)
+  (cond ((null? lst)                     #f)
+        ((eq? elt lst)                   #t)
+        ((pair? lst)
+         (or (deep-find elt (car lst))
+             (deep-find elt (cdr lst))))
+        (else #f)))
+
+;; (internal-shadow? bindings) will check if the bindings would
+;; LET their own variable definition if turned into a LET*.
+;; For example:
+;;
+;; (let ((a 10)
+;;       (b 20)
+;;       (c (+ 1 a))  ;; Oops, this is NOT the "a" begin defined in this LET...
+;;
+;; What we have above is internal shadowing, which this procedure detects.
+;;
+;; If we turned the above LET into LET*, it would be wrong:
+;; (let* ((a 10)
+;;        (b 20)
+;;        (c (+ 1 a))  ;; Now this "a" refers to the "a" being defined in these
+;;                     ;; bindings, and this is not correct!
+;;
+;; (internal-shadow? '( (a 1) (b 3) (c (+ a 2)) )) => #t
+;; (internal-shadow? '( (a 1) (b 3) (c (+ f 2)) )) => #f
+(define (internal-shadow? bindings)
+  (let ((vars  (map car bindings))
+        (exprs (map cdr bindings)))
+    (let Loop ((V vars)
+               (E exprs))
+      (cond ((null? V)             #f)
+            ((deep-find (car V) E) #t)
+            (else                  (Loop (cdr V) (cdr E)))))))
+
+;; (external-shadow? bindings2 bindings1) will check if bindings2
+;; will shadow any variable in bindings1.
+;;
+;; (external-shadow? '((a 1) (b 2)) '((x 10) (y 20)) ) => #f
+;; (external-shadow? '((a 1) (b 2)) '((x 10) (a 20)) ) => #t
+(define (external-shadow? bindings2 bindings1)
+  (let ((vars1 (map car bindings1))
+        (vars2 (map car bindings2)))
+    (let Loop ((vars1 vars1))
+      (cond ((null? vars1)            #f)
+            ((memq (car vars1) vars2) #t)
+            (else                     (Loop (cdr vars1)))))))
+
+;; (join-lets expr) will join nested LETs into a single
+;; LET-star (let*). this is faster since we avoid going
+;; into several "ENTER-LET" and "PREPARE-CALL" instructions.
+;;
+;; (join-lets '(let ((a 1))
+;;               (let ((b 2))
+;;                 (let ((c 3))
+;;                   x))))
+;; =>
+;; (let* ((a 1)
+;;        (b 2)
+;;        (c 3))
+;;   x)
+;;
+;; These are not optimized, as this can lead to wrong results:
+;; - a LET that would shadow a variable in an outer let
+;; - a LET that uses a symbol that it also defines:
+;;   (LET ((a ...) (b ... a ...)) ...)
+;; - SRFI-5 LETs
+;; - named LETs
+;; - LETs with non-empty body, except for the inner one.
+;;
+;; In particular, regarding the last one (outer LETs with non-empty
+;; following body):
+;;
+;; (define b -1)
+;;
+;; (let ((a 10))
+;;   (let ((b 5))
+;;     1)
+;;   b)    => -1
+;;
+;; If we rewrote this, then the result would be wrong (5 instead of -1).
+;;
+(define (join-lets expression)
+  ;; (let1 bindings1 (let2 bindings2 . body2) . body1)
+  ;;
+  ;; We know that (length expr) > 2, and:
+  ;;
+  ;; (list-ref expr 1)       = bindings1
+  ;; (list-ref expr 2)       = (let2 bindings2 ...)
+  ;; (cadr (list-ref expr 2) = bindings2
+  ;; (cdddr expr)            = body1
+  ;; (cddr (list-ref expr2)) = body2
+
+  (define (%join expr)
+    (if (and (pair? (list-ref expr 2))         ; body of LET1 is a list...
+             (memq (car (list-ref expr 2))
+                   '(let let*))                ; ...starting with LET or LET*
+             (no-named-let? (list-ref expr 2)) ; and LET2 is not a named let
+             (no-srfi-5-let? expr))            ; no SRFI-5 LET
+
+        (let ((bindings1 (list-ref expr 1))
+              (bindings2 (cadr (list-ref expr 2)))
+              (body1 (cdddr expr))
+              (body2 (cddr (list-ref expr 2))))
+
+          ;; No internal or external shadowing, and the body for the
+          ;; external LET should be empty
+          (if (and (not (external-shadow? bindings2 bindings1))
+                   (not (internal-shadow? bindings1))
+                   (not (internal-shadow? bindings2))
+                   (not (null? body2))
+                   (null? body1))
+
+              (let* ((new-bindings (append bindings1 bindings2)))
+                (%join (append (list 'let* new-bindings) body2)))
+              expr))
+        expr))
+
+  (%join expression))
+
+;; (maybe-let->let* expr) receives a LET form and turns it into a LET*.
+;; This is only done if:
+;; - It is not a named LET
+;; - Single-binding LETs are not rewritten (it's not useful)
+;; - Turning it into a LET* will not insert new shadowing, changing semantics
+;;   (no internal shadowing).
+;; - We don't rewrite SRFI-5 LETs
+;;
+;; This is rewritten:
+;; (maybe-let->let* '(let ((a 1) (b 2)) b))      => (let* ((a 1) (b 2)) b)
+;;
+;; The following are not (named let; single binding; shadowing; SRFI 5, in
+;; that order):
+;; (maybe-let->let* '(let f ((a 1) (b 2)) body)) => (let f ((a 1) (b 2)) body)
+;; (maybe-let->let* '(let ((a 1)) b))            => (let ((a 1)) b)
+;; (maybe-let->let* '(let ((a 1) (b a)) b))      => (let ((a 1) (b a)) b)
+;; (maybe-let->let* '(let (f (a) 2) (f 4)))      => (let (f (a) 2) (f 4))
+(define (maybe-let->let* expr)
+  (if (and (no-named-let? expr)                   ; no named LETs
+           (no-srfi-5-let? expr)                  ; no SRFI-5 LET
+           (> (length (cadr expr)) 1)             ; don't rewrite single-binding LET
+           (not (internal-shadow? (cadr expr)))) ; no shadowing
+      (cons 'let* (cdr expr))
+      expr))
+
+(compiler:add-rewriter!            ;; 'LET' rewriter
+ 'let
+ ;; (let BINDINGS1 (let BINDINGS2 ...)) => (let* BINDINGS ...)
+ (lambda (expr len env)
+   (if (> len 2)              ; at least '(let bindings expr)'
+       ;; Don't include the code here; keep it in a 'join-lets'
+       ;; separate procedure, so we can use it for LET* also.
+       ;;
+       ;; Also -- LET does call maybe-let->let*; LET* doesn't.
+       (join-lets (maybe-let->let* expr))
+       expr)))
+
+(compiler:add-rewriter!            ;; 'LET*' rewriter
+ 'let*
+ ;; (let BINDINGS1 (let BINDINGS2 ...)) => (let* BINDINGS ...)
+ (lambda (expr len env)
+   (if (> len 2)              ; at least '(let bindings expr)'
+       ;; Don't include the code here; keep it in a 'join-lets'
+       ;; separate procedure, so we can use it for LET also.
+       ;;
+       ;; Also -- LET does call maybe-let->let*; LET* doesn't.
+       (join-lets expr)
+       expr)))
