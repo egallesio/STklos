@@ -2485,7 +2485,7 @@ doc>
                             `((>= ,len ,(- (- arity) 1))
                                 (apply (lambda ,formals ,@body) ,args))))))
                   clauses)
-           (else (error 'case-lambda "no matching clause in list ~S for ~S"
+           (else (error "no matching clause in case-lambda with ~S for ~S"
                         ',(map car clauses) ,args)))))))
 
 ;;;
