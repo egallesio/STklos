@@ -1,7 +1,7 @@
 ;;;;
 ;;;; ffi.stk            -- FFI support
 ;;;;
-;;;; Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,50 +23,32 @@
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
 ;;;;
 
-(export make-external-function make-callback define-external)
-
+(export make-external-function
+        make-callback
+        define-external)
 
 (define make-external-function #f)
 (define make-callback          #f)
 
-(let ((table '((:void       0)
-               (:char       1)
-               (:short      2)
-               (:ushort     3)
-               (:int        4)
-               (:uint       5)
-               (:long       6)
-               (:ulong      7)
-               (:lonlong    8)
-               (:ulonlong   9)
-               (:float      10)
-               (:double     11)
-               (:boolean    12)
-               (:pointer    13)
-               (:string     14)
-               (:int8       15)
-               (:int16      16)
-               (:int32      17)
-               (:int64      18)
-               (:obj        19))))
+(let ((table (%ffi-assoc-table)))  ;; table is an A-list which asssociate
+                                   ;; a type name to its encoding in ffi.c
 
-  (define (arg-type->number k argument?)
+  (define (C-type->number k argument?)
+    (when (and argument?  (eq? k :void))
+      (error 'define-external "parameter of type :void are forbidden"))
     (let ((info (assoc k table)))
       (if info
-      (let ((r (cadr info)))
-        (if (and (zero? r) argument?)
-        (error 'define-external "parameter of type :void are forbidden")
-        (cadr info)))
-      (error 'define-external "bad type name ~S" k))))
+          (cdr info)
+          (error 'define-external "bad type name ~S" k))))
 
   (define (parse-parameters lst)
     (map (lambda (x)
        (cond
          ((keyword? x)
-          (arg-type->number x #t))
+          (C-type->number x #t))
          ((pair? x)
           (if (and (symbol? (car x)) (keyword? (cadr x)) (null? (cddr x)))
-          (arg-type->number (cadr x) #t)
+          (C-type->number (cadr x) #t)
           (error 'make-external-function
              "bad parameter description: ~S" x)))
          (else
@@ -79,7 +61,7 @@
     (lambda (entry-name parameters return-type lib-name)
       (%make-ext-func entry-name
               (parse-parameters parameters)
-              (arg-type->number return-type #f)
+              (C-type->number return-type #f)
               lib-name)))
 
   ;; make-callback

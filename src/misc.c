@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,10 +23,11 @@
  *    Creation date:  9-Jan-2000 12:50 (eg)
  */
 
-#include <limits.h>
 #include "stklos.h"
 #include "gnu-getopt.h"
 #include "git-info.h"
+#include <limits.h>
+
 
 #ifdef STK_DEBUG
   #ifdef HAVE_BACKTRACE
@@ -35,6 +36,7 @@
 
 int STk_interactive_debug = 0;
 #endif
+
 
 int STk_count_allocations = 0;         /* Set it to 1 to have GC accouniting */
 
@@ -72,12 +74,12 @@ void* STk_count_malloc_atomic(size_t size)
 }
 
 /* Getter and Setter for the count-allocation parameter */
-SCM get_count_allocs(void)
+static SCM get_count_allocs(void)
 {
   return MAKE_BOOLEAN(STk_count_allocations);
 }
 
-SCM set_count_allocs(SCM value)
+static SCM set_count_allocs(SCM value)
 {
   STk_count_allocations = (value != STk_false);
   return STk_void;
@@ -743,6 +745,27 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 #endif
   return STk_void;
 }
+
+
+/****
+ **** Tracing GC calls
+ ****
+*/
+
+static void simple_trace_object(SCM ptr, void _UNUSED(*client_data))
+{
+  STk_debug("GC  is called on object (%%x%x): ~S",  ptr, ptr);
+}
+
+
+DEFINE_PRIMITIVE("%gc-trace-object", gc_trace_object, subr1, (SCM ptr))
+{
+  if (!BOXED_OBJP(ptr)) {
+    STk_error("cannot trace non-boxed object ~S", ptr);
+  }
+  STk_register_finalizer(ptr, simple_trace_object);
+  return STk_void;
+}
 #endif
 
 /*===========================================================================*\
@@ -777,6 +800,7 @@ int STk_init_misc(void)
   ADD_PRIMITIVE(set_debug);
   ADD_PRIMITIVE(test);
   ADD_PRIMITIVE(c_backtrace);
+  ADD_PRIMITIVE(gc_trace_object);
 #endif
   return TRUE;
 }

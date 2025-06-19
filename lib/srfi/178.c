@@ -23,8 +23,9 @@
  *    Creation date: 19-Aug-2023 06:12
  */
 
-#include <gmp.h>
 #include "stklos.h"
+#include <gmp.h>
+
 #include "178-incl.c"
 
 /*

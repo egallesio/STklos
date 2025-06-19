@@ -32,6 +32,11 @@ extern "C"
 {
 #endif
 
+#define _DEFAULT_SOURCE
+#define _XOPEN_SOURCE 500
+#define _SVID_SOURCE
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -153,8 +158,11 @@ extern "C"
 // struct GC_prof_stats_s;
 // GC_API size_t GC_CALL GC_get_prof_stats(struct GC_prof_stats_s *,
 //                                         size_t /* stats_sz */);
+// For allocating list (fast)
+// GC_API GC_ATTR_MALLOC void * GC_CALL GC_malloc_many(size_t lb);
 
-  /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
+
+/* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
 #define STk_must_malloc(size)                                           \
   ((STk_count_allocations)? STk_count_malloc(size): GC_MALLOC(size))
@@ -169,6 +177,8 @@ extern "C"
                                             0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 #define STk_gc_base(ptr)                GC_base(ptr)
+#define STk_must_malloc_many(size)      GC_malloc_many(size)
+
 
 void STk_gc_init(void);
 
@@ -192,10 +202,10 @@ typedef enum {
   tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,                   /* 15 */
   tc_subr23, tc_subr34, tc_vsubr, tc_apply, tc_vector,                  /* 20 */
   tc_uvector, tc_hash_table, tc_port, tc_frame, tc_next_method,         /* 25 */
-  tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
+  tc_promise, tc_regexp, tc_process, tc_continuation, tc_syntax,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback, tc_syntax,                                               /* 45 */
+  tc_callback,                                               /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -253,7 +263,17 @@ typedef struct {
         BOXED_INFO(_var) = 0;                           \
         }while(0)
 
-typedef SCM (*t_subrptr)();
+
+#if __STDC_VERSION__ >= 202311L
+  /* Gcc 15+ uses by default -stdc=gnu23 (that is an adapration of C23), where
+   * we cannot declare t_subrptr as a "SCM (*)()" which is equivalent to a
+   * SCM (*)(void).
+   */
+  typedef SCM (*t_subrptr)(...);
+#else
+  typedef SCM (*t_subrptr)();
+#endif
+
 
 struct primitive_obj {
   stk_header header;
@@ -429,6 +449,7 @@ SCM STk_make_C_cond(SCM type, int nargs, ...);
 EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3,
                  (SCM name, SCM parent, SCM slots));
 EXTERN_PRIMITIVE("raise", raise, subr1, (SCM obj));
+EXTERN_PRIMITIVE("condition-has-type?", cond_has_typep, subr2, (SCM c, SCM t));
 
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
 SCM STk_condition_type_is_a(SCM type, SCM t);
@@ -602,8 +623,21 @@ int STk_init_extend(void);
   ----
   ------------------------------------------------------------------------------
 */
+enum f_codes {
+  f_void,      f_char,      f_schar,     f_uchar,
+  f_short,     f_ushort,    f_int,       f_uint,
+  f_long,      f_ulong,     f_longlong,  f_ulonglong,
+  f_int8,      f_uint8,     f_int16,     f_uint16,
+  f_int32,     f_uint32,    f_int64,     f_uint64,
+  f_float,     f_double,    f_boolean,   f_obj,
+  f_pointer,   f_string,
+  f_last    /* MUST be the last item of the enum */
+};
+
+int STk_C_type2number(SCM key);
 SCM STk_call_ext_function(SCM fct, int argc, SCM *argv);
 SCM STk_ext_func_name(SCM fct);
+  
 int STk_init_ffi(void);
 
 
@@ -706,6 +740,7 @@ SCM STk_append2(SCM l1, SCM l2);
 SCM STk_dappend2(SCM l1, SCM l2);       /* destructive append */
 SCM STk_dremq(SCM obj, SCM list);       /* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
+SCM STk_C_make_list(int n, SCM init);  /* GC friendly list allocation */
 
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
@@ -1208,6 +1243,7 @@ char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
 int   STk_keyword_colon_convention(void); // pos. of ':' in symbol to make a  keyword
 void STk_add_uvector_reader_tag(const char *tag); // to add #s8(..), #u16(...) ...
+void STk_del_uvector_reader_tag(const char *tag); // to invalidate them
 void STk_set_port_case_sensitivity(SCM port, int sensitive);
 
 
@@ -1278,7 +1314,7 @@ struct string_obj {
 #define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
 SCM STk_makestring(int len, const char *init);
-SCM STk_Cstring2string(const char *str);           /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(const char *str);      /* Embed a C string in Scheme world  */
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));

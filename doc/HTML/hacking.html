@@ -2547,7 +2547,9 @@ the GC is located in the header file <code>src/stklos.h</code>:</p>
                                             <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="cp">#define STk_gc()                        GC_gcollect()
 </span>
-<span class="kt">void</span> <span class="nf">STk_gc_init</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span></code></pre>
+<span class="kt">void</span> <span class="nf">STk_gc_init</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
+<span class="n">SCM</span> <span class="nf">STk_C_make_list</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">SCM</span> <span class="n">init</span><span class="p">);</span></code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -2564,6 +2566,15 @@ for strings, numbers etc.</p>
 <li>
 <p><code>STk_register_finalizer</code> will register a finalizer function <code>f</code>, which
 will be called when the object at <code>ptr</code> is collected.</p>
+</li>
+<li>
+<p><code>STk_C_alloc_list</code> will allocate a list of length <code>len</code>, initialized
+with <code>val</code>. This is done in a single call to the garbage collector, so
+it&#8217;s much faster than consing each cell individually. It should be
+used when creating or copying lists. See for example the function
+<code>simple_list_copy</code>, <code>list_copy</code> and <code>STk_append2</code>, and also the
+primitive <code>list</code> in <code>list.c and the function `map</code>, used by the
+primitive <code>map</code> in <code>proc.c</code>.</p>
 </li>
 </ul>
 </div>

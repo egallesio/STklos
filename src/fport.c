@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,14 +28,16 @@
  * implementation using the C buffered IO (at least on glibc).
  *
  */
+
+#include "stklos.h"
+#include "fport.h"
+#include "vm.h"
+
 #include <ctype.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/wait.h>
 
-#include "stklos.h"
-#include "fport.h"
-#include "vm.h"
 
 int STk_interactive = 0;                  /* We are in interactive mode */
 SCM STk_stdin, STk_stdout, STk_stderr;    /* The unredirected ports */
@@ -606,7 +608,7 @@ SCM STk_fd2scheme_port(int fd, const char *mode, char *identification)
 {
   int flags;
 
-  flags = PORT_IS_FILE | ((*mode == 'r') ? PORT_READ : PORT_WRITE);
+  flags = PORT_IS_FILE | PORT_TEXTUAL | ((*mode == 'r') ? PORT_READ : PORT_WRITE);
   return (SCM) make_fport(identification, fd, flags);
 }
 

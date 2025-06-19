@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,13 @@
  *    Creation date: 12-May-1993 10:34
  */
 
+#include "stklos.h"
 
 #include <math.h>
 #include <float.h>
 #include <ctype.h>
 #include <locale.h>
-#include "stklos.h"
+
 
 #undef sinc
 #if defined(__linux__) && defined(__alpha__)
@@ -3852,7 +3853,7 @@ static inline int power_of_2_p(long x) {
   return 0;
 }
 
-SCM my_log2(SCM x, SCM b) {
+static SCM my_log2(SCM x, SCM b) {
   /* my_log2 has fast path for taking logs of fixnums, bignums and
      exact rationals in base two.  It uses a simple trick to extend
      this to "base which is power of two". */

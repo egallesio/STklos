@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1994-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -423,7 +423,7 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
     case 0:                                                   /* CHILD */
       if (thunk) {
         STk_C_apply(thunk, 0);
-        STk_exit(0);
+        STk_exit(MAKE_INT(EXIT_SUCCESS));
       }
       return STk_false;
     default:                                                  /* PARENT */
@@ -694,12 +694,7 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
 
 
   if (PROCESS_EXITED(proc)) {
-#ifndef WIN32
-    if (WIFSIGNALED(PROCESS_STATUS(proc)))
-      n = WCOREDUMP(PROCESS_STATUS(proc));
-    else
-#endif
-      n = WEXITSTATUS(PROCESS_STATUS(proc));
+    n = WEXITSTATUS(PROCESS_STATUS(proc));
   } else {
     res = waitpid(PROCESS_PID(proc), &info, WNOHANG);
     if (res == 0) {

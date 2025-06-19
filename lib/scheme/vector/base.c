@@ -24,9 +24,11 @@
  *    Creation date: 17-Jun-2022 09:10
  */
 
+#include "stklos.h"
+
 #include <float.h>
 #include <math.h>
-#include "stklos.h"
+
 #include "base-incl.c"
 
 /***

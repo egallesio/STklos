@@ -1,7 +1,7 @@
 /*
  * md5.c            -- MD5 algorithm
  *
- * Copyright © 2007-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,8 @@
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-May-2007 22:21 (eg)
  */
+
+#include "stklos.h"
 
 /*
  * RFC 1321 compliant MD5 implementation,
@@ -270,7 +272,6 @@ static void md5_finish( struct md5_context *ctx, uint8 digest[16] )
  *
 \*===========================================================================*/
 
-#include "stklos.h"
 #define MD5BUFSIZ 8192
 
 static inline char hexchar(unsigned int v)

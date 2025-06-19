@@ -1,7 +1,7 @@
 /*
  * v m . h                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,10 +35,12 @@
 #include <signal.h>
 #include "stklosconf.h"
 
-typedef struct {        /* simple wrapper around jmp_buf */
-  jmp_buf j;
-  sigset_t blocked;
-} jbuf;
+// Could be defined with sigsetjmp or siglongjmp, if saving/restroring signal masks
+// is needed. sigsetjmp and siglongjmp are REALLY slower. For now, we can only use
+// the basic setjmp/longjmp primitives.
+#define JBUF                    jmp_buf
+#define MY_SETJMP(jb)           setjmp(jb)
+#define MY_LONGJMP(jb, val)     longjmp(jb, val)
 
 
 /*===========================================================================*\
@@ -54,7 +56,7 @@ struct continuation_obj {
   int ssize;                    /* Scheme stack size */
   void *sstart, *send;          /* Start and end of the Scheme stack */
 
-  jbuf state;
+  JBUF state;
   int fresh;
   STk_instr *pc;                /* VM registers */
   SCM *fp;
@@ -62,7 +64,7 @@ struct continuation_obj {
   SCM env;
   SCM *constants;
   SCM *handlers;
-  jbuf *jb;
+  JBUF *jb;
   void *cstack;
   void *sstack;
 };
@@ -125,7 +127,7 @@ typedef struct {
   SCM vals[MAX_VALS];   /* registers for multiple values */
   int valc;             /* # of multiple values          */
 
-  jbuf *top_jmp_buf;
+  JBUF *top_jmp_buf;
   void *start_stack;
 
   SCM *stack;

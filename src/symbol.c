@@ -24,9 +24,10 @@
  *    Creation date: 20-Nov-1993 12:12
  */
 
-#include <ctype.h>
 #include "stklos.h"
 #include "hash.h"
+
+#include <ctype.h>
 
 /**** Static globals ****/
 static struct hash_table_obj obarray;
@@ -48,10 +49,13 @@ int STk_symbol_flags(register const char *s)
     return SYMBOL_NEEDS_BARS;
   } else {
     int res = 0;
+    int only_digits = 1;
 
     if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
 
-    for ( ;*s; s++) {
+    for (; *s; s++) {
+      if (!isdigit(*s) && *s != '_')
+        only_digits = 0;
       if (isupper(*s)) {
         res |= SYMBOL_HAS_UPPER;
         continue;
@@ -62,7 +66,9 @@ int STk_symbol_flags(register const char *s)
       }
     }
 
-    if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS; // seems to be a keyword
+    if (s[-1] == ':' || only_digits)
+      // seems to be a keyword or a symbol consisting only of digits (and '_')
+      res |= SYMBOL_NEEDS_BARS; 
     return res;
   }
 }

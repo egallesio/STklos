@@ -1,0 +1,51 @@
+;;;;
+;;;; srfi-260.stk		-- Implementation of SRFI-260
+;;;;
+;;;; Copyright © 2025 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a reimplementation of the SRFI proposed by Marc
+;;;; Nieper-Wißkirchen, but does not use the original code.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 22-Apr-2025 10:20 (jpellegrini)
+
+(define-library (srfi 260)
+  (import SCHEME
+          (srfi 27))
+  (export generate-symbol)
+
+  (begin
+
+    (define max-random (expt 2 128))
+
+    (define (generate-symbol . opt)
+      (string->symbol
+       (format "~x:~a"
+               (random-integer max-random)
+               (cond ((null? opt) "")
+                     ((null? (cdr opt))
+                      (let ((first (car opt)))
+                        (if (string? first)
+                            first
+                            (error "bad string ~s" first))))
+                     (else (error "too many parameters ~s" opt))))))
+
+))
+
+(provide "srfi/260")

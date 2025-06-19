@@ -2,7 +2,7 @@
 ;;;;
 ;;;; srfi-5.stk         -- Implementattion of SRFI-5
 ;;;;
-;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -71,7 +71,7 @@
 
      ((list?  bindings)
       ;; ==== Unamed
-      `(%let ,bindings ,@body))
+      `(%%let ,bindings ,@body))
 
      (else
       (let* ((name     bindings)

@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,8 @@
  *    Creation date: ??????
  */
 
-#include <ctype.h>
 #include "stklos.h"
+#include <ctype.h>
 
 
 /* min size added to a string when reallocated in a string-set! */
@@ -939,22 +939,19 @@ DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
   register char *s;
   int len;
   utf8_char c;
-  SCM tmp, tmp1, z;
+  SCM tmp, z;
 
   if (!STRINGP(str)) error_bad_string(str);
 
   len = STRING_LENGTH(str);
   s   = STRING_CHARS(str);
 
-  tmp = z = STk_nil;
+  tmp = z = STk_C_make_list(len, STk_void);
 
-  while (len--) {
+  for (int i=0; i<len; i++) {
     s = STk_utf8_grab_char(s, &c);
-    tmp1 = STk_cons(MAKE_CHARACTER(c), STk_nil);
-    if (z == STk_nil)
-      tmp = z = tmp1;
-    else
-      tmp = CDR(tmp) = tmp1;
+    CAR(tmp) = MAKE_CHARACTER(c);
+    tmp = CDR(tmp);
   }
   return z;
 }

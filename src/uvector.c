@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,12 +23,13 @@
  *    Creation date: 15-Apr-2001 10:13 (eg)
  */
 
-#include <float.h>
-#include <math.h>
 #include "stklos.h"
 
-static SCM u64_max, s64_min, s64_max;
+#include <float.h>
+#include <math.h>
 
+static SCM u64_max, s64_min, s64_max;
+static int accept_uvector_syntax = 0; // #uxx and #sxx allowed?
 
 /*
  * Utilities
@@ -120,7 +121,8 @@ int STk_vector_element_size(int type)
 
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfill)
 {
-  SCM v = STk_void; /* value chosen to avoid a warning from the gcc static analyzer */
+  SCM v = STk_void; /* value chosen to avoid a warning from the gcc
+                       static analyzer */
   long len, start=0, end=-1;
 
   /* Controling number of arguments */
@@ -314,8 +316,9 @@ static void uvector_set(SCM v, long i, SCM value)
       -----+-----+-----+-----+-------
      | r_1 | i_1 | r_2 | i_2 |  ...  |
       -----+-----+-----+-----+-------
-     Every complex real-part and imag-part is transformed into inexact, so it would into
-     a double. Forthermore, for c64 vectors, they're downcasted to floats.
+     Every complex real-part and imag-part is transformed into inexact, so it
+     would into a double. Forthermore, for c64 vectors, they're downcasted
+     to floats.
     */
     case UVECT_C64:
       if (COMPLEXP(value)) {
@@ -489,7 +492,7 @@ SCM STk_list2uvector(int type, SCM l)
 /*===========================================================================*\
  *
  * User primitives on uniform vectors.
- * All thes functions are used by the file  which implements SRFI-4
+ * All thes functions are used by the file which implements SRFI-4
  *
 \*===========================================================================*/
 
@@ -609,6 +612,63 @@ DEFINE_PRIMITIVE("uvector-tag", uvector_tag, subr1, (SCM v))
 }
 
 
+static void add_uvector_syntax(void) {
+  if (!accept_uvector_syntax) {
+    // Add uvector syntax if not already in the table
+    STk_add_uvector_reader_tag("s8");  /* "u8" is defined by default */
+    STk_add_uvector_reader_tag("s16"); STk_add_uvector_reader_tag("u16");
+    STk_add_uvector_reader_tag("s32"); STk_add_uvector_reader_tag("u32");
+    STk_add_uvector_reader_tag("s64"); STk_add_uvector_reader_tag("u64");
+    STk_add_uvector_reader_tag("f32"); STk_add_uvector_reader_tag("f64");
+    STk_add_uvector_reader_tag("c64");
+    STk_add_uvector_reader_tag("c128");
+    accept_uvector_syntax = 1;
+  }
+}
+
+
+static void delete_uvector_syntax(void) {
+  if (accept_uvector_syntax) {
+    // Delete uvector syntax if necessary
+    STk_del_uvector_reader_tag("s8");  /* "u8" is defined by default */
+    STk_del_uvector_reader_tag("s16"); STk_del_uvector_reader_tag("u16");
+    STk_del_uvector_reader_tag("s32"); STk_del_uvector_reader_tag("u32");
+    STk_del_uvector_reader_tag("s64"); STk_del_uvector_reader_tag("u64");
+    STk_del_uvector_reader_tag("f32"); STk_del_uvector_reader_tag("f64");
+    STk_del_uvector_reader_tag("c64"); STk_del_uvector_reader_tag("c128");
+    accept_uvector_syntax = 0;
+  }
+}
+
+/*
+<doc EXT accept-uvector-syntax
+ * (accept-uvector-syntax)
+ * (accept-uvector-syntax v)
+ *
+ * SRFIS which define homogeneous or uniform vectors permit to have
+ * an extended lexical syntax for such objects (`#s8`, `#u64` ...).
+ * The parameter |accept-uvector-syntax| permits to accept or not the
+ * reading of this extended syntax depending of the value of |v|.
+ *
+ * By default, {{stklos}} does not allow the reading of this extended syntax
+ * for uniform. Use this parameter object to permit the use of this extended
+ * syntax.
+ *
+ * NOTE: Extended syntax for bytevectors is always accepted, since it is
+ * {{rseven}}. Loading or importing {{quick-link-srfi 4}} or {{quick-link-srfi
+ * 160}} will allow the reading of this extended lexical syntax.
+doc>
+*/
+static SCM accept_uvector_syntax_conv(SCM val)
+{
+  if (val == STk_false)
+    delete_uvector_syntax();
+  else
+    add_uvector_syntax();
+  return MAKE_BOOLEAN(accept_uvector_syntax);
+}
+
+
 DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
 {
   ADD_PRIMITIVE(uvector_list);
@@ -619,18 +679,9 @@ DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
   s64_min = STk_Cstr2number(S64_MIN, 10);
   s64_max = STk_Cstr2number(S64_MAX, 10);
 
-  /* Add new readers #xxx syntax */
-  STk_add_uvector_reader_tag("s8");  /* "u8" is defined by default */
-  STk_add_uvector_reader_tag("s16"); STk_add_uvector_reader_tag("u16");
-
-  STk_add_uvector_reader_tag("s32"); STk_add_uvector_reader_tag("u32");
-  STk_add_uvector_reader_tag("s64"); STk_add_uvector_reader_tag("u64");
-  STk_add_uvector_reader_tag("f32"); STk_add_uvector_reader_tag("f64");
-  STk_add_uvector_reader_tag("c64"); STk_add_uvector_reader_tag("c128");
-
+  add_uvector_syntax();    // allow to read #s64(...), #f32(...)
   return STk_void;
 }
-
 
 /*===========================================================================*\
  *
@@ -808,8 +859,14 @@ int STk_init_uniform_vector(void)
   ADD_PRIMITIVE(bytevector_append);
   ADD_PRIMITIVE(utf82string);
 
-  /* A pseudo primitive to launch the definition of  all the function of SRFI-4 */
+  /* A pseudo primitive to launch the definition of all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);
+
+  /* Declare parameter accept-uvector-syntax */
+  STk_make_C_parameter("accept-uvector-syntax",
+                       MAKE_BOOLEAN(accept_uvector_syntax),
+                       accept_uvector_syntax_conv,
+                       STk_STklos_module);
 
   return TRUE;
 }

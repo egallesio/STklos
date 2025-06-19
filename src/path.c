@@ -1,7 +1,7 @@
 /*
  * p a t h . c          -- Path names management
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 #ifdef HAVE_GLOB
 #  include <glob.h>
 #endif
+
 
 /*===========================================================================*\
  *

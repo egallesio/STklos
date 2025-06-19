@@ -279,21 +279,26 @@
     (238 "Codesets" () "srfi-238")
     ;; 239 Destructuring lists
     ;; 240 Reconciled records
-    ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data (drafr)
-    ;; 242 The CFG Language (draft)
-    ;; 243 Unreadable objects (draft)
+    ;; 241 Match -- Simple Pattern-Matching Syntax to Express Catamorphisms on Scheme Data
+    ;; 242 The CFG Language
+    ;; 243 ...... withdrawn (Unreadable data)
     (244 "Multiple-value definitions")
     ;; 245 ...... withdrawn (Mixing definitions and expressions within bodies)
     ;; 246 ...... withdrawn (Guardians)
     ;; 247 Syntactic Monads
     ;; 248 Minimal delimited continuations (draft)
     ;; 249 ...... withdrawn (Restarting conditions)
-    ;; 250 ...... withdrawn (Insertion-ordered hash tables)
+    ;; 250 Insertion-ordered hash tables (draft)
     ;; 251 Mixing groups of definitions with expressions within bodies
     ;; 252 Property Testing
     (253 "Data (Type-)Checking" () "srfi-253")
     ;; 254 Ephemerons and Guardians (draft)
-    ;; 255 Restarting conditions (draft)
+    ;; 255 Restarting conditions
+    ;; 256 ...... withdrawn (Minimal extension to SRFI 9/R7RS small record type definitions for inheritance)
+    ;; 257 Simple extendable pattern matcher with backtracking (draft)
+    (258 "Uninterned symbols" () "srfi-258")
+    ;; 259 Tagged procedures with type safety (draft)
+    (260 "Generated symbols" () "srfi-260")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file

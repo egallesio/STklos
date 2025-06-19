@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,10 @@
  *    Creation date: 17-Feb-1993 12:27
  *
  */
-
-#include <ctype.h>
 #include "stklos.h"
 #include "vm.h"
 
+#include <ctype.h>
 
 #define INITIAL_LINE_SIZE 256           /* Initial size for readline */
 
@@ -1181,6 +1180,16 @@ Incorrect_format_width:
  *    (format "~a ~? ~a" 'a "~s" '(new) 'test)
  *                                 => "a new test"
  * @end lisp
+ * The following code illustrates the case in which |port| is an output
+ * port:
+ * @lisp
+ * (let ((out (open-output-file "output.txt")))
+ *   (format out "This goes to the file: ~x~%" 251))
+ * @end lisp
+ * After the code is executed, the file |output.txt| will contain the line
+ * "|This goes to the file: fb|".
+ *
+ * Finally, |(pp (format #f "~h"))| will print some quick help for |format|.
  *
  * NOTE: The second form of |format| is compliant with {{link-srfi 28}}.
  * That is, when |port| is omitted, the output is returned as a string as if
@@ -1826,7 +1835,7 @@ int STk_init_port(void)
 
   ADD_PRIMITIVE(port_cs);
   ADD_PRIMITIVE(port_cs_set);
-  
+
   return STk_init_fport() &&
          STk_init_sport() &&
          STk_init_vport();

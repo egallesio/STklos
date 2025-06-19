@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1999-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 
 #include "stklos.h"
 #include <langinfo.h>
+#include <strings.h>
 #include "gnu-getopt.h"
 
 #define ADD_OPTION(o, k)                                     do{\

@@ -2,7 +2,7 @@
  *
  * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,8 +24,9 @@
  *    Creation date: ??? 1993
  */
 
-#include <string.h>
 #include "stklos.h"
+#include <string.h>
+
 
 /*
  * Utilities
@@ -302,22 +303,22 @@ doc>
 /* Following version implements only the R5RS version of vector->list (1 arg only) */
 DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
 {
-  int j, len;
-  SCM z, tmp;
+  int len;
+  SCM z = STk_nil;
 
   if (!VECTORP(v)) error_bad_vector(v);
-
   len = VECTOR_SIZE(v);
-  if (!len) return STk_nil;
+  if (len) {
+    int i = 0;
 
-  /* len > 0. Build the fist cell and iterate */
-  tmp = z = STk_cons(*VECTOR_DATA(v), STk_nil);
-  for (j=1; j<len; j++) {
-    tmp = CDR(tmp) = STk_cons(VECTOR_DATA(v)[j], STk_nil);
+    // Allocate the list all at once to avoid calling the allocator repeated times.
+    z = STk_C_make_list(len, STk_void);
+    for (SCM ptr = z; CONSP(ptr); ptr = CDR(ptr)) {
+      CAR(ptr) = VECTOR_DATA(v)[i++];
+    }
   }
   return z;
 }
-
 
 DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))
 {
@@ -414,7 +415,7 @@ DEFINE_PRIMITIVE("vector-append", vector_append, vsubr, (int argc, SCM *argv))
  * (vector-fill! vector fill start end)
  *
  * Stores |fill| in every element of |vector| between |start| and |end|.
- * 
+ *
  * NOTE: The R5RS version of |vector-fill!| accepts only one
  * parameter.
 doc>

@@ -1,7 +1,7 @@
 /*
  * gnu-getopt.c         -- Adaptation of the GNU getopt function for STklos
  *
- * Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
@@ -47,6 +47,8 @@
 /* STklos: # include <config.h> */
 /* STklos: #endif               */
 
+#include "stklos.h" /* STklos: */
+
 #if !defined __STDC__ || !__STDC__
 /* This is a separate conditional since some stdc systems
    reject `defined (const)'.  */
@@ -63,7 +65,6 @@
  *                              STklos adaptation
  *
 \*===========================================================================*/
-#include "stklos.h"
 #define GETOPT_BUF_SIZE 250
 
 static int we_are_in_scheme = 0;

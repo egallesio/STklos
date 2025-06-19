@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,12 +23,13 @@
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
  */
-#include <sys/resource.h>
-#include <math.h>
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
 #include "hash.h"
+
+#include <sys/resource.h>
+#include <math.h>
 
 /* Define the maximum calls for equal-count (a version of equal bounded in
   recursive calls). The value depends on the way the program is compiled: if
@@ -252,11 +253,10 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
     case tc_vector:       case tc_uvector:     case tc_hash_table:
     case tc_port:         case tc_frame:       case tc_next_method:
     case tc_promise:      case tc_regexp:      case tc_process:
-    case tc_continuation: case tc_values:      case tc_parameter:
+    case tc_continuation: case tc_syntax:      case tc_parameter:
     case tc_socket:       case tc_struct_type: case tc_struct:
     case tc_thread:       case tc_mutex:       case tc_condv:
     case tc_box:          case tc_ext_func:    case tc_callback:
-    case tc_syntax:
       return STk_false;
 
     default:
@@ -451,10 +451,10 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
     case tc_subr34:       case tc_vsubr:        case tc_apply:
     case tc_hash_table:   case tc_frame:        case tc_next_method:
     case tc_promise:      case tc_regexp:       case tc_process:
-    case tc_continuation: case tc_values:       case tc_parameter:
+    case tc_continuation: case tc_syntax:       case tc_parameter:
     case tc_socket:       case tc_struct_type:  case tc_thread:
     case tc_mutex:        case tc_condv:        case tc_ext_func:
-    case tc_pointer:      case tc_callback:     case tc_syntax:
+    case tc_pointer:      case tc_callback:
       return STk_false;
 
    default:

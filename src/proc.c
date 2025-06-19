@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -367,10 +367,16 @@ DEFINE_PRIMITIVE("procedure-source", proc_source, subr1, (SCM proc))
  *                      M A P   &   F O R - E A C H
  *
 \*===========================================================================*/
+
+/* map does both 'map' and 'for-each':
+   - when in_map is non-zero, the result of each operation will be stored
+     in a result list
+   - when it is zero, no result is stored, and AN EMPTY LIST is returned
+     (not void -- the primitive "for-each" will do that). */
 static SCM map(int argc, SCM *argv, int in_map)
 {
-  SCM fct, res, v, tmp, *args;
-  int i, j;
+  SCM fct, res, ptr, v, tmp, *args;
+  int i, j, len, tmplen;
 
   if (argc <= 1) STk_error("expected at least 2 arguments (given %d)", argc);
 
@@ -378,33 +384,77 @@ static SCM map(int argc, SCM *argv, int in_map)
   argc -= 1;
   res   = STk_nil;
 
+
   if (argc == 1) {
     /* frequent case (map (lambda (x) ...) list). Do it specially */
-    for (v = *argv; !NULLP(v); v = CDR(v)) {
+
+    v = *argv;
+
+    if (in_map) {
+        /* Calculate the length so we can use STk_C_make_list(): */
+        len = STk_int_length(v);
+        if (len < 0) STk_error("bad list ~W", v);
+        /* Allocate the result list: */
+        res = STk_C_make_list(len, STk_false);
+    }
+
+    /* Just fill in the list and return it: */
+    for (ptr = res; !NULLP(v); v = CDR(v)) {
       if (!CONSP(v)) error_malformed_list(v);
       tmp = STk_C_apply(fct, 1, CAR(v));
-      if (in_map)
-        res = STk_cons(tmp, res);
+      if (in_map) {
+        CAR(ptr) = tmp;
+        ptr = CDR(ptr);
+      }
     }
-    return STk_dreverse(res);
+    return res;
+
   } else {
+
     /* General case */
     v    = STk_makevect(argc, (SCM) NULL);
     args = VECTOR_DATA(v);
 
+      if (in_map) {
+        /* Find out the length of the smaller list and allocate
+           the reulting list of that size. */
+        len = INT_MAX;
+        for (i=0, j=0; i < argc; i++, j--) {
+          tmplen = STk_int_length(argv[j]);
+          /* If tmplen is negative, we ignore it. This is because we
+             should accept circular lists, so long as there is a
+             non-circular list also in the arguments See SRFI 1 test:
+             (map + '(3 1 4 1) (circular-list 1 0)) expects (4 1 5 1) */
+          if (tmplen >= 0 && tmplen < len) len = tmplen;
+        }
+        if (len == INT_MAX) STk_error("at least one proper list required");
+
+        res = STk_C_make_list(len, STk_false);
+        ptr = res;
+    }
+
     for ( ; ; ) {
-      /* Build the parameter list */
-      for (i=0, j=0; i < argc; i++,j--) {
+      /* Build the parameter list.
+         'argc' was decreased by one, so it is now *exactlty* the
+         number of lists on which MAP will operate. Which is also
+         the argument count of the function to be applied. */
+      for (i=0, j=0; i < argc; i++, j--) {
         if (NULLP(argv[j]))
-          return STk_dreverse(res); /* // FIXME: verifier longueurs */
+          return res;
         if (!CONSP(argv[j])) error_malformed_list(argv[j]);
-        args[i] = CAR(argv[j]);
-        argv[j] = CDR(argv[j]);
+
+        args[i] = CAR(argv[j]); /* set i-th argument to fct */
+        argv[j] = CDR(argv[j]); /* get the next argument from MAP */
       }
 
       tmp = STk_C_apply(fct, -argc, args);
-      if (in_map)
-        res = STk_cons(tmp, res);
+
+      /* If we're storing the resulting list, set the CAR at this
+         position, and update the pointer. */
+      if (in_map) {
+        CAR(ptr) = tmp;
+        ptr = CDR(ptr);
+      }
     }
   }
   return STk_void;      /* never reached */
