@@ -721,6 +721,34 @@ doc>
                              '()))
                 (Loop (cdr l))))))))
 
+;; check-clauses will check for validity of syntax-rules clauses.
+;;
+(define (check-clauses macro-name clauses)
+  (for-each (lambda (l)
+              (cond  ((not (pair? l))
+                      (syntax-error 'let-syntax
+                                    "bad clause spec (not a pair) ~S for syntax ~S"
+                                    l
+                                    macro-name))
+                     ((not (pair? (car l)))
+                      (syntax-error 'let-syntax
+                                    "clause head ~S is not a pair in clause ~S for syntax ~S"
+                                    (car l)
+                                    l
+                                    macro-name))
+                     ((not (symbol? (caar l)))
+                      (syntax-error 'let-syntax
+                                    "car of clause head (~S) is not a symbol in clause ~S for syntax ~S"
+                                    (caar l)
+                                    l
+                                    macro-name))
+                     ((null? (cdr l))
+                      (syntax-error 'let-syntax
+                                    "null output template in clause spec ~S for syntax ~S"
+                                    l
+                                    macro-name))))
+            clauses))
+
 
 ;;
 ;; A very simple implementation of let-syntax.
@@ -742,32 +770,67 @@ doc>
 ;;       (f))
 ;;
 (define-macro (let-syntax bindings . body)
+  (unless (list? bindings)
+    (syntax-error 'let-syntax
+                  "bad syntax specification ~S"
+                  bindings))
   `(%%let-syntax
     ,(map (lambda (x)
             (let ((macro-name (car x))
-                  (syn-rules  (cadr x)))
-              (let ((alt-ellipsis? (not (list? (cadr syn-rules)))))
-                (let ((ellipsis (if alt-ellipsis?
-                                    (cadr syn-rules)
-                                    '...))
-                      (keywords (if alt-ellipsis?
-                                    (cons macro-name (caddr syn-rules))
-                                    (cons macro-name (cadr syn-rules))))
-                      (clauses  (if alt-ellipsis?
-                                    (cdddr syn-rules)
-                                    (cddr syn-rules))))
-                  `(,macro-name (lambda args
-                                  ((%%symbol-value 'find-clause 'MBE)
-                                           ',macro-name
-                                           args
-                                           ',keywords
-                                           ',clauses
-                                           ',ellipsis)))))))
+                  (transformer  (cadr x)))
+              ;; bindings are (name transformer)
+              ;; **IF** transformer is a list that begins with 'syntax-rules,
+              ;;   then we compile it as syntax-rules.
+              ;; **IF** transformer is a list beginning with 'lambda,
+              ;;   then we compile it as an internal define-macro 8-)
+              (unless (pair? transformer) (syntax-error 'let-syntax
+                                                        "bad transformer ~S"
+                                                        transformer))
+              (case (car transformer)
+                ((syntax-rules)
+                  (unless (memq (length transformer) '(3 4))
+                    (syntax-error 'let-syntax
+                                  "bad transformer ~S (wrong length)"
+                                  transformer))
+                 (let ((alt-ellipsis? (not (list? (cadr transformer)))))
+                   (let ((ellipsis (if alt-ellipsis?
+                                       (cadr transformer)
+                                       '...))
+                         (keywords (if alt-ellipsis?
+                                       (cons macro-name (caddr transformer))
+                                       (cons macro-name (cadr transformer))))
+                         (clauses  (if alt-ellipsis?
+                                       (cdddr transformer)
+                                       (cddr transformer))))
+                     (check-clauses macro-name clauses)
+                     `(,macro-name (lambda args
+                                     ((%%symbol-value 'find-clause 'MBE)
+                                      ',macro-name
+                                      args
+                                      ',keywords
+                                      ',clauses
+                                      ',ellipsis))))))
+                ((lambda) ;; local define-macro
+                 (unless (>= (length transformer) 3) ; 1. name 2. args 3+. body
+                   (syntax-error 'let-syntax
+                                 "bad local define-macro transformer ~S"
+                                 transformer))
+                 (let ((macro-args (cadr transformer))
+                       (macro-body (cddr transformer)))
+                   (unless (or (symbol? macro-args)
+                               (list? macro-args))
+                     (syntax-error 'let-syntax
+                                   "bad argument list ~S to local define-macro transformer named ~S"
+                                   macro-args macro-name))
+                   `(,macro-name (lambda ,macro-args ,@macro-body))))
+                (else (syntax-error 'let-syntax
+                                    "bad transformer ~S"
+                                    transformer)))))
           bindings)
     ,@body))
 
 ;;;;
-;;;; STklos code for define-syntax and syntax-rules 
+;;;; STklos code for define-syntax and syntax-rules
 ;;;;
 
 (define-macro (syntax-rules . syn-rules)
