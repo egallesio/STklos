@@ -575,6 +575,8 @@
 ;;------------------------------------------------------------------
 (test-subsection "integer addition")
 
+(test/error "bad operator - unary addition" (+ "x"))
+
 (define x #xffffffff00000000ffffffff00000000)
 (define xx (- x))
 (define y #x00000002000000000000000200000000)
@@ -735,6 +737,8 @@
 
 ;;------------------------------------------------------------------
 (test-subsection "integer multiplication")
+
+(test/error "bad operator - unary addition" (* "x"))
 
 (define (m-result x) (list x (- x) (- x) x))
 (define (m-tester x y)

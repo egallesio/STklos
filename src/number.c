@@ -2216,7 +2216,12 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
   SCM res;
 
   if (argc == 0) return MAKE_INT(0);
-  if (argc == 1) return add2(MAKE_INT(0), *argv);
+  if (argc == 1)
+    if (STk_numberp(*argv) == STk_true)
+      return *argv;
+    else
+      error_cannot_operate("addition",MAKE_INT(0),*argv);
+
 
   for (res = *argv--; --argc; argv--)
     res = add2(res, *argv);
@@ -2366,7 +2371,11 @@ DEFINE_PRIMITIVE("*", multiplication, vsubr, (int argc, SCM *argv))
   SCM res;
 
   if (argc == 0) return MAKE_INT(1);
-  if (argc == 1) return mul2(MAKE_INT(1), *argv);
+  if (argc == 1)
+    if (STk_numberp(*argv) == STk_true)
+      return *argv;
+    else
+      error_cannot_operate("multiplication",MAKE_INT(1),*argv);
 
   for (res = *argv--; --argc; argv--)
     res = mul2(res, *argv);
