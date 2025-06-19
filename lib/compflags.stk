@@ -64,6 +64,55 @@ doc>
  * when debugging a program. This parameter defaults to `#f` (but is set to
  * ``#t` when {{stklos}} is launched in debug mode).
 doc>
+<doc EXT compiler:warn-use-undefined compiler:warn-use-undefined-postpone
+ * (compiler:warn-use-undefined)
+ * (compiler:warn-use-undefined-postpone)
+ *
+ * When compiling a file (but not when a procedure or thunk is entered
+ * in the REPL):
+ *
+ * If the parameter `compiler:warn-use-undefined-postpone` is true,
+ * then all warnings about undefined globals will be deferred until
+ * compilation of the file has finished.
+ * If not, then if the parameter |compiler:warn-use-undefined| is
+ * true, then a warning will be emmited when a reference to a global
+ * variable is found.
+ *
+ * For example, if the contents of `bad-code.stk` is
+ *
+ * @lisp
+ * (define (f) x)
+ * (define (g) y)
+ * (define y 10)
+ * @end lisp
+ * Then the compiler may
+ *
+ * 1. Not care about undefined variables ar all (both parameters
+ *    set to false)
+ * 2. Postpone undefined variables to the end of compilation, and
+ *    only complain about `x` (`-postpone` true)
+ * 3. Emit warnings for both, as soon as they are found
+ *    (`-postpone` false, `-undefined` true).
+ *
+ * @lisp
+ * (compiler:warn-use-undefined-postpone #f)
+ * (compiler:warn-use-undefined #t)
+ * (compile-file "bad-code.stk" "bad-code.ostk")
+ *                                               ;; (no warning)
+ *
+ * (compiler:warn-use-undefined #f)
+ * (compiler:warn-use-undefined-postpone #t)
+ * (compile-file "bad-code.stk" "bad-code.ostk")
+ *   **** Warning;
+ *   reference to undefined symbol x             ;; only x missing
+ *
+ * (compiler:warn-use-undefined-postpone #f)
+ * (compiler:warn-use-undefined #t)
+ * (compile-file "bad-code.stk" "bad-code.ostk")
+ *   warning: reference to undefined symbol x    ;; complains about
+ *   warning: reference to undefined symbol y    ;; both x and y
+ * @end lisp
+doc>
 <doc EXT compiler:show-assembly-code
  * (compiler:show-assembly-code)
  * (compiler:show-assembly-code bool)
