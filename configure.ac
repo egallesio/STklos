@@ -671,6 +671,16 @@ then
   fi
 fi
 
+if test "X$STAT_VM" = "X"  ; then
+   STAT_VM_STR="no"
+else
+   STAT_VM_STR="yes"
+fi
+if test "X$DEBUG_VM" = "X"  ; then
+   DEBUG_VM_STR="no"
+else
+   DEBUG_VM_STR="yes"
+fi
 
 
 
@@ -804,6 +814,8 @@ echo "                Loader: " $LD
 echo "        Thread support: " $STR_THREADS
 echo "           FFI support: " $STR_FFI
 echo " Control fx parameters: " $CONTROL_FX
+echo "   VM stats collecting: " $STAT_VM_STR
+echo "          VM debugging: " $DEBUG_VM_STR
 echo " System libraries used: " $SYST_LIBS_SHOW
 echo "    Compiled libraries: " $COMP_LIBS_SHOW
 echo "    STklos load prefix: " $PREFIX
