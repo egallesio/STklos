@@ -1297,9 +1297,9 @@ char* STk_boot_consts = "#("
 "!no-uvector-syntax" " "
 "(|lambda| (vars producer . body) `(call-with-values (|lambda| () ,producer) (|lambda| ,vars ,@body)))" " "
 "case-lambda" " "
-"(|lambda| clauses (let ((len (gensym)) (args (gensym)) (compute-arity (in-module STKLOS-COMPILER compute-arity))) `(|lambda| ,args (let ((,len (length ,args))) (cond ,@(map (|lambda| (x) (unless (>= (length x) 2) (error 'case-lambda \"bad clause ~S\" x)) (let* ((formals (car x)) (body (cdr x)) (arity (compute-arity formals))) (cond ((positive? arity) `((= ,len ,arity) (apply (|lambda| ,formals ,@body) ,args))) ((zero? arity) `((= ,len ,arity) ,@body)) (else `((>= ,len ,(- (- arity) 1)) (apply (|lambda| ,formals ,@body) ,args)))))) clauses) (else (error 'case-lambda \"no matching clause in list ~S for ~S\" ',(map car clauses) ,args)))))))" " "
+"(|lambda| clauses (let ((len (gensym)) (args (gensym)) (compute-arity (in-module STKLOS-COMPILER compute-arity))) `(|lambda| ,args (let ((,len (length ,args))) (cond ,@(map (|lambda| (x) (unless (>= (length x) 2) (error 'case-lambda \"bad clause ~S\" x)) (let* ((formals (car x)) (body (cdr x)) (arity (compute-arity formals))) (cond ((positive? arity) `((= ,len ,arity) (apply (|lambda| ,formals ,@body) ,args))) ((zero? arity) `((= ,len ,arity) ,@body)) (else `((>= ,len ,(- (- arity) 1)) (apply (|lambda| ,formals ,@body) ,args)))))) clauses) (else (error \"no matching clause in case-lambda with ~S for ~S\" ',(map car clauses) ,args)))))))" " "
 "\"bad clause ~S\"" " "
-"\"no matching clause in list ~S for ~S\"" " "
+"\"no matching clause in case-lambda with ~S for ~S\"" " "
 "%define-condition-type-accessors" " "
 "(|lambda| (name supertype predicate . slots) (let ((obj (gensym))) `(begin (define (,predicate ,obj) (and (condition? ,obj) (condition-has-type? ,obj ,name))) ,@(map (|lambda| (x) `(define (,(cadr x) ,obj) (unless (,predicate ,obj) (error ',(cadr x) \"bad type for condition ~S\" ,obj)) (condition-ref ,obj ',(car x)))) slots))))" " "
 "\"bad type for condition ~S\"" " "
@@ -23436,7 +23436,7 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x7d,
 0x2d,
-0x685d,
+0x6854,
 0x25,
 0x55,
 0x11a,
@@ -33020,7 +33020,7 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x50a,
 0x23,
-0xfe,
+0xf5,
 0xffff,
 0x25,
 0x25,
@@ -33222,14 +33222,6 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x4c,
 0x55,
-0x6b,
-0x55,
-0x509,
-0x3,
-0x3b,
-0x3b,
-0x21,
-0x55,
 0x50c,
 0x55,
 0x6b,
@@ -33248,7 +33240,6 @@ STk_instr STk_boot_code [] = {
 0x21,
 0x66,
 0x3,
-0x3b,
 0x3b,
 0x3b,
 0x3b,
