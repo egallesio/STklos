@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2005-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -738,7 +738,7 @@
 ;;------------------------------------------------------------------
 (test-subsection "integer multiplication")
 
-(test/error "bad operator - unary addition" (* "x"))
+(test/error "bad operator - unary multiplication" (* "x"))
 
 (define (m-result x) (list x (- x) (- x) x))
 (define (m-tester x y)
