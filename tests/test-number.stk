@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2005-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -575,6 +575,12 @@
 ;;------------------------------------------------------------------
 (test-subsection "integer addition")
 
+(test/error "bad operand - unary addition" (+ "x"))
+(test/error "bad operand  addition (fast path).1" (+ 0 "x"))
+(test/error "bad operand  addition (fast path).2" (+ "x" 0))
+(test/error "bad operand  substraction (fast path)" (- "x" 0))
+
+
 (define x #xffffffff00000000ffffffff00000000)
 (define xx (- x))
 (define y #x00000002000000000000000200000000)
@@ -735,6 +741,12 @@
 
 ;;------------------------------------------------------------------
 (test-subsection "integer multiplication")
+
+(test/error "bad operand - unary multiplication" (* "x"))
+(test/error "bad operand  multiplication (fast path).1" (* 1 "x"))
+(test/error "bad operand  multiplication (fast path).2" (* "x" 1))
+(test/error "bad operand  division (fast path)" (/ "x" 1))
+
 
 (define (m-result x) (list x (- x) (- x) x))
 (define (m-tester x y)
