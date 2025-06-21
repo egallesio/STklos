@@ -2093,11 +2093,10 @@ doc>
  */
 SCM STk_add2(SCM o1, SCM o2)
 {
-  if (o1 == MAKE_INT(0)) return o2;
-  if (o2 == MAKE_INT(0)) return o1;
+  if (o1 == MAKE_INT(0) && STk_numberp(o2) == STk_true) return o2;
+  if (o2 == MAKE_INT(0) && STk_numberp(o1) == STk_true) return o1;
 
   switch (TYPEOF(o1)) {
-
     // ========== o1 is a complex
     case tc_complex: {
       switch (TYPEOF(o2)) {
@@ -2235,8 +2234,8 @@ DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_mul2(SCM o1, SCM o2)
 {
-  if (o1 == MAKE_INT(1)) return o2;
-  if (o2 == MAKE_INT(1)) return o1;
+  if (o1 == MAKE_INT(1) && STk_numberp(o2) == STk_true) return o2;
+  if (o2 == MAKE_INT(1) && STk_numberp(o1) == STk_true) return o1;
 
   switch (TYPEOF(o1)) {
 
@@ -2377,7 +2376,7 @@ DEFINE_PRIMITIVE("*", multiplication, vsubr, (int argc, SCM *argv))
     else
       error_cannot_operate("multiplication",MAKE_INT(1),*argv);
   }
-  
+
   for (res = *argv--; --argc; argv--)
     res = mul2(res, *argv);
 
@@ -2411,7 +2410,7 @@ doc>
  */
 SCM STk_sub2(SCM o1, SCM o2)
 {
-  if (o2 == MAKE_INT(0)) return o1;
+  if (o2 == MAKE_INT(0) && STk_numberp(o1) == STk_true) return o1;
 
   switch (TYPEOF(o1)) {
 
@@ -2557,7 +2556,7 @@ DEFINE_PRIMITIVE("-", difference, vsubr, (int argc, SCM *argv))
  ***/
 SCM STk_div2(SCM o1, SCM o2)
 {
-  if (o2 == MAKE_INT(1)) return o1;
+  if (o2 == MAKE_INT(1) && STk_numberp(o1) == STk_true) return o1;
 
   switch (TYPEOF(o1)) {
 
