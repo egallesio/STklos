@@ -186,3 +186,23 @@
                    expr))
              expr))
        expr)))
+
+(compiler:add-rewriter!            ;; '1+' rewriter
+ '1+
+ ;; (1+ x) ===> (+ x 1)
+ ;; which will be compiled into IN-INCR x
+ (lambda (expr len env)
+   (if (= len 2)
+       (let ((v (rewrite-expression (cadr expr) env)))
+         (list '+ v 1))
+       expr)))
+
+(compiler:add-rewriter!            ;; '1-' rewriter
+ '1-
+ ;; (1+ x) ===> (+ 1 x)
+ ;; which will be compiled into IN-DECR x
+ (lambda (expr len env)
+   (if (= len 2)
+       (let ((v (rewrite-expression (cadr expr) env)))
+         (list '- v 1))
+       expr)))
