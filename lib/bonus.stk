@@ -1369,40 +1369,46 @@ doc>
  * @end lisp
 doc>
 |#
-(define (%make-inc-dec-push-body place func val)
+(define (%invalid-place who place)
+  (error who
+         "place must be a symbol (variable) or a list (generalized variable). Was ~S"
+         place))
+
+(define-macro (push! place val)
   (cond
    ((symbol? place)
-    ;; simple xxx! on a variable
-    `(set! ,place (,func ,val ,place)))
+    ;; simple push! on a variable
+    `(set! ,place (cons ,val ,place)))
    ((list? place)
-    ;; Generalized xxx!. Do not evaluate arguments two times
+    ;; Generalized push!. Do not evaluate arguments two times
     (let ((vars (map (lambda (x) (list (gensym) x)) place)))
       `(let ,vars
          ((setter ,(caar vars))
           ,@(map car (cdr vars))
-          (,func ,val ,(map car vars))))))
+          (cons ,val ,(map car vars))))))
    (else
-    (error "place ~W must be a symbol (variable) or a list (generalized variable)"
-           place))))
+    (%invalid-place 'push! place))))
 
-(define-macro (push! place val)
-  (%make-inc-dec-push-body place 'cons val))
 
 (define-macro (pop! place)
   (let ((x (gensym 'res-)))
-    (if (symbol? place)
-        ;; simple pop! on a variable
-        `(let ((,x (car ,place)))
-           (set! ,place (cdr ,place))
-           ,x)
-        ;; Generalized pop!. Do not evaluate argument two times
-        (let ((vars (map (lambda (x) (list (gensym) x)) place)))
-          `(let ,vars
-               (let ((,x ,(map car vars)))
-                 ((setter ,(caar vars))
-                  ,@(map car (cdr vars))
-                  (cdr ,x))
-                 (car ,x)))))))
+    (cond
+     ((symbol? place)
+      ;; simple pop! on a variable
+      `(let ((,x (car ,place)))
+         (set! ,place (cdr ,place))
+         ,x))
+     ((list? place)
+      ;; Generalized pop!. Do not evaluate argument two times
+      (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+        `(let ,vars
+           (let ((,x ,(map car vars)))
+             ((setter ,(caar vars))
+              ,@(map car (cdr vars))
+              (cdr ,x))
+             (car ,x)))))
+     (else
+      (%invalid-place 'pop! place)))))
 
 #|
 <doc EXT inc! dec!
@@ -1431,11 +1437,26 @@ doc>
  * @end lisp
 doc>
 |#
+(define (%make-inc-dec-body who place op val)
+  (cond
+   ((symbol? place)
+    ;; simple inc! or dec! on a variable
+    `(set! ,place (,op ,place ,val)))
+   ((list? place)
+    ;; Generalized inc! or dec!. Do not evaluate arguments two times
+    (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+      `(let ,vars
+         ((setter ,(caar vars))
+          ,@(map car (cdr vars))
+          (,op ,(map car vars) ,val)))))
+   (else
+    (%invalid-place who place))))
+
 (define-macro (inc! place :optional (value 1))
-  (%make-inc-dec-push-body place '+ value))
+  (%make-inc-dec-body 'inc! place '+ value))
 
 (define-macro (dec! place :optional (value 1))
-  (%make-inc-dec-push-body place (lambda (a b) (- b a)) value))
+  (%make-inc-dec-body 'dec! place '- value))
 
 
 #|
@@ -2345,7 +2366,7 @@ doc>
 ;;;;
 ;;;; ======================================================================
 
-;;;; 
+;;;;
 ;;;; SRFI 4: Uniform vectors
 ;;;; ----------------------------------------------------------------------
 ;; The following code is more or less
