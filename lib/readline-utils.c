@@ -137,6 +137,20 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,
 }
 
 
+/*
+<doc EXT readline-set-option!
+ * (readline-set-option! var val)
+ *
+ * The primitive |readline-set-option!| is defined when readline support is
+ * enabled. It permits to change dynamically the behaviour of the readline
+ * library. The list of possible variables |var| and values |val| can be found
+ * in in the https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html[readline documentation manual].
+ * 
+ * @lisp
+ * (readline-set-option! "disable-completion" "on") ;; disable TAB-completion
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
                  (SCM option, SCM value)) {
   if (!STRINGP(option)) STk_error("bad string ~s", option);
