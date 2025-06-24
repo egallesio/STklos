@@ -179,12 +179,12 @@
          (suffix  (%shared-suffix))
          (res (or (try-initialize (string-append "libreadline." lsuffix))
                   (try-initialize (string-append "libedit." lsuffix)))))
-    (when res   ;; We have found a readline library.
-      ;; Try to load completion support
-      (when (try-load (string-append "readline-complete." suffix))
-        (%init-readline-completion-function readline-completion-generator))
-      ;; Run the user readline hook
-      ( (readline-startup-hook) ))
+    ;; We have found a readline library. Try to load completion support
+    (when (and res (try-load (string-append "readline-complete." suffix)))
+      (%init-readline-completion-function readline-completion-generator)
+      ;; Run the user readline hook (if we are sure to run readline)
+      (when (eq? (key-get *%system-state-plist* #:readline #f) 'readline)
+        ( (readline-startup-hook) )))
 
     res))
 
