@@ -26,7 +26,8 @@
 (define *all-errors* '())
 (define *log* (current-output-port))
 (define *err* (current-error-port))
-(define *test-failed* (vector 'fail))
+(define *test-failed* (gensym 'fail))
+(define *test-compile-failed* (gensym 'compile-fail))
 (define *test-counter* 0)
 (define *test-ko* 0)
 
@@ -34,21 +35,30 @@
 ;;  %tester ...
 ;; ----------------------------------------------------------------------
 (define (%tester message expect thunk code compare)
-  (let ((expected (if (equal? expect *test-failed*) 'failure expect)))
+  (let ((expected (cond ((eq? expect *test-failed*) 'failure)
+                        ((eq? expect *test-compile-failed*) 'compile-failure)
+                        (else expect))))
     (format *log* "  testing ~A expects ~S ==> " message expected)
     (flush-output-port)
-    (let ((res (with-handler
-                (lambda (c) *test-failed*)
-                (thunk))))
-      (set! *test-counter* (+ *test-counter* 1))
-      (if (compare expect res)
-          (format *log* "OK.\n")
-          (begin
-            (set! *test-ko* (+ *test-ko* 1))
-            (format *log* "ERROR: got ~S.\n" res)
-            (set! *all-errors* (cons (list message code expected res)
-                                     *all-errors*)))))
-    (flush-output-port *log*)))
+    (let ((thunk (if (eq? expect *test-compile-failed*)
+                     `(eval ,thunk)
+                     thunk)))
+
+      (let ((res (with-handler
+                  (lambda (c) (if (eq? expect *test-compile-failed*)
+                             *test-compile-failed*
+                             *test-failed*))
+                  (thunk))))
+
+          (set! *test-counter* (+ *test-counter* 1))
+          (if (compare expect res)
+              (format *log* "OK.\n")
+              (begin
+                (set! *test-ko* (+ *test-ko* 1))
+                (format *log* "ERROR: got ~S.\n" res)
+                (set! *all-errors* (cons (list message code expected res)
+                                         *all-errors*)))))
+        (flush-output-port *log*))))
 
 ;; ----------------------------------------------------------------------
 ;;  test-init ...
@@ -136,6 +146,6 @@
 (define-syntax test/compile-error
   (syntax-rules ()
     ((_ str code)
-     (test str *test-failed* (eval 'code) eq?))))
-  
+     (test str *test-compile-failed* 'code eq?))))
+
 (provide "test")
