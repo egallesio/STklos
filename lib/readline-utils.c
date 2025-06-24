@@ -1,5 +1,5 @@
 /*
- * readline-complete.c   -- tab-completion for readline
+ * readline-utils.c   -- Readline utils (tab-completion, option setting)
  *
  * Copyright © 2022 Jerônimo Pellegrini <j_p@aleph0.info>
  *
@@ -93,7 +93,7 @@ generator(const char *text, int state) {
    - The start and end positions (end position is ignored here)
    The actual work is done by the generator function in this file,
    which in turn calls the Scheme procedure complete in
-   readline-complete.stk.
+   readline.stk.
 */
 static char **
 scheme_completion(const char *str, int start, int _UNUSED(end)) {
@@ -151,7 +151,7 @@ DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
 }
 
 
-MODULE_ENTRY_START("readline-complete")
+MODULE_ENTRY_START("readline-utils")
 {
   SCM module =  STk_STklos_module;   // FIXME: should be READLINE
 
