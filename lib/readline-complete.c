@@ -23,7 +23,7 @@
  *    Creation date: 09-May-2022 09:22
  */
 
-#include <stklos.h>
+#include "../src/stklos.h"
 
 //
 // Readline interface for completion
@@ -51,12 +51,14 @@ extern int rl_parse_and_bind (char *);
 extern char *rl_line_buffer;                    // The line buffer
 extern int rl_attempted_completion_over;        // 1 to suppress filename completion
 extern char *rl_completer_word_break_characters;// word separator. Normally "n\"\\'`@$>"
-extern rl_completion_func_t *rl_attempted_completion_function; // Pointer to our completion func
+extern rl_completion_func_t
+            *rl_attempted_completion_function; // Pointer to our completion func
 
 extern char* rl_readline_name;                  // NOTE: both vars a are not
 extern char* rl_basic_quote_characters;         // completion related (see below)
 
 static SCM gen;                 // A pointer to the Scheme generator function
+
 
 /*
   Calls the generator (gen) with two arguments:
@@ -79,8 +81,7 @@ generator(const char *text, int state) {
      to free the pointer (at least on FresBSD). */
   size_t size = STRING_SIZE(s);
   char *res = malloc(size+1);
-  if (res == NULL) return ""; /* better return no completions than
-				 signaling an error... */
+  if (res == NULL) return ""; // better return no completion than signaling an error.
   strncpy(res,STRING_CHARS(s), size);
   res[size]=0;
   return res;
@@ -107,6 +108,12 @@ scheme_completion(const char *str, int start, int _UNUSED(end)) {
   return rl_completion_matches(str, generator);
 }
 
+
+/* ======================================================================
+ *
+ * Readline primitives
+ *
+ * ====================================================================== */
 /*
   %init-readline-completion-function will:
   1. set our C variable 'gen' to the STklos closure that is passed
@@ -115,8 +122,8 @@ scheme_completion(const char *str, int start, int _UNUSED(end)) {
      function STk_completion.
   It is called by the Scheme procedure 'init-readline-completion-function'.
  */
-DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,subr1,
-                 (SCM generator))
+DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,
+                 subr1, (SCM generator))
 {
   gen = generator;
   /* The word break chars are by default " \t\n\"\\'`@$><=;|&{(".
@@ -129,7 +136,9 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,s
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("readline-set-option",readline_set_option,subr2, (SCM option, SCM value)) {
+
+DEFINE_PRIMITIVE("readline-set-option",readline_set_option,subr2,
+                 (SCM option, SCM value)) {
   if (!STRINGP(option)) STk_error("bad string ~s", option);
   if (!STRINGP(value)) STk_error("bad string ~s", value);
   if (STRING_SIZE(option) + STRING_SIZE(value) > 195)
@@ -140,6 +149,7 @@ DEFINE_PRIMITIVE("readline-set-option",readline_set_option,subr2, (SCM option, S
   int res = rl_parse_and_bind(s);
   return MAKE_BOOLEAN(res == 0);
 }
+
 
 MODULE_ENTRY_START("readline-complete")
 {

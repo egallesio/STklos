@@ -2,7 +2,7 @@
 ;;;; readline.stk       -- Access to the GNU-readline lib
 ;;;;                       (or libedit if absent :-<)
 ;;;;
-;;;; Copyright © 2007-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2007-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -179,9 +179,13 @@
          (suffix  (%shared-suffix))
          (res (or (try-initialize (string-append "libreadline." lsuffix))
                   (try-initialize (string-append "libedit." lsuffix)))))
-    (when (and res (try-load (string-append "readline-complete." suffix)))
-      ;; We have found a readline library. Try to load completion support
-      (%init-readline-completion-function readline-completion-generator))
+    (when res   ;; We have found a readline library.
+      ;; Try to load completion support
+      (when (try-load (string-append "readline-complete." suffix))
+        (%init-readline-completion-function readline-completion-generator))
+      ;; Run the user readline hook
+      ( (readline-startup-hook) ))
+
     res))
 
 ) ;; End of module READLINE

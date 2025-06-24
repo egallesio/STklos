@@ -1,7 +1,7 @@
 ;;;;
 ;;;; repl-readline.stk  -- REPL with GNU-Readline support
 ;;;;
-;;;; Copyright © 2010-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2010-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,8 @@
 
 (define-module REPL-READLINE
   (import SCHEME REPL READLINE)
-  (export try-initialize-repl-with-readline)
+  (export try-initialize-repl-with-readline
+          readline-startup-hook)
 
 ;;;; In module REPL-READLINE
 
@@ -106,6 +107,12 @@
 
       (current-input-port port)
       (repl-change-default-ports :in port))))
+
+
+;; A hook for the user which will be called if readline is used
+(define-parameter readline-startup-hook void)
+
+
 
 (define (try-initialize-repl-with-readline)
   (let ((use-editor (key-get *%system-state-plist* :line-editor #t)))
