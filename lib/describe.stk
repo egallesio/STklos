@@ -1,7 +1,7 @@
 ;;;;
 ;;;; d e s c r i b e . s t k    -- The DESCRIBE method (partly stolen fom Elk lib)
 ;;;;
-;;;; Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -203,7 +203,8 @@ doc>
                                 (if (positive? (hash-table-size x))
                                     (format #f " with ~a entries" (hash-table-size x))
                                     "")))
-     ((mutex? x)        (let ((name     (mutex-name     x))
+     ((and (not (eq? (%thread-system) 'none)) (mutex? x))
+                        (let ((name     (mutex-name     x))
                               (state    (if (thread? (mutex-state    x))
                                             (format #f "locked by thread ~a" (mutex-state x))
                                             (mutex-state x)))
