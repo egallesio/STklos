@@ -1,0 +1,465 @@
+;;;;
+;;;; d e s c r i b e . s t k    -- The DESCRIBE method (partly stolen fom Elk lib)
+;;;;
+;;;; Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 21-Mar-1993 14:33
+;;;;
+
+
+#|
+<doc EXT describe
+ * (describe obj)
+ *
+ * Shows a brief description of |obj|. If the object is structured
+ * such as a struct, class or instance, some information about its
+ * internal structure will be shown.
+ *
+ * *Using `describe` on simple values*
+ * @lisp
+ * (describe 10)
+ *   10 is a fixnum integer number (#xa #o12 #b1010).
+ *
+ * (describe 5.4)
+ *   5.4 is a real.
+ *
+ * (describe 2+3i)
+ *   2+3i is a complex number.
+ *
+ * (describe #\\é)
+ *   #\\é is a character whose Unicode code point is 233.
+ * @end lisp
+ *
+ * *Using `describe` on a class*
+ * @lisp
+ * (describe <integer>)
+ *   <integer> is a class. It's an instance of <class>.
+ *   Superclasses are:
+ *       <rational>
+ *   (No direct slot)
+ *   Directs subclasses are:
+ *       <fixnum>
+ *       <bignum>
+ *   Class Precedence List is:
+ *       <integer>
+ *       <rational>
+ *       <real>
+ *       <complex>
+ *       <number>
+ *       <top>
+ *   (No direct method)
+ * @end lisp
+ *
+ * *Using `describe` on structures*
+ * @lisp
+ * (define-struct person name email)
+ * (define one (make-person "Some One" "one@domain.org"))
+ *
+ * (describe person)
+ *   #[struct-type person 139786494092352] is a structure type whose name is person.
+ *   Parent structure type: #f
+ *   Slots are:
+ *        name
+ *        email
+ *
+ * (describe one)
+ *   #[struct person 139786494288064] is an instance of the structure type person.
+ *   Slots are:
+ *        name = "Some One"
+ *        email = "one@domain.org"
+ * @end lisp
+doc>
+|#
+
+
+(define-module (stklos describe)
+  (export describe)
+
+;;;
+;;; describe for simple objects
+;;;
+(define-method describe ((x <top>) port)
+  (format port "~W is " x)
+  (cond
+     ((null?    x)      (format port "the empty list"))
+     ((void?    x)      (format port "the unspecified (void) object"))
+     ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
+     ((char?    x)      (format port "a character whose Unicode code point~a is ~s"
+                                (if (<= (char->integer x) 127) " (and ASCII value)" "")
+                                (char->integer x)))
+     ((symbol?  x)      (format port "a symbol")
+                        (call/cc
+                         (lambda (out)
+                           (with-handler
+                            (lambda (e) (out))
+                            (format port ", with ~amutable binding"
+                                    (if (symbol-mutable? x) "" "im"))))))
+     ((keyword? x)      (format port "a keyword"))
+     ((pair?    x)      (format port "a non-empty list"))
+     ((string?  x)      (if (zero? (string-length x))
+                            (format port "an empty string")
+                            (format port "a string of length ~s"
+                                    (string-length x))))
+     ((bytevector? x)   (let ((n (bytevector-length x)))
+                          (if (zero? n)
+                              (format port "an empty bytevector")
+                              (format port "a bytevector of length ~s"
+                                      n))))
+     ((vector?  x)      (if (eqv? x '#())
+                            (format port "an empty vector")
+                            (format port "a vector of length ~s"
+                                    (vector-length x))))
+     ((%uvector? x)     ;; don't use uvector? and uvector-length to avoid the load of SRFI-4
+                        (let* ((tag  (uvector-tag x))
+                               (a-an (case tag ((u16 u32 u64) "an") (else "a"))))
+                          (if (zero? (%uvector-length x))
+                            (format port "~a empty ~svector" a-an tag)
+                            (format port "~a ~svector of length ~s" a-an tag
+                                    (%uvector-length x)))))
+     ((closure? x)      (format port "a procedure")
+                        ;; We don't need to show the formals, because they're already
+                        ;; displayed in the object. For example, [closure g (a b)].
+                        ;; But we offer the user a way to read the source, if it is
+                        ;; available.
+                        (when (procedure-source x)
+                          (format port
+                              ".~%The source code is available -- call `procedure-source` on it")))
+     ((procedure? x)    (format port "a primitive procedure"))
+     ((eof-object? x)   (format port "the end-of-file object"))
+     ((struct-type? x)  (format port "the type structure named ~A"
+                                (struct-type-name x)))
+     ((library? x)      (format port "~a R7RS library named ~A"
+                                (if (module-mutable? x) "a mutable" "an immutable")
+                                (library-name x)))
+     ((module? x)       (format port "~a module named ~A"
+                                (if (module-mutable? x) "a mutable" "an immutable")
+                                (module-name x)))
+     ((port? x)         (format port "an ~a ~a port"
+                                (if (input-port? x) "input" "output")
+                                (if (binary-port? x) "binary" "textual")))
+     ((hash-table? x)   (format port "~a~a hash table~a"
+                                (if (hash-table-mutable? x)     "a mutable" "an immutable")
+                                (if (zero? (hash-table-size x)) ", empty"   "")
+                                (if (positive? (hash-table-size x))
+                                    (format #f " with ~a entries" (hash-table-size x))
+                                    "")))
+     ((and (not (eq? (%thread-system) 'none)) (mutex? x))
+                        (let ((name     (mutex-name     x))
+                              (state    (if (thread? (mutex-state    x))
+                                            (format #f "locked by thread ~a" (mutex-state x))
+                                            (mutex-state x)))
+                              (specific (if (void? (mutex-specific x))
+                                            "void"
+                                            "non-void")))
+                          (if name
+                              (format port "a mutex with name ~a, state ~a and ~a specific field"
+                                      name state specific)
+                              (format port "an unnamed mutex with state ~a and ~a specific field"
+                                      state specific))))
+
+     (else              (let ((user-type-name (%user-type-name x)))
+                          (if user-type-name
+                              ;; Object type is user defined.
+                              (let ((proc (%user-type-proc user-type-name
+                                                           'describe)))
+                                (if proc
+                                    (proc x port) ;; Use user defined procedure
+                                    (format port "an objet whose type name is ~s"
+                                            user-type-name)))
+                              (begin
+                                ;; an object instance
+                                (format port "an instance of class ~A"
+                                (class-name (class-of x))))))))
+  (format port ".~%")
+  (void))
+
+;;; ======================================================================
+;;;     Describe for numbers
+;;; ======================================================================
+
+(define-method describe ((x <number>) port)
+
+  (define (spell-number-type x)
+    (cond ((fixnum? x)   "fixnum")
+          ((bignum? x)   "bignum")
+          ((nan? x)      "NaN")
+          ((inexact? x)  "inexact")
+          ((rational? x) "rational")))
+
+  (format port "~W is " x)
+  (if (exact? x)
+      (cond
+       ((fixnum? x)    (format port "a fixnum integer number (")
+        (format port "#x~a "  (number->string x 16))
+        (format port "#o~a "  (number->string x 8))
+        (format port "#b~a)"  (number->string x 2)))
+       ((bignum? x)   (format port "a bignum integer number"))
+       ((rational? x) (format port
+                              "a rational number, with a ~a numerator and a ~a denominator"
+                              (spell-number-type (numerator x))
+                              (spell-number-type (denominator x))))
+       ((complex? x)  (format port
+                              "an exact complex number, with ~a real part and ~a imaginary part"
+                              (spell-number-type (real-part x))
+                              (spell-number-type (imag-part x)))))
+      ;; now inexact:
+      (cond
+       ((infinite? x) (format port "~a infinity"
+                              (if (negative? x)
+                                  "negative"
+                                  "positive")))
+       ((and (nan? x)
+             (not (complex? x))) ; don't call nan-quiet? nan-payload etc on complexes
+        (format port
+                "a ~aquiet, ~anegative non-number (NaN), "
+                (if (nan-quiet? x) "" "non-")
+                (if (nan-negative? x) "" "non-"))
+        (format port "with payload ~a" (nan-payload x)))
+       ((real? x)     (format port "a real number"))
+       ((complex? x)  (format port
+                              "an inexact complex number, with ~a real part and ~a imaginary part"
+                              (spell-number-type (real-part x))
+                              (spell-number-type (imag-part x))))))
+  (format port ".~%"))
+
+
+
+;;; ======================================================================
+;;;     Describe for STklos instances
+;;; ======================================================================
+(define (%describe-parts-header slots port)
+  ;; header of the slot names of classes, objects, structs description
+  (format port (case (length slots)
+                 ((0) "There are no slots.~%")
+                 ((1) "The only slot is:~%")
+                 (else "Slots are:~%"))))
+
+
+(define-method describe ((x <object>) port)
+  (let ((sort-slots (lambda (l)
+                      (sort l (lambda (a b)
+                                (string<?
+                                   (symbol->string (slot-definition-name a))
+                                   (symbol->string (slot-definition-name b))))))))
+    (next-method)
+    ;; print all the instance slots
+    (let ((slots (class-slots (class-of x))))
+      (%describe-parts-header slots port)
+      (for-each (lambda (slot)
+                  (let ((name (slot-definition-name slot)))
+                    (format port "     ~S = ~A~%" name
+                            (if (slot-bound? x name)
+                                (format #f "~W" (slot-ref x name))
+                                "#[unbound]"))))
+                (sort-slots slots)))
+    (void)))
+
+;;; ======================================================================
+;;;     Describe for classes
+;;; ======================================================================
+(define-method describe ((x <class>) port)
+  (format port "~S is a class. It's an instance of ~A.~%"
+          (class-name x) (class-name (class-of x)))
+
+  ;; Super classes
+  (format port "Superclasses are:~%")
+  (for-each (lambda (class) (format port "    ~A~%" (class-name class)))
+       (class-direct-superclasses x))
+
+  ;; Direct slots
+  (let ((slots (class-direct-slots x)))
+    (if (null? slots)
+        (format port "(No direct slot)~%")
+        (begin
+          (format port "Directs slots are:~%")
+          (for-each (lambda (s)
+                      (format port "    ~A~%" (slot-definition-name s)))
+                    slots))))
+
+
+  ;; Direct subclasses
+  (let ((classes (class-direct-subclasses x)))
+    (if (null? classes)
+        (format port "(No direct subclass)~%")
+        (begin
+          (format port "Directs subclasses are:~%")
+          (for-each (lambda (s)
+                      (format port "    ~A~%" (class-name s)))
+                    classes))))
+
+  ;; CPL
+  (format port "Class Precedence List is:~%")
+  (for-each (lambda (s) (format port "    ~A~%" (class-name s)))
+            (class-precedence-list x))
+
+  ;; Direct Methods
+  (let ((methods (class-direct-methods x)))
+    (if (null? methods)
+        (format port "(No direct method)~%")
+        (begin
+          (format port "Class direct methods are:~%")
+          (for-each (lambda (x) (describe x port))
+                    methods))))
+
+;  (format port "~%Field Initializers ~%    ")
+;  (write (slot-ref x 'initializers)) (newline)
+
+  ;;  (format port "~%Getters and Setters~%    ")
+  ;;  (write (slot-ref x 'getters-n-setters)) (newline)
+  (void))
+
+;;; ======================================================================
+;;;     Describe for generic functions
+;;; ======================================================================
+(define-method describe ((x <generic>) port)
+  (let ((name    (generic-function-name x))
+        (methods (generic-function-methods x)))
+    ;; Title
+    (format port "~S is a generic function. It's an instance of ~A.~%"
+            name (class-name (class-of x)))
+    ;; Methods
+    (if (null? methods)
+        (format port "(No method defined for ~S)~%" name)
+        (begin
+          (format port "Methods defined for ~S~%" name)
+          (for-each (lambda (x) (describe x port #t)) methods))))
+  (void))
+
+
+;;; ======================================================================
+;;;     Describe for methods
+;;; ======================================================================
+(define-method describe ((x <method>) port :optional omit-title)
+  (if omit-title
+      (format port "    Method ~A~%" x)
+      (let ((gf (method-generic-function x)))
+        (if gf
+            (format port "~S is a method of the `~S' generic function.~%"
+                    x (generic-function-name gf))
+            (format port "~S is a method (no generic function).~%" x))))
+
+  ;; GF specializers
+  (format port "\tSpecializers: ~S\n"
+          (map* class-name (method-specializers x)))
+  (void))
+
+;;; ======================================================================
+;;;     Describe for structures & structure-types
+;;; ======================================================================
+(define-method describe ((x <struct>) port)
+  (let ((type (struct-type x)))
+    (format port "~A is an instance of the structure type ~A.\n"
+            x (struct-type-name type))
+    (let ((slots (struct-type-slots type)))
+      (%describe-parts-header slots port)
+      (for-each (lambda (slot)
+                  (let ((val (struct-ref x slot)))
+                    (format port "     ~S = ~A~%" slot
+                            (if (eq? val (void))
+                                "#[unbound]"
+                                (format #f "~W" val)))))
+                slots))))
+
+;;;
+;;; Describe for struct-types
+;;;
+(define-method describe ((x <struct-type>) port)
+  (format port "~A is a structure type whose name is ~A.\n" x (struct-type-name x))
+  (format port "Parent structure type: ~S\n" (struct-type-parent x))
+  (let ((slots (struct-type-slots x)))
+    (%describe-parts-header slots port)
+    (for-each (lambda (x) (format port "\t~A\n" x)) slots)))
+
+;;; ======================================================================
+;;;     Describe for conditions & condition types
+;;; ======================================================================
+(define-method describe ((x <condition>) port)
+  (let ((type (struct-type x)))
+    (format port "~A is a condition of type ~A.\n" x (struct-type-name type))
+    (let ((slots (struct-type-slots type)))
+      (%describe-parts-header slots port)
+      (for-each (lambda (slot)
+                  (let ((val (struct-ref x slot)))
+                    (format port "     ~S = ~A~%" slot
+                            (if (eq? val (void))
+                                "#[unbound]"
+                                (format #f "~W" val)))))
+                slots))))
+
+;;;
+;;; Describe for conditions-types
+;;;
+(define-method describe ((x <condition-type>) port)
+  (format port "~A is a condition type whose name is ~A.\n" x (struct-type-name x))
+  (let ((parents (struct-type-parent x)))
+    (cond
+      ((pair? parents)
+       (format port "This condition is a compound condition.\n")
+       (format port "Parents of condition type:\n")
+       (for-each (lambda (x) (format port "\t~A\n" (struct-type-name x))) parents))
+      ((not parents)
+       (format port "This condition has no parent.\n"))
+      (else
+       (format port "Parent of condition type: ~A\n" (struct-type-name parents)))))
+  (let ((fields (struct-type-slots x)))
+    (unless (null? fields)
+      (format port "Fields of condition type:\n")
+      (for-each (lambda (x) (format port "\t~A\n" x)) fields))))
+
+
+;;; ======================================================================
+;;;     Describe for boxes
+;;; ======================================================================
+(define-method describe ((self <box>) port)
+  (next-method)
+  (let ((arity (box-arity self)))
+    (fprintf port "It is ~amutable and contains ~a.~%"
+             (if (box-mutable? self) "" "not ")
+             (case arity
+               ((0) "no value")
+               ((1) "one value")
+               (else (format "~a values" arity))))
+    (when (>= arity 1)
+      (fprintf port "Its content is:~%")
+      (for-each (lambda (x) (fprintf port "    ~W~%" x))
+                (call-with-values (lambda () (unbox self)) list)))))
+
+;;; ======================================================================
+;;;     Describe for syntax
+;;; ======================================================================
+(define-method describe ((self <syntax>) port)
+  (next-method)
+  (fprintf port "Its name is ~a.~%" (%syntax-name self))
+  (fprintf port "Its expander procedure is ~a whose source code is:~%"
+           (%syntax-expander self))
+  (pretty-print (%syntax-source self) :port port))
+
+;;; ======================================================================
+;;;     Describe without second parameter
+;;; ======================================================================
+(define-method describe (x)
+  (describe x (current-output-port)))
+
+)  ;; End of module DESCRIBE
+
+(select-module STklos)
+(import (stklos describe))
+
+(provide "stklos/describe")
+
