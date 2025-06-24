@@ -68,7 +68,6 @@ scheme_extra = STklos.init
 
 SRC_STK = bigmatch.stk        \
           conditions.stk      \
-          describe.stk        \
           expand.ss           \
           full-syntax.stk     \
           getopt.stk          \
@@ -82,7 +81,6 @@ SRC_STK = bigmatch.stk        \
 scheme_OBJS = bigmatch.ostk     \
           conditions.ostk       \
           full-syntax.ostk      \
-          describe.ostk         \
           getopt.ostk           \
           lex-rt.ostk           \
           pretty-print.ostk     \
