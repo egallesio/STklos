@@ -137,7 +137,7 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,
 }
 
 
-DEFINE_PRIMITIVE("readline-set-option",readline_set_option,subr2,
+DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
                  (SCM option, SCM value)) {
   if (!STRINGP(option)) STk_error("bad string ~s", option);
   if (!STRINGP(value)) STk_error("bad string ~s", value);
