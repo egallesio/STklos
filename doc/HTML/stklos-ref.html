@@ -26541,6 +26541,79 @@ the <strong><em>STklos</em></strong> command. Otherwise, a good place to set thi
 </table>
 </div>
 </div>
+<div class="sect3">
+<h4 id="doc_repl_readline_support">10.3.4. REPL readline support</h4>
+<div class="paragraph">
+<p><a id='P_readline-set-option!'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(readline-set-option! var val) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The primitive <code>readline-set-option!</code> is defined when readline support is
+enabled. It permits to change dynamically the behaviour of the readline
+library. The list of possible variables <code>var</code> and values <code>val</code> can be found
+in in the <a href="https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html">readline documentation manual</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"disable-completion"</span> <span class="s">"on"</span><span class="p">)</span> <span class="c1">;; disable TAB-completion</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_readline-startup-hook'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(readline-startup-hook) </strong></code><br>
+<code><strong>(readline-startup-hook thunk) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter object can be used to read/set the hook function run
+once the readline library is initialized (and before the first prompt is
+printed). It can be used to set some readline options in your <code>stklosrc</code>
+file. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-startup-hook</span>
+   <span class="p">(</span><span class="k">lambda</span><span class="p">()</span>
+     <span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"blink-matching-paren"</span>      <span class="s">"on"</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"colored-completion-prefix"</span> <span class="s">"on"</span><span class="p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>permit to have parenthesis flashing and more colored completions.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This hook is run only if the line editor library is the
+<em>GNU readline library</em>.
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>

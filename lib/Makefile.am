@@ -87,9 +87,9 @@ scheme_OBJS = bigmatch.ostk     \
           slib.ostk             \
           trace.ostk
 
-SRC_C         = readline-complete.c
+SRC_C         = readline-utils.c
 SRC_C_STK     =
-scheme_SOLIBS = readline-complete.@SH_SUFFIX@
+scheme_SOLIBS = readline-utils.@SH_SUFFIX@
 
 
 DOCDB       = DOCDB
