@@ -94,100 +94,138 @@ doc>
 ;;;
 ;;; describe for simple objects
 ;;;
-(define-method describe ((x <top>) port)
-  (format port "~W is " x)
-  (cond
-     ((null?    x)      (format port "the empty list"))
-     ((void?    x)      (format port "the unspecified (void) object"))
-     ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
-     ((char?    x)      (format port "a character whose Unicode code point~a is ~s"
-                                (if (<= (char->integer x) 127) " (and ASCII value)" "")
-                                (char->integer x)))
-     ((symbol?  x)      (format port "a symbol")
-                        (call/cc
-                         (lambda (out)
-                           (with-handler
-                            (lambda (e) (out))
-                            (format port ", with ~amutable binding"
-                                    (if (symbol-mutable? x) "" "im"))))))
-     ((keyword? x)      (format port "a keyword"))
-     ((pair?    x)      (format port "a non-empty list"))
-     ((string?  x)      (if (zero? (string-length x))
-                            (format port "an empty string")
-                            (format port "a string of length ~s"
-                                    (string-length x))))
-     ((bytevector? x)   (let ((n (bytevector-length x)))
-                          (if (zero? n)
-                              (format port "an empty bytevector")
-                              (format port "a bytevector of length ~s"
-                                      n))))
-     ((vector?  x)      (if (eqv? x '#())
-                            (format port "an empty vector")
-                            (format port "a vector of length ~s"
-                                    (vector-length x))))
-     ((%uvector? x)     ;; don't use uvector? and uvector-length to avoid the load of SRFI-4
-                        (let* ((tag  (uvector-tag x))
-                               (a-an (case tag ((u16 u32 u64) "an") (else "a"))))
-                          (if (zero? (%uvector-length x))
-                            (format port "~a empty ~svector" a-an tag)
-                            (format port "~a ~svector of length ~s" a-an tag
-                                    (%uvector-length x)))))
-     ((closure? x)      (format port "a procedure")
-                        ;; We don't need to show the formals, because they're already
-                        ;; displayed in the object. For example, [closure g (a b)].
-                        ;; But we offer the user a way to read the source, if it is
-                        ;; available.
-                        (when (procedure-source x)
-                          (format port
-                              ".~%The source code is available -- call `procedure-source` on it")))
-     ((procedure? x)    (format port "a primitive procedure"))
-     ((eof-object? x)   (format port "the end-of-file object"))
-     ((struct-type? x)  (format port "the type structure named ~A"
-                                (struct-type-name x)))
-     ((library? x)      (format port "~a R7RS library named ~A"
-                                (if (module-mutable? x) "a mutable" "an immutable")
-                                (library-name x)))
-     ((module? x)       (format port "~a module named ~A"
-                                (if (module-mutable? x) "a mutable" "an immutable")
-                                (module-name x)))
-     ((port? x)         (format port "an ~a ~a port"
-                                (if (input-port? x) "input" "output")
-                                (if (binary-port? x) "binary" "textual")))
-     ((hash-table? x)   (format port "~a~a hash table~a"
-                                (if (hash-table-mutable? x)     "a mutable" "an immutable")
-                                (if (zero? (hash-table-size x)) ", empty"   "")
-                                (if (positive? (hash-table-size x))
-                                    (format #f " with ~a entries" (hash-table-size x))
-                                    "")))
-     ((and (not (eq? (%thread-system) 'none)) (mutex? x))
-                        (let ((name     (mutex-name     x))
-                              (state    (if (thread? (mutex-state    x))
-                                            (format #f "locked by thread ~a" (mutex-state x))
-                                            (mutex-state x)))
-                              (specific (if (void? (mutex-specific x))
-                                            "void"
-                                            "non-void")))
-                          (if name
-                              (format port "a mutex with name ~a, state ~a and ~a specific field"
-                                      name state specific)
-                              (format port "an unnamed mutex with state ~a and ~a specific field"
-                                      state specific))))
+  (define-method describe ((x <top>) port)
+    (format port "~W is " x)
+    (cond
+     ((null?    x)
+      (format port "the empty list"))
 
-     (else              (let ((user-type-name (%user-type-name x)))
-                          (if user-type-name
-                              ;; Object type is user defined.
-                              (let ((proc (%user-type-proc user-type-name
-                                                           'describe)))
-                                (if proc
-                                    (proc x port) ;; Use user defined procedure
-                                    (format port "an objet whose type name is ~s"
-                                            user-type-name)))
-                              (begin
-                                ;; an object instance
-                                (format port "an instance of class ~A"
-                                (class-name (class-of x))))))))
-  (format port ".~%")
-  (void))
+     ((void?    x)
+      (format port "the unspecified (void) object"))
+     ((boolean? x)
+
+      (format port "a boolean value (~s)" (if x 'true 'false)))
+
+     ((char?    x)
+      (format port "a character whose Unicode code point~a is ~s"
+              (if (<= (char->integer x) 127) " (and ASCII value)" "")
+              (char->integer x)))
+
+     ((symbol?  x)
+      (format port "a symbol")
+      (call/cc
+       (lambda (out)
+         (with-handler
+          (lambda (e) (out))
+          (format port ", with ~amutable binding"
+                  (if (symbol-mutable? x) "" "im"))))))
+
+     ((keyword? x)
+      (format port "a keyword"))
+
+     ((pair?    x)
+      (format port "a non-empty list"))
+
+     ((string?  x)
+      (if (zero? (string-length x))
+          (format port "an empty string")
+          (format port "a string of length ~s"
+                  (string-length x))))
+
+     ((bytevector? x)
+      (let ((n (bytevector-length x)))
+        (if (zero? n)
+            (format port "an empty bytevector")
+            (format port "a bytevector of length ~s"
+                    n))))
+
+     ((vector?  x)
+      (if (eqv? x '#())
+          (format port "an empty vector")
+          (format port "a vector of length ~s"
+                  (vector-length x))))
+
+     ((%uvector? x)
+      ;; don't use uvector? and uvector-length to avoid the load of SRFI-4
+      (let* ((tag  (uvector-tag x))
+             (a-an (case tag ((u16 u32 u64) "an") (else "a"))))
+        (if (zero? (%uvector-length x))
+            (format port "~a empty ~svector" a-an tag)
+            (format port "~a ~svector of length ~s" a-an tag
+                    (%uvector-length x)))))
+
+     ((closure? x)
+      (format port "a procedure")
+      ;; We don't need to show the formals, because they're already
+      ;; displayed in the object. For example, [closure g (a b)].
+      ;; But we offer the user a way to read the source, if it is
+      ;; available.
+      (when (procedure-source x)
+        (format port
+                ".~%The source code is available -- call `procedure-source` on it")))
+
+     ((procedure? x)
+      (format port "a primitive procedure"))
+
+     ((eof-object? x)
+      (format port "the end-of-file object"))
+
+     ((struct-type? x)
+      (format port "the type structure named ~A"
+              (struct-type-name x)))
+
+     ((library? x)
+      (format port "~a R7RS library named ~A"
+              (if (module-mutable? x) "a mutable" "an immutable")
+              (library-name x)))
+
+     ((module? x)
+      (format port "~a module named ~A"
+              (if (module-mutable? x) "a mutable" "an immutable")
+              (module-name x)))
+
+     ((port? x)
+      (format port "an ~a ~a port"
+              (if (input-port? x) "input" "output")
+              (if (binary-port? x) "binary" "textual")))
+
+     ((hash-table? x)
+      (format port "~a~a hash table~a"
+              (if (hash-table-mutable? x)     "a mutable" "an immutable")
+              (if (zero? (hash-table-size x)) ", empty"   "")
+              (if (positive? (hash-table-size x))
+                  (format #f " with ~a entries" (hash-table-size x))
+                  "")))
+
+     ((and (not (eq? (%thread-system) 'none)) (mutex? x))
+      (let ((name     (mutex-name     x))
+            (state    (if (thread? (mutex-state    x))
+                          (format #f "locked by thread ~a" (mutex-state x))
+                          (mutex-state x)))
+            (specific (if (void? (mutex-specific x))
+                          "void"
+                          "non-void")))
+        (if name
+            (format port "a mutex with name ~a, state ~a and ~a specific field"
+                    name state specific)
+            (format port "an unnamed mutex with state ~a and ~a specific field"
+                    state specific))))
+
+     (else
+      (let ((user-type-name (%user-type-name x)))
+        (if user-type-name
+            ;; Object type is user defined.
+            (let ((proc (%user-type-proc user-type-name
+                                         'describe)))
+              (if proc
+                  (proc x port) ;; Use user defined procedure
+                  (format port "an objet whose type name is ~s"
+                          user-type-name)))
+            (begin
+              ;; an object instance
+              (format port "an instance of class ~A"
+                      (class-name (class-of x))))))))
+    (format port ".~%"))
 
 ;;; ======================================================================
 ;;;     Describe for numbers
@@ -462,4 +500,3 @@ doc>
 (import (stklos describe))
 
 (provide "stklos/describe")
-
