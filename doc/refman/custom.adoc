@@ -134,5 +134,7 @@ The following parameter objects can be used to customize the REPL:
 
 ==== REPL readline support
 
+STklos has support for dynamically changing readline options.
+
 {{insertdoc 'readline-set-option!}}
 {{insertdoc 'readline-startup-hook}}
