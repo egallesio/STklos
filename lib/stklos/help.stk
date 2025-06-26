@@ -1,7 +1,7 @@
 ;;;;
 ;;;; help.stk           -- Interactive help
 ;;;;
-;;;; Copyright © 2009-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2009-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -216,6 +216,12 @@ doc>
   #f)
 
 ;; ======================================================================
+;;  Help 
+;; ======================================================================
+(define help (make <generic> :name 'help))
+
+
+;; ======================================================================
 ;; Help with a parameter
 
 (define-method help (obj)
@@ -270,6 +276,8 @@ doc>
             (display (do-color color "help only accepts symbols.\n")))
         (Loop prompt))))
   (display "done.\n"))
+
+ 
 
 ) ;; End of module (stklos library)
 
