@@ -216,9 +216,9 @@ doc>
   #f)
 
 ;; ======================================================================
-;;  Help 
+;;  Help
 ;; ======================================================================
-(define help (make <generic> :name 'help))
+(define-generic help :add-default #f) ;; delete old value of help (the  autoload)
 
 
 ;; ======================================================================
@@ -233,16 +233,18 @@ doc>
     (cond
        ((or sig doc)
          ;; Documentation or signature found
-         (display (ansi-color 'bold 'yellow (format #f "Help for ~a:" name) 'normal "\n"))
+         (display (ansi-color 'bold 'yellow
+                              (format #f "Help for ~a:" name) 'normal "\n"))
          (when sig
-           (display (ansi-color 'bold "Signature:" 'normal (format #f "\n  ~S\n" sig))))
+           (display (ansi-color 'bold "Signature:" 'normal
+                                (format #f "\n  ~S\n" sig))))
          (when doc
            (display (ansi-color 'bold "Documentation:" 'normal "\n"))
            (pr doc)))
 
       ((symbol? obj)
-         ;; We have a symbol and no documentation in the database. Perhaps, it's a closure
-         ;; with embedded documentation sting. Look at symbol value.
+         ;; We have a symbol and no documentation in the database. Perhaps, it's
+         ;; a closure with an embedded documentation string. Look at symbol value.
        (let ((val (symbol-value* obj (current-module) #f)))
          (if val
              (help val)
@@ -277,7 +279,7 @@ doc>
         (Loop prompt))))
   (display "done.\n"))
 
- 
+
 
 ) ;; End of module (stklos library)
 
