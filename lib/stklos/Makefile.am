@@ -34,13 +34,15 @@ SRC_STK  = apropos.stk      \
            describe.stk     \
            help.stk         \
            preproc.stk      \
-           pretty-print.stk
+           pretty-print.stk \
+           trace.stk
 
-SRC_OSTK = apropos.ostk     \
-           describe.ostk    \
-           help.ostk        \
-           preproc.ostk     \
-           pretty-print.ostk
+SRC_OSTK = apropos.ostk      \
+           describe.ostk     \
+           help.ostk         \
+           preproc.ostk      \
+           pretty-print.ostk \
+           trace.ostk
 
 #
 # Libraries written in C and Scheme

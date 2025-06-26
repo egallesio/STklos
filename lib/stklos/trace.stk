@@ -1,7 +1,7 @@
 ;;;;
 ;;;; trace.stk                          -- Trace & Untrace
 ;;;;
-;;;; Copyright © 1997-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1997-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,10 @@
 ;;;;
 
 
+(define-module (stklos trace)
+  (import SCHEME STKLOS-OBJECT)
+  (export trace untrace %trace-expand %untrace-expand)
+
 #|
 <doc EXT-SYNTAX trace
  * (trace f-name ...)
@@ -36,6 +40,8 @@
  * Calling |trace| with no argument returns the list of traced functions.
 doc>
 |#
+  (define-macro (trace . args)
+    (%trace-expand args))
 
 #|
 <doc EXT-SYNTAX untrace
@@ -48,12 +54,9 @@ doc>
  * currently traced.
 doc>
 |#
+  (define-macro (untrace . args)
+    (%untrace-expand args))
 
-
-(define-module Trace
-  (import SCHEME STKLOS-OBJECT)
-  (export %trace-expand %untrace-expand)
-  
   (define *traced-symbols* (make-hash-table equal?))
   (define *indentation*    0)
   (define *err-port*       (current-error-port))
@@ -222,12 +225,14 @@ doc>
         `(begin
            ,@(map (lambda (x)
                     `(set! ,x (,untrace-symbol ',x (current-module))))
-                  args)))))
+                  args))))
+
+) ;; End of module (stklos trace)
+
 
 (select-module STklos)
-(import Trace)
+(import (stklos trace))
 
-(provide "trace")
-
+(provide "stklos/trace")
 
 ;; LocalWords:  untrace

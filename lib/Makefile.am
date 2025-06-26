@@ -73,8 +73,7 @@ SRC_STK = bigmatch.stk        \
           getopt.stk          \
           lex-rt.stk          \
           make-C-boot.stk     \
-          slib.stk            \
-          trace.stk
+          slib.stk
 
 
 scheme_OBJS = bigmatch.ostk     \
@@ -82,8 +81,7 @@ scheme_OBJS = bigmatch.ostk     \
           full-syntax.ostk      \
           getopt.ostk           \
           lex-rt.ostk           \
-          slib.ostk             \
-          trace.ostk
+          slib.ostk
 
 SRC_C         = readline-utils.c
 SRC_C_STK     =
