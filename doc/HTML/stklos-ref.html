@@ -24459,8 +24459,8 @@ behavior which depends of the type or the number of its parameters.</p>
 <div class="paragraph small">
 <p><code><strong>(define-generic gf) </strong></code><br>
 <code><strong>(define-generic gf metaclass) </strong></code><br>
-<code><strong>(define-generic gf :documentation str) </strong></code><br>
-<code><strong>(define-generic gf metaclass :documentation str) </strong></code><br></p>
+<code><strong>(define-generic gf :documentation str :add-default bool) </strong></code><br>
+<code><strong>(define-generic gf metaclass :documentation str :add-default bool) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -24468,6 +24468,53 @@ behavior which depends of the type or the number of its parameters.</p>
 <p>This function creates a new generic function named <code>gf</code>. By default, the created
 function is an instance of the class <code>&lt;generic&gt;</code>, except if <code>metaclass</code> is used.
 Using a different metaclass permits to fine tune the way methods are applied.</p>
+</div>
+<div class="paragraph">
+<p>When a generic function is defined whereas a procedure with this name already
+exists, a new wrapper method around this procedure is created, by default,
+and added as a default method for the new generic function.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">define-generic</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">describe</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">+</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">generic</span> <span class="nv">function</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;generic&gt;</span><span class="o">.</span>
+<span class="nv">Methods</span> <span class="nv">defined</span> <span class="nv">for</span> <span class="nv">+</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81d5990</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="nv">&lt;top&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Defining the new generic function <code>+</code> wraps the default addition primitive in a new
+(n-ary) method. This particularily useful to keep the default behaviour of the
+addiftion</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">define-method</span> <span class="nv">+</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;string&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nb">string-append</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">describe</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">+</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">generic</span> <span class="nv">function</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;generic&gt;</span><span class="o">.</span>
+<span class="nv">Methods</span> <span class="nv">defined</span> <span class="nv">for</span> <span class="nv">+</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81957e0</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="p">(</span><span class="nf">&lt;string&gt;</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81d5990</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="nv">&lt;top&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have now two methods on <code>+</code>: one which appends two strings and one which is a
+wrapper around the addition.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">+</span> <span class="s">"abc"</span> <span class="s">"def"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"abcdef"</span>
+<span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nb">+</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="mi">0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To avoid the creation of the default wrapper, use the value <code>#f</code> for the
+<code>:add-default</code> keyword parameter</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -24477,10 +24524,10 @@ Using a different metaclass permits to fine tune the way methods are applied.</p
 </td>
 <td class="content">
 Generally, it is not necessary to use <code>define-generic</code> to declare a generic
-function, since it is created the first time a method  with the name of that function
-is created. However, for the sake of documentation, or to export a generic function
-from a module which do not define methods, it is possible also to explicitly
-define the generic function before its methods.
+function, since it is created the first time a method  with the name of that
+function is created. However, for the sake of documentation, or to export a
+generic function from a module which do not define methods, it is possible
+also to explicitly define the generic function before its methods.
 </td>
 </tr>
 </table>
