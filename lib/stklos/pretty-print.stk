@@ -66,7 +66,7 @@
 doc>
 |#
 
-(define-module pretty-print
+(define-module (stklos pretty-print)
 
   (define (reverse-string-append l)
     (define (rev-string-append l i)
@@ -339,7 +339,7 @@ doc>
               ((#t) (current-output-port))
               ((#f) (open-output-string))
               (else port)))
-        (gw (in-module pretty-print generic-write)))
+        (gw (in-module (stklos pretty-print) generic-write)))
     (gw obj #f width (lambda (s) (display s p) #t))
 
     (if port
@@ -348,4 +348,4 @@ doc>
 
 (define pretty-print pp)
 
-(provide "pretty-print")
+(provide "stklos/pretty-print")

@@ -73,7 +73,6 @@ SRC_STK = bigmatch.stk        \
           getopt.stk          \
           lex-rt.stk          \
           make-C-boot.stk     \
-          pretty-print.stk    \
           slib.stk            \
           trace.stk
 
@@ -83,7 +82,6 @@ scheme_OBJS = bigmatch.ostk     \
           full-syntax.ostk      \
           getopt.ostk           \
           lex-rt.ostk           \
-          pretty-print.ostk     \
           slib.ostk             \
           trace.ostk
 

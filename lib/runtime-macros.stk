@@ -47,8 +47,8 @@
 (define-macro (let* . args)          `(%%let* ,@args))
 (define-macro (letrec . args)        `(%%letrec ,@args))
 (define-macro (with-handler . args)  `(%%with-handler ,@args))
-(define-macro (lambda . args)        `(%%lambda ,@args))
-(define-macro (|λ| . args)           `(%%lambda ,@args))
+;(define-macro (|λ| . args)           `(%%lambda ,@args))
+(define-macro (lambda . args)             `(%%lambda ,@args))
 (define-macro (quote . args)         `(%%quote ,@args))
 (define-macro (set! . args)          `(%%set! ,@args))
 
