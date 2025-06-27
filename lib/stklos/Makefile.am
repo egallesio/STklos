@@ -32,6 +32,7 @@ SO = @SH_SUFFIX@
 #
 SRC_STK  = apropos.stk      \
            describe.stk     \
+           getopt.stk       \
            help.stk         \
            preproc.stk      \
            pretty-print.stk \
@@ -39,6 +40,7 @@ SRC_STK  = apropos.stk      \
 
 SRC_OSTK = apropos.ostk      \
            describe.ostk     \
+           getopt.ostk       \
            help.ostk         \
            preproc.ostk      \
            pretty-print.ostk \

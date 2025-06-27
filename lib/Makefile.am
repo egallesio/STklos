@@ -70,7 +70,6 @@ SRC_STK = bigmatch.stk        \
           conditions.stk      \
           expand.ss           \
           full-syntax.stk     \
-          getopt.stk          \
           lex-rt.stk          \
           make-C-boot.stk     \
           slib.stk
@@ -79,7 +78,6 @@ SRC_STK = bigmatch.stk        \
 scheme_OBJS = bigmatch.ostk     \
           conditions.ostk       \
           full-syntax.ostk      \
-          getopt.ostk           \
           lex-rt.ostk           \
           slib.ostk
 
