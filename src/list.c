@@ -1134,7 +1134,7 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
   int len;
   SCM x = list_type_and_length(l, &len);
 
-  if (!x) error_bad_list(l);
+  if (!x || !len) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
 
   while(--len)
