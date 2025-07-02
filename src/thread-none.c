@@ -34,12 +34,6 @@ static SCM cond_thread_abandonned_mutex, cond_join_timeout;
 static vm_thread_t *current_vm;
 
 
-static void verify_thread(SCM thr)
-{
-  if (thr && thr != STk_primordial_thread) STk_error("bad thread ~s", thr);
-}
-
-
 vm_thread_t *STk_get_current_vm(void){
   return current_vm;
 }
@@ -79,46 +73,6 @@ DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1,
 
 }
 
-/*
- *
- * Thread memory allocation counter management
- *
- */
-static unsigned long _allocations     = 0UL;
-static unsigned long _bytes_allocated = 0UL;
-
-#define THREAD_ALLOCATIONS(thr)      _allocations
-#define THREAD_BYTES_ALLOCATED(thr)  _bytes_allocated
-
-void STk_thread_inc_allocs(SCM _UNUSED(thr), size_t size)
-{
-  THREAD_ALLOCATIONS(thr)++;
-  THREAD_BYTES_ALLOCATED(thr) += size;
-}
-
-DEFINE_PRIMITIVE("%thread-allocation-reset!", thread_allocs_reset, subr01, (SCM thr))
-{
-  verify_thread(thr);
-  THREAD_BYTES_ALLOCATED(thr) = 0;
-  THREAD_ALLOCATIONS(thr)     = 0;
-  return STk_void;
-}
-
-DEFINE_PRIMITIVE("%thread-allocation-counter", thread_alloc_count, subr01, (SCM thr))
-{
-  verify_thread(thr);
-
-  return STk_ulong2integer(THREAD_ALLOCATIONS(thr));
-}
-
-DEFINE_PRIMITIVE("%thread-allocation-bytes", thread_alloc_bytes, subr01, (SCM thr))
-{
-  verify_thread(thr);
-  return STk_ulong2integer(THREAD_BYTES_ALLOCATED(thr));
-}
-
-
-
 int STk_init_threads(int stack_size, void *start_stack)
 {
   /* Define the threads exceptions */
@@ -144,11 +98,6 @@ int STk_init_threads(int stack_size, void *start_stack)
   ADD_PRIMITIVE(thread_system);
   ADD_PRIMITIVE(thread_dynwind_stack);
   ADD_PRIMITIVE(thread_dynwind_stack_set);
-
-  /* GC counting primitives (acting on globals since we have no thread) */
-  ADD_PRIMITIVE(thread_allocs_reset);
-  ADD_PRIMITIVE(thread_alloc_count);
-  ADD_PRIMITIVE(thread_alloc_bytes);
 
   /* Fake primitives */
   ADD_PRIMITIVE(threadno);

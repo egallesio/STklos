@@ -229,17 +229,21 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   }
 
   /* Initialize the VM registers */
-  vm->sp             = vm->stack + vm->stack_len;
-  vm->fp             = vm->sp;
-  vm->val            = STk_void;
-  vm->current_module = STk_current_module();
-  vm->env            = vm->current_module;
-  vm->handlers       = NULL;
-  vm->top_jmp_buf    = NULL;
-  vm->start_stack    = 0;               /* MUST be initialized later */
-  vm->scheme_thread  = STk_false;
-  vm->dynwind_stack  = LIST1(STk_false);
+  vm->sp              = vm->stack + vm->stack_len;
+  vm->fp              = vm->sp;
+  vm->val             = STk_void;
+  vm->current_module  = STk_current_module();
+  vm->env             = vm->current_module;
+  vm->allocations     = 0;
+  vm->bytes_allocated = 0;
+  vm->handlers        = NULL;
+  vm->top_jmp_buf     = NULL;
+  vm->start_stack     = 0;               /* MUST be initialized later */
+  vm->scheme_thread   = STk_false;
+  vm->dynwind_stack   = LIST1(STk_false);
 
+  for (int i = 0; i < CELL_POOL_SZ; i++)
+    vm->cell_pool[i] = NULL;
   return vm;
 }
 
@@ -2393,6 +2397,18 @@ DEFINE_PRIMITIVE("%pop-exception-handler", pop_handler, subr0, (void))
 */
 
 /*===========================================================================*\
+ *
+ *                         A L L O C A T I O N S
+ *
+\*===========================================================================*/
+void STk_vm_inc_allocs(vm_thread_t *vm, size_t sz)
+{
+  vm->allocations     += 1;
+  vm->bytes_allocated += sz;
+}
+
+
+/*===========================================================================* \
  *
  *                         C O N T I N U A T I O N S
  *

@@ -1034,14 +1034,12 @@ doc>
  * (let ((T (make-thread (lambda () (make-list 1_000_000) (eprintf "finish\n")))))
  *   (time (thread-start! T) ;; Launch T wich allocate 1_000_1000 cells
  *         (thread-sleep! 3) ;; wait for the child thread to allocate list
- *         (thread-join! T)
- *         100))
+ *         (thread-join! T)))
  * finish
- *     Elapsed time: 33.299 ms
- *     Allocations: 800408 bytes in 10 allocation calls (GC: 0)
- * 100
+ *     Elapsed time: 9.795 ms
+ *     Allocations: 800384 bytes in 8 allocation calls (GC: 0)
  * @end lisp
- * The ten allocations we can see here are for theads bookeeping and are
+ * The eight allocations we can see here are for theads bookeeping and are
  * far from the million cells allocated in thread |T|.
 doc>
 |#
@@ -1055,12 +1053,12 @@ doc>
           (gc-no       (gensym)))
       `(let ((,counting? (%count-allocations))  ;; save if we are counting allocs
              (,gc-no     (begin (gc) (key-get (%gc-stats) #:gc-no 0)))) ;; and GC count
-         (%thread-allocation-reset!)            ;; reset thread counters
+         (%vm-allocation-reset!)                ;; reset thread counters
          (%count-allocations #t)                ;; count allocations now
          (let* ((,time-start (exact-clock))
                 (,res        (begin ,@args))
-                (,allocs     (%thread-allocation-counter))
-                (,bytes      (%thread-allocation-bytes)))
+                (,allocs     (%vm-allocation-counter))
+                (,bytes      (%vm-allocation-bytes)))
            (eprintf ";    Elapsed time: ~S ms\n"
                     (/ (- (exact-clock) ,time-start) 1000.0))
            (eprintf ";    Allocations: ~S byte~A in ~S allocation call~A (GC: ~A)\n"
