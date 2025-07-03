@@ -176,6 +176,8 @@ slib.ostk: slib.stk STklos.init
 STklos.init: srfi/59.stk
 srfi/59.ostk:
 	(cd srfi; make 59.ostk)
+stklos/getopt.ostk:
+	(cd stklos; make getopt.ostk)
 
 
 lib/scheme: lib
@@ -188,7 +190,7 @@ lib/srfi: lib/scheme lib/stklos lib/streams
 #
 # If ./srfis.stk we must rebuild
 #     - srfis-data.scm (used by SRFI0 and features)
-srfis-data.scm: srfis.stk getopt.ostk
+srfis-data.scm: srfis.stk stklos/getopt.ostk
 	$(STKLOS_BINARY) -c -q -l srfis.stk \
 	                 -f ../utils/update-srfi-list.stk \
                      -- --internal > $@
