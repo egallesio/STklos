@@ -36,9 +36,9 @@
               ((get-nat) boolean? => not)
               ((get-sym) 'last)))
 
-(test/error "no 5-element => clause"
-            (cond ((get-nat) integer? => (lambda (x) (- x)) 'extraneous)
-                  ((get-sym) 'y)))
+(test/compile-error "no 5-element => clause"
+                    (cond ((get-nat) integer? => (lambda (x) (- x)) 'extraneous)
+                          ((get-sym) 'y)))
 
 
 

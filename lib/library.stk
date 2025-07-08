@@ -2,7 +2,7 @@
 ;;;;
 ;;;; library.stk         -- R7RS define-library
 ;;;;
-;;;; Copyright © 2019-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2019-2025 Erick Gallesio <eg@stklos.net>
 ;;;; Copyright © 2023 Robby Zambito <contact@robbyzambito.me>
 ;;;;
 ;;;;
@@ -27,16 +27,14 @@
 
 
 (export define-library library-name library-list
-        ;; FIXME
-        %module-define-and-export
-        %make-copy-module)
+               %scheme-import-and-export %make-copy-module)
 
 ;;
-;; A macro to redefine a symbol in a R7RS module
+;; A macro to import a list of symbols from SCHEME and re-export it
 ;;
-(define-macro (%module-define-and-export . lst)
+(define-macro (%scheme-import-and-export . lst)
   `(begin
-     ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)
+     (import (only SCHEME ,@lst))
      (export ,@lst)))
 
 ;;

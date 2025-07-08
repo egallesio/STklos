@@ -2,7 +2,7 @@
 ;;;;
 ;;;; case-lambda.stk         -- The (scheme case-lambda) R7RS library
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -25,9 +25,7 @@
 ;;;;
 
 (define-module scheme/case-lambda
-  ;; HACK
-  ;; FIXME: must be changed when we have clean macros
-  (define case-lambda #void)
+  (import (only SCHEME case-lambda))
   (export case-lambda))
 
 (provide "scheme/case-lambda")

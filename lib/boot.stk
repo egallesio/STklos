@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -100,17 +100,15 @@
   (for-each (lambda(v) (%symbol-define v (symbol-value v SCHEME) STklos))
             (module-exports SCHEME)))
 
-;;
-;; Define common standard libraries to minimize file accesses at runtime
-;;
-(include "./scheme/base.stk")
-(include "./scheme/write.stk")
 
 ;;
 ;; It's time to lock the SCHEME module, that is make bindings in it read-only
 ;; and forbid further definitions.
 (define-module SCHEME
   (import STKLOS-COMPILER STKLOS-OBJECT MBE SRFI-0 REPL REPL-READLINE)
+  (export eval                                                ;; from STKLOS-COMPILER
+          let-syntax letrec-syntax syntax-rules define-syntax ;; from MBE
+          cond-expand)                                        ;; from SRFI-0
 
   ;; During he bootstap, the module SCHEME is present and all the definitions
   ;; made above (yes above!!), need an unlocked SCHEME module. So, the module
@@ -119,6 +117,12 @@
   (unless (getenv "STKLOS_BUILDING")
     ;; We are not bootstapping
     (module-immutable! (current-module))))
+
+;;
+;; Define common standard libraries to minimize file accesses at runtime
+;;
+(include "./scheme/base.stk")
+(include "./scheme/write.stk")
 
 
 ;; ======================================================================

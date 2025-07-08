@@ -229,17 +229,21 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   }
 
   /* Initialize the VM registers */
-  vm->sp             = vm->stack + vm->stack_len;
-  vm->fp             = vm->sp;
-  vm->val            = STk_void;
-  vm->current_module = STk_current_module();
-  vm->env            = vm->current_module;
-  vm->handlers       = NULL;
-  vm->top_jmp_buf    = NULL;
-  vm->start_stack    = 0;               /* MUST be initialized later */
-  vm->scheme_thread  = STk_false;
-  vm->dynwind_stack  = LIST1(STk_false);
+  vm->sp              = vm->stack + vm->stack_len;
+  vm->fp              = vm->sp;
+  vm->val             = STk_void;
+  vm->current_module  = STk_current_module();
+  vm->env             = vm->current_module;
+  vm->allocations     = 0;
+  vm->bytes_allocated = 0;
+  vm->handlers        = NULL;
+  vm->top_jmp_buf     = NULL;
+  vm->start_stack     = 0;               /* MUST be initialized later */
+  vm->scheme_thread   = STk_false;
+  vm->dynwind_stack   = LIST1(STk_false);
 
+  for (int i = 0; i < CELL_POOL_SZ; i++)
+    vm->cell_pool[i] = NULL;
   return vm;
 }
 
@@ -459,10 +463,21 @@ void STk_print_vm_registers(char *msg, STk_instr *code)
  */
 static inline SCM listify_top(int n, vm_thread_t *vm)
 {
-  SCM *p, res = STk_nil;
+  /* Using STk_C_make_list here makes this faster when the list of
+     variable arguments is long, and has no impact when it's
+     short. */
+  SCM *p, res = STk_C_make_list(n, STk_nil);
+  SCM ptr = res;
 
-  for (p = vm->sp, vm->sp+=n; p < vm->sp; p++)
-    res = STk_cons(*p, res);
+  /* Popping means we *increase* vm->sp by n.
+     We start with the pointer p on vm->sp+n-1, and go down until
+     it reaches vm->sp.
+   */
+  for (p = vm->sp+n-1 ;  p >= vm->sp ;  p--, ptr = CDR(ptr) )
+    CAR(ptr) = *p;
+
+  vm->sp+=n;
+
   return res;
 }
 
@@ -747,11 +762,17 @@ DEFINE_PRIMITIVE("%call-for-values", call_for_values, subr1, (SCM prod))
     case 0: return STk_nil;
     case 1: return LIST1(vm->val);
     default:  {
-                SCM  res = STk_nil;
                 if (len <= MAX_VALS) {
-                  for (int i = len-1; i >= 1; i--)
-                    res = STk_cons(vm->vals[i], res);
-                  return STk_cons(vm->val, res);
+                  /* vm->val goes into CAR(res), and
+                     vm->vals go into the other list positions: */
+                  SCM res = STk_C_make_list(len, STk_nil);
+                  SCM ptr = CDR(res);
+                  CAR(res) = vm->val;
+                  for (int i = 1; i <= len-1; i++) {
+                    CAR(ptr) = vm->vals[i];
+                    ptr = CDR(ptr);
+                  }
+                  return res;
                 } else {
                   return STk_vector2list(vm->vals[0]);
                 }
@@ -2376,6 +2397,18 @@ DEFINE_PRIMITIVE("%pop-exception-handler", pop_handler, subr0, (void))
 */
 
 /*===========================================================================*\
+ *
+ *                         A L L O C A T I O N S
+ *
+\*===========================================================================*/
+void STk_vm_inc_allocs(vm_thread_t *vm, size_t sz)
+{
+  vm->allocations     += 1;
+  vm->bytes_allocated += sz;
+}
+
+
+/*===========================================================================* \
  *
  *                         C O N T I N U A T I O N S
  *

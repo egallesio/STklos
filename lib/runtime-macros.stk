@@ -29,6 +29,29 @@
 (select-module STklos)
 
 
+;; ======================================================================
+;;
+;; Define here primordial syntax with low level macros
+;;
+;; ======================================================================
+(define-macro (define-macro . args)  `(%%define-macro ,@args)) ;; Funny, isn't it?
+(define-macro (if . args)            `(%%if ,@args))
+(define-macro (define . args)        `(%%define ,@args))
+(define-macro (begin . args)         `(%%begin ,@args))
+(define-macro (and . args)           `(%%and ,@args))
+(define-macro (or . args)            `(%%or ,@args))
+(define-macro (cond . args)          `(%%cond ,@args))
+(define-macro (case . args)          `(%%case ,@args))
+(define-macro (do . args)            `(%%do ,@args))
+(define-macro (let . args)           `(%%let ,@args))
+(define-macro (let* . args)          `(%%let* ,@args))
+(define-macro (letrec . args)        `(%%letrec ,@args))
+(define-macro (with-handler . args)  `(%%with-handler ,@args))
+;(define-macro (|λ| . args)           `(%%lambda ,@args))
+(define-macro (lambda . args)             `(%%lambda ,@args))
+(define-macro (quote . args)         `(%%quote ,@args))
+(define-macro (set! . args)          `(%%set! ,@args))
+
 ;;;;
 ;;;; WHEN/UNLESS
 ;;;;
@@ -43,10 +66,47 @@
       `(if (not ,(car args)) (begin ,@(cdr args)))))
 
 ;;;;
-;;;; SET!
+;;;; QUASIQUOTE
 ;;;;
-(define-macro (set! . args)
-  `(%%set! ,@args))
+(define-macro (quasiquote expr)
+  (define (backquotify e level)
+    (cond
+      ((pair? e)
+         (cond
+           ((eq? (car e) 'quasiquote)
+                 (list 'list ''quasiquote
+                       (backquotify (cadr e) (+ level 1))))
+           ((eq? (car e) 'unquote)
+                 (if (<= level 0)
+                     (cadr e)
+                     (list 'list ''unquote
+                           (backquotify (cadr e) (- level 1)))))
+           ((eq? (car e) 'unquote-splicing)
+                (if (<= level 0)
+                    (list 'cons
+                          (backquotify (car e) level)
+                          (backquotify (cdr e) level))
+                    (list 'list ''unquote-splicing
+                          (backquotify (cadr e) (- level 1)))))
+           ((and (<= level 0) (pair? (car e)) (eq? (caar e) 'unquote-splicing))
+                (if (null? (cdr e))
+                    (cadar e)
+                    (list 'append (cadar e)
+                          (backquotify (cdr e) level))))
+           (else
+                (list 'cons
+                      (backquotify (car e) level)
+                      (backquotify (cdr e) level)))))
+      ((vector? e)
+         (list 'list->vector (backquotify (vector->list e) level)))
+      ((symbol? e)
+         (list 'quote e))
+      (else
+       e)))
+
+  ;; Body of quasiquote starts here
+  (backquotify expr 0))
+
 
 ;; ----------------------------------------------------------------------
 ;; syntax-error
@@ -55,34 +115,3 @@
   (if (zero? (length args))
       (error 'syntax-error "needs at least one argument")
       `(%syntax-error ,@args)))
-
-
-;; ----------------------------------------------------------------------
-;; define-syntax
-;; ----------------------------------------------------------------------
-(define-macro (define-syntax macro-name syn-rules)
-  (if (or (not (pair? syn-rules))
-          (not (eq? (car syn-rules) 'syntax-rules)))
-      (error 'define-syntax "in `~S', bad syntax-rules ~S" macro-name syn-rules)
-
-      ;; SRFI-46:
-      ;; Let the user pick the ellipsis symbol. Since STklos does not recognize
-      ;; symbols starting with ":", we test for symbol and keyword here.
-      ;; If we find that the user included a symbol or keyword instead of a list
-      ;; after "SYNTAX-RULES", then it's the ellipsis marker to be used,
-      ;; (SYNTAX-RULES ::: () ((_ (f x :::)) (do-something x :::)))
-      (let ((ellipsis '...))
-        (when (or (symbol?  (cadr syn-rules))
-                  (keyword? (cadr syn-rules)))
-          (set! ellipsis (cadr syn-rules))
-          (set! syn-rules (cdr syn-rules)))
-
-
-        (let ((keywords    (cons macro-name (cadr syn-rules)))
-              (clauses     (cddr syn-rules)))
-          `(define-macro (,macro-name . args)
-             ((%%symbol-value 'find-clause 'MBE) ',macro-name
-                                                 args
-                                                 ',keywords
-                                                 ',clauses
-                                                 ',ellipsis))))))

@@ -768,33 +768,25 @@ pre.rouge {
 <li><a href="#doc_object_system_main_functions_and_syntaxes">8.3. Object System Main Functions and Syntaxes</a></li>
 </ul>
 </li>
-<li><a href="#doc_threads_mutexes_and_condition_variables">9. Threads, Mutexes and Condition Variables</a>
+<li><a href="#doc_stklos_customization">9. STklos Customization</a>
 <ul class="sectlevel2">
-<li><a href="#doc_threads">9.1. Threads</a></li>
-<li><a href="#doc_mutexes">9.2. Mutexes</a></li>
-<li><a href="#doc_condition_variables">9.3. Condition Variables</a></li>
-<li><a href="#doc_conditions_2">9.4. Conditions</a></li>
+<li><a href="#doc_parameter_objects_2">9.1. Parameter Objects</a></li>
+<li><a href="#doc_environment_variables">9.2. Environment variables</a></li>
+<li><a href="#doc_repl">9.3. REPL</a></li>
 </ul>
 </li>
-<li><a href="#doc_stklos_customization">10. STklos Customization</a>
+<li><a href="#doc_foreign_function_interface">10. Foreign Function Interface</a>
 <ul class="sectlevel2">
-<li><a href="#doc_parameter_objects_2">10.1. Parameter Objects</a></li>
-<li><a href="#doc_environment_variables">10.2. Environment variables</a></li>
-<li><a href="#doc_repl">10.3. REPL</a></li>
+<li><a href="#doc_external_functions">10.1. External functions</a></li>
+<li><a href="#doc_c_pointers">10.2. C pointers</a></li>
 </ul>
 </li>
-<li><a href="#doc_foreign_function_interface">11. Foreign Function Interface</a>
+<li><a href="#doc_using_the_slib_package">11. Using the SLIB package</a></li>
+<li><a href="#doc_srfis">12. SRFIs</a>
 <ul class="sectlevel2">
-<li><a href="#doc_external_functions">11.1. External functions</a></li>
-<li><a href="#doc_c_pointers">11.2. C pointers</a></li>
-</ul>
-</li>
-<li><a href="#doc_using_the_slib_package">12. Using the SLIB package</a></li>
-<li><a href="#doc_srfis">13. SRFIs</a>
-<ul class="sectlevel2">
-<li><a href="#doc_supported_srfis">13.1. Supported SRFIs</a></li>
-<li><a href="#doc_using_a_srfi">13.2. Using a SRFI</a></li>
-<li><a href="#doc_misc_information">13.3. Misc. Information</a></li>
+<li><a href="#doc_supported_srfis">12.1. Supported SRFIs</a></li>
+<li><a href="#doc_using_a_srfi">12.2. Using a SRFI</a></li>
+<li><a href="#doc_misc_information">12.3. Misc. Information</a></li>
 </ul>
 </li>
 <li><a href="#doc_bibliography">Bibliography</a></li>
@@ -11347,8 +11339,9 @@ in the R<sup>5</sup>RS report.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-In STklos, <code>scheme-report-environment</code> function can be called
-without the version number (defaults to 5).
+<code>scheme-report-environment</code> function can be called
+without the version number (defaults to 5). Other version values return
+an error.
 </td>
 </tr>
 </table>
@@ -13844,6 +13837,23 @@ string.  Otherwise, the output is printed on the specified port.</p>
                                 <span class="nv">=&gt;</span> <span class="s">"a new test"</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The following code illustrates the case in which <code>port</code> is an output
+port:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">out</span> <span class="p">(</span><span class="nb">open-output-file</span> <span class="s">"output.txt"</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">format</span> <span class="nv">out</span> <span class="s">"This goes to the file: ~x~%"</span> <span class="mi">251</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After the code is executed, the file <code>output.txt</code> will contain the line
+&#8220;This goes to the file: fb&#8221;.</p>
+</div>
+<div class="paragraph">
+<p>Finally, <code>(pp (format #f "~h"))</code> will print some quick help for <code>format</code>.</p>
+</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -15385,16 +15395,14 @@ calls is is a global counter.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">T</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nf">make-list</span> <span class="mi">1</span><span class="nv">_000_000</span><span class="p">)</span> <span class="p">(</span><span class="nf">eprintf</span> <span class="s">"finishn"</span><span class="p">)))))</span>
   <span class="p">(</span><span class="nf">time</span> <span class="p">(</span><span class="nf">thread-start!</span> <span class="nv">T</span><span class="p">)</span> <span class="c1">;; Launch T wich allocate 1_000_1000 cells</span>
         <span class="p">(</span><span class="nf">thread-sleep!</span> <span class="mi">3</span><span class="p">)</span> <span class="c1">;; wait for the child thread to allocate list</span>
-        <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">T</span><span class="p">)</span>
-        <span class="mi">100</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">T</span><span class="p">)))</span>
 <span class="nv">finish</span>
-    <span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">33.299</span> <span class="nv">ms</span>
-    <span class="nv">Allocations:</span> <span class="mi">800408</span> <span class="nv">bytes</span> <span class="nv">in</span> <span class="mi">10</span> <span class="nv">allocation</span> <span class="nv">calls</span> <span class="p">(</span><span class="nf">GC:</span> <span class="mi">0</span><span class="p">)</span>
-<span class="mi">100</span></code></pre>
+    <span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">9.795</span> <span class="nv">ms</span>
+    <span class="nv">Allocations:</span> <span class="mi">800384</span> <span class="nv">bytes</span> <span class="nv">in</span> <span class="mi">8</span> <span class="nv">allocation</span> <span class="nv">calls</span> <span class="p">(</span><span class="nf">GC:</span> <span class="mi">0</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The ten allocations we can see here are for theads bookeeping and are
+<p>The eight allocations we can see here are for theads bookeeping and are
 far from the million cells allocated in thread <code>T</code>.</p>
 </div>
 </div>
@@ -19523,7 +19531,7 @@ For instance,</p>
 <p>is equivalent to the requiring <code>srfi-1</code> and <code>srfi-2</code>.</p>
 </div>
 <div class="paragraph">
-<p>A list of available symbolic names for features is given in <a href="#doc_srfis">Chapter 13</a>.</p>
+<p>A list of available symbolic names for features is given in <a href="#doc_srfis">Chapter 12</a>.</p>
 </div>
 <div class="paragraph">
 <p><a id='P_require-feature'></a>
@@ -19555,7 +19563,7 @@ Consequently, to use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.htm
 </div>
 </div>
 <div class="paragraph">
-<p>See also <a href="#doc_srfis">Chapter 13</a> for more information.</p>
+<p>See also <a href="#doc_srfis">Chapter 12</a> for more information.</p>
 </div>
 <div id="assume" class="paragraph">
 <p><a id='P_assume'></a>
@@ -20000,11 +20008,39 @@ currently traced.</p>
 <div class="paragraph">
 <p>This function tries to obtain a pretty-printed representation of <code>sexpr</code>.
 The pretty-printed form is written on <code>port</code> with lines which are no
-more long than <code>width</code> characters. If <code>port</code> is omitted if defaults to
+more long than <code>width</code> characters. If <code>port</code> is omitted it defaults to
 the current error port. As a special convention, if <code>port</code> is <code>#t</code>,
 output goes to the current output port and if <code>port</code> is <code>#f</code>, the output
-is returned as a string by <code>pretty-print</code>.
-Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
+is returned as a string by <code>pretty-print</code>.</p>
+</div>
+<div class="paragraph">
+<p>Note that <code>pp</code> is another name for <code>pretty-print</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">pp</span> <span class="o">'</span><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))</span> <span class="p">))</span> <span class="nv">:width</span> <span class="mi">25</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">display</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span>
+        <span class="nv">b</span>
+        <span class="nv">c</span>
+        <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>
+        <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span>
+                <span class="nv">g</span>
+                <span class="nv">h</span>
+                <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nf">pp</span> <span class="o">'</span><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))</span> <span class="p">))</span> <span class="nv">:width</span> <span class="mi">35</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">display</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span>
+        <span class="nv">b</span>
+        <span class="nv">c</span>
+        <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span>
+        <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nf">pp</span> <span class="o">'</span><span class="p">(</span><span class="nb">display</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))</span> <span class="p">))</span> <span class="nv">:width</span> <span class="mi">47</span><span class="p">)</span>
+<span class="nv">=&gt;</span> <span class="p">(</span><span class="nb">display</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span> <span class="nv">c</span> <span class="p">(</span><span class="nb">expt</span> <span class="nv">d</span> <span class="nv">e</span><span class="p">)</span> <span class="p">(</span><span class="nb">abs</span> <span class="p">(</span><span class="nb">*</span> <span class="nv">f</span> <span class="nv">g</span> <span class="nv">h</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">i</span> <span class="nv">j</span><span class="p">)))))</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_procedure-formals'></a>
@@ -24413,8 +24449,8 @@ behavior which depends of the type or the number of its parameters.</p>
 <div class="paragraph small">
 <p><code><strong>(define-generic gf) </strong></code><br>
 <code><strong>(define-generic gf metaclass) </strong></code><br>
-<code><strong>(define-generic gf :documentation str) </strong></code><br>
-<code><strong>(define-generic gf metaclass :documentation str) </strong></code><br></p>
+<code><strong>(define-generic gf :documentation str :add-default bool) </strong></code><br>
+<code><strong>(define-generic gf metaclass :documentation str :add-default bool) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -24422,6 +24458,53 @@ behavior which depends of the type or the number of its parameters.</p>
 <p>This function creates a new generic function named <code>gf</code>. By default, the created
 function is an instance of the class <code>&lt;generic&gt;</code>, except if <code>metaclass</code> is used.
 Using a different metaclass permits to fine tune the way methods are applied.</p>
+</div>
+<div class="paragraph">
+<p>When a generic function is defined whereas a procedure with this name already
+exists, a new wrapper method around this procedure is created, by default,
+and added as a default method for the new generic function.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">define-generic</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">describe</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">+</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">generic</span> <span class="nv">function</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;generic&gt;</span><span class="o">.</span>
+<span class="nv">Methods</span> <span class="nv">defined</span> <span class="nv">for</span> <span class="nv">+</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81d5990</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="nv">&lt;top&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Defining the new generic function <code>+</code> wraps the default addition primitive in a new
+(n-ary) method. This particularily useful to keep the default behaviour of the
+addiftion</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">define-method</span> <span class="nv">+</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;string&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nb">string-append</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">describe</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">+</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">generic</span> <span class="nv">function</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;generic&gt;</span><span class="o">.</span>
+<span class="nv">Methods</span> <span class="nv">defined</span> <span class="nv">for</span> <span class="nv">+</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81957e0</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="p">(</span><span class="nf">&lt;string&gt;</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81d5990</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="nv">&lt;top&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have now two methods on <code>+</code>: one which appends two strings and one which is a
+wrapper around the addition.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">+</span> <span class="s">"abc"</span> <span class="s">"def"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"abcdef"</span>
+<span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nb">+</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="mi">0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To avoid the creation of the default wrapper, use the value <code>#f</code> for the
+<code>:add-default</code> keyword parameter</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -24431,10 +24514,10 @@ Using a different metaclass permits to fine tune the way methods are applied.</p
 </td>
 <td class="content">
 Generally, it is not necessary to use <code>define-generic</code> to declare a generic
-function, since it is created the first time a method  with the name of that function
-is created. However, for the sake of documentation, or to export a generic function
-from a module which do not define methods, it is possible also to explicitly
-define the generic function before its methods.
+function, since it is created the first time a method  with the name of that
+function is created. However, for the sake of documentation, or to export a
+generic function from a module which do not define methods, it is possible
+also to explicitly define the generic function before its methods.
 </td>
 </tr>
 </table>
@@ -24928,903 +25011,15 @@ the list of methods and the documentation of the generic function.</p>
 <p>It is not necessary that the generic function be explicitly defined. If it is
 not explicitly created, however, the documentation will be set to <code>#f</code>.</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>  //  SPDX-License-Identifier: GFDL-1.3-or-later
-//
-//  Copyright © 2000-2023 Erick Gallesio &lt;eg@stklos.net&gt;
-//
-//           Author: Erick Gallesio [eg@unice.fr]
-//    Creation date: 26-Nov-2000 18:19 (eg)</pre>
-</div>
-</div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="doc_threads_mutexes_and_condition_variables">9. Threads, Mutexes and Condition Variables</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>
-
-
-
-The thread system provides the following data types:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Thread (a virtual processor which shares object space with all other threads)</p>
-</li>
-<li>
-<p>Mutex (a mutual exclusion device, also known as a lock and binary semaphore)</p>
-</li>
-<li>
-<p>Condition variable (a set of blocked threads)</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>The <strong><em>STklos</em></strong> thread system is conform to <strong><a href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a></strong> (<em>Multithreading support</em>), and implement
-all the SRFI mechanisms. See this SRFI documentation for a more complete
-description</p>
-</div>
-<div class="sect2">
-<h3 id="doc_threads">9.1. Threads</h3>
-<div id="make-thread" class="paragraph">
-<p><a id='P_make-thread'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(make-thread thunk) </strong></code><br>
-<code><strong>(make-thread thunk name) </strong></code><br>
-<code><strong>(make-thread thunk name stack-size) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns a new thread. This thread is not automatically made runnable
-(the procedure <code>thread-start!</code> must be used for this). A thread has the
-following fields:  name, specific, end-result, end-exception, and a list
-of locked/owned mutexes it owns. The thread&#8217;s execution consists of a call
-to thunk with the "initial continuation". This continuation causes the
-(then) current thread to store the result in its end-result field, abandon
-all mutexes it owns, and finally terminate. The dynamic-wind
-stack of the initial continuation is empty. The optional name is an
-arbitrary Scheme object which identifies the thread (useful for debugging);
-it defaults to an unspecified value. The specific field is set to an
-unspecified value.  The thread inherits the dynamic environment from the
-current thread. Moreover, in this dynamic environment the exception handler
-is bound to the "initial exception handler" which is a unary procedure
-which causes the (then) current thread to store in its end-exception
-field an "uncaught exception" object whose "reason" is the argument
-of the handler, abandon all mutexes it owns, and finally terminate.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-The optional parameter <code>stack-size</code> permits to specify
-the size (in words) reserved for the thread. This option does not exist
-in <strong><a href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a></strong>.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p><a id='P_current-thread'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(current-thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the current thread.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">)</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))</span>  <span class="nv">=&gt;</span>  <span class="no">#t</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-start!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-start! thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Makes <code>thread</code> runnable. The <code>thread</code> must be a new thread.
-<code>Thread-start!</code> returns the thread.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">t</span> <span class="p">(</span><span class="nf">thread-start!</span> <span class="p">(</span><span class="nf">make-thread</span>
-                           <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nb">write</span> <span class="ss">'a</span><span class="p">))))))</span>
-   <span class="p">(</span><span class="nb">write</span> <span class="ss">'b</span><span class="p">)</span>
-   <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">t</span><span class="p">))</span>       <span class="nv">=&gt;</span>  <span class="nv">unspecified</span>
-                               <span class="nv">after</span> <span class="nv">writing</span> <span class="nv">ab</span> <span class="nv">or</span> <span class="nv">ba</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-yield!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-yield!) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>The current thread exits the running state as if its quantum had
-expired. <code>Thread-yield!</code> returns an unspecified value.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-terminate!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-terminate! thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Causes an abnormal termination of the <code>thread</code>. If the <code>thread</code> is not
-already terminated, all mutexes owned by the <code>thread</code> become
-unlocked/abandoned and a "terminated thread exception" object is stored
-in the thread&#8217;s end-exception field. If <code>thread</code> is the current thread,
-<code>thread-terminate!</code> does not return. Otherwise, <code>thread-terminate!</code>
-returns an unspecified value; the termination of the thread will occur
-before <code>thread-terminate!</code> returns.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="ulist">
-<ul>
-<li>
-<p>This operation must be used carefully because it terminates a thread
-abruptly and it is impossible for that thread to perform any kind of
-cleanup. This may be a problem if the thread is in the middle of a
-critical section where some structure has been put in an inconsistent
-state. However, another thread attempting to enter this critical section
-will raise an "abandoned mutex exception" because the mutex is
-unlocked/abandoned.</p>
-</li>
-<li>
-<p>On <em>Android</em>, <code>thread-terminate!</code> can be used only to terminate the
-current thread.  Trying to kill another thread produces an error.</p>
-</li>
-</ul>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-sleep!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-sleep! timeout) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>The current thread waits until the <code>timeout</code> is reached. This blocks the
-thread only if timeout represents a point in the future. It is an error
-for timeout to be <code>#f</code>. <code>Thread-sleep!</code> returns an unspecified value.</p>
-</div>
-<div id="thread-join" class="paragraph">
-<p><a id='P_thread-join!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-join! thread) </strong></code><br>
-<code><strong>(thread-join! thread timeout) </strong></code><br>
-<code><strong>(thread-join! thread timeout timeout-val) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>The current thread waits until the <code>thread</code> terminates (normally or not)
-or until the timeout is reached if <code>timeout</code> is supplied.
-If the timeout is reached, <code>thread-join!</code> returns <code>timeout-val</code> if it is
-supplied, otherwise a "join timeout exception" is raised.
-If the <code>thread</code> terminated normally, the content of the end-result
-field is returned, otherwise the content of the end-exception field
-is raised.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">t</span> <span class="p">(</span><span class="nf">thread-start!</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
-                                       <span class="p">(</span><span class="nb">expt</span> <span class="mi">2</span> <span class="mi">100</span><span class="p">))))))</span>
-  <span class="p">(</span><span class="nf">thread-sleep!</span> <span class="mi">1</span><span class="p">)</span>
-  <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">t</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">1267650600228229401496703205376</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_thread?'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread? obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is a thread, otherwise returns <code>#f</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">thread?</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nf">thread?</span> <span class="ss">'foo</span><span class="p">)</span>              <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-name'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-name thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the name of the <code>thread</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">thread-name</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="no">#f</span><span class="p">)</span> <span class="ss">'foo</span><span class="p">))</span>  <span class="nv">=&gt;</span>  <span class="nv">foo</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-stack-size'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-stack-size thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the allocated stack size for <code>thread</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">thread-stack-size</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="no">#f</span><span class="p">)</span> <span class="ss">'foo</span> <span class="mi">2000</span><span class="p">))</span> <span class="nv">=&gt;</span> <span class="mi">2000</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Note that this procedure is not present in <strong><a href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a></strong>.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-specific'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-specific thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the content of the `thread&#8217;s specific field.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_thread-specific-set!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(thread-specific-set! thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Stores <code>obj</code> into the <code>thread&#8217;s specific field. `Thread-specific-set!</code>
-returns an unspecified value.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">thread-specific-set!</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">)</span> <span class="s">"hello"</span><span class="p">)</span>
-           <span class="nv">=&gt;</span>  <span class="nv">unspecified</span>
-<span class="p">(</span><span class="nf">thread-specific</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))</span>
-           <span class="nv">=&gt;</span>  <span class="s">"hello"</span></code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="doc_mutexes">9.2. Mutexes</h3>
-<div class="paragraph">
-<p><a id='P_make-mutex'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(make-mutex) </strong></code><br>
-<code><strong>(make-mutex name) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns a new mutex in the unlocked/not-abandoned state. The optional <code>name</code>
-is an arbitrary Scheme object which identifies the mutex
-(useful for debugging); it defaults to an unspecified value.
-The mutex&#8217;s specific field is set to an unspecified value.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_mutex?'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(mutex? obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns <code>#t</code> if obj is a mutex, otherwise returns <code>#f</code>.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_mutex-name'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(mutex-name mutex) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the name of the <code>mutex</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">mutex-name</span> <span class="p">(</span><span class="nf">make-mutex</span> <span class="ss">'foo</span><span class="p">))</span>  <span class="nv">=&gt;</span>  <span class="nv">foo</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_mutex-specific'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(mutex-specific mutex) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the content of the `mutex&#8217;s specific field.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_mutex-specific-set!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(mutex-specific! mutex obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Stores <code>obj</code> into the `mutex&#8217;s specific field and eturns an unspecified value.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">m</span> <span class="p">(</span><span class="nf">make-mutex</span><span class="p">))</span>
-<span class="p">(</span><span class="nf">mutex-specific-set!</span> <span class="nv">m</span> <span class="s">"hello"</span><span class="p">)</span>  <span class="nv">=&gt;</span>  <span class="nv">unspecified</span>
-<span class="p">(</span><span class="nf">mutex-specific</span> <span class="nv">m</span><span class="p">)</span>               <span class="nv">=&gt;</span>  <span class="s">"hello"</span>
-
-<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">mutex-lock-recursively!</span> <span class="nv">mutex</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">eq?</span> <span class="p">(</span><span class="nf">mutex-state</span> <span class="nv">mutex</span><span class="p">)</span> <span class="p">(</span><span class="nf">current-thread</span><span class="p">))</span>
-      <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">n</span> <span class="p">(</span><span class="nf">mutex-specific</span> <span class="nv">mutex</span><span class="p">)))</span>
-        <span class="p">(</span><span class="nf">mutex-specific-set!</span> <span class="nv">mutex</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">)))</span>
-      <span class="p">(</span><span class="k">begin</span>
-        <span class="p">(</span><span class="nf">mutex-lock!</span> <span class="nv">mutex</span><span class="p">)</span>
-        <span class="p">(</span><span class="nf">mutex-specific-set!</span> <span class="nv">mutex</span> <span class="mi">0</span><span class="p">))))</span>
-
-<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">mutex-unlock-recursively!</span> <span class="nv">mutex</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">n</span> <span class="p">(</span><span class="nf">mutex-specific</span> <span class="nv">mutex</span><span class="p">)))</span>
-    <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">=</span> <span class="nv">n</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="p">(</span><span class="nf">mutex-unlock!</span> <span class="nv">mutex</span><span class="p">)</span>
-        <span class="p">(</span><span class="nf">mutex-specific-set!</span> <span class="nv">mutex</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">n</span> <span class="mi">1</span><span class="p">)))))</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_mutex-state'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(mutex-state mutex) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns information about the state of the <code>mutex</code>. The possible results
-are:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>a thread <strong>T</strong>: the mutex is in the locked/owned state and
-thread <strong>T</strong> is the owner of the mutex</p>
-</li>
-<li>
-<p>the symbol <strong>not-owned</strong>: the mutex is in the locked/not-owned
-state</p>
-</li>
-<li>
-<p>the symbol <strong>abandoned</strong>: the mutex is in the unlocked/abandoned
-state</p>
-</li>
-<li>
-<p>the symbol <strong>not-abandoned</strong>: the mutex is in the
-unlocked/not-abandoned state</p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">mutex-state</span> <span class="p">(</span><span class="nf">make-mutex</span><span class="p">))</span>  <span class="nv">=&gt;</span>  <span class="nv">not-abandoned</span>
-
-<span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">thread-alive?</span> <span class="nv">thread</span><span class="p">)</span>
-  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">mutex</span> <span class="p">(</span><span class="nf">make-mutex</span><span class="p">)))</span>
-    <span class="p">(</span><span class="nf">mutex-lock!</span> <span class="nv">mutex</span> <span class="no">#f</span> <span class="nv">thread</span><span class="p">)</span>
-    <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">state</span> <span class="p">(</span><span class="nf">mutex-state</span> <span class="nv">mutex</span><span class="p">)))</span>
-      <span class="p">(</span><span class="nf">mutex-unlock!</span> <span class="nv">mutex</span><span class="p">)</span> <span class="c1">; avoid space leak</span>
-      <span class="p">(</span><span class="nb">eq?</span> <span class="nv">state</span> <span class="nv">thread</span><span class="p">))))</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_mutex-lock!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(mutex-lock! mutex) </strong></code><br>
-<code><strong>(mutex-lock! mutex timeout) </strong></code><br>
-<code><strong>(mutex-lock! mutex timeout thread) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>If the <code>mutex</code> is currently locked, the current thread waits until the
-<code>mutex</code> is unlocked, or until the timeout is reached if <code>timeout</code> is supplied.
-If the <code>timeout</code> is reached, <code>mutex-lock!</code> returns <code>#f</code>.
-Otherwise, the state of the mutex is changed as follows:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>if thread is <code>#f</code> the mutex becomes <em>locked/not-owned</em>,</p>
-</li>
-<li>
-<p>otherwise, let T be thread (or the current thread if thread
-is not supplied),</p>
-<div class="ulist">
-<ul>
-<li>
-<p>if T is terminated the mutex becomes <em>unlocked/abandoned</em>,</p>
-</li>
-<li>
-<p>otherwise mutex becomes <em>locked/owned</em> with T as the owner.</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>After changing the state of the mutex, an "abandoned mutex exception" is
-raised if the mutex was unlocked/abandoned before the state change,
-otherwise <code>mutex-lock!</code> returns <code>#t</code>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="p">(</span><span class="nf">sleep!</span> <span class="nv">timeout</span><span class="p">)</span>
-  <span class="c1">;; an alternate implementation of thread-sleep!</span>
-  <span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">m</span> <span class="p">(</span><span class="nf">make-mutex</span><span class="p">)))</span>
-  <span class="p">(</span><span class="nf">mutex-lock!</span> <span class="nv">m</span> <span class="no">#f</span> <span class="no">#f</span><span class="p">)</span>
-  <span class="p">(</span><span class="nf">mutex-lock!</span> <span class="nv">m</span> <span class="nv">timeout</span> <span class="no">#f</span><span class="p">)))</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><a id='P_mutex-unlock!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(mutex-unlock! mutex) </strong></code><br>
-<code><strong>(mutex-unlock! mutex condition-variable) </strong></code><br>
-<code><strong>(mutex-unlock! mutex condition-variable timeout) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Unlocks the <code>mutex</code> by making it unlocked/not-abandoned. It is not an error
-to unlock an unlocked mutex and a mutex that is owned by any thread.
-If <code>condition-variable</code> is supplied, the current thread is blocked and
-added to the <code>condition-variable</code> before unlocking <code>mutex</code>; the thread
-can unblock at any time but no later than when an appropriate call to
-<code>condition-variable-signal!</code> or <code>condition-variable-broadcast!</code> is
-performed (see below), and no later than the timeout (if timeout is
-supplied). If there are threads waiting to lock this mutex, the scheduler
-selects a thread, the <code>mutex</code> becomes locked/owned or locked/not-owned,
-and the thread is unblocked. <code>mutex-unlock!</code> returns <code>#f</code> when the
-<code>timeout</code> is reached, otherwise it returns <code>#t</code>.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_with-mutex'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(with-mutex mtx &lt;thunk&gt;) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Executes <code>thunk</code>, protected by mutex <code>mtx</code>. The mutex will
-be locked before and released after execution of <code>body</code>, and
-also on entrance or departure of its dynamic context
-(lock and unlock are used within <code>dynamic-wind</code>).</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="doc_condition_variables">9.3. Condition Variables</h3>
-<div class="paragraph">
-<p><a id='P_make-condition-variable'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(make-conditon-variable) </strong></code><br>
-<code><strong>(make-conditon-variable name) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns a new empty condition variable. The optional <code>name</code> is an arbitrary
-Scheme object which identifies the condition variable (useful for debugging);
-it defaults to an unspecified value. The condition variable&#8217;s specific
-field is set to an unspecified value.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_condition-variable?'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(conditon-variable? obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is a condition variable, otherwise returns <code>#f</code>.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_condition-variable-name'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(conditon-variable-name conditon-variable) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the name of the <code>condition-variable</code>.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_condition-variable-specific'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(conditon-variable-specific conditon-variable) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the content of the `condition-variable&#8217;s specific field.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_condition-variable-specific-set!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(conditon-variable-specific-set! conditon-variable obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Stores <code>obj</code> into the `condition-variable&#8217;s specific field.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_condition-variable-signal!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(condition-variable-signal! condition-variable) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>If there are threads blocked on the <code>condition-variable</code>, the scheduler
-selects a thread and unblocks it. <code>Condition-variable-signal!</code>  returns
-an unspecified value.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_condition-variable-broadcast!'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(condition-variable-broadcast! condition-variable) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Unblocks all the threads blocked on the <code>condition-variable</code>.
-<code>Condition-variable-broadcast!</code> returns an unspecified value.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="doc_conditions_2">9.4. Conditions</h3>
-<div class="paragraph">
-<p><a id='P_join-timeout-exception?'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(join-timeout-exception? obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is a <em>join timeout exception</em> object,
-otherwise returns <code>#f</code>.</p>
-</div>
-<div class="paragraph">
-<p>A <em>join timeout exception</em> is raised when thread-join! is called, the timeout
-is reached and no timeout-val is supplied.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_abandoned-mutex-exception?'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(abandoned-mutex-exception? obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is an <em>abandoned mutex exception</em> object,
-otherwise returns <code>#f</code>.</p>
-</div>
-<div class="paragraph">
-<p>An <em>abandoned mutex exception</em> is raised when the current thread locks
-a mutex that was owned by a thread which terminated ,(see <code>mutex-lock!</code>).</p>
-</div>
-<div class="paragraph">
-<p><a id='P_terminated-thread-exception?'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(terminated-thread-exception? obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is a <em>terminated thread exception</em> object, otherwise
-returns <code>#f</code>.</p>
-</div>
-<div class="paragraph">
-<p>A <em>terminated thread exception</em> is raised when thread-join! is
-called and the target thread has terminated as a result of a call to
-<code>thread-terminate!</code>.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_uncaught-exception?'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(uncaught-exception? obj) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is an <em>uncaught exception</em> object, otherwise
-returns <code>#f</code>.</p>
-</div>
-<div class="paragraph">
-<p>An <em>uncaught exception</em> is raised when <code>thread-join!</code> is called and the
-target thread has terminated because it raised an exception that called
-the initial exception handler of that thread.</p>
-</div>
-<div class="paragraph">
-<p><a id='P_uncaught-exception-reason'></a>
-</p>
-</div>
-<div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
-</div>
-<div class="sidebarblock">
-<div class="content">
-<div class="paragraph small">
-<p><code><strong>(uncaught-exception-reason exc) </strong></code><br></p>
-</div>
-</div>
-</div>
-<div class="paragraph">
-<p>Returns the object which was passed to the initial exception handler
-of that thread (<code>exc</code> must be an <em>uncaught exception</em> object).</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="doc_stklos_customization">10. STklos Customization</h2>
+<h2 id="doc_stklos_customization">9. STklos Customization</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="doc_parameter_objects_2">10.1. Parameter Objects</h3>
+<h3 id="doc_parameter_objects_2">9.1. Parameter Objects</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> environement can be customized using Parameter Objects. These
 parameters are listed below.</p>
@@ -26161,7 +25356,7 @@ Note that the debugging level can also be set by the <code>--debug</code> option
 </div>
 </div>
 <div class="sect2">
-<h3 id="doc_environment_variables">10.2. Environment variables</h3>
+<h3 id="doc_environment_variables">9.2. Environment variables</h3>
 <div class="paragraph">
 <p>The following variables can be used to customize <strong><em>STklos</em></strong>:</p>
 </div>
@@ -26189,7 +25384,7 @@ shell variable <code>XDG_CONFIG_HOME</code> is unset).</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="doc_repl">10.3. REPL</h3>
+<h3 id="doc_repl">9.3. REPL</h3>
 <div class="paragraph">
 <p>By default, the <strong><em>STklos</em></strong> REPL try to find an installed
 <em>editing line library</em> to read input expressions. It tries to link with GNU readline
@@ -26219,7 +25414,7 @@ be passed when <code>repl</code> is called. If not passed, they default to
 <code>current-input-port</code>, <code>current-output-port</code> and <code>current-error-port</code>.</p>
 </div>
 <div class="sect3">
-<h4 id="doc_repl_commands">10.3.1. REPL commands</h4>
+<h4 id="doc_repl_commands">9.3.1. REPL commands</h4>
 <div class="paragraph">
 <p>By default, <strong><em>STklos</em></strong> accepts some special commands. A command starts
 with a comma character, followed by the name of the command. The list
@@ -26335,7 +25530,7 @@ such a definition is in the <code>stklosrc</code> file.
 </div>
 </div>
 <div class="sect3">
-<h4 id="doc_repl_variables">10.3.2. REPL variables</h4>
+<h4 id="doc_repl_variables">9.3.2. REPL variables</h4>
 <div class="paragraph">
 <p>By default, <strong><em>STklos</em></strong> defines the following variables:</p>
 </div>
@@ -26371,7 +25566,7 @@ computed values</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="doc_repl_parameters">10.3.3. REPL parameters</h4>
+<h4 id="doc_repl_parameters">9.3.3. REPL parameters</h4>
 <div class="paragraph">
 <p>The following parameter objects can be used to customize the REPL:</p>
 </div>
@@ -26495,11 +25690,84 @@ the <strong><em>STklos</em></strong> command. Otherwise, a good place to set thi
 </table>
 </div>
 </div>
+<div class="sect3">
+<h4 id="doc_repl_readline_support">10.3.4. REPL readline support</h4>
+<div class="paragraph">
+<p><a id='P_readline-set-option!'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(readline-set-option! var val) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The primitive <code>readline-set-option!</code> is defined when readline support is
+enabled. It permits to change dynamically the behaviour of the readline
+library. The list of possible variables <code>var</code> and values <code>val</code> can be found
+in in the <a href="https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html">readline documentation manual</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"disable-completion"</span> <span class="s">"on"</span><span class="p">)</span> <span class="c1">;; disable TAB-completion</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_readline-startup-hook'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(readline-startup-hook) </strong></code><br>
+<code><strong>(readline-startup-hook thunk) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter object can be used to read/set the hook function run
+once the readline library is initialized (and before the first prompt is
+printed). It can be used to set some readline options in your <code>stklosrc</code>
+file. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-startup-hook</span>
+   <span class="p">(</span><span class="k">lambda</span><span class="p">()</span>
+     <span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"blink-matching-paren"</span>      <span class="s">"on"</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"colored-completion-prefix"</span> <span class="s">"on"</span><span class="p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>permit to have parenthesis flashing and more colored completions.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This hook is run only if the line editor library is the
+<em>GNU readline library</em>.
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="doc_foreign_function_interface">11. Foreign Function Interface</h2>
+<h2 id="doc_foreign_function_interface">10. Foreign Function Interface</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p></p>
@@ -26523,7 +25791,7 @@ the <strong><em>STklos</em></strong> VM when using an external C function.</p>
 evolve in future versions.</strong></p>
 </div>
 <div class="sect2">
-<h3 id="doc_external_functions">11.1. External functions</h3>
+<h3 id="doc_external_functions">10.1. External functions</h3>
 <div class="paragraph">
 <p>The definition of an external function is done with the
 <code>define-external</code> special form.  This form takes as arguments
@@ -26557,7 +25825,17 @@ between the C and the Scheme worlds.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:char</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">char</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme character</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:uchar</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">unsigned char</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:schar</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">signed char</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:short</strong></p></td>
@@ -26590,6 +25868,56 @@ between the C and the Scheme worlds.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:longlong</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">long long int</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:ulonglong</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">unsigned long long int</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:int8</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int8_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:int16</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int16_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:int32</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int32_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:int64</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">int64_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:uint8</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">uint8_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:uint16</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">uint16_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:uint32</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">uint32_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:uint64</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">uint64_t</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme integer</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:float</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">float</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Scheme real number</p></td>
@@ -26602,7 +25930,7 @@ between the C and the Scheme worlds.</p>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:boolean</strong></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">int</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheme boolean</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><strong>:pointer</strong></p></td>
@@ -26621,6 +25949,23 @@ between the C and the Scheme worlds.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<strong>About <code>:char</code>, <code>:schar</code> and <code>:uchar</code></strong>:<br>
+When the value comes from Scheme,
+it can be either an integer or a character. When the value is read back from
+C, the value is always returned as an integer. This is because a character can
+be used as a small integer in C (possibly signed) and that its value may be an
+incorrect Scheme character.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p><a id='P_define-external'></a>
 </p>
@@ -26842,7 +26187,7 @@ the FFI better!):</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="doc_c_pointers">11.2. C pointers</h3>
+<h3 id="doc_c_pointers">10.2. C pointers</h3>
 <div class="paragraph">
 <p>It is very common that external functions return pointers, serving as
 handles on internal structures. This pointers, called hereafter
@@ -26984,6 +26329,89 @@ in a fatal error.</p>
 </div>
 </div>
 <div class="paragraph">
+<p><a id='P_cpointer-set!'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(cpointer-set! pointer type value) </strong></code><br>
+<code><strong>(cpointer-set! pointer type value offset) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets the given <code>value</code> of <code>type</code> inside <code>pointer</code>. If <code>offset</code> is not given
+it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+<code>type</code>. It permits to access the C object as an array.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">p</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">1</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">42</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">p</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">42</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">43</span> <span class="mi">1</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following examples shows how we cans forge a C string in Scheme</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span> <span class="nv">buff</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">5</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">a</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">b</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">c</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">d</span> <span class="mi">3</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">null</span> <span class="mi">4</span><span class="p">)</span> <span class="c1">;; convention for end of string in C</span>
+  <span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span><span class="p">))</span>      <span class="nv">=&gt;</span> <span class="s">"abcd"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_cpointer-ref'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(cpointer-ref pointer type) </strong></code><br>
+<code><strong>(cpointer-ref pointer type offset) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns value of <code>type</code> from <code>pointer</code>. If <code>offset</code> is not given
+it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+<code>type</code>. It permits to access the C object as an array.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">p</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">1</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">42</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">p</span> <span class="nv">:uint8</span><span class="p">)</span>
+      <span class="nv">=&gt;</span> <span class="mi">42</span>
+<span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="nv">=&gt;</span> <span class="mi">42</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">q</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:long</span><span class="p">))))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">1234</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">6789</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">; address is one C "long" after</span>
+<span class="p">(</span><span class="nb">cons</span> <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">0</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">6789</span> <span class="o">.</span> <span class="mi">1234</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><a id='P_allocate-bytes'></a>
 </p>
 </div>
@@ -27042,11 +26470,37 @@ on <code>obj</code>, it will deallocate its data calling
 shown is zero, indicating that its data pointer does not point to
 allocated memory (a NULL value for C).</p>
 </div>
+<div class="paragraph">
+<p><a id='P_c-size-of'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(c-size-of type) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>c-size-of</code> returns the size of a C <code>type</code>, measured in units sized as char.
+The type is given as a keyword following the conventions described in the
+previous table.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:char</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="mi">1</span>
+<span class="p">(</span><span class="nb">=</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:int8</span><span class="p">))</span>
+   <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:int16</span><span class="p">))</span>          <span class="nv">=&gt;</span> <span class="no">#t</span></code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="doc_using_the_slib_package">12. Using the SLIB package</h2>
+<h2 id="doc_using_the_slib_package">11. Using the SLIB package</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -27111,7 +26565,7 @@ variable.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="doc_srfis">13. SRFIs</h2>
+<h2 id="doc_srfis">12. SRFIs</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -27131,7 +26585,7 @@ information on each SRFI, please look at the official
 SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 </div>
 <div class="sect2">
-<h3 id="doc_supported_srfis">13.1. Supported SRFIs</h3>
+<h3 id="doc_supported_srfis">12.1. Supported SRFIs</h3>
 <div class="paragraph">
 <p><strong><em>STklos</em></strong> supports <strong>129</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
@@ -27276,7 +26730,7 @@ whereas an <em>external</em> needs to be loaded before use.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="doc_using_a_srfi">13.2. Using a SRFI</h3>
+<h3 id="doc_using_a_srfi">12.2. Using a SRFI</h3>
 <div class="paragraph">
 <p>Using a particular SRFI can be done with the special form
 <code>cond-expand</code> defined in <strong><a href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a></strong> which is fully supported
@@ -27318,7 +26772,7 @@ use <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a></st
 <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 <div class="sect3">
-<h4 id="doc_embedded_srfis">13.2.1. Embedded SRFIs</h4>
+<h4 id="doc_embedded_srfis">12.2.1. Embedded SRFIs</h4>
 <div class="paragraph">
 <p>As said before, an <em>embedded</em> SRFI can be used directly without loading a
 support file. (Note that using <strong>require-feature</strong> works too
@@ -27330,7 +26784,7 @@ and permits to ignore if the SRFI is embedded).</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="doc_external_srfis">13.2.2. External SRFIs</h4>
+<h4 id="doc_external_srfis">12.2.2. External SRFIs</h4>
 <div class="paragraph">
 <p>An external SRFI needs to load at least one external file. This can be done
 with <strong>require</strong> or <strong>require-feature</strong>. As with embedded SRFIS, using
@@ -27342,7 +26796,7 @@ with <strong>require</strong> or <strong>require-feature</strong>. As with embed
 </div>
 </div>
 <div class="sect3">
-<h4 id="doc_srfi_features">13.2.3. SRFI features</h4>
+<h4 id="doc_srfi_features">12.2.3. SRFI features</h4>
 <div class="paragraph">
 <p>For some SRFIs, <strong><em>STklos</em></strong> accepts that uses them with a name. This names
 are given <a href="#feature_identifiers">Table 2</a>.</p>
@@ -27533,7 +26987,7 @@ are given <a href="#feature_identifiers">Table 2</a>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="doc_misc_information">13.3. Misc. Information</h3>
+<h3 id="doc_misc_information">12.3. Misc. Information</h3>
 <div class="paragraph">
 <p>Previous section described the general way to use the SRFIS implemented in
 <strong><em>STklos</em></strong>.  This section concentrates on information not given above.</p>
@@ -31615,7 +31069,7 @@ the exported symbols of <strong><a href="http://srfi.schemers.org/srfi-1/srfi-1.
 <code>(srfi 1)</code> library.</p>
 </div>
 <div class="paragraph">
-<p>See  <em><a href="#doc_srfis">Chapter 13</a></em> for more information</p>
+<p>See  <em><a href="#doc_srfis">Chapter 12</a></em> for more information</p>
 </div>
 </div>
 <div class="sect3">

@@ -133,8 +133,9 @@ b|)
 (test "void string"      #f (void? "str"))
 (test "void nil"         #f (void? '()))
 (test "void closure"     #f (void? (lambda () -1)))
+
 (define-macro %%tmp (lambda lst 'ok))
-(test "void syntax"      #f (void? %%tmp))
+(test/compile-error "void syntax" (void? %%tmp))
 
 ;;----------------------------------------------------------------------
 (test-subsection "Escaped octals in strings")

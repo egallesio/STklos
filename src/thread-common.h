@@ -1,7 +1,7 @@
 /*
  * thread-common.h      -- Thread support for STklos
  *
- * Copyright © 2006-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -63,8 +63,7 @@ struct thread_obj {
 #define THREAD_STATE(p)           (((struct thread_obj *) (p))->state)
 #define THREAD_STACK_SIZE(p)      (((struct thread_obj *) (p))->stack_stize)
 #define THREAD_VM(p)              (((struct thread_obj *) (p))->vm)
-#define THREAD_ALLOCATIONS(p)     (((struct thread_obj *) (p))->allocations)
-#define THREAD_BYTES_ALLOCATED(p) (((struct thread_obj *) (p))->bytes_allocated)
+
 
 extern void STk_error_bad_thread(SCM obj);
 double STk_verify_timeout(SCM tm);

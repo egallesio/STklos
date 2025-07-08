@@ -178,13 +178,14 @@
 (define (find-syntax-in-env symb env)
   (and (symbol? symb)
        (let ((val (find-symbol-in-env symb env)))         ; local macro?
-         (if (%syntax? val)
-             val
+         (if val
+             ;; Symbol was found (but it can also be a non syntax -- a simple local)
+             (and (%syntax? val) val)
+             ;; symbol was not found try to see if it is a global macroo
              (let ((val (symbol-value* symb               ; global macro?
                                        (compiler-current-module)
                                        #f)))
-               (and (%syntax? val)
-                    val))))))
+               (and (%syntax? val) val))))))
 
 (define (%macro-expand form env)
   (let ((map-expander (lambda (form)
@@ -194,11 +195,9 @@
      ((not (symbol? (car form)))  (map-expander form))
      (else  (let* ((name (car form))
                    (val  (find-syntax-in-env name env)))
-              (if (or (eq?  name 'quote) (eq? name 'quasiquote))
-                  form
-                  (if (and (symbol? name) (%syntax? val))
-                      (apply (%syntax-expander val) (cdr form))
-                      (map-expander form))))))))
+              (if (and (symbol? name) (%syntax? val))
+                  (apply (%syntax-expander val) (cdr form))
+                  (map-expander form)))))))
 
 ;; ======================================================================
 
@@ -309,7 +308,7 @@
  * constant vectors. This is not necessary with STklos.
 doc>
 |#
-(define (compile-quote expr env tail?)
+(define (compile-%%quote expr env tail?)
   (if (= (length expr) 2)
       (compile-constant (cadr expr) env tail?)
       (compiler-error 'quote expr "bad usage in ~S" expr)))
@@ -355,13 +354,13 @@ doc>
       (let ((bind (cadr l))
             (body (cddr l)))
         (if (pair? bind)
-            (define->lambda `(define ,(car bind) (lambda ,(cdr bind) ,@body)))
+            (define->lambda `(%%define ,(car bind) (lambda ,(cdr bind) ,@body)))
             l))
       (begin
         (compiler-error 'define l "ill formed definition ~S" l)
         l)))
 
-(define (compile-define args env tail?)
+(define (compile-%%define args env tail?)
   (let* ((l   (define->lambda args))
          (who (cadr l)))
     (if (not (= (length l) 3))
@@ -420,7 +419,7 @@ doc>
 
   (let loop ((lev 0) (env env))
     ;; lev denotes the number of frames between the searched variable location
-    ;; and the current frame. Note that the extra levels introduced by %let-syntax
+    ;; and the current frame. Note that the extra levels introduced by %%let-syntax
     ;; don't result in a frame in the stack.
     (if (not env)
         ;; name is a global variable
@@ -498,7 +497,7 @@ doc>
 ;;    L1:
 ;;    [ expr2 ] -or- IM-VOID
 ;;    L2:
-(define (compile-if args env tail?)
+(define (compile-%%if args env tail?)
   (let ((len (length (cdr args)))
         (l1  (new-label))
         (l2  (new-label)))
@@ -518,7 +517,7 @@ doc>
 ;;
 ;; DEFINE-MACRO
 ;;
-(define (compile-define-macro e env tail?)
+(define (compile-%%define-macro e env tail?)
   (if (not env)
       ;; We have a global macro
       (let ((l (define->lambda e)))
@@ -563,7 +562,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define (compile-and args env tail?)
+(define (compile-%%and args env tail?)
   (if (null? (cdr args))
       ;; Case (and) ==> #t
       (emit 'IM-TRUE)
@@ -605,7 +604,7 @@ doc>
  * @end lisp
 doc>
 |#
-(define (compile-or args env tail?)
+(define (compile-%%or args env tail?)
   ;; General case
   ;; code for (or x1 x2 .. xn) is
   ;;      x1; jump-true l1; x2; jump-true l1; ... ; im-false; L1:
@@ -622,7 +621,7 @@ doc>
 ;;;;
 ;;;; BEGIN
 ;;;;
-(define (compile-begin args env tail?)
+(define (compile-%%begin args env tail?)
   (let ((len (length (cdr args))))
     (case len
       ((0) ;; Body without form
@@ -714,11 +713,11 @@ doc>
                    (else
                       (car l)))))
         (cond
-          ((and (pair? cur) (eq? (car cur) 'begin))
+          ((and (pair? cur) (memq (car cur) '(%%begin begin)))
             ;; Delete useless begin
             (Loop (append (cdr cur) (cdr l))
                   defs))
-        ((and (pair? cur) (eq? (car cur) 'define))
+        ((and (pair? cur) (memq (car cur) '(%%define define)))
            ;; This is an internal define
            (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
         (else
@@ -1004,7 +1003,7 @@ doc>
       (compiler-error 'lambda el "bad definition ~S" el)))
 
 
-(define (compile-lambda args env tail?)
+(define (compile-%%lambda args env tail?)
   (let* ((r5rs-lambda (extended-lambda->lambda args))
          (formals     (cadr r5rs-lambda))
          (body        (cddr r5rs-lambda))
@@ -1492,7 +1491,7 @@ doc>
 ;; LETREC
 ;;
 
-(define (compile-letrec args env tail?)
+(define (compile-%%letrec args env tail?)
   (let ((len (length args)))
     (if (< len 3)
         (compiler-error 'letrec args "ill formed letrec ~S" args)
@@ -1526,7 +1525,7 @@ doc>
                  tail?))))
 
 
-(define (compile-let args env tail?)
+(define (compile-%%let args env tail?)
   (let ((len (length args)))
     (if (< len 3)
         (compiler-error 'let args "ill formed let ~S" args)
@@ -1544,9 +1543,9 @@ doc>
 ;; LET*
 ;;
 
-;; Here is a simple version (inefficient) of compile-let*
+;; Here is a simple version (inefficient) of compile-%%let*
 ;;
-;;    (define (compile-let* args env tail?)
+;;    (define (compile-%%let* args env tail?)
 ;;      (let ((len (length args)))
 ;;        (if (< len 3)
 ;;      (compiler-error 'let* args "ill formed let* ~S" args)
@@ -1561,7 +1560,7 @@ doc>
 ;;                   env args tail?))))))
 ;;
 
-(define (compile-let* args env tail?)
+(define (compile-%%let* args env tail?)
   ;; This is a little bit tricky
   ;; We have something like
   ;; (let ((a E1) (b E2)) ...) =>
@@ -1584,7 +1583,7 @@ doc>
               (body     (cddr args)))
           (when (check-let-bindings 'let* bindings #f)
             (if (<= (length bindings) 1)
-                (compile-let `(let ,bindings ,@body) env tail?)
+                (compile-%%let `(let ,bindings ,@body) env tail?)
                 (begin
                   (emit (if tail? 'ENTER-TAIL-LET-STAR 'ENTER-LET-STAR)
                         (length bindings))
@@ -1636,7 +1635,7 @@ doc>
                                    (begin ,@(cdar c))
                                    ,(rewrite-cond-clauses (cdr c))))))
 
-(define (compile-cond e env tail?)
+(define (compile-%%cond e env tail?)
   (let ((new-form (rewrite-cond-clauses (cdr e))))
     (compile new-form env e tail?)))
 
@@ -1708,7 +1707,7 @@ doc>
                                    `((memv ,key ',case) ,@exprs))))))))
                 clauses)))
 
-(define (compile-case e env tail?)
+(define (compile-%%case e env tail?)
   (if (> (length e) 2)
       (let* ((key     (cadr e))
              (clauses (cddr e))
@@ -1757,7 +1756,7 @@ doc>
        (,loop-name ,@(map cadr inits)))))
 
 
-(define (compile-do e env tail?)
+(define (compile-%%do e env tail?)
   (if (>= (length e) 3)
       (compile (rewrite-do (cadr e) (caddr e) (cdddr e))
                env
@@ -1766,54 +1765,9 @@ doc>
       (compiler-error 'do e "bad syntax")))
 
 ;;
-;; QUASIQUOTE
-;;
-
-(define (backquotify e level)
-  (cond
-    ((pair? e)
-       (cond
-         ((eq? (car e) 'quasiquote)
-               (list 'list ''quasiquote
-                     (backquotify (cadr e) (+ level 1))))
-         ((eq? (car e) 'unquote)
-               (if (<= level 0)
-                   (cadr e)
-                   (list 'list ''unquote
-                         (backquotify (cadr e) (- level 1)))))
-         ((eq? (car e) 'unquote-splicing)
-              (if (<= level 0)
-                  (list 'cons
-                        (backquotify (car e) level)
-                        (backquotify (cdr e) level))
-                  (list 'list ''unquote-splicing
-                        (backquotify (cadr e) (- level 1)))))
-         ((and (<= level 0) (pair? (car e)) (eq? (caar e) 'unquote-splicing))
-              (if (null? (cdr e))
-                  (cadar e)
-                  (list 'append (cadar e)
-                        (backquotify (cdr e) level))))
-         (else
-              (list 'cons
-                    (backquotify (car e) level)
-                    (backquotify (cdr e) level)))))
-    ((vector? e)
-       (list 'list->vector (backquotify (vector->list e) level)))
-    ((symbol? e)
-       (list 'quote e))
-    (else
-       e)))
-
-(define (compile-quasiquote e env tail?)
-  (if (= (length e) 2)
-      (compile (backquotify (cadr e) 0) env e tail?)
-      (compiler-error 'quasiquote e "bad syntax")))
-
-
-;;
 ;; WITH-HANDLER
 ;;
-(define (compile-with-handler e env tail?)
+(define (compile-%%with-handler e env tail?)
   (if (> (length e) 2)
       (let ((handler (cadr e))
             (body    (cddr e))
@@ -1898,10 +1852,10 @@ the R7RS form
 NOTE: Hopefully our implementation produce the SAME (incorrect) result for
 both forms.
 |#
-(define (compile-%let-syntax e env tail?)
+(define (compile-%%let-syntax e env tail?)
   (let ((len (length e)))
     (if (< len  3)
-        (compiler-error '%let-syntax e "ill formed %let-syntax ~S" e)
+        (compiler-error '%%let-syntax e "ill formed syntax ~S" e)
         (let ((bindings (cadr e))
               (body     (cddr e)))
           (if (null? bindings)
@@ -1917,7 +1871,7 @@ both forms.
                     ;; build a new macro environment for evaluating body
                     (let ((new (car bindings)))
                       (unless (and (list? new) (= (length new) 2))
-                        (compiler-error '%let-syntax new
+                        (compiler-error '%%let-syntax new
                                         "ill formed binding ~S" new))
                       (let* ((name      (car new))
                              (expander  (cadr new))
@@ -2105,26 +2059,23 @@ both forms.
          (else
           ;; ---- special-form OR (not in env) function call?
           (case first
-            ((if)                 (compile-if             e env tail?))
-            ((define)             (compile-define         e env tail?))
-            ((begin)              (compile-begin          e env tail?))
-            ((lambda λ)                (compile-lambda         e env tail?))
-            ((let %let)           (compile-let            e env tail?))
-            ((let*)               (compile-let*           e env tail?))
-            ((letrec)             (compile-letrec         e env tail?))
-            ((and)                (compile-and            e env tail?))
-            ((or)                 (compile-or             e env tail?))
-            ((cond)               (compile-cond           e env tail?))
-            ((case)               (compile-case           e env tail?))
-            ((do)                 (compile-do             e env tail?))
-            ((quote)              (compile-quote          e env tail?))
-            ((quasiquote)         (compile-quasiquote     e env tail?))
-            ((with-handler)       (compile-with-handler   e env tail?))
-            ((define-macro)       (compile-define-macro   e env tail?))
-
+            ((%%if)               (compile-%%if           e env tail?))
+            ((%%define)           (compile-%%define       e env tail?))
+            ((%%begin)            (compile-%%begin        e env tail?))
+            ((%%lambda)           (compile-%%lambda       e env tail?))
+            ((%%let)              (compile-%%let          e env tail?))
+            ((%%let*)             (compile-%%let*         e env tail?))
+            ((%%letrec)           (compile-%%letrec       e env tail?))
+            ((%%and)              (compile-%%and          e env tail?))
+            ((%%or)               (compile-%%or           e env tail?))
+            ((%%cond)             (compile-%%cond         e env tail?))
+            ((%%case)             (compile-%%case         e env tail?))
+            ((%%do)               (compile-%%do           e env tail?))
+            ((%%quote)            (compile-%%quote        e env tail?))
+            ((%%with-handler)     (compile-%%with-handler e env tail?))
+            ((%%define-macro)     (compile-%%define-macro e env tail?))
             ((%%set!)             (compile-%%set!         e env tail?))
-
-            ((%let-syntax)        (compile-%let-syntax     e env tail?))
+            ((%%let-syntax)       (compile-%%let-syntax   e env tail?))
 
             ;; Special calls
             ((%%require)          (compile-%%require      e env tail?))
@@ -2142,6 +2093,9 @@ both forms.
 
      ;; ---- We have a symbol
      ((symbol? e)
+      (when (find-syntax-in-env e env)
+        ;; Accessing the value of a syntax (not calling it) is forbidden
+        (error "invalid use of syntax ~S" e))
       (compile-reference e env epair tail?))
 
      ;; Self evaluating object

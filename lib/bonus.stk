@@ -24,7 +24,8 @@
 
 
 (export read-chars read-chars! display-shared gensym
-        macro-expand macro-expand*
+        macro-expand macro-expand* unquote unquote-splicing
+        ... => _ else
         improper-list?
         remove remove! delete delete!
         every any
@@ -159,6 +160,33 @@ doc>
     (if (equal? new exp)
         exp
         (macro-expand* new))))
+
+
+;;
+;; Quasiquote friends
+;;
+(define-macro (unquote . e)
+  (syntax-error "unquote cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote e)))
+
+(define-macro (unquote-splicing . e)
+  (syntax-error "unquote-splicing cannot be used outside of quasiquote in form ~S"
+                (cons 'unquote-splicing e)))
+
+;;
+;; auxiliary syntax
+;;
+(define-macro (...  . args)
+  (syntax-error "auxiliary syntax '...' cannot be used here ~s" (cons '... args)))
+
+(define-macro (=>  . args)   ;;  FIXME: it breaks SRFI 61
+  (syntax-error "auxiliary syntax '=>' cannot be used here ~s" (cons '=> args)))
+
+(define-macro (_  . args)
+  (syntax-error "auxiliary syntax '_' cannot be used here ~s" (cons '_ args)))
+
+(define-macro (else  . args)
+  (syntax-error "auxiliary syntax 'else' cannot be used here ~s" (cons 'else args)))
 
 ;;;
 ;;; List functions
@@ -1006,14 +1034,12 @@ doc>
  * (let ((T (make-thread (lambda () (make-list 1_000_000) (eprintf "finish\n")))))
  *   (time (thread-start! T) ;; Launch T wich allocate 1_000_1000 cells
  *         (thread-sleep! 3) ;; wait for the child thread to allocate list
- *         (thread-join! T)
- *         100))
+ *         (thread-join! T)))
  * finish
- *     Elapsed time: 33.299 ms
- *     Allocations: 800408 bytes in 10 allocation calls (GC: 0)
- * 100
+ *     Elapsed time: 9.795 ms
+ *     Allocations: 800384 bytes in 8 allocation calls (GC: 0)
  * @end lisp
- * The ten allocations we can see here are for theads bookeeping and are
+ * The eight allocations we can see here are for theads bookeeping and are
  * far from the million cells allocated in thread |T|.
 doc>
 |#
@@ -1027,12 +1053,12 @@ doc>
           (gc-no       (gensym)))
       `(let ((,counting? (%count-allocations))  ;; save if we are counting allocs
              (,gc-no     (begin (gc) (key-get (%gc-stats) #:gc-no 0)))) ;; and GC count
-         (%thread-allocation-reset!)            ;; reset thread counters
+         (%vm-allocation-reset!)                ;; reset thread counters
          (%count-allocations #t)                ;; count allocations now
          (let* ((,time-start (exact-clock))
                 (,res        (begin ,@args))
-                (,allocs     (%thread-allocation-counter))
-                (,bytes      (%thread-allocation-bytes)))
+                (,allocs     (%vm-allocation-counter))
+                (,bytes      (%vm-allocation-bytes)))
            (eprintf ";    Elapsed time: ~S ms\n"
                     (/ (- (exact-clock) ,time-start) 1000.0))
            (eprintf ";    Allocations: ~S byte~A in ~S allocation call~A (GC: ~A)\n"
@@ -1341,40 +1367,46 @@ doc>
  * @end lisp
 doc>
 |#
-(define (%make-inc-dec-push-body place func val)
+(define (%invalid-place who place)
+  (error who
+         "place must be a symbol (variable) or a list (generalized variable). Was ~S"
+         place))
+
+(define-macro (push! place val)
   (cond
    ((symbol? place)
-    ;; simple xxx! on a variable
-    `(set! ,place (,func ,val ,place)))
+    ;; simple push! on a variable
+    `(set! ,place (cons ,val ,place)))
    ((list? place)
-    ;; Generalized xxx!. Do not evaluate arguments two times
+    ;; Generalized push!. Do not evaluate arguments two times
     (let ((vars (map (lambda (x) (list (gensym) x)) place)))
       `(let ,vars
          ((setter ,(caar vars))
           ,@(map car (cdr vars))
-          (,func ,val ,(map car vars))))))
+          (cons ,val ,(map car vars))))))
    (else
-    (error "place ~W must be a symbol (variable) or a list (generalized variable)"
-           place))))
+    (%invalid-place 'push! place))))
 
-(define-macro (push! place val)
-  (%make-inc-dec-push-body place 'cons val))
 
 (define-macro (pop! place)
   (let ((x (gensym 'res-)))
-    (if (symbol? place)
-        ;; simple pop! on a variable
-        `(let ((,x (car ,place)))
-           (set! ,place (cdr ,place))
-           ,x)
-        ;; Generalized pop!. Do not evaluate argument two times
-        (let ((vars (map (lambda (x) (list (gensym) x)) place)))
-          `(let ,vars
-               (let ((,x ,(map car vars)))
-                 ((setter ,(caar vars))
-                  ,@(map car (cdr vars))
-                  (cdr ,x))
-                 (car ,x)))))))
+    (cond
+     ((symbol? place)
+      ;; simple pop! on a variable
+      `(let ((,x (car ,place)))
+         (set! ,place (cdr ,place))
+         ,x))
+     ((list? place)
+      ;; Generalized pop!. Do not evaluate argument two times
+      (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+        `(let ,vars
+           (let ((,x ,(map car vars)))
+             ((setter ,(caar vars))
+              ,@(map car (cdr vars))
+              (cdr ,x))
+             (car ,x)))))
+     (else
+      (%invalid-place 'pop! place)))))
 
 #|
 <doc EXT inc! dec!
@@ -1403,11 +1435,26 @@ doc>
  * @end lisp
 doc>
 |#
+(define (%make-inc-dec-body who place op val)
+  (cond
+   ((symbol? place)
+    ;; simple inc! or dec! on a variable
+    `(set! ,place (,op ,place ,val)))
+   ((list? place)
+    ;; Generalized inc! or dec!. Do not evaluate arguments two times
+    (let ((vars (map (lambda (x) (list (gensym) x)) place)))
+      `(let ,vars
+         ((setter ,(caar vars))
+          ,@(map car (cdr vars))
+          (,op ,(map car vars) ,val)))))
+   (else
+    (%invalid-place who place))))
+
 (define-macro (inc! place :optional (value 1))
-  (%make-inc-dec-push-body place '+ value))
+  (%make-inc-dec-body 'inc! place '+ value))
 
 (define-macro (dec! place :optional (value 1))
-  (%make-inc-dec-push-body place (lambda (a b) (- b a)) value))
+  (%make-inc-dec-body 'dec! place '- value))
 
 
 #|
@@ -2317,7 +2364,7 @@ doc>
 ;;;;
 ;;;; ======================================================================
 
-;;;; 
+;;;;
 ;;;; SRFI 4: Uniform vectors
 ;;;; ----------------------------------------------------------------------
 ;; The following code is more or less
@@ -2457,7 +2504,7 @@ doc>
                             `((>= ,len ,(- (- arity) 1))
                                 (apply (lambda ,formals ,@body) ,args))))))
                   clauses)
-           (else (error 'case-lambda "no matching clause in list ~S for ~S"
+           (else (error "no matching clause in case-lambda with ~S for ~S"
                         ',(map car clauses) ,args)))))))
 
 ;;;

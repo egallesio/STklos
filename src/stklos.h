@@ -179,7 +179,7 @@ extern "C"
 #define STk_gc_base(ptr)                GC_base(ptr)
 #define STk_must_malloc_many(size)      GC_malloc_many(size)
 
-
+void* STk_must_malloc_cell(size_t size);
 void STk_gc_init(void);
 
 
@@ -202,10 +202,10 @@ typedef enum {
   tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,                   /* 15 */
   tc_subr23, tc_subr34, tc_vsubr, tc_apply, tc_vector,                  /* 20 */
   tc_uvector, tc_hash_table, tc_port, tc_frame, tc_next_method,         /* 25 */
-  tc_promise, tc_regexp, tc_process, tc_continuation, tc_values,        /* 30 */
+  tc_promise, tc_regexp, tc_process, tc_continuation, tc_syntax,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback, tc_syntax,                                               /* 45 */
+  tc_callback,                                               /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -245,10 +245,10 @@ typedef struct {
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
-#define NEWCELL(_var, _type)    do{                                             \
-        _var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));    \
-        BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                              \
-        BOXED_INFO(_var) = 0;                                                   \
+#define NEWCELL(_var, _type)    do{                                               \
+        _var = (SCM) STk_must_malloc_cell(sizeof(struct CPP_CONCAT(_type,_obj))); \
+        BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                                \
+        BOXED_INFO(_var) = 0;                                                     \
         }while(0)
 
 #define NEWCELL_WITH_LEN(_var, _type, _len)     do{     \
@@ -623,8 +623,21 @@ int STk_init_extend(void);
   ----
   ------------------------------------------------------------------------------
 */
+enum f_codes {
+  f_void,      f_char,      f_schar,     f_uchar,
+  f_short,     f_ushort,    f_int,       f_uint,
+  f_long,      f_ulong,     f_longlong,  f_ulonglong,
+  f_int8,      f_uint8,     f_int16,     f_uint16,
+  f_int32,     f_uint32,    f_int64,     f_uint64,
+  f_float,     f_double,    f_boolean,   f_obj,
+  f_pointer,   f_string,
+  f_last    /* MUST be the last item of the enum */
+};
+
+int STk_C_type2number(SCM key);
 SCM STk_call_ext_function(SCM fct, int argc, SCM *argv);
 SCM STk_ext_func_name(SCM fct);
+  
 int STk_init_ffi(void);
 
 
@@ -1383,8 +1396,6 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
 */
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
 
-void STk_thread_inc_allocs(SCM thr, size_t size);
-
 int STk_init_threads(int stack_size, void *start_stack);
 int STk_init_mutexes(void);
 
@@ -1521,7 +1532,7 @@ SCM STk_values2vector(SCM obj, SCM vect);
 EXTERN_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv));
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 
-  SCM STk_load_bcode_file(SCM f, SCM env);
+SCM STk_load_bcode_file(SCM f, SCM env);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
