@@ -1072,20 +1072,39 @@ DEFINE_PRIMITIVE("list-deep-copy", list_deep_copy, subr1, (SCM l))
 
 
 /*
-<doc EXT pair-mutable?
+<doc EXT pair-mutable? pair-immutable!
  * (pair-mutable? obj)
+ * (pair-immutable! obj)
  *
- * Returns |#t| if |obj| is a mutable pair, otherwise returns |#f|.
+ * |Pair-mutable?| returns |#t| if |obj| is a mutable pair, otherwise
+ * returns |#f|.
+ *
+ * |Pair-immutable!| will turn the pair into an immutable one (the
+ * pair is modified and returned -- no copy is made).
+ *
  * @lisp
- * (pair-mutable? '(1 . 2))    => #f
- * (pair-mutable? (cons 1 2))  => #t
- * (pair-mutable? 12)          => #f
+ * (pair-mutable? '(1 . 2))                     => #f
+ * (pair-mutable? (cons 1 2))                   => #t
+ * (pair-mutable? 12)                           => #f
+ * (pair-mutable? (pair-immutable! (cons 1 2))) => #f
+ *
+ * (define x (list 1 2))
+ * (pair-mutable? x)                            => #t
+ * (eq? x (pair-immutable! x))                  => #t
+ * (pair-mutable? x)                            => #f
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("pair-mutable?", pair_mutable, subr1, (SCM obj))
+DEFINE_PRIMITIVE("pair-mutable?", pair_mutablep, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(CONSP(obj) && !(BOXED_INFO(obj) & CONS_CONST));
+}
+
+DEFINE_PRIMITIVE("pair-immutable!", pair_immutable, subr1, (SCM obj))
+{
+  if (!CONSP(obj)) STk_error("bad pair ~s", obj);
+  BOXED_INFO(obj) |= CONS_CONST;
+  return STk_void;
 }
 
 
@@ -1437,7 +1456,8 @@ int STk_init_list(void)
   ADD_PRIMITIVE(list_copy);
   ADD_PRIMITIVE(list_deep_copy);
 
-  ADD_PRIMITIVE(pair_mutable);
+  ADD_PRIMITIVE(pair_mutablep);
+  ADD_PRIMITIVE(pair_immutable);
   ADD_PRIMITIVE(list_star);
   ADD_PRIMITIVE(last_pair);
   ADD_PRIMITIVE(filter);
