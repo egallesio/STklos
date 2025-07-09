@@ -1072,7 +1072,7 @@ DEFINE_PRIMITIVE("list-deep-copy", list_deep_copy, subr1, (SCM l))
 
 
 /*
-<doc EXT pair-mutable? pair-immutable!
+<doc EXT pair-immutable! pair-mutable?
  * (pair-mutable? obj)
  * (pair-immutable! obj)
  *
