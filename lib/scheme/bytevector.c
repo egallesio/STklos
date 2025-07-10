@@ -515,8 +515,14 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
 
       /* The value must fit the 'size' bytes, which means it should
          be less than (256)^size.  The bounds are explicit in the
-         spec. */
-      if ((unsigned long) val >= ((unsigned long) 1 << (size * 8)))
+         spec.
+         However -- if the size is larger than sizeof(long), we don't test,
+         because
+         1. It's always OK, should never trigger the error
+         2. The rotate operator WILL do the wrong thing in 1 << (size * 8)
+            and we'll likely (incorrectly) trigger the error.              */
+      if (size < sizeof(long) &&
+          (unsigned long) val >= ((unsigned long) 1 << (size * 8)))
           STk_error("value %d does not fit in %d bytes", val, size);
 
       char *ptr;
@@ -540,7 +546,7 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
                               0,                  /* nails                   */
                               BIGNUM_VAL(n));     /* from */
       if ((long)count > size)
-          STk_error("bignum ~S does not fit in ~S bytes", n, size);
+          STk_error("bignum ~S does not fit in %d bytes", n, size);
 
       if (end == end_little) {
           memcpy(&(((char *) UVECTOR_DATA(b))[idx]),
