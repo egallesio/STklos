@@ -42,6 +42,9 @@ struct bignum_obj {
 
 #define BIGNUM_VAL(p)   (((struct bignum_obj *) (p))->val)
 
+#define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 && \
+                                  mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
+
 #define LONG_FITS_INTEGER(_l) \
   (((int64_t)INT_MIN_VAL) <= (_l) && \
    (_l) <= ((int64_t) INT_MAX_VAL))
@@ -341,10 +344,11 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
       mpz_add_ui(num2,num,1);
       mpz_neg(num,num2);
 
+      if (BIGNUM_FITS_INTEGER(num))  return MAKE_INT(mpz_get_si(num));
+
       NEWCELL(z, bignum);
       mpz_set(BIGNUM_VAL(z), num);
       return z;
-
     } else {
       /***
           Positive case: the GMP already has a function for that!
@@ -360,6 +364,8 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
                   e,                                   /* endianness within words */
                   0,                                   /* nails (skipped bits)    */
                   &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
+
+      if (BIGNUM_FITS_INTEGER(num))  return MAKE_INT(mpz_get_si(num));
 
       NEWCELL(z, bignum);
       mpz_set(BIGNUM_VAL(z), num);
