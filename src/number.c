@@ -1054,6 +1054,12 @@ static long do_compare(SCM x, SCM y)
                 But we do NOT do this for reals and complexes, because it's a
                 more complicated situation.       */
 
+  /* Fast path when no math is necessary: */
+  if (!COMPLEXP(x) && !COMPLEXP(y)) {
+    //if (negativep(x) && positivep(y)) return -1;
+    if (positivep(x) && negativep(y)) return +1;
+  }
+
  Top:
   switch (TYPEOF(x)) {
     case tc_real:
@@ -1071,6 +1077,9 @@ static long do_compare(SCM x, SCM y)
         case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
         case tc_rational: return do_compare(STk_mul2(x, RATIONAL_DEN(y)),
                                              RATIONAL_NUM(y));
+          /* When comparing fixnums and bignums, the bignum is *always* larger
+             if it's positive, and *always* smaller if it's negative! */
+        case tc_bignum:   return (mpz_sgn(BIGNUM_VAL(y)) < 0) ? +1 : -1;
         case tc_complex:  return complex_diff(x, MAKE_INT(0),
                                               COMPLEX_REAL(y),COMPLEX_IMAG(y));
         default: break;
@@ -1080,6 +1089,9 @@ static long do_compare(SCM x, SCM y)
       switch (TYPEOF(y)) {
         case tc_rational: return do_compare(STk_mul2(x, RATIONAL_DEN(y)),
                                             RATIONAL_NUM(y));
+        /* When comparing fixnums and bignums, the bignum is *always* larger
+           if it's positive, and *always* smaller if it's negative! */
+        case tc_integer: return (mpz_sgn(BIGNUM_VAL(x)) < 0) ? -1 : +1;
         default: break;
       }
       break;
