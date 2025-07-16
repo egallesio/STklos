@@ -1737,6 +1737,20 @@ doc>
 ;; CASE
 ;;
 
+;; Standard transformation of CASE.
+;; (case key
+;;       ((1 2) one-two)
+;;       ((3 4) three-four)
+;;       ((5 6) => print)
+;;       (else nope))
+;;
+;; =>
+;;
+;; (cond ((memv key '(1 2)) one-two)
+;;       ((memv key '(3 4)) three-four)
+;;       ((memv key '(5 6)) (print key))
+;;       (else nope))
+;;
 (define (rewrite-case-clauses key clauses)
   ;; Some controls on the case form
   (let ((all-values '()))
