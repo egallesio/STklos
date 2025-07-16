@@ -1582,6 +1582,26 @@ doc>
 ;; LET (& named let)
 ;;
 
+;; compile-named-let will do the following transformation:
+;;
+;; (compile-named-let 'loop
+;;                    '((a 1) (b 2))
+;;                    '((if #f (loop b a) (void)))
+;;                    4
+;;                    '(%%let loop ((a 1) (b 2)) (if #f (loop b a) (void))) #f #f)
+;;
+;; =>
+;;
+;; ((letrec ((loop (lambda (a b)
+;;                  (if #f
+;;                      (loop b a)
+;;                      (void)))))
+;;    loop)
+;;  1 2)
+;;
+;; - 'loop' is defined as a lambda, which takes arguments a and b;
+;; - it is then applied to the init forms (1 and 2).
+;;
 (define (compile-named-let name bindings body len args env tail?)
   (if (< len 4)
       (compiler-error 'let args "ill formed named let ~S" args)
@@ -1594,6 +1614,27 @@ doc>
                  tail?))))
 
 
+;; compile-%%let does the basic transformation of LET into LAMBDA:
+;;
+;; (let ((a 1) (b 2)) body1 body2)
+;;
+;; =>
+;;
+;; ((lambda (a b) body1 body2)
+;;  1 2)
+;;
+;; If it's a named LET:
+;;
+;; (let loop ((a 1) (b 2)) body1 body2)
+;;
+;; =>
+;;
+;; ((letrec ((loop (lambda (a b)
+;;                   body1 body2)))
+;;    loop)
+;;  1 2)
+;;
+;; LETREC itself will be transformed into nested LETs.
 (define (compile-%%let args env tail?)
   (let ((len (length args)))
     (if (< len 3)
