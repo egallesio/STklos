@@ -119,4 +119,23 @@
 (test "unmutable / new value" -1 %%%___unmutable)
 
 
+
+(test "pair-mutable? 1" #f (pair-mutable? '()))
+(test "pair-mutable? 2" #f (pair-mutable? '(1 2)))
+(test "pair-mutable? 3" #t (pair-mutable? (list 1 2)))
+(test "pair-mutable? 4" #f (pair-mutable? 1))
+(test "pair-mutable? 5" #t (pair-mutable? (list-copy '(1 2))))
+(test "pair-mutable? 6" #t (pair-mutable? (map - '(1 2))))
+
+(test "pair-immutable! 1" #t  (let ((a (list 1 2 3))) (pair-mutable? a)))
+(test "pair-immutable! 2" #f  (let ((a (list 1 2 3))) (pair-immutable! a) (pair-mutable? a)))
+(test "pair-immutable! (already-immutable)"
+      '((1 2 3)  #f)
+      (let ((a '(1 2 3))) (pair-immutable! a) (list a (pair-mutable? a))))
+(test/error "pair-immutable! (set! not allowed)"
+            (let ((a (list 1 2 3))) (pair-immutable! a) (set-car! a 100)))
+(test/error "pair-immutable! (bad pair)"    (pair-immutable! 20))
+(test/error "pair-immutable! (bad pair)"    (pair-immutable! '()))
+(test/error "pair-immutable! (bad pair)"    (pair-immutable! (list)))
+
 (test-section-end)
