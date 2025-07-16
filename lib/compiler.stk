@@ -173,7 +173,7 @@
 ;; STKLOS-COMPILER> (let ((a 10) (b 20))
 ;;                    (let-syntax ((f (syntax-rules () ((_) -1))))
 ;;                      (let ((c 5))
-;;                        (%%debug-scope))))
+;;                        (#%debug-scope))))
 ;;
 ;; ***SCOPE*** #[struct scope 7f38fa04e7b0]
 ;;
@@ -181,14 +181,14 @@
 ;;    ==> locals= () mlocals= ((f . #[syntax f])) parent =#[struct scope 7f38fa046690]
 ;;    ==> locals= (b a) mlocals= () parent =#f
 
-;;(define (compile-%%debug-scope env)     ;; FIXME:
-;;  (%debug "***SCOPE*** ~S\n" env)
-;;  (let L ((env env))
-;;    (when env
-;;      (%debug "   ==> locals= ~S mlocals= ~S parent =~S"
-;;              (scope-locals env) (scope-mlocals env) (scope-parent env))
-;;      (L (scope-parent env))))
-;;  (emit 'IM-VOID))
+(define (compile-%%debug-scope args env tail?)     ;; FIXME:
+ (%debug "***SCOPE*** ~S\n" env)
+ (let L ((env env))
+   (when env
+     (%debug "   ==> locals= ~S mlocals= ~S parent =~S"
+             (scope-locals env) (scope-mlocals env) (scope-parent env))
+     (L (scope-parent env))))
+ (emit 'IM-VOID))
 
 
 ; ======================================================================
@@ -1775,6 +1775,20 @@ doc>
 ;; CASE
 ;;
 
+;; Standard transformation of CASE.
+;; (case key
+;;       ((1 2) one-two)
+;;       ((3 4) three-four)
+;;       ((5 6) => print)
+;;       (else nope))
+;;
+;; =>
+;;
+;; (cond ((memv key '(1 2)) one-two)
+;;       ((memv key '(3 4)) three-four)
+;;       ((memv key '(5 6)) (print key))
+;;       (else nope))
+;;
 (define (rewrite-case-clauses key clauses)
   ;; Some controls on the case form
   (let ((all-values '()))
