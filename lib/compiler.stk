@@ -116,10 +116,26 @@
 ;                               SCOPE
 ;
 ; ======================================================================
+
+;; When "ENV" is given to a procedure in this compiler, it is either a
+;; struct of the type 'scope' (below) or #f.
+;;
+;; An example of scope struct: in the following code,
+;;
+;; (let ((a 10) (b 20))
+;;   (let-syntax ((f (syntax-rules () ((_) -1))))
+;;     (let ((c 5))
+;;       ...)))
+;;
+;; Scope will be represented as
+;;
+;; SCOPE-A: locals= (c)   mlocals= ()                  parent = SCOPE-B
+;; SCOPE-B: locals= ()    mlocals= ((f . #[syntax f])) parent = SCOPE-C
+;; SCOPE-C: locals= (b a) mlocals= ()                  parent =#f
 (define-struct scope
-  locals                        ; local symbols
-  mlocals                       ; #t if symbols are macros
-  parent)                       ; parent scope
+  locals             ; local symbols            (list of symbols)
+  mlocals            ; #t if symbols are macros (list of conses, symbol/transformer)
+  parent)            ; parent scope             (or #f if no parent)
 
 ;; find-symbol-in-env will return:
 ;;    - a symbol, if it is a local variable
@@ -2087,6 +2103,22 @@ both forms.
             ((%%label)            (compile-%%label        e env tail?))
             ((%%goto)             (compile-%%goto         e env tail?))
             ((%%symbol-value)     (compile-%%symbol-value e env tail?))
+
+            ;; Uncomment the following two lines when debugging the scope.
+            ;; It may be used as in the following example:
+            ;; STKLOS-COMPILER> (let ((a 10) (b 20))
+            ;;                    (let-syntax ((f (syntax-rules () ((_) -1))))
+            ;;                      (let ((c 5))
+            ;;                        (%%debug-scope))))
+            ;;
+            ;; ***SCOPE*** #[struct scope 7f38fa04e7b0]
+            ;;
+            ;;    ==> locals= (c) mlocals= () parent =#[struct scope 7f38fa04b150]
+            ;;    ==> locals= () mlocals= ((f . #[syntax f])) parent =#[struct scope 7f38fa046690]
+            ;;    ==> locals= (b a) mlocals= () parent =#f
+
+            ;;((%%debug-scope)      (begin (%debug-scope env)
+            ;;                             (emit 'IM-VOID)))
 
             ;; Standard call (first is not in lexical env)
             (else                 (compile-call           e env tail?)))))))
