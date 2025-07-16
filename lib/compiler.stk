@@ -1715,6 +1715,28 @@ doc>
 
 ;;
 ;; COND
+
+;;
+;; COND is rewritten into IFs in a quite standard way:
+;;
+;; (cond ((test1 body1)
+;;        (test2 body2)
+;;        (test3)
+;;        (test4 => func)
+;;        (else body-default)))
+;;
+;; =>
+;;
+;; (if test1
+;;     (begin body1)
+;;     (if test2
+;;         (begin body2)
+;;         (let ((G16 test3))
+;;           (or G16
+;;               (let ((G17 test4))
+;;                 (if G17
+;;                     (func G17)
+;;                     (begin body-default)))))))
 ;;
 (define (rewrite-cond-clauses c)
   (cond
