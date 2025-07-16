@@ -91,6 +91,9 @@ doc>
 (define-module (stklos describe)
   (export describe)
 
+  (define-generic describe :add-default #f) ;; Do not keep old value of describe
+                                            ;; (that is the autolad function)
+
 ;;;
 ;;; describe for simple objects
 ;;;
@@ -154,7 +157,7 @@ doc>
                     (%uvector-length x)))))
 
      ((closure? x)
-      (format port "a procedure")
+      (format port "a closure")
       ;; We don't need to show the formals, because they're already
       ;; displayed in the object. For example, [closure g (a b)].
       ;; But we offer the user a way to read the source, if it is
@@ -164,7 +167,7 @@ doc>
                 ".~%The source code is available -- call `procedure-source` on it")))
 
      ((procedure? x)
-      (format port "a primitive procedure"))
+      (format port "a (non closure) procedure"))
 
      ((eof-object? x)
       (format port "the end-of-file object"))
