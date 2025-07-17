@@ -2436,7 +2436,7 @@ doc>
 ;; SRFI-16: "Syntax for procedures of variable arity"
 ;;
 #|
-<doc EXT-SYNTAX case-lambda
+<doc R7RS-SYNTAX case-lambda
  * (case-lambda <clause> ...)
  *
  * Each |<clause>| should have the form |(<formals> <body>)|, where
@@ -2481,31 +2481,38 @@ doc>
 doc>
 |#
 (define-macro (case-lambda . clauses)
-  (let ((len  (gensym))
-        (args (gensym))
+  (let ((len        (gensym))
+        (args       (gensym))
+        (len-prim   (gensym 'length))
+        (apply-prim (gensym 'apply))
+        (err-prim   (gensym 'error))
         (compute-arity (in-module STKLOS-COMPILER compute-arity)))
-    `(lambda ,args
-       (let ((,len (length ,args)))
-         (cond
-           ,@(map (lambda (x)
-                    (unless (>= (length x) 2)
-                      (error 'case-lambda "bad clause ~S" x))
-                    (let* ((formals (car x))
-                           (body    (cdr x))
-                           (arity   (compute-arity formals)))
-                      (cond
+    `(%%let ((,len-prim   (in-module SCHEME length))
+             (,apply-prim (in-module SCHEME apply))
+             (,err-prim   (in-module SCHEME error)))
+       (lambda ,args
+         (let ((,len (,len-prim ,args)))
+           (%%cond
+            ,@(map (lambda (x)
+                     (unless (>= (length x) 2)
+                       (error 'case-lambda "bad clause ~S" x))
+                     (let* ((formals (car x))
+                            (body    (cdr x))
+                            (arity   (compute-arity formals)))
+                       (cond
                         ((positive? arity)
-                            `((= ,len ,arity)
-                              (apply (lambda ,formals ,@body) ,args)))
+                         `((= ,len ,arity)
+                           (,apply-prim (%%lambda ,formals ,@body) ,args)))
                         ((zero? arity)
-                            `((= ,len ,arity)
-                              ,@body))
+                         `((= ,len ,arity)
+                           ,@body))
                         (else
-                            `((>= ,len ,(- (- arity) 1))
-                                (apply (lambda ,formals ,@body) ,args))))))
-                  clauses)
-           (else (error "no matching clause in case-lambda with ~S for ~S"
-                        ',(map car clauses) ,args)))))))
+                         `((>= ,len ,(- (- arity) 1))
+                           (,apply-prim (%%lambda ,formals ,@body) ,args))))))
+                   clauses)
+            (else (,err-prim "no matching clause in case-lambda with ~S for ~S"
+                             ',(map car clauses) ,args))))))))
+
 
 ;;;
 ;;; SRFI-35: "Conditions"

@@ -605,7 +605,7 @@
             ((a)        (f a))
             ((a b c)    (/ (+ a b c) 3))
             ((x . rest) (* x (apply * rest)))))
-  
+
   (test "case-lambda.8"
         '(10 -5 200 120)
         (list (g)       ; 10
@@ -656,17 +656,17 @@
                       z)))))
           (f 2))))
 
-;; lexical scope: we override APPLY -- this fails!
-;; (test "case-lambda.13"
-;;       '(0 -9)
-;;       (let ((counter 0))
-;;         (let* ((ap apply)
-;;                (apply (lambda args
-;;                         (set! counter (+ 1 counter))
-;;                         (ap (car args) (cadr args)))))
-;;           (let ((x ((case-lambda
-;;                       ((a) (- a))) 9)))
-;;             (list counter x))))
+;; lexical scope: we override APPLY
+(test "case-lambda.13"
+      '(0 -9)
+      (let ((counter 0))
+        (let* ((ap apply)
+               (apply (lambda args
+                        (set! counter (+ 1 counter))
+                        (ap (car args) (cadr args)))))
+          (let ((x ((case-lambda
+                      ((a) (- a))) 9)))
+            (list counter x)))))
 
 ;; ======================================================================
 
