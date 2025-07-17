@@ -504,9 +504,30 @@ static void bytevector_int_set_aux (SCM b, SCM i, SCM n, SCM endianness, SCM s)
 
       /* The value must fit the 'size' bytes, which means it should
          be less than (256)^size.  The bounds are explicit in the
-         spec. */
-      if ((unsigned long) val >= ((unsigned long) 1 << (size * 8)))
+         spec.
+
+         1. Compute B = sizeof(long) * CHAR_BIT, total bits in a long int.
+         2. Compute K = size*8, bits we want n to fit into
+         3. If K >= B, always answer yes (obviously).
+         4. Otherwise we  B − K (which we call 'shift') is the number of high bits
+            that we must lose to get anything larger than k.8 bits away.
+            * (x << shift) throws away the top shift bits, keeping only the low
+              K bits (and since x is signed, this is still a left shift).
+            * (... >> shift) is a right-shift, sign-extending from bit K–1.
+         5. If x really only used K bits, these two shifts round‐trip perfectly
+            and we get truncated == x. If x used any of the upper bits, they’re
+            lost and the reuncated is NOT equal to x.
+      */
+
+      size_t B = sizeof(long) * CHAR_BIT;    // total bits in a long int
+      size_t K = size * CHAR_BIT;            // bits we want n to fit into
+
+      if (K < B) {
+        size_t shift = B - K;
+        long truncated = (val << shift) >> shift;
+        if (truncated != val)
           STk_error("value %d does not fit in %d bytes", val, size);
+      }
 
       char *ptr;
       if (end == end_little) ptr = &(((char *) UVECTOR_DATA(b))[idx]);
