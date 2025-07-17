@@ -206,3 +206,21 @@
        (let ((v (rewrite-expression (cadr expr) env)))
          (list '- v 1))
        expr)))
+
+(compiler:add-rewriter!            ;; '(/ log a b)' rewriter
+ '/
+ ;; (/ (log a) (log b) ===> (log a b)
+ ;; Why?
+ ;; 1. It's faster
+ ;; 2. Doesn't introduce inexactness when not necessary:
+ ;;    (/ (log 4) (log 2))  =>  2
+ (lambda (expr len env)
+   (if (and (= len 3)
+            (pair? (cadr  expr))       ;; (log a)
+            (pair? (caddr expr))       ;; (log b)
+            (eq? 'log (caadr expr))    ;; 'log (first)
+            (eq? 'log (caaddr expr)))  ;; 'log (second)
+       (let ((a (rewrite-expression (cadr (cadr  expr)) env))
+             (b (rewrite-expression (cadr (caddr expr)) env)))
+         `(log ,a ,b))
+       expr)))
