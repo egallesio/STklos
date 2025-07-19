@@ -521,7 +521,7 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
          1. It's always OK, should never trigger the error
          2. The rotate operator WILL do the wrong thing in 1 << (size * 8)
             and we'll likely (incorrectly) trigger the error.              */
-      if (size < sizeof(long) &&
+      if ((unsigned long) size < sizeof(long) &&
           (unsigned long) val >= ((unsigned long) 1 << (size * 8)))
           STk_error("value %d does not fit in %d bytes", val, size);
 
