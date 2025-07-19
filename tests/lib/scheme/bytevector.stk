@@ -296,6 +296,41 @@
               (bytevector->uint-list b (endianness little) 2))
             '(513 65283 513 513)))
 
+    (let ([b (make-bytevector 16 0)])
+      (test "38+1"
+            (void)
+            (bytevector-sint-set! b 0 -11
+                                  (endianness little) 16))
+      (test "38+2"
+            -11
+            (bytevector-sint-ref b 0
+                                 (endianness little) 16))
+      (test "38+3"
+            (void)
+            (bytevector-sint-set! b 0 (+ 121 (- (expt 3 70)))
+                                  (endianness little) 16))
+      (test "38+4"
+            (+ 121 (- (expt 3 70)))
+            (bytevector-sint-ref b 0
+                                 (endianness little) 16))
+
+      (test "38+5"
+            (void)
+            (bytevector-sint-set! b 0 -11
+                                  (endianness big) 16))
+      (test "38+6"
+            -11
+            (bytevector-sint-ref b 0
+                                 (endianness big) 16))
+      (test "38+7"
+            (void)
+            (bytevector-sint-set! b 0 (+ 121 (- (expt 3 70)))
+                                  (endianness big) 16))
+      (test "38+8"
+            (+ 121 (- (expt 3 70)))
+            (bytevector-sint-ref b 0
+                                 (endianness big) 16)))
+
 
 
 (let ((b (u8-list->bytevector
