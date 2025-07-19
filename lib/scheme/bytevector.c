@@ -42,6 +42,9 @@ struct bignum_obj {
 
 #define BIGNUM_VAL(p)   (((struct bignum_obj *) (p))->val)
 
+#define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 && \
+                                  mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
+
 #define LONG_FITS_INTEGER(_l) \
   (((int64_t)INT_MIN_VAL) <= (_l) && \
    (_l) <= ((int64_t) INT_MAX_VAL))
@@ -341,10 +344,11 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
       mpz_add_ui(num2,num,1);
       mpz_neg(num,num2);
 
+      if (BIGNUM_FITS_INTEGER(num))  return MAKE_INT(mpz_get_si(num));
+
       NEWCELL(z, bignum);
       mpz_set(BIGNUM_VAL(z), num);
       return z;
-
     } else {
       /***
           Positive case: the GMP already has a function for that!
@@ -360,6 +364,8 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
                   e,                                   /* endianness within words */
                   0,                                   /* nails (skipped bits)    */
                   &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
+
+      if (BIGNUM_FITS_INTEGER(num))  return MAKE_INT(mpz_get_si(num));
 
       NEWCELL(z, bignum);
       mpz_set(BIGNUM_VAL(z), num);
@@ -509,8 +515,14 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
 
       /* The value must fit the 'size' bytes, which means it should
          be less than (256)^size.  The bounds are explicit in the
-         spec. */
-      if ((unsigned long) val >= ((unsigned long) 1 << (size * 8)))
+         spec.
+         However -- if the size is larger than sizeof(long), we don't test,
+         because
+         1. It's always OK, should never trigger the error
+         2. The rotate operator WILL do the wrong thing in 1 << (size * 8)
+            and we'll likely (incorrectly) trigger the error.              */
+      if (size < sizeof(long) &&
+          (unsigned long) val >= ((unsigned long) 1 << (size * 8)))
           STk_error("value %d does not fit in %d bytes", val, size);
 
       char *ptr;
@@ -534,7 +546,7 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
                               0,                  /* nails                   */
                               BIGNUM_VAL(n));     /* from */
       if ((long)count > size)
-          STk_error("bignum ~S does not fit in ~S bytes", n, size);
+          STk_error("bignum ~S does not fit in %d bytes", n, size);
 
       if (end == end_little) {
           memcpy(&(((char *) UVECTOR_DATA(b))[idx]),

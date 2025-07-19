@@ -266,6 +266,9 @@
 
       (test "31" (bytevector-sint-ref b 0 (endianness little) 16)
             -3)
+
+      (test "31.5" #t (fixnum? (bytevector-sint-ref b 0 (endianness little) 16)))
+
       (test "32" (bytevector->u8-list b)
             '(253 255 255 255 255 255 255 255
                   255 255 255 255 255 255 255 255))
@@ -278,6 +281,8 @@
             #xfffffffffffffffffffffffffffffffd)
 
       (test "35" (bytevector-sint-ref b 0 (endianness big) 16) -3)
+
+      (test "35.5" #t (fixnum? (bytevector-sint-ref b 0 (endianness big) 16)))
 
       (test "36" (bytevector->u8-list b)
             '(255 255 255 255 255 255 255 255
