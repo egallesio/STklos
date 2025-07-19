@@ -1298,7 +1298,7 @@ char* STk_boot_consts = "#("
 "!no-uvector-syntax" " "
 "(lambda (vars producer . body) `(call-with-values (lambda () ,producer) (lambda ,vars ,@body)))" " "
 "case-lambda" " "
-"(lambda clauses (let ((len (gensym)) (args (gensym)) (len-prim (gensym 'length)) (apply-prim (gensym 'apply)) (err-prim (gensym 'error)) (compute-arity (in-module STKLOS-COMPILER compute-arity))) `(%%let ((,len-prim (in-module SCHEME length)) (,apply-prim (in-module SCHEME apply)) (,err-prim (in-module SCHEME error))) (lambda ,args (let ((,len (,len-prim ,args))) (%%cond ,@(map (lambda (x) (unless (>= (length x) 2) (error 'case-lambda \"bad clause ~S\" x)) (let* ((formals (car x)) (body (cdr x)) (arity (compute-arity formals))) (cond ((positive? arity) `((= ,len ,arity) (,apply-prim (%%lambda ,formals ,@body) ,args))) ((= arity 0) `((= ,len ,arity) ,@body)) (else `((>= ,len ,(- (- arity) 1)) (,apply-prim (lambda ,formals ,@body) ,args)))))) clauses) (else (,err-prim \"no matching clause in case-lambda with ~S for ~S\" ',(map car clauses) ,args))))))))" " "
+"(lambda clauses (let ((len (gensym)) (args (gensym)) (len-prim (gensym 'length)) (apply-prim (gensym 'apply)) (err-prim (gensym 'error)) (compute-arity (in-module STKLOS-COMPILER compute-arity))) `(%%let ((,len-prim (in-module SCHEME length)) (,apply-prim (in-module SCHEME apply)) (,err-prim (in-module SCHEME error))) (lambda ,args (let ((,len (,len-prim ,args))) (%%cond ,@(map (lambda (x) (unless (>= (length x) 2) (error 'case-lambda \"bad clause ~S\" x)) (let* ((formals (car x)) (body (cdr x)) (arity (compute-arity formals))) (cond ((positive? arity) `((= ,len ,arity) (,apply-prim (%%lambda ,formals ,@body) ,args))) ((zero? arity) `((= ,len ,arity) ,@body)) (else `((>= ,len ,(- (- arity) 1)) (,apply-prim (%%lambda ,formals ,@body) ,args)))))) clauses) (else (,err-prim \"no matching clause in case-lambda with ~S for ~S\" ',(map car clauses) ,args))))))))" " "
 "\"bad clause ~S\"" " "
 "\"no matching clause in case-lambda with ~S for ~S\"" " "
 "%define-condition-type-accessors" " "
@@ -23514,7 +23514,7 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x7d,
 0x2d,
-0x6953,
+0x6956,
 0x25,
 0x55,
 0x11a,
@@ -33232,7 +33232,7 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x50b,
 0x23,
-0x140,
+0x143,
 0xffff,
 0x25,
 0x25,
@@ -33361,7 +33361,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x23,
-0x83,
+0x86,
 0x1,
 0x25,
 0x65,
@@ -33439,9 +33439,12 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x3b,
 0x24,
+0x25,
 0x67,
-0x5,
-0x5c,
+0x56,
+0xcd,
+0x1,
+0x1d,
 0xe,
 0x55,
 0x2e2,
@@ -33476,7 +33479,7 @@ STk_instr STk_boot_code [] = {
 0x75,
 0x202,
 0x55,
-0xb5,
+0xb4,
 0x65,
 0xd,
 0x3b,
