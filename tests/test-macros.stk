@@ -274,8 +274,6 @@
         (lambda ()
           (g ((quote ...) 2 3 4 5 6)))))
 
-
-
 (test "macro shadows variable.1"
       -1
       (let ((f 1))
@@ -376,6 +374,27 @@
 
 ;; (select-module B)
 ;; (f) ;; should be 10 (a in module A, not in module B)
+
+
+;;; vector patterns
+
+(define-syntax %%%%f (syntax-rules () ((_ #(a b)) b)))
+(test "vector-pattern.1" 2 (%%%%f #(1 2)))
+
+(let-syntax ((f (syntax-rules () ((_ #(a b)) b))))
+  (test "vector-pattern.2" 2 (f #(1 2))))
+
+(let-syntax ((f (syntax-rules () ((_ #(a b)) b))))
+  (test/compile-error "vector-pattern.3" (f #(1 2 3))))
+
+(let-syntax ((f (syntax-rules () ((f (a #(b c) d)) (list d c b a)))))
+  (test "vector-pattern.4" '(4 3 2 1)  (f (1 #(2 3) 4))))
+
+(let-syntax ((f (syntax-rules () ((f a #(b c) d) (list d c b a)))))
+  (test "vector-pattern.5" '(4 3 2 1)  (f 1 #(2 3) 4)))
+
+(let-syntax ((f (syntax-rules () ((_ #()) 20))))
+  (test "vector-pattern.6" 20 (f #())))
 
 
 ;;FIXME: Add more tests !!!!!!!!!
