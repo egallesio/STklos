@@ -23,7 +23,7 @@
 
 #-======================================================================
 
-SUBDIRS=160
+SUBDIRS=160 225
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -137,6 +137,7 @@ SRC_STK   = 1.stk   \
             222.stk \
             223.stk \
             224.stk \
+            225.stk \
             227.stk \
             228.stk \
             229.stk \
@@ -255,6 +256,7 @@ SRC_OSTK =  1.ostk   \
             222.ostk \
             223.ostk \
             224.ostk \
+            225.ostk \
             227.ostk \
             228.ostk \
             229.ostk \
@@ -344,6 +346,11 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 217.ostk: ../stklos/itrie.$(SO)
 221.ostk: 41.ostk 158.ostk
 224.ostk: ../scheme/comparator.ostk
+225.ostk: 225/core.ostk \
+          225/alist-impl.ostk \
+          225/default-impl.ostk \
+          225/indexes.ostk \
+          225/srfi-125-impl.ostk
 234.ostk: 1.ostk 11.ostk 26.ostk
 235.ostk: 1.ostk
 260.ostk: 27.$(SO)
