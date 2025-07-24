@@ -83,6 +83,70 @@ DEFINE_PRIMITIVE("%cars+cdrs/notest", cars_cdrs_notest, subr1, (SCM lists)) {
   return cars_cdrs(lists, NULL, 1, 1, 0);
 }
 
+/*   We already have list_type_and_length in list.c, which does most
+     of the job, so it makes no sense to use the reference
+     implementation of SRFI-1 for length+, circular-list? and
+     dotted-list?.
+
+     list_type_and_length's return value depends on what the list is:
+     1. PROPER LIST: return STk_nil.
+     2. CYCLIC LIST: A CONS cell (this is where the cycle starts).
+     3. FINITE IMPROPER LIST: The last CDR.
+     4. NOT A LIST: NULL.  */
+
+DEFINE_PRIMITIVE("length+", length_plus, subr1, (SCM list)) {
+  /* length+ returns #f if the list is not proper. */
+
+  int len;
+  SCM res = list_type_and_length(list, &len);
+
+  if (res == NULL) STk_error("bad list ~W", list); /* not a list */
+  if (res == STk_nil) return MAKE_INT(len);        /* proper */
+  return STk_false;                                /* improper (dotted/circular) */
+}
+
+DEFINE_PRIMITIVE("dotted-list?", dotted_list, subr1, (SCM list)) {
+  int len;
+  SCM res = list_type_and_length(list, &len);
+  if (res == NULL) STk_error("bad list ~W", list); /* not a list */
+
+  return MAKE_BOOLEAN(!CONSP(res)       &&  /* not circular */
+                      !(res == STk_nil));   /* not proper */
+}
+
+DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
+  /*  count [start step] */
+  if (argc < 1) STk_error("at least one argument needed");
+  SCM count, start, step;
+
+  count = *argv--; argc--;
+  if (!(INTP(count))) STk_error("bad fixnum ~S", count);
+
+  if (INT_VAL(count) == 0) return STk_nil;
+
+  if (argc) {
+    start = *argv--; argc--;
+  } else {
+    start = MAKE_INT(0);
+  }
+  if (argc) {
+    step = *argv--; argc--;
+  } else {
+    step = MAKE_INT(1);
+  }
+
+  if (count < 0) STk_error("negative step count %d", count);
+
+  SCM list = STk_C_make_list(INT_VAL(count), start);
+  SCM ptr  = CDR(list); /* CAR is already initialized by STk_C_make_list */
+
+  for (long c = 1; c < INT_VAL(count); c++, ptr = CDR(ptr)) {
+    start = STk_add2(start, step);
+    CAR(ptr) = start;
+  }
+  return list;
+}
+
 MODULE_ENTRY_START("scheme/list")
 {
   SCM module =  STk_create_module(STk_intern("scheme/list"));
@@ -92,6 +156,10 @@ MODULE_ENTRY_START("scheme/list")
   ADD_PRIMITIVE_IN_MODULE(cars_cdrs, module);
   ADD_PRIMITIVE_IN_MODULE(cars_cdrs_fin, module);
   ADD_PRIMITIVE_IN_MODULE(cars_cdrs_notest, module);
+
+  ADD_PRIMITIVE_IN_MODULE(length_plus, module);
+  ADD_PRIMITIVE_IN_MODULE(dotted_list, module);
+  ADD_PRIMITIVE_IN_MODULE(iota, module);
 
   STk_export_all_symbols(module);
 

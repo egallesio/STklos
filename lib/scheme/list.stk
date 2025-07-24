@@ -366,16 +366,17 @@
 
 ;;; IOTA count [start step] (start start+step ... start+(count-1)*step)
 
-(define (iota count :optional (start 0) (step 1))
-  (check-arg integer? count iota)
-  (check-arg number? start iota)
-  (check-arg number? step iota)
-  (if (< count 0) (error 'iota "negative step count ~S" count))
-  (let ((last-val (+ start (* (- count 1) step))))
-    (do ((count count (- count 1))
-     (val last-val (- val step))
-     (ans '() (cons val ans)))
-    ((<= count 0)  ans))))
+;; Reweitten in C
+;; (define (iota count :optional (start 0) (step 1))
+;;   (check-arg integer? count iota)
+;;   (check-arg number? start iota)
+;;   (check-arg number? step iota)
+;;   (if (< count 0) (error 'iota "negative step count ~S" count))
+;;   (let ((last-val (+ start (* (- count 1) step))))
+;;     (do ((count count (- count 1))
+;;      (val last-val (- val step))
+;;      (ans '() (cons val ans)))
+;;     ((<= count 0)  ans))))
 
 ;;; I thought these were lovely, but the public at large did not share my
 ;;; enthusiasm...
@@ -456,16 +457,20 @@
 ;;; <dotted-list> ::= <non-nil,non-pair>    ; Empty dotted list
 ;;;               |   (cons <x> <dotted-list>)  ; Proper-list pair
 
-(define (dotted-list? x)
-  (let lp ((x x) (lag x))
-    (if (pair? x)
-    (let ((x (cdr x)))
-      (if (pair? x)
-          (let ((x   (cdr x))
-            (lag (cdr lag)))
-        (and (not (eq? x lag)) (lp x lag)))
-          (not (null? x))))
-    (not (null? x)))))
+;; Suppressed dotted-list? and circular-list? because we build them easily
+;; in C, using list_type_and_length().
+
+;; In STklos core
+;; (define (dotted-list? x)
+;;   (let lp ((x x) (lag x))
+;;     (if (pair? x)
+;;     (let ((x (cdr x)))
+;;       (if (pair? x)
+;;           (let ((x   (cdr x))
+;;             (lag (cdr lag)))
+;;         (and (not (eq? x lag)) (lp x lag)))
+;;           (not (null? x))))
+;;     (not (null? x)))))
 
 ;; In STklos core
 ;; (define (circular-list? x)
@@ -514,18 +519,19 @@
 ;        (lp (cdr x) (+ len 1))     ; diverges.
 ;        len)))
 
-(define (length+ x)         ; Returns #f if X is circular.
-  (let lp ((x x) (lag x) (len 0))
-    (if (pair? x)
-    (let ((x (cdr x))
-          (len (+ len 1)))
-      (if (pair? x)
-          (let ((x   (cdr x))
-            (lag (cdr lag))
-            (len (+ len 1)))
-        (and (not (eq? x lag)) (lp x lag len)))
-          len))
-    len)))
+;; Suppressed length+: re-written in C, using list_type_and_length():
+;; (define (length+ x)         ; Returns #f if X is circular.
+;;   (let lp ((x x) (lag x) (len 0))
+;;     (if (pair? x)
+;;     (let ((x (cdr x))
+;;           (len (+ len 1)))
+;;       (if (pair? x)
+;;           (let ((x   (cdr x))
+;;             (lag (cdr lag))
+;;             (len (+ len 1)))
+;;         (and (not (eq? x lag)) (lp x lag len)))
+;;           len))
+;;     len)))
 
 (define (zip list1 . more-lists) (apply map list list1 more-lists))
 
@@ -1771,6 +1777,7 @@ FILTER an FILTER! are primitives in STklos
 (redefine make-list)
 (redefine assoc)
 (redefine member)
+
 
 ;; Not R7RS, but also moved to STklos core:
 (redefine last-pair)
