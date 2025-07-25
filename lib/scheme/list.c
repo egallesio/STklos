@@ -147,6 +147,127 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
   return list;
 }
 
+DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative amount ~S", k);
+
+  SCM res = STk_C_make_list(INT_VAL(k), STk_false);
+  SCM ptr = res;
+
+  for (int i = INT_VAL(k); i; i--) {
+    if (!CONSP(lis)) STk_error("count (~S) less than list size", k);
+    CAR(ptr) = CAR(lis);
+    lis = CDR(lis);
+    ptr = CDR(ptr);
+  }
+  return res;
+}
+
+DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative amount ~S", k);
+  if (k == MAKE_INT(0)) return STk_nil;
+
+  SCM ptr = lis;
+
+  for (int i = INT_VAL(k) - 1; i; i--) {
+    if (!CONSP(ptr)) STk_error("count (~S) larger than list size", k);
+    ptr = CDR(ptr);
+  }
+  if (!CONSP(ptr)) STk_error("count (~S) larger than list size", k);
+  CDR(ptr) = STk_nil;
+
+  return lis;
+}
+
+DEFINE_PRIMITIVE("drop", drop, subr2, (SCM lis, SCM k)) {
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+
+  SCM res = lis;
+
+  for (int i = INT_VAL(k); i; i--) {
+    if (!CONSP(res)) STk_error("count (~S) less than list size", k);
+    res = CDR(res);
+  }
+  return res;
+}
+
+DEFINE_PRIMITIVE("take-right", take_right, subr2, (SCM lis, SCM k)) {
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+
+  int len;
+  SCM res = list_type_and_length(lis, &len);
+  SCM ptr = lis;
+
+  if (CONSP(res)) STk_error("circular list ~W", lis);
+  if (res == NULL) STk_error("bad list ~W", lis);
+
+  for (int i = 0; i < len - INT_VAL(k); i++)
+    ptr = CDR(ptr);
+  return ptr;
+}
+
+DEFINE_PRIMITIVE("drop-right", drop_right, subr2, (SCM lis, SCM k)) {
+  /* The spec says " If the argument is a list of non-zero length,
+     drop-right is guaranteed to return a freshly-allocated list, even
+     in the case where nothing is dropped, e.g. (drop-right lis
+     0)." */
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+
+  int len;
+  SCM res = list_type_and_length(lis, &len);
+
+  if (CONSP(res)) STk_error("circular list ~W", lis);
+  if (res == NULL) STk_error("bad list ~W", lis);
+
+  if (INT_VAL(k) == len) return STk_nil;
+
+  int size = len - INT_VAL(k);
+  if (size < 0) STk_error("count %d larger than list size %d", INT_VAL(k), len);
+
+  res = STk_C_make_list(size, STk_false);
+  SCM ptr = res;
+
+  for (; size-1; size--) {
+    CAR(ptr) = CAR(lis);
+    lis = CDR(lis);
+    ptr = CDR(ptr);
+  }
+  CAR(ptr) = CAR(lis);
+  CDR(ptr) = STk_nil;
+
+  return res;
+}
+
+DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+
+  int len;
+  SCM res = list_type_and_length(lis, &len);
+
+  if (CONSP(res)) STk_error("circular list ~W", lis);
+  if (res == NULL) STk_error("bad list ~W", lis);
+
+  if (INT_VAL(k) == len) return STk_nil;
+
+  int size = len - INT_VAL(k);
+  if (size < 0) STk_error("count %d larger than list size %d", INT_VAL(k), len);
+
+  SCM ptr = lis;
+
+  for (; size-1; size--)
+    ptr = CDR(ptr);
+
+  /* Just cut the tail setting the CDR to NIL: */
+  CDR(ptr) = STk_nil;
+
+  return lis;
+}
+
 MODULE_ENTRY_START("scheme/list")
 {
   SCM module =  STk_create_module(STk_intern("scheme/list"));
@@ -160,6 +281,13 @@ MODULE_ENTRY_START("scheme/list")
   ADD_PRIMITIVE_IN_MODULE(length_plus, module);
   ADD_PRIMITIVE_IN_MODULE(dotted_list, module);
   ADD_PRIMITIVE_IN_MODULE(iota, module);
+
+  ADD_PRIMITIVE_IN_MODULE(take, module);
+  ADD_PRIMITIVE_IN_MODULE(drop, module);
+  ADD_PRIMITIVE_IN_MODULE(ntake, module);
+  ADD_PRIMITIVE_IN_MODULE(take_right, module);
+  ADD_PRIMITIVE_IN_MODULE(drop_right, module);
+  ADD_PRIMITIVE_IN_MODULE(ndrop_right, module);
 
   STk_export_all_symbols(module);
 
