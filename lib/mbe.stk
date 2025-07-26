@@ -771,10 +771,11 @@ doc>
                         (cons macro-name (cadr syn-rules))))
           (clauses  (if alt-ellipsis?
                         (cdddr syn-rules)
-                        (cddr syn-rules))))
-      `(lambda args
+                        (cddr syn-rules)))
+          (args     (gensym 'args)))
+      `(lambda ,args
          ((%%symbol-value 'find-clause 'MBE) ',macro-name
-                                             args
+                                             ,args
                                              ',keywords
                                              ',clauses
                                              ',ellipsis)))))
