@@ -268,6 +268,51 @@ DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
   return lis;
 }
 
+DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+
+  int len;
+  SCM res = list_type_and_length(lis, &len);
+
+  if (INT_VAL(k) > len) STk_error("count %d greater than list length %d",
+                                  INT_VAL(k), len);
+
+  SCM left     = STk_C_make_list(INT_VAL(k), STk_false);
+  SCM left_ptr = left;
+
+  for (long i=0; i < INT_VAL(k); i++) {
+    CAR(left_ptr) = CAR(lis);
+    left_ptr      = CDR(left_ptr);
+    lis           = CDR(lis);
+  }
+  return STk_n_values(2, left, lis);
+}
+
+DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
+  if (!INTP(k)) STk_error("bad integer ~S", k);
+  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+
+  int len;
+  SCM res = list_type_and_length(lis, &len);
+
+  if (INT_VAL(k) > len) STk_error("count %d greater than list length %d",
+                                  INT_VAL(k), len);
+
+  SCM prev = STk_nil;
+  SCM ptr  = lis;
+
+  for (long i=0; i < INT_VAL(k); i++) {
+    prev = ptr;
+    ptr  = CDR(ptr);
+  }
+  if (INT_VAL(k) > 0) {
+    CDR(prev) = STk_nil;
+    return STk_n_values(2, lis, ptr);
+  }
+  return STk_n_values(2, STk_nil, lis);
+}
+
 MODULE_ENTRY_START("scheme/list")
 {
   SCM module =  STk_create_module(STk_intern("scheme/list"));
@@ -288,6 +333,8 @@ MODULE_ENTRY_START("scheme/list")
   ADD_PRIMITIVE_IN_MODULE(take_right, module);
   ADD_PRIMITIVE_IN_MODULE(drop_right, module);
   ADD_PRIMITIVE_IN_MODULE(ndrop_right, module);
+  ADD_PRIMITIVE_IN_MODULE(split_at, module);
+  ADD_PRIMITIVE_IN_MODULE(nsplit_at, module);
 
   STk_export_all_symbols(module);
 
