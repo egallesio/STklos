@@ -742,75 +742,66 @@ doc>
                 (Loop (cdr l))))))))
 
 
+
+;;(define (syntax-rules->lambda macro-name syn-rules)
+;;  (let ((alt-ellipsis? (not (list? (cadr syn-rules)))))
+;;    (let ((ellipsis (if alt-ellipsis?
+;;                        (cadr syn-rules)
+;;                        '...))
+;;          (keywords (if alt-ellipsis?
+;;                        (cons macro-name (caddr syn-rules))
+;;                        (cons macro-name (cadr syn-rules))))
+;;          (clauses  (if alt-ellipsis?
+;;                        (cdddr syn-rules)
+;;                        (cddr syn-rules)))
+;;          (args     (gensym 'args)))
+;;      `(lambda ,args
+;;         ((%%symbol-value 'find-clause 'MBE) ',macro-name
+;;                                             ,args
+;;                                             ',keywords
+;;                                             ',clauses
+;;                                             ',ellipsis)))))
+
+
+
+;;;; ----------------------------------------------------------------------
+;;;;
+;;;; STklos code for syntax-rules, define-syntax and let-syntax
+;;;;
+;;;; ----------------------------------------------------------------------
+
 ;;
-;; A very simple implementation of let-syntax.
-;; FIXME: Need some work
-;;
-;; Example (with alternative ellipsis symbol '===):
-;;
-;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
-;;
-;; =>
-;;     (%%let-syntax
-;;       ((f (lambda args
-;;             ((%%symbol-value 'find-clause 'MBE)
-;;              'f
-;;              args
-;;              '(f)
-;;              '(((f) 10))
-;;              '===))))
-;;       (f))
+;; Utility function convert a syntax-rules in a macro transformer
 ;;
 (define (syntax-rules->lambda macro-name syn-rules)
-  (let ((alt-ellipsis? (not (list? (cadr syn-rules)))))
-    (let ((ellipsis (if alt-ellipsis?
-                        (cadr syn-rules)
-                        '...))
-          (keywords (if alt-ellipsis?
-                        (cons macro-name (caddr syn-rules))
-                        (cons macro-name (cadr syn-rules))))
-          (clauses  (if alt-ellipsis?
-                        (cdddr syn-rules)
-                        (cddr syn-rules)))
-          (args     (gensym 'args)))
-      `(lambda ,args
-         ((%%symbol-value 'find-clause 'MBE) ',macro-name
-                                             ,args
-                                             ',keywords
-                                             ',clauses
-                                             ',ellipsis)))))
-
-
-(define-macro (let-syntax bindings . body)
-  `(%%let-syntax
-    ,(map (lambda (x)
-            (let ((func (syntax-rules->lambda (car x) (cadr x))))
-              `(,(car x) ,func)))
-          bindings)
-    ,@body))
-
-
-;;;;
-;;;; STklos code for define-syntax and syntax-rules
-;;;;
-
-(define-macro (syntax-rules . syn-rules)
   (let ((ellipsis '...))
-    (when (or (symbol?  (car syn-rules))
-              (keyword? (car syn-rules)))
+    (unless (list? (car syn-rules))
+      ;; User gave its own ellipsis symbol. Shift left syn-rules
       (set! ellipsis  (car syn-rules))
       (set! syn-rules (cdr syn-rules)))
 
-    (let ((keywords    (car syn-rules))
-          (clauses     (cdr syn-rules))
-          (args        (gensym 'args)))
+    (let* ((keywords    (car syn-rules))
+           (clauses     (cdr syn-rules))
+           (args        (gensym 'args))
+           (name        (or macro-name               ;; use macro-name if given,
+                            (and (pair? keywords)    ;; or the first of keywords
+                                 (car keywords)))))  ;; otherwise name is #f
       `(lambda ,args
-         ((%%symbol-value 'find-clause 'MBE) ',(car keywords)
+         ((%%symbol-value 'find-clause 'MBE) ',name
                                              ,args
                                              ',keywords
                                              ',clauses
                                              ',ellipsis)))))
 
+;;
+;; Syntax-rules
+;;
+(define-macro (syntax-rules . syn-rules)
+  ((%%symbol-value 'syntax-rules->lambda 'MBE) #f syn-rules))
+
+;;
+;; define-syntax
+;;
 (define-macro (define-syntax macro-name syn-rules)
 
   (define (gen-macro ellipsis keywords clauses)
@@ -831,7 +822,31 @@ doc>
                           (gen-macro first (caddr syn-rules) (cdddr syn-rules))
                           (gen-macro '...  first             (cddr syn-rules)))))))
 
-
+;;
+;; A very simple implementation of let-syntax. (FIXME: need some work)
+;;
+;; Example (with alternative ellipsis symbol '===):
+;;
+;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
+;; =>
+;;     (%%let-syntax
+;;       ((f (lambda args12
+;;             ((%%symbol-value 'find-clause 'MBE)
+;;              'f
+;;              args12
+;;              '()
+;;              '(((f) 10))
+;;              '===))))
+;;       (f))
+;;
+(define-macro (let-syntax bindings . body)
+  (let ((syntax-rules->lambda (%%symbol-value 'syntax-rules->lambda 'MBE)))
+    `(%%let-syntax
+      ,(map (lambda (x)
+              (let ((func (syntax-rules->lambda (car x) (cdadr x))))
+                `(,(car x) ,func)))
+            bindings)
+      ,@body)))
 
 
 
