@@ -43,6 +43,7 @@
         (srfi 225))
 
 (import (prefix (srfi 125) t125-))
+(import (prefix (srfi 69)  t69-))
 
 ;; The original test suite uses SRFI-64. --jpellegrini
 ;; (import (srfi 64))
@@ -834,19 +835,18 @@
 ;;   ((and (library (srfi 69))
 ;;         (not gauche) ;; gauche has bug with comparator retrieval from srfi 69 table
 ;;         )
-;;    ;(test-subsection     "srfi-69"
-;;      (do-test
-;;        srfi-69-dto
-;;        (lambda (alist)
-;;          (define table (t69-make-hash-table equal?))
-;;          (for-each
-;;            (lambda (pair)
-;;              (t69-hash-table-set! table (car pair) (cdr pair)))
-;;            alist)
-;;          table)
-;;        (make-default-comparator)
-;;        #t)))
-;;   (else))
+;(test-subsection     "srfi-69"
+(do-test
+ srfi-69-dto
+ (lambda (alist)
+   (define table (t69-make-hash-table equal?))
+   (for-each
+    (lambda (pair)
+      (t69-hash-table-set! table (car pair) (cdr pair)))
+    alist)
+   table)
+ (make-default-comparator)
+ #t)
 
 ;(cond-expand
 ;  ((library (srfi 125))

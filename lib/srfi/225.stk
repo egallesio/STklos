@@ -172,4 +172,7 @@
      equal-alist-dto)
 
     (import (srfi 225 srfi-125-impl))
-    (export hash-table-dto))
+    (export hash-table-dto)
+
+    (import (srfi 225 srfi-69-impl))
+    (export srfi-69-dto))
