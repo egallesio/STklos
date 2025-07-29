@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk -- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;;
-;;;; Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -748,35 +748,74 @@ doc>
 <doc EXT define-generic
  * (define-generic gf)
  * (define-generic gf metaclass)
- * (define-generic gf :documentation str)
- * (define-generic gf metaclass :documentation str)
+ * (define-generic gf :documentation str :add-default bool)
+ * (define-generic gf metaclass :documentation str :add-default bool)
  *
  * This function creates a new generic function named |gf|. By default, the created
  * function is an instance of the class |<generic>|, except if |metaclass| is used.
  * Using a different metaclass permits to fine tune the way methods are applied.
  *
+ * When a generic function is defined whereas a procedure with this name already
+ * exists, a new wrapper method around this procedure is created, by default,
+ * and added as a default method for the new generic function.
+ * @lisp
+ * > (define-generic +)
+ * > (describe +)
+ * + is a generic function. It's an instance of <generic>.
+ * Methods defined for +
+ *     Method #[<method> 720dc81d5990]
+ *         Specializers: <top>
+ * @end lisp
+ *
+ * Defining the new generic function |+| wraps the default addition primitive in a new
+ * (n-ary) method. This particularily useful to keep the default behaviour of the
+ * addiftion
+ * @lisp
+ * > (define-method + ((a <string>) (b <string>)) (string-append a b))
+ * > (describe +)
+ * + is a generic function. It's an instance of <generic>.
+ * Methods defined for +
+ *     Method #[<method> 720dc81957e0]
+ *         Specializers: (<string> <string>)
+ *     Method #[<method> 720dc81d5990]
+ *         Specializers: <top>
+ * @end lisp
+ * We have now two methods on |+|: one which appends two strings and one which is a
+ * wrapper around the addition.
+ * @lisp
+ * (+ "abc" "def")   => "abcdef"
+ * (+ 1 2)           => 3
+ * (+)               => 0
+ * @end lisp
+ *
+ * To avoid the creation of the default wrapper, use the value `#f` for the
+ * |:add-default| keyword parameter
+ *
  * NOTE:  Generally, it is not necessary to use |define-generic| to declare a generic
- * function, since it is created the first time a method  with the name of that function
- * is created. However, for the sake of documentation, or to export a generic function
- * from a module which do not define methods, it is possible also to explicitly
- * define the generic function before its methods.
+ * function, since it is created the first time a method  with the name of that
+ * function is created. However, for the sake of documentation, or to export a
+ * generic function from a module which do not define methods, it is possible
+ * also to explicitly define the generic function before its methods.
 doc>
 |#
 ; ==== Define-generic
 (define-macro (define-generic gf :optional (meta '<generic>)
-                                 :key      (documentation #f))
-  `(define ,gf (ensure-generic-function ',gf ,meta ,documentation)))
+                                 :key      (documentation #f)
+                                           (add-default #t))
+  `(define ,gf (ensure-generic-function ',gf ,meta ,documentation ,add-default)))
 
 
 ;==== Ensure-generic-function
 (define (ensure-generic-function name :optional (metaclass <generic>)
-                                                (documentation #f))
-  (let ((old (symbol-value* name (current-module) #f)))
+                                                (documentation #f)
+                                                (add-default #t))
+  (let ((old (and add-default (symbol-value* name (current-module) #f))))
     (if (generic? old)
         old
         (%symbol-define name
                         (make metaclass :name name
-                                        :default (and (procedure? old) old)
+                                        :default (and add-default (procedure? old)
+                                                      old)
                                         :documentation documentation)
                         (current-module)))))
 

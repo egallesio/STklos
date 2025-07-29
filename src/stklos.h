@@ -179,7 +179,7 @@ extern "C"
 #define STk_gc_base(ptr)                GC_base(ptr)
 #define STk_must_malloc_many(size)      GC_malloc_many(size)
 
-
+void* STk_must_malloc_cell(size_t size);
 void STk_gc_init(void);
 
 
@@ -245,10 +245,10 @@ typedef struct {
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
-#define NEWCELL(_var, _type)    do{                                             \
-        _var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));    \
-        BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                              \
-        BOXED_INFO(_var) = 0;                                                   \
+#define NEWCELL(_var, _type)    do{                                               \
+        _var = (SCM) STk_must_malloc_cell(sizeof(struct CPP_CONCAT(_type,_obj))); \
+        BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                                \
+        BOXED_INFO(_var) = 0;                                                     \
         }while(0)
 
 #define NEWCELL_WITH_LEN(_var, _type, _len)     do{     \
@@ -1396,8 +1396,6 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
 */
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
 
-void STk_thread_inc_allocs(SCM thr, size_t size);
-
 int STk_init_threads(int stack_size, void *start_stack);
 int STk_init_mutexes(void);
 
@@ -1534,7 +1532,7 @@ SCM STk_values2vector(SCM obj, SCM vect);
 EXTERN_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv));
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 
-  SCM STk_load_bcode_file(SCM f, SCM env);
+SCM STk_load_bcode_file(SCM f, SCM env);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);

@@ -25,6 +25,7 @@
 
 ;;;; Most of theses tests were stolen in Gauche Scheme distribution
 
+(require "test")
 
 (test-section "Keywords")
 
@@ -143,4 +144,3 @@
 
 
 (test-section-end)
-

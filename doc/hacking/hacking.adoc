@@ -165,6 +165,103 @@ directory and include it in the list of loaded files in `do-test.stk`
 * STklos modules go into `lib/stklos`
 * Scheme (R7RS small or large) libraries go into `lib/scheme`
 * SRFIs go into `lib/srfi`
+* Tests go into `tests/lib`, `tests/lib/scheme` or `tests/stklos`
+
+=== Adding tests
+
+In order to add a test suite for a new library `(stklos foo)`:
+
+1. The test suite must include `(require "test")` in the beginning of the file
+2. The macros `test`, `test/error` and `test/compile-error` can be
+   used to perform tests
+3. The macros `test-section` `test-subsection` and `test-section-end`
+   are used to indicate the sections of the test suite
+4. If the new libray is a SRFI, it will be automatically included in the full
+   test suite. If it is a new library, it needs to be included in `do-test.stk`
+
+The following is a fictitious example of a test module.
+
+[source,scheme]
+----
+(require "test") ; so we can perform tests individually
+
+(test-section "Addition")
+
+
+(test-subsection "Integers")
+
+;; Remember this from school, long time ago:
+(test "simple integer addition"  ; test name
+     2                           ; expected result
+     (+ 1 1))                    ; expression to be tested
+
+;; For expected errors, we use `test/error`
+;; Checking that this is not Perl:
+(test/error "addition: string + number" ; test-name
+          (+ 1 "1"))                    ; expression to be tested
+
+;; (if) will cause a compiler error, so we can use neither `test` nor
+;; `test-error` here. We use `test-compiler-error`
+(test/compile-error "addition causing compiler error"
+                (+ (if) 1))
+
+
+(test-subsection "Rationals")
+
+(test "simple rational addition"
+     5/9
+     (+ 2/9 3/9))
+
+(test-section-end)
+----
+
+The output will be:
+
+[source]
+----
+======================================================================
+==== Testing Addition  ===============================================
+======================================================================
+
+==== Testing Addition  ...
+--------------------------------------------------
+---- Integers
+--------------------------------------------------
+
+  testing simple integer addition expects 2 ==> OK.
+  testing addition: string + number expects failure ==> OK.
+  testing addition causing compiler error expects failure ==> OK.
+
+--------------------------------------------------
+---- Rationals
+--------------------------------------------------
+
+  testing simple rational addition expects 5/9 ==> OK.
+passed
+passed
+----
+
+Note that we cannot detect read errors, as in `(+ #e1__0)`.
+
+Tests can be performed individually:
+
+[source]
+----
+$ stklos -f test-box.stk
+
+======================================================================
+==== Testing Boxes  ==================================================
+======================================================================
+
+==== Testing Boxes  ...
+  testing make-box expects "#&10" ==> OK.
+  testing make-constant-box expects "#&10" ==> OK.
+  testing reader expects #&100 ==> OK.
+  testing equal?.1 expects #f ==> OK.
+  testing equal?.2 expects #t ==> OK.
+passed
+passed
+----
 
 === Adding SRFIs
 

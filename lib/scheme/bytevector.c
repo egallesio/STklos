@@ -42,6 +42,9 @@ struct bignum_obj {
 
 #define BIGNUM_VAL(p)   (((struct bignum_obj *) (p))->val)
 
+#define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 && \
+                                  mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
+
 #define LONG_FITS_INTEGER(_l) \
   (((int64_t)INT_MIN_VAL) <= (_l) && \
    (_l) <= ((int64_t) INT_MAX_VAL))
@@ -341,10 +344,11 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
       mpz_add_ui(num2,num,1);
       mpz_neg(num,num2);
 
+      if (BIGNUM_FITS_INTEGER(num))  return MAKE_INT(mpz_get_si(num));
+
       NEWCELL(z, bignum);
       mpz_set(BIGNUM_VAL(z), num);
       return z;
-
     } else {
       /***
           Positive case: the GMP already has a function for that!
@@ -360,6 +364,8 @@ bytevector_uint_ref_aux(SCM b, endianness_t end, size_t idx, size_t size, int si
                   e,                                   /* endianness within words */
                   0,                                   /* nails (skipped bits)    */
                   &(((char *) UVECTOR_DATA(b))[idx])); /* from                    */
+
+      if (BIGNUM_FITS_INTEGER(num))  return MAKE_INT(mpz_get_si(num));
 
       NEWCELL(z, bignum);
       mpz_set(BIGNUM_VAL(z), num);
@@ -478,8 +484,7 @@ DEFINE_PRIMITIVE("bytevector-sint-ref", bytevector_sint_ref, subr4,
 
 
 
-DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
-                 (SCM b, SCM i, SCM n, SCM endianness, SCM s))
+static void bytevector_int_set_aux (SCM b, SCM i, SCM n, SCM endianness, SCM s)
 {
   check_bytevector(b);
   check_integer(i);
@@ -503,15 +508,32 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
       long j;
       long val  = INT_VAL(n);
 
-      /* This is the uint version, so no negatives: */
-      if (val < 0)
-          STk_error("value ~S is not unsigned", n);
-
       /* The value must fit the 'size' bytes, which means it should
          be less than (256)^size.  The bounds are explicit in the
-         spec. */
-      if ((unsigned long) val >= ((unsigned long) 1 << (size * 8)))
+         spec.
+
+         1. Compute B = sizeof(long) * CHAR_BIT, total bits in a long int.
+         2. Compute K = size*8, bits we want n to fit into
+         3. If K >= B, always answer yes (obviously).
+         4. Otherwise we  B − K (which we call 'shift') is the number of high bits
+            that we must lose to get anything larger than k.8 bits away.
+            * (x << shift) throws away the top shift bits, keeping only the low
+              K bits (and since x is signed, this is still a left shift).
+            * (... >> shift) is a right-shift, sign-extending from bit K–1.
+         5. If x really only used K bits, these two shifts round‐trip perfectly
+            and we get truncated == x. If x used any of the upper bits, they’re
+            lost and the reuncated is NOT equal to x.
+      */
+
+      size_t B = sizeof(long) * CHAR_BIT;    // total bits in a long int
+      size_t K = size * CHAR_BIT;            // bits we want n to fit into
+
+      if (K < B) {
+        size_t shift = B - K;
+        long truncated = (val << shift) >> shift;
+        if (truncated != val)
           STk_error("value %d does not fit in %d bytes", val, size);
+      }
 
       char *ptr;
       if (end == end_little) ptr = &(((char *) UVECTOR_DATA(b))[idx]);
@@ -526,13 +548,26 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
       /* n is a BIGNUM */
       int e = (end == end_little) ? -1 : +1;
       size_t count;
+      mpz_t n2;
+      mpz_init(n2);
+      mpz_set(n2,BIGNUM_VAL(n));
+     if (mpz_sgn(BIGNUM_VAL(n)) < 0) {
+       /* OK, so if it's negative, we need to wrap around the range ourselves,
+          since mpz_export only exports the magnitude: */
+       mpz_t range;
+       mpz_init(range);
+       mpz_set_ui(range, 0);
+       mpz_ui_pow_ui(range, 2, 8 * size);  /* range = 2^(8 size) */
+       mpz_add(n2,n2,range);
+     }
       void *ptr = mpz_export (NULL,               /* destination             */
                               &count,             /* bytes written           */
                               e,                  /* endianness              */
                               1,                  /* word size               */
                               e,                  /* endianness within words */
                               0,                  /* nails                   */
-                              BIGNUM_VAL(n));     /* from */
+                              n2);                /* from */
+
       if ((long)count > size)
           STk_error("bignum ~S does not fit in ~S bytes", n, size);
 
@@ -554,10 +589,28 @@ DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
           /* do not free ptr, GMP is using libgc already */
       }
   }
-  return STk_void;
 }
 
+DEFINE_PRIMITIVE("bytevector-uint-set!", bytevector_uint_set, subr5,
+                 (SCM b, SCM i, SCM n, SCM endianness, SCM s)) {
 
+    if (INTP(n)) {
+      long val  = INT_VAL(n);
+
+      /* This is the uint version, so no negatives: */
+      if (val < 0)
+        STk_error("value ~S is not unsigned", n);
+    }
+
+    bytevector_int_set_aux(b, i, n, endianness, s);
+    return STk_void;
+}
+
+DEFINE_PRIMITIVE("bytevector-sint-set!", bytevector_sint_set, subr5,
+                 (SCM b, SCM i, SCM n, SCM endianness, SCM s)) {
+    bytevector_int_set_aux(b, i, n, endianness, s);
+    return STk_void;
+}
 
 /******
        INT16
@@ -1566,6 +1619,7 @@ MODULE_ENTRY_START("scheme/bytevector")
     ADD_PRIMITIVE_IN_MODULE(bytevector_uint_ref, module);
     ADD_PRIMITIVE_IN_MODULE(bytevector_sint_ref, module);
     ADD_PRIMITIVE_IN_MODULE(bytevector_uint_set, module);
+    ADD_PRIMITIVE_IN_MODULE(bytevector_sint_set, module);
 
     ADD_PRIMITIVE_IN_MODULE(bytevector_s8_ref,   module);
     ADD_PRIMITIVE_IN_MODULE(bytevector_s8_set,   module);

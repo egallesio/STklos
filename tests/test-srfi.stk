@@ -23,6 +23,7 @@
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
 ;;;;
 
+(require "test")
 (require "srfi-48")   ;; for ~F format
 
 
