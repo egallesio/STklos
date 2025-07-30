@@ -27,7 +27,7 @@
         macro-expand macro-expand* unquote unquote-splicing
         ... => _ else
         improper-list?
-        remove remove! delete delete!
+        delete delete!
         every any
         call-with-input-string call-with-output-string
         read-case-sensitive
@@ -212,24 +212,6 @@ doc>
 (define (improper-list? lst)
   (and (pair? lst)
        (not (list? lst))))
-
-
-#|
-<doc EXT remove remove!
- * (remove pred list)
- *
- * |Remove| returns |list| without the elements that satisfy predicate |pred|:
- * @l
- * The list is not disordered -- elements that appear in the result list occur
- * in the same order as they occur in the argument list. |Remove!| does the
- * same job than |remove| by physically modifying its |list| argument
- * @lisp
- * (remove even? '(0 7 8 8 43 -4)) => (7 43)
- * @end lisp
-doc>
-|#
-(define (remove  pred l) (filter  (lambda (x) (not (pred x))) l))
-(define (remove! pred l) (filter! (lambda (x) (not (pred x))) l))
 
 
 #|
