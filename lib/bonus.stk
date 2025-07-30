@@ -243,10 +243,10 @@ doc>
 doc>
 |#
 (define (delete  x l :optional (comp equal?))
-  (filter  (lambda (y) (not (comp x y))) l))
+  (remove  (lambda (y) (comp x y)) l))
 
 (define (delete! x l :optional (comp equal?))
-  (filter! (lambda (y) (not (comp x y))) l))
+  (remove! (lambda (y) (comp x y)) l))
 
 
 #|
