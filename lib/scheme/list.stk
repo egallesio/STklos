@@ -1666,25 +1666,49 @@ FILTER an FILTER! are primitives in STklos
              lis1)))))
 
 
-(define (lset-difference = lis1 . lists)
-  (check-arg procedure? = lset-difference)
-  (let ((lists (filter pair? lists)))   ; Throw out empty lists.
-    (cond ((null? lists)     lis1)  ; Short cut
-      ((memq lis1 lists) '())   ; Short cut
-      (else (filter (lambda (x)
-              (every (lambda (lis) (not (member x lis =)))
-                 lists))
-            lis1)))))
 
-(define (lset-difference! = lis1 . lists)
-  (check-arg procedure? = lset-difference!)
-  (let ((lists (filter pair? lists)))   ; Throw out empty lists.
-    (cond ((null? lists)     lis1)  ; Short cut
-      ((memq lis1 lists) '())   ; Short cut
-      (else (filter! (lambda (x)
-               (every (lambda (lis) (not (member x lis =)))
-                  lists))
-             lis1)))))
+;;; The lset-difference in the SRFI reference implementation is
+;;; too slow - it's O(m.n), where m is the size of lis1
+;;; and n is the sum of sizes of lists.
+;;; We use a faster version using hash tables, O(m+n).
+;;;
+;; (define (lset-difference = lis1 . lists)
+;;   (check-arg procedure? = lset-difference)
+;;   (let ((lists (filter pair? lists)))   ; Throw out empty lists.
+;;     (cond ((null? lists)     lis1)  ; Short cut
+;;       ((memq lis1 lists) '())   ; Short cut
+;;       (else (filter (lambda (x)
+;;               (every (lambda (lis) (not (member x lis =)))
+;;                  lists))
+;;             lis1)))))
+
+(define (lset-difference eq lis . lists)
+  (check-arg procedure? = lset-difference)
+  (let ((h (make-hash-table eq))
+        (mark #(1)))
+    ;; mark every element present in the lists
+    (for-each (lambda (lst)
+                (for-each (lambda (elt)
+                            (hash-table-set! h elt #t))
+                          lst))
+              lists)
+    ;; and remove them from lis
+    (filter (lambda (x)
+              (eq? mark (hash-table-ref/default h x mark)))
+            lis)))
+
+;;; lset-difference is faster than lset-difference!, there is no
+;;; reason to not make them the same.
+(define lset-difference! lset-difference)
+;; (define (lset-difference! = lis1 . lists)
+;;   (check-arg procedure? = lset-difference!)
+;;   (let ((lists (filter pair? lists)))   ; Throw out empty lists.
+;;     (cond ((null? lists)     lis1)  ; Short cut
+;;       ((memq lis1 lists) '())   ; Short cut
+;;       (else (filter! (lambda (x)
+;;                (every (lambda (lis) (not (member x lis =)))
+;;                   lists))
+;;              lis1)))))
 
 (define (lset-diff+intersection = lis1 . lists)
   (check-arg procedure? = lset-diff+intersection)
