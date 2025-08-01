@@ -549,14 +549,9 @@ doc>
  *
 doc>
 |#
-(define (boolean=? e1 . rest)
-  (letrec ((verify (lambda (val lst)
-                  (or (null? lst)
-                     (and (boolean? (car lst))
-                        (eq? (car lst) val)
-                        (verify val (cdr lst)))))))
-    (verify e1 rest)))
-
+(define (boolean=? . args)
+  (or (every (lambda (x) (eq? x #f)) args)
+      (every (lambda (x) (eq? x #t)) args)))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.5 Symbols
