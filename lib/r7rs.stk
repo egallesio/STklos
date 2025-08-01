@@ -550,6 +550,8 @@ doc>
 doc>
 |#
 (define (boolean=? . args)
+  (when (or (null? args) (null? (cdr args)))
+    (error "at least two arguments required"))
   (or (every (lambda (x) (eq? x #f)) args)
       (every (lambda (x) (eq? x #t)) args)))
 
@@ -564,14 +566,13 @@ doc>
  * the sense of |string=?|.
 doc>
 |#
-(define (symbol=? e1 . rest)
-  (unless (symbol? e1) (error "bad symbol ~s" e1))
-  (letrec ((verify (lambda (lst)
-                     (cond ((null? lst)               #t)
-                           ((not (symbol? (car lst))) (error "bad symbol ~s" (car lst)))
-                           ((eq? (car lst) e1)        (verify (cdr lst)))
-                           (else                      #f)))))
-    (verify rest)))
+(define (symbol=? . args)
+  (when (or (null? args) (null? (cdr args)))
+    (error "at least two arguments required"))
+  (every (lambda (x)
+           (when (not (symbol? x)) (error "bad symbol ~S" x))
+           (eq? (car args) x ))
+         (cdr args)))
 
 
 ;;;; ----------------------------------------------------------------------
