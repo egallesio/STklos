@@ -847,8 +847,8 @@
 
 (test "boolean=?.1" #t (boolean=? #true #t #t (= 2 2)))
 (test "boolean=?.2" #f (boolean=? #true #t #t (= 2 2) #false))
-(test "boolean=?.3" #t (boolean=? #t))
-(test "boolean=?.4" #t (boolean=? #f))
+(test/error "boolean=?.3" (boolean=? #t))
+(test/error "boolean=?.4" (boolean=? #f))
 
 
 ;;------------------------------------------------------------------
