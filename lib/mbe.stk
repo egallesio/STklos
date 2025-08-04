@@ -182,11 +182,12 @@ doc>
           (if (eq? (cdr c) k) c
             (loop (cdr al))))))))
 
-;; hyg:tag uses gensym to rename variables (actually, tag the ones which will be renamed).
+;; hyg:tag uses gensym to rename variables (actually, tag the ones which will be
+;; renamed).
 ;;
-;; e is the form
-;; kk are the keywords
-;; al is an assoc list
+;;    e is the form
+;;    kk are the keywords
+;;    al is an assoc list
 ;;
 ;; returns a list with
 ;; CAR: the original form, rewritten so only the keywords stay with the same names,
@@ -194,9 +195,11 @@ doc>
 ;; CDR: is an assoc list that maps the generated symbols (G...) with their original
 ;;      names.
 ;;
-;; the list al is appended to the output CDR, so the assoc list may be build gradually.
+;; the list al is appended to the output CDR, so the assoc list may be build
+;; gradually.
 ;;
-;; (hyg:tag '(f a b c) '(a c)          '() '...) => ((G984 a G985 c) (G985 . b) (G984 . f))
+;; (hyg:tag '(f a b c) '(a c)          '() '...) => ((G984 a G985 c) (G985 . b)
+;;                                                   (G984 . f))
 ;; (hyg:tag 1          '(fun x fun oh) '() '...) => (1)
 ;; (hyg:tag '(f a b c) '(a c)          '((G-something . y)) '...)
 ;;                                               => ((G1333 a G1334 c)
@@ -230,8 +233,12 @@ doc>
 ;; al is the assoc list of tags -- se hyg:tag
 ;; tmps is a list of gensymed symbols NOT to be substituted back.
 ;;
-;; (hyg:untag '(G1333 a G1334 c) '((G1334 . b) (G1333 . f) (G-something . y)) '()) => (f a b c)
-;; (hyg:untag '(G1333 a G1334 c) '((G1334 . b) (G1333 . f) (G-something . y)) '(G1334)) => (f a G1334 c)
+;; (hyg:untag '(G1333 a G1334 c)
+;;            '((G1334 . b) (G1333 . f) (G-something . y))
+;;            '())                                             => (f a b c)
+;; (hyg:untag '(G1333 a G1334 c)
+;;            '((G1334 . b) (G1333 . f) (G-something . y))
+;;            '(G1334))                                        => (f a G1334 c)
 (define hyg:untag
   (lambda (e al tmps)
     (if (pair? e)
@@ -492,39 +499,40 @@ doc>
 ;; (mbe:matches-pattern? '(f a x b) '(* 2 3 4) '(x) '...) => #f
 (define mbe:matches-pattern?
   (lambda (p e k ellipsis)
-      (cond ((mbe:ellipsis? p ellipsis)
-             ;; p+, e+ will be the last CDRs of p, e (the improper tail of '())
-             ;; then, p and e will be rebound to a similar list, WITHOUT that tail,
-             ;; if it existed (see split-improper-tail
-             (let-values (((p+ p) (split-improper-tail p))
-                          ((e+ e) (split-improper-tail e)))
-               (and (or (null? e) (pair? e))
-                    (let* ((p-head (car p))
-                           (p-tail (cddr p))
-                           (e-head=e-tail (mbe:split-at-ellipsis e p-tail)))
-                      (and e-head=e-tail
-		                   (not (memq ellipsis p-tail))             ; fail on multiple ellipses
-                           (mbe:matches-pattern?  p+ e+ k ellipsis) ; if improper, match tails
-                           (let ((e-head (car e-head=e-tail))
-                                 (e-tail (cdr e-head=e-tail)))
-                             (and (every
-			                       (lambda (x) (mbe:matches-pattern? p-head x k ellipsis))
-                                   e-head)
-			                      (mbe:matches-pattern? p-tail e-tail k ellipsis))))))))
-            ((and (pair? p) (pair? e))
-		     (and (mbe:matches-pattern? (car p) (car e) k ellipsis)
-		          (mbe:matches-pattern? (cdr p) (cdr e) k ellipsis)))
-            ((and (vector? p)
-                  (vector? e)
-                  (> (vector-length p) 0)
-                  (= (vector-length p)
-                     (vector-length e)))
-             (let ((list-p (vector->list p))
-                   (list-e (vector->list e)))
-               (and (mbe:matches-pattern? (car list-p) (car list-e) k ellipsis)
-		            (mbe:matches-pattern? (cdr list-p) (cdr list-e) k ellipsis))))
-            ((symbol? p) (if (memq p k) (eq? p e) #t))
-            (else (equal? p e)))))
+    (cond ((mbe:ellipsis? p ellipsis)
+           ;; p+, e+ will be the last CDRs of p, e (the improper tail of '())
+           ;; then, p and e will be rebound to a similar list, WITHOUT that tail,
+           ;; if it existed (see split-improper-tail
+           (let-values (((p+ p) (split-improper-tail p))
+                        ((e+ e) (split-improper-tail e)))
+             (and (or (null? e) (pair? e))
+                  (let* ((p-head (car p))
+                         (p-tail (cddr p))
+                         (e-head=e-tail (mbe:split-at-ellipsis e p-tail)))
+                    (and e-head=e-tail
+                         (not (memq ellipsis p-tail))             ; fail on multiple ellipses
+                         (mbe:matches-pattern?  p+ e+ k ellipsis) ; if improper, match tails
+                         (let ((e-head (car e-head=e-tail))
+                               (e-tail (cdr e-head=e-tail)))
+                           (and (every
+                                 (lambda (x)
+                                   (mbe:matches-pattern? p-head x k ellipsis))
+                                 e-head)
+                                (mbe:matches-pattern? p-tail e-tail k ellipsis))))))))
+          ((and (pair? p) (pair? e))
+           (and (mbe:matches-pattern? (car p) (car e) k ellipsis)
+                (mbe:matches-pattern? (cdr p) (cdr e) k ellipsis)))
+          ((and (vector? p)
+                (vector? e)
+                (> (vector-length p) 0)
+                (= (vector-length p)
+                   (vector-length e)))
+           (let ((list-p (vector->list p))
+                 (list-e (vector->list e)))
+             (and (mbe:matches-pattern? (car list-p) (car list-e) k ellipsis)
+                  (mbe:matches-pattern? (cdr list-p) (cdr list-e) k ellipsis))))
+          ((symbol? p) (if (memq p k) (eq? p e) #t))
+          (else (equal? p e)))))
 
 ;;; gets the bindings of pattern variables of pattern p for
 ;;; expression e where k is the list of keywords, and 'ellipsis'
@@ -571,16 +579,17 @@ doc>
                     (e-head=e-tail (mbe:split-at-ellipsis e p-tail))
                     (e-head (car e-head=e-tail))
                     (e-tail (cdr e-head=e-tail)))
-	           (let ((res (cons (cons (mbe:get-ellipsis-nestings p-head k ellipsis)
-		                              (map (lambda (x) (mbe:get-bindings p-head x k ellipsis))
+               (let ((res (cons (cons (mbe:get-ellipsis-nestings p-head k ellipsis)
+                                      (map (lambda (x)
+                                             (mbe:get-bindings p-head x k ellipsis))
                                            e-head))
-	                            (mbe:get-bindings p-tail e-tail k ellipsis))))
+                                (mbe:get-bindings p-tail e-tail k ellipsis))))
                  (if (null? p+)
                      res
                      (append (mbe:get-bindings p+ e+ k ellipsis) res))))))
           ((pair? p)
-	       (append (mbe:get-bindings (car p) (car e) k ellipsis)
-	               (mbe:get-bindings (cdr p) (cdr e) k ellipsis)))
+           (append (mbe:get-bindings (car p) (car e) k ellipsis)
+                   (mbe:get-bindings (cdr p) (cdr e) k ellipsis)))
           ((and (vector? p)  (vector? e) (= (vector-length p)
                                             (vector-length e)))
            (mbe:get-bindings (vector->list p) (vector->list e) k ellipsis))
@@ -594,15 +603,15 @@ doc>
   (lambda (p r k ellipsis)
     (cond ((mbe:ellipsis? p ellipsis)
            (append (let* ((p-head (car p))
-			              (nestings (mbe:get-ellipsis-nestings p-head k ellipsis))
+                          (nestings (mbe:get-ellipsis-nestings p-head k ellipsis))
                           (rr (mbe:ellipsis-sub-envs nestings r)))
                      (map (lambda (r1)
-			                (mbe:expand-pattern p-head (append r1 r) k ellipsis))
+                            (mbe:expand-pattern p-head (append r1 r) k ellipsis))
                           rr))
-	               (mbe:expand-pattern (cddr p) r k ellipsis)))
+                   (mbe:expand-pattern (cddr p) r k ellipsis)))
           ((pair? p)
-	       (cons (mbe:expand-pattern (car p) r k ellipsis)
-	             (mbe:expand-pattern (cdr p) r k ellipsis)))
+           (cons (mbe:expand-pattern (car p) r k ellipsis)
+                 (mbe:expand-pattern (cdr p) r k ellipsis)))
           ((symbol? p)
            (if (memq p k) p
              (let ((x (assq p r)))
@@ -740,28 +749,6 @@ doc>
                              (cdr tmp)
                              '()))
                 (Loop (cdr l))))))))
-
-
-
-;;(define (syntax-rules->lambda macro-name syn-rules)
-;;  (let ((alt-ellipsis? (not (list? (cadr syn-rules)))))
-;;    (let ((ellipsis (if alt-ellipsis?
-;;                        (cadr syn-rules)
-;;                        '...))
-;;          (keywords (if alt-ellipsis?
-;;                        (cons macro-name (caddr syn-rules))
-;;                        (cons macro-name (cadr syn-rules))))
-;;          (clauses  (if alt-ellipsis?
-;;                        (cdddr syn-rules)
-;;                        (cddr syn-rules)))
-;;          (args     (gensym 'args)))
-;;      `(lambda ,args
-;;         ((%%symbol-value 'find-clause 'MBE) ',macro-name
-;;                                             ,args
-;;                                             ',keywords
-;;                                             ',clauses
-;;                                             ',ellipsis)))))
-
 
 
 ;;;; ----------------------------------------------------------------------
