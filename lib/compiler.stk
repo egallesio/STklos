@@ -40,6 +40,7 @@
           %syntax-error
           %compile-time-define)
 
+;; Standard syntax
 (define %%define-macro (string->uninterned-symbol "%%_define-macro"))
 (define %%if           (string->uninterned-symbol "%%_if"))
 (define %%define       (string->uninterned-symbol "%%_define"))
@@ -56,6 +57,16 @@
 (define %%quote        (string->uninterned-symbol "%%_quote"))
 (define %%set!         (string->uninterned-symbol "%%_set!"))
 (define %%lambda       (string->uninterned-symbol "%%_lambda"))
+;; Special STklos calls
+(define %%require      (string->uninterned-symbol "%%_require"))
+(define %%when-compile (string->uninterned-symbol "%%_when-compile"))
+(define %%include      (string->uninterned-symbol "%%_include"))
+(define %%include-ci   (string->uninterned-symbol "%%_include-ci"))
+(define %%in-scheme    (string->uninterned-symbol "%%_in-scheme"))
+(define %%source-pos   (string->uninterned-symbol "%%_source-pos"))
+(define %%label        (string->uninterned-symbol "%%_label"))
+(define %%goto         (string->uninterned-symbol "%%_goto"))
+(define %%symbol-value (string->uninterned-symbol "%%_symbol-value"))
 
 ;; ----------------------------------------------------------------------
 ;;  Define the inlining tables
@@ -120,13 +131,13 @@
 ;; ----------------------------------------------------------------------
 ;; Debbugging support
 ;; ----------------------------------------------------------------------
-;;= (export %compiler-debug)
-;;=
-;;= (define %compiler-debug (make-parameter #f))
-;;=
-;;= (define (dprintf . args)
-;;=   (when  (%compiler-debug) (apply eprintf args)))
-;;=
+(export %compiler-debug dprintf)
+
+(define %compiler-debug (make-parameter #f))
+
+(define (dprintf . args)
+  (when  (%compiler-debug) (apply %debug args)))
+
 
 ; ======================================================================
 ;
@@ -2109,24 +2120,35 @@ both forms.
             ;; Standard call (first is not in lexical env)
             (else
              (cond
-              ((eq? first %%if)      (compile-%%if     e env tail?))
-              ((eq? first %%define)  (compile-%%define e env tail?))
-              ((eq? first %%begin)   (compile-%%begin  e env tail?))
-              ((eq? first %%and)     (compile-%%and    e env tail?))
-              ((eq? first %%or)      (compile-%%or     e env tail?))
-              ((eq? first %%cond)    (compile-%%cond   e env tail?))
-              ((eq? first %%case)    (compile-%%case   e env tail?))
-              ((eq? first %%do)      (compile-%%do     e env tail?))
-              ((eq? first %%let)     (compile-%%let    e env tail?))
-              ((eq? first %%let*)    (compile-%%let*   e env tail?))
-              ((eq? first %%letrec)       (compile-%%letrec e env tail?))
-              ((eq? first %%with-handler) (compile-%%with-handler    e env tail?))
-              ((eq? first %%define-macro) (compile-%%define-macro    e env tail?))
-              ((eq? first %%quote)        (compile-%%quote           e env tail?))
-              ((eq? first %%set!)         (compile-%%set!            e env tail?))
-              ((eq? first %%lambda)       (compile-%%lambda          e env tail?))
+              ((eq? first %%if)               (compile-%%if           e env tail?))
+              ((eq? first %%define)           (compile-%%define       e env tail?))
+              ((eq? first %%begin)            (compile-%%begin        e env tail?))
+              ((eq? first %%and)              (compile-%%and          e env tail?))
+              ((eq? first %%or)               (compile-%%or           e env tail?))
+              ((eq? first %%cond)             (compile-%%cond         e env tail?))
+              ((eq? first %%case)             (compile-%%case         e env tail?))
+              ((eq? first %%do)               (compile-%%do           e env tail?))
+              ((eq? first %%let)              (compile-%%let          e env tail?))
+              ((eq? first %%let*)             (compile-%%let*         e env tail?))
+              ((eq? first %%letrec)           (compile-%%letrec       e env tail?))
+              ((eq? first %%with-handler)     (compile-%%with-handler e env tail?))
+              ((eq? first %%define-macro)     (compile-%%define-macro e env tail?))
+              ((eq? first %%quote)            (compile-%%quote        e env tail?))
+              ((eq? first %%set!)             (compile-%%set!         e env tail?))
+              ((eq? first %%lambda)           (compile-%%lambda       e env tail?))
 
-              (else                  (compile-call           e env tail?)))))))))
+               ;; Special calls
+             ; ((eq? first %%require)          (compile-%%require      e env tail?))
+             ; ((eq? first %%when-compile)     (compile-%%when-compile e env tail?))
+             ; ((eq? first %%include)          (compile-%%include      e env tail?))
+             ; ((eq? first %%include-ci)       (compile-%%include-ci   e env tail?))
+             ; ((eq? first %%in-scheme)        (compile-%%in-scheme    e env tail?))
+             ; ((eq? first %%source-pos)       (compile-%%source-pos   e env tail?))
+             ((eq? first %%label)            (compile-%%label        e env tail?))
+             ((eq? first %%goto)             (compile-%%goto         e env tail?))
+             ; ((eq? first %%symbol-value)     (compile-%%symbol-value e env tail?))
+
+              (else                            (compile-call          e env tail?)))))))))
 
 
      ;; ---- We have a symbol
