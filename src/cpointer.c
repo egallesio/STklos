@@ -139,10 +139,12 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
 /*
 <doc EXT cpointer->string
  * (cpointer->string str)
+ * (cpointer->string str num-bytes)
  *
  * Returns the C (null terminated) string |str| as a Scheme string.
  * If |str| doesn't contain a C string, the result will probably result
- * in a fatal error.
+ * in a fatal error. If |num-bytes| is passed as an argument, only
+ * that number of bytes is copied into the new string.
  *
  * @lisp
  * (define-external c-ghn ((s :pointer) (size :int))
@@ -153,15 +155,42 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
  * name                    => #[C-pointer 7fd830820f80 @ 7fd8305bee40]
  * (c-ghn name 9)          => 0
  * (cpointer->string name) => "socrates"
+ *
+ * (define buff (allocate-bytes 5))
+ * (cpointer-set! buff :uchar #\a 0)
+ * (cpointer-set! buff :uchar #\B 1)
+ * (cpointer-set! buff :uchar #\c 2)
+ * (cpointer-set! buff :uchar #\D 3)
+ * (cpointer-set! buff :uchar #\null 4)
+ *
+ * (cpointer->string buff)    => "aBcD"
+ * (cpointer->string buff 2)  => "aB"
+ * (cpointer->string buff -1) => error
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr1, (SCM p))
+SCM STk_Cstring2string_nbytes(const char *str, int len) /* Embed a C string in Scheme world  */
 {
-  if (!CPOINTERP(p))
-    error_bad_cpointer(p);
+  SCM  z;
 
-  return STk_Cstring2string(CPOINTER_VALUE(p));
+  NEWCELL(z, string);
+  STRING_CHARS(z)  = STk_must_malloc_atomic(len + 1);
+  STRING_SPACE(z)  = STRING_SIZE(z) = len;
+  STRING_LENGTH(z) = STk_use_utf8 ? (size_t) STk_utf8_strlen(str, len): len;
+  snprintf(STRING_CHARS(z), len+1, "%s", str);
+
+  return z;
+}
+DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes))
+{
+  if (!CPOINTERP(p)) error_bad_cpointer(p);
+
+  if (nbytes) {
+    if (!INTP(nbytes)) STk_error("bad integer ~S", nbytes);
+    if (INT_VAL(nbytes) < 0) STk_error("negative length %d", INT_VAL(nbytes));
+    return STk_Cstring2string_nbytes(CPOINTER_VALUE(p), INT_VAL(nbytes));
+  } else
+    return STk_Cstring2string(CPOINTER_VALUE(p));
 }
 
 /*
@@ -331,7 +360,7 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
  *
  * (define q (allocate-bytes (* 2 (c-size-of :long))))
  * (cpointer-set! q :long 1234 0)
- * (cpointer-set! q :long 6789 1) ; address is one C "long" after 
+ * (cpointer-set! q :long 6789 1) ; address is one C "long" after
  * (cons (cpointer-ref q :long 1)
  *       (cpointer-ref q :long 0))   => (6789 . 1234)
  * @end lisp
