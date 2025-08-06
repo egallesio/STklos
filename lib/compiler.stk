@@ -63,7 +63,6 @@
 (define %%include      (string->uninterned-symbol "%%_include"))
 (define %%include-ci   (string->uninterned-symbol "%%_include-ci"))
 (define %%in-scheme    (string->uninterned-symbol "%%_in-scheme"))
-(define %%source-pos   (string->uninterned-symbol "%%_source-pos"))
 (define %%label        (string->uninterned-symbol "%%_label"))
 (define %%goto         (string->uninterned-symbol "%%_goto"))
 (define %%symbol-value (string->uninterned-symbol "%%_symbol-value"))
@@ -2045,13 +2044,13 @@ both forms.
       (compiler-error '%%goto e "bad usage ~S" e)))
 
 
-(define (compile-%%source-pos e env tail)
-  (compile (if (%epair? e)
-               `(cons ,(%epair-file e) ,(%epair-line e))
-               #f)
-           '()
-           e
-           #f))
+;;(define (compile-%%source-pos e env tail)
+;;  (compile (if (%epair? e)
+;;               `(cons ,(%epair-file e) ,(%epair-line e))
+;;               #f)
+;;           '()
+;;           e
+;;           #f))
 
 ;; A fast acess to symbol-value (useful when the function symbol-value is
 ;; not in the environment).
@@ -2112,7 +2111,6 @@ both forms.
             ((%%include)          (compile-%%include      e env tail?))
             ((%%include-ci)       (compile-%%include-ci   e env tail?))
             ((%%in-scheme)        (compile-%%in-scheme    e env tail?))
-            ((%%source-pos)       (compile-%%source-pos   e env tail?))
             ((%%label)            (compile-%%label        e env tail?))
             ((%%goto)             (compile-%%goto         e env tail?))
             ((%%symbol-value)     (compile-%%symbol-value e env tail?))
@@ -2143,7 +2141,6 @@ both forms.
              ; ((eq? first %%include)          (compile-%%include      e env tail?))
              ; ((eq? first %%include-ci)       (compile-%%include-ci   e env tail?))
              ; ((eq? first %%in-scheme)        (compile-%%in-scheme    e env tail?))
-             ; ((eq? first %%source-pos)       (compile-%%source-pos   e env tail?))
              ((eq? first %%label)            (compile-%%label        e env tail?))
              ((eq? first %%goto)             (compile-%%goto         e env tail?))
              ; ((eq? first %%symbol-value)     (compile-%%symbol-value e env tail?))
