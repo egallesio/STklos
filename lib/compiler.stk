@@ -40,6 +40,23 @@
           %syntax-error
           %compile-time-define)
 
+(define %%define-macro (string->uninterned-symbol "%%_define-macro"))
+(define %%if           (string->uninterned-symbol "%%_if"))
+(define %%define       (string->uninterned-symbol "%%_define"))
+(define %%begin        (string->uninterned-symbol "%%_begin"))
+(define %%and          (string->uninterned-symbol "%%_and"))
+(define %%or           (string->uninterned-symbol "%%_or"))
+(define %%cond         (string->uninterned-symbol "%%_cond"))
+(define %%case         (string->uninterned-symbol "%%_case"))
+(define %%do           (string->uninterned-symbol "%%_do"))
+(define %%let          (string->uninterned-symbol "%%_let"))
+(define %%let*         (string->uninterned-symbol "%%_let*"))
+(define %%letrec       (string->uninterned-symbol "%%_letrec"))
+(define %%with-handler (string->uninterned-symbol "%%_with-handler"))
+(define %%quote        (string->uninterned-symbol "%%_quote"))
+(define %%set!         (string->uninterned-symbol "%%_set!"))
+(define %%lambda       (string->uninterned-symbol "%%_lambda"))
+
 ;; ----------------------------------------------------------------------
 ;;  Define the inlining tables
 ;; ----------------------------------------------------------------------
@@ -354,7 +371,7 @@ doc>
       (let ((bind (cadr l))
             (body (cddr l)))
         (if (pair? bind)
-            (define->lambda `(%%define ,(car bind) (lambda ,(cdr bind) ,@body)))
+            (define->lambda `(,%%define ,(car bind) (lambda ,(cdr bind) ,@body)))
             l))
       (begin
         (compiler-error 'define l "ill formed definition ~S" l)
@@ -372,7 +389,8 @@ doc>
                   (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
                 (compiler-error 'define args "bad variable name ~S" who))
-            (compiler-error 'define args "internal define forbidden here ~S" args)))))
+            (compiler-error 'define args "internal define forbidden here ~S"
+                            args)))))
 
 
 ;;;;
@@ -713,11 +731,11 @@ doc>
                    (else
                       (car l)))))
         (cond
-          ((and (pair? cur) (memq (car cur) '(%%begin begin)))
+          ((and (pair? cur) (memq (car cur) `(,%%begin begin)))
             ;; Delete useless begin
             (Loop (append (cdr cur) (cdr l))
                   defs))
-        ((and (pair? cur) (memq (car cur) '(%%define define)))
+        ((and (pair? cur) (memq (car cur) `(,%%define define)))
            ;; This is an internal define
            (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
         (else
@@ -2089,7 +2107,27 @@ both forms.
             ((%%symbol-value)     (compile-%%symbol-value e env tail?))
 
             ;; Standard call (first is not in lexical env)
-            (else                 (compile-call           e env tail?)))))))
+            (else
+             (cond
+              ((eq? first %%if)      (compile-%%if     e env tail?))
+              ((eq? first %%define)  (compile-%%define e env tail?))
+              ((eq? first %%begin)   (compile-%%begin  e env tail?))
+              ((eq? first %%and)     (compile-%%and    e env tail?))
+              ((eq? first %%or)      (compile-%%or     e env tail?))
+              ((eq? first %%cond)    (compile-%%cond   e env tail?))
+              ((eq? first %%case)    (compile-%%case   e env tail?))
+              ((eq? first %%do)      (compile-%%do     e env tail?))
+              ((eq? first %%let)     (compile-%%let    e env tail?))
+              ((eq? first %%let*)    (compile-%%let*   e env tail?))
+              ((eq? first %%letrec)       (compile-%%letrec e env tail?))
+              ((eq? first %%with-handler) (compile-%%with-handler    e env tail?))
+              ((eq? first %%define-macro) (compile-%%define-macro    e env tail?))
+              ((eq? first %%quote)        (compile-%%quote           e env tail?))
+              ((eq? first %%set!)         (compile-%%set!            e env tail?))
+              ((eq? first %%lambda)       (compile-%%lambda          e env tail?))
+
+              (else                  (compile-call           e env tail?)))))))))
+
 
      ;; ---- We have a symbol
      ((symbol? e)
