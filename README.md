@@ -5,7 +5,7 @@ STklos (version 2.10)
 
 Purpose
 -------
-*STklos*** (pronounced [/ˈɛs.'ti.kl'ɔss/](https://itinerarium.github.io/phoneme-synthesis/?w=ˈɛs.'ti.kl'ɔss)) is a free [Scheme](http://www.schemers.org) system mostly compliant
+***STklos*** (pronounced [/ˈɛs.'ti.kl'ɔss/](https://itinerarium.github.io/phoneme-synthesis/?w=ˈɛs.'ti.kl'ɔss)) is a free [Scheme](http://www.schemers.org) system mostly compliant
 with the language features defined in [R⁷RS small](http://www.scheme-reports.org/2015/working-group-1.html). The aim of this implementation
 is to be fast as well as light. The implementation is based on an ad-hoc
 *Virtual Machine*.
