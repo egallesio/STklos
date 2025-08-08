@@ -1671,17 +1671,17 @@ doc>
                        (append (cdr clauses)
                                `((else (set! ,reraised #t)
                                        (,old-hdlr ,ex)))))))
-    `(let ((,old-hdlr ( [%%symbol-value 'current-exception-handler 'SCHEME] )))
+    `(let ((,old-hdlr ( [%%in-scheme 'current-exception-handler] )))
        (with-handler
         (lambda (,ex)
-          (let* ((,var (if ([%%symbol-value '%continuable-exception? 'SCHEME] ,ex)
-                           ([%%symbol-value '%continuable-exception-value 'SCHEME] ,ex)
+          (let* ((,var (if ([%%in-scheme '%continuable-exception?] ,ex)
+                           ([%%in-scheme '%continuable-exception-value] ,ex)
                            ,ex))
                  (,reraised #f)
                  (,res (cond ,@clauses)))
             (if ,reraised
                 ,res
-                (if ([%%symbol-value '%continuable-exception? 'SCHEME] ,ex)
+                (if ([%%in-scheme '%continuable-exception?] ,ex)
                     (raise ,res)
                     ,res))))
         ,@body))))

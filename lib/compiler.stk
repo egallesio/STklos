@@ -2052,7 +2052,7 @@ both forms.
 ;;           e
 ;;           #f))
 
-;; A fast acess to symbol-value (useful when the function symbol-value is
+;; A fast access to symbol-value (useful when the function symbol-value is
 ;; not in the environment).
 (define (compile-%%symbol-value e env tail)
   (if (= (length e)  3)
@@ -2061,7 +2061,7 @@ both forms.
        (emit 'PUSH)
        (compile (caddr e) env (caddr e) tail)
        (emit 'SYMBOL-VALUE))
-     (compiler-error '%%symbol-value e "bas usage ~S" e)))
+     (compiler-error '%%symbol-value e "bad usage ~S" e)))
 
 
 ;;;;======================================================================
