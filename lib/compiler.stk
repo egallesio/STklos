@@ -2140,7 +2140,7 @@ both forms.
              ; ((eq? first %%when-compile)     (compile-%%when-compile e env tail?))
              ; ((eq? first %%include)          (compile-%%include      e env tail?))
              ; ((eq? first %%include-ci)       (compile-%%include-ci   e env tail?))
-             ; ((eq? first %%in-scheme)        (compile-%%in-scheme    e env tail?))
+             ((eq? first %%in-scheme)        (compile-%%in-scheme    e env tail?))
              ((eq? first %%label)            (compile-%%label        e env tail?))
              ((eq? first %%goto)             (compile-%%goto         e env tail?))
              ; ((eq? first %%symbol-value)     (compile-%%symbol-value e env tail?))

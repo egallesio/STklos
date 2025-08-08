@@ -358,9 +358,10 @@ doc>
 ;; Implementation of R7RS define-record-type using the internal STklos structs
 
 (define-macro (define-record-type name constructor predicate . fields)
-  (let ((struct-type      (gensym))
-        (tmp              (gensym))
-        (val              (gensym)))
+  (let ((struct-type  (gensym))
+        (tmp          (gensym))
+        (val          (gensym))
+        (%%in-scheme  (in-module STKLOS-COMPILER %%in-scheme)))
     `(begin
        ;; Define the constructor, the predicates and the accessors as global
        (define ,(car constructor) #f)
@@ -376,12 +377,12 @@ doc>
               fields)
        ;; Grab the STklos struct functions to be independent of SCHEME module
        ;; at runtime
-       (let ((make-struct-type (%%in-scheme 'make-struct-type))
-             (make-struct      (%%in-scheme 'make-struct))
-             (struct?          (%%in-scheme 'struct?))
-             (struct-is-a?     (%%in-scheme 'struct-is-a?))
-             (struct-ref       (%%in-scheme 'struct-ref))
-             (struct-set!      (%%in-scheme 'struct-set!)))
+       (let ((make-struct-type (,%%in-scheme 'make-struct-type))
+             (make-struct      (,%%in-scheme 'make-struct))
+             (struct?          (,%%in-scheme 'struct?))
+             (struct-is-a?     (,%%in-scheme 'struct-is-a?))
+             (struct-ref       (,%%in-scheme 'struct-ref))
+             (struct-set!      (,%%in-scheme 'struct-set!)))
          ;;
          ;; Build the record using STklos structs
          ;;

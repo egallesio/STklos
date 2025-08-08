@@ -654,12 +654,12 @@ doc>
   ;;
   ;; So, in that case we can call the `%%in-scheme` primitive, which is
   ;; much faster than using apply and symbol-value*.
-  ;; however, if the user wanted a default value, we revert to applying
+  ;; However, if the user wanted a default value, we revert to applying
   ;; symbol-value*, because we'd need a handler around %%in-scheme, which
   ;; becomes terribly slow.
   (if (and (eq? mod 'SCHEME)
            (null? default))
-      `(%%in-scheme ',symb)
+      `(,[in-module STKLOS-COMPILER %%in-scheme] ',symb)
       `(apply symbol-value* ',symb (find-module ',mod) ',default)))
 
 
