@@ -2064,6 +2064,12 @@ both forms.
      (compiler-error '%%symbol-value e "bad usage ~S" e)))
 
 
+
+
+
+
+
+
 ;;;;======================================================================
 ;;;;
 ;;;;            The bytecode compiler
@@ -2140,12 +2146,26 @@ both forms.
              ; ((eq? first %%when-compile)     (compile-%%when-compile e env tail?))
              ; ((eq? first %%include)          (compile-%%include      e env tail?))
              ; ((eq? first %%include-ci)       (compile-%%include-ci   e env tail?))
-             ((eq? first %%in-scheme)        (compile-%%in-scheme    e env tail?))
-             ((eq? first %%label)            (compile-%%label        e env tail?))
-             ((eq? first %%goto)             (compile-%%goto         e env tail?))
-             ; ((eq? first %%symbol-value)     (compile-%%symbol-value e env tail?))
+             ((eq? first %%in-scheme)        (compile-%%in-scheme    e env tail?)) 
+             ((eq? first %%label)            (compile-%%label        e env tail?)) 
+             ((eq? first %%goto)             (compile-%%goto         e env tail?)) 
+             ((eq? first %%symbol-value)     (compile-%%symbol-value e env tail?)) 
 
-              (else                            (compile-call          e env tail?)))))))))
+             (else
+              (if (%icall? first)
+                  (let ((func (%icall-function first)))
+                    (unless func
+                      (let* ((name (string->symbol (format "compile-%%~a"
+                                                           (%icall-name first))))
+                             (f     (symbol-value name 'STKLOS-COMPILER #f)))
+                        (unless f
+                          (error "Fatal: cannot find function ~S in compiler" name)
+                          (exit 1))
+                        (%icall-function-set! first f)
+                        (%debug "Forced the value of `~S to ~S"
+                                (%icall-function first) f)))
+                      ( [%icall-function first] e env tail?))
+                  (compile-call          e env tail?))))))))))
 
 
      ;; ---- We have a symbol
