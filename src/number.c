@@ -3056,7 +3056,7 @@ DEFINE_PRIMITIVE("numerator", numerator, subr1, (SCM q))
     case tc_rational: return RATIONAL_NUM(q);
     case tc_bignum:
     case tc_integer:  return q;
-    default:          error_bad_number(q);
+    default:          error_not_a_real_number(q);
   }
   return STk_void; /* never reached */
 }
@@ -3068,7 +3068,7 @@ DEFINE_PRIMITIVE("denominator", denominator, subr1, (SCM q))
     case tc_rational: return RATIONAL_DEN(q);
     case tc_bignum:
     case tc_integer:  return MAKE_INT(1);
-    default:          error_bad_number(q);
+    default:          error_not_a_real_number(q);
   }
   return STk_void; /* never reached */
 }
