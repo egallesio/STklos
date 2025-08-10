@@ -1,0 +1,145 @@
+;;;;
+;;;; 225/indexes.stk         -- SRFI-225: Dictionaries - indexes
+;;;;
+;;;; Copyright © 2025 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the implementation of this
+;;;; SRFI by John Cowan and Arvydas Silanskas, it is copyrighted as:
+;;;;
+
+;;;;;; © 2021 John Cowan, Arvydas Silanskas.
+;;;;;;
+;;;;;; Permission is hereby granted, free of charge, to any person
+;;;;;; obtaining a copy of this software and associated documentation
+;;;;;; files (the "Software"), to deal in the Software without
+;;;;;; restriction, including without limitation the rights to use,
+;;;;;; copy, modify, merge, publish, distribute, sublicense, and/or sell
+;;;;;; copies of the Software, and to permit persons to whom the
+;;;;;; Software is furnished to do so, subject to the following
+;;;;;; conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice (including
+;;;;;; the next paragraph) shall be included in all copies or
+;;;;;; substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 17-Jun-2022 16:47
+;;;;
+
+(define-library
+  (srfi 225 indexes)
+  (import (scheme base))
+
+  ;;(include-library-declarations "indexes-exports.scm")
+
+  (export
+    ;; required
+    dictionary?-id
+    dict-find-update!-id
+    dict-comparator-id
+    dict-map-id
+    dict-pure?-id
+    dict-remove-id
+    dict-size-id
+
+    ;; extra
+    dict->alist-id
+    dict-adjoin!-accumulator-id
+    dict-adjoin!-id
+    dict-any-id
+    dict-contains?-id
+    dict-count-id
+    dict-delete-all!-id
+    dict-delete!-id
+    dict-empty?-id
+    dict-entries-id
+    dict-every-id
+    dict-filter-id
+    dict-fold-id
+    dict-for-each-id
+    dict-intern!-id
+    dict-keys-id
+    dict-map->list-id
+    dict-map-id
+    dict-pop!-id
+    dict-ref-id
+    dict-ref/default-id
+    dict-remove-id
+    dict-replace!-id
+    dict-set!-accumulator-id
+    dict-set!-id
+    dict-update!-id
+    dict-update/default!-id
+    dict-values-id
+    dict=?-id
+    dict->generator-id)
+
+  (export dict-procedures-count)
+  (begin
+    (define proc-id 0)
+    (define (proc-id-inc)
+      (define v proc-id)
+      (set! proc-id (+ 1 proc-id))
+      v)
+    (define dictionary?-id (proc-id-inc))
+    (define dict-empty?-id (proc-id-inc))
+    (define dict-contains?-id (proc-id-inc))
+    (define dict=?-id (proc-id-inc))
+    (define dict-pure?-id (proc-id-inc))
+    (define dict-ref-id (proc-id-inc))
+    (define dict-ref/default-id (proc-id-inc))
+    (define dict-set!-id (proc-id-inc))
+    (define dict-adjoin!-id (proc-id-inc))
+    (define dict-delete!-id (proc-id-inc))
+    (define dict-delete-all!-id (proc-id-inc))
+    (define dict-replace!-id (proc-id-inc))
+    (define dict-intern!-id (proc-id-inc))
+    (define dict-update!-id (proc-id-inc))
+    (define dict-update/default!-id (proc-id-inc))
+    (define dict-pop!-id (proc-id-inc))
+    (define dict-map-id (proc-id-inc))
+    (define dict-filter-id (proc-id-inc))
+    (define dict-remove-id (proc-id-inc))
+    (define dict-find-update!-id (proc-id-inc))
+    (define dict-size-id (proc-id-inc))
+    (define dict-count-id (proc-id-inc))
+    (define dict-any-id (proc-id-inc))
+    (define dict-every-id (proc-id-inc))
+    (define dict-keys-id (proc-id-inc))
+    (define dict-values-id (proc-id-inc))
+    (define dict-entries-id (proc-id-inc))
+    (define dict-fold-id (proc-id-inc))
+    (define dict-map->list-id (proc-id-inc))
+    (define dict->alist-id (proc-id-inc))
+    (define dict-comparator-id (proc-id-inc))
+    (define dict-for-each-id (proc-id-inc))
+    (define dict->generator-id (proc-id-inc))
+    (define dict-set!-accumulator-id (proc-id-inc))
+    (define dict-adjoin!-accumulator-id (proc-id-inc))
+    (define dict-procedures-count (proc-id-inc)) ;; only used for tracking backing vector size
+    ))
