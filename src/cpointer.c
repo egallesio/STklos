@@ -161,7 +161,7 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
  * (cpointer-set! buff :uchar #\B 1)
  * (cpointer-set! buff :uchar #\c 2)
  * (cpointer-set! buff :uchar #\D 3)
- * (cpointer-set! buff :uchar #\null 4)
+ * (cpointer-set! buff :uchar #\null 4) ;; convention for end of string in C
  *
  * (cpointer->string buff)    => "aBcD"
  * (cpointer->string buff 2)  => "aB"
@@ -169,14 +169,14 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
  * @end lisp
 doc>
  */
-SCM STk_Cstring2string_nbytes(const char *str, int len) /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string_nbytes(const char *str, int len) // Embed a C string in Scheme
 {
   SCM  z;
 
   NEWCELL(z, string);
   STRING_CHARS(z)  = STk_must_malloc_atomic(len + 1);
   STRING_SPACE(z)  = STRING_SIZE(z) = len;
-  STRING_LENGTH(z) = STk_use_utf8 ? (size_t) STk_utf8_strlen(str, len): len;
+  STRING_LENGTH(z) = STk_use_utf8 ? (size_t) STk_utf8_strlen(str, len): (size_t) len;
   snprintf(STRING_CHARS(z), len+1, "%s", str);
 
   return z;
