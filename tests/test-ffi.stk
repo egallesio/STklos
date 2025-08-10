@@ -235,6 +235,14 @@
       "aBcD"
       (cpointer->string buff))
 
+(test "read back the (forged) C string.2"
+      "aB"
+      (cpointer->string buff 2))
+
+(test/error "cpointer->string bad integer" (cpointer->string buff 'a))
+(test/error "cpointer->string bad length"  (cpointer->string buff -1))
+
+
 
 (let ((array (allocate-bytes (* 10 (c-size-of :long)))))
   (dotimes (i 10)
