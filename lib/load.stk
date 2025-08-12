@@ -533,18 +533,18 @@ doc>
 ;=============================================================================
 
 (define-macro (%do-include kind files)
-  (let ((inc (string->symbol (format "%%~a" kind))))
-    (if (null? files)
-        (error kind "at least one parameter must be provided")
-        (let* ((port     (compiler-current-port))
-               (src-file (if port (port-file-name port) (current-loading-file)))
-               (dir      (and src-file (dirname src-file)))
-               (others   (if (includes-use-load-path) *load-path* '()))
-               (paths    (if dir (cons dir others) others)))
-          `(,inc ,@(map (lambda (x)
-                          ;; return x if find-path is null to improve messages
-                          (or (find-path x paths) x))
-                      files))))))
+  (if (null? files)
+      (error kind "at least one parameter must be provided")
+      (let* ((port     (compiler-current-port))
+             (src-file (if port (port-file-name port) (current-loading-file)))
+             (dir      (and src-file (dirname src-file)))
+             (others   (if (includes-use-load-path) *load-path* '()))
+             (paths    (if dir (cons dir others) others)))
+        (cons (if (eq? kind 'include) #%include #%includes-ci)
+              (map (lambda (x)
+                     ;; return x if find-path is null to improve messages
+                     (or (find-path x paths) x))
+                   files)))))
 
 (define-macro (include . files)
   `(%do-include include ,files))
@@ -554,7 +554,7 @@ doc>
 
 
 (define-macro (include-file file) ;; Only one file no search in the load-path
-  `(%%include ,file))
+  `(#%include ,file))
 
 #|
 <doc EXT autoload
