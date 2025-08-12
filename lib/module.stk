@@ -193,7 +193,7 @@ doc>
       (when-compile (compiler-current-module ,newmod))
       ,@body
       (when-compile (compiler-current-module ,oldmod))
-      (%%set-current-module ( (%%in-scheme '%module-restore) ))
+      (%%set-current-module ( [#%in-scheme '%module-restore] ))
       (values (void) ',name))))
 
 ;;=============================================================================
@@ -652,14 +652,14 @@ doc>
   ;; 2. This is a macro, and we don't need to (and cannot!) evaluate its
   ;;    arguments.
   ;;
-  ;; So, in that case we can call the `%%in-scheme` primitive, which is
+  ;; So, in that case we can use the `#%in-scheme` internal call, which is
   ;; much faster than using apply and symbol-value*.
   ;; However, if the user wanted a default value, we revert to applying
-  ;; symbol-value*, because we'd need a handler around %%in-scheme, which
+  ;; symbol-value*, because we'd need a handler around #%in-scheme, which
   ;; becomes terribly slow.
   (if (and (eq? mod 'SCHEME)
            (null? default))
-      `(,[in-module STKLOS-COMPILER %%in-scheme] ',symb)
+      `(#%in-scheme ',symb)
       `(apply symbol-value* ',symb (find-module ',mod) ',default)))
 
 
