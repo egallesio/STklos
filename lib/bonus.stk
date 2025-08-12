@@ -1115,9 +1115,7 @@ doc>
       (if (pair? code)
           (if (and (eq? (car code) '->) (= (length code) 2))
               (let ((t (assq (cadr code) tags)))
-                (if t
-                    `(,(in-module STKLOS-COMPILER %%goto) ,(cdr t))
-                    code))
+                (if t `(#%goto ,(cdr t)) code))
               (map replace code))
           code))
 
@@ -1135,8 +1133,7 @@ doc>
 
     (let ((new-body (map (lambda (x)
                            (if (keyword? x)
-                               `(,(in-module STKLOS-COMPILER %%label)
-                                                ,(cdr (assq x tags)))
+                               `(#%label ,(cdr (assq x tags)))
                                (replace x)))
                          body)))
       (verify new-body)
