@@ -753,7 +753,7 @@ doc>
 ;; =>
 ;;     (%%let-syntax
 ;;       ((f (lambda args
-;;             ((%%symbol-value 'find-clause 'MBE)
+;;             ((#%symbol-value 'find-clause 'MBE)
 ;;              'f
 ;;              args
 ;;              '(f)
@@ -777,7 +777,7 @@ doc>
                                     (cdddr syn-rules)
                                     (cddr syn-rules))))
                   `(,macro-name (lambda args
-                                  ((%%symbol-value 'find-clause 'MBE)
+                                  ((#%symbol-value 'find-clause 'MBE)
                                            ',macro-name
                                            args
                                            ',keywords
@@ -801,7 +801,7 @@ doc>
           (clauses     (cdr syn-rules))
           (args        (gensym 'args)))
       `(lambda ,args
-         ((%%symbol-value 'find-clause 'MBE) ',(car keywords)
+         ((#%symbol-value 'find-clause 'MBE) ',(car keywords)
                                              ,args
                                              ',keywords
                                              ',clauses
