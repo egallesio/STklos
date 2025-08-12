@@ -190,9 +190,9 @@ doc>
   `(with-handler
       %module-handler
       (%%set-current-module (%module-create ',name))
-      (%%when-compile (compiler-current-module ,newmod))
+      (when-compile (compiler-current-module ,newmod))
       ,@body
-      (%%when-compile (compiler-current-module ,oldmod))
+      (when-compile (compiler-current-module ,oldmod))
       (%%set-current-module ( (%%in-scheme '%module-restore) ))
       (values (void) ',name))))
 

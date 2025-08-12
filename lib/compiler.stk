@@ -2020,12 +2020,12 @@ both forms.
 
 (define-macro (when-compile . body)
   `(begin
-     (%%when-compile ,@body)
+     (#%when-compile ,@body)
      (void)))
 
 (define-macro (when-load-and-compile . body)
   `(begin
-     (%%when-compile ,@body)
+     (#%when-compile ,@body)
      ,@body
      (void)))
 
