@@ -2485,12 +2485,12 @@ doc>
         (apply-prim    (gensym 'apply))
         (err-prim      (gensym 'error))
         (compute-arity (in-module STKLOS-COMPILER compute-arity)))
-    `(%%let ((,len-prim   (in-module SCHEME length))
+    `(#%let ((,len-prim   (in-module SCHEME length))
              (,apply-prim (in-module SCHEME apply))
              (,err-prim   (in-module SCHEME error)))
        (lambda ,args
          (let ((,len (,len-prim ,args)))
-           (%%cond
+           (#%cond
             ,@(map (lambda (x)
                      (unless (>= (length x) 2)
                        (error 'case-lambda "bad clause ~S" x))
@@ -2500,13 +2500,13 @@ doc>
                        (cond
                         ((positive? arity)
                          `((= ,len ,arity)
-                           (,apply-prim (%%lambda ,formals ,@body) ,args)))
+                           (,apply-prim (#%lambda ,formals ,@body) ,args)))
                         ((zero? arity)
                          `((= ,len ,arity)
                            ,@body))
                         (else
                          `((>= ,len ,(- (- arity) 1))
-                           (,apply-prim (%%lambda ,formals ,@body) ,args))))))
+                           (,apply-prim (#%lambda ,formals ,@body) ,args))))))
                    clauses)
             (else (,err-prim "no matching clause in case-lambda with ~S for ~S"
                              ',(map car clauses) ,args))))))))

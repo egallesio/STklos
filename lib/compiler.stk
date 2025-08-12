@@ -2166,10 +2166,9 @@ both forms.
                         (unless f
                           (error "Fatal: cannot find function ~S in compiler" name)
                           (exit 1))
-                        (%icall-function-set! first f)
-                        (%debug "Forced the value of `~S to ~S"
-                                (%icall-function first) f)))
-                      ( [%icall-function first] e env tail?))
+                        (%icall-function-set! first f)))
+                    ;; Call the internal function contained in `first`
+                    ( [%icall-function first] e env tail?))
                   (compile-call          e env tail?))))))))))
 
 
