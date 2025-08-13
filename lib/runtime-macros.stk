@@ -74,8 +74,8 @@
 ;; ----------------------------------------------------------------------
 (define-macro (define-macro . args)  `(#%define-macro ,@args)) ;; Funny, isn't it?
 (define-macro (if . args)            `(#%if ,@args))
-;;;;(define-macro (define . args)        `(%%define ,@args))
-;;(define-macro (begin . args)         `(#%begin ,@args))
+(define-macro (define . args)        `(#%define ,@args))
+(define-macro (begin . args)         `(#%begin ,@args))
 (define-macro (and . args)           `(#%and ,@args))
 (define-macro (or . args)            `(#%or ,@args))
 (define-macro (cond . args)          `(#%cond ,@args))
