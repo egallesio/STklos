@@ -742,11 +742,11 @@ doc>
                    (else
                       (car l)))))
         (cond
-          ((and (pair? cur) (memq (car cur) `(,%%begin begin)))
+          ((and (pair? cur) (memq (car cur) `(,%%begin begin #%begin)))
             ;; Delete useless begin
             (Loop (append (cdr cur) (cdr l))
                   defs))
-        ((and (pair? cur) (memq (car cur) `(,%%define define)))
+        ((and (pair? cur) (memq (car cur) `(,%%define define #%define)))
            ;; This is an internal define
            (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
         (else
