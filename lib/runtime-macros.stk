@@ -34,44 +34,6 @@
 ;; Define here primordial syntax with low level macros
 ;;
 ;; ======================================================================
-(define-macro (define-macro . args)  `(%%define-macro ,@args)) ;; Funny, isn't it?
-(define-macro (if . args)            `(%%if    ,@args))
-(define-macro (define . args)        `(%%define ,@args))
-(define-macro (begin . args)         `(%%begin ,@args))
-(define-macro (and . args)           `(%%and ,@args))
-(define-macro (or . args)            `(%%or ,@args))
-(define-macro (cond . args)          `(%%cond ,@args))
-(define-macro (case . args)          `(%%case ,@args))
-(define-macro (do . args)            `(%%do ,@args))
-(define-macro (let . args)           `(%%let ,@args))
-(define-macro (let* . args)          `(%%let* ,@args))
-(define-macro (letrec . args)        `(%%letrec ,@args))
-(define-macro (with-handler . args)  `(%%with-handler ,@args))
-(define-macro (quote . args)         `(%%quote ,@args))
-(define-macro (set! . args)          `(%%set! ,@args))
-(define-macro (|λ| . args)           `(%%lambda ,@args))
-(define-macro (lambda . args)        `(%%lambda ,@args))
-
-
-;; FIXME: suppress previous definitions
-(define-macro (define-macro . args)  `(,(in-module STKLOS-COMPILER %%define-macro)  ,@args))
-(define-macro (if . args)            `(,(in-module STKLOS-COMPILER %%if)     ,@args))
-(define-macro (define . args)        `(,(in-module STKLOS-COMPILER %%define) ,@args))
-(define-macro (begin . args)         `(,(in-module STKLOS-COMPILER %%begin)  ,@args))
-(define-macro (and . args)           `(,(in-module STKLOS-COMPILER %%and)    ,@args))
-(define-macro (or . args)            `(,(in-module STKLOS-COMPILER %%or)     ,@args))
-(define-macro (cond . args)          `(,(in-module STKLOS-COMPILER %%cond)  ,@args))
-(define-macro (case . args)          `(,(in-module STKLOS-COMPILER %%case)  ,@args))
-(define-macro (do . args)            `(,(in-module STKLOS-COMPILER %%do)    ,@args))
-(define-macro (let . args)            `(,(in-module STKLOS-COMPILER %%let)  ,@args))
-(define-macro (let* . args)           `(,(in-module STKLOS-COMPILER %%let*)    ,@args))
-(define-macro (letrec . args)        `(,(in-module STKLOS-COMPILER %%letrec)    ,@args))
-(define-macro (with-handler . args)  `(,(in-module STKLOS-COMPILER %%with-handler) ,@args))
-(define-macro (quote . args)         `(,(in-module STKLOS-COMPILER %%quote) ,@args))
-(define-macro (set! . args)         `(,(in-module STKLOS-COMPILER %%set!) ,@args))
-(define-macro (lambda    . args)         `(,(in-module STKLOS-COMPILER %%lambda) ,@args))
-
-;; ----------------------------------------------------------------------
 (define-macro (define-macro . args)  `(#%define-macro ,@args)) ;; Funny, isn't it?
 (define-macro (if . args)            `(#%if ,@args))
 (define-macro (define . args)        `(#%define ,@args))
@@ -89,7 +51,6 @@
 (define-macro (set! . args)          `(#%set! ,@args))
 (define-macro (|λ| . args)           `(#%lambda ,@args))
 (define-macro (lambda . args)             `(#%lambda ,@args))
-
 
 ;;;;
 ;;;; WHEN/UNLESS
