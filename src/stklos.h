@@ -205,7 +205,7 @@ typedef enum {
   tc_promise, tc_regexp, tc_process, tc_continuation, tc_syntax,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback,                                               /* 45 */
+  tc_callback, tc_icall,                                                 /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -659,6 +659,18 @@ int STk_init_fixnum(void);
 
 /* TAG_FIXNUM forces a fixnum tag on x. */
 #define TAG_FIXNUM(x)      ((UNTAG(x)) | 1)
+
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ----                           I C A L L . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+  SCM STk_get_icall(SCM name);   // get back an already existing internal call
+int STk_init_icall(void);
+
 
 /*
   ------------------------------------------------------------------------------

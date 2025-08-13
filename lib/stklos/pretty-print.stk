@@ -162,7 +162,7 @@ doc>
             ((keyword? obj)     (out (string-append "#:" (keyword->string obj)) col))
             ((eq? obj (void))   (out "#void" col))
             ((hash-table? obj)  (out "#[hash-table]" col))
-            (else               (out "#[unknown]" col))))
+            (else               (out (format "~A" obj) col))))
 
     (define (pp obj col)
 

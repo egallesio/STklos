@@ -1379,7 +1379,7 @@ syntax and <code>#f</code> otherwise.</p>
 </p>
 </div>
 <div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> syntax</span></p>
+<p><span class="rmargin small silver">R<sup>7</sup>RS syntax</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -7013,6 +7013,43 @@ There are twenty-eight of these procedures in all.</p>
 </div>
 <div class="paragraph">
 <p>Returns <code>#t</code> if <code>obj</code> is the empty list, otherwise returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_pair-mutable?'></a><a id='P_pair-immutable!'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(pair-mutable? obj) </strong></code><br>
+<code><strong>(pair-immutable! obj) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Pair-mutable?</code> returns <code>#t</code> if <code>obj</code> is a mutable pair, otherwise
+returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Pair-immutable!</code> will turn the pair into an immutable one (the
+pair is modified and returned&#8201;&#8212;&#8201;no copy is made).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">pair-mutable?</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="o">.</span> <span class="mi">2</span><span class="p">))</span>                     <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>                   <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="mi">12</span><span class="p">)</span>                           <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="p">(</span><span class="nf">pair-immutable!</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="nv">x</span><span class="p">)</span>                            <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="nv">x</span> <span class="p">(</span><span class="nf">pair-immutable!</span> <span class="nv">x</span><span class="p">))</span>                  <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="nv">x</span><span class="p">)</span>                            <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_list?'></a>

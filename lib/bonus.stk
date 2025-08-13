@@ -1115,9 +1115,7 @@ doc>
       (if (pair? code)
           (if (and (eq? (car code) '->) (= (length code) 2))
               (let ((t (assq (cadr code) tags)))
-                (if t
-                    `(%%goto ,(cdr t))
-                    code))
+                (if t `(#%goto ,(cdr t)) code))
               (map replace code))
           code))
 
@@ -1135,7 +1133,7 @@ doc>
 
     (let ((new-body (map (lambda (x)
                            (if (keyword? x)
-                               `(%%label ,(cdr (assq x tags)))
+                               `(#%label ,(cdr (assq x tags)))
                                (replace x)))
                          body)))
       (verify new-body)
@@ -2481,18 +2479,18 @@ doc>
 doc>
 |#
 (define-macro (case-lambda . clauses)
-  (let ((len        (gensym))
-        (args       (gensym))
-        (len-prim   (gensym 'length))
-        (apply-prim (gensym 'apply))
-        (err-prim   (gensym 'error))
+  (let ((len           (gensym))
+        (args          (gensym))
+        (len-prim      (gensym 'length))
+        (apply-prim    (gensym 'apply))
+        (err-prim      (gensym 'error))
         (compute-arity (in-module STKLOS-COMPILER compute-arity)))
-    `(%%let ((,len-prim   (in-module SCHEME length))
+    `(#%let ((,len-prim   (in-module SCHEME length))
              (,apply-prim (in-module SCHEME apply))
              (,err-prim   (in-module SCHEME error)))
        (lambda ,args
          (let ((,len (,len-prim ,args)))
-           (%%cond
+           (#%cond
             ,@(map (lambda (x)
                      (unless (>= (length x) 2)
                        (error 'case-lambda "bad clause ~S" x))
@@ -2502,13 +2500,13 @@ doc>
                        (cond
                         ((positive? arity)
                          `((= ,len ,arity)
-                           (,apply-prim (%%lambda ,formals ,@body) ,args)))
+                           (,apply-prim (#%lambda ,formals ,@body) ,args)))
                         ((zero? arity)
                          `((= ,len ,arity)
                            ,@body))
                         (else
                          `((>= ,len ,(- (- arity) 1))
-                           (,apply-prim (%%lambda ,formals ,@body) ,args))))))
+                           (,apply-prim (#%lambda ,formals ,@body) ,args))))))
                    clauses)
             (else (,err-prim "no matching clause in case-lambda with ~S for ~S"
                              ',(map car clauses) ,args))))))))
