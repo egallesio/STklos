@@ -27216,14 +27216,16 @@ left to the extension writer.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(cpointer&#8594;string str) </strong></code><br></p>
+<p><code><strong>(cpointer&#8594;string str) </strong></code><br>
+<code><strong>(cpointer&#8594;string str num-bytes) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Returns the C (null terminated) string <code>str</code> as a Scheme string.
 If <code>str</code> doesn&#8217;t contain a C string, the result will probably result
-in a fatal error.</p>
+in a fatal error. If <code>num-bytes</code> is passed as an argument, only
+that number of bytes is copied into the new string.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27234,7 +27236,18 @@ in a fatal error.</p>
 
 <span class="nv">name</span>                    <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">fd830820f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd8305bee40</span><span class="p">]</span>
 <span class="p">(</span><span class="nf">c-ghn</span> <span class="nv">name</span> <span class="mi">9</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">name</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"socrates"</span></code></pre>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">name</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"socrates"</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">buff</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">5</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">a</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">B</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">c</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">D</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">null</span> <span class="mi">4</span><span class="p">)</span> <span class="c1">;; convention for end of string in C</span>
+
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="s">"aBcD"</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span> <span class="mi">2</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="s">"aB"</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span> <span class="mi">-1</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
