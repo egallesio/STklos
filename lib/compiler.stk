@@ -2064,27 +2064,23 @@ both forms.
           ;; --- Macro call
           (compile (%macro-expand e env) env epair tail?))
 
-         ((find-symbol-in-env first env)
-          ;; --- Symbol is in environment => function call
-          (compile-call e env tail?))
+         ((%icall? first)
+          ;; --- Internal call such as #%if, #%and ...
+          (let ((func (%icall-function first)))
+            (unless func
+              (let* ((name (string->symbol (format "compile-%%~a"
+                                                   (%icall-name first))))
+                     (f     (symbol-value name 'STKLOS-COMPILER #f)))
+                (unless f
+                  (error "Fatal: cannot find function ~S in compiler" name)
+                  (exit 1))
+                (%icall-function-set! first f)))
+            ;; Call the internal function contained in `first` internal call
+            ( [%icall-function first] e env tail?)))
 
          (else
-          ;; --- special-form OR (not in env) function call?
-          (if (%icall? first)
-              ;; We have an internal call such as #%if, #%and ...
-              (let ((func (%icall-function first)))
-                (unless func
-                  (let* ((name (string->symbol (format "compile-%%~a"
-                                                       (%icall-name first))))
-                         (f     (symbol-value name 'STKLOS-COMPILER #f)))
-                    (unless f
-                      (error "Fatal: cannot find function ~S in compiler" name)
-                      (exit 1))
-                    (%icall-function-set! first f)))
-                ;; Call the internal function contained in `first` internal call
-                ( [%icall-function first] e env tail?))
-              ;; Not an internal call => normal function call (not in env)
-              (compile-call          e env tail?))))))
+          ;; Not an internal call => normal function call
+          (compile-call e env tail?)))))
 
      ;; ---- We have a symbol
      ((symbol? e)
