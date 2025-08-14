@@ -396,7 +396,6 @@
 (let-syntax ((f (syntax-rules () ((_ #()) 20))))
   (test "vector-pattern.6" 20 (f #())))
 
-
 ;;FIXME: Add more tests !!!!!!!!!
 
 
