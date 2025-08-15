@@ -335,7 +335,7 @@ doc>
        (set! *forward-globals* (cons (cons symbol epair) *forward-globals*)))
       ((compiler:warn-use-undefined)
        (compiler-warn-undef symbol epair)
-       (register-new-global! symbol)))))        ; to avoid multiple warnings
+       (%register-new-global! symbol)))))        ; to avoid multiple warnings
 
 
 (define (compiler-show-undefined-symbols)
@@ -344,7 +344,7 @@ doc>
                     (where  (cdr x)))
                 (unless (known-var? symbol)
                   (compiler-warn-undef symbol where)
-                  (register-new-global! symbol)))) ;; to avoid multiple warnings
+                  (%register-new-global! symbol)))) ;; to avoid multiple warnings
             (reverse *forward-globals*))
   (set! *forward-globals* '()))
 
@@ -369,7 +369,7 @@ doc>
         (if (not env)
             (if (symbol? who)
                 (begin
-                  (register-new-global! who)
+                  (%register-new-global! who)
                   (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
                 (compiler-error 'define args "bad variable name ~S" who))
@@ -534,7 +534,7 @@ doc>
                                                           ,proc
                                                           ',(module-name mod))))
                   ;; produce code for defining the macro
-                  (register-new-global! name)
+                  (%register-new-global! name)
                   (compile obj #f env #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant name))
                   ;; register the macro, so that the compiler expand macro calls
@@ -1928,7 +1928,7 @@ both forms.
 (define (import-file-information infos)
   (when (pair? infos)
     ;; Register all the global symbols of the file
-    (for-each register-new-global! (key-get infos :globals '()))
+    (for-each %register-new-global! (key-get infos :globals '()))
 
     ;; Rebuild the expanders exported by the imported file.
     (for-each (lambda (x)

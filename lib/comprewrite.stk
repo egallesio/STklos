@@ -62,8 +62,8 @@
 (define (rewrite-expression e env)  ;; try to rewrite(simplify) expression e
   (let Loop ((save e))
     (when (pair? e)
-      (let ((s     (car e))
-            (optim (compiler:find-rewriter (car e))))
+      (let* ((s     (car e))
+             (optim (compiler:find-rewriter s)))
         (when (and optim (not (find-symbol-in-env s env)))
           ;; We have a rewriter and symbol is not defined in current
           ;; environment
