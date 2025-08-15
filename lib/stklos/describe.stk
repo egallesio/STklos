@@ -213,6 +213,13 @@ doc>
             (format port "an unnamed mutex with state ~a and ~a specific field"
                     state specific))))
 
+     ((%icall? x)
+      (format port "an icall (internal compiler call) object, ")
+      (format port "whose name is `~a' and compiling function set to ~a"
+              (%icall-name x)
+              (%icall-function x)))
+
+
      (else
       (let ((user-type-name (%user-type-name x)))
         (if user-type-name
