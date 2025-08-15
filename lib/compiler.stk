@@ -1833,7 +1833,7 @@ doc>
       (compiler-error '%in-scheme e "expected one argument")))
 
 (define-macro (%in-scheme symbol)
-  `(#%in-scheme symbol))
+  `(#%in-scheme ,symbol))
 
 
 ;;;;======================================================================
