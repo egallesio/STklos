@@ -1045,6 +1045,145 @@ The code is generated as a list, in the `*code-instr*` global variable
 in the `STKLOS-COMPILER` module. The procedure `emit` conses one more
 instruction on the code (which will later be reversed, of course)
 
+==== Standard and new special forms
+
+The set of special forms in STklos is extendable, and the whole
+mechanism is illustrated in this section with an example.
+
+The special form `if` is a macro. It is defined in `lib/runtime-macros.stk` as
+
+[source, scheme]
+----
+(define-macro (if . args)            `(#%if ,@args))
+----
+
+The `#%if` to which it exapands into is an *internal compiler call*
+(named `icall` in STklos). It looks like a Scheme symbol, but symbols
+cannot start with the sharp sign (`#`), so one cannot use this as a symbol name:
+
+[source, scheme]
+----
+stklos> (define #%if 10)
+**** Error:
+compiler-error: define: bad variable name #%if
+----
+
+However, `icall` objects are self-evaluating, just like symbols:
+
+[source, scheme]
+----
+stklos> #%if
+#%if
+----
+
+This makes it possible to redefine the symbols that usually are names of
+special forms, like `if`, `cond`, `quote` etc.
+
+When the compiler looks at the form `(#%if bool something)`,
+it will recognize that the `car` of the form is an `icall` object,
+and automatically call a procedure that compiles it.
+
+Each `icall` object has
+* a name (a Scheme symbol)
+* a "function" (actually the Scheme procedure that compiles this form, just
+  like the others in `compiler.stk`). The function field may be set to `#f`.
+
+If the function field of an `icall` object is `#f`, then the function called to
+compile it is `compile-%%NAME`, where `NAME` is the name of the `icall`
+object.
+
+[source, scheme]
+----
+(%icall? #%if)         => #t
+(%icall-name #%if)     => if
+(%icall-function #%if) => #f
+----
+
+Since the function attached to `#%if` is `#f`, then `compile-%%if` (which is
+defined inside the `STKLOS-COMPILER` module) is called.
+
+[source, scheme]
+----
+(if bool something)
+  ~~> (#%if bool something)
+    ~~> (compile-%%if '((#%if bool something) #f #f)     ;; if env and tail are both #f
+----
+
+We now implement a special form `twice`, that compiles the code inside it twice.
+
+[source,scheme]
+----
+stklos> (define-macro (twice . args)            `(#%twice ,@args))
+----
+
+We *do not* need to "create" the `#%twice`  icall. We just create the function that will
+compile it, *inside the `STKLOS-COMPILER` module*:
+
+[source,scheme]
+----
+stklos> (select-module STKLOS-COMPILER)
+STKLOS-COMPILER>
+(define (compile-%%twice args env tail?)
+  (if (null? (cdr args))
+      (emit 'IM-VOID)      ;; (twice) => void
+      (compile
+       `(begin ,@(cdr args)  ;; once
+               ,@(cdr args)) ;; twice
+       env args tail?)))
+----
+
+And that's all. We can test our new special form (and we move out of
+the `STKLOS-COMPILER` module, since it's not necessary anymore):
+
+[source,scheme]
+----
+STKLOS-COMPILER> (select-module stklos)
+stklos> (disassemble-expr '(twice (print 1)))
+
+000:  PREPARE-CALL
+001:  ONE-PUSH
+002:  GREF-INVOKE          0 1
+005:  PREPARE-CALL
+006:  ONE-PUSH
+007:  GREF-INVOKE          0 1
+010:
+----
+
+The code was compiled twice!
+
+[source,scheme]
+----
+stklos> (twice (print 1))
+1
+1
+----
+
+Of course, STklos will optimize out whatever redundancies we introduce, so
+`(twice 1)` will generate the same code as `(begin 1)`.
+
+Now we illustrate the use of `%icall-function`.
+
+[source,scheme]
+----
+stklos> (define-macro (double . args)            `(#%double ,@args))
+----
+
+We may have an `icall` object with a different name from its compiling function. The
+procedure `%icall-function-set!` allows one to define the compiling procedure for
+that special form.
+
+[source,scheme]
+----
+stklos> (%icall-function #%double)
+#f
+stklos> (%icall-function-set! #%double (in-module STKLOS-COMPILER compile-%%twice))
+stklos> (%icall-function #%double)
+#[closure compile-%%twice]
+stklos> (double (print 2))
+2
+2
+----
+
 === Peephole optimizer
 
 STklos uses a peephole optimzier, located in the file
