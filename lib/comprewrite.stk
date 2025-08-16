@@ -65,9 +65,11 @@
       (let* ((s     (car e))
              (optim (compiler:find-rewriter s)))
         (when (and optim                             ;; we have a rewriter
-                   (not (find-symbol-in-env s env))  ;; symb is not redefined in env
-                   (eq? (symbol-value  s *scmmod*)   ;; value is the std Scheme one
-                        (symbol-value* s *stklosmod*)))
+                   (or (%icall? s)
+                       (and (not (find-symbol-in-env s env))      ; s is not in env
+                            (eq? (symbol-value  s *scmmod*)       ; value is the std
+                                 (symbol-value* s *stklosmod*))))); Scheme one
+          ;; We can rewrite this form 
           (set! e (optim e (length e) env))          ;; call the optimizer
           (unless (equal? e save)                    ;; loop is rewritten
             ;; (%debug "Rewrite ~s => ~s" save e)
@@ -154,9 +156,6 @@
        #eof
        expr)))
 
-
-;; FIXME: Verify that CAR and CDR rewriters preserve eq?-ness in code constants
-;; (or suppress them)
 (compiler:add-rewriter!            ;; 'CAR' rewriter
  'car
  ;; (car (CONST-HEAD . CONST-TAIL)) ===> CONST-HEAD
