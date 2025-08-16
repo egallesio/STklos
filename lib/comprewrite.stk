@@ -36,7 +36,10 @@
 (define *all-rewriters* (%make-hash-table eq? hash-table-hash))
 
 (define (compiler:find-rewriter symb)
-  (hash-table-get *all-rewriters* symb #f))
+  ;; (%debug "=> ~S \t\t~S" symb (length (%redefined-vars)))
+  (and (not (memq symb (%redefined-vars)))
+       (hash-table-get *all-rewriters* symb #f)))
+
 
 (define (compiler:add-rewriter! symb proc)
   ;; A rewriter must take 3 parameters

@@ -361,6 +361,7 @@ doc>
         (compiler-error 'define l "ill formed definition ~S" l)
         l)))
 
+
 (define (compile-%%define args env tail?)
   (let* ((l   (define->lambda args))
          (who (cadr l)))
@@ -369,6 +370,9 @@ doc>
         (if (not env)
             (if (symbol? who)
                 (begin
+                  (when (memq who (compiler-known-globals))
+                    ;; Symbol is redefined. Add it to redefined global vars list
+                    (%redefined-vars (cons who (%redefined-vars))))
                   (%register-new-global! who)
                   (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))

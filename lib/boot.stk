@@ -250,6 +250,7 @@
 ;;      Set the default module for the compiler to (current-module)
 ;; ----------------------------------------------------------------------
 (compiler-current-module (current-module))
+;(set! *register-redefined-vars* #t)
 
 ;; ----------------------------------------------------------------------
 ;;      option analysis and REPL launching
