@@ -372,7 +372,8 @@ doc>
                 (begin
                   (when (memq who (compiler-known-globals))
                     ;; Symbol is redefined. Add it to redefined global vars list
-                    (%redefined-vars (cons who (%redefined-vars))))
+                    (unless (memq who (%redefined-vars))
+                      (%redefined-vars (cons who (%redefined-vars)))))
                   (%register-new-global! who)
                   (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
