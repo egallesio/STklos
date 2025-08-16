@@ -92,7 +92,7 @@
 (define *compiling-file*        #f)  ;; is #t when we are compiling a file
 
 (define *scmmod*                (find-module 'SCHEME))
-
+(define *stklosmod*             (find-module 'STklos))
 
 (include "peephole.stk")
 (include "assembler.stk")
@@ -370,10 +370,6 @@ doc>
         (if (not env)
             (if (symbol? who)
                 (begin
-                  (when (memq who (compiler-known-globals))
-                    ;; Symbol is redefined. Add it to redefined global vars list
-                    (unless (memq who (%redefined-vars))
-                      (%redefined-vars (cons who (%redefined-vars)))))
                   (%register-new-global! who)
                   (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
@@ -1066,17 +1062,15 @@ doc>
   (emit (if tail? 'TAIL-INVOKE 'INVOKE)
         (length actuals)))
 
-(define can-be-inlined?
-  (let ((STklos (find-module 'STklos)))
-    (lambda (fct env . alist)
-      (let* ((table (if (null? alist) *inline-table* (car alist)))
-             (found (memq fct table)))
-        (if (and found
-                 (not (find-symbol-in-env fct env)))
-            (let ((f (symbol-value fct *scmmod*)))
-              (and f (eq? f (symbol-value* fct STklos))))
-            (and (null? alist)                     ; if alist was passed, it was
-                 (memq fct *always-inlined*))))))) ; a request for THAT alist only
+(define (can-be-inlined? fct env . alist)
+  (let* ((table (if (null? alist) *inline-table* (car alist)))
+         (found (memq fct table)))
+    (if (and found
+             (not (find-symbol-in-env fct env)))
+        (let ((f (symbol-value fct *scmmod*)))
+          (and f (eq? f (symbol-value* fct *stklosmod*))))
+        (and (null? alist)                      ; if alist was passed, it was
+             (memq fct *always-inlined*)))))    ; a request for THAT alist only
 
 ;; maybe-fold-constant takes the current environment, a list of
 ;; arguments and tries to math-fold them into constants.

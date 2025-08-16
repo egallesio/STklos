@@ -210,11 +210,6 @@ doc>
 ;;
 ;; This should be in compiler module but it a nightmare with bootstrap.
 ;; ----------------------------------------------------------------------
-
-;; List of redefined global variables
-(define-parameter %redefined-vars '())
-(define *register-redefined-vars*  #f)
-
 (define-parameter compiler-known-globals '())
 
 (define (%register-new-global! symbol)
@@ -224,6 +219,7 @@ doc>
 
 (define (%register-new-globals! symbols)
   (for-each %register-new-global! symbols))
+
 
 ;; ----------------------------------------------------------------------
 ;;      Module management
