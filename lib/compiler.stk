@@ -92,7 +92,7 @@
 (define *compiling-file*        #f)  ;; is #t when we are compiling a file
 
 (define *scmmod*                (find-module 'SCHEME))
-
+(define *stklosmod*             (find-module 'STklos))
 
 (include "peephole.stk")
 (include "assembler.stk")
@@ -335,7 +335,7 @@ doc>
        (set! *forward-globals* (cons (cons symbol epair) *forward-globals*)))
       ((compiler:warn-use-undefined)
        (compiler-warn-undef symbol epair)
-       (register-new-global! symbol)))))        ; to avoid multiple warnings
+       (%register-new-global! symbol)))))        ; to avoid multiple warnings
 
 
 (define (compiler-show-undefined-symbols)
@@ -344,7 +344,7 @@ doc>
                     (where  (cdr x)))
                 (unless (known-var? symbol)
                   (compiler-warn-undef symbol where)
-                  (register-new-global! symbol)))) ;; to avoid multiple warnings
+                  (%register-new-global! symbol)))) ;; to avoid multiple warnings
             (reverse *forward-globals*))
   (set! *forward-globals* '()))
 
@@ -361,6 +361,7 @@ doc>
         (compiler-error 'define l "ill formed definition ~S" l)
         l)))
 
+
 (define (compile-%%define args env tail?)
   (let* ((l   (define->lambda args))
          (who (cadr l)))
@@ -369,7 +370,7 @@ doc>
         (if (not env)
             (if (symbol? who)
                 (begin
-                  (register-new-global! who)
+                  (%register-new-global! who)
                   (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
                 (compiler-error 'define args "bad variable name ~S" who))
@@ -534,7 +535,7 @@ doc>
                                                           ,proc
                                                           ',(module-name mod))))
                   ;; produce code for defining the macro
-                  (register-new-global! name)
+                  (%register-new-global! name)
                   (compile obj #f env #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant name))
                   ;; register the macro, so that the compiler expand macro calls
@@ -1061,17 +1062,15 @@ doc>
   (emit (if tail? 'TAIL-INVOKE 'INVOKE)
         (length actuals)))
 
-(define can-be-inlined?
-  (let ((STklos (find-module 'STklos)))
-    (lambda (fct env . alist)
-      (let* ((table (if (null? alist) *inline-table* (car alist)))
-             (found (memq fct table)))
-        (if (and found
-                 (not (find-symbol-in-env fct env)))
-            (let ((f (symbol-value fct *scmmod*)))
-              (and f (eq? f (symbol-value* fct STklos))))
-            (and (null? alist)                     ; if alist was passed, it was
-                 (memq fct *always-inlined*))))))) ; a request for THAT alist only
+(define (can-be-inlined? fct env . alist)
+  (let* ((table (if (null? alist) *inline-table* (car alist)))
+         (found (memq fct table)))
+    (if (and found
+             (not (find-symbol-in-env fct env)))
+        (eq? (symbol-value fct *scmmod*)        ; value in STklos is identical
+             (symbol-value* fct *stklosmod*))   ; to the one in SCHEME
+        (and (null? alist)                      ; if alist was passed, it was
+             (memq fct *always-inlined*)))))    ; a request for THAT alist only
 
 ;; maybe-fold-constant takes the current environment, a list of
 ;; arguments and tries to math-fold them into constants.
@@ -1833,7 +1832,7 @@ doc>
       (compiler-error '%in-scheme e "expected one argument")))
 
 (define-macro (%in-scheme symbol)
-  `(#%in-scheme symbol))
+  `(#%in-scheme ,symbol))
 
 
 ;;;;======================================================================
@@ -1928,7 +1927,7 @@ both forms.
 (define (import-file-information infos)
   (when (pair? infos)
     ;; Register all the global symbols of the file
-    (for-each register-new-global! (key-get infos :globals '()))
+    (for-each %register-new-global! (key-get infos :globals '()))
 
     ;; Rebuild the expanders exported by the imported file.
     (for-each (lambda (x)
@@ -2064,27 +2063,23 @@ both forms.
           ;; --- Macro call
           (compile (%macro-expand e env) env epair tail?))
 
-         ((find-symbol-in-env first env)
-          ;; --- Symbol is in environment => function call
-          (compile-call e env tail?))
+         ((%icall? first)
+          ;; --- Internal call such as #%if, #%and ...
+          (let ((func (%icall-function first)))
+            (unless func
+              (let* ((name (string->symbol (format "compile-%%~a"
+                                                   (%icall-name first))))
+                     (f     (symbol-value name 'STKLOS-COMPILER #f)))
+                (unless f
+                  (error "Fatal: cannot find function ~S in compiler" name)
+                  (exit 1))
+                (%icall-function-set! first f)))
+            ;; Call the internal function contained in `first` internal call
+            ( [%icall-function first] e env tail?)))
 
          (else
-          ;; --- special-form OR (not in env) function call?
-          (if (%icall? first)
-              ;; We have an internal call such as #%if, #%and ...
-              (let ((func (%icall-function first)))
-                (unless func
-                  (let* ((name (string->symbol (format "compile-%%~a"
-                                                       (%icall-name first))))
-                         (f     (symbol-value name 'STKLOS-COMPILER #f)))
-                    (unless f
-                      (error "Fatal: cannot find function ~S in compiler" name)
-                      (exit 1))
-                    (%icall-function-set! first f)))
-                ;; Call the internal function contained in `first` internal call
-                ( [%icall-function first] e env tail?))
-              ;; Not an internal call => normal function call (not in env)
-              (compile-call          e env tail?))))))
+          ;; Not an internal call => normal function call
+          (compile-call e env tail?)))))
 
      ;; ---- We have a symbol
      ((symbol? e)

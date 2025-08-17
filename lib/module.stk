@@ -124,7 +124,7 @@ doc>
                                (%module-create name)
                                (error 'select-module "module ~s does not exists" name)))))
     (when (and mod (not (eq? name 'STklos)))
-      (register-new-globals! (module-symbols mod)))
+      (%register-new-globals! (module-symbols mod)))
 
   ;; The real expansion of the select-module
   `(begin
@@ -449,11 +449,11 @@ doc>
                       (let ((val (symbol-value* (car pair) mod 'absent)))
                         (when (%syntax? val)
                           (%symbol-link (cdr pair) (car pair) lib mod))
-                        (register-new-global! (cdr pair))))
+                        (%register-new-global! (cdr pair))))
                       imported)
           (for-each (lambda (pair)
                       (%symbol-link (cdr pair) (car pair) lib mod)
-                      (register-new-global! (cdr pair)))
+                      (%register-new-global! (cdr pair)))
                     imported))))
 
   (define (add-imports lst imports)
@@ -547,7 +547,7 @@ doc>
           (let ((res (reverse! res)))
             ;; HACK: register exported symbols to avoid furteher useless
             ;; compilation messages.
-            (register-new-globals!  (map car res))
+            (%register-new-globals!  (map car res))
 
             ;; HACK: do the exportations in compiler-current-module to permit
             ;; the syntax publication in header of `.ostk` files. It means
