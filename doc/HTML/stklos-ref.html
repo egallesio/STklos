@@ -27251,6 +27251,105 @@ that number of bytes is copied into the new string.</p>
 </div>
 </div>
 <div class="paragraph">
+<p><a id='P_cpointer-set!'></a><a id='P_cpointer-set-abs!'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(cpointer-set! pointer type value) </strong></code><br>
+<code><strong>(cpointer-set! pointer type value offset) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value offset) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets the given <code>value</code> of <code>type</code> inside <code>pointer</code>. If <code>offset</code> is not given
+it defaults to 0. Note that, as in C, the <code>offset</code> is multiplied by the size of
+<code>type</code> when using <code>cpointer-set!</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-set!</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">p</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">1</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">42</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">p</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">42</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">43</span> <span class="mi">1</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following examples shows how we can forge a C string in Scheme</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span> <span class="nv">buff</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">5</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">a</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">b</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">c</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">d</span> <span class="mi">3</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">null</span> <span class="mi">4</span><span class="p">)</span> <span class="c1">;; convention for end of string in C</span>
+  <span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span><span class="p">))</span>      <span class="nv">=&gt;</span> <span class="s">"abcd"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_cpointer-ref'></a><a id='P_cpointer-ref-abs'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(cpointer-ref pointer type) </strong></code><br>
+<code><strong>(cpointer-ref pointer type offset) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type offset) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns value of <code>type</code> from <code>pointer</code>. If <code>offset</code> is not given
+it defaults to 0. Note that, as in C, the offset is multiplied by the size of
+<code>type</code> when using <code>cpointer-ref</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-ref</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">p</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">1</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">42</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">p</span> <span class="nv">:uint8</span><span class="p">)</span>
+      <span class="nv">=&gt;</span> <span class="mi">42</span>
+<span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">p</span> <span class="nv">:uint8</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="nv">=&gt;</span> <span class="mi">42</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">q</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="p">(</span><span class="nb">*</span> <span class="mi">2</span> <span class="p">(</span><span class="nf">c-size-of</span> <span class="nv">:long</span><span class="p">))))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">1234</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">6789</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">; address is one C "long" after</span>
+<span class="p">(</span><span class="nb">cons</span> <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">cpointer-ref</span> <span class="nv">q</span> <span class="nv">:long</span> <span class="mi">0</span><span class="p">))</span>   <span class="nv">=&gt;</span> <span class="p">(</span><span class="nf">6789</span> <span class="o">.</span> <span class="mi">1234</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><a id='P_allocate-bytes'></a>
 </p>
 </div>

@@ -136,36 +136,71 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
   return STk_void;
 }
 
-static size_t get_type_size(long kind) {
+
+
+/*
+<doc EXT c-size-of
+ * (c-size-of type)
+ *
+ * |c-size-of| returns the size of a C |type|, measured in units sized as char.
+ * The type is given as a keyword following the conventions described in the
+ * previous table.
+ *
+ * @lisp
+ * (c-size-of :char)               => 1
+ * (= (* 2 (c-size-of :int8))
+ *    (c-size-of :int16))          => #t
+ * @end lisp
+doc>
+*/
+static size_t get_type_size(long kind)
+{
   switch (kind) {
-    case f_void:      return sizeof(void*);
-    case f_char:      return sizeof(char);
-    case f_uchar:     return sizeof(unsigned char);
-    case f_schar:     return sizeof(signed char);
-    case f_short:     return sizeof(short);
-    case f_ushort:    return sizeof(unsigned short);
-    case f_int:       return sizeof(int);
-    case f_uint:      return sizeof(unsigned int);
-    case f_long:      return sizeof(long);
-    case f_ulong:     return sizeof(unsigned long);
-    case f_longlong:  return sizeof(long long);
-    case f_ulonglong: return sizeof(unsigned long long);
-    case f_int8:      return sizeof(int8_t);
-    case f_uint8:     return sizeof(uint8_t);
-    case f_int16:     return sizeof(int16_t);
-    case f_uint16:    return sizeof(uint16_t);
-    case f_int32:     return sizeof(int32_t);
-    case f_uint32:    return sizeof(uint32_t);
-    case f_int64:     return sizeof(int64_t);
-    case f_uint64:    return sizeof(uint64_t);
+    case f_char:
+    case f_schar:
+    case f_uchar:     return  sizeof(char);
+
+    case f_short:
+    case f_ushort:    return sizeof(short);
+    case f_int:
+    case f_uint:      return sizeof(int);
+    case f_long:
+    case f_ulong:     return sizeof(long);
+    case f_longlong:
+    case f_ulonglong: return sizeof(long long);
+    case f_int8:
+    case f_uint8:     return sizeof(int8_t);
+    case f_int16:
+    case f_uint16:    return sizeof(int16_t);
+    case f_int32:
+    case f_uint32:    return sizeof(int32_t);
+    case f_int64:
+    case f_uint64:    return  sizeof(int64_t);
+
     case f_float:     return sizeof(float);
     case f_double:    return sizeof(double);
-    case f_boolean:   return sizeof(int);      /* boolean is int */
-    case f_pointer:   return sizeof(void *);
-    case f_string:    return sizeof(char *);
-    case f_obj:       return sizeof(void *);
+
+    case f_boolean:   return sizeof(int);
+
+    case f_pointer:
+    case f_string:   return sizeof(void *);
+
+    case f_void:
+    case f_obj:     /* fallthrough */
+
+    default:        return 0; // This is an error. 
   }
 }
+
+DEFINE_PRIMITIVE("c-size-of", csizeof, subr1, (SCM type))
+{
+  int res   =  get_type_size(STk_C_type2number(type));
+
+  if (!res) STk_error("cannot determine the size of ~S", type);
+
+  return MAKE_INT(res);
+}
+
 
 /*
 <doc EXT cpointer->string
@@ -228,7 +263,7 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes)
 }
 
 /*
-<doc EXT cpointer-set! cpointer-set-abs!
+<doc EXT cpointer-set-abs! cpointer-set!
  * (cpointer-set! pointer type value)
  * (cpointer-set! pointer type value offset)
  * (cpointer-set-abs! pointer type value)
@@ -397,7 +432,7 @@ DEFINE_PRIMITIVE("cpointer-set-abs!", cpointer_set_abs, subr34,
 }
 
 /*
-<doc EXT cpointer-ref cpointer-ref-abs
+<doc EXT cpointer-ref-abs cpointer-ref
  * (cpointer-ref pointer type)
  * (cpointer-ref pointer type offset)
  * (cpointer-ref-abs pointer type)
@@ -577,63 +612,7 @@ DEFINE_PRIMITIVE("free-bytes", free_bytes, subr1, (SCM p))
   return STk_void;
 }
 
-/*
-<doc EXT c-size-of
- * (c-size-of type)
- *
- * |c-size-of| returns the size of a C |type|, measured in units sized as char.
- * The type is given as a keyword following the conventions described in the
- * previous table.
- *
- * @lisp
- * (c-size-of :char)               => 1
- * (= (* 2 (c-size-of :int8))
- *    (c-size-of :int16))          => #t
- * @end lisp
-doc>
-*/
-DEFINE_PRIMITIVE("c-size-of", csizeof, subr1, (SCM type))
-{
-  long kind =  STk_C_type2number(type);
-  int res = 0;
 
-  switch (kind) {
-    case f_char:
-    case f_schar:
-    case f_uchar:     res = sizeof(char); break;
-
-    case f_short:
-    case f_ushort:    res = sizeof(short); break;
-    case f_int:
-    case f_uint:      res = sizeof(int); break;
-    case f_long:
-    case f_ulong:     res = sizeof(long); break;
-    case f_longlong:
-    case f_ulonglong: res = sizeof(long long); break;
-    case f_int8:
-    case f_uint8:     res = sizeof(int8_t); break;
-    case f_int16:
-    case f_uint16:    res = sizeof(int16_t); break;
-    case f_int32:
-    case f_uint32:    res = sizeof(int32_t); break;
-    case f_int64:
-    case f_uint64:    res = sizeof(int64_t); break;
-
-    case f_float:     res = sizeof(float);; break;
-    case f_double:    res = sizeof(double); break;
-
-    case f_boolean:   res = sizeof(int); break;
-
-    case f_pointer:
-    case f_string:   res = sizeof(void *); break;
-
-    case f_void:
-    case f_obj:     /* fallthrough */
-
-    default: STk_error("cannot determine the size of ~S", type);
-  }
-  return MAKE_INT(res);
-}
 
 int STk_init_cpointer(void)
 {
@@ -643,6 +622,7 @@ int STk_init_cpointer(void)
   ADD_PRIMITIVE(cpointer_type);
   ADD_PRIMITIVE(cpointer_data_set);
   ADD_PRIMITIVE(cpointer_type_set);
+  ADD_PRIMITIVE(csizeof);
   ADD_PRIMITIVE(cpointer2string);
   ADD_PRIMITIVE(cpointer_set);
   ADD_PRIMITIVE(cpointer_set_abs);
@@ -651,7 +631,6 @@ int STk_init_cpointer(void)
 
   ADD_PRIMITIVE(allocate_bytes);
   ADD_PRIMITIVE(free_bytes);
-  ADD_PRIMITIVE(csizeof);
-
+  
   return TRUE;
 }
