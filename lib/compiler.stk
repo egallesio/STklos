@@ -2067,15 +2067,19 @@ both forms.
           ;; --- Internal call such as #%if, #%and ...
           (let ((func (%icall-function first)))
             (unless func
-              (let* ((name (string->symbol (format "compile-%%~a"
-                                                   (%icall-name first))))
-                     (f     (symbol-value name 'STKLOS-COMPILER #f)))
-                (unless f
-                  (error "Fatal: cannot find function ~S in compiler" name)
-                  (exit 1))
-                (%icall-function-set! first f)))
+              ;; This is the fist execution of this icall. It has not associated
+              ;; function. If the icall is '#%XXX' we set the function slot
+              ;; to compile-%%XXX, so that its later uses are faster.
+              (let* ((name  (string->symbol (format "compile-%%~a"
+                                                    (%icall-name first))))
+                     (fcomp (symbol-value name 'STKLOS-COMPILER #f)))
+                (if fcomp
+                    (begin
+                      (%icall-function-set! first fcomp)
+                      (set! func fcomp))
+                    (error "cannot find function compile-%%~a in compiler" name))))
             ;; Call the internal function contained in `first` internal call
-            ( [%icall-function first] e env tail?)))
+            (func e env tail?)))
 
          (else
           ;; Not an internal call => normal function call

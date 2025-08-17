@@ -26,6 +26,15 @@
 #include "stklos.h"
 #include "hash.h"
 
+/* Internal calls have the form #%xxx and are directly executed by the
+ * function compile-%%xxx in the STklos compiler. For instance, the Scheme
+ * `(if a b c)` is rewritten in `(%if a b c)` by the `if` macro (which can be
+ * re-assigned later by the user). The `tc_icall` type is used for internal
+ * calls.  It has two slots: the name of the icall and the function to call
+ * in the compiler (a local cache). All the #%xxx icalls share the same
+ * address, and the function pointer is set to `#f` when initialized (it will
+ * be set! at the first use of the icall by the compiler).
+ */
 
 struct icall_obj {
   stk_header header;
@@ -125,3 +134,6 @@ int STk_init_icall(void)
   ADD_PRIMITIVE(icall_func_set);
   return 1;
 }
+
+/*  LocalWords:  icall icalls
+ */
