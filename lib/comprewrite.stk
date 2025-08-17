@@ -38,13 +38,18 @@
 (define (compiler:find-rewriter symb)
   (hash-table-get *all-rewriters* symb #f))
 
-(define (compiler:add-rewriter! symb proc)
-  ;; A rewriter must take 3 parameters
+(define (compiler:add-rewriter! key proc)
+  ;; key can
+  ;;    - a symbol (or an internal call)
+  ;;    - a list (to associate the same rewriter to several keys)
+  ;; A rewriter procedure must take 3 parameters
   ;;    - expr  (the expression to simplify/rewrite)
   ;;    - len   (the length of the expression)
   ;;    - env   (the environment)
   ;; It returns a (possibly) simplified expression
-  (hash-table-set! *all-rewriters* symb proc))
+  (if (list? key)
+      (for-each (lambda (k) (hash-table-set! *all-rewriters* k proc)) key)
+      (hash-table-set! *all-rewriters* key proc)))
 
 ;;
 ;; rewrite an expression
@@ -69,7 +74,7 @@
                        (and (not (find-symbol-in-env s env))      ; s is not in env
                             (eq? (symbol-value  s *scmmod*)       ; value is the std
                                  (symbol-value* s *stklosmod*))))); Scheme one
-          ;; We can rewrite this form 
+          ;; We can rewrite this form
           (set! e (optim e (length e) env))          ;; call the optimizer
           (unless (equal? e save)                    ;; loop is rewritten
             ;; (%debug "Rewrite ~s => ~s" save e)
@@ -89,7 +94,7 @@
 ;;;
 ;;; ======================================================================
 (compiler:add-rewriter!            ;; 'IF' rewriter
- 'if
+ '(if #%if)
  ;; (if CONST then-expr else-expr)
  ;; ===> then-expr  (if CONST is #f)
  ;; ===> else-expr  (otherwise)
@@ -125,7 +130,7 @@
 
 
 (compiler:add-rewriter!            ;; 'BEGIN' rewriter
- 'begin
+ '(begin #%begin)
  ;; (begin CONST (a...) CONST (b...) => CONST (c...) XCONST)
  ;; ===>
  ;; (begin (a...) (b...) => (c...) XCONST
@@ -133,7 +138,7 @@
  ;; (remove constants, except the last one and the => symbol)
  (lambda (expr _len env) ;; _len unused here
    (let Loop ((e   (cdr expr))
-              (res (list 'begin)))
+              (res (list (car expr))))
      (cond
       ((null? e)          ;; end of the list
        (reverse! res))
