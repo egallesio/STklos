@@ -27251,7 +27251,8 @@ that number of bytes is copied into the new string.</p>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_cpointer-set!'></a>
+<p><a id='P_cpointer-set!'></a><a id='P_cpointer-set-abs!'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -27261,14 +27262,21 @@ that number of bytes is copied into the new string.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(cpointer-set! pointer type value) </strong></code><br>
-<code><strong>(cpointer-set! pointer type value offset) </strong></code><br></p>
+<code><strong>(cpointer-set! pointer type value offset) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value offset) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Sets the given <code>value</code> of <code>type</code> inside <code>pointer</code>. If <code>offset</code> is not given
-it defaults to 0. Note that, as in C, the offset is multiplied by the size of
-<code>type</code>. It permits to access the C object as an array.</p>
+it defaults to 0. Note that, as in C, the <code>offset</code> is multiplied by the size of
+<code>type</code> when using <code>cpointer-set!</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-set!</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27284,7 +27292,7 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 </div>
 </div>
 <div class="paragraph">
-<p>The following examples shows how we cans forge a C string in Scheme</p>
+<p>The following examples shows how we can forge a C string in Scheme</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27298,7 +27306,8 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_cpointer-ref'></a>
+<p><a id='P_cpointer-ref'></a><a id='P_cpointer-ref-abs'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -27308,14 +27317,21 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(cpointer-ref pointer type) </strong></code><br>
-<code><strong>(cpointer-ref pointer type offset) </strong></code><br></p>
+<code><strong>(cpointer-ref pointer type offset) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type offset) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Returns value of <code>type</code> from <code>pointer</code>. If <code>offset</code> is not given
 it defaults to 0. Note that, as in C, the offset is multiplied by the size of
-<code>type</code>. It permits to access the C object as an array.</p>
+<code>type</code> when using <code>cpointer-ref</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-ref</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
 </div>
 <div class="listingblock">
 <div class="content">

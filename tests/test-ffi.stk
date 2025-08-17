@@ -254,6 +254,44 @@
              '(0 1 2 3 4 5 6 7 8 9))))
 
 
+(let ((buf (allocate-bytes (* 8 (c-size-of :uint16)))))
+  (cpointer-set! buf :int8 5 0)
+  (cpointer-set! buf :int8 7 1)
+  (cpointer-set! buf :int8 0 2) ;; uint16 is 0
+  (cpointer-set! buf :int8 0 3)
+  (cpointer-set! buf :int8 2 4) ;; uint16 is 770
+  (cpointer-set! buf :int8 3 5)
+  (cpointer-set! buf :int8 4 6) ;; uint16 is 1284
+  (cpointer-set! buf :int8 5 7)
+
+  (test "cpointer pos 0" 5 (cpointer-ref buf :int8 0))
+  (test "cpointer pos 1" 7 (cpointer-ref buf :int8 1))
+  (test "cpointer pos 2" 0 (cpointer-ref buf :int8 2))
+  (test "cpointer pos 3" 0 (cpointer-ref buf :int8 3))
+  (test "cpointer pos 4" 2 (cpointer-ref buf :int8 4))
+  (test "cpointer pos 5" 3 (cpointer-ref buf :int8 5))
+  (test "cpointer pos 6" 4 (cpointer-ref buf :int8 6))
+  (test "cpointer pos 7" 5 (cpointer-ref buf :int8 7))
+
+  (test "cpointer steps at zero"
+        #t
+        (= (cpointer-ref     buf :int16 0)
+           (cpointer-ref-abs buf :int16 0)))
+
+  (test "cpointer 1/2 steps.1" 0    (cpointer-ref     buf :int16 1)) ; one step of size 16
+  (test "cpointer 1/2 steps.2" 0    (cpointer-ref-abs buf :int16 2)) ; two steps of size 8
+
+  (test "cpointer one, four steps"
+        #t
+        (=
+         (cpointer-ref-abs buf :int32 4)    ; four steps of size 8
+         (cpointer-ref     buf :int32 1)))  ; one  step  of size 32
+
+  (test/error "cpointer-ref error" (cpointer-ref  buf 'y 1))
+  ;; (test/error "cpointer-ref error" (cpointer-ref  buf :uint8 -1))
+  ;; (test/error "cpointer-ref-abs error" (cpointer-ref-abs  buf :uint8 -1)
+  )
+
 
 
 (test-section-end)

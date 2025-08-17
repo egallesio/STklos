@@ -136,6 +136,72 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
   return STk_void;
 }
 
+
+
+/*
+<doc EXT c-size-of
+ * (c-size-of type)
+ *
+ * |c-size-of| returns the size of a C |type|, measured in units sized as char.
+ * The type is given as a keyword following the conventions described in the
+ * previous table.
+ *
+ * @lisp
+ * (c-size-of :char)               => 1
+ * (= (* 2 (c-size-of :int8))
+ *    (c-size-of :int16))          => #t
+ * @end lisp
+doc>
+*/
+static size_t get_type_size(long kind)
+{
+  switch (kind) {
+    case f_char:
+    case f_schar:
+    case f_uchar:     return  sizeof(char);
+
+    case f_short:
+    case f_ushort:    return sizeof(short);
+    case f_int:
+    case f_uint:      return sizeof(int);
+    case f_long:
+    case f_ulong:     return sizeof(long);
+    case f_longlong:
+    case f_ulonglong: return sizeof(long long);
+    case f_int8:
+    case f_uint8:     return sizeof(int8_t);
+    case f_int16:
+    case f_uint16:    return sizeof(int16_t);
+    case f_int32:
+    case f_uint32:    return sizeof(int32_t);
+    case f_int64:
+    case f_uint64:    return  sizeof(int64_t);
+
+    case f_float:     return sizeof(float);
+    case f_double:    return sizeof(double);
+
+    case f_boolean:   return sizeof(int);
+
+    case f_pointer:
+    case f_string:   return sizeof(void *);
+
+    case f_void:
+    case f_obj:     /* fallthrough */
+
+    default:        return 0; // This is an error. 
+  }
+}
+
+DEFINE_PRIMITIVE("c-size-of", csizeof, subr1, (SCM type))
+{
+  int res   =  get_type_size(STk_C_type2number(type));
+
+  if (!res) STk_error("cannot determine the size of ~S", type);
+
+  return MAKE_INT(res);
+}
+
+
 /*
 <doc EXT cpointer->string
  * (cpointer->string str)
@@ -169,7 +235,8 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
  * @end lisp
 doc>
  */
-SCM STk_Cstring2string_nbytes(const char *str, int len) // Embed a C string in Scheme
+static SCM Cstring2string_nbytes(const char *str, int len)
+/* Embed a C string in Scheme (as STk_Cstring2string but limited to len bytes */
 {
   SCM  z;
 
@@ -181,6 +248,7 @@ SCM STk_Cstring2string_nbytes(const char *str, int len) // Embed a C string in S
 
   return z;
 }
+
 DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes))
 {
   if (!CPOINTERP(p)) error_bad_cpointer(p);
@@ -188,19 +256,26 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes)
   if (nbytes) {
     if (!INTP(nbytes)) STk_error("bad integer ~S", nbytes);
     if (INT_VAL(nbytes) < 0) STk_error("negative length %d", INT_VAL(nbytes));
-    return STk_Cstring2string_nbytes(CPOINTER_VALUE(p), INT_VAL(nbytes));
-  } else
+    return Cstring2string_nbytes(CPOINTER_VALUE(p), INT_VAL(nbytes));
+  } else {
     return STk_Cstring2string(CPOINTER_VALUE(p));
+  }
 }
 
 /*
-<doc EXT cpointer-set!
+<doc EXT cpointer-set-abs! cpointer-set!
  * (cpointer-set! pointer type value)
  * (cpointer-set! pointer type value offset)
+ * (cpointer-set-abs! pointer type value)
+ * (cpointer-set-abs! pointer type value offset)
  *
  * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
- * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
- * |type|. It permits to access the C object as an array.
+ * it defaults to 0. Note that, as in C, the |offset| is multiplied by the size of
+ * |type| when using |cpointer-set!|, but it is exactly a number of bytes when
+ * using |cpointer-set-abs!|.
+ *
+ * |Cpointer-set!| is suitable for accessing the C object pointed by |pointer|
+ * as an array.
  *
  * @lisp
  * (define p (allocate-bytes 1))
@@ -213,7 +288,7 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes)
  * (cpointer-set! p :uint8 43 1)
  * @end lisp
  *
- * The following examples shows how we cans forge a C string in Scheme
+ * The following examples shows how we can forge a C string in Scheme
  * @lisp
  * (let (( buff (allocate-bytes 5)))
  *   (cpointer-set! buff :uchar #\a 0)
@@ -225,18 +300,21 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes)
  * @end lisp
 doc>
 */
-#define SET_CPTR(type, v) (*((type *) ptr+ off) = (type) v)
+/* SET_CPTR(type,v) sets position off (in BYTES) to obj, which is of
+   type 'type'. */
+#define SET_CPTR(type, v) (*( (type* ) (((char*) ptr) + off)) = (type) v)
 
-DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
-                 (SCM pointer_obj, SCM type, SCM obj, SCM offset))
-{
+static void cptr_set(SCM pointer_obj, SCM type, SCM obj, SCM offset, int abs) {
   long kind = STk_C_type2number(type);
   long off  = offset? STk_integer_value(offset): 0;
   void *ptr = CPOINTER_VALUE(pointer_obj);
 
   // kind is verified by STk_C_type2number
+  /* if (off < 0) error_bad_offset(offset);  // FIXME: too restrictive? */
   if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
+
+  if (!abs) off = off * (get_type_size(kind));
 
   switch (kind) {
     case f_void:
@@ -337,18 +415,36 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
       STk_error("cannot set a :obj pointer. Value was ~S", obj);
       break;
   }
+}
+
+DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
+                 (SCM pointer_obj, SCM type, SCM obj, SCM offset))
+{
+  cptr_set(pointer_obj, type, obj, offset, 0);
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("cpointer-set-abs!", cpointer_set_abs, subr34,
+                 (SCM pointer_obj, SCM type, SCM obj, SCM offset))
+{
+  cptr_set(pointer_obj, type, obj, offset, 1);
+  return STk_void;
+}
 
 /*
-<doc EXT cpointer-ref
+<doc EXT cpointer-ref-abs cpointer-ref
  * (cpointer-ref pointer type)
  * (cpointer-ref pointer type offset)
+ * (cpointer-ref-abs pointer type)
+ * (cpointer-ref-abs pointer type offset)
  *
  * Returns value of |type| from |pointer|. If |offset| is not given
  * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
- * |type|. It permits to access the C object as an array.
+ * |type| when using |cpointer-ref|, but it is exactly a number of bytes when
+ * using |cpointer-set-abs!|.
+ *
+ * |Cpointer-ref| is suitable for accessing the C object pointed by |pointer|
+ * as an array.
  *
  * @lisp
  * (define p (allocate-bytes 1))
@@ -366,18 +462,22 @@ DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
  * @end lisp
 doc>
 */
-#define CPTR_REF(type) (*( (type*)ptr + off))
 
-DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
-                 (SCM pointer_obj, SCM type, SCM offset))
-{
+/* CPTR_REF(type) is a reference to the object of SIZE of type,
+   based on ptr, but the displacement is off BYTES (not objects) */
+#define CPTR_REF(type) (*( (type*) (((char*) ptr) + off)))
+
+static SCM cptr_get(SCM pointer_obj, SCM type, SCM offset, int abs) {
   long kind =  STk_C_type2number(type);
   long off  = offset? STk_integer_value(offset): 0;
   void *ptr = CPOINTER_VALUE(pointer_obj);
 
   // kind is verified by STk_C_type2number
+  /* if (off < 0) error_bad_offset(offset); // FIXME: too restrictive? */
   if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
+
+  if (!abs) off = off * (get_type_size(kind));
 
   switch (kind) {
     case f_void:      STk_error("can not ref type :void"); return STk_void;
@@ -416,6 +516,18 @@ DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
     default: STk_error("incorrect type: ~S", type);
   }
   return STk_void; /* for the compiler */
+}
+
+DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
+                 (SCM pointer_obj, SCM type, SCM offset))
+{
+  return cptr_get(pointer_obj, type, offset, 0);
+}
+
+DEFINE_PRIMITIVE("cpointer-ref-abs", cpointer_ref_abs, subr34,
+                 (SCM pointer_obj, SCM type, SCM offset))
+{
+  return cptr_get(pointer_obj, type, offset, 1);
 }
 
 /* ----------------------------------------------------------------------
@@ -500,63 +612,7 @@ DEFINE_PRIMITIVE("free-bytes", free_bytes, subr1, (SCM p))
   return STk_void;
 }
 
-/*
-<doc EXT c-size-of
- * (c-size-of type)
- *
- * |c-size-of| returns the size of a C |type|, measured in units sized as char.
- * The type is given as a keyword following the conventions described in the
- * previous table.
- *
- * @lisp
- * (c-size-of :char)               => 1
- * (= (* 2 (c-size-of :int8))
- *    (c-size-of :int16))          => #t
- * @end lisp
-doc>
-*/
-DEFINE_PRIMITIVE("c-size-of", csizeof, subr1, (SCM type))
-{
-  long kind =  STk_C_type2number(type);
-  int res = 0;
 
-  switch (kind) {
-    case f_char:
-    case f_schar:
-    case f_uchar:     res = sizeof(char); break;
-
-    case f_short:
-    case f_ushort:    res = sizeof(short); break;
-    case f_int:
-    case f_uint:      res = sizeof(int); break;
-    case f_long:
-    case f_ulong:     res = sizeof(long); break;
-    case f_longlong:
-    case f_ulonglong: res = sizeof(long long); break;
-    case f_int8:
-    case f_uint8:     res = sizeof(int8_t); break;
-    case f_int16:
-    case f_uint16:    res = sizeof(int16_t); break;
-    case f_int32:
-    case f_uint32:    res = sizeof(int32_t); break;
-    case f_int64:
-    case f_uint64:    res = sizeof(int64_t); break;
-
-    case f_float:     res = sizeof(float);; break;
-    case f_double:    res = sizeof(double); break;
-
-    case f_boolean:   res = sizeof(int); break;
-
-    case f_pointer:
-    case f_string:   res = sizeof(void *); break;
-
-    case f_void:
-    case f_obj:     /* fallthrough */
-
-    default: STk_error("cannot determine the size of ~S", type);
-  }
-  return MAKE_INT(res);
-}
 
 int STk_init_cpointer(void)
 {
@@ -566,13 +622,15 @@ int STk_init_cpointer(void)
   ADD_PRIMITIVE(cpointer_type);
   ADD_PRIMITIVE(cpointer_data_set);
   ADD_PRIMITIVE(cpointer_type_set);
+  ADD_PRIMITIVE(csizeof);
   ADD_PRIMITIVE(cpointer2string);
   ADD_PRIMITIVE(cpointer_set);
+  ADD_PRIMITIVE(cpointer_set_abs);
   ADD_PRIMITIVE(cpointer_ref);
+  ADD_PRIMITIVE(cpointer_ref_abs);
 
   ADD_PRIMITIVE(allocate_bytes);
   ADD_PRIMITIVE(free_bytes);
-  ADD_PRIMITIVE(csizeof);
-
+  
   return TRUE;
 }
