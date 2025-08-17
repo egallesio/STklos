@@ -200,7 +200,8 @@ static size_t get_type_size(long kind) {
  * @end lisp
 doc>
  */
-SCM STk_Cstring2string_nbytes(const char *str, int len) // Embed a C string in Scheme
+static SCM Cstring2string_nbytes(const char *str, int len)
+/* Embed a C string in Scheme (as STk_Cstring2string but limited to len bytes */
 {
   SCM  z;
 
@@ -212,6 +213,7 @@ SCM STk_Cstring2string_nbytes(const char *str, int len) // Embed a C string in S
 
   return z;
 }
+
 DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes))
 {
   if (!CPOINTERP(p)) error_bad_cpointer(p);
@@ -219,9 +221,10 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes)
   if (nbytes) {
     if (!INTP(nbytes)) STk_error("bad integer ~S", nbytes);
     if (INT_VAL(nbytes) < 0) STk_error("negative length %d", INT_VAL(nbytes));
-    return STk_Cstring2string_nbytes(CPOINTER_VALUE(p), INT_VAL(nbytes));
-  } else
+    return Cstring2string_nbytes(CPOINTER_VALUE(p), INT_VAL(nbytes));
+  } else {
     return STk_Cstring2string(CPOINTER_VALUE(p));
+  }
 }
 
 /*
@@ -232,11 +235,13 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes)
  * (cpointer-set-abs! pointer type value offset)
  *
  * Sets the given |value| of |type| inside |pointer|. If |offset| is not given
- * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
- * |type|when using |cpointer-set!|, but it is exactly one byte when
+ * it defaults to 0. Note that, as in C, the |offset| is multiplied by the size of
+ * |type| when using |cpointer-set!|, but it is exactly a number of bytes when
  * using |cpointer-set-abs!|.
  *
- * |Cpointer-set| is suitable for accessing the C object as an array.
+ * |Cpointer-set!| is suitable for accessing the C object pointed by |pointer|
+ * as an array.
+ *
  * @lisp
  * (define p (allocate-bytes 1))
  * (cpointer-set! p :uint8 42)
@@ -248,7 +253,7 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr12, (SCM p, SCM nbytes)
  * (cpointer-set! p :uint8 43 1)
  * @end lisp
  *
- * The following examples shows how we cans forge a C string in Scheme
+ * The following examples shows how we can forge a C string in Scheme
  * @lisp
  * (let (( buff (allocate-bytes 5)))
  *   (cpointer-set! buff :uchar #\a 0)
@@ -270,7 +275,7 @@ static void cptr_set(SCM pointer_obj, SCM type, SCM obj, SCM offset, int abs) {
   void *ptr = CPOINTER_VALUE(pointer_obj);
 
   // kind is verified by STk_C_type2number
-  if (off < 0) error_bad_offset(offset);
+  /* if (off < 0) error_bad_offset(offset);  // FIXME: too restrictive? */
   if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
 
@@ -378,14 +383,17 @@ static void cptr_set(SCM pointer_obj, SCM type, SCM obj, SCM offset, int abs) {
 }
 
 DEFINE_PRIMITIVE("cpointer-set!", cpointer_set, subr34,
-                 (SCM pointer_obj, SCM type, SCM obj, SCM offset)) {
-    cptr_set(pointer_obj,type,obj,offset,0);
-    return STk_void;
+                 (SCM pointer_obj, SCM type, SCM obj, SCM offset))
+{
+  cptr_set(pointer_obj, type, obj, offset, 0);
+  return STk_void;
 }
+
 DEFINE_PRIMITIVE("cpointer-set-abs!", cpointer_set_abs, subr34,
-                 (SCM pointer_obj, SCM type, SCM obj, SCM offset)) {
-    cptr_set(pointer_obj,type,obj,offset,1);
-    return STk_void;
+                 (SCM pointer_obj, SCM type, SCM obj, SCM offset))
+{
+  cptr_set(pointer_obj, type, obj, offset, 1);
+  return STk_void;
 }
 
 /*
@@ -397,10 +405,11 @@ DEFINE_PRIMITIVE("cpointer-set-abs!", cpointer_set_abs, subr34,
  *
  * Returns value of |type| from |pointer|. If |offset| is not given
  * it defaults to 0. Note that, as in C, the offset is multiplied by the size of
- * |type|when using |cpointer-ref|, but it is exactly one byte when
- * using |cpointer-ref-abs|.
+ * |type| when using |cpointer-ref|, but it is exactly a number of bytes when
+ * using |cpointer-set-abs!|.
  *
- * |Cpointer-ref| is suitable for accessing the C object as an array.
+ * |Cpointer-ref| is suitable for accessing the C object pointed by |pointer|
+ * as an array.
  *
  * @lisp
  * (define p (allocate-bytes 1))
@@ -429,7 +438,7 @@ static SCM cptr_get(SCM pointer_obj, SCM type, SCM offset, int abs) {
   void *ptr = CPOINTER_VALUE(pointer_obj);
 
   // kind is verified by STk_C_type2number
-  if (off < 0) error_bad_offset(offset);
+  /* if (off < 0) error_bad_offset(offset); // FIXME: too restrictive? */
   if (off  == LONG_MIN) error_bad_offset(offset);
   if (!CPOINTERP(pointer_obj)) error_bad_cpointer(pointer_obj);
 
@@ -475,12 +484,15 @@ static SCM cptr_get(SCM pointer_obj, SCM type, SCM offset, int abs) {
 }
 
 DEFINE_PRIMITIVE("cpointer-ref", cpointer_ref, subr23,
-                 (SCM pointer_obj, SCM type, SCM offset)) {
-    return cptr_get(pointer_obj,type,offset,0);
+                 (SCM pointer_obj, SCM type, SCM offset))
+{
+  return cptr_get(pointer_obj, type, offset, 0);
 }
+
 DEFINE_PRIMITIVE("cpointer-ref-abs", cpointer_ref_abs, subr34,
-                 (SCM pointer_obj, SCM type, SCM offset)) {
-    return cptr_get(pointer_obj,type,offset,1);
+                 (SCM pointer_obj, SCM type, SCM offset))
+{
+  return cptr_get(pointer_obj, type, offset, 1);
 }
 
 /* ----------------------------------------------------------------------

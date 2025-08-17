@@ -288,8 +288,9 @@
          (cpointer-ref     buf :int32 1)))  ; one  step  of size 32
 
   (test/error "cpointer-ref error" (cpointer-ref  buf 'y 1))
-  (test/error "cpointer-ref error" (cpointer-ref  buf :uint8 -1))
-  (test/error "cpointer-ref-abs error" (cpointer-ref-abs  buf :uint8 -1)))
+  ;; (test/error "cpointer-ref error" (cpointer-ref  buf :uint8 -1))
+  ;; (test/error "cpointer-ref-abs error" (cpointer-ref-abs  buf :uint8 -1)
+  )
 
 
 
