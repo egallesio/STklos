@@ -1,0 +1,917 @@
+;; Tests for SRFI 225.
+;;
+;; Adapted from the reference implementation
+;;
+;; - removed all "test-subsection"s
+;; - Changed test-assert and test-equal to STklos' test
+;; - Removed cond-expand on libraries
+;; - Removed tests not useful in STklos
+;; - Other minor changes
+;;
+;; The original test suite has the following copyright note:
+
+;;;; © 2021 John Cowan, Arvydas Silanskas.
+
+;;;; Permission is hereby granted, free of charge, to any person
+;;;; obtaining a copy of this software and associated documentation
+;;;; files (the "Software"), to deal in the Software without
+;;;; restriction, including without limitation the rights to use,
+;;;; copy, modify, merge, publish, distribute, sublicense, and/or sell
+;;;; copies of the Software, and to permit persons to whom the
+;;;; Software is furnished to do so, subject to the following
+;;;; conditions:
+;;;;
+;;;; The above copyright notice and this permission notice (including
+;;;; the next paragraph) shall be included in all copies or
+;;;; substantial portions of the Software.
+;;;;
+;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;; OTHER DEALINGS IN THE SOFTWARE.
+
+(import (scheme base)
+        ;;(scheme case-lambda)) => failing for some non-obvious reason
+        (scheme write)
+        (srfi 1)
+        (srfi 128)
+        (srfi 158)
+        (srfi 225))
+
+(import (prefix (srfi 125) t125-))
+(import (prefix (srfi 69)  t69-))
+
+;; The original test suite uses SRFI-64. --jpellegrini
+;; (import (srfi 64))
+
+;; returns new wrapper dto
+;; which counts how often each dto's method was called
+;; verify that all functions were tested
+(define (wrap-dto dto)
+  (define proc-count (+ 1 dict-adjoin!-accumulator-id))
+  (define counter (make-vector proc-count 0))
+  (define wrapper-dto-args
+    (let loop ((indexes (iota proc-count))
+               (args '()))
+      (if (null? indexes)
+          args
+          (let* ((index (car indexes))
+                 (real-proc (dto-ref dto index))
+                 (wrapper-proc (lambda args
+                                 (vector-set! counter index (+ 1 (vector-ref counter index)))
+                                 (apply real-proc args))))
+            (loop (cdr indexes)
+                  (append (list index wrapper-proc)
+                          args))))))
+  (values
+   (apply make-dto wrapper-dto-args)
+   counter))
+
+(define (test-for-each expect-success for-each-proc expected-keys)
+  (call/cc (lambda (cont)
+             (with-exception-handler
+                 (lambda (err)
+                   (when expect-success
+                     (display err)
+                     (newline))
+                   (unless expect-success
+                     (cont #t)))
+               (lambda ()
+                 (define lst '())
+                 (for-each-proc
+                  (lambda (key value)
+                    (set! lst (append lst (list key)))))
+                 (test "srfi-225" (length lst) (length expected-keys))
+                 (for-each
+                  (lambda (key)
+                    (test "srfi-225" #f (not (find (lambda (key*) (equal? key key*))
+                                                   expected-keys))))
+                  lst))))))
+
+(define (do-test real-dto alist->dict comparator mutable?)
+
+  (define-values
+      (dto counter)
+    (wrap-dto real-dto))
+
+  ;(test-subsection   "dictionary?")
+  (test "srfi-225" #t (not (dictionary? dto 'foo)))
+  (test "srfi-225" #t (dictionary? dto (alist->dict '())))
+  (test "srfi-225" #t (dictionary? dto (alist->dict '((a . b)))))
+
+  ;(test-subsection   "dict-empty?")
+   (test "srfi-225" #t (dict-empty? dto (alist->dict '())))
+   (test "srfi-225" #t (not (dict-empty? dto (alist->dict '((a . b))))))
+
+  ;(test-subsection   "dict-contains?")
+   (test "srfi-225" #t (not (dict-contains? dto (alist->dict '()) 'a)))
+   (test "srfi-225" #t (not (dict-contains? dto (alist->dict '((b . c))) 'a)))
+   (test "srfi-225" #t (dict-contains? dto (alist->dict '((a . b))) 'a))
+
+   ;(test-subsection    "dict=?")
+   (let ()
+    (define dict1 (alist->dict '((a . 1) (b . 2))))
+    (define dict2 (alist->dict '((b . 2) (a . 1))))
+    (define dict3 (alist->dict '((a . 1))))
+    (define dict4 (alist->dict '((a . 2) (b . 2))))
+
+    (test "srfi-225" #t (dict=? dto = dict1 dict2))
+    (test "srfi-225" #t (not (dict=? dto = dict1 dict3)))
+    (test "srfi-225" #t (not (dict=? dto = dict3 dict1)))
+    (test "srfi-225" #t (not (dict=? dto = dict1 dict4)))
+    (test "srfi-225" #t (not (dict=? dto = dict4 dict1))))
+
+  ;(test-subsection   "dict-ref")
+   (test "srfi-225" #t (dict-ref dto (alist->dict '((a . b))) 'a (lambda () #f) (lambda (x) #t)))
+   (test "srfi-225" #t (dict-ref dto (alist->dict '((a . b))) 'b (lambda () #t) (lambda (x) #f)))
+
+  ;(test-subsection   "dict-ref/default")
+   (test "srfi-225" (dict-ref/default dto (alist->dict '((a . b))) 'a 'c) 'b)
+   (test "srfi-225" (dict-ref/default dto (alist->dict '((a* . b))) 'a 'c) 'c)
+
+  (unless mutable?
+    ;(test-subsection        "dict-set!")
+    (let ()
+      (define dict-original (alist->dict '((a . b))))
+      (define d (dict-set! dto dict-original 'a 'c 'a2 'b2))
+      (test "srfi-225" 'c (dict-ref dto d 'a ))
+      (test "srfi-225" 'b2 (dict-ref dto d 'a2))
+      (test "srfi-225" 'b (dict-ref dto dict-original' a))
+      (test "srfi-225" #f (dict-ref/default dto dict-original 'a2 #f))))
+
+  (when mutable?
+    ;(test-subsection        "dict-set!")
+    (let ()
+      (define d (alist->dict '((a . b))))
+      (dict-set! dto d 'a 'c 'a2 'b2)
+      (test "srfi-225" 'c (dict-ref dto d 'a ))
+      (test "srfi-225" 'b2 (dict-ref dto d 'a2))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-adjoin!")
+    (let ()
+      (define dict-original (alist->dict '((a . b))))
+      (define d (dict-adjoin! dto dict-original 'a 'c 'a2 'b2))
+      (test "srfi-225" 'b (dict-ref dto d 'a))
+      (test "srfi-225" 'b2 (dict-ref dto d 'a2))
+      (test "srfi-225" #f (dict-ref/default dto dict-original 'a2 #f))))
+
+  (when mutable?
+    ;(test-subsection        "dict-adjoin!")
+    (let ()
+      (define d (alist->dict '((a . b))))
+      (dict-adjoin! dto d 'a 'c 'a2 'b2)
+      (test "srfi-225" 'b (dict-ref dto d 'a))
+      (test "srfi-225" 'b2 (dict-ref dto d 'a2))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-delete!")
+    (let ()
+      (define dict-original (alist->dict '((a . b) (c . d))))
+      (define d (dict-delete! dto dict-original 'a 'b))
+      (test "srfi-225" (dict->alist dto d) '((c . d)))
+      (test "srfi-225" 'b (dict-ref dto dict-original 'a))))
+
+  (when mutable?
+    ;(test-subsection        "dict-delete!")
+    (let ()
+      (define d (alist->dict '((a . b) (c . d))))
+      (dict-delete! dto d 'a 'b)
+      (test "srfi-225" (dict->alist dto d) '((c . d)))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-delete-all!")
+    (let ()
+      (define dict-original (alist->dict '((a . b) (c . d))))
+      (define d (dict-delete-all! dto dict-original '(a b)))
+      (test "srfi-225" (dict->alist dto d) '((c . d)))
+      (test "srfi-225" 'b (dict-ref dto dict-original 'a))))
+
+  (when mutable?
+    ;(test-subsection        "dict-delete-all!")
+    (let ()
+      (define d (alist->dict '((a . b) (c . d))))
+      (dict-delete-all! dto d '(a b))
+      (test "srfi-225" (dict->alist dto d) '((c . d)))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-replace!")
+    (let ()
+      (define dict-original (alist->dict '((a . b) (c . d))))
+      (define d (dict-replace! dto dict-original 'a 'b2))
+      (test "srfi-225" 'b2 (dict-ref dto d 'a))
+      (test "srfi-225" 'd (dict-ref dto d 'c))
+      (test "srfi-225" 'b (dict-ref dto dict-original 'a))))
+
+  (when mutable?
+    ;(test-subsection        "dict-replace!")
+    (let ()
+      (define d (alist->dict '((a . b) (c . d))))
+      (dict-replace! dto d 'a 'b2)
+      (test "srfi-225" 'b2 (dict-ref dto d 'a))
+      (test "srfi-225" 'd (dict-ref dto d 'c))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-intern!")
+      ;; intern existing
+      (let ()
+        (define-values
+            (d value)
+          (dict-intern! dto (alist->dict '((a . b))) 'a (lambda () 'd)))
+        (test "srfi-225" 'b (dict-ref dto d 'a))
+        (test "srfi-225" 'b value))
+      ;; intern missing
+      (let ()
+        (define dict-original (alist->dict '((a . b))))
+        (define-values
+            (d value)
+          (dict-intern! dto dict-original 'c (lambda () 'd)))
+        (test "srfi-225" 'b (dict-ref dto d 'a))
+        (test "srfi-225" 'd (dict-ref dto d 'c))
+        (test "srfi-225" 'd value)
+        (test "srfi-225" #f (dict-ref/default dto dict-original 'c #f))))
+
+  (when mutable?
+    ;(test-subsection        "dict-intern!")
+      ;; intern existing
+      (let ()
+        (define d (alist->dict '((a . b))))
+    (define-values (new-dict value) (dict-intern! dto d 'a (lambda () 'd)))
+    (test "srfi-225" 'b (dict-ref dto d 'a))
+    (test "srfi-225" 'b value))
+      ;; intern missing
+      (let ()
+        (define d (alist->dict '((a . b))))
+        (define-values (new-dict value) (dict-intern! dto d 'c (lambda () 'd)))
+        (test "srfi-225" 'b (dict-ref dto d 'a))
+        (test "srfi-225" 'd (dict-ref dto d 'c))
+        (test "srfi-225" 'd value)))
+
+  (unless mutable?
+    ;(test-subsection        "dict-update!")
+      ;; update existing
+    (let ()
+      (define dict-original (alist->dict '((a . "b"))))
+      (let ()
+        (define d (dict-update! dto dict-original 'a
+                                (lambda (value)
+                                  (string-append value "2"))
+                                error
+                                (lambda (x) (string-append x "1"))))
+        (test "srfi-225" "b12" (dict-ref dto d 'a))
+        (test "srfi-225" "b" (dict-ref dto dict-original 'a)))
+      ;; update missing
+      (let ()
+        (define d (dict-update! dto dict-original 'c
+                                (lambda (value)
+                                  (string-append value "2"))
+                                (lambda () "d1")
+                                (lambda (x) (string-append x "1"))))
+        (test "srfi-225" "d12" (dict-ref dto d 'c))
+        (test "srfi-225" #f (dict-ref/default dto dict-original 'c #f)))))
+
+  (when mutable?
+    ;(test-subsection        "dict-update!")
+      ;; update existing
+      (let ()
+        (define d (alist->dict '((a . "b"))))
+        (dict-update! dto d 'a
+                      (lambda (value)
+                        (string-append value "2"))
+                      error
+                      (lambda (x) (string-append x "1")))
+        (test "srfi-225" "b12" (dict-ref dto d 'a)))
+      ;; update missing
+      (let ()
+        (define d (alist->dict '((a . "b"))))
+        (dict-update! dto d 'c
+                      (lambda (value)
+                        (string-append value "2"))
+                      (lambda () "d1")
+                      (lambda (x) (string-append x "1")))
+        (test "srfi-225" "d12" (dict-ref dto d 'c))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-update/default!")
+      ;; update existing
+    (let ()
+      (define dict-original (alist->dict '((a . "b"))))
+      (let ()
+        (define d (dict-update/default! dto dict-original 'a
+                                        (lambda (value)
+                                          (string-append value "2"))
+                                        "d1"))
+        (test "srfi-225" "b2" (dict-ref dto d 'a))
+        (test "srfi-225" "b" (dict-ref dto dict-original 'a)))
+
+      ;; update missing
+      (let ()
+        (define d (dict-update/default! dto dict-original 'c
+                                        (lambda (value)
+                                          (string-append value "2"))
+                                        "d1"))
+        (test "srfi-225" "d12" (dict-ref dto d 'c))
+        (test "srfi-225" #f (dict-ref/default dto dict-original 'c #f)))))
+
+  (when mutable?
+    ;(test-subsection        "dict-update/default!")
+      ;; update existing
+      (let ()
+        (define d (alist->dict '((a . "b"))))
+        (dict-update/default! dto d 'a
+                              (lambda (value)
+                                (string-append value "2"))
+                              "d1")
+        (test "srfi-225" "b2" (dict-ref dto d 'a)))
+
+      ;; update missing
+      (let ()
+        (define d (alist->dict '((a . "b"))))
+        (dict-update/default! dto d 'c
+                              (lambda (value)
+                                (string-append value "2"))
+                              "d1")
+        (test "srfi-225" "d12" (dict-ref dto d 'c))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-pop!")
+    (let ()
+      (define dict-original (alist->dict '((a . b) (c . d))))
+      (define-values
+          (new-dict key value)
+        (dict-pop! dto dict-original))
+      (test "srfi-225" #t
+            (or
+             (and (equal? (dict->alist dto new-dict) '((c . d)))
+                  (equal? key 'a)
+                  (equal? value 'b))
+
+             (and (equal? (dict->alist dto new-dict) '((a . b)))
+                  (equal? key 'c)
+                  (equal? value 'd))))
+      (test "srfi-225"  'b (dict-ref dto dict-original 'a))
+      (test "srfi-225"  'd (dict-ref dto dict-original 'c))))
+
+  (when mutable?
+    ;(test-subsection        "dict-pop!")
+    (let ()
+      (define d (alist->dict '((a . b) (c . d))))
+      (define-values
+       (new-dict key value)
+       (dict-pop! dto d))
+      (test "srfi-225" #t (eq? new-dict d))
+      (test "srfi-225" #t
+            (or
+             (and (equal? (dict->alist dto d) '((c . d)))
+                  (equal? key 'a)
+                  (equal? value 'b))
+
+             (and (equal? (dict->alist dto d) '((a . b)))
+                  (equal? key 'c)
+                  (equal? value 'd))))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-map")
+    (let ()
+      (define dict-original (alist->dict '((a . "a") (b . "b"))))
+      (define d (dict-map dto
+                          (lambda (key value)
+                            (string-append value "2"))
+                          dict-original))
+      (test "srfi-225" "a2" (dict-ref dto d 'a))
+      (test "srfi-225" "b2" (dict-ref dto d 'b))
+      (test "srfi-225" "a" (dict-ref dto dict-original 'a))
+      (test "srfi-225" "b" (dict-ref dto dict-original 'b))))
+
+  (when mutable?
+    ;(test-subsection        "dict-map")
+    (let ()
+      (define d (alist->dict '((a . "a") (b . "b"))))
+      (dict-map dto
+                (lambda (key value)
+                  (string-append value "2"))
+                d)
+      (test "srfi-225" "a2" (dict-ref dto d 'a))
+      (test "srfi-225" "b2" (dict-ref dto d 'b))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-filter")
+    (let ()
+      (define dict-original (alist->dict '((a . b) (c . d))))
+
+      (define d (dict-filter dto
+                             (lambda (key value)
+                               (equal? value 'b))
+                             dict-original))
+      (test "srfi-225" '((a . b)) (dict->alist dto d))
+      (test "srfi-225" 'd (dict-ref dto dict-original 'c))))
+
+  (when mutable?
+    ;(test-subsection        "dict-filter")
+    (let ()
+      (define d (alist->dict '((a . b) (c . d))))
+      (dict-filter dto
+                   (lambda (key value)
+                     (equal? value 'b))
+                   d)
+      (test "srfi-225" '((a . b)) (dict->alist dto d))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-remove")
+    (let ()
+      (define dict-original (alist->dict '((a . b) (c . d))))
+      (define d (dict-remove dto
+                             (lambda (key value)
+                               (equal? value 'b))
+                             dict-original))
+      (test "srfi-225" '((c . d)) (dict->alist dto d))
+      (test "srfi-225" 'b (dict-ref dto dict-original 'a))))
+
+  (when mutable?
+    ;(test-subsection        "dict-remove")
+    (let ()
+      (define d (alist->dict '((a . b) (c . d))))
+      (dict-remove dto
+                   (lambda (key value)
+                     (equal? value 'b))
+                   d)
+      (test "srfi-225" '((c . d)) (dict->alist dto d))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-find-update!")
+      ;; ignore
+    (let ()
+        (define dict (dict-find-update! dto (alist->dict '((a . b))) 'c
+                                        (lambda (insert ignore)
+                                          (ignore))
+                                        (lambda args
+                                          (error "shouldn't happen"))))
+        (test "srfi-225" '((a . b)) (dict->alist dto dict)))
+
+      ;; insert
+      (let ()
+        (define dict-original (alist->dict '((a . b))))
+        (define dict (dict-find-update! dto dict-original 'c
+                                        (lambda (insert ignore)
+                                          (insert 'd))
+                                        (lambda args
+                                          (error "shouldn't happen"))))
+        (test "srfi-225" 'b (dict-ref dto dict 'a))
+        (test "srfi-225" 'd (dict-ref dto dict 'c))
+        (test "srfi-225" #f (dict-ref/default dto dict-original 'c #f)))
+
+      ;; update
+      (let ()
+        (define dict-original (alist->dict '((a . b))))
+        (define dict (dict-find-update! dto dict-original 'a
+                                        (lambda args
+                                          (error "shouldn't happen"))
+                                        (lambda (key value update delete)
+                                          (update 'a2 'b2))))
+        (test "srfi-225" '((a2 . b2)) (dict->alist dto dict))
+        (test "srfi-225" #f (dict-ref/default dto dict-original 'a2 #f))
+        (test "srfi-225" 'b (dict-ref dto dict-original 'a)))
+
+      ;; delete
+      (let ()
+        (define dict-original (alist->dict '((a . b) (c . d))))
+        (define dict (dict-find-update! dto dict-original 'a
+                                        (lambda args
+                                          (error "shouldn't happen"))
+                                        (lambda (key value update delete)
+                                          (delete))))
+        (test "srfi-225" '((c . d)) (dict->alist dto dict))
+        (test "srfi-225" 'b (dict-ref dto dict-original 'a))))
+
+  (when mutable?
+    ;(test-subsection        "dict-find-update!")
+      ;; ignore
+      (let ()
+        (define dict (alist->dict '((a . b))))
+        (dict-find-update! dto dict 'c
+                           (lambda (insert ignore)
+                             (ignore))
+                           (lambda args
+                             (error "shouldn't happen")))
+        (test "srfi-225" '((a . b)) (dict->alist dto dict)))
+
+      ;; insert
+      (let ()
+        (define dict (alist->dict '((a . b))))
+        (dict-find-update! dto dict 'c
+                           (lambda (insert ignore)
+                             (insert 'd))
+                           (lambda args
+                             (error "shouldn't happen")))
+        (test "srfi-225" 'b (dict-ref dto dict 'a))
+        (test "srfi-225" 'd (dict-ref dto dict 'c)))
+
+      ;; update
+      (let ()
+        (define dict (alist->dict '((a . b))))
+        (dict-find-update! dto dict 'a
+                           (lambda args
+                             (error "shouldn't happen"))
+                           (lambda (key value update delete)
+                             (update 'a2 'b2)))
+        (test "srfi-225" '((a2 . b2)) (dict->alist dto dict)))
+
+      ;; delete
+      (let ()
+        (define dict (alist->dict '((a . b) (c . d))))
+        (dict-find-update! dto dict 'a
+                           (lambda args
+                             (error "shouldn't happen"))
+                           (lambda (key value update delete)
+                             (delete)))
+        (test "srfi-225" '((c . d)) (dict->alist dto dict))))
+
+  ;(test-subsection      "dict-size")
+    (test "srfi-225" 2 (dict-size dto (alist->dict '((a . b) (c . d)))))
+    (test "srfi-225" 0 (dict-size dto (alist->dict '())))
+
+  ;(test-subsection      "dict-count")
+    (let ()
+      (define count (dict-count dto
+                                (lambda (key value)
+                                  (equal? value 'b))
+                                (alist->dict '((a . b) (c . d)))))
+      (test "srfi-225" count 1))
+
+  ;(test-subsection      "dict-any")
+
+    (let ()
+      (define value
+        (dict-any dto
+                  (lambda (key value)
+                    (if (equal? 'b value) 'foo #f))
+                  (alist->dict '((a . b) (c . d)))))
+      (test "srfi-225" value 'foo))
+
+    (let ()
+      (define value
+        (dict-any dto
+                  (lambda (key value)
+                    (if (equal? 'e value) 'foo #f))
+                  (alist->dict '((a . b) (c . d)))))
+      (test "srfi-225" value #f))
+
+  ;(test-subsection   "dict-every")
+   (let ()
+     (define value
+       (dict-every dto
+                   (lambda (key value)
+                     (if (equal? 'b value) 'foo #f))
+                   (alist->dict '((a . b) (c . b)))))
+     (test "srfi-225" value 'foo))
+
+   (let ()
+     (define value
+       (dict-every dto
+                   (lambda (key value)
+                     (if (equal? 'b value) 'foo #f))
+                   (alist->dict '())))
+     (test "srfi-225" value #t))
+
+   (let ()
+     (define value
+       (dict-every dto
+                   (lambda (key value)
+                     (if (equal? 'b value) 'foo #f))
+                   (alist->dict '((a . b) (c . d)))))
+     (test "srfi-225" value #f))
+
+  ;(test-subsection   "dict-keys")
+   (let ()
+     (define keys
+       (dict-keys dto (alist->dict '((a . b) (c . d)))))
+     (test "srfi-225" #t
+           (or (equal? '(a c) keys)
+               (equal? '(c a) keys))))
+
+  ;(test-subsection   "dict-values")
+   (let ()
+     (define vals
+       (dict-values dto (alist->dict '((a . b) (c . d)))))
+     (test "srfi-225" #t
+           (or (equal? '(b d) vals)
+               (equal? '(d b) vals))))
+
+  ;(test-subsection   "dict-entries")
+   (let ()
+     (define-values
+         (keys vals)
+       (dict-entries dto (alist->dict '((a . b) (c . d)))))
+     (test "srfi-225" #t
+           (or (and (equal? '(a c) keys)
+                    (equal? '(b d) vals))
+               (and (equal? '(c a) keys)
+                    (equal? '(d b) vals)))))
+
+  ;(test-subsection   "dict-fold")
+
+   ;; simple case
+   (let ()
+    (define value
+      (dict-fold dto
+                 (lambda (key value acc)
+                   (append acc (list key value)))
+                 '()
+                 (alist->dict '((a . b) (c . d)))))
+    (test "srfi-225" #t
+      (or (equal? '(a b c d) value)
+          (equal? '(c d a b) value))))
+
+   (let ()
+
+     ;; continuation captured in a middle of fold
+    (define k #f)
+    (define pass 0)
+
+    (define value
+      (dict-fold dto
+                 (lambda (key value acc)
+                   ;; check fold only starts once -- further passes enter in a middle
+                   (test "srfi-225" #t (not (and k
+                                          (null? acc))))
+                   ;; capture continuation on second fold iteration
+                   (when (and (not k)
+                              (not (null? acc)))
+                     (test "srfi-225" #t
+                       (or (equal? '(a b) acc)
+                           (equal? '(c d) acc)))
+                     (call/cc (lambda (cont) (set! k cont))))
+                   (append acc (list key value)))
+                 '()
+                 (alist->dict '((a . b) (c . d)))))
+
+    (test "srfi-225" #t
+      (or (equal? '(a b c d) value)
+          (equal? '(c d a b) value)))
+
+    (when (< pass 3)
+      (set! pass (+ 1 pass))
+      (k #t)))
+
+  ;(test-subsection   "dict-map->list")
+   (let ()
+     (define lst
+       (dict-map->list dto
+                       (lambda (key value)
+                         (string-append (symbol->string key)
+                                        value))
+                       (alist->dict '((a . "b") (c . "d")))))
+     (test "srfi-225" #t
+           (or (equal? '("ab" "cd") lst)
+               (equal? '("cd" "ab") lst))))
+
+  ;(test-subsection   "dict->alist")
+   (let ()
+     (define alist
+       (dict->alist dto (alist->dict '((a . b) (c . d)))))
+     (test "srfi-225" #t
+           (or (equal? '((a . b) (c . d)) alist)
+               (equal? '((c . d) (a . b)) alist))))
+
+  ;(test-subsection   "dict-comparator")
+   ;; extremelly basic generic test; more useful specific tests defined separately
+   ;; for each dto
+   (let ((cmp (dict-comparator dto (alist->dict '((a . b))))))
+     (test "srfi-225" #t (or (not cmp)
+                             (comparator? cmp))))
+
+  ;(test-subsection    "dict-for-each")
+    (test-for-each #t
+      (lambda (proc)
+        (dict-for-each dto
+                       proc
+                       (alist->dict '((1 . a)
+                                      (2 . b)
+                                      (3 . c)
+                                      (4 . d)))))
+      '(1 2 3 4))
+
+    (test-for-each (let* ((cmp (dict-comparator dto (alist->dict '())))
+                          (ordering (and cmp (comparator-ordered? cmp))))
+                     ordering)
+                   (lambda (proc)
+                     (dict-for-each dto
+                                    proc
+                                    (alist->dict '((1 . a)
+                                                   (2 . b)
+                                                   (3 . c)
+                                                   (4 . d)))
+                                    2))
+                   '(2 3 4))
+
+    (test-for-each (let* ((cmp (dict-comparator dto (alist->dict '())))
+                          (ordering (and cmp (comparator-ordered? cmp))))
+                     ordering)
+                   (lambda (proc)
+                     (dict-for-each dto
+                                    proc
+                                    (alist->dict '((1 . a)
+                                                   (2 . b)
+                                                   (3 . c)
+                                                   (4 . d)))
+                                    2
+                                    3))
+                   '(2 3))
+
+  ;(test-subsection    "dict->generator")
+    (test-for-each #t
+                   (lambda (proc)
+                     (generator-for-each
+                       (lambda (entry)
+                         (proc (car entry) (cdr entry)))
+                       (dict->generator dto (alist->dict '((1 . a)
+                                                           (2 . b)
+                                                           (3 . c)
+                                                           (4 . d))))))
+                   '(1 2 3 4))
+
+    (test-for-each (let* ((cmp (dict-comparator dto (alist->dict '())))
+                          (ordering (and cmp (comparator-ordered? cmp))))
+                     ordering)
+                   (lambda (proc)
+                     (generator-for-each
+                       (lambda (entry)
+                         (proc (car entry) (cdr entry)))
+                       (dict->generator dto (alist->dict '((1 . a)
+                                                           (2 . b)
+                                                           (3 . c)
+                                                           (4 . d)))
+                                        2)))
+                   '(2 3 4))
+
+    (test-for-each (let* ((cmp (dict-comparator dto (alist->dict '())))
+                          (ordering (and cmp (comparator-ordered? cmp))))
+                     ordering)
+                   (lambda (proc)
+                     (generator-for-each
+                       (lambda (entry)
+                         (proc (car entry) (cdr entry)))
+                       (dict->generator dto (alist->dict '((1 . a)
+                                                           (2 . b)
+                                                           (3 . c)
+                                                           (4 . d)))
+                                        2 3)))
+                   '(2 3))
+
+  (unless mutable?
+    ;(test-subsection        "dict-set!-accumulator")
+    (let ()
+      (define acc (dict-set!-accumulator dto (alist->dict '())))
+      (acc (cons 1 'a))
+      (acc (cons 2 'b))
+      (acc (cons 2 'c))
+      (test "srfi-225" #t (dict=? dto equal? (acc (eof-object)) (alist->dict '((1 . a) (2 . c)))))))
+
+  (when mutable?
+    ;(test-subsection        "dict-set!-accumulator")
+    (let ()
+      (define acc (dict-set!-accumulator dto (alist->dict '())))
+      (acc (cons 1 'a))
+      (acc (cons 2 'b))
+      (acc (cons 2 'c))
+      (test "srfi-225" #t (dict=? dto equal? (acc (eof-object)) (alist->dict '((1 . a) (2 . c)))))))
+
+  (unless mutable?
+    ;(test-subsection        "dict-adjoin!-accumulator")
+    (let ()
+      (define acc (dict-adjoin!-accumulator dto (alist->dict '())))
+      (acc (cons 1 'a))
+      (acc (cons 2 'b))
+      (acc (cons 2 'c))
+      (test "srfi-225" #t (dict=? dto equal? (acc (eof-object)) (alist->dict '((1 . a) (2 . b)))))))
+
+  (when mutable?
+    ;(test-subsection        "dict-adjoin!-accumulator")
+    (let ()
+      (define acc (dict-adjoin!-accumulator dto (alist->dict '())))
+      (acc (cons 1 'a))
+      (acc (cons 2 'b))
+      (acc (cons 2 'c))
+      (test "srfi-225" #t (dict=? dto equal? (acc (eof-object)) (alist->dict '((1 . a) (2 . b)))))))
+
+  ;; check all procs were called
+  (for-each
+   (lambda (index)
+     (when (> 0 (vector-ref counter index))
+       (error "Untested procedure" index)))
+   (iota (vector-length counter))))
+
+(test-subsection "Dictionaries")
+
+;(test-subsection "default")
+ ;; test defaults by overring only procedures that raise error otherwise
+
+ (define minimal-alist-dto
+   (make-dto
+    dictionary?-id (dto-ref equal-alist-dto dictionary?-id)
+    dict-pure?-id (dto-ref equal-alist-dto dict-pure?-id)
+    dict-size-id (dto-ref equal-alist-dto dict-size-id)
+    dict-find-update!-id (dto-ref equal-alist-dto dict-find-update!-id)
+    dict-map-id (dto-ref equal-alist-dto dict-map-id)
+    dict-comparator-id (dto-ref equal-alist-dto dict-comparator-id)))
+ (do-test
+  minimal-alist-dto
+  alist-copy
+  #f
+  #f)
+
+;(test-subsection  "alist")
+  (do-test
+    equal-alist-dto
+    alist-copy
+    #f
+    #f)
+
+;; (cond-expand
+;;   ((and (library (srfi 69))
+;;         (not gauche) ;; gauche has bug with comparator retrieval from srfi 69 table
+;;         )
+;(test-subsection     "srfi-69"
+(do-test
+ srfi-69-dto
+ (lambda (alist)
+   (define table (t69-make-hash-table equal?))
+   (for-each
+    (lambda (pair)
+      (t69-hash-table-set! table (car pair) (cdr pair)))
+    alist)
+   table)
+ (make-default-comparator)
+ #t)
+
+;(cond-expand
+;  ((library (srfi 125))
+;(test-subsection     "srfi-125")
+(do-test
+ hash-table-dto
+ (lambda (alist)
+   (define table (t125-hash-table-empty-copy (t125-make-hash-table equal?)))
+   (for-each
+    (lambda (pair)
+      (t125-hash-table-set! table (car pair) (cdr pair)))
+    alist)
+   table)
+ (make-default-comparator)
+ #t)
+;  (else))
+
+;; (cond-expand
+;;   ((library (srfi 126))
+;;    ;(test-subsection     "srfi-126 (r6rs)"
+;;      (do-test
+;;        srfi-126-dto
+;;        (lambda (alist)
+;;          (define table (t126-make-eqv-hashtable))
+;;          (for-each
+;;            (lambda (pair)
+;;              (t126-hashtable-set! table (car pair) (cdr pair)))
+;;            alist)
+;;          table)
+;;        (make-default-comparator)
+;;        #t)))
+;;   (else))
+
+;; (cond-expand
+;;   ((and (library (srfi 146))
+;;         (library (srfi 146 hash)))
+;;    ;(test-subsection     "srfi-146"
+;;      (define cmp (make-default-comparator))
+;;      (do-test
+;;        mapping-dto
+;;        (lambda (alist)
+;;          (let loop ((table (mapping cmp))
+;;                     (entries alist))
+;;            (if (null? entries)
+;;                table
+;;                (loop (mapping-set! table (caar entries) (cdar entries))
+;;                      (cdr entries)))))
+;;        cmp
+;;        #f)
+;;      ;(test-subsection       "srfi-146 dict-comparator"
+;;        (test "srfi-225" cmp (dict-comparator mapping-dto (mapping cmp)))))
+
+;;    ;(test-subsection     "srfi-146 hash"
+;;      (define cmp (make-default-comparator))
+;;      (do-test
+;;        hash-mapping-dto
+;;        (lambda (alist)
+;;          (let loop ((table (hashmap cmp))
+;;                     (entries alist))
+;;            (if (null? entries)
+;;                table
+;;                (loop (hashmap-set! table (caar entries) (cdar entries))
+;;                      (cdr entries)))))
+;;        cmp
+;;        #f)
+;;      ;(test-subsection       "srfi-146 hash dict-comparator"
+;;        (test "srfi-225" cmp (dict-comparator hash-mapping-dto (hashmap cmp))))))
+;;   (else))
