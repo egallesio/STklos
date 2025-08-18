@@ -1019,6 +1019,17 @@ stklos> (%restore-continuation c c)
 6 2 #[continuation (C=3992 S=1512) c069e000]
 ----
 
+Interestingly, the captured continuation is a *primitive* procedure!
+
+[source, scheme]
+----
+stklos> (describe (%make-continuation))
+#[continuation (C=1416 S=1312) 8c61b000] is a primitive procedure.
+----
+
+The details of how continuations are implemented is in the file `vm.adoc`.
+
+
 == The virtual machine
 
 See the file `vm.adoc` for a description of the opcodes.
