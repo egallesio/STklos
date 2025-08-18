@@ -1,0 +1,91 @@
+
+
+(test "list-case.1"
+      'z
+      (list-case '(1 2)
+                 [(a . c) 'z]
+                 [a  'blah]))
+
+(test "list-case.2"
+      15
+      (list-case '(3 . 5)
+                 [(a . b) (* a b)]
+                 [a  99]))
+
+(test "list-case.2"
+      'blah
+      (list-case 3
+                 [(a . c) 'z]
+                 [() 'null]
+                 [a  'blah]))
+
+(test "list-case.3"
+      'blah
+      (list-case 3
+                 [(a . c) 'z]
+                 [() 'null]
+           [_  'blah]))
+
+(test "list-case.4"
+      'null
+      (list-case '()
+                 [(a . c) 'z]
+                 [() 'null]
+                 [a  'blah]))
+
+(test/compile-error "list-case.5"
+            (list-case '()
+                       [(a . c) 'z]
+                       [a  'blah]))
+
+(test/compile-error "list-case.6"
+            (list-case 2
+                       [(a . c) 'z]
+                       [() 'null]))
+
+(test/compile-error "list-case.7"
+            (list-case '(1 2)
+                       [() 'null]
+                       [a  'blah]))
+
+(test/compile-error "list-case.8"
+            (list-case 2
+                       [(a . c) 'z]
+                       [() 'NULLA]
+                       [() 'null]))
+(test/compile-error "list-case.9"
+            (list-case 2
+                       [() 'null]))
+
+
+(test "list-case.10"
+      3
+      (list-case 2
+                 [_ 1 2 3]))
+
+(test/compile-error "list-case.10"
+                    (list-case 10
+                               [#(1 2) 1 2 3]))
+
+(test/compile-error "list-case.11"
+                    (list-case 10
+                               [#(void) 1 2 3]))
+
+(test/compile-error "list-case.12"
+                     (list-case 10
+                                [ (a . a) 'will-fail ]))
+
+(test "list-case.13"
+      'ok-it-is-a-pair
+      (list-case '(1 . 2)
+                 [ () 'null ]
+                 [ a  'neither-null-nor-pair ]
+                 [ (_ . _) 'ok-it-is-a-pair ]))
+
+(test "list-case.14"
+            (list-case 14
+                       [#(1 2) 1 2 3]))
+
+(test/compile-error "list-case.15"
+            (list-case 15
+                       [#(void) 1 2 3]))
