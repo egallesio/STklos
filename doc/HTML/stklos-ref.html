@@ -1379,7 +1379,7 @@ syntax and <code>#f</code> otherwise.</p>
 </p>
 </div>
 <div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> syntax</span></p>
+<p><span class="rmargin small silver">R<sup>7</sup>RS syntax</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -7013,6 +7013,43 @@ There are twenty-eight of these procedures in all.</p>
 </div>
 <div class="paragraph">
 <p>Returns <code>#t</code> if <code>obj</code> is the empty list, otherwise returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p><a id='P_pair-mutable?'></a><a id='P_pair-immutable!'></a>
+
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(pair-mutable? obj) </strong></code><br>
+<code><strong>(pair-immutable! obj) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Pair-mutable?</code> returns <code>#t</code> if <code>obj</code> is a mutable pair, otherwise
+returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Pair-immutable!</code> will turn the pair into an immutable one (the
+pair is modified and returned&#8201;&#8212;&#8201;no copy is made).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">pair-mutable?</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="o">.</span> <span class="mi">2</span><span class="p">))</span>                     <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>                   <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="mi">12</span><span class="p">)</span>                           <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="p">(</span><span class="nf">pair-immutable!</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="nv">x</span><span class="p">)</span>                            <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="nv">x</span> <span class="p">(</span><span class="nf">pair-immutable!</span> <span class="nv">x</span><span class="p">))</span>                  <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="nv">x</span><span class="p">)</span>                            <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p><a id='P_list?'></a>
@@ -27179,14 +27216,16 @@ left to the extension writer.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(cpointer&#8594;string str) </strong></code><br></p>
+<p><code><strong>(cpointer&#8594;string str) </strong></code><br>
+<code><strong>(cpointer&#8594;string str num-bytes) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Returns the C (null terminated) string <code>str</code> as a Scheme string.
 If <code>str</code> doesn&#8217;t contain a C string, the result will probably result
-in a fatal error.</p>
+in a fatal error. If <code>num-bytes</code> is passed as an argument, only
+that number of bytes is copied into the new string.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27197,11 +27236,23 @@ in a fatal error.</p>
 
 <span class="nv">name</span>                    <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">fd830820f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd8305bee40</span><span class="p">]</span>
 <span class="p">(</span><span class="nf">c-ghn</span> <span class="nv">name</span> <span class="mi">9</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">name</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"socrates"</span></code></pre>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">name</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"socrates"</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">buff</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">5</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">a</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">B</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">c</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">D</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">null</span> <span class="mi">4</span><span class="p">)</span> <span class="c1">;; convention for end of string in C</span>
+
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="s">"aBcD"</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span> <span class="mi">2</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="s">"aB"</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span> <span class="mi">-1</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_cpointer-set!'></a>
+<p><a id='P_cpointer-set!'></a><a id='P_cpointer-set-abs!'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -27211,14 +27262,21 @@ in a fatal error.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(cpointer-set! pointer type value) </strong></code><br>
-<code><strong>(cpointer-set! pointer type value offset) </strong></code><br></p>
+<code><strong>(cpointer-set! pointer type value offset) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value offset) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Sets the given <code>value</code> of <code>type</code> inside <code>pointer</code>. If <code>offset</code> is not given
-it defaults to 0. Note that, as in C, the offset is multiplied by the size of
-<code>type</code>. It permits to access the C object as an array.</p>
+it defaults to 0. Note that, as in C, the <code>offset</code> is multiplied by the size of
+<code>type</code> when using <code>cpointer-set!</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-set!</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27234,7 +27292,7 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 </div>
 </div>
 <div class="paragraph">
-<p>The following examples shows how we cans forge a C string in Scheme</p>
+<p>The following examples shows how we can forge a C string in Scheme</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27248,7 +27306,8 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_cpointer-ref'></a>
+<p><a id='P_cpointer-ref'></a><a id='P_cpointer-ref-abs'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -27258,14 +27317,21 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(cpointer-ref pointer type) </strong></code><br>
-<code><strong>(cpointer-ref pointer type offset) </strong></code><br></p>
+<code><strong>(cpointer-ref pointer type offset) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type offset) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Returns value of <code>type</code> from <code>pointer</code>. If <code>offset</code> is not given
 it defaults to 0. Note that, as in C, the offset is multiplied by the size of
-<code>type</code>. It permits to access the C object as an array.</p>
+<code>type</code> when using <code>cpointer-ref</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-ref</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
 </div>
 <div class="listingblock">
 <div class="content">

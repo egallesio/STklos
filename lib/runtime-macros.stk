@@ -34,23 +34,23 @@
 ;; Define here primordial syntax with low level macros
 ;;
 ;; ======================================================================
-(define-macro (define-macro . args)  `(%%define-macro ,@args)) ;; Funny, isn't it?
-(define-macro (if . args)            `(%%if ,@args))
-(define-macro (define . args)        `(%%define ,@args))
-(define-macro (begin . args)         `(%%begin ,@args))
-(define-macro (and . args)           `(%%and ,@args))
-(define-macro (or . args)            `(%%or ,@args))
-(define-macro (cond . args)          `(%%cond ,@args))
-(define-macro (case . args)          `(%%case ,@args))
-(define-macro (do . args)            `(%%do ,@args))
-(define-macro (let . args)           `(%%let ,@args))
-(define-macro (let* . args)          `(%%let* ,@args))
-(define-macro (letrec . args)        `(%%letrec ,@args))
-(define-macro (with-handler . args)  `(%%with-handler ,@args))
-(define-macro (quote . args)         `(%%quote ,@args))
-(define-macro (set! . args)          `(%%set! ,@args))
-(define-macro (|λ| . args)           `(%%lambda ,@args))
-(define-macro (lambda . args)        `(%%lambda ,@args))
+(define-macro (define-macro . args)  `(#%define-macro ,@args)) ;; Funny, isn't it?
+(define-macro (if . args)            `(#%if ,@args))
+(define-macro (define . args)        `(#%define ,@args))
+(define-macro (begin . args)         `(#%begin ,@args))
+(define-macro (and . args)           `(#%and ,@args))
+(define-macro (or . args)            `(#%or ,@args))
+(define-macro (cond . args)          `(#%cond ,@args))
+(define-macro (case . args)          `(#%case ,@args))
+(define-macro (do . args)            `(#%do ,@args))
+(define-macro (let . args)           `(#%let ,@args))
+(define-macro (let* . args)          `(#%let* ,@args))
+(define-macro (letrec . args)        `(#%letrec ,@args))
+(define-macro (with-handler . args)  `(#%with-handler ,@args))
+(define-macro (quote . args)         `(#%quote ,@args))
+(define-macro (set! . args)          `(#%set! ,@args))
+(define-macro (|λ| . args)           `(#%lambda ,@args))
+(define-macro (lambda . args)             `(#%lambda ,@args))
 
 ;;;;
 ;;;; WHEN/UNLESS

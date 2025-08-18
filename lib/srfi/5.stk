@@ -45,6 +45,7 @@
 
 
 (define-module srfi/5
+  (import (scheme base))
   (export let)
   (define-macro (let bindings . body)
 
@@ -71,7 +72,8 @@
 
      ((list?  bindings)
       ;; ==== Unamed
-      `(%%let ,bindings ,@body))
+      ;; generate a function call (will be optimized in let call by the compiler)
+      `((lambda ,(map car bindings) ,@body) ,@(map cadr bindings)))
 
      (else
       (let* ((name     bindings)

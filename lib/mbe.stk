@@ -185,7 +185,7 @@ doc>
 ;; hyg:tag uses gensym to rename variables (actually, tag the ones which will be renamed).
 ;;
 ;; e is the form
-;; kk ar ethe keywords
+;; kk are the keywords
 ;; al is an assoc list
 ;;
 ;; returns a list with
@@ -196,29 +196,33 @@ doc>
 ;;
 ;; the list al is appended to the output CDR, so the assoc list may be build gradually.
 ;;
-;; (hyg:tag '(f a b c) '(a c)          '()) => ((G984 a G985 c) (G985 . b) (G984 . f))
-;; (hyg:tag 1          '(fun x fun oh) '()) => (1)
-;; (hyg:tag '(f a b c) '(a c)          '((G-something . y))) => ((G1333 a G1334 c) (G1334 . b) (G1333 . f) (G-something . y))
+;; (hyg:tag '(f a b c) '(a c)          '() '...) => ((G984 a G985 c) (G985 . b) (G984 . f))
+;; (hyg:tag 1          '(fun x fun oh) '() '...) => (1)
+;; (hyg:tag '(f a b c) '(a c)          '((G-something . y)) '...)
+;;                                               => ((G1333 a G1334 c)
+;;                                                   (G1334 . b)
+;;                                                   (G1333 . f)
+;;                                                   (G-something . y))
 (define hyg:tag
   (lambda (e kk al ellipsis)
     (cond ((pair? e)
             (let* ((a-te-al (hyg:tag (car e) kk al ellipsis))
                     (d-te-al (hyg:tag (cdr e) kk (cdr a-te-al) ellipsis)))
               (cons (cons (car a-te-al) (car d-te-al))
-                (cdr d-te-al))))
-      ((vector? e)
-        (list->vector
-          (hyg:tag (vector->list e) kk al ellipsis)))
-      ((symbol? e)
-        (cond ((eq? e ellipsis) (cons ellipsis al))
-          ((memq e kk) (cons e al))
-          ((hyg:rassq e al) =>
-            (lambda (c)
-              (cons (car c) al)))
-          (else
-            (let ((te (gensym e)))
-              (cons te (cons (cons te e) al))))))
-      (else (cons e al)))))
+                    (cdr d-te-al))))
+          ((vector? e)
+           (list->vector
+            (hyg:tag (vector->list e) kk al ellipsis)))
+          ((symbol? e)
+           (cond ((eq? e ellipsis) (cons ellipsis al))
+                 ((memq e kk) (cons e al))
+                 ((hyg:rassq e al) =>
+                  (lambda (c)
+                    (cons (car c) al)))
+                 (else
+                  (let ((te (gensym e)))
+                    (cons te (cons (cons te e) al))))))
+          (else (cons e al)))))
 
 ;;untagging
 ;;
@@ -284,14 +288,14 @@ doc>
 (define hyg:untag-no-tags
   (lambda (e al)
     (cond ((pair? e)
-            (cons (hyg:untag-no-tags (car e) al)
-              (hyg:untag-no-tags (cdr e) al)))
-      ((vector? e)
-        (list->vector
-          (hyg:untag-no-tags (vector->list e) al)))
-      ((not (symbol? e)) e)
-      ((assq e al) => cdr)
-      (else e))))
+           (cons (hyg:untag-no-tags (car e) al)
+                 (hyg:untag-no-tags (cdr e) al)))
+          ((vector? e)
+           (list->vector
+            (hyg:untag-no-tags (vector->list e) al)))
+          ((not (symbol? e)) e)
+          ((assq e al) => cdr)
+          (else e))))
 
 (define hyg:untag-quasiquote
   (lambda (form al tmps)
@@ -408,33 +412,35 @@ doc>
     (cond ((pair? e)
             (cons (hyg:untag-vanilla (car e) al tmps)
               (hyg:untag-vanilla (cdr e) al tmps)))
-      ((vector? e)
-        (list->vector
-          (hyg:untag-vanilla (vector->list e) al tmps)))
-      ((not (symbol? e)) e)
-      ((memq e tmps) e)
-      ((assq e al) => (lambda (v)
-                        ;; This is a kludge which basically permits to
-                        ;; say that a symbol which starts with "%%" must
-                        ;; always be gensymed. This is used when the
-                        ;; output pattern introduces a new symbol since
-                        ;; original MBE code does not deal well with
-                        ;; this case [eg]
-                        (let ((str (symbol->string (cdr v))))
-                          (if (and (> (string-length str) 2)
-                                   (string=? (substring str 0 2) "%%"))
-                              (car v)
-                              (cdr v)))))
-      (else e))))
+          ((vector? e)
+           (list->vector
+            (hyg:untag-vanilla (vector->list e) al tmps)))
+          ((not (symbol? e)) e)
+          ((memq e tmps) e)
+          ((assq e al) => (lambda (v)
+                            ;; This is a kludge which basically permits to
+                            ;; say that a symbol which starts with "%%" must
+                            ;; always be gensymed. This is used when the
+                            ;; output pattern introduces a new symbol since
+                            ;; original MBE code does not deal well with
+                            ;; this case [eg]
+                            (let ((str (symbol->string (cdr v))))
+                              (if (and (> (string-length str) 2)
+                                       (string=? (substring str 0 2) "%%"))
+                                  (car v)
+                                  (cdr v)))))
+          (else e))))
 
 ;; a flatten procedure.
 (define hyg:flatten
   (lambda (e)
     (let loop ((e e) (r '()))
-      (cond ((pair? e) (loop (car e)
-                             (loop (cdr e) r)))
-            ((null? e) r)
-            (else (cons e r))))))
+
+      (cond ((pair? e)    (loop (car e)
+                                (loop (cdr e) r)))
+            ((vector? e)  (loop (vector->list e) r))
+            ((null? e)    r)
+            (else         (cons e r))))))
 
 ;;;; End of hygiene filter.
 
@@ -505,10 +511,18 @@ doc>
 			                       (lambda (x) (mbe:matches-pattern? p-head x k ellipsis))
                                    e-head)
 			                      (mbe:matches-pattern? p-tail e-tail k ellipsis))))))))
-            ((pair? p)
-             (and (pair? e)
-		          (mbe:matches-pattern? (car p) (car e) k ellipsis)
+            ((and (pair? p) (pair? e))
+		     (and (mbe:matches-pattern? (car p) (car e) k ellipsis)
 		          (mbe:matches-pattern? (cdr p) (cdr e) k ellipsis)))
+            ((and (vector? p)
+                  (vector? e)
+                  (> (vector-length p) 0)
+                  (= (vector-length p)
+                     (vector-length e)))
+             (let ((list-p (vector->list p))
+                   (list-e (vector->list e)))
+               (and (mbe:matches-pattern? (car list-p) (car list-e) k ellipsis)
+		            (mbe:matches-pattern? (cdr list-p) (cdr list-e) k ellipsis))))
             ((symbol? p) (if (memq p k) (eq? p e) #t))
             (else (equal? p e)))))
 
@@ -528,7 +542,10 @@ doc>
 ;;   => ((f . *) (a . 2) (b . 4))
 ;;
 ;; (mbe:get-bindings '(f a . b) '(func 1 2 3) '() '...)
-;;   =>((f . func) (a . 1) (b 2 3))
+;;   => ((f . func) (a . 1) (b 2 3))
+;;
+;; (mbe:get-bindings '(f #(a b)) '(func #(1 2)) '() '...)
+;;   => ((f . func) (a . 1) (b . 2))
 ;;
 ;; (mbe:get-bindings '(f a ...) '(func 1 2) '() '...) ; see how lists are dealt with!
 ;;   => ((f . func) ((a) ((a . 1)) ((a . 2))))
@@ -564,6 +581,9 @@ doc>
           ((pair? p)
 	       (append (mbe:get-bindings (car p) (car e) k ellipsis)
 	               (mbe:get-bindings (cdr p) (cdr e) k ellipsis)))
+          ((and (vector? p)  (vector? e) (= (vector-length p)
+                                            (vector-length e)))
+           (mbe:get-bindings (vector->list p) (vector->list e) k ellipsis))
           ((symbol? p)
            (if (memq p k) '() (list (cons p e))))
           (else '()))))
@@ -693,18 +713,18 @@ doc>
 ;;     ((f a b)   (+ a b))
 ;;     ((f a b c) (* b c))))
 ;;
-;; (find-clause 'f '(2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))))
+;; (find-clause 'f '(2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))) '...)
 ;; => (+ 2 3)
 ;;
-;; (find-clause 'f '(1 2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))))
+;; (find-clause 'f '(1 2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))) '...)
 ;; => (* 2 3)
 (define (find-clause macro-name macro-args keywords clauses ellipsis)
   (let ((macro-form (cons macro-name macro-args)))
     (let Loop ((l clauses))
       (if (null? l)
           (syntax-error macro-name "no matching clause for ~S" macro-form)
-          (let ((in-pattern  (caar  l))
-                (out-pattern (cadar l)))
+          (let ((in-pattern  (caar  l))  ; example '(f a b)
+                (out-pattern (cadar l))) ; example '(+ a b)
             (if (mbe:matches-pattern? in-pattern macro-form keywords ellipsis)
                 (let ((tmp (hyg:tag out-pattern
                                     (append! (hyg:flatten in-pattern) keywords)
@@ -731,9 +751,9 @@ doc>
 ;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
 ;;
 ;; =>
-;;     (%%let-syntax
+;;     (#%let-syntax
 ;;       ((f (lambda args
-;;             ((%%symbol-value 'find-clause 'MBE)
+;;             ((#%symbol-value 'find-clause 'MBE)
 ;;              'f
 ;;              args
 ;;              '(f)
@@ -742,7 +762,7 @@ doc>
 ;;       (f))
 ;;
 (define-macro (let-syntax bindings . body)
-  `(%%let-syntax
+  `(#%let-syntax
     ,(map (lambda (x)
             (let ((macro-name (car x))
                   (syn-rules  (cadr x)))
@@ -757,7 +777,7 @@ doc>
                                     (cdddr syn-rules)
                                     (cddr syn-rules))))
                   `(,macro-name (lambda args
-                                  ((%%symbol-value 'find-clause 'MBE)
+                                  ((#%symbol-value 'find-clause 'MBE)
                                            ',macro-name
                                            args
                                            ',keywords
@@ -767,7 +787,7 @@ doc>
     ,@body))
 
 ;;;;
-;;;; STklos code for define-syntax and syntax-rules 
+;;;; STklos code for define-syntax and syntax-rules
 ;;;;
 
 (define-macro (syntax-rules . syn-rules)
@@ -781,7 +801,7 @@ doc>
           (clauses     (cdr syn-rules))
           (args        (gensym 'args)))
       `(lambda ,args
-         ((%%symbol-value 'find-clause 'MBE) ',(car keywords)
+         ((#%symbol-value 'find-clause 'MBE) ',(car keywords)
                                              ,args
                                              ',keywords
                                              ',clauses
