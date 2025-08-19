@@ -1,5 +1,5 @@
 /*
- * readline-complete.c   -- tab-completion for readline
+ * readline-utils.c   -- Readline utils (tab-completion, option setting)
  *
  * Copyright © 2022 Jerônimo Pellegrini <j_p@aleph0.info>
  *
@@ -23,7 +23,7 @@
  *    Creation date: 09-May-2022 09:22
  */
 
-#include <stklos.h>
+#include "../src/stklos.h"
 
 //
 // Readline interface for completion
@@ -45,17 +45,20 @@ typedef char **rl_completion_func_t(const char *, int, int);
 
 /* Readline function used */
 extern char **rl_completion_matches(const char *, rl_compentry_func_t *);
+extern int rl_parse_and_bind (char *);
 
 /* Readline variables used */
 extern char *rl_line_buffer;                    // The line buffer
 extern int rl_attempted_completion_over;        // 1 to suppress filename completion
 extern char *rl_completer_word_break_characters;// word separator. Normally "n\"\\'`@$>"
-extern rl_completion_func_t *rl_attempted_completion_function; // Pointer to our completion func
+extern rl_completion_func_t
+            *rl_attempted_completion_function; // Pointer to our completion func
 
 extern char* rl_readline_name;                  // NOTE: both vars a are not
 extern char* rl_basic_quote_characters;         // completion related (see below)
 
 static SCM gen;                 // A pointer to the Scheme generator function
+
 
 /*
   Calls the generator (gen) with two arguments:
@@ -78,8 +81,7 @@ generator(const char *text, int state) {
      to free the pointer (at least on FresBSD). */
   size_t size = STRING_SIZE(s);
   char *res = malloc(size+1);
-  if (res == NULL) return ""; /* better return no completions than
-				 signaling an error... */
+  if (res == NULL) return ""; // better return no completion than signaling an error.
   strncpy(res,STRING_CHARS(s), size);
   res[size]=0;
   return res;
@@ -91,7 +93,7 @@ generator(const char *text, int state) {
    - The start and end positions (end position is ignored here)
    The actual work is done by the generator function in this file,
    which in turn calls the Scheme procedure complete in
-   readline-complete.stk.
+   readline.stk.
 */
 static char **
 scheme_completion(const char *str, int start, int _UNUSED(end)) {
@@ -106,6 +108,12 @@ scheme_completion(const char *str, int start, int _UNUSED(end)) {
   return rl_completion_matches(str, generator);
 }
 
+
+/* ======================================================================
+ *
+ * Readline primitives
+ *
+ * ====================================================================== */
 /*
   %init-readline-completion-function will:
   1. set our C variable 'gen' to the STklos closure that is passed
@@ -114,8 +122,8 @@ scheme_completion(const char *str, int start, int _UNUSED(end)) {
      function STk_completion.
   It is called by the Scheme procedure 'init-readline-completion-function'.
  */
-DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,subr1,
-                 (SCM generator))
+DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,
+                 subr1, (SCM generator))
 {
   gen = generator;
   /* The word break chars are by default " \t\n\"\\'`@$><=;|&{(".
@@ -128,11 +136,41 @@ DEFINE_PRIMITIVE("%init-readline-completion-function",readline_init_completion,s
   return STk_void;
 }
 
-MODULE_ENTRY_START("readline-complete")
+
+/*
+<doc EXT readline-set-option!
+ * (readline-set-option! var val)
+ *
+ * The primitive |readline-set-option!| is defined when readline support is
+ * enabled. It permits to change dynamically the behaviour of the readline
+ * library. The list of possible variables |var| and values |val| can be found
+ * in in the https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html[readline documentation manual].
+ * 
+ * @lisp
+ * (readline-set-option! "disable-completion" "on") ;; disable TAB-completion
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("readline-set-option!",readline_set_option,subr2,
+                 (SCM option, SCM value)) {
+  if (!STRINGP(option)) STk_error("bad string ~s", option);
+  if (!STRINGP(value)) STk_error("bad string ~s", value);
+  if (STRING_SIZE(option) + STRING_SIZE(value) > 195)
+    STk_error("option and value strings too long (max 195 bytes)");
+
+  char s[201];
+  snprintf(s,200,"set %s %s",STRING_CHARS(option), STRING_CHARS(value));
+  int res = rl_parse_and_bind(s);
+  return MAKE_BOOLEAN(res == 0);
+}
+
+
+MODULE_ENTRY_START("readline-utils")
 {
   SCM module =  STk_STklos_module;   // FIXME: should be READLINE
 
   ADD_PRIMITIVE_IN_MODULE(readline_init_completion, module);
+  ADD_PRIMITIVE_IN_MODULE(readline_set_option, module);
 
   // NOTE: the following assignments are not related to completion and should
   // not be here.  However since our FFI doesn't permit to read/set variables

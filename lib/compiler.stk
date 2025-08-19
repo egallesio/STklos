@@ -37,6 +37,7 @@
           compiler-current-port
           when-compile
           when-load-and-compile
+          %in-scheme
           %syntax-error
           %compile-time-define)
 
@@ -91,7 +92,7 @@
 (define *compiling-file*        #f)  ;; is #t when we are compiling a file
 
 (define *scmmod*                (find-module 'SCHEME))
-
+(define *stklosmod*             (find-module 'STklos))
 
 (include "peephole.stk")
 (include "assembler.stk")
@@ -103,13 +104,13 @@
 ;; ----------------------------------------------------------------------
 ;; Debbugging support
 ;; ----------------------------------------------------------------------
-;;= (export %compiler-debug)
-;;=
-;;= (define %compiler-debug (make-parameter #f))
-;;=
-;;= (define (dprintf . args)
-;;=   (when  (%compiler-debug) (apply eprintf args)))
-;;=
+(export %compiler-debug dprintf)
+
+(define %compiler-debug (make-parameter #f))
+
+(define (dprintf . args)
+  (when  (%compiler-debug) (apply %debug args)))
+
 
 ; ======================================================================
 ;
@@ -334,7 +335,7 @@ doc>
        (set! *forward-globals* (cons (cons symbol epair) *forward-globals*)))
       ((compiler:warn-use-undefined)
        (compiler-warn-undef symbol epair)
-       (register-new-global! symbol)))))        ; to avoid multiple warnings
+       (%register-new-global! symbol)))))        ; to avoid multiple warnings
 
 
 (define (compiler-show-undefined-symbols)
@@ -343,7 +344,7 @@ doc>
                     (where  (cdr x)))
                 (unless (known-var? symbol)
                   (compiler-warn-undef symbol where)
-                  (register-new-global! symbol)))) ;; to avoid multiple warnings
+                  (%register-new-global! symbol)))) ;; to avoid multiple warnings
             (reverse *forward-globals*))
   (set! *forward-globals* '()))
 
@@ -354,11 +355,12 @@ doc>
       (let ((bind (cadr l))
             (body (cddr l)))
         (if (pair? bind)
-            (define->lambda `(%%define ,(car bind) (lambda ,(cdr bind) ,@body)))
+            (define->lambda `(#%define ,(car bind) (lambda ,(cdr bind) ,@body)))
             l))
       (begin
         (compiler-error 'define l "ill formed definition ~S" l)
         l)))
+
 
 (define (compile-%%define args env tail?)
   (let* ((l   (define->lambda args))
@@ -368,11 +370,12 @@ doc>
         (if (not env)
             (if (symbol? who)
                 (begin
-                  (register-new-global! who)
+                  (%register-new-global! who)
                   (compile (caddr l) #f args #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant who)))
                 (compiler-error 'define args "bad variable name ~S" who))
-            (compiler-error 'define args "internal define forbidden here ~S" args)))))
+            (compiler-error 'define args "internal define forbidden here ~S"
+                            args)))))
 
 
 ;;;;
@@ -527,12 +530,12 @@ doc>
                  (proc     (caddr l))
                  (mod      (compiler-current-module)))
             (if (symbol? name)
-                (let ((obj `( (%%in-scheme '%make-syntax) ',name
+                (let ((obj `( (#%in-scheme '%make-syntax) ',name
                                                           ',proc
                                                           ,proc
                                                           ',(module-name mod))))
                   ;; produce code for defining the macro
-                  (register-new-global! name)
+                  (%register-new-global! name)
                   (compile obj #f env #f)
                   (emit 'DEFINE-SYMBOL (fetch-constant name))
                   ;; register the macro, so that the compiler expand macro calls
@@ -713,11 +716,11 @@ doc>
                    (else
                       (car l)))))
         (cond
-          ((and (pair? cur) (memq (car cur) '(%%begin begin)))
+          ((and (pair? cur) (memq (car cur) `(#%begin begin)))
             ;; Delete useless begin
             (Loop (append (cdr cur) (cdr l))
                   defs))
-        ((and (pair? cur) (memq (car cur) '(%%define define)))
+        ((and (pair? cur) (memq (car cur) `(#%define define)))
            ;; This is an internal define
            (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
         (else
@@ -1059,17 +1062,15 @@ doc>
   (emit (if tail? 'TAIL-INVOKE 'INVOKE)
         (length actuals)))
 
-(define can-be-inlined?
-  (let ((STklos (find-module 'STklos)))
-    (lambda (fct env . alist)
-      (let* ((table (if (null? alist) *inline-table* (car alist)))
-             (found (memq fct table)))
-        (if (and found
-                 (not (find-symbol-in-env fct env)))
-            (let ((f (symbol-value fct *scmmod*)))
-              (and f (eq? f (symbol-value* fct STklos))))
-            (and (null? alist)                     ; if alist was passed, it was
-                 (memq fct *always-inlined*))))))) ; a request for THAT alist only
+(define (can-be-inlined? fct env . alist)
+  (let* ((table (if (null? alist) *inline-table* (car alist)))
+         (found (memq fct table)))
+    (if (and found
+             (not (find-symbol-in-env fct env)))
+        (eq? (symbol-value fct *scmmod*)        ; value in STklos is identical
+             (symbol-value* fct *stklosmod*))   ; to the one in SCHEME
+        (and (null? alist)                      ; if alist was passed, it was
+             (memq fct *always-inlined*)))))    ; a request for THAT alist only
 
 ;; maybe-fold-constant takes the current environment, a list of
 ;; arguments and tries to math-fold them into constants.
@@ -1812,11 +1813,12 @@ doc>
 
 
 ;; ======================================================================
+;; IN-SCHEME
 
 ;; Compiles access to a symbol in the SCHEME module, using a special
 ;; VM instruction INSCHEME:
 ;;
-;; (%%in-scheme x) =>
+;; (%in-scheme x) =>
 ;;    GLOBAL-REF           0
 ;;    INSCHEME
 ;;
@@ -1827,7 +1829,11 @@ doc>
       (begin
         (compile (cadr e) env (cadr e) tail)
         (emit 'INSCHEME))
-      (compiler-error '%%in-scheme e "expected one argument")))
+      (compiler-error '%in-scheme e "expected one argument")))
+
+(define-macro (%in-scheme symbol)
+  `(#%in-scheme ,symbol))
+
 
 ;;;;======================================================================
 ;;;;
@@ -1871,11 +1877,11 @@ both forms.
                     ;; build a new macro environment for evaluating body
                     (let ((new (car bindings)))
                       (unless (and (list? new) (= (length new) 2))
-                        (compiler-error '%%let-syntax new
+                        (compiler-error 'let-syntax new
                                         "ill formed binding ~S" new))
                       (let* ((name      (car new))
                              (expander  (cadr new))
-                             (new-macro ( (%%in-scheme '%make-syntax)
+                             (new-macro ( (#%in-scheme '%make-syntax)
                                           name
                                           expander
                                           (eval expander)
@@ -1921,7 +1927,7 @@ both forms.
 (define (import-file-information infos)
   (when (pair? infos)
     ;; Register all the global symbols of the file
-    (for-each register-new-global! (key-get infos :globals '()))
+    (for-each %register-new-global! (key-get infos :globals '()))
 
     ;; Rebuild the expanders exported by the imported file.
     (for-each (lambda (x)
@@ -1977,9 +1983,8 @@ both forms.
              (boolean? (caddr e)))
     (let ((infos (find-file-information (cadr e) (caddr e) #f)))
       (import-file-information infos)))
-
-  (compile-normal-call (car e) (cdr e) (length e) env e tail))
-
+  ;; Compile a call to %require which is defined in load.stk
+  (compile-normal-call '%require (cdr e) (length e) env e tail))
 
 ;;;;
 ;;;; WHEN-COMPILE
@@ -1992,14 +1997,19 @@ both forms.
 
 (define-macro (when-compile . body)
   `(begin
-     (%%when-compile ,@body)
+     (#%when-compile ,@body)
      (void)))
 
 (define-macro (when-load-and-compile . body)
   `(begin
-     (%%when-compile ,@body)
+     (#%when-compile ,@body)
      ,@body
      (void)))
+
+
+;;;;
+;;;; LABEL and GOTO (generated by taglody construct)
+;;;;
 
 ;; The expression, 'e', is of the form '(%%label nnnn)',
 ;; where nnnn is an integer that describes this label.
@@ -2016,15 +2026,16 @@ both forms.
       (compiler-error '%%goto e "bad usage ~S" e)))
 
 
-(define (compile-%%source-pos e env tail)
-  (compile (if (%epair? e)
-               `(cons ,(%epair-file e) ,(%epair-line e))
-               #f)
-           '()
-           e
-           #f))
+;;(define (compile-%%source-pos e env tail)
+;;  (compile (if (%epair? e)
+;;               `(cons ,(%epair-file e) ,(%epair-line e))
+;;               #f)
+;;           '()
+;;           e
+;;           #f))
 
-;; A fast acess to symbol-value (useful when the function symbol-value is
+
+;; A fast access to symbol-value (useful when the function symbol-value is
 ;; not in the environment).
 (define (compile-%%symbol-value e env tail)
   (if (= (length e)  3)
@@ -2033,7 +2044,7 @@ both forms.
        (emit 'PUSH)
        (compile (caddr e) env (caddr e) tail)
        (emit 'SYMBOL-VALUE))
-     (compiler-error '%%symbol-value e "bas usage ~S" e)))
+     (compiler-error '%%symbol-value e "bad usage ~S" e)))
 
 
 ;;;;======================================================================
@@ -2049,47 +2060,30 @@ both forms.
       (let ((first (car e)))
          (cond
          ((find-syntax-in-env first env)
-          ;; ---- Macro call
+          ;; --- Macro call
           (compile (%macro-expand e env) env epair tail?))
 
-         ((find-symbol-in-env first env)
-          ;; --- Symbol is in environment => function call
-          (compile-call e env tail?))
+         ((%icall? first)
+          ;; --- Internal call such as #%if, #%and ...
+          (let ((func (%icall-function first)))
+            (unless func
+              ;; This is the fist execution of this icall. It has not associated
+              ;; function. If the icall is '#%XXX' we set the function slot
+              ;; to compile-%%XXX, so that its later uses are faster.
+              (let* ((name  (string->symbol (format "compile-%%~a"
+                                                    (%icall-name first))))
+                     (fcomp (symbol-value name 'STKLOS-COMPILER #f)))
+                (if fcomp
+                    (begin
+                      (%icall-function-set! first fcomp)
+                      (set! func fcomp))
+                    (error "cannot find function compile-%%~a in compiler" name))))
+            ;; Call the internal function contained in `first` internal call
+            (func e env tail?)))
 
          (else
-          ;; ---- special-form OR (not in env) function call?
-          (case first
-            ((%%if)               (compile-%%if           e env tail?))
-            ((%%define)           (compile-%%define       e env tail?))
-            ((%%begin)            (compile-%%begin        e env tail?))
-            ((%%lambda)           (compile-%%lambda       e env tail?))
-            ((%%let)              (compile-%%let          e env tail?))
-            ((%%let*)             (compile-%%let*         e env tail?))
-            ((%%letrec)           (compile-%%letrec       e env tail?))
-            ((%%and)              (compile-%%and          e env tail?))
-            ((%%or)               (compile-%%or           e env tail?))
-            ((%%cond)             (compile-%%cond         e env tail?))
-            ((%%case)             (compile-%%case         e env tail?))
-            ((%%do)               (compile-%%do           e env tail?))
-            ((%%quote)            (compile-%%quote        e env tail?))
-            ((%%with-handler)     (compile-%%with-handler e env tail?))
-            ((%%define-macro)     (compile-%%define-macro e env tail?))
-            ((%%set!)             (compile-%%set!         e env tail?))
-            ((%%let-syntax)       (compile-%%let-syntax   e env tail?))
-
-            ;; Special calls
-            ((%%require)          (compile-%%require      e env tail?))
-            ((%%when-compile)     (compile-%%when-compile e env tail?))
-            ((%%include)          (compile-%%include      e env tail?))
-            ((%%include-ci)       (compile-%%include-ci   e env tail?))
-            ((%%in-scheme)        (compile-%%in-scheme    e env tail?))
-            ((%%source-pos)       (compile-%%source-pos   e env tail?))
-            ((%%label)            (compile-%%label        e env tail?))
-            ((%%goto)             (compile-%%goto         e env tail?))
-            ((%%symbol-value)     (compile-%%symbol-value e env tail?))
-
-            ;; Standard call (first is not in lexical env)
-            (else                 (compile-call           e env tail?)))))))
+          ;; Not an internal call => normal function call
+          (compile-call e env tail?)))))
 
      ;; ---- We have a symbol
      ((symbol? e)

@@ -5,7 +5,7 @@ STklos (version 2.10)
 
 Purpose
 -------
-*STklos*** (pronounced [/ˈɛs.'ti.kl'ɔss/](https://itinerarium.github.io/phoneme-synthesis/?w=ˈɛs.'ti.kl'ɔss)) is a free [Scheme](http://www.schemers.org) system mostly compliant
+***STklos*** (pronounced [/ˈɛs.'ti.kl'ɔss/](https://itinerarium.github.io/phoneme-synthesis/?w=ˈɛs.'ti.kl'ɔss)) is a free [Scheme](http://www.schemers.org) system mostly compliant
 with the language features defined in [R⁷RS small](http://www.scheme-reports.org/2015/working-group-1.html). The aim of this implementation
 is to be fast as well as light. The implementation is based on an ad-hoc
 *Virtual Machine*.
@@ -21,7 +21,7 @@ The salient points of ***STklos*** are:
     -   Generic Functions,
     -   Multi-methods
     -   an efficient MOP (Meta Object Protocol)
--   a simple to use module system, as well as R⁷RS libraries
+-   a simple to use module system, as well as *R⁷RS* libraries
 -   a full [Numerical tower](https://en.wikipedia.org/wiki/Numerical_tower), as defined in *R⁷RS*,
 -   a simple [FFI](https://en.wikipedia.org/wiki/Foreign_function_interface) (Foreign Function Interface),
 -   an easy connection to the [GTK+](http://www.gtk.org) toolkit,
@@ -69,7 +69,7 @@ The 1.70 version supports 14 new [**SRFIs**](https://www.stklos.net/srfi.html).
 an OO binding to the [GTK+3](https://docs.gtk.org/gtk3/) toolkit.
 
 **August 2023**
-The 2.00 version is available. This version is conforming to R^7^RS
+The 2.00 version is available. This version is conforming to *R⁷RS*
 (previous versions of STklos used to implement the R^5^RS standard).
 It adds support for 24 new [**SRFIs**](https://www.stklos.net/srfi.html) giving a complete
 support for 122 SRFIs. You can now use the [cURL](https://curl.se/libcurl/)

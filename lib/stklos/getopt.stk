@@ -1,7 +1,7 @@
 ;;;;
 ;;;; getopt.stk                         -- getopt
 ;;;;
-;;;; Copyright © 2001-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -23,11 +23,9 @@
 ;;;;    Creation date: 26-Oct-2001 08:40 (eg)
 ;;;;
 
-;;;;
-;;;; %PRINT--USAGE
-;;;;
-;;;; pretty print options usage
-;;;;
+(define-module (stklos getopt)
+  (export %print-usage %parse-arguments-expand)
+
 #|
 <doc EXT arg-usage
  * (arg-usage port)
@@ -382,7 +380,9 @@ doc>
                              (cdr x))
                            '(void)))))))))))
 
-;(define-macro (parse-arguments argv . clauses)
-;  (%parse-arguments-expand argv clauses))
+)
 
-(provide "getopt")
+(select-module STklos)
+(import (stklos getopt))
+
+(provide "stklos/getopt")

@@ -1379,7 +1379,7 @@ syntax and <code>#f</code> otherwise.</p>
 </p>
 </div>
 <div class="paragraph rmargin text-right">
-<p><span class="rmargin small silver"><em>STklos</em> syntax</span></p>
+<p><span class="rmargin small silver">R<sup>7</sup>RS syntax</span></p>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -7015,7 +7015,8 @@ There are twenty-eight of these procedures in all.</p>
 <p>Returns <code>#t</code> if <code>obj</code> is the empty list, otherwise returns <code>#f</code>.</p>
 </div>
 <div class="paragraph">
-<p><a id='P_pair-mutable?'></a>
+<p><a id='P_pair-mutable?'></a><a id='P_pair-immutable!'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -7024,18 +7025,30 @@ There are twenty-eight of these procedures in all.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(pair-mutable? obj) </strong></code><br></p>
+<p><code><strong>(pair-mutable? obj) </strong></code><br>
+<code><strong>(pair-immutable! obj) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns <code>#t</code> if <code>obj</code> is a mutable pair, otherwise returns <code>#f</code>.</p>
+<p><code>Pair-mutable?</code> returns <code>#t</code> if <code>obj</code> is a mutable pair, otherwise
+returns <code>#f</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Pair-immutable!</code> will turn the pair into an immutable one (the
+pair is modified and returned&#8201;&#8212;&#8201;no copy is made).</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">pair-mutable?</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="o">.</span> <span class="mi">2</span><span class="p">))</span>    <span class="nv">=&gt;</span> <span class="no">#f</span>
-<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="no">#t</span>
-<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="mi">12</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">pair-mutable?</span> <span class="o">'</span><span class="p">(</span><span class="nf">1</span> <span class="o">.</span> <span class="mi">2</span><span class="p">))</span>                     <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>                   <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="mi">12</span><span class="p">)</span>                           <span class="nv">=&gt;</span> <span class="no">#f</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="p">(</span><span class="nf">pair-immutable!</span> <span class="p">(</span><span class="nb">cons</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="no">#f</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">x</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="nv">x</span><span class="p">)</span>                            <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nb">eq?</span> <span class="nv">x</span> <span class="p">(</span><span class="nf">pair-immutable!</span> <span class="nv">x</span><span class="p">))</span>                  <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">pair-mutable?</span> <span class="nv">x</span><span class="p">)</span>                            <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -15403,16 +15416,14 @@ calls is is a global counter.</p>
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">T</span> <span class="p">(</span><span class="nf">make-thread</span> <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nf">make-list</span> <span class="mi">1</span><span class="nv">_000_000</span><span class="p">)</span> <span class="p">(</span><span class="nf">eprintf</span> <span class="s">"finishn"</span><span class="p">)))))</span>
   <span class="p">(</span><span class="nf">time</span> <span class="p">(</span><span class="nf">thread-start!</span> <span class="nv">T</span><span class="p">)</span> <span class="c1">;; Launch T wich allocate 1_000_1000 cells</span>
         <span class="p">(</span><span class="nf">thread-sleep!</span> <span class="mi">3</span><span class="p">)</span> <span class="c1">;; wait for the child thread to allocate list</span>
-        <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">T</span><span class="p">)</span>
-        <span class="mi">100</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">thread-join!</span> <span class="nv">T</span><span class="p">)))</span>
 <span class="nv">finish</span>
-    <span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">33.299</span> <span class="nv">ms</span>
-    <span class="nv">Allocations:</span> <span class="mi">800408</span> <span class="nv">bytes</span> <span class="nv">in</span> <span class="mi">10</span> <span class="nv">allocation</span> <span class="nv">calls</span> <span class="p">(</span><span class="nf">GC:</span> <span class="mi">0</span><span class="p">)</span>
-<span class="mi">100</span></code></pre>
+    <span class="nv">Elapsed</span> <span class="nv">time:</span> <span class="mf">9.795</span> <span class="nv">ms</span>
+    <span class="nv">Allocations:</span> <span class="mi">800384</span> <span class="nv">bytes</span> <span class="nv">in</span> <span class="mi">8</span> <span class="nv">allocation</span> <span class="nv">calls</span> <span class="p">(</span><span class="nf">GC:</span> <span class="mi">0</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The ten allocations we can see here are for theads bookeeping and are
+<p>The eight allocations we can see here are for theads bookeeping and are
 far from the million cells allocated in thread <code>T</code>.</p>
 </div>
 </div>
@@ -24459,8 +24470,8 @@ behavior which depends of the type or the number of its parameters.</p>
 <div class="paragraph small">
 <p><code><strong>(define-generic gf) </strong></code><br>
 <code><strong>(define-generic gf metaclass) </strong></code><br>
-<code><strong>(define-generic gf :documentation str) </strong></code><br>
-<code><strong>(define-generic gf metaclass :documentation str) </strong></code><br></p>
+<code><strong>(define-generic gf :documentation str :add-default bool) </strong></code><br>
+<code><strong>(define-generic gf metaclass :documentation str :add-default bool) </strong></code><br></p>
 </div>
 </div>
 </div>
@@ -24468,6 +24479,53 @@ behavior which depends of the type or the number of its parameters.</p>
 <p>This function creates a new generic function named <code>gf</code>. By default, the created
 function is an instance of the class <code>&lt;generic&gt;</code>, except if <code>metaclass</code> is used.
 Using a different metaclass permits to fine tune the way methods are applied.</p>
+</div>
+<div class="paragraph">
+<p>When a generic function is defined whereas a procedure with this name already
+exists, a new wrapper method around this procedure is created, by default,
+and added as a default method for the new generic function.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">define-generic</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">describe</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">+</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">generic</span> <span class="nv">function</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;generic&gt;</span><span class="o">.</span>
+<span class="nv">Methods</span> <span class="nv">defined</span> <span class="nv">for</span> <span class="nv">+</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81d5990</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="nv">&lt;top&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Defining the new generic function <code>+</code> wraps the default addition primitive in a new
+(n-ary) method. This particularily useful to keep the default behaviour of the
+addiftion</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">&gt;</span> <span class="p">(</span><span class="nf">define-method</span> <span class="nv">+</span> <span class="p">((</span><span class="nf">a</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span> <span class="p">(</span><span class="nf">b</span> <span class="nv">&lt;string&gt;</span><span class="p">))</span> <span class="p">(</span><span class="nb">string-append</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">))</span>
+<span class="nv">&gt;</span> <span class="p">(</span><span class="nf">describe</span> <span class="nv">+</span><span class="p">)</span>
+<span class="nv">+</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">generic</span> <span class="nv">function</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;generic&gt;</span><span class="o">.</span>
+<span class="nv">Methods</span> <span class="nv">defined</span> <span class="nv">for</span> <span class="nv">+</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81957e0</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="p">(</span><span class="nf">&lt;string&gt;</span> <span class="nv">&lt;string&gt;</span><span class="p">)</span>
+    <span class="nv">Method</span> <span class="o">#</span><span class="p">[</span><span class="nf">&lt;method&gt;</span> <span class="mi">720</span><span class="nv">dc81d5990</span><span class="p">]</span>
+        <span class="nv">Specializers:</span> <span class="nv">&lt;top&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have now two methods on <code>+</code>: one which appends two strings and one which is a
+wrapper around the addition.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nb">+</span> <span class="s">"abc"</span> <span class="s">"def"</span><span class="p">)</span>   <span class="nv">=&gt;</span> <span class="s">"abcdef"</span>
+<span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span>           <span class="nv">=&gt;</span> <span class="mi">3</span>
+<span class="p">(</span><span class="nb">+</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="mi">0</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To avoid the creation of the default wrapper, use the value <code>#f</code> for the
+<code>:add-default</code> keyword parameter</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -24477,10 +24535,10 @@ Using a different metaclass permits to fine tune the way methods are applied.</p
 </td>
 <td class="content">
 Generally, it is not necessary to use <code>define-generic</code> to declare a generic
-function, since it is created the first time a method  with the name of that function
-is created. However, for the sake of documentation, or to export a generic function
-from a module which do not define methods, it is possible also to explicitly
-define the generic function before its methods.
+function, since it is created the first time a method  with the name of that
+function is created. However, for the sake of documentation, or to export a
+generic function from a module which do not define methods, it is possible
+also to explicitly define the generic function before its methods.
 </td>
 </tr>
 </table>
@@ -26541,6 +26599,79 @@ the <strong><em>STklos</em></strong> command. Otherwise, a good place to set thi
 </table>
 </div>
 </div>
+<div class="sect3">
+<h4 id="doc_repl_readline_support">10.3.4. REPL readline support</h4>
+<div class="paragraph">
+<p><a id='P_readline-set-option!'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(readline-set-option! var val) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The primitive <code>readline-set-option!</code> is defined when readline support is
+enabled. It permits to change dynamically the behaviour of the readline
+library. The list of possible variables <code>var</code> and values <code>val</code> can be found
+in in the <a href="https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html">readline documentation manual</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"disable-completion"</span> <span class="s">"on"</span><span class="p">)</span> <span class="c1">;; disable TAB-completion</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><a id='P_readline-startup-hook'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(readline-startup-hook) </strong></code><br>
+<code><strong>(readline-startup-hook thunk) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This parameter object can be used to read/set the hook function run
+once the readline library is initialized (and before the first prompt is
+printed). It can be used to set some readline options in your <code>stklosrc</code>
+file. For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">readline-startup-hook</span>
+   <span class="p">(</span><span class="k">lambda</span><span class="p">()</span>
+     <span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"blink-matching-paren"</span>      <span class="s">"on"</span><span class="p">)</span>
+     <span class="p">(</span><span class="nf">readline-set-option!</span> <span class="s">"colored-completion-prefix"</span> <span class="s">"on"</span><span class="p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>permit to have parenthesis flashing and more colored completions.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This hook is run only if the line editor library is the
+<em>GNU readline library</em>.
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -27085,14 +27216,16 @@ left to the extension writer.</p>
 <div class="sidebarblock">
 <div class="content">
 <div class="paragraph small">
-<p><code><strong>(cpointer&#8594;string str) </strong></code><br></p>
+<p><code><strong>(cpointer&#8594;string str) </strong></code><br>
+<code><strong>(cpointer&#8594;string str num-bytes) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Returns the C (null terminated) string <code>str</code> as a Scheme string.
 If <code>str</code> doesn&#8217;t contain a C string, the result will probably result
-in a fatal error.</p>
+in a fatal error. If <code>num-bytes</code> is passed as an argument, only
+that number of bytes is copied into the new string.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27103,11 +27236,23 @@ in a fatal error.</p>
 
 <span class="nv">name</span>                    <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">fd830820f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd8305bee40</span><span class="p">]</span>
 <span class="p">(</span><span class="nf">c-ghn</span> <span class="nv">name</span> <span class="mi">9</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">name</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"socrates"</span></code></pre>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">name</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"socrates"</span>
+
+<span class="p">(</span><span class="k">define</span> <span class="nv">buff</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">5</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">a</span> <span class="mi">0</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">B</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">c</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">D</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">cpointer-set!</span> <span class="nv">buff</span> <span class="nv">:uchar</span> <span class="o">#</span><span class="nv">null</span> <span class="mi">4</span><span class="p">)</span> <span class="c1">;; convention for end of string in C</span>
+
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="s">"aBcD"</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span> <span class="mi">2</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="s">"aB"</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">buff</span> <span class="mi">-1</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="nv">error</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_cpointer-set!'></a>
+<p><a id='P_cpointer-set!'></a><a id='P_cpointer-set-abs!'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -27117,14 +27262,21 @@ in a fatal error.</p>
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(cpointer-set! pointer type value) </strong></code><br>
-<code><strong>(cpointer-set! pointer type value offset) </strong></code><br></p>
+<code><strong>(cpointer-set! pointer type value offset) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value) </strong></code><br>
+<code><strong>(cpointer-set-abs! pointer type value offset) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Sets the given <code>value</code> of <code>type</code> inside <code>pointer</code>. If <code>offset</code> is not given
-it defaults to 0. Note that, as in C, the offset is multiplied by the size of
-<code>type</code>. It permits to access the C object as an array.</p>
+it defaults to 0. Note that, as in C, the <code>offset</code> is multiplied by the size of
+<code>type</code> when using <code>cpointer-set!</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-set!</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27140,7 +27292,7 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 </div>
 </div>
 <div class="paragraph">
-<p>The following examples shows how we cans forge a C string in Scheme</p>
+<p>The following examples shows how we can forge a C string in Scheme</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -27154,7 +27306,8 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 </div>
 </div>
 <div class="paragraph">
-<p><a id='P_cpointer-ref'></a>
+<p><a id='P_cpointer-ref'></a><a id='P_cpointer-ref-abs'></a>
+
 </p>
 </div>
 <div class="paragraph rmargin text-right">
@@ -27164,14 +27317,21 @@ it defaults to 0. Note that, as in C, the offset is multiplied by the size of
 <div class="content">
 <div class="paragraph small">
 <p><code><strong>(cpointer-ref pointer type) </strong></code><br>
-<code><strong>(cpointer-ref pointer type offset) </strong></code><br></p>
+<code><strong>(cpointer-ref pointer type offset) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type) </strong></code><br>
+<code><strong>(cpointer-ref-abs pointer type offset) </strong></code><br></p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>Returns value of <code>type</code> from <code>pointer</code>. If <code>offset</code> is not given
 it defaults to 0. Note that, as in C, the offset is multiplied by the size of
-<code>type</code>. It permits to access the C object as an array.</p>
+<code>type</code> when using <code>cpointer-ref</code>, but it is exactly a number of bytes when
+using <code>cpointer-set-abs!</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Cpointer-ref</code> is suitable for accessing the C object pointed by <code>pointer</code>
+as an array.</p>
 </div>
 <div class="listingblock">
 <div class="content">

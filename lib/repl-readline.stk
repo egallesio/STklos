@@ -1,7 +1,7 @@
 ;;;;
 ;;;; repl-readline.stk  -- REPL with GNU-Readline support
 ;;;;
-;;;; Copyright © 2010-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2010-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,8 @@
 
 (define-module REPL-READLINE
   (import SCHEME REPL READLINE)
-  (export try-initialize-repl-with-readline)
+  (export try-initialize-repl-with-readline
+          readline-startup-hook)
 
 ;;;; In module REPL-READLINE
 
@@ -107,6 +108,34 @@
       (current-input-port port)
       (repl-change-default-ports :in port))))
 
+
+#|
+<doc EXT readline-startup-hook
+ * (readline-startup-hook)
+ * (readline-startup-hook thunk)
+ *
+ * This parameter object can be used to read/set the hook function run
+ * once the readline library is initialized (and before the first prompt is
+ * printed). It can be used to set some readline options in your |stklosrc|
+ * file. For instance,
+ *
+ * @lisp
+ * (readline-startup-hook
+ *    (lambda()
+ *      (readline-set-option! "blink-matching-paren"      "on")
+ *      (readline-set-option! "colored-completion-prefix" "on")))
+ * @end lisp
+ * permit to have parenthesis flashing and more colored completions.
+ *
+ * NOTE: This hook is run only if the line editor library is the
+ * _GNU readline library_.
+doc>
+|#
+(define-parameter readline-startup-hook void)
+
+;;
+;;try-initialize-repl-with-readline
+;;
 (define (try-initialize-repl-with-readline)
   (let ((use-editor (key-get *%system-state-plist* :line-editor #t)))
     (when (and use-editor (try-initialize-readline))

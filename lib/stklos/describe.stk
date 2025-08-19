@@ -1,7 +1,7 @@
 ;;;;
 ;;;; d e s c r i b e . s t k    -- The DESCRIBE method (partly stolen fom Elk lib)
 ;;;;
-;;;; Copyright © 1993-2023 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -88,13 +88,153 @@ doc>
 |#
 
 
-(define-module DESCRIBE
+(define-module (stklos describe)
   (export describe)
+
+  (define-generic describe :add-default #f) ;; Do not keep old value of describe
+                                            ;; (that is the autolad function)
 
 ;;;
 ;;; describe for simple objects
 ;;;
-(define-method describe ((x <top>) port)
+  (define-method describe ((x <top>) port)
+    (format port "~W is " x)
+    (cond
+     ((null?    x)
+      (format port "the empty list"))
+
+     ((void?    x)
+      (format port "the unspecified (void) object"))
+     ((boolean? x)
+
+      (format port "a boolean value (~s)" (if x 'true 'false)))
+
+     ((char?    x)
+      (format port "a character whose Unicode code point~a is ~s"
+              (if (<= (char->integer x) 127) " (and ASCII value)" "")
+              (char->integer x)))
+
+     ((symbol?  x)
+      (let ((int   (if (symbol-interned? x) "a" "an uninterned"))
+            (bound (if (symbol-bound? x)
+                       (format #f ", with ~amutable binding"
+                               (if (symbol-mutable? x) "" "im"))
+                       "")))
+         (format port "~a symbol~a" int bound)))
+
+     ((keyword? x)
+      (format port "a keyword"))
+
+     ((pair?    x)
+      (format port "a non-empty list"))
+
+     ((string?  x)
+      (if (zero? (string-length x))
+          (format port "an empty string")
+          (format port "a string of length ~s"
+                  (string-length x))))
+
+     ((bytevector? x)
+      (let ((n (bytevector-length x)))
+        (if (zero? n)
+            (format port "an empty bytevector")
+            (format port "a bytevector of length ~s"
+                    n))))
+
+     ((vector?  x)
+      (if (eqv? x '#())
+          (format port "an empty vector")
+          (format port "a vector of length ~s"
+                  (vector-length x))))
+
+     ((%uvector? x)
+      ;; don't use uvector? and uvector-length to avoid the load of SRFI-4
+      (let* ((tag  (uvector-tag x))
+             (a-an (case tag ((u16 u32 u64) "an") (else "a"))))
+        (if (zero? (%uvector-length x))
+            (format port "~a empty ~svector" a-an tag)
+            (format port "~a ~svector of length ~s" a-an tag
+                    (%uvector-length x)))))
+
+     ((closure? x)
+      (format port "a closure")
+      ;; We don't need to show the formals, because they're already
+      ;; displayed in the object. For example, [closure g (a b)].
+      ;; But we offer the user a way to read the source, if it is
+      ;; available.
+      (when (procedure-source x)
+        (format port
+                ".~%The source code is available -- call `procedure-source` on it")))
+
+     ((procedure? x)
+      (format port "a (non closure) procedure"))
+
+     ((eof-object? x)
+      (format port "the end-of-file object"))
+
+     ((struct-type? x)
+      (format port "the type structure named ~A"
+              (struct-type-name x)))
+
+     ((library? x)
+      (format port "~a R7RS library named ~A"
+              (if (module-mutable? x) "a mutable" "an immutable")
+              (library-name x)))
+
+     ((module? x)
+      (format port "~a module named ~A"
+              (if (module-mutable? x) "a mutable" "an immutable")
+              (module-name x)))
+
+     ((port? x)
+      (format port "an ~a ~a port"
+              (if (input-port? x) "input" "output")
+              (if (binary-port? x) "binary" "textual")))
+
+     ((hash-table? x)
+      (format port "~a~a hash table~a"
+              (if (hash-table-mutable? x)     "a mutable" "an immutable")
+              (if (zero? (hash-table-size x)) ", empty"   "")
+              (if (positive? (hash-table-size x))
+                  (format #f " with ~a entries" (hash-table-size x))
+                  "")))
+
+     ((and (not (eq? (%thread-system) 'none)) (mutex? x))
+      (let ((name     (mutex-name     x))
+            (state    (if (thread? (mutex-state    x))
+                          (format #f "locked by thread ~a" (mutex-state x))
+                          (mutex-state x)))
+            (specific (if (void? (mutex-specific x))
+                          "void"
+                          "non-void")))
+        (if name
+            (format port "a mutex with name ~a, state ~a and ~a specific field"
+                    name state specific)
+            (format port "an unnamed mutex with state ~a and ~a specific field"
+                    state specific))))
+
+     (else
+      (let ((user-type-name (%user-type-name x)))
+        (if user-type-name
+            ;; Object type is user defined.
+            (let ((proc (%user-type-proc user-type-name
+                                         'describe)))
+              (if proc
+                  (proc x port) ;; Use user defined procedure
+                  (format port "an objet whose type name is ~s"
+                          user-type-name)))
+            (begin
+              ;; an object instance
+              (format port "an instance of class ~A"
+                      (class-name (class-of x))))))))
+    (format port ".~%"))
+
+;;; ======================================================================
+;;;     Describe for numbers
+;;; ======================================================================
+
+(define-method describe ((x <number>) port)
+
   (define (spell-number-type x)
     (cond ((fixnum? x)   "fixnum")
           ((bignum? x)   "bignum")
@@ -102,127 +242,47 @@ doc>
           ((inexact? x)  "inexact")
           ((rational? x) "rational")))
 
-
   (format port "~W is " x)
-  (cond
-     ((number? x)       (if (exact? x)
-                            (cond
-                             ((fixnum? x)    (format port "a fixnum integer number (")
-                                             (format port "#x~a "  (number->string x 16))
-                                             (format port "#o~a "  (number->string x 8))
-                                             (format port "#b~a)"  (number->string x 2)))
-                              ((bignum? x)   (format port "a bignum integer number"))
-                              ((rational? x) (format port
-                                                     "a rational number, with a ~a numerator and a ~a denominator"
-                                                     (spell-number-type (numerator x))
-                                                     (spell-number-type (denominator x))))
-                              ((complex? x)  (format port
-                                                     "an exact complex number, with ~a real part and ~a imaginary part"
-                                                     (spell-number-type (real-part x))
-                                                     (spell-number-type (imag-part x)))))
-                            ;; now inexact:
-                            (cond
-                              ((infinite? x) (format port "~a infinity"
-                                                     (if (negative? x)
-                                                         "negative"
-                                                         "positive")))
-                              ((and (nan? x)
-                                    (not (complex? x))) ; don't call nan-quiet? nan-payload etc on complexes
-                                             (format port
-                                                     "a ~aquiet, ~anegative non-number (NaN), "
-                                                     (if (nan-quiet? x) "" "non-")
-                                                     (if (nan-negative? x) "" "non-"))
-                                             (format port "with payload ~a" (nan-payload x)))
-                              ((real? x)     (format port "a real number"))
-                              ((complex? x)  (format port
-                                                     "an inexact complex number, with ~a real part and ~a imaginary part"
-                                                     (spell-number-type (real-part x))
-                                                     (spell-number-type (imag-part x)))))))
-
-     ((null?    x)      (format port "the empty list"))
-     ((void?    x)      (format port "the unspecified (void) object"))
-     ((boolean? x)      (format port "a boolean value (~s)" (if x 'true 'false)))
-     ((char?    x)      (format port "a character whose Unicode code point~a is ~s"
-                                (if (<= (char->integer x) 127) " (and ASCII value)" "")
-                                (char->integer x)))
-     ((symbol?  x)      (let ((int (if (symbol-interned? x)
-                                       "a"
-                                       "an uninterned"))
-
-                              (bound (if (symbol-bound? x)
-                                         (format #f ", with ~amutable binding"
-                                                 (if (symbol-mutable? x) "" "im"))
-                                         "")))
-                          (format port "~a symbol~a" int bound)))
-     ((keyword? x)      (format port "a keyword"))
-     ((pair?    x)      (format port "a non-empty list"))
-     ((string?  x)      (if (zero? (string-length x))
-                            (format port "an empty string")
-                            (format port "a string of length ~s"
-                                    (string-length x))))
-     ((bytevector? x)   (let ((n (bytevector-length x)))
-                          (if (zero? n)
-                              (format port "an empty bytevector")
-                              (format port "a bytevector of length ~s"
-                                      n))))
-     ((vector?  x)      (if (eqv? x '#())
-                            (format port "an empty vector")
-                            (format port "a vector of length ~s"
-                                    (vector-length x))))
-     ((%uvector? x)     ;; don't use uvector? and uvector-length to avoid the load of SRFI-4
-                        (let* ((tag  (uvector-tag x))
-                               (a-an (case tag ((u16 u32 u64) "an") (else "a"))))
-                          (if (zero? (%uvector-length x))
-                            (format port "~a empty ~svector" a-an tag)
-                            (format port "~a ~svector of length ~s" a-an tag
-                                    (%uvector-length x)))))
-     ((closure? x)      (format port "a procedure")
-                        ;; We don't need to show the formals, because they're already
-                        ;; displayed in the object. For example, [closure g (a b)].
-                        ;; But we offer the user a way to read the source, if it is
-                        ;; available.
-                        (when (procedure-source x)
-                          (format port
-                              ".~%The source code is available -- call `procedure-source` on it")))
-     ((procedure? x)    (format port "a primitive procedure"))
-     ((eof-object? x)   (format port "the end-of-file object"))
-     ((struct-type? x)  (format port "the type structure named ~A"
-                                (struct-type-name x)))
-     ((library? x)      (format port "~a R7RS library named ~A"
-                                (if (module-mutable? x) "a mutable" "an immutable")
-                                (library-name x)))
-     ((module? x)       (format port "~a module named ~A"
-                                (if (module-mutable? x) "a mutable" "an immutable")
-                                (module-name x)))
-     ((port? x)         (format port "an ~a ~a port"
-                                (if (input-port? x) "input" "output")
-                                (if (binary-port? x) "binary" "textual")))
-     ((hash-table? x)   (format port "~a~a hash table~a"
-                                (if (hash-table-mutable? x)     "a mutable" "an immutable")
-                                (if (zero? (hash-table-size x)) ", empty"   "")
-                                (if (positive? (hash-table-size x))
-                                    (format #f " with ~a entries" (hash-table-size x))
-                                    "")))
-     (else              (let ((user-type-name (%user-type-name x)))
-                          (if user-type-name
-                              ;; Object type is user defined.
-                              (let ((proc (%user-type-proc user-type-name
-                                                           'describe)))
-                                (if proc
-                                    (proc x port) ;; Use user defined procedure
-                                    (format port "an objet whose type name is ~s"
-                                            user-type-name)))
-                              (begin
-                                ;; an object instance
-                                (format port "an instance of class ~A"
-                                (class-name (class-of x))))))))
-  (format port ".~%")
-  (void))
+  (if (exact? x)
+      (cond
+       ((fixnum? x)    (format port "a fixnum integer number (")
+        (format port "#x~a "  (number->string x 16))
+        (format port "#o~a "  (number->string x 8))
+        (format port "#b~a)"  (number->string x 2)))
+       ((bignum? x)   (format port "a bignum integer number"))
+       ((rational? x) (format port
+                              "a rational number, with a ~a numerator and a ~a denominator"
+                              (spell-number-type (numerator x))
+                              (spell-number-type (denominator x))))
+       ((complex? x)  (format port
+                              "an exact complex number, with ~a real part and ~a imaginary part"
+                              (spell-number-type (real-part x))
+                              (spell-number-type (imag-part x)))))
+      ;; now inexact:
+      (cond
+       ((infinite? x) (format port "~a infinity"
+                              (if (negative? x)
+                                  "negative"
+                                  "positive")))
+       ((and (nan? x)
+             (not (complex? x))) ; don't call nan-quiet? nan-payload etc on complexes
+        (format port
+                "a ~aquiet, ~anegative non-number (NaN), "
+                (if (nan-quiet? x) "" "non-")
+                (if (nan-negative? x) "" "non-"))
+        (format port "with payload ~a" (nan-payload x)))
+       ((real? x)     (format port "a real number"))
+       ((complex? x)  (format port
+                              "an inexact complex number, with ~a real part and ~a imaginary part"
+                              (spell-number-type (real-part x))
+                              (spell-number-type (imag-part x))))))
+  (format port ".~%"))
 
 
-;;;
-;;; describe for STklos instances
-;;;
+
+;;; ======================================================================
+;;;     Describe for STklos instances
+;;; ======================================================================
 (define (%describe-parts-header slots port)
   ;; header of the slot names of classes, objects, structs description
   (format port (case (length slots)
@@ -438,8 +498,7 @@ doc>
 
 )  ;; End of module DESCRIBE
 
-;; overload the autoload closure with "describe" generic function
 (select-module STklos)
-(set! describe (in-module DESCRIBE describe))
+(import (stklos describe))
 
-(provide "describe")
+(provide "stklos/describe")
