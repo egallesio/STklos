@@ -1181,23 +1181,39 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
  * @end lisp
  * An error is signaled if |list| is a constant list.
 doc>
+<doc EXT remove remove!
+ * (remove pred list)
+ * (remove! pred list)
+ *
+ * |Remove| returns |list| without the elements that satisfy predicate |pred|:
+ * @l
+ * The list is not disordered -- elements that appear in the result list occur
+ * in the same order as they occur in the argument list. |Remove!| does the
+ * same job than |remove| by physically modifying its |list| argument
+ * @lisp
+ * (remove even? '(0 7 8 8 43 -4)) => (7 43)
+ * @end lisp
+doc>
  */
-DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
+static SCM filter_remove (SCM pred, SCM list, int filter)
 {
   register SCM ptr, l;
   SCM result;
   int len;
   SCM x = list_type_and_length(list, &len);
+  int cmp;
 
-  if (!x) error_bad_list(list);
-  if (CONSP(x)) error_circular_list(list);
+  if (!x)        error_bad_list(list);
+  if (CONSP(x))  error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);
 
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
 
-  for (ptr=l=list, result=STk_nil; !NULLP(l); ) {
+  for (ptr=l=list, result=STk_nil; !NULLP(l); l=CDR(l) ) {
+    cmp = (STk_C_apply(pred, 1, CAR(l)) != STk_false); // 1 if in the result
+    if (!filter) cmp = !cmp;                           // invert test when removing
 
-    if (STk_C_apply(pred, 1, CAR(l)) != STk_false) {
+    if (cmp) {
       if (NULLP(result)) {
         NEWCELL(result, cons);
         ptr = result;
@@ -1209,28 +1225,41 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
       CAR(ptr) = CAR(l);
       CDR(ptr) = STk_nil;
     }
-    l=CDR(l);
  }
   return result;
 }
 
+DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
+{
+  return filter_remove(pred, list, 1);
+}
 
-DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
+DEFINE_PRIMITIVE("remove", remove, subr2, (SCM pred, SCM list))
+{
+  return filter_remove(pred, list, 0);
+}
+
+/* -------------------------------------------------- */
+
+static SCM dfilter_remove (SCM pred, SCM list, int filter)
 {
   SCM previous, l;
   int len;
   SCM x = list_type_and_length(list, &len);
+  int cmp;
 
-  if (!x) error_bad_list(list);
-  if (CONSP(x)) error_circular_list(list);
+  if (!x)        error_bad_list(list);
+  if (CONSP(x))  error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);
 
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
 
-  for (previous=STk_nil, l=list; !NULLP(l); ) {
+  for (previous=STk_nil, l=list; !NULLP(l); l=CDR(l) ) {
     if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
+    cmp = (STk_C_apply(pred, 1, CAR(l)) == STk_false); // 1 if in the result
+    if (!filter) cmp = !cmp;                           // invert test when removing
 
-    if (STk_C_apply(pred, 1, CAR(l)) == STk_false) {
+    if (cmp) {
       if (previous == STk_nil)
         list = CDR(list);
       else
@@ -1238,9 +1267,18 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
     } else {
       previous = l;
     }
-    l = CDR(l);
   }
   return list;
+}
+
+DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
+{
+  return dfilter_remove(pred, list, 1);
+}
+
+DEFINE_PRIMITIVE("remove!", dremove, subr2, (SCM pred, SCM list))
+{
+  return dfilter_remove(pred, list, 0);
 }
 
 /*
@@ -1461,6 +1499,8 @@ int STk_init_list(void)
   ADD_PRIMITIVE(list_star);
   ADD_PRIMITIVE(last_pair);
   ADD_PRIMITIVE(filter);
+  ADD_PRIMITIVE(remove);
+  ADD_PRIMITIVE(dremove);
   ADD_PRIMITIVE(dfilter);
   ADD_PRIMITIVE(dappend);
   ADD_PRIMITIVE(dreverse);
