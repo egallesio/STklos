@@ -1,0 +1,238 @@
+;;;;
+;;;; trace.stk                          -- Trace & Untrace
+;;;;
+;;;; Copyright © 1997-2025 Erick Gallesio <eg@stklos.net>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 26-Apr-1997 16:02 (eg)
+;;;;
+
+
+(define-module (stklos trace)
+  (import SCHEME STKLOS-OBJECT)
+  (export trace untrace %trace-expand %untrace-expand)
+
+#|
+<doc EXT-SYNTAX trace
+ * (trace f-name ...)
+ *
+ * Invoking |trace| with one or more function names causes the functions
+ * named to be traced. Henceforth, whenever such a function is invoked,
+ * information about the call and the returned values, if any, will be
+ * printed on the current error port.
+ *
+ * Calling |trace| with no argument returns the list of traced functions.
+doc>
+|#
+  (define-macro (trace . args)
+    (%trace-expand args))
+
+#|
+<doc EXT-SYNTAX untrace
+ * (untrace f-name ...)
+ *
+ * Invoking |untrace| with one or more function names causes the functions
+ * named not to be traced anymore.
+ *
+ * Calling |untrace| with no argument will untrace all the functions
+ * currently traced.
+doc>
+|#
+  (define-macro (untrace . args)
+    (%untrace-expand args))
+
+  (define *traced-symbols* (make-hash-table equal?))
+  (define *indentation*    0)
+  (define *err-port*       (current-error-port))
+  (define indent           (lambda () (make-string *indentation* #\.)))
+  (define indent-more      (lambda () (set! *indentation* (+ *indentation* 2))))
+  (define indent-less      (lambda () (set! *indentation* (- *indentation* 2))))
+  (define display-result   (lambda (l)
+                             (if (= (length l) 1)
+                                 ;; Only one result
+                                 (format *err-port* "~S\n" (car l))
+                                 ;; Result is a multiple value
+                                 (begin
+                                   (format *err-port* "<< ")
+                                   (for-each (lambda (x)
+                                               (format *err-port* "~S " x))
+                                             l)
+                                   (format *err-port* ">>\n")))
+                             ;; Return all the values as "normal" result
+                             (apply values l)))
+
+
+  ;;=============================================================================
+  ;;
+  ;; Class <Traced-generic>
+  ;;
+  ;; Trace of a generic function is done using MOP.
+  ;; In fact, to trace a gf we change its class from <generic> to <traced-generic>
+  ;; Untracing is of course just the contrary
+  ;;
+  ;;=============================================================================
+  (define-class <traced-generic> (<generic>)
+    ())
+
+  ;;
+  ;; How to apply the methods of a <traced-generic>
+  ;;
+  (define-method apply-method ((gf <traced-generic>) methods-list build-next args)
+    (let* ((name (generic-function-name gf))
+           (m    (car methods-list))
+           (spec (method-specializers m)))
+      ;; Trace the closure application in a dynamic wind to restore indentation
+      ;; on error.
+      (dynamic-wind
+          indent-more
+          (lambda ()
+            (let ((I   (indent))
+                  (res #f))
+              (format *err-port* "~A -> generic function ~S\n" I name)
+              (format *err-port* "~A    spec = ~S\n~A    args = ~S\n"
+                      I (map* class-name spec) I args)
+              (call-with-values
+                  (lambda () (apply (method-procedure (car methods-list))
+                                    (build-next (cdr methods-list) args)
+                                    args))
+                  (lambda l
+                    (format *err-port* "~A <- GF ~S returns " I name)
+                    (display-result l)))))
+          indent-less)))
+
+  ;; ======================================================================
+  ;;
+  ;;                            T R A C E
+  ;;
+  ;; ======================================================================
+
+  ;;
+  ;; Trace-closure
+  ;;
+  (define (trace-closure symbol value)
+    (lambda l
+      ;; We trace the closure in a dynamic-wind to restore indentation on error
+      (dynamic-wind
+          indent-more
+          (lambda ()
+            (format *err-port* "~A -> ~A with args = ~S\n" (indent) symbol l)
+            (call-with-values
+                (lambda () (apply value l))
+                (lambda l
+                  (format *err-port* "~A <- ~A returns " (indent) symbol)
+                  (display-result l))))
+          indent-less)))
+
+  ;;
+  ;; Trace-generic
+  ;;
+  (define (trace-generic symbol gf)
+    ;; Verify that gf is "exactly" a <generic> (not "is-a?")
+    ;; Otherwise, we can lost some information when untracing
+    (unless (eq? (class-of gf) <generic>)
+      (error 'trace "cannot trace ~S (descendant of <generic>)" symbol))
+    (change-class gf <traced-generic>)
+    gf)
+
+  ;;
+  ;; Trace-symbol
+  ;;
+  (define (trace-symbol symbol proc mod)
+    (unless (symbol? symbol)
+      (error 'trace "bad symbol: ~S" symbol))
+    ;; Verify if "symbol" is already traced
+    (let ((entry (hash-table-ref/default *traced-symbols* (cons symbol mod) #f)))
+      (when entry
+        ; (car entry) contains the traced proc and (cdr entry) the untraced one
+        (let ((new (car entry)))
+          (if (and (procedure? new) (eq? new proc))
+              (error 'trace "~S is already traced" symbol)))))
+    ;; Do the trace
+    (let ((traced-proc  (cond  ; Order is important!!!
+                         ((generic?   proc)(trace-generic   symbol proc))
+                         ((procedure? proc)(trace-closure   symbol proc))
+                         (else             (error 'trace "cannot trace ~S" proc)))))
+      (hash-table-set! *traced-symbols* (cons symbol mod) (cons traced-proc proc))
+      traced-proc))
+
+  ;;
+  ;; The TRACE macro expander
+  ;;
+  (define (%trace-expand args)
+    (if (null? args)
+        ;; Show all the traced symbols
+        `(list ,@(hash-table-map *traced-symbols*
+                                 (lambda (x y) (list 'quote x))))
+        ;; We have arguments. Trace them
+        `(begin
+           ,@(map (lambda (x)
+                    `(set! ,x (,trace-symbol ',x ,x (current-module))))
+                  args))))
+
+  ;; ======================================================================
+  ;;
+  ;;                            U N T R A C E
+  ;;
+  ;; ======================================================================
+
+
+  ;;
+  ;; Untrace-symbol
+  ;;
+  (define (untrace-symbol symbol mod)
+    (unless (symbol? symbol)
+      (error 'untrace "bad symbol: ~S" symbol))
+
+    ;; Verify if symbol is already traced
+    (let ((entry (hash-table-ref/default *traced-symbols* (cons symbol mod) #f)))
+      (if entry
+          (let ((res (cdr entry)))
+            (hash-table-delete! *traced-symbols* (cons symbol mod))
+            ;; For <traced-generic>, revert the function to <generic>
+            (when (is-a? res <traced-generic>) (change-class res <generic>))
+            res)
+          (error 'untrace "~S is not traced" symbol))))
+
+
+  ;;
+  ;; The UNTRACE macro expander
+  ;;
+  (define (%untrace-expand args)
+    (if (null? args)
+        ;; Untrace, all the traced arguments
+        (let ((traced-symbols (hash-table-map *traced-symbols*
+                                              (lambda (x y) (car x)))))
+          (if (null? traced-symbols)
+              (void)
+              `(untrace ,@traced-symbols)))
+        ;; Normal case, trace only the specified arguments
+        `(begin
+           ,@(map (lambda (x)
+                    `(set! ,x (,untrace-symbol ',x (current-module))))
+                  args))))
+
+) ;; End of module (stklos trace)
+
+
+(select-module STklos)
+(import (stklos trace))
+
+(provide "stklos/trace")
+
+;; LocalWords:  untrace

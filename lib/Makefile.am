@@ -68,30 +68,22 @@ scheme_extra = STklos.init
 
 SRC_STK = bigmatch.stk        \
           conditions.stk      \
-          describe.stk        \
           expand.ss           \
           full-syntax.stk     \
-          getopt.stk          \
           lex-rt.stk          \
           make-C-boot.stk     \
-          pretty-print.stk    \
-          slib.stk            \
-          trace.stk
+          slib.stk
 
 
 scheme_OBJS = bigmatch.ostk     \
           conditions.ostk       \
           full-syntax.ostk      \
-          describe.ostk         \
-          getopt.ostk           \
           lex-rt.ostk           \
-          pretty-print.ostk     \
-          slib.ostk             \
-          trace.ostk
+          slib.ostk
 
-SRC_C         = readline-complete.c
+SRC_C         = readline-utils.c
 SRC_C_STK     =
-scheme_SOLIBS = readline-complete.@SH_SUFFIX@
+scheme_SOLIBS = readline-utils.@SH_SUFFIX@
 
 
 DOCDB       = DOCDB
@@ -184,6 +176,8 @@ slib.ostk: slib.stk STklos.init
 STklos.init: srfi/59.stk
 srfi/59.ostk:
 	(cd srfi; make 59.ostk)
+stklos/getopt.ostk:
+	(cd stklos; make getopt.ostk)
 
 
 lib/scheme: lib
@@ -196,7 +190,7 @@ lib/srfi: lib/scheme lib/stklos lib/streams
 #
 # If ./srfis.stk we must rebuild
 #     - srfis-data.scm (used by SRFI0 and features)
-srfis-data.scm: srfis.stk getopt.ostk
+srfis-data.scm: srfis.stk stklos/getopt.ostk
 	$(STKLOS_BINARY) -c -q -l srfis.stk \
 	                 -f ../utils/update-srfi-list.stk \
                      -- --internal > $@

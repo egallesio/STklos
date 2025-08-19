@@ -227,7 +227,7 @@ DEFINE_PRIMITIVE("struct-type-change-writer!",
   if (!STRUCT_TYPEP(st)) error_bad_type(st);
   if (proc != STk_false && (STk_procedurep(proc) == STk_true) &&
       STk_proc_arity(proc) != MAKE_INT(2))
-    STk_error("bad wrtiter procedure ~S", proc);
+    STk_error("bad writer procedure ~S", proc);
 
   res             = STRUCT_TYPE_PRINTER(st);
   STRUCT_TYPE_PRINTER(st) = proc;

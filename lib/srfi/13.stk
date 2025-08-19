@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-13.stk                -- Implementation of SRFI-13
 ;;;;
-;;;; Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,10 @@
 ;;;;
 
 (define-module srfi/13
-  (import (srfi 14))
+  (import (srfi 14)
+          ;; Import explicitely from SCHEME SRFI-13 function which are now R7RS
+          ;; (in case they are redefined in the STklos module)
+          (only SCHEME string-copy string-copy! string-fill! string->list))
   (export ;;predicates
           string-null? string-every string-any
           ;; Constructors
@@ -192,11 +195,11 @@
 ;;;;            L I S T   &   S T R I N G   C O N V E R S I O N
 ;;;;
 ;;;; ======================================================================
-(define (string->list str :optional (start 0) (end -1))
-  (%check-indexes str start end 'string->list)
-  (do ((i (- end 1) (- i 1))
-       (res '() (cons (string-ref str i) res)))
-      ((< i start) res)))
+;; (define (string->list str :optional (start 0) (end -1))
+;;   (%check-indexes str start end 'string->list)
+;;   (do ((i (- end 1) (- i 1))
+;;        (res '() (cons (string-ref str i) res)))
+;;       ((< i start) res)))
 
 (define (reverse-list->string char-list)
   (list->string (reverse char-list)))
@@ -254,19 +257,19 @@
 ;;;
 ;;; Exported procedures
 ;;;
-(define (string-copy str :optional (start 0) (end -1))
-  (%check-indexes str start end 'string-copy)
-  (substring str start end))
+;; (define (string-copy str :optional (start 0) (end -1))
+;;   (%check-indexes str start end 'string-copy)
+;;   (substring str start end))
 
 (define (substring/shared str :optional (start 0) (end -1))
   (%check-indexes str start end 'substring/shared)
   (%substring/shared str start end))
 
-(define (string-copy! to tstart from :optional (fstart 0) (fend -1))
-  (%check-indexes from fstart fend 'string-copy!)
-  (check-arg integer? tstart 'string-copy!)
-  (%check-substring-indexes  to tstart (+ tstart (- fend fstart)) 'string-copy!)
-  (%string-copy! to tstart from fstart fend))
+;; (define (string-copy! to tstart from :optional (fstart 0) (fend -1))
+;;   (%check-indexes from fstart fend 'string-copy!)
+;;   (check-arg integer? tstart 'string-copy!)
+;;   (%check-substring-indexes  to tstart (+ tstart (- fend fstart)) 'string-copy!)
+;;   (%string-copy! to tstart from fstart fend))
 
 (define (string-take s n)
   (check-arg string? s 'string-take)
@@ -344,12 +347,12 @@
 ;;;;                            M O D I F I C A T I O N
 ;;;;
 ;;;; ======================================================================
-(define (string-fill! str char :optional (start 0) (end -1))
-  (%check-indexes str start end 'string-fill!)
-  (check-arg char? char 'string-fill!)
-  (do ((i (- end 1) (- i 1)))
-      ((< i start))
-    (string-set! str i char)))
+;; (define (string-fill! str char :optional (start 0) (end -1))
+;;   (%check-indexes str start end 'string-fill!)
+;;   (check-arg char? char 'string-fill!)
+;;   (do ((i (- end 1) (- i 1)))
+;;       ((< i start))
+;;     (string-set! str i char)))
 
 ;;;; ======================================================================
 ;;;;
@@ -1254,6 +1257,17 @@
                              (if (= vi -1) 0
                                  (Loop2 vi))))))))))))
 
+;;; Some functions are now defined in R7RS, or are in STklos
+;;; core. They have been deleted from this file. However, in order to
+;;; keep a list of exported symbol which is coherent with the text of
+;;; the SRFI
+(define-macro (redefine symb)
+  `(define ,symb (in-module |SCHEME| ,symb)))
+
+(redefine string-fill!) ; R7RS
+(redefine string-copy)  ; R7RS
+(redefine string-copy!) ; R7RS
+(redefine string->list) ; R7RS
 
 ;;; End of module SRFI-13
 )

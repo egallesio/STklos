@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
-;;;; Copyright © 2011-2022 Erick Gallesio - Polytech Nice Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -590,12 +590,84 @@
         10
         (plus 1 2 3 4)))
 
-(test "case-lambda.7"
-      *test-failed*
-      ( (case-lambda
-         ((a) a)
-         ((a b) (* a b)))
-       1 2 3))
+(test/error "case-lambda.7"
+            ( (case-lambda
+                ((a) a)
+                ((a b) (* a b)))
+              1 2 3))
+
+
+(let ((g #f)
+      (Z 10)
+      (f (lambda (x) (- x))))
+  (set! g (case-lambda
+            (()         Z)
+            ((a)        (f a))
+            ((a b c)    (/ (+ a b c) 3))
+            ((x . rest) (* x (apply * rest)))))
+
+  (test "case-lambda.8"
+        '(10 -5 200 120)
+        (list (g)       ; 10
+              (g 5)           ; -5
+              (g 100 200 300) ; 200
+              (g 2 3 4 5))))  ; 120
+
+;; lexical scope: the inner g (-) shadoes the outer g (+),
+;; so the result is -2.
+(test "case-lambda.9"
+      -2
+      (let ((f (lambda (z)
+                 (let ((g +))
+                   ((case-lambda
+                      ((a)  (let ((g -))
+                              (g a))))
+                    z)))))
+        (f 2)))
+
+;; nested
+(test "case-lambda.10"
+      '(-5 300 20)
+      (let ((f (case-lambda
+                 ((a)        (- a))
+                 ((a b)      (+ a b))
+                 ((a b c)    (let ((g (case-lambda
+                                        ((a) b))))
+                               (g -1))))))
+        (list (f 5)
+              (f 100 200)
+              (f 10 20 30))))
+
+;; lexical scope
+(test "case-lambda.11"
+      55
+      (let ((a 55)) ((case-lambda (() a)))))
+
+;; lexical scope: the inner g (-) shadoes the outer g (+),
+;; so the result is -2.
+(test "case-lambda.12"
+      -2
+      (let ((g log))
+        (let ((f (lambda (z)
+                   (let ((g +))
+                     ((case-lambda
+                        ((a)  (let ((g -))
+                                (g a))))
+                      z)))))
+          (f 2))))
+
+;; lexical scope: we override APPLY
+(test "case-lambda.13"
+      '(0 -9)
+      (let ((counter 0))
+        (let* ((ap apply)
+               (apply (lambda args
+                        (set! counter (+ 1 counter))
+                        (ap (car args) (cadr args)))))
+          (let ((x ((case-lambda
+                      ((a) (- a))) 9)))
+            (list counter x)))))
+
 ;; ======================================================================
 
 (test-subsection "5.3 Multiple-values definitions")

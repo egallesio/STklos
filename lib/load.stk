@@ -1,7 +1,7 @@
 ;;;;
 ;;;; load.stk   -- Extended load function
 ;;;;
-;;;; Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,7 @@
         %stklos-conf-file
         %try-load-conditions
         %do-include
-        %%require)
+        %require)
 
 
 (define *path-separator*        (if (eqv? (running-os) 'windows) ";" ":"))
@@ -410,7 +410,7 @@ doc>
  * |string| was already provided; it returns `#f` otherwise.
 doc>
 |#
-(define %%require       #f)
+(define %require        #f)
 (define require         #f)
 (define provide         #f)
 (define provided?       #f)
@@ -451,8 +451,7 @@ doc>
 (let ((provided '())
       (stklos-building? (getenv "STKLOS_BUILDING")))
 
-
-  (set! %%require
+  (set! %require
     (lambda (what lib-only?)
       (when stklos-building?
         ;; When building STklos, require-library ==  require.
@@ -485,7 +484,7 @@ doc>
   (set! require
     (lambda (what)
       #:require
-      (%%require what (load-path))))
+      (#%require what (load-path))))
 
 
   (set! require/provide
@@ -519,12 +518,12 @@ doc>
             `(begin
                (define-module STklos (import ,(cdr spec)))
                (provide ,what))
-            `(%%require ,what #f)))
-      `(%%require ,what #f)))
+            `(#%require ,what #f)))
+      `(#%require ,what #f)))
 
 
 (define-macro (require-library what)
-  `(%%require ,what #t))
+  `(#%require ,what #t))
 
 ;=============================================================================
 ;
@@ -533,18 +532,18 @@ doc>
 ;=============================================================================
 
 (define-macro (%do-include kind files)
-  (let ((inc (string->symbol (format "%%~a" kind))))
-    (if (null? files)
-        (error kind "at least one parameter must be provided")
-        (let* ((port     (compiler-current-port))
-               (src-file (if port (port-file-name port) (current-loading-file)))
-               (dir      (and src-file (dirname src-file)))
-               (others   (if (includes-use-load-path) *load-path* '()))
-               (paths    (if dir (cons dir others) others)))
-          `(,inc ,@(map (lambda (x)
-                          ;; return x if find-path is null to improve messages
-                          (or (find-path x paths) x))
-                      files))))))
+  (if (null? files)
+      (error kind "at least one parameter must be provided")
+      (let* ((port     (compiler-current-port))
+             (src-file (if port (port-file-name port) (current-loading-file)))
+             (dir      (and src-file (dirname src-file)))
+             (others   (if (includes-use-load-path) *load-path* '()))
+             (paths    (if dir (cons dir others) others)))
+        (cons (if (eq? kind 'include) #%include #%includes-ci)
+              (map (lambda (x)
+                     ;; return x if find-path is null to improve messages
+                     (or (find-path x paths) x))
+                   files)))))
 
 (define-macro (include . files)
   `(%do-include include ,files))
@@ -554,7 +553,7 @@ doc>
 
 
 (define-macro (include-file file) ;; Only one file no search in the load-path
-  `(%%include ,file))
+  `(#%include ,file))
 
 #|
 <doc EXT autoload

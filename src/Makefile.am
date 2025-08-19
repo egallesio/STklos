@@ -1,6 +1,6 @@
 # Makefile.am for STklos source file
 #
-# Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+# Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ endif
 
 stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  cond.c  cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
- fport.c gnu-getopt.c hash.c keyword.c lib.c \
+ fport.c gnu-getopt.c hash.c keyword.c icall.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c symbol.c \

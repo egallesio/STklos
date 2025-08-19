@@ -25,7 +25,7 @@
  */
 
 #include "stklos.h"
-
+#include "vm.h"      // FIXME:
 /*===========================================================================*\
  *
  *                              Utilities
@@ -131,38 +131,39 @@ static SCM simple_list_copy(SCM l, int len)
 
 SCM STk_C_make_list(int n, SCM init)
 {
-  SCM ptr, start, next = STk_nil;
-  static void* pool    = NULL;        // protected by the cons_pool mutex
-  MUT_DECL(cons_pool);
+  if (!n)
+    return STk_nil;
+  else {
+    vm_thread_t *vm = STk_get_current_vm();
+    register size_t index = sizeof(struct cons_obj) / sizeof(SCM);
+    SCM ptr, start, next = STk_nil;
+    SCM pool = vm->cell_pool[index];
 
-  if (!n) return STk_nil;
+    // Initialize start from a previous call to STk_C_make_list, if possible.
+    // Otherwise call the special GC function
+    ptr = start = pool? pool: STk_must_malloc_many(sizeof(struct cons_obj));
 
-  // Initialize start from a previous call to STk_C_make_list, if possible.
-  // Otherwise call the special GC function
-  MUT_LOCK(cons_pool);
-  ptr = start = pool? pool: STk_must_malloc_many(sizeof(struct cons_obj));
-  pool = NULL; // in case we are interrupted before setting it before return
-  MUT_UNLOCK(cons_pool);
-
-  for (int i=0; i < n; i++) {
-    if (!GC_NEXT(ptr)) {
-      // Enlarge current list chunk by allocatting some new pairs
-      GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
+    for (int i=0; i < n; i++) {
+      if (!GC_NEXT(ptr)) {
+        // Enlarge current list chunk by allocatting some new pairs
+        GC_NEXT(ptr) = STk_must_malloc_many(sizeof(struct cons_obj));
+      }
+      next = GC_NEXT(ptr);
+      BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
+      BOXED_INFO((struct cons_obj* ) ptr) = 0;
+      CAR((struct cons_obj* ) ptr) = init;
+      CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
+      ptr = next;
     }
-    next = GC_NEXT(ptr);
-    BOXED_TYPE((struct cons_obj* ) ptr) = tc_cons;
-    BOXED_INFO((struct cons_obj* ) ptr) = 0;
-    CAR((struct cons_obj* ) ptr) = init;
-    CDR((struct cons_obj* ) ptr) = (i < n-1) ? next: STk_nil ;
-    ptr = next;
+
+    vm->cell_pool[index] = next;
+
+    if (STk_count_allocations)
+      STk_vm_inc_allocs(vm, n * sizeof(struct cons_obj));
+    return start;
   }
-
-  MUT_LOCK(cons_pool); pool = next; MUT_UNLOCK(cons_pool);
-
-  if (STk_count_allocations)
-    STk_thread_inc_allocs(STk_current_thread(), n * sizeof(struct cons_obj));
-  return start;
 }
+
 
 
 /* list_type_and_length():
@@ -1071,20 +1072,39 @@ DEFINE_PRIMITIVE("list-deep-copy", list_deep_copy, subr1, (SCM l))
 
 
 /*
-<doc EXT pair-mutable?
+<doc EXT pair-immutable! pair-mutable?
  * (pair-mutable? obj)
+ * (pair-immutable! obj)
  *
- * Returns |#t| if |obj| is a mutable pair, otherwise returns |#f|.
+ * |Pair-mutable?| returns |#t| if |obj| is a mutable pair, otherwise
+ * returns |#f|.
+ *
+ * |Pair-immutable!| will turn the pair into an immutable one (the
+ * pair is modified and returned -- no copy is made).
+ *
  * @lisp
- * (pair-mutable? '(1 . 2))    => #f
- * (pair-mutable? (cons 1 2))  => #t
- * (pair-mutable? 12)          => #f
+ * (pair-mutable? '(1 . 2))                     => #f
+ * (pair-mutable? (cons 1 2))                   => #t
+ * (pair-mutable? 12)                           => #f
+ * (pair-mutable? (pair-immutable! (cons 1 2))) => #f
+ *
+ * (define x (list 1 2))
+ * (pair-mutable? x)                            => #t
+ * (eq? x (pair-immutable! x))                  => #t
+ * (pair-mutable? x)                            => #f
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("pair-mutable?", pair_mutable, subr1, (SCM obj))
+DEFINE_PRIMITIVE("pair-mutable?", pair_mutablep, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(CONSP(obj) && !(BOXED_INFO(obj) & CONS_CONST));
+}
+
+DEFINE_PRIMITIVE("pair-immutable!", pair_immutable, subr1, (SCM obj))
+{
+  if (!CONSP(obj)) STk_error("bad pair ~s", obj);
+  BOXED_INFO(obj) |= CONS_CONST;
+  return STk_void;
 }
 
 
@@ -1134,7 +1154,7 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
   int len;
   SCM x = list_type_and_length(l, &len);
 
-  if (!x) error_bad_list(l);
+  if (!x || !len) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
 
   while(--len)
@@ -1436,7 +1456,8 @@ int STk_init_list(void)
   ADD_PRIMITIVE(list_copy);
   ADD_PRIMITIVE(list_deep_copy);
 
-  ADD_PRIMITIVE(pair_mutable);
+  ADD_PRIMITIVE(pair_mutablep);
+  ADD_PRIMITIVE(pair_immutable);
   ADD_PRIMITIVE(list_star);
   ADD_PRIMITIVE(last_pair);
   ADD_PRIMITIVE(filter);

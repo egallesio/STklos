@@ -137,7 +137,7 @@ doc>
     ;;
     ;; NOTE: Since the environment of a library is empty, we cannot use the
     ;; primitives defined in STklos or SCHEME modules. In this case, we can
-    ;; use the special call (%%in-scheme 'xx) to grab the value of xx in
+    ;; use the internal call (#%in-scheme 'xx) to grab the value of xx in
     ;; SCHEME module (used for instance with %module-restore which
     ;; is needed at the end of the expansion of define-module
     ;;

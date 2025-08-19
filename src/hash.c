@@ -485,7 +485,8 @@ DEFINE_PRIMITIVE("%make-hash-table", make_hash, subr2, (SCM compar, SCM hashfct)
   return z;
 }
 
-SCM STk_make_basic_hash_table(void) {
+SCM STk_make_basic_hash_table(void)
+{
   SCM z;
 
   NEWCELL(z, hash_table);

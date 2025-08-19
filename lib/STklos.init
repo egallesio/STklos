@@ -358,7 +358,7 @@
 ;;;
 ;;; Retain original require/provide before loading "require.scm"
 ;;;
-(define stklos:require   %%require)
+(define stklos:require   %require)
 (define stklos:provide   provide)
 (define stklos:provided? provided?)
 
