@@ -23,7 +23,7 @@
 
 #-======================================================================
 
-SUBDIRS=160
+SUBDIRS=160 172
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -116,6 +116,7 @@ SRC_STK   = 1.stk   \
             162.stk \
             169.stk \
             171.stk \
+            172.stk \
             173.stk \
             174.stk \
             176.stk \
@@ -235,6 +236,7 @@ SRC_OSTK =  1.ostk   \
             162.ostk \
             169.ostk \
             171.ostk \
+            172.ostk \
             173.ostk \
             174.ostk \
             176.ostk \
