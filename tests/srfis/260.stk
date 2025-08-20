@@ -7,7 +7,7 @@
 (test "srfi-260.2"
       #t
       (let ([s (generate-symbol "S:::")])
-        (symbol=? s))) ; => #t
+        (symbol? s))) ; => #t
 
 
 (test "srfi-260.3"
@@ -48,4 +48,3 @@
 
 (test/error "srfi-260.10"
             (generate-symbol 100 200 300))
-
