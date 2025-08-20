@@ -1453,105 +1453,103 @@ doc>
 doc>
 */
 
-/* any_every does the work for the any and every procedures.
-   When the argument 'any' is non-zero, it does any; when it's
-   zero, it does every.
-   *argv is the list of lists, received from the Scheme vsubr
-   procedure any/every; n is the number of lists.
+/* any_every does the work for the any and every procedures.  When the
+   argument 'any' is non-zero, it does any; when it's zero, it does every.
+   *argv is the list of lists, received from the Scheme vsubr procedure
+   any/every; n is the number of lists.
 */
-SCM any_every(SCM pred, SCM *argv, int n, int any) {
-    if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
-    SCM *argv_ptr = argv;
+static SCM any_every(SCM pred, SCM *argv, int n, int any)
+{
+  SCM *argv_ptr = argv;
+  SCM res = any ? STk_false : STk_true;
+  SCM lists_ptr;
 
-    /* Check the list arguments. If there is any NULL list, we can
-       return already. If there are any non-lists, we signal an
-       error. */
-    for (int i=0; i<n; i++, argv_ptr--) {
-        if (!CONSP(*argv_ptr)) {
-            if (NULLP(*argv_ptr))   return any ? STk_false : STk_true;
-            else                     error_bad_list(*argv_ptr);
-        }
+  if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
+
+  /* Check the list arguments. If there is any NULL list, we can return
+     already. If there are any non-lists, we signal an error. */
+  for (int i=0; i<n; i++, argv_ptr--) {
+    if (!CONSP(*argv_ptr)) {
+      if (NULLP(*argv_ptr))  return res;
+      else                   error_bad_list(*argv_ptr);
+    }
+  }
+
+  /* FAST PATH n = 1 */
+  if (n == 1) {
+    /* *argv is the ONLY list that needs to be used. */
+    for (lists_ptr = *argv; CONSP(lists_ptr);  lists_ptr = CDR(lists_ptr)) {
+      res = STk_C_apply(pred,1,CAR(lists_ptr));
+      if (any   && res != STk_false) return res;
+      if (!any  && res == STk_false) return STk_false;
+    }
+    if (!NULLP(lists_ptr)) error_bad_list(*argv);
+  } else {
+    /* cars is a list with the cars from the given lists; and we'll keep
+       moving forward through the lists, updating each element in cars, using
+       cars_ptr. */
+    SCM cars = STk_C_make_list(n, STk_false);
+    SCM cars_ptr;
+    int i, stop=0;
+
+
+    /* Make a list of lists and copy the lists in argv into it */
+    SCM l = STk_C_make_list(n, STk_false);
+    lists_ptr = l;
+    argv_ptr = argv;
+    for (int i=0; i<n; i++) {
+      CAR(lists_ptr) = *argv_ptr--;
+      lists_ptr=CDR(lists_ptr);
     }
 
-    SCM lists_ptr;
-    SCM res = any ? STk_false : STk_true;
-
-    /* FAST PATH n = 1 */
-    if (n == 1) {
-        /* *argv is the ONLY list that needs to be used. */
-        lists_ptr = *argv;
-        while(CONSP(lists_ptr)) {
-            res = STk_C_apply(pred,1,CAR(lists_ptr));
-            if (any   && res != STk_false) return res;
-            if (!any  && res == STk_false) return STk_false;
-            lists_ptr = CDR(lists_ptr);
+    /* Now l is a list of lists, similar to the argument given to any/every,
+       but we'll use it as a multi-pointer through thte lists. */
+    while (!stop) {
+      /* Load arguments into cars */
+      lists_ptr = l;
+      cars_ptr  = cars;
+      for(i=0; i<n; i++) {
+        /* When one of thet lists is over, stop.
+           And if it's improper, signal an error. */
+        if (!CONSP(CAR(lists_ptr))) {
+          /* Do not allow improper lists... SRFI-116 wants this: */
+          if (!NULLP(CAR(lists_ptr))) error_bad_list(l);
+          stop = 1;
+          break;
         }
-        if (!NULLP(lists_ptr)) error_bad_list(*argv);
-    } else {
-        /* cars will be a list with the cars from the given lists; and
-           we'll keep moving forward through the lists, updating each
-           element in cars, using cars_ptr. */
-        SCM cars = STk_C_make_list(n, STk_false);
-        SCM cars_ptr;
+        /* Load the next argument from the list of lists: */
+        CAR(cars_ptr) = CAR(CAR(lists_ptr));
+        cars_ptr = CDR(cars_ptr);             /* advance cars pointer */
 
-        int stop=0;
-        int i;
+        /* and advance the pointers: */
+        CAR(lists_ptr) = CDR(CAR(lists_ptr)); /* of this (i-th) list  */
+        lists_ptr = CDR(lists_ptr);           /* of the list of lists */
+      }
 
-        /* Make a list of lists and copy the lists in argv into it */
-        SCM l = STk_C_make_list(n, STk_false);
-        lists_ptr = l;
-        argv_ptr = argv;
-        for (int i=0; i<n; i++) {
-            CAR(lists_ptr) = *argv_ptr--;
-            lists_ptr=CDR(lists_ptr);
-        }
-        /* Now l is a list of lists, similar to the argument given to
-           any/every, but we'll use it as a multi-pointer through thte
-           lists. */
-
-        while (!stop) {
-            /* Load arguments into cars */
-            lists_ptr = l;
-            cars_ptr  = cars;
-            for(i=0; i<n; i++) {
-                /* When one of thet lists is over, stop.
-                   And if it's improper, signal an error. */
-                if (!CONSP(CAR(lists_ptr))) {
-                    /* Do not allow improper lists... SRFI-116 wants this: */
-                    if (!NULLP(CAR(lists_ptr))) error_bad_list(l);
-                    stop = 1;
-                    break;
-                }
-                /* Load the next argument from the list of lists: */
-                CAR(cars_ptr) = CAR(CAR(lists_ptr));
-                cars_ptr = CDR(cars_ptr);             /* advance cars pointer */
-
-                /* and advance the pointers: */
-                CAR(lists_ptr) = CDR(CAR(lists_ptr)); /* of this (i-th) list  */
-                lists_ptr = CDR(lists_ptr);           /* of the list of lists */
-            }
-
-            if (!stop) {
-                /* The heart of it all is here: */
-                res = STk_C_apply_list(pred, cars);
-                if (any   && res != STk_false) return res;
-                if (!any  && res == STk_false) return STk_false;
-            }
-        }
+      if (!stop) {
+        /* The heart of it all is here: */
+        res = STk_C_apply_list(pred, cars);
+        if (any   && res != STk_false) return res;
+        if (!any  && res == STk_false) return STk_false;
+      }
     }
-    return res;
+  }
+  return res;
 }
 
-DEFINE_PRIMITIVE("any", any, vsubr, (int argc, SCM *argv)) {
-    if (argc < 1) STk_error("at least one argument needed");
-    SCM pred = *argv--; argc--;
-    return any_every(pred, argv, argc, 1);
+DEFINE_PRIMITIVE("any", any, vsubr, (int argc, SCM *argv))
+{
+  if (argc < 1) STk_error("at least one argument needed");
+  SCM pred = *argv--; argc--;
+  return any_every(pred, argv, argc, 1);
 }
 
-DEFINE_PRIMITIVE("every", every, vsubr, (int argc, SCM *argv)) {
-    if (argc < 1) STk_error("at least one argument needed");
-    SCM pred = *argv--; argc--;
-    return any_every(pred, argv, argc, 0);
+
+DEFINE_PRIMITIVE("every", every, vsubr, (int argc, SCM *argv))
+{
+  if (argc < 1) STk_error("at least one argument needed");
+  SCM pred = *argv--; argc--;
+  return any_every(pred, argv, argc, 0);
 }
 
 /* ======================================================================
