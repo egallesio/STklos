@@ -982,9 +982,9 @@ static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
       }
     }
 
-    case '&': return STk_make_box(read_rec(port, ctx, inlist));
+    case '&': return STk_make_box(read_rec(port, ctx, 0));
 
-    case '%': return STk_get_icall(read_rec(port, ctx, inlist));
+    case '%':  return STk_get_icall(read_rec(port, ctx, 0));
 
     case 'p':
     case 'P': return read_address(port);
