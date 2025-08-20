@@ -71,9 +71,15 @@ static void error_not_exact_positive(SCM x)
 {
   STk_error("index ~W is not an exact positive integer", x);
 }
+
 static void error_bad_comparison_function(SCM x)
 {
   STk_error("bad comparison function ~S", x);
+}
+
+static void verify_at_least_2_args(int n)
+{
+  if (n < 2) STk_error("at least two arguments needed");
 }
 
 int STk_int_length(SCM l)
@@ -1539,17 +1545,15 @@ static SCM any_every(SCM pred, SCM *argv, int n, int any)
 
 DEFINE_PRIMITIVE("any", any, vsubr, (int argc, SCM *argv))
 {
-  if (argc < 1) STk_error("at least one argument needed");
-  SCM pred = *argv--; argc--;
-  return any_every(pred, argv, argc, 1);
+  verify_at_least_2_args(argc);
+  return any_every(*argv, argv-1, argc-1, 1);
 }
 
 
 DEFINE_PRIMITIVE("every", every, vsubr, (int argc, SCM *argv))
 {
-  if (argc < 1) STk_error("at least one argument needed");
-  SCM pred = *argv--; argc--;
-  return any_every(pred, argv, argc, 0);
+  verify_at_least_2_args(argc);
+  return any_every(*argv, argv-1, argc-1, 0);
 }
 
 /* ======================================================================
