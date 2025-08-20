@@ -1,7 +1,7 @@
-;;;;
+>;;;;
 ;;;; test-keyword.stk   -- ss
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -51,6 +51,17 @@
 (test "reader.bars.4" #f (keyword? '|:foobar|))  ; it's a symbol
 (test "reader.bars.5" ":foobar" (keyword->string :|:foobar|))
 (test "reader.bars.6" ::foobar :|:foobar|)
+
+(test "reader.bars.7"  #t (symbol? '|#foo bar|))
+(test "reader.bars.8"  #t (symbol? '|#:foo bar|))
+(test "reader.bars.9"  #t (keyword? '#:|foo bar|))
+(test "reader.bars.10" #t (keyword? '#:fo|o bar|))
+(test "reader.bars.11" #t (eq? '#:|foo bar| '#:fo|o bar|))
+(test "reader.bars.12" #t (keyword? '#:||))
+(test "reader.bars.13" #t (symbol? '|#:|))
+
+
+
 
 
 (test "writer.1" "#:ab" (with-output-to-string (lambda()
