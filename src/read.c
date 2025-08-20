@@ -351,6 +351,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
                      int *seen_pipe)
 // read an item whose 1st char is in c. Return its length
 // At exit "last", if not NULL,  contains the last character read for this item
+// seen_pipe contains the position+1 of the first '|'. If 0, no '| seen.
 {
   register int j = 0;
   int allchars   = 0;
@@ -366,7 +367,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
     if (c != '|')
       tok[j++]  = (allchars || case_significant) ? c : tolower(c);
     else
-      if (seen_pipe) *seen_pipe = 1;
+      if (!*seen_pipe) *seen_pipe = j+1; // retain the position(+1) of first '|'
 
     if (c == '\\') {
       int k = j-1;
@@ -441,11 +442,12 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
   }
 
   /* It is not a number */
-  if (*tok == '#') {
+  if (*tok == '#' && seen_pipe != 1) {
+    /* tok begins with a sharp sign and it is not preceded by a pipe sign */
     if (len > 1) {
-      if (tok[1] == ':')
+      if (tok[1] == ':') {
         return STk_makekey(tok+2);
-      else {
+      } else {
         SCM tmp = STk_C_hash_get(sharp_table, tok+1);
 
         if (tmp) {
