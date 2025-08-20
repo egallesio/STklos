@@ -550,13 +550,14 @@ doc>
 doc>
 |#
 (define (boolean=? e1 . rest)
-  (letrec ((verify (lambda (val lst)
-                  (or (null? lst)
-                     (and (boolean? (car lst))
-                        (eq? (car lst) val)
-                        (verify val (cdr lst)))))))
-    (verify e1 rest)))
-
+  (unless (boolean? e1)               ;; Verify that e1 is boolean
+    (error "bad boolean ~S" e1))
+  (when (null? rest)                  ;; Verify that we have at least 2 arguments
+    (error "at least two arguments required"))
+  (every (lambda (x)                      ;; All the items in rest must be eq? to e1
+           (unless (boolean? x) (error "bad boolean ~S" x))
+           (eq? x e1))
+         rest))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.5 Symbols
@@ -570,14 +571,14 @@ doc>
 doc>
 |#
 (define (symbol=? e1 . rest)
-  (unless (symbol? e1) (error "bad symbol ~s" e1))
-  (letrec ((verify (lambda (lst)
-                     (cond ((null? lst)               #t)
-                           ((not (symbol? (car lst))) (error "bad symbol ~s" (car lst)))
-                           ((eq? (car lst) e1)        (verify (cdr lst)))
-                           (else                      #f)))))
-    (verify rest)))
-
+  (unless (symbol? e1)               ;; Verify that e1 is symbol
+    (error "bad symbol ~S" e1))
+  (when (null? rest)                  ;; Verify that we have at least 2 arguments
+    (error "at least two arguments required"))
+  (every (lambda (x)                      ;; All the items in rest must be eq? to e1
+           (unless (symbol? x) (error "bad symbol ~S" x))
+           (eq? x e1))
+         rest))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.6 Characters

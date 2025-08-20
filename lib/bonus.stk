@@ -28,7 +28,6 @@
         ... => _ else
         improper-list?
         delete delete!
-        every any
         call-with-input-string call-with-output-string
         read-case-sensitive
         open-input-virtual open-output-virtual
@@ -213,7 +212,6 @@ doc>
   (and (pair? lst)
        (not (list? lst))))
 
-
 #|
 <doc EXT delete delete!
  * (delete  x list [=])
@@ -247,116 +245,6 @@ doc>
 
 (define (delete! x l :optional (comp equal?))
   (remove! (lambda (y) (comp x y)) l))
-
-
-#|
-<doc EXT every
- * (every pred list1 list2 ...)
- *
- * |every| applies the predicate |pred| across the lists, returning true if
- * the predicate returns true on every application.
- * @l
- * If there are n list arguments |list1| ... |listn|, then |pred| must be
- * a procedure taking n arguments and returning a boolean result.
- * @l
- * |every| applies pred to the first elements of the |listi| parameters. If
- * this application returns false, every immediately returns `#f`.
- * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
- * parameters, then the third, and so forth. The iteration stops when a
- * false value is produced or one of the lists runs out of values.
- * In the latter case, |every| returns the true value produced by its final
- * application of pred. The application of pred to the last element of the
- * lists is a tail call.
- * @l
- * If one of the |listi| has no elements, |every| simply returns `#t`.
- * @l
- * Like |any|, |every|'s name does not end with a question mark -- this is to
- * indicate that it does not return a simple boolean (`#t` or `#f`), but a
- * general value.
-doc>
-|#
-(define (every pred l . others)         ;; compatible with SRFI-1
-  (unless (procedure? pred)
-    (error 'every "bad procedure" pred))
-
-  (if (null? others)
-      ;; EVERY called with mono argument predicate
-      (letrec ((every (lambda (l)
-                        (cond
-                         ((null? l)        #t)
-                         ((null? (cdr l)) (pred (car l)))
-                         (else            (and  (pred (car l))
-                                                (every (cdr l))))))))
-        (every l))
-
-      ;; General case
-      (letrec ((every (lambda (l last)
-                        (if (memq '() l)
-                            last
-                            (let ((cars  (map car l))
-                                  (cdrs (map cdr l)))
-                              (if (memq '() cdrs)
-                                  (apply pred cars)
-                                  (let ((res (apply pred cars)))
-                                    (and res
-                                         (every cdrs res)))))))))
-        (every (cons l others) #t))))
-
-#|
-<doc EXT any
- * (any pred list1 list2 ...)
- *
- * |any| applies the predicate across the lists, returning true if the
- * predicate returns true on any application.
- *
- * If there are n list arguments |list1| ... |listn|, then |pred| must be
- * a procedure taking n arguments.
- *
- * |any| applies |pred| to the first elements of the |listi| parameters. If
- * this application returns a true value, |any| immediately returns that value.
- * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
- * parameters, then the third, and so forth. The iteration stops when a true
- * value is produced or one of the lists runs out of values; in the latter case,
- * any returns `#f`. The application of |pred| to the last element of the
- * lists is a tail call.
- *
- * Like |every|, |any|'s name does not end with a question mark -- this is
- * to indicate that it does not return a simple boolean (`#t` or `#f`), but
- * a general value.
- *
- * @lisp
- * (any integer? '(a 3 b 2.7))   => #t
- * (any integer? '(a 3.1 b 2.7)) => #f
- * (any < '(3 1 4 1 5)
- *        '(2 7 1 8 2))          => #t
- * @end lisp
-doc>
-|#
-(define (any pred l . others)           ;; compatible with SRFI-1
-  (unless (procedure? pred)
-    (error 'any "bad procedure" pred))
-
-  (if (null? others)
-      ;; ANY called with mono argument predicate
-      (letrec ((any (lambda (l)
-                      (cond
-                       ((null? l)       #f)
-                       ((null? (cdr l)) (pred (car l)))
-                       (else            (or (pred (car l))
-                                            (any (cdr l))))))))
-        (any l))
-      ;; General case
-      (letrec ((any (lambda (l last)
-                      (if (memq '() l)
-                          last
-                          (let ((cars  (map car l))
-                                (cdrs (map cdr l)))
-                            (if (memq '() cdrs)
-                                (apply pred cars)
-                                (let ((res (apply pred cars)))
-                                  (or res
-                                      (any cdrs res)))))))))
-        (any (cons l others) #f))))
 
 
 ;;;
