@@ -350,16 +350,18 @@ static char *enlarge_word(s_word *pword, int *sz)
 static int read_word(SCM port, int c, s_word *pword, int case_significant, int *last,
                      int *seen_pipe)
 // read an item whose 1st char is in c. Return its length
-// At exit "last", if not NULL,  contains the last character read for this item
-// seen_pipe contains the position+1 of the first '|'. If 0, no '| seen.
+// At exit:
+//   - "last", if not NULL,  contains the last character read for this item
+//   - seen_pipe contains the position of the first '|' or -1 if no pipe was seen.
 {
   register int j = 0;
   int allchars   = 0;
   int next, sz;
   char *tok;
 
-  tok = pword->word= pword->buffer;
-  sz = TOKEN_SIZE;             /* size statically allocated for reading a token */
+  tok       = pword->word= pword->buffer;
+  sz        = TOKEN_SIZE;       /* size statically allocated for reading a token */
+  *seen_pipe = -1;
 
   for( ; ; ) {
     allchars  ^= (c == '|');
@@ -367,7 +369,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
     if (c != '|')
       tok[j++]  = (allchars || case_significant) ? c : tolower(c);
     else
-      if (!*seen_pipe) *seen_pipe = j+1; // retain the position(+1) of first '|'
+      if (*seen_pipe < 0) *seen_pipe = j; // retain the position of first '|'
 
     if (c == '\\') {
       int k = j-1;
@@ -427,7 +429,7 @@ static int read_word(SCM port, int c, s_word *pword, int case_significant, int *
 static SCM read_token(SCM port, int c, struct read_context *ctx)
 {
   s_word w;
-  int len, last, seen_pipe=0;
+  int len, last, seen_pipe;
   char *tok;
   int ci= ctx->case_significant && (c != '#'); // #xxx constants are case insensitive
 
@@ -435,14 +437,14 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
   tok = w.word;
 
 
-  if (!seen_pipe) {
+  if (seen_pipe < 0) {   // No '|' was used in the worard read. 
     SCM z = STk_Cstr2number(tok, 10L);
     if (z != STk_false)
       return z;
   }
 
   /* It is not a number */
-  if (*tok == '#' && seen_pipe != 1) {
+  if (*tok == '#' && seen_pipe != 0) {
     /* tok begins with a sharp sign and it is not preceded by a pipe sign */
     if (len > 1) {
       if (tok[1] == ':') {
@@ -484,7 +486,7 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
       // when tok != w.buffer. Is it really worthwhile?
       SCM tmp =  STk_intern(tok);
 
-      if (seen_pipe) BOXED_INFO(tmp) |= SYMBOL_NEEDS_BARS;
+      if (seen_pipe >= 0) BOXED_INFO(tmp) |= SYMBOL_NEEDS_BARS;
       return tmp;
     }
   }
@@ -1562,7 +1564,7 @@ int STk_init_reader(void) {
     STk_C_hash_set(sharp_table, "!keyword-colon-position-after",  tmp);
     STk_C_hash_set(sharp_table, "!keyword-colon-position-both",   tmp);
   }
-  
+
   /* Add reader for #u8 constants */
   STk_add_uvector_reader_tag("u8");
 
