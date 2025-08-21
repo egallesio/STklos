@@ -683,9 +683,10 @@ pre.rouge {
 <ul class="sectlevel2">
 <li><a href="#_adding_modules">5.1. Adding modules</a></li>
 <li><a href="#_module_placement_in_the_tree">5.2. Module placement in the tree</a></li>
-<li><a href="#_adding_srfis">5.3. Adding SRFIs</a></li>
-<li><a href="#_mixed_srfis_scheme_and_c">5.4. Mixed SRFIs (Scheme and C)</a></li>
-<li><a href="#_documentation">5.5. Documentation</a></li>
+<li><a href="#_adding_tests">5.3. Adding tests</a></li>
+<li><a href="#_adding_srfis">5.4. Adding SRFIs</a></li>
+<li><a href="#_mixed_srfis_scheme_and_c">5.5. Mixed SRFIs (Scheme and C)</a></li>
+<li><a href="#_documentation">5.6. Documentation</a></li>
 </ul>
 </li>
 <li><a href="#_writing_primitives_in_c">6. Writing primitives in C</a>
@@ -984,11 +985,127 @@ directory and include it in the list of loaded files in <code>do-test.stk</code>
 <li>
 <p>SRFIs go into <code>lib/srfi</code></p>
 </li>
+<li>
+<p>Tests go into <code>tests/lib</code>, <code>tests/lib/scheme</code> or <code>tests/stklos</code></p>
+</li>
 </ul>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_adding_srfis">5.3. Adding SRFIs</h3>
+<h3 id="_adding_tests">5.3. Adding tests</h3>
+<div class="paragraph">
+<p>In order to add a test suite for a new library <code>(stklos foo)</code>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>The test suite must include <code>(require "test")</code> in the beginning of the file</p>
+</li>
+<li>
+<p>The macros <code>test</code>, <code>test/error</code> and <code>test/compile-error</code> can be
+used to perform tests</p>
+</li>
+<li>
+<p>The macros <code>test-section</code> <code>test-subsection</code> and <code>test-section-end</code>
+are used to indicate the sections of the test suite</p>
+</li>
+<li>
+<p>If the new libray is a SRFI, it will be automatically included in the full
+test suite. If it is a new library, it needs to be included in <code>do-test.stk</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The following is a fictitious example of a test module.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require</span> <span class="s">"test"</span><span class="p">)</span> <span class="c1">; so we can perform tests individually</span>
+
+<span class="p">(</span><span class="nf">test-section</span> <span class="s">"Addition"</span><span class="p">)</span>
+
+
+<span class="p">(</span><span class="nf">test-subsection</span> <span class="s">"Integers"</span><span class="p">)</span>
+
+<span class="c1">;; Remember this from school, long time ago:</span>
+<span class="p">(</span><span class="nf">test</span> <span class="s">"simple integer addition"</span>  <span class="c1">; test name</span>
+     <span class="mi">2</span>                           <span class="c1">; expected result</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">))</span>                    <span class="c1">; expression to be tested</span>
+
+<span class="c1">;; For expected errors, we use `test/error`</span>
+<span class="c1">;; Checking that this is not Perl:</span>
+<span class="p">(</span><span class="nf">test/error</span> <span class="s">"addition: string + number"</span> <span class="c1">; test-name</span>
+          <span class="p">(</span><span class="nb">+</span> <span class="mi">1</span> <span class="s">"1"</span><span class="p">))</span>                    <span class="c1">; expression to be tested</span>
+
+<span class="c1">;; (if) will cause a compiler error, so we can use neither `test` nor</span>
+<span class="c1">;; `test-error` here. We use `test-compiler-error`</span>
+<span class="p">(</span><span class="nf">test/compile-error</span> <span class="s">"addition causing compiler error"</span>
+                <span class="p">(</span><span class="nb">+</span> <span class="p">(</span><span class="k">if</span><span class="p">)</span> <span class="mi">1</span><span class="p">))</span>
+
+
+<span class="p">(</span><span class="nf">test-subsection</span> <span class="s">"Rationals"</span><span class="p">)</span>
+
+<span class="p">(</span><span class="nf">test</span> <span class="s">"simple rational addition"</span>
+     <span class="mi">5</span><span class="nv">/9</span>
+     <span class="p">(</span><span class="nb">+</span> <span class="mi">2</span><span class="nv">/9</span> <span class="mi">3</span><span class="nv">/9</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">test-section-end</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output will be:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>======================================================================
+==== Testing Addition  ===============================================
+======================================================================
+
+==== Testing Addition  ...
+--------------------------------------------------
+---- Integers
+--------------------------------------------------
+
+  testing simple integer addition expects 2 ==&gt; OK.
+  testing addition: string + number expects failure ==&gt; OK.
+  testing addition causing compiler error expects failure ==&gt; OK.
+
+--------------------------------------------------
+---- Rationals
+--------------------------------------------------
+
+  testing simple rational addition expects 5/9 ==&gt; OK.
+passed
+passed</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that we cannot detect read errors, as in <code>(+ #e1__0)</code>.</p>
+</div>
+<div class="paragraph">
+<p>Tests can be performed individually:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>$ stklos -f test-box.stk
+
+======================================================================
+==== Testing Boxes  ==================================================
+======================================================================
+
+==== Testing Boxes  ...
+  testing make-box expects "#&amp;10" ==&gt; OK.
+  testing make-constant-box expects "#&amp;10" ==&gt; OK.
+  testing reader expects #&amp;100 ==&gt; OK.
+  testing equal?.1 expects #f ==&gt; OK.
+  testing equal?.2 expects #t ==&gt; OK.
+passed
+passed</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_adding_srfis">5.4. Adding SRFIs</h3>
 <div class="paragraph">
 <p>In order to add SRFI 9999 to STklos,</p>
 </div>
@@ -1030,7 +1147,7 @@ update</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_mixed_srfis_scheme_and_c">5.4. Mixed SRFIs (Scheme and C)</h3>
+<h3 id="_mixed_srfis_scheme_and_c">5.5. Mixed SRFIs (Scheme and C)</h3>
 <div class="paragraph">
 <p>To add a mixed SRFI 8888,</p>
 </div>
@@ -1050,7 +1167,7 @@ written in C and Scheme'' (variables `SRC_C</code>, <code>SRC_C_STK</code>, and
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_content_of_the_scheme_file">5.4.1. Content of the Scheme file</h4>
+<h4 id="_content_of_the_scheme_file">5.5.1. Content of the Scheme file</h4>
 <div class="paragraph">
 <p>The Scheme file will be compiled as a byte-code stream embedded in C.
 Here, the compiled file will be called <code>$DIR/srfi-170-incl.c</code>. It is
@@ -1071,7 +1188,7 @@ of this file.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_content_of_the_c_file">5.4.2. Content of the C file</h4>
+<h4 id="_content_of_the_c_file">5.5.2. Content of the C file</h4>
 <div class="paragraph">
 <p>The C file must follow the conventions of dynamically loadable code as
 shown in the example in the <code>/etc</code> directory.</p>
@@ -1136,9 +1253,9 @@ compiler warning about an unresolved reference.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_documentation">5.5. Documentation</h3>
+<h3 id="_documentation">5.6. Documentation</h3>
 <div class="sect3">
-<h4 id="_documenting_srfis_in_srfi_adoc">5.5.1. Documenting SRFIs in <code>srfi.adoc</code></h4>
+<h4 id="_documenting_srfis_in_srfi_adoc">5.6.1. Documenting SRFIs in <code>srfi.adoc</code></h4>
 <div class="paragraph">
 <p>General documentation is automatically generated for SRFIs. If you need
 to give a precision specific to a given SRFI, add it to the end of the
@@ -1151,7 +1268,7 @@ HTML and PDF documentation is rebuilt from time to time by @egallesio.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_documenting_primitives_written_in_c">5.5.2. Documenting primitives written in C</h4>
+<h4 id="_documenting_primitives_written_in_c">5.6.2. Documenting primitives written in C</h4>
 <div class="paragraph">
 <p>Before <code>DEFINE_PRIMITIVE</code>, add a comment similar to the others you see
 in the C files. An example:</p>
@@ -2055,6 +2172,106 @@ special forms and inlinable primitives.</p>
 <p>The code is generated as a list, in the <code><strong>code-instr</strong></code> global variable
 in the <code>STKLOS-COMPILER</code> module. The procedure <code>emit</code> conses one more
 instruction on the code (which will later be reversed, of course)</p>
+</div>
+<div class="sect3">
+<h4 id="_standard_and_new_special_forms">9.1.1. Standard and new special forms</h4>
+<div class="paragraph">
+<p>The set of special forms in STklos is extendable, and the whole
+mechanism is illustrated in this section with an example.</p>
+</div>
+<div class="paragraph">
+<p>The special form <code>if</code> is a macro. It is defined in <code>lib/runtime-macros.stk</code> as</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-macro</span> <span class="p">(</span><span class="k">if</span> <span class="o">.</span> <span class="nv">args</span><span class="p">)</span>            <span class="o">`</span><span class="p">(</span><span class="o">#</span><span class="nv">%if</span> <span class="o">,@</span><span class="nv">args</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>#%if</code> to which it expands into is an <strong>internal compiler call</strong>
+(named <code>icall</code> in STklos). It looks like a Scheme symbol, but symbols
+which start with a sharp sign (<code>#</code>) are read and written enclosed
+with pipe signs (<code>|</code>).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="p">(</span><span class="k">define</span> <span class="o">#</span><span class="nv">%if</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nv">****</span> <span class="nv">Error:</span>
+<span class="nv">compiler-error:</span> <span class="nv">define:</span> <span class="nv">bad</span> <span class="nv">variable</span> <span class="nv">name</span> <span class="o">#</span><span class="nv">%if</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, <code>icall</code> objects are self-evaluating, just like keywords:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="nv">stklos&gt;</span> <span class="o">#</span><span class="nv">%if</span>
+<span class="o">#</span><span class="nv">%if</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This makes it possible to redefine the symbols that usually are names of
+special forms, like <code>if</code>, <code>cond</code>, <code>quote</code> etc.</p>
+</div>
+<div class="paragraph">
+<p>When the compiler looks at the form <code>(#%if bool something)</code>,
+it will recognize that the <code>car</code> of the form is an <code>icall</code> object,
+and automatically call a procedure that compiles it.</p>
+</div>
+<div class="paragraph">
+<p>Each <code>icall</code> object has</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a name (a Scheme symbol)</p>
+</li>
+<li>
+<p>a "function" (actually the Scheme procedure that compiles this form, just
+like the others in <code>compiler.stk</code>). The function field is initialized to <code>#f</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If the function field of an <code>icall</code> object is <code>#f</code>, then the function called to
+compile it is <code>compile-%%NAME</code>, where <code>NAME</code> is the name of the <code>icall</code>
+object (and the function is stored in the function field to speed up  further calls to
+this icall).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">%icall?</span> <span class="o">#</span><span class="nv">%if</span><span class="p">)</span>         <span class="nv">=&gt;</span> <span class="no">#t</span>
+<span class="p">(</span><span class="nf">%icall-name</span> <span class="o">#</span><span class="nv">%if</span><span class="p">)</span>     <span class="nv">=&gt;</span> <span class="nv">if</span>
+<span class="p">(</span><span class="nf">%icall-function</span> <span class="o">#</span><span class="nv">%if</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since the function attached to <code>#%if</code> is <code>#f</code>, then <code>compile-%%if</code> (which is
+defined inside the <code>STKLOS-COMPILER</code> module) is called.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">if</span> <span class="nv">bool</span> <span class="nv">something</span><span class="p">)</span>
+  <span class="nv">~~&gt;</span> <span class="p">(</span><span class="o">#</span><span class="nv">%if</span> <span class="nv">bool</span> <span class="nv">something</span><span class="p">)</span>
+    <span class="nv">~~&gt;</span> <span class="p">(</span><span class="nf">compile-%%if</span> <span class="o">'</span><span class="p">((</span><span class="o">#</span><span class="nv">%if</span> <span class="nv">bool</span> <span class="nv">something</span><span class="p">)</span> <span class="no">#f</span> <span class="no">#f</span><span class="p">)</span>  <span class="c1">;; if env and tail are both #f</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A complete example is given below</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">bool</span> <span class="no">#t</span><span class="p">)</span>                     <span class="c1">;; use a variable to avoid compile time optims.</span>
+<span class="p">(</span><span class="nf">%icall-function</span> <span class="o">#</span><span class="nv">%if</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="no">#f</span>    <span class="c1">;; if we don't have used "if" before</span>
+<span class="p">(</span><span class="k">if</span> <span class="nv">bool</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span>               <span class="nv">=&gt;</span> <span class="mi">1</span>     <span class="c1">;; first use of "if"</span>
+<span class="p">(</span><span class="nf">%icall-function</span> <span class="o">#</span><span class="nv">%if</span><span class="p">)</span>      <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">closure</span> <span class="nv">compile-%%if</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As we see, the first call to the <code>if</code> macro (which expands in a <code>#%if</code> use)
+initializes the function field of the icall. Hence, later uses of this icall
+will find the internal function of the compiler to call more quickly.</p>
+</div>
 </div>
 </div>
 <div class="sect2">
