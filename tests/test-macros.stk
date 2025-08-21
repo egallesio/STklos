@@ -396,6 +396,45 @@
 (let-syntax ((f (syntax-rules () ((_ #()) 20))))
   (test "vector-pattern.6" 20 (f #())))
 
+
+;; quote-expanded
+
+(let-syntax ((%f (syntax-rules ()
+                    ((%f) (format  "2")))))
+  (test "quote-expanded.1"
+        '(format "2")
+        (quote-expanded (%f))))
+
+(let-syntax ((%f (syntax-rules ()
+                   ((%f x) (display x) ))))
+  (test "quote-expanded.2"
+        '(display '(a b c))
+        (quote-expanded (%f '(a b c)))))
+
+(define-syntax %fgh
+  (syntax-rules ()
+    ((_ a b) '(b a))))
+
+(test "quote-expanded.3-a"
+      ;; the macro introduces a quote
+      '(4 "x")
+      (%fgh "x" 4))
+
+(test "quote-expanded.3-b"
+      ;; the macro introduces a quote, and quote-expanded
+      ;; introduces one more!
+      ''(4 "x")
+      (quote-expanded (%fgh "x" 4)))
+
+(define-macro (%ijk x y) `(something ,x ,y))
+
+(test "quote-expanded.3"
+      '(something 'symbol #(2 3))
+      (quote-expanded (%ijk 'symbol #(2 3))))
+
+
+
+
 ;;FIXME: Add more tests !!!!!!!!!
 
 
