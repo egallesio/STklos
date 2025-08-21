@@ -108,7 +108,8 @@ DEFINE_PRIMITIVE("%icall-function-set!", icall_func_set, subr2, (SCM x, SCM v))
 // Define a new type for internal calls
 static void print_icall(SCM icall, SCM port, int _UNUSED(mode))
 {
-  STk_fprintf(port, "#%%%s", SYMBOL_PNAME(ICALL_NAME(icall)));
+  STk_puts("#%", port);
+  STk_print(ICALL_NAME(icall), port, WRT_MODE);
 }
 
 static struct extended_type_descr xtype_icall = {
