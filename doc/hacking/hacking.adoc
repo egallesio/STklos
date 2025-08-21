@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GFDL-1.3-or-later
 //
-//  Copyright © 2000-2024 Erick Gallesio <eg@stklos.net>
+//  Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
 //
 //           Author: Jeronimo Pellegrini <j_p@aleph0.info>
 //    Creation date:  4-Feb-2022 09:48
@@ -1045,6 +1045,88 @@ The code is generated as a list, in the `*code-instr*` global variable
 in the `STKLOS-COMPILER` module. The procedure `emit` conses one more
 instruction on the code (which will later be reversed, of course)
 
+==== Standard and new special forms
+
+The set of special forms in STklos is extendable, and the whole
+mechanism is illustrated in this section with an example.
+
+The special form `if` is a macro. It is defined in `lib/runtime-macros.stk` as
+
+[source, scheme]
+----
+(define-macro (if . args)            `(#%if ,@args))
+----
+
+The `++#%if++` to which it expands into is an *internal compiler call*
+(named `icall` in STklos). It looks like a Scheme symbol, but symbols
+which start with a sharp sign (`#`) are read and written enclosed
+with pipe signs (`|`).
+
+[source, scheme]
+----
+stklos> (define #%if 10)
+**** Error:
+compiler-error: define: bad variable name #%if
+----
+
+However, `icall` objects are self-evaluating, just like keywords:
+
+[source, scheme]
+----
+stklos> #%if
+#%if
+----
+
+This makes it possible to redefine the symbols that usually are names of
+special forms, like `if`, `cond`, `quote` etc.
+
+When the compiler looks at the form `(#%if bool something)`,
+it will recognize that the `car` of the form is an `icall` object,
+and automatically call a procedure that compiles it.
+
+Each `icall` object has
+
+* a name (a Scheme symbol)
+* a "function" (actually the Scheme procedure that compiles this form, just
+  like the others in `compiler.stk`). The function field is initialized to `#f`.
+
+If the function field of an `icall` object is `#f`, then the function called to
+compile it is `compile-%%NAME`, where `NAME` is the name of the `icall`
+object (and the function is stored in the function field to speed up  further calls to
+this icall).
+
+[source, scheme]
+----
+(%icall? #%if)         => #t
+(%icall-name #%if)     => if
+(%icall-function #%if) => #f
+----
+
+Since the function attached to `#%if` is `#f`, then `compile-%%if` (which is
+defined inside the `STKLOS-COMPILER` module) is called.
+
+[source, scheme]
+----
+(if bool something)
+  ~~> (#%if bool something)
+    ~~> (compile-%%if '((#%if bool something) #f #f)  ;; if env and tail are both #f
+----
+
+A complete example is given below
+
+[source, scheme]
+----
+(define bool #t)                     ;; use a variable to avoid compile time optims.
+(%icall-function #%if)      => #f    ;; if we don't have used "if" before
+(if bool 1 2)               => 1     ;; first use of "if"
+(%icall-function #%if)      => #[closure compile-%%if] 
+----
+
+As we see, the first call to the `if` macro (which expands in a `#%if` use)
+initializes the function field of the icall. Hence, later uses of this icall
+will find the internal function of the compiler to call more quickly. 
+
+
 === Peephole optimizer
 
 STklos uses a peephole optimzier, located in the file
@@ -1484,3 +1566,4 @@ static int collect_stats = 0;
 static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time);
 #endif
 ----
+
