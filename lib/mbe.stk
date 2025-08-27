@@ -774,7 +774,7 @@ doc>
                             (and (pair? keywords)    ;; or the first of keywords
                                  (car keywords)))))  ;; otherwise name is #f
       `(lambda ,args
-         ((%%symbol-value 'find-clause 'MBE) ',name
+         ((#%symbol-value 'find-clause 'MBE) ',name
                                              ,args
                                              ',keywords
                                              ',clauses
@@ -784,7 +784,7 @@ doc>
 ;; Syntax-rules
 ;;
 (define-macro (syntax-rules . syn-rules)
-  ((%%symbol-value 'syntax-rules->lambda 'MBE) #f syn-rules))
+  ((#%symbol-value 'syntax-rules->lambda 'MBE) #f syn-rules))
 
 ;;
 ;; define-syntax
@@ -816,9 +816,9 @@ doc>
 ;;
 ;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
 ;; =>
-;;     (%%let-syntax
+;;     (#%let-syntax
 ;;       ((f (lambda args12
-;;             ((%%symbol-value 'find-clause 'MBE)
+;;             ((#%symbol-value 'find-clause 'MBE)
 ;;              'f
 ;;              args12
 ;;              '()
@@ -827,8 +827,8 @@ doc>
 ;;       (f))
 ;;
 (define-macro (let-syntax bindings . body)
-  (let ((syntax-rules->lambda (%%symbol-value 'syntax-rules->lambda 'MBE)))
-    `(%%let-syntax
+  (let ((syntax-rules->lambda (#%symbol-value 'syntax-rules->lambda 'MBE)))
+    `(#%let-syntax
       ,(map (lambda (x)
               (let ((func (syntax-rules->lambda (car x) (cdadr x))))
                 `(,(car x) ,func)))

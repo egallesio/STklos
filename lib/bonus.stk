@@ -27,8 +27,7 @@
         macro-expand macro-expand* unquote unquote-splicing
         ... => _ else
         improper-list?
-        remove remove! delete delete!
-        every any
+        delete delete!
         call-with-input-string call-with-output-string
         read-case-sensitive
         open-input-virtual open-output-virtual
@@ -213,25 +212,6 @@ doc>
   (and (pair? lst)
        (not (list? lst))))
 
-
-#|
-<doc EXT remove remove!
- * (remove pred list)
- *
- * |Remove| returns |list| without the elements that satisfy predicate |pred|:
- * @l
- * The list is not disordered -- elements that appear in the result list occur
- * in the same order as they occur in the argument list. |Remove!| does the
- * same job than |remove| by physically modifying its |list| argument
- * @lisp
- * (remove even? '(0 7 8 8 43 -4)) => (7 43)
- * @end lisp
-doc>
-|#
-(define (remove  pred l) (filter  (lambda (x) (not (pred x))) l))
-(define (remove! pred l) (filter! (lambda (x) (not (pred x))) l))
-
-
 #|
 <doc EXT delete delete!
  * (delete  x list [=])
@@ -261,120 +241,10 @@ doc>
 doc>
 |#
 (define (delete  x l :optional (comp equal?))
-  (filter  (lambda (y) (not (comp x y))) l))
+  (remove  (lambda (y) (comp x y)) l))
 
 (define (delete! x l :optional (comp equal?))
-  (filter! (lambda (y) (not (comp x y))) l))
-
-
-#|
-<doc EXT every
- * (every pred list1 list2 ...)
- *
- * |every| applies the predicate |pred| across the lists, returning true if
- * the predicate returns true on every application.
- * @l
- * If there are n list arguments |list1| ... |listn|, then |pred| must be
- * a procedure taking n arguments and returning a boolean result.
- * @l
- * |every| applies pred to the first elements of the |listi| parameters. If
- * this application returns false, every immediately returns `#f`.
- * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
- * parameters, then the third, and so forth. The iteration stops when a
- * false value is produced or one of the lists runs out of values.
- * In the latter case, |every| returns the true value produced by its final
- * application of pred. The application of pred to the last element of the
- * lists is a tail call.
- * @l
- * If one of the |listi| has no elements, |every| simply returns `#t`.
- * @l
- * Like |any|, |every|'s name does not end with a question mark -- this is to
- * indicate that it does not return a simple boolean (`#t` or `#f`), but a
- * general value.
-doc>
-|#
-(define (every pred l . others)         ;; compatible with SRFI-1
-  (unless (procedure? pred)
-    (error 'every "bad procedure" pred))
-
-  (if (null? others)
-      ;; EVERY called with mono argument predicate
-      (letrec ((every (lambda (l)
-                        (cond
-                         ((null? l)        #t)
-                         ((null? (cdr l)) (pred (car l)))
-                         (else            (and  (pred (car l))
-                                                (every (cdr l))))))))
-        (every l))
-
-      ;; General case
-      (letrec ((every (lambda (l last)
-                        (if (memq '() l)
-                            last
-                            (let ((cars  (map car l))
-                                  (cdrs (map cdr l)))
-                              (if (memq '() cdrs)
-                                  (apply pred cars)
-                                  (let ((res (apply pred cars)))
-                                    (and res
-                                         (every cdrs res)))))))))
-        (every (cons l others) #t))))
-
-#|
-<doc EXT any
- * (any pred list1 list2 ...)
- *
- * |any| applies the predicate across the lists, returning true if the
- * predicate returns true on any application.
- *
- * If there are n list arguments |list1| ... |listn|, then |pred| must be
- * a procedure taking n arguments.
- *
- * |any| applies |pred| to the first elements of the |listi| parameters. If
- * this application returns a true value, |any| immediately returns that value.
- * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
- * parameters, then the third, and so forth. The iteration stops when a true
- * value is produced or one of the lists runs out of values; in the latter case,
- * any returns `#f`. The application of |pred| to the last element of the
- * lists is a tail call.
- *
- * Like |every|, |any|'s name does not end with a question mark -- this is
- * to indicate that it does not return a simple boolean (`#t` or `#f`), but
- * a general value.
- *
- * @lisp
- * (any integer? '(a 3 b 2.7))   => #t
- * (any integer? '(a 3.1 b 2.7)) => #f
- * (any < '(3 1 4 1 5)
- *        '(2 7 1 8 2))          => #t
- * @end lisp
-doc>
-|#
-(define (any pred l . others)           ;; compatible with SRFI-1
-  (unless (procedure? pred)
-    (error 'any "bad procedure" pred))
-
-  (if (null? others)
-      ;; ANY called with mono argument predicate
-      (letrec ((any (lambda (l)
-                      (cond
-                       ((null? l)       #f)
-                       ((null? (cdr l)) (pred (car l)))
-                       (else            (or (pred (car l))
-                                            (any (cdr l))))))))
-        (any l))
-      ;; General case
-      (letrec ((any (lambda (l last)
-                      (if (memq '() l)
-                          last
-                          (let ((cars  (map car l))
-                                (cdrs (map cdr l)))
-                            (if (memq '() cdrs)
-                                (apply pred cars)
-                                (let ((res (apply pred cars)))
-                                  (or res
-                                      (any cdrs res)))))))))
-        (any (cons l others) #f))))
+  (remove! (lambda (y) (comp x y)) l))
 
 
 ;;;
@@ -1115,9 +985,7 @@ doc>
       (if (pair? code)
           (if (and (eq? (car code) '->) (= (length code) 2))
               (let ((t (assq (cadr code) tags)))
-                (if t
-                    `(%%goto ,(cdr t))
-                    code))
+                (if t `(#%goto ,(cdr t)) code))
               (map replace code))
           code))
 
@@ -1135,7 +1003,7 @@ doc>
 
     (let ((new-body (map (lambda (x)
                            (if (keyword? x)
-                               `(%%label ,(cdr (assq x tags)))
+                               `(#%label ,(cdr (assq x tags)))
                                (replace x)))
                          body)))
       (verify new-body)
@@ -1489,15 +1357,14 @@ doc>
                (<= 2 (length binding) 3)
                (symbol? (car binding)))
     (error 'dolist "bad dolist binding" binding))
-  (let ((x (gensym 'x)))
-    (apply (lambda (var lst . result)
-             `(begin
-                ;; iterate on all the list elements
-                (for-each (lambda (,x) (let ((,var ,x)) ,@body))
-                          ,lst)
-                ;; insert in the begin form the result if present or != of var
-                ,@(if (or (null? result) (eq? (car result) var)) '() result)))
-           binding)))
+  (apply (lambda (var lst . result)
+           `(begin
+              ;; iterate on all the list elements
+              (for-each (lambda (,var) ,@body)
+                        ,lst)
+              ;; insert in the begin form the result if present or != of var
+              ,@(if (or (null? result) (eq? (car result) var)) '() result)))
+         binding))
 
 #|
 <doc EXT call/ec
@@ -2481,18 +2348,18 @@ doc>
 doc>
 |#
 (define-macro (case-lambda . clauses)
-  (let ((len        (gensym))
-        (args       (gensym))
-        (len-prim   (gensym 'length))
-        (apply-prim (gensym 'apply))
-        (err-prim   (gensym 'error))
+  (let ((len           (gensym))
+        (args          (gensym))
+        (len-prim      (gensym 'length))
+        (apply-prim    (gensym 'apply))
+        (err-prim      (gensym 'error))
         (compute-arity (in-module STKLOS-COMPILER compute-arity)))
-    `(%%let ((,len-prim   (in-module SCHEME length))
+    `(#%let ((,len-prim   (in-module SCHEME length))
              (,apply-prim (in-module SCHEME apply))
              (,err-prim   (in-module SCHEME error)))
        (lambda ,args
          (let ((,len (,len-prim ,args)))
-           (%%cond
+           (#%cond
             ,@(map (lambda (x)
                      (unless (>= (length x) 2)
                        (error 'case-lambda "bad clause ~S" x))
@@ -2502,13 +2369,13 @@ doc>
                        (cond
                         ((positive? arity)
                          `((= ,len ,arity)
-                           (,apply-prim (%%lambda ,formals ,@body) ,args)))
+                           (,apply-prim (#%lambda ,formals ,@body) ,args)))
                         ((zero? arity)
                          `((= ,len ,arity)
                            ,@body))
                         (else
                          `((>= ,len ,(- (- arity) 1))
-                           (,apply-prim (%%lambda ,formals ,@body) ,args))))))
+                           (,apply-prim (#%lambda ,formals ,@body) ,args))))))
                    clauses)
             (else (,err-prim "no matching clause in case-lambda with ~S for ~S"
                              ',(map car clauses) ,args))))))))

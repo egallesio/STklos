@@ -1527,7 +1527,7 @@ There is an instruction for returning the value of a symbol in the
 
 [source,scheme]
 ----
-(disassemble-expr '(%%in-scheme 'a) #t)
+(disassemble-expr '(%in-scheme 'a) #t)
 
 000:  CONSTANT             0
 002:  INSCHEME

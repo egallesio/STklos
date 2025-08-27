@@ -358,9 +358,9 @@ doc>
 ;; Implementation of R7RS define-record-type using the internal STklos structs
 
 (define-macro (define-record-type name constructor predicate . fields)
-  (let ((struct-type      (gensym))
-        (tmp              (gensym))
-        (val              (gensym)))
+  (let ((struct-type  (gensym))
+        (tmp          (gensym))
+        (val          (gensym)))
     `(begin
        ;; Define the constructor, the predicates and the accessors as global
        (define ,(car constructor) #f)
@@ -376,12 +376,12 @@ doc>
               fields)
        ;; Grab the STklos struct functions to be independent of SCHEME module
        ;; at runtime
-       (let ((make-struct-type (%%in-scheme 'make-struct-type))
-             (make-struct      (%%in-scheme 'make-struct))
-             (struct?          (%%in-scheme 'struct?))
-             (struct-is-a?     (%%in-scheme 'struct-is-a?))
-             (struct-ref       (%%in-scheme 'struct-ref))
-             (struct-set!      (%%in-scheme 'struct-set!)))
+       (let ((make-struct-type (#%in-scheme 'make-struct-type))
+             (make-struct      (#%in-scheme 'make-struct))
+             (struct?          (#%in-scheme 'struct?))
+             (struct-is-a?     (#%in-scheme 'struct-is-a?))
+             (struct-ref       (#%in-scheme 'struct-ref))
+             (struct-set!      (#%in-scheme 'struct-set!)))
          ;;
          ;; Build the record using STklos structs
          ;;
@@ -550,13 +550,14 @@ doc>
 doc>
 |#
 (define (boolean=? e1 . rest)
-  (letrec ((verify (lambda (val lst)
-                  (or (null? lst)
-                     (and (boolean? (car lst))
-                        (eq? (car lst) val)
-                        (verify val (cdr lst)))))))
-    (verify e1 rest)))
-
+  (unless (boolean? e1)               ;; Verify that e1 is boolean
+    (error "bad boolean ~S" e1))
+  (when (null? rest)                  ;; Verify that we have at least 2 arguments
+    (error "at least two arguments required"))
+  (every (lambda (x)                      ;; All the items in rest must be eq? to e1
+           (unless (boolean? x) (error "bad boolean ~S" x))
+           (eq? x e1))
+         rest))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.5 Symbols
@@ -570,14 +571,14 @@ doc>
 doc>
 |#
 (define (symbol=? e1 . rest)
-  (unless (symbol? e1) (error "bad symbol ~s" e1))
-  (letrec ((verify (lambda (lst)
-                     (cond ((null? lst)               #t)
-                           ((not (symbol? (car lst))) (error "bad symbol ~s" (car lst)))
-                           ((eq? (car lst) e1)        (verify (cdr lst)))
-                           (else                      #f)))))
-    (verify rest)))
-
+  (unless (symbol? e1)               ;; Verify that e1 is symbol
+    (error "bad symbol ~S" e1))
+  (when (null? rest)                  ;; Verify that we have at least 2 arguments
+    (error "at least two arguments required"))
+  (every (lambda (x)                      ;; All the items in rest must be eq? to e1
+           (unless (symbol? x) (error "bad symbol ~S" x))
+           (eq? x e1))
+         rest))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.6 Characters
@@ -1670,17 +1671,17 @@ doc>
                        (append (cdr clauses)
                                `((else (set! ,reraised #t)
                                        (,old-hdlr ,ex)))))))
-    `(let ((,old-hdlr ( [%%symbol-value 'current-exception-handler 'SCHEME] )))
+    `(let ((,old-hdlr ( [#%in-scheme 'current-exception-handler] )))
        (with-handler
         (lambda (,ex)
-          (let* ((,var (if ([%%symbol-value '%continuable-exception? 'SCHEME] ,ex)
-                           ([%%symbol-value '%continuable-exception-value 'SCHEME] ,ex)
+          (let* ((,var (if ([#%in-scheme '%continuable-exception?] ,ex)
+                           ([#%in-scheme '%continuable-exception-value] ,ex)
                            ,ex))
                  (,reraised #f)
                  (,res (cond ,@clauses)))
             (if ,reraised
                 ,res
-                (if ([%%symbol-value '%continuable-exception? 'SCHEME] ,ex)
+                (if ([#%in-scheme '%continuable-exception?] ,ex)
                     (raise ,res)
                     ,res))))
         ,@body))))

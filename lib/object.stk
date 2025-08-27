@@ -114,9 +114,9 @@
               (let ((getter   (slot-definition-getter   s))
                     (setter   (slot-definition-setter   s))
                     (accessor (slot-definition-accessor s)))
-                (when getter   (register-new-global! getter))
-                (when setter   (register-new-global! setter))
-                (when accessor (register-new-global! accessor))))
+                (when getter   (%register-new-global! getter))
+                (when setter   (%register-new-global! setter))
+                (when accessor (%register-new-global! accessor))))
             slots)
   slots)
 

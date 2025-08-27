@@ -71,9 +71,15 @@ static void error_not_exact_positive(SCM x)
 {
   STk_error("index ~W is not an exact positive integer", x);
 }
+
 static void error_bad_comparison_function(SCM x)
 {
   STk_error("bad comparison function ~S", x);
+}
+
+static void verify_at_least_2_args(int n)
+{
+  if (n < 2) STk_error("at least two arguments needed");
 }
 
 int STk_int_length(SCM l)
@@ -1181,23 +1187,39 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
  * @end lisp
  * An error is signaled if |list| is a constant list.
 doc>
+<doc EXT remove remove!
+ * (remove pred list)
+ * (remove! pred list)
+ *
+ * |Remove| returns |list| without the elements that satisfy predicate |pred|:
+ * @l
+ * The list is not disordered -- elements that appear in the result list occur
+ * in the same order as they occur in the argument list. |Remove!| does the
+ * same job than |remove| by physically modifying its |list| argument
+ * @lisp
+ * (remove even? '(0 7 8 8 43 -4)) => (7 43)
+ * @end lisp
+doc>
  */
-DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
+static SCM filter_remove (SCM pred, SCM list, int filter)
 {
   register SCM ptr, l;
   SCM result;
   int len;
   SCM x = list_type_and_length(list, &len);
+  int cmp;
 
-  if (!x) error_bad_list(list);
-  if (CONSP(x)) error_circular_list(list);
+  if (!x)        error_bad_list(list);
+  if (CONSP(x))  error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);
 
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
 
-  for (ptr=l=list, result=STk_nil; !NULLP(l); ) {
+  for (ptr=l=list, result=STk_nil; !NULLP(l); l=CDR(l) ) {
+    cmp = (STk_C_apply(pred, 1, CAR(l)) != STk_false); // 1 if in the result
+    if (!filter) cmp = !cmp;                           // invert test when removing
 
-    if (STk_C_apply(pred, 1, CAR(l)) != STk_false) {
+    if (cmp) {
       if (NULLP(result)) {
         NEWCELL(result, cons);
         ptr = result;
@@ -1209,28 +1231,41 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
       CAR(ptr) = CAR(l);
       CDR(ptr) = STk_nil;
     }
-    l=CDR(l);
  }
   return result;
 }
 
+DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
+{
+  return filter_remove(pred, list, 1);
+}
 
-DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
+DEFINE_PRIMITIVE("remove", remove, subr2, (SCM pred, SCM list))
+{
+  return filter_remove(pred, list, 0);
+}
+
+/* -------------------------------------------------- */
+
+static SCM dfilter_remove (SCM pred, SCM list, int filter)
 {
   SCM previous, l;
   int len;
   SCM x = list_type_and_length(list, &len);
+  int cmp;
 
-  if (!x) error_bad_list(list);
-  if (CONSP(x)) error_circular_list(list);
+  if (!x)        error_bad_list(list);
+  if (CONSP(x))  error_circular_list(list);
   if (!NULLP(x)) error_improper_list(list);
 
   if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
 
-  for (previous=STk_nil, l=list; !NULLP(l); ) {
+  for (previous=STk_nil, l=list; !NULLP(l); l=CDR(l) ) {
     if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
+    cmp = (STk_C_apply(pred, 1, CAR(l)) == STk_false); // 1 if in the result
+    if (!filter) cmp = !cmp;                           // invert test when removing
 
-    if (STk_C_apply(pred, 1, CAR(l)) == STk_false) {
+    if (cmp) {
       if (previous == STk_nil)
         list = CDR(list);
       else
@@ -1238,9 +1273,18 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
     } else {
       previous = l;
     }
-    l = CDR(l);
   }
   return list;
+}
+
+DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
+{
+  return dfilter_remove(pred, list, 1);
+}
+
+DEFINE_PRIMITIVE("remove!", dremove, subr2, (SCM pred, SCM list))
+{
+  return dfilter_remove(pred, list, 0);
 }
 
 /*
@@ -1360,7 +1404,157 @@ SCM STk_int_assq(SCM obj, SCM alist)
   return STk_false;
 }
 
+/*
+<doc EXT every
+ * (every pred list1 list2 ...)
+ *
+ * |every| applies the predicate |pred| across the lists, returning true if
+ * the predicate returns true on every application.
+ * @l
+ * If there are n list arguments |list1| ... |listn|, then |pred| must be
+ * a procedure taking n arguments and returning a boolean result.
+ * @l
+ * |every| applies pred to the first elements of the |listi| parameters. If
+ * this application returns false, every immediately returns `#f`.
+ * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
+ * parameters, then the third, and so forth. The iteration stops when a
+ * false value is produced or one of the lists runs out of values.
+ * In the latter case, |every| returns the true value produced by its final
+ * application of pred. The application of pred to the last element of the
+ * lists is a tail call.
+ * @l
+ * If one of the |listi| has no elements, |every| simply returns `#t`.
+ * @l
+ * Like |any|, |every|'s name does not end with a question mark -- this is to
+ * indicate that it does not return a simple boolean (`#t` or `#f`), but a
+ * general value.
+doc>
+<doc EXT any
+ * (any pred list1 list2 ...)
+ *
+ * |any| applies the predicate across the lists, returning true if the
+ * predicate returns true on any application.
+ *
+ * If there are n list arguments |list1| ... |listn|, then |pred| must be
+ * a procedure taking n arguments.
+ *
+ * |any| applies |pred| to the first elements of the |listi| parameters. If
+ * this application returns a true value, |any| immediately returns that value.
+ * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
+ * parameters, then the third, and so forth. The iteration stops when a true
+ * value is produced or one of the lists runs out of values; in the latter case,
+ * any returns `#f`. The application of |pred| to the last element of the
+ * lists is a tail call.
+ *
+ * Like |every|, |any|'s name does not end with a question mark -- this is
+ * to indicate that it does not return a simple boolean (`#t` or `#f`), but
+ * a general value.
+ *
+ * @lisp
+ * (any integer? '(a 3 b 2.7))   => #t
+ * (any integer? '(a 3.1 b 2.7)) => #f
+ * (any < '(3 1 4 1 5)
+ *        '(2 7 1 8 2))          => #t
+ * @end lisp
+doc>
+*/
 
+/* any_every does the work for the any and every procedures.  When the
+   argument 'any' is non-zero, it does any; when it's zero, it does every.
+   *argv is the list of lists, received from the Scheme vsubr procedure
+   any/every; n is the number of lists.
+*/
+static SCM any_every(SCM pred, SCM *argv, int n, int any)
+{
+  SCM *argv_ptr = argv;
+  SCM res = any ? STk_false : STk_true;
+  SCM lists_ptr;
+
+  if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
+
+  /* Check the list arguments. If there is any NULL list, we can return
+     already. If there are any non-lists, we signal an error. */
+  for (int i=0; i<n; i++, argv_ptr--) {
+    if (!CONSP(*argv_ptr)) {
+      if (NULLP(*argv_ptr))  return res;
+      else                   error_bad_list(*argv_ptr);
+    }
+  }
+
+  /* FAST PATH n = 1 */
+  if (n == 1) {
+    /* *argv is the ONLY list that needs to be used. */
+    for (lists_ptr = *argv; CONSP(lists_ptr);  lists_ptr = CDR(lists_ptr)) {
+      res = STk_C_apply(pred,1,CAR(lists_ptr));
+      if (any   && res != STk_false) return res;
+      if (!any  && res == STk_false) return STk_false;
+    }
+    if (!NULLP(lists_ptr)) error_bad_list(*argv);
+  } else {
+    /* cars is a list with the cars from the given lists; and we'll keep
+       moving forward through the lists, updating each element in cars, using
+       cars_ptr. */
+    SCM cars = STk_C_make_list(n, STk_false);
+    SCM cars_ptr;
+    int i, stop=0;
+
+
+    /* Make a list of lists and copy the lists in argv into it */
+    SCM l = STk_C_make_list(n, STk_false);
+    lists_ptr = l;
+    argv_ptr = argv;
+    for (int i=0; i<n; i++) {
+      CAR(lists_ptr) = *argv_ptr--;
+      lists_ptr=CDR(lists_ptr);
+    }
+
+    /* Now l is a list of lists, similar to the argument given to any/every,
+       but we'll use it as a multi-pointer through thte lists. */
+    while (!stop) {
+      /* Load arguments into cars */
+      lists_ptr = l;
+      cars_ptr  = cars;
+      for(i=0; i<n; i++) {
+        /* When one of thet lists is over, stop.
+           And if it's improper, signal an error. */
+        if (!CONSP(CAR(lists_ptr))) {
+          /* Do not allow improper lists... SRFI-116 wants this: */
+          if (!NULLP(CAR(lists_ptr))) error_bad_list(l);
+          stop = 1;
+          break;
+        }
+        /* Load the next argument from the list of lists: */
+        CAR(cars_ptr) = CAR(CAR(lists_ptr));
+        cars_ptr = CDR(cars_ptr);             /* advance cars pointer */
+
+        /* and advance the pointers: */
+        CAR(lists_ptr) = CDR(CAR(lists_ptr)); /* of this (i-th) list  */
+        lists_ptr = CDR(lists_ptr);           /* of the list of lists */
+      }
+
+      if (!stop) {
+        /* The heart of it all is here: */
+        res = STk_C_apply_list(pred, cars);
+        if (any   && res != STk_false) return res;
+        if (!any  && res == STk_false) return STk_false;
+      }
+    }
+  }
+  return res;
+}
+
+DEFINE_PRIMITIVE("any", any, vsubr, (int argc, SCM *argv))
+{
+  verify_at_least_2_args(argc);
+  return any_every(*argv, argv-1, argc-1, 1);
+}
+
+
+DEFINE_PRIMITIVE("every", every, vsubr, (int argc, SCM *argv))
+{
+  verify_at_least_2_args(argc);
+  return any_every(*argv, argv-1, argc-1, 0);
+}
 
 /* ======================================================================
  *
@@ -1461,9 +1655,14 @@ int STk_init_list(void)
   ADD_PRIMITIVE(list_star);
   ADD_PRIMITIVE(last_pair);
   ADD_PRIMITIVE(filter);
+  ADD_PRIMITIVE(remove);
+  ADD_PRIMITIVE(dremove);
   ADD_PRIMITIVE(dfilter);
   ADD_PRIMITIVE(dappend);
   ADD_PRIMITIVE(dreverse);
+
+  ADD_PRIMITIVE(any);
+  ADD_PRIMITIVE(every);
 
   ADD_PRIMITIVE(epairp);
   ADD_PRIMITIVE(epair_file);
