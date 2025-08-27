@@ -827,16 +827,7 @@ doc>
 ;;       (f))
 ;;
 (define-macro (let-syntax bindings . body)
-  (let ((syntax-rules->lambda (#%symbol-value 'syntax-rules->lambda 'MBE)))
-    `(#%let-syntax
-      ,(map (lambda (x)
-              (let ((func (syntax-rules->lambda (car x) (cdadr x))))
-                `(,(car x) ,func)))
-            bindings)
-      ,@body)))
-
-
-
+  `(#%let-syntax ,bindings ,@body))
 
 
 )       ;;; end of module definition of MBE
