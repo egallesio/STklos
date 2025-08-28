@@ -37,11 +37,11 @@
 
 This macro implementation has been slightly modified for STklos.
 In particular,
-  - all the function reside in the module MBE, the only binding which is
-    visible from outside is DEFINE-SYNTAX (and the fake LET-SYNTAX and
-    LETREC-SYNTAX).
-  - function some used by the original code and function split are added
-    in the MBE module
+  - all the function reside in the module MBE, the only bindings which
+    are exported are DEFINE-SYNTAX, SYNTAX-RULES, LET-SYNTAX (and the 
+    fake LETREC-SYNTAX).
+  - functions `some` and `split` used by the original code are added
+    in the this module
   - The macro define-syntax itself is expanded to a function call which
     parses all the clauses rather than to a cond which tests all the
     clauses. This conducts to code which is smaller than the original
@@ -781,13 +781,25 @@ doc>
                                              ',ellipsis)))))
 
 ;;
-;; Syntax-rules
+;; SYNTAX-RULES
 ;;
+
+;; Example (with alternative ellipsis symbol '===):
+;;
+;;     (macro-expand '(syntax-rules === () ((f) 0) ((f a) (+ a 1))))
+;;
+;;        =>
+;;        ( [#%symbol-value 'find-clause 'MBE] '#f
+;;                                             args12
+;;                                             '()
+;;                                             '(((f)   0)
+;;                                               ((f a) (+ a 1)))
+;;                                             '===)
 (define-macro (syntax-rules . syn-rules)
   ((#%symbol-value 'syntax-rules->lambda 'MBE) #f syn-rules))
 
 ;;
-;; define-syntax
+;; DEFINE-SYNTAX
 ;;
 (define-macro (define-syntax macro-name syn-rules)
 
@@ -809,22 +821,9 @@ doc>
                           (gen-macro first (caddr syn-rules) (cdddr syn-rules))
                           (gen-macro '...  first             (cddr syn-rules)))))))
 
+
 ;;
-;; A very simple implementation of let-syntax. (FIXME: need some work)
-;;
-;; Example (with alternative ellipsis symbol '===):
-;;
-;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
-;; =>
-;;     (#%let-syntax
-;;       ((f (lambda args12
-;;             ((#%symbol-value 'find-clause 'MBE)
-;;              'f
-;;              args12
-;;              '()
-;;              '(((f) 10))
-;;              '===))))
-;;       (f))
+;; LET-SYNTAX
 ;;
 (define-macro (let-syntax bindings . body)
   `(#%let-syntax ,bindings ,@body))
