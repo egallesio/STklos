@@ -714,10 +714,9 @@ doc>
 
 
 ;; find-clause will find the clause to be used in order to expand a macro.
-;;
 ;; Example:
 ;;
-;; (define-syntax2 f
+;; (define-syntax f
 ;;   (syntax-rules ()
 ;;     ((f a b)   (+ a b))
 ;;     ((f a b c) (* b c))))
@@ -753,6 +752,9 @@ doc>
                              '()))
                 (Loop (cdr l))))))))
 
+
+
+
 ;;;; ----------------------------------------------------------------------
 ;;;;
 ;;;; STklos code for syntax-rules, define-syntax and let-syntax
@@ -781,6 +783,7 @@ doc>
                                              ',keywords
                                              ',clauses
                                              ',ellipsis)))))
+
 
 ;;
 ;; SYNTAX-RULES

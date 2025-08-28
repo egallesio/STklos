@@ -190,6 +190,18 @@
 
 
 (define (%macro-expand form env)
+  (define (hdlr c)
+    (cond
+     ((eq? c #:find-clause-error)
+      ;; Error while expanding a syntax-rules clause
+      (syntax-error "no matching clause. Call was ~S" form))
+     ((and (condition? c) (condition-has-type? c &error-message))
+      ;; replace error by syntax-error in case we compile a file
+      (syntax-error "~A. Call was ~S" (struct-ref c 'message) form))
+     (else
+      ;; just raise the error
+      (raise c))))
+
   (let ((map-expander (lambda (form)
                         (map* (lambda (x) (%macro-expand x env)) form))))
     (cond
@@ -198,22 +210,8 @@
      (else  (let* ((name (car form))
                    (val  (find-syntax-in-env name env)))
               (if (and (symbol? name) (%syntax? val))
-                  (with-handler
-                       (lambda (c)
-                         (cond
-                          ((eq? c #:find-clause-error)
-                           ;; Error while expanding a syntax-rules clause
-                           (syntax-error "no matching clause. Call was ~S" form))
-                          ((and (condition? c)
-                                (condition-has-type? c &error-message))
-                           ;; replace error by syntax-error in case we compile a file
-                           (syntax-error "~A. Call was ~S"
-                                         (struct-ref c 'message)
-                                         form))
-                          (else
-                           ;; just raise the error
-                           (raise c))))
-                       (apply (%syntax-expander val) (cdr form)))
+                  (with-handler hdlr
+                                (apply (%syntax-expander val) (cdr form)))
                   (map-expander form)))))))
 
 ;; ======================================================================
@@ -1874,10 +1872,12 @@ the R7RS form
 NOTE: Hopefully our implementation produce the SAME (incorrect) result for
 both forms.
 |#
+
+
 (define (compile-%%let-syntax e env tail?)
   (let ((len (length e)))
     (if (< len  3)
-        (compiler-error '%%let-syntax e "ill formed syntax ~S" e)
+        (compiler-error '#%let-syntax e "ill formed syntax ~S" e)
         (let ((bindings (cadr e))
               (body     (cddr e)))
           (if (null? bindings)
