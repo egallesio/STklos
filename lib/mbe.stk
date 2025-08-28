@@ -731,7 +731,10 @@ doc>
   (let ((macro-form (cons macro-name macro-args)))
     (let Loop ((l clauses))
       (if (null? l)
-          (syntax-error macro-name "no matching clause for ~S" macro-form)
+          ;; No more clause. Produce a special error which will be trapped by
+          ;; %macro-expand. We need this to retrieve the original macro call.
+          (raise #:find-clause-error)
+          ;; Try to find a  matching clause
           (let ((in-pattern  (caar  l))  ; example '(f a b)
                 (out-pattern (cadar l))) ; example '(+ a b)
             (if (mbe:matches-pattern? in-pattern macro-form keywords ellipsis)
@@ -749,7 +752,6 @@ doc>
                              (cdr tmp)
                              '()))
                 (Loop (cdr l))))))))
-
 
 ;;;; ----------------------------------------------------------------------
 ;;;;
@@ -796,7 +798,7 @@ doc>
 ;;                                               ((f a) (+ a 1)))
 ;;                                             '===)
 (define-macro (syntax-rules . syn-rules)
-  ((#%symbol-value 'syntax-rules->lambda 'MBE) #f syn-rules))
+  ( [#%symbol-value 'syntax-rules->lambda 'MBE] #f syn-rules))
 
 ;;
 ;; DEFINE-SYNTAX

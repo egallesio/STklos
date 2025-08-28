@@ -188,6 +188,7 @@
                                        #f)))
                (and (%syntax? val) val))))))
 
+
 (define (%macro-expand form env)
   (let ((map-expander (lambda (form)
                         (map* (lambda (x) (%macro-expand x env)) form))))
@@ -197,7 +198,22 @@
      (else  (let* ((name (car form))
                    (val  (find-syntax-in-env name env)))
               (if (and (symbol? name) (%syntax? val))
-                  (apply (%syntax-expander val) (cdr form))
+                  (with-handler
+                       (lambda (c)
+                         (cond
+                          ((eq? c #:find-clause-error)
+                           ;; Error while expanding a syntax-rules clause
+                           (syntax-error "no matching clause. Call was ~S" form))
+                          ((and (condition? c)
+                                (condition-has-type? c &error-message))
+                           ;; replace error by syntax-error in case we compile a file
+                           (syntax-error "~A. Call was ~S"
+                                         (struct-ref c 'message)
+                                         form))
+                          (else
+                           ;; just raise the error
+                           (raise c))))
+                       (apply (%syntax-expander val) (cdr form)))
                   (map-expander form)))))))
 
 ;; ======================================================================
