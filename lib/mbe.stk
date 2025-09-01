@@ -38,7 +38,7 @@
 This macro implementation has been slightly modified for STklos.
 In particular,
   - all the function reside in the module MBE, the only bindings which
-    are exported are DEFINE-SYNTAX, SYNTAX-RULES, LET-SYNTAX (and the 
+    are exported are DEFINE-SYNTAX, SYNTAX-RULES, LET-SYNTAX (and the
     fake LETREC-SYNTAX).
   - functions `some` and `split` used by the original code are added
     in the this module
@@ -753,51 +753,6 @@ doc>
                 (Loop (cdr l))))))))
 
 
-;;
-;; A very simple implementation of let-syntax.
-;; FIXME: Need some work
-;;
-;; Example (with alternative ellipsis symbol '===):
-;;
-;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
-;;
-;; =>
-;;     (#%let-syntax
-;;       ((f (lambda args
-;;             ((#%symbol-value 'find-clause 'MBE)
-;;              'f
-;;              args
-;;              '(f)
-;;              '(((f) 10))
-;;              '===))))
-;;       (f))
-;;
-(define-macro (let-syntax bindings . body)
-  `(#%let-syntax
-    ,(map (lambda (x)
-            (let ((macro-name (car x))
-                  (syn-rules  (cadr x)))
-              (let ((alt-ellipsis? (not (list? (cadr syn-rules)))))
-                (let ((ellipsis (if alt-ellipsis?
-                                    (cadr syn-rules)
-                                    '...))
-                      (keywords (if alt-ellipsis?
-                                    (cons macro-name (caddr syn-rules))
-                                    (cons macro-name (cadr syn-rules))))
-                      (clauses  (if alt-ellipsis?
-                                    (cdddr syn-rules)
-                                    (cddr syn-rules))))
-                  `(,macro-name (lambda args
-                                  ((#%symbol-value 'find-clause 'MBE)
-                                           ',macro-name
-                                           args
-                                           ',keywords
-                                           ',clauses
-                                           ',ellipsis)))))))
-          bindings)
-    ,@body))
-
-
 ;;;; ----------------------------------------------------------------------
 ;;;;
 ;;;; STklos code for syntax-rules, define-syntax and let-syntax
@@ -807,7 +762,32 @@ doc>
 ;;
 ;; Utility function convert a syntax-rules in a macro transformer
 ;;
+
+
+; check-clauses will check for validity of syntax-rules clauses.
+;;
 (define (syntax-rules->lambda macro-name syn-rules)
+
+  (define (check-clause clause name)
+    (cond
+     ((not (pair? clause))
+      (syntax-error 'syntax-rules "bad clause spec (not a pair) ~S for syntax ~S"
+                    clause name))
+     ((not (pair? (car clause)))
+      (syntax-error 'syntax-rules
+                    "clause head ~S is not a pair in clause ~S for syntax ~S"
+                    (car clause) clause name))
+     ((not (symbol? (caar clause)))
+      (syntax-error 'syntax-rules
+                    "car of clause head (~S) is not a symbol in clause ~S for syntax ~S"
+                    (caar clause)
+                    clause
+                    name))
+     ((null? (cdr clause))
+      (syntax-error 'syntax-rules "null output template in clause spec ~S for syntax ~S"
+                    clause
+                    name))))
+
   (let ((ellipsis '...))
     (unless (list? (car syn-rules))
       ;; User gave its own ellipsis symbol. Shift left syn-rules
@@ -820,6 +800,10 @@ doc>
            (name        (or macro-name               ;; use macro-name if given,
                             (and (pair? keywords)    ;; or the first of keywords
                                  (car keywords)))))  ;; otherwise name is #f
+      ;; Check that the clauses are correct
+      (for-each (lambda (c) (check-clause c name)) clauses)
+
+      ;; return a transformer
       `(lambda ,args
          ((#%symbol-value 'find-clause 'MBE) ',name
                                              ,args
