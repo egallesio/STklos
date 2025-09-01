@@ -753,6 +753,49 @@ doc>
                 (Loop (cdr l))))))))
 
 
+;;
+;; A very simple implementation of let-syntax.
+;; FIXME: Need some work
+;;
+;; Example (with alternative ellipsis symbol '===):
+;;
+;; (macro-expand '(let-syntax ((f (syntax-rules === () ((f) 10)))) (f)))
+;;
+;; =>
+;;     (#%let-syntax
+;;       ((f (lambda args
+;;             ((#%symbol-value 'find-clause 'MBE)
+;;              'f
+;;              args
+;;              '(f)
+;;              '(((f) 10))
+;;              '===))))
+;;       (f))
+;;
+(define-macro (let-syntax bindings . body)
+  `(#%let-syntax
+    ,(map (lambda (x)
+            (let ((macro-name (car x))
+                  (syn-rules  (cadr x)))
+              (let ((alt-ellipsis? (not (list? (cadr syn-rules)))))
+                (let ((ellipsis (if alt-ellipsis?
+                                    (cadr syn-rules)
+                                    '...))
+                      (keywords (if alt-ellipsis?
+                                    (cons macro-name (caddr syn-rules))
+                                    (cons macro-name (cadr syn-rules))))
+                      (clauses  (if alt-ellipsis?
+                                    (cdddr syn-rules)
+                                    (cddr syn-rules))))
+                  `(,macro-name (lambda args
+                                  ((#%symbol-value 'find-clause 'MBE)
+                                           ',macro-name
+                                           args
+                                           ',keywords
+                                           ',clauses
+                                           ',ellipsis)))))))
+          bindings)
+    ,@body))
 
 
 ;;;; ----------------------------------------------------------------------
