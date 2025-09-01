@@ -1875,11 +1875,31 @@ both forms.
 
 
 (define (compile-%%let-syntax e env tail?)
+  (define (verify-bindings bindings)
+    (let Loop ((lst  bindings)
+               (seen '()))
+      (unless (null? lst)
+        (let ((new (car lst)))
+          ;; verify that new
+          ;;    1. is a list of length two,
+          ;;    2. whose car is a symbol and
+          ;;    3. which has not been seen before
+          (unless (and  (list? new) (= (length new) 2))     ;; ①
+            (compiler-error 'let-syntax new "ill formed let-syntax binding ~S" new))
+          (unless (symbol? (car new))                       ;; ②
+            (compiler-error 'let-syntax new "bad symbol in let-syntax ~S" (car new)))
+          (when (memq (car new) seen)                       ;; ③
+            (compiler-error 'let-syntax new "duplicate symbol in let-syntax ~S"
+                            (car new)))
+          ;; verify next binding
+          (Loop (cdr lst) (cons (car new) seen))))))
+
   (let ((len (length e)))
     (if (< len  3)
         (compiler-error '#%let-syntax e "ill formed syntax ~S" e)
         (let ((bindings (cadr e))
               (body     (cddr e)))
+          (verify-bindings bindings)
           (if (null? bindings)
               (compile-body body env body tail?)
               (let Loop ((bindings bindings)
@@ -1891,17 +1911,17 @@ both forms.
                                   body
                                   tail?)
                     ;; build a new macro environment for evaluating body
-                    (let ((new (car bindings)))
-                      (unless (and (list? new) (= (length new) 2))
-                        (compiler-error 'let-syntax new
-                                        "ill formed binding ~S" new))
-                      (let* ((name      (car new))
-                             (expander  (cadr new))
-                             (new-macro ( (#%in-scheme '%make-syntax)
-                                          name
-                                          expander
-                                          (eval expander)
-                                          #f))) ; #f =>  non global macro
+                    (let* ((new      (car bindings))
+                           (name     (car new))
+                           (expander (cadr new))
+                           (exp-val  (eval expander)))
+                      (unless (procedure? exp-val)
+                        (compiler-error 'let-syntax new "bad expander ~S" exp-val))
+                      (let ((new-macro ( [#%in-scheme '%make-syntax]
+                                         name
+                                         expander
+                                         exp-val
+                                         #f))) ; #f =>  non global macro
                         (Loop (cdr bindings)
                               (cons (cons name new-macro)
                                     new-env)))))))))))
