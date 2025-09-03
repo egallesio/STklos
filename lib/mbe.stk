@@ -767,26 +767,24 @@ doc>
 ; check-clauses will check for validity of syntax-rules clauses.
 ;;
 (define (syntax-rules->lambda macro-name syn-rules)
-
   (define (check-clause clause name)
-    (cond
-     ((not (pair? clause))
+    (unless (pair? clause)
       (syntax-error 'syntax-rules "bad clause spec (not a pair) ~S for syntax ~S"
                     clause name))
-     ((not (pair? (car clause)))
+    (unless (pair? (car clause))
       (syntax-error 'syntax-rules
                     "clause head ~S is not a pair in clause ~S for syntax ~S"
                     (car clause) clause name))
-     ((not (symbol? (caar clause)))
+    (unless (symbol? (caar clause))
       (syntax-error 'syntax-rules
                     "car of clause head (~S) is not a symbol in clause ~S for syntax ~S"
                     (caar clause)
                     clause
                     name))
-     ((null? (cdr clause))
+    (when (null? (cdr clause))
       (syntax-error 'syntax-rules "null output template in clause spec ~S for syntax ~S"
                     clause
-                    name))))
+                    name)))
 
   (let ((ellipsis '...))
     (unless (list? (car syn-rules))
