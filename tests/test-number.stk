@@ -1412,6 +1412,15 @@
       #t
       (nan? (sqrt -nan.0)))
 
+(test "sqrt +x-inf.0i" +inf.0-inf.0i (sqrt 2.0-inf.0i))
+(test "sqrt +x+inf.0i" +inf.0+inf.0i (sqrt 2.0+inf.0i))
+(test "sqrt +inf.0-yi" +inf.0-0.0i   (sqrt +inf.0-2i))
+(test "sqrt +inf.0-yi" +inf.0+0.0i   (sqrt +inf.0+2i))
+(test "sqrt -x-inf.0i" +inf.0-inf.0i (sqrt -2.0-inf.0i))
+(test "sqrt -x+inf.0i" +inf.0+inf.0i (sqrt -2.0+inf.0i))
+(test "sqrt -inf.0-yi" +0.0-inf.0i   (sqrt -inf.0-2i))
+(test "sqrt -inf.0-yi" +0.0+inf.0i   (sqrt -inf.0+2i))
+
 ;;------------------------------------------------------------------
 (test-subsection "logical operations")
 
