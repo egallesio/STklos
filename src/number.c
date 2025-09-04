@@ -4097,6 +4097,12 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
     case tc_real:     if (REAL_VAL(z) < 0 && FINITE_REALP(z))
                         return Cmake_complex(MAKE_INT(0),
                                              double2real(sqrt(-REAL_VAL(z))));
+                      /* The C function sqt will return a NaN for "-inf",
+                         because it doesn't handle complexes. We treat this as
+                         aspecial case, returning -inf.0i */
+                      if (IS_INFP(z) && REAL_VAL(z) < 0.0)
+                        return Cmake_complex(MAKE_INT(0),
+                                             double2real(plus_inf));
                       return double2real(sqrt(REAL_VAL(z)));
     case tc_complex:  return my_sqrt_complex(z);
     default:          error_bad_number(z);
