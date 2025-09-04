@@ -533,6 +533,11 @@
 (test "even?" #f (even? 0+1.0i))
 (test/error "even?" (even? "i am a number"))
 
+(test "odd?"  #f (odd?  +inf.0))
+(test "odd?"  #f (odd?  +inf.0))
+(test "even?" #f (even? -inf.0))
+(test "even?" #f (even? -inf.0))
+
 (test "zero?" #t (zero? 0))
 (test "zero?" #t (zero? 0.0))
 (test "zero?" #t (zero? (- 10 10.0)))
