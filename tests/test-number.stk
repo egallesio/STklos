@@ -937,6 +937,10 @@
                             974849)
                   319489))
 
+(test/error "quotient w/inf.1" (quotient +inf.0 10))
+(test/error "quotient w/inf.2" (quotient 10 +inf.0))
+
+
 ;;------------------------------------------------------------------
 (test-subsection "remainder")
 
@@ -999,6 +1003,9 @@
       (r-tester 3735928559.0 27353))
 (test "inexact rem inexact -> inexact" (r-result 1113.0 #f)
       (r-tester 3735928559.0 27353.0))
+
+(test/error "remainder w/inf.1" (remainder +inf.0 10))
+(test/error "remainder w/inf.2" (remainder 10 +inf.0))
 
 ;;------------------------------------------------------------------
 (test-subsection "modulo")
@@ -1090,6 +1097,9 @@
 (test "mersenne prime? 48" #f (mersenne-prime? 48))
 (test "mersenne prime? 100" #f (mersenne-prime? 100))
 (test "mersenne prime? (* 61 19)" #f (mersenne-prime? (* 61 19)))
+
+(test/error "modulo w/inf.1" (modulo +inf.0 10))
+(test/error "modulo w/inf.2" (modulo 10 +inf.0))
 
 ;;------------------------------------------------------------------
 (test-subsection "gcd and lcm")
@@ -1255,6 +1265,9 @@
 (test/compile-error "lcm" (lcm 1 #\a))
 (test/compile-error "lcm" (lcm 1 "a"))
 (test/compile-error "lcm" (lcm 1 lcm))
+
+(test/error "gcd w/inf" (gcd 10 +inf.0 2))
+(test/error "lcm w/inf" (lcm 10 +inf.0 2))
 
 (compiler:inline-common-functions %%%___inline-common-functions)
 
@@ -1656,6 +1669,8 @@
       (bit-or #x-aa55aa55aa #x-6666666666))
 (test "bit-or (-big | -big)" #x-103454301aacca9
       (bit-or #x-123456789abcdef #x-fedcba987654321fedcba987654321fedcba))
+
+(test/error "bit-shift w/inf" (bit-shift 2.0 -inf.0))
 
 ;;------------------------------------------------------------------
 (test-subsection "transcendental functions")
