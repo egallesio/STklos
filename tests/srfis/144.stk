@@ -621,6 +621,15 @@
      (test-assert "srfi-144.236 " (fleven? zero))
      (test-deny "srfi-144.237 "   (fleven? one))
 
+     (test/error "srfi-144.237.1" (flodd? +inf.0))
+     (test/error "srfi-144.237.2" (flodd? +nan.0))
+     (test/error "srfi-144.237.3" (flodd? -inf.0))
+     (test/error "srfi-144.237.4" (flodd? -nan.0))
+     (test/error "srfi-144.237.5" (fleven? +inf.0))
+     (test/error "srfi-144.237.6" (fleven? +nan.0))
+     (test/error "srfi-144.237.7" (fleven? -inf.0))
+     (test/error "srfi-144.237.8" (fleven? -nan.0))
+
      (test "srfi-144.238 " (map flfinite? somereals)
            (map (lambda (x) #t) somereals))
      (test "srfi-144.239 " (map flfinite? weird)
