@@ -227,11 +227,11 @@
 
 
 
-(test/compile-error "wrong syntax-rules.1"
+(test/compile-error "let-syntax: wrong syntax-rules.1"
                     (let-syntax ((f (syntax-rules))) (f)))
-(test/compile-error "wrong syntax-rules.2"
+(test/compile-error "let-syntax: wrong syntax-rules.2"
                     (let-syntax ((f (syntax-rules ()))) (f)))
-(test/compile-error "wrong syntax-rules.3"
+(test/compile-error "let-syntax: wrong syntax-rules.3"
                     (let-syntax ((f (syntax-rules () ((f) 1) 2))) (f 1)))
 
 (define-syntax swap!
