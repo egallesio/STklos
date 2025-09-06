@@ -38,7 +38,7 @@
 This macro implementation has been slightly modified for STklos.
 In particular,
   - all the function reside in the module MBE, the only bindings which
-    are exported are DEFINE-SYNTAX, SYNTAX-RULES, LET-SYNTAX (and the 
+    are exported are DEFINE-SYNTAX, SYNTAX-RULES, LET-SYNTAX (and the
     fake LETREC-SYNTAX).
   - functions `some` and `split` used by the original code are added
     in the this module
@@ -753,8 +753,6 @@ doc>
                 (Loop (cdr l))))))))
 
 
-
-
 ;;;; ----------------------------------------------------------------------
 ;;;;
 ;;;; STklos code for syntax-rules, define-syntax and let-syntax
@@ -764,7 +762,23 @@ doc>
 ;;
 ;; Utility function convert a syntax-rules in a macro transformer
 ;;
+
+
+; check-clauses will check for validity of syntax-rules clauses.
+;;
 (define (syntax-rules->lambda macro-name syn-rules)
+  (define (check-clause clause name)
+    (unless (pair? clause)
+      (syntax-error 'syntax-rules "clause must be a list (it was ~S)" clause))
+    (unless (pair? (car clause))
+      (syntax-error 'syntax-rules
+                    "clause head ~S is not a pair in clause ~S" (car clause) clause))
+    (unless (symbol? (caar clause))
+      (syntax-error 'syntax-rules
+                    "car of clause head is not a symbol in clause ~S" clause))
+    (when (null? (cdr clause))
+      (syntax-error 'syntax-rules "null output template in clause spec ~S" clause)))
+
   (let ((ellipsis '...))
     (unless (list? (car syn-rules))
       ;; User gave its own ellipsis symbol. Shift left syn-rules
@@ -777,6 +791,10 @@ doc>
            (name        (or macro-name               ;; use macro-name if given,
                             (and (pair? keywords)    ;; or the first of keywords
                                  (car keywords)))))  ;; otherwise name is #f
+      ;; Check that the clauses are correct
+      (for-each (lambda (c) (check-clause c name)) clauses)
+
+      ;; return a transformer
       `(lambda ,args
          ((#%symbol-value 'find-clause 'MBE) ',name
                                              ,args

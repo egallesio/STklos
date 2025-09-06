@@ -1,4 +1,4 @@
-;;;;
+<;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
 ;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
@@ -1896,7 +1896,8 @@ both forms.
 
   (let ((len (length e)))
     (if (< len  3)
-        (compiler-error '#%let-syntax e "ill formed syntax ~S" e)
+        (compiler-error 'let-syntax e "ill formed syntax ~S"
+                        `(let-syntax ,@(cdr e))) ; #%let-syntax => let-syntax in msg
         (let ((bindings (cadr e))
               (body     (cddr e)))
           (verify-bindings bindings)
