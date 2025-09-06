@@ -190,7 +190,7 @@
            (DEEP-LOC-REF-PUSH   1)      ;; peephole: DEEP-LOCAL-SET + PUSH
            (IN-ASSOC            1)      ;; Inlining of assq, assv and assoc
            (IN-MEMBER           1)      ;; Inlining of memq, memv and member
-           (UNUSED-5            0)
+           (JUMP-FALSE-V        1)      ;; JUMP-FALSE + set val to #void if jump
            (UNUSED-6            0)
            (UNUSED-7            0)
            (UNUSED-8            0)
@@ -267,6 +267,7 @@
 (define use-address?
   (let ((instr-with-address (map (lambda (x) (car (info-opcode x)))
                                  '(GOTO JUMP-FALSE JUMP-TRUE
+                                   JUMP-FALSE-V
                                    JUMP-NUMDIFF JUMP-NUMGE
                                    JUMP-NUMGT JUMP-NUMGE
                                    JUMP-NUMLT JUMP-NUMLE

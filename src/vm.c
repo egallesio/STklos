@@ -1543,6 +1543,12 @@ CASE(JUMP_TRUE) {
   NEXT;
 }
 
+ CASE(JUMP_FALSE_V) {
+  offset = fetch_next();
+  if (vm->val == STk_false) { vm->val = STk_void; vm->pc += offset; }
+  NEXT;
+}
+
 CASE(JUMP_NUMDIFF) {
   offset = fetch_next(); if (!STk_numeq2(pop(), vm->val)) vm->pc += offset; NEXT;
 }
@@ -1802,7 +1808,6 @@ CASE(DBG_VM)  {
   ;
 }
 
-CASE(UNUSED_5)
 CASE(UNUSED_6)
 CASE(UNUSED_7)
 CASE(UNUSED_8)
