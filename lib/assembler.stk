@@ -268,8 +268,8 @@
   (let ((instr-with-address (map (lambda (x) (car (info-opcode x)))
                                  '(GOTO JUMP-FALSE JUMP-TRUE
                                    JUMP-FALSE-V JUMP-TRUE-V
-                                   JUMP-NUMDIFF JUMP-NUMGE
-                                   JUMP-NUMGT JUMP-NUMGE
+                                   JUMP-NUMDIFF JUMP-NUMEQ
+                                   JUMP-NUMGT JUMP-NUMGE 
                                    JUMP-NUMLT JUMP-NUMLE
                                    JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL
                                    CREATE-CLOSURE CREATE-CLOSURE-FAR

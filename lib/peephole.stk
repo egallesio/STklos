@@ -148,7 +148,7 @@
              ;; [IN-EQV; JUMP-FALSE]            => JUMP-NOT-EQ
              ;; [IN-EQUAL; JUMP-FALSE]          => JUMP-NOT-EQUAL
              ;; [IN-NOT; JUMP-FALSE]            => JUMP-TRUE
-             ((and (eq? i2 'JUMP-FALSE) (memq i1 '(IN-NUMEQ ; IN-NUMDIFF
+             ((and (eq? i2 'JUMP-FALSE) (memq i1 '(IN-NUMEQ IN-NUMDIFF
                                                    IN-NUMLT IN-NUMGT
                                                    IN-NUMLE IN-NUMGE
                                                    IN-EQ IN-EQV IN-EQUAL
