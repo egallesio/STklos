@@ -4052,6 +4052,29 @@ static inline SCM my_sqrt_complex(SCM z)
   SCM a = COMPLEX_REAL(z);
   SCM b = COMPLEX_IMAG(z);
 
+  /* Handle infinities. For example,
+     (sqrt 2.0-inf.0i)  => +inf.0-inf.0i
+     (sqrt 2.0+inf.0i)  => +inf.0+inf.0i
+     (sqrt +inf.0-2i)   => +inf.0-0.0i
+     (sqrt +inf.0+2i)   => +inf.0+0.0i
+     (sqrt -2.0-inf.0i) => +inf.0-inf.0i
+     (sqrt -2.0+inf.0i) => +inf.0+inf.0i
+     (sqrt -inf.0-2i)   => 0.0-inf.0i
+     (sqrt -inf.0+2i)   => 0.0+inf.0i   */
+  if (IS_INFP(a)) {
+    double sign_of_b;
+    if (REALP(b))          sign_of_b = signbit(REAL_VAL(b));
+    else if (zerop(b))     sign_of_b = 0.0;
+    else if (positivep(b)) sign_of_b = +1.0;
+    else                   sign_of_b = -1.0;
+
+    return (REAL_VAL(a) > 0.0)
+      ? Cmake_complex(double2real(plus_inf), double2real(copysign(0.0, sign_of_b)))
+      : Cmake_complex(double2real(0.0), double2real(copysign(plus_inf, sign_of_b)));
+  }
+
+  if (IS_INFP(b)) return Cmake_complex(double2real(plus_inf), b);
+
   /* Given a, b we will compute A, B such that the square root of
      the complex number a+bi is
 
@@ -4097,6 +4120,12 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
     case tc_real:     if (REAL_VAL(z) < 0 && FINITE_REALP(z))
                         return Cmake_complex(MAKE_INT(0),
                                              double2real(sqrt(-REAL_VAL(z))));
+                      /* The C function sqt will return a NaN for "-inf",
+                         because it doesn't handle complexes. We treat this as
+                         aspecial case, returning -inf.0i */
+                      if (IS_INFP(z) && REAL_VAL(z) < 0.0)
+                        return Cmake_complex(MAKE_INT(0),
+                                             double2real(plus_inf));
                       return double2real(sqrt(REAL_VAL(z)));
     case tc_complex:  return my_sqrt_complex(z);
     default:          error_bad_number(z);
