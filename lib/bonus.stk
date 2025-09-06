@@ -1169,8 +1169,8 @@ doc>
   `(tagbody
     #:top
     (when ,test
-      (begin ,@body
-             (-> #:top)))))
+      ,@body
+      (-> #:top))))
 
 #|
 <doc EXT-SYNTAX until
@@ -1184,8 +1184,8 @@ doc>
   `(tagbody
     #:top
     (unless ,test
-      (begin ,@body
-             (-> #:top)))))
+      ,@body
+      (-> #:top))))
 
 #|
 <doc EXT 1+ 1-
