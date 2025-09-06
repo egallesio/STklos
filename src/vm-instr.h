@@ -123,7 +123,7 @@
 #  define IN_ASSOC             118
 #  define IN_MEMBER            119
 #  define JUMP_FALSE_V         120
-#  define UNUSED_6             121
+#  define JUMP_TRUE_V          121
 #  define UNUSED_7             122
 #  define UNUSED_8             123
 #  define UNUSED_9             124
@@ -301,7 +301,7 @@ static void *jump_table[] = {
   &&lab_IN_ASSOC            ,
   &&lab_IN_MEMBER           ,
   &&lab_JUMP_FALSE_V        ,
-  &&lab_UNUSED_6            ,
+  &&lab_JUMP_TRUE_V         ,
   &&lab_UNUSED_7            ,
   &&lab_UNUSED_8            ,
   &&lab_UNUSED_9            ,
@@ -479,7 +479,7 @@ static char *name_table[] = {
   "IN_ASSOC            ",
   "IN_MEMBER           ",
   "JUMP_FALSE_V        ",
-  "UNUSED_6            ",
+  "JUMP_TRUE_V         ",
   "UNUSED_7            ",
   "UNUSED_8            ",
   "UNUSED_9            ",

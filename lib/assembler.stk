@@ -191,8 +191,8 @@
            (IN-ASSOC            1)      ;; Inlining of assq, assv and assoc
            (IN-MEMBER           1)      ;; Inlining of memq, memv and member
            (JUMP-FALSE-V        1)      ;; JUMP-FALSE + set val to #void if jump
-           (UNUSED-6            0)
-           (UNUSED-7            0)
+           (JUMP-TRUE-V         1)      ;; peephole: IN-NOT + JUMP-FALSE-V
+           (UNUSED-7            0) 
            (UNUSED-8            0)
            (UNUSED-9            0)
            (UNUSED-10           0)
@@ -267,7 +267,7 @@
 (define use-address?
   (let ((instr-with-address (map (lambda (x) (car (info-opcode x)))
                                  '(GOTO JUMP-FALSE JUMP-TRUE
-                                   JUMP-FALSE-V
+                                   JUMP-FALSE-V JUMP-TRUE-V
                                    JUMP-NUMDIFF JUMP-NUMGE
                                    JUMP-NUMGT JUMP-NUMGE
                                    JUMP-NUMLT JUMP-NUMLE

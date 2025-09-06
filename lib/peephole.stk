@@ -1,7 +1,7 @@
 ;;;;
 ;;;; peephole.stk       -- Peephole Optimiser fro the STklos VM
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -166,6 +166,10 @@
                                        ((IN-EQUAL)   'JUMP-NOT-EQUAL)
                                        ((IN-NOT)     'JUMP-TRUE))
                                      (next-arg1 code))))
+             ;; [IN-NOT ; JUMP-FALSE-V => JUMP-TRUE-V
+             ((and (eq? i1 'IN-NOT) (eq? i2 'JUMP-FALSE-V))
+              (replace-2-instr code (list 'JUMP-TRUE-V (next-arg1 code))))
+
              ;; [GLOBAL-REF, PUSH] => GLOBAL-REF-PUSH
              ((and (eq? i1 'GLOBAL-REF) (eq? i2 'PUSH))
               (replace-2-instr code (list 'GLOBAL-REF-PUSH
