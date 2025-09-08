@@ -122,8 +122,8 @@
 #  define DEEP_LOC_REF_PUSH    117
 #  define IN_ASSOC             118
 #  define IN_MEMBER            119
-#  define UNUSED_5             120
-#  define UNUSED_6             121
+#  define JUMP_FALSE_V         120
+#  define JUMP_TRUE_V          121
 #  define UNUSED_7             122
 #  define UNUSED_8             123
 #  define UNUSED_9             124
@@ -300,8 +300,8 @@ static void *jump_table[] = {
   &&lab_DEEP_LOC_REF_PUSH   ,
   &&lab_IN_ASSOC            ,
   &&lab_IN_MEMBER           ,
-  &&lab_UNUSED_5            ,
-  &&lab_UNUSED_6            ,
+  &&lab_JUMP_FALSE_V        ,
+  &&lab_JUMP_TRUE_V         ,
   &&lab_UNUSED_7            ,
   &&lab_UNUSED_8            ,
   &&lab_UNUSED_9            ,
@@ -478,8 +478,8 @@ static char *name_table[] = {
   "DEEP_LOC_REF_PUSH   ",
   "IN_ASSOC            ",
   "IN_MEMBER           ",
-  "UNUSED_5            ",
-  "UNUSED_6            ",
+  "JUMP_FALSE_V        ",
+  "JUMP_TRUE_V         ",
   "UNUSED_7            ",
   "UNUSED_8            ",
   "UNUSED_9            ",

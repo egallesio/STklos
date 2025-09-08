@@ -506,30 +506,35 @@ doc>
 ;;;; IF
 ;;;;
 ;;
-;; (if cond expr1 expr2) =>
-;;    [ cond ]       * tail? = #f
-;;    JUMP-FALSE L1
-;;    [ expr1 ]
-;;    GOTO L2
-;;    L1:
-;;    [ expr2 ] -or- IM-VOID
-;;    L2:
+;; (if cond expr1 expr2) =>                | (if cond expr1) =>
+;;    [ cond ]       * tail? = #f          |     [ cond ]       * tail? = #f
+;;    JUMP-FALSE L1                        |     JUMP-FALSE-V L1
+;;    [ expr1 ]                            |     [ expr1 ]
+;;    GOTO L2                              |     L1:
+;;    L1:                                  |
+;;    [ expr2 ]                            | JUMP-FALSE-V: jump if val is #f and 
+;;    L2:                                  | set val to #void
 (define (compile-%%if args env tail?)
-  (let ((len (length (cdr args)))
-        (l1  (new-label))
-        (l2  (new-label)))
-    (if (<= 2 len 3)
-        (begin
-          (compile (cadr args) env args #f)
-          (emit 'JUMP-FALSE l1)
-          (compile (caddr args) env args tail?)
-          (emit 'GOTO l2)
-          (emit-label l1)
-          (if (= len 3)
-              (compile (cadddr args) env args tail?)
-              (emit 'IM-VOID))
-          (emit-label l2))
-        (compiler-error 'if args "bad syntax in ~S" args))))
+  (case (length (cdr args))
+    ((2)                            ;; if without else
+     (let ((l1 (new-label)))
+       (compile (cadr args) env args #f)
+       (emit 'JUMP-FALSE-V l1)
+       (compile (caddr args) env args tail?)
+       (emit-label l1)))
+    ((3)                             if with a else
+     (let ((l1 (new-label))
+           (l2 (new-label)))
+       (compile (cadr args) env args #f)
+       (emit 'JUMP-FALSE l1)
+       (compile (caddr args) env args tail?)
+       (emit 'GOTO l2)
+       (emit-label l1)
+       (compile (cadddr args) env args tail?)
+       (emit-label l2)))
+    (else
+     (compiler-error 'if args "bad syntax in ~S" args))))
+
 
 ;;
 ;; DEFINE-MACRO
