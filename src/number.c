@@ -811,7 +811,10 @@ static inline SCM real2integer(SCM r)
 {
   double v = REAL_VAL(r);
 
-  if (floor(v) != v) {
+  /* For NaNs, the test floor(v) == v will return false.  But for infinities,
+     it returns true. And we can't do double2integer on an inf.
+  */
+  if (floor(v) != v || isinf(v)) {
     /* This is not an inexact integer (weak test) */
     STk_error("bad number (~s) in an integer division", r);
   }

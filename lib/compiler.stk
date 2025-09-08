@@ -1112,8 +1112,8 @@ doc>
       (let ((new-args (map (lambda (f) (maybe-fold-constant env f)) (cdr args))))
         (if (every number? new-args)
             (with-handler (lambda (_) args)
-             (apply (symbol-value (car args) *scmmod*)
-                    (map (lambda (f) (maybe-fold-constant env f)) new-args)))
+               (apply (symbol-value (car args) *scmmod*)
+                      (map (lambda (f) (maybe-fold-constant env f)) new-args)))
             (cons (car args) new-args)))
       args))
 
@@ -1128,12 +1128,14 @@ doc>
         (non-nums (filter (lambda (x) (not (number? x))) args)))
     (if (null? nums)
         args
-        (let ((num
-               (let loop ((n (car nums)) (nums (cdr nums)))
-                 (if (not (null? nums))
-                     (loop (fct n (car nums)) (cdr nums))
-                     n))))
-          (cons num non-nums)))))
+        (with-handler
+             (lambda (_) args)
+             (let ((num
+                    (let loop ((n (car nums)) (nums (cdr nums)))
+                      (if (not (null? nums))
+                          (loop (fct n (car nums)) (cdr nums))
+                          n))))
+               (cons num non-nums))))))
 
 
 
