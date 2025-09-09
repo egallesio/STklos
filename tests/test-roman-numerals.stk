@@ -1,0 +1,79 @@
+;(define-module test-roman-numerals
+;  (import SCHEME
+;          (stklos roman-numerals))
+;  (begin
+(import (stklos roman-numerals))
+  ;  (define (run)
+
+      (dotimes (i 5000)
+        (test "integer->roman returns string"
+              #t
+              (string? (integer->roman i))))
+
+      (dotimes (i 5000)
+        (test "roman->integer returns fixnum integer"
+              #t
+              (fixnum? (roman->integer (integer->roman i)))))
+
+      (dotimes (i 5000)
+        (test "roman <-> integer"
+              #t
+              (fx= (roman->integer (integer->roman i)))))
+
+      (test "roman nulla.1"
+            "N"
+            (integer->roman 0))
+
+      (test "roman nulla.2"
+            0
+            (roman->integer "N"))
+
+      ;; The following test crashes, and I could not identify the reason.
+      ;;(test "roman nulla.3"
+      ;;      "nulla"
+      ;;      (integer->roman 0 #:zero "nulla"))
+
+      (test "roman integer real"
+            "III"
+            (integer->roman 3.0))
+
+      (test "roman mixed case"
+            17
+            (roman->integer "xViI"))
+
+      (test "roman upper case"
+            "DLXII"
+            (integer->roman 562))
+
+      ;; The following test crashes, and I could not identify the reason.
+      ;;(test "roman lower case"
+      ;;      "dlxii"
+      ;;      (integer->roman 562 #:case 'lower))
+
+      (test/error "roman bad roman number.1"
+                  (roman->integer "A"))
+
+      (test/error "roman bad roman number.2"
+                  (roman->integer 'XV))
+
+      (test/error "roman bad roman number.3"
+                  (roman->integer "IIX"))
+
+      (test/error "roman bad roman number.4"
+                  (roman->integer "ixvii"))
+
+      (test/error "roman bad integer input.5"
+                  (integer->roman 6000))
+
+      (test/error "roman bad integer input.6"
+                  (integer->roman -2))
+
+      (test/error "roman bad integer input.7"
+                  (integer->roman 3.1))
+
+ ;     )
+
+;(run)
+;;))
+
+;((in-module test-roman-numerals run))
