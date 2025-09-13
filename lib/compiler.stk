@@ -328,6 +328,31 @@ doc>
       (compile-constant (cadr expr) env tail?)
       (compiler-error 'quote expr "bad usage in ~S" expr)))
 
+#|
+<doc syntax quote-expanded
+ * (quote-expanded form)
+ *
+ * |Quote-expanded| will first expand then quote (without evaluating)
+ * |form|, and it can be used not only on the REPL or on top-level
+ * contexts, but also inside |let-syntax|.
+ *
+ * @lisp
+ * (let-syntax ((%f (syntax-rules ()
+ *                    ((%f) (format  "2")))))
+ *   (quote-expanded (%f)))                    => (format "2")
+ *
+ * (let-syntax ((%f (syntax-rules ()
+ *                    ((%f x) (display x)))))
+ *   (quote-expanded (%f '(a b c))))           => (display '(a b c))
+ * @end lisp
+doc>
+|#
+(define (compile-%%quote-expanded expr env tail?)
+  (if (= (length expr) 2)
+      (compile-constant (%macro-expand (cadr expr) env) env tail?)
+      (compiler-error 'quote-expanded expr "bad usage in ~S" expr)))
+
+
 ; ======================================================================
 ;
 ;                               DEFINE
