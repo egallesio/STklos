@@ -205,7 +205,7 @@ typedef enum {
   tc_promise, tc_regexp, tc_process, tc_continuation, tc_syntax,        /* 30 */
   tc_parameter, tc_socket, tc_struct_type, tc_struct, tc_thread,        /* 35 */
   tc_mutex, tc_condv, tc_box, tc_ext_func, tc_pointer,                  /* 40 */
-  tc_callback, tc_icall,                                                 /* 45 */
+  tc_callback, tc_icall, tc_environment,                                /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -553,8 +553,9 @@ struct frame_obj {
 
 #define MODULE_CONST            (1 << 0)
 
-/* modules are defined in env.c but are private */
+/* modules and environments are defined in env.c but are private */
 #define MODULEP(p)              (BOXED_TYPE_EQ((p), tc_module))
+#define ENVIRONMENTP(p)         (BOXED_TYPE_EQ((p), tc_environment))
 
 SCM STk_make_frame(int len);
 SCM STk_clone_frame(SCM f);

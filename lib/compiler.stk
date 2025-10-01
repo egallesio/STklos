@@ -134,21 +134,22 @@
      ((assq symb (scope-mlocals env)) => cdr)
      (else                            (Loop (scope-parent env))))))
 
-;;// FIXME:
-;;//;; Temporary function for bootstraping the environment representation
-;;//(define (%list->scope lst)
-;;//  (if (null? lst)
-;;//      #f
-;;//      (make-scope (car lst) '() (%list->scope (cdr lst)))))
-;;//
-;;//;; Temporary function for bootstraping the environment representation
-;;//(define (%scope->list sc)
-;;//  (if (not sc)
-;;//      '()
-;;//      (cons (scope-locals sc)
-;;//            (%scope->list (scope-parent sc)))))
-;;//
 
+(define (scope->list env)
+  (if env
+      (cons (list (scope-locals env) (scope-mlocals env))
+            (scope->list (scope-parent env)))
+      '()))
+
+(define (list->scope lst)
+  (%debug "list->scope `~S" lst)
+  (if (pair? lst)
+      (let ((top (car lst)))
+        (%debug "list->scope top=~S" top)
+        (make-scope (car top)
+                    (cadr top)
+                    (list->scope (cdr lst))))
+      #f))
 
 (define (%debug-scope env)     ;; FIXME:
   (%debug "***SCOPE*** ~S\n" env)
@@ -512,7 +513,7 @@ doc>
 ;;    [ expr1 ]                            |     [ expr1 ]
 ;;    GOTO L2                              |     L1:
 ;;    L1:                                  |
-;;    [ expr2 ]                            | JUMP-FALSE-V: jump if val is #f and 
+;;    [ expr2 ]                            | JUMP-FALSE-V: jump if val is #f and
 ;;    L2:                                  | set val to #void
 (define (compile-%%if args env tail?)
   (case (length (cdr args))
@@ -2147,7 +2148,7 @@ both forms.
 ;
 ;=============================================================================
 
-(define (eval e :optional env)
+(define (eval e :optional (env (current-module)))
 
   (define (parse-expression e)
     (compile e #f e #f)
@@ -2156,9 +2157,14 @@ both forms.
 
   (fluid-let ((*code-instr*     '())
               (*code-constants* '()))
-    (let ((code (parse-expression e)))
-      ;;(disassemble-code code (current-error-port))
-      (%execute code (list->vector *code-constants*) (or env (current-module))))))
+    (let* ((senv (if (environment? env) (%environment-static-environment env) '()))
+           (denv (if (environment? env) (%environment-dynamic-environment env) env)))
+      (let ((code (parse-expression e)))
+        ;;(disassemble-code code (current-error-port))
+        (%execute code
+                  (list->vector *code-constants*)
+                  denv)))))
+
 
 (define-macro (%compile-time-define . symbs)
   ;; This macro permits to add the given symbols in the list of defined symbols

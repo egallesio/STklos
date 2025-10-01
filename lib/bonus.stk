@@ -432,11 +432,11 @@ doc>
  * @end lisp
 doc>
 |#
-(define (eval-from-string str :optional env)
+(define (eval-from-string str :optional (env (current-module)))
   (eval (read-from-string str)
         env))
 
-(define (eval-from-string-ci str :optional env)
+(define (eval-from-string-ci str :optional (env (current-module)))
   (eval (read-from-string-ci str)
         env))
 
