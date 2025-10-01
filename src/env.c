@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2024 Erick Gallesio <eg@stklos.net>
+ * Copyright © 1993-2025 Erick Gallesio <eg@stklos.net>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -64,23 +64,23 @@ static SCM all_modules;         /* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)
 {
-  if (MODULE_NAME(module) == STk_false) {
-    STk_fprintf(port, "#[environment %lx", (unsigned long) module);
-  } else {
-    if (MODULE_IS_LIBRARY(module)) {
-      const char *name = MODULE_NAME(module);
+  if (MODULE_IS_LIBRARY(module)) {
+    const char *name = MODULE_NAME(module);
 
-      STk_nputs(port, "#[library ", 11);
-      STk_putc('(', port);
-      for (const char *s = SYMBOL_PNAME(name); *s; s++) {
-        STk_putc((*s == '/') ? ' ': *s, port);
-      }
-      STk_putc(')', port);
-    } else  {
-      STk_nputs(port, "#[module ", 9);
-      STk_print(MODULE_NAME(module), port, mode);
+    STk_nputs(port, "#[library ", 11);
+    STk_putc('(', port);
+    for (const char *s = SYMBOL_PNAME(name); *s; s++) {
+      STk_putc((*s == '/') ? ' ': *s, port);
     }
+    STk_putc(')', port);
+  } else  {
+    STk_nputs(port, "#[module ", 9);
+    if (MODULE_NAME(module) == STk_false)
+      STk_fprintf(port, "%lx", (unsigned long) module);
+    else
+      STk_print(MODULE_NAME(module), port, mode);
   }
+
   if (!MODULE_IS_INSTANCIATED(module)) STk_puts(" (*)", port);
   STk_putc(']', port);
 }
@@ -95,7 +95,7 @@ static void register_module(SCM mod)
 }
 
 
-static inline SCM make_empty_environment(SCM name)
+static inline SCM make_empty_module(SCM name)
 {
   register SCM z;
 
@@ -113,7 +113,7 @@ static inline SCM make_empty_environment(SCM name)
 
 static inline SCM make_module(SCM name)
 {
-  register SCM z = make_empty_environment(name);
+  register SCM z = make_empty_module(name);
 
   if (name != STk_void) MODULE_IMPORTS(z) = LIST1(STk_STklos_module);
   MODULE_IS_LIBRARY(z) = FALSE;
@@ -173,6 +173,11 @@ static void verify_symbol(SCM obj)
 static void verify_module(SCM obj)
 {
   if (!MODULEP(obj)) STk_error("bad module ~S", obj);
+}
+
+static void verify_environment(SCM obj)
+{
+  if (!ENVIRONMENTP(obj)) STk_error("bad module ~S", obj);
 }
 
 static void verify_list(SCM obj)
@@ -260,12 +265,6 @@ void STk_export_all_symbols(SCM module)
 }
 
 /* ==== Undocumented primitives ==== */
-DEFINE_PRIMITIVE("%make-empty-environment", make_empty_env, subr0, (void))
-{
-  return make_empty_environment(STk_false);
-}
-
-
 DEFINE_PRIMITIVE("%normalize-library-name",normalize_name, subr1, (SCM obj))
 {
   return normalize_library_name(obj);
@@ -884,6 +883,75 @@ DEFINE_PRIMITIVE("%global-var-info", glob_var_info, subr12, (SCM name, SCM modul
 }
 #endif
 
+/*===========================================================================* \
+ *
+ *                        E N V I R O N M E N T S
+ *
+\*===========================================================================*/
+struct environment_obj {
+  stk_header header;
+  SCM dyn_env;                /* dynamic (runtime) environment */
+  SCM static_env;             /* static (compiler) environment */
+  SCM module;                 /* dynamic module */
+};
+
+#define ENV_STAT_ENV(m)          (((struct environment_obj *) (m))->static_env)
+#define ENV_DYN_ENV(m)           (((struct environment_obj *) (m))->dyn_env)
+#define ENV_MODULE(m)            (((struct environment_obj *) (m))->module)
+
+
+static void print_environment(SCM env, SCM port, int _UNUSED(mode))
+{
+  STk_fprintf(port, "#[environment %lx]", (unsigned long) env);
+}
+
+DEFINE_PRIMITIVE("%make-environment", make_env, subr3, (SCM stat, SCM dyn, SCM mod))
+{
+  SCM z;
+
+  if (stat != STk_nil && !CONSP(stat)) STk_error("bad static environment");
+  if (!FRAMEP(dyn) && !MODULEP(dyn))   STk_error("bad dynamic environment");
+  verify_module(mod);
+
+  NEWCELL(z, environment);
+  ENV_STAT_ENV(z) = stat;
+  ENV_DYN_ENV(z)  = dyn;
+  ENV_MODULE(z)   = mod;
+  return z;
+}
+
+DEFINE_PRIMITIVE("%make-empty-environment", make_empty_env, subr0, (void))
+{
+  SCM m = make_empty_module(STk_false);
+  return STk_make_env(STk_nil, m, m);
+}
+
+
+DEFINE_PRIMITIVE("environment?", environmentp, subr1, (SCM env))
+{
+  return MAKE_BOOLEAN(ENVIRONMENTP(env));
+}
+
+DEFINE_PRIMITIVE("%environment-static-environment", env_stat_env, subr1, (SCM env))
+{
+  verify_environment(env);
+  return ENV_STAT_ENV(env);
+}
+
+DEFINE_PRIMITIVE("%environment-dynamic-environment", env_dyn_env, subr1, (SCM env))
+{
+  verify_environment(env);
+  return ENV_DYN_ENV(env);
+}
+
+DEFINE_PRIMITIVE("%environment-module", env_module, subr1, (SCM env))
+{
+  verify_environment(env);
+  return ENV_MODULE(env);
+}
+
+
+
 
 /*===========================================================================*\
  *
@@ -903,6 +971,13 @@ static struct extended_type_descr xtype_frame = {
   .name= "frame"                      /* name */
 };
 
+/* The stucture which describes the modules type */
+static struct extended_type_descr xtype_environment = {
+  .name  = "environment",
+  .print = print_environment
+};
+
+
 /* ---------------------------------------------------------------------- */
 
 int STk_init_env(void)
@@ -912,12 +987,14 @@ int STk_init_env(void)
   /* Create the stklos module */
   STk_STklos_module  = make_module(STk_void); /* will be changed later */
 
-  /* Declare the extended types module_obj and frame_obj */
-  DEFINE_XTYPE(module, &xtype_module);
-  DEFINE_XTYPE(frame,  &xtype_frame);
+  /* Declare the extended types module_obj, frame_obj and environment_obj */
+  DEFINE_XTYPE(module,     &xtype_module);
+  DEFINE_XTYPE(frame,       &xtype_frame);
+  DEFINE_XTYPE(environment, &xtype_environment);
 
   return TRUE;
 }
+
 
 int STk_late_init_env(void)
 {
@@ -942,6 +1019,10 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
+  ADD_PRIMITIVE(make_env);
+  ADD_PRIMITIVE(env_stat_env);
+  ADD_PRIMITIVE(env_dyn_env);
+  ADD_PRIMITIVE(env_module);
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(glob_var_info);
 #endif
@@ -949,6 +1030,7 @@ int STk_late_init_env(void)
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);
   ADD_PRIMITIVE(libraryp);
+  ADD_PRIMITIVE(environmentp);
   ADD_PRIMITIVE(scheme_find_module);
   ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);

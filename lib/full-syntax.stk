@@ -240,7 +240,7 @@ doc>
 ;;; Don't use set! here but a define that will break the previous binding
 ;;;;
 (define eval
-  (lambda (x :optional env)
+  (lambda (x :optional (env (current-module)))
     (sc:eval-hook (sc:expand-syntax x) env)))
 
 ;;;;

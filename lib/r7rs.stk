@@ -1247,11 +1247,12 @@ doc>
 (define (environment . args)
   (if (null? args)
       (null-environment)
-      (let ((e (%make-empty-environment)))
+      (let* ((e (%make-empty-environment))
+             (m (%environment-dynamic-environment e)))
         ;; import the specified import sets in args
-        (%%import e args)
+        (%%import m args)
         ;; make the module immutable
-        (module-immutable! e)
+        (module-immutable! m)
         e)))
 
 #|
@@ -1292,7 +1293,8 @@ doc>
         (error "this version is not supported ~S" version))
       (unless null-env
         (set! null-env (%make-empty-environment))
-        (module-immutable! null-env))
+        ;; make the module immutable
+        (module-immutable! (%environment-dynamic-environment null-env)))
       null-env)))
 
 #|

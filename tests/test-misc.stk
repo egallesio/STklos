@@ -782,7 +782,7 @@ b|)
             (eval-from-string "(DisPlaY 3.14)"))
 
 ;;------------------------------------------------------------------
-(test-subsection "read brace and brackets")
+(test-subsection "read braces and brackets")
 
 (let ((brace    (read-brace-handler))
       (bracket  (read-bracket-handler)))

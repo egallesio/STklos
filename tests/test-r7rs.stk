@@ -1819,8 +1819,8 @@ a")
                         '(scheme write))) ; system lib
 
 
- ;; All modules have names now...
- (test "environment.0" #f (module-name e))
+;; EG: 2025-09-30 environment is no more a module
+;; (test "environment.0" #f (module-name e)) 
  (test "environment.1" "aaa" (eval 'a e))
  (test "environment.2" "bbb" (eval 'b e))
  (test/error "environment.3" (eval 'c e))
@@ -1845,11 +1845,13 @@ a")
 ;; less simpler import specs
 (define e1 (environment '(only (scheme base) + -) '(only (scheme write) display)))
 (define e2 (environment '(prefix (only (scheme base) + -) |foo:|)))
-
-(test "environment only" 3 (length (module-symbols e1)))
-(test "environment only+prefix"  #t (let ((symbs (module-symbols e2)))
-                                      (or (equal? symbs '(foo:+ foo:-))
-                                          (equal? symbs '(foo:- foo:+)))))
+(let ((environment-symbols (lambda (e)
+                             (module-symbols (%environment-dynamic-environment e)))))
+  
+  (test "environment only" 3 (length (environment-symbols e1)))
+  (test "environment only+prefix"  #t (let ((symbs (environment-symbols e2)))
+                                        (or (equal? symbs '(foo:+ foo:-))
+                                            (equal? symbs '(foo:- foo:+))))))
 
 
 ;;======================================================================
