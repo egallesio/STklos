@@ -1,4 +1,4 @@
-<;;;;
+;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
 ;;;; Copyright © 2000-2025 Erick Gallesio <eg@stklos.net>
@@ -142,10 +142,8 @@
       '()))
 
 (define (list->scope lst)
-  (%debug "list->scope `~S" lst)
   (if (pair? lst)
       (let ((top (car lst)))
-        (%debug "list->scope top=~S" top)
         (make-scope (car top)
                     (cadr top)
                     (list->scope (cdr lst))))
@@ -2092,6 +2090,20 @@ both forms.
      (compiler-error '%%symbol-value e "bad usage ~S" e)))
 
 
+;;
+;; Capture the current-environment
+;;
+(define (compile-%%current-environment e env tail)
+  (if (= (length e) 1)
+      (let* ((lst  (scope->list env))
+             (e   `(%make-environment ',lst                  ;; static environment
+                                      (%dynamic-environment) ;; runtime environment
+                                      (compiler-current-module))))
+        (compile e env e #f))
+      (compiler-error '#%current-environment e "bad usage ~S" e)))
+
+
+
 ;;;;======================================================================
 ;;;;
 ;;;;            The bytecode compiler
@@ -2150,21 +2162,21 @@ both forms.
 
 (define (eval e :optional (env (current-module)))
 
-  (define (parse-expression e)
-    (compile e #f e #f)
-    (emit 'END-OF-CODE)
-    (assemble (reverse! *code-instr*)))
+  (define (parse-expression expr env)
+    (let ((E (if (null? env) #f (list->scope env))))
+      (compile expr E expr #f)
+      (emit 'END-OF-CODE)
+      (assemble (reverse! *code-instr*))))
 
   (fluid-let ((*code-instr*     '())
               (*code-constants* '()))
     (let* ((senv (if (environment? env) (%environment-static-environment env) '()))
            (denv (if (environment? env) (%environment-dynamic-environment env) env)))
-      (let ((code (parse-expression e)))
-        ;;(disassemble-code code (current-error-port))
+      (let ((code (parse-expression e senv)))
+        ;; (disassemble-code code (current-error-port))
         (%execute code
                   (list->vector *code-constants*)
                   denv)))))
-
 
 (define-macro (%compile-time-define . symbs)
   ;; This macro permits to add the given symbols in the list of defined symbols

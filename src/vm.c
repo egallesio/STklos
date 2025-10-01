@@ -677,9 +677,10 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
 
   if (!envt) envt = vm->current_module;
 
-  if (!VECTORP(code))   STk_error("bad code vector ~S", code);
-  if (!VECTORP(consts)) STk_error("bad constant list ~S", consts);
-  if (!MODULEP(envt))   STk_error("bad module for evaluation ~S", envt);
+  if (!VECTORP(code))                  STk_error("bad code vector ~S", code);
+  if (!VECTORP(consts))                STk_error("bad constant list ~S", consts);
+  if (!MODULEP(envt) && !FRAMEP(envt)) STk_error("bad evaluation environment ~S",
+                                                 envt);
 
   /* convert code to a vector of instructions */
   len = VECTOR_SIZE(code);
@@ -2416,6 +2417,17 @@ void STk_vm_inc_allocs(vm_thread_t *vm, size_t sz)
   vm->bytes_allocated += sz;
 }
 
+/*===========================================================================* \
+ *
+ *                         Dynamic environment
+ *
+\*===========================================================================*/
+DEFINE_PRIMITIVE("%dynamic-environment", dynenv, subr0, (void))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+
+  return clone_env(vm->env, vm);
+}
 
 /*===========================================================================* \
  *
@@ -2835,6 +2847,7 @@ int STk_late_init_vm()
   ADD_PRIMITIVE(continuationp);
   ADD_PRIMITIVE(fresh_continuationp);
 
+  ADD_PRIMITIVE(dynenv);
   ADD_PRIMITIVE(vm_config);
 
 #ifdef STK_DEBUG
