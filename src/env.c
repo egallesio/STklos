@@ -64,23 +64,23 @@ static SCM all_modules;         /* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)
 {
-  if (MODULE_NAME(module) == STk_false) {
-    STk_fprintf(port, "#[environment %lx", (unsigned long) module);
-  } else {
-    if (MODULE_IS_LIBRARY(module)) {
-      const char *name = MODULE_NAME(module);
+  if (MODULE_IS_LIBRARY(module)) {
+    const char *name = MODULE_NAME(module);
 
-      STk_nputs(port, "#[library ", 11);
-      STk_putc('(', port);
-      for (const char *s = SYMBOL_PNAME(name); *s; s++) {
-        STk_putc((*s == '/') ? ' ': *s, port);
-      }
-      STk_putc(')', port);
-    } else  {
-      STk_nputs(port, "#[module ", 9);
-      STk_print(MODULE_NAME(module), port, mode);
+    STk_nputs(port, "#[library ", 11);
+    STk_putc('(', port);
+    for (const char *s = SYMBOL_PNAME(name); *s; s++) {
+      STk_putc((*s == '/') ? ' ': *s, port);
     }
+    STk_putc(')', port);
+  } else  {
+    STk_nputs(port, "#[module ", 9);
+    if (MODULE_NAME(module) == STk_false)
+      STk_fprintf(port, "%lx", (unsigned long) module);
+    else
+      STk_print(MODULE_NAME(module), port, mode);
   }
+
   if (!MODULE_IS_INSTANCIATED(module)) STk_puts(" (*)", port);
   STk_putc(']', port);
 }
@@ -902,16 +902,16 @@ struct environment_obj {
 
 static void print_environment(SCM env, SCM port, int _UNUSED(mode))
 {
-  STk_fprintf(port, "#[ENVIRONMENT %lx]", (unsigned long) env); //FIXME
+  STk_fprintf(port, "#[environment %lx]", (unsigned long) env);
 }
 
-static SCM make_environment(SCM stat, SCM dyn, SCM mod)
+DEFINE_PRIMITIVE("%make-environment", make_env, subr3, (SCM stat, SCM dyn, SCM mod))
 {
   SCM z;
 
   if (stat != STk_nil && !CONSP(stat)) STk_error("bad static environment");
   if (!FRAMEP(dyn) && !MODULEP(dyn))   STk_error("bad dynamic environment");
-  if (mod != STk_false) verify_module(mod);
+  verify_module(mod);
 
   NEWCELL(z, environment);
   ENV_STAT_ENV(z) = stat;
@@ -923,8 +923,9 @@ static SCM make_environment(SCM stat, SCM dyn, SCM mod)
 DEFINE_PRIMITIVE("%make-empty-environment", make_empty_env, subr0, (void))
 {
   SCM m = make_empty_module(STk_false);
-  return make_environment(STk_nil, m, m);
+  return STk_make_env(STk_nil, m, m);
 }
+
 
 DEFINE_PRIMITIVE("environment?", environmentp, subr1, (SCM env))
 {
@@ -1018,6 +1019,7 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(symb2libname);
   ADD_PRIMITIVE(populate_scheme_module);
+  ADD_PRIMITIVE(make_env);
   ADD_PRIMITIVE(env_stat_env);
   ADD_PRIMITIVE(env_dyn_env);
   ADD_PRIMITIVE(env_module);
