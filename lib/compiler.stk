@@ -59,7 +59,7 @@
 (define *inline-general*          '(=    <    <=    >    >=
                                     fx=? fx<? fx<=? fx>? fx>=?
                                     fx=  fx<  fx<= fx> fx>= ;FIXME should be deleted
-                                    cons car cdr null? list
+                                    cons car cdr null? pair? list
                                     not
                                     vector-ref vector-set!
                                     string-ref string-set!
@@ -1361,6 +1361,8 @@ doc>
       ((cdr)    (comp1 'IN-CDR))
       ((null?)  (comp1 'IN-NULLP))
       ((not)    (comp1 'IN-NOT))
+      ((pair?)  (comp1 'IN-PAIRP))
+      
       ((list)           (compile-args actuals env)
                         (emit 'IN-LIST len))
       ((vector-ref)     (comp2 'IN-VREF))
