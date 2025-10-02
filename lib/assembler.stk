@@ -192,7 +192,7 @@
            (IN-MEMBER           1)      ;; Inlining of memq, memv and member
            (JUMP-FALSE-V        1)      ;; JUMP-FALSE + set val to #void if jump
            (JUMP-TRUE-V         1)      ;; peephole: IN-NOT + JUMP-FALSE-V
-           (UNUSED-7            0) 
+           (IN-PAIRP            0)      ;; Inlining of pair?
            (UNUSED-8            0)
            (UNUSED-9            0)
            (UNUSED-10           0)

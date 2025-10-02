@@ -1814,7 +1814,6 @@ CASE(DBG_VM)  {
   ;
 }
 
-CASE(UNUSED_7)
 CASE(UNUSED_8)
 CASE(UNUSED_9)
 CASE(UNUSED_10)
@@ -2015,7 +2014,7 @@ CASE(IN_CDR)    {
 CASE(IN_NULLP)  { vm->val = MAKE_BOOLEAN(vm->val == STk_nil);              NEXT1;}
 CASE(IN_LIST)   { vm->val = listify_top(fetch_next(), vm);                 NEXT1;}
 CASE(IN_NOT)    { vm->val = SCHEME_NOT(vm->val);                           NEXT1;}
-
+CASE(IN_PAIRP)  { vm->val = MAKE_BOOLEAN(CONSP(vm->val));                  NEXT1;}
 
 CASE(IN_EQUAL)  { vm->val = STk_equal(pop(), vm->val);                     NEXT1;}
 CASE(IN_EQV)    { vm->val = STk_eqv(pop(), vm->val);                       NEXT1;}
