@@ -484,12 +484,14 @@ doc>
   (set! require
     (lambda (what)
       #:require
+      (unless (string? what) (error "bad string ~S" what))
       (#%require what (load-path))))
 
 
   (set! require/provide
     (lambda (what)
       #:require/provide
+      (unless (string? what) (error "bad string ~S" what))
       (unless (member what provided)
         (%load what (load-path) (load-suffixes) #f))
       (provide what)))
@@ -498,6 +500,7 @@ doc>
   (set! provide
     (lambda (what)
       #:provide
+      (unless (string? what) (error "bad string ~S" what))
       (unless (member what provided)
         (set! provided (cons what provided)))
       what))
@@ -506,6 +509,7 @@ doc>
   (set! provided?
     (lambda (what)
       #:provided
+      (unless (string? what) (error "bad string ~S" what))
       (and (member what provided) #t))))
 
 
