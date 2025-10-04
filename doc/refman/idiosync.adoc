@@ -195,11 +195,41 @@ Those parameters are described below.
 {{insertdoc 'compiler:verify-assume}}
 
 
-=== Customizing the reader
+=== Reader
+
+==== STklos reader features
+
+When reading inexact real numbers in base 10, {{stklos}} will interpret
+the `#` sign as a zero, except when it is the first character. If the
+exactness is not specified, it is automatically forced to inexact.
+
+[source,scheme]
+----
+2304  => 2304
+23#4  => 2304.0
+1###  => 1000.0
+0#.2  => 0.2
+0#.   => 0.0
+0#    => 0.0
+1.#   => 1.0
+1#.   => 10.0
+1#.#1 => 10.01
+1#2#3 => 10203.0
+----
+
+{{stklos}} accepts both `(...)` and `[...]` as list delimiters, but they
+cannot be mixed:
+
+[source,scheme]
+----
+(equal? '(a b) '[a b]) => #t
+'(a b]                 => error
+----
+
+==== Customizing the reader
 
 {{stklos}} reader compiler behaviour can be customized by several parameters.
 Those parameters are described below.
 
 {{insertdoc 'read-brace-handler}}
 {{insertdoc 'define-read-directive}}
-
