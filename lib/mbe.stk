@@ -168,6 +168,8 @@ doc>
 (define mbe:ellipsis-sub-envs           #f)
 (define mbe:contained-in?               #f)
 
+(define ellipsis-marker (gensym "ELLIPSIS-"))
+
 ;=============================================================================
 
 ;; reverse assq:
@@ -674,6 +676,85 @@ doc>
     (and (pair? x) (pair? (cdr x)) (eq? (cadr x) ellipsis))))
 
 
+;;; tests if x is an ellipsis escape pattern, i.e., of the form
+;;; (... <template>)
+;;;
+;;; (mbe:ellipsis-escape? 'a '...)         => #f
+;;; (mbe:ellipsis-escape? '(a b) '...)     => #f
+;;; (mbe:ellipsis-escape? '(... b) '...)   => #t
+;;; (mbe:ellipsis-escape? '(... ...) '...) => #t
+;;; (mbe:ellipsis-escape? '(... b c) '...) => error
+(define mbe:ellipsis-escape?
+  (lambda (expr ell)
+    (and (pair? expr)
+         (eq? ell (car expr))
+         (pair? (cdr expr)))))
+
+
+;; Simple substitituon x -> y in a nested list.
+;;
+;; (replace
+;;  '(a b (c d e) (f (d e) g) h e)
+;;  'e
+;;  'EH) => (a b (c d EH) (f (d EH) g) h EH)
+;;
+;; The test used is eq? so no substitution is done
+;; in the following case, for example:
+;;
+;; (replace
+;;  '(a b (c d (e e e)) (f (d e) g) h (e e e))
+;;  '(e e e)
+;;  'EH) => '(a b (c d (e e e)) (f (d e) g) h (e e e))
+;;
+(define (replace lst x y)
+  (cond ((eq? lst x) y)
+        ((pair? lst)
+         (cons (replace (car lst) x y)
+               (replace (cdr lst) x y)))
+        (else lst)))
+
+;; mbe:subst-ellipsis will replace the ellipsis symbol inside
+;; a template that is marked as an "ellipsis escape":
+;;
+;; (mbe:subst-ellipsis
+;;  '(... x)
+;;  '... 'ELL)         => 'x
+;;
+;; (mbe:subst-ellipsis
+;;  '(... ...)
+;;  '... 'ELL)         => 'ELL
+;;
+;; (mbe:subst-ellipsis
+;;  '(a (b ... x) c)
+;;  '... 'ELL)         => '(a (b ... x) c)
+;;
+;; (mbe:subst-ellipsis
+;;  '(a (... x) c)
+;;  '... 'ELL)         => '(a x c)
+;;
+;;  (mbe:subst-ellipsis
+;;  'a
+;;  '... 'ELL)          => 'a
+;;
+;; (mbe:subst-ellipsis
+;;  '(a (b (... (x y z)) c) d)
+;;  '... 'ELL)          => '(a (b (x y z) c) d)
+;;
+;; (mbe:subst-ellipsis
+;;  '(a (b (... (x (... u) y z)) c) d)
+;;  '... 'ELL)          => (a (b (x (ELL u) y z) c) d)
+;;
+;; (mbe:subst-ellipsis
+;;  '(a (b (... c d)))
+;;  '... 'ELL)          => error
+(define (mbe:subst-ellipsis lst ell new-ell)
+  (cond ((mbe:ellipsis-escape? lst ell)
+         (cadr (replace lst ell new-ell)))
+        ((pair? lst)
+         (map* (lambda (x) (mbe:subst-ellipsis x ell new-ell)) lst))
+        (else lst)))
+
+
 #|
 
                         Original DEFINE-SYNTAX
@@ -737,21 +818,72 @@ doc>
           (let ((in-pattern  (caar  l))  ; example '(f a b)
                 (out-pattern (cadar l))) ; example '(+ a b)
             (if (mbe:matches-pattern? in-pattern macro-form keywords ellipsis)
-                (let ((tmp (hyg:tag out-pattern
+                ;; We call mbe:subst-ellipsis on the out-pattern before anything else, so the
+                ;; escaped ellipsis patterns have their ellispses truned into the gensymed
+                ;; symbol "ellipsis-marker".
+                ;; Then, after doing the tag/untag/get-bindings, we call replace to put
+                ;; the ellipsis symbols back into their places.
+                (let ((tmp (hyg:tag (mbe:subst-ellipsis out-pattern ellipsis ellipsis-marker)
                                     (append! (hyg:flatten in-pattern) keywords)
                                     '()
                                     ellipsis)))
-                  (hyg:untag (mbe:expand-pattern (car tmp)
-                                                 (mbe:get-bindings in-pattern
-                                                                   macro-form
-                                                                   keywords
-                                                                   ellipsis)
-                                                 keywords
-                                                 ellipsis)
-                             (cdr tmp)
-                             '()))
+                  (replace (hyg:untag (mbe:expand-pattern (car tmp)
+                                                          (mbe:get-bindings in-pattern
+                                                                            macro-form
+                                                                            keywords
+                                                                            ellipsis)
+                                                          keywords
+                                                          ellipsis)
+                                      (cdr tmp)
+                                      '())
+                           ellipsis-marker ellipsis))
                 (Loop (cdr l))))))))
 
+;; This utility checks for ellipsis escaping patterns written wrongly, like
+;; (... a b)  --> the "b" cannot be there
+(define (check-wrong-ellipsis-escape-single expr ell)
+  (when (and (pair? expr)
+             (eq? ell (car expr))
+             (list? (cdr expr))) ;;  length of cdr may be 0 (bad) 1 (good) or more (bad).
+    (when (null? (cdr expr))     ;; length of expr = 1, only (...)
+      (syntax-error 'syntax-rules "Misplaced ellipsis"))
+    (unless (null? (cddr expr))  ;; length of expr > 2, we have (... a more)
+      (syntax-error 'syntax-rules
+                    "In (<ellipsis> <pattern>), <pattern> should be a single element: ~s" expr))))
+
+
+;; for-each, but goes into sublists. used by the ellipsis escaping chack in syntax-rules
+(define (deep-for-each f lst)
+  (cond
+   ((null? lst)
+    (void))
+   ((pair? lst)
+    (f lst)
+    (for-each* (lambda (x) (deep-for-each f x)) lst)
+    (void))
+   (else (void))))
+
+;; Check for wrong ellipsis escaping patterns
+(define (check-wrong-ellipsis-escape clauses ell)
+  ;; clauses is like
+  ;;
+  ;; (((arg1 arg2 ...)
+  ;;   template))
+  ;;
+  ;; then each clause is
+  ;;
+  ;; ((arg1 arg2 ...)
+  ;;   template)
+  ;;
+  ;; so we do for-each in the clauses list, and in each one we run
+  ;; deep-for-each on (cadr clause)
+  (for-each
+   (lambda (clause)
+     (deep-for-each
+      (lambda (x)
+        (check-wrong-ellipsis-escape-single x ell))
+      (cadr clause)))
+   clauses))
 
 ;;;; ----------------------------------------------------------------------
 ;;;;
@@ -793,6 +925,11 @@ doc>
                                  (car keywords)))))  ;; otherwise name is #f
       ;; Check that the clauses are correct
       (for-each (lambda (c) (check-clause c name)) clauses)
+
+      ;; Check if ellipsis patterns are proper (if any). If they are not,
+      ;; an error will be signaled by check-wrong-ellipsis-escape
+      ;; * Should we export this symbol from MBE? It will only be used here.
+      ((in-module MBE check-wrong-ellipsis-escape) clauses ellipsis)
 
       ;; return a transformer
       `(lambda ,args
