@@ -400,7 +400,7 @@ DEFINE_PRIMITIVE("fxsqrt", fxsqrt, subr1, (SCM o))
   {
     long no = INT_VAL(o);
     if (no < 0)   STk_error("non negative fixnum expected. It was: ~S", o);
-    long n1 = (long) sqrt((float)no);
+    long n1 = (long) sqrt((double)no);
     long n2 = no - (n1*n1);
     return STk_n_values(2,
                         MAKE_INT(n1),
