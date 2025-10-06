@@ -816,7 +816,7 @@ static inline SCM real2integer(SCM r)
   */
   if (floor(v) != v || isinf(v)) {
     /* This is not an inexact integer (weak test) */
-    STk_error("bad number (~s) in an integer division", r);
+    STk_error("non-integer real number (~s) in an integer division", r);
   }
   return double2integer(v);
 }
