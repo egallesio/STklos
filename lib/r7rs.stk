@@ -32,7 +32,8 @@
         exact-integer?
         floor-quotient floor/ truncate/ truncate-quotient
         truncate-remainder floor-remainder
-        square exact-integer-sqrt exact inexact
+        square
+        exact inexact
         boolean=?
         member assoc
         symbol=?
@@ -482,46 +483,6 @@ doc>
 (define truncate-quotient  quotient)
 (define truncate-remainder remainder)
 (define floor-remainder    modulo)
-
-
-#|
-<doc R7RS exact-integer-sqrt
- * (exact-integer-sqrt k)
- *
- * Returns two non negatives integers |s| and |r| where
- * |k=s**2+r| and |k<(s+1)**2|.
- *
- * @lisp
- * (exact-integer-sqrt 4)     => 2 0
- * (exact-integer-sqrt 5)     => 2 1
- * @end lisp
-doc>
-|#
-(define (exact-integer-sqrt k)
-  (define (isqrt n)
-    ;; Compute integer square root using Newton's method.
-
-    ;; We take special care when picking the initial guess, which
-    ;; is computed in the 'xn' argument to the named let below:
-    ;; this is a very good estimate (much better than the usual
-    ;; textbook "n/2" guess), and safe:
-    ;;
-    ;; (expt 2 (+ 1 (quotient (integer-length n) 2)))
-    ;;
-    ;; which is the least power of two bigger than SQRT(n).
-    (let loop ((xn (expt 2 (+ 1 (quotient (integer-length n) 2)))))
-      (let ((xn1 (quotient (+ xn (quotient n xn)) 2)))
-        (if (>= xn1 xn)
-            xn
-            (loop xn1)))))
-
-  (unless (and (exact-integer? k)(>= k 0))
-    (error "non negative integer expected. It was: ~S" k))
-  (let ((s (if (fixnum? k)
-               (let ((v (sqrt k)))
-                 (if (exact? v) v (inexact->exact (floor v))))
-               (isqrt k))))
-    (values s (- k (* s s)))))
 
 
 #|

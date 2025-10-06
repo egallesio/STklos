@@ -4136,6 +4136,37 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
   return STk_void; /* never reached */
 }
 
+/*
+<doc R7RS exact-integer-sqrt
+ * (exact-integer-sqrt k)
+ *
+ * Returns two non negatives integers |s| and |r| where
+ * |k=s**2+r| and |k<(s+1)**2|.
+ *
+ * @lisp
+ * (exact-integer-sqrt 4)     => 2 0
+ * (exact-integer-sqrt 5)     => 2 1
+ * @end lisp
+doc>
+*/
+EXTERN_PRIMITIVE("fxsqrt", fxsqrt, subr1, (SCM o));
+DEFINE_PRIMITIVE("exact-integer-sqrt", exact_int_sqrt, subr1, (SCM z))
+{
+  if ( (!(INTP(z) || BIGNUMP(z))) ||
+       negativep(z))
+    STk_error("non negative integer expected. It was: ~s", z);
+
+  if (INTP(z)) return STk_fxsqrt(z);
+
+  mpz_t root;
+  mpz_t rem;
+  mpz_init(root);
+  mpz_init(rem);
+  mpz_sqrtrem(root, rem, BIGNUM_VAL(z));
+  return STk_n_values(2,
+                      bignum2number(root),
+                      bignum2number(rem));
+}
 
 /*
 <doc expt
@@ -5014,6 +5045,7 @@ int STk_init_number(void)
 
   ADD_PRIMITIVE(square);
   ADD_PRIMITIVE(sqrt);
+  ADD_PRIMITIVE(exact_int_sqrt);
   ADD_PRIMITIVE(expt);
 
 
