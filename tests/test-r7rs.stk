@@ -842,6 +842,32 @@
           (exact-integer-sqrt 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999)
         (cons root rem)))
 
+(test "exact-integer-sqrt.5"
+      '(1234567 654321)
+      (receive (q r) (exact-integer-sqrt 1524156331810) (list q r)))
+
+(test "exact-integer-sqrt.6"
+      '(124 74)
+      (receive (q r) (exact-integer-sqrt 15450) (list q r)))
+
+(test "exact-integer-sqrt.7"
+      '(1073741823 2147483424)
+      (receive (q r) (exact-integer-sqrt 1152921504606846753) (list q r)))
+
+;; exact-integer-sqrt will internally call fxsqrt for fixnums:
+;; Why the loop? Well, it would be nice to test all cases near the edge so
+;; we will be sure no specific numeric strangeness happens. One point to
+;; keep in mind is that this is fairly portable: it will work for different
+;; architectures, with different bit lengths for fixnums (C 'sizeof(long)'
+;; may vary).
+(dotimes (k 1000)
+  (test "exact-integer-sqrt.8"
+        (- (greatest-fixnum) k)
+        (let ((res (receive (q r) (exact-integer-sqrt (- (greatest-fixnum) k)) (list q r))))
+          (let ((q (car res))
+                (r (cadr res)))
+            (+ (* q q) r)))))
+
 ;; -----------------------------------------------------------------
 (test-subsection "6.3 Booleans")
 
