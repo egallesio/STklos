@@ -214,8 +214,8 @@ doc>
                     state specific))))
 
      ((%icall? x)
-      (format port "an icall (internal compiler call) object, ")
-      (format port "whose name is `~a' and compiling function set to ~a"
+      (format port "an icall (internal compiler call) object.\n")
+      (format port "Its name is `~a' and its compiling function ~a"
               (%icall-name x)
               (%icall-function x)))
 
