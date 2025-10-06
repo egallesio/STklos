@@ -25,14 +25,14 @@ GC: The Boehm's conservative garbage collector for C and C++
 
 PCRE2: Perl-Compatible Regular Expression library
 ================================================
-    - Version: 10.45
+    - Version: 10.46
     - License: BSD
     - Home: http://www.pcre.org/
 
 
 libffi - a portable foreign function interface library
 ======================================================
-        - Version 3.5.1
+        - Version 3.5.2
         - License: Free (BSD like)
         - Home Page: https://sourceware.org/libffi/
 

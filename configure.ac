@@ -404,7 +404,7 @@ else
         PCRE2VER=$(${PKGCONFIG} --modversion libpcre2-posix)
      else
         PCRE2INC=""
-        PCRE2LIB="-lpcre-8 -lpcre2-posix"
+        PCRE2LIB="-lpcre2-8 -lpcre2-posix"
      fi
      DLLIBS="$DLLIBS $PCRE2LIB"
      AC_DEFINE(HAVE_PCRE2, 1 , [We use our version of pcre])
