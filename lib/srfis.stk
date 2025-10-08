@@ -299,6 +299,10 @@
     (258 "Uninterned symbols" () "srfi-258")
     ;; 259 Tagged procedures with type safety (draft)
     (260 "Generated symbols" () "srfi-260")
+    ;; 261 Portable SRFI Library Reference
+    ;; 262 Extensible pattern matcher
+    ;; 263 Prototype Object System
+    (264 "String Syntax for Scheme Regular Expressions" () "srfi-264")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
