@@ -1119,13 +1119,103 @@ A complete example is given below
 (define bool #t)                     ;; use a variable to avoid compile time optims.
 (%icall-function #%if)      => #f    ;; if we don't have used "if" before
 (if bool 1 2)               => 1     ;; first use of "if"
-(%icall-function #%if)      => #[closure compile-%%if] 
+(%icall-function #%if)      => #[closure compile-%%if]
 ----
 
 As we see, the first call to the `if` macro (which expands in a `#%if` use)
 initializes the function field of the icall. Hence, later uses of this icall
-will find the internal function of the compiler to call more quickly. 
+will find the internal function of the compiler to call more quickly.
 
+=== Scopes / Environments
+
+In Scheme, the 'static scope' at a certin position of the code text is
+the bindings of variables to locations that can be inferred from the
+program. For example,
+
+[source,scheme]
+----
+(let ((number 2)
+      (text "something")
+      (more-text "more things"))
+  (if (number > 0)
+      (let ((number -1))
+        (display "x""))))
+----
+In the line "display x", the static scope is
+
+----
+number    -> [ -1 ]
+......... (next level)
+more-text -> [ "more things" ]
+text      -> [ "soething" ]
+number    -> [ 2 ]
+----
+
+The *dynamic scope* is the way the virtual machine implements the static scope.
+It will create a structure that is a linked list of _frames_ (each frame is
+a sequence of locations; but variable names are not stored anymore -- the
+compiler translated them all into locations already).
+
+The data type 'environment' contains thestatic environment, the dynamic
+environment, and the module for a iven point in the code.
+
+[source,c]
+----
+struct environment_obj {
+  stk_header header;
+  SCM dyn_env;                /* dynamic (runtime) environment - a LIST */
+  SCM static_env;             /* static (compiler) environment - */
+  SCM module;                 /* dynamic module */
+};
+----
+
+The following primitives are used to work with environments:
+* `%make-empty-environment`
+* `%make-environment`
+* `environment?`
+* `%environment-static-environment`
+* `%environment-dynamic-environment`
+* `%environment-module`
+Along with the compiler call `#%current-environment'.
+
+The following examples makes this clear.
+
+[source,scheme]
+----
+(define e #f)
+(define (fun a)
+  (let ((b 10))
+    (set! e (#%current-environment))))
+
+(let ((a 1) (b 2))
+  (let ((c 3)) (fun 5)))
+
+(%environment-module e)              => #[module stklos]
+(%environment-static-environment e)  => (((b) ()) ((a) ()))
+(%environment-dynamic-environment e) => #[frame 7f1bbf886420]
+----
+That frame as a "next frame" below it. This is clear from the
+definition of frame in `stklos.h`:
+
+[source,c]
+----
+struct frame_obj {
+  stk_header header;
+  SCM next_frame;
+  SCM owner;
+  SCM locals[1];        /* the values associated to the names */
+};
+
+#define FRAME_LENGTH(p)         (BOXED_INFO(p))
+#define FRAME_NEXT(p)           (((struct frame_obj *) (p))->next_frame)
+#define FRAME_OWNER(p)          (((struct frame_obj *) (p))->owner)
+#define FRAME_LOCALS(p)         (((struct frame_obj *) (p))->locals)
+#define FRAME_LOCAL(p, i)       (FRAME_LOCALS(p)[i])
+#define FRAMEP(p)               (BOXED_TYPE_EQ((p), tc_frame))
+----
+
+So `#%current-environment` will, *at runtime*, capture both the dynamic (runtime)
+environment and the static (compile time) environment.
 
 === Peephole optimizer
 
@@ -1566,4 +1656,3 @@ static int collect_stats = 0;
 static void tick(STk_instr b, STk_instr *previous_op, clock_t *previous_time);
 #endif
 ----
-
