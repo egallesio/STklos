@@ -408,10 +408,15 @@ doc>
  * subsequent loads of this file. |Require/provide| is more or less equivalent to
  * a |require| followed by a |provide|. |Provided?| returns `#t` if
  * |string| was already provided; it returns `#f` otherwise.
+ *
+ * NOTE: When the SLIB Portable Scheme Library is loaded, `require` is
+ * overloaded by a new version which accepts whose parameter may be a
+ * symbol or a string. If it is a symbol, the slib package is required
+ * (as described in the slib  documentation). If it is a string, the
+ * the standard {{stklos}} `require` is used.
 doc>
 |#
-(define %require        #f)
-(define require         #f)
+(define %require        #f)   ;; effective requiring function. "require" is a macro
 (define provide         #f)
 (define provided?       #f)
 (define require/provide #f)
@@ -453,6 +458,8 @@ doc>
 
   (set! %require
     (lambda (what lib-only?)
+      #:require
+      (unless  (string? what) (error "bad string ~S" what))
       (when stklos-building?
         ;; When building STklos, require-library ==  require.
         ;; Otherwise, we need an already installed  STklos
@@ -481,15 +488,10 @@ doc>
       what))
 
 
-  (set! require
-    (lambda (what)
-      #:require
-      (#%require what (load-path))))
-
-
   (set! require/provide
     (lambda (what)
       #:require/provide
+      (unless (string? what) (error "bad string ~S" what))
       (unless (member what provided)
         (%load what (load-path) (load-suffixes) #f))
       (provide what)))
@@ -498,6 +500,7 @@ doc>
   (set! provide
     (lambda (what)
       #:provide
+      (unless (string? what) (error "bad string ~S" what))
       (unless (member what provided)
         (set! provided (cons what provided)))
       what))
@@ -506,6 +509,7 @@ doc>
   (set! provided?
     (lambda (what)
       #:provided
+      (unless (string? what) (error "bad string ~S" what))
       (and (member what provided) #t))))
 
 
