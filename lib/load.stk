@@ -453,6 +453,8 @@ doc>
 
   (set! %require
     (lambda (what lib-only?)
+      #:require
+      (unless  (string? what) (error "bad string ~S" what))
       (when stklos-building?
         ;; When building STklos, require-library ==  require.
         ;; Otherwise, we need an already installed  STklos
