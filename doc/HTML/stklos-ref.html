@@ -14145,6 +14145,22 @@ subsequent loads of this file. <code>Require/provide</code> is more or less equi
 a <code>require</code> followed by a <code>provide</code>. <code>Provided?</code> returns <code>#t</code> if
 <code>string</code> was already provided; it returns <code>#f</code> otherwise.</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+When the SLIB Portable Scheme Library is loaded, <code>require</code> is
+overloaded by a new version which accepts whose parameter may be a
+symbol or a string. If it is a symbol, the slib package is required
+(as described in the slib  documentation). If it is a string, the
+the standard <strong><em>STklos</em></strong> <code>require</code> is used.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="doc_file_primitives">4.13.2. File Primitives</h4>
