@@ -389,6 +389,23 @@
              (negative? (real-part c))
              (positive? (imag-part c)))))
 
+;;
+;; CL complex-number notation
+;;
+(test "CL complex.1" 1+2i (read-from-string "#c(1 2)"))
+(test "CL complex.2" 1+2i (read-from-string "#C(1 2)"))
+(test "CL complex.3" -inf.0+inf.0i (read-from-string "#c(-inf.0 +inf.0)"))
+(test/error "CL complex.4" (read-from-string "#c"))
+(test/error "CL complex.4" (read-from-string "#c(1)"))
+(test/error "CL complex.4" (read-from-string "#c(1 . 2)"))
+(test/error "CL complex.4" (read-from-string "#c(1 2 3)"))
+(test/error "CL complex.4" (read-from-string "#c(+ 2)"))
+
+
+
+
+
+
 
 ;;------------------------------------------------------------------
 (test-subsection "integer writer syntax")

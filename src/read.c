@@ -437,7 +437,7 @@ static SCM read_token(SCM port, int c, struct read_context *ctx)
   tok = w.word;
 
 
-  if (seen_pipe < 0) {   // No '|' was used in the worard read. 
+  if (seen_pipe < 0) {   // No '|' was used in the worard read.
     SCM z = STk_Cstr2number(tok, 10L);
     if (z != STk_false)
       return z;
@@ -989,6 +989,22 @@ static SCM read_sharp(SCM port, struct read_context *ctx, int inlist)
     case '&': return STk_make_box(read_rec(port, ctx, 0));
 
     case '%':  return STk_get_icall(read_rec(port, ctx, 0));
+
+    case 'c':
+    case 'C': {                         // Common-Lisp complex notation
+      int next = STk_getc(port);
+      if (next != '(')
+        STk_error("'(' expected to read a complex number");
+      else {
+        SCM lst = read_list(port, ')',ctx);
+        if (CONSP(lst) && CONSP(CDR(lst)) && NULLP(CDR(CDR(lst)))) {
+          return STk_make_rectangular(CAR(lst), CAR(CDR(lst)));
+        }
+        else
+          STk_error("cannot make complex number with ~S", lst);
+      }
+      break;
+    }
 
     case 'p':
     case 'P': return read_address(port);
