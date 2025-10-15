@@ -888,6 +888,8 @@ struct complex_obj {
                                  !REALP(COMPLEX_REAL(p))  && \
                                  !REALP(COMPLEX_IMAG(p)))
 
+EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i));
+
 
   /****
    **** Conversions
