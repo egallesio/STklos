@@ -170,6 +170,11 @@ right square bracket (see _<<doc_pairs_and_lists>>_).
 a symbol introduces a keyword.  Keywords are described in section
 Keywords (see _<<doc_keywords>>_).
 
+
+* `#c(v1 v2)` or `#C(v1 v2)` can be used to denote the complex number
+  with `v1` real part and `v2` imaginary part. This notation is
+  similar to the Common Lisp one used for complex numbers.
+
 * `{{sharp}}n=` ((("Circular structure"))) 
  is used to represent circular structures.  The value given of `n`
 must be a number. It is used as a label, which can be referenced
