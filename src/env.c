@@ -1026,7 +1026,7 @@ DEFINE_PRIMITIVE("%debug-environment", debug_env, subr12, (SCM e, SCM p)) {
   SCM dyn  = ENV_DYN_ENV(e);
   SCM stat = ENV_STAT_ENV(e);
 
-  STk_puts("\\\n ----------------\n", port);
+  STk_puts(" ----------------\n", port);
 
   while(CONSP(stat)) { /* For each level */
     SCM vars;
