@@ -170,8 +170,7 @@ Furthermore, {{stklos}} defines two read directives:
   uniform vectors (such as `#s8` or `#f32`, ...)
 - `#!no-uvector-syntax` to forbid the reading of uniform vector lexical syntax.
 
-When this SRFI is imported/loaded, {{stklos}} reader accepts numbers with
-underscores.
+When this SRFI is imported/loaded, {{stklos}} reader accepts uniform vectors.
 
 
 // **** SRFI-10
