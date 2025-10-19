@@ -2,7 +2,7 @@
  * Copyright 1988, 1989 Hans-J. Boehm, Alan J. Demers
  * Copyright (c) 1991-1994 by Xerox Corporation.  All rights reserved.
  * Copyright (c) 1999-2001 by Hewlett-Packard Company. All rights reserved.
- * Copyright (c) 2008-2021 Ivan Maidanski
+ * Copyright (c) 2008-2025 Ivan Maidanski
  *
  * THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
  * OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
@@ -74,6 +74,13 @@
 #endif
 
 GC_FAR struct _GC_arrays GC_arrays /* = { 0 } */;
+
+#ifdef SEPARATE_GLOBALS
+void *GC_objfreelist[MAXOBJGRANULES + 1] = { NULL };
+void *GC_aobjfreelist[MAXOBJGRANULES + 1] = { NULL };
+
+word GC_bytes_allocd = 0;
+#endif
 
 GC_INNER unsigned GC_n_mark_procs = GC_RESERVED_MARK_PROCS;
 
@@ -411,7 +418,7 @@ STATIC void GC_init_size_map(void)
 
 #endif /* !ALWAYS_SMALL_CLEAR_STACK && !STACK_NOT_SCANNED */
 
-/* Return a pointer to the base address of p, given a pointer to a      */
+/* Return a pointer to the base address of p, given a pointer to        */
 /* an address within an object.  Return 0 o.w.                          */
 GC_API void * GC_CALL GC_base(void * p)
 {
@@ -960,6 +967,29 @@ GC_API void GC_CALL GC_init(void)
 #     ifndef GC_ALWAYS_MULTITHREADED
         GC_ASSERT(!GC_need_to_lock);
 #     endif
+      {
+#       if !defined(GC_BUILTIN_ATOMIC) && defined(HP_PA) \
+           && (defined(USE_SPIN_LOCK) || defined(NEED_FAULT_HANDLER_LOCK))
+          AO_TS_t ts_init = AO_TS_INITIALIZER;
+
+          /* Arrays can only be initialized when declared. */
+#         ifdef USE_SPIN_LOCK
+            BCOPY(&ts_init, (/* no volatile */ void *)&GC_allocate_lock,
+                  sizeof(GC_allocate_lock));
+#         endif
+#         ifdef NEED_FAULT_HANDLER_LOCK
+            BCOPY(&ts_init, (/* no volatile */ void *)&GC_fault_handler_lock,
+                  sizeof(GC_fault_handler_lock));
+#         endif
+#       else
+#         ifdef USE_SPIN_LOCK
+            GC_allocate_lock = AO_TS_INITIALIZER;
+#         endif
+#         ifdef NEED_FAULT_HANDLER_LOCK
+            GC_fault_handler_lock = AO_TS_INITIALIZER;
+#         endif
+#       endif
+      }
 #     ifdef SN_TARGET_PS3
         {
           pthread_mutexattr_t mattr;
@@ -1770,7 +1800,8 @@ GC_API void GC_CALL GC_start_mark_threads(void)
 #   endif
 # endif /* !GC_NO_TYPES && !SN_TARGET_PSP2 */
 
-  STATIC int GC_write(int fd, const char *buf, size_t len)
+  STATIC int GC_write(int fd GC_ATTR_UNUSED, const char *buf GC_ATTR_UNUSED,
+                      size_t len)
   {
 #   if defined(ECOS) || defined(PLATFORM_WRITE) || defined(SN_TARGET_PSP2) \
        || defined(NOSYS)
@@ -1975,7 +2006,7 @@ GC_API GC_warn_proc GC_CALL GC_get_warn_proc(void)
 
 #if !defined(PCR) && !defined(SMALL_CONFIG)
   /* Print (or display) a message before abnormal exit (including       */
-  /* abort).  Invoked from ABORT(msg) macro (there msg is non-NULL)     */
+  /* abort).  Invoked from ABORT(msg) macro (where msg is non-NULL)     */
   /* and from EXIT() macro (msg is NULL in that case).                  */
   STATIC void GC_CALLBACK GC_default_on_abort(const char *msg)
   {
@@ -2003,6 +2034,11 @@ GC_API GC_warn_proc GC_CALL GC_get_warn_proc(void)
       }
 #   else
       __android_log_assert("*" /* cond */, GC_ANDROID_LOG_TAG, "%s\n", msg);
+#   endif
+#   if defined(HAIKU) && !defined(DONT_CALL_DEBUGGER)
+      /* This will cause the crash reason to appear in any debug reports  */
+      /* generated (by the default system application crash dialog).      */
+      debugger(msg);
 #   endif
     }
 
