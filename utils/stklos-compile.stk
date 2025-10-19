@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2024 Erick Gallesio <eg@stklos.net>
+;;;; Copyright © 2001-2025 Erick Gallesio <eg@stklos.net>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -171,7 +171,7 @@
        :help "Append <dir> to the loading path")
       (set! (load-path) (append (load-path) (list dir))))
      (("includes-use-load-path"
-       :help "include and include-ci use the load-path parameter")
+       :help "Include and include-ci use load-path")
       (includes-use-load-path #t))
 
      "Misc. options"
