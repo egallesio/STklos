@@ -1,5 +1,110 @@
 NEWS
 ====
+## Version 2.20
+
+@jpellegrini
+@Retropikzel
+
+
+
+**Enhancements**
+
+* Globally, everything is a bit faster:
+     * some often used list primitives have been rewritten in C
+     * Scheme object allocation uses now a pool of pre-allocatted cells
+     * compiler is faster
+* ***STklos*** can be compiled with `-std=c23`
+* Reader:
+    * Accept the Common Lisp syntax for complex numbers
+    * Accept symbols with a leading sharp character
+    * Use can define new read directives
+    * new directives  `#!uvector-syntax` and `#!no-uvector-syntax` to allow/forbid the reading of unifom vectors.
+    * Skip characters until end of line when an error occurs in the REPL to avoid cascading errors.
+    * the behaviour of the reader can be customized when an opening angle bracket (or curly brace) is encountered.
+
+* VM:
+     * added specialized instruction for `pair?` testing
+     * added new instruction for `if` without `else`
+* `eval` can now evaluate an expression in a local (rather global) environment
+* Correct/enhance implementation of numerical functions in some corner cases (in particular with NaNs and infinities).
+* functions in R7RS libraries can be auto-loaded
+
+* **Syntax**:
+   * implement ellipsis escaping
+   * implementation enhancement of `let-syntax` and `define-syntax`
+   * `syntax-rules` returns now a matching function
+   * implement vector patterns in `syntax-rules`
+   * change: syntax value cannot be used in an expression
+   * all fundamental forms are now syntax and can be redefined as required by R⁷RS (they were special forms before)
+   * `let-syntax` accepts Scheme syntax as wall as Lisp like macros.
+* `describe` has been extended to give better information on certain object types
+* **FFI:**
+   * code has been enhanced and should be more secure.
+   * fixed precision problem between float and double
+   * permit to access array elements
+* **Compiler**
+   * some new optimizations
+   * enhanced the code rewriter.
+* Added support for the R7RS-large library `(scheme rlist)`
+
+
+**Extensions**
+
+- **GTklos** extension (GTK+ bindings)
+     * a documentation has been added
+     * code rewriting and widgets are more coherent
+     * deleted GTK+ deprecated properties
+     * Library paths are guessed for system which do not install libraries in standard places
+
+
+**New primitives / parameter objects**:
+
+* `pair-immutable! `
+* `c-size-of`
+* `cpointer-ref`
+* `cpointer-set!`
+* `cpointer-ref/abs`
+* `cpointer-set/abs!`
+* `symbol-interned?`
+* `compiler-current-port`
+* `includes-use-load-path`
+* `readline-startup-hook`
+* `readline-set-option!`
+* `readline-bind!`
+* `compiler:verify-assume`
+* `accept-uvector-syntax`
+* `define-read-directive`
+* `read-bracket-handler`
+* `read-brace-handler`
+
+
+**Updated embedded libraries**
+
+- `libffi` updated to version 3.5.2
+- `pcre2` updated to version 10.46
+- `libgc` updated to version 8.2.12
+
+**New supported SRFI**
+
+* SRFI-101: Purely Functional Random-Access Pairs and Lists
+* SRFI-234: Topological Sorting
+* SRFI 239: Destructuring Lists
+* SRFI-253: Data (Type-)Checking
+* SRFI-225: Dictionnaries
+* SRFI-258: Uninterned symbols
+- SRFI-260: Generated Symbols
+* SRFI-264: String Syntax for Scheme Regular Expressions
+
+**Misc:**
+
+* Updated documentation
+* Better error messages
+* Added tests
+* Code cleaning and optimizations
+* Bug fixes
+
+
+
 ## Version 2.10
 
 This version of ***STklos*** mostly enhances the 2.00 version released a year ago. As usual, this version could not have be finalized without the help of Jeronimo Pellegrini ([@jpellegrini](https://github.com/jpellegrini)).
@@ -37,7 +142,7 @@ This version of ***STklos*** mostly enhances the 2.00 version released a year ag
 - Better UTF-8 support and updated Unicode tables to version 16.0.0
 - Enhance the `apropos` primitive
 - New REPL variables: `@*`, `@1`, `@2`, `@3`, `@4` and `@5`
-- New REPL commands: `time`, `describe`, `expand`, `import`, `require-feature`, 
+- New REPL commands: `time`, `describe`, `expand`, `import`, `require-feature`,
   `open`, `browse`, `manual`, `apropos`
 - Documentation of a function can be accessed directly into the HTML Reeference Manual
 - Length of symbols is no more limited.

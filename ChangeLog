@@ -1,11 +1,258 @@
 ---
---- ChangeLog sice STklos 2.00 release
+--- ChangeLog since STklos 2.00 release (see ChangeLog.old for older changes)
 ---
 
+
+2026-02-08 Erick Gallesio <eg@stklos.net>
+	- Suppress the STk_make_frame function
+	- Merge branch 'jpellegrini-doc-continuations'
+	- Merge branch 'jpellegrini-gc-new'
+
+2026-02-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update libgc
+
+2026-02-05 Erick Gallesio <eg@stklos.net>
+	- Updated the README for GTklos (now that the library path is guessed)
+	- Add some information about the construction of GTKlos in QUICK-INSTALL.md
+	- Fix a problem with GTK and locales
+
+2026-02-04 Erick Gallesio <eg@stklos.net>
+	- Fix some non UTF-8 characters that were remaining in files
+	- Fix dialog demo
+	- Merge branch 'gtklos-path'
+	- Guess the path for GTk libraries to make GTklos installation simpler
+
+2026-02-02 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-not-not'
+	- Verify that not has not been oveloaded in double not optimization
+
+2026-01-26 Erick Gallesio <eg@stklos.net>
+	- Small refactoring of IF rewriter
+	- Fix: the old optimization did't work anymore
+	- Merge branch 'not-not' of github.com:jpellegrini/STklos into jpellegrini-not-not
+	- Merge branch 'jpellegrini-lcm'
+	- Small rewrite
+	- Merge branch 'lcm' of github.com:jpellegrini/STklos into jpellegrini-lcm
+	- Merge branch 'jpellegrini-optimize-rational-comparison'
+	- Merge branch 'optimize-rational-comparison' of github.com:jpellegrini/STklos into jpellegrini-optimize-rational-comparison
+	- Merge branch 'jpellegrini-zero'
+	- Merge branch 'zero' of github.com:jpellegrini/STklos into jpellegrini-zero
+	- Merge branch 'fix-number'
+	- Fix double2rational when using GMP light
+
+2026-01-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Test 0/0
+	- Fix 0/0 (which should not be zero)
+
+2026-01-13 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-srfi-255-single-dir'
+	- New boot.c
+
+2026-01-12 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'srfi-225-single-dir' of github.com:jpellegrini/STklos into jpellegrini-srfi-255-single-dir
+	- Added function readline-bind!
+
+2026-01-07 Erick Gallesio <eg@stklos.net>
+	- Rewrite readline-set-option!
 	
-	
+2026-01-06 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'fix-slib'
+	- Permit to load "lib/slib" (or SRFI-96) even if SLIB is not found
+	- Better message in require/provide when parameter is not a string
+
+2026-01-05 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-expt-small'
+	- Added tests for (expt real bignum)  where the result is 0.0 and -0.0
+	- Take care of the sign of 0.0 with (expt small big)
+	- Merge branch 'expt-small' of github.com:jpellegrini/STklos into jpellegrini-expt-small
+	- Merge branch 'jpellegrini-srfi-101'
+	- Added rlist to the supported R7RS large libraries
+	- Invalidated the SRFI-101 primitives documentation
+
+2026-01-04 Erick Gallesio <eg@stklos.net>
+	- Add the (missing) new SRFI-101 test file
+	- Delete SRFI-101 tests the first tests and place it among other the SRFI tests
+
+2026-01-03 Erick Gallesio <eg@stklos.net>
+	- Fix a dependency rule in Makefile.am
+	- Merge branch 'srfi-101' of github.com:jpellegrini/STklos into jpellegrini-srfi-101
+
+2025-12-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- (expt x bignum) is zero if -1.0 < x < 1.0 and x is inexact
+
+2025-12-18 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'Retropikzel-master'
+	- Use a parameter object for the list of provided files
+	- Replaced some remaining (require "srfi-N") by (require "srfi/N")
+	- Simpilfied (a lot) the require and provide code.
+	- Symplified all the require/provide stuff
+	- Fixed the issue with SRFI-96
+
+2025-12-15 Erick Gallesio <eg@stklos.net>
+	- Attribute authorship of tests/test-cond-expand to Retropikzel
+	- WIP: modified require and provide srfi-N is translated in srfi/N
+
+2025-12-12 retropikzel <retropikzel@iki.fi>
+	- Fix the test check part
+	- Add long cond-expand test
+
+2025-12-11 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-gcd-abs'
+	- Merge branch 'gcd-abs' of github.com:jpellegrini/STklos into jpellegrini-gcd-abs
+	- Added dependencies rules for libraries written in C and Scheme
+
+2025-12-10 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'autoload'
+	- Import only the triggering symbols instad of the autoload symbol list
+	- Add documentation for autoload form.
+	- Merge branch 'cyclic-box'
+	- Restrict the cycle detection to the mono-valued cells
+	- Fix a bug when printing cyclic boxes
+	- Merge branch 'jpellegrini-srfi-127'
+	- Restore back the test on nullity of one of the sequences
+
+2025-12-09 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'srfi-127' of github.com:jpellegrini/STklos into jpellegrini-srfi-127
+	- Merge branch 'big-cond-expand'
+	- Fix: Forgot to add a provide in "srfi/175.stk" (it was empty)
+
+2025-12-07 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Optimize lseq=?
+
+2025-12-06 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI 101: Purely Functional Random-Access Pairs and Lists
+
+2025-12-04 Erick Gallesio <eg@stklos.net>
+	- Changed the way we test if a symbol has been defined in an autoload
+	- apropos and describe autoloading update
+	- getopt and help autoloading updated
+	- trace and pretty-print autoloading updated
+	- srf-27 and srfi-48 autoloading updated
+	- Added the missing file "autoloads.stk" to the list of boot files
+
+2025-12-03 Erick Gallesio <eg@stklos.net>
+	- When autoloading a library, Use import only for the specified symbols
+	- Merge autoload and autoimport.
+
+2025-12-02 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove extra absolute computations in gcd2_fixnum
+
+2025-11-28 Erick Gallesio <eg@stklos.net>
+	- Lower the value of the wait in the test of SRFI-216
+	- Fixed tanh for complex numbers
+	- Fixed the test and the condition for atanh with a bignu parameter
+	- Merge branch 'jpellegrini-srfi-264'
+	- Deletion of 1200 additional duplicate tests
+
+2025-11-25 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'srfi-264' of github.com:jpellegrini/STklos into jpellegrini-srfi-264
+
+2025-11-24 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-atanh-fix'
+	- Merge branch 'atanh-fix' of github.com:jpellegrini/STklos into jpellegrini-atanh-fix
+
+2025-11-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix tanh for large numbers
+
+2025-11-17 Erick Gallesio <eg@stklos.net>
+	- Update boot.c
+	- Merge branch 'jpellegrini-optimize-srfi-1'
+	- Fix: verify that the count is a valid integer
+	- Fix: accept no more than 3 parameters for iota
+	- Fix: verify for constant lists for take!, split-at! and take-right!
+	- Fix: split-at and split-at! on circular lists.
+
+2025-11-12 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-optimize-repeat'
+	- Merge branch 'optimize-repeat' of github.com:jpellegrini/STklos into jpellegrini-optimize-repeat
+	- Furthermore factorization
+	- Factorize error messages
+	- Fix error message
+	- Suppressed the inlin qualifier for car_cdrs
+	- Use reverse! instead of reverse in car_cdrs
+
+2025-11-08 Erick Gallesio <eg@stklos.net>
+	- Add prefix `STk_" to list_type_and_length since it is now exported
+	- Fix: Bad comparison and bad print format in a validation test
+	- Merge branch 'optimize-srfi-1' of github.com:jpellegrini/STklos into jpellegrini-optimize-srfi-1
+
+2025-11-05 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-acos'
+	- Merge branch 'acos' of github.com:jpellegrini/STklos into jpellegrini-acos
+	- Merge branch 'jpellegrini-max-min'
+	- Simplified the code of min/max
+	- Merge branch 'max-min' of github.com:jpellegrini/STklos into jpellegrini-max-min
+
+2025-11-01 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-srfi-239'
+	- Added some tests to SRFI-239
+	- Fixed a test for SRFI-239
+	- Merge branch 'srfi-239' of github.com:jpellegrini/STklos into jpellegrini-srfi-239
+	- Merge branch 'jpellegrini-tiny-changes'
+	- Merge branch 'tiny-changes' of github.com:jpellegrini/STklos into jpellegrini-tiny-changes
+	- Merge branch 'jpellegrini-small-opt'
+	- Simplified a bit more double2rational function
+	- Merge branch 'small-opt' of github.com:jpellegrini/STklos into jpellegrini-small-opt
+	- Merge branch 'jpellegrini-bignum-fits-double'
+	- Merge branch 'bignum-fits-double' of github.com:jpellegrini/STklos into jpellegrini-bignum-fits-double
+	- Fix: map or for-each with a non procedure did not yield an error
+	- Merge branch 'jpellegrini-fold-reduce'
+	- Merge branch 'jpellegrini-fold-reduce'
+	- Small rewrite of fold/reduce
+
+2025-10-31 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Don't call sub2 when not needed
+	- Compact and more readable code
+
+2025-10-31 Erick Gallesio <eg@stklos.net>
+	- Make the fold function static
+
+2025-10-31 Erick Gallesio <eg@stklos.net>
+	- Small rewrite of logical.stk
+	- Merge branch 'fold-reduce' of github.com:jpellegrini/STklos into jpellegrini-fold-reduce
+
+2025-10-29 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix acos for numbers outside [-1, +1]
+
+2025-10-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use BIGNUM_FITS_DOUBLE instead of BIGNUM_FITS_INTEGER
+
+2025-10-22 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Max/min: do not compare complexes
+	- Optimize repeat
+
+2025-10-22 Erick Gallesio <eg@stklos.net>
+	- Merge branch 'jpellegrini-pcre2'
+	- Added pcre2 10-47 missing files
+	- Merge branch 'pcre2' of github.com:jpellegrini/STklos into jpellegrini-pcre2
+
+2025-10-22 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update PCRE2 to 10.47
+
+2025-10-19 Erick Gallesio <eg@stklos.net>
+	- Typo
+	- Merge branch 'jpellegrini-env-message'
+	- Merge branch 'env-message' of github.com:jpellegrini/STklos into jpellegrini-env-message
+	- Merge branch 'jpellegrini-libgc'
+	- Merge branch 'libgc' of github.com:jpellegrini/STklos into jpellegrini-libgc
+	- Merge branch 'jpellegrini-degree-radians-precision'
+	- Merge branch 'degree-radians-precision' of github.com:jpellegrini/STklos into
+	  jpellegrini-degree-radians-precision
+
+2025-10-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update libgc to 8.2.10
+
+2025-10-19 Erick Gallesio <eg@stklos.net>
+	- Shorten message (< 80 char) for stklos-compile
+
+2025-10-17 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Make degrees->radians and radians->degrees more precise
+
+2025-10-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix bad environment message
+
 2025-10-15 Erick Gallesio <eg@stklos.net>
-	- Factorize errors in reaquire /  provide
+	- Factorize errors in require /  provide
 	- Merge branch 'lisp-complex'
 	- Added documentation on the #c(x y) notation
 	- Suppress the declaration of STk_make_comple_number
@@ -464,7 +711,7 @@
 
 2025-05-22 Erick Gallesio <eg@stklos.net>
 	- Adadpted tests since macros value cannot be used anymore
-	- Change: syntax value canot be used in a expression
+	- Change: syntax value cannot be used in an expression
 	- Fix: when a local has the name of a global syntax
 	- Add syntax-rules to the syntaxes exported from (scheme base)
 	- syntax-rules is now also a macro.
@@ -953,9 +1200,7 @@
 2024-10-10 Jeronimo Pellegrini <j_p@aleph0.info>
 	- Add SRFI-234: Topological Sorting
 
-
-------------------------------------------
-
+----------------------------------------------------------------------
 
 2024-10-10 Erick Gallesio <eg@stklos.net>
 	- Add option -q to the call of System command in stklos-pp doc.
