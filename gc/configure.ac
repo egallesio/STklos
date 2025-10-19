@@ -1,6 +1,6 @@
 # Copyright (c) 1999-2001 by Red Hat, Inc. All rights reserved.
 # Copyright (c) 2005-2009 Hewlett-Packard Development Company, L.P.
-# Copyright (c) 2009-2021 Ivan Maidanski
+# Copyright (c) 2009-2025 Ivan Maidanski
 #
 # THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
 # OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
@@ -14,7 +14,7 @@
 dnl Process this file with autoconf to produce configure.
 
 dnl Initialization.
-AC_INIT(gc,8.2.8,https://github.com/ivmai/bdwgc/issues)
+AC_INIT(gc,8.2.10,https://github.com/bdwgc/bdwgc/issues)
 dnl Version must conform to: [0-9]+[.][0-9]+[.][0-9]+
 
 AC_CONFIG_SRCDIR(gcj_mlc.c)
@@ -213,7 +213,7 @@ case "$THREADS" in
       *-*-aix* | *-*-android* | *-*-cygwin* | *-*-darwin* | *-*-dragonfly* | \
       *-*-freebsd* | *-*-haiku* | *-*-hpux11* | *-*-irix* | \
       *-*-kfreebsd*-gnu | *-*-gnu* | *-*-*linux* | *-*-msys* | *-*-nacl* | \
-      *-*-netbsd* | *-*-openbsd* | *-*-osf* | *-*-solaris*)
+      *-*-netbsd* | *-*-openbsd* | *-*-osf* | *-*-serenity* | *-*-solaris*)
         AC_DEFINE(GC_THREADS)
         AC_DEFINE([_REENTRANT], [1],
                   [Required define if using POSIX threads.])
@@ -628,7 +628,7 @@ case "$host" in
     AC_DEFINE(SUNOS53_SHARED_LIB, 1,
               [Define to work around a Solaris 5.3 bug (see dyn_load.c).])
     ;;
- sparc*-sun-solaris2*)
+ sparc*-sun-solaris*)
     machdep="sparc_mach_dep.lo"
     compile_asm=true
     ;;
@@ -907,7 +907,7 @@ if test "${enable_redirect_malloc}" = yes; then
         AC_DEFINE([REDIRECT_MALLOC], GC_debug_malloc_replacement,
                   [If defined, redirect malloc to this function.])
         AC_DEFINE([REDIRECT_REALLOC], GC_debug_realloc_replacement,
-                  [If defined, redirect GC_realloc to this function.])
+                  [If defined, redirect realloc to this function.])
         AC_DEFINE([REDIRECT_FREE], GC_debug_free,
                   [If defined, redirect free to this function.])
     else
@@ -1029,12 +1029,6 @@ AC_ARG_ENABLE(werror,
     werror_flag=$enableval, werror_flag=no)
 if test x$werror_flag = xyes; then
     WERROR_CFLAGS="-Werror"
-    case "$host" in
-      # _dyld_bind_fully_image_containing_address is deprecated in OS X 10.5+
-      *-*-darwin*)
-        WERROR_CFLAGS="$WERROR_CFLAGS -Wno-deprecated-declarations"
-        ;;
-    esac
 fi
 AC_SUBST([WERROR_CFLAGS])
 
@@ -1068,7 +1062,7 @@ AM_CONDITIONAL(ENABLE_DOCS, test x$enable_docs != xno)
 
 AM_CONDITIONAL(ENABLE_SHARED, test x$enable_shared = xyes)
 
-# Atomic Ops
+# Atomic_ops
 # ----------
 
 # Do we want to use an external libatomic_ops?  By default use it if it's
