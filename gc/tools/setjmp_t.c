@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <string.h>
+
+#define NOT_GCBUILD
 #include "private/gc_priv.h"
 
 #ifdef OS2
@@ -60,6 +62,7 @@ struct a_s {
   char * a_b;
 } a;
 
+GC_ATTR_NOINLINE
 word nested_sp(void)
 {
 # if GC_GNUC_PREREQ(4, 0)

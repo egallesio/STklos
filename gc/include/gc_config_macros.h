@@ -4,7 +4,7 @@
  * Copyright (c) 1998 by Fergus Henderson.  All rights reserved.
  * Copyright (c) 2000-2009 by Hewlett-Packard Development Company.
  * All rights reserved.
- * Copyright (c) 2008-2020 Ivan Maidanski
+ * Copyright (c) 2008-2024 Ivan Maidanski
  *
  * THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
  * OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
@@ -148,6 +148,13 @@
   /* Better late than never.  This fails if system headers that depend  */
   /* on this were previously included.                                  */
 # define _REENTRANT 1
+#endif
+
+#if defined(__clang__) && defined(__CYGWIN__) && defined(GC_THREADS) \
+    && defined(__LP64__)
+  /* Workaround "__stdcall__ ignored for this target" clang warning.    */
+  /* Note: __stdcall is defined implicitly based on __stdcall__.        */
+# define __stdcall__ /* empty */
 #endif
 
 #define __GC
