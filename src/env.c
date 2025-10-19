@@ -177,7 +177,7 @@ static void verify_module(SCM obj)
 
 static void verify_environment(SCM obj)
 {
-  if (!ENVIRONMENTP(obj)) STk_error("bad module ~S", obj);
+  if (!ENVIRONMENTP(obj)) STk_error("bad environment ~S", obj);
 }
 
 static void verify_list(SCM obj)
