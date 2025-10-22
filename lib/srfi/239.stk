@@ -1,0 +1,127 @@
+;;;;
+;;;;
+;;;; 239.stk         -- Implementation of SRFI-239
+;;;;
+;;;; Copyright © 2025 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 30-Jan-2025 10:12
+
+
+
+(define-library (srfi 239)
+  (import SCHEME)
+  (export list-case)
+
+  (begin
+
+    ;; (pair-clause->code '((a . b) (blah)) '(x y z))
+    ;; => ((pair? #0=(x y z)) (let ((a (car #0#)) (b (cdr #0#))) (blah)))
+    (define (pair-clause->code clause expr)
+      (let ((head (caar clause))
+            (tail (cdar clause))
+            (body (cdr clause)))
+        (unless (symbol? head) (error 'list-case "bad variable name ~s" head))
+        (unless (symbol? tail) (error 'list-case "bad variable name ~s" tail))
+        (when (and (not (eq? head '_))
+                   (eq? head tail))
+          (error 'list-case "double variable in clause: ~s" head))
+        (let ((bindings (let  loop ((vars (list head tail))
+                                    (exprs (list `(car ,expr) `(cdr ,expr)))
+                                    (bin '()))
+                          (if (null? vars)
+                              bin
+                              (loop (cdr vars)
+                                    (cdr exprs)
+                                    (if (eq? (car vars) '_)
+                                        bin
+                                        (cons (list (car vars) (car exprs)) bin)))))))
+
+          `(let ,bindings
+             ,@body))))
+
+    ;;(null-clause->code '(() (blah)) '(x y z))
+    ;; => ((null? (x y z)) (begin (blah)))
+    (define (null-clause->code clause expr)
+      (let ((body (cdr clause)))
+        `(begin ,@body)))
+
+    ;; (var-clause->code '(_ (blah)) '(x y z))
+    ;; (begin (blah))
+    ;;
+    ;; (var-clause->code '(q (blah)) '(x y z))
+    ;; (let ((q (x y z))) (blah))
+    (define (var-clause->code clause expr)
+      (let ((var (car clause))
+            (body (cdr clause)))
+        (cond ((eq? var '_)   `(begin ,@body))
+              ((symbol? var) `(let ((,var ,expr)) ,@body))
+              (else (error 'list-case "bad variable name ~s" var)))))
+
+
+
+    (define-macro (list-case expr . clauses)
+      (let ((ex (gensym "list-case-expr:")))
+        (let ((pair-clause #f)
+              (null-clause #f)
+              (var-clause  #f)
+              (pair-clause-action `(error 'list-case "pair not allowed: ~s" ,ex))
+              (null-clause-action `(error 'list-case "null list not allowed: ~s" ,ex))
+              (var-clause-action  `(error 'list-case "non-list not allowed: ~s" ,ex)))
+
+          (dolist (clause clauses)
+                  (unless (pair? clause) (error list-case "bad clause ~s" clause))
+                  (cond ((pair?      (car clause))
+                         (when pair-clause (error 'list-case "extra pair clause ~s" clause))
+                         (set! pair-clause clause))
+
+                        ((null?      (car clause))
+                         (when null-clause (error 'list-case "extra null clause ~s" clause))
+                         (set! null-clause clause))
+
+                        ((eq? '_     (car clause))
+                         (when var-clause (error 'list-case "extra var clause ~s" clause))
+                         (set! var-clause clause))
+
+                        ((symbol?    (car clause))
+                         (when var-clause (error 'list-case "extra var clause ~s" clause))
+                         (set! var-clause clause))
+                        (else (error 'list-case "bad clause head in clause ~s" clause))))
+
+          (let ((pair-clause-action (if pair-clause
+                                        (pair-clause->code pair-clause ex)
+                                        pair-clause-action))
+                (null-clause-action (if null-clause
+                                        (null-clause->code null-clause ex)
+                                        null-clause-action))
+                (var-clause-action  (if var-clause
+                                        (var-clause->code  var-clause ex)
+                                        var-clause-action)))
+
+            `(let ((,ex ,expr))
+               ;; We always check for the three cases. If the user didn't provide
+               ;; a clause for one case, the default action os to signal an error.
+               (cond  ((pair? ,ex)  ,pair-clause-action)
+                      ((null? ,ex)  ,null-clause-action)
+                      (else         ,var-clause-action)))))))
+
+
+))
+
+(provide "srfi/239")
