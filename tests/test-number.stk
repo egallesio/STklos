@@ -2573,6 +2573,10 @@
 (test "nan and min.1" +nan.0 (min 1 2 3.0 4/5 +nan.0))
 (test "nan and min.2" +nan.0 (min +nan.0 1 2 3.0 4/5))
 
+(test/error "max and non-real.1" (max 1.2+0.1i 200))
+(test/error "max and non-real.2" (max 10 1.2+0.1i 200))
+(test/error "min and non-real.1" (min 1.2+0.1i 200))
+(test/error "min and non-real.2" (min 10 1.2+0.1i 200))
 
 (test "abs complex"
       5
