@@ -30,20 +30,22 @@ SO = @SH_SUFFIX@
 #
 # Libraries written in Scheme only
 #
-SRC_STK  = apropos.stk      \
-           describe.stk     \
-           getopt.stk       \
-           help.stk         \
-           preproc.stk      \
-           pretty-print.stk \
+SRC_STK  = apropos.stk        \
+           describe.stk       \
+           getopt.stk         \
+           help.stk           \
+           preproc.stk        \
+           pretty-print.stk   \
+           roman-numerals.stk \
            trace.stk
 
-SRC_OSTK = apropos.ostk      \
-           describe.ostk     \
-           getopt.ostk       \
-           help.ostk         \
-           preproc.ostk      \
-           pretty-print.ostk \
+SRC_OSTK = apropos.ostk        \
+           describe.ostk       \
+           getopt.ostk         \
+           help.ostk           \
+           preproc.ostk        \
+           pretty-print.ostk   \
+           roman-numerals.ostk \
            trace.ostk
 
 #

@@ -1,0 +1,140 @@
+;;;;
+;;;; roman-numerals.stk         -- convert from/to roman numerals
+;;;;
+;;;; Copyright © 2025 Jerônimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date:  9-Sep-2025 15:01
+;;;;
+
+(define-library (stklos roman-numerals)
+
+  (import SCHEME)
+  (export integer->roman
+          roman->integer)
+
+  (begin
+
+    ;; Assoc list of symbols and integer value, in reverse
+    ;; order of value
+    (define numerals '(("M"  . 1000)
+                       ("CM" .  900)
+                       ("D"  .  500)
+                       ("CD" .  400)
+                       ("C"  .  100)
+                       ("XC" .   90)
+                       ("L"  .   50)
+                       ("XL" .   40)
+                       ("X"  .   10)
+                       ("IX" .    9)
+                       ("V"  .    5)
+                       ("IV" .    4)
+                       ("I"  .    1)))
+
+    #|
+    * <doc EXT integer->roman
+    * (integer->roman n [ :case c ] [ :zero z])
+    *
+    * Converts the integer n to roman numerals. If the keyword
+    * argument |case| is the symbol |lower|, then lower case will be used.
+    * If the keyword argument |zero| is passed, it is
+    * used as the string for "zero". By default, the string "N" is
+    * used for zero.
+    *
+    * Only integer numbers between 0 and 4999 are allowed.
+    *
+    * @lisp
+    * (integer->roman 23)               => "XXIII"
+    * (integer->roman 23 :case 'lower)  => "xxiii"
+    * (integer->roman 0)                => "N"
+    * (integer->roman 0 :zero "nulla")  => "nulla"
+    * (integer->roman 6000)             => error
+    * (integer->roman -1)               => error
+    * @end lisp
+    * doc>
+    |#
+    (define (integer->roman n :key (case 'upper) (zero "N"))
+      (unless (integer? n) (error "bad integer ~s" n))
+      (unless (< -1 n 5000) (error "number out of range ~s" n))
+      (unless (string? zero) (error "bad string ~w for zero" zero))
+
+      (if (zero? n)
+          zero
+          (let ((result ""))
+            (for-each (lambda (L)
+                        (let ((sym (car L))
+                              (val (cdr L)))
+                          (while (>= n val)
+                            (set! result (string-append result sym))
+                            (dec! n val))))
+                      numerals)
+            (if (eq? case 'lower)
+                (string-lower result)
+                result))))
+
+    ;; Regular expression for roman numerals.
+    (define re (string->regexp
+                (string-append "^"                  ;; beginning of string
+                               "(?i)"               ;; case-insensitive
+                               "M{0,4}"             ;; thousands
+                               "(CM|CD|D?C{0,3})"   ;; hundreds
+                               "(XC|XL|L?X{0,3})"   ;; tens
+                               "(IX|IV|V?I{0,3})"   ;; units
+                               "$")))               ;; end of string
+
+#|
+* <doc EXT roman->integer
+* (roman->integer n [:zero z])
+*
+* Converts the roman number |n| (represented as a string) into
+* an integer. If the keyword argument |zero| is passed, it is
+* used as the string for "zero". By default, the string "N" is
+* used for zero.
+*
+* Only simple numbers between "I" (1) and "MMMMCMXCIX" (4999)
+* are supported.
+*
+* @lisp
+* (roman->integer "xvii")                    => 17
+* (roman->integer "DxI")                     => 511
+* (roman->integer "nothing" :zero "nothing") => 0
+* (roman->integer "nothing")                 => error
+* (roman->integer "abcde")                   => error
+* @end lisp
+* doc>
+|#
+    (define (roman->integer r :key (zero "N"))
+      (unless (string? zero) (error "bad string ~w for zero" zero))
+      (if (string=? r zero)
+          0
+          (let ((r (string-upper r)) ;; compare using upper-case only
+                (result 0)
+                (index 0))
+            (unless (regexp-match re r) (error "bad roman number ~s" r))
+            (for-each (lambda (L)
+                        (let ((sym (car L))
+                              (val (cdr L)))
+                          (while (and (<= (fx+ index (string-length sym)) (string-length r))
+                                      (string=? (substring r index (fx+ index (string-length sym))) sym))
+                            (inc! result val)
+                            (inc! index (string-length sym)))))
+                      numerals)
+            result)))
+
+    ))
