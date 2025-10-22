@@ -592,6 +592,66 @@
 (test "integer-length" 5001 (integer-length (expt 2 5000)))
 
 ;;==================================================================
+;; Comparisons
+;;
+
+;;------------------------------------------------------------------
+
+(test-subsection "comparisons")
+
+;; (< neg pos) and (< pos neg) are optimized. Test here.
+(test "fx <.1"  #t (< -10 +10))
+(test "fx <.2"  #t (< +10 +11))
+(test "fx <.3"  #f (< +11 +11))
+(test "fx <=.1" #t (<= -10 +10))
+(test "fx <=.2" #t (<= +10 +11))
+(test "fx <=.3" #t (<= +11 +11))
+
+(test "rat <.1"  #t (< -10/3 +10/3))
+(test "rat <.2"  #t (< +10/5 +11/5))
+(test "rat <.3"  #f (< +11/6 +11/6))
+(test "rat <=.1" #t (<= -10/7 +10/7))
+(test "rat <=.2" #t (<= +10/3 +11/3))
+(test "rat <=.3" #t (<= +11/5 +11/5))
+
+
+;; Non-exhaustive but interesting comparison sequence:
+(let ((As (list 2  10  -4 2/3 0.5  1.2 33.3 -20  -20 -33.3 -9.2
+                (expt 2 100)
+                (- (expt 5 60))))
+      (Bs (list 3 -10 3/2  33   4 -0.2    0  20  1.1  11.1  (expt 3 70)
+                -25
+                (expt 7 60))))
+  (let ((f (lambda (a b)
+             (if (< a b)
+                 (test "mix >"  #t (> b a))
+                 (test "mix <=" #t (<= b a))))))
+    (for-each f As Bs)
+    (for-each f (reverse As) Bs)
+    (for-each f (map abs As) Bs)
+    (for-each f (map exp As) Bs)
+    (for-each f (map - As) Bs)
+    (for-each f  As (map - Bs))
+    (for-each f  As (map abs Bs))
+    (for-each f  As (map exp Bs))
+    (for-each f  (reverse As) (map - Bs))
+    (for-each f  (reverse As) (map abs Bs))
+    (for-each f  (reverse As) (map exp Bs))))
+
+;; Bignum x fixnum comparisons are optimized. We test several cases here.
+(test "-fixnum < +bignum" #t (< -10 (expt 2 100)))
+(test "+fixnum < +bignum" #t (< +10 (expt 2 100)))
+(test "+fixnum > -bignum" #t (> +10 (- (expt 2 100))))
+(test "-fixnum > -bignum" #t (> -10 (- (expt 2 100))))
+
+(test "-bignum < +fixnum" #t (< (- (expt 2 100) +10)))
+(test "-bignum < -fixnum" #t (< (- (expt 2 100) -10)))
+(test "+bignum < +fixnum" #t (> (+ (expt 2 100) +10)))
+(test "+bignum < -fixnum" #t (> (+ (expt 2 100) -10)))
+
+
+
+;;==================================================================
 ;; Arithmetics
 ;;
 
