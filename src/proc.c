@@ -177,27 +177,46 @@ DEFINE_PRIMITIVE("%set-procedure-name!", set_procedure_name, subr2, (SCM obj, SC
 
 
 /*
-<doc EXT closure?
+<doc EXT closure? primitive?
  * (closure? obj)
+ * (primitive? obj)
  *
- * Returns |#t| if |obj| is a procedure created with the |lambda|
- * syntax and |#f| otherwise.
+ * STklos procedures can be either closures (created with the |lambda|
+ * syntax) or primitives (written in C).
  *
- * Note that primitive procedures (those which are written in C) are
- * *not* closures:
+ * |Closure?| returns |#t| if |obj| is a closure, and |#f| otherwise.
+ * |Primitive?| returns |#t| if |obj| is a primitive, and |#f| otherwise.
+ *
+ * Note that |make-parameter| returns a primitive, not a closure!
  *
  * @lisp
+ * (primitive? "a string")         => #f
+ * (closure? "a string")           => #f
+ * (closure? 10)                   => #f
+ * (primitive? 10)                 => #f
+ *
+ * (primitive? cons)               => #t
+ * (closure? cons)                 => #f
+ *
  * (define (cube x) (* x x x))
- * (closure? cube)               => #t
+ * (primitive? cube?)              => #f
+ * (closure? cube)                 => #t
  *
  * (define square-root sqrt)
- * (eq? square-root sqrt)        => #t
- * (closure? square-root)        => #f
+ * (eq? square-root sqrt)          => #t
+ * (closure? square-root)          => #f
+ * (primitive? square-root)        => #t
  *
- * (closure? 10)                 => #f
- * (closure? display)            => #f
- * (closure? (lambda (x) (- x))) => #t
- * (closure? any)                => #t
+ * (define p (make-parameter -1)
+ * (primitive? p)                  => #t
+ * (closure? p)                    => #f
+ *
+ * (closure? display)              => #f
+ * (primitive? display)            => #t
+ * (closure? (lambda (x) (- x)))   => #t
+ * (primitive? (lambda (x) (- x))) => #f
+ * (closure? any)                  => #t
+ * (primitive? any)                => #f
  * @end lisp
 doc>
  */
@@ -205,6 +224,13 @@ DEFINE_PRIMITIVE("closure?", closurep, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(CLOSUREP(obj));
 }
+
+DEFINE_PRIMITIVE("primitive?", primitivep, subr1, (SCM obj))
+{
+  return MAKE_BOOLEAN ((STk_procedurep(obj) == STk_true) &&
+                       (STk_closurep(obj) == STk_false));
+}
+
 
 
 DEFINE_PRIMITIVE("%procedure-plist", proc_plist, subr1, (SCM obj))
@@ -528,6 +554,7 @@ int STk_init_proc(void)
   DEFINE_XTYPE(closure, &xtype_closure);
   ADD_PRIMITIVE(procedurep);
   ADD_PRIMITIVE(closurep);
+  ADD_PRIMITIVE(primitivep);
   ADD_PRIMITIVE(proc_plist);
   ADD_PRIMITIVE(set_proc_plist);
   ADD_PRIMITIVE(proc_code);
