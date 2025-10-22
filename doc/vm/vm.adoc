@@ -1646,24 +1646,99 @@ Continuation is a native type (`tc_continuation`). A continuation object (define
 in `vm.h`) contains pointers to the C stack, the Scheme stack and several other
 data.
 
-Capturing a continuation is carried out by the following steps (these are
-the actual comments in the function `STk_make_continuation`):
+STklos saves both the C and the Scheme stack when capturing
+continuations. For that to work, we need to be able to tell where the
+C stack begins and where the top is (the precise C pointers to those
+places).
+
+The C function that retrieves the address of the current top of the
+stack is quite simple:
+
+[source,c]
+----
+void STk_get_stack_pointer(void **addr)
+{
+  char c;
+  *addr = (void *) &c;
+}
+----
+
+This is called when initializing the current thread, and also when
+capturing and saving continuations.
+
+==== Capturing a continuation
+
+
+`%make-continuation` is the primitive that captures the current
+continuation.
+
+It basically:
 
 [arabic]
-. Determine the size of the C stack and the start address
-. Determine the size of the Scheme stack
-. Allocate a continuation object
-. Save the Scheme stack
-. Save the C stack
+. Determines the size of the C stack and the start address;
+. Determines the size of the Scheme stack;
+. Allocates a object of type `struct continuation_obj`, but whose size
+   is that of the continuation structure *plus* the size of the two stacks;
+. Copies the sizes of the stack into the continuation object;
+. Calls `patch_environment(vm)`. This will clone the environments
+   down through the activation records (we cannot jsut copy the stack; the
+   values must be copied -- in particular, values of globals must be the
+   ones at the time the continuation was captured);
+. Copies the VM registers into the continuation;
+. Allocates and copy the Scheme stack and the C stack;
+. Marks the continuation as fresh;
+. Uses theh usual `setjmp` method to either return the continuation
+   object (if it's the first time it is used) or return the continuation
+   value (if it is getting back after being caputred).
 
-Restoring is easier:
+
+==== Restoring a continuation
+
+`restore_cont_jump` is the final step when restoring a continuation.
+It receives two parameters:
+- parameter `k` is used to get the beginning and end of the C stack to
+  be restored;
+- parameter `addr` is the current top of the C stack;
+
+Inside the function,
+- `vm` (obtained inside the function) is THIS thread;
+- `vm->start_stack` is the beginning of the stack (in this thread).
+
+This is what this C function does:
 
 [arabic]
-. Restore the Scheme stack
-. Restore the C stack
+. Calculate the distance from beginning to the top, in order to be
+   sure that there is enough room (if the current stack is shorter
+   than the old, we cannot just copy over the top!);
+. If there's not enough space, call ourselves recursively. Sounds
+  strange, but -- with each recursive call, we allocate 1024 bytes
+  (see at the beginning of the function -- the declaration
+  `char unused_buf[1024];` serves this purpose only!);
+. `memcpy` from the beginning to the (new) top;
+. `longjmp` to the saved state, but this time return 1.
 
-And, when the C stack is restored, the VM is back to its original state, except
-for the global variables.
+
+`%restore-continuation` is called when we do `(k val)` inside a
+`(call/cc (lambda (k) ...))`.
+
+This C function (and Scheme primitive) basically:
+
+[arabic]
+. Copies the continuation information into the VM registers;
+. Copies `value` into VM's `val` register (because the value is not
+   part of the continuation, it was passed now to
+   `%restore-continuation`);
+. Sets `fresh` to `0` in the continuation (marks it as already
+   restored);
+. Copies the Scheme stack from the continuation, overriding the
+   current Scheme stack (no need to check if it fits, since the Scheme
+   stack has a fixed size and has been allocated already);
+. Gets the address of the current top of the C stack. This is done by
+   calling `STk_get_stack_pointer(&addr)`;
+. Calls `restore_cont_jump(k, addr)`, where `k` is the continuation
+   and `addr` is the top of the C stack.
+
+
 
 == Verifying the VM configuration
 
