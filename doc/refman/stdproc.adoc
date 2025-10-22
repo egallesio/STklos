@@ -998,6 +998,8 @@ See SRFI document for more information.
 {{insertdoc 'procedure-source}}
 [#ansicolor]
 {{insertdoc 'ansi-color}}
+{{insertdoc 'ansi-color-specifier-list}}
+{{insertdoc 'ansi-color-specifier?}}
 {{insertdoc 'disassemble}}
 {{insertdoc 'disassemble-expr}}
 {{insertdoc 'uri-parse}}
