@@ -125,10 +125,10 @@ schemelib_DATA  = $(LARGE_SHOBJ)
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 .stk.ostk:
-	$(COMP) -o $*.ostk $*.stk
+	KEEP_FORMALS=@KEEP_FORMALS@ $(COMP) -o $*.ostk $*.stk
 
 .stk-incl.c:
-	$(COMP) -C -o $*-incl.c $*.stk
+	KEEP_FORMALS=@KEEP_FORMALS@ $(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
 	@CC@ @CFLAGS@ @CPPFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ \
