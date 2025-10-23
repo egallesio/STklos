@@ -3023,12 +3023,35 @@ DEFINE_PRIMITIVE("lcm", lcm, vsubr, (int argc, SCM *argv))
 {
   SCM res, gcd;
 
+  mpz_t *r, *a, new;
+  unsigned long ii;
+
   if (argc == 0) return MAKE_INT(1);
   if (STk_numberp(*argv) == STk_false) error_bad_number(*argv);
 
   for (res = *argv--; --argc; argv--) {
-    gcd = gcd2(res, *argv);
-    res = mul2(res,div2(*argv, gcd));
+      /* It's faster to use GMP/s mpz_lcm or mpz_lcm_ui when it makes sense
+         to do so: */
+      if (BIGNUMP(res) && BIGNUMP(*argv)) {       /* BIGNUM - BIGNUM */
+          r = &BIGNUM_VAL(res);
+          mpz_lcm(*r, *r, BIGNUM_VAL(*argv));
+          res = bignum2number(*r);
+      } else if (BIGNUMP(res) && INTP(*argv)) {   /* BIGNUM - FIXNUM */
+          r = &BIGNUM_VAL(res);
+          ii = labs(INT_VAL(*argv));
+          mpz_lcm_ui(*r, *r, ii);
+          res = bignum2number(*r);
+      } else if (INTP(res) && BIGNUMP(*argv)) {   /* FIXNUM - BIGNUM */
+          ii = labs(INT_VAL(res));
+          a = &BIGNUM_VAL(*argv);
+          mpz_lcm_ui(*a, *a, ii);
+          res = bignum2number(*a);
+      } else {                                    /* FIXNUM - FIXNUM */
+          /* No bignums; revert to the simple
+             LCM algorithm for fixnums: */
+          gcd = gcd2(res, *argv);
+          res = mul2(res,div2(*argv, gcd));
+      }
   }
   return absolute(res);
 }
