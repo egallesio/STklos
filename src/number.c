@@ -815,7 +815,7 @@ static inline SCM real2integer(SCM r)
   */
   if (floor(v) != v || isinf(v)) {
     /* This is not an inexact integer (weak test) */
-    STk_error("non-integer real number (~s) in an integer division", r);
+    STk_error("non-integer real number (~s) where an integer was expected", r);
   }
   return double2integer(v);
 }
@@ -4802,6 +4802,61 @@ LOGICAL_OP("%bit-and", bit_and, &, mpz_and)
 LOGICAL_OP("%bit-or",  bit_or,  |, mpz_ior)
 LOGICAL_OP("%bit-xor", bit_xor, ^, mpz_xor)
 
+/*
+<doc EXT factorial
+ * (factorial n)
+ *
+ * This procedure computes the factorial of |n|, which must be a
+ * fixnum, or an inexact real representing an integer that is in the
+ * fixnum range. The result may be a fixnum or a bignum, and will
+ * be inexact when the argument is inexact.
+ *
+ * @lisp
+ * (factorial 0)   => 1
+ * (factorial 5)   => 120
+ * (factorial 30)  => 265252859812191058636308480000000   ; bignum
+ * (factorial 5.0) => 120.0
+ * (factorial 5.4) => error
+ * (factorial -10) => error
+ * (factorial "x") => error
+ * @end lisp
+ *
+ * Note that when the argument |n| is inexact, the result will be
+ * constrained to the values that fit an inexact number (which may
+ * vary among hardware architectures, but will *always* be less than
+ * what can be represented as an exact integer.
+ *
+ * @lisp
+ * (factorial 180)   => 2008960...00000000 ; a bignum, exact
+ * (factorial 180.0) => +inf.0             ; does not fit an inexact real
+ * @end lisp
+ *
+ * The largest inexact real number is the constant |fl-greatest|, available
+ * in the library |(scheme flonum)|. If the *result* of the factorial is
+ * larger than that number, it will be converted to |+inf.0|.
+doc>
+*/
+DEFINE_PRIMITIVE("factorial", factorial, subr1, (SCM n)) {
+  int exact = 1;
+  if (REALP(n)) {
+    n = real2integer(n);
+    exact = 0;
+  }
+  if (!(INTP(n) && !negativep(n)))
+    STk_error("~s is not a non-negative fixnum", n);
+
+  mpz_t z;
+  mpz_init(z);
+  mpz_fac_ui(z, (unsigned long) INT_VAL(n)); /* GMP wants unsigned long */
+
+  if (exact)
+    return bignum2number(z);
+  else
+    /* We may lose the number here! If the user required inexact by
+       passing an inexact argument, the result may not fit a double,
+       and will be converted to +inf.0... */
+    return double2real(bignum2double(z));
+}
 
 /*
  *
@@ -5071,6 +5126,7 @@ int STk_init_number(void)
   ADD_PRIMITIVE(bit_or);
   ADD_PRIMITIVE(bit_xor);
 
+  ADD_PRIMITIVE(factorial);
 
   /* SRFI 208: NaN procedures */
   ADD_PRIMITIVE(make_nan);
