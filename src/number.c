@@ -78,6 +78,11 @@ struct bignum_obj {
 //#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
 #define MY_PI      3.1415926535897932384626433832795028841971693993751058209749445923078164062862090L
 
+/* The most positive and most negative flonums are (+/-) DBL_MAX, so we only
+   call the GMP function mpz_cmpabs_d once (no need to test for both
+   > +DBL_MAX and < -DBL_MAX) */
+#define BIGNUM_FITS_DOUBLE(_bn)  (mpz_cmpabs_d((_bn), +DBL_MAX) <= 0)
+
 #define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 &&        \
                                   mpz_cmp_si((_bn), INT_MAX_VAL) <= 0)
 #define LONG_FITS_INTEGER(_l)    (INT_MIN_VAL <= (_l) && (_l) <= INT_MAX_VAL)
@@ -554,12 +559,8 @@ static inline double bignum2double(mpz_t n)
 {
     /* If the result does not fit a double, we return (+/-)inf.0
        We don't use the result of mpz_get_d because it does not
-       guarantee that an inf will be returned in this case.
-
-       The most positive and most negative flonums are (+/-) DBL_MAX,
-       so we only call the GMP function mpz_cmpabs_d once (no need to
-       test for both > +DBL_MAX and < -DBL_MAX).                 */
-    if (mpz_cmpabs_d((n), +DBL_MAX) > 0)
+       guarantee that an inf will be returned in this case. */
+    if (!BIGNUM_FITS_DOUBLE(n))
         return (mpz_sgn(n)>0)
             ? plus_inf
             : minus_inf;
@@ -3315,7 +3316,7 @@ static double my_bignum_rational_log(SCM z) {
        is a bignum. Then the other won't be, and we just
        take the log of it with my_log.                     */
   if (BIGNUMP(num))
-    if (BIGNUM_FITS_INTEGER(BIGNUM_VAL(num)))
+    if (BIGNUM_FITS_DOUBLE(BIGNUM_VAL(num)))
       log_num = log(scheme_bignum2double(num));
     else
       log_num = my_bignum_log(num);
@@ -3323,7 +3324,7 @@ static double my_bignum_rational_log(SCM z) {
     log_num = STk_number2double(my_log(num));
 
   if (BIGNUMP(den))
-    if (BIGNUM_FITS_INTEGER(BIGNUM_VAL(den)))
+    if (BIGNUM_FITS_DOUBLE(BIGNUM_VAL(den)))
       log_den = log(scheme_bignum2double(den));
     else
       log_den = my_bignum_log(den);
@@ -3345,7 +3346,7 @@ static SCM my_log(SCM z)
     case tc_integer:  if (z == MAKE_INT(0)) STk_error("value is not defined for 0");
                       if (z == MAKE_INT(1)) return MAKE_INT(0);
                       return double2real(log((double) INT_VAL(z)));
-    case tc_bignum:   if (BIGNUM_FITS_INTEGER(BIGNUM_VAL(z)))
+    case tc_bignum:   if (BIGNUM_FITS_DOUBLE(BIGNUM_VAL(z)))
                         return double2real(log(scheme_bignum2double(z)));
                       else
                         return double2real(my_bignum_log(z));
