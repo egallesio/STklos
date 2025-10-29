@@ -3487,11 +3487,15 @@ static SCM my_asin(SCM z)
 
 static inline SCM acos_complex(SCM z)
 {
-  return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1UL)),
-              my_log(add2(z,
-                          mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(1UL)),
-                               STk_sqrt(sub2(MAKE_INT(1UL),
-                                             mul2(z, z)))))));
+  /* acos(z) = -i ln(z + SQRT(z^2-1)).
+     HOWEVER, we may end up with a negative imaginary part, due to the
+     way the computation is done, but it's enough to take the absolute
+     value of the imag part (it will be correct).   */
+  SCM res = mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1UL)), /* -i */
+                 my_log(add2(z,
+                             STk_sqrt(add2(mul2(z, z), MAKE_INT(-1UL))))));
+  COMPLEX_IMAG(res) = absolute(COMPLEX_IMAG(res));
+  return res;
 }
 
 static SCM acos_real(double d)
