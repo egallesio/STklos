@@ -517,38 +517,6 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
   return STk_void;
 }
 
-
-SCM fold(SCM kons, SCM knil, int n, SCM* lists) {
-  if (n == 1) { /* Fast path for common case */
-    SCM tmp = knil;
-    for (SCM v = *lists; !NULLP(v); v = CDR(v)) {
-      if (!CONSP(v)) error_malformed_list(v);
-      tmp = STk_C_apply(kons, 2, CAR(v), tmp);
-    }
-    return tmp;
-  } else {
-    SCM v     = STk_makevect(n + 1, (SCM) NULL);
-    SCM *args = VECTOR_DATA(v);
-    int i, j;
-    SCM tmp = knil;
-
-    for ( ; ; ) {
-      /* Build the parameter list */
-      for (i=0, j=0; i < n; i++,j--) {
-        if (NULLP(lists[j]))
-          return tmp;
-        if (!CONSP(lists[j])) error_malformed_list(lists[j]);
-
-        args[i]  = CAR(lists[j]);
-        lists[j] = CDR(lists[j]);
-      }
-      args[n] = tmp;
-
-      tmp = STk_C_apply(kons, -(n+1), args);
-    }
-  }
-}
-
 /*
 <doc fold
  * (fold kons knil list1 list2 ...)
@@ -568,7 +536,7 @@ SCM fold(SCM kons, SCM knil, int n, SCM* lists) {
  * In the first example, there is only an empty list, so |kons| is not
  * even called, and |knil| is returned.
  *
- * In the second case, the oerations performed were
+ * In the second case, the operations performed were
  * @lisp
  * (- 1 100)  => -99       ; X is -99
  * (- 2 -99)  => 101       ; X is 101
@@ -582,6 +550,38 @@ SCM fold(SCM kons, SCM knil, int n, SCM* lists) {
  * @end lisp
 doc>
 */
+static SCM fold(SCM kons, SCM knil, int n, SCM* lists)
+{
+  if (n == 1) { /* Fast path for common case */
+    SCM tmp = knil;
+    for (SCM v = *lists; !NULLP(v); v = CDR(v)) {
+      if (!CONSP(v)) error_malformed_list(v);
+      tmp = STk_C_apply(kons, 2, CAR(v), tmp);
+    }
+    return tmp;
+  } else {
+    SCM v     = STk_makevect(n + 1, (SCM) NULL);
+    SCM *args = VECTOR_DATA(v);
+    SCM tmp = knil;
+
+    for ( ; ; ) {
+      /* Build the parameter list */
+      for (int i=0, j=0; i < n; i++,j--) {
+        if (NULLP(lists[j]))
+          return tmp;
+        if (!CONSP(lists[j])) error_malformed_list(lists[j]);
+
+        args[i]  = CAR(lists[j]);
+        lists[j] = CDR(lists[j]);
+      }
+      args[n] = tmp;
+
+      tmp = STk_C_apply(kons, -(n+1), args);
+    }
+  }
+}
+
+
 DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
 {
   if (argc < 3) STk_error("expected at least 3 arguments (given %d)", argc);
@@ -595,6 +595,7 @@ DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
     if (!NULLP(*ptr) && !CONSP(*ptr)) STk_error("bad list ~s", *ptr);
   return fold(kons, knil, argc, lists);
 }
+
 
 /*
 <doc reduce
@@ -625,6 +626,7 @@ DEFINE_PRIMITIVE("reduce", reduce, subr3, (SCM f, SCM id, SCM list))
   if (!CONSP(list)) STk_error("bad list ~s", list);
   return fold(f,CAR(list), 1, &(CDR(list)));
 }
+
 
 int STk_init_proc(void)
 {
