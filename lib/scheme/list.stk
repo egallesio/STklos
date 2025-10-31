@@ -771,10 +771,10 @@
 ;;; REDUCE and REDUCE-RIGHT only use RIDENTITY in the empty-list case.
 ;;; These cannot meaningfully be n-ary.
 
-(define (reduce f ridentity lis)
-  (check-arg procedure? f reduce)
-  (if (null-list? lis) ridentity
-      (fold f (car lis) (cdr lis))))
+;; (define (reduce f ridentity lis)
+;;   (check-arg procedure? f reduce)
+;;   (if (null-list? lis) ridentity
+;;       (fold f (car lis) (cdr lis))))
 
 (define (reduce-right f ridentity lis)
   (check-arg procedure? f reduce-right)
@@ -953,17 +953,17 @@ written in C, in STklos core!
         (cons (f seed) (recur (g seed)))))))
 
 
-(define (fold kons knil lis1 . lists)
-  (check-arg procedure? kons fold)
-  (if (pair? lists)
-      (let lp ((lists (cons lis1 lists)) (ans knil))    ; N-ary case
-    (receive (cars+ans cdrs) (%cars+cdrs+ lists ans)
-      (if (null? cars+ans) ans ; Done.
-          (lp cdrs (apply kons cars+ans)))))
+;; (define (fold kons knil lis1 . lists)
+;;   (check-arg procedure? kons fold)
+;;   (if (pair? lists)
+;;       (let lp ((lists (cons lis1 lists)) (ans knil))    ; N-ary case
+;;     (receive (cars+ans cdrs) (%cars+cdrs+ lists ans)
+;;       (if (null? cars+ans) ans ; Done.
+;;           (lp cdrs (apply kons cars+ans)))))
 
-      (let lp ((lis lis1) (ans knil))           ; Fast path
-    (if (null-list? lis) ans
-        (lp (cdr lis) (kons (car lis) ans))))))
+;;       (let lp ((lis lis1) (ans knil))           ; Fast path
+;;     (if (null-list? lis) ans
+;;         (lp (cdr lis) (kons (car lis) ans))))))
 
 
 ;; FOLD-RIGHT: the single list case has been changed:
@@ -1771,6 +1771,9 @@ FILTER an FILTER! are primitives in STklos
 (redefine make-list)
 (redefine assoc)
 (redefine member)
+
+(redefine fold)
+(redefine reduce)
 
 ;; Not R7RS, but also moved to STklos core:
 (redefine last-pair)
