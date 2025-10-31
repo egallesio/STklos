@@ -695,7 +695,7 @@ static SCM double2rational(double d)
   int_part = double2integer(i);
 
   if (!fraction) {
-    res = negative ? sub2(MAKE_INT(0), int_part) : int_part;
+      res = negative ? double2integer((- i)) : int_part;
   } else {
 
 #ifdef __MINI_GMP_H__
