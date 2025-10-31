@@ -75,7 +75,6 @@ struct bignum_obj {
 
 /*==============================================================================*/
 
-//#define MY_PI           3.1415926535897932384626433832795029L  /* pi */
 #define MY_PI      3.1415926535897932384626433832795028841971693993751058209749445923078164062862090L
 
 #define BIGNUM_FITS_INTEGER(_bn) (mpz_cmp_si((_bn), INT_MIN_VAL) >= 0 &&        \
@@ -1598,9 +1597,7 @@ DEFINE_PRIMITIVE("real?", realp, subr1, (SCM x))
 {
   switch (TYPEOF(x)) {
     case tc_complex:
-      // a+0i is real; a+0.0i is not
-      // return MAKE_BOOLEAN(STk_eq(COMPLEX_IMAG(x), MAKE_INT(0)) == STk_true);
-      // Useless: if it's a complex, IMAG_PART is not #e0
+      /* If x is complex, IMAG_PART is not #e0, so x is NOT real! */
       return STk_false;
     case tc_real:
     case tc_rational:
@@ -2690,7 +2687,6 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
                       return (INT_VAL(x) < 0) ? MAKE_INT(-INT_VAL(x)) : x;
     case tc_bignum:   if (mpz_sgn(BIGNUM_VAL(x)) < 0) {
                         mpz_t tmp;
-
                         mpz_init(tmp);
                         mpz_neg(tmp, BIGNUM_VAL(x));
                         x = bignum2scheme_bignum(tmp);
@@ -3425,9 +3421,7 @@ static SCM my_tan(SCM z)
                         SCM b = my_exp(make_complex(COMPLEX_IMAG(z),
                                                     sub2(MAKE_INT(0),
                                                          COMPLEX_REAL(z))));
-                        SCM c;
-
-                        c = div2(sub2(a, b), add2(a,b));
+                        SCM c = div2(sub2(a, b), add2(a,b));
                         return COMPLEXP(c) ?
                                   make_complex(COMPLEX_IMAG(c),
                                                sub2(MAKE_INT(0), COMPLEX_REAL(c))):
