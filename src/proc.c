@@ -585,14 +585,18 @@ static SCM fold(SCM kons, SCM knil, int n, SCM* lists)
 DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
 {
   if (argc < 3) STk_error("expected at least 3 arguments (given %d)", argc);
+
   SCM kons = *argv--;
   SCM knil = *argv--;
-  argc = argc - 2;
-  if (STk_procedurep(kons) == STk_false) STk_error("bad procedure ~s", kons);
   SCM *lists = argv;
   SCM *ptr = lists;
-  for (int i=0; i<argc; i++)
+
+  argc -= 2;
+  if (STk_procedurep(kons) == STk_false) error_bad_procedure(kons);
+
+  for (int i = 0; i < argc; i++)
     if (!NULLP(*ptr) && !CONSP(*ptr)) STk_error("bad list ~s", *ptr);
+
   return fold(kons, knil, argc, lists);
 }
 
@@ -621,9 +625,10 @@ doc>
 */
 DEFINE_PRIMITIVE("reduce", reduce, subr3, (SCM f, SCM id, SCM list))
 {
-  if (STk_procedurep(f) == STk_false) STk_error("bad procedure ~s", f);
+  if (STk_procedurep(f) == STk_false) error_bad_procedure(f);
   if (NULLP(list)) return id;
   if (!CONSP(list)) STk_error("bad list ~s", list);
+
   return fold(f,CAR(list), 1, &(CDR(list)));
 }
 
