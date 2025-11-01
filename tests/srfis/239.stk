@@ -89,3 +89,55 @@
 (test/compile-error "list-case.15"
             (list-case 15
                        [#(void) 1 2 3]))
+
+;;
+;; Examples of the SRFI documenet
+;;
+(define type-of
+  (lambda (obj)
+    (list-case obj
+      [(_ . _) 'pair]
+      [() 'null]
+      [_ 'atom])))
+
+(test "list-case.16"
+      'pair
+      (type-of '(1 2 3)))
+
+(test "list-case.17"
+      'pair
+      (type-of '(1 . 2)))
+
+(test "list-case.18"
+      'null
+      (type-of (list)))
+
+(test "list-case.19"
+      'atom
+      (type-of 'foo))
+
+(test "list-case.20"
+      'atom
+      (type-of (void)))
+
+;; ------
+(let ()
+
+  (define (fold proc seed ls)
+    (let f ([acc seed] [ls ls])
+      (list-case ls
+                 [(h . t) (f (proc h acc) t)]
+                 [() acc]
+                 [_ (error 'fold "not a list" ls)])))
+
+  (test "list-case.21"
+        1
+        (fold - 1 '(1 2 3)))
+
+  (test "list-case.22"
+        'foo
+        (fold - 'foo '()))
+
+  (test/error "list-case.23"
+              (fold - 1 (cons 1 2))))
+
