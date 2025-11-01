@@ -470,6 +470,8 @@ read directive>>_.
 {{insertdoc 'for-each}}
 {{insertdoc 'string-for-each}}
 {{insertdoc 'vector-for-each}}
+{{insertdoc 'fold}}
+{{insertdoc 'reduce}}
 {{insertdoc 'every}}
 {{insertdoc 'any}}
 {{insertdoc 'call/cc}}

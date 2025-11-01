@@ -517,6 +517,121 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
   return STk_void;
 }
 
+/*
+<doc fold
+ * (fold kons knil list1 list2 ...)
+ *
+ * The procedure |kons| will first be applied to |(arg1 arg2 ... argn
+ * X)|, where |argj| is the CAR of the j-th list and |X| is |knil|.
+ * Then, this will be repeated, but each |argj| is updated to the next
+ * element in the j-th list, and |X| is updated to the result of the
+ * previous pass.
+ *
+ * @lisp
+ * (fold - 100 '())            => 100
+ * (fold - 100 '(1 2 3))       => -98
+ * (fold - 100 '(1 4) '(5 10)) => 98
+ * @end lisp
+ *
+ * In the first example, there is only an empty list, so |kons| is not
+ * even called, and |knil| is returned.
+ *
+ * In the second case, the operations performed were
+ * @lisp
+ * (- 1 100)  => -99       ; X is -99
+ * (- 2 -99)  => 101       ; X is 101
+ * (- 3 101)  => -98       ; final result
+ * @end lisp
+ *
+ * In the the third example,
+ * @lisp
+ * (- 1 5 100)   => -104   ; X is -104
+ * (- 4 10 -104) =>  98    ; final result
+ * @end lisp
+doc>
+*/
+static SCM fold(SCM kons, SCM knil, int n, SCM* lists)
+{
+  if (n == 1) { /* Fast path for common case */
+    SCM tmp = knil;
+    for (SCM v = *lists; !NULLP(v); v = CDR(v)) {
+      if (!CONSP(v)) error_malformed_list(v);
+      tmp = STk_C_apply(kons, 2, CAR(v), tmp);
+    }
+    return tmp;
+  } else {
+    SCM v     = STk_makevect(n + 1, (SCM) NULL);
+    SCM *args = VECTOR_DATA(v);
+    SCM tmp = knil;
+
+    for ( ; ; ) {
+      /* Build the parameter list */
+      for (int i=0, j=0; i < n; i++,j--) {
+        if (NULLP(lists[j]))
+          return tmp;
+        if (!CONSP(lists[j])) error_malformed_list(lists[j]);
+
+        args[i]  = CAR(lists[j]);
+        lists[j] = CDR(lists[j]);
+      }
+      args[n] = tmp;
+
+      tmp = STk_C_apply(kons, -(n+1), args);
+    }
+  }
+}
+
+
+DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
+{
+  if (argc < 3) STk_error("expected at least 3 arguments (given %d)", argc);
+
+  SCM kons = *argv--;
+  SCM knil = *argv--;
+  SCM *lists = argv;
+  SCM *ptr = lists;
+
+  argc -= 2;
+  if (STk_procedurep(kons) == STk_false) error_bad_procedure(kons);
+
+  for (int i = 0; i < argc; i++)
+    if (!NULLP(*ptr) && !CONSP(*ptr)) STk_error("bad list ~s", *ptr);
+
+  return fold(kons, knil, argc, lists);
+}
+
+
+/*
+<doc reduce
+ * (reduce f init lst)
+ *
+ * If |lst| is null, the returned value is |init|. Otherwise,
+ * it is equivalent to |(fold f (car lst) (cdr lst))|.
+ * That is, |reduce| will operate on each par of consecutive
+ * elements of lst beginning at the leftmost position, accumulating
+ * the result value.
+ *
+ * @lisp
+ * (reduce - 'a '())        => 'a
+ * (reduce - 'a '(10 40 90) => 60
+ * @end lisp
+ *
+ * In the second example, the computations are:
+ * @lisp
+ * (- 40 10)   => 30 ; will be used as second argument
+ * (- 90 30)   => 60 ; final value
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("reduce", reduce, subr3, (SCM f, SCM id, SCM list))
+{
+  if (STk_procedurep(f) == STk_false) error_bad_procedure(f);
+  if (NULLP(list)) return id;
+  if (!CONSP(list)) STk_error("bad list ~s", list);
+
+  return fold(f,CAR(list), 1, &(CDR(list)));
+}
+
 
 int STk_init_proc(void)
 {
@@ -541,5 +656,8 @@ int STk_init_proc(void)
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);
-  return TRUE;
+
+  ADD_PRIMITIVE(fold);
+  ADD_PRIMITIVE(reduce);
+return TRUE;
 }
