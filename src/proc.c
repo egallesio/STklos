@@ -384,6 +384,7 @@ static SCM map(int argc, SCM *argv, int in_map)
   argc -= 1;
   res   = STk_nil;
 
+  if (STk_procedurep(fct) == STk_false) error_bad_procedure(fct);
 
   if (argc == 1) {
     /* frequent case (map (lambda (x) ...) list). Do it specially */
