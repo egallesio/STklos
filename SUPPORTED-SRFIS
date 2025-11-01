@@ -141,6 +141,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-235: Combinators
     - SRFI-236: Evaluating expressions in an unspecified order
     - SRFI-238: Codesets
+    - SRFI-239: Destructuring lists
     - SRFI-244: Multiple-value definitions
     - SRFI-253: Data (Type-)Checking
     - SRFI-258: Uninterned symbols
