@@ -82,7 +82,7 @@
                  [ a  'neither-null-nor-pair ]
                  [ (_ . _) 'ok-it-is-a-pair ]))
 
-(test "list-case.14"
+(test/compile-error "list-case.14"
             (list-case 14
                        [#(1 2) 1 2 3]))
 
