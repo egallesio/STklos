@@ -384,6 +384,7 @@ static SCM map(int argc, SCM *argv, int in_map)
   argc -= 1;
   res   = STk_nil;
 
+  if (STk_procedurep(fct) == STk_false) error_bad_procedure(fct);
 
   if (argc == 1) {
     /* frequent case (map (lambda (x) ...) list). Do it specially */
@@ -518,7 +519,7 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
 }
 
 /*
-<doc fold
+<doc EXT fold
  * (fold kons knil list1 list2 ...)
  *
  * The procedure |kons| will first be applied to |(arg1 arg2 ... argn
@@ -602,7 +603,7 @@ DEFINE_PRIMITIVE("fold", fold, vsubr, (int argc, SCM* argv))
 
 
 /*
-<doc reduce
+<doc EXT reduce
  * (reduce f init lst)
  *
  * If |lst| is null, the returned value is |init|. Otherwise,
