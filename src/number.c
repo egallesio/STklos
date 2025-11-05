@@ -2003,21 +2003,11 @@ doc>
 DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
 {
   SCM res;
-  int exactp;
+  int exactp=1, first=1;
 
   if (argc == 0) error_at_least_1();
 
-  /* At least one argument; it must be REAL: */
-  if (STk_realp(*argv) == STk_false)
-    error_not_a_real_number(*argv);
-
-  /* Exactly one argument; return it: */
-  if (argc == 1) return *argv;
-
-  exactp = isexactp(*argv);
-  if (STk_isnan(*argv)) return *argv;
-
-  for (res = *argv--; --argc; argv--) {
+  for (res = *argv; argc; argv--, argc--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
 
@@ -2027,8 +2017,10 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
 
-    /* compute max */
-    if (do_compare(res, *argv) < 0) res = *argv;
+    if (first)       /* this is the first argument: do nothing */
+      first = 0;
+    else             /* compute max */
+       if (do_compare(res, *argv) < 0) res = *argv;
   }
   return (!exactp && isexactp(res)) ? exact2inexact(res) : res;
 }
@@ -2037,21 +2029,11 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
 DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
 {
   SCM res;
-  int exactp;
+  int exactp=1, first=1;
 
   if (argc == 0) error_at_least_1();
 
-  /* At least one argument; it must be REAL: */
-  if (STk_realp(*argv) == STk_false)
-    error_not_a_real_number(*argv);
-
-  /* Exactly one argument; return it: */
-  if (argc == 1) return *argv;
-
-  exactp = isexactp(*argv);
-  if (STk_isnan(*argv)) return *argv;
-
-  for (res = *argv--; --argc; argv--) {
+  for (res = *argv; argc; argv--, argc--) {
     /* See that the argument is a correct number */
     if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
 
@@ -2061,8 +2043,10 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
 
-    /* compute max */
-    if (do_compare(res, *argv) > 0) res = *argv;
+    if (first)       /* this is the first argument: do nothing */
+      first = 0;
+    else             /* compute max */
+       if (do_compare(res, *argv) > 0) res = *argv;
   }
   return (!exactp && isexactp(res)) ? exact2inexact(res) : res;
 }
