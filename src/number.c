@@ -2006,10 +2006,13 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
   int exactp;
 
   if (argc == 0) error_at_least_1();
-  if (argc == 1) {
-    if (STk_realp(*argv) == STk_true) return *argv;
+
+  /* At least one argument; it must be REAL: */
+  if (STk_realp(*argv) == STk_false)
     error_not_a_real_number(*argv);
-  }
+
+  /* Exactly one argument; return it: */
+  if (argc == 1) return *argv;
 
   exactp = isexactp(*argv);
   if (STk_isnan(*argv)) return *argv;
@@ -2037,10 +2040,13 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
   int exactp;
 
   if (argc == 0) error_at_least_1();
-  if (argc == 1) {
-    if (STk_realp(*argv) == STk_true) return *argv;
+
+  /* At least one argument; it must be REAL: */
+  if (STk_realp(*argv) == STk_false)
     error_not_a_real_number(*argv);
-  }
+
+  /* Exactly one argument; return it: */
+  if (argc == 1) return *argv;
 
   exactp = isexactp(*argv);
   if (STk_isnan(*argv)) return *argv;
