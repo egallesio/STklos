@@ -187,7 +187,7 @@ SCM STk_C_make_list(int n, SCM init)
  *   - If the list consists of a single cycle, then we guarantee that
  *    the pointer returned is to the FIRST cell of the list.
  */
-static SCM list_type_and_length(SCM l, int *len)
+SCM list_type_and_length(SCM l, int *len)
 {
   //     About the cycle detecting and copying algorithm:
   //

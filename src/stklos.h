@@ -638,7 +638,7 @@ enum f_codes {
 int STk_C_type2number(SCM key);
 SCM STk_call_ext_function(SCM fct, int argc, SCM *argv);
 SCM STk_ext_func_name(SCM fct);
-  
+
 int STk_init_ffi(void);
 
 
@@ -754,6 +754,7 @@ SCM STk_dappend2(SCM l1, SCM l2);       /* destructive append */
 SCM STk_dremq(SCM obj, SCM list);       /* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
 SCM STk_C_make_list(int n, SCM init);  /* GC friendly list allocation */
+SCM list_type_and_length(SCM l, int *len);
 
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
 EXTERN_PRIMITIVE("car", car, subr1, (SCM x));

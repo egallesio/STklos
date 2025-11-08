@@ -366,16 +366,17 @@
 
 ;;; IOTA count [start step] (start start+step ... start+(count-1)*step)
 
-(define (iota count :optional (start 0) (step 1))
-  (check-arg integer? count iota)
-  (check-arg number? start iota)
-  (check-arg number? step iota)
-  (if (< count 0) (error 'iota "negative step count ~S" count))
-  (let ((last-val (+ start (* (- count 1) step))))
-    (do ((count count (- count 1))
-     (val last-val (- val step))
-     (ans '() (cons val ans)))
-    ((<= count 0)  ans))))
+;; Rewritten in C
+;; (define (iota count :optional (start 0) (step 1))
+;;   (check-arg integer? count iota)
+;;   (check-arg number? start iota)
+;;   (check-arg number? step iota)
+;;   (if (< count 0) (error 'iota "negative step count ~S" count))
+;;   (let ((last-val (+ start (* (- count 1) step))))
+;;     (do ((count count (- count 1))
+;;      (val last-val (- val step))
+;;      (ans '() (cons val ans)))
+;;     ((<= count 0)  ans))))
 
 ;;; I thought these were lovely, but the public at large did not share my
 ;;; enthusiasm...
@@ -456,16 +457,20 @@
 ;;; <dotted-list> ::= <non-nil,non-pair>    ; Empty dotted list
 ;;;               |   (cons <x> <dotted-list>)  ; Proper-list pair
 
-(define (dotted-list? x)
-  (let lp ((x x) (lag x))
-    (if (pair? x)
-    (let ((x (cdr x)))
-      (if (pair? x)
-          (let ((x   (cdr x))
-            (lag (cdr lag)))
-        (and (not (eq? x lag)) (lp x lag)))
-          (not (null? x))))
-    (not (null? x)))))
+;; Suppressed dotted-list? and circular-list? because we build them easily
+;; in C, using list_type_and_length().
+
+;; In STklos core
+;; (define (dotted-list? x)
+;;   (let lp ((x x) (lag x))
+;;     (if (pair? x)
+;;     (let ((x (cdr x)))
+;;       (if (pair? x)
+;;           (let ((x   (cdr x))
+;;             (lag (cdr lag)))
+;;         (and (not (eq? x lag)) (lp x lag)))
+;;           (not (null? x))))
+;;     (not (null? x)))))
 
 ;; In STklos core
 ;; (define (circular-list? x)
@@ -514,18 +519,19 @@
 ;        (lp (cdr x) (+ len 1))     ; diverges.
 ;        len)))
 
-(define (length+ x)         ; Returns #f if X is circular.
-  (let lp ((x x) (lag x) (len 0))
-    (if (pair? x)
-    (let ((x (cdr x))
-          (len (+ len 1)))
-      (if (pair? x)
-          (let ((x   (cdr x))
-            (lag (cdr lag))
-            (len (+ len 1)))
-        (and (not (eq? x lag)) (lp x lag len)))
-          len))
-    len)))
+;; Suppressed length+: re-written in C, using list_type_and_length():
+;; (define (length+ x)         ; Returns #f if X is circular.
+;;   (let lp ((x x) (lag x) (len 0))
+;;     (if (pair? x)
+;;     (let ((x (cdr x))
+;;           (len (+ len 1)))
+;;       (if (pair? x)
+;;           (let ((x   (cdr x))
+;;             (lag (cdr lag))
+;;             (len (+ len 1)))
+;;         (and (not (eq? x lag)) (lp x lag len)))
+;;           len))
+;;     len)))
 
 (define (zip list1 . more-lists) (apply map list list1 more-lists))
 
@@ -581,56 +587,58 @@
 
 ;;; take & drop
 
-(define (take lis k)
-  (check-arg integer? k take)
-  (let recur ((lis lis) (k k))
-    (if (zero? k) '()
-    (cons (car lis)
-          (recur (cdr lis) (- k 1))))))
+;; All variantes of take and drop were moved to scheme/list.c
 
-(define (drop lis k)
-  (check-arg integer? k drop)
-  (let iter ((lis lis) (k k))
-    (if (zero? k) lis (iter (cdr lis) (- k 1)))))
+;; (define (take lis k)
+;;   (check-arg integer? k take)
+;;   (let recur ((lis lis) (k k))
+;;     (if (zero? k) '()
+;;     (cons (car lis)
+;;           (recur (cdr lis) (- k 1))))))
 
-(define (take! lis k)
-  (check-arg integer? k take!)
-  (if (zero? k) '()
-      (begin (set-cdr! (drop lis (- k 1)) '())
-         lis)))
+;; (define (drop lis k)
+;;   (check-arg integer? k drop)
+;;   (let iter ((lis lis) (k k))
+;;     (if (zero? k) lis (iter (cdr lis) (- k 1)))))
+
+;; (define (take! lis k)
+;;   (check-arg integer? k take!)
+;;   (if (zero? k) '()
+;;       (begin (set-cdr! (drop lis (- k 1)) '())
+;;              lis)))
 
 ;;; TAKE-RIGHT and DROP-RIGHT work by getting two pointers into the list,
 ;;; off by K, then chasing down the list until the lead pointer falls off
 ;;; the end.
 
-(define (take-right lis k)
-  (check-arg integer? k take-right)
-  (let lp ((lag lis)  (lead (drop lis k)))
-    (if (pair? lead)
-    (lp (cdr lag) (cdr lead))
-    lag)))
+;; (define (take-right lis k)
+;;   (check-arg integer? k take-right)
+;;   (let lp ((lag lis)  (lead (drop lis k)))
+;;     (if (pair? lead)
+;;     (lp (cdr lag) (cdr lead))
+;;     lag)))
 
-(define (drop-right lis k)
-  (check-arg integer? k drop-right)
-  (let recur ((lag lis) (lead (drop lis k)))
-    (if (pair? lead)
-    (cons (car lag) (recur (cdr lag) (cdr lead)))
-    '())))
+;; (define (drop-right lis k)
+;;   (check-arg integer? k drop-right)
+;;   (let recur ((lag lis) (lead (drop lis k)))
+;;     (if (pair? lead)
+;;     (cons (car lag) (recur (cdr lag) (cdr lead)))
+;;     '())))
 
 ;;; In this function, LEAD is actually K+1 ahead of LAG. This lets
 ;;; us stop LAG one step early, in time to smash its cdr to ().
-(define (drop-right! lis k)
-  (check-arg integer? k drop-right!)
-  (let ((lead (drop lis k)))
-    (if (pair? lead)
+;; (define (drop-right! lis k)
+;;   (check-arg integer? k drop-right!)
+;;   (let ((lead (drop lis k)))
+;;     (if (pair? lead)
 
-    (let lp ((lag lis)  (lead (cdr lead)))  ; Standard case
-      (if (pair? lead)
-          (lp (cdr lag) (cdr lead))
-          (begin (set-cdr! lag '())
-             lis)))
-
-    '())))  ; Special case dropping everything -- no cons to side-effect.
+;;     (let lp ((lag lis)  (lead (cdr lead)))  ; Standard case
+;;       (if (pair? lead)
+;;           (lp (cdr lag) (cdr lead))
+;;           (begin (set-cdr! lag '())
+;;              lis)))
+;;
+;;     '())))  ; Special case dropping everything -- no cons to side-effect.
 
 ;(define (list-ref lis i) (car (drop lis i)))   ; R4RS
 
@@ -676,20 +684,20 @@
 ;          lis)))
 ;      (list-tail lis k)))
 
-(define (split-at x k)
-  (check-arg integer? k split-at)
-  (let recur ((lis x) (k k))
-    (if (zero? k) (values '() lis)
-    (receive (prefix suffix) (recur (cdr lis) (- k 1))
-      (values (cons (car lis) prefix) suffix)))))
+;; (define (split-at x k)
+;;   (check-arg integer? k split-at)
+;;   (let recur ((lis x) (k k))
+;;     (if (zero? k) (values '() lis)
+;;     (receive (prefix suffix) (recur (cdr lis) (- k 1))
+;;       (values (cons (car lis) prefix) suffix)))))
 
-(define (split-at! x k)
-  (check-arg integer? k split-at!)
-  (if (zero? k) (values '() x)
-      (let* ((prev (drop x (- k 1)))
-         (suffix (cdr prev)))
-    (set-cdr! prev '())
-    (values x suffix))))
+;; (define (split-at! x k)
+;;   (check-arg integer? k split-at!)
+;;   (if (zero? k) (values '() x)
+;;       (let* ((prev (drop x (- k 1)))
+;;          (suffix (cdr prev)))
+;;     (set-cdr! prev '())
+;;     (values x suffix))))
 
 
 (define (last lis) (car (last-pair lis)))
@@ -960,7 +968,7 @@ written in C, in STklos core!
 ;;     (receive (cars+ans cdrs) (%cars+cdrs+ lists ans)
 ;;       (if (null? cars+ans) ans ; Done.
 ;;           (lp cdrs (apply kons cars+ans)))))
-
+;;
 ;;       (let lp ((lis lis1) (ans knil))           ; Fast path
 ;;     (if (null-list? lis) ans
 ;;         (lp (cdr lis) (kons (car lis) ans))))))
@@ -1658,25 +1666,49 @@ FILTER an FILTER! are primitives in STklos
              lis1)))))
 
 
-(define (lset-difference = lis1 . lists)
-  (check-arg procedure? = lset-difference)
-  (let ((lists (filter pair? lists)))   ; Throw out empty lists.
-    (cond ((null? lists)     lis1)  ; Short cut
-      ((memq lis1 lists) '())   ; Short cut
-      (else (filter (lambda (x)
-              (every (lambda (lis) (not (member x lis =)))
-                 lists))
-            lis1)))))
 
-(define (lset-difference! = lis1 . lists)
-  (check-arg procedure? = lset-difference!)
-  (let ((lists (filter pair? lists)))   ; Throw out empty lists.
-    (cond ((null? lists)     lis1)  ; Short cut
-      ((memq lis1 lists) '())   ; Short cut
-      (else (filter! (lambda (x)
-               (every (lambda (lis) (not (member x lis =)))
-                  lists))
-             lis1)))))
+;;; The lset-difference in the SRFI reference implementation is
+;;; too slow - it's O(m.n), where m is the size of lis1
+;;; and n is the sum of sizes of lists.
+;;; We use a faster version using hash tables, O(m+n).
+;;;
+;; (define (lset-difference = lis1 . lists)
+;;   (check-arg procedure? = lset-difference)
+;;   (let ((lists (filter pair? lists)))   ; Throw out empty lists.
+;;     (cond ((null? lists)     lis1)  ; Short cut
+;;       ((memq lis1 lists) '())   ; Short cut
+;;       (else (filter (lambda (x)
+;;               (every (lambda (lis) (not (member x lis =)))
+;;                  lists))
+;;             lis1)))))
+
+(define (lset-difference eq lis . lists)
+  (check-arg procedure? = lset-difference)
+  (let ((h (make-hash-table eq))
+        (mark #(1)))
+    ;; mark every element present in the lists
+    (for-each (lambda (lst)
+                (for-each (lambda (elt)
+                            (hash-table-set! h elt #t))
+                          lst))
+              lists)
+    ;; and remove them from lis
+    (filter (lambda (x)
+              (eq? mark (hash-table-ref/default h x mark)))
+            lis)))
+
+;;; lset-difference is faster than lset-difference!, there is no
+;;; reason to not make them the same.
+(define lset-difference! lset-difference)
+;; (define (lset-difference! = lis1 . lists)
+;;   (check-arg procedure? = lset-difference!)
+;;   (let ((lists (filter pair? lists)))   ; Throw out empty lists.
+;;     (cond ((null? lists)     lis1)  ; Short cut
+;;       ((memq lis1 lists) '())   ; Short cut
+;;       (else (filter! (lambda (x)
+;;                (every (lambda (lis) (not (member x lis =)))
+;;                   lists))
+;;              lis1)))))
 
 (define (lset-diff+intersection = lis1 . lists)
   (check-arg procedure? = lset-diff+intersection)
@@ -1771,7 +1803,6 @@ FILTER an FILTER! are primitives in STklos
 (redefine make-list)
 (redefine assoc)
 (redefine member)
-
 (redefine fold)
 (redefine reduce)
 
