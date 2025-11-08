@@ -35,7 +35,9 @@
    do_cars, co_cdrs = which lists should be computed? cars, cdrs, or both?
    test             = if one of the lists is null, return NIL (test=1) or
                       error (test=0)                                        */
-static inline SCM cars_cdrs(SCM lists, SCM cars_final, int do_cars, int do_cdrs, int test) {
+
+static inline SCM cars_cdrs(SCM lists, SCM cars_final, int do_cars, int do_cdrs,
+                            int test) {
   SCM cars = STk_nil;
   SCM cdrs = STk_nil;
 
@@ -135,7 +137,7 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
     step = MAKE_INT(1);
   }
 
-  if (count < 0) STk_error("negative step count %d", count);
+  if (INT_VAL(count) < 0) STk_error("negative step count ~S", count);
 
   SCM list = STk_C_make_list(INT_VAL(count), start);
   SCM ptr  = CDR(list); /* CAR is already initialized by STk_C_make_list */
