@@ -85,12 +85,12 @@ DEFINE_PRIMITIVE("%cars+cdrs/notest", cars_cdrs_notest, subr1, (SCM lists)) {
   return cars_cdrs(lists, NULL, 1, 1, 0);
 }
 
-/*   We already have list_type_and_length in list.c, which does most
+/*   We already have STk_list_type_and_length in list.c, which does most
      of the job, so it makes no sense to use the reference
      implementation of SRFI-1 for length+, circular-list? and
      dotted-list?.
 
-     list_type_and_length's return value depends on what the list is:
+     STk_list_type_and_length's return value depends on what the list is:
      1. PROPER LIST: return STk_nil.
      2. CYCLIC LIST: A CONS cell (this is where the cycle starts).
      3. FINITE IMPROPER LIST: The last CDR.
@@ -100,7 +100,7 @@ DEFINE_PRIMITIVE("length+", length_plus, subr1, (SCM list)) {
   /* length+ returns #f if the list is not proper. */
 
   int len;
-  SCM res = list_type_and_length(list, &len);
+  SCM res = STk_list_type_and_length(list, &len);
 
   if (res == NULL) STk_error("bad list ~W", list); /* not a list */
   if (res == STk_nil) return MAKE_INT(len);        /* proper */
@@ -109,7 +109,7 @@ DEFINE_PRIMITIVE("length+", length_plus, subr1, (SCM list)) {
 
 DEFINE_PRIMITIVE("dotted-list?", dotted_list, subr1, (SCM list)) {
   int len;
-  SCM res = list_type_and_length(list, &len);
+  SCM res = STk_list_type_and_length(list, &len);
   if (res == NULL) STk_error("bad list ~W", list); /* not a list */
 
   return MAKE_BOOLEAN(!CONSP(res)       &&  /* not circular */
@@ -200,7 +200,7 @@ DEFINE_PRIMITIVE("take-right", take_right, subr2, (SCM lis, SCM k)) {
   if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
 
   int len;
-  SCM res = list_type_and_length(lis, &len);
+  SCM res = STk_list_type_and_length(lis, &len);
   SCM ptr = lis;
 
   if (CONSP(res)) STk_error("circular list ~W", lis);
@@ -220,7 +220,7 @@ DEFINE_PRIMITIVE("drop-right", drop_right, subr2, (SCM lis, SCM k)) {
   if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
 
   int len;
-  SCM res = list_type_and_length(lis, &len);
+  SCM res = STk_list_type_and_length(lis, &len);
 
   if (CONSP(res)) STk_error("circular list ~W", lis);
   if (res == NULL) STk_error("bad list ~W", lis);
@@ -249,7 +249,7 @@ DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
   if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
 
   int len;
-  SCM res = list_type_and_length(lis, &len);
+  SCM res = STk_list_type_and_length(lis, &len);
 
   if (CONSP(res)) STk_error("circular list ~W", lis);
   if (res == NULL) STk_error("bad list ~W", lis);
@@ -275,7 +275,8 @@ DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
   if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
 
   int len;
-  SCM res = list_type_and_length(lis, &len);
+
+  (void) STk_list_type_and_length(lis, &len);
 
   if (INT_VAL(k) > len) STk_error("count %d greater than list length %d",
                                   INT_VAL(k), len);
@@ -296,7 +297,8 @@ DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
   if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
 
   int len;
-  SCM res = list_type_and_length(lis, &len);
+
+  (void) STk_list_type_and_length(lis, &len);
 
   if (INT_VAL(k) > len) STk_error("count %d greater than list length %d",
                                   INT_VAL(k), len);
@@ -314,6 +316,7 @@ DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
   }
   return STk_n_values(2, STk_nil, lis);
 }
+
 
 MODULE_ENTRY_START("scheme/list")
 {
