@@ -29,7 +29,7 @@ The salient points of ***STklos*** are:
 -   [Unicode](https://en.wikipedia.org/wiki/Unicode) support,
 -   native threads built on top of [Posix theads](https://en.wikipedia.org/w/index.php?title=Pthreads),
 -   [Tail Call Optimization](https://en.wikipedia.org/w/index.php?title=Tail_call), as required by R⁷RS,
--   support for a large number (> 120) of [SRFIs](https://en.wikipedia.org/wiki/Scheme_Requests_for_Implementation).
+-   support for a large number (> 260) of [SRFIs](https://en.wikipedia.org/wiki/Scheme_Requests_for_Implementation).
 
 
 History
