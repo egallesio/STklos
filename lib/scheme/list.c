@@ -59,10 +59,10 @@ static inline SCM cars_cdrs(SCM lists, SCM cars_final, int do_cars, int do_cdrs,
       lists = CDR(lists);
     } else break;
   }
-  if (!do_cars) return STk_reverse(cdrs);
+  if (!do_cars) return STk_dreverse(cdrs);
   if (cars_final) cars = STk_cons(cars_final, cars);
-  if (!do_cdrs) return STk_reverse(cars);
-  return STk_n_values(2, STk_reverse(cars), STk_reverse(cdrs));
+  if (!do_cdrs) return STk_dreverse(cars);
+  return STk_n_values(2, STk_dreverse(cars), STk_dreverse(cdrs));
 }
 
 DEFINE_PRIMITIVE("%cars+", cars, subr2, (SCM lists, SCM fin)) {
