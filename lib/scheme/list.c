@@ -28,6 +28,30 @@
 
 #include "list-incl.c"
 
+static void error_bad_list(SCM l) {
+  STk_error("bad list ~s", l);
+}
+
+static void error_circular_list(SCM l) {
+  STk_error("circular list ~s", l);
+}
+
+static void error_bad_integer(SCM l) {
+  STk_error("bad integer ~s", l);
+}
+
+static void error_negative_amount(SCM v) {
+  STk_error("negative amount ~S", v);
+}
+
+static void error_negative_count(SCM v) {
+  STk_error("negative count ~S", v);
+}
+
+static void error_count_too_big(SCM v) {
+  STk_error("count (~s) is larger than list size", v);
+}
+
 /* cars_cdrs is the heart of the CAR/CDR extracting internal utilities
    for SRFI-1. THe parameters are:
    cars_final       = element to use after the last one in the CAR list.
@@ -40,8 +64,7 @@ static SCM cars_cdrs(SCM lists, SCM cars_final, int do_cars, int do_cdrs, int te
   SCM cars = STk_nil;
   SCM cdrs = STk_nil;
 
-  if (!(CONSP(lists) || NULLP(lists)))
-    STk_error("bad list ~S", lists);
+  if (!(CONSP(lists) || NULLP(lists))) error_bad_list(lists);
 
   while(CONSP(lists)) {
     if (NULLP(CAR(lists))) {
@@ -96,12 +119,10 @@ DEFINE_PRIMITIVE("%cars+cdrs/notest", cars_cdrs_notest, subr1, (SCM lists)) {
      4. NOT A LIST: NULL.  */
 
 DEFINE_PRIMITIVE("length+", length_plus, subr1, (SCM list)) {
-  /* length+ returns #f if the list is not proper. */
-
   int len;
   SCM res = STk_list_type_and_length(list, &len);
 
-  if (res == NULL) STk_error("bad list ~W", list); /* not a list */
+  if (res == NULL) error_bad_list(list);           /* not a list */
   if (res == STk_nil) return MAKE_INT(len);        /* proper */
   return STk_false;                                /* improper (dotted/circular) */
 }
@@ -109,8 +130,8 @@ DEFINE_PRIMITIVE("length+", length_plus, subr1, (SCM list)) {
 DEFINE_PRIMITIVE("dotted-list?", dotted_list, subr1, (SCM list)) {
   int len;
   SCM res = STk_list_type_and_length(list, &len);
-  if (res == NULL) STk_error("bad list ~W", list); /* not a list */
 
+  if (res == NULL) error_bad_list(list);    /* not a list */
   return MAKE_BOOLEAN(!CONSP(res)       &&  /* not circular */
                       !(res == STk_nil));   /* not proper */
 }
@@ -121,7 +142,7 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
   SCM count, start, step;
 
   count = *argv--; argc--;
-  if (!(INTP(count))) STk_error("bad fixnum ~S", count);
+  if (!(INTP(count))) error_bad_integer(count);
 
   if (INT_VAL(count) == 0) return STk_nil;
 
@@ -136,7 +157,7 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
     step = MAKE_INT(1);
   }
 
-  if (INT_VAL(count) < 0) STk_error("negative step count ~S", count);
+  if (INT_VAL(count) < 0) error_negative_count(count);
 
   SCM list = STk_C_make_list(INT_VAL(count), start);
   SCM ptr  = CDR(list); /* CAR is already initialized by STk_C_make_list */
@@ -149,14 +170,14 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
 }
 
 DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative amount ~S", k);
+  if (!INTP(k))       error_bad_integer(k);
+  if (INT_VAL(k) < 0) error_negative_amount(k);
 
   SCM res = STk_C_make_list(INT_VAL(k), STk_false);
   SCM ptr = res;
 
   for (int i = INT_VAL(k); i; i--) {
-    if (!CONSP(lis)) STk_error("count (~s) larger than list size", k);
+    if (!CONSP(lis)) error_count_too_big(k);
     CAR(ptr) = CAR(lis);
     lis = CDR(lis);
     ptr = CDR(ptr);
@@ -165,45 +186,45 @@ DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative amount ~S", k);
+  if (!INTP(k))       error_bad_integer(k);
+  if (INT_VAL(k) < 0) error_negative_amount(k);
   if (k == MAKE_INT(0)) return STk_nil;
 
   SCM ptr = lis;
 
   for (int i = INT_VAL(k) - 1; i; i--) {
-    if (!CONSP(ptr)) STk_error("count (~s) larger than list size", k);
+    if (!CONSP(ptr)) error_count_too_big(k);
     ptr = CDR(ptr);
   }
-  if (!CONSP(ptr)) STk_error("count (~s) larger than list size", k);
+  if (!CONSP(ptr)) error_negative_count(k);
   CDR(ptr) = STk_nil;
 
   return lis;
 }
 
 DEFINE_PRIMITIVE("drop", drop, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+  if (!INTP(k))       error_bad_integer(k);
+  if (INT_VAL(k) < 0) error_negative_count(k);
 
   SCM res = lis;
 
   for (int i = INT_VAL(k); i; i--) {
-    if (!CONSP(res)) STk_error("count (~s) larger than list size", k);
+    if (!CONSP(res)) error_count_too_big(k);
     res = CDR(res);
   }
   return res;
 }
 
 DEFINE_PRIMITIVE("take-right", take_right, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+  if (!INTP(k))       error_bad_integer(k);
+  if (INT_VAL(k) < 0) error_negative_count(k);
 
   int len;
   SCM res = STk_list_type_and_length(lis, &len);
   SCM ptr = lis;
 
-  if (CONSP(res)) STk_error("circular list ~W", lis);
-  if (res == NULL) STk_error("bad list ~W", lis);
+  if (CONSP(res))  error_circular_list(lis);
+  if (res == NULL) error_bad_list(lis);
 
   for (int i = 0; i < len - INT_VAL(k); i++)
     ptr = CDR(ptr);
@@ -215,19 +236,19 @@ DEFINE_PRIMITIVE("drop-right", drop_right, subr2, (SCM lis, SCM k)) {
      drop-right is guaranteed to return a freshly-allocated list, even
      in the case where nothing is dropped, e.g. (drop-right lis
      0)." */
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
+  if (!INTP(k))       error_bad_integer(k);
+  if (INT_VAL(k) < 0) error_negative_count(k);
 
   int len;
   SCM res = STk_list_type_and_length(lis, &len);
 
-  if (CONSP(res)) STk_error("circular list ~W", lis);
-  if (res == NULL) STk_error("bad list ~W", lis);
+  if (CONSP(res))  error_circular_list(lis);
+  if (res == NULL) error_bad_list(lis);
 
   if (INT_VAL(k) == len) return STk_nil;
 
   int size = len - INT_VAL(k);
-  if (size < 0) STk_error("count %d larger than list size %d", INT_VAL(k), len);
+  if (size < 0) error_count_too_big(k);
 
   res = STk_C_make_list(size, STk_false);
   SCM ptr = res;
@@ -244,19 +265,20 @@ DEFINE_PRIMITIVE("drop-right", drop_right, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
-
   int len;
+  
+  if (!INTP(k))       error_bad_integer(k);
+  if (INT_VAL(k) < 0) error_negative_count(k);
+
   SCM res = STk_list_type_and_length(lis, &len);
 
-  if (CONSP(res)) STk_error("circular list ~W", lis);
-  if (res == NULL) STk_error("bad list ~W", lis);
+  if (CONSP(res))  error_bad_integer(lis);
+  if (res == NULL) error_bad_list(lis);
 
   if (INT_VAL(k) == len) return STk_nil;
 
   int size = len - INT_VAL(k);
-  if (size < 0) STk_error("count %d larger than list size %d", INT_VAL(k), len);
+  if (size < 0) error_count_too_big(k);
 
   SCM ptr = lis;
 
@@ -270,16 +292,14 @@ DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
-
   int len;
+  
+  if (!INTP(k))       error_bad_list(k);
+  if (INT_VAL(k) < 0) error_negative_count(k);
 
   (void) STk_list_type_and_length(lis, &len);
 
-  if (INT_VAL(k) > len) STk_error("count %d greater than list length %d",
-                                  INT_VAL(k), len);
-
+  if (INT_VAL(k) > len) error_count_too_big(k);
   SCM left     = STk_C_make_list(INT_VAL(k), STk_false);
   SCM left_ptr = left;
 
@@ -292,15 +312,14 @@ DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k)) STk_error("bad integer ~S", k);
-  if (INT_VAL(k) < 0) STk_error("negative count ~S", k);
-
   int len;
+  
+  if (!INTP(k))       error_bad_integer(k);
+  if (INT_VAL(k) < 0) error_negative_count(k);
 
   (void) STk_list_type_and_length(lis, &len);
 
-  if (INT_VAL(k) > len) STk_error("count %d greater than list length %d",
-                                  INT_VAL(k), len);
+  if (INT_VAL(k) > len) error_count_too_big(k);
 
   SCM prev = STk_nil;
   SCM ptr  = lis;
