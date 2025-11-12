@@ -36,8 +36,7 @@
    test             = if one of the lists is null, return NIL (test=1) or
                       error (test=0)                                        */
 
-static inline SCM cars_cdrs(SCM lists, SCM cars_final, int do_cars, int do_cdrs,
-                            int test) {
+static SCM cars_cdrs(SCM lists, SCM cars_final, int do_cars, int do_cdrs, int test) {
   SCM cars = STk_nil;
   SCM cdrs = STk_nil;
 
