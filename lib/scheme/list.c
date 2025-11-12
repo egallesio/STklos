@@ -156,7 +156,7 @@ DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
   SCM ptr = res;
 
   for (int i = INT_VAL(k); i; i--) {
-    if (!CONSP(lis)) STk_error("count (~S) less than list size", k);
+    if (!CONSP(lis)) STk_error("count (~s) larger than list size", k);
     CAR(ptr) = CAR(lis);
     lis = CDR(lis);
     ptr = CDR(ptr);
@@ -172,10 +172,10 @@ DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
   SCM ptr = lis;
 
   for (int i = INT_VAL(k) - 1; i; i--) {
-    if (!CONSP(ptr)) STk_error("count (~S) larger than list size", k);
+    if (!CONSP(ptr)) STk_error("count (~s) larger than list size", k);
     ptr = CDR(ptr);
   }
-  if (!CONSP(ptr)) STk_error("count (~S) larger than list size", k);
+  if (!CONSP(ptr)) STk_error("count (~s) larger than list size", k);
   CDR(ptr) = STk_nil;
 
   return lis;
@@ -188,7 +188,7 @@ DEFINE_PRIMITIVE("drop", drop, subr2, (SCM lis, SCM k)) {
   SCM res = lis;
 
   for (int i = INT_VAL(k); i; i--) {
-    if (!CONSP(res)) STk_error("count (~S) less than list size", k);
+    if (!CONSP(res)) STk_error("count (~s) larger than list size", k);
     res = CDR(res);
   }
   return res;
