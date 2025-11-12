@@ -1133,19 +1133,25 @@ doc>
     (if (fixnum? count)
         ;; We can compute the number of loops at compile time and produce
         ;; simpler code. We can also use fx functions.
-        (if (and (= it 1) (positive? count))
-            ;; No loop unrolling
-            `(let ((,c ,count)) ,(%repeat c body #t))
-            ;; Unroll the loop.
-            (let ((valq (quotient count it))
-                  (valr (remainder count it)))
-               `(begin
-                  ,(if (positive? valq) ;; We have a "big" loop
-                      `(let ((,q ,valq)) ,(%repeat q inside #t))
-                      `(void))
-                  ,(if (positive? valr);; we have a "small" loop
-                       `(let ((,r ,valr)) ,(%repeat r body #t))
-                       `(void)))))
+        (cond ((not (positive? count))
+               '(void))
+              ((= it 1)
+               ;; No loop unrolling
+               `(let ((,c ,count)) ,(%repeat c body #t)))
+              ((<= count it)
+               ;; No iteration structure needed; just repeat the call
+               `(begin ,@(%multiply-list body count) (void)))
+              (else
+               ;; Unroll the loop.
+               (let ((valq (quotient count it))
+                     (valr (remainder count it)))
+                 `(begin
+                    ,(if (positive? valq) ;; We have a "big" loop
+                         `(let ((,q ,valq)) ,(%repeat q inside #t))
+                         `(void))
+                    ,(if (positive? valr);; we have a "small" loop
+                         `(let ((,r ,valr)) ,(%repeat r body #t))
+                         `(void))))))
         ;; count is not a fixnum.  Compute modulo and reminder at runtime
         (if (= it 1)
             ;; No loop unrolling.
