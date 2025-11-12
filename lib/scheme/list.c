@@ -1,7 +1,7 @@
 /*
  *  list.c         -- Partial implementation of (scheme list) aka SRFI-1
  *
- *  Copyright © 2023 Jeronimo Pellegrini - <j_p@aleph0.info>
+ *  Copyright © 2023-2025 Jeronimo Pellegrini - <j_p@aleph0.info>
  *
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -40,9 +40,6 @@ static void error_bad_integer(SCM l) {
   STk_error("bad integer ~s", l);
 }
 
-static void error_negative_amount(SCM v) {
-  STk_error("negative amount ~S", v);
-}
 
 static void error_negative_count(SCM v) {
   STk_error("negative count ~S", v);
@@ -51,6 +48,14 @@ static void error_negative_count(SCM v) {
 static void error_count_too_big(SCM v) {
   STk_error("count (~s) is larger than list size", v);
 }
+
+static inline void verify_count(SCM v) {
+  if (!INTP(v))       error_bad_integer(v);
+  if (INT_VAL(v) < 0) error_negative_count(v);
+}
+
+
+// ----------------------------------------------------------------------
 
 /* cars_cdrs is the heart of the CAR/CDR extracting internal utilities
    for SRFI-1. THe parameters are:
@@ -170,8 +175,7 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
 }
 
 DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k))       error_bad_integer(k);
-  if (INT_VAL(k) < 0) error_negative_amount(k);
+  verify_count(k);
 
   SCM res = STk_C_make_list(INT_VAL(k), STk_false);
   SCM ptr = res;
@@ -186,8 +190,7 @@ DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k))       error_bad_integer(k);
-  if (INT_VAL(k) < 0) error_negative_amount(k);
+  verify_count(k);
   if (k == MAKE_INT(0)) return STk_nil;
 
   SCM ptr = lis;
@@ -196,15 +199,14 @@ DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
     if (!CONSP(ptr)) error_count_too_big(k);
     ptr = CDR(ptr);
   }
-  if (!CONSP(ptr)) error_negative_count(k);
+  if (!CONSP(ptr)) error_count_too_big(k);
   CDR(ptr) = STk_nil;
 
   return lis;
 }
 
 DEFINE_PRIMITIVE("drop", drop, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k))       error_bad_integer(k);
-  if (INT_VAL(k) < 0) error_negative_count(k);
+  verify_count(k);
 
   SCM res = lis;
 
@@ -216,8 +218,7 @@ DEFINE_PRIMITIVE("drop", drop, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("take-right", take_right, subr2, (SCM lis, SCM k)) {
-  if (!INTP(k))       error_bad_integer(k);
-  if (INT_VAL(k) < 0) error_negative_count(k);
+  verify_count(k);
 
   int len;
   SCM res = STk_list_type_and_length(lis, &len);
@@ -236,10 +237,10 @@ DEFINE_PRIMITIVE("drop-right", drop_right, subr2, (SCM lis, SCM k)) {
      drop-right is guaranteed to return a freshly-allocated list, even
      in the case where nothing is dropped, e.g. (drop-right lis
      0)." */
-  if (!INTP(k))       error_bad_integer(k);
-  if (INT_VAL(k) < 0) error_negative_count(k);
-
   int len;
+
+  verify_count(k);
+
   SCM res = STk_list_type_and_length(lis, &len);
 
   if (CONSP(res))  error_circular_list(lis);
@@ -266,9 +267,8 @@ DEFINE_PRIMITIVE("drop-right", drop_right, subr2, (SCM lis, SCM k)) {
 
 DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
   int len;
-  
-  if (!INTP(k))       error_bad_integer(k);
-  if (INT_VAL(k) < 0) error_negative_count(k);
+
+  verify_count(k);
 
   SCM res = STk_list_type_and_length(lis, &len);
 
@@ -293,10 +293,8 @@ DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
 
 DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
   int len;
-  
-  if (!INTP(k))       error_bad_list(k);
-  if (INT_VAL(k) < 0) error_negative_count(k);
 
+  verify_count(k);
   (void) STk_list_type_and_length(lis, &len);
 
   if (INT_VAL(k) > len) error_count_too_big(k);
@@ -313,10 +311,8 @@ DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
 
 DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
   int len;
-  
-  if (!INTP(k))       error_bad_integer(k);
-  if (INT_VAL(k) < 0) error_negative_count(k);
 
+  verify_count(k);
   (void) STk_list_type_and_length(lis, &len);
 
   if (INT_VAL(k) > len) error_count_too_big(k);
