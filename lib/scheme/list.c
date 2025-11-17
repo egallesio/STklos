@@ -136,6 +136,7 @@ DEFINE_PRIMITIVE("length+", length_plus, subr1, (SCM list)) {
   return STk_false;                                /* improper (dotted/circular) */
 }
 
+
 DEFINE_PRIMITIVE("dotted-list?", dotted_list, subr1, (SCM list)) {
   int len;
   SCM res = STk_list_type_and_length(list, &len);
@@ -145,28 +146,21 @@ DEFINE_PRIMITIVE("dotted-list?", dotted_list, subr1, (SCM list)) {
                       !(res == STk_nil));   /* not proper */
 }
 
+
 DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
-  /*  count [start step] */
-  if (argc < 1) STk_error("at least one argument needed");
-  SCM count, start, step;
+  SCM count, start, step;      /*  count [start step] */
 
-  count = *argv--; argc--;
-  if (!(INTP(count))) error_bad_integer(count);
-
-  if (INT_VAL(count) == 0) return STk_nil;
-
-  if (argc) {
-    start = *argv--; argc--;
-  } else {
-    start = MAKE_INT(0);
-  }
-  if (argc) {
-    step = *argv--; argc--;
-  } else {
-    step = MAKE_INT(1);
+  switch (argc) {
+    case 1:  count = *argv;   start = MAKE_INT(0); step = MAKE_INT(1); break;
+    case 2:  count = *argv--; start = *argv;       step = MAKE_INT(1); break;
+    case 3:  count = *argv--; start = *argv--;     step = *argv;       break;
+    default:
+      count = start = step = STk_nil;
+      STk_error("bad nuber of parameters (must be 1, 2 or 3) was %d", argc);
   }
 
   if (INT_VAL(count) < 0) error_negative_count(count);
+  if (INT_VAL(count) == 0) return STk_nil;
 
   SCM list = STk_C_make_list(INT_VAL(count), start);
   SCM ptr  = CDR(list); /* CAR is already initialized by STk_C_make_list */
@@ -177,6 +171,7 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
   }
   return list;
 }
+
 
 DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
   SCM ptr, res;
