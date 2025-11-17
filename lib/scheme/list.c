@@ -159,17 +159,22 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
       STk_error("bad nuber of parameters (must be 1, 2 or 3) was %d", argc);
   }
 
-  if (INT_VAL(count) < 0) error_negative_count(count);
-  if (INT_VAL(count) == 0) return STk_nil;
+  verify_count(count);
+  {
+    int ccount = INT_VAL(count);
 
-  SCM list = STk_C_make_list(INT_VAL(count), start);
-  SCM ptr  = CDR(list); /* CAR is already initialized by STk_C_make_list */
+    if (ccount == 0) return STk_nil;
 
-  for (long c = 1; c < INT_VAL(count); c++, ptr = CDR(ptr)) {
-    start = STk_add2(start, step);
-    CAR(ptr) = start;
+    SCM list = STk_C_make_list(ccount, start);
+    SCM ptr  = CDR(list); /* CAR is already initialized by STk_C_make_list */
+
+    while(--ccount) {
+      start = STk_add2(start, step);
+      CAR(ptr) = start;
+      ptr = CDR(ptr);
+    }
+    return list;
   }
-  return list;
 }
 
 
