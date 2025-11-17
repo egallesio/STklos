@@ -49,6 +49,10 @@ static void error_count_too_big(SCM v) {
   STk_error("count (~s) is larger than list size", v);
 }
 
+static void error_const_cell(SCM v) {
+  STk_error("changing the constant ~s is not allowed", v);
+}
+
 static inline void verify_count(SCM v) {
   if (!INTP(v))       error_bad_integer(v);
   if (INT_VAL(v) < 0) error_negative_count(v);
@@ -200,6 +204,7 @@ DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
     ptr = CDR(ptr);
   }
   if (!CONSP(ptr)) error_count_too_big(k);
+  if (BOXED_INFO(ptr) & CONS_CONST) error_const_cell(lis);
   CDR(ptr) = STk_nil;
 
   return lis;
@@ -286,6 +291,7 @@ DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
     ptr = CDR(ptr);
 
   /* Just cut the tail setting the CDR to NIL: */
+  if (BOXED_INFO(ptr) & CONS_CONST) error_const_cell(lis);
   CDR(ptr) = STk_nil;
 
   return lis;
@@ -318,7 +324,7 @@ DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
   SCM res = STk_list_type_and_length(lis, &len);
 
   verify_count(k);
-  
+
   if (res == NULL) error_bad_list(lis);      /* not a list */
   if (res == STk_nil || !CONSP(res))         /* finite proper or dotted list */
     if (INT_VAL(k) > len) error_count_too_big(k);
@@ -331,10 +337,11 @@ DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
     ptr  = CDR(ptr);
   }
   if (INT_VAL(k) > 0) {
+    if (BOXED_INFO(prev) & CONS_CONST) error_const_cell(lis);
     CDR(prev) = STk_nil;
     return STk_n_values(2, lis, ptr);
   }
-  return STk_n_values(2, STk_nil, lis);
+  return STk_n_values(2, STk_nil, lis);     /* k = 0 */
 }
 
 
