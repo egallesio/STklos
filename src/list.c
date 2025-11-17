@@ -187,7 +187,7 @@ SCM STk_C_make_list(int n, SCM init)
  *   - If the list consists of a single cycle, then we guarantee that
  *    the pointer returned is to the FIRST cell of the list.
  */
-static SCM list_type_and_length(SCM l, int *len)
+SCM STk_list_type_and_length(SCM l, int *len)
 {
   //     About the cycle detecting and copying algorithm:
   //
@@ -508,7 +508,7 @@ doc>
  */
 {
   int len;
-  return MAKE_BOOLEAN(NULLP(list_type_and_length(x, &len)));
+  return MAKE_BOOLEAN(NULLP(STk_list_type_and_length(x, &len)));
 }
 
 /*
@@ -659,7 +659,7 @@ doc>
 DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
 {
   int len;
-  SCM x = list_type_and_length(l, &len);
+  SCM x = STk_list_type_and_length(l, &len);
 
   if (!x) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
@@ -956,7 +956,7 @@ doc>
 DEFINE_PRIMITIVE("circular-list?", circular_listp, subr1, (SCM l))
 {
   int len;
-  SCM x = list_type_and_length(l, &len);
+  SCM x = STk_list_type_and_length(l, &len);
 
   return MAKE_BOOLEAN (x && CONSP(x));
 }
@@ -1000,7 +1000,7 @@ static SCM list_copy(SCM l, int deep)
   if (!CONSP(l)) return l;     // non list values and '() too
 
   int len;
-  SCM last = list_type_and_length(l, &len);
+  SCM last = STk_list_type_and_length(l, &len);
   SCM cycle_start = last;
   int cycle = CONSP(last);
 
@@ -1158,7 +1158,7 @@ doc>
 DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 {
   int len;
-  SCM x = list_type_and_length(l, &len);
+  SCM x = STk_list_type_and_length(l, &len);
 
   if (!x || !len) error_bad_list(l);
   if (CONSP(x)) error_circular_list(l);
@@ -1206,7 +1206,7 @@ static SCM filter_remove (SCM pred, SCM list, int filter)
   register SCM ptr, l;
   SCM result;
   int len;
-  SCM x = list_type_and_length(list, &len);
+  SCM x = STk_list_type_and_length(list, &len);
   int cmp;
 
   if (!x)        error_bad_list(list);
@@ -1251,7 +1251,7 @@ static SCM dfilter_remove (SCM pred, SCM list, int filter)
 {
   SCM previous, l;
   int len;
-  SCM x = list_type_and_length(list, &len);
+  SCM x = STk_list_type_and_length(list, &len);
   int cmp;
 
   if (!x)        error_bad_list(list);
