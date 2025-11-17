@@ -175,10 +175,10 @@ DEFINE_PRIMITIVE("iota", iota, vsubr, (int argc, SCM *argv)) {
 }
 
 DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
-  verify_count(k);
+  SCM ptr, res;
 
-  SCM res = STk_C_make_list(INT_VAL(k), STk_false);
-  SCM ptr = res;
+  verify_count(k);
+  ptr = res = STk_C_make_list(INT_VAL(k), STk_false);
 
   for (int i = INT_VAL(k); i; i--) {
     if (!CONSP(lis)) error_count_too_big(k);
@@ -190,10 +190,10 @@ DEFINE_PRIMITIVE("take", take, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
+  SCM ptr = lis;
+
   verify_count(k);
   if (k == MAKE_INT(0)) return STk_nil;
-
-  SCM ptr = lis;
 
   for (int i = INT_VAL(k) - 1; i; i--) {
     if (!CONSP(ptr)) error_count_too_big(k);
@@ -206,9 +206,9 @@ DEFINE_PRIMITIVE("take!", ntake, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("drop", drop, subr2, (SCM lis, SCM k)) {
-  verify_count(k);
-
   SCM res = lis;
+
+  verify_count(k);
 
   for (int i = INT_VAL(k); i; i--) {
     if (!CONSP(res)) error_count_too_big(k);
@@ -218,11 +218,11 @@ DEFINE_PRIMITIVE("drop", drop, subr2, (SCM lis, SCM k)) {
 }
 
 DEFINE_PRIMITIVE("take-right", take_right, subr2, (SCM lis, SCM k)) {
-  verify_count(k);
-
   int len;
   SCM res = STk_list_type_and_length(lis, &len);
   SCM ptr = lis;
+
+  verify_count(k);
 
   if (CONSP(res))  error_circular_list(lis);
   if (res == NULL) error_bad_list(lis);
@@ -293,11 +293,15 @@ DEFINE_PRIMITIVE("drop-right!", ndrop_right, subr2, (SCM lis, SCM k)) {
 
 DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
   int len;
+  SCM res = STk_list_type_and_length(lis, &len);
 
   verify_count(k);
-  (void) STk_list_type_and_length(lis, &len);
 
-  if (INT_VAL(k) > len) error_count_too_big(k);
+  if (res == NULL) error_bad_list(lis);      /* not a list */
+  if (res == STk_nil || !CONSP(res))         /* finite proper or dotted list */
+    if (INT_VAL(k) > len) error_count_too_big(k);
+                                             /* don't test k if lis is circular */
+
   SCM left     = STk_C_make_list(INT_VAL(k), STk_false);
   SCM left_ptr = left;
 
@@ -311,12 +315,14 @@ DEFINE_PRIMITIVE("split-at", split_at, subr2, (SCM lis, SCM k)) {
 
 DEFINE_PRIMITIVE("split-at!", nsplit_at, subr2, (SCM lis, SCM k)) {
   int len;
+  SCM res = STk_list_type_and_length(lis, &len);
 
   verify_count(k);
-  (void) STk_list_type_and_length(lis, &len);
-
-  if (INT_VAL(k) > len) error_count_too_big(k);
-
+  
+  if (res == NULL) error_bad_list(lis);      /* not a list */
+  if (res == STk_nil || !CONSP(res))         /* finite proper or dotted list */
+    if (INT_VAL(k) > len) error_count_too_big(k);
+                                             /* don't test k if lis is circular */
   SCM prev = STk_nil;
   SCM ptr  = lis;
 
