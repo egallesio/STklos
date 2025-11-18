@@ -2104,6 +2104,14 @@
          (tanh 2)
          0.9640275801000000))
 
+(test "tanh bignum"
+      1.0
+      (tanh (expt 10 1000)))
+
+(test "tanh inf"
+      1.0
+      (tanh +inf.0))
+
 
 (test "sinh asinh 2"
       #t
