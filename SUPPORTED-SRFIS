@@ -146,3 +146,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-253: Data (Type-)Checking
     - SRFI-258: Uninterned symbols
     - SRFI-260: Generated symbols
+    - SRFI-264: String Syntax for Scheme Regular Expressions
