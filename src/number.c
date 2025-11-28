@@ -3683,8 +3683,8 @@ static SCM my_tanh(SCM z)
     case tc_integer:  if (INT_VAL(z) == 0) return MAKE_INT(0);
                       return double2real(tanh(INT_VAL(z)));
     case tc_complex:
-    case tc_bignum:   if (BIGNUM_FITS_DOUBLE(z))
-                          return double2real(tanh(REAL_VAL(z)));
+    case tc_bignum:   if (BIGNUM_FITS_DOUBLE(BIGNUM_VAL(z)))
+                        return double2real(tanh(bignum2double(BIGNUM_VAL(z))));
                       else
                           return double2real(1.0); /* Cannot be exact! */
     case tc_rational: {
