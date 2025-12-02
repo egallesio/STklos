@@ -2923,15 +2923,12 @@ static SCM gcd2_fixnum(SCM n1, SCM n2) /* special version for fixnums */
   long l1 = INT_VAL(n1);
   long l2 = INT_VAL(n2);
 
-  if (l1 < 0) l1 = -l1;
-  if (l2 < 0) l2 = -l2;
-
   while (l2) {
     long tmp = l1;
     l1 = l2;
     l2 = tmp % l2;
   }
-  return MAKE_INT(l1);
+  return MAKE_INT(l1 >= 0 ? l1 : -l1);
 }
 
 
