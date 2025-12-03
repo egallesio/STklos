@@ -585,7 +585,7 @@ doc>
               symbols))))
 
 
-(export autoimport)                             ;; FIXME: Temporary version
+(export autoimport)                         ;; FIXME: Temporary version
 (define-macro (autoimport lib . symbols)
   (let ((args (gensym))
         (old  (gensym)))
@@ -593,11 +593,13 @@ doc>
        ,@(map (lambda (x)
                 `(define ,x (lambda ,args
                               (let ((,old ,x))
-                                (import lib)
+                                (eval '(import ,lib))
                                 (if (eq? ,old ,x)
                                     (error 'autoimport "~S has not been defined in ~S"
                                            ',x ,lib)
                                     (apply ,x ,args))))))
-              symbols))))
+              symbols)
+       (void))))
+ 
 
-; LocalWords:  repl autoload prepended
+;; LocalWords:  repl autoload prepended
