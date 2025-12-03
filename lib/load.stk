@@ -570,36 +570,26 @@ doc>
  *
 doc>
 |#
-(define-macro (autoload file . symbols)
+(define-macro (autoload lib . symbols)
   (let ((args (gensym))
         (old  (gensym)))
     `(begin
        ,@(map (lambda (x)
                 `(define ,x (lambda ,args
                               (let ((,old ,x))
-                                (require ,file)
+                                ;; Either require lib (if it is a string) of import
+                                ;; if it is a R7RS lirary.
+                                ;; Eval is used here to delay the loading of
+                                ;; the library when the function is called.
+                                (eval ',(if (string? lib)
+                                            `(require ,lib)
+                                            `(import ,lib)))
                                 (if (eq? ,old ,x)
                                     (error 'autoload "~S has not been defined in ~S"
-                                           ',x ,file)
-                                    (apply ,x ,args))))))
-              symbols))))
-
-
-(export autoimport)                         ;; FIXME: Temporary version
-(define-macro (autoimport lib . symbols)
-  (let ((args (gensym))
-        (old  (gensym)))
-    `(begin
-       ,@(map (lambda (x)
-                `(define ,x (lambda ,args
-                              (let ((,old ,x))
-                                (eval '(import ,lib))
-                                (if (eq? ,old ,x)
-                                    (error 'autoimport "~S has not been defined in ~S"
                                            ',x ,lib)
                                     (apply ,x ,args))))))
               symbols)
        (void))))
- 
+
 
 ;; LocalWords:  repl autoload prepended
