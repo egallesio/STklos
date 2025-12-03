@@ -583,7 +583,8 @@ doc>
                                 ;; the library when the function is called.
                                 (eval ',(if (string? lib)
                                             `(require ,lib)
-                                            `(import ,lib)))
+                                            `(import (only ,lib ,@symbols)))
+                                      (current-module))
                                 (if (eq? ,old ,x)
                                     (error 'autoload "~S has not been defined in ~S"
                                            ',x ,lib)
