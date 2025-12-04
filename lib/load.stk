@@ -571,7 +571,8 @@ doc>
 |#
 (define-macro (autoload lib . symbols)
   (let ((args (gensym))
-        (old  (gensym)))
+        (old  (gensym))
+        (new  (gensym)))
     `(begin
        ,@(map (lambda (x)
                 `(define ,x (lambda ,args
@@ -583,11 +584,13 @@ doc>
                                 (eval ',(if (string? lib)
                                             `(require ,lib)
                                             `(import (only ,lib ,@symbols))))
-                                (if (eq? ,old ,x)
+                                (let ((,new (symbol-value* ',x (current-module))))
+                                  (when (eq? ,old ,new)
                                     (error 'autoload "~S has not been defined in ~S"
-                                           ',x ',lib)
-                                    (apply ,x ,args))))))
+                                           ',x ',lib))
+                                  (apply ,new ,args))))))
               symbols)
+       ;; Result is void
        (void))))
 
 ;; LocalWords:  repl autoload prepended
