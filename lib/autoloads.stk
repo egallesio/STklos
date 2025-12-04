@@ -50,8 +50,8 @@
 
 (autoload "stklos/apropos"      apropos apropos/alist apropos/pp)
 (autoload "stklos/describe"     describe)
-(autoload "stklos/getopt"       %parse-arguments-expand %print-usage)
-(autoload "stklos/help"         help)
+(autoload (stklos getopt)       %parse-arguments-expand %print-usage)
+(autoload (stklos help)          help)
 (autoload (stklos pretty-print)  pp pretty-print)
 (autoload (stklos trace)         %trace-expand %untrace-expand)
 

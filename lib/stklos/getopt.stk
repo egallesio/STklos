@@ -382,7 +382,5 @@ doc>
 
 )
 
-(select-module STklos)
-(import (stklos getopt))
 
 (provide "stklos/getopt")
