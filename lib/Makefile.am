@@ -28,7 +28,8 @@ COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 
-scheme_BOOT = assembler.stk \
+scheme_BOOT = autoloads.stk \
+          assembler.stk     \
           bb.stk            \
           bonus.stk         \
           boot.stk          \

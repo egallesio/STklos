@@ -397,7 +397,8 @@ SUBDIRS = Match.d SILex.d Lalr.d   \
 	      scheme stklos streams srfi
 
 STKLOS_FLAGS = --no-init-file --case-sensitive
-scheme_BOOT = assembler.stk \
+scheme_BOOT = autoloads.stk \
+          assembler.stk     \
           bb.stk            \
           bonus.stk         \
           boot.stk          \
