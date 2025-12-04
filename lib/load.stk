@@ -32,7 +32,6 @@
         warning-when-not-provided
         require-library include include-ci include-file
         autoload
-
         ;; FIXME
         %guess-pathname
         %stklos-conf-dir
@@ -583,14 +582,12 @@ doc>
                                 ;; the library when the function is called.
                                 (eval ',(if (string? lib)
                                             `(require ,lib)
-                                            `(import (only ,lib ,@symbols)))
-                                      (current-module))
+                                            `(import (only ,lib ,@symbols))))
                                 (if (eq? ,old ,x)
                                     (error 'autoload "~S has not been defined in ~S"
-                                           ',x ,lib)
+                                           ',x ',lib)
                                     (apply ,x ,args))))))
               symbols)
        (void))))
-
 
 ;; LocalWords:  repl autoload prepended
