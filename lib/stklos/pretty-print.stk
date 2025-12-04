@@ -36,7 +36,7 @@
  * the current error port. As a special convention, if |port| is `#t`,
  * output goes to the current output port and if |port| is `#f`, the output
  * is returned as a string by |pretty-print|.
- * 
+ *
  * Note that |pp| is another name for |pretty-print|.
  *
  * @lisp
@@ -67,6 +67,7 @@ doc>
 |#
 
 (define-module (stklos pretty-print)
+  (export pp pretty-print)
 
   (define (reverse-string-append l)
     (define (rev-string-append l i)
@@ -328,24 +329,21 @@ doc>
 
     (if width
       (out genwrite:newline-str (pp obj 0))
-      (wr obj 0))))
+      (wr obj 0)))
 
+  (define (pp obj :key (port (current-error-port)) (width 79))
+    (let ((p  (case port
+                ((#t) (current-output-port))
+                ((#f) (open-output-string))
+                (else port)))
+          (gw (in-module (stklos pretty-print) generic-write)))
+      (gw obj #f width (lambda (s) (display s p) #t))
 
-;;;
-;;; In module STklos
-;;;
-(define (pp obj :key (port (current-error-port)) (width 79))
-  (let ((p  (case port
-              ((#t) (current-output-port))
-              ((#f) (open-output-string))
-              (else port)))
-        (gw (in-module (stklos pretty-print) generic-write)))
-    (gw obj #f width (lambda (s) (display s p) #t))
+      (if port
+          (void)
+          (get-output-string p))))
 
-    (if port
-        (void)
-        (get-output-string p))))
+  (define pretty-print pp)
 
-(define pretty-print pp)
-
+)
 (provide "stklos/pretty-print")
