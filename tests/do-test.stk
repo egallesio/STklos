@@ -29,6 +29,7 @@
 (load "./test.stk")
 
 (define (load-tests)
+  (load "test-srfi-101.stk")
   (load "test-number.stk")
   (load "test-keyword.stk")
   (load "test-callcc.stk")

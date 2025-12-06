@@ -351,6 +351,16 @@ whereas the SRFI considers that `:` is not a keyword but a symbol.
 NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
 
 
+// **** SRFI-101
+{{srfi-subsection 101}}
+
+((("Purely Functional Random-Access Pairs and Lists")))
+
+{{stklos}} implements {{quick-link-srfi 101}}. However, the
+implementation of that SRFI is incompatible with `full-syntax`,
+which redefines `eval`.
+
+
 // **** SRFI-116
 {{srfi-subsection 116}}
 ((("immutable lists")))

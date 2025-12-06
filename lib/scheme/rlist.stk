@@ -1,0 +1,196 @@
+;;;;
+;;;; 101.stk        -- SRFI 101 (Scheme part)
+;;;;
+;;;; Copyright © 2022 Jerônimo Pellegrini (j_p@aleph0.info)
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 27-Jun-2022 21:19 (jpellegrini)
+;;;;
+
+
+(select-module scheme/rlist)
+
+(import (except SCHEME
+                ;;quote
+                pair? cons car cdr
+                caar cadr cddr cdar
+                caaar caadr caddr cadar
+                cdaar cdadr cdddr cddar
+                caaaar caaadr caaddr caadar
+                cadaar cadadr cadddr caddar
+                cdaaar cdaadr cdaddr cdadar
+                cddaar cddadr cddddr cdddar
+                null? list? list length
+                append reverse list-tail
+                list-ref map for-each))
+
+(export (rename srfi101:quote quote)
+        (rename srfi101:pair? pair?)
+        (rename srfi101:cons cons)
+        (rename srfi101:car car)
+        (rename srfi101:cdr cdr)
+        (rename srfi101:caar caar)
+        (rename srfi101:cadr cadr)
+        (rename srfi101:cddr cddr)
+        (rename srfi101:cdar cdar)
+        (rename srfi101:caaar caaar)
+        (rename srfi101:caadr caadr)
+        (rename srfi101:caddr caddr)
+        (rename srfi101:cadar cadar)
+        (rename srfi101:cdaar cdaar)
+        (rename srfi101:cdadr cdadr)
+        (rename srfi101:cdddr cdddr)
+        (rename srfi101:cddar cddar)
+        (rename srfi101:caaaar caaaar)
+        (rename srfi101:caaadr caaadr)
+        (rename srfi101:caaddr caaddr)
+        (rename srfi101:caadar caadar)
+        (rename srfi101:cadaar cadaar)
+        (rename srfi101:cadadr cadadr)
+        (rename srfi101:cadddr cadddr)
+        (rename srfi101:caddar caddar)
+        (rename srfi101:cdaaar cdaaar)
+        (rename srfi101:cdaadr cdaadr)
+        (rename srfi101:cdaddr cdaddr)
+        (rename srfi101:cdadar cdadar)
+        (rename srfi101:cddaar cddaar)
+        (rename srfi101:cddadr cddadr)
+        (rename srfi101:cddddr cddddr)
+        (rename srfi101:cdddar cdddar)
+        (rename srfi101:null? null?)
+        (rename srfi101:list? list?)
+        (rename srfi101:list list)
+        (rename srfi101:make-list make-list)
+        (rename srfi101:length length)
+        (rename srfi101:append append)
+        (rename srfi101:reverse reverse)
+        (rename srfi101:list-tail list-tail)
+        (rename srfi101:list-ref list-ref)
+        (rename srfi101:list-set list-set)
+        (rename srfi101:list-ref/update list-ref/update)
+        (rename srfi101:map map)
+        (rename srfi101:for-each for-each)
+
+        (rename srfi101:random-access-list->linear-access-list
+                random-access-list->linear-access-list)
+
+        (rename srfi101:linear-access-list->random-access-list
+                linear-access-list->random-access-list))
+
+(%user-type-proc-set! 'rlist 'describe
+                      (lambda (x port)
+                        (format port "an rlist with ~a elements"
+                                (srfi101:length x))))
+
+(define-class <rlist> (<top>) ())
+(export <rlist>)
+
+(define-reader-ctor '<rlist>
+  (lambda args
+    (srfi101:linear-access-list->random-access-list args)))
+
+
+;; We give correct names to Scheme CAR and CDR, and also
+;; set NULL?
+(define scheme (find-module 'SCHEME))
+(define srfi101:null? (symbol-value 'null? scheme))
+(define scheme:pair?  (symbol-value 'pair? scheme))
+(define scheme:car    (symbol-value 'car scheme))
+(define scheme:cdr    (symbol-value 'cdr scheme))
+
+;;;
+;;; QUOTE
+;;;
+
+(define-macro (srfi101:quote x)
+  (define (x->rlist obj)
+    (if (scheme:pair? obj)
+        (srfi101:cons (x->rlist (scheme:car obj))
+                      (x->rlist (scheme:cdr obj)))
+        obj))
+  `(#%quote ,(x->rlist x)))
+
+;;;
+;;; ACCESSORS
+;;;
+
+(define (srfi101:caar x) (srfi101:car (srfi101:car x)))
+(define (srfi101:cadr x) (srfi101:car (srfi101:cdr x)))
+(define (srfi101:cdar x) (srfi101:cdr (srfi101:car x)))
+(define (srfi101:cddr x) (srfi101:cdr (srfi101:cdr x)))
+
+(define (srfi101:caaar x) (srfi101:car (srfi101:caar x)))
+(define (srfi101:caadr x) (srfi101:car (srfi101:cadr x)))
+(define (srfi101:cadar x) (srfi101:car (srfi101:cdar x)))
+(define (srfi101:caddr x) (srfi101:car (srfi101:cddr x)))
+(define (srfi101:cdaar x) (srfi101:cdr (srfi101:caar x)))
+(define (srfi101:cdadr x) (srfi101:cdr (srfi101:cadr x)))
+(define (srfi101:cddar x) (srfi101:cdr (srfi101:cdar x)))
+(define (srfi101:cdddr x) (srfi101:cdr (srfi101:cddr x)))
+
+(define (srfi101:caaaar x) (srfi101:car (srfi101:caaar x)))
+(define (srfi101:caaadr x) (srfi101:car (srfi101:caadr x)))
+(define (srfi101:caadar x) (srfi101:car (srfi101:cadar x)))
+(define (srfi101:caaddr x) (srfi101:car (srfi101:caddr x)))
+(define (srfi101:cadaar x) (srfi101:car (srfi101:cdaar x)))
+(define (srfi101:cadadr x) (srfi101:car (srfi101:cdadr x)))
+(define (srfi101:caddar x) (srfi101:car (srfi101:cddar x)))
+(define (srfi101:cadddr x) (srfi101:car (srfi101:cdddr x)))
+
+(define (srfi101:cdaaar x) (srfi101:cdr (srfi101:caaar x)))
+(define (srfi101:cdaadr x) (srfi101:cdr (srfi101:caadr x)))
+(define (srfi101:cdadar x) (srfi101:cdr (srfi101:cadar x)))
+(define (srfi101:cdaddr x) (srfi101:cdr (srfi101:caddr x)))
+(define (srfi101:cddaar x) (srfi101:cdr (srfi101:cdaar x)))
+(define (srfi101:cddadr x) (srfi101:cdr (srfi101:cdadr x)))
+(define (srfi101:cdddar x) (srfi101:cdr (srfi101:cddar x)))
+(define (srfi101:cddddr x) (srfi101:cdr (srfi101:cdddr x)))
+
+;;;
+;;; UTILITIES
+;;;
+
+;; FIXME: the SRFI requires a procedure that runs in
+;; O( log (min (k, n) ) ).
+(define (srfi101:list-tail rlist k)
+  (let loop ((rl rlist) (n k))
+    (cond ((zero? n) rl)
+          (else (loop (srfi101:cdr rl)
+                      (- n 1))))))
+
+;;;
+;;; CONVERSION
+;;;
+
+;; Conversion between linear access lists (= traditional Lisp lists)
+;; and SRFi-101 (random access) lists.
+
+(define (srfi101:random-access-list->linear-access-list rl)
+  (if (null? rl)
+      rl
+      (cons (srfi101:car rl)
+            (srfi101:random-access-list->linear-access-list (srfi101:cdr rl)))))
+
+(define (srfi101:linear-access-list->random-access-list rl)
+    (if (null? rl)
+        rl
+        (srfi101:cons (scheme:car rl)
+                      (srfi101:linear-access-list->random-access-list (scheme:cdr rl)))))
+
+(provide "scheme/rlist")

@@ -1,0 +1,61 @@
+;;;;
+;;;;
+;;;; 116.stk         -- Implementation of SRFI-116 (ilist)
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini  <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [aleph0.info]
+;;;;    Creation date:  9-Oct-2022 19:11
+;;;;
+
+;;;; The real implementation is in (scheme rlist).
+
+;; HACK:
+;; We will not do
+;; (%make-copy-module scheme/rlist srfi/101)
+;; because this seems to load the module, and we will not be able to use
+;; the original CAR, QUOTE, LIST, CONS, etc.
+;; Instead we mimic what %make-copy-module would do:
+
+(define-module srfi/101
+  (import scheme/rlist)
+  (export <rlist>
+          linear-access-list->random-access-list
+          random-access-list->linear-access-list
+          for-each map
+          list-ref/update
+          list-set
+          list-ref
+          list-tail
+          reverse
+          append
+          length
+          make-list
+          list
+          list?
+          null?
+          cdddar cddddr cddadr cddaar cdadar cdaddr cdaadr
+          cdaaar caddar cadddr cadadr cadaar caadar caaddr
+          caaadr caaaar cddar cdddr cdadr cdaar cadar caddr
+          caadr caaar cdar cddr cadr caar cdr car
+          cons
+          pair?
+          quote))
+
+(provide "srfi/101")
