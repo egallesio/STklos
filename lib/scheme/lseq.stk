@@ -48,7 +48,7 @@
 ;;;;    Creation date: 13-Nov-2020 05:21 (jpellegrini)
 ;;;;
 (define-module scheme/lseq
-  
+
   (export generator->lseq lseq? lseq=?)
   (export lseq-car lseq-first lseq-cdr lseq-rest lseq-ref lseq-take lseq-drop)
   (export lseq-realize lseq->generator lseq-length lseq-append lseq-zip)
@@ -130,10 +130,8 @@
 ;;; Compare lseqs for equality
 (define (lseq=? = lseq1 lseq2)
   (cond
-    ((and (null? lseq1) (null? lseq2))
+    ((eq? lseq1 lseq2)
      #t)
-    ((or (null? lseq1) (null? lseq2))
-     #f)
     ((= (lseq-car lseq1) (lseq-car lseq2))
      (lseq=? = (lseq-cdr lseq1) (lseq-cdr lseq2)))
     (else #f)))
