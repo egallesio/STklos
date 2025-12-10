@@ -14253,6 +14253,83 @@ the standard <strong><em>STklos</em></strong> <code>require</code> is used.
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p><a id='P_autoload'></a>
+</p>
+</div>
+<div class="paragraph rmargin text-right">
+<p><span class="rmargin small silver"><em>STklos</em> syntax</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><code><strong>(autoload spec symbol &#8230;&#8203;) </strong></code><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This form is similar to the Emacs <code>autoload</code> macro: it registers the existence
+of a function, but postpones the loading of the file or the importation of the
+library that defines it. The  first call to the function automatically loads,
+or imports, the proper library, in order to install the real definition and
+other associated code, then runs the real definition as if it had been loaded
+all along. The specifier <code>spec</code> may be:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a string which denotes the file which will be required (with <code>require</code> form)
+before calling the
+function denoted by <code>symbol</code>.</p>
+</li>
+<li>
+<p>a R<sup>7</sup>RS library name denoting the library that must be imported in order to
+the function denoted by <code>symbol</code>.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">autoload</span> <span class="p">(</span><span class="nf">scheme</span> <span class="nv">list</span><span class="p">)</span> <span class="nv">iota</span> <span class="nv">take</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">autoload</span> <span class="s">"utils"</span> <span class="nv">cube</span> <span class="nv">fact</span> <span class="nv">fib</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With the first <code>autoload</code>, the first call of <code>iota</code> or <code>take</code> will automatically
+import the Scheme library <code>(scheme list)</code>.
+In the second call, the file "utils" will be required before calling, for the
+first time,  <code>cube</code>, <code>fact</code> or <code>fib</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>If <code>spec</code> is a string, the corresponding <code>provide</code> must be present in the file
+denoted by <code>spec</code>.</p>
+</li>
+<li>
+<p>To avoid an infinite loop, the symbols specified in the <code>autoload</code> must be
+defined in the file or library given in <code>spec</code>.</p>
+</li>
+<li>
+<p>When <code>spec</code> denotes a library, the imporation is limited only to the symbol
+which trigger this importation.</p>
+</li>
+<li>
+<p>For now, the symbols specified in the <code>atoload</code> form cannot denote a syntax name.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="doc_file_primitives">4.13.2. File Primitives</h4>

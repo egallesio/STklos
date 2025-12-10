@@ -1944,7 +1944,7 @@ char* STk_boot_consts = "#("
 "include-file" " "
 "(lambda (file) `(#%include ,file))" " "
 "autoload" " "
-"(lambda (lib . symbols) (let ((args (gensym)) (old (gensym)) (new (gensym))) `(begin ,@(map (lambda (x) `(define ,x (lambda ,args (let ((,old ,x)) (eval ',(if (string? lib) `(require ,lib) `(import (only ,lib ,@symbols)))) (let ((,new (symbol-value* ',x (current-module)))) (when (eq? ,old ,new) (error 'autoload \"~S has not been defined in ~S\" ',x ',lib)) (apply ,new ,args)))))) symbols) (void))))" " "
+"(lambda (lib . symbols) (let ((args (gensym)) (old (gensym)) (new (gensym))) `(begin ,@(map (lambda (x) `(define ,x (lambda ,args (let ((,old ,x)) (eval ',(if (string? lib) `(require ,lib) `(import (only ,lib ,x)))) (let ((,new (symbol-value* ',x (current-module)))) (when (eq? ,old ,new) (error 'autoload \"~S has not been defined in ~S\" ',x ',lib)) (apply ,new ,args)))))) symbols) (void))))" " "
 "\"~S has not been defined in ~S\"" " "
 "((define-library . define-library) (library-name . library-name) (library-list . library-list) (%scheme-import-and-export . %scheme-import-and-export) (%make-copy-module . %make-copy-module))" " "
 "%scheme-import-and-export" " "
@@ -2589,37 +2589,37 @@ char* STk_boot_consts = "#("
 "lexer-next-token" " "
 "(require \"lex-rt\")" " "
 "\"lex-rt\"" " "
-"(import (only (stklos apropos) apropos apropos/alist apropos/pp))" " "
+"(import (only (stklos apropos) apropos))" " "
 "(stklos apropos)" " "
 "apropos/alist" " "
-"(import (only (stklos apropos) apropos apropos/alist apropos/pp))" " "
+"(import (only (stklos apropos) apropos/alist))" " "
 "apropos/pp" " "
-"(import (only (stklos apropos) apropos apropos/alist apropos/pp))" " "
+"(import (only (stklos apropos) apropos/pp))" " "
 "(import (only (stklos describe) describe))" " "
 "(stklos describe)" " "
-"(import (only (stklos getopt) %parse-arguments-expand %print-usage))" " "
+"(import (only (stklos getopt) %parse-arguments-expand))" " "
 "(stklos getopt)" " "
 "%print-usage" " "
-"(import (only (stklos getopt) %parse-arguments-expand %print-usage))" " "
+"(import (only (stklos getopt) %print-usage))" " "
 "(import (only (stklos help) help))" " "
 "(stklos help)" " "
 "pp" " "
-"(import (only (stklos pretty-print) pp pretty-print))" " "
+"(import (only (stklos pretty-print) pp))" " "
 "(stklos pretty-print)" " "
-"(import (only (stklos pretty-print) pp pretty-print))" " "
-"(import (only (stklos trace) %trace-expand %untrace-expand))" " "
+"(import (only (stklos pretty-print) pretty-print))" " "
+"(import (only (stklos trace) %trace-expand))" " "
 "(stklos trace)" " "
-"(import (only (stklos trace) %trace-expand %untrace-expand))" " "
+"(import (only (stklos trace) %untrace-expand))" " "
 "random-integer" " "
-"(import (only (srfi 27) random-integer random-real))" " "
+"(import (only (srfi 27) random-integer))" " "
 "(srfi 27)" " "
 "random-real" " "
-"(import (only (srfi 27) random-integer random-real))" " "
+"(import (only (srfi 27) random-real))" " "
 "srfi48:help" " "
-"(import (only (srfi 48) srfi48:help srfi48:format-fixed))" " "
+"(import (only (srfi 48) srfi48:help))" " "
 "(srfi 48)" " "
 "srfi48:format-fixed" " "
-"(import (only (srfi 48) srfi48:help srfi48:format-fixed))" " "
+"(import (only (srfi 48) srfi48:format-fixed))" " "
 "((STKLOS-OBJECT) (MBE) (|SRFI-0|) (REPL) (REPL-READLINE))" " "
 "((STKLOS-COMPILER) (STKLOS-OBJECT) (MBE) (|SRFI-0|) (REPL) (REPL-READLINE))" " "
 "((eval . eval) (let-syntax . let-syntax) (letrec-syntax . letrec-syntax) (syntax-rules . syntax-rules) (define-syntax . define-syntax) (cond-expand . cond-expand))" " "
@@ -23407,7 +23407,7 @@ STk_instr STk_boot_code [] = {
 0xa,
 0x7c,
 0x2d,
-0x639a,
+0x639b,
 0x25,
 0x55,
 0x118,
@@ -47883,7 +47883,7 @@ STk_instr STk_boot_code [] = {
 0x55,
 0x791,
 0x23,
-0xdd,
+0xde,
 0xfffe,
 0x25,
 0x25,
@@ -47906,7 +47906,7 @@ STk_instr STk_boot_code [] = {
 0x25,
 0x25,
 0x23,
-0xb3,
+0xb4,
 0x1,
 0x55,
 0x66,
@@ -47947,15 +47947,16 @@ STk_instr STk_boot_code [] = {
 0x3b,
 0x3b,
 0x1c,
-0xe,
+0xf,
 0x55,
 0xe4,
 0x55,
 0xe2,
 0x75,
 0x201,
-0x12,
-0x200,
+0x65,
+0x3,
+0x3b,
 0x3b,
 0x3b,
 0x21,

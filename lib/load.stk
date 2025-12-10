@@ -614,7 +614,7 @@ doc>
                                 ;; the library when the function is called.
                                 (eval ',(if (string? lib)
                                             `(require ,lib)
-                                            `(import (only ,lib ,@symbols))))
+                                            `(import (only ,lib ,x))))
                                 (let ((,new (symbol-value* ',x (current-module))))
                                   (when (eq? ,old ,new)
                                     (error 'autoload "~S has not been defined in ~S"
