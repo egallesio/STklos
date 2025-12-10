@@ -132,6 +132,8 @@
   (cond
     ((eq? lseq1 lseq2)
      #t)
+    ((or (null? lseq1) (null? lseq2))
+     #f)
     ((= (lseq-car lseq1) (lseq-car lseq2))
      (lseq=? = (lseq-cdr lseq1) (lseq-cdr lseq2)))
     (else #f)))
