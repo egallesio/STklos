@@ -177,7 +177,6 @@ static void printstring(SCM s, SCM port, int mode)
 }
 
 
-
 void STk_print(SCM exp, SCM port, int mode)
 {
   char buffer[512]; /* for small results */
@@ -330,6 +329,8 @@ typedef struct {
   int label;
 } cycles;
 
+#define BOX1P(exp) (BOXP(exp) && BOX_ARITY(exp) == 1) // mono value box?
+
 static void pass1(SCM exp, cycles *c);                     /* pass 1: mark cells */
 static void pass2(SCM exp, SCM port, int mode, cycles *c); /* pass 2: print      */
 
@@ -396,11 +397,17 @@ static void printvector_star(SCM exp, SCM port, int mode, cycles *c)
   STk_putc(')', port);
 }
 
+static void printbox_star(SCM exp, SCM port, int mode, cycles *c)
+{
+  STk_nputs(port, "#&", 2);
+  print_cycle(*BOX_VALUES(exp), port, mode, c);
+}
+
 
 static void pass1(SCM exp, cycles *c)
 {
 Top:
-  if (!CONSP(exp) && !VECTORP(exp)) return;
+  if (!CONSP(exp) && !VECTORP(exp) && !BOX1P(exp)) return;
 
   if ((STk_hash_ref_default(c->seen, exp, STk_void)) == STk_void) {
     /* We have never seen this cell so far */
@@ -411,10 +418,17 @@ Top:
       exp = CDR(exp);
       goto Top;
     }
-    else {                              /* it's a vector */
+    else if (VECTORP(exp)) {            /* it's a vector */
       int i, len = VECTOR_SIZE(exp)-1;
       for (i = 0; i < len; i++) pass1(VECTOR_DATA(exp)[i], c);
       if (len >= 0) {exp = VECTOR_DATA(exp)[len]; goto Top;}
+    }
+    else {                              /* it's a box */
+      /* Only the mono value boxes can display a cycle (other boxes
+         don't display their value but an address).
+      */
+      exp = *BOX_VALUES(exp);
+      goto Top;
     }
   }
   else {
@@ -426,7 +440,7 @@ Top:
 
 static void pass2(SCM exp, SCM port, int mode, cycles *c)
 {
-  if (!CONSP(exp) && !VECTORP(exp))
+  if (!CONSP(exp) && !VECTORP(exp) && !BOX1P(exp))
     STk_print(exp, port, mode);     /* Normal print */
   else {
     /* Eventually print a definition label */
@@ -436,8 +450,9 @@ static void pass2(SCM exp, SCM port, int mode, cycles *c)
       STk_hash_set(c->seen, exp, MAKE_INT(c->label++));
     }
 
-    if (CONSP(exp)) printlist_star(exp, port, mode, c);
-    else            printvector_star(exp, port, mode, c);
+    if (CONSP(exp))        printlist_star(exp, port, mode, c);
+    else if (VECTORP(exp)) printvector_star(exp, port, mode, c);
+    else                   printbox_star(exp, port, mode, c);
   }
 }
 
@@ -446,9 +461,9 @@ void STk_print_star(SCM exp, SCM port, int mode)
 {
   cycles c;
 
-  if (!CONSP(exp) &&  !VECTORP(exp)) {
-      STk_print(exp, port, mode);
-      return;
+  if (!CONSP(exp) && !VECTORP(exp) && !BOX1P(exp)) {
+    STk_print(exp, port, mode);
+    return;
   }
 
   /* Initialize the cycle structure */
