@@ -505,7 +505,4 @@ doc>
 
 )  ;; End of module DESCRIBE
 
-(select-module STklos)
-(import (stklos describe))
-
 (provide "stklos/describe")

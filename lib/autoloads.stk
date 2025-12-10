@@ -24,6 +24,9 @@
 ;;;;    Creation date: 12-May-2022 16:35
 ;;;;
 
+;;
+;; Some runtime for the following autoloads
+;;
 (define-macro (trace . args)
   (%trace-expand args))
 
@@ -39,16 +42,18 @@
 (define-macro (match-case expr . clauses)
   `((match-lambda  ,@clauses) ,expr))
 
-
+;;
+;; STklos autoloads
+;;
 (autoload "bigmatch"            expand-match-lambda)
 (autoload "lex-rt"              lexer-next-token)
 
-(autoload "stklos/apropos"      apropos apropos/alist apropos/pp)
-(autoload "stklos/describe"     describe)
-(autoload "stklos/getopt"       %parse-arguments-expand %print-usage)
-(autoload "stklos/help"         help)
-(autoload "stklos/pretty-print" pp pretty-print)
-(autoload "stklos/trace"        %trace-expand %untrace-expand)
+(autoload (stklos apropos)      apropos apropos/alist apropos/pp)
+(autoload (stklos describe)     describe)
+(autoload (stklos getopt)       %parse-arguments-expand %print-usage)
+(autoload (stklos help)         help)
+(autoload (stklos pretty-print) pp pretty-print)
+(autoload (stklos trace)        %trace-expand %untrace-expand)
 
-(autoload "srfi/27"             random-integer random-real)
-(autoload "srfi/48"             srfi48:help srfi48:format-fixed)
+(autoload (srfi 27)             random-integer random-real)
+(autoload (srfi 48)             srfi48:help srfi48:format-fixed) ;; for full SRFI-48

@@ -230,8 +230,8 @@ doc>
 ) ;; End of module (stklos trace)
 
 
-(select-module STklos)
-(import (stklos trace))
+;;(select-module STklos)
+;;(import (stklos trace))
 
 (provide "stklos/trace")
 

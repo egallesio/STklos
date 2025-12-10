@@ -646,6 +646,7 @@ that STklos supports.
 {{insertdoc 'find-path}}
 {{insertdoc 'current-loading-file}}
 {{insertdoc 'provided?}}
+{{insertdoc 'autoload}}
 
 ==== File Primitives
 {{insertdoc 'temp-file-prefix}}

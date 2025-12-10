@@ -277,10 +277,3 @@ doc>
  * function of  {{link-srfi 27}}.
 doc>
 |#
-
-;; These two procedures were broken due to autoloads, so we force their definition here
-
-(define-module STklos
-  (import (only (srfi 27)
-                random-integer
-                random-real)))
