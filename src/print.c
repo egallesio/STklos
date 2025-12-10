@@ -177,7 +177,6 @@ static void printstring(SCM s, SCM port, int mode)
 }
 
 
-
 void STk_print(SCM exp, SCM port, int mode)
 {
   char buffer[512]; /* for small results */
@@ -330,6 +329,8 @@ typedef struct {
   int label;
 } cycles;
 
+#define BOX1P(exp) (BOXP(exp) && BOX_ARITY(exp) == 1) // mono value box?
+
 static void pass1(SCM exp, cycles *c);                     /* pass 1: mark cells */
 static void pass2(SCM exp, SCM port, int mode, cycles *c); /* pass 2: print      */
 
@@ -406,7 +407,7 @@ static void printbox_star(SCM exp, SCM port, int mode, cycles *c)
 static void pass1(SCM exp, cycles *c)
 {
 Top:
-  if (!CONSP(exp) && !VECTORP(exp) && !BOXP(exp)) return;
+  if (!CONSP(exp) && !VECTORP(exp) && !BOX1P(exp)) return;
 
   if ((STk_hash_ref_default(c->seen, exp, STk_void)) == STk_void) {
     /* We have never seen this cell so far */
@@ -423,6 +424,9 @@ Top:
       if (len >= 0) {exp = VECTOR_DATA(exp)[len]; goto Top;}
     }
     else {                              /* it's a box */
+      /* Only the mono value boxes can display a cycle (other boxes
+         don't display their value but an address).
+      */
       exp = *BOX_VALUES(exp);
       goto Top;
     }
@@ -436,7 +440,7 @@ Top:
 
 static void pass2(SCM exp, SCM port, int mode, cycles *c)
 {
-  if (!CONSP(exp) && !VECTORP(exp) && !BOXP(exp))
+  if (!CONSP(exp) && !VECTORP(exp) && !BOX1P(exp))
     STk_print(exp, port, mode);     /* Normal print */
   else {
     /* Eventually print a definition label */
@@ -457,7 +461,7 @@ void STk_print_star(SCM exp, SCM port, int mode)
 {
   cycles c;
 
-  if (!CONSP(exp) && !VECTORP(exp) && !BOXP(exp)) {
+  if (!CONSP(exp) && !VECTORP(exp) && !BOX1P(exp)) {
     STk_print(exp, port, mode);
     return;
   }
