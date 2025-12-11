@@ -1,6 +1,6 @@
 # Makefile for the R7RS Scheme standard libraries
 #
-# Copyright © 2021-2024 Erick Gallesio <eg@stklos.net>
+# Copyright © 2021-2025 Erick Gallesio <eg@stklos.net>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -204,6 +204,15 @@ text.ostk: ../srfi/129.ostk
 bitwise.ostk: ../srfi/60.ostk
 regex.ostk: regex/boundary.stk hash-table.ostk list.$(SO) \
             charset.$(SO) bitwise.ostk
+
+
+list-inc.c:       list.stk
+ilist-inc.c:      ilist.stk
+flonum-inc.c:     flonum.stk
+sort-inc.c:       sort.stk
+vector-inc.c:     vector.stk
+bytevector-inc.c: bytevector.stk
+charset-inc.c:    charset.stk
 
 
 # ======================================================================

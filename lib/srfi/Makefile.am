@@ -353,13 +353,22 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 260.ostk: 27.$(SO)
 
 
-25.$(SO):  25-incl.c  25.c
-27.$(SO):  27-incl.c  27.c
-116.$(SO): 128.ostk 116-incl.c 116.c
-170.$(SO): 170-incl.c 170.c
-175.$(SO): 175-incl.c 175.c
-178.$(SO): 178-incl.c 178.c
-238.$(SO): 238-incl.c 238.c
+25-incl.c:    25.stk
+27-incl.c:    27.stk
+116-incl.c:  116.stk
+170-incl.c:  170.stk
+175-incl.c:  175.stk
+178-incl.c:  178.stk
+238-incl.c:  238.stk
+
+
+25.$(SO):  25-incl.c  25.c 25.stk
+27.$(SO):  27-incl.c  27.c 27.stk
+116.$(SO): 128.ostk 116-incl.c 116.c 116.stk
+170.$(SO): 170-incl.c 170.c 170.stk
+175.$(SO): 175-incl.c 175.c 175.stk
+178.$(SO): 178-incl.c 178.c 178.stk
+238.$(SO): 238-incl.c 238.c 238.stk
 
 ../streams/derived.ostk:
 	(cd ../streams && $(MAKE) derived.ostk)
