@@ -1,0 +1,1095 @@
+;;;;
+;;;; 225.stk         -- SRFI-225: Dictionaries
+;;;;
+;;;; Copyright © 2025 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the implementation of this
+;;;; SRFI by John Cowan and Arvydas Silanskas, it is copyrighted as:
+;;;;
+
+;;;;;; © 2021 John Cowan, Arvydas Silanskas.
+;;;;;;
+;;;;;; Permission is hereby granted, free of charge, to any person
+;;;;;; obtaining a copy of this software and associated documentation
+;;;;;; files (the "Software"), to deal in the Software without
+;;;;;; restriction, including without limitation the rights to use,
+;;;;;; copy, modify, merge, publish, distribute, sublicense, and/or sell
+;;;;;; copies of the Software, and to permit persons to whom the
+;;;;;; Software is furnished to do so, subject to the following
+;;;;;; conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice (including
+;;;;;; the next paragraph) shall be included in all copies or
+;;;;;; substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 17-Jun-2022 15:54
+;;;;
+
+(define-library
+    (srfi 225)
+
+  (import
+    (scheme base)
+    (srfi 1)
+    (srfi 128)
+    (prefix (srfi 69) t69-)
+    (prefix (srfi 125) t125-))
+
+  ;; INDEXES exports
+  (export
+   ;; required
+   dictionary?-id
+   dict-find-update!-id
+   dict-comparator-id
+   dict-map-id
+   dict-pure?-id
+   dict-remove-id
+   dict-size-id
+
+   ;; extra
+   dict->alist-id
+   dict-adjoin!-accumulator-id
+   dict-adjoin!-id
+   dict-any-id
+   dict-contains?-id
+   dict-count-id
+   dict-delete-all!-id
+   dict-delete!-id
+   dict-empty?-id
+   dict-entries-id
+   dict-every-id
+   dict-filter-id
+   dict-fold-id
+   dict-for-each-id
+   dict-intern!-id
+   dict-keys-id
+   dict-map->list-id
+   dict-map-id
+   dict-pop!-id
+   dict-ref-id
+   dict-ref/default-id
+   dict-remove-id
+   dict-replace!-id
+   dict-set!-accumulator-id
+   dict-set!-id
+   dict-update!-id
+   dict-update/default!-id
+   dict-values-id
+   dict=?-id
+   dict->generator-id)
+
+  (export dict-procedures-count)
+
+  ;; CORE exports
+  (export
+   ;; predicates
+   dictionary?
+   dict-empty?
+   dict-contains?
+   dict=?
+   dict-pure?
+
+   ;; lookup
+   dict-ref
+   dict-ref/default
+   dict-comparator
+
+   ;; mutation
+   dict-set!
+   dict-adjoin!
+   dict-delete!
+   dict-delete-all!
+   dict-replace!
+   dict-intern!
+   dict-update!
+   dict-update/default!
+   dict-pop!
+   dict-map
+   dict-filter
+   dict-remove
+   dict-find-update!
+
+   ;; whole dictionary
+   dict-size
+   dict-count
+   dict-any
+   dict-every
+   dict-keys
+   dict-values
+   dict-entries
+   dict-fold
+   dict-map->list
+   dict->alist
+
+   ;; iteration
+   dict-for-each
+   dict->generator
+   dict-set!-accumulator
+   dict-adjoin!-accumulator
+
+   ;; dictionary type descriptors
+   dto?
+   dto-ref
+
+   ;; exceptions
+   dictionary-error
+   dictionary-error?
+   dictionary-message
+   dictionary-irritants)
+
+  (export make-dto)
+
+  ;; ALIST exports
+  (export
+   make-alist-dto
+   eqv-alist-dto
+   equal-alist-dto)
+
+  ;; SRFI-69 exports
+  (export srfi-69-dto)
+
+  ;; SRFI-125 exports
+  (export hash-table-dto)
+
+    ;;;;
+    ;;;; CORE implementation
+    ;;;;
+
+  (begin
+
+    (define-record-type <dto>
+      (make-dto-private procvec)
+      dto?
+      (procvec procvec))
+
+    (define-record-type <dto-err>
+      (make-dictionary-error message irritants)
+      dictionary-error?
+      (message dictionary-message)
+      (irritants dictionary-irritants))
+
+    ;; shorthand access to dto procedure by index
+    (define-syntax dto-ref-stx
+      (syntax-rules ()
+        ((_ dto index)
+         (begin
+           (vector-ref (procvec dto) index)))))
+
+    ;; shorthand to define proc with using proc index
+    (define-syntax define/dict-proc
+      (syntax-rules ()
+        ((_ proc index)
+         (define (proc dto . args)
+           (assume (dto? dto))
+           (apply (dto-ref-stx dto index) dto args)))))
+
+    (define/dict-proc dictionary? dictionary?-id)
+    (define/dict-proc dict-empty? dict-empty?-id)
+    (define/dict-proc dict-contains? dict-contains?-id)
+    (define/dict-proc dict-pure? dict-pure?-id)
+    (define/dict-proc dict=? dict=?-id)
+
+    (define dict-ref
+      (case-lambda
+        ((dto dict key)
+         (dict-ref dto dict key
+                   (lambda () (error "Key not found in dictionary" dict key))
+                   values))
+
+        ((dto dict key failure)
+         (dict-ref dto dict key failure values))
+
+        ((dto dict key failure success)
+         (assume (dto? dto))
+         ((dto-ref-stx dto dict-ref-id) dto dict key failure success))))
+
+    (define/dict-proc dict-ref/default dict-ref/default-id)
+    (define/dict-proc dict-set! dict-set!-id)
+    (define/dict-proc dict-adjoin! dict-adjoin!-id)
+    (define/dict-proc dict-delete! dict-delete!-id)
+    (define/dict-proc dict-delete-all! dict-delete-all!-id)
+    (define/dict-proc dict-replace! dict-replace!-id)
+    (define/dict-proc dict-intern! dict-intern!-id)
+
+    (define dict-update!
+      (case-lambda
+        ((dto dict key updater)
+         (dict-update! dto dict key updater
+                       (lambda () (error "Key not found in dictionary" dict key))
+                       values))
+
+        ((dto dict key updater failure)
+         (dict-update! dto dict key  updater failure values))
+
+        ((dto dict key updater failure success)
+         (assume (dto? dto))
+         ((dto-ref-stx dto dict-update!-id) dto dict key updater failure success))))
+
+    (define/dict-proc dict-update/default! dict-update/default!-id)
+    (define/dict-proc dict-pop! dict-pop!-id)
+    (define/dict-proc dict-map dict-map-id)
+    (define/dict-proc dict-filter dict-filter-id)
+    (define/dict-proc dict-remove dict-remove-id)
+    (define/dict-proc dict-find-update! dict-find-update!-id)
+    (define/dict-proc dict-size dict-size-id)
+    (define/dict-proc dict-count dict-count-id)
+    (define/dict-proc dict-any dict-any-id)
+    (define/dict-proc dict-every dict-every-id)
+    (define/dict-proc dict-keys dict-keys-id)
+    (define/dict-proc dict-values dict-values-id)
+    (define/dict-proc dict-entries dict-entries-id)
+    (define/dict-proc dict-fold dict-fold-id)
+    (define/dict-proc dict-map->list dict-map->list-id)
+    (define/dict-proc dict->alist dict->alist-id)
+    (define/dict-proc dict-comparator dict-comparator-id)
+
+    (define dict-for-each
+      (case-lambda
+        ((dto proc dict) (dict-for-each dto proc dict #f #f))
+        ((dto proc dict start) (dict-for-each dto proc dict start #f))
+        ((dto proc dict start end) ((dto-ref-stx dto dict-for-each-id) dto proc dict start end))))
+
+    (define dict->generator
+      (case-lambda
+        ((dto dict) (dict->generator dto dict #f #f))
+        ((dto dict start) (dict->generator dto dict start #f))
+        ((dto dict start end) ((dto-ref-stx dto dict->generator-id) dto dict start end))))
+
+    (define/dict-proc dict-set!-accumulator dict-set!-accumulator-id)
+    (define/dict-proc dict-adjoin!-accumulator dict-adjoin!-accumulator-id)
+
+    (define (dto-ref dto procindex)
+      (dto-ref-stx dto procindex))
+
+    (define (make-modified-dto dto lst)
+      (define vec (vector-copy (procvec dto)))
+      (do ((lst lst (cddr lst)))
+          ((null? lst))
+        (when (null? (cdr lst))
+          (error "Uneven amount of arguments" lst))
+        (let ((proc-id (car lst))
+              (proc (cadr lst)))
+          (unless (procedure? proc)
+            (error "Not a procedure" proc))
+          (vector-set! vec proc-id proc)))
+      (make-dto-private vec))
+
+    (define-syntax dto-helper
+      (syntax-rules ()
+        ((_ (arg ...) (index proc) rest ...)
+         (dto-helper (arg ... index proc) rest ...))
+        ((_ (arg ...))
+         (make-dto arg ...))))
+
+    (define-syntax dto
+      (syntax-rules ()
+        ((_ (index proc) ...)
+         (dto-helper () (index proc) ...))))
+
+    (define (dictionary-error message . irritants)
+      (make-dictionary-error message irritants))
+
+    ;;;;
+    ;;;; INDEXES
+    ;;;;
+
+    (define proc-id 0)
+    (define (proc-id-inc)
+      (define v proc-id)
+      (set! proc-id (+ 1 proc-id))
+      v)
+    (define dictionary?-id (proc-id-inc))
+    (define dict-empty?-id (proc-id-inc))
+    (define dict-contains?-id (proc-id-inc))
+    (define dict=?-id (proc-id-inc))
+    (define dict-pure?-id (proc-id-inc))
+    (define dict-ref-id (proc-id-inc))
+    (define dict-ref/default-id (proc-id-inc))
+    (define dict-set!-id (proc-id-inc))
+    (define dict-adjoin!-id (proc-id-inc))
+    (define dict-delete!-id (proc-id-inc))
+    (define dict-delete-all!-id (proc-id-inc))
+    (define dict-replace!-id (proc-id-inc))
+    (define dict-intern!-id (proc-id-inc))
+    (define dict-update!-id (proc-id-inc))
+    (define dict-update/default!-id (proc-id-inc))
+    (define dict-pop!-id (proc-id-inc))
+    (define dict-map-id (proc-id-inc))
+    (define dict-filter-id (proc-id-inc))
+    (define dict-remove-id (proc-id-inc))
+    (define dict-find-update!-id (proc-id-inc))
+    (define dict-size-id (proc-id-inc))
+    (define dict-count-id (proc-id-inc))
+    (define dict-any-id (proc-id-inc))
+    (define dict-every-id (proc-id-inc))
+    (define dict-keys-id (proc-id-inc))
+    (define dict-values-id (proc-id-inc))
+    (define dict-entries-id (proc-id-inc))
+    (define dict-fold-id (proc-id-inc))
+    (define dict-map->list-id (proc-id-inc))
+    (define dict->alist-id (proc-id-inc))
+    (define dict-comparator-id (proc-id-inc))
+    (define dict-for-each-id (proc-id-inc))
+    (define dict->generator-id (proc-id-inc))
+    (define dict-set!-accumulator-id (proc-id-inc))
+    (define dict-adjoin!-accumulator-id (proc-id-inc))
+    (define dict-procedures-count (proc-id-inc)) ;; only used for tracking backing vector size
+
+
+    ;;;;
+    ;;;; DEFAULT implementation
+    ;;;;
+
+    ;; implementation of "default" dto, used as a filler for undefined
+    ;; functions in other dtos
+
+    ;; primitives
+    (define (not-implemented name)
+      (lambda (dto . args)
+        (raise (dictionary-error (string-append name " not implemented") dto))))
+    (define default-dictionary? (not-implemented "dictionary?"))
+    (define default-dict-pure? (not-implemented "dict-pure?"))
+    (define default-dict-size (not-implemented "dict-size"))
+    (define default-dict-find-update! (not-implemented "dict-find-update!"))
+
+    (define (default-dict-empty? dto dictionary)
+      (= 0 (dict-size dto dictionary)))
+
+    (define (default-dict=? dto = dict1 dict2)
+      (define (check-entries* keys)
+        (cond
+         ((null? keys) #t)
+         (else (let* ((key (car keys))
+                      (d1-value (dict-ref dto dict1 key)))
+                 (dict-ref dto dict2 key
+                           (lambda () #f)
+                           (lambda (d2-value)
+                             (if (= d1-value d2-value)
+                                 (check-entries* (cdr keys))
+                                 #f)))))))
+      (and (= (dict-size dto dict1)
+              (dict-size dto dict2))
+           (check-entries* (dict-keys dto dict1))))
+
+    (define (default-dict-contains? dto dictionary key)
+      (dict-ref dto dictionary key
+                (lambda () #f)
+                (lambda (x) #t)))
+
+    (define (default-dict-ref dto dictionary key failure success)
+      (dict-find-update! dto dictionary key
+                         (lambda (insert ignore)
+                           (failure))
+                         (lambda (key value update remove)
+                           (success value))))
+
+    (define (default-dict-ref/default dto dictionary key default)
+      (dict-ref dto dictionary key
+                (lambda () default)
+                (lambda (x) x)))
+
+    ;; private
+    (define (default-dict-set!* dto dictionary use-old? objs)
+      (let loop ((objs objs)
+                 (dictionary dictionary))
+        (cond
+         ((null? objs)
+          dictionary)
+         ((null? (cdr objs))
+          (error "mismatch of key / values argument list" objs))
+         (else (let* ((key (car objs))
+                      (value (cadr objs))
+                      (new-d (dict-find-update! dto dictionary key
+                                                (lambda (insert ignore)
+                                                  (insert value))
+                                                (lambda (key old-value update delete)
+                                                  (update key (if use-old? old-value value))))))
+                 (loop (cddr objs)
+                       new-d))))))
+
+    (define (default-dict-set! dto dictionary . objs)
+      (default-dict-set!* dto dictionary #f objs))
+
+    (define (default-dict-adjoin! dto dictionary . objs)
+      (default-dict-set!* dto dictionary #t objs))
+
+    (define (default-dict-delete! dto dictionary . keys)
+      (dict-delete-all! dto dictionary keys))
+
+    (define (default-dict-delete-all! dto dictionary keylist)
+      (let loop ((keylist keylist)
+                 (d dictionary))
+        (cond
+         ((null? keylist) d)
+         (else (let* ((key (car keylist))
+                      (new-d (dict-find-update! dto d key
+                                                (lambda (_ ignore)
+                                                  (ignore))
+                                                (lambda (key old-value _ delete)
+                                                  (delete)))))
+                 (loop (cdr keylist)
+                       new-d))))))
+
+    (define (default-dict-replace! dto dictionary key value)
+      (dict-find-update! dto dictionary key
+                         (lambda (_ ignore)
+                           (ignore))
+                         (lambda (key old-value update _)
+                           (update key value))))
+
+    (define (default-dict-intern! dto dictionary key failure)
+      (dict-find-update! dto dictionary key
+                         (lambda (insert _)
+                           (let ((value (failure)))
+                             (values (insert value) value)))
+                         (lambda (key value update _)
+                           (values dictionary value))))
+
+    (define (default-dict-update! dto dictionary key updater failure success)
+      (dict-find-update! dto dictionary key
+                         (lambda (insert ignore)
+                           (insert (updater (failure))))
+                         (lambda (key value update _)
+                           (update key (updater (success value))))))
+
+    (define (default-dict-update/default! dto dictionary key updater default)
+      (dict-update! dto dictionary key updater
+                    (lambda () default)
+                    (lambda (x) x)))
+
+    (define (default-dict-pop! dto dictionary)
+      (define (do-pop)
+        (call/cc
+         (lambda (cont)
+           (dict-for-each dto
+                          (lambda (key value)
+                            (define new-dict
+                              (dict-delete-all! dto dictionary (list key)))
+                            (cont new-dict key value))
+                          dictionary))))
+      (define empty? (dict-empty? dto dictionary))
+      (if empty?
+          (error "popped empty dictionary")
+          (do-pop)))
+
+    (define default-dict-map (not-implemented "dict-map"))
+
+    (define (default-dict-filter dto pred dictionary)
+      (define keys (dict-keys dto dictionary))
+      (define keys-to-delete
+        (filter
+         (lambda (key)
+           (not (pred key (dict-ref dto dictionary key))))
+         keys))
+      (dict-delete-all! dto dictionary keys-to-delete))
+
+    (define (default-dict-remove dto pred dictionary)
+      (dict-filter dto (lambda (key value)
+                         (not (pred key value)))
+                   dictionary))
+
+    (define (default-dict-count dto pred dictionary)
+      (dict-fold dto
+                 (lambda (key value acc)
+                   (if (pred key value)
+                       (+ 1 acc)
+                       acc))
+                 0
+                 dictionary))
+
+    (define (default-dict-any dto pred dictionary)
+      (call/cc
+       (lambda (cont)
+         (dict-for-each dto
+                        (lambda (key value)
+                          (define ret (pred key value))
+                          (when ret
+                            (cont ret)))
+                        dictionary)
+         #f)))
+
+    (define (default-dict-every dto pred dictionary)
+      (define last #t)
+      (call/cc
+       (lambda (cont)
+         (dict-for-each dto
+                        (lambda (key value)
+                          (define ret (pred key value))
+                          (when (not ret)
+                            (cont #f))
+                          (set! last ret))
+                        dictionary)
+         last)))
+
+    (define (default-dict-keys dto dictionary)
+      (reverse
+       (dict-fold dto
+                  (lambda (key value acc)
+                    (cons key acc))
+                  '()
+                  dictionary)))
+
+    (define (default-dict-values dto dictionary)
+      (reverse
+       (dict-fold dto
+                  (lambda (key value acc)
+                    (cons value acc))
+                  '()
+                  dictionary)))
+
+    (define (default-dict-entries dto dictionary)
+      (define pair
+        (dict-fold dto
+                   (lambda (key value acc)
+                     (cons (cons key (car acc))
+                           (cons value (cdr acc))))
+                   (cons '() '())
+                   dictionary))
+      (values (reverse (car pair))
+              (reverse (cdr pair))))
+
+    (define (default-dict-fold dto proc knil dictionary)
+      (define acc knil)
+      (dict-for-each dto
+                     (lambda (key value)
+                       (set! acc (proc key value acc)))
+                     dictionary)
+      acc)
+
+    (define (default-dict-map->list dto proc dictionary)
+      (define reverse-lst
+        (dict-fold dto
+                   (lambda (key value lst)
+                     (cons (proc key value) lst))
+                   '()
+                   dictionary))
+      (reverse reverse-lst))
+
+    (define (default-dict->alist dto dictionary)
+      (dict-map->list dto
+                      cons
+                      dictionary))
+
+    (define default-dict-comparator (not-implemented "dict-comparator"))
+
+    (define (default-dict-for-each dto proc dict start end)
+      (define (any . _) #t)
+      (define cmp (dict-comparator dto dict))
+      (define lower
+        (if start
+            (lambda (el) (>=? cmp el start))
+            any))
+      (define upper
+        (if end
+            (lambda (el) (<=? cmp el end))
+            any))
+      (define (accept el)
+        (and (upper el) (lower el)))
+
+      (dict-map
+       dto
+       (lambda (key value)
+         (when (accept key)
+           (proc key value))
+         value)
+       dict))
+
+    (define (default-dict->generator dto dict start end)
+
+      (define (any . _) #t)
+      (define cmp (dict-comparator dto dict))
+      (define lower
+        (if start
+            (lambda (el) (>=? cmp el start))
+            any))
+      (define upper
+        (if end
+            (lambda (el) (<=? cmp el end))
+            any))
+      (define (accept el)
+        (and (upper el) (lower el)))
+
+      ;; proc that takes yield value and yield continuation when yield is called
+      ;; shouldn't return
+      (define yield-handler #f)
+
+      (define (yield value)
+        (when (or (eof-object? value)
+                  (accept (car value)))
+          (call/cc (lambda (yield-cont)
+                     (yield-handler value yield-cont))) ))
+
+      (define (generate)
+        (dict-for-each dto
+                       (lambda (key value)
+                         (yield (cons key value)))
+                       dict)
+        (yield (eof-object)))
+
+      ;; continuation at the point of last yield
+      (define yield-cont #f)
+
+      ;; check if eof return was seen; if yes, keep returning eof
+      ;; for further invocations
+      (define eof #f)
+
+      (define (get-next-value exit)
+        (set! yield-handler
+          (lambda (value new-yield-cont)
+            (set! yield-cont new-yield-cont)
+            (when (eof-object? value)
+              (set! eof #t)
+              ;; unset continuation reference to allow
+              ;; gc clean everything up
+              (set! yield-cont #f))
+            (exit value)))
+
+        (cond
+         ;; eof seen -- keep returning eof
+         (eof (eof-object))
+         ;; no yield called yet -- start the generator
+         ((not yield-cont) (generate))
+         ;; continue from last yield position
+         (else (yield-cont #t))))
+
+      (lambda ()
+        (call/cc get-next-value)))
+
+    (define (default-dict-accumulator dto dict acc-proc)
+      (lambda (arg)
+        (if (eof-object? arg)
+            dict
+            (set! dict (acc-proc dto dict (car arg) (cdr arg))))))
+
+    (define (default-dict-set!-accumulator dto dict)
+      (default-dict-accumulator dto dict dict-set!))
+
+    (define (default-dict-adjoin!-accumulator dto dict)
+      (default-dict-accumulator dto dict dict-adjoin!))
+
+    (define null-dto (make-dto-private (make-vector dict-procedures-count #f)))
+
+    (define default-dto
+      (make-modified-dto
+       null-dto
+       (list
+        dictionary?-id default-dictionary?
+        dict-empty?-id default-dict-empty?
+        dict-contains?-id default-dict-contains?
+        dict=?-id default-dict=?
+        dict-pure?-id default-dict-pure?
+        dict-ref-id default-dict-ref
+        dict-ref/default-id default-dict-ref/default
+        dict-set!-id default-dict-set!
+        dict-adjoin!-id default-dict-adjoin!
+        dict-delete!-id default-dict-delete!
+        dict-delete-all!-id default-dict-delete-all!
+        dict-replace!-id default-dict-replace!
+        dict-intern!-id default-dict-intern!
+        dict-update!-id default-dict-update!
+        dict-update/default!-id default-dict-update/default!
+        dict-pop!-id default-dict-pop!
+        dict-map-id default-dict-map
+        dict-filter-id default-dict-filter
+        dict-remove-id default-dict-remove
+        dict-find-update!-id default-dict-find-update!
+        dict-size-id default-dict-size
+        dict-count-id default-dict-count
+        dict-any-id default-dict-any
+        dict-every-id default-dict-every
+        dict-keys-id default-dict-keys
+        dict-values-id default-dict-values
+        dict-entries-id default-dict-entries
+        dict-fold-id default-dict-fold
+        dict-map->list-id default-dict-map->list
+        dict->alist-id default-dict->alist
+        dict-comparator-id default-dict-comparator
+
+        dict-for-each-id default-dict-for-each
+
+        ;; generator procedures
+        dict->generator-id default-dict->generator
+        dict-set!-accumulator-id default-dict-set!-accumulator
+        dict-adjoin!-accumulator-id default-dict-adjoin!-accumulator)))
+
+    (define (make-dto . lst)
+      (make-modified-dto default-dto lst))
+
+    ;; sanity check
+    (vector-for-each
+     (lambda (proc index)
+       (unless (and proc (procedure? proc))
+         (error "Missing or wrong default procedure definition" proc index)))
+     (procvec default-dto)
+     (list->vector (iota dict-procedures-count)))
+
+
+    ;;;;
+    ;;;; ALIST implementation
+    ;;;;
+
+    (define (alist? dto l)
+      (and (list? l)
+           (or (null? l)
+               (pair? (car l)))))
+
+    (define (alist-pure? dto alist)
+      #t)
+
+    (define (alist-map dto proc alist)
+      (map
+       (lambda (e)
+         (define key (car e))
+         (define value (cdr e))
+         (cons key (proc key value)))
+       alist))
+
+    (define (alist-filter dto pred alist)
+      (filter
+       (lambda (e)
+         (pred (car e) (cdr e)))
+       alist))
+
+    (define (make-alist-delete key=)
+      (lambda (dto key alist)
+        (filter
+         (lambda (entry)
+           (not (key= (car entry) key)))
+         alist)))
+
+    (define (make-alist-find-update key=)
+      (define alist-delete (make-alist-delete key=))
+      (lambda (dto alist key failure success)
+        (define (handle-success pair)
+          (define old-key (car pair))
+          (define old-value (cdr pair))
+          (define (update new-key new-value)
+            (cond
+             ((and (eq? old-key
+                        new-key)
+                   (eq? old-value
+                        new-value))
+              alist)
+             (else
+              (let ((new-list
+                     (alist-cons
+                      new-key new-value
+                      (alist-delete dto old-key alist))))
+                new-list))))
+          (define (remove)
+            (alist-delete dto old-key alist))
+          (success old-key old-value update remove))
+
+        (define (handle-failure)
+          (define (insert value)
+            (alist-cons key value alist))
+          (define (ignore)
+            alist)
+          (failure insert ignore))
+        (cond
+         ((assoc key alist key=) => handle-success)
+         (else (handle-failure)))))
+
+
+    (define (alist-size dto alist)
+      (length alist))
+
+    (define (alist->alist dto alist)
+      alist)
+
+    (define (alist-comparator dto dictionary)
+      #f)
+
+    (define (make-alist-dto key=)
+      (make-dto
+       dictionary?-id alist?
+       dict-pure?-id alist-pure?
+       dict-map-id alist-map
+       dict-filter-id alist-filter
+       dict-find-update!-id (make-alist-find-update key=)
+       dict-size-id alist-size
+       dict->alist-id alist->alist
+       dict-comparator-id alist-comparator))
+
+    (define eqv-alist-dto (make-alist-dto eqv?))
+    (define equal-alist-dto (make-alist-dto equal?))
+
+    ;;;;
+    ;;;; SRFI-69 implementation
+    ;;;;
+
+
+    (define (prep-dto-arg proc)
+      (lambda (dto . args)
+        (apply proc args)))
+
+    (define (t69-hash-table-pure?* dto table)
+      #f)
+
+    (define (t69-hash-table-ref* dto table key fail success)
+      (define default (cons #f #f))
+      (define found (t69-hash-table-ref/default table key default))
+      (if (eq? found default)
+          (fail)
+          (success found)))
+
+    (define (t69-hash-table-set!* dto table . obj)
+      (let loop ((obj obj))
+        (if (null? obj)
+            table
+            (begin
+              (t69-hash-table-set! table (car obj) (cadr obj))
+              (loop (cddr obj)))))
+      table)
+
+    (define (t69-hash-table-update!/default* dto table key proc default)
+      (t69-hash-table-update!/default table key proc default)
+      table)
+
+    (define (t69-hash-table-delete-all!* dto table keys)
+      (for-each
+       (lambda (key)
+         (t69-hash-table-delete! table key))
+       keys)
+      table)
+
+    (define (t69-hash-table-map!* dto proc table)
+      (t69-hash-table-walk table (lambda (key value)
+                                   (t69-hash-table-set! table key (proc key value))))
+      table)
+
+    (define (t69-hash-table-filter!* dto proc table)
+      (t69-hash-table-walk table
+                           (lambda (key value)
+                             (unless (proc key value)
+                               (t69-hash-table-delete! table key))))
+      table)
+
+    (define (t69-hash-table-fold* dto proc knil table)
+      (t69-hash-table-fold table proc knil))
+
+    (define (t69-hash-table-find-update!* dto table key fail success)
+      (define (handle-success value)
+        (define (update new-key new-value)
+          (unless (eq? new-key key)
+            (t69-hash-table-delete! table key))
+          (t69-hash-table-set! table new-key new-value)
+          table)
+        (define (remove)
+          (t69-hash-table-delete! table key)
+          table)
+        (success key value update remove))
+      (define (handle-fail)
+        (define (ignore)
+          table)
+        (define (insert value)
+          (t69-hash-table-set! table key value)
+          table)
+        (fail insert ignore))
+
+      (define default (cons #f #f))
+      (define found (t69-hash-table-ref/default table key default))
+      (if (eq? default found)
+          (handle-fail)
+          (handle-success found)))
+
+    (define (t69-hash-table-comparator* dto table)
+      (make-comparator (lambda args #t)
+                       (or (t69-hash-table-equivalence-function table)
+                           equal?)
+                       #f
+                       (t69-hash-table-hash-function table)))
+
+    (define srfi-69-dto
+      (make-dto
+       dictionary?-id (prep-dto-arg t69-hash-table?)
+       dict-pure?-id t69-hash-table-pure?*
+       dict-ref-id t69-hash-table-ref*
+       dict-ref/default-id (prep-dto-arg t69-hash-table-ref/default)
+       dict-set!-id t69-hash-table-set!*
+       dict-delete-all!-id t69-hash-table-delete-all!*
+       dict-contains?-id (prep-dto-arg t69-hash-table-exists?)
+       dict-update/default!-id t69-hash-table-update!/default*
+       dict-size-id (prep-dto-arg t69-hash-table-size)
+       dict-keys-id (prep-dto-arg t69-hash-table-keys)
+       dict-values-id (prep-dto-arg t69-hash-table-values)
+       dict-map-id t69-hash-table-map!*
+       dict-filter-id t69-hash-table-filter!*
+       dict-fold-id t69-hash-table-fold*
+       dict->alist-id (prep-dto-arg t69-hash-table->alist)
+       dict-find-update!-id t69-hash-table-find-update!*
+       dict-comparator-id t69-hash-table-comparator*))
+
+
+    ;;;;
+    ;;;; SRFI-125 implementation
+    ;;;;
+
+
+    (define (t125-hash-table-pure?* dto table)
+      #f)
+
+    (define (t125-hash-table-set* dto table . obj)
+      (apply t125-hash-table-set! (cons table obj))
+      table)
+
+    (define (t125-hash-table-update* dto table key updater fail success)
+      (t125-hash-table-update! table key updater fail success)
+      table)
+
+    (define (t125-hash-table-update/default* dto table key proc default)
+      (t125-hash-table-update!/default table key proc default)
+      table)
+
+    (define (t125-hash-table-intern* dto table key failure)
+      (values table (t125-hash-table-intern! table key failure)))
+
+    (define (t125-hash-table-pop* dto table)
+      (if (t125-hash-table-empty? table)
+          (error "popped empty dictionary")
+          (call-with-values (lambda () (t125-hash-table-pop! table))
+            (lambda (key value) (values table key value)))))
+
+    (define (t125-hash-table-delete-all* dto table keys)
+      (for-each
+       (lambda (key)
+         (t125-hash-table-delete! table key))
+       keys)
+      table)
+
+    (define (t125-hash-table-map* dto proc table)
+      (t125-hash-table-map! proc table))
+
+    (define (t125-hash-table-filter* dto proc table)
+      (t125-hash-table-prune!
+       (lambda (key value)
+         (not (proc key value)))
+       table)
+      table)
+
+    (define (t125-hash-table-remove* dto proc table)
+      (t125-hash-table-prune! proc table)
+      table)
+
+    (define (t125-hash-table-find-update* dto table key fail success)
+      ;; instead of running immediately,
+      ;; add an indirection through thunk
+      ;; to guarantee call in tail position
+      (define (make-success-thunk value)
+        (define (update new-key new-value)
+          (unless (eq? new-key key)
+            (t125-hash-table-delete! table key))
+          (t125-hash-table-set! table new-key new-value)
+          table)
+        (define (remove)
+          (t125-hash-table-delete! table key)
+          table)
+        (lambda ()
+          (success key value update remove) ))
+      (define (make-failure-thunk)
+        (define (ignore)
+          table)
+        (define (insert value)
+          (t125-hash-table-set! table key value)
+          table)
+        (lambda ()
+          (fail insert ignore)))
+      (define thunk (t125-hash-table-ref table key make-failure-thunk make-success-thunk))
+      (thunk))
+
+    (define (t125-hash-table-comparator* dto table)
+      (make-comparator (lambda args #t)
+                       (t125-hash-table-equivalence-function table)
+                       #f
+                       (t125-hash-table-hash-function table)))
+
+    (define (t125-hash-table-size* dto table)
+      (t125-hash-table-size table))
+
+    (define (t125-hash-table-keys* dto table)
+      (t125-hash-table-keys table))
+
+    (define (t125-hash-table-values* dto table)
+      (t125-hash-table-values table))
+
+    (define (t125-hash-table-entries* dto table)
+      (t125-hash-table-entries table))
+
+    (define (t125-hash-table-fold* dto proc knil table)
+      (t125-hash-table-fold proc knil table))
+
+    (define (t125-hash-table-map->list* dto proc table)
+      (t125-hash-table-map->list proc table))
+
+    (define (t125-hash-table->alist* dto table)
+      (t125-hash-table->alist table))
+
+    (define (t125-hash-table?* dto table)
+      (t125-hash-table? table))
+
+    (define (t125-hash-table-empty?* dto table)
+      (t125-hash-table-empty? table))
+
+    (define (t125-hash-table-contains?* dto table key)
+      (t125-hash-table-contains? table key))
+
+    (define (t125-hash-table-ref* dto table key failure success)
+      (t125-hash-table-ref table key failure success))
+
+    (define (t125-hash-table-ref/default* dto table key default)
+      (t125-hash-table-ref/default table key default))
+
+    (define hash-table-dto
+      (make-dto
+       dictionary?-id t125-hash-table?*
+       dict-pure?-id t125-hash-table-pure?*
+       dict-empty?-id t125-hash-table-empty?*
+       dict-contains?-id t125-hash-table-contains?*
+       dict-ref-id t125-hash-table-ref*
+       dict-ref/default-id t125-hash-table-ref/default*
+       dict-set!-id t125-hash-table-set*
+       dict-delete-all!-id t125-hash-table-delete-all*
+       dict-intern!-id t125-hash-table-intern*
+       dict-update!-id t125-hash-table-update*
+       dict-update/default!-id t125-hash-table-update/default*
+       dict-pop!-id t125-hash-table-pop*
+       dict-map-id t125-hash-table-map*
+       dict-filter-id t125-hash-table-filter*
+       dict-remove-id t125-hash-table-remove*
+       dict-find-update!-id t125-hash-table-find-update*
+       dict-size-id t125-hash-table-size*
+       dict-keys-id t125-hash-table-keys*
+       dict-values-id t125-hash-table-values*
+       dict-entries-id t125-hash-table-entries*
+       dict-fold-id t125-hash-table-fold*
+       dict-map->list-id t125-hash-table-map->list*
+       dict->alist-id t125-hash-table->alist*
+       dict-comparator-id t125-hash-table-comparator*))
+
+    ))
