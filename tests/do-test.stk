@@ -53,6 +53,7 @@
   (load "test-macros.stk")
   (load "test-misc.stk")
   (load "test-r5rs-pitfall.stk")
+  (load "test-cond-expand.stk")
 )
 
 
