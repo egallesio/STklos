@@ -534,7 +534,7 @@
   (cond-expand (srfi-498 498) (else #f))
   (cond-expand (srfi-499 499) (else #f))))
 
-(test (list? srfis))
+(test "cond-expand srfi-list" #t (list? srfis))
 
 (test-section-end)
 
