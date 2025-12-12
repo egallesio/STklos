@@ -107,6 +107,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-169: Underscores in numbers
     - SRFI-170: POSIX API
     - SRFI-171: Transducers
+    - SRFI-172: Two Safer Subsets of R7RS
     - SRFI-173: Hooks
     - SRFI-174: POSIX Timespecs
     - SRFI-175: ASCII character library
