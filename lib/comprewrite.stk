@@ -99,18 +99,28 @@
  ;; ===> then-expr  (if CONST is #f)
  ;; ===> else-expr  (otherwise)
  (lambda (expr len env)
+   (define (rewrite-cond c)
+     (if (and (pair? c)             ; (
+              (eq? (car c)  'not)   ; (not
+              (pair? (cdr c))       ; (not (...
+              (pair? (cadr c))      ; (not ( OBJ      (cdr not nil)
+              (eq? (caadr c) 'not)) ; (not (not ...
+         (cadadr c)
+         c))
    (if (<= 3 len 4)
-       (let ((Cond (rewrite-expression (cadr expr) env))
-             (Then (caddr expr))
-             (Else (if (null? (cdddr expr))
-                       #void
-                       (cadddr expr))))
-         (if (const-expr? Cond)
-             (if (const-value Cond)
-                 (rewrite-expression Then env)
-                 (rewrite-expression Else env))
-             expr))
-       expr)))
+       (let ((Cond (rewrite-cond (rewrite-expression (cadr expr) env))))
+         (let ((expr (cons (car expr)
+                          (cons Cond (cddr expr)))))
+           (let ((Then (caddr expr))
+                 (Else (if (null? (cdddr expr))
+                           #void
+                           (cadddr expr))))
+             (if (const-expr? Cond)
+                 (if (const-value Cond)
+                     (rewrite-expression Then env)
+                     (rewrite-expression Else env))
+                 expr))
+           expr)))))
 
 
 (compiler:add-rewriter!            ;; 'NOT' rewriter
